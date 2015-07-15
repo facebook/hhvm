@@ -167,14 +167,6 @@ public:
   void preOptimize();
 
   /**
-   * Force all class variables to be variants, since l-val or reference
-   * of dynamic properties are used.
-   */
-  void forceClassVariants(
-      ClassScopePtr curScope,
-      bool doStatic);
-
-  /**
    * Code generation functions.
    */
   bool outputAllPHP(CodeGenerator::Output output);
@@ -192,8 +184,9 @@ public:
   void parseOnDemandByConstant(const std::string &name) const {
     parseOnDemandBy(name, Option::AutoloadConstMap);
   }
+  template <class Map>
   void parseOnDemandBy(const std::string &name,
-                       const std::map<std::string,std::string>& amap) const;
+                       const Map& amap) const;
   FileScopePtr findFileScope(const std::string &name) const;
   const StringToFileScopePtrMap &getAllFiles() { return m_files;}
   const std::vector<FileScopePtr> &getAllFilesVector() {
@@ -303,8 +296,6 @@ private:
   // Names of type aliases.
   std::set<std::string> m_typeAliasNames;
 
-  bool m_classForcedVariants[2];
-
   StatementPtrVec m_stmts;
   StatementPtr m_stmt;
 
@@ -362,15 +353,6 @@ public:
   static DECLARE_THREAD_LOCAL(BlockScopeRawPtr, s_currentScopeThreadLocal);
   static DECLARE_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
                               s_changedScopesMapThreadLocal);
-
-#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-  static std::atomic<int>                     s_NumDoJobCalls;
-  static ConcurrentBlockScopeRawPtrIntHashMap s_DoJobUniqueScopes;
-  static std::atomic<int>                     s_NumForceRerunGlobal;
-  static std::atomic<int>                     s_NumReactivateGlobal;
-  static std::atomic<int>                     s_NumForceRerunUseKinds;
-  static std::atomic<int>                     s_NumReactivateUseKinds;
-#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
 
 private:
   template <typename Visitor>

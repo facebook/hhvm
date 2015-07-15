@@ -34,6 +34,7 @@ namespace HPHP {
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   assert(ad->isApcArray());
+  assert(ad->getCount() != 0);
   DEBUG_ONLY auto const shared = static_cast<const APCLocalArray*>(ad);
   if (auto ptr = shared->m_localCache) {
     auto const cap = shared->m_arr->capacity();
@@ -65,10 +66,10 @@ const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
       return tvAsCVarRef(tv);
     }
   } else {
-    static_assert(KindOfUninit == 0, "must be 0 since we use smart_calloc");
+    static_assert(KindOfUninit == 0, "must be 0 since we use req::calloc");
     unsigned cap = ad->m_arr->capacity();
     ad->m_localCache = static_cast<TypedValue*>(
-      smart_calloc(cap, sizeof(TypedValue))
+      req::calloc(cap, sizeof(TypedValue))
     );
   }
   auto const tv = &ad->m_localCache[pos];
@@ -84,16 +85,17 @@ APCLocalArray::~APCLocalArray() {
          tv < end; ++tv) {
       tvRefcountedDecRef(tv);
     }
-    smart_free(m_localCache);
+    req::free(m_localCache);
   }
   m_arr->getHandle()->unreference();
   MM().removeApcArray(this);
 }
 
 void APCLocalArray::Release(ArrayData* ad) {
+  assert(ad->hasExactlyOneRef());
   auto const a = asApcArray(ad);
   a->~APCLocalArray();
-  MM().smartFreeSize(a, sizeof(APCLocalArray));
+  MM().freeSmallSize(a, sizeof(APCLocalArray));
 }
 
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
@@ -129,13 +131,13 @@ ArrayData* APCLocalArray::loadElems() const {
   ArrayData* elems;
   if (m_arr->isPacked()) {
     PackedArrayInit ai(count);
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
       ai.append(GetValueRef(this, i));
     }
     elems = ai.create();
   } else {
     ArrayInit ai(count, ArrayInit::Mixed{});
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
       ai.add(getKey(i), GetValueRef(this, i), true);
     }
     elems = ai.create();
@@ -143,6 +145,7 @@ ArrayData* APCLocalArray::loadElems() const {
   if (elems->isStatic()) {
     elems = elems->copy();
   }
+  assert(elems->hasExactlyOneRef());
   return elems;
 }
 
@@ -231,12 +234,12 @@ APCLocalArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
-  Array escalated{Escalate(ad)};
+  auto escalated = Array::attach(Escalate(ad));
   return (escalated += const_cast<ArrayData*>(elems)).detach();
 }
 
 ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
-  Array escalated{Escalate(ad)};
+  auto escalated = Array::attach(Escalate(ad));
   return escalated->merge(elems);
 }
 
@@ -249,6 +252,7 @@ ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
   auto smap = asApcArray(ad);
   auto ret = smap->loadElems();
   assert(!ret->isStatic());
+  assert(ret->hasExactlyOneRef());
   return ret;
 }
 
@@ -286,7 +290,7 @@ ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (ret != elems) {
     elems->release();
   }
-  assert(ret->getCount() == 0);
+  assert(ret->hasExactlyOneRef());
   assert(!ret->isStatic());
   return ret;
 }
@@ -353,8 +357,8 @@ bool APCLocalArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   not_reached();  // we should've escalated
 }
 
-ArrayData* APCLocalArray::NonSmartCopy(const ArrayData*) {
-  raise_error("APCLocalArray::nonSmartCopy not implemented.");
+ArrayData* APCLocalArray::CopyStatic(const ArrayData*) {
+  raise_error("APCLocalArray::copyStatic not implemented.");
   return nullptr;
 }
 

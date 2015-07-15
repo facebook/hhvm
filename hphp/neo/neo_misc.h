@@ -34,6 +34,13 @@
 
 #define PATH_BUF_SIZE 512
 
+#ifdef _MSC_VER
+#include <sys/stat.h>
+#define S_IXUSR 0
+#define S_IWUSR _S_IWRITE
+#define S_IRUSR _S_IREAD
+#endif
+
 #ifndef S_IXGRP
 #define S_IXGRP S_IXUSR
 #endif
@@ -55,10 +62,12 @@
 
 /* Format string checking for compilers that support it (GCC style) */
 
+#ifndef ATTRIBUTE_PRINTF
 #if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
 #define ATTRIBUTE_PRINTF(a1,a2) __attribute__((__format__ (__printf__, a1, a2)))
 #else
 #define ATTRIBUTE_PRINTF(a1,a2)
+#endif
 #endif
 
 
@@ -97,7 +106,7 @@ typedef unsigned short int UINT16;
 typedef short int INT16;
 typedef unsigned char UINT8;
 /* This was conflicting with a cygwin header definition */
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
 typedef signed char INT8;
 #else
 typedef char INT8;

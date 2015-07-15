@@ -1,3 +1,66 @@
+"Nash" 16-Jul-2015
+- Make ArrayData ref-count start at 1
+- Remove the NOUSER define when compiling with MSVC, Cygwin, or MinGW
+- Fix typos of `__MSC_VER` to be the correct value, `_MSC_VER`
+- Shapes::removeKey(...) - remember the names of unset fields
+- Shapes::toArray() - add .hhi
+- Shapes::removeKey()
+- Shapes::keyExists()
+- Shapes::idx helper function for accessing optional fields
+- Don't assume a scalar Map/Set initializer is an integer if its not a string
+- Update mysqlclient library to 5.6.23 everywhere
+- Port fix for php bug #48147
+- Fixed #5475: ResourceBundle::getLocales('') don't return list of locales
+- [hhvm][oss][frameworks] Add Smarty to Framework test runner
+- Add in a facility to pool curl handles between requests.
+- Fix xdebug trying to write to a nullptr std::FILE*.
+- Fix bug when appending unaligned StringSlice
+- Remove XDebug chrome support
+- Incorrect return value from eval, Closure generated in first eval pass is returned in the second eval pass
+- Stop throwing ints in xdebug
+- CVE-2015-4663: Support verifying certificates on ssl/tls streams, enable by default
+- Allow inlining immutable methods in non-repo mode
+- Reusable TC
+- Release some old hack design documentation
+- Don't step into builtin functions in the debugger
+- Support collections in array_map.hhas
+- [hhvm] Make sure iteration of class_iterator actually stops
+- [hhvm] Open source idx
+- Add .hhas implementation of array_reduce
+- Change memory layout for hni
+
+"McQueen" 2-Jul-2015
+- Add basic stream_socket_enable_crypto() client support
+- [hack] Check types for class vars in decl mode as well
+- [hhvm] Fix xdebug with multiple commands (and hopefully with PhpStorm)
+- [hack][hhvm] Standard library for shapes - runtime support
+- Fix date_create_immutable error state
+- [hack] Include debug symbols in OSS build
+- Update Hack Tools README to point to new OPAM Quick Install URL
+- [hack] add color mode to Tty
+- Update CMake/FindTBB.cmake for current Windows support.
+- [hhvm][mac] Fix ext_ipc on Mac
+- [hhvm][easy] Add README.md to php-octane
+- [zoncolan] Missing cases to bring BW analysis at par with FW
+- [zoncolan] Added "support" for reflection
+- [zoncolan] Added support for XHP
+- [hack][shapes] Anonymous shapes
+- [hack][shapes] Structural subtyping for shapes proposal
+- Fix some bugs in ext_servicerouter.cpp / ext_gatehouse.cpp
+- [zoncolan] Added analysis of toplevel functions
+- [zonconal] Adding shapes
+- [hack] Infer types for constants in decl mode as well
+- [hhvm] Enable JIT by default on Mac
+- [hack] Format: Improve handling of comments in switch statements
+- Make ObjectData ref-counts start at 1
+- APC collection optimizations
+- [Hack] Fix JSON escaping
+- [hack] Make Typing_instantiate only work on decl ty
+- use ...$args in invariant_violation()
+- [hack] Make decl mode equivalent to partial + // UNSAFE
+- [hhvm] Don't use libbfd in OSS build by default
+- [hhvm][mac] Fix async mysql time calculation on Mac clang
+
 "Lukather" 18-Jun-2015
 - Check that the right operand of instanceof is not an enum
 - Allow inlining static builtin methods

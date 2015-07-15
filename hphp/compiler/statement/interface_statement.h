@@ -51,7 +51,7 @@ public:
   int getLocalEffects() const override;
 
   std::string getName() const override;
-  const std::string &getOriginalName() const { return m_originalName;}
+  const std::string &getOriginalName() const { return m_originalName; }
   ClassScopeRawPtr getClassScope() const {
     BlockScopeRawPtr b = getScope();
     assert(b->is(BlockScope::ClassScope));
@@ -63,7 +63,6 @@ public:
                                ExpressionListPtr params, int type);
 protected:
   std::string m_originalName;
-  std::string m_name;
   ExpressionListPtr m_base;
   std::string m_docComment;
   StatementListPtr m_stmt;

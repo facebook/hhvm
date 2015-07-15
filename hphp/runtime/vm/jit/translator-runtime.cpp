@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
@@ -75,7 +75,6 @@ namespace jit {
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   ArrayData* r = a->append(tvAsCVarRef(&value), a->getCount() != 1);
   if (UNLIKELY(r != a)) {
-    r->incRefCount();
     decRefArr(a);
   }
   tvRefcountedDecRef(value);
@@ -1048,9 +1047,11 @@ Cell lookupClassConstantTv(TypedValue* cache,
 
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
   collections::initElem(coll, &value);
-  // consume the input value. the collection setter either threw or created a
-  // reference to value, so we can use a cheaper decref.
-  tvRefcountedDecRefNZ(value);
+  // If we specialized this on Vector we could use a DecRefNZ here (since we
+  // could assume that initElem has incref'd the value).  Right now, HH\Set
+  // goes through this code path also, though, and it might fail to add the new
+  // element.
+  tvRefcountedDecRef(value);
   return coll;
 }
 

@@ -36,10 +36,10 @@ extern "C" {
 
 #define HAVE_LIBJPEG
 #define HAVE_LIBPNG
-#define emalloc HPHP::smart_malloc
-#define ecalloc HPHP::smart_calloc
-#define efree HPHP::smart_free
-#define erealloc HPHP::smart_realloc
+#define emalloc HPHP::req::malloc
+#define ecalloc HPHP::req::calloc
+#define efree HPHP::req::free
+#define erealloc HPHP::req::realloc
 #define vspprintf HPHP::vspprintf
 #define TSRMLS_CC
 #define TSRMLS_FETCH()

@@ -92,6 +92,7 @@ bool MixedArray::isFull() const {
 ALWAYS_INLINE
 void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
                            int64_t nextIntKey) {
+  assert(count != 0);
   // Intentionally initialize hash table before header.
 #ifdef __x86_64__
   static_assert(MixedArray::Empty == -1, "");
@@ -443,13 +444,13 @@ uint32_t computeScaleFromSize(uint32_t n) {
 }
 
 ALWAYS_INLINE
-MixedArray* smartAllocArray(uint32_t scale) {
+MixedArray* reqAllocArray(uint32_t scale) {
   auto const allocBytes = computeAllocBytes(scale);
   return static_cast<MixedArray*>(MM().objMalloc(allocBytes));
 }
 
 ALWAYS_INLINE
-MixedArray* mallocArray(uint32_t scale) {
+MixedArray* staticAllocArray(uint32_t scale) {
   auto const allocBytes = computeAllocBytes(scale);
   return static_cast<MixedArray*>(std::malloc(allocBytes));
 }

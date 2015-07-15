@@ -47,7 +47,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
  * underlying representation of an XML DOM. Because these extensions share
  * libxml data we use Resource wrappers to control destruction of libxml data.
  *
- * In addition to their SmartPtr behavior these wrappers also serve as a
+ * In addition to their req::ptr behavior these wrappers also serve as a
  * cache for DOMNode objects that have been associated with particular xmlNodes
  * and retain information about the owning document for each node.
  *
@@ -55,7 +55,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
  * as weak-references. In particular it is possible for (1) the cached
  * DOMNode object to be free'd before the xmlNode*, in which case the DOMNode
  * is responsible for clearing the cache, and (2) for the underlying xmlNode*
- * to be free'd while there are still SmartPtrs holding XMLNodeData resouces.
+ * to be free'd while there are still req::ptr holding XMLNodeData resouces.
  *
  * In the event of (1) the only reference to the free'd object will be the
  * object in m_cache, and as such an raw ObjectData* is used as a quasi-weak
@@ -107,17 +107,17 @@ struct XMLNodeData : SweepableResourceData {
   void setCache(ObjectData* o) { m_cache = o; }
 
   void reset() { m_node = nullptr; }
-  void setDoc(SmartPtr<XMLDocumentData>&& doc);
+  void setDoc(req::ptr<XMLDocumentData>&& doc);
 
   xmlDocPtr docp() const;
   xmlNodePtr nodep() const { return m_node; }
-  SmartPtr<XMLDocumentData> doc();
+  req::ptr<XMLDocumentData> doc();
   void unlink() { xmlUnlinkNode(m_node); }
 
 private:
   ObjectData* m_cache {nullptr}; // XXX: to avoid a cycle this is a weak ref
   xmlNodePtr m_node {nullptr};
-  SmartPtr<XMLDocumentData> m_doc {nullptr};
+  req::ptr<XMLDocumentData> m_doc {nullptr};
 
   friend class XMLDocumentData;
 };
@@ -162,7 +162,7 @@ struct XMLDocumentData : XMLNodeData {
   unsigned m_destruct           :1; // cleanup when last node de-registers
 };
 
-using XMLNode = SmartPtr<XMLNodeData>;
+using XMLNode = req::ptr<XMLNodeData>;
 
 inline XMLNode libxml_register_node(xmlNodePtr p) {
   if (!p) return nullptr;
@@ -174,9 +174,9 @@ inline XMLNode libxml_register_node(xmlNodePtr p) {
       p->type == XML_DOCUMENT_NODE) {
     assert(p->doc == (xmlDocPtr)p);
 
-    return makeSmartPtr<XMLDocumentData>((xmlDocPtr)p);
+    return req::make<XMLDocumentData>((xmlDocPtr)p);
   }
-  return makeSmartPtr<XMLNodeData>(p);
+  return req::make<XMLNodeData>(p);
 }
 
 inline XMLNode libxml_register_node(xmlDocPtr p) {
@@ -204,18 +204,18 @@ inline XMLNodeData::~XMLNodeData() {
   if (m_doc) m_doc->detachNode();
 }
 
-inline void XMLNodeData::setDoc(SmartPtr<XMLDocumentData>&& doc) {
+inline void XMLNodeData::setDoc(req::ptr<XMLDocumentData>&& doc) {
   if (m_doc) m_doc->detachNode();
   if (doc) doc->attachNode();
   m_doc = std::move(doc);
 }
 
-inline SmartPtr<XMLDocumentData> XMLNodeData::doc() {
+inline req::ptr<XMLDocumentData> XMLNodeData::doc() {
   if (!m_node) return nullptr;
 
   if (m_node->type == XML_HTML_DOCUMENT_NODE ||
       m_node->type == XML_DOCUMENT_NODE) {
-    return SmartPtr<XMLDocumentData>(static_cast<XMLDocumentData*>(this));
+    return req::ptr<XMLDocumentData>(static_cast<XMLDocumentData*>(this));
   }
 
   if (!m_doc) {

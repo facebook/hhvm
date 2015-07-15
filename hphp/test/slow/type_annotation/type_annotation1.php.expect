@@ -1,0 +1,145 @@
+string(23) "?array<HH\int, HH\bool>"
+array(3) {
+  ["nullable"]=>
+  bool(true)
+  ["kind"]=>
+  int(12)
+  ["generic_types"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+    [1]=>
+    array(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+}
+string(45) "HH\Map<HH\arraykey, HH\Vector<array<HH\int>>>"
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["classname"]=>
+  string(6) "HH\Map"
+  ["generic_types"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(7)
+    }
+    [1]=>
+    array(3) {
+      ["kind"]=>
+      int(14)
+      ["classname"]=>
+      string(9) "HH\Vector"
+      ["generic_types"]=>
+      array(1) {
+        [0]=>
+        array(2) {
+          ["kind"]=>
+          int(12)
+          ["generic_types"]=>
+          array(1) {
+            [0]=>
+            array(1) {
+              ["kind"]=>
+              int(1)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+string(28) "(HH\int, HH\this, ?HH\float)"
+array(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  array(3) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+    [1]=>
+    array(1) {
+      ["kind"]=>
+      int(15)
+    }
+    [2]=>
+    array(2) {
+      ["nullable"]=>
+      bool(true)
+      ["kind"]=>
+      int(3)
+    }
+  }
+}
+string(22) "(function (): HH\void)"
+array(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  array(1) {
+    ["kind"]=>
+    int(0)
+  }
+  ["param_types"]=>
+  array(0) {
+  }
+}
+string(49) "(function (HH\mixed, HH\resource): array<HH\int>)"
+array(3) {
+  ["kind"]=>
+  int(11)
+  ["return_type"]=>
+  array(2) {
+    ["kind"]=>
+    int(12)
+    ["generic_types"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["kind"]=>
+        int(1)
+      }
+    }
+  }
+  ["param_types"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(9)
+    }
+    [1]=>
+    array(1) {
+      ["kind"]=>
+      int(5)
+    }
+  }
+}
+string(13) "N::M::O::P::Q"
+array(3) {
+  ["kind"]=>
+  int(16)
+  ["root_name"]=>
+  string(1) "N"
+  ["access_list"]=>
+  array(4) {
+    [0]=>
+    string(1) "M"
+    [1]=>
+    string(1) "O"
+    [2]=>
+    string(1) "P"
+    [3]=>
+    string(1) "Q"
+  }
+}

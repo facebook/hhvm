@@ -605,7 +605,7 @@ bool MimePart::parse(const char *buf, int bufsize) {
     if (len < bufsize && buf[len] == '\n') {
       ++len;
       m_parsedata.workbuf += String(buf, len, CopyString);
-      ProcessLine(SmartPtr<MimePart>(this), m_parsedata.workbuf);
+      ProcessLine(req::ptr<MimePart>(this), m_parsedata.workbuf);
       m_parsedata.workbuf.clear();
     } else {
       m_parsedata.workbuf += String(buf, len, CopyString);
@@ -617,8 +617,8 @@ bool MimePart::parse(const char *buf, int bufsize) {
   return true;
 }
 
-SmartPtr<MimePart> MimePart::createChild(int startpos, bool inherit) {
-  auto child = makeSmartPtr<MimePart>();
+req::ptr<MimePart> MimePart::createChild(int startpos, bool inherit) {
+  auto child = req::make<MimePart>();
   m_parsedata.lastpart = child;
   child->m_parent = this;
 
@@ -729,7 +729,7 @@ bool MimePart::processHeader() {
   return true;
 }
 
-bool MimePart::ProcessLine(SmartPtr<MimePart> workpart, const String& line) {
+bool MimePart::ProcessLine(req::ptr<MimePart> workpart, const String& line) {
   /* sanity check */
   if (workpart->m_children.size() > MAXPARTS) {
     raise_warning("MIME message too complex");
@@ -887,7 +887,7 @@ bool MimePart::ProcessLine(SmartPtr<MimePart> workpart, const String& line) {
   return true;
 }
 
-void MimePart::UpdatePositions(SmartPtr<MimePart> part, int newendpos,
+void MimePart::UpdatePositions(req::ptr<MimePart> part, int newendpos,
                                int newbodyend, int deltanlines) {
   while (part) {
     part->m_endpos = newendpos;
@@ -903,7 +903,7 @@ void MimePart::UpdatePositions(SmartPtr<MimePart> part, int newendpos,
 Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, int decode,
                           bool isfile) {
   /* filename can be a filename or a stream */
-  SmartPtr<File> file;
+  req::ptr<File> file;
   if (filename.isResource()) {
     file = cast<File>(filename);
   } else if (isfile) {
@@ -911,7 +911,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
   } else {
     /* filename is the actual data */
     String data = filename.toString();
-    file = makeSmartPtr<MemFile>(data.data(), data.size());
+    file = req::make<MemFile>(data.data(), data.size());
   }
 
   if (!file) {
@@ -943,7 +943,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
   return init_null();
 }
 
-int MimePart::extractImpl(int decode, SmartPtr<File> src) {
+int MimePart::extractImpl(int decode, req::ptr<File> src) {
   /* figure out where the message part starts/ends */
   int start_pos = (decode & DecodeNoHeaders) ? m_bodystart : m_startpos;
   int end = (decode & DecodeNoBody) ?

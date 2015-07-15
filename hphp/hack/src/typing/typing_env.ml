@@ -34,8 +34,14 @@ type fake_members = {
   invalid   : SSet.t;
   valid     : SSet.t;
 }
-
-type local = locl ty list * locl ty
+(* Along with a type, each local variable has a expression id associated with
+ * it. This is used when generating expression dependent types for the 'this'
+ * type. The idea is that if two local variables have the same expression_id
+ * then they refer to the same late bound type, and thus have compatible
+ * 'this' types.
+ *)
+type expression_id = Ident.t
+type local = locl ty list * locl ty * expression_id
 type local_env = fake_members * local IMap.t
 
 type env = {
@@ -60,7 +66,6 @@ and genv = {
   self_id : string;
   self    : locl ty;
   static  : bool;
-  is_constructor : bool;
   fun_kind : Ast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option;
@@ -198,6 +203,7 @@ let rec debug stack env (r, ty) =
       | Tbool -> o "Tbool"
       | Tfloat -> o "Tfloat"
       | Tstring -> o "Tstring"
+      | Tclassname s -> o "Tclassname<"; o s; o ">"
       | Tnum -> o "Tnum"
       | Tresource -> o "Tresource"
       | Tarraykey -> o "Tarraykey"
@@ -217,19 +223,28 @@ let rec debug stack env (r, ty) =
   | Tvar x ->
       let env, x = get_var env x in
       if ISet.mem x stack
-      then o (Ident.debug x)
+      then o (Ident.debug ~normalize:get_printable_tvar_id x)
       else
         let stack = ISet.add x stack in
         let _, y = get_var env x in
         o "["; o (string_of_int (get_printable_tvar_id y)); o "]";
         (match get_type env x with
-        | _, (_, Tany) -> o (Ident.debug x)
+        | _, (_, Tany) -> o (Ident.debug ~normalize:get_printable_tvar_id x)
         | _, ty -> debug stack env ty)
   | Tobject -> o "object"
   | Tshape (fields_known, fdm) ->
-      o "shape<fields ";
-      o (if fields_known then "fully" else "partially");
-      o " known>(";
+      o "shape<";
+      begin match fields_known with
+        | FieldsFullyKnown -> o "FieldsFullyKnown";
+        | FieldsPartiallyKnown unset_fields -> begin
+            o "FieldsPartiallyKnown(unset fields:";
+              ShapeMap.iter begin fun k _ ->
+                o (get_shape_field_name k); o " "
+              end unset_fields;
+            o ")"
+          end
+      end;
+      o ">(";
       ShapeMap.iter begin fun k v ->
         o (get_shape_field_name k); o " => "; debug stack env v
       end fdm;
@@ -267,7 +282,6 @@ let empty tcopt file = {
     self_id = "";
     self    = Reason.none, Tany;
     static  = false;
-    is_constructor = false;
     parent  = Reason.none, Tany;
     fun_kind = Ast.FSync;
     anons   = IMap.empty;
@@ -418,10 +432,10 @@ let with_return env f =
   let env = f env in
   set_return env ret
 
-let is_constructor env = env.genv.is_constructor
 let is_static env = env.genv.static
 let get_self env = env.genv.self
 let get_self_id env = env.genv.self_id
+let is_outside_class env = (env.genv.self_id = "")
 let get_parent env = env.genv.parent
 
 let get_fn_kind env = env.genv.fun_kind
@@ -483,11 +497,6 @@ let set_mode env mode =
 let set_root env root =
   let genv = env.genv in
   let genv = { genv with droot = Some root } in
-  { env with genv = genv }
-
-let set_is_constructor env =
-  let genv = env.genv in
-  let genv = { genv with is_constructor = true } in
   { env with genv = genv }
 
 let get_mode env = env.genv.mode
@@ -643,24 +652,25 @@ let rec unbind seen env ty =
 
 let unbind = unbind []
 
-(* We maintain 2 states for a local, all the types that the
- * local ever had (cf integrate in typing.ml), and the type
- * that the local currently has.
+(* We maintain 3 states for a local, all the types that the
+ * local ever had (cf integrate in typing.ml), the type
+ * that the local currently has, and an expression_id generated from
+ * the last assignment to this local.
  *)
 let set_local env x new_type =
   let fake_members, locals = env.lenv in
   let env, new_type = unbind env new_type in
-  let all_types =
+  let all_types, expr_id =
     match IMap.get x locals with
-    | None -> []
-    | Some (x, _) -> x
+    | None -> [], Ident.tmp()
+    | Some (x, _, y) -> x, y
   in
   let all_types =
     if List.exists (fun x -> x = new_type) all_types
     then all_types
     else new_type :: all_types
   in
-  let local = all_types, new_type in
+  let local = all_types, new_type, expr_id in
   let locals = IMap.add x local locals in
   let env = { env with lenv = fake_members, locals } in
   env
@@ -669,7 +679,21 @@ let get_local env x =
   let lcl = IMap.get x (snd env.lenv) in
   match lcl with
   | None -> env, (Reason.Rnone, Tany)
-  | Some (_, x) -> env, x
+  | Some (_, x, _) -> env, x
+
+let set_local_expr_id env x new_eid =
+  let fake_members, locals = env.lenv in
+  match IMap.get x locals with
+  | Some (all_types, type_, eid) when eid <> new_eid ->
+      let local = all_types, type_, new_eid in
+      let locals = IMap.add x local locals in
+      let env = { env with lenv = fake_members, locals } in
+      env
+  | _ -> env
+
+let get_local_expr_id env x =
+  let lcl = IMap.get x (snd env.lenv) in
+  Option.map lcl ~f:(fun (_, _, x) -> x)
 
 (*****************************************************************************)
 (* This function is called when we are about to type-check a block that will
@@ -703,7 +727,7 @@ let get_local env x =
 
 let freeze_local_env env =
   let (members, locals) = env.lenv in
-  let locals = IMap.map (fun (_, type_) -> [type_], type_) locals in
+  let locals = IMap.map (fun (_, type_, eid) -> [type_], type_, eid) locals in
   let lenv = members, locals in
   { env with lenv = lenv }
 

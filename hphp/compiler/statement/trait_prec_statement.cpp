@@ -49,14 +49,13 @@ StatementPtr TraitPrecStatement::clone() {
 }
 
 void TraitPrecStatement::getOtherTraitNames(
-    std::unordered_set<std::string>& namesSet) const {
-  std::vector<std::string> namesVec;
-  m_otherTraitNames->getStrings(namesVec);
-  for (unsigned int i = 0; i < namesVec.size(); i++) {
-    namesVec[i] = toLower(namesVec[i]);
-  }
+  hphp_string_iset& namesSet) const {
   namesSet.clear();
-  namesSet.insert(namesVec.begin(), namesVec.end());
+  for (int i = 0; i < m_otherTraitNames->getCount(); i++) {
+    auto s = dynamic_pointer_cast<ScalarExpression>(
+      (*m_otherTraitNames)[i]);
+    namesSet.insert(s->getString());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

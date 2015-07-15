@@ -102,7 +102,6 @@
 
 
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-#undef NOUSER
 #include <windows.h>
 #include <winuser.h>
 #endif
@@ -1426,7 +1425,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (!po.show.empty()) {
-    auto f = makeSmartPtr<PlainFile>();
+    auto f = req::make<PlainFile>();
     f->open(po.show, "r");
     if (!f->valid()) {
       Logger::Error("Unable to open file %s", po.show.c_str());
@@ -1467,8 +1466,9 @@ static int execute_program_impl(int argc, char** argv) {
   for (auto& filename : po.config) {
     Config::ParseConfigFile(filename, ini, config);
   }
+  std::vector<std::string> messages;
   // Now, take care of CLI options and then officially load and bind things
-  RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings);
+  RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);
 
   vector<string> badnodes;
   config.lint(badnodes);
@@ -1508,6 +1508,11 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   open_server_log_file();
+  if (RuntimeOption::ServerExecutionMode()) {
+    for (auto const& m : messages) {
+      Logger::Info(m);
+    }
+  }
 
   // Defer the initialization of light processes until the log file handle is
   // created, so that light processes can log to the right place. If we ever
@@ -2044,9 +2049,9 @@ void hphp_memory_cleanup() {
   // I considered just clearing the inited flags; which works for some
   // RequestEventHandlers - but its a disaster for others. So just fail hard
   // here.
-  always_assert(!g_context->hasRequestEventHandlers());
+  always_assert(g_context.isNull() || !g_context->hasRequestEventHandlers());
 
-  // g_context is smart allocated, and has some members that need
+  // g_context is request allocated, and has some members that need
   // cleanup, so destroy it before its too late
   g_context.destroy();
 

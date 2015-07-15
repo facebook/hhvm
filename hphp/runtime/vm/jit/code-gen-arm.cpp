@@ -35,8 +35,8 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include <folly/Optional.h>
 
@@ -60,8 +60,6 @@ NOOP_OPCODE(EndGuards)
 NOOP_OPCODE(HintLocInner)
 NOOP_OPCODE(HintStkInner)
 NOOP_OPCODE(DbgTraceCall)
-NOOP_OPCODE(PredictLoc);
-NOOP_OPCODE(PredictStk);
 
 // When implemented this shouldn't be a nop, but there's no reason to make us
 // punt on everything until then.
@@ -539,6 +537,11 @@ PUNT_OPCODE(CheckStackOverflow)
 PUNT_OPCODE(InitExtraArgs)
 PUNT_OPCODE(InitCtx)
 PUNT_OPCODE(CheckSurpriseFlagsEnter)
+PUNT_OPCODE(CheckARMagicFlag)
+PUNT_OPCODE(StARNumArgsAndFlags)
+PUNT_OPCODE(LdARInvName)
+PUNT_OPCODE(StARInvName)
+PUNT_OPCODE(PackMagicArgs)
 PUNT_OPCODE(ProfileSwitchDest)
 PUNT_OPCODE(CheckSurpriseAndStack)
 
@@ -1034,7 +1037,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   auto callArgs = argGroup();
   if (isBuiltinByRef(funcReturnType)) {
-    if (isSmartPtrRef(funcReturnType)) {
+    if (isReqPtrRef(funcReturnType)) {
       // first arg is pointer to storage for the return value
       returnOffset += TVOFF(m_data);
     }
@@ -1048,7 +1051,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   for (auto i = uint32_t{0}; i < numArgs; ++i, ++srcNum) {
     auto const& pi = func->params()[i];
-    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
+    if (TVOFF(m_data) && isReqPtrRef(pi.builtinType)) {
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
       callArgs.ssa(srcNum);
@@ -1074,7 +1077,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   if (returnType.isReferenceType()) {
     // this should use some kind of cmov
-    assertx(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && isReqPtrRef(funcReturnType));
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
     if (dstType.isValid()) {
       condZero(v, dst, dstType, [&](Vout& v) {
@@ -1089,7 +1092,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (returnType <= TCell || returnType <= TBoxedCell) {
     // this should use some kind of cmov
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
-    assertx(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
     auto tmp_dst_type = v.makeReg();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
     if (dstType.isValid()) {

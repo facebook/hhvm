@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ struct XDebugProfiler : Profiler {
     if (m_tracingEnabled) {
       disableTracing();
     }
-    smart_free(m_frameBuffer);
+    req::free(m_frameBuffer);
   }
 
   // Returns true if function enter/exit event collection is required by the

@@ -23,6 +23,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/option.h"
+#include "hphp/compiler/type_annotation.h"
 
 using namespace HPHP;
 
@@ -31,10 +32,17 @@ using namespace HPHP;
 
 ClassConstant::ClassConstant
 (STATEMENT_CONSTRUCTOR_PARAMETERS, std::string typeConstraint,
- ExpressionListPtr exp, bool abstract, bool typeconst)
+ ExpressionListPtr exp, bool abstract,
+ bool typeconst, TypeAnnotationPtr typeAnnot)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassConstant)),
     m_typeConstraint(typeConstraint), m_exp(exp), m_abstract(abstract),
     m_typeconst(typeconst) {
+  // for now only store TypeAnnotation info for type constants
+  if (typeconst) {
+    if (typeAnnot) {
+      m_typeStructure = typeAnnot->getScalarArrayRep();
+    }
+  }
 }
 
 StatementPtr ClassConstant::clone() {

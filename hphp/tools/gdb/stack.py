@@ -5,6 +5,8 @@ GDB commands related to the HHVM stack.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from gdbutils import *
 import frame
@@ -24,12 +26,13 @@ The output backtrace has the following format:
     def __init__(self):
         super(WalkstkCommand, self).__init__('walkstk', gdb.COMMAND_STACK)
 
-
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 
         if len(argv) > 2:
             print('Usage: walkstk [sp] [rip]')
+            return
 
         # Set sp = $rbp.
         sp_type = T('uintptr_t').pointer()

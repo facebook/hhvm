@@ -172,8 +172,8 @@ String TimeZone::CurrentName() {
   return String(s_guessed_timezone.m_tzid);
 }
 
-SmartPtr<TimeZone> TimeZone::Current() {
-  return makeSmartPtr<TimeZone>(CurrentName());
+req::ptr<TimeZone> TimeZone::Current() {
+  return req::make<TimeZone>(CurrentName());
 }
 
 bool TimeZone::SetCurrent(const String& zone) {
@@ -277,8 +277,8 @@ TimeZone::TimeZone(timelib_tzinfo *tzi) {
   m_tzi = tzi;
 }
 
-SmartPtr<TimeZone> TimeZone::cloneTimeZone() const {
-  return makeSmartPtr<TimeZone>(m_tzi);
+req::ptr<TimeZone> TimeZone::cloneTimeZone() const {
+  return req::make<TimeZone>(m_tzi);
 }
 
 String TimeZone::name() const {
@@ -317,7 +317,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
   if (m_tzi) {
     // If explicitly provided add the beginning timestamp to the ret array
     if (timestamp_begin > k_PHP_INT_MIN) {
-      auto dt = makeSmartPtr<DateTime>(timestamp_begin);
+      auto dt = req::make<DateTime>(timestamp_begin);
       ret.append(make_map_array(
             s_ts, timestamp_begin,
             s_time, dt->toString(DateTime::DateFormat::ISO8601),
@@ -331,7 +331,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
       int timestamp = m_tzi->trans[i];
       if (timestamp > timestamp_begin && timestamp <= timestamp_end) {
         int index = m_tzi->trans_idx[i];
-        auto dt = makeSmartPtr<DateTime>(timestamp);
+        auto dt = req::make<DateTime>(timestamp);
         ttinfo &offset = m_tzi->type[index];
         const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
 

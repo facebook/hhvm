@@ -44,14 +44,9 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
     m_effectsTag(1), m_numDepsToWaitFor(0),
     m_forceRerun(false),
     m_rescheduleFlags(0), m_selfUser(0) {
-  m_originalName = name;
-  m_name = toLower(name);
+  m_scopeName = name;
   m_variables = VariableTablePtr(new VariableTable(*this));
   m_constants = ConstantTablePtr(new ConstantTable(*this));
-
-  Lock lock(SymbolTable::AllSymbolTablesMutex);
-  SymbolTable::AllSymbolTables.push_back(m_variables);
-  SymbolTable::AllSymbolTables.push_back(m_constants);
 }
 
 void BlockScope::incLoopNestedLevel() {
@@ -116,7 +111,7 @@ ClassScopeRawPtr BlockScope::getContainingClass() {
 
 ClassScopeRawPtr BlockScope::findExactClass(ClassScopeRawPtr cls) {
   if (ClassScopeRawPtr currentCls = getContainingClass()) {
-    if (cls->getName() == currentCls->getName()) {
+    if (cls->isNamed(currentCls->getOriginalName())) {
       return currentCls;
     }
   }
@@ -181,11 +176,4 @@ BlockScope::setModifiers(ModifierExpressionPtr modifiers) {
 void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_constants->outputPHP(cg, ar);
   m_variables->outputPHP(cg, ar);
-}
-
-int BlockScope::ScopeCompare::cmp(const BlockScopeRawPtr &p1,
-                                  const BlockScopeRawPtr &p2) const {
-  int d1 = p1->m_kind - p2->m_kind;
-  if (d1) return d1;
-  return strcasecmp(p1->getName().c_str(), p2->getName().c_str());
 }

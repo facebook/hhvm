@@ -18,7 +18,6 @@
 #include <vector>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
@@ -31,27 +30,26 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
-    : SymbolTable(blockScope, true),
+    : SymbolTable(blockScope),
       m_hasDynamic(false) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypePtr ConstantTable::add(const std::string &name, TypePtr type,
-                           ExpressionPtr exp, AnalysisResultConstPtr ar,
-                           ConstructPtr construct) {
+void ConstantTable::add(const std::string &name,
+                        ExpressionPtr exp, AnalysisResultConstPtr ar,
+                        ConstructPtr construct) {
 
   if (name == "true" || name == "false") {
-    return Type::Boolean;
+    return;
   }
 
   Symbol *sym = genSymbol(name, true);
   if (!sym->declarationSet()) {
     assert(!sym->valueSet());
-    setType(ar, sym, type, true);
     sym->setDeclaration(construct);
     sym->setValue(exp);
-    return type;
+    return;
   }
   assert(sym->declarationSet() && sym->valueSet());
 
@@ -64,19 +62,15 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
           sym->setDynamic();
           m_hasDynamic = true;
         }
-        type = Type::Variant;
       }
     } else if (exp) {
       sym->setValue(exp);
     }
-    setType(ar, sym, type, true);
   }
-
-  return type;
 }
 
 void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
-                               const std::string &name, bool forceVariant) {
+                               const std::string &name) {
   Symbol *sym = genSymbol(name, true);
   if (!sym->isDynamic()) {
     Lock lock(BlockScope::s_constMutex);
@@ -86,9 +80,6 @@ void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
         addUpdates(BlockScope::UseKindConstRef);
     }
     m_hasDynamic = true;
-    if (forceVariant) {
-      setType(ar, sym, Type::Variant, true);
-    }
   }
 }
 
@@ -146,7 +137,8 @@ const {
 void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {
   AnalysisResult::Locker lock(ar);
 
-  for (Symbol *sym: m_symbolVec) {
+  for (auto& ent : m_symbolMap) {
+    auto sym = &ent.second;
     if (!sym->isDynamic()) {
       sym->setDynamic();
       sym->setDeclaration(ConstructPtr());

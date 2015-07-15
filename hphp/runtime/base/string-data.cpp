@@ -40,63 +40,111 @@ namespace HPHP {
 
 namespace {
 
-/*
- * how many bytes are not included in capacity()'s return value.
- */
-auto const kCapOverhead = 1 + sizeof(StringData);
+// how many bytes are not included in capacity()'s return value.
+auto constexpr kCapOverhead = 1 + sizeof(StringData);
 
-NEVER_INLINE void throw_string_too_large(size_t len);
 NEVER_INLINE void throw_string_too_large(size_t len) {
   raise_error("String length exceeded 2^31-2: %zu", len);
 }
 
-//////////////////////////////////////////////////////////////////////
-// Allocate memory for a string, return the pointer to uninitialized
-// memory, and the encoded CapCode value to use.
-ALWAYS_INLINE
-std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
-  static_assert(StringData::MaxSize + 1 < CapCode::Max, "");
-  static_assert(CapCode::Threshold >= kCapOverhead, "");
+NEVER_INLINE StringData* allocFlatForLenSlow(size_t len);
 
-  if (LIKELY(len <= CapCode::Threshold - kCapOverhead)) {
-    // fast path for most small strings
-    auto need = MemoryManager::smartSizeClass(len + kCapOverhead);
-    auto sd = static_cast<StringData*>(MM().smartMallocSize(need));
-    // size class rounding ensures need >= (len+kCapOverhead), but rounding up
-    // might have caused our capacity value (need - kCapOverhead) to
-    // cross CapCode::Threshold. Truncate it to an encodable value. This is
-    // safe because floor either returns the value exactly (fine), or returns
-    // an encoded value >= Threshold, which is safe if we're on this path.
-    auto cc = CapCode::floor(need - kCapOverhead);
-    assert(cc.decode() >= len);
-    return std::make_pair(sd, cc);
-  }
+// For request-local allocation, we make a fast path to handle cases where no
+// CapCode encoding is needed and the corresponding size class is fully
+// utilized.  Since `CapCode::Threshold + 1' is a small size class (it should
+// always be a power of 2), the threshold for string length is
+auto constexpr kMaxStringSimpleLen = CapCode::Threshold + 1 - kCapOverhead;
+
+// The following static assertions should ensure `kMaxStringSimpleLen' has the
+// properties we want.
+static_assert(kMaxStringSimpleLen + kCapOverhead < kMaxSmallSizeLookup, "");
+static_assert(kMaxStringSimpleLen <= CapCode::Threshold, "");
+auto constexpr maxSimpleAlloc = kMaxStringSimpleLen + kCapOverhead;
+auto constexpr sizeClass =
+  kSmallSize2Index[(maxSimpleAlloc - 1) >> kLgSmallSizeQuantum];
+static_assert(kSmallIndex2Size[sizeClass] == maxSimpleAlloc,
+              "kMaxStringSimpleLen should be maximized");
+
+}
+
+// Allocate a string with length <= kMaxStringSimpleLen, initialize `m_data'
+// and `m_hdr', but not `m_lenAndHash'.
+ALWAYS_INLINE StringData* allocFlatSmallImpl(size_t len) {
+  assertx(len <= kMaxStringSimpleLen);
+  static_assert(kMaxStringSimpleLen + kCapOverhead <= kMaxSmallSizeLookup, "");
+
+  auto const requestSize = len + kCapOverhead;
+  auto const sizeClass = MemoryManager::lookupSmallSize2Index(requestSize);
+  auto const allocSize = kSmallIndex2Size[sizeClass];
+  auto sd = static_cast<StringData*>(
+    MM().mallocSmallIndex(sizeClass, allocSize)
+  );
+
+  auto const cap = allocSize - kCapOverhead;
+
+  sd->m_data = reinterpret_cast<char*>(sd + 1);
+  // Refcount initialized to 1.
+  sd->m_hdr.init(CapCode::exact(cap), HeaderKind::String, 1, sizeClass);
+  return sd;
+}
+
+// Allocate a string with length > kMaxStringSimpleLen, initialize `m_data'
+// and `m_hdr', but not `m_lenAndHash'.  We sometimes want to inline this slow
+// path, too.
+ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
+  // Slow path when length is large enough to need the real CapCode encoding.
   if (UNLIKELY(len > StringData::MaxSize)) {
     throw_string_too_large(len);
   }
-  auto const encoded = CapCode::ceil(len);
-  auto const need = encoded.decode() + kCapOverhead;
-  if (LIKELY(need <= kMaxSmartSize)) {
-    auto cap = MemoryManager::smartSizeClass(need);
-    auto cc = CapCode::floor(cap - kCapOverhead);
-    assert(cc.decode() >= len);
-    auto const sd = static_cast<StringData*>(
-        MM().smartMallocSize(cc.decode() + kCapOverhead)
-    );
-    return std::make_pair(sd, cc);
+  auto const need = CapCode::roundUp(len) + kCapOverhead;
+  StringData* sd;
+  CapCode cc;
+  size_t sizeClass = 0;
+  static_assert(kSmallIndex2Size[0] < kCapOverhead,
+                "Size class 0 indicates shared or big allocations");
+  if (LIKELY(need <= kMaxSmallSize)) {
+    sizeClass = MemoryManager::computeSmallSize2Index(need);
+    auto const sz = MemoryManager::smallIndex2Size(sizeClass);
+    cc = CapCode::floor(sz - kCapOverhead);
+    sd = static_cast<StringData*>(MM().mallocSmallIndex(sizeClass, sz));
+  } else {
+    auto const block = MM().mallocBigSize<true>(need);
+    size_t actualCap = block.size - kCapOverhead;
+    if (UNLIKELY(actualCap > StringData::MaxSize)) {
+      actualCap = StringData::MaxSize;
+    }
+    cc = CapCode::floor(static_cast<uint32_t>(actualCap));
+    sd = static_cast<StringData*>(block.ptr);
   }
-  auto const block = MM().smartMallocSizeBig<true>(need);
-  auto cc = CapCode::floor(block.size - kCapOverhead);
   assert(cc.decode() >= len);
-  return std::make_pair(static_cast<StringData*>(block.ptr), cc);
+  sd->m_data = reinterpret_cast<char*>(sd + 1);
+  // Refcount initialized to 1.
+  sd->m_hdr.init(cc, HeaderKind::String, 1, sizeClass);
+  return sd;
 }
 
-ALWAYS_INLINE
-void freeForSize(void* vp, uint32_t size) {
-  if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(vp, size);
+namespace {
+
+// Use this if the `len' is expected to be small. For long strings it falls
+// back to the non-inlined slow path.
+ALWAYS_INLINE UNUSED StringData* allocFlatForLenSmall(size_t len) {
+  if (LIKELY(len <= kMaxStringSimpleLen)) {
+    return allocFlatSmallImpl(len);
   }
-  return MM().smartFreeSizeBig(vp, size);
+  return allocFlatForLenSlow(len);
+}
+
+// This version has the slow path inlined. Use it if `len' can often be large
+// enough to require cap code encoding.
+ALWAYS_INLINE UNUSED StringData* allocFlatForLen(size_t len) {
+  if (LIKELY(len <= kMaxStringSimpleLen)) {
+    return allocFlatSmallImpl(len);
+  }
+  return allocFlatSlowImpl(len);
+}
+
+NEVER_INLINE StringData* allocFlatForLenSlow(size_t len) {
+  return allocFlatSlowImpl(len);
 }
 
 }
@@ -110,7 +158,7 @@ std::aligned_storage<
 
 //////////////////////////////////////////////////////////////////////
 
-// create either a static or an uncounted string.
+// Create either a static or an uncounted string.
 // Diffrence between static and uncounted is in the lifetime
 // of the string. Static are alive for the lifetime of the process.
 // Uncounted are not ref counted but will be deleted at some point.
@@ -127,22 +175,16 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
-  sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 0);
-  sd->m_lenAndHash  = sl.len; // hash=0
+  sd->m_data = data;
+  auto const count = trueStatic ? StaticValue : UncountedValue;
+  sd->m_hdr.init(cc, HeaderKind::String, count);
+  sd->m_len = sl.len; // m_hash is computed soon.
 
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
-  auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
-
-  assert(ret->m_hash == 0);
-  assert(ret->getCount() == 0);
-  if (trueStatic) {
-    ret->setStatic();
-  } else {
-    ret->setUncounted();
-  }
+  ret->preCompute();                    // get m_hash right
 
   assert(ret == sd);
   assert(ret->isFlat());
@@ -170,12 +212,11 @@ StringData* StringData::MakeEmpty() {
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
 
+  sd->setStatic();
+
   assert(sd->m_len == 0);
-  assert(sd->m_hash == 0);
   assert(sd->capacity() == 0);
   assert(sd->m_hdr.kind == HeaderKind::String);
-  assert(sd->getCount() == 0);
-  sd->setStatic();
   assert(sd->isFlat());
   assert(sd->isStatic());
   assert(sd->checkSane());
@@ -213,7 +254,7 @@ unsigned StringData::sweepAll() {
   for (StringDataNode *next, *n = head.next; n != &head; n = next) {
     count++;
     next = n->next;
-    assert(next && uintptr_t(next) != kSmartFreeWord);
+    assert(next && uintptr_t(next) != kSmallFreeWord);
     assert(next && uintptr_t(next) != kMallocFreeWord);
     auto const s = node2str(n);
     assert(s->isShared());
@@ -226,32 +267,23 @@ unsigned StringData::sweepAll() {
 //////////////////////////////////////////////////////////////////////
 
 StringData* StringData::Make(const StringData* s, CopyStringMode) {
-  auto const allocRet = allocFlatForLen(s->m_len);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
-  sd->m_data          = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash    = s->m_lenAndHash;
-  *memcpy8(data, s->m_data, s->m_len) = 0;
+  auto const sd = allocFlatForLenSmall(s->m_len);
+  sd->m_lenAndHash = s->m_lenAndHash;
+  auto const data = static_cast<void*>(sd + 1);
+  *memcpy8(data, s->data(), s->m_len) = 0;
 
   assert(sd->same(s));
   return sd;
 }
 
 StringData* StringData::Make(StringSlice sl, CopyStringMode) {
-  auto const allocRet = allocFlatForLen(sl.len);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
-
-  sd->m_data         = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash   = sl.len; // hash=0
+  auto const sd = allocFlatForLenSmall(sl.len);
+  sd->m_lenAndHash = sl.len; // hash=0
+  auto const data = reinterpret_cast<char*>(sd + 1);
 
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
-  auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
+  auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
 
   assert(ret == sd);
@@ -272,20 +304,17 @@ StringData* StringData::Make(const char* data, size_t len, CopyStringMode) {
 }
 
 StringData* StringData::Make(size_t reserveLen) {
-  auto const allocRet = allocFlatForLen(reserveLen);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
-
-  data[0] = 0;
-  sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash  = 0; // len=hash=0
+  auto const sd = allocFlatForLenSmall(reserveLen);
+  sd->setSize(0);
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
+}
+
+StringData* StringData::Make() {
+  return Make(SmallStringReserve);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -301,16 +330,11 @@ StringData* StringData::Make(char* data, size_t len, AttachStringMode) {
 }
 
 StringData* StringData::Make(StringSlice r1, StringSlice r2) {
-  auto const len      = r1.len + r2.len;
-  auto const allocRet = allocFlatForLen(len);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const len = r1.len + r2.len;
+  auto const sd = allocFlatForLenSmall(len);
+  sd->m_lenAndHash = len; // hash=0
 
-  sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash  = len; // hash=0
-
+  auto const data = reinterpret_cast<char*>(sd + 1);
   memcpy(data, r1.ptr, r1.len);
   memcpy(data + r1.len, r2.ptr, r2.len);
   data[len] = 0;
@@ -322,19 +346,14 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
 }
 
 StringData* StringData::Make(const StringData* s1, const StringData* s2) {
-  auto const len      = s1->m_len + s2->m_len;
-  // `memcpy8()` could overrun the buffer by at most 7 bytes, so we allocate 6
+  auto const len = s1->m_len + s2->m_len;
+  // `memcpy8()' could overrun the buffer by at most 7 bytes, so we allocate 6
   // more bytes here, which (together with the trailing 0) makes it safe.
-  auto const allocRet = allocFlatForLen(len + 6);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const sd = allocFlatForLenSmall(len + 6);
+  sd->m_lenAndHash = len; // hash=0
 
-  sd->m_data          = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash    = len; // hash=0
-
-  auto next = memcpy8(data, s1->m_data, s1->m_len);
+  auto const data = reinterpret_cast<char*>(sd + 1);
+  auto const next = memcpy8(data, s1->m_data, s1->m_len);
   *memcpy8(next, s2->m_data, s2->m_len) = 0;
 
   assert(sd->getCount() == 1);
@@ -349,21 +368,15 @@ StringData* StringData::Make(StringSlice s1, const char* lit2) {
 
 StringData* StringData::Make(StringSlice r1, StringSlice r2,
                              StringSlice r3) {
-  auto const len      = r1.len + r2.len + r3.len;
-  auto const allocRet = allocFlatForLen(len);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
-
-  sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
+  auto const len = r1.len + r2.len + r3.len;
+  auto const sd = allocFlatForLenSmall(len);
   sd->m_lenAndHash  = len; // hash=0
 
-  void* p;
-  p = memcpy(data,              r1.ptr, r1.len);
-  p = memcpy((char*)p + r1.len, r2.ptr, r2.len);
-      memcpy((char*)p + r2.len, r3.ptr, r3.len);
-  data[len] = 0;
+  char* p = reinterpret_cast<char*>(sd + 1);
+  p = static_cast<char*>(memcpy(p, r1.ptr, r1.len));
+  p = static_cast<char*>(memcpy(p + r1.len, r2.ptr, r2.len));
+  p = static_cast<char*>(memcpy(p + r2.len, r3.ptr, r3.len));
+  p[r3.len] = 0;
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
@@ -373,22 +386,16 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
 
 StringData* StringData::Make(StringSlice r1, StringSlice r2,
                              StringSlice r3, StringSlice r4) {
-  auto const len      = r1.len + r2.len + r3.len + r4.len;
-  auto const allocRet = allocFlatForLen(len);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const len = r1.len + r2.len + r3.len + r4.len;
+  auto const sd = allocFlatForLenSmall(len);
+  sd->m_lenAndHash = len; // hash=0
 
-  sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash  = len; // hash=0
-
-  void* p;
-  p = memcpy(data,              r1.ptr, r1.len);
-  p = memcpy((char*)p + r1.len, r2.ptr, r2.len);
-  p = memcpy((char*)p + r2.len, r3.ptr, r3.len);
-      memcpy((char*)p + r3.len, r4.ptr, r4.len);
-  data[len] = 0;
+  char* p = reinterpret_cast<char*>(sd + 1);
+  p = static_cast<char*>(memcpy(p, r1.ptr, r1.len));
+  p = static_cast<char*>(memcpy(p + r1.len, r2.ptr, r2.len));
+  p = static_cast<char*>(memcpy(p + r2.len, r3.ptr, r3.len));
+  p = static_cast<char*>(memcpy(p + r3.len, r4.ptr, r4.len));
+  p[r4.len] = 0;
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
@@ -413,7 +420,7 @@ ALWAYS_INLINE void StringData::enlist() {
 NEVER_INLINE
 StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   auto const sd = static_cast<StringData*>(
-      MM().smartMallocSize(sizeof(StringData) + sizeof(SharedPayload))
+    MM().mallocSmallSize(sizeof(StringData) + sizeof(SharedPayload))
   );
   auto const data = shared->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
@@ -444,36 +451,22 @@ StringData* StringData::Make(const APCString* shared) {
     return MakeAPCSlowPath(shared);
   }
 
-  // small-string path
+  // small-string path: make a flat copy.
+  static_assert(SmallStringReserve + kCapOverhead <= CapCode::Threshold, "");
+  static_assert(SmallStringReserve + kCapOverhead == 64, "");
+  auto const sd = allocFlatSmallImpl(SmallStringReserve);
+  sd->m_lenAndHash = data->m_lenAndHash;
+
   auto const psrc = data->data();
-  auto const hash = data->m_hash & STRHASH_MASK;
-  assert(hash != 0);
-
-  static_assert(SmallStringReserve + sizeof(StringData) + 1 <
-                CapCode::Threshold, "");
-  auto const need = sizeof(StringData) + len + 1;
-  auto const cap = MemoryManager::smartSizeClass(need);
-  auto const sd = static_cast<StringData*>(MM().smartMallocSize(cap));
   auto const pdst = reinterpret_cast<char*>(sd + 1);
-  auto const cc = CapCode::ceil(cap - kCapOverhead);
-  assert(cc.code == cap - kCapOverhead);
-
-  sd->m_data = pdst;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash = len | int64_t{hash} << 32;
-
-  // pdst[len] = 0;
-  auto const mcret = memcpy(pdst, psrc, len + 1);
+  auto const mcret = memcpy(pdst, psrc, len + 1); // also copy the tailing 0
   auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
-
-  // Note: this return value thing is doing a dead lea into %rsi in
-  // the caller for some reason.
 
   assert(ret == sd);
   assert(ret->m_len == len);
   assert(ret->hasExactlyOneRef());
-  assert(ret->m_hash == hash);
+  assert(ret->m_hash == data->m_hash);
   assert(ret->isFlat());
   assert(ret->checkSane());
   return ret;
@@ -487,13 +480,24 @@ void StringData::releaseDataSlowPath() {
 
   sharedPayload()->shared->getHandle()->unreference();
   delist();
-  freeForSize(this, sizeof(StringData) + sizeof(SharedPayload));
+  MM().freeSmallSize(this, sizeof(StringData) + sizeof(SharedPayload));
 }
 
 void StringData::release() noexcept {
   assert(checkSane());
-  if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
-  freeForSize(this, capacity() + kCapOverhead);
+  if (auto const sizeClass = m_hdr.smallSizeClass) {
+    assert(isFlat());
+    MM().freeSmallIndex(this, sizeClass,
+                        MemoryManager::smallIndex2Size(sizeClass));
+  } else {
+    // We know that the string is request local.  A `smallSizeClass' of 0 in
+    // its header indicates that the StringData is either not flat, or too big
+    // to fit in a small size class.
+    if (!isFlat()) return releaseDataSlowPath();
+    auto const size = capacity() + kCapOverhead;
+    assertx(size > kMaxSmallSize);
+    MM().freeBigSize(this, size);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -508,7 +512,6 @@ StringData* StringData::append(StringSlice range) {
 
   auto s = range.ptr;
   auto const len = range.len;
-
   if (len == 0) return this;
   auto const newLen = size_t(m_len) + size_t(len);
 
@@ -526,7 +529,6 @@ StringData* StringData::append(StringSlice range) {
   auto const requestLen = static_cast<uint32_t>(newLen);
   auto const target = UNLIKELY(isShared()) ? escalate(requestLen)
                                            : reserve(requestLen);
-
   memcpy(target->mutableData() + m_len, s, len);
   target->setSize(newLen);
   assert(target->checkSane());
@@ -540,9 +542,6 @@ StringData* StringData::append(StringSlice r1, StringSlice r2) {
   auto const len = r1.len + r2.len;
 
   if (len == 0) return this;
-  if (UNLIKELY(uint32_t(len) > MaxSize)) {
-    throw_string_too_large(len);
-  }
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
     throw_string_too_large(size_t(len) + size_t(m_len));
   }
@@ -627,17 +626,11 @@ StringData* StringData::reserve(size_t cap) {
 
   if (cap <= capacity()) return this;
 
-  cap = std::min(cap + cap / 4, size_t(MaxSize) + 1);
+  cap = std::min(cap + cap / 4, size_t(MaxSize));
+  auto const sd = allocFlatForLenSmall(cap);
 
-  auto const allocRet = allocFlatForLen(cap);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
-
-  sd->m_data          = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  // Smart allocated StringData are always aligned at 16 bytes, thus it is safe
-  // to copy in 16-byte groups. This copies m_lenAndHash (8 bytes), the
+  // Request-allocated StringData are always aligned at 16 bytes, thus it is
+  // safe to copy in 16-byte groups. This copies m_lenAndHash (8 bytes), the
   // characters (m_len bytes), add the trailing zero (1 byte).
   memcpy16_inline(&sd->m_lenAndHash, &m_lenAndHash,
                   (m_len + 8 + 1 + 15) & ~0xF);
@@ -656,11 +649,11 @@ StringData* StringData::shrinkImpl(size_t len) {
   assert(isFlat());
   assert(len <= capacity());
 
-  auto const sd = Make(len);
-  sd->m_len = len;
-  auto const src = slice();
-  auto const dst = sd->mutableData();
-  *memcpy8(dst, src.ptr, len) = 0;
+  auto const sd = allocFlatForLenSmall(len);
+  sd->m_lenAndHash = len;
+  auto const src = static_cast<void*>(this + 1);
+  auto const dst = static_cast<void*>(sd + 1);
+  *memcpy8(dst, src, len) = 0;
 
   assert(sd->checkSane());
   return sd;
@@ -679,14 +672,9 @@ StringData* StringData::shrink(size_t len) {
 StringData* StringData::escalate(size_t cap) {
   assert(isShared() && !isStatic() && cap >= m_len);
 
-  auto const allocRet = allocFlatForLen(cap);
-  auto const sd       = allocRet.first;
-  auto const cc       = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
-
-  sd->m_data          = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
-  sd->m_lenAndHash    = m_lenAndHash;
+  auto const sd = allocFlatForLenSmall(cap);
+  sd->m_lenAndHash = m_lenAndHash;
+  auto const data = reinterpret_cast<char*>(sd + 1);
   *memcpy8(data, m_data, m_len) = 0;
 
   assert(sd->hasExactlyOneRef());

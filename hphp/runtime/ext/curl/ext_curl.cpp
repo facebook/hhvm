@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -159,7 +159,7 @@ public:
 
     // wait until the user-specified timeout for an available handle
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    gettime(CLOCK_REALTIME, &ts);
     ts.tv_sec += m_waitTimeout / 1000;
     ts.tv_nsec += 1000000 * (m_waitTimeout % 1000);
     while (m_handleStack.empty()) {
@@ -214,7 +214,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartPtr<File>     fp;
+    req::ptr<File>     fp;
     StringBuffer       buf;
     String             content;
     int                type;
@@ -226,7 +226,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartPtr<File>     fp;
+    req::ptr<File>     fp;
   };
 
   class ToFree {
@@ -287,7 +287,7 @@ public:
     }
   }
 
-  explicit CurlResource(SmartPtr<CurlResource> src)
+  explicit CurlResource(req::ptr<CurlResource> src)
   : m_connPool(nullptr), m_pooledHandle(nullptr) {
     // NOTE: we never pool copied curl handles, because all spots in
     // the pool are pre-populated
@@ -782,6 +782,7 @@ public:
     case CURLOPT_QUOTE:
     case CURLOPT_HTTP200ALIASES:
     case CURLOPT_POSTQUOTE:
+    case CURLOPT_RESOLVE:
       if (value.is(KindOfArray) || value.is(KindOfObject)) {
         Array arr = value.toArray();
         curl_slist *slist = nullptr;
@@ -802,8 +803,8 @@ public:
       } else {
         raise_warning("You must pass either an object or an array with "
                       "the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, "
-                      "CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE "
-                      "arguments");
+                      "CURLOPT_HTTP200ALIASES, CURLOPT_POSTQUOTE "
+                      "and CURLOPT_RESOLVE arguments");
         return false;
       }
       break;
@@ -1141,9 +1142,9 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
 
 Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
-    return Variant(makeSmartPtr<CurlResource>(null_string));
+    return Variant(req::make<CurlResource>(null_string));
   } else {
-    return Variant(makeSmartPtr<CurlResource>(url.toString()));
+    return Variant(req::make<CurlResource>(url.toString()));
   }
 }
 
@@ -1160,16 +1161,13 @@ Variant HHVM_FUNCTION(curl_init_pooled,
   CurlHandlePool *pool = poolExists ?
     CurlHandlePool::namedPools.at(poolName.toCppString()) : nullptr;
 
-  if (url.isNull()) {
-    return Variant(makeSmartPtr<CurlResource>(null_string, pool));
-  } else {
-    return Variant(makeSmartPtr<CurlResource>(url.toString(), pool));
-  }
+  return url.isNull() ? Variant(req::make<CurlResource>(null_string, pool)) :
+         Variant(req::make<CurlResource>(url.toString(), pool));
 }
 
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
   CHECK_RESOURCE(curl);
-  return Variant(makeSmartPtr<CurlResource>(curl));
+  return Variant(req::make<CurlResource>(curl));
 }
 
 const StaticString
@@ -1465,7 +1463,7 @@ public:
     m_easyh.append(ch);
   }
 
-  void remove(SmartPtr<CurlResource> curle) {
+  void remove(req::ptr<CurlResource> curle) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
       if (cast<CurlResource>(iter.second())->get(true) ==
           curle->get()) {
@@ -1549,7 +1547,7 @@ void CurlMultiResource::sweep() {
   }
 
 Resource HHVM_FUNCTION(curl_multi_init) {
-  return Resource(makeSmartPtr<CurlMultiResource>());
+  return Resource(req::make<CurlMultiResource>());
 }
 
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
@@ -1657,7 +1655,7 @@ class CurlTimeoutHandler : public AsioTimeoutHandler {
 
 class CurlMultiAwait : public AsioExternalThreadEvent {
  public:
-  CurlMultiAwait(SmartPtr<CurlMultiResource> multi, double timeout) {
+  CurlMultiAwait(req::ptr<CurlMultiResource> multi, double timeout) {
     if ((addLowHandles(multi) + addHighHandles(multi)) == 0) {
       // Nothing to do
       markAsFinished();
@@ -1715,7 +1713,7 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
   // Ask curl_multi for its handles directly
   // This is preferable as we get to know which
   // are blocking on reads, and which on writes.
-  int addLowHandles(SmartPtr<CurlMultiResource> multi) {
+  int addLowHandles(req::ptr<CurlMultiResource> multi) {
     fd_set read_fds, write_fds;
     int max_fd = -1, count = 0;
     FD_ZERO(&read_fds); FD_ZERO(&write_fds);
@@ -1739,7 +1737,7 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
   // Check for file descriptors >= FD_SETSIZE
   // which can't be returned in an fdset
   // This is a little hacky, but necessary given cURL's APIs
-  int addHighHandles(SmartPtr<CurlMultiResource> multi) {
+  int addHighHandles(req::ptr<CurlMultiResource> multi) {
     int count = 0;
     auto easy_handles = multi->getEasyHandles();
     for (ArrayIter iter(easy_handles); iter; ++iter) {
@@ -1795,7 +1793,7 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   Array ret = Array::Create();
   for (int i=0; i<=max_fd; i++) {
     if (FD_ISSET(i, fd)) {
-      ret.append(Variant(makeSmartPtr<BuiltinFile>(i)));
+      ret.append(Variant(req::make<BuiltinFile>(i)));
     }
   }
   return ret;
@@ -2062,6 +2060,7 @@ const int64_t k_CURLOPT_RANGE = CURLOPT_RANGE;
 const int64_t k_CURLOPT_READDATA = CURLOPT_READDATA;
 const int64_t k_CURLOPT_READFUNCTION = CURLOPT_READFUNCTION;
 const int64_t k_CURLOPT_REFERER = CURLOPT_REFERER;
+const int64_t k_CURLOPT_RESOLVE = CURLOPT_RESOLVE;
 const int64_t k_CURLOPT_RESUME_FROM = CURLOPT_RESUME_FROM;
 const int64_t k_CURLOPT_RETURNTRANSFER = CURLOPT_RETURNTRANSFER;
 #ifdef FACEBOOK
@@ -2344,6 +2343,7 @@ const StaticString s_CURLOPT_RANGE("CURLOPT_RANGE");
 const StaticString s_CURLOPT_READDATA("CURLOPT_READDATA");
 const StaticString s_CURLOPT_READFUNCTION("CURLOPT_READFUNCTION");
 const StaticString s_CURLOPT_REFERER("CURLOPT_REFERER");
+const StaticString s_CURLOPT_RESOLVE("CURLOPT_RESOLVE");
 const StaticString s_CURLOPT_RESUME_FROM("CURLOPT_RESUME_FROM");
 const StaticString s_CURLOPT_RETURNTRANSFER("CURLOPT_RETURNTRANSFER");
 #ifdef FACEBOOK
@@ -2997,6 +2997,9 @@ class CurlExtension final : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_CURLOPT_REFERER.get(), k_CURLOPT_REFERER
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLOPT_RESOLVE.get(), k_CURLOPT_RESOLVE
     );
     Native::registerConstant<KindOfInt64>(
       s_CURLOPT_RESUME_FROM.get(), k_CURLOPT_RESUME_FROM

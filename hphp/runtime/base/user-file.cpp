@@ -70,7 +70,7 @@ StaticString s_rmdir("rmdir");
 ///////////////////////////////////////////////////////////////////////////////
 
 UserFile::UserFile(Class *cls,
-                   const SmartPtr<StreamContext>& context /*= null */)
+                   const req::ptr<StreamContext>& context /*= null */)
 : UserFSNode(cls, context) {
   m_StreamOpen  = lookupMethod(s_stream_open.get());
   m_StreamClose = lookupMethod(s_stream_close.get());

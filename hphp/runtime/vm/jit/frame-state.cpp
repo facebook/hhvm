@@ -72,14 +72,13 @@ bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
   // Get the least common ancestor across both states.
   if (merge_util(dst.value, least_common_ancestor(dst.value, src.value))) {
     changed = true;
-    assert(dst.value == nullptr || dst.type <= dst.value->type());
+  }
 
-    // We keep the invariant that the known value either has the same
-    // type as the known type or be nullptr.  Otherwise, we may end up
-    // using a value with a more general type than is known about it.
-    if (dst.value && dst.type < dst.value->type()) {
-      dst.value = nullptr;
-    }
+  // We may have changed either dst.value or dst.type in a way that could fail
+  // to preserve SlotState invariants.  So check if we can't keep the value.
+  if (dst.value != nullptr && dst.value->type() != dst.type) {
+    dst.value = nullptr;
+    changed = true;
   }
 
   if (merge_into(dst.typeSrcs, src.typeSrcs)) {
@@ -155,6 +154,21 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     changed = true;
   }
 
+  for (auto const& srcPair : src.predictedTypes) {
+    auto dstIt = dst.predictedTypes.find(srcPair.first);
+    if (dstIt == dst.predictedTypes.end()) {
+      dst.predictedTypes.emplace(srcPair);
+      changed = true;
+      continue;
+    }
+
+    auto const newType = dstIt->second | srcPair.second;
+    if (newType != dstIt->second) {
+      dstIt->second = newType;
+      changed = true;
+    }
+  }
+
   return changed;
 }
 
@@ -183,6 +197,14 @@ bool check_invariants(const FrameState& state) {
       id,
       local.predictedType,
       local.type
+    );
+
+    always_assert_flog(
+      local.value == nullptr || local.value->type() == local.type,
+      "local {} had type {}, but value {}\n",
+      id,
+      local.type,
+      local.value->toString()
     );
 
     if (state.curFunc->isPseudoMain()) {
@@ -221,20 +243,18 @@ bool check_invariants(const FrameState& state) {
 
 /*
  * When we're computing an update for a new predicted type, we sometimes need
- * to fall back to the proven type, e.g. if the new predicted type is Bottom or
- * no longer satisfies the invariant that predictedType <= provenType.
+ * to fall back to the proven type, e.g. if the new predicted type no longer
+ * satisfies the invariant that predictedType <= provenType. predictedType must
+ * not be Bottom.
  */
 Type updatePredictedType(Type predictedType, Type provenType) {
-  if (predictedType == TBottom) return provenType;
-  if (predictedType <= provenType) return predictedType;
-  return provenType;
+  assertx(predictedType != TBottom);
+  return predictedType < provenType ? predictedType : provenType;
 }
 
 Type refinePredictedType(Type oldPrediction, Type newPrediction, Type proven) {
   auto refinedPrediction = oldPrediction & newPrediction;
-  if (refinedPrediction == TBottom) {
-    refinedPrediction = newPrediction;
-  }
+  if (refinedPrediction == TBottom) refinedPrediction = newPrediction;
   return updatePredictedType(refinedPrediction, proven);
 }
 
@@ -282,7 +302,12 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     if (m_status != Status::Building || taken->empty()) changed |= save(taken);
   }
 
-  local_effects(*this, inst, *this);
+  auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
+    for (auto id : ids) {
+      setLocalValue(id, nullptr);
+    }
+  };
+
   assertx(checkInvariants());
 
   switch (inst->op()) {
@@ -292,6 +317,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case Call:
     {
       auto const extra = inst->extra<Call>();
+      killLocalsForCall(extra->destroyLocals);
       for (auto& st : m_stack) st.frameMaySpanCall = true;
       // Remove tracked state for the slots for args and the actrec.
       for (auto i = uint32_t{0}; i < kNumActRecCells + extra->numParams; ++i) {
@@ -317,6 +343,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case CallArray:
     {
       auto const extra = inst->extra<CallArray>();
+      killLocalsForCall(extra->destroyLocals);
       for (auto& st : m_stack) st.frameMaySpanCall = true;
       // Remove tracked state for the actrec and array arg.
       for (auto i = uint32_t{0}; i < kNumActRecCells + 1; ++i) {
@@ -334,9 +361,14 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
+  case CallBuiltin:
+    if (inst->extra<CallBuiltin>()->destroyLocals) clearLocals();
+    break;
+
   case ContEnter:
     {
       auto const extra = inst->extra<ContEnter>();
+      killLocalsForCall(false);
       for (auto& st : m_stack) st.frameMaySpanCall = true;
       clearStackForCall();
       setStackType(extra->spOffset, TGen);
@@ -364,6 +396,15 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().spOffset = inst->extra<DefSP>()->offset;
     break;
 
+  case LdStk:
+    {
+      auto const offset = inst->extra<LdStk>()->offset;
+      auto& state = stackState(offset);
+      refinePredictedTmpType(inst->dst(), state.predictedType);
+      setStackValue(offset, inst->dst());
+    }
+    break;
+
   case StStk:
     setStackValue(inst->extra<StStk>()->offset, inst->src(1));
     break;
@@ -371,6 +412,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case CheckType:
   case AssertType:
     refineStackValues(inst->src(0), inst->dst());
+    refineLocalValues(inst->src(0), inst->dst());
     break;
 
   case CheckStk:
@@ -390,14 +432,40 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
                           inst->typeParam());
     break;
 
-  case PredictLoc:
-    refineLocalPredictedType(inst->extra<PredictLoc>()->locId,
-                             inst->typeParam());
+  case AssertLoc:
+  case CheckLoc:
+    {
+      auto id = inst->extra<LocalId>()->locId;
+      if (inst->marker().func()->isPseudoMain()) {
+        setLocalPredictedType(id, inst->typeParam());
+      } else {
+        refineLocalType(id,
+                        inst->typeParam(),
+                        TypeSource::makeGuard(inst));
+      }
+    }
     break;
 
-  case PredictStk:
-    refineStackPredictedType(inst->extra<PredictStk>()->offset,
-                             inst->typeParam());
+  case HintLocInner:
+    setBoxedLocalPrediction(inst->extra<HintLocInner>()->locId,
+                            inst->typeParam());
+    break;
+
+  case StLoc:
+    setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
+    break;
+
+  case LdLoc:
+    {
+      auto const id = inst->extra<LdLoc>()->locId;
+      refinePredictedTmpType(inst->dst(), cur().locals[id].predictedType);
+      setLocalValue(id, inst->dst());
+    }
+    break;
+
+  case StLocPseudoMain:
+    setLocalPredictedType(inst->extra<LocalId>()->locId,
+                          inst->src(1)->type());
     break;
 
   case CastStk:
@@ -406,6 +474,10 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case CoerceStk:
     setStackType(inst->extra<CoerceStk>()->offset, inst->typeParam());
+    break;
+
+  case StRef:
+    updateLocalRefPredictions(inst->src(0), inst->src(1));
     break;
 
   case CastMem:
@@ -452,6 +524,22 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
+
+    assertx(!extra.smashesAllLocals || extra.nChangedLocals == 0);
+    if (extra.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
+      clearLocals();
+    } else {
+      auto it = extra.changedLocals;
+      auto const end = it + extra.nChangedLocals;
+      for (; it != end; ++it) {
+        auto& loc = *it;
+        // If changing the inner type of a boxed local, also drop the
+        // information about inner types for any other boxed locals.
+        if (loc.type <= TBoxedCell) dropLocalRefsInnerTypes();
+        setLocalType(loc.id, loc.type);
+      }
+    }
+
     auto const spOffset = extra.spOffset;
 
     // Clear tracked information for slots pushed and popped.
@@ -488,13 +576,39 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().thisAvailable = true;
     break;
 
+  case IterInitK:
+  case WIterInitK:
+    // kill the locals to which this instruction stores iter's key and value
+    killIterLocals({inst->extra<IterData>()->keyId,
+                    inst->extra<IterData>()->valId});
+    break;
+
+  case IterInit:
+  case WIterInit:
+    // kill the local to which this instruction stores iter's value
+    killIterLocals({inst->extra<IterData>()->valId});
+    break;
+
+  case IterNextK:
+  case WIterNextK:
+    // kill the locals to which this instruction stores iter's key and value
+    killIterLocals({inst->extra<IterData>()->keyId,
+                    inst->extra<IterData>()->valId});
+    break;
+
+  case IterNext:
+  case WIterNext:
+    // kill the local to which this instruction stores iter's value
+    killIterLocals({inst->extra<IterData>()->valId});
+    break;
+
   default:
     if (MInstrEffects::supported(inst)) {
       auto const base = inst->src(minstrBaseIdx(inst->op()));
-      // Right now we require that minstrs that affect stack locations take the
-      // stack address as an immediate source.  This isn't actually specified
-      // in the ir.spec but we intend to make it more general soon.  There is
-      // an analagous problem in local-effects.cpp for LdLocAddr.
+
+      // We require that minstrs that could affect stack/local locations take
+      // the stack address as an direct source. This restriction may be relaxed
+      // in the future (t7580150).
       if (base->inst()->is(LdStkAddr)) {
         auto const offset = base->inst()->extra<LdStkAddr>()->offset;
         auto const prevTy = stackType(offset);
@@ -508,12 +622,81 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
             ty <= TBoxedCell ? TBoxedInitCell : ty
           );
         }
+      } else if (base->inst()->is(LdLocAddr)) {
+        auto const locId = base->inst()->extra<LdLocAddr>()->locId;
+        auto const baseType = localType(locId);
+
+        MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
+        if (effects.baseTypeChanged || effects.baseValChanged) {
+          auto const ty = effects.baseType.derefIfPtr();
+          if (ty <= TBoxedCell) {
+            setLocalType(locId, TBoxedInitCell);
+            setBoxedLocalPrediction(locId, ty);
+          } else {
+            setLocalType(locId, ty);
+          }
+        }
       }
     }
     break;
   }
 
   return changed;
+}
+
+/*
+ * syncPrediction() is called after we update the predictedType and/or value
+ * for a SlotState. It looks up the predicted type for the value in
+ * cur().predictedTypes and ensures both locations have the most refined
+ * predicted type possible.
+ */
+template<bool Stack>
+void FrameStateMgr::syncPrediction(SlotState<Stack>& slot) {
+  if (!slot.value) return;
+  ITRACE(3, "Syncing prediction for {}\n", *slot.value);
+  auto const canonValue = canonical(slot.value);
+
+  auto& prediction = slot.predictedType;
+  auto& map = cur().predictedTypes;
+  auto it = map.find(canonValue);
+  if (it == map.end()) {
+    ITRACE(4, "No prediction in map; slot has {}\n", prediction);
+    if (prediction < slot.default_type) map.emplace(canonValue, prediction);
+    return;
+  }
+  if (prediction == slot.default_type) {
+    ITRACE(4, "No prediction in slot; map has {}\n", it->second);
+    prediction = it->second;
+    return;
+  }
+
+  auto const newPred = prediction & it->second;
+  ITRACE(3, "New prediction: {} & {} -> {}\n",
+         prediction, it->second, newPred);
+  if (newPred == TBottom) return;
+  if (newPred < prediction) prediction = newPred;
+  if (newPred < it->second) it->second = newPred;
+}
+
+void FrameStateMgr::refinePredictedTmpType(SSATmp* tmp, Type prediction) {
+  auto const canonTmp = canonical(tmp);
+  auto& map = cur().predictedTypes;
+  auto it = map.find(canonTmp);
+  if (it == map.end()) {
+    map.emplace(canonTmp, prediction);
+    ITRACE(3, "New prediction for {}: {}\n", *tmp->inst(), prediction);
+    return;
+  }
+
+  ITRACE(3, "Prediction for {} refined from {} to ", *tmp->inst(), it->second);
+  it->second = refinePredictedType(it->second, prediction, tmp->type());
+  FTRACE(3, "{}\n", it->second);
+}
+
+Type FrameStateMgr::predictedTmpType(SSATmp* tmp) const {
+  auto& map = cur().predictedTypes;
+  auto it = map.find(canonical(tmp));
+  return it == map.end() ? tmp->type() : it->second;
 }
 
 void FrameStateMgr::walkAllInlinedLocals(
@@ -897,7 +1080,6 @@ bool FrameStateMgr::localMaybeChanged(uint32_t id) const {
 Type FrameStateMgr::predictedLocalType(uint32_t id) const {
   always_assert(id < cur().locals.size());
   auto const ty = cur().locals[id].predictedType;
-  ITRACE(2, "Predicting {}: {}\n", id, ty);
   return ty;
 }
 
@@ -931,6 +1113,8 @@ void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {
   stk.type          = value ? value->type() : TStkElem;
   stk.maybeChanged  = true;
   stk.predictedType = stk.type;
+  syncPrediction(stk);
+
   stk.typeSrcs.clear();
   if (value) {
     stk.typeSrcs.insert(TypeSource::makeValue(value));
@@ -994,10 +1178,11 @@ void FrameStateMgr::clearLocals() {
 
 void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < cur().locals.size());
-  cur().locals[id].value        = value;
-  auto const newType            = value ? value->type() : TGen;
-  cur().locals[id].type         = newType;
-  cur().locals[id].maybeChanged = true;
+  auto& loc = cur().locals[id];
+  loc.value          = value;
+  auto const newType = value ? value->type() : TGen;
+  loc.type           = newType;
+  loc.maybeChanged   = true;
   /*
    * Update the predicted type for boxed values in some special cases to
    * something smart.  The rest of the time, throw it away.
@@ -1018,7 +1203,7 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
         break;
       }
     }
-    return cur().locals[id].type;  // just predict what we know
+    return loc.type;  // just predict what we know
   }();
 
   // We need to make sure not to violate the invariant that predictedType is
@@ -1030,11 +1215,12 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
 
   FTRACE(3, "setLocalValue setting prediction {} based on {}, using = {}\n",
     id, newInnerPred, useTy);
-  cur().locals[id].predictedType = useTy;
+  loc.predictedType = useTy;
+  syncPrediction(loc);
 
-  cur().locals[id].typeSrcs.clear();
+  loc.typeSrcs.clear();
   if (value) {
-    cur().locals[id].typeSrcs.insert(TypeSource::makeValue(value));
+    loc.typeSrcs.insert(TypeSource::makeValue(value));
   }
 }
 
@@ -1068,12 +1254,14 @@ void FrameStateMgr::refineLocalPredictedType(uint32_t id, Type type) {
   auto& local = cur().locals[id];
   local.predictedType = refinePredictedType(
     local.predictedType, type, local.type);
+  syncPrediction(local);
 }
 
 void FrameStateMgr::refineStackPredictedType(IRSPOffset offset, Type type) {
   auto& state = stackState(offset);
   state.predictedType = refinePredictedType(
     state.predictedType, type, state.type);
+  syncPrediction(state);
 }
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {
@@ -1156,9 +1344,9 @@ void FrameStateMgr::refineStackValues(SSATmp* oldVal, SSATmp* newVal) {
 }
 
 /*
- * Called to clear out the tracked local values at a call site.  Calls kill all
- * registers, so we don't want to keep locals in registers across calls. We do
- * continue tracking the types in locals, however.
+ * Called to clear out the tracked local values at a call site.  Keeping a
+ * value live across a Call requires spilling, so we avoid it. We do continue
+ * tracking the types in locals, however.
  */
 void FrameStateMgr::killLocalsForCall(bool callDestroysLocals) {
   if (callDestroysLocals) clearLocals();
@@ -1193,7 +1381,7 @@ std::string show(const FrameStateMgr& state) {
 
   return folly::format(
     "func: {}, spOff: {}{}{}",
-    funcName->data(),
+    funcName,
     state.spOffset().offset,
     state.thisAvailable() ? ", thisAvailable" : "",
     state.frameMaySpanCall() ? ", frameMaySpanCall" : ""

@@ -2112,10 +2112,15 @@ void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 
-void in(ISS& env, const bc::Await&) {
-  auto const t = popC(env);
-
-  // If the thing we're awaiting isn't a wait handle, there's nothing we can
+void pushTypeFromWH(ISS& env, const Type t) {
+  if (!t.couldBe(TObj)) {
+    // These opcodes require an object descending from WaitHandle.
+    // Exceptions will be thrown for any non-object.
+    push(env, TBottom);
+    unreachable(env);
+    return;
+  }
+  // If we aren't even sure this is a wait handle, there's nothing we can
   // infer here.  (This can happen if a user declares a class with a
   // getWaitHandle method that returns non-WaitHandle garbage.)
   if (!t.subtypeOf(TObj) || !is_specialized_wait_handle(t)) {
@@ -2132,6 +2137,14 @@ void in(ISS& env, const bc::Await&) {
   }
 
   push(env, inner);
+}
+
+void in(ISS& env, const bc::WHResult&) {
+  pushTypeFromWH(env, popC(env));
+}
+
+void in(ISS& env, const bc::Await&) {
+  pushTypeFromWH(env, popC(env));
 }
 
 void in(ISS& env, const bc::Strlen&) {

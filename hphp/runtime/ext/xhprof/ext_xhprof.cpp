@@ -1,5 +1,5 @@
 #include "hphp/runtime/ext/xhprof/ext_xhprof.h"
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/server/server-stats.h"

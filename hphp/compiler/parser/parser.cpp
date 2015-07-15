@@ -105,17 +105,17 @@
 #define NEW_EXP0(cls)                                           \
   std::make_shared<cls>(BlockScopePtr(),                        \
                         getRange())
-#define NEW_EXP(cls, e...)                                      \
+#define NEW_EXP(cls, ...)                                      \
   std::make_shared<cls>(BlockScopePtr(),                        \
-                        getRange(), ##e)
+                        getRange(), ##__VA_ARGS__)
 #define NEW_STMT0(cls)                                          \
   std::make_shared<cls>(BlockScopePtr(), getLabelScope(),       \
                         getRange())
-#define NEW_STMT(cls, e...)                                     \
+#define NEW_STMT(cls, ...)                                     \
   std::make_shared<cls>(BlockScopePtr(), getLabelScope(),       \
-                        getRange(), ##e)
+                        getRange(), ##__VA_ARGS__)
 
-#define PARSE_ERROR(fmt, args...)  HPHP_PARSER_ERROR(fmt, this, ##args)
+#define PARSE_ERROR(fmt, ...)  HPHP_PARSER_ERROR(fmt, this, ##__VA_ARGS__)
 
 using namespace HPHP::Compiler;
 
@@ -357,15 +357,19 @@ void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
 
   if (isAbstract) {
     onClassAbstractConstant(typeConst, nullptr, var);
+    typeConst.typeAnnotation = nullptr;
   } else {
     value.setText(value.typeAnnotationName());
     Token typeConstValue;
     onScalar(typeConstValue, T_STRING, value);
 
     onClassConstant(typeConst, nullptr, var, typeConstValue);
+    typeConst.typeAnnotation = value.typeAnnotation;
   }
 
-  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract, true);
+  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract,
+                       /* isTypeConst = */ true,
+                       typeConst.typeAnnotation);
 }
 
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
@@ -1587,7 +1591,8 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
                                   Token *type, bool abstract /* = false */,
-                                  bool typeconst /* = false */) {
+                                  bool typeconst /* = false */,
+                                  const TypeAnnotationPtr& typeAnnot) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
@@ -1603,7 +1608,8 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       (type) ? type->typeAnnotationName() : "",
       dynamic_pointer_cast<ExpressionList>(decl->exp),
       abstract,
-      typeconst);
+      typeconst,
+      typeAnnot);
   }
 }
 
@@ -2355,7 +2361,7 @@ void Parser::AliasTable::set(std::string alias,
                              std::string name,
                              AliasType type,
                              int line_no) {
-  m_aliases[alias] = (NameEntry){name, type, line_no};
+  m_aliases[alias] = NameEntry{name, type, line_no};
 }
 
 /*
@@ -2390,69 +2396,69 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
   hphp_string_imap<std::string> autoAliases;
   typedef AliasTable::AliasEntry AliasEntry;
   std::vector<AliasEntry> aliases {
-    (AliasEntry){"AsyncIterator", "HH\\AsyncIterator"},
-    (AliasEntry){"AsyncKeyedIterator", "HH\\AsyncKeyedIterator"},
-    (AliasEntry){"Traversable", "HH\\Traversable"},
-    (AliasEntry){"Container", "HH\\Container"},
-    (AliasEntry){"KeyedTraversable", "HH\\KeyedTraversable"},
-    (AliasEntry){"KeyedContainer", "HH\\KeyedContainer"},
-    (AliasEntry){"Iterator", "HH\\Iterator"},
-    (AliasEntry){"KeyedIterator", "HH\\KeyedIterator"},
-    (AliasEntry){"Iterable", "HH\\Iterable"},
-    (AliasEntry){"KeyedIterable", "HH\\KeyedIterable"},
-    (AliasEntry){"Collection", "HH\\Collection"},
-    (AliasEntry){"Vector", "HH\\Vector"},
-    (AliasEntry){"Map", "HH\\Map"},
-    (AliasEntry){"Set", "HH\\Set"},
-    (AliasEntry){"Pair", "HH\\Pair"},
-    (AliasEntry){"ImmVector", "HH\\ImmVector"},
-    (AliasEntry){"ImmMap", "HH\\ImmMap"},
-    (AliasEntry){"ImmSet", "HH\\ImmSet"},
-    (AliasEntry){"InvariantException", "HH\\InvariantException"},
-    (AliasEntry){"IMemoizeParam", "HH\\IMemoizeParam"},
-    (AliasEntry){"Shapes", "HH\\Shapes"},
+    AliasEntry{"AsyncIterator", "HH\\AsyncIterator"},
+    AliasEntry{"AsyncKeyedIterator", "HH\\AsyncKeyedIterator"},
+    AliasEntry{"Traversable", "HH\\Traversable"},
+    AliasEntry{"Container", "HH\\Container"},
+    AliasEntry{"KeyedTraversable", "HH\\KeyedTraversable"},
+    AliasEntry{"KeyedContainer", "HH\\KeyedContainer"},
+    AliasEntry{"Iterator", "HH\\Iterator"},
+    AliasEntry{"KeyedIterator", "HH\\KeyedIterator"},
+    AliasEntry{"Iterable", "HH\\Iterable"},
+    AliasEntry{"KeyedIterable", "HH\\KeyedIterable"},
+    AliasEntry{"Collection", "HH\\Collection"},
+    AliasEntry{"Vector", "HH\\Vector"},
+    AliasEntry{"Map", "HH\\Map"},
+    AliasEntry{"Set", "HH\\Set"},
+    AliasEntry{"Pair", "HH\\Pair"},
+    AliasEntry{"ImmVector", "HH\\ImmVector"},
+    AliasEntry{"ImmMap", "HH\\ImmMap"},
+    AliasEntry{"ImmSet", "HH\\ImmSet"},
+    AliasEntry{"InvariantException", "HH\\InvariantException"},
+    AliasEntry{"IMemoizeParam", "HH\\IMemoizeParam"},
+    AliasEntry{"Shapes", "HH\\Shapes"},
 
-    (AliasEntry){"Awaitable", "HH\\Awaitable"},
-    (AliasEntry){"AsyncGenerator", "HH\\AsyncGenerator"},
-    (AliasEntry){"WaitHandle", "HH\\WaitHandle"},
+    AliasEntry{"Awaitable", "HH\\Awaitable"},
+    AliasEntry{"AsyncGenerator", "HH\\AsyncGenerator"},
+    AliasEntry{"WaitHandle", "HH\\WaitHandle"},
     // Keep in sync with order in hphp/runtime/ext/asio/wait-handle.h
-    (AliasEntry){"StaticWaitHandle", "HH\\StaticWaitHandle"},
-    (AliasEntry){"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
-    (AliasEntry){"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
-    (AliasEntry){"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
-    (AliasEntry){"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},
-    (AliasEntry){"AwaitAllWaitHandle", "HH\\AwaitAllWaitHandle"},
-    (AliasEntry){"GenArrayWaitHandle", "HH\\GenArrayWaitHandle"},
-    (AliasEntry){"GenMapWaitHandle", "HH\\GenMapWaitHandle"},
-    (AliasEntry){"GenVectorWaitHandle", "HH\\GenVectorWaitHandle"},
-    (AliasEntry){"ConditionWaitHandle", "HH\\ConditionWaitHandle"},
-    (AliasEntry){"RescheduleWaitHandle", "HH\\RescheduleWaitHandle"},
-    (AliasEntry){"SleepWaitHandle", "HH\\SleepWaitHandle"},
-    (AliasEntry){
+    AliasEntry{"StaticWaitHandle", "HH\\StaticWaitHandle"},
+    AliasEntry{"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
+    AliasEntry{"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
+    AliasEntry{"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
+    AliasEntry{"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},
+    AliasEntry{"AwaitAllWaitHandle", "HH\\AwaitAllWaitHandle"},
+    AliasEntry{"GenArrayWaitHandle", "HH\\GenArrayWaitHandle"},
+    AliasEntry{"GenMapWaitHandle", "HH\\GenMapWaitHandle"},
+    AliasEntry{"GenVectorWaitHandle", "HH\\GenVectorWaitHandle"},
+    AliasEntry{"ConditionWaitHandle", "HH\\ConditionWaitHandle"},
+    AliasEntry{"RescheduleWaitHandle", "HH\\RescheduleWaitHandle"},
+    AliasEntry{"SleepWaitHandle", "HH\\SleepWaitHandle"},
+    AliasEntry{
       "ExternalThreadEventWaitHandle",
       "HH\\ExternalThreadEventWaitHandle"
     },
 
-    (AliasEntry){"bool", "HH\\bool"},
-    (AliasEntry){"int", "HH\\int"},
-    (AliasEntry){"float", "HH\\float"},
-    (AliasEntry){"num", "HH\\num"},
-    (AliasEntry){"arraykey", "HH\\arraykey"},
-    (AliasEntry){"string", "HH\\string"},
-    (AliasEntry){"resource", "HH\\resource"},
-    (AliasEntry){"mixed", "HH\\mixed"},
-    (AliasEntry){"noreturn", "HH\\noreturn"},
-    (AliasEntry){"void", "HH\\void"},
-    (AliasEntry){"this", "HH\\this"},
-    (AliasEntry){"classname", "HH\\string"}, // for ::class
+    AliasEntry{"bool", "HH\\bool"},
+    AliasEntry{"int", "HH\\int"},
+    AliasEntry{"float", "HH\\float"},
+    AliasEntry{"num", "HH\\num"},
+    AliasEntry{"arraykey", "HH\\arraykey"},
+    AliasEntry{"string", "HH\\string"},
+    AliasEntry{"resource", "HH\\resource"},
+    AliasEntry{"mixed", "HH\\mixed"},
+    AliasEntry{"noreturn", "HH\\noreturn"},
+    AliasEntry{"void", "HH\\void"},
+    AliasEntry{"this", "HH\\this"},
+    AliasEntry{"classname", "HH\\string"}, // for ::class
 
     // Support a handful of synonyms for backwards compat with code written
     // against older versions of HipHop, and to be consistent with PHP5 casting
     // syntax (for example, PHP5 supports both "(bool)$x" and "(boolean)$x")
-    (AliasEntry){"boolean", "HH\\bool"},
-    (AliasEntry){"integer", "HH\\int"},
-    (AliasEntry){"double", "HH\\float"},
-    (AliasEntry){"real", "HH\\float"},
+    AliasEntry{"boolean", "HH\\bool"},
+    AliasEntry{"integer", "HH\\int"},
+    AliasEntry{"double", "HH\\float"},
+    AliasEntry{"real", "HH\\float"},
   };
   for (auto entry : aliases) {
     autoAliases[entry.alias] = entry.name;

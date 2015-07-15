@@ -36,7 +36,6 @@ namespace jit {
 struct IRUnit;
 struct IRInstruction;
 struct SSATmp;
-struct LocalStateHook;
 struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////

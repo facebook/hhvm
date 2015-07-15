@@ -153,7 +153,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
     return nullptr;
   }
   // fill this out if people need it
-  php_stream_wrapper *stream = HPHP::smart_new<php_stream_wrapper>();
+  php_stream_wrapper *stream = HPHP::req::make_raw<php_stream_wrapper>();
   return stream;
 }
 
@@ -195,7 +195,7 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_conte
   }
 
   // TODO this leaks
-  php_stream *stream = HPHP::smart_new<php_stream>(dir.get());
+  php_stream *stream = HPHP::req::make_raw<php_stream>(dir.get());
   stream->hphp_dir->incRefCount();
   return stream;
 }
@@ -289,7 +289,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int
     return nullptr;
   }
   // TODO this leaks
-  php_stream *stream = HPHP::smart_new<php_stream>(file.get());
+  php_stream *stream = HPHP::req::make_raw<php_stream>(file.get());
   stream->hphp_file->incRefCount();
 
   if (auto urlFile = dynamic_cast<HPHP::UrlFile*>(file.get())) {

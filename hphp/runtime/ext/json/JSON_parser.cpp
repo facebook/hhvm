@@ -43,7 +43,7 @@ SOFTWARE.
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/system/systemlib.h"
 
 #define MAX_LENGTH_OF_LONG 20
@@ -717,7 +717,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           /*<fb>*/
           if (collections) {
             // stable_maps is meaningless
-            top = makeSmartPtr<c_Map>();
+            top = req::make<c_Map>();
           } else {
           /*</fb>*/
             if (!assoc) {
@@ -788,7 +788,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           }
           /*<fb>*/
           if (collections) {
-            top = makeSmartPtr<c_Vector>();
+            top = req::make<c_Vector>();
           } else {
             top = Array::Create();
           }

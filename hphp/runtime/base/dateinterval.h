@@ -103,7 +103,7 @@ public:
   String format(const String& format_spec);
 
   bool isValid() const { return get(); }
-  SmartPtr<DateInterval> cloneDateInterval() const;
+  req::ptr<DateInterval> cloneDateInterval() const;
 
 protected:
   friend class DateTime;

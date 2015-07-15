@@ -229,7 +229,7 @@ public:
    *   passphrase - NULL causes a passphrase prompt to be emitted in
    *   the Apache error log!
    */
-  static SmartPtr<Key> Get(const Variant& var, bool public_key,
+  static req::ptr<Key> Get(const Variant& var, bool public_key,
                            const char *passphrase = nullptr) {
     if (var.is(KindOfArray)) {
       Array arr = var.toArray();
@@ -245,9 +245,9 @@ public:
     return GetHelper(var, public_key, passphrase);
   }
 
-  static SmartPtr<Key> GetHelper(const Variant& var, bool public_key,
+  static req::ptr<Key> GetHelper(const Variant& var, bool public_key,
                                  const char *passphrase) {
-    SmartPtr<Certificate> ocert;
+    req::ptr<Certificate> ocert;
     EVP_PKEY *key = NULL;
 
     if (var.isResource()) {
@@ -295,7 +295,7 @@ public:
     }
 
     if (key) {
-      return makeSmartPtr<Key>(key);
+      return req::make<Key>(key);
     }
 
     return nullptr;
@@ -328,7 +328,7 @@ public:
 
   DECLARE_RESOURCE_ALLOCATION(CSRequest)
 
-  static SmartPtr<CSRequest> Get(const Variant& var) {
+  static req::ptr<CSRequest> Get(const Variant& var) {
     auto csr = cast_or_null<CSRequest>(GetRequest(var));
     if (!csr || !csr->m_csr) {
       raise_warning("cannot get CSR");
@@ -338,7 +338,7 @@ public:
   }
 
 private:
-  static SmartPtr<CSRequest> GetRequest(const Variant& var) {
+  static req::ptr<CSRequest> GetRequest(const Variant& var) {
     if (var.isResource()) {
       return dyn_cast_or_null<CSRequest>(var);
     }
@@ -349,7 +349,7 @@ private:
       X509_REQ *csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
       BIO_free(in);
       if (csr) {
-        return makeSmartPtr<CSRequest>(csr);
+        return req::make<CSRequest>(csr);
       }
     }
     return nullptr;
@@ -995,7 +995,7 @@ Variant HHVM_FUNCTION(openssl_csr_get_public_key, const Variant& csr) {
   auto pcsr = CSRequest::Get(csr);
   if (!pcsr) return false;
 
-  return Variant(makeSmartPtr<Key>(X509_REQ_get_pubkey(pcsr->csr())));
+  return Variant(req::make<Key>(X509_REQ_get_pubkey(pcsr->csr())));
 }
 
 Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,
@@ -1017,7 +1017,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
 
-  SmartPtr<Key> okey;
+  req::ptr<Key> okey;
   X509_REQ *csr = NULL;
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings)) {
@@ -1031,7 +1031,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
     if (req.priv_key == NULL) {
       req.generatePrivateKey();
       if (req.priv_key) {
-        okey = makeSmartPtr<Key>(req.priv_key);
+        okey = req::make<Key>(req.priv_key);
       }
     }
     if (req.priv_key == NULL) {
@@ -1053,7 +1053,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
         } else {
           ret = true;
           if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
-            ret = makeSmartPtr<CSRequest>(csr);
+            ret = req::make<CSRequest>(csr);
             csr = NULL;
           } else {
             raise_warning("Error signing request");
@@ -1079,7 +1079,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   auto pcsr = CSRequest::Get(csr);
   if (!pcsr) return false;
 
-  SmartPtr<Certificate> ocert;
+  req::ptr<Certificate> ocert;
   if (!cacert.isNull()) {
     ocert = Certificate::Get(cacert);
     if (!ocert) {
@@ -1102,7 +1102,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
     return false;
   }
 
-  SmartPtr<Certificate> onewcert;
+  req::ptr<Certificate> onewcert;
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
   Variant ret = false;
@@ -1136,7 +1136,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
     raise_warning("No memory");
     goto cleanup;
   }
-  onewcert = makeSmartPtr<Certificate>(new_cert);
+  onewcert = req::make<Certificate>(new_cert);
   /* Version 3 cert */
   if (!X509_set_version(new_cert, 2)) {
     goto cleanup;
@@ -1402,7 +1402,7 @@ bool HHVM_FUNCTION(openssl_pkcs7_decrypt, const String& infilename,
   bool ret = false;
   BIO *in = NULL, *out = NULL, *datain = NULL;
   PKCS7 *p7 = NULL;
-  SmartPtr<Key> okey;
+  req::ptr<Key> okey;
 
   auto ocert = Certificate::Get(recipcert);
   if (!ocert) {
@@ -1533,8 +1533,8 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
   STACK_OF(X509) *others = NULL;
   BIO *infile = NULL, *outfile = NULL;
   PKCS7 *p7 = NULL;
-  SmartPtr<Key> okey;
-  SmartPtr<Certificate> ocert;
+  req::ptr<Key> okey;
+  req::ptr<Certificate> ocert;
 
   if (!extracerts.empty()) {
     others = load_all_certs_from_file(extracerts.data());
@@ -1812,10 +1812,10 @@ static void add_bignum_as_string(Array &arr,
     return;
   }
   int num_bytes = BN_num_bytes(bn);
-  unsigned char *out = (unsigned char *)smart_malloc(num_bytes);
+  unsigned char *out = (unsigned char *)req::malloc(num_bytes);
   BN_bn2bin(bn, out);
   arr.set(key, String((const char *)out, num_bytes, CopyString));
-  smart_free(out);
+  req::free(out);
 }
 
 Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
@@ -1898,7 +1898,7 @@ Resource HHVM_FUNCTION(openssl_pkey_new,
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    ret = Resource(makeSmartPtr<Key>(req.priv_key));
+    ret = Resource(req::make<Key>(req.priv_key));
   }
 
   php_openssl_dispose_config(&req);
@@ -2087,7 +2087,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   // holder is needed to make sure none of the Keys get deleted prematurely.
   // The pkeys array points to elements inside of Keys returned from Key::Get()
   // which may be newly allocated and have no other owners.
-  std::vector<SmartPtr<Key>> holder;
+  std::vector<req::ptr<Key>> holder;
 
   /* get the public keys we are using to seal this data */
   bool ret = true;
@@ -2289,7 +2289,7 @@ Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
   int ret = -1;
   STACK_OF(X509) *untrustedchain = NULL;
   X509_STORE *pcainfo = NULL;
-  SmartPtr<Certificate> ocert;
+  req::ptr<Certificate> ocert;
 
   if (!untrustedfile.empty()) {
     untrustedchain = load_all_certs_from_file(untrustedfile.data());

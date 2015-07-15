@@ -5,6 +5,8 @@ Set the target Unit; used implicitly by some other commands.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from gdbutils import *
 
@@ -23,6 +25,7 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
         super(UnitCommand, self).__init__('unit', gdb.COMMAND_DATA,
                                           gdb.COMPLETE_NONE, True)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
         global curunit

@@ -17,7 +17,7 @@ open Utils
 open Typing_defs
 
 module SN = Naming_special_names
-
+module Reason = Typing_reason
 (*****************************************************************************)
 (* Computes the string representing a type in an error message.
  * We generally don't want to show the whole type. If an error was due
@@ -36,6 +36,7 @@ module ErrorString = struct
     | Nast.Tbool       -> "a bool"
     | Nast.Tfloat      -> "a float"
     | Nast.Tstring     -> "a string"
+    | Nast.Tclassname s -> "string ("^s^"::class)"
     | Nast.Tnum        -> "a num (int/float)"
     | Nast.Tresource   -> "a resource"
     | Nast.Tarraykey   -> "an array key (int/string)"
@@ -52,16 +53,18 @@ module ErrorString = struct
     | Tvar _             -> "some value"
     | Tanon _    -> "a function"
     | Tfun _     -> "a function"
-    | Tgeneric (x, _)    -> "a value of generic type "^x
+    | Tgeneric (x, _)    -> "a value of declared generic type "^x
+    | Tabstract (ak, _)
+        when AbstractKind.is_classname ak -> "a classname string"
     | Tabstract (ak, cstr) -> abstract ak cstr
-    | Tclass ((_, x), _) ->
-       "an object of type "^(strip_ns x)
+    | Tclass ((_, x), _) -> "an object of type "^(strip_ns x)
+    | Tapply ((_, x), _)
+        when x = SN.Classes.cClassname -> "a classname string"
     | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tobject            -> "an object"
     | Tshape _           -> "a shape"
     | Taccess (root_ty, ids) -> tconst root_ty ids
     | Tthis -> "the type 'this'"
-
 
   and array: type a. a ty option * a ty option -> _ = function
     | None, None     -> "an array"
@@ -71,19 +74,19 @@ module ErrorString = struct
 
   and abstract ak cstr =
     let x = strip_ns @@ AbstractKind.to_string ak in
-    let base, cstr =
-      match ak with
-      | AKdependent (`cls _, []) | AKnewtype (_, _) ->
-          "an object of type "^x, None
-      | AKgeneric (_, _) -> "a value of generic type "^x, None
-      | AKdependent (`this, []) -> "the type 'this'", cstr
-      | AKdependent ((`static | `expr _), _) ->
-          "the expression dependent type "^x, cstr
-      | AKdependent (_, _::_) -> "the abstract type constant "^x, cstr in
-    Option.fold
-      cstr
-      ~init:base
-      ~f:(fun init ty -> init^"\n  that is compatible with "^type_ (snd ty))
+    match ak, cstr with
+    | AKnewtype (_, _), _ -> "an object of type "^x
+    | AKgeneric (_, _), _ -> "a value of generic type "^x
+    | AKdependent (`cls c, []), Some (_, ty) ->
+        type_ ty^" (known to be exactly the class '"^strip_ns c^"')"
+    | AKdependent ((`static | `expr _), _), _ ->
+        "the expression dependent type "^x
+    | AKdependent (_, _::_), _ -> "the abstract type constant "^x
+    | AKdependent _, _ ->
+        "the type '"^x^"'"
+        ^Option.value_map cstr ~default:""
+          ~f:(fun (_, ty) -> "\n  that is compatible with "^type_ ty)
+
   and unresolved l =
     let l = List.map snd l in
     let l = List.map type_ l in
@@ -184,6 +187,7 @@ module Suggest = struct
     | Nast.Tbool   -> "bool"
     | Nast.Tfloat  -> "float"
     | Nast.Tstring -> "string"
+    | Nast.Tclassname s -> "string ("^s^"::class)"
     | Nast.Tnum    -> "num (int/float)"
     | Nast.Tresource -> "resource"
     | Nast.Tarraykey -> "arraykey (int/string)"
@@ -259,6 +263,7 @@ module Full = struct
     | Nast.Tbool   -> "bool"
     | Nast.Tfloat  -> "float"
     | Nast.Tstring -> "string"
+    | Nast.Tclassname s -> "string ("^s^"::class)"
     | Nast.Tnum    -> "num"
     | Nast.Tresource -> "resource"
     | Nast.Tarraykey -> "arraykey"
@@ -526,6 +531,10 @@ let error: type a. a ty_ -> _ = fun ty -> ErrorString.type_ ty
 let suggest: type a. a ty -> _ =  fun ty -> Suggest.type_ ty
 let full env ty = Full.to_string env ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
+let debug env ty =
+  let e_str = error (snd ty) in
+  let f_str = full_strip_ns env ty in
+  e_str^" "^f_str
 let class_ c = PrintClass.class_type c
 let gconst gc = Full.to_string_decl gc
 let fun_ f = PrintFun.fun_type f

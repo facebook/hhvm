@@ -57,29 +57,10 @@ public:
     InsideGlobalStatement = 32,
     ForceGlobal = 64,
     ContainsUnset = 128,
-    NeedGlobalPointer = 256,
     ContainsDynamicStatic  = 512,
     ContainsGetDefinedVars = 1024,
     ContainsDynamicFunctionCall = 2048,
     ContainsAssert = 4096,
-  };
-
-  enum JumpTableType {
-    JumpReturn,
-    JumpSet,
-    JumpInitialized,
-    JumpInitializedString,
-    JumpIndex,
-    JumpReturnString
-  };
-
-  enum JumpTableName {
-    JumpTableGlobalGetImpl,
-    JumpTableGlobalExists,
-    JumpTableGlobalGetIndex,
-
-    JumpTableLocalGetImpl,
-    JumpTableLocalExists,
   };
 
   enum AlteredVarClass {
@@ -160,22 +141,22 @@ public:
   /**
    * Add a function's parameter to this table.
    */
-  TypePtr addParam(const std::string &name, TypePtr type,
-                   AnalysisResultConstPtr ar, ConstructPtr construct);
+  void addParam(const std::string &name,
+                AnalysisResultConstPtr ar, ConstructPtr construct);
 
-  TypePtr addParamLike(const std::string &name, TypePtr type,
-                       AnalysisResultPtr ar, ConstructPtr construct,
-                       bool firstPass);
+  void addParamLike(const std::string &name,
+                    AnalysisResultPtr ar, ConstructPtr construct,
+                    bool firstPass);
 
   /**
    * Called when a variable is declared or being assigned (l-value).
    */
-  TypePtr add(const std::string &name, TypePtr type, bool implicit,
-              AnalysisResultConstPtr ar, ConstructPtr construct,
-              ModifierExpressionPtr modifiers);
-  TypePtr add(Symbol *sym, TypePtr type, bool implicit,
-              AnalysisResultConstPtr ar, ConstructPtr construct,
-              ModifierExpressionPtr modifiers);
+  void add(const std::string &name, bool implicit,
+           AnalysisResultConstPtr ar, ConstructPtr construct,
+           ModifierExpressionPtr modifiers);
+  void add(Symbol *sym, bool implicit,
+           AnalysisResultConstPtr ar, ConstructPtr construct,
+           ModifierExpressionPtr modifiers);
 
   /**
    * Called to note whether a class variable overrides
@@ -187,10 +168,10 @@ public:
   /**
    * Called when a variable is used or being evaluated (r-value).
    */
-  TypePtr checkVariable(const std::string &name, TypePtr type, bool coerce,
-                        AnalysisResultConstPtr ar, ConstructPtr construct);
-  TypePtr checkVariable(Symbol *sym, TypePtr type, bool coerce,
-                        AnalysisResultConstPtr ar, ConstructPtr construct);
+  void checkVariable(const std::string &name,
+                     AnalysisResultConstPtr ar, ConstructPtr construct);
+  void checkVariable(Symbol *sym,
+                     AnalysisResultConstPtr ar, ConstructPtr construct);
   /**
    * Find the class which contains the property, and return
    * its Symbol
@@ -249,18 +230,6 @@ public:
   void cleanupForError(AnalysisResultConstPtr ar);
 
   /**
-   * Set all matching variables to variants, since l-dynamic value was used.
-   */
-  void forceVariants(AnalysisResultConstPtr ar, int varClass,
-                     bool recur = true);
-
-  /**
-   * Set one matching variable to be Type::Variant.
-   */
-  void forceVariant(AnalysisResultConstPtr ar, const std::string &name,
-                    int varClass);
-
-  /**
    * Keep track of $GLOBALS['var'].
    */
   void addSuperGlobal(const std::string &name);
@@ -293,12 +262,6 @@ private:
   unsigned m_forcedVariants : 4;
 
   bool isGlobalTable(AnalysisResultConstPtr ar) const;
-
-  virtual TypePtr setType(AnalysisResultConstPtr ar, const std::string &name,
-                          TypePtr type, bool coerce);
-  virtual TypePtr setType(AnalysisResultConstPtr ar, Symbol *sym,
-                          TypePtr type, bool coerce);
-  virtual void dumpStats(std::map<std::string, int> &typeCounts);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

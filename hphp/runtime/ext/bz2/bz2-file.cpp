@@ -21,12 +21,12 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BZ2File::BZ2File(): m_bzFile(nullptr), m_innerFile(makeSmartPtr<PlainFile>()) {
+BZ2File::BZ2File(): m_bzFile(nullptr), m_innerFile(req::make<PlainFile>()) {
   m_innerFile->unregister();
   setIsLocal(m_innerFile->isLocal());
 }
 
-BZ2File::BZ2File(SmartPtr<PlainFile>&& innerFile)
+BZ2File::BZ2File(req::ptr<PlainFile>&& innerFile)
 : m_bzFile(nullptr), m_innerFile(std::move(innerFile)) {
   setIsLocal(m_innerFile->isLocal());
 }

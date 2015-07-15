@@ -2431,10 +2431,10 @@ std::string show(const Node* node) {
       switch (node->type) {
       case NT::Empty:   return "empty";
       case NT::Halt:    return "halt";
-      case NT::Sig:     return "\u03c3";
+      case NT::Sig:     return u8"\u03c3";
       case NT::Dec:     return sformat("dec({})", to_dec(node)->inst->id());
       case NT::Phi:
-        return sformat("\u03c6({},{})", to_phi(node)->pred_list_sz,
+        return sformat(u8"\u03c6({},{})", to_phi(node)->pred_list_sz,
           to_phi(node)->back_edge_preds);
       case NT::Inc:
         return sformat("inc({})", to_inc(node)->inst->id());

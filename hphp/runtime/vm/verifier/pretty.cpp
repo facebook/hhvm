@@ -63,8 +63,7 @@ std::string blockToString(const Block* b, const Graph* g, const Unit* u) {
 void printFPI(const Func* func) {
   const Unit* unit = func->unit();
   PC bc = unit->entry();
-  for (Range<FixedVector<FPIEnt> > i(func->fpitab()); !i.empty(); ) {
-    const FPIEnt& fpi = i.popFront();
+  for (auto& fpi : func->fpitab()) {
     printf("  FPI[%d:%d] fpoff=%d parent=%d fpiDepth=%d\n",
            fpiBase(fpi, bc), fpiPast(fpi, bc), fpi.m_fpOff, fpi.m_parentIndex,
            fpi.m_fpiDepth);

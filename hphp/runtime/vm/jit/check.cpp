@@ -65,7 +65,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 3. If this block is a catch block, it must have at most one predecessor.
  * 4. The last instruction must be isBlockEnd() and the middle instructions
  *    must not be isBlockEnd().  Therefore, blocks cannot be empty.
- * 5. If the last instruction isTerminal(), block->next() must be null.
+ * 5. block->next() must be null iff the last instruction isTerminal().
  * 6. Every instruction must have a catch block attached to it if and only if it
  *    has the MayRaiseError flag.
  * 7. Any path from this block to a Block that expects values must be
@@ -73,6 +73,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
  */
 bool checkBlock(Block* b) {
+  SCOPE_ASSERT_DETAIL("checkBlock") { return folly::sformat("B{}", b->id()); };
   auto it = b->begin();
   auto end = b->end();
   always_assert(!b->empty());
@@ -100,14 +101,14 @@ bool checkBlock(Block* b) {
     always_assert(inst.marker().valid());
     always_assert(inst.block() == b);
     // Invariant #6
-    always_assert_log(
+    always_assert_flog(
       inst.mayRaiseError() == (inst.taken() && inst.taken()->isCatch()),
-      [&]{ return inst.toString(); }
+      "{}", inst
     );
   }
 
   // Invariant #5
-  always_assert(IMPLIES(b->back().isTerminal(), !b->next()));
+  always_assert(b->back().isTerminal() == (b->next() == nullptr));
 
   // Invariant #7
   if (b->taken()) {

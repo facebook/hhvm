@@ -271,7 +271,7 @@ public:
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
-  static ArrayData* NonSmartCopy(const ArrayData*);
+  static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
@@ -379,7 +379,7 @@ private:
   static void getElmKey(const Elm& e, TypedValue* out);
 
 private:
-  enum class AllocMode : bool { Smart, NonSmart };
+  enum class AllocMode : bool { Request, Static };
 
   static MixedArray* CopyMixed(const MixedArray& other, AllocMode);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
@@ -551,7 +551,6 @@ private:
    */
   MixedArray* resize();
   MixedArray* resizeIfNeeded();
-  MixedArray* resizePackedIfNeeded();
 
   Elm* data() const {
     return const_cast<Elm*>(reinterpret_cast<Elm const*>(this + 1));

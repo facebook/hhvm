@@ -19,14 +19,14 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP {
 
 TEST(MemoryManager, RootMaps) {
   {
     ASSERT_EQ(MM().lookupRoot<DummyResource>(0), nullptr);
-    auto dummy = makeSmartPtr<DummyResource>();
+    auto dummy = req::make<DummyResource>();
     auto id = MM().addRoot(dummy);
     ASSERT_EQ(MM().lookupRoot<DummyResource>(id), dummy);
     auto removed = MM().removeRoot<DummyResource>(id);
@@ -39,7 +39,7 @@ TEST(MemoryManager, RootMaps) {
   }
   {
     ASSERT_EQ(MM().lookupRoot<c_Vector>(0), nullptr);
-    auto vec = makeSmartPtr<c_Vector>();
+    auto vec = req::make<c_Vector>();
     auto id = MM().addRoot(vec);
     ASSERT_EQ(MM().lookupRoot<c_Vector>(id), vec);
     auto removed = MM().removeRoot<c_Vector>(id);

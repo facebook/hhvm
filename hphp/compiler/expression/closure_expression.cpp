@@ -32,9 +32,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-TypePtr ClosureExpression::s_ClosureType =
-  Type::CreateObjectType("closure"); // needs lower case
-
 ClosureExpression::ClosureExpression(
     EXPRESSION_CONSTRUCTOR_PARAMETERS,
     ClosureType type,
@@ -234,7 +231,7 @@ void ClosureExpression::setCaptureList(
   if (captureNames.empty()) return;
 
   m_vars = ExpressionListPtr(
-    new ExpressionList(getOriginalScope(), getRange()));
+    new ExpressionList(getScope(), getRange()));
 
   for (auto const& name : captureNames) {
     if (name == "this") {
@@ -242,8 +239,8 @@ void ClosureExpression::setCaptureList(
       continue;
     }
 
-    auto expr = ParameterExpressionPtr(new ParameterExpression(
-      BlockScopePtr(getOriginalScope()),
+    auto expr = std::make_shared<ParameterExpression>(
+      BlockScopePtr(getScope()),
       getRange(),
       TypeAnnotationPtr(),
       true /* hhType */,
@@ -252,7 +249,7 @@ void ClosureExpression::setCaptureList(
       0 /* token modifier thing */,
       ExpressionPtr(),
       ExpressionPtr()
-    ));
+    );
     m_vars->insertElement(expr);
   }
 

@@ -2,7 +2,7 @@
 #define incl_HPHP_EXT_COLLECTIONS_VECTOR_H
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP { namespace collections {
@@ -62,7 +62,7 @@ struct VectorIterator {
   void rewind() { m_pos = 0; }
 
  private:
-  SmartPtr<BaseVector> m_obj;
+  req::ptr<BaseVector> m_obj;
   uint32_t m_pos{0};
   int32_t  m_version{0};
 };

@@ -26,8 +26,7 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC) {
   FILE *f = tmpfile();
   if (f) {
     auto* file = HPHP::newres<HPHP::PlainFile>(f);
-    auto* stream = HPHP::smart_new<php_stream>(file);
-    stream->hphp_file->incRefCount();
+    auto* stream = HPHP::req::make_raw<php_stream>(file);
     return stream;
   }
   return nullptr;

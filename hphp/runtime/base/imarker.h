@@ -20,7 +20,7 @@ namespace HPHP {
 struct Array;
 struct String;
 struct Variant;
-template <typename T> struct SmartPtr;
+namespace req { template<typename T> struct ptr; }
 
 // Interface for marking.
 struct IMarker {
@@ -33,7 +33,7 @@ protected:
 };
 
 template <typename T, typename F>
-void scan(const SmartPtr<T>& ptr, F& mark);
+void scan(const req::ptr<T>& ptr, F& mark);
 
 }
 #endif

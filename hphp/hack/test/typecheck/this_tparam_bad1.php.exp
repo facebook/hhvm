@@ -1,2 +1,12 @@
-File "this_tparam_bad1.php", line 28, characters 17-20:
-The type "this" can only be used as a return type, to instantiate a covariant type variable, or as a private non-static member variable (Naming[2043])
+File "this_tparam_bad1.php", line 36, characters 13-21:
+Invalid argument (Typing[4110])
+File "this_tparam_bad1.php", line 34, characters 14-16:
+This is the expression dependent type <expr#1>
+File "this_tparam_bad1.php", line 36, characters 3-6:
+  where '<expr#1>' is a reference to this expression
+File "this_tparam_bad1.php", line 36, characters 13-21:
+It is incompatible with an object of type Foo
+File "this_tparam_bad1.php", line 34, characters 14-16:
+Since Foo is not final
+File "this_tparam_bad1.php", line 36, characters 13-21:
+this might not be a Foo

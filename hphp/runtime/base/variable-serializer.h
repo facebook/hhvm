@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
@@ -116,13 +116,13 @@ public:
   Type getType() const { return m_type; }
 
 private:
-  typedef smart::hash_map<void*, int, pointer_hash<void> > SmartPtrCtrMap;
+  using ReqPtrCtrMap = req::hash_map<void*, int, pointer_hash<void>>;
   Type m_type;
   int m_option;                  // type specific extra options
   StringBuffer *m_buf;
   int m_indent;
-  SmartPtrCtrMap m_counts;       // counting seen arrays for recursive levels
-  SmartPtrCtrMap *m_arrayIds;    // reference ids for objs/arrays
+  ReqPtrCtrMap m_counts;         // counting seen arrays for recursive levels
+  ReqPtrCtrMap *m_arrayIds;      // reference ids for objs/arrays
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
   int m_refCount;                // current variable's reference count
@@ -144,7 +144,7 @@ private:
     int  indent_delta;  // the extra indent to serialize this object
     int  size;          // the number of elements in the array
   };
-  smart::vector<ArrayInfo> m_arrayInfos;
+  req::vector<ArrayInfo> m_arrayInfos;
 
   struct ObjectInfo {
     String objClass;
@@ -153,7 +153,7 @@ private:
     String rsrcName;
     int    rsrcId;
   };
-  smart::vector<ObjectInfo> m_objectInfos;
+  req::vector<ObjectInfo> m_objectInfos;
 
   // The func parameter will be invoked only if there is no overflow.
   // Otherwise, writeOverflow will be invoked instead.

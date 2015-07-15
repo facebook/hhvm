@@ -399,8 +399,8 @@ struct Eq {
     if (od1->getVMClass() != od2->getVMClass()) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {
       // Compare the whole object, not just the array representation
-      Array ar1(ArrayData::Create());
-      Array ar2(ArrayData::Create());
+      auto ar1 = Array::Create();
+      auto ar2 = Array::Create();
       od1->o_getArray(ar1);
       od2->o_getArray(ar2);
       return ar1->equal(ar2.get(), false);

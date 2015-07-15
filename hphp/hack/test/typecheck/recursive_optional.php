@@ -15,5 +15,6 @@ function test(bool $b): ?string {
     $res = $non_nullable;
   }
   // integrating if branches unifies ?T with T, resulting in recursive type
-  return $res[0]; // Toption(Toption(Toption(Toption(Toption(...)))))
+  hh_show($res[0]); // Toption(Toption(Toption(Toption(Toption(...)))))
+  return $res[0];
 }

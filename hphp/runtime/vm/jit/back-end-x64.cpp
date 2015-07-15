@@ -150,13 +150,6 @@ struct BackEnd final : jit::BackEnd {
     return x64::funcPrologueToGuard(prologue, func);
   }
 
-  SrcKey emitFuncPrologue(TransID transID, Func* func, int argc,
-                          TCA& start) override {
-    return func->isMagic()
-      ? x64::emitMagicFuncPrologue(transID, func, argc, start)
-      : x64::emitFuncPrologue(transID, func, argc, start);
-  }
-
   TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) override {
     return x64::emitCallArrayPrologue(func, dvs);
   }

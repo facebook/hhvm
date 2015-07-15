@@ -20,7 +20,6 @@
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/compiler/construct.h"
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
@@ -160,39 +159,12 @@ public:
   void setArgNum(int n);
 
   /**
-   * Implementing Construct.
-   */
-  BlockScopeRawPtr getOriginalScope();
-  void setOriginalScope(BlockScopeRawPtr scope);
-  ClassScopeRawPtr getOriginalClass();
-  FunctionScopeRawPtr getOriginalFunction();
-
-  /**
     * For generic walks
     */
   virtual int getKidCount() const { return 0; }
   ExpressionPtr getNthExpr(int n) const { return
       static_pointer_cast<Expression>(getNthKid(n)); }
 
-  /**
-   * For cse & canonicalization
-   */
-  virtual unsigned getCanonHash() const;
-  virtual bool canonCompare(ExpressionPtr e) const;
-  bool equals(ExpressionPtr other);
-  void setCanonID(unsigned id) { m_canon_id = id; }
-  unsigned getCanonID() const { return m_canon_id; }
-  void setCanonPtr(ExpressionPtr e) { m_canonPtr = e; }
-  ExpressionPtr getCanonPtr() const {
-    return m_context & (LValue|RefValue|UnsetContext|DeepReference) ?
-      ExpressionPtr() : m_canonPtr;
-  }
-  ExpressionPtr getCanonLVal() const {
-    return m_canonPtr;
-  }
-  ExpressionPtr getCanonTypeInfPtr() const;
-
-  virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
   bool isArray() const;
   bool isCollection() const;
@@ -229,30 +201,6 @@ public:
     return ExpressionPtr();
   }
 
-  /**
-   * Find other types that have been inferred for this expression,
-   * and combine them with inType to form a new, tighter type.
-   */
-  TypePtr propagateTypes(AnalysisResultConstPtr ar, TypePtr inType);
-
-  /**
-   * Check to make sure return type is convertible to specified type.
-   * If not, raise a CodeError.
-   */
-  TypePtr checkTypesImpl(AnalysisResultConstPtr ar, TypePtr expectedType,
-                         TypePtr actualType);
-
-  TypePtr getActualType()      { return m_actualType;      }
-  TypePtr getExpectedType()    { return m_expectedType;    }
-
-  void setActualType(TypePtr actualType) {
-    m_actualType = actualType;
-  }
-  void setExpectedType(TypePtr expectedType) {
-    m_expectedType = expectedType;
-  }
-  TypePtr getType();
-
   static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
                                     BlockScopePtr scope,
                                     const Location::Range& r,
@@ -267,8 +215,6 @@ public:
 
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
-  ExpressionPtr fetchReplacement();
-  void setReplacement(ExpressionPtr rep) { m_replacement = rep; }
 
   /**
    * Correctly compute the local expression altered bit
@@ -281,26 +227,14 @@ protected:
   int m_argNum;
 
 private:
-  bool m_originalScopeSet;
   bool m_unused;
-  unsigned m_canon_id;
   mutable int m_error;
 
 protected:
-  TypePtr m_actualType;
-  TypePtr m_expectedType; // null if the same as m_actualType
-
-  void setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
-                TypePtr expectedType);
   void setDynamicByIdentifier(AnalysisResultPtr ar,
                               const std::string &value);
-  void resetTypes();
  private:
   static ExprClass Classes[];
-
-  BlockScopeRawPtr m_originalScope;
-  ExpressionPtr m_canonPtr;
-  ExpressionPtr m_replacement;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

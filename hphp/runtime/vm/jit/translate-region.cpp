@@ -192,6 +192,11 @@ void emitEntryAssertions(IRGS& irgs, const Func* func, SrcKey sk) {
     // assert these types.
     return;
   }
+  if (func->isPseudoMain()) {
+    // Pseudomains inherit the variable environment of their caller, so don't
+    // assert anything in them.
+    return;
+  }
   auto const numLocs = func->numLocals();
   for (auto loc = func->numParams(); loc < numLocs; ++loc) {
     auto const location = RegionDesc::Location::Local { loc };

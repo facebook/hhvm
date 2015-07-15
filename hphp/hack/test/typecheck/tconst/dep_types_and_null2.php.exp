@@ -1,0 +1,4 @@
+[1]intersect([\C]App \C<>, option([2]tvar_2))
+[1]intersect([\C]App \C<>, option([3][\C]App \C<>))
+intersect([\C]App \C<>)
+No errors

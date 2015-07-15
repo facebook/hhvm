@@ -1,0 +1,6 @@
+File "shape_idx4.php", line 7, characters 15-16:
+Invalid argument (Typing[4110])
+File "builtins.hhi", line 64, characters 30-34:
+This is a shape
+File "shape_idx4.php", line 6, characters 15-17:
+It is incompatible with an int

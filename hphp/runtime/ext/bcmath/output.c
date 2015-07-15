@@ -61,11 +61,7 @@ void
 bc_out_long (val, size, space, out_char)
      long val;
      int size, space;
-#ifdef __STDC__
      void (*out_char)(int);
-#else
-     void (*out_char)();
-#endif
 {
   char digits[40];
   int len, ix;
@@ -86,11 +82,7 @@ bc_out_long (val, size, space, out_char)
    as the routine to do the actual output of the characters. */
 
 void
-#ifdef __STDC__
 bc_out_num (bc_num num, int o_base, void (*out_char)(int), int leading_zero TSRMLS_DC)
-#else
-bc_out_num (bc_num num, int o_base, void (*out_char)(), int leading_zero TSRMLS_DC)
-#endif
 {
   char *nptr;
   int  index, fdigit, pre_space;

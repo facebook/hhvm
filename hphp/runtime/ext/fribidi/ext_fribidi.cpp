@@ -3,8 +3,8 @@
 
 #include <fribidi/fribidi.h>
 
-#define emalloc HPHP::smart_malloc
-#define efree HPHP::smart_free
+#define emalloc HPHP::req::malloc
+#define efree HPHP::req::free
 
 namespace HPHP {
 

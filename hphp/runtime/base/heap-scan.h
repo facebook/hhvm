@@ -198,7 +198,7 @@ template<class F> void scanRoots(F& mark) {
 }
 
 template <typename T, typename F>
-void scan(const SmartPtr<T>& ptr, F& mark) {
+void scan(const req::ptr<T>& ptr, F& mark) {
   ptr->scan(mark);
 }
 

@@ -44,7 +44,7 @@ const char* Resource::classname_cstr() const {
 
 void Resource::compileTimeAssertions() {
   static_assert(
-    sizeof(Resource) == sizeof(SmartPtr<ResourceData>), "Fix this.");
+    sizeof(Resource) == sizeof(req::ptr<ResourceData>), "Fix this.");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

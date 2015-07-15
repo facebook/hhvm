@@ -120,7 +120,7 @@ struct FormatVisitor {
   void imm(const Func* func) {
     str << sep();
     if (func) {
-      str << folly::format("{}(id {:#x})", func->fullName()->data(),
+      str << folly::format("{}(id {:#x})", func->fullName(),
                            func->getFuncId());
     } else {
       str << "nullptr";

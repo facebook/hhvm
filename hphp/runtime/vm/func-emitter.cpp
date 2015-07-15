@@ -395,7 +395,9 @@ struct EHEntComp {
   bool operator()(const EHEntEmitter& e1, const EHEntEmitter& e2) const {
     if (e1.m_base == e2.m_base) {
       if (e1.m_past == e2.m_past) {
-        return e1.m_type == EHEnt::Type::Catch;
+        static_assert(!static_cast<uint8_t>(EHEnt::Type::Catch),
+            "Catch should be the smallest type");
+        return e1.m_type < e2.m_type;
       }
       return e1.m_past > e2.m_past;
     }

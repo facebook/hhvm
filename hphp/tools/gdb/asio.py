@@ -5,6 +5,8 @@ GDB commands for asio information and stacktraces.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from itertools import count
 import re
@@ -223,6 +225,7 @@ The format used is the same as that used by `walkstk'.
     def __init__(self):
         super(AsyncStkCommand, self).__init__('asyncstk', gdb.COMMAND_STACK)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         try:
             wh = gdb.parse_and_eval(args)
@@ -251,6 +254,7 @@ class InfoAsioCommand(gdb.Command):
     def __init__(self):
         super(InfoAsioCommand, self).__init__('info asio', gdb.COMMAND_STATUS)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         asio_session = TL('HPHP::AsioSession::s_current')['m_p']
 
@@ -277,7 +281,7 @@ class InfoAsioCommand(gdb.Command):
         wh_ptype = T('HPHP::c_WaitableWaitHandle').pointer()
 
         # Find the most recent join().
-        for i, fp in zip(count(), frame.gen_php(vmfp)):
+        for i, fp in izip(count(), frame.gen_php(vmfp)):
             if nameof(fp['m_func']) == 'HH\WaitHandle::join':
                 break
 

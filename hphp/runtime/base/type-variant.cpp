@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -494,7 +494,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfString:
     case KindOfArray:
     case KindOfObject:
-      return Resource(makeSmartPtr<DummyResource>());
+      return Resource(req::make<DummyResource>());
 
     case KindOfResource:
       return m_data.pres;
@@ -757,8 +757,8 @@ static void unserializeProp(VariableUnserializer* uns,
   auto msg = folly::format(
     "Property {} for class {} was deserialized with type ({}) that "
     "didn't match what we inferred in static analysis",
-    key.data(),
-    obj->getVMClass()->name()->data(),
+    key,
+    obj->getVMClass()->name(),
     tname(t->asTypedValue()->m_type)
   ).str();
   throw Exception(msg);
@@ -927,7 +927,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       rsrcName.unserialize(uns);
       uns->expectChar('{');
       uns->expectChar('}');
-      auto rsrc = makeSmartPtr<DummyResource>();
+      auto rsrc = req::make<DummyResource>();
       rsrc->o_setResourceId(id);
       rsrc->m_class_name = rsrcName;
       self = std::move(rsrc);

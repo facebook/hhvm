@@ -1,2 +1,8 @@
-File "this_anon_bad.php", line 14, characters 21-24:
-The type "this" can only be used as a return type, to instantiate a covariant type variable, or as a private non-static member variable (Naming[2043])
+File "this_anon_bad.php", line 34, characters 11-19:
+Invalid argument (Typing[4110])
+File "this_anon_bad.php", line 14, characters 41-44:
+This is the expression dependent type <static>
+File "this_anon_bad.php", line 21, characters 13-17:
+  where '<static>' refers to the late bound type of the enclosing class
+File "this_anon_bad.php", line 34, characters 11-19:
+It is incompatible with an object of type Foo

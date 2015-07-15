@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/thrift/transport.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -842,7 +842,7 @@ class CompactReader {
       String format = spec.rvalAt(s_format,
         AccessFlags::None).toString();
       if (format.equal(s_collection)) {
-        auto ret(makeSmartPtr<c_Map>(size));
+        auto ret(req::make<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
           Variant value = readField(valueSpec, valueType);
@@ -872,7 +872,7 @@ class CompactReader {
       String format = spec.rvalAt(s_format,
         AccessFlags::None).toString();
       if (format.equal(s_collection)) {
-        auto const pvec(makeSmartPtr<c_Vector>(size));
+        auto const pvec(req::make<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
           pvec->t_add(readField(valueSpec, valueType));
         }
@@ -898,7 +898,7 @@ class CompactReader {
       String format = spec.rvalAt(s_format,
         AccessFlags::None).toString();
       if (format.equal(s_collection)) {
-        auto set_ret = makeSmartPtr<c_Set>(size);
+        auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
           set_ret->t_add(value);

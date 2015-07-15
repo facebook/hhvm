@@ -516,7 +516,7 @@ void print_func(Output& out, const Func* func) {
   } else {
     out.fmtln(".function{} {}({}){}{{",
       opt_attrs(AttrContext::Func, func->attrs()),
-      func->name()->data(),
+      func->name(),
       func_param_list(finfo),
       func_flag_list(finfo));
   }
@@ -536,7 +536,7 @@ std::string member_tv_initializer(Cell cell) {
 
 void print_constant(Output& out, const PreClass::Const* cns) {
   if (cns->isAbstract()) { return; }
-  out.fmtln(".const {} = {};", cns->name()->data(),
+  out.fmtln(".const {} = {};", cns->name(),
     member_tv_initializer(cns->val()));
 }
 
@@ -553,7 +553,7 @@ void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
   out.fmtln(".method{} {}({}) {{",
     opt_attrs(AttrContext::Func, func->attrs()),
-    func->name()->data(),
+    func->name(),
     func_param_list(finfo));
   indented(out, [&] {
     print_func_directives(out, func);
@@ -564,12 +564,12 @@ void print_method(Output& out, const Func* func) {
 
 void print_cls_inheritance_list(Output& out, const PreClass* cls) {
   if (!cls->parent()->empty()) {
-    out.fmt(" extends {}", cls->parent()->data());
+    out.fmt(" extends {}", cls->parent());
   }
   if (!cls->interfaces().empty()) {
     out.fmt(" implements (");
     for (auto i = uint32_t{}; i < cls->interfaces().size(); ++i) {
-      out.fmt("{}{}", i != 0 ? " " : "", cls->interfaces()[i]->data());
+      out.fmt("{}{}", i != 0 ? " " : "", cls->interfaces()[i].get());
     }
     out.fmt(")");
   }
@@ -583,7 +583,7 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
   out.fmt(".use");
 
   for (auto i = uint32_t{0}; i < traits.size(); ++i) {
-    out.fmt(" {}", traits[i]->data());
+    out.fmt(" {}", traits[i].get());
   }
 
   auto& precRules  = cls->traitPrecRules();
@@ -604,7 +604,7 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
         [&]() -> std::string {
           auto ret = std::string{};
           for (auto& name : prec.otherTraitNames()) {
-            ret += folly::format(" {}", name->data()).str();
+            ret += folly::format(" {}", name.get()).str();
           }
           return ret;
         }()
@@ -614,7 +614,7 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
       out.fmtln("{}{} as{}{};",
         alias.traitName()->empty()
           ? std::string{}
-          : folly::format("{}::", alias.traitName()->data()).str(),
+          : folly::format("{}::", alias.traitName()).str(),
         alias.origMethodName()->data(),
         opt_attrs(AttrContext::TraitImport, alias.modifiers()),
         alias.newMethodName() != alias.origMethodName()
@@ -637,7 +637,7 @@ void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   out.fmt(".class{} {}",
     opt_attrs(AttrContext::Class, cls->attrs()),
-    cls->name()->data());
+    cls->name());
   print_cls_inheritance_list(out, cls);
   out.fmt(" {{");
   out.nl();
@@ -656,12 +656,12 @@ void print_unit_metadata(Output& out, const Unit* unit) {
 }
 
 void print_unit(Output& out, const Unit* unit) {
-  out.fmtln("# {} starts here", unit->filepath()->data());
+  out.fmtln("# {} starts here", unit->filepath());
   out.nl();
   print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())       print_func(out, func);
   for (auto& cls : unit->preclasses())   print_cls(out, cls.get());
-  out.fmtln("# {} ends here", unit->filepath()->data());
+  out.fmtln("# {} ends here", unit->filepath());
 }
 
 //////////////////////////////////////////////////////////////////////

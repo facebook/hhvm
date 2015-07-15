@@ -49,9 +49,9 @@ std::string show(const Shape& shape) {
   auto ret = std::string{};
   ret += "{";
   assert(shape.size() >= 1);
-  folly::format(&ret, "\"{}\"", shape.keyForOffset(0)->data());
+  folly::format(&ret, "\"{}\"", shape.keyForOffset(0));
   for (uint32_t i = 1; i < shape.size(); ++i) {
-    folly::format(&ret, ", \"{}\"", shape.keyForOffset(i)->data());
+    folly::format(&ret, ", \"{}\"", shape.keyForOffset(i));
   }
   ret += "}";
   return ret;

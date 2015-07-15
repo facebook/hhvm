@@ -1,0 +1,4 @@
+File "new_needs_consistent_construct.php", line 8, characters 10-21:
+Can't use new on classname<C>; __construct arguments are not guaranteed to be consistent in child classes (Typing[4060])
+File "new_needs_consistent_construct.php", line 7, characters 28-28:
+This declaration neither defines an abstract/final __construct nor uses <<__ConsistentConstruct>> attribute

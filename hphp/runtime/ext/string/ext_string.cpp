@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/bstring.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/actrec-args.h"
@@ -1055,8 +1055,8 @@ Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
   assert(memchr(charListData, '\0', charListSz) != nullptr);
 
   // in order to use strcspn, remove all null byte(s) from char_list
-  auto charListWithoutNull = (char*) smart_malloc(charListSz);
-  SCOPE_EXIT { smart_free(charListWithoutNull); };
+  auto charListWithoutNull = (char*) req::malloc(charListSz);
+  SCOPE_EXIT { req::free(charListWithoutNull); };
 
   auto copy_ptr = charListWithoutNull;
   auto const charListStop = charListData + char_list.size();
@@ -1423,7 +1423,7 @@ Array HHVM_FUNCTION(str_getcsv,
   char enclosure_char = check_arg(enclosure, '"');
   char escape_char = check_arg(escape, '\\');
 
-  auto dummy = makeSmartPtr<PlainFile>();
+  auto dummy = req::make<PlainFile>();
   return dummy->readCSV(0, delimiter_char, enclosure_char, escape_char, &str);
 }
 

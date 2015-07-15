@@ -24,7 +24,7 @@
 #include <iomanip>
 #include <cinttypes>
 
-#include <boost/format.hpp>
+#include <boost/filesystem.hpp>
 
 #include <libgen.h>
 #include <sys/mman.h>
@@ -79,7 +79,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
@@ -105,7 +105,7 @@
 #include "hphp/runtime/base/container-functions.h"
 
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 #include "hphp/runtime/vm/globals-array.h"
 
@@ -325,7 +325,7 @@ const StaticString s_GLOBALS("GLOBALS");
 
 void VarEnv::createGlobal() {
   assert(!g_context->m_globalVarEnv);
-  g_context->m_globalVarEnv = smart_new<VarEnv>();
+  g_context->m_globalVarEnv = req::make_raw<VarEnv>();
 }
 
 VarEnv::VarEnv()
@@ -336,9 +336,14 @@ VarEnv::VarEnv()
 {
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
   auto globals = new (MM().objMalloc(sizeof(GlobalsArray)))
-                 GlobalsArray(&m_nvTable);
+    GlobalsArray(&m_nvTable);
+  assert(globals->hasExactlyOneRef());
+
   auto globalArray = make_tv<KindOfArray>(globals->asArrayData());
   m_nvTable.set(s_GLOBALS.get(), &globalArray);
+
+  assert(globals->hasMultipleRefs());
+  globals->decRefCount();
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
@@ -373,7 +378,7 @@ VarEnv::~VarEnv() {
   if (isGlobalScope()) {
     /*
      * When detaching the global scope, we leak any live objects (and
-     * let the smart allocator clean them up).  This is because we're
+     * let MemoryManager clean them up).  This is because we're
      * not supposed to run destructors for objects that are live at
      * the end of a request.
      */
@@ -386,11 +391,11 @@ void VarEnv::deallocate(ActRec* fp) {
 }
 
 VarEnv* VarEnv::createLocal(ActRec* fp) {
-  return smart_new<VarEnv>(fp, fp->getExtraArgs());
+  return req::make_raw<VarEnv>(fp, fp->getExtraArgs());
 }
 
 VarEnv* VarEnv::clone(ActRec* fp) const {
-  return smart_new<VarEnv>(this, fp);
+  return req::make_raw<VarEnv>(this, fp);
 }
 
 void VarEnv::suspend(const ActRec* oldFP, ActRec* newFP) {
@@ -436,7 +441,7 @@ void VarEnv::exitFP(ActRec* fp) {
 
     // don't free global VarEnv
     if (!isGlobalScope()) {
-      smart_delete(this);
+      req::destroy_raw(this);
     }
   } else {
     auto const prevFP = g_context->getPrevVMState(fp);
@@ -495,11 +500,11 @@ Array VarEnv::getDefinedVariables() const {
   }
   {
     // Make result independent of the hashtable implementation.
-    ArrayData* sorted = ret.get()->escalateForSort(SORTFUNC_KSORT);
-    assert(sorted == ret.get() || sorted->getCount() == 0);
+    ArrayData* sorted = ret->escalateForSort(SORTFUNC_KSORT);
+    assert(sorted == ret.get() || sorted->hasExactlyOneRef());
     SCOPE_EXIT {
       if (sorted != ret.get()) {
-        ret = sorted;
+        ret = Array::attach(sorted);
       }
     };
     sorted->ksort(0, true);
@@ -518,7 +523,7 @@ ExtraArgs::~ExtraArgs() {}
 
 void* ExtraArgs::allocMem(unsigned nargs) {
   assert(nargs > 0);
-  return smart_malloc(sizeof(TypedValue) * nargs + sizeof(ExtraArgs));
+  return req::malloc(sizeof(TypedValue) * nargs + sizeof(ExtraArgs));
 }
 
 ExtraArgs* ExtraArgs::allocateCopy(TypedValue* args, unsigned nargs) {
@@ -540,12 +545,11 @@ ExtraArgs* ExtraArgs::allocateUninit(unsigned nargs) {
 
 void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
   assert(nargs > 0);
-
   for (unsigned i = 0; i < nargs; ++i) {
     tvRefcountedDecRef(ea->m_extraArgs + i);
   }
   ea->~ExtraArgs();
-  smart_free(ea);
+  req::free(ea);
 }
 
 void ExtraArgs::deallocate(ActRec* ar) {
@@ -604,19 +608,22 @@ IMPLEMENT_THREAD_LOCAL(StackElms, t_se);
 const int Stack::sSurprisePageSize = sysconf(_SC_PAGESIZE);
 // We reserve the bottom page of each stack for use as the surprise
 // page, so the minimum useful stack size is the next power of two.
-const uint Stack::sMinStackElms = 2 * sSurprisePageSize / sizeof(TypedValue);
+const uint32_t Stack::sMinStackElms =
+  2 * sSurprisePageSize / sizeof(TypedValue);
 
 void Stack::ValidateStackSize() {
   if (RuntimeOption::EvalVMStackElms < sMinStackElms) {
-    throw std::runtime_error(str(
-      boost::format("VM stack size of 0x%llx is below the minimum of 0x%x")
-        % RuntimeOption::EvalVMStackElms
-        % sMinStackElms));
+    throw std::runtime_error(folly::sformat(
+      "VM stack size of {:#x} is below the minimum of {:#x}",
+      RuntimeOption::EvalVMStackElms,
+      sMinStackElms
+    ));
   }
   if (!folly::isPowTwo(RuntimeOption::EvalVMStackElms)) {
-    throw std::runtime_error(str(
-      boost::format("VM stack size of 0x%llx is not a power of 2")
-        % RuntimeOption::EvalVMStackElms));
+    throw std::runtime_error(folly::sformat(
+      "VM stack size of {:#x} is not a power of 2",
+      RuntimeOption::EvalVMStackElms
+    ));
   }
 }
 
@@ -670,7 +677,7 @@ void flush_evaluation_stack() {
      * It is possible to create a new thread, but then not use it
      * because another thread became available and stole the job.
      * If that thread becomes idle, it will have a g_context, and
-     * some smart allocated memory
+     * some request-allocated memory
      */
     hphp_memory_cleanup();
   }
@@ -1686,7 +1693,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
       for (ArrayIter iter(args); iter; ++iter) {
         ai.appendWithRef(iter.secondRefPlus());
       }
-      stack.pushArray(ai.create());
+      stack.pushArrayNoRc(ai.create());
     }
   }
 
@@ -1823,8 +1830,8 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     assert(!iter); // iter should now be exhausted
     if (hasVarParam) {
       auto const ad = ai.create();
-      stack.pushArray(ad);
       assert(ad->hasExactlyOneRef());
+      stack.pushArrayNoRc(ad);
     }
     ar->initNumArgs(nargs);
     ar->setExtraArgs(extraArgs);
@@ -1856,8 +1863,8 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       }
       assert(!iter); // iter should now be exhausted
       auto const ad = ai.create();
-      stack.pushArray(ad);
       assert(ad->hasExactlyOneRef());
+      stack.pushArrayNoRc(ad);
     }
     ar->initNumArgs(f->numParams());
   }
@@ -7052,9 +7059,9 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {
   auto const obj = fp->getThis();
-  assert(obj->getVMClass() == c_AsyncGenerator::classof() ||
-         obj->getVMClass() == c_Generator::classof());
-  return obj->getVMClass() == c_Generator::classof()
+  assert(obj->getVMClass() == AsyncGenerator::getClass() ||
+         obj->getVMClass() == Generator::getClass());
+  return obj->getVMClass() == Generator::getClass()
     ? static_cast<BaseGenerator*>(Generator::fromObject(obj))
     : static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj));
 }
@@ -7355,6 +7362,25 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
   }
 
   return jitReturnPost(jitReturn);
+}
+
+OPTBLD_INLINE void iopWHResult(IOP_ARGS) {
+  pc++;
+  // we should never emit this bytecode for non-waithandle
+  auto const wh = c_WaitHandle::fromCellAssert(vmStack().topC());
+  // the failure condition is likely since we punt to this opcode
+  // in the JIT when the state is failed.
+  if (wh->isFailed()) {
+    throw Object{wh->getException()};
+  }
+  if (wh->isSucceeded()) {
+    cellSet(wh->getResult(), *vmStack().topC());
+    return;
+  }
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Request for result on pending wait handle, "
+    "must await or join() before calling result()");
+  not_reached();
 }
 
 OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {
@@ -7839,7 +7865,7 @@ void ExecutionContext::requestInit() {
   assert(SystemLib::s_nativeFuncUnit);
   assert(SystemLib::s_nativeClassUnit);
 
-  EnvConstants::requestInit(smart_new<EnvConstants>());
+  EnvConstants::requestInit(req::make_raw<EnvConstants>());
   VarEnv::createGlobal();
   vmStack().requestInit();
   ObjectData::resetMaxId();
@@ -7907,8 +7933,8 @@ void ExecutionContext::requestExit() {
   tl_miter_table.clear();
 
   if (m_globalVarEnv) {
-    smart_delete(m_globalVarEnv);
-    m_globalVarEnv = 0;
+    req::destroy_raw(m_globalVarEnv);
+    m_globalVarEnv = nullptr;
   }
 
   if (!m_lastError.isNull()) {

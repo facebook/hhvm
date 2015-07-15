@@ -38,7 +38,7 @@
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
 #include "hphp/runtime/base/zend-scanf.h"
-#include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/hash/ext_hash.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/static-content-cache.h"
@@ -300,7 +300,7 @@ Variant HHVM_FUNCTION(popen,
                       const String& command,
                       const String& mode) {
   CHECK_PATH_FALSE(command, 1);
-  auto file = makeSmartPtr<Pipe>();
+  auto file = req::make<Pipe>();
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
   if (!ret) {
     raise_warning("popen(%s,%s): Invalid argument",
@@ -1763,7 +1763,7 @@ Variant HHVM_FUNCTION(glob,
     return false;
   }
   // php's glob always produces an array, but Variant::Variant(CArrRef)
-  // will produce KindOfNull if given a SmartPtr wrapped around null.
+  // will produce KindOfNull if given a req::ptr wrapped around null.
   if (ret.isNull()) {
     return empty_array();
   }
@@ -1801,7 +1801,7 @@ Variant HHVM_FUNCTION(tempnam,
 Variant HHVM_FUNCTION(tmpfile) {
   FILE *f = tmpfile();
   if (f) {
-    return Variant(makeSmartPtr<PlainFile>(f));
+    return Variant(req::make<PlainFile>(f));
   }
   return false;
 }
@@ -1876,7 +1876,7 @@ struct DirectoryData final : RequestEventHandler {
   void requestShutdown() override {
     defaultDirectory = nullptr;
   }
-  SmartPtr<Directory> defaultDirectory;
+  req::ptr<Directory> defaultDirectory;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryData, s_directory_data);
@@ -1885,7 +1885,7 @@ const StaticString
   s_handle("handle"),
   s_path("path");
 
-SmartPtr<Directory> get_dir(const Resource& dir_handle) {
+req::ptr<Directory> get_dir(const Resource& dir_handle) {
   if (dir_handle.isNull()) {
     auto defaultDir = s_directory_data->defaultDirectory;
     if (!defaultDir) {

@@ -21,8 +21,8 @@
 #include <cstdint>
 
 #include "hphp/runtime/base/array-data-defs.h"
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/util/tls-pod-bag.h"
 
@@ -578,7 +578,7 @@ struct MIterTable {
 
   std::array<Ent,7> ents;
   // Slow path: we expect this `extras' list to rarely be allocated.
-  TlsPodBag<Ent,smart::Allocator<Ent>> extras;
+  TlsPodBag<Ent,req::Allocator<Ent>> extras;
 };
 static_assert(sizeof(MIterTable) == 2*64, "");
 extern __thread MIterTable tl_miter_table;

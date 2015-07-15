@@ -124,7 +124,7 @@ void UnitEmitter::emitImpl(T n, int64_t pos) {
     m_bclen += sizeof(T);
   } else {
     assert(pos + sizeof(T) <= m_bclen);
-    for (uint i = 0; i < sizeof(T); ++i) {
+    for (uint32_t i = 0; i < sizeof(T); ++i) {
       m_bc[pos + i] = c[i];
     }
   }

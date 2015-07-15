@@ -37,8 +37,7 @@ public:
   int getLocalEffects() const override {
     return m_type == '`' ? UnknownEffect : NoEffect;
   }
-  bool canonCompare(ExpressionPtr e) const override;
-  int getType() { return m_type;}
+   int getType() { return m_type;}
   ExpressionListPtr getExpressions() { return m_exps; }
   void stripConcat();
 private:

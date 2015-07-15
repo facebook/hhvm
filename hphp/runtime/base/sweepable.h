@@ -28,14 +28,14 @@ namespace HPHP {
  * Objects that need to do special clean up at the end of the request
  * may register themselves for this by deriving from Sweepable.  After
  * every request, MemoryManager::sweep() called each Sweepable::sweep()
- * method, allowing objects to clear out request-local allocations that
- * are not smart-allocated, do cleanup, etc.
+ * method, allowing objects to clean up resources that are not othewise
+ * owned by the current request, for example malloc'd-memory or file handles.
  */
 struct Sweepable: private boost::noncopyable {
 
   /*
    * There is no default behavior. Make sure this function frees all
-   * NON-SMART-ALLOCATED resources ONLY.
+   * only non-request-allocated resources.
    */
   virtual void sweep() = 0;
 

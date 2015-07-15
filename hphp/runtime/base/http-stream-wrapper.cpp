@@ -41,11 +41,11 @@ const StaticString
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
 
-SmartPtr<File>
+req::ptr<File>
 HttpStreamWrapper::open(const String& filename,
                         const String& mode,
                         int options,
-                        const SmartPtr<StreamContext>& context) {
+                        const req::ptr<StreamContext>& context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return nullptr;
   }
@@ -123,7 +123,7 @@ HttpStreamWrapper::open(const String& filename,
       headers.set(s_User_Agent, default_user_agent);
     }
   }
-  auto file = makeSmartPtr<UrlFile>(method.data(), headers,
+  auto file = req::make<UrlFile>(method.data(), headers,
                                     post_data, max_redirs,
                                     timeout, ignore_errors);
   file->setStreamContext(context);

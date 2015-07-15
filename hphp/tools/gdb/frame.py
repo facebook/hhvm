@@ -5,6 +5,8 @@ Helpers for collecting and printing frame data.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import os
 import gdb
 import bisect
@@ -12,7 +14,7 @@ import sqlite3
 import struct
 
 from gdbutils import *
-import idx
+import idx as idxs
 from nameof import nameof
 import repo
 
@@ -80,10 +82,10 @@ def php_line_number(func, pc):
     unit = func['m_unit']
 
     line_info = V('HPHP::(anonymous namespace)::s_lineInfo')
-    line_map = idx.tbb_chm_at(line_info, unit)
+    line_map = idxs.tbb_chm_at(line_info, unit)
 
     if line_map is not None:
-        line = idx.boost_flat_map_at(line_map, pc)
+        line = idxs.boost_flat_map_at(line_map, pc)
         if line is not None:
             return line
 
@@ -156,7 +158,9 @@ def create_php(idx, ar, rip='0x????????', pc=None):
         'func': '[PHP] %s()' % func_name,
     }
 
-    if func['m_attrs'] & V('HPHP::AttrBuiltin'):
+    attrs = idxs.atomic_get(func['m_attrs']['m_attrs'])
+
+    if attrs & V('HPHP::AttrBuiltin'):
         # Builtins don't have source files.
         return frame
 

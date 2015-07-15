@@ -43,12 +43,18 @@
 #define HAVE_PTHREADS 1
 
 /* Define to 1 if you have the `drand48' function. */
+#ifndef _MSC_VER
 #define HAVE_DRAND48 1
+#endif
 
 /* Define to 1 if you have the `gettimeofday' function. */
+#ifndef _MSC_VER
 #define HAVE_GETTIMEOFDAY 1
+#endif
 
 /* Define to 1 if you have the `random' function. */
+#ifndef _MSC_VER
 #define HAVE_RANDOM 1
+#endif
 
 #endif /* incl_HPHP_CS_CONFIG_H_ */

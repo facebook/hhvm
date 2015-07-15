@@ -22,7 +22,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/bstring.h"
 #include <langinfo.h>
 
 namespace HPHP {

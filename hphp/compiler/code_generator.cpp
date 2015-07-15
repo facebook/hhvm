@@ -35,31 +35,6 @@
 using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
-// statics
-
-void CodeGenerator::BuildJumpTable(const std::vector<const char *> &strings,
-                                   MapIntToStringVec &out, int tableSize,
-                                   bool caseInsensitive) {
-  assert(!strings.empty());
-  assert(out.empty());
-  assert(tableSize > 0);
-
-  for (unsigned int i = 0; i < strings.size(); i++) {
-    const char *s = strings[i];
-    int hash = (caseInsensitive ? hash_string_i(s) : hash_string(s)) %
-               tableSize;
-    out[hash].push_back(s);
-  }
-}
-
-const char *CodeGenerator::STARTER_MARKER =
-  "namespace hphp_impl_starter {}";
-const char *CodeGenerator::SPLITTER_MARKER =
-  "namespace hphp_impl_splitter {}";
-const char *CodeGenerator::HASH_INCLUDE =
-  "#include";
-
-///////////////////////////////////////////////////////////////////////////////
 
 CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
@@ -400,13 +375,6 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
     assert(false);
   }
   return false;
-}
-
-int CodeGenerator::ClassScopeCompare::cmp(const ClassScopeRawPtr &p1,
-                                          const ClassScopeRawPtr &p2) const {
-  int d = p1->getRedeclaringId() - p2->getRedeclaringId();
-  if (d) return d;
-  return strcasecmp(p1->getName().c_str(), p2->getName().c_str());
 }
 
 void CodeGenerator::printObjectHeader(const std::string className,

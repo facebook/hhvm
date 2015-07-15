@@ -23,8 +23,8 @@ set as the plugin runs in order to reduce the time needed to analyze remaining
 classes.
 
 The final list (badContainers) contains a list of container classes that are
-not suitable for containing smart allocated objects, e.g. std::vector. These
-classes are a problem because they use new (not smart_malloc) to allocate
+not suitable for containing request-allocated objects, e.g. std::vector. These
+classes are a problem because they use new (not req::malloc) to allocate
 internal memory. A warning is generated any time a class in this set is used
 to store a scannable class.
 
@@ -37,7 +37,7 @@ that contain no additional scannable fields/parent classes will not get scan
 methods. Scannable classes containing unions will need to be written by the
 user.
 
-In addition to checking for the non-smart allocated containers above, it checks
+In addition to checking for the request-allocated containers above, it checks
 for a number of other problematic situations:
 
 The presence of a union in a scannable class.
@@ -87,7 +87,7 @@ Details
     (Array|String|Object|Resource)Data, TypedValue, RequestEventHandler?
     anything that transitively subclasses/contains one of the above.
     some classes/types have builtin scan methods that we want to ignore, e.g.
-      - smart containers
+      - req:: containers
       - base types
 
    problem types
@@ -121,7 +121,7 @@ C.cpp:
 #include "A.h"  // A defined but B not
 
 handle NativeData
-- adding all classes too permissive.  should only add ones that have a 
+- adding all classes too permissive.  should only add ones that have a
   "need scan" field.
 
 templates

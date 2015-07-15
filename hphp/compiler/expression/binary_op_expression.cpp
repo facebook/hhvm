@@ -84,25 +84,6 @@ ExpressionPtr BinaryOpExpression::clone() {
   return exp;
 }
 
-bool BinaryOpExpression::isTemporary() const {
-  switch (m_op) {
-  case '+':
-  case '-':
-  case '*':
-  case '/':
-  case T_SL:
-  case T_SR:
-  case T_BOOLEAN_OR:
-  case T_BOOLEAN_AND:
-  case T_LOGICAL_OR:
-  case T_LOGICAL_AND:
-  case T_INSTANCEOF:
-  case T_COLLECTION:
-    return true;
-  }
-  return false;
-}
-
 bool BinaryOpExpression::isRefable(bool checkError /* = false */) const {
   return checkError && m_assign;
 }
@@ -164,7 +145,6 @@ ExpressionPtr BinaryOpExpression::unneededHelper() {
 
   if (shortCircuit) {
     m_exp2 = m_exp2->unneeded();
-    m_exp2->setExpectedType(Type::Boolean);
   }
   return static_pointer_cast<Expression>(shared_from_this());
 }
@@ -240,11 +220,6 @@ void BinaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-bool BinaryOpExpression::canonCompare(ExpressionPtr e) const {
-  return Expression::canonCompare(e) &&
-    getOp() == static_cast<BinaryOpExpression*>(e.get())->getOp();
-}
-
 ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) {
@@ -283,7 +258,6 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
       exp->getScope(), r, "is_null", false, expList, ExpressionPtr());
 
   call->setValid();
-  call->setActualType(Type::Boolean);
   call->setupScopes(ar);
 
   if (!invert) return call;
@@ -326,7 +300,6 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               new UnaryOpExpression(
                 getScope(), getRange(),
                 rep, T_BOOL_CAST, true));
-          rep->setActualType(Type::Boolean);
           return replaceValue(rep);
         }
         case '+':
@@ -379,11 +352,11 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           return ExpressionPtr();
         }
       }
-      if (!Option::WholeProgram || !Option::ParseTimeOpts) {
+      if ((!Option::WholeProgram || !Option::ParseTimeOpts) && getScope()) {
         // In the VM, don't optimize __CLASS__ if within a trait, since
         // __CLASS__ is not resolved yet.
-        ClassScopeRawPtr clsScope = getOriginalClass();
-        if (clsScope && clsScope->isTrait()) {
+        auto cs = getClassScope();
+        if (cs && cs->isTrait()) {
           if ((scalar1 && scalar1->getType() == T_CLASS_C) ||
               (scalar2 && scalar2->getType() == T_CLASS_C)) {
             return ExpressionPtr();
@@ -518,7 +491,6 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           new UnaryOpExpression(
             getScope(), getRange(),
             rep, T_BOOL_CAST, true));
-        rep->setActualType(Type::Boolean);
         if (!useFirst) {
           ExpressionListPtr l(
             new ExpressionList(
@@ -526,10 +498,8 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               ExpressionList::ListKindComma));
           l->addElement(m_exp1);
           l->addElement(rep);
-          l->setActualType(Type::Boolean);
           rep = l;
         }
-        rep->setExpectedType(getExpectedType());
         return replaceValue(rep);
       }
       case T_LOGICAL_XOR:

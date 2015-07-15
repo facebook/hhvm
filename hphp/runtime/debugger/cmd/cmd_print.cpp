@@ -117,7 +117,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
   if (strcmp(format, "time") == 0) {
     DateTime dt;
     int64_t ts = -1;
-    if (dt.fromString(ret.toString(), SmartPtr<TimeZone>())) {
+    if (dt.fromString(ret.toString(), req::ptr<TimeZone>())) {
       bool err;
       ts = dt.toTimeStamp(err);
     }

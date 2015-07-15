@@ -145,6 +145,7 @@ public:
   void configGet(std::set<std::string, stdltistr> &values) const;
   void configGet(boost::container::flat_set<std::string> &values) const;
   void configGet(std::map<std::string, std::string> &values) const;
+  void configGet(std::map<std::string, std::string, stdltistr> &values) const;
   void configGet(hphp_string_imap<std::string> &values) const;
 
   /**

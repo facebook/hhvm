@@ -25,11 +25,11 @@ namespace HPHP {
 
 class PhpStreamWrapper : public Stream::Wrapper {
  public:
-  SmartPtr<File> openFD(const char *sFD);
-  virtual SmartPtr<File> open(const String& filename,
+  req::ptr<File> openFD(const char *sFD);
+  virtual req::ptr<File> open(const String& filename,
                               const String& mode,
                               int options,
-                              const SmartPtr<StreamContext>& context);
+                              const req::ptr<StreamContext>& context);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

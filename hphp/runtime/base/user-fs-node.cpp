@@ -26,7 +26,7 @@ namespace HPHP {
 StaticString s_call("__call");
 
 UserFSNode::UserFSNode(Class* cls,
-                       const SmartPtr<StreamContext>& context /*= nullptr */) {
+                       const req::ptr<StreamContext>& context /*= nullptr */) {
   VMRegAnchor _;
   const Func* ctor;
   m_cls = cls;

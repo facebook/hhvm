@@ -104,7 +104,7 @@ bool checkFunc(const Func*, bool verbose = false);
  *
  * Checked:
  * -- Primitive argument types are correct: int64_t, bool, and double
- * -- Complex arguments use correct smart pointer wrapper: String, Object,
+ * -- Complex arguments use correct req::ptr wrapper: String, Object,
  *    Resource, and Array
  * -- Mixed arguments are taken as Variant
  * -- By-reference arguments are taken as VRefParam

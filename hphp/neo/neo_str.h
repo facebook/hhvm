@@ -16,6 +16,7 @@ __BEGIN_DECLS
 
 #include <stdarg.h>
 #include <stdio.h>
+#include "hphp/neo/neo_bool.h"
 #include "hphp/neo/neo_misc.h"
 
 /* This modifies the string its called with by replacing all the white
@@ -71,7 +72,7 @@ void string_clear (NEOSTRING *str);
 NEOERR *string_array_split (ULIST **list, char *s, const char *sep,
                             int max);
 
-char reg_search (const char *re, const char *str);
+BOOL reg_search (const char *re, const char *str);
 
 /* NEOS_ESCAPE details the support escape contexts/modes handled
  * by various NEOS helper methods and reused in CS itself. */

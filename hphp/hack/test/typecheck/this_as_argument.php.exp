@@ -1,0 +1,12 @@
+File "this_as_argument.php", line 20, characters 18-19:
+Invalid argument (Typing[4110])
+File "this_as_argument.php", line 20, characters 5-20:
+This is an object of type C (known to be exactly the class 'C')
+File "this_as_argument.php", line 20, characters 5-5:
+  where the class 'C' was referenced here
+File "this_as_argument.php", line 9, characters 24-24:
+It is incompatible with an object of type C
+File "this_as_argument.php", line 20, characters 5-5:
+This requires the late-bound type to be exactly C
+File "this_as_argument.php", line 9, characters 24-24:
+Since C is not final this might be an instance of a child class

@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/classname-is.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -139,7 +139,7 @@ struct ObjectData {
    * uninitialized object of that class. These are meant to be called from the
    * JIT.
    *
-   * newInstanceRaw should be called only when size <= kMaxSmartSize,
+   * newInstanceRaw should be called only when size <= kMaxSmallSize,
    * otherwise use newInstanceRawBig.
    *
    * The initial ref-count will be set to one.
@@ -506,21 +506,24 @@ using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)                                  \
   HPHP::LowPtr<Class> c_##cls::s_classOf;
 
+namespace req {
+
 template<class T, class... Args>
 typename std::enable_if<
   std::is_convertible<T*, ObjectData*>::value,
-  SmartPtr<T>
->::type makeSmartPtr(Args&&... args) {
-  auto const mem = MM().smartMallocSize(sizeof(T));
+  req::ptr<T>
+>::type make(Args&&... args) {
+  auto const mem = MM().mallocSmallSize(sizeof(T));
   try {
     auto t = new (mem) T(std::forward<Args>(args)...);
     assert(t->hasExactlyOneRef());
-    return SmartPtr<T>::attach(t);
+    return req::ptr<T>::attach(t);
   } catch (...) {
-    MM().smartFreeSize(mem, sizeof(T));
+    MM().freeSmallSize(mem, sizeof(T));
     throw;
   }
 }
+} // namespace req
 
 ///////////////////////////////////////////////////////////////////////////////
 }

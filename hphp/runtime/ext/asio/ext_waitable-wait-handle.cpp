@@ -133,7 +133,7 @@ void
 c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
   assert(isDescendantOf(child));
 
-  smart::vector<std::string> exception_msg_items;
+  req::vector<std::string> exception_msg_items;
   exception_msg_items.push_back("Encountered dependency cycle.\n");
   exception_msg_items.push_back("Existing stack:\n");
 

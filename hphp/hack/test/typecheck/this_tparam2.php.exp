@@ -1,10 +1,8 @@
 File "this_tparam2.php", line 19, characters 10-17:
 Invalid return type (Typing[4110])
-File "this_tparam2.php", line 19, characters 10-17:
-Some type constraint(s) here are violated
-File "this_tparam2.php", line 12, characters 39-42:
-'this' is a constrained type
 File "this_tparam2.php", line 18, characters 48-62:
 This is an object of type OtherPreparable
 File "this_tparam2.php", line 18, characters 20-31:
 It is incompatible with an object of type MyPreparable
+File "this_tparam2.php", line 12, characters 39-42:
+  via this generic this

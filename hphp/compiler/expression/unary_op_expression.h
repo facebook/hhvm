@@ -42,7 +42,6 @@ public:
 
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
-  bool isTemporary() const override;
   bool isRefable(bool checkError = false) const override;
   bool isScalar() const override;
   bool isThis() const override;
@@ -54,10 +53,8 @@ public:
   int getOp() const { return m_op;}
   bool isLogicalNot() const { return m_op == '!'; }
   bool isCast() const;
-  TypePtr getCastType() const;
   bool getFront() const { return m_front; }
 
-  bool canonCompare(ExpressionPtr e) const override;
   ExpressionPtr unneededHelper() override;
   void setDefinedScope(BlockScopeRawPtr scope);
 protected:

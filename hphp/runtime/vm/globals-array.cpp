@@ -287,8 +287,8 @@ GlobalsArray::CopyWithStrongIterators(const ArrayData* ad) {
     "Unimplemented ArrayData::copyWithStrongIterators");
 }
 
-ArrayData* GlobalsArray::NonSmartCopy(const ArrayData*) {
-  throw FatalErrorException("GlobalsArray::nonSmartCopy "
+ArrayData* GlobalsArray::CopyStatic(const ArrayData*) {
+  throw FatalErrorException("GlobalsArray::copyStatic "
     "not implemented.");
 }
 

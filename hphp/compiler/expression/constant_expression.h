@@ -36,9 +36,6 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  bool isTemporary() const override {
-    return isNull() || isBoolean();
-  }
   bool isScalar() const override;
   bool isLiteralNull() const override;
   int getLocalEffects() const override { return NoEffect; }
@@ -46,9 +43,6 @@ public:
   bool containsDynamicConstant(AnalysisResultPtr ar) const override {
     return !m_valid || m_dynamic;
   }
-
-  unsigned getCanonHash() const override;
-  bool canonCompare(ExpressionPtr e) const override;
 
   const std::string &getName() const { return m_name;}
   const std::string &getOriginalName() const { return m_origName;}

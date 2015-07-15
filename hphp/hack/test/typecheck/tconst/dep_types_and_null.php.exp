@@ -1,0 +1,7 @@
+[\Ref]App \Ref<[1]intersect(option([2]tvar_2)), >
+[\Ref]App \Ref<[3]option(Tstring), >
+[3]option(Tstring)
+[\Ref]App \Ref<[4]intersect(option([5]tvar_5)), >
+[4]intersect(option([5]tvar_5))
+[\Ref]App \Ref<[6]intersect([\Exception]App \Exception<>, [<expr#1>]App \Exception<>, option([5]tvar_5)), >
+No errors

@@ -194,67 +194,6 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-unsigned ScalarExpression::getCanonHash() const {
-  int64_t val = getHash();
-  if (val == -1) {
-    val = hash_string_unsafe(m_value.c_str(), m_value.size());
-  }
-  return unsigned(val) ^ unsigned(val >> 32);
-}
-
-bool ScalarExpression::canonCompare(ExpressionPtr e) const {
-  if (!Expression::canonCompare(e)) return false;
-  ScalarExpressionPtr s =
-    static_pointer_cast<ScalarExpression>(e);
-
-  return
-    m_value == s->m_value &&
-    m_type == s->m_type &&
-    m_quoted == s->m_quoted;
-}
-
-TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
-                                        TypePtr type, bool coerce) {
-  TypePtr actualType;
-  switch (m_type) {
-  case T_STRING:
-    actualType = Type::String;
-    break;
-  case T_NUM_STRING:
-  case T_LNUMBER:
-    actualType = Type::Int64;
-    break;
-  case T_DNUMBER:
-    actualType = Type::Double;
-    break;
-  case T_ONUMBER:
-    actualType =
-      RuntimeOption::IntsOverflowToInts ? Type::Int64 : Type::Double;
-    break;
-
-  case T_LINE:
-  case T_COMPILER_HALT_OFFSET:
-    actualType = Type::Int64;
-    break;
-
-  case T_CONSTANT_ENCAPSED_STRING:
-  case T_ENCAPSED_AND_WHITESPACE:
-  case T_TRAIT_C:
-  case T_CLASS_C:
-  case T_NS_C:
-  case T_METHOD_C:
-  case T_FUNC_C:
-    actualType = Type::String;
-    break;
-
-  default:
-    assert(false);
-    break;
-  }
-
-  return checkTypesImpl(ar, type, actualType);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

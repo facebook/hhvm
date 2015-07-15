@@ -16,27 +16,31 @@
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include <sys/stat.h>
-#include <map>
 #include <folly/ScopeGuard.h>
+#include <map>
 
-#include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/lambda_names.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/statement/exp_statement.h"
-#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/parser/parser.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/deprecated/base.h"
-#include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/analysis/lambda_names.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/expression/simple_function_call.h"
+
+#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/include_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/user_attribute.h"
+
+#include "hphp/compiler/option.h"
+
+#include "hphp/compiler/parser/parser.h"
+
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 
@@ -145,13 +149,13 @@ void FileScope::makeParseFatal(AnalysisResultConstPtr ar,
 bool FileScope::addFunction(AnalysisResultConstPtr ar,
                             FunctionScopePtr funcScope) {
   if (ar->declareFunction(funcScope)) {
-    FunctionScopePtr &fs = m_functions[funcScope->getName()];
+    FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
     if (fs) {
       if (!m_redeclaredFunctions) {
         m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
       }
       FunctionScopePtrVec &funcVec =
-        (*m_redeclaredFunctions)[funcScope->getName()];
+        (*m_redeclaredFunctions)[funcScope->getScopeName()];
       if (!funcVec.size()) {
         fs->setLocalRedeclaring();
         funcVec.push_back(fs);
@@ -168,7 +172,7 @@ bool FileScope::addFunction(AnalysisResultConstPtr ar,
 
 bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
   if (ar->declareClass(classScope)) {
-    m_classes[classScope->getName()].push_back(classScope);
+    m_classes[classScope->getScopeName()].push_back(classScope);
     return true;
   }
   return false;
@@ -226,11 +230,11 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {
   ar->declareConst(shared_from_this(), name);
 }
 
-void FileScope::addConstant(const string &name, TypePtr type,
+void FileScope::addConstant(const string &name,
                             ExpressionPtr value,
                             AnalysisResultPtr ar, ConstructPtr con) {
   BlockScopePtr f = ar->findConstantDeclarer(name);
-  f->getConstants()->add(name, type, value, ar, con);
+  f->getConstants()->add(name, value, ar, con);
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
@@ -271,7 +275,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   auto pseudoMain =
     std::make_shared<HPHP::FunctionScope>(
       ar, true,
-      pseudoMainName().c_str(),
+      pseudoMainName(),
       f, false, 0, 0,
       ModifierExpressionPtr(),
       m_attributes[0], "",

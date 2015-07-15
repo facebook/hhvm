@@ -262,6 +262,12 @@ Type provenTypeFromStack(const IRGS&, BCSPOffset slot);
  */
 TypeConstraint mInstrBaseConstraint(const IRGS& env, Type predicted);
 
+/*
+ * Returns the TypeConstraint that should be used to constrain baseType for an
+ * Idx bytecode.
+ */
+TypeConstraint idxBaseConstraint(Type baseType, Type keyType);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

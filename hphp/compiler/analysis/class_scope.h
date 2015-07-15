@@ -108,13 +108,9 @@ public:
     Final = 32
   };
 
-  enum JumpTableName {
-    JumpTableCallInfo
-  };
-
 public:
   ClassScope(FileScopeRawPtr fs,
-             KindOf kindOf, const std::string &name,
+             KindOf kindOf, const std::string &originalName,
              const std::string &parent,
              const std::vector<std::string> &bases,
              const std::string &docComment, StatementPtr stmt,
@@ -124,10 +120,14 @@ public:
    * Special constructor for extension classes.
    */
   ClassScope(AnalysisResultPtr ar,
-             const std::string &name, const std::string &parent,
+             const std::string &originalName, const std::string &parent,
              const std::vector<std::string> &bases,
              const FunctionScopePtrVec &methods);
 
+  bool isNamed(const char* n) const;
+  bool isNamed(const std::string& n) const {
+    return isNamed(n.c_str());
+  }
   bool classNameCtor() const {
     return getAttribute(ClassNameConstructor);
   }
@@ -160,7 +160,7 @@ public:
 
   /* For class_exists */
   void setVolatile();
-  bool isVolatile() const { return m_volatile;}
+  bool isVolatile() const { return m_volatile; }
   bool isPersistent() const { return m_persistent; }
   void setPersistent(bool p) { m_persistent = p; }
 
@@ -324,7 +324,6 @@ public:
   bool hasProperty(const std::string &name) const;
   bool hasConst(const std::string &name) const;
 
-  static bool NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func);
   void inheritedMagicMethods(ClassScopePtr super);
   void derivedMagicMethods(ClassScopePtr super);
   /* true if it might, false if it doesnt */
@@ -415,7 +414,9 @@ private:
     using alias_type = TraitAliasStatementPtr;
 
     static bool strEmpty(const std::string& str)    { return str.empty(); }
-    static std::string clsName(ClassScopePtr cls)   { return cls->getName(); }
+    static std::string clsName(ClassScopePtr cls)   {
+      return cls->getOriginalName();
+    }
 
     static bool isTrait(ClassScopePtr cls)          { return cls->isTrait(); }
     static bool isAbstract(ModifierExpressionPtr m) { return m->isAbstract(); }
@@ -430,25 +431,25 @@ private:
     }
 
     static std::string precMethodName(prec_type stmt) {
-      return toLower(stmt->getMethodName());
+      return stmt->getMethodName();
     }
     static std::string precSelectedTraitName(prec_type stmt) {
-      return toLower(stmt->getTraitName());
+      return stmt->getTraitName();
     }
-    static std::unordered_set<std::string> precOtherTraitNames(prec_type stmt) {
-      std::unordered_set<string> otherTraitNames;
+    static hphp_string_iset precOtherTraitNames(prec_type stmt) {
+      hphp_string_iset otherTraitNames;
       stmt->getOtherTraitNames(otherTraitNames);
       return otherTraitNames;
     }
 
     static std::string aliasTraitName(alias_type stmt) {
-      return toLower(stmt->getTraitName());
+      return stmt->getTraitName();
     }
     static std::string aliasOrigMethodName(alias_type stmt) {
-      return toLower(stmt->getMethodName());
+      return stmt->getMethodName();
     }
     static std::string aliasNewMethodName(alias_type stmt) {
-      return toLower(stmt->getNewMethodName());
+      return stmt->getNewMethodName();
     }
     static ModifierExpressionPtr aliasModifiers(alias_type stmt) {
       return stmt->getModifiers();
@@ -494,7 +495,9 @@ private:
   friend class TMIOps;
 
 public:
-  using TMIData = TraitMethodImportData<TraitMethod, TMIOps>;
+  using TMIData = TraitMethodImportData<TraitMethod, TMIOps,
+                                        std::string,
+                                        string_hashi, string_eqstri>;
 
 private:
   MethodStatementPtr importTraitMethod(const TraitMethod& traitMethod,

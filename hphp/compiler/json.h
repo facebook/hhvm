@@ -17,15 +17,19 @@
 #ifndef incl_HPHP_JSON_H_
 #define incl_HPHP_JSON_H_
 
-#include "hphp/util/deprecated/base.h"
+#include <cassert>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <set>
 #include <vector>
+
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
+
 struct AnalysisResult;
+
 namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -160,8 +164,7 @@ public:
   template<typename K, typename T, typename C>
   _OutputStream &operator<< (const std::map<K, T, C> &v) {
     m_out << "{";
-    for (typename std::map<K, T, C>::const_iterator iter = v.begin();
-         iter != v.end(); ++iter) {
+    for (auto iter = v.begin(); iter != v.end(); ++iter) {
       if (iter != v.begin()) m_out << ',';
       *this << Name(iter->first);
       *this << iter->second;
@@ -170,12 +173,10 @@ public:
     return *this;
   }
 
-  template<typename K, typename T, typename C>
-  _OutputStream &operator<<
-    (const hphp_hash_map<K, T, C> &v) {
+  template<typename K, typename T, typename H, typename E>
+  _OutputStream &operator<< (const hphp_hash_map<K, T, H, E> &v) {
     m_out << "{";
-    for (typename hphp_hash_map<K, T, C>::const_iterator
-           iter = v.begin(); iter != v.end(); ++iter) {
+    for (auto iter = v.begin(); iter != v.end(); ++iter) {
       if (iter != v.begin()) m_out << ',';
       *this << Name(iter->first);
       *this << iter->second;

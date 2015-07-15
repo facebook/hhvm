@@ -99,7 +99,7 @@ struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(Profile k) const {
     return folly::format(
       "{}:t{}:{}",
-      k.name->data(),
+      k.name,
       k.transId,
       k.bcOff
     ).str();

@@ -66,12 +66,12 @@ void c_ExternalThreadEventWaitHandle::sweep() {
   }
 }
 
-SmartPtr<c_ExternalThreadEventWaitHandle>
+req::ptr<c_ExternalThreadEventWaitHandle>
 c_ExternalThreadEventWaitHandle::Create(
   AsioExternalThreadEvent* event,
   ObjectData* priv_data
 ) {
-  auto wh = makeSmartPtr<c_ExternalThreadEventWaitHandle>();
+  auto wh = req::make<c_ExternalThreadEventWaitHandle>();
   wh->initialize(event, priv_data);
   return wh;
 }

@@ -31,7 +31,6 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  bool isTemporary() const override;
   int getLocalEffects() const override;
   bool isLiteralString() const override;
   std::string getLiteralString() const override;
@@ -49,7 +48,6 @@ public:
   ExpressionPtr foldRightAssoc(AnalysisResultConstPtr ar);
 
   ExpressionPtr unneededHelper() override;
-  bool canonCompare(ExpressionPtr e) const override;
 
   static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
                            bool &hasVoid);

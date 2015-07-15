@@ -30,11 +30,12 @@ namespace HPHP {
 __thread int ResourceData::os_max_resource_id;
 
 ResourceData::ResourceData() {
-  m_hdr.init(0, HeaderKind::Resource, 0);
+  m_hdr.init(0, HeaderKind::Resource, 1);
   int& pmax = os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;
   assert(MM().checkContains(this));
+  assert(hasExactlyOneRef());
 }
 
 void ResourceData::o_setId(int id) {

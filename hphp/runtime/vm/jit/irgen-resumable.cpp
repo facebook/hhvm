@@ -17,7 +17,7 @@
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -168,6 +168,24 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
 
 }
 
+void emitWHResult(IRGS& env) {
+  assertx(topC(env)->isA(TObj));
+  auto const exitSlow = makeExitSlow(env);
+  auto const child = popC(env);
+  // In most conditions, this will be optimized out by the simplifier.
+  // We already need to setup a side-exit for the !succeeded case.
+  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, child));
+  static_assert(
+    c_WaitHandle::STATE_SUCCEEDED == 0,
+    "we test state for non-zero, success must be zero"
+  );
+  gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
+  auto const res = gen(env, LdWHResult, TInitCell, child);
+  gen(env, IncRef, res);
+  gen(env, DecRef, child);
+  push(env, res);
+}
+
 void emitAwait(IRGS& env, int32_t numIters) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
@@ -240,7 +258,7 @@ void emitCreateCont(IRGS& env) {
   assertx(!resumed(env));
   assertx(curFunc(env)->isGenerator());
 
-  if (curFunc(env)->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
+  if (curFunc(env)->isAsync()) PUNT(CreateCont-AsyncGenerator);
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
@@ -274,11 +292,11 @@ void emitCreateCont(IRGS& env) {
 void emitContEnter(IRGS& env) {
   auto const returnOffset = nextBcOff(env);
   assertx(curClass(env));
-  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-          curClass(env)->classof(c_Generator::classof()));
+  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
+          curClass(env)->classof(Generator::getClass()));
   assertx(curFunc(env)->contains(returnOffset));
 
-  auto isAsync = curClass(env)->classof(c_AsyncGenerator::classof());
+  auto isAsync = curClass(env)->classof(AsyncGenerator::getClass());
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);
   auto const genFp  = gen(env, LdContActRec, IsAsyncData(isAsync), genObj);
@@ -335,7 +353,7 @@ void emitYieldK(IRGS& env) {
   assertx(resumed(env));
   assertx(curFunc(env)->isGenerator());
 
-  if (curFunc(env)->isAsyncGenerator()) PUNT(YieldK-AsyncGenerator);
+  if (curFunc(env)->isAsync()) PUNT(YieldK-AsyncGenerator);
 
   yieldImpl(env, resumeOffset);
 
@@ -354,21 +372,21 @@ void emitYieldK(IRGS& env) {
 
 void emitContCheck(IRGS& env, int32_t checkStarted) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-          curClass(env)->classof(c_Generator::classof()));
+  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
+          curClass(env)->classof(Generator::getClass()));
   auto const cont = ldThis(env);
   gen(env, ContPreNext,
-    IsAsyncData(curClass(env)->classof(c_AsyncGenerator::classof())),
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())),
     makeExitSlow(env), cont, cns(env, static_cast<bool>(checkStarted)));
 }
 
 void emitContValid(IRGS& env) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-          curClass(env)->classof(c_Generator::classof()));
+  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
+          curClass(env)->classof(Generator::getClass()));
   auto const cont = ldThis(env);
   push(env, gen(env, ContValid,
-    IsAsyncData(curClass(env)->classof(c_AsyncGenerator::classof())), cont));
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
 }
 
 void emitContKey(IRGS& env) {

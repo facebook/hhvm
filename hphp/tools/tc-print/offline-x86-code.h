@@ -45,7 +45,7 @@ enum TCRegion {
   TCRCount, // keep last
 };
 
-extern string TCRegionString[];
+extern std::string TCRegionString[];
 
 struct TCRegionRec {
   FILE*    file;
@@ -57,12 +57,12 @@ class OfflineX86Code {
 
 public:
 
-  OfflineX86Code(string _dumpDir,
-                 TCA    _ahotBase,
-                 TCA    _aBase,
-                 TCA    _aprofBase,
-                 TCA    _coldBase,
-                 TCA    _frozenBase)
+  OfflineX86Code(std::string _dumpDir,
+                 TCA _ahotBase,
+                 TCA _aBase,
+                 TCA _aprofBase,
+                 TCA _coldBase,
+                 TCA _frozenBase)
       : dumpDir(_dumpDir) {
     TCA tcRegionBases[TCRCount] = {
       _ahotBase, _aBase, _aprofBase, _coldBase, _frozenBase
@@ -76,13 +76,14 @@ public:
     closeFiles();
   }
 
-  void printDisasm(TCA                           startAddr,
-                   uint32_t                      len,
-                   const vector<TransBCMapping>& bcMap,
-                   const PerfEventsMap<TCA>&     perfEvents);
+  void printDisasm(TCA startAddr,
+                   uint32_t len,
+                   const std::vector<TransBCMapping>& bcMap,
+                   const PerfEventsMap<TCA>& perfEvents);
 
   // Returns the fall-thru successor from 'a', if any
-  TCA getTransJmpTargets(const TransRec *transRec, vector<TCA> *jmpTargets);
+  TCA getTransJmpTargets(const TransRec *transRec,
+                         std::vector<TCA> *jmpTargets);
 
   TCRegion findTCRegionContaining(TCA addr) const;
 
@@ -99,13 +100,12 @@ private:
     {}
   };
 
-  string            dumpDir;
+  std::string       dumpDir;
   TCRegionRec       tcRegions[TCRCount];
   xed_state_t       xed_state;
   xed_syntax_enum_t xed_syntax;
 
-  typedef std::unordered_map<TCA, string> Addr2SymMap;
-  Addr2SymMap       addr2SymMap;
+  std::unordered_map<TCA, std::string> addr2SymMap;
 
   void openFiles(TCA tcRegionBases[TCRCount]);
   void closeFiles();
@@ -114,7 +114,7 @@ private:
   void loadSymbolsMapTramp();
   void loadSymbolsMapNm();
 
-  bool     tcRegionContains(TCRegion tcr, TCA addr) const;
+  bool tcRegionContains(TCRegion tcr, TCA addr) const;
 
   void disasm(FILE*  file,
               TCA    fileStartAddr,
@@ -125,11 +125,11 @@ private:
               bool   printAddr=true,
               bool   printBinary=false);
 
-  TCA collectJmpTargets(FILE*  file,
-                        TCA    fileStartAddr,
-                        TCA    codeStartAddr,
+  TCA collectJmpTargets(FILE* file,
+                        TCA fileStartAddr,
+                        TCA codeStartAddr,
                         uint64_t codeLen,
-                        vector<TCA>* jmpTargets);
+                        std::vector<TCA>* jmpTargets);
 
   std::string getSymbolName(TCA addr);
 

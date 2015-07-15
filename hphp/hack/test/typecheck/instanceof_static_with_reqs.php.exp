@@ -1,11 +1,12 @@
 object
-[this]App \BaseField<generic T, >
+[<static>][this]App \BaseField<generic T, >
 App \INeedsFoo<[1]intersect(), >
-[2]intersect(App \INeedsFoo<[3]intersect(X), >, [this]App \BaseField<generic T, >)
+[2]intersect(App \INeedsFoo<[3]intersect(X), >, [<static>][this]App \BaseField<generic T, >)
 File "instanceof_static_with_reqs.php", line 31, characters 12-17:
 Invalid return type (Typing[4110])
 File "instanceof_static_with_reqs.php", line 7, characters 49-52:
-This is the type 'this'
-  that is compatible with an object of type BaseField
+This is the expression dependent type <static>
+File "instanceof_static_with_reqs.php", line 7, characters 49-52:
+  where '<static>' refers to the late bound type of the enclosing class
 File "instanceof_static_with_reqs.php", line 23, characters 27-35:
 It is incompatible with an object of type INeedsFoo

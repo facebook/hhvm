@@ -78,6 +78,7 @@ struct ArrayInit {
   ~ArrayInit() {
     // Use non-specialized release call so array instrumentation can track
     // its destruction XXX rfc: keep this? what was it before?
+    assert(!m_data || m_data->hasExactlyOneRef());
     if (m_data) m_data->release();
   }
 
@@ -247,6 +248,7 @@ struct ArrayInit {
   // Prefer toArray() in new code---it can save a null check when the
   // compiler can't prove m_data hasn't changed.
   ArrayData* create() {
+    assert(m_data->hasExactlyOneRef());
     auto const ret = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
@@ -256,6 +258,7 @@ struct ArrayInit {
   }
 
   Array toArray() {
+    assert(m_data->hasExactlyOneRef());
     auto ptr = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
@@ -265,6 +268,7 @@ struct ArrayInit {
   }
 
   Variant toVariant() {
+    assert(m_data->hasExactlyOneRef());
     auto ptr = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
@@ -306,7 +310,7 @@ public:
     , m_expectedCount(n)
 #endif
   {
-    m_vec->setRefCount(0);
+    assert(m_vec->hasExactlyOneRef());
   }
 
   /*
@@ -316,7 +320,7 @@ public:
    */
   PackedArrayInit(size_t n, CheckAllocation) {
     auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
-    if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
+    if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
       check_request_surprise_unlikely();
     }
     m_vec = MixedArray::MakeReserve(n);
@@ -324,7 +328,7 @@ public:
     m_addCount = 0;
     m_expectedCount = n;
 #endif
-    m_vec->setRefCount(0);
+    assert(m_vec->hasExactlyOneRef());
     check_request_surprise_unlikely();
   }
 
@@ -346,6 +350,7 @@ public:
 
   ~PackedArrayInit() {
     // In case an exception interrupts the initialization.
+    assert(!m_vec || m_vec->hasExactlyOneRef());
     if (m_vec) m_vec->release();
   }
 
@@ -380,6 +385,7 @@ public:
   }
 
   Variant toVariant() {
+    assert(m_vec->hasExactlyOneRef());
     auto ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG
@@ -389,6 +395,7 @@ public:
   }
 
   Array toArray() {
+    assert(m_vec->hasExactlyOneRef());
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG
@@ -398,6 +405,7 @@ public:
   }
 
   ArrayData *create() {
+    assert(m_vec->hasExactlyOneRef());
     auto ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG

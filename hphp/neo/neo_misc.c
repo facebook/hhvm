@@ -15,10 +15,19 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #include <string.h>
+
+#ifdef _MSC_VER
+#include <io.h>
+// Because someone thought this was a good place to put
+// timeval.
+#include <WinSock2.h>
+#else
+#include <sys/time.h>
 #include <unistd.h>
+#endif
+
 #include "neo_misc.h"
 #include "neo_err.h"
 
@@ -32,7 +41,11 @@ void ne_vwarn (const char *fmt, va_list ap)
 
   now = time(NULL);
 
+#ifdef _MSC_VER
+  localtime_s(&now, &my_tm);
+#else
   localtime_r(&now, &my_tm);
+#endif
 
   strftime(tbuf, sizeof(tbuf), "%m/%d %H:%M:%S", &my_tm);
 

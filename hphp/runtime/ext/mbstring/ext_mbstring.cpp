@@ -18,9 +18,8 @@
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/ext/php_unicode.h"
-#include "hphp/runtime/ext/unicode_data.h"
-#include "hphp/runtime/ext/process/ext_process.h"
+#include "hphp/runtime/ext/mbstring/php_unicode.h"
+#include "hphp/runtime/ext/mbstring/unicode_data.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/base/array-init.h"
@@ -4367,7 +4366,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   char *all_headers = (char *)device.buffer;
 
-  String cmd = HHVM_FN(escapeshellcmd)(extra_cmd);
+  String cmd = string_escape_shell_cmd(extra_cmd.c_str());
   bool ret = (!err && php_mail(to_r, encoded_subject.data(),
                                encoded_message.data(),
                                all_headers, cmd.data()));

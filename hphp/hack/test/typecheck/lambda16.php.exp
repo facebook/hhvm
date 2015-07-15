@@ -1,7 +1,6 @@
 File "lambda16.php", line 14, characters 12-12:
 Invalid return type (Typing[4110])
-File "lambda16.php", line 13, characters 30-33:
-This is the type 'this'
-  that is compatible with an object of type Foo
+File "lambda16.php", line 12, characters 7-9:
+This is an object of type Foo
 File "lambda16.php", line 14, characters 12-12:
 It is incompatible with a function

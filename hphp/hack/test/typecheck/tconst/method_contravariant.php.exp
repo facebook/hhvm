@@ -1,13 +1,8 @@
 File "method_contravariant.php", line 35, characters 14-15:
 Invalid argument (Typing[4110])
 File "method_contravariant.php", line 12, characters 39-45:
-This is the expression dependent type <expr#242>::T
-  that is compatible with the abstract type constant X::T
-  that is compatible with an array key (int/string)
-File "method_contravariant.php", line 35, characters 3-4:
-  where '<expr#242>' is a reference to this expression
+This is an array key (int/string)
 File "method_contravariant.php", line 4, characters 19-26:
-  resulting from expanding a type constant as follows:
-    X::T
+  resulting from expanding the type constant X::T
 File "method_contravariant.php", line 35, characters 14-15:
 It is incompatible with a string

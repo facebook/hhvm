@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 
-#include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
@@ -55,7 +55,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       "Expected dependencies to be an instance of Vector");
   }
   assertx(collections::isType(obj->getVMClass(), CollectionType::Vector));
-  auto deps = SmartPtr<c_Vector>::attach(c_Vector::Clone(obj));
+  auto deps = req::ptr<c_Vector>::attach(c_Vector::Clone(obj));
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
@@ -91,7 +91,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      auto my_wh = makeSmartPtr<c_GenVectorWaitHandle>();
+      auto my_wh = req::make<c_GenVectorWaitHandle>();
       my_wh->initialize(exception, deps.get(), iter_pos, ctx_idx, child_wh);
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenVectorCreate())) {

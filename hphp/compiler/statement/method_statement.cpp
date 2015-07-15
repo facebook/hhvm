@@ -46,8 +46,6 @@
 
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/compiler/analysis/alias_manager.h"
-
 
 #include "hphp/parser/parser.h"
 #include "hphp/util/text-util.h"
@@ -73,32 +71,6 @@ MethodStatement::MethodStatement
   , m_cppLength(-1)
   , m_autoPropCount(0)
   , m_modifiers(modifiers)
-  , m_name(toLower(name))
-  , m_originalName(name)
-  , m_params(params)
-  , m_retTypeAnnotation(retTypeAnnotation)
-  , m_stmt(stmt)
-  , m_docComment(docComment)
-  , m_attrList(attrList)
-{
-}
-
-MethodStatement::MethodStatement
-(STATEMENT_CONSTRUCTOR_PARAMETERS,
- ModifierExpressionPtr modifiers, bool ref, const string &name,
- ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
- StatementListPtr stmt, int attr, const string &docComment,
- ExpressionListPtr attrList, bool method /* = true */)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement))
-  , m_method(method)
-  , m_ref(ref)
-  , m_hasCallToGetArgs(false)
-  , m_mayCallSetFrameMetadata(false)
-  , m_attribute(attr)
-  , m_cppLength(-1)
-  , m_autoPropCount(0)
-  , m_modifiers(modifiers)
-  , m_name(toLower(name))
   , m_originalName(name)
   , m_params(params)
   , m_retTypeAnnotation(retTypeAnnotation)
@@ -116,14 +88,13 @@ StatementPtr MethodStatement::clone() {
   return stmt;
 }
 
-string MethodStatement::getFullName() const {
-  if (m_className.empty()) return m_name;
-  return m_className + "::" + m_name;
+bool MethodStatement::isNamed(const char* name) const {
+  return !strcasecmp(m_originalName.c_str(), name);
 }
 
 string MethodStatement::getOriginalFullName() const {
-  if (m_originalClassName.empty()) return m_originalName;
-  return m_originalClassName + "::" + m_originalName;
+  if (!m_method) return m_originalName;
+  return getClassScope()->getOriginalName() + "::" + m_originalName;
 }
 
 bool MethodStatement::isRef(int index /* = -1 */) const {
@@ -218,24 +189,17 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   }
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
-  FunctionScopePtr funcScope(
-    new FunctionScope(ar, m_method, m_name, stmt, m_ref, minParam,
-                      numDeclParam, m_modifiers, m_attribute, m_docComment,
-                      fs, attrs));
+  auto funcScope =
+    std::make_shared<FunctionScope>(ar, m_method, m_originalName,
+                                    stmt, m_ref, minParam, numDeclParam,
+                                    m_modifiers, m_attribute, m_docComment,
+                                    fs, attrs);
   if (!m_stmt) {
     funcScope->setVirtual();
   }
   setBlockScope(funcScope);
 
   funcScope->setParamCounts(ar, -1, -1);
-
-  if (funcScope->isNative()) {
-    if ((m_name == "__construct") || (m_name == "__destruct")) {
-      assert(!m_retTypeAnnotation ||
-             !m_retTypeAnnotation->dataType().hasValue() ||
-             (m_retTypeAnnotation->dataType() == KindOfNull));
-    }
-  }
 
   return funcScope;
 }
@@ -246,6 +210,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
   checkParameters(fileScope);
 
   FunctionScopeRawPtr funcScope = getFunctionScope();
+  funcScope->setOuterScope(classScope);
   const bool isNative = funcScope->isNative();
   if (m_modifiers) {
     if ((m_modifiers->isExplicitlyPublic() +
@@ -294,6 +259,14 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       }
     }
     if (m_modifiers->isAbstract()) {
+      if (funcScope->userAttributes().count("__Memoize")) {
+        m_modifiers->parseTimeFatal(
+          fileScope,
+          Compiler::InvalidAttribute,
+          "Abstract method %s::%s cannot be memoized",
+          classScope->getOriginalName().c_str(),
+          getOriginalName().c_str());
+      }
       if (m_modifiers->isPrivate() || m_modifiers->isFinal() || isNative) {
         m_modifiers->parseTimeFatal(
           fileScope,
@@ -349,7 +322,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
       }
-      auto is_ctordtor = (m_name == "__construct") || (m_name == "__destruct");
+      auto is_ctordtor = isNamed("__construct") || isNamed("__destruct");
       if (!m_retTypeAnnotation && !is_ctordtor) {
         parseTimeFatal(fileScope,
                        Compiler::InvalidAttribute,
@@ -378,13 +351,9 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
 
   classScope->addFunction(ar, fileScope, funcScope);
 
-  m_className = classScope->getName();
-  m_originalClassName = classScope->getOriginalName();
-
   setSpecialMethod(fileScope, classScope);
 
-  if (Option::DynamicInvokeFunctions.find(getFullName()) !=
-      Option::DynamicInvokeFunctions.end()) {
+  if (Option::DynamicInvokeFunctions.count(getOriginalFullName())) {
     funcScope->setDynamicInvoke();
   }
   if (m_params) {
@@ -402,7 +371,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       }
     }
   }
-  FunctionScope::RecordFunctionInfo(m_name, funcScope);
+  FunctionScope::RecordFunctionInfo(m_originalName, funcScope);
 }
 
 void MethodStatement::fixupSelfAndParentTypehints(ClassScopePtr scope) {
@@ -417,50 +386,51 @@ void MethodStatement::fixupSelfAndParentTypehints(ClassScopePtr scope) {
 
 void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
                                        ClassScopePtr classScope) {
-  if (m_name.size() < 2 || m_name.substr(0,2) != "__") {
+  if (m_originalName.size() < 2 || m_originalName.substr(0,2) != "__") {
     return;
   }
+  auto name = toLower(m_originalName);
   int numArgs = -1;
   bool isStatic = false;
-  if (m_name == "__construct") {
+  if (name == "__construct") {
     classScope->setAttribute(ClassScope::HasConstructor);
-  } else if (m_name == "__destruct") {
+  } else if (name == "__destruct") {
     classScope->setAttribute(ClassScope::HasDestructor);
     if (m_params && m_params->getCount()) {
       parseTimeFatal(fileScope,
                      Compiler::InvalidMagicMethod,
-                     "Method %s::%s() cannot take any arguments",
-                     m_originalClassName.c_str(), m_originalName.c_str());
+                     "Method %s cannot take any arguments",
+                     getOriginalFullName().c_str());
     }
-  } else if (m_name == "__get") {
+  } else if (name == "__get") {
     classScope->setAttribute(ClassScope::HasUnknownPropGetter);
     numArgs = 1;
-  } else if (m_name == "__set") {
+  } else if (name == "__set") {
     classScope->setAttribute(ClassScope::HasUnknownPropSetter);
     numArgs = 2;
-  } else if (m_name == "__isset") {
+  } else if (name == "__isset") {
     classScope->setAttribute(ClassScope::HasUnknownPropTester);
     numArgs = 1;
-  } else if (m_name == "__unset") {
+  } else if (name == "__unset") {
     classScope->setAttribute(ClassScope::HasPropUnsetter);
     numArgs = 1;
-  } else if (m_name == "__call") {
+  } else if (name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
     numArgs = 2;
-  } else if (m_name == "__callstatic") {
+  } else if (name == "__callstatic") {
     classScope->setAttribute(ClassScope::HasUnknownStaticMethodHandler);
     numArgs = 2;
     isStatic = true;
-  } else if (m_name == "__invoke") {
+  } else if (name == "__invoke") {
     classScope->setAttribute(ClassScope::HasInvokeMethod);
-  } else if (m_name == "__tostring") {
+  } else if (name == "__tostring") {
     numArgs = 0;
-  } else if (m_name == "__clone") {
+  } else if (name == "__clone") {
     if (m_params && m_params->getCount()) {
       parseTimeFatal(fileScope,
                      Compiler::InvalidMagicMethod,
-                     "Method %s::%s() cannot accept any arguments",
-                     m_originalClassName.c_str(), m_originalName.c_str());
+                     "Method %s cannot accept any arguments",
+                     getOriginalFullName().c_str());
     }
   }
   if (numArgs >= 0) {
@@ -469,23 +439,23 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
     if (numArgs != n) {
       parseTimeFatal(fileScope,
                      Compiler::InvalidMagicMethod,
-                     "Method %s::%s() must take exactly %d argument%s",
-                     m_originalClassName.c_str(), m_originalName.c_str(),
+                     "Method %s() must take exactly %d argument%s",
+                     getOriginalFullName().c_str(),
                      numArgs, (numArgs == 1) ? "" : "s");
     }
     // Fatal if any arguments are pass by reference
     if (m_params && hasRefParam()) {
       parseTimeFatal(fileScope,
                      Compiler::InvalidMagicMethod,
-                     "Method %s::%s() cannot take arguments by reference",
-                     m_originalClassName.c_str(), m_originalName.c_str());
+                     "Method %s() cannot take arguments by reference",
+                     getOriginalFullName().c_str());
     }
     // Fatal if any arguments are variadic
     if (m_params && getFunctionScope()->hasVariadicParam()) {
       parseTimeFatal(fileScope,
                      Compiler::InvalidMagicMethod,
-                     "Method %s::%s() cannot take a variadic argument",
-                     m_originalClassName.c_str(), m_originalName.c_str());
+                     "Method %s() cannot take a variadic argument",
+                     getOriginalFullName().c_str());
     }
     // Fatal if protected/private or if the staticness is wrong
     if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
@@ -493,8 +463,8 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
       parseTimeFatal(
         fileScope,
         Compiler::InvalidMagicMethod,
-        "Method %s::%s() must have public visibility and %sbe static",
-        m_originalClassName.c_str(), m_originalName.c_str(),
+        "Method %s() must have public visibility and %sbe static",
+        getOriginalFullName().c_str(),
         isStatic ? "" : "cannot ");
     }
   }
@@ -506,7 +476,7 @@ void MethodStatement::addTraitMethodToScope(AnalysisResultConstPtr ar,
   FileScopeRawPtr fileScope = getFileScope();
   classScope->addFunction(ar, fileScope, funcScope);
   setSpecialMethod(fileScope, classScope);
-  FunctionScope::RecordFunctionInfo(m_name, funcScope);
+  FunctionScope::RecordFunctionInfo(m_originalName, funcScope);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -528,7 +498,8 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    if (Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
+    if (Option::AllDynamic ||
+        Option::IsDynamicFunction(m_method, m_originalName)) {
       funcScope->setDynamic();
     }
   }
@@ -573,7 +544,7 @@ void MethodStatement::setNthKid(int n, ConstructPtr cp) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void MethodStatement::outputCodeModel(CodeGenerator &cg) {
-  auto isAnonymous = ParserBase::IsClosureName(m_name);
+  auto isAnonymous = ParserBase::IsClosureName(m_originalName);
   auto numProps = 4;
   if (m_attrList != nullptr) numProps++;
   if (m_ref) numProps++;
@@ -633,7 +604,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_modifiers->outputPHP(cg, ar);
   cg_printf("function ");
   if (m_ref) cg_printf("&");
-  if (!ParserBase::IsClosureName(m_name)) {
+  if (!ParserBase::IsClosureName(m_originalName)) {
     cg_printf("%s", m_originalName.c_str());
   }
   cg_printf("(");
@@ -663,7 +634,7 @@ void MethodStatement::checkParameters(FileScopeRawPtr scope) {
   if (!m_params) {
     return;
   }
-  bool isCtor = m_name == "__construct";
+  bool isCtor = isNamed("__construct");
   for (int i = 0; i < m_params->getCount(); i++) {
     auto param =
       dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);

@@ -27,7 +27,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -38,6 +38,19 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class MySQLUtil {
+public:
+  enum TimeoutType {
+    ConnectTimeout,
+    ReadTimeout,
+    WriteTimeout
+  };
+
+  static int set_mysql_timeout(MYSQL *mysql,
+                               MySQLUtil::TimeoutType type,
+                               int ms);
+};
 
 enum class MySQLState : int8_t {
   CLOSED = 0,
@@ -246,7 +259,7 @@ struct MySQLRequestData final : RequestEventHandler {
     totalRowCount = 0;
   }
 
-  SmartPtr<MySQLResource> defaultConn;
+  req::ptr<MySQLResource> defaultConn;
   int readTimeout;
   int totalRowCount; // from all queries in current request
 
@@ -344,9 +357,9 @@ protected:
   MYSQL_RES *m_res;
   MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
-  smart::vector<MySQLFieldInfo> m_fields;
-  folly::Optional<smart::list<smart::vector<Variant>>> m_rows;
-  smart::list<smart::vector<Variant>>::const_iterator m_current_row;
+  req::vector<MySQLFieldInfo> m_fields;
+  folly::Optional<req::list<req::vector<Variant>>> m_rows;
+  req::list<req::vector<Variant>>::const_iterator m_current_row;
   int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow
   int64_t m_row_count;
@@ -367,7 +380,7 @@ struct MySQLStmtVariables {
 
 private:
   Array                   m_arr;
-  smart::vector<Variant>  m_value_arr;
+  req::vector<Variant>   m_value_arr;
   MYSQL_BIND             *m_vars;
   my_bool                *m_null;
   unsigned long          *m_length;
@@ -415,15 +428,15 @@ struct MySQLStmt : public SweepableResourceData {
 protected:
   MYSQL_STMT *m_stmt;
   bool m_prepared;
-  smart::unique_ptr<MySQLStmtVariables> m_param_vars;
-  smart::unique_ptr<MySQLStmtVariables> m_result_vars;
+  req::unique_ptr<MySQLStmtVariables> m_param_vars;
+  req::unique_ptr<MySQLStmtVariables> m_result_vars;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-SmartPtr<MySQLResult> php_mysql_extract_result(const Resource& result);
-SmartPtr<MySQLResult> php_mysql_extract_result(const Variant& result);
+req::ptr<MySQLResult> php_mysql_extract_result(const Resource& result);
+req::ptr<MySQLResult> php_mysql_extract_result(const Variant& result);
 
 
 enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };

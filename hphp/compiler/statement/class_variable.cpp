@@ -25,6 +25,8 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/option.h"
 
+#include "hphp/runtime/base/comparisons.h"
+
 using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,10 +65,15 @@ static bool isEquivRedecl(const std::string &name,
       symbol->isStatic()    != modif->isStatic())
     return false;
 
-  ExpressionPtr symDeclExp =
+  auto symDeclExp =
     dynamic_pointer_cast<Expression>(symbol->getDeclaration());
   if (!exp) return !symDeclExp;
-  return exp->equals(symDeclExp);
+  Variant v1, v2;
+  auto s1 = exp->getScalarValue(v1);
+  auto s2 = symDeclExp->getScalarValue(v2);
+  if (s1 != s2) return false;
+  if (s1) return same(v1, v2);
+  return exp->getText() == symDeclExp->getText();
 }
 
 void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
@@ -135,7 +142,7 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
                             "Cannot redeclare %s::$%s",
                             scope->getOriginalName().c_str(), name.c_str());
       } else {
-        variables->add(name, Type::Null, false, ar, exp, m_modifiers);
+        variables->add(name, false, ar, exp, m_modifiers);
       }
     }
   }
@@ -209,7 +216,7 @@ void ClassVariable::addTraitPropsToScope(AnalysisResultPtr ar,
       m_declaration->removeElement(i--);
     } else {
       if (prevScope != scope) { // Property is new or override, so add it
-        variables->add(name, Type::Variant, false, ar, exp, m_modifiers);
+        variables->add(name, false, ar, exp, m_modifiers);
         variables->getSymbol(name)->setValue(exp);
         variables->setClassInitVal(name, value);
         variables->markOverride(ar, name);

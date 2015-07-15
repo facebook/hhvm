@@ -2,7 +2,7 @@
 #define incl_HPHP_EXT_COLLECTIONS_SET_H
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP { namespace collections {
@@ -68,7 +68,7 @@ struct SetIterator {
   }
 
  private:
-  SmartPtr<BaseSet> m_obj;
+  req::ptr<BaseSet> m_obj;
   uint32_t m_pos{0};
   int32_t  m_version{0};
 };

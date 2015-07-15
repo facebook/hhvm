@@ -144,6 +144,7 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 inline void ArrayData::release() noexcept {
   assert(isArrayKind(m_hdr.kind));
+  assert(hasExactlyOneRef());
   return g_array_funcs.release[kind()](this);
 }
 
@@ -320,8 +321,10 @@ inline ArrayData* ArrayData::copyWithStrongIterators() const {
   return g_array_funcs.copyWithStrongIterators[kind()](this);
 }
 
-inline ArrayData* ArrayData::nonSmartCopy() const {
-  return g_array_funcs.nonSmartCopy[kind()](this);
+inline ArrayData* ArrayData::copyStatic() const {
+  auto ret = g_array_funcs.copyStatic[kind()](this);
+  assert(ret != this && ret->hasExactlyOneRef());
+  return ret;
 }
 
 inline ArrayData* ArrayData::pop(Variant& value) {

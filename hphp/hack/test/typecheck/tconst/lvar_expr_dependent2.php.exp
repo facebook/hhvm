@@ -1,0 +1,17 @@
+[<expr#1>::T][\C::T]Tnum
+[<expr#2>::T][\C::T]Tnum
+[<expr#1>::T][\C::T]Tnum
+[<expr#2>::T][\C::T]Tnum
+[1]intersect([<expr#3>::T][\C::T]Tnum)
+[2]intersect([<expr#3>::T][\C::T]Tnum)
+[3]intersect([<expr#4>::T][\C::T]Tnum)
+[4]intersect([<expr#5>::T][\C::T]Tnum)
+[5]intersect([<expr#5>::T][\C::T]Tnum)
+[<expr#6>::T][\C::T]Tnum
+[6]intersect([<expr#5>::T][\C::T]Tnum)
+[<expr#7>::T][\C::T]Tnum
+[<expr#7>::T][\C::T]Tnum
+[<expr#8>::T][\C::T]Tnum
+[<expr#8>::T][\C::T]Tnum
+[7]intersect([<expr#9>::T][\C::T]Tnum)
+No errors

@@ -19,7 +19,6 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/compiler/option.h"

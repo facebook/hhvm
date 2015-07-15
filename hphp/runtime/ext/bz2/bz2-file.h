@@ -35,7 +35,7 @@ public:
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   BZ2File();
-  explicit BZ2File(SmartPtr<PlainFile>&& innerFile);
+  explicit BZ2File(req::ptr<PlainFile>&& innerFile);
   virtual ~BZ2File();
 
   bool open(const String& filename, const String& mode) override;
@@ -50,7 +50,7 @@ public:
 
 private:
   BZFILE * m_bzFile;
-  SmartPtr<PlainFile> m_innerFile;
+  req::ptr<PlainFile> m_innerFile;
   bool closeImpl();
 };
 

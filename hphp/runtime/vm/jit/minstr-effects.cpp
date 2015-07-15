@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 
-#include "hphp/runtime/vm/jit/local-effects.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 
 namespace HPHP { namespace jit {
@@ -100,36 +99,6 @@ bool MInstrEffects::supported(Opcode op) {
 }
 bool MInstrEffects::supported(const IRInstruction* inst) {
   return supported(inst->op());
-}
-
-void MInstrEffects::get(const IRInstruction* inst,
-                        const FrameStateMgr& frame,
-                        LocalStateHook& hook) {
-  // If the base for this instruction is a local address, the helper call might
-  // have side effects on the local's value
-  auto const base = inst->src(minstrBaseIdx(inst->op()));
-  auto const locInstr = base->inst();
-
-  // Right now we require that the address of any affected local is the
-  // immediate source of the base tmp.  This isn't actually specified in the ir
-  // spec right now but will intend to make it more general soon.  There is an
-  // analagous problem in frame-state.cpp for LdStkAddr.
-  if (locInstr->op() != LdLocAddr) return;
-
-  auto const locId = locInstr->extra<LdLocAddr>()->locId;
-  auto const baseType = frame.localType(locId);
-
-  MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
-  if (effects.baseTypeChanged || effects.baseValChanged) {
-    auto const ty = effects.baseType.derefIfPtr();
-    if (ty <= TBoxedCell) {
-      hook.setLocalType(locId, TBoxedInitCell);
-      hook.setBoxedLocalPrediction(locId, ty);
-    } else {
-      hook.setLocalType(locId, ty);
-    }
-  }
-
 }
 
 MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {

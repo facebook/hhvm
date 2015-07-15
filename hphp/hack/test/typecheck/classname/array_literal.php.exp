@@ -1,0 +1,3 @@
+array<[1]intersect(Tstring)>
+array<[2]intersect(Tstring), [3]intersect(array<[4]intersect(Tstring), [5]intersect(Tclassname<\C1>)>, Tclassname<\C2>)>
+No errors

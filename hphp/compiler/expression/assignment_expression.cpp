@@ -73,35 +73,30 @@ ExpressionPtr AssignmentExpression::clone() {
 void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
                                         FileScopeRawPtr fs,
                                         ClassScopePtr scope) {
-  // This is that much we can do during parse phase.
-  TypePtr type;
-  if (m_value->is(Expression::KindOfScalarExpression)) {
-    type = static_pointer_cast<ScalarExpression>(m_value)->inferenceImpl(
-      ar, Type::Some, false);
-  } else if (m_value->is(Expression::KindOfUnaryOpExpression)) {
+  auto isArray = false;
+  if (m_value->is(Expression::KindOfUnaryOpExpression)) {
     UnaryOpExpressionPtr uexp =
       dynamic_pointer_cast<UnaryOpExpression>(m_value);
     if (uexp->getOp() == T_ARRAY) {
-      type = Type::Array;
+      isArray = true;
     }
   }
-  if (!type) type = Type::Some;
 
   if (m_variable->is(Expression::KindOfConstantExpression)) {
     // ...as in ClassConstant statement
     // We are handling this one here, not in ClassConstant, purely because
     // we need "value" to store in constant table.
-    if (type->is(Type::KindOfArray)) {
+    if (isArray) {
       parseTimeFatal(fs,
                      Compiler::NoError,
                      "Arrays are not allowed in class constants");
     }
     ConstantExpressionPtr exp =
       dynamic_pointer_cast<ConstantExpression>(m_variable);
-    scope->getConstants()->add(exp->getName(), type, m_value, ar, m_variable);
+    scope->getConstants()->add(exp->getName(), m_value, ar, m_variable);
   } else if (m_variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-    scope->getVariables()->add(var->getName(), type, true, ar,
+    scope->getVariables()->add(var->getName(), true, ar,
                                shared_from_this(), scope->getModifiers());
     var->clearContext(Declaration); // to avoid wrong CodeError
   } else {
@@ -132,7 +127,7 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
       ConstantExpressionPtr exp =
         dynamic_pointer_cast<ConstantExpression>(m_variable);
       if (!m_value->isScalar()) {
-        getScope()->getConstants()->setDynamic(ar, exp->getName(), false);
+        getScope()->getConstants()->setDynamic(ar, exp->getName());
       }
     } else {
       CheckNeeded(m_variable, m_value);
@@ -207,12 +202,6 @@ ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (Option::EliminateDeadCode &&
-      ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
-    // otherwise used & needed flags may not be up to date yet
-    ExpressionPtr rep = optimize(ar);
-    if (rep) return rep;
-  }
   if (m_variable->getContainedEffects() & ~(CreateEffect|AccessorEffect)) {
     return ExpressionPtr();
   }
@@ -238,53 +227,6 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
       m_value = val->clone();
       rep->addElement(static_pointer_cast<Expression>(shared_from_this()));
       return replaceValue(rep);
-    }
-    if (!m_ref && m_variable->is(KindOfArrayElementExpression)) {
-      ArrayElementExpressionPtr ae(
-        static_pointer_cast<ArrayElementExpression>(m_variable));
-      ExpressionPtr avar(ae->getVariable());
-      ExpressionPtr aoff(ae->getOffset());
-      if (!aoff || aoff->isScalar()) {
-        avar = avar->getCanonLVal();
-        while (avar) {
-          if (avar->isScalar()) {
-            Variant v,o,r;
-            if (!avar->getScalarValue(v)) break;
-            if (!val->getScalarValue(r)) break;
-            try {
-              g_context->setThrowAllErrors(true);
-              if (aoff) {
-                if (!aoff->getScalarValue(o)) break;
-                if (!v.isArray()) break;
-                v.toArrRef().set(o, r);
-              } else {
-                if (!v.isArray()) break;
-                v.toArrRef().append(r);
-              }
-              g_context->setThrowAllErrors(false);
-            } catch (...) {
-              break;
-            }
-            ExpressionPtr rep(
-              new AssignmentExpression(
-                getScope(), getRange(),
-                m_variable->replaceValue(Clone(ae->getVariable())),
-                makeScalarExpression(ar, v), false));
-            if (!isUnused()) {
-              ExpressionListPtr el(
-                new ExpressionList(
-                  getScope(), getRange(),
-                  ExpressionList::ListKindWrapped));
-              el->addElement(rep);
-              el->addElement(val);
-              rep = el;
-            }
-            return replaceValue(rep);
-          }
-          avar = avar->getCanonPtr();
-        }
-        g_context->setThrowAllErrors(false);
-      }
     }
   }
   return ExpressionPtr();

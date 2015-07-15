@@ -258,8 +258,8 @@ public:
   Variant getExitCallback();
   void setExitCallback(Variant);
 
-  void setStreamContext(const SmartPtr<StreamContext>&);
-  const SmartPtr<StreamContext>& getStreamContext();
+  void setStreamContext(const req::ptr<StreamContext>&);
+  const req::ptr<StreamContext>& getStreamContext();
 
   int getPageletTasksStarted() const;
   void incrPageletTasksStarted();
@@ -471,14 +471,6 @@ public:
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
-  template<typename T>
-  using SmartStringIMap = smart::hash_map<
-    String,
-    T,
-    hphp_string_hash,
-    hphp_string_isame
-  >;
-
 public:
   template<class F> void scan(F& mark) {
     //mark(m_transport);
@@ -545,7 +537,7 @@ private:
   StringBuffer* m_sb = nullptr; // current buffer being populated with data
   OutputBuffer* m_out = nullptr; // current OutputBuffer
   int m_remember_chunk = 0; // in case the output buffer is swapped
-  smart::list<OutputBuffer> m_buffers; // a stack of output buffers
+  req::list<OutputBuffer> m_buffers; // a stack of output buffers
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
@@ -555,12 +547,12 @@ private:
   String m_rawPostData;
 
   // request handlers
-  smart::vector<RequestEventHandler*> m_requestEventHandlers;
+  req::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
 
   // error handling
-  smart::vector<std::pair<Variant,int>> m_userErrorHandlers;
-  smart::vector<Variant> m_userExceptionHandlers;
+  req::vector<std::pair<Variant,int>> m_userErrorHandlers;
+  req::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
   String m_lastError;
   int m_lastErrorNum;
@@ -571,19 +563,19 @@ private:
   String m_timezone;
   String m_timezoneDefault;
   bool m_throwAllErrors;
-  SmartPtr<StreamContext> m_streamContext;
+  req::ptr<StreamContext> m_streamContext;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;
-  smart::vector<std::pair<Variant,int>> m_userErrorHandlersBackup;
-  smart::vector<Variant> m_userExceptionHandlersBackup;
+  req::vector<std::pair<Variant,int>> m_userErrorHandlersBackup;
+  req::vector<Variant> m_userExceptionHandlersBackup;
   Variant m_exitCallback;
   String m_sandboxId; // cache the sandbox id for the request
   int m_pageletTasksStarted;
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;
-  smart::set<ObjectData*> m_liveBCObjs;
+  req::set<ObjectData*> m_liveBCObjs;
 private:
   size_t m_apcMemSize{0};
   std::vector<APCHandle*> m_apcHandles; // gets moved to treadmill
@@ -591,13 +583,13 @@ public:
   // Although the error handlers may want to access dynamic properties,
   // we cannot *call* the error handlers (or their destructors) while
   // destroying the context, so C++ order of destruction is not an issue.
-  smart::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+  req::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
   VarEnv* m_globalVarEnv;
-  smart::hash_map<const StringData*,Unit*,string_data_hash,string_data_same>
+  req::hash_map<const StringData*,Unit*,string_data_hash,string_data_same>
     m_evaledFiles;
-  smart::vector<const StringData*> m_evaledFilesOrder;
-  smart::vector<Unit*> m_createdFuncs;
-  smart::vector<Fault> m_faults;
+  req::vector<const StringData*> m_evaledFilesOrder;
+  req::vector<Unit*> m_createdFuncs;
+  req::vector<Fault> m_faults;
   int m_lambdaCounter;
   TinyVector<VMState, 32> m_nestedVMs;
   int m_nesting;
@@ -610,7 +602,7 @@ private:
 public:
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
-  smart::vector<vixl::Simulator*> m_activeSims;
+  req::vector<vixl::Simulator*> m_activeSims;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

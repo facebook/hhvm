@@ -227,10 +227,10 @@ Extension Compatibility Layer to support most PHP extensions:
      Z_STRLEN_P(zval), and Z_TYPE_P(zval) in no particular order, sometimes
      performing other operations in between.
 
- (2) PHP extensions assume that Z_STRVAL_P(zval) returns a smart-malloc'd
+ (2) PHP extensions assume that Z_STRVAL_P(zval) returns a req::malloc'd
      buffer of characters that can be passed to efree() or detached from the
      zval (provided the PHP extension owns the only reference to the zval),
-     and it assumes that smart-malloc'd buffers of characters can be assigned
+     and it assumes that req::malloc'd buffers of characters can be assigned
      to Z_STRVAL_P(zval).
 
  (3) PHP extensions assign to Z_LVAL_P(zval) and Z_TYPE_P(zval) in no

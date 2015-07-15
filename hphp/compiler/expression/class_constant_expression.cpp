@@ -38,28 +38,32 @@ ClassConstantExpression::ClassConstantExpression
  ExpressionPtr classExp, const std::string &varName)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ClassConstantExpression)),
-    StaticClassName(classExp), m_varName(varName), m_defScope(nullptr),
-    m_valid(false), m_depsSet(false) {
+    StaticClassName(classExp), m_varName(varName), m_depsSet(false),
+    m_originalScopeSet(false) {
 }
 
 ExpressionPtr ClassConstantExpression::clone() {
-  ClassConstantExpressionPtr exp(new ClassConstantExpression(*this));
+  auto exp = std::make_shared<ClassConstantExpression>(*this);
   Expression::deepCopy(exp);
   exp->m_class = Clone(m_class);
   exp->m_depsSet = false;
+  exp->m_originalScopeSet = true;
+  exp->m_originalScope = m_originalScope ? m_originalScope : getScope();
   return exp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
+
+ClassScopeRawPtr ClassConstantExpression::getOriginalClassScope() const {
+  auto scope = m_originalScopeSet ? m_originalScope : getScope();
+  return scope ? scope->getContainingClass() : ClassScopeRawPtr();
+}
 
 bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
   const {
   if (m_class) return true;
-  ClassScopePtr cls = ar->findClass(m_className);
+  ClassScopePtr cls = ar->findClass(m_origClassName);
   return !cls || cls->isVolatile() ||
     !cls->getConstants()->isRecursivelyDeclared(ar, m_varName);
 }
@@ -73,12 +77,6 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
         getValueRecur(ar, m_varName, cls);
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
       m_depsSet = true;
-      if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-        if (!isPresent()) {
-          getScope()->getVariables()->
-            setAttribute(VariableTable::NeedGlobalPointer);
-        }
-      }
     }
   }
 }
@@ -158,19 +156,6 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-unsigned ClassConstantExpression::getCanonHash() const {
-  int64_t val =
-    hash_string_i_unsafe(m_varName.c_str(), m_varName.size()) -
-    hash_string_i_unsafe(m_className.c_str(), m_className.size());
-  return ~unsigned(val) ^ unsigned(val >> 32);
-}
-
-bool ClassConstantExpression::canonCompare(ExpressionPtr e) const {
-  return Expression::canonCompare(e) &&
-    m_varName == static_cast<ClassConstantExpression*>(e.get())->m_varName &&
-    m_className == static_cast<ClassConstantExpression*>(e.get())->m_className;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {
@@ -191,9 +176,4 @@ void ClassConstantExpression::outputPHP(CodeGenerator &cg,
   cg_printf("\\");
   StaticClassName::outputPHP(cg, ar);
   cg_printf("::%s", m_varName.c_str());
-}
-
-bool ClassConstantExpression::isDynamic() const {
-  if (!m_valid) return true;
-  return m_defScope->getConstants()->isDynamic(m_varName);
 }

@@ -110,18 +110,6 @@ ExpressionPtr UnaryOpExpression::clone() {
   return exp;
 }
 
-bool UnaryOpExpression::isTemporary() const {
-  switch (m_op) {
-  case '!':
-  case '+':
-  case '-':
-  case '~':
-  case T_ARRAY:
-    return true;
-  }
-  return false;
-}
-
 bool UnaryOpExpression::isScalar() const {
   switch (m_op) {
   case '!':
@@ -150,19 +138,6 @@ bool UnaryOpExpression::isCast() const {
   default: break;
   }
   return false;
-}
-
-TypePtr UnaryOpExpression::getCastType() const {
-  switch (m_op) {
-  case T_INT_CAST:    return Type::Int64;
-  case T_DOUBLE_CAST: return Type::Double;
-  case T_STRING_CAST: return Type::String;
-  case T_ARRAY_CAST:  return Type::Array;
-  case T_OBJECT_CAST: return Type::Object;
-  case T_BOOL_CAST:   return Type::Boolean;
-  default: break;
-  }
-  return TypePtr();
 }
 
 bool UnaryOpExpression::isRefable(bool checkError /*= false */) const {
@@ -301,15 +276,6 @@ void UnaryOpExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-bool UnaryOpExpression::canonCompare(ExpressionPtr e) const {
-  if (!Expression::canonCompare(e)) return false;
-  UnaryOpExpressionPtr u =
-    static_pointer_cast<UnaryOpExpression>(e);
-
-  return m_op == u->m_op &&
-    m_front == u->m_front;
 }
 
 ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {

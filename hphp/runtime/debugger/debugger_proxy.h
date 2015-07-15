@@ -69,7 +69,7 @@ struct DebuggerProxy : Synchronizable,
   static std::string MakePHP(const std::string &php);
   static std::string MakePHPReturn(const std::string &php);
 
-  DebuggerProxy(SmartPtr<Socket> socket, bool local);
+  DebuggerProxy(req::ptr<Socket> socket, bool local);
 
   bool isLocal() const { return m_local; }
 

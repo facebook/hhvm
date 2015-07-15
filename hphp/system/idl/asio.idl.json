@@ -6,74 +6,6 @@
     ],
     "classes": [
         {
-            "name": "HH\\AsyncGenerator",
-            "desc": "A generator that can be iterated asynchronously",
-            "flags": [
-                "IsFinal",
-                "NoDefaultSweep",
-                "CppCustomDelete"
-            ],
-            "ifaces": [
-                "HH\\AsyncKeyedIterator"
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "next",
-                    "desc": "Continue asynchronous iteration",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "send",
-                    "desc": "Continue asynchronous iteration with value",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                        {
-                            "name": "value",
-                            "type": "Variant",
-                            "desc": "A value to be received by yield expression"
-                        }
-                    ]
-                },
-                {
-                    "name": "raise",
-                    "desc": "Continue asynchronous iteration with raised exception",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                        {
-                            "name": "exception",
-                            "type": "Object",
-                            "desc": "An exception to be thrown by yield expression"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "HH\\WaitHandle",
             "desc": "A wait handle representing asynchronous operation",
             "flags": [
@@ -265,19 +197,6 @@
                     "return": {
                         "type": "String",
                         "desc": "A name of the operation behind this wait handle"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "getExceptionIfFailed",
-                    "desc": "Get exception if this wait handle has failed, or null",
-                    "flags": [
-                        "IsFinal"
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "An exception if this wait handle has failed, or null"
                     },
                     "args": [
                     ]

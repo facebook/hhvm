@@ -1,2 +1,0 @@
-File "unsupported_this4.php", line 6, characters 23-26:
-The type "this" can only be used as a return type, to instantiate a covariant type variable, or as a private non-static member variable (Naming[2043])

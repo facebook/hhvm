@@ -71,7 +71,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
   FunctionScopePtr fs = onInitialParse(ar, scope);
-  FunctionScope::RecordFunctionInfo(m_name, fs);
+  FunctionScope::RecordFunctionInfo(m_originalName, fs);
   if (!scope->addFunction(ar, fs)) {
     m_ignored = true;
     return;
@@ -79,7 +79,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 
   fs->setPersistent(false);
 
-  if (m_name == "__autoload") {
+  if (isNamed("__autoload")) {
     if (m_params && m_params->getCount() != 1) {
       parseTimeFatal(scope,
                      Compiler::InvalidMagicMethod,
@@ -125,19 +125,10 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 // static analysis functions
 
 std::string FunctionStatement::getName() const {
-  return string("Function ") + getScope()->getName();
+  return string("Function ") + getOriginalName();
 }
 
 void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
-  FunctionScopeRawPtr fs = getFunctionScope();
-  // redeclared functions are automatically volatile
-  if (fs->isVolatile()) {
-    FunctionScopeRawPtr func =
-      getScope()->getOuterScope()->getContainingFunction();
-    if (func) {
-      func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
-    }
-  }
   MethodStatement::analyzeProgram(ar);
 }
 
@@ -155,8 +146,8 @@ void FunctionStatement::outputPHPHeader(CodeGenerator &cg,
   m_modifiers->outputPHP(cg, ar);
   cg_printf("function ");
   if (m_ref) cg_printf("&");
-  if (!ParserBase::IsClosureName(m_name)) {
-    cg_printf("%s", m_name.c_str());
+  if (!ParserBase::IsClosureName(m_originalName)) {
+    cg_printf("%s", m_originalName.c_str());
   }
   cg_printf("(");
   if (m_params) m_params->outputPHP(cg, ar);

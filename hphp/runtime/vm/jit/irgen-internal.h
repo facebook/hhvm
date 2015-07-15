@@ -400,16 +400,12 @@ inline SSATmp* topR(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
 inline void spillStack(IRGS& env) {
   auto const toSpill = env.irb->evalStack();
   for (auto idx = toSpill.size(); idx-- > 0;) {
-    gen(env,
-        StStk,
-        IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{idx}) },
-        sp(env),
-        toSpill.top(idx));
-    gen(env,
-        PredictStk,
-        toSpill.topPredictedType(idx),
-        IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{idx}) },
-        sp(env));
+    auto const irSPOff = offsetFromIRSP(env, BCSPOffset{idx});
+    auto const tmp = toSpill.top(idx);
+
+    gen(env, StStk, IRSPOffsetData{irSPOff}, sp(env), tmp);
+    env.irb->fs().refineStackPredictedType(
+      irSPOff, env.irb->fs().predictedTmpType(tmp));
   }
   env.irb->syncEvalStack();
 }

@@ -16,12 +16,13 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_ARCH SOURCE_REL BUILD_TARGET)
   set(f_OBJ "${TARGET_ABS}/CMakeFiles/${BUILD_TARGET}.dir/${REL}")
   list(APPEND ${SOURCES} "${f_OBJ}.ext_hhvm.cpp")
   list(APPEND ${HEADERS} "${f_OBJ}.ext_hhvm.h")
+
+  file(MAKE_DIRECTORY "${TARGET_ABS}/CMakeFiles/${BUILD_TARGET}.dir")
   add_custom_command(
     OUTPUT "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
     DEPENDS ${f_SRC} gen-ext-hhvm
-    COMMAND "GEN_EXT_HHVM=${CMAKE_CURRENT_BINARY_DIR}/../../tools/bootstrap/gen-ext-hhvm"
-            "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/bootstrap/gen-ext-hhvm.sh"
-    ARGS ${EHHVM_ARCH} "${f_SRC}" "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
+    COMMAND gen-ext-hhvm
+    ARGS ${EHHVM_ARCH} "${f_OBJ}.ext_hhvm.h" "${f_OBJ}.ext_hhvm.cpp" "${f_SRC}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/bootstrap"
     COMMENT "Generating ext_hhvm wrapper for ${SOURCE_REL}/${REL}")
 endmacro()
@@ -73,7 +74,7 @@ endforeach()
 add_custom_command(
   OUTPUT ${INFOTABS_SOURCE}
   DEPENDS ${CXX_HEADERS} gen-infotabs
-  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/../../tools/bootstrap/gen-infotabs"
+  COMMAND gen-infotabs
   ARGS ${INFOTABS_SOURCE} ${INFOTABS_HEADER} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
 

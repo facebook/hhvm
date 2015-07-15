@@ -29,8 +29,8 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/zend-collator.h"
-#include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -419,7 +419,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
       Variant &v = arr1.lvalAt(key, AccessFlags::Key);
-      Array subarr1(v.toArray()->copy());
+      auto subarr1 = v.toArray().copy();
       php_array_merge_recursive(seen, v.isReferenced(), subarr1,
                                 value.toArray());
       v.unset(); // avoid contamination of the value that was strongly bound
@@ -479,11 +479,11 @@ Variant HHVM_FUNCTION(array_map, const Variant& callback,
   // Handle the uncommon case where the caller passed a callback
   // and two or more containers
   ArrayIter* iters =
-    (ArrayIter*)smart_malloc(sizeof(ArrayIter) * (_argv.size() + 1));
+    (ArrayIter*)req::malloc(sizeof(ArrayIter) * (_argv.size() + 1));
   size_t numIters = 0;
   SCOPE_EXIT {
     while (numIters--) iters[numIters].~ArrayIter();
-    smart_free(iters);
+    req::free(iters);
   };
   size_t maxLen = getContainerSize(cell_arr1);
   (void) new (&iters[numIters]) ArrayIter(cell_arr1);
@@ -1318,7 +1318,7 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, NonArrayRet nonArray,
   if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
-    cellSet(make_tv<KindOfArray>(ad), cell);
+    cellMove(make_tv<KindOfArray>(ad), cell);
   }
   return (ad->*op)();
 }
@@ -1546,7 +1546,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // diff functions
 
-static inline void addToSetHelper(const SmartPtr<c_Set>& st,
+static inline void addToSetHelper(const req::ptr<c_Set>& st,
                                   const Cell c,
                                   TypedValue* strTv,
                                   bool convertIntLikeStrs) {
@@ -1570,7 +1570,7 @@ static inline void addToSetHelper(const SmartPtr<c_Set>& st,
   }
 }
 
-static inline bool checkSetHelper(const SmartPtr<c_Set>& st,
+static inline bool checkSetHelper(const req::ptr<c_Set>& st,
                                   const Cell c,
                                   TypedValue* strTv,
                                   bool convertIntLikeStrs) {
@@ -1592,7 +1592,7 @@ static inline bool checkSetHelper(const SmartPtr<c_Set>& st,
   return st->contains(s);
 }
 
-static void containerValuesToSetHelper(const SmartPtr<c_Set>& st,
+static void containerValuesToSetHelper(const req::ptr<c_Set>& st,
                                        const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
@@ -1602,7 +1602,7 @@ static void containerValuesToSetHelper(const SmartPtr<c_Set>& st,
   }
 }
 
-static void containerKeysToSetHelper(const SmartPtr<c_Set>& st,
+static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
                                      const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
@@ -1661,7 +1661,7 @@ Variant HHVM_FUNCTION(array_diff,
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(largestSize);
   containerValuesToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1711,7 +1711,7 @@ Variant HHVM_FUNCTION(array_diff_key,
   // Put all of the keys from all the containers (except container1) into a
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(largestSize);
   containerKeysToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1834,7 +1834,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   assert(smallestPos < count);
   // Allocate a TypedValue array and copy 'a' and the contents of 'argv'
   TypedValue* containers =
-    (TypedValue*)smart_malloc(count * sizeof(TypedValue));
+    (TypedValue*)req::malloc(count * sizeof(TypedValue));
   tvCopy(*a.asCell(), containers[0]);
   int pos = 1;
   for (ArrayIter argvIter(argv); argvIter; ++argvIter, ++pos) {
@@ -1853,7 +1853,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   return containers;
 }
 
-static inline void addToIntersectMapHelper(const SmartPtr<c_Map>& mp,
+static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
                                            const Cell c,
                                            TypedValue* intOneTv,
                                            TypedValue* strTv,
@@ -1878,7 +1878,7 @@ static inline void addToIntersectMapHelper(const SmartPtr<c_Map>& mp,
   }
 }
 
-static inline void updateIntersectMapHelper(const SmartPtr<c_Map>& mp,
+static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
                                             const Cell c,
                                             int pos,
                                             TypedValue* strTv,
@@ -1915,11 +1915,11 @@ static inline void updateIntersectMapHelper(const SmartPtr<c_Map>& mp,
   }
 }
 
-static void containerValuesIntersectHelper(const SmartPtr<c_Set>& st,
+static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
                                            TypedValue* containers,
                                            int count) {
   assert(count >= 2);
-  auto mp = makeSmartPtr<c_Map>();
+  auto mp = req::make<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1954,11 +1954,11 @@ static void containerValuesIntersectHelper(const SmartPtr<c_Set>& st,
   }
 }
 
-static void containerKeysIntersectHelper(const SmartPtr<c_Set>& st,
+static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
                                          TypedValue* containers,
                                          int count) {
   assert(count >= 2);
-  auto mp = makeSmartPtr<c_Map>();
+  auto mp = req::make<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -2036,7 +2036,7 @@ Variant HHVM_FUNCTION(array_intersect,
   ARRAY_INTERSECT_PRELUDE()
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can
     // just call containerValuesToSetHelper() to build the Set.
@@ -2047,7 +2047,7 @@ Variant HHVM_FUNCTION(array_intersect,
     int count = args.size() + 1;
     TypedValue* containers =
       makeContainerListHelper(container2, args, count, smallestPos);
-    SCOPE_EXIT { smart_free(containers); };
+    SCOPE_EXIT { req::free(containers); };
     // Build a Set of the values that were present in all of the containers
     containerValuesIntersectHelper(st, containers, count);
   }
@@ -2091,7 +2091,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
   }
   // Build up a Set containing the keys that are present in all the containers
   // (except container1)
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can just
     // call containerKeysToSetHelper() to build the Set.
@@ -2102,7 +2102,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
     int count = args.size() + 1;
     TypedValue* containers =
       makeContainerListHelper(container2, args, count, smallestPos);
-    SCOPE_EXIT { smart_free(containers); };
+    SCOPE_EXIT { req::free(containers); };
     // Build a Set of the keys that were present in all of the containers
     containerKeysIntersectHelper(st, containers, count);
   }
@@ -2312,11 +2312,11 @@ class ArraySortTmp {
  public:
   explicit ArraySortTmp(Array& arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr.get()->escalateForSort(sf);
-    assert(m_ad == arr.get() || m_ad->getCount() == 0);
+    assert(m_ad == arr.get() || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
     if (m_ad != m_arr.get()) {
-      m_arr = m_ad;
+      m_arr = Array::attach(m_ad);
     }
   }
   ArrayData* operator->() { return m_ad; }

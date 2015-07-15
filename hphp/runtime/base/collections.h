@@ -199,7 +199,7 @@ COLLECTIONS_ALL_TYPES(X)
 
 inline folly::Optional<CollectionType> stringToType(const std::string& s) {
   return stringToType(
-    SmartPtr<StringData>::attach(StringData::Make(s)).get()
+    req::ptr<StringData>::attach(StringData::Make(s)).get()
   );
 }
 

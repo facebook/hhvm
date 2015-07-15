@@ -1,4 +1,4 @@
-Fatal error: Uncaught exception 'RuntimeException' with message 'SplFileObject::__construct(missing): failed to open stream: No such file or directory' in :
+Fatal error: Uncaught exception 'RuntimeException' with message 'SplFileObject::__construct(missing): failed to open stream: No such file or directory' in %s/test/slow/ext_spl_file/SplFileObject_construct_no_such_file.php:2
 Stack trace:
 #0 %s: SplFileObject->__construct()
 #1 {main}

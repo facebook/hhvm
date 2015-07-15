@@ -17,7 +17,7 @@
 
 #include <hphp/runtime/ext/asio/ext_gen-map-wait-handle.h>
 
-#include <hphp/runtime/ext/ext_collections.h>
+#include <hphp/runtime/ext/collections/ext_collections-idl.h>
 #include <hphp/runtime/ext/ext_closure.h>
 #include <hphp/runtime/ext/asio/asio-blockable.h>
 #include <hphp/runtime/ext/asio/asio-context.h>
@@ -54,7 +54,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
       "Expected dependencies to be an instance of Map");
   }
   assertx(obj->collectionType() == CollectionType::Map);
-  auto deps = SmartPtr<c_Map>::attach(c_Map::Clone(obj));
+  auto deps = req::ptr<c_Map>::attach(c_Map::Clone(obj));
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (ssize_t iter_pos = deps->iter_begin();
        deps->iter_valid(iter_pos);
@@ -95,7 +95,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      auto my_wh = makeSmartPtr<c_GenMapWaitHandle>();
+      auto my_wh = req::make<c_GenMapWaitHandle>();
       my_wh->initialize(exception, deps.get(), iter_pos, ctx_idx, child_wh);
 
       AsioSession* session = AsioSession::Get();

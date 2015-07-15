@@ -41,10 +41,10 @@ static const StaticString
 
 static class PharStreamWrapper : public Stream::Wrapper {
  public:
-  virtual SmartPtr<File> open(const String& filename,
+  virtual req::ptr<File> open(const String& filename,
                               const String& mode,
                               int options,
-                              const SmartPtr<StreamContext>& context) {
+                              const req::ptr<StreamContext>& context) {
     static const char cz[] = "phar://";
     if (strncmp(filename.data(), cz, sizeof(cz) - 1)) {
       return nullptr;
@@ -62,7 +62,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     );
     String contents = ret.toString();
 
-    return makeSmartPtr<MemFile>(contents.data(), contents.size());
+    return req::make<MemFile>(contents.data(), contents.size());
   }
 
   virtual int access(const String& path, int mode) {
@@ -93,7 +93,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     return stat(path, buf);
   }
 
-  virtual SmartPtr<Directory> opendir(const String& path) {
+  virtual req::ptr<Directory> opendir(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
     Variant ret;
     g_context->invokeFunc(
@@ -108,7 +108,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
       raise_warning("No such file or directory");
       return nullptr;
     }
-    return makeSmartPtr<ArrayDirectory>(files);
+    return req::make<ArrayDirectory>(files);
   }
 
  private:

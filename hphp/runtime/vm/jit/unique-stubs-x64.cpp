@@ -247,6 +247,13 @@ void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
   uniqueStubs.add("throwSwitchMode", uniqueStubs.throwSwitchMode);
 }
 
+#ifndef USE_GCC_FAST_TLS
+void unwindResumeHelper() {
+  tl_regState = VMRegState::CLEAN;
+  _Unwind_Resume(unwindRdsInfo->exn);
+}
+#endif
+
 void emitCatchHelper(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.frozen() };
   moveToAlign(mcg->code.frozen());
@@ -267,12 +274,18 @@ void emitCatchHelper(UniqueStubs& uniqueStubs) {
   a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
 
 asm_label(a, resumeCppUnwind);
+#ifdef USE_GCC_FAST_TLS
   static_assert(sizeof(tl_regState) == 1,
                 "The following store must match the size of tl_regState");
   a.    fs().storeb(static_cast<int32_t>(VMRegState::CLEAN),
                     getTLSPtr(tl_regState).mr());
+#endif
   a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
+#ifdef USE_GCC_FAST_TLS
   a.    call(TCA(_Unwind_Resume));
+#else
+  a.    call(TCA(unwindResumeHelper));
+#endif
   uniqueStubs.endCatchHelperPast = a.frontier();
   a.    ud2();
 

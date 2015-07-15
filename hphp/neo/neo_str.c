@@ -11,13 +11,20 @@
 
 #include "cs_config.h"
 
-#include <unistd.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+
+#ifdef _MSC_VER
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <onigposix.h>
+
 #include "neo_bool.h"
 #include "neo_misc.h"
 #include "neo_err.h"

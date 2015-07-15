@@ -681,7 +681,7 @@ Variant HHVM_METHOD(XMLReader, __get,
 Variant HHVM_METHOD(XMLReader, expand,
                     const Variant& basenode /* = null */) {
   auto* data = Native::data<XMLReader>(this_);
-  SmartPtr<XMLDocumentData> doc;
+  req::ptr<XMLDocumentData> doc;
   xmlDocPtr docp = nullptr;
   SYNC_VM_REGS_SCOPED();
 

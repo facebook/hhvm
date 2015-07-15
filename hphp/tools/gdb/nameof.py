@@ -5,6 +5,8 @@ GDB command for printing the names of various objects.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from gdbutils import *
 
@@ -41,6 +43,7 @@ class NameOfCommand(gdb.Command):
     def __init__(self):
         super(NameOfCommand, self).__init__('nameof', gdb.COMMAND_DATA)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         try:
             obj = gdb.parse_and_eval(args)

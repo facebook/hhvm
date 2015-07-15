@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP {
 
@@ -43,7 +43,7 @@ TEST(Object, Casts) {
     EXPECT_FALSE(isa<c_Vector>(Object()));
     EXPECT_TRUE(isa_or_null<c_Vector>(Object()));
 
-    auto dummy = makeSmartPtr<c_Vector>();
+    auto dummy = req::make<c_Vector>();
     Object res(dummy);
     Object empty;
     EXPECT_TRUE(isa<c_Vector>(res));

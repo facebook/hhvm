@@ -34,7 +34,7 @@ const Object Object::s_nullObject = Object();
 ///////////////////////////////////////////////////////////////////////////////
 
 void Object::compileTimeAssertions() {
-  static_assert(sizeof(Object) == sizeof(SmartPtr<ObjectData>), "Fix this.");
+  static_assert(sizeof(Object) == sizeof(req::ptr<ObjectData>), "Fix this.");
 }
 
 void ObjNR::compileTimeAssertions() {
@@ -82,8 +82,8 @@ bool Object::equal(const Object& v2) const {
   }
   if (UNLIKELY(m_obj->instanceof(SystemLib::s_ArrayObjectClass))) {
     // Compare the whole object, not just the array representation
-    Array ar1(ArrayData::Create());
-    Array ar2(ArrayData::Create());
+    auto ar1 = Array::Create();
+    auto ar2 = Array::Create();
     m_obj->o_getArray(ar1);
     v2->o_getArray(ar2);
     return ar1->equal(ar2.get(), false);

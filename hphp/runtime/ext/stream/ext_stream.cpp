@@ -30,7 +30,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-await.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -58,7 +58,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static
-SmartPtr<StreamContext> get_stream_context(const Variant& stream_or_context);
+req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
 #define REGISTER_CONSTANT(name, value)                                         \
   Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
@@ -218,9 +218,9 @@ Variant HHVM_FUNCTION(stream_context_create,
     raise_warning("options should have the form "
                   "[\"wrappername\"][\"optionname\"] = $value");
     return Variant(
-      makeSmartPtr<StreamContext>(HPHP::null_array, HPHP::null_array));
+      req::make<StreamContext>(HPHP::null_array, HPHP::null_array));
   }
-  return Variant(makeSmartPtr<StreamContext>(arrOptions, arrParams));
+  return Variant(req::make<StreamContext>(arrOptions, arrParams));
 }
 
 Variant HHVM_FUNCTION(stream_context_get_options,
@@ -233,7 +233,7 @@ Variant HHVM_FUNCTION(stream_context_get_options,
   return context->getOptions();
 }
 
-static bool stream_context_set_option0(const SmartPtr<StreamContext>& context,
+static bool stream_context_set_option0(const req::ptr<StreamContext>& context,
                                        const Array& options) {
   if (!StreamContext::validateOptions(options)) {
     raise_warning("options should have the form "
@@ -244,7 +244,7 @@ static bool stream_context_set_option0(const SmartPtr<StreamContext>& context,
   return true;
 }
 
-static bool stream_context_set_option1(const SmartPtr<StreamContext>& context,
+static bool stream_context_set_option1(const req::ptr<StreamContext>& context,
                                        const String& wrapper,
                                        const String& option,
                                        const Variant& value) {
@@ -283,7 +283,7 @@ Variant HHVM_FUNCTION(stream_context_get_default,
   const Array& arrOptions = options.isNull() ? null_array : options.toArray();
   auto context = g_context->getStreamContext();
   if (!context) {
-    context = makeSmartPtr<StreamContext>(Array::Create(), Array::Create());
+    context = req::make<StreamContext>(Array::Create(), Array::Create());
     g_context->setStreamContext(context);
   }
   if (!arrOptions.isNull() &&
@@ -565,13 +565,13 @@ bool HHVM_FUNCTION(stream_wrapper_unregister,
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-static SmartPtr<Socket> socket_accept_impl(
+static req::ptr<Socket> socket_accept_impl(
   const Resource& socket,
   struct sockaddr *addr,
   socklen_t *addrlen
 ) {
   auto sock = cast<Socket>(socket);
-  auto new_sock = makeSmartPtr<Socket>(
+  auto new_sock = req::make<Socket>(
     accept(sock->fd(), addr, addrlen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
@@ -825,7 +825,7 @@ bool HHVM_FUNCTION(stream_socket_shutdown,
 }
 
 static
-SmartPtr<StreamContext> get_stream_context(const Variant& stream_or_context) {
+req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context) {
   if (!stream_or_context.isResource()) {
     return nullptr;
   }
@@ -836,7 +836,7 @@ SmartPtr<StreamContext> get_stream_context(const Variant& stream_or_context) {
   if (file != nullptr) {
     auto context = file->getStreamContext();
     if (!file->getStreamContext()) {
-      context = makeSmartPtr<StreamContext>(Array::Create(), Array::Create());
+      context = req::make<StreamContext>(Array::Create(), Array::Create());
       file->setStreamContext(context);
     }
     return context;

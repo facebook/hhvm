@@ -27,17 +27,16 @@ namespace HPHP {
 StructArray::StructArray(
   uint32_t size,
   uint32_t pos,
-  uint32_t count,
   Shape* shape
 )
   : ArrayData(kStructKind)
   , m_shape(shape)
 {
   m_sizeAndPos = size | uint64_t{pos} << 32;
-  m_hdr.init(HeaderKind::Struct, count);
   assert(m_pos == pos);
   assert(m_size == size);
   assert(kind() == kStructKind);
+  assert(hasExactlyOneRef());
 }
 
 StructArray* StructArray::create(
@@ -46,7 +45,7 @@ StructArray* StructArray::create(
   size_t length
 ) {
   auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
-  auto result = new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
+  auto result = new (NotNull{}, ptr) StructArray(length, 0, shape);
 
   auto data = result->data();
   for (auto i = 0; i < length; ++i) {
@@ -63,7 +62,7 @@ StructArray* StructArray::createReversedValues(
   size_t length
 ) {
   auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
-  auto result = new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
+  auto result = new (NotNull{}, ptr) StructArray(length, 0, shape);
 
   auto data = result->data();
   for (auto i = 0; i < length; ++i) {
@@ -76,17 +75,17 @@ StructArray* StructArray::createReversedValues(
 
 StructArray* StructArray::createNoCopy(Shape* shape, size_t length) {
   auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
-  return new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
+  return new (NotNull{}, ptr) StructArray(length, 0, shape);
 }
 
-StructArray* StructArray::createNonSmart(Shape* shape, size_t length) {
+StructArray* StructArray::createStatic(Shape* shape, size_t length) {
   auto ptr = malloc(bytesForCapacity(shape->capacity()));
-  return new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
+  return new (NotNull{}, ptr) StructArray(length, 0, shape);
 }
 
 StructArray* StructArray::createUncounted(Shape* shape, size_t length) {
   auto ptr = malloc(bytesForCapacity(length));
-  return new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
+  return new (NotNull{}, ptr) StructArray(length, 0, shape);
 }
 
 ArrayData* StructArray::MakeUncounted(ArrayData* array) {
@@ -112,6 +111,7 @@ ArrayData* StructArray::MakeUncounted(ArrayData* array) {
 
 void StructArray::Release(ArrayData* ad) {
   assert(ad->isRefCounted());
+  assert(ad->hasExactlyOneRef());
   auto array = asStructArray(ad);
 
   auto const size = array->size();
@@ -406,7 +406,6 @@ ArrayData* StructArray::Copy(const ArrayData* ad) {
 
   auto result = StructArray::createNoCopy(shape, shape->size());
   result->m_pos = old->m_pos;
-  result->setRefCount(0);
 
   assert(result->m_size == result->shape()->size());
   assert(result->size() == old->size());
@@ -418,6 +417,7 @@ ArrayData* StructArray::Copy(const ArrayData* ad) {
   }
 
   assert(result->m_size == result->shape()->size());
+  assert(result->hasExactlyOneRef());
   return result;
 }
 
@@ -430,10 +430,10 @@ ArrayData* StructArray::CopyWithStrongIterators(const ArrayData* ad) {
   return cpy;
 }
 
-ArrayData* StructArray::NonSmartCopy(const ArrayData* ad) {
+ArrayData* StructArray::CopyStatic(const ArrayData* ad) {
   auto structArray = asStructArray(ad);
   auto shape = structArray->shape();
-  auto ret = StructArray::createNonSmart(shape, structArray->size());
+  auto ret = StructArray::createStatic(shape, structArray->size());
 
   ret->m_pos = structArray->m_pos;
 
@@ -444,6 +444,8 @@ ArrayData* StructArray::NonSmartCopy(const ArrayData* ad) {
   for (auto ptr = srcData; ptr != stop; ++ptr, ++targetData) {
     tvDupFlattenVars(ptr, targetData, structArray);
   }
+
+  assert(ret->hasExactlyOneRef());
   return ret;
 }
 
@@ -516,7 +518,7 @@ ArrayData* StructArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   try {
     auto const ret = MixedArray::PlusEq(mixedArray, elems);
     assert(ret == mixedArray);
-    assert(!mixedArray->hasMultipleRefs());
+    assert(mixedArray->hasExactlyOneRef());
     return ret;
   } catch (...) {
     MixedArray::Release(mixedArray);
@@ -561,7 +563,8 @@ ArrayData* StructArray::Escalate(const ArrayData* ad) {
   return const_cast<ArrayData*>(ad);
 }
 
-bool StructArray::checkInvariants(const ArrayData*) {
+bool StructArray::checkInvariants(const ArrayData* ad) {
+  assert(ad->getCount() != 0);
   return true;
 }
 
@@ -571,7 +574,6 @@ StructArray* StructArray::Grow(StructArray* old, Shape* newShape) {
   auto result = StructArray::create(newShape, old->data(),
     old->shape()->size());
   result->m_size = newShape->size();
-  result->setRefCount(0);
 
   if (UNLIKELY(strong_iterators_exist())) {
     move_strong_iterators(result, old);
@@ -583,22 +585,24 @@ StructArray* StructArray::Grow(StructArray* old, Shape* newShape) {
     // asserts in checkInvariants() happy.
     old->m_pos = 0;
   }
+
+  assert(result->hasExactlyOneRef());
   return result;
 }
 
 MixedArray* StructArray::ToMixedHeader(size_t neededSize) {
   auto const scale   = computeScaleFromSize(neededSize);
-  auto const ad      = smartAllocArray(scale);
+  auto const ad      = reqAllocArray(scale);
 
   ad->m_sizeAndPos       = 0; // We'll set size and pos later.
-  ad->m_hdr.init(HeaderKind::Mixed, 0);
+  ad->m_hdr.init(HeaderKind::Mixed, 1);
   ad->m_scale_used       = scale; // used=0
   ad->m_nextKI           = 0; // There were never any numeric indices.
 
   assert(ad->kind() == ArrayData::kMixedKind);
   assert(ad->m_size == 0);
   assert(ad->m_pos == 0);
-  assert(ad->getCount() == 0);
+  assert(ad->hasExactlyOneRef());
   assert(ad->m_used == 0);
   assert(ad->m_scale == scale);
   return ad;
@@ -628,6 +632,7 @@ MixedArray* StructArray::ToMixed(StructArray* old) {
   }
   assert(ad->checkInvariants());
   assert(!ad->isFull());
+  assert(ad->hasExactlyOneRef());
   return ad;
 }
 
@@ -649,6 +654,7 @@ MixedArray* StructArray::ToMixedCopy(const StructArray* old) {
   ad->m_pos = old->m_pos;
   assert(ad->checkInvariants());
   assert(!ad->isFull());
+  assert(ad->hasExactlyOneRef());
   return ad;
 }
 
@@ -658,7 +664,6 @@ MixedArray* StructArray::ToMixedCopyReserve(
 ) {
   assert(neededSize >= old->size());
   auto const ad      = ToMixedHeader(neededSize);
-  ad->setRefCount(1);
   auto const oldSize = old->size();
   auto const srcData = old->data();
   auto shape         = old->shape();
@@ -674,6 +679,7 @@ MixedArray* StructArray::ToMixedCopyReserve(
 
   ad->m_pos = old->m_pos;
   assert(ad->checkInvariants());
+  assert(ad->hasExactlyOneRef());
   return ad;
 }
 

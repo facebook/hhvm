@@ -50,7 +50,7 @@ IRGS::IRGS(TransContext context, TransFlags flags)
 std::string show(const IRGS& irgs) {
   std::ostringstream out;
   auto header = [&](const std::string& str) {
-    out << folly::format("+{:-^82}+\n", str);
+    out << folly::format("+{:-^102}+\n", str);
   };
 
   const int32_t frameCells = irgen::resumed(irgs)
@@ -62,7 +62,7 @@ std::string show(const IRGS& irgs) {
   assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
-    out << folly::format("| {:<80} |\n",
+    out << folly::format("| {:<100} |\n",
                          folly::format("{:>2}: {}",
                                        stackDepth - spOffset, str));
     assertx(spOffset > 0);
@@ -101,7 +101,12 @@ std::string show(const IRGS& irgs) {
     while (checkFpi());
     auto const value = irgen::top(const_cast<IRGS&>(irgs),
                                   BCSPOffset{i}, DataTypeGeneric);
-    elem(value->inst()->toString());
+    std::string elemStr = value->inst()->toString();
+    auto const predicted = irgs.irb->fs().predictedTmpType(value);
+    if (predicted < value->type()) {
+      elemStr += folly::sformat(" (predict: {})", predicted);
+    }
+    elem(elemStr);
   }
 
   header(" in-memory ");
@@ -121,15 +126,21 @@ std::string show(const IRGS& irgs) {
       DataTypeGeneric
     );
 
-    std::ostringstream elemStr;
+    std::string elemStr;
     if (stkTy == TStkElem) {
-      elem("unknown");
+      elemStr = "unknown";
     } else if (stkVal) {
-      elem(stkVal->inst()->toString());
+      elemStr = stkVal->inst()->toString();
     } else {
-      elem(stkTy.toString());
+      elemStr = stkTy.toString();
     }
 
+    auto const predicted = irgen::predictedTypeFromStack(irgs, BCSPOffset{i});
+    if (predicted < stkTy) {
+      elemStr += folly::sformat(" (predict: {})", predicted);
+    }
+
+    elem(elemStr);
     ++i;
   }
   header("");
@@ -143,13 +154,17 @@ std::string show(const IRGS& irgs) {
                                     : irgs.irb->localType(i, DataTypeGeneric);
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
+    auto const predicted = irgs.irb->predictedLocalType(i);
+    if (predicted < localTy) str += folly::sformat(" (predict: {})", predicted);
+
     if (localTy <= TBoxedCell) {
       auto const pred = irgs.irb->predictedInnerType(i);
       if (pred != TBottom) {
         str += folly::sformat(" (predict inner: {})", pred.toString());
       }
     }
-    out << folly::format("| {:<80} |\n",
+
+    out << folly::format("| {:<100} |\n",
                          folly::format("{:>2}: {}", i, str));
   }
   header("");

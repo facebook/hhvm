@@ -667,7 +667,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return '}';
 }
 
-<ST_LOOKING_FOR_VARNAME>{LABEL} {
+<ST_LOOKING_FOR_VARNAME>{LABEL}[[}] {
+        yyless(yyleng - 1);
         SETTOKEN(T_STRING_VARNAME);
         // Change state to IN_SCRIPTING; current state will be popped
         // when we encounter '}'
@@ -787,7 +788,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_HASHBANG;
 }
 
-<INITIAL>(([^<#]|"<"[^?%s<]|"#"[^!]){1,400})|"<s"|"<" {
+<INITIAL>(([^<#]|"<"[^?%s<]){1,400})|"<s"|"<"|"#" {
         SETTOKEN(T_INLINE_HTML);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_IN_HTML, yyscanner);
@@ -1231,8 +1232,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
   YYCURSOR--;
 
-  // The rules that lead to this state all consume an end-of-line.
-  bool lookingForEndLabel = true;
+  // T_START_HEREDOC has a trailing newline, so we can start looking
+  // for the ending label right away
+  bool lookingForEndLabel = _scanner->lastToken() == T_START_HEREDOC;
 
   while (refillResult == EOB_ACT_CONTINUE_SCAN) {
     while (YYCURSOR < YYLIMIT) {

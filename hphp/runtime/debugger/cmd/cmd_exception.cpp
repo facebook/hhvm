@@ -40,7 +40,7 @@ void CmdException::help(DebuggerClient &client) {
   client.helpTitle("Exception Command");
   client.helpCmds(
     "[e]xception {cls}",            "breaks if class of exception throws",
-    "[e]xception {ns}\{cls}",       "breaks if class of exception throws",
+    "[e]xception {ns}\\{cls}",      "breaks if class of exception throws",
     "[e]xception error",            "breaks on errors, warnings and notices",
     "[e]xception {above}@{url}",    "breaks only if url also matches",
     "",                             "",

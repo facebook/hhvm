@@ -1,0 +1,14 @@
+[<static>][this]App \C<>
+[<static>][this]App \C<>
+File "class_prop_as_this.php", line 16, characters 5-19:
+Invalid assignment (Typing[4110])
+File "class_prop_as_this.php", line 8, characters 24-24:
+This is the expression dependent type <expr#1>
+File "class_prop_as_this.php", line 16, characters 5-7:
+  where '<expr#1>' is a reference to this expression
+File "class_prop_as_this.php", line 8, characters 31-31:
+It is incompatible with an object of type C
+File "class_prop_as_this.php", line 8, characters 24-24:
+Since C is not final
+File "class_prop_as_this.php", line 8, characters 31-31:
+this might not be a C

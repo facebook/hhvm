@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VARIABLE_UNSERIALIZER_H_
 #define incl_HPHP_VARIABLE_UNSERIALIZER_H_
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/types.h"
 
@@ -137,7 +137,7 @@ private:
   Type m_type;
   const char* m_buf;
   const char* m_end;
-  smart::vector<RefInfo> m_refs;
+  req::vector<RefInfo> m_refs;
   bool m_unknownSerializable;
   const Array& m_classWhiteList;    // classes allowed to be unserialized
 };

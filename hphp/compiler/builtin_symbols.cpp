@@ -17,7 +17,6 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/expression/modifier_expression.h"
@@ -85,7 +84,7 @@ const char *BuiltinSymbols::SystemClasses[] = {
   nullptr
 };
 
-StringToTypePtrMap BuiltinSymbols::s_superGlobals;
+hphp_string_set BuiltinSymbols::s_superGlobals;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -126,7 +125,6 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
     if (pinfo->attribute & ClassInfo::IsReference) {
       f->setRefParam(idx);
     }
-    f->setParamType(ar, idx, Type::FromDataType(pinfo->argType, Type::Any));
   }
 
   f->setClassInfoAttribute(attrs);
@@ -171,7 +169,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
     f->setAllowOverride();
   }
 
-  FunctionScope::RecordFunctionInfo(f->getName(), f);
+  FunctionScope::RecordFunctionInfo(f->getScopeName(), f);
   return f;
 }
 
@@ -212,9 +210,7 @@ void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
       modifiers->add(T_STATIC);
     }
 
-    dest->add(pinfo->name.data(),
-              Type::FromDataType(pinfo->type, Type::Variant),
-              false, ar, ExpressionPtr(), modifiers);
+    dest->add(pinfo->name.data(), false, ar, ExpressionPtr(), modifiers);
   }
 }
 
@@ -224,14 +220,12 @@ void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
     ExpressionPtr e(Expression::MakeScalarExpression(
                       ar, ar, Location::Range(), tvAsVariant(&cnsPair.second)));
 
-    dest->add(cnsPair.first->data(),
-              Type::FromDataType(cnsPair.second.m_type, Type::Variant),
-              e, ar, e);
+    dest->add(cnsPair.first->data(), e, ar, e);
 
     if ((cnsPair.second.m_type == KindOfUninit) &&
          cnsPair.second.m_data.pref) {
       // Callback based constant
-      dest->setDynamic(ar, cnsPair.first->data(), true);
+      dest->setDynamic(ar, cnsPair.first->data());
     }
   }
 }
@@ -240,10 +234,9 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
                                         ConstantTablePtr dest,
                                         ClassInfo *cls) {
   for (auto cinfo : cls->getConstantsVec()) {
-    auto t = Type::FromDataType(cinfo->getValue().getType(), Type::Variant);
     auto e = Expression::MakeScalarExpression(ar, ar, Location::Range(),
                                               cinfo->getValue());
-    dest->add(cinfo->name.data(), t, e, ar, e);
+    dest->add(cinfo->name.data(), e, ar, e);
   }
 }
 
@@ -262,9 +255,11 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
     stdIfaces.push_back(it->data());
   }
 
-  ClassScopePtr cl(new ClassScope(ar, cls->getName().data(), parent.data(),
-                                  stdIfaces, methods));
-  for (uint i = 0; i < methods.size(); ++i) {
+  auto cl = std::make_shared<ClassScope>(
+    ar, cls->getName().toCppString(), parent.toCppString(),
+    stdIfaces, methods);
+
+  for (uint32_t i = 0; i < methods.size(); ++i) {
     methods[i]->setOuterScope(cl);
   }
 
@@ -312,19 +307,18 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
     if (!value.isInitialized() || value.isObject()) continue;
     ExpressionPtr e = Expression::MakeScalarExpression(
       ar, ar, Location::Range(), value);
-    TypePtr t = Type::FromDataType(value.getType(), Type::Variant);
-    cns->add(key.toCStrRef().data(), t, e, ar, e);
+    cns->add(key.toCStrRef().data(), e, ar, e);
   }
   for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
-    ar->getVariables()->add(GlobalNames[i], Type::Variant, false, ar,
+    ar->getVariables()->add(GlobalNames[i], false, ar,
                             ConstructPtr(), ModifierExpressionPtr());
   }
 
-  cns->setDynamic(ar, "PHP_BINARY", true);
-  cns->setDynamic(ar, "PHP_BINDIR", true);
-  cns->setDynamic(ar, "PHP_OS", true);
-  cns->setDynamic(ar, "PHP_SAPI", true);
-  cns->setDynamic(ar, "SID", true);
+  cns->setDynamic(ar, "PHP_BINARY");
+  cns->setDynamic(ar, "PHP_BINDIR");
+  cns->setDynamic(ar, "PHP_OS");
+  cns->setDynamic(ar, "PHP_SAPI");
+  cns->setDynamic(ar, "SID");
 
   for (auto sym : cns->getSymbols()) {
     sym->setSystem();
@@ -341,14 +335,12 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
       assert(clsVec.second.size() == 1);
       auto cls = clsVec.second[0];
       if (auto nativeConsts = Native::getClassConstants(
-            String(cls->getName()).get())) {
+            String(cls->getScopeName()).get())) {
         for (auto cnsMap : *nativeConsts) {
           auto tv = cnsMap.second;
           auto e = Expression::MakeScalarExpression(ar, ar, Location::Range(),
                                                     tvAsVariant(&tv));
-          cls->getConstants()->add(cnsMap.first->data(),
-                                   Type::FromDataType(tv.m_type, Type::Variant),
-                                   e, ar, e);
+          cls->getConstants()->add(cnsMap.first->data(), e, ar, e);
         }
       }
       cls->setSystem();
@@ -371,25 +363,17 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
 
 void BuiltinSymbols::LoadSuperGlobals() {
   if (s_superGlobals.empty()) {
-    s_superGlobals["_SERVER"] = Type::Variant;
-    s_superGlobals["_GET"] = Type::Variant;
-    s_superGlobals["_POST"] = Type::Variant;
-    s_superGlobals["_COOKIE"] = Type::Variant;
-    s_superGlobals["_FILES"] = Type::Variant;
-    s_superGlobals["_ENV"] = Type::Variant;
-    s_superGlobals["_REQUEST"] = Type::Variant;
-    s_superGlobals["_SESSION"] = Type::Variant;
+    s_superGlobals.insert("_SERVER");
+    s_superGlobals.insert("_GET");
+    s_superGlobals.insert("_POST");
+    s_superGlobals.insert("_COOKIE");
+    s_superGlobals.insert("_FILES");
+    s_superGlobals.insert("_ENV");
+    s_superGlobals.insert("_REQUEST");
+    s_superGlobals.insert("_SESSION");
   }
 }
 
 bool BuiltinSymbols::IsSuperGlobal(const std::string &name) {
-  return s_superGlobals.find(name) != s_superGlobals.end();
-}
-
-TypePtr BuiltinSymbols::GetSuperGlobalType(const std::string &name) {
-  StringToTypePtrMap::const_iterator iter = s_superGlobals.find(name);
-  if (iter != s_superGlobals.end()) {
-    return iter->second;
-  }
-  return TypePtr();
+  return s_superGlobals.count(name);
 }

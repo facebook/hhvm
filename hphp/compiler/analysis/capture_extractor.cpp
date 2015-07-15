@@ -121,8 +121,7 @@ SimpleVariablePtr CaptureExtractor::newQueryParamRef(ExpressionPtr ae) {
  */
 ExpressionPtr CaptureExtractor::rewriteCall(SimpleFunctionCallPtr sfc) {
   assert(sfc != nullptr);
-  if (sfc->hadBackslash() ||
-    (sfc->getClass() != nullptr && !sfc->getClassName().empty())) {
+  if (sfc->hadBackslash() || sfc->getClass() || sfc->hasStaticClass()) {
     return newQueryParamRef(sfc);
   }
   auto args = sfc->getParams();
@@ -146,7 +145,7 @@ ExpressionPtr CaptureExtractor::rewriteCall(SimpleFunctionCallPtr sfc) {
   if (noRewrites) return sfc;
   return std::make_shared<SimpleFunctionCall>(
     sfc->getScope(), sfc->getRange(),
-    sfc->getName(), false, newArgs, ExpressionPtr());
+    sfc->getOriginalName(), false, newArgs, ExpressionPtr());
 }
 
 /**

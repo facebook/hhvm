@@ -35,22 +35,19 @@ public:
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
-  unsigned getCanonHash() const override;
-  bool canonCompare(ExpressionPtr e) const override;
-
   bool containsDynamicConstant(AnalysisResultPtr ar) const override;
 
   const std::string &getConName() const { return m_varName; }
 
-  bool isValid() const { return m_valid; }
-  bool isDynamic() const;
-  bool hasClass() const { return m_defScope != 0; }
+  ClassScopeRawPtr getOriginalClassScope() const;
+
+  bool hasClass() const = delete;
   bool isColonColonClass() const { return m_varName == "class"; }
 private:
   std::string m_varName;
-  BlockScope *m_defScope;
-  bool m_valid;
   bool m_depsSet;
+  bool m_originalScopeSet;
+  BlockScopeRawPtr m_originalScope;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

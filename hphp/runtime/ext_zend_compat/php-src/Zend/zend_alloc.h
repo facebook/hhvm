@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -63,7 +63,7 @@ END_EXTERN_C()
 #include "Zend/zend_types.h"
 /**
  * Sometimes a zval is passed to efree() and friends, but unfortunately
- * zvals (i.e. RefDatas) are not allocated using smart_malloc but rather
+ * zvals (i.e. RefDatas) are not allocated using req::malloc but rather
  * they are allocated using their own allocator, so we have a different
  * overload of _efree() to handle freeing these correctly.
  */
@@ -216,7 +216,6 @@ END_EXTERN_C()
 #define ALLOC_HASHTABLE(ht)                               \
   (ht) = [&]{ auto ret = HPHP::ProxyArray::Make(          \
       HPHP::MixedArray::MakeReserve(0));                   \
-      ret->setRefCount(0);                                \
       return ret; }()
 #else
 #define ALLOC_HASHTABLE(ht)  \

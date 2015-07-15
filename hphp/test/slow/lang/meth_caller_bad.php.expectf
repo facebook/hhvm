@@ -1,5 +1,4 @@
-Fatal error: Uncaught exception 'HH\InvariantException' with message 'object must be an instance of (B), instead it is (A)' in :
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'object must be an instance of (B), instead it is (A)' in %s/test/slow/lang/meth_caller_bad.php:5
 Stack trace:
-#0 (): HH\invariant_violation()
-#1 %s/test/slow/lang/meth_caller_bad.php(5): __SystemLib\MethCallerHelper->__invoke()
-#2 {main}
+#0 %s/test/slow/lang/meth_caller_bad.php(5): __SystemLib\MethCallerHelper->__invoke()
+#1 {main}

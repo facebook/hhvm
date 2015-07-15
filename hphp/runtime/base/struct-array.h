@@ -81,8 +81,7 @@ struct StructArray : public ArrayData {
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
-  static ArrayData* NonSmartCopy(const ArrayData*);
-  static ArrayData* NonSmartCopyHelper(const ArrayData*);
+  static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*, SortFunction);
   static void Ksort(ArrayData*, int, bool);
   static void Sort(ArrayData*, int, bool);
@@ -111,13 +110,6 @@ struct StructArray : public ArrayData {
   const ArrayData* asArrayData() const { return this; }
   static bool checkInvariants(const ArrayData*);
 
-  /*
-   * Accepts any array of any kind satisfying isRecordData() and makes a
-   * non-smart struct copy, like NonSmartCopy().
-   */
-  static ArrayData* NonSmartConvert(const ArrayData*);
-  static ArrayData* NonSmartConvertHelper(const ArrayData*);
-
   static StructArray* asStructArray(ArrayData*);
   static const StructArray* asStructArray(const ArrayData*);
 
@@ -125,7 +117,7 @@ struct StructArray : public ArrayData {
   static StructArray* createReversedValues(Shape* shape,
     const TypedValue* values, size_t length);
   static StructArray* createNoCopy(Shape*, size_t);
-  static StructArray* createNonSmart(Shape*, size_t);
+  static StructArray* createStatic(Shape*, size_t);
   static StructArray* createUncounted(Shape*, size_t);
   static size_t bytesForCapacity(size_t capacity);
 
@@ -155,7 +147,7 @@ struct StructArray : public ArrayData {
 private:
   template <typename F> friend void scan(const StructArray&, F&);
 
-  StructArray(uint32_t size, uint32_t pos, uint32_t count, Shape* shape);
+  StructArray(uint32_t size, uint32_t pos, Shape* shape);
 
   static MixedArray* ToMixedHeader(size_t);
   static MixedArray* ToMixed(StructArray*);

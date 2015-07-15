@@ -21,7 +21,8 @@ type fake_members = {
   invalid : SSet.t;
   valid : SSet.t;
 }
-type local = locl ty list * locl ty
+type expression_id = Ident.t
+type local = locl ty list * locl ty * expression_id
 type local_env = fake_members * local IMap.t
 type env = {
   pos : Pos.t;
@@ -84,6 +85,7 @@ val grow_super : env -> bool
 val invert_grow_super : env -> (env -> env) -> env
 val get_self : env -> locl ty
 val get_self_id : env -> string
+val is_outside_class : env -> bool
 val get_parent : env -> decl ty
 val get_fn_kind : env -> Ast.fun_kind
 val get_file : env -> Relative_path.t
@@ -99,8 +101,6 @@ val set_parent : env -> decl ty -> env
 val set_static : env -> env
 val set_mode : env -> FileInfo.mode -> env
 val set_root : env -> Typing_deps.Dep.variant -> env
-val set_is_constructor : env -> env
-val is_constructor : env -> bool
 val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 val is_decl : env -> bool
@@ -122,6 +122,8 @@ module FakeMembers :
 val unbind : env -> locl ty -> env * locl ty
 val set_local : env -> Ident.t -> locl ty -> env
 val get_local : env -> Ident.t -> env * locl ty
+val set_local_expr_id : env -> Ident.t -> expression_id -> env
+val get_local_expr_id : env -> Ident.t -> expression_id option
 val freeze_local_env : env -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
 val in_loop : env -> (env -> env) -> env

@@ -17,16 +17,13 @@
 #ifndef incl_HPHP_LABEL_SCOPE_H_
 #define incl_HPHP_LABEL_SCOPE_H_
 
-#include "hphp/compiler/hphp.h"
-#include "hphp/util/deprecated/base.h"
-
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "hphp/util/deprecated/declare-boost-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-class Statement;
 
 DECLARE_BOOST_TYPES(Statement);
 

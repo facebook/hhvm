@@ -1,0 +1,6 @@
+File "shape_idx3.php", line 9, characters 24-31:
+Invalid argument (Typing[4110])
+File "shape_idx3.php", line 8, characters 21-26:
+This is a string
+File "shape_idx3.php", line 3, characters 23-25:
+It is incompatible with an int

@@ -352,7 +352,6 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize,
   always_assert(ht->isProxyArray());
   HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
   proxy->proxyInit(nSize, pDestructor, persistent);
-  proxy->incRefCount();
   return SUCCESS;
 }
 

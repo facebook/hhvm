@@ -24,6 +24,8 @@
 #include "zend.h"
 #include "zend_list.h"
 // has to be before zend_API since that defines getThis()
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-request-local.h"
 #include "zend_API.h"
 #include "php.h"
@@ -33,92 +35,165 @@
 ZEND_API int le_index_ptr;
 
 namespace HPHP {
-  static std::vector<zend_rsrc_list_dtors_entry> s_resource_dtors;
+  struct ZendResourceWrapper;
 
-  const String& ZendResourceData::o_getClassNameHook() const {
-    auto& dtor = s_resource_dtors.at(type);
-
-    if (dtor.type_name_str.empty()) {
-      dtor.type_name_str = dtor.type_name;
+  // When the request ends, destroy all remaining Zend resource wrappers by
+  // freeing them. Their destructors will automatically call the appropriate
+  // Zend destructor.
+  struct ZendResourceWrapperDestroyer {
+    void operator()(ZendResourceWrapper* wrapper) {
+      req::destroy_raw(wrapper);
     }
-
-    return dtor.type_name_str;
-  }
-
-  ZendResourceData::~ZendResourceData() {
-    auto& dtor = s_resource_dtors.at(type);
-    if (dtor.list_dtor_ex) {
-      TSRMLS_FETCH();
-      VMRegAnchor _;
-      dtor.list_dtor_ex(this TSRMLS_CC);
-    }
-  }
+  };
 }
 
-ZEND_REQUEST_LOCAL_VECTOR(zend_rsrc_list_entry*, tl_regular_list);
-typedef HPHP::ZendRequestLocalVector<zend_rsrc_list_entry*>::container zend_rsrc_list;
+ZEND_REQUEST_LOCAL_VECTOR(HPHP::ZendResourceWrapper*,
+                          HPHP::ZendResourceWrapperDestroyer,
+                          tl_regular_list);
+typedef HPHP::ZendRequestLocalVector<HPHP::ZendResourceWrapper*,
+                                     HPHP::ZendResourceWrapperDestroyer
+                                     >::container zend_rsrc_list;
 
 namespace {
   zend_rsrc_list& RL() {
     return tl_regular_list.get()->get();
   }
+
+  HPHP::ZendResourceWrapper* zend_list_id_to_wrapper(int id) {
+    if (id >= 0 && id < RL().size()) {
+      return RL()[id];
+    } else {
+      return nullptr;
+    }
+  }
+
 }
 
-static zend_rsrc_list_entry *zend_list_id_to_entry(int id TSRMLS_DC) {
-  if (id < RL().size()) {
-    return RL().at(id);
-  } else {
-    return NULL;
+namespace HPHP {
+  static std::vector<zend_rsrc_list_dtors_entry> s_resource_dtors;
+
+  // Represents the actual Zend resource. ZendResourceData contains the index
+  // into the Zend resource table where these are stored. If the table entry is
+  // null, the resource has been closed. In a few circumstances, a ResourceData
+  // instance can be stored instead of a Zend resource.
+  struct ZendResourceWrapper {
+    ZendResourceWrapper(void* ptr, int type, int id)
+      : raw_ptr{ptr},
+        id{id},
+        type{type},
+        refcount{1},
+        raw_ptr_is_resource{false} {}
+    ZendResourceWrapper(ResourceData* ptr, int id)
+      : raw_ptr{ptr},
+        id{id},
+        type{php_file_le_stream()},
+        refcount{1},
+        raw_ptr_is_resource{true} { ptr->incRefCount(); }
+    ~ZendResourceWrapper();
+
+    void* raw_ptr;
+    int id;
+    int type;
+    int refcount;
+    bool raw_ptr_is_resource; // Whether we're storing a ResourceData or a Zend
+                              // resource.
+  };
+
+  ZendResourceWrapper::~ZendResourceWrapper() {
+    if (!raw_ptr_is_resource) {
+      // If we're storing a (valid) Zend resource, call its destructor (if any).
+      if (type >= 0) {
+        auto& dtor = s_resource_dtors.at(type);
+        if (dtor.list_dtor_ex) {
+          // Zend resource destructors receive a ZendResourceData as their sole
+          // parameter. They use this to determine the pointer to the Zend
+          // resource (the pointer is normally null). Problem is, we don't have
+          // a ZendResourceData handy, as we should only get here if they've all
+          // been released. So, allocate a temporary one (containing the Zend
+          // resource pointer) and pass it into the destructor.
+          auto temp = HPHP::req::make<zend_rsrc_list_entry>(raw_ptr, type);
+          temp->id = id;
+
+          TSRMLS_FETCH();
+          VMRegAnchor _;
+          dtor.list_dtor_ex(temp.get() TSRMLS_CC);
+        }
+      }
+    } else {
+      // Otherwise we're storing a ResourceData instance, so just release our
+      // reference to it.
+      decRefRes(static_cast<ResourceData*>(raw_ptr));
+    }
   }
+
+  ZendResourceData::~ZendResourceData() {
+    // Last reference to the Zend resource is gone, so destroy the resource if
+    // it hasn't already been destroyed.
+    if (auto wrapper = zend_list_id_to_wrapper(id)) {
+      if (--wrapper->refcount <= 0) {
+        // Important: null out the pointer in the resource table before
+        // destroying the resource. This prevents recursion when we allocate a
+        // temporary ZendResourceData before calling the Zend destructor.
+        RL()[id] = nullptr;
+        HPHP::req::destroy_raw(wrapper);
+      }
+    }
+  }
+
+  const String& ZendResourceData::o_getClassNameHook() const {
+    auto& dtor = s_resource_dtors.at(type);
+
+    if (dtor.type_name_str.empty()) {
+      dtor.type_name_str = makeStaticString(dtor.type_name);
+    }
+
+    return dtor.type_name_str;
+  }
+
+  bool ZendResourceData::isInvalid() const {
+    return !zend_list_id_to_wrapper(id);
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 
 ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC) {
-  auto le = HPHP::newres<zend_rsrc_list_entry>(ptr, type);
-  le->incRefCount();
-  RL().push_back(le);
-  int id = RL().size() - 1;
-  le->id = id;
+  int id = RL().size();
+  auto wrapper =
+    HPHP::req::make_raw<HPHP::ZendResourceWrapper>(ptr, type, id);
+  RL().push_back(wrapper);
   return id;
 }
 
 ZEND_API int _zend_list_delete(int id TSRMLS_DC) {
-  zend_rsrc_list_entry* le = zend_list_id_to_entry(id TSRMLS_CC);
-  if (le) {
-    int refcount = le->getCount();
-    decRefRes(le);
-    if (refcount <= 1) {
+  auto wrapper = zend_list_id_to_wrapper(id);
+  if (wrapper) {
+    if (--wrapper->refcount <= 0) {
       RL()[id] = nullptr;
-      return SUCCESS;
-    } else {
-      return SUCCESS;
+      HPHP::req::destroy_raw(wrapper);
     }
+    return SUCCESS;
   } else {
     return FAILURE;
   }
 }
 
 ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC) {
-  zend_rsrc_list_entry* le = zend_list_id_to_entry(id TSRMLS_CC);
-  HPHP::ZendNormalResourceDataHolder* holder =
-    dynamic_cast<HPHP::ZendNormalResourceDataHolder*>(le);
-  if (holder) {
-    *type = php_file_le_stream();
-    return holder->getResourceData();
-  } else if (le) {
-    *type = le->type;
-    return le->ptr;
+  auto* wrapper = zend_list_id_to_wrapper(id);
+  if (wrapper) {
+    *type = wrapper->type;
+    return wrapper->raw_ptr;
   } else {
     *type = -1;
-    return NULL;
+    return nullptr;
   }
 }
 
 ZEND_API int _zend_list_addref(int id TSRMLS_DC) {
-  zend_rsrc_list_entry* le = zend_list_id_to_entry(id TSRMLS_CC);
-  if (le) {
-    le->incRefCount();
+  auto wrapper = zend_list_id_to_wrapper(id);
+  if (wrapper) {
+    ++wrapper->refcount;
     return SUCCESS;
   } else {
     return FAILURE;
@@ -230,17 +305,20 @@ int zval_get_resource_id(const zval &z) {
     return le->id;
   }
 
-  // Make a zend_rsrc_list_entry and return that
-  le = HPHP::newres<HPHP::ZendNormalResourceDataHolder>(z.tv()->m_data.pres);
-  RL().push_back(le);
-  int id = RL().size() - 1;
-  le->id = id;
+  int id = RL().size();
+  auto wrapper =
+    HPHP::req::make_raw<HPHP::ZendResourceWrapper>(z.tv()->m_data.pres, id);
+  RL().push_back(wrapper);
   return id;
 }
 
 HPHP::ResourceData *zend_list_id_to_resource_data(int id TSRMLS_DC) {
-  zend_rsrc_list_entry* le = zend_list_id_to_entry(id TSRMLS_CC);
-  HPHP::ZendNormalResourceDataHolder* holder =
-    dynamic_cast<HPHP::ZendNormalResourceDataHolder*>(le);
-  return holder ? holder->getResourceData() : le;
+  auto wrapper = zend_list_id_to_wrapper(id);
+  if (wrapper) {
+    auto resource = HPHP::newres<zend_rsrc_list_entry>(nullptr, wrapper->type);
+    resource->id = wrapper->id;
+    return resource;
+  } else {
+    return nullptr;
+  }
 }

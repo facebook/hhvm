@@ -120,7 +120,7 @@ class CacheManager : private boost::noncopyable {
   void dump() const;
 
  private:
-  using CacheMap = struct std::map<std::string, std::unique_ptr<CacheData>>;
+  using CacheMap = std::map<std::string, std::unique_ptr<CacheData>>;
 
   void addDirectories(const std::string& name);
 

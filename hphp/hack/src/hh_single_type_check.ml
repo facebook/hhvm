@@ -26,6 +26,7 @@ type mode =
   | Lint
   | Prolog
   | Suggest
+  | Emit
 
 type options = {
   filename : string;
@@ -82,7 +83,10 @@ let builtins = "<?hh // decl\n"^
   "}\n"^
   "final class Set<Tv> implements ConstSet<Tv> {}\n"^
   "final class ImmSet<+Tv> implements ConstSet<Tv> {}\n"^
-  "class Exception { public function __construct(string $x) {} }\n"^
+  "class Exception {"^
+  "  public function __construct(string $x) {}"^
+  "  public function getMessage(): string;"^
+  "}\n"^
   "class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {\n"^
   "  public function next(): void;\n"^
   "  public function current(): Tv;\n"^
@@ -122,7 +126,15 @@ let builtins = "<?hh // decl\n"^
   "function rand($x, $y): int;\n" ^
   "function invariant($x, ...): void;\n" ^
   "function exit(int $exit_code_or_message = 0): noreturn;\n" ^
-  "function invariant_violation(...): noreturn;\n"
+  "function invariant_violation(...): noreturn;\n" ^
+  "function get_called_class(): string;\n" ^
+  "abstract final class Shapes {\n" ^
+  "  public static function idx(shape() $shape, arraykey $index, $default = null) {}\n" ^
+  "  public static function keyExists(shape() $shape, arraykey $index): bool {}\n" ^
+  "  public static function removeKey(shape() $shape, arraykey $index): void {}\n" ^
+  "}\n" ^
+  "newtype classname<+T> = string;\n" ^
+  "function var_dump($x): void;\n"
 
 (*****************************************************************************)
 (* Helpers *)
@@ -161,6 +173,9 @@ let parse_options () =
     "--dump-symbol-info",
       Arg.Unit (set_mode DumpSymbolInfo),
       "Dump all symbol information";
+    "--emit",
+      Arg.Unit (set_mode Emit),
+      "Emit HHVM assembly";
     "--lint",
       Arg.Unit (set_mode Lint),
       "Produce lint errors";
@@ -278,8 +293,10 @@ let handle_mode mode filename nenv files_info errors lint_errors ai_results =
   | Color ->
       Relative_path.Map.iter begin fun fn fileinfo ->
         if fn = builtins_filename then () else begin
-          let result = ServerColorFile.get_level_list
-            (fun () -> ignore (ServerIdeUtils.check_defs nenv fileinfo); fn) in
+          let result = ServerColorFile.get_level_list begin fun () ->
+            ignore @@ Typing_check_utils.check_defs nenv fileinfo;
+            fn
+          end in
           print_colored fn result;
         end
       end files_info
@@ -320,15 +337,21 @@ let handle_mode mode filename nenv files_info errors lint_errors ai_results =
   | Prolog ->
       print_prolog nenv files_info
   | Suggest
+  | Emit
   | Errors ->
       let errors = Relative_path.Map.fold begin fun _ fileinfo errors ->
-        errors @ ServerIdeUtils.check_defs nenv fileinfo
+        errors @ Typing_check_utils.check_defs nenv fileinfo
       end files_info errors in
       if mode = Suggest
       then Relative_path.Map.iter suggest_and_print files_info;
       if errors <> []
       then (error (List.hd errors); exit 2)
-      else Printf.printf "No errors\n"
+      else
+        if mode = Emit then
+          Relative_path.Map.fold begin fun _ fileinfo output ->
+            Emitter.emit_file nenv fileinfo output
+          end files_info ()
+        else Printf.printf "No errors\n"
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -339,10 +362,11 @@ let main_hack { filename; mode; } =
   EventLogger.init (Daemon.devnull ()) 0.0;
   SharedMem.(init default_config);
   Hhi.set_hhi_root_for_unit_test (Path.make "/tmp/hhi");
+  if mode = Emit then Ident.track_names := true; (* <- frumious hack. *)
   let outer_do f = match mode with
     | Ai ->
        let ai_results, inner_results =
-         Ai.do_ ServerIdeUtils.check_defs filename in
+         Ai.do_ Typing_check_utils.check_defs filename in
        ai_results, [], inner_results
     | _ ->
        let lint_results, inner_results = Lint.do_ f in

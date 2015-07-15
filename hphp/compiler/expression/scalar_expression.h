@@ -46,13 +46,9 @@ public:
   std::string getOriginalLiteralString() const;
   std::string getLiteralStringImpl(bool original) const;
   bool needsTranslation() const;
-  TypePtr inferenceImpl(AnalysisResultConstPtr ar, TypePtr type,
-                        bool coerce);
   bool getScalarValue(Variant &value) override {
     value = getVariant(); return true;
   }
-  unsigned getCanonHash() const override;
-  bool canonCompare(ExpressionPtr e) const override;
   bool isQuoted() const { return m_quoted; }
 
   int getType() const { return m_type;}

@@ -159,11 +159,6 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool ArrayElementExpression::isTemporary() const {
-  return !m_global &&
-    !(m_context & (AccessContext|LValue|RefValue|UnsetContext));
-}
-
 void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_variable->analyzeProgram(ar);
   if (m_offset) m_offset->analyzeProgram(ar);
@@ -181,18 +176,6 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
           Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
                           shared_from_this());
         }
-      }
-    } else {
-      TypePtr at(m_variable->getActualType());
-      TypePtr et(m_variable->getExpectedType());
-      if (et &&
-          (et->is(Type::KindOfSequence) ||
-           et->is(Type::KindOfAutoSequence)) &&
-          at && at->isExactType()) {
-        // since Sequence maps to Variant in the runtime,
-        // using Sequence for the expected type will
-        // never allow the necessary casts to be generated.
-        m_variable->setExpectedType(at);
       }
     }
   }
@@ -227,10 +210,6 @@ void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-bool ArrayElementExpression::canonCompare(ExpressionPtr e) const {
-  return m_offset && Expression::canonCompare(e);
 }
 
 ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {

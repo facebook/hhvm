@@ -19,8 +19,8 @@
 #define incl_HPHP_EXT_ASIO_GEN_VECTOR_WAIT_HANDLE_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 namespace HPHP {
@@ -62,7 +62,7 @@ class c_GenVectorWaitHandle final : public c_WaitableWaitHandle {
                   c_WaitableWaitHandle* child);
 
   Object m_exception;
-  SmartPtr<c_Vector> m_deps;
+  req::ptr<c_Vector> m_deps;
   int64_t m_iterPos;
   AsioBlockable m_blockable;
 

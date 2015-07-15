@@ -128,7 +128,7 @@ mem.malloc.leaked: leaked malloc()-ed memory
 
 page.wall.[section]:   wall time a page section takes
 page.cpu.[section]:    CPU time a page section takes
-mem.[section]:         SmartAllocator memory a page section takes
+mem.[section]:         request-local memory that a page section takes
 network.uncompressed:  total bytes to be sent before compression
 network.compressed:    total bytes sent after compression
 

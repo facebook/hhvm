@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/parallel.h"
 
 namespace HPHP { namespace HHBBC {
@@ -75,6 +76,9 @@ void parse_options(int argc, char** argv) {
     ("input",
       po::value(&input_repo)->default_value("hhvm.hhbc"),
       "input hhbc repo path")
+    ("stats-file",
+      po::value(&options.stats_file)->default_value(""),
+      "stats file path")
     ("no-optimizations",
       po::bool_switch(&options.NoOptimizations),
       "turn off all optimizations")

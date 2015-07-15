@@ -61,20 +61,17 @@ Object HHVM_FUNCTION(asio_get_running) {
   return c_ResumableWaitHandle::getRunning(vmfp());
 }
 
-class AsioExtension final : public Extension {
-  public:
-   AsioExtension() : Extension("asio", "0.1") {}
+static AsioExtension s_asio_extension;
 
-   void moduleInit() override {
-     HHVM_FALIAS(
-        HH\\asio_get_current_context_idx,
-        asio_get_current_context_idx);
-     HHVM_FALIAS(HH\\asio_get_running_in_context, asio_get_running_in_context);
-     HHVM_FALIAS(HH\\asio_get_running, asio_get_running);
-     loadSystemlib();
-   }
+void AsioExtension::initFunctions() {
+  HHVM_FALIAS(
+    HH\\asio_get_current_context_idx,
+    asio_get_current_context_idx);
+  HHVM_FALIAS(HH\\asio_get_running_in_context, asio_get_running_in_context);
+  HHVM_FALIAS(HH\\asio_get_running, asio_get_running);
 
-} s_asio_extension;
+  loadSystemlib();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

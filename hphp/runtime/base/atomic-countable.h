@@ -25,8 +25,7 @@ namespace HPHP {
 /**
  * If an object may be shared by multiple threads but we want to reclaim it
  * when all threads are finished using it, we need to allocate it with the C++
- * new operator (instead of SmartAllocator) and we need to use AtomicSharedPtr
- * instead of SmartPtr.
+ * new operator (instead of MemoryManager) and we need to use AtomicSharedPtr.
  */
 struct AtomicCountable {
   using RefCount = int32_t;

@@ -1,0 +1,8 @@
+File "shape_remove_key7.php", line 23, characters 10-11:
+Invalid return type (Typing[4141])
+File "shape_remove_key7.php", line 21, characters 3-28:
+The field 'z' was unset here
+File "shape_remove_key7.php", line 20, characters 24-24:
+The field 'z' might be present in this shape because of structural subtyping
+File "shape_remove_key7.php", line 20, characters 24-24:
+Considering that this type argument is contravariant with respect to I

@@ -109,7 +109,7 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
   data.set(String("summary"),      std::string(summary));
   data.set(String("details"),      details);
 
-  if (!logger.logTest(Array(data.create()))) {
+  if (!logger.logTest(data.toArray())) {
     printf("WARNING: Logging %s failed\n", name.c_str());
     return false;
   }

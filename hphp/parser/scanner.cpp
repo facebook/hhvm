@@ -132,11 +132,11 @@ Scanner::Scanner(const char *source, int len, int type,
 }
 
 void Scanner::computeMd5() {
-  auto startpos = m_stream->tellg();
+  size_t startpos = m_stream->tellg();
   always_assert(startpos != -1 &&
                 startpos <= std::numeric_limits<int32_t>::max());
   m_stream->seekg(0, std::ios::end);
-  auto length = m_stream->tellg();
+  size_t length = m_stream->tellg();
   always_assert(length != -1 &&
                 length <= std::numeric_limits<int32_t>::max());
   m_stream->seekg(0, std::ios::beg);

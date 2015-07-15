@@ -32,6 +32,7 @@
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/array_element_expression.h"
@@ -154,8 +155,8 @@ namespace StackSym {
   static const char P = 0x50; // Property marker
   static const char S = 0x60; // Static property marker
   static const char M = 0x70; // Non elem/prop/W part of M-vector
-  static const char K = 0x80; // Marker for information about a class base
-  static const char Q = 0x90; // NullSafe Property marker
+  static const char K = (char)0x80; // Marker for information about a class base
+  static const char Q = (char)0x90; // NullSafe Property marker
 
   static const char CN = C | N;
   static const char CG = C | G;
@@ -2622,14 +2623,10 @@ void EmitterVisitor::visit(FileScopePtr file) {
 static StringData* getClassName(ExpressionPtr e) {
   ClassScopeRawPtr cls;
   if (e->isThis()) {
-    cls = e->getOriginalClass();
-  } else if (TypePtr t = e->getActualType()) {
-    if (t->isSpecificObject()) {
-      cls = t->getClass(e->getScope()->getContainingProgram(), e->getScope());
-    }
+    cls = e->getClassScope();
   }
   if (cls && !cls->isTrait()) {
-    return makeStaticString(cls->getOriginalName());
+    return makeStaticString(cls->getScopeName());
   }
   return nullptr;
 }
@@ -2648,9 +2645,9 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     ref = (builtinFunc->attrs() & AttrReference) != 0;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
-  } else if (!fn->getName().empty()) {
+  } else if (!fn->getOriginalName().empty()) {
     FunctionScope::FunctionInfoPtr fi =
-      FunctionScope::GetFunctionInfo(fn->getName());
+      FunctionScope::GetFunctionInfo(fn->getOriginalName());
     if (!fi || !fi->getMaybeRefReturn()) ref = false;
   }
 
@@ -3098,7 +3095,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitPop(e);
       return false;
     }
-    uint ncase = cases->getCount();
+    uint32_t ncase = cases->getCount();
     std::vector<Label> caseLabels(ncase);
     Label& brkTarget = registerBreak(sw, region.get(), 1, false)->m_label;
     Label& contTarget =
@@ -3159,7 +3156,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       }
 
       int defI = -1;
-      for (uint i = 0; i < ncase; i++) {
+      for (uint32_t i = 0; i < ncase; i++) {
         CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
         ExpressionPtr condition = c->getCondition();
         if (condition) {
@@ -3192,7 +3189,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.Jmp(brkTarget);
       }
     }
-    for (uint i = 0; i < ncase; i++) {
+    for (uint32_t i = 0; i < ncase; i++) {
       caseLabels[i].set(e);
       CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
       enterRegion(region);
@@ -3284,7 +3281,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         for (int i = 0; i < catch_count; i++) {
           CatchStatementPtr c(static_pointer_cast<CatchStatement>
                               ((*catches)[i]));
-          StringData* eName = makeStaticString(c->getClassName());
+          StringData* eName = makeStaticString(c->getOriginalClassName());
 
           // If there's already a catch of this class, skip;
           // the first one wins
@@ -3642,7 +3639,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           e.UnboxR();
           e.InstanceOf();
         } else if (s != "") {
-          ClassScopeRawPtr cls = second->getOriginalClass();
+          ClassScopeRawPtr cls = second->getClassScope();
           bool isTrait = cls && cls->isTrait();
           bool isSelf = s == "self" && notQuoted;
           bool isParent = s == "parent" && notQuoted;
@@ -3660,7 +3657,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           } else {
             if (cls) {
               if (isSelf) {
-                s = cls->getOriginalName();
+                s = cls->getScopeName();
               } else if (isParent) {
                 s = cls->getOriginalParent();
               }
@@ -3762,8 +3759,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       visit(cls);
       emitAGet(e);
       emitClsCns();
-    } else if (cc->getOriginalClass() &&
-               !cc->getOriginalClass()->isTrait()) {
+    } else if (cc->getOriginalClassScope() &&
+               !cc->getOriginalClassScope()->isTrait()) {
       // C::Constant inside a class
       auto nCls = getOriginalClassName();
       if (cc->isColonColonClass()) {
@@ -4059,7 +4056,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                call->getClassScope() &&
                !call->getClassScope()->isTrait()) {
       StringData* name =
-        makeStaticString(call->getClassScope()->getOriginalName());
+        makeStaticString(call->getClassScope()->getScopeName());
       e.String(name);
       return true;
     }
@@ -4196,7 +4193,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       static_pointer_cast<NewObjectExpression>(node));
     ExpressionListPtr params(ne->getParams());
     int numParams = params ? params->getCount() : 0;
-    ClassScopeRawPtr cls = ne->getOriginalClass();
+    ClassScopeRawPtr cls = ne->getClassScope();
 
     Offset fpiStart;
     if (ne->isStatic()) {
@@ -6453,13 +6450,14 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     Option::GenerateDocComments ? meth->getDocComment().c_str() : ""
   );
   auto retType = meth->retTypeAnnotation();
-  assert(retType || (meth->getName() == "__construct") ||
-                    (meth->getName() == "__destruct"));
+  assert(retType ||
+         meth->isNamed("__construct") ||
+         meth->isNamed("__destruct"));
   fe->returnType = retType ? retType->dataType() : KindOfNull;
   fe->retUserType = makeStaticString(meth->getReturnTypeConstraint());
 
   FunctionScopePtr funcScope = meth->getFunctionScope();
-  const char *funcname  = funcScope->getName().c_str();
+  const char *funcname  = funcScope->getScopeName().c_str();
   const char *classname = pce ? pce->name()->data() : nullptr;
   auto const& info = Native::GetBuiltinFunction(funcname, classname,
                                                 modifiers->isStatic());
@@ -6705,7 +6703,7 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   }
 
   if (!m_curFunc->isMemoizeImpl) {
-    for (uint i = 0; i < m_curFunc->params.size(); i++) {
+    for (uint32_t i = 0; i < m_curFunc->params.size(); i++) {
       const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
       if (!tc.hasConstraint()) continue;
       emitVirtualLocal(i);
@@ -6738,7 +6736,7 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
     : deprArgs.front();
 
   { // preface the message with the name of the offending function
-    auto funcName = funcScope->getOriginalName();
+    auto funcName = funcScope->getScopeName();
     BlockScopeRawPtr b = funcScope->getOuterScope();
     if (b && b->is(BlockScope::ClassScope)) {
       ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
@@ -6749,7 +6747,7 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
         e.Concat();
       } else {
         e.String(makeStaticString(
-                   clsScope->getOriginalName() + "::" + funcName
+                   clsScope->getScopeName() + "::" + funcName
                    + ": " + deprMessage));
       }
     } else {
@@ -6850,14 +6848,14 @@ void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
     m_curFunc->hasMemoizeSharedProp = true;
     m_curFunc->memoizeSharedPropIndex = pce->getNextMemoizeCacheKey();
   } else {
-    propNameBase = funcScope->getName();
+    propNameBase = toLower(funcScope->getScopeName());
   }
 
   // The prop definition in traits conflicts with the definition in a class
   // so make a different prop for each trait
   std::string traitNamePart;
   if (classScope && classScope->isTrait()) {
-    traitNamePart = classScope->getName();
+    traitNamePart = toLower(classScope->getScopeName());
     // the backslash comes from namespaces. @jan thought that would cause
     // issues, so use $ instead
     for (char &c: traitNamePart) {
@@ -6887,7 +6885,7 @@ void EmitterVisitor::emitMemoizeProp(Emitter& e,
                                      MethodStatementPtr meth,
                                      Id localID,
                                      const std::vector<Id>& paramIDs,
-                                     uint numParams) {
+                                     uint32_t numParams) {
   assert(m_curFunc->isMemoizeWrapper);
 
   if (meth->is(Statement::KindOfFunctionStatement)) {
@@ -6906,7 +6904,7 @@ void EmitterVisitor::emitMemoizeProp(Emitter& e,
   }
 
   assert(numParams <= paramIDs.size());
-  for (uint i = 0; i < numParams; i++) {
+  for (uint32_t i = 0; i < numParams; i++) {
     if (i == 0 && m_curFunc->hasMemoizeSharedProp) {
       e.Int(m_curFunc->memoizeSharedPropIndex);
     } else {
@@ -7065,7 +7063,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   }
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    for (uint i = 0; i < numParams; i++) {
+    for (uint32_t i = 0; i < numParams; i++) {
       emitVirtualLocal(i);
       emitFPass(e, i, PassByRefKind::ErrorOnCell);
     }
@@ -7224,7 +7222,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   prepareEvalStack();
 
   m_evalStack.push(StackSym::K);
-  auto const func = node->getOriginalFunction();
+  auto const func = node->getFunctionScope();
 
   if (node->isStatic()) {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_LATE_BOUND);
@@ -7253,8 +7251,8 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
       m_evalStack.setUnnamedLocal(clsBaseIdx, unnamedLoc, m_ue.bcPos());
       emitPop(e);
     }
-  } else if (!node->getOriginalClass() ||
-             node->getOriginalClass()->isTrait() ||
+  } else if (!node->getClassScope() ||
+             node->getClassScope()->isTrait() ||
              (func && func->isClosure())) {
     // In a trait, a potentially rebound closure or psuedo-main, we can't
     // resolve self:: or parent:: yet, so we emit special instructions that do
@@ -7269,7 +7267,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
         makeStaticString(node->getOriginalClassName()));
     }
   } else if (node->isParent() &&
-             node->getOriginalClass()->getOriginalParent().empty()) {
+             node->getClassScope()->getOriginalParent().empty()) {
     // parent:: in a class without a parent.  We'll emit a Parent
     // opcode because it can handle this error case.
     m_evalStack.setClsBaseType(SymbolicStack::CLS_PARENT);
@@ -7496,7 +7494,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   Func* fcallBuiltin = nullptr;
   StringData* nLiteral = nullptr;
   Offset fpiStart = 0;
-  if (node->getClass() || !node->getClassName().empty()) {
+  if (node->getClass() || node->hasStaticClass()) {
     bool isSelfOrParent = node->isSelf() || node->isParent();
     if (!node->isStatic() && !isSelfOrParent &&
         !node->getOriginalClassName().empty() && !nameStr.empty()) {
@@ -7638,7 +7636,7 @@ void EmitterVisitor::emitClassTraitPrecRule(PreClassEmitter* pce,
 
   PreClass::TraitPrecRule rule(traitName, methodName);
 
-  std::unordered_set<std::string> otherTraitNames;
+  hphp_string_iset otherTraitNames;
   stmt->getOtherTraitNames(otherTraitNames);
   for (auto const& name : otherTraitNames) {
     rule.addOtherTraitName(makeStaticString(name));
@@ -7960,7 +7958,8 @@ void EmitterVisitor::emitClass(Emitter& e,
             bool added UNUSED = pce->addConstant(
               constName, typeConstraint, &tvVal,
               makeStaticString(os.str()),
-              cc->isTypeconst());
+              cc->isTypeconst(),
+              cc->getTypeStructure());
             assert(added);
           }
         }
@@ -9068,14 +9067,11 @@ ContMethMapT s_genMethods = {
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
                                    GeneratorMethod m) {
-  static const StringData* valStr = makeStaticString("value");
-
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
   switch (m) {
     case METH_SEND:
     case METH_RAISE:
-      fe->appendParam(valStr, FuncEmitter::ParamInfo());
     case METH_NEXT: {
       // We always want these methods to be cloned with new funcids in
       // subclasses so we can burn Class*s and Func*s into the
@@ -9154,9 +9150,20 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
 }
 
 static int32_t emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
+                      AttrFinal);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
   ue.emitOp(OpThis);
+  ue.emitOp(OpRetC);
+  return 1;  // we use one stack slot
+}
+
+static int32_t emitWaitHandleResultMethod(UnitEmitter& ue, FuncEmitter* fe) {
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
+                      AttrFinal);
+  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
+  ue.emitOp(OpThis);
+  ue.emitOp(OpWHResult);
   ue.emitOp(OpRetC);
   return 1;  // we use one stack slot
 }
@@ -9168,19 +9175,6 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   auto ue = folly::make_unique<UnitEmitter>(s_nativeClassMD5);
   ue->m_filepath = s_systemlibNativeCls.get();
   ue->addTrivialPseudoMain();
-
-  ContMethMap asyncGenMethods;
-  asyncGenMethods[makeStaticString("next")] = METH_NEXT;
-  asyncGenMethods[makeStaticString("send")] = METH_SEND;
-  asyncGenMethods[makeStaticString("raise")] = METH_RAISE;
-
-  ContMethMap genMethods;
-  genMethods[makeStaticString("next")] = METH_NEXT;
-  genMethods[makeStaticString("send")] = METH_SEND;
-  genMethods[makeStaticString("raise")] = METH_RAISE;
-  genMethods[makeStaticString("valid")] = METH_VALID;
-  genMethods[makeStaticString("current")] = METH_CURRENT;
-  genMethods[makeStaticString("key")] = METH_KEY;
 
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
@@ -9260,29 +9254,19 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
-      static const StringData* asyncGenCls =
-        makeStaticString("hh\\asyncgenerator");
-      static const StringData* generatorCls = makeStaticString("generator");
       static const StringData* waitHandleCls =
         makeStaticString("hh\\waithandle");
       static const StringData* gwhMeth = makeStaticString("getwaithandle");
+      static const StringData* resultMeth = makeStaticString("result");
       StringData* methName = makeStaticString(methodInfo->m_name);
-      GeneratorMethod* cmeth;
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
       auto stackPad = int32_t{0};
-      // The following for generators is temporary until HNI conversion
-      if (e.name->isame(asyncGenCls) &&
-          (cmeth = folly::get_ptr(asyncGenMethods, methName))) {
-        auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
-      } else if (e.name->isame(generatorCls) &&
-          (cmeth = folly::get_ptr(genMethods, methName))) {
-        auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
-      } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
+      if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
         stackPad = emitGetWaitHandleMethod(*ue, fe);
+      } else if (e.name->isame(waitHandleCls) && methName->isame(resultMeth)) {
+        stackPad = emitWaitHandleResultMethod(*ue, fe);
       } else {
         if (e.name->isame(s_construct.get())) {
           hasCtor = true;
@@ -9450,7 +9434,7 @@ class EmitterWorker
   : public JobQueueWorker<FileScopeRawPtr, void*, true, true> {
  public:
   EmitterWorker() : m_ret(true) {}
-  virtual void doJob(JobType job) {
+  void doJob(JobType job) override {
     try {
       AnalysisResultPtr ar = ((AnalysisResult*)m_context)->shared_from_this();
       UnitEmitter* ue = emitHHBCVisitor(ar, job);
@@ -9466,6 +9450,9 @@ class EmitterWorker
       Logger::Error("Fatal: An unexpected exception was thrown");
       m_ret = false;
     }
+  }
+  void onThreadExit() override {
+    hphp_memory_cleanup();
   }
  private:
   bool m_ret;
@@ -9508,6 +9495,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     /* same for TypeConstraint */
     TypeConstraint tc;
   }
+
+  Compiler::ClearErrors();
 
   JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
@@ -9640,7 +9629,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       filename = "";
       unitOrigin = UnitOrigin::Eval;
     }
-    SCOPE_EXIT { SymbolTable::Purge(); };
 
     std::unique_ptr<UnitEmitter> ue;
     // Check if this file contains raw hip hop bytecode instead of

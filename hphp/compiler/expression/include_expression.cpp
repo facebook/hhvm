@@ -234,7 +234,6 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
 
   VariableTablePtr var = getScope()->getVariables();
   var->setAttribute(VariableTable::ContainsLDynamicVariable);
-  var->forceVariants(ar, VariableTable::AnyVars);
 
   UnaryOpExpression::analyzeProgram(ar);
 }

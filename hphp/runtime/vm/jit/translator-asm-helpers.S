@@ -3,12 +3,16 @@
  *
  * This helper routine is written in assembly to take care of the details
  * when transferring control between jitted code and the translator.
- *   rdi / x0:  Cell* vm_sp
- *   rsi / x1:  Cell* vm_fp
- *   rdx / x2:  unsigned char* start
- *   rcx / x4:  ActRec* firstAR
- *   r8  / x5:  uint8_t* targetCacheBase
- *   r9  / x6:  ActRec* calleeAR
+ *
+ * The columns are registers of Linux and Mac ABI / Windows ABI / ARM ABI.
+ *   rdi / rcx   / x0:  Cell* vm_sp
+ *   rsi / rdx   / x1:  Cell* vm_fp
+ *   rdx / r8    / x2:  unsigned char* start
+ *   rcx / r9    / x4:  ActRec* firstAR
+ *   r8  / stack / x5:  uint8_t* targetCacheBase
+ *   r9  / stack / x6:  ActRec* calleeAR
+ *
+ * Note that on Windows, ETCH_GET_ARG5/6 borrow r10/r11 respectively
  */
 
 #include "hphp/util/etch-helpers.h"
@@ -22,17 +26,22 @@
 ETCH_NAME(enterTCHelper):
   // Prologue
   CFI(startproc)             // amongst other things, cfa reg is now rsp, and offset is 8
+
+  // On Windows, get the 5th and 6th arguments from the stack.
+  ETCH_GET_ARG5
+  ETCH_GET_ARG6
+
   push %rbp
   CFI2(adjust_cfa_offset, 8) // cfa is now 8 bytes further from rsp than it was before
   CFI3C(offset, rbp, -16)    // Where to find previous value of rbp, relative to cfa
 
   // Set firstAR->m_sfp to point to this frame.
-  mov %rsp, (%rcx)
+  mov %rsp, (ETCH_ARG4)
 
   // Set up special registers used for translated code.
-  mov %rdi, %rbx          // rVmSp
-  mov %r8,  %r12          // rVmTl
-  mov %rsi, %rbp          // rVmFp
+  mov ETCH_ARG1, %rbx          // rVmSp
+  mov ETCH_ARG5, %r12          // rVmTl
+  mov ETCH_ARG2, %rbp          // rVmFp
 
   sub $8, %rsp // align native stack
   CFI2(adjust_cfa_offset, 8)
@@ -48,11 +57,11 @@ ETCH_NAME(enterTCHelper):
    * on the RSB but the ret to callToExit always mispredicts anyway, and this
    * keeps the RSB balanced.
    */
-  test %r9, %r9
+  test ETCH_ARG6, ETCH_ARG6
   jz ETCH_LABEL(enterTCHelper$callTC)
   push ETCH_NAME_REL(enterTCExit)
-  push 0x8(%r9)
-  mov %r9, %rbp
+  push 0x8(ETCH_ARG6)
+  mov ETCH_ARG6, %rbp
   call ETCH_LABEL(enterTCHelper$prologue)
 
   /*
@@ -63,7 +72,7 @@ ETCH_NAME(enterTCHelper):
    * 16-byte aligned.
    */
 ETCH_LABEL(enterTCHelper$callTC):
-  call *%rdx
+  call *ETCH_ARG3
 
   /*
    * enterTCExit is never called directly; this exists to give the jit
@@ -87,7 +96,7 @@ ETCH_NAME(enterTCExit):
 
 ETCH_LABEL(enterTCHelper$prologue):
   pop %rax
-  jmp *%rdx
+  jmp *ETCH_ARG3
 
   CFI(endproc)
   ETCH_SIZE(enterTCHelper)
@@ -115,8 +124,8 @@ ETCH_NAME(handleSRHelper):
   CFI2(adjust_cfa_offset, 0x30)
 
   // call mcg->handleServiceRequest(%rsp)
-  mov ETCH_NAME(mcg)(%rip), %rdi
-  mov %rsp, %rsi
+  mov ETCH_NAME(mcg)(%rip), ETCH_ARG1
+  mov %rsp, ETCH_ARG2
   call MCGenerator_handleServiceRequest
 
   // Pop the ServiceReqInfo off the stack.

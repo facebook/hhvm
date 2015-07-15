@@ -105,7 +105,7 @@ void emitPushL(IRGS& env, int32_t id) {
 void emitCGetL2(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const oldTop = pop(env);
+  auto const oldTop = pop(env, DataTypeGeneric);
   auto const val = ldLocInnerWarn(
     env,
     id,

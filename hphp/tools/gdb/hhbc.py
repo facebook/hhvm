@@ -5,6 +5,8 @@ GDB commands for inspecting HHVM bytecode.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 import unit
 from gdbutils import *
@@ -170,7 +172,7 @@ class HHBC(object):
         instrlen = 1
         imms = []
 
-        for i in xrange(0, HHBC.num_imms(op)):
+        for i in xrange(0, int(HHBC.num_imms(op))):
             immoff = bc + instrlen
             immtype = HHBC.imm_type(op, i)
             imminfo = HHBC.imm_info(immoff, immtype)
@@ -202,6 +204,7 @@ remains where it left off after the previous call.
         super(HHXCommand, self).__init__('hhx', gdb.COMMAND_DATA)
         self.bcpos = None
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 

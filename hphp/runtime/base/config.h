@@ -29,6 +29,7 @@ typedef std::map<std::string, std::string> ConfigMap;
 typedef std::set<std::string> ConfigSet;
 // with comparer
 typedef std::set<std::string, stdltistr> ConfigSetC;
+typedef std::map<std::string, std::string, stdltistr> ConfigMapC;
 typedef boost::container::flat_set<std::string> ConfigFlatSet;
 typedef hphp_string_imap<std::string> ConfigIMap;
 
@@ -135,6 +136,10 @@ struct Config {
                    const std::string& name = "",
                    const ConfigMap& defValue = ConfigMap(),
                    const bool prepend_hhvm = true);
+  static void Bind(ConfigMapC& loc, const IniSettingMap& ini, const Hdf& config,
+                   const std::string& name = "",
+                   const ConfigMapC& defValue = ConfigMapC(),
+                   const bool prepend_hhvm = true);
   static void Bind(ConfigSet& loc, const IniSettingMap& ini, const Hdf& config,
                    const std::string& name = "",
                    const ConfigSet& defValue = ConfigSet(),
@@ -212,6 +217,10 @@ struct Config {
                           const std::string& name = "",
                           const ConfigMap& defValue = ConfigMap(),
                           const bool prepend_hhvm = true);
+  static ConfigMapC GetMapC(const IniSettingMap& ini, const Hdf& config,
+                          const std::string& name = "",
+                          const ConfigMapC& defValue = ConfigMapC(),
+                          const bool prepend_hhvm = true);
   static ConfigSet GetSet(const IniSettingMap& ini, const Hdf& config,
                           const std::string& name = "",
                           const ConfigSet& defValue = ConfigSet(),
@@ -272,6 +281,12 @@ struct Config {
     values.insert(value);
   }
   static void StringInsert(std::map<std::string, std::string> &values,
+                           const std::string &key,
+                           const std::string &value) {
+    values[key] = value;
+  }
+  static void StringInsert(std::map<std::string, std::string,
+                           stdltistr> &values,
                            const std::string &key,
                            const std::string &value) {
     values[key] = value;

@@ -44,7 +44,7 @@ Object c_SleepWaitHandle::ti_create(int64_t usecs) {
         "Expected usecs to be a non-negative integer");
   }
 
-  auto wh = makeSmartPtr<c_SleepWaitHandle>();
+  auto wh = req::make<c_SleepWaitHandle>();
   wh->initialize(usecs);
   return Object(std::move(wh));
 }

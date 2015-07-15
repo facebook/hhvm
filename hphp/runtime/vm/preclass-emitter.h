@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/array-data.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
@@ -188,10 +189,11 @@ class PreClassEmitter {
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
-                   const bool typeConst);
+                   const bool typeConst = false,
+                   const ArrayData* typeStructure = nullptr);
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
-                           const bool typeConst);
+                           const bool typeConst = false);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);

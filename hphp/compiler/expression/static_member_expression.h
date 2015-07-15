@@ -34,9 +34,6 @@ public:
   int getLocalEffects() const override { return NoEffect; }
   bool isRefable(bool checkError = false) const override { return true;}
 
-  unsigned getCanonHash() const override;
-  bool canonCompare(ExpressionPtr e) const override;
-
   ExpressionPtr getExp() { return m_exp; }
 
 private:

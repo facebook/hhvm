@@ -2,7 +2,7 @@
 #define incl_HPHP_EXT_COLLECTIONS_PAIR_H
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP { namespace collections {
@@ -49,7 +49,7 @@ struct PairIterator {
   }
 
   bool valid() const {
-    static_assert(std::is_unsigned<typeof(m_pos)>::value,
+    static_assert(std::is_unsigned<decltype(m_pos)>::value,
                   "m_pos should be unsigned");
     return m_obj && (m_pos < 2);
   }
@@ -58,7 +58,7 @@ struct PairIterator {
   void rewind() { m_pos = 0; }
 
  private:
-  SmartPtr<c_Pair> m_obj;
+  req::ptr<c_Pair> m_obj;
   uint32_t m_pos{0};
 };
 

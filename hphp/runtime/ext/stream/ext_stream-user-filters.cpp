@@ -172,7 +172,7 @@ private:
 
     // If it's ALL we create two resources, but only return one - this
     // matches Zend, and is the documented behavior.
-    SmartPtr<StreamFilter> ret;
+    req::ptr<StreamFilter> ret;
     if (mode & k_STREAM_FILTER_READ) {
       auto resource = createInstance(func_name,
                                      file,
@@ -206,8 +206,8 @@ private:
     return Variant(std::move(ret));
   }
 
-  SmartPtr<StreamFilter> createInstance(const char* php_func,
-                                        SmartPtr<File> stream,
+  req::ptr<StreamFilter> createInstance(const char* php_func,
+                                        req::ptr<File> stream,
                                         const String& filter,
                                         const Variant& params) {
     auto class_name = m_registeredFilters.rvalAt(filter).asCStrRef();
@@ -246,7 +246,7 @@ private:
       return nullptr;
     }
 
-    return makeSmartPtr<StreamFilter>(obj, stream);
+    return req::make<StreamFilter>(obj, stream);
   }
 
 public:
@@ -257,8 +257,8 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(StreamUserFilters, s_stream_user_filters);
 ///////////////////////////////////////////////////////////////////////////////
 // StreamFilter
 
-int64_t StreamFilter::invokeFilter(const SmartPtr<BucketBrigade>& in,
-                                   const SmartPtr<BucketBrigade>& out,
+int64_t StreamFilter::invokeFilter(const req::ptr<BucketBrigade>& in,
+                                   const req::ptr<BucketBrigade>& out,
                                    bool closing) {
   auto consumedTV = make_tv<KindOfInt64>(0);
   auto consumedRef = RefData::Make(consumedTV);
@@ -279,7 +279,7 @@ bool StreamFilter::remove() {
   if (!m_stream) {
     return false;
   }
-  auto ret = m_stream->removeFilter(SmartPtr<StreamFilter>(this));
+  auto ret = m_stream->removeFilter(req::ptr<StreamFilter>(this));
   m_stream.reset();
   return ret;
 }

@@ -257,10 +257,13 @@ void Func::setFullName(int numParams) {
     char* to = (char*)(m_prologueTable + numPrologues);
 
     Debug::DebugInfo::recordDataMap(
-      from, to, folly::format("Func-{}",
-                              (isPseudoMain() ?
-                               m_unit->filepath()->data() :
-                               m_fullName->data())).str());
+      from,
+      to,
+      folly::format(
+        "Func-{}",
+        isPseudoMain() ? m_unit->filepath() : m_fullName.get()
+      ).str()
+    );
   }
   if (RuntimeOption::DynamicInvokeFunctions.size()) {
     if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
@@ -614,7 +617,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   if (!opts.metadata) return;
 
   const ParamInfoVec& params = shared()->m_params;
-  for (uint i = 0; i < params.size(); ++i) {
+  for (uint32_t i = 0; i < params.size(); ++i) {
     if (params[i].funcletOff != InvalidAbsoluteOffset) {
       out << " DV for parameter " << i << " at " << params[i].funcletOff;
       if (params[i].phpCode) {

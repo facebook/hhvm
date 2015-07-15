@@ -24,15 +24,15 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
+#include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include "hphp/runtime/vm/class.h"
@@ -184,10 +184,10 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
   auto const size =
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
   assert(size == sizeForNProps(nProps));
-  if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(this, size);
+  if (LIKELY(size <= kMaxSmallSize)) {
+    return MM().freeSmallSize(this, size);
   }
-  MM().smartFreeSizeBig(this, size);
+  MM().freeBigSize(this, size);
 }
 
 NEVER_INLINE
@@ -267,6 +267,13 @@ Object ObjectData::iterableObject(bool& isIterable,
       return o;
     }
     obj = o;
+  }
+  if (!isIterator() && obj->instanceof(c_SimpleXMLElement::classof())) {
+    auto iterator = cast<c_SimpleXMLElement>(obj)
+      ->t_getiterator()
+      .toObject();
+    isIterable = true;
+    return iterator;
   }
   isIterable = false;
   return obj;
@@ -497,7 +504,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
 
     if (UNLIKELY(flags->m_type == KindOfInt64 &&
                  flags->m_data.num == ARRAYOBJ_STD_PROP_LIST)) {
-      Array ret(ArrayData::Create());
+      auto ret = Array::Create();
       o_getArray(ret, true);
       return ret;
     }
@@ -509,7 +516,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {
-    Array ret(ArrayData::Create());
+    auto ret = Array::Create();
     o_getArray(ret, pubOnly);
     return ret;
   }
@@ -786,7 +793,7 @@ inline Array getSerializeProps(const ObjectData* obj,
     // When ArrayIterator is cast to an array, it returns its array object,
     // however when it's being var_dump'd or print_r'd, it shows its properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
-      Array ret(ArrayData::Create());
+      auto ret = Array::Create();
       obj->o_getArray(ret);
       return ret;
     }
@@ -794,7 +801,7 @@ inline Array getSerializeProps(const ObjectData* obj,
     // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
     if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
-      Array ret(ArrayData::Create());
+      auto ret = Array::Create();
       obj->o_getArray(ret);
       return ret;
     }
@@ -999,14 +1006,11 @@ ObjectData* ObjectData::clone() {
       return collections::clone(this);
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
-    } else if (instanceof(c_Generator::classof())) {
-      return Generator::Clone(this)->toObject();
     } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }
     always_assert(false);
   }
-
   return cloneImpl();
 }
 
@@ -1080,14 +1084,14 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  auto o = new (MM().smartMallocSize(size)) ObjectData(cls, NoInit{});
+  auto o = new (MM().mallocSmallSize(size)) ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;
 }
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  auto o = new (MM().smartMallocSizeBig<false>(size).ptr)
+  auto o = new (MM().mallocBigSize<false>(size).ptr)
     ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;
@@ -1224,8 +1228,7 @@ struct PropAccessInfo::Hash {
 };
 
 struct PropRecurInfo {
-  typedef smart::hash_set<PropAccessInfo,PropAccessInfo::Hash> RecurSet;
-
+  typedef req::hash_set<PropAccessInfo,PropAccessInfo::Hash> RecurSet;
   const PropAccessInfo* activePropInfo;
   RecurSet* activeSet;
 };
@@ -1239,7 +1242,7 @@ bool magic_prop_impl(TypedValue* retval,
                      Invoker invoker) {
   if (UNLIKELY(propRecurInfo.activePropInfo != nullptr)) {
     if (!propRecurInfo.activeSet) {
-      propRecurInfo.activeSet = smart_new<PropRecurInfo::RecurSet>();
+      propRecurInfo.activeSet = req::make_raw<PropRecurInfo::RecurSet>();
       propRecurInfo.activeSet->insert(*propRecurInfo.activePropInfo);
     }
     if (!propRecurInfo.activeSet->insert(info).second) {
@@ -1258,7 +1261,7 @@ bool magic_prop_impl(TypedValue* retval,
   SCOPE_EXIT {
     propRecurInfo.activePropInfo = nullptr;
     if (UNLIKELY(propRecurInfo.activeSet != nullptr)) {
-      smart_delete(propRecurInfo.activeSet);
+      req::destroy_raw(propRecurInfo.activeSet);
       propRecurInfo.activeSet = nullptr;
     }
   };
@@ -1992,7 +1995,10 @@ void ObjectData::cloneSet(ObjectData* clone) {
 }
 
 ObjectData* ObjectData::cloneImpl() {
-  Object o{m_cls};
+  ObjectData* obj = instanceof(Generator::getClass())
+                    ? Generator::allocClone(this)
+                    : ObjectData::newInstance(m_cls);
+  Object o = Object::attach(obj);
   cloneSet(o.get());
   if (UNLIKELY(getAttribute(HasNativeData))) {
     Native::nativeDataInstanceCopy(o.get(), this);

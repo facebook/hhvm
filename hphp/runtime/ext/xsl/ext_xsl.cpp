@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"

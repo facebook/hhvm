@@ -1,8 +1,7 @@
-string(%d) "exception 'ReflectionException' with message 'Class int does not exist' in :
+string(%d) "exception 'ReflectionException' with message 'Class int does not exist' in %s/test/slow/reflection/scalar_param_types/php-noforcehh.php:8
 Stack trace:
-#0 (): ReflectionClass->__construct()
-#1 %s/test/slow/reflection/scalar_param_types/php-noforcehh.php(8): ReflectionParameter->getClass()
-#2 {main}"
+#0 %s/test/slow/reflection/scalar_param_types/php-noforcehh.php(8): ReflectionParameter->getClass()
+#1 {main}"
 string(3) "int"
 NULL
 string(5) "array"

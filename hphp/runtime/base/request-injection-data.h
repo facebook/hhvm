@@ -63,6 +63,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef OUT
+# undef OUT
+#endif
 struct RequestInjectionData {
   /* The state of the step out command. */
   enum class StepOutState : int8_t {

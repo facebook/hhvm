@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
@@ -839,7 +839,6 @@ arrayRefShuffle(ArrayData* oldData, ArrayData* newData, TypedValue* base) {
     return ShuffleReturn<setRef>::do_return(oldData);
   }
 
-  newData->incRefCount();
   if (setRef) {
     if (base->m_type == KindOfArray && base->m_data.parr == oldData) {
       base->m_data.parr = newData;
@@ -1032,7 +1031,6 @@ inline void SetNewElemArray(TypedValue* base, Cell* value) {
     || (value->m_type == KindOfArray && value->m_data.parr == a);
   ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
   if (a2 != a) {
-    a2->incRefCount();
     auto old = base->m_data.parr;
     base->m_data.parr = a2;
     old->decRefAndRelease();
@@ -1550,7 +1548,6 @@ inline void UnsetElemArray(TypedValue* base, key_type<keyType> key) {
   ArrayData* a2 = UnsetElemArrayPre(a, key, copy);
 
   if (a2 != a) {
-    a2->incRefCount();
     auto old = base->m_data.parr;
     base->m_data.parr = a2;
     old->decRefAndRelease();

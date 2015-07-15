@@ -60,13 +60,9 @@ ExpressionPtr ObjectPropertyExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool ObjectPropertyExpression::isTemporary() const {
-  return !m_valid && !(m_context & (LValue | RefValue | UnsetContext));
-}
-
 bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) {
   // To tell whether a property is declared as private in the context
-  ClassScopePtr cls = getOriginalClass();
+  ClassScopePtr cls = getClassScope();
   if (!cls || !cls->getVariables()->hasNonStaticPrivate()) return true;
   if (m_property->getKindOf() != Expression::KindOfScalarExpression) {
     return false;

@@ -104,7 +104,7 @@ public:
         case Kind::SmartPtr:
           m_u.smart_ptr.~EntryPtr();
           break;
-        case Kind::Accessor:
+        case Kind::AccessorKind:
           m_u.accessor.~ConstAccessor();
           break;
       }
@@ -119,7 +119,7 @@ public:
 
     Accessor& operator=(EntryPtr&& ep) {
       switch (m_kind) {
-        case Kind::Accessor:
+        case Kind::AccessorKind:
           m_u.accessor.~ConstAccessor();
         case Kind::Empty:
         case Kind::Ptr:
@@ -141,10 +141,10 @@ public:
           m_u.smart_ptr.~EntryPtr();
         case Kind::Empty:
         case Kind::Ptr:
-          m_kind = Kind::Accessor;
+          m_kind = Kind::AccessorKind;
           new (&m_u.accessor) LRUCache::ConstAccessor();
           break;
-        case Kind::Accessor:
+        case Kind::AccessorKind:
           break;
       }
       return m_u.accessor;
@@ -155,7 +155,7 @@ public:
         case Kind::Empty:    return nullptr;
         case Kind::Ptr:      return m_u.ptr;
         case Kind::SmartPtr: return m_u.smart_ptr.get();
-        case Kind::Accessor: return m_u.accessor->get();
+        case Kind::AccessorKind: return m_u.accessor->get();
       }
       always_assert(false);
     }
@@ -170,7 +170,7 @@ public:
       Empty,
       Ptr,
       SmartPtr,
-      Accessor,
+      AccessorKind,
     };
 
     union Ptr {
@@ -475,7 +475,7 @@ template<bool useSmartFree = false>
 struct FreeHelperImpl : private boost::noncopyable {
   explicit FreeHelperImpl(void* p) : p(p) {}
   ~FreeHelperImpl() {
-    useSmartFree ? smart_free(p) : free(p);
+    useSmartFree ? req::free(p) : free(p);
   }
 
 private:
@@ -756,7 +756,7 @@ static int* create_offset_array(const pcre_cache_entry* pce,
                                 int& size_offsets) {
   /* Allocate memory for the offsets array */
   size_offsets = pce->num_subpats * 3;
-  return (int *)smart_malloc(size_offsets * sizeof(int));
+  return (int *)req::malloc(size_offsets * sizeof(int));
 }
 
 static inline void add_offset_pair(Array& result,
@@ -1859,7 +1859,7 @@ static void php_reg_eprint(int err, regex_t* re) {
   /* get the length of the message */
   buf_len = regerror(REG_ITOA | err, re, nullptr, 0);
   if (buf_len) {
-    buf = (char *)smart_malloc(buf_len);
+    buf = (char *)req::malloc(buf_len);
     if (!buf) return; /* fail silently */
     /* finally, get the error message */
     regerror(REG_ITOA | err, re, buf, buf_len);
@@ -1869,7 +1869,7 @@ static void php_reg_eprint(int err, regex_t* re) {
 #endif
   len = regerror(err, re, nullptr, 0);
   if (len) {
-    message = (char *)smart_malloc(buf_len + len + 2);
+    message = (char *)req::malloc(buf_len + len + 2);
     if (!message) {
       return; /* fail silently */
     }
@@ -1881,8 +1881,8 @@ static void php_reg_eprint(int err, regex_t* re) {
     regerror(err, re, message + buf_len, len);
     raise_warning("%s", message);
   }
-  smart_free(buf);
-  smart_free(message);
+  req::free(buf);
+  req::free(message);
 }
 
 Variant php_split(const String& spliton, const String& str, int count,

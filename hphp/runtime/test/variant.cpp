@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP {
 
@@ -46,14 +46,14 @@ TEST(Variant, References) {
 
 TEST(Variant, Refcounts) {
   {
-    auto ptr = makeSmartPtr<DummyResource>();
+    auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     Variant v(std::move(ptr));
     EXPECT_TRUE(v.getRefCount() == 1);
   }
 
   {
-    auto ptr = makeSmartPtr<DummyResource>();
+    auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     {
       Variant v(ptr);
@@ -72,7 +72,7 @@ TEST(Variant, Casts) {
     EXPECT_FALSE(isa<DummyResource>(Variant(true)));
     EXPECT_FALSE(isa_or_null<DummyResource>(Variant(true)));
 
-    auto dummy = makeSmartPtr<DummyResource>();
+    auto dummy = req::make<DummyResource>();
     Variant var(dummy);
     Variant empty;
     EXPECT_TRUE(isa<DummyResource>(var));
@@ -149,7 +149,7 @@ TEST(Variant, Casts) {
     EXPECT_FALSE(isa<c_Vector>(Variant(true)));
     EXPECT_FALSE(isa_or_null<c_Vector>(Variant(true)));
 
-    auto dummy = makeSmartPtr<c_Vector>();
+    auto dummy = req::make<c_Vector>();
     Variant var(dummy);
     Variant empty;
     EXPECT_TRUE(isa<c_Vector>(var));
@@ -223,30 +223,30 @@ TEST(Variant, Casts) {
 TEST(Variant, MoveCasts) {
   {
     auto res = unsafe_cast_or_null<DummyResource>(
-      Variant(makeSmartPtr<DummyResource>()));
+      Variant(req::make<DummyResource>()));
     EXPECT_NE(res, nullptr);
     auto res2 = dyn_cast<DummyResource>(
-      Variant(makeSmartPtr<DummyResource>()));
+      Variant(req::make<DummyResource>()));
     EXPECT_NE(res2, nullptr);
     auto res3 = dyn_cast<File>(
-      Variant(makeSmartPtr<DummyResource>()));
+      Variant(req::make<DummyResource>()));
     EXPECT_EQ(res3, nullptr);
   }
   {
     auto res = unsafe_cast_or_null<c_Vector>(
-      Variant(makeSmartPtr<c_Vector>()));
+      Variant(req::make<c_Vector>()));
     EXPECT_NE(res, nullptr);
     auto res2 = dyn_cast<c_Vector>(
-      Variant(makeSmartPtr<c_Vector>()));
+      Variant(req::make<c_Vector>()));
     EXPECT_NE(res2, nullptr);
     auto res3 = dyn_cast<c_Map>(
-      Variant(makeSmartPtr<c_Vector>()));
+      Variant(req::make<c_Vector>()));
     EXPECT_EQ(res3, nullptr);
   }
   {
-    auto dummy = makeSmartPtr<DummyResource>();
+    auto dummy = req::make<DummyResource>();
     dummy->incRefCount(); // the RefData constructor steals it's input.
-    auto ref = SmartPtr<RefData>::attach(
+    auto ref = req::ptr<RefData>::attach(
       RefData::Make(*Variant(dummy).asTypedValue()));
     Variant dummyRef(ref);
     EXPECT_FALSE(ref->hasExactlyOneRef());
@@ -254,18 +254,18 @@ TEST(Variant, MoveCasts) {
     EXPECT_EQ(res, dummy);
   }
   {
-    auto dummy = makeSmartPtr<DummyResource>();
+    auto dummy = req::make<DummyResource>();
     dummy->incRefCount(); // the RefData constructor steals it's input.
     Variant dummyRef(
-      SmartPtr<RefData>::attach(RefData::Make(*Variant(dummy).asTypedValue())));
+      req::ptr<RefData>::attach(RefData::Make(*Variant(dummy).asTypedValue())));
     //EXPECT_TRUE(dummyRef.getRefData()->hasExactlyOneRef());
     auto res = cast<DummyResource>(std::move(dummyRef));
     EXPECT_EQ(res, dummy);
   }
   {
-    auto dummy = makeSmartPtr<DummyResource>();
+    auto dummy = req::make<DummyResource>();
     dummy->incRefCount(); // the RefData constructor steals it's input.
-    auto ref = SmartPtr<RefData>::attach(
+    auto ref = req::ptr<RefData>::attach(
       RefData::Make(*Variant(dummy).asTypedValue()));
     Variant dummyRef(ref.get());
     EXPECT_FALSE(ref->hasExactlyOneRef());

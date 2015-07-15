@@ -2718,11 +2718,11 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, const Variant& data,
     ta = localtime_r(&timestamp, &tmbuf);
     /*ta = php_gmtime_r(&timestamp, &tmbuf);*/
 
-    buf = (char *)smart_malloc(buf_len);
+    buf = (char *)req::malloc(buf_len);
     while ((real_len = strftime(buf, buf_len, format, ta)) == buf_len ||
            real_len == 0) {
       buf_len *= 2;
-      buf = (char *)smart_realloc(buf, buf_len);
+      buf = (char *)req::realloc(buf, buf_len);
       if (!--max_reallocs) break;
     }
 
@@ -2737,12 +2737,12 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, const Variant& data,
       real_len += 6;
     }
     if (real_len >= buf_len) {
-      buf = (char *)smart_realloc(buf, real_len+1);
+      buf = (char *)req::realloc(buf, real_len+1);
     }
     strcat(buf, tzbuf);
 
     xmlNodeSetContent(xmlParam, BAD_CAST(buf));
-    smart_free(buf);
+    req::free(buf);
   } else if (data.isString()) {
     String sdata = data.toString();
     xmlNodeSetContentLen(xmlParam, BAD_CAST(sdata.data()), sdata.size());

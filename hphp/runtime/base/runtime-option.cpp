@@ -128,7 +128,6 @@ std::string RuntimeOption::AdminLogSymLink;
 
 std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 
-std::string RuntimeOption::Tier;
 std::string RuntimeOption::Host;
 std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
@@ -337,9 +336,9 @@ bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 
 #ifdef FOLLY_SANITIZE_ADDRESS
-bool RuntimeOption::DisableSmartAllocator = true;
+bool RuntimeOption::DisableSmallAllocator = true;
 #else
-bool RuntimeOption::DisableSmartAllocator = false;
+bool RuntimeOption::DisableSmallAllocator = false;
 #endif
 
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
@@ -662,7 +661,8 @@ static bool matchHdfPattern(const std::string &value,
 // various settings, even if they are set in the same
 // hdf file. However, CLI overrides still win the day over
 // everything.
-static void getTierOverwrites(IniSetting::Map& ini, Hdf& config) {
+static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
+                                                  Hdf& config) {
 
   // Machine metrics
   string hostname, tier, cpu;
@@ -680,26 +680,37 @@ static void getTierOverwrites(IniSetting::Map& ini, Hdf& config) {
     }
   }
 
+  std::vector<std::string> messages;
   // Tier overwrites
   {
     for (Hdf hdf = config["Tiers"].firstChild(); hdf.exists();
          hdf = hdf.next()) {
+      if (messages.empty()) {
+        messages.emplace_back(folly::sformat(
+                                "Matching tiers using: "
+                                "machine='{}', tier='{}', cpu = '{}'",
+                                hostname, tier, cpu));
+      }
       if (matchHdfPattern(hostname, ini, hdf, "machine") &&
           matchHdfPattern(tier, ini, hdf, "tier") &&
           matchHdfPattern(cpu, ini, hdf, "cpu")) {
-        RuntimeOption::Tier = hdf.getName();
+        messages.emplace_back(folly::sformat(
+                                "Matched tier: {}", hdf.getName()));
         config.copy(hdf["overwrite"]);
         // no break here, so we can continue to match more overwrites
       }
       hdf["overwrite"].setVisited(); // avoid lint complaining
     }
   }
+  return messages;
 }
 
 
-void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
+void RuntimeOption::Load(
+  IniSetting::Map& ini, Hdf& config,
   const std::vector<std::string>& iniClis /* = std::vector<std::string>() */,
-  const std::vector<std::string>& hdfClis /* = std::vector<std::string>() */) {
+  const std::vector<std::string>& hdfClis /* = std::vector<std::string>() */,
+  std::vector<std::string>* messages /* = nullptr */) {
 
   // Intialize the memory manager here because various settings and
   // initializations that we do here need it
@@ -717,7 +728,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::ParseHdfString(hstr, config);
   }
   // See if there are any Tier-based overrides
-  getTierOverwrites(ini, config);
+  auto m = getTierOverwrites(ini, config);
+  if (messages) *messages = std::move(m);
+
   // Then get the ini and hdf cli strings again, in case the tier overwrites
   // overrode any non-tier based command line option we set. The tier-based
   // command line overwrites will already have been set in the call above.
@@ -736,36 +749,30 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
   {
     // Logging
-    if (config["Log"]["Level"] == "None") {
-      Logger::LogLevel = Logger::LogNone;
-    } else if (config["Log"]["Level"] == "Error") {
-      Logger::LogLevel = Logger::LogError;
-    } else if (config["Log"]["Level"] == "Warning") {
-      Logger::LogLevel = Logger::LogWarning;
-    } else if (config["Log"]["Level"] == "Info") {
-      Logger::LogLevel = Logger::LogInfo;
-    } else if (config["Log"]["Level"] == "Verbose") {
-      Logger::LogLevel = Logger::LogVerbose;
+    auto setLogLevel = [](const std::string& value) {
+      // ini parsing treats "None" as ""
+      if (value == "None" || value == "") {
+        Logger::LogLevel = Logger::LogNone;
+      } else if (value == "Error") {
+        Logger::LogLevel = Logger::LogError;
+      } else if (value == "Warning") {
+        Logger::LogLevel = Logger::LogWarning;
+      } else if (value == "Info") {
+        Logger::LogLevel = Logger::LogInfo;
+      } else if (value == "Verbose") {
+        Logger::LogLevel = Logger::LogVerbose;
+      } else {
+        return false;
+      }
+      return true;
+    };
+    auto str = Config::GetString(ini, config, "Log.Level");
+    if (!str.empty()) {
+      setLogLevel(str);
     }
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.log.level", IniSetting::SetAndGet<std::string>(
-      [](const std::string& value) {
-        // ini parsing treats "None" as ""
-        if (value == "None" || value == "") {
-          Logger::LogLevel = Logger::LogNone;
-        } else if (value == "Error") {
-          Logger::LogLevel = Logger::LogError;
-        } else if (value == "Warning") {
-          Logger::LogLevel = Logger::LogWarning;
-        } else if (value == "Info") {
-          Logger::LogLevel = Logger::LogInfo;
-        } else if (value == "Verbose") {
-          Logger::LogLevel = Logger::LogVerbose;
-        } else {
-          return false;
-        }
-        return true;
-      },
+      setLogLevel,
       []() {
         switch (Logger::LogLevel) {
           case Logger::LogNone:
@@ -1028,9 +1035,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
       throw std::runtime_error("Code coverage is not supported with "
         "Eval.Jit=true");
     }
-    Config::Bind(DisableSmartAllocator, ini, config,
-                 "Eval.DisableSmartAllocator", DisableSmartAllocator);
-    SetArenaSlabAllocBypass(DisableSmartAllocator);
+    Config::Bind(DisableSmallAllocator, ini, config,
+                 "Eval.DisableSmallAllocator", DisableSmallAllocator);
+    SetArenaSlabAllocBypass(DisableSmallAllocator);
 
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, config,

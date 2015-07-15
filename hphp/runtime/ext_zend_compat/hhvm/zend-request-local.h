@@ -24,20 +24,30 @@
 
 namespace HPHP {
 
-#define ZEND_REQUEST_LOCAL_VECTOR(T, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalVector<T> > N;
-template <class T>
+#define ZEND_REQUEST_LOCAL_VECTOR(T, F, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalVector<T, F> > N;
+template <class T, class F>
 struct ZendRequestLocalVector final : RequestEventHandler {
+  static_assert(std::is_pointer<T>::value,
+                "ZendRequestLocalVector only stores pointers");
   using container = std::vector<T>;
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
   container& get() { return m_container; }
 private:
   void clear() {
+    for (size_t i = 0; i < m_container.size(); ++i) {
+      if (m_container[i]) {
+        auto element = m_container[i];
+        m_container[i] = nullptr;
+        m_destroy_callback(element);
+      }
+    }
     m_container.clear();
     m_container.push_back(nullptr); // don't give out id 0
   }
-private:
+
   container m_container;
+  F m_destroy_callback;
 };
 
 #define ZEND_REQUEST_LOCAL_MAP(K, V, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalMap<K,V> > N;

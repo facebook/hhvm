@@ -245,7 +245,7 @@ Variant HHVM_FUNCTION(mcrypt_module_open, const String& algorithm,
     return false;
   }
 
-  return Variant(makeSmartPtr<MCrypt>(td));
+  return Variant(req::make<MCrypt>(td));
 }
 
 bool HHVM_FUNCTION(mcrypt_module_close, const Resource& td) {

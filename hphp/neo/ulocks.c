@@ -14,9 +14,50 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <string.h>
 #include <errno.h>
+
+#ifdef _MSC_VER
+#include <io.h>
+#include <Windows.h>
+
+#define O_NDELAY 0
+#define LOCK_EX 2
+#define LOCK_NB 4
+#define LOCK_UN 8
+
+#define F_LOCK 0
+#define F_ULOCK LOCK_UN
+
+int lockf(int fd, int operation, int unused) {
+  HANDLE h = (HANDLE)_get_osfhandle(fd);
+  if (h == INVALID_HANDLE_VALUE)
+    return -1;
+
+  LARGE_INTEGER fileSize;
+  if (!GetFileSizeEx(h, &fileSize))
+    return -1;
+
+  if (operation & LOCK_UN) {
+    if (!UnlockFile(h, 0, 0, fileSize.LowPart, (DWORD)fileSize.HighPart))
+      return -1;
+  }
+  else {
+    int flags = 0;
+    OVERLAPPED ov;
+    if (operation & LOCK_NB)
+      flags |= LOCKFILE_FAIL_IMMEDIATELY;
+    if (operation & LOCK_EX)
+      flags |= LOCKFILE_EXCLUSIVE_LOCK;
+    if (!LockFileEx(h, flags, 0, fileSize.LowPart,
+                    (DWORD)fileSize.HighPart, &ov))
+      return -1;
+  }
+  return 0;
+}
+#else
+#include <unistd.h>
+#endif
 
 #include "neo_misc.h"
 #include "neo_err.h"

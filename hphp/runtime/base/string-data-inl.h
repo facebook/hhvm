@@ -19,12 +19,6 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
-inline StringData* StringData::Make() {
-  return Make(SmallStringReserve);
-}
-
-//////////////////////////////////////////////////////////////////////
 // CopyString
 
 inline StringData* StringData::Make(const char* data) {
@@ -91,6 +85,7 @@ inline void StringData::setSize(int len) {
   assert(!hasMultipleRefs());
   m_data[len] = 0;
   m_lenAndHash = len;
+  assert(m_hash == 0);
   assert(checkSane());
 }
 
@@ -157,7 +152,7 @@ inline bool StringData::same(const StringData* s) const {
   assert(s);
   if (m_len != s->m_len) return false;
   // The underlying buffer and its length are 8-byte aligned, ensured by
-  // StringData layout, smart_malloc, or malloc. So compare words.
+  // StringData layout, req::malloc, or malloc. So compare words.
   assert(uintptr_t(data()) % 8 == 0);
   assert(uintptr_t(s->data()) % 8 == 0);
   return wordsame(data(), s->data(), m_len);

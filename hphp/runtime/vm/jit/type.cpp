@@ -241,8 +241,8 @@ std::string Type::constValString() const {
     if (!m_intVal) {
       return "Cctx(Cls(nullptr))";
     }
-    const Class* cls = m_cctxVal.cls();
-    return folly::format("Cctx(Cls({}))", cls->name()->data()).str();
+    auto const cls = m_cctxVal.cls();
+    return folly::format("Cctx(Cls({}))", cls->name()).str();
   }
   if (*this <= TTCA) {
     auto name = getNativeFunctionName(m_tcaVal);

@@ -17,10 +17,8 @@
 #include "hphp/compiler/compiler.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
@@ -103,7 +101,6 @@ struct CompilerOptions {
   bool dump;
   bool coredump;
   bool nofork;
-  string optimizations;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,6 +156,7 @@ int compiler_main(int argc, char **argv) {
     Timer totalTimer(Timer::WallTime, "running hphp");
     createOutputDirectory(po);
     if (ret == 0) {
+#ifndef _MSC_VER
       if (!po.nofork && !Process::IsUnderGDB()) {
         int pid = fork();
         if (pid == 0) {
@@ -167,7 +165,9 @@ int compiler_main(int argc, char **argv) {
         }
         wait(&ret);
         ret = WIFEXITED(ret) ? WEXITSTATUS(ret) : -1;
-      } else {
+      } else
+#endif
+      {
         ret = process(po);
       }
     }
@@ -304,9 +304,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      value<bool>(&po.nofork)->default_value(false),
      "forking is needed for large compilation to release memory before g++"
      "compilation. turning off forking can help gdb debugging.")
-    ("opts",
-     value<string>(&po.optimizations)->default_value(""),
-     "Set optimizations to enable/disable")
     ("compiler-id", "display the git hash for the compiler id")
     ("repo-schema", "display the repo schema id used by this app")
     ;
@@ -419,6 +416,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // The configuration command line strings were already processed above
   // Don't process them again.
   RuntimeOption::Load(iniR, runtime);
+  RuntimeOption::EvalJit = false;
 
   initialize_repo();
 
@@ -488,7 +486,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Option::PostOptimization = true;
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
-    po.optimizations = "none";
     Option::ParseTimeOpts = false;
   }
 
@@ -542,12 +539,6 @@ int process(const CompilerOptions &po) {
   AnalysisResultPtr ar = package.getAnalysisResult();
 
   hhbcTargetInit(po, ar);
-
-  std::string errs;
-  if (!AliasManager::parseOptimizations(po.optimizations, errs)) {
-    Logger::Error("%s\n", errs.c_str());
-    return false;
-  }
 
   // one time initialization
   BuiltinSymbols::LoadSuperGlobals();
@@ -819,7 +810,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
      hoistable */
   SystemLib::s_inited = true;
   RuntimeOption::RepoCommit = true;
-  Option::AutoInline = -1;
 
   if (po.optimizeLevel > 0) {
     ret = 0;

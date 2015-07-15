@@ -243,7 +243,22 @@ class Exception {
           strcasecmp($top['function'], '__init__') === 0) {
         if (isset($top['file'])) $this->file = $top['file'];
         if (isset($top['line'])) $this->line = $top['line'];
-        return;
+        break;
+      }
+    }
+    // Remove systemlib stack frames until we hit the user code.
+    // Assume user code will contain the elements for file and line.
+    if (($this->file === null) && ($this->line === null)) {
+      while (!empty($this->trace)
+        && !isset($this->trace[0]['file']) && !isset($this->trace[0]['line'])
+      ) {
+        array_shift($this->trace);
+      }
+      if (isset($this->trace[0]['file'])) {
+        $this->file = $this->trace[0]['file'];
+      }
+      if (isset($this->trace[0]['line'])) {
+        $this->line = $this->trace[0]['line'];
       }
     }
   }

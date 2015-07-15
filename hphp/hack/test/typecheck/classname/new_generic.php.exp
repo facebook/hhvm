@@ -1,0 +1,11 @@
+[<expr#1>]generic Tobj as <App \C<generic Targ, >>
+[1]intersect(App \C<Tint, >)
+[2]intersect(App \C<Tint, >)
+File "new_generic.php", line 19, characters 29-36:
+Some type constraint(s) here are violated (Typing[4110])
+File "new_generic.php", line 11, characters 4-7:
+'Tobj' is a constrained type
+File "new_generic.php", line 17, characters 35-37:
+This is an int
+File "new_generic.php", line 19, characters 29-36:
+It is incompatible with a string

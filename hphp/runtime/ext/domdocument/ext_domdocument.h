@@ -34,7 +34,7 @@ namespace HPHP {
 Variant HHVM_FUNCTION(dom_import_simplexml,
                       const Object& node);
 
-Variant php_dom_create_object(xmlNodePtr obj, SmartPtr<XMLDocumentData> doc);
+Variant php_dom_create_object(xmlNodePtr obj, req::ptr<XMLDocumentData> doc);
 
 Object newDOMDocument(bool construct = true);
 
@@ -49,13 +49,13 @@ struct DOMNode {
       m_node->clearCache();
     }
   }
-  SmartPtr<XMLDocumentData> doc() const { return m_node->doc(); }
+  req::ptr<XMLDocumentData> doc() const { return m_node->doc(); }
   XMLNode node() const { return m_node; }
   xmlNodePtr nodep() const {
     return m_node ? m_node->nodep() : nullptr;
   }
 
-  void setDoc(SmartPtr<XMLDocumentData>&& doc) {
+  void setDoc(req::ptr<XMLDocumentData>&& doc) {
     assert(m_node);
     m_node->setDoc(std::move(doc));
   }
@@ -104,7 +104,7 @@ struct DOMIterable {
     return Native::data<DOMNode>(m_baseobj);
   }
 
-  SmartPtr<XMLDocumentData> m_doc {nullptr};
+  req::ptr<XMLDocumentData> m_doc {nullptr};
   Object m_baseobj;
   int m_nodetype;
   xmlHashTable* m_ht {nullptr};

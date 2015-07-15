@@ -72,12 +72,17 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   assert(!child->isFinished());
 
-  constexpr const size_t objSize = sizeof(c_AsyncFunctionWaitHandle);
-  void* obj = Resumable::Create<false, objSize, mayUseVV>(fp,
-                                                          numSlots,
-                                                          resumeAddr,
-                                                          resumeOffset);
-  auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
+  const size_t frameSize = Resumable::getFrameSize(numSlots);
+  const size_t totalSize = sizeof(ResumableNode) + frameSize +
+                           sizeof(Resumable) +
+                           sizeof(c_AsyncFunctionWaitHandle);
+  auto const resumable = Resumable::Create(frameSize, totalSize);
+  resumable->initialize<false, mayUseVV>(fp,
+                                         resumeAddr,
+                                         resumeOffset,
+                                         frameSize,
+                                         totalSize);
+  auto const waitHandle = new (resumable + 1) c_AsyncFunctionWaitHandle();
   assert(waitHandle->hasExactlyOneRef());
   waitHandle->actRec()->setReturnVMExit();
   assert(waitHandle->noDestruct());

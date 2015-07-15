@@ -73,9 +73,9 @@ String TimeStamp::CurrentMicroTime() {
 
 int64_t TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,
                    int yea, bool gmt) {
-  auto dt = makeSmartPtr<DateTime>(Current());
+  auto dt = req::make<DateTime>(Current());
   if (gmt) {
-    dt->setTimezone(makeSmartPtr<TimeZone>("UTC"));
+    dt->setTimezone(req::make<TimeZone>("UTC"));
   }
   dt->set(hou, min, sec, mon, day, yea);
   return dt->toTimeStamp(error);

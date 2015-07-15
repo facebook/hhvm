@@ -963,13 +963,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CastCtxThis:
   case LdARNumParams:
   case LdRDSAddr:
-  case PredictLoc:
-  case PredictStk:
   case ExitPlaceholder:
   case CheckRange:
   case ProfileObjClass:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
+  case CheckARMagicFlag:
+  case StARNumArgsAndFlags:
+  case LdARInvName:
+  case StARInvName:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
@@ -1108,6 +1110,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetCtxFwdCallDyn:
   case DbgTraceCall:
   case InitCtx:
+  case PackMagicArgs:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
@@ -1264,13 +1267,34 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_reenter(inst, may_load_store(AEmpty, AEmpty));
 
   //////////////////////////////////////////////////////////////////////
-  // The following instructions are used for debugging memory optimizations, so
-  // this analyzer should pretend they don't exist.
+  // The following instructions are used for debugging memory optimizations.
+  // We can't ignore them, because they can prevent future optimizations;
+  // eg t1 = LdStk<N>; DbgTrashStk<N>; StStk<N> t1
+  // If we ignore the DbgTrashStk it looks like the StStk is redundant
 
   case DbgTrashStk:
+    return GeneralEffects {
+      AEmpty, AEmpty, AEmpty,
+      AStack { inst.src(0), inst.extra<DbgTrashStk>()->offset.offset, 1 }
+    };
   case DbgTrashFrame:
+    return GeneralEffects {
+      AEmpty, AEmpty, AEmpty,
+      AStack {
+        inst.src(0),
+        // SpillFrame's spOffset is to the bottom of where it will store the
+        // ActRec, but AliasClass needs an offset to the highest cell it will
+        // store.
+        inst.extra<DbgTrashFrame>()->offset.offset +
+          int32_t{kNumActRecCells} - 1,
+        kNumActRecCells
+      }
+    };
   case DbgTrashMem:
-    return IrrelevantEffects {};
+    return GeneralEffects {
+      AEmpty, AEmpty, AEmpty,
+      pointee(inst.src(0))
+    };
 
   //////////////////////////////////////////////////////////////////////
 

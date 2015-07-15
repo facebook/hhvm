@@ -47,7 +47,6 @@ public:
   ExpressionPtr getProperty() { return m_property;}
   bool isNullSafe() const { return m_nullsafe; }
 
-  bool isTemporary() const override;
   bool isNonPrivate(AnalysisResultPtr ar);
   bool isValid() const { return m_valid; }
 private:

@@ -17,7 +17,7 @@
 #define incl_HPHP_CONTAINER_FUNCTIONS_H_
 
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP {
 

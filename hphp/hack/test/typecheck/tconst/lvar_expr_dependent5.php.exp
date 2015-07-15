@@ -1,0 +1,8 @@
+[<expr#1>::T][\C::T]Tnum
+[<expr#1>::T][\C::T]Tnum
+[<expr#1>::T][\C::T]Tnum
+[<expr#2>::T][\C::T]Tnum
+[1]intersect([<expr#3>::T][\C::T]Tnum)
+[2]intersect([<expr#4>::T][\C::T]Tnum)
+[3]intersect([<expr#4>::T][\C::T]Tnum)
+No errors

@@ -12,7 +12,6 @@
 #include "cs_config.h"
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -20,6 +19,16 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <sys/stat.h>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#include <direct.h>
+#include <io.h>
+#define PATH_MAX MAX_PATH
+#else
+#include <unistd.h>
+#endif
+
 #include "neo_misc.h"
 #include "neo_err.h"
 #include "neo_rand.h"
@@ -1776,7 +1785,11 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
 	s+=2;
 	value = neos_strip(s);
 
+#ifdef _MSC_VER
+        FILE *f = _popen(value, "r");
+#else
         FILE *f = popen(value, "r");
+#endif
 	if (f == NULL)
         {
 	  err = nerr_raise(NERR_PARSE,

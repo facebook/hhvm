@@ -18,6 +18,9 @@ __BEGIN_DECLS
 #include <sys/types.h>
 #include "hphp/neo/ulist.h"
 
+#ifdef _MSC_VER
+typedef unsigned short mode_t;
+#endif
 
 
 typedef int (* MATCH_FUNC)(void *rock, const char *filename);

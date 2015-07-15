@@ -110,7 +110,7 @@ public:
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter & fp);
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static bool IsVectorData(const ArrayData*);
-  static ArrayData* NonSmartCopy(const ArrayData*);
+  static ArrayData* CopyStatic(const ArrayData*);
   static constexpr auto Pop = &ArrayCommon::Pop;
   static constexpr auto Dequeue = &ArrayCommon::Dequeue;
   static void Renumber(ArrayData*);

@@ -28,8 +28,8 @@ namespace HPHP {
  *
  * If jemalloc is being used, then usage and peakUsage also include bytes that
  * are reported by jemalloc's per-thread stats that are allocated outside of
- * the smart allocator size class APIs (smartMallocSize, smartMallocSizeBig,
- * objMalloc.) totalAlloc will also be maintained, otherwise it will be 0.
+ * the MemoryManager APIs (mallocSmallSize, mallocBigSize, objMalloc.)
+ * totalAlloc will also be maintained, otherwise it will be 0.
  */
 struct MemoryUsageStats {
   int64_t maxBytes;   // the max bytes allowed for a request before it is
@@ -40,10 +40,10 @@ struct MemoryUsageStats {
                       // been processed by MemoryManager::refreshStats
 #endif
   int64_t alloc;      // how many bytes are currently malloc-ed in slabs
-                      // by the smart allocator size class APIs
+                      // by the small-size allocator APIs
   int64_t peakUsage;  // how many bytes have been used at maximum
-  int64_t peakAlloc;  // how many bytes malloc-ed in slabs by the smart
-                      // allocator size class APIs at maximum
+  int64_t peakAlloc;  // how many bytes malloc-ed in slabs by the small-size
+                      // APIs at maximum
   int64_t totalAlloc; // how many bytes have cumulatively been allocated
                       // by the underlying allocator
   int64_t peakIntervalUsage; // peakUsage during a userland specified interval

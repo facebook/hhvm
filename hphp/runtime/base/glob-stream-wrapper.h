@@ -25,11 +25,11 @@ namespace HPHP {
 
 class GlobStreamWrapper : public Stream::Wrapper {
  public:
-  virtual SmartPtr<File> open(const String& filename,
+  virtual req::ptr<File> open(const String& filename,
                               const String& mode,
                               int options,
-                              const SmartPtr<StreamContext>& context);
-  virtual SmartPtr<Directory> opendir(const String& path);
+                              const req::ptr<StreamContext>& context);
+  virtual req::ptr<Directory> opendir(const String& path);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

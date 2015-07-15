@@ -33,12 +33,14 @@ module Classes = struct
 
   let cException = "\\Exception"
   let cStdClass = "\\stdClass"
+  let cDateTime = "\\DateTime"
 
   let cAsyncIterator = "\\AsyncIterator"
   let cAsyncKeyedIterator = "\\AsyncKeyedIterator"
 
   let cStringish = "\\Stringish"
   let cXHPChild = "\\XHPChild"
+  let cClassname = "\\classname"
 end
 
 module Collections = struct
@@ -128,7 +130,6 @@ module SpecialFunctions = struct
   let meth_caller    = "meth_caller"
 
   let call_user_func = "call_user_func"
-
 end
 
 module SpecialIdents = struct
@@ -160,10 +161,10 @@ module StdlibFunctions = struct
   let is_resource = "\\is_resource"
 
   let get_class = "\\get_class"
+  let get_called_class = "\\get_called_class" (* treated as static::class *)
 
   let array_filter = "\\array_filter"
   let array_map = "\\array_map"
-
 end
 
 module Typehints = struct
@@ -209,15 +210,6 @@ module FB = struct
   let cEnum                  = "\\Enum"
   let cUncheckedEnum         = "\\UncheckedEnum"
 
-  let cGenReadApi            = "\\GenReadApi"
-  let cGenReadIdxApi         = "\\GenReadIdxApi"
-
-  let cPrivacyPolicy         = "\\PrivacyPolicy"
-  let cPrivacyPolicyBase     = "\\PrivacyPolicyBase"
-  let cPrivacyPolicyBaseBase = "\\PrivacyPolicyBaseBase"
-  let cDataType              = "\\DataType"
-  let cDataTypeImplProvider  = "\\DataTypeImplProvider"
-
   let cDynamicYield          = "\\DynamicYield"
   let cIUseDynamicYield      = "\\IUseDynamicYield"
 
@@ -225,4 +217,13 @@ module FB = struct
   let fgenva                 = "genva"
   let fgen_array_rec         = "gen_array_rec"
 
+  let idx                    = "\\idx"
+
+end
+
+module Shapes = struct
+  let cShapes                = "\\Shapes"
+  let idx                    = "idx"
+  let keyExists              = "keyExists"
+  let removeKey              = "removeKey"
 end

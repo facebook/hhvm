@@ -27,11 +27,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-SmartPtr<File>
+req::ptr<File>
 DataStreamWrapper::open(const String& filename,
                         const String& mode,
                         int options,
-                        const SmartPtr<StreamContext>& context) {
+                        const req::ptr<StreamContext>& context) {
 
   // @todo: check allow_url_include?
 
@@ -130,7 +130,7 @@ DataStreamWrapper::open(const String& filename,
   } else {
     decoded = url_decode(data, data_len);
   }
-  return makeSmartPtr<MemFile>(decoded.data(), decoded.size());
+  return req::make<MemFile>(decoded.data(), decoded.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

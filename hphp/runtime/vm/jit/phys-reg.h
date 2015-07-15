@@ -381,7 +381,7 @@ struct RegSet {
 
 private:
   uint64_t m_bits;
-  static_assert(sizeof(m_bits) * 8 >= PhysReg::kMaxRegs, "");
+  static_assert(sizeof(decltype(m_bits)) * 8 >= PhysReg::kMaxRegs, "");
 };
 
 inline RegSet operator|(PhysReg r1, PhysReg r2) {

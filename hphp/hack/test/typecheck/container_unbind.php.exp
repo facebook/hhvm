@@ -1,0 +1,4 @@
+[1]intersect(tuple, tuple)
+intersect([2]intersect(X), Tint)
+intersect(intersect(X), Tint)
+No errors

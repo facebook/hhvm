@@ -15,8 +15,14 @@
 */
 
 #include "hphp/compiler/type_annotation.h"
+
 #include <vector>
+
+#include "hphp/compiler/code_generator.h"
 #include "hphp/util/text-util.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/type-structure.h"
 
 namespace HPHP {
 
@@ -259,6 +265,158 @@ TypeAnnotationPtr TypeAnnotation::getTypeArg(int n) const {
     typeEl = typeEl->m_typeList;
   }
   return TypeAnnotationPtr();
+}
+
+bool TypeAnnotation::isPrimType(const char* str) const{
+  return !strcasecmp(m_name.c_str(), str);
+}
+
+TypeStructure::Kind TypeAnnotation::getKind() const {
+  if (isVoid()) {
+    return TypeStructure::Kind::T_void;
+  }
+
+  // Primitive types
+  if (isPrimType("HH\\int")) {
+    return TypeStructure::Kind::T_int;
+  }
+  if (isPrimType("HH\\bool")) {
+    return TypeStructure::Kind::T_bool;
+  }
+  if (isPrimType("HH\\float")) {
+    return TypeStructure::Kind::T_float;
+  }
+  if (isPrimType("HH\\string")) {
+    return TypeStructure::Kind::T_string;
+  }
+  if (isPrimType("HH\\resource")) {
+    return TypeStructure::Kind::T_resource;
+  }
+  if (isPrimType("HH\\num")) {
+    return TypeStructure::Kind::T_num;
+  }
+  if (isPrimType("HH\\arraykey")) {
+    return TypeStructure::Kind::T_arraykey;
+  }
+  if (isPrimType("HH\\noreturn")) {
+    return TypeStructure::Kind::T_noreturn;
+  }
+
+  if (isMixed()) {
+    return TypeStructure::Kind::T_mixed;
+  }
+  if (m_tuple) {
+    return TypeStructure::Kind::T_tuple;
+  }
+  if (m_function) {
+    return TypeStructure::Kind::T_fun;
+  }
+  if (!strcasecmp(m_name.c_str(), "array")) {
+    return TypeStructure::Kind::T_array;
+  }
+  // TODO(7657570): support shapes
+  if (m_typevar) {
+    return TypeStructure::Kind::T_typevar;
+  }
+  if (isThis()) {
+    return TypeStructure::Kind::T_this;
+  }
+  if (m_typeaccess) {
+    return TypeStructure::Kind::T_typeaccess;
+  }
+  if (m_xhp) {
+    // TODO(7657500): in the runtime, resolve this type to a class.
+    return TypeStructure::Kind::T_xhp;
+  }
+
+  return TypeStructure::Kind::T_unresolved;
+}
+
+const StaticString
+  s_nullable("nullable"),
+  s_kind("kind"),
+  s_name("name"),
+  s_classname("classname"),
+  s_elem_types("elem_types"),
+  s_return_type("return_type"),
+  s_param_types("param_types"),
+  s_generic_types("generic_types"),
+  s_root_name("root_name"),
+  s_access_list("access_list")
+;
+
+/* Turns the argsList linked list of TypeAnnotation into a positioned
+ * static array. */
+ArrayData* TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
+  int i = 0;
+  auto typeargs = Array::Create();
+
+  auto typeEl = ta;
+  while (typeEl) {
+    typeargs.add(i, Variant(typeEl->getScalarArrayRep()));
+    ++i;
+    typeEl = typeEl->m_typeList;
+  }
+  return ArrayData::GetScalarArray(typeargs.get());
+}
+
+ArrayData* TypeAnnotation::getScalarArrayRep() const {
+  auto rep = Array::Create();
+
+  bool nullable = (bool) m_nullable;
+  if (nullable) {
+    rep.add(s_nullable, Variant(nullable));
+  }
+
+  TypeStructure::Kind kind = getKind();
+  rep.add(s_kind, Variant(static_cast<uint8_t>(kind)));
+
+  switch (kind) {
+  case TypeStructure::Kind::T_tuple:
+    assert(m_typeArgs);
+    rep.add(s_elem_types, Variant(argsListToScalarArray(m_typeArgs)));
+    break;
+  case TypeStructure::Kind::T_fun:
+    assert(m_typeArgs);
+    // return type is the first of the typeArgs
+    rep.add(s_return_type, Variant(m_typeArgs->getScalarArrayRep()));
+    rep.add(s_param_types,
+            Variant(argsListToScalarArray(m_typeArgs->m_typeList)));
+    break;
+  case TypeStructure::Kind::T_array:
+    rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+    break;
+  case TypeStructure::Kind::T_typevar:
+    rep.add(s_name, Variant(m_name));
+    break;
+  case TypeStructure::Kind::T_typeaccess: {
+    // for now, only store the vanilla names (strings) as part of the
+    // access list
+    rep.add(s_root_name, Variant(m_name));
+    auto accList = Array::Create();
+    auto typeEl = m_typeArgs;
+    int i = 0;
+    while (typeEl) {
+      accList.add(i, Variant(typeEl->vanillaName()));
+      ++i;
+      typeEl = typeEl->m_typeList;
+    }
+    accList = ArrayData::GetScalarArray(accList.get());
+    rep.add(s_access_list, Variant(accList));
+    break;
+  }
+  case TypeStructure::Kind::T_xhp:
+    rep.add(s_classname, Variant(m_name));
+    break;
+  case TypeStructure::Kind::T_unresolved:
+    rep.add(s_classname, Variant(m_name));
+    rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+    break;
+  default:
+    break;
+  }
+
+  return ArrayData::GetScalarArray(rep.get());
 }
 
 }

@@ -678,20 +678,20 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     auto ret = folly::format(
       "{}class {}:\n{}",
       bsep,
-      ctx.cls->name->data(),
+      ctx.cls->name,
       bsep
     ).str();
     for (auto& kv : clsAnalysis.privateProperties) {
       ret += folly::format(
         "private ${: <14} :: {}\n",
-        kv.first->data(),
+        kv.first,
         show(kv.second)
       ).str();
     }
     for (auto& kv : clsAnalysis.privateStatics) {
       ret += folly::format(
         "private static ${: <14} :: {}\n",
-        kv.first->data(),
+        kv.first,
         show(kv.second)
       ).str();
     }

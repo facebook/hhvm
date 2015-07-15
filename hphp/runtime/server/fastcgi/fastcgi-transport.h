@@ -197,7 +197,7 @@ struct FastCGITransport : public Transport, private Synchronizable {
 
   uint16_t getServerPort() override {
     auto port = getParamTyped<uint16_t>("SERVER_PORT");
-    return port ?: Transport::getServerPort();
+    return port ? port : Transport::getServerPort();
   }
 
   const char* getServerSoftware() override {

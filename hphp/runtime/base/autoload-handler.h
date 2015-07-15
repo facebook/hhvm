@@ -18,7 +18,7 @@
 
 #include <utility>
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/type-array.h"
@@ -40,13 +40,13 @@ class AutoloadHandler final : public RequestEventHandler {
   struct HandlerBundle {
     HandlerBundle() = delete;
     HandlerBundle(const Variant& handler,
-                  smart::unique_ptr<CufIter>& cufIter) :
+                  req::unique_ptr<CufIter>& cufIter) :
       m_handler(handler) {
       m_cufIter = std::move(cufIter);
     }
 
     Variant m_handler; // used to respond to f_spl_autoload_functions
-    smart::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
+    req::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
   };
 
   struct CompareBundles {
@@ -145,7 +145,7 @@ private:
   String m_map_root;
   bool m_spl_stack_inited;
   union {
-    smart::deque<HandlerBundle> m_handlers;
+    req::deque<HandlerBundle> m_handlers;
   };
   Array m_loading;
 };

@@ -87,26 +87,26 @@ const Class* getOwningClassForFunc(const Func* f) {
 Class::PropInitVec::PropInitVec()
   : m_data(nullptr)
   , m_size(0)
-  , m_smart(false)
+  , m_req_allocated(false)
 {}
 
 Class::PropInitVec::~PropInitVec() {
-  if (!m_smart) free(m_data);
+  if (!m_req_allocated) free(m_data);
 }
 
 Class::PropInitVec*
-Class::PropInitVec::allocWithSmartAllocator(const PropInitVec& src) {
-  PropInitVec* p = smart_new<PropInitVec>();
+Class::PropInitVec::allocWithReqAllocator(const PropInitVec& src) {
+  PropInitVec* p = req::make_raw<PropInitVec>();
   p->m_size = src.size();
-  p->m_data = smart_new_array<TypedValueAux>(src.size());
+  p->m_data = req::make_raw_array<TypedValueAux>(src.size());
   memcpy(p->m_data, src.m_data, src.size() * sizeof(*p->m_data));
-  p->m_smart = true;
+  p->m_req_allocated = true;
   return p;
 }
 
 const Class::PropInitVec&
 Class::PropInitVec::operator=(const PropInitVec& piv) {
-  assert(!m_smart);
+  assert(!m_req_allocated);
   if (this != &piv) {
     unsigned sz = m_size = piv.size();
     if (sz) sz = folly::nextPowTwo(sz);
@@ -119,7 +119,7 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
 }
 
 void Class::PropInitVec::push_back(const TypedValue& v) {
-  assert(!m_smart);
+  assert(!m_req_allocated);
   /*
    * the allocated size is always the next power of two (or zero)
    * so we just need to reallocate when we hit a power of two
@@ -585,7 +585,7 @@ void Class::initProps() const {
   // 86pinit() calls below. 86pinit() takes a reference to an array to populate
   // with initial property values; after it completes, we copy the values into
   // the new propVec.
-  auto propVec = PropInitVec::allocWithSmartAllocator(m_declPropInit);
+  auto propVec = PropInitVec::allocWithReqAllocator(m_declPropInit);
 
   initPropHandle();
   *m_propDataCache = propVec;
@@ -601,8 +601,8 @@ void Class::initProps() const {
     }
   } catch (...) {
     // Undo the allocation of propVec
-    smart_delete_array(propVec->begin(), propVec->size());
-    smart_delete(propVec);
+    req::destroy_raw_array(propVec->begin(), propVec->size());
+    req::destroy_raw(propVec);
     *m_propDataCache = nullptr;
     throw;
   }

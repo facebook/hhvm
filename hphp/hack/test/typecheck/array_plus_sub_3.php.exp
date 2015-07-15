@@ -1,0 +1,6 @@
+File "array_plus_sub_3.php", line 13, characters 3-4:
+Typing error (Typing[4110])
+File "array_plus_sub_3.php", line 13, characters 3-4:
+This is a num (int/float) because this is used in an arithmetic operation
+File "array_plus_sub_3.php", line 12, characters 3-14:
+It is incompatible with an array (used like a vector) because this is the result of adding arrays

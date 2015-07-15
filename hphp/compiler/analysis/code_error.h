@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_COMPILER_ERROR_H_
 #define incl_HPHP_COMPILER_ERROR_H_
 
-#include "hphp/compiler/analysis/type.h"
+#include "hphp/compiler/hphp.h"
 #include "hphp/compiler/json.h"
 
 namespace HPHP {

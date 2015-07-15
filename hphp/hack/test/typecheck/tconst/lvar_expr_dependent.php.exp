@@ -1,0 +1,20 @@
+[<expr#1>::T][\C::T]Tnum
+[<expr#1>::T][\C::T]Tnum
+[<expr#1>::T][\C::T]Tnum
+App \I<>
+[<expr#1>::T][\I::T]Tnum
+[<expr#2>::T][\C::T]Tnum
+File "lvar_expr_dependent.php", line 42, characters 13-18:
+Invalid argument (Typing[4110])
+File "lvar_expr_dependent.php", line 13, characters 26-32:
+This is the expression dependent type <expr#2>::T
+File "lvar_expr_dependent.php", line 10, characters 28-30:
+  resulting from expanding the type constant C::T
+File "lvar_expr_dependent.php", line 42, characters 5-6:
+  where '<expr#2>' is a reference to this expression
+File "lvar_expr_dependent.php", line 12, characters 35-41:
+It is incompatible with the expression dependent type <expr#1>::T
+File "lvar_expr_dependent.php", line 10, characters 28-30:
+  resulting from expanding the type constant C::T
+File "lvar_expr_dependent.php", line 38, characters 14-15:
+  where '<expr#1>' is a reference to this expression

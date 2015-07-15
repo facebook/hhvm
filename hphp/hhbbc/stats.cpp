@@ -170,7 +170,7 @@ std::string show(const Builtins& builtins) {
          it != builtins.builtinsInfo.end(); ++it) {
       ret += folly::format(
         "  {: >30} [tot:{: >8}, red:{: >8}]\t\ttype: {}\n",
-        it->first->data(),
+        it->first,
         std::get<1>(it->second),
         std::get<2>(it->second),
         show(std::get<0>(it->second))
@@ -520,17 +520,32 @@ void print_stats(const Index& index, const php::Program& program) {
     std::cout << str;
   }
 
-  char fileBuf[] = "/tmp/hhbbcXXXXXX";
-  int fd = mkstemp(fileBuf);
-  if (fd == -1) {
-    std::cerr << "couldn't open temporary file for stats: "
+  auto stats_file = options.stats_file;
+
+  auto const file = [&] () -> std::FILE* {
+    if (!stats_file.empty()) {
+      return fopen(stats_file.c_str(), "w");
+    }
+
+    char fileBuf[] = "/tmp/hhbbcXXXXXX";
+    auto const fd = mkstemp(fileBuf);
+    stats_file = fileBuf;
+    if (fd == -1) return nullptr;
+
+    if (auto const fp = fdopen(fd, "w")) return fp;
+    close(fd);
+    return nullptr;
+  }();
+
+  if (file == nullptr) {
+    std::cerr << "couldn't open file for stats: "
               << folly::errnoStr(errno) << '\n';
     return;
   }
-  SCOPE_EXIT { close(fd); };
-  auto file = fdopen(fd, "w");
-  std::cout << "stats saved to " << fileBuf << '\n';
-  std::fprintf(file, "%s", str.c_str());
+
+  SCOPE_EXIT { fclose(file); };
+  std::cout << "stats saved to " << stats_file << '\n';
+  std::fwrite(str.c_str(), sizeof(char), str.size(), file);
   std::fflush(file);
 }
 

@@ -1,0 +1,6 @@
+File "acts_as_string_bad.php", line 15, characters 10-17:
+Invalid return type (Typing[4110])
+File "acts_as_string_bad.php", line 14, characters 15-17:
+This is an int
+File "acts_as_string_bad.php", line 12, characters 7-7:
+It is incompatible with string (\C::class); implicitly defined constant ::class is a string that contains the fully qualified name of C

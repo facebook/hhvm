@@ -28,7 +28,7 @@ ArrayInit::ArrayInit(size_t n, Map)
 #endif
 {
   m_data = MixedArray::MakeReserveMixed(n);
-  m_data->setRefCount(0);
+  assert(m_data->hasExactlyOneRef());
 }
 
 ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
@@ -42,11 +42,11 @@ ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
     check_request_surprise_unlikely();
   }
   auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
-  if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
     check_request_surprise_unlikely();
   }
   m_data = MixedArray::MakeReserveMixed(n);
-  m_data->setRefCount(0);
+  assert(m_data->hasExactlyOneRef());
   check_request_surprise_unlikely();
 }
 

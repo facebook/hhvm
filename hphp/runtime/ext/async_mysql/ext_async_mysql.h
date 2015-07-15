@@ -25,7 +25,7 @@
 #include <squangle/mysql_client/Row.h>
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/extension.h"
 
 #include <folly/Format.h>
@@ -145,12 +145,12 @@ public:
   AsyncMysqlQueryErrorResult& operator=(const AsyncMysqlQueryErrorResult&)
     = delete;
   void sweep();
-  void create(std::shared_ptr<am::Operation> op, SmartPtr<c_Vector> results);
+  void create(std::shared_ptr<am::Operation> op, req::ptr<c_Vector> results);
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
-                            SmartPtr<c_Vector> results);
+                            req::ptr<c_Vector> results);
 
-  SmartPtr<c_Vector> m_query_results;
+  req::ptr<c_Vector> m_query_results;
   static Class* s_class;
   static const StaticString s_className;
 
@@ -178,8 +178,8 @@ class FieldIndex {
   String getFieldString(size_t field_index) const;
 
  private:
-  smart::vector<String> field_names_;
-  smart::hash_map<
+  req::vector<String> field_names_;
+  req::hash_map<
     String,
     size_t,
     hphp_string_hash,

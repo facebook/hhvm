@@ -33,7 +33,7 @@ $excluded = array(
   // non-PHP licenses
   'runtime/base/zend-strtod.cpp',
   'runtime/ext/json/JSON_parser.cpp',
-  'runtime/ext/php_unicode.h',
+  'runtime/ext/mbstring/php_unicode.h',
   'runtime/base/zend-ini.tab.cpp',
   'util/safesort.h',
   'zend/crypt-blowfish.h',

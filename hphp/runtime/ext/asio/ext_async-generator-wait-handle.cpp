@@ -57,7 +57,7 @@ c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   assert(!child->isFinished());
 
-  auto waitHandle = makeSmartPtr<c_AsyncGeneratorWaitHandle>();
+  auto waitHandle = req::make<c_AsyncGeneratorWaitHandle>();
   waitHandle->initialize(gen, child);
   return waitHandle.detach();
 }

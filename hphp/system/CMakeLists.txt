@@ -4,7 +4,7 @@ auto_sources(IDL_SRCS "*.idl.json" "RECURSE"
 add_custom_command(
   OUTPUT "class_map.cpp" "constants.h"
   DEPENDS ${IDL_SRCS} gen-class-map
-  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/../tools/bootstrap/gen-class-map"
+  COMMAND gen-class-map
   ARGS "--system"
        "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
        "${CMAKE_CURRENT_BINARY_DIR}/constants.h"

@@ -1108,7 +1108,7 @@ To string conversions:
 
 8. Allocation
 
-| AllocObj, DAllocObj, S(Cls), Er
+| AllocObj, DAllocObj, S(Cls), PRc|Er
 
   Allocates a new object of class S1.
 
@@ -1135,7 +1135,7 @@ To string conversions:
   Calls the static property initializer function (86sinit) for class. May
   throw.
 
-| NewInstanceRaw<class>, DAllocObj, NA, NF
+| NewInstanceRaw<class>, DAllocObj, NA, PRc
 
   Allocates an instance of class.
 
@@ -1496,16 +1496,6 @@ To string conversions:
   to a block that was a pure side-exit during initial IR generation.  This
   allows later passes to test conditions and create new exits from the region
   at this point in the program.
-
-| PredictLoc<T, localId>, ND, S(FramePtr), NF
-
-  Does nothing. Serves as an indicator that the predicted type of the given
-  localId on the frame S0 is T.
-
-| PredictStk<T, offset>, ND, S(StkPtr), NF
-
-  Does nothing. Serves as an indicator that the predicted type of the cell on
-  the eval stack pointed to by S0 at offset is T.
 
 14. Runtime helpers
 
@@ -2440,6 +2430,32 @@ fields of that struct for holding intermediate values.
 | CheckSurpriseAndStack<func,args>, ND, S(FramePtr), Er
 
   Test surprise flags and stack overflow at the same time.
+
+| CheckARMagicFlag, ND, S(FramePtr), B
+
+  If the MagicDispatch flags on the ActRec pointed to by the frame pointer S0
+  are not set, branch to block B.
+
+| StARNumArgsAndFlags, ND, S(FramePtr) S(Int), CRc
+
+  Store S1 to m_numArgsAndFlags on the ActRec pointed to by the frame pointer
+  S0.
+
+| LdARInvName, D(Str), S(FramePtr), NF
+
+  Load the value of m_invName off the ActRec pointed to by the frame pointer S0.
+  The compiler should generate this only if it knows that m_invName is a
+  StringData* (rather than, e.g., a VarEnv*).
+
+| StARInvName, ND, S(FramePtr) S(Str,Nullptr), CRc
+
+  Store S1 to m_invName on the ActRec pointed to by the frame pointer S0.
+
+| PackMagicArgs, D(Arr), S(FramePtr), PRc
+
+  Call MixedArray::MakePacked() with the value of numArgs() on the ActRec
+  pointed to by the frame pointer S0 as the first argument, and the pointer to
+  the first parameter in the frame as the second argument.
 
 /* Local Variables: */
 /* fill-column: 79 */

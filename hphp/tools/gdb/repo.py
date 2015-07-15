@@ -5,6 +5,8 @@ Wow okay, let's frob repos from inside gdb.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 import sqlite3
 from gdbutils import *
@@ -97,6 +99,7 @@ class RepoShowCommand(gdb.Command):
     def __init__(self):
         super(RepoShowCommand, self).__init__('repo show', gdb.COMMAND_FILES)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         global _paths
         print('Central repo: %s' % '<none>' if _paths[0] is None else _paths[0])
@@ -110,6 +113,7 @@ class RepoSetCentralCommand(gdb.Command):
         super(RepoSetCentralCommand, self).__init__('repo set-central',
                                                     gdb.COMMAND_FILES)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
         if len(argv) != 1:
@@ -127,6 +131,7 @@ class RepoSetLocalCommand(gdb.Command):
         super(RepoSetLocalCommand, self).__init__('repo set-local',
                                                   gdb.COMMAND_FILES)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
         if len(argv) != 1:

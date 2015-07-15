@@ -161,7 +161,7 @@ if(CYGWIN)
 endif()
 
 if(MSVC OR CYGWIN OR MINGW)
-  add_definitions(-DNOUSER=1 -DGLOG_NO_ABBREVIATED_SEVERITIES)
+  add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
   add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif()
 

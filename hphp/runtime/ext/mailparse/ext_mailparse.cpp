@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Resource HHVM_FUNCTION(mailparse_msg_create) {
-  return Resource(makeSmartPtr<MimePart>());
+  return Resource(req::make<MimePart>());
 }
 
 bool HHVM_FUNCTION(mailparse_msg_free, const Resource& mimemail) {
@@ -36,7 +36,7 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
   auto f = File::Open(filename, "rb");
   if (!f) return false;
 
-  auto p = makeSmartPtr<MimePart>();
+  auto p = req::make<MimePart>();
   while (!f->eof()) {
     String line = f->readLine();
     if (!line.isNull()) {
@@ -205,8 +205,8 @@ bool HHVM_FUNCTION(mailparse_stream_encode,
   if (line[x] == '\0' || line[x] == '\r' || line[x] == '\n') break; \
   v = line[x++]; v = UUDEC(v)
 
-static size_t mailparse_do_uudecode(const SmartPtr<File>& instream,
-                                    const SmartPtr<File>& outstream) {
+static size_t mailparse_do_uudecode(const req::ptr<File>& instream,
+                                    const req::ptr<File>& outstream) {
   int A, B, C, D, n;
   size_t file_size = 0;
   if (outstream) {
@@ -262,7 +262,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
   auto instream = cast<File>(fp);
   instream->rewind();
 
-  auto outstream = makeSmartPtr<TempFile>(false);
+  auto outstream = req::make<TempFile>(false);
 
   Array return_value;
   int nparts = 0;
@@ -297,7 +297,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
       item.set(s_origfilename, String(origfilename, CopyString));
 
       /* create a temp file for the data */
-      auto partstream = makeSmartPtr<TempFile>(false);
+      auto partstream = req::make<TempFile>(false);
       if (partstream)  {
         nparts++;
         item.set(s_filename, String(partstream->getName()));

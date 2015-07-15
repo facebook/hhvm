@@ -137,8 +137,8 @@ bool PreClassEmitter::addAbstractConstant(const StringData* n,
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const const_(n, typeConstraint, nullptr, nullptr, typeconst);
-  m_constMap.add(const_.name(), const_);
+  PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr, typeconst);
+  m_constMap.add(cns.name(), cns);
   return true;
 }
 
@@ -146,13 +146,20 @@ bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* typeConstraint,
                                   const TypedValue* val,
                                   const StringData* phpCode,
-                                  const bool typeconst) {
+                                  const bool typeconst,
+                                  const ArrayData* typeStructure) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const const_(n, typeConstraint, val, phpCode, typeconst);
-  m_constMap.add(const_.name(), const_);
+  TypedValue tvVal;
+  if (typeconst && typeStructure)  {
+    tvVal = make_tv<KindOfArray>(const_cast<ArrayData*>(typeStructure));
+  } else {
+    tvVal = *val;
+  }
+  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode, typeconst);
+  m_constMap.add(cns.name(), cns);
   return true;
 }
 

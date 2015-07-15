@@ -508,7 +508,7 @@ static bool HHVM_METHOD(Imagick, colorizeImage,
   auto wand = getMagickWandResource(this_);
   auto colorPixel = buildColorWand(colorize);
   auto opacityPixel = buildOpacityWand(opacity);
-  auto pixel = makeSmartPtr<WandResource<PixelWand>>(
+  auto pixel = req::make<WandResource<PixelWand>>(
     ClonePixelWand(colorPixel->getWand()));
 
   if (pixel->getWand() == nullptr) {
@@ -861,7 +861,7 @@ static bool HHVM_METHOD(Imagick, evaluateImage,
 template<StorageType T>
 ALWAYS_INLINE
 static vector<typename StorageTypeCPPType<T>::T> exportImagePixels(
-    SmartPtr<WandResource<MagickWand>> wand, int64_t x, int64_t y,
+    req::ptr<WandResource<MagickWand>> wand, int64_t x, int64_t y,
     int64_t width, int64_t height, const String& map) {
   size_t size = width * height * map.length();
   vector<typename StorageTypeCPPType<T>::T> ret(size);
@@ -1863,7 +1863,7 @@ static bool HHVM_METHOD(Imagick, implodeImage, double radius) {
 
 template<StorageType T>
 ALWAYS_INLINE
-static void importImagePixels(SmartPtr<WandResource<MagickWand>> wand,
+static void importImagePixels(req::ptr<WandResource<MagickWand>> wand,
     int64_t x, int64_t y, int64_t width, int64_t height,
     const String& map, const vector<double>& array) {
   vector<typename StorageTypeCPPType<T>::T> data(array.begin(), array.end());
@@ -2195,7 +2195,7 @@ static bool HHVM_METHOD(Imagick, paintFloodfillImage,
   auto wand = getMagickWandResource(this_);
   auto fillPixel = buildColorWand(fill);
   auto borderPixel = bordercolor.isNull()
-                   ? makeSmartPtr<WandResource<PixelWand>>(nullptr)
+                   ? req::make<WandResource<PixelWand>>(nullptr)
                    : buildColorWand(bordercolor);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -2653,12 +2653,12 @@ static bool HHVM_METHOD(Imagick, roundCornersImage,
     IMAGICK_THROW("Failed to allocate PixelWand structure");
   }
 
-  auto drawing = makeSmartPtr<WandResource<DrawingWand>>(NewDrawingWand());
+  auto drawing = req::make<WandResource<DrawingWand>>(NewDrawingWand());
   if (drawing->getWand() == nullptr) {
     IMAGICK_THROW("Failed to allocate DrawingWand structure");
   }
 
-  auto magick = makeSmartPtr<WandResource<MagickWand>>(NewMagickWand());
+  auto magick = req::make<WandResource<MagickWand>>(NewMagickWand());
   if (magick->getWand() == nullptr) {
     IMAGICK_THROW("Failed to allocate MagickWand structure");
   }

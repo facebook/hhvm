@@ -65,10 +65,9 @@ struct Header {
     );
   }
   ObjectData* resumableObj() const {
-    auto const func = resumable()->actRec()->func();
-    return func->isGenerator()
-      ? reinterpret_cast<ObjectData*>((char*)this + resumable()->size()) - 1
-      : reinterpret_cast<ObjectData*>(resumable() + 1);
+    DEBUG_ONLY auto const func = resumable()->actRec()->func();
+    assert(func->isAsyncFunction());
+    return reinterpret_cast<ObjectData*>(resumable() + 1);
   }
 };
 
@@ -115,13 +114,13 @@ inline size_t Header::size() const {
     case HeaderKind::BigObj:    // [BigNode][Header...]
       return big_.nbytes;
     case HeaderKind::ResumableFrame:
-      // Generators -
-      // [ResumableNode][locals][Resumable][BaseGenerator][ObjectData]
       // Async functions -
       // [ResumableNode][locals][Resumable][ObjectData<WaitHandle>]
       return resumable()->size();
     case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
+      // Generators -
+      // [NativeNode][NativeData<locals><Resumable><GeneratorData>][ObjectData]
       return native_.obj_offset + Native::obj(&native_)->heapSize();
     case HeaderKind::Free:
     case HeaderKind::Hole:
@@ -150,7 +149,7 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
       // so don't round them.
       auto size = hdr->hdr_.kind == HeaderKind::Hole ||
                   hdr->hdr_.kind == HeaderKind::Free ? hdr->free_.size() :
-                  MemoryManager::smartSizeClass(hdr->size());
+                  MemoryManager::smallSizeClass(hdr->size());
       hdr = (Header*)((char*)hdr + size);
       if (hdr >= slab_end) {
         assert(hdr == slab_end && "hdr > slab_end indicates corruption");

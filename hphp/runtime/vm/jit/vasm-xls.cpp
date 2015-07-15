@@ -2143,10 +2143,10 @@ LiveRange Vxls::findBlockRange(unsigned pos) {
 enum Mode { Light, Heavy };
 template<class Pred>
 const char* draw(Interval* parent, unsigned pos, Mode m, Pred covers) {
-                               // Light     Heavy
-  static const char* top[]    = { "\u2575", "\u2579" };
-  static const char* bottom[] = { "\u2577", "\u257B" };
-  static const char* both[]   = { "\u2502", "\u2503" };
+                                  // Light     Heavy
+  static const char* top[]    = { u8"\u2575", u8"\u2579" };
+  static const char* bottom[] = { u8"\u2577", u8"\u257B" };
+  static const char* both[]   = { u8"\u2502", u8"\u2503" };
   static const char* empty[]  = { " ", " " };
   auto f = [&](unsigned pos) {
     for (auto ivl = parent; ivl; ivl = ivl->next) {

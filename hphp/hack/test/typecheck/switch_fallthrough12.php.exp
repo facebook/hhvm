@@ -1,0 +1,10 @@
+Tint
+Tint
+Tstring
+[1]intersect(Tint, Tstring)
+Tbool
+[2]intersect(Tstring, Tbool, Tint)
+Tint
+Tfloat
+[3]intersect(Tint, Tstring, Tfloat, Tbool)
+No errors

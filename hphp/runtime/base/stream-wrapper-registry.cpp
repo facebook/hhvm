@@ -162,7 +162,7 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
    * 1. requestShutdown has already been called
    * 2. dereferencing s_request_wrappers will call requestInit, and register
    *    a request shutdown event handler
-   * 3. the list of request event handlers is a smart::vector, so it gets lost
+   * 3. the list of request event handlers is a req::vector, so it gets lost
    *    at the end of the request.
    *
    * The result of this is that s_request_wrappers is no longer request-local -

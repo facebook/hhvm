@@ -1,6 +1,6 @@
 string(13) "<root></root>"
 
-Fatal error: Uncaught exception 'DOMException' with message 'No Modification Allowed Error' in :
+Fatal error: Uncaught exception 'DOMException' with message 'No Modification Allowed Error' in %s/dom-element-lifetime.php:20
 Stack trace:
 #0 %s/dom-element-lifetime.php(20): DOMNode->appendChild()
 #1 %s/dom-element-lifetime.php(26): two()

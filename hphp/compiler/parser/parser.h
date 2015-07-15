@@ -147,7 +147,8 @@ public:
   void onClassVariableModifer(Token &mod) {}
   void onClassVariableStart(Token &out, Token *modifiers, Token &decl,
                             Token *type, bool abstract = false,
-                            bool typeconst = false);
+                            bool typeconst = false,
+                            const TypeAnnotationPtr& typeAnnot = nullptr);
   void onClassVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassConstant(Token &out, Token *exprs, Token &var, Token &value);
   void onClassAbstractConstant(Token &out, Token *exprs, Token &var);

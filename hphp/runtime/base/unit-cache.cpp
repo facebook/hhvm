@@ -29,7 +29,7 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
-#include "hphp/runtime/ext/ext_system_profiler.h"
+#include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
@@ -172,7 +172,7 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
 folly::Optional<String> readFileAsString(const StringData* path) {
   auto const fd = open(path->data(), O_RDONLY);
   if (!fd) return folly::none;
-  auto file = makeSmartPtr<PlainFile>(fd);
+  auto file = req::make<PlainFile>(fd);
   return file->read();
 }
 

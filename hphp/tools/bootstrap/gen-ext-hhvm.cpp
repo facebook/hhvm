@@ -15,7 +15,6 @@
 */
 
 #include <algorithm>
-#include <cxxabi.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -43,7 +42,7 @@ std::unordered_map<fbstring, const PhpClass*> g_classMap;
 // this purpose, not part of the normal argument sequence.
 bool g_armMode = false;
 
-constexpr char* g_allIncludes = R"(
+const char* const g_allIncludes = R"(
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/array-init.h"
@@ -86,10 +85,10 @@ void delete_{0:s}(ObjectData* obj, const Class* cls) {{
 
   auto const builtinSz = sizeof(c_{0:s}) - sizeof(ObjectData);
   auto const size = ObjectData::sizeForNProps(nProps) + builtinSz;
-  if (LIKELY(size <= kMaxSmartSize)) {{
-    return MM().smartFreeSize(ptr, size);
+  if (LIKELY(size <= kMaxSmallSize)) {{
+    return MM().freeSmallSize(ptr, size);
   }}
-  return MM().smartFreeSizeBig(ptr, size);
+  return MM().freeBigSize(ptr, size);
 }})",
     className) << "\n\n";
 }
@@ -289,7 +288,7 @@ void emitBuildExtraArgs(const PhpFunc& func, std::ostream& out,
 {0}      ai.set(i-{1}, tvAsVariant(extraArg));
 {0}    }}
 {0}  }}
-{0}  extraArgs = ai.create();
+{0}  extraArgs = ai.toArray();
 {0}}}
 )",
     ind,

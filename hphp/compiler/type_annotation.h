@@ -17,13 +17,22 @@
 #ifndef incl_HPHP_TYPEANNOTATION_H_
 #define incl_HPHP_TYPEANNOTATION_H_
 
-#include "hphp/util/deprecated/base.h"
+#include <cstring>
+#include <string>
 #include <vector>
+
 #include "hphp/runtime/base/datatype.h"
+
+#include "hphp/util/deprecated/declare-boost-types.h"
+#include "hphp/runtime/base/type-structure.h"
 #include "hphp/compiler/code_generator.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class CodeGenerator;
+
+struct ArrayData;
 
 DECLARE_BOOST_TYPES(TypeAnnotation);
 
@@ -173,12 +182,17 @@ public:
   int numTypeArgs() const;
   TypeAnnotationPtr getTypeArg(int n) const;
 
+  TypeStructure::Kind getKind() const;
+  ArrayData* getScalarArrayRep() const;
+
 private:
   void functionTypeName(std::string &name) const;
   void xhpTypeName(std::string &name) const;
   void tupleTypeName(std::string &name) const;
   void genericTypeName(std::string &name) const;
   void accessTypeName(std::string &name) const;
+  bool isPrimType(const char* str) const;
+  ArrayData* argsListToScalarArray(TypeAnnotationPtr ta) const;
 
 private:
   std::string m_name;
@@ -196,4 +210,3 @@ private:
 }
 
 #endif
-

@@ -27,7 +27,7 @@
  * functions.  These classes may overlap with needScanMethodNames classes.
  *
  * badContainerNames are names of container classes that are not suitable for
- * holding smart allocated objects, e.g. std::vector.
+ * holding request-allocated objects, e.g. std::vector.
  *
  * HandleTranslationUnit is the method that runs the different passes.  It is
  * invoked by Clang once any source files have finished parsing.
@@ -123,7 +123,7 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_needsScanMethodNames.insert("HPHP::Variant");
     m_needsScanMethodNames.insert("HPHP::Object");
     m_needsScanMethodNames.insert("HPHP::Resource");
-    m_needsScanMethodNames.insert("HPHP::SmartPtr");
+    m_needsScanMethodNames.insert("HPHP::req::ptr");
     m_needsScanMethodNames.insert("HPHP::LowPtr");
     //m_needsScanMethodNames.insert("HPHP::SweepableMember");
     //m_needsScanMethodNames.insert("HPHP::RequestEventHandler");
@@ -137,23 +137,23 @@ struct AddScanMethodsAction : public PluginASTAction {
     // If a particular class causes problems with the scan
     // generator, you may want to include it in this list and
     // make sure there is a hand written scan method.
-    m_hasScanMethodNames.insert("HPHP::smart::vector");
-    m_hasScanMethodNames.insert("HPHP::smart::dequeue");
-    m_hasScanMethodNames.insert("HPHP::smart::priority_queue");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_map");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_multimap");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_set");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_multiset");
-    m_hasScanMethodNames.insert("HPHP::smart::stack");
-    m_hasScanMethodNames.insert("HPHP::smart::map");
-    m_hasScanMethodNames.insert("HPHP::smart::multimap");
-    m_hasScanMethodNames.insert("HPHP::smart::set");
-    m_hasScanMethodNames.insert("HPHP::smart::multiset");
-    m_hasScanMethodNames.insert("HPHP::smart::hash_map");
-    m_hasScanMethodNames.insert("HPHP::smart::hash_multimap");
-    m_hasScanMethodNames.insert("HPHP::smart::hash_set");
-    m_hasScanMethodNames.insert("HPHP::smart::unique_ptr");
-    m_hasScanMethodNames.insert("HPHP::SmartPtr");
+    m_hasScanMethodNames.insert("HPHP::req::vector");
+    m_hasScanMethodNames.insert("HPHP::req::dequeue");
+    m_hasScanMethodNames.insert("HPHP::req::priority_queue");
+    m_hasScanMethodNames.insert("HPHP::req::flat_map");
+    m_hasScanMethodNames.insert("HPHP::req::flat_multimap");
+    m_hasScanMethodNames.insert("HPHP::req::flat_set");
+    m_hasScanMethodNames.insert("HPHP::req::flat_multiset");
+    m_hasScanMethodNames.insert("HPHP::req::stack");
+    m_hasScanMethodNames.insert("HPHP::req::map");
+    m_hasScanMethodNames.insert("HPHP::req::multimap");
+    m_hasScanMethodNames.insert("HPHP::req::set");
+    m_hasScanMethodNames.insert("HPHP::req::multiset");
+    m_hasScanMethodNames.insert("HPHP::req::hash_map");
+    m_hasScanMethodNames.insert("HPHP::req::hash_multimap");
+    m_hasScanMethodNames.insert("HPHP::req::hash_set");
+    m_hasScanMethodNames.insert("HPHP::req::unique_ptr");
+    m_hasScanMethodNames.insert("HPHP::req::ptr");
     m_hasScanMethodNames.insert("HPHP::AtomicSmartPtr");
     m_hasScanMethodNames.insert("HPHP::AtomicSharedPtr");
     m_hasScanMethodNames.insert("HPHP::SString");
@@ -170,7 +170,7 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_hasScanMethodNames.insert("folly::Optional");
     m_hasScanMethodNames.insert("boost::variant");
 
-    // These are classes that use non-smart allocation internally.
+    // These are classes that use malloc/new allocation internally.
     // They should generally not be used to store scanable things.
     // This list is used to generate warnings.
     m_badContainerNames.insert("std::vector");

@@ -109,6 +109,7 @@ struct IRBuilder {
    * You can keep using them until we find time to remove them.
    */
   IRUnit& unit() const { return m_unit; }
+  FrameStateMgr& fs() { return m_state; }
   BCMarker curMarker() const { return m_curMarker; }
   const Func* curFunc() const { return m_state.func(); }
   FPInvOffset spOffset() { return m_state.spOffset(); }

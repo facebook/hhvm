@@ -177,9 +177,9 @@ struct Class : AtomicCountable {
     void push_back(const TypedValue& v);
 
     /*
-     * Make a smart-allocated copy of `src'.
+     * Make a request-allocated copy of `src'.
      */
-    static PropInitVec* allocWithSmartAllocator(const PropInitVec& src);
+    static PropInitVec* allocWithReqAllocator(const PropInitVec& src);
 
     static constexpr size_t dataOff() {
       return offsetof(PropInitVec, m_data);
@@ -190,7 +190,7 @@ struct Class : AtomicCountable {
 
     TypedValueAux* m_data;
     unsigned m_size;
-    bool m_smart;
+    bool m_req_allocated;
   };
 
   /*

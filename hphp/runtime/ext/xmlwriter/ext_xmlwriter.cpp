@@ -540,7 +540,7 @@ struct XMLWriterData {
 public:
   xmlTextWriterPtr  m_ptr;
   xmlBufferPtr      m_output;
-  SmartPtr<File>    m_uri;
+  req::ptr<File>    m_uri;
 
 private:
 ///////////////////////////////////////////////////////////////////////////////
@@ -680,7 +680,7 @@ void XMLWriterResource::sweep() {
 XMLWRITER_METHOD_NO_ARGS(bool, openMemory)
 
 static Variant HHVM_FUNCTION(xmlwriter_open_memory) {
-  auto data = makeSmartPtr<XMLWriterResource>();
+  auto data = req::make<XMLWriterResource>();
 
   bool opened = data->m_writer.openMemory();
   if (!opened) {
@@ -694,7 +694,7 @@ XMLWRITER_METHOD(bool, openURI,
 
 static Variant HHVM_FUNCTION(xmlwriter_open_uri,
                              const String& uri) {
-  auto data = makeSmartPtr<XMLWriterResource>();
+  auto data = req::make<XMLWriterResource>();
 
   bool opened = data->m_writer.openURI(uri);
   if (!opened) {

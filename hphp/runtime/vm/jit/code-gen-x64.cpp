@@ -74,8 +74,8 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 
 #define rVmSp DontUseRVmSpInThisFile
 
@@ -277,8 +277,6 @@ NOOP_OPCODE(ExitPlaceholder);
 NOOP_OPCODE(HintLocInner)
 NOOP_OPCODE(HintStkInner)
 NOOP_OPCODE(AssertStk)
-NOOP_OPCODE(PredictLoc);
-NOOP_OPCODE(PredictStk);
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -640,7 +638,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   Fixup syncFixup;
   if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
     // If we are profiling the heap, we always need to sync because regs need
-    // to be correct during smart allocations no matter what
+    // to be correct during allocations no matter what
     syncFixup = makeFixup(inst->marker(), sync);
   }
 
@@ -1928,7 +1926,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
       caddr_hand,
       caddr_hand + sizeof(TypedValue),
       folly::format("rds+MethodCache-{}",
-        getFunc(inst->marker())->fullName()->data()).str());
+        getFunc(inst->marker())->fullName()).str());
   }
 
   auto const mcHandler = extra->fatal ? handlePrimeCacheInit<true>
@@ -2487,7 +2485,9 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
   }
 
   if (!ty.maybe(TStatic)) {
-    auto const sf = emitDecRef(v, base);
+    auto const sf = v.makeReg();
+    v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+    emitAssertFlagsNonNegative(v, sf);
     ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
@@ -2563,7 +2563,10 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   ifRefCountedNonStatic(
     vmain(), ty, srcLoc(inst, 0),
     [&] (Vout& v) {
-      emitDecRef(v, srcLoc(inst, 0).reg());
+      auto const base = srcLoc(inst, 0).reg();
+      auto const sf = v.makeReg();
+      v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+      emitAssertFlagsNonNegative(v, sf);
     }
   );
 }
@@ -2652,7 +2655,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     auto objOrClsPtrReg = srcLoc(inst, 2/*objOrCls*/).reg();
     v << store{objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]};
   } else {
-    assertx(objOrCls->isA(TNullptr));
+    always_assert(objOrCls->isA(TNullptr));
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + int(AROFF(m_this));
     v << storeqi{0, spReg[offset_m_this]};
@@ -2775,7 +2778,7 @@ void CodeGenerator::cgNewInstanceRaw(IRInstruction* inst) {
   auto const dstReg = dstLoc(inst, 0).reg();
   size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
   cgCallHelper(vmain(),
-               size <= kMaxSmartSize
+               size <= kMaxSmallSize
                ? CppCall::direct(ObjectData::newInstanceRaw)
                : CppCall::direct(ObjectData::newInstanceRawBig),
                callDest(dstReg),
@@ -3086,7 +3089,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto callArgs = argGroup(inst);
   if (isBuiltinByRef(funcReturnType)) {
     // First arg is pointer to storage for that return value
-    if (isSmartPtrRef(funcReturnType)) {
+    if (isReqPtrRef(funcReturnType)) {
       returnOffset += TVOFF(m_data);
     }
     // Pass the address of tvBuiltinReturn to the native function as the
@@ -3097,7 +3100,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // Non-pointer args are plain values passed by value.  String, Array,
   // Object, and Variant are passed by const&, ie a pointer to stack memory
   // holding the value, so expect PtrToT types for these.
-  // Pointers to smartptr types (String, Array, Object) need adjusting to
+  // Pointers to req::ptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   auto srcNum = uint32_t{2};
   if (callee->isMethod()) {
@@ -3126,7 +3129,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
-    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
+    if (TVOFF(m_data) && isReqPtrRef(pi.builtinType)) {
       assertx(inst->src(srcNum)->type() <= TPtrToGen);
       callArgs.addr(srcLoc(inst, srcNum).reg(), TVOFF(m_data));
     } else {
@@ -3152,7 +3155,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // the builtin writes the return value into MInstrState::tvBuiltinReturn
   // TV, from where it has to be tested and copied.
   if (returnType.isReferenceType()) {
-    assertx(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && isReqPtrRef(funcReturnType));
     // return type is String, Array, or Object; fold nullptr to KindOfNull
     auto rtype = v.cns(returnType.toDataType());
     auto nulltype = v.cns(KindOfNull);
@@ -3166,7 +3169,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   if (returnType <= TCell || returnType <= TBoxedCell) {
     // return type is Variant; fold KindOfUninit to KindOfNull
-    assertx(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
     auto nulltype = v.cns(KindOfNull);
     auto tmp_type = v.makeReg();
     emitLoadTVType(v, rdsReg[returnOffset + TVOFF(m_type)], tmp_type);
@@ -5627,8 +5630,66 @@ void CodeGenerator::cgCheckSurpriseAndStack(IRInstruction* inst) {
   m_state.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
-void CodeGenerator::print() const {
-  jit::print(std::cout, m_state.unit, m_state.asmInfo);
+void CodeGenerator::cgCheckARMagicFlag(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+
+  auto& v = vmain();
+  auto const arflags = v.makeReg();
+  auto const tmp = v.makeReg();
+  auto const sf = v.makeReg();
+
+  auto const mask = static_cast<int32_t>(ActRec::Flags::MagicDispatch);
+
+  v << loadl{fp[AROFF(m_numArgsAndFlags)], arflags};
+  v << andli{mask, arflags, tmp, v.makeReg()};
+  v << cmpli{mask, tmp, sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
+}
+
+void CodeGenerator::cgStARNumArgsAndFlags(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const val = srcLoc(inst, 1).reg();
+  vmain() << storel{val, fp[AROFF(m_numArgsAndFlags)]};
+}
+
+void CodeGenerator::cgLdARInvName(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const dst = dstLoc(inst, 0).reg();
+  vmain() << load{fp[AROFF(m_invName)], dst};
+}
+
+void CodeGenerator::cgStARInvName(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const val = srcLoc(inst, 1).reg();
+  vmain() << store{val, fp[AROFF(m_invName)]};
+}
+
+void CodeGenerator::cgPackMagicArgs(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+
+  auto& v = vmain();
+  auto const naaf = v.makeReg();
+  auto const num_args = v.makeReg();
+
+  v << loadl{fp[AROFF(m_numArgsAndFlags)], naaf};
+  v << andli{ActRec::kNumArgsMask, naaf, num_args, v.makeReg()};
+
+  auto const offset = v.makeReg();
+  auto const values = v.makeReg();
+
+  static_assert(sizeof(Cell) == 16, "");
+  v << shlli{4, num_args, offset, v.makeReg()};
+  v << subq{offset, fp, values, v.makeReg()};
+
+  cgCallHelper(
+    v,
+    CppCall::direct(MixedArray::MakePacked),
+    callDest(inst),
+    SyncOptions::kSyncPoint,
+    argGroup(inst)
+      .reg(num_args)
+      .reg(values)
+  );
 }
 
 void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
@@ -5640,6 +5701,10 @@ void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
   cgCallHelper(v, CppCall::direct(profileObjClassHelper),
                kVoidDest, SyncOptions::kNoSyncPoint,
                argGroup(inst).reg(profile).ssa(0));
+}
+
+void CodeGenerator::print() const {
+  jit::print(std::cout, m_state.unit, m_state.asmInfo);
 }
 
 }}}

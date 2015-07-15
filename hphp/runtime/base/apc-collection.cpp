@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/base/data-walker.h"
 
 namespace HPHP {

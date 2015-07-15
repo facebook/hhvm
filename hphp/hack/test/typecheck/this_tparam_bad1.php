@@ -10,7 +10,8 @@
  */
 
 // This test illustrates the danger with instantiating a non-covariant type
-// variable with this.
+// variable with this. The analysis used to reject code like this is performed
+// by generating expression dependent types
 trait SomeTrait<T> {
   private ?T $x;
 

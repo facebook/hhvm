@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -81,10 +81,10 @@ struct Marker {
   void operator()(const StringBuffer&);
   void operator()(const NameValueTable&);
 
-  template<class T> void operator()(const smart::vector<T>& c) {
+  template<class T> void operator()(const req::vector<T>& c) {
     for (auto& e : c) (*this)(e);
   }
-  template<class T> void operator()(const smart::set<T>& c) {
+  template<class T> void operator()(const req::set<T>& c) {
     for (auto& e : c) (*this)(e);
   }
   template<class T,class U> void operator()(const std::pair<T,U>& p) {
@@ -92,7 +92,7 @@ struct Marker {
     (*this)(p.second);
   }
   template<class T,class U,class V,class W>
-  void operator()(const smart::hash_map<T,U,V,W>& c) {
+  void operator()(const req::hash_map<T,U,V,W>& c) {
     for (auto& e : c) (*this)(e); // each element is pair<T,U>
   }
 
@@ -137,6 +137,8 @@ void Marker::operator()(const ObjectData* p) {
   if (p->getAttribute(ObjectData::HasNativeData)) {
     // HNI style native object; mark the NativeNode header, queue the object.
     // [NativeNode][NativeData][ObjectData][props] is one allocation.
+    // For generators -
+    // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
     auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
     if (mark(h)) {
       enqueue(p);
@@ -203,7 +205,7 @@ void Marker::operator()(const StringData* p) {
 // ignore the interior pointer; NVT should be scanned by VarEnv::scan.
 void Marker::operator()(const NameValueTable* p) {}
 
-// VarEnvs are allocated with smart_new, so they aren't first-class heap
+// VarEnvs are allocated with req::make, so they aren't first-class heap
 // objects. assume a VarEnv* is a unique ptr, and scan it eagerly.
 void Marker::operator()(const VarEnv* p) {
   if (p) p->scan(*this);
@@ -412,7 +414,7 @@ void Marker::sweep() {
         break;
       case HK::SmallMalloc:
       case HK::BigMalloc:
-        // these are managed by smart_malloc and should not have been marked.
+        // these are managed by req::malloc and should not have been marked.
         assert(!h->hdr_.mark);
         break;
       case HK::Free:

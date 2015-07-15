@@ -23,6 +23,13 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/string-vsnprintf.h"
 
+#ifdef ERROR
+# undef ERROR
+#endif
+#ifdef STRICT
+# undef STRICT
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

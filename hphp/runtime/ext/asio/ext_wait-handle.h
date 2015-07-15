@@ -96,13 +96,11 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
   void t_import();
   Variant t_join();
   Variant t_result();
-  Variant result();
   bool t_isfinished();
   bool t_issucceeded();
   bool t_isfailed();
   int64_t t_getid();
   String t_getname();
-  Object t_getexceptioniffailed();
 
  public:
   static constexpr ptrdiff_t stateOff() {

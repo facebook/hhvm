@@ -65,7 +65,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -719,14 +719,13 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
   // prologues, this is just a possible prologue.
   TCA aStart = code.main().frontier();
-  TCA start  = aStart;
 
   // Give the prologue a TransID if we have profiling data.
   auto transID = m_tx.profData()
     ? m_tx.profData()->addTransPrologue(m_tx.mode(), funcBody, paramIndex)
     : kInvalidTransID;
 
-  genFuncPrologue(transID, func, argc, start);
+  TCA start = genFuncPrologue(transID, func, argc);
 
   auto loc = maker.markEnd();
   if (RuntimeOption::EvalEnableReusableTC) {
@@ -1729,7 +1728,7 @@ template <typename T> void ClearContainer(T& container) {
 void
 CodeGenFixups::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches) {
-  for (uint i = 0; i < m_pendingFixups.size(); i++) {
+  for (uint32_t i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
     assertx(mcg->isValidCodeAddress(tca));
     mcg->fixupMap().recordFixup(tca, m_pendingFixups[i].m_fixup);
@@ -2508,7 +2507,7 @@ void MCGenerator::setJmpTransID(TCA jmp) {
 }
 
 void
-emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
+emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index, int n, bool force) {
   if (!force && !Stats::enabled()) return;
   intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
 

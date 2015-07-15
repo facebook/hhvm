@@ -1,5 +1,4 @@
-Fatal error: Uncaught exception 'HH\InvariantException' with message 'Callback already registered: a' in :
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Callback already registered: a' in %s/test/slow/lang/invariant_cb_two.php:5
 Stack trace:
-#0 (): HH\invariant_violation()
-#1 %s/test/slow/lang/invariant_cb_two.php(5): HH\invariant_callback_register()
-#2 {main}
+#0 %s/test/slow/lang/invariant_cb_two.php(5): HH\invariant_callback_register()
+#1 {main}

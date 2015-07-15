@@ -1,0 +1,9 @@
+SimpleXMLIterator can be initialized :)
+SimpleXMLIterator is a SimpleXMLElement: true
+SimpleXMLIterator is a RecursiveIterator: true
+Node root/b has contents: b
+Iteration of elements: , b, , d, 
+Counts of first level nodes: a: 1, b: 0, c: 1, d: 0, 
+first level nodes have children: a: yes, b: no, c: yes, d: no, 
+Leaves:
+a1, b, c1, d, 

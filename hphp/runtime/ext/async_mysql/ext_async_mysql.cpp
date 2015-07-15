@@ -23,7 +23,7 @@
 #include <squangle/mysql_client/AsyncHelpers.h>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -555,7 +555,7 @@ Variant HHVM_METHOD(AsyncMysqlConnection, releaseConnection) {
   data->m_conn.reset();
   data->m_closed = true;
   return Variant(
-    makeSmartPtr<MySQLResource>(
+    req::make<MySQLResource>(
       std::make_shared<MySQL>(host.c_str(),
                               port,
                               username.c_str(),
@@ -651,7 +651,7 @@ const StaticString AsyncMysqlQueryErrorResult::s_className(
 IMPLEMENT_GET_CLASS(AsyncMysqlQueryErrorResult)
 
 Object AsyncMysqlQueryErrorResult::newInstance(
-    std::shared_ptr<am::Operation> op, SmartPtr<c_Vector> results) {
+    std::shared_ptr<am::Operation> op, req::ptr<c_Vector> results) {
   Object ret{getClass()};
   Native::data<AsyncMysqlQueryErrorResult>(ret)->create(op, results);
   return ret;
@@ -668,7 +668,7 @@ void AsyncMysqlQueryErrorResult::sweep() {
 }
 
 void AsyncMysqlQueryErrorResult::create(std::shared_ptr<am::Operation> op,
-                                        SmartPtr<c_Vector> results) {
+                                        req::ptr<c_Vector> results) {
   m_parent.create(op);
   m_query_results = results;
 }
@@ -711,7 +711,7 @@ void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
   m_query_result =
       folly::make_unique<am::QueryResult>(std::move(query_result));
   m_field_index =
-      smart::make_shared<FieldIndex>(m_query_result->getRowFields());
+      req::make_shared<FieldIndex>(m_query_result->getRowFields());
 }
 
 am::Operation* AsyncMysqlQueryResult::op() {
@@ -756,7 +756,7 @@ Object HHVM_METHOD(AsyncMysqlQueryResult, mapRowsTyped) {
 
 Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
-  auto ret = makeSmartPtr<c_Vector>();
+  auto ret = req::make<c_Vector>();
   auto row_blocks = data->m_query_result->stealRows();
   ret->reserve(row_blocks.size());
 
@@ -793,11 +793,11 @@ Variant buildTypedValue(const am::RowFields* row_fields,
 }
 
 Object AsyncMysqlQueryResult::buildRows(bool as_maps, bool typed_values) {
-  auto ret = makeSmartPtr<c_Vector>();
+  auto ret = req::make<c_Vector>();
   ret->reserve(m_query_result->numRows());
   for (const auto& row : *m_query_result) {
     if (as_maps) {
-      auto row_map = makeSmartPtr<c_Map>();
+      auto row_map = req::make<c_Map>();
       for (int i = 0; i < row.size(); ++i) {
         row_map->t_set(
             m_field_index->getFieldString(i),
@@ -806,7 +806,7 @@ Object AsyncMysqlQueryResult::buildRows(bool as_maps, bool typed_values) {
       }
       ret->t_add(Variant(std::move(row_map)));
     } else {
-      auto row_vector = makeSmartPtr<c_Vector>();
+      auto row_vector = req::make<c_Vector>();
       row_vector->reserve(row.size());
       for (int i = 0; i < row.size(); ++i) {
         row_vector->t_add(buildTypedValue(
@@ -859,7 +859,7 @@ void throwAsyncMysqlException(const char* exception_type,
 
 void throwAsyncMysqlQueryException(const char* exception_type,
                                    std::shared_ptr<am::Operation> op,
-                                   SmartPtr<c_Vector> res) {
+                                   req::ptr<c_Vector> res) {
   auto error = AsyncMysqlQueryErrorResult::newInstance(op, res);
 
   assert(op->result() == am::OperationResult::Failed ||
@@ -898,7 +898,7 @@ void AsyncMysqlQueryEvent::unserialize(Cell& result) {
     throwAsyncMysqlQueryException(
         "AsyncMysqlQueryException",
         m_query_op,
-        makeSmartPtr<c_Vector>());
+        req::make<c_Vector>());
   }
 }
 
@@ -910,7 +910,7 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   conn->setConnection(m_multi_op->releaseConnection());
 
   // Retrieving the results for all executed queries
-  auto results = makeSmartPtr<c_Vector>();
+  auto results = req::make<c_Vector>();
   std::vector<am::QueryResult> query_results = m_multi_op->stealQueryResults();
   results->reserve(query_results.size());
   for (int i = 0; i < query_results.size(); ++i) {
@@ -1104,7 +1104,7 @@ void HHVM_METHOD(AsyncMysqlRowBlockIterator, next) {
 bool HHVM_METHOD(AsyncMysqlRowBlockIterator, valid) {
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(this_);
 
-  static_assert(std::is_unsigned<typeof(data->m_row_number)>::value,
+  static_assert(std::is_unsigned<decltype(data->m_row_number)>::value,
                 "m_row_number should be unsigned");
   int64_t count = HHVM_MN(AsyncMysqlRowBlock, count)(
     data->m_row_block.get());
@@ -1222,7 +1222,7 @@ void HHVM_METHOD(AsyncMysqlRowIterator, next) {
 bool HHVM_METHOD(AsyncMysqlRowIterator, valid) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
 
-  static_assert(std::is_unsigned<typeof(data->m_field_number)>::value,
+  static_assert(std::is_unsigned<decltype(data->m_field_number)>::value,
                 "m_field_number should be unsigned");
   int64_t count = HHVM_MN(AsyncMysqlRow, count)(data->m_row.get());
   return data->m_field_number < count;

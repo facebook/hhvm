@@ -51,7 +51,7 @@ bool makeTempFile(const string& contents, string* fn) {
 
 TEST(TestMemFile, DataConstructor) {
   const char* test_data = "some test data";
-  auto mf = makeSmartPtr<MemFile>(test_data, strlen(test_data));
+  auto mf = req::make<MemFile>(test_data, strlen(test_data));
 
   ASSERT_EQ(mf->getc(), 's');
   ASSERT_EQ(mf->getc(), 'o');
@@ -73,12 +73,12 @@ TEST(TestMemFile, DataConstructor) {
 TEST(TestMemFile, BadReadFromCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
-  auto mf = makeSmartPtr<MemFile>();
+  auto mf = req::make<MemFile>();
   ASSERT_FALSE(mf->open("/some/random/file", "r"));
 }
 
 TEST(TestMemFile, BadOpenModes) {
-  auto mf = makeSmartPtr<MemFile>();
+  auto mf = req::make<MemFile>();
   ASSERT_FALSE(mf->open("/some/file1", "+"));
   ASSERT_FALSE(mf->open("/some/file2", "a"));
   ASSERT_FALSE(mf->open("/some/file3", "w"));
@@ -88,7 +88,7 @@ TEST(TestMemFile, EmptyFileInCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
   StaticContentCache::TheFileCache->write("/no/content/entry");
 
-  auto mf = makeSmartPtr<MemFile>();
+  auto mf = req::make<MemFile>();
 
   // The file itself...
   ASSERT_FALSE(mf->open("/no/content/entry", "r"));
@@ -100,7 +100,7 @@ TEST(TestMemFile, EmptyFileInCache) {
 TEST(TestMemFile, NotInCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
-  auto mf = makeSmartPtr<MemFile>();
+  auto mf = req::make<MemFile>();
   ASSERT_FALSE(mf->open("/not/even/there", "r"));
 }
 
@@ -111,7 +111,7 @@ TEST(TestMemFile, RealFileInCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
   StaticContentCache::TheFileCache->write("/content", temp_fn.c_str());
 
-  auto mf = makeSmartPtr<MemFile>();
+  auto mf = req::make<MemFile>();
   ASSERT_TRUE(mf->open("/content", "r"));
 
   ASSERT_EQ(mf->getc(), '1');

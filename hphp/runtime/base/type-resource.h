@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/resource-data.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/sweepable.h"
 
 #include <algorithm>
@@ -33,7 +33,7 @@ namespace HPHP {
  * Object type wrapping around ObjectData to implement reference count.
  */
 class Resource {
-  SmartPtr<ResourceData> m_res;
+  req::ptr<ResourceData> m_res;
 
 public:
   Resource() {}
@@ -50,9 +50,9 @@ public:
   /* implicit */ Resource(ResourceData *data) : m_res(data) { }
   /* implicit */ Resource(const Resource& src) : m_res(src.m_res) { }
   template <typename T>
-  explicit Resource(SmartPtr<T>&& src) : m_res(std::move(src)) { }
+  explicit Resource(req::ptr<T>&& src) : m_res(std::move(src)) { }
   template <typename T>
-  explicit Resource(const SmartPtr<T>& src) : m_res(src) { }
+  explicit Resource(const req::ptr<T>& src) : m_res(src) { }
 
   // Move ctor
   Resource(Resource&& src) noexcept : m_res(std::move(src.m_res)) { }
@@ -63,7 +63,7 @@ public:
     return *this;
   }
   template <typename T>
-  Resource& operator=(const SmartPtr<T>& src) {
+  Resource& operator=(const req::ptr<T>& src) {
     m_res = src;
     return *this;
   }
@@ -73,7 +73,7 @@ public:
     return *this;
   }
   template <typename T>
-  Resource& operator=(SmartPtr<T>&& src) {
+  Resource& operator=(req::ptr<T>&& src) {
     m_res = std::move(src);
     return *this;
   }
@@ -105,7 +105,7 @@ public:
    */
   template<typename T>
   [[deprecated("Please use one of the cast family of functions instead.")]]
-  SmartPtr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
+  req::ptr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     static_assert(std::is_base_of<ResourceData, T>::value, "");
     if (nullOkay) {
       return badTypeOkay ? dyn_cast_or_null<T>(m_res) : cast_or_null<T>(m_res);

@@ -474,9 +474,10 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
+  assert(a->isStatic() || a->hasExactlyOneRef());
+
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
-  tv->m_data.parr->incRefCount();
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {
@@ -564,7 +565,6 @@ void tvCastToResourceInPlace(TypedValue* tv) {
 
   tv->m_type = KindOfResource;
   tv->m_data.pres = newres<DummyResource>();
-  tv->m_data.pres->incRefCount();
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
@@ -756,7 +756,7 @@ TVCoercionException::TVCoercionException(const Func* func,
         folly::format("Unable to coerce param {} to {}() "
                       "from {} to {}",
                       arg_num,
-                      func->name()->data(),
+                      func->name(),
                       actual,
                       expected).str())
 {

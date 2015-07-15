@@ -95,13 +95,13 @@ StringData* buildStringData(int n) {
   return StringData::Make(sl, CopyString);
 }
 
-SmartPtr<StringData> String::buildString(int n) {
+req::ptr<StringData> String::buildString(int n) {
   const StringData* sd = GetIntegerStringData(n);
   if (sd) {
     assert(sd->isStatic());
-    return SmartPtr<StringData>::attach(const_cast<StringData*>(sd));
+    return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
   }
-  return SmartPtr<StringData>::attach(buildStringData(n));
+  return req::ptr<StringData>::attach(buildStringData(n));
 }
 
 String::String(int n) : m_str(buildString(n)) { }
@@ -114,13 +114,13 @@ StringData* buildStringData(int64_t n) {
   return StringData::Make(sl, CopyString);
 }
 
-SmartPtr<StringData> String::buildString(int64_t n) {
+req::ptr<StringData> String::buildString(int64_t n) {
   const StringData* sd = GetIntegerStringData(n);
   if (sd) {
     assert(sd->isStatic());
-    return SmartPtr<StringData>::attach(const_cast<StringData*>(sd));
+    return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
   }
-  return SmartPtr<StringData>::attach(buildStringData(n));
+  return req::ptr<StringData>::attach(buildStringData(n));
 }
 
 String::String(int64_t n) : m_str(buildString(n)) { }
@@ -242,13 +242,13 @@ char String::charAt(int pos) const {
 // assignments
 
 String& String::operator=(const char* s) {
-  m_str = SmartPtr<StringData>::attach(
+  m_str = req::ptr<StringData>::attach(
     s ? StringData::Make(s, CopyString) : nullptr);
   return *this;
 }
 
 String& String::operator=(const std::string& s) {
-  m_str = SmartPtr<StringData>::attach(
+  m_str = req::ptr<StringData>::attach(
     StringData::Make(s.c_str(), s.size(), CopyString));
   return *this;
 }
@@ -267,15 +267,15 @@ String& String::operator=(Variant&& var) {
 String &String::operator+=(const char* s) {
   if (s && *s) {
     if (empty()) {
-      m_str = SmartPtr<StringData>::attach(StringData::Make(s, CopyString));
+      m_str = req::ptr<StringData>::attach(StringData::Make(s, CopyString));
     } else if (m_str->hasExactlyOneRef()) {
       auto const tmp = m_str->append(StringSlice(s, strlen(s)));
       if (UNLIKELY(tmp != m_str)) {
-        m_str = SmartPtr<StringData>::attach(tmp);
+        m_str = req::ptr<StringData>::attach(tmp);
       }
     } else {
       m_str =
-        SmartPtr<StringData>::attach(StringData::Make(m_str.get(), s));
+        req::ptr<StringData>::attach(StringData::Make(m_str.get(), s));
     }
   }
   return *this;
@@ -288,10 +288,10 @@ String &String::operator+=(const String& str) {
     } else if (m_str->hasExactlyOneRef()) {
       auto tmp = m_str->append(str.slice());
       if (UNLIKELY(tmp != m_str)) {
-        m_str = SmartPtr<StringData>::attach(tmp);
+        m_str = req::ptr<StringData>::attach(tmp);
       }
     } else {
-      m_str = SmartPtr<StringData>::attach(
+      m_str = req::ptr<StringData>::attach(
         StringData::Make(m_str.get(), str.slice())
       );
     }
@@ -306,16 +306,16 @@ String& String::operator+=(const StringSlice& slice) {
   if (m_str && m_str->hasExactlyOneRef()) {
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) {
-      m_str = SmartPtr<StringData>::attach(tmp);
+      m_str = req::ptr<StringData>::attach(tmp);
     }
     return *this;
   }
   if (empty()) {
-    m_str = SmartPtr<StringData>::attach(
+    m_str = req::ptr<StringData>::attach(
       StringData::Make(slice.begin(), slice.size(), CopyString));
     return *this;
   }
-  m_str = SmartPtr<StringData>::attach(
+  m_str = req::ptr<StringData>::attach(
     StringData::Make(m_str.get(), slice)
   );
   return *this;
@@ -527,7 +527,7 @@ void String::unserialize(VariableUnserializer *uns,
   uns->expectChar(':');
   uns->expectChar(delimiter0);
 
-  auto px = SmartPtr<StringData>::attach(StringData::Make(int(size)));
+  auto px = req::ptr<StringData>::attach(StringData::Make(int(size)));
   auto const buf = px->bufferSlice();
   assert(size <= buf.len);
   uns->read(buf.ptr, size);

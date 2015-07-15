@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -1589,8 +1589,7 @@ SSATmp* simplifyCoerceCellToDbl(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-template<class Oper>
-SSATmp* roundImpl(State& env, const IRInstruction* inst, Oper op) {
+SSATmp* roundImpl(State& env, const IRInstruction* inst, double (*op)(double)) {
   auto const src  = inst->src(0);
 
   if (src->hasConstVal()) {
@@ -2410,13 +2409,13 @@ void copyProp(IRInstruction* inst) {
 
     if (srcInst->is(Mov)) {
       inst->setSrc(i, srcInst->src(0));
-      }
+    }
 
     // We're assuming that all of our src instructions have already been
     // copyPropped.
     assertx(!inst->src(i)->inst()->is(Mov));
-    }
   }
+}
 
 PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
   if (idxVal < 0 || idxVal > PackedArray::MaxSize) return PackedBounds::Out;

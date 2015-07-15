@@ -1,2 +1,13 @@
-File "this_ret_bad2.php", line 18, characters 38-41:
-The type "this" can only be used as a return type, to instantiate a covariant type variable, or as a private non-static member variable (Naming[2043])
+App \Foo<[1][<expr#1>]App \Bar<>, >
+File "this_ret_bad2.php", line 41, characters 16-34:
+Invalid argument (Typing[4110])
+File "this_ret_bad2.php", line 33, characters 15-17:
+This is the expression dependent type <expr#1>
+File "this_ret_bad2.php", line 41, characters 16-19:
+  where '<expr#1>' is a reference to this expression
+File "this_ret_bad2.php", line 25, characters 27-29:
+It is incompatible with an object of type Bar
+File "this_ret_bad2.php", line 33, characters 15-17:
+Since Bar is not final
+File "this_ret_bad2.php", line 25, characters 27-29:
+this might not be a Bar

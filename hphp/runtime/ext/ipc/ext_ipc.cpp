@@ -145,7 +145,7 @@ Variant HHVM_FUNCTION(msg_get_queue,
       return false;
     }
   }
-  auto q = makeSmartPtr<MessageQueue>();
+  auto q = req::make<MessageQueue>();
   q->key = key;
   q->id = id;
   return Variant(std::move(q));
@@ -310,7 +310,7 @@ bool HHVM_FUNCTION(msg_receive,
   msgtype = (int)buffer->mtype;
   if (unserialize) {
     const char *bufText = (const char *)buffer->mtext;
-    uint bufLen = strlen(bufText);
+    uint32_t bufLen = strlen(bufText);
     VariableUnserializer vu(bufText, bufLen,
                             VariableUnserializer::Type::Serialize);
     try {
@@ -518,7 +518,7 @@ Variant HHVM_FUNCTION(sem_get,
     }
   }
 
-  auto sem_ptr = makeSmartPtr<Semaphore>();
+  auto sem_ptr = req::make<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
   sem_ptr->count = 0;

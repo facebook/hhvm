@@ -40,32 +40,30 @@ BEGIN_EXTERN_C()
 #define SUPPRESS_RESOURCE_FRIEND(x)
 
 namespace HPHP {
-  struct ZendResourceData : ResourceData {
-    ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
-    ~ZendResourceData();
+// Represents a Zend resource. Does not actually contain the resource, but
+// just the index into a request local table of Zend resources. This is whats
+// passed around during program execution. When its ref-count drops to zero
+// and its released, the Zend resource it represents has its destructor
+// called. However, the Zend resource can be freed before ZendResourceData is
+// released.
+struct ZendResourceData : ResourceData {
+  ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
+  ~ZendResourceData();
 
-    DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendResourceData)
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendResourceData)
 
-    const String& o_getClassNameHook() const;
+  const String& o_getClassNameHook() const override;
+  bool isInvalid() const override;
 
-    void* ptr;
-    int type;
-    int refcount;
-    int id;
-  };
+  // The pointer to the Zend resource, always null except when
+  // calling the Zend destructor.
+  void* ptr;
 
-  struct ZendNormalResourceDataHolder : ZendResourceData {
-    explicit ZendNormalResourceDataHolder(ResourceData* rd)
-      : ZendResourceData(nullptr, -1), m_rd(rd) {
-    }
-    ~ZendNormalResourceDataHolder() {}
+  int type;
+  int refcount;
+  int id;
+};
 
-    DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendNormalResourceDataHolder)
-
-    ResourceData* getResourceData() { return m_rd; }
-
-    ResourceData* m_rd;
-  };
 };
 
 using zend_rsrc_list_entry = HPHP::ZendResourceData;
@@ -136,7 +134,7 @@ ZEND_API int zend_fetch_list_dtor_id(char *type_name);
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
 #ifdef HHVM
-// For ZVAL_RESOURCE()
+// For ZVAL_RESOURCE(). The returned resource has already been inc-refd.
 HPHP::ResourceData *zend_list_id_to_resource_data(int id TSRMLS_DC);
 // for zval_get_resource_id()
 int zval_get_resource_id(const zval &z);
@@ -174,11 +172,3 @@ END_EXTERN_C()
 #define SUPPRESS_RESOURCE_FRIEND(x) x
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

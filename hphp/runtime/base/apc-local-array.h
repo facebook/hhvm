@@ -80,7 +80,7 @@ struct APCLocalArray : private ArrayData {
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp);
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
-  static ArrayData* NonSmartCopy(const ArrayData*);
+  static ArrayData* CopyStatic(const ArrayData*);
   static constexpr auto Pop = &ArrayCommon::Pop;
   static constexpr auto Dequeue = &ArrayCommon::Dequeue;
   static void Renumber(ArrayData*);

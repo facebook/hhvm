@@ -21,6 +21,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#ifdef SOCKET_ERROR
+# undef SOCKET_ERROR
+#endif
 #define SOCKET_ERROR(sock, msg, errn)                                 \
   sock->setError(errn);                                               \
   if (errn != EAGAIN && errn != EWOULDBLOCK && errn != EINPROGRESS) { \

@@ -1,0 +1,18 @@
+App \ALoader<>
+App \ALoader<>
+File "loader_example.php", line 42, characters 11-12:
+Invalid argument (Typing[4110])
+File "loader_example.php", line 12, characters 23-38:
+This is the expression dependent type <expr#1>
+File "loader_example.php", line 17, characters 27-30:
+  resulting from expanding the type constant ALoader::TLoadsType
+File "loader_example.php", line 42, characters 3-4:
+  where '<expr#1>' is a reference to this expression
+File "loader_example.php", line 42, characters 3-4:
+  where '<expr#1>' is a reference to this expression
+File "loader_example.php", line 31, characters 49-55:
+It is incompatible with an object of type ALoader
+File "loader_example.php", line 38, characters 11-17:
+Since ALoader is not final
+File "loader_example.php", line 31, characters 49-55:
+this might not be a ALoader

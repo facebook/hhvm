@@ -52,7 +52,6 @@ public:
    * Testing whether a variable is a PHP superglobal.
    */
   static bool IsSuperGlobal(const std::string &name);
-  static TypePtr GetSuperGlobalType(const std::string &name);
 
   static bool IsDeclaredDynamic(const std::string& name);
   static void LoadSuperGlobals();
@@ -63,7 +62,7 @@ private:
   static StringBag s_strings;
   static const char *SystemClasses[];
 
-  static StringToTypePtrMap s_superGlobals;
+  static hphp_string_set s_superGlobals;
 
   static std::set<std::string> s_declaredDynamic;
 

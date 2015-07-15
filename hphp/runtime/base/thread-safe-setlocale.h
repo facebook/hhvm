@@ -19,7 +19,7 @@
 
 #include <vector>
 #include <string>
-#include <xlocale.h>
+#include "hphp/util/locale-portability.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {

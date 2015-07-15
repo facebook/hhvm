@@ -29,7 +29,7 @@ namespace HPHP {
 
 // Globals
 const StaticString
-  s_COOKIE("_COOOKIE"),
+  s_COOKIE("_COOKIE"),
   s_GET("_GET"),
   s_POST("_POST");
 

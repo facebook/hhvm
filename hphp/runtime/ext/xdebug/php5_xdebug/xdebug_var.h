@@ -21,7 +21,7 @@
 #define incl_XDEBUG_VAR_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
@@ -43,7 +43,7 @@ struct XDebugExporter {
   }
 
   /* Set of seen ObjectData and ArrayData pointers. */
-  smart::hash_set<void*, pointer_hash<void>> seen;
+  req::hash_set<void*, pointer_hash<void>> seen;
 
   /* Current level we are at. */
   uint32_t level{0};

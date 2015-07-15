@@ -23,12 +23,13 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/extension-registry.h"
@@ -1028,7 +1029,7 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
 static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   auto const& allIfaces = cls->allInterfaces();
   st->reserve(allIfaces.size());
 
@@ -1102,7 +1103,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
   StringISet visitedMethods;
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 
   auto add = [&] (const Func* m) {
@@ -1197,7 +1198,7 @@ static Variant HHVM_METHOD(ReflectionClass, getConstant, const String& name) {
 
 static
 void addClassConstantNames(const Class* cls,
-                           const SmartPtr<c_Set>& st,
+                           const req::ptr<c_Set>& st,
                            size_t limit) {
   assert(cls && st && (st->size() < limit));
 
@@ -1230,7 +1231,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
     return Array::Create();
   }
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(numConsts);
 
   addClassConstantNames(cls, st, numConsts);
@@ -1255,7 +1256,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
     return Array::Create();
   }
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(numConsts);
 
   const Class::Const* consts = cls->constants();
@@ -1280,7 +1281,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
     return Array::Create();
   }
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(numConsts);
 
   const Class::Const* consts = cls->constants();
@@ -1432,7 +1433,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
     String clsName = content.toString();
     String result = init(clsName);
     if (result.empty()) {
-      auto msg = folly::format("Class {} does not exist", clsName.data()).str();
+      auto msg = folly::format("Class {} does not exist", clsName).str();
       throw Reflection::AllocReflectionExceptionObject(String(msg));
     }
 
@@ -1512,7 +1513,23 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     return String(cst->m_val.m_data.pstr);
   }
 
+  if (cst->m_val.m_type == KindOfArray) {
+    return TypeStructure::toString(cst->m_val.m_data.parr);
+  }
+
   return String();
+}
+
+static Array HHVM_METHOD(ReflectionTypeConstant, getTypeStructure) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  assert(cst->isType());
+  if (cst->isAbstract()) {
+    assert(cst->m_val.m_type == KindOfUninit);
+    return Array();
+  } else {
+    assert(cst->m_val.m_type == KindOfArray);
+    return Array(const_cast<ArrayData*>(cst->m_val.m_data.parr));
+  }
 }
 
 // private helper for getDeclaringClass
@@ -1624,7 +1641,6 @@ static Variant HHVM_METHOD(ReflectionProperty, __init,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
 class ReflectionExtension final : public Extension {
  public:
   ReflectionExtension() : Extension("reflection", "$Id$") { }
@@ -1680,6 +1696,7 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionTypeConstant, isAbstract);
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
+    HHVM_ME(ReflectionTypeConstant, getTypeStructure);
 
     HHVM_ME(ReflectionProperty, __init);
 

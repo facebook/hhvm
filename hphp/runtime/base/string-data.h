@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/cap-code.h"
 
@@ -44,8 +44,8 @@ class String;
 enum AttachStringMode { AttachString };
 
 // const char* points to client-owned memory, StringData will copy it
-// at construct-time using smart_malloc.  This is only ok when the StringData
-// itself was smart-allocated.
+// at construct-time using req::malloc.  This is only ok when the StringData
+// itself was request-allocated.
 enum CopyStringMode { CopyString };
 
 /*
@@ -70,15 +70,16 @@ enum CopyStringMode { CopyString };
  *   Shared |        |          |    X
  */
 struct StringData {
+  friend class APCString;
+  friend StringData* allocFlatSmallImpl(size_t len);
+  friend StringData* allocFlatSlowImpl(size_t len);
+
   /*
    * Max length of a string, not counting the terminal 0.
    *
-   * This is MAX_INT-1 to avoid this kind of hazard in client code:
-   *
-   *   int size = string_data->size();
-   *   ... = size + 1; // oops, wraparound.
+   * This is smaller than MAX_INT, and we want a CapCode to precisely encode it.
    */
-  static constexpr uint32_t MaxSize = 0x7ffffffe; // 2^31-2
+  static constexpr uint32_t MaxSize = 0x7ff00000; // 11 bits of 1's
 
   /*
    * Creates an empty request-local string with an unspecified amount of
@@ -172,7 +173,7 @@ struct StringData {
   static unsigned sweepAll();
 
   /*
-   * Called to return a StringData to the smart allocator.  This is
+   * Called to return a StringData to the request allocator.  This is
    * normally called when the reference count goes to zero (e.g. with
    * a helper like decRefStr).
    */
@@ -489,8 +490,6 @@ private:
     };
     uint64_t m_lenAndHash;
   };
-
-  friend class APCString;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -499,7 +498,7 @@ private:
  * A reasonable length to reserve for small strings.  This is the
  * default reserve size for StringData::Make(), also.
  */
-const uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
+constexpr uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
 
 /*
  * DecRef a string s, calling release if its reference count goes to
@@ -539,16 +538,29 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 }
 
 namespace folly {
-template<> struct FormatValue<HPHP::StringData> {
-  explicit FormatValue(const HPHP::StringData& str) : m_val(str) {}
+template<> struct FormatValue<const HPHP::StringData*> {
+  explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
 
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
-    format_value::formatString(m_val.data(), arg, cb);
+    auto piece = folly::StringPiece(m_val->data(), m_val->size());
+    format_value::formatString(piece, arg, cb);
   }
 
  private:
-  const HPHP::StringData& m_val;
+  const HPHP::StringData* m_val;
+};
+
+template<> struct FormatValue<HPHP::StringData*> {
+  explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    FormatValue<const HPHP::StringData*>(m_val).format(arg, cb);
+  }
+
+ private:
+  const HPHP::StringData* m_val;
 };
 }
 

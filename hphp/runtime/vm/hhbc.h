@@ -756,6 +756,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
+  O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    CF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \

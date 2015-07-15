@@ -652,13 +652,14 @@ and class_const_decl c (env, acc) (h, id, e) =
 and class_class_decl class_id =
   let pos, name = class_id in
   let reason = Reason.Rclass_class (pos, name) in
+  let classname_ty = (reason, Tprim (Tclassname name)) in
   {
     ce_final       = false;
     ce_is_xhp_attr = false;
     ce_override    = false;
     ce_synthesized = true;
     ce_visibility  = Vpublic;
-    ce_type        = (reason, Tprim Tstring);
+    ce_type        = classname_ty;
     ce_origin      = name;
   }
 

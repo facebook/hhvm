@@ -16,7 +16,7 @@
 
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__x86_64__) && !defined(__APPLE__)
+#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
               .file "hphp/util/memcpy-x64.S"
               ETCH_SECTION(memcpy)
 
@@ -28,7 +28,7 @@
  *    %rsi:  source buffer address.
  *    %edx:  length, in the range of [0, 7]
  */
-              .type ETCH_NAME(_memcpy_short), @function
+              ETCH_TYPE(ETCH_NAME(_memcpy_short), @function)
 ETCH_NAME(_memcpy_short):
 ETCH_LABEL(SHORT):
               CFI(startproc)
@@ -82,7 +82,7 @@ ETCH_LABEL(S4):
  */
               ETCH_ALIGN16
               .globl ETCH_NAME(_memcpy8)
-              .type ETCH_NAME(_memcpy8), @function
+              ETCH_TYPE(ETCH_NAME(_memcpy8), @function)
 ETCH_NAME(_memcpy8):
               CFI(startproc)
               lea   (%rdi, %rdx), %rax
@@ -103,7 +103,7 @@ ETCH_NAME(_memcpy8):
  */
               ETCH_ALIGN16
               .globl ETCH_NAME(memcpy)
-              .type ETCH_NAME(memcpy), @function
+              ETCH_TYPE(ETCH_NAME(memcpy), @function)
 ETCH_NAME(memcpy):
               CFI(startproc)
 
@@ -153,7 +153,7 @@ ETCH_LABEL(R32_adjDI):
  * except that the return value cannot be used.
  */
               .globl ETCH_NAME(_bcopy32)
-              .type ETCH_NAME(_bcopy32), @function
+              ETCH_TYPE(ETCH_NAME(_bcopy32), @function)
 ETCH_NAME(_bcopy32):
 ETCH_LABEL(L32):
               // Multiples of 32 bytes.
@@ -185,7 +185,7 @@ ETCH_LABEL(R64_adjDI):
  * Note that the length being copied is 64 * %edx.
  */
               .globl ETCH_NAME(_bcopy_in_64)
-              .type ETCH_NAME(_bcopy_in_64), @function
+              ETCH_TYPE(ETCH_NAME(_bcopy_in_64), @function)
 ETCH_NAME(_bcopy_in_64):
 ETCH_LABEL(R64Byte):
               // Multiples of 64 bytes.
@@ -212,7 +212,7 @@ ETCH_LABEL(R64Byte_32read):
  *     memcpy(dst, src, length);
  */
               .globl ETCH_NAME(_memcpy16)
-              .type ETCH_NAME(_memcpy16), @function
+              ETCH_TYPE(ETCH_NAME(_memcpy16), @function)
 ETCH_NAME(_memcpy16):
               movdqu -16(%rsi, %rdx), %xmm3
               movdqu (%rsi), %xmm0
@@ -255,5 +255,8 @@ ETCH_LABEL(END16):
               ETCH_SIZE(memcpy)
 
               .ident "GCC: (GNU) 4.8.2"
+#ifdef __linux__
               .section .note.GNU-stack,"",@progbits
+#endif
+
 #endif

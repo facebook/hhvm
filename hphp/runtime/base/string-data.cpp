@@ -84,7 +84,7 @@ ALWAYS_INLINE StringData* allocFlatSmallImpl(size_t len) {
 
   sd->m_data = reinterpret_cast<char*>(sd + 1);
   // Refcount initialized to 1.
-  sd->m_hdr.init(CapCode::exact(cap), HeaderKind::String, 1, sizeClass);
+  sd->m_hdr.init(CapCode::exact(cap), HeaderKind::String, 1);
   return sd;
 }
 
@@ -119,7 +119,7 @@ ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
   assert(cc.decode() >= len);
   sd->m_data = reinterpret_cast<char*>(sd + 1);
   // Refcount initialized to 1.
-  sd->m_hdr.init(cc, HeaderKind::String, 1, sizeClass);
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
   return sd;
 }
 
@@ -485,19 +485,25 @@ void StringData::releaseDataSlowPath() {
 
 void StringData::release() noexcept {
   assert(checkSane());
-  if (auto const sizeClass = m_hdr.smallSizeClass) {
-    assert(isFlat());
-    MM().freeSmallIndex(this, sizeClass,
-                        MemoryManager::smallIndex2Size(sizeClass));
-  } else {
-    // We know that the string is request local.  A `smallSizeClass' of 0 in
-    // its header indicates that the StringData is either not flat, or too big
-    // to fit in a small size class.
-    if (!isFlat()) return releaseDataSlowPath();
-    auto const size = capacity() + kCapOverhead;
-    assertx(size > kMaxSmallSize);
-    MM().freeBigSize(this, size);
+  if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
+  // In CapCode encoding, we always minimize the exponent.  Thus if the
+  // encoded value is above Threshold, the value after decoding is also
+  // above Threshold.
+  if (LIKELY(m_hdr.aux.code <= kMaxStringSimpleLen)) {
+    auto const size = kCapOverhead + m_hdr.aux.code;
+    auto const sizeClass = MemoryManager::lookupSmallSize2Index(size);
+    MM().freeSmallIndex(this, sizeClass, size);
+    return;
   }
+
+  auto const size = capacity() + kCapOverhead;
+  if (size <= kMaxSmallSize) {
+    auto const sizeClass = MemoryManager::computeSmallSize2Index(size);
+    auto const sz = MemoryManager::smallIndex2Size(sizeClass);
+    MM().freeSmallIndex(this, sizeClass, sz);
+    return;
+  }
+  MM().freeBigSize(this, size);
 }
 
 //////////////////////////////////////////////////////////////////////

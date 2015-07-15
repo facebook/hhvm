@@ -623,11 +623,11 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
   auto increfMaybeStatic = [&](Vout& v) {
     auto base = loc.reg(0);
     auto rCount = v.makeReg();
-    v << loadl{base[FAST_REFCOUNT_OFFSET], rCount};
+    //v << loadl{base[FAST_REFCOUNT_OFFSET], rCount};
     if (!type.maybe(TStatic)) {
       auto count1 = v.makeReg();
       v << addli{1, rCount, count1, v.makeReg()};
-      v << storel{count1, base[FAST_REFCOUNT_OFFSET]};
+      //v << storel{count1, base[FAST_REFCOUNT_OFFSET]};
     } else {
       auto const sf = v.makeReg();
       v << cmpli{0, rCount, sf};
@@ -635,7 +635,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
       ifThen(v, CC_GE, sf, [&](Vout& v) {
         auto count1 = v.makeReg();
         v << addli{1, rCount, count1, v.makeReg()};
-        v << storel{count1, base[FAST_REFCOUNT_OFFSET]};
+        //v << storel{count1, base[FAST_REFCOUNT_OFFSET]};
       });
     }
   };

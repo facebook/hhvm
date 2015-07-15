@@ -163,8 +163,6 @@ static void* MemoryManagerInit() {
   // object, overlapping SmartHeader.data, and we also clobber _count
   // as a free-object flag when the object is deallocated.  This
   // assert just makes sure they don't overflow.
-  assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
-    MemoryManager::smartSizeClass(1));
   MemoryManager::TlsWrapper tls;
   return (void*)tls.getNoCheck;
 }

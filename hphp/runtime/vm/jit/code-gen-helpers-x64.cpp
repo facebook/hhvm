@@ -96,11 +96,6 @@ void emitTransCounterInc(Asm& a) {
   emitTransCounterInc(Vauto(a.code()).main());
 }
 
-Vreg emitDecRef(Vout& v, Vreg base) {
-  // this will give errors if actually called
-  return v.makeReg();
-}
-
 void emitIncRef(Vout& v, Vreg base) {
   // set the mrb
   // TODO don't hardcode this

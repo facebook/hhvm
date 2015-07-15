@@ -2549,15 +2549,7 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
-  emitIncStat(vmain(), Stats::TC_DecRef_NZ);
-  emitDecRefTypeStat(vmain(), inst);
-  auto const ty = inst->src(0)->type();
-  ifRefCountedNonStatic(
-    vmain(), ty, srcLoc(inst, 0),
-    [&] (Vout& v) {
-      emitDecRef(v, srcLoc(inst, 0).reg());
-    }
-  );
+
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {

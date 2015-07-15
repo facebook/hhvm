@@ -63,7 +63,7 @@ template<class T = uint16_t> struct HeaderWord {
               mutable uint8_t counted:1;
               mutable uint8_t _static:1;
             };
-            uint8_t gcbyte;
+            mutable uint8_t gcbyte;
           };
         };
         uint32_t lo32;

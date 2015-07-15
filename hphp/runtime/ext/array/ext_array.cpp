@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/zend-collator.h"
+#include "hphp/runtime/base/zend-sort.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -2328,16 +2329,11 @@ class ArraySortTmp {
 
 static bool
 php_sort(VRefParam container, int sort_flags,
-         bool ascending, bool use_collator) {
+         bool ascending, bool use_zend_sort) {
   if (container.isArray()) {
     Array& arr_array = container.wrapped().toArrRef();
-    if (use_collator && sort_flags != SORT_LOCALE_STRING) {
-      UCollator *coll = s_collator->getCollator();
-      if (coll) {
-        Intl::IntlError &errcode = s_collator->getErrorRef();
-        return collator_sort(container, sort_flags, ascending,
-                             coll, &errcode);
-      }
+    if (use_zend_sort) {
+      return zend_sort(container, sort_flags, ascending);
     }
     SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
     ArraySortTmp ast(arr_array, sf);
@@ -2362,16 +2358,11 @@ php_sort(VRefParam container, int sort_flags,
 
 static bool
 php_asort(VRefParam container, int sort_flags,
-          bool ascending, bool use_collator) {
+          bool ascending, bool use_zend_sort) {
   if (container.isArray()) {
     Array& arr_array = container.wrapped().toArrRef();
-    if (use_collator && sort_flags != SORT_LOCALE_STRING) {
-      UCollator *coll = s_collator->getCollator();
-      if (coll) {
-        Intl::IntlError &errcode = s_collator->getErrorRef();
-        return collator_asort(container, sort_flags, ascending,
-                              coll, &errcode);
-      }
+    if (use_zend_sort) {
+      return zend_asort(container, sort_flags, ascending);
     }
     SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
     ArraySortTmp ast(arr_array, sf);
@@ -2395,16 +2386,11 @@ php_asort(VRefParam container, int sort_flags,
 
 static bool
 php_ksort(VRefParam container, int sort_flags, bool ascending,
-          bool use_collator) {
+          bool use_zend_sort) {
   if (container.isArray()) {
     Array& arr_array = container.wrapped().toArrRef();
-    if (use_collator && sort_flags != SORT_LOCALE_STRING) {
-      UCollator *coll = s_collator->getCollator();
-      if (coll) {
-        Intl::IntlError &errcode = s_collator->getErrorRef();
-        return collator_ksort(container, sort_flags, ascending,
-                              coll, &errcode);
-      }
+    if (use_zend_sort) {
+      return zend_ksort(container, sort_flags, ascending);
     }
     SortFunction sf = getSortFunction(SORTFUNC_KRSORT, ascending);
     ArraySortTmp ast(arr_array, sf);
@@ -2429,43 +2415,43 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
 bool HHVM_FUNCTION(sort,
                   VRefParam array,
                   int sort_flags /* = 0 */) {
-  bool use_collator = RuntimeOption::EnableZendSorting;
-  return php_sort(array, sort_flags, true, use_collator);
+  bool use_zend_sort = RuntimeOption::EnableZendSorting;
+  return php_sort(array, sort_flags, true, use_zend_sort);
 }
 
 bool HHVM_FUNCTION(rsort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_collator = RuntimeOption::EnableZendSorting;
-  return php_sort(array, sort_flags, false, use_collator);
+  bool use_zend_sort = RuntimeOption::EnableZendSorting;
+  return php_sort(array, sort_flags, false, use_zend_sort);
 }
 
 bool HHVM_FUNCTION(asort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_collator = RuntimeOption::EnableZendSorting;
-  return php_asort(array, sort_flags, true, use_collator);
+  bool use_zend_sort = RuntimeOption::EnableZendSorting;
+  return php_asort(array, sort_flags, true, use_zend_sort);
 }
 
 bool HHVM_FUNCTION(arsort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_collator = RuntimeOption::EnableZendSorting;
-  return php_asort(array, sort_flags, false, use_collator);
+  bool use_zend_sort = RuntimeOption::EnableZendSorting;
+  return php_asort(array, sort_flags, false, use_zend_sort);
 }
 
 bool HHVM_FUNCTION(ksort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_collator = RuntimeOption::EnableZendSorting;
-  return php_ksort(array, sort_flags, true, use_collator);
+  bool use_zend_sort = RuntimeOption::EnableZendSorting;
+  return php_ksort(array, sort_flags, true, use_zend_sort);
 }
 
 bool HHVM_FUNCTION(krsort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_collator = RuntimeOption::EnableZendSorting;
-  return php_ksort(array, sort_flags, false, use_collator);
+  bool use_zend_sort = RuntimeOption::EnableZendSorting;
+  return php_ksort(array, sort_flags, false, use_zend_sort);
 }
 
 // NOTE: PHP's implementation of natsort and natcasesort accepts ArrayAccess

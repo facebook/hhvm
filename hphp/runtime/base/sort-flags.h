@@ -17,6 +17,9 @@
 #ifndef incl_HPHP_SORT_FLAGS_H_
 #define incl_HPHP_SORT_FLAGS_H_
 
+#include <stdint.h>
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 
 enum SortFlavor { IntegerSort, StringSort, GenericSort };

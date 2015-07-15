@@ -1,0 +1,28 @@
+array(13) {
+  ["AB"]=>
+  string(7) "Alberta"
+  ["BC"]=>
+  string(20) "Colombie-Britannique"
+  ["PE"]=>
+  string(37) "%EF%BF%BDle-du-Prince-%EF%BF%BDdouard"
+  ["MB"]=>
+  string(8) "Manitoba"
+  ["NB"]=>
+  string(17) "Nouveau-Brunswick"
+  ["NS"]=>
+  string(23) "Nouvelle-%EF%BF%BDcosse"
+  ["NU"]=>
+  string(7) "Nunavut"
+  ["ON"]=>
+  string(7) "Ontario"
+  ["QC"]=>
+  string(14) "Qu%EF%BF%BDbec"
+  ["SK"]=>
+  string(12) "Saskatchewan"
+  ["NL"]=>
+  string(23) "Terre-Neuve-et-Labrador"
+  ["YT"]=>
+  string(19) "Territoire+du+Yukon"
+  ["NT"]=>
+  string(25) "Territoires+du+Nord-Ouest"
+}

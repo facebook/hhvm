@@ -127,10 +127,6 @@ class MCRouter {
     opts.async_spool = "";
     opts.stats_logging_interval = 0;
     opts.stats_root = "";
-#else
-    // Default this to true since this is a new interface
-    // and it allows our tests to work inside or out
-    opts.use_new_configs = true;
 #endif
 
     std::unordered_map<std::string, std::string> dict;

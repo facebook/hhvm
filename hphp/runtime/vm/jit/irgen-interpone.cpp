@@ -468,8 +468,6 @@ void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
 
 void emitLowInvalid(IRGS& env)                { std::abort(); }
 void emitCGetL3(IRGS& env, int32_t)           { INTERP }
-void emitBox(IRGS& env)                       { INTERP }
-void emitBoxR(IRGS& env)                      { INTERP }
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitClsCns(IRGS& env, const StringData*) { INTERP }

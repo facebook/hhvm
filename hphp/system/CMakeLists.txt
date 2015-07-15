@@ -45,8 +45,8 @@ foreach(cls ${SYSTEMLIB_CLASSES})
   endif()
 endforeach()
 
-add_custom_target(
-  systemlib
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/systemlib.php
   DEPENDS "php.txt" ${SYSTEMLIB_SRCS}
   COMMAND "INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR}"
           "FBCODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../.."
@@ -55,3 +55,7 @@ add_custom_target(
           "--fbcode_dir=${CMAKE_CURRENT_SOURCE_DIR}/.."
           "${SYSTEMLIB_SRCS_STR}"
   COMMENT "Generating systemlib.php")
+
+add_custom_target(
+  systemlib
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/systemlib.php)

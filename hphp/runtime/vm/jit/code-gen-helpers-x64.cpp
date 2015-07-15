@@ -132,7 +132,7 @@ void emitIncRef(Vout& v, Vreg base) {
   }
   // emit incref
   auto const sf = v.makeReg();
-  v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
+  v << addqim{2, base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
 }
 
@@ -153,7 +153,7 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
     as.   loadq  (base[disp + TVOFF(m_data)], tmpReg);
     { // if !static
       IfCountNotStatic ins(as, tmpReg);
-      as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
+      as. addq(2, tmpReg[FAST_REFCOUNT_OFFSET]);
     } // endif
   } // endif
 }

@@ -102,12 +102,13 @@ inline bool check_refcount_ns_nz(int32_t count) {
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount(m_hdr.count));                                \
-    if (isRefCounted()) { ++m_hdr.count; }                              \
+    if (isRefCounted()) { m_hdr.count += 2; }                           \
   }                                                                     \
                                                                         \
   void setRefCount(RefCount count) {                                    \
     assert(count == StaticValue || !MemoryManager::sweeping());         \
     assert(check_refcount(m_hdr.count));                                \
+    assert(count < 2);                                                  \
     m_hdr.count = count;                                                \
     assert(check_refcount(m_hdr.count));                                \
   }                                                                     \
@@ -166,7 +167,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
   void incRefCount() const {                            \
     assert(!MemoryManager::sweeping());                 \
     assert(check_refcount_ns(m_hdr.count));             \
-    ++m_hdr.count;                                      \
+    m_hdr.count += 2;                                   \
   }                                                     \
                                                         \
   RefCount decRefCount() const {                        \

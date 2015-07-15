@@ -20,11 +20,11 @@ macro(HHVM_EXTENSION EXTNAME)
   endforeach()
 endmacro()
 
-function(HHVM_SYSTEMLIB EXTNAME SOURCE_FILE)
-  # Ignore it, embed_all_systemlibs will pick this up
-  # TODO: Make this cleaner so that we don't embed systemlibs
-  # which aren't going to be used
-endfunction()
+macro(HHVM_SYSTEMLIB EXTNAME)
+  foreach (slib ${ARGN})
+    list(APPEND PHP_SOURCES "${HRE_CURRENT_EXT_PATH}/${slib}")
+  endforeach()
+endmacro()
 
 function(HHVM_DEFINE EXTNAME)
   add_definitions(${ARGN})

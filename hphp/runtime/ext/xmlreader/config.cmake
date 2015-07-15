@@ -1,0 +1,10 @@
+HHVM_DEFINE_EXTENSION("xmlreader"
+  SOURCES
+    ext_xmlreader.cpp
+  HEADERS
+    ext_xmlreader.h
+  SYSTEMLIB
+    ext_xmlreader.php
+  DEPENDS
+    libXML2
+)

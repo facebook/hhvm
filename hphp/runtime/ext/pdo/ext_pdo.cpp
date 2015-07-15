@@ -14,6 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+/* @nolint */
 
 #include "hphp/runtime/ext/pdo/ext_pdo.h"
 
@@ -36,8 +37,12 @@
 
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
+#ifdef ENABLE_EXTENSION_PDO_MYSQL
 #include "hphp/runtime/ext/pdo/pdo_mysql.h"
+#endif
+#ifdef ENABLE_EXTENSION_PDO_SQLITE
 #include "hphp/runtime/ext/pdo/pdo_sqlite.h"
+#endif
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -142,6 +147,7 @@ const int64_t q_PDO$$CURSOR_SCROLL            = PDO_CURSOR_SCROLL;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef ENABLE_EXTENSION_PDO_MYSQL
 const int64_t q_PDO$$MYSQL_ATTR_USE_BUFFERED_QUERY =
   PDO_MYSQL_ATTR_USE_BUFFERED_QUERY;
 const int64_t q_PDO$$MYSQL_ATTR_LOCAL_INFILE = PDO_MYSQL_ATTR_LOCAL_INFILE;
@@ -156,6 +162,7 @@ const int64_t q_PDO$$MYSQL_ATTR_COMPRESS     = PDO_MYSQL_ATTR_COMPRESS;
 const int64_t q_PDO$$MYSQL_ATTR_DIRECT_QUERY = PDO_MYSQL_ATTR_DIRECT_QUERY;
 const int64_t q_PDO$$MYSQL_ATTR_FOUND_ROWS   = PDO_MYSQL_ATTR_FOUND_ROWS;
 const int64_t q_PDO$$MYSQL_ATTR_IGNORE_SPACE = PDO_MYSQL_ATTR_IGNORE_SPACE;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension functions
@@ -1573,6 +1580,7 @@ static Variant HHVM_METHOD(PDO, quote, const String& str,
 
 static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
                         const Variant& callback, int64_t argcount /* = -1 */) {
+#ifdef ENABLE_EXTENSION_PDO_SQLITE
   auto data = Native::data<PDOData>(this_);
 
   auto conn = std::dynamic_pointer_cast<PDOSqliteConnection>(
@@ -1581,6 +1589,9 @@ static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
     return false;
   }
   return conn->createFunction(name, callback, argcount);
+#else
+  raise_recoverable_error("PDO::sqliteCreateFunction not implemented");
+#endif
 }
 
 static bool HHVM_METHOD(PDO, sqlitecreateaggregate, const String& name,
@@ -3420,6 +3431,7 @@ static class PDOExtension final : public Extension {
 public:
   PDOExtension() : Extension("pdo", " 1.0.4dev") {}
 
+#ifdef ENABLE_EXTENSION_PDO_MYSQL
   std::string mysql_default_socket;
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
@@ -3427,6 +3439,7 @@ public:
                      "pdo_mysql.default_socket", nullptr,
                      &mysql_default_socket);
   }
+#endif
 
   void moduleInit() override {
     HHVM_FE(pdo_drivers);
@@ -3826,6 +3839,7 @@ public:
       s_CURSOR_SCROLL.get(),
       q_PDO$$CURSOR_SCROLL
     );
+#ifdef ENABLE_EXTENSION_PDO_MYSQL
     Native::registerClassConstant<KindOfInt64>(
       s_PDO.get(),
       s_MYSQL_ATTR_USE_BUFFERED_QUERY.get(),
@@ -3876,6 +3890,7 @@ public:
       s_MYSQL_ATTR_IGNORE_SPACE.get(),
       q_PDO$$MYSQL_ATTR_IGNORE_SPACE
     );
+#endif
     Native::registerClassConstant<KindOfStaticString>(
       s_PDO.get(),
       s_ERR_NONE.get(),

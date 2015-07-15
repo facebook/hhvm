@@ -1,0 +1,9 @@
+HHVM_DEFINE_EXTENSION("iconv"
+  SOURCES
+    ext_iconv.cpp
+  SYSTEMLIB
+    ext_iconv.php
+  DEPENDS
+    libBoost
+    libIConv
+)

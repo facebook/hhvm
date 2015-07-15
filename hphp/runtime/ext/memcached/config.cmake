@@ -1,0 +1,12 @@
+HHVM_DEFINE_EXTENSION("memcached"
+  SOURCES
+    ext_memcached.cpp
+  HEADERS
+    libmemcached_portability.h
+  SYSTEMLIB
+    ext_memcached.php
+  DEPENDS
+    libFastLZ
+    libMemcached
+    libZLib
+)

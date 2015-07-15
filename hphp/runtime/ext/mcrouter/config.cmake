@@ -1,7 +1,9 @@
-if (ENABLE_MCROUTER)
-  HHVM_EXTENSION(mcrouter ext_mcrouter.cpp)
-  HHVM_SYSTEMLIB(mcrouter ext_mcrouter.php)
-  message(STATUS "Building mcrouter extension")
-else()
-  message(WARNING "Not building mcrouter extension")
-endif()
+HHVM_DEFINE_EXTENSION("mcrouter"
+  SOURCES
+    ext_mcrouter.cpp
+  SYSTEMLIB
+    ext_mcrouter.php
+  DEPENDS
+    libMCRouter
+    varENABLE_MCROUTER
+)

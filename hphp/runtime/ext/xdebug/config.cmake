@@ -1,0 +1,29 @@
+HHVM_DEFINE_EXTENSION("xdebug"
+  SOURCES
+    ext_xdebug.cpp
+    status.cpp
+    xdebug_command.cpp
+    xdebug_hook_handler.cpp
+    xdebug_profiler.cpp
+    xdebug_server.cpp
+    xdebug_utils.cpp
+    php5_xdebug/xdebug_str.cpp
+    php5_xdebug/xdebug_var.cpp
+    php5_xdebug/xdebug_xml.cpp
+  HEADERS
+    ext_xdebug.h
+    status.h
+    xdebug_command.h
+    xdebug_hook_handler.h
+    xdebug_profiler.h
+    xdebug_server.h
+    xdebug_utils.h
+    php5_xdebug/xdebug_mm.h
+    php5_xdebug/xdebug_str.h
+    php5_xdebug/xdebug_var.h
+    php5_xdebug/xdebug_xml.h
+  SYSTEMLIB
+    ext_xdebug.php
+  DEPENDS
+    libFolly
+)

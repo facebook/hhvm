@@ -1,0 +1,16 @@
+HHVM_DEFINE_EXTENSION("filter"
+  SOURCES
+    ext_filter.cpp
+    logical_filters.cpp
+    sanitizing_filters.cpp
+  HEADERS
+    ext_filter.h
+    filter_private.h
+    logical_filters.h
+    sanitizing_filters.h
+  SYSTEMLIB
+    ext_filter.php
+  DEPENDS
+    libFolly
+    libPCRE
+)

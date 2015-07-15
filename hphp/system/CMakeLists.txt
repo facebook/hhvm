@@ -1,6 +1,9 @@
-auto_sources(IDL_SRCS "*.idl.json" "RECURSE"
-             "${CMAKE_CURRENT_SOURCE_DIR}/../system/idl")
+foreach(def ${EXTENSION_IDL_DEFINES})
+  add_definitions(${def})
+endforeach()
 
+# This will be run after runtime/ext has, so we can use the output of
+# that.
 add_custom_command(
   OUTPUT "class_map.cpp" "constants.h"
   DEPENDS ${IDL_SRCS} gen-class-map
@@ -8,7 +11,10 @@ add_custom_command(
   ARGS "--system"
        "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
        "${CMAKE_CURRENT_BINARY_DIR}/constants.h"
-       ${IDL_SRCS}
+       "${CMAKE_CURRENT_SOURCE_DIR}/idl/constants.idl.json"
+       ${EXTENSION_IDL_SOURCES}
+       # TODO: This will get moved into a config.cmake soon, until then...
+       "${CMAKE_CURRENT_SOURCE_DIR}/idl/closure.idl.json"
   COMMENT "Generating class_map.cpp and constants.h")
 
 set(CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"

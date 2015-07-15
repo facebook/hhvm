@@ -1,0 +1,11 @@
+HHVM_DEFINE_EXTENSION("libxml"
+  SOURCES
+    ext_libxml.cpp
+  HEADERS
+    ext_libxml.h
+  SYSTEMLIB
+    ext_libxml.php
+  DEPENDS
+    libFolly
+    libXML2
+)

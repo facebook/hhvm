@@ -1,0 +1,10 @@
+HHVM_DEFINE_EXTENSION("sqlite3"
+  SOURCES
+    ext_sqlite3.cpp
+  HEADERS
+    ext_sqlite3.h
+  SYSTEMLIB
+    ext_sqlite3.php
+  DEPENDS
+    libSQLite
+)

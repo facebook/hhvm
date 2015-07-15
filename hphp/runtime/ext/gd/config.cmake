@@ -1,5 +1,6 @@
 if ((NOT DEFINED EXT_GD) OR (EXT_GD STREQUAL "ON"))
-  HHVM_EXTENSION(gd ext_gd.cpp
+  HHVM_EXTENSION(gd
+    ext_gd.cpp
     libgd/gd_arc.cpp
     libgd/gd_arc_f_buggy.cpp
     libgd/gdcache.cpp

@@ -1,10 +1,16 @@
-if (ENABLE_ASYNC_MYSQL)
-  HHVM_EXTENSION(async_mysql ext_async_mysql.cpp)
-  HHVM_SYSTEMLIB(async_mysql
+HHVM_DEFINE_EXTENSION("async_mysql"
+  PRETTY_NAME "Async MySQL"
+  SOURCES
+    ext_async_mysql.cpp
+  HEADERS
+    ext_async_mysql.h
+  SYSTEMLIB
     ext_async_mysql.php
     ext_async_mysql_exceptions.php
-    ext_mysqlrow.php)
-  message(STATUS "Building async MySQL extension")
-else()
-  message("Not building async MySQL extension")
-endif()
+    ext_mysqlrow.php
+  DEPENDS
+    libFolly
+    libSquangle
+    libWebscaleSQL
+    varENABLE_ASYNC_MYSQL
+)

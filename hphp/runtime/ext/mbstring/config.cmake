@@ -1,0 +1,13 @@
+HHVM_DEFINE_EXTENSION("mbstring"
+  SOURCES
+    ext_mbstring.cpp
+  HEADERS
+    ext_mbstring.h
+    php_unicode.h
+    unicode_data.h
+  SYSTEMLIB
+    ext_mbstring.php
+  DEPENDS
+    libMbfl
+    libOniguruma
+)

@@ -91,11 +91,17 @@ inline bool check_refcount_ns_nz(int32_t count) {
                                                                         \
   bool hasMultipleRefs() const {                                        \
     assert(check_refcount(m_hdr.count));                                \
+    if ((uint32_t)m_hdr.count > 1) assert(m_hdr.mrb);                   \
     return (uint32_t)m_hdr.count > 1;                                   \
+  }                                                                     \
+                                                                        \
+  bool maybeShared() const {                                            \
+    return m_hdr.mrb;                                                   \
   }                                                                     \
                                                                         \
   bool hasExactlyOneRef() const {                                       \
     assert(check_refcount(m_hdr.count));                                \
+    if ((uint32_t)m_hdr.count > 1) assert(m_hdr.mrb);                   \
     return (uint32_t)m_hdr.count == 1;                                  \
   }                                                                     \
                                                                         \
@@ -103,12 +109,14 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount(m_hdr.count));                                \
     if (isRefCounted()) { ++m_hdr.count; }                              \
+    m_hdr.mrb = true;                                                   \
   }                                                                     \
                                                                         \
   void setRefCount(RefCount count) {                                    \
     assert(count == StaticValue || !MemoryManager::sweeping());         \
     assert(check_refcount(m_hdr.count));                                \
     m_hdr.count = count;                                                \
+    if ((uint32_t)m_hdr.count > 1) { m_hdr.mrb = true; }                \
     assert(check_refcount(m_hdr.count));                                \
   }                                                                     \
                                                                         \
@@ -132,16 +140,26 @@ inline bool check_refcount_ns_nz(int32_t count) {
   void setStatic() const {                      \
     assert(check_refcount(m_hdr.count));        \
     m_hdr.count = StaticValue;                  \
+    m_hdr.mrb = true;                           \
   }                                             \
   bool isStatic() const {                       \
-    return m_hdr.count == StaticValue;          \
+    if (m_hdr.count == StaticValue) {           \
+      assert(m_hdr.mrb);                        \
+      return true;                              \
+    }                                           \
+    return false;                               \
   }                                             \
   void setUncounted() const {                   \
     assert(check_refcount(m_hdr.count));        \
     m_hdr.count = UncountedValue;               \
+    m_hdr.mrb = true;                           \
   }                                             \
   bool isUncounted() const {                    \
-    return m_hdr.count == UncountedValue;       \
+    if (m_hdr.count == UncountedValue) {        \
+      assert(m_hdr.mrb);                        \
+      return true;                              \
+    }                                           \
+    return false;                               \
   }                                             \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 

@@ -268,7 +268,7 @@ String &String::operator+=(const char* s) {
   if (s && *s) {
     if (empty()) {
       m_str = req::ptr<StringData>::attach(StringData::Make(s, CopyString));
-    } else if (m_str->hasExactlyOneRef()) {
+    } else if (!m_str->cowCheck()) {
       auto const tmp = m_str->append(StringSlice(s, strlen(s)));
       if (UNLIKELY(tmp != m_str)) {
         m_str = req::ptr<StringData>::attach(tmp);
@@ -285,7 +285,7 @@ String &String::operator+=(const String& str) {
   if (!str.empty()) {
     if (empty()) {
       m_str = str.m_str;
-    } else if (m_str->hasExactlyOneRef()) {
+    } else if (!m_str->cowCheck()) {
       auto tmp = m_str->append(str.slice());
       if (UNLIKELY(tmp != m_str)) {
         m_str = req::ptr<StringData>::attach(tmp);
@@ -303,7 +303,7 @@ String& String::operator+=(const StringSlice& slice) {
   if (slice.size() == 0) {
     return *this;
   }
-  if (m_str && m_str->hasExactlyOneRef()) {
+  if (m_str && !m_str->cowCheck()) {
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) {
       m_str = req::ptr<StringData>::attach(tmp);

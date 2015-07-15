@@ -33,7 +33,7 @@ void zBoxAndProxy(TypedValue* arg) {
   auto inner = arg->m_data.pref->tv();
   if (inner->m_type == KindOfArray && !inner->m_data.parr->isProxyArray()) {
     ArrayData * inner_arr = inner->m_data.parr;
-    if (inner_arr->isStatic() || inner_arr->hasMultipleRefs()) {
+    if (inner_arr->isStatic() || inner_arr->cowCheck()) {
       ArrayData * tmp = inner_arr->copy();
       if (inner_arr != tmp) {
         inner_arr->decRefAndRelease();

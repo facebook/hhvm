@@ -198,6 +198,9 @@ struct StringData {
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
   bool isStatic() const;
   bool isUncounted() const;
+  bool cowCheck() const {
+    return true;
+  }
 
   /*
    * Append the supplied range to this string.  If there is not sufficient

@@ -134,6 +134,12 @@ void emitIncRef(Vout& v, Vreg base) {
   auto const sf = v.makeReg();
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
+
+  // set the mrb
+  // TODO don't hardcode this
+  auto const sf2 = v.makeReg();
+  // take the current gc byte set the mrb
+  v << orbim{1 << 2, base[HeaderKindOffset + 1], sf2};
 }
 
 void emitIncRef(Asm& as, PhysReg base) {
@@ -153,7 +159,8 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
     as.   loadq  (base[disp + TVOFF(m_data)], tmpReg);
     { // if !static
       IfCountNotStatic ins(as, tmpReg);
-      as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
+      //as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
+      emitIncRef(as, tmpReg);
     } // endif
   } // endif
 }

@@ -1002,6 +1002,28 @@ SSATmp* cmpImpl(State& env,
     }
   }
 
+  // Optimize comparisons with the empty string by just checking its length.
+  if (type1 <= TStr && src2->hasConstVal(TStaticStr)) {
+    if (src2->strVal()->empty()) {
+      switch (opName) {
+        case EqStr:
+        case SameStr:
+        case LteStr:
+          return newInst(EqInt, gen(env, LdStrLen, src1), cns(env, 0));
+        case NeqStr:
+        case NSameStr:
+        case GtStr:
+          return newInst(NeqInt, gen(env, LdStrLen, src1), cns(env, 0));
+        case LtStr:
+          return cns(env, false);
+        case GteStr:
+          return cns(env, true);
+        default:
+          break;
+      }
+    }
+  }
+
   // ---------------------------------------------------------------------
   // Constant bool comparisons can be strength-reduced
   // NOTE: Comparisons with bools get juggled to bool.

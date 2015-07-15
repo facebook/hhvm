@@ -115,7 +115,6 @@ struct BackEnd {
 
   virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;
   virtual TCA funcPrologueToGuard(TCA prologue, const Func* func) = 0;
-  virtual TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) = 0;
   virtual void funcPrologueSmashGuard(TCA prologue, const Func* func) = 0;
   virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
 

@@ -2436,6 +2436,11 @@ fields of that struct for holding intermediate values.
   If the MagicDispatch flags on the ActRec pointed to by the frame pointer S0
   are not set, branch to block B.
 
+| LdARNumArgsAndFlags, D(Int), S(FramePtr), NF
+
+  Load the value of m_numArgsAndFlags on the ActRec pointed to by the frame
+  pointer S0.
+
 | StARNumArgsAndFlags, ND, S(FramePtr) S(Int), CRc
 
   Store S1 to m_numArgsAndFlags on the ActRec pointed to by the frame pointer

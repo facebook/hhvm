@@ -489,6 +489,7 @@ bool canDCE(IRInstruction* inst) {
   case InitCtx:
   case CheckSurpriseFlagsEnter:
   case CheckARMagicFlag:
+  case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
   case StARInvName:
   case ExitPlaceholder:

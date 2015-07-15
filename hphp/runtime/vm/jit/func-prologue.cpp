@@ -27,6 +27,8 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -35,6 +37,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/code-cache.h"
 #include "hphp/util/data-block.h"
+#include "hphp/util/growable-vector.h"
 #include "hphp/util/immed.h"
 
 namespace HPHP { namespace jit {
@@ -71,27 +74,63 @@ void genFuncGuard(Func* func, CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TransContext prologue_context(TransID transID,
+                              const Func* func,
+                              Offset entry) {
+  return TransContext(
+    transID,
+    SrcKey{func, entry, SrcKey::PrologueTag{}},
+    FPInvOffset{func->numSlotsInFrame()}
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA genFuncPrologue(TransID transID, Func* func, int argc) {
-  auto const context = TransContext(
-    transID,
-    SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}},
-    FPInvOffset{func->numSlotsInFrame()}
-  );
-  IRGS env{context, TransFlags{0}};
+  auto context = prologue_context(transID, func,
+                                  func->getEntryForNumArgs(argc));
+  IRGS env{context, TransFlags{}};
 
   auto& cb = mcg->code.main();
 
   // Dump the func guard in the TC before anything else.
   genFuncGuard(func, cb);
-  auto start = cb.frontier();
+  auto const start = cb.frontier();
 
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
   genCode(env.unit, CodeKind::CrossTrace);
+
+  return start;
+}
+
+TCA genCallArrayPrologue(Func* func, const DVFuncletsVec& dvs) {
+  auto context = prologue_context(kInvalidTransID, func, func->base());
+  IRGS env{context, TransFlags{}};
+
+  assertx(mcg->cgFixups().empty());
+
+  auto& main = mcg->code.main();
+  auto& frozen = mcg->code.frozen();
+
+  auto const start = main.frontier();
+
+  irgen::emitCallArrayPrologue(env, dvs);
+  irgen::sealUnit(env);
+  genCode(env.unit, CodeKind::CrossTrace);
+
+  if (RuntimeOption::EvalPerfRelocate) {
+    GrowableVector<IncomingBranch> ibs;
+    recordPerfRelocMap(start, main.frontier(),
+                       frozen.frontier(), frozen.frontier(),
+                       SrcKey { func, dvs[0].second, false },
+                       0, ibs, mcg->cgFixups());
+  }
+  mcg->cgFixups().process(nullptr);
 
   return start;
 }

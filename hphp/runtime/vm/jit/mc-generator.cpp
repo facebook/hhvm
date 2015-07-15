@@ -622,7 +622,7 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
-    tca = backEnd().emitCallArrayPrologue(func, dvs);
+    tca = genCallArrayPrologue(func, dvs);
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base(), false);

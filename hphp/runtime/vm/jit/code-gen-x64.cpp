@@ -5646,6 +5646,12 @@ void CodeGenerator::cgCheckARMagicFlag(IRInstruction* inst) {
   v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
+void CodeGenerator::cgLdARNumArgsAndFlags(IRInstruction* inst) {
+  auto fp = srcLoc(inst, 0).reg();
+  auto dst = dstLoc(inst, 0).reg();
+  vmain() << loadzlq{fp[AROFF(m_numArgsAndFlags)], dst};
+}
+
 void CodeGenerator::cgStARNumArgsAndFlags(IRInstruction* inst) {
   auto const fp = srcLoc(inst, 0).reg();
   auto const val = srcLoc(inst, 1).reg();

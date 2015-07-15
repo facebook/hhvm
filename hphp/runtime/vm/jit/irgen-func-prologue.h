@@ -17,9 +17,10 @@
 #ifndef incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
 #define incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
 
-#include <cstdint>
-
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/types.h"
+
+#include <cstdint>
 
 namespace HPHP { namespace jit {
 
@@ -34,6 +35,8 @@ namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
+
+void emitCallArrayPrologue(IRGS& env, const DVFuncletsVec& dvs);
 
 ///////////////////////////////////////////////////////////////////////////////
 

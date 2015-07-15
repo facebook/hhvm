@@ -150,10 +150,6 @@ struct BackEnd final : jit::BackEnd {
     return x64::funcPrologueToGuard(prologue, func);
   }
 
-  TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) override {
-    return x64::emitCallArrayPrologue(func, dvs);
-  }
-
   void funcPrologueSmashGuard(TCA prologue, const Func* func) override {
     x64::funcPrologueSmashGuard(prologue, func);
   }

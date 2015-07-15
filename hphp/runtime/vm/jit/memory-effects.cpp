@@ -969,6 +969,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
   case CheckARMagicFlag:
+  case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
   case LdARInvName:
   case StARInvName:

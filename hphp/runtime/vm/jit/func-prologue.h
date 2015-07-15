@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_FUNC_PROLOGUE_H
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 #include <cstdint>
@@ -33,6 +34,8 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA genFuncPrologue(TransID transID, Func* func, int argc);
+
+TCA genCallArrayPrologue(Func* func, const DVFuncletsVec& dvs);
 
 ///////////////////////////////////////////////////////////////////////////////
 

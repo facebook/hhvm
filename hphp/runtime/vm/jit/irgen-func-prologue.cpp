@@ -303,7 +303,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     ReqBindJmp,
     ReqBindJmpData {
       SrcKey { func, func->getEntryForNumArgs(argc), false },
-      FPInvOffset{func->numSlotsInFrame()},
+      FPInvOffset { func->numSlotsInFrame() },
       offsetFromIRSP(env, BCSPOffset{0}),
       TransFlags{}
     },
@@ -373,6 +373,51 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   }
   emitPrologueEntry(env, argc);
   emitPrologueBody(env, argc, transID);
+}
+
+void emitCallArrayPrologue(IRGS& env, const DVFuncletsVec& dvs) {
+  auto const func = env.context.func;
+
+  // We don't need to mask this value because CallArray calls cannot be
+  // resumed, nor be from FPushCtor, so they can't have flags set.
+  auto const num_args = gen(env, LdARNumArgsAndFlags, fp(env));
+
+  for (auto const& dv : dvs) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const lte = gen(env, LteInt, num_args, cns(env, dv.first));
+        gen(env, JmpNZero, taken, lte);
+      },
+      [&] {
+        gen(
+          env,
+          ReqBindJmp,
+          ReqBindJmpData {
+            SrcKey { func, dv.second, false },
+            FPInvOffset { func->numSlotsInFrame() },
+            offsetFromIRSP(env, BCSPOffset{0}),
+            TransFlags{}
+          },
+          sp(env),
+          fp(env)
+        );
+      }
+    );
+  }
+
+  gen(
+    env,
+    ReqBindJmp,
+    ReqBindJmpData {
+      SrcKey { func, func->base(), false },
+      FPInvOffset { func->numSlotsInFrame() },
+      offsetFromIRSP(env, BCSPOffset{0}),
+      TransFlags{}
+    },
+    sp(env),
+    fp(env)
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

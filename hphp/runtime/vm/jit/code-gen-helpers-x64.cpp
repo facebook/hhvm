@@ -82,40 +82,6 @@ void emitGetGContext(Vout& v, Vreg dest) {
   emitTLSLoad<ExecutionContext>(v, g_context, dest);
 }
 
-void emitGetGContext(Asm& as, PhysReg dest) {
-  emitGetGContext(Vauto(as.code()).main(), dest);
-}
-
-// IfCountNotStatic --
-//   Emits if (%reg->_count < 0) { ... }.
-//   This depends on UncountedValue and StaticValue
-//   being the only valid negative refCounts and both indicating no
-//   ref count is needed.
-//   May short-circuit this check if the type is known to be
-//   static already.
-struct IfCountNotStatic {
-  typedef CondBlock<FAST_REFCOUNT_OFFSET,
-                    0,
-                    CC_S,
-                    int32_t> NonStaticCondBlock;
-  static_assert(UncountedValue < 0 && StaticValue < 0, "");
-  NonStaticCondBlock *m_cb; // might be null
-  IfCountNotStatic(Asm& as, PhysReg reg,
-                   MaybeDataType t = folly::none) {
-
-    // Objects and variants cannot be static
-    if (t != KindOfObject && t != KindOfResource && t != KindOfRef) {
-      m_cb = new NonStaticCondBlock(as, reg);
-    } else {
-      m_cb = nullptr;
-    }
-  }
-
-  ~IfCountNotStatic() {
-    delete m_cb;
-  }
-};
-
 void emitTransCounterInc(Vout& v) {
   if (!mcg->tx().isTransDBEnabled()) return;
   auto t = v.cns(mcg->tx().getTransCounterAddr());
@@ -136,28 +102,6 @@ void emitIncRef(Vout& v, Vreg base) {
   emitAssertFlagsNonNegative(v, sf);
 }
 
-void emitIncRef(Asm& as, PhysReg base) {
-  emitIncRef(Vauto(as.code()).main(), base);
-}
-
-void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype) {
-  { // if !static then
-    IfCountNotStatic ins(as, base, dtype);
-    emitIncRef(as, base);
-  } // endif
-}
-
-void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
-  { // if RC
-    IfRefCounted irc(as, base, disp);
-    as.   loadq  (base[disp + TVOFF(m_data)], tmpReg);
-    { // if !static
-      IfCountNotStatic ins(as, tmpReg);
-      as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
-    } // endif
-  } // endif
-}
-
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
   ifThen(v, CC_NGE, sf, [&](Vout& v) { v << ud2{}; });
@@ -171,43 +115,6 @@ void emitAssertRefCount(Vout& v, Vreg base) {
     v << cmplim{RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
     ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
   });
-}
-
-// Logical register move: ensures the value in src will be in dest
-// after execution, but might do so in strange ways. Do not count on
-// being able to smash dest to a different register in the future, e.g.
-void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
-  assertx(srcReg != InvalidReg);
-  assertx(dstReg != InvalidReg);
-
-  if (srcReg == dstReg) return;
-
-  if (srcReg.isGP()) {
-    if (dstReg.isGP()) {                 // GP => GP
-      as. movq(srcReg, dstReg);
-    } else {                             // GP => XMM
-      // This generates a movq x86 instruction, which zero extends
-      // the 64-bit value in srcReg into a 128-bit XMM register
-      as. movq_rx(srcReg, dstReg);
-    }
-  } else {
-    if (dstReg.isGP()) {                 // XMM => GP
-      as. movq_xr(srcReg, dstReg);
-    } else {                             // XMM => XMM
-      // This copies all 128 bits in XMM,
-      // thus avoiding partial register stalls
-      as. movdqa(srcReg, dstReg);
-    }
-  }
-}
-
-void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
-  if (dst == InvalidReg) return;
-  if (mr.r.disp == 0) {
-    emitMovRegReg(as, mr.r.base, dst);
-  } else {
-    as. lea(mr, dst);
-  }
 }
 
 Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
@@ -284,15 +191,6 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
     // An alternative is two 32-bit immediate stores, but that's little-endian
     // specific and generates larger code on x64 (24 bytes vs. 18 bytes).
     v << store{v.cns(imm.q()), ref};
-  }
-}
-
-void emitImmStoreq(Asm& a, Immed64 imm, MemoryRef ref) {
-  if (imm.fits(sz::dword)) {
-    a.storeq(imm.l(), ref);
-  } else {
-    a.storel(int32_t(imm.q()), ref);
-    a.storel(int32_t(imm.q() >> 32), MemoryRef(ref.r + 4));
   }
 }
 

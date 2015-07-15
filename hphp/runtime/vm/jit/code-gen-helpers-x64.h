@@ -55,7 +55,6 @@ constexpr size_t kJmpTargetAlign = 16;
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp);
-void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
 
 void emitTransCounterInc(Asm& a);
@@ -77,10 +76,8 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg rData,
     v, vcold, CC_E, sf,
     destroy,
     [&] (Vout& v) {
-      /*
-       * If it's not static, actually reduce the reference count.  This does
-       * another branch using the same status flags from the cmplim above.
-       */
+      // If it's not static, actually reduce the reference count.  This does
+      // another branch using the same status flags from the cmplim above.
       ifThen(
         v, CC_NL, sf,
         [&] (Vout& v) {
@@ -94,16 +91,10 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg rData,
   );
 }
 
-void emitIncRef(Asm& as, PhysReg base);
 void emitIncRef(Vout& v, Vreg base);
-void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);
-void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg);
 
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf);
 void emitAssertRefCount(Vout& v, Vreg base);
-
-void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
-void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 
 Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg);
 Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg);
@@ -115,7 +106,6 @@ void emitCall(Vout& v, CppCall call, RegSet args);
 // store imm to the 8-byte memory location at ref. Warning: don't use this
 // if you wanted an atomic store; large imms cause two stores.
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
-void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 

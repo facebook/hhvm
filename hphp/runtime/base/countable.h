@@ -116,7 +116,8 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(count == StaticValue || !MemoryManager::sweeping());         \
     assert(check_refcount(m_hdr.count));                                \
     m_hdr.count = count;                                                \
-    if ((uint32_t)m_hdr.count > 1) { m_hdr.mrb = true; }                \
+    if ((uint32_t)count <= 1) m_hdr.mrb = false;                        \
+    else m_hdr.mrb = true;                                              \
     assert(check_refcount(m_hdr.count));                                \
   }                                                                     \
                                                                         \
@@ -197,6 +198,8 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(!MemoryManager::sweeping());                 \
     assert(check_refcount_ns(m_hdr.count));             \
     m_hdr.count = count;                                \
+    if ((uint32_t)count <= 1) m_hdr.mrb = false;        \
+    else m_hdr.mrb = true;                              \
     assert(check_refcount_ns(m_hdr.count));             \
   }                                                     \
                                                         \

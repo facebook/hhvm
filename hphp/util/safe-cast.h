@@ -22,13 +22,14 @@
 #include <folly/Conv.h>
 
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-void safe_cast_failure(const std::string&, const char*, const char*)
-  __attribute__((__noreturn__));
+ATTRIBUTE_NORETURN
+void safe_cast_failure(const std::string&, const char*, const char*);
 
 //////////////////////////////////////////////////////////////////////
 

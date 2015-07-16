@@ -65,8 +65,8 @@ const Cell container_as_cell(const Variant& container) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void throwIntOOB(int64_t key, bool isVector = false)
-  ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN
+static void throwIntOOB(int64_t key, bool isVector = false);
 
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
   String msg(50, ReserveString);
@@ -82,7 +82,7 @@ void throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
 
-static void throwStrOOB(StringData* key) ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN static void throwStrOOB(StringData* key);
 
 void throwStrOOB(StringData* key) {
   const size_t maxDisplaySize = 100;

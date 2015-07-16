@@ -79,7 +79,7 @@ struct RequestLocal {
     return (m_node.m_p != nullptr) && m_node.m_p->getInited();
   }
 
-  void create() NEVER_INLINE;
+  NEVER_INLINE void create();
 
   static void OnThreadExit(void * p) {
     ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;

@@ -1,7 +1,8 @@
 <?hh // strict
 
 // The test proves that it is safe to allow the 'this' type as a public
-// property. Attempting to assign to the constant
+// property. Attempting to assign to a property of type 'this' will fail
+// if they are not the same expression dependent type.
 abstract class C {
   public function __construct(public this $x) {}
 

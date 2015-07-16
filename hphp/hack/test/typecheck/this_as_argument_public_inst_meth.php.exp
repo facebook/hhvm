@@ -1,8 +1,8 @@
-File "this_as_argument_public_inst_meth.php", line 16, characters 14-16:
+File "this_as_argument_public_inst_meth.php", line 20, characters 14-16:
 Invalid argument (Typing[4110])
 File "this_as_argument_public_inst_meth.php", line 11, characters 31-31:
 This is the expression dependent type <expr#1>
-File "this_as_argument_public_inst_meth.php", line 16, characters 5-7:
+File "this_as_argument_public_inst_meth.php", line 20, characters 5-7:
   where '<expr#1>' is a reference to this expression
 File "this_as_argument_public_inst_meth.php", line 11, characters 24-24:
 It is incompatible with an object of type C

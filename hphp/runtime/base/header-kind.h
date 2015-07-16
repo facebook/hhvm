@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_HEADER_KIND_H_
 #define incl_HPHP_HEADER_KIND_H_
 
+#include "hphp/runtime/base/countable.h"
+
 namespace HPHP {
 
 enum class HeaderKind : uint8_t {
@@ -81,7 +83,11 @@ template<class T = uint16_t> struct HeaderWord {
         uint64_t(count) << 32;
     // TODO make fast
     if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true; 
+    else mrb = true;
+    if (count < 0) _static = true;
+    else _static = false;
+    if (count == UncountedValue) uncounted = true;
+    else uncounted = false;
   }
 
   void init(T aux, HeaderKind kind, RefCount count) {
@@ -90,7 +96,11 @@ template<class T = uint16_t> struct HeaderWord {
         uint64_t(count) << 32;
     // TODO make fast
     if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true; 
+    else mrb = true;
+    if (count < 0) _static = true;
+    else _static = false;
+    if (count == UncountedValue) uncounted = true;
+    else uncounted = false;
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
@@ -98,7 +108,11 @@ template<class T = uint16_t> struct HeaderWord {
     q = h.lo32 | uint64_t(count) << 32;
     // TODO make fast
     if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true; 
+    else mrb = true;
+    if (count < 0) _static = true;
+    else _static = false;
+    if (count == UncountedValue) uncounted = true;
+    else uncounted = false;
   }
 };
 

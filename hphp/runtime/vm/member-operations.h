@@ -145,9 +145,9 @@ void objOffsetSet(ObjectData* base, const Variant& offset, TypedValue* val,
 void objOffsetAppend(ObjectData* base, TypedValue* val, bool validate=true);
 void objOffsetUnset(ObjectData* base, const Variant& offset);
 
-void throw_cannot_use_newelem_for_lval_read() ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN void throw_cannot_use_newelem_for_lval_read();
 
-void unknownBaseType(const TypedValue*) ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN void unknownBaseType(const TypedValue*);
 
 // Post: base is a Cell*
 ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {

@@ -43,7 +43,7 @@ enum TError {
   ERR_BAD_VERSION = 4
 };
 
-static void thrift_error(const String& what, TError why) ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN static void thrift_error(const String& what, TError why);
 static void thrift_error(const String& what, TError why) {
   throw create_object(s_TProtocolException, make_packed_array(what, why));
 }

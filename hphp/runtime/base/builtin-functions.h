@@ -117,13 +117,13 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 bool is_constructor_name(const char* func);
 void throw_instance_method_fatal(const char *name);
 
-void throw_iterator_not_valid() ATTRIBUTE_NORETURN;
-void throw_collection_modified() ATTRIBUTE_NORETURN;
-void throw_collection_property_exception() ATTRIBUTE_NORETURN;
-void throw_collection_compare_exception() ATTRIBUTE_NORETURN;
-void throw_param_is_not_container() ATTRIBUTE_NORETURN;
-void throw_cannot_modify_immutable_object(const char* className)
-  ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN void throw_iterator_not_valid();
+ATTRIBUTE_NORETURN void throw_collection_modified();
+ATTRIBUTE_NORETURN void throw_collection_property_exception();
+ATTRIBUTE_NORETURN void throw_collection_compare_exception();
+ATTRIBUTE_NORETURN void throw_param_is_not_container();
+ATTRIBUTE_NORETURN
+void throw_cannot_modify_immutable_object(const char* className);
 void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
 void check_collection_cast_to_array();

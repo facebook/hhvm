@@ -84,7 +84,7 @@ using ExtCollectionObjectData = ExtObjectDataFlags<
   ObjectData::NoDestructor |
   ObjectData::HasClone>;
 
-void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN void throwOOB(int64_t key);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseVector: encapsulates functionality that is common to both
@@ -459,7 +459,7 @@ class BaseVector : public ExtCollectionObjectData {
    */
   void mutateImpl();
 
-  static void throwBadKeyType() ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwBadKeyType();
 
   // Fields
 #ifndef USE_LOWPTR
@@ -573,7 +573,7 @@ class c_Vector : public BaseVector {
   Object t_immutable();
   String t___tostring();
 
-  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
 
   void sort(int sort_flags, bool ascending);
   bool usort(const Variant& cmp_function);
@@ -837,8 +837,8 @@ class HashCollection : public ExtCollectionObjectData {
     }
   }
 
-  void throwTooLarge() ATTRIBUTE_NORETURN;
-  void throwReserveTooLarge() ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN void throwTooLarge();
+  ATTRIBUTE_NORETURN void throwReserveTooLarge();
   int32_t* warnUnbalanced(size_t n, int32_t* ei) const;
 
   /**
@@ -1240,8 +1240,8 @@ class HashCollection : public ExtCollectionObjectData {
  */
 class BaseMap : public HashCollection {
  protected:
-  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
+  ATTRIBUTE_NORETURN static void throwOOB(StringData* key);
 
  public:
   TypedValue* at(int64_t key) const;
@@ -1354,7 +1354,7 @@ class BaseMap : public HashCollection {
   ~BaseMap();
 
  public:
-  static void throwBadKeyType() ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwBadKeyType();
 
  private:
   friend void collections::deepCopy(TypedValue*);
@@ -1670,9 +1670,9 @@ class BaseSet : public HashCollection {
   static Clone(ObjectData* obj);
 
   // Static methods
-  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
-  static void throwNoMutableIndexAccess() ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
+  ATTRIBUTE_NORETURN static void throwOOB(StringData* key);
+  ATTRIBUTE_NORETURN static void throwNoMutableIndexAccess();
 
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
@@ -1819,7 +1819,7 @@ class BaseSet : public HashCollection {
  private:
   // Helpers
 
-  static void throwBadValueType() ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwBadValueType();
 
  private:
 
@@ -2009,7 +2009,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_immutable();
   String t___tostring();
 
-  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
 
   /**
    * Most methods that operate on Pairs can safely assume that all Pairs have
@@ -2086,7 +2086,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   static constexpr uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
 
  private:
-  static void throwBadKeyType() ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN static void throwBadKeyType();
 
 #ifndef USE_LOWPTR
   // Add 4 bytes here to keep m_size aligned the same way as in BaseVector and

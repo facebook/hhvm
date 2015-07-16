@@ -223,7 +223,7 @@ void registerLiveObj(ObjectData* obj);
 /*
  * Throw a VMSwitchMode exception.
  */
-void throwSwitchMode() ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN void throwSwitchMode();
 
 namespace MInstrHelpers {
 StringData* stringGetI(StringData*, uint64_t);

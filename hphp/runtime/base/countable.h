@@ -174,11 +174,13 @@ inline bool check_refcount_ns_nz(int32_t count) {
                                                         \
   bool hasMultipleRefs() const {                        \
     assert(check_refcount_ns(m_hdr.count));             \
+    if ((uint32_t)m_hdr.count > 1) assert(m_hdr.mrb);   \
     return m_hdr.count > 1;                             \
   }                                                     \
                                                         \
   bool hasExactlyOneRef() const {                       \
     assert(check_refcount(m_hdr.count));                \
+    if ((uint32_t)m_hdr.count > 1) assert(m_hdr.mrb);   \
     return m_hdr.count == 1;                            \
   }                                                     \
                                                         \
@@ -186,6 +188,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(!MemoryManager::sweeping());                 \
     assert(check_refcount_ns(m_hdr.count));             \
     ++m_hdr.count;                                      \
+    m_hdr.mrb = true;                                   \
   }                                                     \
                                                         \
   RefCount decRefCount() const {                        \

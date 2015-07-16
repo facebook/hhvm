@@ -86,7 +86,7 @@ void emitIncRef(Vout& v, Vreg base) {
   // TODO don't hardcode this
   auto const sf2 = v.makeReg();
   // take the current gc byte set the mrb
-  v << orbim{1 << 2, base[HeaderKindOffset + 1], sf2};
+  v << orbim{FAST_MRB_MASK, base[FAST_GC_BYTE_OFFSET], sf2};
 }
 
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {

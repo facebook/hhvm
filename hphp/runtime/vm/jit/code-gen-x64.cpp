@@ -135,7 +135,7 @@ void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
   }
 
   auto const sf = v.makeReg();
-  v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
+  v << cmpbim{0, loc.reg()[FAST_GC_BYTE_OFFSET], sf};
   static_assert(UncountedValue < 0 && StaticValue < 0, "");
   ifThen(v, CC_GE, sf, then);
 }
@@ -2726,7 +2726,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   v << testq{name, name, sf};
   ifThenElse(v, CC_NZ, sf, [&](Vout& v) {
     auto const sf = v.makeReg();
-    v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
+    v << cmpbim{0, name[FAST_GC_BYTE_OFFSET], sf};
     static_assert(UncountedValue < 0 && StaticValue < 0, "");
     ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
     v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
@@ -3977,7 +3977,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       srcType.subtypeOfAny(TStr, TArr) &&
       srcType.maybe(typeParam)) {
     assertx(srcType.maybe(TStatic));
-    v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
+    v << cmpbim{0, rData[FAST_GC_BYTE_OFFSET], sf};
     doJcc(CC_L, sf);
     doMov();
     return;

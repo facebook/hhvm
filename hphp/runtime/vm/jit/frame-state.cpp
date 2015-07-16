@@ -248,7 +248,7 @@ bool check_invariants(const FrameState& state) {
  * not be Bottom.
  */
 Type updatePredictedType(Type predictedType, Type provenType) {
-  assertx(predictedType != TBottom);
+  if (predictedType == TBottom) return provenType;
   return predictedType < provenType ? predictedType : provenType;
 }
 

@@ -615,7 +615,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
   # Keep these in alphabetical order.
   if (
     ${libraryName} STREQUAL "boost" OR
-    ${libraryName} STREQUAL "bz2" OR
     ${libraryName} STREQUAL "editline" OR
     ${libraryName} STREQUAL "fastlz" OR
     ${libraryName} STREQUAL "folly" OR
@@ -634,6 +633,20 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "zlib"
   )
     # Nothing to do, they are included by default.
+  elseif (${libraryName} STREQUAL "bzip2")
+    find_package(BZip2 ${requiredVersion})
+    find_package(EXPAT ${requiredVersion})
+    if (NOT BZIP2_INCLUDE_DIR OR NOT BZIP2_LIBRARIES)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${BZIP2_INCLUDE_DIR})
+      add_definitions(${BZIP2_DEFINITIONS})
+      link_libraries(${BZIP2_LIBRARIES})
+      add_definitions("-DHAVE_LIBBZIP2")
+    endif()
   elseif (${libraryName} STREQUAL "curl")
     find_package(CURL ${requiredVersion})
     if (NOT CURL_INCLUDE_DIR OR NOT CURL_LIBRARIES)

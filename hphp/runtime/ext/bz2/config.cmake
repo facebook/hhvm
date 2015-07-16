@@ -7,6 +7,6 @@ HHVM_DEFINE_EXTENSION("bz2"
   SYSTEMLIB
     ext_bz2.php
   DEPENDS
-    libBz2
+    libBZip2
     libFolly
 )

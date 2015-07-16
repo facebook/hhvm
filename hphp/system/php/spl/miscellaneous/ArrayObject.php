@@ -509,4 +509,74 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
       ),
     );
   }
+
+  /*
+   * Magic function called when invoking reset($arrayObject)
+   */
+  private function __reset() {
+    if($this->flags & self::STD_PROP_LIST) {
+      return false;
+    }
+    reset($this->storage);
+  }
+
+  /*
+   * Magic function called when invoking current($arrayObject)
+   */
+  private function __current() {
+    if($this->flags & self::STD_PROP_LIST) {
+      return false;
+    }
+    return current($this->storage);
+  }
+
+  /*
+   * Magic function called when invoking key($arrayObject)
+   */
+  private function __key() {
+    if($this->flags & self::STD_PROP_LIST) {
+      return null;
+    }
+    return key($this->storage);
+  }
+
+  /*
+   * Magic function called when invoking next($arrayObject)
+   */
+  private function __next() {
+    if($this->flags & self::STD_PROP_LIST) {
+      return false;
+    }
+    return next($this->storage);
+  }
+
+  /*
+   * Magic function called when invoking prev($arrayObject)
+   */
+  private function __prev() {
+    if($this->flags & self::STD_PROP_LIST) {
+      return false;
+    }
+    return prev($this->storage);
+  }
+
+  /*
+   * Magic function called when invoking each($arrayObject)
+   */
+  private function __each() {
+    if($this->flags & self::STD_PROP_LIST) {
+      return false;
+    }
+    return each($this->storage);
+  }
+
+  /*
+   * Magic function called when invoking end($arrayObject)
+   */
+  private function __end() {
+    if($this->flags & self::STD_PROP_LIST) {
+      return false;
+    }
+    return end($this->storage);
+  }
 }

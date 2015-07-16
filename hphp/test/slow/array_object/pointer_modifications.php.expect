@@ -1,0 +1,16 @@
+After reset current of ArrayObject value is: 1
+Next value of ArrayObject is: 2
+Looking back to real array, current value is: 2
+Key of current value of ArrayObject is: 1
+Previous value of ArrayObject is: 1
+Current key-value pair of ArrayObject is: (0, 1)
+Last value of ArrayObject is: 3
+next/reset etc have no impact on using arrayObject as iterator, proof: 1
+current value after setting STD_PROP_LIST: false
+each with STD_PROP_LIST enabled: false
+current with STD_PROP_LIST enabled: false
+key with STD_PROP_LIST enabled: NULL
+prev with STD_PROP_LIST enabled: false
+next with STD_PROP_LIST enabled: false
+reset with STD_PROP_LIST enabled: false
+Disabling STD_PROP_LIST and checking current value: 2

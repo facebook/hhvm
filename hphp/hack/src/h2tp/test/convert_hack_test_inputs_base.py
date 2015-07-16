@@ -126,6 +126,7 @@ UNSUPPORTED_FILES_UNPARSER = {
     ],
     "TypeConst": [
         'tconst/*.php',
+        'classname/with_tconst*.php',
     ],
 }
 

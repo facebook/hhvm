@@ -1,0 +1,12 @@
+File "with_tconst_bad1.php", line 11, characters 7-13:
+This object is of type CLoader (Typing[4110])
+File "with_tconst_bad1.php", line 11, characters 23-29:
+It is incompatible with this object of type ALoader
+because some declarations are incompatible.
+Read the following to see why:
+File "with_tconst_bad1.php", line 7, characters 23-24:
+Unable to satisfy constraint on this type constant
+File "with_tconst_bad1.php", line 7, characters 29-29:
+This is an object of type I
+File "with_tconst_bad1.php", line 12, characters 19-26:
+It is incompatible with an object of type stdClass

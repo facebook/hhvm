@@ -581,7 +581,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "editline" OR
     ${libraryName} STREQUAL "fastlz" OR
     ${libraryName} STREQUAL "folly" OR
-    ${libraryName} STREQUAL "iconv" OR
     ${libraryName} STREQUAL "lz4" OR
     ${libraryName} STREQUAL "mbfl" OR
     ${libraryName} STREQUAL "mcrouter" OR

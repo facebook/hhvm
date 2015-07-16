@@ -2607,9 +2607,8 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
 
   if (!ty.maybe(TStatic)) {
     auto const sf = v.makeReg();
-    v << declm{base[FAST_REFCOUNT_OFFSET], sf};
-    emitAssertFlagsNonNegative(v, sf);
-    ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
+    v << testbim{FAST_MRB_MASK, base[FAST_GC_BYTE_OFFSET], sf};
+    ifThen(v, vcold(), CC_Z, sf, destroy, unlikelyDestroy);
     return;
   }
 

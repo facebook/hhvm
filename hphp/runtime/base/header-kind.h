@@ -54,9 +54,17 @@ template<class T = uint16_t> struct HeaderWord {
         struct {
           T aux;
           HeaderKind kind;
-          mutable uint8_t mark:1;
-          mutable uint8_t cmark:1;
-          mutable uint8_t mrb:1;
+          union {
+            struct {
+              mutable uint8_t mark:1;
+              mutable uint8_t cmark:1;
+              mutable uint8_t mrb:1;
+              uint8_t spare:3;
+              mutable uint8_t uncounted:1;
+              mutable uint8_t _static:1;
+            };
+            uint8_t gcbyte;
+          };
         };
         uint32_t lo32;
       };
@@ -98,6 +106,9 @@ constexpr auto HeaderOffset = sizeof(void*);
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
 constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
                                       offsetof(HeaderWord<>, count);
+constexpr auto FAST_GC_BYTE_OFFSET = HeaderOffset +
+                                      offsetof(HeaderWord<>, gcbyte);
+constexpr int8_t FAST_MRB_MASK = 1 << 2;
 
 inline bool isObjectKind(HeaderKind k) {
   return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;

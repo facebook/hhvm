@@ -415,7 +415,6 @@ macro(hphp_link target)
   endif()
 
   target_link_libraries(${target} ${Boost_LIBRARIES})
-  target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)
   endif()

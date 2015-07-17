@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 #ifdef ENABLE_EXTENSION_PDO_SQLITE
-#include "hphp/runtime/ext/pdo/pdo_sqlite.h"
+#include "hphp/runtime/ext/pdo_sqlite/pdo_sqlite.h"
 #endif
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
-#include "hphp/runtime/ext/pdo/pdo_mysql.h"
+#include "hphp/runtime/ext/pdo_mysql/pdo_mysql.h"
 #endif
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"

@@ -102,14 +102,12 @@ struct Vunit;
   O(leavetc, Inone, U(args), Dn)\
   O(absdbl, Inone, U(s), D(d))\
   /* arm instructions */\
-  O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
   O(cbcc, I(cc), U(s), Dn)\
   O(hcsync, I(fix) I(call), Un, Dn)\
   O(hcnocatch, I(call), Un, Dn)\
   O(hcunwind, I(call), Un, Dn)\
   O(hostcall, I(argc) I(syncpoint), U(args), Dn)\
-  O(lslv, Inone, U(sl) U(sr), D(d))\
   O(tbcc, I(cc) I(bit), U(s), Dn)\
   /* x64 instructions */\
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -184,7 +182,6 @@ struct Vunit;
   O(movtqb, Inone, UH(s,d), DH(d,s))\
   O(movtql, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
-  O(mul, Inone, U(s0) U(s1), D(d))\
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
   O(nop, Inone, Un, Dn)\
   O(not, Inone, UH(s,d), DH(d,s))\
@@ -470,8 +467,8 @@ struct defvmsp { Vreg d; };
 struct syncvmsp { Vreg s; };
 
 struct srem { Vreg s0, s1, d; };
-struct sar { Vreg s0, s1, d; VregSF sf; };
-struct shl { Vreg s0, s1, d; VregSF sf; };
+struct sar { Vreg64 s0, s1, d; VregSF sf; };
+struct shl { Vreg64 s0, s1, d; VregSF sf; };
 struct absdbl { Vreg s, d; };
 
 /*
@@ -506,9 +503,6 @@ struct brk { uint16_t code; };
 struct hostcall { RegSet args; uint8_t argc; Vpoint syncpoint; };
 struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
 struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
-struct lslv { Vreg64 sl, sr, d; };
-struct asrv { Vreg64 sl, sr, d; };
-struct mul { Vreg64 s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // x64.

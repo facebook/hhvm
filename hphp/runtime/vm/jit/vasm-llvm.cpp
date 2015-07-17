@@ -1526,7 +1526,6 @@ O(movzbq) \
 O(movtqb) \
 O(movtql) \
 O(mulsd) \
-O(mul) \
 O(neg) \
 O(nop) \
 O(not) \
@@ -1635,14 +1634,12 @@ O(unpcklpd)
       case Vinstr::ldimmqs:
       case Vinstr::cmpqims:
       // ARM opcodes:
-      case Vinstr::asrv:
       case Vinstr::brk:
       case Vinstr::cbcc:
       case Vinstr::hcsync:
       case Vinstr::hcnocatch:
       case Vinstr::hcunwind:
       case Vinstr::hostcall:
-      case Vinstr::lslv:
       case Vinstr::tbcc:
         throw FailedLLVMCodeGen("Unsupported opcode in B{}: {}",
                                 size_t(label), show(m_unit, inst));
@@ -2658,11 +2655,6 @@ void LLVMEmitter::emit(const movtql& inst) {
 }
 
 void LLVMEmitter::emit(const mulsd& inst) {
-  defineValue(inst.d, m_irb.CreateFMul(asDbl(value(inst.s0)),
-                                       asDbl(value(inst.s1))));
-}
-
-void LLVMEmitter::emit(const mul& inst) {
   defineValue(inst.d, m_irb.CreateFMul(asDbl(value(inst.s0)),
                                        asDbl(value(inst.s1))));
 }

@@ -120,7 +120,7 @@ private:
   void emit(addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.l(), vixl::SetFlags); }
   void emit(andq& i) { a->And(X(i.d), X(i.s1), X(i.s0) /* xxx flags */); }
   void emit(andqi& i) { a->And(X(i.d), X(i.s1), i.s0.l() /* xxx flags */); }
-  void emit(asrv& i) { a->asrv(X(i.d), X(i.sl), X(i.sr)); }
+  void emit(sar& i) { a->asrv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(brk& i) { a->Brk(i.code); }
   void emit(cbcc& i);
   void emit(callr& i) { a->Blr(X(i.target)); }
@@ -136,10 +136,10 @@ private:
   void emit(lea& i) { a->Add(X(i.d), X(i.s.base), i.s.disp); }
   void emit(loadl& i) { a->Ldr(W(i.d), M(i.s)); /* assume 0-extends */ }
   void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
-  void emit(lslv& i) { a->lslv(X(i.d), X(i.sl), X(i.sr)); }
+  void emit(shl& i) { a->lslv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(movzbq& i) { a->Uxtb(W(Vreg32(size_t(i.d))), W(i.s)); }
-  void emit(mul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
+  void emit(imul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
   void emit(neg& i) { a->Neg(X(i.d), X(i.s), vixl::SetFlags); }
   void emit(not& i) { a->Mvn(X(i.d), X(i.s)); }
   void emit(orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* xxx flags? */); }

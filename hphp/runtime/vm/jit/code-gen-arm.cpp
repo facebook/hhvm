@@ -226,9 +226,13 @@ DELEGATE_OPCODE(AddInt)
 DELEGATE_OPCODE(SubInt)
 DELEGATE_OPCODE(AddIntO)
 DELEGATE_OPCODE(SubIntO)
+DELEGATE_OPCODE(MulInt)
 DELEGATE_OPCODE(AndInt)
 DELEGATE_OPCODE(OrInt)
 DELEGATE_OPCODE(XorInt)
+
+DELEGATE_OPCODE(Shl)
+DELEGATE_OPCODE(Shr)
 
 DELEGATE_OPCODE(LtInt)
 DELEGATE_OPCODE(GtInt)
@@ -655,38 +659,6 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
     v << cmpli{KindOfRefCountThreshold, loc.reg(1), sf};
     ifThen(v, CC_G, sf, [&](Vout& v) { increfMaybeStatic(v); });
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-// Arithmetic Instructions
-
-void CodeGenerator::cgMulInt(IRInstruction* inst) {
-  auto dstReg  = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-  auto& v = vmain();
-  v << mul{srcRegR, srcRegL, dstReg};
-}
-
-//////////////////////////////////////////////////////////////////////
-// Bitwise Operators
-
-void CodeGenerator::cgShl(IRInstruction* inst) {
-  auto dstReg  = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-
-  // TODO: t3870154 add shift-by-immediate support to vixl
-  vmain() << lslv{srcRegL, srcRegR, dstReg};
-}
-
-void CodeGenerator::cgShr(IRInstruction* inst) {
-  auto dstReg  = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-
-  // TODO: t3870154 add shift-by-immediate support to vixl
-  vmain() << asrv{srcRegL, srcRegR, dstReg};
 }
 
 //////////////////////////////////////////////////////////////////////

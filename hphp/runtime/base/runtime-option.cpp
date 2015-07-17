@@ -181,7 +181,7 @@ std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
 bool RuntimeOption::EnableKeepAlive = true;
-bool RuntimeOption::ExposeHPHP = true;
+bool RuntimeOption::ExposeHPHP = false;
 bool RuntimeOption::ExposeXFBServer = false;
 bool RuntimeOption::ExposeXFBDebug = false;
 std::string RuntimeOption::XFBDebugSSLKey;

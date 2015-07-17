@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/base/program-functions.h"
 
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
@@ -83,23 +82,28 @@
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/timer.h"
 
+#include <folly/Range.h>
 #include <folly/Portability.h>
 #include <folly/Singleton.h>
 
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
+
 #include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
 #include <libxml/parser.h>
+
 #include <exception>
+#include <fstream>
 #include <iterator>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
-
 
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
 #include <windows.h>
@@ -110,14 +114,15 @@ using namespace boost::program_options;
 using std::cout;
 extern char **environ;
 
-#define MAX_INPUT_NESTING_LEVEL 64
+constexpr auto MAX_INPUT_NESTING_LEVEL = 64;
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Forward declarations.
 
-extern InitFiniNode *extra_process_init, *extra_process_exit;
+extern InitFiniNode* extra_process_init;
+extern InitFiniNode* extra_process_exit;
 
 void initialize_repo();
 
@@ -137,41 +142,37 @@ void pcre_reinit();
 // helpers
 
 struct ProgramOptions {
-  string     mode;
-  std::vector<std::string>
-             config;
-  std::vector<std::string>
-             confStrings;
-  std::vector<std::string>
-             iniStrings;
-  int        port;
-  int        portfd;
-  int        sslportfd;
-  int        admin_port;
-  string     user;
-  string     file;
-  string     lint;
-  bool       isTempFile;
-  int        count;
-  bool       noSafeAccessCheck;
-  std::vector<std::string>
-             args;
-  string     buildId;
-  string     instanceId;
-  int        xhprofFlags;
-  string     show;
-  string     parse;
+  std::string mode;
+  std::vector<std::string> config;
+  std::vector<std::string> confStrings;
+  std::vector<std::string> iniStrings;
+  int port;
+  int portfd;
+  int sslportfd;
+  int admin_port;
+  std::string user;
+  std::string file;
+  std::string lint;
+  bool isTempFile;
+  int count;
+  bool noSafeAccessCheck;
+  std::vector<std::string> args;
+  std::string buildId;
+  std::string instanceId;
+  int xhprofFlags;
+  std::string show;
+  std::string parse;
 
   Eval::DebuggerClientOptions debugger_options;
 };
 
-class StartTime {
-public:
+struct StartTime {
   StartTime() : startTime(time(nullptr)) {}
   time_t startTime;
 };
+
 static StartTime s_startTime;
-static string tempFile;
+static std::string tempFile;
 
 time_t start_time() {
   return s_startTime.startTime;
@@ -480,7 +481,7 @@ static void handle_exception_helper(bool& ret,
   } catch (const Object &e) {
     bool oldRet = ret;
     bool origError = error;
-    std::string origErrorMsg = errorMsg;
+    auto const origErrorMsg = errorMsg;
     ret = false;
     error = true;
     errorMsg = "";
@@ -510,7 +511,7 @@ static void handle_exception_helper(bool& ret,
   }
 }
 
-static bool hphp_chdir_file(const string filename) {
+static bool hphp_chdir_file(const std::string& filename) {
   bool ret = false;
   String s = File::TranslatePath(filename);
   char *buf = strndup(s.data(), s.size());
@@ -548,7 +549,7 @@ static void handle_resource_exceeded_exception() {
 }
 
 void handle_destructor_exception(const char* situation) {
-  string errorMsg;
+  std::string errorMsg;
 
   try {
     throw;
@@ -592,7 +593,7 @@ void handle_destructor_exception(const char* situation) {
 void execute_command_line_begin(int argc, char **argv, int xhprof,
                                 const std::vector<std::string>& config) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
-  string args;
+  std::string args;
   for (int i = 0; i < argc; i++) {
     if (i) args += " ";
     args += argv[i];
@@ -871,7 +872,7 @@ static void pagein_self(void) {
 /* Sets RuntimeOption::ExecutionMode according
  * to commandline options prior to config load
  */
-static void set_execution_mode(string mode) {
+static void set_execution_mode(folly::StringPiece mode) {
   if (mode == "daemon" || mode == "server" || mode == "replay") {
     RuntimeOption::ExecutionMode = "srv";
     Logger::Escape = true;
@@ -974,7 +975,7 @@ static int start_server(const std::string &username, int xhprof) {
   return 0;
 }
 
-string translate_stack(const char *hexencoded, bool with_frame_numbers) {
+std::string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   if (!hexencoded || !*hexencoded) {
     return "";
   }
@@ -984,7 +985,7 @@ string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   st.get(frames);
 
   std::ostringstream out;
-  for (unsigned int i = 0; i < frames.size(); i++) {
+  for (size_t i = 0; i < frames.size(); i++) {
     auto f = frames[i];
     if (with_frame_numbers) {
       out << "# " << (i < 10 ? " " : "") << i << ' ';
@@ -1085,8 +1086,8 @@ static int compute_hhvm_argc(const options_description& desc,
     ARG_OPTIONAL = 2
   };
   const auto& vec = desc.options();
-  std::map<string,ArgCode> long_options;
-  std::map<string,ArgCode> short_options;
+  std::map<std::string,ArgCode> long_options;
+  std::map<std::string,ArgCode> short_options;
   // Build lookup maps for the short options and the long options
   for (unsigned i = 0; i < vec.size(); ++i) {
     auto opt = vec[i];
@@ -1121,7 +1122,7 @@ static int compute_hhvm_argc(const options_description& desc,
     if (len >= 3 && str[0] == '-' && str[1] == '-') {
       // Handle long options
       ++pos;
-      string s(str+2);
+      std::string s(str+2);
       auto it = long_options.find(s);
       if (it != long_options.end() && it->second != NO_ARG && pos < argc &&
           (it->second == ARG_REQUIRED || argv[pos][0] != '-')) {
@@ -1130,7 +1131,7 @@ static int compute_hhvm_argc(const options_description& desc,
     } else if (len >= 2 && str[0] == '-') {
       // Handle short options
       ++pos;
-      string s;
+      std::string s;
       s.append(1, str[1]);
       auto it = short_options.find(s);
       if (it != short_options.end() && it->second != 0 && len == 2 &&
@@ -1220,7 +1221,7 @@ extern "C" {
 }
 
 static int execute_program_impl(int argc, char** argv) {
-  string usage = "Usage:\n\n   ";
+  std::string usage = "Usage:\n\n   ";
   usage += argv[0];
   usage += " [-m <mode>] [<options>] [<arg1>] [<arg2>] ...\n\nOptions";
 
@@ -1232,10 +1233,10 @@ static int execute_program_impl(int argc, char** argv) {
     ("php", "emulate the standard php command line")
     ("compiler-id", "display the git hash for the compiler")
     ("repo-schema", "display the repository schema id")
-    ("mode,m", value<string>(&po.mode)->default_value("run"),
+    ("mode,m", value<std::string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
-    ("config,c", value<vector<string> >(&po.config)->composing(),
+    ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "load specified config file")
     ("config-value,v",
      value<std::vector<std::string>>(&po.confStrings)->composing(),
@@ -1253,28 +1254,28 @@ static int execute_program_impl(int argc, char** argv) {
      "use specified fd for SSL instead of creating a socket")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
      "start admin listener at specified port")
-    ("debug-config", value<string>(&po.debugger_options.configFName),
+    ("debug-config", value<std::string>(&po.debugger_options.configFName),
       "load specified debugger config file")
     ("debug-host,h",
-     value<string>(&po.debugger_options.host)->implicit_value("localhost"),
+     value<std::string>(&po.debugger_options.host)->implicit_value("localhost"),
      "connect to debugger server at specified address")
     ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),
      "connect to debugger server at specified port")
-    ("debug-extension", value<string>(&po.debugger_options.extension),
+    ("debug-extension", value<std::string>(&po.debugger_options.extension),
      "PHP file that extends command 'arg'")
     ("debug-cmd", value<std::vector<std::string>>(
      &po.debugger_options.cmds)->composing(),
      "executes this debugger command and returns its output in stdout")
     ("debug-sandbox",
-     value<string>(&po.debugger_options.sandbox)->default_value("default"),
+     value<std::string>(&po.debugger_options.sandbox)->default_value("default"),
      "initial sandbox to attach to when debugger is started")
-    ("user,u", value<string>(&po.user),
+    ("user,u", value<std::string>(&po.user),
      "run server under this user account")
-    ("file,f", value<string>(&po.file),
+    ("file,f", value<std::string>(&po.file),
      "execute specified file")
-    ("lint,l", value<string>(&po.lint),
+    ("lint,l", value<std::string>(&po.lint),
      "lint specified file")
-    ("show,w", value<string>(&po.show),
+    ("show,w", value<std::string>(&po.show),
      "output specified file and do nothing else")
     ("temp-file",
      "file specified is temporary and removed after execution")
@@ -1285,11 +1286,11 @@ static int execute_program_impl(int argc, char** argv) {
      "whether to ignore safe file access check")
     ("arg", value<std::vector<std::string>>(&po.args)->composing(),
      "arguments")
-    ("extra-header", value<string>(&Logger::ExtraHeader),
+    ("extra-header", value<std::string>(&Logger::ExtraHeader),
      "extra-header to add to log lines")
-    ("build-id", value<string>(&po.buildId),
+    ("build-id", value<std::string>(&po.buildId),
      "unique identifier of compiled server code")
-    ("instance-id", value<string>(&po.instanceId),
+    ("instance-id", value<std::string>(&po.instanceId),
      "unique identifier of server instance")
     ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
      "Set XHProf flags")
@@ -1330,7 +1331,7 @@ static int execute_program_impl(int argc, char** argv) {
         }
       }
       for (unsigned m = hhvm_argc; m < argc; ++m) {
-        string str = argv[m];
+        std::string str = argv[m];
         basic_option<char> bo;
         bo.string_key = "arg";
         bo.position_key = pos++;
@@ -1470,12 +1471,12 @@ static int execute_program_impl(int argc, char** argv) {
   // Now, take care of CLI options and then officially load and bind things
   RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);
 
-  vector<string> badnodes;
+  std::vector<std::string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
-  vector<int> inherited_fds;
+  std::vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
   if (po.port != -1) {
@@ -1606,7 +1607,7 @@ static int execute_program_impl(int argc, char** argv) {
     int ret = 0;
     hphp_process_init();
 
-    string file;
+    std::string file;
     if (new_argc > 0) {
       file = new_argv[0];
     }
@@ -1714,7 +1715,7 @@ static int execute_program_impl(int argc, char** argv) {
 String canonicalize_path(const String& p, const char* root, int rootLen) {
   String path = FileUtil::canonicalize(p);
   if (path.charAt(0) == '/') {
-    const string &sourceRoot = RuntimeOption::SourceRoot;
+    auto const& sourceRoot = RuntimeOption::SourceRoot;
     int len = sourceRoot.size();
     if (len && strncmp(path.data(), sourceRoot.c_str(), len) == 0) {
       return path.substr(len);
@@ -1726,9 +1727,9 @@ String canonicalize_path(const String& p, const char* root, int rootLen) {
   return path;
 }
 
-static string systemlib_split(string slib, string* hhas) {
+static std::string systemlib_split(const std::string& slib, std::string* hhas) {
   auto pos = slib.find("\n<?hhas\n");
-  if (pos != string::npos) {
+  if (pos != std::string::npos) {
     if (hhas) *hhas = slib.substr(pos + 8);
     return slib.substr(0, pos);
   }
@@ -1741,10 +1742,11 @@ static string systemlib_split(string slib, string* hhas) {
 // Additionally, when retrieving the main systemlib
 // from the current executable, honor the
 // HHVM_SYSTEMLIB environment variable as an override.
-string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
-                                   const string &filename /*= "" */) {
+std::string get_systemlib(std::string* hhas,
+                          const std::string &section /*= "systemlib" */,
+                          const std::string &filename /*= "" */) {
   if (filename.empty() && section == "systemlib") {
-    if (char *file = getenv("HHVM_SYSTEMLIB")) {
+    if (auto const file = getenv("HHVM_SYSTEMLIB")) {
       std::ifstream ifs(file);
       if (ifs.good()) {
         return systemlib_split(std::string(
@@ -1758,16 +1760,16 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
   if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  string ret = systemlib_split(std::string(
-                                (const char*)LockResource(desc.m_handle),
-                                desc.m_len), hhas);
+  auto const ret = systemlib_split(std::string(
+                                     (const char*)LockResource(desc.m_handle),
+                                     desc.m_len), hhas);
 #else
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";
   ifs.seekg(desc.m_start, std::ios::beg);
   std::unique_ptr<char[]> data(new char[desc.m_len]);
   ifs.read(data.get(), desc.m_len);
-  string ret = systemlib_split(string(data.get(), desc.m_len), hhas);
+  auto const ret = systemlib_split(std::string(data.get(), desc.m_len), hhas);
 #endif
   return ret;
 }
@@ -1882,8 +1884,8 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
 }
 
 static bool hphp_warmup(ExecutionContext *context,
-                        const string &reqInitFunc,
-                        const string &reqInitDoc, bool &error) {
+                        const std::string &reqInitFunc,
+                        const std::string &reqInitDoc, bool &error) {
   bool ret = true;
   error = false;
   std::string errorMsg;
@@ -1935,7 +1937,7 @@ ExecutionContext *hphp_context_init() {
 
 bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
   bool error;
-  string errorMsg;
+  std::string errorMsg;
   return hphp_invoke(g_context.getNoCheck(), filename, false, null_array,
                      uninit_null(), "", "", error, errorMsg,
                      true /* once */,
@@ -1945,8 +1947,8 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, const Array& funcParams, VRefParam funcRet,
-                 const string &reqInitFunc, const string &reqInitDoc,
-                 bool &error, string &errorMsg,
+                 const std::string &reqInitFunc, const std::string &reqInitDoc,
+                 bool &error, std::string &errorMsg,
                  bool once, bool warmupOnly,
                  bool richErrorMsg) {
   bool isServer = RuntimeOption::ServerExecutionMode();

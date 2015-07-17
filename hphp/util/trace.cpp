@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+// We can't do this on MSVC, it's all debug or all release.
+#ifndef _MSC_VER
 /*
  * Forcibly define USE_TRACE, so we get the debug trace.h interface included
  * here. This allows mixed compilation, where some units were compiled
@@ -21,6 +23,7 @@
  */
 #ifndef USE_TRACE
 #  define USE_TRACE 1
+#endif
 #endif
 #include "hphp/util/trace.h"
 
@@ -135,6 +138,7 @@ void flush() {
   }
 }
 
+#ifdef USE_TRACE
 void vtrace(const char *fmt, va_list ap) {
   static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
   static bool hphp_trace_ringbuffer = getenv("HPHP_TRACE_RINGBUFFER");
@@ -156,6 +160,7 @@ void trace(const char *fmt, ...) {
   vtrace(fmt, ap);
   va_end(ap);
 }
+#endif
 
 void traceRelease(const char* fmt, ...) {
   va_list ap;
@@ -171,9 +176,11 @@ void traceRingBufferRelease(const char *fmt, ...) {
   va_end(ap);
 }
 
+#ifdef USE_TRACE
 void trace(const std::string& s) {
   trace("%s", s.c_str());
 }
+#endif
 
 void traceRelease(const std::string& s) {
   traceRelease("%s", s.c_str());

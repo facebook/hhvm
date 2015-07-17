@@ -254,10 +254,6 @@ if (NOT PCRE_LIBRARY)
   include_directories("${TP_DIR}/pcre")
 endif()
 
-if (NOT FASTLZ_LIBRARY)
-  include_directories("${TP_DIR}/fastlz")
-endif()
-
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")
 include_directories("${TP_DIR}/libmbfl")

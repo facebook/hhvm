@@ -171,12 +171,6 @@ if (LZ4_INCLUDE_DIR)
   include_directories(${LZ4_INCLUDE_DIR})
 endif()
 
-# fastlz
-find_package(FastLZ)
-if (FASTLZ_INCLUDE_DIR)
-  include_directories(${FASTLZ_INCLUDE_DIR})
-endif()
-
 # libzip
 find_package(LibZip)
 if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)
@@ -545,12 +539,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${PCRE_LIBRARY})
   else()
     target_link_libraries(${target} pcre)
-  endif()
-
-  if (LIBFASTLZ_LIBRARY)
-    target_link_libraries(${target} ${LIBFASTLZ_LIBRARY})
-  else()
-    target_link_libraries(${target} fastlz)
   endif()
 
   target_link_libraries(${target} timelib)

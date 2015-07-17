@@ -12,3 +12,5 @@ src/parsing/parser.mli
 *.so
 *.annot
 *.opt
+_obuild/
+.ocp/

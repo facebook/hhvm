@@ -1,4 +1,5 @@
 <?hh
+
 require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/Options.php';
 

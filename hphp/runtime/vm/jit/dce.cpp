@@ -38,6 +38,7 @@ TRACE_SET_MOD(hhir_dce);
 bool canDCE(IRInstruction* inst) {
   switch (inst->op()) {
   case AssertNonNull:
+  case AssertType:
   case AbsDbl:
   case AddInt:
   case SubInt:
@@ -212,7 +213,6 @@ bool canDCE(IRInstruction* inst) {
   case CufIterSpillFrame:
   case CheckType:
   case CheckNullptr:
-  case AssertType:
   case CheckTypeMem:
   case HintLocInner:
   case CheckLoc:

@@ -113,12 +113,6 @@ if(HAVE_CUSTOM_LIBEVENT)
 endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
-find_package(LibUODBC)
-if (LIBUODBC_INCLUDE_DIRS)
-  include_directories(${LIBUODBC_INCLUDE_DIRS})
-  add_definitions("-DHAVE_UODBC")
-endif ()
-
 # libXed
 find_package(LibXed)
 if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
@@ -501,10 +495,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${EXPAT_LIBRARY})
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
   target_link_libraries(${target} ${Mcrypt_LIB})
-
-  if (LIBUODBC_LIBRARIES)
-    target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
-  endif()
 
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})

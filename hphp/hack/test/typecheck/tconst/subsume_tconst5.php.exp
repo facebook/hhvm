@@ -1,0 +1,10 @@
+File "subsume_tconst5.php", line 8, characters 16-28:
+This object is of type FullyAbstract (Typing[4142])
+File "subsume_tconst5.php", line 8, characters 38-54:
+It is incompatible with this object of type PartiallyAbstract
+because some declarations are incompatible.
+Read the following to see why:
+File "subsume_tconst5.php", line 9, characters 23-24:
+Cannot re-declare member T2 as abstract
+File "subsume_tconst5.php", line 5, characters 14-15:
+Previously defined here

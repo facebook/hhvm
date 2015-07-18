@@ -22,7 +22,7 @@
 
 #include "hphp/util/portability.h"
 
-#if defined __x86_64__
+#if defined(__x86_64__) || defined(_MSC_VER)
 #  if (!defined USE_SSECRC)
 #    define USE_SSECRC
 #  endif

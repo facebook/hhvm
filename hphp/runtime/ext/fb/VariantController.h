@@ -148,6 +148,9 @@ struct VariantController {
   static StringType stringFromData(const char* src, int n) {
     return StringType::attach(StringData::Make(src, n, CopyString));
   }
+  static StringType stringFromMutableString(StringType&& s) {
+    return std::move(s);
+  }
   static size_t stringLen(const StringType& str) { return str.size(); }
   static const char* stringData(const StringType& str) {
     return str.data();

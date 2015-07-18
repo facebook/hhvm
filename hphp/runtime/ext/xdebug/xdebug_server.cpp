@@ -161,58 +161,56 @@ bool XDebugServer::lookupHostname(const char* hostname, struct in_addr& in) {
 
 int XDebugServer::createSocket(const char* hostname, int port) {
   // Grab the address info
-  struct sockaddr sa;
-  struct sockaddr_in address;
+  sockaddr sa;
+  sockaddr_in address;
   memset(&address, 0, sizeof(address));
   address.sin_family = AF_INET;
   address.sin_port = htons((unsigned short) port);
   lookupHostname(hostname, address.sin_addr);
 
   // Create the socket
-  int sockfd = socket(address.sin_family, SOCK_STREAM, 0);
+  auto const sockfd = socket(address.sin_family, SOCK_STREAM, 0);
   if (sockfd == -1) {
-    printf("create_debugger_socket(\"%s\", %d) socket: %s\n",
-           hostname, port, strerror(errno));
+    log("create_debugger_socket(\"%s\", %d) socket: %s\n",
+        hostname, port, folly::errnoStr(errno).c_str());
     return -1;
   }
 
-  // Put socket in non-blocking mode so we can use select for timeouts
-  struct timeval timeout;
-  double timeout_sec = XDEBUG_GLOBAL(RemoteTimeout);
-  timeout.tv_sec = (int) timeout_sec;
-  timeout.tv_usec = (timeout_sec - (double) timeout.tv_sec) * 1.0e6;
+  // Put socket in non-blocking mode so we can use poll() for timeouts.
   fcntl(sockfd, F_SETFL, O_NONBLOCK);
 
-  // Do the connect
-  int status = connect(sockfd, (struct sockaddr*) &address, sizeof(address));
+  // Do the connect.
+  auto const status = connect(sockfd, (sockaddr*)(&address), sizeof(address));
   if (status < 0) {
     if (errno != EINPROGRESS) {
       return -1;
     }
 
-    // Loop until request has completed or there is an error
-    while (true) {
-      fd_set rset, wset, eset;
-      FD_ZERO(&rset);
-      FD_SET(sockfd, &rset);
-      FD_ZERO(&wset);
-      FD_SET(sockfd, &wset);
-      FD_ZERO(&eset);
-      FD_SET(sockfd, &eset);
+    double timeout_sec = XDEBUG_GLOBAL(RemoteTimeout);
 
-      // Wait for a socket event. If we continue due to a timeout, return -2
-      // If we exited due to an error, return -1. If the descriptor is ready,
-      // we're done.
-      if (select(sockfd + 1, &rset, &wset, &eset, &timeout) == 0) {
-        return -2;
-      } else if (FD_ISSET(sockfd, &eset)) {
-        return -1;
-      } else if (FD_ISSET(sockfd, &wset) || FD_ISSET(sockfd, &rset)) {
-        break;
-      }
+    // Loop until request has completed or there is an error.
+    while (true) {
+      pollfd pollfd;
+      pollfd.fd = sockfd;
+      pollfd.events = POLLIN | POLLOUT;
+      pollfd.revents = 0;
+
+      // Wait for a socket event.
+      auto const status = poll(&pollfd, 1, (int)(timeout_sec * 1000.0));
+
+      // Timeout.
+      if (status == 0) return -2;
+      // Error.
+      if (status == -1) return -1;
+
+      // Error or hang-up.
+      if ((pollfd.revents & POLLERR) || (pollfd.revents & POLLHUP)) return -1;
+
+      // Success.
+      if ((pollfd.revents & POLLIN) || (pollfd.revents & POLLOUT)) break;
     }
 
-    // Ensure we're actually connected
+    // Ensure we're actually connected.
     socklen_t sa_size = sizeof(sa);
     if (getpeername(sockfd, &sa, &sa_size) == -1) {
       return -1;

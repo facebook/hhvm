@@ -294,7 +294,14 @@ public:
    * translator-asm-helpers.S without hardcoding a fragile mangled name.
    */
   TCA handleServiceRequest(svcreq::ReqInfo& info) noexcept
+#ifdef _MSC_VER
+    // For MSVC, we've had to hard-code the mangled name,
+    // because we can't explicitly set it like we can with
+    // GCC/Clang :(
+    ;
+#else
     asm("MCGenerator_handleServiceRequest");
+#endif
 
   /*
    * Smash the PHP call at address toSmash to point to the appropriate prologue

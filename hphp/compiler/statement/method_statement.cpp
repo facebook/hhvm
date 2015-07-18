@@ -259,7 +259,8 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       }
     }
     if (m_modifiers->isAbstract()) {
-      if (funcScope->userAttributes().count("__Memoize")) {
+      if (!Option::WholeProgram &&
+          funcScope->userAttributes().count("__Memoize")) {
         m_modifiers->parseTimeFatal(
           fileScope,
           Compiler::InvalidAttribute,

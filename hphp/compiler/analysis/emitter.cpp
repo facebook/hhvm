@@ -6316,7 +6316,8 @@ void EmitterVisitor::emitPostponedMeths() {
       }
     }
 
-    if (funcScope->userAttributes().count("__Memoize")) {
+    if (funcScope->userAttributes().count("__Memoize") &&
+        !funcScope->isAbstract()) {
       auto const originalName = fe->name;
       auto const rewrittenName = makeStaticString(
         folly::sformat("{}$memoize_impl", fe->name->data()));

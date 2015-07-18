@@ -30,7 +30,8 @@
 
 namespace HPHP { namespace jit {
 
-RepoWrapper::RepoWrapper(const char* repoSchema, string configFile) {
+RepoWrapper::RepoWrapper(const char* repoSchema,
+                         const std::string& configFile) {
   kRepoSchemaId = repoSchema;
 
   printf("# Config file: %s\n", configFile.c_str());
@@ -63,7 +64,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema, string configFile) {
   repo->loadGlobalData(true /* allowFailure */);
 
   std::string hhasLib;
-  std::string phpLib = get_systemlib(&hhasLib);
+  auto const phpLib = get_systemlib(&hhasLib);
   always_assert(!hhasLib.empty() && !phpLib.empty());
   auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
                                 "systemlib.php");

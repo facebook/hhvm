@@ -50,7 +50,7 @@ bool TestParser::VerifyParser(const char *input, const char *output,
   assert(output);
   if (output2 == nullptr) output2 = output;
 
-  string oldTab = Option::Tab;
+  std::string oldTab = Option::Tab;
   Option::Tab = "";
 
   bool ret = true;

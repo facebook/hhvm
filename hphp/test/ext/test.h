@@ -17,8 +17,11 @@
 #ifndef incl_HPHP_TEST_H_
 #define incl_HPHP_TEST_H_
 
-#include "hphp/compiler/hphp.h"
 #include "hphp/test/ext/test_logger.h"
+
+#include <sys/time.h>
+
+#include <string>
 
 ///////////////////////////////////////////////////////////////////////////////
 

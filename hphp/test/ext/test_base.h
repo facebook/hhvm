@@ -17,13 +17,15 @@
 #ifndef incl_HPHP_TEST_BASE_H_
 #define incl_HPHP_TEST_BASE_H_
 
-#include <string>
-#include <assert.h>
-#include <exception>
 #include "hphp/compiler/hphp.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
+
 #include "hphp/test/ext/test.h"
+
+#include <cassert>
+#include <exception>
+#include <string>
 
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////

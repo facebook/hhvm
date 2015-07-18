@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/analysis/emitter.h"
+#include "hphp/compiler/option.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -73,8 +73,8 @@ void ProcessInit() {
   Option::WholeProgram = false;
 
   rds::requestInit();
-  string hhas;
-  string slib = get_systemlib(&hhas);
+  std::string hhas;
+  auto const slib = get_systemlib(&hhas);
 
   if (slib.empty()) {
     // Die a horrible death.

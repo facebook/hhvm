@@ -746,7 +746,7 @@ NEVER_INLINE void copyHashFuncs() {
     copyFunc(hash_func(hash_string_i_unsafe),
              hash_func(hash_string_i_crc), 64);
     copyFunc(hash_func(hash_string_i),
-             hash_func(hash_string_i_unaligned_crc), 80);
+             hash_func(hash_string_i_unaligned_crc), 128);
   }
 #endif
 }

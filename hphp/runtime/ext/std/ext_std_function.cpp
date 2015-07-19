@@ -162,20 +162,32 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == nullptr) {
     return Array();
   }
-  int numParams = ar->m_func->numNonVariadicParams();
+  int numParams = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
-
-  PackedArrayInit retInit(std::max(numArgs - offset, 0));
+  bool variadic = ar->func()->hasVariadicCaptureParam() &&
+    !(ar->func()->attrs() & AttrMayUseVV);
   auto local = reinterpret_cast<TypedValue*>(
     uintptr_t(ar) - sizeof(TypedValue)
   );
+  if (variadic && numArgs > numParams) {
+    auto arr = local - numParams;
+    if (arr->m_type == KindOfArray &&
+        arr->m_data.parr->isPacked()) {
+      numArgs = numParams + arr->m_data.parr->size();
+    } else {
+      numArgs = numParams;
+    }
+  }
   local -= offset;
+  PackedArrayInit retInit(std::max(numArgs - offset, 0));
   for (int i = offset; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
       retInit.append(tvAsCVarRef(local));
       --local;
+    } else if (variadic) {
+      retInit.append(tvAsCVarRef(local).asCArrRef()[i - numParams]);
     } else {
       // This is not a formal parameter, so it's in the ExtraArgs.
       retInit.append(tvAsCVarRef(ar->getExtraArg(i - numParams)));

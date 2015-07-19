@@ -318,12 +318,13 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
     // If explicitly provided add the beginning timestamp to the ret array
     if (timestamp_begin > k_PHP_INT_MIN) {
       auto dt = req::make<DateTime>(timestamp_begin);
+      auto idx = m_tzi->trans_idx[0];
       ret.append(make_map_array(
             s_ts, timestamp_begin,
             s_time, dt->toString(DateTime::DateFormat::ISO8601),
-            s_offset, m_tzi->type[0].offset,
-            s_isdst, (bool)m_tzi->type[0].isdst,
-            s_abbr, String(m_tzi->timezone_abbr + m_tzi->type[0].abbr_idx,
+            s_offset, m_tzi->type[idx].offset,
+            s_isdst, (bool)m_tzi->type[idx].isdst,
+            s_abbr, String(m_tzi->timezone_abbr + m_tzi->type[idx].abbr_idx,
                            CopyString)
           ));
     }

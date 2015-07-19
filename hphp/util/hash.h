@@ -74,12 +74,6 @@ namespace MurmurHash3 {
 // underscore. Although PHP allows higher ASCII characters (> 127) in an
 // identifier, they should be very rare, and do not change the correctness.
 
-// It is tempting to make useHash128 depend on whether the architecture is 32-
-// or 64-bit, but changing which hash function is used also requires
-// regenerating system files, so this setting is hardcoded here.
-const bool useHash128 = true;
-
-#define ROTL32(x,y) rotl32(x,y)
 #define ROTL64(x,y) rotl64(x,y)
 #define BIG_CONSTANT(x) (x##LLU)
 
@@ -87,24 +81,11 @@ ALWAYS_INLINE uint64_t rotl64(uint64_t x, int8_t r) {
   return (x << r) | (x >> (64 - r));
 }
 
-ALWAYS_INLINE uint32_t rotl32(uint32_t x, int8_t r) {
-  return (x << r) | (x >> (32 - r));
-}
-
 template <bool caseSensitive>
 ALWAYS_INLINE uint64_t getblock64(const uint64_t *p, int i) {
   uint64_t block = p[i];
   if (!caseSensitive) {
     block &= 0xdfdfdfdfdfdfdfdfLLU; // a-z => A-Z
-  }
-  return block;
-}
-
-template <bool caseSensitive>
-ALWAYS_INLINE uint32_t getblock32(const uint32_t *p, int i) {
-  uint32_t block = p[i];
-  if (!caseSensitive) {
-    block &= 0xdfdfdfdfU; // a-z => A-Z
   }
   return block;
 }
@@ -127,55 +108,6 @@ ALWAYS_INLINE uint64_t fmix64(uint64_t k) {
   k *= BIG_CONSTANT(0xc4ceb9fe1a85ec53);
   k ^= k >> 33;
   return k;
-}
-
-ALWAYS_INLINE uint32_t fmix32(uint32_t h) {
-  h ^= h >> 16;
-  h *= 0x85ebca6b;
-  h ^= h >> 13;
-  h *= 0xc2b2ae35;
-  h ^= h >> 16;
-  return h;
-}
-
-template <bool caseSensitive>
-ALWAYS_INLINE uint32_t hash32(const void *key, size_t len, uint32_t seed) {
-  const uint8_t *data = (const uint8_t *)key;
-  const size_t nblocks = len / 4;
-  uint32_t h1 = seed;
-  const uint32_t c1 = 0xcc9e2d51;
-  const uint32_t c2 = 0x1b873593;
-
-  //----------
-  // body
-  const uint32_t *blocks = (const uint32_t *)(data + nblocks*4);
-  for(size_t i = -nblocks; i; i++) {
-    uint32_t k1 = getblock32<caseSensitive>(blocks, i);
-    k1 *= c1;
-    k1 = ROTL32(k1,15);
-    k1 *= c2;
-    h1 ^= k1;
-    h1 = ROTL32(h1,13);
-    h1 = h1*5+0xe6546b64;
-  }
-
-  //----------
-  // tail
-  const uint8_t *tail = (const uint8_t*)(data + nblocks*4);
-  uint32_t k1 = 0;
-  switch(len & 3) {
-  case 3: k1 ^= getblock8<caseSensitive>(tail, 2) << 16;
-  case 2: k1 ^= getblock8<caseSensitive>(tail, 1) << 8;
-  case 1: k1 ^= getblock8<caseSensitive>(tail, 0);
-          k1 *= c1; k1 = ROTL32(k1,15); k1 *= c2; h1 ^= k1;
-  };
-
-  //----------
-  // finalization
-  h1 ^= len;
-  h1 = fmix32(h1);
-
-  return h1;
 }
 
 // Optimized for 64-bit architectures.  MurmurHash3 also implements a 128-bit
@@ -244,7 +176,6 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
   ((uint64_t*)out)[1] = h2;
 }
 
-#undef ROTL32
 #undef ROTL64
 #undef BIG_CONSTANT
 ///////////////////////////////////////////////////////////////////////////////

@@ -259,55 +259,19 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength);
 
-#if FACEBOOK && defined USE_SSECRC
+strhash_t hash_string(const char *arKey);
+strhash_t hash_string_i(const char *arKey);
 
-strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength);
-strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_unsafe(const char *arKey, uint32_t nKeyLength);
+
 strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength);
 
-#else
-
-inline strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_cs_fallback(arKey, nKeyLength);
-}
-
-inline
-strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_cs_fallback(arKey, nKeyLength);
-}
-
-inline strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_fallback(arKey, nKeyLength);
-}
-
-inline
-strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_fallback(arKey, nKeyLength);
-}
-
-#endif
-
-inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i(arKey, nKeyLength);
-}
-
-inline strhash_t hash_string_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_unsafe(arKey, nKeyLength);
-}
-
-/**
- * We probably should get rid of this, so to detect code generation errors,
- * where a binary string is treated as a NULL-terminated literal. Do we ever
- * allow binary strings as array keys or symbol names?
- */
-inline strhash_t hash_string(const char *arKey) {
-  return hash_string(arKey, strlen(arKey));
-}
-
-inline strhash_t hash_string_i(const char *arKey) {
-  return hash_string_i(arKey, strlen(arKey));
-}
+strhash_t hash_string_i_unsafe_mask_stub_(const char *arKey, uint32_t nKeyLength, uint64_t mask);
+strhash_t hash_string_i_mask_stub_(const char *arKey, uint32_t nKeyLength, uint64_t mask);
 
 // This function returns true and sets the res parameter if arKey
 // is a non-empty string that matches one of the following conditions:
@@ -374,9 +338,9 @@ class StringData;
 // The following functions are implemented in ASM directly for x86_64.
 extern "C" {
   HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);
-  HPHP::strhash_t hash_string_i_crc(const char*, uint32_t);
+  HPHP::strhash_t hash_string_i_crc(const char*, uint32_t, uint64_t);
   HPHP::strhash_t hash_string_cs_unaligned_crc(const char*, uint32_t);
-  HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t);
+  HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t, uint64_t);
   HPHP::strhash_t g_hashHelper_crc(const HPHP::StringData*);
 }
 #endif

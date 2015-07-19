@@ -14,21 +14,20 @@ ETCH_LABEL(FB800):
         neg     %esi
         je      ETCH_LABEL(iend)
         mov     %esi, %ecx
-        movabs  $0xdfdfdfdfdfdfdfdf, %r8
         jmp     ETCH_LABEL(iheader)
 
 ETCH_LABEL(iloop):
         add     $8, %rdi
-        crc32q  %rdx, %rax
+        crc32q  %r8, %rax
 ETCH_LABEL(iheader):
-        mov     %r8, %rdx
-        and     (%rdi), %rdx
+        mov     %rdx, %r8
+        and     (%rdi), %r8
         add     $8, %ecx
         jnc     ETCH_LABEL(iloop)
 
         shl     $3, %ecx
-        shl     %cl, %rdx
-        crc32q  %rdx, %rax
+        shl     %cl, %r8
+        crc32q  %r8, %rax
 
 ETCH_LABEL(iend):
         shr     %eax
@@ -48,30 +47,29 @@ ETCH_LABEL(FB801):
         CFI(startproc)
         or      $-1, %eax
         sub     $8, %esi
-        movabs  $0xdfdfdfdfdfdfdfdf, %r8
         js      ETCH_LABEL(iutail)
 
 ETCH_LABEL(iuloop):
-        mov     (%rdi), %rdx
-        and     %r8, %rdx
+        mov     (%rdi), %rcx
+        and     %rdx, %rcx
         add     $8, %rdi
-        crc32q  %rdx, %rax
+        crc32q  %rcx, %rax
         sub     $8, %esi
         jns     ETCH_LABEL(iuloop)
 
 ETCH_LABEL(iutail):
         add     $8, %esi
         je      ETCH_LABEL(iuend)
-        mov     %esi, %ecx
-        xor     %edx, %edx
+        xor     %ecx, %ecx
 
 ETCH_LABEL(iutailloop):
-        mov     (%rdi), %dl
+        mov     (%rdi), %cl
         inc     %rdi
-        ror     $8, %rdx
-        loop    ETCH_LABEL(iutailloop)
-        and     %r8, %rdx
-        crc32q  %rdx, %rax
+        ror     $8, %rcx
+        dec     %esi 
+        jne     ETCH_LABEL(iutailloop)
+        and     %rdx, %rcx
+        crc32q  %rcx, %rax
 
 ETCH_LABEL(iuend):
         shr     %eax

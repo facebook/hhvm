@@ -317,10 +317,6 @@ add_definitions(${BZIP2_DEFINITIONS})
 find_package(ONIGURUMA REQUIRED)
 include_directories(${ONIGURUMA_INCLUDE_DIRS})
 
-# LDAP
-find_package(Ldap REQUIRED)
-include_directories(${LDAP_INCLUDE_DIR})
-
 # libpthreads
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
@@ -476,7 +472,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${LIBXML2_LIBRARIES})
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 
-  target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
   target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})

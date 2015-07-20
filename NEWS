@@ -1,3 +1,28 @@
+"Osborne" 30-Jul-2015
+- Remove global LDAP requirement
+- Don't require libXSLT globally
+- Remove the global MCrypt requirement
+- Remove the global search for LibUODBC
+- Remove the global check for libpam
+- use folly::writeFull wrapper for uploads
+- Fix vararg handling for array_uintersect and others
+- fix error message for abstract type constants
+- Fix variadics in hhvm_get_frame_args
+- Use poll() instead of select() in XDebugServer::createSocket.
+- [hack] Error on overriding concrete type constant with an abstract one
+- [hack] Grow shapes more correctly
+- Array pointer modification functions (next, current, each etc) can be used on ArrayObject
+- Eliminate ext_mbstring's dependence on ext_process
+- Eliminate ext_mail's dependence on ext_process
+- Use utf8 string literals in zend-html
+- Don't allow abstract memoized methods
+- [hack] Properly handle 'this' type for methods
+- Fix lexing of "${fn()}"
+- Fix lexing of #<?php
+- [hack] Fix infinite loop in syntax error when closing a namespace
+- Fix mispelling of COOKIE.
+- Deal with self, static and parent constructors
+
 "Nash" 16-Jul-2015
 - Make ArrayData ref-count start at 1
 - Remove the NOUSER define when compiling with MSVC, Cygwin, or MinGW

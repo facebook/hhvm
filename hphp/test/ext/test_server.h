@@ -98,7 +98,7 @@ protected:
 
 class TestLibEventServer : public TestServer {
   public:
-  TestLibEventServer() : TestServer("libevent") {}
+  TestLibEventServer() : TestServer("proxygen") {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

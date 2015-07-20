@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
-#include "hphp/runtime/server/libevent-server.h"
+#include "hphp/runtime/server/proxygen/proxygen-server.h"
 
 #include <folly/Conv.h>
 
@@ -64,8 +64,8 @@ static std::string get_request_uri() {
 static ServerPtr runServer() {
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      ServerPtr server = folly::make_unique<LibEventServer>(
-          "127.0.0.1", s_server_port, 4);
+      ServerPtr server = folly::make_unique<ProxygenServer>(
+        ServerOptions("127.0.0.1", s_server_port, 4));
       server->setRequestHandlerFactory<TestCurlRequestHandler>(0);
       server->start();
       return std::move(server);

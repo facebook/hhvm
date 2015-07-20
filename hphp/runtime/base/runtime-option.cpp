@@ -130,7 +130,7 @@ std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 
 std::string RuntimeOption::Host;
 std::string RuntimeOption::DefaultServerNameSuffix;
-std::string RuntimeOption::ServerType = "libevent";
+std::string RuntimeOption::ServerType = "proxygen";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
 int RuntimeOption::ServerPort = 80;

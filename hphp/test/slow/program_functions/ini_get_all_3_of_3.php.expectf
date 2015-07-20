@@ -425,9 +425,9 @@ array(194) {
   ["hhvm.server.type"]=>
   array(3) {
     ["global_value"]=>
-    string(8) "libevent"
+    string(8) "proxygen"
     ["local_value"]=>
-    string(8) "libevent"
+    string(8) "proxygen"
     ["access"]=>
     int(4)
   }

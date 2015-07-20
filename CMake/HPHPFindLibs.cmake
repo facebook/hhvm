@@ -144,9 +144,6 @@ find_package(LibXslt REQUIRED)
 include_directories(${LIBXSLT_INCLUDE_DIR})
 add_definitions(${LIBXSLT_DEFINITIONS})
 
-find_package(EXPAT REQUIRED)
-include_directories(${EXPAT_INCLUDE_DIRS})
-
 # libsqlite3
 find_package(LibSQLite)
 if (LIBSQLITE_INCLUDE_DIR)
@@ -483,7 +480,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${LIBXML2_LIBRARIES})
   target_link_libraries(${target} ${LIBXSLT_LIBRARIES})
   target_link_libraries(${target} ${LIBXSLT_EXSLT_LIBRARIES})
-  target_link_libraries(${target} ${EXPAT_LIBRARY})
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 
   target_link_libraries(${target} ${LDAP_LIBRARIES})

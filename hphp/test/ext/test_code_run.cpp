@@ -137,31 +137,16 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
     std::string dir = "runtime/tmp/";
     if (subdir) dir = dir + subdir + "/";
     std::string repoarg = "-vRepo.Central.Path=" + dir + "hhvm.hhbc";
+    std::string filearg = "--file=" + dir + "main.php";
 
-    if (Option::EnableEval < Option::FullEval) {
-      if (fastMode) {
-        std::string path = dir + "libtest.so";
-        const char *argv[] = {"", "--file=string", "--config=test/slow/config.hdf",
-                              repoarg.c_str(), path.c_str(), nullptr};
-        Process::Exec("runtime/tmp/run.sh", argv, nullptr, actual, &err);
-      } else {
-        const char *argv[] = {"", "--file=string", "--config=test/slow/config.hdf",
-                              repoarg.c_str(), nullptr};
-        std::string path = dir + "test";
-        Process::Exec(path.c_str(), argv, nullptr, actual, &err);
-      }
-    } else {
-      std::string filearg = "--file=" + dir + "main.php";
-
-      std::string jitarg = std::string("-vEval.Jit=") +
-        (RuntimeOption::EvalJit ? "true" : "false");
-      const char *argv[] = {"", filearg.c_str(),
-                            "--config=test/slow/config.hdf",
-                            repoarg.c_str(),
-                            jitarg.c_str(),
-                            nullptr};
-      Process::Exec(HHVM_PATH, argv, nullptr, actual, &err);
-    }
+    std::string jitarg = std::string("-vEval.Jit=") +
+      (RuntimeOption::EvalJit ? "true" : "false");
+    const char *argv[] = {"", filearg.c_str(),
+                          "--config=test/slow/config.hdf",
+                          repoarg.c_str(),
+                          jitarg.c_str(),
+                          nullptr};
+    Process::Exec(HHVM_PATH, argv, nullptr, actual, &err);
 
     if (perfMode) {
       std::string sinput = input;

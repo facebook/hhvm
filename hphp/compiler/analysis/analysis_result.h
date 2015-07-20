@@ -66,12 +66,6 @@ public:
     CodeGen,
   };
 
-  enum FindClassBy {
-    ClassName,
-    MethodName,
-    PropertyName
-  };
-
   enum GlobalSymbolType {
     KindOfStaticGlobalVariable,
     KindOfDynamicGlobalVariable,
@@ -204,8 +198,6 @@ public:
   bool declareConst(FileScopePtr fs, const std::string &name);
 
   ClassScopePtr findClass(const std::string &className) const;
-  ClassScopePtr findClass(const std::string &className,
-                          FindClassBy by);
 
   /**
    * Find all the redeclared classes by the name, excluding system classes.
@@ -218,7 +210,6 @@ public:
    * Find all the classes by the name, including system classes.
    */
   ClassScopePtrVec findClasses(const std::string &className) const;
-  bool classMemberExists(const std::string &name, FindClassBy by) const;
   ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name) const;
   FunctionScopePtr findFunction(const std::string &funcName) const ;
   BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
@@ -285,7 +276,6 @@ private:
   StringToFunctionScopePtrMap m_functionDecs;
   StringToFunctionScopePtrVecMap m_functionReDecs;
   StringToClassScopePtrVecMap m_classDecs;
-  StringToClassScopePtrVecMap m_methodToClassDecs;
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
 

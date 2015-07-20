@@ -175,8 +175,6 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
     m_volatile = true;
   }
 
-  m_dynamic = Option::IsDynamicFunction(m_method, m_scopeName) ||
-    Option::EnableEval == Option::FullEval || Option::AllDynamic;
   if (!m_method && Option::DynamicInvokeFunctions.find(m_scopeName) !=
       Option::DynamicInvokeFunctions.end()) {
     setDynamicInvoke();
@@ -218,8 +216,6 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
-  m_dynamic = Option::IsDynamicFunction(method, name) ||
-    Option::EnableEval == Option::FullEval || Option::AllDynamic;
   m_dynamicInvoke = false;
   if (!method && Option::DynamicInvokeFunctions.find(name) !=
       Option::DynamicInvokeFunctions.end()) {

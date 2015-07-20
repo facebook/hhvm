@@ -193,12 +193,7 @@ void TestServer::RunServer() {
   };
 
   // replace __HHVM__
-  if (Option::EnableEval < Option::FullEval) {
-    argv[0] = "runtime/tmp/TestServer/test";
-  } else {
-    argv[0] = HHVM_PATH;
-  }
-
+  argv[0] = HHVM_PATH;
   Process::Exec(argv[0], argv, nullptr, out, &err);
 }
 

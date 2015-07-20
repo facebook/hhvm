@@ -99,7 +99,6 @@ public:
    */
   bool isUserFunction() const { return !m_system && !isNative(); }
   bool isSystem() const { return m_system; }
-  bool isDynamic() const { return m_dynamic; }
   bool isPublic() const;
   bool isProtected() const;
   bool isPrivate() const;
@@ -155,10 +154,6 @@ public:
 
   int getRedeclaringId() const {
     return m_redeclaring;
-  }
-
-  void setDynamic() {
-    m_dynamic = true;
   }
 
   void setSystem() {
@@ -384,7 +379,6 @@ private:
   unsigned m_refReturn : 1; // whether it's "function &get_reference()"
   unsigned m_virtual : 1;
   unsigned m_hasOverride : 1;
-  unsigned m_dynamic : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_volatile : 1; // for function_exists
   unsigned m_persistent : 1;

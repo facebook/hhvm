@@ -490,20 +490,11 @@ int MethodStatement::getLocalEffects() const {
 }
 
 void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
-  FunctionScopeRawPtr funcScope = getFunctionScope();
-
   if (m_params) {
     m_params->analyzeProgram(ar);
   }
 
   if (m_stmt) m_stmt->analyzeProgram(ar);
-
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    if (Option::AllDynamic ||
-        Option::IsDynamicFunction(m_method, m_originalName)) {
-      funcScope->setDynamic();
-    }
-  }
 }
 
 ConstructPtr MethodStatement::getNthKid(int n) const {

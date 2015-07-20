@@ -78,10 +78,7 @@ ClassScope::ClassScope(FileScopeRawPtr fs,
     m_persistent(false), m_derivedByDynamic(false),
     m_needsCppCtor(false), m_needsInit(true) {
 
-  m_dynamic = Option::IsDynamicClass(m_scopeName);
-
-  // dynamic class is also volatile
-  m_volatile = Option::AllVolatile || m_dynamic;
+  m_volatile = Option::AllVolatile;
 
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
@@ -107,7 +104,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_attribute(0), m_redeclaring(-1),
     m_kindOf(KindOf::ObjectClass),
     m_derivesFromRedeclaring(Derivation::Normal),
-    m_traitStatus(NOT_FLATTENED), m_dynamic(false),
+    m_traitStatus(NOT_FLATTENED),
     m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_needsCppCtor(false),
     m_needsInit(true) {
@@ -909,10 +906,6 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
       if (func) return func;
     }
   }
-  if (!Option::AllDynamic &&
-      derivesFromRedeclaring() == Derivation::Redeclaring) {
-    setDynamic(ar, name);
-  }
 
   return FunctionScopePtr();
 }
@@ -939,60 +932,13 @@ FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
       if (func) return func;
     }
   }
-  if (!Option::AllDynamic &&
-      derivesFromRedeclaring() == Derivation::Redeclaring) {
-    setDynamic(ar, name);
-  }
 
   return FunctionScopePtr();
 }
 
-void ClassScope::setStaticDynamic(AnalysisResultConstPtr ar) {
-  for (FunctionScopePtrVec::const_iterator iter =
-         m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
-    FunctionScopePtr fs = *iter;
-    if (fs->isStatic()) fs->setDynamic();
-  }
-  if (!m_parent.empty()) {
-    if (derivesFromRedeclaring() == Derivation::Redeclaring) {
-      const ClassScopePtrVec &parents = ar->findRedeclaredClasses(m_parent);
-      for (ClassScopePtr cl: parents) {
-        cl->setStaticDynamic(ar);
-      }
-    } else {
-      ClassScopePtr parent = ar->findClass(m_parent);
-      if (parent) {
-        parent->setStaticDynamic(ar);
-      }
-    }
-  }
-}
-
-void ClassScope::setDynamic(AnalysisResultConstPtr ar,
-                            const std::string &name) {
-  StringToFunctionScopePtrMap::const_iterator iter =
-    m_functions.find(name);
-  if (iter != m_functions.end()) {
-    FunctionScopePtr fs = iter->second;
-    fs->setDynamic();
-  } else if (!m_parent.empty()) {
-    if (derivesFromRedeclaring() == Derivation::Redeclaring) {
-      const ClassScopePtrVec &parents = ar->findRedeclaredClasses(m_parent);
-      for (ClassScopePtr cl: parents) {
-        cl->setDynamic(ar, name);
-      }
-    } else {
-      ClassScopePtr parent = ar->findClass(m_parent);
-      if (parent) {
-        parent->setDynamic(ar, name);
-      }
-    }
-  }
-}
-
 void ClassScope::setSystem() {
   setAttribute(ClassScope::System);
-  m_volatile = m_dynamic = false;
+  m_volatile = false;
   for (FunctionScopePtrVec::const_iterator iter =
          m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
     (*iter)->setSystem();
@@ -1175,10 +1121,6 @@ void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
   }
   m_redeclaring = redecId;
   setVolatile(); // redeclared class is also volatile
-  for (FunctionScopePtrVec::const_iterator iter =
-         m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
-    (*iter)->setDynamic();
-  }
 }
 
 bool ClassScope::addFunction(AnalysisResultConstPtr ar,

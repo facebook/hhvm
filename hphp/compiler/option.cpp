@@ -68,12 +68,6 @@ bool Option::ConvertSuperGlobals = false;
 bool Option::ConvertQOpExpressions = false;
 std::string Option::ProgramPrologue;
 std::string Option::TrimmedPrologue;
-std::vector<std::string> Option::DynamicFunctionPrefixes;
-std::vector<std::string> Option::DynamicFunctionPostfixes;
-std::vector<std::string> Option::DynamicMethodPrefixes;
-std::vector<std::string> Option::DynamicMethodPostfixes;
-std::vector<std::string> Option::DynamicClassPrefixes;
-std::vector<std::string> Option::DynamicClassPostfixes;
 std::set<std::string, stdltistr> Option::DynamicInvokeFunctions;
 std::set<std::string> Option::VolatileClasses;
 std::map<std::string,std::string,stdltistr> Option::AutoloadClassMap;
@@ -111,8 +105,6 @@ int Option::ConditionalIncludeExpandLevel = 1;
 int Option::DependencyMaxProgram = 1;
 int Option::CodeErrorMaxProgram = 1;
 
-Option::EvalLevel Option::EnableEval = NoEval;
-
 std::string Option::ProgramName;
 
 bool Option::ParseTimeOpts = true;
@@ -143,7 +135,6 @@ bool Option::WholeProgram = true;
 bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC2");
 bool Option::RecordErrors = true;
 
-bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;
 
 StringBag Option::OptionStrings;
@@ -209,9 +200,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     READ_CG_OPTION(LambdaPrefix);
   }
 
-  Config::Bind(DynamicFunctionPrefixes, ini, config, "DynamicFunctionPrefix");
-  Config::Bind(DynamicFunctionPostfixes, ini, config, "DynamicFunctionPostfix");
-  Config::Bind(DynamicMethodPrefixes, ini, config, "DynamicMethodPrefix");
   Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions");
   Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
 
@@ -278,8 +266,10 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
-  EnableEval = (EvalLevel) Config::GetByte(ini, config, "EnableEval", 0);
-  Config::Bind(AllDynamic, ini, config, "AllDynamic", true);
+  // Just to silence warnings until we remove them from various config files
+  (void)Config::GetByte(ini, config, "EnableEval", 0);
+  (void)Config::GetBool(ini, config, "AllDynamic", true);
+
   Config::Bind(AllVolatile, ini, config, "AllVolatile");
 
   Config::Bind(GenerateDocComments, ini, config, "GenerateDocComments", true);
@@ -289,64 +279,12 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
-
-  OnLoad();
 }
 
 void Option::Load() {
-  OnLoad();
-}
-
-void Option::OnLoad() {
-  // all lambda functions are dynamic automatically
-  DynamicFunctionPrefixes.push_back(LambdaPrefix);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-bool Option::IsDynamicFunction(bool method, const std::string &name) {
-  if (method) {
-    return IsDynamic(name, DynamicMethodPrefixes, DynamicMethodPostfixes);
-  }
-  return IsDynamic(name, DynamicFunctionPrefixes, DynamicFunctionPostfixes);
-}
-
-bool Option::IsDynamicClass(const std::string &name) {
-  return IsDynamic(name, DynamicClassPrefixes, DynamicClassPostfixes);
-}
-
-static bool prefix_iequal(const std::string& s, const std::string& prefix) {
-  if (prefix.size() > s.size()) return false;
-  return bstrcaseeq(s.c_str(), prefix.c_str(), prefix.size());
-}
-
-static bool postfix_iequal(const std::string& s, const std::string& postfix) {
-  if (postfix.size() > s.size()) return false;
-  return bstrcaseeq(s.c_str() + s.size() - postfix.size(), postfix.c_str(),
-                    postfix.size());
-}
-
-bool Option::IsDynamic(const std::string &name,
-                       const std::vector<std::string> &prefixes,
-                       const std::vector<std::string> &postfixes) {
-  if (prefix_iequal(name, "dyn_")) {
-    return true;
-  }
-
-  for (auto const& prefix : prefixes) {
-    if (prefix_iequal(name, prefix)) {
-      return true;
-    }
-  }
-
-  for (auto const& postfix : postfixes) {
-    if (postfix_iequal(name, postfix)) {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 std::string Option::GetAutoloadRoot(const std::string &name) {
   for (auto const& pair : AutoloadRoots) {

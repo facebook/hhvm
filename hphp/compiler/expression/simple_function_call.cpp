@@ -366,11 +366,6 @@ void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
 
 void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
-  if (m_class) {
-    if (!Option::AllDynamic) {
-      setDynamicByIdentifier(ar, m_origName);
-    }
-  }
 
   if (m_safeDef) m_safeDef->analyzeProgram(ar);
 

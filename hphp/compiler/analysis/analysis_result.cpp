@@ -230,39 +230,6 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name) const {
   return ClassScopePtr();
 }
 
-ClassScopePtr AnalysisResult::findClass(const std::string &name,
-                                        FindClassBy by) {
-  AnalysisResultPtr ar = shared_from_this();
-  if (by == PropertyName) return ClassScopePtr();
-
-  string lname = toLower(name);
-  if (by == MethodName) {
-    StringToClassScopePtrVecMap::iterator iter =
-      m_methodToClassDecs.find(lname);
-    if (iter != m_methodToClassDecs.end()) {
-      if (iter->second.size() == 1) {
-        iter->second[0]->findFunction(ar, lname, true)->setDynamic();
-        return ClassScopePtr();
-      } else {
-        // The call to findClass by method name means all these
-        // same-named methods should be dynamic since there will
-        // be an invoke to call one of them.
-        for (ClassScopePtr cls: iter->second) {
-          FunctionScopePtr func = cls->findFunction(ar, lname, true);
-          // Something fishy here
-          if (func) {
-            func->setDynamic();
-          }
-        }
-        iter->second.clear();
-      }
-    }
-  } else {
-    return findClass(name);
-  }
-  return ClassScopePtr();
-}
-
 const ClassScopePtrVec &
 AnalysisResult::findRedeclaredClasses(const std::string &name) const {
   StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
@@ -282,14 +249,6 @@ ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) const {
   }
 
   return findRedeclaredClasses(name);
-}
-
-bool AnalysisResult::classMemberExists(const std::string &name,
-                                       FindClassBy by) const {
-  if (by == MethodName) {
-    return m_methodToClassDecs.find(name) != m_methodToClassDecs.end();
-  }
-  return m_classDecs.find(name) != m_classDecs.end();
 }
 
 ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
@@ -632,9 +591,6 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
 
   // Collect methods
   for (ClassScopePtr cls: classes) {
-    if (cls->isRedeclaring()) {
-      cls->setStaticDynamic(ar);
-    }
     StringToFunctionScopePtrMap methods;
     cls->collectMethods(ar, methods, true /* include privates */);
     bool needAbstractMethodImpl =
@@ -651,20 +607,12 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
         Compiler::Error(Compiler::MissingAbstractMethodImpl,
                         func->getStmt(), cls->getStmt());
       }
-      m_methodToClassDecs[iterMethod->first].push_back(cls);
     }
   }
 
-  ClassScopePtr cls;
-  string cname;
-  for (auto& sysclass_cls: m_systemClasses) {
-    tie(cname, cls) = sysclass_cls;
+  for (auto& item : m_systemClasses) {
     StringToFunctionScopePtrMap methods;
-    cls->collectMethods(ar, methods, true /* include privates */);
-    for (StringToFunctionScopePtrMap::const_iterator iterMethod =
-           methods.begin(); iterMethod != methods.end(); ++iterMethod) {
-      m_methodToClassDecs[iterMethod->first].push_back(cls);
-    }
+    item.second->collectMethods(ar, methods, true /* include privates */);
   }
 }
 

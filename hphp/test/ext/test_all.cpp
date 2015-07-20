@@ -30,7 +30,6 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
   // individual test suites
   s_suite = suite;
   if (suite == "TestLibEventServer") {
-    Option::EnableEval = Option::FullEval;
     RUN_TESTSUITE(TestLibEventServer);
     return;
   }

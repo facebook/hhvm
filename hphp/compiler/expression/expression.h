@@ -229,11 +229,6 @@ protected:
 private:
   bool m_unused;
   mutable int m_error;
-
-protected:
-  void setDynamicByIdentifier(AnalysisResultPtr ar,
-                              const std::string &value);
- private:
   static ExprClass Classes[];
 };
 

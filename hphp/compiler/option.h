@@ -134,12 +134,6 @@ struct Option {
   static bool ConvertQOpExpressions;  // $var = $exp ? $yes : $no => if-else
   static std::string ProgramPrologue;
   static std::string TrimmedPrologue;
-  static std::vector<std::string> DynamicFunctionPrefixes;
-  static std::vector<std::string> DynamicFunctionPostfixes;
-  static std::vector<std::string> DynamicMethodPrefixes;
-  static std::vector<std::string> DynamicMethodPostfixes;
-  static std::vector<std::string> DynamicClassPrefixes;
-  static std::vector<std::string> DynamicClassPostfixes;
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
   static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string, stdltistr> AutoloadClassMap;
@@ -193,12 +187,6 @@ struct Option {
   static int CodeErrorMaxProgram;
 
   /**
-   * Whether or not name matches dynamic function/class prefx/postfix lists.
-   */
-  static bool IsDynamicFunction(bool method, const std::string &name);
-  static bool IsDynamicClass(const std::string &name);
-
-  /**
    * Whether or not name matches AUTOLOAD files. If not, returns empty. If
    * yes, returns root directory for the file.
    */
@@ -209,14 +197,6 @@ struct Option {
    * "/" in file paths.
    */
   static std::string MangleFilename(const std::string &name, bool id);
-
-  enum EvalLevel {
-    NoEval = 0, // calling eval is a fatal
-    LimitedEval = 1, // eval is supported in a limited way with no perf hit
-    FullEval = 2 // eval is supported but with a performance hit
-  };
-
-  static EvalLevel EnableEval;
 
   static std::string ProgramName;
 
@@ -237,10 +217,8 @@ struct Option {
   static int GetScannerType();
 
   /**
-   * "Dynamic" means a function or a method can be invoked dynamically.
    * "Volatile" means a class or a function can be declared dynamically.
    */
-  static bool AllDynamic;
   static bool AllVolatile;
 
   /**
@@ -261,11 +239,6 @@ private:
   static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
                           const std::string& name,
                           std::vector<std::string> &vec);
-  static void OnLoad();
-
-  static bool IsDynamic(const std::string &name,
-                        const std::vector<std::string> &prefixes,
-                        const std::vector<std::string> &postfixes);
 };
 
 //////////////////////////////////////////////////////////////////////

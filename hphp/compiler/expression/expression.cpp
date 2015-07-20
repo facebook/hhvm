@@ -243,33 +243,6 @@ bool Expression::IsIdentifier(const string &value) {
 void Expression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
-void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
-                                        const std::string &value) {
-  string id = toLower(value);
-  size_t c = id.find("::");
-  FunctionScopePtr fi;
-  ClassScopePtr ci;
-  if (c != 0 && c != string::npos && c+2 < id.size()) {
-    string cl = id.substr(0, c);
-    string fn = id.substr(c+2);
-    if (IsIdentifier(cl) && IsIdentifier(fn)) {
-      ci = ar->findClass(cl);
-      if (ci) {
-        fi = ci->findFunction(ar, fn, false);
-        if (fi) fi->setDynamic();
-      }
-    }
-  } else if (IsIdentifier(id)) {
-    fi = ar->findFunction(id);
-    if (fi) fi->setDynamic();
-    ClassScopePtr ci = ar->findClass(id, AnalysisResult::MethodName);
-    if (ci) {
-      fi = ci->findFunction(ar, id, false);
-      if (fi) fi->setDynamic();
-    }
-  }
-}
-
 bool Expression::CheckNeededRHS(ExpressionPtr value) {
   bool needed = true;
   always_assert(value);

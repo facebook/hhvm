@@ -142,7 +142,6 @@ public:
    */
   bool isUserClass() const { return !getAttribute(System);}
   bool isExtensionClass() const { return getAttribute(Extension); }
-  bool isDynamic() const { return m_dynamic; }
   bool isBaseClass() const { return m_bases.empty(); }
   bool isBuiltin() const { return !getStmt(); }
 
@@ -152,9 +151,6 @@ public:
   void setRedeclaring(AnalysisResultConstPtr ar, int redecId);
   bool isRedeclaring() const { return m_redeclaring >= 0;}
   int getRedeclaringId() { return m_redeclaring; }
-
-  void setStaticDynamic(AnalysisResultConstPtr ar);
-  void setDynamic(AnalysisResultConstPtr ar, const std::string &name);
 
   void addReferer(BlockScopePtr ref, int useKinds);
 
@@ -538,7 +534,6 @@ private:
     BEING_FLATTENED,
     FLATTENED
   } m_traitStatus;
-  unsigned m_dynamic:1;
   unsigned m_volatile:1; // for class_exists
   unsigned m_persistent:1;
   unsigned m_derivedByDynamic:1;

@@ -30,7 +30,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/async-job.h"
-#include "hphp/util/timer.h"
+#include "hphp/util/boot_timer.h"
 
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/base/array-init.h"
@@ -604,7 +604,7 @@ void apc_load(int thread) {
     return;
   }
 
-  Timer timer(Timer::WallTime, "loading APC data");
+  BootTimer::Block timer("loading APC data");
   handle = dlopen(apcExtension::PrimeLibrary.c_str(), RTLD_LAZY);
   if (!handle) {
     throw Exception("Unable to open apc prime library %s: %s",

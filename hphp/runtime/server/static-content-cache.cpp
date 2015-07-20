@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/timer.h"
+#include "hphp/util/boot_timer.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/compression.h"
@@ -28,7 +28,7 @@ StaticContentCache StaticContentCache::TheCache;
 std::shared_ptr<FileCache> StaticContentCache::TheFileCache;
 
 void StaticContentCache::load() {
-  Timer timer(Timer::WallTime, "loading static content");
+  BootTimer::Block timer("loading static content");
 
   if (!RuntimeOption::FileCache.empty()) {
     TheFileCache = std::make_shared<FileCache>();

@@ -68,6 +68,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
+#include "hphp/util/boot_timer.h"
 #include "hphp/util/code-cache.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"
@@ -816,7 +817,7 @@ static void pagein_self(void) {
   if (buf == nullptr)
     return;
 
-  Timer timer(Timer::WallTime, "mapping self");
+  BootTimer::Block timer("mapping self");
   fp = fopen("/proc/self/maps", "r");
   if (fp != nullptr) {
     while (!feof(fp)) {
@@ -889,9 +890,12 @@ static void set_execution_mode(folly::StringPiece mode) {
 }
 
 static int start_server(const std::string &username, int xhprof) {
+  BootTimer::start();
+
   // Before we start the webserver, make sure the entire
   // binary is paged into memory.
   pagein_self();
+  BootTimer::mark("pagein_self");
 
   set_execution_mode("server");
   HttpRequestHandler::GetAccessLog().init
@@ -925,7 +929,7 @@ static int start_server(const std::string &username, int xhprof) {
   }
 
   if (RuntimeOption::RepoPreload) {
-    Timer timer(Timer::WallTime, "Preloading Repo");
+    BootTimer::Block timer("Preloading Repo");
     profileWarmupStart();
     preloadRepo();
     profileWarmupEnd();
@@ -934,9 +938,11 @@ static int start_server(const std::string &username, int xhprof) {
   // If we have any warmup requests, replay them before listening for
   // real connections
   {
+    Logger::Info("Warming up");
     if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
     for (auto& file : RuntimeOption::ServerWarmupRequests) {
+      BootTimer::Block timer(folly::sformat("warmup:{}", file));
       HttpRequestHandler handler(0);
       ReplayTransport rt;
       timespec start;
@@ -962,12 +968,14 @@ static int start_server(const std::string &username, int xhprof) {
       }
     }
   }
+  BootTimer::mark("warmup");
 
   if (RuntimeOption::EvalEnableNuma) {
 #ifdef USE_JEMALLOC
     mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
 #endif
     enable_numa(RuntimeOption::EvalEnableNumaLocal);
+    BootTimer::mark("enable_numa");
   }
 
   HttpServer::Server->runOrExitProcess();
@@ -1798,11 +1806,14 @@ void hphp_process_init() {
 #endif
   init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
+  BootTimer::mark("pthread_init");
 
   Process::InitProcessStatics();
+  BootTimer::mark("Process::InitProcessStatics");
 
   // initialize the tzinfo cache.
   timezone_init();
+  BootTimer::mark("timezone_init");
 
   init_thread_locals();
 
@@ -1812,6 +1823,7 @@ void hphp_process_init() {
   sigaction(SIGVTALRM, &action, nullptr);
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
+  BootTimer::mark("xenon");
 
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
   k_PHP_BINARY = makeStaticString(current_executable_path());
@@ -1820,37 +1832,50 @@ void hphp_process_init() {
   k_PHP_SAPI = makeStaticString(RuntimeOption::ExecutionMode);
 
   ClassInfo::Load();
+  BootTimer::mark("ClassInfo::Load");
 
   // reinitialize pcre table
   pcre_reinit();
+  BootTimer::mark("pcre_reinit");
 
   // the liboniguruma docs say this isnt needed,
   // but the implementation of init is not
   // thread safe due to bugs
   onig_init();
+  BootTimer::mark("onig_init");
 
   // simple xml also needs one time init
   xmlInitParser();
+  BootTimer::mark("xmlInitParser");
 
   g_vmProcessInit();
+  BootTimer::mark("g_vmProcessInit");
 
   PageletServer::Restart();
+  BootTimer::mark("PageletServer::Restart");
   XboxServer::Restart();
+  BootTimer::mark("XboxServer::Restart");
   Stream::RegisterCoreWrappers();
+  BootTimer::mark("Stream::RegisterCoreWrappers");
   ExtensionRegistry::moduleInit();
+  BootTimer::mark("ExtensionRegistry::moduleInit");
   for (InitFiniNode *in = extra_process_init; in; in = in->next) {
     in->func();
   }
+  BootTimer::mark("extra_process_init");
   int64_t save = RuntimeOption::SerializationSizeLimit;
   RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
   apc_load(apcExtension::LoadThread);
   RuntimeOption::SerializationSizeLimit = save;
+  BootTimer::mark("apc_load");
 
   rds::requestExit();
+  BootTimer::mark("rds::requestExit");
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();
   new (context) ExecutionContext();
+  BootTimer::mark("ExecutionContext");
 }
 
 static void handle_exception(bool& ret, ExecutionContext* context,

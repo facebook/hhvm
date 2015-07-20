@@ -34,6 +34,7 @@
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 
+#include "hphp/util/boot_timer.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
@@ -310,9 +311,11 @@ void HttpServer::runOrExitProcess() {
   }
 
   {
+    BootTimer::mark("servers started");
     Logger::Info("all servers started");
     createPid();
     Lock lock(this);
+    BootTimer::done();
     // continously running until /stop is received on admin server
     while (!m_stopped) {
       wait();

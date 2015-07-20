@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/util/boot_timer.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -361,8 +362,8 @@ void PageletServer::Restart() {
       monitor->subscribe(s_dispatcher);
       monitor->start();
     }
-    Logger::Info("pagelet server started");
     s_dispatcher->start();
+    BootTimer::mark("pagelet server started");
   }
 }
 

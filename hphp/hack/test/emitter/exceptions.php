@@ -24,11 +24,32 @@ function nus(bool $b): void {
     //var_dump($e2);
     var_dump($e2->getMessage());
   } finally {
-    var_dump("final.");
+    echo "final.\n";
   }
 }
+
+function direct_1(): void {
+  try {
+    throw new Exception('hi');
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+}
+function direct_2(): void {
+  try {
+    try {
+      throw new Exception('hi');
+    } finally {
+      echo "cool\n";
+    }
+  } catch (Exception $e) {
+  }
+}
+
 
 function test(): void {
   nus(true);
   nus(false);
+  direct_1();
+  direct_2();
 }

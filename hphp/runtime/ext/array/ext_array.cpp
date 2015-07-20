@@ -1548,7 +1548,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 // return -1, 0, 1 specification. To do what PHP 5.x in these cases,
 // use the RuntimeOption
 #define COMMA ,
-#define diff_intersect_body(type,intersect_params,user_setup)   \
+#define diff_intersect_body(type, vararg, intersect_params)     \
   getCheckedArray(array1);                                      \
   if (!arr_array1.size()) return arr_array1;                    \
   Array ret = Array::Create();                                  \
@@ -1558,10 +1558,9 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
       return ret;                                               \
     }                                                           \
   }                                                             \
-  user_setup                                                    \
   ret = arr_array1.type(array2, intersect_params);              \
   if (ret.size()) {                                             \
-    for (ArrayIter iter(args); iter; ++iter) {                  \
+    for (ArrayIter iter(vararg); iter; ++iter) {                \
       ret = ret.type(iter.second(), intersect_params);          \
       if (!ret.size()) break;                                   \
     }                                                           \
@@ -1768,21 +1767,21 @@ Variant HHVM_FUNCTION(array_udiff,
                       const Variant& array2,
                       const Variant& data_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(diff, false COMMA true COMMA NULL COMMA NULL
-                      COMMA cmp_func COMMA &func,
-                      Variant func = data_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = data_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(diff, extra, false COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func);
 }
 
 Variant HHVM_FUNCTION(array_diff_assoc,
                       const Variant& array1,
                       const Variant& array2,
                       const Array& args /* = null array */) {
-  diff_intersect_body(diff, true COMMA true,);
+  diff_intersect_body(diff, args, true COMMA true);
 }
 
 Variant HHVM_FUNCTION(array_diff_uassoc,
@@ -1790,13 +1789,13 @@ Variant HHVM_FUNCTION(array_diff_uassoc,
                       const Variant& array2,
                       const Variant& key_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(diff, true COMMA true COMMA cmp_func COMMA &func,
-                      Variant func = key_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = key_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(diff, extra, true COMMA true COMMA cmp_func COMMA &func);
 }
 
 Variant HHVM_FUNCTION(array_udiff_assoc,
@@ -1804,14 +1803,14 @@ Variant HHVM_FUNCTION(array_udiff_assoc,
                       const Variant& array2,
                       const Variant& data_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(diff, true COMMA true COMMA NULL COMMA NULL
-                      COMMA cmp_func COMMA &func,
-                      Variant func = data_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = data_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(diff, extra, true COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func);
 }
 
 Variant HHVM_FUNCTION(array_udiff_uassoc,
@@ -1820,17 +1819,18 @@ Variant HHVM_FUNCTION(array_udiff_uassoc,
                       const Variant& data_compare_func,
                       const Variant& key_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(diff, true COMMA true COMMA cmp_func COMMA &key_func
-                      COMMA cmp_func COMMA &data_func,
-                      Variant data_func = data_compare_func;
-                      Variant key_func = key_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(key_func);
-                        extra.prepend(data_func);
-                        key_func = extra.pop();
-                        data_func = extra.pop();
-                      });
+  Variant data_func = data_compare_func;
+  Variant key_func = key_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(key_func);
+    extra.prepend(data_func);
+    key_func = extra.pop();
+    data_func = extra.pop();
+  }
+  diff_intersect_body(diff, extra, true
+                      COMMA true COMMA cmp_func COMMA &key_func
+                      COMMA cmp_func COMMA &data_func);
 }
 
 Variant HHVM_FUNCTION(array_diff_ukey,
@@ -1838,13 +1838,13 @@ Variant HHVM_FUNCTION(array_diff_ukey,
                       const Variant& array2,
                       const Variant& key_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(diff, true COMMA false COMMA cmp_func COMMA &func,
-                      Variant func = key_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = key_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(diff, extra, true COMMA false COMMA cmp_func COMMA &func);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2154,21 +2154,21 @@ Variant HHVM_FUNCTION(array_uintersect,
                       const Variant& array2,
                       const Variant& data_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(intersect, false COMMA true COMMA NULL COMMA NULL
-                      COMMA cmp_func COMMA &func,
-                      Variant func = data_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = data_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(intersect, extra, false COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func);
 }
 
 Variant HHVM_FUNCTION(array_intersect_assoc,
                       const Variant& array1,
                       const Variant& array2,
                       const Array& args /* = null array */) {
-  diff_intersect_body(intersect, true COMMA true,);
+  diff_intersect_body(intersect, args, true COMMA true);
 }
 
 Variant HHVM_FUNCTION(array_intersect_uassoc,
@@ -2176,13 +2176,14 @@ Variant HHVM_FUNCTION(array_intersect_uassoc,
                       const Variant& array2,
                       const Variant& key_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(intersect, true COMMA true COMMA cmp_func COMMA &func,
-                      Variant func = key_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = key_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(intersect, extra, true COMMA true
+                      COMMA cmp_func COMMA &func);
 }
 
 Variant HHVM_FUNCTION(array_uintersect_assoc,
@@ -2190,14 +2191,14 @@ Variant HHVM_FUNCTION(array_uintersect_assoc,
                       const Variant& array2,
                       const Variant& data_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(intersect, true COMMA true COMMA NULL COMMA NULL
-                      COMMA cmp_func COMMA &func,
-                      Variant func = data_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = data_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(intersect, extra, true COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func);
 }
 
 Variant HHVM_FUNCTION(array_uintersect_uassoc,
@@ -2206,17 +2207,17 @@ Variant HHVM_FUNCTION(array_uintersect_uassoc,
                       const Variant& data_compare_func,
                       const Variant& key_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(intersect, true COMMA true COMMA cmp_func COMMA &key_func
-                      COMMA cmp_func COMMA &data_func,
-                      Variant data_func = data_compare_func;
-                      Variant key_func = key_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(key_func);
-                        extra.prepend(data_func);
-                        key_func = extra.pop();
-                        data_func = extra.pop();
-                      });
+  Variant data_func = data_compare_func;
+  Variant key_func = key_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(key_func);
+    extra.prepend(data_func);
+    key_func = extra.pop();
+    data_func = extra.pop();
+  }
+  diff_intersect_body(intersect, extra, true COMMA true COMMA cmp_func
+                      COMMA &key_func COMMA cmp_func COMMA &data_func);
 }
 
 Variant HHVM_FUNCTION(array_intersect_ukey,
@@ -2224,13 +2225,14 @@ Variant HHVM_FUNCTION(array_intersect_ukey,
                       const Variant& array2,
                       const Variant& key_compare_func,
                       const Array& args /* = null array */) {
-  diff_intersect_body(intersect, true COMMA false COMMA cmp_func COMMA &func,
-                      Variant func = key_compare_func;
-                      Array extra = args;
-                      if (!extra.empty()) {
-                        extra.prepend(func);
-                        func = extra.pop();
-                      });
+  Variant func = key_compare_func;
+  Array extra = args;
+  if (!extra.empty()) {
+    extra.prepend(func);
+    func = extra.pop();
+  }
+  diff_intersect_body(intersect, extra, true COMMA false
+                      COMMA cmp_func COMMA &func);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include <folly/FileUtil.h>
 
 using std::set;
 
@@ -974,8 +975,7 @@ void rfc1867PostHandler(Transport* transport,
           cancel_upload = UPLOAD_ERROR_B;
         } else if (blen > 0) {
 
-          wlen = write(fd, buff, blen);
-
+          wlen = folly::writeFull(fd, buff, blen);
           if (wlen < blen) {
             Logger::Verbose("Only %zd bytes were written, expected to "
                             "write %zd", wlen, blen);

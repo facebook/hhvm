@@ -140,10 +140,6 @@ find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 add_definitions(${LIBXML2_DEFINITIONS})
 
-find_package(LibXslt REQUIRED)
-include_directories(${LIBXSLT_INCLUDE_DIR})
-add_definitions(${LIBXSLT_DEFINITIONS})
-
 # libsqlite3
 find_package(LibSQLite)
 if (LIBSQLITE_INCLUDE_DIR)
@@ -478,8 +474,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${BZIP2_LIBRARIES})
 
   target_link_libraries(${target} ${LIBXML2_LIBRARIES})
-  target_link_libraries(${target} ${LIBXSLT_LIBRARIES})
-  target_link_libraries(${target} ${LIBXSLT_EXSLT_LIBRARIES})
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 
   target_link_libraries(${target} ${LDAP_LIBRARIES})

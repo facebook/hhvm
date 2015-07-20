@@ -1690,8 +1690,8 @@ void Class::setConstants() {
         raise_error("Class %s contains abstract %sconstant (%s) and "
                     "must therefore be declared abstract or define "
                     "the remaining constants",
-                    constant.isType() ? "type " : "",
                     m_preClass->name()->data(),
+                    constant.isType() ? "type " : "",
                     constant.m_name->data());
       }
     }
@@ -1706,8 +1706,9 @@ void Class::setConstants() {
         raise_error(
           "Class %s contains abstract %sconstant (%s) and "
           "therefore cannot be declared 'abstract final'",
+          m_preClass->name()->data(),
           constant.isType() ? "type " : "",
-          m_preClass->name()->data(), constant.m_name->data());
+          constant.m_name->data());
       }
     }
   }

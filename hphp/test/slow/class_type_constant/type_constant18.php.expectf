@@ -1,0 +1,1 @@
+Fatal error: Class C contains abstract type constant (T) and therefore cannot be declared 'abstract final' in %s on line 3

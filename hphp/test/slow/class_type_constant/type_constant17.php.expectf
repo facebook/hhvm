@@ -1,0 +1,1 @@
+Fatal error: Class Child contains abstract type constant (T) and must therefore be declared abstract or define the remaining constants in %s on line 7

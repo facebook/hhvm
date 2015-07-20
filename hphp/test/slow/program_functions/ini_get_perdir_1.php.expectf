@@ -1,0 +1,15 @@
+      overwrite.hhvm.server.upload.upload_max_file_size 
+                hhvm.server.upload.upload_max_file_size 2097152
+                                    upload_max_filesize 2M
+                    hhvm.overwrite.server.max_post_size 
+                              hhvm.server.max_post_size 1048576
+                                          post_max_size 1048576
+              hhvm.server.always_populate_raw_post_data 1
+                          always_populate_raw_post_data 1
+                                      auto_prepend_file 
+                                       auto_append_file 
+                                    upload_max_filesize 2M
+                                          post_max_size 1048576
+                          always_populate_raw_post_data 1
+                                      auto_prepend_file 
+                                       auto_append_file 

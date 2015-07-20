@@ -114,15 +114,28 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
         " -vRepo.Authoritative=true";
     }
 
-    $cmd = "exec env MALLOC_CONF=junk:true TESTID={$test_run_id} " . $hhvm .
-      ' --mode=server' . $serverConfig . $logFileConfig .
-      ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
+    $cmd = 'exec' .
+      ' env ' .
+      ' MALLOC_CONF=junk:true' .
+      " TESTID={$test_run_id}" .
+      ' ' . $hhvm .
+      ' --mode=server' .
+      $serverConfig .
+
+      $logFileConfig .
+      ' -vEval.JitProfileInterpRequests=0' .
+      ' -vServer.ExitOnBindFail=true' .
       ' --instance-id=' . $test_run_id .
-      $portConfig . $srcRootConfig .
-      $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
-      $debugPortConfig . $repoConfig . $jitConfig .
+      $portConfig .
+      $srcRootConfig .
+      $includePathConfig .
+      $sandboxHomeConfig .
+      $adminPortConfig .
+      $debugPortConfig .
+      $repoConfig .
+      $jitConfig .
       ' ' . $customArgs .
-      " > ${LOG_ROOT}_test_server_stdout$test_run_id.log" .
+      "  > ${LOG_ROOT}_test_server_stdout$test_run_id.log" .
       " 2> ${LOG_ROOT}_test_server_stderr$test_run_id.log";
 
     tlog('Starting server with command: '.$cmd);
@@ -177,7 +190,6 @@ function stopServer($adminPort, $serverProc) {
     dumpLogFilesToStdoutAndDie();
   }
   proc_close($serverProc);
-
   @unlink("${LOG_ROOT}_test$test_run_id.log");
   @unlink("${LOG_ROOT}_test_server$test_run_id.log");
   @unlink("${LOG_ROOT}_test_server_stderr$test_run_id.log");

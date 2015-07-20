@@ -238,7 +238,7 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
     int extra_byte_read = 0;
     const void *extra = self->transport->getMorePostData(extra_byte_read);
     if (extra_byte_read == 0) break;
-    if (RuntimeOption::AlwaysPopulateRawPostData) {
+    if (self->transport->getAlwaysPopulateRawPostData()) {
       // Possible overflow in buffer_append if post_size + extra_byte_read >=
       // MAX INT
       self->post_data = (const char *)buffer_append(

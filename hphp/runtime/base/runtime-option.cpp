@@ -54,11 +54,13 @@
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
 
@@ -191,9 +193,6 @@ std::string RuntimeOption::OutputHandler;
 bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
-int64_t RuntimeOption::MaxPostSize = 100;
-bool RuntimeOption::AlwaysPopulateRawPostData = false;
-int64_t RuntimeOption::UploadMaxFileSize = 100;
 std::string RuntimeOption::UploadTmpDir = "/tmp";
 bool RuntimeOption::EnableFileUploads = true;
 bool RuntimeOption::EnableUploadProgress = false;
@@ -259,6 +258,36 @@ bool RuntimeOption::Utf8izeReplace = true;
 std::string RuntimeOption::StartupDocument;
 std::string RuntimeOption::RequestInitFunction;
 std::string RuntimeOption::RequestInitDocument;
+
+/*
+ * The following block of variables are parking lots for default values
+ * gotten from the HDF, but nonetheless have to implement PHP_INI_PERDIR
+ * semantics. Their operational values are stored in the VirtualHost.
+ */
+
+/*
+ * The UploadMaxFileSize and MaxPostSize are given in the HDF in units
+ * of Mib, and the initial values here are also in Mib. But later on we
+ * use the same variable uniformly in units of bytes. So as soon as we
+ * get the HDF value, we scale the given Mibytes to the desired bytes.
+ *
+ * The per-request version of these are thread local statics in VirtualHost.
+ * We take the values of < 0 as uninitialized.
+ */
+int64_t RuntimeOption::UploadMaxFileSize = 100;
+int64_t RuntimeOption::MaxPostSize = 100;
+
+/*
+ * The per-request version of this is in:
+ *   Transport::s_alwaysPopulateRawPostData
+ */
+bool RuntimeOption::AlwaysPopulateRawPostData = false;
+
+/*
+ * The per-request version of these are in the RequestInjectionData
+ * We take the uninitialized value as either the empty string, or the
+ * string "none".
+ */ 
 std::string RuntimeOption::AutoPrependFile;
 std::string RuntimeOption::AutoAppendFile;
 
@@ -1214,10 +1243,17 @@ void RuntimeOption::Load(
                  true);
     Config::Bind(ForceChunkedEncoding, ini, config,
                  "Server.ForceChunkedEncoding");
+
+    /*
+     * Treat the HDF value (and its default) in units of Mib.
+     * Immediately scale to bytes for all the rest of HHVM to use.
+     */
     Config::Bind(MaxPostSize, ini, config, "Server.MaxPostSize", 100);
     MaxPostSize <<= 20;
+
     Config::Bind(AlwaysPopulateRawPostData, ini, config,
                  "Server.AlwaysPopulateRawPostData", false);
+
     Config::Bind(LibEventSyncSend, ini, config, "Server.LibEventSyncSend",
                  true);
     Config::Bind(TakeoverFilename, ini, config, "Server.TakeoverFilename");
@@ -1305,9 +1341,15 @@ void RuntimeOption::Load(
                  "Server.AlwaysUseRelativePath", false);
     {
       // Server Upload
+
+      /*
+       * Treat the HDF value (and its default) in units of Mib.
+       * Immediately scale to bytes for all the rest of HHVM to use.
+       */
       Config::Bind(UploadMaxFileSize, ini, config,
                    "Server.Upload.UploadMaxFileSize", 100);
       UploadMaxFileSize <<= 20;
+
       Config::Bind(UploadTmpDir, ini, config, "Server.Upload.UploadTmpDir",
                    "/tmp");
       Config::Bind(EnableFileUploads, ini, config,
@@ -1626,24 +1668,14 @@ void RuntimeOption::Load(
   // Language and Misc Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
                    &RuntimeOption::ExposeHPHP);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "auto_prepend_file", &RuntimeOption::AutoPrependFile);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "auto_append_file", &RuntimeOption::AutoAppendFile);
+
+    // "auto_prepend_file" bound in BindPHPPerDirectoryIniSettings
+    // "auto_append_file"  bound in BindPHPPerDirectoryIniSettings
+
 
   // Data Handling
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "post_max_size",
-                   IniSetting::SetAndGet<int64_t>(
-                     nullptr,
-                     []() {
-                       return VirtualHost::GetMaxPostSize();
-                     }
-                   ),
-                   &RuntimeOption::MaxPostSize);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "always_populate_raw_post_data",
-                   &RuntimeOption::AlwaysPopulateRawPostData);
+    // "post_max_size"                 bound in BindPHPPerDirectoryIniSettings
+    // "always_populate_raw_post_data" bound in BindPHPPerDirectoryIniSettings
 
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
@@ -1661,19 +1693,8 @@ void RuntimeOption::Load(
                    &RuntimeOption::EnableFileUploads);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "upload_max_filesize",
-                   IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) {
-                       return ini_on_update(
-                         value, RuntimeOption::UploadMaxFileSize);
-                     },
-                     []() {
-                       int uploadMaxFilesize =
-                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                       return std::to_string(uploadMaxFilesize) + "M";
-                     }
-                   ));
+    // "upload_max_filesize" bound in BindPHPPerDirectoryIniSettings
+
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "allow_url_fopen",
@@ -1727,7 +1748,6 @@ void RuntimeOption::Load(
   Config::Bind(RuntimeOption::Extensions, ini, config, "extensions");
   Config::Bind(RuntimeOption::DynamicExtensions, ini,
                config, "DynamicExtensions");
-
 
   ExtensionRegistry::moduleLoad(ini, config);
   extern void initialize_apc();

@@ -31,9 +31,11 @@ public:
 
   static void SetCurrent(VirtualHost *vhost);
   static const VirtualHost *GetCurrent();
-  static int64_t GetMaxPostSize();
+
   static int64_t GetUploadMaxFileSize();
-  static void UpdateSerializationSizeLimit();
+  static int64_t GetMaxPostSize();
+
+  static void UpdateVHostModifiableVariables();
   static const std::vector<std::string> &GetAllowedDirectories();
   static void SortAllowedDirectories(std::vector<std::string>& dirs);
 public:
@@ -100,11 +102,37 @@ private:
   struct VhostRuntimeOption {
   public:
     int requestTimeoutSeconds = -1;
+
     int64_t maxPostSize = -1;
     int64_t uploadMaxFileSize = -1;
-    std::vector<std::string> allowedDirectories;
     int64_t serializationSizeLimit = StringData::MaxSize;
+
+    std::vector<std::string> allowedDirectories;
   };
+
+  /*
+   * These are the thread specific working values that reflect
+   * combinations of the items from the per-VirtualHost data members
+   * held in the data member m_runtimeOption of type VhostRuntimeOption,
+   * plus vhost-specific settings that may come from PHP_INI_PERDIR bindings.
+   *
+   * We make these public so that we can statically initialize them.
+   * (They are initialized as part of thread spin up.)
+   */
+public:
+  static __thread int64_t s_maxPostSize;
+  static __thread int64_t s_uploadMaxFileSize;
+
+private:
+  /*
+   * Note that the thread specific value for serializationSizeLimit
+   * is held in:
+   *   public: static __thread VariableSerializar::serializationSizeLimit
+   */
+
+  static void UpdateSerializationSizeLimit();
+  static void UpdateMaxPostSize();
+  static void UpdateUploadMaxFileSize();
 
   void initRuntimeOption(const IniSetting::Map& ini, Hdf overwrite);
   bool m_disabled = false;

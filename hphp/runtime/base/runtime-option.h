@@ -45,6 +45,7 @@ typedef folly::dynamic IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
+class RequestInjectionData;
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
@@ -171,9 +172,6 @@ public:
   static bool ImplicitFlush;
   static bool EnableEarlyFlush;
   static bool ForceChunkedEncoding;
-  static int64_t MaxPostSize;
-  static bool AlwaysPopulateRawPostData;
-  static int64_t UploadMaxFileSize;
   static std::string UploadTmpDir;
   static bool EnableFileUploads;
   static bool EnableUploadProgress;
@@ -240,6 +238,52 @@ public:
   static std::string StartupDocument;
   static std::string RequestInitFunction;
   static std::string RequestInitDocument;
+
+  /*
+   * The following RuntimeOption variables (and correspondences with HDF names
+   * and PHP ini _set names) are all PHP_INI_PERDIR.
+   *
+   * These RuntimeOption variables are parking areas for HDF initialization
+   * and are referred to in order to reclaim the default values.
+   * The working value of these variables live in various places,
+   * such as in the thread static scope of a VirtualHost, or in the
+   * RequestInjectionData, or in thread static scope of a Transport.
+   * This "stand off" is needed is because shared global variables from
+   * RuntimeOption can not also implement PHP_INI_PERDIR.
+   *
+   * Note that the PHP ini_set/ini_get layer has aliases for these variables,
+   * in order to expose the (slightly renamed) HDF namespace, as well as
+   * to expose traditional PHP ini_set/ini_get settings.
+   *
+   * Note that there are annoying differences in the exposed names
+   * of these variables, involving permutations of stem words.
+   *
+   * UploadMaxFileSize        
+   *   HDF:             Server.Upload.UploadMaxFileSize
+   *   ini_set/ini_get: hhvm.server.upload.upload_max_file_size
+   *   ini_set/ini_get:                    upload_max_filesize
+   *
+   * MaxPostSize
+   *   HDF:             Server.MaxPostSize
+   *   ini_set/ini_get: hhvm.server.max_post_size (Watch out!)
+   *   ini_set/ini_get:             post_max_size (Watch out!)
+   *
+   * AlwaysPopulateRawPostData
+   *   HDF:             Server.AlwaysPopulateRawPostData
+   *   ini_set/ini_get: hhvm.server.always_populate_raw_post_data
+   *   ini_set/ini_get:             always_populate_raw_post_data
+   *
+   * AutoPrependFile
+   *   HDF:             <none>
+   *   ini_set/ini_get: auto_prepend_file
+   *
+   * AutoAppendFile
+   *   HDF:             <none>
+   *   ini_set/ini_get: auto_append_file
+   */
+  static int64_t UploadMaxFileSize;
+  static int64_t MaxPostSize;
+  static bool AlwaysPopulateRawPostData;
   static std::string AutoPrependFile;
   static std::string AutoAppendFile;
 

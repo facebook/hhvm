@@ -40,7 +40,7 @@ VirtualHost &VirtualHost::GetDefault() {
 
 void VirtualHost::SetCurrent(VirtualHost *vhost) {
   g_context->setVirtualHost(vhost ? vhost : &VirtualHost::GetDefault());
-  UpdateSerializationSizeLimit();
+  UpdateVHostModifiableVariables();
 }
 
 const VirtualHost *VirtualHost::GetCurrent() {
@@ -49,22 +49,83 @@ const VirtualHost *VirtualHost::GetCurrent() {
   return ret;
 }
 
+/*
+ * These per-thread variables follow the discipline used for
+ * VariableSerializer::serializationSizeLimit
+ * They are bound via per-directory initialization settings,
+ * with a chain of default values.
+ */
+__thread int64_t VirtualHost::s_maxPostSize = -1LL;
+__thread int64_t VirtualHost::s_uploadMaxFileSize = -1LL;
+
+
+template <typename T>
+static T genericGet(const T perRequest,
+                    const T perVHost,
+                    const T perProcess,
+                    const T defValue) {
+  if (perRequest != defValue) {
+    /*
+     * perRequest is per request thread and bound via per-dir php ini setting
+     */
+    return perRequest;
+  } else if (perVHost != defValue) {
+    /*
+     * perVHost is set by VirtualHost::init from HDF "overwrite.Server.Foo"
+     */
+    return perVHost;
+  } else {
+    /*
+     * perProcess set once per process during HDF handling
+     */
+    return perProcess;
+  }
+}
+
+template <typename T>
+static void genericSet(T &perRequest,
+                       const T perVHost,
+                       const T perProcess,
+                       const T defValue) {
+  if (perRequest == -defValue) {
+    perRequest = (perVHost != defValue) ? perVHost : perProcess;
+  }
+}
+
 int64_t VirtualHost::GetMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  if (vh->m_runtimeOption.maxPostSize != -1) {
-    return vh->m_runtimeOption.maxPostSize;
-  }
-  return RuntimeOption::MaxPostSize;
+  return genericGet(VirtualHost::s_maxPostSize,
+                    vh->m_runtimeOption.maxPostSize,
+                    RuntimeOption::MaxPostSize,
+                    -1L);
 }
 
 int64_t VirtualHost::GetUploadMaxFileSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
-    return vh->m_runtimeOption.uploadMaxFileSize;
-  }
-  return RuntimeOption::UploadMaxFileSize;
+  return genericGet(VirtualHost::s_uploadMaxFileSize,
+                    vh->m_runtimeOption.uploadMaxFileSize,
+                    RuntimeOption::UploadMaxFileSize,
+                    -1L);
+}
+
+void VirtualHost::UpdateMaxPostSize() {
+  const VirtualHost *vh = GetCurrent();
+  assert(vh);
+  genericSet(VirtualHost::s_maxPostSize,
+             vh->m_runtimeOption.maxPostSize,
+             RuntimeOption::MaxPostSize,
+             -1L);
+}
+
+void VirtualHost::UpdateUploadMaxFileSize() {
+  const VirtualHost *vh = GetCurrent();
+  assert(vh);
+  genericSet(VirtualHost::s_uploadMaxFileSize,
+             vh->m_runtimeOption.uploadMaxFileSize,
+             RuntimeOption::UploadMaxFileSize,
+             -1L);
 }
 
 void VirtualHost::UpdateSerializationSizeLimit() {
@@ -74,6 +135,12 @@ void VirtualHost::UpdateSerializationSizeLimit() {
     VariableSerializer::serializationSizeLimit =
       vh->m_runtimeOption.serializationSizeLimit;
   }
+}
+
+void VirtualHost::UpdateVHostModifiableVariables() {
+  UpdateSerializationSizeLimit();
+  UpdateMaxPostSize();
+  UpdateUploadMaxFileSize();
 }
 
 const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
@@ -123,17 +190,21 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, Hdf vh) {
   int requestTimeoutSeconds =
     Config::GetInt32(ini, vh, "overwrite.Server.RequestTimeoutSeconds", -1,
                      false);
+
   int64_t maxPostSize =
     Config::GetInt32(ini, vh, "overwrite.Server.MaxPostSize", -1, false);
   if (maxPostSize != -1) maxPostSize *= (1LL << 20);
+
   int64_t uploadMaxFileSize =
     Config::GetInt32(ini, vh, "overwrite.Server.Upload.UploadMaxFileSize", -1);
   if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
+
   int64_t serializationSizeLimit =
     Config::GetInt32(
       ini,
       vh, "overwrite.ResourceLimit.SerializationSizeLimit",
       StringData::MaxSize);
+
   m_runtimeOption.allowedDirectories = Config::GetVector(
     ini,
     vh, "overwrite.Server.AllowedDirectories");

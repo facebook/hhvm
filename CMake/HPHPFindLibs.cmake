@@ -296,10 +296,6 @@ endif()
 include_directories(${TBB_INCLUDE_DIRS})
 link_directories(${TBB_LIBRARY_DIRS})
 
-# mcrypt libs
-find_package(Mcrypt REQUIRED)
-include_directories(${Mcrypt_INCLUDE_DIR})
-
 # OpenSSL libs
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -489,7 +485,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${LIBXSLT_EXSLT_LIBRARIES})
   target_link_libraries(${target} ${EXPAT_LIBRARY})
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
-  target_link_libraries(${target} ${Mcrypt_LIB})
 
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})

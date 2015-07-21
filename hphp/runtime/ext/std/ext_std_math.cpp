@@ -398,6 +398,9 @@ int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef __APPLE__
+static bool s_rand_is_seeded = false;
+#else
 struct RandomBuf {
   random_data data;
   char        buf[128];
@@ -407,14 +410,20 @@ struct RandomBuf {
 };
 
 static __thread RandomBuf s_state;
+#endif
 
 static void randinit(uint32_t seed) {
+#ifdef __APPLE__
+  s_rand_is_seeded = true;
+  srandom(seed);
+#else
   if (s_state.state == RandomBuf::Uninit) {
     initstate_r(seed, s_state.buf, sizeof s_state.buf, &s_state.data);
   } else {
     srandom_r(seed, &s_state.data);
   }
   s_state.state = RandomBuf::RequestInit;
+#endif
 }
 
 void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
@@ -432,12 +441,20 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
 int64_t HHVM_FUNCTION(rand,
                       int64_t min /* = 0 */,
                       const Variant& max /* = null_variant */) {
+#ifdef __APPLE__
+  if (!s_rand_is_seeded) {
+#else
   if (s_state.state != RandomBuf::RequestInit) {
+#endif
     randinit(math_generate_seed());
   }
 
+#ifdef __APPLE__
+  int32_t number = random();
+#else
   int32_t number;
   random_r(&s_state.data, &number);
+#endif
   int64_t int_max = max.isNull() ? RAND_MAX : max.toInt64();
   if (min != 0 || int_max != RAND_MAX) {
     RAND_RANGE(number, min, int_max, RAND_MAX);
@@ -481,9 +498,11 @@ const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
   Native::registerConstant<KindOfDouble>(makeStaticString("M_"#nm), k_M_##nm)  \
 
 void StandardExtension::requestInit() {
+#ifndef __APPLE__
   if (s_state.state == RandomBuf::RequestInit) {
     s_state.state = RandomBuf::ThreadInit;
   }
+#endif
 }
 
 void StandardExtension::initMath() {

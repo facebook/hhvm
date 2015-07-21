@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
 
@@ -34,7 +35,8 @@ void checkHHConfig(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::LookForTypechecker ||
       s_foundHHConfig ||
-      !unit->isHHFile()) {
+      !unit->isHHFile() ||
+      isDebuggerAttached()) {
     return;
   }
 
@@ -102,7 +104,8 @@ void autoTypecheck(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::AutoTypecheck ||
       tl_doneAutoTypecheck ||
-      !unit->isHHFile()) {
+      !unit->isHHFile() ||
+      isDebuggerAttached()) {
     return;
   }
   tl_doneAutoTypecheck = true;

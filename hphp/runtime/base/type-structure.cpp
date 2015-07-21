@@ -59,7 +59,6 @@ const std::string
   s_arraykey("HH\\arraykey"),
   s_noreturn("HH\\noreturn"),
   s_mixed("HH\\mixed"),
-  s_this("HH\\this"),
   s_array("array")
 ;
 
@@ -199,14 +198,13 @@ std::string fullName (const ArrayData* arr) {
       break;
     case TypeStructure::Kind::T_array:
       name += s_array;
-      genericTypeName(arr, name);
+      if (arr->exists(s_generic_types)) {
+        genericTypeName(arr, name);
+      }
       break;
     case TypeStructure::Kind::T_typevar:
       assert(arr->exists(s_name));
       name += arr->get(s_name).getStringData()->toCppString();
-      break;
-    case TypeStructure::Kind::T_this:
-      name += s_this;
       break;
     case TypeStructure::Kind::T_typeaccess:
       accessTypeName(arr, name);
@@ -217,7 +215,9 @@ std::string fullName (const ArrayData* arr) {
     case TypeStructure::Kind::T_unresolved:
       assert(arr->exists(s_classname));
       name += arr->get(s_classname).getStringData()->toCppString();
-      genericTypeName(arr, name);
+      if (arr->exists(s_generic_types)) {
+        genericTypeName(arr, name);
+      }
       break;
   }
 

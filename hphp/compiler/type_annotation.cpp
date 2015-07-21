@@ -318,9 +318,6 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   if (m_typevar) {
     return TypeStructure::Kind::T_typevar;
   }
-  if (isThis()) {
-    return TypeStructure::Kind::T_this;
-  }
   if (m_typeaccess) {
     return TypeStructure::Kind::T_typeaccess;
   }
@@ -384,7 +381,9 @@ ArrayData* TypeAnnotation::getScalarArrayRep() const {
             Variant(argsListToScalarArray(m_typeArgs->m_typeList)));
     break;
   case TypeStructure::Kind::T_array:
-    rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+    if (m_typeArgs) {
+      rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+    }
     break;
   case TypeStructure::Kind::T_typevar:
     rep.add(s_name, Variant(m_name));
@@ -410,7 +409,9 @@ ArrayData* TypeAnnotation::getScalarArrayRep() const {
     break;
   case TypeStructure::Kind::T_unresolved:
     rep.add(s_classname, Variant(m_name));
-    rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+    if (m_typeArgs) {
+      rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+    }
     break;
   default:
     break;

@@ -21,7 +21,7 @@ array(3) {
 string(45) "HH\Map<HH\arraykey, HH\Vector<array<HH\int>>>"
 array(3) {
   ["kind"]=>
-  int(14)
+  int(101)
   ["classname"]=>
   string(6) "HH\Map"
   ["generic_types"]=>
@@ -34,7 +34,7 @@ array(3) {
     [1]=>
     array(3) {
       ["kind"]=>
-      int(14)
+      int(101)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
@@ -56,21 +56,23 @@ array(3) {
     }
   }
 }
-string(28) "(HH\int, HH\this, ?HH\float)"
+string(33) "(HH\int, HH\this, ?HH\float, foo)"
 array(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(3) {
+  array(4) {
     [0]=>
     array(1) {
       ["kind"]=>
       int(1)
     }
     [1]=>
-    array(1) {
+    array(2) {
       ["kind"]=>
-      int(15)
+      int(101)
+      ["classname"]=>
+      string(7) "HH\this"
     }
     [2]=>
     array(2) {
@@ -78,6 +80,13 @@ array(2) {
       bool(true)
       ["kind"]=>
       int(3)
+    }
+    [3]=>
+    array(2) {
+      ["kind"]=>
+      int(101)
+      ["classname"]=>
+      string(3) "foo"
     }
   }
 }
@@ -94,22 +103,14 @@ array(3) {
   array(0) {
   }
 }
-string(49) "(function (HH\mixed, HH\resource): array<HH\int>)"
+string(41) "(function (HH\mixed, HH\resource): array)"
 array(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(2) {
+  array(1) {
     ["kind"]=>
     int(12)
-    ["generic_types"]=>
-    array(1) {
-      [0]=>
-      array(1) {
-        ["kind"]=>
-        int(1)
-      }
-    }
   }
   ["param_types"]=>
   array(2) {
@@ -128,7 +129,7 @@ array(3) {
 string(13) "N::M::O::P::Q"
 array(3) {
   ["kind"]=>
-  int(16)
+  int(102)
   ["root_name"]=>
   string(1) "N"
   ["access_list"]=>
@@ -141,5 +142,17 @@ array(3) {
     string(1) "P"
     [3]=>
     string(1) "Q"
+  }
+}
+string(10) "HH\this::T"
+array(3) {
+  ["kind"]=>
+  int(102)
+  ["root_name"]=>
+  string(7) "HH\this"
+  ["access_list"]=>
+  array(1) {
+    [0]=>
+    string(1) "T"
   }
 }

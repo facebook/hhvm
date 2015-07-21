@@ -48,10 +48,9 @@ enum class Kind : uint8_t {
   /* TODO(7657500): the following kinds needs alias resolution, and
    * are not exposed to the users. Could resolve to a class, enum,
    * interface, or alias. */
-  T_unresolved = 14,
-  T_this = 15,
-  T_typeaccess = 16,
-  T_xhp = 17,
+  T_unresolved = 101,
+  T_typeaccess = 102,
+  T_xhp = 103,
 };
 
 String toString(const ArrayData* arr);

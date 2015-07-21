@@ -22,6 +22,7 @@ class SortedIterator<T> extends SplHeap<T> {
       $this->insert($item);
     }
   }
+
   public function compare(T $b, T $a): int {
     assert($a instanceof SplFileInfo);
     assert($b instanceof SplFileInfo);

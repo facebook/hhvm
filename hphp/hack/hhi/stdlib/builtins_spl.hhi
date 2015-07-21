@@ -179,3 +179,163 @@ class DirectoryIterator extends SplFileInfo
   public function seek(int $position): void;
   public function valid(): bool;
 }
+
+class CallbackFilterIterator<T> extends FilterIterator<T> {
+  public function accept() {}
+}
+
+class RecursiveCallbackFilterIterator<T> extends CallbackFilterIterator<T> implements RecursiveIterator<T> {
+  public function getChildren() {}
+  public function hasChildren() {}
+}
+
+class ParentIterator<T> extends RecursiveFilterIterator<T> {
+  public function accept() {}
+}
+
+class CachingIterator<Tk, Tv> extends IteratorIterator<Tv> implements ArrayAccess<Tk, Tv>, Countable {
+  const int CALL_TOSTRING = 1;
+  const int CATCH_GET_CHILD = 16;
+  const int TOSTRING_USE_KEY = 2;
+  const int TOSTRING_USE_CURRENT = 4;
+  const int TOSTRING_USE_INNER = 8;
+  const int FULL_CACHE = 256;
+  public function __toString() {}
+  public function count() {}
+  public function getCache() {}
+  public function getFlags() {}
+  public function hasNext() {}
+  public function offsetExists($index) {}
+  public function offsetGet($index) {}
+  public function offsetSet($index, $newval) {}
+  public function offsetUnset($index) {}
+  public function setFlags($flags) {}
+}
+
+class RecursiveCachingIterator<Tk, Tv> extends CachingIterator<Tk, Tv> implements RecursiveIterator<Tv> {
+  public function getChildren() {}
+  public function hasChildren() {}
+}
+
+class NoRewindIterator<T> extends IteratorIterator<T> {
+}
+
+class InfiniteIterator<T> extends IteratorIterator<T> {
+}
+
+class RecursiveTreeIterator<Tv> extends RecursiveIteratorIterator<Tv> {
+  const int BYPASS_CURRENT = 4;
+  const int BYPASS_KEY = 8;
+  const int PREFIX_LEFT = 0;
+  const int PREFIX_MID_HAS_NEXT = 1;
+  const int PREFIX_MID_LAST = 2;
+  const int PREFIX_END_HAS_NEXT = 3;
+  const int PREFIX_END_LAST = 4;
+  const int PREFIX_RIGHT = 5;
+  public function getEntry() {}
+  public function getPostfix() {}
+  public function getPrefix() {}
+  public function setPostfix() {}
+  public function setPrefixPart($part, $value) {}
+}
+
+class RecursiveArrayIterator<T> extends ArrayIterator<T> implements RecursiveIterator<T> {
+  const int CHILD_ARRAYS_ONLY = 4;
+  public function getChildren() {}
+  public function hasChildren() {}
+}
+
+class GlobIterator extends FilesystemIterator implements Countable {
+  public function count() {}
+}
+
+class SplStack<T> extends SplDoublyLinkedList<T> {
+}
+
+class SplPriorityQueue<T> implements Iterator<T>, Countable {
+  const int EXTR_BOTH = 3;
+  const int EXTR_PRIORITY = 2;
+  const int EXTR_DATA = 1;
+  public function compare($a, $b) {}
+  public function count() {}
+  public function current() {}
+  public function extract() {}
+  public function insert($value, $priority) {}
+  public function isEmpty() {}
+  public function key() {}
+  public function next() {}
+  public function recoverFromCorruption() {}
+  public function rewind() {}
+  public function setExtractFlags($flags) {}
+  public function top() {}
+  public function valid() {}
+}
+
+class SplFixedArray<Tk, Tv> implements Iterator<Tv>, ArrayAccess<Tk, Tv>, Countable {
+  public function __construct($size = null) {}
+  public function __wakeup() {}
+  public function count() {}
+  public function current() {}
+  public static function fromArray($data, $save_indexes = null) {}
+  public function getSize() {}
+  public function key() {}
+  public function next() {}
+  public function offsetExists($index) {}
+  public function offsetGet($index) {}
+  public function offsetSet($index, $newval) {}
+  public function offsetUnset($index) {}
+  public function rewind() {}
+  public function setSize($value) {}
+  public function toArray() {}
+  public function valid() {}
+}
+
+interface SplObserver {
+  public function update(SplSubject $SplSubject) {}
+}
+
+interface SplSubject {
+  public function attach(SplObserver $SplObserver) {}
+  public function detach(SplObserver $SplObserver) {}
+  public function notify() {}
+}
+
+class MultipleIterator<T> implements Iterator<T> {
+  const int MIT_NEED_ANY = 0;
+  const int MIT_NEED_ALL = 1;
+  const int MIT_KEYS_NUMERIC = 0;
+  const int MIT_KEYS_ASSOC = 2;
+  public function __construct($flags) {}
+  public function attachIterator(Iterator $iterator, $infos = null) {}
+  public function containsIterator(Iterator $iterator) {}
+  public function countIterators() {}
+  public function current() {}
+  public function detachIterator(Iterator $iterator) {}
+  public function getFlags() {}
+  public function key() {}
+  public function next() {}
+  public function rewind() {}
+  public function setFlags($flags) {}
+  public function valid() {}
+}
+
+class SplType {
+  public function __construct($initial_value, $strict) {}
+}
+
+class SplInt extends SplType {
+}
+
+class SplFloat extends SplType {
+}
+
+class SplString extends SplType {
+}
+
+class SplEnum extends SplType {
+  public function __construct($initial_value, $strict) {}
+  public function getConstList($include_default = false) {}
+}
+
+class SplBool extends SplEnum {
+}

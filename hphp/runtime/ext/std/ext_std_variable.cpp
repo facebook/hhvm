@@ -364,33 +364,56 @@ ALWAYS_INLINE static
 int64_t extract_impl(VRefParam vref_array,
                      int extract_type /* = EXTR_OVERWRITE */,
                      const String& prefix /* = "" */) {
-  bool reference = extract_type & EXTR_REFS;
-  extract_type &= ~EXTR_REFS;
-
-  if (!vref_array.wrapped().isArray()) {
+  auto arrByRef = false;
+  TypedValue* arr_tv = vref_array.wrapped().asTypedValue();
+  if (arr_tv->m_type == KindOfRef) {
+    arr_tv = arr_tv->m_data.pref->tv();
+    arrByRef = true;
+  }
+  if (arr_tv->m_type != KindOfArray) {
     raise_warning("extract() expects parameter 1 to be array");
     return 0;
   }
+
+  bool reference = extract_type & EXTR_REFS;
+  extract_type &= ~EXTR_REFS;
 
   VMRegAnchor _;
   auto const varEnv = g_context->getOrCreateVarEnv();
   if (!varEnv) return 0;
 
+  auto& arr = tvAsVariant(arr_tv).asArrRef();
   if (UNLIKELY(reference)) {
-    auto& arr = vref_array.wrapped().toArrRef();
-    int count = 0;
-    for (ArrayIter iter(arr); iter; ++iter) {
-      String name = iter.first();
-      if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
-      g_context->bindVar(name.get(), arr.lvalAt(name).asTypedValue());
-      ++count;
+    auto extr_refs = [&](Array& arr) {
+      {
+        // force arr to escalate (if necessary) by getting an
+        // lvalue to the first element.
+        ArrayData* ad = arr.get();
+        auto const& first_key = ad->getKey(ad->iter_begin());
+        arr.lvalAt(first_key);
+      }
+      int count = 0;
+      for (ArrayIter iter(arr); iter; ++iter) {
+        String name = iter.first();
+        if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
+        // the const_cast is safe because we escalated the array
+        // we can't use arr.lvalAt(name), because arr may have been modified
+        // as a side effect of an earlier iteration
+        auto& ref = const_cast<Variant&>(iter.secondRef());
+        g_context->bindVar(name.get(), ref.asTypedValue());
+        ++count;
+      }
+      return count;
+    };
+    if (arrByRef) {
+      return extr_refs(arr);
     }
-    return count;
+    Array tmp = arr;
+    return extr_refs(tmp);
   }
 
-  auto const var_array = vref_array.wrapped().toArray();
   int count = 0;
-  for (ArrayIter iter(var_array); iter; ++iter) {
+  for (ArrayIter iter(arr); iter; ++iter) {
     String name = iter.first();
     if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
     g_context->setVar(name.get(), iter.secondRef().asTypedValue());

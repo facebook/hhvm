@@ -1,0 +1,8 @@
+array(3) {
+  ["o"]=>
+  NULL
+  ["x"]=>
+  &string(4) "Oops"
+  ["y"]=>
+  NULL
+}

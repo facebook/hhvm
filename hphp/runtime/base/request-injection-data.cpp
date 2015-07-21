@@ -52,7 +52,7 @@ RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
 {}
 
 RequestTimer::~RequestTimer() {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_hasTimer) {
     timer_delete(m_timer_id);
   }
@@ -64,7 +64,7 @@ RequestTimer::~RequestTimer() {
  * makes use of this.
  */
 void RequestTimer::setTimeout(int seconds) {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   m_timeoutSeconds = seconds > 0 ? seconds : 0;
   if (!m_hasTimer) {
     if (!m_timeoutSeconds) {
@@ -118,7 +118,7 @@ void RequestTimer::onTimeout() {
 }
 
 int RequestTimer::getRemainingTime() const {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_hasTimer) {
     itimerspec ts;
     if (!timer_gettime(m_timer_id, &ts)) {

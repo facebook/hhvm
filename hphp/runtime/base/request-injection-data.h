@@ -51,7 +51,7 @@ struct RequestTimer {
 private:
   RequestInjectionData* m_reqInjectionData;
   clockid_t m_clockType;
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   timer_t m_timer_id;      // id of our timer
 #endif
   int m_timeoutSeconds;    // how many seconds to timeout
@@ -75,7 +75,7 @@ struct RequestInjectionData {
   };
 
   RequestInjectionData()
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(_MSC_VER)
     // OS X doesn't have CLOCK_THREAD_CPUTIME_ID... but it also doesn't have an
     // implementation of POSIX timers at all, so all of RequestTimer is ifdef'd
     // out anyways. Just pass dummy values.

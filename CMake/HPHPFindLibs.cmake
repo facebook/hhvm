@@ -86,17 +86,6 @@ else ()
   message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
 endif ()
 
-# libmemcached checks
-find_package(Libmemcached REQUIRED)
-if (LIBMEMCACHED_VERSION VERSION_LESS "0.39")
-  unset(LIBMEMCACHED_INCLUDE_DIR CACHE)
-  unset(LIBMEMCACHED_LIBRARY CACHE)
-  unset(LIBMEMCACHED_VERSION CACHE)
-  message(FATAL_ERROR "libmemcache is too old, found ${LIBMEMCACHED_VERSION} and we need 0.39")
-endif ()
-include_directories(${LIBMEMCACHED_INCLUDE_DIR})
-link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
-
 # pcre checks
 find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
@@ -473,8 +462,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 
   target_link_libraries(${target} ${LBER_LIBRARIES})
-
-  target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})
 
   target_link_libraries(${target} ${CRYPT_LIB})
 

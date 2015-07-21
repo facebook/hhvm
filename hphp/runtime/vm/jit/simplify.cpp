@@ -886,25 +886,31 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   switch (opName) {
   case GtInt:
   case GtStr:
+  case GtBool:
   case Gt:   return a > b;
   case GteInt:
   case GteStr:
+  case GteBool:
   case Gte:  return a >= b;
   case LtInt:
   case LtStr:
+  case LtBool:
   case Lt:   return a < b;
   case LteInt:
   case LteStr:
+  case LteBool:
   case Lte:  return a <= b;
   case Same:
   case SameStr:
   case EqInt:
   case EqStr:
+  case EqBool:
   case Eq:   return a == b;
   case NSame:
   case NSameStr:
   case NeqInt:
   case NeqStr:
+  case NeqBool:
   case Neq:  return a != b;
   default:
     not_reached();
@@ -1049,9 +1055,9 @@ SSATmp* cmpImpl(State& env,
     // overall expression being true (after type-juggling).
     // Hence we may check for equality with that boolean.
     // E.g. `some-int > false` is equivalent to `some-int == true`
-    if (opName != Eq) {
+    if (opName != Eq && opName != EqBool) {
       bool const res = cmpOp(opName, false, b);
-      return newInst(Eq, src1, cns(env, !res));
+      return newInst(isBoolQueryOp(opName) ? EqBool : Eq, src1, cns(env, !res));
     }
   }
 
@@ -1073,6 +1079,11 @@ SSATmp* cmpImpl(State& env,
   // Lower to str-comparison if possible.
   if (!isStrQueryOp(opName) && type1 <= TStr && type2 <= TStr) {
     return newInst(queryToStrQueryOp(opName), src1, src2);
+  }
+
+  // Lower to bool-comparison if possible.
+  if (!isBoolQueryOp(opName) && type1 <= TBool && type2 <= TBool) {
+    return newInst(queryToBoolQueryOp(opName), src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -1202,6 +1213,12 @@ X(LtInt)
 X(LteInt)
 X(EqInt)
 X(NeqInt)
+X(GtBool)
+X(GteBool)
+X(LtBool)
+X(LteBool)
+X(EqBool)
+X(NeqBool)
 X(Same)
 X(NSame)
 X(GtStr)
@@ -2184,6 +2201,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LteInt)
   X(EqInt)
   X(NeqInt)
+  X(GtBool)
+  X(GteBool)
+  X(LtBool)
+  X(LteBool)
+  X(EqBool)
+  X(NeqBool)
   X(Same)
   X(NSame)
   X(GtStr)

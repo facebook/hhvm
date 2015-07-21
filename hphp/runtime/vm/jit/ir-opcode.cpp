@@ -198,6 +198,12 @@ bool isQueryOp(Opcode opc) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case GtBool:
+  case GteBool:
+  case LtBool:
+  case LteBool:
+  case EqBool:
+  case NeqBool:
   case Same:
   case NSame:
   case InstanceOfBitmask:
@@ -232,6 +238,20 @@ bool isDblQueryOp(Opcode opc) {
   case LteDbl:
   case EqDbl:
   case NeqDbl:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool isBoolQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtBool:
+  case GteBool:
+  case LtBool:
+  case LteBool:
+  case EqBool:
+  case NeqBool:
     return true;
   default:
     return false;
@@ -279,6 +299,12 @@ Opcode negateQueryOp(Opcode opc) {
   case NeqStr:              return EqStr;
   case SameStr:             return NSameStr;
   case NSameStr:            return SameStr;
+  case GtBool:              return LteBool;
+  case GteBool:             return LtBool;
+  case LtBool:              return GteBool;
+  case LteBool:             return GtBool;
+  case EqBool:              return NeqBool;
+  case NeqBool:             return EqBool;
   case Same:                return NSame;
   case NSame:               return Same;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
@@ -326,6 +352,13 @@ Opcode commuteQueryOp(Opcode opc) {
   case SameStr:
   case NSameStr:
     return opc;
+  case GtBool:  return LtBool;
+  case GteBool: return LteBool;
+  case LtBool:  return GtBool;
+  case LteBool: return GteBool;
+  case EqBool:
+  case NeqBool:
+    return opc;
   case Same:  return Same;
   case NSame: return NSame;
   default:      always_assert(0);
@@ -367,6 +400,21 @@ Opcode queryToDblQueryOp(Opcode opc) {
   case EqInt: return EqDbl;
   case NeqInt:return NeqDbl;
   default: always_assert(0);
+  }
+}
+
+Opcode queryToBoolQueryOp(Opcode opc) {
+  assertx(isQueryOp(opc));
+  switch (opc) {
+    case Gt:  return GtBool;
+    case Gte: return GteBool;
+    case Lt:  return LtBool;
+    case Lte: return LteBool;
+    case Eq:  return EqBool;
+    case Neq: return NeqBool;
+    case Same: return EqBool;
+    case NSame: return NeqBool;
+    default: always_assert(0);
   }
 }
 

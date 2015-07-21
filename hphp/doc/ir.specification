@@ -587,6 +587,20 @@ To string conversions:
 
   Performs comparison of strings using PHP semantics.
 
+| GtBool,                      D(Bool), S(Bool) S(Bool),                  NF
+
+| GteBool,                     D(Bool), S(Bool) S(Bool),                  NF
+
+| LtBool,                      D(Bool), S(Bool) S(Bool),                  NF
+
+| LteBool,                     D(Bool), S(Bool) S(Bool),                  NF
+
+| EqBool,                      D(Bool), S(Bool) S(Bool),                  NF
+
+| NeqBool,                     D(Bool), S(Bool) S(Bool),                  NF
+
+  Performs comparison of booleans.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait

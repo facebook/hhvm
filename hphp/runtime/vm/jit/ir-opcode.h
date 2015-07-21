@@ -166,6 +166,16 @@ bool isDblQueryOp(Opcode opc);
 Opcode queryToDblQueryOp(Opcode opc);
 
 /*
+ * Return true if opc is a boolean comparison operator
+ */
+bool isBoolQueryOp(Opcode opc);
+
+/*
+ * Return the bool-query opcode for the given non-bool-query opcode
+ */
+Opcode queryToBoolQueryOp(Opcode opc);
+
+/*
  * Return true if opc is a str comparison operator
  */
 bool isStrQueryOp(Opcode opc);

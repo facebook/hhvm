@@ -949,12 +949,6 @@ void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
   Type type1 = src1->type();
   Type type2 = src2->type();
 
-  auto loc1 = srcLoc(inst, 0);
-  auto loc2 = srcLoc(inst, 1);
-
-  auto src1Reg = loc1.reg();
-  auto src2Reg = loc2.reg();
-  auto dstReg  = dstLoc(inst, 0).reg();
   auto& v = vmain();
 
   // case 1: string cmp string
@@ -965,21 +959,9 @@ void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
 
   /////////////////////////////////////////////////////////////////////////////
   // case 2: bool/null cmp anything
-  // simplifyCmp has converted all args to bool
+  // We should only get these if the simplifer didn't run.
   else if (type1 <= TBool && type2 <= TBool) {
-    auto const sf = v.makeReg();
-    if (src2->hasConstVal()) {
-      // Emit testb when possible to enable more optimizations later on.
-      if (cc == CC_E || cc == CC_NE) {
-        if (src2->boolVal()) cc = ccNegate(cc);
-        v << testb{src1Reg, src1Reg, sf};
-      } else {
-        v << cmpbi{src2->boolVal(), src1Reg, sf};
-      }
-    } else {
-      v << cmpb{src2Reg, src1Reg, sf};
-    }
-    v << setcc{cc, sf, dstReg};
+    CG_PUNT(inst->marker(), cgOpCmpHelper_boolbool);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1172,6 +1154,59 @@ void CodeGenerator::cgLteDbl(IRInstruction* inst) {
 
 void CodeGenerator::cgGteDbl(IRInstruction* inst) {
   emitCmpRelDbl(inst, CC_AE, false);
+}
+
+void CodeGenerator::emitCmpBool(IRInstruction* inst,
+                                ConditionCode cc) {
+  DEBUG_ONLY auto src0  = inst->src(0);
+  auto src1  = inst->src(1);
+  auto src0Reg = srcLoc(inst, 0).reg();
+  auto src1Reg = srcLoc(inst, 1).reg();
+  auto dstReg  = dstLoc(inst, 0).reg();
+  auto& v = vmain();
+  auto sf = v.makeReg();
+
+  assert(src0->type() <= TBool);
+  assert(src1->type() <= TBool);
+
+  if (src1->hasConstVal()) {
+    // Emit testb when possible to enable more optimizations later on.
+    if (cc == CC_E || cc == CC_NE) {
+      if (src1->boolVal()) {
+        cc = ccNegate(cc);
+      }
+      v << testb{src0Reg, src0Reg, sf};
+    } else {
+      v << cmpbi{src1->boolVal(), src0Reg, sf};
+    }
+  } else {
+    v << cmpb{src1Reg, src0Reg, sf};
+  }
+  v << setcc{cc, sf, dstReg};
+}
+
+void CodeGenerator::cgGtBool(IRInstruction* inst) {
+  emitCmpBool(inst, CC_G);
+}
+
+void CodeGenerator::cgGteBool(IRInstruction* inst) {
+  emitCmpBool(inst, CC_GE);
+}
+
+void CodeGenerator::cgLtBool(IRInstruction* inst) {
+  emitCmpBool(inst, CC_L);
+}
+
+void CodeGenerator::cgLteBool(IRInstruction* inst) {
+  emitCmpBool(inst, CC_LE);
+}
+
+void CodeGenerator::cgEqBool(IRInstruction* inst) {
+  emitCmpBool(inst, CC_E);
+}
+
+void CodeGenerator::cgNeqBool(IRInstruction* inst) {
+  emitCmpBool(inst, CC_NE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

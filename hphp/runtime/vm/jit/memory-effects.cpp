@@ -898,9 +898,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefFP:
   case DefSP:
   case EndGuards:
+  case EqBool:
   case EqDbl:
   case EqInt:
+  case GteBool:
   case GteInt:
+  case GtBool:
   case GtInt:
   case HintLocInner:
   case Jmp:
@@ -909,8 +912,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdPropAddr:
   case LdStkAddr:
   case LdPackedArrayElemAddr:
+  case LteBool:
   case LteDbl:
   case LteInt:
+  case LtBool:
   case LtInt:
   case GtDbl:
   case GteDbl:
@@ -919,6 +924,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MulDbl:
   case MulInt:
   case MulIntO:
+  case NeqBool:
   case NeqDbl:
   case NeqInt:
   case SubDbl:

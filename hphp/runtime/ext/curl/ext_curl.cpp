@@ -2207,6 +2207,7 @@ const StaticString s_CURLE_LIBRARY_NOT_FOUND("CURLE_LIBRARY_NOT_FOUND");
 const StaticString s_CURLE_MALFORMAT_USER("CURLE_MALFORMAT_USER");
 const StaticString s_CURLE_OBSOLETE("CURLE_OBSOLETE");
 const StaticString s_CURLE_OK("CURLE_OK");
+const StaticString s_CURLE_OPERATION_TIMEDOUT("CURLE_OPERATION_TIMEDOUT");
 const StaticString s_CURLE_OPERATION_TIMEOUTED("CURLE_OPERATION_TIMEOUTED");
 const StaticString s_CURLE_OUT_OF_MEMORY("CURLE_OUT_OF_MEMORY");
 const StaticString s_CURLE_PARTIAL_FILE("CURLE_PARTIAL_FILE");
@@ -2600,6 +2601,9 @@ class CurlExtension final : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_CURLE_OK.get(), k_CURLE_OK
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLE_OPERATION_TIMEDOUT.get(), k_CURLE_OPERATION_TIMEOUTED
     );
     Native::registerConstant<KindOfInt64>(
       s_CURLE_OPERATION_TIMEOUTED.get(), k_CURLE_OPERATION_TIMEOUTED

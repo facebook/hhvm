@@ -24,6 +24,8 @@
 #include <squangle/mysql_client/AsyncConnectionPool.h>
 #include <squangle/mysql_client/Row.h>
 
+#include <squangle/logger/DBEventCounter.h>
+
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/extension.h"
@@ -35,6 +37,7 @@ using folly::StringPiece;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 namespace am = facebook::common::mysql_client;
+namespace db = facebook::db;
 
 extern const int64_t k_NOT_NULL_FLAG;
 extern const int64_t k_PRI_KEY_FLAG;
@@ -88,20 +91,30 @@ public:
 // class AsyncMysqlConnection
 
 class AsyncMysqlConnection {
-public:
+ public:
   AsyncMysqlConnection();
   AsyncMysqlConnection& operator=(const AsyncMysqlConnection&) = delete;
   void sweep();
   void setConnection(std::unique_ptr<am::Connection> conn);
+  void setConnectOperation(std::shared_ptr<am::ConnectOperation> op);
+  void setClientStats(db::ClientPerfStats perfStats);
   void verifyValidConnection();
   static Class* getClass();
-  static Object newInstance(std::unique_ptr<am::Connection> conn);
+  static Object newInstance(
+      std::unique_ptr<am::Connection> conn,
+      std::shared_ptr<am::ConnectOperation> conn_op = nullptr,
+      db::ClientPerfStats clientStats = db::ClientPerfStats());
   Object query(ObjectData* this_, am::Query query, int64_t timeout_micros = -1);
 
   std::unique_ptr<am::Connection> m_conn;
   String m_host;
   int m_port;
   bool m_closed;
+  // Stats at the moment the Connection was created
+  // Only available if the connection was created inside the AsyncMysqlClient.
+  db::ClientPerfStats m_clientStats;
+  std::shared_ptr<am::ConnectOperation> m_op;
+
   static Class* s_class;
   static const StaticString s_className;
 };
@@ -115,23 +128,48 @@ public:
   int64_t elapsedMicros();
   double startTime();
   double endTime();
-  virtual am::Operation* op() = 0;
+
+  Object clientStats();
+
+  void create(std::shared_ptr<am::Operation> op, db::ClientPerfStats values) {
+    m_op = std::move(op);
+    m_clientStats = std::move(values);
+  }
+
+  am::Operation* op();
+
+  void sweep() { m_op.reset(); }
+
+  std::shared_ptr<am::Operation> m_op;
+  db::ClientPerfStats m_clientStats;
+};
+
+// Intended to just hold extra data about the Operation. This should be created
+// in `AsyncMysqlConnection`.
+
+class AsyncMysqlConnectResult : public AsyncMysqlResult {
+ public:
+  virtual ~AsyncMysqlConnectResult() {}
+  AsyncMysqlConnectResult& operator=(const AsyncMysqlConnectResult&) = delete;
+  static Class* getClass();
+  static Object newInstance(std::shared_ptr<am::Operation> op,
+                            db::ClientPerfStats clientStats);
+
+  static Class* s_class;
+  static const StaticString s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlErrorResult
 
 class AsyncMysqlErrorResult : public AsyncMysqlResult {
-public:
+ public:
   virtual ~AsyncMysqlErrorResult() {}
   AsyncMysqlErrorResult& operator=(const AsyncMysqlErrorResult&) = delete;
-  void create(std::shared_ptr<am::Operation> op);
-  void sweep();
-  virtual am::Operation* op();
   static Class* getClass();
-  static Object newInstance(std::shared_ptr<am::Operation> op);
+  static Object newInstance(std::shared_ptr<am::Operation> op,
+                            db::ClientPerfStats clientStats);
 
-  std::shared_ptr<am::Operation> m_op;
   static Class* s_class;
   static const StaticString s_className;
 };
@@ -142,12 +180,15 @@ public:
 class AsyncMysqlQueryErrorResult {
 public:
   AsyncMysqlQueryErrorResult();
-  AsyncMysqlQueryErrorResult& operator=(const AsyncMysqlQueryErrorResult&)
-    = delete;
+  AsyncMysqlQueryErrorResult& operator=(const AsyncMysqlQueryErrorResult&) =
+      delete;
   void sweep();
-  void create(std::shared_ptr<am::Operation> op, req::ptr<c_Vector> results);
+  void create(std::shared_ptr<am::Operation> op,
+              db::ClientPerfStats values,
+              req::ptr<c_Vector> results);
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
+                            db::ClientPerfStats values,
                             req::ptr<c_Vector> results);
 
   req::ptr<c_Vector> m_query_results;
@@ -191,21 +232,21 @@ class FieldIndex {
 
 class AsyncMysqlQueryResult : public AsyncMysqlResult {
 public:
-  virtual ~AsyncMysqlQueryResult() {}
-  AsyncMysqlQueryResult& operator=(const AsyncMysqlQueryResult&) = delete;
-  void sweep();
-  void create(std::shared_ptr<am::Operation> op, am::QueryResult query_result);
-  Object buildRows(bool as_maps, bool typed_values);
-  virtual am::Operation* op();
-  static Class* getClass();
-  static Object newInstance(std::shared_ptr<am::Operation> op,
-                            am::QueryResult query_result);
+ virtual ~AsyncMysqlQueryResult() {}
+ AsyncMysqlQueryResult& operator=(const AsyncMysqlQueryResult&) = delete;
+ void sweep();
+ void create(std::shared_ptr<am::Operation> op,
+             db::ClientPerfStats values,
+             am::QueryResult query_result);
+ Object buildRows(bool as_maps, bool typed_values);
+ static Class* getClass();
+ static Object newInstance(std::shared_ptr<am::Operation> op,
+                           db::ClientPerfStats values,
+                           am::QueryResult query_result);
 
-  // Holding the operation just for operation elapsed time
-  std::shared_ptr<am::Operation> m_op;
-  std::unique_ptr<am::QueryResult> m_query_result;
+ std::unique_ptr<am::QueryResult> m_query_result;
 
-  // Created here for buildRows and passed to RowBlocks
+ // Created here for buildRows and passed to RowBlocks
   std::shared_ptr<FieldIndex> m_field_index;
   static Class* s_class;
   static const StaticString s_className;
@@ -222,11 +263,16 @@ class AsyncMysqlConnectEvent final : public AsioExternalThreadEvent {
 
   void opFinished() { markAsFinished(); }
 
+  void setClientStats(db::ClientPerfStats stats) {
+    m_clientStats = std::move(stats);
+  }
+
  protected:
   void unserialize(Cell& result) override final;
 
  private:
   std::shared_ptr<am::ConnectOperation> m_op;
+  db::ClientPerfStats m_clientStats;
 };
 
 class AsyncMysqlQueryEvent final : public AsioExternalThreadEvent {
@@ -239,11 +285,16 @@ class AsyncMysqlQueryEvent final : public AsioExternalThreadEvent {
 
   void opFinished() { markAsFinished(); }
 
+  void setClientStats(db::ClientPerfStats stats) {
+    m_clientStats = std::move(stats);
+  }
+
  protected:
   void unserialize(Cell& result) override final;
 
  private:
   std::shared_ptr<am::QueryOperation> m_query_op;
+  db::ClientPerfStats m_clientStats;
 };
 
 class AsyncMysqlMultiQueryEvent final : public AsioExternalThreadEvent {
@@ -256,11 +307,16 @@ class AsyncMysqlMultiQueryEvent final : public AsioExternalThreadEvent {
 
   void opFinished() { markAsFinished(); }
 
+  void setClientStats(db::ClientPerfStats stats) {
+    m_clientStats = std::move(stats);
+  }
+
  protected:
   void unserialize(Cell& result) override final;
 
  private:
   std::shared_ptr<am::MultiQueryOperation> m_multi_op;
+  db::ClientPerfStats m_clientStats;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

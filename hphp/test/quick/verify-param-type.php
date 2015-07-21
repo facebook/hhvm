@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-2014 Facebook. All Rights Reserved.
+// Copyright 2004-2015 Facebook. All Rights Reserved.
 
 // Note that this is not the case when compiling with WholeProgram
 // mode, and Option::HardTypeHints, so this test is disabled for repo.

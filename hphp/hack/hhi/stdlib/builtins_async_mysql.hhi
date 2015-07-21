@@ -72,13 +72,6 @@ class AsyncMysqlConnectionPool {
   public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = "") { }
   public function getPoolStats(): array { }
 }
-
-class AsyncMysqlClientStats {
-  public function __construct() { }
-  public function ioEventLoopMicrosAvg() : float {}
-  public function callbackDelayMicrosAvg() : float {}
-}
-
 class AsyncMysqlConnection {
   public function __construct() { }
   public function query(string $query, int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>{ }
@@ -89,29 +82,19 @@ class AsyncMysqlConnection {
   public function releaseConnection() { }
   public function serverInfo() { }
   public function warningCount() { }
-  public function host(): string { }
-  public function port(): int { }
-  public function setReusable(bool $reusable): void { }
+  public function host(): string{ }
+  public function port(): int{ }
+  public function setReusable(bool $reusable): void{ }
   public function isReusable(): bool { }
-  public function lastActivityTime() { }
-  public function connectResult() { }
 }
-
 abstract class AsyncMysqlResult {
   public function __construct() { }
   public function elapsedMicros() { }
   public function startTime() { }
   public function endTime() { }
-
-  public function clientStats() : AsyncMysqlClientStats { }
 }
-
-class AsyncMysqlConnectResult extends AsyncMysqlResult {
-  public function __construct() { parent::__construct(); }
-}
-
 class AsyncMysqlErrorResult extends AsyncMysqlResult {
-  public function __construct() { parent::__construct(); }
+  public function __construct() { parent::__construct();}
   public function mysql_errno() { }
   public function mysql_error() { }
   public function failureType() { }
@@ -200,6 +183,7 @@ class AsyncMysqlException extends Exception {
   public function mysqlErrorCode(): int;
   public function mysqlErrorString(): string;
   public function timedOut(): bool;
+  public function failed(): bool;
   public function getResult(): AsyncMysqlErrorResult;
 }
 class AsyncMysqlConnectException extends AsyncMysqlException {}

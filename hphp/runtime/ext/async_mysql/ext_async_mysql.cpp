@@ -90,53 +90,7 @@ static am::AsyncMysqlClient* getDefaultClient() {
   return am::AsyncMysqlClient::defaultClient();
 }
 
-///////////////////////////////////////////////////////////////////////////
-// AsyncMysqlClientStats
-
-class AsyncMysqlClientStats {
- public:
-  AsyncMysqlClientStats& operator=(const AsyncMysqlClientStats& other) {
-    m_values = other.m_values;
-    return *this;
-  }
-
-  static Class* getClass();
-  static Object newInstance(db::ClientPerfStats values) {
-    Object obj{getClass()};
-    auto* data = Native::data<AsyncMysqlClientStats>(obj);
-    data->setPerfValues(std::move(values));
-    return obj;
-  }
-
-  void setPerfValues(db::ClientPerfStats values) {
-    m_values = std::move(values);
-  }
-
-  static Class* s_class;
-  static const StaticString s_className;
-
-  db::ClientPerfStats m_values;
-};
-
-Class* AsyncMysqlClientStats::s_class = nullptr;
-const StaticString AsyncMysqlClientStats::s_className("AsyncMysqlClientStats");
-
-IMPLEMENT_GET_CLASS(AsyncMysqlClientStats)
-
-double HHVM_METHOD(AsyncMysqlClientStats, ioEventLoopMicrosAvg) {
-  auto* data = Native::data<AsyncMysqlClientStats>(this_);
-  return data->m_values.ioEventLoopMicrosAvg;
-}
-
-double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
-  auto* data = Native::data<AsyncMysqlClientStats>(this_);
-  return data->m_values.callbackDelayMicrosAvg;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// AsyncMysqlClient
-void HHVM_STATIC_METHOD(AsyncMysqlClient,
-                        setPoolsConnectionLimit,
+void HHVM_STATIC_METHOD(AsyncMysqlClient, setPoolsConnectionLimit,
                         int64_t limit) {
   getDefaultClient()->setPoolsConnectionLimit(limit);
 }
@@ -162,13 +116,7 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient, connect,
 
   auto event = new AsyncMysqlConnectEvent(op);
   try {
-    op->setCallback([ event, clientPtr = getDefaultClient() ](
-        am::ConnectOperation & op) {
-      // Get current stats
-      event->setClientStats(clientPtr->collectPerfStats());
-
-      event->opFinished();
-    });
+    op->setCallback([event](am::ConnectOperation& op) { event->opFinished(); });
     op->run();
 
     return event->getWaitHandle();
@@ -305,12 +253,7 @@ Object HHVM_METHOD(AsyncMysqlConnectionPool, connect,
 
   auto event = new AsyncMysqlConnectEvent(op);
   try {
-    op->setCallback(
-        [ event, clientPtr = data->m_async_pool->getMysqlClient() ](
-            am::ConnectOperation & op) {
-          event->setClientStats(clientPtr->collectPerfStats());
-          event->opFinished();
-        });
+    op->setCallback([event](am::ConnectOperation& op) { event->opFinished(); });
     op->run();
 
     return event->getWaitHandle();
@@ -332,14 +275,9 @@ const StaticString AsyncMysqlConnection::s_className("AsyncMysqlConnection");
 IMPLEMENT_GET_CLASS(AsyncMysqlConnection)
 
 Object AsyncMysqlConnection::newInstance(
-    std::unique_ptr<am::Connection> conn,
-    std::shared_ptr<am::ConnectOperation> conn_op,
-    db::ClientPerfStats clientStats) {
+    std::unique_ptr<am::Connection> conn) {
   Object ret{getClass()};
-  auto* retPtr = Native::data<AsyncMysqlConnection>(ret);
-  retPtr->setConnection(std::move(conn));
-  retPtr->setConnectOperation(std::move(conn_op));
-  retPtr->setClientStats(std::move(clientStats));
+  Native::data<AsyncMysqlConnection>(ret)->setConnection(std::move(conn));
   return ret;
 }
 
@@ -353,15 +291,6 @@ void AsyncMysqlConnection::setConnection(std::unique_ptr<am::Connection> conn) {
   m_conn = std::move(conn);
   m_host = String(m_conn->host(), CopyString);
   m_port = m_conn->port();
-}
-
-void AsyncMysqlConnection::setConnectOperation(
-    std::shared_ptr<am::ConnectOperation> op) {
-  m_op = std::move(op);
-}
-
-void AsyncMysqlConnection::setClientStats(db::ClientPerfStats clientStats) {
-  m_clientStats = std::move(clientStats);
 }
 
 void AsyncMysqlConnection::verifyValidConnection() {
@@ -385,7 +314,6 @@ Object AsyncMysqlConnection::query(
   int64_t timeout_micros /* = -1 */) {
 
   verifyValidConnection();
-  auto* clientPtr = m_conn->client();
   auto op = am::Connection::beginQuery(std::move(m_conn), query);
   if (timeout_micros < 0) {
     timeout_micros = mysqlExtension::ReadTimeout * 1000;
@@ -396,7 +324,7 @@ Object AsyncMysqlConnection::query(
 
   auto event = new AsyncMysqlQueryEvent(this_, op);
   try {
-    am::QueryAppenderCallback appender_callback = [event, clientPtr](
+    am::QueryAppenderCallback appender_callback = [event](
         am::QueryOperation& op,
         am::QueryResult query_result,
         am::QueryCallbackReason reason) {
@@ -405,9 +333,7 @@ Object AsyncMysqlConnection::query(
         LOG(ERROR) << "Invalid state! Callback called as finished "
                    << "but operation didn't finish";
       }
-
       op.setQueryResult(std::move(query_result));
-      event->setClientStats(clientPtr->collectPerfStats());
       event->opFinished();
     };
     op->setCallback(am::resultAppender(appender_callback));
@@ -515,7 +441,6 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
     queries_vec.emplace_back(am::Query::unsafe(
         static_cast<std::string>(iter.second().toString().data())));
   }
-  auto* clientPtr = data->m_conn->client();
   auto op = am::Connection::beginMultiQuery(std::move(data->m_conn),
                                             std::move(queries_vec));
   if (timeout_micros < 0) {
@@ -527,7 +452,7 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
 
   auto event = new AsyncMysqlMultiQueryEvent(this_, op);
   try {
-    am::MultiQueryAppenderCallback appender_callback = [event, clientPtr](
+    am::MultiQueryAppenderCallback appender_callback = [event](
         am::MultiQueryOperation& op,
         std::vector<am::QueryResult> query_results,
         am::QueryCallbackReason reason) {
@@ -537,9 +462,7 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
         LOG(ERROR) << "Invalid state! Callback called as finished "
                    << "but operation didn't finish";
       }
-
       op.setQueryResults(std::move(query_results));
-      event->setClientStats(clientPtr->collectPerfStats());
       event->opFinished();
     };
     op->setCallback(am::resultAppender(appender_callback));
@@ -613,32 +536,6 @@ bool HHVM_METHOD(AsyncMysqlConnection, isReusable) {
   return false;
 }
 
-Variant HHVM_METHOD(AsyncMysqlConnection, connectResult) {
-  auto* data = Native::data<AsyncMysqlConnection>(this_);
-
-  if (data->m_op) {
-    return AsyncMysqlConnectResult::newInstance(data->m_op,
-                                                data->m_clientStats);
-  } else {
-    LOG(ERROR) << "ConnectResult only available when Connection created by "
-                  "AsyncMysqlClient";
-  }
-  return false;
-}
-
-double HHVM_METHOD(AsyncMysqlConnection, lastActivityTime) {
-  auto* data = Native::data<AsyncMysqlConnection>(this_);
-
-  if (data->m_conn) {
-    auto d = std::chrono::duration_cast<std::chrono::microseconds>(
-        data->m_op->startTime().time_since_epoch());
-    return d.count() / 1000.0 / 1000.0;
-  } else {
-    LOG(ERROR) << "Accessing closed connection";
-  }
-  return false;
-}
-
 void HHVM_METHOD(AsyncMysqlConnection, close) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
@@ -686,47 +583,13 @@ double AsyncMysqlResult::endTime() {
   return d.count() / 1000.0 / 1000.0;
 }
 
-am::Operation* AsyncMysqlResult::op() {
-  if (m_op.get() == nullptr) {
-    // m_op is null if this object is directly created. It is possible if
-    // a derived class is defined that does not call this class' constructor.
-    SystemLib::throwInvalidOperationExceptionObject(
-        "AsyncMysqlErrorResult object is not properly initialized.");
-  }
-  return m_op.get();
-}
+#define DEFINE_PROXY_METHOD(cls, method, type)                                 \
+  type HHVM_METHOD(cls, method) { return Native::data<cls>(this_)->method(); } \
 
-Object AsyncMysqlResult::clientStats() {
-  return AsyncMysqlClientStats::newInstance(m_clientStats);
-}
-
-#define DEFINE_PROXY_METHOD(cls, method, type) \
-  type HHVM_METHOD(cls, method) { return Native::data<cls>(this_)->method(); }
-
-#define EXTENDS_ASYNC_MYSQL_RESULT(cls)            \
-  DEFINE_PROXY_METHOD(cls, elapsedMicros, int64_t) \
-  DEFINE_PROXY_METHOD(cls, startTime, double)      \
-  DEFINE_PROXY_METHOD(cls, endTime, double)        \
-  DEFINE_PROXY_METHOD(cls, clientStats, Object)
-
-///////////////////////////////////////////////////////////////////////////////
-// class AsyncMysqlConnectResult
-
-Class* AsyncMysqlConnectResult::s_class = nullptr;
-const StaticString AsyncMysqlConnectResult::s_className(
-    "AsyncMysqlConnectResult");
-
-IMPLEMENT_GET_CLASS(AsyncMysqlConnectResult)
-
-Object AsyncMysqlConnectResult::newInstance(std::shared_ptr<am::Operation> op,
-                                            db::ClientPerfStats values) {
-  Object ret{getClass()};
-  Native::data<AsyncMysqlConnectResult>(ret)
-      ->create(std::move(op), std::move(values));
-  return ret;
-}
-
-EXTENDS_ASYNC_MYSQL_RESULT(AsyncMysqlConnectResult)
+#define EXTENDS_ASYNC_MYSQL_RESULT(cls)                                        \
+  DEFINE_PROXY_METHOD(cls, elapsedMicros, int64_t)                             \
+  DEFINE_PROXY_METHOD(cls, startTime, double)                                  \
+  DEFINE_PROXY_METHOD(cls, endTime, double)                                    \
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlErrorResult
@@ -736,12 +599,29 @@ const StaticString AsyncMysqlErrorResult::s_className("AsyncMysqlErrorResult");
 
 IMPLEMENT_GET_CLASS(AsyncMysqlErrorResult)
 
-Object AsyncMysqlErrorResult::newInstance(std::shared_ptr<am::Operation> op,
-                                          db::ClientPerfStats values) {
+Object AsyncMysqlErrorResult::newInstance(
+    std::shared_ptr<am::Operation> op) {
   Object ret{getClass()};
-  Native::data<AsyncMysqlErrorResult>(ret)
-      ->create(std::move(op), std::move(values));
+  Native::data<AsyncMysqlErrorResult>(ret)->create(op);
   return ret;
+}
+
+void AsyncMysqlErrorResult::create(std::shared_ptr<am::Operation> op) {
+  m_op = op;
+}
+
+void AsyncMysqlErrorResult::sweep() {
+  m_op.reset();
+}
+
+am::Operation* AsyncMysqlErrorResult::op() {
+  if (m_op.get() == nullptr) {
+    // m_op is null if this object is directly created. It is possible if
+    // a derived class is defined that does not call this class' constructor.
+    SystemLib::throwInvalidOperationExceptionObject(
+      "AsyncMysqlErrorResult object is not properly initialized.");
+  }
+  return m_op.get();
 }
 
 EXTENDS_ASYNC_MYSQL_RESULT(AsyncMysqlErrorResult)
@@ -771,12 +651,9 @@ const StaticString AsyncMysqlQueryErrorResult::s_className(
 IMPLEMENT_GET_CLASS(AsyncMysqlQueryErrorResult)
 
 Object AsyncMysqlQueryErrorResult::newInstance(
-    std::shared_ptr<am::Operation> op,
-    db::ClientPerfStats values,
-    req::ptr<c_Vector> results) {
+    std::shared_ptr<am::Operation> op, req::ptr<c_Vector> results) {
   Object ret{getClass()};
-  Native::data<AsyncMysqlQueryErrorResult>(ret)
-      ->create(std::move(op), std::move(values), results);
+  Native::data<AsyncMysqlQueryErrorResult>(ret)->create(op, results);
   return ret;
 }
 
@@ -791,9 +668,8 @@ void AsyncMysqlQueryErrorResult::sweep() {
 }
 
 void AsyncMysqlQueryErrorResult::create(std::shared_ptr<am::Operation> op,
-                                        db::ClientPerfStats stats,
                                         req::ptr<c_Vector> results) {
-  m_parent.create(std::move(op), std::move(stats));
+  m_parent.create(op);
   m_query_results = results;
 }
 
@@ -821,21 +697,25 @@ void AsyncMysqlQueryResult::sweep() {
   m_query_result.reset();
 }
 
-Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::Operation> op,
-                                          db::ClientPerfStats stats,
-                                          am::QueryResult query_result) {
+Object AsyncMysqlQueryResult::newInstance(
+    std::shared_ptr<am::Operation> op, am::QueryResult query_result) {
   Object ret{getClass()};
   Native::data<AsyncMysqlQueryResult>(ret)
-      ->create(std::move(op), std::move(stats), std::move(query_result));
+    ->create(op, std::move(query_result));
   return ret;
 }
 
 void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
-                                   db::ClientPerfStats stats,
                                    am::QueryResult query_result) {
-  AsyncMysqlResult::create(std::move(op), std::move(stats));
-  m_query_result = folly::make_unique<am::QueryResult>(std::move(query_result));
-  m_field_index = req::make_shared<FieldIndex>(m_query_result->getRowFields());
+  m_op = op;
+  m_query_result =
+      folly::make_unique<am::QueryResult>(std::move(query_result));
+  m_field_index =
+      req::make_shared<FieldIndex>(m_query_result->getRowFields());
+}
+
+am::Operation* AsyncMysqlQueryResult::op() {
+  return m_op.get();
 }
 
 EXTENDS_ASYNC_MYSQL_RESULT(AsyncMysqlQueryResult)
@@ -965,10 +845,8 @@ String FieldIndex::getFieldString(size_t field_index) const {
 
 namespace {
 void throwAsyncMysqlException(const char* exception_type,
-                              std::shared_ptr<am::Operation> op,
-                              db::ClientPerfStats clientStats) {
-  auto error =
-      AsyncMysqlErrorResult::newInstance(op, std::move(clientStats));
+                              std::shared_ptr<am::Operation> op) {
+  auto error = AsyncMysqlErrorResult::newInstance(op);
 
   assert(op->result() == am::OperationResult::Failed ||
          op->result() == am::OperationResult::TimedOut ||
@@ -981,10 +859,8 @@ void throwAsyncMysqlException(const char* exception_type,
 
 void throwAsyncMysqlQueryException(const char* exception_type,
                                    std::shared_ptr<am::Operation> op,
-                                   db::ClientPerfStats clientStats,
                                    req::ptr<c_Vector> res) {
-  auto error = AsyncMysqlQueryErrorResult::newInstance(
-      op, std::move(clientStats), res);
+  auto error = AsyncMysqlQueryErrorResult::newInstance(op, res);
 
   assert(op->result() == am::OperationResult::Failed ||
          op->result() == am::OperationResult::TimedOut ||
@@ -999,12 +875,10 @@ void throwAsyncMysqlQueryException(const char* exception_type,
 void AsyncMysqlConnectEvent::unserialize(Cell& result) {
   if (m_op->ok()) {
     auto ret = AsyncMysqlConnection::newInstance(
-        m_op->releaseConnection(), m_op, std::move(m_clientStats));
-
+      m_op->releaseConnection());
     cellCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
-    throwAsyncMysqlException("AsyncMysqlConnectException", m_op,
-                             std::move(m_clientStats));
+    throwAsyncMysqlException("AsyncMysqlConnectException", m_op);
   }
 }
 
@@ -1017,14 +891,14 @@ void AsyncMysqlQueryEvent::unserialize(Cell& result) {
 
   if (m_query_op->ok()) {
     auto query_result = m_query_op->stealQueryResult();
-    auto ret = AsyncMysqlQueryResult::newInstance(
-        m_query_op, std::move(m_clientStats), std::move(query_result));
+    auto ret = AsyncMysqlQueryResult::newInstance(m_query_op,
+      std::move(query_result));
     cellCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
-    throwAsyncMysqlQueryException("AsyncMysqlQueryException",
-                                  m_query_op,
-                                  std::move(m_clientStats),
-                                  req::make<c_Vector>());
+    throwAsyncMysqlQueryException(
+        "AsyncMysqlQueryException",
+        m_query_op,
+        req::make<c_Vector>());
   }
 }
 
@@ -1040,8 +914,8 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   std::vector<am::QueryResult> query_results = m_multi_op->stealQueryResults();
   results->reserve(query_results.size());
   for (int i = 0; i < query_results.size(); ++i) {
-    auto ret = AsyncMysqlQueryResult::newInstance(
-        m_multi_op, m_clientStats, std::move(query_results[i]));
+    auto ret = AsyncMysqlQueryResult::newInstance(m_multi_op,
+      std::move(query_results[i]));
     results->t_add(std::move(ret));
   }
   query_results.clear();
@@ -1049,8 +923,8 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   if (m_multi_op->ok()) {
     cellDup(make_tv<KindOfObject>(results.get()), result);
   } else {
-    throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_op,
-                                  std::move(m_clientStats), results);
+    throwAsyncMysqlQueryException(
+        "AsyncMysqlQueryException", m_multi_op, results);
   }
 }
 
@@ -1431,12 +1305,7 @@ public:
     HHVM_ME(AsyncMysqlConnectionPool, getPoolStats);
     HHVM_ME(AsyncMysqlConnectionPool, connect);
     Native::registerNativeDataInfo<AsyncMysqlConnectionPool>(
-        AsyncMysqlConnectionPool::s_className.get(), DISABLE_COPY_AND_SWEEP);
-
-    HHVM_ME(AsyncMysqlClientStats, ioEventLoopMicrosAvg);
-    HHVM_ME(AsyncMysqlClientStats, callbackDelayMicrosAvg);
-    Native::registerNativeDataInfo<AsyncMysqlClientStats>(
-        AsyncMysqlClientStats::s_className.get());
+      AsyncMysqlConnectionPool::s_className.get(), DISABLE_COPY_AND_SWEEP);
 
     HHVM_ME(AsyncMysqlConnection, query);
     HHVM_ME(AsyncMysqlConnection, queryf);
@@ -1450,23 +1319,12 @@ public:
     HHVM_ME(AsyncMysqlConnection, port);
     HHVM_ME(AsyncMysqlConnection, setReusable);
     HHVM_ME(AsyncMysqlConnection, isReusable);
-    HHVM_ME(AsyncMysqlConnection, connectResult);
-    HHVM_ME(AsyncMysqlConnection, lastActivityTime);
-
     Native::registerNativeDataInfo<AsyncMysqlConnection>(
-        AsyncMysqlConnection::s_className.get(), Native::NDIFlags::NO_COPY);
-
-    HHVM_ME(AsyncMysqlConnectResult, elapsedMicros);
-    HHVM_ME(AsyncMysqlConnectResult, startTime);
-    HHVM_ME(AsyncMysqlConnectResult, endTime);
-    HHVM_ME(AsyncMysqlConnectResult, clientStats);
-    Native::registerNativeDataInfo<AsyncMysqlConnectResult>(
-        AsyncMysqlConnectResult::s_className.get(), Native::NDIFlags::NO_COPY);
+      AsyncMysqlConnection::s_className.get(), Native::NDIFlags::NO_COPY);
 
     HHVM_ME(AsyncMysqlErrorResult, elapsedMicros);
     HHVM_ME(AsyncMysqlErrorResult, startTime);
     HHVM_ME(AsyncMysqlErrorResult, endTime);
-    HHVM_ME(AsyncMysqlErrorResult, clientStats);
     HHVM_ME(AsyncMysqlErrorResult, mysql_errno);
     HHVM_ME(AsyncMysqlErrorResult, mysql_error);
     HHVM_ME(AsyncMysqlErrorResult, failureType);
@@ -1482,7 +1340,6 @@ public:
     HHVM_ME(AsyncMysqlQueryResult, elapsedMicros);
     HHVM_ME(AsyncMysqlQueryResult, startTime);
     HHVM_ME(AsyncMysqlQueryResult, endTime);
-    HHVM_ME(AsyncMysqlErrorResult, clientStats);
     HHVM_ME(AsyncMysqlQueryResult, numRowsAffected);
     HHVM_ME(AsyncMysqlQueryResult, lastInsertId);
     HHVM_ME(AsyncMysqlQueryResult, numRows);

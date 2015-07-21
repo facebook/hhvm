@@ -813,7 +813,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
   if (ptr != nullptr) {
     size_t size = ptr - in.data();
     cmd = String::attach(StringData::Make(in.data(), size, CopyString));
-  } else if (in[0] != '\0') {
+  } else if (!in.empty() && in[0] != '\0') {
     // There are no spaces, the entire string is the command
     cmd = String::attach(StringData::Make(in.data(), CopyString));
     return;

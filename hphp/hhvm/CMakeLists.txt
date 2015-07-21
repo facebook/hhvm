@@ -5,7 +5,7 @@ list(APPEND CXX_SOURCES ${files})
 # Windows targets use a generate rc file for embedding libraries
 if(CYGWIN OR MSVC OR MING)
   add_custom_target(generate_embed
-    COMMAND echo \"// THIS IS A GENERATED FILE \" > ${CMAKE_CURRENT_SOURCE_DIR}/embed.rc
+    COMMAND echo // THIS IS A GENERATED FILE > ${CMAKE_CURRENT_BINARY_DIR}/embed.rc
     COMMENT "generating embed.rc")
 
   # this is a cmake trick to allow items added later to depend properly
@@ -13,10 +13,10 @@ if(CYGWIN OR MSVC OR MING)
     DEPENDS generate_embed
     COMMENT "Generating RC file")
 
-    list(APPEND CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/embed.rc)
+    list(APPEND CXX_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/embed.rc)
     set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-      ${CMAKE_CURRENT_SOURCE_DIR}/embed.rc)
-    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/embed.rc
+      ${CMAKE_CURRENT_BINARY_DIR}/embed.rc)
+    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/embed.rc
       PROPERTIES GENERATED TRUE)
 endif()
 

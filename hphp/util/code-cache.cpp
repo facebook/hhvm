@@ -122,13 +122,42 @@ CodeCache::CodeCache()
       : kRoundUp;
   };
 
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  // On Windows, sbrk() returns a 64-bit address. A statically allocated array
+  // will have a 32-bit address for code cache. The drawback is that the
+  // maximum code cache size is pre-defined.
+  const int kMaxCodeSize = 300000000;
+  static char code[kMaxCodeSize];
+#endif
+
   if (base != (uint8_t*)-1) {
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+    allocationSize += kRoundUp - 1;
+    if (RuntimeOption::EvalJitAutoTCShift) {
+      allocationSize += kRoundUp;
+    }
+    if (allocationSize > kMaxCodeSize) {
+      fprintf(stderr, "could not allocate %zd bytes for translation cache\n",
+              allocationSize);
+      exit(1);
+    }
+    if (!jit::deltaFits((int64_t)code, sz::dword)) {
+      fprintf(stderr,
+              "translation cache base address 0x%p is larger than 2^31\n",
+              code);
+      exit(1);
+    }
+    base = (uint8_t*)code;
+    baseAdjustment = -(uint64_t)base & (kRoundUp - 1);
+    baseAdjustment += shiftTC();
+#else
     assert(!(allocationSize & (kRoundUp - 1)));
     // Make sure that we have space to round up to the start of a huge page
     allocationSize += -(uint64_t)base & (kRoundUp - 1);
     allocationSize += shiftTC();
     base = (uint8_t*)sbrk(allocationSize);
     baseAdjustment = allocationSize - m_totalSize;
+#endif
   }
   if (base == (uint8_t*)-1) {
     allocationSize = m_totalSize + kRoundUp - 1;

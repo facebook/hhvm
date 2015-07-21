@@ -37,10 +37,8 @@ void php_shutdown_crypt_r();
 
 extern void _crypt_extended_init_r(void);
 
-/*PHPAPI char* crypt(const char *key, const char *salt);*/
-char *php_crypt_r (const char *__key, const char *__salt, struct php_crypt_extended_data * __data);
-
 #define MD5_HASH_MAX_LEN 120
+#define PHP_MAX_SALT_LEN 123
 
 #include "crypt-blowfish.h"
 

@@ -1,6 +1,6 @@
 <?php
 
-foreach(array('UTF-8', 'uCs-2') as $targetCharset) {
+foreach(array('UTF-8', 'UCS-2LE') as $targetCharset) {
   $s = fopen('php://memory', 'rw');
   fwrite($s, "\xe9"); // euro currency symbol in ISO-8859-1
   fseek($s, 0);

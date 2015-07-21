@@ -138,12 +138,24 @@ bool checkNativeFunc(const Func* func, bool verbose) {
 
   if (func->builtinFuncPtr() == Native::unimplementedWrapper) return true;
 
+  if (func->isAsync()) {
+    verify_error(func->unit(), func,
+      "<<__Native>> function %s%s%s is declared async; <<__Native>> functions "
+      "can return Awaitable<T>, but can not be declared async.\n",
+      clsname ? clsname->data() : "",
+      clsname ? "::" : "",
+      funcname->data()
+    );
+    return false;
+  }
+
   auto const& tc = func->returnTypeConstraint();
   auto const message = Native::checkTypeFunc(info.sig, tc, func);
 
   if (message) {
     auto const tstr = info.sig.toString(clsname ? clsname->data() : nullptr,
                                         funcname->data());
+
     verify_error(func->unit(), func,
       "<<__Native>> function %s%s%s does not match C++ function "
       "signature (%s): %s\n",

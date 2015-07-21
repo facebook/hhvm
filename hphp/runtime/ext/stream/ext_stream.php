@@ -336,9 +336,9 @@ function stream_select(mixed &$read,
  *               STREAM_AWAIT_ERROR: Error
  */
 <<__Native>>
-async function stream_await(resource $fp,
-                            int $events,
-                            float $timeout = 0.0): Awaitable<int>;
+function stream_await(resource $fp,
+                      int $events,
+                      float $timeout = 0.0): Awaitable<int>;
 
 /**
  * Sets blocking or non-blocking mode on a stream.  This function works for

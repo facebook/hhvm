@@ -84,7 +84,7 @@ class MCRouter {
    * @throws On failure (e.g. if the value already exists)
    */
   <<__Native>>
-  async public function add(
+  public function add(
     string $key,
     string $value,
     int $flags = 0,
@@ -102,7 +102,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  async public function set(
+  public function set(
     string $key,
     string $value,
     int $flags = 0,
@@ -120,7 +120,7 @@ class MCRouter {
    * @throws On failure (e.g. No existing value to replace)
    */
   <<__Native>>
-  async public function replace(
+  public function replace(
     string $key,
     string $value,
     int $flags = 0,
@@ -136,7 +136,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  async public function prepend(string $key, string $value): Awaitable<void>;
+  public function prepend(string $key, string $value): Awaitable<void>;
 
   /**
    * Modify a value
@@ -147,7 +147,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  async public function append(string $key, string $value): Awaitable<void>;
+  public function append(string $key, string $value): Awaitable<void>;
 
   /**
    * Atomicly increment a numeric value
@@ -159,7 +159,7 @@ class MCRouter {
    * @throws On failure (e.g. $key not found)
    */
   <<__Native>>
-  async public function incr(string $key, int $val): Awaitable<int>;
+  public function incr(string $key, int $val): Awaitable<int>;
 
   /**
    * Atomicly decrement a numeric value
@@ -171,7 +171,7 @@ class MCRouter {
    * @throws On failure (e.g. $key not found)
    */
   <<__Native>>
-  async public function decr(string $key, int $val): Awaitable<int>;
+  public function decr(string $key, int $val): Awaitable<int>;
 
   /**
    * Delete a key
@@ -181,7 +181,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  async public function del(string $key): Awaitable<void>;
+  public function del(string $key): Awaitable<void>;
 
   /**
    * Flush deleted/expired values
@@ -191,7 +191,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  async public function flushAll(int $delay = 0): Awaitable<void>;
+  public function flushAll(int $delay = 0): Awaitable<void>;
 
   /**
    * Retreive a value
@@ -202,7 +202,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  async public function get(string $key): Awaitable<string>;
+  public function get(string $key): Awaitable<string>;
 
   /**
    * Get the remote server's current version
@@ -212,7 +212,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  async public function version(): Awaitable<string>;
+  public function version(): Awaitable<string>;
 
   /**
    * Translate an mc_op_* numeric code to something human-readable

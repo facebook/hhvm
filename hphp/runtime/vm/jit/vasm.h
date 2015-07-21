@@ -114,7 +114,6 @@ void allocateRegisters(Vunit&, const Abi&);
 void fuseBranches(Vunit&);
 void optimizeExits(Vunit&);
 void optimizeJmps(Vunit&);
-void hoistFallbackccs(Vunit&);
 void optimizeCopies(Vunit&, const Abi&);
 void optimizePhis(Vunit&);
 void removeDeadCode(Vunit&);

@@ -73,6 +73,7 @@ X(rawurlencode)
 X(round)
 X(serialize)
 X(sha1)
+X(strlen)
 X(str_repeat)
 X(str_split)
 X(substr)
@@ -164,6 +165,7 @@ folly::Optional<Type> const_fold(ISS& env, const bc::FCallBuiltin& op) {
   X(s_rawurlencode)
   X(s_round)
   X(s_sha1)
+  X(s_strlen)
   X(s_str_repeat)
   X(s_str_split)
   X(s_substr)
@@ -309,6 +311,16 @@ bool builtin_min2(ISS& env, const bc::FCallBuiltin& op) {
   return minmax2(env, op);
 }
 
+bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 1) return false;
+  auto const ty = popC(env);
+  // Returns null and raises a warning when input is an array, resource, or
+  // object.
+  if (ty.subtypeOfAny(TPrim, TStr)) nothrow(env);
+  push(env, ty.subtypeOfAny(TPrim, TStr) ? TInt : TOptInt);
+  return true;
+}
+
 const StaticString
   s_max2("__SystemLib\\max2"),
   s_min2("__SystemLib\\min2");
@@ -323,6 +335,7 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
   X(max2)
   X(min2)
   X(mt_rand)
+  X(strlen)
 
 #undef X
 

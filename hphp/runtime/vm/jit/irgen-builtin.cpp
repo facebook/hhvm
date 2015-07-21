@@ -44,6 +44,7 @@ const StaticString
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
   s_sqrt("sqrt"),
+  s_strlen("strlen"),
   s_max2("__SystemLib\\max2"),
   s_min2("__SystemLib\\min2"),
   s_ceil("ceil"),
@@ -294,6 +295,23 @@ SSATmp* opt_sqrt(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
+SSATmp* opt_strlen(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  auto const val = topC(env);
+  auto const ty  = val->type();
+
+  if (ty <= TStr) {
+    return gen(env, LdStrLen, val);
+  }
+
+  if (ty.subtypeOfAny(TNull, TBool, TInt, TDbl)) {
+    return gen(env, LdStrLen, gen(env, ConvCellToStr, val));
+  }
+
+  return nullptr;
+}
+
 SSATmp* minmax(IRGS& env, const bool is_max) {
   auto const val1 = topC(env, BCSPOffset{0});
   auto const ty1 = val1->type();
@@ -382,6 +400,7 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(count)
     X(is_a)
     X(sqrt)
+    X(strlen)
     X(max2)
     X(ceil)
     X(floor)
@@ -1496,37 +1515,6 @@ void emitGetMemoKey(IRGS& env) {
   auto const key = gen(env, GetMemoKey, obj);
   push(env, key);
   gen(env, DecRef, obj);
-}
-
-void emitStrlen(IRGS& env) {
-  auto const inType = topC(env)->type();
-
-  if (inType <= TStr) {
-    auto const input = popC(env);
-    if (input->hasConstVal()) {
-      // static string; fold its strlen operation
-      push(env, cns(env, input->strVal()->size()));
-      return;
-    }
-
-    push(env, gen(env, LdStrLen, input));
-    gen(env, DecRef, input);
-    return;
-  }
-
-  if (inType <= TNull) {
-    popC(env);
-    push(env, cns(env, 0));
-    return;
-  }
-
-  if (inType <= TBool) {
-    // strlen(true) == 1, strlen(false) == 0.
-    push(env, gen(env, ConvBoolToInt, popC(env)));
-    return;
-  }
-
-  interpOne(env, TInt | TInitNull, 1);
 }
 
 void emitSilence(IRGS& env, Id localId, SilenceOp subop) {

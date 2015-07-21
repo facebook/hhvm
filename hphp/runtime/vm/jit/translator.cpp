@@ -403,7 +403,6 @@ static const struct {
   { OpLateBoundCls,{None,             Stack1,       OutClassRef,       1 }},
   { OpNativeImpl,  {None,             None,         OutNone,           0 }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject,         1 }},
-  { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
   { OpIncStat,     {None,             None,         OutNone,           0 }},
   { OpIdx,         {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
@@ -999,7 +998,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::StaticLoc:
   case Op::StaticLocInit:
   case Op::String:
-  case Op::Strlen:
   case Op::This:
   case Op::True:
   case Op::Unbox:

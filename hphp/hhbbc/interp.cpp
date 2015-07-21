@@ -2147,20 +2147,6 @@ void in(ISS& env, const bc::Await&) {
   pushTypeFromWH(env, popC(env));
 }
 
-void in(ISS& env, const bc::Strlen&) {
-  auto const t1 = popC(env);
-  auto const v1 = tv(t1);
-  if (v1) {
-    if (v1->m_type == KindOfStaticString) {
-      constprop(env);
-      return push(env, ival(v1->m_data.pstr->size()));
-    }
-    return push(env, TInitCell);
-  }
-  if (t1.subtypeOf(TStr)) { nothrow(env); return push(env, TInt); }
-  push(env, TInitCell);
-}
-
 void in(ISS& env, const bc::IncStat&) {}
 
 void in(ISS& env, const bc::Idx&) {

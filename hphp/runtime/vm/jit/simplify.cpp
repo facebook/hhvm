@@ -1954,7 +1954,12 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) :nullptr;
+  return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) : nullptr;
+}
+
+SSATmp* simplifyLdStrLen(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  return src->hasConstVal(TStr) ? cns(env, src->strVal()->size()) : nullptr;
 }
 
 SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
@@ -2167,6 +2172,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsWaitHandle)
   X(LdClsCtx)
   X(LdClsName)
+  X(LdStrLen)
   X(CheckCtxThis)
   X(CastCtxThis)
   X(LdObjClass)

@@ -1,7 +1,7 @@
 <?php
 
 function b($s) {
-  if (strlen($s) == 4) {
+  if ($s === 'floo') {
     return 12;
   }
   $GLOBALS['z'] = 234;

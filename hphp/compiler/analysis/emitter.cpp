@@ -3971,14 +3971,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.ArrayIdx();
         return true;
       }
-    } else if (call->isCallToFunction("strlen")) {
-      if (params && params->getCount() == 1) {
-        visit((*params)[0]);
-        emitConvertToCell(e);
-        call->changeToBytecode();
-        e.Strlen();
-        return true;
-      }
     } else if (call->isCallToFunction("max")) {
       if (params && params->getCount() == 2) {
         emitFuncCall(e, call, "__SystemLib\\max2", params);

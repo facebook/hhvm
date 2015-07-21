@@ -1,0 +1,20 @@
+int(0)
+int(1)
+int(0)
+int(6)
+int(6)
+int(7)
+
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
+NULL
+int(4)
+int(4)
+int(5)
+int(6)
+int(8)
+int(7)
+int(7)
+int(12)

@@ -161,9 +161,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       auto ty = localType().unbox();
       return ty <= TDbl ? ty : TCell;
     }
-    case OutStrlen:
-      return topType(env, BCSPOffset{0}) <= TStr ?
-        TInt : TUncountedInit;
     case OutClassRef:   return TCls;
     case OutFPushCufSafe: return folly::none;
 

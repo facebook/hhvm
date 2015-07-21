@@ -72,13 +72,8 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
   $output_arr = null;
   $output = \exec($cmd, $output_arr, $ret);
 
-  // 4 -> busy
-  // 6 -> just started up
-  // 7 -> still starting up
-  //
-  // Yes this is terrible, one of these days I'll get around to fixing up the
-  // hh_client return codes.
-  if ($ret == 4 || $ret === 6 || $ret == 7) {
+  // 7 -> timeout, or ran out of retries
+  if ($ret == 7) {
     return new TypecheckResult(
       TypecheckStatus::SERVER_BUSY,
       'Hack typechecking failed: server not ready'

@@ -10,16 +10,46 @@ abstract final class CacheKeys {
   const string RESULT_CACHE_KEY = '__systemlib__hh_client_result';
 }
 
-function typecheck_impl(string $client_name): TypecheckResult {
+function locate_hh(string $client_name): ?string {
+  if (\strlen($client_name) > 0 && $client_name[0] == '/') {
+    if (\is_executable($client_name)) {
+      return $client_name;
+    } else {
+      return null;
+    }
+  }
+
+  $base = \dirname(\PHP_BINARY);
+
+  $next_to_hhvm = $base . '/' . $client_name;
+  if (\is_executable($next_to_hhvm)) {
+    return $next_to_hhvm;
+  }
+
+  $oss_build = $base . '/../hack/bin/' . $client_name;
+  if (\is_executable($oss_build)) {
+    return $oss_build;
+  }
+
   $cmd = \sprintf('which %s > /dev/null 2>&1', \escapeshellarg($client_name));
   $ret = null;
   $output_arr = null;
   \exec($cmd, $output_arr, $ret);
 
-  if ($ret !== 0) {
+  if ($ret === 0) {
+    return $client_name;
+  } else {
+    return null;
+  }
+}
+
+function typecheck_impl(string $input_client_name): TypecheckResult {
+  $client_name = locate_hh($input_client_name);
+
+  if (!$client_name) {
     $error_text = \sprintf(
       'Hack typechecking failed: typechecker command not found: %s',
-      $client_name,
+      $input_client_name,
     );
 
     return new TypecheckResult(TypecheckStatus::COMMAND_NOT_FOUND, $error_text);

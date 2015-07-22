@@ -569,7 +569,13 @@ bool StackTraceBase::Addr2line(const char *filename, const char *address,
 #define DMGL_VERBOSE  (1 << 3)  /* Include implementation details. */
 
 extern "C" {
+#ifdef _MSC_VER
+  char* cplus_demangle(const char* mangled, int options) {
+    return strdup(mangled);
+  }
+#else
   extern char *cplus_demangle (const char *mangled, int options);
+#endif
 }
 
 std::string StackTrace::Demangle(const char *mangled) {

@@ -20,7 +20,7 @@
 #ifndef incl_XDEBUG_XML_H_
 #define incl_XDEBUG_XML_H_
 
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
+#include <cstring>
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,41 +28,38 @@ namespace HPHP {
 struct String;
 
 struct xdebug_xml_attribute {
-  char *name;
-  char *value;
-  int   name_len;
-  int   value_len;
-  xdebug_xml_attribute *next;
-  int   free_name;
-  int   free_value;
+  char* name;
+  char* value;
+  int name_len;
+  int value_len;
+  xdebug_xml_attribute* next;
+  int free_name;
+  int free_value;
 };
 
 /* todo: support multiple text nodes inside an element */
 struct xdebug_xml_text_node {
-  char *text;
-  int   free_value;
-  int   encode;
-  int   text_len;
+  char* text;
+  int free_value;
+  int encode;
+  int text_len;
 };
 
 struct xdebug_xml_node {
-  char *tag;
-  xdebug_xml_text_node *text;
-  xdebug_xml_attribute *attribute;
-  xdebug_xml_node      *child;
-  xdebug_xml_node      *next;
-  int   free_tag;
+  char* tag;
+  xdebug_xml_text_node* text;
+  xdebug_xml_attribute* attribute;
+  xdebug_xml_node* child;
+  xdebug_xml_node* next;
+  int free_tag;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // Construction/Destruction
-xdebug_xml_node* xdebug_xml_node_init_ex(char *tag, int free_tag);
-inline xdebug_xml_node* xdebug_xml_node_init(char* tag) {
-  return xdebug_xml_node_init_ex(tag, 0);
-}
+xdebug_xml_node* xdebug_xml_node_init(char* tag, int free_tag = 0);
+void xdebug_xml_node_dtor(xdebug_xml_node*);
 
-void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output);
-void xdebug_xml_node_dtor(xdebug_xml_node* xml);
+String xdebug_xml_return_node(xdebug_xml_node*);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Attribute adding
@@ -93,23 +90,11 @@ inline void xdebug_xml_add_attribute(xdebug_xml_node* xml,
   xdebug_xml_add_attribute_ex(xml, attr, val, 0, 0);
 }
 
-// Duplicates the passed values before adding the attribute. This is not a
-// solution, just a temporary fix
-inline void xdebug_xml_add_attribute_dup(xdebug_xml_node* xml,
-                                         const char* attr, const char* val) {
-  // const-cast is okay since we are not freeing the passed attribute
-  xdebug_xml_add_attribute_ex(xml, const_cast<char*>(attr),
-                              xdstrdup(val), 0, 1);
-}
+/* Duplicates the passed value before adding the attribute. */
+void xdebug_xml_add_attribute_dup(xdebug_xml_node*, const char*, const char*);
 
-// Adds the given attribute, int value pair. This is not a solution, just a
-// temporary fix
-inline void xdebug_xml_add_attribute(xdebug_xml_node* xml,
-                              const char* attr, int val) {
-  // const-cast is okay since we are not freeing the passed attribute
-  xdebug_xml_add_attribute_ex(xml, const_cast<char*>(attr),
-                              xdebug_sprintf("%d", val), 0, 1);
-}
+/* Adds the given attribute, int value pair. */
+void xdebug_xml_add_attribute(xdebug_xml_node* xml, const char* attr, int val);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Adding Children

@@ -17,103 +17,137 @@
  */
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
+
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/zend-string.h"
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
-// Xml encode the passed string
-String xdebug_xmlize(const char* string, size_t len) {
-  String str(string, CopyString);
-  if (len) {
-    str = string_replace(str, "&","&amp;");
-    str = string_replace(str, ">", "&gt;");
-    str = string_replace(str, "<", "&lt;");
-    str = string_replace(str, "\"", "&quot;");
-    str = string_replace(str, "'", "&#39;");
-    str = string_replace(str, "\n", "&#10;");
-    str = string_replace(str, "\r", "&#13;");
-    str = string_replace(str, "\0", "&#0;");
-    return str;
-  }
-  return str;
-}
+namespace {
+////////////////////////////////////////////////////////////////////////////////
 
-static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr,
-                                        xdebug_str* output) {
-  String tmp;
-  xdebug_str_addl(output, " ", 1, 0);
+void xdebug_xml_return_attribute(
+  StringBuffer& out,
+  const xdebug_xml_attribute* attr
+) {
+  out.append(' ');
 
-  /* attribute name */
-  tmp = xdebug_xmlize(attr->name, attr->name_len);
-  xdebug_str_addl(output, tmp.get()->mutableData(), tmp.size(), 0);
+  // Attribute name.
+  out.append(xdebug_xmlize(attr->name, attr->name_len));
 
-  /* attribute value */
-  xdebug_str_addl(output, "=\"", 2, 0);
+  // Attribute value.
+  out.append("=\"");
   if (attr->value) {
-    tmp = xdebug_xmlize(attr->value, attr->value_len);
-    xdebug_str_add(output, tmp.get()->mutableData(), 0);
+    out.append(xdebug_xmlize(attr->value, attr->value_len));
   }
-  xdebug_str_addl(output, "\"", 1, 0);
+  out.append('"');
 
   if (attr->next) {
-    xdebug_xml_return_attribute(attr->next, output);
+    xdebug_xml_return_attribute(out, attr->next);
   }
 }
 
-static void xdebug_xml_return_text_node(xdebug_xml_text_node* node,
-                                        xdebug_str* output) {
-  xdebug_str_addl(output, "<![CDATA[", 9, 0);
+void xdebug_xml_return_text_node(
+  StringBuffer& out,
+  const xdebug_xml_text_node* node
+) {
+  out.append("<![CDATA[");
   if (node->encode) {
-    /* if cdata tags are in the text, then we must base64 encode */
-    String encoded_str = string_base64_encode((char*) node->text,
-                                              node->text_len);
-    char* encoded_text = encoded_str.get()->mutableData();
-    xdebug_str_add(output, encoded_text, 0);
+    // If cdata tags are in the text, then we must base64 encode.
+    out.append(string_base64_encode(node->text, node->text_len));
   } else {
-    xdebug_str_add(output, node->text, 0);
+    out.append(node->text);
   }
-  xdebug_str_addl(output, "]]>", 3, 0);
+  out.append("]]>");
 }
 
-void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output) {
-  xdebug_str_addl(output, "<", 1, 0);
-  xdebug_str_add(output, node->tag, 0);
+void xdebug_xml_return_node_impl(StringBuffer& out, xdebug_xml_node* node) {
+  out.append('<');
+  out.append(node->tag);
 
   if (node->text && node->text->encode) {
     xdebug_xml_add_attribute_ex(node, "encoding", "base64", 0, 0);
   }
   if (node->attribute) {
-    xdebug_xml_return_attribute(node->attribute, output);
+    xdebug_xml_return_attribute(out, node->attribute);
   }
-  xdebug_str_addl(output, ">", 1, 0);
+  out.append('>');
 
   if (node->child) {
-    xdebug_xml_return_node(node->child, output);
+    xdebug_xml_return_node_impl(out, node->child);
   }
 
   if (node->text) {
-    xdebug_xml_return_text_node(node->text, output);
+    xdebug_xml_return_text_node(out, node->text);
   }
 
-  xdebug_str_addl(output, "</", 2, 0);
-  xdebug_str_add(output, node->tag, 0);
-  xdebug_str_addl(output, ">", 1, 0);
+  out.append("</");
+  out.append(node->tag);
+  out.append('>');
 
   if (node->next) {
-    xdebug_xml_return_node(node->next, output);
+    xdebug_xml_return_node_impl(out, node->next);
   }
 }
 
-xdebug_xml_node* xdebug_xml_node_init_ex(char* tag, int free_tag) {
+void xdebug_xml_text_node_dtor(xdebug_xml_text_node* node) {
+  if (node->free_value && node->text) {
+    xdfree(node->text);
+  }
+  xdfree(node);
+}
+
+
+void xdebug_xml_attribute_dtor(xdebug_xml_attribute* attr) {
+  if (attr->next) {
+    xdebug_xml_attribute_dtor(attr->next);
+  }
+  if (attr->free_name) {
+    xdfree(attr->name);
+  }
+  if (attr->free_value) {
+    xdfree(attr->value);
+  }
+  xdfree(attr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+}
+
+/* Xml encode the passed string. */
+String xdebug_xmlize(const char* string, size_t len) {
+  StringBuffer out;
+  for (size_t i = 0; i < len; ++i) {
+    switch (string[i]) {
+    case '&':  out.append("&amp;");   break;
+    case '>':  out.append("&gt;");    break;
+    case '<':  out.append("&lt;");    break;
+    case '"':  out.append("&quot;");  break;
+    case '\'': out.append("&#39;");   break;
+    case '\n': out.append("&#10;");   break;
+    case '\r': out.append("&#13;");   break;
+    case '\0': out.append("&#0;");    break;
+    default:   out.append(string[i]); break;
+    }
+  }
+  return out.detach();
+}
+
+String xdebug_xml_return_node(xdebug_xml_node* node) {
+  StringBuffer out;
+  xdebug_xml_return_node_impl(out, node);
+  return out.detach();
+}
+
+xdebug_xml_node* xdebug_xml_node_init(char* tag, int free_tag /* = 0 */) {
   auto xml = (xdebug_xml_node*)xdmalloc(sizeof(xdebug_xml_node));
 
   xml->tag = tag;
@@ -126,13 +160,12 @@ xdebug_xml_node* xdebug_xml_node_init_ex(char* tag, int free_tag) {
   return xml;
 }
 
-void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute,
-                                  size_t attribute_len, char *value,
+void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char* attribute,
+                                  size_t attribute_len, char* value,
                                   size_t value_len, int free_name,
                                   int free_value) {
-  xdebug_xml_attribute *attr =
-    (xdebug_xml_attribute*) xdmalloc(sizeof (xdebug_xml_attribute));
-  xdebug_xml_attribute **ptr;
+  auto attr = (xdebug_xml_attribute*)xdmalloc(sizeof(xdebug_xml_attribute));
+  xdebug_xml_attribute** ptr;
 
   /* Init structure */
   attr->name = attribute;
@@ -151,8 +184,8 @@ void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute,
   *ptr = attr;
 }
 
-void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child) {
-  xdebug_xml_node **ptr;
+void xdebug_xml_add_child(xdebug_xml_node* xml, xdebug_xml_node* child) {
+  xdebug_xml_node** ptr;
 
   ptr = &xml->child;
   while (*ptr != nullptr) {
@@ -161,30 +194,22 @@ void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child) {
   *ptr = child;
 }
 
-static void xdebug_xml_text_node_dtor(xdebug_xml_text_node* node) {
-  if (node->free_value && node->text) {
-    xdfree(node->text);
-  }
-  xdfree(node);
-}
-
 void xdebug_xml_add_text(
-  xdebug_xml_node *xml,
-  const char *text,
-  int free /* = 1*/
+  xdebug_xml_node* xml,
+  const char* text,
+  int free /* = 1 */
 ) {
   // Safe as we'll onlyr read the string from the XML node, not write/free it.
   xdebug_xml_add_text_ex(xml, const_cast<char*>(text), strlen(text), free, 0);
 }
 
-void xdebug_xml_add_text_encode(xdebug_xml_node *xml, char *text) {
+void xdebug_xml_add_text_encode(xdebug_xml_node* xml, char* text) {
   xdebug_xml_add_text_ex(xml, text, strlen(text), 1, 1);
 }
 
-void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length,
+void xdebug_xml_add_text_ex(xdebug_xml_node* xml, char* text, int length,
                             int free_text, int encode) {
-  xdebug_xml_text_node *node =
-    (xdebug_xml_text_node*) xdmalloc(sizeof(xdebug_xml_text_node));
+  auto node = (xdebug_xml_text_node*)xdmalloc(sizeof(xdebug_xml_text_node));
   node->free_value = free_text;
   node->encode = encode;
 
@@ -199,17 +224,20 @@ void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length,
   }
 }
 
-static void xdebug_xml_attribute_dtor(xdebug_xml_attribute *attr) {
-  if (attr->next) {
-    xdebug_xml_attribute_dtor(attr->next);
-  }
-  if (attr->free_name) {
-    xdfree(attr->name);
-  }
-  if (attr->free_value) {
-    xdfree(attr->value);
-  }
-  xdfree(attr);
+void xdebug_xml_add_attribute(xdebug_xml_node* xml, const char* attr, int val) {
+  // const-cast is okay since we are not freeing the passed attribute.
+  auto const cattr = const_cast<char*>(attr);
+  xdebug_xml_add_attribute_ex(xml, cattr, xdebug_sprintf("%d", val), 0, 1);
+}
+
+void xdebug_xml_add_attribute_dup(
+  xdebug_xml_node* xml,
+  const char* attr,
+  const char* val
+) {
+  // const-cast is okay since we are not freeing the passed attribute.
+  auto const cattr = const_cast<char*>(attr);
+  xdebug_xml_add_attribute_ex(xml, cattr, xdstrdup(val), 0, 1);
 }
 
 void xdebug_xml_node_dtor(xdebug_xml_node* xml) {

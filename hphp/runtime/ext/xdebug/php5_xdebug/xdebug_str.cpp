@@ -17,63 +17,26 @@
  */
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
+
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <locale.h>
 
-void xdebug_str_add(xdebug_str *xs, char *str, int f) {
-  xdebug_str_addl(xs, str, strlen(str), f);
-}
-
-void xdebug_str_addl(xdebug_str *xs, char *str, int le, int f) {
-  if (xs->l + le > xs->a - 1) {
-    xs->d = (char*) xdrealloc(xs->d, xs->a + le + XDEBUG_STR_PREALLOC);
-    xs->a = xs->a + le + XDEBUG_STR_PREALLOC;
-  }
-  if (!xs->l) {
-    xs->d[0] = '\0';
-  }
-  memcpy(xs->d + xs->l, str, le);
-  xs->d[xs->l + le] = '\0';
-  xs->l = xs->l + le;
-
-  if (f) {
-    xdfree(str);
-  }
-}
-
-void xdebug_str_chop(xdebug_str *xs, int c) {
-  if (c > xs->l) {
-    /* Do nothing if the chop amount is larger than the buffer size */
-  } else {
-    xs->l -= c;
-    xs->d[xs->l] = '\0';
-  }
-}
-
-void xdebug_str_free(xdebug_str *s) {
-  if (s->d) {
-    xdfree(s->d);
-  }
-}
-
-char *xdebug_sprintf(const char* fmt, ...) {
-  char   *new_str;
-  int     size = 1;
+char* xdebug_sprintf(const char* fmt, ...) {
+  int size = 1;
   va_list args;
 
-  char* orig_locale = setlocale(LC_ALL, nullptr);
+  auto const orig_locale = setlocale(LC_ALL, nullptr);
   setlocale(LC_ALL, "C");
-  new_str = (char *) xdmalloc(size);
+  SCOPE_EXIT { setlocale(LC_ALL, orig_locale); };
+  auto new_str = (char*)xdmalloc(size);
   for (;;) {
-    int n;
-
     va_start(args, fmt);
-    n = vsnprintf(new_str, size, fmt, args);
+    auto const n = vsnprintf(new_str, size, fmt, args);
     va_end(args);
 
     if (n > -1 && n < size) {
@@ -84,9 +47,8 @@ char *xdebug_sprintf(const char* fmt, ...) {
     } else {
       size = n + 1;
     }
-    new_str = (char *) xdrealloc(new_str, size);
+    new_str = (char*)xdrealloc(new_str, size);
   }
-  setlocale(LC_ALL, orig_locale);
   return new_str;
 }
 
@@ -95,8 +57,8 @@ char* xdstrdup(const char* str) {
     return nullptr;
   }
 
-  size_t size = strlen(str) + 1;
-  char* dup = (char*) xdmalloc(size);
+  auto const size = strlen(str) + 1;
+  auto const dup = (char*)xdmalloc(size);
   memcpy(dup, str, size);
   return dup;
 }

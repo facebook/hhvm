@@ -21,26 +21,6 @@
 #ifndef incl_XDEBUG_STR_H_
 #define incl_XDEBUG_STR_H_
 
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
-
-#define XDEBUG_STR_PREALLOC 1024
-#define xdebug_str_ptr_init(str) \
-  str = (xdebug_str*) xdmalloc(sizeof(xdebug_str)); \
-  str->l = 0; str->a = 0; str->d = nullptr;
-#define xdebug_str_ptr_dtor(str) xdfree(str->d); xdfree(str)
-#define xdebug_str_dtor(str)     xdfree(str.d)
-
-typedef struct xdebug_str {
-  int   l;
-  int   a;
-  char *d;
-} xdebug_str;
-
-void xdebug_str_add(xdebug_str *xs, char *str, int f);
-void xdebug_str_addl(xdebug_str *xs, char *str, int le, int f);
-void xdebug_str_chop(xdebug_str *xs, int c);
-void xdebug_str_free(xdebug_str *s);
-
 char* xdebug_sprintf(const char* fmt, ...);
 char* xdstrdup(const char*);
 

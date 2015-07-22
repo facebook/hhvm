@@ -579,20 +579,17 @@ void XDebugServer::deinitDbgp() {
 }
 
 void XDebugServer::sendMessage(xdebug_xml_node& xml) {
-  // Convert xml to an xdebug_str.
-  xdebug_str xml_message = {0, 0, nullptr};
-  xdebug_xml_return_node(&xml, &xml_message);
-  size_t msg_len = xml_message.l + sizeof(XML_MSG_HEADER) - 1;
+  auto const message = xdebug_xml_return_node(&xml);
+  auto const message_len = message.size() + sizeof(XML_MSG_HEADER) - 1;
 
-  // Log the message
-  log("-> %s\n\n", xml_message.d);
+  log("-> %s\n\n", message.data());
   logFlush();
 
   StringBuffer buf;
-  buf.append(static_cast<int64_t>(msg_len));
+  buf.append(static_cast<int64_t>(message_len));
   buf.append('\0');
   buf.append(XML_MSG_HEADER);
-  buf.append(xml_message.d);
+  buf.append(message);
   buf.append('\0');
 
   write(m_socket, buf.data(), buf.size());

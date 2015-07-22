@@ -13,45 +13,48 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_ABI_H
-#define incl_HPHP_JIT_ABI_H
 
-#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/abi.h"
+
+#include "hphp/runtime/base/arch.h"
+
+#include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Machine-specific register conventions.
- */
-struct Abi {
-  RegSet gpUnreserved;   // unreserved general purpose 64-bit registers
-  RegSet gpReserved;     // reserved general purpose 64-bit registers
-  RegSet simdUnreserved; // unreserved floating point / simd 128-bit registers
-  RegSet simdReserved;   // reserved floating point / simd 128-bit registers
-  RegSet calleeSaved;    // callee-saved (gp and simd)
-  RegSet sf;             // status flags
-  bool   canSpill;       // are we allowed to spill values to the stack?
+PhysReg rvmfp() {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::rVmFp;
+    case Arch::ARM:
+      return arm::rVmFp;
+  }
+  not_reached();
+}
 
-  // convenience methods
-  RegSet unreserved() const { return gpUnreserved | simdUnreserved | sf; }
-  RegSet gp() const { return gpUnreserved | gpReserved; }
-  RegSet simd() const { return simdUnreserved | simdReserved; }
-  RegSet all() const { return gp() | simd() | sf; }
-};
+PhysReg rvmsp() {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::rVmSp;
+    case Arch::ARM:
+      return arm::rVmSp;
+  }
+  not_reached();
+}
 
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Special VM registers.
- */
-PhysReg rvmfp();
-PhysReg rvmsp();
-PhysReg rvmtl();
+PhysReg rvmtl() {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::rVmTl;
+    case Arch::ARM:
+      return arm::rVmTl;
+  }
+  not_reached();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

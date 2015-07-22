@@ -72,18 +72,6 @@ struct BackEnd final : jit::BackEnd {
     return PhysReg(reg::rsp);
   }
 
-  PhysReg rVmSp() override {
-    return x64::rVmSp;
-  }
-
-  PhysReg rVmFp() override {
-    return x64::rVmFp;
-  }
-
-  PhysReg rVmTl() override {
-    return x64::rVmTl;
-  }
-
   /*
    * enterTCHelper does not save callee-saved registers except %rbp. This means
    * when we call it from C++, we have to tell gcc to clobber all the other

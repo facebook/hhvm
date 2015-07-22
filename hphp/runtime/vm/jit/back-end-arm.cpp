@@ -61,18 +61,6 @@ struct BackEnd final : jit::BackEnd {
     return PhysReg(vixl::sp);
   }
 
-  PhysReg rVmSp() override {
-    return PhysReg(arm::rVmSp);
-  }
-
-  PhysReg rVmFp() override {
-    return PhysReg(arm::rVmFp);
-  }
-
-  PhysReg rVmTl() override {
-    return PhysReg(arm::rVmTl);
-  }
-
 #define CALLEE_SAVED_BARRIER() \
   asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
                "x26", "x27", "x28")

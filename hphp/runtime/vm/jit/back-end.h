@@ -82,9 +82,6 @@ struct BackEnd {
   }
 
   virtual PhysReg rSp() = 0;
-  virtual PhysReg rVmSp() = 0;
-  virtual PhysReg rVmFp() = 0;
-  virtual PhysReg rVmTl() = 0;
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
 

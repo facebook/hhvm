@@ -17,8 +17,8 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -132,13 +132,13 @@ PhysReg forceAlloc(const SSATmp& tmp) {
       "unexpected StkPtr dest from {}",
       opcodeName(opc)
     );
-    return mcg->backEnd().rVmSp();
+    return rvmsp();
   }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rVmFp.
   if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(TFramePtr)) {
-    return mcg->backEnd().rVmFp();
+    return rvmfp();
   }
 
   return InvalidReg;
@@ -227,17 +227,14 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::call:
     case Vinstr::callm:
     case Vinstr::callr:
-      defs = abi.all() - abi.calleeSaved;
+      defs = abi.all() - (abi.calleeSaved | rvmfp());
+
       switch (arch()) {
-        case Arch::ARM:
-          defs.add(PhysReg(arm::rLinkReg));
-          defs.remove(PhysReg(arm::rVmFp));
-          break;
-        case Arch::X64:
-          defs.remove(reg::rbp);
-          break;
+      case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
+      case Arch::X64: break;
       }
       break;
+
     case Vinstr::bindcall:
       defs = abi.all();
       switch (arch()) {
@@ -247,10 +244,10 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
     case Vinstr::contenter:
     case Vinstr::callstub:
-      defs = abi.all();
+      defs = abi.all() - RegSet(rvmfp());
       switch (arch()) {
-      case Arch::ARM: defs.remove(PhysReg(arm::rVmFp)); break;
-      case Arch::X64: defs -= reg::rbp | x64::rVmTl; break;
+      case Arch::ARM: break;
+      case Arch::X64: defs.remove(x64::rVmTl); break;
       }
       break;
     case Vinstr::callfaststub:

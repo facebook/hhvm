@@ -156,7 +156,7 @@ struct BackEnd final : jit::BackEnd {
                          SRFlags flags,
                          folly::Optional<FPInvOffset> spOff,
                          ServiceRequest req,
-                         const ServiceReqArgVec& argv) override {
+                         const SvcReqArgVec& argv) override {
     return arm::emitServiceReqWork(cb, start, flags, spOff, req, argv);
   }
 

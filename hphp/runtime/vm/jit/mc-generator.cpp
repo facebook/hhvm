@@ -1129,7 +1129,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
     getFreeStub(code.frozen(), &mcg->cgFixups()),
     optSPOff,
     REQ_BIND_JMP,
-    RipRelative(toSmash),
+    toSmash,
     skWillDefer.toAtomicInt(),
     TransFlags{}.packed
   );
@@ -2518,29 +2518,6 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
   if (!force && !Stats::enabled()) return;
   intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
   v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
-}
-
-// generic vasm service-request generator. target specific details
-// are hidden by the svcreq{} instruction.
-void emitServiceReq(Vout& v, TCA stub_block,
-                    ServiceRequest req, const ServiceReqArgVec& argv) {
-  TRACE(3, "Emit Service Req %s(", serviceReqName(req));
-  VregList args;
-  for (auto& argInfo : argv) {
-    switch (argInfo.m_kind) {
-      case ServiceReqArgInfo::Immediate: {
-        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
-        args.push_back(v.cns(argInfo.m_imm));
-        break;
-      }
-      default: {
-        always_assert(false);
-        break;
-      }
-    }
-  }
-  auto const regs = x64::kCrossTraceRegs | x64::rVmSp;
-  v << svcreq{req, regs, v.makeTuple(args), stub_block};
 }
 
 }}

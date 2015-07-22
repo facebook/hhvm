@@ -2309,10 +2309,16 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   v << lea{srcLoc(inst, 0).reg()[cellsToBytes(extra->irSPOff.offset)],
            sync_sp};
   v << syncvmsp{sync_sp};
-  emitServiceReq(v, nullptr, REQ_RETRANSLATE_OPT, {
-    {ServiceReqArgInfo::Immediate, {extra->sk.toAtomicInt()}},
-    {ServiceReqArgInfo::Immediate, {static_cast<uint64_t>(extra->transId)}}
-  });
+
+  VregList args;
+  args.push_back(v.cns(extra->sk.toAtomicInt()));
+  args.push_back(v.cns(static_cast<uint64_t>(extra->transId)));
+
+  v << svcreq{
+    REQ_RETRANSLATE_OPT,
+    kCrossTraceRegsResumed,
+    v.makeTuple(args)
+  };
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {

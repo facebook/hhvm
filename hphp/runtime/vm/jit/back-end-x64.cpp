@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -124,7 +125,7 @@ struct BackEnd final : jit::BackEnd {
                          SRFlags flags,
                          folly::Optional<FPInvOffset> spOff,
                          ServiceRequest req,
-                         const ServiceReqArgVec& argv) override {
+                         const SvcReqArgVec& argv) override {
     return x64::emitServiceReqWork(cb, start, flags, spOff, req, argv);
   }
 

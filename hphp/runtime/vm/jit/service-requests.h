@@ -16,15 +16,20 @@
 #ifndef incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/srckey.h"
+
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+
 #include "hphp/util/asm-x64.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+
+struct ActRec;
+
+namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -64,13 +69,18 @@ namespace HPHP { namespace jit {
   REQ(POST_INTERP_RET) \
   REQ(POST_DEBUGGER_RET)
 
+/*
+ * Service request types.
+ */
 enum ServiceRequest {
 #define REQ(nm) REQ_##nm,
   SERVICE_REQUESTS
 #undef REQ
 };
 
-// ID to name mapping for tracing.
+/*
+ * ID to name mapping for tracing.
+ */
 inline const char* serviceReqName(int req) {
   static const char* reqNames[] = {
 #define REQ(nm) #nm,
@@ -82,16 +92,19 @@ inline const char* serviceReqName(int req) {
 
 #undef SERVICE_REQUESTS
 
+//////////////////////////////////////////////////////////////////////
+// Service request emission.
+
 /*
- * Various flags that are passed to emitServiceReq.  May be or'd
- * together.
+ * Flags for emitting service requests.
  */
 enum class SRFlags {
   None = 0,
 
   /*
-   * Indicates if the service request is persistent. For non-persistent
-   * requests, the service request stub may be reused.
+   * Whether the service request is persistent.
+   *
+   * For non-persistent requests, the service request stub may be reused.
    */
   Persist = 1 << 0,
 };
@@ -105,61 +118,64 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
 }
 
 /*
- * Req machinery. We sometimes emit code that is unable to proceed
- * without translator assistance; e.g., a basic block whose successor is
- * unknown. We leave one of these request arg blobs in m_data, and point
- * to it at callout-time.
+ * Type-discriminated service request argument.
+ *
+ * Each argument is written to a register when the service request is made:
+ *  - Immediates are loaded directly.
+ *  - Addresses are loaded using an rip-relative lea to aid code relocation.
+ *  - Condition codes produce a setcc based on the status flags passed to the
+ *    emit routine.
  */
+struct SvcReqArg {
+  enum class Kind { Immed, Address, CondCode };
 
-struct ServiceReqArgInfo {
-  enum {
-    Immediate,
-    CondCode,
-    RipRelative,
-  } m_kind;
+  explicit SvcReqArg(uint64_t imm) : kind{Kind::Immed}, imm{imm} {}
+  explicit SvcReqArg(TCA addr) : kind{Kind::Address}, addr{addr} {}
+  explicit SvcReqArg(ConditionCode cc) : kind{Kind::CondCode}, cc{cc} {}
+
+public:
+  Kind kind;
   union {
-    uint64_t m_imm;
-    jit::ConditionCode m_cc;
+    uint64_t imm;
+    TCA addr;
+    ConditionCode cc;
   };
 };
 
-inline ServiceReqArgInfo RipRelative(TCA addr) {
-  return ServiceReqArgInfo {
-    ServiceReqArgInfo::RipRelative,
-    { (uint64_t)addr }
-  };
-}
-
-using ServiceReqArgVec = jit::vector<ServiceReqArgInfo>;
-
-union ServiceReqArg {
-  TCA tca;
-  Offset offset;
-  SrcKey::AtomicInt sk;
-  TransFlags trflags;
-  TransID transID;
-  bool boolVal;
-  ActRec* ar;
-};
-
-/*
- * Any changes to the size or layout of this struct must be reflected in
- * handleSRHelper() in translator-asm-helpers.S.
- */
-struct ServiceReqInfo {
-  ServiceRequest req;
-  TCA stub;
-  ServiceReqArg args[4];
-};
-static_assert(sizeof(ServiceReqInfo) == 0x30,
-              "rsp adjustments in handleSRHelper");
+using SvcReqArgVec = jit::vector<SvcReqArg>;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Assembly stub called by translated code to pack argument registers into a
- * ServiceReqInfo, along with some other bookkeeping tasks before a service
- * request.
+ * Service request metadata.
+ *
+ * This structure is created on the stack by handleSRHelper() from the SR
+ * arguments passed in registers.  Any changes to its size or layout of must be
+ * reflected in handleSRHelper() in translator-asm-helpers.S.
+ */
+struct ServiceReqInfo {
+  ServiceRequest req;
+  TCA stub;
+
+  union {
+    TCA tca;
+    Offset offset;
+    SrcKey::AtomicInt sk;
+    TransFlags trflags;
+    TransID transID;
+    bool boolVal;
+    ActRec* ar;
+  } args[4];
+};
+
+static_assert(sizeof(ServiceReqInfo) == 0x30,
+              "rsp adjustments in handleSRHelper");
+
+/*
+ * Service request assembly stub.
+ *
+ * Called by translated code before a service request to pack argument
+ * registers into a ServiceReqInfo and perform some other bookkeeping tasks.
  */
 extern "C" void handleSRHelper();
 

@@ -45,7 +45,7 @@ TCA emitServiceReqWork(CodeBlock& cb,
                        SRFlags flags,
                        folly::Optional<FPInvOffset> spOff,
                        ServiceRequest req,
-                       const ServiceReqArgVec&);
+                       const SvcReqArgVec&);
 
 size_t reusableStubSize();
 

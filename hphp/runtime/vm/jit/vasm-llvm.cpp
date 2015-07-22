@@ -915,7 +915,7 @@ struct LLVMEmitter {
             mcg->getFreeStub(frozen, &mcg->cgFixups()),
             optSPOff,
             REQ_BIND_JMP,
-            RipRelative(jmpIp),
+            jmpIp,
             req.target.toAtomicInt(),
             req.trflags.packed
           );
@@ -1844,7 +1844,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
     mcg->getFreeStub(frozen, &mcg->cgFixups(), &reused),
     optSPOff,
     REQ_BIND_JMP,
-    RipRelative(mcg->code.base()),
+    mcg->code.base(),
     inst.target.toAtomicInt(),
     inst.trflags.packed
   );

@@ -24,14 +24,8 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-inline ServiceReqArgInfo ccServiceReqArgInfo(jit::ConditionCode cc) {
-  return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
-}
-
-//////////////////////////////////////////////////////////////////////
-
-struct SRArgMaker {
-  ServiceReqArgVec& argv;
+struct SvcReqArgMaker {
+  SvcReqArgVec& argv;
 
   template<class Head, class... Tail>
   void go(Head h, Tail... tail) {
@@ -41,26 +35,26 @@ struct SRArgMaker {
   void go() {}
 
 private:
+  void pack(const SvcReqArg& arg) { argv.emplace_back(arg); }
+  void pack(TCA addr) { argv.emplace_back(addr); }
+  void pack(ConditionCode cc) { argv.emplace_back(cc); }
+
   template<class T>
   typename std::enable_if<
     std::is_integral<T>::value ||
-      std::is_pointer<T>::value ||
-      std::is_enum<T>::value
+    std::is_pointer<T>::value ||
+    std::is_enum<T>::value
   >::type pack(T arg) {
-    // For things with a sensible cast to uint64_T, we assume we meant to pass
-    // an immediate arg.
-    argv.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
-  }
-
-  void pack(const ServiceReqArgInfo& argInfo) {
-    argv.push_back(argInfo);
+    // For anything else with a sensible cast to uint64_t, we assume we meant
+    // to pass an immediate arg.
+    argv.emplace_back(uint64_t(arg));
   }
 };
 
 template<class... Args>
-ServiceReqArgVec packServiceReqArgs(Args&&... args) {
-  auto ret = ServiceReqArgVec{};
-  SRArgMaker{ret}.go(std::forward<Args>(args)...);
+SvcReqArgVec packServiceReqArgs(Args&&... args) {
+  auto ret = SvcReqArgVec{};
+  SvcReqArgMaker{ret}.go(std::forward<Args>(args)...);
   return ret;
 }
 

@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -420,9 +421,6 @@ TCA popDebuggerCatch(const ActRec* ar);
 
 void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
                  bool force = false);
-
-void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
-                    const ServiceReqArgVec& argv);
 
 bool shouldPGOFunc(const Func& func);
 

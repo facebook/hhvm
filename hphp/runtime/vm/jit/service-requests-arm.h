@@ -26,7 +26,7 @@ namespace arm {
 
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                        folly::Optional<FPInvOffset>,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
+                       ServiceRequest req, const SvcReqArgVec& argInfo);
 void emitBindJ(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                SrcKey dest);
 size_t reusableStubSize();

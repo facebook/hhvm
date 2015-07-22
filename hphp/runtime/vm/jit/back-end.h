@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 
 namespace HPHP { namespace jit {
 
@@ -101,7 +102,7 @@ struct BackEnd {
     SRFlags flags,
     folly::Optional<FPInvOffset> spOff,
     ServiceRequest req,
-    const ServiceReqArgVec& argv) = 0;
+    const SvcReqArgVec& argv) = 0;
 
   virtual size_t reusableStubSize() const = 0;
 

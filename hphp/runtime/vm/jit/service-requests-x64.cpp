@@ -126,7 +126,7 @@ void emitServiceReqImpl(CodeBlock& stub,
                         SRFlags flags,
                         folly::Optional<FPInvOffset> spOff,
                         ServiceRequest req,
-                        const ServiceReqArgVec& argv) {
+                        const SvcReqArgVec& argv) {
   const bool persist = flags & SRFlags::Persist;
   Asm as{stub};
   FTRACE(2, "Emit Service Req @{} {}(", stub.base(), serviceReqName(req));
@@ -149,21 +149,21 @@ void emitServiceReqImpl(CodeBlock& stub,
   for (int i = 0; i < argv.size(); ++i) {
     auto reg = serviceReqArgRegs[i];
     const auto& argInfo = argv[i];
-    switch (argInfo.m_kind) {
-      case ServiceReqArgInfo::Immediate: {
-        FTRACE(2, "{}, ", argInfo.m_imm);
-        as.    emitImmReg(argInfo.m_imm, reg);
+    switch (argInfo.kind) {
+      case SvcReqArg::Kind::Immed: {
+        FTRACE(2, "{}, ", argInfo.imm);
+        as.    emitImmReg(argInfo.imm, reg);
       } break;
-      case ServiceReqArgInfo::RipRelative: {
-        FTRACE(2, "{}(%rip), ", argInfo.m_imm);
-        as.    lea(rip[argInfo.m_imm], reg);
+      case SvcReqArg::Kind::Address: {
+        FTRACE(2, "{}(%rip), ", argInfo.imm);
+        as.    lea(rip[argInfo.imm], reg);
       } break;
-      case ServiceReqArgInfo::CondCode: {
+      case SvcReqArg::Kind::CondCode: {
         // Already set before VM reg save.
         DEBUG_ONLY TCA start = as.frontier();
-        as.    setcc(argInfo.m_cc, rbyte(reg));
+        as.    setcc(argInfo.cc, rbyte(reg));
         assertx(start - as.frontier() <= kMovSize);
-        FTRACE(2, "cc({}), ", cc_names[argInfo.m_cc]);
+        FTRACE(2, "cc({}), ", cc_names[argInfo.cc]);
       } break;
     }
   }
@@ -212,7 +212,7 @@ TCA emitServiceReqWork(CodeBlock& cb,
                        SRFlags flags,
                        folly::Optional<FPInvOffset> spOff,
                        ServiceRequest req,
-                       const ServiceReqArgVec& argv) {
+                       const SvcReqArgVec& argv) {
   auto const is_reused = start != cb.frontier();
 
   CodeBlock stub;
@@ -237,7 +237,7 @@ void emitBindJ(CodeBlock& cb,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     optSPOff,
     REQ_BIND_JMP,
-    RipRelative(smashInfo.primary),
+    smashInfo.primary,
     dest.toAtomicInt(),
     trflags.packed
   );
@@ -329,10 +329,10 @@ void emitBindJmpccFirst(CodeBlock& cb,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     optSPOff,
     REQ_BIND_JMPCC_FIRST,
-    RipRelative(jccAddr),
+    jccAddr,
     targetSk1.toAtomicInt(),
     targetSk0.toAtomicInt(),
-    ccServiceReqArgInfo(cc)
+    cc
   );
   CodeCursor cursor{cb, jccAddr};
   as.jcc(cc, sr);

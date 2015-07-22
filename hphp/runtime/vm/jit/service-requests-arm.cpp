@@ -46,7 +46,7 @@ TCA emitServiceReqWork(CodeBlock& cb,
                        SRFlags flags,
                        folly::Optional<FPInvOffset> spOff,
                        ServiceRequest req,
-                       const ServiceReqArgVec& argv) {
+                       const SvcReqArgVec& argv) {
   MacroAssembler a { cb };
 
   const bool persist = flags & SRFlags::Persist;
@@ -61,11 +61,11 @@ TCA emitServiceReqWork(CodeBlock& cb,
   for (auto i = 0; i < argv.size(); ++i) {
     auto reg = serviceReqArgReg(i);
     auto const& arg = argv[i];
-    switch (arg.m_kind) {
-      case ServiceReqArgInfo::Immediate:
-        a.   Mov  (reg, arg.m_imm);
+    switch (arg.kind) {
+      case SvcReqArg::Kind::Immed:
+        a.   Mov  (reg, arg.imm);
         break;
-      case ServiceReqArgInfo::CondCode:
+      case SvcReqArg::Kind::CondCode:
         not_implemented();
         break;
       default: not_reached();

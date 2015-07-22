@@ -55,6 +55,7 @@ function join($glue, $pieces = null);
 function str_split($str, $split_length = 1);
 function chunk_split($body, $chunklen = 76, $end = "\r\n");
 function strtok($str, $token = null);
+function str_getcsv(?string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): array<?string>;
 function str_replace($search, $replace, $subject, &$count = null);
 function str_ireplace($search, $replace, $subject, &$count = null);
 function substr_replace($str, $replacement, $start, $length = 0x7FFFFFFF);

@@ -199,55 +199,55 @@ Kohana_ArrTest::test_unshift with data set #0
 Kohana_ArrTest::test_unshift with data set #1
 .
 Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #0
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #1
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #2
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #3
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_delete
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_delete_all
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_increment with data set #0
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_increment with data set #1
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_increment with data set #2
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_increment with data set #3
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_multiple_set
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #0
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #1
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #10
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #11
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #12
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #13
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #2
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #3
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #4
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #5
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #6
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #7
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #8
-.
+S
 Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #9
-.
+S
 Kohana_CacheTest::test_cloning_fails
 .
 Kohana_CacheTest::test_config with data set #0
@@ -275,6 +275,8 @@ Kohana_CacheTest::test_sanitize_id with data set #5
 Kohana_Cache_FileTest::test_delete
 .
 Kohana_Cache_FileTest::test_delete_all
+.
+Kohana_Cache_FileTest::test_garbage_collection
 .
 Kohana_Cache_FileTest::test_ignore_delete_file
 .
@@ -835,7 +837,7 @@ Kohana_ExceptionTest::test_constructor with data set #9
 Kohana_ExceptionTest::test_text with data set #0
 .
 Kohana_FeedTest::test_create with data set #0
-E
+.
 Kohana_FeedTest::test_parse with data set #0
 .
 Kohana_FeedTest::test_parse with data set #1
@@ -845,17 +847,17 @@ Kohana_FileTest::test_mime with data set #0
 Kohana_FileTest::test_split_join with data set #0
 .
 Kohana_FormTest::test_check with data set #0
-E
+.
 Kohana_FormTest::test_check with data set #1
-E
+.
 Kohana_FormTest::test_check with data set #2
-E
+.
 Kohana_FormTest::test_check with data set #3
-E
+.
 Kohana_FormTest::test_check with data set #4
-E
+.
 Kohana_FormTest::test_check with data set #5
-E
+.
 Kohana_FormTest::test_close
 .
 Kohana_FormTest::test_file with data set #0
@@ -863,13 +865,13 @@ Kohana_FormTest::test_file with data set #0
 Kohana_FormTest::test_image with data set #0
 .
 Kohana_FormTest::test_input with data set #0
-E
+.
 Kohana_FormTest::test_input with data set #1
-E
+.
 Kohana_FormTest::test_input with data set #2
-E
+.
 Kohana_FormTest::test_input with data set #3
-E
+.
 Kohana_FormTest::test_label with data set #0
 .
 Kohana_FormTest::test_label with data set #1
@@ -883,13 +885,13 @@ Kohana_FormTest::test_label with data set #4
 Kohana_FormTest::test_label with data set #5
 .
 Kohana_FormTest::test_open with data set #0
-E
+.
 Kohana_FormTest::test_open with data set #1
-E
+.
 Kohana_FormTest::test_open with data set #2
-E
+.
 Kohana_FormTest::test_open with data set #3
-E
+.
 Kohana_FormTest::test_select with data set #0
 .
 Kohana_FormTest::test_select with data set #1
@@ -903,17 +905,17 @@ Kohana_FormTest::test_select with data set #4
 Kohana_FormTest::test_select with data set #5
 .
 Kohana_FormTest::test_submit with data set #0
-E
+.
 Kohana_FormTest::test_text with data set #0
-E
+.
 Kohana_FormTest::test_text with data set #1
-E
+.
 Kohana_FormTest::test_text with data set #2
-E
+.
 Kohana_FormTest::test_text with data set #3
-E
+.
 Kohana_FormTest::test_text with data set #4
-E
+.
 Kohana_HTMLTest::test_anchor with data set #0
 .
 Kohana_HTMLTest::test_anchor with data set #1
@@ -982,6 +984,10 @@ Kohana_HTTPTest::test_redirect with data set #1
 F
 Kohana_HTTPTest::test_redirect with data set #2
 F
+Kohana_HTTPTest::test_request_headers with data set #0
+.
+Kohana_HTTPTest::test_request_headers with data set #1
+.
 Kohana_HTTP_HeaderTest::test_accept_quality with data set #0
 .
 Kohana_HTTP_HeaderTest::test_accept_quality with data set #1
@@ -1513,7 +1519,11 @@ Kohana_Request_Client_ExternalTest::test_options with data set #2
 Kohana_Request_Client_ExternalTest::test_options with data set #3
 .
 Kohana_Request_Client_InternalTest::test_response_failure_status with data set #0
-FATAL
+.
+Kohana_Request_Client_InternalTest::test_response_failure_status with data set #1
+.
+Kohana_Request_Client_InternalTest::test_response_failure_status with data set #2
+.
 Kohana_ResponseTest::test_body with data set #0
 .
 Kohana_ResponseTest::test_body with data set #1
@@ -1540,17 +1550,79 @@ Kohana_RouteTest::test_cache_returns_false_if_cache_dnx
 .
 Kohana_RouteTest::test_cache_stores_route_objects
 .
+Kohana_RouteTest::test_compile_uses_custom_regex_if_specificed
+.
+Kohana_RouteTest::test_composing_url_from_route with data set #0
+.
+Kohana_RouteTest::test_composing_url_from_route with data set #1
+.
+Kohana_RouteTest::test_composing_url_from_route with data set #2
+.
 Kohana_RouteTest::test_constructor_only_changes_custom_regex_if_passed with data set #0
 .
 Kohana_RouteTest::test_constructor_returns_if_uri_is_null
 .
+Kohana_RouteTest::test_defaults_are_not_used_if_param_is_identical
+.
+Kohana_RouteTest::test_defaults_are_used_if_params_arent_specified with data set #0
+.
+Kohana_RouteTest::test_defaults_are_used_if_params_arent_specified with data set #1
+.
+Kohana_RouteTest::test_external_route_includes_params_in_uri with data set #0
+.
+Kohana_RouteTest::test_external_route_includes_params_in_uri with data set #1
+.
+Kohana_RouteTest::test_external_route_includes_params_in_uri with data set #2
+.
 Kohana_RouteTest::test_get_throws_exception_if_route_dnx
 .
+Kohana_RouteTest::test_is_external_route_from_host
+.
+Kohana_RouteTest::test_matches_returns_array_of_parameters_on_successful_match with data set #0
+.
 Kohana_RouteTest::test_matches_returns_false_on_failure with data set #0
-FATAL
+.
 Kohana_RouteTest::test_name_returns_routes_name_or_false_if_dnx
 .
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #0
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #1
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #10
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #2
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #3
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #4
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #5
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #6
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #7
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #8
+.
+Kohana_RouteTest::test_optional_groups_containing_specified_params with data set #9
+.
+Kohana_RouteTest::test_required_parameters_are_needed with data set #0
+.
+Kohana_RouteTest::test_reverse_routing_returns_routes_uri_if_route_is_static with data set #0
+.
+Kohana_RouteTest::test_route_filter_modify_params with data set #0
+.
+Kohana_RouteTest::test_route_filter_modify_params with data set #1
+.
+Kohana_RouteTest::test_route_uri_encode_parameters with data set #0
+.
 Kohana_RouteTest::test_route_uses_custom_regex_passed_to_constructor
+.
+Kohana_RouteTest::test_uri_fills_required_uri_segments_from_params with data set #0
+.
+Kohana_RouteTest::test_uri_throws_exception_if_required_params_are_missing with data set #0
+.
+Kohana_RouteTest::test_uri_throws_exception_if_required_params_are_missing with data set #1
 .
 Kohana_SecurityTest::test_csrf_token with data set #0
 .
@@ -1693,9 +1765,9 @@ Kohana_TextTest::test_auto_link_urls with data set #8
 Kohana_TextTest::test_auto_link_urls with data set #9
 .
 Kohana_TextTest::test_auto_para_does_not_enclose_html_tags_in_paragraphs with data set #0
-E
+.
 Kohana_TextTest::test_auto_para_does_not_enclose_html_tags_in_paragraphs with data set #1
-E
+.
 Kohana_TextTest::test_auto_para_encloses_slot_in_paragraph
 .
 Kohana_TextTest::test_auto_para_replaces_multiple_newlines_with_paragraph
@@ -1871,6 +1943,18 @@ Kohana_URLTest::test_base with data set #7
 Kohana_URLTest::test_base with data set #8
 .
 Kohana_URLTest::test_base with data set #9
+.
+Kohana_URLTest::test_if_invalid_host_throws_exception
+.
+Kohana_URLTest::test_if_untrusted_host_throws_exception
+.
+Kohana_URLTest::test_is_trusted_host with data set #0
+.
+Kohana_URLTest::test_is_trusted_host with data set #1
+.
+Kohana_URLTest::test_is_trusted_host with data set #2
+.
+Kohana_URLTest::test_is_trusted_host with data set #3
 .
 Kohana_URLTest::test_query with data set #0
 .

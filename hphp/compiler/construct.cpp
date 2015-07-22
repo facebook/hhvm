@@ -22,7 +22,6 @@
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/ast_walker.h"
 #include "hphp/compiler/analysis/exceptions.h"
 #include "hphp/parser/parse-time-fatal-exception.h"
 
@@ -48,6 +47,19 @@ Construct::Construct(BlockScopePtr scope,
 {
 }
 
+bool Construct::skipRecurse() const {
+  switch (getKindOf()) {
+    case KindOfFunctionStatement:
+    case KindOfMethodStatement:
+    case KindOfClassStatement:
+    case KindOfInterfaceStatement:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
 void Construct::copyLocationTo(ConstructPtr other) {
   always_assert(other->getFileScope() == getFileScope());
   other->m_r = m_r;
@@ -57,7 +69,7 @@ void Construct::resetScope(BlockScopeRawPtr scope) {
   setBlockScope(scope);
   for (int i = 0, n = getKidCount(); i < n; i++) {
     if (ConstructPtr kid = getNthKid(i)) {
-      if (FunctionWalker::SkipRecurse(kid)) continue;
+      if (kid->skipRecurse()) continue;
       kid->resetScope(scope);
     }
   }
@@ -73,7 +85,7 @@ int Construct::getChildrenEffects() const {
   for (int i = getKidCount(); i--; ) {
     ConstructPtr child = getNthKid(i);
     if (child) {
-      if (FunctionWalker::SkipRecurse(child)) continue;
+      if (child->skipRecurse()) continue;
       childrenEffects |= child->getContainedEffects();
       if ((childrenEffects & UnknownEffect) == UnknownEffect) {
         break;
@@ -311,62 +323,17 @@ void Construct::dumpNode(int spc) {
   std::cout << "\n";
 }
 
-class ConstructDumper : public FunctionWalker {
-public:
-  ConstructDumper(int spc, AnalysisResultConstPtr ar,
-                  bool functionOnly = false) :
-      m_spc(spc), m_ar(ar), m_functionOnly(functionOnly), m_showEnds(true) {}
-
-  void walk(AstWalkerStateVec state,
-            ConstructRawPtr endBefore, ConstructRawPtr endAfter) {
-    AstWalker::walk(*this, state, endBefore, endAfter);
-  }
-  int before(ConstructRawPtr cp) {
-    int ret = m_functionOnly ? FunctionWalker::before(cp) : WalkContinue;
-    cp->dumpNode(m_spc);
-    m_spc += 2;
-    m_showEnds = false;
-    return ret;
-  }
-  int after(ConstructRawPtr cp) {
-    if (m_showEnds) {
-      int s = m_spc;
-      while (s > 0) {
-        int n = s > 10 ? 10 : s;
-        std::cout << ("          "+10-n);
-        s -= n;
-      }
-      std::cout << "<<";
-      cp->dumpNode(0);
-    }
-    m_spc -= 2;
-    // HACK: dump the closure function as a "child" of the
-    // closure expression
-    ClosureExpressionPtr c =
-      dynamic_pointer_cast<ClosureExpression>(cp);
-    if (c) {
-      c->getClosureFunction()->dump(m_spc, m_ar);
-    }
-    return WalkContinue;
-  }
-private:
-  int m_spc;
-  AnalysisResultConstPtr m_ar;
-  bool m_functionOnly;
-  bool m_showEnds;
-};
-
 void Construct::dump(int spc, AnalysisResultConstPtr ar) {
-  ConstructDumper cd(spc, ar);
-  cd.walk(AstWalkerStateVec(ConstructRawPtr(this)),
-    ConstructRawPtr(), ConstructRawPtr());
-}
+  dumpNode(spc);
+  for (int i = 0, n = getKidCount(); i < n; i++) {
+    if (auto kid = getNthKid(i)) {
+      kid->dump(spc + 2, ar);
+    }
+  }
 
-void Construct::dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
-                     const AstWalkerStateVec &state,
-                     ConstructPtr endBefore, ConstructPtr endAfter) {
-  ConstructDumper cd(spc, ar, functionOnly);
-  cd.walk(state, endBefore, endAfter);
+  if (is(KindOfClosureExpression)) {
+    static_cast<ClosureExpression*>(this)->getClosureFunction()->dump(spc, ar);
+  }
 }
 
 void Construct::parseTimeFatal(FileScopeRawPtr fs,

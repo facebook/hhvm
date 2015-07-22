@@ -15,7 +15,6 @@
 */
 
 #include "hphp/compiler/statement/statement.h"
-#include "hphp/compiler/analysis/ast_walker.h"
 #include "hphp/compiler/analysis/function_scope.h"
 
 using namespace HPHP;
@@ -55,7 +54,7 @@ void Statement::insertElement(StatementPtr stmt, int index /* = 0 */) {
 }
 
 bool Statement::hasReachableLabel() const {
-  if (FunctionWalker::SkipRecurse(this)) return false;
+  if (skipRecurse()) return false;
   switch (getKindOf()) {
     case KindOfForStatement:
     case KindOfForEachStatement:

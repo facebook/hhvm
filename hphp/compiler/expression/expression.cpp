@@ -126,7 +126,6 @@ void Expression::setArgNum(int n) {
 
 void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_unused = false;
-  exp->clearVisited();
 };
 
 bool Expression::hasSubExpr(ExpressionPtr sub) const {

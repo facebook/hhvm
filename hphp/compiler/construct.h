@@ -209,6 +209,10 @@ public:
     UnknownEffect = 0xfff        // any of the above
   };
 
+  static bool SkipRecurse(ConstructPtr c) {
+    return c && c->skipRecurse();
+  }
+  bool skipRecurse() const;
   void copyLocationTo(ConstructPtr other);
   const Location::Range& getRange() const { return m_r; }
   int line0() const { return m_r.line0; }
@@ -216,11 +220,8 @@ public:
   void setFirst(int line0, int char0) { m_r.line0 = line0; m_r.char0 = char0; }
   void setFileLevel() { m_flags.topLevel = m_flags.fileLevel = true;}
   void setTopLevel() { m_flags.topLevel = true;}
-  void setVisited() { m_flags.visited = true;}
-  void clearVisited() { m_flags.visited = false;}
   bool isFileLevel() const { return m_flags.fileLevel;}
   bool isTopLevel() const { return m_flags.topLevel;}
-  bool isVisited() const { return m_flags.visited; }
 
   void setNeeded() { m_flags.needed = true; }
   void clearNeeded() { m_flags.needed = false; }
@@ -298,10 +299,6 @@ public:
   void dump(int spc, AnalysisResultConstPtr ar);
   void dumpNode(int spc, AnalysisResultConstPtr ar);
 
-  static void dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
-                   const AstWalkerStateVec &start,
-                   ConstructPtr endBefore, ConstructPtr endAfter);
-
   /**
    * Generates a serialized Code Model corresponding to this AST.
    */
@@ -339,7 +336,6 @@ private:
     struct {
       unsigned fileLevel           : 1; // is it at top level of a file
       unsigned topLevel            : 1; // is it at top level of a scope
-      unsigned visited             : 1; // general purpose for walks
       unsigned needed              : 1;
       unsigned unpack              : 1; // is this an unpack (only on params)
     } m_flags;

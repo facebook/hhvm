@@ -18,7 +18,6 @@
 #define incl_HPHP_DEPTH_FIRST_VISITOR_H_
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/ast_walker.h"
 #include "hphp/compiler/analysis/block_scope.h"
 
 #include "hphp/compiler/expression/expression.h"
@@ -63,7 +62,7 @@ public:
     for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
       if (ConstructPtr kid = stmt->getNthKid(i)) {
         if (StatementPtr s = dynamic_pointer_cast<Statement>(kid)) {
-          if (FunctionWalker::SkipRecurse(s)) continue;
+          if (Construct::SkipRecurse(s)) continue;
           if (scope) scope->incLoopNestedLevel();
           if (StatementPtr rep = visitStmtRecur(s)) {
             stmt->setNthKid(i, rep);

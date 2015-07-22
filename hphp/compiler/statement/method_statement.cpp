@@ -36,7 +36,6 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/closure_expression.h"
 
-#include "hphp/compiler/analysis/ast_walker.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"

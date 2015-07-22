@@ -372,7 +372,10 @@ SmartPtr<SSLSocket> SSLSocket::Create(
     method = CryptoMethod::ClientSSLv3;
   } else if (scheme == "tls") {
     method = CryptoMethod::ClientTLS;
-  } else if (scheme == "tcp") {
+  } else if (
+    scheme == "tcp"
+    || (scheme.empty() && (domain == AF_INET || domain == AF_INET6))
+  ) {
     method = CryptoMethod::NoCrypto;
   } else {
     return nullptr;

@@ -246,6 +246,53 @@ final class AsyncMysqlConnection {
    */
   <<__HipHopSpecific, __Native>>
   function isReusable(): bool;
+
+  /**
+   * Last time a successful activity was made in the connection, in seconds
+   * since epoch. The first successful activity of the connection is its
+   * creation.
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function lastActivityTime(): float;
+
+  /**
+   * Returns the AsyncMysqlConnectResult for this connection, it will
+   * contain timing information about it.  `null` is returned when the
+   * AsyncMysqlConnection was not created in the client.
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function connectResult(): ?AsyncMysqlConnectResult;
+}
+
+/**
+ * Statistics about the client. They should be retrieved in the EventBase
+ * thread, they are appended to the result of an operation so the
+ * performance state can be logged.
+ *
+ */
+class AsyncMysqlClientStats {
+  private function __construct(): void {
+    throw new InvalidOperationException(
+      __CLASS__ . " objects cannot be directly created");
+  }
+
+  /**
+   * Average loop time of Client's EventBase in microseconds
+   * (an exponentially-smoothed ave)
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function ioEventLoopMicrosAvg() : float;
+
+  /**
+   * Average delay between when a callback is scheduled in the client
+   * and when it's actually ran in microseconds (an exponentially-smoothed
+   * ave)
+   */
+  <<__HipHopSpecific, __Native>>
+  function callbackDelayMicrosAvg() : float;
 }
 
 /**
@@ -277,6 +324,59 @@ abstract class AsyncMysqlResult {
    *
    */
   abstract function endTime(): float;
+
+  /**
+   * AsyncMysqlClient stats at the moment the result was created.
+   * This information can be used to know how the performance of the
+   * client may have affected the result.
+   *
+   */
+  abstract function clientStats(): AsyncMysqlClientStats;
+
+}
+
+/**
+ * The result information for when the connection is made successfully.
+ *
+ */
+<<__NativeData("AsyncMysqlConnectResult")>>
+final class AsyncMysqlConnectResult extends AsyncMysqlResult {
+
+  private function __construct(): void {
+    throw new InvalidOperationException(
+      __CLASS__ . " objects cannot be directly created");
+  }
+
+  /**
+   * Time this operation took, in microseconds
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function elapsedMicros(): int;
+
+  /**
+   * The time this operation began, in seconds since epoch
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function startTime(): float;
+
+  /**
+   * The time this operation completed, in seconds since epoch
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function endTime(): float;
+
+  /**
+   * AsyncMysqlClient stats at the moment the result was created.
+   * This information can be used to know how the performance of the
+   * client may have affected the result.
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function clientStats(): AsyncMysqlClientStats;
+
 }
 
 /**
@@ -311,6 +411,15 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
    */
   <<__HipHopSpecific, __Native>>
   function endTime(): float;
+
+  /**
+   * AsyncMysqlClient stats at the moment the result was created.
+   * This information can be used to know how the performance of the
+   * client may have affected the result.
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function clientStats(): AsyncMysqlClientStats;
 
   /**
    * The MySQL error number (see MySQL's errmsg.h for details, or the C API's
@@ -396,6 +505,15 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    */
   <<__HipHopSpecific, __Native>>
   function endTime(): float;
+
+  /**
+   * AsyncMysqlClient stats at the moment the result was created.
+   * This information can be used to know how the performance of the
+   * client may have affected the result.
+   *
+   */
+  <<__HipHopSpecific, __Native>>
+  function clientStats(): AsyncMysqlClientStats;
 
   /**
    * The number of rows affected (see the C API's mysql_num_rows()

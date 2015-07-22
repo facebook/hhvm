@@ -1,0 +1,4 @@
+File "abstract_final_tconst.php", line 6, characters 22-22:
+This class was declared as final. It must provide an implementation for the abstract type constant 'T' (Typing[4047])
+File "abstract_final_tconst.php", line 7, characters 23-23:
+Declaration is here

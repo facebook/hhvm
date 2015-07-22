@@ -1,0 +1,10 @@
+File "override_abstract_concrete.php", line 7, characters 16-16:
+This object is of type D (Typing[4142])
+File "override_abstract_concrete.php", line 7, characters 26-26:
+It is incompatible with this object of type C
+because some declarations are incompatible.
+Read the following to see why:
+File "override_abstract_concrete.php", line 8, characters 28-28:
+Cannot re-declare this method as abstract
+File "override_abstract_concrete.php", line 4, characters 19-19:
+Previously defined here

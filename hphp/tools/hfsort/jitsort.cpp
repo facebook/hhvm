@@ -16,7 +16,9 @@
 
 #include "hphp/tools/hfsort/jitsort.h"
 
+#ifndef _MSC_VER
 #include "hphp/util/light-process.h"
+#endif
 #include "hphp/util/logger.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -177,6 +179,7 @@ static void print(Group2BaseMap& f2b, const std::vector<Cluster*>& clusters,
                hotfuncs, clusters.size());
 }
 
+#ifndef _MSC_VER
 static bool light_exec(std::string cmd, std::string& out) {
   auto* proc = LightProcess::popen(cmd.c_str(), "r", "/");
   if (!proc) return false;
@@ -193,6 +196,7 @@ static bool light_exec(std::string cmd, std::string& out) {
   }
   return !ret;
 }
+#endif
 
 int jitsort(int pid, int time, FILE* perfSymFile, FILE* relocResultsFile) {
   bool skipPerf = pid < 0;
@@ -204,11 +208,14 @@ int jitsort(int pid, int time, FILE* perfSymFile, FILE* relocResultsFile) {
   readPerfMap(f2b, perfSymFile);
 
   std::vector<Cluster*> clusters;
+#ifndef _MSC_VER
   if (time < 0) {
+#endif
     for (auto& f : cg.funcs) {
       f.samples = 1;
       clusters.push_back(new Cluster(f.id));
     }
+#ifndef _MSC_VER
   } else {
     auto perfData = folly::sformat("/tmp/perf-{}.data", pid);
     auto perfHitsFileName = folly::sformat("/tmp/perf-{}.out", pid);
@@ -234,6 +241,7 @@ int jitsort(int pid, int time, FILE* perfSymFile, FILE* relocResultsFile) {
     clusters = clusterize();
     sort(clusters.begin(), clusters.end(), compareClustersDensity);
   }
+#endif
   print(f2b, clusters, relocResultsFile);
 
   return 0;

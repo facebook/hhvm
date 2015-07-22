@@ -24,6 +24,7 @@
 
 #include "hphp/tools/tc-print/tc-print.h"
 #include "hphp/tools/tc-print/offline-trans-data.h"
+#include "boost/algorithm/string.hpp"
 
 #define MAX_INSTR_ASM_LEN 128
 #define MAX_SYM_LEN       10240
@@ -51,6 +52,26 @@ static size_t fileSize(FILE* f) {
   struct stat st;
   fstat(fd, &st);
   return st.st_size;
+}
+
+// XED callback function to get a symbol from an address
+static int addressToSymbol(xed_uint64_t  address,
+                           char*         symbolBuffer,
+                           xed_uint32_t  bufferLength,
+                           xed_uint64_t* offset,
+                           void*         context) {
+  auto name = boost::trim_copy(getNativeFunctionName((void*)address));
+  if (boost::starts_with(name, "0x")) {
+    return 0;
+  }
+  auto pos = name.find_first_of('(');
+  auto copyLength = pos != std::string::npos
+    ? std::min(pos, size_t(bufferLength - 1))
+    : bufferLength - 1;
+  strncpy(symbolBuffer, name.c_str(), copyLength);
+  symbolBuffer[copyLength] = '\0';
+  *offset = 0;
+  return 1;
 }
 
 void OfflineX86Code::openFiles(TCA tcRegionBases[TCRCount]) {
@@ -241,7 +262,7 @@ void OfflineX86Code::disasm(FILE* file,
 
     // Get disassembled instruction in codeStr
     if (!xed_format_context(xed_syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr)) {
+                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr, addressToSymbol)) {
       error("disasm error: xed_format_context failed");
     }
 

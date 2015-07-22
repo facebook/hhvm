@@ -28,7 +28,7 @@ function odbc_exec(resource $connection_id,
 
 function odbc_execute(resource $result, ?array $parameters_array): bool;
 
-function odbc_fetch_array(resource $result, ?int $rownumber=0): mixed;
+function odbc_fetch_array(resource $result, ?int $rownumber=0);
 
 function odbc_num_rows(?resource $result): int;
 

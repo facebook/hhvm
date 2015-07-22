@@ -29,6 +29,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-color.h"
+#include "hphp/util/service-data.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/debuggable.h"
@@ -790,7 +791,39 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
                 false)) {
         return true;
       }
+    } catch (const RequestTimeoutException& e) {
+      static auto requestErrorHandlerTimeoutCounter =
+          ServiceData::createTimeseries("requests_timed_out_error_handler",
+                                        {ServiceData::StatsType::COUNT});
+      requestErrorHandlerTimeoutCounter->addValue(1);
+      ServerStats::Log("request.timed_out.error_handler", 1);
+
+      if (!swallowExceptions) throw;
+    } catch (const RequestCPUTimeoutException& e) {
+      static auto requestErrorHandlerCPUTimeoutCounter =
+          ServiceData::createTimeseries("requests_cpu_timed_out_error_handler",
+                                        {ServiceData::StatsType::COUNT});
+      requestErrorHandlerCPUTimeoutCounter->addValue(1);
+      ServerStats::Log("request.cpu_timed_out.error_handler", 1);
+
+      if (!swallowExceptions) throw;
+    } catch (const RequestMemoryExceededException& e) {
+      static auto requestErrorHandlerMemoryExceededCounter =
+          ServiceData::createTimeseries(
+              "requests_memory_exceeded_error_handler",
+              {ServiceData::StatsType::COUNT});
+      requestErrorHandlerMemoryExceededCounter->addValue(1);
+      ServerStats::Log("request.memory_exceeded.error_handler", 1);
+
+      if (!swallowExceptions) throw;
     } catch (...) {
+      static auto requestErrorHandlerOtherExceptionCounter =
+          ServiceData::createTimeseries(
+              "requests_other_exception_error_handler",
+              {ServiceData::StatsType::COUNT});
+      requestErrorHandlerOtherExceptionCounter->addValue(1);
+      ServerStats::Log("request.other_exception.error_handler", 1);
+
       if (!swallowExceptions) throw;
     }
   }

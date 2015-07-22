@@ -138,12 +138,6 @@ public:
   void decLoopNestedLevel();
   int getLoopNestedLevel() const { return m_loopNestedLevel;}
 
-  /**
-   * Helpers for parsing class functions and variables.
-   */
-  ModifierExpressionPtr setModifiers(ModifierExpressionPtr modifiers);
-  ModifierExpressionPtr getModifiers() { return m_modifiers;}
-
   void setClassInfoAttribute(int flag) {
     m_attributeClassInfo |= flag;
   }
@@ -231,7 +225,6 @@ protected:
   BlockScopeRawPtr m_outerScope;
 
   int m_loopNestedLevel;
-  ModifierExpressionPtr m_modifiers;
   int m_pass;
   int m_updated;
   int m_runId;

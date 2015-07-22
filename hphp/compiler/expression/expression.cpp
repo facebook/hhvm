@@ -203,7 +203,7 @@ ExpressionPtr Expression::unneededHelper() {
 }
 
 ExpressionPtr Expression::unneeded() {
-  if (getLocalEffects() || is(KindOfScalarExpression) || isNoRemove()) {
+  if (getLocalEffects() || is(KindOfScalarExpression)) {
     return static_pointer_cast<Expression>(shared_from_this());
   }
   if (!getContainedEffects()) {
@@ -285,23 +285,6 @@ ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
     assert(false);
   }
   return exp;
-}
-
-void Expression::computeLocalExprAltered() {
-  // if no kids, do nothing
-  if (getKidCount() == 0) return;
-
-  bool res = false;
-  for (int i = 0; i < getKidCount(); i++) {
-    ExpressionPtr k = getNthExpr(i);
-    if (k) {
-      k->computeLocalExprAltered();
-      res |= k->isLocalExprAltered();
-    }
-  }
-  if (res) {
-    setLocalExprAltered();
-  }
 }
 
 bool Expression::isArray() const {

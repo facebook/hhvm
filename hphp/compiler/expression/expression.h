@@ -215,11 +215,6 @@ public:
 
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
-
-  /**
-   * Correctly compute the local expression altered bit
-   */
-  void computeLocalExprAltered();
 protected:
   static bool IsIdentifier(const std::string &value);
 

@@ -222,60 +222,13 @@ public:
   bool isTopLevel() const { return m_flags.topLevel;}
   bool isVisited() const { return m_flags.visited; }
 
-  void setAnticipated() { m_flags.anticipated = true; }
-  void clearAnticipated() { m_flags.anticipated = false; }
-  bool isAnticipated() const { return m_flags.anticipated; }
-
-  void setAvailable() { m_flags.available = true; }
-  void clearAvailable() { m_flags.available = false; }
-  bool isAvailable() const { return m_flags.available; }
-
-  void setNonNull() { m_flags.nonNull = true; }
-  void clearNonNull() { m_flags.nonNull = false; }
-  bool isNonNull() const { return m_flags.nonNull; }
-
-  void setLocalExprAltered() { m_flags.localExprNotAltered = false; }
-  void clearLocalExprAltered() { m_flags.localExprNotAltered = true; }
-  bool isLocalExprAltered() const { return !m_flags.localExprNotAltered; }
-
-  void setReferencedValid() { m_flags.referenced_valid = true; }
-  void clearReferencedValid() { m_flags.referenced_valid = false; }
-  bool isReferencedValid() const { return m_flags.referenced_valid; }
-
-  void setReferenced() { m_flags.referenced = true; }
-  void clearReferenced() { m_flags.referenced = false; }
-  bool isReferenced() const { return m_flags.referenced; }
-
   void setNeeded() { m_flags.needed = true; }
   void clearNeeded() { m_flags.needed = false; }
   bool isNeeded() const { return m_flags.needed; }
 
-  void setNoRemove() { m_flags.noRemove = true; }
-  void clearNoRemove() { m_flags.noRemove = false; }
-  bool isNoRemove() const { return m_flags.noRemove; }
-
-  void setGuarded() { m_flags.guarded = true; }
-  void clearGuarded() { m_flags.guarded = false; }
-  bool isGuarded() const { return m_flags.guarded; }
-
-  void setRefCounted() { m_flags.refCounted = 3; }
-  void clearRefCounted() { m_flags.refCounted = 2; }
-  bool maybeRefCounted() const {
-    return !(m_flags.refCounted & 2) || (m_flags.refCounted & 1);
-  }
-
-  void setInited() { m_flags.inited = 3; }
-  void clearInited() { m_flags.inited = 2; }
-  bool maybeInited() const {
-    return !(m_flags.inited & 2) || (m_flags.inited & 1);
-  }
   void setIsUnpack() { m_flags.unpack = 1; }
   bool isUnpack() const { return m_flags.unpack; }
   void clearIsUnpack() { m_flags.unpack = 0; }
-
-  void setKilled() { m_flags.killed = true; }
-  void clearKilled() { m_flags.killed = false; }
-  bool isKilled() const { return m_flags.killed; }
 
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
@@ -387,19 +340,7 @@ private:
       unsigned fileLevel           : 1; // is it at top level of a file
       unsigned topLevel            : 1; // is it at top level of a scope
       unsigned visited             : 1; // general purpose for walks
-      unsigned anticipated         : 1;
-      unsigned available           : 1;
-      unsigned localExprNotAltered : 1; // whether this node can be
-                                        // altered in this expression
-      unsigned nonNull             : 1; // expression is not null
-      unsigned referenced          : 1;
-      unsigned referenced_valid    : 1; // is the above flag is valid
       unsigned needed              : 1;
-      unsigned noRemove            : 1; // DCE should NOT remove this node
-      unsigned guarded             : 1; // previously used
-      unsigned killed              : 1;
-      unsigned refCounted          : 2; // high bit indicates whether its valid
-      unsigned inited              : 2; // high bit indicates whether its valid
       unsigned unpack              : 1; // is this an unpack (only on params)
     } m_flags;
   };

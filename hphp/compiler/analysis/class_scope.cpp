@@ -75,8 +75,7 @@ ClassScope::ClassScope(FileScopeRawPtr fs,
     m_parent(parent), m_bases(bases), m_attribute(0), m_redeclaring(-1),
     m_kindOf(kindOf), m_derivesFromRedeclaring(Derivation::Normal),
     m_traitStatus(NOT_FLATTENED), m_volatile(false),
-    m_persistent(false), m_derivedByDynamic(false),
-    m_needsCppCtor(false), m_needsInit(true) {
+    m_persistent(false) {
 
   m_volatile = Option::AllVolatile;
 
@@ -105,9 +104,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_kindOf(KindOf::ObjectClass),
     m_derivesFromRedeclaring(Derivation::Normal),
     m_traitStatus(NOT_FLATTENED),
-    m_volatile(false), m_persistent(false),
-    m_derivedByDynamic(false), m_needsCppCtor(false),
-    m_needsInit(true) {
+    m_volatile(false), m_persistent(false) {
   for (FunctionScopePtr f: methods) {
     if (f->isNamed("__construct")) setAttribute(HasConstructor);
     else if (f->isNamed("__destruct")) setAttribute(HasDestructor);
@@ -147,9 +144,6 @@ std::string ClassScope::getDocName() const {
 
 void ClassScope::derivedMagicMethods(ClassScopePtr super) {
   super->setAttribute(NotFinal);
-  if (derivedByDynamic()) {
-    super->m_derivedByDynamic = true;
-  }
   if (m_attribute & (HasUnknownPropGetter|
                      MayHaveUnknownPropGetter|
                      InheritsUnknownPropGetter)) {
@@ -317,7 +311,6 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         StringToFunctionScopePtrMap pristine(funcs);
 
         for (auto& cls : classes) {
-          cls->m_derivedByDynamic = true;
           StringToFunctionScopePtrMap cur(pristine);
           derivedMagicMethods(cls);
           cls->collectMethods(ar, cur, false);
@@ -1139,23 +1132,9 @@ bool ClassScope::addFunction(AnalysisResultConstPtr ar,
   return true;
 }
 
-bool ClassScope::canSkipCreateMethod(AnalysisResultConstPtr ar) const {
-  // create() is not necessary if
-  // 1) not inheriting from any class
-  // 2) no constructor defined (__construct or class name)
-  // 3) no init() defined
-
-  if (derivesFromRedeclaring() == Derivation::Redeclaring ||
-      getAttribute(HasConstructor) ||
-      getAttribute(ClassNameConstructor) ||
-      needsInitMethod()) {
-    return false;
-  }
-
-  if (!m_parent.empty()) {
-    ClassScopePtr parent = getParentScope(ar);
-    if (parent) return parent->canSkipCreateMethod(ar);
-  }
-
-  return true;
+ModifierExpressionPtr
+ClassScope::setModifiers(ModifierExpressionPtr modifiers) {
+  ModifierExpressionPtr oldModifiers = m_modifiers;
+  m_modifiers = modifiers;
+  return oldModifiers;
 }

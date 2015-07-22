@@ -96,10 +96,6 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
     m_sym = variables->addDeclaredSymbol(m_name, shared_from_this());
   }
 
-  if (m_name == "http_response_header" || m_name == "php_errormsg") {
-    setInited();
-  }
-
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     if (FunctionScopePtr func = getFunctionScope()) {
       if (m_name == "this" && func->mayContainThis()) {
@@ -113,7 +109,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
             m_sym->isRefClosureVar() || unset);
           if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
             variables->add(m_sym, true, ar, shared_from_this(),
-                           getScope()->getModifiers());
+                           ModifierExpressionPtr());
           }
         }
       }

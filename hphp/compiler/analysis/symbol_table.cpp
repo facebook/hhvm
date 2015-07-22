@@ -98,8 +98,6 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
 
   JSON::DocTarget::MapStream ms(out);
   ms.add("name",       m_name);
-  ms.add("referenced", isReferenced());
-
   ms.add("initializer");
   if (m_value) {
     ExpressionPtr valueExp(

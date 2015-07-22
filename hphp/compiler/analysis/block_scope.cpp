@@ -166,13 +166,6 @@ void BlockScope::addUpdates(int f) {
   m_updated |= f;
 }
 
-ModifierExpressionPtr
-BlockScope::setModifiers(ModifierExpressionPtr modifiers) {
-  ModifierExpressionPtr oldModifiers = m_modifiers;
-  m_modifiers = modifiers;
-  return oldModifiers;
-}
-
 void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_constants->outputPHP(cg, ar);
   m_variables->outputPHP(cg, ar);

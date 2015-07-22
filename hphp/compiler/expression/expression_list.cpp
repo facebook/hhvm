@@ -341,7 +341,7 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
     while (i--) {
       if (i != skip) {
         ExpressionPtr &e = m_exps[i];
-        if (!e || (e->getContainedEffects() == NoEffect && !e->isNoRemove())) {
+        if (!e || (e->getContainedEffects() == NoEffect)) {
           removeElement(i);
           changed = true;
         } else if (e->is(KindOfExpressionList)) {
@@ -358,48 +358,12 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
       }
     }
     if (m_exps.size() == 1) {
-      // don't convert an exp-list with type assertions to
-      // a ListKindWrapped
-      if (!isNoRemove()) {
-        m_kind = ListKindWrapped;
-      }
+      m_kind = ListKindWrapped;
     } else if (m_kind == ListKindLeft && m_exps[0]->isScalar()) {
       ExpressionPtr e = m_exps[0];
       removeElement(0);
       addElement(e);
       m_kind = ListKindWrapped;
-    }
-  } else {
-    bool isUnset = hasContext(UnsetContext) &&
-      // This used to be gated on ar->getPhase() >= PostOptimize
-      false;
-    int isGlobal = -1;
-    while (i--) {
-      ExpressionPtr &e = m_exps[i];
-      if (isUnset) {
-        if (e->is(Expression::KindOfSimpleVariable)) {
-          SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(e);
-          if (var->checkUnused()) {
-            const std::string &name = var->getName();
-            VariableTablePtr variables = getScope()->getVariables();
-            if (!variables->isNeeded(name)) {
-              removeElement(i);
-              changed = true;
-            }
-          }
-        }
-      } else {
-        bool global = e && (e->getContext() & Declaration) == Declaration;
-        if (isGlobal < 0) {
-          isGlobal = global;
-        } else {
-          always_assert(isGlobal == global);
-        }
-        if (isGlobal && e->isScalar()) {
-          removeElement(i);
-          changed = true;
-        }
-      }
     }
   }
   if (changed) {

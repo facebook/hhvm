@@ -142,9 +142,7 @@ void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_property->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_valid && !hasLocalEffect(UnknownEffect) &&
-        !m_object->isThis() &&
-        (!m_object->is(KindOfSimpleVariable) ||
-         !static_pointer_cast<SimpleVariable>(m_object)->isGuarded())) {
+        !m_object->isThis()) {
       setLocalEffect(DiagnosticEffect);
     }
   }

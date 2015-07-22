@@ -4400,14 +4400,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         Id thisId = m_curFunc->lookupVarId(thisStr);
         emitVirtualLocal(thisId);
       } else {
-        if (sv->isGuarded()) {
-          e.This();
-        } else {
-          auto const subop = sv->hasContext(Expression::ExistContext)
-            ? BareThisOp::NoNotice
-            : BareThisOp::Notice;
-          e.BareThis(subop);
-        }
+        auto const subop = sv->hasContext(Expression::ExistContext)
+          ? BareThisOp::NoNotice
+          : BareThisOp::Notice;
+        e.BareThis(subop);
       }
     } else {
       StringData* nLiteral = makeStaticString(sv->getName());

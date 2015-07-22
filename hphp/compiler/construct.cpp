@@ -297,42 +297,12 @@ void Construct::dumpNode(int spc) {
     sef = " (" + sef.substr(1) + ")";
   }
 
-  string localtered;
-  if (Expression *e = dynamic_cast<Expression*>(this)) {
-    localtered = e->isLocalExprAltered() ? "LocalAltered" : "NotLocalAltered";
-  }
-  if (localtered != "") {
-    localtered = " (" + localtered + ")";
-  }
-
-  string refstr;
-  if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
-    if (isReferencedValid()) {
-      if (isReferenced()) {
-        refstr += ",Referenced";
-      } else {
-        refstr += ",NotReferenced";
-      }
-    }
-    if (!maybeRefCounted()) refstr += ",NotRefCounted";
-    if (!maybeInited()) refstr += ",NotInited";
-    if (isNonNull()) refstr += ",NotNull";
-    if (refstr.empty()) refstr = ",NoRefInfo";
-  }
-  if (refstr != "") refstr = " (" + refstr.substr(1) + ")";
-
   string objstr;
   if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
     objstr = " (NoObjInfo)";
   }
 
-  string noremoved;
-  if (isNoRemove()) {
-    noremoved = " (NoRemove)";
-  }
-
-  std::cout << nkid << scontext << sef
-    << localtered << refstr << objstr << noremoved;
+  std::cout << nkid << scontext << sef << objstr;
   if (auto scope = getFileScope()) {
     std::cout << " " << scope->getName() << ":"
       << "[" << m_r.line0 << "@" << m_r.char0 << ", "

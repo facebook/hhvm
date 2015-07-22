@@ -146,6 +146,12 @@ public:
   bool isBuiltin() const { return !getStmt(); }
 
   /**
+   * Helpers for parsing class functions and variables.
+   */
+  ModifierExpressionPtr setModifiers(ModifierExpressionPtr modifiers);
+  ModifierExpressionPtr getModifiers() { return m_modifiers;}
+
+  /**
    * Whether this class name was declared twice or more.
    */
   void setRedeclaring(AnalysisResultConstPtr ar, int redecId);
@@ -164,10 +170,6 @@ public:
 
   Derivation derivesFromRedeclaring() const {
     return m_derivesFromRedeclaring;
-  }
-
-  bool derivedByDynamic() const {
-    return m_derivedByDynamic;
   }
 
   /**
@@ -341,14 +343,6 @@ public:
                    FileScopeRawPtr fileScope,
                    FunctionScopePtr funcScope);
 
-  void setNeedsCppCtor(bool needsCppCtor) { m_needsCppCtor = needsCppCtor; }
-  void setNeedsInitMethod(bool needsInit) { m_needsInit = needsInit; }
-  bool needsCppCtor()    const { return m_needsCppCtor; }
-  bool needsInitMethod() const { return m_needsInit; }
-
-  bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
-  bool checkHasPropTable(AnalysisResultConstPtr ar);
-
   const StringData* getFatalMessage() const {
     return m_fatal_error_msg;
   }
@@ -518,6 +512,7 @@ private:
   std::string m_parent;
   mutable std::vector<std::string> m_bases;
   UserAttributeMap m_userAttributes;
+  ModifierExpressionPtr m_modifiers;
 
   std::vector<std::string> m_usedTraitNames;
   boost::container::flat_set<std::string> m_requiredExtends;
@@ -536,9 +531,6 @@ private:
   } m_traitStatus;
   unsigned m_volatile:1; // for class_exists
   unsigned m_persistent:1;
-  unsigned m_derivedByDynamic:1;
-  unsigned m_needsCppCtor:1;
-  unsigned m_needsInit:1;
   int32_t m_numDeclMethods{-1};
 
   // holds the fact that accessing this class declaration is a fatal error

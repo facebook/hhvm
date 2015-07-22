@@ -467,11 +467,8 @@ void VariableTable::clearUsed() {
     if (!ps || sym.second.isHidden()) {
       sym.second.clearUsed();
       sym.second.clearNeeded();
-      sym.second.clearReferenced();
       sym.second.clearGlobal();
       sym.second.clearReseated();
-    } else {
-      sym.second.setReferenced();
     }
   }
 }

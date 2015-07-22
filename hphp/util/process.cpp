@@ -16,12 +16,19 @@
 #include "hphp/util/process.h"
 
 #include <sys/types.h>
+#include <stdlib.h>
+
+#ifdef _MSC_VER
+#include <lmcons.h>
+#include <Windows.h>
+#include <ShlObj.h>
+#else
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <pwd.h>
 #include <poll.h>
 #include <unistd.h>
-#include <stdlib.h>
+#endif
 
 #include <folly/Conv.h>
 #include <folly/ScopeGuard.h>
@@ -72,7 +79,12 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
                    bool color /* = false */) {
 
   int fdin = 0; int fdout = 0; int fderr = 0;
+#ifdef _MSC_VER
+  PROCESS_INFORMATION procInf;
+  int pid = Exec(path, argv, &fdin, &fdout, &fderr, &procInf);
+#else
   int pid = Exec(path, argv, &fdin, &fdout, &fderr);
+#endif
   if (pid == 0) return false;
 
   {
@@ -93,7 +105,24 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
     perror("fcntl failed on fderr");
   }
 
+#ifdef _MSC_VER
+  HANDLE fds[2];
+  DWORD handleCount = 0;
+  if (fdout)
+    fds[handleCount++] = (HANDLE)_get_osfhandle(fdout);
+  if (fderr)
+    fds[handleCount++] = (HANDLE)_get_osfhandle(fderr);
+#endif
+
   while (fdout || fderr) {
+#ifdef _MSC_VER
+    DWORD res =
+      WaitForMultipleObjectsEx(handleCount, fds, false, INFINITE, true);
+    if (res == WAIT_IO_COMPLETION)
+      continue;
+
+    DWORD hc = 0;
+#else
     pollfd fds[2];
     int n = 0;
     if (fdout) {
@@ -113,8 +142,13 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
     }
 
     n = 0;
+#endif
     if (fdout) {
+#ifdef _MSC_VER
+      if (res == WAIT_OBJECT_0 + hc++ || res == WAIT_ABANDONED_0 + hc++) {
+#else
       if (fds[n++].revents & (POLLIN | POLLHUP)) {
+#endif
         int e = read(fdout, buffer, sizeof buffer);
         if (e <= 0) {
           close(fdout);
@@ -132,7 +166,11 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
     }
 
     if (fderr) {
+#ifdef _MSC_VER
+      if (res == WAIT_OBJECT_0 + hc++ || res == WAIT_ABANDONED_0 + hc++) {
+#else
       if (fds[n++].revents & (POLLIN | POLLHUP)) {
+#endif
         int e = read(fderr, buffer, sizeof buffer);
         if (e <= 0) {
           close(fderr);
@@ -152,6 +190,31 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
 
   int status;
   bool ret = false;
+#ifdef _MSC_VER
+  if (WaitForSingleObject(procInf.hProcess, INFINITE) == WAIT_FAILED) {
+    Logger::Error("Failed to wait for `%s'\n", path);
+  }
+  DWORD st;
+  if (GetExitCodeProcess(procInf.hProcess, &st))
+    Logger::Error("Failed to get the process exit code\n");
+  status = (int)st;
+
+  if (status != EXIT_SUCCESS) {
+      Logger::Verbose("Status %d running command: `%s'\n", status, path);
+      if (argv) {
+        while (*argv) {
+          Logger::Verbose("  arg: `%s'\n", *argv);
+          argv++;
+        }
+      }
+  }
+  else {
+    ret = true;
+  }
+
+  CloseHandle(procInf.hProcess);
+  CloseHandle(procInf.hThread);
+#else
   if (waitpid(pid, &status, 0) != pid) {
     Logger::Error("Failed to wait for `%s'\n", path);
   } else if (WIFEXITED(status)) {
@@ -173,11 +236,34 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
       Logger::Verbose("  signaled with %d\n", WTERMSIG(status));
     }
   }
+#endif
   return ret;
 }
 
 int Process::Exec(const std::string &cmd, const std::string &outf,
                   const std::string &errf) {
+#ifdef _MSC_VER
+  STARTUPINFO sInf;
+  PROCESS_INFORMATION pInf;
+  ZeroMemory(&sInf, sizeof(sInf));
+  ZeroMemory(&pInf, sizeof(pInf));
+  sInf.cb = sizeof(STARTUPINFO);
+  sInf.dwFlags = STARTF_USESTDHANDLES;
+  sInf.hStdError = fopen(errf.c_str(), "a");
+  sInf.hStdOutput = fopen(outf.c_str(), "a");
+  if (!CreateProcess(cmd.c_str(), nullptr, nullptr, nullptr, true,
+    0, nullptr, nullptr, &sInf, &pInf)) {
+    Logger::Error("Unable to CreateProcess: %d %s", errno,
+      folly::errnoStr(errno).c_str());
+    return 0;
+  }
+  WaitForSingleObject(pInf.hProcess, INFINITE);
+  DWORD status;
+  GetExitCodeProcess(pInf.hProcess, &status);
+  CloseHandle(pInf.hProcess);
+  CloseHandle(pInf.hThread);
+  return (int)status;
+#else
   std::vector<std::string> argvs;
   folly::split(' ', cmd, argvs);
   if (argvs.empty()) {
@@ -210,15 +296,51 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
   int status = -1;
   wait(&status);
   return status;
+#endif
 }
 
 int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
-                  int *fderr) {
+                  int *fderr
+#ifdef _MSC_VER
+                  , PROCESS_INFORMATION* procInfo
+#endif
+  ) {
   CPipe pipein, pipeout, pipeerr;
   if (!pipein.open() || !pipeout.open() || !pipeerr.open()) {
     return 0;
   }
 
+#ifdef _MSC_VER
+  STARTUPINFO sInf;
+  ZeroMemory(&sInf, sizeof(sInf));
+  ZeroMemory(procInfo, sizeof(*procInfo));
+  sInf.cb = sizeof(STARTUPINFO);
+  sInf.dwFlags = STARTF_USESTDHANDLES;
+  sInf.hStdInput = (HANDLE)_get_osfhandle(pipein.getOut());
+  sInf.hStdError = (HANDLE)_get_osfhandle(pipeerr.getIn());
+  sInf.hStdOutput = (HANDLE)_get_osfhandle(pipeout.getIn());
+  size_t arglen = 0;
+  for (int i = 0; argv[i]; i++) {
+    arglen += strlen(argv[i]);
+    if (i > 0)
+      arglen++; // Space separator
+  }
+  char* args = (char*)malloc(sizeof(char) * (arglen + 1));
+  for (int i = 0; argv[i]; i++) {
+    if (i > 0)
+      strcat(args, " ");
+    strcat(args, argv[i]);
+  }
+  if (!CreateProcess(path, args, nullptr, nullptr, true,
+    0, nullptr, nullptr, &sInf, procInfo)) {
+    Logger::Error("Unable to CreateProcess: %d %s", errno,
+      folly::errnoStr(errno).c_str());
+    free(args);
+    return 0;
+  }
+  free(args);
+  int pid = (int)procInfo->dwProcessId;
+#else
   int pid = fork();
   if (pid < 0) {
     Logger::Error("Unable to fork: %d %s", errno,
@@ -243,9 +365,15 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
     Logger::Error("Failed to exec `%s'\n", path);
     _Exit(HPHP_EXIT_FAILURE);
   }
+#endif
   if (fdout) *fdout = pipeout.detachOut();
   if (fderr) *fderr = pipeerr.detachOut();
   if (fdin)  *fdin  = pipein.detachIn();
+#ifdef _MSC_VER
+  pipein.close();
+  pipeerr.close();
+  pipeout.close();
+#endif
   return pid;
 }
 
@@ -259,6 +387,10 @@ void Process::Daemonize(const char *stdoutFile /* = "/dev/null" */,
   /* already a daemon */
   if (getppid() == 1) return;
 
+#ifdef _MSC_VER
+  // We are Windows, fear us!
+  umask(0);
+#else
   /* Fork off the parent process */
   pid = fork();
   if (pid < 0) {
@@ -279,6 +411,7 @@ void Process::Daemonize(const char *stdoutFile /* = "/dev/null" */,
   if (sid < 0) {
     exit(EXIT_FAILURE);
   }
+#endif
 
   /* Change the current working directory.  This prevents the current
      directory from being locked; hence not being able to remove it. */
@@ -481,10 +614,15 @@ static __inline void do_cpuid(u_int ax, u_int *p) {
                 : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
                 : "0" (ax));
 }
+#elif defined(_M_X64)
+#include <intrin.h>
+static ALWAYS_INLINE void do_cpuid(int func, uint32_t* p) {
+  __cpuid((int*)p, func);
+}
 #endif
 
 std::string Process::GetCPUModel() {
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_M_X64)
   uint32_t regs[4];
   do_cpuid(0, regs);
 
@@ -544,10 +682,18 @@ std::string Process::GetCurrentUser() {
   if (name && *name) {
     return name;
   }
+
+#ifdef _MSC_VER
+  char username[UNLEN + 1];
+  DWORD username_len = UNLEN + 1;
+  if (GetUserName(username, &username_len))
+    return std::string(username, username_len);
+#else
   passwd *pwd = getpwuid(geteuid());
   if (pwd && pwd->pw_name) {
     return pwd->pw_name;
   }
+#endif
   return "";
 }
 
@@ -591,10 +737,20 @@ std::string Process::GetHomeDirectory() {
   if (home && *home) {
     ret = home;
   } else {
+#ifdef _MSC_VER
+    PWSTR path;
+    if (SHGetKnownFolderPath(FOLDERID_UsersFiles, 0, nullptr, &path) == S_OK) {
+      char hPath[PATH_MAX];
+      size_t len = wcstombs(hPath, path, MAX_PATH);
+      CoTaskMemFree(path);
+      ret = std::string(hPath, len);
+    }
+#else
     passwd *pwd = getpwent();
     if (pwd && pwd->pw_dir) {
       ret = pwd->pw_dir;
     }
+#endif
   }
 
   if (ret.empty() || ret[ret.size() - 1] != '/') {

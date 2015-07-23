@@ -743,7 +743,8 @@ public:
    * The returned Cell is guaranteed not to hold a reference counted object (it
    * may, however, be KindOfString for a static string).
    */
-  Cell clsCnsGet(const StringData* clsCnsName) const;
+  Cell clsCnsGet(const StringData* clsCnsName,
+                 bool includeTypeCns = false) const;
 
   /*
    * Look up a class constant's TypedValue if it doesn't require dynamic

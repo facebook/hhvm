@@ -32,6 +32,7 @@ namespace HPHP {
 
 class CodeGenerator;
 
+struct Array;
 struct ArrayData;
 
 DECLARE_BOOST_TYPES(TypeAnnotation);
@@ -73,6 +74,38 @@ DECLARE_BOOST_TYPES(TypeAnnotation);
  *                                               | m_typeArgs(null) |
  *                                               | m_typeList(null) |
  *                                               |__________________|
+ *
+ * For shapes, we reinterpret the fields of TypeAnnotation so that we
+ * store the full information of a shape type. We use the the typeArgs
+ * to point to its member list; each member (field name => field type
+ * pairs) has its own TypeAnnotation: the field name is stored in
+ * m_name, and the field type is stored in its typeArgs, and we use
+ * typeList to link them together. The m_name remains "array" since we
+ * treat shapes as arrays.
+ *
+ * For example, if we had shape('field1'=>int, 'field2'=>string), the
+ * TypeAnnotation would look like the following:
+ *                                                   ------------------
+ *                                                  | m_name("int")    |
+ *  __________________                              | m_typeArgs(null) |
+ * | m_name("array")  |     __________________   -->| m_typeList(null) |
+ * | m_typeArgs       |--> | m_name("field1") |  |  |__________________|
+ * | m_typeList(null) |    | m_typeArgs       |--|  ___________________
+ * | m_shape(true)    |    | m_typeList       |--> | m_name("field2")  |
+ * |__________________|    |__________________|    | m_typeArgs        |---
+ *                                                 | m_typeList(null)  |  |
+ *                                                 |___________________|  |
+ *                                                                        |
+ *                                                __________________      |
+ *                                               | m_name(string)   |  <--
+ *                                               | m_typeArgs(null) |
+ *                                               | m_typeList(null) |
+ *                                               |__________________|
+ *
+ * Shape fields can be either all string literals or all class
+ * constants. m_clsCnsShapeField indicates whether a field is a class
+ * constants. If so, it is a double colon delimited string in the form
+ * of "clsName::cnsName".
  */
 class TypeAnnotation {
 public:
@@ -85,6 +118,8 @@ public:
   void setXHP() { m_xhp = true; }
   void setTypeVar() { m_typevar = true; }
   void setTypeAccess() { m_typeaccess = true; }
+  void setShape() { m_shape = true; }
+  void setClsCnsShapeField() { m_clsCnsShapeField = true; }
 
   bool isNullable() const { return m_nullable; }
   bool isSoft() const { return m_soft; }
@@ -93,6 +128,8 @@ public:
   bool isXHP() const { return m_xhp; }
   bool isTypeVar() const { return m_typevar; }
   bool isTypeAccess() const { return m_typeaccess; }
+  bool isShape() const { return m_shape; }
+  bool isClsCnsShapeField() const { return m_clsCnsShapeField; }
 
   /*
    * Return a shallow copy of this TypeAnnotation, except with
@@ -183,7 +220,11 @@ public:
   TypeAnnotationPtr getTypeArg(int n) const;
 
   TypeStructure::Kind getKind() const;
-  ArrayData* getScalarArrayRep() const;
+  /* returns the scalar array representation (the TypeStructure) of
+   * this type annotation. If isTopLevel, the representation includes
+   * an element ['unresolved']=>bool(true), which is a temporary aid
+   * of TypeStructure resolution in the runtime. TODO(7657500) */
+  ArrayData* getScalarArrayRep(bool isTopLevel = false) const;
 
 private:
   void functionTypeName(std::string &name) const;
@@ -191,8 +232,10 @@ private:
   void tupleTypeName(std::string &name) const;
   void genericTypeName(std::string &name) const;
   void accessTypeName(std::string &name) const;
+  void shapeTypeName(std::string& name) const;
   bool isPrimType(const char* str) const;
   ArrayData* argsListToScalarArray(TypeAnnotationPtr ta) const;
+  void shapeFieldsToScalarArray(Array& rep, TypeAnnotationPtr ta) const;
 
 private:
   std::string m_name;
@@ -205,6 +248,8 @@ private:
   unsigned m_xhp : 1;
   unsigned m_typevar : 1;
   unsigned m_typeaccess : 1;
+  unsigned m_shape : 1;
+  unsigned m_clsCnsShapeField : 1;
 };
 
 }

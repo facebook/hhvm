@@ -21,8 +21,9 @@
 #include "hphp/compiler/code_generator.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
@@ -39,7 +40,9 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_function(false),
                                 m_xhp(false),
                                 m_typevar(false),
-                                m_typeaccess(false) { }
+                                m_typeaccess(false),
+                                m_shape(false),
+                                m_clsCnsShapeField(false) { }
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
@@ -70,6 +73,8 @@ std::string TypeAnnotation::fullName() const {
     xhpTypeName(name);
   } else if (m_tuple) {
     tupleTypeName(name);
+  } else if (m_shape) {
+    shapeTypeName(name);
   } else if (m_typeArgs) {
     genericTypeName(name);
   } else {
@@ -110,8 +115,34 @@ void TypeAnnotation::getAllSimpleNames(std::vector<std::string>& names) const {
   if (m_typeList) {
     m_typeList->getAllSimpleNames(names);
   } else if (m_typeArgs) {
-    m_typeArgs->getAllSimpleNames(names);
+    // do not return the shape fields and keys
+    if (!m_shape) {
+      m_typeArgs->getAllSimpleNames(names);
+    }
   }
+}
+
+void TypeAnnotation::shapeTypeName(std::string& name) const {
+  name += "HH\\shape(";
+  TypeAnnotationPtr shapeField = m_typeArgs;
+  auto sep = "";
+  while (shapeField) {
+    name += sep;
+
+    if (shapeField->isClsCnsShapeField()) {
+      folly::toAppend(shapeField->m_name, &name);
+    } else {
+      folly::toAppend("'", shapeField->m_name, "'", &name);
+    }
+    auto fieldValue = shapeField->m_typeArgs;
+    assert(fieldValue);
+    folly::toAppend("=>", fieldValue->fullName(), &name);
+
+    sep = ", ";
+    shapeField = shapeField->m_typeList;
+  }
+
+  name += ")";
 }
 
 void TypeAnnotation::functionTypeName(std::string &name) const {
@@ -312,9 +343,10 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
     return TypeStructure::Kind::T_fun;
   }
   if (!strcasecmp(m_name.c_str(), "array")) {
-    return TypeStructure::Kind::T_array;
+    return (m_shape)
+      ? TypeStructure::Kind::T_shape
+      : TypeStructure::Kind::T_array;
   }
-  // TODO(7657570): support shapes
   if (m_typevar) {
     return TypeStructure::Kind::T_typevar;
   }
@@ -339,7 +371,11 @@ const StaticString
   s_param_types("param_types"),
   s_generic_types("generic_types"),
   s_root_name("root_name"),
-  s_access_list("access_list")
+  s_access_list("access_list"),
+  s_fields("fields"),
+  s_is_cls_cns("is_cls_cns"),
+  s_value("value"),
+  s_unresolved("unresolved")
 ;
 
 /* Turns the argsList linked list of TypeAnnotation into a positioned
@@ -357,12 +393,30 @@ ArrayData* TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
   return ArrayData::GetScalarArray(typeargs.get());
 }
 
-ArrayData* TypeAnnotation::getScalarArrayRep() const {
+void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
+                                              TypeAnnotationPtr ta) const {
+  auto fields = Array::Create();
+  auto shapeField = ta;
+  while (shapeField) {
+    assert(shapeField->m_typeArgs);
+    auto field = Array::Create();
+    if (shapeField->isClsCnsShapeField()) field.add(s_is_cls_cns, true_varNR);
+    field.add(s_value, Variant(shapeField->m_typeArgs->getScalarArrayRep()));
+    fields.add(String(shapeField->m_name), Variant(field.get()));
+    shapeField = shapeField->m_typeList;
+  }
+  rep.add(s_fields, Variant(ArrayData::GetScalarArray(fields.get())));
+}
+
+ArrayData* TypeAnnotation::getScalarArrayRep(bool isTopLevel) const {
   auto rep = Array::Create();
 
+  if (isTopLevel) {
+    rep.add(s_unresolved, true_varNR);
+  }
   bool nullable = (bool) m_nullable;
   if (nullable) {
-    rep.add(s_nullable, Variant(nullable));
+    rep.add(s_nullable, true_varNR);
   }
 
   TypeStructure::Kind kind = getKind();
@@ -384,6 +438,9 @@ ArrayData* TypeAnnotation::getScalarArrayRep() const {
     if (m_typeArgs) {
       rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
     }
+    break;
+  case TypeStructure::Kind::T_shape:
+    shapeFieldsToScalarArray(rep, m_typeArgs);
     break;
   case TypeStructure::Kind::T_typevar:
     rep.add(s_name, Variant(m_name));

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -904,11 +905,11 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 
-Cell Class::clsCnsGet(const StringData* clsCnsName) const {
+Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   Slot clsCnsInd;
-  auto clsCns = cnsNameToTV(clsCnsName, clsCnsInd);
+  auto clsCns = cnsNameToTV(clsCnsName, clsCnsInd, includeTypeCns);
   if (!clsCns) return make_tv<KindOfUninit>();
-  if (clsCns->m_type != KindOfUninit) {
+  if (clsCns->m_type != KindOfUninit && !m_constants[clsCnsInd].isType()) {
     return *clsCns;
   }
 
@@ -921,8 +922,19 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
   if (clsCnsData.get() == nullptr) {
     clsCnsData = Array::attach(MixedArray::MakeReserve(m_constants.size()));
   } else {
-    clsCns = clsCnsData->nvGet(clsCnsName);
-    if (clsCns) return *clsCns;
+    auto cCns = clsCnsData->nvGet(clsCnsName);
+    if (cCns) return *cCns;
+  }
+
+  // resolve type constant
+  if (m_constants[clsCnsInd].isType()) {
+    assert(clsCns->m_type == KindOfArray);
+    auto resTS = TypeStructure::resolve(clsCns->m_data.parr);
+    auto tv = make_tv<KindOfArray>(resTS);
+    tv.m_aux = clsCns->m_aux;
+    assert(tvIsPlausible(tv));
+    clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&tv), true /* isKey */);
+    return tv;
   }
 
   // The class constant has not been initialized yet; do so.

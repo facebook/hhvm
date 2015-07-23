@@ -1683,9 +1683,9 @@ static const yytype_uint16 yyrline[] =
     2969,  2973,  2974,  2978,  2980,  2988,  2990,  2994,  2998,  3003,
     3007,  3015,  3016,  3022,  3023,  3030,  3033,  3037,  3040,  3045,
     3050,  3052,  3053,  3054,  3058,  3059,  3063,  3064,  3067,  3069,
-    3070,  3073,  3078,  3079,  3080,  3084,  3087,  3091,  3100,  3102,
-    3106,  3109,  3112,  3117,  3120,  3123,  3130,  3133,  3136,  3137,
-    3140,  3143,  3144,  3149,  3152,  3156,  3160,  3166,  3176,  3177
+    3070,  3073,  3078,  3079,  3080,  3084,  3088,  3098,  3106,  3108,
+    3112,  3114,  3119,  3125,  3128,  3131,  3138,  3141,  3144,  3145,
+    3148,  3151,  3152,  3157,  3160,  3164,  3168,  3174,  3184,  3185
 };
 #endif
 
@@ -13664,55 +13664,78 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 3086 "hphp.y"
-    { validate_shape_keyname((yyvsp[(1) - (3)]), _p); ;}
+    { validate_shape_keyname((yyvsp[(1) - (3)]), _p);
+                                     _p->onTypeAnnotation((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)])); ;}
     break;
 
   case 916:
 
 /* Line 1455 of yacc.c  */
-#line 3090 "hphp.y"
-    { validate_shape_keyname((yyvsp[(2) - (4)]), _p); ;}
+#line 3091 "hphp.y"
+    {
+                                     /* should not reach here as
+                                      * optional shape fields are not
+                                      * supported in strict mode */
+                                     validate_shape_keyname((yyvsp[(2) - (4)]), _p);
+                                     _p->onTypeAnnotation((yyval), (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));
+                                   ;}
     break;
 
   case 917:
 
 /* Line 1455 of yacc.c  */
-#line 3095 "hphp.y"
+#line 3102 "hphp.y"
+    { _p->onClsCnsShapeField((yyval), (yyvsp[(1) - (5)]), (yyvsp[(3) - (5)]), (yyvsp[(5) - (5)])); ;}
+    break;
+
+  case 918:
+
+/* Line 1455 of yacc.c  */
+#line 3107 "hphp.y"
+    { _p->onTypeList((yyval), (yyvsp[(3) - (3)])); ;}
+    break;
+
+  case 919:
+
+/* Line 1455 of yacc.c  */
+#line 3108 "hphp.y"
     { ;}
     break;
 
   case 920:
 
 /* Line 1455 of yacc.c  */
-#line 3107 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (2)]); ;}
+#line 3113 "hphp.y"
+    { _p->onShape((yyval), (yyvsp[(1) - (2)])); ;}
     break;
 
   case 921:
 
 /* Line 1455 of yacc.c  */
-#line 3109 "hphp.y"
-    {;}
+#line 3114 "hphp.y"
+    { Token t; t.reset();
+                                         _p->onShape((yyval), t); ;}
     break;
 
   case 922:
 
 /* Line 1455 of yacc.c  */
-#line 3113 "hphp.y"
-    { (yyval).setText("array"); ;}
+#line 3120 "hphp.y"
+    { (yyval) = (yyvsp[(3) - (4)]);
+                                        (yyval).setText("array"); ;}
     break;
 
   case 923:
 
 /* Line 1455 of yacc.c  */
-#line 3117 "hphp.y"
+#line 3125 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 924:
 
 /* Line 1455 of yacc.c  */
-#line 3120 "hphp.y"
+#line 3128 "hphp.y"
     { Token t; t.reset();
                                           _p->onTypeAnnotation((yyval), (yyvsp[(1) - (3)]), t);
                                           _p->onTypeList((yyval), (yyvsp[(3) - (3)])); ;}
@@ -13721,14 +13744,14 @@ yyreduce:
   case 925:
 
 /* Line 1455 of yacc.c  */
-#line 3123 "hphp.y"
+#line 3131 "hphp.y"
     { _p->onTypeAnnotation((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)])); ;}
     break;
 
   case 926:
 
 /* Line 1455 of yacc.c  */
-#line 3130 "hphp.y"
+#line 3138 "hphp.y"
     { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '?');
                                          (yyval) = (yyvsp[(2) - (2)]); ;}
@@ -13737,7 +13760,7 @@ yyreduce:
   case 927:
 
 /* Line 1455 of yacc.c  */
-#line 3133 "hphp.y"
+#line 3141 "hphp.y"
     { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '@');
                                          (yyval) = (yyvsp[(2) - (2)]); ;}
@@ -13746,14 +13769,14 @@ yyreduce:
   case 928:
 
 /* Line 1455 of yacc.c  */
-#line 3136 "hphp.y"
+#line 3144 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 929:
 
 /* Line 1455 of yacc.c  */
-#line 3137 "hphp.y"
+#line 3145 "hphp.y"
     { Token t; t.reset();
                                          (yyvsp[(1) - (1)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); ;}
@@ -13762,7 +13785,7 @@ yyreduce:
   case 930:
 
 /* Line 1455 of yacc.c  */
-#line 3140 "hphp.y"
+#line 3148 "hphp.y"
     { Token t; t.reset();
                                          (yyvsp[(1) - (1)]).setText("callable");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); ;}
@@ -13771,14 +13794,14 @@ yyreduce:
   case 931:
 
 /* Line 1455 of yacc.c  */
-#line 3143 "hphp.y"
+#line 3151 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 932:
 
 /* Line 1455 of yacc.c  */
-#line 3146 "hphp.y"
+#line 3154 "hphp.y"
     { only_in_hh_syntax(_p);
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));
                                          _p->onTypeSpecialization((yyval), 'a'); ;}
@@ -13787,7 +13810,7 @@ yyreduce:
   case 933:
 
 /* Line 1455 of yacc.c  */
-#line 3150 "hphp.y"
+#line 3158 "hphp.y"
     { (yyvsp[(1) - (4)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)])); ;}
     break;
@@ -13795,7 +13818,7 @@ yyreduce:
   case 934:
 
 /* Line 1455 of yacc.c  */
-#line 3153 "hphp.y"
+#line 3161 "hphp.y"
     { _p->onTypeList((yyvsp[(3) - (6)]), (yyvsp[(5) - (6)]));
                                          (yyvsp[(1) - (6)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (6)]), (yyvsp[(3) - (6)])); ;}
@@ -13804,7 +13827,7 @@ yyreduce:
   case 935:
 
 /* Line 1455 of yacc.c  */
-#line 3156 "hphp.y"
+#line 3164 "hphp.y"
     { (yyvsp[(1) - (1)]).xhpLabel();
                                          Token t; t.reset();
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t);
@@ -13814,7 +13837,7 @@ yyreduce:
   case 936:
 
 /* Line 1455 of yacc.c  */
-#line 3162 "hphp.y"
+#line 3170 "hphp.y"
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[(7) - (8)]), (yyvsp[(4) - (8)]));
                                         _p->onTypeAnnotation((yyval), (yyvsp[(2) - (8)]), (yyvsp[(7) - (8)]));
@@ -13824,7 +13847,7 @@ yyreduce:
   case 937:
 
 /* Line 1455 of yacc.c  */
-#line 3168 "hphp.y"
+#line 3176 "hphp.y"
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[(2) - (6)]), (yyvsp[(4) - (6)]));
                                         Token t; t.reset(); t.setText("array");
@@ -13835,21 +13858,21 @@ yyreduce:
   case 938:
 
 /* Line 1455 of yacc.c  */
-#line 3176 "hphp.y"
+#line 3184 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 939:
 
 /* Line 1455 of yacc.c  */
-#line 3177 "hphp.y"
+#line 3185 "hphp.y"
     { (yyval).reset(); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 13851 "hphp.tab.cpp"
+#line 13874 "hphp.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -14069,7 +14092,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 3180 "hphp.y"
+#line 3188 "hphp.y"
 
 bool Parser::parseImpl() {
   return yyparse(this) == 0;

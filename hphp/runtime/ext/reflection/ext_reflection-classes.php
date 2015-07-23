@@ -1091,7 +1091,7 @@ enum TypeStructureKind: int {
   OF_FUNCTION = 11;
   OF_ARRAY = 12;
   OF_GENERIC = 13;
-  OF_CLASS = 14;
+  OF_SHAPE = 14;
 }
 
 <<__Native>>

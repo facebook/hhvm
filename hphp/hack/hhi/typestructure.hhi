@@ -29,7 +29,7 @@ enum TypeStructureKind: int {
   OF_FUNCTION = 0;
   OF_ARRAY = 0;
   OF_GENERIC = 0;
-  OF_CLASS = 0;
+  OF_SHAPE = 0;
 }
 
 /*
@@ -52,6 +52,8 @@ newtype TypeStructure = shape(
   'return_type' => ?UnknownTypeStructure,
   // for arrays, classes
   'generic_types' => ?array<UnknownTypeStructure>,
+  // for shapes
+  'fields' => ?array<arraykey, UnknownTypeStructure>,
   // classname for classes
   'classname' => ?string,
   // name for generics (type variables)

@@ -2186,6 +2186,24 @@ void Parser::onTypeList(Token& type1, const Token& type2) {
   }
 }
 
+void Parser::onClsCnsShapeField(Token& out,
+                                const Token& cls,
+                                const Token& cns,
+                                const Token& value) {
+  std::string name;
+  folly::toAppend(cls.text(), "::", cns.text(), &name);
+  Token t; t.reset();
+  t.setText(name);
+  onTypeAnnotation(out, t, value);
+  out.typeAnnotation->setClsCnsShapeField();
+}
+
+void Parser::onShape(Token &out, const Token &shapeFieldsList) {
+  out.typeAnnotation = std::make_shared<TypeAnnotation>(
+    "array", shapeFieldsList.typeAnnotation);
+  out.typeAnnotation->setShape();
+}
+
 void Parser::onTypeSpecialization(Token& type, char specialization) {
   if (type.typeAnnotation) {
     switch (specialization) {

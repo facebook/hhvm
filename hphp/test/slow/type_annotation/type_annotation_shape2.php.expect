@@ -1,0 +1,18 @@
+string(15) "foo<HH\shape()>"
+array(3) {
+  ["kind"]=>
+  int(101)
+  ["classname"]=>
+  string(3) "foo"
+  ["generic_types"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      array(0) {
+      }
+    }
+  }
+}

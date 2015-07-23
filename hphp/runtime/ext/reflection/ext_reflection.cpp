@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -454,14 +455,14 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 
 /*
  * cls_or_obj: the name of a class or an instance of the class;
- * cst_name: the name of the type constant of the class;
+ * cns_name: the name of the type constant of the class;
  *
  * If the type constant exists and is not abstract, this function
  * returns the shape representing the type associated with the type
  * constant.
  */
 Array HHVM_FUNCTION(type_structure,
-                    const Variant& cls_or_obj, const String& cst_name) {
+                    const Variant& cls_or_obj, const String& cns_name) {
   auto const cls = get_cls(cls_or_obj);
 
   if (!cls) {
@@ -472,22 +473,21 @@ Array HHVM_FUNCTION(type_structure,
   }
 
   auto const cls_sd = cls->name();
-  auto const cst_sd = cst_name.get();
-  Slot typeCstInd;
-  auto typeCst = cls->cnsNameToTV(cst_sd, typeCstInd, true);
-  if (!typeCst) {
-    if (cls->hasTypeConstant(cst_sd, true)) {
+  auto const cns_sd = cns_name.get();
+  auto typeCns = cls->clsCnsGet(cns_sd, true);
+  if (typeCns.m_type == KindOfUninit) {
+    if (cls->hasTypeConstant(cns_sd, true)) {
       raise_error("Type constant %s::%s is abstract",
-                  cls_sd->data(), cst_sd->data());
+                  cls_sd->data(), cns_sd->data());
     } else {
       raise_error("Non-existent type constant %s::%s",
-                  cls_sd->data(), cst_sd->data());
+                  cls_sd->data(), cns_sd->data());
     }
   }
 
-  assert(typeCst->m_type == KindOfArray);
-  assert(typeCst->m_data.parr->isStatic());
-  return Array::attach(typeCst->m_data.parr);
+  assert(typeCns.m_type == KindOfArray);
+  assert(typeCns.m_data.parr->isStatic());
+  return Array::attach(typeCns.m_data.parr);
 }
 
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
@@ -1532,27 +1532,30 @@ static bool HHVM_METHOD(ReflectionTypeConstant, __init,
 }
 
 static String HHVM_METHOD(ReflectionTypeConstant, getName) {
-  auto const cst = ReflectionConstHandle::GetConstFor(this_);
-  auto ret = const_cast<StringData*>(cst->m_name.get());
+  auto const cns = ReflectionConstHandle::GetConstFor(this_);
+  auto ret = const_cast<StringData*>(cns->m_name.get());
   return String(ret);
 }
 
 static bool HHVM_METHOD(ReflectionTypeConstant, isAbstract) {
-  auto const cst = ReflectionConstHandle::GetConstFor(this_);
-  return cst->isAbstract();
+  auto const cns = ReflectionConstHandle::GetConstFor(this_);
+  return cns->isAbstract();
 }
 
 // helper for getAssignedTypeText
 static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
-  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  auto const cns = ReflectionConstHandle::GetConstFor(this_);
 
-  if (cst->m_val.m_type == KindOfStaticString ||
-      cst->m_val.m_type == KindOfString) {
-    return String(cst->m_val.m_data.pstr);
+  if (cns->m_val.m_type == KindOfStaticString ||
+      cns->m_val.m_type == KindOfString) {
+    return String(cns->m_val.m_data.pstr);
   }
 
-  if (cst->m_val.m_type == KindOfArray) {
-    return TypeStructure::toString(cst->m_val.m_data.parr);
+  if (cns->m_val.m_type == KindOfArray) {
+    auto const cls = cns->m_class;
+    auto typeCns = cls->clsCnsGet(cns->m_name, true);
+    assert(typeCns.m_type == KindOfArray);
+    return TypeStructure::toString(typeCns.m_data.parr);
   }
 
   return String();
@@ -1560,8 +1563,8 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
 
 // private helper for getDeclaringClass
 static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
-  auto const cst = ReflectionConstHandle::GetConstFor(this_);
-  auto cls = cst->m_class;
+  auto const cns = ReflectionConstHandle::GetConstFor(this_);
+  auto cls = cns->m_class;
   auto ret = const_cast<StringData*>(cls->name());
   return String(ret);
 }

@@ -3083,34 +3083,42 @@ hh_typevar_variance:
 hh_shape_member_type:
     T_CONSTANT_ENCAPSED_STRING
       T_DOUBLE_ARROW
-      hh_type                      { validate_shape_keyname($1, _p); }
+      hh_type                      { validate_shape_keyname($1, _p);
+                                     _p->onTypeAnnotation($$, $1, $3); }
  |   '?'
       T_CONSTANT_ENCAPSED_STRING
       T_DOUBLE_ARROW
-      hh_type                      { validate_shape_keyname($2, _p); }
+      hh_type                      {
+                                     /* should not reach here as
+                                      * optional shape fields are not
+                                      * supported in strict mode */
+                                     validate_shape_keyname($2, _p);
+                                     _p->onTypeAnnotation($$, $2, $4);
+                                   }
  |  class_namespace_string_typeargs
       T_DOUBLE_COLON
       ident
-     T_DOUBLE_ARROW
-      hh_type                      { }
-
+      T_DOUBLE_ARROW
+      hh_type                      { _p->onClsCnsShapeField($$, $1, $3, $5); }
 ;
 
 hh_non_empty_shape_member_list:
     hh_non_empty_shape_member_list ','
-      hh_shape_member_type
-  | hh_shape_member_type
+    hh_shape_member_type               { _p->onTypeList($$, $3); }
+  | hh_shape_member_type               { }
 ;
 
 hh_shape_member_list:
     hh_non_empty_shape_member_list
-    possible_comma                     { $$ = $1; }
-  | /* empty */
-{}
+    possible_comma                     { _p->onShape($$, $1); }
+  | /* empty */                        { Token t; t.reset();
+                                         _p->onShape($$, t); }
+;
 
 hh_shape_type:
     T_SHAPE
-     '(' hh_shape_member_list ')'      { $$.setText("array"); }
+    '(' hh_shape_member_list ')'      { $$ = $3;
+                                        $$.setText("array"); }
 ;
 
 hh_access_type_start:

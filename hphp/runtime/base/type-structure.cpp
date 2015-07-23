@@ -16,11 +16,12 @@
 
 #include "hphp/runtime/base/type-structure.h"
 
-#include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -45,7 +46,11 @@ const StaticString
   s_param_types("param_types"),
   s_generic_types("generic_types"),
   s_root_name("root_name"),
-  s_access_list("access_list")
+  s_access_list("access_list"),
+  s_fields("fields"),
+  s_is_cls_cns("is_cls_cns"),
+  s_unresolved("unresolved"),
+  s_value("value")
 ;
 
 const std::string
@@ -59,7 +64,8 @@ const std::string
   s_arraykey("HH\\arraykey"),
   s_noreturn("HH\\noreturn"),
   s_mixed("HH\\mixed"),
-  s_array("array")
+  s_array("array"),
+  s_shape("HH\\shape")
 ;
 
 std::string fullName(const ArrayData* arr);
@@ -144,8 +150,37 @@ void genericTypeName(const ArrayData* arr, std::string& name) {
     name += ", ";
   }
 
-  // replace the trailing ", " with ">"
-  name.replace(name.size() - 2, 2, ">");
+  if (sz > 0) {
+    // replace the trailing ", " with ">"
+    name.replace(name.size() - 2, 2, ">");
+  } else {
+    name.erase(name.size() - 1, 1);
+  }
+}
+
+void shapeTypeName(const ArrayData* arr, std::string& name) {
+  // when toString is accessed, all class constant field names should
+  // have been resolved.
+  name += "(";
+  assert(arr->exists(s_fields));
+  auto const fields = arr->get(s_fields).getArrayData();
+  auto const sz = fields->getSize();
+  auto sep = "";
+  for (auto i = 0; i < sz; i++) {
+    name += sep;
+    auto field = fields->getKey(i);
+    auto fieldType = field.getType();
+    if (IS_STRING_TYPE(fieldType)) {
+      folly::toAppend("'", field.getStringData()->data(), "'", &name);
+    } else if (IS_INT_TYPE(fieldType)) {
+      folly::toAppend(field.getInt64(), &name);
+    }
+    auto value = fields->getValue(i);
+    folly::toAppend("=>", fullName(value.getArrayData()), &name);
+    sep = ", ";
+  }
+
+  name += ")";
 }
 
 std::string fullName (const ArrayData* arr) {
@@ -202,6 +237,10 @@ std::string fullName (const ArrayData* arr) {
         genericTypeName(arr, name);
       }
       break;
+    case TypeStructure::Kind::T_shape:
+      name += s_shape;
+      shapeTypeName(arr, name);
+      break;
     case TypeStructure::Kind::T_typevar:
       assert(arr->exists(s_name));
       name += arr->get(s_name).getStringData()->toCppString();
@@ -215,23 +254,146 @@ std::string fullName (const ArrayData* arr) {
     case TypeStructure::Kind::T_unresolved:
       assert(arr->exists(s_classname));
       name += arr->get(s_classname).getStringData()->toCppString();
-      if (arr->exists(s_generic_types)) {
-        genericTypeName(arr, name);
-      }
+      if (arr->exists(s_generic_types)) genericTypeName(arr, name);
       break;
   }
 
   return name;
 }
 
+ArrayData* resolveTS(ArrayData* arr);
+
+ArrayData* resolveList(ArrayData* arr) {
+  auto const sz = arr->getSize();
+
+  auto newarr = Array::Create();
+  for (auto i = 0; i < sz; i++) {
+    auto elem = arr->get(i).getArrayData();
+    newarr.add(i, Variant(resolveTS(elem)));
+  }
+
+  return ArrayData::GetScalarArray(newarr.get());
+}
+
+/* Given an unresolved T_shape TypeStructure, returns the __fields__
+ * portion of the array with all the field names resolved to string
+ * literals. */
+ArrayData* resolveShape(ArrayData* arr) {
+  assert(arr->exists(s_kind));
+  assert(static_cast<TypeStructure::Kind>(arr->get(s_kind).getNumData())
+         == TypeStructure::Kind::T_shape);
+  assert(arr->exists(s_fields));
+
+  auto newfields = Array::Create();
+  auto const fields = arr->get(s_fields).getArrayData();
+  auto const sz = fields->getSize();
+  for (auto i = 0; i < sz; i++) {
+    Variant key = fields->getKey(i);
+    auto wrapper = fields->getValue(i).getArrayData();
+    if (wrapper->exists(s_is_cls_cns)) {
+      // if the shape field name is a class constant, its name is
+      // double colon delimited clsName::cnsName
+      auto const clsCns = key.getStringData()->toCppString();
+      std::string clsName, cnsName;
+      folly::split("::", clsCns, clsName, cnsName);
+
+      // look up clsName::cnsName
+      auto cls = Unit::loadClass(String(clsName).get());
+      if (!cls) raise_error("class %s not found", clsName.c_str());
+      auto cnsValue = cls->clsCnsGet(String(cnsName).get());
+
+      if (IS_STRING_TYPE(cnsValue.m_type) || IS_INT_TYPE(cnsValue.m_type)) {
+        key = tvAsVariant(&cnsValue);
+      } else {
+        raise_error("class constant %s::%s is not a string or an int "
+                    "and cannot be used as shape field names",
+                    clsName.c_str(), cnsName.c_str());
+      }
+    }
+    assert(wrapper->exists(s_value));
+    auto value = resolveTS(wrapper->get(s_value).getArrayData());
+    newfields.add(key, Variant(value));
+  }
+
+  return ArrayData::GetScalarArray(newfields.get());
+}
+
+ArrayData* resolveTS(ArrayData* arr) {
+  assert(arr->exists(s_kind));
+  auto const kind = static_cast<TypeStructure::Kind>(
+    arr->get(s_kind).getNumData());
+
+  auto newarr = Array::Create();
+  if (arr->exists(s_nullable)) newarr.add(s_nullable, true_varNR);
+  newarr.add(s_kind, Variant(static_cast<uint8_t>(kind)));
+
+  switch (kind) {
+    case TypeStructure::Kind::T_tuple: {
+      assert(arr->exists(s_elem_types));
+      auto elemTypes = arr->get(s_elem_types).getArrayData();
+      newarr.add(s_elem_types, Variant(resolveList(elemTypes)));
+      break;
+    }
+    case TypeStructure::Kind::T_fun: {
+      assert(arr->exists(s_return_type));
+      auto returnType = arr->get(s_return_type).getArrayData();
+      newarr.add(s_return_type, Variant(resolveTS(returnType)));
+      assert(arr->exists(s_param_types));
+      auto paramTypes = arr->get(s_param_types).getArrayData();
+      newarr.add(s_param_types, Variant(resolveList(paramTypes)));
+      break;
+    }
+    case TypeStructure::Kind::T_array: {
+      if (arr->exists(s_generic_types)) {
+        auto genericTypes = arr->get(s_generic_types).getArrayData();
+        newarr.add(s_generic_types, Variant(resolveList(genericTypes)));
+      }
+      break;
+    }
+    case TypeStructure::Kind::T_shape:
+      newarr.add(s_fields, Variant(resolveShape(arr)));
+      break;
+    case TypeStructure::Kind::T_unresolved: {
+      assert(arr->exists(s_classname));
+      newarr.add(s_classname, Variant(arr->get(s_classname).getStringData()));
+      if (arr->exists(s_generic_types)) {
+        auto genericTypes = arr->get(s_generic_types).getArrayData();
+        newarr.add(s_generic_types, Variant(resolveList(genericTypes)));
+      }
+      break;
+    }
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_xhp:
+    default:
+      if (!arr->exists(s_unresolved)) return arr;
+      newarr = Array(arr);
+      newarr.remove(s_unresolved);
+      break;
+  }
+
+  return ArrayData::GetScalarArray(newarr.get());
+}
+
 } // anonymous namespace
 
 String TypeStructure::toString(const ArrayData* arr) {
-  if (arr->empty()) {
-    return String();
-  }
+  if (arr->empty()) return String();
+
+  /* When toString is called, the TypeStructure must be resolved. */
+  assert(!arr->exists(s_unresolved));
 
   return String(fullName(arr));
+}
+
+/* Constructs a scalar array with all the shape field names resolved. */
+ArrayData* TypeStructure::resolve(ArrayData* arr) {
+  if (arr == nullptr) return arr;
+
+  if (arr->exists(s_unresolved)) return resolveTS(arr);
+
+  assert(arr->isStatic());
+  return arr;
 }
 
 } // namespace HPHP

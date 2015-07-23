@@ -44,6 +44,7 @@ enum class Kind : uint8_t {
   T_fun = 11,
   T_array = 12,
   T_typevar = 13, // corresponds to user OF_GENERIC
+  T_shape = 14,
 
   /* TODO(7657500): the following kinds needs alias resolution, and
    * are not exposed to the users. Could resolve to a class, enum,
@@ -54,6 +55,8 @@ enum class Kind : uint8_t {
 };
 
 String toString(const ArrayData* arr);
+
+ArrayData* resolve(ArrayData* arr);
 
 }
 

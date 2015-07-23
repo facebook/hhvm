@@ -53,7 +53,6 @@ class ResourceData {
 
  public:
   void setStatic() const { assert(false); }
-  bool isStatic() const { return false; }
   void setUncounted() const { assert(false); }
   bool isUncounted() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC

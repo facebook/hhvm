@@ -698,18 +698,19 @@ static std::string toStringElm(const TypedValue* tv) {
     os << " ??? type " << tv->m_type << "\n";
     return os.str();
   }
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.parr->getCount() <= 0 &&
-      !tv->m_data.parr->isStatic()) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) &&
+      TV_GENERIC_DISPATCH(*tv, getCount) <= 0 &&
+      !TV_GENERIC_DISPATCH(*tv, isStatic)) {
     // OK in the invoking frame when running a destructor.
     os << " ??? inner_count " << tv->m_data.parr->getCount() << " ";
     return os.str();
   }
 
   auto print_count = [&] {
-    if (tv->m_data.parr->isStatic()) {
+    if (TV_GENERIC_DISPATCH(*tv, isStatic)) {
       os << ":c(static)";
     } else {
-      os << ":c(" << tv->m_data.parr->getCount() << ")";
+      os << ":c(" << TV_GENERIC_DISPATCH(*tv, getCount) << ")";
     }
   };
 

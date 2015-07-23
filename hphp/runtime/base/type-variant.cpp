@@ -147,7 +147,10 @@ void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
   assert(type == KindOfString || type == KindOfArray ||
          type == KindOfObject || type == KindOfResource ||
          type == KindOfRef);
-  if (((ArrayData*)datum)->decReleaseCheck()) {
+  TypedValue tmp;
+  tmp.m_type = type;
+  tmp.m_data.num = datum;
+  if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
     g_destructors[typeToDestrIndex(type)]((void*)datum);
   }
 }

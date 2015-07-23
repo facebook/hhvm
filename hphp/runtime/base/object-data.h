@@ -116,7 +116,6 @@ struct ObjectData {
 
  public:
   void setStatic() const;
-  bool isStatic() const;
   void setUncounted() const;
   bool isUncounted() const;
 

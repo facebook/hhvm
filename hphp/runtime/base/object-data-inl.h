@@ -78,10 +78,6 @@ inline void ObjectData::setStatic() const {
   assert(false);
 }
 
-inline bool ObjectData::isStatic() const {
-  return false;
-}
-
 inline void ObjectData::setUncounted() const {
   assert(false);
 }

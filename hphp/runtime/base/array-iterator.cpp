@@ -1782,16 +1782,16 @@ int64_t iter_next_mixed_impl(Iter* it,
 
 
   if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-    if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
+    if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
-    valOut->m_data.pstr->decRefCount();
+    TV_GENERIC_DISPATCH(*valOut, decRefCount);
   }
   if (HasKey && IS_REFCOUNTED_TYPE(keyOut->m_type)) {
-    if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
+    if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
-    keyOut->m_data.pstr->decRefCount();
+    TV_GENERIC_DISPATCH(*keyOut, decRefCount);
   }
 
   iter.setPos(pos);
@@ -1817,16 +1817,16 @@ int64_t iter_next_packed_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-      if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
+      if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
-      valOut->m_data.pstr->decRefCount();
+      TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     if (HasKey && UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
-      if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
+      if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
-      keyOut->m_data.pstr->decRefCount();
+      TV_GENERIC_DISPATCH(*keyOut, decRefCount);
     }
     iter.setPos(pos);
     cellDup(*tvToCell(packedData(ad) + pos), *valOut);
@@ -1861,16 +1861,16 @@ int64_t iter_next_struct_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-      if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
+      if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
-      valOut->m_data.pstr->decRefCount();
+      TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     if (HasKey && UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
-      if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
+      if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
-      keyOut->m_data.pstr->decRefCount();
+      TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     auto structArray = StructArray::asStructArray(ad);
     iter.setPos(pos);

@@ -30,6 +30,27 @@ namespace HPHP {
 struct Variant;
 
 /*
+ * Call a (ref-count related) function on a TypedValue data pointer where we
+ * don't statically know the pointer's type. This is superior to the old idiom
+ * of choosing one of the pointers, calling the method for that type, and
+ * relying on the fact that all the method's have the same code, and therefore
+ * will work correctly even if its actually a different type. This breaks strong
+ * type aliasing and can cause GCC to miscompile code in hard to debug ways.
+ * Instead use manual pointer arithmetic to index to where the ref-count is,
+ * cast it, then call the appropriate generic function. Since we don't use any
+ * of the pointer types, the compiler cannot use type aliasing assumptions to
+ * miscompile.
+ *
+ * This assumes IS_REFCOUNTED_TYPE() is true.
+ */
+#define TV_GENERIC_DISPATCH(exp, func)                                  \
+  HPHP::CountableManip::func(                                           \
+    *reinterpret_cast<HPHP::RefCount*>(                                 \
+      (exp).m_data.num + HPHP::FAST_REFCOUNT_OFFSET                     \
+    )                                                                   \
+  )
+
+/*
  * Assertions on Cells and TypedValues.  Should usually only happen
  * inside an assert().
  */
@@ -82,7 +103,7 @@ bool tvDecRefWillRelease(TypedValue* tv);
  */
 inline bool tvDecRefWillCallHelper(TypedValue* tv) {
   return IS_REFCOUNTED_TYPE(tv->m_type) &&
-    !tv->m_data.pstr->hasMultipleRefs();
+    !TV_GENERIC_DISPATCH(*tv, hasMultipleRefs);
 }
 
 inline void tvDecRefStr(TypedValue* tv) {
@@ -130,17 +151,10 @@ inline void tvRefcountedDecRef(TypedValue v) {
   return tvRefcountedDecRefHelper(v.m_type, v.m_data.num);
 }
 
-// Assumes the value is live, and has a count of at least 2 coming in.
-inline void tvRefcountedDecRefHelperNZ(DataType type, uint64_t datum) {
-  if (IS_REFCOUNTED_TYPE(type)) {
-    auto* asStr = reinterpret_cast<StringData*>(datum);
-    auto const DEBUG_ONLY newCount = asStr->decRefCount();
-    assert(newCount != 0);
+inline void tvRefcountedDecRefNZ(TypedValue tv) {
+  if (IS_REFCOUNTED_TYPE(tv.m_type)) {
+    TV_GENERIC_DISPATCH(tv, decRefCount);
   }
-}
-
-inline void tvRefcountedDecRefNZ(TypedValue v) {
-  return tvRefcountedDecRefHelperNZ(v.m_type, v.m_data.num);
 }
 
 // Assumes 'tv' is live
@@ -159,9 +173,7 @@ ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
 // decref when the count is known not to reach zero
 ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
   assert(!tvDecRefWillCallHelper(tv));
-  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    tv->m_data.pstr->decRefCount();
-  }
+  tvRefcountedDecRefNZ(*tv);
 }
 
 // Assumes 'tv' is live
@@ -178,7 +190,7 @@ inline TypedValue* tvBox(TypedValue* tv) {
 inline void tvIncRef(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(IS_REFCOUNTED_TYPE(tv->m_type));
-  tv->m_data.pstr->incRefCount();
+  TV_GENERIC_DISPATCH(*tv, incRefCount);
 }
 
 ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {
@@ -193,7 +205,9 @@ ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {
 // Assumes 'tv' is not shared (ie KindOfRef or KindOfObject)
 inline void tvIncRefNotShared(TypedValue* tv) {
   assert(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
-  tv->m_data.pobj->incRefCount();
+  tv->m_type == KindOfObject ?
+    tv->m_data.pobj->incRefCount() :
+    tv->m_data.pref->incRefCount();
 }
 
 // Assumes 'tv' is live
@@ -264,9 +278,9 @@ inline void cellDup(const Cell fr, Cell& to) {
  */
 inline void refDup(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
-  to.m_data.num = fr.m_data.num;
   to.m_type = KindOfRef;
-  tvIncRefNotShared(&to);
+  to.m_data.pref = fr.m_data.pref;
+  to.m_data.pref->incRefCount();
 }
 
 // Assumes 'tv' is dead
@@ -285,7 +299,7 @@ inline void tvWriteUninit(TypedValue* tv) {
 inline void tvWriteObject(ObjectData* pobj, TypedValue* tv) {
   tv->m_type = KindOfObject;
   tv->m_data.pobj = pobj;
-  tvIncRef(tv);
+  tv->m_data.pobj->incRefCount();
 }
 
 // conditionally unbox tv
@@ -487,8 +501,7 @@ inline void tvUnset(TypedValue* to) {
  */
 inline bool tvIsStatic(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  return !IS_REFCOUNTED_TYPE(tv->m_type) ||
-         tv->m_data.parr->isStatic();
+  return !IS_REFCOUNTED_TYPE(tv->m_type) || TV_GENERIC_DISPATCH(*tv, isStatic);
 }
 
 /**

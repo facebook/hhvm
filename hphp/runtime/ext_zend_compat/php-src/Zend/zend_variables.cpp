@@ -40,7 +40,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
     }
     zvalue->tv()->m_data.parr = ad;
   } else if (IS_REFCOUNTED_TYPE(zvalue->tv()->m_type)) {
-    zvalue->tv()->m_data.pstr->incRefCount();
+    TV_GENERIC_DISPATCH(*zvalue->tv(), incRefCount);
   }
 }
 

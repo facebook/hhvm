@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -434,6 +434,12 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     ((int32_t*)after_lea)[-1] = d;
   }
 
+  if (unit.padding) {
+    while (a->available() >= 2) a->ud2();
+    if (a->available() > 0) a->int3();
+    assertx(a->available() == 0);
+  }
+
   if (!shouldUpdateAsmInfo) {
     return;
   }
@@ -835,32 +841,32 @@ void Vgen::emit(const lea& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Lower svcreq{} by making copies to abi registers explicit, saving
-// vm regs, and returning to the VM. svcreq{} is guaranteed to be
+// Lower svcreqstub{} by making copies to abi registers explicit, saving
+// vm regs, and returning to the VM. svcreqstub{} is guaranteed to be
 // at the end of a block, so we can just keep appending to the same
 // block.
-void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
-  assertx(unit.tuples[inst.svcreq_.extraArgs].size() < kNumServiceReqArgRegs);
-  auto svcreq = inst.svcreq_; // copy it
+void lower_svcreqstub(Vunit& unit, Vlabel b, const Vinstr& inst) {
+  assertx(unit.tuples[inst.svcreqstub_.extraArgs].size() < svcreq::kMaxArgs);
+  auto svcreqstub = inst.svcreqstub_; // copy it
   auto origin = inst.origin;
-  auto& argv = unit.tuples[svcreq.extraArgs];
-  unit.blocks[b].code.pop_back(); // delete the svcreq instruction
+  auto& argv = unit.tuples[svcreqstub.extraArgs];
+  unit.blocks[b].code.pop_back(); // delete the svcreqstub instruction
   Vout v(unit, b, origin);
 
-  RegSet arg_regs = svcreq.args;
+  RegSet arg_regs = svcreqstub.args;
   VregList arg_dests;
   for (int i = 0, n = argv.size(); i < n; ++i) {
-    PhysReg d{serviceReqArgRegs[i]};
+    PhysReg d{kSvcReqArgRegs[i]};
     arg_dests.push_back(d);
     arg_regs |= d;
   }
-  v << copyargs{svcreq.extraArgs, v.makeTuple(arg_dests)};
-  if (svcreq.stub_block) {
-    v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
+  v << copyargs{svcreqstub.extraArgs, v.makeTuple(arg_dests)};
+  if (svcreqstub.stub_block) {
+    v << leap{rip[(int64_t)svcreqstub.stub_block], rAsm};
   } else {
     v << ldimmq{0, rAsm}; // because persist flag
   }
-  v << ldimmq{svcreq.req, rdi};
+  v << ldimmq{svcreqstub.req, rdi};
   arg_regs |= rAsm | rdi | rVmFp | rVmSp;
 
   v << jmpi{TCA(handleSRHelper), arg_regs};
@@ -1084,8 +1090,8 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
   PostorderWalker{unit}.dfs([&](Vlabel ib) {
     assertx(!blocks[ib].code.empty());
     auto& back = blocks[ib].code.back();
-    if (back.op == Vinstr::svcreq) {
-      lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
+    if (back.op == Vinstr::svcreqstub) {
+      lower_svcreqstub(unit, Vlabel{ib}, blocks[ib].code.back());
     } else if (back.op == Vinstr::vcallstub) {
       lower_vcallstub(unit, Vlabel{ib});
     }
@@ -1179,11 +1185,6 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
 }
 
 void emitX64(const Vunit& unit, Vasm::AreaList& areas, AsmInfo* asmInfo) {
-  static thread_local bool busy;
-  always_assert(!busy);
-  busy = true;
-  SCOPE_EXIT { busy = false; };
-
   Timer timer(Timer::vasm_gen);
   auto blocks = layoutBlocks(unit);
   Vgen(unit, areas, asmInfo).emit(blocks);

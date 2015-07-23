@@ -55,7 +55,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -2314,7 +2314,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   args.push_back(v.cns(extra->sk.toAtomicInt()));
   args.push_back(v.cns(static_cast<uint64_t>(extra->transId)));
 
-  v << svcreq{
+  v << svcreqstub{
     REQ_RETRANSLATE_OPT,
     kCrossTraceRegsResumed,
     v.makeTuple(args)

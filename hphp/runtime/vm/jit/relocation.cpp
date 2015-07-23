@@ -20,10 +20,12 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/treadmill.h"
+
 #include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 
 #include "hphp/tools/hfsort/jitsort.h"
 
@@ -118,7 +120,7 @@ void postProcess(TransRelocInfo&& tri, void* paramPtr) {
       auto it = deadStubs.lower_bound(tri.coldStart);
       while (it != deadStubs.end() && *it < tri.coldEnd) {
         x64::adjustForRelocation(rel, coldStart, *it);
-        coldStart = *it + mcg->backEnd().reusableStubSize();
+        coldStart = *it + svcreq::stub_size();
         ++it;
       }
     }
@@ -220,7 +222,7 @@ struct TransRelocInfoHelper {
 void relocateStubs(TransLoc& loc, TCA frozenStart, TCA frozenEnd,
                    RelocationInfo& rel, CodeCache& cache,
                    CodeGenFixups& fixups) {
-  auto const stubSize = mcg->backEnd().reusableStubSize();
+  auto const stubSize = svcreq::stub_size();
 
   for (auto addr : fixups.m_reusedStubs) {
     if (!loc.contains(addr)) continue;

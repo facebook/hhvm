@@ -204,16 +204,10 @@ const PhysReg argNumToSIMDRegName[] = {
 #endif
 const int kNumSIMDRegisterArgs = sizeof(argNumToSIMDRegName) / sizeof(PhysReg);
 
-/*
- * JIT'd code "reverse calls" the enterTC routine by returning to it,
- * with a service request number and arguments.
- */
-constexpr PhysReg serviceReqArgRegs[] = {
-  // rdi: contains request number
+constexpr PhysReg kSvcReqArgRegs[] = {
+  // reg::rdi contains request number.
   reg::rsi, reg::rdx, reg::rcx, reg::r8
 };
-constexpr int kNumServiceReqArgRegs =
-  sizeof(serviceReqArgRegs) / sizeof(PhysReg);
 
 /*
  * Some data structures are accessed often enough from translated code

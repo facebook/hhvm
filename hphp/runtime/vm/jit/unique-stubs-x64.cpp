@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -52,10 +52,9 @@ TCA emitRetFromInterpretedFrame() {
   auto const ret = a.frontier();
 
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
-  a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
-  a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.cold(), SRFlags::None, folly::none,
-    REQ_POST_INTERP_RET);
+  a.   lea  (rVmSp[-arBase], kSvcReqArgRegs[0]);
+  a.   movq (rVmFp, kSvcReqArgRegs[1]);
+  svcreq::emit_persistent(mcg->code.cold(), folly::none, REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -69,12 +68,11 @@ TCA emitRetFromInterpretedGeneratorFrame() {
 
   // We have to get the Generator object from the current AR's $this, then
   // find where its embedded AR is.
-  PhysReg rContAR = serviceReqArgRegs[0];
+  PhysReg rContAR = kSvcReqArgRegs[0];
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
   a.    lea    (rContAR[arOff], rContAR);
-  a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.cold(), SRFlags::None, folly::none,
-    REQ_POST_INTERP_RET);
+  a.    movq   (rVmFp, kSvcReqArgRegs[1]);
+  svcreq::emit_persistent(mcg->code.cold(), folly::none, REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -292,8 +290,7 @@ asm_label(a, resumeCppUnwind);
 asm_label(a, debuggerReturn);
   a.    loadq (rVmTl[unwinderDebuggerReturnSPOff()], rVmSp);
   a.    storeq(0, rVmTl[unwinderDebuggerReturnSPOff()]);
-  emitServiceReq(a.code(), SRFlags::None, folly::none,
-    REQ_POST_DEBUGGER_RET);
+  svcreq::emit_persistent(a.code(), folly::none, REQ_POST_DEBUGGER_RET);
 
   uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
 }

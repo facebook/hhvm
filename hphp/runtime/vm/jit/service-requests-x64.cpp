@@ -16,20 +16,28 @@
 
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 
-#include <folly/Optional.h>
-
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
-#include "hphp/runtime/vm/jit/back-end.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/srckey.h"
+
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/back-end.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
+
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/safe-cast.h"
+
+#include <folly/Optional.h>
+
+#include <cstring>
 
 namespace HPHP { namespace jit { namespace x64 {
 
@@ -38,9 +46,6 @@ using jit::reg::rip;
 TRACE_SET_MOD(servicereq);
 
 namespace {
-
-constexpr int kMovSize = 0xa;
-constexpr int kLeaVmSpSize = 0x7;
 
 /*
  * Work to be done for jmp-smashing service requests before the service request
@@ -107,121 +112,9 @@ void emitBindJPost(CodeBlock& cb,
   mcg->backEnd().emitSmashableJump(cb, sr, cc);
 }
 
-const int kExtraRegs = 2; // we also set rdi and r10
-static constexpr int maxStubSpace() {
-  /* max space for emitting args */
-  return (kNumServiceReqArgRegs + kExtraRegs) * kMovSize + kLeaVmSpSize;
-}
-
-// fill remaining space in stub with ud2 or int3
-void padStub(CodeBlock& stub) {
-  Asm a{stub};
-  // do not use nops, or the relocator will strip them out
-  while (stub.available() >= 2) a.ud2();
-  if (stub.available() > 0) a.int3();
-  assertx(stub.available() == 0);
-}
-
-void emitServiceReqImpl(CodeBlock& stub,
-                        SRFlags flags,
-                        folly::Optional<FPInvOffset> spOff,
-                        ServiceRequest req,
-                        const SvcReqArgVec& argv) {
-  const bool persist = flags & SRFlags::Persist;
-  Asm as{stub};
-  FTRACE(2, "Emit Service Req @{} {}(", stub.base(), serviceReqName(req));
-
-  /*
-   * If we have an spOff, materialize rVmSp so that handleSRHelper can do a vm
-   * reg sync.  When we don't have an spOff, the caller of the service request
-   * was responsible for making sure rVmSp already contained the top of the
-   * stack.
-   */
-  if (spOff) {
-    as.    lea(rVmFp[-cellsToBytes(spOff->offset)], rVmSp);
-  }
-
-  /*
-   * Move args into appropriate regs. Eager VMReg save may bash flags,
-   * so set the CondCode arguments first.
-   */
-  assertx(argv.size() <= kNumServiceReqArgRegs);
-  for (int i = 0; i < argv.size(); ++i) {
-    auto reg = serviceReqArgRegs[i];
-    const auto& argInfo = argv[i];
-    switch (argInfo.kind) {
-      case SvcReqArg::Kind::Immed: {
-        FTRACE(2, "{}, ", argInfo.imm);
-        as.    emitImmReg(argInfo.imm, reg);
-      } break;
-      case SvcReqArg::Kind::Address: {
-        FTRACE(2, "{}(%rip), ", argInfo.imm);
-        as.    lea(rip[argInfo.imm], reg);
-      } break;
-      case SvcReqArg::Kind::CondCode: {
-        // Already set before VM reg save.
-        DEBUG_ONLY TCA start = as.frontier();
-        as.    setcc(argInfo.cc, rbyte(reg));
-        assertx(start - as.frontier() <= kMovSize);
-        FTRACE(2, "cc({}), ", cc_names[argInfo.cc]);
-      } break;
-    }
-  }
-  if (persist) {
-    FTRACE(2, "no stub");
-    as.  emitImmReg(0, rAsm);
-  } else {
-    FTRACE(2, "stub: {}", stub.base());
-    as.  lea(rip[(int64_t)stub.base()], rAsm);
-  }
-  FTRACE(2, ")\n");
-  as.    emitImmReg(req, reg::rdi);
-
-  /*
-   * Jump to the helper that will pack our args into a struct and call into
-   * MCGenerator::handleServiceRequest().
-   */
-  as.    jmp(TCA(handleSRHelper));
-
-  if (debug || !persist) {
-    /*
-     * not reached.
-     * For re-usable stubs, used to mark the
-     * end of the code, for the relocator's benefit.
-     */
-    as.ud2();
-  }
-
-  // Recycled stubs need to be uniformly sized. Make space for the
-  // maximal possible service requests.
-  if (!persist) {
-    padStub(stub);
-  }
-}
-
 } // anonymous namespace
 
 //////////////////////////////////////////////////////////////////////
-
-size_t reusableStubSize() {
-  return maxStubSpace();
-}
-
-TCA emitServiceReqWork(CodeBlock& cb,
-                       TCA start,
-                       SRFlags flags,
-                       folly::Optional<FPInvOffset> spOff,
-                       ServiceRequest req,
-                       const SvcReqArgVec& argv) {
-  auto const is_reused = start != cb.frontier();
-
-  CodeBlock stub;
-  stub.init(start, maxStubSpace(), "stubTemp");
-  emitServiceReqImpl(stub, flags, spOff, req, argv);
-  if (!is_reused) cb.skip(stub.used());
-
-  return start;
-}
 
 void emitBindJ(CodeBlock& cb,
                CodeBlock& frozen,
@@ -232,7 +125,7 @@ void emitBindJ(CodeBlock& cb,
   auto const smashInfo = emitBindJPre(cb, frozen, cc);
   auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!dest.resumed()) optSPOff = spOff;
-  auto const sr = emitEphemeralServiceReq(
+  auto const sr = svcreq::emit_ephemeral(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     optSPOff,
@@ -251,9 +144,8 @@ TCA emitRetranslate(CodeBlock& cb,
                     folly::Optional<FPInvOffset> spOff,
                     TransFlags trflags) {
   auto const toSmash = emitBindJPre(cb, frozen, cc);
-  auto const sr = emitServiceReq(
+  auto const sr = svcreq::emit_persistent(
     frozen,
-    SRFlags::None,
     spOff,
     REQ_RETRANSLATE,
     dest.offset(),
@@ -281,7 +173,7 @@ TCA emitBindAddr(CodeBlock& cb,
   auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!sk.resumed()) optSPOff = spOff;
 
-  auto const sr = emitEphemeralServiceReq(
+  auto const sr = svcreq::emit_ephemeral(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     optSPOff,
@@ -324,7 +216,7 @@ void emitBindJmpccFirst(CodeBlock& cb,
   auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!targetSk0.resumed()) optSPOff = spOff;
 
-  auto const sr = emitEphemeralServiceReq(
+  auto const sr = svcreq::emit_ephemeral(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     optSPOff,
@@ -339,4 +231,30 @@ void emitBindJmpccFirst(CodeBlock& cb,
   as.jmp(sr);
 }
 
-}}}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void adjustBindJmpPatchableJmpAddress(TCA addr,
+                                      bool targetIsResumed,
+                                      TCA newJmpIp) {
+  assert_not_implemented(arch() == Arch::X64);
+
+  // We rely on emitServiceReqWork putting an optional lea for the SP offset
+  // first (depending on whether the target SrcKey is a resumed function),
+  // followed by an RIP relative lea of the jump address.
+  if (!targetIsResumed) {
+    DecodedInstruction instr(addr);
+    addr += instr.size();
+  }
+  auto const leaIp = addr;
+  always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
+  always_assert(leaIp[1] == 0x8d); // lea
+  auto const afterLea = leaIp + x64::kRipLeaLen;
+  auto const delta = safe_cast<int32_t>(newJmpIp - afterLea);
+  std::memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}}

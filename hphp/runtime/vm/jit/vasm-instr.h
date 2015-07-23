@@ -65,7 +65,7 @@ struct Vunit;
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
-  O(svcreq, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
+  O(svcreqstub, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   /* vasm intrinsics */\
   O(callfaststub, I(fix), U(args), Dn)\
   O(copy, Inone, UH(s,d), DH(d,s))\
@@ -268,8 +268,8 @@ struct bindcall {
 struct callstub { TCA target; RegSet args; };
 
 struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
-struct svcreq { ServiceRequest req; RegSet args; Vtuple extraArgs;
-                TCA stub_block; };
+struct svcreqstub { ServiceRequest req; RegSet args; Vtuple extraArgs;
+                    TCA stub_block; };
 
 struct fallbackcc {
   explicit fallbackcc(ConditionCode cc,

@@ -204,7 +204,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::storesd:
     case Vinstr::storew:
     case Vinstr::storewi:
-    case Vinstr::svcreq:
+    case Vinstr::svcreqstub:
     case Vinstr::syncpoint:
     case Vinstr::syncvmsp:
     case Vinstr::tbcc:

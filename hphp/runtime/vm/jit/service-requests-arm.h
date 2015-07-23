@@ -16,20 +16,14 @@
 #ifndef incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
 #define incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
 
-namespace HPHP { namespace jit {
-struct Vout;
-namespace arm {
+namespace HPHP { namespace jit { namespace arm {
 
 /*
  * See service-requests-x64.h for interface documentation.
  */
 
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
-                       folly::Optional<FPInvOffset>,
-                       ServiceRequest req, const SvcReqArgVec& argInfo);
 void emitBindJ(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                SrcKey dest);
-size_t reusableStubSize();
 
 }}}
 

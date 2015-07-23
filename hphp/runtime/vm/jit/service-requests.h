@@ -24,6 +24,9 @@
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/data-block.h"
+
+#include <folly/Optional.h>
 
 namespace HPHP {
 
@@ -129,10 +132,16 @@ enum ServiceRequest {
 #undef REQ
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+namespace svcreq {
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * ID to name mapping for tracing.
  */
-inline const char* serviceReqName(int req) {
+inline const char* to_name(ServiceRequest req) {
   static const char* reqNames[] = {
 #define REQ(nm) #nm,
     SERVICE_REQUESTS
@@ -144,29 +153,7 @@ inline const char* serviceReqName(int req) {
 #undef SERVICE_REQUESTS
 
 ///////////////////////////////////////////////////////////////////////////////
-// Service request emission.
-
-/*
- * Flags for emitting service requests.
- */
-enum class SRFlags {
-  None = 0,
-
-  /*
-   * Whether the emitted service request stub should be persistent.
-   *
-   * Non-persistent stubs are called "ephemeral", and may be reused.
-   */
-  Persist = 1 << 0,
-};
-
-inline bool operator&(SRFlags a, SRFlags b) {
-  return int(a) & int(b);
-}
-
-inline SRFlags operator|(SRFlags a, SRFlags b) {
-  return SRFlags(int(a) | int(b));
-}
+// Emitters.
 
 /*
  * Type-discriminated service request argument.
@@ -177,12 +164,12 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
  *  - Condition codes produce a setcc based on the status flags passed to the
  *    emit routine.
  */
-struct SvcReqArg {
+struct Arg {
   enum class Kind { Immed, Address, CondCode };
 
-  explicit SvcReqArg(uint64_t imm) : kind{Kind::Immed}, imm{imm} {}
-  explicit SvcReqArg(TCA addr) : kind{Kind::Address}, addr{addr} {}
-  explicit SvcReqArg(ConditionCode cc) : kind{Kind::CondCode}, cc{cc} {}
+  explicit Arg(uint64_t imm) : kind{Kind::Immed}, imm{imm} {}
+  explicit Arg(TCA addr) : kind{Kind::Address}, addr{addr} {}
+  explicit Arg(ConditionCode cc) : kind{Kind::CondCode}, cc{cc} {}
 
 public:
   Kind kind;
@@ -193,9 +180,55 @@ public:
   };
 };
 
-using SvcReqArgVec = jit::vector<SvcReqArg>;
+using ArgVec = jit::vector<Arg>;
+
+/*
+ * Service request stub emitters.
+ *
+ * Some clients (e.g., unique stubs, bind_jcc_1st machinery) need to emit stubs
+ * directly without the supporting code (e.g., smashable jumps).
+ *
+ * Service request stubs can be either persistent or ephemeral.  The only
+ * difference (besides that ephemeral service requests require a stub start
+ * address) is that ephemeral requests are padded to stub_size().
+ */
+template<typename... Args>
+TCA emit_persistent(CodeBlock& cb,
+                    folly::Optional<FPInvOffset> spOff,
+                    ServiceRequest sr,
+                    Args... args);
+template<typename... Args>
+TCA emit_ephemeral(CodeBlock& cb,
+                   TCA start,
+                   folly::Optional<FPInvOffset> spOff,
+                   ServiceRequest sr,
+                   Args... args);
+
+/*
+ * Space used by an ephemeral stub.
+ *
+ * All ephemeral service request stubs are sized to this fixed, architecture-
+ * dependent size, which is guaranteed to fit all service request types along
+ * with a terminal padding instruction.
+ */
+size_t stub_size();
+
+/*
+ * Extract the VM stack offset associated with a service request stub.
+ *
+ * When we emit service requests stubs for non-resumed TC contexts, we first
+ * emit code that rematerializes the VM stack pointer.  Sometimes, we want to
+ * replace a stub with a different service request (e.g., bind_jcc_1st), so we
+ * have to fish the offset out of the stub first.
+ */
+FPInvOffset extract_spoff(TCA stub);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Maximum number of arguments a service request can accept.
+ */
+constexpr int kMaxArgs = 4;
 
 /*
  * Service request metadata.
@@ -204,7 +237,7 @@ using SvcReqArgVec = jit::vector<SvcReqArg>;
  * arguments passed in registers.  Any changes to its size or layout of must be
  * reflected in handleSRHelper() in translator-asm-helpers.S.
  */
-struct ServiceReqInfo {
+struct ReqInfo {
   /*
    * The service request type.
    */
@@ -229,28 +262,27 @@ struct ServiceReqInfo {
     TransID transID;
     bool boolVal;
     ActRec* ar;
-  } args[4];
+  } args[kMaxArgs];
 };
 
-static_assert(sizeof(ServiceReqInfo) == 0x30,
+static_assert(sizeof(ReqInfo) == 0x30,
               "rsp adjustments in handleSRHelper");
+
+///////////////////////////////////////////////////////////////////////////////
+
+} // svcreq
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Service request assembly stub.
  *
  * Called by translated code before a service request to pack argument
- * registers into a ServiceReqInfo and perform some other bookkeeping tasks.
+ * registers into a ReqInfo and perform some other bookkeeping tasks.
  */
 extern "C" void handleSRHelper();
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Return the VM stack offset a service request was associated with.  This
- * function is only legal to call with service requests that were created with
- * an FPInvOffset.  (TODO: list of when we do that.)
- */
-FPInvOffset serviceReqSPOff(TCA);
 
 /*
  * A REQ_BIND_JMP service request passes an address of a jump that can be
@@ -267,5 +299,7 @@ void adjustBindJmpPatchableJmpAddress(TCA stub,
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
+
+#include "hphp/runtime/vm/jit/service-requests-inl.h"
 
 #endif

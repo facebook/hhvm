@@ -74,7 +74,7 @@ void dumpEntry(const RingBufferEntry* e) {
     case RBTypeServiceReq: {
       auto req = static_cast<jit::ServiceRequest>(e->m_sk);
       std::cerr << folly::format(msgFormat,
-                                 jit::serviceReqName(req), e->m_data);
+                                 jit::svcreq::to_name(req), e->m_data);
       break;
     }
     default: {

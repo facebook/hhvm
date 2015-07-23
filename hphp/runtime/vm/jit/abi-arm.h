@@ -53,7 +53,7 @@ inline RegSet argSet(int n) {
   return regs;
 }
 
-inline vixl::Register serviceReqArgReg(unsigned index) {
+inline vixl::Register svcReqArgReg(unsigned index) {
   // First arg holds the request number
   return argReg(index + 1);
 }

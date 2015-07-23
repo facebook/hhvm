@@ -180,6 +180,7 @@ struct Vunit {
   jit::hash_map<size_t,Vconst> regToConst;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
+  bool padding{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

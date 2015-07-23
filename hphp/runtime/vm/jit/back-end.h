@@ -93,16 +93,6 @@ struct BackEnd {
 
   virtual UniqueStubs emitUniqueStubs() = 0;
 
-  virtual TCA emitServiceReqWork(
-    CodeBlock& cb,
-    TCA start,
-    SRFlags flags,
-    folly::Optional<FPInvOffset> spOff,
-    ServiceRequest req,
-    const SvcReqArgVec& argv) = 0;
-
-  virtual size_t reusableStubSize() const = 0;
-
   /*
    * Emit a small piece of code to `code' that jumps to
    * uniqueStubs.interpHelper.

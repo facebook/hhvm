@@ -23,8 +23,8 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -132,6 +132,7 @@ private:
   void emit(incq& i) { a->Add(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
   void emit(jcc& i);
   void emit(jmp i);
+  // FIXME: lea implementation ignores scale
   void emit(lea& i) { a->Add(X(i.d), X(i.s.base), i.s.disp); }
   void emit(loadl& i) { a->Ldr(W(i.d), M(i.s)); /* assume 0-extends */ }
   void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
@@ -538,34 +539,34 @@ void Vgen::emit(tbcc& i) {
   emit(jmp{i.targets[0]});
 }
 
-// Lower svcreq{} by making copies to abi registers explicit, saving
-// vm regs, and returning to the VM. svcreq{} is guaranteed to be
+// Lower svcreqstub{} by making copies to abi registers explicit, saving
+// vm regs, and returning to the VM. svcreqstub{} is guaranteed to be
 // at the end of a block, so we can just keep appending to the same block.
-void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
-  auto svcreq = inst.svcreq_; // copy it
+void lower_svcreqstub(Vunit& unit, Vlabel b, Vinstr& inst) {
+  auto svcreqstub = inst.svcreqstub_; // copy it
   auto origin = inst.origin;
-  auto& argv = unit.tuples[svcreq.extraArgs];
-  unit.blocks[b].code.pop_back(); // delete the svcreq instruction
+  auto& argv = unit.tuples[svcreqstub.extraArgs];
+  unit.blocks[b].code.pop_back(); // delete the svcreqstub instruction
   Vout v(unit, b, origin);
 
   RegSet arg_regs;
   VregList arg_dests;
   for (int i = 0, n = argv.size(); i < n; ++i) {
-    PhysReg d{serviceReqArgReg(i)};
+    PhysReg d{svcReqArgReg(i)};
     arg_dests.push_back(d);
     arg_regs |= d;
   }
-  v << copyargs{svcreq.extraArgs, v.makeTuple(arg_dests)};
+  v << copyargs{svcreqstub.extraArgs, v.makeTuple(arg_dests)};
   // Save VM regs
   PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rdsp{rVmTl};
   v << store{vmfp, rdsp[rds::kVmfpOff]};
   v << store{vmsp, rdsp[rds::kVmspOff]};
-  if (svcreq.stub_block) {
+  if (svcreqstub.stub_block) {
     always_assert(false && "use rip-rel addr to get ephemeral stub addr");
   } else {
     v << ldimmq{0, PhysReg{arm::rAsm}}; // because persist flag
   }
-  v << ldimmq{svcreq.req, PhysReg{argReg(0)}};
+  v << ldimmq{svcreqstub.req, PhysReg{argReg(0)}};
   arg_regs |= arm::rAsm | argReg(0);
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.
@@ -585,8 +586,8 @@ void lower(Vunit& unit) {
   for (size_t b = 0; b < unit.blocks.size(); ++b) {
     auto& code = unit.blocks[b].code;
     if (code.empty()) continue;
-    if (code.back().op == Vinstr::svcreq) {
-      lower_svcreq(unit, Vlabel{b}, code.back());
+    if (code.back().op == Vinstr::svcreqstub) {
+      lower_svcreqstub(unit, Vlabel{b}, code.back());
     }
     for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
       auto& inst = unit.blocks[b].code[i];

@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/back-end.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
@@ -31,67 +31,6 @@ namespace HPHP { namespace jit { namespace arm {
 using namespace vixl;
 
 //////////////////////////////////////////////////////////////////////
-
-size_t reusableStubSize() {
-  // There are 4 instructions after the argument-shuffling, and they're all
-  // single instructions (i.e. not macros). There are up to 4 instructions per
-  // argument (it may take up to 4 instructions to move a 64-bit immediate into
-  // a register).
-  return 4 * vixl::kInstructionSize +
-    (4 * maxArgReg()) * vixl::kInstructionSize;
-}
-
-TCA emitServiceReqWork(CodeBlock& cb,
-                       TCA start,
-                       SRFlags flags,
-                       folly::Optional<FPInvOffset> spOff,
-                       ServiceRequest req,
-                       const SvcReqArgVec& argv) {
-  MacroAssembler a { cb };
-
-  const bool persist = flags & SRFlags::Persist;
-
-  folly::Optional<CodeCursor> maybeCc = folly::none;
-  if (start != cb.frontier()) {
-    maybeCc.emplace(cb, start);
-  }
-
-  const auto kMaxStubSpace = reusableStubSize();
-
-  for (auto i = 0; i < argv.size(); ++i) {
-    auto reg = serviceReqArgReg(i);
-    auto const& arg = argv[i];
-    switch (arg.kind) {
-      case SvcReqArg::Kind::Immed:
-        a.   Mov  (reg, arg.imm);
-        break;
-      case SvcReqArg::Kind::CondCode:
-        not_implemented();
-        break;
-      default: not_reached();
-    }
-  }
-
-  if (persist) {
-    a.   Mov   (rAsm, 0);
-  } else {
-    a.   Mov   (rAsm, reinterpret_cast<intptr_t>(start));
-  }
-  a.     Mov   (argReg(0), req);
-
-  a.     Ldr   (rLinkReg, MemOperand(sp, 16, PostIndex));
-  a.     Ret   ();
-  a.     Brk   (0);
-
-  if (!persist) {
-    assertx(cb.frontier() - start <= kMaxStubSpace);
-    while (cb.frontier() - start < kMaxStubSpace) {
-      a. Nop   ();
-    }
-  }
-
-  return start;
-}
 
 void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
                SrcKey dest) {
@@ -103,7 +42,7 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
 
   mcg->setJmpTransID(toSmash);
 
-  TCA sr = emitEphemeralServiceReq(
+  TCA sr = svcreq::emit_ephemeral(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     folly::none,

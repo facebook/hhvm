@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/debug-guards.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 

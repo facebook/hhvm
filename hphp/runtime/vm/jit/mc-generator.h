@@ -293,7 +293,7 @@ public:
    * The forced symbol name is so we can call this from
    * translator-asm-helpers.S without hardcoding a fragile mangled name.
    */
-  TCA handleServiceRequest(ServiceReqInfo& info) noexcept
+  TCA handleServiceRequest(svcreq::ReqInfo& info) noexcept
     asm("MCGenerator_handleServiceRequest");
 
   /*

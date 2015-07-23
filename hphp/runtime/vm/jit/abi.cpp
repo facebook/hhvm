@@ -57,4 +57,36 @@ PhysReg rvmtl() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+PhysReg r_svcreq_req() {
+  switch (arch()) {
+    case Arch::X64:
+      return reg::rdi;
+    case Arch::ARM:
+      not_implemented();
+  }
+  not_reached();
+}
+
+PhysReg r_svcreq_stub() {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::rAsm;
+    case Arch::ARM:
+      not_implemented();
+  }
+  not_reached();
+}
+
+PhysReg r_svcreq_arg(unsigned i) {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::kSvcReqArgRegs[i];
+    case Arch::ARM:
+      return arm::svcReqArgReg(i);
+  }
+  not_reached();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}

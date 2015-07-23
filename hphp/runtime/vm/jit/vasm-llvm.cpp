@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/jit/llvm-locrecs.h"
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -910,7 +910,7 @@ struct LLVMEmitter {
           auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
           auto optSPOff = folly::Optional<FPInvOffset>{};
           if (!req.target.resumed()) optSPOff = req.spOff;
-          auto newStub = emitEphemeralServiceReq(
+          auto newStub = svcreq::emit_ephemeral(
             frozen,
             mcg->getFreeStub(frozen, &mcg->cgFixups()),
             optSPOff,
@@ -1561,7 +1561,7 @@ O(subli) \
 O(subq) \
 O(subqi) \
 O(subsd) \
-O(svcreq) \
+O(svcreqstub) \
 O(syncvmsp) \
 O(testb) \
 O(testbi) \
@@ -1838,7 +1838,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   bool reused;
   auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!inst.target.resumed()) optSPOff = inst.spOff;
-  auto reqIp = emitEphemeralServiceReq(
+  auto reqIp = svcreq::emit_ephemeral(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups(), &reused),
     optSPOff,
@@ -1942,7 +1942,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
   auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!inst.sk.resumed()) optSPOff = inst.spOff;
 
-  *inst.dest = emitEphemeralServiceReq(
+  *inst.dest = svcreq::emit_ephemeral(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     optSPOff,
@@ -2306,19 +2306,15 @@ void LLVMEmitter::emit(const fallback& inst) {
   if (inst.trflags.packed == 0) {
     stub = sr->getFallbackTranslation();
   } else {
-    // Emit a custom REQ_RETRANSLATE
     auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-    auto const args = packServiceReqArgs(inst.dest.offset(),
-                                         inst.trflags.packed);
-    auto optSPOff = folly::Optional<FPInvOffset>{};
-    if (!inst.dest.resumed()) optSPOff = sr->nonResumedSPOff();
-    stub = mcg->backEnd().emitServiceReqWork(
+    auto const spOff = inst.dest.resumed() ? folly::Optional<FPInvOffset>{}
+                                           : sr->nonResumedSPOff();
+    stub = svcreq::emit_persistent(
       frozen,
-      frozen.frontier(),
-      SRFlags::Persist,
-      optSPOff,
+      spOff,
       REQ_RETRANSLATE,
-      args
+      inst.dest.offset(),
+      inst.trflags.packed
     );
   }
 
@@ -2989,7 +2985,7 @@ void LLVMEmitter::emit(const subsd& inst) {
                                        asDbl(value(inst.s0))));
 }
 
-void LLVMEmitter::emit(const svcreq& inst) {
+void LLVMEmitter::emit(const svcreqstub& inst) {
   auto args = makePhysRegArgs(inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
   args.emplace_back(cns(reinterpret_cast<uintptr_t>(inst.stub_block)));
   args.emplace_back(cns(uint64_t{inst.req}));

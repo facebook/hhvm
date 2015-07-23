@@ -127,7 +127,7 @@ struct FormatVisitor {
     }
   }
   void imm(ServiceRequest req) {
-    str << sep() << serviceReqName(req);
+    str << sep() << svcreq::to_name(req);
   }
   void imm(TransFlags f) {
     if (f.noinlineSingleton) str << sep() << "noinlineSingleton";

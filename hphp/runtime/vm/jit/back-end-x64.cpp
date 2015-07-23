@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -106,19 +106,6 @@ struct BackEnd final : jit::BackEnd {
 
   UniqueStubs emitUniqueStubs() override {
     return x64::emitUniqueStubs();
-  }
-
-  TCA emitServiceReqWork(CodeBlock& cb,
-                         TCA start,
-                         SRFlags flags,
-                         folly::Optional<FPInvOffset> spOff,
-                         ServiceRequest req,
-                         const SvcReqArgVec& argv) override {
-    return x64::emitServiceReqWork(cb, start, flags, spOff, req, argv);
-  }
-
-  size_t reusableStubSize() const override {
-    return x64::reusableStubSize();
   }
 
   void emitInterpReq(CodeBlock& mainCode,

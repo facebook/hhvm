@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/trace.h"
@@ -135,7 +135,7 @@ TCA SrcRec::getFallbackTranslation() const {
 }
 
 FPInvOffset SrcRec::nonResumedSPOff() const {
-  return serviceReqSPOff(getFallbackTranslation());
+  return svcreq::extract_spoff(getFallbackTranslation());
 }
 
 void SrcRec::chainFrom(IncomingBranch br) {

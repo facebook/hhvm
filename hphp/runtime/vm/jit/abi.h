@@ -50,6 +50,13 @@ PhysReg rvmfp();
 PhysReg rvmsp();
 PhysReg rvmtl();
 
+/*
+ * Service request argument registers.
+ */
+PhysReg r_svcreq_req();
+PhysReg r_svcreq_stub();
+PhysReg r_svcreq_arg(unsigned i);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

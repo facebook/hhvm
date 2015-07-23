@@ -85,7 +85,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
@@ -524,23 +524,22 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   TCA realFrozenStart = code.realFrozen().frontier();
   TCA req;
   if (!RuntimeOption::EvalEnableReusableTC) {
-    req = emitServiceReq(code.cold(),
-                         SRFlags::None,
-                         srcRecSPOff,
-                         REQ_RETRANSLATE,
-                         sk.offset(),
-                         TransFlags().packed);
-  } else {
-    auto const stubsize = mcg->backEnd().reusableStubSize();
-    auto newStart = code.cold().allocInner(stubsize) ?: code.cold().frontier();
-    // Ensure that the anchor translation is a known size so that it can be
-    // reclaimed when the function is freed
-    req = emitEphemeralServiceReq(code.cold(),
-                                  (TCA)newStart,
+    req = svcreq::emit_persistent(code.cold(),
                                   srcRecSPOff,
                                   REQ_RETRANSLATE,
                                   sk.offset(),
                                   TransFlags().packed);
+  } else {
+    auto const stubsize = svcreq::stub_size();
+    auto newStart = code.cold().allocInner(stubsize) ?: code.cold().frontier();
+    // Ensure that the anchor translation is a known size so that it can be
+    // reclaimed when the function is freed
+    req = svcreq::emit_ephemeral(code.cold(),
+                                 (TCA)newStart,
+                                 srcRecSPOff,
+                                 REQ_RETRANSLATE,
+                                 sk.offset(),
+                                 TransFlags().packed);
   }
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
@@ -1121,10 +1120,10 @@ MCGenerator::bindJccFirst(TCA toSmash,
    */
   auto const optSPOff = [&] () -> folly::Optional<FPInvOffset> {
     if (isResumed) return folly::none;
-    return serviceReqSPOff(jmpTarget);
+    return svcreq::extract_spoff(jmpTarget);
   }();
 
-  auto const stub = emitEphemeralServiceReq(
+  auto const stub = svcreq::emit_ephemeral(
     code.frozen(),
     getFreeStub(code.frozen(), &mcg->cgFixups()),
     optSPOff,
@@ -1231,8 +1230,8 @@ MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
   vmfp() = nullptr;
 }
 
-TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) noexcept {
-  FTRACE(1, "handleServiceRequest {}\n", serviceReqName(info.req));
+TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
+  FTRACE(1, "handleServiceRequest {}\n", svcreq::to_name(info.req));
 
   assert_native_stack_aligned();
   tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced

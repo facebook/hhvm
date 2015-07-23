@@ -131,7 +131,7 @@ void reclaimSrcRec(const SrcRec* rec) {
   Trace::Indent _i;
 
   auto anchor = rec->getFallbackTranslation();
-  mcg->code.blockFor(anchor).free(anchor, mcg->backEnd().reusableStubSize());
+  mcg->code.blockFor(anchor).free(anchor, svcreq::stub_size());
 
   for (auto& loc : rec->translations()) {
     reclaimTranslation(loc);

@@ -21,33 +21,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
-struct Vout;
-namespace x64 {
-
-/*
- * emitServiceReqWork --
- *
- *   Call a translator service co-routine. The code emitted here
- *   reenters the enterTC loop, invoking the requested service. Control
- *   will be returned non-locally to the next logical instruction in
- *   the TC.
- *
- *   Return value is a destination; we emit the bulky service
- *   request code into acold.
- *
- *   Returns a continuation that will run after the arguments have been
- *   emitted. This is gross, but is a partial workaround for the inability
- *   to capture argument packs in the version of gcc we're using.
- */
-TCA emitServiceReqWork(CodeBlock& cb,
-                       TCA start,
-                       SRFlags flags,
-                       folly::Optional<FPInvOffset> spOff,
-                       ServiceRequest req,
-                       const SvcReqArgVec&);
-
-size_t reusableStubSize();
+namespace HPHP { namespace jit { namespace x64 {
 
 /*
  * "cb" may be either the main section or frozen section.

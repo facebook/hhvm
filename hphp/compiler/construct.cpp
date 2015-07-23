@@ -288,7 +288,7 @@ void Construct::dumpNode(int spc) {
     std::cout << "[" << value << "] ";
   }
 
-  string sef;
+  std::string sef;
   if ((ef & UnknownEffect) == UnknownEffect) {
     sef = "|UnknownEffect";
   } else {
@@ -309,7 +309,7 @@ void Construct::dumpNode(int spc) {
     sef = " (" + sef.substr(1) + ")";
   }
 
-  string objstr;
+  std::string objstr;
   if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
     objstr = " (NoObjInfo)";
   }
@@ -340,7 +340,7 @@ void Construct::parseTimeFatal(FileScopeRawPtr fs,
                                Compiler::ErrorType err, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  string msg;
+  std::string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
@@ -353,7 +353,7 @@ void Construct::analysisTimeFatal(Compiler::ErrorType err,
                                   const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  string msg;
+  std::string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 

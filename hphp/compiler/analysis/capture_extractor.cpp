@@ -294,7 +294,7 @@ ExpressionPtr CaptureExtractor::rewriteObjectProperty(
     auto prop = ope->getProperty();
     if (prop->getKindOf() == Expression::KindOfScalarExpression) {
       auto scalar = static_pointer_cast<ScalarExpression>(prop);
-      const string &propName = scalar->getLiteralString();
+      auto const& propName = scalar->getLiteralString();
       if (!propName.empty()) {
         return ope;
       }

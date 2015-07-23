@@ -27,6 +27,8 @@
 #include <pcre.h>
 #include <folly/Conv.h>
 
+#include <fstream>
+
 using std::istringstream;
 using std::ostringstream;
 
@@ -233,7 +235,7 @@ bool TestCodeRun::RecordMulti(const char *input, const char *output,
     std::ofstream s((fullPath + "/test.result").c_str());
     if (fileoutput) {
       String expected = HHVM_FN(file_get_contents)(output);
-      s << string(expected.data(), expected.size());
+      s << std::string(expected.data(), expected.size());
     } else {
       s << output;
     }

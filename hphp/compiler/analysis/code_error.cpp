@@ -15,8 +15,11 @@
 */
 
 #include "hphp/compiler/analysis/code_error.h"
+
+#include <fstream>
 #include <map>
 #include <vector>
+
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/construct.h"
@@ -129,7 +132,7 @@ void ErrorInfo::serialize(JSON::CodeError::OutputStream &out) const {
 }
 
 void CodeErrors::serialize(JSON::CodeError::OutputStream &out) const {
-  vector<const char *> errorTexts = getErrorTexts();
+  auto errorTexts = getErrorTexts();
 
   unsigned int total = 0;
   for (unsigned int i = 0; i < m_errors.size(); i++) {

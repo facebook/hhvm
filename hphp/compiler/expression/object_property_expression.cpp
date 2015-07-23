@@ -69,7 +69,7 @@ bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) {
   }
   ScalarExpressionPtr name =
     dynamic_pointer_cast<ScalarExpression>(m_property);
-  string propName = name->getLiteralString();
+  auto const propName = name->getLiteralString();
   if (propName.empty()) {
     return false;
   }

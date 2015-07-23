@@ -133,10 +133,10 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
 
 static std::string fully_qualified_name_as_alias_key(const std::string &fqn,
                                                      const std::string &as) {
-  string key = as;
+  auto key = as;
   if (key.empty()) {
-    size_t pos = fqn.rfind(NAMESPACE_SEP);
-    if (pos == string::npos) {
+    auto const pos = fqn.rfind(NAMESPACE_SEP);
+    if (pos == std::string::npos) {
       key = fqn;
     } else {
       key = fqn.substr(pos + 1);
@@ -213,7 +213,7 @@ bool Parser::parse() {
 void Parser::error(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  string msg;
+  std::string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
@@ -242,7 +242,7 @@ void Parser::fatal(const Location* loc, const char* msg) {
   throw ParseTimeFatalException(m_file->getName(), loc->r.line0, "%s", msg);
 }
 
-string Parser::errString() {
+std::string Parser::errString() {
   return m_error.empty() ? getMessage() : m_error;
 }
 
@@ -496,12 +496,12 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     call->onParse(m_ar, m_file);
     out->exp = call;
   } else {
-    string funcName = name.text();
+    std::string funcName = name.text();
     // strip out namespaces for func_get_args and friends check
     size_t lastBackslash = funcName.find_last_of(NAMESPACE_SEP);
-    string stripped = lastBackslash == string::npos
-                      ? funcName
-                      : funcName.substr(lastBackslash+1);
+    auto const stripped = lastBackslash == std::string::npos
+      ? funcName
+      : funcName.substr(lastBackslash+1);
     bool hadBackslash = name->num() & 2;
 
     if (stripped == "set_frame_metadata" && m_funcContexts.size() > 0) {
@@ -813,7 +813,7 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
-void Parser::checkThisContext(string var, ThisContextError error) {
+void Parser::checkThisContext(const std::string& var, ThisContextError error) {
   if (var != "this") {
     return;
   }
@@ -1074,7 +1074,7 @@ void Parser::fixStaticVars() {
   m_staticVars.pop_back();
 }
 
-void Parser::checkFunctionContext(string funcName,
+void Parser::checkFunctionContext(const std::string& funcName,
                                   FunctionContext& funcContext,
                                   ModifierExpressionPtr modifiers,
                                   int returnsRef) {
@@ -1145,7 +1145,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
   }
 }
 
-string Parser::getFunctionName(FunctionType type, Token* name) {
+std::string Parser::getFunctionName(FunctionType type, Token* name) {
   switch (type) {
     case FunctionType::Closure:
       return newClosureName(m_namespace, m_clsName, m_containingFuncName);
@@ -1195,7 +1195,7 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
     checkThisContext(old_params, ThisContextError::Assign);
   }
 
-  string funcName = getFunctionName(type, name);
+  auto const funcName = getFunctionName(type, name);
 
   if (type == FunctionType::Method && old_params &&
       funcName == "__construct") {
@@ -1206,7 +1206,7 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
   fixStaticVars();
 
   int attribute = m_file->popAttribute();
-  string comment = popComment();
+  auto const comment = popComment();
 
   ExpressionListPtr attrList;
   if (attr && attr->exp) {
@@ -1430,8 +1430,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
     std::string name = param->getName();
-    std::string type = param->hasUserType() ?
-                                  param->getUserTypeHint() : "";
+    std::string type = param->hasUserType() ? param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
     // point to the parameter location for error reporting
@@ -1823,7 +1822,8 @@ void Parser::invalidYield() {
   Compiler::Error(Compiler::InvalidYield, exp);
 }
 
-bool Parser::canBeAsyncOrGenerator(string funcName, string clsName) {
+bool Parser::canBeAsyncOrGenerator(const std::string& funcName,
+                                   const std::string& clsName) {
   if (clsName.empty()) {
     return true;
   }
@@ -2337,7 +2337,7 @@ void Parser::AliasTable::setFalseOracle() {
   m_autoOracle = [] () { return false; };
 }
 
-std::string Parser::AliasTable::getName(std::string alias, int line_no) {
+std::string Parser::AliasTable::getName(const std::string& alias, int line_no) {
   auto it = m_aliases.find(alias);
   if (it != m_aliases.end()) {
     return it->second.name;
@@ -2350,7 +2350,7 @@ std::string Parser::AliasTable::getName(std::string alias, int line_no) {
   return "";
 }
 
-std::string Parser::AliasTable::getNameRaw(std::string alias) {
+std::string Parser::AliasTable::getNameRaw(const std::string& alias) {
   auto it = m_aliases.find(alias);
   if (it != m_aliases.end()) {
     return it->second.name;
@@ -2358,17 +2358,19 @@ std::string Parser::AliasTable::getNameRaw(std::string alias) {
   return "";
 }
 
-Parser::AliasTable::AliasType Parser::AliasTable::getType(std::string alias) {
+Parser::AliasTable::AliasType Parser::AliasTable::getType(
+  const std::string& alias
+) {
   auto it = m_aliases.find(alias);
   return it != m_aliases.end() ? it->second.type : AliasType::NONE;
 }
 
-int Parser::AliasTable::getLine(std::string alias) {
+int Parser::AliasTable::getLine(const std::string& alias) {
   auto it = m_aliases.find(alias);
   return (it != m_aliases.end()) ? it->second.line_no : -1;
 }
 
-bool Parser::AliasTable::isAliased(std::string alias) {
+bool Parser::AliasTable::isAliased(const std::string& alias) {
   auto t = getType(alias);
   if (t == AliasType::USE || t == AliasType::AUTO_USE) {
     return true;
@@ -2376,8 +2378,8 @@ bool Parser::AliasTable::isAliased(std::string alias) {
   return m_autoOracle() && m_autoAliases.find(alias) != m_autoAliases.end();
 }
 
-void Parser::AliasTable::set(std::string alias,
-                             std::string name,
+void Parser::AliasTable::set(const std::string& alias,
+                             const std::string& name,
                              AliasType type,
                              int line_no) {
   m_aliases[alias] = NameEntry{name, type, line_no};
@@ -2550,7 +2552,7 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
     error("You seem to be trying to use a different language. "
           "May I recommend Hack? http://hacklang.org");
   }
-  string key = fully_qualified_name_as_alias_key(ns, as);
+  auto const key = fully_qualified_name_as_alias_key(ns, as);
 
   if (m_nsAliasTable.getType(key) == AliasType::AUTO_USE) {
     error("Cannot use %s as %s because the name was implicitly used "
@@ -2586,7 +2588,7 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
 }
 
 void Parser::onUseFunction(const std::string &fn, const std::string &as) {
-  string key = fully_qualified_name_as_alias_key(fn, as);
+  auto const key = fully_qualified_name_as_alias_key(fn, as);
 
   if (m_fnTable.count(key) || m_fnAliasTable.count(key)) {
     error(
@@ -2598,7 +2600,7 @@ void Parser::onUseFunction(const std::string &fn, const std::string &as) {
 }
 
 void Parser::onUseConst(const std::string &cnst, const std::string &as) {
-  string key = fully_qualified_name_as_alias_key(cnst, as);
+  auto const key = fully_qualified_name_as_alias_key(cnst, as);
 
   if (m_cnstTable.count(key) || m_cnstAliasTable.count(key)) {
     error(
@@ -2626,8 +2628,8 @@ std::string Parser::nsDecl(const std::string &name) {
 }
 
 std::string Parser::resolve(const std::string &ns, bool cls) {
-  size_t pos = ns.find(NAMESPACE_SEP);
-  string alias = (pos != string::npos) ? ns.substr(0, pos) : ns;
+  auto const pos = ns.find(NAMESPACE_SEP);
+  auto const alias = (pos != std::string::npos) ? ns.substr(0, pos) : ns;
 
   // Don't expand type variables into the current namespace.
   if (isTypeVar(ns)) {
@@ -2637,7 +2639,7 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
   if (m_nsAliasTable.isAliased(alias)) {
     auto name = m_nsAliasTable.getName(alias, line1());
     // Was it a namespace alias?
-    if (pos != string::npos) {
+    if (pos != std::string::npos) {
       return name + ns.substr(pos);
     }
     // Only classes can appear directly in "use" statements
@@ -2652,7 +2654,7 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
   }
 
   // if qualified name, prepend current namespace
-  if (pos != string::npos) {
+  if (pos != std::string::npos) {
     return nsDecl(ns);
   }
 
@@ -2689,8 +2691,8 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Parser::registerAlias(std::string name) {
-  size_t pos = name.rfind(NAMESPACE_SEP);
-  string key = (pos != string::npos) ? name.substr(pos + 1) : name;
+  auto const pos = name.rfind(NAMESPACE_SEP);
+  auto const key = (pos != std::string::npos) ? name.substr(pos + 1) : name;
   if (m_nsAliasTable.getType(key) != AliasType::USE &&
       m_nsAliasTable.getType(key) != AliasType::AUTO_USE) {
     m_nsAliasTable.set(key, name, AliasType::DEF, line1());

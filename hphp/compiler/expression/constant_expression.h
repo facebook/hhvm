@@ -48,7 +48,7 @@ public:
   const std::string &getOriginalName() const { return m_origName;}
   const std::string getNonNSOriginalName() const {
     auto nsPos = m_origName.rfind('\\');
-    if (nsPos == string::npos) {
+    if (nsPos == std::string::npos) {
       return m_origName;
     }
     return m_origName.substr(nsPos + 1);

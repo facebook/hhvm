@@ -38,7 +38,7 @@ using namespace HPHP;
 
 ConstantExpression::ConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- const string &name, bool hadBackslash, const string &docComment)
+ const std::string &name, bool hadBackslash, const std::string &docComment)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ConstantExpression)),
     m_name(name), m_origName(name), m_hadBackslash(hadBackslash),
     m_docComment(docComment), m_valid(false), m_dynamic(false),
@@ -59,7 +59,7 @@ ExpressionPtr ConstantExpression::clone() {
 
 bool ConstantExpression::isScalar() const {
   if (m_name == "INF" || m_name == "NAN") return true;
-  string lower = toLower(m_name);
+  auto const lower = toLower(m_name);
   return lower == "true" || lower == "false" || lower == "null";
 }
 
@@ -68,12 +68,12 @@ bool ConstantExpression::isLiteralNull() const {
 }
 
 bool ConstantExpression::isNull() const {
-  string lower = toLower(m_name);
+  auto const lower = toLower(m_name);
   return (lower == "null");
 }
 
 bool ConstantExpression::isBoolean() const {
-  string lower = toLower(m_name);
+  auto const lower = toLower(m_name);
   return (lower == "true" || lower == "false");
 }
 
@@ -82,7 +82,7 @@ bool ConstantExpression::isDouble() const {
 }
 
 bool ConstantExpression::getBooleanValue() const {
-  string lower = toLower(m_name);
+  auto const lower = toLower(m_name);
   assert(lower == "true" || lower == "false");
   return lower == "true";
 }

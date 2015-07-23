@@ -16,16 +16,18 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 
-#include <folly/Conv.h>
-
-#include <iomanip>
-#include <algorithm>
-#include <sstream>
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
+
+#include <folly/Conv.h>
+
+#include <algorithm>
 #include <atomic>
+#include <fstream>
+#include <iomanip>
 #include <map>
 #include <set>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -101,7 +103,7 @@ void AnalysisResult::finish() {
 
 void AnalysisResult::appendExtraCode(const std::string &key,
                                      const std::string &code) {
-  string &extraCode = m_extraCodes[key];
+  auto& extraCode = m_extraCodes[key];
 
   if (extraCode.empty()) {
     extraCode = "<?php\n";
@@ -114,12 +116,12 @@ void AnalysisResult::appendExtraCode(const std::string &key,
   lock()->appendExtraCode(key, code);
 }
 
-void AnalysisResult::parseExtraCode(const string &key) {
+void AnalysisResult::parseExtraCode(const std::string &key) {
   Lock lock(getMutex());
-  map<string, string>::iterator iter = m_extraCodes.find(key);
+  auto iter = m_extraCodes.find(key);
   if (iter != m_extraCodes.end()) {
-    string code = iter->second;
-    string sfilename = iter->first + "." + Option::LambdaPrefix + "lambda";
+    auto const code = iter->second;
+    auto const sfilename = iter->first + "." + Option::LambdaPrefix + "lambda";
     m_extraCodes.erase(key);
 
     const char *filename = m_extraCodeFileNames.add(sfilename.c_str());
@@ -138,7 +140,7 @@ void AnalysisResult::addFileScope(FileScopePtr fileScope) {
   m_fileScopes.push_back(fileScope);
 }
 
-bool AnalysisResult::inParseOnDemandDirs(const string &filename) const {
+bool AnalysisResult::inParseOnDemandDirs(const std::string &filename) const {
   for (size_t i = 0; i < m_parseOnDemandDirs.size(); i++) {
     if (filename.find(m_parseOnDemandDirs[i]) == 0) return true;
   }
@@ -147,8 +149,8 @@ bool AnalysisResult::inParseOnDemandDirs(const string &filename) const {
 
 void AnalysisResult::parseOnDemand(const std::string &name) const {
   if (m_package) {
-    const std::string &root = m_package->getRoot();
-    string rname = name;
+    auto const& root = m_package->getRoot();
+    auto rname = name;
     if (name.find(root) == 0) {
       rname = name.substr(root.length());
     }
@@ -166,7 +168,7 @@ void AnalysisResult::parseOnDemand(const std::string &name) const {
 }
 
 template <class Map>
-void AnalysisResult::parseOnDemandBy(const string &name,
+void AnalysisResult::parseOnDemandBy(const std::string &name,
                                      const Map &amap) const {
   if (m_package) {
     auto it = amap.find(name);
@@ -177,10 +179,10 @@ void AnalysisResult::parseOnDemandBy(const string &name,
 }
 
 template void AnalysisResult::parseOnDemandBy(
-  const string &name, const std::map<std::string,std::string> &amap) const;
+  const std::string &name, const std::map<std::string,std::string> &amap) const;
 
 template void AnalysisResult::parseOnDemandBy(
-  const string &name,
+  const std::string &name,
   const std::map<std::string,std::string,stdltistr> &amap) const;
 
 void AnalysisResult::addNSFallbackFunc(ConstructPtr c, FileScopePtr fs) {
@@ -218,12 +220,11 @@ BlockScopePtr AnalysisResult::findConstantDeclarer(
 
 ClassScopePtr AnalysisResult::findClass(const std::string &name) const {
   AnalysisResultConstPtr ar = shared_from_this();
-  string lname = toLower(name);
-  StringToClassScopePtrMap::const_iterator sysIter =
-    m_systemClasses.find(lname);
+  auto const lname = toLower(name);
+  auto const sysIter = m_systemClasses.find(lname);
   if (sysIter != m_systemClasses.end()) return sysIter->second;
 
-  StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(lname);
+  auto const iter = m_classDecs.find(lname);
   if (iter != m_classDecs.end() && iter->second.size()) {
     return iter->second.back();
   }
@@ -242,8 +243,7 @@ AnalysisResult::findRedeclaredClasses(const std::string &name) const {
 }
 
 ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) const {
-  StringToClassScopePtrMap::const_iterator sysIter =
-    m_systemClasses.find(name);
+  auto const sysIter = m_systemClasses.find(name);
   if (sysIter != m_systemClasses.end()) {
     return ClassScopePtrVec(1, sysIter->second);
   }
@@ -265,18 +265,16 @@ ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
 
 int AnalysisResult::getFunctionCount() const {
   int total = 0;
-  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-       iter != m_files.end(); ++iter) {
-    total += iter->second->getFunctionCount();
+  for (auto& pair : m_files) {
+    total += pair.second->getFunctionCount();
   }
   return total;
 }
 
 int AnalysisResult::getClassCount() const {
   int total = 0;
-  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-       iter != m_files.end(); ++iter) {
-    total += iter->second->getClassCount();
+  for (auto& pair : m_files) {
+    total += pair.second->getClassCount();
   }
   return total;
 }
@@ -319,7 +317,7 @@ void AnalysisResult::declareUnknownClass(const std::string &name) {
   m_classDecs.operator[](name);
 }
 
-bool AnalysisResult::declareConst(FileScopePtr fs, const string &name) {
+bool AnalysisResult::declareConst(FileScopePtr fs, const std::string &name) {
   if (getConstants()->isPresent(name) ||
       m_constDecs.find(name) != m_constDecs.end()) {
     m_constRedeclared.insert(name);
@@ -345,12 +343,11 @@ void AnalysisResult::canonicalizeSymbolOrder() {
 
 void AnalysisResult::markRedeclaringClasses() {
   AnalysisResultPtr ar = shared_from_this();
-  for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin();
-       iter != m_classDecs.end(); ++iter) {
-    ClassScopePtrVec &classes = iter->second;
+  for (auto& pair : m_classDecs) {
+    auto& classes = pair.second;
     if (classes.size() > 1) {
       sort(classes.begin(), classes.end(), by_source);
-      for (unsigned int i = 0; i < classes.size(); i++) {
+      for (size_t i = 0; i < classes.size(); i++) {
         classes[i]->setRedeclaring(ar, i);
       }
     }
@@ -360,7 +357,7 @@ void AnalysisResult::markRedeclaringClasses() {
     auto it = m_classDecs.find(name);
     if (it != m_classDecs.end()) {
       auto& classes = it->second;
-      for (unsigned int i = 0; i < classes.size(); ++i) {
+      for (size_t i = 0; i < classes.size(); ++i) {
         classes[i]->setRedeclaring(ar, i);
       }
     }
@@ -412,7 +409,7 @@ void AnalysisResult::markRedeclaringClasses() {
 
 bool AnalysisResult::isConstantDeclared(const std::string &constName) const {
   if (m_constants->isPresent(constName)) return true;
-  StringToFileScopePtrMap::const_iterator iter = m_constDecs.find(constName);
+  auto const iter = m_constDecs.find(constName);
   if (iter == m_constDecs.end()) return false;
   FileScopePtr fileScope = iter->second;
   ConstantTablePtr constants = fileScope->getConstants();
@@ -446,9 +443,8 @@ void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
 
 void AnalysisResult::checkClassDerivations() {
   AnalysisResultPtr ar = shared_from_this();
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
-       iter != m_classDecs.end(); ++iter) {
-    for (ClassScopePtr cls : iter->second) {
+  for (auto& pair : m_classDecs) {
+    for (ClassScopePtr cls : pair.second) {
       if (Option::WholeProgram) {
         try {
           cls->importUsedTraits(ar);
@@ -464,8 +460,7 @@ void AnalysisResult::checkClassDerivations() {
 
 void AnalysisResult::resolveNSFallbackFuncs() {
   for (auto &pair : m_nsFallbackFuncs) {
-    SimpleFunctionCallPtr sfc =
-      static_pointer_cast<SimpleFunctionCall>(pair.first);
+    auto sfc = static_pointer_cast<SimpleFunctionCall>(pair.first);
     sfc->resolveNSFallbackFunc(
       shared_from_this(),
       pair.second
@@ -520,7 +515,7 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
   }
 
   for (const auto& iter : fs->getClasses()) {
-    ClassScopePtrVec &clsVec = m_classDecs[iter.first];
+    auto& clsVec = m_classDecs[iter.first];
     clsVec.insert(clsVec.end(), iter.second.begin(), iter.second.end());
   }
 
@@ -555,9 +550,8 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   markRedeclaringClasses();
 
   // Analyze some special cases
-  for (set<string>::const_iterator it = Option::VolatileClasses.begin();
-       it != Option::VolatileClasses.end(); ++it) {
-    ClassScopePtr cls = findClass(toLower(*it));
+  for (auto& cls_name : Option::VolatileClasses) {
+    ClassScopePtr cls = findClass(toLower(cls_name));
     if (cls && cls->isUserClass()) {
       cls->setVolatile();
     }
@@ -582,27 +576,24 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   */
   std::vector<ClassScopePtr> classes;
   classes.reserve(m_classDecs.size());
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
-       iter != m_classDecs.end(); ++iter) {
-    for (ClassScopePtr cls: iter->second) {
+  for (auto& pair : m_classDecs) {
+    for (auto cls : pair.second) {
       classes.push_back(cls);
     }
   }
 
   // Collect methods
-  for (ClassScopePtr cls: classes) {
+  for (auto cls : classes) {
     StringToFunctionScopePtrMap methods;
     cls->collectMethods(ar, methods, true /* include privates */);
     bool needAbstractMethodImpl =
       (!cls->isAbstract() && !cls->isInterface() &&
        cls->derivesFromRedeclaring() == Derivation::Normal &&
        !cls->getAttribute(ClassScope::UsesUnknownTrait));
-    for (StringToFunctionScopePtrMap::const_iterator iterMethod =
-           methods.begin(); iterMethod != methods.end(); ++iterMethod) {
-      FunctionScopePtr func = iterMethod->second;
+    for (auto& pair : methods) {
+      auto func = pair.second;
       if (Option::WholeProgram && !func->hasImpl() && needAbstractMethodImpl) {
-        FunctionScopePtr tmpFunc =
-          cls->findFunction(ar, func->getScopeName(), true, true);
+        auto tmpFunc = cls->findFunction(ar, func->getScopeName(), true, true);
         always_assert(!tmpFunc || !tmpFunc->hasImpl());
         Compiler::Error(Compiler::MissingAbstractMethodImpl,
                         func->getStmt(), cls->getStmt());
@@ -619,7 +610,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
 void AnalysisResult::analyzeProgramFinal() {
   AnalysisResultPtr ar = shared_from_this();
   setPhase(AnalysisResult::AnalyzeFinal);
-  for (uint32_t i = 0; i < m_fileScopes.size(); i++) {
+  for (size_t i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
 
@@ -645,19 +636,14 @@ void AnalysisResult::dump() {
 void AnalysisResult::visitFiles(void (*cb)(AnalysisResultPtr,
                                            StatementPtr, void*), void *data) {
   AnalysisResultPtr ar = shared_from_this();
-  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-       iter != m_files.end(); ++iter) {
-    FileScopePtr file = iter->second;
-
-    file->visit(ar, cb, data);
+  for (auto& pair : m_files) {
+    pair.second->visit(ar, cb, data);
   }
 }
 
 void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
-  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-       iter != m_files.end(); ++iter) {
-    FileScopePtr file = iter->second;
-    file->getScopesSet(v);
+  for (auto& pair: m_files) {
+    pair.second->getScopesSet(v);
   }
 }
 
@@ -1020,17 +1006,19 @@ void AnalysisResult::preOptimize() {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-string AnalysisResult::prepareFile(const char *root, const string &fileName,
-                                   bool chop, bool stripPath /* = true */) {
-  string fullPath = root;
+std::string AnalysisResult::prepareFile(const char *root,
+                                        const std::string &fileName,
+                                        bool chop,
+                                        bool stripPath /* = true */) {
+  std::string fullPath = root;
   if (!fullPath.empty() && fullPath[fullPath.size() - 1] != '/') {
     fullPath += "/";
   }
 
-  string file = fileName;
+  auto file = fileName;
   if (stripPath) {
     size_t npos = file.rfind('/');
-    if (npos != string::npos) {
+    if (npos != std::string::npos) {
       file = file.substr(npos + 1);
     }
   }
@@ -1040,7 +1028,7 @@ string AnalysisResult::prepareFile(const char *root, const string &fileName,
   } else {
     fullPath += file;
   }
-  for (int pos = strlen(root); pos < (int)fullPath.size(); pos++) {
+  for (size_t pos = strlen(root); pos < fullPath.size(); pos++) {
     if (fullPath[pos] == '/') {
       mkdir(fullPath.substr(0, pos).c_str(), 0777);
     }
@@ -1052,15 +1040,14 @@ bool AnalysisResult::outputAllPHP(CodeGenerator::Output output) {
   AnalysisResultPtr ar = shared_from_this();
   switch (output) {
   case CodeGenerator::PickledPHP:
-    for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-         iter != m_files.end(); ++iter) {
-      string fullPath = prepareFile(m_outputPath.c_str(), iter->first, false);
-      ofstream f(fullPath.c_str());
+    for (auto& pair : m_files) {
+      auto fullPath = prepareFile(m_outputPath.c_str(), pair.first, false);
+      std::ofstream f(fullPath.c_str());
       if (f) {
         CodeGenerator cg(&f, output);
         cg_printf("<?php\n");
         Logger::Info("Generating %s...", fullPath.c_str());
-        iter->second->getStmt()->outputPHP(cg, ar);
+        pair.second->getStmt()->outputPHP(cg, ar);
         f.close();
       } else {
         Logger::Error("Unable to open %s for write", fullPath.c_str());

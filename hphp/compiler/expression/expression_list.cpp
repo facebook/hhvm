@@ -156,8 +156,9 @@ void ExpressionList::getStrings(std::vector<std::string> &strings) {
   }
 }
 
-bool
-ExpressionList::flattenLiteralStrings(vector<ExpressionPtr> &literals) const {
+bool ExpressionList::flattenLiteralStrings(
+  std::vector<ExpressionPtr>& literals
+) const {
   for (unsigned i = 0; i < m_exps.size(); i++) {
     ExpressionPtr e = m_exps[i];
     if (e->is(Expression::KindOfArrayPairExpression)) {
@@ -328,9 +329,9 @@ bool ExpressionList::isLiteralString() const {
   return v ? v->isLiteralString() : false;
 }
 
-string ExpressionList::getLiteralString() const {
+std::string ExpressionList::getLiteralString() const {
   ExpressionPtr v(listValue());
-  return v ? v->getLiteralString() : string("");
+  return v ? v->getLiteralString() : std::string("");
 }
 
 void ExpressionList::optimize(AnalysisResultConstPtr ar) {
@@ -407,7 +408,7 @@ void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 unsigned int ExpressionList::checkLitstrKeys() const {
   assert(m_elems_kind == ElemsKind::ArrayPairs);
-  std::unordered_set<string> keys;
+  std::unordered_set<std::string> keys;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr ap =
       dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
@@ -419,7 +420,7 @@ unsigned int ExpressionList::checkLitstrKeys() const {
     if (!value.isString()) return 0;
     String str = value.toString();
     if (str.isInteger()) return 0;
-    string s(str.data(), str.size());
+    std::string s(str.data(), str.size());
     keys.insert(s);
   }
   return keys.size();

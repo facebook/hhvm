@@ -17,12 +17,16 @@
 #ifndef incl_HPHP_CODE_GENERATOR_H_
 #define incl_HPHP_CODE_GENERATOR_H_
 
-#include "hphp/compiler/hphp.h"
 #include <deque>
 #include <map>
+#include <ostream>
 #include <set>
 #include <utility>
 #include <vector>
+
+#include "hphp/util/deprecated/declare-boost-types.h"
+
+#include "hphp/compiler/hphp.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,17 +247,17 @@ public:
   /**
    * Support for printing AST nodes in PHP serialize() format.
    */
-  void printObjectHeader(const std::string className, int numProperties);
-  void printPropertyHeader(const std::string propertyName);
+  void printObjectHeader(const std::string& className, int numProperties);
+  void printPropertyHeader(const std::string& propertyName);
   void printObjectFooter();
   void printNull();
   void printBool(bool value);
   void printValue(double value);
   void printValue(int32_t value);
   void printValue(int64_t value);
-  void printValue(std::string value);
-  void printModifierVector(std::string value);
-  void printTypeExpression(std::string value);
+  void printValue(const std::string& value);
+  void printModifierVector(const std::string& value);
+  void printTypeExpression(const std::string& value);
   void printTypeExpression(ExpressionPtr expression);
   void printExpression(ExpressionPtr expression, bool isRef);
   void printExpressionVector(ExpressionListPtr el);

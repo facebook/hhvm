@@ -359,7 +359,7 @@ public:
   using FunctionInfoPtr = std::shared_ptr<FunctionInfo>;
   using StringToFunctionInfoPtrMap = hphp_string_imap<FunctionInfoPtr>;
   static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
-  static FunctionInfoPtr GetFunctionInfo(std::string fname);
+  static FunctionInfoPtr GetFunctionInfo(const std::string& fname);
 
 private:
   void init(AnalysisResultConstPtr ar);

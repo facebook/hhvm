@@ -54,9 +54,10 @@ ExpressionPtr IncludeExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-static string get_include_file_path(const string &source,
-                                    const string &var, const string &lit,
-                                    bool documentRoot) {
+static std::string get_include_file_path(const std::string &source,
+                                         const std::string &var,
+                                         const std::string &lit,
+                                         bool documentRoot) {
   if (var.empty()) {
     // absolute path
     if (!lit.empty() && lit[0] == '/') {
@@ -75,8 +76,8 @@ static string get_include_file_path(const string &source,
     }
 
     size_t pos = source.rfind('/');
-    string resolved;
-    if (pos != string::npos) {
+    std::string resolved;
+    if (pos != std::string::npos) {
       resolved = source.substr(0, pos + 1) + lit;
       if (stat(resolved.c_str(), &sb) == 0) {
         return resolved;
@@ -85,7 +86,7 @@ static string get_include_file_path(const string &source,
 
     // if file cannot be found, resolve it using search paths
     for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
-      string filename = Option::IncludeSearchPaths[i] + "/" + lit;
+      auto const filename = Option::IncludeSearchPaths[i] + "/" + lit;
       struct stat sb;
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
@@ -101,11 +102,10 @@ static string get_include_file_path(const string &source,
   }
 
   // [IncludeRoot] . 'string'
-  std::map<string, string>::const_iterator iter =
-    Option::IncludeRoots.find(var);
+  auto const iter = Option::IncludeRoots.find(var);
 
   if (iter != Option::IncludeRoots.end()) {
-    string includeRoot = iter->second;
+    auto includeRoot = iter->second;
     if (!includeRoot.empty()) {
       if (includeRoot[0] == '/') includeRoot = includeRoot.substr(1);
       if (includeRoot.empty() ||
@@ -124,7 +124,9 @@ static string get_include_file_path(const string &source,
   return "";
 }
 
-static void parse_string_arg(ExpressionPtr exp, string &var, string &lit) {
+static void parse_string_arg(ExpressionPtr exp,
+                             std::string &var,
+                             std::string &lit) {
   if (exp->is(Expression::KindOfUnaryOpExpression)) {
     UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(exp));
     if (u->getOp() == '(') {
@@ -134,7 +136,7 @@ static void parse_string_arg(ExpressionPtr exp, string &var, string &lit) {
   } else if (exp->is(Expression::KindOfBinaryOpExpression)) {
     BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(exp));
     if (b->getOp() == '.') {
-      string v, l;
+      std::string v, l;
       parse_string_arg(b->getExp2(), v, l);
       if (v.empty()) {
         parse_string_arg(b->getExp1(), var, lit);
@@ -153,12 +155,12 @@ static void parse_string_arg(ExpressionPtr exp, string &var, string &lit) {
   return;
 }
 
-string IncludeExpression::CheckInclude(ConstructPtr includeExp,
-                                       FileScopePtr scope,
-                                       ExpressionPtr fileExp,
-                                       bool &documentRoot) {
-  string container = scope->getName();
-  string var, lit;
+std::string IncludeExpression::CheckInclude(ConstructPtr includeExp,
+                                            FileScopePtr scope,
+                                            ExpressionPtr fileExp,
+                                            bool &documentRoot) {
+  auto const& container = scope->getName();
+  std::string var, lit;
   parse_string_arg(fileExp, var, lit);
   if (lit.empty()) return lit;
 
@@ -171,7 +173,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
     }
   }
 
-  string included = get_include_file_path(container, var, lit, documentRoot);
+  auto included = get_include_file_path(container, var, lit, documentRoot);
   if (!included.empty()) {
     if (included == container) {
       Compiler::Error(Compiler::BadPHPIncludeFile, includeExp);

@@ -209,7 +209,7 @@ ExpressionPtr Expression::unneeded() {
     getScope()->addUpdates(BlockScope::UseKindCaller);
     return ScalarExpressionPtr
       (new ScalarExpression(getScope(), getRange(),
-                            T_LNUMBER, string("0")));
+                            T_LNUMBER, std::string("0")));
   }
 
   return unneededHelper();
@@ -217,7 +217,7 @@ ExpressionPtr Expression::unneeded() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Expression::IsIdentifier(const string &value) {
+bool Expression::IsIdentifier(const std::string &value) {
   if (value.empty()) {
     return false;
   }

@@ -36,12 +36,12 @@ GlobalStatement::GlobalStatement
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(GlobalStatement)),
     m_exp(exp) {
 
-  std::set<string> seen;
+  std::set<std::string> seen;
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
     exp->setContext(Expression::Declaration);
     if (exp->is(Expression::KindOfSimpleVariable)) {
-      const string &name = static_pointer_cast<SimpleVariable>(exp)->getName();
+      auto const& name = static_pointer_cast<SimpleVariable>(exp)->getName();
       if (!seen.insert(name).second) {
         m_exp->removeElement(i--);
       }

@@ -67,7 +67,7 @@ ScalarExpression::ScalarExpression
       m_quoted(quoted) {
   if (!value.isNull()) {
     String serialized = HHVM_FN(serialize)(value);
-    m_serializedValue = string(serialized.data(), serialized.size());
+    m_serializedValue = std::string(serialized.data(), serialized.size());
     if (value.isDouble()) {
       m_dval = value.toDouble();
     }
@@ -101,7 +101,8 @@ ScalarExpression::ScalarExpression
   }();
   const String& s = value.toString();
   m_value = s.toCppString();
-  if (m_type == T_DNUMBER && m_value.find_first_of(".eE", 0) == string::npos) {
+  if (m_type == T_DNUMBER &&
+      m_value.find_first_of(".eE", 0) == std::string::npos) {
     m_value += ".";
   }
   m_originalValue = m_value;
@@ -140,11 +141,11 @@ bool ScalarExpression::needsTranslation() const {
 
 void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    string id = HPHP::toLower(getIdentifier());
+    auto const id = HPHP::toLower(getIdentifier());
 
     switch (m_type) {
       case T_LINE:
-        m_translated = folly::to<string>(line1());
+        m_translated = folly::to<std::string>(line1());
         break;
       case T_NS_C:
         m_translated = m_value;
@@ -260,7 +261,7 @@ std::string ScalarExpression::getOriginalLiteralString() const {
 }
 
 std::string ScalarExpression::getLiteralStringImpl(bool original) const {
-  string output;
+  std::string output;
   if (!isLiteralString() && m_type != T_STRING) {
     return output;
   }
@@ -378,7 +379,7 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     assert(m_quoted); // fall through
   case T_STRING:
     if (m_quoted) {
-      string output = escapeStringForPHP(m_originalValue);
+      auto const output = escapeStringForPHP(m_originalValue);
       cg_printf("%s", output.c_str());
     } else {
       cg_printf("%s", m_originalValue.c_str());
@@ -419,7 +420,7 @@ int64_t ScalarExpression::getHash() const {
   if (isLiteralInteger()) {
     hash = hash_int64(getLiteralInteger());
   } else if (isLiteralString()) {
-    string scs = getLiteralString();
+    auto const scs = getLiteralString();
     int64_t res;
     if (is_strictly_integer(scs.c_str(), scs.size(), res)) {
       hash = hash_int64(res);

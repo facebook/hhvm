@@ -22,7 +22,9 @@
 #include "hphp/util/bits.h"
 #include "hphp/util/lock.h"
 
+#include <boost/noncopyable.hpp>
 #include <tbb/concurrent_hash_map.h>
+
 #include <list>
 #include <memory>
 #include <set>

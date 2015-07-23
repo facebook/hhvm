@@ -38,22 +38,23 @@
 
 #define DECLARE_BOOST_TYPES(classname)                                  \
   class classname;                                                      \
-  typedef std::shared_ptr<classname> classname ## Ptr;                  \
-  typedef hphp_raw_ptr<classname> classname ## RawPtr;                  \
-  typedef std::weak_ptr<classname> classname ## WeakPtr;                \
-  typedef std::shared_ptr<const classname> classname ## ConstPtr;       \
-  typedef std::vector<classname ## Ptr> classname ## PtrVec;            \
-  typedef std::set<classname ## Ptr> classname ## PtrSet;               \
-  typedef std::list<classname ## Ptr> classname ## PtrList;
+                                                                        \
+  using classname ## Ptr      = std::shared_ptr<classname>;             \
+  using classname ## RawPtr   = hphp_raw_ptr<classname>;                \
+  using classname ## WeakPtr  = std::weak_ptr<classname>;               \
+  using classname ## ConstPtr = std::shared_ptr<const classname>;       \
+  using classname ## PtrVec   = std::vector<classname ## Ptr>;          \
 
-#define DECLARE_EXTENDED_BOOST_TYPES(classname)                 \
-  DECLARE_BOOST_TYPES(classname)                                \
-  typedef hphp_string_hash_map<classname ## Ptr, classname>     \
-    StringTo ## classname ## PtrMap;                            \
-  typedef hphp_string_hash_map<classname ## PtrVec, classname>  \
-    StringTo ## classname ## PtrVecMap;                         \
-  typedef hphp_string_hash_map<classname ## PtrSet, classname>  \
-    StringTo ## classname ## PtrSetMap;
+#define DECLARE_EXTENDED_BOOST_TYPES(classname)                     \
+  DECLARE_BOOST_TYPES(classname)                                    \
+  using StringTo ## classname ## PtrMap    = hphp_string_hash_map<  \
+    classname ## Ptr,                                               \
+    classname                                                       \
+  >;                                                                \
+  using StringTo ## classname ## PtrVecMap = hphp_string_hash_map<  \
+    classname ## PtrVec,                                            \
+    classname                                                       \
+  >;                                                                \
 
 //////////////////////////////////////////////////////////////////////
 

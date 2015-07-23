@@ -87,7 +87,7 @@ void ClosureExpression::initializeValuesFromVars() {
   for (int i = 0; i < m_vars->getCount(); i++) {
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-    const string &name = param->getName();
+    auto const& name = param->getName();
 
     SimpleVariablePtr var(new SimpleVariable(param->getScope(),
                                              param->getRange(),
@@ -168,7 +168,7 @@ void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
     for (int i = 0; i < m_vars->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      const string &name = param->getName();
+      auto const& name = param->getName();
       {
         Symbol *containingSym = containing->addDeclaredSymbol(name, param);
         containingSym->setPassClosureVar();
@@ -194,7 +194,7 @@ void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
     for (int i = 0; i < m_vars->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      const string &name = param->getName();
+      auto const& name = param->getName();
 
       // so we can assign values to them, instead of seeing CVarRef
       Symbol *sym = variables->getSymbol(name);

@@ -41,7 +41,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
 DECLARE_EXTENDED_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(AnalysisResult);

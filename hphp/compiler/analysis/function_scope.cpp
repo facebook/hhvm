@@ -110,7 +110,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
 
 FunctionScope::FunctionScope(FunctionScopePtr orig,
                              AnalysisResultConstPtr ar,
-                             const string &originalName,
+                             const std::string &originalName,
                              StatementPtr stmt,
                              ModifierExpressionPtr modifiers,
                              bool user)
@@ -460,12 +460,12 @@ bool FunctionScope::needsLocalThis() const {
 }
 
 static std::string s_empty;
-const string &FunctionScope::getOriginalName() const {
+const std::string &FunctionScope::getOriginalName() const {
   if (m_pseudoMain) return s_empty;
   return m_scopeName;
 }
 
-string FunctionScope::getOriginalFullName() const {
+std::string FunctionScope::getOriginalFullName() const {
   if (m_stmt) {
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     return stmt->getOriginalFullName();
@@ -567,7 +567,7 @@ std::vector<std::string> FunctionScope::getUserAttributeStringParams(
 }
 
 std::string FunctionScope::getDocName() const {
-  string name = getScopeName();
+  auto const& name = getScopeName();
   if (m_redeclaring < 0) {
     return name;
   }
@@ -576,9 +576,9 @@ std::string FunctionScope::getDocName() const {
 
 std::string FunctionScope::getDocFullName() const {
   FunctionScope *self = const_cast<FunctionScope*>(this);
-  const string &docName = getDocName();
+  auto const& docName = getDocName();
   if (ClassScopeRawPtr cls = self->getContainingClass()) {
-    return cls->getDocName() + string("::") + docName;
+    return cls->getDocName() + std::string("::") + docName;
   }
   return docName;
 }
@@ -628,10 +628,10 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
 
   ms.add("refreturn", isRefReturn());
 
-  vector<SymParamWrapper> paramSymbols;
+  std::vector<SymParamWrapper> paramSymbols;
   auto const limit = getDeclParamCount();
   for (int i = 0; i < limit; i++) {
-    const string &name = getParamName(i);
+    auto const& name = getParamName(i);
     const Symbol *sym = getVariables()->getSymbol(name);
     assert(sym && sym->isParameter());
     paramSymbols.push_back(SymParamWrapper(sym));
@@ -639,10 +639,9 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.add("parameters", paramSymbols);
 
   // scopes that call this scope (callers)
-  vector<string> callers;
+  std::vector<std::string> callers;
   const BlockScopeRawPtrFlagsPtrVec &deps = getDeps();
-  for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin();
-       it != deps.end(); ++it) {
+  for (auto it = deps.begin(); it != deps.end(); ++it) {
     const BlockScopeRawPtrFlagsPtrPair &p(*it);
     if ((*p.second & BlockScope::UseKindCaller) &&
         p.first->is(BlockScope::FunctionScope)) {
@@ -656,10 +655,9 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   // scopes that this scope calls (callees)
   // TODO(stephentu): this list only contains *user* functions,
   // we should also include builtins
-  vector<string> callees;
+  std::vector<std::string> callees;
   const BlockScopeRawPtrFlagsVec &users = getOrderedUsers();
-  for (BlockScopeRawPtrFlagsVec::const_iterator uit = users.begin();
-       uit != users.end(); ++uit) {
+  for (auto uit = users.begin(); uit != users.end(); ++uit) {
     BlockScopeRawPtrFlagsVec::value_type pf = *uit;
     if ((pf->second & BlockScope::UseKindCaller) &&
         pf->first->is(BlockScope::FunctionScope)) {
@@ -683,7 +681,7 @@ void FunctionScope::getClosureUseVars(
   for (int i = 0; i < m_closureVars->getCount(); i++) {
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
-    const string &name = param->getName();
+    auto const& name = param->getName();
     if (!filterUsed || variables->isUsed(name)) {
       useVars.push_back(ParameterExpressionPtrIdxPair(param, i));
     }
@@ -693,7 +691,8 @@ void FunctionScope::getClosureUseVars(
 FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;
 static Mutex s_refParamInfoLock;
 
-void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
+void FunctionScope::RecordFunctionInfo(std::string fname,
+                                       FunctionScopePtr func) {
   VariableTablePtr variables = func->getVariables();
   if (Option::WholeProgram) {
     Lock lock(s_refParamInfoLock);
@@ -721,7 +720,9 @@ void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
   }
 }
 
-FunctionScope::FunctionInfoPtr FunctionScope::GetFunctionInfo(string fname) {
+FunctionScope::FunctionInfoPtr FunctionScope::GetFunctionInfo(
+  const std::string& fname
+) {
   assert(Option::WholeProgram);
   auto it = s_refParamInfo.find(fname);
   if (it == s_refParamInfo.end()) {

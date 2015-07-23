@@ -673,6 +673,7 @@ public:
   void unexpectedStackSym(char sym, const char* where) const;
 
   int scanStackForLocation(int iLast);
+
   void buildVectorImm(std::vector<unsigned char>& vectorImm,
                       int iFirst, int iLast, bool allowW,
                       Emitter& e);
@@ -766,7 +767,7 @@ public:
                        const std::vector<Id>& paramIDs, uint32_t numParams);
   void addMemoizeProp(MethodStatementPtr meth);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName);
-  void emitConstMethodCallNoParams(Emitter& e, string name);
+  void emitConstMethodCallNoParams(Emitter& e, const std::string& name);
   bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,

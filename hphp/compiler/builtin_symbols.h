@@ -17,9 +17,13 @@
 #ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
-#include "hphp/compiler/hphp.h"
 #include <set>
+#include <string>
+
 #include "hphp/util/string-bag.h"
+
+#include "hphp/compiler/hphp.h"
+
 #include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {

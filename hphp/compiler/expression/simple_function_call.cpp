@@ -189,7 +189,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
         ScalarExpressionPtr name =
           dynamic_pointer_cast<ScalarExpression>(ename);
         if (name) {
-          string varName = name->getIdentifier();
+          auto const varName = name->getIdentifier();
           if (varName.empty()) break;
           AnalysisResult::Locker lock(ar);
           fs->declareConstant(lock.get(), varName);
@@ -209,10 +209,10 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
           m_params->getCount() == 2 &&
           (*m_params)[0]->isLiteralString() &&
           (*m_params)[1]->isLiteralString()) {
-        string params = (*m_params)[0]->getLiteralString();
-        string body = (*m_params)[1]->getLiteralString();
+        auto const params = (*m_params)[0]->getLiteralString();
+        auto const body = (*m_params)[1]->getLiteralString();
         m_lambda = CodeGenerator::GetNewLambda();
-        string code = "function " + m_lambda + "(" + params + ") "
+        auto const code = "function " + m_lambda + "(" + params + ") "
           "{" + body + "}";
         m_lambda = "1_" + m_lambda;
         ar->appendExtraCode(fs->getName(), code);
@@ -266,7 +266,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
     case FunType::Compact: {
       // If all the parameters in the compact() call are statically known,
       // there is no need to create a variable table.
-      vector<ExpressionPtr> literals;
+      std::vector<ExpressionPtr> literals;
       if (false && m_params->flattenLiteralStrings(literals)) {
         m_type = FunType::StaticCompact;
         m_params->clearElements();
@@ -395,7 +395,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         ScalarExpressionPtr name =
           dynamic_pointer_cast<ScalarExpression>(value);
         if (name && name->isLiteralString()) {
-          string symbol = name->getLiteralString();
+          auto const symbol = name->getLiteralString();
           switch (m_type) {
             case FunType::Define: {
               ConstantTableConstPtr constants = ar->getConstants();
@@ -476,12 +476,12 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         m_type = FunType::Compact;
       } else {
         // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c)
-        vector<ExpressionPtr> new_params;
-        vector<string> strs;
+        std::vector<ExpressionPtr> new_params;
+        std::vector<std::string> strs;
         for (int i = 0; i < m_params->getCount(); i++) {
           ExpressionPtr e = (*m_params)[i];
           always_assert(e->isLiteralString());
-          string name = e->getLiteralString();
+          auto const name = e->getLiteralString();
 
           // no need to record duplicate names
           bool found = false;
@@ -625,7 +625,7 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
     if (!name) return false;
-    string varName = name->getIdentifier();
+    auto const varName = name->getIdentifier();
     if (varName.empty()) return false;
     if (!SystemLib::s_inited || ar->isSystemConstant(varName)) {
       return true;
@@ -712,7 +712,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
             ExpressionListPtr rep(
               new ExpressionList(getScope(), getRange(),
                                  ExpressionList::ListKindWrapped));
-            string root_name;
+            std::string root_name;
             int n = arr ? arr->getCount() : 0;
             int i, j, k;
             for (i = j = k = 0; i < n; i++) {
@@ -754,7 +754,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
               ExpressionPtr val(ap->getValue());
               if (!val->isScalar()) {
                 if (root_name.empty()) {
-                  root_name = "t" + folly::to<string>(
+                  root_name = "t" + folly::to<std::string>(
                     getFunctionScope()->nextInlineIndex());
                   SimpleVariablePtr rv(
                     new SimpleVariable(getScope(), getRange(), root_name));
@@ -871,7 +871,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
     if (value->isScalar()) {
       ScalarExpressionPtr name = dynamic_pointer_cast<ScalarExpression>(value);
       if (name && name->isLiteralString()) {
-        string symbol = name->getLiteralString();
+        auto symbol = name->getLiteralString();
         switch (m_type) {
           case FunType::Define: {
             ConstantTableConstPtr constants = ar->getConstants();
@@ -1110,8 +1110,8 @@ SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
   ScalarExpressionPtr funcName0(
       dynamic_pointer_cast<ScalarExpression>(funcName));
   if (clsName0 && funcName0) {
-    string cname = clsName0->getLiteralString();
-    string fname = funcName0->getLiteralString();
+    auto const cname = clsName0->getLiteralString();
+    auto const fname = funcName0->getLiteralString();
     if (!fname.empty()) {
       if (!cname.empty()) {
         ClassScopePtr cscope(ar->findClass(cname));
@@ -1217,8 +1217,8 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
         if (testOnly < 0) return SimpleFunctionCallPtr();
 
         size_t c = smethod.find("::");
-        if (c != 0 && c != string::npos && c+2 < smethod.size()) {
-          string name = smethod.substr(0, c);
+        if (c != 0 && c != std::string::npos && c+2 < smethod.size()) {
+          auto const name = smethod.substr(0, c);
           if (!cls->isNamed(name)) {
             if (!cls->derivesFrom(ar, name, true, false)) {
               error = cls->derivesFromRedeclaring() == Derivation::Normal;

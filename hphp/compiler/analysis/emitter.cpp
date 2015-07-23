@@ -15,16 +15,18 @@
 */
 #include "hphp/compiler/analysis/emitter.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <memory>
-#include <iostream>
-#include <iomanip>
-#include <vector>
 #include <algorithm>
 #include <deque>
 #include <exception>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <memory>
 #include <set>
 #include <utility>
+#include <vector>
+
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
@@ -4724,7 +4726,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   not_reached();
 }
 
-void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e, string name) {
+void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e,
+                                                 const std::string& name) {
   auto const nameLit = makeStaticString(name);
   auto const fpiStart = m_ue.bcPos();
   e.FPushObjMethodD(0, nameLit, ObjMethodOp::NullThrows);
@@ -6246,7 +6249,7 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
 }
 
 void EmitterVisitor::emitPostponedMeths() {
-  vector<FuncEmitter*> top_fes;
+  std::vector<FuncEmitter*> top_fes;
   while (!m_postponedMeths.empty()) {
     assert(m_actualStackHighWater == 0);
     assert(m_fdescHighWater == 0);

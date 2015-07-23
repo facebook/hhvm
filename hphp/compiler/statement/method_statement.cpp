@@ -57,9 +57,9 @@ using std::map;
 
 MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
- ModifierExpressionPtr modifiers, bool ref, const string &name,
+ ModifierExpressionPtr modifiers, bool ref, const std::string &name,
  ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
- StatementListPtr stmt, int attr, const string &docComment,
+ StatementListPtr stmt, int attr, const std::string &docComment,
  ExpressionListPtr attrList, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES)
   , m_method(method)
@@ -91,7 +91,7 @@ bool MethodStatement::isNamed(const char* name) const {
   return !strcasecmp(m_originalName.c_str(), name);
 }
 
-string MethodStatement::getOriginalFullName() const {
+std::string MethodStatement::getOriginalFullName() const {
   if (!m_method) return m_originalName;
   return getClassScope()->getOriginalName() + "::" + m_originalName;
 }
@@ -122,7 +122,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   bool hasRef = false;
   bool hasVariadicParam = false;
   if (m_params) {
-    std::set<string> names, allDeclNames;
+    std::set<std::string> names, allDeclNames;
     int i = 0;
     numDeclParam = m_params->getCount();
     ParameterExpressionPtr lastParam =
@@ -159,7 +159,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
       if (names.find(param->getName()) != names.end()) {
         Compiler::Error(Compiler::RedundantParameter, param);
         for (int j = 0; j < 1000; j++) {
-          string name = param->getName() + folly::to<string>(j);
+          auto name = param->getName() + folly::to<std::string>(j);
           if (names.find(name) == names.end() &&
               allDeclNames.find(name) == allDeclNames.end()) {
             param->rename(name);
@@ -178,7 +178,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
     m_attribute |= FileScope::VariadicArgumentParam;
   }
 
-  vector<UserAttributePtr> attrs;
+  std::vector<UserAttributePtr> attrs;
   if (m_attrList) {
     for (int i = 0; i < m_attrList->getCount(); ++i) {
       UserAttributePtr a =

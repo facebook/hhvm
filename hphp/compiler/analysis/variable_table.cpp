@@ -45,7 +45,9 @@ VariableTable::VariableTable(BlockScope &blockScope)
       m_forcedVariants(0) {
 }
 
-void VariableTable::getLocalVariableNames(vector<string> &syms) const {
+void VariableTable::getLocalVariableNames(
+  std::vector<std::string>& syms
+) const {
   FunctionScopeRawPtr fs = getScopePtr()->getContainingFunction();
   bool dollarThisIsSpecial = fs->getContainingClass() ||
                              fs->inPseudoMain() ||
@@ -57,7 +59,7 @@ void VariableTable::getLocalVariableNames(vector<string> &syms) const {
 
   bool hadThisSym = false;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-    const string& name = m_symbolVec[i]->getName();
+    auto const& name = m_symbolVec[i]->getName();
     if (name == "this" && dollarThisIsSpecial) {
       /*
        * The "this" variable in methods, pseudo-main, or closures is
@@ -80,7 +82,7 @@ void VariableTable::getLocalVariableNames(vector<string> &syms) const {
   }
 }
 
-void VariableTable::getNames(std::set<string> &names,
+void VariableTable::getNames(std::set<std::string> &names,
                              bool collectPrivate /* = true */) const {
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     if (collectPrivate || !m_symbolVec[i]->isPrivate()) {
@@ -89,72 +91,72 @@ void VariableTable::getNames(std::set<string> &names,
   }
 }
 
-bool VariableTable::isParameter(const string &name) const {
+bool VariableTable::isParameter(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isParameter();
 }
 
-bool VariableTable::isPublic(const string &name) const {
+bool VariableTable::isPublic(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isPublic();
 }
 
-bool VariableTable::isProtected(const string &name) const {
+bool VariableTable::isProtected(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isProtected();
 }
 
-bool VariableTable::isPrivate(const string &name) const {
+bool VariableTable::isPrivate(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isPrivate();
 }
 
-bool VariableTable::isStatic(const string &name) const {
+bool VariableTable::isStatic(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isStatic();
 }
 
-bool VariableTable::isGlobal(const string &name) const {
+bool VariableTable::isGlobal(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isGlobal();
 }
 
-bool VariableTable::isRedeclared(const string &name) const {
+bool VariableTable::isRedeclared(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isRedeclared();
 }
 
-bool VariableTable::isLocalGlobal(const string &name) const {
+bool VariableTable::isLocalGlobal(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isLocalGlobal();
 }
 
-bool VariableTable::isNestedStatic(const string &name) const {
+bool VariableTable::isNestedStatic(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isNestedStatic();
 }
 
-bool VariableTable::isLvalParam(const string &name) const {
+bool VariableTable::isLvalParam(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isLvalParam();
 }
 
-bool VariableTable::isUsed(const string &name) const {
+bool VariableTable::isUsed(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isUsed();
 }
 
-bool VariableTable::isNeeded(const string &name) const {
+bool VariableTable::isNeeded(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isNeeded();
 }
 
-bool VariableTable::isSuperGlobal(const string &name) const {
+bool VariableTable::isSuperGlobal(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isSuperGlobal();
 }
 
-bool VariableTable::isLocal(const string &name) const {
+bool VariableTable::isLocal(const std::string &name) const {
   return isLocal(getSymbol(name));
 }
 
@@ -173,7 +175,7 @@ bool VariableTable::isLocal(const Symbol *sym) const {
   return false;
 }
 
-bool VariableTable::needLocalCopy(const string &name) const {
+bool VariableTable::needLocalCopy(const std::string &name) const {
   return needLocalCopy(getSymbol(name));
 }
 
@@ -188,20 +190,20 @@ bool VariableTable::needLocalCopy(const Symbol *sym) const {
      getAttribute(ContainsUnset));
 }
 
-bool VariableTable::isInherited(const string &name) const {
+bool VariableTable::isInherited(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return !sym ||
     (!sym->isGlobal() && !sym->isSystem() && !sym->getDeclaration());
 }
 
-ConstructPtr VariableTable::getStaticInitVal(string varName) {
+ConstructPtr VariableTable::getStaticInitVal(std::string varName) {
   if (Symbol *sym = getSymbol(varName)) {
     return sym->getStaticInitVal();
   }
   return ConstructPtr();
 }
 
-bool VariableTable::setStaticInitVal(string varName,
+bool VariableTable::setStaticInitVal(std::string varName,
                                      ConstructPtr value) {
   Symbol *sym = addSymbol(varName);
   bool exists = (sym->getStaticInitVal() != nullptr);
@@ -209,14 +211,14 @@ bool VariableTable::setStaticInitVal(string varName,
   return exists;
 }
 
-ConstructPtr VariableTable::getClassInitVal(string varName) {
+ConstructPtr VariableTable::getClassInitVal(std::string varName) {
   if (Symbol *sym = getSymbol(varName)) {
     return sym->getClassInitVal();
   }
   return ConstructPtr();
 }
 
-bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
+bool VariableTable::setClassInitVal(std::string varName, ConstructPtr value) {
   Symbol *sym = addSymbol(varName);
   bool exists = (sym->getClassInitVal() != nullptr);
   sym->setClassInitVal(value);
@@ -225,7 +227,7 @@ bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void VariableTable::addParam(const string &name,
+void VariableTable::addParam(const std::string &name,
                              AnalysisResultConstPtr ar,
                              ConstructPtr construct) {
   Symbol *sym = addDeclaredSymbol(name, construct);
@@ -235,7 +237,7 @@ void VariableTable::addParam(const string &name,
   add(sym, false, ar, construct, ModifierExpressionPtr());
 }
 
-void VariableTable::addParamLike(const string &name,
+void VariableTable::addParamLike(const std::string &name,
                                  AnalysisResultPtr ar,
                                  ConstructPtr construct, bool firstPass) {
   if (firstPass) {
@@ -271,7 +273,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
 void VariableTable::cleanupForError(AnalysisResultConstPtr ar) {
 }
 
-bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
+bool VariableTable::markOverride(AnalysisResultPtr ar, const std::string &name) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
   bool ret = false;
@@ -299,7 +301,7 @@ bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
   return ret;
 }
 
-void VariableTable::add(const string &name,
+void VariableTable::add(const std::string &name,
                         bool implicit, AnalysisResultConstPtr ar,
                         ConstructPtr construct,
                         ModifierExpressionPtr modifiers) {
@@ -358,7 +360,7 @@ void VariableTable::add(Symbol *sym,
   }
 }
 
-void VariableTable::checkVariable(const string &name,
+void VariableTable::checkVariable(const std::string &name,
                                   AnalysisResultConstPtr ar,
                                   ConstructPtr construct) {
   checkVariable(addSymbol(name), ar, construct);
@@ -380,7 +382,7 @@ void VariableTable::checkVariable(Symbol *sym,
 }
 
 Symbol *VariableTable::findProperty(ClassScopePtr &cls,
-                                    const string &name,
+                                    const std::string &name,
                                     AnalysisResultConstPtr ar) {
   Symbol *sym = getSymbol(name);
   if (sym) {
@@ -405,7 +407,7 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
   return sym;
 }
 
-bool VariableTable::checkRedeclared(const string &name,
+bool VariableTable::checkRedeclared(const std::string &name,
                                     Statement::KindOf kindOf)
 {
   Symbol *sym = getSymbol(name);
@@ -429,23 +431,23 @@ bool VariableTable::checkRedeclared(const string &name,
   }
 }
 
-void VariableTable::addLocalGlobal(const string &name) {
+void VariableTable::addLocalGlobal(const std::string &name) {
   addSymbol(name)->setLocalGlobal();
 }
 
-void VariableTable::addNestedStatic(const string &name) {
+void VariableTable::addNestedStatic(const std::string &name) {
   addSymbol(name)->setNestedStatic();
 }
 
-void VariableTable::addLvalParam(const string &name) {
+void VariableTable::addLvalParam(const std::string &name) {
   addSymbol(name)->setLvalParam();
 }
 
-void VariableTable::addUsed(const string &name) {
+void VariableTable::addUsed(const std::string &name) {
   addSymbol(name)->setUsed();
 }
 
-void VariableTable::addNeeded(const string &name) {
+void VariableTable::addNeeded(const std::string &name) {
   addSymbol(name)->setNeeded();
 }
 
@@ -461,7 +463,7 @@ bool VariableTable::checkUnused(Symbol *sym) {
 }
 
 void VariableTable::clearUsed() {
-  typedef std::pair<const string,Symbol> symPair;
+  typedef std::pair<const std::string,Symbol> symPair;
   bool ps = isPseudoMainTable();
   for (symPair &sym: m_symbolMap) {
     if (!ps || sym.second.isHidden()) {
@@ -473,16 +475,16 @@ void VariableTable::clearUsed() {
   }
 }
 
-void VariableTable::addSuperGlobal(const string &name) {
+void VariableTable::addSuperGlobal(const std::string &name) {
   addSymbol(name)->setSuperGlobal();
 }
 
-bool VariableTable::isConvertibleSuperGlobal(const string &name) const {
+bool VariableTable::isConvertibleSuperGlobal(const std::string &name) const {
   return !getAttribute(ContainsDynamicVariable) && isSuperGlobal(name);
 }
 
 ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
-                                        const string &name,
+                                        const std::string &name,
                                         const Symbol *&sym) const {
   sym = nullptr;
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
@@ -513,8 +515,8 @@ bool VariableTable::hasNonStaticPrivate() const {
 
 void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::ConvertSuperGlobals && !getAttribute(ContainsDynamicVariable)) {
-    std::set<string> convertibles;
-    typedef std::pair<const string,Symbol> symPair;
+    std::set<std::string> convertibles;
+    typedef std::pair<const std::string,Symbol> symPair;
     for (symPair &sym: m_symbolMap) {
       if (sym.second.isSuperGlobal() && !sym.second.declarationSet()) {
         convertibles.insert(sym.second.getName());
@@ -522,7 +524,7 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     if (!convertibles.empty()) {
       cg_printf("/* converted super globals */ global ");
-      for (std::set<string>::const_iterator iter = convertibles.begin();
+      for (auto iter = convertibles.begin();
            iter != convertibles.end(); ++iter) {
         if (iter != convertibles.begin()) cg_printf(",");
         cg_printf("$%s", iter->c_str());

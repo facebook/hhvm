@@ -49,11 +49,13 @@
 #include <sys/wait.h>
 #include <dlfcn.h>
 
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
+
 #include <exception>
 
 using namespace boost::program_options;
@@ -63,33 +65,33 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CompilerOptions {
-  string target;
-  string format;
-  string outputDir;
-  string syncDir;
-  vector<string> config;
-  string configDir;
-  vector<string> confStrings;
-  vector<string> iniStrings;
-  string inputDir;
-  vector<string> inputs;
-  string inputList;
-  vector<string> includePaths;
-  vector<string> modules;
-  vector<string> excludeDirs;
-  vector<string> excludeFiles;
-  vector<string> excludePatterns;
-  vector<string> excludeStaticDirs;
-  vector<string> excludeStaticFiles;
-  vector<string> excludeStaticPatterns;
-  vector<string> fmodules;
-  vector<string> ffiles;
-  vector<string> cfiles;
-  vector<string> cmodules;
+  std::string target;
+  std::string format;
+  std::string outputDir;
+  std::string syncDir;
+  std::vector<std::string> config;
+  std::string configDir;
+  std::vector<std::string> confStrings;
+  std::vector<std::string> iniStrings;
+  std::string inputDir;
+  std::vector<std::string> inputs;
+  std::string inputList;
+  std::vector<std::string> includePaths;
+  std::vector<std::string> modules;
+  std::vector<std::string> excludeDirs;
+  std::vector<std::string> excludeFiles;
+  std::vector<std::string> excludePatterns;
+  std::vector<std::string> excludeStaticDirs;
+  std::vector<std::string> excludeStaticFiles;
+  std::vector<std::string> excludeStaticPatterns;
+  std::vector<std::string> fmodules;
+  std::vector<std::string> ffiles;
+  std::vector<std::string> cfiles;
+  std::vector<std::string> cmodules;
   bool parseOnDemand;
-  string program;
-  string programArgs;
-  string branch;
+  std::string program;
+  std::string programArgs;
+  std::string branch;
   int revision;
   bool genStats;
   bool keepTempDir;
@@ -97,7 +99,7 @@ struct CompilerOptions {
   int logLevel;
   bool force;
   int optimizeLevel;
-  string filecache;
+  std::string filecache;
   bool dump;
   bool coredump;
   bool nofork;
@@ -205,65 +207,67 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
-    ("target,t", value<string>(&po.target)->default_value("run"),
+    ("target,t", value<std::string>(&po.target)->default_value("run"),
      "lint | "
      "php | "
      "hhbc | "
      "filecache | "
      "run (default)")
-    ("format,f", value<string>(&po.format),
+    ("format,f", value<std::string>(&po.format),
      "lint: (none); \n"
      "php: trimmed (default) | inlined | pickled |"
      " <any combination of them by any separator>; \n"
      "hhbc: binary (default) | text; \n"
      "run: cluster (default) | file")
-    ("input-dir", value<string>(&po.inputDir), "input directory")
-    ("program", value<string>(&po.program)->default_value("program"),
+    ("input-dir", value<std::string>(&po.inputDir), "input directory")
+    ("program", value<std::string>(&po.program)->default_value("program"),
      "final program name to use")
-    ("args", value<string>(&po.programArgs), "program arguments")
-    ("inputs,i", value<vector<string> >(&po.inputs), "input file names")
-    ("input-list", value<string>(&po.inputList),
+    ("args", value<std::string>(&po.programArgs), "program arguments")
+    ("inputs,i", value<std::vector<std::string>>(&po.inputs), "input file names")
+    ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
     ("include-path",
-     value<vector<string> >(&po.includePaths)->composing(),
+     value<std::vector<std::string>>(&po.includePaths)->composing(),
      "a list of full paths to search for files being included in includes "
      "or requires but cannot be found assuming relative paths")
-    ("module", value<vector<string> >(&po.modules)->composing(),
+    ("module", value<std::vector<std::string>>(&po.modules)->composing(),
      "directories containing all input files")
-    ("exclude-dir", value<vector<string> >(&po.excludeDirs)->composing(),
+    ("exclude-dir",
+     value<std::vector<std::string>>(&po.excludeDirs)->composing(),
      "directories to exclude from the input")
-    ("fmodule", value<vector<string> >(&po.fmodules)->composing(),
+    ("fmodule", value<std::vector<std::string>>(&po.fmodules)->composing(),
      "same with module, except no exclusion checking is performed, so these "
      "modules are forced to be included")
-    ("ffile", value<vector<string> >(&po.ffiles)->composing(),
+    ("ffile", value<std::vector<std::string>>(&po.ffiles)->composing(),
      "extra PHP files forced to include without exclusion checking")
-    ("exclude-file", value<vector<string> >(&po.excludeFiles)->composing(),
+    ("exclude-file",
+     value<std::vector<std::string>>(&po.excludeFiles)->composing(),
      "files to exclude from the input, even if parse-on-demand finds it")
     ("exclude-pattern",
-     value<vector<string> >(&po.excludePatterns)->composing(),
+     value<std::vector<std::string>>(&po.excludePatterns)->composing(),
      "regex (in 'find' command's regex command line option format) of files "
      "or directories to exclude from the input, even if parse-on-demand finds "
      "it")
     ("exclude-static-pattern",
-     value<vector<string> >(&po.excludeStaticPatterns)->composing(),
+     value<std::vector<std::string>>(&po.excludeStaticPatterns)->composing(),
      "regex (in 'find' command's regex command line option format) of files "
      "or directories to exclude from static content cache")
     ("exclude-static-dir",
-     value<vector<string> >(&po.excludeStaticDirs)->composing(),
+     value<std::vector<std::string>>(&po.excludeStaticDirs)->composing(),
      "directories to exclude from static content cache")
     ("exclude-static-file",
-     value<vector<string> >(&po.excludeStaticFiles)->composing(),
+     value<std::vector<std::string>>(&po.excludeStaticFiles)->composing(),
      "files to exclude from static content cache")
-    ("cfile", value<vector<string> >(&po.cfiles)->composing(),
+    ("cfile", value<std::vector<std::string>>(&po.cfiles)->composing(),
      "extra static files forced to include without exclusion checking")
-    ("cmodule", value<vector<string> >(&po.cmodules)->composing(),
+    ("cmodule", value<std::vector<std::string>>(&po.cmodules)->composing(),
      "extra directories for static files without exclusion checking")
     ("parse-on-demand", value<bool>(&po.parseOnDemand)->default_value(true),
      "whether to parse files that are not specified from command line")
-    ("branch", value<string>(&po.branch), "SVN branch")
+    ("branch", value<std::string>(&po.branch), "SVN branch")
     ("revision", value<int>(&po.revision), "SVN revision")
-    ("output-dir,o", value<string>(&po.outputDir), "output directory")
-    ("sync-dir", value<string>(&po.syncDir),
+    ("output-dir,o", value<std::string>(&po.outputDir), "output directory")
+    ("sync-dir", value<std::string>(&po.syncDir),
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
      "compilation and build.")
@@ -273,15 +277,16 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "whether to generate code errors")
     ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
      "whether to keep the temporary directory")
-    ("config,c", value<vector<string> >(&po.config)->composing(),
+    ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "config file name")
-    ("config-dir", value<string>(&po.configDir),
+    ("config-dir", value<std::string>(&po.configDir),
      "root directory configuration is based on (for example, "
      "excluded directories may be relative path in configuration.")
-    ("config-value,v", value<vector<string> >(&po.confStrings)->composing(),
+    ("config-value,v",
+     value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
      "name can be any valid configuration for a config file")
-    ("define,d", value<vector<string>>(&po.iniStrings)->composing(),
+    ("define,d", value<std::vector<std::string>>(&po.iniStrings)->composing(),
      "define an ini setting in the same format ( foo[=bar] ) as provided in a "
      ".ini file")
     ("log,l",
@@ -292,7 +297,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      value<bool>(&po.force)->default_value(true),
      "force to ignore code generation errors and continue compilations")
     ("file-cache",
-     value<string>(&po.filecache),
+     value<std::string>(&po.filecache),
      "if specified, generate a static file cache with this file name")
     ("dump",
      value<bool>(&po.dump)->default_value(false),
@@ -383,7 +388,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   if ((po.target == "hhbc" || po.target == "run") &&
-      po.format.find("exe") == string::npos) {
+      po.format.find("exe") == std::string::npos) {
     if (po.program == "program") {
       po.program = "hhvm.hhbc";
     }
@@ -420,7 +425,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   initialize_repo();
 
-  vector<string> badnodes;
+  std::vector<std::string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
@@ -663,7 +668,7 @@ int process(const CompilerOptions &po) {
 int lintTarget(const CompilerOptions &po) {
   int ret = 0;
   for (unsigned int i = 0; i < po.inputs.size(); i++) {
-    string filename = po.inputDir + "/" + po.inputs[i];
+    std::string filename = po.inputDir + "/" + po.inputs[i];
     try {
       Scanner scanner(filename, Option::GetScannerType());
       Compiler::Parser parser(scanner, filename.c_str(),
@@ -700,15 +705,15 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
 
   // format
   int formatCount = 0;
-  if (po.format.find("pickled") != string::npos) {
+  if (po.format.find("pickled") != std::string::npos) {
     Option::GeneratePickledPHP = true;
     formatCount++;
   }
-  if (po.format.find("inlined") != string::npos) {
+  if (po.format.find("inlined") != std::string::npos) {
     Option::GenerateInlinedPHP = true;
     formatCount++;
   }
-  if (po.format.find("trimmed") != string::npos) {
+  if (po.format.find("trimmed") != std::string::npos) {
     Option::GenerateTrimmedPHP = true;
     formatCount++;
   }
@@ -721,14 +726,14 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
   ar->setOutputPath(po.outputDir);
   if (Option::GeneratePickledPHP) {
     Logger::Info("creating pickled PHP files...");
-    string outputDir = po.outputDir;
+    std::string outputDir = po.outputDir;
     if (formatCount > 1) outputDir += "/pickled";
     mkdir(outputDir.c_str(), 0777);
     ar->outputAllPHP(CodeGenerator::PickledPHP);
   }
   if (Option::GenerateInlinedPHP) {
     Logger::Info("creating inlined PHP files...");
-    string outputDir = po.outputDir;
+    std::string outputDir = po.outputDir;
     if (formatCount > 1) outputDir += "/inlined";
     mkdir(outputDir.c_str(), 0777);
     if (!ar->outputAllPHP(CodeGenerator::InlinedPHP)) {
@@ -737,7 +742,7 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
   }
   if (Option::GenerateTrimmedPHP) {
     Logger::Info("creating trimmed PHP files...");
-    string outputDir = po.outputDir;
+    std::string outputDir = po.outputDir;
     if (formatCount > 1) outputDir += "/trimmed";
     mkdir(outputDir.c_str(), 0777);
     if (!ar->outputAllPHP(CodeGenerator::TrimmedPHP)) {
@@ -758,7 +763,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   }
   // Propagate relevant compiler-specific options to the runtime.
   RuntimeOption::RepoCentralPath = ar->getOutputPath() + '/' + po.program;
-  if (po.format.find("exe") != string::npos) {
+  if (po.format.find("exe") != std::string::npos) {
     RuntimeOption::RepoCentralPath += ".hhbc";
   }
   unlink(RuntimeOption::RepoCentralPath.c_str());
@@ -785,17 +790,17 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   int ret = 0;
   int formatCount = 0;
   const char *type = 0;
-  if (po.format.find("text") != string::npos) {
+  if (po.format.find("text") != std::string::npos) {
     Option::GenerateTextHHBC = true;
     type = "creating text HHBC files";
     formatCount++;
   }
-  if (po.format.find("binary") != string::npos) {
+  if (po.format.find("binary") != std::string::npos) {
     Option::GenerateBinaryHHBC = true;
     type = "creating binary HHBC files";
     formatCount++;
   }
-  if (po.format.find("exe") != string::npos) {
+  if (po.format.find("exe") != std::string::npos) {
     Option::GenerateBinaryHHBC = true;
     type = "creating binary HHBC files";
     formatCount++;
@@ -828,21 +833,21 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     boost::filesystem::remove_all(po.syncDir);
   }
 
-  if (!ret && po.format.find("exe") != string::npos) {
+  if (!ret && po.format.find("exe") != std::string::npos) {
     /*
      * We need to create an executable with the repo
      * embedded in it.
      * Copy ourself, and embed the repo as a section
      * named "repo".
      */
-    string exe = po.outputDir + '/' + po.program;
-    string repo = "repo=" + exe + ".hhbc";
-    string buf = current_executable_path();
+    std::string exe = po.outputDir + '/' + po.program;
+    std::string repo = "repo=" + exe + ".hhbc";
+    std::string buf = current_executable_path();
     if (buf.empty()) return -1;
 
     const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
                            buf.c_str(), exe.c_str(), 0 };
-    string out;
+    std::string out;
     ret = Process::Exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
   }
 
@@ -878,9 +883,9 @@ int runTarget(const CompilerOptions &po) {
   }
 
   // run the executable
-  string cmd;
-  if (po.format.find("exe") == string::npos) {
-    string buf = current_executable_path();
+  std::string cmd;
+  if (po.format.find("exe") == std::string::npos) {
+    std::string buf = current_executable_path();
     if (buf.empty()) return -1;
 
     cmd += buf;
@@ -890,7 +895,7 @@ int runTarget(const CompilerOptions &po) {
     cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
   }
   cmd += po.outputDir + '/' + po.program;
-  cmd += string(" --file ") +
+  cmd += std::string(" --file ") +
     (po.inputs.size() == 1 ? po.inputs[0] : "") +
     " " + po.programArgs;
   Logger::Info("running executable: %s", cmd.c_str());
@@ -911,7 +916,7 @@ void createOutputDirectory(CompilerOptions &po) {
     if (!t) {
       t = "/tmp";
     }
-    string temp = t;
+    std::string temp = t;
     temp += "/hphp_XXXXXX";
     std::vector<char> path(begin(temp), end(temp));
     path.push_back('\0');

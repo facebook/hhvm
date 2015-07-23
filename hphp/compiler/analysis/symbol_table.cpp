@@ -103,7 +103,7 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
     ExpressionPtr valueExp(
       dynamic_pointer_cast<Expression>(m_value));
     assert(valueExp);
-    const string &init = ExtractInitializer(out.analysisResult(), valueExp);
+    auto const init = ExtractInitializer(out.analysisResult(), valueExp);
     if (!init.empty()) out << init;
     else               out << JSON::Null();
   } else {
@@ -152,14 +152,14 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
     ExpressionPtr initExp(
       dynamic_pointer_cast<Expression>(m_initVal));
     assert(initExp);
-    const string &init = ExtractInitializer(out.analysisResult(), initExp);
+    auto const init = ExtractInitializer(out.analysisResult(), initExp);
     if (!init.empty()) out << init;
     else               out << JSON::Null();
   } else {
     out << JSON::Null();
   }
 
-  const string &docs = ExtractDocComment(
+  auto const docs = ExtractDocComment(
       m_declaration ?
         dynamic_pointer_cast<Expression>(m_declaration) : ExpressionPtr());
   ms.add("docs", docs);
@@ -292,14 +292,14 @@ void SymbolTable::canonicalizeSymbolOrder() {
   sort(m_symbolVec.begin(), m_symbolVec.end(), canonicalizeSymbolComp);
 }
 
-void SymbolTable::getSymbols(vector<Symbol*> &syms,
+void SymbolTable::getSymbols(std::vector<Symbol*> &syms,
                              bool filterHidden /* = false */) const {
   for (Symbol *sym: m_symbolVec) {
     if (!filterHidden || !sym->isHidden()) syms.push_back(sym);
   }
 }
 
-void SymbolTable::getSymbols(vector<string> &syms) const {
+void SymbolTable::getSymbols(std::vector<std::string> &syms) const {
   for (Symbol *sym: m_symbolVec) {
     syms.push_back(sym->getName());
   }
@@ -308,16 +308,15 @@ void SymbolTable::getSymbols(vector<string> &syms) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void SymbolTable::serialize(JSON::CodeError::OutputStream &out) const {
-  vector<string> symbols;
+  std::vector<std::string> symbols;
   getSymbols(symbols);
 
   out << symbols;
 }
 
-string SymbolTable::getEscapedText(Variant v, int &len) {
+std::string SymbolTable::getEscapedText(Variant v, int &len) {
   VariableSerializer vs(VariableSerializer::Type::Serialize);
   String str = vs.serialize(v, true);
   len = str.length();
-  string output = escapeStringForCPP(str.data(), len);
-  return output;
+  return escapeStringForCPP(str.data(), len);
 }

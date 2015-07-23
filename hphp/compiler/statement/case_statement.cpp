@@ -65,7 +65,7 @@ int64_t CaseStatement::getLiteralInteger() const {
   return exp->getLiteralInteger();
 }
 
-string CaseStatement::getLiteralString() const {
+std::string CaseStatement::getLiteralString() const {
   assert(m_condition->is(Expression::KindOfScalarExpression));
   ScalarExpressionPtr exp =
     dynamic_pointer_cast<ScalarExpression>(m_condition);

@@ -204,7 +204,7 @@ void ClassVariable::addTraitPropsToScope(AnalysisResultPtr ar,
       value = makeConstant(ar, "null");
     }
 
-    const string &name = var->getName();
+    auto const& name = var->getName();
     Symbol *sym;
     ClassScopePtr prevScope = variables->isPresent(name) ? scope :
       scope->getVariables()->findParent(ar, name, sym);

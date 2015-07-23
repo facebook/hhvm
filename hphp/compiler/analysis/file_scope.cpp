@@ -46,7 +46,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FileScope::FileScope(const string &fileName, int fileSize, const MD5 &md5)
+FileScope::FileScope(const std::string &fileName, int fileSize, const MD5 &md5)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
     m_size(fileSize), m_md5(md5), m_system(false),
     m_isHHFile(false), m_preloadPriority(0),
@@ -89,8 +89,7 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
 }
 
 void FileScope::cleanupForError(AnalysisResultConstPtr ar) {
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
-       iter != m_classes.end(); ++iter) {
+  for (auto iter = m_classes.begin(); iter != m_classes.end(); ++iter) {
     for (ClassScopePtr cls: iter->second) {
       cls->getVariables()->cleanupForError(ar);
     }
@@ -179,7 +178,7 @@ bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
 }
 
 ClassScopePtr FileScope::getClass(const char *name) {
-  StringToClassScopePtrVecMap::const_iterator iter = m_classes.find(name);
+  auto iter = m_classes.find(name);
   if (iter == m_classes.end()) return ClassScopePtr();
   return iter->second.back();
 }
@@ -187,8 +186,7 @@ ClassScopePtr FileScope::getClass(const char *name) {
 
 int FileScope::getFunctionCount() const {
   int total = FunctionContainer::getFunctionCount();
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
-       iter != m_classes.end(); ++iter) {
+  for (auto iter = m_classes.begin(); iter != m_classes.end(); ++iter) {
     for (ClassScopePtr cls: iter->second) {
       total += cls->getFunctionCount();
     }
@@ -226,11 +224,11 @@ ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {
+void FileScope::declareConstant(AnalysisResultPtr ar, const std::string &name) {
   ar->declareConst(shared_from_this(), name);
 }
 
-void FileScope::addConstant(const string &name,
+void FileScope::addConstant(const std::string &name,
                             ExpressionPtr value,
                             AnalysisResultPtr ar, ConstructPtr con) {
   BlockScopePtr f = ar->findConstantDeclarer(name);
@@ -252,7 +250,7 @@ void FileScope::visit(AnalysisResultPtr ar,
   }
 }
 
-const string &FileScope::pseudoMainName() {
+const std::string &FileScope::pseudoMainName() {
   if (m_pseudoMainName.empty()) {
     m_pseudoMainName = Option::MangleFilename(m_fileName, true);
   }
@@ -280,7 +278,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
       ModifierExpressionPtr(),
       m_attributes[0], "",
       shared_from_this(),
-      vector<UserAttributePtr>(),
+      std::vector<UserAttributePtr>(),
       true);
   f->setBlockScope(pseudoMain);
   auto& fs = m_functions[pseudoMainName()];

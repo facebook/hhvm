@@ -57,7 +57,7 @@ void StaticClassName::updateClassName() {
   if (m_class && m_class->is(Expression::KindOfScalarExpression) &&
       !m_static) {
     ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
-    const string &className = s->getString();
+    auto const& className = s->getString();
     m_origClassName = className;
     m_class.reset();
   } else {

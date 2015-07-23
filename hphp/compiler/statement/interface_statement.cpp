@@ -77,7 +77,7 @@ int InterfaceStatement::getRecursiveCount() const {
 
 void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
                                  FileScopePtr scope) {
-  vector<string> bases;
+  std::vector<std::string> bases;
   if (m_base) m_base->getStrings(bases);
 
   for (auto &b : bases) {
@@ -86,7 +86,7 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
 
-  vector<UserAttributePtr> attrs;
+  std::vector<UserAttributePtr> attrs;
   if (m_attrList) {
     for (int i = 0; i < m_attrList->getCount(); ++i) {
       UserAttributePtr a =
@@ -155,15 +155,14 @@ int InterfaceStatement::getLocalEffects() const {
 }
 
 std::string InterfaceStatement::getName() const {
-  return string("Interface ") + m_originalName;
+  return std::string("Interface ") + m_originalName;
 }
 
 bool InterfaceStatement::checkVolatileBases(AnalysisResultConstPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   assert(!classScope->isVolatile());
-  const vector<string> &bases = classScope->getBases();
-  for (vector<string>::const_iterator it = bases.begin();
-       it != bases.end(); ++it) {
+  auto const& bases = classScope->getBases();
+  for (auto it = bases.begin(); it != bases.end(); ++it) {
     ClassScopePtr base = ar->findClass(*it);
     if (base && base->isVolatile()) return true;
   }
@@ -190,7 +189,7 @@ void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
   checkVolatile(ar);
 
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-  vector<string> bases;
+  std::vector<std::string> bases;
   if (m_base) m_base->getStrings(bases);
   for (unsigned int i = 0; i < bases.size(); i++) {
     ClassScopePtr cls = ar->findClass(bases[i]);

@@ -68,7 +68,7 @@ using std::map;
 ClassScope::ClassScope(FileScopeRawPtr fs,
                        KindOf kindOf, const std::string &originalName,
                        const std::string &parent,
-                       const vector<string> &bases,
+                       const std::vector<std::string> &bases,
                        const std::string &docComment, StatementPtr stmt,
                        const std::vector<UserAttributePtr> &attrs)
   : BlockScope(originalName, docComment, stmt, BlockScope::ClassScope),
@@ -133,7 +133,7 @@ const std::string &ClassScope::getOriginalName() const {
 }
 
 std::string ClassScope::getDocName() const {
-  string name = getOriginalName();
+  auto const& name = getOriginalName();
   if (m_redeclaring < 0) {
     return name;
   }
@@ -248,7 +248,7 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
 
   hphp_string_iset bases;
   for (int i = m_bases.size() - 1; i >= 0; i--) {
-    const string &base = m_bases[i];
+    auto const& base = m_bases[i];
 
     if (seen.find(base) != seen.end() || bases.find(base) != bases.end()) {
       Compiler::Error(
@@ -303,7 +303,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
 
   int n = m_bases.size();
   for (int i = 0; i < n; i++) {
-    const string &base = m_bases[i];
+    auto const& base = m_bases[i];
     ClassScopePtr super = ar->findClass(base);
     if (super) {
       if (super->isRedeclaring()) {
@@ -443,7 +443,7 @@ void ClassScope::informClosuresAboutScopeClone(
   }
 }
 
-void ClassScope::addClassRequirement(const string &requiredName,
+void ClassScope::addClassRequirement(const std::string &requiredName,
                                      bool isExtends) {
   assert(isTrait() || (isInterface() && isExtends)
          // when flattening traits, their requirements get flattened
@@ -467,7 +467,7 @@ void ClassScope::importClassRequirements(AnalysisResultPtr ar,
   }
 }
 
-bool ClassScope::hasMethod(const string &methodName) const {
+bool ClassScope::hasMethod(const std::string &methodName) const {
   return m_functions.find(methodName) != m_functions.end();
 }
 
@@ -526,7 +526,7 @@ MethodStatementPtr findTraitMethodImpl(AnalysisResultPtr ar,
     UseTraitStatementPtr useTraitStmt =
       dynamic_pointer_cast<UseTraitStatement>((*tStmts)[s]);
     if (useTraitStmt) {
-      vector<string> usedTraits;
+      std::vector<std::string> usedTraits;
       useTraitStmt->getUsedTraitNames(usedTraits);
       for (unsigned i = 0; i < usedTraits.size(); i++) {
         MethodStatementPtr foundMethod =
@@ -718,8 +718,8 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
   auto traitMethods = tmid.finish(this);
 
-  std::map<string, MethodStatementPtr, stdltistr> importedTraitMethods;
-  std::vector<std::pair<string,const TraitMethod*>> importedTraitsWithOrigName;
+  std::map<std::string, MethodStatementPtr, stdltistr> importedTraitMethods;
+  std::vector<std::pair<std::string,const TraitMethod*>> importedTraitsWithOrigName;
 
   // Actually import the methods.
   for (auto const& mdata : traitMethods) {
@@ -775,7 +775,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool ClassScope::usesTrait(const string &traitName) const {
+bool ClassScope::usesTrait(const std::string &traitName) const {
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
     if (traitName == m_usedTraitNames[i]) {
       return true;
@@ -803,7 +803,7 @@ bool ClassScope::needsInvokeParent(AnalysisResultConstPtr ar,
 }
 
 bool ClassScope::derivesDirectlyFrom(const std::string &base) const {
-  for (std::string base_i: m_bases) {
+  for (auto const& base_i: m_bases) {
     if (strcasecmp(base_i.c_str(), base.c_str()) == 0) return true;
   }
   return false;
@@ -815,7 +815,7 @@ bool ClassScope::derivesFrom(AnalysisResultConstPtr ar,
 
   if (derivesDirectlyFrom(base)) return true;
 
-  for (std::string base_i: m_bases) {
+  for (auto const& base_i: m_bases) {
     ClassScopePtr cl = ar->findClass(base_i);
     if (cl) {
       if (strict && cl->isRedeclaring()) {
@@ -841,8 +841,8 @@ ClassScopePtr ClassScope::FindCommonParent(AnalysisResultConstPtr ar,
   if (cls2->derivesFrom(ar, cn1, true, false)) return cls1;
 
   // walk up the class hierarchy.
-  for (const std::string &base1: cls1->m_bases) {
-    for (const std::string &base2: cls2->m_bases) {
+  for (auto const& base1: cls1->m_bases) {
+    for (auto const& base2: cls2->m_bases) {
       ClassScopePtr parent = FindCommonParent(ar, base1, base2);
       if (parent) return parent;
     }
@@ -881,9 +881,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
 
   // walk up
   if (recursive) {
-    int s = m_bases.size();
-    for (int i = 0; i < s; i++) {
-      const string &base = m_bases[i];
+    for (auto const& base : m_bases) {
       ClassScopePtr super = ar->findClass(base);
       if (!super) continue;
       if (exclIntfBase && super->isInterface()) break;
@@ -905,7 +903,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
 
 FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
                                              bool recursive) {
-  string name;
+  std::string name;
   if (classNameCtor()) {
     name = getScopeName();
   } else {
@@ -943,14 +941,14 @@ bool ClassScope::needLazyStaticInitializer() {
     getConstants()->hasDynamic();
 }
 
-bool ClassScope::hasConst(const string &name) const {
+bool ClassScope::hasConst(const std::string &name) const {
   const Symbol *sym = m_constants->getSymbol(name);
   assert(!sym || sym->isPresent());
   return sym;
 }
 
 Symbol *ClassScope::findProperty(ClassScopePtr &cls,
-                                 const string &name,
+                                 const std::string &name,
                                  AnalysisResultConstPtr ar) {
   return getVariables()->findProperty(cls, name, ar);
 }
@@ -993,10 +991,10 @@ ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) const {
 
 void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
   JSON::CodeError::MapStream ms(out);
-  std::map<string, int> propMap;
-  std::set<string> names;
+  std::map<std::string, int> propMap;
+  std::set<std::string> names;
   m_variables->getNames(names);
-  for (const string& name: names) {
+  for (auto const& name: names) {
     int pm = 0;
     if (m_variables->isPublic(name)) pm |= ClassScope::Public;
     else if (m_variables->isPrivate(name)) pm |= ClassScope::Private;
@@ -1017,9 +1015,9 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
   ms.done();
 }
 
-static inline string GetDocName(AnalysisResultPtr ar,
-                                BlockScopeRawPtr scope,
-                                const string &name) {
+static inline std::string GetDocName(AnalysisResultPtr ar,
+                                     BlockScopeRawPtr scope,
+                                     const std::string &name) {
   ClassScopePtr c(ar->findClass(name));
   if (c && c->isRedeclaring()) {
     ClassScopePtr exact(scope->findExactClass(c));
@@ -1036,7 +1034,7 @@ class GetDocNameFunctor {
 public:
   GetDocNameFunctor(AnalysisResultPtr ar, BlockScopeRawPtr scope) :
     m_ar(ar), m_scope(scope) {}
-  inline string operator()(const string &name) const {
+  std::string operator()(const std::string &name) const {
     return GetDocName(m_ar, m_scope, name);
   }
 private:
@@ -1061,9 +1059,9 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
     out << GetDocName(out.analysisResult(), self, m_parent);
   }
 
-  vector<string> ifaces;
+  std::vector<std::string> ifaces;
   getInterfaces(out.analysisResult(), ifaces, true);
-  vector<string> origIfaces;
+  std::vector<std::string> origIfaces;
   origIfaces.resize(ifaces.size());
   transform(ifaces.begin(), ifaces.end(), origIfaces.begin(),
             GetDocNameFunctor(out.analysisResult(), self));
@@ -1088,11 +1086,10 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   getFunctionsFlattened(0, funcs);
   ms.add("methods", funcs);
 
-  vector<Symbol*> rawSymbols;
+  std::vector<Symbol*> rawSymbols;
   getVariables()->getSymbols(rawSymbols, true);
-  vector<SymClassVarWrapper> wrappedSymbols;
-  for (vector<Symbol*>::iterator it = rawSymbols.begin();
-       it != rawSymbols.end(); ++it) {
+  std::vector<SymClassVarWrapper> wrappedSymbols;
+  for (auto it = rawSymbols.begin(); it != rawSymbols.end(); ++it) {
     wrappedSymbols.push_back(SymClassVarWrapper(*it));
   }
   ms.add("properties", wrappedSymbols);
@@ -1102,7 +1099,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.done();
 }
 
-bool ClassScope::hasProperty(const string &name) const {
+bool ClassScope::hasProperty(const std::string &name) const {
   const Symbol *sym = m_variables->getSymbol(name);
   assert(!sym || sym->isPresent());
   return sym;

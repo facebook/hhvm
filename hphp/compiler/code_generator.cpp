@@ -167,7 +167,7 @@ std::string CodeGenerator::getFormattedName(const std::string &file) {
   for (int i = 0; i < len; i++) {
     if (!isalnum(fn[i])) fn[i] = '_';
   }
-  string formatted = fn;
+  std::string formatted = fn;
   free(fn);
   int hash = hash_string_unsafe(file.data(), file.size());
   formatted += boost::str(boost::format("%08x") % hash);
@@ -200,7 +200,7 @@ void CodeGenerator::ifdefEnd(const char *fmt, ...) {
 
 void CodeGenerator::printDocComment(const std::string comment) {
   if (comment.empty()) return;
-  string escaped;
+  std::string escaped;
   escaped.reserve(comment.size() + 10);
   for (unsigned int i = 0; i < comment.size(); i++) {
     char ch = comment[i];
@@ -294,8 +294,9 @@ void CodeGenerator::printIndent() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int CodeGenerator::s_idLambda = 0;
-string CodeGenerator::GetNewLambda() {
-  return Option::LambdaPrefix + "lambda_" + folly::to<string>(++s_idLambda);
+std::string CodeGenerator::GetNewLambda() {
+  return Option::LambdaPrefix + "lambda_" +
+    folly::to<std::string>(++s_idLambda);
 }
 
 void CodeGenerator::resetIdCount(const std::string &key) {
@@ -377,7 +378,7 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
   return false;
 }
 
-void CodeGenerator::printObjectHeader(const std::string className,
+void CodeGenerator::printObjectHeader(const std::string& className,
                                       int numProperties) {
   std::string prefixedClassName;
   prefixedClassName.append(m_astPrefix);
@@ -392,7 +393,7 @@ void CodeGenerator::printObjectFooter() {
   m_astClassNames.pop_back();
 }
 
-void CodeGenerator::printPropertyHeader(const std::string propertyName) {
+void CodeGenerator::printPropertyHeader(const std::string& propertyName) {
   auto prefixedClassName = m_astClassNames.back();
   auto len = 2+prefixedClassName.length()+propertyName.length();
   printf("s:%d:\"", (int)len);
@@ -435,13 +436,13 @@ void CodeGenerator::printValue(int64_t value) {
   printf("i:%" PRId64 ";", value);
 }
 
-void CodeGenerator::printValue(std::string value) {
+void CodeGenerator::printValue(const std::string& value) {
   printf("s:%d:\"", (int)value.length());
   getStream()->write(value.c_str(), value.length());
   printf("\";");
 }
 
-void CodeGenerator::printModifierVector(std::string value) {
+void CodeGenerator::printModifierVector(const std::string& value) {
   printf("V:9:\"HH\\Vector\":1:{");
   printObjectHeader("Modifier", 1);
   printPropertyHeader("name");
@@ -450,7 +451,7 @@ void CodeGenerator::printModifierVector(std::string value) {
   printf("}");
 }
 
-void CodeGenerator::printTypeExpression(std::string value) {
+void CodeGenerator::printTypeExpression(const std::string& value) {
   printObjectHeader("TypeExpression", 1);
   printPropertyHeader("name");
   printValue(value);

@@ -264,8 +264,8 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
        }
     }
 
-    string name = getName();
-    string tdefault = HPHP::tname(defaultType);
+    auto const& name = getName();
+    auto const tdefault = HPHP::tname(defaultType);
     parseTimeFatal(file,
                    Compiler::BadDefaultValueType, msg,
                    name.c_str(), tdefault.c_str(),

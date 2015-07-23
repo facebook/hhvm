@@ -125,7 +125,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 // static analysis functions
 
 std::string FunctionStatement::getName() const {
-  return string("Function ") + getOriginalName();
+  return std::string("Function ") + getOriginalName();
 }
 
 void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {

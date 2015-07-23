@@ -45,8 +45,8 @@ using namespace HPHP;
 
 ClassStatement::ClassStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
- int type, const string &name, const string &parent,
- ExpressionListPtr base, const string &docComment, StatementListPtr stmt,
+ int type, const std::string &name, const std::string &parent,
+ ExpressionListPtr base, const std::string &docComment, StatementListPtr stmt,
  ExpressionListPtr attrList,
  TypeAnnotationPtr enumBaseTy)
   : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassStatement),
@@ -79,7 +79,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       assert(false);
   }
 
-  vector<string> bases;
+  std::vector<std::string> bases;
   if (!m_originalParent.empty()) {
     bases.push_back(m_originalParent);
   }
@@ -89,7 +89,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     ar->parseOnDemandByClass(b);
   }
 
-  vector<UserAttributePtr> attrs;
+  std::vector<UserAttributePtr> attrs;
   if (m_attrList) {
     for (int i = 0; i < m_attrList->getCount(); ++i) {
       UserAttributePtr a =
@@ -201,12 +201,12 @@ StatementPtr ClassStatement::addClone(StatementPtr origStmt) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-string ClassStatement::getName() const {
-  return string("Class ") + getOriginalName();
+std::string ClassStatement::getName() const {
+  return std::string("Class ") + getOriginalName();
 }
 
 void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
-  vector<string> bases;
+  std::vector<std::string> bases;
   auto const hasParent = !m_originalParent.empty();
   if (hasParent) bases.push_back(m_originalParent);
   if (m_base) m_base->getStrings(bases);

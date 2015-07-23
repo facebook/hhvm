@@ -53,7 +53,7 @@ void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
                    Compiler::InvalidTraitStatement,
                    "Interfaces cannot use traits");
   }
-  vector<string> usedTraits;
+  std::vector<std::string> usedTraits;
   getUsedTraitNames(usedTraits);
   for (auto &t : usedTraits) {
     ar->parseOnDemandByClass(toLower(t));

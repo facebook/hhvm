@@ -17,10 +17,9 @@
 #ifndef incl_HPHP_H_
 #define incl_HPHP_H_
 
-#include "hphp/util/deprecated/base.h"
-#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,15 +27,17 @@ namespace HPHP {
 class ClassScope;
 class FunctionScope;
 
-template<class type> struct hphp_string_hash_map<type, ClassScope> :
-      public hphp_hash_map<std::string, type, string_hashi,
-                           string_eqstri> {};
+// ClassScope and FunctionScope are compared case-insensitively.
 
-template<class type> struct hphp_string_hash_map<type, FunctionScope> :
-      public hphp_hash_map<std::string, type, string_hashi,
-                           string_eqstri> {};
+template<class V>
+struct hphp_string_hash_map<V, ClassScope> :
+  hphp_hash_map<std::string, V, string_hashi, string_eqstri> {};
+
+template<class V>
+struct hphp_string_hash_map<V, FunctionScope> :
+  hphp_hash_map<std::string, V, string_hashi, string_eqstri> {};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // incl_HPHP_H_
+#endif

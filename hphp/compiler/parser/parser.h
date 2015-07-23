@@ -18,6 +18,7 @@
 #define incl_HPHP_COMPILER_PARSER_H_
 
 #include <functional>
+#include <string>
 #include <vector>
 
 #include "hphp/runtime/base/exceptions.h"
@@ -435,13 +436,14 @@ private:
   void invalidAwait();
   void setIsAsync();
 
-  static bool canBeAsyncOrGenerator(string funcName, string clsName);
-  void checkFunctionContext(string funcName,
+  static bool canBeAsyncOrGenerator(const std::string& funcName,
+                                    const std::string& clsName);
+  void checkFunctionContext(const std::string& funcName,
                             FunctionContext& funcContext,
                             ModifierExpressionPtr modifiers,
                             int returnsRef);
 
-  string getFunctionName(FunctionType type, Token* name);
+  std::string getFunctionName(FunctionType type, Token* name);
   void prepareConstructorParameters(StatementListPtr stmts,
                                     ExpressionListPtr params,
                                     bool isAbstract);
@@ -453,7 +455,7 @@ private:
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
 
-  void checkThisContext(string var, ThisContextError error);
+  void checkThisContext(const std::string& var, ThisContextError error);
   void checkThisContext(Token &var, ThisContextError error);
   void checkThisContext(ExpressionPtr e, ThisContextError error);
   void checkThisContext(ExpressionListPtr params, ThisContextError error);
@@ -490,12 +492,15 @@ private:
     AliasTable(const hphp_string_imap<std::string>& autoAliases,
                std::function<bool ()> autoOracle);
 
-    std::string getName(std::string alias, int line_no);
-    std::string getNameRaw(std::string alias);
-    AliasType getType(std::string alias);
-    int getLine(std::string alias);
-    bool isAliased(std::string alias);
-    void set(std::string alias, std::string name, AliasType type, int line_no);
+    std::string getName(const std::string& alias, int line_no);
+    std::string getNameRaw(const std::string& alias);
+    AliasType getType(const std::string& alias);
+    int getLine(const std::string& alias);
+    bool isAliased(const std::string& alias);
+    void set(const std::string& alias,
+             const std::string& name,
+             AliasType type,
+             int line_no);
     void clear();
 
   private:

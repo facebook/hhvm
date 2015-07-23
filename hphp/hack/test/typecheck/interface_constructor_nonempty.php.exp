@@ -1,0 +1,2 @@
+File "interface_constructor_nonempty.php", line 3, characters 19-29:
+This method shouldn't have a body (NastCheck[3001])

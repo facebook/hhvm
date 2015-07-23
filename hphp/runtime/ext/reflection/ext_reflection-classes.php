@@ -1092,6 +1092,10 @@ enum TypeStructureKind: int {
   OF_ARRAY = 12;
   OF_GENERIC = 13;
   OF_SHAPE = 14;
+  OF_CLASS = 15;
+  OF_INTERFACE = 16;
+  OF_TRAIT = 17;
+  OF_ENUM = 18;
 }
 
 <<__Native>>

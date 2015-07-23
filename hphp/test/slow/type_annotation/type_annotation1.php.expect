@@ -56,12 +56,12 @@ array(3) {
     }
   }
 }
-string(33) "(HH\int, HH\this, ?HH\float, foo)"
+string(24) "(HH\int, ?HH\float, foo)"
 array(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(4) {
+  array(3) {
     [0]=>
     array(1) {
       ["kind"]=>
@@ -69,19 +69,12 @@ array(2) {
     }
     [1]=>
     array(2) {
-      ["kind"]=>
-      int(101)
-      ["classname"]=>
-      string(7) "HH\this"
-    }
-    [2]=>
-    array(2) {
       ["nullable"]=>
       bool(true)
       ["kind"]=>
       int(3)
     }
-    [3]=>
+    [2]=>
     array(2) {
       ["kind"]=>
       int(101)

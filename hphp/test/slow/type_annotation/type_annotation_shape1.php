@@ -4,8 +4,7 @@ class C {
   const type T = ?shape('field1'=>?bool, 'field2'=>int, 'field3'=>arraykey);
   const type U = Set<shape('field1'=>string,)>;
   const type V = shape('array'=>?Vector<string>,
-                       'shape'=>shape('HH\\this'=>this,
-                                      'HH\\float'=>float,
+                       'shape'=>shape('HH\\float'=>float,
                                       'HH\\num'=>num),
                        'HH\\int'=>int,
                       );

@@ -29,12 +29,23 @@ inline bool PreClass::isBuiltin() const {
   return m_attrs & AttrBuiltin;
 }
 
+inline bool PreClass::hasConstant(const StringData* cnsName) const {
+  return m_constants.contains(cnsName);
+}
+
 inline bool PreClass::hasMethod(const StringData* methName) const {
   return m_methods.contains(methName);
 }
 
 inline bool PreClass::hasProp(const StringData* propName) const {
   return m_properties.contains(propName);
+}
+
+inline const PreClass::Const*
+PreClass::lookupConstant(const StringData* cnsName) const {
+  Slot s = m_constants.findIndex(cnsName);
+  assert(s != kInvalidSlot);
+  return &m_constants[s];
 }
 
 inline Func* PreClass::lookupMethod(const StringData* methName) const {

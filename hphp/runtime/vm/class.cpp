@@ -929,7 +929,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   // resolve type constant
   if (m_constants[clsCnsInd].isType()) {
     assert(clsCns->m_type == KindOfArray);
-    auto resTS = TypeStructure::resolve(clsCns->m_data.parr);
+    auto resTS = TypeStructure::resolve(clsCns->m_data.parr, this);
     auto tv = make_tv<KindOfArray>(resTS);
     tv.m_aux = clsCns->m_aux;
     assert(tvIsPlausible(tv));

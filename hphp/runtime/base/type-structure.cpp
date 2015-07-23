@@ -49,8 +49,8 @@ const StaticString
   s_access_list("access_list"),
   s_fields("fields"),
   s_is_cls_cns("is_cls_cns"),
-  s_unresolved("unresolved"),
-  s_value("value")
+  s_value("value"),
+  s_this("HH\\this")
 ;
 
 const std::string
@@ -251,6 +251,10 @@ std::string fullName (const ArrayData* arr) {
     case TypeStructure::Kind::T_xhp:
       xhpTypeName(arr, name);
       break;
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_unresolved:
       assert(arr->exists(s_classname));
       name += arr->get(s_classname).getStringData()->toCppString();
@@ -261,15 +265,15 @@ std::string fullName (const ArrayData* arr) {
   return name;
 }
 
-ArrayData* resolveTS(ArrayData* arr);
+ArrayData* resolveTS(ArrayData* arr, const Class* typeCnsCls);
 
-ArrayData* resolveList(ArrayData* arr) {
+ArrayData* resolveList(ArrayData* arr, const Class* typeCnsCls) {
   auto const sz = arr->getSize();
 
   auto newarr = Array::Create();
   for (auto i = 0; i < sz; i++) {
     auto elem = arr->get(i).getArrayData();
-    newarr.add(i, Variant(resolveTS(elem)));
+    newarr.add(i, Variant(resolveTS(elem, typeCnsCls)));
   }
 
   return ArrayData::GetScalarArray(newarr.get());
@@ -278,7 +282,7 @@ ArrayData* resolveList(ArrayData* arr) {
 /* Given an unresolved T_shape TypeStructure, returns the __fields__
  * portion of the array with all the field names resolved to string
  * literals. */
-ArrayData* resolveShape(ArrayData* arr) {
+ArrayData* resolveShape(ArrayData* arr, const Class* typeCnsCls) {
   assert(arr->exists(s_kind));
   assert(static_cast<TypeStructure::Kind>(arr->get(s_kind).getNumData())
          == TypeStructure::Kind::T_shape);
@@ -311,14 +315,31 @@ ArrayData* resolveShape(ArrayData* arr) {
       }
     }
     assert(wrapper->exists(s_value));
-    auto value = resolveTS(wrapper->get(s_value).getArrayData());
+    auto value = resolveTS(wrapper->get(s_value).getArrayData(), typeCnsCls);
     newfields.add(key, Variant(value));
   }
 
   return ArrayData::GetScalarArray(newfields.get());
 }
 
-ArrayData* resolveTS(ArrayData* arr) {
+void resolveThis(Array& ret, const Class* typeCnsCls) {
+  TypeStructure::Kind resolvedKind;
+  if (isNormalClass(typeCnsCls)) {
+    resolvedKind = TypeStructure::Kind::T_class;
+  } else if (isInterface(typeCnsCls)) {
+    resolvedKind = TypeStructure::Kind::T_interface;
+  } else {
+    // trait or enum; should not reach here
+    raise_error("%s cannot contain a type constant "
+                "because it is not an interface or class",
+                typeCnsCls->name()->data());
+  }
+  ret.set(s_kind, Variant(static_cast<uint8_t>(resolvedKind)));
+  ret.add(s_classname,
+          Variant(makeStaticString(typeCnsCls->name())));
+}
+
+ArrayData* resolveTS(ArrayData* arr, const Class* typeCnsCls) {
   assert(arr->exists(s_kind));
   auto const kind = static_cast<TypeStructure::Kind>(
     arr->get(s_kind).getNumData());
@@ -331,45 +352,50 @@ ArrayData* resolveTS(ArrayData* arr) {
     case TypeStructure::Kind::T_tuple: {
       assert(arr->exists(s_elem_types));
       auto elemTypes = arr->get(s_elem_types).getArrayData();
-      newarr.add(s_elem_types, Variant(resolveList(elemTypes)));
+      newarr.add(s_elem_types, Variant(resolveList(elemTypes, typeCnsCls)));
       break;
     }
     case TypeStructure::Kind::T_fun: {
       assert(arr->exists(s_return_type));
       auto returnType = arr->get(s_return_type).getArrayData();
-      newarr.add(s_return_type, Variant(resolveTS(returnType)));
+      newarr.add(s_return_type, Variant(resolveTS(returnType, typeCnsCls)));
       assert(arr->exists(s_param_types));
       auto paramTypes = arr->get(s_param_types).getArrayData();
-      newarr.add(s_param_types, Variant(resolveList(paramTypes)));
+      newarr.add(s_param_types, Variant(resolveList(paramTypes, typeCnsCls)));
       break;
     }
     case TypeStructure::Kind::T_array: {
       if (arr->exists(s_generic_types)) {
         auto genericTypes = arr->get(s_generic_types).getArrayData();
-        newarr.add(s_generic_types, Variant(resolveList(genericTypes)));
+        newarr.add(s_generic_types,
+                   Variant(resolveList(genericTypes, typeCnsCls)));
       }
       break;
     }
     case TypeStructure::Kind::T_shape:
-      newarr.add(s_fields, Variant(resolveShape(arr)));
+      newarr.add(s_fields, Variant(resolveShape(arr, typeCnsCls)));
       break;
     case TypeStructure::Kind::T_unresolved: {
       assert(arr->exists(s_classname));
-      newarr.add(s_classname, Variant(arr->get(s_classname).getStringData()));
+      auto const clsName = arr->get(s_classname).getStringData();
+      if (clsName->same(s_this.get())) {
+        resolveThis(newarr, typeCnsCls);
+      } else {
+        newarr.add(s_classname, Variant(arr->get(s_classname).getStringData()));
+      }
       if (arr->exists(s_generic_types)) {
         auto genericTypes = arr->get(s_generic_types).getArrayData();
-        newarr.add(s_generic_types, Variant(resolveList(genericTypes)));
+        newarr.add(s_generic_types,
+                   Variant(resolveList(genericTypes, typeCnsCls)));
       }
       break;
     }
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_typeaccess:
+      // TODO(7650500): resolve this if it is the rootname.
     case TypeStructure::Kind::T_xhp:
     default:
-      if (!arr->exists(s_unresolved)) return arr;
-      newarr = Array(arr);
-      newarr.remove(s_unresolved);
-      break;
+      return arr;
   }
 
   return ArrayData::GetScalarArray(newarr.get());
@@ -380,20 +406,16 @@ ArrayData* resolveTS(ArrayData* arr) {
 String TypeStructure::toString(const ArrayData* arr) {
   if (arr->empty()) return String();
 
-  /* When toString is called, the TypeStructure must be resolved. */
-  assert(!arr->exists(s_unresolved));
-
   return String(fullName(arr));
 }
 
-/* Constructs a scalar array with all the shape field names resolved. */
-ArrayData* TypeStructure::resolve(ArrayData* arr) {
+/* Constructs a scalar array with all the shape field names, 'this'
+ * resolved. TODO(7657500): resolve type access and generic types. */
+ArrayData* TypeStructure::resolve(ArrayData* arr,
+                                  const Class* typeCnsCls) {
   if (arr == nullptr) return arr;
 
-  if (arr->exists(s_unresolved)) return resolveTS(arr);
-
-  assert(arr->isStatic());
-  return arr;
+  return resolveTS(arr, typeCnsCls);
 }
 
 } // namespace HPHP

@@ -374,8 +374,7 @@ const StaticString
   s_access_list("access_list"),
   s_fields("fields"),
   s_is_cls_cns("is_cls_cns"),
-  s_value("value"),
-  s_unresolved("unresolved")
+  s_value("value")
 ;
 
 /* Turns the argsList linked list of TypeAnnotation into a positioned
@@ -408,12 +407,9 @@ void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
   rep.add(s_fields, Variant(ArrayData::GetScalarArray(fields.get())));
 }
 
-ArrayData* TypeAnnotation::getScalarArrayRep(bool isTopLevel) const {
+ArrayData* TypeAnnotation::getScalarArrayRep() const {
   auto rep = Array::Create();
 
-  if (isTopLevel) {
-    rep.add(s_unresolved, true_varNR);
-  }
   bool nullable = (bool) m_nullable;
   if (nullable) {
     rep.add(s_nullable, true_varNR);

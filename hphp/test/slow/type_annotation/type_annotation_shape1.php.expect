@@ -48,7 +48,7 @@ array(3) {
     }
   }
 }
-string(137) "HH\shape('array'=>?HH\Vector<HH\string>, 'shape'=>HH\shape('HH\this'=>HH\this, 'HH\float'=>HH\float, 'HH\num'=>HH\num), 'HH\int'=>HH\int)"
+string(117) "HH\shape('array'=>?HH\Vector<HH\string>, 'shape'=>HH\shape('HH\float'=>HH\float, 'HH\num'=>HH\num), 'HH\int'=>HH\int)"
 array(2) {
   ["kind"]=>
   int(14)
@@ -76,14 +76,7 @@ array(2) {
       ["kind"]=>
       int(14)
       ["fields"]=>
-      array(3) {
-        ["HH\this"]=>
-        array(2) {
-          ["kind"]=>
-          int(101)
-          ["classname"]=>
-          string(7) "HH\this"
-        }
+      array(2) {
         ["HH\float"]=>
         array(1) {
           ["kind"]=>

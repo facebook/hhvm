@@ -220,11 +220,10 @@ public:
   TypeAnnotationPtr getTypeArg(int n) const;
 
   TypeStructure::Kind getKind() const;
+
   /* returns the scalar array representation (the TypeStructure) of
-   * this type annotation. If isTopLevel, the representation includes
-   * an element ['unresolved']=>bool(true), which is a temporary aid
-   * of TypeStructure resolution in the runtime. TODO(7657500) */
-  ArrayData* getScalarArrayRep(bool isTopLevel = false) const;
+   * this type annotation. */
+  ArrayData* getScalarArrayRep() const;
 
 private:
   void functionTypeName(std::string &name) const;

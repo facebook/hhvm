@@ -406,16 +406,18 @@ public:
   bool isBuiltin() const;
 
   /*
-   * Check whether a method or property exists on the PreClass.
+   * Check whether a constant, method, or property exists on the PreClass.
    */
+  bool hasConstant(const StringData* cnsName) const;
   bool hasMethod(const StringData* methName) const;
   bool hasProp(const StringData* propName) const;
 
   /*
-   * Look up a method or property on the PreClass.
+   * Look up a constant, method, or property on the PreClass.
    *
-   * @requires: hasMethod(), hasProp(), respectively.
+   * @requires: hasConstant(), hasMethod(), hasProp(), respectively.
    */
+  const Const* lookupConstant(const StringData* cnsName) const;
   Func* lookupMethod(const StringData* methName) const;
   const Prop* lookupProp(const StringData* propName) const;
 

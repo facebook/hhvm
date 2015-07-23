@@ -23,6 +23,7 @@ namespace HPHP {
 
 struct String;
 struct ArrayData;
+struct Class;
 
 /* Utility for representing full type information in the runtime. */
 namespace TypeStructure {
@@ -46,6 +47,12 @@ enum class Kind : uint8_t {
   T_typevar = 13, // corresponds to user OF_GENERIC
   T_shape = 14,
 
+  // These values are only used after resolution in ext_reflection.cpp
+  T_class = 15,
+  T_interface = 16,
+  T_trait = 17,
+  T_enum = 18,
+
   /* TODO(7657500): the following kinds needs alias resolution, and
    * are not exposed to the users. Could resolve to a class, enum,
    * interface, or alias. */
@@ -56,7 +63,7 @@ enum class Kind : uint8_t {
 
 String toString(const ArrayData* arr);
 
-ArrayData* resolve(ArrayData* arr);
+ArrayData* resolve(ArrayData* arr, const Class* typeCstCls);
 
 }
 

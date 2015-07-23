@@ -2,7 +2,7 @@
 class C {
   const type T = ?array<int, @bool>;
   const type U = map<arraykey, Vector<array<int>>>;
-  const type V = (int, this, ?float, foo);
+  const type V = (int, ?float, foo);
   const type W = (function (): void);
   const type X = (function (mixed, resource): array);
   const type Y = N::M::O::P::Q;

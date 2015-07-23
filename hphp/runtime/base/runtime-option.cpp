@@ -1092,6 +1092,7 @@ void RuntimeOption::Load(
                  "Hack.Lang.IconvIgnoreCorrect");
     Config::Bind(MinMaxAllowDegenerate, ini, config,
                  "Hack.Lang.MinMaxAllowDegenerate");
+
 #ifdef FACEBOOK
     // Force off for Facebook unless you explicitly turn on; folks here both
     // disproportionately know what they are doing, and are doing work on HHVM
@@ -1102,10 +1103,16 @@ void RuntimeOption::Load(
     // assumed to know what you're doing.
     const bool aggroHackChecksDefault = !EnableHipHopSyntax;
 #endif
+
     Config::Bind(LookForTypechecker, ini, config,
                  "Hack.Lang.LookForTypechecker", aggroHackChecksDefault);
+
+    // If you turn off LookForTypechecker, you probably want to turn this off
+    // too -- basically, make the two look like the same option to external
+    // users, unless you really explicitly want to set them differently for
+    // some reason.
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
-                 aggroHackChecksDefault);
+                 LookForTypechecker);
   }
   {
     // Server

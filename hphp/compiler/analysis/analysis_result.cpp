@@ -190,7 +190,7 @@ void AnalysisResult::addNSFallbackFunc(ConstructPtr c, FileScopePtr fs) {
 }
 
 FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
-  StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
+  auto iter = m_files.find(name);
   if (iter != m_files.end()) {
     return iter->second;
   }
@@ -213,7 +213,7 @@ FunctionScopePtr AnalysisResult::findFunction(
 BlockScopePtr AnalysisResult::findConstantDeclarer(
   const std::string &name) {
   if (getConstants()->isPresent(name)) return shared_from_this();
-  StringToFileScopePtrMap::const_iterator iter = m_constDecs.find(name);
+  auto iter = m_constDecs.find(name);
   if (iter != m_constDecs.end()) return iter->second;
   return BlockScopePtr();
 }
@@ -231,21 +231,23 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name) const {
   return ClassScopePtr();
 }
 
-const ClassScopePtrVec &
+const std::vector<ClassScopePtr>&
 AnalysisResult::findRedeclaredClasses(const std::string &name) const {
-  StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
+  auto iter = m_classDecs.find(name);
   if (iter == m_classDecs.end()) {
-    static ClassScopePtrVec empty;
+    static std::vector<ClassScopePtr> empty;
     empty.clear();
     return empty;
   }
   return iter->second;
 }
 
-ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) const {
+std::vector<ClassScopePtr> AnalysisResult::findClasses(
+  const std::string &name
+) const {
   auto const sysIter = m_systemClasses.find(name);
   if (sysIter != m_systemClasses.end()) {
-    return ClassScopePtrVec(1, sysIter->second);
+    return {sysIter->second};
   }
 
   return findRedeclaredClasses(name);
@@ -480,7 +482,7 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
         } else if (func->isSystem()) {
           assert(func->allowOverride());
         } else {
-          FunctionScopePtrVec &funcVec = m_functionReDecs[iter.first];
+          auto& funcVec = m_functionReDecs[iter.first];
           int sz = funcVec.size();
           if (!sz) {
             funcDec->setRedeclaring(sz++);
@@ -495,13 +497,13 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
     }
   }
 
-  if (const StringToFunctionScopePtrVecMap *redec = fs->getRedecFunctions()) {
+  if (const auto redec = fs->getRedecFunctions()) {
     for (const auto &iter : *redec) {
-      FunctionScopePtrVec::const_iterator i = iter.second.begin();
-      FunctionScopePtrVec::const_iterator e = iter.second.end();
-      FunctionScopePtr &funcDec = m_functionDecs[iter.first];
+      auto i = iter.second.begin();
+      auto e = iter.second.end();
+      auto& funcDec = m_functionDecs[iter.first];
       assert(funcDec); // because the first one was in funcs above
-      FunctionScopePtrVec &funcVec = m_functionReDecs[iter.first];
+      auto& funcVec = m_functionReDecs[iter.first];
       int sz = funcVec.size();
       if (!sz) {
         funcDec->setRedeclaring(sz++);
@@ -745,19 +747,10 @@ public:
         // re-enqueue changed scopes, regardless of rescheduling exception.
         // this is because we might have made changes to other scopes which we
         // do not undo, so we need to announce their updates
-        BlockScopeRawPtrFlagsHashMap::const_iterator localIt =
-          AnalysisResult::s_changedScopesMapThreadLocal->begin();
-        BlockScopeRawPtrFlagsHashMap::const_iterator localEnd =
-          AnalysisResult::s_changedScopesMapThreadLocal->end();
-        for (; localIt != localEnd; ++localIt) {
-          const BlockScopeRawPtrFlagsVec &ordered =
-            localIt->first->getOrderedUsers();
-          for (BlockScopeRawPtrFlagsVec::const_iterator userIt =
-                 ordered.begin(), userEnd = ordered.end();
-               userIt != userEnd; ++userIt) {
-            BlockScopeRawPtrFlagsVec::value_type pf = *userIt;
+        for (const auto& local : *AnalysisResult::s_changedScopesMapThreadLocal) {
+          for (const auto& pf : local.first->getOrderedUsers()) {
             if ((pf->second & GetPhaseInterestMask<When>()) &&
-                (pf->second & localIt->second)) {
+                (pf->second & local.second)) {
               int m = pf->first->getMark();
               switch (m) {
               case BlockScope::MarkWaiting:
@@ -782,10 +775,7 @@ public:
         useKinds |= scope->rescheduleFlags();
         scope->setRescheduleFlags(0);
 
-        const BlockScopeRawPtrFlagsVec &ordered = scope->getOrderedUsers();
-        for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
-               end = ordered.end(); it != end; ++it) {
-          BlockScopeRawPtrFlagsVec::value_type pf = *it;
+        for (const auto& pf : scope->getOrderedUsers()) {
           if (pf->second & GetPhaseInterestMask<When>()) {
             int m = pf->first->getMark();
             if (pf->second & useKinds && m == BlockScope::MarkProcessed) {
@@ -821,10 +811,7 @@ public:
             visitor->enqueue(BlockScopeRawPtr(scope));
           }
         } else {
-          const BlockScopeRawPtrFlagsPtrVec &deps = scope->getDeps();
-          for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
-                 end = deps.end(); it != end; ++it) {
-            const BlockScopeRawPtrFlagsPtrPair &p(*it);
+          for (const auto& p : scope->getDeps()) {
             if (*p.second & GetPhaseInterestMask<When>()) {
               if (p.first->getMark() == BlockScope::MarkProcessing) {
                 bool ready = visitor->activateScope(BlockScopeRawPtr(scope));

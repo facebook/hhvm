@@ -36,15 +36,14 @@ FunctionContainer::FunctionContainer() {
 // code generation functions
 
 void FunctionContainer::getFunctionsFlattened(
-  const StringToFunctionScopePtrVecMap *redec,
-  FunctionScopePtrVec &funcs,
+  const StringToFunctionScopePtrVecMap* redec,
+  std::vector<FunctionScopePtr>& funcs,
   bool excludePseudoMains /* = false */) const {
-  for (StringToFunctionScopePtrMap::const_iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    FunctionScopePtr func = it->second;
+  for (const auto& fscope : m_functions) {
+    auto func = fscope.second;
     if (!excludePseudoMains || !func->inPseudoMain()) {
       if (func->isLocalRedeclaring()) {
-        const FunctionScopePtrVec &r = redec->find(it->first)->second;
+        const auto& r = redec->find(fscope.first)->second;
         funcs.insert(funcs.end(), r.begin(), r.end());
       } else {
         funcs.push_back(func);

@@ -86,7 +86,7 @@ private:
   enum class ElemsKind: uint8_t { None, ArrayPairs, Collection };
 
 private:
-  ExpressionPtrVec m_exps;
+  std::vector<ExpressionPtr> m_exps;
   ElemsKind m_elems_kind;
   bool m_argUnpack;
   ListKind m_kind;

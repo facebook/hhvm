@@ -49,7 +49,7 @@ public:
 
   ExpressionPtr unneededHelper() override;
 
-  static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
+  static int getConcatList(std::vector<ExpressionPtr>& ev, ExpressionPtr exp,
                            bool &hasVoid);
   bool isAssignmentOp() const { return m_assign; }
 

@@ -94,10 +94,10 @@ ClassScope::ClassScope(FileScopeRawPtr fs,
 
 // System
 ClassScope::ClassScope(AnalysisResultPtr ar,
-                       const std::string &originalName,
-                       const std::string &parent,
-                       const std::vector<std::string> &bases,
-                       const FunctionScopePtrVec &methods)
+                       const std::string& originalName,
+                       const std::string& parent,
+                       const std::vector<std::string>& bases,
+                       const std::vector<FunctionScopePtr>& methods)
   : BlockScope(originalName, "", StatementPtr(), BlockScope::ClassScope),
     m_parent(parent), m_bases(bases),
     m_attribute(0), m_redeclaring(-1),
@@ -105,7 +105,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_derivesFromRedeclaring(Derivation::Normal),
     m_traitStatus(NOT_FLATTENED),
     m_volatile(false), m_persistent(false) {
-  for (FunctionScopePtr f: methods) {
+  for (auto f : methods) {
     if (f->isNamed("__construct")) setAttribute(HasConstructor);
     else if (f->isNamed("__destruct")) setAttribute(HasDestructor);
     else if (f->isNamed("__get"))  setAttribute(HasUnknownPropGetter);
@@ -264,9 +264,9 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
     }
     bases.insert(base);
 
-    ClassScopePtrVec parents = ar->findClasses(base);
-    for (unsigned int j = 0; j < parents.size(); j++) {
-      parents[j]->checkDerivation(ar, seen);
+    auto parents = ar->findClasses(base);
+    for (auto& parent : parents) {
+      parent->checkDerivation(ar, seen);
     }
   }
 
@@ -277,9 +277,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
                                 StringToFunctionScopePtrMap &funcs,
                                 bool collectPrivate) {
   // add all functions this class has
-  for (FunctionScopePtrVec::const_iterator iter =
-         m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
-    const FunctionScopePtr &fs = *iter;
+  for (const auto& fs : m_functionsVec) {
     if (!collectPrivate && fs->isPrivate()) continue;
 
     FunctionScopePtr &func = funcs[fs->getScopeName()];
@@ -307,7 +305,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
     ClassScopePtr super = ar->findClass(base);
     if (super) {
       if (super->isRedeclaring()) {
-        const ClassScopePtrVec &classes = ar->findRedeclaredClasses(base);
+        const auto& classes = ar->findRedeclaredClasses(base);
         StringToFunctionScopePtrMap pristine(funcs);
 
         for (auto& cls : classes) {
@@ -788,9 +786,8 @@ bool ClassScope::needsInvokeParent(AnalysisResultConstPtr ar,
                                    bool considerSelf /* = true */) {
   // check all functions this class has
   if (considerSelf) {
-    for (FunctionScopePtrVec::const_iterator iter =
-           m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
-      if ((*iter)->isPrivate()) return true;
+    for (const auto& func : m_functionsVec) {
+      if (func->isPrivate()) return true;
     }
   }
 
@@ -855,14 +852,11 @@ void ClassScope::setVolatile() {
   if (!m_volatile) {
     m_volatile = true;
     Lock lock(s_depsMutex);
-    const BlockScopeRawPtrFlagsVec &orderedUsers = getOrderedUsers();
-    for (BlockScopeRawPtrFlagsVec::const_iterator it = orderedUsers.begin(),
-           end = orderedUsers.end(); it != end; ++it) {
-      BlockScopeRawPtrFlagsVec::value_type pf = *it;
+    for (const auto pf : getOrderedUsers()) {
       if (pf->second & UseKindParentRef) {
-        BlockScopeRawPtr scope = pf->first;
+        auto scope = pf->first;
         if (scope->is(BlockScope::ClassScope)) {
-          ((HPHP::ClassScope*)scope.get())->setVolatile();
+          static_cast<HPHP::ClassScope*>(scope.get())->setVolatile();
         }
       }
     }
@@ -882,7 +876,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
   // walk up
   if (recursive) {
     for (auto const& base : m_bases) {
-      ClassScopePtr super = ar->findClass(base);
+      auto super = ar->findClass(base);
       if (!super) continue;
       if (exclIntfBase && super->isInterface()) break;
       if (super->isRedeclaring()) {
@@ -892,8 +886,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
         }
         continue;
       }
-      FunctionScopePtr func =
-        super->findFunction(ar, name, true, exclIntfBase);
+      auto func = super->findFunction(ar, name, true, exclIntfBase);
       if (func) return func;
     }
   }
@@ -917,9 +910,9 @@ FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
 
   // walk up
   if (recursive && derivesFromRedeclaring() != Derivation::Redeclaring) {
-    ClassScopePtr super = ar->findClass(m_parent);
+    const auto super = ar->findClass(m_parent);
     if (super) {
-      FunctionScopePtr func = super->findConstructor(ar, true);
+      auto func = super->findConstructor(ar, true);
       if (func) return func;
     }
   }
@@ -930,9 +923,8 @@ FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
 void ClassScope::setSystem() {
   setAttribute(ClassScope::System);
   m_volatile = false;
-  for (FunctionScopePtrVec::const_iterator iter =
-         m_functionsVec.begin(); iter != m_functionsVec.end(); ++iter) {
-    (*iter)->setSystem();
+  for (const auto& func : m_functionsVec) {
+    func->setSystem();
   }
 }
 
@@ -1082,7 +1074,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   }
   ms.add("modifiers", mods);
 
-  FunctionScopePtrVec funcs;
+  std::vector<FunctionScopePtr> funcs;
   getFunctionsFlattened(0, funcs);
   ms.add("methods", funcs);
 

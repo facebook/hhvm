@@ -963,11 +963,9 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             break;
           }
           case FunType::InterfaceExists: {
-            ClassScopePtrVec classes = ar->findClasses(toLower(symbol));
+            auto classes = ar->findClasses(toLower(symbol));
             bool interfaceFound = false;
-            for (ClassScopePtrVec::const_iterator it = classes.begin();
-                 it != classes.end(); ++it) {
-              ClassScopePtr cls = *it;
+            for (const auto cls : classes) {
               if (cls->isUserClass()) {
                 cls->setVolatile();
               }
@@ -987,11 +985,9 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             break;
           }
           case FunType::ClassExists: {
-            ClassScopePtrVec classes = ar->findClasses(toLower(symbol));
+            auto classes = ar->findClasses(toLower(symbol));
             bool classFound = false;
-            for (ClassScopePtrVec::const_iterator it = classes.begin();
-                 it != classes.end(); ++it) {
-              ClassScopePtr cls = *it;
+            for (const auto cls : classes) {
               if (cls->isUserClass()) {
                 cls->setVolatile();
               }

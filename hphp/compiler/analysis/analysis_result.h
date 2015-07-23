@@ -203,13 +203,13 @@ public:
    * Find all the redeclared classes by the name, excluding system classes.
    * Note that system classes cannot be redeclared.
    */
-  const ClassScopePtrVec &findRedeclaredClasses(
+  const std::vector<ClassScopePtr>& findRedeclaredClasses(
     const std::string &className) const;
 
   /**
    * Find all the classes by the name, including system classes.
    */
-  ClassScopePtrVec findClasses(const std::string &className) const;
+  std::vector<ClassScopePtr> findClasses(const std::string &className) const;
   ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name) const;
   FunctionScopePtr findFunction(const std::string &funcName) const ;
   BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
@@ -267,7 +267,7 @@ private:
   std::set<std::pair<ConstructPtr, FileScopePtr> > m_nsFallbackFuncs;
   Phase m_phase;
   StringToFileScopePtrMap m_files;
-  FileScopePtrVec m_fileScopes;
+  std::vector<FileScopePtr> m_fileScopes;
 
   StringBag m_extraCodeFileNames;
   std::map<std::string, std::string> m_extraCodes;
@@ -286,7 +286,7 @@ private:
   // Names of type aliases.
   std::set<std::string> m_typeAliasNames;
 
-  StatementPtrVec m_stmts;
+  std::vector<StatementPtr> m_stmts;
   StatementPtr m_stmt;
 
   std::string m_outputPath;
@@ -302,7 +302,7 @@ public:
   }
 
 private:
-  BlockScopePtrVec m_ignoredScopes;
+  std::vector<BlockScopePtr> m_ignoredScopes;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.

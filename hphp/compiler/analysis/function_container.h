@@ -41,11 +41,11 @@ public:
    */
   int getFunctionCount() const { return m_functions.size(); }
 
-  const StringToFunctionScopePtrMap &getFunctions() const {
+  const StringToFunctionScopePtrMap& getFunctions() const {
     return m_functions;
   }
-  void getFunctionsFlattened(const StringToFunctionScopePtrVecMap *redec,
-                             FunctionScopePtrVec &funcs,
+  void getFunctionsFlattened(const StringToFunctionScopePtrVecMap* redec,
+                             std::vector<FunctionScopePtr>& funcs,
                              bool excludePseudoMains = false) const;
 
 protected:

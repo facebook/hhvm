@@ -181,7 +181,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
   m_file = std::make_shared<FileScope>(m_fileName, fileSize, md5);
 
   newScope();
-  m_staticVars.push_back(StringToExpressionPtrVecMap());
+  m_staticVars.emplace_back();
   m_inTrait = false;
 
   Lock lock(m_ar->getMutex());
@@ -261,12 +261,12 @@ std::string Parser::popComment() {
 }
 
 void Parser::newScope() {
-  m_scopes.push_back(BlockScopePtrVec());
+  m_scopes.emplace_back();
 }
 
 void Parser::completeScope(BlockScopePtr inner) {
   always_assert(inner);
-  BlockScopePtrVec &sv = m_scopes.back();
+  auto& sv = m_scopes.back();
   for (int i = 0, n = sv.size(); i < n; i++) {
     BlockScopePtr scope = sv[i];
     scope->setOuterScope(inner);
@@ -287,7 +287,7 @@ LabelScopePtr Parser::getLabelScope() const {
 
 void Parser::onNewLabelScope(bool fresh) {
   if (fresh) {
-    m_labelScopes.push_back(LabelScopePtrVec());
+    m_labelScopes.emplace_back();
   }
   assert(!m_labelScopes.empty());
   auto labelScope = std::make_shared<LabelScope>();
@@ -332,7 +332,7 @@ void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
                               Token *value) {
   onVariable(out, exprs, var, value);
   if (m_staticVars.size()) {
-    StringToExpressionPtrVecMap &m = m_staticVars.back();
+    auto& m = m_staticVars.back();
     m[var->text()].push_back(out->exp);
   }
 }
@@ -1037,7 +1037,7 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   newScope();
   m_funcContexts.push_back(FunctionContext());
   m_funcName = name.text();
-  m_staticVars.push_back(StringToExpressionPtrVecMap());
+  m_staticVars.emplace_back();
 }
 
 void Parser::onMethodStart(Token &name, Token &mods,
@@ -1046,10 +1046,8 @@ void Parser::onMethodStart(Token &name, Token &mods,
 }
 
 void Parser::fixStaticVars() {
-  StringToExpressionPtrVecMap &m = m_staticVars.back();
-  for (StringToExpressionPtrVecMap::iterator it = m.begin(), end = m.end();
-       it != end; ++it) {
-    const ExpressionPtrVec &v = it->second;
+  for (const auto& var : m_staticVars.back()) {
+    const auto& v = var.second;
     if (v.size() > 1) {
       ExpressionPtr last;
       for (int i = v.size(); i--; ) {
@@ -1059,7 +1057,7 @@ void Parser::fixStaticVars() {
           SimpleVariablePtr v = dynamic_pointer_cast<SimpleVariable>(
             s->is(Expression::KindOfAssignmentExpression) ?
             static_pointer_cast<AssignmentExpression>(s)->getVariable() : s);
-          if (v->getName() == it->first) {
+          if (v->getName() == var.first) {
             if (!last) {
               last = s;
             } else {

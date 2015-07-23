@@ -120,9 +120,9 @@ public:
    * Special constructor for extension classes.
    */
   ClassScope(AnalysisResultPtr ar,
-             const std::string &originalName, const std::string &parent,
-             const std::vector<std::string> &bases,
-             const FunctionScopePtrVec &methods);
+             const std::string& originalName, const std::string& parent,
+             const std::vector<std::string>& bases,
+             const std::vector<FunctionScopePtr>& methods);
 
   bool isNamed(const char* n) const;
   bool isNamed(const std::string& n) const {
@@ -187,7 +187,7 @@ public:
     ClassScopePtr parent = getParentScope(ar);
     return parent && !parent->isRedeclaring() && parent->hasAttribute(attr, ar);
   }
-  const FunctionScopePtrVec &getFunctionsVec() const {
+  const std::vector<FunctionScopePtr>& getFunctionsVec() const {
     return m_functionsVec;
   }
 
@@ -507,7 +507,7 @@ private:
 
 private:
   // need to maintain declaration order for ClassInfo map
-  FunctionScopePtrVec m_functionsVec;
+  std::vector<FunctionScopePtr> m_functionsVec;
 
   std::string m_parent;
   mutable std::vector<std::string> m_bases;

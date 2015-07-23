@@ -129,8 +129,7 @@ bool BlockScope::hasUser(BlockScopeRawPtr user, int useKinds) const {
     }
 
     Lock lock(s_depsMutex);
-    BlockScopeRawPtrFlagsHashMap::const_iterator it =
-      m_userMap.find(user);
+    const auto it = m_userMap.find(user);
     return it != m_userMap.end() && it->second & useKinds;
   }
   return true; // builtins/systems always have a user of anybody
@@ -146,13 +145,11 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
 
     Lock lock(s_depsMutex);
     Lock l2(s_jobStateMutex);
-    std::pair<BlockScopeRawPtrFlagsHashMap::iterator,bool> val =
-      m_userMap.insert(BlockScopeRawPtrFlagsHashMap::value_type(user,
-                                                                useKinds));
+    auto val = m_userMap.emplace(user, useKinds);
     if (val.second) {
       m_orderedUsers.push_back(&*val.first);
-      user->m_orderedDeps.push_back(
-          std::make_pair(BlockScopeRawPtr(this), &(val.first->second)));
+      user->m_orderedDeps.emplace_back(BlockScopeRawPtr{this},
+                                       &(val.first->second));
       assert(user->getMark() != BlockScope::MarkReady &&
              user->getMark() != BlockScope::MarkWaiting);
     } else {

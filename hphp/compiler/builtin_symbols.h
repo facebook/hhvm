@@ -71,19 +71,19 @@ private:
   static std::set<std::string> s_declaredDynamic;
 
   static FunctionScopePtr ImportFunctionScopePtr(AnalysisResultPtr ar,
-                                                 ClassInfo *cls,
-                                                 ClassInfo::MethodInfo *method);
+                                                 const ClassInfo* cls,
+                                                 const ClassInfo::MethodInfo* method);
   static void ImportExtFunctions(AnalysisResultPtr ar,
-                                 ClassInfo *cls);
+                                 const ClassInfo* cls);
   static void ImportExtMethods(AnalysisResultPtr ar,
-                               FunctionScopePtrVec &vec,
-                               ClassInfo *cls);
+                               std::vector<FunctionScopePtr>& vec,
+                               const ClassInfo* cls);
   static void ImportExtProperties(AnalysisResultPtr ar,
                                   VariableTablePtr dest,
-                                  ClassInfo *cls);
+                                  const ClassInfo* cls);
   static void ImportExtConstants(AnalysisResultPtr ar,
                                  ConstantTablePtr dest,
-                                 ClassInfo *cls);
+                                 const ClassInfo* cls);
   static void ImportNativeConstants(AnalysisResultPtr ar,
                                     ConstantTablePtr dest);
   static ClassScopePtr ImportClassScopePtr(AnalysisResultPtr ar,

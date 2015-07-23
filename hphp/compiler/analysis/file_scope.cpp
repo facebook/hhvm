@@ -153,8 +153,7 @@ bool FileScope::addFunction(AnalysisResultConstPtr ar,
       if (!m_redeclaredFunctions) {
         m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
       }
-      FunctionScopePtrVec &funcVec =
-        (*m_redeclaredFunctions)[funcScope->getScopeName()];
+      auto& funcVec = (*m_redeclaredFunctions)[funcScope->getScopeName()];
       if (!funcVec.size()) {
         fs->setLocalRedeclaring();
         funcVec.push_back(fs);
@@ -317,7 +316,7 @@ void FileScope::getScopesSet(BlockScopeRawPtrQueue &v) {
   }
 }
 
-void FileScope::getClassesFlattened(ClassScopePtrVec &classes) const {
+void FileScope::getClassesFlattened(std::vector<ClassScopePtr>& classes) const {
   for (const auto& clsVec : m_classes) {
     for (auto cls : clsVec.second) {
       classes.push_back(cls);
@@ -329,11 +328,11 @@ void FileScope::serialize(JSON::DocTarget::OutputStream &out) const {
   JSON::DocTarget::MapStream ms(out);
   ms.add("name", getName());
 
-  ClassScopePtrVec classes;
+  std::vector<ClassScopePtr> classes;
   getClassesFlattened(classes);
   ms.add("classes", classes);
 
-  FunctionScopePtrVec funcs;
+  std::vector<FunctionScopePtr> funcs;
   getFunctionsFlattened(m_redeclaredFunctions, funcs, true);
   ms.add("functions", funcs);
 

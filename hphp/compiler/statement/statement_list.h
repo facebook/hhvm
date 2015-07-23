@@ -41,9 +41,8 @@ public:
   void insertElement(StatementPtr stmt, int index = 0) override;
   int getRecursiveCount() const override {
     int ct = 0;
-    for (StatementPtrVec::const_iterator it = m_stmts.begin();
-         it != m_stmts.end(); ++it) {
-      ct += (*it)->getRecursiveCount();
+    for (const auto stmt : m_stmts) {
+      ct += stmt->getRecursiveCount();
     }
     return ct;
   }
@@ -58,7 +57,7 @@ public:
   void shift(int from, int to);
 
 private:
-  StatementPtrVec m_stmts;
+  std::vector<StatementPtr> m_stmts;
   bool m_included; // whether includes have been inlined
 };
 

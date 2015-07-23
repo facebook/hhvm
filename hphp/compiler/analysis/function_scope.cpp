@@ -640,13 +640,10 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
 
   // scopes that call this scope (callers)
   std::vector<std::string> callers;
-  const BlockScopeRawPtrFlagsPtrVec &deps = getDeps();
-  for (auto it = deps.begin(); it != deps.end(); ++it) {
-    const BlockScopeRawPtrFlagsPtrPair &p(*it);
+  for (const auto& p : getDeps()) {
     if ((*p.second & BlockScope::UseKindCaller) &&
         p.first->is(BlockScope::FunctionScope)) {
-      FunctionScopeRawPtr f(
-          static_pointer_cast<FunctionScope>(p.first));
+      auto f = static_pointer_cast<FunctionScope>(p.first);
       callers.push_back(f->getDocFullName());
     }
   }
@@ -656,13 +653,10 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   // TODO(stephentu): this list only contains *user* functions,
   // we should also include builtins
   std::vector<std::string> callees;
-  const BlockScopeRawPtrFlagsVec &users = getOrderedUsers();
-  for (auto uit = users.begin(); uit != users.end(); ++uit) {
-    BlockScopeRawPtrFlagsVec::value_type pf = *uit;
+  for (const auto pf : getOrderedUsers()) {
     if ((pf->second & BlockScope::UseKindCaller) &&
         pf->first->is(BlockScope::FunctionScope)) {
-      FunctionScopeRawPtr f(
-          static_pointer_cast<FunctionScope>(pf->first));
+      auto f = static_pointer_cast<FunctionScope>(pf->first);
       callees.push_back(f->getDocFullName());
     }
   }

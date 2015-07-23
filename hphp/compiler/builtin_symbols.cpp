@@ -98,18 +98,18 @@ const StaticString
   s_fb_call_user_func_safe_return("fb_call_user_func_safe_return"),
   s_fb_call_user_func_array_safe("fb_call_user_func_array_safe");
 
-FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
-                 ClassInfo *cls, ClassInfo::MethodInfo *method) {
+FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(
+  AnalysisResultPtr ar,
+  const ClassInfo* cls,
+  const ClassInfo::MethodInfo* method
+) {
   int attrs = method->attribute;
   bool isMethod = cls != ClassInfo::GetSystem();
-  FunctionScopePtr f(new FunctionScope(isMethod,
-                                       method->name.data(),
-                                       attrs & ClassInfo::IsReference));
+  auto f = std::make_shared<FunctionScope>(isMethod, method->name.data(),
+                                           attrs & ClassInfo::IsReference);
 
   int reqCount = 0, totalCount = 0;
-  for(auto it = method->parameters.begin();
-      it != method->parameters.end(); ++it) {
-    const ClassInfo::ParameterInfo *pinfo = *it;
+  for (const auto pinfo : method->parameters) {
     if (!pinfo->value || !pinfo->value[0]) {
       ++reqCount;
     }
@@ -118,9 +118,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   f->setParamCounts(ar, reqCount, totalCount);
 
   int idx = 0;
-  for(auto it = method->parameters.begin();
-      it != method->parameters.end(); ++it, ++idx) {
-    const ClassInfo::ParameterInfo *pinfo = *it;
+  for (const auto pinfo : method->parameters) {
     f->setParamName(idx, pinfo->name);
     if (pinfo->attribute & ClassInfo::IsReference) {
       f->setRefParam(idx);
@@ -174,30 +172,26 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
 }
 
 void BuiltinSymbols::ImportExtFunctions(AnalysisResultPtr ar,
-                                        ClassInfo *cls) {
-  const ClassInfo::MethodVec &methods = cls->getMethodsVec();
-  for (auto it = methods.begin(); it != methods.end(); ++it) {
-    FunctionScopePtr f = ImportFunctionScopePtr(ar, cls, *it);
+                                        const ClassInfo *cls) {
+  for (const auto method : cls->getMethodsVec()) {
+    auto f = ImportFunctionScopePtr(ar, cls, method);
     ar->addSystemFunction(f);
   }
 }
 
 void BuiltinSymbols::ImportExtMethods(AnalysisResultPtr ar,
-                                      FunctionScopePtrVec &vec,
-                                      ClassInfo *cls) {
-  const ClassInfo::MethodVec &methods = cls->getMethodsVec();
-  for (auto it = methods.begin(); it != methods.end(); ++it) {
-    FunctionScopePtr f = ImportFunctionScopePtr(ar, cls, *it);
+                                      std::vector<FunctionScopePtr>& vec,
+                                      const ClassInfo* cls) {
+  for (const auto method : cls->getMethodsVec()) {
+    auto f = ImportFunctionScopePtr(ar, cls, method);
     vec.push_back(f);
   }
 }
 
 void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
                                          VariableTablePtr dest,
-                                         ClassInfo *cls) {
-  ClassInfo::PropertyVec src = cls->getPropertiesVec();
-  for (auto it = src.begin(); it != src.end(); ++it) {
-    ClassInfo::PropertyInfo *pinfo = *it;
+                                         const ClassInfo* cls) {
+  for (auto pinfo : cls->getPropertiesVec()) {
     int attrs = pinfo->attribute;
     auto modifiers =
       std::make_shared<ModifierExpression>(BlockScopePtr(), Location::Range());
@@ -232,7 +226,7 @@ void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
 
 void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
                                         ConstantTablePtr dest,
-                                        ClassInfo *cls) {
+                                        const ClassInfo *cls) {
   for (auto cinfo : cls->getConstantsVec()) {
     auto e = Expression::MakeScalarExpression(ar, ar, Location::Range(),
                                               cinfo->getValue());
@@ -242,7 +236,7 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
 
 ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
                                                   ClassInfo *cls) {
-  FunctionScopePtrVec methods;
+  std::vector<FunctionScopePtr> methods;
   ImportExtMethods(ar, methods, cls);
 
   ClassInfo::InterfaceVec ifaces = cls->getInterfacesVec();
@@ -326,7 +320,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
 
   // Systemlib files were all parsed by hphp_process_init
 
-  const StringToFileScopePtrMap &files = ar->getAllFiles();
+  const auto& files = ar->getAllFiles();
   for (const auto& file : files) {
     file.second->setSystem();
 

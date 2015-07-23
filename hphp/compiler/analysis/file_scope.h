@@ -86,7 +86,7 @@ public:
   const StringToClassScopePtrVecMap &getClasses() const {
     return m_classes;
   }
-  void getClassesFlattened(ClassScopePtrVec &classes) const;
+  void getClassesFlattened(std::vector<ClassScopePtr>& classes) const;
   ClassScopePtr getClass(const char *name);
   void getScopesSet(BlockScopeRawPtrQueue &v);
 

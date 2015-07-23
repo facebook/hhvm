@@ -93,11 +93,7 @@ public:
 
   bool activateScope(BlockScopeRawPtr scope) {
     if (scope->getMark() == BlockScope::MarkProcessed) {
-      const BlockScopeRawPtrFlagsVec &ordered =
-        scope->getOrderedUsers();
-      for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
-           end = ordered.end(); it != end; ++it) {
-        BlockScopeRawPtrFlagsVec::value_type pf = *it;
+      for (const auto pf : scope->getOrderedUsers()) {
         if (pf->second & GetPhaseInterestMask<When>()) {
           int m = pf->first->getMark();
           if (m == BlockScope::MarkWaiting ||
@@ -108,11 +104,8 @@ public:
       }
     }
 
-    const BlockScopeRawPtrFlagsPtrVec &deps = scope->getDeps();
     int numDeps = 0;
-    for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
-         end = deps.end(); it != end; ++it) {
-      const BlockScopeRawPtrFlagsPtrPair &p(*it);
+    for (const auto& p : scope->getDeps()) {
       if (*p.second & GetPhaseInterestMask<When>()) {
         int m = p.first->getMark();
         if (m == BlockScope::MarkWaiting ||
@@ -136,10 +129,7 @@ public:
                        BlockScopeRawPtr      scope) {
     assert(scope->getMark() != BlockScope::MarkProcessingDeps);
     scope->setMark(BlockScope::MarkProcessingDeps);
-    const BlockScopeRawPtrFlagsPtrVec &deps = scope->getDeps();
-    for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
-         end = deps.end(); it != end; ++it) {
-      const BlockScopeRawPtrFlagsPtrPair &p(*it);
+    for (const auto& p : scope->getDeps()) {
       if (*p.second & GetPhaseInterestMask<When>()) {
         if (p.first->getMark() == BlockScope::MarkWaitingInQueue) {
           collectOrdering(queue, p.first);

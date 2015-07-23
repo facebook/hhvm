@@ -54,7 +54,6 @@ typedef hphp_hash_set<BlockScopeRawPtr,
                       smart_pointer_hash<BlockScopeRawPtr>
                       > BlockScopeRawPtrHashSet;
 
-typedef std::vector<BlockScopeRawPtr> BlockScopeRawPtrVec;
 typedef std::list<BlockScopeRawPtr>   BlockScopeRawPtrQueue;
 typedef std::vector<BlockScopeRawPtrFlagsHashMap::
                     value_type*> BlockScopeRawPtrFlagsVec;

@@ -404,8 +404,8 @@ private:
   AnalysisResultPtr m_ar;
   FileScopePtr m_file;
   std::vector<std::string> m_comments; // for docComment stack
-  std::vector<BlockScopePtrVec> m_scopes;
-  std::vector<LabelScopePtrVec> m_labelScopes;
+  std::vector<std::vector<BlockScopePtr>> m_scopes;
+  std::vector<std::vector<LabelScopePtr>> m_labelScopes;
   std::vector<FunctionContext> m_funcContexts;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure

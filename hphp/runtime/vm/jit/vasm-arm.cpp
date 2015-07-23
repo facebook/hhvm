@@ -128,7 +128,6 @@ private:
   void emit(cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(cmpqi& i) { a->Cmp(X(i.s1), i.s0.l()); }
-  void emit(cmpqims& i) { not_implemented(); }
   void emit(decq& i) { a->Sub(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
   void emit(incq& i) { a->Add(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
   void emit(jcc& i);

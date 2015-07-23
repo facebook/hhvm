@@ -127,7 +127,6 @@ struct Vgen {
   void emit(const cmpq& i) { a->cmpq(i.s0, i.s1); }
   void emit(const cmpqi& i) { a->cmpq(i.s0, i.s1); }
   void emit(const cmpqim& i) { a->cmpq(i.s0, i.s1); }
-  void emit(const cmpqims& i);
   void emit(const cmpqm& i) { a->cmpq(i.s0, i.s1); }
   void emit(cmpsd i) { noncommute(i); a->cmpsd(i.s0, i.d, i.pred); }
   void emit(const cqo& i) { a->cqo(); }
@@ -614,11 +613,6 @@ void Vgen::emit(const callstub& i) {
 void Vgen::emit(const callfaststub& i) {
   emit(call{i.target, i.args});
   emit(syncpoint{i.fix});
-}
-
-void Vgen::emit(const cmpqims& i) {
-  backend.prepareForSmash(a->code(), kCmpLen);
-  a->cmpq(i.s0, i.s1);
 }
 
 void Vgen::emit(const fallback& i) {

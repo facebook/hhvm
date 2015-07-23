@@ -139,7 +139,6 @@ struct Vunit;
   O(cmpq, Inone, U(s0) U(s1), D(sf))\
   O(cmpqi, I(s0), U(s1), D(sf))\
   O(cmpqim, I(s0), U(s1), D(sf))\
-  O(cmpqims, I(s0), U(s1), D(sf))\
   O(cmpqm, Inone, U(s0) U(s1), D(sf))\
   O(cmpsd, I(pred), UA(s0) U(s1), D(d))\
   O(cqo, Inone, Un, Dn)\
@@ -570,7 +569,6 @@ struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; };
 struct cmpq  { Vreg64 s0; Vreg64 s1; VregSF sf; };
 struct cmpqi { Immed  s0; Vreg64 s1; VregSF sf; };
 struct cmpqim { Immed s0; Vptr s1; VregSF sf; };
-struct cmpqims { Immed s0; Vptr s1; VregSF sf; };
 struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; };
 struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
 struct cqo {};

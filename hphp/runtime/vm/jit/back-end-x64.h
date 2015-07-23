@@ -34,8 +34,6 @@ constexpr int kRipLeaLen = 7;
 
 constexpr int kMovLen = 10;
 constexpr int kMovImmOff = 2;
-constexpr int kCmpLen = 14;
-constexpr int kCmpImmOff = 6;
 
 //////////////////////////////////////////////////////////////////////
 

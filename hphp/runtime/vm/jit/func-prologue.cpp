@@ -17,11 +17,14 @@
 #include "hphp/runtime/vm/jit/func-prologue.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/func-guard-arm.h"
+#include "hphp/runtime/vm/jit/func-guard-x64.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -48,32 +51,6 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void genFuncGuard(Func* func, CodeBlock& cb) {
-  Vauto vasm { cb };
-
-  auto& v = vasm.main();
-  auto const done = v.makeBlock();
-
-  auto const sf = v.makeReg();
-
-  auto const funcImm = Immed64(func);
-  auto const arFunc = x64::rVmFp[AROFF(m_func)];
-
-  if (funcImm.fits(sz::dword)) {
-    v << cmpqims{funcImm.l(), arFunc, sf};
-  } else {
-    auto const rScratch = v.makeReg();
-    v << ldimmqs{funcImm, rScratch};
-    v << cmpqm{rScratch, arFunc, sf};
-  }
-  v << jcci{CC_NZ, sf, done, mcg->tx().uniqueStubs.funcPrologueRedispatch};
-
-  v = done;
-  v << fallthru{};
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 TransContext prologue_context(TransID transID,
                               const Func* func,
                               Offset entry) {
@@ -82,6 +59,15 @@ TransContext prologue_context(TransID transID,
     SrcKey{func, entry, SrcKey::PrologueTag{}},
     FPInvOffset{func->numSlotsInFrame()}
   );
+}
+
+void emit_func_guard(Func* func, CodeBlock& cb) {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::emitFuncGuard(func, cb);
+    case Arch::ARM:
+      return arm::emitFuncGuard(func, cb);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,7 +84,7 @@ TCA genFuncPrologue(TransID transID, Func* func, int argc) {
   auto& cb = mcg->code.main();
 
   // Dump the func guard in the TC before anything else.
-  genFuncGuard(func, cb);
+  emit_func_guard(func, cb);
   auto const start = cb.frontier();
 
   irgen::emitFuncPrologue(env, argc, transID);

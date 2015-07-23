@@ -1632,7 +1632,6 @@ O(unpcklpd)
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
       case Vinstr::ldimmqs:
-      case Vinstr::cmpqims:
       // ARM opcodes:
       case Vinstr::brk:
       case Vinstr::cbcc:

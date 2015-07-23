@@ -13,14 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_FUNC_PROLOGUES_X64_H
-#define incl_HPHP_JIT_FUNC_PROLOGUES_X64_H
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/runtime/base/arch.h"
+#ifndef incl_HPHP_JIT_FUNC_GUARD_X64_H
+#define incl_HPHP_JIT_FUNC_GUARD_X64_H
+
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
+
+#include "hphp/util/data-block.h"
+#include "hphp/util/immed.h"
 
 namespace HPHP {
 
@@ -37,25 +41,33 @@ namespace jit { namespace x64 {
 
 /*
  * The func guard gets skipped and patched by other code, so we have some
- * magic offsets.
+ * magic offsets:
+ *
+ * kFuncGuardLen:   Size of the guard.
+ * kFuncGuardImm:   Offset of the smashable immediate.
+ * kFuncGuardSmash: Number of initial bytes that must be smashable.
+ *
+ * These come in regular and short versions---the latter are used for Func*'s
+ * which fit into a signed 32-bit immediate.
  */
-constexpr auto kFuncMovImm = 2; // Offset to the immediate for 8 byte Func*
-constexpr auto kFuncCmpImm = 4; // Offset to the immediate for 4 byte Func*
 constexpr auto kFuncGuardLen = 20;
+constexpr auto kFuncGuardImm = 2;
+constexpr auto kFuncGuardSmash = 10;  // mov $func, %rax
+
 constexpr auto kFuncGuardShortLen = 14;
+constexpr auto kFuncGuardShortImm = 4;
+constexpr auto kFuncGuardShortSmash = 8;  // cmp $func, 0x10(%rbp)
 
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
 
-///////////////////////////////////////////////////////////////////////////////
-
 template<typename T>
-T* funcPrologueToGuardImm(jit::TCA prologue) {
+T* funcPrologueToGuardImm(TCA prologue) {
   assertx(sizeof(T) == 4 || sizeof(T) == 8);
   T* retval = (T*)(prologue - (sizeof(T) == 8 ?
-                               kFuncGuardLen - kFuncMovImm :
-                               kFuncGuardShortLen - kFuncCmpImm));
+                               kFuncGuardLen - kFuncGuardImm :
+                               kFuncGuardShortLen - kFuncGuardShortImm));
   // We padded these so the immediate would fit inside a cache line
   assertx(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
           ~kCacheLineMask) == 0);
@@ -63,13 +75,11 @@ T* funcPrologueToGuardImm(jit::TCA prologue) {
   return retval;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
+inline bool funcPrologueHasGuard(TCA prologue, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
     return *detail::funcPrologueToGuardImm<int32_t>(prologue) == iptr;
@@ -86,7 +96,7 @@ inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
                                              kFuncGuardLen);
 }
 
-inline void funcPrologueSmashGuard(jit::TCA prologue, const Func* func) {
+inline void funcPrologueSmashGuard(TCA prologue, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
     *detail::funcPrologueToGuardImm<int32_t>(prologue) = 0;
@@ -94,6 +104,10 @@ inline void funcPrologueSmashGuard(jit::TCA prologue, const Func* func) {
   }
   *detail::funcPrologueToGuardImm<int64_t>(prologue) = 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void emitFuncGuard(const Func* func, CodeBlock& cb);
 
 ///////////////////////////////////////////////////////////////////////////////
 

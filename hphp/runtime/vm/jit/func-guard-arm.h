@@ -13,18 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_FUNC_PROLOGUES_ARM_H
-#define incl_HPHP_JIT_FUNC_PROLOGUES_ARM_H
 
-#include "hphp/util/data-block.h"
+#ifndef incl_HPHP_JIT_FUNC_GUARD_ARM_H
+#define incl_HPHP_JIT_FUNC_GUARD_ARM_H
+
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/vixl/a64/instructions-a64.h"
-
-#include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
 
@@ -40,24 +38,19 @@ namespace jit { namespace arm {
 
 namespace detail {
 
-///////////////////////////////////////////////////////////////////////////////
-
-inline const Func** funcPrologueToGuardImmPtr(jit::TCA prologue) {
+inline const Func** funcPrologueToGuardImmPtr(TCA prologue) {
   return reinterpret_cast<const Func**>(prologue) - 1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
+inline bool funcPrologueHasGuard(TCA prologue, const Func* func) {
   return *detail::funcPrologueToGuardImmPtr(prologue) == func;
 }
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
-  assertx(arch() == Arch::ARM);
   if (!prologue || prologue == mcg->tx().uniqueStubs.fcallHelperThunk) {
     return prologue;
   }
@@ -79,9 +72,13 @@ inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
   }
 }
 
-inline void funcPrologueSmashGuard(jit::TCA prologue, const Func* func) {
+inline void funcPrologueSmashGuard(TCA prologue, const Func* func) {
   *detail::funcPrologueToGuardImmPtr(prologue) = nullptr;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void emitFuncGuard(const Func* func, CodeBlock& cb);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -10,9 +10,16 @@ namespace HH {
  *  future.  If so, it will be documented.
  */
 
+type ObjprofPathsStats = shape(
+  'instances' => int,
+  'bytes' => int,
+  'path' => array<string>,
+);
+
 type ObjprofObjectStats = shape(
   'instances' => int,
   'bytes' => int,
+  'paths' => ObjprofPathsStats,
 );
 
 type ObjprofStringStats = shape(
@@ -22,10 +29,14 @@ type ObjprofStringStats = shape(
   'path' => string,
 );
 
+
 <<__Native>>
 function objprof_get_data(): array<string, ObjprofObjectStats>;
 
 <<__Native>>
 function objprof_get_strings(int $min_dup): array<string, ObjprofStringStats>;
+
+<<__Native>>
+function objprof_get_paths(): array<string, ObjprofObjectStats>;
 
 }

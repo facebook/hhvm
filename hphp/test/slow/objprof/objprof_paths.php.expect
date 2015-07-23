@@ -1,0 +1,9 @@
+ClassProperty:StaticClass:myStaticArr->ArrayIndex->Object:ClassReachableByStaticOnly 1
+ClassProperty:StaticClass:myStaticRef->Object:ClassReachableByStaticOnly 1
+Object:ChildClass->Key:mixed->ArrayKeyInt:123->Object:NestedClass 1
+Object:ChildClass->Key:mixed->ArrayKeyString:MyStringKey->Object:NestedClass 1
+Object:ChildClass->Key:packed->ArrayIndex->Object:NestedClass 1
+Object:ChildClass->Property:childNested->Object:NestedClass 1
+Object:ChildClass->Property:parentNested->Object:NestedClass 2
+Object:RootClass->Property:someObject->Object:ChildClass 1
+

@@ -919,6 +919,7 @@ public:
   MaybeDataType enumBaseTy() const;
 
 
+  bool needsInitSProps() const;
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1096,8 +1097,6 @@ private:
         unsigned classVecLen,
         unsigned funcVecLen);
   ~Class();
-
-  bool needsInitSProps() const;
 
   /*
    * Trait method import routines.

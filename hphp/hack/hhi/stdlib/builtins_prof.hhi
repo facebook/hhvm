@@ -26,4 +26,6 @@ function objprof_start(): void; // auto-imported from HH namespace
 
 function objprof_get_data(): array<string, array>; // auto-imported from HH namespace
 
+function objprof_get_paths(): array<string, array>; // auto-imported from HH namespace
+
 function objprof_get_strings(int $min_dup): array<string, array>; // auto-imported from HH namespace

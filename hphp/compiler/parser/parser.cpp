@@ -534,6 +534,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "xenon_get_data" ||
            stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
+           stripped == "objprof_get_paths" ||
            stripped == "objprof_start" ||
            stripped == "server_warmup_status"
           )) {

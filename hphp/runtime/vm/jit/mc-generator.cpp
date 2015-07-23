@@ -1069,18 +1069,18 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
  * offNotTaken:
  */
 TCA
-MCGenerator::bindJmpccFirst(TCA toSmash,
-                            SrcKey skTaken, SrcKey skNotTaken,
-                            bool taken,
-                            bool& smashed) {
+MCGenerator::bindJccFirst(TCA toSmash,
+                          SrcKey skTaken, SrcKey skNotTaken,
+                          bool taken,
+                          bool& smashed) {
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
   auto const skWillExplore = taken ? skTaken : skNotTaken;
   auto const skWillDefer = taken ? skNotTaken : skTaken;
   auto const dest = skWillExplore;
   auto cc = backEnd().jccCondCode(toSmash);
-  TRACE(3, "bindJmpccFirst: explored %d, will defer %d; overwriting cc%02x "
-        "taken %d\n",
+  TRACE(3, "bindJccFirst: explored %d, will defer %d; "
+           "overwriting cc%02x taken %d\n",
         skWillExplore.offset(), skWillDefer.offset(), cc, taken);
   always_assert(skTaken.resumed() == skNotTaken.resumed());
   auto const isResumed = skTaken.resumed();
@@ -1153,7 +1153,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   CodeCursor cg(cb, toSmash);
   as.jcc(cc, stub);
   m_tx.getSrcRec(dest)->chainFrom(IncomingBranch::jmpFrom(cb.frontier()));
-  TRACE(5, "bindJmpccFirst: overwrote with cc%02x taken %d\n", cc, taken);
+  TRACE(5, "bindJccFirst: overwrote with cc%02x taken %d\n", cc, taken);
   return tDest;
 }
 
@@ -1257,13 +1257,13 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) noexcept {
       break;
     }
 
-    case REQ_BIND_JMPCC_FIRST: {
+    case REQ_BIND_JCC_FIRST: {
       auto toSmash = info.args[0].tca;
       auto skTaken = SrcKey::fromAtomicInt(info.args[1].sk);
       auto skNotTaken = SrcKey::fromAtomicInt(info.args[2].sk);
       auto taken = info.args[3].boolVal;
       sk = taken ? skTaken : skNotTaken;
-      start = bindJmpccFirst(toSmash, skTaken, skNotTaken, taken, smashed);
+      start = bindJccFirst(toSmash, skTaken, skNotTaken, taken, smashed);
       break;
     }
 

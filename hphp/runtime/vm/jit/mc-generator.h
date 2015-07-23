@@ -321,10 +321,10 @@ private:
    */
   TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req,
               TransFlags trflags, bool& smashed);
-  TCA bindJmpccFirst(TCA toSmash,
-                     SrcKey skTrue, SrcKey skFalse,
-                     bool toTake,
-                     bool& smashed);
+  TCA bindJccFirst(TCA toSmash,
+                   SrcKey skTrue, SrcKey skFalse,
+                   bool toTake,
+                   bool& smashed);
 
   bool shouldTranslate(const Func*) const;
   bool shouldTranslateNoSizeLimit(const Func*) const;

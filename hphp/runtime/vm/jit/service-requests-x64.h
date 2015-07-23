@@ -80,7 +80,7 @@ TCA emitBindAddr(CodeBlock& cb, CodeBlock& frozen, TCA* addr, SrcKey sk,
                  FPInvOffset spOff);
 
 /*
- * Emit a REQ_BIND_JMPCC_FIRST service request in `frozen' and the
+ * Emit a REQ_BIND_JCC_FIRST service request in `frozen' and the
  * corresponding jumps to be smashed in `cb'.  `frozen' and `cb' are
  * allowed to be the same code block.
  */

@@ -61,7 +61,7 @@ SvcReqArgVec packServiceReqArgs(Args&&... args) {
 //////////////////////////////////////////////////////////////////////
 
 inline bool isEphemeralServiceReq(ServiceRequest sr) {
-  return sr == REQ_BIND_JMPCC_FIRST ||
+  return sr == REQ_BIND_JCC_FIRST ||
          sr == REQ_BIND_JMP ||
          sr == REQ_BIND_ADDR;
 }

@@ -48,6 +48,10 @@ function test(): void {
 
   var_dump(interesting_array(343));
   var_dump(interesting_kv_array(343));
+
+  nots(0);
+  nots(1);
+  nots(30);
 }
 
 
@@ -169,6 +173,11 @@ function dstring2(int $x): string {
 
 function make_thing(): Nus {
   return new Nus();
+}
+
+function nots(int $x): void {
+  var_dump(!$x);
+  var_dump(~$x);
 }
 
 class Nus {

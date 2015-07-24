@@ -1,0 +1,4 @@
+File "indexing_increment.php", line 5, characters 17-18:
+Unsequenced modification and access to local variable. Modified here (Typing[4143])
+File "indexing_increment.php", line 5, characters 13-14:
+And accessed here

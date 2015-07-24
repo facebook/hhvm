@@ -1,0 +1,4 @@
+File "binop_increment.php", line 4, characters 15-16:
+Unsequenced modification and access to local variable. Modified here (Typing[4143])
+File "binop_increment.php", line 4, characters 10-11:
+And accessed here

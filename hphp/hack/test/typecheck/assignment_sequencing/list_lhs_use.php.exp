@@ -1,0 +1,4 @@
+File "list_lhs_use.php", line 7, characters 18-19:
+Unsequenced modification and access to local variable. Modified here (Typing[4143])
+File "list_lhs_use.php", line 7, characters 41-42:
+And accessed here

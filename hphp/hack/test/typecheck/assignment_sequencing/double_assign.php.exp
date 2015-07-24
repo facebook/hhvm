@@ -1,0 +1,4 @@
+File "double_assign.php", line 6, characters 3-4:
+Unsequenced modifications to local variable. Modified here (Typing[4144])
+File "double_assign.php", line 6, characters 8-9:
+And also modified here

@@ -1,0 +1,4 @@
+File "list_rhs_increment.php", line 6, characters 8-9:
+Unsequenced modifications to local variable. Modified here (Typing[4144])
+File "list_rhs_increment.php", line 6, characters 21-22:
+And also modified here

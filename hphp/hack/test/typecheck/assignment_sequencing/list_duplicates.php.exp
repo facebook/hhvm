@@ -1,0 +1,4 @@
+File "list_duplicates.php", line 5, characters 8-9:
+Unsequenced modifications to local variable. Modified here (Typing[4144])
+File "list_duplicates.php", line 5, characters 12-13:
+And also modified here

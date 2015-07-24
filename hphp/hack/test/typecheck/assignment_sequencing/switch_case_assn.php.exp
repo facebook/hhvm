@@ -1,0 +1,2 @@
+File "switch_case_assn.php", line 6, characters 11-12:
+Don't assign to variables inside of case labels (Typing[4145])

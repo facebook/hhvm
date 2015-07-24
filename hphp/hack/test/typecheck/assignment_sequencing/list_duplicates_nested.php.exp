@@ -1,0 +1,4 @@
+File "list_duplicates_nested.php", line 6, characters 8-9:
+Unsequenced modification and access to local variable. Modified here (Typing[4143])
+File "list_duplicates_nested.php", line 6, characters 15-16:
+And accessed here

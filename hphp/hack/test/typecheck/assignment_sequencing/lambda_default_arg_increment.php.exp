@@ -1,0 +1,4 @@
+File "lambda_default_arg_increment.php", line 5, characters 22-23:
+Unsequenced modifications to local variable. Modified here (Typing[4144])
+File "lambda_default_arg_increment.php", line 5, characters 29-30:
+And also modified here

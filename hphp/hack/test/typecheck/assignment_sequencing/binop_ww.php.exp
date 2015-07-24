@@ -1,0 +1,4 @@
+File "binop_ww.php", line 4, characters 9-10:
+Unsequenced modifications to local variable. Modified here (Typing[4144])
+File "binop_ww.php", line 4, characters 22-23:
+And also modified here

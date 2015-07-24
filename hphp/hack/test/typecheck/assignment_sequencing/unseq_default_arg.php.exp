@@ -1,0 +1,4 @@
+File "unseq_default_arg.php", line 4, characters 33-34:
+Unsequenced modifications to local variable. Modified here (Typing[4144])
+File "unseq_default_arg.php", line 4, characters 40-41:
+And also modified here

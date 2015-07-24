@@ -1,0 +1,4 @@
+File "binop_rw.php", line 8, characters 17-18:
+Unsequenced modification and access to local variable. Modified here (Typing[4143])
+File "binop_rw.php", line 8, characters 10-11:
+And accessed here

@@ -74,18 +74,6 @@ inline ObjectData::ObjectData(Class* cls,
   o_id = ++os_max_id;
 }
 
-inline void ObjectData::setStatic() const {
-  assert(false);
-}
-
-inline void ObjectData::setUncounted() const {
-  assert(false);
-}
-
-inline bool ObjectData::isUncounted() const {
-  return false;
-}
-
 inline size_t ObjectData::heapSize() const {
   return m_cls->builtinODTailSize() + sizeForNProps(m_cls->numDeclProperties());
 }

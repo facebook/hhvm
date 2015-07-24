@@ -115,10 +115,6 @@ struct ObjectData {
                       NoInit) noexcept;
 
  public:
-  void setStatic() const;
-  void setUncounted() const;
-  bool isUncounted() const;
-
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
   template<class F> void scan(F&) const;
 

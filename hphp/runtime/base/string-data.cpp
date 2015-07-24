@@ -208,11 +208,10 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_hdr.init(HeaderKind::String, 0);
+  sd->m_hdr.init(HeaderKind::String, StaticValue);
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
-
-  sd->setStatic();
+  sd->preCompute();
 
   assert(sd->m_len == 0);
   assert(sd->capacity() == 0);
@@ -817,16 +816,6 @@ void StringData::preCompute() {
                          1, nullptr) == KindOfNull)) {
     m_hash |= STRHASH_MSB;
   }
-}
-
-void StringData::setStatic() {
-  setRefCount(StaticValue);
-  preCompute();
-}
-
-void StringData::setUncounted() {
-  setRefCount(UncountedValue);
-  preCompute();
 }
 
 NEVER_INLINE strhash_t StringData::hashHelper() const {

@@ -79,21 +79,15 @@ void functionTypeName(const ArrayData* arr, std::string& name) {
   assert(arr->exists(s_param_types));
   auto const params = arr->get(s_param_types).getArrayData();
 
+  auto sep = "";
   auto sz = params->getSize();
   for (auto i = 0; i < sz; i++) {
-    name += fullName(params->get(i).getArrayData());
-    name += ", ";
+    folly::toAppend(sep, fullName(params->get(i).getArrayData()), &name);
+    sep = ", ";
   }
-
-  // if the function has args, erase the trailing comma
-  if (sz > 1) {
-    name.erase(name.size() - 2, 2);
-  }
-  name += "): ";
 
   // add funciton return type
-  name += fullName(retType);
-  name += ")";
+  folly::toAppend("): ", fullName(retType), ")", &name);
 }
 
 void accessTypeName(const ArrayData* arr, std::string& name) {
@@ -105,8 +99,9 @@ void accessTypeName(const ArrayData* arr, std::string& name) {
   auto const accessList = arr->get(s_access_list).getArrayData();
   auto sz = accessList->getSize();
   for (auto i = 0; i < sz; i++) {
-    name += "::";
-    name += accessList->get(i).getStringData()->toCppString();
+    folly::toAppend("::",
+                    accessList->get(i).getStringData()->toCppString(),
+                    &name);
   }
 }
 
@@ -131,13 +126,13 @@ void tupleTypeName(const ArrayData* arr, std::string& name) {
   assert(arr->exists(s_elem_types));
   auto const elems = arr->get(s_elem_types).getArrayData();
   auto sz = elems->getSize();
+  auto sep = "";
   for (auto i = 0; i < sz; i++) {
-    name += fullName(elems->get(i).getArrayData());
-    name += ", ";
+    folly::toAppend(sep, fullName(elems->get(i).getArrayData()), &name);
+    sep = ", ";
   }
 
-  // replace the trailing ", " with ">"
-  name.replace(name.size() - 2, 2, ")");
+  name += ")";
 }
 
 void genericTypeName(const ArrayData* arr, std::string& name) {
@@ -145,17 +140,12 @@ void genericTypeName(const ArrayData* arr, std::string& name) {
   assert(arr->exists(s_generic_types));
   auto const args = arr->get(s_generic_types).getArrayData();
   auto sz = args->getSize();
+  auto sep = "";
   for (auto i = 0; i < sz; i++) {
-    name += fullName(args->get(i).getArrayData());
-    name += ", ";
+    folly::toAppend(sep, fullName(args->get(i).getArrayData()), &name);
+    sep = ", ";
   }
-
-  if (sz > 0) {
-    // replace the trailing ", " with ">"
-    name.replace(name.size() - 2, 2, ">");
-  } else {
-    name.erase(name.size() - 1, 1);
-  }
+  name += ">";
 }
 
 void shapeTypeName(const ArrayData* arr, std::string& name) {

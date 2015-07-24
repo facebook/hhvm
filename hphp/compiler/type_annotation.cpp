@@ -150,21 +150,14 @@ void TypeAnnotation::functionTypeName(std::string &name) const {
   // return value of function types is the first element of type list
   TypeAnnotationPtr retType = m_typeArgs;
   TypeAnnotationPtr typeEl = m_typeArgs->m_typeList;
-  bool hasArgs = (typeEl != nullptr);
+  auto sep = "";
   while (typeEl) {
-    name += typeEl->fullName();
+    folly::toAppend(sep, typeEl->fullName(), &name);
     typeEl = typeEl->m_typeList;
-    name += ", ";
-  }
-  // replace the trailing ", " (if any) with "): "
-  if (hasArgs) {
-    name.replace(name.size() - 2, 2, "): ");
-  } else {
-    name += "): ";
+    sep = ", ";
   }
   // add function return value
-  name += retType->fullName();
-  name += ")";
+  folly::toAppend("): ", retType->fullName(), ")", &name);
 }
 
 // xhp names are mangled so we get them back to their original definition
@@ -184,34 +177,32 @@ void TypeAnnotation::xhpTypeName(std::string &name) const {
 void TypeAnnotation::tupleTypeName(std::string &name) const {
   name += "(";
   TypeAnnotationPtr typeEl = m_typeArgs;
+  auto sep = "";
   while (typeEl) {
-    name += typeEl->fullName();
+    folly::toAppend(sep, typeEl->fullName(), &name);
     typeEl = typeEl->m_typeList;
-    name += ", ";
+    sep = ", ";
   }
-  // replace the trailing ", " with ")"
-  name.replace(name.size() - 2, 2, ")");
+  name += ")";
 }
 
 void TypeAnnotation::genericTypeName(std::string &name) const {
-  name += m_name;
-  name += "<";
+  folly::toAppend(m_name, "<", &name);
   TypeAnnotationPtr typeEl = m_typeArgs;
+  auto sep = "";
   while (typeEl) {
-    name += typeEl->fullName();
+    folly::toAppend(sep, typeEl->fullName(), &name);
     typeEl = typeEl->m_typeList;
-    name += ", ";
+    sep = ", ";
   }
-  // replace the trailing ", " with ">"
-  name.replace(name.size() - 2, 2, ">");
+  name += ">";
 }
 
 void TypeAnnotation::accessTypeName(std::string &name) const {
   name += m_name;
   TypeAnnotationPtr typeEl = m_typeArgs;
   while (typeEl) {
-    name += "::";
-    name += typeEl->fullName();
+    folly::toAppend("::", typeEl->fullName(), &name);
     typeEl = typeEl->m_typeList;
   }
 }

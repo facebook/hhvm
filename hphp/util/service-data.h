@@ -27,6 +27,7 @@
 #include <folly/Synchronized.h>
 #include <folly/stats/Histogram.h>
 #include <folly/stats/MultiLevelTimeSeries.h>
+#include <folly/Optional.h>
 
 namespace HPHP {
 
@@ -168,6 +169,11 @@ ExportedHistogram* createHistogram(
  * Export all the statistics as simple key, value pairs.
  */
 void exportAll(std::map<std::string, int64_t>& statsMap);
+
+/*
+ * Export a specific counter by key name.
+ */
+folly::Optional<int64_t> exportCounterByKey(std::string& key);
 
 // Interface for a flat counter. All methods are thread safe.
 class ExportedCounter {

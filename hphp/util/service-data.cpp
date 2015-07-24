@@ -237,6 +237,15 @@ class Impl {
     }
   }
 
+  folly::Optional<int64_t> exportCounterByKey(std::string& key) {
+    ExportedCounterMap::const_iterator it = m_counterMap.find(key);
+    if (it != m_counterMap.end()) {
+      return folly::Optional<int64_t>(it->second->getValue());
+    } else {
+      return folly::Optional<int64_t>();
+    }
+  }
+
  private:
   // This is a singleton class. Once constructed, we never destroy it. See the
   // implementation note below.
@@ -320,6 +329,10 @@ ExportedHistogram* createHistogram(
 
 void exportAll(std::map<std::string, int64_t>& statsMap) {
   return getServiceDataInstance().exportAll(statsMap);
+}
+
+folly::Optional<int64_t> exportCounterByKey(std::string& key) {
+  return getServiceDataInstance().exportCounterByKey(key);
 }
 
 }  // namespace ServiceData.

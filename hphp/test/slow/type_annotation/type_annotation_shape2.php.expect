@@ -1,9 +1,9 @@
-string(15) "foo<HH\shape()>"
+string(18) "HH\Set<HH\shape()>"
 array(3) {
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
-  string(3) "foo"
+  string(6) "HH\Set"
   ["generic_types"]=>
   array(1) {
     [0]=>

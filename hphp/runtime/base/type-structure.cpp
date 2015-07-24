@@ -322,21 +322,32 @@ ArrayData* resolveShape(ArrayData* arr, const Class* typeCnsCls) {
   return ArrayData::GetScalarArray(newfields.get());
 }
 
-void resolveThis(Array& ret, const Class* typeCnsCls) {
+void resolveClass(Array& ret, const StringData* clsName,
+                  const Class* typeCnsCls) {
+  bool isThis = clsName->same(s_this.get());
+  auto const cls = isThis ? typeCnsCls : Unit::loadClass(clsName);
+  if (!cls) raise_error("class %s does not exist", clsName->data());
+
   TypeStructure::Kind resolvedKind;
-  if (isNormalClass(typeCnsCls)) {
+  if (isNormalClass(cls)) {
     resolvedKind = TypeStructure::Kind::T_class;
-  } else if (isInterface(typeCnsCls)) {
+  } else if (isInterface(cls)) {
     resolvedKind = TypeStructure::Kind::T_interface;
+  } else if (isTrait(cls)) {
+    resolvedKind = TypeStructure::Kind::T_trait;
+  } else if (isEnum(cls)) {
+    resolvedKind = TypeStructure::Kind::T_enum;
   } else {
-    // trait or enum; should not reach here
-    raise_error("%s cannot contain a type constant "
-                "because it is not an interface or class",
-                typeCnsCls->name()->data());
+    not_reached();
+  }
+
+  if (isThis && (isTrait(cls) || isEnum(cls))) {
+    // traits or enums cannot contain class constants
+    not_reached();
   }
   ret.set(s_kind, Variant(static_cast<uint8_t>(resolvedKind)));
   ret.add(s_classname,
-          Variant(makeStaticString(typeCnsCls->name())));
+          Variant(makeStaticString(cls->name())));
 }
 
 ArrayData* resolveTS(ArrayData* arr, const Class* typeCnsCls) {
@@ -378,11 +389,7 @@ ArrayData* resolveTS(ArrayData* arr, const Class* typeCnsCls) {
     case TypeStructure::Kind::T_unresolved: {
       assert(arr->exists(s_classname));
       auto const clsName = arr->get(s_classname).getStringData();
-      if (clsName->same(s_this.get())) {
-        resolveThis(newarr, typeCnsCls);
-      } else {
-        newarr.add(s_classname, Variant(arr->get(s_classname).getStringData()));
-      }
+      resolveClass(newarr, clsName, typeCnsCls);
       if (arr->exists(s_generic_types)) {
         auto genericTypes = arr->get(s_generic_types).getArrayData();
         newarr.add(s_generic_types,
@@ -413,6 +420,7 @@ String TypeStructure::toString(const ArrayData* arr) {
  * resolved. TODO(7657500): resolve type access and generic types. */
 ArrayData* TypeStructure::resolve(ArrayData* arr,
                                   const Class* typeCnsCls) {
+  assert(typeCnsCls);
   if (arr == nullptr) return arr;
 
   return resolveTS(arr, typeCnsCls);

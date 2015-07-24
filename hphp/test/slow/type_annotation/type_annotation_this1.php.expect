@@ -88,7 +88,7 @@ array(2) {
     ["bar"]=>
     array(3) {
       ["kind"]=>
-      int(101)
+      int(15)
       ["classname"]=>
       string(6) "HH\Map"
       ["generic_types"]=>

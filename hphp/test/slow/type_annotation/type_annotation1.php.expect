@@ -21,7 +21,7 @@ array(3) {
 string(45) "HH\Map<HH\arraykey, HH\Vector<array<HH\int>>>"
 array(3) {
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
   string(6) "HH\Map"
   ["generic_types"]=>
@@ -34,7 +34,7 @@ array(3) {
     [1]=>
     array(3) {
       ["kind"]=>
-      int(101)
+      int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
@@ -56,7 +56,7 @@ array(3) {
     }
   }
 }
-string(24) "(HH\int, ?HH\float, foo)"
+string(28) "(HH\int, ?HH\float, HH\bool)"
 array(2) {
   ["kind"]=>
   int(10)
@@ -75,11 +75,9 @@ array(2) {
       int(3)
     }
     [2]=>
-    array(2) {
+    array(1) {
       ["kind"]=>
-      int(101)
-      ["classname"]=>
-      string(3) "foo"
+      int(2)
     }
   }
 }

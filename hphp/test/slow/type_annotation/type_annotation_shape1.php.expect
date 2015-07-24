@@ -28,7 +28,7 @@ array(3) {
 string(37) "HH\Set<HH\shape('field1'=>HH\string)>"
 array(3) {
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
   string(6) "HH\Set"
   ["generic_types"]=>
@@ -59,7 +59,7 @@ array(2) {
       ["nullable"]=>
       bool(true)
       ["kind"]=>
-      int(101)
+      int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
@@ -99,7 +99,7 @@ array(2) {
 string(54) "HH\Map<HH\int, HH\shape('foo'=>array, 'bar'=>HH\bool)>"
 array(3) {
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
   string(6) "HH\Map"
   ["generic_types"]=>

@@ -1,7 +1,7 @@
 <?hh // strict
 
 class C {
-  const type T = foo<shape()>;
+  const type T = Set<shape()>;
 }
 
 $x = new ReflectionTypeConstant('C', 'T');

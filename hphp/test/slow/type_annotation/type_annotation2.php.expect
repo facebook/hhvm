@@ -3,7 +3,7 @@ bool(true)
 bool(true)
 array(3) {
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
   string(9) "HH\Vector"
   ["generic_types"]=>

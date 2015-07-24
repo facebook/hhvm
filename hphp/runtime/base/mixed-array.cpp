@@ -551,6 +551,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
   std::free(ad);
 }
 
+NEVER_INLINE
 void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
   assert(PackedArray::checkInvariants(ad));
   assert(ad->isUncounted());

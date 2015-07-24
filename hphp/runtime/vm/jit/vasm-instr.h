@@ -168,6 +168,7 @@ struct Vunit;
   O(leap, I(s), Un, D(d))\
   O(loadups, Inone, U(s), D(d))\
   O(loadtqb, Inone, U(s), D(d))\
+  O(loadb, Inone, U(s), D(d))\
   O(loadl, Inone, U(s), D(d))\
   O(loadqp, I(s), Un, D(d))\
   O(loadsd, Inone, U(s), D(d))\
@@ -228,6 +229,7 @@ struct Vunit;
   O(testli, I(s0), U(s1), D(sf))\
   O(testlim, I(s0), U(s1), D(sf))\
   O(testq, Inone, U(s0) U(s1), D(sf))\
+  O(testqi, I(s0), U(s1), D(sf))\
   O(testqm, Inone, U(s0) U(s1), D(sf))\
   O(testqim, I(s0), U(s1), D(sf))\
   O(ucomisd, Inone, U(s0) U(s1), D(sf))\
@@ -598,6 +600,7 @@ struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
 struct loadups { Vptr s; Vreg128 d; };
 struct loadtqb { Vptr s; Vreg8 d; };
+struct loadb { Vptr s; Vreg8 d; };
 struct loadl { Vptr s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
 struct loadsd { Vptr s; VregDbl d; };
@@ -665,6 +668,7 @@ struct testl { Vreg32 s0, s1; VregSF sf; };
 struct testli { Immed s0; Vreg32 s1; VregSF sf; };
 struct testlim { Immed s0; Vptr s1; VregSF sf; };
 struct testq { Vreg64 s0, s1; VregSF sf; };
+struct testqi { Immed s0; Vreg64 s1; VregSF sf; };
 struct testqm { Vreg64 s0; Vptr s1; VregSF sf; };
 struct testqim { Immed s0; Vptr s1; VregSF sf; };
 // compare is att-style: s1-s0 => sf

@@ -156,6 +156,7 @@ struct Vgen {
   void emit(const leap& i) { a->lea(i.s, i.d); }
   void emit(const loadups& i) { a->movups(i.s, i.d); }
   void emit(const loadtqb& i) { a->loadb(i.s, i.d); }
+  void emit(const loadb& i) { a->loadb(i.s, i.d); }
   void emit(const loadl& i) { a->loadl(i.s, i.d); }
   void emit(const loadqp& i) { a->loadq(i.s, i.d); }
   void emit(const loadsd& i) { a->movsd(i.s, i.d); }
@@ -214,6 +215,7 @@ struct Vgen {
   void emit(const testli& i) { a->testl(i.s0, i.s1); }
   void emit(const testlim& i);
   void emit(const testq& i) { a->testq(i.s0, i.s1); }
+  void emit(const testqi& i);
   void emit(const testqm& i) { a->testq(i.s0, i.s1); }
   void emit(const testqim& i);
   void emit(const ucomisd& i) { a->ucomisd(i.s0, i.s1); }
@@ -645,12 +647,12 @@ void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
 
 void Vgen::emit(const ldimmb& i) {
   // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
-  auto val = i.s.b();
+  auto val = i.s.ub();
   if (i.d.isGP()) {
     Vreg8 d8 = i.d;
-    a->movb(val, d8);
+    a->movb(static_cast<int8_t>(val), d8);
   } else {
-    emitSimdImm(a, uint8_t(val), i.d);
+    emitSimdImm(a, val, i.d);
   }
 }
 
@@ -761,6 +763,15 @@ void Vgen::emit(const testwim& i) {
 
 void Vgen::emit(const testlim& i) {
   a->testl(i.s0, i.s1);
+}
+
+void Vgen::emit(const testqi& i) {
+  auto const imm = i.s0.q();
+  if (magFits(imm, sz::byte)) {
+    a->testb(i.s0, rbyte(i.s1));
+  } else {
+    a->testq(i.s0, i.s1);
+  }
 }
 
 void Vgen::emit(const testqim& i) {

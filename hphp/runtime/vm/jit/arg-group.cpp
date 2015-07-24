@@ -38,13 +38,15 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     // tmp is a constant
     if (val) {
       m_imm64 = tmp->rawVal();
+      m_kind = Kind::Imm;
     } else {
       static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-      m_imm64 = uint64_t(tmp->type().toDataType());
+      m_typeImm = tmp->type().toDataType();
+      m_kind = Kind::TypeImm;
     }
-    m_kind = Kind::Imm;
     return;
   }
+
   if (val) {
     assertx(loc.reg(0) != InvalidReg);
     m_srcReg = loc.reg(0);
@@ -54,19 +56,19 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     if (tmp->isA(TBool)) m_zeroExtend = true;
     return;
   }
+
   if (tmp->numWords() > 1) {
     assertx(loc.reg(1) != InvalidReg);
+    // val is false so we're passing tmp's type.
     m_srcReg = loc.reg(1);
-    // Since val is false then we're passing tmp's type. TypeReg lets
-    // CodeGenerator know that the value might require some massaging
-    // to be in the right format for the call.
-    m_kind = Kind::TypeReg;
+    m_kind = Kind::Reg;
     return;
   }
+
   // arg is the (constant) type of a known-typed value.
   static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-  m_imm64 = uint64_t(tmp->type().toDataType());
-  m_kind = Kind::Imm;
+  m_typeImm = tmp->type().toDataType();
+  m_kind = Kind::TypeImm;
 }
 
 }}

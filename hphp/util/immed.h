@@ -70,6 +70,7 @@ struct Immed {
   int32_t l() const { return safe_cast<int32_t>(m_int); }
   int16_t w() const { return safe_cast<int16_t>(m_int); }
   int8_t  b() const { return safe_cast<int8_t>(m_int); }
+  uint8_t ub() const { return safe_cast<uint8_t>(m_int); }
 
   bool fits(int sz) const { return deltaFits(m_int, sz); }
 

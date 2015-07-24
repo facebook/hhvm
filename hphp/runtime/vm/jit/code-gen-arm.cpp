@@ -676,9 +676,7 @@ static void shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
   for (size_t i = 0; i < args.numGpArgs(); i++) {
     auto& arg = args.gpArg(i);
     auto kind = arg.kind();
-    if (!(kind == ArgDesc::Kind::Reg  ||
-          kind == ArgDesc::Kind::Addr ||
-          kind == ArgDesc::Kind::TypeReg)) {
+    if (kind != ArgDesc::Kind::Reg && kind != ArgDesc::Kind::Addr) {
       continue;
     }
     auto srcReg = arg.srcReg();
@@ -709,9 +707,7 @@ static void shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
               v << copy{src, dst};
             }
           }
-          if (kind != ArgDesc::Kind::TypeReg) {
-            argDesc->markDone();
-          }
+          argDesc->markDone();
         } else {
           v << copy{src, dst};
         }
@@ -740,11 +736,6 @@ static void shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
         if (src.isVirt()) {
           v << copy{src, dst};
         }
-      }
-    } else if (kind == ArgDesc::Kind::TypeReg) {
-      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-      if (src.isVirt()) {
-        v << copy{src, dst};
       }
     } else if (kind == ArgDesc::Kind::Addr) {
       if (src.isVirt()) {

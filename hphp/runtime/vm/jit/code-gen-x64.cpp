@@ -602,13 +602,13 @@ static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
       break;
     }
 
-    case ArgDesc::Kind::TypeReg:
-      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-      vargs.push_back(arg.srcReg());
-      break;
-
     case ArgDesc::Kind::Imm: {
       vargs.push_back(v.cns(arg.imm().q()));
+      break;
+    }
+
+    case ArgDesc::Kind::TypeImm: {
+      vargs.push_back(v.cns(arg.typeImm()));
       break;
     }
 
@@ -2390,7 +2390,7 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
       emitIncRef(v, unshifted);
     });
   } else {
-    v << testbi{0x1, src, sf};
+    v << testqi{0x1, src, sf};
     ifThen(v, CC_Z, sf, [&] (Vout& v) { emitIncRef(v, src); });
   }
 }
@@ -3304,7 +3304,7 @@ void CodeGenerator::cgCheckCtxThis(IRInstruction* inst) {
   }
 
   auto const sf = v.makeReg();
-  v << testbi{1, rctx, sf};
+  v << testqi{1, rctx, sf};
   v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
@@ -3314,7 +3314,7 @@ void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
   // Context could be either a this object or a class ptr
   auto& v = vmain();
   auto const sf = v.makeReg();
-  v << testbi{1, srcReg, sf};
+  v << testqi{1, srcReg, sf};
   cond(v, CC_NZ, sf, dstReg,
     [&](Vout& v) { // ctx is a class
       return emitLdClsCctx(v, srcReg, v.makeReg());
@@ -4167,7 +4167,7 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   // If we don't know whether we have a This, we need to check dynamically
   if (!withThis) {
     auto const sf = v.makeReg();
-    v << testbi{1, srcCtxReg, sf};
+    v << testqi{1, srcCtxReg, sf};
     cond(v, CC_Z, sf, destCtxReg, [&](Vout& v) {
       // If we have a This pointer in destCtxReg, then select either This
       // or its Class based on whether callee is static or not
@@ -4277,7 +4277,7 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   // dynamically check if we have a This pointer and call
   // emitGetCtxFwdCallWithThisDyn below
   auto const sf = v.makeReg();
-  v << testbi{1, srcCtxReg, sf};
+  v << testqi{1, srcCtxReg, sf};
   cond(v, CC_Z, sf, destCtxReg, [&](Vout& v) {
     // If we have a 'this' pointer ...
     return emitGetCtxFwdCallWithThisDyn(v.makeReg(), srcCtxReg, make_cache());

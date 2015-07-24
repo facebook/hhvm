@@ -315,7 +315,7 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
                                              // for destructor calls
   auto const rIter     = argNumToRegName[1]; // live coming in
   auto const rFinished = rdx;
-  auto const rType     = rcx;
+  auto const rType     = ecx;
   int const tvSize     = sizeof(TypedValue);
 
   auto& cb = mcg->code.hot().available() > 512 ?
@@ -344,8 +344,10 @@ asm_label(a, doRelease);
   auto emitDecLocal = [&]() {
     Label skipDecRef;
 
+    // Zero-extend the type while loading so it can be used as an array index
+    // to lookupDestructor() above.
     emitLoadTVType(a, rIter[TVOFF(m_type)], rType);
-    emitCmpTVType(a, KindOfRefCountThreshold, rType);
+    emitCmpTVType(a, KindOfRefCountThreshold, rbyte(rType));
     a.  jle8   (skipDecRef);
     a.  call   (release);
   asm_label(a, skipDecRef);

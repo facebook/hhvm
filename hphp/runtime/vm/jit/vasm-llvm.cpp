@@ -1512,6 +1512,7 @@ O(lea) \
 O(loadups) \
 O(load) \
 O(loadtqb) \
+O(loadb) \
 O(loadl) \
 O(loadsd) \
 O(loadzbl) \
@@ -1571,6 +1572,7 @@ O(testl) \
 O(testli) \
 O(testlim) \
 O(testq) \
+O(testqi) \
 O(testqm) \
 O(testqim) \
 O(ud2) \
@@ -1778,8 +1780,7 @@ void LLVMEmitter::emit(const andb& inst) {
 }
 
 void LLVMEmitter::emit(const andbi& inst) {
-  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.b()),
-                                      narrow(value(inst.s1), 8)));
+  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.b()), value(inst.s1)));
 }
 
 void LLVMEmitter::emit(const andbim& inst) {
@@ -2147,7 +2148,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     static_assert(offsetof(TypedValue, m_type) == 8, "");
     assertx(dests.size() <= 2 && dests.size() >= 1);
     auto const data = m_irb.CreateExtractValue(callInst, 0);
-    auto const type = zext(m_irb.CreateExtractValue(callInst, 1), 64);
+    auto const type = m_irb.CreateExtractValue(callInst, 1);
 
     if (destType == DestType::TV) {
       defineValue(dests[0], data);
@@ -2422,10 +2423,10 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
     lhs = flagTmp(sf);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::cmpb) {
-    lhs = narrow(value(cmp.cmpb_.s1), 8);
-    rhs = narrow(value(cmp.cmpb_.s0), 8);
+    lhs = value(cmp.cmpb_.s1);
+    rhs = value(cmp.cmpb_.s0);
   } else if (cmp.op == Vinstr::cmpbi) {
-    lhs = narrow(value(cmp.cmpbi_.s1), 8);
+    lhs = value(cmp.cmpbi_.s1);
     rhs = cns(cmp.cmpbi_.s0.b());
   } else if (cmp.op == Vinstr::cmpbim) {
     lhs = flagTmp(sf);
@@ -2476,7 +2477,7 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
     lhs = flagTmp(sf);
     rhs = m_int16Zero;
   } else if (cmp.op == Vinstr::subbi) {
-    lhs = narrow(value(cmp.subbi_.d), 8);
+    lhs = value(cmp.subbi_.d);
     rhs = m_int8Zero;
   } else if (cmp.op == Vinstr::subl) {
     lhs = value(cmp.subl_.d);
@@ -2504,6 +2505,7 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
     lhs = flagTmp(sf);
     rhs = m_int32Zero;
   } else if (cmp.op == Vinstr::testq ||
+             cmp.op == Vinstr::testqi ||
              cmp.op == Vinstr::testqm ||
              cmp.op == Vinstr::testqim) {
     lhs = flagTmp(sf);
@@ -2587,6 +2589,10 @@ void LLVMEmitter::emit(const load& inst) {
 void LLVMEmitter::emit(const loadtqb& inst) {
   auto quad = m_irb.CreateLoad(emitPtr(inst.s, 64));
   defineValue(inst.d, narrow(quad, 8));
+}
+
+void LLVMEmitter::emit(const loadb& inst) {
+  defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s, 8)));
 }
 
 void LLVMEmitter::emit(const loadl& inst) {
@@ -2920,7 +2926,7 @@ void LLVMEmitter::emit(const store& inst) {
 }
 
 void LLVMEmitter::emit(const storeb& inst) {
-  m_irb.CreateStore(narrow(value(inst.s), 8), emitPtr(inst.m, 8));
+  m_irb.CreateStore(value(inst.s), emitPtr(inst.m, 8));
 }
 
 void LLVMEmitter::emit(const storebi& inst) {
@@ -2960,7 +2966,7 @@ void LLVMEmitter::emit(const storewi& inst) {
 }
 
 void LLVMEmitter::emit(const subbi& inst) {
-  defineValue(inst.d, m_irb.CreateSub(narrow(value(inst.s1), 8),
+  defineValue(inst.d, m_irb.CreateSub(value(inst.s1),
                                       cns(inst.s0.b())));
 }
 
@@ -3009,13 +3015,12 @@ void LLVMEmitter::emit(const syncvmsp& inst) {
 }
 
 void LLVMEmitter::emit(const testb& inst) {
-  auto result = m_irb.CreateAnd(narrow(value(inst.s1), 8),
-                                narrow(value(inst.s0), 8));
+  auto result = m_irb.CreateAnd(value(inst.s1), value(inst.s0));
   defineFlagTmp(inst.sf, result);
 }
 
 void LLVMEmitter::emit(const testbi& inst) {
-  auto result = m_irb.CreateAnd(narrow(value(inst.s1), 8), inst.s0.b());
+  auto result = m_irb.CreateAnd(value(inst.s1), inst.s0.b());
   defineFlagTmp(inst.sf, result);
 }
 
@@ -3044,6 +3049,10 @@ void LLVMEmitter::emit(const testlim& inst) {
 
 void LLVMEmitter::emit(const testq& inst) {
   defineFlagTmp(inst.sf, m_irb.CreateAnd(value(inst.s1), value(inst.s0)));
+}
+
+void LLVMEmitter::emit(const testqi& inst) {
+  defineFlagTmp(inst.sf, m_irb.CreateAnd(value(inst.s1), inst.s0.q()));
 }
 
 void LLVMEmitter::emit(const testqm& inst) {

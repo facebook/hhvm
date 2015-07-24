@@ -63,7 +63,7 @@ inline VcallArgsId Vout::makeVcallArgs(VcallArgs&& args) const {
 
 template<class T>
 inline Vreg Vout::cns(T v) {
-  return m_unit.makeConst(v);
+  return m_unit.makeConst(Vconst{v});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

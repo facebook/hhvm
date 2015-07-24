@@ -55,25 +55,15 @@ VcallArgsId Vunit::makeVcallArgs(VcallArgs&& args) {
   return i;
 }
 
-// helper for making constants, where T maps to the correct overloaded
-// Vconst constructor.
-template<class T> Vreg make_const(Vunit& unit, T c) {
-  auto const vconst = Vconst{c};
-  auto it = unit.constToReg.find(vconst);
-  if (it != unit.constToReg.end()) return it->second;
+Vreg Vunit::makeConst(Vconst vconst) {
+  auto it = constToReg.find(vconst);
+  if (it != constToReg.end()) return it->second;
 
-  auto const reg = unit.makeReg();
-  unit.constToReg.emplace(vconst, reg);
-  unit.regToConst.emplace(reg, vconst);
+  auto const reg = makeReg();
+  constToReg.emplace(vconst, reg);
+  regToConst.emplace(reg, vconst);
   return reg;
 }
-
-Vreg Vunit::makeConst(bool v)     { return make_const(*this, v); }
-Vreg Vunit::makeConst(uint32_t v) { return make_const(*this, v); }
-Vreg Vunit::makeConst(uint64_t v) { return make_const(*this, v); }
-Vreg Vunit::makeConst(Vptr v)     { return make_const(*this, v); }
-Vreg Vunit::makeConst(double v)   { return make_const(*this, v); }
-Vreg Vunit::makeConst(Vconst::Kind k) { return make_const(*this, k); }
 
 bool Vunit::needsRegAlloc() const {
   if (next_vr > Vreg::V0) return true;

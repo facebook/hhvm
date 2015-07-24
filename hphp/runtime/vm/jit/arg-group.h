@@ -57,13 +57,11 @@ struct CallDest {
 };
 UNUSED const CallDest kVoidDest { DestType::None };
 
-class ArgDesc {
-public:
+struct ArgDesc {
   enum class Kind {
     Reg,     // Normal register
-    TypeReg, // TypedValue's m_type field. Might need arch-specific
-             // mangling before call depending on TypedValue's layout.
     Imm,     // 64-bit Immediate
+    TypeImm, // DataType Immediate
     Addr,    // Address (register plus 32-bit displacement)
   };
 
@@ -72,6 +70,10 @@ public:
   Kind kind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
   Immed64 imm() const { assertx(m_kind == Kind::Imm); return m_imm64; }
+  DataType typeImm() const {
+    assertx(m_kind == Kind::TypeImm);
+    return m_typeImm;
+  }
   Immed disp() const { assertx(m_kind == Kind::Addr); return m_disp32; }
   bool isZeroExtend() const { return m_zeroExtend; }
   bool done() const { return m_done; }
@@ -104,6 +106,7 @@ private:
   union {
     Immed64 m_imm64; // 64-bit plain immediate
     Immed m_disp32;  // 32-bit displacement
+    DataType m_typeImm;
   };
   bool m_zeroExtend{false};
   bool m_done{false};

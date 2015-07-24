@@ -32,20 +32,6 @@ namespace HPHP { namespace jit {
 
 static_assert(sizeof(DataType) == 1,
               "Your DataType has an unsupported size.");
-static inline Reg8 toByte(const Reg32& x)   { return rbyte(x); }
-static inline Reg8 toByte(const Reg64& x)   { return rbyte(x); }
-static inline Reg8 toByte(PhysReg x)        { return rbyte(Reg64(x)); }
-
-static inline Reg32 toReg32(const Reg64& x) { return r32(x); }
-static inline Reg32 toReg32(const Reg8& x)  { return r32(x); }
-static inline Reg32 toReg32(PhysReg x)      { return r32(Reg64(x)); }
-
-// For other operand types, let whatever conversions (or compile
-// errors) exist handle it.
-template<typename OpndType>
-static OpndType toByte(const OpndType& x) { return x; }
-template<typename OpndType>
-static OpndType toReg32(const OpndType& x) { return x; }
 
 inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << testbi{s0, s1, sf};
@@ -55,20 +41,20 @@ inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
   v << testbim{s0, s1, sf};
 }
 
-template<typename SrcType, typename OpndType>
-static inline void
-emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  // Zero extend the type, just in case.
-  a.  loadzbl(src, toReg32(tvOp));
+inline void emitLoadTVType(X64Assembler& a, MemoryRef src, Reg8 d) {
+  a.  loadb(src, d);
 }
 
-inline void emitLoadTVType(Vout& v, Vptr mem, Vreg d) {
-  v << loadzbq{mem, d};
+inline void emitLoadTVType(X64Assembler& a, MemoryRef src, Reg32 d) {
+  a.  loadzbl(src, d);
 }
 
-template<typename SrcType, typename OpndType>
-void emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  a.  cmpb(src, toByte(tvOp));
+inline void emitLoadTVType(Vout& v, Vptr mem, Vreg8 d) {
+  v << loadb{mem, d};
+}
+
+inline void emitCmpTVType(X64Assembler& a, DataType dt, Reg8 typeReg) {
+  a.  cmpb(dt, typeReg);
 }
 
 inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {

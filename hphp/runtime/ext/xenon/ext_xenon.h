@@ -102,8 +102,8 @@ class Xenon final {
     bool      m_stopping;
   private:
     sem_t     m_timerTriggered;
-    pthread_t m_triggerThread;
 #ifndef __APPLE__
+    pthread_t m_triggerThread;
     timer_t   m_timerid;
 #endif
 };

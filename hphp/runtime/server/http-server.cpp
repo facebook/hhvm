@@ -493,8 +493,9 @@ void HttpServer::dropCache() {
 void HttpServer::checkMemory() {
   int64_t used = Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
   if (RuntimeOption::MaxRSS > 0 && used > RuntimeOption::MaxRSS) {
-    Logger::Error("ResourceLimit.MaxRSS %ld reached %ld used, exiting",
-                  RuntimeOption::MaxRSS, used);
+    Logger::Error(
+      "ResourceLimit.MaxRSS %" PRId64 " reached %" PRId64 " used, exiting",
+      RuntimeOption::MaxRSS, used);
     stop();
   }
 }

@@ -83,7 +83,7 @@ const char* const cs_GMP_INVALID_INDEX_IS_NEGATIVE =
 const char* const cs_GMP_INVALID_NUMBER_IS_NEGATIVE =
   "%s(): Number has to be greater than or equal to 0";
 const char* const cs_GMP_INVALID_BASE_VALUE =
-  "%s(): Bad base for conversion: %ld (should be between 2 and %d)";
+  "%s(): Bad base for conversion: %" PRId64 " (should be between 2 and %d)";
 const char* const cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE =
   "%s(): Exponent must not be negative";
 const char* const cs_GMP_INVALID_ROOT_MUST_BE_POSITIVE =

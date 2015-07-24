@@ -45,9 +45,11 @@ const StaticString s_dot(".");
 
 RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
     : m_reqInjectionData(data)
+#if !defined(__APPLE__) && !defined(_MSC_VER)
     , m_clockType(clockType)
-    , m_timeoutSeconds(0)  // no timeout by default
     , m_hasTimer(false)
+#endif
+    , m_timeoutSeconds(0)  // no timeout by default
     , m_timerActive(false)
 {}
 

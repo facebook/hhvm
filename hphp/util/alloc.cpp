@@ -55,20 +55,6 @@ namespace HPHP {
 
 #ifdef USE_JEMALLOC
 static void numa_purge_arena();
-
-static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
-  size_t miblen = 3;
-  size_t mib[miblen];
-  if (mallctlnametomib("arena.0.lg_dirty_mult", mib, &miblen) == 0) {
-    mib[1] = arena;
-    int err = mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,
-                           sizeof(lg_dirty_mult));
-    if (err != 0) {
-      Logger::Warning("mallctl arena.%u.lg_dirty_mult failed with error %d",
-                      arena, err);
-    }
-  }
-}
 #endif
 
 void flush_thread_caches() {
@@ -78,9 +64,7 @@ void flush_thread_caches() {
     if (UNLIKELY(err != 0)) {
       Logger::Warning("mallctl thread.tcache.flush failed with error %d", err);
     }
-#ifdef HAVE_NUMA
     numa_purge_arena();
-#endif
   }
 #endif
 #ifdef USE_TCMALLOC
@@ -242,6 +226,20 @@ static void initNuma() {
   if (!ret || numa_num_nodes <= 1) return;
 
   numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
+}
+
+static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
+  size_t miblen = 3;
+  size_t mib[miblen];
+  if (mallctlnametomib("arena.0.lg_dirty_mult", mib, &miblen) == 0) {
+    mib[1] = arena;
+    int err = mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,
+                           sizeof(lg_dirty_mult));
+    if (err != 0) {
+      Logger::Warning("mallctl arena.%u.lg_dirty_mult failed with error %d",
+                      arena, err);
+    }
+  }
 }
 
 static void numa_purge_arena() {

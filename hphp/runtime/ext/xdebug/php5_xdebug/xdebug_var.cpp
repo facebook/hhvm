@@ -573,7 +573,7 @@ void xdebug_var_export_text_ansi(
     break;
   case KindOfInt64:
     sb.printf(
-      "%sint%s(%s%ld%s)",
+      "%sint%s(%s%" PRId64 "%s)",
       ANSI_COLOR_BOLD,
       ANSI_COLOR_BOLD_OFF,
       ANSI_COLOR_LONG,
@@ -668,7 +668,7 @@ void xdebug_var_export_text_ansi(
         switch (first.m_type) {
         case KindOfInt64:
           sb.printf(
-            "[%ld] %s=>%s\n",
+            "[%" PRId64 "] %s=>%s\n",
             first.m_data.num,
             ANSI_COLOR_POINTER,
             ANSI_COLOR_RESET

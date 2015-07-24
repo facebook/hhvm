@@ -56,7 +56,7 @@ folly::Optional<int32_t> phys_reg_index(Vreg reg) {
  */
 struct RegInfo { Vreg base; int32_t disp; };
 
-std::string show(RegInfo x) {
+DEBUG_ONLY std::string show(RegInfo x) {
   return folly::sformat("{} + {}", show(x.base), x.disp);
 }
 

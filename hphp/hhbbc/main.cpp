@@ -178,7 +178,7 @@ void parse_options(int argc, char** argv) {
   logging = !no_logging;
 }
 
-void validate_options() {
+UNUSED void validate_options() {
   if (parallel::work_chunk <= 10 || parallel::num_threads < 1) {
     std::cerr << "Invalid parallelism configuration.\n";
     std::exit(1);

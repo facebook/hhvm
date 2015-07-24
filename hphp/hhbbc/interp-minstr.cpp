@@ -164,7 +164,7 @@ struct Base {
   borrowed_ptr<php::Local> local;
 };
 
-std::string base_string(const Base& b) {
+DEBUG_ONLY std::string base_string(const Base& b) {
   auto const locStr = [&]() -> const char* {
     switch (b.loc) {
     case BaseLoc::PostElem:      return "PostElem";

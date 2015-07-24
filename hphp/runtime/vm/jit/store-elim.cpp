@@ -210,7 +210,8 @@ struct TrackedStore {
   bool same(const TrackedStore& other) const {
     return kind() == other.kind() && m_ptr.ptr() == other.m_ptr.ptr();
   }
-  friend bool operator>=(const TrackedStore& a, const TrackedStore& b) {
+  friend DEBUG_ONLY bool operator>=(const TrackedStore& a,
+                                    const TrackedStore& b) {
     return a.kind() >= b.kind();
   }
   size_t hash() const {

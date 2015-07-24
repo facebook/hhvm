@@ -50,12 +50,12 @@ struct RequestTimer {
 
 private:
   RequestInjectionData* m_reqInjectionData;
-  clockid_t m_clockType;
 #if !defined(__APPLE__) && !defined(_MSC_VER)
+  clockid_t m_clockType;
   timer_t m_timer_id;      // id of our timer
+  bool m_hasTimer;         // Whether we've created our timer yet
 #endif
   int m_timeoutSeconds;    // how many seconds to timeout
-  bool m_hasTimer;         // Whether we've created our timer yet
   std::atomic<bool> m_timerActive;
                            // Set true when we activate a timer,
                            // cleared when the signal handler runs

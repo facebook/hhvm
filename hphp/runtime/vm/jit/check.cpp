@@ -134,7 +134,7 @@ bool checkBlock(Block* b) {
  * 1. At most one should exist in a given unit.
  * 2. If present, InitCtx must dominate all occurrences of LdCtx and LdCctx.
  */
-bool checkInitCtxInvariants(const IRUnit& unit) {
+bool DEBUG_ONLY checkInitCtxInvariants(const IRUnit& unit) {
   auto const blocks = rpoSortCfg(unit);
 
   const Block* init_ctx_block = nullptr;

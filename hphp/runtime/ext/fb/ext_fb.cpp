@@ -76,6 +76,7 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined __BYTE_ORDER && defined __BIG_ENDIAN
 /* Linux and other systems don't currently support a ntohx or htonx
    set of functions for 64-bit values.  We've implemented our own here
    which is based off of GNU Net's implementation with some slight
@@ -90,6 +91,7 @@ const StaticString
 #define htonll(n)                                                       \
   ( (((uint64_t)htonl(n)) << 32)                                        \
     | ((uint64_t)htonl((n) >> 32) & 0x00000000ffffffff) )
+#endif
 #endif
 
 /* enum of thrift types */

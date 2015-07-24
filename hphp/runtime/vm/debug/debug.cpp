@@ -246,7 +246,7 @@ void DebugInfo::recordDataMap(void* from, void* to, const std::string& desc) {
 void DebugInfo::recordRelocMap(void* from, void* to,
                                const String& transInfo) {
   if (m_relocMap) {
-    fprintf(m_relocMap, "%" PRIxPTR " %" PRIx64 " %s\n",
+    fprintf(m_relocMap, "%" PRIxPTR " %" PRIxPTR " %s\n",
             uintptr_t(from),
             uintptr_t(to),
             transInfo.c_str());

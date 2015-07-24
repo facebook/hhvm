@@ -282,12 +282,12 @@ std::string show(const InstrIdSet& set) {
     ;
 }
 
-std::string show(const UseInfo& ui) {
+std::string DEBUG_ONLY show(const UseInfo& ui) {
   return folly::format("{}@{}", show(ui.first), show(ui.second)).str();
 }
 
-std::string bits_string(borrowed_ptr<const php::Func> func,
-                        std::bitset<kMaxTrackedLocals> locs) {
+std::string DEBUG_ONLY bits_string(borrowed_ptr<const php::Func> func,
+                                   std::bitset<kMaxTrackedLocals> locs) {
   std::ostringstream out;
   if (func->locals.size() < kMaxTrackedLocals) {
     for (auto i = func->locals.size(); i-- > 0;) {

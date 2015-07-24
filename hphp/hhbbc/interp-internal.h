@@ -81,6 +81,11 @@ struct ISS {
 
 namespace {
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+
 void nothrow(ISS& env) {
   FTRACE(2, "    nothrow\n");
   env.flags.wasPEI = false;
@@ -595,6 +600,9 @@ void loseNonRefSelfPropTypes(ISS& env) {
   }
 }
 
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////

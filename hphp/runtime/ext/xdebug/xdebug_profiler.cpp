@@ -48,8 +48,8 @@ void XDebugProfiler::ensureBufferSpace() {
                 "settings such as xdebug.collect_memory and "
                 "xdebug.collect_time implicitly turn on tracing, so turn those "
                 " off if this is unexpected.\n"
-                "Current frame buffer length: %zu\n"
-                "Failed to expand to length: %zu\n",
+                "Current frame buffer length: %" PRIu64 "\n"
+                "Failed to expand to length: %" PRIu64 "\n",
                 m_frameBufferSize,
                 new_buf_size);
   }
@@ -125,8 +125,9 @@ void XDebugProfiler::beginFrame(const char *symbol) {
   // Check the stack depth, abort if we've reached the limit
   m_depth++;
   if (m_maxDepth != 0 && m_depth >= m_maxDepth) {
-    raise_error("Maximum function nesting level of '%lu' reached, aborting!",
-                m_maxDepth);
+    raise_error(
+      "Maximum function nesting level of '%" PRIu64 "' reached, aborting!",
+      m_maxDepth);
   }
 
   // Record the frame if we are collecting
@@ -340,7 +341,7 @@ void XDebugProfiler::writeTracingLinePrefix() {
 template<XDebugProfiler::TraceOutputType outputType>
 void XDebugProfiler::writeTracingLevel(int64_t level) {
   if (outputType == TraceOutputType::COMPUTERIZED) {
-      fprintf(m_tracingFile, "%ld\t", level);
+      fprintf(m_tracingFile, "%" PRId64 "\t", level);
   }
 }
 
@@ -350,10 +351,10 @@ void XDebugProfiler::writeTracingFrameId(uint64_t id) {
     case TraceOutputType::NORMAL:
       break;
     case TraceOutputType::HTML:
-      fprintf(m_tracingFile, "<td>%ld</td>", id);
+      fprintf(m_tracingFile, "<td>%" PRIu64 "</td>", id);
       break;
     case TraceOutputType::COMPUTERIZED:
-      fprintf(m_tracingFile, "%ld\t", id);
+      fprintf(m_tracingFile, "%" PRIu64 "\t", id);
       fprintf(m_tracingFile, "0\t"); // func exit column
       break;
   }
@@ -378,22 +379,22 @@ template<XDebugProfiler::TraceOutputType outputType>
 void XDebugProfiler::writeTracingMemory(int64_t memory) {
   switch (outputType) {
     case TraceOutputType::NORMAL:
-      fprintf(m_tracingFile, "%10lu ", memory);
+      fprintf(m_tracingFile, "%10" PRIu64 " ", memory);
       // Delta Memory (since the last begin frame)
       if (XDEBUG_GLOBAL(ShowMemDelta)) {
         if (m_tracingPrevBegin != nullptr) {
           int64_t prev_usage = m_tracingPrevBegin->memory_usage;
-          fprintf(m_tracingFile, "%+8ld", memory - prev_usage);
+          fprintf(m_tracingFile, "%+8" PRId64, memory - prev_usage);
         } else {
           fprintf(m_tracingFile, "        ");
         }
       }
       break;
     case TraceOutputType::HTML:
-      fprintf(m_tracingFile, "<td align='right'>%ld</td>", memory);
+      fprintf(m_tracingFile, "<td align='right'>%" PRIu64 "</td>", memory);
       break;
     case TraceOutputType::COMPUTERIZED:
-      fprintf(m_tracingFile, "%lu\t", memory);
+      fprintf(m_tracingFile, "%" PRIu64 "\t", memory);
       break;
   }
 }
@@ -512,11 +513,11 @@ void XDebugProfiler::writeTracingEndFrame(FrameData& frame,
   }
 
   // Computerized output has a line for exit events
-  fprintf(m_tracingFile, "%ld\t", level);
-  fprintf(m_tracingFile, "%ld\t", id);
+  fprintf(m_tracingFile, "%" PRId64 "\t", level);
+  fprintf(m_tracingFile, "%" PRId64 "\t", id);
   fprintf(m_tracingFile, "1\t"); // frame exit column
   fprintf(m_tracingFile, "%f\t", timeSinceBase(frame.time));
-  fprintf(m_tracingFile, "%ld\n", frame.memory_usage);
+  fprintf(m_tracingFile, "%" PRId64 "\n", frame.memory_usage);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -630,11 +631,11 @@ void XDebugProfiler::writeCachegrindFrame(const Frame& frame,
   writeCachegrindFuncName(frame.begin.func, isTopPseudoMain);
   if (isTopPseudoMain) {
     fprintf(m_profilingFile, "\nSummary: %lu\n\n",
-                            frame.end.time - frame.begin.time);
+            static_cast<long>(frame.end.time - frame.begin.time));
   }
   fprintf(m_profilingFile, "%d %ld\n",
           frame.begin.func->line1(),
-          frame.end.time - frame.begin.time - childrenCost);
+          static_cast<long>(frame.end.time - frame.begin.time - childrenCost));
 
   // Write each child call
   for (const Frame& child_frame : children) {
@@ -651,7 +652,7 @@ void XDebugProfiler::writeCachegrindFrame(const Frame& frame,
     fprintf(m_profilingFile, "calls=1 0 0\n");
     fprintf(m_profilingFile, "%d %ld\n",
             child_frame.begin.line,
-            child_frame.end.time - child_frame.begin.time);
+            static_cast<long>(child_frame.end.time - child_frame.begin.time));
   }
   fprintf(m_profilingFile, "\n");
 }

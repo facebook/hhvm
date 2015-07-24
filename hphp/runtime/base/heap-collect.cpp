@@ -165,7 +165,7 @@ void Marker::operator()(const ObjectData* p) {
 }
 
 // Utility to just extract the kind field from an arbitrary Header ptr.
-inline HeaderKind kind(const void* p) {
+inline DEBUG_ONLY HeaderKind kind(const void* p) {
   return static_cast<const Header*>(p)->kind();
 }
 

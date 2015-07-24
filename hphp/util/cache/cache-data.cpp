@@ -268,9 +268,9 @@ bool CacheData::sufficientlyCompressed(uint64_t orig_size,
 void CacheData::dump() const {
   printf(
     "  Name: %s\n"
-    "  Flags: 0x%08lx\n"
-    "  Size: %ld\n"
-    "  ID: %ld\n",
+    "  Flags: 0x%08" PRIx64 "\n"
+    "  Size: %" PRIu64 "\n"
+    "  ID: %" PRIu64 "\n",
     name_.c_str(),
     flags_,
     fileSize(),

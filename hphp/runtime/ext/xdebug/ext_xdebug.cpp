@@ -137,7 +137,7 @@ static String format_filename(StringSlice dir,
         break;
       // Random number
       case 'r':
-        buf.printf("%lx", (uint64_t)HHVM_FN(rand)());
+        buf.printf("%lx", (long)HHVM_FN(rand)());
         break;
       // Script name
       case 's': {
@@ -161,7 +161,7 @@ static String format_filename(StringSlice dir,
       case 'u': {
         struct timeval tv;
         if (gettimeofday(&tv, 0) != -1) {
-          buf.printf("%ld_%ld", int64_t(tv.tv_sec), tv.tv_usec);
+          buf.printf("%ld_%ld", long(tv.tv_sec), long(tv.tv_usec));
         }
         break;
       }

@@ -237,6 +237,33 @@ class ReflectionSPropHandle {
   const Class::SProp* m_sprop{nullptr};
 };
 
+/* A ReflectionTypeAliasHandle is a NativeData object wrapping a TypeAliasReq*
+ * for the purposes of static ReflectionTypeAlias. */
+struct ReflectionTypeAliasHandle {
+  ReflectionTypeAliasHandle(): m_req(nullptr) {}
+  explicit ReflectionTypeAliasHandle(const TypeAliasReq* req): m_req(req) {};
+
+  static ReflectionTypeAliasHandle* Get(ObjectData* obj) {
+    return Native::data<ReflectionTypeAliasHandle>(obj);
+  }
+
+  static const TypeAliasReq* GetTypeAliasReqFor(ObjectData* obj) {
+    return Native::data<ReflectionTypeAliasHandle>(obj)->getTypeAliasReq();
+  }
+
+  const TypeAliasReq* getTypeAliasReq() const { return m_req; }
+
+  void setTypeAliasReq(const TypeAliasReq* req) {
+    assert(req != nullptr);
+    assert(m_req == nullptr);
+    m_req = req;
+  }
+
+ private:
+  template <typename F> friend void scan(const ReflectionTypeAliasHandle&, F&);
+  const TypeAliasReq* m_req;
+};
+
 namespace DebuggerReflection {
 Array get_function_info(const String& name);
 Array get_class_info(const String& name);

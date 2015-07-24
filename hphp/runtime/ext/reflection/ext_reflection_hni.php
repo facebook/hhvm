@@ -2310,3 +2310,70 @@ class ReflectionTypeConstant implements Reflector {
   }
 
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// type aliases
+
+/** The ReflectionTypeAlias class reports information about a type
+ * alias.
+ */
+<<__NativeData('ReflectionTypeAliasHandle')>>
+class ReflectionTypeAlias implements Reflector {
+
+  private string $name = '';
+
+  /**
+   * Constructs a new ReflectionTypeAlias.
+   *
+   * @name      string  Name of the type alias.
+   */
+  final public function __construct(string $name) {
+    if (!$this->__init($name)) {
+      throw new ReflectionException(
+        "type alias {$name} does not exist");
+    }
+    $this->name = $name;
+  }
+
+  // helper for ctor
+  <<__Native>>
+  private function __init(string $name): bool;
+
+  /**
+   * Get the TypeStructure that contains the full type information of
+   * the assigned type.
+   *
+   * @return    array  The type structure of the type alias.
+   */
+  <<__Native>>
+  public function getTypeStructure(): array;
+
+  /**
+   * Get the assigned type as a string.
+   *
+   * @return    string The assigned type.
+   */
+  <<__Native>>
+  public function getAssignedTypeText(): string;
+
+  /**
+   * Get the name of the type alias.
+   *
+   * @return    string  The name of the type alias
+   */
+  public function getName() {
+    return $name;
+  }
+
+  // Prevent cloning
+  final public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ReflectionTypeAlias'
+    );
+  }
+
+  public function __toString() {
+    return "TypeAlias [ {$this->name} : {$this->getAssignedTypeText()} ]\n";
+  }
+
+}

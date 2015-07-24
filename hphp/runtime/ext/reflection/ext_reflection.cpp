@@ -1669,6 +1669,42 @@ static Variant HHVM_METHOD(ReflectionProperty, __init,
   return Variant(-2);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// class ReflectionTypeAlias
+
+const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
+
+// helper for __construct:
+// caller throws exception when return value is false
+static bool HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
+  auto ne = NamedEntity::get(name.get(), /* allowCreate = */ false);
+  if (!ne) {
+    return false;
+  }
+  auto const typeAliasReq = ne->getCachedTypeAlias();
+  if (!typeAliasReq) return false;
+
+  ReflectionTypeAliasHandle::Get(this_)->setTypeAliasReq(typeAliasReq);
+  return true;
+}
+
+static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  assert(req);
+  auto const typeStructure = req->typeStructure;
+  assert(typeStructure);
+  assert(typeStructure->isStatic());
+  return Array::attach(typeStructure);
+}
+
+static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  assert(req);
+  auto const typeStructure = req->typeStructure;
+  assert(typeStructure != nullptr);
+  return String(TypeStructure::toString(typeStructure));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 class ReflectionExtension final : public Extension {
  public:
@@ -1729,6 +1765,10 @@ class ReflectionExtension final : public Extension {
 
     HHVM_ME(ReflectionProperty, __init);
 
+    HHVM_ME(ReflectionTypeAlias, __init);
+    HHVM_ME(ReflectionTypeAlias, getTypeStructure);
+    HHVM_ME(ReflectionTypeAlias, getAssignedTypeText);
+
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);
     HHVM_ME(ReflectionClass, getParentName);
@@ -1776,6 +1816,8 @@ class ReflectionExtension final : public Extension {
       s_ReflectionPropHandle.get());
     Native::registerNativeDataInfo<ReflectionSPropHandle>(
       s_ReflectionSPropHandle.get());
+    Native::registerNativeDataInfo<ReflectionTypeAliasHandle>(
+      s_ReflectionTypeAliasHandle.get(), Native::NO_SWEEP);
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);

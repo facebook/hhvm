@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/annot-type.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/array-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,16 +47,37 @@ struct TypeAlias {
   LowStringPtr value;
   Attr         attrs;
   AnnotType    type;
+  ArrayData*   typeStructure{nullptr};
   bool         nullable;  // null is allowed; for ?Foo aliases
 
-  template<class SerDe> void serde(SerDe& sd) {
+  template<class SerDe>
+  typename std::enable_if<!SerDe::deserializing>::type
+  serde(SerDe& sd) {
+    sd(name)
+      (value)
+      (type)
+      (nullable)
+      (attrs)
+      (make_tv<KindOfArray>(typeStructure))
+      ;
+  }
+
+  template<class SerDe>
+  typename std::enable_if<SerDe::deserializing>::type
+  serde(SerDe& sd) {
     sd(name)
       (value)
       (type)
       (nullable)
       (attrs)
       ;
+
+    TypedValue tv;
+    sd(tv);
+    assert(tv.m_type == KindOfArray);
+    typeStructure = ArrayData::GetScalarArray(tv.m_data.parr);
   }
+
 };
 
 
@@ -95,6 +118,7 @@ struct TypeAliasReq {
   LowPtr<Class> klass{nullptr};
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};
+  ArrayData* typeStructure{nullptr};
 };
 
 bool operator==(const TypeAliasReq& l, const TypeAliasReq& r);

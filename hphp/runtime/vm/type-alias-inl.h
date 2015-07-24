@@ -35,6 +35,7 @@ inline TypeAliasReq TypeAliasReq::From(const TypeAlias& alias) {
   req.name = alias.name;
   req.type = alias.type;
   req.nullable = alias.nullable;
+  req.typeStructure = alias.typeStructure;
   return req;
 }
 
@@ -46,6 +47,7 @@ inline TypeAliasReq TypeAliasReq::From(TypeAliasReq req,
   }
   req.name = alias.name;
   req.nullable |= alias.nullable;
+  req.typeStructure = alias.typeStructure;
   return req;
 }
 

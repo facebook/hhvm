@@ -216,7 +216,8 @@ Array TimeZone::GetNamesToCountryCodes() {
     const char* infoString = (const char*)&tzdb->data[table[i].pos];
     const char* countryCode = &infoString[5];
 
-    ret.set(String(table[i].id, CopyString), String(countryCode, 2, CopyString));
+    ret.set(String(table[i].id, CopyString),
+            String(countryCode, 2, CopyString));
   }
   return ret;
 }

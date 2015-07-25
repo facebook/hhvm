@@ -152,6 +152,7 @@ struct Vasm {
   Vout& cold(X64Assembler& a) { return cold(a.code()); }
   Vout& frozen(X64Assembler& a) { return frozen(a.code()); }
 
+  static X64Assembler& prefix(X64Assembler& a, const Vptr& ptr);
 private:
   Area& area(AreaIndex i);
   Vout& add(CodeBlock &cb, AreaIndex area);

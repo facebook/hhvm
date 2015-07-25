@@ -233,6 +233,10 @@ std::string show(Vptr p) {
     str += "%fs";
     prefix = true;
   }
+  if (p.seg == Vptr::GS) {
+    str += "%gs";
+    prefix = true;
+  }
   if (p.base.isValid()) {
     folly::toAppend(prefix ? " + " : "", show(p.base), &str);
     prefix = true;

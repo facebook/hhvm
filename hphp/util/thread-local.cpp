@@ -20,15 +20,42 @@ namespace HPHP {
 
 #ifdef USE_GCC_FAST_TLS
 
-void ThreadLocalManager::OnThreadExit(void * p) {
+void ThreadLocalManager::OnThreadExit(void* p) {
+  auto list = getList(p);
+  p = list->head;
+  delete list;
   while (p != nullptr) {
-    ThreadLocalNode<void*> * pNode = (ThreadLocalNode<void*>*)p;
+    auto* pNode = static_cast<ThreadLocalNode<void>*>(p);
     if (pNode->m_on_thread_exit_fn) {
       pNode->m_on_thread_exit_fn(p);
     }
     p = pNode->m_next;
   }
 }
+
+void ThreadLocalManager::PushTop(void* nodePtr) {
+  auto& node = *static_cast<ThreadLocalNode<void>*>(nodePtr);
+  auto key = GetManager().m_key;
+  auto tmp = getList(pthread_getspecific(key));
+  if (UNLIKELY(!tmp)) {
+    ThreadLocalSetValue(key, tmp = new ThreadLocalList);
+  }
+  node.m_next = tmp->head;
+  tmp->head = node.m_next;
+}
+
+ThreadLocalManager& ThreadLocalManager::GetManager() {
+  static ThreadLocalManager m;
+  return m;
+}
+
+#ifdef __APPLE__
+ThreadLocalManager::ThreadLocalList::ThreadLocalList() {
+  handler.__routine = ThreadLocalManager::OnThreadExit;
+  handler.__arg = this;
+  handler.__next = pthread_self()->__cleanup_stack;
+}
+#endif
 
 #endif
 

@@ -3148,6 +3148,7 @@ llvm::Value* LLVMEmitter::emitPtr(const Vptr s, llvm::Type* ptrTy) {
 }
 
 llvm::Value* LLVMEmitter::emitPtr(const Vptr s, size_t bits) {
+  always_assert(s.seg != Vptr::GS);
   return emitPtr(s, ptrIntNType(bits, s.seg == Vptr::FS));
 }
 

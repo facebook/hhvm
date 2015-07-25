@@ -471,8 +471,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const addqim& i) {
-  if (i.m.seg == Vptr::FS) a->fs();
-  a->addq(i.s0, i.m.mr());
+  Vasm::prefix(*a, i.m).addq(i.s0, i.m.mr());
 }
 
 void Vgen::emit(const call& i) {
@@ -690,7 +689,7 @@ void Vgen::emit(const ldimmqs& i) {
 }
 
 void Vgen::emit(const load& i) {
-  if (i.s.seg == Vptr::FS) a->fs();
+  Vasm::prefix(*a, i.s);
   auto mref = i.s.mr();
   if (i.d.isGP()) {
     a->loadq(mref, i.d);
@@ -725,8 +724,7 @@ void Vgen::emit(const mcprep& i) {
 }
 
 void Vgen::emit(const storebi& i) {
-  if (i.m.seg == Vptr::FS) a->fs();
-  a->storeb(i.s, i.m.mr());
+  Vasm::prefix(*a, i.m).storeb(i.s, i.m.mr());
 }
 
 void Vgen::emit(const store& i) {

@@ -79,7 +79,7 @@ void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
 }
 
 void emitGetGContext(Vout& v, Vreg dest) {
-  emitTLSLoad<ExecutionContext>(v, g_context, dest);
+  emitTLSLoad(v, g_context, dest);
 }
 
 void emitTransCounterInc(Vout& v) {

@@ -217,7 +217,7 @@ VscaledDisp operator+(Vscaled, int32_t);
  *    - index is optional
  */
 struct Vptr {
-  enum Segment : uint8_t { DS, FS };
+  enum Segment : uint8_t { DS, FS, GS };
 
   Vptr()
     : base(Vreg{})
@@ -250,11 +250,11 @@ struct Vptr {
   bool operator==(const Vptr&) const;
   bool operator!=(const Vptr&) const;
 
-public:
+
   Vreg64 base;      // optional, for baseless mode
   Vreg64 index;     // optional
   uint8_t scale;    // 1,2,4,8
-  Segment seg{DS};  // DS or FS
+  Segment seg{DS};  // DS, FS or GS
   int32_t disp;
 };
 

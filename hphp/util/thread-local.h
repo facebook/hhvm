@@ -74,7 +74,7 @@ inline uintptr_t tlsBase() {
 // IMPLEMENT_THREAD_LOCAL() macros to access either __thread or the emulation
 // as appropriate.
 
-#if !defined(NO_TLS) && !defined(__APPLE__) &&                \
+#if !defined(NO_TLS) &&                                       \
     !defined(__CYGWIN__) && !defined(__MINGW__) &&            \
    ((__llvm__ && __clang__) ||                                \
    __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||   \
@@ -104,6 +104,10 @@ inline void ThreadLocalSetValue(pthread_key_t key, const void* value) {
   int ret = pthread_setspecific(key, value);
   ThreadLocalCheckReturn(ret, "pthread_setspecific");
 }
+
+#ifdef __APPLE__
+typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -140,24 +144,30 @@ struct ThreadLocalNode {
 
 struct ThreadLocalManager {
   template<class T>
-  static void PushTop(ThreadLocalNode<T>& node) {
-    auto key = GetManager().m_key;
-    auto tmp = pthread_getspecific(key);
-    ThreadLocalSetValue(key, &node);
-    node.m_next = tmp;
+  static void PushTop(ThreadLocalNode<T>& node) { PushTop(&node); }
+private:
+  static void PushTop(void* node);
+  struct ThreadLocalList {
+    void* head{nullptr};
+#ifdef __APPLE__
+    ThreadLocalList();
+    darwin_pthread_handler handler;
+#endif
+  };
+  static ThreadLocalList* getList(void* p) {
+    return static_cast<ThreadLocalList*>(p);
   }
-
- private:
   ThreadLocalManager() : m_key(0) {
+#ifdef __APPLE__
+    ThreadLocalCreateKey(&m_key, nullptr);
+#else
     ThreadLocalCreateKey(&m_key, ThreadLocalManager::OnThreadExit);
+#endif
   };
   static void OnThreadExit(void *p);
   pthread_key_t m_key;
 
-  static ThreadLocalManager& GetManager() {
-    static ThreadLocalManager m;
-    return m;
-  }
+  static ThreadLocalManager& GetManager();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

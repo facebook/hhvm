@@ -259,7 +259,7 @@ struct BackEnd final : jit::BackEnd {
 
     // Emit the checks for debugger attach
     auto rtmp = rAsm;
-    emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rtmp);
+    emitTLSLoad(a, ThreadInfo::s_threadInfo, rtmp);
     a.   loadb  (rtmp[dbgOff], rbyte(rtmp));
     a.   testb  ((int8_t)0xff, rbyte(rtmp));
 

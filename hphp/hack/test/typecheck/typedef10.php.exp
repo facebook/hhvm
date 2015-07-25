@@ -1,10 +1,2 @@
-File "typedef10.php", line 12, characters 13-13:
-Error while expanding an object of type B: (Typing[4014])
 File "typedef10.php", line 12, characters 15-15:
-Error while expanding an object of type A:
-File "typedef10.php", line 12, characters 13-13:
-Error while expanding an object of type B:
-File "typedef10.php", line 12, characters 15-15:
-Error while expanding an object of type A:
-File "typedef10.php", line 12, characters 15-15:
-Cyclic typedef
+Cyclic typedef (Typing[4014])

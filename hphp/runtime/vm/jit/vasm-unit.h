@@ -71,6 +71,8 @@ struct VcallArgs {
 struct Vconst {
   enum Kind { Quad, Long, Byte, Double, ThreadLocal };
 
+  using ullong = unsigned long long;
+  using ulong = unsigned long;
   Vconst() : kind(Quad), val(0) {}
   explicit Vconst(Kind k)        : kind(k), isUndef(true), val(0) {}
   explicit Vconst(bool b)        : kind(Byte), val(b) {}
@@ -81,8 +83,10 @@ struct Vconst {
   explicit Vconst(int32_t i)     : Vconst(int64_t(i)) {}
   explicit Vconst(uint16_t)      = delete;
   explicit Vconst(int16_t)       = delete;
-  explicit Vconst(uint64_t i)    : kind(Quad), val(i) {}
-  explicit Vconst(int64_t i)     : Vconst(uint64_t(i)) {}
+  explicit Vconst(ullong i)      : kind(Quad), val(i) {}
+  explicit Vconst(long long i)   : Vconst(ullong(i)) {}
+  explicit Vconst(ulong i)       : Vconst(ullong(i)) {}
+  explicit Vconst(long i)        : Vconst(ullong(i)) {}
   explicit Vconst(const void* p) : Vconst(uintptr_t(p)) {}
   explicit Vconst(double d)      : kind(Double), doubleVal(d) {}
   explicit Vconst(Vptr tl)       : kind(ThreadLocal), disp(tl.disp) {

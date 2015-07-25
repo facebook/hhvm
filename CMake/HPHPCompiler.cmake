@@ -132,29 +132,54 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
 # using Visual Studio C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   message(WARNING "MSVC support is VERY experimental. It will likely not compile, and is intended for the utterly insane.")
+
+  ############################################################
+  # First we setup and account for the option sets.
+  ############################################################
+
   set(MSVC_GENERAL_OPTIONS)
   set(MSVC_DISABLED_WARNINGS)
   set(MSVC_WARNINGS_AS_ERRORS)
   set(MSVC_ADDITIONAL_DEFINES)
-  
+  set(MSVC_EXE_LINKER_OPTIONS)
+  set(MSVC_DEBUG_OPTIONS)
+  set(MSVC_RELEASE_OPTIONS)
+  set(MSVC_RELEASE_LINKER_OPTIONS)
+  set(MSVC_RELEASE_EXE_LINKER_OPTIONS)
+
+  # Some addional configuration options.
+  set(MSVC_FAVORED_ARCHITECTURE "blend" CACHE STRING "One of 'blend', 'AMD64', 'INTEL64', or 'ATOM'. This tells the compiler to generate code optimized to run best on the specified architecture.")
+
   # The general options passed:
   list(APPEND MSVC_GENERAL_OPTIONS
+    "bigobj" # Support objects with > 65k sections. Needed because we've enabled function level linking.
     "fp:precise" # Precise floating point model used in every other build, use it here as well.
+    "EHa" # Enable both SEH and C++ Exceptions.
+    "MP" # Enable multi-processor compilation.
     "Oy-" # Disable elimination of stack frames.
-    "Zp4" # Set the default packing to 4 to be the same as GCC.
   )
-  
-  # The warnings that are disabled.
+
+  # Enable AVX2 codegen if available and requested.
+  if (ENABLE_AVX2)
+    list(APPEND MSVC_GENERAL_OPTIONS "arch:AVX2")
+  endif()
+
+  # Validate, and then add the favored architecture.
+  if (NOT MSVC_FAVORED_ARCHITECTURE STREQUAL "blend" AND NOT MSVC_FAVORED_ARCHITECTURE STREQUAL "AMD64" AND NOT MSVC_FAVORED_ARCHITECTURE STREQUAL "INTEL64" AND NOT MSVC_FAVORED_ARCHITECTURE STREQUAL "ATOM")
+    message(FATAL_ERROR "MSVC_FAVORED_ARCHITECTURE must be set to one of exactly, 'blend', 'AMD64', 'INTEL64', or 'ATOM'! Got '${MSVC_FAVORED_ARCHITECTURE}' instead!")
+  endif()
+  list(APPEND MSVC_GENERAL_OPTIONS "favor:${MSVC_FAVORED_ARCHITECTURE}")
+
+  # The warnings that are disabled:
   list(APPEND MSVC_DISABLED_WARNINGS
     "4068" # Unknown pragma.
     "4091" # 'typedef' ignored on left of '' when no variable is declared.
-    "4099" # Mixed use of struct and class on same type names. This is absolutely everywhere.
     "4101" # Unused variables
     "4103" # Alignment changed after including header. This is needed because boost includes an ABI header that does some #pragma pack push/pop stuff, and we've passed our own packing
     "4146" # Unary minus applied to unsigned type, result still unsigned.
     "4800" # Values being forced to bool, this happens many places, and is a "performance warning".
   )
-  
+
   # Warnings disabled to keep it quiet for now,
   # most of these should be reviewed and re-enabled:
   list(APPEND MSVC_DISABLED_WARNINGS
@@ -163,44 +188,148 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     "4244" # Implicit truncation of data.
     "4267" # Implicit truncation of data. This really shouldn't be disabled.
     "4291" # No matching destructor found.
+    "4302" # Pointer casting size difference
+    "4311" # Pointer casting size difference
+    "4312" # Pointer casting size difference
     "4624" # Destructor was implicitly undefined.
     "4804" # Unsafe use of type 'bool' in operation. (comparing if bool is <=> scalar)
     "4805" # Unsafe mix of scalar type and type 'bool' in operation. (comparing if bool is == scalar)
   )
-  
+
   # Warnings to treat as errors:
   list(APPEND MSVC_WARNINGS_AS_ERRORS
+    "4099" # Mixed use of struct and class on same type names. This was absolutely everywhere, and can cause errors at link-time if not fixed.
     "4129" # Unknown escape sequence. This is usually caused by incorrect escaping.
     "4566" # Character cannot be represented in current charset. This is remidied by prefixing string with "u8".
   )
-  
+
   # And the extra defines:
   list(APPEND MSVC_ADDITIONAL_DEFINES
     "NOMINMAX" # This is needed because, for some absurd reason, one of the windows headers tries to define "min" and "max" as macros, which messes up most uses of std::numeric_limits.
     "_CRT_NONSTDC_NO_WARNINGS" # Don't deprecate posix names of functions.
     "_CRT_SECURE_NO_WARNINGS" # Don't deprecate the non _s versions of various standard library functions, because safety is for chumps.
     "_SCL_SECURE_NO_WARNINGS" # Don't deprecate the non _s versions of various standard library functions, because safety is for chumps.
+    "_WINSOCK_DEPRECATED_NO_WARNINGS" # Don't deprecate pieces of winsock
     "YY_NO_UNISTD_H" # Because MSVC doesn't have unistd.h, which is requested by the YACC generated code.
   )
-  
+
+  # The options passed to the linker for EXE targets:
+  list(APPEND MSVC_EXE_LINKER_OPTIONS
+    "STACK:8388608,8388608" # Set the stack reserve,commit to 8mb. Reserve should probably be higher.
+    "INCREMENTAL:NO" # Disable incremental linking, because it takes absolutely forever with HHVM.
+  )
+
+  # The options to pass to the compiler for debug builds:
+  list(APPEND MSVC_DEBUG_OPTIONS
+    "Gy-" # Disable function level linking. This speeds up linking massively.
+  )
+
+  # The options to pass to the compiler for release builds:
+  list(APPEND MSVC_RELEASE_OPTIONS
+    "GF" # Enable string pooling. (this is enabled by default by the optimization level, but we enable it here for clarity)
+    "GL" # Enable whole program optimization (LTCG).
+    "Gw" # Optimize global data. (-fdata-sections)
+    "Gy" # Enable function level linking.
+    "Qpar" # Enable parallel code generation. HHVM itself doesn't currently use this, but it's dependencies, TBB for instance, might, so enable it.
+    "Oi" # Enable intrinsic functions.
+    "Ot" # Favor fast code.
+  )
+
+  # The options to pass to the linker for release builds:
+  list(APPEND MSVC_RELEASE_LINKER_OPTIONS
+    "LTCG" # Link Time Code Gen (LTCG)
+  )
+
+  # The options to pass to the linker for release builds for EXE targets:
+  list(APPEND MSVC_RELEASE_EXE_LINKER_OPTIONS
+    "OPT:REF" # Remove unreferenced functions and data.
+    "OPT:ICF" # Identical COMDAT folding.
+  )
+
+  ############################################################
+  # Now we need to adjust a couple of the default option sets.
+  ############################################################
+
+  # We need the static runtime.
+  foreach(flag_var
+      CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+      CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+      CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+      CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    if (${flag_var} MATCHES "/MD")
+      string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+    endif()
+  endforeach()
+
+  # We have to remove the incremental flags, so that we can explicitly disable it
+  # for all builds.
+  foreach(flag_var
+      CMAKE_EXE_LINKER_FLAGS_DEBUG
+      CMAKE_EXE_LINKER_FLAGS_RELEASE
+      CMAKE_EXE_LINKER_FLAGS_MINSIZEREL
+      CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO)
+    if (NOT ${flag_var} MATCHES "/INCREMENTAL:NO" AND ${flag_var} MATCHES "/INCREMENTAL")
+      string(REGEX REPLACE "/INCREMENTAL" "" ${flag_var} "${${flag_var}}")
+    endif()
+  endforeach()
+
+  # Disable elimination of unreferenced things in debug mode.
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /OPT:NOREF")
+
+  ############################################################
+  # And finally, we can set all the flags we've built up.
+  ############################################################
+
   foreach(opt ${MSVC_GENERAL_OPTIONS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /${opt}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /${opt}")
   endforeach()
-  
+
   foreach(opt ${MSVC_DISABLED_WARNINGS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd${opt}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${opt}")
   endforeach()
-  
+
   foreach(opt ${MSVC_WARNINGS_AS_ERRORS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /we${opt}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we${opt}")
   endforeach()
-  
+
   foreach(opt ${MSVC_ADDITIONAL_DEFINES})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D ${opt}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D ${opt}")
+  endforeach()
+
+  foreach(opt ${MSVC_EXE_LINKER_OPTIONS})
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /${opt}")
+  endforeach()
+
+  foreach(opt ${MSVC_RELEASE_LINKER_OPTIONS})
+    foreach(flag_var
+        CMAKE_EXE_LINKER_FLAGS_RELEASE CMAKE_EXE_LINKER_FLAGS_MINSIZEREL CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+        CMAKE_SHARED_LINKER_FLAGS_RELEASE CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO
+        CMAKE_STATIC_LINKER_FLAGS_RELEASE CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO)
+      set(${flag_var} "${${flag_var}} /${opt}")
+    endforeach()
+  endforeach()
+
+  foreach(opt ${MSVC_DEBUG_OPTIONS})
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /${opt}")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /${opt}")
+  endforeach()
+
+  foreach(opt ${MSVC_RELEASE_OPTIONS})
+    foreach(flag_var
+        CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+      set(${flag_var} "${${flag_var}} /${opt}")
+    endforeach()
+  endforeach()
+
+  foreach(opt ${MSVC_RELEASE_EXE_LINKER_OPTIONS})
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /${opt}")
+    set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "${CMAKE_EXE_LINKER_FLAGS} /${opt}")
+    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS} /${opt}")
   endforeach()
 else()
   message("Warning: unknown/unsupported compiler, things may go wrong")

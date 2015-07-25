@@ -1,2 +1,6 @@
 File "typedef_as4.php", line 12, characters 30-33:
-Cyclic typedef (Typing[4014])
+Error while expanding an object of type fbid: (Typing[4014])
+File "typedef_as4.php", line 12, characters 30-33:
+Error while expanding an object of type fbid:
+File "typedef_as4.php", line 12, characters 30-33:
+Cyclic typedef

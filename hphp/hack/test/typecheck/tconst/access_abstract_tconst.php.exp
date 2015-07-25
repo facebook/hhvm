@@ -1,0 +1,10 @@
+File "access_abstract_tconst.php", line 8, characters 33-39:
+Error while expanding the type constant this::T: (Typing[4146])
+File "access_abstract_tconst.php", line 8, characters 39-39:
+Cannot directly access the abstract type constant C::T
+File "access_abstract_tconst.php", line 6, characters 23-23:
+C::T was declared abstract here
+File "access_abstract_tconst.php", line 8, characters 33-36:
+We believe the type 'this' expands to an object of type C for the following reason:
+File "access_abstract_tconst.php", line 14, characters 3-10:
+This is an object of type C

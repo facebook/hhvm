@@ -1,2 +1,6 @@
 File "typedef9.php", line 12, characters 10-10:
-Cyclic typedef (Typing[4014])
+Error while expanding an object of type A: (Typing[4014])
+File "typedef9.php", line 12, characters 10-10:
+Error while expanding an object of type A:
+File "typedef9.php", line 12, characters 10-10:
+Cyclic typedef

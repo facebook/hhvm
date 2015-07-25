@@ -24,7 +24,12 @@
 /*
  * Conditionally drop into the debugger
  */
-#define DEBUGGER()    kill(getpid(), SIGTRAP)
+#ifdef _MSC_VER
+#include <intrin.h>
+#define DEBUGGER() __debugbreak()
+#else
+#define DEBUGGER() kill(getpid(), SIGTRAP)
+#endif
 
 /*
  * DEBUGGER_IF: use like always_assert(), i.e., do not rely on side effects

@@ -166,7 +166,16 @@ if(MSVC OR CYGWIN OR MINGW)
 endif()
 
 if(CMAKE_CONFIGURATION_TYPES)
-  # Do nothing, CMake adds these defines for us.
+  if(NOT MSVC)
+    message(FATAL_ERROR "Adding the appropriate defines for multi-config targets using anything other than MSVC is not yet supported!")
+  endif()
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D DEBUG")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D DEBUG")
+  foreach(flag_var
+      CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+      CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    set(${flag_var} "${${flag_var}} /D RELEASE=1 /D NDEBUG")
+  endforeach()
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   add_definitions(-DDEBUG)
   message("Generating DEBUG build")

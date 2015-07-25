@@ -91,6 +91,11 @@ Examples:
   % $argv[0] -b ~/code/hhvm/hphp/hhvm/hhvm
   % $argv[0] --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
 
+  # Use relocation to run tests in the same thread. e.g, 6 times in the same thread,
+  # where the 3 specifies a random relocation for the 3rd request and the test is
+  # run 3 * 2 times.
+  % $argv[0] --relocate 3 test/quick/silencer.php
+
 EOT;
   return usage().$help;
 }

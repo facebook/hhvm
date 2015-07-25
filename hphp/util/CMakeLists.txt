@@ -5,6 +5,8 @@ list(APPEND CXX_SOURCES ${files})
 set(ASM_SOURCES)
 auto_sources(asmfiles "*.S" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND ASM_SOURCES ${asmfiles})
+auto_sources(asmfiles "*.asm" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND ASM_SOURCES ${asmfiles})
 
 # Disable Channeled JSON until we're sure it's going to stick
 # sgolemon(2014-02-19)

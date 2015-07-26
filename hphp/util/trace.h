@@ -445,7 +445,8 @@ namespace folly {
 template<typename Val>
 struct FormatValue<Val,
                    typename std::enable_if<
-                     HPHP::has_toString<Val, std::string() const>::value,
+                     HPHP::has_toString<Val, std::string() const>::value
+                     && !std::is_same<Val, StringPiece>::value,
                      void
                    >::type> {
   explicit FormatValue(const Val& val) : m_val(val) {}

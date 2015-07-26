@@ -104,7 +104,7 @@ function(append_systemlib TARGET SOURCE SECTNAME)
     # for each library append the following line to embed.rc
     # $sectionname RCDATA "$source"
     add_custom_command(TARGET generate_rc
-      COMMAND echo "\"${SECTNAME}\" RCDATA \"${SOURCE}\"" >> embed.rc
+      COMMAND echo "${SECTNAME} RCDATA \"${SOURCE}\"" >> embed.rc
       COMMENT "Adding ${SOURCE} as ${SECTNAME} to embed.rc"
       )
   else()
@@ -140,7 +140,13 @@ macro(embed_systemlib_byname TARGET SLIB)
   string(MD5 SLIB_HASH_NAME ${SLIB_EXTNAME})
   # Some platforms limit section names to 16 characters :(
   string(SUBSTRING ${SLIB_HASH_NAME} 0 12 SLIB_HASH_NAME_SHORT)
-  append_systemlib(${TARGET} ${SLIB} "ext.${SLIB_HASH_NAME_SHORT}")
+  if (CYGWIN OR MINGW OR MSVC)
+    # The dot would be causing the RC lexer to begin a number in the
+    # middle of our resource name, so use an underscore instead.
+    append_systemlib(${TARGET} ${SLIB} "ext_${SLIB_HASH_NAME_SHORT}")
+  else()
+    append_systemlib(${TARGET} ${SLIB} "ext.${SLIB_HASH_NAME_SHORT}")
+  endif()
 endmacro()
 
 function(embed_all_systemlibs TARGET ROOT DEST)

@@ -566,6 +566,19 @@ void Repo::initCentral() {
     }
   }
 
+  // Try "$HOMEDRIVE$HOMEPATH/.hhvm.hhbc"
+  char* HOMEDRIVE = getenv("HOMEDRIVE");
+  if (HOMEDRIVE != nullptr) {
+    char* HOMEPATH = getenv("HOMEPATH");
+    if (HOMEPATH != nullptr) {
+      std::string centralPath = HOMEDRIVE;
+      centralPath += HOMEPATH;
+      centralPath += "\\.hhvm.hhbc";
+      if (tryPath(centralPath.c_str()))
+        return;
+    }
+  }
+
   error = "Failed to initialize central HHBC repository:\n" + error;
   // Database initialization failed; this is an unrecoverable state.
   Logger::Error("%s", error.c_str());

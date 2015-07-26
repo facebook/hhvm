@@ -16,11 +16,6 @@
 
 #include "hphp/util/embedded-data.h"
 
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-#include <windows.h>
-#include <winuser.h>
-#endif
-
 #include "hphp/util/current-executable.h"
 
 #include <folly/ScopeGuard.h>
@@ -34,6 +29,9 @@
 
 #ifdef __APPLE__
 #include <mach-o/getsect.h>
+#elif defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#include <windows.h>
+#include <winuser.h>
 #else
 #include <libelf.h>
 #include <gelf.h>
@@ -45,32 +43,26 @@ bool get_embedded_data(const char *section, embedded_data* desc,
                        const std::string &filename /*= "" */) {
   std::string fname(filename.empty() ? current_executable_path() : filename);
 
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  HMODULE moduleHandle = GetModuleHandle(nullptr);
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
   HGLOBAL loadedResource;
   HRSRC   resourceInfo;
   DWORD   resourceSize;
 
-  resourceInfo = FindResource(moduleHandle, section, RT_RCDATA);
-
-  if (!resourceInfo) {
+  resourceInfo = FindResource(NULL, section, RT_RCDATA);
+  if (!resourceInfo)
     return false;
-  }
 
-  loadedResource = LoadResource(moduleHandle, resourceInfo);
-
-  if (!loadedResource) {
+  loadedResource = LoadResource(NULL, resourceInfo);
+  if (!loadedResource)
     return false;
-  }
 
-  resourceSize = SizeofResource(moduleHandle, resourceInfo);
+  resourceSize = SizeofResource(NULL, resourceInfo);
 
   desc->m_filename = fname;
   desc->m_handle = loadedResource;
   desc->m_len = resourceSize;
 
   return true;
-
 #elif !defined(__APPLE__) // LINUX/ELF
   GElf_Shdr shdr;
   size_t shstrndx = -1;

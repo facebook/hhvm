@@ -65,7 +65,7 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_resource.hits() +
                m_ref.hits();
   if (!total) return;
-  fprintf(stderr, "%s: total=%lu KindOfUninit=%.1f%% "
+  fprintf(stderr, "%s: total=%zu KindOfUninit=%.1f%% "
                   "KindOfNull=%.1f%% "
                   "KindOfBoolean=%.1f%% "
                   "KindOfInt64=%.1f%% "

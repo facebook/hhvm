@@ -6,7 +6,8 @@ $r = NewRedisTestInstance();
 $r->setOption(Redis::OPT_PREFIX, GetTestKeyName(__FILE__) . ':');
 $r->delete('scan');
 
-$r->mset(array('key:one' => 'one', 'key:two' => 'two', 'key:three' => 'three', 'key:four' => 'four'));
+$r->mset(array('key:one' => 'one', 'key:two' => 'two',
+               'key:three' => 'three','key:four' => 'four'));
 
 var_dump($r->scan(0));
 var_dump($r->scan(0, 'key:t*'));

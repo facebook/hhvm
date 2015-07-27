@@ -89,24 +89,20 @@ inline bool check_refcount_ns_nz(int32_t count) {
 namespace CountableManip {
 
 // Clowny... but needed so we can handle the functions generically
-inline RefCount getCount(RefCount count) {
-  assert(check_refcount(count));
-  return count;
+inline RefCount getCount(uint8_t mrb) {
+  return mrb + 1;
 }
 
-inline bool isRefCounted(RefCount count) {
-  assert(check_refcount(count));
-  return count >= 0;
+inline bool isRefCounted(bool _static) {
+  return !_static;
 }
 
-inline bool hasMultipleRefs(RefCount count) {
-  assert(check_refcount(count));
-  return (uint32_t)count > 1;
+inline bool hasMultipleRefs(bool mrb) {
+  return mrb;
 }
 
-inline bool hasExactlyOneRef(RefCount count) {
-  assert(check_refcount(count));
-  return (uint32_t)count == 1;
+inline bool hasExactlyOneRef(bool mrb) {
+  return !mrb;
 }
 
 inline bool maybeShared(bool mrb) {
@@ -180,22 +176,22 @@ ALWAYS_INLINE bool decReleaseCheck(bool mrb) {
 
 #define IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC                         \
   RefCount getCount() const {                                           \
-    return CountableManip::getCount(m_hdr.count);                       \
+    return CountableManip::getCount(m_hdr.mrb);                         \
   }                                                                     \
   bool isRefCounted() const {                                           \
-    return CountableManip::isRefCounted(m_hdr.count);                   \
+    return CountableManip::isRefCounted(m_hdr._static);                 \
   }                                                                     \
   bool hasMultipleRefs() const {                                        \
-    return CountableManip::hasMultipleRefs(m_hdr.count);                \
+    return CountableManip::hasMultipleRefs(m_hdr.mrb);                  \
   }                                                                     \
   bool hasExactlyOneRef() const {                                       \
-    return CountableManip::hasExactlyOneRef(m_hdr.count);               \
+    return CountableManip::hasExactlyOneRef(m_hdr.mrb);                 \
   }                                                                     \
   bool maybeShared() const {                                            \
     return CountableManip::maybeShared(m_hdr.mrb);                      \
   }                                                                     \
   bool cowCheck() const {                                               \
-    return hasMultipleRefs();                                           \
+    return maybeShared();                                               \
   }                                                                     \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \

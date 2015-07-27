@@ -74,34 +74,14 @@ void emitTransCounterInc(Asm& a) {
 }
 
 void emitIncRef(Vout& v, Vreg base) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitAssertRefCount(v, base);
-  }
-  // emit incref
-  auto const sf = v.makeReg();
-  v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  emitAssertFlagsNonNegative(v, sf);
-
   // set the mrb
-  // TODO don't hardcode this
-  auto const sf2 = v.makeReg();
-  // take the current gc byte set the mrb
-  v << orbim{FAST_MRB_MASK, base[FAST_GC_BYTE_OFFSET], sf2};
+  auto const sf = v.makeReg();
+  v << orbim{FAST_MRB_MASK, base[FAST_GC_BYTE_OFFSET], sf};
 }
 
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
   ifThen(v, CC_NGE, sf, [&](Vout& v) { v << ud2{}; });
-}
-
-void emitAssertRefCount(Vout& v, Vreg base) {
-  auto const sf = v.makeReg();
-  v << cmplim{StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
-  ifThen(v, CC_NLE, sf, [&](Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmplim{RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
-    ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
-  });
 }
 
 Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {

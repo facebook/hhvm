@@ -40,7 +40,6 @@ APCString::MakeSharedString(DataType type, StringData* data) {
 
   assert(apcStr->m_str.m_hash != 0);
   assert(apcStr->m_str.m_data[len] == 0);
-  assert(apcStr->m_str.getCount() == 0);
   assert(apcStr->m_str.isFlat());
   assert(apcStr->m_str.checkSane());
   return {apcStr->getHandle(), size};

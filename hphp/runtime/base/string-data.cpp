@@ -355,7 +355,7 @@ StringData* StringData::Make(const StringData* s1, const StringData* s2) {
   auto const next = memcpy8(data, s1->m_data, s1->m_len);
   *memcpy8(next, s2->m_data, s2->m_len) = 0;
 
-  assert(sd->getCount() == 1);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;

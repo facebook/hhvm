@@ -63,6 +63,10 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(GNUCC_OPT "${GNUCC_OPT} -fno-delete-null-pointer-checks")
   endif()
 
+  if(GCC_VERSION VERSION_GREATER 5.0 OR GCC_VERSION VERSION_EQUAL 5.0)
+    message(WARNING "HHVM is primarily tested on GCC 4.8 and GCC 4.9. Using other versions may produce unexpected results, or may not even build at all.")
+  endif()
+
   if(GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
     set(GNUCC_OPT "${GNUCC_OPT} -D_GLIBCXX_USE_CXX11_ABI=0 -Wno-bool-compare -DFOLLY_HAVE_MALLOC_H")
   endif()

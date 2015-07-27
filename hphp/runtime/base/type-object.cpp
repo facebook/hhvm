@@ -29,7 +29,7 @@
 
 namespace HPHP {
 
-const Object Object::s_nullObject = Object();
+extern const Object null_object = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
 

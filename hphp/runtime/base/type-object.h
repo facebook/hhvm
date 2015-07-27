@@ -27,8 +27,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define null_object Object::s_nullObject
-
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
@@ -38,8 +36,6 @@ class Object {
   using NoIncRef = req::ptr<ObjectData>::NoIncRef;
 public:
   Object() {}
-
-  static const Object s_nullObject;
 
   ObjectData* get() const { return m_obj.get(); }
   void reset() { m_obj.reset(); }
@@ -223,6 +219,8 @@ private:
 
   const char* classname_cstr() const;
 };
+
+extern const Object null_object;
 
 ///////////////////////////////////////////////////////////////////////////////
 // ObjNR

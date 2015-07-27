@@ -27,7 +27,7 @@
 
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <folly/wangle/acceptor/Acceptor.h>
+#include <wangle/acceptor/Acceptor.h>
 
 namespace HPHP {
 

@@ -333,6 +333,11 @@ if (ELF_GETSHDRSTRNDX)
   add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
 endif()
 
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+  include_directories(${PAM_INCLUDE_PATH})
+endif()
+
 # LLVM. Disabled in OSS for now: t5056266
 # find_package(LLVM)
 # if (LIBLLVM_INCLUDE_DIR)
@@ -538,6 +543,10 @@ macro(hphp_link target)
     target_link_libraries(${target} ${EDITLINE_LIBRARIES})
   elseif (READLINE_LIBRARY)
     target_link_libraries(${target} ${READLINE_LIBRARY})
+  endif()
+
+  if (PAM_LIBRARY)
+    target_link_libraries(${target} ${PAM_LIBRARY})
   endif()
 
   target_link_libraries(${target} ${LIBDWARF_LIBRARIES})

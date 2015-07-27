@@ -219,6 +219,7 @@ struct Input {
     case '\"': out.push_back('\"'); break;
     case '\?': out.push_back('\?'); break;
     case '\\': out.push_back('\\'); break;
+    case '\r': /* ignore */         break;
     case '\n': /* ignore */         break;
     default:
       if (is_oct(src)) {
@@ -329,7 +330,7 @@ struct Input {
   // Skips whitespace (including newlines and comments).
   void skipWhitespace() {
     for (;;) {
-      skipPred(boost::is_any_of(" \t\n"));
+      skipPred(boost::is_any_of(" \t\r\n"));
       if (peek() == '#') {
         skipPred(!boost::is_any_of("\n"));
         expect('\n');
@@ -824,7 +825,7 @@ void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {
 template<class Target> Target read_opcode_arg(AsmState& as) {
   as.in.skipSpaceTab();
   std::string strVal;
-  as.in.consumePred(!boost::is_any_of(" \t\n#;>"),
+  as.in.consumePred(!boost::is_any_of(" \t\r\n#;>"),
                     std::back_inserter(strVal));
   if (strVal.empty()) {
     as.error("expected opcode or directive argument");
@@ -1549,7 +1550,10 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
     it->second(as);
 
     as.in.skipSpaceTab();
-    if (as.in.peek() != '\n' && as.in.peek() != '#' && as.in.peek() != EOF) {
+    if (as.in.peek() != '\n' &&
+        as.in.peek() != '\r' &&
+        as.in.peek() != '#' &&
+        as.in.peek() != EOF) {
       as.error("too many arguments for opcode `" + word + "'");
     }
   }

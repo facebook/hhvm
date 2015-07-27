@@ -296,7 +296,7 @@ function(auto_source_group rootName rootDir)
     string(SUBSTRING "${filePath}" ${rootDirLength} ${filePathLength} fileGroup)
     
     string(REPLACE "/" "\\" fileGroup "${fileGroup}")
-    string(CONCAT fileGroup "\\${rootName}" "${fileGroup}")
+    set(fileGroup "\\${rootName}${fileGroup}")
     
     list(FIND sourceGroups "${fileGroup}" rIdx)
     if (rIdx EQUAL -1)

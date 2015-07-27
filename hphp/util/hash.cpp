@@ -34,14 +34,9 @@ strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength) {
     return hash_string_cs_unaligned_crc(arKey, nKeyLength);
   }
 #endif
-  if (MurmurHash3::useHash128) {
-    uint64_t h[2];
-    MurmurHash3::hash128<true>(arKey, nKeyLength, 0, h);
-    return strhash_t(h[0] & STRHASH_MASK);
-  } else {
-    uint32_t h = MurmurHash3::hash32<true>(arKey, nKeyLength, 0);
-    return strhash_t(h & STRHASH_MASK);
-  }
+  uint64_t h[2];
+  MurmurHash3::hash128<true>(arKey, nKeyLength, 0, h);
+  return strhash_t(h[0] & STRHASH_MASK);
 }
 
 NEVER_INLINE
@@ -51,14 +46,9 @@ strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength) {
     return hash_string_i_unaligned_crc(arKey, nKeyLength);
   }
 #endif
-  if (MurmurHash3::useHash128) {
-    uint64_t h[2];
-    MurmurHash3::hash128<false>(arKey, nKeyLength, 0, h);
-    return strhash_t(h[0] & STRHASH_MASK);
-  } else {
-    uint32_t h = MurmurHash3::hash32<false>(arKey, nKeyLength, 0);
-    return strhash_t(h & STRHASH_MASK);
-  }
+  uint64_t h[2];
+  MurmurHash3::hash128<false>(arKey, nKeyLength, 0, h);
+  return strhash_t(h[0] & STRHASH_MASK);
 }
 
 #if FACEBOOK && defined USE_SSECRC

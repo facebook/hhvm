@@ -333,11 +333,6 @@ if (ELF_GETSHDRSTRNDX)
   add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
 endif()
 
-find_package(Libpam)
-if (PAM_INCLUDE_PATH)
-  include_directories(${PAM_INCLUDE_PATH})
-endif()
-
 # LLVM. Disabled in OSS for now: t5056266
 # find_package(LLVM)
 # if (LIBLLVM_INCLUDE_DIR)
@@ -376,6 +371,14 @@ if (APPLE)
     include_directories(${LIBINTL_INCLUDE_DIR})
   endif()
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
+
+  # This is required by Homebrew's libc. See
+  # https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
+  # for more info.
+  find_package(Libpam)
+  if (PAM_INCLUDE_PATH)
+    include_directories(${PAM_INCLUDE_PATH})
+  endif()
 endif()
 
 #find_package(BISON REQUIRED)
@@ -473,6 +476,10 @@ macro(hphp_link target)
   if (APPLE)
     target_link_libraries(${target} ${LIBINTL_LIBRARIES})
     target_link_libraries(${target} ${KERBEROS_LIB})
+
+    if (PAM_LIBRARY)
+      target_link_libraries(${target} ${PAM_LIBRARY})
+    endif()
   endif()
 
   if (${LIBPTHREAD_LIBRARIES})
@@ -543,10 +550,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${EDITLINE_LIBRARIES})
   elseif (READLINE_LIBRARY)
     target_link_libraries(${target} ${READLINE_LIBRARY})
-  endif()
-
-  if (PAM_LIBRARY)
-    target_link_libraries(${target} ${PAM_LIBRARY})
   endif()
 
   target_link_libraries(${target} ${LIBDWARF_LIBRARIES})

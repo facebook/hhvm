@@ -695,7 +695,7 @@ inline SSATmp* stLoc(IRGS& env,
                      Block* ldPMExit,
                      SSATmp* newVal) {
   constexpr bool decRefOld = true;
-  constexpr bool incRefNew = false;
+  constexpr bool incRefNew = true;
   return stLocImpl(env, id, ldrefExit, ldPMExit, newVal, decRefOld, incRefNew);
 }
 

@@ -81,7 +81,10 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
   if ($ret == 4 || $ret === 6 || $ret == 7) {
     return new TypecheckResult(
       TypecheckStatus::SERVER_BUSY,
-      'Hack typechecking failed: server not ready'
+      'Hack typechecking failed: server not ready. Unless you have run '.
+      '"hh_client" manually, you may be missing Hack type errors! Once the '.
+      'typechecker server has started up, the errors, if any, will then show '.
+      'up in this error log.'
     );
   }
 
@@ -151,6 +154,7 @@ final class TypecheckResult implements \JsonSerializable {
   public function triggerError(
     int $type_error_level = \E_RECOVERABLE_ERROR,
     int $client_error_level = \E_RECOVERABLE_ERROR,
+    int $server_busy_level = \E_WARNING,
   ): void {
     switch ($this->status) {
     case TypecheckStatus::SUCCESS:
@@ -160,6 +164,8 @@ final class TypecheckResult implements \JsonSerializable {
       \trigger_error($this->error, $type_error_level);
       break;
     case TypecheckStatus::SERVER_BUSY:
+      \trigger_error($this->error, $server_busy_level);
+      break;
     case TypecheckStatus::COMMAND_NOT_FOUND:
     case TypecheckStatus::OTHER_ERROR:
       \trigger_error($this->error, $client_error_level);

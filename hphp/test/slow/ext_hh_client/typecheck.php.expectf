@@ -1,4 +1,13 @@
-object(HH\Client\TypecheckResult)#1 (3) {
+object(HH\Client\TypecheckResult)#%d (3) {
+  ["status":"HH\Client\TypecheckResult":private]=>
+  int(2)
+  ["error":"HH\Client\TypecheckResult":private]=>
+  string(223) "Hack typechecking failed: server not ready. Unless you have run "hh_client" manually, you may be missing Hack type errors! Once the typechecker server has started up, the errors, if any, will then show up in this error log."
+  ["rawResult":"HH\Client\TypecheckResult":private]=>
+  NULL
+}
+
+object(HH\Client\TypecheckResult)#%d (3) {
   ["status":"HH\Client\TypecheckResult":private]=>
   int(0)
   ["error":"HH\Client\TypecheckResult":private]=>
@@ -15,7 +24,7 @@ object(HH\Client\TypecheckResult)#1 (3) {
   }
 }
 {"passed":true,"errors":[],"version":"mock"}
-object(HH\Client\TypecheckResult)#2 (3) {
+object(HH\Client\TypecheckResult)#%d (3) {
   ["status":"HH\Client\TypecheckResult":private]=>
   int(1)
   ["error":"HH\Client\TypecheckResult":private]=>
@@ -83,7 +92,7 @@ object(HH\Client\TypecheckResult)#2 (3) {
   }
 }
 {"passed":false,"errors":[{"message":[{"descr":"Invalid return type","path":"test.php","line":1,"start":1,"end":1,"code":4110},{"descr":"This is a string","path":"test.php","line":2,"start":2,"end":2,"code":4110},{"descr":"It is incompatible with an int","path":"test.php","line":1,"start":3,"end":3,"code":4110}]}],"version":"mock"}
-object(HH\Client\TypecheckResult)#3 (3) {
+object(HH\Client\TypecheckResult)#%d (3) {
   ["status":"HH\Client\TypecheckResult":private]=>
   int(3)
   ["error":"HH\Client\TypecheckResult":private]=>
@@ -92,6 +101,8 @@ object(HH\Client\TypecheckResult)#3 (3) {
   NULL
 }
 {"passed":false,"errors":[{"message":[{"descr":"Hack typechecking failed: typechecker command not found: %s\/this_file_does_not_exist"}]}]}
+
+Warning: Hack typechecking failed: server not ready. Unless you have run "hh_client" manually, you may be missing Hack type errors! Once the typechecker server has started up, the errors, if any, will then show up in this error log. in %s/typecheck.php on line %d
 
 Warning: Hack type error: Invalid return type at test.php line 1 in %s/typecheck.php on line %d
 

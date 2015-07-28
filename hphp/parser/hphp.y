@@ -931,6 +931,7 @@ statement:
   | T_GLOBAL global_var_list ';'       { _p->onGlobal($$, $2);}
   | T_STATIC static_var_list ';'       { _p->onStatic($$, $2);}
   | T_ECHO expr_list ';'               { _p->onEcho($$, $2, 0);}
+  | T_OPEN_TAG_WITH_ECHO expr_list ';' { _p->onEcho($$, $2, 0);}
   | T_UNSET '(' variable_list ')' ';'  { _p->onUnset($$, $3);}
   | ';'                                { $$.reset(); $$ = ';';}
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}

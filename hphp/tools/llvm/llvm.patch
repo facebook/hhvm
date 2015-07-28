@@ -1,50 +1,54 @@
 diff --git include/llvm/Bitcode/LLVMBitCodes.h include/llvm/Bitcode/LLVMBitCodes.h
-index c42ecfe..ef795d7 100644
+index c42ecfe..2d3a480 100644
 --- include/llvm/Bitcode/LLVMBitCodes.h
 +++ include/llvm/Bitcode/LLVMBitCodes.h
-@@ -376,7 +376,8 @@ namespace bitc {
+@@ -376,7 +376,9 @@ namespace bitc {
      ATTR_KIND_IN_ALLOCA = 38,
      ATTR_KIND_NON_NULL = 39,
      ATTR_KIND_JUMP_TABLE = 40,
 -    ATTR_KIND_DEREFERENCEABLE = 41
 +    ATTR_KIND_DEREFERENCEABLE = 41,
-+    ATTR_KIND_SMASHABLE = 42
++    ATTR_KIND_SMASHABLE = 42,
++    ATTR_KIND_TCR = 43
    };
  
    enum ComdatSelectionKindCodes {
 diff --git include/llvm/CodeGen/FastISel.h include/llvm/CodeGen/FastISel.h
-index 7af25db..47cc8f4 100644
+index 7af25db..16df94a 100644
 --- include/llvm/CodeGen/FastISel.h
 +++ include/llvm/CodeGen/FastISel.h
-@@ -81,6 +81,7 @@ class FastISel {
+@@ -81,6 +81,8 @@ class FastISel {
      bool IsInReg           : 1;
      bool DoesNotReturn     : 1;
      bool IsReturnValueUsed : 1;
 +    bool Smashable         : 1;
++    bool IsTCR             : 1;
  
      // IsTailCall should be modified by implementations of
      // FastLowerCall that perform tail call conversions.
-@@ -105,6 +106,7 @@ class FastISel {
+@@ -105,6 +107,7 @@ class FastISel {
      CallLoweringInfo()
        : RetTy(nullptr), RetSExt(false), RetZExt(false), IsVarArg(false),
          IsInReg(false), DoesNotReturn(false), IsReturnValueUsed(true),
-+        Smashable(false),
++        Smashable(false), IsTCR(false),
          IsTailCall(false), NumFixedArgs(-1), CallConv(CallingConv::C),
          Callee(nullptr), SymName(nullptr), CS(nullptr), Call(nullptr),
          ResultReg(0), NumResultRegs(0)
-@@ -122,6 +124,7 @@ class FastISel {
+@@ -122,6 +125,8 @@ class FastISel {
        IsReturnValueUsed = !Call.getInstruction()->use_empty();
        RetSExt = Call.paramHasAttr(0, Attribute::SExt);
        RetZExt = Call.paramHasAttr(0, Attribute::ZExt);
 +      Smashable = Call.smashable();
++      IsTCR = Call.isTCR();
  
        CallConv = Call.getCallingConv();
        NumFixedArgs = FuncTy->getNumParams();
-@@ -146,6 +149,7 @@ class FastISel {
+@@ -146,6 +151,8 @@ class FastISel {
        IsReturnValueUsed = !Call.getInstruction()->use_empty();
        RetSExt = Call.paramHasAttr(0, Attribute::SExt);
        RetZExt = Call.paramHasAttr(0, Attribute::ZExt);
 +      Smashable = Call.smashable();
++      IsTCR = Call.isTCR();
  
        CallConv = Call.getCallingConv();
        NumFixedArgs = (FixedArgs == ~0U) ? FuncTy->getNumParams() : FixedArgs;
@@ -274,7 +278,7 @@ index b1d6810..b7db02c 100644
    ///
    /// \p Addr parameter provides the local address of the EH frame section
 diff --git include/llvm/IR/Attributes.h include/llvm/IR/Attributes.h
-index 5ff48d6..05f4fa4 100644
+index 5ff48d6..51be7be 100644
 --- include/llvm/IR/Attributes.h
 +++ include/llvm/IR/Attributes.h
 @@ -99,6 +99,7 @@ public:
@@ -285,11 +289,19 @@ index 5ff48d6..05f4fa4 100644
      StackAlignment,        ///< Alignment of stack for function (3 bits)
                             ///< stored as log2 of alignment with +1 bias 0
                             ///< means unaligned (different from
+@@ -110,6 +111,7 @@ public:
+     SanitizeAddress,       ///< AddressSanitizer is on.
+     SanitizeThread,        ///< ThreadSanitizer is on.
+     SanitizeMemory,        ///< MemorySanitizer is on.
++    TCR,                   ///< Tail call via return.
+     UWTable,               ///< Function must be in a unwind table
+     ZExt,                  ///< Zero extended before/after call
+ 
 diff --git include/llvm/IR/CallSite.h include/llvm/IR/CallSite.h
-index df08257..a8f4334 100644
+index df08257..22cdf94 100644
 --- include/llvm/IR/CallSite.h
 +++ include/llvm/IR/CallSite.h
-@@ -269,6 +269,15 @@ public:
+@@ -269,6 +269,23 @@ public:
      CALLSITE_DELEGATE_SETTER(setDoesNotThrow());
    }
  
@@ -301,40 +313,38 @@ index df08257..a8f4334 100644
 +    CALLSITE_DELEGATE_SETTER(setSmashable());
 +  }
 +
++  /// @brief Determine if the call is via ret instruction.
++  bool isTCR() const {
++    CALLSITE_DELEGATE_GETTER(isTCR());
++  }
++  void setTCR() {
++    CALLSITE_DELEGATE_SETTER(setTCR());
++  }
++
 +
  #undef CALLSITE_DELEGATE_GETTER
  #undef CALLSITE_DELEGATE_SETTER
  
 diff --git include/llvm/IR/CallingConv.h include/llvm/IR/CallingConv.h
-index 1eaf4f7..33a0eef 100644
+index 1eaf4f7..5890029 100644
 --- include/llvm/IR/CallingConv.h
 +++ include/llvm/IR/CallingConv.h
-@@ -137,7 +137,28 @@ namespace CallingConv {
+@@ -137,7 +137,18 @@ namespace CallingConv {
      /// convention differs from the more common \c X86_64_SysV convention
      /// in a number of ways, most notably in that XMM registers used to pass
      /// arguments are shadowed by GPRs, and vice versa.
 -    X86_64_Win64 = 79
 +    X86_64_Win64 = 79,
 +
-+    /// \brief HHVM calling convention for invoking C/C++ functions.
-+    X86_64_HHVM_C = 80,
-+
-+    /// \brief HHVM calling convention for invoking PHP functions.
-+    /// Supports tail call elimination.
-+    X86_64_HHVM_PHP = 81,
-+
-+    /// \brief HHVM calling convention used for service requests.
-+    /// Supports tail call elimination.
-+    X86_64_HHVM_SR = 82,
-+
 +    /// \brief Calling convention used by HipHop Virtual Machine (HHVM) to
-+    /// perform calls to and from translation cache. No registers are preserved.
++    /// perform calls to and from translation cache, and for calling PHP
++    /// functions. It can use any number of registers for arguments, and
++    /// any number of registers for return values.
 +    /// It supports tail/sibling call elimination.
-+    X86_64_HHVM_TC = 83,
++    X86_64_HHVM = 80,
 +
-+    /// \brief Calling convention used by HHVM to return from translation cache
-+    /// by performing a tail call using push+ret instructions.
-+    X86_64_HHVM_TCR = 84
++    /// \brief HHVM calling convention for invoking C/C++ functions.
++    X86_64_HHVM_C = 81,
 +
    };
  } // End CallingConv namespace
@@ -403,13 +413,14 @@ index 3d969a8..bd72214 100644
  
      /// getScope - This returns the scope pointer for this DebugLoc, or null if
 diff --git include/llvm/IR/Function.h include/llvm/IR/Function.h
-index ad4b139..9badc95 100644
+index ad4b139..999aed2 100644
 --- include/llvm/IR/Function.h
 +++ include/llvm/IR/Function.h
-@@ -276,6 +276,15 @@ public:
+@@ -276,6 +276,25 @@ public:
      addFnAttr(Attribute::NoUnwind);
    }
  
++  /// FIXME: does it only apply to function, not call sites?
 +  /// @brief Determine if the function is smashable.
 +  bool smashable() const {
 +    return AttributeSets.hasAttribute(AttributeSet::FunctionIndex,
@@ -419,14 +430,23 @@ index ad4b139..9badc95 100644
 +    addFnAttr(Attribute::Smashable);
 +  }
 +
++  /// @brief Determine if the function call is via push+ret.
++  bool isTCR() const {
++    return AttributeSets.hasAttribute(AttributeSet::FunctionIndex,
++                                      Attribute::TCR);
++  }
++  void setTCR() {
++    addFnAttr(Attribute::TCR);
++  }
++
    /// @brief Determine if the call cannot be duplicated.
    bool cannotDuplicate() const {
      return AttributeSets.hasAttribute(AttributeSet::FunctionIndex,
 diff --git include/llvm/IR/Instructions.h include/llvm/IR/Instructions.h
-index 308467f..04ed996 100644
+index 308467f..9a72242 100644
 --- include/llvm/IR/Instructions.h
 +++ include/llvm/IR/Instructions.h
-@@ -1431,6 +1431,12 @@ public:
+@@ -1431,6 +1431,18 @@ public:
      addAttribute(AttributeSet::FunctionIndex, Attribute::NoUnwind);
    }
  
@@ -436,10 +456,16 @@ index 308467f..04ed996 100644
 +    addAttribute(AttributeSet::FunctionIndex, Attribute::Smashable);
 +  }
 +
++  /// \brief Determine if the call should be done via push+ret.
++  bool isTCR() const { return hasFnAttr(Attribute::TCR); }
++  void setTCR() {
++    addAttribute(AttributeSet::FunctionIndex, Attribute::TCR);
++  }
++
    /// \brief Determine if the call cannot be duplicated.
    bool cannotDuplicate() const {return hasFnAttr(Attribute::NoDuplicate); }
    void setCannotDuplicate() {
-@@ -3100,6 +3106,12 @@ public:
+@@ -3100,6 +3112,18 @@ public:
      addAttribute(AttributeSet::FunctionIndex, Attribute::NoReturn);
    }
  
@@ -447,6 +473,12 @@ index 308467f..04ed996 100644
 +  bool smashable() const { return hasFnAttr(Attribute::Smashable); }
 +  void setSmashable() {
 +    addAttribute(AttributeSet::FunctionIndex, Attribute::Smashable);
++  }
++
++  /// \brief Determine if the call should be done via push+ret.
++  bool isTCR() const { return hasFnAttr(Attribute::TCR); }
++  void setTCR() {
++    addAttribute(AttributeSet::FunctionIndex, Attribute::TCR);
 +  }
 +
    /// \brief Determine if the call cannot unwind.
@@ -753,34 +785,36 @@ index 85a91c6..0a25d15 100644
    static SectionKind getMergeable1ByteCString() {
      return get(Mergeable1ByteCString);
 diff --git include/llvm/Target/TargetLowering.h include/llvm/Target/TargetLowering.h
-index 0f90961..1e27628 100644
+index 0f90961..c61e74c 100644
 --- include/llvm/Target/TargetLowering.h
 +++ include/llvm/Target/TargetLowering.h
-@@ -2158,6 +2158,7 @@ public:
+@@ -2158,6 +2158,8 @@ public:
      bool IsInReg           : 1;
      bool DoesNotReturn     : 1;
      bool IsReturnValueUsed : 1;
 +    bool Smashable         : 1;
++    bool IsTCR             : 1;
  
      // IsTailCall should be modified by implementations of
      // TargetLowering::LowerCall that perform tail call conversions.
-@@ -2177,6 +2178,7 @@ public:
+@@ -2177,6 +2179,7 @@ public:
      CallLoweringInfo(SelectionDAG &DAG)
        : RetTy(nullptr), RetSExt(false), RetZExt(false), IsVarArg(false),
          IsInReg(false), DoesNotReturn(false), IsReturnValueUsed(true),
-+        Smashable(false),
++        Smashable(false), IsTCR(false),
          IsTailCall(false), NumFixedArgs(-1), CallConv(CallingConv::C),
          DAG(DAG), CS(nullptr) {}
  
-@@ -2213,6 +2215,7 @@ public:
+@@ -2213,6 +2216,8 @@ public:
        IsReturnValueUsed = !Call.getInstruction()->use_empty();
        RetSExt = Call.paramHasAttr(0, Attribute::SExt);
        RetZExt = Call.paramHasAttr(0, Attribute::ZExt);
 +      Smashable = Call.smashable();
++      IsTCR = Call.isTCR();
  
        Callee = Target;
  
-@@ -2235,6 +2238,11 @@ public:
+@@ -2235,6 +2240,16 @@ public:
        return *this;
      }
  
@@ -789,38 +823,41 @@ index 0f90961..1e27628 100644
 +      return *this;
 +    }
 +
++    CallLoweringInfo &setTCR(bool Value = true) {
++      IsTCR = Value;
++      return *this;
++    }
++
      CallLoweringInfo &setVarArg(bool Value = true) {
        IsVarArg = Value;
        return *this;
 diff --git lib/AsmParser/LLLexer.cpp lib/AsmParser/LLLexer.cpp
-index 04dcd2b..3b2ade6 100644
+index 04dcd2b..3d900f0 100644
 --- lib/AsmParser/LLLexer.cpp
 +++ lib/AsmParser/LLLexer.cpp
-@@ -599,6 +599,11 @@ lltok::Kind LLLexer::LexIdentifier() {
+@@ -599,6 +599,8 @@ lltok::Kind LLLexer::LexIdentifier() {
    KEYWORD(anyregcc);
    KEYWORD(preserve_mostcc);
    KEYWORD(preserve_allcc);
++  KEYWORD(hhvm);
 +  KEYWORD(hhvm_c);
-+  KEYWORD(hhvm_php);
-+  KEYWORD(hhvm_sr);
-+  KEYWORD(hhvm_tc);
-+  KEYWORD(hhvm_tcr);
  
    KEYWORD(cc);
    KEYWORD(c);
-@@ -642,6 +647,7 @@ lltok::Kind LLLexer::LexIdentifier() {
+@@ -642,6 +644,8 @@ lltok::Kind LLLexer::LexIdentifier() {
    KEYWORD(sanitize_address);
    KEYWORD(sanitize_thread);
    KEYWORD(sanitize_memory);
 +  KEYWORD(smashable);
++  KEYWORD(tcr);
    KEYWORD(uwtable);
    KEYWORD(zeroext);
  
 diff --git lib/AsmParser/LLParser.cpp lib/AsmParser/LLParser.cpp
-index 0fa5301..1b78709 100644
+index 0fa5301..9f2adb8 100644
 --- lib/AsmParser/LLParser.cpp
 +++ lib/AsmParser/LLParser.cpp
-@@ -1030,6 +1030,7 @@ bool LLParser::ParseFnAttributeValuePairs(AttrBuilder &B,
+@@ -1030,12 +1030,14 @@ bool LLParser::ParseFnAttributeValuePairs(AttrBuilder &B,
      case lltok::kw_readnone:          B.addAttribute(Attribute::ReadNone); break;
      case lltok::kw_readonly:          B.addAttribute(Attribute::ReadOnly); break;
      case lltok::kw_returns_twice:     B.addAttribute(Attribute::ReturnsTwice); break;
@@ -828,7 +865,14 @@ index 0fa5301..1b78709 100644
      case lltok::kw_ssp:               B.addAttribute(Attribute::StackProtect); break;
      case lltok::kw_sspreq:            B.addAttribute(Attribute::StackProtectReq); break;
      case lltok::kw_sspstrong:         B.addAttribute(Attribute::StackProtectStrong); break;
-@@ -1331,6 +1332,7 @@ bool LLParser::ParseOptionalParamAttrs(AttrBuilder &B) {
+     case lltok::kw_sanitize_address:  B.addAttribute(Attribute::SanitizeAddress); break;
+     case lltok::kw_sanitize_thread:   B.addAttribute(Attribute::SanitizeThread); break;
+     case lltok::kw_sanitize_memory:   B.addAttribute(Attribute::SanitizeMemory); break;
++    case lltok::kw_tcr:               B.addAttribute(Attribute::TCR); break;
+     case lltok::kw_uwtable:           B.addAttribute(Attribute::UWTable); break;
+ 
+     // Error handling.
+@@ -1331,9 +1333,11 @@ bool LLParser::ParseOptionalParamAttrs(AttrBuilder &B) {
      case lltok::kw_sanitize_address:
      case lltok::kw_sanitize_memory:
      case lltok::kw_sanitize_thread:
@@ -836,7 +880,11 @@ index 0fa5301..1b78709 100644
      case lltok::kw_ssp:
      case lltok::kw_sspreq:
      case lltok::kw_sspstrong:
-@@ -1400,6 +1402,7 @@ bool LLParser::ParseOptionalReturnAttrs(AttrBuilder &B) {
++    case lltok::kw_tcr:
+     case lltok::kw_uwtable:
+       HaveError |= Error(Lex.getLoc(), "invalid use of function-only attribute");
+       break;
+@@ -1400,9 +1404,11 @@ bool LLParser::ParseOptionalReturnAttrs(AttrBuilder &B) {
      case lltok::kw_sanitize_address:
      case lltok::kw_sanitize_memory:
      case lltok::kw_sanitize_thread:
@@ -844,44 +892,41 @@ index 0fa5301..1b78709 100644
      case lltok::kw_ssp:
      case lltok::kw_sspreq:
      case lltok::kw_sspstrong:
-@@ -1507,6 +1510,11 @@ bool LLParser::ParseOptionalDLLStorageClass(unsigned &Res) {
++    case lltok::kw_tcr:
+     case lltok::kw_uwtable:
+       HaveError |= Error(Lex.getLoc(), "invalid use of function-only attribute");
+       break;
+@@ -1507,6 +1513,8 @@ bool LLParser::ParseOptionalDLLStorageClass(unsigned &Res) {
  ///   ::= 'anyregcc'
  ///   ::= 'preserve_mostcc'
  ///   ::= 'preserve_allcc'
++///   ::= 'hhvm'
 +///   ::= 'hhvm_c'
-+///   ::= 'hhvm_php'
-+///   ::= 'hhvm_sr'
-+///   ::= 'hhvm_tc'
-+///   ::= 'hhvm_tcr'
  ///   ::= 'cc' UINT
  ///
  bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
-@@ -1533,6 +1541,11 @@ bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
+@@ -1533,6 +1541,8 @@ bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
    case lltok::kw_anyregcc:       CC = CallingConv::AnyReg; break;
    case lltok::kw_preserve_mostcc:CC = CallingConv::PreserveMost; break;
    case lltok::kw_preserve_allcc: CC = CallingConv::PreserveAll; break;
++  case lltok::kw_hhvm:           CC = CallingConv::X86_64_HHVM; break;
 +  case lltok::kw_hhvm_c:         CC = CallingConv::X86_64_HHVM_C; break;
-+  case lltok::kw_hhvm_php:       CC = CallingConv::X86_64_HHVM_PHP; break;
-+  case lltok::kw_hhvm_sr:        CC = CallingConv::X86_64_HHVM_SR; break;
-+  case lltok::kw_hhvm_tc:        CC = CallingConv::X86_64_HHVM_TC; break;
-+  case lltok::kw_hhvm_tcr:       CC = CallingConv::X86_64_HHVM_TCR; break;
    case lltok::kw_cc: {
        unsigned ArbitraryCC;
        Lex.Lex();
 diff --git lib/AsmParser/LLToken.h lib/AsmParser/LLToken.h
-index b28699e..833c73c 100644
+index b28699e..b18d7df 100644
 --- lib/AsmParser/LLToken.h
 +++ lib/AsmParser/LLToken.h
-@@ -95,6 +95,8 @@ namespace lltok {
+@@ -95,6 +95,7 @@ namespace lltok {
      kw_x86_64_sysvcc, kw_x86_64_win64cc,
      kw_webkit_jscc, kw_anyregcc,
      kw_preserve_mostcc, kw_preserve_allcc,
-+    kw_hhvm_c, kw_hhvm_php,
-+    kw_hhvm_sr, kw_hhvm_tc, kw_hhvm_tcr,
++    kw_hhvm, kw_hhvm_c,
  
      // Attributes:
      kw_attributes,
-@@ -129,6 +131,7 @@ namespace lltok {
+@@ -129,12 +130,14 @@ namespace lltok {
      kw_returned,
      kw_returns_twice,
      kw_signext,
@@ -889,8 +934,15 @@ index b28699e..833c73c 100644
      kw_ssp,
      kw_sspreq,
      kw_sspstrong,
+     kw_sret,
+     kw_sanitize_thread,
+     kw_sanitize_memory,
++    kw_tcr,
+     kw_uwtable,
+     kw_zeroext,
+ 
 diff --git lib/Bitcode/Writer/BitcodeWriter.cpp lib/Bitcode/Writer/BitcodeWriter.cpp
-index feb9a42..8c35473 100644
+index feb9a42..80bcfa4 100644
 --- lib/Bitcode/Writer/BitcodeWriter.cpp
 +++ lib/Bitcode/Writer/BitcodeWriter.cpp
 @@ -202,6 +202,8 @@ static uint64_t getAttrKindEncoding(Attribute::AttrKind Kind) {
@@ -902,6 +954,15 @@ index feb9a42..8c35473 100644
    case Attribute::NoUnwind:
      return bitc::ATTR_KIND_NO_UNWIND;
    case Attribute::OptimizeForSize:
+@@ -234,6 +236,8 @@ static uint64_t getAttrKindEncoding(Attribute::AttrKind Kind) {
+     return bitc::ATTR_KIND_SANITIZE_THREAD;
+   case Attribute::SanitizeMemory:
+     return bitc::ATTR_KIND_SANITIZE_MEMORY;
++  case Attribute::TCR:
++    return bitc::ATTR_KIND_TCR;
+   case Attribute::UWTable:
+     return bitc::ATTR_KIND_UW_TABLE;
+   case Attribute::ZExt:
 diff --git lib/CodeGen/AsmPrinter/AsmPrinter.cpp lib/CodeGen/AsmPrinter/AsmPrinter.cpp
 index a030c5c..d6268f6 100644
 --- lib/CodeGen/AsmPrinter/AsmPrinter.cpp
@@ -1309,7 +1370,7 @@ index 4976e35..587eefb 100644
    VariableDbgInfos.clear();
  }
 diff --git lib/CodeGen/PrologEpilogInserter.cpp lib/CodeGen/PrologEpilogInserter.cpp
-index 9d332ca..982b777 100644
+index 9d332ca..119c1ca 100644
 --- lib/CodeGen/PrologEpilogInserter.cpp
 +++ lib/CodeGen/PrologEpilogInserter.cpp
 @@ -402,19 +402,21 @@ void PEI::insertCSRSpillsAndRestores(MachineFunction &Fn) {
@@ -1359,7 +1420,7 @@ index 9d332ca..982b777 100644
 +  // all objects on the stack.
 +  unsigned Skew = 0;
 +  if (LLVM_UNLIKELY(Fn.getFunction()->getCallingConv() ==
-+                    CallingConv::X86_64_HHVM_TC)) {
++                    CallingConv::X86_64_HHVM)) {
 +    Skew = 8;
 +  }
 +
@@ -1764,22 +1825,19 @@ index 526fe55..04e4699 100644
        StubMap::const_iterator i = Stubs.find(Value);
        uintptr_t StubAddress;
 diff --git lib/IR/AsmWriter.cpp lib/IR/AsmWriter.cpp
-index 8f91225..842b118 100644
+index 8f91225..1cd7eac 100644
 --- lib/IR/AsmWriter.cpp
 +++ lib/IR/AsmWriter.cpp
-@@ -89,6 +89,11 @@ static void PrintCallingConv(unsigned cc, raw_ostream &Out) {
+@@ -89,6 +89,8 @@ static void PrintCallingConv(unsigned cc, raw_ostream &Out) {
    case CallingConv::X86_64_Win64:  Out << "x86_64_win64cc"; break;
    case CallingConv::SPIR_FUNC:     Out << "spir_func"; break;
    case CallingConv::SPIR_KERNEL:   Out << "spir_kernel"; break;
-+  case CallingConv::X86_64_HHVM_C: Out<< "hhvm_c"; break;
-+  case CallingConv::X86_64_HHVM_PHP:  Out<< "hhvm_php"; break;
-+  case CallingConv::X86_64_HHVM_SR:   Out << "hhvm_sr"; break;
-+  case CallingConv::X86_64_HHVM_TC:   Out << "hhvm_tc"; break;
-+  case CallingConv::X86_64_HHVM_TCR:  Out << "hhvm_tcr"; break;
++  case CallingConv::X86_64_HHVM:   Out << "hhvm"; break;
++  case CallingConv::X86_64_HHVM_C: Out << "hhvm_c"; break;
    }
  }
  
-@@ -2104,6 +2109,9 @@ void AssemblyWriter::printInstruction(const Instruction &I) {
+@@ -2104,6 +2106,9 @@ void AssemblyWriter::printInstruction(const Instruction &I) {
                               TheModule);
      }
    }
@@ -1790,7 +1848,7 @@ index 8f91225..842b118 100644
  }
  
 diff --git lib/IR/Attributes.cpp lib/IR/Attributes.cpp
-index 04545ea..f93a793 100644
+index 04545ea..1fbe865 100644
 --- lib/IR/Attributes.cpp
 +++ lib/IR/Attributes.cpp
 @@ -231,6 +231,8 @@ std::string Attribute::getAsString(bool InAttrGrp) const {
@@ -1802,11 +1860,21 @@ index 04545ea..f93a793 100644
    if (hasAttribute(Attribute::StackProtect))
      return "ssp";
    if (hasAttribute(Attribute::StackProtectReq))
-@@ -426,6 +428,7 @@ uint64_t AttributeImpl::getAttrMask(Attribute::AttrKind Val) {
+@@ -243,6 +245,8 @@ std::string Attribute::getAsString(bool InAttrGrp) const {
+     return "sanitize_thread";
+   if (hasAttribute(Attribute::SanitizeMemory))
+     return "sanitize_memory";
++  if (hasAttribute(Attribute::TCR))
++    return "tcr";
+   if (hasAttribute(Attribute::UWTable))
+     return "uwtable";
+   if (hasAttribute(Attribute::ZExt))
+@@ -426,6 +430,8 @@ uint64_t AttributeImpl::getAttrMask(Attribute::AttrKind Val) {
    case Attribute::InAlloca:        return 1ULL << 43;
    case Attribute::NonNull:         return 1ULL << 44;
    case Attribute::JumpTable:       return 1ULL << 45;
 +  case Attribute::Smashable:       return 1ULL << 46;
++  case Attribute::TCR:             return 1ULL << 47;
    case Attribute::Dereferenceable:
      llvm_unreachable("dereferenceable attribute not supported in raw format");
    }
@@ -1904,16 +1972,17 @@ index a017bd3..6cff9b9 100644
    if (Node) {
      LLVMContextImpl::MDMapTy &Info = getContext().pImpl->MetadataStore[this];
 diff --git lib/IR/Verifier.cpp lib/IR/Verifier.cpp
-index 9cf911b..382a451 100644
+index 9cf911b..30071b7 100644
 --- lib/IR/Verifier.cpp
 +++ lib/IR/Verifier.cpp
-@@ -775,7 +775,8 @@ void Verifier::VerifyAttributeTypes(AttributeSet Attrs, unsigned Idx,
+@@ -775,7 +775,9 @@ void Verifier::VerifyAttributeTypes(AttributeSet Attrs, unsigned Idx,
          I->getKindAsEnum() == Attribute::NoBuiltin ||
          I->getKindAsEnum() == Attribute::Cold ||
          I->getKindAsEnum() == Attribute::OptimizeNone ||
 -        I->getKindAsEnum() == Attribute::JumpTable) {
 +        I->getKindAsEnum() == Attribute::JumpTable ||
-+        I->getKindAsEnum() == Attribute::Smashable) {
++        I->getKindAsEnum() == Attribute::Smashable ||
++        I->getKindAsEnum() == Attribute::TCR) {
        if (!isFunction) {
          CheckFailed("Attribute '" + I->getAsString() +
                      "' only applies to functions!", V);
@@ -2319,10 +2388,10 @@ index fdec333..ec9ee65 100644
    }
  
 diff --git lib/Target/X86/X86CallingConv.td lib/Target/X86/X86CallingConv.td
-index 899a960..39d2907 100644
+index 899a960..091b7da 100644
 --- lib/Target/X86/X86CallingConv.td
 +++ lib/Target/X86/X86CallingConv.td
-@@ -162,6 +162,15 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
+@@ -162,6 +162,16 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
    CCIfType<[i64], CCAssignToReg<[RAX]>>
  ]>;
  
@@ -2331,30 +2400,36 @@ index 899a960..39d2907 100644
 +  // Promote all types to i64
 +  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
 +
-+  // Return: RBX and RBP
-+  CCIfType<[i64], CCAssignToReg<[RBX, RBP]>>
++  // Return: could potentially return in any register but RSP.
++  CCIfType<[i64], CCAssignToReg<[RBX, RBP, R12, RDI, RSI, RDX, RCX, R8, R9,
++                                 RAX, R10, R11, R13, R14, R15]>>
 +]>;
 +
  // X86-64 AnyReg return-value convention. No explicit register is specified for
  // the return-value. The register allocator is allowed and expected to choose
  // any free register.
-@@ -197,6 +206,12 @@ def RetCC_X86_64 : CallingConv<[
+@@ -197,6 +207,9 @@ def RetCC_X86_64 : CallingConv<[
    CCIfCC<"CallingConv::X86_64_Win64", CCDelegateTo<RetCC_X86_Win64_C>>,
    CCIfCC<"CallingConv::X86_64_SysV", CCDelegateTo<RetCC_X86_64_C>>,
  
 +  // Handle HHVM calls.
-+  CCIfCC<"CallingConv::X86_64_HHVM_PHP", CCDelegateTo<RetCC_X86_64_HHVM>>,
-+  CCIfCC<"CallingConv::X86_64_HHVM_SR", CCDelegateTo<RetCC_X86_64_HHVM>>,
-+  CCIfCC<"CallingConv::X86_64_HHVM_TC", CCDelegateTo<RetCC_X86_64_HHVM>>,
-+  CCIfCC<"CallingConv::X86_64_HHVM_TCR", CCDelegateTo<RetCC_X86_64_HHVM>>,
++  CCIfCC<"CallingConv::X86_64_HHVM", CCDelegateTo<RetCC_X86_64_HHVM>>,
 +
    // Mingw64 and native Win64 use Win64 CC
    CCIfSubtarget<"isTargetWin64()", CCDelegateTo<RetCC_X86_Win64_C>>,
  
-@@ -278,6 +293,43 @@ def CC_X86_64_C : CallingConv<[
+@@ -278,6 +291,23 @@ def CC_X86_64_C : CallingConv<[
             CCAssignToStack<64, 64>>
  ]>;
  
++// Calling convention for HHVM.
++def CC_X86_64_HHVM : CallingConv<[
++  // Use all/any registers for args.
++  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP, R15,
++                                 RDI, RSI, RDX, RCX, R8, R9,
++                                 RAX, R10, R11, R13, R14]>>
++]>;
++
 +// Calling convention for helper functions in HHVM.
 +def CC_X86_64_HHVM_C : CallingConv<[
 +  // Pass the first argument in RBP.
@@ -2364,69 +2439,25 @@ index 899a960..39d2907 100644
 +  CCDelegateTo<CC_X86_64_C>
 +]>;
 +
-+// Calling convention for PHP calls in HHVM.
-+def CC_X86_64_HHVM_PHP : CallingConv<[
-+  // Use all registers for args.
-+  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP, R15,
-+                                 RDI, RSI, RDX, RCX, R8, R9,
-+                                 RAX, R10, R11, R13, R14]>>
-+]>;
-+
-+// Calling convention for HHVM's service requests on X86-64
-+def CC_X86_64_HHVM_SR : CallingConv<[
-+  // Pass HHVM's rVmSp, rVmTl, rVmFp, rAsm, and X64 ABI args regs.
-+  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP, R10, RDI, RSI, RDX, RCX, R8, R9]>>
-+]>;
-+
-+// Calling convention for HHVM's TC on X86-64
-+def CC_X86_64_HHVM_TC : CallingConv<[
-+  // Pass HHVM's rVmSp, rVmTl, and rVmFp.
-+  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP]>>
-+]>;
-+
-+// Calling convention for HHVM's return from TC on X86-64
-+def CC_X86_64_HHVM_TCR : CallingConv<[
-+  // Pass as many registers as we like (sort of allreg_cc).
-+  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP,
-+                                 RAX, RCX, RDX, RDI, RSI,
-+                                 R8, R9, R10, R11, R13, R14, R15]>>
-+]>;
-+
  // Calling convention used on Win64
  def CC_X86_Win64_C : CallingConv<[
    // FIXME: Handle byval stuff.
-@@ -592,6 +644,11 @@ def CC_X86_64 : CallingConv<[
+@@ -592,6 +622,8 @@ def CC_X86_64 : CallingConv<[
    CCIfCC<"CallingConv::AnyReg", CCDelegateTo<CC_X86_64_AnyReg>>,
    CCIfCC<"CallingConv::X86_64_Win64", CCDelegateTo<CC_X86_Win64_C>>,
    CCIfCC<"CallingConv::X86_64_SysV", CCDelegateTo<CC_X86_64_C>>,
++  CCIfCC<"CallingConv::X86_64_HHVM", CCDelegateTo<CC_X86_64_HHVM>>,
 +  CCIfCC<"CallingConv::X86_64_HHVM_C", CCDelegateTo<CC_X86_64_HHVM_C>>,
-+  CCIfCC<"CallingConv::X86_64_HHVM_PHP", CCDelegateTo<CC_X86_64_HHVM_PHP>>,
-+  CCIfCC<"CallingConv::X86_64_HHVM_SR", CCDelegateTo<CC_X86_64_HHVM_SR>>,
-+  CCIfCC<"CallingConv::X86_64_HHVM_TC", CCDelegateTo<CC_X86_64_HHVM_TC>>,
-+  CCIfCC<"CallingConv::X86_64_HHVM_TCR", CCDelegateTo<CC_X86_64_HHVM_TCR>>,
  
    // Mingw64 and native Win64 use Win64 CC
    CCIfSubtarget<"isTargetWin64()", CCDelegateTo<CC_X86_Win64_C>>,
-@@ -662,3 +719,6 @@ def CSR_64_Intel_OCL_BI_AVX    : CalleeSavedRegs<(add CSR_64,
+@@ -662,3 +694,6 @@ def CSR_64_Intel_OCL_BI_AVX    : CalleeSavedRegs<(add CSR_64,
  def CSR_64_Intel_OCL_BI_AVX512 : CalleeSavedRegs<(add RBX, RDI, RSI, R14, R15,
                                                    (sequence "ZMM%u", 16, 31),
                                                    K4, K5, K6, K7)>;
 +
-+// rVmTl is preserved for PHP calls in HHVM.
-+def CSR_64_HHVM_PHP : CalleeSavedRegs<(add R12)>;
-diff --git lib/Target/X86/X86FastISel.cpp lib/Target/X86/X86FastISel.cpp
-index a5bbf72..6bbec33 100644
---- lib/Target/X86/X86FastISel.cpp
-+++ lib/Target/X86/X86FastISel.cpp
-@@ -2650,7 +2650,7 @@ static unsigned computeBytesPoppedByCallee(const X86Subtarget *Subtarget,
-   if (Subtarget->getTargetTriple().isOSMSVCRT())
-     return 0;
-   if (CC == CallingConv::Fast || CC == CallingConv::GHC ||
--      CC == CallingConv::HiPE)
-+      CC == CallingConv::HiPE || CC == CallingConv::X86_64_HHVM_TC)
-     return 0;
-   if (CS && !CS->paramHasAttr(1, Attribute::StructRet))
-     return 0;
++// R12 is preserved for PHP calls in HHVM.
++def CSR_64_HHVM : CalleeSavedRegs<(add R12)>;
 diff --git lib/Target/X86/X86FrameLowering.cpp lib/Target/X86/X86FrameLowering.cpp
 index 58e15c7..fe54aef 100644
 --- lib/Target/X86/X86FrameLowering.cpp
@@ -2484,22 +2515,19 @@ index 58e15c7..fe54aef 100644
      MBB.erase(MBBI);
    } else if ((RetOpcode == X86::RETQ || RetOpcode == X86::RETL ||
 diff --git lib/Target/X86/X86ISelLowering.cpp lib/Target/X86/X86ISelLowering.cpp
-index 70760c1..be8f077 100644
+index 70760c1..ae8340d 100644
 --- lib/Target/X86/X86ISelLowering.cpp
 +++ lib/Target/X86/X86ISelLowering.cpp
-@@ -2190,7 +2190,10 @@ CreateCopyOfByValArgument(SDValue Src, SDValue Dst, SDValue Chain,
+@@ -2190,7 +2190,7 @@ CreateCopyOfByValArgument(SDValue Src, SDValue Dst, SDValue Chain,
  /// supports tail call optimization.
  static bool IsTailCallConvention(CallingConv::ID CC) {
    return (CC == CallingConv::Fast || CC == CallingConv::GHC ||
 -          CC == CallingConv::HiPE);
-+          CC == CallingConv::HiPE || CC == CallingConv::X86_64_HHVM_PHP ||
-+          CC == CallingConv::X86_64_HHVM_SR ||
-+          CC == CallingConv::X86_64_HHVM_TC ||
-+          CC == CallingConv::X86_64_HHVM_TCR);
++          CC == CallingConv::HiPE || CC == CallingConv::X86_64_HHVM);
  }
  
  /// \brief Return true if the calling convention is a C calling convention.
-@@ -3028,10 +3031,17 @@ X86TargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
+@@ -3028,10 +3028,17 @@ X86TargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
      // This isn't right, although it's probably harmless on x86; liveouts
      // should be computed from returns not tail calls.  Consider a void
      // function making a tail call to a function returning int.
@@ -2508,7 +2536,7 @@ index 70760c1..be8f077 100644
 +    // Propagate attribute
 +    SDValue result = DAG.getNode(X86ISD::TC_RETURN, dl, NodeTys, Ops);
 +    result.setSmashable(CLI.Smashable);
-+    result.setTCR(CallConv == CallingConv::X86_64_HHVM_TCR);
++    result.setTCR(CLI.IsTCR);
 +    return result;
    }
  
@@ -2518,7 +2546,7 @@ index 70760c1..be8f077 100644
    InFlag = Chain.getValue(1);
  
    // Create the CALLSEQ_END node.
-@@ -3540,6 +3550,9 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
+@@ -3540,6 +3547,9 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
    if (IsVarArg)
      return false;
  
@@ -2528,7 +2556,7 @@ index 70760c1..be8f077 100644
    switch (CallingConv) {
    default:
      return false;
-@@ -3549,12 +3562,6 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
+@@ -3549,12 +3559,6 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
      return !is64Bit;
    case CallingConv::X86_ThisCall:
      return !is64Bit;
@@ -2541,7 +2569,7 @@ index 70760c1..be8f077 100644
    }
  }
  
-@@ -3594,8 +3601,11 @@ static unsigned TranslateX86CC(ISD::CondCode SetCCOpcode, bool isFP,
+@@ -3594,8 +3598,11 @@ static unsigned TranslateX86CC(ISD::CondCode SetCCOpcode, bool isFP,
        }
        if (SetCCOpcode == ISD::SETLT && RHSC->getZExtValue() == 1) {
          // X < 1   -> X <= 0
@@ -2737,32 +2765,28 @@ index 892396b..187ada4 100644
 +    OutStreamer.EmitBundleAlignMode(CurrentBundleAlignMode);
  }
 diff --git lib/Target/X86/X86RegisterInfo.cpp lib/Target/X86/X86RegisterInfo.cpp
-index 97f86e2..116fe92 100644
+index 97f86e2..ab7924e 100644
 --- lib/Target/X86/X86RegisterInfo.cpp
 +++ lib/Target/X86/X86RegisterInfo.cpp
-@@ -224,7 +224,12 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
-   switch (MF->getFunction()->getCallingConv()) {
+@@ -225,6 +225,12 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
    case CallingConv::GHC:
    case CallingConv::HiPE:
-+  case CallingConv::X86_64_HHVM_SR:
-+  case CallingConv::X86_64_HHVM_TC:
-+  case CallingConv::X86_64_HHVM_TCR:
      return CSR_NoRegs_SaveList;
-+  case CallingConv::X86_64_HHVM_PHP:
-+    return CSR_64_HHVM_PHP_SaveList;
++  case CallingConv::X86_64_HHVM:
++    // This is awkward. We are telling LLVM to not save our registers.
++    // This is done to prevent it from overly conservative spilling
++    // in cases where the register is used for passing argument to callee.
++    // Instead we preserve registers manually.
++    return CSR_NoRegs_SaveList;
    case CallingConv::AnyReg:
      if (HasAVX)
        return CSR_64_AllRegs_AVX_SaveList;
-@@ -277,7 +282,12 @@ X86RegisterInfo::getCallPreservedMask(CallingConv::ID CC) const {
-   switch (CC) {
+@@ -278,6 +284,8 @@ X86RegisterInfo::getCallPreservedMask(CallingConv::ID CC) const {
    case CallingConv::GHC:
    case CallingConv::HiPE:
-+  case CallingConv::X86_64_HHVM_SR:
-+  case CallingConv::X86_64_HHVM_TC:
-+  case CallingConv::X86_64_HHVM_TCR:
      return CSR_NoRegs_RegMask;
-+  case CallingConv::X86_64_HHVM_PHP:
-+    return CSR_64_HHVM_PHP_RegMask;
++  case CallingConv::X86_64_HHVM:
++    return CSR_64_HHVM_RegMask;
    case CallingConv::AnyReg:
      if (HasAVX)
        return CSR_64_AllRegs_AVX_RegMask;
@@ -3004,78 +3028,117 @@ index 0000000..b0fb073
 +
 diff --git test/CodeGen/X86/hhvm-cc.ll test/CodeGen/X86/hhvm-cc.ll
 new file mode 100644
-index 0000000..f546243
+index 0000000..f1eaff2
 --- /dev/null
 +++ test/CodeGen/X86/hhvm-cc.ll
-@@ -0,0 +1,172 @@
+@@ -0,0 +1,231 @@
 +; RUN: llc -stack-alignment=8 < %s | FileCheck %s
 +
-+; 80 - HHVM_C
-+; 81 - HHVM_PHP
-+; 82 - HHVM_SR
-+; 83 - HHVM_TC
-+; 84 - HHVM_TCR
 +target triple = "x86_64-linux-gnu"
 +
-+declare hhvm_tc void @bar(i64, i64, i64)
++declare hhvm void @bar(i64, i64, i64) nounwind
 +
-+define hhvm_tc void @foo(i64 %a, i64 %b, i64 %c) {
++define hhvm void @foo(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  foo:
 +; CHECK-DAG:    movl $1, %ebx
-+; CHECK-DAG:    movl $2, %r12
 +; CHECK-DAG:    movl $3, %ebp
 +; CHECK:        jmp bar
-+  tail call hhvm_tc void @bar(i64 1, i64 2, i64 3)
++  tail call hhvm void @bar(i64 1, i64 %b, i64 3)
++  ;%t1 = call i64 asm sideeffect "", "=
 +  ret void
 +}
 +
++; can return up to 15 64-bit args in registers
++%rettype = type { i64, i64, i64, i64, i64, i64, i64, i64,
++                  i64, i64, i64, i64, i64, i64, i64
++}
 +
-+declare hhvm_tc i64 @baz(i64, i64, i64)
++define hhvm %rettype @return_all(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  return_all:
++; CHECK-DAG:    movl $1, %ebx
++; CHECK-DAG:    movl $2, %ebp
++; CHECK-DAG:    movl $3, %r12
++; CHECK-DAG:    movl $4, %edi
++; CHECK-DAG:    movl $5, %esi
++; CHECK-DAG:    movl $6, %edx
++; CHECK-DAG:    movl $7, %ecx
++; CHECK-DAG:    movl $8, %r8
++; CHECK-DAG:    movl $9, %r9
++; CHECK-DAG:    movl $10, %eax
++; CHECK-DAG:    movl $11, %r10
++; CHECK-DAG:    movl $12, %r11
++; CHECK-DAG:    movl $13, %r13
++; CHECK-DAG:    movl $14, %r14
++; CHECK-DAG:    movl $15, %r15
++; CHECK:        retq
++  %r0 = insertvalue %rettype zeroinitializer, i64 1, 0
++  %r1 = insertvalue %rettype %r0, i64 2, 1
++  %r2 = insertvalue %rettype %r1, i64 3, 2
++  %r3 = insertvalue %rettype %r2, i64 4, 3
++  %r4 = insertvalue %rettype %r3, i64 5, 4
++  %r5 = insertvalue %rettype %r4, i64 6, 5
++  %r6 = insertvalue %rettype %r5, i64 7, 6
++  %r7 = insertvalue %rettype %r6, i64 8, 7
++  %r8 = insertvalue %rettype %r7, i64 9, 8
++  %r9 = insertvalue %rettype %r8, i64 10, 9
++  %r10 = insertvalue %rettype %r9, i64 11, 10
++  %r11 = insertvalue %rettype %r10, i64 12, 11
++  %r12 = insertvalue %rettype %r11, i64 13, 12
++  %r13 = insertvalue %rettype %r12, i64 14, 13
++  %r14 = insertvalue %rettype %r13, i64 15, 14
++  ret %rettype %r14
++}
 +
-+define hhvm_tc i64 @faz(i64 %t0, i64 %t1, i64 %t2) nounwind {
++declare hhvm i64 @baz(i64, i64, i64)
++
++define hhvm i64 @faz(i64 %t0, i64 %t1, i64 %t2) nounwind {
 +entry:
 +; CHECK-LABEL:  faz:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NEXT:   jmp baz
-+  %tmp = tail call hhvm_tc i64 @baz(i64 %t0, i64 %t1, i64 %t2)
++  %tmp = tail call hhvm i64 @baz(i64 %t0, i64 %t1, i64 %t2)
 +  ret i64 %tmp
 +}
 +
-+define hhvm_tc i64 @mod_return(i64 %t0, i64 %t1, i64 %t2) nounwind {
++define hhvm i64 @mod_return(i64 %t0, i64 %t1, i64 %t2) nounwind {
 +entry:
 +; CHECK-LABEL:  mod_return:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NEXT:   callq baz
 +; CHECK-NEXT:   incq %rbx
-+  %tmp = tail call hhvm_tc i64 @baz(i64 %t0, i64 %t1, i64 %t2)
++  %tmp = tail call hhvm i64 @baz(i64 %t0, i64 %t1, i64 %t2)
 +  %retval = add i64 %tmp, 1
 +  ret i64 %retval
 +}
 +
-+declare hhvm_php {i64, i64} @php_short(i64, i64, i64, i64)
++declare hhvm {i64, i64} @php_short(i64, i64, i64, i64)
 +
-+; %r12 (2nd arg) should not be spilled.
-+define hhvm_tc i64 @test_php_short(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm i64 @test_php_short(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
++; %r12 (2nd arg) should not be spilled.
++;
 +; CHECK-LABEL:  test_php_short:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NEXT:   movl $42, %r15
 +; CHECK-NEXT:   callq php_short
 +; CHECK-NEXT:   leaq (%rbp,%r12), %rbx
 +; CHECK-NEXT:   retq
-+  %pair = call hhvm_php {i64, i64} @php_short(i64 %a, i64 %b, i64 %c, i64 42)
++  %pair = call hhvm {i64, i64} @php_short(i64 %a, i64 %b, i64 %c, i64 42)
++  ;call void asm "", "~{r10},~{r11},~{r12}"()
 +  %fp = extractvalue {i64, i64} %pair, 1
 +  %rv = add i64 %fp, %b
 +  ret i64 %rv
 +}
 +
-+declare hhvm_php {i64, i64} @php_all(i64, i64, i64, i64, i64, i64, i64,
++declare hhvm {i64, i64} @php_all(i64, i64, i64, i64, i64, i64, i64,
 +                                     i64, i64, i64, i64, i64, i64, i64, i64)
 +
-+; %r12 (2nd arg) should not be spilled.
-+define hhvm_tc i64 @test_php_all(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm i64 @test_php_all(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
++; %r12 (2nd arg) should not be spilled.
++;
 +; CHECK-LABEL:  test_php_all:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NOT:    sub
@@ -3093,8 +3156,8 @@ index 0000000..f546243
 +; CHECK-DAG:    movl $13, %r11
 +; CHECK-DAG:    movl $14, %r13
 +; CHECK-DAG:    movl $15, %r14
-+; CHECK-DAG:    callq php_all
-+  %pair = call hhvm_php {i64, i64} @php_all(
++; CHECK:        callq php_all
++  %pair = call hhvm {i64, i64} @php_all(
 +    i64 1, i64 %b, i64 3, i64 4, i64 5, i64 6, i64 7,
 +    i64 8, i64 9, i64 10, i64 11, i64 12, i64 13, i64 14, i64 15)
 +  %fp = extractvalue {i64, i64} %pair, 1
@@ -3102,28 +3165,47 @@ index 0000000..f546243
 +  ret i64 %rv
 +}
 +
-+declare hhvm_sr void @svcreq(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
++declare hhvm void @svcreq(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64,
++                             i64, i64)
 +
-+define hhvm_tc void @test_svcreq(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm void @test_svcreq(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_svcreq:
-+; CHECK-NEXT:   {{^#.*}}
-+; CHECK-NEXT:   movl $42, %r10
-+; CHECK-NEXT:   movl $1, %edi
-+; CHECK-NEXT:   movl $2, %esi
-+; CHECK-NEXT:   movl $3, %edx
-+; CHECK-NEXT:   movl $4, %ecx
-+; CHECK-NEXT:   movl $5, %r8
-+; CHECK-NEXT:   movl $6, %r9
-+; CHECK-NEXT:   jmp svcreq
-+  tail call hhvm_sr void @svcreq(i64 %a, i64 %b, i64 %c, i64 42, i64 1, i64 2,
-+                                 i64 3, i64 4, i64 5, i64 6)
++; CHECK-DAG:    movl $42, %r10
++; CHECK-DAG:    movl $1, %edi
++; CHECK-DAG:    movl $2, %esi
++; CHECK-DAG:    movl $3, %edx
++; CHECK-DAG:    movl $4, %ecx
++; CHECK-DAG:    movl $5, %r8
++; CHECK-DAG:    movl $6, %r9
++; CHECK:        jmp svcreq
++  tail call hhvm void @svcreq(i64 %a, i64 %b, i64 %c, i64 undef, i64 1,
++                                 i64 2, i64 3, i64 4, i64 5, i64 6, i64 undef,
++                                 i64 42)
++  ret void
++}
++
++declare hhvm_c void @helper_short(i64, i64, i64, i64, i64, i64, i64)
++
++define hhvm void @test_helper_short(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_helper_short:
++; CHECK-NOT:    sub
++; CHECK-DAG:    movl $1, %edi
++; CHECK-DAG:    movl $2, %esi
++; CHECK-DAG:    movl $3, %edx
++; CHECK-DAG:    movl $4, %ecx
++; CHECK-DAG:    movl $5, %r8
++; CHECK-DAG:    movl $6, %r9
++; CHECK:        callq helper_short
++  call hhvm_c void @helper_short(i64 %c, i64 1, i64 2, i64 3, i64 4,
++                                 i64 5, i64 6)
 +  ret void
 +}
 +
 +declare hhvm_c void @helper(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
 +
-+define hhvm_tc void @test_helper(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm void @test_helper(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_helper:
 +; CHECK-DAG:    movl $1, %edi
@@ -3132,57 +3214,58 @@ index 0000000..f546243
 +; CHECK-DAG:    movl $4, %ecx
 +; CHECK-DAG:    movl $5, %r8
 +; CHECK-DAG:    movl $6, %r9
-+; CHECK-DAG:    callq helper
++; CHECK:        callq helper
 +  call hhvm_c void @helper(i64 %c, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6,
 +                           i64 7, i64 8, i64 9)
 +  ret void
 +}
 +
-+declare hhvm_tcr void @return_short(i64, i64, i64)
++declare hhvm void @return_short(i64, i64, i64)
 +
-+define hhvm_tc void @test_return_short(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm void @test_return_short(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_return_short:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NEXT:   pushq $return_short
 +; CHECK-NEXT:   retl
-+  tail call hhvm_tcr void @return_short(i64 %a, i64 %b, i64 %c)
++  tail call hhvm void @return_short(i64 %a, i64 %b, i64 %c) tcr
 +  ret void
 +}
 +
-+declare hhvm_tcr void @return_all(i64, i64, i64, i64, i64, i64, i64, i64,
-+                                  i64, i64, i64, i64, i64, i64, i64)
++declare hhvm void @return_all_tc(i64, i64, i64, i64, i64, i64, i64, i64,
++                                 i64, i64, i64, i64, i64, i64, i64)
 +
-+define hhvm_tc void @test_return_all(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm void @test_return_all_tc(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
-+; CHECK-LABEL:  test_return_all:
++; CHECK-LABEL:  test_return_all_tc:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-DAG:    movl $1, %ebx
 +; CHECK-DAG:    movl $2, %r12
 +; CHECK-DAG:    movl $3, %ebp
-+; CHECK-DAG:    movl $4, %eax
-+; CHECK-DAG:    movl $5, %ecx
-+; CHECK-DAG:    movl $6, %edx
-+; CHECK-DAG:    movl $7, %edi
-+; CHECK-DAG:    movl $8, %esi
++; CHECK-DAG:    movl $4, %r15
++; CHECK-DAG:    movl $5, %edi
++; CHECK-DAG:    movl $6, %esi
++; CHECK-DAG:    movl $7, %edx
++; CHECK-DAG:    movl $8, %ecx
 +; CHECK-DAG:    movl $9, %r8
 +; CHECK-DAG:    movl $10, %r9
-+; CHECK-DAG:    movl $11, %r10
-+; CHECK-DAG:    movl $12, %r11
-+; CHECK-DAG:    movl $13, %r13
-+; CHECK-DAG:    movl $14, %r14
-+; CHECK-DAG:    movl $15, %r15
-+; CHECK-DAG:    pushq $return_all
-+; CHECK-DAG:    retl
-+  tail call hhvm_tcr void @return_all(
++; CHECK-DAG:    movl $11, %eax
++; CHECK-DAG:    movl $12, %r10
++; CHECK-DAG:    movl $13, %r11
++; CHECK-DAG:    movl $14, %r13
++; CHECK-DAG:    movl $15, %r14
++; CHECK:        pushq $return_all
++; CHECK-NEXT:   retl
++  tail call hhvm void @return_all_tc(
 +    i64 1, i64 2, i64 3, i64 4, i64 5, i64 6, i64 7,
-+    i64 8, i64 9, i64 10, i64 11, i64 12, i64 13, i64 14, i64 15)
++    i64 8, i64 9, i64 10, i64 11, i64 12, i64 13, i64 14, i64 15) tcr
++  
 +  ret void
 +}
 +
 diff --git test/CodeGen/X86/hhvm-stack.ll test/CodeGen/X86/hhvm-stack.ll
 new file mode 100644
-index 0000000..1ff5b7e
+index 0000000..add58dc
 --- /dev/null
 +++ test/CodeGen/X86/hhvm-stack.ll
 @@ -0,0 +1,43 @@
@@ -3191,7 +3274,7 @@ index 0000000..1ff5b7e
 +declare hhvm_c void @helper(i64, i64, i64)
 +declare hhvm_c void @helper2(<2 x double>, i64)
 +
-+define hhvm_tc void @test_helper(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm void @test_helper(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_helper:
 +; CHECK-NOT:    push
@@ -3209,7 +3292,7 @@ index 0000000..1ff5b7e
 +  ret void
 +}
 +
-+define hhvm_tc void @test_helper2(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm void @test_helper2(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_helper2:
 +; CHECK-NOT:    push
@@ -3220,7 +3303,7 @@ index 0000000..1ff5b7e
 +  ret void
 +}
 +
-+define hhvm_tc void @test_helper3(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm void @test_helper3(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_helper3:
 +; CHECK-NOT:    push
@@ -3725,7 +3808,7 @@ index 0000000..006fe54
 +!0 = metadata !{i32 1, metadata !"code_skew", i32 60}
 +!llvm.module.flags = !{ !0 }
 diff --git utils/vim/llvm.vim utils/vim/llvm.vim
-index 2b91823..42f34f7 100644
+index 2b91823..96ad5bf 100644
 --- utils/vim/llvm.vim
 +++ utils/vim/llvm.vim
 @@ -16,7 +16,7 @@ syn case match
@@ -3737,13 +3820,13 @@ index 2b91823..42f34f7 100644
  syn match   llvmType /\<i\d\+\>/
  
  " Instructions.
-@@ -42,17 +42,18 @@ syn keyword llvmKeyword arm_aapcscc arm_apcscc asm atomic available_externally
+@@ -42,18 +42,19 @@ syn keyword llvmKeyword arm_aapcscc arm_apcscc asm atomic available_externally
  syn keyword llvmKeyword blockaddress byval c catch cc ccc cleanup coldcc common
  syn keyword llvmKeyword constant datalayout declare default define deplibs
  syn keyword llvmKeyword dllexport dllimport except extern_weak external fastcc
 -syn keyword llvmKeyword filter gc global hidden initialexec inlinehint inreg
-+syn keyword llvmKeyword filter gc global hhvm_c hhvm_php hhvm_sr hhvm_tc
-+syn keyword llvmKeyword hhvm_tcr hidden initialexec inlinehint inreg
++syn keyword llvmKeyword filter gc global hhvm hhvm_c
++syn keyword llvmKeyword hidden initialexec inlinehint inreg
  syn keyword llvmKeyword intel_ocl_bicc inteldialect internal
  syn keyword llvmKeyword linkonce linkonce_odr
  syn keyword llvmKeyword localdynamic localexec minsize module monotonic
@@ -3755,7 +3838,9 @@ index 2b91823..42f34f7 100644
  syn keyword llvmKeyword returns_twice sanitize_thread sanitize_memory
  syn keyword llvmKeyword section seq_cst sideeffect signext singlethread
 -syn keyword llvmKeyword spir_func spir_kernel sret ssp sspreq sspstrong
+-syn keyword llvmKeyword tail target thread_local to triple unnamed_addr
 +syn keyword llvmKeyword smashable spir_func spir_kernel sret ssp sspreq sspstrong
- syn keyword llvmKeyword tail target thread_local to triple unnamed_addr
++syn keyword llvmKeyword tail target tcr thread_local to triple unnamed_addr
  syn keyword llvmKeyword unordered uwtable volatile weak weak_odr
  syn keyword llvmKeyword x86_fastcallcc x86_stdcallcc x86_thiscallcc x86_64_sysvcc
+ syn keyword llvmKeyword x86_64_win64cc zeroext

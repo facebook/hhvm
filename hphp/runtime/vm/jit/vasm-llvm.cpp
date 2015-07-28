@@ -533,7 +533,7 @@ struct LLVMEmitter {
     llvm::InitializeNativeTargetAsmPrinter();
     llvm::InitializeNativeTargetAsmParser();
 
-    m_function->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+    m_function->setCallingConv(llvm::CallingConv::X86_64_HHVM);
     m_function->setAlignment(1);
 
     if (RuntimeOption::EvalJitLLVMOptSize) {
@@ -1873,7 +1873,7 @@ void LLVMEmitter::emit(const bindcall& inst) {
   next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
   auto call = m_irb.CreateInvoke(func, next, unwind, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   call->setSmashable();
   m_irb.SetInsertPoint(next);
 
@@ -1901,7 +1901,7 @@ void LLVMEmitter::emit(const vcallstub& inst) {
   next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
   auto call = m_irb.CreateInvoke(func, next, unwind, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   m_irb.SetInsertPoint(next);
 
   // Register new rVmSp/rVmFp, just like bindcall.
@@ -2005,7 +2005,7 @@ llvm::CallInst* LLVMEmitter::emitTraceletTailCall(llvm::Value* target,
                                                   RegSet argRegs) {
   auto args = makePhysRegArgs(argRegs, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
   auto call = m_irb.CreateCall(target, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   call->setTailCallKind(llvm::CallInst::TCK_MustTail);
   m_irb.CreateRetVoid();
   return call;
@@ -2543,7 +2543,9 @@ void LLVMEmitter::emit(const jmpm& inst) {
 
 void LLVMEmitter::emit(const jmpi& inst) {
   auto args = makePhysRegArgs(
-    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rAsm});
+    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15,
+      reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9,
+      reg::rax, reg::r10});
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
 
   auto func = emitFuncPtr(
@@ -2552,7 +2554,7 @@ void LLVMEmitter::emit(const jmpi& inst) {
     reinterpret_cast<uint64_t>(inst.target)
   );
   auto call = m_irb.CreateCall(func, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   call->setTailCallKind(llvm::CallInst::TCK_Tail);
   m_irb.CreateRetVoid();
 }
@@ -2780,8 +2782,7 @@ void LLVMEmitter::emit(const vretm& inst) {
   // "Return" with a tail call to the loaded address
   auto call = emitTraceletTailCall(retAddr, inst.args);
   if (RuntimeOption::EvalJitLLVMRetOpt) {
-    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
-    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+    call->setTCR();
   }
 }
 
@@ -2790,8 +2791,7 @@ void LLVMEmitter::emit(const vret& inst) {
                                             ptrType(m_traceletFnTy));
   auto call = emitTraceletTailCall(retAddr, inst.args);
   if (RuntimeOption::EvalJitLLVMRetOpt) {
-    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
-    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+    call->setTCR();
   }
 }
 
@@ -2805,8 +2805,7 @@ void LLVMEmitter::emit(const leavetc& inst) {
   );
   auto call = emitTraceletTailCall(exit_ptr, inst.args);
   if (RuntimeOption::EvalJitLLVMRetOpt) {
-    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
-    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+    call->setTCR();
   }
 }
 
@@ -3005,7 +3004,7 @@ void LLVMEmitter::emit(const svcreqstub& inst) {
                           funcType,
                           uint64_t(handleSRHelper));
   auto call = m_irb.CreateCall(func, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   call->setTailCallKind(llvm::CallInst::TCK_Tail);
   m_irb.CreateRetVoid();
 }

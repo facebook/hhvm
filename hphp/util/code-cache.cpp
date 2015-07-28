@@ -25,7 +25,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(mcg);
 
-#if defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
 const void* __hot_start = nullptr;
 const void* __hot_end = nullptr;
 #endif

@@ -65,7 +65,7 @@ template<class T = uint16_t> struct HeaderWord {
               mutable uint8_t uncounted:1;
               mutable uint8_t _static:1;
             };
-            uint8_t gcbyte;
+            mutable uint8_t gcbyte;
           };
         };
         uint32_t lo32;
@@ -79,40 +79,39 @@ template<class T = uint16_t> struct HeaderWord {
   };
 
   void init(HeaderKind kind, RefCount count) {
+    uint8_t gc = 0;
+    if (count == StaticValue) {
+      gc = 0x84; // 1000 0100, _static=mrb=1
+    } else if (count == UncountedValue) {
+      gc = 0xC4; // 1100 0100, _static=uncounted=mrb=1
+    }
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
-        uint64_t(count) << 32;
-    // TODO make fast
-    if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true;
-    if (count < 0) _static = true;
-    else _static = false;
-    if (count == UncountedValue) uncounted = true;
-    else uncounted = false;
+        gc << (8 * offsetof(HeaderWord, gcbyte));
   }
 
   void init(T aux, HeaderKind kind, RefCount count) {
+    uint8_t gc = 0;
+    if (count == StaticValue) {
+      gc = 0x84; // 1000 0100, _static=mrb=1
+    } else if (count == UncountedValue) {
+      gc = 0xC4; // 1100 0100, _static=uncounted=mrb=1
+    }
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         static_cast<uint16_t>(aux) |
-        uint64_t(count) << 32;
-    // TODO make fast
-    if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true;
-    if (count < 0) _static = true;
-    else _static = false;
-    if (count == UncountedValue) uncounted = true;
-    else uncounted = false;
+        gc << (8 * offsetof(HeaderWord, gcbyte));
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
   void init(const HeaderWord<T>& h, RefCount count) {
-    q = h.lo32 | uint64_t(count) << 32;
-    // TODO make fast
-    if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true;
-    if (count < 0) _static = true;
-    else _static = false;
-    if (count == UncountedValue) uncounted = true;
-    else uncounted = false;
+    uint8_t gc = 0;
+    if (count == StaticValue) {
+      gc = 0x84; // 1000 0100, _static=mrb=1
+    } else if (count == UncountedValue) {
+      gc = 0xC4; // 1100 0100, _static=uncounted=mrb=1
+    }
+    q = static_cast<uint32_t>(h.kind) << (8 * offsetof(HeaderWord, kind)) |
+        static_cast<uint16_t>(h.aux) |
+        gc << (8 * offsetof(HeaderWord, gcbyte));
   }
 };
 

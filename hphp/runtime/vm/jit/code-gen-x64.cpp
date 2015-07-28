@@ -2679,13 +2679,6 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   emitIncStat(vmain(), Stats::TC_DecRef_NZ);
   emitDecRefTypeStat(vmain(), inst);
-  auto const ty = inst->src(0)->type();
-  ifRefCountedNonStatic(
-    vmain(), ty, srcLoc(inst, 0),
-    [&] (Vout& v) {
-
-    }
-  );
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
@@ -2722,10 +2715,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testq{name, name, sf};
   ifThenElse(v, CC_NZ, sf, [&](Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmpbim{0, name[FAST_GC_BYTE_OFFSET], sf};
-    static_assert(UncountedValue < 0 && StaticValue < 0, "");
-    ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
+    emitIncRef(v, name);
     v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
     auto const encoded = ActRec::encodeNumArgsAndFlags(
       safe_cast<int32_t>(nArgs),

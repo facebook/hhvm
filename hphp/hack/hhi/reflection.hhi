@@ -290,6 +290,7 @@ class ReflectionTypeConstant implements Reflector {
   public function getName(): string;
   public function isAbstract(): bool;
   public function getDeclaringClass(): ReflectionClass;
+  public function getClass(): ReflectionClass;
   public function getAssignedTypeText(): ?string;
 }
 

@@ -2257,13 +2257,24 @@ class ReflectionTypeConstant implements Reflector {
   }
 
   /**
-   * Gets the declaring class for the reflected type constant.
+   * Gets the declaring class for the reflected type constant. This is
+   * the most derived class in which the type constant is declared.
    *
    * @return ReflectionClass   A ReflectionClass object of the class that the
    *                           reflected type constant is part of.
    */
   public function getDeclaringClass() {
     return new ReflectionClass($this->getDeclaringClassname());
+  }
+
+  /**
+   * Gets the class for the reflected type constant.
+   *
+   * @return ReflectionClass   A ReflectionClass object of the class that the
+   *                           reflected type constant is part of.
+   */
+  public function getClass() {
+    return new ReflectionClass($this->getClassname());
   }
 
   public function __toString() {
@@ -2298,6 +2309,9 @@ class ReflectionTypeConstant implements Reflector {
 
   <<__Native>>
   private function getDeclaringClassname(): string;
+
+  <<__Native>>
+  private function getClassname(): string;
 
   /* returns the shape containing the full type information for this
    * type constant. The structure of this shape is specified in

@@ -1522,7 +1522,9 @@ static bool HHVM_METHOD(ReflectionTypeConstant, __init,
 
   for (size_t i = 0; i < numConsts; i++) {
     if (const_name.same(consts[i].m_name) && consts[i].isType()) {
-      ReflectionConstHandle::Get(this_)->setConst(&consts[i]);
+      auto handle = ReflectionConstHandle::Get(this_);
+      handle->setConst(&consts[i]);
+      handle->setClass(cls);
       return true;
     }
   }
@@ -1565,6 +1567,13 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
 static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
   auto const cns = ReflectionConstHandle::GetConstFor(this_);
   auto cls = cns->m_class;
+  auto ret = const_cast<StringData*>(cls->name());
+  return String(ret);
+}
+
+// private helper for getClass
+static String HHVM_METHOD(ReflectionTypeConstant, getClassname) {
+  auto const cls = ReflectionConstHandle::GetClassFor(this_);
   auto ret = const_cast<StringData*>(cls->name());
   return String(ret);
 }
@@ -1762,6 +1771,7 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionTypeConstant, isAbstract);
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
+    HHVM_ME(ReflectionTypeConstant, getClassname);
 
     HHVM_ME(ReflectionProperty, __init);
 

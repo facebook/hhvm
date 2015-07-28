@@ -131,16 +131,10 @@ class ReflectionClassHandle {
 /* A ReflectionConstHandle is a NativeData object wrapping a Const*
  * for the purposes of ReflectionTypeConstant. */
 extern const StaticString s_ReflectionConstHandle;
-class ReflectionConstHandle {
- public:
-  ReflectionConstHandle(): m_const(nullptr) {}
-  explicit ReflectionConstHandle(const Class::Const* cst): m_const(cst) {};
-  ReflectionConstHandle(const ReflectionConstHandle&) = delete;
-  ReflectionConstHandle& operator=(const ReflectionConstHandle& other) {
-    m_const = other.m_const;
-    return *this;
-  }
-  ~ReflectionConstHandle() {}
+struct ReflectionConstHandle {
+  ReflectionConstHandle(): m_const(nullptr), m_cls(nullptr) {}
+  explicit ReflectionConstHandle(const Class::Const* cns, const Class* cls):
+      m_const(cns), m_cls(cls) {};
 
   static ReflectionConstHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionConstHandle>(obj);
@@ -150,17 +144,29 @@ class ReflectionConstHandle {
     return Native::data<ReflectionConstHandle>(obj)->getConst();
   }
 
-  const Class::Const* getConst() { return m_const; }
+  static const Class* GetClassFor(ObjectData* obj) {
+    return Native::data<ReflectionConstHandle>(obj)->getClass();
+  }
 
-  void setConst(const Class::Const* cst) {
-    assert(cst != nullptr);
+  const Class::Const* getConst() const { return m_const; }
+  const Class* getClass() const { return m_cls; }
+
+  void setConst(const Class::Const* cns) {
+    assert(cns != nullptr);
     assert(m_const == nullptr);
-    m_const = cst;
+    m_const = cns;
+  }
+
+  void setClass(const Class* cls) {
+    assert(cls != nullptr);
+    assert(m_cls == nullptr);
+    m_cls = cls;
   }
 
  private:
   template <typename F> friend void scan(const ReflectionConstHandle&, F&);
-  const Class::Const* m_const{nullptr};
+  const Class::Const* m_const;
+  const Class* m_cls;
 };
 
 /* A ReflectionPropHandle is a NativeData object wrapping a Prop*

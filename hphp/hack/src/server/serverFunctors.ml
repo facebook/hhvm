@@ -127,10 +127,7 @@ end = struct
       end else msg_to_channel oc Connection_ok;
       let client = { ic; oc; close } in
       Program.handle_client genv env client
-    with
-    | Sys_error("Broken pipe") ->
-      close ()
-    | e ->
+    with e ->
       let msg = Printexc.to_string e in
       EventLogger.master_exception msg;
       Printf.fprintf stderr "Error: %s\n%!" msg;
@@ -326,14 +323,8 @@ end = struct
       Option.iter (ServerArgs.save_filename genv.options) (save genv env);
       Program.run_once_and_exit genv env
     else
-      (* Open up a server on the socket before we go into MainInit -- the client
-       * will try to connect to the socket as soon as we lock the init lock. We
-       * need to have the socket open now (even if we won't actually accept
-       * connections until init is done) so that the client can try to use the
-       * socket and get blocked on it -- otherwise, trying to open a socket with
-       * no server on the other end is an immediate error. *)
-      let socket = Socket.init_unix_socket root in
       let env = MainInit.go options program_init in
+      let socket = Socket.init_unix_socket root in
       serve genv env socket
 
   let get_log_file root =

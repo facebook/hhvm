@@ -36,7 +36,7 @@ function break_finally_1(int $b): int {
 function break_finally_2(int $b): int {
   while ($b != 343) {
     try {
-      if ($b >= 300) { $b++; echo $b; continue; }
+      //if ($b >= 300) { $b++; echo $b; continue; }
 
       try {
         if ($b === 0) {
@@ -50,6 +50,7 @@ function break_finally_2(int $b): int {
     } finally {
       echo "more finally\n";
     }
+    if ($b >= 300) { $b++; echo $b; continue; }
     if ($b == 10) break;
   }
   return 1;

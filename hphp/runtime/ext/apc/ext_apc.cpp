@@ -1560,8 +1560,7 @@ String apc_reserialize(const String& str) {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
 
-bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
-              int waitSeconds) {
+bool apc_dump(const char *filename, bool keyOnly, bool metaDump) {
   DumpMode mode;
   std::ofstream out(filename);
 

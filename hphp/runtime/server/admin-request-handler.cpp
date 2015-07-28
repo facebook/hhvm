@@ -1091,12 +1091,7 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
     if (keyOnlyParam == "true" || keyOnlyParam == "1") {
       keyOnly = true;
     }
-    int waitSeconds = transport->getIntParam("waitseconds");
-    if (!waitSeconds) {
-      waitSeconds = RuntimeOption::RequestTimeoutSeconds > 0 ?
-                    RuntimeOption::RequestTimeoutSeconds : 10;
-    }
-    apc_dump("/tmp/apc_dump", keyOnly, false, waitSeconds);
+    apc_dump("/tmp/apc_dump", keyOnly, false);
     transport->sendString("Done");
     return true;
   }
@@ -1113,12 +1108,7 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
       transport->sendString("No APC\n");
       return true;
     }
-    int waitSeconds = transport->getIntParam("waitseconds");
-    if (!waitSeconds) {
-      waitSeconds = RuntimeOption::RequestTimeoutSeconds > 0 ?
-        RuntimeOption::RequestTimeoutSeconds : 10;
-    }
-    apc_dump("/tmp/apc_dump_meta", false, true, waitSeconds);
+    apc_dump("/tmp/apc_dump_meta", false, true);
     transport->sendString("Done");
     return true;
   }

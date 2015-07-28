@@ -3,7 +3,7 @@ continue
 bool(true)
 array(2) {
   ["clientIP"]=>
-  NULL
+  string(0) ""
   ["clientPort"]=>
   NULL
 }

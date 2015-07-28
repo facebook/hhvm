@@ -694,7 +694,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
         # to figure that out, and complains about it. The OLD behavior here tells cmake
         # to simply not emit the dependency for itself. (which doesn't really exist to
         # begin with)
-        cmake_policy(SET CMP0038 OLD)
+        if(POLICY CMP0038)
+          cmake_policy(SET CMP0038 OLD)
+        endif()
         link_libraries("$<$<NOT:$<STREQUAL:fastlz,$<TARGET_PROPERTY:NAME>>>:$<TARGET_NAME:fastlz>>")
       endif()
       add_definitions("-DHAVE_LIBFASTLZ")

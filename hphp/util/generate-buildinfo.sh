@@ -12,14 +12,16 @@
 unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-# OSS version depends on this fallback since it's
-# obviously not using fbmake
+# OSS version depends on this fallback since it's obviously not using fbmake.
 if [ x"$FBMAKE_PRE_COMMAND_OUTDIR" = x"" ]; then
-  FBMAKE_PRE_COMMAND_OUTDIR="$DIR/../"
+  BUILD_DIR="$DIR/../"
+else
+  # Should be in /some/path/hphp/util/, so chop off the hphp/util.
+  BUILD_DIR="$DIR/../../$FBMAKE_PRE_COMMAND_OUTDIR"
 fi
 
-BUILDINFO_FILE="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-build-info.cpp"
-REPO_SCHEMA_H="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-repo-schema.h"
+BUILDINFO_FILE="$BUILD_DIR/hphp-build-info.cpp"
+REPO_SCHEMA_H="$BUILD_DIR/hphp-repo-schema.h"
 
 if git rev-parse --show-toplevel >& /dev/null; then
     scm=git

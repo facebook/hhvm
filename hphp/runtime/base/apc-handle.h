@@ -210,14 +210,14 @@ private:
 
 private:
   void realIncRef() const {
-    assert(IS_REFCOUNTED_TYPE(m_type));
+    assert(isRefcountedType(m_type));
     ++m_count;
   }
 
   void realDecRef() const {
     assert(m_count.load() > 0);
     if (m_count > 1) {
-      assert(IS_REFCOUNTED_TYPE(m_type));
+      assert(isRefcountedType(m_type));
       if (--m_count) return;
     }
     const_cast<APCHandle*>(this)->deleteShared();

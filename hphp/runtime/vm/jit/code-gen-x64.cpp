@@ -145,7 +145,7 @@ template<class Then>
 void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   if (!ty.maybe(TCounted)) return;
   if (ty.isKnownDataType()) {
-    if (IS_REFCOUNTED_TYPE(ty.toDataType())) then(v);
+    if (isRefcountedType(ty.toDataType())) then(v);
     return;
   }
   auto const sf = v.makeReg();
@@ -2765,7 +2765,7 @@ void CodeGenerator::emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
         sizeof(ObjectData) + cls->builtinODTailSize() + sizeof(TypedValue) * i;
       auto propDataOffset = propOffset + TVOFF(m_data);
       auto propTypeOffset = propOffset + TVOFF(m_type);
-      if (!IS_NULL_TYPE(cls->declPropInit()[i].m_type)) {
+      if (!isNullType(cls->declPropInit()[i].m_type)) {
         emitImmStoreq(v, cls->declPropInit()[i].m_data.num,
                       dstReg[propDataOffset]);
       }

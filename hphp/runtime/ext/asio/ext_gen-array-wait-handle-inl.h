@@ -27,7 +27,7 @@ inline void c_GenArrayWaitHandle::forEachChild(T fn) {
   auto const last = m_deps->iter_end();
   for (auto iter = m_iterPos; iter != last; iter = m_deps->iter_advance(iter)) {
     auto const current = tvAssertCell(m_deps->getValueRef(iter).asTypedValue());
-    if (IS_NULL_TYPE(current->m_type)) continue;
+    if (isNullType(current->m_type)) continue;
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto const child = static_cast<c_WaitHandle*>(current->m_data.pobj);

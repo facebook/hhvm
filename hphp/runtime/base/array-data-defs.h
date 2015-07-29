@@ -28,7 +28,7 @@ namespace HPHP {
 
 namespace {
 inline bool isIntKey(const Cell* cell) {
-  return IS_INT_KEY_TYPE(cell->m_type);
+  return isIntKeyType(cell->m_type);
 }
 
 inline int64_t getIntKey(const Cell* cell) {
@@ -37,7 +37,7 @@ inline int64_t getIntKey(const Cell* cell) {
 }
 
 inline StringData* getStringKey(const Cell* cell) {
-  assert(IS_STRING_TYPE(cell->m_type));
+  assert(isStringType(cell->m_type));
   return cell->m_data.pstr;
 }
 }

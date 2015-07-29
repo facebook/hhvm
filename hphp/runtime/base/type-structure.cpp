@@ -160,9 +160,9 @@ void shapeTypeName(const ArrayData* arr, std::string& name) {
     name += sep;
     auto field = fields->getKey(i);
     auto fieldType = field.getType();
-    if (IS_STRING_TYPE(fieldType)) {
+    if (isStringType(fieldType)) {
       folly::toAppend("'", field.getStringData()->data(), "'", &name);
-    } else if (IS_INT_TYPE(fieldType)) {
+    } else if (isIntType(fieldType)) {
       folly::toAppend(field.getInt64(), &name);
     }
     auto value = fields->getValue(i);
@@ -296,7 +296,7 @@ ArrayData* resolveShape(ArrayData* arr, const Class* typeCnsCls) {
       if (!cls) raise_error("class %s not found", clsName.c_str());
       auto cnsValue = cls->clsCnsGet(String(cnsName).get());
 
-      if (IS_STRING_TYPE(cnsValue.m_type) || IS_INT_TYPE(cnsValue.m_type)) {
+      if (isStringType(cnsValue.m_type) || isIntType(cnsValue.m_type)) {
         key = tvAsVariant(&cnsValue);
       } else {
         raise_error("class constant %s::%s is not a string or an int "

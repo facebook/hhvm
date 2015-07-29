@@ -110,7 +110,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
   }
 
   auto const tv_func = v.asCell();
-  if (IS_STRING_TYPE(tv_func->m_type)) {
+  if (isStringType(tv_func->m_type)) {
     if (name) *name->var() = v;
     return ret;
   }
@@ -131,7 +131,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     StringData* clsString = nullptr;
     if (tv_cls->m_type == KindOfObject) {
       clsString = tv_cls->m_data.pobj->getClassName().get();
-    } else if (IS_STRING_TYPE(tv_cls->m_type)) {
+    } else if (isStringType(tv_cls->m_type)) {
       clsString = tv_cls->m_data.pstr;
     } else {
       if (name) *name->var() = array_string;

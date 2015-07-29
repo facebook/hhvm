@@ -95,7 +95,7 @@ bool refIsPlausible(const Ref ref) {
 }
 
 bool tvDecRefWillRelease(TypedValue* tv) {
-  if (!IS_REFCOUNTED_TYPE(tv->m_type)) {
+  if (!isRefcountedType(tv->m_type)) {
     return false;
   }
   if (tv->m_type == KindOfRef) {
@@ -527,7 +527,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
 }
 
 void tvCastToNullableObjectInPlace(TypedValue* tv) {
-  if (IS_NULL_TYPE(tv->m_type)) {
+  if (isNullType(tv->m_type)) {
     // XXX(t3879280) This happens immediately before calling an extension
     // function that takes an optional Object argument. We want to end up
     // passing const Object& holding nullptr, so by clearing out m_data.pobj we
@@ -710,7 +710,7 @@ bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
 bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
-  if (IS_NULL_TYPE(tv->m_type)) {
+  if (isNullType(tv->m_type)) {
     // See comment in tvCastToNullableObjectInPlace
     tv->m_data.pobj = nullptr;
     return true;

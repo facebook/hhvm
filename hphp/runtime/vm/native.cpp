@@ -261,7 +261,7 @@ bool coerceFCallArgs(TypedValue* args,
     auto tc = pi.typeConstraint;
     auto targetType = pi.builtinType;
     if (tc.isNullable() && !func->byRef(i)) {
-      if (IS_NULL_TYPE(args[-i].m_type)) {
+      if (isNullType(args[-i].m_type)) {
         // No need to coerce when passed a null for a nullable type
         continue;
       }
@@ -272,8 +272,8 @@ bool coerceFCallArgs(TypedValue* args,
 
     // Skip tvCoerceParamTo*() call if we're already the right type
     if (args[-i].m_type == targetType ||
-        (IS_STRING_TYPE(args[-i].m_type) &&
-         IS_STRING_TYPE(targetType))) {
+        (isStringType(args[-i].m_type) &&
+         isStringType(targetType))) {
       continue;
     }
 

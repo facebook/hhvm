@@ -698,7 +698,7 @@ public:
   ALWAYS_INLINE
   void popX() {
     assert(m_top != m_base);
-    assert(!IS_REFCOUNTED_TYPE(m_top->m_type));
+    assert(!isRefcountedType(m_top->m_type));
     tvDebugTrash(m_top);
     m_top++;
   }

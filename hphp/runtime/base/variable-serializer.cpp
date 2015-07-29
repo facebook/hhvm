@@ -503,10 +503,10 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     if ((m_option & k_JSON_NUMERIC_CHECK) && !isArrayKey) {
       int64_t lval; double dval;
       auto dt = is_numeric_string(v, len, &lval, &dval, 0);
-      if (IS_INT_TYPE(dt)) {
+      if (isIntType(dt)) {
         write(lval);
         return;
-      } else if (IS_DOUBLE_TYPE(dt)) {
+      } else if (isDoubleType(dt)) {
         write(dval);
         return;
       }
@@ -907,7 +907,7 @@ void VariableSerializer::writePropertyKey(const String& prop) {
 /* key MUST be a non-reference string or int */
 void VariableSerializer::writeArrayKey(const Variant& key) {
   auto const keyCell = tvAssertCell(key.asTypedValue());
-  bool const skey = IS_STRING_TYPE(keyCell->m_type);
+  bool const skey = isStringType(keyCell->m_type);
 
   ArrayInfo &info = m_arrayInfos.back();
 

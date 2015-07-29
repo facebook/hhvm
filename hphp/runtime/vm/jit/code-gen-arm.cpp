@@ -658,7 +658,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 
   auto& v = vmain();
   if (type.isKnownDataType()) {
-    assertx(IS_REFCOUNTED_TYPE(type.toDataType()));
+    assertx(isRefcountedType(type.toDataType()));
     increfMaybeStatic(v);
   } else {
     auto const sf = v.makeReg();

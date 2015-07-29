@@ -319,7 +319,7 @@ folly::Optional<DArrStruct> toDArrStruct(SArray ar) {
   auto map = StructMap{};
   for (ArrayIter iter(ar); iter; ++iter) {
     auto const key = *iter.first().asTypedValue();
-    if (!IS_STRING_TYPE(key.m_type)) return folly::none;
+    if (!isStringType(key.m_type)) return folly::none;
     map[key.m_data.pstr] = from_cell(*iter.secondRef().asTypedValue());
   }
 

@@ -154,7 +154,7 @@ void APCArray::add(APCHandle *key, APCHandle *val) {
   bucket->val = val;
   m.m_num++;
   int hash_pos;
-  if (!IS_REFCOUNTED_TYPE(key->type())) {
+  if (!isRefcountedType(key->type())) {
     auto const k = APCTypedValue::fromHandle(key);
     hash_pos = (key->type() == KindOfInt64 ?
         k->getInt64() : k->getStringData()->hash()) & m.m_capacity_mask;
@@ -174,7 +174,7 @@ ssize_t APCArray::indexOf(const StringData* key) const {
   ssize_t bucket = hash()[h & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {
-    if (!IS_REFCOUNTED_TYPE(b[bucket].key->type())) {
+    if (!isRefcountedType(b[bucket].key->type())) {
       auto const k = APCTypedValue::fromHandle(b[bucket].key);
       if (b[bucket].key->type() != KindOfInt64 &&
           key->same(k->getStringData())) {

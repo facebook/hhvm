@@ -1578,7 +1578,7 @@ static inline void addToSetHelper(const req::ptr<c_Set>& st,
     st->add(c.m_data.num);
   } else {
     StringData* s;
-    if (LIKELY(IS_STRING_TYPE(c.m_type))) {
+    if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
       s = tvCastToString(&c);
@@ -1602,7 +1602,7 @@ static inline bool checkSetHelper(const req::ptr<c_Set>& st,
     return st->contains(c.m_data.num);
   }
   StringData* s;
-  if (LIKELY(IS_STRING_TYPE(c.m_type))) {
+  if (LIKELY(isStringType(c.m_type))) {
     s = c.m_data.pstr;
   } else {
     s = tvCastToString(&c);
@@ -1725,7 +1725,7 @@ Variant HHVM_FUNCTION(array_diff_key,
       if (c.m_type == KindOfInt64) {
         if (ad2->exists(c.m_data.num)) continue;
       } else {
-        assert(IS_STRING_TYPE(c.m_type));
+        assert(isStringType(c.m_type));
         if (ad2->exists(c.m_data.pstr)) continue;
       }
       ret.setWithRef(key, iter.secondRefPlus(), true);
@@ -1887,7 +1887,7 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
     mp->set(c.m_data.num, intOneTv);
   } else {
     StringData* s;
-    if (LIKELY(IS_STRING_TYPE(c.m_type))) {
+    if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
       s = tvCastToString(&c);
@@ -1916,7 +1916,7 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
     }
   } else {
     StringData* s;
-    if (LIKELY(IS_STRING_TYPE(c.m_type))) {
+    if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
       s = tvCastToString(&c);
@@ -2107,7 +2107,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
       if (c.m_type == KindOfInt64) {
         if (!ad2->exists(c.m_data.num)) continue;
       } else {
-        assert(IS_STRING_TYPE(c.m_type));
+        assert(isStringType(c.m_type));
         if (!ad2->exists(c.m_data.pstr)) continue;
       }
       ret.setWithRef(key, iter.secondRefPlus(), true);

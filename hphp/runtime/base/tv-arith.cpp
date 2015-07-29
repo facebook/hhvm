@@ -311,7 +311,7 @@ Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
   assert(cellIsPlausible(c1));
   assert(cellIsPlausible(c2));
 
-  if (IS_STRING_TYPE(c1.m_type) && IS_STRING_TYPE(c2.m_type)) {
+  if (isStringType(c1.m_type) && isStringType(c2.m_type)) {
     return make_tv<KindOfString>(
       stringBitOp(
         BitOp<char>(),
@@ -337,7 +337,7 @@ void cellBitOpEq(Op op, Cell& c1, Cell c2) {
 // Op must implement the interface described for cellIncDecOp.
 template<class Op>
 void stringIncDecOp(Op op, Cell& cell) {
-  assert(IS_STRING_TYPE(cell.m_type));
+  assert(isStringType(cell.m_type));
 
   auto const sd = cell.m_data.pstr;
   if (sd->empty()) {

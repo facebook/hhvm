@@ -49,7 +49,7 @@ folly::Optional<Type> eval_cell(Pred p) {
     SCOPE_EXIT { g_context->setThrowAllErrors(false); };
 
     Cell c = p();
-    if (IS_REFCOUNTED_TYPE(c.m_type)) {
+    if (isRefcountedType(c.m_type)) {
       switch (c.m_type) {
       case KindOfString:
         {

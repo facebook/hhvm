@@ -376,7 +376,7 @@ class BaseVector : public ExtCollectionObjectData {
     DataType oldType = tv->m_type;
     uint64_t oldDatum = tv->m_data.num;
     cellDup(*val, *tv);
-    if (IS_REFCOUNTED_TYPE(oldType)) {
+    if (isRefcountedType(oldType)) {
       tvDecRefHelper(oldType, oldDatum);
     }
   }
@@ -956,7 +956,7 @@ class HashCollection : public ExtCollectionObjectData {
   }
 
   static bool isTombstoneType(DataType t) {
-    assert(IS_REAL_TYPE(t) || t == kInvalidDataType);
+    assert(isRealType(t) || t == kInvalidDataType);
     return t < KindOfUninit;
     static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
   }
@@ -1270,7 +1270,7 @@ class BaseMap : public HashCollection {
       return throwOnMiss ? mp->at(key->m_data.num)
                          : mp->get(key->m_data.num);
     }
-    if (IS_STRING_TYPE(key->m_type)) {
+    if (isStringType(key->m_type)) {
       return throwOnMiss ? mp->at(key->m_data.pstr)
                          : mp->get(key->m_data.pstr);
     }
@@ -1314,7 +1314,7 @@ class BaseMap : public HashCollection {
     assert(key->m_type != KindOfRef);
     if (key->m_type == KindOfInt64) {
       setRaw(key->m_data.num, data);
-    } else if (IS_STRING_TYPE(key->m_type)) {
+    } else if (isStringType(key->m_type)) {
       setRaw(key->m_data.pstr, data);
     } else {
       throwBadKeyType();
@@ -1336,7 +1336,7 @@ class BaseMap : public HashCollection {
     assert(key->m_type != KindOfRef);
     if (key->m_type == KindOfInt64) {
       set(key->m_data.num, data);
-    } else if (IS_STRING_TYPE(key->m_type)) {
+    } else if (isStringType(key->m_type)) {
       set(key->m_data.pstr, data);
     } else {
       throwBadKeyType();
@@ -1623,7 +1623,7 @@ class BaseSet : public HashCollection {
     assert(val->m_type != KindOfRef);
     if (val->m_type == KindOfInt64) {
       addRaw(val->m_data.num);
-    } else if (IS_STRING_TYPE(val->m_type)) {
+    } else if (isStringType(val->m_type)) {
       addRaw(val->m_data.pstr);
     } else {
       throwBadValueType();
@@ -1639,7 +1639,7 @@ class BaseSet : public HashCollection {
     assert(val->m_type != KindOfRef);
     if (val->m_type == KindOfInt64) {
       add(val->m_data.num);
-    } else if (IS_STRING_TYPE(val->m_type)) {
+    } else if (isStringType(val->m_type)) {
       add(val->m_data.pstr);
     } else {
       throwBadValueType();
@@ -1654,7 +1654,7 @@ class BaseSet : public HashCollection {
   void addFront(const TypedValue* val) {
     if (val->m_type == KindOfInt64) {
       addFront(val->m_data.num);
-    } else if (IS_STRING_TYPE(val->m_type)) {
+    } else if (isStringType(val->m_type)) {
       addFront(val->m_data.pstr);
     } else {
       throwBadValueType();
@@ -1684,7 +1684,7 @@ class BaseSet : public HashCollection {
     ssize_t p;
     if (key->m_type == KindOfInt64) {
       p = st->find(key->m_data.num);
-    } else if (IS_STRING_TYPE(key->m_type)) {
+    } else if (isStringType(key->m_type)) {
       p = st->find(key->m_data.pstr, key->m_data.pstr->hash());
     } else {
       BaseSet::throwBadValueType();
@@ -1698,7 +1698,7 @@ class BaseSet : public HashCollection {
     if (key->m_type == KindOfInt64) {
       BaseSet::throwOOB(key->m_data.num);
     } else {
-      assert(IS_STRING_TYPE(key->m_type));
+      assert(isStringType(key->m_type));
       BaseSet::throwOOB(key->m_data.pstr);
     }
   }

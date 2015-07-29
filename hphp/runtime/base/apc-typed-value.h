@@ -101,7 +101,7 @@ public:
   const Variant& asCVarRef() const {
     // Must be non-refcounted types
     assert(m_handle.m_flags == 0);
-    assert(!IS_REFCOUNTED_TYPE(m_handle.m_type));
+    assert(!isRefcountedType(m_handle.m_type));
     return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
   }
 

@@ -202,7 +202,7 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
   if (doCheck) {
     out << ind << "if (";
     if (param.kindOf() == KindOfString) {
-      out << "!IS_STRING_TYPE((args-" << index << ")->m_type)";
+      out << "!isStringType((args-" << index << ")->m_type)";
     } else {
       out << "(args-" << index << ")->m_type != KindOf"
           << kindOfString(param.kindOf());
@@ -258,7 +258,7 @@ void emitTypechecks(const PhpFunc& func, std::ostream& out, const char* ind) {
       out << "(count <= " << k << " || ";
     }
     if (kindof == KindOfString) {
-      out << "IS_STRING_TYPE((args - " << k << ")->m_type)";
+      out << "isStringType((args - " << k << ")->m_type)";
     } else {
       out << "(args - " << k << ")->m_type == KindOf" << kindOfString(kindof);
     }

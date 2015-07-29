@@ -35,7 +35,7 @@ namespace HPHP {
 struct TVAccessor {
   typedef const TypedValue& ElmT;
   bool isInt(ElmT elm) const { return elm.m_type == KindOfInt64; }
-  bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.m_type); }
+  bool isStr(ElmT elm) const { return isStringType(elm.m_type); }
   int64_t getInt(ElmT elm) const { return elm.m_data.num; }
   StringData* getStr(ElmT elm) const { return elm.m_data.pstr; }
   Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm); }
@@ -59,7 +59,7 @@ template<typename E> struct AssocKeyAccessor {
 template<typename E> struct AssocValAccessor {
   typedef const E& ElmT;
   bool isInt(ElmT elm) const { return elm.data.m_type == KindOfInt64; }
-  bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.data.m_type); }
+  bool isStr(ElmT elm) const { return isStringType(elm.data.m_type); }
   int64_t getInt(ElmT elm) const { return elm.data.m_data.num; }
   StringData* getStr(ElmT elm) const { return elm.data.m_data.pstr; }
   Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm.data); }
@@ -329,9 +329,9 @@ struct ElmUCompare {
       int64_t lval; double dval;
       auto dt = ret.getStringData()->isNumericWithVal(lval, dval, 0);
 
-      if (IS_INT_TYPE(dt)) {
+      if (isIntType(dt)) {
         return lval > 0;
-      } else if (IS_DOUBLE_TYPE(dt)) {
+      } else if (isDoubleType(dt)) {
         return dval > 0;
       }
     }

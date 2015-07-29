@@ -682,7 +682,7 @@ void tv_release_generic(TypedValue* tv) {
   assertx(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
          tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
          tv->m_type == KindOfRef);
-  g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
+  g_destructors[typeToDestrIdx(tv->m_type)](tv->m_data.pref);
 }
 
 Cell lookupCnsHelper(const TypedValue* tv,
@@ -925,7 +925,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     auto const elem1 = tvToCell(PackedArray::NvGetInt(arr, 1));
 
     if (UNLIKELY(elem0->m_type != KindOfObject ||
-                 !IS_STRING_TYPE(elem1->m_type))) {
+                 !isStringType(elem1->m_type))) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 

@@ -176,7 +176,7 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
 inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
   auto dt = key.m_type;
   if (dt == KindOfInt64)  return ElemArrayPre(base, key.m_data.num);
-  if (IS_STRING_TYPE(dt)) return ElemArrayPre(base, key.m_data.pstr);
+  if (isStringType(dt)) return ElemArrayPre(base, key.m_data.pstr);
   return ArrNR(base).asArray().rvalAtRef(cellAsCVarRef(key)).asTypedValue();
 }
 
@@ -236,9 +236,9 @@ inline int64_t ElemStringPre(StringData* key) {
 }
 
 inline int64_t ElemStringPre(TypedValue key) {
-  if (LIKELY(IS_INT_TYPE(key.m_type))) {
+  if (LIKELY(isIntType(key.m_type))) {
     return key.m_data.num;
-  } else if (LIKELY(IS_STRING_TYPE(key.m_type))) {
+  } else if (LIKELY(isStringType(key.m_type))) {
     return key.m_data.pstr->toInt64(10);
   } else {
     raise_notice("String offset cast occurred");
@@ -755,7 +755,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
   char y[2];
   {
     StringData* valStr;
-    if (LIKELY(IS_STRING_TYPE(value->m_type))) {
+    if (LIKELY(isStringType(value->m_type))) {
       valStr = value->m_data.pstr;
       valStr->incRefCount();
     } else {
@@ -884,10 +884,10 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   TypedValue key,
                                   Cell* value,
                                   bool copy) {
-  if (IS_NULL_TYPE(key.m_type)) {
+  if (isNullType(key.m_type)) {
     return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);
   }
-  if (IS_STRING_TYPE(key.m_type)) {
+  if (isStringType(key.m_type)) {
     return SetElemArrayPre<setResult>(a, key.m_data.pstr, value, copy);
   }
   if (key.m_type == KindOfInt64) {
@@ -1525,7 +1525,7 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
 
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
                                     bool copy) {
-  if (IS_STRING_TYPE(key.m_type)) {
+  if (isStringType(key.m_type)) {
     return UnsetElemArrayPre(a, key.m_data.pstr, copy);
   }
   if (key.m_type == KindOfInt64) {
@@ -1645,7 +1645,7 @@ inline bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
     TypedValue tv;
     cellDup(scratchKey, tv);
     bool badKey = false;
-    if (IS_STRING_TYPE(tv.m_type)) {
+    if (isStringType(tv.m_type)) {
       const char* str = tv.m_data.pstr->data();
       size_t len = tv.m_data.pstr->size();
       while (len > 0 &&
@@ -2107,9 +2107,9 @@ inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
     tvWriteUninit(&tDest);
     IncDecBody<true>(op, &tv, &tDest);
     obj->setProp(nullptr, keySD, &tDest);
-    assert(!IS_REFCOUNTED_TYPE(tDest.m_type));
+    assert(!isRefcountedType(tDest.m_type));
   }
-  assert(!IS_REFCOUNTED_TYPE(tv.m_type));
+  assert(!isRefcountedType(tv.m_type));
 }
 
 template <bool setResult>

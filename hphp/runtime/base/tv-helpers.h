@@ -41,7 +41,7 @@ struct Variant;
  * of the pointer types, the compiler cannot use type aliasing assumptions to
  * miscompile.
  *
- * This assumes IS_REFCOUNTED_TYPE() is true.
+ * This assumes isRefcountedType() is true.
  */
 #define TV_GENERIC_DISPATCH(exp, func)                                  \
   HPHP::CountableManip::func(                                           \
@@ -80,14 +80,14 @@ inline bool isTypedNum(const TypedValue& tv) {
  * static string.
  */
 inline bool isUncounted(const TypedValue& tv) {
-  auto const uncounted = !IS_REFCOUNTED_TYPE(tv.m_type) ||
+  auto const uncounted = !isRefcountedType(tv.m_type) ||
     (tv.m_type == KindOfString && tv.m_data.pstr->isStatic());
   if (uncounted) assert(cellIsPlausible(tv));
   return uncounted;
 }
 
 // Assumes 'data' is live
-// Assumes 'IS_REFCOUNTED_TYPE(type)'
+// Assumes 'isRefcountedType(type)'
 void tvDecRefHelper(DataType type, uint64_t datum) noexcept;
 
 /*
@@ -102,7 +102,7 @@ bool tvDecRefWillRelease(TypedValue* tv);
  * true but tvDecRefWillRelease() will return false.
  */
 inline bool tvDecRefWillCallHelper(TypedValue* tv) {
-  return IS_REFCOUNTED_TYPE(tv->m_type) &&
+  return isRefcountedType(tv->m_type) &&
     !TV_GENERIC_DISPATCH(*tv, hasMultipleRefs);
 }
 
@@ -142,7 +142,7 @@ inline void tvDecRefRef(TypedValue* tv) {
 
 // Assumes 'tv' is live
 inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
-  if (IS_REFCOUNTED_TYPE(type)) {
+  if (isRefcountedType(type)) {
     tvDecRefHelper(type, datum);
   }
 }
@@ -152,20 +152,20 @@ inline void tvRefcountedDecRef(TypedValue v) {
 }
 
 inline void tvRefcountedDecRefNZ(TypedValue tv) {
-  if (IS_REFCOUNTED_TYPE(tv.m_type)) {
+  if (isRefcountedType(tv.m_type)) {
     TV_GENERIC_DISPATCH(tv, decRefCount);
   }
 }
 
 // Assumes 'tv' is live
-// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
+// Assumes 'isRefcountedType(tv->m_type)'
 inline void tvDecRef(TypedValue* tv) {
   tvDecRefHelper(tv->m_type, tv->m_data.num);
 }
 
 // Assumes 'tv' is live
 ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
-  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+  if (isRefcountedType(tv->m_type)) {
     tvDecRef(tv);
   }
 }
@@ -186,22 +186,22 @@ inline TypedValue* tvBox(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
+// Assumes 'isRefcountedType(tv->m_type)'
 inline void tvIncRef(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  assert(IS_REFCOUNTED_TYPE(tv->m_type));
+  assert(isRefcountedType(tv->m_type));
   TV_GENERIC_DISPATCH(*tv, incRefCount);
 }
 
 ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+  if (isRefcountedType(tv->m_type)) {
     tvIncRef(tv);
   }
 }
 
 // Assumes 'tv' is live
-// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
+// Assumes 'isRefcountedType(tv->m_type)'
 // Assumes 'tv' is not shared (ie KindOfRef or KindOfObject)
 inline void tvIncRefNotShared(TypedValue* tv) {
   assert(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
@@ -501,7 +501,7 @@ inline void tvUnset(TypedValue* to) {
  */
 inline bool tvIsStatic(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  return !IS_REFCOUNTED_TYPE(tv->m_type) || TV_GENERIC_DISPATCH(*tv, isStatic);
+  return !isRefcountedType(tv->m_type) || TV_GENERIC_DISPATCH(*tv, isStatic);
 }
 
 /**
@@ -560,7 +560,7 @@ template<class Fun>
 void tvDupFlattenImpl(const TypedValue* fr, TypedValue* to, Fun shouldFlatten) {
   tvCopy(*fr, *to);
   auto type = fr->m_type;
-  if (!IS_REFCOUNTED_TYPE(type)) return;
+  if (!isRefcountedType(type)) return;
   if (type != KindOfRef) {
     tvIncRef(to);
     return;
@@ -591,7 +591,7 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
 
 inline bool cellIsNull(const Cell* tv) {
   assert(cellIsPlausible(*tv));
-  return IS_NULL_TYPE(tv->m_type);
+  return isNullType(tv->m_type);
 }
 
 inline bool tvIsString(const TypedValue* tv) {

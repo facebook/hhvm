@@ -81,7 +81,7 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
       value = klass->clsCnsGet(consts[i].m_name);
     }
     assert(value.m_type != KindOfUninit);
-    if (UNLIKELY(!(IS_INT_TYPE(value.m_type) ||
+    if (UNLIKELY(!(isIntType(value.m_type) ||
         (tvIsString(&value) && value.m_data.pstr->isStatic())))) {
       // only int and string values allowed for enums. Moreover the strings
       // must be static

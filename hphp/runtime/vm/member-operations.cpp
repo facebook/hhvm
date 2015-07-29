@@ -26,7 +26,7 @@ const StaticString
   s_offsetExists("offsetExists");
 
 StringData* prepareAnyKey(TypedValue* tv) {
-  if (IS_STRING_TYPE(tv->m_type)) {
+  if (isStringType(tv->m_type)) {
     StringData* str = tv->m_data.pstr;
     str->incRefCount();
     return str;
@@ -107,7 +107,7 @@ bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
   assert(method != nullptr);
   g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
                            offset.asCell());
-  auto const result = !IS_NULL_TYPE(tvResult.m_type);
+  auto const result = !isNullType(tvResult.m_type);
   tvRefcountedDecRef(&tvResult);
   return result;
 }

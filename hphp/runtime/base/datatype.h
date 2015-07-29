@@ -284,15 +284,13 @@ inline DataType getDataTypeValue(unsigned index) {
 /*
  * These are used in type_variant.cpp and mc-generator.cpp.
  */
-const int kShiftDataTypeToDestrIndex = 4;
-const int kDestrTableSize = 6;
+constexpr int kShiftDataTypeToDestrIndex = 4;
+constexpr int kDestrTableSize = 6;
 
-#define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
-
-ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
-  assert(t == KindOfString || t == KindOfArray || t == KindOfObject ||
-         t == KindOfResource || t == KindOfRef);
-  return TYPE_TO_DESTR_IDX(t);
+constexpr unsigned typeToDestrIdx(DataType t) {
+  //assert(t == KindOfString || t == KindOfArray || t == KindOfObject ||
+         //t == KindOfResource || t == KindOfRef);
+  return t >> kShiftDataTypeToDestrIndex;
 }
 
 
@@ -302,20 +300,21 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
 /*
  * Whether a type is valid.
  */
-#define IS_REAL_TYPE(t)                                             \
-  (((t) >= ::HPHP::KindOfUninit && (t) <= ::HPHP::kMaxDataType) ||  \
-   (t) == ::HPHP::KindOfClass)
+constexpr bool isRealType(DataType t) {
+  return (t >= KindOfUninit && t <= kMaxDataType) || t == KindOfClass;
+}
 
 /*
  * Whether a type is refcounted.
  */
-#define IS_REFCOUNTED_TYPE(t)                                   \
-  (assert(IS_REAL_TYPE(t)), (t) > HPHP::KindOfRefCountThreshold)
+constexpr bool isRefcountedType(DataType t) {
+  return t > KindOfRefCountThreshold;
+}
 
 /*
  * Whether a builtin return or param type is not a simple type.
  *
- * This is different from IS_REFCOUNTED_TYPE because builtins can accept and
+ * This is different from isRefcountedType because builtins can accept and
  * return Variants, and we use folly::none to denote these cases.
  */
 inline bool isBuiltinByRef(MaybeDataType t) {
@@ -328,36 +327,31 @@ inline bool isBuiltinByRef(MaybeDataType t) {
 /*
  * Whether a type is KindOfUninit or KindOfNull.
  */
-constexpr bool IS_NULL_TYPE(DataType t) {
+constexpr bool isNullType(DataType t) {
   return unsigned(t) <= KindOfNull;
 }
 
 /*
  * Whether a type is any kind of string.
  */
-constexpr bool IS_STRING_TYPE(DataType t) {
+constexpr bool isStringType(DataType t) {
   return (t & ~0x18) == KindOfStringBit;
 }
-inline bool IS_STRING_TYPE(MaybeDataType t) {
-  return t && IS_STRING_TYPE(*t);
+inline bool isStringType(MaybeDataType t) {
+  return t && isStringType(*t);
 }
 static_assert(KindOfStaticString == 0x0c, "");
 static_assert(KindOfString       == 0x14, "");
 
 /*
- * Other type-check macros.
+ * Other type-check functions.
  */
-#define IS_TYPE(NAME, Kind)                       \
-  constexpr bool IS_##NAME##_TYPE(DataType t) {   \
-    return t == KindOf##Kind;                     \
-  }
-IS_TYPE(INT,    Int64)
-IS_TYPE(BOOL,   Boolean)
-IS_TYPE(DOUBLE, Double)
-IS_TYPE(ARRAY,  Array)
-#undef IS_TYPE
+constexpr bool isIntType(DataType t) { return t == KindOfInt64; }
+constexpr bool isBoolType(DataType t) { return t == KindOfBoolean; }
+constexpr bool isDoubleType(DataType t) { return t == KindOfDouble; }
+constexpr bool isArrayType(DataType t) { return t == KindOfArray; }
 
-constexpr bool IS_INT_KEY_TYPE(DataType t) {
+constexpr bool isIntKeyType(DataType t) {
   return t <= KindOfInt64;
 }
 
@@ -372,8 +366,8 @@ constexpr bool IS_INT_KEY_TYPE(DataType t) {
 constexpr bool equivDataTypes(DataType t1, DataType t2) {
   return
     (t1 == t2) ||
-    (IS_STRING_TYPE(t1) && IS_STRING_TYPE(t2)) ||
-    (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
+    (isStringType(t1) && isStringType(t2)) ||
+    (isNullType(t1) && isNullType(t2));
 }
 
 
@@ -381,7 +375,7 @@ constexpr bool equivDataTypes(DataType t1, DataType t2) {
 // Switch case macros.
 
 /*
- * Covers all DataTypes `dt' such that !IS_REFCOUNTED_TYPE(dt) holds.
+ * Covers all DataTypes `dt' such that !isRefcountedType(dt) holds.
  */
 #define DT_UNCOUNTED_CASE   \
   case KindOfUninit:        \

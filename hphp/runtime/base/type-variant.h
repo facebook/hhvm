@@ -420,26 +420,26 @@ struct Variant : private TypedValue {
 // string
 
   ALWAYS_INLINE const String& asCStrRef() const {
-    assert(IS_STRING_TYPE(m_type) && m_data.pstr);
+    assert(isStringType(m_type) && m_data.pstr);
     return *reinterpret_cast<const String*>(&m_data.pstr);
   }
 
   ALWAYS_INLINE const String& toCStrRef() const {
     assert(is(KindOfString) || is(KindOfStaticString));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    return *reinterpret_cast<const String*>(LIKELY(IS_STRING_TYPE(m_type)) ?
+    return *reinterpret_cast<const String*>(LIKELY(isStringType(m_type)) ?
         &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
   }
 
   ALWAYS_INLINE String& asStrRef() {
-    assert(IS_STRING_TYPE(m_type) && m_data.pstr);
+    assert(isStringType(m_type) && m_data.pstr);
     return *reinterpret_cast<String*>(&m_data.pstr);
   }
 
   ALWAYS_INLINE String& toStrRef() {
     assert(is(KindOfString) || is(KindOfStaticString));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    return *reinterpret_cast<String*>(LIKELY(IS_STRING_TYPE(m_type)) ?
+    return *reinterpret_cast<String*>(LIKELY(isStringType(m_type)) ?
         &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
   }
 
@@ -530,7 +530,7 @@ struct Variant : private TypedValue {
     return m_type != KindOfUninit;
   }
   bool isNull() const {
-    return IS_NULL_TYPE(getType());
+    return isNullType(getType());
   }
   bool isBoolean() const {
     return getType() == KindOfBoolean;
@@ -539,7 +539,7 @@ struct Variant : private TypedValue {
     return getType() == KindOfDouble;
   }
   bool isString() const {
-    return IS_STRING_TYPE(getType());
+    return isStringType(getType());
   }
   bool isInteger() const {
     return getType() == KindOfInt64;
@@ -697,7 +697,7 @@ struct Variant : private TypedValue {
    * Explicit type conversions
    */
   bool toBoolean() const {
-    if (IS_NULL_TYPE(m_type)) return false;
+    if (isNullType(m_type)) return false;
     if (m_type <= KindOfInt64) return m_data.num;
     return toBooleanHelper();
   }
@@ -705,12 +705,12 @@ struct Variant : private TypedValue {
   short toInt16(int base = 10) const { return (short)toInt64(base);}
   int toInt32(int base = 10) const { return (int)toInt64(base);}
   int64_t toInt64() const {
-    if (IS_NULL_TYPE(m_type)) return 0;
+    if (isNullType(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(10);
   }
   int64_t toInt64(int base) const {
-    if (IS_NULL_TYPE(m_type)) return 0;
+    if (isNullType(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(base);
   }
@@ -719,7 +719,7 @@ struct Variant : private TypedValue {
     return toDoubleHelper();
   }
   String toString() const {
-    if (IS_STRING_TYPE(m_type)) {
+    if (isStringType(m_type)) {
       return m_data.pstr;
     }
     return toStringHelper();
@@ -765,7 +765,7 @@ struct Variant : private TypedValue {
    * Whether or not calling toKey() will throw a bad type exception
    */
   bool canBeValidKey() const {
-    return !IS_ARRAY_TYPE(getType()) && getType() != KindOfObject;
+    return !isArrayType(getType()) && getType() != KindOfObject;
   }
   VarNR toKey() const;
   /* Creating a temporary Array, String, or Object with no ref-counting and
@@ -797,7 +797,7 @@ struct Variant : private TypedValue {
                      const_cast<double*>(&m_data.dbl);
   }
   StringData *getStringData() const {
-    assert(IS_STRING_TYPE(getType()));
+    assert(isStringType(getType()));
     return m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr;
   }
   StringData *getStringDataOrNull() const {
@@ -985,12 +985,12 @@ struct Variant : private TypedValue {
     }
   }
 
-  bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
+  bool isPrimitive() const { return !isRefcountedType(m_type); }
   bool isObjectConvertable() {
     assert(m_type != KindOfRef);
     return m_type <= KindOfNull ||
       (m_type == KindOfBoolean && !m_data.num) ||
-      (IS_STRING_TYPE(m_type) && m_data.pstr->empty());
+      (isStringType(m_type) && m_data.pstr->empty());
   }
 
   void set(bool    v) noexcept;
@@ -1294,7 +1294,7 @@ private:
   }
   void checkRefCount() {
     assert(m_type != KindOfRef);
-    assert(IS_REFCOUNTED_TYPE(m_type) ? varNrFlag() == NR_FLAG : true);
+    assert(isRefcountedType(m_type) ? varNrFlag() == NR_FLAG : true);
 
     switch (m_type) {
       DT_UNCOUNTED_CASE:

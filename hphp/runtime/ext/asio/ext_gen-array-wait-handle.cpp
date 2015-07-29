@@ -78,7 +78,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
     if (UNLIKELY(current->m_type == KindOfRef)) {
       tvUnbox(current);
     }
-    if (IS_NULL_TYPE(current->m_type)) continue;
+    if (isNullType(current->m_type)) continue;
 
     auto const child = c_WaitHandle::fromCell(current);
     if (UNLIKELY(!child)) fail();
@@ -108,7 +108,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
       if (UNLIKELY(future->m_type == KindOfRef)) {
         tvUnbox(future);
       }
-      if (IS_NULL_TYPE(future->m_type)) continue;
+      if (isNullType(future->m_type)) continue;
       auto const future_wh = c_WaitHandle::fromCell(future);
       if (UNLIKELY(!future_wh)) fail();
       if (!future_wh->isFinished()) {
@@ -166,7 +166,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
   for (; !arrIter.empty(); arrIter.advance()) {
     auto const current = tvAssertCell(arrIter.current());
 
-    if (IS_NULL_TYPE(current->m_type)) continue;
+    if (isNullType(current->m_type)) continue;
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
 

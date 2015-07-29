@@ -141,10 +141,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Mixed:
       return AnnotAction::Pass;
     case AnnotMetaType::Number:
-      return (IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt))
+      return (isIntType(dt) || isDoubleType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::ArrayKey:
-      return (IS_INT_TYPE(dt) || IS_STRING_TYPE(dt))
+      return (isIntType(dt) || isStringType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Self:
     case AnnotMetaType::Parent:
@@ -155,7 +155,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Callable:
       // For "callable", if `dt' is not string/array/object we know
       // it's not compatible, otherwise more checks are required
-      return (IS_STRING_TYPE(dt) || dt == KindOfArray || dt == KindOfObject)
+      return (isStringType(dt) || dt == KindOfArray || dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       break;
@@ -166,7 +166,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'
     // is compatible. Uninit, to which 'HH\noreturn' maps, is special-cased
-    // because uninit and null are equivalent due to IS_NULL_TYPE.
+    // because uninit and null are equivalent due to isNullType.
     return equivDataTypes(getAnnotDataType(at), dt) && (at != AnnotType::Uninit)
       ? AnnotAction::Pass : AnnotAction::Fail;
   }

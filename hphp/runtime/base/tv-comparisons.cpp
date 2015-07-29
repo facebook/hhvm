@@ -330,7 +330,7 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
   switch (c2.m_type) {
   case KindOfUninit:
   case KindOfNull:
-    return IS_STRING_TYPE(c1.m_type) ? op(c1.m_data.pstr, staticEmptyString()) :
+    return isStringType(c1.m_type) ? op(c1.m_data.pstr, staticEmptyString()) :
            c1.m_type == KindOfObject ? op(true, false) :
            cellRelOp(op, c1, false);
 
@@ -521,8 +521,8 @@ bool cellSame(Cell c1, Cell c2) {
   assert(cellIsPlausible(c1));
   assert(cellIsPlausible(c2));
 
-  bool const null1 = IS_NULL_TYPE(c1.m_type);
-  bool const null2 = IS_NULL_TYPE(c2.m_type);
+  bool const null1 = isNullType(c1.m_type);
+  bool const null2 = isNullType(c2.m_type);
   if (null1 && null2) return true;
   if (null1 || null2) return false;
 
@@ -538,7 +538,7 @@ bool cellSame(Cell c1, Cell c2) {
 
     case KindOfStaticString:
     case KindOfString:
-      if (!IS_STRING_TYPE(c2.m_type)) return false;
+      if (!isStringType(c2.m_type)) return false;
       return c1.m_data.pstr->same(c2.m_data.pstr);
 
     case KindOfArray:

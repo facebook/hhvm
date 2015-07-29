@@ -35,7 +35,7 @@ inline bool isContainer(const Variant& v) {
 
 inline bool isContainerOrNull(const Cell c) {
   assert(cellIsPlausible(c));
-  return IS_NULL_TYPE(c.m_type) || c.m_type == KindOfArray ||
+  return isNullType(c.m_type) || c.m_type == KindOfArray ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
 

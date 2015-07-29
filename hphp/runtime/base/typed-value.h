@@ -256,7 +256,7 @@ typename std::enable_if<
   typename DataTypeCPPType<DType>::type
 >::type unpack_tv(TypedValue *tv) {
   assert((DType == tv->m_type) ||
-         (IS_STRING_TYPE(DType) && IS_STRING_TYPE(tv->m_type)));
+         (isStringType(DType) && isStringType(tv->m_type)));
   return reinterpret_cast<typename DataTypeCPPType<DType>::type>
            (tv->m_data.pstr);
 }

@@ -744,7 +744,7 @@ void xdebug_var_export_text_ansi(
 
       auto first = *iter.first().asTypedValue();
 
-      auto prop_name = IS_STRING_TYPE(first.m_type)
+      auto prop_name = isStringType(first.m_type)
         ? String{first.m_data.pstr}
         : String{first.m_data.num};
 
@@ -975,7 +975,7 @@ void xdebug_var_export_fancy(
         continue;
       }
 
-      auto prop_name = IS_STRING_TYPE(first.m_type)
+      auto prop_name = isStringType(first.m_type)
         ? String{first.m_data.pstr}
       : empty_string();
 

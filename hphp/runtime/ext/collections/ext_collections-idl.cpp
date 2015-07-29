@@ -1968,7 +1968,7 @@ bool BaseMap::t_contains(const Variant& key) {
   if (t == KindOfInt64) {
     return contains(key.toInt64());
   }
-  if (IS_STRING_TYPE(t)) {
+  if (isStringType(t)) {
     return contains(key.getStringData());
   }
   throwBadKeyType();
@@ -1981,7 +1981,7 @@ Object c_Map::t_remove(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
-  } else if (IS_STRING_TYPE(t)) {
+  } else if (isStringType(t)) {
     remove(key.getStringData());
   } else {
     throwBadKeyType();
@@ -3079,7 +3079,7 @@ bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = mp->get(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
+  } else if (isStringType(key->m_type)) {
     result = mp->get(key->m_data.pstr);
   } else {
     throwBadKeyType();
@@ -3094,7 +3094,7 @@ bool BaseMap::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = mp->get(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
+  } else if (isStringType(key->m_type)) {
     result = mp->get(key->m_data.pstr);
   } else {
     throwBadKeyType();
@@ -3108,7 +3108,7 @@ bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto mp = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {
     return mp->contains(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
+  } else if (isStringType(key->m_type)) {
     return mp->contains(key->m_data.pstr);
   } else {
     throwBadKeyType();
@@ -3123,7 +3123,7 @@ void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
     mp->remove(key->m_data.num);
     return;
   }
-  if (IS_STRING_TYPE(key->m_type)) {
+  if (isStringType(key->m_type)) {
     mp->remove(key->m_data.pstr);
     return;
   }
@@ -3646,7 +3646,7 @@ bool BaseSet::t_contains(const Variant& key) {
   if (t == KindOfInt64) {
     return contains(key.toInt64());
   }
-  if (IS_STRING_TYPE(t)) {
+  if (isStringType(t)) {
     return contains(key.getStringData());
   }
   throwBadValueType();
@@ -3657,7 +3657,7 @@ Object c_Set::t_remove(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
-  } else if (IS_STRING_TYPE(t)) {
+  } else if (isStringType(t)) {
     remove(key.getStringData());
   } else {
     throwBadValueType();
@@ -3670,7 +3670,7 @@ bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   auto st = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return st->contains(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
+  } else if (isStringType(key->m_type)) {
     return st->contains(key->m_data.pstr);
   } else {
     throwBadValueType();
@@ -3683,7 +3683,7 @@ bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
   auto st = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return st->contains(key->m_data.num) ? !cellToBool(*key) : true;
-  } else if (IS_STRING_TYPE(key->m_type)) {
+  } else if (isStringType(key->m_type)) {
     return st->contains(key->m_data.pstr) ? !cellToBool(*key) : true;
   } else {
     throwBadValueType();
@@ -3696,7 +3696,7 @@ bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto st = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return st->contains(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
+  } else if (isStringType(key->m_type)) {
     return st->contains(key->m_data.pstr);
   } else {
     throwBadValueType();
@@ -3711,7 +3711,7 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
     st->remove(key->m_data.num);
     return;
   }
-  if (IS_STRING_TYPE(key->m_type)) {
+  if (isStringType(key->m_type)) {
     st->remove(key->m_data.pstr);
     return;
   }

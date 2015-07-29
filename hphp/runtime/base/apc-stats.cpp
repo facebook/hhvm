@@ -37,7 +37,7 @@ namespace {
 size_t getMemSize(const TypedValue* tv) {
   const auto& v = tvAsCVarRef(tv);
   auto type = v.getType();
-  if (!IS_REFCOUNTED_TYPE(type)) {
+  if (!isRefcountedType(type)) {
     return sizeof(Variant);
   }
   if (type == KindOfString) {
@@ -54,7 +54,7 @@ size_t getMemSize(const TypedValue* tv) {
 
 size_t getMemSize(const APCHandle* handle) {
   auto t = handle->type();
-  if (!IS_REFCOUNTED_TYPE(t)) {
+  if (!isRefcountedType(t)) {
     return sizeof(APCHandle);
   }
   if (t == KindOfString) {
@@ -407,7 +407,7 @@ void APCDetailedStats::removeAPCValue(APCHandle* handle, bool expired) {
 
 void APCDetailedStats::addType(APCHandle* handle) {
   DataType type = handle->type();
-  assert(!IS_REFCOUNTED_TYPE(type) ||
+  assert(!isRefcountedType(type) ||
          type == KindOfString ||
          type == KindOfArray ||
          type == KindOfObject);
@@ -453,7 +453,7 @@ void APCDetailedStats::addType(APCHandle* handle) {
 
 void APCDetailedStats::removeType(APCHandle* handle) {
   DataType type = handle->type();
-  assert(!IS_REFCOUNTED_TYPE(type) ||
+  assert(!isRefcountedType(type) ||
          type == KindOfString ||
          type == KindOfArray ||
          type == KindOfObject);

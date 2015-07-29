@@ -352,9 +352,9 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
 
   dt = is_numeric_string(p.data(), p.size(), &lval, &dval, 0);
 
-  if (IS_INT_TYPE(dt)) {
+  if (isIntType(dt)) {
     return (double)lval;
-  } else if (IS_DOUBLE_TYPE(dt)) {
+  } else if (isDoubleType(dt)) {
     if ((!dval && p.size() > 1 && strpbrk(p.data(), "123456789")) ||
          !zend_finite(dval)) {
       goto error;

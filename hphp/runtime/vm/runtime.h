@@ -136,7 +136,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
               fp->m_func->numLocals());
     TypedValue* loc = frame_local(fp, i);
     DataType t = loc->m_type;
-    if (IS_REFCOUNTED_TYPE(t)) {
+    if (isRefcountedType(t)) {
       uint64_t datum = loc->m_data.num;
       if (unwinding) {
         tvWriteUninit(loc);
@@ -192,7 +192,7 @@ frame_free_args(TypedValue* args, int count) {
   for (int i = 0; i < count; i++) {
     TypedValue* loc = args - i;
     DataType t = loc->m_type;
-    if (IS_REFCOUNTED_TYPE(t)) {
+    if (isRefcountedType(t)) {
       uint64_t datum = loc->m_data.num;
       // We don't have to write KindOfUninit here, because a
       // debug_backtrace wouldn't be able to see these slots (they are

@@ -515,7 +515,7 @@ void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {
     return;
   }
 
-  assert(!IS_REFCOUNTED_TYPE(tv.m_type));
+  assert(!isRefcountedType(tv.m_type));
 }
 
 NEVER_INLINE

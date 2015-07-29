@@ -27,7 +27,7 @@
 #include "zend_list.h"
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
-  if (HPHP::IS_STRING_TYPE(zvalue->tv()->m_type)) {
+  if (HPHP::isStringType(zvalue->tv()->m_type)) {
     zvalue->tv()->m_data.pstr =
       HPHP::StringData::Make(zvalue->tv()->m_data.pstr, HPHP::CopyString);
     zvalue->tv()->m_type = HPHP::KindOfString; // not KindOfStaticString anymore
@@ -39,7 +39,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
       assert(ad->hasExactlyOneRef());
     }
     zvalue->tv()->m_data.parr = ad;
-  } else if (IS_REFCOUNTED_TYPE(zvalue->tv()->m_type)) {
+  } else if (isRefcountedType(zvalue->tv()->m_type)) {
     TV_GENERIC_DISPATCH(*zvalue->tv(), incRefCount);
   }
 }

@@ -643,8 +643,8 @@ bool Array::exists(const String& key, bool isKey /* = false */) const {
 }
 
 bool Array::exists(const Variant& key, bool isKey /* = false */) const {
-  if (IS_BOOL_TYPE(key.getType()) ||
-      IS_INT_TYPE(key.getType())) {
+  if (isBoolType(key.getType()) ||
+      isIntType(key.getType())) {
     return existsImpl(key.toInt64());
   }
   if (isKey) return existsImpl(key);
@@ -664,8 +664,8 @@ void Array::remove(const String& key, bool isString /* = false */) {
 }
 
 void Array::remove(const Variant& key) {
-  if (IS_BOOL_TYPE(key.getType()) ||
-      IS_INT_TYPE(key.getType())) {
+  if (isBoolType(key.getType()) ||
+      isIntType(key.getType())) {
     removeImpl(key.toInt64());
     return;
   }
@@ -774,7 +774,7 @@ void Array::unserialize(VariableUnserializer *uns) {
              !exists(key, true));
 
       Variant &value = lvalAt(key, AccessFlags::Key);
-      if (UNLIKELY(IS_REFCOUNTED_TYPE(value.getRawType()))) {
+      if (UNLIKELY(isRefcountedType(value.getRawType()))) {
         uns->putInOverwrittenList(value);
       }
       unserializeVariant(value, uns);

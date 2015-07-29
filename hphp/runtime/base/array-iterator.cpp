@@ -1178,7 +1178,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     ad->decRefCount();
     return 0;
   }
-  if (UNLIKELY(IS_REFCOUNTED_TYPE(valOut->m_type))) {
+  if (UNLIKELY(isRefcountedType(valOut->m_type))) {
     return new_iter_array_cold<false>(dest, ad, valOut, nullptr);
   }
 
@@ -1236,10 +1236,10 @@ int64_t new_iter_array_key(Iter*       dest,
     ad->decRefCount();
     return 0;
   }
-  if (UNLIKELY(IS_REFCOUNTED_TYPE(valOut->m_type))) {
+  if (UNLIKELY(isRefcountedType(valOut->m_type))) {
     return new_iter_array_cold<WithRef>(dest, ad, valOut, keyOut);
   }
-  if (UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
+  if (UNLIKELY(isRefcountedType(keyOut->m_type))) {
     return new_iter_array_cold<WithRef>(dest, ad, valOut, keyOut);
   }
 
@@ -1781,13 +1781,13 @@ int64_t iter_next_mixed_impl(Iter* it,
   } while (UNLIKELY(arr->isTombstone(pos)));
 
 
-  if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+  if (isRefcountedType(valOut->m_type)) {
     if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
     TV_GENERIC_DISPATCH(*valOut, decRefCount);
   }
-  if (HasKey && IS_REFCOUNTED_TYPE(keyOut->m_type)) {
+  if (HasKey && isRefcountedType(keyOut->m_type)) {
     if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
@@ -1816,13 +1816,13 @@ int64_t iter_next_packed_impl(Iter* it,
 
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
-    if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+    if (isRefcountedType(valOut->m_type)) {
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
       TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
-    if (HasKey && UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
+    if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
@@ -1860,13 +1860,13 @@ int64_t iter_next_struct_impl(Iter* it,
 
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
-    if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
+    if (isRefcountedType(valOut->m_type)) {
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
       TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
-    if (HasKey && UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
+    if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }

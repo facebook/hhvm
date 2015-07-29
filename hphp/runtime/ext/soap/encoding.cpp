@@ -1046,9 +1046,9 @@ static Variant to_zval_double(encodeTypePtr type, xmlNodePtr data) {
                                   data->children->content ?
                                   strlen((char*)data->children->content) : 0,
                                   &lval, &dval, 0);
-      if (IS_INT_TYPE(dt)) {
+      if (isIntType(dt)) {
         ret = lval;
-      } else if (IS_DOUBLE_TYPE(dt)) {
+      } else if (isDoubleType(dt)) {
         ret = dval;
       } else {
         if (data->children->content) {
@@ -1087,9 +1087,9 @@ static Variant to_zval_long(encodeTypePtr type, xmlNodePtr data) {
                                   data->children->content ?
                                   strlen((char*)data->children->content) : 0,
                                   &lval, &dval, 0);
-      if (IS_INT_TYPE(dt)) {
+      if (isIntType(dt)) {
         ret = (int64_t)lval;
-      } else if (IS_DOUBLE_TYPE(dt)) {
+      } else if (isDoubleType(dt)) {
         ret = dval;
       } else {
         throw SoapException("Encoding: Violation of encoding rules");

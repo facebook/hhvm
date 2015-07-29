@@ -2512,7 +2512,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
               v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
             } else {
               assert(v.isInitialized());
-              assert(!IS_REFCOUNTED_TYPE(v.getType()));
+              assert(!isRefcountedType(v.getType()));
             }
             mainReturn = *v.asCell();
             m_ue.m_returnSeen = true;
@@ -3142,7 +3142,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         } else if (stype == KindOfInt64) {
           emitIntegerSwitch(e, sw, caseLabels, brkTarget, state);
         } else {
-          assert(IS_STRING_TYPE(*stype));
+          assert(isStringType(*stype));
           emitStringSwitch(e, sw, caseLabels, brkTarget, state);
         }
         didSwitch = true;

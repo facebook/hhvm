@@ -611,7 +611,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       // You can get this if you cast an array to object. These
       // properties must be dynamic because you can't declare a
       // property with a non-string name.
-      if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
+      if (UNLIKELY(!isStringType(key.m_type))) {
         assert(key.m_type == KindOfInt64);
         switch (mode) {
         case CreateRefs: {
@@ -1072,7 +1072,7 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   // ref-count starts at 1.
   try {
     DEBUG_ONLY auto const tv = g_context->invokeMethod(this, init);
-    assert(!IS_REFCOUNTED_TYPE(tv.m_type));
+    assert(!isRefcountedType(tv.m_type));
   } catch (...) {
     this->setNoDestruct();
     decRefObj(this);
@@ -1961,7 +1961,7 @@ String ObjectData::invokeToString() {
     return empty_string();
   }
   auto const tv = g_context->invokeMethod(this, method);
-  if (!IS_STRING_TYPE(tv.m_type)) {
+  if (!isStringType(tv.m_type)) {
     // Discard the value returned by the __toString() method and raise
     // a recoverable error
     tvRefcountedDecRef(tv);

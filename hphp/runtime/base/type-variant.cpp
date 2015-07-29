@@ -111,12 +111,12 @@ Variant::Variant(const Variant& v) noexcept {
  * ResourceData, and RefData classes.
  */
 
-static_assert(TYPE_TO_DESTR_IDX(KindOfString) == 1, "String destruct index");
-static_assert(TYPE_TO_DESTR_IDX(KindOfArray)  == 2,  "Array destruct index");
-static_assert(TYPE_TO_DESTR_IDX(KindOfObject) == 3, "Object destruct index");
-static_assert(TYPE_TO_DESTR_IDX(KindOfResource) == 4,
+static_assert(typeToDestrIdx(KindOfString) == 1, "String destruct index");
+static_assert(typeToDestrIdx(KindOfArray)  == 2,  "Array destruct index");
+static_assert(typeToDestrIdx(KindOfObject) == 3, "Object destruct index");
+static_assert(typeToDestrIdx(KindOfResource) == 4,
               "Resource destruct index");
-static_assert(TYPE_TO_DESTR_IDX(KindOfRef)    == 5,    "Ref destruct index");
+static_assert(typeToDestrIdx(KindOfRef)    == 5,    "Ref destruct index");
 
 static_assert(kDestrTableSize == 6,
               "size of g_destructors[] must be kDestrTableSize");
@@ -132,7 +132,7 @@ RawDestructor g_destructors[] = {
 
 void tweak_variant_dtors() {
   if (RuntimeOption::EnableObjDestructCall) return;
-  g_destructors[TYPE_TO_DESTR_IDX(KindOfObject)] =
+  g_destructors[typeToDestrIdx(KindOfObject)] =
     (RawDestructor)getMethodPtr(&ObjectData::releaseNoObjDestructCheck);
 }
 
@@ -151,7 +151,7 @@ void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
   tmp.m_type = type;
   tmp.m_data.num = datum;
   if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
-    g_destructors[typeToDestrIndex(type)]((void*)datum);
+    g_destructors[typeToDestrIdx(type)]((void*)datum);
   }
 }
 
@@ -166,7 +166,7 @@ Variant& Variant::assignRef(Variant& v) noexcept {
 }
 
 Variant& Variant::setWithRef(const Variant& v) noexcept {
-  setWithRefHelper(v, IS_REFCOUNTED_TYPE(m_type));
+  setWithRefHelper(v, isRefcountedType(m_type));
   return *this;
 }
 
@@ -734,7 +734,7 @@ static void unserializeProp(VariableUnserializer* uns,
     t = &tvAsVariant(lookup.prop);
   }
 
-  if (UNLIKELY(IS_REFCOUNTED_TYPE(t->getRawType()))) {
+  if (UNLIKELY(isRefcountedType(t->getRawType()))) {
     uns->putInOverwrittenList(*t);
   }
 

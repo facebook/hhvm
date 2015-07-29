@@ -307,7 +307,7 @@ private:
 public:
   // Elm's data.m_type == kInvalidDataType for deleted slots.
   static bool isTombstone(DataType t) {
-    assert(IS_REAL_TYPE(t) || t == kInvalidDataType);
+    assert(isRealType(t) || t == kInvalidDataType);
     return t < KindOfUninit;
     static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
   }

@@ -358,7 +358,7 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
       v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
     } else {
       // Serialized variants and objects shouldn't ever make it into the repo.
-      assert(!IS_REFCOUNTED_TYPE(v.getType()));
+      assert(!isRefcountedType(v.getType()));
     }
     tvAsVariant(&tv) = v;
   }

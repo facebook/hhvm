@@ -237,7 +237,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::Str:
-    return IS_STRING_TYPE(tv.m_type);
+    return isStringType(tv.m_type);
 
   case T::OptSArr:
     if (initNull) return true;
@@ -289,7 +289,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
   case T::Unc:
-    return !IS_REFCOUNTED_TYPE(tv.m_type) ||
+    return !isRefcountedType(tv.m_type) ||
            (tv.m_type == KindOfString && tv.m_data.pstr->isStatic()) ||
            (tv.m_type == KindOfArray && tv.m_data.parr->isStatic());
 

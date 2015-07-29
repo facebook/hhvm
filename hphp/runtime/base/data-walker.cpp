@@ -45,7 +45,7 @@ void DataWalker::traverseData(ArrayData* data,
 
     auto const type = var.getType();
     // cheap enough, do it always
-    features.hasRefCountReference = IS_REFCOUNTED_TYPE(type);
+    features.hasRefCountReference = isRefcountedType(type);
     if (type == KindOfObject) {
       features.hasObjectOrResource = true;
       traverseData(var.getObjectData(), features, visited);

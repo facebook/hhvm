@@ -621,7 +621,7 @@ bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
                                                 KeyValuePair& item) {
   if (s_apc_file_storage.getState() !=
       APCFileStorage::StorageState::Invalid &&
-      (IS_REFCOUNTED_TYPE(v.getType()))) {
+      (isRefcountedType(v.getType()))) {
     // Only do the storage for ref-counted type
     String s = apc_serialize(v);
     char *sAddr = s_apc_file_storage.put(s.data(), s.size());

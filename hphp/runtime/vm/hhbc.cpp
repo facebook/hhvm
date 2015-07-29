@@ -708,9 +708,9 @@ void staticArrayStreamer(ArrayData* ad, std::ostream& out) {
       Variant key = it.first();
 
       // Key.
-      if (IS_INT_TYPE(key.getType())) {
+      if (isIntType(key.getType())) {
         out << *key.getInt64Data();
-      } else if (IS_STRING_TYPE(key.getType())) {
+      } else if (isStringType(key.getType())) {
         out << "\""
             << escapeStringForCPP(key.getStringData()->data(),
                                   key.getStringData()->size())

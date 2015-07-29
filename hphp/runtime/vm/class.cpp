@@ -2566,8 +2566,8 @@ void Class::setEnumType() {
 
     // Make sure we've loaded a valid underlying type.
     if (m_enumBaseTy &&
-        !IS_INT_TYPE(*m_enumBaseTy) &&
-        !IS_STRING_TYPE(*m_enumBaseTy)) {
+        !isIntType(*m_enumBaseTy) &&
+        !isStringType(*m_enumBaseTy)) {
       raise_error("Invalid base type for enum %s",
                   m_preClass->name()->data());
     }

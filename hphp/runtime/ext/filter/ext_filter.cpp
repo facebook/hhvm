@@ -95,8 +95,8 @@ const StaticString
   s_SERVER("_SERVER"),
   s_ENV("_ENV");
 
-struct FilterRequestData final : RequestEventHandler {
-  void requestInit() override {
+struct FilterRequestData final {
+  void requestInit() {
     // This doesn't copy them yet, but will do COW if they are modified
     m_GET    = php_global(s_GET).toArray();
     m_POST   = php_global(s_POST).toArray();
@@ -105,12 +105,12 @@ struct FilterRequestData final : RequestEventHandler {
     m_ENV    = php_global(s_ENV).toArray();
   }
 
-  void requestShutdown() override {
-    m_GET = nullptr;
-    m_POST = nullptr;
-    m_COOKIE = nullptr;
-    m_SERVER = nullptr;
-    m_ENV = nullptr;
+  void requestShutdown() {
+    m_GET.detach();
+    m_POST.detach();
+    m_COOKIE.detach();
+    m_SERVER.detach();
+    m_ENV.detach();
   }
 
   Array getVar(int64_t type) {
@@ -124,7 +124,7 @@ struct FilterRequestData final : RequestEventHandler {
     return empty_array();
   }
 
-  void vscan(IMarker& mark) const override {
+  void vscan(IMarker& mark) const {
     mark(m_GET);
     mark(m_POST);
     mark(m_COOKIE);
@@ -139,7 +139,7 @@ private:
   Array m_SERVER;
   Array m_ENV;
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(FilterRequestData, s_filter_request_data);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
@@ -216,11 +216,23 @@ public:
     loadSystemlib();
   }
 
+  void threadInit() override {
+    s_filter_request_data.getCheck();
+  }
+
   void requestInit() override {
     // warm up the s_filter_request_data
     s_filter_request_data->requestInit();
   }
 
+  void requestShutdown() override {
+    // warm up the s_filter_request_data
+    s_filter_request_data->requestShutdown();
+  }
+
+  void vscan(IMarker& m) const override {
+    s_filter_request_data->vscan(m);
+  }
 } s_filter_extension;
 
 #undef REGISTER_CONSTANT

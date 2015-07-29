@@ -347,7 +347,6 @@ void Class::destroy() {
 
 void Class::atomicRelease() {
   assert(!m_cachedClass.bound());
-  assert(!getCount());
   this->~Class();
   low_free(mallocPtr());
 }

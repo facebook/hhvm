@@ -668,7 +668,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
     } else {
       auto const sf = v.makeReg();
       v << cmpli{0, rCount, sf};
-      static_assert(UncountedValue < 0 && StaticValue < 0, "");
+      static_assert((int8_t)UncountedGCByte < 0 && (int8_t)StaticGCByte < 0, "");
       ifThen(v, CC_GE, sf, [&](Vout& v) {
         auto count1 = v.makeReg();
         v << addli{1, rCount, count1, v.makeReg()};

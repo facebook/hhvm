@@ -35,7 +35,6 @@ namespace HPHP {
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->isPacked());
-  assert(arr->getCount() != 0);
   assert(arr->m_size <= arr->cap());
   assert(arr->m_pos >= 0 && arr->m_pos <= arr->m_size);
   static_assert(ArrayData::kPackedKind == 0, "");
@@ -66,7 +65,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const scale   = computeScaleFromSize(neededSize);
   auto const ad      = reqAllocArray(scale);
   ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
-  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->m_hdr.init(HeaderKind::Mixed, UnsharedGCByte);
   ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI       = oldSize;
 
@@ -203,7 +202,7 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = old->m_sizeAndPos;
-    ad->m_hdr.init(CapCode::exact(cap), old->m_hdr.kind, 1);
+    ad->m_hdr.init(CapCode::exact(cap), old->m_hdr.kind, UnsharedGCByte);
     assert(ad->isPacked());
     assert(ad->m_size == old->m_size);
     assert(ad->cap() == cap);
@@ -298,12 +297,13 @@ ArrayData* PackedArray::ResizeIfNeeded(ArrayData* adIn) {
 //////////////////////////////////////////////////////////////////////
 ALWAYS_INLINE
 void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
-                                   RefCount initial_count) {
+                                   GCByte gcbyte) {
   // Copy everything from `adIn' to `ad', including refcount, etc.
   auto const size = adIn->m_size;
   static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
   memcpy16_inline(ad, adIn, (size + 1) * 16);
-  ad->m_hdr.init(adIn->m_hdr, initial_count);
+
+  ad->m_hdr.init(adIn->m_hdr, gcbyte);
 
   // Copy counted types correctly, especially RefData.
   auto data = packedData(ad);
@@ -330,7 +330,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
     MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
 
-  CopyPackedHelper(adIn, ad, 1);
+  CopyPackedHelper(adIn, ad, UnsharedGCByte);
 
   assert(ad->isPacked());
   assert(ad->cap() == adIn->cap());
@@ -367,7 +367,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   } else {
     ad = CopyStaticHelper(adIn);
   }
-  CopyPackedHelper(adIn, ad, StaticValue);
+  CopyPackedHelper(adIn, ad, StaticGCByte);
 
   assert(ad->isPacked());
   assert(ad->cap() == adIn->cap());
@@ -386,7 +386,7 @@ ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = adIn->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticValue);
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticGCByte);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == adIn->m_size);
@@ -405,7 +405,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = arr->m_sizeAndPos;
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, StaticValue);
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, StaticGCByte);
     assert(ad->isPacked());
     assert(ad->cap() == cap);
     assert(ad->m_size == arr->m_size);
@@ -432,7 +432,7 @@ ArrayData* PackedArray::ConvertStaticHelper(const ArrayData* arr) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = arr->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticValue);
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticGCByte);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == arr->m_size);
@@ -450,7 +450,7 @@ ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = 0; // size=0, pos=0
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UnsharedGCByte);
     assert(ad->isPacked());
     assert(ad->cap() == cap);
     assert(ad->m_size == 0);
@@ -471,7 +471,7 @@ ArrayData* MixedArray::MakeReserveSlow(uint32_t capacity) {
   auto const requestSize = sizeof(ArrayData) + sizeof(TypedValue) * cap;
   auto const ad = static_cast<ArrayData*>(MM().objMalloc(requestSize));
   ad->m_sizeAndPos = 0;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, 1);
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, UnsharedGCByte);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == 0);

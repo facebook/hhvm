@@ -690,10 +690,10 @@ static std::string toStringElm(const TypedValue* tv) {
     return os.str();
   }
   if (isRefcountedType(tv->m_type) &&
-      TV_GENERIC_DISPATCH(*tv, getCount) <= 0 &&
+      !TV_GENERIC_DISPATCH(*tv, isRefCounted) &&
       !TV_GENERIC_DISPATCH(*tv, isStatic)) {
     // OK in the invoking frame when running a destructor.
-    os << " ??? inner_count " << tv->m_data.parr->getCount() << " ";
+    os << " ??? mrb " << tv->m_data.parr->maybeShared() << " ";
     return os.str();
   }
 
@@ -701,7 +701,7 @@ static std::string toStringElm(const TypedValue* tv) {
     if (TV_GENERIC_DISPATCH(*tv, isStatic)) {
       os << ":c(static)";
     } else {
-      os << ":c(" << TV_GENERIC_DISPATCH(*tv, getCount) << ")";
+      os << ":c(" << TV_GENERIC_DISPATCH(*tv, maybeShared) << ")";
     }
   };
 
@@ -763,13 +763,11 @@ static std::string toStringElm(const TypedValue* tv) {
       }
       continue;
     case KindOfArray:
-      assert(check_refcount_nz(tv->m_data.parr->getCount()));
       os << tv->m_data.parr;
       print_count();
       os << ":Array";
       continue;
     case KindOfObject:
-      assert(check_refcount_nz(tv->m_data.pobj->getCount()));
       os << tv->m_data.pobj;
       print_count();
       os << ":Object("
@@ -777,7 +775,6 @@ static std::string toStringElm(const TypedValue* tv) {
          << ")";
       continue;
     case KindOfResource:
-      assert(check_refcount_nz(tv->m_data.pres->getCount()));
       os << tv->m_data.pres;
       print_count();
       os << ":Resource("
@@ -1725,7 +1722,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       if (LIKELY(!f->byRef(i))) {
         cellDup(*tvToCell(from), *to);
       } else if (LIKELY(from->m_type == KindOfRef &&
-                        from->m_data.pref->getCount() >= 2)) {
+                        from->m_data.pref->hasMultipleRefs())) {
         refDup(*from, *to);
       } else {
         if (doCufRefParamChecks && f->mustBeRef(i)) {
@@ -2990,7 +2987,7 @@ static UNUSED int innerCount(const TypedValue* tv) {
     if (tv->m_type == KindOfRef) {
       return tv->m_data.pref->getRealCount();
     } else {
-      return tv->m_data.pref->getCount();
+      return tv->m_data.pref->hasMultipleRefs() ? 2 : 1;
     }
   }
   return -1;
@@ -3813,7 +3810,6 @@ OPTBLD_INLINE void iopConcat(IOP_ARGS) {
   auto const s2 = cellAsVariant(*c2).toString();
   auto const s1 = cellAsCVarRef(*c1).toString();
   cellAsVariant(*c2) = concat(s2, s1);
-  assert(check_refcount_nz(c2->m_data.pstr->getCount()));
   vmStack().popC();
 }
 
@@ -3828,14 +3824,12 @@ OPTBLD_INLINE void iopConcatN(IOP_ARGS) {
     auto const s2 = cellAsVariant(*c2).toString();
     auto const s1 = cellAsCVarRef(*c1).toString();
     cellAsVariant(*c2) = concat(s2, s1);
-    assert(check_refcount_nz(c2->m_data.pstr->getCount()));
   } else if (n == 3) {
     auto const c3 = vmStack().indC(2);
     auto const s3 = cellAsVariant(*c3).toString();
     auto const s2 = cellAsCVarRef(*c2).toString();
     auto const s1 = cellAsCVarRef(*c1).toString();
     cellAsVariant(*c3) = concat3(s3, s2, s1);
-    assert(check_refcount_nz(c3->m_data.pstr->getCount()));
   } else {
     assert(n == 4);
     auto const c3 = vmStack().indC(2);
@@ -3845,7 +3839,6 @@ OPTBLD_INLINE void iopConcatN(IOP_ARGS) {
     auto const s2 = cellAsCVarRef(*c2).toString();
     auto const s1 = cellAsCVarRef(*c1).toString();
     cellAsVariant(*c4) = concat4(s4, s3, s2, s1);
-    assert(check_refcount_nz(c4->m_data.pstr->getCount()));
   }
 
   for (int i = 1; i < n; ++i) {

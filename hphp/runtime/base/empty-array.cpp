@@ -44,7 +44,7 @@ struct EmptyArray::Initializer {
   Initializer() {
     auto const ad   = reinterpret_cast<ArrayData*>(&s_theEmptyArray);
     ad->m_sizeAndPos = 0;
-    ad->m_hdr.init(HeaderKind::Empty, StaticValue);
+    ad->m_hdr.init(HeaderKind::Empty, StaticGCByte);
   }
 };
 EmptyArray::Initializer EmptyArray::s_initializer;
@@ -130,7 +130,7 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = 1; // size=1, pos=0
-  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UnsharedGCByte);
 
   auto& lval = *reinterpret_cast<TypedValue*>(ad + 1);
   lval.m_data = tv.m_data;
@@ -158,7 +158,7 @@ NEVER_INLINE
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const ad = reqAllocArray(MixedArray::SmallScale);
-  MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, 0/*nextIntKey*/);
+  MixedArray::InitSmall(ad, UnsharedGCByte, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
   auto const khash = key->hash();
@@ -187,7 +187,7 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const ad = reqAllocArray(MixedArray::SmallScale);
-  MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
+  MixedArray::InitSmall(ad, UnsharedGCByte, 1/*size*/, (key >= 0) ? key + 1 : 0);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
 

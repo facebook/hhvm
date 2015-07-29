@@ -62,19 +62,19 @@ public:
 
   template <typename T>
   explicit Object(req::ptr<T>&& ptr) : m_obj(std::move(ptr)) {
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->isRefCounted());
   }
 
   explicit Object(Class* cls)
     : m_obj(ObjectData::newInstance(cls), NoIncRef{}) {
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->isRefCounted());
   }
 
   // Move ctor
   Object(Object&& src) noexcept : m_obj(std::move(src.m_obj)) {
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->isRefCounted());
   }
 
   // Regular assign
@@ -94,14 +94,14 @@ public:
   // Move assign
   Object& operator=(Object&& src) {
     m_obj = std::move(src.m_obj);
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->isRefCounted());
     return *this;
   }
 
   template <typename T>
   Object& operator=(req::ptr<T>&& src) {
     m_obj = std::move(src);
-    assert(!m_obj || m_obj->getCount() > 0);
+    assert(!m_obj || m_obj->isRefCounted());
     return *this;
   }
 
@@ -202,7 +202,7 @@ public:
 
   // Take ownership of a reference without touching the ref count
   static Object attach(ObjectData *object) {
-    assert(!object || object->getCount() > 0);
+    assert(!object || object->isRefCounted());
     return Object{req::ptr<ObjectData>::attach(object)};
   }
 

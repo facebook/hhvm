@@ -66,9 +66,9 @@ protected:
    * NOTE: MixedArray no longer calls this constructor.  If you change
    * it, change the MixedArray::Make functions as appropriate.
    */
-  explicit ArrayData(ArrayKind kind, RefCount initial_count = 1)
+  explicit ArrayData(ArrayKind kind, GCByte gcbyte = UnsharedGCByte)
     : m_sizeAndPos(uint32_t(-1)) {
-    m_hdr.init(static_cast<HeaderKind>(kind), initial_count);
+    m_hdr.init(static_cast<HeaderKind>(kind), gcbyte);
     assert(m_size == -1);
     assert(m_pos == 0);
     assert(m_hdr.kind == static_cast<HeaderKind>(kind));

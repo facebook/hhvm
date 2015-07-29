@@ -28,9 +28,9 @@ StructArray::StructArray(
   uint32_t size,
   uint32_t pos,
   Shape* shape,
-  RefCount initial_count
+  GCByte gcbyte
 )
-  : ArrayData(kStructKind, initial_count)
+  : ArrayData(kStructKind, gcbyte)
   , m_shape(shape)
 {
   m_sizeAndPos = size | uint64_t{pos} << 32;
@@ -95,7 +95,7 @@ ArrayData* StructArray::MakeUncounted(ArrayData* array) {
   // change once it's uncounted.
   auto size = structArray->size();
   StructArray* result = createUncounted(structArray->shape(), size);
-  result->m_hdr.init(HeaderKind::Struct, UncountedValue);
+  result->m_hdr.init(HeaderKind::Struct, UncountedGCByte);
   result->m_sizeAndPos = array->m_sizeAndPos;
   auto const srcData = structArray->data();
   auto const stop    = srcData + size;
@@ -565,7 +565,6 @@ ArrayData* StructArray::Escalate(const ArrayData* ad) {
 }
 
 bool StructArray::checkInvariants(const ArrayData* ad) {
-  assert(ad->getCount() != 0);
   return true;
 }
 
@@ -596,7 +595,7 @@ MixedArray* StructArray::ToMixedHeader(size_t neededSize) {
   auto const ad      = reqAllocArray(scale);
 
   ad->m_sizeAndPos       = 0; // We'll set size and pos later.
-  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->m_hdr.init(HeaderKind::Mixed, UnsharedGCByte);
   ad->m_scale_used       = scale; // used=0
   ad->m_nextKI           = 0; // There were never any numeric indices.
 

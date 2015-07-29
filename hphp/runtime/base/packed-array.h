@@ -86,7 +86,7 @@ struct PackedArray {
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
-                               RefCount initial_count);
+                               GCByte gcbyte);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);

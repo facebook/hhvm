@@ -73,7 +73,7 @@ namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
-  ArrayData* r = a->append(tvAsCVarRef(&value), a->getCount() != 1);
+  ArrayData* r = a->append(tvAsCVarRef(&value), a->maybeShared());
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }

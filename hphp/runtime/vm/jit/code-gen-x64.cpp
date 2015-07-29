@@ -136,7 +136,7 @@ void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
 
   auto const sf = v.makeReg();
   v << cmpbim{0, loc.reg()[FAST_GC_BYTE_OFFSET], sf};
-  static_assert(UncountedValue < 0 && StaticValue < 0, "");
+  static_assert((int8_t)UncountedGCByte < 0 && (int8_t)StaticGCByte < 0, "");
   ifThen(v, CC_GE, sf, then);
 }
 

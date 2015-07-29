@@ -34,11 +34,8 @@ namespace HPHP {
  * Using 8-bit values generates shorter cmp instructions while still being
  * far enough from 0 to be safe.
  */
-constexpr size_t UncountedBitPos = 31;
-constexpr int32_t UncountedValue = -128;
-constexpr int32_t StaticValue = -127; // implies UncountedValue
-constexpr int32_t RefCountMaxRealistic = (1 << 30) - 1;
 
+<<<<<<< HEAD
 static_assert((uint32_t)UncountedValue & (1uL << UncountedBitPos),
               "Check UncountedValue and UncountedBitPos");
 static_assert((uint32_t)StaticValue & (1uL << UncountedBitPos),
@@ -74,6 +71,12 @@ inline bool check_refcount_nz(int32_t count) {
 inline bool check_refcount_ns_nz(int32_t count) {
   return check_refcount_ns(count - 1);
 }
+=======
+constexpr uint8_t StaticGCByte = 0x84; // 1000 0100, _static=mrb=1
+constexpr uint8_t UncountedGCByte = 0xC4; // 1100 0100, _static=uncounted=mrb=1
+constexpr uint8_t UnsharedGCByte = 0x0; // when refcount == 0 or 1
+constexpr uint8_t SharedGCByte = 0x4; // when refcount == 0 or 1
+>>>>>>> Make the world less refcount-centric and hopefully a bit faster
 
 /*
  * Ref-count manipulation functions, where static ref-counts are allowed. These

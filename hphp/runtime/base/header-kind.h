@@ -43,6 +43,7 @@ extern const char* header_names[];
  * RefCount type for m_count field in refcounted objects
  */
 using RefCount = int32_t;
+using GCByte = uint8_t;
 
 /*
  * Common header for all heap-allocated objects. Layout is carefully
@@ -65,7 +66,7 @@ template<class T = uint16_t> struct HeaderWord {
               mutable uint8_t uncounted:1;
               mutable uint8_t _static:1;
             };
-            mutable uint8_t gcbyte;
+            mutable GCByte gcbyte;
           };
         };
         uint32_t lo32;
@@ -78,37 +79,19 @@ template<class T = uint16_t> struct HeaderWord {
     uint64_t q;
   };
 
-  void init(HeaderKind kind, RefCount count) {
-    uint8_t gc = 0;
-    if (count == StaticValue) {
-      gc = 0x84; // 1000 0100, _static=mrb=1
-    } else if (count == UncountedValue) {
-      gc = 0xC4; // 1100 0100, _static=uncounted=mrb=1
-    }
+  void init(HeaderKind kind, GCByte gc) {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         gc << (8 * offsetof(HeaderWord, gcbyte));
   }
 
-  void init(T aux, HeaderKind kind, RefCount count) {
-    uint8_t gc = 0;
-    if (count == StaticValue) {
-      gc = 0x84; // 1000 0100, _static=mrb=1
-    } else if (count == UncountedValue) {
-      gc = 0xC4; // 1100 0100, _static=uncounted=mrb=1
-    }
+  void init(T aux, HeaderKind kind, GCByte gc) {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         static_cast<uint16_t>(aux) |
         gc << (8 * offsetof(HeaderWord, gcbyte));
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
-  void init(const HeaderWord<T>& h, RefCount count) {
-    uint8_t gc = 0;
-    if (count == StaticValue) {
-      gc = 0x84; // 1000 0100, _static=mrb=1
-    } else if (count == UncountedValue) {
-      gc = 0xC4; // 1100 0100, _static=uncounted=mrb=1
-    }
+  void init(const HeaderWord<T>& h, GCByte gc) {
     q = static_cast<uint32_t>(h.kind) << (8 * offsetof(HeaderWord, kind)) |
         static_cast<uint16_t>(h.aux) |
         gc << (8 * offsetof(HeaderWord, gcbyte));

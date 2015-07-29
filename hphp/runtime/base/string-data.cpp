@@ -176,8 +176,8 @@ StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data = data;
-  auto const count = trueStatic ? StaticValue : UncountedValue;
-  sd->m_hdr.init(cc, HeaderKind::String, count);
+  sd->m_hdr.init(cc, HeaderKind::String, 
+      trueStatic ? StaticGCByte : UncountedGCByte);
   sd->m_len = sl.size(); // m_hash is computed soon.
 
   data[sl.size()] = 0;
@@ -208,7 +208,7 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_hdr.init(HeaderKind::String, StaticValue);
+  sd->m_hdr.init(HeaderKind::String, StaticGCByte);
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
   sd->preCompute();
@@ -272,6 +272,7 @@ StringData* StringData::Make(const StringData* s, CopyStringMode) {
   *memcpy8(data, s->data(), s->m_len) = 0;
 
   assert(sd->same(s));
+  assert(sd->m_hdr.gcbyte == UnsharedGCByte);
   return sd;
 }
 
@@ -423,7 +424,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   );
   auto const data = shared->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_hdr.init(data->m_hdr, 1);
+  sd->m_hdr.init(data->m_hdr, UnsharedGCByte);
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->sharedPayload()->shared = shared;
   sd->enlist();
@@ -689,7 +690,7 @@ StringData* StringData::escalate(size_t cap) {
 void StringData::dump() const {
   auto s = slice();
 
-  printf("StringData(%d) (%s%s%d): [", getCount(),
+  printf("StringData(%d) (%s%s%d): [", maybeShared(),
          isShared() ? "shared " : "",
          isStatic() ? "static " : "",
          static_cast<int>(s.size()));

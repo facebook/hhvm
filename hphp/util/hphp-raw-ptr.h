@@ -42,16 +42,8 @@ public:
   hphp_raw_ptr() : px(0) {}
   explicit hphp_raw_ptr(T *p) : px(p) {}
 
-  /* implicit */ hphp_raw_ptr(const std::weak_ptr<T> &p)
-    : px(p.lock().get())
-  {}
-
   template <class S>
   /* implicit */ hphp_raw_ptr(const std::shared_ptr<S> &p) : px(p.get()) {}
-  template <class S>
-  /* implicit */ hphp_raw_ptr(const std::weak_ptr<S> &p)
-    : px(p.lock().get())
-  {}
   template <class S>
   /* implicit */ hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
 

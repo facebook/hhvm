@@ -28,15 +28,6 @@ DECLARE_BOOST_TYPES(LoopStatement);
 class LoopStatement : public Statement {
 protected:
   explicit LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
-public:
-  void clearStringBufs();
-  void addStringBuf(const std::string &name);
-  void removeStringBuf(const std::string &name);
-  int numStringBufs() const { return m_string_bufs.size(); }
-  bool checkStringBuf(const std::string &name);
-private:
-  std::set<std::string>  m_string_bufs;
-  LoopStatementWeakPtr m_outer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

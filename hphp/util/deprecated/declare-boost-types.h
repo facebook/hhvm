@@ -41,7 +41,6 @@
                                                                         \
   using classname ## Ptr      = std::shared_ptr<classname>;             \
   using classname ## RawPtr   = hphp_raw_ptr<classname>;                \
-  using classname ## WeakPtr  = std::weak_ptr<classname>;               \
   using classname ## ConstPtr = std::shared_ptr<const classname>;       \
   using classname ## PtrVec   = std::vector<classname ## Ptr>;          \
 

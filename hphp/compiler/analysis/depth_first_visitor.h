@@ -56,22 +56,22 @@ public:
   }
 
   StatementPtr visitStmtRecur(StatementPtr stmt) {
-    BlockScopeRawPtr scope = dynamic_pointer_cast<LoopStatement>(stmt) ?
+    auto scope = dynamic_pointer_cast<LoopStatement>(stmt) ?
       stmt->getScope() : BlockScopeRawPtr();
 
     for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
-      if (ConstructPtr kid = stmt->getNthKid(i)) {
-        if (StatementPtr s = dynamic_pointer_cast<Statement>(kid)) {
+      if (auto kid = stmt->getNthKid(i)) {
+        if (auto s = dynamic_pointer_cast<Statement>(kid)) {
           if (Construct::SkipRecurse(s)) continue;
           if (scope) scope->incLoopNestedLevel();
-          if (StatementPtr rep = visitStmtRecur(s)) {
+          if (auto rep = visitStmtRecur(s)) {
             stmt->setNthKid(i, rep);
             stmt->getScope()->addUpdates(BlockScope::UseKindCaller);
           }
           if (scope) scope->decLoopNestedLevel();
         } else {
-          ExpressionPtr e = dynamic_pointer_cast<Expression>(kid);
-          if (ExpressionPtr rep = visitExprRecur(e)) {
+          auto e = dynamic_pointer_cast<Expression>(kid);
+          if (auto rep = visitExprRecur(e)) {
             stmt->setNthKid(i, rep);
             stmt->getScope()->addUpdates(BlockScope::UseKindCaller);
           }

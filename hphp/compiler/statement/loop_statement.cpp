@@ -24,25 +24,3 @@ using namespace HPHP;
 LoopStatement::LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS) :
     Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES) {
 }
-
-void LoopStatement::addStringBuf(const std::string &name) {
-  m_string_bufs.insert(name);
-}
-
-void LoopStatement::removeStringBuf(const std::string &name) {
-  m_string_bufs.erase(name);
-}
-
-void LoopStatement::clearStringBufs() {
-  m_string_bufs.clear();
-}
-
-bool LoopStatement::checkStringBuf(const std::string &name) {
-  if (m_string_bufs.find(name) != m_string_bufs.end()) {
-    return true;
-  }
-  if (LoopStatementPtr outer = m_outer.lock()) {
-    return outer->checkStringBuf(name);
-  }
-  return false;
-}

@@ -430,14 +430,14 @@ static Variant setVariable(const Object& obj, const char* varName, const Variant
 #define FAIL_IF_INVALID_ZIPDIRECTORY(func, res)                         \
   if (!res->isValid()) {                                                \
     raise_warning(#func "(): %d is not a valid "                        \
-                  "Zip Directory resource", res->o_getId());            \
+                  "Zip Directory resource", res->getId());              \
     return false;                                                       \
   }
 
 #define FAIL_IF_INVALID_ZIPENTRY(func, res)                             \
   if (!res->isValid()) {                                                \
     raise_warning(#func "(): %d is not a valid Zip Entry resource",     \
-                  res->o_getId());                                      \
+                  res->getId());                                        \
     return false;                                                       \
   }
 

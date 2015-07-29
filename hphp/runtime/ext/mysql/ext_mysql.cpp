@@ -778,7 +778,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int row,
     mysql_result = res->get();
     if (row < 0 || row >= (int)mysql_num_rows(mysql_result)) {
       raise_warning("Unable to jump to row %d on MySQL result index %d",
-                      row, result->o_getId());
+                      row, result->getId());
       return false;
     }
     mysql_data_seek(mysql_result, row);
@@ -823,7 +823,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int row,
       if (!found) { /* no match found */
         raise_warning("%s%s%s not found in MySQL result index %d",
                         table_name.data(), (table_name.empty() ? "" : "."),
-                        field_name.data(), result->o_getId());
+                        field_name.data(), result->getId());
         return false;
       }
     } else {

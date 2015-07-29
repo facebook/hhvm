@@ -74,9 +74,8 @@ class ResourceData {
     delete this;
   }
 
-  int32_t o_getId() const { return o_id; }
-  int32_t getId() const { return o_id; }
-  void o_setId(int id); // only for BuiltinFiles
+  int32_t getId() const { return m_id; }
+  void setId(int id); // only for BuiltinFiles
 
   const String& o_getClassName() const;
   virtual const String& o_getClassNameHook() const;
@@ -87,8 +86,8 @@ class ResourceData {
   bool instanceof() const { return dynamic_cast<const T*>(this) != nullptr; }
 
   bool o_toBoolean() const { return true; }
-  int64_t o_toInt64() const { return o_id; }
-  double o_toDouble() const { return o_id; }
+  int64_t o_toInt64() const { return m_id; }
+  double o_toDouble() const { return m_id; }
   String o_toString() const;
   Array o_toArray() const;
 
@@ -107,7 +106,7 @@ class ResourceData {
  protected:
   // Numeric identifier of resource object (used by var_dump() and other
   // output functions)
-  int32_t o_id;
+  int32_t m_id;
 };
 
 /**

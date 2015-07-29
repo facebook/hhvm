@@ -372,7 +372,7 @@ struct Semaphore : SweepableResourceData {
 
     if (!acquire && count == 0) {
       raise_warning("SysV semaphore %d (key 0x%x) is not currently acquired",
-                      o_getId(), key);
+                    getId(), key);
       return false;
     }
 
@@ -539,13 +539,13 @@ bool HHVM_FUNCTION(sem_remove,
   un.buf = &buf;
   if (semctl(sem_ptr->semid, 0, IPC_STAT, un) < 0) {
     raise_warning("SysV semaphore %d does not (any longer) exist",
-                    sem_identifier->o_getId());
+                    sem_identifier->getId());
     return false;
   }
 
   if (semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
     raise_warning("failed for SysV sempphore %d: %s",
-                    sem_identifier->o_getId(),
+                    sem_identifier->getId(),
                     folly::errnoStr(errno).c_str());
     return false;
   }

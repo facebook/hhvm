@@ -22,8 +22,7 @@
 
 namespace HPHP {
 
-struct DummyResource2 : public DummyResource {
-public:
+struct DummyResource2 : DummyResource {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource2);
   CLASSNAME_IS("Unknown");
   DummyResource2() {}
@@ -35,7 +34,7 @@ public:
     return m_class_name;
   }
   virtual bool isInvalid() const { return m_class_name.empty(); }
-  void o_setResourceId(int64_t id) { o_id = id; }
+  void o_setResourceId(int64_t id) { m_id = id; }
 };
 
 TEST(ReqPtr, Refcounts) {

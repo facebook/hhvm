@@ -31,15 +31,14 @@ namespace HPHP {
  * places in the runtime and the extensions that would need to be updated
  * first to make that work.
  */
-class DummyResource : public ResourceData {
-public:
+struct DummyResource : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource);
   CLASSNAME_IS("Unknown");
   DummyResource();
   String m_class_name;
   virtual const String& o_getClassNameHook() const;
   virtual bool isInvalid() const { return m_class_name.empty(); }
-  void o_setResourceId(int64_t id) { o_id = id; }
+  void o_setResourceId(int64_t id) { m_id = id; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

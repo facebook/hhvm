@@ -485,7 +485,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     auto res = var.toResource();
     xdebug_xml_add_attribute(node, "type", "resource");
     const char* text = xdebug_sprintf("resource id='%ld' type='%s'",
-                                      res->o_getId(),
+                                      res->getId(),
                                       res->o_getResourceName().data());
     xdebug_xml_add_text(node, const_cast<char*>(text));
   } else {
@@ -635,7 +635,7 @@ void xdebug_var_export_text_ansi(
       ANSI_COLOR_BOLD,
       ANSI_COLOR_BOLD_OFF,
       ANSI_COLOR_RESOURCE,
-      res->o_getId(),
+      res->getId(),
       ANSI_COLOR_RESET,
       res->o_getClassName().c_str()
     );

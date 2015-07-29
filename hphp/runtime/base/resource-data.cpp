@@ -33,30 +33,30 @@ ResourceData::ResourceData() {
   m_hdr.init(0, HeaderKind::Resource, 1);
   int& pmax = os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
-  o_id = ++pmax;
+  m_id = ++pmax;
   assert(MM().checkContains(this));
   assert(hasExactlyOneRef());
 }
 
-void ResourceData::o_setId(int id) {
+void ResourceData::setId(int id) {
   assert(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
   int &pmax = os_max_resource_id;
-  if (o_id != id) {
-    if (o_id == pmax) --pmax;
-    o_id = id;
+  if (m_id != id) {
+    if (m_id == pmax) --pmax;
+    m_id = id;
   }
 }
 
 ResourceData::~ResourceData() {
   int &pmax = os_max_resource_id;
-  if (o_id && o_id == pmax) {
+  if (m_id && m_id == pmax) {
     --pmax;
   }
-  o_id = -1;
+  m_id = -1;
 }
 
 String ResourceData::o_toString() const {
-  return String("Resource id #") + String(o_id);
+  return String("Resource id #") + String(m_id);
 }
 
 Array ResourceData::o_toArray() const {
@@ -75,7 +75,7 @@ const String& ResourceData::o_getClassNameHook() const {
 }
 
 void ResourceData::serializeImpl(VariableSerializer *serializer) const {
-  serializer->pushResourceInfo(o_getResourceName(), o_id);
+  serializer->pushResourceInfo(o_getResourceName(), m_id);
   empty_array().serialize(serializer);
   serializer->popResourceInfo();
 }

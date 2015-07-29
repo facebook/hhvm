@@ -781,7 +781,7 @@ int64_t MySQLResult::getRowCount() const {
 bool MySQLResult::seekRow(int64_t row) {
   if (row < 0 || row >= getRowCount()) {
     raise_warning("Unable to jump to row %" PRId64 " on MySQL result index %d",
-                    row, o_getId());
+                    row, getId());
     return false;
   }
 
@@ -809,7 +809,7 @@ bool MySQLResult::fetchRow() {
 bool MySQLResult::seekField(int64_t field) {
   if (field < 0 || field >= getFieldCount()) {
     raise_warning("Field %" PRId64 " is invalid for MySQL result index %d",
-                    field, o_getId());
+                    field, getId());
     return false;
   }
 

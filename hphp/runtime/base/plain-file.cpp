@@ -297,8 +297,8 @@ const Variant& BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
     auto f = req::make<BuiltinFile>(stdin);
     g_builtin_files->m_stdin = f;
-    f->o_setId(1);
-    assert(f->o_getId() == 1);
+    f->setId(1);
+    assert(f->getId() == 1);
   }
   return g_builtin_files->m_stdin;
 }
@@ -307,8 +307,8 @@ const Variant& BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
     auto f = req::make<BuiltinFile>(stdout);
     g_builtin_files->m_stdout = f;
-    f->o_setId(2);
-    assert(f->o_getId() == 2);
+    f->setId(2);
+    assert(f->getId() == 2);
   }
   return g_builtin_files->m_stdout;
 }
@@ -317,8 +317,8 @@ const Variant& BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
     auto f = req::make<BuiltinFile>(stderr);
     g_builtin_files->m_stderr = f;
-    f->o_setId(3);
-    assert(f->o_getId() == 3);
+    f->setId(3);
+    assert(f->getId() == 3);
   }
   return g_builtin_files->m_stderr;
 }

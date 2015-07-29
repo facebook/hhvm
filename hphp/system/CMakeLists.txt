@@ -1,3 +1,7 @@
+foreach(def ${EXTENSION_IDL_DEFINES})
+  add_definitions(${def})
+endforeach()
+
 # This will be run after runtime/ext has, so we can use the output of
 # that.
 add_custom_command(

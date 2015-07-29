@@ -78,6 +78,11 @@ add_custom_command(
   ARGS ${INFOTABS_SOURCE} ${INFOTABS_HEADER} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
 
+# Enable IDL based extensions
+foreach(def ${EXTENSION_IDL_DEFINES})
+  add_definitions(${def})
+endforeach()
+
 #
 ## Actual library
 #

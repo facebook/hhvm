@@ -322,6 +322,19 @@ endfunction()
 
 # Call after all of the calls to HHVM_DEFINE_EXTENSION are complete.
 #
+# This will append the files of the enabled extensions to the following variables:
+# C_SOURCES: C Source Files
+# CXX_SOURCES: C++ Source Files
+# H_SOURCES: C/C++ Header Files
+# ASM_SOURCES: asm source files appropriate for the current compiler.
+# PHP_SOURCES: PHP files representing the various extensions' systemlib.
+# IDL_SOURCES: The .idl.json files for the various extensions.
+#
+# IDL_DEFINES: Defines necessary for IDL-based extensions
+#   Super hacky way to ensure that class_map.cpp and ext_hhvm stubs have access
+#   to IDL based extensions via runtime/ext.h
+#   "Die IDL-based extensions, die." -sgolemon
+#
 # This will also add the appropriate libraries, include directories, and
 # defines for the enabled extensions' dependencies.
 function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
@@ -345,7 +358,16 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
         math(EXPR i2 "${i2} + 1")
       endwhile()
 
+      HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES(${HHVM_EXTENSION_${i}_ROOT_DIR}
+        ${HHVM_EXTENSION_${i}_SOURCE_FILES}
+        ${HHVM_EXTENSION_${i}_HEADER_FILES}
+        ${HHVM_EXTENSION_${i}_SYSTEMLIB}
+        ${HHVM_EXTENSION_${i}_IDL_FILES}
+      )
       add_definitions("-DENABLE_EXTENSION_${upperExtName}")
+      if (HHVM_EXTENSION_${i}_IDL_FILES)
+        list(APPEND IDL_DEFINES "-DENABLE_EXTENSION_${upperExtName}")
+      endif()
       set(ENABLE_EXTENSION_${upperExtName} ON CACHE BOOL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
     else()
       if (HHVM_EXTENSION_${i}_REQUIRED)
@@ -353,28 +375,6 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
       endif()
       message("Not building the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
       set(ENABLE_EXTENSION_${upperExtName} OFF CACHE BOOL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
-    endif()
-    math(EXPR i "${i} + 1")
-  endwhile()
-endfunction()
-
-# This will append the files of the enabled extensions to the following variables:
-# C_SOURCES: C Source Files
-# CXX_SOURCES: C++ Source Files
-# HEADER_SOURCES: C/C++ Header Files
-# ASM_SOURCES: asm source files appropriate for the current compiler.
-# PHP_SOURCES: PHP files representing the various extensions' systemlib.
-# IDL_SOURCES: The .idl.json files for the various extensions.
-function (HHVM_EXTENSION_BUILD_SOURCE_LISTS)
-  set(i 0)
-  while (i LESS HHVM_EXTENSION_COUNT)
-    if (${HHVM_EXTENSION_${i}_ENABLED_STATE} EQUAL 1)
-      HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES(${HHVM_EXTENSION_${i}_ROOT_DIR}
-        ${HHVM_EXTENSION_${i}_SOURCE_FILES}
-        ${HHVM_EXTENSION_${i}_HEADER_FILES}
-        ${HHVM_EXTENSION_${i}_EXTENSION_LIBRARY}
-        ${HHVM_EXTENSION_${i}_IDL_FILES}
-      )
     endif()
     math(EXPR i "${i} + 1")
   endwhile()
@@ -386,6 +386,7 @@ function (HHVM_EXTENSION_BUILD_SOURCE_LISTS)
   set(ASM_SOURCES ${ASM_SOURCES} PARENT_SCOPE)
   set(PHP_SOURCES ${PHP_SOURCES} PARENT_SCOPE)
   set(IDL_SOURCES ${IDL_SOURCES} PARENT_SCOPE)
+  set(IDL_DEFINES ${IDL_DEFINES} PARENT_SCOPE)
 endfunction()
 
 # Sort out all the files into their appropriate variable, as well as transform the paths

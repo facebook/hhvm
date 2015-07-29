@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
@@ -290,10 +291,12 @@ InitFiniNode llvmInit(
 InitFiniNode llvmExit(llvm::remove_fatal_error_handler,
                       InitFiniNode::When::ProcessExit);
 
-std::string showNewCode(const Vasm::AreaList& areas) DEBUG_ONLY;
-std::string showNewCode(const Vasm::AreaList& areas) {
+std::string showNewCode(const Vtext& text) DEBUG_ONLY;
+std::string showNewCode(const Vtext& text) {
   std::ostringstream str;
   Disasm disasm(Disasm::Options().indent(2));
+
+  auto const& areas = text.areas();
 
   for (unsigned i = 0, n = areas.size(); i < n; ++i) {
     auto& area = areas[i];
@@ -330,13 +333,11 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     size_t size;
   };
 
-  explicit TCMemoryManager(Vasm::AreaList& areas)
-    : m_areas(areas)
-  {
-  }
+  explicit TCMemoryManager(Vtext& text)
+    : m_text(text)
+  {}
 
-  ~TCMemoryManager() {
-  }
+  ~TCMemoryManager() {}
 
   uint8_t* allocateCodeSection(
     uintptr_t Size, unsigned Alignment, unsigned SectionID,
@@ -345,7 +346,7 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
 
     auto areaIndex = SectionName.endswith(".cold") ? AreaIndex::Cold
                                                    : AreaIndex::Main;
-    auto& code = m_areas[static_cast<size_t>(areaIndex)].code;
+    auto& code = m_text.area(areaIndex).code;
     auto codeSkew = m_codeSkews[static_cast<size_t>(areaIndex)];
 
     // We override/ignore the alignment and use skew value to compensate.
@@ -441,7 +442,7 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
   }
 
   uint32_t computeCodeSkew(unsigned alignment, AreaIndex area) {
-    auto& code = m_areas[static_cast<size_t>(area)].code;
+    auto& code = m_text.area(area).code;
     return m_codeSkews[static_cast<size_t>(area)] =
       reinterpret_cast<uint64_t>(code.frontier()) & (alignment - 1);
   }
@@ -456,7 +457,7 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
   }
 
 private:
-  Vasm::AreaList& m_areas;
+  Vtext& m_text;
 
   std::unordered_map<std::string, SectionInfo> m_dataSections;
 
@@ -509,7 +510,7 @@ struct VasmAnnotationWriter : llvm::AssemblyAnnotationWriter {
  * optimizing that and emitting machine code from the result.
  */
 struct LLVMEmitter {
-  explicit LLVMEmitter(const Vunit& unit, Vasm::AreaList& areas)
+  explicit LLVMEmitter(const Vunit& unit, Vtext& text)
     : m_context(llvm::getGlobalContext())
     , m_module(new llvm::Module("", m_context))
     , m_function(llvm::Function::Create(
@@ -521,13 +522,13 @@ struct LLVMEmitter {
     , m_irb(m_context,
             llvm::ConstantFolder(),
             IRBuilderVasmInserter(*this))
-    , m_tcMM(new TCMemoryManager(areas))
+    , m_tcMM(new TCMemoryManager(text))
     , m_valueInfo(unit.next_vr)
     , m_blocks(unit.blocks.size())
     , m_incomingVmFp(unit.blocks.size())
     , m_incomingVmSp(unit.blocks.size())
     , m_unit(unit)
-    , m_areas(areas)
+    , m_text(text)
   {
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmPrinter();
@@ -773,8 +774,7 @@ struct LLVMEmitter {
 
     // Record start of cold block. Alas there's no better way to find where
     // LLVM-generated cold code goes.
-    auto coldStart =
-      m_areas[static_cast<size_t>(AreaIndex::Cold)].code.frontier();
+    auto coldStart = m_text.cold().code.frontier();
 
     auto fpm = folly::make_unique<llvm::FunctionPassManager>(module);
     fpm->add(new llvm::DataLayoutPass(module));
@@ -824,14 +824,16 @@ struct LLVMEmitter {
     if (!RuntimeOption::EvalJitLLVMCompare.empty()) {
       jit::vector<std::string> code;
       Disasm disasm;
-      for (auto const& area : m_areas) {
+      for (auto const& area : m_text.areas()) {
         std::ostringstream str;
         disasm.disasm(str, area.start, area.code.frontier());
         code.emplace_back(str.str());
       }
-      throw CompareLLVMCodeGen(std::move(code),
-                               showModule(m_module.get()),
-                               m_areas[0].code.frontier() - m_areas[0].start);
+      throw CompareLLVMCodeGen(
+        std::move(code),
+        showModule(m_module.get()),
+        m_text.main().code.frontier() - m_text.main().start
+      );
     }
 
     if (RuntimeOption::EvalJitLLVMDiscard) return;
@@ -842,7 +844,7 @@ struct LLVMEmitter {
       static_cast<uint8_t*>(ee->getPointerToFunction(m_function));
     FTRACE(2, "LLVM function address: {}\n", funcStart);
     FTRACE(1, "\n{:-^80}\n{}\n",
-           " x64 after LLVM codegen ", showNewCode(m_areas));
+           " x64 after LLVM codegen ", showNewCode(m_text));
 
     if (auto secLocRecs = tcMM->getDataSection(".llvm_locrecs")) {
       auto const recs = parseLocRecs(secLocRecs->data.get(),
@@ -907,7 +909,7 @@ struct LLVMEmitter {
           // If LLVM duplicated the tail call into more than one jmp
           // instruction, we have to create new stubs for the duplicates to
           // avoid reusing the ephemeral stubs before they're done.
-          auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+          auto& frozen = m_text.frozen().code;
           auto optSPOff = folly::Optional<FPInvOffset>{};
           if (!req.target.resumed()) optSPOff = req.spOff;
           auto newStub = svcreq::emit_ephemeral(
@@ -1358,7 +1360,7 @@ VASM_OPCODES
   uint32_t m_nextLocRec{1};
 
   const Vunit& m_unit;
-  Vasm::AreaList& m_areas;
+  Vtext& m_text;
 
   // Faux personality for emitting landingpad.
   llvm::Function* m_personalityFunc;
@@ -1835,7 +1837,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   // lying to our stub emitter or llvm it's generally better to lie to the stub
   // emitter, so that's what we do here.
 
-  auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+  auto& frozen = m_text.frozen().code;
   bool reused;
   auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!inst.target.resumed()) optSPOff = inst.spOff;
@@ -1937,7 +1939,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
   // inst.dest is a pointer to memory allocated in globalData, so we can just
   // do what vasm does here.
 
-  auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+  auto& frozen = m_text.frozen().code;
   mcg->setJmpTransID((TCA)inst.dest);
 
   auto optSPOff = folly::Optional<FPInvOffset>{};
@@ -2307,7 +2309,7 @@ void LLVMEmitter::emit(const fallback& inst) {
   if (inst.trflags.packed == 0) {
     stub = sr->getFallbackTranslation();
   } else {
-    auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+    auto& frozen = m_text.frozen().code;
     auto const spOff = inst.dest.resumed() ? folly::Optional<FPInvOffset>{}
                                            : sr->nonResumedSPOff();
     stub = svcreq::emit_persistent(
@@ -3177,13 +3179,13 @@ llvm::Type* LLVMEmitter::ptrIntNType(size_t bits, bool inFS) const {
 
 } // unnamed namespace
 
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas) {
+void genCodeLLVM(const Vunit& unit, Vtext& text) {
   Timer timer(Timer::llvm);
   FTRACE(2, "\nTrying to emit LLVM IR for Vunit:\n{}\n", show(unit));
 
   try {
     auto const labels = sortBlocks(unit);
-    LLVMEmitter(unit, areas).emit(labels);
+    LLVMEmitter(unit, text).emit(labels);
   } catch (const FailedLLVMCodeGen& e) {
     throw;
   } catch (const std::exception& e) {
@@ -3199,7 +3201,7 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas) {
 
 namespace HPHP { namespace jit {
 
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas) {
+void genCodeLLVM(const Vunit& unit, Vtext& areas) {
   throw FailedLLVMCodeGen("This build does not support the LLVM backend");
 }
 

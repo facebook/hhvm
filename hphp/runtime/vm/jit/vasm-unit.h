@@ -18,12 +18,14 @@
 #define incl_HPHP_JIT_VASM_UNIT_H_
 
 #include "hphp/runtime/base/datatype.h"
+
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/data-block.h"
 #include "hphp/util/immed.h"
 
 #include <functional>
@@ -34,6 +36,9 @@ namespace HPHP { namespace jit {
 
 /*
  * Block of Vinstrs, managed by Vunit.
+ *
+ * A Vblock, in addition to containing a Vinstr stream, also specifies where it
+ * should be emitted to.
  */
 struct Vblock {
   explicit Vblock(AreaIndex area) : area(area) {}
@@ -63,16 +68,18 @@ struct VcallArgs {
  * Vasm constant.
  *
  * Either a 1, 4, or 8 byte unsigned value, 8 byte double, or the disp32 part
- * of a thread-local address of an immutable constant that varies by
- * thread. Constants may represent an undefined value of any type, indicated by
- * the isUndef member. Also contains convenience constructors for various
- * pointer and enum types.
+ * of a thread-local address of an immutable constant that varies by thread.
+ * Constants may also represent an undefined value, indicated by the isUndef
+ * member.
+ *
+ * Also contains convenience constructors for various pointer and enum types.
  */
 struct Vconst {
   enum Kind { Quad, Long, Byte, Double, ThreadLocal };
 
   using ullong = unsigned long long;
   using ulong = unsigned long;
+
   Vconst() : kind(Quad), val(0) {}
   explicit Vconst(Kind k)        : kind(k), isUndef(true), val(0) {}
   explicit Vconst(bool b)        : kind(Byte), val(b) {}
@@ -153,6 +160,8 @@ struct Vunit {
    */
   void freeScratchBlock(Vlabel);
 
+  /////////////////////////////////////////////////////////////////////////////
+
   /*
    * Make various Vunit-managed vasm structures.
    */
@@ -167,13 +176,14 @@ struct Vunit {
   Vreg makeConst(Vconst);
   template<typename T> Vreg makeConst(T v) { return makeConst(Vconst{v}); }
 
+  /////////////////////////////////////////////////////////////////////////////
+
   /*
    * Return true iff this Vunit needs register allocation before it can be
    * emitted, either because it uses virtual registers or contains instructions
    * that must be lowered by xls.
    */
   bool needsRegAlloc() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

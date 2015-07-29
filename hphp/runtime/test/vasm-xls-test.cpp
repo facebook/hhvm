@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include <gtest/gtest.h>
@@ -37,16 +38,24 @@ template<class T> uint64_t test_const(T val) {
     .sf = x64::abi.sf
   };
   static uint8_t code[1000];
+
   CodeBlock main;
   main.init(code, sizeof(code), "test");
+
   Vasm vasm;
   auto& unit = vasm.unit();
-  auto& v = vasm.main(main);
+
+  Vtext text;
+  text.main(main);
+
+  auto& v = vasm.main();
   unit.entry = v;
   v << copy{v.cns(val), Vreg{xmm0}};
   v << ret{RegSet{xmm0}};
+
   optimizeX64(vasm.unit(), test_abi);
-  emitX64(vasm.unit(), vasm.areas(), nullptr);
+  emitX64(unit, text, nullptr);
+
   union { double d; uint64_t c; } u;
   u.d = ((testfunc)code)();
   return u.c;

@@ -51,10 +51,10 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Vgen {
-  Vgen(const Vunit& u, Vasm::AreaList& areas, AsmInfo* asmInfo)
+  Vgen(const Vunit& u, Vtext& text, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
-    , areas(areas)
+    , text(text)
     , m_asmInfo(asmInfo) {
     addrs.resize(u.blocks.size());
     points.resize(u.next_point);
@@ -234,11 +234,11 @@ struct Vgen {
   void prep(RegXMM s, RegXMM d) { if (s != d) a->movdqa(s, d); }
   CodeAddress start(Vlabel b) {
     auto area = unit.blocks[b].area;
-    return areas[(int)area].start;
+    return text.area(area).start;
   }
-  CodeBlock& main() { return area(AreaIndex::Main).code; }
-  CodeBlock& cold() { return area(AreaIndex::Cold).code; }
-  CodeBlock& frozen() { return area(AreaIndex::Frozen).code; }
+  CodeBlock& main() { return text.main().code; }
+  CodeBlock& cold() { return text.cold().code; }
+  CodeBlock& frozen() { return text.frozen().code; }
   template<class Inst> void unary(Inst& i) { prep(i.s, i.d); }
   template<class Inst> void binary(Inst& i) { prep(i.s1, i.d); }
   template<class Inst> void commuteSF(Inst&);
@@ -246,17 +246,11 @@ struct Vgen {
   template<class Inst> void noncommute(Inst&);
 
 private:
-  Vasm::Area& area(AreaIndex i) {
-    assertx((unsigned)i < areas.size());
-    return areas[(unsigned)i];
-  }
-
-private:
   struct LabelPatch { CodeAddress instr; Vlabel target; };
   struct PointPatch { CodeAddress instr; Vpoint pos; };
   const Vunit& unit;
   BackEnd& backend;
-  Vasm::AreaList& areas;
+  Vtext& text;
   AsmInfo* m_asmInfo;
   X64Assembler* a;
   Vlabel current{0}, next{0}; // in linear order
@@ -330,7 +324,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
   jit::vector<jit::vector<BlockInfo>> areaToBlockInfos;
   if (shouldUpdateAsmInfo) {
-    areaToBlockInfos.resize(areas.size());
+    areaToBlockInfos.resize(text.areas().size());
     for (auto& r : areaToBlockInfos) {
       r.resize(unit.blocks.size());
     }
@@ -341,7 +335,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
     auto b = labels[i];
     auto& block = unit.blocks[b];
-    X64Assembler as { area(block.area).code };
+    X64Assembler as { text.area(block.area).code };
     a = &as;
     auto blockStart = a->frontier();
     addrs[b] = blockStart;
@@ -446,7 +440,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     return;
   }
 
-  for (auto i = 0; i < areas.size(); ++i) {
+  for (auto i = 0; i < text.areas().size(); ++i) {
     auto& blockInfos = areaToBlockInfos[i];
     for (auto const blockID : labels) {
       auto const& blockInfo = blockInfos[static_cast<size_t>(blockID)];
@@ -1193,10 +1187,10 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   }
 }
 
-void emitX64(const Vunit& unit, Vasm::AreaList& areas, AsmInfo* asmInfo) {
+void emitX64(const Vunit& unit, Vtext& text, AsmInfo* asmInfo) {
   Timer timer(Timer::vasm_gen);
   auto blocks = layoutBlocks(unit);
-  Vgen(unit, areas, asmInfo).emit(blocks);
+  Vgen(unit, text, asmInfo).emit(blocks);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

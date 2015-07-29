@@ -14,57 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include <algorithm>
+#include <utility>
 
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Vout.
 
-inline Vout& Vout::operator=(const Vout& v) {
-  assertx(&v.m_unit == &m_unit);
-  m_block = v.m_block;
-  m_origin = v.m_origin;
-  return *this;
+inline Varea& Vtext::area(AreaIndex i) {
+  assertx(static_cast<unsigned>(i) < m_areas.size());
+  return m_areas[static_cast<unsigned>(i)];
 }
 
-inline Vout& Vout::operator=(Vlabel b) {
-  m_block = b;
-  return *this;
-}
+inline Varea& Vtext::add(CodeBlock& cb, AreaIndex area) {
+  assertx(size_t(area) == m_areas.size());
 
-inline Vout::operator Vlabel() const {
-  return m_block;
-}
-
-inline AreaIndex Vout::area() const {
-  return m_unit.blocks[m_block].area;
-}
-
-inline Vpoint Vout::makePoint() {
-  return Vpoint{m_unit.next_point++};
-}
-
-inline Vreg Vout::makeReg() {
-  return m_unit.makeReg();
-}
-
-inline Vtuple Vout::makeTuple(const VregList& regs) const {
-  return m_unit.makeTuple(regs);
-}
-
-inline Vtuple Vout::makeTuple(VregList&& regs) const {
-  return m_unit.makeTuple(std::move(regs));
-}
-
-inline VcallArgsId Vout::makeVcallArgs(VcallArgs&& args) const {
-  return m_unit.makeVcallArgs(std::move(args));
-}
-
-template<class T>
-inline Vreg Vout::cns(T v) {
-  return m_unit.makeConst(Vconst{v});
+  m_areas.emplace_back(Varea { cb, cb.frontier() });
+  return m_areas.back();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }}

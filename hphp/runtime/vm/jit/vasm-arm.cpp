@@ -77,10 +77,10 @@ vixl::Condition C(ConditionCode cc) {
 }
 
 struct Vgen {
-  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, AsmInfo* asmInfo)
+  Vgen(Vunit& u, Vtext& text, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
-    , areas(areas)
+    , text(text)
     , m_asmInfo(asmInfo) {
     addrs.resize(u.blocks.size());
     points.resize(u.next_point);
@@ -160,24 +160,18 @@ private:
 
   CodeAddress start(Vlabel b) {
     auto area = unit.blocks[b].area;
-    return areas[(int)area].start;
+    return text.area(area).start;
   }
-  CodeBlock& main() { return area(AreaIndex::Main).code; }
-  CodeBlock& cold() { return area(AreaIndex::Cold).code; }
-  CodeBlock& frozen() { return area(AreaIndex::Frozen).code; }
-
-private:
-  Vasm::Area& area(AreaIndex i) {
-    assertx((unsigned)i < areas.size());
-    return areas[(unsigned)i];
-  }
+  CodeBlock& main() { return text.main().code; }
+  CodeBlock& cold() { return text.cold().code; }
+  CodeBlock& frozen() { return text.frozen().code; }
 
 private:
   struct LabelPatch { CodeAddress instr; Vlabel target; };
   struct PointPatch { CodeAddress instr; Vpoint pos; Vreg d; };
   Vunit& unit;
   BackEnd& backend;
-  jit::vector<Vasm::Area>& areas;
+  Vtext& text;
   AsmInfo* m_asmInfo;
   vixl::MacroAssembler* a;
   CodeBlock* codeBlock;
@@ -210,7 +204,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
   jit::vector<jit::vector<BlockInfo>> areaToBlockInfos;
   if (shouldUpdateAsmInfo) {
-    areaToBlockInfos.resize(areas.size());
+    areaToBlockInfos.resize(text.areas().size());
     for (auto& r : areaToBlockInfos) {
       r.resize(unit.blocks.size());
     }
@@ -221,7 +215,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
     auto b = labels[i];
     auto& block = unit.blocks[b];
-    codeBlock = &area(block.area).code;
+    codeBlock = &text.area(block.area).code;
     vixl::MacroAssembler as { *codeBlock };
     a = &as;
     auto blockStart = a->frontier();
@@ -312,7 +306,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     return;
   }
 
-  for (auto i = 0; i < areas.size(); ++i) {
+  for (auto i = 0; i < text.areas().size(); ++i) {
     const IRInstruction* currentOrigin = nullptr;
     auto& blockInfos = areaToBlockInfos[i];
     for (auto const blockID : labels) {
@@ -671,8 +665,7 @@ void lowerForARM(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void finishARM(Vunit& unit, Vasm::AreaList& areas,
-               const Abi& abi, AsmInfo* asmInfo) {
+void finishARM(Vunit& unit, Vtext& text, const Abi& abi, AsmInfo* asmInfo) {
   optimizeExits(unit);
   lower(unit);
   simplify(unit);
@@ -692,7 +685,7 @@ void finishARM(Vunit& unit, Vasm::AreaList& areas,
 
   Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(unit);
-  Vgen(unit, areas, asmInfo).emit(blocks);
+  Vgen(unit, text, asmInfo).emit(blocks);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

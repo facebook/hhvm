@@ -56,13 +56,15 @@ Vout Vout::makeBlock() {
 ///////////////////////////////////////////////////////////////////////////////
 // Vasm.
 
-Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
-  assertx(size_t(area) == m_areas.size());
+Vout& Vasm::out(AreaIndex area) {
+  auto const a = static_cast<size_t>(area);
 
-  auto b = m_unit.makeBlock(area);
-  m_areas.emplace_back(Area { Vout{m_unit, b}, cb, cb.frontier() });
-
-  return m_areas.back().out;
+  // Initialize all streams up through `area'.
+  for (auto i = m_outs.size(); i <= a; ++i) {
+    auto b = m_unit.makeBlock(static_cast<AreaIndex>(i));
+    m_outs.emplace_back(m_unit, b);
+  }
+  return m_outs[a];
 }
 
 X64Assembler& Vasm::prefix(X64Assembler& a, const Vptr& ptr) {
@@ -90,7 +92,7 @@ const Abi vauto_abi {
 };
 
 Vauto::~Vauto() {
-  auto& areas = this->areas();
+  DEBUG_ONLY auto const nareas = m_text.areas().size();
 
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
@@ -98,18 +100,18 @@ Vauto::~Vauto() {
       if (!main().closed()) {
         main() << fallthru{};
       }
-      assertx(areas.size() < 2 || cold().empty() || cold().closed());
-      assertx(areas.size() < 3 || frozen().empty() || frozen().closed());
+      assertx(nareas < 2 || cold().empty() || cold().closed());
+      assertx(nareas < 3 || frozen().empty() || frozen().closed());
 
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
 
       switch (arch()) {
         case Arch::X64:
           optimizeX64(unit(), vauto_abi);
-          emitX64(unit(), areas, nullptr);
+          emitX64(unit(), m_text, nullptr);
           break;
         case Arch::ARM:
-          finishARM(unit(), areas, vauto_abi, nullptr);
+          finishARM(unit(), m_text, vauto_abi, nullptr);
           break;
       }
       return;

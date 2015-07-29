@@ -485,9 +485,10 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
     // create vregs for all relevant SSATmps
     assignRegs(unit, vunit, state, blocks);
     vunit.entry = state.labels[unit.entry()];
-    vasm.main(mainCode);
-    vasm.cold(coldCode);
-    vasm.frozen(*frozenCode);
+    Vtext vtext;
+    vtext.main(mainCode);
+    vtext.cold(coldCode);
+    vtext.frozen(*frozenCode);
     for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
@@ -505,7 +506,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
-    finishARM(vasm.unit(), vasm.areas(), arm::abi, state.asmInfo);
+    finishARM(vasm.unit(), vtext, arm::abi, state.asmInfo);
   }
 
   assertx(coldCodeIn.frontier() == coldStart);

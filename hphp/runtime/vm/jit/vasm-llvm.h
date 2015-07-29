@@ -29,6 +29,7 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Vtext;
 struct Vunit;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,7 +70,7 @@ struct CompareLLVMCodeGen : FailedLLVMCodeGen {
  * areas is *not* cleaned up on failure; the caller must decide how to clean
  * up.
  */
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas);
+void genCodeLLVM(const Vunit& unit, Vtext& text);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

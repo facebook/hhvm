@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include "hphp/util/data-block.h"
@@ -32,8 +33,6 @@ struct AsmInfo;
 struct IRInstruction;
 struct Vinstr;
 struct Vreg;
-struct Vunit;
-struct X64Assemblers;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -112,72 +111,36 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Similar to X64Assembler, but buffers instructions as they are written, then
- * generates code all at once at the end.
+ * Vasm assembler.
  *
- * Areas represent the separate sections we generate code into.
+ * A Vasm manages Vout streams for a Vunit.
  */
 struct Vasm {
-  struct Area {
-    Vout out;
-    CodeBlock& code;
-    CodeAddress start;
-  };
-  using AreaList = jit::vector<Area>;
-
-  Vasm() {
-    m_areas.reserve(kNumAreas);
-  }
+  Vasm() { m_outs.reserve(kNumAreas); }
 
   /*
-   * Accessors.
+   * Obtain the managed Vunit.
    */
   Vunit& unit() { return m_unit; }
-  AreaList& areas() { return m_areas; }
 
   /*
-   * Get an existing area.
+   * Get or create the stream for the corresponding Varea.
    */
-  Vout& main() { return area(AreaIndex::Main).out; }
-  Vout& cold() { return area(AreaIndex::Cold).out; }
-  Vout& frozen() { return area(AreaIndex::Frozen).out; }
-
-  /*
-   * Create areas.
-   */
-  Vout& main(CodeBlock& cb) { return add(cb, AreaIndex::Main); }
-  Vout& cold(CodeBlock& cb) { return add(cb, AreaIndex::Cold); }
-  Vout& frozen(CodeBlock& cb) { return add(cb, AreaIndex::Frozen); }
-  Vout& main(X64Assembler& a) { return main(a.code()); }
-  Vout& cold(X64Assembler& a) { return cold(a.code()); }
-  Vout& frozen(X64Assembler& a) { return frozen(a.code()); }
+  Vout& main() { return out(AreaIndex::Main); }
+  Vout& cold() { return out(AreaIndex::Cold); }
+  Vout& frozen() { return out(AreaIndex::Frozen); }
 
   static X64Assembler& prefix(X64Assembler& a, const Vptr& ptr);
+
 private:
-  Area& area(AreaIndex i);
-  Vout& add(CodeBlock &cb, AreaIndex area);
+  Vout& out(AreaIndex i);
 
 private:
   Vunit m_unit;
-  AreaList m_areas; // indexed by AreaIndex
+  jit::vector<Vout> m_outs; // one for each AreaIndex
 };
 
-/*
- * Optimize, lower for x64, register allocator, and perform more optimizations
- * on unit.
- */
-void optimizeX64(Vunit& unit, const Abi&);
-
-/*
- * Emit code for the given unit using the given code areas. The unit should
- * have already been through optimizeX64().
- */
-void emitX64(const Vunit&, Vasm::AreaList&, AsmInfo*);
-
-/*
- * Optimize, register allocate, and emit ARM code for the given unit.
- */
-void finishARM(Vunit&, Vasm::AreaList&, const Abi&, AsmInfo* asmInfo);
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Vauto is a convenience helper for emitting small amounts of machine code
@@ -189,10 +152,33 @@ void finishARM(Vunit&, Vasm::AreaList&, const Abi&, AsmInfo* asmInfo);
  */
 struct Vauto : Vasm {
   explicit Vauto(CodeBlock& code) {
-    unit().entry = Vlabel(main(code));
+    m_text.main(code);
+    unit().entry = Vlabel(main());
   }
   ~Vauto();
+
+private:
+  Vtext m_text;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Optimize, lower for x64, register allocator, and perform more optimizations
+ * on `unit'.
+ */
+void optimizeX64(Vunit& unit, const Abi&);
+
+/*
+ * Emit code for the given unit using the given code areas. The unit should
+ * have already been through optimizeX64().
+ */
+void emitX64(const Vunit&, Vtext&, AsmInfo*);
+
+/*
+ * Optimize, register allocate, and emit ARM code for the given unit.
+ */
+void finishARM(Vunit&, Vtext&, const Abi&, AsmInfo*);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

@@ -30,15 +30,16 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
-#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-llvm.h"
-#include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-text.h"
 
 namespace HPHP { namespace jit {
 
@@ -368,7 +369,7 @@ static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
  */
 static void printLLVMComparison(const IRUnit& ir_unit,
                                 const Vunit& vasm_unit,
-                                const Vasm::AreaList& areas,
+                                const jit::vector<Varea>& areas,
                                 const CompareLLVMCodeGen* compare) {
   auto const vasm_size = areas[0].code.frontier() - areas[0].start;
   auto const percentage = compare->main_size * 100 / vasm_size;
@@ -523,9 +524,11 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
     // create vregs for all relevant SSATmps
     assignRegs(unit, vunit, state, blocks);
     vunit.entry = state.labels[unit.entry()];
-    vasm.main(mainCode);
-    vasm.cold(coldCode);
-    vasm.frozen(*frozenCode);
+
+    Vtext vtext;
+    vtext.main(mainCode);
+    vtext.cold(coldCode);
+    vtext.frozen(*frozenCode);
 
     for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
@@ -549,12 +552,11 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
                                               : x64::cross_trace_abi;
 
     if (mcg->useLLVM()) {
-      auto& areas = vasm.areas();
       auto x64_unit = vunit;
       auto vasm_size = std::numeric_limits<size_t>::max();
 
       jit::vector<UndoMarker> undoAll = {UndoMarker(mcg->globalData())};
-      for (auto const& area : areas) undoAll.emplace_back(area.code);
+      for (auto const& area : vtext.areas()) undoAll.emplace_back(area.code);
       auto resetCode = [&] {
         for (auto& marker : undoAll) marker.undo();
         mcg->cgFixups().clear();
@@ -569,15 +571,16 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
       if (RuntimeOption::EvalJitLLVMKeepSize) {
         optimizeX64(x64_unit, abi);
         optimized = true;
-        emitX64(x64_unit, areas, nullptr);
-        vasm_size = areas[0].code.frontier() - areas[0].start;
+        emitX64(x64_unit, vtext, nullptr);
+        vasm_size = vtext.main().code.frontier() - vtext.main().start;
         resetCode();
       }
 
       try {
-        genCodeLLVM(vunit, areas);
+        genCodeLLVM(vunit, vtext);
 
-        auto const llvm_size = areas[0].code.frontier() - areas[0].start;
+        auto const llvm_size = vtext.main().code.frontier() -
+                               vtext.main().start;
         if (llvm_size * 100 / vasm_size > RuntimeOption::EvalJitLLVMKeepSize) {
           throw FailedLLVMCodeGen("LLVM size {}, vasm size {}\n",
                                   llvm_size, vasm_size);
@@ -595,15 +598,15 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
         mcg->setUseLLVM(false);
         resetCode();
         if (!optimized) optimizeX64(x64_unit, abi);
-        emitX64(x64_unit, areas, state.asmInfo);
+        emitX64(x64_unit, vtext, state.asmInfo);
 
         if (auto compare = dynamic_cast<const CompareLLVMCodeGen*>(&e)) {
-          printLLVMComparison(unit, vasm.unit(), areas, compare);
+          printLLVMComparison(unit, vasm.unit(), vtext.areas(), compare);
         }
       }
     } else {
       optimizeX64(vunit, abi);
-      emitX64(vunit, vasm.areas(), state.asmInfo);
+      emitX64(vunit, vtext, state.asmInfo);
     }
   }
 

@@ -7722,7 +7722,7 @@ TCA dispatchImpl() {
       Stats::incOp(Op::name);                                 \
     }                                                         \
     if (UNLIKELY(!pc)) {                                      \
-      DEBUG_ONLY op = Op::name;                               \
+      op = Op::name;                                          \
       assert(op == OpRetC || op == OpRetV ||                  \
              op == OpAwait || op == OpCreateCont ||           \
              op == OpYield || op == OpYieldK ||               \

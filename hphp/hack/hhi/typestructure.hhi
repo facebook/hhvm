@@ -35,31 +35,3 @@ enum TypeStructureKind: int {
   OF_TRAIT = 0;
   OF_ENUM = 0;
 }
-
-/*
- * Exposing the TypeStructure shapes to users. To avoid cyclic definition of
- * shapes, we define UnknownTypeStructure to be the subtype.
- */
-newtype UnknownTypeStructure = shape(
-  'nullable' => ?bool,
-  'kind' => TypeStructureKind,
-);
-
-newtype TypeStructure = shape(
-  'nullable' => ?bool,
-  'kind' => TypeStructureKind,
-
-  // for tuples
-  'elem_types' => ?array<UnknownTypeStructure>,
-  // for functions
-  'param_types' => ?array<UnknownTypeStructure>,
-  'return_type' => ?UnknownTypeStructure,
-  // for arrays, classes
-  'generic_types' => ?array<UnknownTypeStructure>,
-  // for shapes
-  'fields' => ?array<arraykey, UnknownTypeStructure>,
-  // classname for classes, interfaces, enums, or traits
-  'classname' => ?string,
-  // name for generics (type variables)
-  'name' => ?string,
-);

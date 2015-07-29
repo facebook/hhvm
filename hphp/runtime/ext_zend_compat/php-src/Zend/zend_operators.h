@@ -471,7 +471,7 @@ public:
   explicit ZArrVal(TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
     ArrayData * ad = m_tv->m_data.parr;
-    if (ad->isStatic() || ad->cowCheck()) {
+    if (ad->cowCheck()) {
       forceAsProxyArray ();
     }
   }
@@ -491,7 +491,6 @@ public:
       ad = ProxyArray::Make(ad);
 	  assert(ad->hasExactlyOneRef());
     }
-    m_tv->m_data.parr->decRefCount();
     m_tv->m_data.parr = ad;
   }
   /* implicit */ operator HashTable*() {

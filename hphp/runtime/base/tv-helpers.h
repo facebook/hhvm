@@ -151,9 +151,7 @@ inline void tvRefcountedDecRef(TypedValue v) {
 }
 
 inline void tvRefcountedDecRefNZ(TypedValue tv) {
-  if (isRefcountedType(tv.m_type)) {
-    TV_GENERIC_DISPATCH(tv, decRefCount);
-  }
+
 }
 
 // Assumes 'tv' is live
@@ -172,7 +170,6 @@ ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
 // decref when the count is known not to reach zero
 ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
   assert(!tvDecRefWillCallHelper(tv));
-  tvRefcountedDecRefNZ(*tv);
 }
 
 // Assumes 'tv' is live

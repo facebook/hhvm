@@ -37,7 +37,7 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC) {
 }
 
 ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC) {
-  Z_OBJVAL_P(zobject)->decRefCount();
+  Z_OBJVAL_P(zobject)->decRefAndRelease();
 }
 
 ZEND_API void *zend_object_store_get_object(const zval *zobject TSRMLS_DC) {

@@ -210,7 +210,6 @@ public:
     return nextElm(data(), 0);
   }
 
-  using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;
   using ArrayData::incRefCount;

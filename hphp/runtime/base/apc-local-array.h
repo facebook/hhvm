@@ -96,7 +96,6 @@ struct APCLocalArray : private ArrayData {
   static bool Uasort(ArrayData*, const Variant&);
 
 public:
-  using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;
   using ArrayData::incRefCount;

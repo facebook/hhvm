@@ -139,7 +139,6 @@ struct Add {
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
     a1->incRefCount(); // force COW
-    SCOPE_EXIT { a1->decRefCount(); };
     return a1->plusEq(a2);
   }
 };
@@ -633,7 +632,6 @@ void cellBitNot(Cell& cell) {
           cell.m_data.pstr->slice(),
           CopyString
         );
-        cell.m_data.pstr->decRefCount(); // can't go to zero
         cell.m_data.pstr = newSd;
         cell.m_type = KindOfString;
       } else {

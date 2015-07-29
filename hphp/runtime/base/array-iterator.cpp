@@ -1175,7 +1175,6 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
       if (ad->isStruct()) return iter_next_free_struct(dest, ad);
     }
-    ad->decRefCount();
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->m_type))) {
@@ -1233,7 +1232,6 @@ int64_t new_iter_array_key(Iter*       dest,
       if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
       if (ad->isStruct()) return iter_next_free_struct(dest, ad);
     }
-    ad->decRefCount();
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->m_type))) {
@@ -1518,7 +1516,6 @@ static int64_t iter_next_apc_array(Iter* iter,
     if (UNLIKELY(arr->hasExactlyOneRef())) {
       return iter_next_free_apc(iter, arr);
     }
-    arr->decRefCount();
     if (debug) {
       iter->arr().setIterType(ArrayIter::TypeUndefined);
     }
@@ -1572,7 +1569,6 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         if (UNLIKELY(ad->hasExactlyOneRef())) {
           return iter_next_free_packed(iter, ad);
         }
-        ad->decRefCount();
         if (debug) {
           iter->arr().setIterType(ArrayIter::TypeUndefined);
         }
@@ -1599,7 +1595,6 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         if (UNLIKELY(ad->hasExactlyOneRef())) {
           return iter_next_free_struct(iter, ad);
         }
-        ad->decRefCount();
         if (debug) {
           iter->arr().setIterType(ArrayIter::TypeUndefined);
         }
@@ -1630,7 +1625,6 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         if (UNLIKELY(mixed->hasExactlyOneRef())) {
           return iter_next_free_mixed(iter, mixed->asArrayData());
         }
-        mixed->decRefCount();
         if (debug) {
           iter->arr().setIterType(ArrayIter::TypeUndefined);
         }
@@ -1771,9 +1765,7 @@ int64_t iter_next_mixed_impl(Iter* it,
     if (size_t(++pos) >= size_t(arr->iterLimit())) {
       if (UNLIKELY(arr->hasExactlyOneRef())) {
         return iter_next_free_mixed(it, arr->asArrayData());
-      }
-      arr->decRefCount();
-      if (debug) {
+      }      if (debug) {
         iter.setIterType(ArrayIter::TypeUndefined);
       }
       return 0;
@@ -1785,13 +1777,11 @@ int64_t iter_next_mixed_impl(Iter* it,
     if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*valOut, decRefCount);
   }
   if (HasKey && isRefcountedType(keyOut->m_type)) {
     if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*keyOut, decRefCount);
   }
 
   iter.setPos(pos);
@@ -1820,13 +1810,11 @@ int64_t iter_next_packed_impl(Iter* it,
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*keyOut, decRefCount);
     }
     iter.setPos(pos);
     cellDup(*tvToCell(packedData(ad) + pos), *valOut);
@@ -1841,7 +1829,6 @@ int64_t iter_next_packed_impl(Iter* it,
   if (UNLIKELY(ad->hasExactlyOneRef())) {
     return iter_next_free_packed(it, ad);
   }
-  ad->decRefCount();
   if (debug) {
     iter.setIterType(ArrayIter::TypeUndefined);
   }
@@ -1864,13 +1851,11 @@ int64_t iter_next_struct_impl(Iter* it,
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
       if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     auto structArray = StructArray::asStructArray(ad);
     iter.setPos(pos);
@@ -1887,7 +1872,6 @@ int64_t iter_next_struct_impl(Iter* it,
   if (UNLIKELY(ad->hasExactlyOneRef())) {
     return iter_next_free_struct(it, ad);
   }
-  ad->decRefCount();
   if (debug) {
     iter.setIterType(ArrayIter::TypeUndefined);
   }

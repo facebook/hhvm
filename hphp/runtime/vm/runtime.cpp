@@ -69,9 +69,6 @@ void print_boolean(bool val) {
 StringData* concat_ss(StringData* v1, StringData* v2) {
   if (v1->cowCheck()) {
     StringData* ret = StringData::Make(v1, v2);
-    // Because v1 is shared, we know we will never
-    // have to release the string here
-    v1->decRefCount();
     return ret;
   }
 
@@ -104,9 +101,6 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   if (v1->cowCheck()) {
     auto const s1 = v1->slice();
     auto const ret = StringData::Make(s1, s2);
-    // Because v1 is shared, we know we will never
-    // have to release the string here
-    v1->decRefCount();
     return ret;
   }
 
@@ -122,9 +116,6 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   if (v1->cowCheck()) {
     StringData* ret = StringData::Make(
       v1->slice(), v2->slice(), v3->slice());
-    // Because v1 is shared, we know we will never
-    // have to release the string here
-    v1->decRefCount();
     return ret;
   }
 
@@ -142,9 +133,6 @@ StringData* concat_s4(StringData* v1, StringData* v2,
   if (v1->cowCheck()) {
     StringData* ret = StringData::Make(
         v1->slice(), v2->slice(), v3->slice(), v4->slice());
-    // Because v1 is shared, we know we will never
-    // have to release the string here
-    v1->decRefCount();
     return ret;
   }
 

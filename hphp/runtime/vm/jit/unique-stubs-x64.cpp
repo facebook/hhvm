@@ -245,13 +245,6 @@ void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
   uniqueStubs.add("throwSwitchMode", uniqueStubs.throwSwitchMode);
 }
 
-#ifndef USE_GCC_FAST_TLS
-void unwindResumeHelper() {
-  tl_regState = VMRegState::CLEAN;
-  _Unwind_Resume(unwindRdsInfo->exn);
-}
-#endif
-
 void emitCatchHelper(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.frozen() };
   moveToAlign(mcg->code.frozen());

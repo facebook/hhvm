@@ -49,10 +49,7 @@ namespace HPHP {
 
 ZEND_REQUEST_LOCAL_VECTOR(HPHP::ZendResourceWrapper*,
                           HPHP::ZendResourceWrapperDestroyer,
-                          tl_regular_list);
-typedef HPHP::ZendRequestLocalVector<HPHP::ZendResourceWrapper*,
-                                     HPHP::ZendResourceWrapperDestroyer
-                                     >::container zend_rsrc_list;
+                          tl_regular_list, zend_rsrc_list);
 
 namespace {
   zend_rsrc_list& RL() {

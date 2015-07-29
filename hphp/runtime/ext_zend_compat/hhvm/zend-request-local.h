@@ -24,7 +24,21 @@
 
 namespace HPHP {
 
-#define ZEND_REQUEST_LOCAL_VECTOR(T, F, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalVector<T, F> > N;
+// a trick to allow us to parenthesize the type, so the macros
+// don't get confused by the commas
+namespace detail {
+template<typename T> struct get_first_param;
+template<typename P> struct get_first_param<void(P)> {
+  typedef P type;
+};
+}
+
+#define ZEND_REQUEST_LOCAL_VECTOR(T, F, N, Z)                   \
+  IMPLEMENT_STATIC_REQUEST_LOCAL(                               \
+    HPHP::detail::get_first_param<                              \
+    void(HPHP::ZendRequestLocalVector<T, F>)>::type, N);        \
+  typedef HPHP::ZendRequestLocalVector<T, F>::container Z
+
 template <class T, class F>
 struct ZendRequestLocalVector final : RequestEventHandler {
   static_assert(std::is_pointer<T>::value,
@@ -50,7 +64,11 @@ private:
   F m_destroy_callback;
 };
 
-#define ZEND_REQUEST_LOCAL_MAP(K, V, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalMap<K,V> > N;
+#define ZEND_REQUEST_LOCAL_MAP(K, V, N)                 \
+  IMPLEMENT_STATIC_REQUEST_LOCAL(                       \
+    HPHP::detail::get_first_param<                      \
+    void(HPHP::ZendRequestLocalMap<K, V>)>::type, N)
+
 template <class K, class V>
 struct ZendRequestLocalMap final : RequestEventHandler {
   typedef std::unordered_map<K, V> container;

@@ -109,23 +109,23 @@ void RequestLocal<T>::create() {
 }
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f) \
-  __thread RequestLocal<T> f
+  __thread HPHP::RequestLocal<T> f
 
 #define DECLARE_STATIC_REQUEST_LOCAL(T,f) \
-  static __thread RequestLocal<T> f
+  static __thread HPHP::RequestLocal<T> f
 
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f) \
-  static __thread RequestLocal<T> f
+  static __thread HPHP::RequestLocal<T> f
 
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f) \
-  extern __thread RequestLocal<T> f
+  extern __thread HPHP::RequestLocal<T> f
 
 #else // defined(USE_GCC_FAST_TLS)
 
 template<typename T>
 class RequestLocal {
 public:
-  RequestLocal(ThreadLocal<T> & tl) : m_tlsObjects(tl) {}
+  explicit RequestLocal(ThreadLocal<T> & tl) : m_tlsObjects(tl) {}
 
   bool getInited() const {
     return !m_tlsObjects.isNull() && m_tlsObjects.get()->getInited();
@@ -158,19 +158,19 @@ private:
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f)     \
   IMPLEMENT_THREAD_LOCAL(T, f ## __tl);  \
-  RequestLocal<T> f(f ## __tl)
+  HPHP::RequestLocal<T> f(f ## __tl)
 
 #define DECLARE_STATIC_REQUEST_LOCAL(T,f)    \
   static DECLARE_THREAD_LOCAL(T,f ## __tl);  \
-  static RequestLocal<T> f
+  static HPHP::RequestLocal<T> f
 
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f)     \
   static IMPLEMENT_THREAD_LOCAL(T, f ## __tl);  \
-  static RequestLocal<T> f(f ## __tl)
+  static HPHP::RequestLocal<T> f(f ## __tl)
 
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f)    \
   extern DECLARE_THREAD_LOCAL(T,f ## __tl);  \
-  extern RequestLocal<T> f
+  extern HPHP::RequestLocal<T> f
 
 #endif // defined(USE_GCC_FAST_TLS)
 

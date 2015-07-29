@@ -397,19 +397,19 @@ struct ThreadLocalProxy {
  */
 
 #define DECLARE_THREAD_LOCAL(T, f) \
-  __thread ThreadLocal<T> f
+  __thread HPHP::ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) \
   __thread HPHP::ThreadLocal<T> f
 
 #define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread ThreadLocalNoCheck<T> f
+  __thread HPHP::ThreadLocalNoCheck<T> f
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread ThreadLocalNoCheck<T> f
+  __thread HPHP::ThreadLocalNoCheck<T> f
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
-  __thread ThreadLocalProxy<T, N> f
+  __thread HPHP::ThreadLocalProxy<T, N> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) \
-  __thread ThreadLocalProxy<T, N> f
+  __thread HPHP::ThreadLocalProxy<T, N> f
 
 #else /* USE_GCC_FAST_TLS */
 
@@ -623,7 +623,9 @@ public:
     return obj;
   }
 
-  static bool isNull() { return pthread_getspecific(s_key) == nullptr; }
+  static bool isNull() {
+    return !s_inited || pthread_getspecific(s_key) == nullptr;
+  }
 
   static void destroy() {
     void* p = pthread_getspecific(s_key);
@@ -738,14 +740,14 @@ public:
 /**
  * The emulation version of the thread-local macros
  */
-#define DECLARE_THREAD_LOCAL(T, f) ThreadLocal<T> f
-#define IMPLEMENT_THREAD_LOCAL(T, f) ThreadLocal<T> f
+#define DECLARE_THREAD_LOCAL(T, f) HPHP::ThreadLocal<T> f
+#define IMPLEMENT_THREAD_LOCAL(T, f) HPHP::ThreadLocal<T> f
 
-#define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) ThreadLocalNoCheck<T> f
-#define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) ThreadLocalNoCheck<T> f
+#define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) HPHP::ThreadLocalNoCheck<T> f
+#define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) HPHP::ThreadLocalNoCheck<T> f
 
-#define DECLARE_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
-#define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
+#define DECLARE_THREAD_LOCAL_PROXY(T, N, f) HPHP::ThreadLocalProxy<T, N> f
+#define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) HPHP::ThreadLocalProxy<T, N> f
 
 #endif /* USE_GCC_FAST_TLS */
 

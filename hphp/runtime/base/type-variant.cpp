@@ -408,7 +408,7 @@ String Variant::toStringHelper() const {
     case KindOfStaticString:
     case KindOfString:
       assert(false); // Should be done in caller
-      return m_data.pstr;
+      return String{m_data.pstr};
 
     case KindOfArray:
       raise_notice("Array to string conversion");
@@ -437,7 +437,7 @@ Array Variant::toArrayHelper() const {
     case KindOfInt64:         return Array::Create(m_data.num);
     case KindOfDouble:        return Array::Create(*this);
     case KindOfStaticString:
-    case KindOfString:        return Array::Create(m_data.pstr);
+    case KindOfString:        return Array::Create(Variant{m_data.pstr});
     case KindOfArray:         return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->o_toArray();
@@ -468,7 +468,7 @@ Object Variant::toObjectHelper() const {
       return ObjectData::FromArray(m_data.parr);
 
     case KindOfObject:
-      return m_data.pobj;
+      return Object{m_data.pobj};
 
     case KindOfRef:
       return m_data.pref->var()->toObject();
@@ -493,7 +493,7 @@ Resource Variant::toResourceHelper() const {
       return Resource(req::make<DummyResource>());
 
     case KindOfResource:
-      return m_data.pres;
+      return Resource{m_data.pres};
 
     case KindOfRef:
       return m_data.pref->var()->toResource();

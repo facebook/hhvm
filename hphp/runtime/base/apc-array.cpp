@@ -39,7 +39,7 @@ APCArray::MakeSharedArray(ArrayData* arr, bool inner, bool unserializeObj) {
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr);
     if (features.isCircular) {
-      String s = apc_serialize(arr);
+      String s = apc_serialize(Variant{arr});
       auto pair = APCString::MakeSharedString(KindOfArray, s.get());
       pair.handle->setSerializedArray();
       return pair;
@@ -115,7 +115,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {
 
 Variant APCArray::MakeArray(const APCHandle* handle) {
   if (handle->isUncounted()) {
-    return APCTypedValue::fromHandle(handle)->getArrayData();
+    return Variant{APCTypedValue::fromHandle(handle)->getArrayData()};
   } else if (handle->isSerializedArray()) {
     auto const serArr = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serArr->data(), serArr->size());

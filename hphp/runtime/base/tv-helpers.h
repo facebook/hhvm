@@ -302,6 +302,13 @@ inline void tvWriteObject(ObjectData* pobj, TypedValue* tv) {
   tv->m_data.pobj->incRefCount();
 }
 
+// Like tvWriteObject, but does not increment ref-count. Used for transferring
+// object ownership.
+inline void tvMoveObject(ObjectData* pobj, TypedValue* tv) {
+  tv->m_type = KindOfObject;
+  tv->m_data.pobj = pobj;
+}
+
 // conditionally unbox tv
 inline Cell* tvToCell(TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();

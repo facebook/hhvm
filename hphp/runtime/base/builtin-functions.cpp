@@ -139,7 +139,9 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     }
 
     if (name) {
-      *name->var() = concat3(clsString, s_colon2, tv_meth->m_data.pstr);
+      *name->var() = concat3(String{clsString},
+                             s_colon2,
+                             String{tv_meth->m_data.pstr});
     }
     return ret;
   }
@@ -589,7 +591,7 @@ Object create_object_only(const String& s) {
 }
 
 Object init_object(const String& s, const Array& params, ObjectData* o) {
-  return g_context->initObject(s.get(), params, o);
+  return Object{g_context->initObject(s.get(), params, o)};
 }
 
 Object create_object(const String& s, const Array& params, bool init /* = true */) {

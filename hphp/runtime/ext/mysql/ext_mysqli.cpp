@@ -211,34 +211,34 @@ static TypedValue* bind_result_helper(const Object& obj, ActRec* ar,
   VALIDATE_CONN(conn, state)
 
 static Variant HHVM_METHOD(mysqli, autocommit, bool mode) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN_CONNECTED(conn);
   return !mysql_autocommit(conn->get(), (my_bool)mode);
 }
 
 static Variant HHVM_METHOD(mysqli, change_user, const String& user,
                            const String& password, const String& database) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN_CONNECTED(conn);
   return !mysql_change_user(conn->get(), user.c_str(), password.c_str(),
                             database.c_str());
 }
 
 static Variant HHVM_METHOD(mysqli, character_set_name) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN_CONNECTED(conn);
   return String(mysql_character_set_name(conn->get()), CopyString);
 }
 
 static Variant HHVM_METHOD(mysqli, dump_debug_info) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN_CONNECTED(conn);
   return !mysql_dump_debug_info(conn->get());
 }
 
 static Variant HHVM_METHOD(mysqli, get_charset) {
   MY_CHARSET_INFO cs;
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN_CONNECTED(conn);
   mysql_get_character_set_info(conn->get(), &cs);
 
@@ -259,13 +259,13 @@ static Variant HHVM_METHOD(mysqli, get_charset) {
 //}
 
 static Variant HHVM_METHOD(mysqli, hh_get_connection, int64_t state) {
-  auto res = get_connection_resource(this_);
+  auto res = get_connection_resource(Object{this_});
   VALIDATE_RESOURCE(res, state)
   return res;
 }
 
 static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
-  auto res = get_connection_resource(this_);
+  auto res = get_connection_resource(Object{this_});
   VALIDATE_RESOURCE(res, MySQLState::CONNECTED)
   return php_mysql_get_result(res, use_store);
 }
@@ -285,7 +285,7 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
     persistent = true;
     s = s.substr(2);
   }
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   assert(conn);
   Variant ret = php_mysql_do_connect_on_link(
                   conn, s, username.toString(), password.toString(),
@@ -301,13 +301,13 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
 }
 
 static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
-  auto res = get_connection_resource(this_);
+  auto res = get_connection_resource(Object{this_});
   VALIDATE_RESOURCE(res, MySQLState::CONNECTED)
   return php_mysql_do_query(query, res, false);
 }
 
 static void HHVM_METHOD(mysqli, hh_update_last_error, const Object& stmt_obj) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   assert(conn);
 
   auto stmt = getStmt(stmt_obj);
@@ -335,7 +335,7 @@ static void HHVM_METHOD(mysqli, hh_update_last_error, const Object& stmt_obj) {
 }
 
 static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN_CONNECTED(conn);
   return !mysql_kill(conn->get(), processid);
 }
@@ -400,7 +400,7 @@ static MaybeDataType get_option_value_type(int64_t option) {
 
 static Variant HHVM_METHOD(mysqli, options, int64_t option,
                            const Variant& value) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN(conn, MySQLState::INITED)
 
   MaybeDataType dt = get_option_value_type(option);
@@ -458,7 +458,7 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
 //}
 
 static Variant HHVM_METHOD(mysqli, refresh, int64_t options) {
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN_CONNECTED(conn);
   return !mysql_refresh(conn->get(), options);
 }
@@ -482,7 +482,7 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
   auto get_str_ptr = [](const Variant& v) -> const char* {
     return v.isNull() ? nullptr : v.toString().c_str();
   };
-  auto conn = get_connection(this_);
+  auto conn = get_connection(Object{this_});
   VALIDATE_CONN(conn, MySQLState::INITED);
   mysql_ssl_set(conn->get(), get_str_ptr(key), get_str_ptr(cert),
                 get_str_ptr(ca), get_str_ptr(capath), get_str_ptr(cipher));
@@ -495,7 +495,7 @@ static Variant* getRawProp(const Object& obj,
   return obj->o_realProp(
     propName,
     ObjectData::RealPropUnchecked,
-    className.get()
+    className
   );
 }
 
@@ -774,7 +774,7 @@ static Variant HHVM_METHOD(mysqli_result, get_mysqli_conn_resource,
 #undef VALIDATE_CONN_CONNECTED
 
 static Variant HHVM_METHOD(mysqli_result, fetch_field) {
-  auto res = getResult(this_);
+  auto res = getResult(Object{this_});
   VALIDATE_RESULT(res)
 
   auto info = res->fetchFieldInfo();
@@ -882,39 +882,39 @@ struct mysqli_result_PropHandler :
 // class mysqli_stmt
 
 static Variant HHVM_METHOD(mysqli_stmt, attr_get, int64_t attr) {
-  return getStmt(this_)->attr_get(attr);
+  return getStmt(Object{this_})->attr_get(attr);
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, attr_set, int64_t attr, int64_t mode) {
-  return getStmt(this_)->attr_set(attr, mode);
+  return getStmt(Object{this_})->attr_set(attr, mode);
 }
 
 static TypedValue* HHVM_MN(mysqli_stmt, bind_param)(ActRec* ar) {
-  return bind_param_helper(ar->getThis(), ar, 0);
+  return bind_param_helper(Object{ar->getThis()}, ar, 0);
 }
 
 static TypedValue* HHVM_MN(mysqli_stmt, bind_result)(ActRec* ar) {
-  return bind_result_helper(ar->getThis(), ar, 0);
+  return bind_result_helper(Object{ar->getThis()}, ar, 0);
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, close) {
-  return getStmt(this_)->close();
+  return getStmt(Object{this_})->close();
 }
 
 static void HHVM_METHOD(mysqli_stmt, data_seek, int64_t offset) {
-  getStmt(this_)->data_seek(offset);
+  getStmt(Object{this_})->data_seek(offset);
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, execute) {
-  return getStmt(this_)->execute();
+  return getStmt(Object{this_})->execute();
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, fetch) {
-  return getStmt(this_)->fetch();
+  return getStmt(Object{this_})->fetch();
 }
 
 static void HHVM_METHOD(mysqli_stmt, free_result) {
-  getStmt(this_)->free_result();
+  getStmt(Object{this_})->free_result();
 }
 
 //static Object HHVM_METHOD(mysqli_stmt, get_result) {
@@ -932,24 +932,24 @@ static void HHVM_METHOD(mysqli_stmt, hh_init, const Object& connection) {
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, hh_store_result) {
-  return getStmt(this_)->store_result();
+  return getStmt(Object{this_})->store_result();
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, prepare, const String& query) {
-  return getStmt(this_)->prepare(query);
+  return getStmt(Object{this_})->prepare(query);
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, reset) {
-  return getStmt(this_)->reset();
+  return getStmt(Object{this_})->reset();
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, result_metadata) {
-  return getStmt(this_)->result_metadata();
+  return getStmt(Object{this_})->result_metadata();
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, send_long_data, int64_t param_nr,
                            const String& data) {
-  return getStmt(this_)->send_long_data(param_nr, data);
+  return getStmt(Object{this_})->send_long_data(param_nr, data);
 }
 
 Variant mysqli_stmt_affected_rows_get(const Object& this_) {
@@ -1073,11 +1073,11 @@ void HHVM_FUNCTION(mysqli_free_result, const Variant& result) {
 //}
 
 static TypedValue* HHVM_FN(mysqli_stmt_bind_param)(ActRec* ar) {
-  return bind_param_helper(getArg<KindOfObject>(ar, 0), ar, 1);
+  return bind_param_helper(Object{getArg<KindOfObject>(ar, 0)}, ar, 1);
 }
 
 static TypedValue* HHVM_FN(mysqli_stmt_bind_result)(ActRec* ar) {
-  return bind_result_helper(getArg<KindOfObject>(ar, 0), ar, 1);
+  return bind_result_helper(Object{getArg<KindOfObject>(ar, 0)}, ar, 1);
 }
 
 static bool HHVM_FUNCTION(mysqli_thread_safe) {

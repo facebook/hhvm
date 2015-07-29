@@ -52,7 +52,7 @@ template<typename E> struct AssocKeyAccessor {
       return getInt(elm);
     }
     assert(isStr(elm));
-    return getStr(elm);
+    return Variant{getStr(elm)};
   }
 };
 

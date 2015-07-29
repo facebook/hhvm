@@ -1776,7 +1776,7 @@ Object HHVM_FUNCTION(curl_multi_await, const Resource& mh,
   CHECK_MULTI_RESOURCE_THROW(curlm);
   auto ev = new CurlMultiAwait(curlm, timeout);
   try {
-    return ev->getWaitHandle();
+    return Object{ev->getWaitHandle()};
   } catch (...) {
     assert(false);
     ev->abandon();

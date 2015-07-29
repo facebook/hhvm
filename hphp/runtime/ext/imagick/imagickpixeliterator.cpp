@@ -71,14 +71,14 @@ static Object HHVM_STATIC_METHOD(ImagickPixelIterator, getPixelRegionIterator,
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, clear) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   ClearPixelIterator(it->getWand());
   return true;
 }
 
 static void HHVM_METHOD(ImagickPixelIterator, __construct,
     const Object& magick) {
-  initPixelIterator(this_, magick);
+  initPixelIterator(Object{this_}, magick);
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, destroy) {
@@ -87,26 +87,26 @@ static bool HHVM_METHOD(ImagickPixelIterator, destroy) {
 
 static Array HHVM_METHOD(ImagickPixelIterator, getCurrentIteratorRow) {
   size_t num;
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   auto wands = PixelGetCurrentIteratorRow(it->getWand(), &num);
   return createImagickPixelArray(num, wands, false);
 }
 
 static int64_t HHVM_METHOD(ImagickPixelIterator, getIteratorRow) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   return PixelGetIteratorRow(it->getWand());
 }
 
 static Array HHVM_METHOD(ImagickPixelIterator, getNextIteratorRow) {
   size_t num;
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   auto wands = PixelGetNextIteratorRow(it->getWand(), &num);
   return createImagickPixelArray(num, wands, false);
 }
 
 static Array HHVM_METHOD(ImagickPixelIterator, getPreviousIteratorRow) {
   size_t num;
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   auto wands = PixelGetPreviousIteratorRow(it->getWand(), &num);
   return createImagickPixelArray(num, wands, false);
 }
@@ -115,7 +115,7 @@ static bool HHVM_METHOD(ImagickPixelIterator, newPixelIterator,
     const Object& magick) {
   raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelIterator",
                   s_ImagickPixelIterator.c_str(), "getPixelIterator");
-  initPixelIterator(this_, magick);
+  initPixelIterator(Object{this_}, magick);
   return true;
 }
 
@@ -123,30 +123,30 @@ static bool HHVM_METHOD(ImagickPixelIterator, newPixelRegionIterator,
     const Object& magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
   raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelRegionIterator",
                   s_ImagickPixelIterator.c_str(), "getPixelRegionIterator");
-  initPixelRegionIterator(this_, magick, x, y, columns, rows);
+  initPixelRegionIterator(Object{this_}, magick, x, y, columns, rows);
   return true;
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, resetIterator) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   PixelResetIterator(it->getWand());
   return true;
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, setIteratorFirstRow) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   PixelSetFirstIteratorRow(it->getWand());
   return true;
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, setIteratorLastRow) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   PixelSetLastIteratorRow(it->getWand());
   return true;
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, setIteratorRow, int64_t row) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   if (PixelSetIteratorRow(it->getWand(), row) == MagickFalse) {
     IMAGICKPIXELITERATOR_THROW("Unable to set iterator row");
   } else {
@@ -155,7 +155,7 @@ static bool HHVM_METHOD(ImagickPixelIterator, setIteratorRow, int64_t row) {
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, syncIterator) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   PixelSyncIterator(it->getWand());
   return true;
 }
@@ -177,7 +177,7 @@ static void HHVM_METHOD(ImagickPixelIterator, rewind) {
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, valid) {
-  auto it = getPixelIteratorResource(this_);
+  auto it = getPixelIteratorResource(Object{this_});
   auto row = PixelGetIteratorRow(it->getWand());
   return PixelSetIteratorRow(it->getWand(), row) != MagickFalse;
 }

@@ -195,7 +195,7 @@ String WddxPacket::wrapValue(const String& start,
 void find_var_recursive(const TypedValue* tv,
                         const req::ptr<WddxPacket>& wddxPacket) {
   if (tvIsString(tv)) {
-    String var_name = tvCastToString(tv);
+    String var_name{tvCastToString(tv)};
     wddxPacket->add_var(var_name, true);
   }
   if (tv->m_type == KindOfArray) {
@@ -207,7 +207,7 @@ void find_var_recursive(const TypedValue* tv,
 
 static TypedValue* add_vars_helper(ActRec* ar) {
   int start_index = 1;
-  Resource packet_id = getArg<KindOfResource>(ar, 0);
+  Resource packet_id{getArg<KindOfResource>(ar, 0)};
   auto wddxPacket = cast<WddxPacket>(packet_id);
 
   for (int i = start_index; i < ar->numArgs(); i++) {

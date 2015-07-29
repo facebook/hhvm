@@ -666,7 +666,7 @@ static Variant idateImpl(const String& format, int64_t timestamp) {
 #define GET_ARGS_AND_CALL(ar, func)                                            \
   try {                                                                        \
     return arReturn(ar, func(                                                  \
-      getArgStrict<KindOfString>(ar, 0),                                       \
+      String{getArgStrict<KindOfString>(ar, 0)},                               \
       getArgStrict<KindOfInt64>(ar, 1, TimeStamp::Current())));                \
   } catch (const IncoercibleArgumentException& e) {                            \
     return arReturn(ar, false);                                                \

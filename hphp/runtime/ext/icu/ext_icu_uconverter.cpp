@@ -265,8 +265,8 @@ static void HHVM_METHOD(UConverter, __construct, const String& toEncoding,
   data->setDest(doSetEncoding(data, toEncoding));
   data->setSrc(doSetEncoding(data, fromEncoding));
   if (this_->getVMClass() != getClass()) {
-    setCallback(this_, data->dest());
-    setCallback(this_, data->src());
+    setCallback(Object{this_}, data->dest());
+    setCallback(Object{this_}, data->src());
   }
 }
 

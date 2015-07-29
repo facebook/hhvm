@@ -171,12 +171,12 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient, connect,
     });
     op->run();
 
-    return event->getWaitHandle();
+    return Object{event->getWaitHandle()};
   }
   catch (...) {
     assert(false);
     event->abandon();
-    return nullptr;
+    return Object{};
   }
 }
 
@@ -313,13 +313,13 @@ Object HHVM_METHOD(AsyncMysqlConnectionPool, connect,
         });
     op->run();
 
-    return event->getWaitHandle();
+    return Object{event->getWaitHandle()};
   }
   catch (...) {
     LOG(ERROR) << "Unexpected exception while beginning ConnectPoolOperation";
     assert(false);
     event->abandon();
-    return nullptr;
+    return Object{};
   }
 }
 
@@ -413,13 +413,13 @@ Object AsyncMysqlConnection::query(
     op->setCallback(am::resultAppender(appender_callback));
     op->run();
 
-    return event->getWaitHandle();
+    return Object{event->getWaitHandle()};
   }
   catch (...) {
     LOG(ERROR) << "Unexpected exception while beginning ConnectOperation";
     assert(false);
     event->abandon();
-    return nullptr;
+    return Object{};
   }
 }
 
@@ -545,12 +545,12 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
     op->setCallback(am::resultAppender(appender_callback));
     op->run();
 
-    return event->getWaitHandle();
+    return Object{event->getWaitHandle()};
   }
   catch (...) {
     assert(false);
     event->abandon();
-    return nullptr;
+    return Object{};
   }
 }
 
@@ -1197,11 +1197,11 @@ int64_t HHVM_METHOD(AsyncMysqlRowBlock, count) {
 
 Object HHVM_METHOD(AsyncMysqlRowBlock, getRow,
                    int64_t row_no) {
-  return AsyncMysqlRow::newInstance(this_, row_no);
+  return AsyncMysqlRow::newInstance(Object{this_}, row_no);
 }
 
 Object HHVM_METHOD(AsyncMysqlRowBlock, getIterator) {
-  return AsyncMysqlRowBlockIterator::newInstance(this_, 0);
+  return AsyncMysqlRowBlockIterator::newInstance(Object{this_}, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1318,7 +1318,7 @@ int64_t HHVM_METHOD(AsyncMysqlRow, count) {
 }
 
 Object HHVM_METHOD(AsyncMysqlRow, getIterator) {
-  return AsyncMysqlRowIterator::newInstance(this_, 0);
+  return AsyncMysqlRowIterator::newInstance(Object{this_}, 0);
 }
 
 #undef ROW_BLOCK

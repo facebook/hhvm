@@ -84,7 +84,7 @@ void c_ExternalThreadEventWaitHandle::initialize(
   setState(STATE_WAITING);
   setContextIdx(session->getCurrentContextIdx());
   m_event = event;
-  m_privData = priv_data;
+  m_privData.reset(priv_data);
 
   if (isInContext()) {
     registerToContext();
@@ -104,7 +104,7 @@ void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
   m_sweepable.unregister();
 
   if (LIKELY(!sweeping)) {
-    m_privData = nullptr;
+    m_privData.reset();
     // drop ownership by pending event (see initialize())
     decRefObj(this);
   }

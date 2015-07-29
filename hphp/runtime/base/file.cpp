@@ -560,7 +560,7 @@ String File::getWrapperType() const {
   if (!m_wrapperType || m_wrapperType->empty()) {
     return o_getClassName();
   }
-  return m_wrapperType;
+  return String{m_wrapperType};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

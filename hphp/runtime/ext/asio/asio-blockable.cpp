@@ -216,7 +216,7 @@ Array AsioBlockableChain::toArray() {
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
     auto const wh = cur->getWaitHandle();
     if (!wh->isFinished()) {
-      result.append(wh);
+      result.append(Variant{wh});
     }
   }
   return result;

@@ -63,7 +63,7 @@ StringCase:
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
-        return APCObject::MakeSerializedObj(apc_reserialize(s));
+        return APCObject::MakeSerializedObj(apc_reserialize(String{s}));
       }
 
       auto const st = lookupStaticString(s);
@@ -119,7 +119,7 @@ Variant APCHandle::toLocal() const {
     case KindOfDouble:
       return APCTypedValue::fromHandle(this)->getDouble();
     case KindOfStaticString:
-      return APCTypedValue::fromHandle(this)->getStringData();
+      return Variant{APCTypedValue::fromHandle(this)->getStringData()};
     case KindOfString:
       return APCString::MakeString(this);
     case KindOfArray:

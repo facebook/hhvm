@@ -94,7 +94,7 @@ int64_t HHVM_FUNCTION(hphp_object_pointer, const Object& obj) {
 }
 
 Variant HHVM_FUNCTION(hphp_get_this) {
-  return g_context->getThis();
+  return Variant{g_context->getThis()};
 }
 
 Variant HHVM_FUNCTION(class_implements, const Variant& obj,

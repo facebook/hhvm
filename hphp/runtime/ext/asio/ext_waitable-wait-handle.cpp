@@ -164,7 +164,7 @@ Array c_WaitableWaitHandle::t_getdependencystack() {
   auto wait_handle = this;
   auto session = AsioSession::Get();
   while (wait_handle != nullptr) {
-    result.append(wait_handle);
+    result.append(Variant{wait_handle});
     visited.insert(wait_handle->t_getid());
     auto context_idx = wait_handle->getContextIdx();
 

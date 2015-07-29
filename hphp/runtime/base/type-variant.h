@@ -119,8 +119,13 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Resource& v) noexcept
   : Variant(deref<ResourceData>(v)) {}
-  /* implicit */ Variant(StringData* v) noexcept;
-  /* implicit */ Variant(ArrayData* v) noexcept {
+
+  /*
+   * Explicit conversion constructors. These all manipulate ref-counts of bare
+   * pointers as a side-effect, so we want to be explicit when its happening.
+   */
+  explicit Variant(StringData* v) noexcept;
+  explicit Variant(ArrayData* v) noexcept {
     if (v) {
       m_type = KindOfArray;
       m_data.parr = v;
@@ -129,7 +134,7 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
     }
   }
-  /* implicit */ Variant(ObjectData* v) noexcept {
+  explicit Variant(ObjectData* v) noexcept {
     if (v) {
       m_type = KindOfObject;
       m_data.pobj = v;
@@ -138,7 +143,7 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
     }
   }
-  /* implicit */ Variant(RefData* r) noexcept {
+  explicit Variant(RefData* r) noexcept {
     if (r) {
       m_type = KindOfRef;
       m_data.pref = r;
@@ -722,7 +727,7 @@ struct Variant : private TypedValue {
   }
   String toString() const {
     if (isStringType(m_type)) {
-      return m_data.pstr;
+      return String{m_data.pstr};
     }
     return toStringHelper();
   }
@@ -731,11 +736,11 @@ struct Variant : private TypedValue {
     return toArrayHelper();
   }
   Object toObject() const {
-    if (m_type == KindOfObject) return m_data.pobj;
+    if (m_type == KindOfObject) return Object{m_data.pobj};
     return toObjectHelper();
   }
   Resource toResource() const {
-    if (m_type == KindOfResource) return m_data.pres;
+    if (m_type == KindOfResource) return Resource{m_data.pres};
     return toResourceHelper();
   }
 

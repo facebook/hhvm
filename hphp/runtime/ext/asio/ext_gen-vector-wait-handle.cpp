@@ -37,7 +37,7 @@ namespace {
     assert(new_exception->instanceof(SystemLib::s_ExceptionClass));
 
     if (exception_field.isNull()) {
-      exception_field = new_exception;
+      exception_field.reset(new_exception);
     }
   }
 }
@@ -163,8 +163,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
     tvWriteObject(m_deps.get(), &m_resultOrException);
   } else {
     setState(STATE_FAILED);
-    tvWriteObject(m_exception.get(), &m_resultOrException);
-    m_exception = nullptr;
+    tvMoveObject(m_exception.detach(), &m_resultOrException);
   }
 
   m_deps = nullptr;

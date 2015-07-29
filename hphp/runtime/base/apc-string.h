@@ -37,7 +37,7 @@ struct APCString {
   static Variant MakeString(const APCHandle* handle) {
     assert(handle->type() == KindOfString);
     if (handle->isUncounted()) {
-      return APCTypedValue::fromHandle(handle)->getStringData();
+      return Variant{APCTypedValue::fromHandle(handle)->getStringData()};
     }
     return Variant::attach(StringData::Make(APCString::fromHandle(handle)));
   }

@@ -76,7 +76,7 @@ public:
   ArrayData* detach() { return m_arr.detach(); }
 
   ArrayData* get() const { return m_arr.get(); }
-  void reset() { m_arr.reset(); }
+  void reset(ArrayData* arr = nullptr) { m_arr.reset(arr); }
 
   // Deliberately doesn't throw_null_pointer_exception as a perf
   // optimization.

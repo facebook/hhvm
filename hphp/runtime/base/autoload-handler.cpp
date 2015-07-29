@@ -242,7 +242,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
   bool ok = false;
   if (file.isString()) {
-    String fName = file.toCStrRef().get();
+    String fName{file.toCStrRef().get()};
     if (fName.get()->data()[0] != '/') {
       if (!m_map_root.empty()) {
         fName = m_map_root + fName;
@@ -327,12 +327,18 @@ AutoloadHandler::invokeFailureCallback(const Variant& func, const String& kind,
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {
   return !m_map.isNull() &&
-    loadFromMap(name, s_function, true, FuncExistsChecker(name)) != Failure;
+    loadFromMap(String{name},
+                s_function,
+                true,
+                FuncExistsChecker(name)) != Failure;
 }
 
 bool AutoloadHandler::autoloadConstant(StringData* name) {
   return !m_map.isNull() &&
-    loadFromMap(name, s_constant, false, ConstExistsChecker(name)) != Failure;
+    loadFromMap(String{name},
+                s_constant,
+                false,
+                ConstExistsChecker(name)) != Failure;
 }
 
 bool AutoloadHandler::autoloadType(const String& name) {
@@ -554,7 +560,7 @@ Array AutoloadHandler::getHandlers() {
         callable.append(String(cls->nameStr()));
       } else {
         obj = (ObjectData*)cufIter->ctx();
-        callable.append(obj);
+        callable.append(Variant{obj});
       }
       callable.append(String(f->nameStr()));
       handlers.append(callable.toArray());

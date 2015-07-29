@@ -82,7 +82,7 @@ Object File::await(uint16_t events, double timeout) {
     Cell closedResult;
     closedResult.m_type = KindOfInt64;
     closedResult.m_data.num = FileAwait::CLOSED;
-    return c_StaticWaitHandle::CreateSucceeded(closedResult);
+    return Object{c_StaticWaitHandle::CreateSucceeded(closedResult)};
   }
   if (fd() < 0) {
     SystemLib::throwExceptionObject(
@@ -96,7 +96,7 @@ Object File::await(uint16_t events, double timeout) {
 
   auto ev = new FileAwait(fd(), events, timeout);
   try {
-    return ev->getWaitHandle();
+    return Object{ev->getWaitHandle()};
   } catch (...) {
     assert(false);
     ev->abandon();

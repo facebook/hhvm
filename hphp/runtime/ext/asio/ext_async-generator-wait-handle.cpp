@@ -140,7 +140,7 @@ void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
 void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFail())) {
-    session->onResumableFail(this, exception);
+    session->onResumableFail(this, Object{exception});
   }
 
   auto parentChain = getParentChain();

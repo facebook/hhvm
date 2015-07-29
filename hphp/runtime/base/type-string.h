@@ -94,10 +94,10 @@ public:
 
   // create a string from a character
   static String FromChar(char ch) {
-    return makeStaticString(ch);
+    return String{makeStaticString(ch)};
   }
   static String FromCStr(const char* str) {
-    return makeStaticString(str);
+    return String{makeStaticString(str)};
   }
 
   static const StringData *ConvertInteger(int64_t n);
@@ -120,7 +120,7 @@ public:
   ~String();
 
   StringData* get() const { return m_str.get(); }
-  void reset() { m_str.reset(); }
+  void reset(StringData* str = nullptr) { m_str.reset(str); }
 
   // Transfer ownership of our reference to this StringData.
   StringData* detach() { return m_str.detach(); }
@@ -128,7 +128,7 @@ public:
   /**
    * Constructors
    */
-  /* implicit */ String(StringData *data) : m_str(data) { }
+  explicit String(StringData *data) : m_str(data) { }
   /* implicit */ String(int     n);
   /* implicit */ String(int64_t n);
   /* implicit */ String(double  n);
@@ -426,7 +426,7 @@ public:
 
   String rvalAtImpl(int key) const {
     if (m_str) {
-      return m_str->getChar(key);
+      return String{m_str->getChar(key)};
     }
     return String();
   }

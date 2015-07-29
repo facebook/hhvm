@@ -380,7 +380,7 @@ static Variant HHVM_FUNCTION(xdebug_call_class) {
   // PHP5 xdebug returns "" for no class
   auto cls = fp->m_func->cls();
   if (!cls) {
-    return staticEmptyString();
+    return Variant{staticEmptyString()};
   }
   return String(const_cast<StringData*>(cls->name()));
 }

@@ -441,7 +441,7 @@ namespace make_array_detail {
 
   template<class Val, class... Vals>
   void packed_impl(PackedArrayInit& init, Val&& val, Vals&&... vals) {
-    init.append(std::forward<Val>(val));
+    init.append(Variant(std::forward<Val>(val)));
     packed_impl(init, std::forward<Vals>(vals)...);
   }
 
@@ -449,12 +449,13 @@ namespace make_array_detail {
   inline int64_t init_key(int k) { return k; }
   inline int64_t init_key(int64_t k) { return k; }
   inline const String& init_key(const String& k) { return k; }
+  inline const String init_key(StringData* k) { return String{k}; }
 
   inline void map_impl(ArrayInit&) {}
 
   template<class Key, class Val, class... KVPairs>
   void map_impl(ArrayInit& init, Key&& key, Val&& val, KVPairs&&... kvpairs) {
-    init.set(init_key(std::forward<Key>(key)), std::forward<Val>(val));
+    init.set(init_key(std::forward<Key>(key)), Variant(std::forward<Val>(val)));
     map_impl(init, std::forward<KVPairs>(kvpairs)...);
   }
 

@@ -265,7 +265,7 @@ void MCRouter::onCancel(void* request, void* router) {
 Object MCRouter::issue(mcr::mcrouter_msg_t& msg) {
   auto ev = new MCRouterResult(this, msg);
   try {
-    return ev->getWaitHandle();
+    return Object{ev->getWaitHandle()};
   } catch (...) {
     assert(false);
     ev->abandon();

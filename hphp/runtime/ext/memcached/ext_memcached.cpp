@@ -233,7 +233,7 @@ public:
 static memcached_return_t memcached_dump_callback(const memcached_st*,
                                                   const char* key,
                                                   size_t len, void* context) {
-  ((Array*)context)->append(makeStaticString(key, len));
+  ((Array*)context)->append(Variant{makeStaticString(key, len)});
   return MEMCACHED_SUCCESS;
 }
 

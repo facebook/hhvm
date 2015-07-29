@@ -376,7 +376,7 @@ Variant HHVM_METHOD(SQLite3, prepare,
   if (!sql.empty()) {
     Object ret{SQLite3Stmt::getClass()};
     SQLite3Stmt *stmt = Native::data<SQLite3Stmt>(ret);
-    HHVM_MN(SQLite3Stmt, __construct)(ret.get(), this_, sql);
+    HHVM_MN(SQLite3Stmt, __construct)(ret.get(), Object{this_}, sql);
     if (stmt->m_raw_stmt) {
       return ret;
     }

@@ -47,10 +47,10 @@ Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
 
   if (ctx_idx < session->getCurrentContextIdx()) {
     auto fp = session->getContext(ctx_idx + 1)->getSavedFP();
-    return c_ResumableWaitHandle::getRunning(fp);
+    return Object{c_ResumableWaitHandle::getRunning(fp)};
   } else {
     VMRegAnchor _;
-    return c_ResumableWaitHandle::getRunning(vmfp());
+    return Object{c_ResumableWaitHandle::getRunning(vmfp())};
   }
 }
 
@@ -58,7 +58,7 @@ Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
 
 Object HHVM_FUNCTION(asio_get_running) {
   VMRegAnchor _;
-  return c_ResumableWaitHandle::getRunning(vmfp());
+  return Object{c_ResumableWaitHandle::getRunning(vmfp())};
 }
 
 static AsioExtension s_asio_extension;

@@ -920,7 +920,7 @@ void VariableSerializer::writeArrayKey(const Variant& key) {
     indent();
     m_buf->append('[');
     if (info.is_object && skey) {
-      writePropertyKey(keyCell->m_data.pstr);
+      writePropertyKey(String{keyCell->m_data.pstr});
     } else {
       m_buf->append(key);
     }
@@ -944,7 +944,7 @@ void VariableSerializer::writeArrayKey(const Variant& key) {
     } else {
       m_buf->append('"');
       if (info.is_object) {
-        writePropertyKey(keyCell->m_data.pstr);
+        writePropertyKey(String{keyCell->m_data.pstr});
       } else {
         m_buf->append(keyCell->m_data.pstr);
         m_buf->append('"');

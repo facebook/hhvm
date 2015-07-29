@@ -423,11 +423,11 @@ Variant fscanfImpl(const Resource& handle,
 }
 
 TypedValue* HHVM_FN(fscanf)(ActRec* ar) {
-  Resource handle = getArg<KindOfResource>(ar, 0);
+  Resource handle{getArg<KindOfResource>(ar, 0)};
   if (ar->numArgs() < 1) {
     return arReturn(ar, init_null());
   }
-  String format = getArg<KindOfString>(ar, 1);
+  String format{getArg<KindOfString>(ar, 1)};
   if (ar->numArgs() < 2) {
     return arReturn(ar, false);
   }

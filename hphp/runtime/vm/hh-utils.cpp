@@ -110,7 +110,8 @@ void autoTypecheck(const Unit* unit) {
   }
   tl_doneAutoTypecheck = true;
 
-  vm_call_user_func("\\HH\\Client\\typecheck_and_error", staticEmptyArray());
+  vm_call_user_func("\\HH\\Client\\typecheck_and_error",
+                    Variant{staticEmptyArray()});
 }
 
 }

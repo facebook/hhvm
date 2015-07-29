@@ -206,7 +206,7 @@ struct File : SweepableResourceData {
   virtual Array getMetaData();
   virtual Variant getWrapperMetaData() { return Variant(); }
   String getWrapperType() const;
-  String getStreamType() const { return m_streamType; }
+  String getStreamType() const { return String{m_streamType}; }
   const req::ptr<StreamContext>& getStreamContext() { return m_streamContext; }
   void setStreamContext(const req::ptr<StreamContext>& context) {
     m_streamContext = context;

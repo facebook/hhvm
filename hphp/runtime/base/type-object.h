@@ -38,7 +38,7 @@ public:
   Object() {}
 
   ObjectData* get() const { return m_obj.get(); }
-  void reset() { m_obj.reset(); }
+  void reset(ObjectData* obj = nullptr) { m_obj.reset(obj); }
 
   ObjectData* operator->() const {
     return m_obj.get();
@@ -47,7 +47,7 @@ public:
   /**
    * Constructors
    */
-  /* implicit */ Object(ObjectData *data) : m_obj(data) {
+  explicit Object(ObjectData *data) : m_obj(data) {
     // The object must have at least two refs here. One pre-existing ref, and
     // one caused by placing it under m_obj's control.
     assert(!data || data->hasMultipleRefs());

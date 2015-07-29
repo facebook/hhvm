@@ -195,7 +195,7 @@ protected:
       ret.append(init_null_variant);
     } else {
       // The event was added to the job to be triggered next.
-      ret.append(event->getWaitHandle());
+      ret.append(Variant{event->getWaitHandle()});
     }
 
     cellDup(*(Variant(ret)).asCell(), result);

@@ -85,9 +85,9 @@ struct SystemlibSessionInstance final : RequestEventHandler {
 
   const Object& getObject() { return m_obj; }
   void setObject(Object&& obj) { m_obj = std::move(obj); }
-  void destroy() { m_obj = nullptr; }
-  void requestInit() override { m_obj = nullptr; }
-  void requestShutdown() override { m_obj = nullptr; }
+  void destroy() { m_obj.reset(); }
+  void requestInit() override { m_obj.reset(); }
+  void requestShutdown() override { m_obj.reset(); }
 
 private:
   Object m_obj;

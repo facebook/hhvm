@@ -266,7 +266,7 @@ int64_t StreamFilter::invokeFilter(const req::ptr<BucketBrigade>& in,
   PackedArrayInit params(4);
   params.append(Variant(in));
   params.append(Variant(out));
-  params.append(consumedRef);
+  params.append(Variant{consumedRef});
   params.append(closing);
   return m_filter->o_invoke(s_filter, params.toArray()).toInt64();
 }

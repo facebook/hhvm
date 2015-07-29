@@ -235,7 +235,7 @@ static String HHVM_FUNCTION(finfo_file,
 }
 
 static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
-  return php_finfo_get_type(nullptr, filename, 0, uninit_null(), -1, 1);
+  return php_finfo_get_type(Resource{}, filename, 0, uninit_null(), -1, 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////

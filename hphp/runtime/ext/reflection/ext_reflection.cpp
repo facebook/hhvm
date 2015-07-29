@@ -887,9 +887,9 @@ static Object HHVM_METHOD(ReflectionFunction, getClosureThisObject,
                           const Object& closure) {
   auto clos = unsafe_cast<c_Closure>(closure);
   if (clos->hasThis()) {
-    return clos->getThis();
+    return Object{clos->getThis()};
   }
-  return nullptr;
+  return Object{};
 }
 
 // helper for getStaticVariables
@@ -1059,7 +1059,7 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
   PackedArrayInit pai(numReqs);
   for (int i = 0; i < numReqs; ++i) {
     auto const& req = requirements[i];
-    pai.append(const_cast<StringData*>(req->name()));
+    pai.append(Variant{const_cast<StringData*>(req->name())});
   }
   return pai.toArray();
 }
@@ -1093,7 +1093,7 @@ static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
   auto const& traits = cls->preClass()->usedTraits();
   PackedArrayInit ai(traits.size());
   for (const StringData* traitName : traits) {
-    ai.append(const_cast<StringData*>(traitName));
+    ai.append(Variant{const_cast<StringData*>(traitName)});
   }
   return ai.toArray();
 }
@@ -1482,8 +1482,8 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {
-  auto name = this_->o_realProp(s___name.get(), ObjectData::RealPropUnchecked,
-                                s_reflectionextension.get());
+  auto name = this_->o_realProp(s___name, ObjectData::RealPropUnchecked,
+                                s_reflectionextension);
   return name->toString();
 }
 

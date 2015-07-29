@@ -117,7 +117,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const filename = fp->func()->filename();
 
       ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
-      frame.set(s_file, const_cast<StringData*>(filename));
+      frame.set(s_file, Variant{const_cast<StringData*>(filename)});
       frame.set(s_line, unit->getLineNumber(pc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
@@ -154,7 +154,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         prevFile = prevFp->func()->originalFilename();
       }
       assert(prevFile);
-      frame.set(s_file, const_cast<StringData*>(prevFile));
+      frame.set(s_file, Variant{const_cast<StringData*>(prevFile)});
 
       // In the normal method case, the "saved pc" for line number printing is
       // pointing at the cell conversion (Unbox/Pop) instruction, not the call
@@ -177,10 +177,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     // Check for include.
-    String funcname = const_cast<StringData*>(fp->func()->name());
+    String funcname{const_cast<StringData*>(fp->func()->name())};
     if (fp->func()->isClosureBody()) {
       // Strip the file hash from the closure name.
-      String fullName = const_cast<StringData*>(fp->func()->baseCls()->name());
+      String fullName{const_cast<StringData*>(fp->func()->baseCls()->name())};
       funcname = fullName.substr(0, fullName.find(';'));
     }
 
@@ -197,7 +197,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // Closures have an m_this but they aren't in object context.
       auto ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->func()->isClosureBody()) {
-        frame.set(s_class, const_cast<StringData*>(ctx->name()));
+        frame.set(s_class, Variant{const_cast<StringData*>(ctx->name())});
         if (fp->hasThis() && !isReturning) {
           if (btArgs.m_withThis) {
             frame.set(s_object, Object(fp->getThis()));

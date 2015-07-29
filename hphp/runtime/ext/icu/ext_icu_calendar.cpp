@@ -222,18 +222,18 @@ static Variant intlcal_field_method(const Object& obj, int64_t field,
 }
 
 static Variant HHVM_METHOD(IntlCalendar, get, int64_t field) {
-  return intlcal_field_method(this_, field,
+  return intlcal_field_method(Object{this_}, field,
                               &icu::Calendar::get, "intlcal_get");
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getActualMaximum, int64_t field) {
-  return intlcal_field_method(this_, field,
+  return intlcal_field_method(Object{this_}, field,
                               &icu::Calendar::getActualMaximum,
                               "intlcal_get_actual_maximum");
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getActualMinimum, int64_t field) {
-  return intlcal_field_method(this_, field,
+  return intlcal_field_method(Object{this_}, field,
                               &icu::Calendar::getActualMinimum,
                               "intlcal_get_actual_minimum");
 }
@@ -270,13 +270,13 @@ static Variant HHVM_METHOD(IntlCalendar, getFirstDayOfWeek) {
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getGreatestMinimum, int64_t field) {
-  return intlcal_field_method(this_, field,
+  return intlcal_field_method(Object{this_}, field,
                                 &icu::Calendar::getGreatestMinimum,
                                 "intlcal_get_greatest_minimum");
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getLeastMaximum, int64_t field) {
-  return intlcal_field_method(this_, field,
+  return intlcal_field_method(Object{this_}, field,
                                 &icu::Calendar::getLeastMaximum,
                                 "intlcal_get_least_maximum");
 }
@@ -300,7 +300,7 @@ static Variant HHVM_METHOD(IntlCalendar, getLocale, int64_t localeType) {
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getMaximum, int64_t field) {
-  return intlcal_field_method(this_, field,
+  return intlcal_field_method(Object{this_}, field,
                                 &icu::Calendar::getMaximum,
                                 "intlcal_get_maximum");
 }
@@ -312,7 +312,7 @@ static Variant HHVM_METHOD(IntlCalendar, getMinimalDaysInFirstWeek) {
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getMinimum, int64_t field) {
-  return intlcal_field_method(this_, field,
+  return intlcal_field_method(Object{this_}, field,
                                 &icu::Calendar::getMinimum,
                                 "intlcal_get_maximum");
 }

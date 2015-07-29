@@ -9019,7 +9019,7 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     StringData* name = makeStaticString(info->m_name);
     BuiltinFunction bif = (BuiltinFunction)info->m_builtinFunc;
     BuiltinFunction nif = (BuiltinFunction)info->m_nativeFunc;
-    const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
+    const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(String{name});
     assert(mi &&
       "MethodInfo not found; may be a problem with the .idl.json files");
 
@@ -9224,7 +9224,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       Entry e;
       e.name = const_cast<StringData*>(it->first);
       e.info = it->second;
-      e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(e.name);
+      e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(String{e.name});
       assert(e.ci);
       StringData* parentName
         = makeStaticString(e.ci->getParentClass().get());

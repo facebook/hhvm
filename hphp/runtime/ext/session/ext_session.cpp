@@ -128,7 +128,7 @@ struct SessionRequestData final : Session {
   void init() {
     id.detach();
     session_status = Session::None;
-    ps_session_handler = nullptr;
+    ps_session_handler.reset();
   }
 
   void destroy() {
@@ -153,7 +153,7 @@ void SessionRequestData::requestShutdownImpl() {
       mod->close();
     } catch (...) {}
   }
-  ps_session_handler = nullptr;
+  ps_session_handler.reset();
   id.reset();
 }
 
@@ -1304,7 +1304,7 @@ new_session:
    */
 
   /* Unconditionally destroy existing arrays -- possible dirty data */
-  php_global_set(s__SESSION, staticEmptyArray());
+  php_global_set(s__SESSION, Variant{staticEmptyArray()});
 
   s_session->invalid_session_id = false;
   String value;
@@ -1381,7 +1381,7 @@ static void php_session_reset_id() {
     static const auto s_SID = makeStaticString("SID");
     auto const handle = lookupCnsHandle(s_SID);
     if (!handle) {
-      f_define(s_SID, v);
+      f_define(String{s_SID}, v);
     } else {
       TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
       v.setEvalScalar();

@@ -335,7 +335,7 @@ static String staticString(const char *s) {
   if (!s) {
     return String();
   }
-  return makeStaticString(s);
+  return String{makeStaticString(s)};
 }
 
 void ClassInfo::ReadUserAttributes(const char **&p,

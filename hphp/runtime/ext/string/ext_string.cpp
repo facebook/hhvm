@@ -867,11 +867,11 @@ Variant sscanfImpl(const String& str,
 }
 
 TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
-  String str = getArg<KindOfString>(ar, 0);
+  String str{getArg<KindOfString>(ar, 0)};
   if (ar->numArgs() < 1) {
     return arReturn(ar, init_null());
   }
-  String format = getArg<KindOfString>(ar, 1);
+  String format{getArg<KindOfString>(ar, 1)};
 
   std::vector<Variant*> args;
   for (int i = 2; i < ar->numArgs(); ++i) {

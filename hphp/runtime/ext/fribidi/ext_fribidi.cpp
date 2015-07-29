@@ -143,12 +143,15 @@ static Array HHVM_FUNCTION(
 ) {
   Array result;
 
-  result.add(FRIBIDI_CHAR_SET_UTF8, s_FRIBIDI_CHARSET_UTF8.get());
-  result.add(FRIBIDI_CHAR_SET_ISO8859_6, s_FRIBIDI_CHARSET_8859_6.get());
-  result.add(FRIBIDI_CHAR_SET_ISO8859_8, s_FRIBIDI_CHARSET_8859_8.get());
-  result.add(FRIBIDI_CHAR_SET_CP1255, s_FRIBIDI_CHARSET_CP1255.get());
-  result.add(FRIBIDI_CHAR_SET_CP1256, s_FRIBIDI_CHARSET_CP1256.get());
-  result.add(FRIBIDI_CHAR_SET_CAP_RTL, s_FRIBIDI_CHARSET_CAP_RTL.get());
+  result.add(FRIBIDI_CHAR_SET_UTF8, Variant{s_FRIBIDI_CHARSET_UTF8.get()});
+  result.add(FRIBIDI_CHAR_SET_ISO8859_6,
+             Variant{s_FRIBIDI_CHARSET_8859_6.get()});
+  result.add(FRIBIDI_CHAR_SET_ISO8859_8,
+             Variant{s_FRIBIDI_CHARSET_8859_8.get()});
+  result.add(FRIBIDI_CHAR_SET_CP1255, Variant{s_FRIBIDI_CHARSET_CP1255.get()});
+  result.add(FRIBIDI_CHAR_SET_CP1256, Variant{s_FRIBIDI_CHARSET_CP1256.get()});
+  result.add(FRIBIDI_CHAR_SET_CAP_RTL,
+             Variant{s_FRIBIDI_CHARSET_CAP_RTL.get()});
 
   return result;
 }

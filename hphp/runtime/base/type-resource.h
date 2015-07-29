@@ -40,14 +40,14 @@ public:
 
   static const Resource s_nullResource;
 
-  void reset() { m_res.reset(); }
+  void reset(ResourceData* res = nullptr) { m_res.reset(res); }
 
   ResourceData* operator->() const { return m_res.get(); }
 
   /**
    * Constructors
    */
-  /* implicit */ Resource(ResourceData *data) : m_res(data) { }
+  explicit Resource(ResourceData *data) : m_res(data) { }
   /* implicit */ Resource(const Resource& src) : m_res(src.m_res) { }
   template <typename T>
   explicit Resource(req::ptr<T>&& src) : m_res(std::move(src)) { }

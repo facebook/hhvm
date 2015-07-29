@@ -264,9 +264,9 @@ Object ObjectData::iterableObject(bool& isIterable,
     auto o = iterator.getObjectData();
     if (o->isIterator()) {
       isIterable = true;
-      return o;
+      return Object{o};
     }
-    obj = o;
+    obj.reset(o);
   }
   if (!isIterator() && obj->instanceof(c_SimpleXMLElement::classof())) {
     auto iterator = cast<c_SimpleXMLElement>(obj)
@@ -1346,7 +1346,8 @@ static bool guardedNativePropResult(TypedValue* retval, Variant result) {
 
 bool ObjectData::invokeNativeGetProp(TypedValue* retval,
                                      const StringData* key) {
-  return guardedNativePropResult(retval, Native::getProp(this, StrNR(key)));
+  return guardedNativePropResult(retval,
+                                 Native::getProp(Object{this}, StrNR(key)));
 }
 
 bool ObjectData::invokeNativeSetProp(TypedValue* retval,
@@ -1354,18 +1355,20 @@ bool ObjectData::invokeNativeSetProp(TypedValue* retval,
                                      TypedValue* val) {
   return guardedNativePropResult(
     retval,
-    Native::setProp(this, StrNR(key), tvAsVariant(val))
+    Native::setProp(Object{this}, StrNR(key), tvAsVariant(val))
   );
 }
 
 bool ObjectData::invokeNativeIssetProp(TypedValue* retval,
                                        const StringData* key) {
-  return guardedNativePropResult(retval, Native::issetProp(this, StrNR(key)));
+  return guardedNativePropResult(retval,
+                                 Native::issetProp(Object{this}, StrNR(key)));
 }
 
 bool ObjectData::invokeNativeUnsetProp(TypedValue* retval,
                                        const StringData* key) {
-  return guardedNativePropResult(retval, Native::unsetProp(this, StrNR(key)));
+  return guardedNativePropResult(retval,
+                                 Native::unsetProp(Object{this}, StrNR(key)));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1972,9 +1975,8 @@ String ObjectData::invokeToString() {
     // we return the empty string.
     return empty_string();
   }
-  String ret = tv.m_data.pstr;
-  decRefStr(tv.m_data.pstr);
-  return ret;
+
+  return String::attach(tv.m_data.pstr);
 }
 
 bool ObjectData::hasToString() {

@@ -321,20 +321,21 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
     case KindOfDouble:
       return source.getDouble();
     case KindOfStaticString:
-      return source.getStringData();
+      return Variant{source.getStringData()};
 
     case KindOfString: {
       auto const st = lookupStaticString(source.getStringData());
-      if (st != nullptr) return st;
-      return StringData::MakeUncounted(source.getStringData()->slice());
+      if (st != nullptr) return Variant{st};
+      return
+        Variant{StringData::MakeUncounted(source.getStringData()->slice())};
     }
 
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      if (ad == staticEmptyArray()) return ad;
-      if (ad->isPacked()) return MixedArray::MakeUncountedPacked(ad);
-      if (ad->isStruct()) return StructArray::MakeUncounted(ad);
-      return MixedArray::MakeUncounted(ad);
+      if (ad == staticEmptyArray()) return Variant{ad};
+      if (ad->isPacked()) return Variant{MixedArray::MakeUncountedPacked(ad)};
+      if (ad->isStruct()) return Variant{StructArray::MakeUncounted(ad)};
+      return Variant{MixedArray::MakeUncounted(ad)};
     }
 
     case KindOfObject:

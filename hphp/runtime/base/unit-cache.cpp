@@ -220,7 +220,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
       // XXX: it seems weird we have to do this even though we already ran
       // resolveVmInclude.
       (requestedPath->data()[0] == '/'
-        ? requestedPath
+       ?  String{requestedPath}
         : String(SourceRootInfo::GetCurrentSourceRoot()) + StrNR(requestedPath)
       ).get()
     );
@@ -413,7 +413,7 @@ String resolveVmInclude(StringData* path,
   ctx.s = s;
   ctx.allow_dir = allow_dir;
   void* vpCtx = &ctx;
-  resolve_include(path, currentDir, findFileWrapper, vpCtx);
+  resolve_include(String{path}, currentDir, findFileWrapper, vpCtx);
   // If resolve_include() could not find the file, return NULL
   return ctx.path;
 }

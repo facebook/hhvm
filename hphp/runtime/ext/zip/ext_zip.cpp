@@ -726,7 +726,7 @@ static bool HHVM_METHOD(ZipArchive, close) {
 
   bool ret = zipDir->close();
 
-  setVariable(this_, "zipDir", null_resource);
+  setVariable(Object{this_}, "zipDir", null_resource);
 
   return ret;
 }
@@ -1059,8 +1059,8 @@ static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
 
   auto zipDir = req::make<ZipDirectory>(z);
 
-  setVariable(this_, "zipDir", Variant(zipDir));
-  setVariable(this_, "filename", filename);
+  setVariable(Object{this_}, "zipDir", Variant(zipDir));
+  setVariable(Object{this_}, "filename", filename);
 
   zip_error_clear(zipDir->getZip());
   return true;

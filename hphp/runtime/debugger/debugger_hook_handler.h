@@ -36,7 +36,7 @@ struct DebuggerHookHandler : DebugHookHandler {
   }
 
   void onExceptionThrown(ObjectData* exception) override {
-    Debugger::InterruptVMHook(ExceptionThrown, exception);
+    Debugger::InterruptVMHook(ExceptionThrown, Variant{exception});
   }
 
   void onExceptionHandle() override {

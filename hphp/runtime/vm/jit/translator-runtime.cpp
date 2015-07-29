@@ -504,7 +504,7 @@ bool ak_exist_string(ArrayData* arr, StringData* key) {
 
 bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
-    return collections::contains(obj, key);
+    return collections::contains(obj, Variant{key});
   }
   auto arr = obj->toArray();
   return ak_exist_string_impl(arr.get(), key);

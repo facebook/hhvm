@@ -1130,7 +1130,7 @@ class HashCollection : public ExtCollectionObjectData {
     assert(iter_valid(pos));
     auto* e = iter_elm(pos);
     if (e->hasStrKey()) {
-      return e->skey;
+      return Variant{e->skey};
     }
     return (int64_t)e->ikey;
   }

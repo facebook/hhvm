@@ -203,7 +203,7 @@ static void php_sxe_move_forward_iterator(c_SimpleXMLElement* sxe) {
   if (!sxe->iter.data.isNull()) {
     auto intern = cast<c_SimpleXMLElement>(sxe->iter.data);
     node = intern->nodep();
-    sxe->iter.data = nullptr;
+    sxe->iter.data.reset();
   }
 
   if (node) {
@@ -214,7 +214,7 @@ static void php_sxe_move_forward_iterator(c_SimpleXMLElement* sxe) {
 static xmlNodePtr php_sxe_reset_iterator(c_SimpleXMLElement* sxe,
                                          bool use_data) {
   if (!sxe->iter.data.isNull()) {
-    sxe->iter.data = nullptr;
+    sxe->iter.data.reset();
   }
 
   xmlNodePtr node = sxe->nodep();
@@ -235,7 +235,7 @@ static xmlNodePtr php_sxe_reset_iterator(c_SimpleXMLElement* sxe,
 
 static int64_t php_sxe_count_elements_helper(c_SimpleXMLElement* sxe) {
   Object data = sxe->iter.data;
-  sxe->iter.data = nullptr;
+  sxe->iter.data.reset();
 
   xmlNodePtr node = php_sxe_reset_iterator(sxe, false);
   int64_t count = 0;
@@ -295,7 +295,7 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, const Variant& member,
     } else if (member.isNull()) {
       /* This happens when the user did: $sxe[]->foo = $value */
       raise_error("Cannot create unnamed attribute");
-      return nullptr;
+      return Object{};
     }
   } else {
     name = member.toString();
@@ -317,11 +317,11 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, const Variant& member,
         node->parent->type == XML_DOCUMENT_NODE) {
       /* This happens when the user did: $sxe[]->foo = $value */
       raise_error("Cannot create unnamed attribute");
-      return nullptr;
+      return Object{};
     }
   }
 
-  Object return_value = nullptr;
+  Object return_value;
   if (node) {
     if (attribs) {
       if (!member.isInteger() || sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -687,7 +687,7 @@ static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
                               Array& rv, bool isBoolCast = false) {
   rv.clear();
 
-  Object iter_data = nullptr;
+  Object iter_data;
   bool use_iter = false;
   xmlNodePtr node = sxe->nodep();
   if (!node) {
@@ -733,7 +733,7 @@ static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
         node = node->children;
       } else {
         iter_data = sxe->iter.data;
-        sxe->iter.data = nullptr;
+        sxe->iter.data.reset();
 
         node = php_sxe_reset_iterator(sxe, false);
 
@@ -1169,7 +1169,7 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
   iter.nsprefix = nullptr;
   iter.isprefix = false;
   iter.type     = SXE_ITER_NONE;
-  iter.data     = nullptr;
+  iter.data.reset();
 }
 
 c_SimpleXMLElement::~c_SimpleXMLElement() {

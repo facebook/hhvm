@@ -412,7 +412,7 @@ Resource MimePart::findByName(const char *name) {
   find.searchfor = name;
   find.foundpart = NULL;
   enumerateParts(&MimePart::findPart, &find);
-  return find.foundpart;
+  return Resource{find.foundpart};
 }
 
 static int filter_into_work_buffer(int c, void *dat) {

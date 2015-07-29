@@ -104,7 +104,7 @@ void c_AwaitAllWaitHandle::ti_setoncreatecallback(const Variant& callback) {
 Object c_AwaitAllWaitHandle::ti_fromarray(const Array& dependencies) {
   auto ad = dependencies.get();
   assert(ad);
-  if (!ad->size()) return returnEmpty();
+  if (!ad->size()) return Object{returnEmpty()};
 
 retry:
   switch (ad->kind()) {
@@ -171,7 +171,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
     prepareChild(tvToCell(iter), ctx_idx, cnt);
   }
 
-  if (!cnt) return returnEmpty();
+  if (!cnt) return Object{returnEmpty()};
 
   auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];
@@ -196,7 +196,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
     prepareChild(tvToCell(&iter->data), ctx_idx, cnt);
   }
 
-  if (!cnt) return returnEmpty();
+  if (!cnt) return Object{returnEmpty()};
 
   auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];
@@ -221,7 +221,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
     prepareChild(tvAssertCell(&iter->data), ctx_idx, cnt);
   }
 
-  if (!cnt) return returnEmpty();
+  if (!cnt) return Object{returnEmpty()};
 
   auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];
@@ -245,7 +245,7 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
     prepareChild(tvAssertCell(iter), ctx_idx, cnt);
   }
 
-  if (!cnt) return returnEmpty();
+  if (!cnt) return Object{returnEmpty()};
 
   auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];

@@ -157,23 +157,23 @@ Object c_Closure::ti_bind(const Variant& closure, const Variant& newthis,
                            const Variant& scope) {
   if (!closure.isObject()) {
     raise_warning("Closure::bind() expects parameter 1 to be an object");
-    return nullptr;
+    return Object{};
   }
 
   Object closureObject = closure.toObject();
   if (!closureObject.is<c_Closure>()) {
     raise_warning("Closure::bind() expects parameter 1 to be closure");
-    return nullptr;
+    return Object{};
   }
 
   if (!newthis.isObject() && !newthis.isNull()) {
     raise_warning("Closure::bind() expects parameter 2 to be object or NULL");
-    return nullptr;
+    return Object{};
   }
 
   if (!scope.isObject() && !scope.isString() && !scope.isNull()) {
     raise_warning("Closure::bindto expects parameter 3 to be string or object");
-    return nullptr;
+    return Object{};
   }
 
   return unsafe_cast<c_Closure>(closureObject)->t_bindto(newthis, scope);
@@ -183,7 +183,7 @@ Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {
   if (RuntimeOption::RepoAuthoritative &&
       RuntimeOption::EvalAllowScopeBinding) {
     raise_warning("Closure binding is not supported in RepoAuthoritative mode");
-    return nullptr;
+    return Object{};
   }
 
   auto const cls = getVMClass();
@@ -198,7 +198,7 @@ Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {
     }
   } else if (!newthis.isNull()) {
     raise_warning("Closure::bindto() expects parameter 1 to be object");
-    return nullptr;
+    return Object{};
   }
 
   auto const curscope = invoke->cls();
@@ -213,7 +213,7 @@ Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {
       newscope = Unit::loadClass(className);
       if (!newscope) {
         raise_warning("Class '%s' not found", className->data());
-        return nullptr;
+        return Object{};
       }
     }
   } else if (scope.isNull()) {
@@ -221,7 +221,7 @@ Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {
   } else {
     raise_warning("Closure::bindto() expects parameter 2 "
                   "to be string or object");
-    return nullptr;
+    return Object{};
   }
 
   if (od && !newscope) {
@@ -235,13 +235,13 @@ Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {
   if (!RuntimeOption::EvalAllowScopeBinding) {
     if (newscope != curscope) {
       raise_warning("Re-binding closure scopes is disabled");
-      return nullptr;
+      return Object{};
     }
 
     if (thisNotOfCtx) {
       raise_warning("Binding to objects not subclassed from closure "
                     "context is disabled");
-      return nullptr;
+      return Object{};
     }
   }
 

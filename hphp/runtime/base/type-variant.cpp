@@ -170,12 +170,12 @@ Variant& Variant::setWithRef(const Variant& v) noexcept {
   return *this;
 }
 
-#define IMPLEMENT_SET_IMPL(name, argType, argName, setOp) \
-  void Variant::name(argType argName) noexcept {          \
+#define IMPLEMENT_SET(argType, setOp)                     \
+  void Variant::set(argType v) noexcept {                 \
     if (isPrimitive()) {                                  \
       setOp;                                              \
     } else if (m_type == KindOfRef) {                     \
-      m_data.pref->var()->name(argName);                  \
+      m_data.pref->var()->set(v);                         \
     } else {                                              \
       auto const d = m_data.num;                          \
       auto const t = m_type;                              \
@@ -183,12 +183,7 @@ Variant& Variant::setWithRef(const Variant& v) noexcept {
       tvDecRefHelper(t, d);                               \
     }                                                     \
   }
-#define IMPLEMENT_VOID_SET(name, setOp) \
-  IMPLEMENT_SET_IMPL(name, , , setOp)
-#define IMPLEMENT_SET(argType, setOp) \
-  IMPLEMENT_SET_IMPL(set, argType, v, setOp)
 
-IMPLEMENT_VOID_SET(setNull, m_type = KindOfNull)
 IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
 IMPLEMENT_SET(int, m_type = KindOfInt64; m_data.num = v)
 IMPLEMENT_SET(int64_t, m_type = KindOfInt64; m_data.num = v)
@@ -199,9 +194,6 @@ IMPLEMENT_SET(const StaticString&,
               m_type = KindOfStaticString;
               m_data.pstr = s)
 
-
-#undef IMPLEMENT_SET_IMPL
-#undef IMPLEMENT_VOID_SET
 #undef IMPLEMENT_SET
 
 #define IMPLEMENT_PTR_SET(ptr, member, dtype)                           \

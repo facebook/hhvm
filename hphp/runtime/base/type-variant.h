@@ -333,7 +333,7 @@ struct Variant : private TypedValue {
 
  public:
   /**
-   * Break bindings and set to null.
+   * Break bindings and set to uninit.
    */
   void unset() {
     auto const d = m_data.num;
@@ -345,7 +345,9 @@ struct Variant : private TypedValue {
   /**
    * set to null without breaking bindings (if any), faster than v_a = null;
    */
-  void setNull() noexcept;
+  void setNull() noexcept {
+    tvSetNull(*asTypedValue());
+  }
 
   /**
    * Clear the original data, and set it to be the same as in v, and if

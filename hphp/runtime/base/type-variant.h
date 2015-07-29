@@ -841,6 +841,13 @@ struct Variant : private TypedValue {
   }
 
   int64_t getNumData() const { return m_data.num; }
+
+  /*
+   * Make any Variant strings and arrays not ref counted (e.g., static).
+   * Use it, for example, if you need a long-lived Variant before the Memory
+   * Manager has been initialized.
+   * You will still get an assertion if the Variant is an object, resource, etc.
+   */
   void setEvalScalar();
 
   /*

@@ -40,8 +40,7 @@ struct IpBlockMap;
 struct SatelliteServerInfo;
 struct FilesMatch;
 struct Hdf;
-// Can we make sure this equals IniSetting::Map?
-typedef folly::dynamic IniSettingMap;
+class IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 

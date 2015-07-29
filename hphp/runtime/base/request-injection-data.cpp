@@ -164,21 +164,12 @@ void RequestInjectionData::threadInit() {
   }
 
   // Resource Limits
+  std::string mem_def = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
+                   mem_def.c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       int64_t newInt = strtoll(value.c_str(), nullptr, 10);
-                       if (newInt <= 0) {
-                         newInt = std::numeric_limits<int64_t>::max();
-                         m_maxMemory = std::to_string(newInt);
-                       } else {
-                         m_maxMemory = value;
-                         newInt = convert_bytes_to_long(value);
-                         if (newInt <= 0) {
-                           newInt = std::numeric_limits<int64_t>::max();
-                         }
-                       }
-                       MM().getStatsNoRefresh().maxBytes = newInt;
+                       setMemoryLimit(value);
                        return true;
                      },
                      nullptr
@@ -515,4 +506,19 @@ void RequestInjectionData::setFlag(SurpriseFlag flag) {
   m_sflagsAndStkPtr->fetch_or(flag);
 }
 
+void RequestInjectionData::setMemoryLimit(std::string limit) {
+  int64_t newInt = strtoll(limit.c_str(), nullptr, 10);
+  if (newInt <= 0) {
+   newInt = std::numeric_limits<int64_t>::max();
+   m_maxMemory = std::to_string(newInt);
+  } else {
+   m_maxMemory = limit;
+   newInt = convert_bytes_to_long(limit);
+   if (newInt <= 0) {
+     newInt = std::numeric_limits<int64_t>::max();
+   }
+  }
+  MM().getStatsNoRefresh().maxBytes = newInt;
+  m_maxMemoryNumeric = newInt;
+}
 }

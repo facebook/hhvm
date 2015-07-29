@@ -20,9 +20,6 @@
 #include <map>
 #include <set>
 #include <vector>
-
-#include <folly/dynamic.h>
-
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/string-bag.h"
@@ -32,8 +29,7 @@ namespace HPHP {
 
 class Hdf;
 
-// Can we make sure this equals IniSettingMap?
-using IniSettingMap = folly::dynamic;
+class IniSettingMap;
 
 struct Option {
   /**

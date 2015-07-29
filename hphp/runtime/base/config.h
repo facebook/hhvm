@@ -17,13 +17,12 @@
 #ifndef incl_HPHP_CONFIG_H_
 #define incl_HPHP_CONFIG_H_
 
-#include <folly/dynamic.h>
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-typedef folly::dynamic IniSettingMap;
+class Variant;
+class IniSettingMap;
 typedef std::vector<std::string> ConfigVector;
 typedef std::map<std::string, std::string> ConfigMap;
 typedef std::set<std::string> ConfigSet;

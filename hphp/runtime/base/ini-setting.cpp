@@ -43,10 +43,9 @@ namespace HPHP {
 
 const Extension* IniSetting::CORE = (Extension*)(-1);
 
-bool IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
-
 bool IniSetting::s_config_is_a_constant = false;
 std::set<std::string> IniSetting::config_names_that_use_constants;
+bool IniSetting::s_system_settings_are_set = false;
 
 const StaticString
   s_global_value("global_value"),
@@ -70,96 +69,18 @@ int64_t convert_bytes_to_long(const std::string& value) {
   return newInt;
 }
 
-static std::string dynamic_to_std_string(const folly::dynamic& v) {
-  switch (v.type()) {
-    case folly::dynamic::Type::NULLT:
-    case folly::dynamic::Type::ARRAY:
-    case folly::dynamic::Type::OBJECT:
-      return "";
-    case folly::dynamic::Type::BOOL:
-      return std::to_string(v.asBool());
-    case folly::dynamic::Type::DOUBLE:
-      return convDblToStrWithPhpFormat(v.asDouble());
-    case folly::dynamic::Type::INT64:
-      return std::to_string(v.asInt());
-    case folly::dynamic::Type::STRING:
-      return v.data();
-  }
-  not_reached();
-}
-
-static Variant dynamic_to_variant(const folly::dynamic& v) {
-  switch (v.type()) {
-    case folly::dynamic::Type::NULLT:
-      return init_null();
-    case folly::dynamic::Type::BOOL:
-      return v.asBool();
-    case folly::dynamic::Type::DOUBLE:
-      return v.asDouble();
-    case folly::dynamic::Type::INT64:
-      return v.asInt();
-    case folly::dynamic::Type::STRING:
-      return v.data();
-    case folly::dynamic::Type::ARRAY:
-    case folly::dynamic::Type::OBJECT:
-      ArrayInit arr_init(v.size(), ArrayInit::Mixed{});
-      for (auto& item : v.items()) {
-        arr_init.add(dynamic_to_variant(item.first),
-                dynamic_to_variant(item.second));
-      }
-      Array ret = arr_init.toArray();
-      // Sort the array since folly::dynamic has a tendency to iterate from
-      // back to front. This way a var_dump of the array, for example, looks
-      // ordered.
-      ret.sort(Array::SortNaturalAscending, true, false);
-      return ret;
-  }
-  not_reached();
-}
-
-static folly::dynamic variant_to_dynamic(const Variant& v) {
-  switch (v.getType()) {
-    case KindOfUninit:
-    case KindOfNull:
-      return nullptr;
-    case KindOfBoolean:
-      return v.toBoolean();
-    case KindOfDouble:
-      return v.toDouble();
-    case KindOfInt64:
-      return v.toInt64();
-    case KindOfString:
-    case KindOfStaticString:
-      return v.toString().data();
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource: {
-      folly::dynamic ret = folly::dynamic::object;
-      for (ArrayIter iter(v.toArray()); iter; ++iter) {
-        ret.insert(variant_to_dynamic(iter.first()),
-                   variant_to_dynamic(iter.second()));
-      }
-      return ret;
-    }
-    case KindOfRef:
-    case KindOfClass:
-      break;
-  }
-  not_reached();
-}
-
 #define INI_ASSERT_STR(v) \
-  if (value.isArray() || value.isObject()) { \
+  if (!v.isScalar()) { \
     return false; \
   } \
-  auto str = dynamic_to_std_string(v);
+  auto str = v.toString().toCppString();
 
 #define INI_ASSERT_ARR(v) \
   if (!value.isArray() && !value.isObject()) { \
     return false; \
   }
 
-bool ini_on_update(const folly::dynamic& value, bool& p) {
+bool ini_on_update(const Variant& value, bool& p) {
   INI_ASSERT_STR(value);
   if ((str.size() == 0) ||
       (str.size() == 1 && strcasecmp("0", str.data()) == 0) ||
@@ -173,13 +94,13 @@ bool ini_on_update(const folly::dynamic& value, bool& p) {
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, double& p) {
+bool ini_on_update(const Variant& value, double& p) {
   INI_ASSERT_STR(value);
   p = zend_strtod(str.data(), nullptr);
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, char& p) {
+bool ini_on_update(const Variant& value, char& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
   auto maxValue = 0x7FL;
@@ -190,7 +111,7 @@ bool ini_on_update(const folly::dynamic& value, char& p) {
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, int16_t& p) {
+bool ini_on_update(const Variant& value, int16_t& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
   auto maxValue = 0x7FFFL;
@@ -201,7 +122,7 @@ bool ini_on_update(const folly::dynamic& value, int16_t& p) {
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, int32_t& p) {
+bool ini_on_update(const Variant& value, int32_t& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
   auto maxValue = 0x7FFFFFFFL;
@@ -212,13 +133,13 @@ bool ini_on_update(const folly::dynamic& value, int32_t& p) {
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, int64_t& p) {
+bool ini_on_update(const Variant& value, int64_t& p) {
   INI_ASSERT_STR(value);
   p = convert_bytes_to_long(str);
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, unsigned char& p) {
+bool ini_on_update(const Variant& value, unsigned char& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
   auto mask = ~0xFFUL;
@@ -229,7 +150,7 @@ bool ini_on_update(const folly::dynamic& value, unsigned char& p) {
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, uint16_t& p) {
+bool ini_on_update(const Variant& value, uint16_t& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
   auto mask = ~0xFFFFUL;
@@ -240,7 +161,7 @@ bool ini_on_update(const folly::dynamic& value, uint16_t& p) {
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, uint32_t& p) {
+bool ini_on_update(const Variant& value, uint32_t& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
   auto mask = ~0x7FFFFFFFUL;
@@ -251,219 +172,217 @@ bool ini_on_update(const folly::dynamic& value, uint32_t& p) {
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, uint64_t& p) {
+bool ini_on_update(const Variant& value, uint64_t& p) {
   INI_ASSERT_STR(value);
   p = convert_bytes_to_long(str);
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, std::string& p) {
+bool ini_on_update(const Variant& value, std::string& p) {
   INI_ASSERT_STR(value);
   p = str;
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, String& p) {
+bool ini_on_update(const Variant& value, String& p) {
   INI_ASSERT_STR(value);
   p = str.data();
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, Array& p) {
+bool ini_on_update(const Variant& value, Array& p) {
   INI_ASSERT_ARR(value);
-  p = dynamic_to_variant(value).toArray();
+  p = value.toArray();
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p) {
+bool ini_on_update(const Variant& value, std::set<std::string>& p) {
   INI_ASSERT_ARR(value);
-  for (auto& v : value.values()) {
-    p.insert(v.data());
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.insert(iter.second().toString().toCppString());
   }
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value,
+bool ini_on_update(const Variant& value,
                    std::set<std::string, stdltistr>& p) {
   INI_ASSERT_ARR(value);
-  for (auto& v : value.values()) {
-    p.insert(v.data());
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.insert(iter.second().toString().toCppString());
   }
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value,
+bool ini_on_update(const Variant& value,
                    boost::container::flat_set<std::string>& p) {
   INI_ASSERT_ARR(value);
-  for (auto& v : value.values()) {
-    p.insert(v.data());
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.insert(iter.second().toString().toCppString());
   }
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p) {
+bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
   INI_ASSERT_ARR(value);
-  for (auto& v : value.values()) {
-    p.push_back(v.data());
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p.push_back(iter.second().toString().toCppString());
   }
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value,
+bool ini_on_update(const Variant& value,
                    std::map<std::string, std::string>& p) {
   INI_ASSERT_ARR(value);
-  for (auto& pair : value.items()) {
-    p[pair.first.data()] = pair.second.data();
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p[iter.first().toString().toCppString()] =
+      iter.second().toString().toCppString();
   }
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value,
+bool ini_on_update(const Variant& value,
                    std::map<std::string, std::string, stdltistr>& p) {
   INI_ASSERT_ARR(value);
-  for (auto& pair : value.items()) {
-    p[pair.first.data()] = pair.second.data();
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p[iter.first().toString().toCppString()] =
+      iter.second().toString().toCppString();
   }
   return true;
 }
 
-bool ini_on_update(const folly::dynamic& value,
+bool ini_on_update(const Variant& value,
                    hphp_string_imap<std::string>& p) {
   INI_ASSERT_ARR(value);
-  for (auto& pair : value.items()) {
-    p[pair.first.data()] = pair.second.data();
+  for (ArrayIter iter(value.toArray()); iter; ++iter) {
+    p[iter.first().toString().toCppString()] =
+      iter.second().toString().toCppString();
   }
   return true;
 }
 
-folly::dynamic ini_get(bool& p) {
+Variant ini_get(bool& p) {
   return p ? "1" : "";
 }
 
-folly::dynamic ini_get(double& p) {
+Variant ini_get(double& p) {
   return p;
 }
 
-folly::dynamic ini_get(char& p) {
+Variant ini_get(char& p) {
   return p;
 }
 
-folly::dynamic ini_get(int16_t& p) {
+Variant ini_get(int16_t& p) {
   return p;
 }
 
-folly::dynamic ini_get(int32_t& p) {
+Variant ini_get(int32_t& p) {
   return p;
 }
 
-folly::dynamic ini_get(int64_t& p) {
+Variant ini_get(int64_t& p) {
   return p;
 }
 
-folly::dynamic ini_get(unsigned char& p) {
+Variant ini_get(unsigned char& p) {
   return p;
 }
 
-folly::dynamic ini_get(uint16_t& p) {
+Variant ini_get(uint16_t& p) {
   return p;
 }
 
-folly::dynamic ini_get(uint32_t& p) {
+Variant ini_get(uint32_t& p) {
+  return (uint64_t) p;
+}
+
+Variant ini_get(uint64_t& p) {
   return p;
 }
 
-folly::dynamic ini_get(uint64_t& p) {
-  return p;
-}
-
-folly::dynamic ini_get(std::string& p) {
+Variant ini_get(std::string& p) {
   return p.data();
 }
 
-folly::dynamic ini_get(String& p) {
+Variant ini_get(String& p) {
   return p.data();
 }
 
-folly::dynamic ini_get(std::map<std::string, std::string>& p) {
-  folly::dynamic ret = folly::dynamic::object;
+Variant ini_get(std::map<std::string, std::string>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
-    ret.insert(pair.first, pair.second);
+    ret.add(String(pair.first), pair.second);
   }
-  return ret;
+  return ret.toArray();
 }
 
-folly::dynamic ini_get(std::map<std::string, std::string, stdltistr>& p) {
-  folly::dynamic ret = folly::dynamic::object;
+Variant ini_get(std::map<std::string, std::string, stdltistr>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
-    ret.insert(pair.first, pair.second);
+    ret.add(String(pair.first), pair.second);
   }
-  return ret;
+  return ret.toArray();
 }
 
-folly::dynamic ini_get(hphp_string_imap<std::string>& p) {
-  folly::dynamic ret = folly::dynamic::object;
+Variant ini_get(hphp_string_imap<std::string>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
   for (auto& pair : p) {
-    ret.insert(pair.first, pair.second);
+    ret.add(String(pair.first), pair.second);
   }
-  return ret;
+  return ret.toArray();
 }
 
-folly::dynamic ini_get(Array& p) {
-  folly::dynamic ret = folly::dynamic::object;
-  for (ArrayIter iter(p); iter; ++iter) {
-    ret.insert(variant_to_dynamic(iter.first()),
-               variant_to_dynamic(iter.second()));
-  }
-  return ret;
+Variant ini_get(Array& p) {
+  return p;
 }
 
-folly::dynamic ini_get(std::set<std::string>& p) {
-  folly::dynamic ret = folly::dynamic::object;
+Variant ini_get(std::set<std::string>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
   auto idx = 0;
   for (auto& s : p) {
-    ret.insert(idx++, s);
+    ret.add(idx++, s);
   }
-  return ret;
+  return ret.toArray();
 }
 
-folly::dynamic ini_get(std::set<std::string, stdltistr>& p) {
-  folly::dynamic ret = folly::dynamic::object;
+Variant ini_get(std::set<std::string, stdltistr>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
   auto idx = 0;
   for (auto& s : p) {
-    ret.insert(idx++, s);
+    ret.add(idx++, s);
   }
-  return ret;
+  return ret.toArray();
 }
 
-folly::dynamic ini_get(boost::container::flat_set<std::string>& p) {
-  folly::dynamic ret = folly::dynamic::object;
+Variant ini_get(boost::container::flat_set<std::string>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
   auto idx = 0;
   for (auto& s : p) {
-    ret.insert(idx++, s);
+    ret.add(idx++, s);
   }
-  return ret;
+  return ret.toArray();
 }
 
-folly::dynamic ini_get(std::vector<std::string>& p) {
-  folly::dynamic ret = folly::dynamic::object;
+Variant ini_get(std::vector<std::string>& p) {
+  ArrayInit ret(p.size(), ArrayInit::Map{});
   auto idx = 0;
   for (auto& s : p) {
-    ret.insert(idx++, s);
+    ret.add(idx++, s);
   }
-  return ret;
+  return ret.toArray();
 }
 
-const folly::dynamic* ini_iterate(const folly::dynamic &ini,
-                                  const std::string &name) {
+const IniSettingMap ini_iterate(const IniSettingMap &ini,
+                                const std::string &name) {
   // This should never happen, but handle it anyway.
-  if (ini == nullptr) {
-    return nullptr;
+  if (ini.isNull()) {
+    return init_null();
   }
 
   // If for some reason we are passed a string (i.e., a leaf value),
   // just return it back
   if (ini.isString()) {
-    return &ini;
+    return ini;
   }
 
   // If we just passed in a name that already has a value like:
@@ -473,8 +392,8 @@ const folly::dynamic* ini_iterate(const folly::dynamic &ini,
   // i.e., a value that didn't look like
   //   hhvm.a.b[c][d], where name = hhvm.a.b.c.d
   //   c[d] (where ini is already hhvm.a.b), where name = c.d
-  auto* value = ini.get_ptr(name);
-  if (value) {
+  auto value = ini[name];
+  if (!value.isNull()) {
     return value;
   }
 
@@ -485,30 +404,64 @@ const folly::dynamic* ini_iterate(const folly::dynamic &ini,
   int dot_loc = 0;
   int dot_parts_size = dot_parts.size();
   std::string part = dot_parts[0];
-  // If this is null, then all the loops below will be skipped and
-  // we will return it as null.
-  value = ini.get_ptr(part);
+  value = ini[part];
   // Loop through the dot parts, getting a pointer to each
   // We may need to concatenate dots to be able to get a real value
   // e.g., if someone passed in hhvm.a.b.c.d, which in ini was equal
   // to hhvm.a.b[c][d], then we would start with hhvm and get null,
   // then hhvm.a and get null, then hhvm.a.b and actually get an object
   // to point to.
-  while (!value && dot_loc < dot_parts_size - 1) {
+  while (value.isNull() && dot_loc < dot_parts_size - 1) {
     dot_loc++;
     part = part + "." + dot_parts[dot_loc];
-    value = ini.get_ptr(part);
+    value = ini[part];
   }
   // Get to the last dot part and get its value, if it exists
   for (int i = dot_loc + 1; i < dot_parts_size; i++) {
-    if (value) {
+    if (!value.isNull()) {
       part = dot_parts[i];
-      value = value->get_ptr(part);
+      value = value[part];
     } else { // If we reach a bad point, just return null
-      return nullptr;
+      return init_null();
     }
   }
   return value;
+}
+
+///////////////////////////////////
+// IniSettingMap
+
+IniSettingMap::IniSettingMap() {
+  m_map = Variant(Array::Create());
+}
+
+IniSettingMap::IniSettingMap(Type t) : IniSettingMap() {}
+
+IniSettingMap::IniSettingMap(const IniSettingMap& i) {
+  m_map = i.m_map;
+}
+
+IniSettingMap::IniSettingMap(IniSettingMap&& i) noexcept {
+  m_map = std::move(i.m_map);
+}
+
+/* implicit */ IniSettingMap::IniSettingMap(const Variant& v) {
+  m_map = v;
+}
+
+const IniSettingMap IniSettingMap::operator[](const String& key) const {
+  assert(this->isArray());
+  return IniSettingMap(m_map.toCArrRef()[key]);
+}
+
+IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
+  m_map = i.m_map;
+  return *this;
+}
+
+void IniSettingMap::set(const String& key, const Variant& v) {
+  assert(this->isArray());
+  m_map.toArrRef().set(key, v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -524,7 +477,7 @@ void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
 void IniSetting::ParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   Variant *arr = (Variant*)arg;
-  forceToArray(*arr).set(String(key), String(value));
+  forceToArray(*arr).set(String(key), Variant(value));
 }
 
 void IniSetting::ParserCallback::onPopEntry(
@@ -547,26 +500,23 @@ void IniSetting::ParserCallback::makeArray(Variant& hash,
                                            const std::string& offset,
                                            const std::string& value) {
   assert(!offset.empty());
-  Variant val(Variant::StrongBind{}, hash);
+  Variant *val = &hash;
+  assert(val->isArray());
   auto start = offset.c_str();
   auto p = start;
   bool last = false;
   do {
     String index(p);
     last = p + index.size() >= start + offset.size();
-    Variant newval;
+    // This is mandatory in case we have a nested array like:
+    //   hhvm.a[b][c][d]
+    // b will be hash and an array already, but c and d might
+    // not exist and will need to be made an array
+    forceToArray(*val);
+    val = &val->toArrRef().lvalAt(index);
     if (last) {
-      newval = Variant(value);
+      *val = Variant(value);
     } else {
-      if (val.toArrRef().exists(index)) {
-        newval = val.toArrRef().rvalAt(index);
-      } else {
-        newval = Variant(Array::Create());
-      }
-    }
-    val.toArrRef().setRef(index, newval);
-    if (!last) {
-      val.assignRef(newval);
       p += index.size() + 1;
     }
   } while (!last);
@@ -646,14 +596,6 @@ void IniSetting::SectionParserCallback::onPopEntry(
                                          activeArray((CallbackData*)arg));
 }
 
-void IniSetting::SystemParserCallback::onSection(const std::string &name,
-                                                 void *arg) {
-  // do nothing
-}
-void IniSetting::SystemParserCallback::onLabel(const std::string &name,
-                                               void *arg) {
-  // do nothing
-}
 void IniSetting::SystemParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   assert(!key.empty());
@@ -663,8 +605,8 @@ void IniSetting::SystemParserCallback::onEntry(
     IniSetting::config_names_that_use_constants.insert(key);
     IniSetting::s_config_is_a_constant = false;
   }
-  auto& arr = *(IniSetting::Map*)arg;
-  arr[key] = value;
+  ParserCallback::onEntry(key, value, arg);
+
 }
 
 void IniSetting::SystemParserCallback::onPopEntry(const std::string& key,
@@ -676,59 +618,12 @@ void IniSetting::SystemParserCallback::onPopEntry(const std::string& key,
     IniSetting::config_names_that_use_constants.insert(key);
     IniSetting::s_config_is_a_constant = false;
   }
-  auto& arr = *(IniSetting::Map*)arg;
-  auto* ptr = arr.get_ptr(key);
-  if (!ptr || !ptr->isObject()) {
-    arr[key] = IniSetting::Map::object;
-    ptr = arr.get_ptr(key);
-  }
-  if (!offset.empty()) {
-    makeArray(*ptr, offset, value);
-  } else {
-    // Find the highest index
-    auto max = 0;
-    for (auto &a : ptr->keys()) {
-      try {
-        if (a.asInt() >= max) {
-          max = a.asInt() + 1;
-        }
-      } catch (std::range_error const& e) { /* not an int */ }
-    }
-    (*ptr)[std::to_string(max)] = value;
-  }
+  ParserCallback::onPopEntry(key, value, offset, arg);
 }
 
-void IniSetting::SystemParserCallback::makeArray(Map &hash,
-                                                 const std::string &offset,
-                                                 const std::string &value) {
-  assert(!offset.empty());
-  Map* val = &hash;
-  auto start = offset.c_str();
-  auto p = start;
-  bool last = false;
-  do {
-    std::string index(p);
-    last = p + index.size() >= start + offset.size();
-
-    Map newval = last ? Map(value) : val->getDefault(index, Map::object());
-    val = &(*val)[index];
-    *val = newval;
-
-    if (!last) {
-      p += index.size() + 1;
-    }
-  } while (!last);
-}
 void IniSetting::SystemParserCallback::onConstant(std::string &result,
                                                   const std::string &name) {
   IniSetting::s_config_is_a_constant = true;
-  if (MemoryManager::TlsWrapper::isNull()) {
-    // We can't load constants before the memory manger is up, so lets just
-    // pretend they are strings I guess
-    result = name;
-    return;
-  }
-
   if (f_defined(name, false)) {
     result = f_constant(name).toString().toCppString();
   } else {
@@ -740,7 +635,8 @@ void IniSetting::SystemParserCallback::onConstant(std::string &result,
 
 static Mutex s_mutex;
 Variant IniSetting::FromString(const String& ini, const String& filename,
-                               bool process_sections, int scanner_mode) {
+                               bool process_sections /* = false */,
+                               int scanner_mode /* = NormalScanner */) {
   Lock lock(s_mutex); // ini parser is not thread-safe
   // We are parsing something new, so reset this flag
   s_config_is_a_constant = false;
@@ -764,16 +660,17 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
   return false;
 }
 
-IniSetting::Map IniSetting::FromStringAsMap(const std::string& ini,
-                                            const std::string& filename) {
+IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
+                                          const std::string& filename) {
   Lock lock(s_mutex); // ini parser is not thread-safe
   // We are parsing something new, so reset this flag
   s_config_is_a_constant = false;
   SystemParserCallback cb;
-  Map ret = IniSetting::Map::object;
-  zend_parse_ini_string(ini, filename, NormalScanner, cb, &ret);
-  return ret;
+  Variant parsed;
+  zend_parse_ini_string(ini, filename, NormalScanner, cb, &parsed);
+  return std::move(parsed);
 }
+
 
 class IniCallbackData {
 public:
@@ -792,8 +689,8 @@ public:
   const Extension* extension;
   IniSetting::Mode mode;
   UserIniData *iniData;
-  std::function<bool(const folly::dynamic& value)> updateCallback;
-  std::function<folly::dynamic()> getCallback;
+  std::function<bool(const Variant& value)> updateCallback;
+  std::function<Variant()> getCallback;
 };
 
 typedef std::map<std::string, IniCallbackData> CallbackMap;
@@ -817,7 +714,8 @@ static CallbackMap s_system_ini_callbacks;
 //
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
 
-typedef std::map<std::string, folly::dynamic> SettingMap;
+typedef std::map<std::string, Variant> SettingMap;
+
 // Set by a .ini file at the start
 static SettingMap s_system_settings;
 // Changed during the course of the request
@@ -827,22 +725,23 @@ class IniSettingExtension final : public Extension {
 public:
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
 
-  void requestShutdown() override {
-    // Put all the defaults back to the way they were before any ini_set()
-    for (auto &item : *s_saved_defaults) {
-      IniSetting::SetUser(item.first, item.second, IniSetting::FollyDynamic());
-    }
-    s_saved_defaults->clear();
+  // s_saved_defaults should be clear at the beginning of any request
+  void requestInit() override {
+    assert(s_saved_defaults->empty());
   }
 
+  void requestShutdown() override {
+    IniSetting::ResetSavedDefaults();
+    assert(s_saved_defaults->empty());
+  }
 } s_ini_extension;
 
 void IniSetting::Bind(
   const Extension* extension,
   const Mode mode,
   const std::string& name,
-  std::function<bool(const folly::dynamic&)> updateCallback,
-  std::function<folly::dynamic()> getCallback,
+  std::function<bool(const Variant&)> updateCallback,
+  std::function<Variant()> getCallback,
   std::function<class UserIniData *(void)> userDataCallback
 ) {
   assert(!name.empty());
@@ -868,7 +767,7 @@ void IniSetting::Bind(
   } else {
     is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
     assert(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
-           s_pretendExtensionsHaveNotBeenLoaded);
+           !s_system_settings_are_set);
   }
   //
   // When the debugger is loading its configuration, there will be some
@@ -936,19 +835,10 @@ static IniCallbackData* get_callback(const std::string& name) {
   return &iter->second;
 }
 
-bool IniSetting::Get(const std::string& name, folly::dynamic& value) {
-  auto cb = get_callback(name);
-  if (!cb) {
-    return false;
-  }
-  value = cb->getCallback();
-  return true;
-}
-
 bool IniSetting::Get(const std::string& name, std::string &value) {
-  folly::dynamic b = nullptr;
+  Variant b;
   auto ret = Get(name, b);
-  value = dynamic_to_std_string(b);
+  value = b.toString().toCppString();
   return ret && !value.empty();
 }
 
@@ -960,10 +850,12 @@ bool IniSetting::Get(const String& name, String& value) {
 }
 
 bool IniSetting::Get(const String& name, Variant& value) {
-  folly::dynamic b = nullptr;
-  auto ret = Get(name.toCppString(), b);
-  value = dynamic_to_variant(b);
-  return ret;
+  auto cb = get_callback(name.toCppString());
+  if (!cb) {
+    return false;
+  }
+  value = cb->getCallback();
+  return true;
 }
 
 std::string IniSetting::Get(const std::string& name) {
@@ -972,7 +864,7 @@ std::string IniSetting::Get(const std::string& name) {
   return ret;
 }
 
-static bool ini_set(const std::string& name, const folly::dynamic& value,
+static bool ini_set(const std::string& name, const Variant& value,
                     IniSetting::Mode mode) {
   auto cb = get_callback(name);
   if (!cb || !(cb->mode & mode)) {
@@ -982,53 +874,49 @@ static bool ini_set(const std::string& name, const folly::dynamic& value,
 }
 
 bool IniSetting::FillInConstant(const std::string& name,
-                                const folly::dynamic& value,
-                                FollyDynamic) {
+                                const Variant& value) {
 
   if (config_names_that_use_constants.find(name) ==
       config_names_that_use_constants.end()) {
     return false;
   }
-  return IniSetting::Set(name, value, FollyDynamic());
+  // We can cheat here since we fill in constants a while after
+  // runtime options are loaded.
+  s_system_settings_are_set = false;
+  return IniSetting::SetSystem(name, value);
+  s_system_settings_are_set = true;
 }
 
-bool IniSetting::Set(const std::string& name, const folly::dynamic& value,
-                     FollyDynamic) {
-  // Need to make sure to update the value if the pair exists already
-  // A general insert(make_pair) won't actually update new values.
-  bool found = false;
-  for (auto& pair : s_system_settings) {
-    if (pair.first == name) {
-      pair.second = value;
-      found = true;
-      break;
-    }
-  }
-  if (!found) {
-    s_system_settings.insert(make_pair(name, value));
-  }
-  return ini_set(name, value, PHP_INI_SET_EVERY);
+bool IniSetting::SetSystem(const String& name, const Variant& value) {
+  // Shouldn't be calling this function after the runtime options are loaded.
+  assert(!s_system_settings_are_set);
+  // Since we're going to keep these settings for the lifetime of the program,
+  // we need to make them static.
+  Variant eval_scalar_variant = value;
+  eval_scalar_variant.setEvalScalar();
+  s_system_settings[name.toCppString()] = eval_scalar_variant;
+  return ini_set(name.toCppString(), value, PHP_INI_SET_EVERY);
 }
 
-bool IniSetting::Set(const String& name, const Variant& value) {
-  return Set(name.toCppString(), variant_to_dynamic(value), FollyDynamic());
-}
-
-bool IniSetting::SetUser(const std::string& name, const folly::dynamic& value,
-                         FollyDynamic) {
-  auto it = s_saved_defaults->find(name);
-  if (it == s_saved_defaults->end()) {
-    folly::dynamic def = nullptr;
-    auto success = Get(name, def);
-    if (success) {
-      s_saved_defaults->insert(make_pair(name, def));
-    }
+bool IniSetting::GetSystem(const String& name, Variant& value) {
+  auto it = s_system_settings.find(name.toCppString());
+  if (it == s_system_settings.end()) {
+    return false;
   }
-  return ini_set(name, value, PHP_INI_SET_USER);
+  value = it->second;
+  return true;
 }
 
 bool IniSetting::SetUser(const String& name, const Variant& value) {
-  return SetUser(name.toCppString(), variant_to_dynamic(value), FollyDynamic());
+  auto it = s_saved_defaults->find(name.toCppString());
+  if (it == s_saved_defaults->end()) {
+    Variant def;
+    auto success = Get(name, def); // def gets populated here
+    if (success) {
+      (*s_saved_defaults)[name.toCppString()] = def;
+    }
+  }
+  return ini_set(name.toCppString(), value, PHP_INI_SET_USER);
 }
 
 bool IniSetting::ResetSystemDefault(const std::string& name) {
@@ -1037,6 +925,13 @@ bool IniSetting::ResetSystemDefault(const std::string& name) {
     return false;
   }
   return ini_set(name, it->second, PHP_INI_SET_EVERY);
+}
+
+void IniSetting::ResetSavedDefaults() {
+  for (auto& item : *s_saved_defaults) {
+    ini_set(item.first, item.second, PHP_INI_SET_USER);
+  }
+  s_saved_defaults->clear();
 }
 
 bool IniSetting::GetMode(const std::string& name, Mode& mode) {
@@ -1070,7 +965,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       continue;
     }
 
-    auto value = dynamic_to_variant(iter.second.getCallback());
+    auto value = iter.second.getCallback();
     // Cast all non-arrays to strings since that is what everything used ot be
     if (!value.isArray()) {
       value = value.toString();

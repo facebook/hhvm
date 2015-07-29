@@ -2,9 +2,9 @@ string(2) "11"
 string(1) "2"
 array(2) {
   [0]=>
-  string(2) "cp"
-  [1]=>
   string(2) "ls"
+  [1]=>
+  string(2) "cp"
 }
 array(3) {
   ["MYBOOL"]=>

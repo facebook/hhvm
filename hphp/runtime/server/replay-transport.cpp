@@ -79,15 +79,14 @@ void ReplayTransport::replayInput(Hdf hdf) {
 }
 
 void ReplayTransport::replayInputImpl() {
-  String postData = StringUtil::UUDecode(Config::Get(m_ini, m_hdf, "post", "",
-                                                     false));
+  String postData = StringUtil::UUDecode(Config::GetString(m_ini, m_hdf, "post",
+                                                           "", false));
   m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
   for (Hdf hdf = m_hdf["headers"].firstChild(); hdf.exists();
        hdf = hdf.next()) {
-    m_requestHeaders[Config::Get(m_ini, hdf, "name", "", false)].push_back(
-      Config::Get(m_ini, hdf, "value", "", false)
-    );
+    m_requestHeaders[Config::GetString(m_ini, hdf, "name", "", false)]
+      .push_back(Config::GetString(m_ini, hdf, "value", "", false));
   }
 }
 

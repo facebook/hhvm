@@ -150,8 +150,8 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
                          std::map<std::string, std::string> &map) {
   if (roots.exists()) {
     for (Hdf hdf = roots[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
-      map[Config::Get(ini, hdf, "root", "", false)] =
-        Config::Get(ini, hdf, "path", "", false);
+      map[Config::GetString(ini, hdf, "root", "", false)] =
+        Config::GetString(ini, hdf, "path", "", false);
     }
   }
 }

@@ -22,6 +22,7 @@
 
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,7 +85,7 @@ std::string Config::IniName(const std::string& config,
   return out;
 }
 
-void Config::ParseIniString(const std::string iniStr, IniSetting::Map &ini) {
+void Config::ParseIniString(const std::string iniStr, IniSettingMap &ini) {
   Config::SetParsedIni(ini, iniStr, "", false);
 }
 
@@ -92,7 +93,7 @@ void Config::ParseHdfString(const std::string hdfStr, Hdf &hdf) {
   hdf.fromString(hdfStr.c_str());
 }
 
-void Config::ParseConfigFile(const std::string &filename, IniSetting::Map &ini,
+void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,
                              Hdf &hdf) {
   // We don't allow a filename of just ".ini"
   if (boost::ends_with(filename, ".ini") && filename.length() > 4) {
@@ -106,11 +107,11 @@ void Config::ParseConfigFile(const std::string &filename, IniSetting::Map &ini,
 }
 
 void Config::ParseIniFile(const std::string &filename) {
-  IniSetting::Map ini = IniSetting::Map::object;;
+  IniSettingMap ini = IniSettingMap();
   Config::ParseIniFile(filename, ini, false);
 }
 
-void Config::ParseIniFile(const std::string &filename, IniSetting::Map &ini,
+void Config::ParseIniFile(const std::string &filename, IniSettingMap &ini,
                           const bool constants_only /* = false */) {
     std::ifstream ifs(filename);
     const std::string str((std::istreambuf_iterator<char>(ifs)),
@@ -122,36 +123,42 @@ void Config::ParseHdfFile(const std::string &filename, Hdf &hdf) {
   hdf.append(filename);
 }
 
-void Config::SetParsedIni(IniSetting::Map &ini, const std::string confStr,
+void Config::SetParsedIni(IniSettingMap &ini, const std::string confStr,
                           const std::string filename, bool constants_only) {
-  assert(ini != nullptr);
   auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
-  for (auto &pair : parsed_ini.items()) {
-    ini[pair.first] = pair.second;
+  for (ArrayIter iter(parsed_ini.toArray()); iter; ++iter) {
+    // most likely a string, but just make sure that we are dealing
+    // with something that can be converted to a string
+    assert(iter.first().isScalar());
+    ini.set(iter.first().toString(), iter.second());
     if (constants_only) {
-      IniSetting::FillInConstant(pair.first.data(), pair.second,
-                                 IniSetting::FollyDynamic());
+      IniSetting::FillInConstant(iter.first().toString().toCppString(),
+                                 iter.second());
     } else {
-      IniSetting::Set(pair.first.data(), pair.second,
-                      IniSetting::FollyDynamic());
+      IniSetting::SetSystem(iter.first().toString().toCppString(),
+                            iter.second());
     }
   }
 }
 
-const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
+// This method must return a char* which is owned by the IniSettingMap
+// to avoid issues with the lifetime of the char*
+const char* Config::Get(const IniSettingMap &ini, const Hdf& config,
                         const std::string& name /* = "" */,
                         const char *defValue /* = nullptr */,
                         const bool prepend_hhvm /* = true */) {
   auto ini_name = IniName(name, prepend_hhvm);
   Hdf hdf = name != "" ? config[name] : config;
-  auto* value = ini_iterate(ini, ini_name);
-  if (value && value->isString()) {
+  auto value = ini_iterate(ini, ini_name);
+  if (value.isString()) {
     // See generic Get##METHOD below for why we are doing this
-    const char* ini_ret = value->data();
-    const char* hdf_ret = hdf.configGet(value->data());
+    // Note that value is a string, so value.toString() is not
+    // a temporary.
+    const char* ini_ret = value.toString().data();
+    const char* hdf_ret = hdf.configGet(ini_ret);
     if (hdf_ret != ini_ret) {
       ini_ret = hdf_ret;
-      IniSetting::Set(ini_name, ini_ret);
+      IniSetting::SetSystem(ini_name, ini_ret);
     }
     return ini_ret;
   }
@@ -174,10 +181,10 @@ T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
   /* If we don't pass a name, then we just use the raw config as-is. */ \
   /* This could happen when we are at a known leaf of a config node. */ \
   Hdf hdf = name != "" ? config[name] : config; \
-  auto* value = ini_iterate(ini, ini_name); \
-  if (value && value->isString()) { \
+  auto value = ini_iterate(ini, ini_name); \
+  if (value.isString()) { \
     T ini_ret, hdf_ret; \
-    ini_on_update(value->data(), ini_ret); \
+    ini_on_update(value.toString(), ini_ret); \
     /* I don't care what the ini_ret was if it isn't equal to what  */ \
     /* is returned back from from an HDF get call, which it will be */ \
     /* if the call just passes back ini_ret because either they are */ \
@@ -186,7 +193,7 @@ T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
     hdf_ret = hdf.configGet##METHOD(ini_ret); \
     if (hdf_ret != ini_ret) { \
       ini_ret = hdf_ret; \
-      IniSetting::Set(ini_name, variant_init(ini_ret)); \
+      IniSetting::SetSystem(ini_name, variant_init(ini_ret)); \
     } \
     return ini_ret; \
   } \
@@ -224,9 +231,9 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
   auto ini_name = IniName(name, prepend_hhvm); \
   Hdf hdf = name != "" ? config[name] : config; \
   T ini_ret, hdf_ret; \
-  const folly::dynamic* value = ini_iterate(ini, ini_name); \
-  if (value && (value->isArray() || value->isObject())) { \
-    ini_on_update(*value, ini_ret); \
+  auto value = ini_iterate(ini, ini_name); \
+  if (value.isArray() || value.isObject()) { \
+    ini_on_update(value.toVariant(), ini_ret); \
     /** Make sure that even if we have an ini value, that if we also **/ \
     /** have an hdf value, that it maintains its edge as beating out **/ \
     /** ini                                                          **/ \
@@ -234,8 +241,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
       hdf.configGet(hdf_ret); \
       if (hdf_ret != ini_ret) { \
         ini_ret = hdf_ret; \
-        IniSetting::Set(ini_name, ini_get(ini_ret), \
-                        IniSetting::FollyDynamic()); \
+        IniSetting::SetSystem(ini_name, ini_get(ini_ret)); \
       } \
     } \
     return ini_ret; \
@@ -309,10 +315,10 @@ void Config::Iterate(std::function<void (const IniSettingMap&,
   } else {
     Hdf empty;
     auto ini_name = IniName(name, prepend_hhvm);
-    auto* ini_value = ini_iterate(ini, ini_name);
-    if (ini_value && ini_value->isObject()) {
-      for (auto& pair : ini_value->items()) {
-        cb(pair.second, empty, pair.first.data());
+    auto ini_value = ini_iterate(ini, ini_name);
+    if (ini_value.isArray()) {
+      for (ArrayIter iter(ini_value.toArray()); iter; ++iter) {
+        cb(iter.second(), empty, iter.first().toString().toCppString());
       }
     }
   }

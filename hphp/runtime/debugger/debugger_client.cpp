@@ -2328,7 +2328,7 @@ void DebuggerClient::loadConfig() {
   }
 
   Hdf config;
-  IniSetting::Map ini = IniSetting::Map::object;
+  IniSettingMap ini = IniSetting::Map::object;
   try {
     if (usedHomeDirConfig) {
       config.open(Process::GetHomeDirectory() + LegacyConfigFileName);
@@ -2341,9 +2341,12 @@ void DebuggerClient::loadConfig() {
 #define BIND(name, ...) \
         IniSetting::Bind(&s_debugger_extension, IniSetting::PHP_INI_SYSTEM, \
                          "hhvm." #name, __VA_ARGS__)
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = true;
 
   m_neverSaveConfigOverride = true; // Prevent saving config while reading it
+
+  // These are system settings, but can be loaded after the core runtime
+  // options are loaded. So allow it.
+  IniSetting::s_system_settings_are_set = false;
 
   Config::Bind(s_use_utf8, ini, config, "UTF8", true);
   config["UTF8"] = s_use_utf8; // for starter
@@ -2465,8 +2468,6 @@ void DebuggerClient::loadConfig() {
   Config::Bind(m_neverSaveConfig, ini, config, "NeverSaveConfig", false);
   BIND(never_save_config, &m_neverSaveConfig);
 
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
-
   // We are guaranteed to have an ini file given how m_configFileName is set
   // above
   Config::ParseIniFile(m_configFileName);
@@ -2474,6 +2475,8 @@ void DebuggerClient::loadConfig() {
   // Do this after the ini processing so we don't accidentally save the config
   // when we change one of the options
   m_neverSaveConfigOverride = false;
+
+  IniSetting::s_system_settings_are_set = true; // We are set again
 
   if (needToWriteFile && !m_neverSaveConfig) {
     saveConfig(); // so to generate a starter for people

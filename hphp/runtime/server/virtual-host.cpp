@@ -176,24 +176,18 @@ VirtualHost::VirtualHost(const IniSetting::Map& ini, Hdf vh) : m_disabled(false)
 void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
   m_name = vh.getName();
 
-  const char *prefix = Config::Get(ini, vh, "Prefix", "", false);
-  const char *pattern = Config::Get(ini, vh, "Pattern", "", false);
-  const char *pathTranslation = Config::Get(ini, vh, "PathTranslation", "",
-                                            false);
-
-  if (prefix) m_prefix = prefix;
-  if (pattern) {
-    m_pattern = format_pattern(pattern, false);
-    if (!m_pattern.empty()) {
-      m_pattern += "i"; // case-insensitive
-    }
+  m_prefix = Config::GetString(ini, vh, "Prefix", "", false);
+  m_pattern = format_pattern(Config::GetString(ini, vh, "Pattern", "", false),
+                             false);
+  m_pathTranslation = Config::GetString(ini, vh, "PathTranslation", "",
+                                        false);
+  if (!m_pattern.empty()) {
+    m_pattern += "i"; // case-insensitive
   }
-  if (pathTranslation) {
-    m_pathTranslation = pathTranslation;
-    if (!m_pathTranslation.empty() &&
-        m_pathTranslation[m_pathTranslation.length() - 1] != '/') {
-      m_pathTranslation += '/';
-    }
+
+  if (!m_pathTranslation.empty() &&
+      m_pathTranslation[m_pathTranslation.length() - 1] != '/') {
+    m_pathTranslation += '/';
   }
 
   initRuntimeOption(ini, vh); // overwrites

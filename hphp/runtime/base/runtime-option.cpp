@@ -824,8 +824,8 @@ void RuntimeOption::Load(
                  RuntimeOption::EnableHipHopSyntax);
     Config::Bind(NoSilencer, ini, config, "Log.NoSilencer");
     Config::Bind(RuntimeErrorReportingLevel, ini,
-                config, "Log.RuntimeErrorReportingLevel",
-                static_cast<int>(ErrorMode::HPHP_ALL));
+                 config, "Log.RuntimeErrorReportingLevel",
+                 static_cast<int>(ErrorMode::HPHP_ALL));
     Config::Bind(ForceErrorReportingLevel, ini,
                  config, "Log.ForceErrorReportingLevel", 0);
     Config::Bind(AccessLogDefaultFormat, ini, config,
@@ -1491,7 +1491,7 @@ void RuntimeOption::Load(
     }
 
     auto core_dump_report_dir =
-      Config::Get(ini, config, "Debug.CoreDumpReportDirectory",
+      Config::GetString(ini, config, "Debug.CoreDumpReportDirectory",
 #if defined(HPHP_OSS)
   "/tmp"
 #else

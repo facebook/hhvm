@@ -57,13 +57,16 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_currentDepth(0)
   , m_maxDepth(0)
 {
-  m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
-  if (type == Type::Serialize ||
-      type == Type::APCSerialize ||
-      type == Type::DebuggerSerialize) {
-    m_arrayIds = new ReqPtrCtrMap();
-  } else {
-    m_arrayIds = nullptr;
+  switch (type) {
+    case Type::DebuggerSerialize:
+       m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
+       // fall-through
+    case Type::Serialize:
+    case Type::APCSerialize:
+       m_arrayIds = new ReqPtrCtrMap();;
+       break;
+    default:
+       m_arrayIds = nullptr;
   }
 }
 

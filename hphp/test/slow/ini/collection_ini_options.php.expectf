@@ -7,10 +7,10 @@ array(3) {
   string(8) "/var/www"
 }
 array(2) {
-  [0]=>
-  string(4) ".txt"
   [1]=>
   string(4) ".doc"
+  [0]=>
+  string(4) ".txt"
 }
 array(1) {
   [0]=>

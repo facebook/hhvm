@@ -195,6 +195,8 @@ struct RequestInjectionData {
   std::string getDefaultIncludePath();
   int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
+  void setMemoryLimit(std::string limit);
+  int64_t GetMemoryLimitNumeric() { return m_maxMemoryNumeric; }
 
   const std::string& getVariablesOrder() const {
     return m_variablesOrder;
@@ -293,6 +295,7 @@ private:
   std::vector<std::string> m_allowedDirectories;
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
+  int64_t m_maxMemoryNumeric;
 
   /*
    * Keep track of the open_basedir_separator that may be used so we can

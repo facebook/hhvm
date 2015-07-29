@@ -88,22 +88,8 @@ ExecutionContext::ExecutionContext()
   // allocations (because it will cause us to hold a slab, even while idle).
   static auto s_cwd = makeStaticString(Process::CurrentWorkingDirectory);
   m_cwd = s_cwd;
-
-  // We want this to run on every request, instead of just once per thread
-  std::string memory_limit = "memory_limit";
-  auto hasSystemDefault = IniSetting::ResetSystemDefault(memory_limit);
-  if (!hasSystemDefault) {
-    auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
-    IniSetting::SetUser(memory_limit, max_mem, IniSetting::FollyDynamic());
-  }
-
-  // This one is hot so we don't want to go through the ini_set() machinery to
-  // change it in error_reporting(). Because of that, we have to set it back to
-  // the default on every request.
-  hasSystemDefault = IniSetting::ResetSystemDefault("error_reporting");
-  if (!hasSystemDefault) {
-    RID().setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
-  }
+  RID().setMemoryLimit(std::to_string(RuntimeOption::RequestMemoryMaxBytes));
+  RID().setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
 
   VariableSerializer::serializationSizeLimit =
     RuntimeOption::SerializationSizeLimit;

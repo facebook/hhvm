@@ -105,8 +105,7 @@ Hdf::~Hdf() {
 
 bool Hdf::isEmpty() const {
   return this->getFullPath() == "" &&
-         this->getName() == "" &&
-         strcmp(this->toString(), "") == 0;
+         this->getName() == "";
 }
 
 void Hdf::assign(const Hdf &hdf) {

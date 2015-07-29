@@ -739,10 +739,10 @@ template <typename T>
 static inline T xdebug_init_opt(const char* name, T defVal,
                                 std::map<std::string, std::string>& envCfg) {
   // First try to load the ini setting
-  folly::dynamic ini_val = folly::dynamic::object();
-  if (IniSetting::Get(XDEBUG_INI(name), ini_val)) {
+  IniSettingMap ini_val;
+  if (IniSetting::Get(XDEBUG_INI(name), ini_val.toVariant())) {
     T val;
-    ini_on_update(ini_val, val);
+    ini_on_update(ini_val.toVariant(), val);
     return val;
   }
 

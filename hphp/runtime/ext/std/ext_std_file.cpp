@@ -189,8 +189,7 @@ static int statSyscall(
   auto canUseFileCache = useFileCache && isFileStream;
   if (isRelative && !pathIndex) {
     auto fullpath = g_context->getCwd() + String::FromChar('/') + path;
-    if (!ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess() &&
-        !canUseFileCache) {
+    if (!RID().hasSafeFileAccess() && !canUseFileCache) {
       if (strlen(fullpath.data()) != fullpath.size()) return ENOENT;
       return ::stat(fullpath.data(), buf);
     }
@@ -1720,7 +1719,7 @@ Variant HHVM_FUNCTION(glob,
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
-    if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
+    if (RID().hasSafeFileAccess()) {
       if (!HHVM_FN(is_dir)(work_pattern)) {
         globfree(&globbuf);
         return false;

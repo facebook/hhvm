@@ -95,7 +95,13 @@ struct File : SweepableResourceData {
 
   static String TranslatePath(const String& filename);
   // Same as TranslatePath except doesn't make paths absolute
-  static String TranslatePathKeepRelative(const String& filename);
+  static String TranslatePathKeepRelative(const char* fn, uint32_t len);
+  static String TranslatePathKeepRelative(const String& filename) {
+    return TranslatePathKeepRelative(filename.c_str(), filename.size());
+  }
+  static String TranslatePathKeepRelative(const std::string& filename) {
+    return TranslatePathKeepRelative(filename.c_str(), filename.size());
+  }
   // Same as TranslatePath except checks the file cache on miss
   static String TranslatePathWithFileCache(const String& filename);
   static String TranslateCommand(const String& cmd);

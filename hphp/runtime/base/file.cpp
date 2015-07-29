@@ -73,12 +73,11 @@ int __thread s_pcloseRet;
 const int File::CHUNK_SIZE = FileData::CHUNK_SIZE;
 const int File::USE_INCLUDE_PATH = 1;
 
-String File::TranslatePathKeepRelative(const String& filename) {
+String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
   // canonicalize asserts that we don't have nulls
-  String canonicalized = FileUtil::canonicalize(filename);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
-    auto const& allowedDirectories = ThreadInfo::s_threadInfo->
-      m_reqInjectionData.getAllowedDirectories();
+  String canonicalized = FileUtil::canonicalize(filename, size);
+  if (RID().hasSafeFileAccess()) {
+    auto const& allowedDirectories = RID().getAllowedDirectoriesProcessed();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
                                [](const String& val, const std::string& dir) {

@@ -25,6 +25,7 @@
 #include <signal.h>
 
 #include <boost/filesystem.hpp>
+#include <folly/Optional.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file.h"
@@ -36,10 +37,6 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
-
-//////////////////////////////////////////////////////////////////////
-
-const StaticString s_dot(".");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -133,6 +130,47 @@ int RequestTimer::getRemainingTime() const {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+bool RequestInjectionData::setAllowedDirectories(const std::string& value) {
+  // Backwards compat with ;
+  // but moving forward should use PATH_SEPARATOR
+  std::vector<std::string> boom;
+  if (value.find(";") != std::string::npos) {
+    folly::split(";", value, boom, true);
+    m_open_basedir_separator = ";";
+  } else {
+    m_open_basedir_separator =
+      s_PATH_SEPARATOR.toCppString();
+    folly::split(m_open_basedir_separator, value, boom,
+                 true);
+  }
+
+  if (boom.empty() && m_safeFileAccess) return false;
+  for (auto& path : boom) {
+    // Canonicalise the path
+    if (!path.empty() &&
+        File::TranslatePathKeepRelative(path).empty()) {
+      return false;
+    }
+
+    if (path == ".") {
+      path = g_context->getCwd().toCppString();
+    }
+  }
+  m_safeFileAccess = !boom.empty();
+  std::string dirs;
+  folly::join(m_open_basedir_separator, boom, dirs);
+  VirtualHost::SortAllowedDirectories(boom);
+  m_allowedDirectoriesInfo.reset(
+    new AllowedDirectoriesInfo(std::move(boom), std::move(dirs)));
+  return true;
+}
+
+const std::vector<std::string>&
+RequestInjectionData::getAllowedDirectoriesProcessed() const {
+  return m_allowedDirectoriesInfo ?
+    m_allowedDirectoriesInfo->vec : VirtualHost::GetAllowedDirectories();
+}
 
 void RequestInjectionData::threadInit() {
   // phpinfo
@@ -234,86 +272,30 @@ void RequestInjectionData::threadInit() {
                      },
                      [this]() {
                        std::string ret;
-                       bool first = true;
-                       for (auto &path : m_include_paths) {
-                         if (first) {
-                           first = false;
-                         } else {
-                           ret += ":";
-                         }
-                         ret += path;
-                       }
+                       folly::join(":", m_include_paths, ret);
                        return ret;
                      }
                    ));
 
   // Paths and Directories
-  m_allowedDirectories = RuntimeOption::AllowedDirectories;
-  m_safeFileAccess = RuntimeOption::SafeFileAccess;
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       // Backwards compat with ;
-                       // but moving forward should use PATH_SEPARATOR
-                       Array boom;
-                       if (value.find(";") != std::string::npos) {
-                         boom = HHVM_FN(explode)(";", value).toCArrRef();
-                         m_open_basedir_separator = ";";
-                       } else {
-                         boom = HHVM_FN(explode)(s_PATH_SEPARATOR,
-                                                 value).toCArrRef();
-                         m_open_basedir_separator =
-                          s_PATH_SEPARATOR.toCppString();
-                       }
-
-                       // If the open_basedir ends with a separator, then
-                       // explode will give us an empty string at the end.
-                       // Get rid of it.
-                       int sz = value.size();
-                       if (value.find(m_open_basedir_separator) == (sz - 1)) {
-                         boom.pop();
-                       }
-
-                       std::vector<std::string> directories;
-                       directories.reserve(boom.size());
-                       for (ArrayIter iter(boom); iter; ++iter) {
-                         const auto& path = iter.second().toString();
-
-                         // Canonicalise the path
-                         if (!path.empty() &&
-                             File::TranslatePathKeepRelative(path).empty()) {
-                           return false;
-                         }
-
-                         if (path.equal(s_dot)) {
-                           auto cwd = g_context->getCwd().toCppString();
-                           directories.push_back(cwd);
-                         } else {
-                           directories.push_back(path.toCppString());
-                         }
-                       }
-                       m_allowedDirectories = directories;
-                       m_safeFileAccess = !boom.empty();
-                       return true;
+                       return setAllowedDirectories(value);
                      },
                      [this]() -> std::string {
                        if (!hasSafeFileAccess()) {
                          return "";
                        }
-
-                       std::string out;
-                       for (auto& directory: getAllowedDirectories()) {
-                         if (!directory.empty()) {
-                            out += directory + m_open_basedir_separator;
-                         }
+                       if (m_allowedDirectoriesInfo) {
+                         return m_allowedDirectoriesInfo->string;
                        }
-
-                       // Remove the trailing separator
-                       if (!out.empty()) {
-                         out.erase(std::end(out) - 1, std::end(out));
-                       }
-                       return out;
+                       std::string ret;
+                       folly::join(m_open_basedir_separator,
+                                   getAllowedDirectoriesProcessed(),
+                                   ret);
+                       return ret;
                      }
                    ));
 
@@ -395,18 +377,29 @@ void RequestInjectionData::threadInit() {
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
 }
 
-
 std::string RequestInjectionData::getDefaultIncludePath() {
-  auto include_paths = Array::Create();
-  for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
-    include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
-  }
-  return HHVM_FN(implode)(":", include_paths).toCppString();
+  std::string result;
+  folly::join(":", RuntimeOption::IncludeSearchPaths, result);
+  return result;
 }
 
 void RequestInjectionData::onSessionInit() {
+  static auto open_basedir_val = []() -> folly::Optional<std::string> {
+    Variant v;
+    if (IniSetting::GetSystem("open_basedir", v)) {
+      return { v.toString().toCppString() };
+    }
+    return {};
+  }();
+
   rds::requestInit();
   m_sflagsAndStkPtr = &rds::header()->stackLimitAndSurprise;
+  m_allowedDirectoriesInfo.reset();
+  m_open_basedir_separator = s_PATH_SEPARATOR.toCppString();
+  m_safeFileAccess = RuntimeOption::SafeFileAccess;
+  if (open_basedir_val) {
+    setAllowedDirectories(*open_basedir_val);
+  }
   reset();
 }
 

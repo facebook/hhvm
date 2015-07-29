@@ -213,9 +213,8 @@ struct RequestInjectionData {
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
   std::string getUserAgent() { return m_userAgent; }
   void setUserAgent(std::string userAgent) { m_userAgent = userAgent; }
-  std::vector<std::string> getAllowedDirectories() const {
-    return m_allowedDirectories;
-  }
+  bool setAllowedDirectories(const std::string& value);
+  const std::vector<std::string>& getAllowedDirectoriesProcessed() const;
   bool hasSafeFileAccess() const { return m_safeFileAccess; }
   bool hasTrackErrors() const { return m_trackErrors; }
   bool hasHtmlErrors() const { return m_htmlErrors; }
@@ -292,7 +291,14 @@ private:
   std::string m_errorLog;
   std::string m_userAgent;
   std::vector<std::string> m_include_paths;
-  std::vector<std::string> m_allowedDirectories;
+  struct AllowedDirectoriesInfo {
+    AllowedDirectoriesInfo(std::vector<std::string>&& v,
+                           std::string&& s) :
+        vec(std::move(v)), string(std::move(s)) {}
+    std::vector<std::string> vec;
+    std::string string;
+  };
+  std::unique_ptr<AllowedDirectoriesInfo> m_allowedDirectoriesInfo;
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
   int64_t m_maxMemoryNumeric;

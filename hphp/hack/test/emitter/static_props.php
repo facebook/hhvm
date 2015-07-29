@@ -53,6 +53,13 @@ class C extends B {
   }
 }
 
+class Cns {
+  const C = 5;
+}
+class D {
+  public static int $sprop = Cns::C;
+}
+
 function test(): void {
   $x = C::$static_prop;
   var_dump($x);
@@ -86,4 +93,6 @@ function test(): void {
   C::call_static_statically();
   A::call_static_statically();
   C::trait_fn();
+
+  var_dump(D::$sprop);
 }

@@ -48,15 +48,17 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   HRSRC   resourceInfo;
   DWORD   resourceSize;
 
-  resourceInfo = FindResource(NULL, section, RT_RCDATA);
-  if (!resourceInfo)
+  resourceInfo = FindResource(nullptr, section, RT_RCDATA);
+  if (!resourceInfo) {
     return false;
+  }
 
-  loadedResource = LoadResource(NULL, resourceInfo);
-  if (!loadedResource)
+  loadedResource = LoadResource(nullptr, resourceInfo);
+  if (!loadedResource) {
     return false;
+  }
 
-  resourceSize = SizeofResource(NULL, resourceInfo);
+  resourceSize = SizeofResource(nullptr, resourceInfo);
 
   desc->m_filename = fname;
   desc->m_handle = loadedResource;

@@ -24,3 +24,7 @@ VS(date("M-d-Y", mktime(0, 0, 0, 1, 1, 2100)),   "Jan-01-2100");
 VS(date("M-d-Y", mktime(0, 0, 0, 1, 1, 110)),    "Jan-01-0110");
 
 VS(date("h", mktime(9)), "09");
+
+error_reporting(E_ALL);
+date_default_timezone_set('UTC');
+mktime();

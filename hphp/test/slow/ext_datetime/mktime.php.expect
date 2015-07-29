@@ -7,3 +7,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Strict Warning: mktime(): You should be using the time() function instead in /home/noony/hhvm/hphp/test/slow/ext_datetime/mktime.php on line 30

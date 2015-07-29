@@ -619,6 +619,7 @@ Variant HHVM_FUNCTION(mktime,
                       int64_t month /* = PHP_INT_MAX */,
                       int64_t day /* = PHP_INT_MAX */,
                       int64_t year /* = PHP_INT_MAX */) {
+
   hour = hour < INT_MAX ? hour : INT_MAX;
   minute = minute < INT_MAX ? minute : INT_MAX;
   second = second < INT_MAX ? second : INT_MAX;
@@ -627,8 +628,8 @@ Variant HHVM_FUNCTION(mktime,
   year = year < INT_MAX ? year : INT_MAX;
   if (hour == INT_MAX && minute == INT_MAX && second == INT_MAX &&
       month == INT_MAX && day == INT_MAX && year == INT_MAX) {
-    raise_strict_warning("mktime(): You should be using " .
-                         "the time() function instead");
+    raise_strict_warning("mktime(): You should be using " +
+                         std::string("the time() function instead"));
   }
   bool error;
   int64_t ts = TimeStamp::Get(error, hour, minute, second, month, day, year,

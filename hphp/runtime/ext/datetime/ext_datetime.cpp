@@ -619,7 +619,6 @@ Variant HHVM_FUNCTION(mktime,
                       int64_t month /* = PHP_INT_MAX */,
                       int64_t day /* = PHP_INT_MAX */,
                       int64_t year /* = PHP_INT_MAX */) {
-
   hour = hour < INT_MAX ? hour : INT_MAX;
   minute = minute < INT_MAX ? minute : INT_MAX;
   second = second < INT_MAX ? second : INT_MAX;

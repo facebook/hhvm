@@ -25,7 +25,7 @@ static bool HHVM_METHOD(SpoofChecker, isSuspicious, const String& text,
                          "error %d (%s)",
                          text.c_str(), error, u_errorName(error));
   }
-  issuesFound = ret;
+  issuesFound.assignIfRef(ret);
   return ret != 0;
 }
 
@@ -43,7 +43,7 @@ static bool HHVM_METHOD(SpoofChecker, areConfusable, const String& s1,
                          " error %d (%s)",
                          s1.c_str(), s2.c_str(), error, u_errorName(error));
   }
-  issuesFound = ret;
+  issuesFound.assignIfRef(ret);
   return ret != 0;
 }
 

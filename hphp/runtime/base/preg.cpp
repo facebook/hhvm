@@ -1527,7 +1527,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 }
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
-                          const Variant& subject, int limit, Variant& count,
+                          const Variant& subject, int limit, Variant* count,
                           bool is_callable, bool is_filter) {
   assert(!(is_callable && is_filter));
   if (!is_callable &&
@@ -1544,7 +1544,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
                                          limit, is_callable, &replace_count);
 
     if (ret.isString()) {
-      count = replace_count;
+      if (count) *count = replace_count;
       if (is_filter && replace_count == 0) {
         return init_null();
       } else {
@@ -1568,7 +1568,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
       return_value.set(iter.first(), ret.asStrRef());
     }
   }
-  count = replace_count;
+  if (count) *count = replace_count;
   return return_value;
 }
 
@@ -1579,7 +1579,7 @@ int preg_replace(Variant& result,
                  int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, replacement, subject,
-                             limit, count, false, false);
+                             limit, &count, false, false);
   return count.toInt32();
 }
 
@@ -1590,7 +1590,7 @@ int preg_replace_callback(Variant& result,
                           int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, callback, subject,
-                             limit, count, true, false);
+                             limit, &count, true, false);
   return count.toInt32();
 }
 
@@ -1601,7 +1601,7 @@ int preg_filter(Variant& result,
                 int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, replacement, subject,
-                             limit, count, false, true);
+                             limit, &count, false, true);
   return count.toInt32();
 }
 

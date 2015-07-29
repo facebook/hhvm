@@ -243,7 +243,7 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
                                                int64_t extract_type,
                                                int64_t start,
                                                VRefParam next) {
-  next = start;
+  next.assignIfRef(start);
   if ((extract_type < GraphemeExtractType::MIN) ||
       (extract_type > GraphemeExtractType::MAX)) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
@@ -288,7 +288,7 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
 
   if (is_ascii(String(p, ((size + 1) < len) ? (size + 1) : len, CopyString))) {
     int32_t nsize = (size < len) ? size : len;
-    next = start + nsize;
+    next.assignIfRef(start + nsize);
     return String(p, nsize, CopyString);
   }
 
@@ -317,7 +317,7 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
       not_reached();
   }
 
-  next = start + pos;
+  next.assignIfRef(start + pos);
   return String(p, pos, CopyString);
 }
 

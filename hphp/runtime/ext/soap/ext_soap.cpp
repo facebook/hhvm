@@ -2585,7 +2585,7 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
 
   Array output_headers;
   SCOPE_EXIT {
-    output_headers_ref = output_headers;
+    output_headers_ref.assignIfRef(output_headers);
   };
 
   if (data->m_trace) {

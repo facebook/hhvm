@@ -982,7 +982,7 @@ bool HHVM_FUNCTION(openssl_csr_export, const Variant& csr, VRefParam out,
   if (PEM_write_bio_X509_REQ(bio_out, pcsr->csr())) {
     BUF_MEM *bio_buf;
     BIO_get_mem_ptr(bio_out, &bio_buf);
-    out = String((char*)bio_buf->data, bio_buf->length, CopyString);
+    out.assignIfRef(String((char*)bio_buf->data, bio_buf->length, CopyString));
     BIO_free(bio_out);
     return true;
   }
@@ -1047,7 +1047,8 @@ Variant HHVM_FUNCTION(openssl_csr_new,
         /* Add extensions */
         if (req.request_extensions_section &&
             !X509V3_EXT_REQ_add_conf(req.req_config, &ext_ctx,
-                                     (char*)req.request_extensions_section, csr)) {
+                                     (char*)req.request_extensions_section,
+                                     csr)) {
           raise_warning("Error loading extension section %s",
                           req.request_extensions_section);
         } else {
@@ -1059,7 +1060,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
             raise_warning("Error signing request");
           }
 
-          privkey = okey;
+          privkey.assignIfRef(Variant(okey));
         }
       }
     }
@@ -1226,7 +1227,7 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
       len1 + len2 == 0) {
     return false;
   }
-  open_data = s.setSize(len1 + len2);
+  open_data.assignIfRef(s.setSize(len1 + len2));
   return true;
 }
 
@@ -1320,7 +1321,7 @@ bool HHVM_FUNCTION(openssl_pkcs12_export, const Variant& x509, VRefParam out,
   if (ret) {
     BUF_MEM *bio_buf;
     BIO_get_mem_ptr(bio_out, &bio_buf);
-    out = String((char*)bio_buf->data, bio_buf->length, CopyString);
+    out.assignIfRef(String((char*)bio_buf->data, bio_buf->length, CopyString));
   }
   BIO_free(bio_out);
   return ret;
@@ -1332,7 +1333,6 @@ const StaticString
 
 bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, VRefParam certs,
                                         const String& pass) {
-  Variant &vcerts = certs;
   bool ret = false;
   PKCS12 *p12 = NULL;
 
@@ -1346,8 +1346,10 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, VRefParam certs,
     X509 *cert = NULL;
     STACK_OF(X509) *ca = NULL;
     if (PKCS12_parse(p12, pass.data(), &pkey, &cert, &ca)) {
-      vcerts = Array::Create();
-
+      Variant vcerts = Array::Create();
+      SCOPE_EXIT {
+        certs.assignIfRef(vcerts);
+      };
       BIO *bio_out = BIO_new(BIO_s_mem());
       if (PEM_write_bio_X509(bio_out, cert)) {
         BUF_MEM *bio_buf;
@@ -1769,7 +1771,7 @@ bool HHVM_FUNCTION(openssl_pkey_export, const Variant& key, VRefParam out,
   if (ret) {
     char *bio_mem_ptr;
     long bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
-    out = String(bio_mem_ptr, bio_mem_len, CopyString);
+    out.assignIfRef(String(bio_mem_ptr, bio_mem_len, CopyString));
   }
   BIO_free(bio_out);
   return ret;
@@ -1938,7 +1940,7 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
   }
 
   if (successful) {
-    decrypted = s.setSize(cryptedlen);
+    decrypted.assignIfRef(s.setSize(cryptedlen));
     return true;
   }
 
@@ -1974,7 +1976,7 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
   }
 
   if (successful) {
-    crypted = s.setSize(cryptedlen);
+    crypted.assignIfRef(s.setSize(cryptedlen));
     return true;
   }
 
@@ -2014,7 +2016,7 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
   }
 
   if (successful) {
-    decrypted = s.setSize(cryptedlen);
+    decrypted.assignIfRef(s.setSize(cryptedlen));
     return true;
   }
 
@@ -2050,7 +2052,7 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
   }
 
   if (successful) {
-    crypted = s.setSize(cryptedlen);
+    crypted.assignIfRef(s.setSize(cryptedlen));
     return true;
   }
 
@@ -2131,7 +2133,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
 
   EVP_SealFinal(&ctx, buf + len1, &len2);
   if (len1 + len2 > 0) {
-    sealed_data = s.setSize(len1 + len2);
+    sealed_data.assignIfRef(s.setSize(len1 + len2));
 
     Array ekeys;
     for (int i = 0; i < nkeys; i++) {
@@ -2139,7 +2141,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
       ekeys.append(String((char*)eks[i], eksl[i], AttachString));
       eks[i] = NULL;
     }
-    env_keys = ekeys;
+    env_keys.assignIfRef(ekeys);
   }
 
  clean_exit:
@@ -2204,7 +2206,7 @@ bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
   EVP_SignInit(&md_ctx, mdtype);
   EVP_SignUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
   if (EVP_SignFinal(&md_ctx, sigbuf, (unsigned int *)&siglen, pkey)) {
-    signature = s.setSize(siglen);
+    signature.assignIfRef(s.setSize(siglen));
 #if OPENSSL_VERSION_NUMBER >= 0x0090700fL
     EVP_MD_CTX_cleanup(&md_ctx);
 #endif
@@ -2361,7 +2363,7 @@ bool HHVM_FUNCTION(openssl_x509_export, const Variant& x509, VRefParam output,
   if (ret) {
     BUF_MEM *bio_buf;
     BIO_get_mem_ptr(bio_out, &bio_buf);
-    output = String(bio_buf->data, bio_buf->length, CopyString);
+    output.assignIfRef(String(bio_buf->data, bio_buf->length, CopyString));
   }
   BIO_free(bio_out);
   return ret;
@@ -2614,7 +2616,7 @@ Variant HHVM_FUNCTION(openssl_x509_read, const Variant& x509certdata) {
 }
 
 Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
-                                        VRefParam crypto_strong /* = false */) {
+                      VRefParam crypto_strong /* = false */) {
   if (length <= 0) {
     return false;
   }
@@ -2624,15 +2626,13 @@ Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
   String s = String(length, ReserveString);
   buffer = (unsigned char *)s.mutableData();
 
-  crypto_strong = false;
-
   int crypto_strength = 0;
 
   if ((crypto_strength = RAND_pseudo_bytes(buffer, length)) < 0) {
-    crypto_strong = false;
+    crypto_strong.assignIfRef(false);
     return false;
   } else {
-    crypto_strong = (bool)crypto_strength;
+    crypto_strong.assignIfRef((bool)crypto_strength);
     s.setSize(length);
     return s;
   }

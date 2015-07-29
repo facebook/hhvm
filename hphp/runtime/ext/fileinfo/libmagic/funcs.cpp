@@ -450,7 +450,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
   convert_libmagic_pattern(patt, opts);
 
   auto ret = HPHP::preg_replace_impl(patt, rep, ms->o.buf,
-                                     -1, rep_cnt, false, false);
+                                     -1, &rep_cnt, false, false);
   if (!ret.isString()) {
     return -1;
   }

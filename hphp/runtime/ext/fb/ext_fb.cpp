@@ -143,14 +143,13 @@ Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success) {
 
     if (sthing.size() && (sthing.data()[0] & 0x80)) {
       return fb_compact_unserialize(sthing.data(), sthing.size(),
-                                    ref(success));
+                                    success);
     } else {
-      return fb_unserialize(sthing.data(), sthing.size(),
-                            ref(success));
+      return fb_unserialize(sthing.data(), sthing.size(), success);
     }
   }
 
-  success = false;
+  success.assignIfRef(false);
   return false;
 }
 
@@ -158,10 +157,10 @@ Variant fb_unserialize(const char* str, int len, VRefParam success) {
   try {
     auto res = HPHP::serialize::FBUnserializer<VariantController>::unserialize(
       folly::StringPiece(str, len));
-    success = true;
+    success.assignIfRef(true);
     return res;
   } catch (const HPHP::serialize::UnserializeError&) {
-    success = false;
+    success.assignIfRef(false);
     return false;
   }
 }
@@ -745,12 +744,12 @@ Variant fb_compact_unserialize(const char* str, int len,
   int p = 0;
   int err = fb_compact_unserialize_from_buffer(ret, str, len, p);
   if (err) {
-    success = false;
-    errcode = err;
+    success.assignIfRef(false);
+    errcode.assignIfRef(err);
     return false;
   }
-  success = true;
-  errcode = uninit_null();
+  success.assignIfRef(true);
+  errcode.assignIfRef(init_null());
   return ret;
 }
 
@@ -758,8 +757,8 @@ Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, VRefParam success,
                       VRefParam errcode /* = null_variant */) {
   if (!thing.isString()) {
-    success = false;
-    errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
+    success.assignIfRef(false);
+    errcode.assignIfRef(FB_UNSERIALIZE_NONSTRING_VALUE);
     return false;
   }
 
@@ -843,7 +842,7 @@ bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
     U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
   }
   assert(dstPosBytes <= dstMaxLenBytes);
-  input = dstStr.shrink(dstPosBytes);
+  input.assignIfRef(dstStr.shrink(dstPosBytes));
   return true;
 }
 

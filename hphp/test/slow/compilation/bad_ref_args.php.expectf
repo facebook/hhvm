@@ -1,0 +1,5 @@
+Warning: socket_select() expects parameter 1 to be array() in %s/test/slow/compilation/bad_ref_args.php on line 5
+NULL
+
+Warning: Argument 2 not passed as reference in %s/test/slow/compilation/bad_ref_args.php on line 6
+int(1)

@@ -678,7 +678,7 @@ Variant HHVM_FUNCTION(str_replace,
     // the valid combinations to multiple string_replace() calls.
     ret = str_replace(search, replace, subject, nCount, true);
   }
-  count = nCount;
+  if (auto ref = count.getRefDataOrNull()) *ref->var() = nCount;
   return ret;
 }
 
@@ -689,7 +689,7 @@ Variant HHVM_FUNCTION(str_ireplace,
                       VRefParam count /* = null */) {
   int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, false);
-  count = nCount;
+  if (auto ref = count.getRefDataOrNull()) *ref->var() = nCount;
   return ret;
 }
 
@@ -856,9 +856,12 @@ Variant sscanfImpl(const String& str,
   if (args.empty()) return ret;
 
   if (ret.isArray()) {
-    Array retArray = ret.toArray();
+    auto& retArray = ret.toArrRef();
     for (int i = 0; i < retArray.size(); i++) {
-      *args.at(i)->getRefData() = retArray[i];
+      auto var = args.at(i);
+      if (var) {
+        *var->getRefData() = retArray[i];
+      }
     }
     return retArray.size();
   }
@@ -875,7 +878,7 @@ TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
 
   std::vector<Variant*> args;
   for (int i = 2; i < ar->numArgs(); ++i) {
-    args.push_back(&getArg<KindOfRef>(ar, i));
+    args.push_back(getArg<KindOfRef>(ar, i));
   }
 
   return arReturn(ar, sscanfImpl(str, format, args));
@@ -1584,7 +1587,7 @@ int64_t HHVM_FUNCTION(similar_text,
   float p;
   int ret = string_similar_text(first.data(), first.size(),
                                 second.data(), second.size(), &p);
-  percent = p;
+  percent.assignIfRef(p);
   return ret;
 }
 

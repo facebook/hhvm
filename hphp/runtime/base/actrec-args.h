@@ -56,17 +56,18 @@ inline Variant getArgVariant(ActRec *ar, unsigned arg,
  * Get a reference value from the stack
  */
 template <DataType DType>
-typename std::enable_if<DType == KindOfRef, VRefParam>::type
+typename std::enable_if<DType == KindOfRef, Variant*>::type
 getArg(ActRec *ar, unsigned arg) {
   auto tv = getArg(ar, arg);
   if (!tv) {
     raise_warning("Required parameter %d not passed", (int)arg);
-    return directRef(Variant());
+    return nullptr;
   }
   if (tv->m_type != KindOfRef) {
     raise_warning("Argument %d not passed as reference", (int)arg);
+    return nullptr;
   }
-  return directRef(tvAsVariant(tv));
+  return &tvAsVariant(tv);
 }
 
 /**

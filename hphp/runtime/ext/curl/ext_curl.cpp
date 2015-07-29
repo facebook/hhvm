@@ -1571,7 +1571,7 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_runni
   SYNC_VM_REGS_SCOPED();
   int result = curl_multi_perform(curlm->get(), &running);
   curlm->check_exceptions();
-  still_running = running;
+  still_running.assignIfRef(running);
   return result;
 }
 
@@ -1800,10 +1800,10 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
 }
 
 Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
-                              VRefParam read_fd_set,
-                              VRefParam write_fd_set,
-                              VRefParam exc_fd_set,
-                              VRefParam max_fd /* = null_object */) {
+                      VRefParam read_fd_set,
+                      VRefParam write_fd_set,
+                      VRefParam exc_fd_set,
+                      VRefParam max_fd /* = null_object */) {
   CHECK_MULTI_RESOURCE(curlm);
 
   fd_set read_set;
@@ -1816,10 +1816,10 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
   FD_ZERO(&exc_set);
 
   int r = curl_multi_fdset(curlm->get(), &read_set, &write_set, &exc_set, &max);
-  read_fd_set = curl_convert_fd_to_stream(&read_set, max);
-  write_fd_set = curl_convert_fd_to_stream(&write_set, max);
-  exc_fd_set = curl_convert_fd_to_stream(&exc_set, max);
-  max_fd = max;
+  read_fd_set.assignIfRef(curl_convert_fd_to_stream(&read_set, max));
+  write_fd_set.assignIfRef(curl_convert_fd_to_stream(&write_set, max));
+  exc_fd_set.assignIfRef(curl_convert_fd_to_stream(&exc_set, max));
+  max_fd.assignIfRef(max);
 
   return r;
 }
@@ -1830,7 +1830,7 @@ const StaticString
   s_handle("handle");
 
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
-                               VRefParam msgs_in_queue /* = null */) {
+                      VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);
 
   int queued_msgs;
@@ -1839,7 +1839,7 @@ Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
   if (tmp_msg == nullptr) {
     return false;
   }
-  msgs_in_queue = queued_msgs;
+  msgs_in_queue.assignIfRef(queued_msgs);
 
   Array ret;
   ret.set(s_msg, tmp_msg->msg);

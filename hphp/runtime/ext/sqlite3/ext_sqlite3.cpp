@@ -596,7 +596,7 @@ bool HHVM_METHOD(SQLite3Stmt, bindparam,
   auto *data = Native::data<SQLite3Stmt>(this_);
   auto param = std::make_shared<SQLite3Stmt::BoundParam>();
   param->type = type;
-  param->value.assignRef(parameter);
+  param->value.setWithRef(parameter);
 
   if (name.isString()) {
     String sname = name.toString();

@@ -693,7 +693,15 @@ Variant HHVM_FUNCTION(array_pop,
     return init_null();
   }
   if (container->m_type == KindOfArray) {
-    return containerRef.wrapped().toArrRef().pop();
+    if (auto ref = containerRef.getVariantOrNull()) {
+      return ref->asArrRef().pop();
+    }
+    auto ad = container->m_data.parr;
+    if (ad->size()) {
+      auto last = ad->iter_last();
+      return ad->getValue(last);
+    }
+    return init_null();
   }
   assert(container->m_type == KindOfObject);
   return collections::pop(container->m_data.pobj);
@@ -779,15 +787,17 @@ Variant HHVM_FUNCTION(array_push,
                       const Array& args /* = null array */) {
 
   if (LIKELY(container->isArray())) {
-    auto const array_cell = container.wrapped().asCell();
-    assert(array_cell->m_type == KindOfArray);
+    auto ref = container.getVariantOrNull();
+    if (!ref) {
+      return 1 + args.size() + container->asCArrRef().size();
+    }
 
     /*
      * Important note: this *must* cast the parr in the inner cell to
      * the Array&---we can't copy it to the stack or anything because we
      * might escalate.
      */
-    Array& arr_array = *reinterpret_cast<Array*>(&array_cell->m_data.parr);
+    Array& arr_array = ref->asArrRef();
     arr_array.append(var);
     for (ArrayIter iter(args); iter; ++iter) {
       arr_array.append(iter.second());
@@ -878,7 +888,15 @@ Variant HHVM_FUNCTION(array_shift,
     return init_null();
   }
   if (cell_array->m_type == KindOfArray) {
-    return array.wrapped().toArrRef().dequeue();
+    if (auto ref = array.getVariantOrNull()) {
+      return ref->asArrRef().dequeue();
+    }
+    auto ad = cell_array->m_data.parr;
+    if (ad->size()) {
+      auto first = ad->iter_begin();
+      return ad->getValue(first);
+    }
+    return init_null();
   }
   assertx(cell_array->m_type == KindOfObject);
   return collections::shift(cell_array->m_data.pobj);
@@ -961,7 +979,7 @@ Variant HHVM_FUNCTION(array_splice,
   getCheckedArray(input);
   Array ret(Array::Create());
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
-  input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
+  input.assignIfRef(ArrayUtil::Splice(arr_input, offset, len, replacement, &ret));
   return ret;
 }
 
@@ -1050,15 +1068,19 @@ Variant HHVM_FUNCTION(array_unshift,
     return init_null();
   }
   if (cell_array->m_type == KindOfArray) {
-    if (array.toArray()->isVectorData()) {
+    auto ref_array = array.getVariantOrNull();
+    if (!ref_array) {
+      return cell_array->m_data.parr->size() + args.size() + 1;
+    }
+    if (cell_array->m_data.parr->isVectorData()) {
       if (!args.empty()) {
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          array.wrapped().toArrRef().prepend(args->getValueRef(pos));
+          ref_array->asArrRef().prepend(args->getValueRef(pos));
         }
       }
-      array.wrapped().toArrRef().prepend(var);
+      ref_array->asArrRef().prepend(var);
     } else {
       {
         Array newArray;
@@ -1079,14 +1101,12 @@ Variant HHVM_FUNCTION(array_unshift,
             newArray.setWithRef(key, value, true);
           }
         }
-        array = newArray;
+        *ref_array = std::move(newArray);
       }
       // Reset the array's internal pointer
-      if (array.is(KindOfArray)) {
-        HHVM_FN(reset)(array);
-      }
+      ref_array->asArrRef()->reset();
     }
-    return array.toArray().size();
+    return ref_array->asArrRef().size();
   }
   // Handle collections
   assert(cell_array->m_type == KindOfObject);
@@ -1144,14 +1164,14 @@ Variant HHVM_FUNCTION(array_values,
   return ai.toVariant();
 }
 
-static void walk_func(VRefParam value,
+static void walk_func(Variant& value,
                       const Variant& key,
                       const Variant& userdata,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
   int nargs = userdata.isInitialized() ? 3 : 2;
-  TypedValue args[3] = { *value->asRef(), *key.asCell(), *userdata.asCell() };
+  TypedValue args[3] = { *value.asRef(), *key.asCell(), *userdata.asCell() };
   g_context->invokeFuncFew(sink.asTypedValue(), *ctx, nargs, args);
 }
 
@@ -1170,7 +1190,8 @@ bool HHVM_FUNCTION(array_walk_recursive,
     return false;
   }
   PointerSet seen;
-  ArrayUtil::Walk(input, walk_func, &ctx, true, &seen, userdata);
+  Variant var(input, Variant::WithRefBind{});
+  ArrayUtil::Walk(var, walk_func, &ctx, true, &seen, userdata);
   return true;
 }
 
@@ -1188,7 +1209,8 @@ bool HHVM_FUNCTION(array_walk,
   if (ctx.func == NULL) {
     return false;
   }
-  ArrayUtil::Walk(input, walk_func, &ctx, false, NULL, userdata);
+  Variant var(input, Variant::WithRefBind{});
+  ArrayUtil::Walk(var, walk_func, &ctx, false, NULL, userdata);
   return true;
 }
 
@@ -1249,7 +1271,7 @@ bool HHVM_FUNCTION(shuffle,
     throw_expected_array_exception("shuffle");
     return false;
   }
-  array = ArrayUtil::Shuffle(array);
+  array.assignIfRef(ArrayUtil::Shuffle(array));
   return true;
 }
 
@@ -1326,7 +1348,12 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
   if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
-    cellMove(make_tv<KindOfArray>(ad), cell);
+    if (LIKELY(refParam.isRefData()))
+      cellMove(make_tv<KindOfArray>(ad), *refParam.getRefData()->tv());
+    else {
+      req::ptr<ArrayData> tmp(ad, req::ptr<ArrayData>::NoIncRef{});
+      return (ad->*op)();
+    }
   }
   return (ad->*op)();
 }
@@ -2357,9 +2384,11 @@ static bool
 php_sort(VRefParam container, int sort_flags,
          bool ascending, bool use_zend_sort) {
   if (container.isArray()) {
-    Array& arr_array = container.wrapped().toArrRef();
+    auto ref = container.getVariantOrNull();
+    if (!ref) return true;
+    Array& arr_array = ref->asArrRef();
     if (use_zend_sort) {
-      return zend_sort(container, sort_flags, ascending);
+      return zend_sort(*ref, sort_flags, ascending);
     }
     SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
     ArraySortTmp ast(arr_array, sf);
@@ -2386,9 +2415,11 @@ static bool
 php_asort(VRefParam container, int sort_flags,
           bool ascending, bool use_zend_sort) {
   if (container.isArray()) {
-    Array& arr_array = container.wrapped().toArrRef();
+    auto ref = container.getVariantOrNull();
+    if (!ref) return true;
+    Array& arr_array = ref->asArrRef();
     if (use_zend_sort) {
-      return zend_asort(container, sort_flags, ascending);
+      return zend_asort(*ref, sort_flags, ascending);
     }
     SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
     ArraySortTmp ast(arr_array, sf);
@@ -2414,9 +2445,11 @@ static bool
 php_ksort(VRefParam container, int sort_flags, bool ascending,
           bool use_zend_sort) {
   if (container.isArray()) {
-    Array& arr_array = container.wrapped().toArrRef();
+    auto ref = container.getVariantOrNull();
+    if (!ref) return true;
+    Array& arr_array = ref->asArrRef();
     if (use_zend_sort) {
-      return zend_ksort(container, sort_flags, ascending);
+      return zend_ksort(*ref, sort_flags, ascending);
     }
     SortFunction sf = getSortFunction(SORTFUNC_KRSORT, ascending);
     ArraySortTmp ast(arr_array, sf);
@@ -2498,14 +2531,21 @@ bool HHVM_FUNCTION(usort,
                    VRefParam container,
                    const Variant& cmp_function) {
   if (container.isArray()) {
-    Array& arr_array = container.wrapped().toArrRef();
-    if (RuntimeOption::EnableZendSorting) {
-      arr_array.sort(cmp_func, false, true, &cmp_function);
-      return true;
-    } else {
-      ArraySortTmp ast(arr_array, SORTFUNC_USORT);
-      return ast->usort(cmp_function);
+    auto sort = [](Array& arr_array, const Variant& cmp_function) -> bool {
+      if (RuntimeOption::EnableZendSorting) {
+        arr_array.sort(cmp_func, false, true, &cmp_function);
+        return true;
+      } else {
+        ArraySortTmp ast(arr_array, SORTFUNC_USORT);
+        return ast->usort(cmp_function);
+      }
+    };
+    auto ref = container.getVariantOrNull();
+    if (LIKELY(ref != nullptr)) {
+      return sort(ref->asArrRef(), cmp_function);
     }
+    auto tmp = container->asCArrRef();
+    return sort(tmp, cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
@@ -2527,14 +2567,21 @@ bool HHVM_FUNCTION(uasort,
                    VRefParam container,
                    const Variant& cmp_function) {
   if (container.isArray()) {
-    Array& arr_array = container.wrapped().toArrRef();
-    if (RuntimeOption::EnableZendSorting) {
-      arr_array.sort(cmp_func, false, false, &cmp_function);
-      return true;
-    } else {
-      ArraySortTmp ast(arr_array, SORTFUNC_UASORT);
-      return ast->uasort(cmp_function);
+    auto sort = [](Array& arr_array, const Variant& cmp_function) -> bool {
+      if (RuntimeOption::EnableZendSorting) {
+        arr_array.sort(cmp_func, false, false, &cmp_function);
+        return true;
+      } else {
+        ArraySortTmp ast(arr_array, SORTFUNC_UASORT);
+        return ast->uasort(cmp_function);
+      }
+    };
+    auto ref = container.getVariantOrNull();
+    if (LIKELY(ref != nullptr)) {
+      return sort(ref->asArrRef(), cmp_function);
     }
+    auto tmp = container->asCArrRef();
+    return sort(tmp, cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
@@ -2557,9 +2604,16 @@ bool HHVM_FUNCTION(uksort,
                    VRefParam container,
                    const Variant& cmp_function) {
   if (container.isArray()) {
-    Array& arr_array = container.wrapped().toArrRef();
-    ArraySortTmp ast(arr_array, SORTFUNC_UKSORT);
-    return ast->uksort(cmp_function);
+    auto sort = [](Array& arr_array, const Variant& cmp_function) -> bool {
+      ArraySortTmp ast(arr_array, SORTFUNC_UKSORT);
+      return ast->uksort(cmp_function);
+    };
+    auto ref = container.getVariantOrNull();
+    if (LIKELY(ref != nullptr)) {
+      return sort(ref->asArrRef(), cmp_function);
+    }
+    auto tmp = container->asCArrRef();
+    return sort(tmp, cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();

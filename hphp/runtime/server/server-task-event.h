@@ -57,7 +57,7 @@ class ServerTaskEvent final : public AsioExternalThreadEvent {
 
     Variant ret;
 
-    int code = TServer::TaskResult(m_job, 0, ret);
+    int code = TServer::TaskResult(m_job, 0, &ret);
     if (code != 200) {
       SystemLib::throwExceptionObject(ret);
     }

@@ -71,6 +71,7 @@ struct Variant : private TypedValue {
   enum class ArrayInitCtor {};
   enum class StrongBind {};
   enum class Attach {};
+  enum class WithRefBind {};
 
   Variant() noexcept { m_type = KindOfUninit; }
   explicit Variant(NullInit) noexcept { m_type = KindOfNull; }
@@ -114,6 +115,9 @@ struct Variant : private TypedValue {
     m_data.pstr = s;
   }
 
+  Variant(const Variant& other, WithRefBind) {
+    constructWithRefHelper(other);
+  }
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
@@ -621,6 +625,7 @@ struct Variant : private TypedValue {
    */
   Variant &assign(const Variant& v) noexcept;
   Variant &assignRef(Variant& v) noexcept;
+  Variant &assignRef(VRefParam v) = delete;;
 
   // Generic assignment operator. Forward argument (preserving rvalue-ness and
   // lvalue-ness) to the appropriate set function, as long as its not a Variant.
@@ -1136,7 +1141,7 @@ public:
 
   ALWAYS_INLINE
   void setWithRefHelper(const Variant& v, bool destroy) {
-    assert(tvIsPlausible(*this) && tvIsPlausible(v));
+    assert((!destroy || tvIsPlausible(*this)) && tvIsPlausible(v));
     assert(this != &v);
 
     const Variant& rhs =
@@ -1188,19 +1193,12 @@ public:
   /* implicit */ VRefParamValue(RefResult v)
     : m_var(Variant::StrongBind{}, const_cast<Variant&>(variant(v))) {} // XXX
   template <typename T>
-  Variant &operator=(const T &v) const {
-    m_var = v;
-    return m_var;
-  }
-  VRefParamValue &operator=(const VRefParamValue &v) const {
-    m_var = v.m_var;
-    return *const_cast<VRefParamValue*>(this);
-  }
-  operator Variant&() const { return m_var; }
-  Variant *operator&() const { return &m_var; } // FIXME
-  Variant *operator->() const { return &m_var; }
+  Variant &operator=(const T &v) const = delete;
+  operator const Variant&() const { return m_var; }
+  const Variant *operator&() const { return &m_var; } // FIXME
+  const Variant *operator->() const { return &m_var; }
 
-  Variant& wrapped() const { return m_var; }
+  const Variant& wrapped() const { return m_var; }
 
   explicit operator bool   () const { return m_var.toBoolean();}
   operator int    () const { return m_var.toInt32();}
@@ -1216,6 +1214,7 @@ public:
   bool isObject() const { return m_var.isObject(); }
   bool isReferenced() const { return m_var.isReferenced(); }
   bool isNull() const { return m_var.isNull(); }
+  bool isRefData() const { return m_var.asTypedValue()->m_type == KindOfRef; }
 
   bool toBoolean() const { return m_var.toBoolean(); }
   int64_t toInt64() const { return m_var.toInt64(); }
@@ -1230,13 +1229,25 @@ public:
   bool isArray() const { return m_var.isArray(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }
 
+  RefData* getRefData() const {
+    assert(isRefData());
+    return m_var.asTypedValue()->m_data.pref;
+  }
+  RefData* getRefDataOrNull() const {
+    return isRefData() ? m_var.asTypedValue()->m_data.pref : nullptr;
+  }
+  Variant* getVariantOrNull() const {
+    return isRefData() ? m_var.asTypedValue()->m_data.pref->var() : nullptr;
+  }
+  void assignIfRef(const Variant& other) const {
+    if (auto ref = getVariantOrNull()) *ref = other;
+  }
+  void assignIfRef(const Variant&& other) const {
+    if (auto ref = getVariantOrNull()) *ref = std::move(other);
+  }
 private:
-  mutable Variant m_var;
+  Variant m_var;
 };
-
-inline VRefParam directRef(const Variant& v) {
-  return *(VRefParamValue*)&v;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR

@@ -153,9 +153,9 @@ static TypedValue* bind_param_helper(const Object& obj, ActRec* ar,
                     i + 2 + start_index);
       return arReturn(ar, false);
     }
-    auto rparam = &getArg<KindOfRef>(ar, i + 1 + start_index);
+    auto rparam = getArg<KindOfRef>(ar, i + 1 + start_index);
 
-    if (rparam->getRawType() != KindOfRef) {
+    if (!rparam) {
       return arReturn(ar, false);
     }
     vars.appendRef(*rparam);
@@ -175,9 +175,9 @@ static TypedValue* bind_result_helper(const Object& obj, ActRec* ar,
 
   PackedArrayInit vars(ar->numArgs());
   for (int i = start_index; i < ar->numArgs(); i++) {
-    auto rparam = &getArg<KindOfRef>(ar, i);
+    auto rparam = getArg<KindOfRef>(ar, i);
 
-    if (rparam->getRawType() != KindOfRef) {
+    if (!rparam) {
       return arReturn(ar, false);
     }
     vars.appendRef(*rparam);

@@ -73,17 +73,19 @@ String HHVM_FUNCTION(strval, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(settype, VRefParam var, const String& type) {
-  if      (type == s_boolean) var = var.toBoolean();
-  else if (type == s_bool   ) var = var.toBoolean();
-  else if (type == s_integer) var = var.toInt64();
-  else if (type == s_int    ) var = var.toInt64();
-  else if (type == s_float  ) var = var.toDouble();
-  else if (type == s_double ) var = var.toDouble();
-  else if (type == s_string ) var = var.toString();
-  else if (type == s_array  ) var = var.toArray();
-  else if (type == s_object ) var = var.toObject();
-  else if (type == s_null   ) var = uninit_null();
+  Variant val;
+  if      (type == s_boolean) val = var.toBoolean();
+  else if (type == s_bool   ) val = var.toBoolean();
+  else if (type == s_integer) val = var.toInt64();
+  else if (type == s_int    ) val = var.toInt64();
+  else if (type == s_float  ) val = var.toDouble();
+  else if (type == s_double ) val = var.toDouble();
+  else if (type == s_string ) val = var.toString();
+  else if (type == s_array  ) val = var.toArray();
+  else if (type == s_object ) val = var.toObject();
+  else if (type == s_null   ) val = uninit_null();
   else return false;
+  var.assignIfRef(val);
   return true;
 }
 
@@ -365,7 +367,7 @@ int64_t extract_impl(VRefParam vref_array,
                      int extract_type /* = EXTR_OVERWRITE */,
                      const String& prefix /* = "" */) {
   auto arrByRef = false;
-  TypedValue* arr_tv = vref_array.wrapped().asTypedValue();
+  auto arr_tv = vref_array.wrapped().asTypedValue();
   if (arr_tv->m_type == KindOfRef) {
     arr_tv = arr_tv->m_data.pref->tv();
     arrByRef = true;
@@ -382,7 +384,7 @@ int64_t extract_impl(VRefParam vref_array,
   auto const varEnv = g_context->getOrCreateVarEnv();
   if (!varEnv) return 0;
 
-  auto& arr = tvAsVariant(arr_tv).asArrRef();
+  auto& arr = tvAsCVarRef(arr_tv).asCArrRef();
   if (UNLIKELY(reference)) {
     auto extr_refs = [&](Array& arr) {
       {
@@ -406,7 +408,7 @@ int64_t extract_impl(VRefParam vref_array,
       return count;
     };
     if (arrByRef) {
-      return extr_refs(arr);
+      return extr_refs(const_cast<Array&>(arr));
     }
     Array tmp = arr;
     return extr_refs(tmp);
@@ -443,7 +445,7 @@ static void parse_str_impl(const String& str, VRefParam arr) {
     HHVM_FN(SystemLib_extract)(result);
     return;
   }
-  arr = result;
+  arr.assignIfRef(result);
 }
 
 void HHVM_FUNCTION(parse_str,

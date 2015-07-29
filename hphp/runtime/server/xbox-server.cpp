@@ -400,17 +400,19 @@ bool XboxServer::TaskStatus(const Resource& task) {
   return cast<XboxTask>(task)->getJob()->isDone();
 }
 
-int XboxServer::TaskResult(const Resource& task, int timeout_ms, Variant &ret) {
+int XboxServer::TaskResult(const Resource& task, int timeout_ms, Variant *ret) {
   return TaskResult(cast<XboxTask>(task)->getJob(), timeout_ms, ret);
 }
 
-int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant &ret) {
+int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant *ret) {
   int code = 0;
   String response = job->getResults(code, timeout_ms);
-  if (code == 200) {
-    ret = unserialize_from_string(response);
-  } else {
-    ret = response;
+  if (ret) {
+    if (code == 200) {
+      *ret = unserialize_from_string(response);
+    } else {
+      *ret = response;
+    }
   }
   return code;
 }

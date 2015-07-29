@@ -859,7 +859,7 @@ bool HHVM_FUNCTION(ldap_get_option,
       if (ldap_get_option(ld->link, option, &val)) {
         return false;
       }
-      retval = (int64_t)val;
+      retval.assignIfRef((int64_t)val);
     } break;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   case LDAP_OPT_NETWORK_TIMEOUT:
@@ -872,7 +872,7 @@ bool HHVM_FUNCTION(ldap_get_option,
         }
         return false;
       }
-      retval = (int64_t)timeout->tv_sec;
+      retval.assignIfRef((int64_t)timeout->tv_sec);
       ldap_memfree(timeout);
     } break;
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
@@ -882,7 +882,7 @@ bool HHVM_FUNCTION(ldap_get_option,
       if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
         return false;
       }
-      retval = (int64_t)(timeout / 1000);
+      retval.assignIfRef((int64_t)(timeout / 1000));
     } break;
 #endif
   /* options with string value */
@@ -908,7 +908,7 @@ bool HHVM_FUNCTION(ldap_get_option,
         }
         return false;
       }
-      retval = String(val, CopyString);
+      retval.assignIfRef(String(val, CopyString));
       ldap_memfree(val);
     } break;
 /* options not implemented
@@ -1365,7 +1365,7 @@ bool HHVM_FUNCTION(ldap_parse_reference,
     }
     ldap_value_free(lreferrals);
   }
-  referrals = arr;
+  referrals.assignIfRef(arr);
   return true;
 }
 
@@ -1390,7 +1390,7 @@ bool HHVM_FUNCTION(ldap_parse_result,
     return false;
   }
 
-  errcode = lerrcode;
+  errcode.assignIfRef(lerrcode);
 
   /* Reverse -> fall through */
   Array arr = Array::Create();
@@ -1402,19 +1402,19 @@ bool HHVM_FUNCTION(ldap_parse_result,
     }
     ldap_value_free(lreferrals);
   }
-  referrals = arr;
+  referrals.assignIfRef(arr);
 
   if (lerrmsg == NULL) {
-    errmsg = empty_string_variant();
+    errmsg.assignIfRef(empty_string_variant());
   } else {
-    errmsg = String(lerrmsg, CopyString);
+    errmsg.assignIfRef(String(lerrmsg, CopyString));
     ldap_memfree(lerrmsg);
   }
 
   if (lmatcheddn == NULL) {
-    matcheddn = empty_string_variant();
+    matcheddn.assignIfRef(empty_string_variant());
   } else {
-    matcheddn = String(lmatcheddn, CopyString);
+    matcheddn.assignIfRef(String(lmatcheddn, CopyString));
     ldap_memfree(lmatcheddn);
   }
   return true;
@@ -1571,8 +1571,8 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
     return false;
   }
 
-  cookie = String(lcookie.bv_val, lcookie.bv_len, CopyString);
-  estimated = lestimated;
+  cookie.assignIfRef(String(lcookie.bv_val, lcookie.bv_len, CopyString));
+  estimated.assignIfRef(lestimated);
 
   ber_memfree(lcookie.bv_val);
   return true;

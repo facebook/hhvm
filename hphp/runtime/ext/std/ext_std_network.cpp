@@ -841,8 +841,8 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
     }
   }
 
-  authnsRef = authns;
-  addtlRef = addtl;
+  authnsRef.assignIfRef(authns);
+  addtlRef.assignIfRef(addtl);
   return ret;
 }
 
@@ -859,8 +859,8 @@ bool HHVM_FUNCTION(getmxrr, const String& hostname,
   Array mxhosts;
   Array weights;
   SCOPE_EXIT {
-    mxhostsRef = mxhosts;
-    weightsRef = weights;
+    mxhostsRef.assignIfRef(mxhosts);
+    weightsRef.assignIfRef(weights);
   };
 
   /* Go! */
@@ -1034,8 +1034,8 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
                                  VRefParam line /* = null */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
-    file = String(transport->getFirstHeaderFile());
-    line = transport->getFirstHeaderLine();
+    file.assignIfRef(String(transport->getFirstHeaderFile()));
+    line.assignIfRef(transport->getFirstHeaderLine());
     return transport->headersSent();
   } else {
     return g_context->getStdoutBytesWritten() > 0;

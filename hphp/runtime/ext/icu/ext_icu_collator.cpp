@@ -50,14 +50,16 @@ static bool HHVM_METHOD(Collator, asort, VRefParam arr, int64_t flag) {
     return false;
   }
   data->clearError();
-  bool ret = collator_asort(arr, flag, true, data->collator(), data);
+  Variant ref(arr, Variant::WithRefBind{});
+  bool ret = collator_asort(ref, flag, true, data->collator(), data);
   if (U_FAILURE(data->getErrorCode())) {
     return false;
   }
   return ret;
 }
 
-static Variant HHVM_METHOD(Collator, compare, const Variant& str1, const Variant& str2) {
+static Variant HHVM_METHOD(Collator, compare,
+                           const Variant& str1, const Variant& str2) {
   FETCH_COL(data, this_, false);
   data->clearError();
   UErrorCode error = U_ZERO_ERROR;
@@ -288,7 +290,7 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
   for (int i = 0; i < sortIndexPos; ++i) {
     ret.append(hash->getValue(sortIndex[i].valPos));
   }
-  arr = ret;
+  arr.assignIfRef(ret);
   return true;
 }
 
@@ -300,7 +302,8 @@ static bool HHVM_METHOD(Collator, sort, VRefParam arr,
     return false;
   }
   data->clearError();
-  bool ret = collator_sort(arr, sort_flag, true, data->collator(), data);
+  Variant ref(arr, Variant::WithRefBind{});
+  bool ret = collator_sort(ref, sort_flag, true, data->collator(), data);
   if (U_FAILURE(data->getErrorCode())) {
     return false;
   }

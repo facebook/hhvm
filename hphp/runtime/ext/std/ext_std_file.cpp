@@ -434,7 +434,7 @@ TypedValue* HHVM_FN(fscanf)(ActRec* ar) {
 
   std::vector<Variant*> args;
   for (int i = 2; i < ar->numArgs(); ++i) {
-    args.push_back(&getArg<KindOfRef>(ar, i));
+    args.push_back(getArg<KindOfRef>(ar, i));
   }
   return arReturn(ar, fscanfImpl(handle, format, args));
 }
@@ -521,7 +521,7 @@ bool HHVM_FUNCTION(flock,
   }
   act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
   bool ret = f->lock(act, block);
-  wouldblock = block;
+  wouldblock.assignIfRef(block);
   return ret;
 }
 

@@ -45,7 +45,7 @@ Variant HHVM_FUNCTION(preg_match,
                       VRefParam matches /* = null */,
                       int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match(pattern, subject,
-                    matches.isReferenced() ? &matches : nullptr,
+                    matches.getVariantOrNull(),
                     flags, offset);
 }
 
@@ -56,7 +56,7 @@ Variant HHVM_FUNCTION(preg_match_all,
                       int flags /* = 0 */,
                       int offset /* = 0 */) {
   return preg_match_all(pattern, subject,
-                        matches.isReferenced() ? &matches : nullptr,
+                        matches.getVariantOrNull(),
                         flags, offset);
 }
 
@@ -67,7 +67,7 @@ Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& repla
                                     const Variant& subject, int limit /* = -1 */,
                                     VRefParam count /* = null */) {
   return preg_replace_impl(pattern, replacement, subject,
-                           limit, count, false, false);
+                           limit, count.getVariantOrNull(), false, false);
 }
 
 Variant HHVM_FUNCTION(preg_replace_callback,
@@ -78,18 +78,18 @@ Variant HHVM_FUNCTION(preg_replace_callback,
                       VRefParam count /* = null */) {
   if (!is_callable(callback)) {
     raise_warning("Not a valid callback function %s",
-        callback.toString().data());
+                  callback.toString().data());
     return empty_string_variant();
   }
   return preg_replace_impl(pattern, callback, subject,
-                           limit, count, true, false);
+                           limit, count.getVariantOrNull(), true, false);
 }
 
 Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callback,
                                    const Variant& subject, int limit /* = -1 */,
                                    VRefParam count /* = null */) {
   return preg_replace_impl(pattern, callback, subject,
-                           limit, count, false, true);
+                           limit, count.getVariantOrNull(), false, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

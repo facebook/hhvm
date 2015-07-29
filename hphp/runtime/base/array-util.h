@@ -111,9 +111,9 @@ public:
   /**
    * Apply a user function to every member of an array.
    */
-  typedef void (*PFUNC_WALK)(VRefParam value, const Variant& key, const Variant& userdata,
-                             const void *data);
-  static void Walk(VRefParam input, PFUNC_WALK walk_function, const void *data,
+  typedef void (*PFUNC_WALK)(Variant& value, const Variant& key,
+                             const Variant& userdata, const void *data);
+  static void Walk(Variant &input, PFUNC_WALK walk_function, const void *data,
                    bool recursive = false, PointerSet *seen = nullptr,
                    const Variant& userdata = null_variant);
 

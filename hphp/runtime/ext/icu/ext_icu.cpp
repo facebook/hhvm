@@ -47,11 +47,8 @@ static Variant HHVM_FUNCTION(icu_match, const String& pattern,
                                         int64_t flags /* = 0 */) {
   UErrorCode status = U_ZERO_ERROR;
 
-  Array matchesArr;
-  if (matches.isReferenced()) {
-    matchesArr = Array::Create();
-  }
-  SCOPE_EXIT { if (matches.isReferenced()) matches = matchesArr; };
+  Array matchesArr = Array::Create();
+  SCOPE_EXIT { matches.assignIfRef(matchesArr); };
 
   // Create hash map key by concatenating pattern and flags.
   StringBuffer bpattern;

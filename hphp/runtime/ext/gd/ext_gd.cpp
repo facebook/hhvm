@@ -1657,8 +1657,9 @@ const StaticString
 Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
   int itype = 0;
   struct gfxinfo *result = nullptr;
-  if (imageinfo.isReferenced()) {
-    imageinfo = Array::Create();
+  auto imageInfoPtr = imageinfo.getVariantOrNull();
+  if (imageInfoPtr) {
+    *imageInfoPtr = Array::Create();
   }
 
   itype = php_getimagetype(stream);
@@ -1669,12 +1670,12 @@ Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
   case IMAGE_FILETYPE_JPEG:
     {
       Array infoArr;
-      if (imageinfo.isReferenced()) {
+      if (imageInfoPtr) {
         infoArr = Array::Create();
       }
       result = php_handle_jpeg(stream, infoArr);
-      if (!infoArr.empty()) {
-        imageinfo = infoArr;
+      if (imageInfoPtr) {
+        *imageInfoPtr = infoArr;
       }
     }
     break;
@@ -1752,7 +1753,7 @@ Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
 }
 
 Variant HHVM_FUNCTION(getimagesize, const String& filename,
-                                    VRefParam imageinfo /*=null */) {
+                      VRefParam imageinfo /*=null */) {
   if (auto stream = File::Open(filename, "rb")) {
     return getImageSize(stream, imageinfo);
   }
@@ -1760,7 +1761,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
 }
 
 Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
-                                              VRefParam imageinfo /*=null */) {
+                      VRefParam imageinfo /*=null */) {
   String data = "data://text/plain;base64,";
   data += StringUtil::Base64Encode(imagedata);
   if (auto stream = File::Open(data, "r")) {
@@ -8038,9 +8039,9 @@ Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
   if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
     exif_scan_thumbnail(&ImageInfo);
   }
-  width = (int64_t)ImageInfo.Thumbnail.width;
-  height = (int64_t)ImageInfo.Thumbnail.height;
-  imagetype = ImageInfo.Thumbnail.filetype;
+  width.assignIfRef((int64_t)ImageInfo.Thumbnail.width);
+  height.assignIfRef((int64_t)ImageInfo.Thumbnail.height);
+  imagetype.assignIfRef(ImageInfo.Thumbnail.filetype);
   String str(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, CopyString);
   exif_discard_imageinfo(&ImageInfo);
   return str;

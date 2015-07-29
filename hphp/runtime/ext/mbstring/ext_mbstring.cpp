@@ -1433,7 +1433,7 @@ Variant HHVM_FUNCTION(mb_convert_variables,
 
   /* convert */
   if (convd != nullptr) {
-    vars = php_mbfl_convert(vars, convd, &string, &result);
+    vars.assignIfRef(php_mbfl_convert(vars, convd, &string, &result));
     for (int n = 0; n < args.size(); n++) {
       const_cast<Array&>(args).set(n, php_mbfl_convert(args[n], convd,
                                                         &string, &result));
@@ -2237,7 +2237,7 @@ bool HHVM_FUNCTION(mb_parse_str,
   mbfl_encoding *detected =
     _php_mb_encoding_handler_ex(&info, resultArr, encstr);
   free(encstr);
-  result = resultArr;
+  result.assignIfRef(resultArr);
 
   MBSTRG(http_input_identify) = detected;
   return detected != nullptr;
@@ -3712,7 +3712,7 @@ Variant HHVM_FUNCTION(mb_ereg_search_regs,
 }
 
 static Variant _php_mb_regex_ereg_exec(const Variant& pattern, const String& str,
-                                       Variant &regs, int icase) {
+                                       Variant *regs, int icase) {
   php_mb_regex_t *re;
   OnigRegion *regions = nullptr;
   int i, match_len, beg, end;
@@ -3767,7 +3767,7 @@ static Variant _php_mb_regex_ereg_exec(const Variant& pattern, const String& str
       regsPai.append(false);
     }
   }
-  regs = regsPai.toArray();
+  if (regs) *regs = regsPai.toArray();
 
   if (match_len == 0) {
     match_len = 1;
@@ -3782,14 +3782,14 @@ Variant HHVM_FUNCTION(mb_ereg,
                       const Variant& pattern,
                       const String& str,
                       VRefParam regs /* = null */) {
-  return _php_mb_regex_ereg_exec(pattern, str, regs, 0);
+  return _php_mb_regex_ereg_exec(pattern, str, regs.getVariantOrNull(), 0);
 }
 
 Variant HHVM_FUNCTION(mb_eregi,
                       const Variant& pattern,
                       const String& str,
                       VRefParam regs /* = null */) {
-  return _php_mb_regex_ereg_exec(pattern, str, regs, 1);
+  return _php_mb_regex_ereg_exec(pattern, str, regs.getVariantOrNull(), 1);
 }
 
 Variant HHVM_FUNCTION(mb_regex_encoding,

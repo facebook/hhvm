@@ -775,8 +775,8 @@ static bool HHVM_FUNCTION(clock_getres,
 #else
   struct timespec ts;
   int ret = clock_getres(clk_id, &ts);
-  sec = (int64_t)ts.tv_sec;
-  nsec = (int64_t)ts.tv_nsec;
+  sec.assignIfRef((int64_t)ts.tv_sec);
+  nsec.assignIfRef((int64_t)ts.tv_nsec);
   return ret == 0;
 #endif
 }
@@ -785,8 +785,8 @@ static bool HHVM_FUNCTION(clock_gettime,
                           int64_t clk_id, VRefParam sec, VRefParam nsec) {
   struct timespec ts;
   int ret = gettime(clk_id, &ts);
-  sec = (int64_t)ts.tv_sec;
-  nsec = (int64_t)ts.tv_nsec;
+  sec.assignIfRef((int64_t)ts.tv_sec);
+  nsec.assignIfRef((int64_t)ts.tv_nsec);
   return ret == 0;
 }
 

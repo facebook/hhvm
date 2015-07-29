@@ -381,7 +381,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
   }
   ret.set(s_tm_isdst, isDST ? 1 : 0);
 
-  position = (int64_t)parse_pos;
+  position.assignIfRef((int64_t)parse_pos);
   return ret;
 }
 
@@ -404,7 +404,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, parse,
   UDate timestamp = udat_parse(data->datefmt(),
                                str.getBuffer(), str.length(),
                                &pos, &error);
-  position = (int64_t)pos;
+  position.assignIfRef((int64_t)pos);
   if (U_FAILURE(error)) {
     data->setError(error, "Date parsing failed");
     return false;

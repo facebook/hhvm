@@ -351,14 +351,14 @@ Variant HHVM_FUNCTION(apc_fetch,
         init.set(strKey, v);
       }
     }
-    success = tmp;
+    success.assignIfRef(tmp);
     return init.toVariant();
   }
 
   if (apc_store().get(key.toString(), v)) {
-    success = true;
+    success.assignIfRef(true);
   } else {
-    success = false;
+    success.assignIfRef(false);
     v = false;
   }
   return v;
@@ -415,7 +415,7 @@ Variant HHVM_FUNCTION(apc_inc,
 
   bool found = false;
   int64_t newValue = apc_store().inc(key, step, found);
-  success = found;
+  success.assignIfRef(found);
   if (!found) return false;
   return newValue;
 }
@@ -428,7 +428,7 @@ Variant HHVM_FUNCTION(apc_dec,
 
   bool found = false;
   int64_t newValue = apc_store().inc(key, -step, found);
-  success = found;
+  success.assignIfRef(found);
   if (!found) return false;
   return newValue;
 }

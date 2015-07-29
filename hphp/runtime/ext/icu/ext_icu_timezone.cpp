@@ -169,7 +169,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
     return false;
   }
 
-  isSystemID = (bool)system;
+  isSystemID.assignIfRef((bool)system);
   error = U_ZERO_ERROR;
   String ret(u8(result, error));
   if (U_FAILURE(error)) {
@@ -268,8 +268,8 @@ static bool HHVM_METHOD(IntlTimeZone, getOffset,
     data->setError(error, "intltz_get_offset: error obtaining offset");
     return false;
   }
-  rawOffset = rawOff;
-  dstOffset = dstOff;
+  rawOffset.assignIfRef(rawOff);
+  dstOffset.assignIfRef(dstOff);
   return true;
 }
 

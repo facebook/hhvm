@@ -656,7 +656,9 @@ Variant HHVM_FUNCTION(stream_socket_accept,
     struct sockaddr sa;
     socklen_t salen = sizeof(sa);
     auto new_sock = socket_accept_impl(server_socket, &sa, &salen);
-    peername = get_sockaddr_name(&sa, salen);
+    if (auto ref = peername.getVariantOrNull()) {
+      *ref = get_sockaddr_name(&sa, salen);
+    }
     if (new_sock) return Resource(new_sock);
   } else if (n < 0) {
     sock->setError(errno);
@@ -784,11 +786,13 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
   Variant retval = HHVM_FN(socket_recvfrom)(socket, ref(ret), length, flags,
                                             ref(host), ref(port));
   if (!same(retval, false) && retval.toInt64() >= 0) {
-    auto sock = cast<Socket>(socket);
-    if (sock->getType() == AF_INET6) {
-      address = "[" + host.toString() + "]:" + port.toInt32();
-    } else {
-      address = host.toString() + ":" + port.toInt32();
+    if (auto ref = address.getVariantOrNull()) {
+      auto sock = cast<Socket>(socket);
+      if (sock->getType() == AF_INET6) {
+        *ref = "[" + host.toString() + "]:" + port.toInt32();
+      } else {
+        *ref = host.toString() + ":" + port.toInt32();
+      }
     }
     return ret.toString(); // watch out, "ret", not "retval"
   }

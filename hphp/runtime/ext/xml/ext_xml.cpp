@@ -763,10 +763,10 @@ int64_t HHVM_FUNCTION(xml_parse_into_struct,
   SYNC_VM_REGS_SCOPED();
   int ret;
   auto p = cast<XmlParser>(parser);
-  values = Array::Create();
-  p->data.assignRef(values);
-  index = Array::Create();
-  p->info.assignRef(index);
+  p->data.setWithRef(values);
+  p->data = Array::Create();
+  p->info.setWithRef(index);
+  p->info = Array::Create();
   p->level = 0;
   p->ltags = (char**)malloc(XML_MAXLEVEL * sizeof(char*));
 
@@ -920,7 +920,7 @@ bool HHVM_FUNCTION(xml_set_object,
                    const Resource& parser,
                    VRefParam object) {
   auto p = cast<XmlParser>(parser);
-  p->object.assignRef(object);
+  p->object.setWithRef(object);
   return true;
 }
 

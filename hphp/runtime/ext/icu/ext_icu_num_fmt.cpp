@@ -445,9 +445,9 @@ static Variant HHVM_METHOD(NumberFormatter, parseCurrency,
                         val.getBuffer(), val.length(),
                         &pos, cur, &error);
   NUMFMT_CHECK(obj, error, false);
-  position = (int64_t)pos;
+  position.assignIfRef((int64_t)pos);
   error = U_ZERO_ERROR;
-  currency = u8(cur, u_strlen(cur), error);
+  currency.assignIfRef(u8(cur, u_strlen(cur), error));
   NUMFMT_CHECK(obj, error, false);
   return parsed;
 }
@@ -480,7 +480,7 @@ static Variant HHVM_METHOD(NumberFormatter, parse,
       return false;
   }
   NUMFMT_CHECK(obj, error, false);
-  position = pos;
+  position.assignIfRef(pos);
   return ret;
 }
 

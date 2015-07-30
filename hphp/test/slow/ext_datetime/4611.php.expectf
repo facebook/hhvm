@@ -1,0 +1,1 @@
+Strict Warning: mktime(): You should be using the time() function instead in %s/test/slow/ext_datetime/4611.php on line 5

@@ -3,6 +3,6 @@ Invalid return type (Typing[4110])
 File "fc_enum_9.php", line 12, characters 41-43:
 This is an int
 File "fc_enum_9.php", line 3, characters 6-8:
-It is incompatible with an object of type Foo
+It is incompatible with a value of enum Foo
 File "builtins.hhi", line 47, characters 59-59:
   via this generic T

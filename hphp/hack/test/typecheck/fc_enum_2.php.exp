@@ -1,6 +1,6 @@
 File "fc_enum_2.php", line 11, characters 10-10:
 Invalid return type (Typing[4110])
 File "fc_enum_2.php", line 10, characters 18-20:
-This is an object of type Foo
+This is a value of enum Foo
 File "fc_enum_2.php", line 11, characters 10-10:
 It is incompatible with an int

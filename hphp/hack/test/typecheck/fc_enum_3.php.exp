@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "fc_enum_3.php", line 15, characters 16-18:
 This is an int
 File "fc_enum_3.php", line 5, characters 12-14:
-It is incompatible with an object of type Foo
+It is incompatible with a value of enum Foo

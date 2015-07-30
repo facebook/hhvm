@@ -56,7 +56,7 @@ bool StaticClassName::isNamed(const std::string& clsName) const {
 void StaticClassName::updateClassName() {
   if (m_class && m_class->is(Expression::KindOfScalarExpression) &&
       !m_static) {
-    ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
+    auto s = dynamic_pointer_cast<ScalarExpression>(m_class);
     auto const& className = s->getString();
     m_origClassName = className;
     m_class.reset();

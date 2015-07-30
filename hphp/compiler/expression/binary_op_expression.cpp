@@ -224,8 +224,7 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) {
       if (m_exp1->is(KindOfBinaryOpExpression)) {
-        BinaryOpExpressionPtr b(
-          dynamic_pointer_cast<BinaryOpExpression>(m_exp1));
+        auto b = dynamic_pointer_cast<BinaryOpExpression>(m_exp1);
         if (b->m_op == m_op && b->m_exp1->isScalar()) {
           return foldRightAssoc(ar);
         }
@@ -309,8 +308,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case '|':
         case '^':
           if (m_exp2->is(KindOfBinaryOpExpression)) {
-            BinaryOpExpressionPtr binOpExp =
-              dynamic_pointer_cast<BinaryOpExpression>(m_exp2);
+            auto binOpExp = dynamic_pointer_cast<BinaryOpExpression>(m_exp2);
             if (binOpExp->m_op == m_op && binOpExp->m_exp1->isScalar()) {
               ExpressionPtr aExp = m_exp1;
               ExpressionPtr bExp = binOpExp->m_exp1;
@@ -340,10 +338,8 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
-      ScalarExpressionPtr scalar1 =
-        dynamic_pointer_cast<ScalarExpression>(m_exp1);
-      ScalarExpressionPtr scalar2 =
-        dynamic_pointer_cast<ScalarExpression>(m_exp2);
+      auto scalar1 = dynamic_pointer_cast<ScalarExpression>(m_exp1);
+      auto scalar2 = dynamic_pointer_cast<ScalarExpression>(m_exp2);
       // Some data, like the values of __CLASS__ and friends, are not available
       // while we're still in the initial parse phase.
       if (ar->getPhase() == AnalysisResult::ParseAllFiles) {
@@ -534,8 +530,7 @@ BinaryOpExpression::foldRightAssoc(AnalysisResultConstPtr ar) {
   case '+':
   case '*':
     if (m_exp1->is(Expression::KindOfBinaryOpExpression)) {
-      BinaryOpExpressionPtr binOpExp =
-        dynamic_pointer_cast<BinaryOpExpression>(m_exp1);
+      auto binOpExp = dynamic_pointer_cast<BinaryOpExpression>(m_exp1);
       if (binOpExp->m_op == m_op) {
         // turn a Op b Op c, namely (a Op b) Op c into a Op (b Op c)
         ExpressionPtr aExp = binOpExp->m_exp1;

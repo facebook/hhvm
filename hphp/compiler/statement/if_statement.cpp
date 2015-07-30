@@ -105,8 +105,7 @@ StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
   Variant value;
   bool hoist = false;
   for (i = 0; i < m_stmts->getCount(); i++) {
-    IfBranchStatementPtr branch =
-      dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
+    auto branch = dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
     ExpressionPtr condition = branch->getCondition();
     if (!condition) {
       StatementPtr stmt = branch->getStmt();
@@ -118,8 +117,7 @@ StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
           break;
         }
         if (stmt->is(KindOfIfStatement)) {
-          StatementListPtr sub_stmts =
-            dynamic_pointer_cast<IfStatement>(stmt)->m_stmts;
+          auto sub_stmts = dynamic_pointer_cast<IfStatement>(stmt)->m_stmts;
           m_stmts->removeElement(i);
           changed = true;
           for (j = 0; j < sub_stmts->getCount(); j++) {
@@ -156,8 +154,7 @@ StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
 
   // if there is only one branch left, return stmt.
   if (hoist) {
-    IfBranchStatementPtr branch =
-      dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[0]);
+    auto branch = dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[0]);
     return branch->getStmt() ? branch->getStmt() : NULL_STATEMENT();
   } else if (m_stmts->getCount() == 0) {
     return NULL_STATEMENT();
@@ -173,8 +170,7 @@ void IfStatement::outputCodeModel(CodeGenerator &cg) {
   IfBranchStatementPtr elseBranch = nullptr;
   auto count = m_stmts->getCount();
   for (int i = 0; i < count; i++) {
-    IfBranchStatementPtr branch =
-      dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
+    auto branch = dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
     assert(branch != nullptr); // this cast always succeeds, by construction.
     auto condition = branch->getCondition();
     if (condition == nullptr) {

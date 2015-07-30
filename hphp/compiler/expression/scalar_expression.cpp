@@ -161,7 +161,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
         }
         m_translated.clear();
         if (b && b->is(BlockScope::ClassScope)) {
-          ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
+          auto clsScope = dynamic_pointer_cast<ClassScope>(b);
           if (!clsScope->isTrait()) {
             m_translated = clsScope->getOriginalName();
           }

@@ -180,8 +180,7 @@ void ListAssignment::setLValue() {
       ExpressionPtr exp = (*m_variables)[i];
       if (exp) {
         if (exp->is(Construct::KindOfListAssignment)) {
-          ListAssignmentPtr sublist =
-            dynamic_pointer_cast<ListAssignment>(exp);
+          auto sublist = dynamic_pointer_cast<ListAssignment>(exp);
           sublist->setLValue();
         } else {
           // Magic contexts I took from assignment expression

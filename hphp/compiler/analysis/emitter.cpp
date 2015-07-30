@@ -2338,8 +2338,7 @@ void EmitterVisitor::visitIfCondition(
   ExpressionPtr cond, Emitter& e, Label& tru, Label& fals,
   bool truFallthrough) {
 
-  BinaryOpExpressionPtr binOpNode(
-    dynamic_pointer_cast<BinaryOpExpression>(cond));
+  auto binOpNode = dynamic_pointer_cast<BinaryOpExpression>(cond);
 
   if (binOpNode) {
     int op = binOpNode->getOp();
@@ -2370,7 +2369,7 @@ void EmitterVisitor::visitIfCondition(
     }
   }
 
-  UnaryOpExpressionPtr unOpNode(dynamic_pointer_cast<UnaryOpExpression>(cond));
+  auto unOpNode = dynamic_pointer_cast<UnaryOpExpression>(cond);
   if (unOpNode) {
     int op = unOpNode->getOp();
     // Logical not
@@ -2434,7 +2433,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
 
   AnalysisResultPtr ar(file->getContainingProgram());
   assert(ar);
-  MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(func->getStmt()));
+  auto m = dynamic_pointer_cast<MethodStatement>(func->getStmt());
   if (!m) return;
   StatementListPtr stmts(m->getStmts());
   if (!stmts) return;
@@ -2444,7 +2443,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
   int i, nk = stmts->getCount();
   for (i = 0; i < nk; i++) {
     StatementPtr s = (*stmts)[i];
-    if (MethodStatementPtr meth = dynamic_pointer_cast<MethodStatement>(s)) {
+    if (auto meth = dynamic_pointer_cast<MethodStatement>(s)) {
       // Emit afterwards
       postponeMeth(meth, nullptr, true);
     }
@@ -3128,8 +3127,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     Offset start = InvalidAbsoluteOffset;
 
     bool enabled = RuntimeOption::EnableEmitSwitch;
-    SimpleFunctionCallPtr
-      call(dynamic_pointer_cast<SimpleFunctionCall>(subject));
+    auto call = dynamic_pointer_cast<SimpleFunctionCall>(subject);
 
     SwitchState state;
     bool didSwitch = false;
@@ -3443,8 +3441,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitArrayInit(e, el);
       return true;
     } else if (op == T_ISSET) {
-      ExpressionListPtr list =
-        dynamic_pointer_cast<ExpressionList>(u->getExpression());
+      auto list = dynamic_pointer_cast<ExpressionList>(u->getExpression());
       if (list) {
         // isset($a, $b, ...)  ==>  isset($a) && isset($b) && ...
         Label done;
@@ -3634,8 +3631,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitConvertToCell(e);
       ExpressionPtr second = b->getExp2();
       if (second->isScalar()) {
-        ScalarExpressionPtr scalar =
-          dynamic_pointer_cast<ScalarExpression>(second);
+        auto scalar = dynamic_pointer_cast<ScalarExpression>(second);
         bool notQuoted = scalar && !scalar->isQuoted();
         std::string s = second->getLiteralString();
         if (s == "static" && notQuoted) {
@@ -4301,7 +4297,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         Strings::NULLSAFE_PROP_WRITE_ERROR);
     }
     ExpressionPtr obj = op->getObject();
-    SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(obj);
+    auto sv = dynamic_pointer_cast<SimpleVariable>(obj);
     if (sv && sv->isThis() && sv->hasContext(Expression::ObjectContext)) {
       e.CheckThis();
       m_evalStack.push(StackSym::H);
@@ -6696,12 +6692,11 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
       pi.phpCode = phpCode;
     }
 
-    ExpressionListPtr paramUserAttrs =
+    auto paramUserAttrs =
       dynamic_pointer_cast<ExpressionList>(par->userAttributeList());
     if (paramUserAttrs) {
       for (int j = 0; j < paramUserAttrs->getCount(); ++j) {
-        UserAttributePtr a = dynamic_pointer_cast<UserAttribute>(
-          (*paramUserAttrs)[j]);
+        auto a = dynamic_pointer_cast<UserAttribute>((*paramUserAttrs)[j]);
         StringData* uaName = makeStaticString(a->getName());
         ExpressionPtr uaValue = a->getExp();
         assert(uaValue);
@@ -6763,7 +6758,7 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
     auto funcName = funcScope->getScopeName();
     BlockScopeRawPtr b = funcScope->getOuterScope();
     if (b && b->is(BlockScope::ClassScope)) {
-      ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
+      auto clsScope = dynamic_pointer_cast<ClassScope>(b);
       if (clsScope->isTrait()) {
         e.Self();
         e.NameA();
@@ -7691,16 +7686,14 @@ void EmitterVisitor::emitClassTraitAliasRule(PreClassEmitter* pce,
 
 void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
                                        UseTraitStatementPtr useStmt) {
-  StatementListPtr rules = useStmt->getStmts();
+  auto rules = useStmt->getStmts();
   for (int r = 0; r < rules->getCount(); r++) {
-    StatementPtr rule = (*rules)[r];
-    TraitPrecStatementPtr precStmt =
-      dynamic_pointer_cast<TraitPrecStatement>(rule);
+    auto rule = (*rules)[r];
+    auto precStmt = dynamic_pointer_cast<TraitPrecStatement>(rule);
     if (precStmt) {
       emitClassTraitPrecRule(pce, precStmt);
     } else {
-      TraitAliasStatementPtr aliasStmt =
-        dynamic_pointer_cast<TraitAliasStatement>(rule);
+      auto aliasStmt = dynamic_pointer_cast<TraitAliasStatement>(rule);
       assert(aliasStmt);
       emitClassTraitAliasRule(pce, aliasStmt);
     }
@@ -7870,15 +7863,13 @@ void EmitterVisitor::emitClass(Emitter& e,
   if (StatementListPtr stmts = is->getStmts()) {
     int i, n = stmts->getCount();
     for (i = 0; i < n; i++) {
-      if (MethodStatementPtr meth =
-          dynamic_pointer_cast<MethodStatement>((*stmts)[i])) {
+      if (auto meth = dynamic_pointer_cast<MethodStatement>((*stmts)[i])) {
         StringData* methName = makeStaticString(meth->getOriginalName());
         FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
         bool added UNUSED = pce->addMethod(fe);
         assert(added);
         postponeMeth(meth, fe, false);
-      } else if (ClassVariablePtr cv =
-                 dynamic_pointer_cast<ClassVariable>((*stmts)[i])) {
+      } else if (auto cv = dynamic_pointer_cast<ClassVariable>((*stmts)[i])) {
         ModifierExpressionPtr mod(cv->getModifiers());
         ExpressionListPtr el(cv->getVarList());
         Attr declAttrs = buildAttrs(mod);
@@ -7936,8 +7927,7 @@ void EmitterVisitor::emitClass(Emitter& e,
                              propDoc, &tvVal, RepoAuthType{});
           assert(added);
         }
-      } else if (ClassConstantPtr cc =
-                 dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
+      } else if (auto cc = dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
 
         ExpressionListPtr el(cc->getConList());
         StringData* typeConstraint =
@@ -7992,7 +7982,7 @@ void EmitterVisitor::emitClass(Emitter& e,
             assert(added);
           }
         }
-      } else if (UseTraitStatementPtr useStmt =
+      } else if (auto useStmt =
                  dynamic_pointer_cast<UseTraitStatement>((*stmts)[i])) {
         emitClassUseTrait(pce, useStmt);
       }
@@ -8930,7 +8920,7 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
       }
     }
   }
-  if (ExpressionPtr e = dynamic_pointer_cast<Expression>(c)) {
+  if (auto e = dynamic_pointer_cast<Expression>(c)) {
     switch (e->getKindOf()) {
       case Expression::KindOfBinaryOpExpression:
       case Expression::KindOfUnaryOpExpression:
@@ -8962,8 +8952,8 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
     }
   }
 
-  MethodStatementPtr msp(dynamic_pointer_cast<MethodStatement>(
-                         fsp->getPseudoMain()->getStmt()));
+  auto msp =
+    dynamic_pointer_cast<MethodStatement>(fsp->getPseudoMain()->getStmt());
   UnitEmitter* ue = new UnitEmitter(md5);
   ue->m_preloadPriority = fsp->preloadPriority();
   ue->initMain(msp->line0(), msp->line1());

@@ -40,7 +40,7 @@ SwitchStatement::SwitchStatement
     m_exp(exp), m_cases(cases) {
   if (m_cases && m_exp->is(Expression::KindOfSimpleVariable)) {
     for (int i = m_cases->getCount(); i--; ) {
-      CaseStatementPtr c(dynamic_pointer_cast<CaseStatement>((*m_cases)[i]));
+      auto c = dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
       if (c->getCondition() && c->getCondition()->hasEffect()) {
         m_exp->setContext(Expression::LValue);
         m_exp->setContext(Expression::NoLValueWrapper);
@@ -73,17 +73,15 @@ void SwitchStatement::analyzeProgram(AnalysisResultPtr ar) {
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
       m_exp->is(Expression::KindOfSimpleVariable)) {
-    SimpleVariablePtr exp = dynamic_pointer_cast<SimpleVariable>(m_exp);
+    auto exp = dynamic_pointer_cast<SimpleVariable>(m_exp);
     if (exp && exp->getSymbol() && exp->getSymbol()->isClassName()) {
       // Mark some classes as volatile since the name is used in switch
       for (int i = 0; i < m_cases->getCount(); i++) {
-        CaseStatementPtr stmt =
-          dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
+        auto stmt = dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
         assert(stmt);
         ExpressionPtr caseCond = stmt->getCondition();
         if (caseCond && caseCond->isScalar()) {
-          ScalarExpressionPtr name =
-            dynamic_pointer_cast<ScalarExpression>(caseCond);
+          auto name = dynamic_pointer_cast<ScalarExpression>(caseCond);
           if (name && name->isLiteralString()) {
             string className = name->getLiteralString();
             ClassScopePtr cls = ar->findClass(toLower(className));

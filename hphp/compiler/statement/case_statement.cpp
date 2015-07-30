@@ -46,30 +46,26 @@ StatementPtr CaseStatement::clone() {
 
 bool CaseStatement::isLiteralInteger() const {
   if (!m_condition->is(Expression::KindOfScalarExpression)) return false;
-  ScalarExpressionPtr exp =
-    dynamic_pointer_cast<ScalarExpression>(m_condition);
-  return exp->isLiteralInteger();
+  return dynamic_pointer_cast<ScalarExpression>(m_condition)
+    ->isLiteralInteger();
 }
 
 bool CaseStatement::isLiteralString() const {
   if (!m_condition->is(Expression::KindOfScalarExpression)) return false;
-  ScalarExpressionPtr exp =
-    dynamic_pointer_cast<ScalarExpression>(m_condition);
-  return exp->isLiteralString();
+  return dynamic_pointer_cast<ScalarExpression>(m_condition)
+    ->isLiteralString();
 }
 
 int64_t CaseStatement::getLiteralInteger() const {
   assert(m_condition->is(Expression::KindOfScalarExpression));
-  ScalarExpressionPtr exp =
-    dynamic_pointer_cast<ScalarExpression>(m_condition);
-  return exp->getLiteralInteger();
+  return dynamic_pointer_cast<ScalarExpression>(m_condition)
+    ->getLiteralInteger();
 }
 
 std::string CaseStatement::getLiteralString() const {
   assert(m_condition->is(Expression::KindOfScalarExpression));
-  ScalarExpressionPtr exp =
-    dynamic_pointer_cast<ScalarExpression>(m_condition);
-  return exp->getLiteralString();
+  return dynamic_pointer_cast<ScalarExpression>(m_condition)
+    ->getLiteralString();
 }
 
 void CaseStatement::analyzeProgram(AnalysisResultPtr ar) {

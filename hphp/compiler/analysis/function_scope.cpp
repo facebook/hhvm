@@ -184,14 +184,14 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
   }
 
   if (m_stmt) {
-    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+    auto stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     StatementListPtr stmts = stmt->getStmts();
     if (stmts) {
       for (int i = 0; i < stmts->getCount(); i++) {
         StatementPtr stmt = (*stmts)[i];
         stmt->setFileLevel();
         if (stmt->is(Statement::KindOfExpStatement)) {
-          ExpStatementPtr expStmt = dynamic_pointer_cast<ExpStatement>(stmt);
+          auto expStmt = dynamic_pointer_cast<ExpStatement>(stmt);
           ExpressionPtr exp = expStmt->getExpression();
           exp->setTopLevel();
         }
@@ -242,14 +242,13 @@ void FunctionScope::setParamCounts(AnalysisResultConstPtr ar, int minParam,
     m_refs.resize(m_numDeclParams);
 
     if (m_stmt) {
-      MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+      auto stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
       ExpressionListPtr params = stmt->getParams();
 
       for (int i = 0; i < m_numDeclParams; i++) {
         if (stmt->isRef(i)) m_refs[i] = true;
 
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+        auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         m_paramNames[i] = param->getName();
       }
       assert(m_paramNames.size() == m_numDeclParams);
@@ -429,7 +428,7 @@ bool FunctionScope::hasImpl() const {
     return !isAbstract();
   }
   if (m_stmt) {
-    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+    auto stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     return stmt->getStmts() != nullptr;
   }
   return false;
@@ -467,7 +466,7 @@ const std::string &FunctionScope::getOriginalName() const {
 
 std::string FunctionScope::getOriginalFullName() const {
   if (m_stmt) {
-    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+    auto stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     return stmt->getOriginalFullName();
   }
   return m_scopeName;
@@ -673,8 +672,7 @@ void FunctionScope::getClosureUseVars(
   assert(isClosure());
   VariableTablePtr variables = getVariables();
   for (int i = 0; i < m_closureVars->getCount(); i++) {
-    ParameterExpressionPtr param =
-      dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
+    auto param = dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
     auto const& name = param->getName();
     if (!filterUsed || variables->isUsed(name)) {
       useVars.push_back(ParameterExpressionPtrIdxPair(param, i));

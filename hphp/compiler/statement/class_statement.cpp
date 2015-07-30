@@ -92,13 +92,12 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   std::vector<UserAttributePtr> attrs;
   if (m_attrList) {
     for (int i = 0; i < m_attrList->getCount(); ++i) {
-      UserAttributePtr a =
-        dynamic_pointer_cast<UserAttribute>((*m_attrList)[i]);
+      auto a = dynamic_pointer_cast<UserAttribute>((*m_attrList)[i]);
       attrs.push_back(a);
     }
   }
 
-  StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
+  auto stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   auto classScope = std::make_shared<ClassScope>(
     fs, kindOf, m_originalName,
     m_originalParent,
@@ -120,8 +119,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
 
     // flatten continuation StatementList into MethodStatements
     for (int i = 0; i < m_stmt->getCount(); i++) {
-      StatementListPtr stmts =
-        dynamic_pointer_cast<StatementList>((*m_stmt)[i]);
+      auto stmts = dynamic_pointer_cast<StatementList>((*m_stmt)[i]);
       if (stmts) {
         m_stmt->removeElement(i);
         for (int j = 0; j < stmts->getCount(); j++) {
@@ -131,8 +129,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     }
 
     for (int i = 0; i < m_stmt->getCount(); i++) {
-      MethodStatementPtr meth =
-        dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
+      auto meth = dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
       if (meth) {
         if (meth->isNamed("__construct")) {
           constructor = meth;
@@ -154,8 +151,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
 
     for (int i = 0; i < m_stmt->getCount(); i++) {
       if (!constructor) {
-        MethodStatementPtr meth =
-          dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
+        auto meth = dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
         if (meth &&
             meth->isNamed(classScope->getOriginalName()) &&
             !classScope->isTrait()) {
@@ -164,7 +160,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
           classScope->setAttribute(ClassScope::ClassNameConstructor);
         }
       }
-      IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
+      auto ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
       ph->onParseRecur(ar, fs, classScope);
     }
     if (constructor && constructor->getModifiers()->isStatic()) {

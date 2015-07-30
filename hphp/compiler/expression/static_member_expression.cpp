@@ -39,7 +39,7 @@ StaticMemberExpression::StaticMemberExpression
     StaticClassName(classExp), m_exp(exp), m_valid(false),
     m_dynamicClass(false) {
   if (exp->is(KindOfSimpleVariable)) {
-    SimpleVariablePtr s(dynamic_pointer_cast<SimpleVariable>(exp));
+    auto s = dynamic_pointer_cast<SimpleVariable>(exp);
     m_exp = ExpressionPtr
       (new ScalarExpression(getScope(), getRange(),
                             T_STRING, s->getName(), true));
@@ -67,7 +67,7 @@ ExpressionPtr StaticMemberExpression::clone() {
 bool StaticMemberExpression::findMember(AnalysisResultPtr ar, std::string &name,
                                         Symbol *&sym) {
   if (m_exp->is(Expression::KindOfScalarExpression)) {
-    ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+    auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     name = var->getString();
   }
 
@@ -159,7 +159,7 @@ void StaticMemberExpression::outputCodeModel(CodeGenerator &cg) {
   StaticClassName::outputCodeModel(cg);
   if (m_exp->is(Expression::KindOfScalarExpression)) {
     cg.printPropertyHeader("propertyName");
-    ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+    auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     cg.printValue(var->getString());
   } else {
     cg.printPropertyHeader("propertyExpression");
@@ -182,7 +182,7 @@ void StaticMemberExpression::outputPHP(CodeGenerator &cg,
   switch (m_exp->getKindOf()) {
   case KindOfScalarExpression:
     {
-      ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+      auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
       cg_printf("%s", var->getString().c_str());
       return;
     }

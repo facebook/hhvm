@@ -945,8 +945,7 @@ template<>
 int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
   int updates, all_updates = 0;
   StatementPtr stmt = scope->getStmt();
-  if (MethodStatementPtr m =
-      dynamic_pointer_cast<MethodStatement>(stmt)) {
+  if (auto m = dynamic_pointer_cast<MethodStatement>(stmt)) {
     do {
       scope->clearUpdated();
       StatementPtr rep = this->visitStmtRecur(stmt);

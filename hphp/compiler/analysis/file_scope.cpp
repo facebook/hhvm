@@ -62,7 +62,7 @@ void FileScope::setFileLevel(StatementListPtr stmtList) {
     StatementPtr stmt = (*stmtList)[i];
     stmt->setFileLevel();
     if (stmt->is(Statement::KindOfExpStatement)) {
-      ExpStatementPtr expStmt = dynamic_pointer_cast<ExpStatement>(stmt);
+      auto expStmt = dynamic_pointer_cast<ExpStatement>(stmt);
       ExpressionPtr exp = expStmt->getExpression();
       exp->setFileLevel();
     }

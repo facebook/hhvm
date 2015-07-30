@@ -360,7 +360,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
 void UnaryOpExpression::setExistContext() {
   if (m_exp) {
     if (m_exp->is(Expression::KindOfExpressionList)) {
-      ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(m_exp);
+      auto exps = dynamic_pointer_cast<ExpressionList>(m_exp);
       if (exps->getListKind() == ExpressionList::ListKindParam) {
         for (int i = 0; i < exps->getCount(); i++) {
           (*exps)[i]->setContext(Expression::ExistContext);

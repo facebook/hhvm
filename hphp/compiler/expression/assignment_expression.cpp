@@ -75,8 +75,7 @@ void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
                                         ClassScopePtr scope) {
   auto isArray = false;
   if (m_value->is(Expression::KindOfUnaryOpExpression)) {
-    UnaryOpExpressionPtr uexp =
-      dynamic_pointer_cast<UnaryOpExpression>(m_value);
+    auto uexp = dynamic_pointer_cast<UnaryOpExpression>(m_value);
     if (uexp->getOp() == T_ARRAY) {
       isArray = true;
     }
@@ -91,11 +90,10 @@ void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
                      Compiler::NoError,
                      "Arrays are not allowed in class constants");
     }
-    ConstantExpressionPtr exp =
-      dynamic_pointer_cast<ConstantExpression>(m_variable);
+    auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
     scope->getConstants()->add(exp->getName(), m_value, ar, m_variable);
   } else if (m_variable->is(Expression::KindOfSimpleVariable)) {
-    SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(m_variable);
+    auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
     scope->getVariables()->add(var->getName(), true, ar,
                                shared_from_this(), scope->getModifiers());
     var->clearContext(Declaration); // to avoid wrong CodeError
@@ -116,16 +114,14 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_value->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     if (m_ref && m_variable->is(Expression::KindOfSimpleVariable)) {
-      SimpleVariablePtr var =
-        dynamic_pointer_cast<SimpleVariable>(m_variable);
-      const std::string &name = var->getName();
+      auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
+      const auto& name = var->getName();
       VariableTablePtr variables = getScope()->getVariables();
       variables->addUsed(name);
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_variable->is(Expression::KindOfConstantExpression)) {
-      ConstantExpressionPtr exp =
-        dynamic_pointer_cast<ConstantExpression>(m_variable);
+      auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
       if (!m_value->isScalar()) {
         getScope()->getConstants()->setDynamic(ar, exp->getName());
       }
@@ -188,8 +184,7 @@ bool AssignmentExpression::isSimpleGlobalAssign(StringData **name,
 
 ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
-    SimpleVariablePtr var =
-      dynamic_pointer_cast<SimpleVariable>(m_variable);
+    auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
     if (var->checkUnused() &&
         !CheckNeeded(var, m_value)) {
       if (m_value->getContainedEffects() != getContainedEffects()) {

@@ -260,8 +260,7 @@ bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
   bool needed = true;
   if (value) needed = CheckNeededRHS(value);
   if (variable->is(Expression::KindOfSimpleVariable)) {
-    SimpleVariablePtr var =
-      dynamic_pointer_cast<SimpleVariable>(variable);
+    auto var = dynamic_pointer_cast<SimpleVariable>(variable);
     const std::string &name = var->getName();
     VariableTablePtr variables = var->getScope()->getVariables();
     if (needed) {

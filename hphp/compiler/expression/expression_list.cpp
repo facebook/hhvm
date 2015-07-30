@@ -70,7 +70,7 @@ void ExpressionList::setContext(Context context) {
 // parser functions
 
 void ExpressionList::addElement(ExpressionPtr exp) {
-  ArrayPairExpressionPtr ap = dynamic_pointer_cast<ArrayPairExpression>(exp);
+  auto ap = dynamic_pointer_cast<ArrayPairExpression>(exp);
   if (ap) {
     if (m_elems_kind == ElemsKind::None) m_elems_kind = ElemsKind::ArrayPairs;
   } else {
@@ -121,15 +121,15 @@ bool ExpressionList::isScalar() const {
 }
 
 bool ExpressionList::isNoObjectInvolved() const {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    if (!m_exps[i]->isScalar()) return false;
+  for (const auto& exp : m_exps) {
+    if (!exp->isScalar()) return false;
   }
   return true;
 }
 
 bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    if (m_exps[i]->containsDynamicConstant(ar)) return true;
+  for (const auto& exp : m_exps) {
+    if (exp->containsDynamicConstant(ar)) return true;
   }
   return false;
 }
@@ -139,9 +139,8 @@ bool ExpressionList::isScalarArrayPairs() const {
       m_elems_kind != ElemsKind::Collection) {
     return false;
   }
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ArrayPairExpressionPtr exp =
-      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+  for (const auto& ape : m_exps) {
+    auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
     if (!exp || !exp->isScalarArrayPair()) {
       return false;
     }
@@ -150,8 +149,8 @@ bool ExpressionList::isScalarArrayPairs() const {
 }
 
 void ExpressionList::getStrings(std::vector<std::string> &strings) {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ScalarExpressionPtr s = dynamic_pointer_cast<ScalarExpression>(m_exps[i]);
+  for (const auto& exp : m_exps) {
+    auto s = dynamic_pointer_cast<ScalarExpression>(exp);
     strings.push_back(s->getString());
   }
 }
@@ -159,18 +158,16 @@ void ExpressionList::getStrings(std::vector<std::string> &strings) {
 bool ExpressionList::flattenLiteralStrings(
   std::vector<ExpressionPtr>& literals
 ) const {
-  for (unsigned i = 0; i < m_exps.size(); i++) {
-    ExpressionPtr e = m_exps[i];
+  for (auto e : m_exps) {
     if (e->is(Expression::KindOfArrayPairExpression)) {
-      ArrayPairExpressionPtr ap = dynamic_pointer_cast<ArrayPairExpression>(e);
+      auto ap = dynamic_pointer_cast<ArrayPairExpression>(e);
       if (ap->getName()) return false;
       e = ap->getValue();
     }
     if (e->is(Expression::KindOfUnaryOpExpression)) {
-      UnaryOpExpressionPtr unary = dynamic_pointer_cast<UnaryOpExpression>(e);
+      auto unary = dynamic_pointer_cast<UnaryOpExpression>(e);
       if (unary->getOp() == T_ARRAY) {
-        ExpressionListPtr el =
-          dynamic_pointer_cast<ExpressionList>(unary->getExpression());
+        auto el = dynamic_pointer_cast<ExpressionList>(unary->getExpression());
         if (!el->flattenLiteralStrings(literals)) {
           return false;
         }
@@ -189,11 +186,10 @@ bool ExpressionList::getScalarValue(Variant &value) {
   if (m_elems_kind != ElemsKind::None) {
     if (isScalarArrayPairs()) {
       ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
-      for (unsigned int i = 0; i < m_exps.size(); i++) {
-        ArrayPairExpressionPtr exp =
-          dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-        ExpressionPtr name = exp->getName();
-        ExpressionPtr val = exp->getValue();
+      for (const auto ape : m_exps) {
+        auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
+        auto name = exp->getName();
+        auto val = exp->getValue();
         if (!name) {
           Variant v;
           bool ret = val->getScalarValue(v);
@@ -409,19 +405,17 @@ void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 unsigned int ExpressionList::checkLitstrKeys() const {
   assert(m_elems_kind == ElemsKind::ArrayPairs);
   std::unordered_set<std::string> keys;
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ArrayPairExpressionPtr ap =
-      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-    ExpressionPtr name = ap->getName();
+  for (const auto exp : m_exps) {
+    auto ap = dynamic_pointer_cast<ArrayPairExpression>(exp);
+    auto name = ap->getName();
     if (!name) return 0;
     Variant value;
     bool ret = name->getScalarValue(value);
     if (!ret) return 0;
     if (!value.isString()) return 0;
-    String str = value.toString();
+    auto str = value.toString();
     if (str.isInteger()) return 0;
-    std::string s(str.data(), str.size());
-    keys.insert(s);
+    keys.emplace(str.data(), str.size());
   }
   return keys.size();
 }

@@ -354,18 +354,16 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
 
 void ClassScope::importTraitProperties(AnalysisResultPtr ar) {
 
-  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
-    ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
+  for (const auto& name : m_usedTraitNames) {
+    auto tCls = ar->findClass(name);
     if (!tCls) continue;
-    ClassStatementPtr tStmt =
-      dynamic_pointer_cast<ClassStatement>(tCls->getStmt());
-    StatementListPtr tStmts = tStmt->getStmts();
+    auto tStmt = dynamic_pointer_cast<ClassStatement>(tCls->getStmt());
+    auto tStmts = tStmt->getStmts();
     if (!tStmts) continue;
     for (int s = 0; s < tStmts->getCount(); s++) {
-      ClassVariablePtr prop =
-        dynamic_pointer_cast<ClassVariable>((*tStmts)[s]);
+      auto prop = dynamic_pointer_cast<ClassVariable>((*tStmts)[s]);
       if (prop) {
-        ClassVariablePtr cloneProp = dynamic_pointer_cast<ClassVariable>(
+        auto cloneProp = dynamic_pointer_cast<ClassVariable>(
           dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(prop));
         cloneProp->resetScope(shared_from_this());
         cloneProp->addTraitPropsToScope(ar,
@@ -383,7 +381,7 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
   std::string origMethName = traitMethod.originalName;
   ModifierExpressionPtr modifiers = traitMethod.modifiers;
 
-  MethodStatementPtr cloneMeth = dynamic_pointer_cast<MethodStatement>(
+  auto cloneMeth = dynamic_pointer_cast<MethodStatement>(
     dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(meth));
   cloneMeth->setOriginalName(origMethName);
   // Note: keep previous modifiers if none specified when importing the trait
@@ -393,7 +391,7 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
   FunctionScopePtr funcScope = meth->getFunctionScope();
 
   // Trait method typehints, self and parent, need to be converted
-  ClassScopePtr cScope = dynamic_pointer_cast<ClassScope>(shared_from_this());
+  auto cScope = dynamic_pointer_cast<ClassScope>(shared_from_this());
   cloneMeth->fixupSelfAndParentTypehints( cScope );
 
   auto cloneFuncScope =
@@ -424,8 +422,8 @@ void ClassScope::informClosuresAboutScopeClone(
   }
 
   for (int i = 0; i < root->getKidCount(); i++) {
-    ConstructPtr cons = root->getNthKid(i);
-    ClosureExpressionPtr closure =
+    auto cons = root->getNthKid(i);
+    auto closure =
       dynamic_pointer_cast<ClosureExpression>(cons);
 
     if (!closure) {
@@ -478,14 +476,12 @@ void findTraitMethodsToImport(AnalysisResultPtr ar,
                               ClassScopePtr trait,
                               ClassScope::TMIData& tmid) {
   assert(Option::WholeProgram);
-  ClassStatementPtr tStmt =
-    dynamic_pointer_cast<ClassStatement>(trait->getStmt());
+  auto tStmt = dynamic_pointer_cast<ClassStatement>(trait->getStmt());
   StatementListPtr tStmts = tStmt->getStmts();
   if (!tStmts) return;
 
   for (int s = 0; s < tStmts->getCount(); s++) {
-    MethodStatementPtr meth =
-      dynamic_pointer_cast<MethodStatement>((*tStmts)[s]);
+    auto meth = dynamic_pointer_cast<MethodStatement>((*tStmts)[s]);
     if (meth) {
       ClassScope::TraitMethod traitMethod(trait, meth,
                                           ModifierExpressionPtr(),
@@ -504,14 +500,12 @@ MethodStatementPtr findTraitMethodImpl(AnalysisResultPtr ar,
   }
   visitedTraits.insert(trait);
 
-  ClassStatementPtr tStmt =
-    dynamic_pointer_cast<ClassStatement>(trait->getStmt());
+  auto tStmt = dynamic_pointer_cast<ClassStatement>(trait->getStmt());
   StatementListPtr tStmts = tStmt->getStmts();
 
   // Look in the current trait.
   for (int s = 0; s < tStmts->getCount(); s++) {
-    MethodStatementPtr meth =
-      dynamic_pointer_cast<MethodStatement>((*tStmts)[s]);
+    auto meth = dynamic_pointer_cast<MethodStatement>((*tStmts)[s]);
     if (meth) { // handle methods
       if (meth->isNamed(methodName)) {
         return meth;
@@ -521,8 +515,7 @@ MethodStatementPtr findTraitMethodImpl(AnalysisResultPtr ar,
 
   // Look into children traits.
   for (int s = 0; s < tStmts->getCount(); s++) {
-    UseTraitStatementPtr useTraitStmt =
-      dynamic_pointer_cast<UseTraitStatement>((*tStmts)[s]);
+    auto useTraitStmt = dynamic_pointer_cast<UseTraitStatement>((*tStmts)[s]);
     if (useTraitStmt) {
       std::vector<std::string> usedTraits;
       useTraitStmt->getUsedTraitNames(usedTraits);
@@ -588,30 +581,26 @@ ClassScope::TMIOps::findTraitMethod(ClassScope* cs,
 }
 
 void ClassScope::applyTraitRules(TMIData& tmid) {
-  ClassStatementPtr classStmt =
-    dynamic_pointer_cast<ClassStatement>(getStmt());
+  auto classStmt = dynamic_pointer_cast<ClassStatement>(getStmt());
   assert(classStmt);
 
-  StatementListPtr stmts = classStmt->getStmts();
+  auto stmts = classStmt->getStmts();
   if (!stmts) return;
 
   for (int s = 0; s < stmts->getCount(); s++) {
-    StatementPtr stmt = (*stmts)[s];
+    auto stmt = (*stmts)[s];
 
-    UseTraitStatementPtr useStmt =
-      dynamic_pointer_cast<UseTraitStatement>(stmt);
+    auto useStmt = dynamic_pointer_cast<UseTraitStatement>(stmt);
     if (!useStmt) continue;
 
-    StatementListPtr rules = useStmt->getStmts();
+    auto rules = useStmt->getStmts();
     for (int r = 0; r < rules->getCount(); r++) {
-      StatementPtr rule = (*rules)[r];
-      TraitPrecStatementPtr precStmt =
-        dynamic_pointer_cast<TraitPrecStatement>(rule);
+      auto rule = (*rules)[r];
+      auto precStmt = dynamic_pointer_cast<TraitPrecStatement>(rule);
       if (precStmt) {
         tmid.applyPrecRule(precStmt);
       } else {
-        TraitAliasStatementPtr aliasStmt =
-          dynamic_pointer_cast<TraitAliasStatement>(rule);
+        auto aliasStmt = dynamic_pointer_cast<TraitAliasStatement>(rule);
         assert(aliasStmt);
         tmid.applyAliasRule(aliasStmt, this);
       }

@@ -100,8 +100,7 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
   ms.add("name",       m_name);
   ms.add("initializer");
   if (m_value) {
-    ExpressionPtr valueExp(
-      dynamic_pointer_cast<Expression>(m_value));
+    auto valueExp = dynamic_pointer_cast<Expression>(m_value);
     assert(valueExp);
     auto const init = ExtractInitializer(out.analysisResult(), valueExp);
     if (!init.empty()) out << init;
@@ -149,8 +148,7 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
 
   ms.add("initializer");
   if (m_initVal) {
-    ExpressionPtr initExp(
-      dynamic_pointer_cast<Expression>(m_initVal));
+    auto initExp = dynamic_pointer_cast<Expression>(m_initVal);
     assert(initExp);
     auto const init = ExtractInitializer(out.analysisResult(), initExp);
     if (!init.empty()) out << init;

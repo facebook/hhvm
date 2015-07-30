@@ -175,8 +175,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
         // need to register the constant before AnalyzeAll, so that
         // DefinedFunction can mark this volatile
         ExpressionPtr ename = (*m_params)[0];
-        if (ConstantExpressionPtr cname =
-            dynamic_pointer_cast<ConstantExpression>(ename)) {
+        if (auto cname = dynamic_pointer_cast<ConstantExpression>(ename)) {
           /*
             Hack: If the name of the constant being defined is itself
             a constant expression, assume that its not yet defined.
@@ -186,8 +185,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
           m_params->removeElement(0);
           m_params->insertElement(ename);
         }
-        ScalarExpressionPtr name =
-          dynamic_pointer_cast<ScalarExpression>(ename);
+        auto name = dynamic_pointer_cast<ScalarExpression>(ename);
         if (name) {
           auto const varName = name->getIdentifier();
           if (varName.empty()) break;
@@ -392,8 +390,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         m_params && m_params->getCount() >= 1) {
       ExpressionPtr value = (*m_params)[0];
       if (value->isScalar()) {
-        ScalarExpressionPtr name =
-          dynamic_pointer_cast<ScalarExpression>(value);
+        auto name = dynamic_pointer_cast<ScalarExpression>(value);
         if (name && name->isLiteralString()) {
           auto const symbol = name->getLiteralString();
           switch (m_type) {
@@ -458,7 +455,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       } else if ((m_type == FunType::InterfaceExists ||
                   m_type == FunType::ClassExists) &&
                  value->is(KindOfSimpleVariable)) {
-        SimpleVariablePtr name = dynamic_pointer_cast<SimpleVariable>(value);
+        auto name = dynamic_pointer_cast<SimpleVariable>(value);
         if (name && name->getSymbol()) {
           // name is checked as class name
           name->getSymbol()->setClassName();
@@ -622,8 +619,7 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
   if (m_type == FunType::Define && m_params &&
       unsigned(m_params->getCount() - 2) <= 1u) {
     if (m_dynamicConstant) return false;
-    ScalarExpressionPtr name =
-      dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
+    auto name = dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
     if (!name) return false;
     auto const varName = name->getIdentifier();
     if (varName.empty()) return false;
@@ -716,8 +712,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
             int n = arr ? arr->getCount() : 0;
             int i, j, k;
             for (i = j = k = 0; i < n; i++) {
-              ArrayPairExpressionPtr ap(
-                dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]));
+              auto ap = dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]);
               always_assert(ap);
               String name;
               Variant voff;
@@ -869,7 +864,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
        m_params->getCount() == 1)) {
     ExpressionPtr value = (*m_params)[0];
     if (value->isScalar()) {
-      ScalarExpressionPtr name = dynamic_pointer_cast<ScalarExpression>(value);
+      auto name = dynamic_pointer_cast<ScalarExpression>(value);
       if (name && name->isLiteralString()) {
         auto symbol = name->getLiteralString();
         switch (m_type) {
@@ -936,7 +931,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             if (constants->isDynamic(symbol)) return ExpressionPtr();
             Lock lock(BlockScope::s_constMutex);
             ConstructPtr decl = constants->getValue(symbol);
-            ExpressionPtr constValue = dynamic_pointer_cast<Expression>(decl);
+            auto constValue = dynamic_pointer_cast<Expression>(decl);
             if (constValue->isScalar()) {
               return CONSTANT("true");
             }
@@ -1101,10 +1096,8 @@ SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
                                            ExpressionPtr funcName,
                                            ClassScopePtr &clsScope) {
   clsScope.reset();
-  ScalarExpressionPtr clsName0(
-      dynamic_pointer_cast<ScalarExpression>(clsName));
-  ScalarExpressionPtr funcName0(
-      dynamic_pointer_cast<ScalarExpression>(funcName));
+  auto clsName0 = dynamic_pointer_cast<ScalarExpression>(clsName);
+  auto funcName0 = dynamic_pointer_cast<ScalarExpression>(funcName);
   if (clsName0 && funcName0) {
     auto const cname = clsName0->getLiteralString();
     auto const fname = funcName0->getLiteralString();

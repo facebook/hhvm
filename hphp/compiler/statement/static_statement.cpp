@@ -68,11 +68,10 @@ void StaticStatement::analyzeProgram(AnalysisResultPtr ar) {
         (*m_exp)[i] = exp;
       }
       always_assert(exp->is(Expression::KindOfAssignmentExpression));
-      AssignmentExpressionPtr assignment_exp =
-        dynamic_pointer_cast<AssignmentExpression>(exp);
+      auto assignment_exp = dynamic_pointer_cast<AssignmentExpression>(exp);
       variable = assignment_exp->getVariable();
       value = assignment_exp->getValue();
-      SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
+      auto var = dynamic_pointer_cast<SimpleVariable>(variable);
       // set the Declaration context here instead of all over this file - this phase
       // is the first to run
       var->setContext(Expression::Declaration);
@@ -109,16 +108,14 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr ar) {
-  BlockScopePtr scope = getScope();
   for (int i = 0; i < m_exp->getCount(); i++) {
-    ExpressionPtr exp = (*m_exp)[i];
-    AssignmentExpressionPtr assignment_exp =
+    auto exp = (*m_exp)[i];
+    auto assignment_exp =
       dynamic_pointer_cast<AssignmentExpression>(exp);
-    ExpressionPtr variable = assignment_exp->getVariable();
-    ExpressionPtr value = assignment_exp->getValue();
-    SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
+    auto var =
+      dynamic_pointer_cast<SimpleVariable>(assignment_exp->getVariable());
     Symbol *sym = var->getSymbol();
-    sym->setStaticInitVal(value);
+    sym->setStaticInitVal(assignment_exp->getValue());
   }
   return StatementPtr();
 }

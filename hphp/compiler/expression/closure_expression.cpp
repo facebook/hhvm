@@ -62,8 +62,7 @@ void ClosureExpression::initializeFromUseList(ExpressionListPtr vars) {
   auto seenBefore = collectParamNames();
 
   for (int i = vars->getCount() - 1; i >= 0; i--) {
-    ParameterExpressionPtr param(
-      dynamic_pointer_cast<ParameterExpression>((*vars)[i]));
+    auto param = dynamic_pointer_cast<ParameterExpression>((*vars)[i]);
     assert(param);
     if (param->getName() == "this") {
       // "this" is automatically included.
@@ -85,8 +84,7 @@ void ClosureExpression::initializeValuesFromVars() {
   m_values = ExpressionListPtr
     (new ExpressionList(m_vars->getScope(), m_vars->getRange()));
   for (int i = 0; i < m_vars->getCount(); i++) {
-    ParameterExpressionPtr param =
-      dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
+    auto param = dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
     auto const& name = param->getName();
 
     SimpleVariablePtr var(new SimpleVariable(param->getScope(),
@@ -166,8 +164,7 @@ void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
     VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
     VariableTablePtr containing = getFunctionScope()->getVariables();
     for (int i = 0; i < m_vars->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
+      auto param = dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
       auto const& name = param->getName();
       {
         Symbol *containingSym = containing->addDeclaredSymbol(name, param);
@@ -192,8 +189,7 @@ void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
     // closure function's variable table (not containing function's)
     VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
     for (int i = 0; i < m_vars->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
+      auto param = dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
       auto const& name = param->getName();
 
       // so we can assign values to them, instead of seeing CVarRef
@@ -286,8 +282,8 @@ bool ClosureExpression::hasStaticLocalsImpl(ConstructPtr root) {
   }
 
   for (int i = 0; i < root->getKidCount(); i++) {
-    ConstructPtr cons = root->getNthKid(i);
-    if (StatementPtr s = dynamic_pointer_cast<Statement>(cons)) {
+    auto cons = root->getNthKid(i);
+    if (auto s = dynamic_pointer_cast<Statement>(cons)) {
       if (s->is(Statement::KindOfStaticStatement)) {
         return true;
       }

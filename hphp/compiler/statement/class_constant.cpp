@@ -67,8 +67,7 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
 
   if (isAbstract()) {
     for (int i = 0; i < m_exp->getCount(); i++) {
-      ConstantExpressionPtr exp =
-        dynamic_pointer_cast<ConstantExpression>((*m_exp)[i]);
+      auto exp = dynamic_pointer_cast<ConstantExpression>((*m_exp)[i]);
       const std::string &name = exp->getName();
       if (constants->isPresent(name)) {
         exp->parseTimeFatal(fs,
@@ -87,11 +86,10 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
     }
   } else {
     for (int i = 0; i < m_exp->getCount(); i++) {
-      AssignmentExpressionPtr assignment =
+      auto assignment =
         dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
-
-      ExpressionPtr var = assignment->getVariable();
-      const std::string &name =
+      auto var = assignment->getVariable();
+      const auto& name =
         dynamic_pointer_cast<ConstantExpression>(var)->getName();
       if (constants->isPresent(name)) {
         assignment->parseTimeFatal(fs,
@@ -151,13 +149,13 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
 StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
   if (!isAbstract() && !isTypeconst()) {
     for (int i = 0; i < m_exp->getCount(); i++) {
-      AssignmentExpressionPtr assignment =
+      auto assignment =
         dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
 
-      ExpressionPtr var = assignment->getVariable();
-      ExpressionPtr val = assignment->getValue();
+      auto var = assignment->getVariable();
+      auto val = assignment->getValue();
 
-      const std::string &name =
+      const auto& name =
         dynamic_pointer_cast<ConstantExpression>(var)->getName();
 
       Symbol *sym = getScope()->getConstants()->getSymbol(name);

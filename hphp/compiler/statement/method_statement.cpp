@@ -99,7 +99,7 @@ std::string MethodStatement::getOriginalFullName() const {
 bool MethodStatement::isRef(int index /* = -1 */) const {
   if (index == -1) return m_ref;
   assert(index >= 0 && index < m_params->getCount());
-  ParameterExpressionPtr param =
+  auto param =
     dynamic_pointer_cast<ParameterExpression>((*m_params)[index]);
   return param->isRef();
 }
@@ -125,7 +125,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
     std::set<std::string> names, allDeclNames;
     int i = 0;
     numDeclParam = m_params->getCount();
-    ParameterExpressionPtr lastParam =
+    auto lastParam =
       dynamic_pointer_cast<ParameterExpression>(
         (*m_params)[numDeclParam - 1]);
     hasVariadicParam = lastParam->isVariadic();
@@ -139,8 +139,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
       i = numDeclParam - 1;
     }
     for (; i >= 0; --i) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       assert(!param->isVariadic());
       if (param->isRef()) { hasRef = true; }
       if (!param->isOptional()) {
@@ -154,8 +153,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
     // For the purpose of naming (having entered the the function body), a
     // variadic capture param acts as any other variable.
     for (i = (numDeclParam - 1); i >= 0; --i) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       if (names.find(param->getName()) != names.end()) {
         Compiler::Error(Compiler::RedundantParameter, param);
         for (int j = 0; j < 1000; j++) {
@@ -181,13 +179,12 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   std::vector<UserAttributePtr> attrs;
   if (m_attrList) {
     for (int i = 0; i < m_attrList->getCount(); ++i) {
-      UserAttributePtr a =
-        dynamic_pointer_cast<UserAttribute>((*m_attrList)[i]);
+      auto a = dynamic_pointer_cast<UserAttribute>((*m_attrList)[i]);
       attrs.push_back(a);
     }
   }
 
-  StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
+  auto stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   auto funcScope =
     std::make_shared<FunctionScope>(ar, m_method, m_originalName,
                                     stmt, m_ref, minParam, numDeclParam,
@@ -359,8 +356,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
   if (m_params) {
     auto nParams = m_params->getCount();
     for (int i = 0; i < nParams; i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       param->parseHandler(fileScope, classScope);
       // Variadic capture params don't need types because they'll
       // be treated as Arrays as far as HNI is concerned.
@@ -377,8 +373,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
 void MethodStatement::fixupSelfAndParentTypehints(ClassScopePtr scope) {
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       param->fixupSelfAndParentTypehints(scope);
     }
   }
@@ -612,8 +607,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 bool MethodStatement::hasRefParam() {
   for (int i = 0; i < m_params->getCount(); i++) {
-    ParameterExpressionPtr param =
-      dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+    auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
     if (param->isRef()) return true;
   }
   return false;

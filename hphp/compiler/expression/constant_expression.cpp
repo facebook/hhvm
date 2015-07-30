@@ -156,7 +156,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
     }
     if (!sym) break;
     if (!sym->isSystem()) BlockScope::s_constMutex.lock();
-    ExpressionPtr value = dynamic_pointer_cast<Expression>(sym->getValue());
+    auto value = dynamic_pointer_cast<Expression>(sym->getValue());
     if (!sym->isSystem()) BlockScope::s_constMutex.unlock();
 
     if (!value || !value->isScalar()) {

@@ -59,8 +59,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   // Correctness checks are normally done before adding function to scope.
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       if (param->hasTypeHint() && param->defaultValue()) {
         param->compatibleDefault(scope);
       }

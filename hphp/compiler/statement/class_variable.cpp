@@ -120,10 +120,9 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
     VariableTablePtr variables = scope->getVariables();
     ExpressionPtr exp = (*m_declaration)[i];
     if (exp->is(Expression::KindOfAssignmentExpression)) {
-      AssignmentExpressionPtr assignment =
-        dynamic_pointer_cast<AssignmentExpression>(exp);
+      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
       ExpressionPtr var = assignment->getVariable();
-      const std::string &name =
+      const auto& name =
         dynamic_pointer_cast<SimpleVariable>(var)->getName();
       if (variables->isPresent(name)) {
         exp->parseTimeFatal(fs,
@@ -155,25 +154,24 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
 
 void ClassVariable::analyzeProgram(AnalysisResultPtr ar) {
   m_declaration->analyzeProgram(ar);
-  AnalysisResult::Phase phase = ar->getPhase();
+  auto phase = ar->getPhase();
   if (phase != AnalysisResult::AnalyzeAll) {
     return;
   }
-  ClassScopePtr scope = getClassScope();
+  auto scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
-    ExpressionPtr exp = (*m_declaration)[i];
+    auto exp = (*m_declaration)[i];
     bool error;
     if (exp->is(Expression::KindOfAssignmentExpression)) {
-      AssignmentExpressionPtr assignment =
+      auto assignment =
         dynamic_pointer_cast<AssignmentExpression>(exp);
-      SimpleVariablePtr var =
+      auto var =
         dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      ExpressionPtr value = assignment->getValue();
+      auto value = assignment->getValue();
       scope->getVariables()->setClassInitVal(var->getName(), value);
       error = scope->getVariables()->markOverride(ar, var->getName());
     } else {
-      SimpleVariablePtr var =
-        dynamic_pointer_cast<SimpleVariable>(exp);
+      auto var = dynamic_pointer_cast<SimpleVariable>(exp);
       error = scope->getVariables()->markOverride(ar, var->getName());
       scope->getVariables()->setClassInitVal(var->getName(),
                                              makeConstant(ar, "null"));
@@ -195,8 +193,7 @@ void ClassVariable::addTraitPropsToScope(AnalysisResultPtr ar,
     SimpleVariablePtr var;
     ExpressionPtr value;
     if (exp->is(Expression::KindOfAssignmentExpression)) {
-      AssignmentExpressionPtr assignment =
-        dynamic_pointer_cast<AssignmentExpression>(exp);
+      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
       var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
       value = assignment->getValue();
     } else {
@@ -260,15 +257,14 @@ void ClassVariable::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr ClassVariable::preOptimize(AnalysisResultConstPtr ar) {
-  ClassScopePtr scope = getClassScope();
+  auto scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
-    ExpressionPtr exp = (*m_declaration)[i];
+    auto exp = (*m_declaration)[i];
     if (exp->is(Expression::KindOfAssignmentExpression)) {
-      AssignmentExpressionPtr assignment =
-        dynamic_pointer_cast<AssignmentExpression>(exp);
-      SimpleVariablePtr var =
+      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
+      auto var =
         dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      ExpressionPtr value = assignment->getValue();
+      auto value = assignment->getValue();
       scope->getVariables()->setClassInitVal(var->getName(), value);
     }
   }

@@ -138,8 +138,6 @@ void raise_recoverable_error(const char *fmt, ...) {
   raise_recoverable_error(msg);
 }
 
-static int64_t g_notice_counter = 0;
-
 void raise_strict_warning(const std::string &msg) {
   raise_message(ErrorMode::STRICT, false, msg);
 }

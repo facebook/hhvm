@@ -36,6 +36,11 @@ namespace HPHP { namespace jit {
  * be used to detect aliased CodeBlocks when we emit.
  */
 struct Varea {
+  /* implicit */ Varea(CodeBlock& cb)
+    : code(cb)
+    , start(cb.frontier())
+  {}
+
   CodeBlock& code;
   CodeAddress start;
 };
@@ -48,7 +53,15 @@ struct Varea {
  * Vtext is a lightweight container for Vareas.
  */
 struct Vtext {
-  Vtext() { m_areas.reserve(kNumAreas); }
+  explicit Vtext(CodeBlock& main)
+    : m_areas{main}
+  {}
+  Vtext(CodeBlock& main, CodeBlock& cold)
+    : m_areas{main, cold}
+  {}
+  Vtext(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen)
+    : m_areas{main, cold, frozen}
+  {}
 
   /*
    * Get an existing area.
@@ -58,27 +71,10 @@ struct Vtext {
   Varea& cold() { return area(AreaIndex::Cold); }
   Varea& frozen() { return area(AreaIndex::Frozen); }
 
-  const Varea& area(AreaIndex i) const;
-  const Varea& main() const { return area(AreaIndex::Main); }
-  const Varea& cold() const { return area(AreaIndex::Cold); }
-  const Varea& frozen() const { return area(AreaIndex::Frozen); }
-
-  /*
-   * Create an area.
-   *
-   * The main, cold, and frozen areas must be added in order.
-   */
-  Varea& main(CodeBlock& cb) { return add(cb, AreaIndex::Main); }
-  Varea& cold(CodeBlock& cb) { return add(cb, AreaIndex::Cold); }
-  Varea& frozen(CodeBlock& cb) { return add(cb, AreaIndex::Frozen); }
-
   /*
    * The vector of areas.
    */
   const jit::vector<Varea>& areas() const { return m_areas; }
-
-private:
-  Varea& add(CodeBlock& cb, AreaIndex area);
 
 private:
   jit::vector<Varea> m_areas; // indexed by AreaIndex

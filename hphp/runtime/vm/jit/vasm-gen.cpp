@@ -93,18 +93,13 @@ const Abi vauto_abi {
 };
 
 Vauto::~Vauto() {
-  DEBUG_ONLY auto const nareas = m_text.areas().size();
-
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
       // Found at least one nonempty block.  Finish up.
-      if (!main().closed()) {
-        main() << fallthru{};
-      }
-      assertx(nareas < 2 || cold().empty() || cold().closed());
-      assertx(nareas < 3 || frozen().empty() || frozen().closed());
+      if (!main().closed()) main() << fallthru{};
 
-      Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
+      // Prevent spurious printir traces.
+      Trace::Bump bumper{Trace::printir, 10};
 
       switch (arch()) {
         case Arch::X64:

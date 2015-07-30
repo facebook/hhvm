@@ -527,10 +527,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
     assignRegs(unit, vunit, state, blocks);
     vunit.entry = state.labels[unit.entry()];
 
-    Vtext vtext;
-    vtext.main(mainCode);
-    vtext.cold(coldCode);
-    vtext.frozen(*frozenCode);
+    Vtext vtext { mainCode, coldCode, *frozenCode };
 
     for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :

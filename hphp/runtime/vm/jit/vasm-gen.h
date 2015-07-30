@@ -141,22 +141,28 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Vauto is a convenience helper for emitting small amounts of machine code
- * using vasm.
+ * Helper for emitting small amounts of machine code using vasm.
  *
- * A Vauto always has a main code block; cold and frozen blocks may be added
- * using the normal vasm API after creation.  When the Vauto goes out of scope,
+ * Vauto manages a Vunit with a single area.  When the Vauto goes out of scope,
  * it will finalize and emit any code it contains.
  */
-struct Vauto : Vasm {
-  explicit Vauto(CodeBlock& code) {
-    m_text.main(code);
-    unit().entry = Vlabel(main());
+struct Vauto {
+  explicit Vauto(CodeBlock& code)
+    : m_text{code}
+    , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
+  {
+    m_unit.entry = Vlabel(main());
   }
+
+  Vunit& unit() { return m_unit; }
+  Vout& main() { return m_main; }
+
   ~Vauto();
 
 private:
+  Vunit m_unit;
   Vtext m_text;
+  Vout m_main;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

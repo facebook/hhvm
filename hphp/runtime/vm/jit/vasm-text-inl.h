@@ -25,13 +25,6 @@ inline Varea& Vtext::area(AreaIndex i) {
   return m_areas[static_cast<unsigned>(i)];
 }
 
-inline Varea& Vtext::add(CodeBlock& cb, AreaIndex area) {
-  assertx(size_t(area) == m_areas.size());
-
-  m_areas.emplace_back(Varea { cb, cb.frontier() });
-  return m_areas.back();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

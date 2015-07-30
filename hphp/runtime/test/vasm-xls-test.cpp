@@ -44,13 +44,12 @@ template<class T> uint64_t test_const(T val) {
   main.init(code, sizeof(code), "test");
 
   Vasm vasm;
+  Vtext text { main };
+
   auto& unit = vasm.unit();
-
-  Vtext text;
-  text.main(main);
-
   auto& v = vasm.main();
   unit.entry = v;
+
   v << copy{v.cns(val), Vreg{xmm0}};
   v << ret{RegSet{xmm0}};
 

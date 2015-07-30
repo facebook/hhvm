@@ -58,6 +58,11 @@ struct Vtext {
   Varea& cold() { return area(AreaIndex::Cold); }
   Varea& frozen() { return area(AreaIndex::Frozen); }
 
+  const Varea& area(AreaIndex i) const;
+  const Varea& main() const { return area(AreaIndex::Main); }
+  const Varea& cold() const { return area(AreaIndex::Cold); }
+  const Varea& frozen() const { return area(AreaIndex::Frozen); }
+
   /*
    * Create an area.
    *

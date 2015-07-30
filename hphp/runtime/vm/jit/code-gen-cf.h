@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_CODE_GEN_CF_H_
 #define incl_HPHP_VM_CODE_GEN_CF_H_
 
-#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 

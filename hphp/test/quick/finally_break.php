@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function break_finally_0(int $b): int {
   while (true) {
@@ -68,3 +68,5 @@ function test(): void {
   var_dump(break_finally_2(340));
   var_dump(break_finally_2(10));
 }
+
+test();

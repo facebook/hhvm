@@ -1608,6 +1608,10 @@ void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
     if (p.second.used) emitGotoTrampoline(e, region, cases, p.first);
   }
   for (auto c : cases) {
+    // Some cases might get assigned state numbers but not actually
+    // occur in the try block. We need to set /some/ target for them,
+    // so point them here.
+    if (!c->isSet()) c->set(e);
     delete c;
   }
   after.set(e);

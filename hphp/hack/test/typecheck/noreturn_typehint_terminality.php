@@ -8,6 +8,13 @@ class C {
   public static function invariant_violation(string $arg): noreturn {
     throw new Exception($arg);
   }
+
+  public function test_static(?int $x): int {
+    if ($x === null) {
+      static::invariant_violation("yup!");
+    }
+    return $x;
+  }
 }
 
 function test_fun1(?int $x): int {

@@ -328,7 +328,7 @@ size_t FileUtil::dirname_helper(char *path, int len) {
 
   /* Strip trailing slashes */
   register char *end = path + len - 1;
-  while (end >= path && *end == '/') {
+  while (end >= path && (*end == '/' || *end == '\\')) {
     end--;
   }
   if (end < path) {
@@ -339,7 +339,7 @@ size_t FileUtil::dirname_helper(char *path, int len) {
   }
 
   /* Strip filename */
-  while (end >= path && *end != '/') {
+  while (end >= path && *end != '/' && *end != '\\') {
     end--;
   }
   if (end < path) {
@@ -350,7 +350,7 @@ size_t FileUtil::dirname_helper(char *path, int len) {
   }
 
   /* Strip slashes which came before the file name */
-  while (end >= path && *end == '/') {
+  while (end >= path && (*end == '/' || *end == '\\')) {
     end--;
   }
   if (end < path) {
@@ -521,7 +521,7 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
       /* ./ */
     } else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') {
       /* backpath (../) */
-      if (pathlen == 1 && path[0] == '/') {
+      if (pathlen == 1 && (path[0] == '/' || path[0] == '\\')) {
       } else if (pathlen == 0
                  || (pathlen == 3
                      && !memcmp(path + pathlen - 3, "../", 3))
@@ -536,7 +536,7 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
         /* otherwise crop the prior segment */
         do {
           --pathlen;
-        } while (pathlen && path[pathlen - 1] != '/');
+        } while (pathlen && path[pathlen - 1] != '/' && path[pathlen - 1] != '\\');
       }
     } else {
       /* An actual segment, append it to the destination path */
@@ -556,6 +556,10 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
   }
   ret.setSize(pathlen);
   return ret;
+}
+
+bool FileUtil::isAbsolutePath(const std::string& path) {
+  return boost::filesystem::absolute(path).string() == path;
 }
 
 std::string FileUtil::normalizeDir(const std::string &dirname) {

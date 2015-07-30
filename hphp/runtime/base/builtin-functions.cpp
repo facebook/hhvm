@@ -824,7 +824,7 @@ static Variant invoke_file(const String& s,
 
 Variant include_impl_invoke(const String& file, bool once,
                             const char *currentDir) {
-  if (file[0] == '/') {
+  if (FileUtil::isAbsolutePath(file.toCppString())) {
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {
         return invoke_file(file, once, currentDir);
@@ -887,7 +887,7 @@ String resolve_include(const String& file, const char* currentDir,
       return file;
     }
 
-  } else if (c_file[0] == '/') {
+  } else if (FileUtil::isAbsolutePath(file.toCppString())) {
     String can_path = FileUtil::canonicalize(file);
 
     if (tryFile(can_path, ctx)) {
@@ -913,7 +913,7 @@ String resolve_include(const String& file, const char* currentDir,
       auto const is_stream_wrapper =
         includePath.find("://") != std::string::npos;
 
-      if (!is_stream_wrapper && includePath[0] != '/') {
+      if (!is_stream_wrapper && !FileUtil::isAbsolutePath(includePath)) {
         path += (g_context->getCwd() + "/");
       }
 
@@ -937,7 +937,7 @@ String resolve_include(const String& file, const char* currentDir,
       }
     }
 
-    if (currentDir[0] == '/') {
+    if (FileUtil::isAbsolutePath(currentDir)) {
       String path(currentDir);
       path += "/";
       path += file;

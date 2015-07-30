@@ -232,7 +232,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     makeStaticString(
       // XXX: it seems weird we have to do this even though we already ran
       // resolveVmInclude.
-      (requestedPath->data()[0] == '/'
+      (FileUtil::isAbsolutePath(requestedPath->toCppString())
        ?  String{requestedPath}
         : String(SourceRootInfo::GetCurrentSourceRoot()) + StrNR(requestedPath)
       ).get()
@@ -366,7 +366,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);
-  if (file[0] != '/') {
+  if (!FileUtil::isAbsolutePath(file.toCppString())) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
       context->path = translatedPath;
       return true;

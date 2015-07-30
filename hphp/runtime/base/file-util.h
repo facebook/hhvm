@@ -80,6 +80,12 @@ String canonicalize(const char* path, size_t len,
                     bool collapse_slashes = true);
 
 /**
+ * Check if the given path is an absolute path. This
+ * does not guarantee that the path is canonicalized.
+ */
+bool isAbsolutePath(const std::string& path);
+
+/**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".
  */
 std::string normalizeDir(const std::string &dirname);

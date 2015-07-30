@@ -52,10 +52,12 @@ static inline bool checkReportLevel(ErrorMode mode) {
 }
 
 #define CHECK_REPORT_LEVEL(mode) \
-   VMRegAnchor _;   \
-   if (checkReportLevel(mode)) { \
-      return; \
-   } 
+   do { \
+     VMRegAnchor _;   \
+     if (checkReportLevel(mode)) { \
+       return; \
+     } \
+   } while(0)
 
 /*
  * Careful in these functions: they can be called when tl_regState is

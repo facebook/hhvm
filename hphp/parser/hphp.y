@@ -1611,11 +1611,15 @@ xhp_attribute_decl_type:
   | T_CALLABLE                         { $$ = 9; }
 ;
 
-xhp_attribute_enum:
+non_empty_xhp_attribute_enum:
     common_scalar                      { _p->onArrayPair($$,  0,0,$1,0);}
-  | xhp_attribute_enum ','
+  | non_empty_xhp_attribute_enum ','
     common_scalar                      { _p->onArrayPair($$,&$1,0,$3,0);}
 ;
+
+xhp_attribute_enum:
+  non_empty_xhp_attribute_enum
+  possible_comma                       { $$ = $1;}
 
 xhp_attribute_default:
     '=' static_expr                    { $$ = $2;}

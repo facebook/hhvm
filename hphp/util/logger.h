@@ -69,6 +69,11 @@ public:
   static void Info(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
   static void Verbose(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
+  template<typename... Args> static void FError(Args&&... args);
+  template<typename... Args> static void FWarning(Args&&... args);
+  template<typename... Args> static void FInfo(Args&&... args);
+  template<typename... Args> static void FVerbose(Args&&... args);
+
   static void Log(LogLevelType level, const char *type, const Exception &e,
                   const char *file = nullptr, int line = 0);
   static void OnNewRequest();
@@ -148,5 +153,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/util/logger-inl.h"
 
 #endif // incl_HPHP_LOGGER_H_

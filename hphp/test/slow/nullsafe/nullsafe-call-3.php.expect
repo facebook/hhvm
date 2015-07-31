@@ -1,10 +1,10 @@
 object(E)#3 (0) {
 }
-BadMethodCallException: Call to a member function bar() on a non-object (NULL)
-BadMethodCallException: Call to a member function bar() on a non-object (NULL)
-BadMethodCallException: Call to a member function bar() on a non-object (NULL)
+BadMethodCallException: Call to a member function bar() on a non-object (null)
+BadMethodCallException: Call to a member function bar() on a non-object (null)
+BadMethodCallException: Call to a member function bar() on a non-object (null)
 object(F)#8 (0) {
 }
-BadMethodCallException: Call to a member function bar() on a non-object (NULL)
-BadMethodCallException: Call to a member function bar() on a non-object (NULL)
-BadMethodCallException: Call to a member function bar() on a non-object (NULL)
+BadMethodCallException: Call to a member function bar() on a non-object (null)
+BadMethodCallException: Call to a member function bar() on a non-object (null)
+BadMethodCallException: Call to a member function bar() on a non-object (null)

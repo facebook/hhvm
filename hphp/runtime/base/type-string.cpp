@@ -569,7 +569,7 @@ StaticString& StaticString::operator=(const StaticString &str) {
 }
 
 const StaticString
-  s_NULL("NULL"),
+  s_null("null"),
   s_boolean("boolean"),
   s_integer("integer"),
   s_double("double"),
@@ -582,7 +582,7 @@ const StaticString
 StaticString getDataTypeString(DataType t) {
   switch (t) {
     case KindOfUninit:
-    case KindOfNull:       return s_NULL;
+    case KindOfNull:       return s_null;
     case KindOfBoolean:    return s_boolean;
     case KindOfInt64:      return s_integer;
     case KindOfDouble:     return s_double;

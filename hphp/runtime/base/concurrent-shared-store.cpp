@@ -201,6 +201,11 @@ void ConcurrentTableSharedStore::purgeExpired() {
     if (apcExtension::UseFileStorage &&
         strcmp(tmp.first, apcExtension::FileStorageFlagKey.c_str()) == 0) {
       s_apc_file_storage.adviseOut();
+
+      // Erase from m_expMap before attempting to re-add, to ensure it gets
+      // added to m_expQueue.
+      m_expMap.erase(tmp.first);
+      free((void*)tmp.first);
       addToExpirationQueue(apcExtension::FileStorageFlagKey.c_str(),
                            time(nullptr) +
                            apcExtension::FileStorageAdviseOutPeriod);
@@ -208,7 +213,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
     }
     m_expMap.erase(tmp.first);
     eraseImpl(tmp.first, true, oldestLive); // XXX allocating a String
-    free((void *)tmp.first);
+    free((void*)tmp.first);
     ++i;
   }
 }

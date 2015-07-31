@@ -102,6 +102,7 @@ void APCFileStorage::seal() {
 void APCFileStorage::adviseOut() {
   Lock lock(m_lock);
   Timer timer(Timer::WallTime, "advising out apc prime");
+  Logger::FInfo("Advising out {} APCFileStorage chunks\n", m_chunks.size());
   for (int i = 0; i < (int)m_chunks.size(); i++) {
     if (madvise(m_chunks[i], m_chunkSize, MADV_DONTNEED) < 0) {
       Logger::Error("Failed to madvise chunk %d", i);

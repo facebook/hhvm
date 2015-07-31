@@ -348,6 +348,8 @@
       # (eg :00.999 => :01.000), these tests fail.
       - laravel/tests/Database/DatabaseEloquentRelationTest.php
       - laravel/tests/Database/DatabaseEloquentModelTest.php
+      # Depends on google.com
+      - laravel/tests/Validation/ValidationValidatorTest.php
   lessphp:
     url: https://github.com/leafo/lessphp.git
     branch: v0.4.0

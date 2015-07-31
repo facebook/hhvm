@@ -144,15 +144,15 @@ timelib_tzinfo* TimeZone::GetTimeZoneInfoRaw(char* name,
   return tzi;
 }
 
-bool TimeZone::IsValid(const String& name) {
-  return timelib_timezone_id_is_valid((char*)name.data(), GetDatabase());
+bool TimeZone::IsValid(const char* name) {
+  return timelib_timezone_id_is_valid((char*)name, GetDatabase());
 }
 
 String TimeZone::CurrentName() {
   /* Checking configure timezone */
-  String timezone = g_context->getTimeZone();
-  if (!timezone.empty()) {
-    return timezone;
+  auto& tz = RID().getTimeZone();
+  if (!tz.empty()) {
+    return String(tz);
   }
 
   /* Check environment variable */
@@ -170,14 +170,13 @@ req::ptr<TimeZone> TimeZone::Current() {
   return req::make<TimeZone>(CurrentName());
 }
 
-bool TimeZone::SetCurrent(const String& zone) {
+bool TimeZone::SetCurrent(const char* name) {
   bool valid;
-  const char* name = zone.data();
   auto const it = s_tzvCache->find(name);
   if (it != s_tzvCache->end()) {
     valid = it->second;
   } else {
-    valid = IsValid(zone);
+    valid = IsValid(name);
 
     auto key = strdup(name);
     auto result = s_tzvCache->insert(TimeZoneValidityCacheEntry(key, valid));
@@ -189,10 +188,10 @@ bool TimeZone::SetCurrent(const String& zone) {
   }
 
   if (!valid) {
-    raise_notice("Timezone ID '%s' is invalid", zone.data());
+    raise_notice("Timezone ID '%s' is invalid", name);
     return false;
   }
-  g_context->setTimeZone(zone);
+  RID().setTimeZone(name);
   return true;
 }
 

@@ -43,14 +43,14 @@ public:
   /**
    * Get/set current timezone that controls how local time is interpreted.
    */
-  static String CurrentName();            // current timezone's name
-  static req::ptr<TimeZone> Current(); // current timezone
-  static bool SetCurrent(const String& name);   // returns false if invalid
+  static String CurrentName();              // current timezone's name
+  static req::ptr<TimeZone> Current();      // current timezone
+  static bool SetCurrent(const char* name); // returns false if invalid
 
   /**
    * TimeZone database queries.
    */
-  static bool IsValid(const String& name);
+  static bool IsValid(const char* name);
   static Array GetAbbreviations();
   static Array GetNamesToCountryCodes();
   static String AbbreviationToName(String abbr, int utcoffset = -1,

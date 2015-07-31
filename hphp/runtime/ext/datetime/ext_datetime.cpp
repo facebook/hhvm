@@ -790,7 +790,7 @@ String HHVM_FUNCTION(date_default_timezone_get) {
 
 bool HHVM_FUNCTION(date_default_timezone_set,
                    const String& name) {
-  return TimeZone::SetCurrent(name);
+  return TimeZone::SetCurrent(name.c_str());
 }
 
 Variant HHVM_FUNCTION(timezone_name_from_abbr,
@@ -1072,15 +1072,11 @@ private:
     if (value.empty()) {
       return false;
     }
-    return f_date_default_timezone_set(value);
+    return TimeZone::SetCurrent(value.c_str());
   }
 
   static std::string dateTimezoneIniGet() {
-    auto ret = g_context->getTimeZone();
-    if (ret.isNull()) {
-      return "";
-    }
-    return ret.toCppString();
+    return RID().getTimeZone();
   }
 } s_date_extension;
 

@@ -213,6 +213,8 @@ struct RequestInjectionData {
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
   std::string getUserAgent() { return m_userAgent; }
   void setUserAgent(std::string userAgent) { m_userAgent = userAgent; }
+  const std::string& getTimeZone() const  { return m_timezone; }
+  void setTimeZone(const std::string& tz) { m_timezone = tz; }
   bool setAllowedDirectories(const std::string& value);
   const std::vector<std::string>& getAllowedDirectoriesProcessed() const;
   bool hasSafeFileAccess() const { return m_safeFileAccess; }
@@ -290,6 +292,7 @@ private:
   std::string m_gzipCompression;
   std::string m_errorLog;
   std::string m_userAgent;
+  std::string m_timezone;
   std::vector<std::string> m_include_paths;
   struct AllowedDirectoriesInfo {
     AllowedDirectoriesInfo(std::vector<std::string>&& v,

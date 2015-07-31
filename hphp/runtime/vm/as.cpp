@@ -1745,7 +1745,7 @@ void parse_function(AsmState& as) {
 }
 
 /*
- * directive-method : attribute-list identifier parameter-list
+ * directive-method : attribute-list identifier parameter-list function-flags
  *                      '{' function-body
  *                  ;
  */
@@ -1764,6 +1764,8 @@ void parse_method(AsmState& as) {
               as.ue->bcPos(), attrs, true, 0);
 
   parse_parameter_list(as);
+  parse_function_flags(as);
+
   as.in.expectWs('{');
 
   parse_function_body(as);

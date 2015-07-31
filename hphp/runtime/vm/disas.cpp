@@ -551,10 +551,11 @@ void print_property(Output& out, const PreClass::Prop* prop) {
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{} {}({}) {{",
+  out.fmtln(".method{} {}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs()),
     func->name(),
-    func_param_list(finfo));
+    func_param_list(finfo),
+    func_flag_list(finfo));
   indented(out, [&] {
     print_func_directives(out, func);
     print_func_body(out, finfo);

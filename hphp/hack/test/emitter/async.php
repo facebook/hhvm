@@ -44,6 +44,16 @@ async function foo3(): Awaitable<array<int>> {
   return $nus;
 }
 
+class Foo {
+  public async function gen(): Awaitable<int> {
+    return await foo0();
+  }
+}
+async function foo4(): Awaitable<int> {
+  $x = new Foo();
+  return await $x->gen();
+}
+
 function prep<T>(Awaitable<T> $aw): T {
   /* HH_FIXME[4053]: WaitHandle missing join in hh_single_type_check */
   return $aw->getWaitHandle()->join();
@@ -72,4 +82,5 @@ function test(): void {
   var_dump(prep(foo1()));
   var_dump(prep(foo2()));
   var_dump(prep(foo3()));
+  var_dump(prep(foo4()));
 }

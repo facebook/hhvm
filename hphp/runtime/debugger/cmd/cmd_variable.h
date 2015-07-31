@@ -47,7 +47,13 @@ protected:
 private:
   Array m_variables;
   int m_frame;
-  bool m_global; // Set true by onServer if it used g_context->m_globalVarEnv
+
+  /* Serialization limit on a single variable value.  -1 means unlimited. */
+  int m_formatMaxLen{200};
+
+  /* Set true by onServer if it used g_context->m_globalVarEnv. */
+  bool m_global;
+
   String m_varName;
   String m_filter;
 };

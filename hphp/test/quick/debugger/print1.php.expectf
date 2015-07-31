@@ -19,7 +19,7 @@ Array
     [12] => 12
     [13] => 13
   
-There are 90 more characters. Continue? [y/N]n
+There are more characters. Continue? [y/N]n
 = $a
 Array
 (
@@ -38,7 +38,7 @@ Array
     [12] => 12
     [13] => 13
   
-There are 90 more characters. Continue? [y/N]y
+There are more characters. Continue? [y/N]y
   [14] => 14
     [15] => 15
     [16] => 16
@@ -60,7 +60,7 @@ Array
     [5] => 5
     [6] => 6
  
-There are 190 more characters. Continue? [y/N]y
+There are more characters. Continue? [y/N]y
    [7] => 7
     [8] => 8
     [9] => 9

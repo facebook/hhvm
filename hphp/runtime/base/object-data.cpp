@@ -829,9 +829,10 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
   Variant serializableNativeData = init_null();
   Variant ret;
+  auto const type = serializer->getType();
 
-  if (LIKELY(serializer->getType() == VariableSerializer::Type::Serialize ||
-             serializer->getType() == VariableSerializer::Type::APCSerialize)) {
+  if (LIKELY(type == VariableSerializer::Type::Serialize ||
+             type == VariableSerializer::Type::APCSerialize)) {
     if (instanceof(SystemLib::s_SerializableClass)) {
       assert(!isCollection());
       Variant ret =
@@ -867,8 +868,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         serializableNativeData = Native::nativeDataSleep(this);
       }
     }
-  } else if (UNLIKELY(serializer->getType() ==
-                      VariableSerializer::Type::DebuggerSerialize)) {
+  } else if (UNLIKELY(type == VariableSerializer::Type::DebuggerSerialize)) {
     // Don't try to serialize a CPP extension class which doesn't
     // support serialization. Just send the class name instead.
     if (getAttribute(IsCppBuiltin) && !getVMClass()->isCppSerializable()) {
@@ -954,14 +954,13 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   } else {
     if (isCollection()) {
       collections::serialize(const_cast<ObjectData*>(this), serializer);
-    } else if (serializer->getType() == VariableSerializer::Type::VarExport &&
+    } else if (type == VariableSerializer::Type::VarExport &&
                instanceof(c_Closure::classof())) {
       serializer->write(getClassName());
     } else {
       auto className = getClassName();
       Array properties = getSerializeProps(this, serializer);
-      if (serializer->getType() ==
-        VariableSerializer::Type::DebuggerSerialize) {
+      if (type == VariableSerializer::Type::DebuggerSerialize) {
         try {
            auto val = const_cast<ObjectData*>(this)->invokeToDebugDisplay();
            if (val.isInitialized()) {
@@ -972,16 +971,29 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
             getClassName().data());
         }
       }
-      if (serializer->getType() == VariableSerializer::Type::DebuggerDump) {
-        const Variant* debugDispVal = o_realProp(s_PHP_DebugDisplay, 0);
+      if (type == VariableSerializer::Type::DebuggerDump) {
+        // Expect to display as their stringified classname.
+        if (instanceof(SystemLib::s_ClosureClass)) {
+          serializer->write(getVMClass()->nameStr());
+          return;
+        }
+
+        // If we have a DebugDisplay prop saved, use it.
+        auto const debugDispVal = o_realProp(s_PHP_DebugDisplay, 0);
         if (debugDispVal) {
           serializeVariant(*debugDispVal, serializer, false, false, true);
           return;
         }
+        // Otherwise compute it if we have a __toDebugDisplay method.
+        auto val = const_cast<ObjectData*>(this)->invokeToDebugDisplay();
+        if (val.isInitialized()) {
+          serializeVariant(val, serializer, false, false, true);
+          return;
+        }
       }
-      if (serializer->getType() != VariableSerializer::Type::VarDump &&
+      if (type != VariableSerializer::Type::VarDump &&
           className.asString() == s_PHP_Incomplete_Class) {
-        const Variant* cname = o_realProp(s_PHP_Incomplete_Class_Name, 0);
+        auto const cname = o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {
           serializer->pushObjectInfo(cname->toCStrRef(), getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);

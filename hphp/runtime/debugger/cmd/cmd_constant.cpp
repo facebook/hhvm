@@ -75,10 +75,10 @@ void CmdConstant::onClient(DebuggerClient &client) {
     }
 
     for (ArrayIter iter(m_constants); iter; ++iter) {
-      String name = iter.first().toString();
-      String value = DebuggerClient::FormatVariable(iter.second(), 200);
+      auto name = iter.first().toString();
+      auto value = DebuggerClient::FormatVariableWithLimit(iter.second(), 200);
       if (!text.empty()) {
-        String fullvalue = DebuggerClient::FormatVariable(iter.second(), -1);
+        auto fullvalue = DebuggerClient::FormatVariable(iter.second());
         if (name.find(text, 0, false) >= 0 ||
             fullvalue.find(text, 0, false) >= 0) {
           client.print("%s = %s", name.data(), value.data());

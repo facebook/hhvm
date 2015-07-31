@@ -432,9 +432,9 @@ String CmdInfo::GetParams(const Array& params, bool varg,
         Object obj{defValue.asCell()->m_data.pobj};
         args.append(obj->o_get(s_msg).toString());
       } else if (detailed) {
-        args.append(DebuggerClient::FormatVariable(arg[s_default], -1));
-      } else {
         args.append(DebuggerClient::FormatVariable(arg[s_default]));
+      } else {
+        args.append(DebuggerClient::FormatVariableWithLimit(arg[s_default],80));
       }
     }
   }
@@ -468,9 +468,11 @@ bool CmdInfo::TryConstant(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol) {
   String key = FindSubSymbol(info[s_constants].toArray(), subsymbol);
   if (!key.isNull()) {
-    sb.printf("  const %s = %s;\n", key.data(),
-              DebuggerClient::FormatVariable
-              (info[s_constants].toArray()[key], -1).data());
+    sb.printf(
+      "  const %s = %s;\n",
+      key.data(),
+      DebuggerClient::FormatVariable(info[s_constants].toArray()[key]).data()
+    );
     return true;
   }
   return false;
@@ -636,9 +638,11 @@ void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, const Array& i
   if (!info[s_constants].toArray().empty()) {
     sb.printf("  // constants\n");
     for (ArrayIter iter(info[s_constants].toArray()); iter; ++iter) {
-      sb.printf("  const %s = %s;\n",
-                iter.first().toString().data(),
-                DebuggerClient::FormatVariable(iter.second()).data());
+      sb.printf(
+        "  const %s = %s;\n",
+        iter.first().toString().data(),
+        DebuggerClient::FormatVariableWithLimit(iter.second(), 80).data()
+      );
     }
   }
 

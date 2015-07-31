@@ -138,8 +138,10 @@ public:
   static void AdjustScreenMetrics();
   static bool Match(const char *input, const char *cmd);
   static bool IsValidNumber(const std::string &arg);
-  static String FormatVariable(const Variant& v, int maxlen = 80,
-                               char format = 'd');
+
+  static String FormatVariable(const Variant& v, char format = 'd');
+  static String FormatVariableWithLimit(const Variant& v, int maxlen);
+
   static String FormatInfoVec(const IDebuggable::InfoVec &info,
                               int *nameLen = nullptr);
   static String FormatTitle(const char *title);
@@ -178,6 +180,11 @@ public:
   void info   (const String& s);
   void output (const String& s);
   void error  (const String& s);
+
+  void help   (StringSlice);
+  void info   (StringSlice);
+  void output (StringSlice);
+  void error  (StringSlice);
 
   bool code(const String& source, int lineFocus = 0, int line1 = 0,
             int line2 = 0,

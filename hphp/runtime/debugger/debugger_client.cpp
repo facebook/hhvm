@@ -373,43 +373,52 @@ void DebuggerClient::AdjustScreenMetrics() {
 bool DebuggerClient::IsValidNumber(const std::string &arg) {
   TRACE(2, "DebuggerClient::IsValidNumber\n");
   if (arg.empty()) return false;
-  for (unsigned int i = 0; i < arg.size(); i++) {
-    if (!isdigit(arg[i])) {
+  for (auto c : arg) {
+    if (!isdigit(c)) {
       return false;
     }
   }
   return true;
 }
 
-String DebuggerClient::FormatVariable(const Variant& v, int maxlen /* = 80 */,
-                                      char format /* = 'd' */) {
+String DebuggerClient::FormatVariable(
+  const Variant& v,
+  char format /* = 'd' */
+) {
   TRACE(2, "DebuggerClient::FormatVariable\n");
   String value;
-  if (maxlen <= 0) {
-    try {
-      VariableSerializer::Type t =
-        format == 'r' ? VariableSerializer::Type::PrintR :
-        format == 'v' ? VariableSerializer::Type::VarDump :
-                        VariableSerializer::Type::DebuggerDump;
-      VariableSerializer vs(t, 0, 2);
-      value = vs.serialize(v, true);
-    } catch (StringBufferLimitException &e) {
-      value = "Serialization limit reached";
-    } catch (...) {
-      assert(false);
-      throw;
-    }
-  } else {
-    VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
-    value = vs.serializeWithLimit(v, maxlen+1);
+  try {
+    auto const t =
+      format == 'r' ? VariableSerializer::Type::PrintR :
+      format == 'v' ? VariableSerializer::Type::VarDump :
+      VariableSerializer::Type::DebuggerDump;
+    VariableSerializer vs(t, 0, 2);
+    value = vs.serialize(v, true);
+  } catch (const StringBufferLimitException& e) {
+    value = "Serialization limit reached";
+  } catch (...) {
+    assert(false);
+    throw;
   }
+  return value;
+}
 
-  if (maxlen <= 0 || value.length() <= maxlen) {
+/*
+ * Serializes a Variant, and truncates it to a limit if necessary.  Returns the
+ * truncated result, and the number of bytes truncated.
+ */
+String DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
+  assert(maxlen >= 0);
+
+  VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+  auto const value = vs.serializeWithLimit(v, maxlen + 1);
+
+  if (value.length() <= maxlen) {
     return value;
   }
 
   StringBuffer sb;
-  sb.append(value.substr(0, maxlen));
+  sb.append(StringSlice(value.data(), maxlen));
   sb.append(" ...(omitted)");
   return sb.detach();
 }
@@ -1387,17 +1396,22 @@ void DebuggerClient::print(const String& msg) {
 }
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
-  void DebuggerClient::name(const String& msg) {                              \
+  void DebuggerClient::name(StringSlice msg) {                          \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       DWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
-    DWRITE(msg.data(), 1, msg.length(), where);                         \
+    DWRITE(msg.ptr, 1, msg.len, where);                                 \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       DWRITE(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
     }                                                                   \
     DWRITE("\n", 1, 1, where);                                          \
     fflush(where);                                                      \
   }                                                                     \
+                                                                        \
+  void DebuggerClient::name(const String& msg) {                        \
+    name(msg.slice());                                                  \
+  }                                                                     \
+                                                                        \
   void DebuggerClient::name(const char *fmt, ...) {                     \
     std::string msg;                                                    \
     va_list ap;                                                         \
@@ -1405,8 +1419,9 @@ void DebuggerClient::print(const String& msg) {
     string_vsnprintf(msg, fmt, ap); va_end(ap);                         \
     name(msg);                                                          \
   }                                                                     \
+                                                                        \
   void DebuggerClient::name(const std::string &msg) {                   \
-    name(String(msg.data(), msg.length(), CopyString));                 \
+    name(StringSlice(msg.c_str(), msg.size()));                         \
   }                                                                     \
 
 IMPLEMENT_COLOR_OUTPUT(help,     stdout,  HelpColor);
@@ -2144,8 +2159,7 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
   StringBuffer args;
   for (ArrayIter iter(frame[s_args].toArray()); iter; ++iter) {
     if (!args.empty()) args.append(", ");
-    String value = FormatVariable(iter.second());
-    args.append(value);
+    args.append(FormatVariableWithLimit(iter.second(), 80));
   }
 
   StringBuffer func;

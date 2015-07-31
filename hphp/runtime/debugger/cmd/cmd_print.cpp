@@ -32,17 +32,17 @@ const char* formats[] = {
 
 std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
   if (format == nullptr) {
-    String sret = DebuggerClient::FormatVariable(ret, -1);
+    String sret = DebuggerClient::FormatVariable(ret);
     return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "r") == 0) {
-    String sret = DebuggerClient::FormatVariable(ret, -1, 'r');
+    String sret = DebuggerClient::FormatVariable(ret, 'r');
     return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "v") == 0) {
-    String sret = DebuggerClient::FormatVariable(ret, -1, 'v');
+    String sret = DebuggerClient::FormatVariable(ret, 'v');
     return std::string(sret.data(), sret.size());
   }
 
@@ -94,7 +94,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
     assert(false);
   }
 
-  String sret = DebuggerClient::FormatVariable(ret, -1);
+  String sret = DebuggerClient::FormatVariable(ret);
   if (strcmp(format, "hex") == 0 || strcmp(format, "x") == 0 ||
       strcmp(format, "oct") == 0) {
     StringBuffer sb;

@@ -44,7 +44,7 @@ endforeach()
 
 add_definitions(-DALWAYS_ASSERT=1)
 
-ADD_LIBRARY(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES})
+ADD_LIBRARY(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_analysis" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
 target_link_libraries(hphp_analysis ${Boost_LIBRARIES})

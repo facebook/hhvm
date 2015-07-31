@@ -40,7 +40,7 @@ add_library(hphp_util STATIC ${CXX_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp")
 auto_source_group("hphp_util" "${CMAKE_CURRENT_SOURCE_DIR}"
-  ${ASM_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES}))
+  ${ASM_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 if (ENABLE_COTIRE)
   cotire(hphp_util)
 endif()

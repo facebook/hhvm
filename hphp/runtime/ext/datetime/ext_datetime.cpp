@@ -1040,7 +1040,7 @@ public:
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",
-      g_context->getDefaultTimeZone().c_str(),
+      "",
       IniSetting::SetAndGet<std::string>(
         dateTimezoneIniUpdate, dateTimezoneIniGet
       )

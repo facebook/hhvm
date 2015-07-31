@@ -161,12 +161,6 @@ String TimeZone::CurrentName() {
     return String(env, CopyString);
   }
 
-  /* Check config setting for default timezone */
-  String default_timezone = g_context->getDefaultTimeZone();
-  if (!default_timezone.empty() && IsValid(default_timezone.data())) {
-    return default_timezone;
-  }
-
   /* Try to guess timezone from system information */
   raise_strict_warning(s_guessed_timezone.m_warning);
   return String(s_guessed_timezone.m_tzid);

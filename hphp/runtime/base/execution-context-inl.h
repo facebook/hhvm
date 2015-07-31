@@ -122,14 +122,6 @@ inline void ExecutionContext::setTimeZone(const String& timezone) {
   m_timezone = timezone;
 }
 
-inline String ExecutionContext::getDefaultTimeZone() const {
-  return m_timezoneDefault;
-}
-
-inline void ExecutionContext::setDefaultTimeZone(const String& timezone) {
-  m_timezoneDefault = timezone;
-}
-
 inline bool ExecutionContext::getThrowAllErrors() const {
   return m_throwAllErrors;
 }

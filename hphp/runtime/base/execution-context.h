@@ -249,9 +249,6 @@ public:
   String getTimeZone() const;
   void setTimeZone(const String&);
 
-  String getDefaultTimeZone() const;
-  void setDefaultTimeZone(const String&);
-
   bool getThrowAllErrors() const;
   void setThrowAllErrors(bool);
 
@@ -495,7 +492,6 @@ public:
     mark(m_errorPage);
     mark(m_envs);
     mark(m_timezone);
-    mark(m_timezoneDefault);
     mark(m_throwAllErrors);
     //mark(m_streamContext);
     mark(m_shutdownsBackup);
@@ -561,7 +557,6 @@ private:
   // misc settings
   Array m_envs;
   String m_timezone;
-  String m_timezoneDefault;
   bool m_throwAllErrors;
   req::ptr<StreamContext> m_streamContext;
 

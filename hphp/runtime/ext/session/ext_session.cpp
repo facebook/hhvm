@@ -80,6 +80,7 @@ struct Session {
   };
 
   std::string save_path;
+  bool        reset_save_path{false};
   std::string session_name;
   std::string extern_referer_chk;
   std::string entropy_file;
@@ -129,6 +130,8 @@ struct SessionRequestData final : Session {
     id.detach();
     session_status = Session::None;
     ps_session_handler.reset();
+    save_path.clear();
+    if (reset_save_path) IniSetting::ResetSystemDefault("session.save_path");
   }
 
   void destroy() {
@@ -1209,6 +1212,7 @@ static bool ini_on_update_save_dir(const std::string& value) {
   if (value.find('\0') != std::string::npos) {
     return false;
   }
+  if (g_context.isNull()) return false;
   const char *path = value.data() + value.rfind(';') + 1;
   if (File::TranslatePath(path).empty()) {
     return false;
@@ -1904,6 +1908,11 @@ static class SessionExtension final : public Extension {
                        ini_on_update_save_dir, nullptr
                      ),
                      &s_session->save_path);
+    Variant v;
+    if (IniSetting::GetSystem("session.save_path", v) &&
+        !v.toString().empty()) {
+      s_session->reset_save_path = true;
+    }
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.name",                    "PHPSESSID",
                      &s_session->session_name);

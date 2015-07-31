@@ -43,19 +43,21 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   auto const funcImm = Immed64(func);
   int nbytes, offset;
 
-  if (!funcImm.fits(sz::dword)) {
-    nbytes = kFuncGuardSmash;
-    offset = kFuncGuardImm;
-  } else {
+  if (funcImm.fits(sz::dword)) {
     nbytes = kFuncGuardShortSmash;
     offset = kFuncGuardShortImm;
+  } else {
+    nbytes = kFuncGuardSmash;
+    offset = kFuncGuardImm;
   }
   mcg->backEnd().prepareForSmash(a.code(), nbytes, offset);
 
   TCA start DEBUG_ONLY = a.frontier();
 
-  if (!funcImm.fits(sz::dword)) {
-    // Although func doesnt fit in a signed 32-bit immediate, it may still fit
+  if (funcImm.fits(sz::dword)) {
+    a.  cmpq   (funcImm.l(), rVmFp[AROFF(m_func)]);
+  } else {
+    // Although func doesn't fit in a signed 32-bit immediate, it may still fit
     // in an unsigned one.  Rather than deal with yet another case (which only
     // happens when we disable jemalloc), just force it to be an 8-byte
     // immediate, and patch it up afterwards.
@@ -66,8 +68,6 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
     *immptr = uintptr_t(func);
 
     a.  cmpq   (rax, rVmFp[AROFF(m_func)]);
-  } else {
-    a.  cmpq   (funcImm.l(), rVmFp[AROFF(m_func)]);
   }
   a.    jnz    (mcg->tx().uniqueStubs.funcPrologueRedispatch);
 

@@ -144,8 +144,7 @@ struct Vgen {
   void emit(incq& i) { a->Add(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
   void emit(jcc& i);
   void emit(jmp i);
-  // FIXME: lea implementation ignores scale
-  void emit(lea& i) { a->Add(X(i.d), X(i.s.base), i.s.disp); }
+  void emit(lea& i);
   void emit(loadl& i) { a->Ldr(W(i.d), M(i.s)); /* assume 0-extends */ }
   void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(shl& i) { a->lslv(X(i.d), X(i.s0), X(i.s1)); }
@@ -355,6 +354,8 @@ void Vgen::emit(syncpoint& i) {
   mcg->recordSyncPoint(a->frontier(), i.fix);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 void Vgen::emit(jmp i) {
   if (next == i.target) return;
   jmps.push_back({a->frontier(), i.target});
@@ -374,6 +375,12 @@ void Vgen::emit(jcc& i) {
     backend.emitSmashableJump(*codeBlock, kEndOfTargetChain, i.cc);
   }
   emit(jmp{i.targets[0]});
+}
+
+void Vgen::emit(lea& i) {
+  assertx(!i.s.index.isValid());
+  assertx(i.s.scale == 1);
+  a->Add(X(i.d), X(i.s.base), i.s.disp);
 }
 
 void Vgen::emit(cbcc& i) {

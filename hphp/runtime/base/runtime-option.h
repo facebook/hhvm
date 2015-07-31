@@ -428,6 +428,14 @@ public:
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
+  F(string, UseExternalEmitter,        "")                              \
+  /* ExternalEmitterFallback:
+     0 - No fallback; fail when external emitter fails
+     1 - Fallback to builtin emitter if external emitter fails,
+         but log a diagnostic
+     2 - Fallback to builtin emitter if external emitter fails and
+         don't log anything */                                          \
+  F(int, ExternalEmitterFallback,      0)                               \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.

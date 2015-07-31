@@ -31,6 +31,8 @@
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
+#include <folly/Subprocess.h>
+#include <folly/String.h>
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -9618,6 +9620,90 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   commitGlobalData(std::move(pair.second));
 }
 
+namespace {
+
+bool startsWith(const char* big, const char* small) {
+  return strncmp(big, small, strlen(small)) == 0;
+}
+bool isFileHackStrict(const char* code, int codeLen) {
+  return codeLen > strlen("<?hh // strict") &&
+    (startsWith(code, "<?hh // strict") || startsWith(code, "<?hh //strict"));
+}
+
+UnitEmitter* makeFatalUnit(const char* filename, const MD5& md5,
+                           const std::string& msg) {
+  // basically duplicated from as.cpp but is maybe too janky to be
+  // a common routine somewhere...
+
+  // The line numbers we output are bogus, but it's not totally clear
+  // what line numbers to put. It might be worth adding a mechanism for
+  // the external emitter to emit a line number when it fails that we can
+  // use when available.
+  UnitEmitter* ue = new UnitEmitter(md5);
+  ue->m_filepath = makeStaticString(filename);
+  ue->initMain(1, 1);
+  ue->emitOp(OpString);
+  ue->emitInt32(ue->mergeLitstr(makeStaticString(msg)));
+  ue->emitOp(OpFatal);
+  ue->emitByte(static_cast<uint8_t>(FatalOp::Runtime));
+  FuncEmitter* fe = ue->getMain();
+  fe->maxStackCells = 1;
+  fe->finish(ue->bcPos(), false);
+  ue->recordFunction(fe);
+
+  return ue;
+}
+
+UnitEmitter* useExternalEmitter(const char* code, int codeLen,
+                                const char* filename, const MD5& md5) {
+  std::string hhas, errorOutput;
+
+  try {
+    std::vector<std::string> cmd({
+        RuntimeOption::EvalUseExternalEmitter, "--stdin", filename});
+    auto options = folly::Subprocess::pipeStdin().pipeStdout().pipeStderr();
+
+    // Run the external emitter, sending the code to its stdin
+    folly::Subprocess proc(cmd, options);
+    std::tie(hhas, errorOutput) = proc.communicate(std::string(code, codeLen));
+    proc.waitChecked();
+
+    // External emitter succeeded; assemble its output
+    // If assembly fails (probably because of malformed emitter
+    // output), the assembler will return a unit that Fatals and we
+    // won't do a fallback to the regular emitter. We may want to
+    // revisit this.
+    return assemble_string(hhas.data(), hhas.length(), filename, md5);
+
+  } catch (const std::exception& e) {
+    std::string errorMsg = e.what();
+    if (!errorOutput.empty()) {
+      // Add the stderr to the output
+      errorMsg += folly::format(". Output: '{}'",
+                                folly::trimWhitespace(errorOutput)).str();
+    }
+
+    // If we aren't going to fall back to the internal emitter, generate a
+    // Fatal'ing unit.
+    if (!RuntimeOption::EvalExternalEmitterFallback) {
+      auto msg =
+        folly::format("Failure running external emitter: {}", errorMsg);
+      return makeFatalUnit(filename, md5, msg.str());
+    }
+
+    // Unless we have fallback at the highest level, print a
+    // diagnostic when we fail
+    if (RuntimeOption::EvalExternalEmitterFallback < 2) {
+      Logger::Warning("Failure running external emitter for %s: %s",
+                      filename,
+                      errorMsg.c_str());
+    }
+    return nullptr;
+  }
+}
+
+}
+
 extern "C" {
 
 /**
@@ -9667,6 +9753,16 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
           ue.reset(assemble_string(code, codeLen, filename, md5));
         }
       }
+    }
+
+    // If we are configured to use an external emitter and we are compiling
+    // a strict mode hack file, try external emitting. Don't externally emit
+    // systemlib because the external emitter can't handle that yet.
+    if (!ue &&
+        !RuntimeOption::EvalUseExternalEmitter.empty() &&
+        isFileHackStrict(code, codeLen) &&
+        SystemLib::s_inited) {
+      ue.reset(useExternalEmitter(code, codeLen, filename, md5));
     }
 
     if (!ue) {

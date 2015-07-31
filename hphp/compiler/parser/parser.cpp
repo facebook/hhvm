@@ -761,17 +761,14 @@ void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
   }
   if (dynamic_pointer_cast<FunctionCall>(e)) {
     if (e->is(Expression::KindOfObjectMethodExpression)) {
-      ObjectMethodExpressionPtr om =
-        static_pointer_cast<ObjectMethodExpression>(e);
+      auto om = static_pointer_cast<ObjectMethodExpression>(e);
       if (om->isXhpGetAttr()) {
         PARSE_ERROR("Using ->: syntax in write context is not supported");
       }
     }
     PARSE_ERROR("Can't use return value in write context");
   } if (e->is(Expression::KindOfObjectPropertyExpression)) {
-    ObjectPropertyExpressionPtr op(
-      static_pointer_cast<ObjectPropertyExpression>(e)
-    );
+    auto op = static_pointer_cast<ObjectPropertyExpression>(e);
     if (op->isNullSafe()) {
       PARSE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
     }
@@ -2226,7 +2223,7 @@ void Parser::onQuery(Token &out, Token &head, Token &body) {
 void appendList(ExpressionListPtr expList, Token *exps) {
   if (exps != nullptr) {
     assert(exps->exp->is(Expression::KindOfExpressionList));
-    ExpressionListPtr el(static_pointer_cast<ExpressionList>(exps->exp));
+    auto el = static_pointer_cast<ExpressionList>(exps->exp);
     for (unsigned int i = 0; i < el->getCount(); i++) {
       if ((*el)[i]) expList->addElement((*el)[i]);
     }

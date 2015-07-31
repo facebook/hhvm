@@ -297,7 +297,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (m_op == T_ISSET && m_exp->is(KindOfExpressionList) &&
       static_pointer_cast<ExpressionList>(m_exp)->getListKind() ==
       ExpressionList::ListKindParam) {
-    ExpressionListPtr el(static_pointer_cast<ExpressionList>(m_exp));
+    auto el = static_pointer_cast<ExpressionList>(m_exp);
     result = true;
     int i = 0, n = el->getCount();
     for (; i < n; i++) {

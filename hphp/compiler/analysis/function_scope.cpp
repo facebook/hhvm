@@ -388,7 +388,7 @@ void FunctionScope::setContainsThis(bool f /* = true */) {
 
   BlockScopePtr bs(this->getOuterScope());
   while (bs && bs->is(BlockScope::FunctionScope)) {
-    FunctionScopePtr fs = static_pointer_cast<FunctionScope>(bs);
+    auto fs = static_pointer_cast<FunctionScope>(bs);
     if (!fs->isClosure()) {
       break;
     }
@@ -410,7 +410,7 @@ void FunctionScope::setContainsBareThis(bool f, bool ref /* = false */) {
 
   BlockScopePtr bs(this->getOuterScope());
   while (bs && bs->is(BlockScope::FunctionScope)) {
-    FunctionScopePtr fs = static_pointer_cast<FunctionScope>(bs);
+    auto fs = static_pointer_cast<FunctionScope>(bs);
     if (!fs->isClosure()) {
       break;
     }

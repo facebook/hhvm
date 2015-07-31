@@ -128,13 +128,13 @@ static void parse_string_arg(ExpressionPtr exp,
                              std::string &var,
                              std::string &lit) {
   if (exp->is(Expression::KindOfUnaryOpExpression)) {
-    UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(exp));
+    auto u = static_pointer_cast<UnaryOpExpression>(exp);
     if (u->getOp() == '(') {
       parse_string_arg(u->getExpression(), var, lit);
       return;
     }
   } else if (exp->is(Expression::KindOfBinaryOpExpression)) {
-    BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(exp));
+    auto b = static_pointer_cast<BinaryOpExpression>(exp);
     if (b->getOp() == '.') {
       std::string v, l;
       parse_string_arg(b->getExp2(), v, l);

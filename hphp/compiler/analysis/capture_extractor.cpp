@@ -220,13 +220,13 @@ ExpressionListPtr CaptureExtractor::rewriteExpressionList(ExpressionListPtr l) {
     switch (kind) {
       case Expression::KindOfIntoClause: {
         // The into expression is in the scope of the into clause
-        SimpleQueryClausePtr qcp(static_pointer_cast<SimpleQueryClause>(e));
+        auto qcp = static_pointer_cast<SimpleQueryClause>(e);
         m_boundVars.push_back(qcp->getIdentifier());
         np++;
         break;
       }
       case Expression::KindOfJoinClause: {
-        JoinClausePtr jcp(static_pointer_cast<JoinClause>(e));
+        auto jcp = static_pointer_cast<JoinClause>(e);
         m_boundVars.push_back(jcp->getVar());
         np++;
         break;
@@ -241,13 +241,13 @@ ExpressionListPtr CaptureExtractor::rewriteExpressionList(ExpressionListPtr l) {
     switch (kind) {
       case Expression::KindOfFromClause:
       case Expression::KindOfLetClause: {
-        SimpleQueryClausePtr qcp(static_pointer_cast<SimpleQueryClause>(e));
+        auto qcp = static_pointer_cast<SimpleQueryClause>(e);
         m_boundVars.push_back(qcp->getIdentifier());
         np++;
         break;
       }
       case Expression::KindOfJoinClause: {
-        JoinClausePtr jcp(static_pointer_cast<JoinClause>(e));
+        auto jcp = static_pointer_cast<JoinClause>(e);
         auto groupId = jcp->getGroup();
         if (!groupId.empty()) {
           m_boundVars.push_back(groupId);

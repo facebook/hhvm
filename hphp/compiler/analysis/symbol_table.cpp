@@ -77,8 +77,7 @@ std::string ExtractInitializer(AnalysisResultPtr ar, ExpressionPtr e) {
   switch (e->getKindOf()) {
   case Expression::KindOfParameterExpression:
     {
-      ParameterExpressionPtr p(
-        static_pointer_cast<ParameterExpression>(e));
+      auto p = static_pointer_cast<ParameterExpression>(e);
       if (!p->defaultValue()) return "";
       return p->defaultValue()->getText(ar);
     }
@@ -116,15 +115,15 @@ static inline std::string ExtractDocComment(ExpressionPtr e) {
   if (!e) return "";
   switch (e->getKindOf()) {
   case Expression::KindOfAssignmentExpression: {
-    AssignmentExpressionPtr ae(static_pointer_cast<AssignmentExpression>(e));
+    auto ae = static_pointer_cast<AssignmentExpression>(e);
     return ExtractDocComment(ae->getVariable());
   }
   case Expression::KindOfSimpleVariable: {
-    SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
+    auto sv = static_pointer_cast<SimpleVariable>(e);
     return sv->getDocComment();
   }
   case Expression::KindOfConstantExpression: {
-    ConstantExpressionPtr ce(static_pointer_cast<ConstantExpression>(e));
+    auto ce = static_pointer_cast<ConstantExpression>(e);
     return ce->getDocComment();
   }
   default: return "";

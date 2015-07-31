@@ -165,8 +165,7 @@ void AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
 bool AssignmentExpression::isSimpleGlobalAssign(StringData **name,
                                                 TypedValue *tv) const {
   if (!m_variable->is(KindOfArrayElementExpression)) return false;
-  ArrayElementExpressionPtr ae(
-    static_pointer_cast<ArrayElementExpression>(m_variable));
+  auto ae = static_pointer_cast<ArrayElementExpression>(m_variable);
   if (!ae->isSuperGlobal() || ae->isDynamicGlobal()) return false;
   Variant v;
   if (!m_value->getScalarValue(v) || v.is(KindOfArray)) return false;
@@ -203,8 +202,7 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
   ExpressionPtr val = m_value;
   while (val) {
     if (val->is(KindOfExpressionList)) {
-      ExpressionListPtr el(static_pointer_cast<ExpressionList>(val));
-      val = el->listValue();
+      val = static_pointer_cast<ExpressionList>(val)->listValue();
       continue;
     }
     if (val->is(KindOfAssignmentExpression)) {

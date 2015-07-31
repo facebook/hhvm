@@ -84,7 +84,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     return GetRHSKind(static_pointer_cast<ListAssignment>(rhs)->getArray());
 
   case Construct::KindOfUnaryOpExpression: {
-    UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(rhs));
+    auto u = static_pointer_cast<UnaryOpExpression>(rhs);
     switch (u->getOp()) {
       case '@':
         return GetRHSKind(u->getExpression());
@@ -103,7 +103,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   }
 
   case Construct::KindOfBinaryOpExpression: {
-    BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(rhs));
+    auto b = static_pointer_cast<BinaryOpExpression>(rhs);
     if (b->isAssignmentOp() ||
         b->getOp() == '+' ||
         b->getOp() == T_COLLECTION) {

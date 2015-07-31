@@ -51,7 +51,7 @@ QueryExpression::QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
   m_expressions->addElement(head);
 
   assert(body != nullptr && body->is(Expression::KindOfExpressionList));
-  ExpressionListPtr el(static_pointer_cast<ExpressionList>(body));
+  auto el = static_pointer_cast<ExpressionList>(body);
   for (unsigned int i = 0; i < el->getCount(); i++) {
     if ((*el)[i]) m_expressions->addElement((*el)[i]);
   }

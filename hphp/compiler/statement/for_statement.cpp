@@ -27,8 +27,7 @@ using namespace HPHP;
 static void setListKind(ExpressionPtr e)
 {
   if (e && e->is(Expression::KindOfExpressionList)) {
-    ExpressionListPtr list =
-      static_pointer_cast<ExpressionList>(e);
+    auto list = static_pointer_cast<ExpressionList>(e);
     list->setListKind(ExpressionList::ListKindComma);
   }
 }

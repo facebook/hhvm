@@ -2296,8 +2296,8 @@ void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
 
   if (exp->is(Expression::KindOfListAssignment)) {
     // Nested assignment
-    ListAssignmentPtr la = static_pointer_cast<ListAssignment>(exp);
-    ExpressionListPtr lhs = la->getVariables();
+    auto la = static_pointer_cast<ListAssignment>(exp);
+    auto lhs = la->getVariables();
     int n = lhs->getCount();
     for (int i = 0; i < n; ++i) {
       indexChain.push_back(i);
@@ -2521,7 +2521,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           }
 
           {
-            ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
+            auto r = static_pointer_cast<ReturnStatement>(s);
             Variant v((Variant::NullInit()));
             if (r->getRetExp() &&
                 !r->getRetExp()->getScalarValue(v)) {
@@ -2543,12 +2543,10 @@ void EmitterVisitor::visit(FileScopePtr file) {
           break;
         case Statement::KindOfExpStatement:
           if (mainReturn.m_type == kInvalidDataType) {
-            ExpressionPtr e =
-              static_pointer_cast<ExpStatement>(s)->getExpression();
+            auto e = static_pointer_cast<ExpStatement>(s)->getExpression();
             switch (e->getKindOf()) {
               case Expression::KindOfSimpleFunctionCall: {
-                SimpleFunctionCallPtr func =
-                  static_pointer_cast<SimpleFunctionCall>(e);
+                auto func = static_pointer_cast<SimpleFunctionCall>(e);
                 StringData *name;
                 TypedValue tv;
                 if (func->isSimpleDefine(&name, &tv)) {
@@ -2565,8 +2563,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 break;
               }
               case Expression::KindOfAssignmentExpression: {
-                AssignmentExpressionPtr ae(
-                  static_pointer_cast<AssignmentExpression>(e));
+                auto ae = static_pointer_cast<AssignmentExpression>(e);
                 StringData *name;
                 TypedValue tv;
                 if (ae->isSimpleGlobalAssign(&name, &tv)) {
@@ -2577,8 +2574,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 break;
               }
               case Expression::KindOfIncludeExpression: {
-                IncludeExpressionPtr inc =
-                  static_pointer_cast<IncludeExpression>(e);
+                auto inc = static_pointer_cast<IncludeExpression>(e);
                 if (inc->isReqLit()) {
                   if (FileScopeRawPtr f = inc->getIncludedFile(ar)) {
                     if (StatementListPtr sl = f->getStmt()) {
@@ -2834,7 +2830,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfContinueStatement:
   case Construct::KindOfBreakStatement: {
     auto s = static_pointer_cast<Statement>(node);
-    BreakStatementPtr bs(static_pointer_cast<BreakStatement>(s));
+    auto bs = static_pointer_cast<BreakStatement>(s);
     uint64_t destLevel = bs->getDepth();
 
     if (destLevel > m_regions.back()->getMaxBreakContinueDepth()) {
@@ -2859,7 +2855,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfDoStatement: {
     auto s = static_pointer_cast<Statement>(node);
     auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-    DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
+    auto ds = static_pointer_cast<DoStatement>(s);
 
     Label top(e);
     Label& condition =
@@ -2889,7 +2885,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
   case Construct::KindOfCatchStatement: {
     // Store the current exception object in the appropriate local variable
-    CatchStatementPtr cs(static_pointer_cast<CatchStatement>(node));
+    auto cs = static_pointer_cast<CatchStatement>(node);
     StringData* vName = makeStaticString(cs->getVariable()->getName());
     Id i = m_curFunc->lookupVarId(vName);
     emitVirtualLocal(i);
@@ -2901,8 +2897,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfEchoStatement: {
-    EchoStatementPtr es(static_pointer_cast<EchoStatement>(node));
-    ExpressionListPtr exps = es->getExpressionList();
+    auto es = static_pointer_cast<EchoStatement>(node);
+    auto exps = es->getExpressionList();
     int count = exps->getCount();
     for (int i = 0; i < count; i++) {
       visit((*exps)[i]);
@@ -2915,7 +2911,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
   case Construct::KindOfExpStatement: {
     auto s = static_pointer_cast<Statement>(node);
-    ExpStatementPtr es(static_pointer_cast<ExpStatement>(s));
+    auto es = static_pointer_cast<ExpStatement>(s);
     if (visit(es->getExpression())) {
       emitPop(e);
     }
@@ -2925,7 +2921,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfForStatement: {
     auto s = static_pointer_cast<Statement>(node);
     auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-    ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
+    auto fs = static_pointer_cast<ForStatement>(s);
 
     if (visit(fs->getInitExp())) {
       emitPop(e);
@@ -2961,7 +2957,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfForEachStatement: {
-    ForEachStatementPtr fe(static_pointer_cast<ForEachStatement>(node));
+    auto fe = static_pointer_cast<ForEachStatement>(node);
     if (fe->isAwaitAs()) {
       emitForeachAwaitAs(e, fe);
     } else {
@@ -2971,12 +2967,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfGlobalStatement: {
-    ExpressionListPtr vars(
-      static_pointer_cast<GlobalStatement>(node)->getVars());
+    auto vars = static_pointer_cast<GlobalStatement>(node)->getVars();
     for (int i = 0, n = vars->getCount(); i < n; i++) {
       ExpressionPtr var((*vars)[i]);
       if (var->is(Construct::KindOfSimpleVariable)) {
-        SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(var));
+        auto sv = static_pointer_cast<SimpleVariable>(var);
         if (sv->isSuperGlobal()) {
           continue;
         }
@@ -2990,7 +2985,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.PopV();
       } else if (var->is(Construct::KindOfDynamicVariable)) {
         // global $<exp> =& $GLOBALS[<exp>]
-        DynamicVariablePtr dv(static_pointer_cast<DynamicVariable>(var));
+        auto dv = static_pointer_cast<DynamicVariable>(var);
         // Get the variable name as a cell, for the LHS
         visit(dv->getSubExpression());
         emitConvertToCell(e);
@@ -3009,13 +3004,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfIfStatement: {
-    IfStatementPtr ifp(static_pointer_cast<IfStatement>(node));
+    auto ifp = static_pointer_cast<IfStatement>(node);
     StatementListPtr branches(ifp->getIfBranches());
     int nb = branches->getCount();
     Label done;
     for (int i = 0; i < nb; i++) {
-      IfBranchStatementPtr branch(
-        static_pointer_cast<IfBranchStatement>((*branches)[i]));
+      auto branch = static_pointer_cast<IfBranchStatement>((*branches)[i]);
       Label fals;
       if (branch->getCondition()) {
         Label tru;
@@ -3044,7 +3038,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     not_reached(); // handled by KindOfIfStatement
 
   case Construct::KindOfReturnStatement: {
-    ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
+    auto r = static_pointer_cast<ReturnStatement>(node);
 
     char retSym = StackSym::C;
     if (visit(r->getRetExp())) {
@@ -3065,17 +3059,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfStaticStatement: {
-    ExpressionListPtr vars(
-      static_pointer_cast<StaticStatement>(node)->getVars());
+    auto vars = static_pointer_cast<StaticStatement>(node)->getVars();
     for (int i = 0, n = vars->getCount(); i < n; i++) {
       ExpressionPtr se((*vars)[i]);
       assert(se->is(Construct::KindOfAssignmentExpression));
-      AssignmentExpressionPtr ae(
-        static_pointer_cast<AssignmentExpression>(se));
+      auto ae = static_pointer_cast<AssignmentExpression>(se);
       ExpressionPtr var(ae->getVariable());
       ExpressionPtr value(ae->getValue());
       assert(var->is(Construct::KindOfSimpleVariable));
-      SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(var));
+      auto sv = static_pointer_cast<SimpleVariable>(var);
       StringData* name = makeStaticString(sv->getName());
       Id local = m_curFunc->lookupVarId(name);
 
@@ -3116,9 +3108,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfSwitchStatement: {
     auto s = static_pointer_cast<Statement>(node);
     auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-    SwitchStatementPtr sw(static_pointer_cast<SwitchStatement>(node));
+    auto sw = static_pointer_cast<SwitchStatement>(node);
 
-    StatementListPtr cases(sw->getCases());
+    auto cases = sw->getCases();
     if (!cases) {
       visit(sw->getExp());
       emitPop(e);
@@ -3138,7 +3130,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     // false.  In particular, if a case condition modifies the switch
     // subject, things behave differently depending on whether the subject
     // is a simple variable.
-    ExpressionPtr subject = sw->getExp();
+    auto subject = sw->getExp();
     bool simpleSubject = subject->is(Construct::KindOfSimpleVariable)
       && !static_pointer_cast<SimpleVariable>(subject)->getAlwaysStash();
     Id tempLocal = -1;
@@ -3185,7 +3177,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
       int defI = -1;
       for (uint32_t i = 0; i < ncase; i++) {
-        CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
+        auto c = static_pointer_cast<CaseStatement>((*cases)[i]);
         ExpressionPtr condition = c->getCondition();
         if (condition) {
           if (simpleSubject) {
@@ -3219,7 +3211,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     }
     for (uint32_t i = 0; i < ncase; i++) {
       caseLabels[i].set(e);
-      CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
+      auto c = static_pointer_cast<CaseStatement>((*cases)[i]);
       enterRegion(region);
       SCOPE_EXIT { leaveRegion(region); };
       visit(c->getStatement());
@@ -3252,7 +3244,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     enterRegion(region);
     SCOPE_EXIT { leaveRegion(region); };
 
-    FinallyStatementPtr fs = static_pointer_cast<FinallyStatement>(node);
+    auto fs = static_pointer_cast<FinallyStatement>(node);
     visit(fs->getBody());
     return false;
   }
@@ -3266,10 +3258,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         "at the beginning of a try region: %d", m_ue.bcPos());
     }
 
-    TryStatementPtr ts = static_pointer_cast<TryStatement>(node);
-
-    FinallyStatementPtr f(static_pointer_cast<FinallyStatement>
-                          (ts->getFinally()));
+    auto ts = static_pointer_cast<TryStatement>(node);
+    auto f = static_pointer_cast<FinallyStatement>(ts->getFinally());
 
     Offset start = m_ue.bcPos();
     Offset end;
@@ -3307,8 +3297,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
         bool firstHandler = true;
         for (int i = 0; i < catch_count; i++) {
-          CatchStatementPtr c(static_pointer_cast<CatchStatement>
-                              ((*catches)[i]));
+          auto c = static_pointer_cast<CatchStatement>((*catches)[i]);
           StringData* eName = makeStaticString(c->getOriginalClassName());
 
           // If there's already a catch of this class, skip;
@@ -3353,8 +3342,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfUnsetStatement: {
-    ExpressionListPtr exps(
-      static_pointer_cast<UnsetStatement>(node)->getExps());
+    auto exps = static_pointer_cast<UnsetStatement>(node)->getExps();
     for (int i = 0, n = exps->getCount(); i < n; i++) {
       emitVisitAndUnset(e, (*exps)[i]);
     }
@@ -3364,7 +3352,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfWhileStatement: {
     auto s = static_pointer_cast<Statement>(node);
     auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-    WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
+    auto ws = static_pointer_cast<WhileStatement>(s);
     ExpressionPtr condExp(ws->getCondExp());
     Label& lcontinue = registerContinue(ws, region.get(), 1,
       false)->m_label;
@@ -3400,7 +3388,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     not_reached();
 
   case Construct::KindOfFunctionStatement: {
-    MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
+    auto m = static_pointer_cast<MethodStatement>(node);
     // Only called for fn defs not on the top level
     assert(!node->getClassScope()); // Handled directly by emitClass().
     StringData* nName = makeStaticString(m->getOriginalName());
@@ -3411,14 +3399,14 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfGotoStatement: {
-    GotoStatementPtr g(static_pointer_cast<GotoStatement>(node));
+    auto g = static_pointer_cast<GotoStatement>(node);
     StringData* nName = makeStaticString(g->label());
     emitGoto(e, nName, g);
     return false;
   }
 
   case Construct::KindOfLabelStatement: {
-    LabelStatementPtr l(static_pointer_cast<LabelStatement>(node));
+    auto l = static_pointer_cast<LabelStatement>(node);
     StringData* nName = makeStaticString(l->label());
     registerGoto(l, m_regions.back().get(), nName, false)
       ->m_label.set(e);
@@ -3432,16 +3420,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     not_implemented();
   }
   case Construct::KindOfUnaryOpExpression: {
-    UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(node));
+    auto u = static_pointer_cast<UnaryOpExpression>(node);
     int op = u->getOp();
 
     if (op == T_UNSET) {
       // php doesnt have an unset expression, but hphp's optimizations
       // sometimes introduce them
-      ExpressionPtr exp(u->getExpression());
+      auto exp = u->getExpression();
       if (exp->is(Construct::KindOfExpressionList)) {
-        ExpressionListPtr exps(
-          static_pointer_cast<ExpressionList>(exp));
+        auto exps = static_pointer_cast<ExpressionList>(exp);
         if (exps->getListKind() == ExpressionList::ListKindParam) {
           for (int i = 0, n = exps->getCount(); i < n; i++) {
             emitVisitAndUnset(e, (*exps)[i]);
@@ -3576,8 +3563,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfAssignmentExpression: {
-    AssignmentExpressionPtr ae(
-      static_pointer_cast<AssignmentExpression>(node));
+    auto ae = static_pointer_cast<AssignmentExpression>(node);
     ExpressionPtr rhs = ae->getValue();
     Id tempLocal = -1;
     Offset start = InvalidAbsoluteOffset;
@@ -3617,7 +3603,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfBinaryOpExpression: {
-    BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(node));
+    auto b = static_pointer_cast<BinaryOpExpression>(node);
     int op = b->getOp();
     if (b->isAssignmentOp()) {
       visit(b->getExp1());
@@ -3749,8 +3735,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfClassConstantExpression: {
-    ClassConstantExpressionPtr cc(
-      static_pointer_cast<ClassConstantExpression>(node));
+    auto cc = static_pointer_cast<ClassConstantExpression>(node);
     auto const nName = makeStaticString(cc->getConName());
     auto const getOriginalClassName = [&] {
       const std::string& clsName = cc->getOriginalClassName();
@@ -3825,7 +3810,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfConstantExpression: {
-    ConstantExpressionPtr c(static_pointer_cast<ConstantExpression>(node));
+    auto c = static_pointer_cast<ConstantExpression>(node);
     if (c->isNull()) {
       e.Null();
     } else if (c->isBoolean()) {
@@ -3855,9 +3840,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfEncapsListExpression: {
-    EncapsListExpressionPtr el(
-      static_pointer_cast<EncapsListExpression>(node));
-    ExpressionListPtr args(el->getExpressions());
+    auto el = static_pointer_cast<EncapsListExpression>(node);
+    auto args = el->getExpressions();
     int n = args ? args->getCount() : 0;
     int i = 0;
     FPIRegionRecorder* fpi = nullptr;
@@ -3897,8 +3881,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfArrayElementExpression: {
-    ArrayElementExpressionPtr ae(
-      static_pointer_cast<ArrayElementExpression>(node));
+    auto ae = static_pointer_cast<ArrayElementExpression>(node);
     if (!ae->isSuperGlobal() || !ae->getOffset()) {
       visit(ae->getVariable());
       // XHP syntax allows for expressions like "($a =& $b)[0]". We
@@ -3937,9 +3920,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfSimpleFunctionCall: {
-    SimpleFunctionCallPtr call(
-      static_pointer_cast<SimpleFunctionCall>(node));
-    ExpressionListPtr params = call->getParams();
+    auto call = static_pointer_cast<SimpleFunctionCall>(node);
+    auto params = call->getParams();
 
     if (call->isFatalFunction()) {
       if (params && params->getCount() == 1) {
@@ -4030,9 +4012,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       Variant v1;
       if (p0->getKindOf() == Construct::KindOfSimpleFunctionCall &&
           p1->getScalarValue(v1) && v1.isInteger()) {
-        SimpleFunctionCallPtr innerCall(
-          static_pointer_cast<SimpleFunctionCall>(p0));
-        ExpressionListPtr innerParams = innerCall->getParams();
+        auto innerCall = static_pointer_cast<SimpleFunctionCall>(p0);
+        auto innerParams = innerCall->getParams();
         if (innerCall->isCallToFunction("func_get_args") &&
             (!innerParams || innerParams->getCount() == 0)) {
           params->removeElement(0);
@@ -4122,7 +4103,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfIncludeExpression: {
-    IncludeExpressionPtr ie(static_pointer_cast<IncludeExpression>(node));
+    auto ie = static_pointer_cast<IncludeExpression>(node);
     if (ie->isReqLit()) {
       StringData* nValue = makeStaticString(ie->includePath());
       e.String(nValue);
@@ -4152,8 +4133,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfListAssignment: {
-    ListAssignmentPtr la(static_pointer_cast<ListAssignment>(node));
-    ExpressionPtr rhs = la->getArray();
+    auto la = static_pointer_cast<ListAssignment>(node);
+    auto rhs = la->getArray();
 
     // listAssignmentVisitLHS should have handled this
     assert(rhs);
@@ -4207,9 +4188,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfNewObjectExpression: {
-    NewObjectExpressionPtr ne(
-      static_pointer_cast<NewObjectExpression>(node));
-    ExpressionListPtr params(ne->getParams());
+    auto ne = static_pointer_cast<NewObjectExpression>(node);
+    auto params = ne->getParams();
     int numParams = params ? params->getCount() : 0;
     ClassScopeRawPtr cls = ne->getClassScope();
 
@@ -4251,8 +4231,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfObjectMethodExpression: {
-    ObjectMethodExpressionPtr om(
-      static_pointer_cast<ObjectMethodExpression>(node));
+    auto om = static_pointer_cast<ObjectMethodExpression>(node);
     // $obj->name(...)
     // ^^^^
     visit(om->getObject());
@@ -4265,8 +4244,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     ExpressionPtr methName = om->getNameExp();
     bool useDirectForm = false;
     if (methName->is(Construct::KindOfScalarExpression)) {
-      ScalarExpressionPtr sval(
-        static_pointer_cast<ScalarExpression>(methName));
+      auto sval = static_pointer_cast<ScalarExpression>(methName);
       const std::string& methStr = sval->getOriginalLiteralString();
       if (!methStr.empty()) {
         // $obj->name(...)
@@ -4302,8 +4280,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfObjectPropertyExpression: {
-    ObjectPropertyExpressionPtr op(
-      static_pointer_cast<ObjectPropertyExpression>(node));
+    auto op = static_pointer_cast<ObjectPropertyExpression>(node);
     if (op->isNullSafe() &&
         op->hasAnyContext(
             Expression::RefValue
@@ -4341,7 +4318,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfQOpExpression: {
-    QOpExpressionPtr q(static_pointer_cast<QOpExpression>(node));
+    auto q = static_pointer_cast<QOpExpression>(node);
     if (q->getYes()) {
       // <expr> ? <expr> : <expr>
       Label tru, fals, done;
@@ -4417,7 +4394,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfSimpleVariable: {
-    SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(node));
+    auto sv = static_pointer_cast<SimpleVariable>(node);
     if (sv->isThis()) {
       if (sv->hasContext(Expression::ObjectContext)) {
         e.This();
@@ -4453,7 +4430,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfDynamicVariable: {
-    DynamicVariablePtr dv(static_pointer_cast<DynamicVariable>(node));
+    auto dv = static_pointer_cast<DynamicVariable>(node);
     visit(dv->getSubExpression());
     emitConvertToCellOrLoc(e);
     markName(e);
@@ -4461,8 +4438,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfStaticMemberExpression: {
-    StaticMemberExpressionPtr sm(
-      static_pointer_cast<StaticMemberExpression>(node));
+    auto sm = static_pointer_cast<StaticMemberExpression>(node);
     emitVirtualClassBase(e, sm.get());
     emitNameString(e, sm->getExp());
     markSProp(e);
@@ -4470,12 +4446,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfArrayPairExpression: {
-    ArrayPairExpressionPtr ap(
-      static_pointer_cast<ArrayPairExpression>(node));
+    auto ap = static_pointer_cast<ArrayPairExpression>(node);
 
-    ExpressionPtr key = ap->getName();
+    auto key = ap->getName();
     if (!m_staticArrays.empty()) {
-      ExpressionPtr val = ap->getValue();
+      auto val = ap->getValue();
 
       TypedValue tvVal;
       initScalar(tvVal, val);
@@ -4528,7 +4503,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     return true;
   }
   case Construct::KindOfExpressionList: {
-    ExpressionListPtr el(static_pointer_cast<ExpressionList>(node));
+    auto el = static_pointer_cast<ExpressionList>(node);
     int nelem = el->getCount(), i;
     bool pop = el->getListKind() != ExpressionList::ListKindParam;
     int keep = el->getListKind() == ExpressionList::ListKindLeft ?
@@ -4558,7 +4533,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   case Construct::KindOfClosureExpression: {
     // Closures are implemented by anonymous classes that extend Closure.
     // There is one anonymous class per closure body.
-    ClosureExpressionPtr ce(static_pointer_cast<ClosureExpression>(node));
+    auto ce = static_pointer_cast<ClosureExpression>(node);
 
     // Build a convenient list of use-variables. Each one corresponds to:
     // (a) an instance variable, to store the value until call time
@@ -4566,13 +4541,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     // (c) an argument to the constructor at the definition site
     // (d) a line of code in the generated constructor;
     // (e) a line of code in the generated prologue to the closure body
-    ExpressionListPtr useList(ce->getClosureVariables());
+    auto useList = ce->getClosureVariables();
     ClosureUseVarVec useVars;
     int useCount = (useList ? useList->getCount() : 0);
     if (useList) {
       for (int i = 0; i < useCount; ++i) {
-        ParameterExpressionPtr var(
-          static_pointer_cast<ParameterExpression>((*useList)[i]));
+        auto var = static_pointer_cast<ParameterExpression>((*useList)[i]);
         StringData* varName = makeStaticString(var->getName());
         useVars.push_back(ClosureUseVar(varName, var->isRef()));
       }
@@ -4642,14 +4616,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
     invoke->isClosureBody = true;
     pce->addMethod(invoke);
-    MethodStatementPtr body(
-      static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
+    auto body = static_pointer_cast<MethodStatement>(ce->getClosureFunction());
     postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
 
     return true;
   }
   case Construct::KindOfYieldExpression: {
-    YieldExpressionPtr y(static_pointer_cast<YieldExpression>(node));
+    auto y = static_pointer_cast<YieldExpression>(node);
 
     registerYieldAwait(y);
     assert(m_evalStack.size() == 0);
@@ -4680,7 +4653,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     return true;
   }
   case Construct::KindOfAwaitExpression: {
-    AwaitExpressionPtr await(static_pointer_cast<AwaitExpression>(node));
+    auto await = static_pointer_cast<AwaitExpression>(node);
 
     registerYieldAwait(await);
     assert(m_evalStack.size() == 0);
@@ -4707,7 +4680,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     return true;
   }
   case Construct::KindOfQueryExpression: {
-    QueryExpressionPtr query(static_pointer_cast<QueryExpression>(node));
+    auto query = static_pointer_cast<QueryExpression>(node);
     auto args = *query->getQueryArguments();
     auto numArgs = args.getCount();
     visit(args[0]);
@@ -5243,15 +5216,13 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
   // on the RHS until it encounters an expression other than a list
   // assignment expression.
   while (exp->is(Expression::KindOfListAssignment)) {
-    ListAssignmentPtr la(static_pointer_cast<ListAssignment>(exp));
-    exp = la->getArray();
+    exp = static_pointer_cast<ListAssignment>(exp)->getArray();
     permissiveKind = PassByRefKind::WarnOnCell;
   }
 
   switch (exp->getKindOf()) {
     case Expression::KindOfSimpleFunctionCall: {
-      SimpleFunctionCallPtr sfc(
-        static_pointer_cast<SimpleFunctionCall>(exp));
+      auto sfc = static_pointer_cast<SimpleFunctionCall>(exp);
       // this only happens for calls that have been morphed into bytecode
       // e.g. idx(), abs(), strlen(), etc..
       // It is to allow the following code to work
@@ -5273,12 +5244,12 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
       // Assignment (=) and binding assignment (=&)
       return PassByRefKind::WarnOnCell;
     case Expression::KindOfBinaryOpExpression: {
-      BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(exp));
+      auto b = static_pointer_cast<BinaryOpExpression>(exp);
       // Assignment op (+=, -=, *=, etc)
       if (b->isAssignmentOp()) return PassByRefKind::WarnOnCell;
     } break;
     case Expression::KindOfUnaryOpExpression: {
-      UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(exp));
+      auto u = static_pointer_cast<UnaryOpExpression>(exp);
       int op = u->getOp();
       if (op == T_CLONE) {
         // clone
@@ -5290,7 +5261,7 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
       }
     } break;
     case Expression::KindOfExpressionList: {
-      ExpressionListPtr el(static_pointer_cast<ExpressionList>(exp));
+      auto el = static_pointer_cast<ExpressionList>(exp);
       if (el->getListKind() != ExpressionList::ListKindParam) {
         return PassByRefKind::WarnOnCell;
       }
@@ -5939,8 +5910,8 @@ MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
 
   // Bail if the cases aren't homogeneous
   for (int i = 0; i < ncase; ++i) {
-    CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
-    ExpressionPtr condition = c->getCondition();
+    auto c = static_pointer_cast<CaseStatement>((*cases)[i]);
+    auto condition = c->getCondition();
     if (condition) {
       Variant cval;
       DataType caseType;
@@ -6637,8 +6608,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
         // Does this method take doubles as arguments?
         for (int i = 0; i < numParams; ++i) {
-          ParameterExpressionPtr par(
-            static_pointer_cast<ParameterExpression>((*params)[i]));
+          auto par = static_pointer_cast<ParameterExpression>((*params)[i]);
           auto const typeAnnotation = par->annotation();
           if (typeAnnotation && typeAnnotation->dataType() == KindOfDouble) {
             usesDouble = true;
@@ -6680,8 +6650,8 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   // assign ids to parameters (all methods)
   int numParam = meth->getParams() ? meth->getParams()->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
-    ParameterExpressionPtr par(
-      static_pointer_cast<ParameterExpression>((*meth->getParams())[i]));
+    auto par =
+      static_pointer_cast<ParameterExpression>((*meth->getParams())[i]);
     fe->allocVarId(makeStaticString(par->getName()));
   }
 
@@ -6760,8 +6730,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
                                            bool coerce_params /*= false */) {
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
-    ParameterExpressionPtr par(
-      static_pointer_cast<ParameterExpression>((*params)[i]));
+    auto par = static_pointer_cast<ParameterExpression>((*params)[i]);
     StringData* parName = makeStaticString(par->getName());
 
     FuncEmitter::ParamInfo pi;
@@ -6948,8 +6917,7 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
   ExpressionListPtr params = meth->getParams();
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
-    ParameterExpressionPtr par(
-      static_pointer_cast<ParameterExpression>((*params)[i]));
+    auto par = static_pointer_cast<ParameterExpression>((*params)[i]);
     if (par->isOptional()) {
       hasOptional = true;
       Label entryPoint(e);
@@ -7872,8 +7840,7 @@ void EmitterVisitor::emitClass(Emitter& e,
     return;
   }
 
-  InterfaceStatementPtr is(
-    static_pointer_cast<InterfaceStatement>(cNode->getStmt()));
+  auto is = static_pointer_cast<InterfaceStatement>(cNode->getStmt());
   StringData* className = makeStaticString(cNode->getOriginalName());
   StringData* parentName = makeStaticString(cNode->getOriginalParent());
   StringData* classDoc = Option::GenerateDocComments ?
@@ -8001,8 +7968,7 @@ void EmitterVisitor::emitClass(Emitter& e,
           ExpressionPtr vNode;
           SimpleVariablePtr var;
           if (exp->is(Expression::KindOfAssignmentExpression)) {
-            AssignmentExpressionPtr ae(
-              static_pointer_cast<AssignmentExpression>(exp));
+            auto ae = static_pointer_cast<AssignmentExpression>(exp);
             var = static_pointer_cast<SimpleVariable>(ae->getVariable());
             vNode = ae->getValue();
           } else {
@@ -8056,8 +8022,7 @@ void EmitterVisitor::emitClass(Emitter& e,
 
         if (cc->isAbstract()) {
           for (int ii = 0; ii < nCons; ii++) {
-            ConstantExpressionPtr con(
-              static_pointer_cast<ConstantExpression>((*el)[ii]));
+            auto con = static_pointer_cast<ConstantExpression>((*el)[ii]);
             StringData* constName = makeStaticString(con->getName());
             bool added UNUSED =
               pce->addAbstractConstant(constName, typeConstraint,
@@ -8066,11 +8031,10 @@ void EmitterVisitor::emitClass(Emitter& e,
           }
         } else {
           for (int ii = 0; ii < nCons; ii++) {
-            AssignmentExpressionPtr ae(
-              static_pointer_cast<AssignmentExpression>((*el)[ii]));
-            ConstantExpressionPtr con(
-              static_pointer_cast<ConstantExpression>(ae->getVariable()));
-            ExpressionPtr vNode(ae->getValue());
+            auto ae = static_pointer_cast<AssignmentExpression>((*el)[ii]);
+            auto con =
+              static_pointer_cast<ConstantExpression>(ae->getVariable());
+            auto vNode = ae->getValue();
             StringData* constName = makeStaticString(con->getName());
             assert(vNode);
             TypedValue tvVal;
@@ -8151,7 +8115,7 @@ void EmitterVisitor::emitClass(Emitter& e,
 
   // If this is an enum, get its type constraint.
   if (cNode->isEnum()) {
-    ClassStatementPtr cs = static_pointer_cast<ClassStatement>(is);
+    auto cs = static_pointer_cast<ClassStatement>(is);
     auto const typeConstraint =
       determine_type_constraint_from_annot(cs->getEnumBaseTy(), true);
     pce->setEnumBaseTy(typeConstraint);
@@ -8213,11 +8177,11 @@ void EmitterVisitor::emitForeach(Emitter& e,
   bool listVal = val->is(Expression::KindOfListAssignment);
 
   if (simpleCase) {
-    SimpleVariablePtr svVal(static_pointer_cast<SimpleVariable>(val));
+    auto svVal = static_pointer_cast<SimpleVariable>(val);
     StringData* name = makeStaticString(svVal->getName());
     valTempLocal = m_curFunc->lookupVarId(name);
     if (key) {
-      SimpleVariablePtr svKey(static_pointer_cast<SimpleVariable>(key));
+      auto svKey = static_pointer_cast<SimpleVariable>(key);
       name = makeStaticString(svKey->getName());
       keyTempLocal = m_curFunc->lookupVarId(name);
       visit(key);
@@ -8666,7 +8630,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
   };
   switch (val->getKindOf()) {
     case Expression::KindOfConstantExpression: {
-      ConstantExpressionPtr ce(static_pointer_cast<ConstantExpression>(val));
+      auto ce = static_pointer_cast<ConstantExpression>(val);
       if (ce->isNull()) {
         tvVal.m_data.num = 0;
         tvVal.m_type = KindOfNull;
@@ -8680,7 +8644,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
       break;
     }
     case Expression::KindOfScalarExpression: {
-      ScalarExpressionPtr sval = static_pointer_cast<ScalarExpression>(val);
+      auto sval = static_pointer_cast<ScalarExpression>(val);
       const std::string* s;
       if (sval->getString(s)) {
         StringData* sd = makeStaticString(*s);
@@ -8706,7 +8670,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
       break;
     }
     case Expression::KindOfUnaryOpExpression: {
-      UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
+      auto u = static_pointer_cast<UnaryOpExpression>(val);
       if (u->getOp() == T_ARRAY) {
         initArray(u->getExpression());
         break;
@@ -8790,8 +8754,7 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
   }
   e.NewCol(static_cast<int>(CollectionType::Pair));
   for (int i = 0; i < 2; i++) {
-    ArrayPairExpressionPtr ap(
-      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     if (ap->getName() != nullptr) {
       throw IncludeTimeFatalException(ap,
         "Keys may not be specified for Pair initialization");
@@ -8807,8 +8770,7 @@ void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
   // Do not allow specification of keys even if the resulting array is
   // packed. It doesn't make sense to specify keys for Vectors.
   for (int i = 0; i < el->getCount(); i++) {
-    ArrayPairExpressionPtr ap(
-      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     if (ap->getName() != nullptr) {
       throw IncludeTimeFatalException(ap,
         "Keys may not be specified for Vector initialization");
@@ -8835,8 +8797,7 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
   auto useArray = !!nElms;
   auto hasVectorData = true;
   for (int i = 0; i < nElms; i++) {
-    ArrayPairExpressionPtr ap(
-      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     auto key = ap->getName();
     if ((bool)key) {
       throw IncludeTimeFatalException(ap,
@@ -8875,8 +8836,7 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
     e.NewMixedArray(nElms);
     e.ColFromArray(static_cast<int>(ct));
     for (int i = 0; i < nElms; i++) {
-      ArrayPairExpressionPtr ap(
-        static_pointer_cast<ArrayPairExpression>((*el)[i]));
+      auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
       visit(ap->getValue());
       emitConvertToCell(e);
       e.ColAddNewElemC();
@@ -8897,8 +8857,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
   auto useArray = !!nElms;
   auto hasVectorData = true;
   for (int i = 0; i < nElms; i++) {
-    ArrayPairExpressionPtr ap(
-      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     auto key = ap->getName();
     if (key == nullptr) {
       throw IncludeTimeFatalException(ap,
@@ -8935,8 +8894,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
     e.NewMixedArray(nElms);
     e.ColFromArray(static_cast<int>(ct));
     for (int i = 0; i < nElms; i++) {
-      ArrayPairExpressionPtr ap(
-        static_pointer_cast<ArrayPairExpression>((*el)[i]));
+      auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
       visit(ap->getName());
       emitConvertToCell(e);
       visit(ap->getValue());
@@ -8947,8 +8905,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
 }
 
 void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
-  ScalarExpressionPtr cls =
-    static_pointer_cast<ScalarExpression>(b->getExp1());
+  auto cls = static_pointer_cast<ScalarExpression>(b->getExp1());
   const std::string* clsName = nullptr;
   cls->getString(clsName);
   auto ct = collections::stringToType(*clsName);
@@ -8995,16 +8952,13 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
     case Expression::KindOfConstantExpression:
       return !initExpr->isScalar();
     case Expression::KindOfUnaryOpExpression: {
-      UnaryOpExpressionPtr u(
-        static_pointer_cast<UnaryOpExpression>(initExpr));
+      auto u = static_pointer_cast<UnaryOpExpression>(initExpr);
       if (u->getOp() == T_ARRAY) {
-        ExpressionListPtr el =
-          static_pointer_cast<ExpressionList>(u->getExpression());
+        auto el = static_pointer_cast<ExpressionList>(u->getExpression());
         if (el) {
           int n = el->getCount();
           for (int i = 0; i < n; i++) {
-            ArrayPairExpressionPtr ap =
-              static_pointer_cast<ArrayPairExpression>((*el)[i]);
+            auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
             ExpressionPtr key = ap->getName();
             if (requiresDeepInit(ap->getValue()) ||
                 (key && requiresDeepInit(key))) {
@@ -9021,8 +8975,7 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
       return true;
     }
     case Expression::KindOfBinaryOpExpression: {
-      BinaryOpExpressionPtr b(
-        static_pointer_cast<BinaryOpExpression>(initExpr));
+      auto b = static_pointer_cast<BinaryOpExpression>(initExpr);
       return requiresDeepInit(b->getExp1()) || requiresDeepInit(b->getExp2());
     }
     default:
@@ -9048,7 +9001,7 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
       case Expression::KindOfSimpleFunctionCall:
         return e->preOptimize(ar);
       case Expression::KindOfClosureExpression: {
-        ClosureExpressionPtr cl = static_pointer_cast<ClosureExpression>(e);
+        auto cl = static_pointer_cast<ClosureExpression>(e);
         auto UNUSED exp = doOptimize(cl->getClosureFunction(), ar);
         assert(!exp);
         break;

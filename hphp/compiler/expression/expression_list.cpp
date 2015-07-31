@@ -221,14 +221,13 @@ void ExpressionList::stripConcat() {
   for (int i = 0; i < el.getCount(); ) {
     ExpressionPtr &e = el[i];
     if (e->is(Expression::KindOfUnaryOpExpression)) {
-      UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(e));
+      auto u = static_pointer_cast<UnaryOpExpression>(e);
       if (u->getOp() == '(') {
         e = u->getExpression();
       }
     }
     if (e->is(Expression::KindOfBinaryOpExpression)) {
-      BinaryOpExpressionPtr b
-        (static_pointer_cast<BinaryOpExpression>(e));
+      auto b = static_pointer_cast<BinaryOpExpression>(e);
       if (b->getOp() == '.') {
         if (!b->getExp1()->isArray() && !b->getExp2()->isArray()) {
           e = b->getExp1();
@@ -342,7 +341,7 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
           removeElement(i);
           changed = true;
         } else if (e->is(KindOfExpressionList)) {
-          ExpressionListPtr el(static_pointer_cast<ExpressionList>(e));
+          auto el = static_pointer_cast<ExpressionList>(e);
           removeElement(i);
           for (size_t j = el->getCount(); j--; ) {
             insertElement((*el)[j], i);

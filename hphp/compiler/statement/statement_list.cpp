@@ -117,7 +117,7 @@ ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr s = m_stmts[i];
     if (s->is(KindOfReturnStatement)) {
-      ExpressionPtr e = static_pointer_cast<ReturnStatement>(s)->getRetExp();
+      auto e = static_pointer_cast<ReturnStatement>(s)->getRetExp();
       if (!e) {
         e = CONSTANT("null");
       } else if (!e->isScalar()) {
@@ -193,7 +193,7 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
 
     if (s) {
       if (s->is(KindOfStatementList) && !s->hasDecl()) {
-        StatementListPtr stmts(static_pointer_cast<StatementList>(s));
+        auto stmts = static_pointer_cast<StatementList>(s);
         removeElement(i);
         m_stmts.insert(m_stmts.begin() + i,
                        stmts->m_stmts.begin(), stmts->m_stmts.end());
@@ -201,8 +201,8 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
         changed = true;
         continue;
       } else if (s->is(KindOfBlockStatement)) {
-        BlockStatementPtr bs(static_pointer_cast<BlockStatement>(s));
-        StatementListPtr stmts(bs->getStmts());
+        auto bs = static_pointer_cast<BlockStatement>(s);
+        auto stmts = bs->getStmts();
         if (!stmts) {
           removeElement(i--);
           changed = true;

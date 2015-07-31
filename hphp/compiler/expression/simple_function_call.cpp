@@ -375,8 +375,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     m_classScope.reset();
     setupScopes(ar);
     if (m_funcScope && m_funcScope->getOptFunction()) {
-      SimpleFunctionCallPtr self(
-        static_pointer_cast<SimpleFunctionCall>(shared_from_this()));
+      auto self = static_pointer_cast<SimpleFunctionCall>(shared_from_this());
       (m_funcScope->getOptFunction())(0, ar, self, 1);
     }
 
@@ -702,9 +701,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
           case EXTR_PREFIX_ALL:
           case EXTR_PREFIX_INVALID:
           case EXTR_OVERWRITE: {
-            ExpressionListPtr arr(
-              static_pointer_cast<ExpressionList>(
-                static_pointer_cast<UnaryOpExpression>(vars)->getExpression()));
+            auto arr = static_pointer_cast<ExpressionList>(
+              static_pointer_cast<UnaryOpExpression>(vars)->getExpression());
             ExpressionListPtr rep(
               new ExpressionList(getScope(), getRange(),
                                  ExpressionList::ListKindWrapped));
@@ -829,8 +827,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
       return ExpressionPtr();
     }
     if (m_funcScope->getOptFunction()) {
-      SimpleFunctionCallPtr self(
-        static_pointer_cast<SimpleFunctionCall>(shared_from_this()));
+      auto self = static_pointer_cast<SimpleFunctionCall>(shared_from_this());
       ExpressionPtr e = (m_funcScope->getOptFunction())(0, ar, self, 0);
       if (e) return e;
     }
@@ -892,8 +889,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
                 getScope()->addUpdates(BlockScope::UseKindConstRef);
               }
               Variant v;
-              ExpressionPtr value =
-                static_pointer_cast<Expression>(sym->getValue());
+              auto value = static_pointer_cast<Expression>(sym->getValue());
               if (value->getScalarValue(v)) {
                 if (!v.isAllowedAsConstantValue()) {
                   const_cast<Symbol*>(sym)->setDynamic();

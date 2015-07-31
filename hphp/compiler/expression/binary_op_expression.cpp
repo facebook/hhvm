@@ -67,8 +67,7 @@ BinaryOpExpression::BinaryOpExpression
     break;
   case T_COLLECTION: {
     std::string s = m_exp1->getLiteralString();
-    ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
-    el->setCollectionElems();
+    static_pointer_cast<ExpressionList>(m_exp2)->setCollectionElems();
     break;
   }
   default:
@@ -310,9 +309,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           if (m_exp2->is(KindOfBinaryOpExpression)) {
             auto binOpExp = dynamic_pointer_cast<BinaryOpExpression>(m_exp2);
             if (binOpExp->m_op == m_op && binOpExp->m_exp1->isScalar()) {
-              ExpressionPtr aExp = m_exp1;
-              ExpressionPtr bExp = binOpExp->m_exp1;
-              ExpressionPtr cExp = binOpExp->m_exp2;
+              auto aExp = m_exp1;
+              auto bExp = binOpExp->m_exp1;
+              auto cExp = binOpExp->m_exp2;
               if (aExp->isArray() || bExp->isArray() || cExp->isArray()) {
                 break;
               }
@@ -320,7 +319,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               m_exp2 = cExp;
               binOpExp->m_exp1 = aExp;
               binOpExp->m_exp2 = bExp;
-              if (ExpressionPtr optExp = binOpExp->foldConst(ar)) {
+              if (auto optExp = binOpExp->foldConst(ar)) {
                 m_exp1 = optExp;
               }
               return static_pointer_cast<Expression>(shared_from_this());
@@ -673,7 +672,7 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_IS_GREATER_OR_EQUAL: cg_printf(" >= ");         break;
   case T_INSTANCEOF:          cg_printf(" instanceof "); break;
   case T_COLLECTION: {
-    ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
+    auto el = static_pointer_cast<ExpressionList>(m_exp2);
     if (el->getCount() == 0) {
       cg_printf(" {}");
     } else {

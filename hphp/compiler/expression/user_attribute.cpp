@@ -59,12 +59,12 @@ void UserAttribute::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("attributeName");
   cg.printValue(m_name);
   if (m_exp != nullptr && m_exp->is(Expression::KindOfUnaryOpExpression)) {
-    UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(m_exp));
+    auto u = static_pointer_cast<UnaryOpExpression>(m_exp);
     if (u->getOp() == T_ARRAY) {
       ExpressionPtr ex = u->getExpression();
       if (ex != nullptr) {
         if (ex->is(Expression::KindOfExpressionList)) {
-          ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
+          auto el = static_pointer_cast<ExpressionList>(ex);
           cg.printPropertyHeader("expressions");
           cg.printExpressionVector(el);
         } else {

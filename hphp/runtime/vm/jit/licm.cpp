@@ -169,23 +169,23 @@ IdomVector& find_idoms(Env& env) {
  * header block.
  */
 struct LoopEnv {
-  explicit LoopEnv(Env& global, LoopID canonical_loop)
+  explicit LoopEnv(Env& global, LoopID loop_id)
     : global(global)
-    , canonical_loop(canonical_loop)
+    , loop_id(loop_id)
     , invariant_tmps(global.unit.numTmps())
-    , expanded_blocks(expanded_loop_blocks(global.loops, canonical_loop))
+    , blocks(global.loops.loops[loop_id].members)
   {
-    FTRACE(2, "expanded_blocks: {}\n",
+    FTRACE(2, "blocks: {}\n",
       [&] () -> std::string {
         auto ret = std::string{};
-        for (auto& b : expanded_blocks) folly::format(&ret, "B{} ", b->id());
+        for (auto& b : blocks) folly::format(&ret, "B{} ", b->id());
         return ret;
       }()
     );
   }
 
   Env& global;
-  LoopID canonical_loop;
+  LoopID loop_id;
 
   /*
    * SSATmps with loop-invariant definitions, either because they are purely
@@ -239,10 +239,9 @@ struct LoopEnv {
   jit::vector<IRInstruction*> hoistable_as_side_exits;
 
   /*
-   * All member blocks of any natural loop with the same header as our
-   * canonical loop.
+   * The set of blocks in this loop.
    */
-  jit::flat_set<Block*> expanded_blocks;
+  jit::flat_set<Block*> blocks;
 
   /*
    * Whether any block in the loop contains a php call.  If this is true,
@@ -271,8 +270,8 @@ struct LoopEnv {
 
 //////////////////////////////////////////////////////////////////////
 
-NaturalLoopInfo& linfo(LoopEnv& env) {
-  return env.global.loops.naturals[env.canonical_loop];
+LoopInfo& linfo(LoopEnv& env) {
+  return env.global.loops.loops[env.loop_id];
 }
 
 Block* header(LoopEnv& env)     { return linfo(env).header; }
@@ -283,7 +282,7 @@ void visit_loop_post_order(LoopEnv& env, Seen& seen, Block* b, F f) {
   if (seen[b->id()]) return;
   seen.set(b->id());
   auto go = [&] (Block* b) {
-    if (!b || !env.expanded_blocks.count(b)) return;
+    if (!b || !env.blocks.count(b)) return;
     visit_loop_post_order(env, seen, b, f);
   };
   go(b->next());
@@ -357,7 +356,7 @@ void analyze_block(LoopEnv& env, Block* blk) {
 void analyze_loop(LoopEnv& env) {
   env.invariant_memory.set();
   analyze_block(env, header(env));
-  for (auto& blk : env.expanded_blocks) analyze_block(env, blk);
+  for (auto& blk : env.blocks) analyze_block(env, blk);
   FTRACE(2, "invariant: {}\n"
             "pure-load: {}\n"
             "  checked: {}\n"
@@ -397,7 +396,7 @@ bool try_pure_licmable(LoopEnv& env, const IRInstruction& inst) {
 
 bool check_is_loop_exit(LoopEnv& env, const IRInstruction& inst) {
   auto const t = inst.taken();
-  return t != header(env) && !env.expanded_blocks.count(t);
+  return !env.blocks.count(t);
 }
 
 bool impl_hoistable_check(LoopEnv& env, IRInstruction& inst) {
@@ -643,7 +642,7 @@ void hoist_check_instruction(LoopEnv& env,
 
   // We've changed the pre-header and invalidated the dominator tree.
   env.global.idom_state = IdomState::Invalid;
-  update_pre_header(env.global.loops, env.canonical_loop, new_preh);
+  update_pre_header(env.global.loops, env.loop_id, new_preh);
 }
 
 void hoist_invariant_checks(LoopEnv& env) {
@@ -686,7 +685,7 @@ void process_loop(LoopEnv& env) {
 
 void insert_pre_headers(IRUnit& unit, LoopAnalysis& loops) {
   auto added_pre_headers = false;
-  for (auto& linfo : loops.naturals) {
+  for (auto& linfo : loops.loops) {
     if (!linfo.pre_header) {
       insert_loop_pre_header(unit, loops, linfo.id);
       added_pre_headers = true;
@@ -704,7 +703,7 @@ void insert_pre_headers(IRUnit& unit, LoopAnalysis& loops) {
 void optimizeLoopInvariantCode(IRUnit& unit) {
   PassTracer tracer { &unit, Trace::hhir_licm, "LICM" };
   Env env { unit, rpoSortCfg(unit) };
-  if (env.loops.naturals.empty()) {
+  if (env.loops.loops.empty()) {
     FTRACE(1, "no loops\n");
     return;
   }
@@ -718,11 +717,11 @@ void optimizeLoopInvariantCode(IRUnit& unit) {
    */
 
   auto workQ = jit::queue<LoopID>{};
-  auto seen = boost::dynamic_bitset<>(env.loops.naturals.size());
+  auto seen = boost::dynamic_bitset<>(env.loops.loops.size());
 
   auto enqueue = [&] (LoopID id) {
     if (id == kInvalidLoopID) return;
-    id = env.loops.headers[env.loops.naturals[id].header];
+    id = env.loops.headers[env.loops.loops[id].header];
     if (seen[id]) return;
     seen[id] = true;
     workQ.push(id);
@@ -733,7 +732,7 @@ void optimizeLoopInvariantCode(IRUnit& unit) {
   do {
     auto const id = workQ.front();
     workQ.pop();
-    enqueue(env.loops.naturals[id].canonical_outer);
+    enqueue(env.loops.loops[id].parent);
 
     FTRACE(1, "L{}:\n", id);
     auto lenv = LoopEnv { env, id };

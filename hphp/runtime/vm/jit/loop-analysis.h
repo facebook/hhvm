@@ -31,43 +31,26 @@ struct IRUnit;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Each natural loop has a unique id, which is its index in the `naturals'
- * vector in a LoopAnalysis.  We use these ids to link related loops together
- * (to represent the loop nesting structure in the cfg).
+ * Each loop has a unique id, which is its index in the `loops' vector
+ * in a LoopAnalysis.  We use these ids to link related loops together
+ * (to represent the loop nesting structure in the CFG).
  */
 using LoopID = uint32_t;
 constexpr auto kInvalidLoopID = -LoopID{1};
 
 //////////////////////////////////////////////////////////////////////
 
-struct NaturalLoopInfo {
+struct LoopInfo {
   LoopID id;
 
   /*
-   * The next loop that shares the same header as this loop.  The first loop in
-   * any `header_next' list is called the canonical natural loop for that
-   * header.  See LoopAnalysis::headers.
-   *
-   * These loops may have overlapping blocks in their members list, and may or
-   * may not have a nesting structure, but we don't represent that.
-   *
-   * You can find the first loop with a particular header by looking in
-   * LoopAnalysis's headers list.
+   * Parent loop in the loop forest, if any.
    */
-  LoopID header_next{kInvalidLoopID};
+  LoopID parent{kInvalidLoopID};
 
   /*
-   * Pointer to the canonical outer loop.
-   *
-   * This is the canonical natural loop for a header block that has at least
-   * one natural loop which contains this loop.  Note that this loop may be
-   * contained in more than one of the natural loops from that header.
-   */
-  LoopID canonical_outer{kInvalidLoopID};
-
-  /*
-   * The header dominates all nodes in the loop (members), and is the target of
-   * the loop's back edge.
+   * The header dominates all blocks in the loop, and is the target of
+   * the loop's back-edges.
    */
   Block* header;
 
@@ -78,23 +61,18 @@ struct NaturalLoopInfo {
    * If it exists, it is a block which has the loop header as its only
    * successor, and that is the only predecessor of `header' other than
    * predecessors via back-edges.
-   *
-   * Note that this definition of `pre_header' still allows the actual loop
-   * header to have some predecessors that are not part of this loop, even when
-   * `pre_header' is not nullptr.  Specifically, there may be back-edge
-   * predecessors of the header that are not part of this natural loop, in
-   * situations with multiple loops that share the same header.  This also
-   * means different natural loops may have the same pre_header block, if (and
-   * only if) they have the same header.
    */
   Block* pre_header{nullptr};
 
   /*
-   * The members of this natural loop, excluding the header block.  The header
-   * dominates each loop member, and each loop member has a path to the back
-   * edge.
+   * The blocks within this loop.
    */
   jit::flat_set<Block*> members;
+
+  /*
+   * The loop's back-edges.
+   */
+  jit::flat_set<Edge*> back_edges;
 };
 
 /*
@@ -106,27 +84,21 @@ struct LoopAnalysis {
   {}
 
   /*
-   * The set of back edges.
-   *
-   * The target of a back edge dominates its source, and each back edge is
-   * associated with exactly one of the natural loop entries in `naturals'.
+   * The set of back-edges.
    */
   jit::flat_set<Edge*> back_edges;
 
   /*
-   * The natural loops in the CFG.  Each natural loop is defined by the set of
-   * CFG nodes that can reach a particular back edge without going through the
-   * block the back edge targets (the loop header).
-   *
-   * We do not combine non-nested loops with the same header into the same
-   * NaturalLoopInfo, so there is exactly one entry in `naturals' for each back
-   * edge.
+   * The loops in the CFG.  Each loop contains a header block and a
+   * set of blocks that are dominated by the header and that can reach
+   * the header in the reverse CFG starting at any of the loop's
+   * back-edges.  Notice that multiple back-edges sharing the same
+   * target (header) block are thus part of the same loop.
    */
-  jit::vector<NaturalLoopInfo> naturals;
+  jit::vector<LoopInfo> loops;
 
   /*
-   * The first natural loop in the list for each loop header block.  This is
-   * called the "canonical" natural loop for that header.
+   * This maps blocks that are loop headers to their corresponding LoopID.
    *
    * Note that the size of this sparse map is based on the number of blocks
    * when this LoopAnalysis structure was created.  If more blocks are added
@@ -135,9 +107,7 @@ struct LoopAnalysis {
   sparse_idptr_map<Block,LoopID> headers;
 
   /*
-   * List of natural loops that have no loops nested inside them.  If
-   * inner_loops.size() == naturals.size(), there are no nested loops in the
-   * program.
+   * List of inner-most loops in the CFG.
    */
   jit::vector<LoopID> inner_loops;
 };
@@ -149,13 +119,6 @@ struct LoopAnalysis {
  * the CFG.
  */
 LoopAnalysis identify_loops(const IRUnit&, const BlockList& rpoBlocks);
-
-/*
- * Given a LoopID for the canonical natural loop with a given header block,
- * return a set of all the Blocks that are members of any natural loop with
- * that header.  The returned set does not include the header block.
- */
-jit::flat_set<Block*> expanded_loop_blocks(const LoopAnalysis&, LoopID);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -173,14 +136,13 @@ void insert_loop_pre_header(IRUnit&, LoopAnalysis&, LoopID);
  * Update containing loop member lists to reflect a newly inserted pre-header
  * in a possibly nested loop.
  *
- * If you are inserting blocks in CFG, generally speaking you should consider a
- * LoopAnalysis invalidated.  In the special case that a loop pre header is
- * being inserted, if the pre_header fields in NaturalLoopInfo are maintained,
- * calling this function will keep the rest of the LoopAnalysis valid as well.
+ * If you are inserting blocks in the CFG, generally speaking you should
+ * consider a LoopAnalysis invalidated.  In the special case that a loop
+ * pre-header is being inserted, if the pre_header fields in LoopInfo are
+ * maintained, calling this function will keep the rest of the LoopAnalysis
+ * valid as well.
  */
-void update_pre_header(LoopAnalysis&,
-                       LoopID canonical_loop_id,
-                       Block* new_pre_header);
+void update_pre_header(LoopAnalysis&, LoopID loop_id, Block* pre_header);
 
 //////////////////////////////////////////////////////////////////////
 

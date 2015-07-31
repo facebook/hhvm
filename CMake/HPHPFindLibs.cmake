@@ -40,6 +40,12 @@ if (FEATURES_HEADER)
   add_definitions("-DHAVE_FEATURES_H=1")
 endif()
 
+# strfmon
+CHECK_FUNCTION_EXISTS(strfmon HAVE_STRFMON)
+if (HAVE_STRFMON)
+  add_definitions("-DHAVE_STRFMON=1")
+endif()
+
 # google-glog
 find_package(Glog REQUIRED)
 include_directories(${LIBGLOG_INCLUDE_DIR})

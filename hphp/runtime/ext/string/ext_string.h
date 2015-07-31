@@ -218,9 +218,11 @@ TypedValue* HHVM_FN(sscanf)(ActRec* ar);
 String HHVM_FUNCTION(chr, const Variant& ascii);
 int64_t HHVM_FUNCTION(ord,
                       const String& str);
+#ifdef HAVE_STRFMON
 Variant HHVM_FUNCTION(money_format,
                       const String& format,
                       double number);
+#endif
 String HHVM_FUNCTION(number_format,
                      double number,
                      int decimals = 0,

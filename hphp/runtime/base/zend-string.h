@@ -232,7 +232,9 @@ void string_translate(char *str, int len, const char *str_from,
 /**
  * Formatting.
  */
+#ifdef HAVE_STRFMON
 String string_money_format(const char *format, double value);
+#endif
 
 String string_number_format(double d, int dec,
                             const String& dec_point,

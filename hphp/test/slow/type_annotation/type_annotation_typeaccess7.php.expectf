@@ -1,0 +1,1 @@
+Fatal error: when resolving type constant C::T, class D does not have non-abstract type constant T in %s on line 11

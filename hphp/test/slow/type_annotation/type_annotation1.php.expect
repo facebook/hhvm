@@ -117,33 +117,3 @@ array(3) {
     }
   }
 }
-string(13) "N::M::O::P::Q"
-array(3) {
-  ["kind"]=>
-  int(102)
-  ["root_name"]=>
-  string(1) "N"
-  ["access_list"]=>
-  array(4) {
-    [0]=>
-    string(1) "M"
-    [1]=>
-    string(1) "O"
-    [2]=>
-    string(1) "P"
-    [3]=>
-    string(1) "Q"
-  }
-}
-string(10) "HH\this::T"
-array(3) {
-  ["kind"]=>
-  int(102)
-  ["root_name"]=>
-  string(7) "HH\this"
-  ["access_list"]=>
-  array(1) {
-    [0]=>
-    string(1) "T"
-  }
-}

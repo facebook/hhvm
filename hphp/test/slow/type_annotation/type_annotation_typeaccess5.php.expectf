@@ -1,0 +1,1 @@
+Fatal error: when resolving type constant C::U, class NonExistentClass not found in %s on line 9

@@ -1,0 +1,1 @@
+Fatal error: when resolving type constant C::U, C::T does not resolve to a class or an interface and cannot contain type constant T1 in %s on line 11

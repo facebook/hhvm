@@ -1,0 +1,1 @@
+Fatal error: when resolving type constant C::T, class NonExistentClass not found in %s on line 8

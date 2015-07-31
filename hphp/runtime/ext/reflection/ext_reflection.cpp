@@ -1555,9 +1555,14 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
 
   if (cns->m_val.m_type == KindOfArray) {
     auto const cls = cns->m_class;
-    auto typeCns = cls->clsCnsGet(cns->m_name, true);
-    assert(typeCns.m_type == KindOfArray);
-    return TypeStructure::toString(typeCns.m_data.parr);
+    // go to the preclass to find the unresolved TypeStructure to get
+    // the original assigned type text
+    auto const preCls = cls->preClass();
+    auto typeCns = preCls->lookupConstant(cns->m_name);
+    assert(typeCns->isType());
+    assert(!typeCns->isAbstract());
+    assert(typeCns->val().m_type == KindOfArray);
+    return TypeStructure::toString(typeCns->val().m_data.parr);
   }
 
   return String();

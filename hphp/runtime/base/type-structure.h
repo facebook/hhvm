@@ -18,12 +18,12 @@
 #define incl_HPHP_TYPE_STRUCTURE_H
 
 #include <cstdint>
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 
 struct String;
 struct ArrayData;
-struct Class;
 
 /* Utility for representing full type information in the runtime. */
 namespace TypeStructure {
@@ -63,7 +63,7 @@ enum class Kind : uint8_t {
 
 String toString(const ArrayData* arr);
 
-ArrayData* resolve(ArrayData* arr, const Class* typeCstCls);
+ArrayData* resolve(const Class::Const& typeCns, const Class* typeCnsCls);
 
 }
 

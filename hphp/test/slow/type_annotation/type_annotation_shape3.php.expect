@@ -1,4 +1,4 @@
-string(38) "HH\shape(42=>HH\int, 'bar'=>HH\string)"
+string(41) "HH\shape(D::F1=>HH\int, D::F2=>HH\string)"
 array(2) {
   ["kind"]=>
   int(14)

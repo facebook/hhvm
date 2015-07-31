@@ -1,0 +1,27 @@
+array(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(2) {
+    ["foo"]=>
+    array(1) {
+      ["kind"]=>
+      int(3)
+    }
+    ["bar"]=>
+    array(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(9) "HH\Vector"
+      ["generic_types"]=>
+      array(1) {
+        [0]=>
+        array(1) {
+          ["kind"]=>
+          int(2)
+        }
+      }
+    }
+  }
+}

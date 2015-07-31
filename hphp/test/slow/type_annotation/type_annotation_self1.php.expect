@@ -1,0 +1,31 @@
+array(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(4) "Base"
+}
+array(1) {
+  ["kind"]=>
+  int(2)
+}
+array(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(4) "Base"
+}
+array(1) {
+  ["kind"]=>
+  int(2)
+}
+array(2) {
+  ["kind"]=>
+  int(16)
+  ["classname"]=>
+  string(1) "I"
+}
+array(1) {
+  ["kind"]=>
+  int(3)
+}
+string(10) "self::self"

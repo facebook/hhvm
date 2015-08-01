@@ -33,7 +33,7 @@ trait Trait1 {
     $this->baz();
   }
 
-  // <<Override>> // FIXME: check without a use class?
+  // <<__Override>> // FIXME: check without a use class?
   // protected function override_me(): void {}
 }
 

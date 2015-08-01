@@ -10,6 +10,6 @@
  */
 
 class BadC {
-  <<Override>>
+  <<__Override>>
   private function foo(): void {}
 }

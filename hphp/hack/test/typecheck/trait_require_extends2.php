@@ -2,7 +2,7 @@
 
 trait T1 {
   require extends X;
-  <<Override>>
+  <<__Override>>
   final protected function foo() { }
 }
 

@@ -15,7 +15,7 @@ abstract class A {
 
 abstract class B extends A {
 
-  <<Override>>
+  <<__Override>>
   public function foo(): void {}
 
   abstract protected function bar();
@@ -23,6 +23,6 @@ abstract class B extends A {
 
 class C extends B {
 
-  <<Override>>
+  <<__Override>>
   public function bar(): void {}
 }

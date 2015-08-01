@@ -14,6 +14,6 @@ class A {
 }
 
 class B extends A {
-  <<Override>>
+  <<__Override>>
   public function foo(): void {}
 }

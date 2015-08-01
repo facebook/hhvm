@@ -28,7 +28,7 @@ interface I {
 class CTrait extends UnrelatedParent implements I {
   use ATrait;
 
-  <<Override>>
+  <<__Override>>
   public function foo(): void {}
 
   public function bar(): void {}
@@ -38,7 +38,7 @@ class CParentAndTrait extends CParent implements I {
   use ATrait;
   use Unrelated;
 
-  <<Override>>
+  <<__Override>>
   public function foo(): void {}
 
   public function bar(): void {}

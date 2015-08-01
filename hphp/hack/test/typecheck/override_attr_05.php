@@ -22,17 +22,17 @@ trait TUnrelated {
 }
 
 trait ATr {
-  <<Override>> // enforced onto C1 with A as parent
+  <<__Override>> // enforced onto C1 with A as parent
   public function foo(): void {}
 
-  <<Override>> // enforced onto C1 with A as parent
+  <<__Override>> // enforced onto C1 with A as parent
   public static function statFoo(): void {}
 
-  <<Override>> // enforced onto C1 with A as parent
+  <<__Override>> // enforced onto C1 with A as parent
   final public function bar(): void {}
 
   use TUnrelated;
-  <<Override>> // enforced immediately with TUnrelated parent
+  <<__Override>> // enforced immediately with TUnrelated parent
   public function baz(): void {}
 }
 
@@ -42,7 +42,7 @@ class C1 extends A {
 
 class C2 extends C1 {
 
-  <<Override>> // C1 is the parent
+  <<__Override>> // C1 is the parent
   public function foo(): void {}
 
 }

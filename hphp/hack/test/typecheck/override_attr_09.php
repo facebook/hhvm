@@ -10,7 +10,7 @@
  */
 
 trait ATr {
-  <<Override>> // enforced onto C1
+  <<__Override>> // enforced onto C1
   public static function foo(): void {}
 }
 

@@ -29,6 +29,7 @@ class SpoofChecker : public IntlError {
   }
   SpoofChecker(const SpoofChecker&) = delete;
   SpoofChecker& operator=(const SpoofChecker& src) {
+    IntlError::operator =(src);
     UErrorCode error = U_ZERO_ERROR;
     m_checker = uspoof_clone(src.m_checker, &error);
     if (U_FAILURE(error)) {

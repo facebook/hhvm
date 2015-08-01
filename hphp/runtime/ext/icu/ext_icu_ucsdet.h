@@ -79,6 +79,7 @@ class EncodingMatch : public IntlError {
   EncodingMatch() {}
   EncodingMatch(const EncodingMatch&) = delete;
   EncodingMatch& operator=(const EncodingMatch& src) {
+    IntlError::operator =(src);
     m_match = src.m_match;
     return *this;
   }

@@ -9,7 +9,7 @@
  *
  */
 
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 abstract class A {
 
   public function foo(): void {}

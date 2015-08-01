@@ -8,7 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 abstract class A {
 
   public function foo(): void {}

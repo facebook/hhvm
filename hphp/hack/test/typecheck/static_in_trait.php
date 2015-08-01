@@ -11,7 +11,7 @@
 
 interface A {}
 
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 trait X implements A {
   public function foo(): A {
     return new static();

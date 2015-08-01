@@ -13,7 +13,7 @@ class Gen<T> {
   public function __construct(public T $data) {}
 }
 
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 class Base<T> {
   public function __construct(private Gen<T> $data) {}
   public function get(): T {

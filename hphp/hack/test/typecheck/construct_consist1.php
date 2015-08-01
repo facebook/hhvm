@@ -1,6 +1,6 @@
 <?hh
 
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 class C1 {}
 
 class C2 extends C1 {

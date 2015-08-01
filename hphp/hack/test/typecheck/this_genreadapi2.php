@@ -38,7 +38,7 @@ class FooIdx {
   }
 }
 
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 class BarIdx extends FooIdx {
   public static function make<Tk>(): GenReadIdxApi<Tk, this> {
     return new GenReadIdxApiClass(new static());

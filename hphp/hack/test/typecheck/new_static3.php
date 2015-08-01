@@ -9,7 +9,7 @@
  *
  */
 
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 class A {
   public static function bar(): void {
     $x = new static();

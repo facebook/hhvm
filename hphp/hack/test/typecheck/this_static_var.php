@@ -9,7 +9,7 @@
  *
  */
 
-<<ConsistentConstruct>>
+<<__ConsistentConstruct>>
 class A {
   public static function getInstance(): this {
     static $instance = null;

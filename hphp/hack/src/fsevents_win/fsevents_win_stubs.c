@@ -16,24 +16,18 @@
 #include <caml/signals.h>
 #include <caml/callback.h>
 
-#include <stdio.h>
+
+
+ // We've raided the OSX events system, as we'd have to do the same on windows.
 #include <pthread.h>
-
-// Basically the ocaml headers and the mac headers are redefining the same
-// types. AFAIK, this is a longstanding bug in the ocaml headers
-// (http://caml.inria.fr/mantis/print_bug_page.php?bug_id=4877). Looking at the
-// OS X headers, the conflicting typehints are gated with these definitions, so
-// this was the easiest workaround for me.
-#define _UINT64
-#define _UINT32
-
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreServices/CoreServices.h>
-#include <libkern/OSAtomic.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <Windows.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /**
  * Commands and events are passed back and forth between the main thread and
  * the run loop thread using two lockless linked lists. Each linked list is
@@ -91,21 +85,44 @@ struct event {
   char *path;
 };
 
+// Terrible guesstimate of ~1k files, highly unlikely,
+// but it's ~16kb buffer.
+#define FILE_NOTIFY_BUFFER_LENGTH ((sizeof(DWORD) * 4) * 1000)
+#define FILE_NOTIFY_CONDITIONS (\
+FILE_NOTIFY_CHANGE_FILE_NAME | \
+FILE_NOTIFY_CHANGE_DIR_NAME | \
+FILE_NOTIFY_CHANGE_ATTRIBUTES | \
+FILE_NOTIFY_CHANGE_SIZE | \
+FILE_NOTIFY_CHANGE_LAST_WRITE | \
+FILE_NOTIFY_CHANGE_SECURITY | \
+FILE_NOTIFY_CHANGE_CREATION)
+
 /**
- * This is a structure that the thread holds on to. It has all the context it
+ * This is a structure that the watcher thread holds on to. It has all the context it
  * needs
  */
 struct thread_env {
   // This fd will be ready to be read when there is a command ready to be run
-  int read_command_fd;
+  HANDLE read_command_fd;
   // The thread writes to this fd when there are events ready to be returned
-  int write_event_fd;
+  HANDLE write_event_fd;
   // A pointer to the linked list of commands to run. The thread will only ever
   // remove all the commands...it will never append a command
   struct command **commands;
   // A pointer to the linked list of events to process. The thread will append
   // events to this linked list
   struct event **events;
+  // The buffer used by the callbacks.
+  char file_notify_buffer[FILE_NOTIFY_BUFFER_LENGTH];
+  // Just in case numbers all work out and we need the extra space
+  // for the null at the end of the filename.
+  wchar_t bonus_buffer;
+};
+
+struct filewatch_env {
+  const char* watched_directory;
+  thread_env* parent_env;
+  HANDLE dir_handle;
 };
 
 /**
@@ -115,10 +132,10 @@ struct thread_env {
  */
 struct env {
   // The main thread writes to this fd when there are events ready to be run
-  int write_command_fd;
+  HANDLE write_command_fd;
   // This fd will be ready to be read when there are events ready to be
   // processed
-  int read_event_fd;
+  HANDLE read_event_fd;
   // A pointer to the linked list of commands to run. The main thread will
   // append commands to this list
   struct command **commands;
@@ -135,9 +152,10 @@ struct env {
  * usually 512). In the case where we have large paths, though, it gets a
  * little tricker, and I like writing lockless data structures :P
  */
-static void signal_on_pipe(int fd) {
+static void signal_on_pipe(HANDLE fd) {
   char dot = '.';
-  write(fd, &dot, 1);
+  DWORD bytesWritten;
+  WriteFile(fd, &dot, sizeof(dot), &bytesWritten, NULL);
 }
 
 /**
@@ -145,175 +163,89 @@ static void signal_on_pipe(int fd) {
  * pipe and we've received the signal, now we need to read all the data so we
  * can select on this fd again.
  */
-static void clear_pipe(int fd) {
-  fd_set rfds;
-  struct timeval tv;
-  int retval;
+static void clear_pipe(HANDLE fd) {
   char c;
-  FD_ZERO(&rfds);
-  FD_SET(fd, &rfds);
-  tv.tv_sec = 0;
-  tv.tv_usec = 0;
-  while (true) {
-    // I really hate select(). The first argument is
-    // 1 + max(fd1, fd2, ..., fdn) because reasons
-    retval = select(fd + 1, &rfds, NULL, NULL, &tv);
-    if (retval > 0) {
-      read(fd, &c, 1);
-    } else {
-      break;
-    }
+  DWORD readLen;
+  while (ReadFile(fd, &c, sizeof(c), &readLen, NULL)) {
   }
 }
 
+static void CALLBACK watch_callback(DWORD errorCode, DWORD numberOfBytesTransferred, LPOVERLAPPED overlappedBuffer)
+{
+  filewatch_env* watchEnv = (filewatch_env*)overlappedBuffer->hEvent;
 
-/**
- * This callback is called whenver an FSEvents watch is triggered
- */
-static void watch_callback(
-    ConstFSEventStreamRef streamRef,
-    void *info,
-    size_t numEvents,
-    void *eventPaths,
-    const FSEventStreamEventFlags eventFlags[],
-    const FSEventStreamEventId eventIds[]) {
-  struct thread_env *thread_env = (struct thread_env *)info;
-  int i;
-  char **paths = eventPaths;
-  CFStringRef cf_wpath;
-  CFArrayRef paths_watched;
-  CFIndex wpath_len;
-  int path_len;
-  struct event *ev;
+  FILE_NOTIFY_INFORMATION* fileInfo = (FILE_NOTIFY_INFORMATION*)&watchEnv->parent_env->file_notify_buffer;
 
-  for (i = 0; i < numEvents; i++) {
-    paths_watched = FSEventStreamCopyPathsBeingWatched(streamRef);
-    if (CFArrayGetCount(paths_watched) < 1) {
-      continue;
-    }
-    // Create an event with the info from FSEvents
-    ev = malloc(sizeof(struct event));
-    cf_wpath = CFArrayGetValueAtIndex(paths_watched, 0);
-    wpath_len = CFStringGetLength(cf_wpath);
-    ev->wpath = malloc(wpath_len + 1);
-    CFStringGetCString(
-        cf_wpath,
-        ev->wpath,
-        wpath_len + 1,
-        kCFStringEncodingMacRoman
-    );
-    path_len = strlen(paths[i]);
-    ev->path = malloc(path_len + 1);
-    strcpy(ev->path, paths[i]);
+  for (;;) {
+    // Forcefully null terminate the filename.
+    wchar_t oldMem = fileInfo->FileName[fileInfo->FileNameLength];
+    fileInfo->FileName[fileInfo->FileNameLength] = L'\0';
+
+    char* modifiedFilename = (char*)malloc(sizeof(wchar_t) * fileInfo->FileNameLength);
+    size_t filenameLen = wcstombs_s(NULL, modifiedFilename, sizeof(wchar_t) * fileInfo->FileNameLength, fileInfo->FileName, (sizeof(wchar_t) * fileInfo->FileNameLength) - 1);
+    fileInfo->FileName[fileInfo->FileNameLength] = oldMem;
+    modifiedFilename = (char*)realloc(modifiedFilename, filenameLen +  1);
+
+    struct event *ev = (struct event*)malloc(sizeof(struct event));
+    ev->path = modifiedFilename;
+    ev->wpath = _strdup(watchEnv->watched_directory);
 
     // Update the lockless linked list of events
-    ev->next = *(thread_env->events);
-    if (OSAtomicCompareAndSwapPtr(ev->next, ev, (void *)(thread_env->events)) == false) {
+    ev->next = *(watchEnv->parent_env->events);
+    if (InterlockedCompareExchangePointer((void**)(watchEnv->parent_env->events), ev, ev->next) != ev) {
       // The only thing the main thread can write to events is NULL, so we can just
       // try one more time
       ev->next = NULL;
-      if (OSAtomicCompareAndSwapPtr(ev->next, ev, (void *)(thread_env->events)) == false) {
+      if (InterlockedCompareExchangePointer((void**)(watchEnv->parent_env->events), ev, ev->next) != ev) {
         // This should never happen
         fprintf(stderr, "Unexpected error with fsevents lockless events list\n");
       }
     }
-    signal_on_pipe(thread_env->write_event_fd);
+    signal_on_pipe(watchEnv->parent_env->write_event_fd);
+
+    if (fileInfo->NextEntryOffset == 0)
+      break;
+    fileInfo = (FILE_NOTIFY_INFORMATION*)((char*)fileInfo + fileInfo->NextEntryOffset);
   }
+
+  ReadDirectoryChangesW(
+    watchEnv->dir_handle,
+    &watchEnv->parent_env->file_notify_buffer,
+    FILE_NOTIFY_BUFFER_LENGTH,
+    true,
+    FILE_NOTIFY_CONDITIONS,
+    NULL,
+    overlappedBuffer,
+    &watch_callback);
 }
 
 /**
  * Create a new watch for a given path
  */
 static void add_watch(char *wpath, struct thread_env *env) {
-  // Copied latency from Watchman
-  // https://github.com/facebook/watchman/blob/5161cb6eeca4405bcaea820f377cd6d2f51ce1f4/root.c#L1838
-  CFAbsoluteTime latency = 0.0001;
-  FSEventStreamRef stream;
-  CFStringRef path = CFStringCreateWithCString(NULL, wpath, kCFStringEncodingMacRoman);
-  CFArrayRef pathsToWatch = CFArrayCreate(NULL, (const void**)&path, 1, NULL);
-
-  // Docs say FSEventStreamCreate copies the fields out of this context, so it
-  // doesn't need to be long lived
-  FSEventStreamContext context = {};
-  memset(&context, 0, sizeof(FSEventStreamContext));
-  context.info = env;
-  stream = FSEventStreamCreate(
+  // Yes, this is technically a memory leak, but we don't support removing
+  // watches anyways.
+  filewatch_env* watchEnv = (filewatch_env*)malloc(sizeof(filewatch_env));
+  watchEnv->watched_directory = _strdup(wpath);
+  watchEnv->parent_env = env;
+  OVERLAPPED* overlappedBuffer = (OVERLAPPED*)calloc(1, sizeof(OVERLAPPED));
+  // As backed up by the documentation, hEvent isn't used when a callback is passed.
+  overlappedBuffer->hEvent = watchEnv;
+  watchEnv->dir_handle = CreateFile(wpath,
+    FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
     NULL,
-    &watch_callback,
-    &context,
-    pathsToWatch,
-    kFSEventStreamEventIdSinceNow,
-    latency,
-    kFSEventStreamCreateFlagFileEvents
-  );
-  FSEventStreamScheduleWithRunLoop(
-    stream,
-    CFRunLoopGetCurrent(),
-    kCFRunLoopDefaultMode
-  );
-  FSEventStreamStart(stream);
-}
-
-/**
- * The callback for when the main thread has issued a command to the run loop
- * thread. Reads all the pending commands and executes them
- */
-static void command_callback(
-    CFFileDescriptorRef fdref,
-    CFOptionFlags callBackTypes,
-    void *context) {
-  int fd = CFFileDescriptorGetNativeDescriptor(fdref);
-  struct thread_env *thread_env = (struct thread_env *)context;
-  struct command *to_do = NULL;
-  struct command *to_free = NULL;
-  clear_pipe(fd);
-  do {
-    to_do = *(thread_env->commands);
-  } while (OSAtomicCompareAndSwapPtr(to_do, NULL, (void *)(thread_env->commands)) == false);
-  while (to_do != NULL) {
-    switch (to_do->type) {
-      case ADD_WATCH:
-        add_watch(to_do->arg, thread_env);
-        break;
-      case RM_WATCH:
-        // hh_server doesn't need this at the moment. Shouldn't be too hard to
-        // do...just need to map of paths to FSEvent streams.
-        fprintf(stderr, "fsevents impl doesn't support removing watches yet\n");
-        break;
-    }
-    to_free = to_do;
-    to_do = to_do->next;
-    free(to_free->arg);
-    free(to_free);
-  }
-  // For some reason you have to re-enable this callback every bloody time
-  CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
-}
-
-/**
- * The main thread tells the run loop thread that a new command is ready by
- * writing to a pipe. This function tells the run loop to call a callback
- * whenever that fd is ready to be read
- */
-static void listen_for_command_fd(struct thread_env *thread_env) {
-  int fd = thread_env->read_command_fd;
-  CFFileDescriptorContext fd_context = {};
-  fd_context.info = thread_env;
-  CFFileDescriptorRef fdref = CFFileDescriptorCreate(
-    kCFAllocatorDefault,
-    fd,
+    OPEN_EXISTING,
+    FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+    NULL);
+  ReadDirectoryChangesW(
+    watchEnv->dir_handle,
+    &env->file_notify_buffer,
+    FILE_NOTIFY_BUFFER_LENGTH, 
     true,
-    command_callback,
-    &fd_context
-  );
-  CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
-  CFRunLoopSourceRef source = CFFileDescriptorCreateRunLoopSource(
-    kCFAllocatorDefault,
-    fdref,
-    0
-  );
-  CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
-  CFRelease(source);
+    FILE_NOTIFY_CONDITIONS,
+    NULL,
+    overlappedBuffer,
+    &watch_callback);
 }
 
 /**
@@ -321,8 +253,43 @@ static void listen_for_command_fd(struct thread_env *thread_env) {
  * the callbacks when they are triggered
  */
 static void run_loop_thread(struct thread_env *thread_env) {
-  listen_for_command_fd(thread_env);
-  CFRunLoopRun();
+  HANDLE commandReadHandle = (HANDLE)thread_env->read_command_fd;
+
+  while (true) {
+    DWORD rc = WaitForMultipleObjectsEx(1, &commandReadHandle, false, INFINITE, true);
+    switch (rc) {
+      case WAIT_OBJECT_0: {
+        struct command *to_do = NULL;
+        struct command *to_free = NULL;
+        clear_pipe(thread_env->read_command_fd);
+        do {
+          to_do = *(thread_env->commands);
+        } while (InterlockedCompareExchangePointer((void**)(thread_env->commands), NULL, to_do) != NULL);
+        while (to_do != NULL) {
+          switch (to_do->type) {
+            case ADD_WATCH:
+              add_watch(to_do->arg, thread_env);
+              break;
+            case RM_WATCH:
+              // hh_server doesn't need this at the moment. Shouldn't be too hard to
+              // do...just need to map of paths to FSEvent streams.
+              fprintf(stderr, "fsevents impl doesn't support removing watches yet\n");
+              break;
+          }
+          to_free = to_do;
+          to_do = to_do->next;
+          free(to_free->arg);
+          free(to_free);
+        }
+        break;
+      }
+      case WAIT_IO_COMPLETION:
+        // Nothing to do.
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 /**
@@ -334,30 +301,23 @@ static struct env *fsevents_init()
   struct thread_env *thread_env;
   struct env *env;
 
-  int command_pipe[2];
-  int event_pipe[2];
-
-  struct command **commands = malloc(sizeof(struct command*));
-  struct event **events = malloc(sizeof(struct event*));
+  struct command **commands = (struct command**)malloc(sizeof(struct command*));
+  struct event **events = (struct event**)malloc(sizeof(struct event*));
   *commands = NULL;
   *events = NULL;
 
-  pipe(command_pipe);
-  pipe(event_pipe);
-
-  thread_env = malloc(sizeof(struct thread_env));
-  thread_env->read_command_fd = command_pipe[0];
-  thread_env->write_event_fd = event_pipe[1];
+  thread_env = (struct thread_env*)malloc(sizeof(struct thread_env));
   thread_env->commands = commands;
   thread_env->events = events;
 
-  pthread_create(&loop_thread, NULL, (void *)&run_loop_thread, thread_env);
-
-  env = malloc(sizeof(struct env));
-  env->write_command_fd = command_pipe[1];
-  env->read_event_fd = event_pipe[0];
+  env = (struct env*)malloc(sizeof(struct env));
   env->commands = commands;
   env->events = events;
+
+  CreatePipe(&thread_env->read_command_fd, &env->write_command_fd, NULL, 0);
+  CreatePipe(&env->read_event_fd, &thread_env->write_event_fd, NULL, 0);
+
+  pthread_create(&loop_thread, NULL, (void*(*)(void*))&run_loop_thread, thread_env);
 
   return env;
 }
@@ -367,17 +327,17 @@ static struct env *fsevents_init()
  * list of commands and then signaling the run loop thread through a pipe
  */
 static void send_command(struct env *env, command_type type, char const *arg) {
-  struct command *c = malloc(sizeof(struct command));
+  struct command *c = (struct command*)malloc(sizeof(struct command));
 
   c->type = type;
-  c->arg = malloc(strlen(arg) + 1);
+  c->arg = (char*)malloc(strlen(arg) + 1);
   strcpy(c->arg, arg);
   c->next = *(env->commands);
-  if (OSAtomicCompareAndSwapPtr(c->next, c, (void *)(env->commands)) == false) {
+  if (InterlockedCompareExchangePointer((void**)(env->commands), c, c->next) != c) {
     // The only thing the thread can write to commands is NULL, so we can just
     // try one more time
     c->next = NULL;
-    if (OSAtomicCompareAndSwapPtr(c->next, c, (void *)(env->commands)) == false) {
+    if (InterlockedCompareExchangePointer((void**)(env->commands), c, c->next) != c) {
       // This should never happen
       fprintf(stderr, "Unexpected error with fsevents lockless commands list\n");
     }
@@ -394,7 +354,7 @@ static struct event *read_events(struct env *env) {
   clear_pipe(env->read_event_fd);
   do {
     to_do = *(env->events);
-  } while (OSAtomicCompareAndSwapPtr(to_do, NULL, (void *)(env->events)) == false);
+  } while (InterlockedCompareExchangePointer((void**)(env->events), NULL, to_do) != NULL);
   return to_do;
 }
 
@@ -412,7 +372,8 @@ value stub_fsevents_add_watch(value env, value path)
   CAMLparam2(env, path);
   CAMLlocal1(ret);
   struct env *c_env = (struct env*)env;
-  char *rpath = realpath(String_val(path), NULL);
+  char output[_MAX_PATH];
+  char *rpath = _strdup(_fullpath(output, String_val(path), _MAX_PATH));
   send_command(c_env, ADD_WATCH, rpath);
   ret = caml_copy_string(rpath);
   free(rpath);
@@ -427,7 +388,8 @@ value stub_fsevents_rm_watch(value env, value path)
   CAMLparam2(env, path);
   CAMLlocal1(ret);
   struct env *c_env = (struct env*)env;
-  char *rpath = realpath(String_val(path), NULL);
+  char output[_MAX_PATH];
+  char *rpath = _strdup(_fullpath(output, String_val(path), _MAX_PATH));
   send_command(c_env, RM_WATCH, String_val(path));
   ret = caml_copy_string(rpath);
   free(rpath);
@@ -437,8 +399,8 @@ value stub_fsevents_rm_watch(value env, value path)
 value stub_fsevents_get_event_fd(value env)
 {
   CAMLparam1(env);
-  int fd = ((struct env *)env)->read_event_fd;
-  CAMLreturn(Val_int(fd));
+  HANDLE fd = ((struct env *)env)->read_event_fd;
+  CAMLreturn((value)fd);
 }
 
 value stub_fsevents_read_events(value env)

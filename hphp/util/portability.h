@@ -170,4 +170,47 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef _MSC_VER
+// This is a terrible hack that I wish wasn't needed :(
+// It is due to MSVC 2015's initial release not allowing
+// you to do an offsetof within a constexpr member function.
+// It's allowed at the global scope, but that still requires
+// the fields to be public.
+// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1414341
+# define MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF 1
+// MSVC2015's initial release has an issue with getting
+// function pointers to templated functions if the expected
+// result type isn't auto.
+// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1464651
+# define MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD 1
+
+# if _MSC_FULL_VER <= 190022816 // 2015 RC or below
+// TODO: Check if these four are present in 2015's
+//       full release, which happens July 20th UTC 2015.
+#  define MSVC_NO_TEMPLATED_IMPLICIT_CONVERSIONS 1
+#  define MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD 1
+#  define MSVC_REPO_PROXY_CONSTRUCTION_ISSUES 1
+// Something doesn't like boost::variant at times,
+// because it will cause the compiler to simply crash,
+// and not produce any errors to explain it.
+#  define MSVC_BOOST_VARIANT_CLOSURE_ISSUES 1
+
+// 2015 RC doesn't support the use of a vector's size in a constexpr context.
+#  define MSVC_NO_CONSTEXPR_VECTOR_SIZE 1
+// 2015 RC doesn't support initializing a managed ref constexpr.
+#  define MSVC_NO_CONSTEXPR_MANAGED_REF_INITIALIZERS 1
+# endif
+
+#ifdef MSVC_NO_CONSTEXPR_MANAGED_REF_INITIALIZERS
+template<void(*ctor)()>
+struct static_constructor
+{
+  struct constructor { constructor() { ctor(); } };
+  static constructor c;
+};
+
+template<void(*ctor)()>
+typename static_constructor<ctor>::constructor static_constructor<ctor>::c;
+#endif
+
 #endif

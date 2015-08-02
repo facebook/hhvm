@@ -58,7 +58,7 @@ ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
   VariableSerializer vs(VariableSerializer::Type::Serialize);
-  auto s = vs.serialize(VarNR(arr), true);
+  auto s = vs.serializeValue(VarNR(arr), false /* limit */);
   return GetScalarArrayKey(s.data(), s.size());
 }
 

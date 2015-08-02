@@ -423,7 +423,9 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
       VariableSerializer vs(VariableSerializer::Type::Serialize);
       urp.insertUnitArray[repoId].insert(
-        txn, usn, i, vs.serialize(VarNR(m_arrays[i]), true).toCppString());
+        txn, usn, i,
+        vs.serializeValue(VarNR(m_arrays[i]), false /* limit */).toCppString()
+      );
     }
     for (auto& fe : m_fes) {
       fe->commit(txn);

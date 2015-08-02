@@ -1,0 +1,16 @@
+array(7) {
+  ["false"]=>
+  bool(false)
+  ["zero"]=>
+  bool(false)
+  ["no"]=>
+  bool(false)
+  ["off"]=>
+  bool(false)
+  ["empty"]=>
+  bool(false)
+  ["null"]=>
+  bool(false)
+  ["false-bool"]=>
+  bool(false)
+}

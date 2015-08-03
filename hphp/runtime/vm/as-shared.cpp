@@ -58,6 +58,14 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrMayUseVV,             F,       "mayusevv");         \
   /* */
 
+#define HHAS_TYPE_FLAGS                                     \
+  X(Nullable,        "nullable");                           \
+  X(HHType,          "hh_type");                            \
+  X(ExtendedHint,    "extended_hint");                      \
+  X(TypeVar,         "type_var");                           \
+  X(Soft,            "soft");                               \
+  X(TypeConstant,    "type_constant")
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -86,5 +94,28 @@ return folly::none;
 
 //////////////////////////////////////////////////////////////////////
 
+std::string type_flags_to_string(TypeConstraint::Flags flags) {
+  std::vector<std::string> vec;
+
+#define X(flag, str) \
+  if (flags & TypeConstraint::flag) vec.push_back(str);
+  HHAS_TYPE_FLAGS
+#undef X
+
+  using namespace folly::gen;
+  return from(vec) | unsplit<std::string>(" ");
 }
 
+folly::Optional<TypeConstraint::Flags> string_to_type_flag(
+  const std::string& name) {
+#define X(flag, str) \
+  if (name == str) return TypeConstraint::flag;
+  HHAS_TYPE_FLAGS
+#undef X
+
+return folly::none;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}

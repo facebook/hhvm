@@ -51,21 +51,25 @@
  *      could be done without this if you feel like changing it.
  *
  *
- * Caveats:
+ * Wishlist:
  *
  *   - It might be nice if you could refer to iterators by name
  *     instead of by index.
  *
  *   - DefCls by name would be nice.
  *
- *   - Line number information can't be propagated to the various Unit
- *     structures.  (It might make sense to do this via something like
- *     a .line directive at some point.)
+ * Missing features (partial list):
  *
- *   - You can't currently create non-top functions or non-hoistable
- *     classes.
+ *   - line number information. (It might make sense to do this via
+ *     something like a .line directive at some point.)
  *
- *   - Missing support for static variables in a function/method.
+ *   - non-top functions and non-hoistable classes
+ *
+ *   - static variables in a function/method
+ *
+ *   - builtinType (for native funcs) field on ParamInfo
+ *
+ *   - type aliases
  *
  * @author Jordan DeLong <delong.j@fb.com>
  */
@@ -857,6 +861,20 @@ const StringData* read_litstr(AsmState& as) {
   return makeStaticString(strVal);
 }
 
+/*
+ * maybe-string-literal : N
+ *                      | string-literal
+ *                      ;
+ */
+const StringData* read_maybe_litstr(AsmState& as) {
+  as.in.skipSpaceTab();
+  if (as.in.peek() == 'N') {
+    as.in.getc();
+    return nullptr;
+  }
+  return read_litstr(as);
+}
+
 std::vector<std::string> read_strvector(AsmState& as) {
   std::vector<std::string> ret;
   as.in.skipSpaceTab();
@@ -1592,6 +1610,40 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
 }
 
 /*
+ * type-constraint : empty
+ *                 | '<' maybe-string-literal maybe-string-literal
+ *                       type-flag* '>'
+ *                 ;
+ */
+std::pair<const StringData *, TypeConstraint> parse_type_info(AsmState& as) {
+  as.in.skipWhitespace();
+  if (as.in.peek() != '<') return {};
+  as.in.getc();
+
+  const StringData *userType = read_maybe_litstr(as);
+  const StringData *typeName = read_maybe_litstr(as);
+
+  std::string word;
+  auto flags = TypeConstraint::NoFlags;
+  for (;;) {
+    as.in.skipWhitespace();
+    if (as.in.peek() == '>') break;
+    if (!as.in.readword(word)) break;
+
+    auto const abit = string_to_type_flag(word);
+    if (abit) {
+      flags = flags | *abit;
+      continue;
+    }
+
+    as.error("unrecognized type flag `" + word + "' in this context");
+  }
+  as.in.expect('>');
+  return std::make_pair(userType, TypeConstraint{typeName, flags});
+}
+
+
+/*
  * parameter-list : '(' param-name-list ')'
  *                ;
  *
@@ -1624,9 +1676,10 @@ void parse_parameter_list(AsmState& as) {
     FuncEmitter::ParamInfo param;
 
     as.in.skipWhitespace();
-    int ch = as.in.getc();
-    if (ch == ')') break; // allow empty param lists
+    int ch = as.in.peek();
+    if (ch == ')') { as.in.getc(); break; } // allow empty param lists
     if (ch == '.') {
+      as.in.getc();
       if (as.in.getc() != '.' ||
           as.in.getc() != '.') {
         as.error("expecting '...'");
@@ -1635,6 +1688,11 @@ void parse_parameter_list(AsmState& as) {
       as.fe->attrs |= AttrMayUseVV;
       break;
     }
+
+    std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
+    as.in.skipWhitespace();
+    ch = as.in.getc();
+
     if (ch == '&') {
       param.byRef = true;
       ch = as.in.getc();
@@ -1727,6 +1785,7 @@ void parse_function(AsmState& as) {
   }
 
   Attr attrs = parse_attribute_list(as, AttrContext::Func);
+  auto typeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readword(name)) {
     as.error(".function must have a name");
@@ -1735,6 +1794,7 @@ void parse_function(AsmState& as) {
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
               as.ue->bcPos(), attrs, true, 0);
+  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
 
   parse_parameter_list(as);
   parse_function_flags(as);
@@ -1753,6 +1813,7 @@ void parse_method(AsmState& as) {
   as.in.skipWhitespace();
 
   Attr attrs = parse_attribute_list(as, AttrContext::Func);
+  auto typeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readword(name)) {
     as.error(".method requires a method name");
@@ -1762,6 +1823,7 @@ void parse_method(AsmState& as) {
   as.pce->addMethod(as.fe);
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
               as.ue->bcPos(), attrs, true, 0);
+  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
 
   parse_parameter_list(as);
   parse_function_flags(as);

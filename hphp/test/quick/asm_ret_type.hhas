@@ -1,0 +1,17 @@
+# Test for hhas return types
+
+.adata A_0 = """a:0:{}""";
+
+.main {
+  FPushFuncD 0 "fail"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function [mayusevv] <"HH\\int" "HH\\int" hh_type extended_hint> fail() {
+  Array @A_0
+  VerifyRetTypeC
+  RetC
+}

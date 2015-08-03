@@ -20,6 +20,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/vm/type-constraint.h"
 
 namespace HPHP {
 
@@ -57,6 +58,19 @@ std::string attrs_to_string(AttrContext, Attr);
  */
 folly::Optional<Attr> string_to_attr(AttrContext, const std::string&);
 
+/*
+ * Convert TypeConstraint flags to a string of space-separated flag names.
+ */
+std::string type_flags_to_string(TypeConstraint::Flags flags);
+
+/*
+ * Convert a string containing a single type flag name into a
+ * TypeConstraint::Flag.
+ *
+ * Returns folly::none if the string doesn't name a known attribute.
+ */
+folly::Optional<TypeConstraint::Flags> string_to_type_flag(
+    const std::string& name);
 //////////////////////////////////////////////////////////////////////
 
 }

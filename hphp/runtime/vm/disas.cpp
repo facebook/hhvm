@@ -466,6 +466,19 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   }
 }
 
+std::string opt_type_constraint(const StringData *userType,
+                                const TypeConstraint &tc) {
+  if (userType || tc.typeName() || tc.flags()) {
+    std::string utype = userType ? escaped(userType) : "N";
+    std::string typeName = tc.typeName() ? escaped(tc.typeName()) : "N";
+    return folly::format("<{} {} {}> ",
+                         utype,
+                         typeName,
+                         type_flags_to_string(tc.flags())).str();
+  }
+  return "";
+}
+
 std::string func_param_list(const FuncInfo& finfo) {
   auto ret = std::string{};
   auto const func = finfo.func;
@@ -473,6 +486,8 @@ std::string func_param_list(const FuncInfo& finfo) {
   for (auto i = uint32_t{0}; i < func->numParams(); ++i) {
     if (i != 0) ret += ", ";
 
+    ret += opt_type_constraint(func->params()[i].userType,
+                               func->params()[i].typeConstraint);
     if (func->byRef(i)) ret += "&";
     ret += folly::format("${}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
@@ -514,8 +529,9 @@ void print_func(Output& out, const Func* func) {
   if (func->isPseudoMain()) {
     out.fmtln(".main {{");
   } else {
-    out.fmtln(".function{} {}({}){}{{",
+    out.fmtln(".function{} {}{}({}){}{{",
       opt_attrs(AttrContext::Func, func->attrs()),
+      opt_type_constraint(func->returnUserType(), func->returnTypeConstraint()),
       func->name(),
       func_param_list(finfo),
       func_flag_list(finfo));
@@ -551,8 +567,9 @@ void print_property(Output& out, const PreClass::Prop* prop) {
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{} {}({}){}{{",
+  out.fmtln(".method{} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs()),
+    opt_type_constraint(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
     func_param_list(finfo),
     func_flag_list(finfo));
@@ -681,8 +698,6 @@ void print_unit(Output& out, const Unit* unit) {
  * - Unnamed locals.
  *
  * - Static locals.
- *
- * - Parameter type hints.
  */
 
 std::string disassemble(const Unit* unit) {

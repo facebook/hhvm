@@ -1,0 +1,119 @@
+# Test type annotations for hhas
+
+.adata A_0 = """a:0:{}""";
+
+.main {
+  DefCls 0
+  FPushFuncD 0 "test"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function [mayusevv] use_class(<"@C" "C" hh_type extended_hint soft> $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function [mayusevv] use_int_soft(<"@HH\\int" "HH\\int" hh_type extended_hint soft> $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function [mayusevv] use_int_nullable(<"?HH\\int" "HH\\int" nullable hh_type extended_hint> $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function [mayusevv] use_int(<"HH\\int" "HH\\int" hh_type> $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function [mayusevv] use_mixed(<"HH\\mixed" N> $x) {
+  Null
+  RetC
+}
+
+.function [mayusevv] test() {
+  FPushFuncD 1 "use_class"
+  FPushCtorD 0 "C"
+  FCall 0
+  PopR
+  FPassC 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_class"
+  Null
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_int_soft"
+  Int 5
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_int_soft"
+  Array @A_0
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_int_soft"
+  Null
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_int_nullable"
+  Int 6
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_int_nullable"
+  Null
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_int"
+  Int 5
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_mixed"
+  Array @A_0
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "use_int"
+  Array @A_0
+  FPassCE 0
+  FCall 1
+  PopR
+
+  Null
+  RetC
+}
+
+.class C {
+  .method [public mayusevv] 86ctor() {
+    Null
+    RetC
+  }
+  .method [public static mayusevv] <"HH\\int" "HH\\int" hh_type extended_hint> test() {
+    Null
+    RetC
+  }
+}

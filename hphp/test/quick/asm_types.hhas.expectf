@@ -1,0 +1,7 @@
+Warning: Argument 1 to use_class() must be of type @C, null given in %s on line -1
+
+Warning: Argument 1 to use_int_soft() must be of type @int, array given in %s on line -1
+
+Warning: Argument 1 to use_int_soft() must be of type @int, null given in %s on line -1
+
+Catchable fatal error: Argument 1 passed to use_int() must be an instance of int, array given in %s on line -1

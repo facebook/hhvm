@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function fail() must be of type int, array given in %s on line -1

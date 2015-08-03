@@ -177,9 +177,21 @@ public:
    * Comparisons
    */
   bool same(const Object& v2) const { return m_obj == v2.m_obj; }
-  bool equal(const Object& v2) const;
-  bool less(const Object& v2) const;
-  bool more(const Object& v2) const;
+  bool equal(const Object& v2) const {
+    return m_obj ?
+      (v2.m_obj && m_obj->equal(*v2.m_obj.get())) :
+      !v2.m_obj;
+  }
+  bool less(const Object& v2) const {
+    return m_obj ?
+      (v2.m_obj && m_obj->less(*v2.m_obj.get())) :
+      static_cast<bool>(v2.m_obj);
+  }
+  bool lessEqual(const Object& v2) const { return less(v2) || equal(v2); }
+  bool more(const Object& v2) const {
+    return m_obj && (!v2.m_obj || m_obj->more(*v2.m_obj.get()));
+  }
+  bool moreEqual(const Object& v2) const { return more(v2) || equal(v2); }
 
   Variant o_get(const String& propName, bool error = true,
                 const String& context = null_string) const;

@@ -204,12 +204,34 @@ bool isQueryOp(Opcode opc) {
   case LteBool:
   case EqBool:
   case NeqBool:
+  case SameObj:
+  case NSameObj:
   case Same:
   case NSame:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
   case IsType:
   case IsNType:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool isSideEffectfulQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtX:
+  case GteX:
+  case LtX:
+  case LteX:
+  case EqX:
+  case NeqX:
+  case GtObj:
+  case GteObj:
+  case LtObj:
+  case LteObj:
+  case EqObj:
+  case NeqObj:
     return true;
   default:
     return false;
@@ -269,8 +291,24 @@ bool isStrQueryOp(Opcode opc) {
   case SameStr:
   case NSameStr:
     return true;
- default:
+  default:
    return false;
+  }
+}
+
+bool isObjQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtObj:
+  case GteObj:
+  case LtObj:
+  case LteObj:
+  case EqObj:
+  case NeqObj:
+  case SameObj:
+  case NSameObj:
+    return true;
+  default:
+    return false;
   }
 }
 
@@ -305,6 +343,8 @@ Opcode negateQueryOp(Opcode opc) {
   case LteBool:             return GtBool;
   case EqBool:              return NeqBool;
   case NeqBool:             return EqBool;
+  case SameObj:             return NSameObj;
+  case NSameObj:            return SameObj;
   case Same:                return NSame;
   case NSame:               return Same;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
@@ -323,14 +363,20 @@ Opcode negateQueryOp(Opcode opc) {
 }
 
 Opcode commuteQueryOp(Opcode opc) {
-  assertx(isQueryOp(opc));
+  assertx(isQueryOp(opc) || isSideEffectfulQueryOp(opc));
   switch (opc) {
   case Gt:    return Lt;
+  case GtX:   return LtX;
   case Gte:   return Lte;
+  case GteX:  return LteX;
   case Lt:    return Gt;
+  case LtX:   return GtX;
   case Lte:   return Gte;
+  case LteX:  return GteX;
   case Eq:    return Eq;
+  case EqX:   return EqX;
   case Neq:   return Neq;
+  case NeqX:  return NeqX;
   case GtInt: return LtInt;
   case GteInt:return LteInt;
   case LtInt: return GtInt;
@@ -358,6 +404,15 @@ Opcode commuteQueryOp(Opcode opc) {
   case LteBool: return GteBool;
   case EqBool:
   case NeqBool:
+    return opc;
+  case GtObj:  return LtObj;
+  case GteObj: return LteObj;
+  case LtObj:  return GtObj;
+  case LteObj: return LteObj;
+  case EqObj:
+  case NeqObj:
+  case SameObj:
+  case NSameObj:
     return opc;
   case Same:  return Same;
   case NSame: return NSame;
@@ -429,6 +484,27 @@ Opcode queryToStrQueryOp(Opcode opc) {
     case Neq: return NeqStr;
     case Same: return SameStr;
     case NSame: return NSameStr;
+    default: always_assert(0);
+  }
+}
+
+Opcode queryToObjQueryOp(Opcode opc) {
+  assertx(isQueryOp(opc) || isSideEffectfulQueryOp(opc));
+  switch (opc) {
+    case GtX:
+    case Gt: return GtObj;
+    case GteX:
+    case Gte: return GteObj;
+    case LtX:
+    case Lt: return LtObj;
+    case LteX:
+    case Lte: return LteObj;
+    case EqX:
+    case Eq: return EqObj;
+    case NeqX:
+    case Neq: return NeqObj;
+    case Same: return SameObj;
+    case NSame: return NSameObj;
     default: always_assert(0);
   }
 }

@@ -1026,6 +1026,68 @@ ObjectData* ObjectData::clone() {
   return cloneImpl();
 }
 
+bool ObjectData::equal(const ObjectData& other) const {
+  if (this == &other) return true;
+  if (isCollection()) {
+    return collections::equals(this, &other);
+  }
+  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
+               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    return DateTimeData::getTimestamp(this) ==
+      DateTimeData::getTimestamp(&other);
+  }
+  if (getVMClass() != other.getVMClass()) return false;
+  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
+    // Compare the whole object, not just the array representation
+    auto ar1 = Array::Create();
+    auto ar2 = Array::Create();
+    o_getArray(ar1);
+    other.o_getArray(ar2);
+    return ar1->equal(ar2.get(), false);
+  }
+  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    // First comparison already proves they are different
+    return false;
+  }
+  return toArray()->equal(other.toArray().get(), false);
+}
+
+bool ObjectData::less(const ObjectData& other) const {
+  if (isCollection() || other.isCollection()) {
+    throw_collection_compare_exception();
+  }
+  if (this == &other) return false;
+  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
+               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    return DateTimeData::getTimestamp(this) <
+      DateTimeData::getTimestamp(&other);
+  }
+  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    // First comparison already proves they are different
+    return false;
+  }
+  if (getVMClass() != other.getVMClass()) return false;
+  return toArray().less(other.toArray());
+}
+
+bool ObjectData::more(const ObjectData& other) const {
+  if (isCollection() || other.isCollection()) {
+    throw_collection_compare_exception();
+  }
+  if (this == &other) return false;
+  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
+               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    return DateTimeData::getTimestamp(this) >
+      DateTimeData::getTimestamp(&other);
+  }
+  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    // First comparison already proves they are different
+    return false;
+  }
+  if (getVMClass() != other.getVMClass()) return false;
+  return toArray().more(other.toArray());
+}
+
 Variant ObjectData::offsetGet(Variant key) {
   assert(instanceof(SystemLib::s_ArrayAccessClass));
 

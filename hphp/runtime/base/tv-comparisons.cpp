@@ -388,30 +388,9 @@ struct Eq {
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    if (od1 == od2) return true;
-    if (od1->isCollection()) {
-      return collections::equals(od1, od2);
-    }
-    if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
-        && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return DateTimeData::getTimestamp(od1) == DateTimeData::getTimestamp(od2);
-    }
-    if (od1->getVMClass() != od2->getVMClass()) return false;
-    if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {
-      // Compare the whole object, not just the array representation
-      auto ar1 = Array::Create();
-      auto ar2 = Array::Create();
-      od1->o_getArray(ar1);
-      od2->o_getArray(ar2);
-      return ar1->equal(ar2.get(), false);
-    }
-    if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
-      // First comparison already proves they are different
-      return false;
-    }
-    auto ar1 = od1->toArray();
-    auto ar2 = od2->toArray();
-    return ar1->equal(ar2.get(), false);
+    assert(od1);
+    assert(od2);
+    return od1->equal(*od2);
   }
 
   bool operator()(const ResourceData* od1, const ResourceData* od2) const {
@@ -438,23 +417,9 @@ struct Lt {
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    if (od1->isCollection() || od2->isCollection()) {
-      throw_collection_compare_exception();
-    }
-    if (od1 == od2) return false;
-    if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
-        && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return DateTimeData::getTimestamp(od1) < DateTimeData::getTimestamp(od2);
-    }
-    if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
-      return false;
-    }
-    if (od1->getVMClass() != od2->getVMClass()) {
-      return false;
-    }
-    auto ar1 = od1->toArray();
-    auto ar2 = od2->toArray();
-    return (*this)(ar1.get(), ar2.get());
+    assert(od1);
+    assert(od2);
+    return od1->less(*od2);
   }
 
   bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
@@ -484,23 +449,9 @@ struct Gt {
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    if (od1->isCollection() || od2->isCollection()) {
-      throw_collection_compare_exception();
-    }
-    if (od1 == od2) return false;
-    if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
-        && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return DateTimeData::getTimestamp(od1) > DateTimeData::getTimestamp(od2);
-    }
-    if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
-      return false;
-    }
-    if (od1->getVMClass() != od2->getVMClass()) {
-      return false;
-    }
-    auto ar1 = od1->toArray();
-    auto ar2 = od2->toArray();
-    return (*this)(ar1.get(), ar2.get());
+    assert(od1);
+    assert(od2);
+    return od1->more(*od2);
   }
 
   bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {

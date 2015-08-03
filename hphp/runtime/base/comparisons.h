@@ -788,6 +788,39 @@ inline bool more(const Object& v1, const Variant& v2) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// ObjectData*
+
+inline bool equal(const ObjectData* v1, const ObjectData* v2) {
+  assert(v1);
+  assert(v2);
+  return v1->equal(*v2);
+}
+
+inline bool nequal(const ObjectData* v1, const ObjectData* v2) {
+  return !equal(v1, v2);
+}
+
+inline bool less(const ObjectData* v1, const ObjectData* v2) {
+  assert(v1);
+  assert(v2);
+  return v1->less(*v2);
+}
+
+inline bool lessEqual(const ObjectData* v1, const ObjectData* v2) {
+  return less(v1, v2) || equal(v1, v2);
+}
+
+inline bool more(const ObjectData* v1, const ObjectData* v2) {
+  assert(v1);
+  assert(v2);
+  return v1->more(*v2);
+}
+
+inline bool moreEqual(const ObjectData* v1, const ObjectData* v2) {
+  return more(v1, v2) || equal(v1, v2);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Resource
 
 inline bool same(const Resource& v1, bool    v2) { return same(v2, v1); }

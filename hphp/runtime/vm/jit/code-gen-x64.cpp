@@ -335,6 +335,12 @@ CALL_OPCODE(EqStr);
 CALL_OPCODE(NeqStr);
 CALL_OPCODE(SameStr);
 CALL_OPCODE(NSameStr);
+CALL_OPCODE(GtObj);
+CALL_OPCODE(GteObj);
+CALL_OPCODE(LtObj);
+CALL_OPCODE(LteObj);
+CALL_OPCODE(EqObj);
+CALL_OPCODE(NeqObj);
 
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
@@ -1207,6 +1213,30 @@ void CodeGenerator::cgEqBool(IRInstruction* inst) {
 
 void CodeGenerator::cgNeqBool(IRInstruction* inst) {
   emitCmpBool(inst, CC_NE);
+}
+
+void CodeGenerator::cgSameObj(IRInstruction* inst) {
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
+  auto& v = vmain();
+  auto sf = v.makeReg();
+  assert(inst->src(0)->type() <= TObj);
+  assert(inst->src(1)->type() <= TObj);
+  v << cmpq{src0, src1, sf};
+  v << setcc{CC_E, sf, dst};
+}
+
+void CodeGenerator::cgNSameObj(IRInstruction* inst) {
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
+  auto& v = vmain();
+  auto sf = v.makeReg();
+  assert(inst->src(0)->type() <= TObj);
+  assert(inst->src(1)->type() <= TObj);
+  v << cmpq{src0, src1, sf};
+  v << setcc{CC_NE, sf, dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

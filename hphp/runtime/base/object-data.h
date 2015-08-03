@@ -195,6 +195,15 @@ struct ObjectData {
   Array toArray(bool pubOnly = false) const;
 
   /*
+   * Comparisons.
+   *
+   * Note that for objects !(X < Y) does *not* imply (X >= Y).
+   */
+  bool equal(const ObjectData&) const;
+  bool less(const ObjectData&) const;
+  bool more(const ObjectData&) const;
+
+  /*
    * Call this object's destructor, if it has one. No restrictions are placed
    * on the object's refcount, since this is used on objects still alive at
    * request shutdown.

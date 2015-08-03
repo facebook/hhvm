@@ -58,6 +58,7 @@ auto constexpr TV       = ArgType::TV;
 using IFaceSupportFn = bool (*)(const StringData*);
 
 using StrCmpFn = bool (*)(const StringData*, const StringData*);
+using ObjCmpFn = bool (*)(const ObjectData*, const ObjectData*);
 
 }
 
@@ -251,6 +252,18 @@ static CallMap s_callMap {
     {SameStr,            static_cast<StrCmpFn>(same), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {NSameStr,           static_cast<StrCmpFn>(nsame), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {GtObj,              static_cast<ObjCmpFn>(more), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {GteObj,             static_cast<ObjCmpFn>(moreEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LtObj,              static_cast<ObjCmpFn>(less), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LteObj,             static_cast<ObjCmpFn>(lessEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {EqObj,              static_cast<ObjCmpFn>(equal), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {NeqObj,             static_cast<ObjCmpFn>(nequal), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
 
     /* Static prop helpers */

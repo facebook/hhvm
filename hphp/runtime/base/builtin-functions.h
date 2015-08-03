@@ -124,8 +124,8 @@ ATTRIBUTE_NORETURN void throw_collection_compare_exception();
 ATTRIBUTE_NORETURN void throw_param_is_not_container();
 ATTRIBUTE_NORETURN
 void throw_cannot_modify_immutable_object(const char* className);
-void check_collection_compare(ObjectData* obj);
-void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
+void check_collection_compare(const ObjectData* obj);
+void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2);
 void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);

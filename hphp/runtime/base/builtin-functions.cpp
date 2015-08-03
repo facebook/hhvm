@@ -567,11 +567,11 @@ void throw_cannot_modify_immutable_object(const char* className) {
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void check_collection_compare(ObjectData* obj) {
+void check_collection_compare(const ObjectData* obj) {
   if (obj && obj->isCollection()) throw_collection_compare_exception();
 }
 
-void check_collection_compare(ObjectData* obj1, ObjectData* obj2) {
+void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2) {
   if (obj1 && obj2 && (obj1->isCollection() || obj2->isCollection())) {
     throw_collection_compare_exception();
   }

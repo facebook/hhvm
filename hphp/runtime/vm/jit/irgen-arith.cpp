@@ -202,8 +202,8 @@ void implCmp(IRGS& env, Opcode opc) {
       PUNT(LtGtOp-UnknownInput);
     }
     auto const ok =
-      leftType.subtypeOfAny(TNull, TBool, TInt, TDbl, TStr) &&
-      rightType.subtypeOfAny(TNull, TBool, TInt, TDbl, TStr);
+      leftType.subtypeOfAny(TNull, TBool, TInt, TDbl, TStr, TObj) &&
+      rightType.subtypeOfAny(TNull, TBool, TInt, TDbl, TStr, TObj);
     if (!ok) {
       PUNT(LtGtOp-NotOk);
     }

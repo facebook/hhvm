@@ -515,8 +515,8 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   }
 
   for (uint32_t i = 0; i < sz; ++i) {
-    if (!equal(tvAsCVarRef(&bv1->m_data[i]),
-               tvAsCVarRef(&bv2->m_data[i]))) {
+    if (!HPHP::equal(tvAsCVarRef(&bv1->m_data[i]),
+                     tvAsCVarRef(&bv2->m_data[i]))) {
 
       return false;
     }
@@ -3174,7 +3174,7 @@ bool BaseMap::Equals(EqualityFlavor eq,
           tv2 = mp2->get(e.skey);
         }
         if (!tv2) return false;
-        if (!equal(tvAsCVarRef(&e.data), tvAsCVarRef(tv2))) return false;
+        if (!HPHP::equal(tvAsCVarRef(&e.data), tvAsCVarRef(tv2))) return false;
       }
       return true;
     }
@@ -3205,11 +3205,11 @@ bool BaseMap::Equals(EqualityFlavor eq,
           }
         } else {
           assert(e1.hasStrKey());
-          if (!e2.hasStrKey() || !equal(e1.skey, e2.skey)) {
+          if (!e2.hasStrKey() || !HPHP::equal(e1.skey, e2.skey)) {
             return false;
           }
         }
-        if (!equal(tvAsCVarRef(&e1.data), tvAsCVarRef(&e2.data))) {
+        if (!HPHP::equal(tvAsCVarRef(&e1.data), tvAsCVarRef(&e2.data))) {
           return false;
         }
 
@@ -4890,8 +4890,8 @@ bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto pair2 = static_cast<const c_Pair*>(obj2);
   assert(pair1->isFullyConstructed());
   assert(pair2->isFullyConstructed());
-  return equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
-         equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
+  return HPHP::equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
+         HPHP::equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
 }
 
 void c_Pair::Unserialize(ObjectData* obj,

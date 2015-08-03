@@ -601,6 +601,26 @@ To string conversions:
 
   Performs comparison of booleans.
 
+| GtObj,                       D(Bool), S(Obj) S(Obj),                    Er
+
+| GteObj,                      D(Bool), S(Obj) S(Obj),                    Er
+
+| LtObj,                       D(Bool), S(Obj) S(Obj),                    Er
+
+| LteObj,                      D(Bool), S(Obj) S(Obj),                    Er
+
+| EqObj,                       D(Bool), S(Obj) S(Obj),                    Er
+
+| NeqObj,                      D(Bool), S(Obj) S(Obj),                    Er
+
+| SameObj,                     D(Bool), S(Obj) S(Obj),                    NF
+
+| NSameObj,                    D(Bool), S(Obj) S(Obj),                    NF
+
+  Perform comparison of objects using PHP semantics. All versions except for
+  SameObj and NSameObj may re-enter the VM and therefore may throw
+  exceptions. SameObj and NSameObj never re-enter or throw.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait

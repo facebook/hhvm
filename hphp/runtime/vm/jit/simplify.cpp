@@ -887,30 +887,44 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case GtInt:
   case GtStr:
   case GtBool:
+  case GtObj:
+  case GtX:
   case Gt:   return a > b;
   case GteInt:
   case GteStr:
   case GteBool:
+  case GteObj:
+  case GteX:
   case Gte:  return a >= b;
   case LtInt:
   case LtStr:
   case LtBool:
+  case LtObj:
+  case LtX:
   case Lt:   return a < b;
   case LteInt:
   case LteStr:
   case LteBool:
+  case LteObj:
+  case LteX:
   case Lte:  return a <= b;
   case Same:
   case SameStr:
+  case SameObj:
   case EqInt:
   case EqStr:
   case EqBool:
+  case EqObj:
+  case EqX:
   case Eq:   return a == b;
   case NSame:
   case NSameStr:
+  case NSameObj:
   case NeqInt:
   case NeqStr:
   case NeqBool:
+  case NeqObj:
+  case NeqX:
   case Neq:  return a != b;
   default:
     not_reached();
@@ -929,6 +943,16 @@ SSATmp* cmpImpl(State& env,
   auto const type1 = src1->type();
   auto const type2 = src2->type();
 
+  // Normally we wouldn't try to simplify side-effectful comparisons, but we
+  // want to at least transform object comparisons to their specific comparison
+  // ops.
+  if (isSideEffectfulQueryOp(opName)) {
+    if (!(type1 <= TObj || type1 <= TNull) ||
+        !(type2 <= TObj || type2 <= TNull)) {
+      return nullptr;
+    }
+  }
+
   // Identity optimization
   if (src1 == src2 && !type1.maybe(TDbl)) {
     // (val1 == val1) does not simplify to true when val1 is a NaN
@@ -944,10 +968,11 @@ SSATmp* cmpImpl(State& env,
     return nullptr;
   }
 
-  // OpSame and OpNSame have some special rules
+  // Same/NSame have some special rules
   if (opName == Same || opName == NSame ||
-      opName == SameStr || opName == NSameStr) {
-    // OpSame and OpNSame do not perform type juggling
+      opName == SameStr || opName == NSameStr ||
+      opName == SameObj || opName == NSameObj) {
+    // Same and NSame do not perform type juggling
     if (type1.toDataType() != type2.toDataType() &&
         !(type1 <= TStr && type2 <= TStr)) {
       return cns(env, bool(cmpOp(opName, 0, 1)));
@@ -967,10 +992,17 @@ SSATmp* cmpImpl(State& env,
         return newInst(queryToStrQueryOp(opName), src1, src2);
       }
       return nullptr;
+    } else if (type1 <= TObj && type2 <= TObj) {
+      if (!isObjQueryOp(opName)) {
+        return newInst(queryToObjQueryOp(opName), src1, src2);
+      }
+      return nullptr;
     }
-    assertx(opName != SameStr && opName != NSameStr);
 
-    // If type is a primitive type - simplify to Eq/Neq.  Str was already
+    assertx(opName != SameStr && opName != NSameStr);
+    assertx(opName != SameObj && opName != NSameObj);
+
+    // If type is a primitive type - simplify to Eq/Neq.  Str/Obj was already
     // removed above.
     auto const badTypes = TObj | TRes | TArr;
     if (type1.maybe(badTypes) || type2.maybe(badTypes)) {
@@ -1086,12 +1118,17 @@ SSATmp* cmpImpl(State& env,
     return newInst(queryToBoolQueryOp(opName), src1, src2);
   }
 
+  // Lower to obj-comparison if possible.
+  if (!isObjQueryOp(opName) && type1 <= TObj && type2 <= TObj) {
+    return newInst(queryToObjQueryOp(opName), src1, src2);
+  }
+
   // ---------------------------------------------------------------------
   // For same-type cmps, canonicalize any constants to the right
   // Then stop - there are no more simplifications left
   // ---------------------------------------------------------------------
 
-  if (type1.toDataType() == type2.toDataType() ||
+  if ((type1.toDataType() == type2.toDataType()) ||
       (type1 <= TStr && type2 <= TStr)) {
     if (src1->hasConstVal() && !src2->hasConstVal()) {
       return newInst(commuteQueryOp(opName), src2, src1);
@@ -1207,6 +1244,12 @@ X(Lt)
 X(Lte)
 X(Eq)
 X(Neq)
+X(GtX)
+X(GteX)
+X(LtX)
+X(LteX)
+X(EqX)
+X(NeqX)
 X(GtInt)
 X(GteInt)
 X(LtInt)
@@ -1229,7 +1272,14 @@ X(EqStr)
 X(NeqStr)
 X(SameStr)
 X(NSameStr)
-
+X(GtObj)
+X(GteObj)
+X(LtObj)
+X(LteObj)
+X(EqObj)
+X(NeqObj)
+X(SameObj)
+X(NSameObj)
 #undef X
 
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
@@ -2201,6 +2251,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Lte)
   X(Eq)
   X(Neq)
+  X(GtX)
+  X(GteX)
+  X(LtX)
+  X(LteX)
+  X(EqX)
+  X(NeqX)
   X(GtInt)
   X(GteInt)
   X(LtInt)
@@ -2223,6 +2279,14 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqStr)
   X(SameStr)
   X(NSameStr)
+  X(GtObj)
+  X(GteObj)
+  X(LtObj)
+  X(LteObj)
+  X(EqObj)
+  X(NeqObj)
+  X(SameObj)
+  X(NSameObj)
   X(ArrayGet)
   X(OrdStr)
   X(LdLoc)

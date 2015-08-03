@@ -106,8 +106,6 @@ public:
     return *this;
   }
 
-  ~Object();
-
   /**
    * Informational
    */

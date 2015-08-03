@@ -41,10 +41,6 @@ void ObjNR::compileTimeAssertions() {
   static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
 }
 
-Object::~Object() {
-  // force it out of line
-}
-
 Array Object::toArray() const {
   return m_obj ? m_obj->toArray() : Array();
 }

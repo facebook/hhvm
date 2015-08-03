@@ -1,0 +1,33 @@
+array(2) {
+  [0]=>
+  string(1) "0"
+  [1]=>
+  array(4) {
+    [0]=>
+    string(11) "member:four"
+    [1]=>
+    string(12) "member:three"
+    [2]=>
+    string(10) "member:two"
+    [3]=>
+    string(10) "member:one"
+  }
+}
+array(2) {
+  [0]=>
+  string(1) "0"
+  [1]=>
+  array(2) {
+    [0]=>
+    string(12) "member:three"
+    [1]=>
+    string(10) "member:two"
+  }
+}
+array(2) {
+  [0]=>
+  string(1) "0"
+  [1]=>
+  array(0) {
+  }
+}

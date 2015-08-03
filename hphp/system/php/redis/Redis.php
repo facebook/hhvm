@@ -507,6 +507,39 @@ class Redis {
     return $this->processVectorResponse(true);
   }
 
+  /* Scan --------------------------------------------------------------- */
+
+  protected function scanImpl($cmd, $key, $cursor, $pattern, $count) {
+    $args = [];
+    if ($key !== null) {
+      $args[] = $this->_prefix($key);
+    }
+    $args[] = (int)$cursor;
+    if ($pattern !== null) {
+      $args[] = 'MATCH';
+      if ($cmd === 'SCAN') {
+        $args[] = (string)$this->_prefix($pattern);
+      }
+      else {
+        $args[] = (string)$pattern;
+      }
+    }
+    if ($count !== null) {
+      $args[] = 'COUNT';
+      $args[] = (int)$count;
+    }
+    $this->processArrayCommand($cmd, $args);
+    return $this->processVariantResponse();
+  }
+
+  public function scan($cursor, $pattern = null, $count = null) {
+    return $this->scanImpl('SCAN', null, $cursor, $pattern, $count);
+}
+
+  public function sScan($key, $cursor, $pattern = null, $count = null) {
+    return $this->scanImpl('SSCAN', $key, $cursor, $pattern, $count);
+  }
+
   /* Multi --------------------------------------------------------------- */
 
   protected function flushCallbacks($multibulk = true) {

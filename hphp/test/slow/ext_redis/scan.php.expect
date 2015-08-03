@@ -1,0 +1,33 @@
+array(2) {
+  [0]=>
+  string(1) "0"
+  [1]=>
+  array(4) {
+    [0]=>
+    string(52) "REDIS_TEST:a994b47cc077764cbbb47943ee50fca1:key:four"
+    [1]=>
+    string(51) "REDIS_TEST:a994b47cc077764cbbb47943ee50fca1:key:one"
+    [2]=>
+    string(53) "REDIS_TEST:a994b47cc077764cbbb47943ee50fca1:key:three"
+    [3]=>
+    string(51) "REDIS_TEST:a994b47cc077764cbbb47943ee50fca1:key:two"
+  }
+}
+array(2) {
+  [0]=>
+  string(1) "0"
+  [1]=>
+  array(2) {
+    [0]=>
+    string(53) "REDIS_TEST:a994b47cc077764cbbb47943ee50fca1:key:three"
+    [1]=>
+    string(51) "REDIS_TEST:a994b47cc077764cbbb47943ee50fca1:key:two"
+  }
+}
+array(2) {
+  [0]=>
+  string(1) "0"
+  [1]=>
+  array(0) {
+  }
+}

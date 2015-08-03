@@ -62,6 +62,8 @@ VregSF sf() {
       return x64::abi.sf.findFirst();
     case Arch::ARM:
       return arm::abi.sf.findFirst();
+    case Arch::PPC64:
+      not_implemented();
   }
   not_implemented();
 }
@@ -162,6 +164,8 @@ size_t stub_size() {
       return total_args * x64::kMovLen + kLeaVmSpLen;
     case Arch::ARM:
       not_implemented();
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -182,6 +186,10 @@ FPInvOffset extract_spoff(TCA stub) {
 
     case Arch::ARM:
       not_implemented();
+
+    case Arch::PPC64:
+      not_implemented();
+
   }
   not_reached();
 }

@@ -83,6 +83,10 @@ struct BackEnd final : jit::BackEnd {
 #if defined(__CYGWIN__) || defined(__MINGW__)
   #define CALLEE_SAVED_BARRIER()                                    \
       asm volatile("" : : : "rbx", "rsi", "rdi", "r12", "r13", "r14", "r15");
+#elif defined (__powerpc64__)
+// PPC64 port under development
+  #define CALLEE_SAVED_BARRIER()                                    \
+      not_implemented();
 #else
   #define CALLEE_SAVED_BARRIER()                                    \
       asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");

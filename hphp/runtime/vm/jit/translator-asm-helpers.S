@@ -149,4 +149,28 @@ enterTCHelper:
 enterTCServiceReq:
   brk 0
 
+#elif defined(__powerpc64__)
+ETCH_SECTION(handleSRHelper)
+.globl ETCH_NAME(handleSRHelper)
+ETCH_NAME(handleSRHelper):
+  blr
+ETCH_SIZE(handleSRHelper)
+
+ETCH_SECTION(handleSRResumeTC)
+.globl ETCH_NAME(handleSRResumeTC)
+ETCH_NAME(handleSRResumeTC):
+  blr
+ETCH_SIZE(handleSRResumeTC)
+
+ETCH_SECTION(enterTCServiceReq)
+.globl ETCH_NAME(enterTCServiceReq)
+ETCH_NAME(enterTCServiceReq):
+  blr
+ETCH_SIZE(enterTCServiceReq)
+
+ETCH_SECTION(enterTCExit)
+.globl ETCH_NAME(enterTCExit)
+ETCH_NAME(enterTCExit):
+  blr
+ETCH_SIZE(enterTCExit)
 #endif

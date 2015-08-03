@@ -29,6 +29,8 @@ ClassConstantMapMap s_class_constant_map;
 static size_t numGPRegArgs() {
 #ifdef __AARCH64EL__
   return 8; // r0-r7
+#elif defined(__powerpc64__)
+  return 31;
 #else // amd64
   if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
     return 8;

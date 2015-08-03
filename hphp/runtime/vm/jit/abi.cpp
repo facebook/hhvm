@@ -31,6 +31,8 @@ PhysReg rvmfp() {
       return x64::rVmFp;
     case Arch::ARM:
       return arm::rVmFp;
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -41,6 +43,8 @@ PhysReg rvmsp() {
       return x64::rVmSp;
     case Arch::ARM:
       return arm::rVmSp;
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -51,6 +55,8 @@ PhysReg rvmtl() {
       return x64::rVmTl;
     case Arch::ARM:
       return arm::rVmTl;
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -63,6 +69,8 @@ PhysReg r_svcreq_req() {
       return reg::rdi;
     case Arch::ARM:
       not_implemented();
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -72,6 +80,8 @@ PhysReg r_svcreq_stub() {
     case Arch::X64:
       return x64::rAsm;
     case Arch::ARM:
+      not_implemented();
+    case Arch::PPC64:
       not_implemented();
   }
   not_reached();
@@ -83,6 +93,8 @@ PhysReg r_svcreq_arg(unsigned i) {
       return x64::kSvcReqArgRegs[i];
     case Arch::ARM:
       return arm::svcReqArgReg(i);
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }

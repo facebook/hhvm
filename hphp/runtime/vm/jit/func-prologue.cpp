@@ -67,6 +67,8 @@ void emit_func_guard(Func* func, CodeBlock& cb) {
       return x64::emitFuncGuard(func, cb);
     case Arch::ARM:
       return arm::emitFuncGuard(func, cb);
+    case Arch::PPC64:
+      not_implemented();
   }
 }
 

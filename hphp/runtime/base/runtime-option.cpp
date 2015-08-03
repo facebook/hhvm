@@ -437,7 +437,8 @@ static inline bool hhirRelaxGuardsDefault() {
 }
 
 static inline bool evalJitDefault() {
-#ifdef __CYGWIN__
+// Disble JIT for PPC64 - Port under development
+#if defined(__CYGWIN__) || defined(__powerpc64__)
   return false;
 #else
   return true;

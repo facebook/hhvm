@@ -1,6 +1,6 @@
 
-Warning: hash_equals(): Expected user_string to be a string, NULL given in %s
+Warning: hash_equals(): Expected user_string to be a string, null given in %s
 bool(false)
 
-Warning: hash_equals(): Expected known_string to be a string, NULL given in %s
+Warning: hash_equals(): Expected known_string to be a string, null given in %s
 bool(false)

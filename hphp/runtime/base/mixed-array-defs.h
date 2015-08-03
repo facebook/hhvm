@@ -104,16 +104,21 @@ void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
     "movdqu     %%xmm0, 104(%0)\n"
     : : "r"(a) : "xmm0"
   );
-#else
+#endif
+
+  a->m_sizeAndPos = size; // pos=0
+  a->m_hdr.init(HeaderKind::Mixed, count);
+  a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
+  a->m_nextKI = nextIntKey;
+
+// Initialize hash table after header for other platforms
+#if !defined(__x86_64__)
   auto const hash = a->hashTab();
   auto const emptyVal = int64_t{MixedArray::Empty};
   reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
   reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
 #endif
-  a->m_sizeAndPos = size; // pos=0
-  a->m_hdr.init(HeaderKind::Mixed, count);
-  a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
-  a->m_nextKI = nextIntKey;
+
 }
 
 inline void MixedArray::initHash(int32_t* hash, uint32_t scale) {

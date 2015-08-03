@@ -1,9 +1,9 @@
 TypeAlias [ Matrix : ?HH\Vector<HH\Vector<T>> ]
-array(4) {
+array(5) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
   string(9) "HH\Vector"
   ["generic_types"]=>
@@ -11,7 +11,7 @@ array(4) {
     [0]=>
     array(3) {
       ["kind"]=>
-      int(101)
+      int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
@@ -26,4 +26,6 @@ array(4) {
       }
     }
   }
+  ["alias"]=>
+  string(6) "Matrix"
 }

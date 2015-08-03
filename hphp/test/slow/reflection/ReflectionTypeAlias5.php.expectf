@@ -1,0 +1,1 @@
+ReflectionException: resolving type alias MyAlias failed. Have you declared all classes appeared in the type alias?

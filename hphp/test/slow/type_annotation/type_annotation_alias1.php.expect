@@ -1,0 +1,12 @@
+array(2) {
+  ["kind"]=>
+  int(19)
+  ["classname"]=>
+  string(6) "MyType"
+}
+array(2) {
+  ["kind"]=>
+  int(19)
+  ["classname"]=>
+  string(6) "MyType"
+}

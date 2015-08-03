@@ -1,0 +1,1 @@
+Fatal error: when resolving type constant C::T, alias MyAlias does not resolve to a class in %s on line 11

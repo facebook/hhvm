@@ -1692,9 +1692,8 @@ const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
 // caller throws exception when return value is false
 static bool HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
   auto ne = NamedEntity::get(name.get(), /* allowCreate = */ false);
-  if (!ne) {
-    return false;
-  }
+  if (!ne) return false;
+
   auto const typeAliasReq = ne->getCachedTypeAlias();
   if (!typeAliasReq) return false;
 
@@ -1709,6 +1708,23 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   assert(typeStructure);
   assert(typeStructure->isStatic());
   return Array::attach(typeStructure);
+}
+
+static Array HHVM_METHOD(ReflectionTypeAlias, __getResolvedTypeStructure) {
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  assert(req);
+  auto const typeStructure = req->typeStructure;
+  assert(typeStructure);
+  ArrayData* resolved;
+  try {
+    resolved = const_cast<ArrayData*>(
+      TypeStructure::resolve(req->name, typeStructure));
+  } catch (Exception &e) {
+    return Array();
+  }
+  assert(resolved);
+  assert(resolved->isStatic());
+  return Array::attach(resolved);
 }
 
 static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
@@ -1782,6 +1798,7 @@ class ReflectionExtension final : public Extension {
 
     HHVM_ME(ReflectionTypeAlias, __init);
     HHVM_ME(ReflectionTypeAlias, getTypeStructure);
+    HHVM_ME(ReflectionTypeAlias, __getResolvedTypeStructure);
     HHVM_ME(ReflectionTypeAlias, getAssignedTypeText);
 
     HHVM_ME(ReflectionClass, __init);

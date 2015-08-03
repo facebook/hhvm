@@ -1,0 +1,17 @@
+array(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["foo"]=>
+    array(1) {
+      ["value"]=>
+      array(2) {
+        ["kind"]=>
+        int(101)
+        ["classname"]=>
+        string(1) "E"
+      }
+    }
+  }
+}

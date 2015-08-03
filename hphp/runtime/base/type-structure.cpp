@@ -19,9 +19,11 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/text-util.h"
 
@@ -53,7 +55,9 @@ const StaticString
   s_value("value"),
   s_this("HH\\this"),
   s_self("self"),
-  s_parent("parent")
+  s_parent("parent"),
+  s_callable("callable"),
+  s_alias("alias")
 ;
 
 const std::string
@@ -250,6 +254,7 @@ std::string fullName (const ArrayData* arr) {
     case TypeStructure::Kind::T_xhp:
       xhpTypeName(arr, name);
       break;
+    case TypeStructure::Kind::T_alias:
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
@@ -283,39 +288,79 @@ ArrayData* resolveList(ArrayData* arr,
   return ArrayData::GetScalarArray(newarr.create());
 }
 
+const std::string resolveContextMsg(const Class::Const& typeCns,
+                                    const Class* typeCnsCls) {
+  std::string msg("when resolving ");
+  if (typeCnsCls) {
+    folly::toAppend("type constant ", typeCnsCls->name()->data(),
+                    "::", typeCns.m_name->data(),
+                    &msg);
+  } else {
+    folly::toAppend("type alias ", typeCns.m_name->data(), &msg);
+  }
+  return msg;
+}
+
+/* returns the resolved TypeStructure; if aliasName is not an alias,
+ * return nullptr. */
+ArrayData* getAlias(const StringData* aliasName) {
+  auto typeAliasReq = Unit::loadTypeAlias(aliasName);
+  if (!typeAliasReq) return nullptr;
+
+  // this returned type structure is unresolved.
+  return typeAliasReq->typeStructure;
+}
+
 const Class* getClass(const StringData* clsName,
                       const Class::Const& typeCns,
                       const Class* typeCnsCls) {
-  // HH\this: late static binding
-  if (clsName->same(s_this.get())) {
-    return typeCnsCls;
-  }
-
-  auto declCls = typeCns.m_class;
-  // self
-  if (clsName->same(s_self.get())) {
-    return declCls;
-  }
-  // parent
-  if (clsName->same(s_parent.get())) {
-    auto parent = declCls->parent();
-    if (!parent) {
-      raise_error("when resolving type constant %s::%s, "
-                  "class %s does not have a parent",
-                  typeCnsCls->name()->data(),
-                  typeCns.m_name->data(),
-                  declCls->name()->data());
+  // the original unresolved type structure came from a type constant
+  // (instead of a type alias), and may have this/self/parent.
+  if (typeCnsCls) {
+    // HH\this: late static binding
+    if (clsName->same(s_this.get())) {
+      return typeCnsCls;
     }
-    return parent;
+
+    auto declCls = typeCns.m_class;
+    // self
+    if (clsName->same(s_self.get())) {
+      return declCls;
+    }
+    // parent
+    if (clsName->same(s_parent.get())) {
+      auto parent = declCls->parent();
+      if (!parent) {
+        throw Exception(
+          "%s, class %s does not have a parent",
+          resolveContextMsg(typeCns, typeCnsCls).c_str(),
+          declCls->name()->data());
+      }
+      return parent;
+    }
   }
 
-  auto const cls = Unit::loadClass(clsName);
+  auto name = const_cast<StringData*>(clsName);
+  auto ts = getAlias(name);
+  while (ts) {
+    assert(ts->exists(s_kind));
+    if (!ts->exists(s_classname)) {
+      // not a class, interface, trait, enum, or alias
+      throw Exception(
+        "%s, alias %s does not resolve to a class",
+        resolveContextMsg(typeCns, typeCnsCls).c_str(),
+        name->data());
+    }
+    name = ts->get(s_classname).getStringData();
+    ts = getAlias(name);
+  }
+
+  auto const cls = Unit::loadClass(name);
   if (!cls) {
-    raise_error("when resolving type constant %s::%s, "
-                "class %s not found",
-                typeCnsCls->name()->data(),
-                typeCns.m_name->data(),
-                clsName->data());
+    throw Exception(
+      "%s, class %s not found",
+      resolveContextMsg(typeCns, typeCnsCls).c_str(),
+      name->data());
   }
 
   return cls;
@@ -352,9 +397,10 @@ ArrayData* resolveShape(ArrayData* arr,
       if (isStringType(cnsValue.m_type) || isIntType(cnsValue.m_type)) {
         key = tvAsVariant(&cnsValue);
       } else {
-        raise_error("class constant %s::%s is not a string or an int "
-                    "and cannot be used as shape field names",
-                    clsName.c_str(), cnsName.c_str());
+        throw Exception(
+          "class constant %s::%s is not a string or an int "
+          "and cannot be used as shape field names",
+          clsName.c_str(), cnsName.c_str());
       }
     }
     assert(wrapper->exists(s_value));
@@ -400,7 +446,6 @@ void resolveGenerics(Array& ret,
   }
 }
 
-
 ArrayData* resolveTS(ArrayData* arr,
                      const Class::Const& typeCns,
                      const Class* typeCnsCls) {
@@ -444,6 +489,28 @@ ArrayData* resolveTS(ArrayData* arr,
     case TypeStructure::Kind::T_unresolved: {
       assert(arr->exists(s_classname));
       auto const clsName = arr->get(s_classname).getStringData();
+      auto ts = getAlias(clsName);
+      /* Special case for type aliases: due to hoistability issues, do
+       * not proactively resolve aliases unless they appear in type
+       * accesses. */
+      if (ts) {
+        newarr.add(s_kind,
+                   Variant(static_cast<uint8_t>(TypeStructure::Kind::T_alias)));
+        newarr.add(s_classname, Variant(clsName));
+        break;
+      }
+
+      /* Special cases for 'callable': Hack typechecker throws a naming
+       * error (unbound name), however, hhvm still supports this type
+       * hint to be compatible with php. We simply return as a
+       * OF_CLASS with class name set to 'callable'. */
+      if (clsName->same(s_callable.get())) {
+        newarr.add(s_kind,
+                   Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
+        newarr.add(s_classname, Variant(clsName));
+        break;
+      }
+
       resolveClass(newarr, clsName, typeCns, typeCnsCls);
       resolveGenerics(newarr, arr, typeCns, typeCnsCls);
       break;
@@ -463,12 +530,12 @@ ArrayData* resolveTS(ArrayData* arr,
         auto const cls = getClass(clsName, typeCns, typeCnsCls);
         auto cnsName = accList->get(i).getStringData();
         if (!cls->hasTypeConstant(cnsName)) {
-          raise_error("when resolving type constant %s::%s, "
-                      "class %s does not have non-abstract type constant %s",
-                      typeCnsCls->name()->data(),
-                      typeCns.m_name->data(),
-                      clsName->data(),
-                      cnsName->data());
+          throw Exception(
+            "%s, class %s does not have non-abstract "
+            "type constant %s",
+            resolveContextMsg(typeCns, typeCnsCls).c_str(),
+            clsName->data(),
+            cnsName->data());
         }
         auto tv = cls->clsCnsGet(cnsName, /* includeTypeCns = */ true);
         assert(tv.m_type == KindOfArray);
@@ -481,14 +548,13 @@ ArrayData* resolveTS(ArrayData* arr,
           (typeCnsVal->get(s_kind).getInt64());
         if (kind != TypeStructure::Kind::T_class
             && kind != TypeStructure::Kind::T_interface) {
-          raise_error("when resolving type constant %s::%s, "
-                      "%s::%s does not resolve to a class or "
-                      "an interface and cannot contain type constant %s",
-                      typeCnsCls->name()->data(),
-                      typeCns.m_name->data(),
-                      clsName->data(),
-                      cnsName->data(),
-                      accList->get(i+1).getStringData()->data());
+          throw Exception(
+            "%s, %s::%s does not resolve to a class or "
+            "an interface and cannot contain type constant %s",
+            resolveContextMsg(typeCns, typeCnsCls).c_str(),
+            clsName->data(),
+            cnsName->data(),
+            accList->get(i+1).getStringData()->data());
         }
         assert(typeCnsVal->exists(s_classname));
         clsName = typeCnsVal->get(s_classname).getStringData();
@@ -496,6 +562,7 @@ ArrayData* resolveTS(ArrayData* arr,
       assert(typeCnsVal->isStatic());
       return typeCnsVal;
     }
+    case TypeStructure::Kind::T_alias:
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_xhp:
     default:
@@ -507,14 +574,22 @@ ArrayData* resolveTS(ArrayData* arr,
 
 } // anonymous namespace
 
+bool TypeStructure::KindOfClass(TypeStructure::Kind kind) {
+  return kind == TypeStructure::Kind::T_class
+    || kind == TypeStructure::Kind::T_interface
+    || kind == TypeStructure::Kind::T_trait
+    || kind == TypeStructure::Kind::T_enum;
+}
+
 String TypeStructure::toString(const ArrayData* arr) {
   if (arr->empty()) return String();
 
   return String(fullName(arr));
 }
 
-/* Constructs a scalar array with all the shape field names, 'this'
- * resolved. TODO(7657500): type aliases. */
+/* Constructs a scalar array with all the shape field names,
+ * this/self/parent, classes, type accesses, and type aliases
+ * resolved. */
 ArrayData* TypeStructure::resolve(const Class::Const& typeCns,
                                   const Class* typeCnsCls) {
   assert(typeCns.isType());
@@ -523,6 +598,18 @@ ArrayData* TypeStructure::resolve(const Class::Const& typeCns,
   assert(typeCnsCls);
 
   return resolveTS(typeCns.m_val.m_data.parr, typeCns, typeCnsCls);
+}
+
+/* called by TypeAliasReq to get resolved TypeStructure for type aliases */
+ArrayData* TypeStructure::resolve(const StringData* aliasName,
+                                  const ArrayData* arr) {
+  // use a bogus constant to store the name
+  Class::Const cns;
+  cns.m_name = aliasName;
+
+  auto newarr = Array(resolveTS(const_cast<ArrayData*>(arr), cns, nullptr));
+  newarr.add(s_alias, Variant(const_cast<StringData*>(aliasName)));
+  return ArrayData::GetScalarArray(newarr.get());
 }
 
 } // namespace HPHP

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 try {
   $x = new ReflectionTypeAlias('NoSuchTypeAlias');

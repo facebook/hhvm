@@ -52,18 +52,22 @@ enum class Kind : uint8_t {
   T_interface = 16,
   T_trait = 17,
   T_enum = 18,
+  T_alias = 19,
 
-  /* TODO(7657500): the following kinds needs alias resolution, and
-   * are not exposed to the users. Could resolve to a class, enum,
-   * interface, or alias. */
+  /* The following kinds needs class/alias resolution, and
+   * are not exposed to the users. */
   T_unresolved = 101,
   T_typeaccess = 102,
   T_xhp = 103,
 };
 
+bool KindOfClass(Kind kind);
+
 String toString(const ArrayData* arr);
 
 ArrayData* resolve(const Class::Const& typeCns, const Class* typeCnsCls);
+
+ArrayData* resolve(const StringData* aliasName, const ArrayData* arr);
 
 }
 

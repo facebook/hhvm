@@ -1,7 +1,7 @@
 TypeAlias [ MyType : HH\Vector<HH\int> ]
-array(3) {
+array(4) {
   ["kind"]=>
-  int(101)
+  int(15)
   ["classname"]=>
   string(9) "HH\Vector"
   ["generic_types"]=>
@@ -12,9 +12,11 @@ array(3) {
       int(1)
     }
   }
+  ["alias"]=>
+  string(6) "MyType"
 }
 TypeAlias [ MyOpaqueType : (function (HH\string, HH\Set<HH\int>): HH\void) ]
-array(3) {
+array(4) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
@@ -32,7 +34,7 @@ array(3) {
     [1]=>
     array(3) {
       ["kind"]=>
-      int(101)
+      int(15)
       ["classname"]=>
       string(6) "HH\Set"
       ["generic_types"]=>
@@ -45,4 +47,6 @@ array(3) {
       }
     }
   }
+  ["alias"]=>
+  string(12) "MyOpaqueType"
 }

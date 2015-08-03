@@ -5,10 +5,6 @@ type Point = shape(
   'y' => int,
 );
 
-type Recur = shape(
-  'shape' => Recur
-);
-
 type Point3 = shape(
   'x' => int,
   'y' => int,

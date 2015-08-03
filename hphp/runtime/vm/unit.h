@@ -634,6 +634,8 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
+  static const TypeAliasReq* loadTypeAlias(const StringData* name);
+
   /*
    * Define the type alias given by `id', binding it to the appropriate
    * NamedEntity for this request.

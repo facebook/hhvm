@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_TYPE_ALIAS_H_
 #define incl_HPHP_TYPE_ALIAS_H_
 
-#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/annot-type.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

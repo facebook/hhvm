@@ -946,6 +946,22 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+const TypeAliasReq* Unit::loadTypeAlias(const StringData* name) {
+  auto ne = NamedEntity::get(name);
+  if (auto target = ne->getCachedTypeAlias()) {
+    return target;
+  }
+  if (AutoloadHandler::s_instance->autoloadClassOrType(
+        StrNR(const_cast<StringData*>(name))
+      )) {
+    if (auto target = ne->getCachedTypeAlias()) {
+      return target;
+    }
+  }
+
+  return nullptr;
+}
+
 void Unit::defTypeAlias(Id id) {
   assert(id < m_typeAliases.size());
   auto thisType = &m_typeAliases[id];

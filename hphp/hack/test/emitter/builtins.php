@@ -11,4 +11,6 @@ function test(): void {
   var_dump(idx($x, 4));
   var_dump(idx($x, 0, 10));
   var_dump(idx($x, 4, 10));
+  $n = idx($x, 0, 10);
+  var_dump($n);
 }

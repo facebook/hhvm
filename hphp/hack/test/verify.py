@@ -123,6 +123,10 @@ def list_test_files(root, disabled_ext):
                 result.extend(list_test_files(os.path.join(root, child),
                     disabled_ext))
         return result
+    elif os.path.islink(root):
+        # Some editors create broken symlinks as part of their locking scheme,
+        # so ignore those.
+        return []
     else:
         raise Exception('Could not find test file or directory at %s' %
             args.test_path)

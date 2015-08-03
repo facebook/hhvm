@@ -27,7 +27,7 @@ class :foo {
       'aaaaaaaaaa',
       'bbbbbbbbbb',
       'cccccccccc',
-      'dddddddddd',
+      'dddddddddd'
     } x = 'aaaaaaaaaa';
 
   children (

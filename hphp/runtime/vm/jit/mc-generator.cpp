@@ -118,7 +118,20 @@ static const char* const kPerfCounterNames[] = {
 };
 #undef TPC
 
+#ifdef __APPLE__
+// Clang believes that it can force s_perfCounters into 16-byte alignment, and
+// thus emit an inlined version of memcpy later in this file using SSE
+// instructions which require  such alignment. It can, in fact, do this --
+// except due to what is as far as I can tell a linker bug on OS X, ld doesn't
+// actually lay this out with 16 byte alignment, and so the SSE instructions
+// crash. In order to work around this, tell clang to force it to only 8 byte
+// alignment, which causes it to emit an inlined version of memcpy which does
+// not assume 16-byte alignment. (Perversely, it also tickles the ld bug
+// differently such that it actually gets 16-byte alignment :\)
+__attribute__((__aligned__(8)))
+#endif
 __thread int64_t s_perfCounters[tpc_num_counters];
+
 static __thread size_t s_initialTCSize;
 
 // The global MCGenerator object.

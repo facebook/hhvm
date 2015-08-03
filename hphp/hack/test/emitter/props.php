@@ -1,5 +1,9 @@
 <?hh // strict
 
+class Cns {
+  const C = 5;
+}
+
 class C {
   public int $arithmetic = 100+100;
   public int $intvar = 100;
@@ -12,6 +16,8 @@ class C {
   public bool $boolvar2 = false;
   public float $floatvar = 3.1415;
   public ?bool $nullvar = null;
+  public Map<int, int> $mapvar = Map {};
+  public int $constvar = Cns::C;
 }
 
 function test(): void {
@@ -26,4 +32,6 @@ function test(): void {
   var_dump($x->boolvar2);
   var_dump($x->floatvar);
   var_dump($x->nullvar);
+  var_dump($x->mapvar);
+  var_dump($x->constvar);
 }

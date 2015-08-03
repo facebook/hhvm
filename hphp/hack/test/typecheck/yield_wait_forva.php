@@ -24,8 +24,12 @@ async function maybe_null(): Awaitable<(int, ?int)> {
 }
 
 async function def_null(): Awaitable<(int, ?int, ?string, ?int)> {
-  $ret = await
-    genva(gen_int(), gen_int_opt(), null, coin_flip() ? gen_int() : null);
+  $ret = await genva(
+    gen_int(),
+    gen_int_opt(),
+    null,
+    coin_flip() ? gen_int() : null,
+  );
   return $ret;
 }
 

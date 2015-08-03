@@ -52,7 +52,6 @@ enum class Kind : uint8_t {
   T_interface = 16,
   T_trait = 17,
   T_enum = 18,
-  T_alias = 19,
 
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */

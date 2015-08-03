@@ -1,12 +1,12 @@
 array(2) {
   ["kind"]=>
-  int(19)
-  ["classname"]=>
+  int(1)
+  ["alias"]=>
   string(6) "MyType"
 }
 array(2) {
   ["kind"]=>
-  int(19)
-  ["classname"]=>
+  int(1)
+  ["alias"]=>
   string(6) "MyType"
 }

@@ -34,6 +34,5 @@ enum TypeStructureKind: int {
   OF_INTERFACE = 0;
   OF_TRAIT = 0;
   OF_ENUM = 0;
-  OF_ALIAS = 0;
   OF_UNRESOLVED = 0;
 }

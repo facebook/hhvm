@@ -1,6 +1,0 @@
-array(2) {
-  ["kind"]=>
-  int(19)
-  ["classname"]=>
-  string(7) "MyAlias"
-}

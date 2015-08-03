@@ -13,10 +13,12 @@ array(2) {
       ["generic_types"]=>
       array(1) {
         [0]=>
-        array(2) {
+        array(3) {
           ["kind"]=>
-          int(19)
+          int(15)
           ["classname"]=>
+          string(1) "C"
+          ["alias"]=>
           string(8) "MyAlias3"
         }
       }

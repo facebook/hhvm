@@ -254,7 +254,6 @@ std::string fullName (const ArrayData* arr) {
     case TypeStructure::Kind::T_xhp:
       xhpTypeName(arr, name);
       break;
-    case TypeStructure::Kind::T_alias:
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
@@ -307,8 +306,8 @@ ArrayData* getAlias(const StringData* aliasName) {
   auto typeAliasReq = Unit::loadTypeAlias(aliasName);
   if (!typeAliasReq) return nullptr;
 
-  // this returned type structure is unresolved.
-  return typeAliasReq->typeStructure;
+  // this returned type structure is resolved.
+  return TypeStructure::resolve(aliasName, typeAliasReq->typeStructure);
 }
 
 const Class* getClass(const StringData* clsName,
@@ -490,15 +489,7 @@ ArrayData* resolveTS(ArrayData* arr,
       assert(arr->exists(s_classname));
       auto const clsName = arr->get(s_classname).getStringData();
       auto ts = getAlias(clsName);
-      /* Special case for type aliases: due to hoistability issues, do
-       * not proactively resolve aliases unless they appear in type
-       * accesses. */
-      if (ts) {
-        newarr.add(s_kind,
-                   Variant(static_cast<uint8_t>(TypeStructure::Kind::T_alias)));
-        newarr.add(s_classname, Variant(clsName));
-        break;
-      }
+      if (ts) return ts;
 
       /* Special cases for 'callable': Hack typechecker throws a naming
        * error (unbound name), however, hhvm still supports this type
@@ -562,7 +553,6 @@ ArrayData* resolveTS(ArrayData* arr,
       assert(typeCnsVal->isStatic());
       return typeCnsVal;
     }
-    case TypeStructure::Kind::T_alias:
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_xhp:
     default:

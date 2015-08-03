@@ -1,0 +1,1 @@
+Fatal error: when resolving type alias MyAlias, class NonExistentClass not found in %s on line 11

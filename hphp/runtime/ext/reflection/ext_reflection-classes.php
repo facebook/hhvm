@@ -1096,7 +1096,6 @@ enum TypeStructureKind: int {
   OF_INTERFACE = 16;
   OF_TRAIT = 17;
   OF_ENUM = 18;
-  OF_ALIAS = 19;
   OF_UNRESOLVED = 101; // for type aliases only
 }
 

@@ -75,7 +75,7 @@ static void populateArgs(const Func* func,
     if (type == KindOfDouble) {
       if (SIMD_count < kNumSIMDRegs) {
         SIMD_args[SIMD_count++] = args[-i].m_data.dbl;
-      } else if (GP_count < numGP) {
+      } else if (GP_count > numGP) {
         // We have enough double args to hit the stack
         // but we haven't finished filling the GP regs yet.
         // Stack these in tmp (autoboxed to int64_t)

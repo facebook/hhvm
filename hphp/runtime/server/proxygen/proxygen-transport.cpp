@@ -549,7 +549,7 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
         m_response.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH,
                                     folly::to<std::string>(size));
       }
-    } else {
+    } else if (!suppressBody) {
       // Explicitly add Transfer-Encoding: chunked here.  libproxygen will only
       // add it for keep-alive connections
       m_response.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
@@ -560,10 +560,6 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
       HTTPMessage::getDefaultReason(code) : reasonStr.c_str();
     m_response.setStatusMessage(reason);
     m_response.setHTTPVersion(1, 1);
-
-    // If it is a HEAD request, lie to Proxygen about the chunked status, since
-    // Proxygen is broken and will send a response body consisting of an empty
-    // chunk if the chunked flag is set.
     m_response.setIsChunked(chunked && !suppressBody);
 
     m_response.dumpMessage(4);

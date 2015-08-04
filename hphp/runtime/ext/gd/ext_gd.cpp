@@ -4306,8 +4306,8 @@ bool HHVM_FUNCTION(imageantialias, const Resource& image, bool on) {
   return true;
 }
 
-Variant HHVM_FUNCTION(imagescale, const Resource& image,
-  int64_t newwidth, int64_t newheight /* =-1 */, int64_t method /*=GD_BILINEAR_FIXED*/) {
+Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
+  int64_t newheight /* =-1 */, int64_t method /*=GD_BILINEAR_FIXED*/) {
   gdImagePtr im = cast<Image>(image)->get();
   gdImagePtr imscaled = nullptr;
   if (!im) return false;

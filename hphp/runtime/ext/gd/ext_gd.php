@@ -754,7 +754,7 @@ function imagesavealpha(resource $image,
                         bool $saveflag): bool;
 
 /*
- * imagescale — Scale an image using the given new width and height.
+ * imagescale - Scale an image using the given new width and height.
  */
 <<__Native>>
 function imagescale(resource $img, int $newwidth, int $newheigh = -1,

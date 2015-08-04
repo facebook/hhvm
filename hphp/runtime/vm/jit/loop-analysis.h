@@ -55,24 +55,24 @@ struct LoopInfo {
   Block* header;
 
   /*
-   * The `pre_header' is not part of the loop, and does not necessarily exist,
+   * The `preHeader' is not part of the loop, and does not necessarily exist,
    * so it may be nullptr.
    *
    * If it exists, it is a block which has the loop header as its only
    * successor, and that is the only predecessor of `header' other than
    * predecessors via back-edges.
    */
-  Block* pre_header{nullptr};
+  Block* preHeader{nullptr};
 
   /*
    * The blocks within this loop.
    */
-  jit::flat_set<Block*> members;
+  jit::flat_set<Block*> blocks;
 
   /*
    * The loop's back-edges.
    */
-  jit::flat_set<Edge*> back_edges;
+  jit::flat_set<Edge*> backEdges;
 };
 
 /*
@@ -86,7 +86,7 @@ struct LoopAnalysis {
   /*
    * The set of back-edges.
    */
-  jit::flat_set<Edge*> back_edges;
+  jit::flat_set<Edge*> backEdges;
 
   /*
    * The loops in the CFG.  Each loop contains a header block and a
@@ -104,12 +104,12 @@ struct LoopAnalysis {
    * when this LoopAnalysis structure was created.  If more blocks are added
    * after that, you may have blocks outside of its universe.
    */
-  sparse_idptr_map<Block,LoopID> headers;
+  sparse_idptr_map<Block, LoopID> headers;
 
   /*
    * List of inner-most loops in the CFG.
    */
-  jit::vector<LoopID> inner_loops;
+  jit::vector<LoopID> innerLoops;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ struct LoopAnalysis {
  * Produce a LoopAnalysis structure that contains information about loops in
  * the CFG.
  */
-LoopAnalysis identify_loops(const IRUnit&, const BlockList& rpoBlocks);
+LoopAnalysis identifyLoops(const IRUnit&, const BlockList& rpoBlocks);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -130,7 +130,7 @@ LoopAnalysis identify_loops(const IRUnit&, const BlockList& rpoBlocks);
  * references or iterators to the vectors in the LoopAnalysis.  It will change
  * the number of blocks and invalidate any IdomVectors, though.
  */
-void insert_loop_pre_header(IRUnit&, LoopAnalysis&, LoopID);
+void insertLoopPreHeader(IRUnit&, LoopAnalysis&, LoopID);
 
 /*
  * Update containing loop member lists to reflect a newly inserted pre-header
@@ -142,7 +142,7 @@ void insert_loop_pre_header(IRUnit&, LoopAnalysis&, LoopID);
  * maintained, calling this function will keep the rest of the LoopAnalysis
  * valid as well.
  */
-void update_pre_header(LoopAnalysis&, LoopID loop_id, Block* pre_header);
+void updatePreHeader(LoopAnalysis&, LoopID loopId, Block* preHeader);
 
 //////////////////////////////////////////////////////////////////////
 

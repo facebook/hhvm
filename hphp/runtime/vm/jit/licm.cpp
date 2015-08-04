@@ -115,7 +115,7 @@ struct Env {
   explicit Env(IRUnit& unit, const BlockList& rpoBlocks)
     : unit(unit)
     , ainfo(collect_aliases(unit, rpoBlocks))
-    , loops(identify_loops(unit, rpoBlocks))
+    , loops(identifyLoops(unit, rpoBlocks))
   {}
 
   ~Env() {
@@ -169,11 +169,11 @@ IdomVector& find_idoms(Env& env) {
  * header block.
  */
 struct LoopEnv {
-  explicit LoopEnv(Env& global, LoopID loop_id)
+  explicit LoopEnv(Env& global, LoopID loopId)
     : global(global)
-    , loop_id(loop_id)
+    , loopId(loopId)
     , invariant_tmps(global.unit.numTmps())
-    , blocks(global.loops.loops[loop_id].members)
+    , blocks(global.loops.loops[loopId].blocks)
   {
     FTRACE(2, "blocks: {}\n",
       [&] () -> std::string {
@@ -184,8 +184,8 @@ struct LoopEnv {
     );
   }
 
-  Env& global;
-  LoopID loop_id;
+  Env&   global;
+  LoopID loopId;
 
   /*
    * SSATmps with loop-invariant definitions, either because they are purely
@@ -271,11 +271,11 @@ struct LoopEnv {
 //////////////////////////////////////////////////////////////////////
 
 LoopInfo& linfo(LoopEnv& env) {
-  return env.global.loops.loops[env.loop_id];
+  return env.global.loops.loops[env.loopId];
 }
 
 Block* header(LoopEnv& env)     { return linfo(env).header; }
-Block* pre_header(LoopEnv& env) { return linfo(env).pre_header; }
+Block* pre_header(LoopEnv& env) { return linfo(env).preHeader; }
 
 template<class Seen, class F>
 void visit_loop_post_order(LoopEnv& env, Seen& seen, Block* b, F f) {
@@ -642,7 +642,7 @@ void hoist_check_instruction(LoopEnv& env,
 
   // We've changed the pre-header and invalidated the dominator tree.
   env.global.idom_state = IdomState::Invalid;
-  update_pre_header(env.global.loops, env.loop_id, new_preh);
+  updatePreHeader(env.global.loops, env.loopId, new_preh);
 }
 
 void hoist_invariant_checks(LoopEnv& env) {
@@ -686,8 +686,8 @@ void process_loop(LoopEnv& env) {
 void insert_pre_headers(IRUnit& unit, LoopAnalysis& loops) {
   auto added_pre_headers = false;
   for (auto& linfo : loops.loops) {
-    if (!linfo.pre_header) {
-      insert_loop_pre_header(unit, loops, linfo.id);
+    if (!linfo.preHeader) {
+      insertLoopPreHeader(unit, loops, linfo.id);
       added_pre_headers = true;
     }
   }
@@ -727,7 +727,7 @@ void optimizeLoopInvariantCode(IRUnit& unit) {
     workQ.push(id);
   };
 
-  for (auto& id : env.loops.inner_loops) enqueue(id);
+  for (auto& id : env.loops.innerLoops) enqueue(id);
 
   do {
     auto const id = workQ.front();

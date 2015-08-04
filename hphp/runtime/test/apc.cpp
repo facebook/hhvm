@@ -115,7 +115,7 @@ TEST(APC, Basic) {
   EXPECT_EQ(store->get(s_key, got), true);
   EXPECT_TRUE(cellSame(*got.asCell(),
     make_tv<KindOfStaticString>(s_value1.get())));
-  EXPECT_EQ(store->erase(s_key), true);
+  EXPECT_EQ(store->eraseKey(s_key), true);
   EXPECT_EQ(store->get(s_key, got), false);
 }
 
@@ -189,7 +189,7 @@ TEST(APC, IncCas) {
   EXPECT_EQ(store->inc(s_key, 1, found), 0);
   EXPECT_FALSE(found);
   EXPECT_FALSE(store->cas(s_key, 1, 2));
-  store->erase(s_key);
+  store->eraseKey(s_key);
   EXPECT_EQ(store->inc(s_key, 1, found), 0);
   EXPECT_FALSE(found);
   EXPECT_FALSE(store->cas(s_key, 1, 2));

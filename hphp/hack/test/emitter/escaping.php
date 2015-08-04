@@ -12,8 +12,7 @@ function test(): void {
   $a['hello\n']++;
   var_dump($a);
 
-  // Make sure we properly escape the \s in namespace things *)
-  /* HH_FIXME[2049] */
-  /* HH_FIXME[4107] */
-  var_dump(new HH\Vector());
+  // Make sure we properly escape the \s in namespace things
+  // (HH\ will be implicitly added here)
+  var_dump(new Vector());
 }

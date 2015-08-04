@@ -16,6 +16,7 @@ class B extends A {
 function test(): void {
   echo A::class, "\n";
   echo B::class, "\n";
+  echo Awaitable::class, "\n";
   A::static_class();
   B::static_class();
   B::stuff();

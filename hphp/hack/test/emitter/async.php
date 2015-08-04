@@ -68,13 +68,13 @@ function gena_<Tk, Tv>(
   }
   /* HH_FIXME[2049] */
   /* HH_FIXME[4026] */
-  return HH\GenArrayWaitHandle::create($wait_handles);
+  return GenArrayWaitHandle::create($wait_handles);
 }
 
 function wait(): Awaitable<void> {
   /* HH_FIXME[2049] */
   /* HH_FIXME[4026] */
-  return HH\RescheduleWaitHandle::create(0, 0);
+  return RescheduleWaitHandle::create(0, 0);
 }
 
 function test(): void {

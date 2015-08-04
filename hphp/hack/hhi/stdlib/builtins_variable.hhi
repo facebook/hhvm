@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,32 +8,32 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function is_bool($var) { }
-function is_int($var) { }
+function is_bool($var): bool;
+function is_int($var): bool;
 <<__Deprecated('Use is_int().')>>
-function is_integer($var) { }
+function is_integer($var): bool;
 <<__Deprecated('Use is_int().')>>
-function is_long($var) { }
+function is_long($var): bool;
 <<__Deprecated('Use is_float().')>>
-function is_double($var) { }
-function is_float($var) { }
-function is_numeric($var) { }
+function is_double($var): bool;
+function is_float($var): bool;
+function is_numeric($var): bool;
 <<__Deprecated('Use is_float().')>>
-function is_real($var) { }
-function is_string($var) { }
-function is_scalar($var) { }
-function is_object($var) { }
-function is_resource($var) { }
-function is_null($var) { }
-function gettype($v) { }
-function get_resource_type($handle) { }
-function settype(&$var, $type) { }
-function print_r($expression, $ret = false) { }
-function var_export($expression, $ret = false) { }
-function var_dump($expression, ...) { }
-function debug_zval_dump($variable) { }
-function serialize($value) { }
-function unserialize($str, $class_whitelist = array()) { }
-function get_defined_vars() { }
-function import_request_variables($types, $prefix = "") { }
-function extract($var_array, $extract_type = EXTR_OVERWRITE, $prefix = "") { }
+function is_real($var): bool;
+function is_string($var): bool;
+function is_scalar($var): bool;
+function is_object($var): bool;
+function is_resource($var): bool;
+function is_null($var): bool;
+function gettype($v);
+function get_resource_type($handle);
+function settype(&$var, $type);
+function print_r($expression, $ret = false);
+function var_export($expression, $ret = false);
+function var_dump($expression, ...);
+function debug_zval_dump($variable);
+function serialize($value);
+function unserialize($str, $class_whitelist = array());
+function get_defined_vars();
+function import_request_variables($types, $prefix = "");
+function extract($var_array, $extract_type = EXTR_OVERWRITE, $prefix = "");

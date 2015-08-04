@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
- 
+
 exception Error of string * int
 
 (* Contains all the fsevents context *)

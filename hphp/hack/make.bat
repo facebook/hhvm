@@ -8,7 +8,7 @@ if "%1" == "test" goto test
 if "%1" == "init" goto init
 if "%1" == "clean" goto clean
 REM Invalid argument
-echo Invalid argument, please check README.win32	
+echo Invalid argument, please check README.win32
 goto end
 
 REM initialize ocp-build and create _obuild directory
@@ -21,7 +21,7 @@ REM 2/ generate get_build_id.gen.c
 REM 3/ start build hack with ocp-build
 :build
 if not exist "_obuild/" ocp-build init
-ocaml.exe unix.cma ./src/utils/gen_build_id.ml ./src/utils/get_build_id.gen.c
+ocaml.exe unix.cma ./src/scripts/gen_build_id.ml ./src/utils/get_build_id.gen.c
 ocp-build
 md bin 2>NUL
 copy _obuild\hh_server\hh_server.asm.exe bin\hh_server.exe
@@ -43,18 +43,18 @@ del bin\h2tp.exe 2>NUL
 goto end
 
 REM execute the Hack testsuite
-:test 
+:test
 @echo on
 
-set "py=C:\Program Files (x86)\Python34\python.exe"
-"%py%" test/verify.py --program bin/hh_single_type_check.exe test/autocomplete
-"%py%" test/verify.py --program bin/hh_single_type_check.exe test/color
-"%py%" test/verify.py --program bin/hh_single_type_check.exe test/coverage
-"%py%" test/verify.py --program bin/hh_single_type_check.exe test/dumpsymbolinfo
-"%py%" test/verify.py --program bin/hh_format.exe test/format
-"%py%" test/verify.py --program bin/hh_single_type_check.exe test/suggest
-"%py%" test/verify.py --program bin/hh_single_type_check.exe test/typecheck
-"%py%" test/verify.py --program bin/hh_format.exe test/typecheck ^
+set "python3=python.exe"
+"%python3%" test/verify.py --program bin/hh_single_type_check.exe test/autocomplete
+"%python3%" test/verify.py --program bin/hh_single_type_check.exe test/color
+"%python3%" test/verify.py --program bin/hh_single_type_check.exe test/coverage
+"%python3%" test/verify.py --program bin/hh_single_type_check.exe test/dumpsymbolinfo
+"%python3%" test/verify.py --program bin/hh_format.exe test/format
+"%python3%" test/verify.py --program bin/hh_single_type_check.exe test/suggest
+"%python3%" test/verify.py --program bin/hh_single_type_check.exe test/typecheck
+"%python3%" test/verify.py --program bin/hh_format.exe test/typecheck ^
 		--disabled-extension .no_format ^
 		--out-extension .format_out ^
 		--expect-extension '' ^

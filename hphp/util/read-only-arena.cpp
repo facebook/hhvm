@@ -44,33 +44,29 @@ void checked_mprotect(void* addr, size_t size, int prot) {
 
 //////////////////////////////////////////////////////////////////////
 
-ReadOnlyArena::ReadOnlyArena(size_t chunkSize)
-  : m_chunkSize(chunkSize)
+ReadOnlyArena::ReadOnlyArena(size_t minChunkSize)
+  : m_minChunkSize((minChunkSize + (s_pageSize - 1)) & ~(s_pageSize - 1))
   , m_frontier(nullptr)
   , m_end(nullptr)
 {
-  always_assert(m_chunkSize % s_pageSize == 0);
-  grow();
+  always_assert(m_minChunkSize % s_pageSize == 0);
 }
 
 ReadOnlyArena::~ReadOnlyArena() {
   for (auto& chunk : m_chunks) {
-    checked_mprotect(chunk, m_chunkSize, PROT_READ|PROT_WRITE);
-    std::free(chunk);
+    checked_mprotect(chunk.data(), chunk.size(), PROT_READ|PROT_WRITE);
+    std::free(chunk.data());
   }
 }
 
 const void* ReadOnlyArena::allocate(const void* data, size_t dataLen) {
-  always_assert(dataLen <= m_chunkSize);
   guard g(m_mutex);
 
   // Round up to the minimal alignment.
   auto alignedLen =
     (dataLen + (kMinimalAlignment - 1)) & ~(kMinimalAlignment - 1);
 
-  if (m_frontier + alignedLen > m_end) {
-    grow();
-  }
+  ensureFree(alignedLen);
   always_assert(m_frontier + alignedLen <= m_end);
 
   auto const ret = m_frontier;
@@ -89,25 +85,40 @@ const void* ReadOnlyArena::allocate(const void* data, size_t dataLen) {
   return ret;
 }
 
-// Pre: mutex already held, or no other threads may be able to access
-// this (i.e. it's the ctor).
-void ReadOnlyArena::grow() {
-  void* vp;
-  if (auto err = posix_memalign(&vp, s_pageSize, m_chunkSize)) {
-    folly::throwSystemError(err, "failed to posix_memalign in "
-      "ReadOnlyArena");
+// Pre: mutex already held, or no other threads may be able to access this
+// (i.e. it's the ctor).
+//
+// Post: m_end - m_frontier >= bytes
+void ReadOnlyArena::ensureFree(size_t bytes) {
+  if (m_end - m_frontier >= bytes) return;
+
+  // Allocate a multiple of s_pageSize, and no less than m_minChunkSize.
+  if (bytes > m_minChunkSize) {
+    bytes = (bytes + (s_pageSize - 1)) & ~(s_pageSize - 1);
+  } else {
+    bytes = m_minChunkSize;
   }
-  checked_mprotect(vp, m_chunkSize, PROT_READ);
+
+  void* vp;
+  if (auto err = posix_memalign(&vp, s_pageSize, bytes)) {
+    folly::throwSystemError(err, "failed to posix_memalign in "
+                            "ReadOnlyArena");
+  }
+  checked_mprotect(vp, bytes, PROT_READ);
 
   auto uc = static_cast<unsigned char*>(vp);
-  m_chunks.push_back(uc);
   m_frontier = uc;
-  m_end = uc + m_chunkSize;
+  m_end = uc + bytes;
+  m_chunks.emplace_back(m_frontier, m_end);
 }
 
 size_t ReadOnlyArena::capacity() const {
   guard g(m_mutex);
-  return m_chunks.size() * m_chunkSize;
+  size_t size = 0;
+  for (auto& chunk : m_chunks) {
+    size += chunk.size();
+  }
+  return size;
 }
 
 //////////////////////////////////////////////////////////////////////

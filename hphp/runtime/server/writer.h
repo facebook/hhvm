@@ -153,6 +153,11 @@ private:
 class JSONWriter : public Writer {
 
 protected:
+  // If true it will generate human-friendly output on multiple lines and with
+  // tabs for indentation. If false the output will be in a single line with no
+  // extra spacing.
+  bool m_prettify;
+
   // Whether or not we have skiped a comma for this current indent level. Valid
   // json may not have trailing commas such as {"a":4, "b":5,} Since we are
   // writing to a stream, we output *valid* json that has commas preceding all
@@ -193,7 +198,10 @@ protected:
   virtual void beginContainer(const char *name, bool isList) {
     char opener = isList ? '[' : '{';
     beginEntity(name);
-    m_out << opener << '\n';
+    m_out << opener;
+    if (m_prettify) {
+      m_out << '\n';
+    }
 
     // Push on whether or not we're entering a nameless context
     m_namelessContextStack.push(isList);
@@ -203,8 +211,13 @@ protected:
   virtual void endContainer(bool isList) {
     char closer = isList ? ']' : '}';
     decreaseIndent();
-    writeIndent();
-    m_out << closer << '\n';
+    if (m_prettify) {
+      writeIndent();
+    }
+    m_out << closer;
+    if (m_prettify) {
+      m_out << '\n';
+    }
   }
 
   /**
@@ -214,7 +227,9 @@ protected:
    * written with/without a name and if we need a comma.
    */
   virtual void beginEntity(const char *name) {
-    writeIndent();
+    if (m_prettify) {
+      writeIndent();
+    }
     if (!m_justIndented) {
       m_out << ", ";
     }
@@ -226,8 +241,8 @@ protected:
 
 public:
 
-  explicit JSONWriter(std::ostream &out) : Writer(out),
-      m_justIndented(true) {
+  explicit JSONWriter(std::ostream &out, bool prettify=true) : Writer(out),
+      m_prettify(prettify), m_justIndented(true) {
 
     // A valid json object begins in the nameless context. See
     // json.org for JSON state machine.
@@ -263,14 +278,20 @@ public:
     beginEntity(name);
 
     // Now write the actual value
-    m_out << escape_for_json(value.c_str()) << "\n";
+    m_out << escape_for_json(value.c_str());
+    if (m_prettify) {
+      m_out << '\n';
+    }
   }
 
   virtual void writeEntry(const char *name, int64_t value) {
     beginEntity(name);
 
     // Now write the actual value
-    m_out << value << '\n';
+    m_out << value;
+    if (m_prettify) {
+      m_out << '\n';
+    }
   }
 };
 

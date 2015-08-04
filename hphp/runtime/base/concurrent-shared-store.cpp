@@ -123,16 +123,9 @@ bool ConcurrentTableSharedStore::clear() {
   return true;
 }
 
-bool ConcurrentTableSharedStore::erase(const String& key) {
+bool ConcurrentTableSharedStore::eraseKey(const String& key) {
   assert(!key.isNull());
-  return eraseImpl(tagStringData(key.get()), false, 0);
-}
-
-void ConcurrentTableSharedStore::eraseAcc(Map::accessor& acc) {
-  APCStats::getAPCStats().removeKey(strlen(acc->first));
-  const void* vpkey = acc->first;
-  m_vars.erase(acc);
-  free(const_cast<void*>(vpkey));
+  return eraseImpl(tagStringData(key.get()), false, 0, nullptr);
 }
 
 /*
@@ -145,7 +138,8 @@ void ConcurrentTableSharedStore::eraseAcc(Map::accessor& acc) {
  */
 bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            bool expired,
-                                           int64_t oldestLive) {
+                                           int64_t oldestLive,
+                                           ExpMap::accessor* expAcc) {
   assert(key);
 
   ReadLock l(m_lock);
@@ -159,24 +153,27 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
 
   auto& storeVal = acc->second;
 
-  storeVal.data.match(
-    [&] (APCHandle* var) {
-      APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
-        storeVal.expire == 0, expired);
-      if (expired && storeVal.expire < oldestLive && var->isUncounted()) {
-        APCTypedValue::fromHandle(var)->deleteUncounted();
-      } else {
-        var->unreferenceRoot(storeVal.dataSize);
-      }
-
-      eraseAcc(acc);
-    },
-    [&] (char* file) {
-      assert(!expired);  // primed keys never say true to expired()
-      eraseAcc(acc);
+  if (auto const var = storeVal.data.left()) {
+    APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
+                                           storeVal.expire == 0, expired);
+    if (expired && storeVal.expire < oldestLive && var->isUncounted()) {
+      APCTypedValue::fromHandle(var)->deleteUncounted();
+    } else {
+      var->unreferenceRoot(storeVal.dataSize);
     }
-  );
+  } else {
+    assert(!expired);  // primed keys never say true to expired()
+  }
 
+  APCStats::getAPCStats().removeKey(strlen(acc->first));
+  const void* vpkey = acc->first;
+  m_vars.erase(acc);
+  if (expAcc) {
+    m_expMap.erase(*expAcc);
+  } else {
+    m_expMap.erase(intptr_t(vpkey));
+  }
+  free(const_cast<void*>(vpkey));
   return true;
 }
 
@@ -199,22 +196,18 @@ void ConcurrentTableSharedStore::purgeExpired() {
       m_expQueue.push(tmp);
       break;
     }
-    if (apcExtension::UseFileStorage &&
-        strcmp(tmp.first, apcExtension::FileStorageFlagKey.c_str()) == 0) {
+    if (UNLIKELY(tmp.first ==
+                 intptr_t(apcExtension::FileStorageFlagKey.c_str()))) {
       s_apc_file_storage.adviseOut();
 
-      // Erase from m_expMap before attempting to re-add, to ensure it gets
-      // added to m_expQueue.
-      m_expMap.erase(tmp.first);
-      free((void*)tmp.first);
-      addToExpirationQueue(apcExtension::FileStorageFlagKey.c_str(),
-                           time(nullptr) +
-                           apcExtension::FileStorageAdviseOutPeriod);
+      tmp.second = time(nullptr) + apcExtension::FileStorageAdviseOutPeriod;
+      m_expQueue.push(tmp);
       continue;
     }
-    m_expMap.erase(tmp.first);
-    eraseImpl(tmp.first, true, oldestLive);
-    free((void*)tmp.first);
+    ExpMap::accessor acc;
+    if (m_expMap.find(acc, tmp.first)) {
+      eraseImpl((char*)tmp.first, true, oldestLive, &acc);
+    }
     ++i;
   }
 }
@@ -223,18 +216,12 @@ void ConcurrentTableSharedStore::purgeExpired() {
 void ConcurrentTableSharedStore::addToExpirationQueue(const char* key,
                                                       int64_t etime) {
   ExpMap::accessor acc;
-  if (m_expMap.find(acc, key)) {
+  auto ikey = intptr_t(key);
+  if (!m_expMap.insert(acc, ikey)) {
     acc->second++;
     return;
   }
-
-  const char *copy = strdup(key);
-  if (!m_expMap.insert(acc, copy)) {
-    free((void *)copy);
-    acc->second++;
-    return;
-  }
-  ExpirationPair p(copy, etime);
+  ExpirationPair p(ikey, etime);
   m_expQueue.push(p);
 }
 
@@ -350,7 +337,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   if (expired) {
     eraseImpl(tag, true,
               apcExtension::UseUncounted ?
-              HPHP::Treadmill::getOldestStartTime() : 0);
+              HPHP::Treadmill::getOldestStartTime() : 0, nullptr);
     return false;
   }
 
@@ -453,7 +440,7 @@ bool ConcurrentTableSharedStore::exists(const String& keyStr) {
   if (expired) {
     eraseImpl(tag, true,
               apcExtension::UseUncounted ?
-              HPHP::Treadmill::getOldestStartTime() : 0);
+              HPHP::Treadmill::getOldestStartTime() : 0, nullptr);
     return false;
   }
   return true;
@@ -656,9 +643,9 @@ void ConcurrentTableSharedStore::primeDone() {
     // initial accesses to the primed keys are not too bad. Still, for
     // the keys in file, a deserialization from memory is required on first
     // access.
-    addToExpirationQueue(apcExtension::FileStorageFlagKey.c_str(),
-                         time(nullptr) +
-                         apcExtension::FileStorageAdviseOutPeriod);
+    ExpirationPair p(intptr_t(apcExtension::FileStorageFlagKey.c_str()),
+                     time(nullptr) + apcExtension::FileStorageAdviseOutPeriod);
+    m_expQueue.push(p);
   }
 
   for (auto iter = apcExtension::CompletionKeys.begin();

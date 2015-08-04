@@ -376,7 +376,7 @@ Variant HHVM_FUNCTION(apc_delete,
       if (!k.isString()) {
         raise_warning("apc key is not a string");
         init.append(k);
-      } else if (!apc_store().erase(k.toCStrRef())) {
+      } else if (!apc_store().eraseKey(k.toCStrRef())) {
         init.append(k);
       }
     }
@@ -398,7 +398,7 @@ Variant HHVM_FUNCTION(apc_delete,
     return tvAsVariant(&tvResult);
   }
 
-  return apc_store().erase(key.toString());
+  return apc_store().eraseKey(key.toString());
 }
 
 bool HHVM_FUNCTION(apc_clear_cache,

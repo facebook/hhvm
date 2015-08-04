@@ -418,7 +418,7 @@ String DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
   }
 
   StringBuffer sb;
-  sb.append(StringSlice(value.data(), maxlen));
+  sb.append(folly::StringPiece{value.data(), static_cast<size_t>(maxlen)});
   sb.append(" ...(omitted)");
   return sb.detach();
 }
@@ -1372,8 +1372,8 @@ do {                                                                    \
   fwrite(ptr, size, nmemb, stream);                                     \
 } while (0)                                                             \
 
-void DebuggerClient::print(const char *fmt, ...) {
-  TRACE(2, "DebuggerClient::print(const char *fmt, ...)\n");
+void DebuggerClient::print(const char* fmt, ...) {
+  TRACE(2, "DebuggerClient::print(const char* fmt, ...)\n");
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -1381,26 +1381,33 @@ void DebuggerClient::print(const char *fmt, ...) {
   print(msg);
 }
 
-void DebuggerClient::print(const std::string &s) {
-  TRACE(2, "DebuggerClient::print(const std::string &s)\n");
-  DWRITE(s.data(), 1, s.length(), stdout);
-  DWRITE("\n", 1, 1, stdout);
-  fflush(stdout);
-}
-
 void DebuggerClient::print(const String& msg) {
-  TRACE(2, "DebuggerClient::print(CStrRef msg)\n");
+  TRACE(2, "DebuggerClient::print(const String& msg)\n");
   DWRITE(msg.data(), 1, msg.length(), stdout);
   DWRITE("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
+void DebuggerClient::print(const std::string& msg) {
+  TRACE(2, "DebuggerClient::print(const std::string& msg)\n");
+  DWRITE(msg.data(), 1, msg.size(), stdout);
+  DWRITE("\n", 1, 1, stdout);
+  fflush(stdout);
+}
+
+void DebuggerClient::print(folly::StringPiece msg) {
+  TRACE(2, "DebuggerClient::print(folly::StringPiece msg)\n");
+  DWRITE(msg.data(), 1, msg.size(), stdout);
+  DWRITE("\n", 1, 1, stdout);
+  fflush(stdout);
+}
+
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
-  void DebuggerClient::name(StringSlice msg) {                          \
+  void DebuggerClient::name(folly::StringPiece msg) {                   \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       DWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
-    DWRITE(msg.ptr, 1, msg.len, where);                                 \
+    DWRITE(msg.data(), 1, msg.size(), where);                           \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       DWRITE(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
     }                                                                   \
@@ -1412,16 +1419,16 @@ void DebuggerClient::print(const String& msg) {
     name(msg.slice());                                                  \
   }                                                                     \
                                                                         \
+  void DebuggerClient::name(const std::string& msg) {                   \
+    name(folly::StringPiece{msg});                                      \
+  }                                                                     \
+                                                                        \
   void DebuggerClient::name(const char *fmt, ...) {                     \
     std::string msg;                                                    \
     va_list ap;                                                         \
     va_start(ap, fmt);                                                  \
     string_vsnprintf(msg, fmt, ap); va_end(ap);                         \
     name(msg);                                                          \
-  }                                                                     \
-                                                                        \
-  void DebuggerClient::name(const std::string &msg) {                   \
-    name(StringSlice(msg.c_str(), msg.size()));                         \
   }                                                                     \
 
 IMPLEMENT_COLOR_OUTPUT(help,     stdout,  HelpColor);

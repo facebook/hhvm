@@ -16,20 +16,19 @@
 #ifndef incl_HPHP_STATIC_STRING_TABLE_H_
 #define incl_HPHP_STATIC_STRING_TABLE_H_
 
+#include <string>
+
+#include <folly/Range.h>
 
 #include "hphp/runtime/base/types.h"
-
-#include "hphp/util/slice.h"
-
-#include <string>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+struct Array;
 struct StringData;
 struct String;
-struct Array;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -59,7 +58,7 @@ struct Array;
  * and return it.
  */
 StringData* makeStaticString(const StringData* str);
-StringData* makeStaticString(StringSlice);
+StringData* makeStaticString(folly::StringPiece);
 StringData* makeStaticString(const std::string& str);
 StringData* makeStaticString(const String& str);
 StringData* makeStaticString(const char* str, size_t len);

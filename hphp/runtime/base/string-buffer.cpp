@@ -38,8 +38,8 @@ StringBuffer::StringBuffer(uint32_t initialSize /* = SmallStringReserve */)
 {
   m_str = StringData::Make(initialSize);
   auto const s = m_str->bufferSlice();
-  m_buffer = s.ptr;
-  m_cap = s.len;
+  m_buffer = s.data();
+  m_cap = s.size();
 }
 
 StringBuffer::~StringBuffer() {
@@ -138,8 +138,8 @@ char* StringBuffer::appendCursor(int size) {
       m_str = tmp;
     }
     auto const s = m_str->bufferSlice();
-    m_buffer = s.ptr;
-    m_cap = s.len;
+    m_buffer = s.data();
+    m_cap = s.size();
   }
   return m_buffer + m_len;
 }
@@ -147,12 +147,12 @@ char* StringBuffer::appendCursor(int size) {
 void StringBuffer::append(int n) {
   char buf[12];
   int len;
-  const StringData *sd = String::GetIntegerStringData(n);
+  auto const sd = String::GetIntegerStringData(n);
   char *p;
   if (!sd) {
     auto sl = conv_10(n, buf + 12);
-    p = const_cast<char*>(sl.ptr);
-    len = sl.len;
+    p = const_cast<char*>(sl.data());
+    len = sl.size();
   } else {
     p = (char *)sd->data();
     len = sd->size();
@@ -163,12 +163,12 @@ void StringBuffer::append(int n) {
 void StringBuffer::append(int64_t n) {
   char buf[21];
   int len;
-  const StringData *sd = String::GetIntegerStringData(n);
+  auto const sd = String::GetIntegerStringData(n);
   char *p;
   if (!sd) {
     auto sl = conv_10(n, buf + 21);
-    p = const_cast<char*>(sl.ptr);
-    len = sl.len;
+    p = const_cast<char*>(sl.data());
+    len = sl.size();
   } else {
     p = (char *)sd->data();
     len = sd->size();
@@ -318,8 +318,8 @@ void StringBuffer::growBy(int spaceRequired) {
     m_str = tmp;
   }
   auto const s = m_str->bufferSlice();
-  m_buffer = s.ptr;
-  m_cap = s.len;
+  m_buffer = s.data();
+  m_cap = s.size();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -365,9 +365,9 @@ CstrBuffer::~CstrBuffer() {
   free(m_buffer);
 }
 
-void CstrBuffer::append(StringSlice slice) {
-  auto const data = slice.ptr;
-  auto const len = slice.len;
+void CstrBuffer::append(folly::StringPiece slice) {
+  auto const data = slice.data();
+  auto const len = slice.size();
 
   static_assert(std::is_unsigned<decltype(len)>::value,
                 "len is supposed to be unsigned");

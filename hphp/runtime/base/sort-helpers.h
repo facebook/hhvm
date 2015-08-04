@@ -95,8 +95,8 @@ struct IntElmCompare {
     } else {
       bufLeft[20] = '\0';
       auto sl = conv_10(iLeft, &bufLeft[20]);
-      sLeft = sl.ptr;
-      lenLeft = sl.len;
+      sLeft = sl.data();
+      lenLeft = sl.size();
     }
     const StringData* sdRight = String::GetIntegerStringData(iRight);
     if (sdRight) {
@@ -105,8 +105,8 @@ struct IntElmCompare {
     } else {
       bufRight[20] = '\0';
       auto sl = conv_10(iRight, &bufRight[20]);
-      sRight = sl.ptr;
-      lenRight = sl.len;
+      sRight = sl.data();
+      lenRight = sl.size();
     }
     if (sort_flags == SORT_STRING) {
       return ascending ?

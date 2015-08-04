@@ -46,7 +46,7 @@ static const StringData* convert_integer_helper(int64_t n) {
   char tmpbuf[21];
   tmpbuf[20] = '\0';
   auto sl = conv_10(n, &tmpbuf[20]);
-  return makeStaticString(sl.ptr, sl.len);
+  return makeStaticString(sl);
 }
 
 void String::PreConvertInteger(int64_t n) {
@@ -153,10 +153,10 @@ String::String(Variant&& src) : String(src.toString()) { }
 
 String String::substr(int start, int length /* = 0x7FFFFFFF */,
                       bool nullable /* = false */) const {
-  StringSlice r = slice();
+  auto r = slice();
   // string_substr_check() will update start & length to a legal range.
-  if (string_substr_check(r.len, start, length)) {
-    return String(r.ptr + start, length, CopyString);
+  if (string_substr_check(r.size(), start, length)) {
+    return String(r.data() + start, length, CopyString);
   }
   return nullable ? String() : String("", 0, CopyString);
 }
@@ -264,12 +264,12 @@ String& String::operator=(Variant&& var) {
 ///////////////////////////////////////////////////////////////////////////////
 // concatenation and increments
 
-String &String::operator+=(const char* s) {
+String& String::operator+=(const char* s) {
   if (s && *s) {
     if (empty()) {
       m_str = req::ptr<StringData>::attach(StringData::Make(s, CopyString));
     } else if (m_str->hasExactlyOneRef()) {
-      auto const tmp = m_str->append(StringSlice(s, strlen(s)));
+      auto const tmp = m_str->append(folly::StringPiece{s});
       if (UNLIKELY(tmp != m_str)) {
         m_str = req::ptr<StringData>::attach(tmp);
       }
@@ -281,7 +281,7 @@ String &String::operator+=(const char* s) {
   return *this;
 }
 
-String &String::operator+=(const String& str) {
+String& String::operator+=(const String& str) {
   if (!str.empty()) {
     if (empty()) {
       m_str = str.m_str;
@@ -299,7 +299,11 @@ String &String::operator+=(const String& str) {
   return *this;
 }
 
-String& String::operator+=(const StringSlice& slice) {
+String& String::operator+=(const std::string& str) {
+  return (*this += folly::StringPiece{str});
+}
+
+String& String::operator+=(folly::StringPiece slice) {
   if (slice.size() == 0) {
     return *this;
   }
@@ -321,8 +325,8 @@ String& String::operator+=(const StringSlice& slice) {
   return *this;
 }
 
-String& String::operator+=(const MutableSlice& slice) {
-  return (*this += StringSlice(slice.begin(), slice.size()));
+String& String::operator+=(folly::MutableStringPiece slice) {
+  return (*this += folly::StringPiece{slice.begin(), slice.size()});
 }
 
 String&& operator+(String&& lhs, const char* rhs) {
@@ -529,8 +533,8 @@ void String::unserialize(VariableUnserializer *uns,
 
   auto px = req::ptr<StringData>::attach(StringData::Make(int(size)));
   auto const buf = px->bufferSlice();
-  assert(size <= buf.len);
-  uns->read(buf.ptr, size);
+  assert(size <= buf.size());
+  uns->read(buf.data(), size);
   px->setSize(size);
   m_str = std::move(px);
   uns->expectChar(delimiter1);

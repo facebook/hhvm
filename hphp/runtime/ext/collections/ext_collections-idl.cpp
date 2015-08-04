@@ -71,10 +71,12 @@ static void throwIntOOB(int64_t key, bool isVector = false);
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
   String msg(50, ReserveString);
   auto buf = msg.bufferSlice();
-  uint32_t sz = snprintf(buf.ptr, buf.len + 1,
-                         "Integer key %" PRId64 " is %s", key,
-                         isVector ? "out of bounds" : "not defined");
-  msg.setSize(std::min(sz, buf.len));
+  auto sz = snprintf(
+    buf.data(), buf.size() + 1,
+    "Integer key %" PRId64 " is %s", key,
+    isVector ? "out of bounds" : "not defined"
+  );
+  msg.setSize(std::min<int>(sz, buf.size()));
   SystemLib::throwOutOfBoundsExceptionObject(msg);
 }
 
@@ -85,19 +87,17 @@ void throwOOB(int64_t key) {
 ATTRIBUTE_NORETURN static void throwStrOOB(StringData* key);
 
 void throwStrOOB(StringData* key) {
-  const size_t maxDisplaySize = 100;
-  int keySize = key->size();
-  bool keyIsLarge = (keySize > maxDisplaySize);
-  const char* part1 = "String key \"";
-  const char* part3 = keyIsLarge ? "\" (truncated) is not defined" :
+  constexpr size_t maxDisplaySize = 100;
+  auto const keySize = key->size();
+  auto const keyIsLarge = (keySize > maxDisplaySize);
+  folly::StringPiece part1{"String key \""};
+  folly::StringPiece part3 = keyIsLarge ? "\" (truncated) is not defined" :
                                    "\" is not defined";
-  StringSlice ss1(part1, strlen(part1));
-  StringSlice ss2(key->data(), keyIsLarge ? maxDisplaySize : keySize);
-  StringSlice ss3(part3, strlen(part3));
-  String msg(ss1.len + ss2.len + ss3.len, ReserveString);
-  msg += ss1;
-  msg += ss2;
-  msg += ss3;
+  folly::StringPiece part2(key->data(), keyIsLarge ? maxDisplaySize : keySize);
+  String msg(part1.size() + part2.size() + part2.size(), ReserveString);
+  msg += part1;
+  msg += part2;
+  msg += part3;
   SystemLib::throwOutOfBoundsExceptionObject(msg);
 }
 
@@ -1422,13 +1422,13 @@ void HashCollection::throwTooLarge() {
   assert(getClassName().size() == 6);
   String msg(130, ReserveString);
   auto buf = msg.bufferSlice();
-  uint32_t sz = snprintf(buf.ptr, buf.len + 1,
+  auto sz = snprintf(buf.data(), buf.size() + 1,
     "%s object has reached its maximum capacity of %u element "
     "slots and does not have room to add a new element",
     getClassName().data() + 3, // strip "HH\" prefix
     MaxSize
   );
-  msg.setSize(std::min(sz, buf.len));
+  msg.setSize(std::min<int>(sz, buf.size()));
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
@@ -1437,12 +1437,12 @@ void HashCollection::throwReserveTooLarge() {
   assert(getClassName().size() == 6);
   String msg(80, ReserveString);
   auto buf = msg.bufferSlice();
-  uint32_t sz = snprintf(buf.ptr, buf.len + 1,
+  auto sz = snprintf(buf.data(), buf.size() + 1,
     "%s does not support reserving room for more than %u elements",
     getClassName().data() + 3, // strip "HH\" prefix
     MaxReserveSize
   );
-  msg.setSize(std::min(sz, buf.len));
+  msg.setSize(std::min<int>(sz, buf.size()));
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 

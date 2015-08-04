@@ -169,22 +169,23 @@ public:
   void output (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   void error  (const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
-  void print  (const std::string &s);
-  void help   (const std::string &s);
-  void info   (const std::string &s);
-  void output (const std::string &s);
-  void error  (const std::string &s);
-
   void print  (const String& s);
   void help   (const String& s);
   void info   (const String& s);
   void output (const String& s);
   void error  (const String& s);
 
-  void help   (StringSlice);
-  void info   (StringSlice);
-  void output (StringSlice);
-  void error  (StringSlice);
+  void print  (const std::string& s);
+  void help   (const std::string& s);
+  void info   (const std::string& s);
+  void output (const std::string& s);
+  void error  (const std::string& s);
+
+  void print  (folly::StringPiece);
+  void help   (folly::StringPiece);
+  void info   (folly::StringPiece);
+  void output (folly::StringPiece);
+  void error  (folly::StringPiece);
 
   bool code(const String& source, int lineFocus = 0, int line1 = 0,
             int line2 = 0,

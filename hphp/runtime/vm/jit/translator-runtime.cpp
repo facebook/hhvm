@@ -908,8 +908,8 @@ static void fpushCufHelperArraySlowPath(ArrayData* arr,
 ALWAYS_INLINE
 static bool strHasColon(StringData* sd) {
   auto const sl = sd->slice();
-  auto const e = sl.ptr + sl.len;
-  for (auto p = sl.ptr; p != e; ++p) {
+  auto const e = sl.end();
+  for (auto p = sl.begin(); p != e; ++p) {
     if (*p == ':') return true;
   }
   return false;

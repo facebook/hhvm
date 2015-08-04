@@ -1375,14 +1375,14 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
               lastStart = result.size();
             }
           }
-          int full_len = result.size();
-          const char* data = result.data() + result_len;
+          auto full_len = result.size();
+          auto data = result.data() + result_len;
           if (eval) {
             VMRegAnchor _;
             // reserve space for "<?php return " + code + ";"
             String prefixedCode(full_len - result_len + 14, ReserveString);
             prefixedCode += "<?php return ";
-            prefixedCode += StringSlice(data, full_len - result_len);
+            prefixedCode += folly::StringPiece{data, full_len - result_len};
             prefixedCode += ";";
             Unit* unit = g_context->compileEvalString(prefixedCode.get());
             Variant v;

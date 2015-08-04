@@ -218,8 +218,8 @@ public:
     }
     return *this;
   }
-  MutableSlice reserve(size_t size) {
-    if (!m_str) return MutableSlice("", 0);
+  folly::MutableStringPiece reserve(size_t size) {
+    if (!m_str) return folly::MutableStringPiece();
     auto const tmp = m_str->reserve(size);
     if (UNLIKELY(tmp != m_str)) {
       m_str = req::ptr<StringData>::attach(tmp);
@@ -241,11 +241,11 @@ public:
   uint32_t capacity() const {
     return m_str->capacity(); // intentionally skip nullptr check
   }
-  StringSlice slice() const {
-    return m_str ? m_str->slice() : StringSlice("", 0);
+  folly::StringPiece slice() const {
+    return m_str ? m_str->slice() : folly::StringPiece();
   }
-  MutableSlice bufferSlice() {
-    return m_str ? m_str->bufferSlice() : MutableSlice("", 0);
+  folly::MutableStringPiece bufferSlice() {
+    return m_str ? m_str->bufferSlice() : folly::MutableStringPiece();
   }
   bool isNull() const { return !m_str; }
   bool isNumeric() const {
@@ -300,16 +300,17 @@ public:
   friend String operator+(const String & lhs, String&& rhs);
   friend String operator+(const String& lhs, const char* rhs);
   friend String operator+(const String & lhs, const String & rhs);
-  String &operator += (const char* v);
-  String &operator += (const String& v);
-  String &operator += (const StringSlice& slice);
-  String &operator += (const MutableSlice& slice);
+  String& operator += (const char* v);
+  String& operator += (const String& v);
+  String& operator += (const std::string& v);
+  String& operator += (folly::StringPiece slice);
+  String& operator += (folly::MutableStringPiece slice);
   String  operator |  (const String& v) const = delete;
   String  operator &  (const String& v) const = delete;
   String  operator ^  (const String& v) const = delete;
-  String &operator |= (const String& v) = delete;
-  String &operator &= (const String& v) = delete;
-  String &operator ^= (const String& v) = delete;
+  String& operator |= (const String& v) = delete;
+  String& operator &= (const String& v) = delete;
+  String& operator ^= (const String& v) = delete;
   String  operator ~  () const = delete;
   explicit operator std::string () const { return toCppString(); }
   explicit operator bool() const { return (bool)m_str; }

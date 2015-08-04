@@ -64,14 +64,7 @@ std::string escaped_string(SString str) {
     return ret;
   }
   auto const sl = str->slice();
-  folly::toAppend(
-    "\"",
-    folly::cEscape<std::string>(
-      folly::StringPiece(sl.ptr, sl.len)
-    ),
-    "\"",
-    &ret
-  );
+  folly::toAppend("\"", folly::cEscape<std::string>(sl), "\"", &ret);
   return ret;
 };
 

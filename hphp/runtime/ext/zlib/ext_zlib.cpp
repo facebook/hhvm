@@ -227,11 +227,11 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
     }
 
     auto const ms = ret.reserve(retsize + 1);
-    char *retbuf = ms.ptr;
-    Z->avail_out = ms.len - retused;
+    auto retbuf = ms.data();
+    Z->avail_out = ms.size() - retused;
     Z->next_out = (Bytef *) (retbuf + retused);
     status = inflate(Z, Z_NO_FLUSH);
-    retused = ms.len - Z->avail_out;
+    retused = ms.size() - Z->avail_out;
     ret.setSize(retused);
 
     retsize += (retsize >> 3) + 1;

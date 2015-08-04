@@ -232,8 +232,8 @@ Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
 }
 
 bool HHVM_FUNCTION(hphp_set_hardware_events,
-                    const Variant& events /* = null */) {
-  String ev = events.toString();
+                   const Variant& events /* = null */) {
+  auto ev = events.toString();
   ev = url_decode(ev.data(), ev.size());
   return HardwareCounter::SetPerfEvents(ev.slice());
 }

@@ -136,7 +136,8 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
   }
 
   // Don't show the "omitted" suffix.
-  client.output(StringSlice(value.data(), charCount));
+  auto piece = folly::StringPiece{value.data(), static_cast<size_t>(charCount)};
+  client.output(piece);
   if (client.ask("There are more characters. Continue? [y/N]") == 'y') {
     // Now we get the full value, and show the rest.
     cmd.m_variables.reset();
@@ -144,7 +145,10 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
     rcmd = client.xend<CmdVariable>(&cmd);
 
     auto value = get_var(*rcmd);
-    auto rest = StringSlice(value.data() + charCount, value.size() - charCount);
+    auto rest = folly::StringPiece {
+      value.data() + charCount,
+      static_cast<size_t>(value.size() - charCount)
+    };
     client.output(rest);
     client.tutorial("You can use 'set cc n' to increase the character"
                     " limit. 'set cc -1' will remove the limit.");

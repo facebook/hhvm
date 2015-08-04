@@ -47,7 +47,7 @@ static Mutex s_mutex;
 template <class Op> ALWAYS_INLINE
 String stringForEachBuffered(uint32_t bufLen, const String& str, Op action) {
   StringBuffer sb(bufLen);
-  StringSlice sl  = str.slice();
+  auto sl = str.slice();
   const char* src = sl.begin();
   const char* end = sl.end();
 
@@ -62,7 +62,7 @@ template <bool mutate, class Op> ALWAYS_INLINE
 String stringForEach(uint32_t len, const String& str, Op action) {
   String ret = mutate ? str : String(len, ReserveString);
 
-  StringSlice srcSlice = str.slice();
+  auto srcSlice = str.slice();
 
   const char* src = srcSlice.begin();
   const char* end = srcSlice.end();
@@ -255,7 +255,7 @@ Variant HHVM_FUNCTION(hex2bin,
 
   StringBuffer ret(str.size() / 2 + 1);
 
-  StringSlice sl  = str.slice();
+  auto sl = str.slice();
   const char* src = sl.begin();
   const char* end = sl.end();
 
@@ -1741,14 +1741,14 @@ Variant strtr_fast(const String& str, const Array& arr,
   int pattern_id = 0;
   for (ArrayIter iter(arr); iter; ++iter, pattern_id++) {
     String search = iter.first();
-    StringSlice slice = search.slice();
+    auto slice = search.slice();
 
-    for (auto i = 0; i < slice.len; i++) {
-      mask[i][(unsigned char)slice.ptr[i]] |= (1 << pattern_id);
+    for (auto i = 0; i < slice.size(); i++) {
+      mask[i][(unsigned char)slice.data()[i]] |= (1 << pattern_id);
     }
   }
-  const char* s = str.data();
-  int slen = str.size();
+  auto s = str.data();
+  auto slen = str.size();
   StringBuffer result(slen);
   String key(maxlen, ReserveString);
 

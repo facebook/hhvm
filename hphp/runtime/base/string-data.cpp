@@ -163,12 +163,12 @@ std::aligned_storage<
 // of the string. Static are alive for the lifetime of the process.
 // Uncounted are not ref counted but will be deleted at some point.
 ALWAYS_INLINE
-StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
-  if (UNLIKELY(sl.len > StringData::MaxSize)) {
-    throw_string_too_large(sl.len);
+StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
+  if (UNLIKELY(sl.size() > StringData::MaxSize)) {
+    throw_string_too_large(sl.size());
   }
 
-  auto const cc = CapCode::ceil(sl.len);
+  auto const cc = CapCode::ceil(sl.size());
   auto const need = cc.decode() + kCapOverhead;
   auto const sd = static_cast<StringData*>(
     trueStatic ? low_malloc(need) : malloc(need)
@@ -178,10 +178,10 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   sd->m_data = data;
   auto const count = trueStatic ? StaticValue : UncountedValue;
   sd->m_hdr.init(cc, HeaderKind::String, count);
-  sd->m_len = sl.len; // m_hash is computed soon.
+  sd->m_len = sl.size(); // m_hash is computed soon.
 
-  data[sl.len] = 0;
-  auto const mcret = memcpy(data, sl.ptr, sl.len);
+  data[sl.size()] = 0;
+  auto const mcret = memcpy(data, sl.data(), sl.size());
   auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
   ret->preCompute();                    // get m_hash right
@@ -193,11 +193,11 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   return ret;
 }
 
-StringData* StringData::MakeStatic(StringSlice sl) {
+StringData* StringData::MakeStatic(folly::StringPiece sl) {
   return MakeShared(sl, true);
 }
 
-StringData* StringData::MakeUncounted(StringSlice sl) {
+StringData* StringData::MakeUncounted(folly::StringPiece sl) {
   return MakeShared(sl, false);
 }
 
@@ -275,18 +275,18 @@ StringData* StringData::Make(const StringData* s, CopyStringMode) {
   return sd;
 }
 
-StringData* StringData::Make(StringSlice sl, CopyStringMode) {
-  auto const sd = allocFlatForLenSmall(sl.len);
-  sd->m_lenAndHash = sl.len; // hash=0
+StringData* StringData::Make(folly::StringPiece sl, CopyStringMode) {
+  auto const sd = allocFlatForLenSmall(sl.size());
+  sd->m_lenAndHash = sl.size(); // hash=0
   auto const data = reinterpret_cast<char*>(sd + 1);
 
-  data[sl.len] = 0;
-  auto const mcret = memcpy(data, sl.ptr, sl.len);
+  data[sl.size()] = 0;
+  auto const mcret = memcpy(data, sl.data(), sl.size());
   auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
 
   assert(ret == sd);
-  assert(ret->m_len == sl.len);
+  assert(ret->m_len == sl.size());
   assert(ret->hasExactlyOneRef());
   assert(ret->m_hash == 0);
   assert(ret->isFlat());
@@ -299,7 +299,7 @@ StringData* StringData::Make(const char* data, size_t len, CopyStringMode) {
     throw_string_too_large(len);
   }
 
-  return Make(StringSlice(data, len), CopyString);
+  return Make(folly::StringPiece(data, len), CopyString);
 }
 
 StringData* StringData::Make(size_t reserveLen) {
@@ -322,20 +322,20 @@ StringData* StringData::Make(char* data, size_t len, AttachStringMode) {
   if (UNLIKELY(len > StringData::MaxSize)) {
     throw_string_too_large(len);
   }
-  auto const sd = Make(StringSlice(data, len), CopyString);
+  auto const sd = Make(folly::StringPiece(data, len), CopyString);
   free(data);
   assert(sd->checkSane());
   return sd;
 }
 
-StringData* StringData::Make(StringSlice r1, StringSlice r2) {
-  auto const len = r1.len + r2.len;
+StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2) {
+  auto const len = r1.size() + r2.size();
   auto const sd = allocFlatForLenSmall(len);
   sd->m_lenAndHash = len; // hash=0
 
   auto const data = reinterpret_cast<char*>(sd + 1);
-  memcpy(data, r1.ptr, r1.len);
-  memcpy(data + r1.len, r2.ptr, r2.len);
+  memcpy(data,             r1.data(), r1.size());
+  memcpy(data + r1.size(), r2.data(), r2.size());
   data[len] = 0;
 
   assert(sd->hasExactlyOneRef());
@@ -361,21 +361,21 @@ StringData* StringData::Make(const StringData* s1, const StringData* s2) {
   return sd;
 }
 
-StringData* StringData::Make(StringSlice s1, const char* lit2) {
-  return Make(s1, StringSlice(lit2, strlen(lit2)));
+StringData* StringData::Make(folly::StringPiece s1, const char* lit2) {
+  return Make(s1, folly::StringPiece(lit2, strlen(lit2)));
 }
 
-StringData* StringData::Make(StringSlice r1, StringSlice r2,
-                             StringSlice r3) {
-  auto const len = r1.len + r2.len + r3.len;
+StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2,
+                             folly::StringPiece r3) {
+  auto const len = r1.size() + r2.size() + r3.size();
   auto const sd = allocFlatForLenSmall(len);
   sd->m_lenAndHash  = len; // hash=0
 
-  char* p = reinterpret_cast<char*>(sd + 1);
-  p = static_cast<char*>(memcpy(p, r1.ptr, r1.len));
-  p = static_cast<char*>(memcpy(p + r1.len, r2.ptr, r2.len));
-  p = static_cast<char*>(memcpy(p + r2.len, r3.ptr, r3.len));
-  p[r3.len] = 0;
+  auto p = reinterpret_cast<char*>(sd + 1);
+  p = static_cast<char*>(memcpy(p,             r1.data(), r1.size()));
+  p = static_cast<char*>(memcpy(p + r1.size(), r2.data(), r2.size()));
+  p = static_cast<char*>(memcpy(p + r2.size(), r3.data(), r3.size()));
+  p[r3.size()] = 0;
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
@@ -383,18 +383,18 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   return sd;
 }
 
-StringData* StringData::Make(StringSlice r1, StringSlice r2,
-                             StringSlice r3, StringSlice r4) {
-  auto const len = r1.len + r2.len + r3.len + r4.len;
+StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2,
+                             folly::StringPiece r3, folly::StringPiece r4) {
+  auto const len = r1.size() + r2.size() + r3.size() + r4.size();
   auto const sd = allocFlatForLenSmall(len);
   sd->m_lenAndHash = len; // hash=0
 
-  char* p = reinterpret_cast<char*>(sd + 1);
-  p = static_cast<char*>(memcpy(p, r1.ptr, r1.len));
-  p = static_cast<char*>(memcpy(p + r1.len, r2.ptr, r2.len));
-  p = static_cast<char*>(memcpy(p + r2.len, r3.ptr, r3.len));
-  p = static_cast<char*>(memcpy(p + r3.len, r4.ptr, r4.len));
-  p[r4.len] = 0;
+  auto p = reinterpret_cast<char*>(sd + 1);
+  p = static_cast<char*>(memcpy(p,             r1.data(), r1.size()));
+  p = static_cast<char*>(memcpy(p + r1.size(), r2.data(), r2.size()));
+  p = static_cast<char*>(memcpy(p + r2.size(), r3.data(), r3.size()));
+  p = static_cast<char*>(memcpy(p + r3.size(), r4.data(), r4.size()));
+  p[r4.size()] = 0;
 
   assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
@@ -512,11 +512,11 @@ void StringData::release() noexcept {
          uintptr_t(ptr) >= uintptr_t(data() + capacity() + 1)); \
   assert(ptr != data() || len <= m_len);
 
-StringData* StringData::append(StringSlice range) {
+StringData* StringData::append(folly::StringPiece range) {
   assert(!hasMultipleRefs());
 
-  auto s = range.ptr;
-  auto const len = range.len;
+  auto s = range.data();
+  auto const len = range.size();
   if (len == 0) return this;
   auto const newLen = size_t(m_len) + size_t(len);
 
@@ -541,10 +541,10 @@ StringData* StringData::append(StringSlice range) {
   return target;
 }
 
-StringData* StringData::append(StringSlice r1, StringSlice r2) {
+StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
   assert(!hasMultipleRefs());
 
-  auto const len = r1.len + r2.len;
+  auto const len = r1.size() + r2.size();
 
   if (len == 0) return this;
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
@@ -558,20 +558,20 @@ StringData* StringData::append(StringSlice r1, StringSlice r2) {
    * interior pointer, although we may be asked to append less than
    * the whole string in an aliasing situation.
    */
-  ALIASING_APPEND_ASSERT(r1.ptr, r1.len);
-  ALIASING_APPEND_ASSERT(r2.ptr, r2.len);
+  ALIASING_APPEND_ASSERT(r1.data(), r1.size());
+  ALIASING_APPEND_ASSERT(r2.data(), r2.size());
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
-   * disjoint, since rN.ptr can't point past the start of our source
-   * pointer, and rN.len is smaller than the old length.
+   * disjoint, since rN.data() can't point past the start of our source
+   * pointer, and rN.size() is smaller than the old length.
    */
   void* p = target->mutableData();
-  p = memcpy((char*)p + m_len,  r1.ptr, r1.len);
-      memcpy((char*)p + r1.len, r2.ptr, r2.len);
+  p = memcpy((char*)p + m_len,     r1.data(), r1.size());
+      memcpy((char*)p + r1.size(), r2.data(), r2.size());
 
   target->setSize(newLen);
   assert(target->checkSane());
@@ -579,12 +579,12 @@ StringData* StringData::append(StringSlice r1, StringSlice r2) {
   return target;
 }
 
-StringData* StringData::append(StringSlice r1,
-                               StringSlice r2,
-                               StringSlice r3) {
+StringData* StringData::append(folly::StringPiece r1,
+                               folly::StringPiece r2,
+                               folly::StringPiece r3) {
   assert(!hasMultipleRefs());
 
-  auto const len = r1.len + r2.len + r3.len;
+  auto const len = r1.size() + r2.size() + r3.size();
 
   if (len == 0) return this;
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
@@ -598,22 +598,22 @@ StringData* StringData::append(StringSlice r1,
    * interior pointer, although we may be asked to append less than
    * the whole string in an aliasing situation.
    */
-  ALIASING_APPEND_ASSERT(r1.ptr, r1.len);
-  ALIASING_APPEND_ASSERT(r2.ptr, r2.len);
-  ALIASING_APPEND_ASSERT(r3.ptr, r3.len);
+  ALIASING_APPEND_ASSERT(r1.data(), r1.size());
+  ALIASING_APPEND_ASSERT(r2.data(), r2.size());
+  ALIASING_APPEND_ASSERT(r3.data(), r3.size());
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
-   * disjoint, since rN.ptr can't point past the start of our source
-   * pointer, and rN.len is smaller than the old length.
+   * disjoint, since rN.data() can't point past the start of our source
+   * pointer, and rN.size() is smaller than the old length.
    */
   void* p = target->mutableData();
-  p = memcpy((char*)p + m_len,  r1.ptr, r1.len);
-  p = memcpy((char*)p + r1.len, r2.ptr, r2.len);
-      memcpy((char*)p + r2.len, r3.ptr, r3.len);
+  p = memcpy((char*)p + m_len,     r1.data(), r1.size());
+  p = memcpy((char*)p + r1.size(), r2.data(), r2.size());
+      memcpy((char*)p + r2.size(), r3.data(), r3.size());
 
   target->setSize(newLen);
   assert(target->checkSane());
@@ -689,14 +689,14 @@ StringData* StringData::escalate(size_t cap) {
 }
 
 void StringData::dump() const {
-  StringSlice s = slice();
+  auto s = slice();
 
   printf("StringData(%d) (%s%s%d): [", getCount(),
          isShared() ? "shared " : "",
          isStatic() ? "static " : "",
-         s.len);
-  for (uint32_t i = 0; i < s.len; i++) {
-    char ch = s.ptr[i];
+         static_cast<int>(s.size()));
+  for (uint32_t i = 0; i < s.size(); i++) {
+    char ch = s.data()[i];
     if (isprint(ch)) {
       printf("%c", ch);
     } else {
@@ -808,11 +808,11 @@ void StringData::incrementHelper() {
 }
 
 void StringData::preCompute() {
-  StringSlice s = slice();
-  m_hash = hash_string_unsafe(s.ptr, s.len);
+  auto s = slice();
+  m_hash = hash_string_unsafe(s.data(), s.size());
   assert(m_hash >= 0);
-  if (s.len > 0 &&
-      (is_numeric_string(s.ptr, s.len, nullptr, nullptr,
+  if (s.size() > 0 &&
+      (is_numeric_string(s.data(), s.size(), nullptr, nullptr,
                          1, nullptr) == KindOfNull)) {
     m_hash |= STRHASH_MSB;
   }
@@ -833,9 +833,16 @@ DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
                                       int allow_errors, int* overflow) const {
   if (m_hash < 0) return KindOfNull;
   DataType ret = KindOfNull;
-  StringSlice s = slice();
-  if (s.len) {
-    ret = is_numeric_string(s.ptr, s.len, &lval, &dval, allow_errors, overflow);
+  auto s = slice();
+  if (s.size()) {
+    ret = is_numeric_string(
+      s.data(),
+      s.size(),
+      &lval,
+      &dval,
+      allow_errors,
+      overflow
+    );
     if (ret == KindOfNull && !isShared() && allow_errors) {
       m_hash |= STRHASH_MSB;
     }
@@ -900,8 +907,8 @@ int64_t StringData::toInt64(int base /* = 10 */) const {
 }
 
 double StringData::toDouble() const {
-  StringSlice s = slice();
-  if (s.len) return zend_strtod(s.ptr, nullptr);
+  auto s = slice();
+  if (s.size()) return zend_strtod(s.data(), nullptr);
   return 0;
 }
 
@@ -997,8 +1004,8 @@ int StringData::compare(const StringData *v2) const {
 // Debug
 
 std::string StringData::toCppString() const {
-  StringSlice s = slice();
-  return std::string(s.ptr, s.len);
+  auto s = slice();
+  return std::string(s.data(), s.size());
 }
 
 bool StringData::checkSane() const {

@@ -103,8 +103,8 @@ static void replace_special_chars(StringData* str) {
 
 // Helper used to create an absolute filename using the passed
 // directory and xdebug-specific format string
-static String format_filename(StringSlice dir,
-                              StringSlice formatFile,
+static String format_filename(folly::StringPiece dir,
+                              folly::StringPiece formatFile,
                               bool addSuffix) {
   // Create a string buffer and append the directory name
   auto const formatlen = formatFile.size();
@@ -241,7 +241,7 @@ static inline XDebugProfiler* xdebug_profiler() {
 
 // Starts tracing using the given profiler
 static void start_tracing(XDebugProfiler* profiler,
-                          StringSlice filename = StringSlice(nullptr, 0),
+                          folly::StringPiece filename = folly::StringPiece(),
                           int64_t options = 0) {
   // Add ini settings
   if (XDEBUG_GLOBAL(TraceOptions)) {
@@ -255,15 +255,15 @@ static void start_tracing(XDebugProfiler* profiler,
   }
 
   // If no filename is passed, php5 xdebug stores in the default output
-  // directory with the default file name
-  StringSlice dirname(nullptr, 0);
+  // directory with the default file name.
+  folly::StringPiece dirname;
 
   if (filename.empty()) {
     auto& default_dirname = XDEBUG_GLOBAL(TraceOutputDir);
     auto& default_filename = XDEBUG_GLOBAL(TraceOutputName);
 
-    dirname = StringSlice(default_dirname.data(), default_dirname.size());
-    filename = StringSlice(default_filename.data(), default_filename.size());
+    dirname = folly::StringPiece(default_dirname);
+    filename = folly::StringPiece(default_filename);
   }
 
   auto const suffix = !(options & k_XDEBUG_TRACE_NAKED_FILENAME);
@@ -282,8 +282,8 @@ static void start_profiling(XDebugProfiler* profiler) {
   // Create the filename then enable
   auto& dirname = XDEBUG_GLOBAL(ProfilerOutputDir);
   auto& filename = XDEBUG_GLOBAL(ProfilerOutputName);
-  auto dirname_slice = StringSlice(dirname.data(), dirname.size());
-  auto filename_slice = StringSlice(filename.data(), filename.size());
+  auto dirname_slice = folly::StringPiece{dirname};
+  auto filename_slice = folly::StringPiece{filename};
 
   auto abs_filename = format_filename(dirname_slice, filename_slice, false);
 
@@ -615,8 +615,10 @@ static Variant HHVM_FUNCTION(xdebug_start_trace,
                              const Variant& traceFileVar,
                              int64_t options /* = 0 */) {
   // Allowed to pass null.
-  StringSlice trace_file(nullptr, 0);
+  folly::StringPiece trace_file;
   if (traceFileVar.isString()) {
+    // We're not constructing a new String, we're just using the one in
+    // traceFileVar, so this is safe.
     trace_file = traceFileVar.toString().slice();
   }
 

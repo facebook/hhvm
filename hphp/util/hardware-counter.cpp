@@ -204,8 +204,7 @@ HardwareCounter::HardwareCounter()
     m_storeCounter.reset(new StoreCounter());
   } else {
     m_countersSet = true;
-    setPerfEvents(StringSlice(s_profileHWEvents.data(),
-                              s_profileHWEvents.size()));
+    setPerfEvents(s_profileHWEvents);
   }
 }
 
@@ -415,12 +414,12 @@ bool HardwareCounter::eventExists(const char *event) {
   return false;
 }
 
-bool HardwareCounter::setPerfEvents(const StringSlice& sevents) {
+bool HardwareCounter::setPerfEvents(folly::StringPiece sevents) {
   // Make a copy of the string for use with strtok.
-  auto const sevents_buf = static_cast<char*>(malloc(sevents.len + 1));
+  auto const sevents_buf = static_cast<char*>(malloc(sevents.size() + 1));
   SCOPE_EXIT { free(sevents_buf); };
-  memcpy(sevents_buf, sevents.ptr, sevents.len);
-  sevents_buf[sevents.len] = '\0';
+  memcpy(sevents_buf, sevents.data(), sevents.size());
+  sevents_buf[sevents.size()] = '\0';
 
   char* strtok_buf = nullptr;
   char* s = strtok_r(sevents_buf, ",", &strtok_buf);
@@ -433,7 +432,7 @@ bool HardwareCounter::setPerfEvents(const StringSlice& sevents) {
   return true;
 }
 
-bool HardwareCounter::SetPerfEvents(const StringSlice& events) {
+bool HardwareCounter::SetPerfEvents(folly::StringPiece events) {
   return s_counter->setPerfEvents(events);
 }
 

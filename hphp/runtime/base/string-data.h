@@ -17,18 +17,19 @@
 #ifndef incl_HPHP_STRING_DATA_H_
 #define incl_HPHP_STRING_DATA_H_
 
-#include "hphp/util/slice.h"
-#include "hphp/util/hash.h"
+#include <folly/Range.h>
+
 #include "hphp/util/alloc.h"
+#include "hphp/util/bstring.h"
+#include "hphp/util/hash.h"
 #include "hphp/util/word-mem.h"
 
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/countable.h"
-#include "hphp/util/bstring.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/cap-code.h"
+#include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 
@@ -98,7 +99,7 @@ struct StringData {
   static StringData* Make(const char* data, CopyStringMode);
   static StringData* Make(const char* data, size_t len, CopyStringMode);
   static StringData* Make(const StringData* s, CopyStringMode);
-  static StringData* Make(StringSlice r1, CopyStringMode);
+  static StringData* Make(folly::StringPiece r1, CopyStringMode);
 
   /*
    * Attach constructors for request-local strings.
@@ -114,14 +115,14 @@ struct StringData {
    * strings. Ref-count is pre-initialized to 1.
    */
   static StringData* Make(const StringData* s1, const StringData* s2);
-  static StringData* Make(const StringData* s1, StringSlice s2);
+  static StringData* Make(const StringData* s1, folly::StringPiece s2);
   static StringData* Make(const StringData* s1, const char* lit2);
-  static StringData* Make(StringSlice s1, const char* lit2);
-  static StringData* Make(StringSlice s1, StringSlice s2);
-  static StringData* Make(StringSlice s1, StringSlice s2,
-                          StringSlice s3);
-  static StringData* Make(StringSlice s1, StringSlice s2,
-                          StringSlice s3, StringSlice s4);
+  static StringData* Make(folly::StringPiece s1, const char* lit2);
+  static StringData* Make(folly::StringPiece s1, folly::StringPiece s2);
+  static StringData* Make(folly::StringPiece s1, folly::StringPiece s2,
+                          folly::StringPiece s3);
+  static StringData* Make(folly::StringPiece s1, folly::StringPiece s2,
+                          folly::StringPiece s3, folly::StringPiece s4);
 
   /*
    * Create a new request-local empty string big enough to hold strings of
@@ -144,14 +145,14 @@ struct StringData {
    * StringData is not expected to be reference counted, and must be
    * deallocated using destructStatic.
    */
-  static StringData* MakeStatic(StringSlice);
+  static StringData* MakeStatic(folly::StringPiece);
 
   /*
    * Same as MakeStatic but the string allocated will *not* be in the static
    * string table, will not be in low-memory, and should be deleted using
    * destructUncounted once the root goes out of scope.
    */
-  static StringData* MakeUncounted(StringSlice);
+  static StringData* MakeUncounted(folly::StringPiece);
 
   /*
    * Same as MakeStatic but initializes the empty string in aligned storage.
@@ -207,9 +208,11 @@ struct StringData {
    * Pre: !hasMultipleRefs()
    * Pre: the string is request-local
    */
-  StringData* append(StringSlice r);
-  StringData* append(StringSlice r1, StringSlice r2);
-  StringData* append(StringSlice r1, StringSlice r2, StringSlice r3);
+  StringData* append(folly::StringPiece r);
+  StringData* append(folly::StringPiece r1, folly::StringPiece r2);
+  StringData* append(folly::StringPiece r1,
+                     folly::StringPiece r2,
+                     folly::StringPiece r3);
 
   /*
    * Reserve space for a string of length `maxLen' (not counting null
@@ -244,7 +247,7 @@ struct StringData {
    * include a null-terminator if possible.  (We would like to make
    * this unnecessary eventually.)
    */
-  StringSlice slice() const;
+  folly::StringPiece slice() const;
 
   /*
    * Returns a mutable slice with extents sized to the *buffer* this
@@ -254,7 +257,7 @@ struct StringData {
    * Note: please do not introduce new uses of this API that write
    * nulls 1 byte past slice.len---we want to weed those out.
    */
-  MutableSlice bufferSlice();
+  folly::MutableStringPiece bufferSlice();
 
   /*
    * If external users of this object want to modify it (e.g. through
@@ -449,7 +452,7 @@ private:
   };
 
 private:
-  static StringData* MakeShared(StringSlice sl, bool trueStatic);
+  static StringData* MakeShared(folly::StringPiece sl, bool trueStatic);
   static StringData* MakeAPCSlowPath(const APCString*);
 
   StringData(const StringData&) = delete;

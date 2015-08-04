@@ -1923,7 +1923,7 @@ String string_soundex(const String& str) {
 
   /* build soundex string */
   last = -1;
-  const char *p = str.slice().ptr;
+  auto p = str.slice().data();
   for (_small = 0; *p && _small < 4; p++) {
     /* convert chars to upper case and strip non-letter chars */
     /* BUG: should also map here accented letters used in non */
@@ -2519,7 +2519,7 @@ static const _cyr_charset_table _cyr_mac = {
 String string_convert_cyrillic_string(const String& input, char from, char to) {
   const unsigned char *from_table, *to_table;
   unsigned char tmp;
-  const unsigned char *uinput = (unsigned char *)input.slice().ptr;
+  auto uinput = (unsigned char*)input.slice().data();
   String retString(input.size(), ReserveString);
   unsigned char *str = (unsigned char *)retString.mutableData();
 

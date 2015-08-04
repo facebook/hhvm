@@ -46,7 +46,8 @@ inline StringData* StringData::Make(char* data, AttachStringMode) {
 //////////////////////////////////////////////////////////////////////
 // Concat creation
 
-inline StringData* StringData::Make(const StringData* s1, StringSlice s2) {
+inline StringData* StringData::Make(const StringData* s1,
+                                    folly::StringPiece s2) {
   return Make(s1->slice(), s2);
 }
 
@@ -64,13 +65,13 @@ inline bool StringData::isUncounted() const {
   return m_hdr.count == UncountedValue;
 }
 
-inline StringSlice StringData::slice() const {
-  return StringSlice(m_data, m_len);
+inline folly::StringPiece StringData::slice() const {
+  return folly::StringPiece{m_data, m_len};
 }
 
-inline MutableSlice StringData::bufferSlice() {
+inline folly::MutableStringPiece StringData::bufferSlice() {
   assert(!isImmutable());
-  return MutableSlice(m_data, capacity());
+  return folly::MutableStringPiece{m_data, capacity()};
 }
 
 inline void StringData::invalidateHash() {
@@ -126,7 +127,7 @@ inline bool StringData::isStrictlyInteger(int64_t& res) const {
   }
   if (isStatic() && m_hash < 0) return false;
   auto const s = slice();
-  return is_strictly_integer(s.ptr, s.len, res);
+  return is_strictly_integer(s.data(), s.size(), res);
 }
 
 inline bool StringData::isZero() const  {

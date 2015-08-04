@@ -1394,7 +1394,7 @@ inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
     if (str.get()->hasExactlyOneRef()) {
-      str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
+      str += s2.slice();
       return v1;
     }
   }

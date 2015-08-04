@@ -69,7 +69,9 @@ public:
               StringBuffer &response, const HeaderMap *requestHeaders,
               std::vector<String> *responseHeaders);
 
-  std::string getLastError() const { return m_error;}
+  const std::string& getLastError() const {
+    return m_error;
+  }
 
   static const int defaultMaxRedirect = 20;
 

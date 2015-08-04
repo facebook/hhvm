@@ -90,8 +90,7 @@ void indented(Output& out, Func f) {
 
 std::string escaped(const StringData* sd) {
   auto const sl = sd->slice();
-  auto const sp = folly::StringPiece{sl.ptr, sl.ptr + sl.len};
-  return folly::format("\"{}\"", folly::cEscape<std::string>(sp)).str();
+  return folly::format("\"{}\"", folly::cEscape<std::string>(sl)).str();
 }
 
 /*

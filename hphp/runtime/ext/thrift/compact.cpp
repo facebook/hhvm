@@ -363,10 +363,10 @@ class CompactWriter {
         case T_UTF8:
         case T_UTF16:
         case T_STRING: {
-            String s = value.toString();
+            auto s = value.toString();
             auto slice = s.slice();
-            writeVarint(slice.len);
-            transport->write(slice.ptr, slice.len);
+            writeVarint(slice.size());
+            transport->write(slice.data(), slice.size());
             break;
           }
 
@@ -490,8 +490,8 @@ class CompactWriter {
 
     void writeString(const String& s) {
       auto slice = s.slice();
-      writeVarint(slice.len);
-      transport->write(slice.ptr, slice.len);
+      writeVarint(slice.size());
+      transport->write(slice.data(), slice.size());
     }
 
     uint64_t i64ToZigzag(int64_t n) {

@@ -133,7 +133,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charName,
   String buffer(buffer_len, ReserveString);
   error = U_ZERO_ERROR;
   buffer_len = u_charName(cp, (UCharNameChoice)choice,
-                          buffer.bufferSlice().ptr, buffer_len + 1, &error);
+                          buffer.bufferSlice().data(), buffer_len + 1, &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "Failure getting character name");
     return init_null();
@@ -331,7 +331,7 @@ Variant uchar_method(const Class* self_, const Variant& arg) {
   auto ret = T(cp);
   if (arg.isString()) {
     String buf(5, ReserveString);
-    auto s = buf.bufferSlice().ptr;
+    auto s = buf.bufferSlice().data();
     int s_len = 0;
     U8_APPEND_UNSAFE(s, s_len, ret);
     s[s_len] = 0;

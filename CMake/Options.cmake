@@ -12,6 +12,8 @@ option(ENABLE_FULL_SETLINE "Enable full setline function for debugger and code-c
 
 option(USE_JEMALLOC "Use jemalloc" ON)
 
+option(CLANG_FORCE_LIBSTDCXX "Force libstdc++ when building against Clang/LLVM" OFF)
+
 option(USE_TCMALLOC "Use tcmalloc (if jemalloc is not used)" ON)
 option(USE_GOOGLE_HEAP_PROFILER "Use Google heap profiler" OFF)
 option(USE_GOOGLE_CPU_PROFILER "Use Google cpu profiler" OFF)

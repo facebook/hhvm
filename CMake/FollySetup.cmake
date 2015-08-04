@@ -46,5 +46,7 @@ if(CYGWIN)
 endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  add_definitions("-DFOLLY_USE_LIBCPP=1")
+  if(NOT CLANG_FORCE_LIBSTDCXX)
+    add_definitions("-DFOLLY_USE_LIBCPP=1")
+  endif()
 endif()

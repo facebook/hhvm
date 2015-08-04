@@ -804,7 +804,7 @@ public:
   void emitBuiltinDefaultArg(Emitter& e, Variant& v,
                              MaybeDataType t, int paramId);
   void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
-  void emitTypedef(Emitter& e, TypedefStatementPtr);
+  Id emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e,
                                  ListAssignmentPtr la,
                                  std::function<void()> emitSrc);

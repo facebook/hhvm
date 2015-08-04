@@ -287,7 +287,7 @@ public:
     Define              = 2,  // Toplevel scalar define.
     PersistentDefine    = 3,  // Cross-request persistent toplevel defines.
     Global              = 4,  // Global variable declarations.
-    // Unused           = 5,
+    TypeAlias           = 5,
     ReqDoc              = 6,
     Done                = 7,
     // We cannot add more kinds here; this has to fit in 3 bits.

@@ -1,0 +1,3 @@
+string(13) "Hello, World!"
+
+Catchable fatal error: Argument 1 passed to foo() must be an instance of HH\FormatString, stdClass given in %s/system-type.php on line 5

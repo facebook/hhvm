@@ -946,6 +946,11 @@ void emit_class(EmitUnitState& state,
   pce->setEnumBaseTy(cls.enumBaseTy);
 }
 
+void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
+  auto const id = ue.addTypeAlias(alias);
+  ue.pushMergeableTypeAlias(HPHP::Unit::MergeKind::TypeAlias, id);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -991,7 +996,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   emit_pseudomain(state, *ue, unit);
   for (auto& c : unit.classes)     emit_class(state, *ue, *c);
   for (auto& f : unit.funcs)       emit_func(state, *ue, *f);
-  for (auto& t : unit.typeAliases) ue->addTypeAlias(*t);
+  for (auto& t : unit.typeAliases) emit_typealias(*ue, *t);
 
   for (size_t id = 0; id < unit.classes.size(); ++id) {
     // We may not have a DefCls PC if we're a closure, or a

@@ -1,5 +1,10 @@
 <?hh
 
+namespace HH {
+newtype FormatString<T> = string;
+}
+
+namespace {
 /**
  * Returns a string with backslashes before characters that are listed in
  *   charlist parameter.
@@ -1711,3 +1716,4 @@ function soundex(string $str): mixed;
  */
 <<__IsFoldable, __Native>>
 function metaphone(string $str, int $phones = 0): mixed;
+}

@@ -75,6 +75,7 @@ namespace Stats {
   STAT(UnitMerge_mergeable_global) \
   STAT(UnitMerge_mergeable_class) \
   STAT(UnitMerge_mergeable_require) \
+  STAT(UnitMerge_mergeable_typealias) \
   STAT(UnitMerge_redo_hoistable) \
   /* stub reuse stats */ \
   STAT(Astub_New) \

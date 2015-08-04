@@ -2488,10 +2488,12 @@ void EmitterVisitor::visit(FileScopePtr file) {
           }
           break;
         }
-        case Statement::KindOfTypedefStatement:
-          emitTypedef(e, static_pointer_cast<TypedefStatement>(s));
-          notMergeOnly = true; // TODO(#2103206): typedefs should be mergable
+        case Statement::KindOfTypedefStatement: {
+          auto const id =
+            emitTypedef(e, static_pointer_cast<TypedefStatement>(s));
+          m_ue.pushMergeableTypeAlias(Unit::MergeKind::TypeAlias, id);
           break;
+        }
         case Statement::KindOfReturnStatement:
           if (mainReturn.m_type != kInvalidDataType) break;
 
@@ -7700,7 +7702,7 @@ void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
   }
 }
 
-void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
+Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   auto const nullable = td->annot->isNullable();
   auto const annot = td->annot->stripNullable();
   auto const valueStr = annot.vanillaName();
@@ -7736,9 +7738,11 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   record.value    = value;
   record.type     = type;
   record.nullable = nullable;
-  record.attrs    = AttrNone;
+  record.attrs    = !SystemLib::s_inited ? AttrPersistent : AttrNone;
   Id id = m_ue.addTypeAlias(record);
   e.DefTypeAlias(id);
+
+  return id;
 }
 
 void EmitterVisitor::emitClass(Emitter& e,

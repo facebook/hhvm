@@ -378,6 +378,18 @@ void UnitEmitter::insertMergeableDef(int ix, Unit::MergeKind kind,
   m_allClassesHoistable = false;
 }
 
+void UnitEmitter::pushMergeableTypeAlias(Unit::MergeKind kind, const Id id) {
+  m_mergeableStmts.push_back(std::make_pair(kind, id));
+  m_allClassesHoistable = false;
+}
+
+void UnitEmitter::insertMergeableTypeAlias(int ix, Unit::MergeKind kind,
+                                           const Id id) {
+  assert(size_t(ix) <= m_mergeableStmts.size());
+  m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
+                          std::make_pair(kind, id));
+  m_allClassesHoistable = false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
@@ -440,6 +452,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         case MergeKind::UniqueDefinedClass:
           not_reached();
         case MergeKind::Class: break;
+        case MergeKind::TypeAlias:
         case MergeKind::ReqDoc: {
           urp.insertUnitMergeable[repoId].insert(
             txn, usn, i,
@@ -581,6 +594,10 @@ std::unique_ptr<Unit> UnitEmitter::create() {
       switch (mergeable.first) {
         case MergeKind::Class:
           mi->mergeableObj(ix++) = u->m_preClasses[mergeable.second].get();
+          break;
+        case MergeKind::TypeAlias:
+          mi->mergeableObj(ix++) =
+            (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
           break;
         case MergeKind::ReqDoc: {
           assert(RuntimeOption::RepoAuthoritative);
@@ -965,7 +982,7 @@ void UnitRepoProxy::InsertUnitMergeableStmt
            kind == MergeKind::Global);
     query.bindTypedValue("@mergeableValue", *value);
   } else {
-    assert(kind == MergeKind::ReqDoc);
+    assert(kind == MergeKind::ReqDoc || kind == MergeKind::TypeAlias);
     query.bindNull("@mergeableValue");
   }
   query.exec();
@@ -1000,13 +1017,18 @@ void UnitRepoProxy::GetUnitMergeablesStmt
          * (this is dodgy to start with). We're not going to
          * deal with requires at merge time, so drop them
          * here, and clear the mergeOnly flag for the unit.
-         * The one exception is persistent constants are allowed in systemlib.
+         * The two exceptions are persistent constants and
+         * TypeAliases which are allowed in systemlib.
          */
-        if (k != MergeKind::PersistentDefine || SystemLib::s_inited) {
+        if ((k != MergeKind::PersistentDefine && k != MergeKind::TypeAlias)
+            || SystemLib::s_inited) {
           ue.m_mergeOnly = false;
         }
       }
       switch (k) {
+        case MergeKind::TypeAlias:
+          ue.insertMergeableTypeAlias(mergeableIx, k, mergeableId);
+          break;
         case MergeKind::ReqDoc:
           ue.insertMergeableInclude(mergeableIx, k, mergeableId);
           break;

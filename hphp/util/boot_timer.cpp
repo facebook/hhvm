@@ -32,6 +32,8 @@ struct BootTimer::Impl {
   void dumpMarks();
   int64_t computeDeltaFromLast();
 
+  friend class BootTimer;
+
 private:
   // Must hold when updating m_last
   std::mutex m_last_guard_;
@@ -85,6 +87,7 @@ BootTimer::Block::~Block() {
 bool BootTimer::s_started;
 std::chrono::steady_clock::time_point BootTimer::s_start;
 std::unique_ptr<BootTimer::Impl> BootTimer::s_instance;
+BootTimerCallback BootTimer::s_doneCallback;
 
 void BootTimer::start() {
   BootTimer::s_started = true;
@@ -104,6 +107,10 @@ void BootTimer::done() {
 
   BootTimer::s_instance->add("TOTAL", total);
   BootTimer::s_instance->dumpMarks();
+
+  if (s_doneCallback) {
+    s_doneCallback(BootTimer::s_instance->m_marks);
+  }
 }
 
 void BootTimer::mark(const std::string& info) {
@@ -118,6 +125,10 @@ void BootTimer::add(const std::string& info,
     const std::chrono::nanoseconds value) {
   if (!s_started) return;
   BootTimer::s_instance->add(info, value.count());
+}
+
+void BootTimer::setDoneCallback(BootTimerCallback cb) {
+  s_doneCallback = cb;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

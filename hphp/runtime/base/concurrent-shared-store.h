@@ -305,7 +305,7 @@ private:
   };
 
 private:
-  bool eraseImpl(const String&, bool, int64_t);
+  bool eraseImpl(const char*, bool, int64_t);
   bool storeImpl(const String&, const Variant&, int64_t, bool, bool);
   void eraseAcc(Map::accessor&);
   void purgeExpired();

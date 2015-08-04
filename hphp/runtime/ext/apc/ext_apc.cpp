@@ -376,7 +376,7 @@ Variant HHVM_FUNCTION(apc_delete,
       if (!k.isString()) {
         raise_warning("apc key is not a string");
         init.append(k);
-      } else if (!apc_store().erase(k.toString())) {
+      } else if (!apc_store().erase(k.toCStrRef())) {
         init.append(k);
       }
     }

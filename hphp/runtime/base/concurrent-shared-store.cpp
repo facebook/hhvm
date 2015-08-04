@@ -124,7 +124,8 @@ bool ConcurrentTableSharedStore::clear() {
 }
 
 bool ConcurrentTableSharedStore::erase(const String& key) {
-  return eraseImpl(key, false, 0);
+  assert(!key.isNull());
+  return eraseImpl(tagStringData(key.get()), false, 0);
 }
 
 void ConcurrentTableSharedStore::eraseAcc(Map::accessor& acc) {
@@ -142,14 +143,14 @@ void ConcurrentTableSharedStore::eraseAcc(Map::accessor& acc) {
  * The ReadLock here is to sync with clear(), which only has a WriteLock,
  * not a specific accessor.
  */
-bool ConcurrentTableSharedStore::eraseImpl(const String& key,
+bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            bool expired,
                                            int64_t oldestLive) {
-  if (key.isNull()) return false;
+  assert(key);
 
   ReadLock l(m_lock);
   Map::accessor acc;
-  if (!m_vars.find(acc, tagStringData(key.get()))) {
+  if (!m_vars.find(acc, key)) {
     return false;
   }
   if (expired && !acc->second.expired()) {
@@ -212,7 +213,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
       continue;
     }
     m_expMap.erase(tmp.first);
-    eraseImpl(tmp.first, true, oldestLive); // XXX allocating a String
+    eraseImpl(tmp.first, true, oldestLive);
     free((void*)tmp.first);
     ++i;
   }
@@ -298,15 +299,16 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
   }
 }
 
-bool ConcurrentTableSharedStore::get(const String& key, Variant& value) {
+bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   const StoreValue *sval;
   APCHandle *svar = nullptr;
   ReadLock l(m_lock);
   bool expired = false;
   bool promoteObj = false;
+  auto tag = tagStringData(keyStr.get());
   {
     Map::const_accessor acc;
-    if (!m_vars.find(acc, tagStringData(key.get()))) {
+    if (!m_vars.find(acc, tag)) {
       return false;
     } else {
       sval = &acc->second;
@@ -330,7 +332,7 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant& value) {
              * values to in-memory values, so it's basically not a real
              * problem, but ... :)
              */
-            svar = unserialize(key, const_cast<StoreValue*>(sval));
+            svar = unserialize(keyStr, const_cast<StoreValue*>(sval));
             if (!svar) return false;
           }
         }
@@ -346,13 +348,14 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant& value) {
     }
   }
   if (expired) {
-    eraseImpl(key, true, apcExtension::UseUncounted ?
-                              HPHP::Treadmill::getOldestStartTime() : 0);
+    eraseImpl(tag, true,
+              apcExtension::UseUncounted ?
+              HPHP::Treadmill::getOldestStartTime() : 0);
     return false;
   }
 
   if (promoteObj)  {
-    handlePromoteObj(key, svar, value);
+    handlePromoteObj(keyStr, svar, value);
     // release the extra ref
     svar->unreference();
   }
@@ -429,13 +432,14 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   return true;
 }
 
-bool ConcurrentTableSharedStore::exists(const String& key) {
+bool ConcurrentTableSharedStore::exists(const String& keyStr) {
   const StoreValue *sval;
   ReadLock l(m_lock);
   bool expired = false;
+  auto tag = tagStringData(keyStr.get());
   {
     Map::const_accessor acc;
-    if (!m_vars.find(acc, tagStringData(key.get()))) {
+    if (!m_vars.find(acc, tag)) {
       return false;
     } else {
       sval = &acc->second;
@@ -447,8 +451,9 @@ bool ConcurrentTableSharedStore::exists(const String& key) {
     }
   }
   if (expired) {
-    eraseImpl(key, true, apcExtension::UseUncounted ?
-                              HPHP::Treadmill::getOldestStartTime() : 0);
+    eraseImpl(tag, true,
+              apcExtension::UseUncounted ?
+              HPHP::Treadmill::getOldestStartTime() : 0);
     return false;
   }
   return true;

@@ -18,10 +18,12 @@ love for the entire codebase to follow this guide, we'd rather get there
 gradually than lose lots of git history and developer time to purely cosmetic
 changes. That said, if cosmetic changes that you're making as part of a larger
 diff keep growing in scope, it may be worth pulling them out into a separate
-diff. There's no well-defined cutoff here - just try to minimize effort for
-your reviewers. A good rule of thumb is that if your cosmetic changes require
-adding significant new sections to the diff (such as a function rename that
-touches all callsites), it should probably be pulled out into its own diff.
+diff.
+
+There's no well-defined cutoff here - just try to minimize effort for your
+reviewers. A good rule of thumb is that if your cosmetic changes require adding
+significant new sections to the diff (such as a function rename that touches
+all callsites), it should probably be pulled out into its own diff.
 
 
 ## Headers ##
@@ -104,7 +106,7 @@ compact interfaces (e.g., a smart pointer class, or any wrapper class), prefer
 to define the functions in the class definition, for concision.
 
 However, for classes with more complex, malleable APIs where inline helpers
-proliferate (e.g., Func, Class, HhbcTranslator, etc.), restrict the class
+proliferate (e.g., Func, Class, IRInstruction, etc.), restrict the class
 definition to member function prototypes *only*. This makes the API much
 cleaner. For these classes, define all inline functions in a corresponding
 `-inl.h` file.
@@ -112,17 +114,11 @@ cleaner. For these classes, define all inline functions in a corresponding
 ```cpp
 // At the bottom of func.h.
 
-#define incl_HPHP_VM_FUNC_INL_H_
 #include "hphp/runtime/vm/func-inl.h"
-#undef incl_HPHP_VM_FUNC_INL_H_
 ```
 
 ```cpp
 // After the copyright in func-inl.h.
-
-#ifndef incl_HPHP_VM_FUNC_INL_H_
-#error "func-inl.h should only be included from func.h"
-#endif
 
 namespace HPHP {
 
@@ -233,7 +229,7 @@ rather than adopting an existing one.
 ### Namespaces ###
 
 All HHVM code should be scoped in `namespace HPHP { /* everything */ }`. Large
-submodules such as `HPHP::jit` and `HPHP::RDS` may be contained in their own
+submodules such as `HPHP::jit` and `HPHP::rds` may be contained in their own
 namespace within `HPHP`. We often use anonymous namespaces instead of the
 `static` keyword to keep symbols internal to their translation unit. This is
 mostly left up to the author; just keep in mind that classes and structs,
@@ -254,14 +250,20 @@ context, such as array indexing.
 
 ## Naming ##
 
-Adhere to the following naming conventions.
+HHVM code adheres to the some broad naming conventions.
+
+When the convention is left open, in general, prefer the local conventions
+used in the file you are working on---e.g., in a struct whose data members all
+have `m_namesLikeThis`, prefer `m_anotherNameLikeThis` to `m_this_style`, even
+though the latter is found in other parts of the codebase.
 
 ### Variables ###
 
-Use `lowerCamelCase` for all local variables. Static variables (whether
-declared in an anonymous namespace or with the `static` keyword) should
-additionally be prefixed by `s_` (e.g., `s_funcVec`). Globals, likewise,
-should be prefixed by `g_` (e.g., `g_context`).
+Use `lowerCamelCase` or `lower_case_with_underscores` for all local variables,
+adhering to whichever is the discernable local convention if possible.  Static
+variables (whether declared in an anonymous namespace or with the `static`
+keyword) should additionally be prefixed by `s` (e.g., `s_funcVec`).  Globals,
+likewise, should be prefixed by `g_` (e.g., `g_context`).
 
 ### Constants ###
 
@@ -270,22 +272,33 @@ All constants should be prefixed with `k` and use `CamelCase`, e.g.,
 
 ### Class data members ###
 
-As with variables, use `lowerCamelCase` for all data members. Additionally,
-private instance members should be prefixed with `m_` (e.g., `m_cls`), and all
-static members should be prefixed with `s_` (e.g., `s_instance`).  Public
-members should be left unprefixed.
+As with variables, use `lowerCamelCase` or `lower_case_with_underscores` for
+all data members. Additionally, private instance members should be prefixed
+with `m_` (e.g., `m_cls`, `m_baseCls`, `m_base_cls`), and all static members
+should be prefixed with `s_` (e.g., `s_instance`).  Prefer to leave public
+members unprefixed.
 
 ### Functions ###
 
-Generally, we prefer `lowerCamelCase` for all functions, including member
-functions. If the file you are working in follows a clearly different naming
-convention, follow that. Or if you are modeling a class after an existing
-pattern such as an STL container, follow the appropriate conventions (e.g.,
-`MyList::push_back` rather than `MyList::pushBack`).
+We generally prefer `lowerCamelCase` for header-exposed functions, including
+member functions, although we use `lower_case_with_underscores` as well (e.g.,
+`hphp_session_init`), more commonly in file-local scopes.  As usual, follow the
+local naming conventions of the file you are working in.
 
-### Namespaces and classes ###
+If you are modeling a class after an existing pattern, such as an STL
+container, prefer to follow the appropriate conventions (e.g.,
+`my_list::push_back` is preferred over `my_list::pushBack`).
 
-Namespaces and classes should use `UpperCamelCase`.
+### Classes ###
+
+Classes use `UpperCamelCase`, except when modeling existing patterns like STL
+containers or smart pointers.
+
+### Namespaces ###
+
+New namespaces should use `lowercase`---and single-word namespaces are greatly
+prefered for common usage.  For longer namespaces (e.g., `vasm_detail`), use
+`lower_case_with_underscores`.
 
 ### Other conventions ###
 
@@ -363,6 +376,7 @@ line. The opening curly brace should be on the same line as the last argument,
 with the exception of class constructors (see the Constructor initializer list
 section). When writing function declarations in headers, include argument names
 unless they add no value:
+
 ```cpp
 struct Person {
   // The single string argument here is obviously the name.
@@ -437,7 +451,7 @@ for (auto const& thing : thingVec) {
 - If an expression does not fit on one line, attempt to wrap it after an
   operator (rather than an identifier or keyword) and indent subsequent lines
   with the beginning of the current parenthesis/brace nesting level. For
-  example, here is a long expression, formatted appropriately:
+  example, here are some long expressions, formatted appropriately:
 ```cpp
 if (RuntimeOption::EvalJitRegionSelector != "" &&
     (RuntimeOption::EvalHHIRRefcountOpts ||
@@ -455,7 +469,8 @@ longFunctionName(argumentTheFirst,
 - Function calls should be formatted primarily using the previous rule. If one
   or more of the arguments to the function is very wide, it may be necessary to
   shift all the arguments down one line and align them one level deeper than
-  the current scope. This is especially common when passing lambdas:
+  the current scope. This is always acceptable, but is especially common when
+  passing lambdas:
 ```cpp
 m_irb->ifThen(
   [&](Block* taken) {

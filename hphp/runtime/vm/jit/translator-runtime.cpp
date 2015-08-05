@@ -250,16 +250,16 @@ StringData* convIntToStrHelper(int64_t i) {
 
 StringData* convObjToStrHelper(ObjectData* o) {
   auto s = o->invokeToString();
-  auto r = s.get();
-  if (!r->isStatic()) r->incRefCount();
-  return r;
+  auto sd = s.get();
+  sd->incRefCount(); // includes static/uncounted check
+  return sd;
 }
 
 StringData* convResToStrHelper(ResourceData* o) {
   auto s = o->o_toString();
-  auto r = s.get();
-  if (!r->isStatic()) r->incRefCount();
-  return r;
+  auto sd = s.get();
+  sd->incRefCount(); // includes static/uncounted check
+  return sd;
 }
 
 TypedValue getMemoKeyHelper(TypedValue tv) {

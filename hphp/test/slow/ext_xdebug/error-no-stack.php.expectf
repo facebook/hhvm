@@ -1,0 +1,2 @@
+xdebug.enable = true
+Warning: This test should not print a stack. in %s/test/slow/ext_xdebug/error-no-stack.php on line %d

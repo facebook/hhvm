@@ -849,16 +849,22 @@ void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
 
   // XDebug is disabled by default.
   Config::Bind(Enable, ini, xdebug_hdf, "Eval.Debugger.XDebugEnable", false);
+
+  // Normally, php5-xdebug always prints stack traces for error reporting.  We
+  // gate this by an option, that defaults to true.
+  if (Enable) {
+    constexpr auto key = "Eval.Debugger.XDebugErrorReportStack";
+    if (Config::GetBool(ini, xdebug_hdf, key, true)) {
+      Logger::SetTheLogger(new ExtendedLogger());
+      ExtendedLogger::EnabledByDefault = true;
+    }
+  }
 }
 
 void XDebugExtension::moduleInit() {
   if (!Enable) {
     return;
   }
-
-  // Stacktraces are always on when XDebug is enabled
-  Logger::SetTheLogger(new ExtendedLogger());
-  ExtendedLogger::EnabledByDefault = true;
 
   Native::registerConstant<KindOfInt64>(
     s_XDEBUG_CC_UNUSED.get(), k_XDEBUG_CC_UNUSED

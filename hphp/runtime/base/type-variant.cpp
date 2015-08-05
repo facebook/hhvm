@@ -542,42 +542,6 @@ VarNR Variant::toKey() const {
   not_reached();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// offset functions
-
-template <typename T>
-class LvalHelper {};
-
-template<>
-class LvalHelper<int64_t> {
-public:
-  typedef int64_t KeyType;
-  static bool CheckKey(KeyType k) { return true; };
-  static const bool CheckParams = false;
-};
-
-template<>
-class LvalHelper<bool> : public LvalHelper<int64_t> {};
-
-template<>
-class LvalHelper<double> : public LvalHelper<int64_t> {};
-
-template<>
-class LvalHelper<const String&> {
-public:
-  typedef VarNR KeyType;
-  static bool CheckKey(const KeyType &k) { return true; };
-  static const bool CheckParams = true;
-};
-
-template<>
-class LvalHelper<const Variant&> {
-public:
-  typedef VarNR KeyType;
-  static bool CheckKey(const KeyType &k) { return !k.isNull(); };
-  static const bool CheckParams = true;
-};
-
 Variant& lvalBlackHole() {
   auto& bh = get_env_constants()->lvalProxy;
   bh = uninit_null();

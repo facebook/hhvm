@@ -2159,7 +2159,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
       assertx(dests.size() == 1);
       llvm::Value* packed = llvm::UndefValue::get(m_tvVectorType);
       packed = m_irb.CreateInsertElement(packed, data, cns(0));
-      packed = m_irb.CreateInsertElement(packed, type, cns(1));
+      packed = m_irb.CreateInsertElement(packed, zext(type, 64), cns(1));
       defineValue(dests[0], packed);
     }
     break;

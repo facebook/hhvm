@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const Resource Resource::s_nullResource = Resource();
+extern const Resource null_resource = Resource();
 
 Resource::~Resource() {
   // force it out of line

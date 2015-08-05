@@ -51,9 +51,11 @@ ThreadLocalManager& ThreadLocalManager::GetManager() {
 
 #ifdef __APPLE__
 ThreadLocalManager::ThreadLocalList::ThreadLocalList() {
+  pthread_t self = pthread_self();
   handler.__routine = ThreadLocalManager::OnThreadExit;
   handler.__arg = this;
-  handler.__next = pthread_self()->__cleanup_stack;
+  handler.__next = self->__cleanup_stack;
+  self->__cleanup_stack = &handler;
 }
 #endif
 

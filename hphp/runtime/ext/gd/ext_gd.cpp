@@ -3161,6 +3161,88 @@ bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
   return true;
 }
 
+const StaticString
+  s_x("x"),
+  s_y("y"),
+  s_width("width"),
+  s_height("height");
+
+Variant HHVM_FUNCTION(imagecrop, const Resource& image, const Array& rect) {
+  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr imcropped = nullptr;
+  gdRect gdrect;
+  if (!im) return false;
+  if (rect.exists(s_x)) {
+    gdrect.x = rect[s_x].toInt64();
+  }
+  else {
+    raise_warning("imagecrop(): Missing x position");
+    return false;
+  }
+  if (rect.exists(s_y)) {
+    gdrect.y = rect[s_y].toInt64();
+  }
+  else {
+    raise_warning("imagecrop(): Missing y position");
+    return false;
+  }
+  if (rect.exists(s_width)) {
+    gdrect.width = rect[s_width].toInt64();
+  }
+  else {
+    raise_warning("imagecrop(): Missing width position");
+    return false;
+  }
+  if (rect.exists(s_height)) {
+    gdrect.height = rect[s_height].toInt64();
+  }
+  else {
+    raise_warning("imagecrop(): Missing height position");
+    return false;
+  }
+
+  imcropped = gdImageCrop(im, &gdrect);
+
+  if (!imcropped) {
+    return false;
+  }
+  return Variant(req::make<Image>(imcropped));
+}
+
+Variant HHVM_FUNCTION(imagecropauto, const Resource& image, int64_t mode,
+                      double threshold, int64_t color) {
+  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr imcropped = nullptr;
+  if (!im) return false;
+  switch (mode) {
+    case -1:
+      mode = GD_CROP_DEFAULT;
+    case GD_CROP_DEFAULT:
+    case GD_CROP_TRANSPARENT:
+    case GD_CROP_BLACK:
+    case GD_CROP_WHITE:
+    case GD_CROP_SIDES:
+      imcropped = gdImageCropAuto(im, mode);
+      break;
+
+    case GD_CROP_THRESHOLD:
+      if (color < 0) {
+        raise_warning("imagecropauto(): Color argument missing with threshold mode");
+        return false;
+      }
+      imcropped = gdImageCropThreshold(im, color, (float) threshold);
+      break;
+
+    default:
+      raise_warning("imagecropauto(): Unknown crop mode");
+      return false;
+  }
+  if (!imcropped) {
+    return false;
+  }
+  return Variant(req::make<Image>(imcropped));
+}
+
 Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
   gdImagePtr im;
 
@@ -3248,6 +3330,188 @@ bool HHVM_FUNCTION(imagefilledarc, const Resource& image,
   if (start < 0) start %= 360;
   gdImageFilledArc(im, cx, cy, width, height, start, end, color, style);
   return true;
+}
+
+Variant HHVM_FUNCTION(imageaffine, const Resource& image, const Array& affine,
+    const Array& clip) {
+  gdImagePtr src = cast<Image>(image)->get();
+  if (!src) return false;
+  gdImagePtr dst = nullptr;
+  gdRect rect;
+  gdRectPtr pRect = NULL;
+  int nelem = affine.size();
+  int i;
+  double daffine[6];
+
+  if (nelem != 6) {
+    raise_warning("imageaffine(): Affine array must have six elements");
+    return false;
+  }
+
+  for (i = 0; i < nelem; i++) {
+    if (affine[i].isInteger()) {
+      daffine[i] = affine[i].toInt64();
+    } else if (affine[i].isDouble() || affine[i].isString()) {
+      daffine[i] = affine[i].toDouble();
+    } else {
+      raise_warning("imageaffine(): Invalid type for element %i", i);
+      return false;
+    }
+  }
+
+  if (!clip.empty()) {
+    if (clip.exists(s_x)) {
+      rect.x = clip[s_x].toInt64();
+    } else {
+      raise_warning("imageaffine(): Missing x position");
+      return false;
+    }
+    if (clip.exists(s_y)) {
+      rect.y = clip[s_y].toInt64();
+    } else {
+      raise_warning("imageaffine(): Missing y position");
+      return false;
+    } if (clip.exists(s_width)) {
+      rect.width = clip[s_width].toInt64();
+    } else {
+      raise_warning("imageaffine(): Missing width position");
+      return false;
+    }
+    if (clip.exists(s_height)) {
+      rect.height = clip[s_height].toInt64();
+    } else {
+      raise_warning("imageaffine(): Missing height position");
+      return false;
+    }
+    pRect = &rect;
+  } else {
+    rect.x = -1;
+    rect.y = -1;
+    rect.width = gdImageSX(src);
+    rect.height = gdImageSY(src);
+    pRect = NULL;
+  }
+
+  if (gdTransformAffineGetImage(&dst, src, pRect, daffine) != GD_TRUE) {
+    return false;
+  }
+  return Variant(req::make<Image>(dst));
+}
+
+Variant HHVM_FUNCTION(imageaffinematrixconcat, const Array& m1,
+    const Array& m2) {
+  int nelem1 = m1.size();
+  int nelem2 = m2.size();
+  int i;
+  double dm1[6];
+  double dm2[6];
+  double dmr[6];
+  Array ret = Array::Create();
+
+  if (nelem1 != 6 || nelem2 != 6) {
+    raise_warning("imageaffinematrixconcat(): Affine array must have six elements");
+    return false;
+  }
+
+  for (i = 0; i < 6; i++) {
+    if (m1[i].isInteger()) {
+      dm1[i] = m1[i].toInt64();
+    } else if (m1[i].isDouble() || m1[i].isString()) {
+      dm1[i] = m1[i].toDouble();
+    } else {
+      raise_warning("imageaffinematrixconcat(): Invalid type for element %i", i);
+      return false;
+    }
+    if (m2[i].isInteger()) {
+      dm2[i] = m2[i].toInt64();
+    } else if (m2[i].isDouble() || m2[i].isString()) {
+      dm2[i] = m2[i].toDouble();
+    } else {
+      raise_warning("imageaffinematrixconcat():Invalid type for element %i", i);
+      return false;
+    }
+  }
+  if (gdAffineConcat(dmr, dm1, dm2) != GD_TRUE) {
+    return false;
+  }
+
+  for (i = 0; i < 6; i++) {
+    ret.set(String(i, CopyString), dmr[i]);
+  }
+  return ret;
+}
+
+Variant HHVM_FUNCTION(imageaffinematrixget, int64_t type,
+    const Variant& options) {
+  Array ret = Array::Create();
+  double affine[6];
+  int res = GD_FALSE, i;
+
+  switch((gdAffineStandardMatrix)type) {
+    case GD_AFFINE_TRANSLATE:
+    case GD_AFFINE_SCALE: {
+      double x, y;
+      Array aoptions = options.toArray();
+      if (aoptions.empty()) {
+        raise_warning("imageaffinematrixget(): Array expected as options");
+        return false;
+      }
+      if (aoptions.exists(s_x)) {
+        x = aoptions[s_x].toDouble();
+      } else {
+        raise_warning("imageaffinematrixget(): Missing x position");
+        return false;
+      }
+      if (aoptions.exists(s_y)) {
+        y = aoptions[s_y].toDouble();
+      } else {
+        raise_warning("imageaffinematrixget(): Missing x position");
+        return false;
+      }
+
+      if (type == GD_AFFINE_TRANSLATE) {
+        res = gdAffineTranslate(affine, x, y);
+      } else {
+        res = gdAffineScale(affine, x, y);
+      }
+      break;
+    }
+
+    case GD_AFFINE_ROTATE:
+    case GD_AFFINE_SHEAR_HORIZONTAL:
+    case GD_AFFINE_SHEAR_VERTICAL: {
+      double angle;
+      double doptions = options.toDouble();
+      if (!doptions) {
+        raise_warning("imageaffinematrixget(): Number is expected as option");
+        return false;
+      }
+
+      angle = doptions;
+
+      if (type == GD_AFFINE_SHEAR_HORIZONTAL) {
+        res = gdAffineShearHorizontal(affine, angle);
+      } else if (type == GD_AFFINE_SHEAR_VERTICAL) {
+        res = gdAffineShearVertical(affine, angle);
+      } else {
+        res = gdAffineRotate(affine, angle);
+      }
+      break;
+    }
+
+    default:
+      raise_warning("imageaffinematrixget():Invalid type for element %li", type);
+      return false;
+  }
+
+  if (res == GD_FALSE) {
+    return false;
+  } else {
+    for (i = 0; i < 6; i++) {
+      ret.set(String(i, CopyString), affine[i]);
+    }
+  }
+  return ret;
 }
 
 bool HHVM_FUNCTION(imagealphablending, const Resource& image,
@@ -4189,6 +4453,33 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
                                           arg3.toInt64(), arg4.toInt64());
   }
   return false;
+}
+
+bool HHVM_FUNCTION(imageflip, const Resource& image,
+    int64_t mode /*=GD_FLIP_HORINZONTAL*/) {
+  gdImagePtr im = cast<Image>(image)->get();
+  if (!im) return false;
+  if (mode == -1) mode = GD_FLIP_HORINZONTAL;
+
+  switch (mode) {
+    case GD_FLIP_VERTICAL:
+      gdImageFlipVertical(im);
+      break;
+
+    case GD_FLIP_HORINZONTAL:
+      gdImageFlipHorizontal(im);
+      break;
+
+    case GD_FLIP_BOTH:
+      gdImageFlipBoth(im);
+      break;
+
+    default:
+      raise_warning("imageflip(): Unknown flip mode");
+      return false;
+  }
+
+  return true;
 }
 
 // gdImageConvolution does not exist in our libgd.a, copied from
@@ -8103,6 +8394,9 @@ class GdExtension final : public Extension {
 #ifdef HAVE_GD_WBMP
     HHVM_FE(image2wbmp);
 #endif
+    HHVM_FE(imageaffine);
+    HHVM_FE(imageaffinematrixconcat);
+    HHVM_FE(imageaffinematrixget);
     HHVM_FE(imagealphablending);
     HHVM_FE(imageantialias);
     HHVM_FE(imagearc);
@@ -8159,6 +8453,8 @@ class GdExtension final : public Extension {
     HHVM_FE(imagecreatefromxpm);
 #endif
     HHVM_FE(imagecreatetruecolor);
+    HHVM_FE(imagecrop);
+    HHVM_FE(imagecropauto);
     HHVM_FE(imagedashedline);
     HHVM_FE(imagedestroy);
     HHVM_FE(imageellipse);
@@ -8173,6 +8469,7 @@ class GdExtension final : public Extension {
     HHVM_FE(imagefilledrectangle);
     HHVM_FE(imagefilltoborder);
     HHVM_FE(imagefilter);
+    HHVM_FE(imageflip);
     HHVM_FE(imagefontheight);
     HHVM_FE(imagefontwidth);
 #if defined(ENABLE_GD_TTF) && HAVE_LIBGD20 && \

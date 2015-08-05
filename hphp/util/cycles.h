@@ -18,6 +18,9 @@
 #define incl_HPHP_TSC_H_
 
 #include "hphp/util/assertions.h"
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
 
 namespace HPHP {
 
@@ -36,6 +39,8 @@ inline uint64_t cpuCycles() {
   uint64_t tb;
   asm volatile("mfspr %0, 268" : "=r" (tb));
   return tb;
+#elif _MSC_VER
+  return (uint64_t)__rdtsc();
 #else
   not_implemented();
 #endif

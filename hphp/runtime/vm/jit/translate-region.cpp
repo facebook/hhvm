@@ -560,6 +560,10 @@ TranslateResult irGenRegion(IRGS& irgs,
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
+  if (RuntimeOption::EvalDumpRegion) {
+    mcg->annotations().emplace_back("RegionDesc", show(region));
+  }
+
   std::string errorMsg;
   always_assert_flog(check(region, errorMsg), "{}", errorMsg);
 

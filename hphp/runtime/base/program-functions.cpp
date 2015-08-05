@@ -691,7 +691,9 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   MM().collect();
-  if (RuntimeOption::EvalDumpTC || RuntimeOption::EvalDumpIR) {
+  if (RuntimeOption::EvalDumpTC ||
+      RuntimeOption::EvalDumpIR ||
+      RuntimeOption::EvalDumpRegion) {
     HPHP::jit::tc_dump();
   }
   if (xhprof) {

@@ -666,7 +666,7 @@ Block* find_exit_placeholder(LoopEnv& env) {
 
 void hoist_side_exits(LoopEnv& env) {
   auto const side_exit = find_exit_placeholder(env);
-  if (!side_exit) return;
+  assertx(side_exit);
   for (auto& check : env.hoistable_as_side_exits) {
     hoist_check_instruction(env, check, side_exit, "side-exit");
   }

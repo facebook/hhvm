@@ -1488,7 +1488,7 @@ void translateInstr(
   IRGS& irgs,
   const NormalizedInstruction& ni,
   bool checkOuterTypeOnly,
-  bool needsExitPlaceholder
+  bool firstInst
 ) {
   irgen::prepareForNextHHBC(
     irgs,
@@ -1514,12 +1514,11 @@ void translateInstr(
 
   if (RuntimeOption::EvalHHIRConstrictGuards) {
     emitInputChecks(irgs, ni, checkOuterTypeOnly);
+    if (firstInst) irgen::gen(irgs, EndGuards);
   }
 
   FTRACE(1, "\nTranslating {}: {} with state:\n{}\n",
          ni.offset(), ni, show(irgs));
-
-  if (needsExitPlaceholder) irgen::makeExitPlaceholder(irgs);
 
   irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(irgs, Stats::Instr_TC, 1);

@@ -626,7 +626,7 @@ void translateInstr(
   IRGS&,
   const NormalizedInstruction&,
   bool checkOuterTypeOnly,
-  bool needsExitPlaceholder
+  bool firstInst
 );
 
 extern bool tc_dump();

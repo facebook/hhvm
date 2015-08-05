@@ -40,22 +40,136 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+#if defined(__APPLE__)
+
+RequestTimer::RequestTimer(RequestInjectionData* data)
+    : m_reqInjectionData(data)
+    , m_timeoutSeconds(0)
+    , m_timerSource(nullptr)
+{
+  // Unlike the canonical Linux implementation, this does not distinguish
+  // between whether we wanted real seconds or CPU seconds -- you always get
+  // real seconds. There isn't a nice way to get CPU seconds on OS X that I've
+  // found, outside of setitimer, which has its own configurability issues. So
+  // we just always give real seconds, which is "close enough".
+
+  m_timerGroup = dispatch_group_create();
+}
+
+RequestTimer::~RequestTimer() {
+  cancelTimerSource();
+  dispatch_release(m_timerGroup);
+}
+
+void RequestTimer::cancelTimerSource() {
+  if (m_timerSource) {
+    dispatch_source_cancel(m_timerSource);
+    dispatch_group_wait(m_timerGroup, DISPATCH_TIME_FOREVER);
+
+    // At this point it is safe to free memory, the source or even ourselves (if
+    // this is part of the destructor). See the way we set up the timer group
+    // and cancellation handler in setTimeout() below.
+
+    dispatch_release(m_timerSource);
+    m_timerSource = nullptr;
+  }
+}
+
+void RequestTimer::setTimeout(int seconds) {
+  m_timeoutSeconds = seconds > 0 ? seconds : 0;
+
+  cancelTimerSource();
+
+  if (!m_timeoutSeconds) {
+    return;
+  }
+
+  dispatch_queue_t q =
+    dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+  m_timerSource = dispatch_source_create(
+    DISPATCH_SOURCE_TYPE_TIMER, 0, DISPATCH_TIMER_STRICT, q);
+
+  dispatch_time_t t =
+    dispatch_time(DISPATCH_TIME_NOW, m_timeoutSeconds * NSEC_PER_SEC);
+  dispatch_source_set_timer(m_timerSource, t, DISPATCH_TIME_FOREVER, 0);
+
+  // Use the timer group as a semaphore. When the source is cancelled,
+  // libdispatch will make sure all pending event handlers have finished before
+  // invoking the cancel handler. This means that if we cancel the source and
+  // then wait on the timer group, when we are done waiting, we know the source
+  // is completely done and it's safe to free memory (e.g., in the destructor).
+  // See cancelTimerSource() above.
+  dispatch_group_enter(m_timerGroup);
+  dispatch_source_set_event_handler(m_timerSource, ^{
+    onTimeout();
+
+    // Cancelling ourselves isn't needed for correctness, but we can go ahead
+    // and do it now instead of waiting on it later, so why not. (Also,
+    // getRemainingTime does use this opportunistically, but it's best effort.)
+    dispatch_source_cancel(m_timerSource);
+  });
+  dispatch_source_set_cancel_handler(m_timerSource, ^{
+    dispatch_group_leave(m_timerGroup);
+  });
+
+  dispatch_resume(m_timerSource);
+}
+
+
+void RequestTimer::onTimeout() {
+  m_reqInjectionData->onTimeout(this);
+}
+
+int RequestTimer::getRemainingTime() const {
+  // Unfortunately, not a good way to detect this. The best we can say is if the
+  // timer exists and fired and cancelled itself, we can clip to 0, otherwise
+  // just return the full timeout seconds. In principle, we could use the
+  // interval configuration of the timer to count down one second at a time,
+  // but that doesn't seem worth it.
+  if (m_timerSource && dispatch_source_testcancel(m_timerSource)) {
+    return 0;
+  }
+
+  return m_timeoutSeconds;
+}
+
+#elif defined(_MSC_VER)
+
+RequestTimer::RequestTimer(RequestInjectionData* data)
+    : m_reqInjectionData(data)
+    , m_timeoutSeconds(0)
+{}
+
+RequestTimer::~RequestTimer() {
+}
+
+void RequestTimer::setTimeout(int seconds) {
+  m_timeoutSeconds = seconds > 0 ? seconds : 0;
+}
+
+
+void RequestTimer::onTimeout() {
+  m_reqInjectionData->onTimeout(this);
+}
+
+int RequestTimer::getRemainingTime() const {
+  return m_timeoutSeconds;
+}
+
+#else
+
 RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
     : m_reqInjectionData(data)
-#if !defined(__APPLE__) && !defined(_MSC_VER)
+    , m_timeoutSeconds(0)  // no timeout by default
     , m_clockType(clockType)
     , m_hasTimer(false)
-#endif
-    , m_timeoutSeconds(0)  // no timeout by default
     , m_timerActive(false)
 {}
 
 RequestTimer::~RequestTimer() {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_hasTimer) {
     timer_delete(m_timer_id);
   }
-#endif
 }
 
 /*
@@ -63,7 +177,6 @@ RequestTimer::~RequestTimer() {
  * makes use of this.
  */
 void RequestTimer::setTimeout(int seconds) {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   m_timeoutSeconds = seconds > 0 ? seconds : 0;
   if (!m_hasTimer) {
     if (!m_timeoutSeconds) {
@@ -109,7 +222,6 @@ void RequestTimer::setTimeout(int seconds) {
   } else {
     m_timerActive.store(false, std::memory_order_relaxed);
   }
-#endif
 }
 
 void RequestTimer::onTimeout() {
@@ -117,7 +229,6 @@ void RequestTimer::onTimeout() {
 }
 
 int RequestTimer::getRemainingTime() const {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_hasTimer) {
     itimerspec ts;
     if (!timer_gettime(m_timer_id, &ts)) {
@@ -125,9 +236,9 @@ int RequestTimer::getRemainingTime() const {
       return remaining > 1 ? remaining : 1;
     }
   }
-#endif
   return m_timeoutSeconds;
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -406,10 +517,14 @@ void RequestInjectionData::onSessionInit() {
 void RequestInjectionData::onTimeout(RequestTimer* timer) {
   if (timer == &m_timer) {
     setFlag(TimedOutFlag);
+#if !defined(__APPLE__) && !defined(_MSC_VER)
     m_timer.m_timerActive.store(false, std::memory_order_relaxed);
+#endif
   } else if (timer == &m_cpuTimer) {
     setFlag(CPUTimedOutFlag);
+#if !defined(__APPLE__) && !defined(_MSC_VER)
     m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
+#endif
   } else {
     always_assert(false && "Unknown timer fired");
   }

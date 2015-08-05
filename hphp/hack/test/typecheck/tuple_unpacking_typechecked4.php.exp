@@ -1,0 +1,4 @@
+File "tuple_unpacking_typechecked4.php", line 7, characters 3-13:
+Too few arguments (Typing[4104])
+File "tuple_unpacking_typechecked4.php", line 3, characters 10-10:
+Definition is here

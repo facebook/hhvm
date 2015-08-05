@@ -1,0 +1,6 @@
+File "tuple_unpacking_typechecked6.php", line 8, characters 11-15:
+Invalid argument (Typing[4110])
+File "tuple_unpacking_typechecked6.php", line 3, characters 39-44:
+This is a string
+File "tuple_unpacking_typechecked6.php", line 6, characters 22-22:
+It is incompatible with an int

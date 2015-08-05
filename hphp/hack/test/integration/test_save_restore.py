@@ -341,14 +341,6 @@ class TestSaveRestore(unittest.TestCase):
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'))
 
-        # adding flags to hh_client check disables the autostart behavior, so
-        # we start up hh_server manually
-        proc_call([
-            self.hh_client,
-            'start',
-            self.repo_dir
-        ])
-
         self.check_cmd([
             'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
             ], options=['--search', 'some_lo'])

@@ -1,0 +1,3 @@
+shape<FieldsFullyKnown>(bar => [1]intersect(Tbool), baz => [2]intersect(Tstring), foo => [3]intersect(Tint), xyz => [4]intersect(Tfloat))
+shape<FieldsFullyKnown>(bar => [5]intersect(Tbool), baz => [6]intersect(Tstring), foo => [7]intersect(Tint), xyz => [8]intersect(Tfloat))
+No errors

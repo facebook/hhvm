@@ -61,7 +61,7 @@ function imageaffinematrixconcat(array $m1, array $m2): mixed;
 /* Return an image containing the affine tramsformed src image, using an optional clipping area.
  */
 <<__Native>>
-function imageaffinematrixget(int $type, mixed $option = []): mixed;
+function imageaffinematrixget(int $type, mixed $options = []): mixed;
 
 /* imagealphablending() allows for two different modes of drawing on truecolor
  * images. In blending mode, the alpha channel component of the color supplied

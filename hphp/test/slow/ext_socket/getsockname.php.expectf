@@ -1,0 +1,6 @@
+resource(%d) of type (stream)
+bool(true)
+bool(true)
+string(%d) "/tmp/socktest%d"
+string(%d) "/tmp/socktest%d"
+bool(true)

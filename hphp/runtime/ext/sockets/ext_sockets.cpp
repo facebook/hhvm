@@ -109,7 +109,12 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
       // struct without sun_path.
       struct sockaddr_un *s_un = (struct sockaddr_un *)sa;
       if (salen > offsetof(sockaddr_un, sun_path)) {
-        address = String(s_un->sun_path, CopyString);
+        assert(strlen(s_un->sun_path) ==
+          salen - offsetof(sockaddr_un, sun_path) - 1);
+        address = String(
+          s_un->sun_path,
+          salen - offsetof(sockaddr_un, sun_path) - 1,
+          CopyString);
       } else {
         address = empty_string();
       }

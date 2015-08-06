@@ -2309,15 +2309,11 @@ void LLVMEmitter::emit(const fallback& inst) {
   if (inst.trflags.packed == 0) {
     stub = sr->getFallbackTranslation();
   } else {
-    auto& frozen = m_text.frozen().code;
-    auto const spOff = inst.dest.resumed() ? folly::Optional<FPInvOffset>{}
-                                           : sr->nonResumedSPOff();
-    stub = svcreq::emit_persistent(
-      frozen,
-      spOff,
-      REQ_RETRANSLATE,
-      inst.dest.offset(),
-      inst.trflags.packed
+    stub = svcreq::emit_retranslate_stub(
+      m_text.frozen().code,
+      inst.spOff,
+      inst.dest,
+      inst.trflags
     );
   }
 
@@ -2340,7 +2336,7 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
   emitJcc(
     inst.sf, inst.cc, "guard",
     [&] {
-      emit(fallback{inst.dest, inst.trflags, inst.args});
+      emit(fallback{inst.dest, inst.spOff, inst.trflags, inst.args});
     }
   );
 }

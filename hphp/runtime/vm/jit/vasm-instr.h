@@ -63,8 +63,8 @@ struct Vunit;
   O(bindjmp, I(target) I(spOff) I(trflags), U(args), Dn)\
   O(callstub, I(target), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
-  O(fallback, I(dest), U(args), Dn)\
-  O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
+  O(fallback, I(dest) I(spOff), U(args), Dn)\
+  O(fallbackcc, I(cc) I(dest) I(spOff), U(sf) U(args), Dn)\
   O(svcreqstub, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   /* vasm intrinsics */\
   O(callfaststub, I(fix), U(args), Dn)\
@@ -277,11 +277,13 @@ struct fallbackcc {
   explicit fallbackcc(ConditionCode cc,
                       VregSF sf,
                       SrcKey dest,
+                      FPInvOffset spOff,
                       TransFlags trflags,
                       RegSet args)
     : cc{cc}
     , sf{sf}
     , dest{dest}
+    , spOff(spOff)
     , trflags{trflags}
     , args{args}
   {}
@@ -289,20 +291,24 @@ struct fallbackcc {
   ConditionCode cc;
   VregSF sf;
   SrcKey dest;
+  FPInvOffset spOff;
   TransFlags trflags;
   RegSet args;
 };
 
 struct fallback {
   explicit fallback(SrcKey dest,
+                    FPInvOffset spOff,
                     TransFlags trflags,
                     RegSet args)
     : dest{dest}
+    , spOff(spOff)
     , trflags{trflags}
     , args{args}
   {}
 
   SrcKey dest;
+  FPInvOffset spOff;
   TransFlags trflags;
   RegSet args;
 };

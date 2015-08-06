@@ -173,13 +173,7 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
-  void emitFallbackJump(CodeBlock& cb, ConditionCode cc = CC_None);
   void registerFallbackJump(TCA from, ConditionCode cc = CC_None);
-  void emitFallbackJumpCustom(CodeBlock& cb,
-                              CodeBlock& frozen,
-                              SrcKey sk,
-                              TransFlags trflags,
-                              ConditionCode cc = CC_None);
   TCA getFallbackTranslation() const;
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);

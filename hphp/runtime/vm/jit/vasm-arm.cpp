@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -107,13 +106,9 @@ struct Vgen {
 
   // intrinsics
   void emit(bindcall& i);
-  void emit(bindjcc& i);
-  void emit(bindjmp& i);
   void emit(copy& i);
   void emit(copy2& i);
   void emit(debugtrap& i) { a->Brk(0); }
-  void emit(fallbackcc i);
-  void emit(fallback& i);
   void emit(hcsync& i);
   void emit(hcnocatch& i);
   void emit(hcunwind& i);
@@ -212,15 +207,6 @@ void Vgen::emit(bindcall& i) {
   mcg->backEnd().emitSmashableCall(*codeBlock, i.stub);
 }
 
-void Vgen::emit(bindjcc& i) {
-  emitBindJ(*codeBlock, frozen(), i.cc, i.target);
-}
-
-void Vgen::emit(bindjmp& i) {
-  // XXX what about trflags
-  emitBindJ(*codeBlock, frozen(), CC_None, i.target);
-}
-
 void Vgen::emit(copy& i) {
   if (i.s.isGP() && i.d.isGP()) {
     a->Mov(X(i.d), X(i.s));
@@ -247,19 +233,6 @@ void Vgen::emit(copy2& i) {
       emitXorSwap(*a, X(how.m_dst), X(how.m_src));
     }
   }
-}
-
-void Vgen::emit(fallbackcc i) {
-  auto const destSR = mcg->tx().getSrcRec(i.dest);
-  if (!i.trflags.packed) {
-    destSR->emitFallbackJump(*codeBlock, i.cc);
-  } else {
-    destSR->emitFallbackJumpCustom(*codeBlock, frozen(), i.dest, i.trflags);
-  }
-}
-
-void Vgen::emit(fallback& i) {
-  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags, i.args});
 }
 
 void Vgen::emit(hcsync& i) {

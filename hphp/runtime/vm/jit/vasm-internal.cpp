@@ -152,4 +152,76 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
+  auto& frozen = env.text.frozen().code;
+
+  TCA stub = nullptr;
+
+  switch (p.svcreq.op) {
+    case Vinstr::bindjmp:
+      { auto const& i = p.svcreq.bindjmp_;
+        assertx(p.jmp && !p.jcc);
+        stub = svcreq::emit_bindjmp_stub(frozen, i.spOff, p.jmp,
+                                         i.target, i.trflags);
+      } break;
+
+    case Vinstr::bindjcc:
+      { auto const& i = p.svcreq.bindjcc_;
+        assertx(!p.jmp && p.jcc);
+        stub = svcreq::emit_bindjmp_stub(frozen, i.spOff, p.jcc,
+                                         i.target, i.trflags);
+      } break;
+
+    case Vinstr::bindaddr:
+      { auto const& i = p.svcreq.bindaddr_;
+        assertx(!p.jmp && !p.jcc);
+        stub = svcreq::emit_bindaddr_stub(frozen, i.spOff, i.dest,
+                                          i.sk, TransFlags{});
+        *i.dest = stub;
+      } break;
+
+    case Vinstr::bindjcc1st:
+      { auto const& i = p.svcreq.bindjcc1st_;
+        assertx(p.jmp && p.jcc);
+        stub = svcreq::emit_bindjcc1st_stub(frozen, i.spOff, p.jcc,
+                                            i.targets[1], i.targets[0], i.cc);
+      } break;
+
+    case Vinstr::fallback:
+      { auto const& i = p.svcreq.fallback_;
+        assertx(p.jmp && !p.jcc);
+
+        auto const srcrec = mcg->tx().getSrcRec(i.dest);
+        stub = i.trflags.packed
+          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.dest, i.trflags)
+          : srcrec->getFallbackTranslation();
+      } break;
+
+    case Vinstr::fallbackcc:
+      { auto const& i = p.svcreq.fallbackcc_;
+        assertx(!p.jmp && p.jcc);
+
+        auto const srcrec = mcg->tx().getSrcRec(i.dest);
+        stub = i.trflags.packed
+          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.dest, i.trflags)
+          : srcrec->getFallbackTranslation();
+      } break;
+
+    default: always_assert(false);
+  }
+  assertx(stub != nullptr);
+
+  // Register any necessary patches by creating fake labels for the stubs.
+  if (p.jmp) {
+    env.jmps.push_back({p.jmp, Vlabel { env.addrs.size() }});
+    env.addrs.push_back(stub);
+  }
+  if (p.jcc) {
+    env.jccs.push_back({p.jcc, Vlabel { env.addrs.size() }});
+    env.addrs.push_back(stub);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

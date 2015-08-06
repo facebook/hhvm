@@ -92,6 +92,11 @@ bool is_empty_catch(const Vblock& block);
  */
 void register_catch_block(const Venv& env, const Venv::LabelPatch& p);
 
+/*
+ * Emit a service request stub and register a patch point as needed.
+ */
+void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -151,8 +156,13 @@ void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
     irmu.register_block_end();
   }
 
+  // Emit service request stubs and register patch points.
+  for (auto& p : env.stubs) vasm_detail::emit_svcreq_stub(env, p);
+
+  // Patch up jump targets and friends.
   Vemit::patch(env);
 
+  // Register catch blocks.
   for (auto& p : env.catches) {
     vasm_detail::register_catch_block(env, p);
   }

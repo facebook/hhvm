@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
-#define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
+
+#ifndef incl_HPHP_JIT_SERVICE_REQUESTS_H_
+#define incl_HPHP_JIT_SERVICE_REQUESTS_H_
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -203,6 +204,15 @@ TCA emit_ephemeral(CodeBlock& cb,
                    folly::Optional<FPInvOffset> spOff,
                    ServiceRequest sr,
                    Args... args);
+
+TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff,
+                      TCA jmp, SrcKey target, TransFlags trflags);
+TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff,
+                       TCA* addr, SrcKey target, TransFlags trflags);
+TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff,
+                         TCA jcc, SrcKey taken, SrcKey next, ConditionCode cc);
+TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
+                          SrcKey target, TransFlags trflags);
 
 /*
  * Space used by an ephemeral stub.

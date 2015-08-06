@@ -61,6 +61,7 @@ struct Vgen {
     , jmps(env.jmps)
     , jccs(env.jccs)
     , catches(env.catches)
+    , stubs(env.stubs)
   {}
 
   static void patch(Venv& env);
@@ -259,6 +260,7 @@ private:
   jit::vector<Venv::LabelPatch>& jmps;
   jit::vector<Venv::LabelPatch>& jccs;
   jit::vector<Venv::LabelPatch>& catches;
+  jit::vector<Venv::SvcReqPatch>& stubs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -423,8 +425,9 @@ void Vgen::emit(const copy2& i) {
 }
 
 void Vgen::emit(const bindaddr& i) {
-  *i.dest = emitBindAddr(a->code(), frozen(), i.dest, i.sk, i.spOff);
+  stubs.push_back({nullptr, nullptr, i});
   mcg->setJmpTransID(TCA(i.dest));
+  mcg->cgFixups().m_codePointers.insert(i.dest);
 }
 
 void Vgen::emit(const bindcall& i) {
@@ -434,30 +437,35 @@ void Vgen::emit(const bindcall& i) {
 }
 
 void Vgen::emit(const bindjcc1st& i) {
-  emitBindJmpccFirst(a->code(), frozen(), i.cc, i.targets[0], i.targets[1],
-                     i.spOff);
+  mcg->backEnd().prepareForTestAndSmash(a->code(), 0,
+                                        TestAndSmashFlags::kAlignJccAndJmp);
+  auto const jcc_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
+  auto const jmp_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, CC_None);
+
+  stubs.push_back({jmp_addr, jcc_addr, i});
+
+  mcg->setJmpTransID(jmp_addr);
+  mcg->setJmpTransID(jcc_addr);
 }
 
 void Vgen::emit(const bindjcc& i) {
-  emitBindJ(
-    a->code(),
-    frozen(),
-    i.cc,
-    i.target,
-    i.spOff,
-    i.trflags
-  );
+  mcg->backEnd().prepareForSmash(a->code(), kJmpccLen);
+  auto const jcc_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
+
+  stubs.push_back({nullptr, jcc_addr, i});
+  mcg->setJmpTransID(jcc_addr);
 }
 
 void Vgen::emit(const bindjmp& i) {
-  emitBindJ(
-    a->code(),
-    frozen(),
-    CC_None,
-    i.target,
-    i.spOff,
-    i.trflags
-  );
+  mcg->backEnd().prepareForSmash(a->code(), kJmpLen);
+  auto const jmp_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), a->frontier(), CC_None);
+
+  stubs.push_back({jmp_addr, nullptr, i});
+  mcg->setJmpTransID(jmp_addr);
 }
 
 void Vgen::emit(const callstub& i) {
@@ -470,16 +478,25 @@ void Vgen::emit(const callfaststub& i) {
 }
 
 void Vgen::emit(const fallback& i) {
-  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags, i.args});
+  mcg->backEnd().prepareForSmash(a->code(), kJmpLen);
+  auto const jmp_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), a->frontier(), CC_None);
+
+  stubs.push_back({jmp_addr, nullptr, i});
+
+  auto const srcrec = mcg->tx().getSrcRec(i.dest);
+  srcrec->registerFallbackJump(jmp_addr, CC_None);
 }
 
 void Vgen::emit(const fallbackcc& i) {
-  auto const destSR = mcg->tx().getSrcRec(i.dest);
-  if (!i.trflags.packed) {
-    destSR->emitFallbackJump(a->code(), i.cc);
-  } else {
-    destSR->emitFallbackJumpCustom(a->code(), frozen(), i.dest, i.trflags);
-  }
+  mcg->backEnd().prepareForSmash(a->code(), kJmpccLen);
+  auto const jcc_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
+
+  stubs.push_back({nullptr, jcc_addr, i});
+
+  auto const srcrec = mcg->tx().getSrcRec(i.dest);
+  srcrec->registerFallbackJump(jcc_addr, i.cc);
 }
 
 void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {

@@ -55,6 +55,7 @@ PhysReg rvmtl();
  */
 PhysReg r_svcreq_req();
 PhysReg r_svcreq_stub();
+PhysReg r_svcreq_sf();
 PhysReg r_svcreq_arg(unsigned i);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/trace.h"
 
@@ -154,19 +153,6 @@ void SrcRec::chainFrom(IncomingBranch br) {
   }
 }
 
-void SrcRec::emitFallbackJump(CodeBlock& cb, ConditionCode cc /* = -1 */) {
-  // This is a spurious platform dependency. TODO(2990497)
-  mcg->backEnd().prepareForSmash(
-    cb,
-    cc == CC_None ? x64::kJmpLen : x64::kJmpccLen
-  );
-
-  auto from = cb.frontier();
-  TCA destAddr = getFallbackTranslation();
-  mcg->backEnd().emitSmashableJump(cb, destAddr, cc);
-  registerFallbackJump(from, cc);
-}
-
 void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
   auto incoming = cc < 0 ? IncomingBranch::jmpFrom(from)
                          : IncomingBranch::jccFrom(from);
@@ -174,18 +160,6 @@ void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.
   mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
-}
-
-void SrcRec::emitFallbackJumpCustom(CodeBlock& cb,
-                                    CodeBlock& frozen,
-                                    SrcKey sk,
-                                    TransFlags trflags,
-                                    ConditionCode cc) {
-  // Another platform dependency (the same one as above). TODO(2990497)
-  auto optSPOff = folly::Optional<FPInvOffset>{};
-  if (!sk.resumed()) optSPOff = nonResumedSPOff();
-  auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, optSPOff, trflags);
-  registerFallbackJump(toSmash, cc);
 }
 
 void SrcRec::newTranslation(TransLoc loc,

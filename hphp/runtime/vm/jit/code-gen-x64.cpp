@@ -56,7 +56,6 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -2355,8 +2354,14 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   auto const destSK = m_state.unit.initSrcKey();
   auto const extra  = inst->extra<ReqRetranslate>();
   auto& v = vmain();
+
   maybe_syncsp(v, inst->marker(), srcLoc(inst, 0).reg(), extra->irSPOff);
-  v << fallback{destSK, extra->trflags, leave_trace_args(inst->marker())};
+  v << fallback{
+    destSK,
+    inst->marker().spOff(),
+    extra->trflags,
+    leave_trace_args(inst->marker())
+  };
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
@@ -2940,6 +2945,10 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const rds = rVmTl;
   auto& v = vmain();
   auto& vc = vcold();
+
+  // An intentionally funny-looking-in-core-dumps constant for uninitialized
+  // instruction pointers.
+  constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
 
   auto const ar = argc * sizeof(TypedValue);
   v << store{rFP, rSP[cellsToBytes(extra->spOffset.offset) +

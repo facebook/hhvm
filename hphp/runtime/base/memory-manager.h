@@ -979,6 +979,8 @@ private:
   void dropRootMaps();
   void deleteRootMaps();
 
+  void eagerGCCheck();
+
   template <typename T>
   typename std::enable_if<
     std::is_base_of<ResourceData,T>::value,

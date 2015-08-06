@@ -551,6 +551,11 @@ public:
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, CheckHeapOnAlloc,            false)                           \
   F(bool, EnableGC,                    false)                           \
+  /*
+    Run GC on every allocation/deallocation with probability 1/N (0 to
+    disable). Requires EnableGC=true with debug build.
+  */                                                                    \
+  F(uint32_t, EagerGCProbability,   0)                                  \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \

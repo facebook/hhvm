@@ -46,12 +46,20 @@ enum SurpriseFlag : size_t {
   CPUTimedOutFlag      = 1ul << 58,
   IntervalTimerFlag    = 1ul << 59,
 
+  /* Set if a GC should be run at the next safe point. */
+  PendingGCFlag        = 1ul << 60,
+
   /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to
    * PHP-visible signals/exceptions and resource limits.
    */
-  ResourceFlags = MemExceededFlag | TimedOutFlag | CPUTimedOutFlag,
+  ResourceFlags =
+    MemExceededFlag |
+    TimedOutFlag |
+    CPUTimedOutFlag |
+    PendingGCFlag,
+
   StickyFlags =
     AsyncEventHookFlag |
     DebuggerHookFlag |

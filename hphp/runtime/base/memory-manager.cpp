@@ -35,6 +35,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
+#include <folly/Random.h>
 #include <folly/ScopeGuard.h>
 #include "hphp/runtime/base/memory-manager-defs.h"
 
@@ -604,6 +605,7 @@ inline void* MemoryManager::realloc(void* ptr, size_t nbytes) {
     return newmem;
   }
   // Ok, it's a big allocation.
+  if (debug) eagerGCCheck();
   auto block = m_heap.resizeBig(ptr, nbytes);
   refreshStats();
   return block.ptr;
@@ -917,6 +919,8 @@ MemBlock MemoryManager::mallocBigSize<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::mallocBigSize(size_t bytes) {
+  if (debug) eagerGCCheck();
+
   auto block = m_heap.allocBig(bytes, HeaderKind::BigObj);
   auto szOut = block.size;
 #ifdef USE_JEMALLOC
@@ -937,6 +941,7 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes) {
 
 NEVER_INLINE
 void* MemoryManager::callocBig(size_t totalbytes) {
+  if (debug) eagerGCCheck();
   assert(totalbytes > 0);
   auto block = m_heap.callocBig(totalbytes);
   updateBigStats();
@@ -1106,6 +1111,14 @@ void MemoryManager::requestShutdown() {
 
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
   profctx = ReqProfContext{};
+}
+
+void MemoryManager::eagerGCCheck() {
+  if (RuntimeOption::EvalEagerGCProbability > 0 &&
+      !g_context.isNull() &&
+      folly::Random::oneIn(RuntimeOption::EvalEagerGCProbability)) {
+    setSurpriseFlag(PendingGCFlag);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

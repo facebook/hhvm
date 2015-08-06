@@ -30,7 +30,6 @@ namespace HPHP {
 
 class Array;
 class String;
-class VariableSerializer;
 struct IMarker;
 
 namespace req {
@@ -97,9 +96,6 @@ class ResourceData {
   double o_toDouble() const { return m_id; }
   String o_toString() const;
   Array o_toArray() const;
-
-  void serialize(VariableSerializer* serializer) const;
-  void serializeImpl(VariableSerializer* serializer) const;
 
  private:
   static void compileTimeAssertions();

@@ -410,7 +410,6 @@ public:
   /**
    * Input/Output
    */
-  void serialize(VariableSerializer *serializer) const;
   void unserialize(VariableUnserializer *uns, char delimiter0 = '"',
                    char delimiter1 = '"');
 

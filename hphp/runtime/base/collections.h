@@ -31,7 +31,6 @@ class c_Map;
 class c_ImmMap;
 class c_Set;
 class c_ImmSet;
-class VariableSerializer;
 class VariableUnserializer;
 }
 
@@ -102,7 +101,6 @@ uint32_t dataOffset(CollectionType type);
 
 void unserialize(ObjectData* obj, VariableUnserializer* uns,
                  int64_t sz, char type);
-void serialize(ObjectData* obj, VariableSerializer* serializer);
 
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Cloing

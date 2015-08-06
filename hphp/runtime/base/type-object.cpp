@@ -82,12 +82,9 @@ const char* Object::classname_cstr() const {
   return m_obj->getClassName().c_str();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// output
-
-void Object::serialize(VariableSerializer *serializer) const {
-  if (m_obj) {
-    m_obj->serialize(serializer);
+void serializeObject(const Object& obj, VariableSerializer* serializer) {
+  if (obj) {
+    serializeObject(obj.get(), serializer);
   } else {
     serializer->writeNull();
   }

@@ -63,7 +63,6 @@ class MArrayIter;
 class Class;
 class Func;
 
-class VariableSerializer;
 class VariableUnserializer;
 
 using LowStringPtr = LowPtr<const StringData>;

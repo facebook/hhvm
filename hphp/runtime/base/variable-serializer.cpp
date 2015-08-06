@@ -564,7 +564,7 @@ void VariableSerializer::write(const String& v) {
     m_buf->append(u.buf, 8);
     m_buf->append(';');
   } else {
-    v.serialize(this);
+    serializeString(v, this);
   }
 }
 
@@ -590,7 +590,7 @@ void VariableSerializer::write(const Object& v) {
     }
     preventOverflow(v, [&v, this]() {
       if (v->isCollection()) {
-        collections::serialize(v.get(), this);
+        serializeCollection(v.get(), this);
       } else if (v->instanceof(SystemLib::s_ClosureClass)) {
         // We serialize closures as "{}" in JSON mode to be compatible
         // with PHP. And issue a warning in HipHop syntax.
@@ -604,12 +604,12 @@ void VariableSerializer::write(const Object& v) {
       } else {
         auto props = v->toArray(true);
         pushObjectInfo(v->getClassName(), v->getId(), 'O');
-        props.serialize(this);
+        serializeArray(props, this);
         popObjectInfo();
       }
     });
   } else {
-    v.serialize(this);
+    serializeObject(v, this);
   }
 }
 
@@ -623,7 +623,7 @@ void VariableSerializer::preventOverflow(const Object& v,
   decNestedLevel(v.get());
 }
 
-void VariableSerializer::write(const Variant& v, bool isArrayKey /* = false */) {
+void VariableSerializer::write(const Variant& v, bool isArrayKey /*= false */) {
   setReferenced(v.isReferenced());
   if (m_type == Type::DebugDump) {
     setRefCount(v.getRefCount());

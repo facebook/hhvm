@@ -508,9 +508,9 @@ bool String::operator<(const Variant& v) const {
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-void String::serialize(VariableSerializer *serializer) const {
-  if (m_str) {
-    serializer->write(m_str->data(), m_str->size());
+void serializeString(const String& str, VariableSerializer* serializer) {
+  if (str) {
+    serializer->write(str.data(), str.size());
   } else {
     serializer->writeNull();
   }

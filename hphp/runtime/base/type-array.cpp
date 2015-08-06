@@ -732,10 +732,10 @@ void Array::prepend(const Variant& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-void Array::serialize(VariableSerializer *serializer,
-                      bool isObject /* = false */) const {
-  if (m_arr) {
-    m_arr->serialize(serializer, isObject);
+void serializeArray(const Array& arr, VariableSerializer* serializer,
+                    bool isObject /* = false */) {
+  if (!arr.isNull()) {
+    serializeArray(arr.get(), serializer, isObject);
   } else {
     serializer->writeNull();
   }

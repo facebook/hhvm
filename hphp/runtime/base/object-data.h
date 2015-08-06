@@ -89,8 +89,6 @@ struct ObjectData {
     RealPropExist = 16,    // For property_exists
   };
 
-  static const StaticString s_serializedNativeDataKey;
-
  private:
   static __thread int os_max_id;
 
@@ -254,8 +252,6 @@ struct ObjectData {
   Variant o_invoke_few_args(const String& s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
-  void serialize(VariableSerializer*) const;
-  void serializeImpl(VariableSerializer*) const;
   ObjectData* clone();
 
   Variant offsetGet(Variant key);
@@ -290,7 +286,7 @@ struct ObjectData {
    */
   Array& reserveProperties(int nProp = 2);
 
- protected:
+  // accessors for the declared properties area
   TypedValue* propVec();
   const TypedValue* propVec() const;
 

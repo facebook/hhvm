@@ -31,8 +31,7 @@ class ClassInfo;
  * Maintaining states during serialization of a variable. We use this single
  * class to uniformly serialize variables according to different formats.
  */
-class VariableSerializer {
-public:
+struct VariableSerializer {
   /**
    * Supported formats.
    */
@@ -172,6 +171,16 @@ void serializeVariant(const Variant&,
                       bool isArrayKey = false,
                       bool skipNestCheck = false,
                       bool noQuotes = false);
+void serializeObject(const Object&, VariableSerializer*);
+void serializeObject(const ObjectData*, VariableSerializer*);
+void serializeCollection(ObjectData* obj, VariableSerializer*);
+void serializeArray(const Array&, VariableSerializer*, bool isObject = false);
+void serializeArray(const ArrayData*, VariableSerializer*,
+                    bool skipNestCheck = false);
+void serializeResource(const ResourceData*, VariableSerializer*);
+void serializeString(const String&, VariableSerializer*);
+
+extern const StaticString s_serializedNativeDataKey;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

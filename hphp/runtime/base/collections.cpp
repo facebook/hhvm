@@ -157,7 +157,9 @@ void unserialize(ObjectData* obj, VariableUnserializer* uns,
   }
 }
 
-void serialize(ObjectData* obj, VariableSerializer* serializer) {
+}// namespace collections
+
+void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
   int64_t sz = getCollectionSize(obj);
   auto type = obj->collectionType();
 
@@ -206,6 +208,7 @@ void serialize(ObjectData* obj, VariableSerializer* serializer) {
   serializer->popObjectInfo();
 }
 
+namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Copying
 

@@ -196,11 +196,6 @@ public:
   Variant o_set(
     const String& s, const Variant& v, const String& context = null_string);
 
-  /**
-   * Input/Output
-   */
-  void serialize(VariableSerializer *serializer) const;
-
   void setToDefaultObject();
 
   // Transfer ownership of our reference to this object.

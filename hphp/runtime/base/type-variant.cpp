@@ -645,17 +645,17 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
 
     case KindOfArray:
       assert(!isArrayKey);
-      tv->m_data.parr->serialize(serializer, skipNestCheck);
+      serializeArray(tv->m_data.parr, serializer, skipNestCheck);
       return;
 
     case KindOfObject:
       assert(!isArrayKey);
-      tv->m_data.pobj->serialize(serializer);
+      serializeObject(tv->m_data.pobj, serializer);
       return;
 
     case KindOfResource:
       assert(!isArrayKey);
-      tv->m_data.pres->serialize(serializer);
+      serializeResource(tv->m_data.pres, serializer);
       return;
 
     case KindOfRef:
@@ -996,7 +996,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
             int ksize = key.size();
             const char *kdata = key.data();
             int subLen = 0;
-            if (key == ObjectData::s_serializedNativeDataKey) {
+            if (key == s_serializedNativeDataKey) {
               unserializeVariant(serializedNativeData, uns);
               hasSerializedNativeData = true;
             } else if (kdata[0] == '\0') {

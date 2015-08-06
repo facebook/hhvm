@@ -812,33 +812,34 @@ Variant ArrayData::each() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void ArrayData::serializeImpl(VariableSerializer *serializer) const {
-  serializer->writeArrayHeader(size(), isVectorData());
-  for (ArrayIter iter(this); iter; ++iter) {
+static void serializeArrayImpl(const ArrayData* arr,
+                               VariableSerializer* serializer) {
+  serializer->writeArrayHeader(arr->size(), arr->isVectorData());
+  for (ArrayIter iter(arr); iter; ++iter) {
     serializer->writeArrayKey(iter.first());
     serializer->writeArrayValue(iter.secondRef());
   }
   serializer->writeArrayFooter();
 }
 
-void ArrayData::serialize(VariableSerializer *serializer,
-                          bool skipNestCheck /* = false */) const {
-  if (size() == 0) {
-    serializer->writeArrayHeader(0, isVectorData());
+void serializeArray(const ArrayData* arr, VariableSerializer* serializer,
+                    bool skipNestCheck /* = false */) {
+  if (arr->size() == 0) {
+    serializer->writeArrayHeader(0, arr->isVectorData());
     serializer->writeArrayFooter();
     return;
   }
   if (!skipNestCheck) {
-    if (serializer->incNestedLevel((void*)this)) {
-      serializer->writeOverflow((void*)this);
+    if (serializer->incNestedLevel((void*)arr)) {
+      serializer->writeOverflow((void*)arr);
     } else {
-      serializeImpl(serializer);
+      serializeArrayImpl(arr, serializer);
     }
-    serializer->decNestedLevel((void*)this);
+    serializer->decNestedLevel((void*)arr);
   } else {
     // If isObject, the array is temporary and we should not check or save
     // its pointer.
-    serializeImpl(serializer);
+    serializeArrayImpl(arr, serializer);
   }
 }
 

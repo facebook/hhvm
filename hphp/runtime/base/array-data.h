@@ -364,10 +364,6 @@ public:
 
   void onSetEvalScalar();
 
-  // TODO(#3903818): move serialization out of ArrayData, Variant, etc.
-  void serialize(VariableSerializer *serializer,
-                 bool skipNestCheck = false) const;
-
   /**
    * Comparisons.
    */
@@ -407,7 +403,6 @@ public:
   static const char* kindToString(ArrayKind kind);
 
 private:
-  void serializeImpl(VariableSerializer *serializer) const;
   friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {
     static_assert(offsetof(ArrayData, m_hdr) == HeaderOffset, "");

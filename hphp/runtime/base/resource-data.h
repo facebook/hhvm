@@ -33,6 +33,13 @@ class String;
 class VariableSerializer;
 struct IMarker;
 
+namespace req {
+template<class T, class... Args>
+typename std::enable_if<std::is_convertible<T*,ResourceData*>::value,
+                        req::ptr<T>>::type
+make(Args&&... args);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -96,7 +103,9 @@ class ResourceData {
 
  private:
   static void compileTimeAssertions();
-  template<class T, class... Args> friend T* newres(Args&&...);
+  template<class T, class... Args> friend
+  typename std::enable_if<std::is_convertible<T*,ResourceData*>::value,
+                          req::ptr<T>>::type req::make(Args&&... args);
 
  private:
   //============================================================================
@@ -197,22 +206,6 @@ ALWAYS_INLINE bool decRefRes(ResourceData* res) {
   return res->decRefAndRelease();
 }
 
-// allocate and construct a resource subclass type T
-template<class T, class... Args> T* newres(Args&&... args) {
-  static_assert(sizeof(T) <= 0xffff && sizeof(T) < kMaxSmallSize, "");
-  static_assert(std::is_convertible<T*,ResourceData*>::value, "");
-  auto const mem = MM().mallocSmallSize(sizeof(T));
-  try {
-    auto r = new (mem) T(std::forward<Args>(args)...);
-    r->m_hdr.aux = sizeof(T);
-    assert(r->hasExactlyOneRef());
-    return r;
-  } catch (...) {
-    MM().freeSmallSize(mem, sizeof(T));
-    throw;
-  }
-}
-
 #define RESOURCE_FRIEND(T) \
 template <typename F> friend void scan(const T& this_, F& mark);
 #define SUPPRESS_RESOURCE_FRIEND(x) x
@@ -235,14 +228,25 @@ template <typename F> friend void scan(const T& this_, F& mark);
   void HPHP::T::sweep() { this->~T(); }
 
 namespace req {
+// allocate and construct a resource subclass type T,
+// wrapped in a req::ptr<T>
 template<class T, class... Args>
 typename std::enable_if<
   std::is_convertible<T*, ResourceData*>::value,
   req::ptr<T>
 >::type make(Args&&... args) {
-  using NoIncRef = typename req::ptr<T>::NoIncRef;
-  return req::ptr<T>(newres<T>(std::forward<Args>(args)...),
-                     NoIncRef{});
+  static_assert(sizeof(T) <= 0xffff && sizeof(T) < kMaxSmallSize, "");
+  static_assert(std::is_convertible<T*,ResourceData*>::value, "");
+  auto const mem = MM().mallocSmallSize(sizeof(T));
+  try {
+    auto r = new (mem) T(std::forward<Args>(args)...);
+    r->m_hdr.aux = sizeof(T);
+    assert(r->hasExactlyOneRef());
+    return req::ptr<T>::attach(r);
+  } catch (...) {
+    MM().freeSmallSize(mem, sizeof(T));
+    throw;
+  }
 }
 } // namespace req
 

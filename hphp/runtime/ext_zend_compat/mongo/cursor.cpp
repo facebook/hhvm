@@ -1748,7 +1748,8 @@ int php_mongo_create_le(mongo_cursor *cursor, char *name TSRMLS_DC)
 		prev->next = new_node;
 		new_node->prev = prev;
 	} else {
-		auto new_le = HPHP::newres<zend_rsrc_list_entry>(new_node, le_cursor_list);
+		auto new_le =
+      HPHP::req::make<zend_rsrc_list_entry>(new_node, le_cursor_list).detach();
     SCOPE_EXIT { delete new_le; };
 		new_le->refcount = 1;
 		zend_hash_add(&EG(persistent_list), name, strlen(name) + 1, new_le,

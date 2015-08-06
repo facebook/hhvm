@@ -309,10 +309,11 @@ int zval_get_resource_id(const zval &z) {
   return id;
 }
 
-HPHP::ResourceData *zend_list_id_to_resource_data(int id TSRMLS_DC) {
+HPHP::ResourceData* zend_list_id_to_resource_data(int id TSRMLS_DC) {
   auto wrapper = zend_list_id_to_wrapper(id);
   if (wrapper) {
-    auto resource = HPHP::newres<zend_rsrc_list_entry>(nullptr, wrapper->type);
+    auto resource =
+      HPHP::req::make<zend_rsrc_list_entry>(nullptr, wrapper->type).detach();
     resource->id = wrapper->id;
     return resource;
   } else {

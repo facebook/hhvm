@@ -564,7 +564,7 @@ void tvCastToResourceInPlace(TypedValue* tv) {
   } while (0);
 
   tv->m_type = KindOfResource;
-  tv->m_data.pres = newres<DummyResource>();
+  tv->m_data.pres = req::make<DummyResource>().detach();
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {

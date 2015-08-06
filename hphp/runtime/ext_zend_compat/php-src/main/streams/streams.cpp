@@ -116,7 +116,7 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const 
   }
 
   if (persistent_id) {
-    auto le = HPHP::newres<zend_rsrc_list_entry>(ret, le_pstream);
+    auto le = HPHP::req::make<zend_rsrc_list_entry>(ret, le_pstream).detach();
     SCOPE_EXIT { delete le; };
     le->refcount = 0;
 

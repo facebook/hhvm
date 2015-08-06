@@ -627,8 +627,8 @@ Variant HHVM_FUNCTION(mktime,
   year = year < INT_MAX ? year : INT_MAX;
   if (hour == INT_MAX && minute == INT_MAX && second == INT_MAX &&
       month == INT_MAX && day == INT_MAX && year == INT_MAX) {
-    raise_strict_warning("mktime(): You should be using " +
-                         std::string("the time() function instead"));
+    raise_strict_warning("mktime(): You should be using "
+                         "the time() function instead");
   }
   bool error;
   int64_t ts = TimeStamp::Get(error, hour, minute, second, month, day, year,

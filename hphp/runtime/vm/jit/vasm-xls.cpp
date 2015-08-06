@@ -1822,7 +1822,7 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     if (inst.op == Vinstr::fallbackcc) {
       auto const& fb_i = inst.fallbackcc_;
       targetCode.emplace_back(free);
-      targetCode.emplace_back(fallback{fb_i.dest, fb_i.spOff,
+      targetCode.emplace_back(fallback{fb_i.target, fb_i.spOff,
                                        fb_i.trflags, fb_i.args});
       cc = fb_i.cc;
       sf = fb_i.sf;

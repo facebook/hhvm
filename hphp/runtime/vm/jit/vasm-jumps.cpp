@@ -78,7 +78,7 @@ void optimizeJmps(Vunit& unit) {
             const auto jcc_origin = code.back().origin;
             code.pop_back();
             code.emplace_back(
-              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.dest,
+              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.target,
                          fb_i.spOff, fb_i.trflags, fb_i.args}
             );
             code.back().origin = jcc_origin;

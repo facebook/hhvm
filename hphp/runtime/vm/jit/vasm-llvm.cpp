@@ -901,7 +901,7 @@ struct LLVMEmitter {
       auto doBindJmp = [&] (uint8_t* jmpIp, ConditionCode cc) {
         FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
-        auto jmpLen = (cc == CC_None) ? x64::kJmpLen : x64::kJmpccLen;
+        auto jmpLen = (cc == CC_None) ? x64::kJmpLen : x64::kJccLen;
         mcg->cgFixups().m_alignFixups.emplace(jmpIp, std::make_pair(jmpLen, 0));
         mcg->setJmpTransID(jmpIp);
 
@@ -954,7 +954,7 @@ struct LLVMEmitter {
 
     for (auto& req : m_fallbacks) {
       auto doFallback = [&] (uint8_t* jmpIp, ConditionCode cc) {
-        auto destSR = mcg->tx().getSrcRec(req.dest);
+        auto destSR = mcg->tx().getSrcRec(req.target);
         destSR->registerFallbackJump(jmpIp, cc);
       };
       auto it = locRecs.records.find(req.id);
@@ -1189,7 +1189,7 @@ private:
 
   struct LLVMFallback {
     uint32_t id;
-    SrcKey dest;
+    SrcKey target;
   };
 
   /*
@@ -1461,7 +1461,7 @@ O(andli) \
 O(andq) \
 O(andqi) \
 O(bindcall) \
-O(vcallstub) \
+O(vcallarray) \
 O(bindjcc1st) \
 O(bindjcc) \
 O(bindjmp) \
@@ -1585,7 +1585,6 @@ O(xorq) \
 O(xorqi) \
 O(landingpad) \
 O(leavetc) \
-O(vretm) \
 O(vret) \
 O(absdbl) \
 O(phijmp) \
@@ -1608,7 +1607,7 @@ O(unpcklpd)
       case Vinstr::call:
       case Vinstr::callm:
       case Vinstr::callr:
-      case Vinstr::callstub:
+      case Vinstr::callarray:
       case Vinstr::unwind:
       case Vinstr::nothrow:
       case Vinstr::syncpoint:
@@ -1889,10 +1888,10 @@ void LLVMEmitter::emit(const bindcall& inst) {
   m_irb.CreateBr(block(inst.targets[0]));
 }
 
-void LLVMEmitter::emit(const vcallstub& inst) {
-  // vcallstub is like bindcall but it's not smashable and it can take extra
+void LLVMEmitter::emit(const vcallarray& inst) {
+  // vcallarray is like bindcall but it's not smashable and it can take extra
   // arguments.
-  auto funcName = folly::sformat("vcallstub_{}", inst.target);
+  auto funcName = folly::sformat("vcallarray_{}", inst.target);
   auto args = makePhysRegArgs(
     inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15});
   for (auto arg : m_unit.tuples[inst.extraArgs]) args.emplace_back(value(arg));
@@ -1936,26 +1935,26 @@ void LLVMEmitter::emit(const bindjcc& inst) {
 }
 
 void LLVMEmitter::emit(const bindaddr& inst) {
-  // inst.dest is a pointer to memory allocated in globalData, so we can just
+  // inst.addr is a pointer to memory allocated in globalData, so we can just
   // do what vasm does here.
 
   auto& frozen = m_text.frozen().code;
-  mcg->setJmpTransID((TCA)inst.dest);
+  mcg->setJmpTransID((TCA)inst.addr);
 
   auto optSPOff = folly::Optional<FPInvOffset>{};
-  if (!inst.sk.resumed()) optSPOff = inst.spOff;
+  if (!inst.target.resumed()) optSPOff = inst.spOff;
 
-  *inst.dest = svcreq::emit_ephemeral(
+  *inst.addr = svcreq::emit_ephemeral(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
     optSPOff,
     REQ_BIND_ADDR,
-    inst.dest,
-    inst.sk.toAtomicInt(),
+    inst.addr,
+    inst.target.toAtomicInt(),
     TransFlags{}.packed
   );
-  mcg->cgFixups().m_codePointers.insert(inst.dest);
-  mcg->setJmpTransID(TCA(inst.dest));
+  mcg->cgFixups().m_codePointers.insert(inst.addr);
+  mcg->setJmpTransID(TCA(inst.addr));
 }
 
 void LLVMEmitter::emit(const defvmsp& inst) {
@@ -2305,14 +2304,14 @@ void LLVMEmitter::emit(const imul& inst) {
 
 void LLVMEmitter::emit(const fallback& inst) {
   TCA stub;
-  auto const sr = mcg->tx().getSrcRec(inst.dest);
+  auto const sr = mcg->tx().getSrcRec(inst.target);
   if (inst.trflags.packed == 0) {
     stub = sr->getFallbackTranslation();
   } else {
     stub = svcreq::emit_retranslate_stub(
       m_text.frozen().code,
       inst.spOff,
-      inst.dest,
+      inst.target,
       inst.trflags
     );
   }
@@ -2323,7 +2322,7 @@ void LLVMEmitter::emit(const fallback& inst) {
   auto call = emitTraceletTailCall(func, inst.args);
   call->setSmashable();
 
-  LLVMFallback req{m_nextLocRec++, inst.dest};
+  LLVMFallback req{m_nextLocRec++, inst.target};
   FTRACE(2, "Adding fallback locrec {} for {}\n", req.id, llshow(call));
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(req.id)));
@@ -2336,7 +2335,7 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
   emitJcc(
     inst.sf, inst.cc, "guard",
     [&] {
-      emit(fallback{inst.dest, inst.spOff, inst.trflags, inst.args});
+      emit(fallback{inst.target, inst.spOff, inst.trflags, inst.args});
     }
   );
 }
@@ -2769,24 +2768,15 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
   call->setCallingConv(llvm::CallingConv::C);
 }
 
-void LLVMEmitter::emit(const vretm& inst) {
+void LLVMEmitter::emit(const vret& inst) {
   // We emit volatile loads for return addresses to prevent LLVM from
   // generating move from memory to register via another register.
   auto const retPtr = emitPtr(inst.retAddr, ptrType(ptrType(m_traceletFnTy)));
   auto const retAddr = m_irb.CreateLoad(retPtr, true);
-  auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64), true);
-  defineValue(inst.d, prevFp);
+  auto const prevFP = m_irb.CreateLoad(emitPtr(inst.prevFP, 64), true);
+  defineValue(inst.d, prevFP);
 
   // "Return" with a tail call to the loaded address
-  auto call = emitTraceletTailCall(retAddr, inst.args);
-  if (RuntimeOption::EvalJitLLVMRetOpt) {
-    call->setTCR();
-  }
-}
-
-void LLVMEmitter::emit(const vret& inst) {
-  auto const retAddr = m_irb.CreateIntToPtr(value(inst.retAddr),
-                                            ptrType(m_traceletFnTy));
   auto call = emitTraceletTailCall(retAddr, inst.args);
   if (RuntimeOption::EvalJitLLVMRetOpt) {
     call->setTCR();

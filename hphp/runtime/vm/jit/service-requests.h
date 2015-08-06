@@ -62,19 +62,6 @@ namespace jit {
   REQ(BIND_JMP)           \
                           \
   /*
-   * bind_addr(TCA* addr, SrcKey target, TransFlags trflags)
-   *
-   * A code pointer to the potentially untranslated `target'; used for
-   * just-in-time indirect call translations.
-   *
-   * Similar to bind_jmp, except that the smash target is *addr instead of the
-   * jmp instruction's immediate.  When we emit a bind_addr, we only emit the
-   * request stub and store its address to *addr; someone else has to emit the
-   * indirect jump that actually invokes the service request.
-   */                     \
-  REQ(BIND_ADDR)          \
-                          \
-  /*
    * bind_jcc_first(TCA jcc, SrcKey taken, SrcKey next, bool did_take)
    *
    * A branch between two potentially untranslated targets.
@@ -88,6 +75,19 @@ namespace jit {
    * @see: MCGenerator::bindJccFirst()
    */                     \
   REQ(BIND_JCC_FIRST)     \
+                          \
+  /*
+   * bind_addr(TCA* addr, SrcKey target, TransFlags trflags)
+   *
+   * A code pointer to the potentially untranslated `target'; used for
+   * just-in-time indirect call translations.
+   *
+   * Similar to bind_jmp, except that the smash target is *addr instead of the
+   * jmp instruction's immediate.  When we emit a bind_addr, we only emit the
+   * request stub and store its address to *addr; someone else has to emit the
+   * indirect jump that actually invokes the service request.
+   */                     \
+  REQ(BIND_ADDR)          \
                           \
   /*
    * retranslate(Offset off, TransFlags trflags)
@@ -218,10 +218,10 @@ TCA emit_ephemeral(CodeBlock& cb,
  */
 TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff,
                       TCA jmp, SrcKey target, TransFlags trflags);
-TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff,
-                       TCA* addr, SrcKey target, TransFlags trflags);
 TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff,
                          TCA jcc, SrcKey taken, SrcKey next, ConditionCode cc);
+TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff,
+                       TCA* addr, SrcKey target, TransFlags trflags);
 TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
                           SrcKey target, TransFlags trflags);
 

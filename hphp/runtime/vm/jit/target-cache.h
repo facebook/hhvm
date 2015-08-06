@@ -108,16 +108,12 @@ struct StaticMethodFCache {
 namespace MethodCache {
 
 /*
- * Method cache entries cache the dispatch target for a function call.
- * The key is a Class*, but the low bits are reused for other
- * purposes.  The fast path in the TC doesn't have to check these
- * bits---it just checks if m_key is bitwise equal to the candidate
- * Class* it has, and if so it accepts m_value.
+ * One-way request-local cache for object method lookups.
  *
- * The MethodCache line consists of a Class* key (stored as a
- * uintptr_t) and a Func*.  The low bit of the key is set if the
- * function call is a magic call (in which case the cached Func* is
- * the __call function).  The second lowest bit of the key is set if
+ * MethodCache entries cache the dispatch target for an object method call.
+ * Each line consists of a Class* key (stored as a uintptr_t) and a Func*.  We
+ * also pack bits into the key---the low bit is set if the function is a magic
+ * call (in which case the cached Func* is, and the second lowest bit is set if
  * the cached Func has AttrStatic.
  */
 struct Entry {

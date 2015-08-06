@@ -1109,7 +1109,7 @@ MCGenerator::bindJccFirst(TCA toSmash,
 
   // can we just directly fall through?
   // a jmp + jz takes 5 + 6 = 11 bytes
-  bool const fallThru = toSmash + kJmpccLen + kJmpLen == cb.frontier() &&
+  bool const fallThru = toSmash + kJccLen + kJmpLen == cb.frontier() &&
     !m_tx.getSrcDB().find(dest);
 
   auto const tDest = getTranslation(TranslArgs{dest, !fallThru});
@@ -1117,7 +1117,7 @@ MCGenerator::bindJccFirst(TCA toSmash,
     return 0;
   }
 
-  auto const jmpTarget = backEnd().jmpTarget(toSmash + kJmpccLen);
+  auto const jmpTarget = backEnd().jmpTarget(toSmash + kJccLen);
   if (jmpTarget != backEnd().jccTarget(toSmash)) {
     // someone else already smashed this one. Ideally we would
     // just re-execute from toSmash - except the flags will have

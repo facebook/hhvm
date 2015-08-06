@@ -153,19 +153,6 @@ TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff, TCA jmp,
   );
 }
 
-TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff, TCA* addr,
-                       SrcKey target, TransFlags trflags) {
-  return emit_ephemeral(
-    cb,
-    mcg->getFreeStub(cb, &mcg->cgFixups()),
-    target.resumed() ? folly::none : folly::make_optional(spOff),
-    REQ_BIND_ADDR,
-    addr,
-    target.toAtomicInt(),
-    trflags.packed
-  );
-}
-
 TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff, TCA jcc,
                          SrcKey taken, SrcKey next, ConditionCode cc) {
   always_assert_flog(taken.resumed() == next.resumed(),
@@ -179,6 +166,19 @@ TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff, TCA jcc,
     taken.toAtomicInt(),
     next.toAtomicInt(),
     cc
+  );
+}
+
+TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff, TCA* addr,
+                       SrcKey target, TransFlags trflags) {
+  return emit_ephemeral(
+    cb,
+    mcg->getFreeStub(cb, &mcg->cgFixups()),
+    target.resumed() ? folly::none : folly::make_optional(spOff),
+    REQ_BIND_ADDR,
+    addr,
+    target.toAtomicInt(),
+    trflags.packed
   );
 }
 

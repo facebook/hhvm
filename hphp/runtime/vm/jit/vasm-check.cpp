@@ -121,7 +121,7 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
         case Vinstr::call:
         case Vinstr::callm:
         case Vinstr::callr:
-        case Vinstr::callstub:
+        case Vinstr::callarray:
         case Vinstr::mccall:
         case Vinstr::contenter:
           sync_valid = unwind_valid = nothrow_valid = true;
@@ -238,7 +238,7 @@ bool checkSF(Vunit& unit, jit::vector<Vlabel>& blocks) {
       auto& inst = *--i;
       RegSet implicit_uses, implicit_across, implicit_defs;
       if (inst.op == Vinstr::vcall || inst.op == Vinstr::vinvoke ||
-          inst.op == Vinstr::vcallstub) {
+          inst.op == Vinstr::vcallarray) {
         // getEffects would assert since these haven't been lowered yet.
         implicit_defs |= RegSF{0};
       } else {

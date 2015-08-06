@@ -60,7 +60,7 @@ bool sets_flags(Vinstr& inst) {
   case Vinstr::callm:
   case Vinstr::callr:
   case Vinstr::mccall:
-  case Vinstr::callstub:
+  case Vinstr::callarray:
   case Vinstr::callfaststub:
   case Vinstr::bindcall:
   case Vinstr::contenter:

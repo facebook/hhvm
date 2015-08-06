@@ -74,15 +74,16 @@ struct Vgen {
                        vinst_names[Vinstr(i).op], size_t(current));
   }
 
-  // intrinsics
-  void emit(const bindaddr& i);
+  // service requests
   void emit(const bindcall& i);
-  void emit(const bindjcc1st& i);
-  void emit(const bindjcc& i);
   void emit(const bindjmp& i);
-  void emit(const callstub& i);
-  void emit(const callfaststub& i);
-  void emit(const contenter& i);
+  void emit(const bindjcc& i);
+  void emit(const bindjcc1st& i);
+  void emit(const bindaddr& i);
+  void emit(const fallback& i);
+  void emit(const fallbackcc& i);
+
+  // intrinsics
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& i) { a->int3(); }
@@ -91,19 +92,23 @@ struct Vgen {
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
   void emit(const ldimmqs& i);
-  void emit(const fallback& i);
-  void emit(const fallbackcc& i);
   void emit(const load& i);
-  void emit(const mccall& i);
-  void emit(const mcprep& i);
-  void emit(const nothrow& i);
   void emit(const store& i);
+
+  // calls/rets
+  void emit(const callarray& i);
+  void emit(const callfaststub& i);
+  void emit(const contenter& i);
+  void emit(const leavetc&) { a->ret(); }
+  void emit(const mcprep& i);
+  void emit(const mccall& i);
+  void emit(const vret& i);
+
+  // boundaries
+  void emit(const landingpad& i) {}
+  void emit(const nothrow& i);
   void emit(const syncpoint& i);
   void emit(const unwind& i);
-  void emit(const landingpad& i) {}
-  void emit(const vretm& i);
-  void emit(const vret& i);
-  void emit(const leavetc&) { a->ret(); }
 
   // instructions
   void emit(andb i) { commuteSF(i); a->andb(i.s0, i.d); }
@@ -319,6 +324,263 @@ void Vgen::pad(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Vgen::emit(const bindcall& i) {
+  mcg->backEnd().prepareForSmash(a->code(), kCallLen);
+  a->call(i.stub);
+  emit(unwind{{i.targets[0], i.targets[1]}});
+}
+
+void Vgen::emit(const bindjmp& i) {
+  mcg->backEnd().prepareForSmash(a->code(), kJmpLen);
+  auto const jmp_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), a->frontier(), CC_None);
+
+  stubs.push_back({jmp_addr, nullptr, i});
+  mcg->setJmpTransID(jmp_addr);
+}
+
+void Vgen::emit(const bindjcc& i) {
+  mcg->backEnd().prepareForSmash(a->code(), kJccLen);
+  auto const jcc_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
+
+  stubs.push_back({nullptr, jcc_addr, i});
+  mcg->setJmpTransID(jcc_addr);
+}
+
+void Vgen::emit(const bindjcc1st& i) {
+  mcg->backEnd().prepareForTestAndSmash(a->code(), 0,
+                                        TestAndSmashFlags::kAlignJccAndJmp);
+  auto const jcc_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
+  auto const jmp_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, CC_None);
+
+  stubs.push_back({jmp_addr, jcc_addr, i});
+
+  mcg->setJmpTransID(jmp_addr);
+  mcg->setJmpTransID(jcc_addr);
+}
+
+void Vgen::emit(const bindaddr& i) {
+  stubs.push_back({nullptr, nullptr, i});
+  mcg->setJmpTransID(TCA(i.addr));
+  mcg->cgFixups().m_codePointers.insert(i.addr);
+}
+
+void Vgen::emit(const fallback& i) {
+  mcg->backEnd().prepareForSmash(a->code(), kJmpLen);
+  auto const jmp_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), a->frontier(), CC_None);
+
+  stubs.push_back({jmp_addr, nullptr, i});
+
+  auto const srcrec = mcg->tx().getSrcRec(i.target);
+  srcrec->registerFallbackJump(jmp_addr, CC_None);
+}
+
+void Vgen::emit(const fallbackcc& i) {
+  mcg->backEnd().prepareForSmash(a->code(), kJccLen);
+  auto const jcc_addr = a->frontier();
+  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
+
+  stubs.push_back({nullptr, jcc_addr, i});
+
+  auto const srcrec = mcg->tx().getSrcRec(i.target);
+  srcrec->registerFallbackJump(jcc_addr, i.cc);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const copy& i) {
+  if (i.s == i.d) return;
+  if (i.s.isGP()) {
+    if (i.d.isGP()) {                 // GP => GP
+      a->movq(i.s, i.d);
+    } else {                             // GP => XMM
+      assertx(i.d.isSIMD());
+      // This generates a movq x86 instruction, which zero extends
+      // the 64-bit value in srcReg into a 128-bit XMM register
+      a->movq_rx(i.s, i.d);
+    }
+  } else {
+    if (i.d.isGP()) {                 // XMM => GP
+      a->movq_xr(i.s, i.d);
+    } else {                             // XMM => XMM
+      assertx(i.d.isSIMD());
+      // This copies all 128 bits in XMM,
+      // thus avoiding partial register stalls
+      a->movdqa(i.s, i.d);
+    }
+  }
+}
+
+void Vgen::emit(const copy2& i) {
+  assertx(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
+  auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
+  assertx(d0 != d1);
+  if (d0 == s1) {
+    if (d1 == s0) {
+      a->xchgq(d0, d1);
+    } else {
+      // could do this in a simplify pass
+      if (s1 != d1) a->movq(s1, d1); // save s1 first; d1 != s0
+      if (s0 != d0) a->movq(s0, d0);
+    }
+  } else {
+    // could do this in a simplify pass
+    if (s0 != d0) a->movq(s0, d0);
+    if (s1 != d1) a->movq(s1, d1);
+  }
+}
+
+void emit_simd_imm(X64Assembler* a, int64_t val, Vreg d) {
+  if (val == 0) {
+    a->pxor(d, d); // does not modify flags
+  } else {
+    auto addr = mcg->allocLiteral(val);
+    a->movsd(rip[(intptr_t)addr], d);
+  }
+}
+
+void Vgen::emit(const ldimmb& i) {
+  // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
+  auto val = i.s.ub();
+  if (i.d.isGP()) {
+    Vreg8 d8 = i.d;
+    a->movb(static_cast<int8_t>(val), d8);
+  } else {
+    emit_simd_imm(a, val, i.d);
+  }
+}
+
+void Vgen::emit(const ldimml& i) {
+  // ldimml is for Vconst::Long, which is treated as unsigned uint32_t
+  auto val = i.s.l();
+  if (i.d.isGP()) {
+    Vreg32 d32 = i.d;
+    a->movl(val, d32);
+  } else {
+    emit_simd_imm(a, uint32_t(val), i.d);
+  }
+}
+
+void Vgen::emit(const ldimmq& i) {
+  auto val = i.s.q();
+  if (i.d.isGP()) {
+    if (val == 0) {
+      Vreg32 d32 = i.d;
+      a->movl(0, d32); // because emitImmReg tries the xor optimization
+    } else {
+      a->emitImmReg(i.s, i.d);
+    }
+  } else {
+    emit_simd_imm(a, val, i.d);
+  }
+}
+
+void Vgen::emit(const ldimmqs& i) {
+  mcg->backEnd().prepareForSmash(a->code(), kMovLen);
+  a->movq(0xdeadbeeffeedface, i.d);
+
+  auto immp = reinterpret_cast<uintptr_t*>(a->frontier()) - 1;
+  *immp = i.s.q();
+}
+
+void Vgen::emit(const load& i) {
+  Vasm::prefix(*a, i.s);
+  auto mref = i.s.mr();
+  if (i.d.isGP()) {
+    a->loadq(mref, i.d);
+  } else {
+    assertx(i.d.isSIMD());
+    a->movsd(mref, i.d);
+  }
+}
+
+void Vgen::emit(const store& i) {
+  if (i.s.isGP()) {
+    a->storeq(i.s, i.d);
+  } else {
+    assertx(i.s.isSIMD());
+    a->movsd(i.s, i.d);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const callarray& i) {
+  emit(call{i.target, i.args});
+}
+
+void Vgen::emit(const callfaststub& i) {
+  emit(call{i.target, i.args});
+  emit(syncpoint{i.fix});
+}
+
+void Vgen::emit(const contenter& i) {
+  Label Stub, End;
+  Reg64 fp = i.fp, target = i.target;
+  a->jmp8(End);
+
+  asm_label(*a, Stub);
+  a->pop(fp[AROFF(m_savedRip)]);
+  a->jmp(target);
+
+  asm_label(*a, End);
+  a->call(Stub);
+  // m_savedRip will point here.
+  emit(unwind{{i.targets[0], i.targets[1]}});
+}
+
+void Vgen::emit(const mcprep& i) {
+  /*
+   * Initially, we set the cache to hold (addr << 1) | 1 (where `addr' is the
+   * address of the movq) so that we can find the movq from the handler.
+   *
+   * We set the low bit for two reasons: the Class* will never be a valid
+   * Class*, so we'll always miss the inline check before it's smashed, and
+   * handlePrimeCacheInit can tell it's not been smashed yet
+   */
+  emit(ldimmqs{0x8000000000000000u, i.d});
+
+  auto movAddr = reinterpret_cast<uintptr_t>(a->frontier()) - x64::kMovLen;
+  auto immAddr = reinterpret_cast<uintptr_t*>(movAddr + x64::kMovImmOff);
+
+  *immAddr = (movAddr << 1) | 1;
+  mcg->cgFixups().m_addressImmediates.insert(reinterpret_cast<TCA>(~movAddr));
+}
+
+void Vgen::emit(const mccall& i) {
+  mcg->backEnd().prepareForSmash(a->code(), kCallLen);
+  a->call(i.target);
+}
+
+void Vgen::emit(const vret& i) {
+  a->push(i.retAddr);
+  a->loadq(i.prevFP, i.d);
+  a->ret();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const nothrow& i) {
+  mcg->registerCatchBlock(a->frontier(), nullptr);
+}
+
+void Vgen::emit(const syncpoint& i) {
+  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
+         i.fix.pcOffset, i.fix.spOffset);
+  mcg->recordSyncPoint(a->frontier(), i.fix);
+}
+
+void Vgen::emit(const unwind& i) {
+  catches.push_back({a->frontier(), i.targets[1]});
+  emit(jmp{i.targets[0]});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void Vgen::emit(const addqim& i) {
   Vasm::prefix(*a, i.m).addq(i.s0, i.m.mr());
 }
@@ -367,309 +629,6 @@ void Vgen::emit(const cmovq& i) {
   a->cmov_reg64_reg64(i.cc, i.t, i.d);
 }
 
-void Vgen::emit(const contenter& i) {
-  Label Stub, End;
-  Reg64 fp = i.fp, target = i.target;
-  a->jmp8(End);
-
-  asm_label(*a, Stub);
-  a->pop(fp[AROFF(m_savedRip)]);
-  a->jmp(target);
-
-  asm_label(*a, End);
-  a->call(Stub);
-  // m_savedRip will point here.
-  emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
-void Vgen::emit(const copy& i) {
-  if (i.s == i.d) return;
-  if (i.s.isGP()) {
-    if (i.d.isGP()) {                 // GP => GP
-      a->movq(i.s, i.d);
-    } else {                             // GP => XMM
-      assertx(i.d.isSIMD());
-      // This generates a movq x86 instruction, which zero extends
-      // the 64-bit value in srcReg into a 128-bit XMM register
-      a->movq_rx(i.s, i.d);
-    }
-  } else {
-    if (i.d.isGP()) {                 // XMM => GP
-      a->movq_xr(i.s, i.d);
-    } else {                             // XMM => XMM
-      assertx(i.d.isSIMD());
-      // This copies all 128 bits in XMM,
-      // thus avoiding partial register stalls
-      a->movdqa(i.s, i.d);
-    }
-  }
-}
-
-void Vgen::emit(const copy2& i) {
-  assertx(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
-  auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
-  assertx(d0 != d1);
-  if (d0 == s1) {
-    if (d1 == s0) {
-      a->xchgq(d0, d1);
-    } else {
-      // could do this in a simplify pass
-      if (s1 != d1) a->movq(s1, d1); // save s1 first; d1 != s0
-      if (s0 != d0) a->movq(s0, d0);
-    }
-  } else {
-    // could do this in a simplify pass
-    if (s0 != d0) a->movq(s0, d0);
-    if (s1 != d1) a->movq(s1, d1);
-  }
-}
-
-void Vgen::emit(const bindaddr& i) {
-  stubs.push_back({nullptr, nullptr, i});
-  mcg->setJmpTransID(TCA(i.dest));
-  mcg->cgFixups().m_codePointers.insert(i.dest);
-}
-
-void Vgen::emit(const bindcall& i) {
-  mcg->backEnd().prepareForSmash(a->code(), kCallLen);
-  a->call(i.stub);
-  emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
-void Vgen::emit(const bindjcc1st& i) {
-  mcg->backEnd().prepareForTestAndSmash(a->code(), 0,
-                                        TestAndSmashFlags::kAlignJccAndJmp);
-  auto const jcc_addr = a->frontier();
-  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
-  auto const jmp_addr = a->frontier();
-  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, CC_None);
-
-  stubs.push_back({jmp_addr, jcc_addr, i});
-
-  mcg->setJmpTransID(jmp_addr);
-  mcg->setJmpTransID(jcc_addr);
-}
-
-void Vgen::emit(const bindjcc& i) {
-  mcg->backEnd().prepareForSmash(a->code(), kJmpccLen);
-  auto const jcc_addr = a->frontier();
-  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
-
-  stubs.push_back({nullptr, jcc_addr, i});
-  mcg->setJmpTransID(jcc_addr);
-}
-
-void Vgen::emit(const bindjmp& i) {
-  mcg->backEnd().prepareForSmash(a->code(), kJmpLen);
-  auto const jmp_addr = a->frontier();
-  mcg->backEnd().emitSmashableJump(a->code(), a->frontier(), CC_None);
-
-  stubs.push_back({jmp_addr, nullptr, i});
-  mcg->setJmpTransID(jmp_addr);
-}
-
-void Vgen::emit(const callstub& i) {
-  emit(call{i.target, i.args});
-}
-
-void Vgen::emit(const callfaststub& i) {
-  emit(call{i.target, i.args});
-  emit(syncpoint{i.fix});
-}
-
-void Vgen::emit(const fallback& i) {
-  mcg->backEnd().prepareForSmash(a->code(), kJmpLen);
-  auto const jmp_addr = a->frontier();
-  mcg->backEnd().emitSmashableJump(a->code(), a->frontier(), CC_None);
-
-  stubs.push_back({jmp_addr, nullptr, i});
-
-  auto const srcrec = mcg->tx().getSrcRec(i.dest);
-  srcrec->registerFallbackJump(jmp_addr, CC_None);
-}
-
-void Vgen::emit(const fallbackcc& i) {
-  mcg->backEnd().prepareForSmash(a->code(), kJmpccLen);
-  auto const jcc_addr = a->frontier();
-  mcg->backEnd().emitSmashableJump(a->code(), jcc_addr, i.cc);
-
-  stubs.push_back({nullptr, jcc_addr, i});
-
-  auto const srcrec = mcg->tx().getSrcRec(i.dest);
-  srcrec->registerFallbackJump(jcc_addr, i.cc);
-}
-
-void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
-  if (val == 0) {
-    a->pxor(d, d); // does not modify flags
-  } else {
-    auto addr = mcg->allocLiteral(val);
-    a->movsd(rip[(intptr_t)addr], d);
-  }
-}
-
-void Vgen::emit(const ldimmb& i) {
-  // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
-  auto val = i.s.ub();
-  if (i.d.isGP()) {
-    Vreg8 d8 = i.d;
-    a->movb(static_cast<int8_t>(val), d8);
-  } else {
-    emitSimdImm(a, val, i.d);
-  }
-}
-
-void Vgen::emit(const ldimml& i) {
-  // ldimml is for Vconst::Long, which is treated as unsigned uint32_t
-  auto val = i.s.l();
-  if (i.d.isGP()) {
-    Vreg32 d32 = i.d;
-    a->movl(val, d32);
-  } else {
-    emitSimdImm(a, uint32_t(val), i.d);
-  }
-}
-
-void Vgen::emit(const ldimmq& i) {
-  auto val = i.s.q();
-  if (i.d.isGP()) {
-    if (val == 0) {
-      Vreg32 d32 = i.d;
-      a->movl(0, d32); // because emitImmReg tries the xor optimization
-    } else {
-      a->emitImmReg(i.s, i.d);
-    }
-  } else {
-    emitSimdImm(a, val, i.d);
-  }
-}
-
-void Vgen::emit(const ldimmqs& i) {
-  mcg->backEnd().prepareForSmash(a->code(), kMovLen);
-  a->movq(0xdeadbeeffeedface, i.d);
-
-  auto immp = reinterpret_cast<uintptr_t*>(a->frontier()) - 1;
-  *immp = i.s.q();
-}
-
-void Vgen::emit(const load& i) {
-  Vasm::prefix(*a, i.s);
-  auto mref = i.s.mr();
-  if (i.d.isGP()) {
-    a->loadq(mref, i.d);
-  } else {
-    assertx(i.d.isSIMD());
-    a->movsd(mref, i.d);
-  }
-}
-
-void Vgen::emit(const mccall& i) {
-  mcg->backEnd().prepareForSmash(a->code(), kCallLen);
-  a->call(i.target);
-}
-
-// emit smashable mov as part of method cache callsite
-void Vgen::emit(const mcprep& i) {
-  /*
-   * For the first time through, set the cache to hold the address
-   * of the movq (*2 + 1), so we can find the movq from the handler.
-   *
-   * We set the low bit for two reasons: the Class* will never be a valid
-   * Class*, so we'll always miss the inline check before it's smashed, and
-   * handlePrimeCacheMiss can tell it's not been smashed yet
-   */
-  emit(ldimmqs{0x8000000000000000u, i.d});
-
-  auto movAddr = reinterpret_cast<uintptr_t>(a->frontier()) - x64::kMovLen;
-  auto immAddr = reinterpret_cast<uintptr_t*>(movAddr + x64::kMovImmOff);
-
-  *immAddr = (movAddr << 1) | 1;
-  mcg->cgFixups().m_addressImmediates.insert(reinterpret_cast<TCA>(~movAddr));
-}
-
-void Vgen::emit(const storebi& i) {
-  Vasm::prefix(*a, i.m).storeb(i.s, i.m.mr());
-}
-
-void Vgen::emit(const store& i) {
-  if (i.s.isGP()) {
-    a->storeq(i.s, i.d);
-  } else {
-    assertx(i.s.isSIMD());
-    a->movsd(i.s, i.d);
-  }
-}
-
-void Vgen::emit(const syncpoint& i) {
-  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
-         i.fix.pcOffset, i.fix.spOffset);
-  mcg->recordSyncPoint(a->frontier(), i.fix);
-}
-
-void Vgen::emit(const testwim& i) {
-  // If there's only 1 byte of meaningful bits in the mask, we can adjust the
-  // pointer offset and use testbim instead.
-  int off = 0;
-  uint16_t newMask = i.s0.w();
-  while (newMask > 0xff && !(newMask & 0xff)) {
-    off++;
-    newMask >>= 8;
-  }
-
-  if (newMask > 0xff) {
-    a->testw(i.s0, i.s1);
-  } else {
-    emit(testbim{int8_t(newMask), i.s1 + off, i.sf});
-  }
-}
-
-void Vgen::emit(const testlim& i) {
-  a->testl(i.s0, i.s1);
-}
-
-void Vgen::emit(const testqi& i) {
-  auto const imm = i.s0.q();
-  if (magFits(imm, sz::byte)) {
-    a->testb(i.s0, rbyte(i.s1));
-  } else {
-    a->testq(i.s0, i.s1);
-  }
-}
-
-void Vgen::emit(const testqim& i) {
-  // The immediate is 32 bits, sign-extended to 64. If the sign bit isn't set,
-  // we can get the same results by emitting a testlim.
-  if (i.s0.l() < 0) {
-    a->testq(i.s0, i.s1);
-  } else {
-    emit(testlim{i.s0, i.s1, i.sf});
-  }
-}
-
-void Vgen::emit(const nothrow& i) {
-  // register a null catch trace at this position, telling the unwinder that
-  // the function call returning to here isn't allowed to throw.
-  mcg->registerCatchBlock(a->frontier(), nullptr);
-}
-
-void Vgen::emit(const unwind& i) {
-  // Unwind instructions terminate blocks with calls that can throw, and have
-  // the edges to catch (unwinder) blocks and fall-through blocks.
-  catches.push_back({a->frontier(), i.targets[1]});
-  emit(jmp{i.targets[0]});
-}
-
-void Vgen::emit(const vretm& i) {
-  a->push(i.retAddr);
-  a->loadq(i.prevFp, i.d);
-  a->ret();
-}
-
-void Vgen::emit(const vret& i) {
-  a->push(i.retAddr);
-  a->ret();
-}
-
 void Vgen::emit(const cvtsi2sd& i) {
   a->pxor(i.d, i.d);
   a->cvtsi2sd(i.s, i.d);
@@ -709,6 +668,50 @@ void Vgen::emit(const lea& i) {
     emit(copy{i.s.base, i.d});
   } else {
     a->lea(i.s, i.d);
+  }
+}
+
+void Vgen::emit(const storebi& i) {
+  Vasm::prefix(*a, i.m).storeb(i.s, i.m.mr());
+}
+
+void Vgen::emit(const testwim& i) {
+  // If there's only 1 byte of meaningful bits in the mask, we can adjust the
+  // pointer offset and use testbim instead.
+  int off = 0;
+  uint16_t newMask = i.s0.w();
+  while (newMask > 0xff && !(newMask & 0xff)) {
+    off++;
+    newMask >>= 8;
+  }
+
+  if (newMask > 0xff) {
+    a->testw(i.s0, i.s1);
+  } else {
+    emit(testbim{int8_t(newMask), i.s1 + off, i.sf});
+  }
+}
+
+void Vgen::emit(const testlim& i) {
+  a->testl(i.s0, i.s1);
+}
+
+void Vgen::emit(const testqi& i) {
+  auto const imm = i.s0.q();
+  if (magFits(imm, sz::byte)) {
+    a->testb(i.s0, rbyte(i.s1));
+  } else {
+    a->testq(i.s0, i.s1);
+  }
+}
+
+void Vgen::emit(const testqim& i) {
+  // The immediate is 32 bits, sign-extended to 64. If the sign bit isn't set,
+  // we can get the same results by emitting a testlim.
+  if (i.s0.l() < 0) {
+    a->testq(i.s0, i.s1);
+  } else {
+    emit(testlim{i.s0, i.s1, i.sf});
   }
 }
 
@@ -926,10 +929,10 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   }
 }
 
-void lower_vcallstub(Vunit& unit, Vlabel b) {
+void lower_vcallarray(Vunit& unit, Vlabel b) {
   auto& code = unit.blocks[b].code;
-  // vcallstub can only appear at the end of a block.
-  auto const inst = code.back().get<vcallstub>();
+  // vcallarray can only appear at the end of a block.
+  auto const inst = code.back().get<vcallarray>();
   auto const origin = code.back().origin;
 
   auto argRegs = inst.args;
@@ -941,7 +944,7 @@ void lower_vcallstub(Vunit& unit, Vlabel b) {
   }
 
   code.back() = copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
-  code.emplace_back(callstub{inst.target, argRegs});
+  code.emplace_back(callarray{inst.target, argRegs});
   code.back().origin = origin;
   code.emplace_back(unwind{{inst.targets[0], inst.targets[1]}});
   code.back().origin = origin;
@@ -965,8 +968,8 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
     auto& back = blocks[ib].code.back();
     if (back.op == Vinstr::svcreqstub) {
       lower_svcreqstub(unit, Vlabel{ib}, blocks[ib].code.back());
-    } else if (back.op == Vinstr::vcallstub) {
-      lower_vcallstub(unit, Vlabel{ib});
+    } else if (back.op == Vinstr::vcallarray) {
+      lower_vcallarray(unit, Vlabel{ib});
     }
 
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {

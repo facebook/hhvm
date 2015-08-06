@@ -151,29 +151,29 @@ struct BackEnd final : jit::BackEnd {
     using namespace x64;
     switch (flags) {
       case TestAndSmashFlags::kAlignJcc:
-        prepareForSmash(cb, testBytes + kJmpccLen, testBytes);
-        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen));
+        prepareForSmash(cb, testBytes + kJccLen, testBytes);
+        assertx(isSmashable(cb.frontier() + testBytes, kJccLen));
         break;
       case TestAndSmashFlags::kAlignJccImmediate:
         prepareForSmash(cb,
-                        testBytes + kJmpccLen,
-                        testBytes + kJmpccLen - kJmpImmBytes);
-        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen,
-                           kJmpccLen - kJmpImmBytes));
+                        testBytes + kJccLen,
+                        testBytes + kJccLen - kJmpImmBytes);
+        assertx(isSmashable(cb.frontier() + testBytes, kJccLen,
+                           kJccLen - kJmpImmBytes));
         break;
       case TestAndSmashFlags::kAlignJccAndJmp:
         // Ensure that the entire jcc, and the entire jmp are smashable
         // (but we dont need them both to be in the same cache line)
-        prepareForSmashImpl(cb, testBytes + kJmpccLen, testBytes);
-        prepareForSmashImpl(cb, testBytes + kJmpccLen + kJmpLen,
-                            testBytes + kJmpccLen);
+        prepareForSmashImpl(cb, testBytes + kJccLen, testBytes);
+        prepareForSmashImpl(cb, testBytes + kJccLen + kJmpLen,
+                            testBytes + kJccLen);
         mcg->cgFixups().m_alignFixups.emplace(
-          cb.frontier(), std::make_pair(testBytes + kJmpccLen, testBytes));
+          cb.frontier(), std::make_pair(testBytes + kJccLen, testBytes));
         mcg->cgFixups().m_alignFixups.emplace(
-          cb.frontier(), std::make_pair(testBytes + kJmpccLen + kJmpLen,
-                                        testBytes + kJmpccLen));
-        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen));
-        assertx(isSmashable(cb.frontier() + testBytes + kJmpccLen, kJmpLen));
+          cb.frontier(), std::make_pair(testBytes + kJccLen + kJmpLen,
+                                        testBytes + kJccLen));
+        assertx(isSmashable(cb.frontier() + testBytes, kJccLen));
+        assertx(isSmashable(cb.frontier() + testBytes + kJccLen, kJmpLen));
         break;
     }
   }
@@ -192,13 +192,13 @@ struct BackEnd final : jit::BackEnd {
     // Make sure the encoding is what we expect. It has to be a rip-relative jcc
     // with a 4-byte delta.
     assertx(*jccAddr == 0x0F && (*(jccAddr + 1) & 0xF0) == 0x80);
-    assertx(isSmashable(jccAddr, x64::kJmpccLen));
+    assertx(isSmashable(jccAddr, x64::kJccLen));
 
     // Can't use the assembler to write out a new instruction, because we have
     // to preserve the condition code.
-    auto newDelta = safe_cast<int32_t>(newDest - jccAddr - x64::kJmpccLen);
+    auto newDelta = safe_cast<int32_t>(newDest - jccAddr - x64::kJccLen);
     auto deltaAddr = reinterpret_cast<int32_t*>(jccAddr
-                                                + x64::kJmpccLen
+                                                + x64::kJccLen
                                                 - x64::kJmpImmBytes);
     *deltaAddr = newDelta;
   }
@@ -209,7 +209,7 @@ struct BackEnd final : jit::BackEnd {
       assertx(isSmashable(cb.frontier(), x64::kJmpLen));
       a.  jmp(dest);
     } else {
-      assertx(isSmashable(cb.frontier(), x64::kJmpccLen));
+      assertx(isSmashable(cb.frontier(), x64::kJccLen));
       a.  jcc(cc, dest);
     }
   }

@@ -1982,6 +1982,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto const extra     = inst->extra<LdObjMethodData>();
   auto& v = vmain();
 
+  // Allocate the request-local one-way method cache for this lookup.
   auto const handle = rds::alloc<Entry, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
     auto const caddr_hand = reinterpret_cast<char*>(
@@ -2002,26 +2003,42 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto done = v.makeBlock();
 
   /*
-   * Inline cache: we "prime" the cache across requests by smashing
-   * this immediate to hold a Func* in the upper 32 bits, and a Class*
-   * in the lower 32 bits.  (If both are low-malloced pointers can
-   * fit.)  See pmethodCacheMissPath.
+   * The `mcprep' instruction here creates a smashable move, which serves as
+   * the inline cache, or "prime cache" for the method lookup.
+   *
+   * On our first time through this codepath in the TC, we "prime" this cache
+   * (which holds across /all/ requests) by smashing the mov immediate to hold
+   * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
+   * not always possible (see handlePrimeCacheInit() for details), in which
+   * case we smash an immediate with some low bits set, so that we always miss
+   * on the inline cache when comparing against our live Class*.
+   *
+   * The inline cache is set up so that we always miss initially, and take the
+   * slow path to initialize it.  After initialization, we also smash the slow
+   * path call to point instead to a lookup routine for the out-of-line method
+   * cache (allocated above).  The inline cache is guaranteed to be set only
+   * once, but the one-way request-local method cache is updated on each miss.
    */
   auto func_class = v.makeReg();
   auto classptr = v.makeReg();
   v << mcprep{func_class};
+
+  // Check the inline cache.
   v << movl{func_class, classptr};  // zeros the top 32 bits
   auto const sf = v.makeReg();
   v << cmpq{classptr, clsReg, sf};
   v << jcc{CC_NE, sf, {fast_path, slow_path}};
 
+  // Inline cache hit; store the value in the AR.
   v = fast_path;
   auto funcptr = v.makeReg();
   v << shrqi{32, func_class, funcptr, v.makeReg()};
-  v << store{funcptr, actRecReg[cellsToBytes(extra->offset.offset) +
-    AROFF(m_func)]};
+  v << store{funcptr,
+             actRecReg[cellsToBytes(extra->offset.offset) + AROFF(m_func)]};
   v << jmp{done};
 
+  // Initialize the inline cache, or do a lookup in the out-of-line cache if
+  // we've finished initialization and have smashed this call.
   v = slow_path;
   cgCallHelper(v,
     CppCall::direct(mcHandler),
@@ -2033,8 +2050,6 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
       .immPtr(extra->method)
       .ssa(0/*cls*/)
       .immPtr(getClass(inst->marker()))
-      // The scratch reg contains the prime data before we've smashed the call
-      // to handleSlowPath.  After, it contains the primed Class/Func pair.
       .reg(func_class)
   );
   v << jmp{done};
@@ -2083,7 +2098,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{prev_fp, sync_sp, ripReg}}), v.makeTuple({})};
   }
 
-  v << vretm{fp[AROFF(m_savedRip)], fp[AROFF(m_sfp)], rVmFp,
+  v << vret{fp[AROFF(m_savedRip)], fp[AROFF(m_sfp)], rVmFp,
     kCrossTraceRegsReturn};
 }
 
@@ -2324,7 +2339,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   auto& v = vmain();
   maybe_syncsp(v, inst->marker(), srcLoc(inst, 0).reg(), extra->irSPOff);
   v << bindjmp{
-    extra->dest,
+    extra->target,
     extra->invSPOff,
     extra->trflags,
     cross_trace_args(inst->marker())
@@ -2340,8 +2355,8 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   v << syncvmsp{sync_sp};
 
   VregList args;
-  args.push_back(v.cns(extra->sk.toAtomicInt()));
-  args.push_back(v.cns(static_cast<uint64_t>(extra->transId)));
+  args.push_back(v.cns(extra->target.toAtomicInt()));
+  args.push_back(v.cns(static_cast<uint64_t>(extra->transID)));
 
   v << svcreqstub{
     REQ_RETRANSLATE_OPT,
@@ -2930,8 +2945,8 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   v << syncvmsp{syncSP};
 
   auto done = v.makeBlock();
-  v << vcallstub{target, kCrossTraceRegsFCallArray, v.makeTuple({pc, after}),
-                 {done, m_state.labels[inst->taken()]}};
+  v << vcallarray{target, kCrossTraceRegsFCallArray, v.makeTuple({pc, after}),
+                {done, m_state.labels[inst->taken()]}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;
 }

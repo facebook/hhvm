@@ -348,9 +348,6 @@ struct RelOffsetData : IRExtraData {
  * order.  Add new IRExtraData types here.
  */
 
-/*
- * IsAsyncData
- */
 struct IsAsyncData : IRExtraData {
   explicit IsAsyncData(bool isAsync) : isAsync(isAsync) {}
 
@@ -462,9 +459,30 @@ struct FPushCufData : IRExtraData {
   uint32_t iterId;
 };
 
-/*
- * Information for REQ_RETRANSLATE stubs.
- */
+struct ReqBindJmpData : IRExtraData {
+  explicit ReqBindJmpData(const SrcKey& target,
+                          FPInvOffset invSPOff,
+                          IRSPOffset irSPOff,
+                          TransFlags trflags)
+    : target(target)
+    , invSPOff(invSPOff)
+    , irSPOff(irSPOff)
+    , trflags(trflags)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(target.offset(), ',',
+                                  invSPOff.offset, ',',
+                                  irSPOff.offset, ',',
+                                  trflags.packed);
+  }
+
+  SrcKey target;
+  FPInvOffset invSPOff;
+  IRSPOffset irSPOff;
+  TransFlags trflags;
+};
+
 struct ReqRetranslateData : IRExtraData {
   explicit ReqRetranslateData(IRSPOffset irSPOff,
                               TransFlags trflags)
@@ -480,29 +498,24 @@ struct ReqRetranslateData : IRExtraData {
   TransFlags trflags;
 };
 
-/*
- * Information for REQ_BIND_JMP stubs.
- */
-struct ReqBindJmpData : IRExtraData {
-  explicit ReqBindJmpData(const SrcKey& dest,
-                          FPInvOffset invSPOff,
-                          IRSPOffset irSPOff,
-                          TransFlags trflags)
-    : dest(dest)
-    , invSPOff(invSPOff)
+struct ReqRetranslateOptData : IRExtraData {
+  explicit ReqRetranslateOptData(TransID transID,
+                                 SrcKey target,
+                                 IRSPOffset irSPOff)
+    : transID(transID)
+    , target(target)
     , irSPOff(irSPOff)
-    , trflags(trflags)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(dest.offset(), ',', invSPOff.offset, ',',
-      irSPOff.offset, ',', trflags.packed);
+    return folly::to<std::string>(transID, ',',
+                                  target.offset(), ',',
+                                  irSPOff.offset);
   }
 
-  SrcKey dest;
-  FPInvOffset invSPOff;
+  TransID transID;
+  SrcKey target;
   IRSPOffset irSPOff;
-  TransFlags trflags;
 };
 
 /*
@@ -530,28 +543,6 @@ struct PropOffset : IRExtraData {
   size_t hash() const { return std::hash<int32_t>()(offsetBytes); }
 
   int32_t offsetBytes;
-};
-
-/*
- * Information needed to generate a REQ_RETRANSLATE_OPT service request.
- */
-struct ReqRetranslateOptData : IRExtraData {
-  explicit ReqRetranslateOptData(TransID transId,
-                                 SrcKey sk,
-                                 IRSPOffset irSPOff)
-    : transId(transId)
-    , sk(sk)
-    , irSPOff(irSPOff)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(transId, ',', sk.offset(), ',',
-      irSPOff.offset);
-  }
-
-  TransID transId;
-  SrcKey sk;
-  IRSPOffset irSPOff;
 };
 
 /*

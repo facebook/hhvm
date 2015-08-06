@@ -175,9 +175,9 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
     case Vinstr::bindaddr:
       { auto const& i = p.svcreq.bindaddr_;
         assertx(!p.jmp && !p.jcc);
-        stub = svcreq::emit_bindaddr_stub(frozen, i.spOff, i.dest,
-                                          i.sk, TransFlags{});
-        *i.dest = stub;
+        stub = svcreq::emit_bindaddr_stub(frozen, i.spOff, i.addr,
+                                          i.target, TransFlags{});
+        *i.addr = stub;
       } break;
 
     case Vinstr::bindjcc1st:
@@ -191,9 +191,9 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       { auto const& i = p.svcreq.fallback_;
         assertx(p.jmp && !p.jcc);
 
-        auto const srcrec = mcg->tx().getSrcRec(i.dest);
+        auto const srcrec = mcg->tx().getSrcRec(i.target);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.dest, i.trflags)
+          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;
 
@@ -201,9 +201,9 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       { auto const& i = p.svcreq.fallbackcc_;
         assertx(!p.jmp && p.jcc);
 
-        auto const srcrec = mcg->tx().getSrcRec(i.dest);
+        auto const srcrec = mcg->tx().getSrcRec(i.target);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.dest, i.trflags)
+          ? svcreq::emit_retranslate_stub(frozen, i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;
 

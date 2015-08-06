@@ -68,7 +68,7 @@ struct CodegenState {
   // callsite so it can fix rsp before executing the catch block.
   StateVector<Block,Offset> catch_offsets;
 
-  // Catch blocks that are targets of php calls (bindcall, contenter, callstub)
+  // Catch blocks that are targets of php calls (bindcall, contenter, callarray)
   // are handled specially. This StateVector is used to propagate information
   // from the cg* function that detects this situation to cgBeginCatch, which
   // encodes the information in the landingpad{} instruction.

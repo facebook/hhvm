@@ -24,14 +24,14 @@ type env = {
 }
 
 let start_server env =
-  let hh_server = Printf.sprintf "%s -d %s %s --waiting-client %d"
-    (Filename.quote (get_hhserver ()))
-    (Filename.quote (Path.to_string env.root))
-    (if env.no_load then "--no-load" else "")
-    (Unix.getpid ())
-  in
-  Printf.eprintf "Server launched with the following command:\n\t%s\n%!"
-    hh_server;
+  let hh_server = get_hhserver () in
+  let hh_server_args =
+    Array.concat
+      [ [|hh_server; "-d"; Path.to_string env.root|];
+        if env.no_load then [| "--no-load" |] else [||];
+        [| "--waiting-client"; string_of_int (Unix.getpid ()) |] ] in
+  (* Printf.eprintf "Server launched with the following command:\n\t%s\n%!" *)
+    (* hh_server; *)
 
   (* Start up the hh_server, and wait on SIGUSR1, which is sent to us at various
    * stages of the start up process. See if we're in the state we want to be in;
@@ -50,8 +50,10 @@ let start_server env =
       ()
   in
 
-  (match Unix.system hh_server with
-    | Unix.WEXITED 0 -> ()
+  let server_pid =
+    Unix.(create_process hh_server hh_server_args stdin stdout stderr) in
+  (match Unix.waitpid [] server_pid with
+    | _, Unix.WEXITED 0 -> ()
     | _ -> Printf.fprintf stderr "Could not start hh_server!\n"; exit 77);
   wait_loop ();
 

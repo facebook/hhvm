@@ -39,6 +39,13 @@ let open_in_no_fail fn =
     Printf.fprintf stderr "Could not open_in: '%s' (%s)\n" fn e;
     exit 3
 
+let open_in_bin_no_fail fn =
+  try open_in_bin fn
+  with e ->
+    let e = Printexc.to_string e in
+    Printf.fprintf stderr "Could not open_in: '%s' (%s)\n" fn e;
+    exit 3
+
 let close_in_no_fail fn ic =
   try close_in ic with e ->
     let e = Printexc.to_string e in
@@ -59,7 +66,7 @@ let close_out_no_fail fn oc =
     exit 3
 
 let cat filename =
-  let ic = open_in filename in
+  let ic = open_in_bin filename in
   let len = in_channel_length ic in
   let buf = Buffer.create len in
   Buffer.add_channel buf ic len;
@@ -68,7 +75,7 @@ let cat filename =
   content
 
 let cat_no_fail filename =
-  let ic = open_in_no_fail filename in
+  let ic = open_in_bin_no_fail filename in
   let len = in_channel_length ic in
   let buf = Buffer.create len in
   Buffer.add_channel buf ic len;
@@ -228,7 +235,7 @@ let lines_of_file filename =
 
 
 let read_file file =
-  let ic = open_in file  in
+  let ic = open_in_bin file  in
   let size = in_channel_length ic in
   let buf = String.create size in
   really_input ic buf 0 size;

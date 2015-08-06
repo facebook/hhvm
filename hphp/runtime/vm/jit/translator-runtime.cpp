@@ -249,17 +249,15 @@ StringData* convIntToStrHelper(int64_t i) {
 }
 
 StringData* convObjToStrHelper(ObjectData* o) {
-  auto s = o->invokeToString();
-  auto sd = s.get();
-  sd->incRefCount(); // includes static/uncounted check
-  return sd;
+  // toString() returns a counted String; detach() it to move ownership
+  // of the count to the caller
+  return o->invokeToString().detach();
 }
 
-StringData* convResToStrHelper(ResourceData* o) {
-  auto s = o->o_toString();
-  auto sd = s.get();
-  sd->incRefCount(); // includes static/uncounted check
-  return sd;
+StringData* convResToStrHelper(ResourceData* r) {
+  // toString() returns a counted String; detach() it to move ownership
+  // of the count to the caller
+  return r->o_toString().detach();
 }
 
 TypedValue getMemoKeyHelper(TypedValue tv) {

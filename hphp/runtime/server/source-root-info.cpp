@@ -105,7 +105,7 @@ void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
   }
   String logPath = logsRoot + "/" + sandboxName + "_error.log";
   String accessLogPath = logsRoot + "/" + sandboxName + "_access.log";
-  if (!Logger::SetThreadLog(logPath.c_str())) {
+  if (!Logger::SetThreadLog(logPath.c_str(), false)) {
     Logger::Warning("Sandbox error log %s could not be opened",
                     logPath.c_str());
   }
@@ -176,7 +176,7 @@ void SourceRootInfo::createFromUserConfig() {
     if (lp.charAt(0) != '/') {
       lp = homePath + lp;
     }
-    if (!Logger::SetThreadLog(lp.c_str())) {
+    if (!Logger::SetThreadLog(lp.c_str(), false)) {
       Logger::Warning("Sandbox error log %s could not be opened",
                       lp.c_str());
     }

@@ -79,7 +79,7 @@ public:
   static void OnNewRequest();
   static void ResetRequestCount();
 
-  static bool SetThreadLog(const char *file);
+  static bool SetThreadLog(const char *file, bool threadOnly);
   static void ClearThreadLog();
   static void SetNewOutput(FILE *output);
   static void UnlimitThreadMessages();
@@ -106,12 +106,12 @@ public:
 protected:
   class ThreadData {
   public:
-    ThreadData() : request(0), message(0), log(nullptr), hook(nullptr) {}
-    int request;
-    int message;
+    int request{0};
+    int message{0};
     LogFileFlusher flusher;
-    FILE *log;
-    PFUNC_LOG hook;
+    FILE *log{nullptr};
+    bool threadLogOnly{false};
+    PFUNC_LOG hook{nullptr};
     void *hookData;
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);

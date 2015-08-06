@@ -440,13 +440,10 @@ void RequestInjectionData::threadInit() {
                        if (m_logErrors != on) {
                          if (on) {
                            if (!m_errorLog.empty()) {
-                             FILE *output = fopen(m_errorLog.data(), "a");
-                             if (output) {
-                               Logger::SetNewOutput(output);
-                             }
+                             Logger::SetThreadLog(m_errorLog.data(), true);
                            }
                          } else {
-                           Logger::SetNewOutput(nullptr);
+                           Logger::ClearThreadLog();
                          }
                        }
                        return true;
@@ -458,11 +455,8 @@ void RequestInjectionData::threadInit() {
                    "error_log",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       if (m_logErrors && !m_errorLog.empty()) {
-                         FILE *output = fopen(m_errorLog.data(), "a");
-                         if (output) {
-                           Logger::SetNewOutput(output);
-                         }
+                       if (m_logErrors && !value.empty()) {
+                         Logger::SetThreadLog(value.data(), true);
                        }
                        return true;
                      },

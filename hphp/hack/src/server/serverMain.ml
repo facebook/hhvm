@@ -108,8 +108,8 @@ module Program : SERVER_PROGRAM =
         )
 
     let make_next_files dir =
-      let php_next_files = Find.make_next_files FindUtils.is_php dir in
-      let js_next_files = Find.make_next_files FindUtils.is_js dir in
+      let php_next_files = Find.make_next_files ~filter:FindUtils.is_php dir in
+      let js_next_files = Find.make_next_files ~filter:FindUtils.is_js dir in
       fun () -> php_next_files () @ js_next_files ()
 
     let stamp_file = Filename.concat GlobalConfig.tmp_dir "stamp"

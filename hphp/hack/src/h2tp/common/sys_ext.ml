@@ -67,12 +67,12 @@ let cmd_to_list command =
 
 
 let recursive_file_pairs src dest =
-  let escaped_src =
-    cmd_to_list ("find \"" ^ src ^ "\" -maxdepth 0") |> List.hd in
+  let src = Path.make src in
+  let escaped_src = Find.find ~max_depth:0 [ src ] |> List.hd in
   List.map begin fun f ->
     let suffix = filename_without_leading_path escaped_src f in
     if suffix = "." then (f, dest) else (f, dest ^ "/" ^ suffix)
-    end (cmd_to_list ("find \"" ^ src ^ "\""))
+  end (Find.find [ src ])
 
 let has_extension f ext =
   if ext.[0] <> '.'

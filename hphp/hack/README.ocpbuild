@@ -1,0 +1,45 @@
+This document describes an alternative build-system for Hack. This is
+currently the only build system available on Windows. Meanwhile, this
+document focuses on using this alternative build system on Linux and
+OS X; for Windows, see `README.win32`.
+
+### ocp-build, a build system for OCaml applications
+
+ocp-build is a build system for OCaml applications, based on simple
+descriptions of packages. ocp-build combines the descriptions of
+packages in different directories, and optimize the parallel incremental
+compilation of files depending on the number of cores and the 
+automatically-infered dependencies between source files.
+
+For more details, you can take a look at
+
+   http://www.typerex.org/ocp-build.html
+
+### Download and install `ocp-build` by using OPAM
+
+OPAM is a source-based package manager for OCaml. It supports multiple
+simultaneous compiler installations, flexible package constraints, and
+a Git-friendly development workflow.
+
+To install OPAM, please check http://opam.ocaml.org/doc/Install.html
+
+Once OPAM is installed correctly with an OCaml compiler, you can setup
+your configuration and installl `ocp-build`:
+
+    $ opam init
+    $ eval $(opam config env)
+    $ opam install ocp-build
+
+Note that you will always need to use `eval $(opam config env)` when restarting
+a shell in a terminal, to get your PATH properly configured.
+
+### Compiling Hack with ocp-build
+
+For Windows, see `README.win32.` Otherwise in `hack/src`, run:
+
+  $ make fast
+
+Optionally, you may run:
+
+  $ make test-ocp
+  

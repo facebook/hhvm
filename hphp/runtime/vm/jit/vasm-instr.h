@@ -63,7 +63,7 @@ struct Vunit;
   O(bindaddr, I(addr) I(target) I(spOff), Un, Dn)\
   O(fallback, I(target) I(spOff) I(trflags), U(args), Dn)\
   O(fallbackcc, I(cc) I(target) I(spOff) I(trflags), U(sf) U(args), Dn)\
-  O(svcreqstub, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
+  O(retransopt, I(transID) I(target) I(spOff), U(args), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
@@ -399,11 +399,21 @@ struct fallbackcc {
   RegSet args;
 };
 
-struct svcreqstub {
-  ServiceRequest req;
+struct retransopt {
+  explicit retransopt(TransID transID,
+                      SrcKey target,
+                      FPInvOffset spOff,
+                      RegSet args)
+    : transID{transID}
+    , target{target}
+    , spOff(spOff)
+    , args{args}
+  {}
+
+  TransID transID;
+  SrcKey target;
+  FPInvOffset spOff;
   RegSet args;
-  Vtuple extraArgs;
-  TCA stub_block;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

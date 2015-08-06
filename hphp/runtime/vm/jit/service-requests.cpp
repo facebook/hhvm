@@ -193,6 +193,17 @@ TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
   );
 }
 
+TCA emit_retranslate_opt_stub(CodeBlock& cb, FPInvOffset spOff,
+                              SrcKey target, TransID transID) {
+  return emit_persistent(
+    cb,
+    target.resumed() ? folly::none : folly::make_optional(spOff),
+    REQ_RETRANSLATE_OPT,
+    target.toAtomicInt(),
+    transID
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static constexpr int kLeaVmSpLen = 7;

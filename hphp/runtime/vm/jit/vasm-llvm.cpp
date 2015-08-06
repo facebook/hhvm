@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
@@ -31,6 +32,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -1537,6 +1539,7 @@ O(orwim) \
 O(orq) \
 O(orqi) \
 O(orqim) \
+O(retransopt) \
 O(roundsd) \
 O(srem) \
 O(sar) \
@@ -1564,7 +1567,6 @@ O(subli) \
 O(subq) \
 O(subqi) \
 O(subsd) \
-O(svcreqstub) \
 O(syncvmsp) \
 O(testb) \
 O(testbi) \
@@ -2721,6 +2723,36 @@ void LLVMEmitter::emit(const phidef& inst) {
   m_phiInfos.at(block).phidef(*this, block, defs);
 }
 
+void LLVMEmitter::emit(const retransopt& inst) {
+  auto passArgs = inst.args;
+  if (!inst.target.resumed()) {
+    emit(lea{rvmfp()[-cellsToBytes(inst.spOff.offset)], rvmsp()});
+    passArgs |= rvmsp();
+  }
+
+  defineValue(r_svcreq_req(), cns(static_cast<uint64_t>(REQ_RETRANSLATE_OPT)));
+  defineValue(r_svcreq_stub(), m_int64Zero);
+  defineValue(r_svcreq_arg(0), cns(inst.target.toAtomicInt()));
+  defineValue(r_svcreq_arg(1), cns(static_cast<uint64_t>(inst.transID)));
+  passArgs |= reg::rdi | reg::rsi | reg::rdx | reg::r10;
+
+  auto const args = makePhysRegArgs(
+    passArgs, {x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15,
+               reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9,
+               reg::rax, reg::r10});
+
+  std::vector<llvm::Type*> argTypes(args.size(), m_int64);
+  auto funcType = llvm::FunctionType::get(m_void, argTypes, false);
+  auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",
+                                                 argTypes.size()),
+                          funcType,
+                          uint64_t(handleSRHelper));
+  auto call = m_irb.CreateCall(func, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
+  call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  m_irb.CreateRetVoid();
+}
+
 llvm::Value* LLVMEmitter::getReturnAddress() {
   if (!m_llvmReturnAddress) {
     m_llvmReturnAddress =
@@ -2976,25 +3008,6 @@ void LLVMEmitter::emit(const subqi& inst) {
 void LLVMEmitter::emit(const subsd& inst) {
   defineValue(inst.d, m_irb.CreateFSub(asDbl(value(inst.s1)),
                                        asDbl(value(inst.s0))));
-}
-
-void LLVMEmitter::emit(const svcreqstub& inst) {
-  auto args = makePhysRegArgs(inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
-  args.emplace_back(cns(reinterpret_cast<uintptr_t>(inst.stub_block)));
-  args.emplace_back(cns(uint64_t{inst.req}));
-  for (auto arg : m_unit.tuples[inst.extraArgs]) {
-    args.push_back(value(arg));
-  }
-  std::vector<llvm::Type*> argTypes(args.size(), m_int64);
-  auto funcType = llvm::FunctionType::get(m_void, argTypes, false);
-  auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",
-                                                 argTypes.size()),
-                          funcType,
-                          uint64_t(handleSRHelper));
-  auto call = m_irb.CreateCall(func, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
-  call->setTailCallKind(llvm::CallInst::TCK_Tail);
-  m_irb.CreateRetVoid();
 }
 
 void LLVMEmitter::emit(const syncvmsp& inst) {

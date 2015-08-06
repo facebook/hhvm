@@ -396,56 +396,11 @@ void Vgen::emit(tbcc& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Lower svcreqstub{} by making copies to abi registers explicit, saving
-// vm regs, and returning to the VM. svcreqstub{} is guaranteed to be
-// at the end of a block, so we can just keep appending to the same block.
-void lower_svcreqstub(Vunit& unit, Vlabel b, Vinstr& inst) {
-  auto svcreqstub = inst.svcreqstub_; // copy it
-  auto origin = inst.origin;
-  auto& argv = unit.tuples[svcreqstub.extraArgs];
-  unit.blocks[b].code.pop_back(); // delete the svcreqstub instruction
-  Vout v(unit, b, origin);
-
-  RegSet arg_regs;
-  VregList arg_dests;
-  for (int i = 0, n = argv.size(); i < n; ++i) {
-    PhysReg d{svcReqArgReg(i)};
-    arg_dests.push_back(d);
-    arg_regs |= d;
-  }
-  v << copyargs{svcreqstub.extraArgs, v.makeTuple(arg_dests)};
-  // Save VM regs
-  PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rdsp{rVmTl};
-  v << store{vmfp, rdsp[rds::kVmfpOff]};
-  v << store{vmsp, rdsp[rds::kVmspOff]};
-  if (svcreqstub.stub_block) {
-    always_assert(false && "use rip-rel addr to get ephemeral stub addr");
-  } else {
-    v << ldimmq{0, PhysReg{arm::rAsm}}; // because persist flag
-  }
-  v << ldimmq{svcreqstub.req, PhysReg{argReg(0)}};
-  arg_regs |= arm::rAsm | argReg(0);
-
-  // Weird hand-shaking with enterTC: reverse-call a service routine.
-  // In the case of some special stubs (m_callToExit, m_retHelper), we
-  // have already unbalanced the return stack by doing a ret to
-  // something other than enterTCHelper.  In that case
-  // SRJmpInsteadOfRet indicates to fake the return.
-  v << load{sp[0], PhysReg{rLinkReg}};
-  v << lea{sp[16], sp}; // fake postindexing
-  arg_regs |= rLinkReg; // arm ret{} implicitly uses LR
-  v << ret{arg_regs};
-}
-
-// Lower svcreq
 void lower(Vunit& unit) {
   Timer _t(Timer::vasm_lower);
   for (size_t b = 0; b < unit.blocks.size(); ++b) {
     auto& code = unit.blocks[b].code;
     if (code.empty()) continue;
-    if (code.back().op == Vinstr::svcreqstub) {
-      lower_svcreqstub(unit, Vlabel{b}, code.back());
-    }
     for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
       auto& inst = unit.blocks[b].code[i];
       switch (inst.op) {

@@ -194,6 +194,7 @@ struct Vgen {
   void emit(psllq i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(const push& i) { a->push(i.s); }
+  void emit(const retransopt& i);
   void emit(const roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(const ret& i) { a->ret(); }
   void emit(const sarq& i) { unary(i); a->sarq(i.d); }
@@ -388,6 +389,10 @@ void Vgen::emit(const fallbackcc& i) {
 
   auto const srcrec = mcg->tx().getSrcRec(i.target);
   srcrec->registerFallbackJump(jcc_addr, i.cc);
+}
+
+void Vgen::emit(const retransopt& i) {
+  svcreq::emit_retranslate_opt_stub(a->code(), i.spOff, i.target, i.transID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -717,37 +722,6 @@ void Vgen::emit(const testqim& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Lower svcreqstub{} by making copies to abi registers explicit, saving
-// vm regs, and returning to the VM. svcreqstub{} is guaranteed to be
-// at the end of a block, so we can just keep appending to the same
-// block.
-void lower_svcreqstub(Vunit& unit, Vlabel b, const Vinstr& inst) {
-  assertx(unit.tuples[inst.svcreqstub_.extraArgs].size() < svcreq::kMaxArgs);
-  auto svcreqstub = inst.svcreqstub_; // copy it
-  auto origin = inst.origin;
-  auto& argv = unit.tuples[svcreqstub.extraArgs];
-  unit.blocks[b].code.pop_back(); // delete the svcreqstub instruction
-  Vout v(unit, b, origin);
-
-  RegSet arg_regs = svcreqstub.args;
-  VregList arg_dests;
-  for (int i = 0, n = argv.size(); i < n; ++i) {
-    PhysReg d{kSvcReqArgRegs[i]};
-    arg_dests.push_back(d);
-    arg_regs |= d;
-  }
-  v << copyargs{svcreqstub.extraArgs, v.makeTuple(arg_dests)};
-  if (svcreqstub.stub_block) {
-    v << leap{rip[(int64_t)svcreqstub.stub_block], rAsm};
-  } else {
-    v << ldimmq{0, rAsm}; // because persist flag
-  }
-  v << ldimmq{svcreqstub.req, rdi};
-  arg_regs |= rAsm | rdi | rVmFp | rVmSp;
-
-  v << jmpi{TCA(handleSRHelper), arg_regs};
-}
-
 void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
   auto const& inst = unit.blocks[b].code[iInst];
   auto const& srem = inst.srem_;
@@ -966,9 +940,7 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
   PostorderWalker{unit}.dfs([&](Vlabel ib) {
     assertx(!blocks[ib].code.empty());
     auto& back = blocks[ib].code.back();
-    if (back.op == Vinstr::svcreqstub) {
-      lower_svcreqstub(unit, Vlabel{ib}, blocks[ib].code.back());
-    } else if (back.op == Vinstr::vcallarray) {
+    if (back.op == Vinstr::vcallarray) {
       lower_vcallarray(unit, Vlabel{ib});
     }
 

@@ -2349,19 +2349,12 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto const extra = inst->extra<ReqRetranslateOpt>();
   auto& v = vmain();
-  auto const sync_sp = v.makeReg();
-  v << lea{srcLoc(inst, 0).reg()[cellsToBytes(extra->irSPOff.offset)],
-           sync_sp};
-  v << syncvmsp{sync_sp};
-
-  VregList args;
-  args.push_back(v.cns(extra->target.toAtomicInt()));
-  args.push_back(v.cns(static_cast<uint64_t>(extra->transID)));
-
-  v << svcreqstub{
-    REQ_RETRANSLATE_OPT,
-    kCrossTraceRegsResumed,
-    v.makeTuple(args)
+  maybe_syncsp(v, inst->marker(), srcLoc(inst, 0).reg(), extra->irSPOff);
+  v << retransopt{
+    extra->transID,
+    extra->target,
+    inst->marker().spOff(),
+    cross_trace_args(inst->marker())
   };
 }
 

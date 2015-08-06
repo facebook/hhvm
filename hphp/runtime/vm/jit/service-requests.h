@@ -224,6 +224,8 @@ TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff,
                        TCA* addr, SrcKey target, TransFlags trflags);
 TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
                           SrcKey target, TransFlags trflags);
+TCA emit_retranslate_opt_stub(CodeBlock& cb, FPInvOffset spOff,
+                              SrcKey target, TransID transID);
 
 /*
  * Space used by an ephemeral stub.

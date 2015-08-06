@@ -45,12 +45,6 @@ template<typename T> struct ptr final {
     if (LIKELY(m_px != nullptr)) m_px->incRefCount();
   }
 
-  enum class IsUnowned {};
-  ptr(T* px, IsUnowned) : m_px(px) {
-    assert(!m_px || m_px->getCount() == 0);
-    if (LIKELY(m_px != nullptr)) m_px->setRefCount(1);
-  }
-
   enum class NoIncRef {};
   explicit ptr(T* px, NoIncRef) : m_px(px) {}
 
@@ -58,12 +52,6 @@ template<typename T> struct ptr final {
   explicit ptr(T* px, NonNull) : m_px(px) {
     assert(px);
     m_px->incRefCount();
-  }
-
-  enum class UnownedAndNonNull {};
-  ptr(T* px, UnownedAndNonNull) : m_px(px) {
-    assert(m_px && m_px->getCount() == 0);
-    m_px->setRefCount(1);
   }
 
   // Move ctor

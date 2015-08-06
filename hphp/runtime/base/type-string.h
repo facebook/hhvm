@@ -70,9 +70,7 @@ class String {
   req::ptr<StringData> m_str;
 
 protected:
-  using IsUnowned = req::ptr<StringData>::IsUnowned;
   using NoIncRef = req::ptr<StringData>::NoIncRef;
-
   String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
 public:

@@ -118,12 +118,6 @@ inline void incRefCount(RefCount& count) {
   if (isRefCounted(count)) { ++count; }
 }
 
-inline void setRefCount(RefCount& oldCount, RefCount newCount) {
-  assert(check_refcount(oldCount));
-  assert(check_refcount(newCount));
-  oldCount = newCount;
-}
-
 inline RefCount decRefCount(RefCount& count) {
   assert(check_refcount_nz(count));
   return (isRefCounted(count)) ? --count : count;
@@ -167,12 +161,6 @@ inline void incRefCount(RefCount& count) {
   ++count;
 }
 
-inline void setRefCount(RefCount& oldCount, RefCount newCount) {
-  assert(check_refcount_ns(oldCount));
-  assert(check_refcount_ns(newCount));
-  oldCount = newCount;
-}
-
 inline RefCount decRefCount(RefCount& count) {
   assert(check_refcount_ns_nz(count));
   return --count;
@@ -208,10 +196,6 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     CountableManip::incRefCount(m_hdr.count);                           \
-  }                                                                     \
-  void setRefCount(RefCount count) {                                    \
-    assert(count == StaticValue || !MemoryManager::sweeping());         \
-    CountableManip::setRefCount(m_hdr.count, count);                    \
   }                                                                     \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \
@@ -261,10 +245,6 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     CountableManipNS::incRefCount(m_hdr.count);                         \
-  }                                                                     \
-  void setRefCount(RefCount count) {                                    \
-    assert(!MemoryManager::sweeping());                                 \
-    CountableManipNS::setRefCount(m_hdr.count, count);                  \
   }                                                                     \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \

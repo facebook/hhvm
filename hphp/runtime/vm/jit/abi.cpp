@@ -99,4 +99,16 @@ PhysReg r_svcreq_arg(unsigned i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+RegSet leave_trace_regs() {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::kLeaveTraceRegs;
+    case Arch::ARM:
+      not_implemented();
+  }
+  not_reached();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}

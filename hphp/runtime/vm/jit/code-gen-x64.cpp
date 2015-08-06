@@ -213,7 +213,7 @@ void maybe_syncsp(Vout& v, BCMarker marker, Vreg irSP, IRSPOffset off) {
   v << syncvmsp{sp};
 }
 
-RegSet leave_trace_args(BCMarker marker) {
+RegSet cross_trace_args(BCMarker marker) {
   return marker.resumed() ? kCrossTraceRegsResumed : kCrossTraceRegs;
 }
 
@@ -2153,7 +2153,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     v << bindaddr{&table[i], extra->targets[i], invSPOff};
   }
   v << leap{rip[(intptr_t)table], t};
-  v << jmpm{t[indexReg * 8], leave_trace_args(marker)};
+  v << jmpm{t[indexReg * 8], cross_trace_args(marker)};
 }
 
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
@@ -2327,7 +2327,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
     extra->dest,
     extra->invSPOff,
     extra->trflags,
-    leave_trace_args(inst->marker())
+    cross_trace_args(inst->marker())
   };
 }
 
@@ -2360,7 +2360,7 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
     destSK,
     inst->marker().spOff(),
     extra->trflags,
-    leave_trace_args(inst->marker())
+    cross_trace_args(inst->marker())
   };
 }
 
@@ -4583,7 +4583,7 @@ void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
   auto const m = inst->marker();
   auto& v = vmain();
   maybe_syncsp(v, m, srcLoc(inst, 1).reg(), extra->offset);
-  v << jmpr{srcLoc(inst, 0).reg(), leave_trace_args(m)};
+  v << jmpr{srcLoc(inst, 0).reg(), cross_trace_args(m)};
 }
 
 void CodeGenerator::cgNewCol(IRInstruction* inst) {

@@ -186,12 +186,20 @@ using ArgVec = jit::vector<Arg>;
 /*
  * Service request stub emitters.
  *
- * Some clients (e.g., unique stubs, bind_jcc_1st machinery) need to emit stubs
- * directly without the supporting code (e.g., smashable jumps).
+ * These stubs do some shuffling of arguments before launching into the JIT
+ * translator via handleSRHelper().
  *
  * Service request stubs can be either persistent or ephemeral.  The only
  * difference (besides that ephemeral service requests require a stub start
  * address) is that ephemeral requests are padded to stub_size().
+ *
+ * Since making a service request leaves the TC, we need to sync the current
+ * `spOff' to vmsp.  In the cases where vmsp also needs to be synced between
+ * translations (namely, in resumed contexts), we do this sync inline at the
+ * site of the jump to the stub, so that it still occurs once the jump gets
+ * smashed.  Otherwise (namely, in non-resumed contexts), the client must pass
+ * a non-none `spOff', and we do the sync in the stub to save work once the
+ * service request is completed and the jump is smashed.
  */
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
@@ -205,6 +213,9 @@ TCA emit_ephemeral(CodeBlock& cb,
                    ServiceRequest sr,
                    Args... args);
 
+/*
+ * Helpers for emitting specific service requests.
+ */
 TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff,
                       TCA jmp, SrcKey target, TransFlags trflags);
 TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff,

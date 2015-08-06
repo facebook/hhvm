@@ -1095,7 +1095,6 @@ MCGenerator::bindJccFirst(TCA toSmash,
            "overwriting cc%02x taken %d\n",
         skWillExplore.offset(), skWillDefer.offset(), cc, taken);
   always_assert(skTaken.resumed() == skNotTaken.resumed());
-  auto const isResumed = skTaken.resumed();
 
   // We want the branch to point to whichever side has not been explored yet.
   if (taken) cc = ccNegate(cc);
@@ -1126,24 +1125,12 @@ MCGenerator::bindJccFirst(TCA toSmash,
     return tDest;
   }
 
-  /*
-   * If we're not in a resumed function, we need to fish out the stack offset
-   * that the original service request used, so we can use it again on the one
-   * we're about to create.
-   */
-  auto const optSPOff = [&] () -> folly::Optional<FPInvOffset> {
-    if (isResumed) return folly::none;
-    return svcreq::extract_spoff(jmpTarget);
-  }();
-
-  auto const stub = svcreq::emit_ephemeral(
+  auto const stub = svcreq::emit_bindjmp_stub(
     code.frozen(),
-    getFreeStub(code.frozen(), &mcg->cgFixups()),
-    optSPOff,
-    REQ_BIND_JMP,
+    liveSpOff(),
     toSmash,
-    skWillDefer.toAtomicInt(),
-    TransFlags{}.packed
+    skWillDefer,
+    TransFlags{}
   );
 
   mcg->cgFixups().process(nullptr);

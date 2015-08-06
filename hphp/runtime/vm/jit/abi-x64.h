@@ -166,6 +166,12 @@ const RegSet kCrossCallRegs = kCrossTraceRegs;
 const RegSet kScratchCrossTraceRegs = kXMMCallerSaved |
   (kGPUnreserved - (kCrossTraceRegs | kCrossTraceRegsResumed));
 
+/*
+ * Registers that need to be live when we reenter the JIT from the TC (e.g.,
+ * via service requests).
+ */
+const RegSet kLeaveTraceRegs = kCrossTraceRegs | rVmSp;
+
 //////////////////////////////////////////////////////////////////////
 /*
  * Calling convention registers for service requests or calling C++.
@@ -208,6 +214,8 @@ constexpr PhysReg kSvcReqArgRegs[] = {
   // reg::rdi contains request number.
   reg::rsi, reg::rdx, reg::rcx, reg::r8
 };
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Some data structures are accessed often enough from translated code

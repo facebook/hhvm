@@ -78,6 +78,8 @@ void emit_svcreq(CodeBlock& cb,
       v << lea{rvmfp()[-cellsToBytes(spOff->offset)], rvmsp()};
     }
 
+    auto live_out = leave_trace_regs();
+
     assert(argv.size() <= kMaxArgs);
 
     // Pick up CondCode arguments first---vasm may optimize immediate loads
@@ -106,6 +108,7 @@ void emit_svcreq(CodeBlock& cb,
         case Arg::Kind::CondCode:
           break;
       }
+      live_out |= r;
     }
     FTRACE(2, ") : stub@{}");
 
@@ -116,9 +119,12 @@ void emit_svcreq(CodeBlock& cb,
       FTRACE(2, "{}", stub.base());
       v << leap{reg::rip[int64_t(stub.base())], r_svcreq_stub()};
     }
-
     v << copy{v.cns(sr), r_svcreq_req()};
-    v << jmpi{TCA(handleSRHelper)};
+
+    live_out |= r_svcreq_stub();
+    live_out |= r_svcreq_req();
+
+    v << jmpi{TCA(handleSRHelper), live_out};
 
     // We pad ephemeral stubs unconditionally.  This is required for
     // correctness by the x64 code relocator.

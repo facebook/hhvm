@@ -431,6 +431,7 @@ begin library "hh-emitter"
     "emitter/emitter_expr.ml"
     "emitter/emitter_lit.ml"
     "emitter/emitter_stmt.ml"
+    "emitter/emitter_types.ml"
     "emitter/emitter.ml"
   ]
 end

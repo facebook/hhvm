@@ -3227,7 +3227,8 @@ Variant HHVM_FUNCTION(imagecropauto, const Resource& image, int64_t mode,
 
     case GD_CROP_THRESHOLD:
       if (color < 0) {
-        raise_warning("imagecropauto(): Color argument missing with threshold mode");
+        raise_warning("imagecropauto(): Color argument missing "
+                      "with threshold mode");
         return false;
       }
       imcropped = gdImageCropThreshold(im, color, (float) threshold);
@@ -3338,7 +3339,7 @@ Variant HHVM_FUNCTION(imageaffine, const Resource& image, const Array& affine,
   if (!src) return false;
   gdImagePtr dst = nullptr;
   gdRect rect;
-  gdRectPtr pRect = NULL;
+  gdRectPtr pRect = nullptr;
   int nelem = affine.size();
   int i;
   double daffine[6];
@@ -3389,7 +3390,7 @@ Variant HHVM_FUNCTION(imageaffine, const Resource& image, const Array& affine,
     rect.y = -1;
     rect.width = gdImageSX(src);
     rect.height = gdImageSY(src);
-    pRect = NULL;
+    pRect = nullptr;
   }
 
   if (gdTransformAffineGetImage(&dst, src, pRect, daffine) != GD_TRUE) {
@@ -3409,7 +3410,8 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat, const Array& m1,
   Array ret = Array::Create();
 
   if (nelem1 != 6 || nelem2 != 6) {
-    raise_warning("imageaffinematrixconcat(): Affine array must have six elements");
+    raise_warning("imageaffinematrixconcat(): Affine array must "
+                  "have six elements");
     return false;
   }
 
@@ -3419,7 +3421,8 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat, const Array& m1,
     } else if (m1[i].isDouble() || m1[i].isString()) {
       dm1[i] = m1[i].toDouble();
     } else {
-      raise_warning("imageaffinematrixconcat(): Invalid type for element %i", i);
+      raise_warning("imageaffinematrixconcat(): Invalid type for "
+                    "element %i", i);
       return false;
     }
     if (m2[i].isInteger()) {
@@ -3427,7 +3430,8 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat, const Array& m1,
     } else if (m2[i].isDouble() || m2[i].isString()) {
       dm2[i] = m2[i].toDouble();
     } else {
-      raise_warning("imageaffinematrixconcat():Invalid type for element %i", i);
+      raise_warning("imageaffinematrixconcat():Invalid type for"
+                    "element %i", i);
       return false;
     }
   }
@@ -3500,7 +3504,8 @@ Variant HHVM_FUNCTION(imageaffinematrixget, int64_t type,
     }
 
     default:
-      raise_warning("imageaffinematrixget():Invalid type for element %li", type);
+      raise_warning("imageaffinematrixget():Invalid type for "
+                    "element %li", type);
       return false;
   }
 

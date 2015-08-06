@@ -46,14 +46,14 @@ gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop)
 
 	if (src->trueColor) {
 		dst = gdImageCreateTrueColor(crop->width, crop->height);
-		if (dst == NULL) {
-			return NULL;
+		if (dst == nullptr) {
+			return nullptr;
 		}
 		gdImageSaveAlpha(dst, 1);
 	} else {
 		dst = gdImageCreate(crop->width, crop->height);
-		if (dst == NULL) {
-			return NULL;
+		if (dst == nullptr) {
+			return nullptr;
 		}
 		gdImagePaletteCopy(dst, src);
 	}

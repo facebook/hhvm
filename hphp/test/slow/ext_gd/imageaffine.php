@@ -27,14 +27,15 @@
     $triangle = [ 50, 50, 50, 150, 200, 150 ];
     $points = 3;
     imageantialias($RSR_base, 1);
-    $drawtriangle = imagefilledpolygon($RSR_base, $triangle, $points, $drawcolor);
+    $drawtriangle = imagefilledpolygon($RSR_base, $triangle,
+                                        $points, $drawcolor);
     imagepng($RSR_base, $tgt_img);
     var_dump(md5_file($tgt_img));
     foreach($arrAffine as $aff) {
         $dst = tempnam('/tmp', 'test-imageaffine');
         $toDelete[] = $dst;
-    	$RSRaff2 = imageaffine($RSR_base, $aff, $arrClip);
-    	imagepng($RSRaff2, $dst, 9);
+        $RSRaff2 = imageaffine($RSR_base, $aff, $arrClip);
+        imagepng($RSRaff2, $dst, 9);
         var_dump(md5_file($dst));
     }
     foreach ($toDelete as $file) {

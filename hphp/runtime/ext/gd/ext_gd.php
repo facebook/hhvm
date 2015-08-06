@@ -47,7 +47,8 @@ function image2wbmp(resource $image,
                     string $filename = "",
                     int $threshold = -1): bool;
 
-/* Return an image containing the affine tramsformed src image, using an optional clipping area.
+/* Return an image containing the affine tramsformed src image, using
+ * an optional clipping area.
  */
 <<__Native>>
 function imageaffine(resource $image, array $affine = [],
@@ -58,7 +59,8 @@ function imageaffine(resource $image, array $affine = [],
 <<__Native>>
 function imageaffinematrixconcat(array $m1, array $m2): mixed;
 
-/* Return an image containing the affine tramsformed src image, using an optional clipping area.
+/* Return an image containing the affine tramsformed src image, using
+ * an optional clipping area.
  */
 <<__Native>>
 function imageaffinematrixget(int $type, mixed $options = []): mixed;
@@ -520,7 +522,8 @@ function imagecrop(resource $image, array $rect): mixed;
 /* Crop an image automatically using one of the available modes.
  */
 <<__Native>>
-function imagecropauto(resource $image, int $mode = -1, float $threshold = 0.5, int $color = -1): mixed;
+function imagecropauto(resource $image, int $mode = -1,
+                       float $threshold = 0.5, int $color = -1): mixed;
 
 /* This function is deprecated. Use combination of imagesetstyle() and
  * imageline() instead.

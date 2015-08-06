@@ -24,7 +24,7 @@ struct stat;
 namespace HPHP {
 
 struct Unit;
-struct String;
+class String;
 struct StringData;
 
 //////////////////////////////////////////////////////////////////////

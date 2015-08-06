@@ -35,12 +35,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class AccessLogFileData;
-struct VirtualHost;
-struct IpBlockMap;
-struct SatelliteServerInfo;
-struct FilesMatch;
-struct Hdf;
-class IniSettingMap;
+class VirtualHost;
+class IpBlockMap;
+class SatelliteServerInfo;
+class FilesMatch;
+class Hdf;
+struct IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 

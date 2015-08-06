@@ -482,7 +482,7 @@ private:
     }
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
 public:
   using TMIData = TraitMethodImportData<TraitMethod, TMIOps,

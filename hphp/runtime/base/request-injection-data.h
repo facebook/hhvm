@@ -46,7 +46,7 @@ struct RequestInjectionData;
 //////////////////////////////////////////////////////////////////////
 
 struct RequestTimer {
-  friend class RequestInjectionData;
+  friend struct RequestInjectionData;
 
 #if defined(__APPLE__) || defined(_MSC_VER)
   RequestTimer(RequestInjectionData*);

@@ -682,7 +682,7 @@ inline ConditionCode ccNegate(ConditionCode c) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Label;
+class Label;
 
 /**
  * Copyright (c) 2009, Andrew J. Paroski
@@ -712,7 +712,7 @@ struct Label;
  */
 
 class X64Assembler {
-  friend struct Label;
+  friend class Label;
 
   /*
    * Type for register numbers, independent of the size we're going to

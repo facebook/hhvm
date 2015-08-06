@@ -65,7 +65,7 @@ int main(int argc, const char* argv[]) {
       << "namespace HPHP {\n"
       << "  struct TypedValue;\n"
       << "  struct ActRec;\n"
-      << "  class Class;\n"
+      << "  struct Class;\n"
       << "\n\n";
 
   std::unordered_set<fbstring> classesWithCtors;

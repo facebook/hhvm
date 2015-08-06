@@ -30,7 +30,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct LibEventHttpClient;
+class LibEventHttpClient;
 using LibEventHttpClientPtr = std::shared_ptr<LibEventHttpClient>;
 
 /*

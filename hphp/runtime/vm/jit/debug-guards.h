@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit {
-class SrcRec;
+struct SrcRec;
 void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec);
 
 }}

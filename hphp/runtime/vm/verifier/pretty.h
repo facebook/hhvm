@@ -24,13 +24,13 @@
 
 namespace HPHP {
 
-class Func;
-class Unit;
+struct Func;
+struct Unit;
 
 namespace Verifier {
 
-class Graph;
-class Block;
+struct Graph;
+struct Block;
 
 /**
  * Pretty print the control flow graph to stdout.

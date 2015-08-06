@@ -34,10 +34,10 @@ template <class T> class Optional;
 
 namespace HPHP {
 namespace req { template<typename T> struct ptr; }
-struct Array;
+class Array;
 struct ArrayIter;
 struct MArrayIter;
-struct String;
+class String;
 struct Variant;
 struct ObjectData;
 struct ResourceData;

@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // forward declaration
-class ArrayIter;
+struct ArrayIter;
 class VariableUnserializer;
 
 #define ACCESSPARAMS_DECL AccessFlags::Type flags = AccessFlags::None

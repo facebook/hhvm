@@ -68,7 +68,7 @@ public:
 };
 
 class StackTraceTree {
-  struct Node;
+  class Node;
 
   std::shared_ptr<Node> root;
 

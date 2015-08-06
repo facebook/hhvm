@@ -114,7 +114,7 @@ using PropState = std::map<SString,Type>;
 struct IndexData;
 struct FuncFamily;
 struct FuncInfo;
-struct ClassInfo;
+class ClassInfo;
 
 //////////////////////////////////////////////////////////////////////
 

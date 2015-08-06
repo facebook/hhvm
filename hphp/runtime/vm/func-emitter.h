@@ -38,7 +38,7 @@ namespace HPHP {
 struct PreClass;
 struct StringData;
 
-struct PreClassEmitter;
+class PreClassEmitter;
 struct UnitEmitter;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -334,8 +334,8 @@ private:
  * Proxy for converting in-repo function representations into FuncEmitters.
  */
 struct FuncRepoProxy : public RepoProxy {
-  friend class Func;
-  friend class FuncEmitter;
+  friend struct Func;
+  friend struct FuncEmitter;
 
   explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();

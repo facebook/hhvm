@@ -46,7 +46,7 @@ struct TypedValue;
 //////////////////////////////////////////////////////////////////////
 
 struct RepoAuthType {
-  struct Array;
+  class Array;
 
 #define REPO_AUTH_TYPE_TAGS                       \
     TAG(Uninit)                                   \

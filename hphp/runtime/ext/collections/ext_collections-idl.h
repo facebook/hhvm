@@ -50,10 +50,10 @@ namespace HPHP {
 
 namespace collections{
 void deepCopy(TypedValue*);
-class PairIterator;
-class VectorIterator;
-class MapIterator;
-class SetIterator;
+struct PairIterator;
+struct VectorIterator;
+struct MapIterator;
+struct SetIterator;
 }
 
 /**
@@ -585,7 +585,7 @@ class c_Vector : public BaseVector {
 
   friend class BaseMap;
   friend class c_Pair;
-  friend class ArrayIter;
+  friend struct ArrayIter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1359,7 +1359,7 @@ class BaseMap : public HashCollection {
   friend class c_Vector;
   friend class c_Map;
   friend class c_ImmMap;
-  friend class ArrayIter;
+  friend struct ArrayIter;
   friend class c_AwaitAllWaitHandle;
   friend class c_GenMapWaitHandle;
 
@@ -1820,7 +1820,7 @@ class BaseSet : public HashCollection {
   friend class c_Vector;
   friend class c_Set;
   friend class c_Map;
-  friend class ArrayIter;
+  friend struct ArrayIter;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field

@@ -44,7 +44,7 @@ namespace vixl { class Simulator; }
 
 namespace HPHP {
 struct RequestEventHandler;
-struct EventHook;
+class EventHook;
 struct Resumable;
 namespace jit { struct Translator; }
 }

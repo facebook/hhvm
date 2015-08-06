@@ -63,7 +63,7 @@ struct FileData {
   int getFd() { return m_fd; }
 
  private:
-  friend class File;
+  friend struct File;
   int m_fd{-1};      // file descriptor
   bool m_isLocal{false}; // is this on the local disk?
   bool m_closed{false}; // whether close() was called

@@ -26,7 +26,7 @@ namespace HPHP {
 class String;
 struct StaticString;
 class Array;
-class Variant;
+struct Variant;
 class VarNR;
 
 extern const Variant null_variant;      // uninitialized variant
@@ -48,7 +48,7 @@ extern const StaticString array_string; // String("Array")
 extern const StaticString empty_string_ref; // const StaticString&
 extern const Variant empty_string_variant_ref; // const Variant&
 
-class StringData;
+struct StringData;
 using LowStringPtr = LowPtr<const StringData>;
 
 ///////////////////////////////////////////////////////////////////////////////

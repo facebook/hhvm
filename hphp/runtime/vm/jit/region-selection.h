@@ -37,8 +37,8 @@
 namespace HPHP { namespace jit {
 
 struct MCGenerator;
-struct ProfData;
-struct TransCFG;
+class ProfData;
+class TransCFG;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -64,8 +64,8 @@ enum class PGORegionMode {
  */
 struct RegionDesc {
   struct Block;
-  struct Arc;
-  struct Location;
+  class Arc;
+  class Location;
   struct TypedLocation;
   struct GuardedLocation;
   struct ReffinessPred;

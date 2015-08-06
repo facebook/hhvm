@@ -22,8 +22,8 @@
 
 namespace HPHP {
 
-struct String;
-struct Array;
+class String;
+class Array;
 
 /* Utility for representing full type information in the runtime. */
 namespace TypeStructure {

@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-class Variant;
+struct Variant;
 
 /*
  * We heap allocate a RefData when we make a reference to something.

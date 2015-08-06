@@ -241,7 +241,7 @@ public:
   }
 
 private:
-  friend class IndexedStringMap;
+  friend struct IndexedStringMap;
   std::vector<T> m_list;
   Map m_map;
 };

@@ -166,11 +166,16 @@ void Logger::log(LogLevelType level, const std::string &msg,
   if (UseLogFile) {
     FILE *stdf = GetStandardOut(level);
     FILE *f;
-    if (UseCronolog) {
-      f = cronOutput.getOutputFile();
-      if (!f) f = stdf;
+    FILE *tf = threadData->log;
+    if (tf && threadData->threadLogOnly) {
+      f = tf;
     } else {
-      f = Output ? Output : stdf;
+      if (UseCronolog) {
+        f = cronOutput.getOutputFile();
+      } else {
+        f = Output;
+      }
+      if (!f) f = stdf;
     }
     std::string header, sheader;
     if (LogHeader) {
@@ -193,8 +198,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
       bytes = fprintf(f, "%s%s%s", sheader.c_str(), escaped, ending);
     }
 
-    FILE *tf = threadData->log;
-    if (tf) {
+    if (tf && tf != f) {
       int threadBytes =
         fprintf(tf, "%s%s%s", header.c_str(), escaped, ending);
       fflush(tf);
@@ -269,15 +273,21 @@ char *Logger::EscapeString(const std::string &msg) {
   return new_str;
 }
 
-bool Logger::SetThreadLog(const char *file) {
-  return (s_threadData->log = fopen(file, "a")) != nullptr;
+bool Logger::SetThreadLog(const char *file, bool threadOnly) {
+  if (auto log = fopen(file, "a")) {
+    ClearThreadLog();
+    s_threadData->log = log;
+    s_threadData->threadLogOnly = threadOnly;
+    return true;
+  }
+  return false;
 }
 void Logger::ClearThreadLog() {
   ThreadData *threadData = s_threadData.get();
   if (threadData->log) {
     fclose(threadData->log);
+    threadData->log = nullptr;
   }
-  threadData->log = nullptr;
 }
 
 void Logger::SetThreadHook(PFUNC_LOG func, void *data) {

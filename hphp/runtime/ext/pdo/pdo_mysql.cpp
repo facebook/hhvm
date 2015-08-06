@@ -1361,7 +1361,7 @@ req::ptr<PDOResource> PDOMySql::createResourceImpl() {
       std::make_shared<PDOMySqlConnection>());
 }
 
-req::ptr<PDOResource> PDOMySql::createResourceImpl(
+req::ptr<PDOResource> PDOMySql::createResource(
   const sp_PDOConnection& conn
 ) {
   return req::make<PDOMySqlResource>(

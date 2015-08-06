@@ -319,13 +319,8 @@ void PDOSqliteResource::sweep() {
     udf->step.releaseForSweep();
     udf->fini.releaseForSweep();
   }
-  PDOResource::sweep();
-}
-
-void PDOSqliteResource::persistentSave() {
   conn()->clearFunctions();
-
-  PDOResource::persistentSave();
+  PDOResource::sweep();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -644,7 +639,7 @@ req::ptr<PDOResource> PDOSqlite::createResourceImpl() {
     std::make_shared<PDOSqliteConnection>());
 }
 
-req::ptr<PDOResource> PDOSqlite::createResourceImpl(
+req::ptr<PDOResource> PDOSqlite::createResource(
   const sp_PDOConnection& conn
 ) {
   return req::make<PDOSqliteResource>(

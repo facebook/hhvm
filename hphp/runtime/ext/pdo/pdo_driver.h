@@ -227,7 +227,8 @@ struct PDODriver {
                                        const String& username,
                                        const String& password,
                                        const Array& options);
-  req::ptr<PDOResource> createResource(const sp_PDOConnection& conn);
+  virtual req::ptr<PDOResource>
+    createResource(const sp_PDOConnection& conn) = 0;
 
   static const PDODriverMap& GetDrivers() { return s_drivers; }
 
@@ -238,8 +239,6 @@ private:
 
   // Methods a driver needs to implement.
   virtual req::ptr<PDOResource> createResourceImpl() = 0;
-  virtual req::ptr<PDOResource>
-    createResourceImpl(const sp_PDOConnection& conn) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -406,7 +405,6 @@ public:
   PDODriver* driver{nullptr};
 
   std::string def_stmt_clsname;
-  std::string serialized_def_stmt_ctor_args;
 
   PDOFetchType default_fetch_type{PDO_FETCH_USE_DEFAULT};
 };
@@ -429,13 +427,6 @@ struct PDOResource : SweepableResourceData {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   const sp_PDOConnection& conn() const { return m_conn; }
-
-  /*
-   * Serialize/unserialize between persistent data and runtime structures.
-   */
-  virtual void persistentSave();
-  virtual void persistentRestore();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

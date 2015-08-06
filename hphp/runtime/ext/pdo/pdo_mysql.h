@@ -42,7 +42,7 @@ struct PDOMySql : PDODriver {
   PDOMySql();
   req::ptr<PDOResource> createResourceImpl() override;
   req::ptr<PDOResource>
-    createResourceImpl(const sp_PDOConnection&) override;
+    createResource(const sp_PDOConnection&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -927,42 +927,6 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
                         const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-struct PDORequestData final : RequestEventHandler {
-  void requestInit() override {}
-
-  void requestShutdown() override {
-    for (auto pdo : m_persistent_connections) {
-      if (!pdo) {
-        // Dead handle in the set.
-        continue;
-      }
-      if (pdo->conn()->support(PDOConnection::MethodCheckLiveness) &&
-          !pdo->conn()->checkLiveness()) {
-        // Dead connection in the handle.
-        continue;
-      }
-      // All seems right, save it.
-      pdo->persistentSave();
-    }
-    m_persistent_connections.clear();
-  }
-
-  void addPersistent(const req::ptr<PDOResource>& pdo) {
-    pdo->conn()->is_persistent = true;
-    m_persistent_connections.insert(pdo);
-  }
-  void removePersistent(const req::ptr<PDOResource>& pdo) {
-    pdo->conn()->is_persistent = false;
-    m_persistent_connections.erase(pdo);
-  }
-
-public:
-  std::unordered_set<req::ptr<PDOResource>> m_persistent_connections;
-};
-IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
-
-///////////////////////////////////////////////////////////////////////////////
 // PDO
 
 namespace {
@@ -1059,11 +1023,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
         if (conn->support(PDOConnection::MethodCheckLiveness) &&
             !conn->checkLiveness()) {
           /* nope... need to kill it */
-          s_pdo_request_data->removePersistent(data->m_dbh);
           data->m_dbh = nullptr;
-        } else {
-          /* Yep, use it and mark it for saving at rshutdown */
-          s_pdo_request_data->addPersistent(data->m_dbh);
         }
       }
 
@@ -1107,7 +1067,6 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     if (is_persistent) {
       assert(!shashkey.empty());
       s_connections[shashkey] = data->m_dbh->conn();
-      s_pdo_request_data->addPersistent(data->m_dbh);
     }
 
     data->m_dbh->conn()->driver = driver;

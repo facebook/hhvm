@@ -76,12 +76,6 @@ req::ptr<PDOResource> PDODriver::createResource(const String& datasource,
   return rsrc;
 }
 
-req::ptr<PDOResource> PDODriver::createResource(const sp_PDOConnection& conn) {
-  auto const rsrc = createResourceImpl(conn);
-  rsrc->persistentRestore();
-  return rsrc;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // PDOConnection
 
@@ -169,19 +163,6 @@ bool PDOConnection::checkLiveness() {
 void PDOResource::sweep() {
   def_stmt_ctor_args.releaseForSweep();
   this->~PDOResource();
-}
-
-void PDOResource::persistentSave() {
-  String serialized = HHVM_FN(serialize)(def_stmt_ctor_args);
-  conn()->serialized_def_stmt_ctor_args = serialized.toCppString();
-  def_stmt_ctor_args.releaseForSweep(); // we're called from requestShutdown
-}
-
-void PDOResource::persistentRestore() {
-  auto const serialized = conn()->serialized_def_stmt_ctor_args;
-  if (!serialized.empty()) {
-    def_stmt_ctor_args = unserialize_from_string(serialized);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -32,7 +32,7 @@ namespace HPHP {
 struct PDOSqlite : PDODriver {
   PDOSqlite();
   req::ptr<PDOResource> createResourceImpl() override;
-  req::ptr<PDOResource> createResourceImpl(const sp_PDOConnection&) override;
+  req::ptr<PDOResource> createResource(const sp_PDOConnection&) override;
 };
 
 struct PDOSqliteError {
@@ -100,7 +100,6 @@ struct PDOSqliteResource : PDOResource {
   }
 
   void sweep() override;
-  void persistentSave() override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

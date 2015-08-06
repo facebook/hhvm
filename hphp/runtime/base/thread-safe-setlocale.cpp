@@ -163,7 +163,7 @@ const char* ThreadSafeLocaleHandler::actuallySetLocale(
          */
         for (auto &i : m_category_locale_map) {
           if (i.category_str == key) {
-            i.locale_str = value;
+            i.locale_str = value ? value : "";
             break;
           }
         }

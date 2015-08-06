@@ -868,29 +868,6 @@ Variant HHVM_FUNCTION(date_parse,
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 
-double get_date_default_latitude() {
-  return s_date_globals->default_latitude;
-}
-
-double get_date_default_longitude() {
-  return s_date_globals->default_longitude;
-}
-
-double get_date_default_sunset_zenith() {
-  return s_date_globals->sunset_zenith;
-}
-
-double get_date_default_sunrise_zenith() {
-  return s_date_globals->sunrise_zenith;
-}
-
-double get_date_default_gmt_offset() {
-  req::ptr<TimeZone> tzi = TimeZone::Current();
-  // just get the offset form utc time
-  // set the timestamp 0 is ok
-  return tzi->offset(0) / 3600;
-}
-
 Array HHVM_FUNCTION(date_sun_info,
                     int64_t timestamp,
                     double latitude,
@@ -899,42 +876,24 @@ Array HHVM_FUNCTION(date_sun_info,
   return dt->getSunInfo(latitude, longitude);
 }
 
-#define GET_ARGS_AND_CALL(ar, func)                                            \
-  try {                                                                        \
-    return arReturn(ar, func(                                                  \
-      getArgStrict<KindOfInt64>(ar, 0),                                        \
-      getArgStrict<KindOfInt64>(ar, 1, 1),                                     \
-      getArgStrict<KindOfDouble>(ar, 2, get_date_default_latitude()),          \
-      getArgStrict<KindOfDouble>(ar, 3, get_date_default_longitude()),         \
-      getArgStrict<KindOfDouble>(ar, 4, get_date_default_sunset_zenith()),     \
-      getArgStrict<KindOfDouble>(ar, 5, get_date_default_gmt_offset())));      \
-  } catch (const IncoercibleArgumentException& e) {                            \
-    return arReturn(ar, false);                                                \
-  }                                                                            \
-
-Variant date_sunriseImpl(int64_t timestamp, int format, double latitude,
-                         double longitude, double zenith, double gmt_offset) {
+template<bool sunset>
+Variant date_sunrise_sunset(int64_t numArgs,
+                            int64_t timestamp, int64_t format,
+                            double latitude, double longitude,
+                            double zenith, double offset) {
+  /* Fill in dynamic args (3..6) as needed */
+  switch (numArgs) {
+    case 0: case 1: /* fallthrough */
+    case 2: latitude  = s_date_globals->default_latitude;
+    case 3: longitude = s_date_globals->default_longitude;
+    case 4: zenith = sunset ? s_date_globals->sunset_zenith
+                            : s_date_globals->sunrise_zenith;
+    case 5: offset = TimeZone::Current()->offset(0) / 3600;
+  }
   return req::make<DateTime>(timestamp, false)->getSunInfo
     (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
-     zenith, gmt_offset, false);
+     zenith, offset, sunset);
 }
-
-TypedValue* HHVM_FN(date_sunrise)(ActRec* ar) {
-  GET_ARGS_AND_CALL(ar, date_sunriseImpl)
-}
-
-Variant date_sunsetImpl(int64_t timestamp, int format, double latitude,
-                        double longitude, double zenith, double gmt_offset) {
-  return req::make<DateTime>(timestamp, false)->getSunInfo
-    (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
-     zenith, gmt_offset, true);
-}
-
-TypedValue* HHVM_FN(date_sunset)(ActRec* ar) {
-  GET_ARGS_AND_CALL(ar, date_sunsetImpl)
-}
-
-#undef GET_ARGS_AND_CALL
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1014,8 +973,8 @@ public:
     HHVM_FE(date_format);
     HHVM_FE(date_parse);
     HHVM_FE(date_sun_info);
-    HHVM_FE(date_sunrise);
-    HHVM_FE(date_sunset);
+    HHVM_NAMED_FE(date_sunrise, date_sunrise_sunset<false>);
+    HHVM_NAMED_FE(date_sunset, date_sunrise_sunset<true>);
     HHVM_FE(date);
     HHVM_FE(getdate);
     HHVM_FE(gettimeofday);
@@ -1032,6 +991,15 @@ public:
     HHVM_FE(time);
     HHVM_FE(timezone_name_from_abbr);
     HHVM_FE(timezone_version_get);
+
+#define SUNFUNCS_CNS(name, type) \
+    Native::registerConstant<KindOfInt64> \
+      (makeStaticString("SUNFUNCS_RET_" #name), \
+      (int64_t)DateTime::SunInfoFormat::Return##type);
+    SUNFUNCS_CNS(DOUBLE, Double);
+    SUNFUNCS_CNS(STRING, String);
+    SUNFUNCS_CNS(TIMESTAMP, TimeStamp);
+#undef SUNFUNCS_CNS
 
     loadSystemlib("datetime");
   }

@@ -1769,18 +1769,6 @@
             "value": 1
         },
         {
-            "name": "SUNFUNCS_RET_DOUBLE",
-            "value": 2
-        },
-        {
-            "name": "SUNFUNCS_RET_STRING",
-            "value": 1
-        },
-        {
-            "name": "SUNFUNCS_RET_TIMESTAMP",
-            "value": 0
-        },
-        {
             "name": "THOUSEP",
             "value": 65537
         },

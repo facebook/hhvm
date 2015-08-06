@@ -517,9 +517,9 @@ function date_sun_info(int $ts, float $latitude, float $longitude): array;
  *   or FALSE on failure.
  *
  */
-<<__Native("ActRec")>>
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
 function date_sunrise(int $timestamp,
-                      int $format = 1,
+                      int $format = SUNFUNCS_RET_STRING,
                       float $latitude = 0.0,
                       float $longitude = 0.0,
                       float $zenith = 0.0,
@@ -546,9 +546,9 @@ function date_sunrise(int $timestamp,
  *   FALSE on failure.
  *
  */
-<<__Native("ActRec")>>
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
 function date_sunset(int $timestamp,
-                     int $format = 1,
+                     int $format = SUNFUNCS_RET_STRING,
                      float $latitude = 0.0,
                      float $longitude = 0.0,
                      float $zenith = 0.0,

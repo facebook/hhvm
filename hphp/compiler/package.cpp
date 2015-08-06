@@ -217,6 +217,9 @@ public:
     }
   }
 
+  void onThreadEnter() override {
+    g_context.getCheck();
+  }
   void onThreadExit() override {
     hphp_memory_cleanup();
   }

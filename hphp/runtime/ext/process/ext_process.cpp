@@ -40,7 +40,6 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"

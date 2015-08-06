@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -240,6 +241,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     auto env = php_global(s__ENV);
     env.toArrRef().set(s_HPHP_RPC, 1);
     php_global_set(s__ENV, std::move(env));
+    InitFiniNode::GlobalsInit();
   }
 
   bool isFile = rpcFunc.rfind('.') != std::string::npos;

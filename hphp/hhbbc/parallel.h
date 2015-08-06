@@ -61,6 +61,7 @@ void for_each(const std::vector<Item>& inputs, Func func) {
   for (auto worker = size_t{0}; worker < num_threads; ++worker) {
     workers.push_back(std::thread([&] {
       try {
+        hphp_thread_init();
         hphp_session_init();
         hphp_context_init();
         SCOPE_EXIT {
@@ -115,6 +116,7 @@ map(const std::vector<Item>& inputs, Func func) {
   for (auto worker = size_t{0}; worker < num_threads; ++worker) {
     workers.push_back(std::thread([&] {
       try {
+        hphp_thread_init();
         hphp_session_init();
         hphp_context_init();
         SCOPE_EXIT {

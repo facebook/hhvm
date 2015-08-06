@@ -9474,6 +9474,9 @@ class EmitterWorker
       m_ret = false;
     }
   }
+  void onThreadEnter() override {
+    g_context.getCheck();
+  }
   void onThreadExit() override {
     hphp_memory_cleanup();
   }

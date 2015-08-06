@@ -35,7 +35,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/ext/hash/ext_hash.h"

@@ -35,11 +35,13 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/thread-safe-setlocale.h"
+#include "hphp/runtime/base/zend-math.h"
+#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
@@ -121,9 +123,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Forward declarations.
-
-extern InitFiniNode* extra_process_init;
-extern InitFiniNode* extra_process_exit;
 
 void initialize_repo();
 
@@ -684,7 +683,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     Xenon::getInstance().surpriseAll();
   }
 
-  ExtensionRegistry::requestInit();
+  InitFiniNode::GlobalsInit();
   // Initialize the debugger
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
 }
@@ -1218,9 +1217,6 @@ std::string get_right_option_name(const basic_parsed_options<char>& opts,
 //
 // See the related issue https://github.com/facebook/hhvm/issues/5244
 //
-extern "C" {
-  void zend_startup_strtod(void);
-}
 
 static int execute_program_impl(int argc, char** argv) {
   std::string usage = "Usage:\n\n   ";
@@ -1821,6 +1817,30 @@ static void update_constants_and_options() {
   }
 }
 
+void hphp_thread_init() {
+  ServerStats::GetLogger();
+  zend_get_bigint_data();
+  zend_get_rand_data();
+  get_server_note();
+  MemoryManager::TlsWrapper::getCheck();
+
+  assert(ThreadInfo::s_threadInfo.isNull());
+  ThreadInfo::s_threadInfo.getCheck()->init();
+
+  HardwareCounter::s_counter.getCheck();
+  ExtensionRegistry::threadInit();
+  InitFiniNode::ThreadInit();
+
+  // ensure that there's no request-allocated memory
+  hphp_memory_cleanup();
+}
+
+void hphp_thread_exit() {
+  InitFiniNode::ThreadFini();
+  ExtensionRegistry::threadShutdown();
+  if (!g_context.isNull()) g_context.destroy();
+}
+
 void hphp_process_init() {
   pthread_attr_t attr;
 // Linux+GNU extension
@@ -1840,7 +1860,7 @@ void hphp_process_init() {
   timezone_init();
   BootTimer::mark("timezone_init");
 
-  init_thread_locals();
+  hphp_thread_init();
 
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;
@@ -1873,6 +1893,7 @@ void hphp_process_init() {
   xmlInitParser();
   BootTimer::mark("xmlInitParser");
 
+  g_context.getCheck();
   g_vmProcessInit();
   BootTimer::mark("g_vmProcessInit");
 
@@ -1889,9 +1910,7 @@ void hphp_process_init() {
   // in ini files (e.g., E_ALL) and sync some other options
   update_constants_and_options();
 
-  for (InitFiniNode *in = extra_process_init; in; in = in->next) {
-    in->func();
-  }
+  InitFiniNode::ProcessInit();
   BootTimer::mark("extra_process_init");
   int64_t save = RuntimeOption::SerializationSizeLimit;
   RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
@@ -1963,7 +1982,9 @@ static bool hphp_warmup(ExecutionContext *context,
 
 void hphp_session_init() {
   assert(!s_sessionInitialized);
-  init_thread_locals();
+  g_context.getCheck();
+  AsioSession::Init();
+  InitFiniNode::RequestInit();
   TI().onSessionInit();
   MM().resetExternalStats();
 
@@ -1981,6 +2002,7 @@ void hphp_session_init() {
 
   g_context->requestInit();
   s_sessionInitialized = true;
+  ExtensionRegistry::requestInit();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -2071,6 +2093,7 @@ void hphp_context_shutdown() {
 
   // Extensions could have shutdown handlers
   ExtensionRegistry::requestShutdown();
+  InitFiniNode::RequestFini();
 
   // Extension shutdown could have re-initialized some
   // request locals
@@ -2087,10 +2110,6 @@ void hphp_context_exit(bool shutdown /* = true */) {
   context->requestExit();
   context->obProtect(false);
   context->obEndAll();
-}
-
-void hphp_thread_exit() {
-  finish_thread_locals();
 }
 
 void hphp_memory_cleanup() {
@@ -2153,9 +2172,7 @@ void hphp_process_exit() {
   g_context.destroy();
   ExtensionRegistry::moduleShutdown();
   LightProcess::Close();
-  for (InitFiniNode *in = extra_process_exit; in; in = in->next) {
-    in->func();
-  }
+  InitFiniNode::ProcessFini();
   delete jit::mcg;
   jit::mcg = nullptr;
   folly::SingletonVault::singleton()->destroyInstances();
@@ -2164,6 +2181,16 @@ void hphp_process_exit() {
 bool is_hphp_session_initialized() {
   return s_sessionInitialized;
 }
+
+static class SetThreadInitFini {
+public:
+  SetThreadInitFini() {
+    AsyncFuncImpl::SetThreadInitFunc([](void*) { hphp_thread_init(); },
+                                     nullptr);
+    AsyncFuncImpl::SetThreadFiniFunc([](void*) { hphp_thread_exit(); },
+                                     nullptr);
+  }
+} s_SetThreadInitFini;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

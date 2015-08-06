@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/filter/logical_filters.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/php-globals.h"
@@ -220,11 +221,6 @@ public:
     s_filter_request_data.getCheck();
   }
 
-  void requestInit() override {
-    // warm up the s_filter_request_data
-    s_filter_request_data->requestInit();
-  }
-
   void requestShutdown() override {
     // warm up the s_filter_request_data
     s_filter_request_data->requestShutdown();
@@ -234,6 +230,11 @@ public:
     s_filter_request_data->vscan(m);
   }
 } s_filter_extension;
+
+namespace {
+InitFiniNode globalsInit([]() { s_filter_request_data->requestInit(); },
+                         InitFiniNode::When::GlobalsInit);
+}
 
 #undef REGISTER_CONSTANT
 

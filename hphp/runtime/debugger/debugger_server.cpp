@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/util/network.h"
@@ -147,6 +148,7 @@ void DebuggerServer::stop() {
 }
 
 void DebuggerServer::accept() {
+  g_context.getCheck();
   TRACE(2, "DebuggerServer::accept\n");
   // Setup server-side usage logging before accepting any connections.
   Debugger::InitUsageLogging();
@@ -194,6 +196,7 @@ void DebuggerServer::accept() {
   for(auto &m_sock : m_socks) {
     m_sock.reset();
   }
+  hphp_memory_cleanup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

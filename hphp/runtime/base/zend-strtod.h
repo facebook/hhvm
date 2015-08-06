@@ -30,12 +30,14 @@ double zend_strtod(const char *s00, const char **se);
 double zend_hex_strtod(const char *str, const char **endptr);
 double zend_oct_strtod(const char *str, const char **endptr);
 double zend_bin_strtod(const char *str, const char **endptr);
-int zend_startup_strtod(void);
-int zend_shutdown_strtod(void);
 
 void zend_get_bigint_data();
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+// These are actually implemented in EZC/php-src/Zend/zend_strtod.cpp
+extern "C" int zend_startup_strtod(void);
+extern "C" int zend_shutdown_strtod(void);
 
 #endif // incl_HPHP_ZEND_STRTOD_H_

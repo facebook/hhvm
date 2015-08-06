@@ -25,7 +25,6 @@
 #include <sstream>
 
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
 

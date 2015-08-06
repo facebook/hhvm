@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,27 +18,58 @@
 #define incl_HPHP_THREAD_INIT_FINI_H_
 
 #include "hphp/util/portability.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-NEVER_INLINE
-void init_thread_locals(void *arg = nullptr);
-NEVER_INLINE
-void finish_thread_locals(void *arg = nullptr);
-
 struct InitFiniNode {
   enum class When {
-    ThreadInit, // actually represents request starts/inits
-    ThreadFini,
-    ProcessInit,
-    ProcessExit,
-    ServerInit,
-    ServerExit
+    RequestInit,
+      RequestFini,
+      ThreadInit,
+      ThreadFini,
+      ProcessInit,
+      ProcessExit,
+      ServerInit,
+      ServerExit,
+      GlobalsInit,
+
+      Sentinel
   };
-  InitFiniNode(void(*f)(), When when);
+
+  const static unsigned NumNodes = static_cast<unsigned>(When::Sentinel);
+
+  InitFiniNode(void(*f)(), When when) {
+    InitFiniNode *&n = node(when);
+    func = f;
+    next = n;
+    n = this;
+  }
+
+  static void RequestInit() { iterate(When::RequestInit); }
+  static void RequestFini() { iterate(When::RequestFini); }
+  static void ThreadInit()  { iterate(When::ThreadInit);  }
+  static void ThreadFini()  { iterate(When::ThreadFini);  }
+  static void ProcessInit() { iterate(When::ProcessInit); }
+  static void ProcessFini() { iterate(When::ProcessExit); }
+  static void ServerInit()  { iterate(When::ServerInit);  }
+  static void ServerFini()  { iterate(When::ServerExit);  }
+  static void GlobalsInit() { iterate(When::GlobalsInit); }
+
+ private:
+  static InitFiniNode*& node(When when) {
+    auto idx = static_cast<unsigned>(when);
+    assert(idx < NumNodes);
+    return s_nodes[idx];
+  }
   void (*func)();
   InitFiniNode *next;
+
+  static void iterate(When when) { iterate(node(when)); }
+  static void iterate(InitFiniNode* node);
+
+  static InitFiniNode *s_nodes[NumNodes];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

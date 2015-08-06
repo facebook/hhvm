@@ -265,7 +265,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 
     // The effect of this call is simply to ignore anything we've done *outside*
     // the MemoryManager allocator after we initialized to avoid attributing
-    // shared structure initialization that happens during init_thread_locals()
+    // shared structure initialization that happens during hphp_thread_init()
     // to this session.
 
     // We don't want to clear the other values because we do already have some

@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -444,7 +445,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   {
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
-    ExtensionRegistry::requestInit();
+    InitFiniNode::GlobalsInit();
 
     if (RuntimeOption::EnableDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

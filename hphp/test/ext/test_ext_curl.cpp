@@ -37,6 +37,7 @@ public:
   explicit TestCurlRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
+    g_context.getCheck();
     transport->addHeader("ECHOED", transport->getHeader("ECHO").c_str());
 
     if (transport->getMethod() == Transport::Method::POST) {
@@ -48,6 +49,7 @@ public:
     } else {
       transport->sendString("OK");
     }
+    hphp_memory_cleanup();
   }
   virtual void abortRequest(Transport *transport) {
     transport->sendString("Aborted");

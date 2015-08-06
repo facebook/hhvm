@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_HHVM_PROCESS_INIT_H_
 #define incl_HPHP_HHVM_PROCESS_INIT_H_
 
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/compiler/analysis/emitter.h"
 
@@ -47,7 +47,6 @@ inline void register_process_init() {
 inline void init_for_unit_test() {
   register_process_init();
   initialize_repo();
-  init_thread_locals();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   RuntimeOption::Load(ini, config);

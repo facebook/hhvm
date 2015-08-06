@@ -23,7 +23,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -39,7 +38,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
 
   register_process_init();
   initialize_repo();
-  init_thread_locals();
+  hphp_thread_init();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   if (!configFile.empty()) {

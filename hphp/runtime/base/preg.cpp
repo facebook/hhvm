@@ -34,7 +34,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"

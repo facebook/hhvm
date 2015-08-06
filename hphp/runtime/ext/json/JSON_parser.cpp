@@ -39,7 +39,7 @@ SOFTWARE.
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/json/ext_json.h"
@@ -356,7 +356,7 @@ const char *json_get_last_error_msg() {
 // Inline the function to do that reset.
 static InitFiniNode init(
   []{ s_json_parser->error_code = JSON_ERROR_NONE; },
-  InitFiniNode::When::ThreadInit
+  InitFiniNode::When::RequestInit
 );
 
 class JsonParserCleaner {

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server.h"
 
@@ -116,7 +117,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
     server += urls[url];
     actual = "<No response from server>";
     std::string err;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 50; i++) {
       Variant c = HHVM_FN(curl_init)();
       HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, server);
       HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
@@ -515,7 +516,7 @@ public:
   void process() {
     HttpRequestHandler handler(0);
     for (unsigned int i = 0; i < 100; i++) {
-      handler.handleRequest(this);
+      handler.run(this);
     }
   }
 };
@@ -654,6 +655,7 @@ public:
   explicit EchoHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
+    g_context.getCheck();
     HeaderMap headers;
     transport->getHeaders(headers);
 
@@ -682,6 +684,7 @@ public:
 
     transport->addHeader("Custom", "blah");
     transport->sendString(response);
+    hphp_memory_cleanup();
   }
   virtual void abortRequest(Transport *transport) {
     transport->sendString("Service Unavailable", 503);

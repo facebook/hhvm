@@ -35,7 +35,6 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/repo.h"
@@ -536,7 +535,6 @@ int process(const CompilerOptions &po) {
   }
 
   register_process_init();
-  init_thread_locals();
 
   Timer timer(Timer::WallTime);
   // prepare a package
@@ -565,6 +563,8 @@ int process(const CompilerOptions &po) {
         return false;
       }
     }
+  } else {
+    hphp_process_init();
   }
 
   {

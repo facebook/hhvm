@@ -89,6 +89,8 @@ protected:
     bool error = true;
     std::string errorMsg;
 
+    assertx(MM().empty());
+
     SCOPE_EXIT { m_handler->teardownRequest(transport); };
 
     try {

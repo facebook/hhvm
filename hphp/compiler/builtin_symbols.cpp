@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/logger.h"
 #include <dlfcn.h>
@@ -278,7 +277,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   if (Loaded) return true;
   Loaded = true;
 
-  if (g_context.isNull()) init_thread_locals();
+  if (g_context.isNull()) hphp_thread_init();
   ClassInfo::Load();
 
   // load extension functions first, so system/php may call them

@@ -672,15 +672,6 @@ void flush_evaluation_stack() {
     RPCRequestHandler::cleanupState();
   }
 
-  if (!g_context.isNull()) {
-    /*
-     * It is possible to create a new thread, but then not use it
-     * because another thread became available and stole the job.
-     * If that thread becomes idle, it will have a g_context, and
-     * some request-allocated memory
-     */
-    hphp_memory_cleanup();
-  }
   MM().flush();
 
   if (!t_se.isNull()) {

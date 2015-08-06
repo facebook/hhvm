@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
@@ -46,7 +46,6 @@
 #include <signal.h>
 
 namespace HPHP {
-extern InitFiniNode *extra_server_init, *extra_server_exit;
 
 using std::string;
 
@@ -181,9 +180,7 @@ HttpServer::HttpServer()
 
 // Synchronously stop satellites and start danglings
 void HttpServer::onServerShutdown() {
-  for (InitFiniNode *in = extra_server_exit; in; in = in->next) {
-    in->func();
-  }
+  InitFiniNode::ServerFini();
 
   Eval::Debugger::Stop();
   if (RuntimeOption::EnableDebuggerServer) {
@@ -306,9 +303,7 @@ void HttpServer::runOrExitProcess() {
     Logger::Info("debugger server started");
   }
 
-  for (InitFiniNode *in = extra_server_init; in; in = in->next) {
-    in->func();
-  }
+  InitFiniNode::ServerInit();
 
   {
     BootTimer::mark("servers started");

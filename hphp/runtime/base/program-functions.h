@@ -99,7 +99,9 @@ bool hphp_invoke(ExecutionContext *context,
 void hphp_context_shutdown();
 void hphp_context_exit(bool shutdown = true);
 
+void hphp_thread_init();
 void hphp_thread_exit();
+
 void hphp_memory_cleanup();
 void hphp_session_exit();
 void hphp_process_exit();
@@ -113,6 +115,7 @@ extern const char* const kCompilerId;
 
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

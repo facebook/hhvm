@@ -9,7 +9,13 @@
  *)
 
 val make_next_files:
-  (string -> bool) -> ?others: Path.t list -> Path.t ->
-  (unit -> string list)
+  ?filter:(string -> bool) -> ?others: Path.t list ->
+  Path.t -> (unit -> string list)
 
-val find_with_name: Path.t list -> string -> string list
+val find:
+  ?max_depth:int -> ?filter:(string -> bool) ->
+  Path.t list -> string list
+
+val iter_files:
+  ?max_depth:int -> ?filter:(string -> bool) ->
+  Path.t list -> (string -> unit) -> unit

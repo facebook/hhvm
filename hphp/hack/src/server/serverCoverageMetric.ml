@@ -96,7 +96,7 @@ let mk_trie acc fn_counts_l =
     | None, None -> None) v1 v2 in
   List.fold_left
     ~f:(fun acc (fn, counts) ->
-      let path_l = Str.split (Str.regexp "/") fn in
+      let path_l = Str.split (Str.regexp Filename.dir_sep) fn in
       Some (insert combine path_l counts acc))
     ~init:acc fn_counts_l
 
@@ -104,7 +104,7 @@ let mk_trie acc fn_counts_l =
  * Returns None if root is not a prefix of path. *)
 let relativize root path =
   (* naive implementation *)
-  let root = Path.to_string root ^ "/" in
+  let root = Path.to_string root ^ Filename.dir_sep in
   if str_starts_with path root
   then
     let root_len = String.length root in
@@ -117,7 +117,7 @@ let go_ fn genv env =
   let module RP = Relative_path in
   let next_files = compose
     (List.map ~f:(RP.create RP.Root))
-    (Find.make_next_files FindUtils.is_php path)
+    (Find.make_next_files ~filter:FindUtils.is_php path)
   in
   FileInfoStore.store env.ServerEnv.files_info;
   let result =

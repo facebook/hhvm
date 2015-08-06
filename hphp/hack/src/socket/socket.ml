@@ -34,8 +34,8 @@ let get_path tmp_dir root =
   (* It's possible that the tmp_dir path is too long. If so, let's give up and
    * use /tmp/ *)
   let tmp_dir = if String.length tmp_dir > max_addr_length - min_name_length
-  then "/tmp/"
-  else tmp_dir in
+    then Filename.get_temp_dir_name ()
+    else tmp_dir in
   let root_part = Path.slash_escaped_string_of_path root in
   let extension = ".sock" in
   let max_root_part_length =

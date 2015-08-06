@@ -19,9 +19,8 @@ let find_www_root_from_absolute_path (path : string): string =
   let rec aux subdir =
     if is_www_directory subdir
     then subdir
-    else let parent = Filename.dirname subdir in
-    if parent = "/"
+    else let parent = Path.dirname subdir in
+    if parent = Path.make "/"
     then raise Not_found
     else aux parent
   in aux path
-

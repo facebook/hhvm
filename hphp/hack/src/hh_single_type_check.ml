@@ -352,7 +352,8 @@ let handle_mode mode filename nenv files_contents files_info errors ai_results =
 (*****************************************************************************)
 
 let main_hack { filename; mode; } =
-  ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
+  if not Sys.win32 then
+    ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   EventLogger.init (Daemon.devnull ()) 0.0;
   SharedMem.(init default_config);
   let tmp_hhi = Path.concat Path.temp_dir_name "hhi" in
@@ -421,4 +422,5 @@ let _ =
        expected one (i.e. in given file without CRLF). *)
     set_binary_mode_out stdout true;
     let options = parse_options () in
-    main_hack options
+    Unix.handle_unix_error main_hack options
+   

@@ -14,6 +14,7 @@ from glob import glob
 from itertools import compress
 from operator import not_
 
+max_workers = 48
 verbose = False
 dump_on_failure = False
 
@@ -30,7 +31,7 @@ def run_test_program(files, program, out_ext, get_flags):
                 print('Executing', ' '.join(cmd))
             subprocess.call(cmd, stdout=outfile, stderr=outfile, cwd=test_dir)
 
-    executor = ThreadPoolExecutor(max_workers=48)
+    executor = ThreadPoolExecutor(max_workers=max_workers)
     futures = [executor.submit(run, f) for f in files]
 
     # this is equivalent to calling wait(), but will also raise exceptions if
@@ -142,6 +143,7 @@ if __name__ == '__main__':
     parser.add_argument('--disabled-extension', type=str,
             default='.no_typecheck')
     parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--max-workers', type=int, default='48')
     parser.add_argument('--diff', action='store_true',
                        help='On test failure, show the content of the files and a diff')
     parser.add_argument('--flags', nargs=argparse.REMAINDER)
@@ -152,6 +154,7 @@ if __name__ == '__main__':
                     "<program>." % parser.prog
     args = parser.parse_args()
 
+    max_workers = args.max_workers
     verbose = args.verbose
     dump_on_failure = args.diff
 

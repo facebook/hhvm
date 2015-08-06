@@ -47,16 +47,17 @@ REM execute the Hack testsuite
 @echo on
 
 set "python3=python.exe"
-"%python3%" test\verify.py --program bin\hh_single_type_check.exe test\autocomplete
-"%python3%" test\verify.py --program bin\hh_single_type_check.exe test\color
-"%python3%" test\verify.py --program bin\hh_single_type_check.exe test\coverage
-"%python3%" test\verify.py --program bin\hh_single_type_check.exe test\dumpsymbolinfo
-"%python3%" test\verify.py --program bin\hh_format.exe test\format
-"%python3%" test\verify.py --program bin\hh_single_type_check.exe test\suggest
-"%python3%" test\verify.py --program bin\hh_single_type_check.exe test\typecheck
-"%python3%" test\verify.py --program bin\hh_format.exe test\typecheck ^
+set "max=2"
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\autocomplete
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\color
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\coverage
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\dumpsymbolinfo
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_format.exe test\format
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\suggest
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\typecheck
+"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_format.exe test\typecheck ^
 		--disabled-extension .no_format ^
 		--out-extension .format_out ^
-		--expect-extension '' ^
+		--expect-extension "" ^
 		--flags --root .
 :end

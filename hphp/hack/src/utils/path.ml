@@ -18,6 +18,8 @@ let cat = Sys_utils.cat
 let compare = Pervasives.compare
 let dirname = Filename.dirname
 let expanduser = Sys_utils.expanduser
+let temp_dir_name = Filename.get_temp_dir_name ()
+let null_path = if Sys.win32 then "nul" else "/dev/null"
 
 (**
  * Resolves a path (using realpath)
@@ -38,11 +40,11 @@ let make path =
 let to_string path = path
 
 let concat path more =
-  make (Printf.sprintf "%s/%s" path more)
+  make (Filename.concat path more)
 
 let parent path =
   if is_directory path
-  then make (path ^ "/../")
+  then make (concat path Filename.parent_dir_name)
   else make (Filename.dirname path)
 
 let output = output_string

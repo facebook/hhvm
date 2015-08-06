@@ -11,7 +11,8 @@
 module CCS = ClientConnectSimple
 
 let get_hhserver () =
-  let server_next_to_client = (Filename.dirname Sys.argv.(0)) ^ "/hh_server" in
+  let server_next_to_client =
+    Filename.concat (Filename.dirname Sys.argv.(0)) "hh_server" in
   if Sys.file_exists server_next_to_client
   then server_next_to_client
   else "hh_server"

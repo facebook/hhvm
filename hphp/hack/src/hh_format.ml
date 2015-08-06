@@ -75,11 +75,8 @@ let debug () fnl =
         Printf.eprintf
           "Applying the formatter twice lead to different results: %s\n%!"
           (filepath :> string);
-        let () = Random.self_init() in
-        let nbr = string_of_int (Random.int 100000) in
-        let tmp = "/tmp/xx_"^nbr in
-        let file1 = tmp^"_1.php" in
-        let file2 = tmp^"_2.php" in
+        let file1 = Filename.temp_file "xx_" "_1.php" in
+        let file2 = Filename.temp_file "xx_" "_2.php" in
         let oc = open_out file1 in
         output_string oc content;
         close_out oc;
@@ -272,7 +269,7 @@ let format_stdin modes from to_ =
 
 let () =
   SharedMem.(init default_config);
-  PidLog.log_oc := Some (open_out "/dev/null");
+  PidLog.log_oc := Some (open_out (Path.to_string Path.null_path));
   let files, from, to_, apply_mode, debug, diff, modes, root, test =
     parse_args() in
   if not test then FormatEventLogger.init (Unix.time());

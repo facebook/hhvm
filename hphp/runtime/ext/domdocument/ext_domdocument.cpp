@@ -687,9 +687,11 @@ static xmlNsPtr dom_get_ns(xmlNodePtr nodep, const char *uri, int *errorcode,
   return nsptr;
 }
 
-static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
+static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
                                      const String& source,
                                      int options) {
+  SYNC_VM_REGS_SCOPED();
+
   xmlDocPtr ret = nullptr;
   xmlParserCtxtPtr ctxt = nullptr;
 
@@ -705,7 +707,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
 
   req::ptr<File> stream;
 
-  if (mode == DOM_LOAD_FILE) {
+  if (isFile) {
     String file_dest = libxml_get_valid_file_path(source);
     if (!file_dest.empty()) {
       // This is considerably more verbose than just using
@@ -732,7 +734,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
 
   /* If loading from memory, we need to set the base directory for the
    * document */
-  if (mode != DOM_LOAD_FILE) {
+  if (!isFile) {
     String directory = g_context->getCwd();
     if (!directory.empty()) {
       if (ctxt->directory != nullptr) xmlFree(ctxt->directory);
@@ -780,7 +782,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
       HHVM_FN(error_reporting)(old_error_reporting);
     }
     if (ret && ret->URL == nullptr) {
-      if (mode == DOM_LOAD_FILE) {
+      if (isFile) {
         ret->URL = xmlStrdup((xmlChar*)source.c_str());
       } else {
         /* If loading from memory, set the base reference uri for the
@@ -801,14 +803,14 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
   return ret;
 }
 
-static bool dom_parse_document(DOMNode* domdoc, const String& source,
-                                  int options, int mode) {
+static bool HHVM_METHOD(DomDocument, _load, const String& source,
+                        int64_t options, bool isFile) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
     return false;
   }
-  xmlDoc *newdoc =
-    dom_document_parser(domdoc, mode, source, options);
+  auto domdoc = Native::data<DOMNode>(this_);
+  auto newdoc = dom_document_parser(domdoc, isFile, source, options);
   if (!newdoc) {
     return false;
   }
@@ -816,14 +818,17 @@ static bool dom_parse_document(DOMNode* domdoc, const String& source,
   return true;
 }
 
-static bool dom_load_html(DOMNode* domdoc, const String& source,
-                             int options, int mode) {
+static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
+                        int64_t options, bool isFile) {
+  SYNC_VM_REGS_SCOPED();
+
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
     return false;
   }
+
   htmlParserCtxtPtr ctxt;
-  if (mode == DOM_LOAD_FILE) {
+  if (isFile) {
     ctxt = htmlCreateFileParserCtxt(source.data(), nullptr);
   } else {
     ctxt = htmlCreateMemoryParserCtxt(source.data(), source.size());
@@ -846,7 +851,7 @@ static bool dom_load_html(DOMNode* domdoc, const String& source,
   if (!newdoc) {
     return false;
   }
-  domdoc->setNode((xmlNodePtr)newdoc);
+  Native::data<DOMNode>(this_)->setNode((xmlNodePtr)newdoc);
   return true;
 }
 
@@ -3603,55 +3608,6 @@ Variant HHVM_METHOD(DOMDocument, importNode,
   return create_node_object(retnodep, data->doc());
 }
 
-template<typename L>
-static TypedValue* dom_load(ActRec* ar, L fn) {
-  SYNC_VM_REGS_SCOPED();
-
-  StringData* sd;
-  int64_t options = 0;
-
-  if (!parseArgs(ar, "s|l", &sd, &options)) {
-    return arReturn(ar, init_null());
-  }
-
-  ObjectData* od = ar->hasThis()
-    ? ar->getThis()
-    : newDOMDocument().detach();
-
-  auto* data = Native::data<DOMNode>(od);
-  bool res = fn(data, String{sd}, options);
-
-  if (ar->hasThis()) {
-    return arReturn(ar, res);
-  }
-
-  return arReturn(ar, Variant{od});
-}
-
-TypedValue* HHVM_MN(DOMDocument, load)(ActRec* ar) {
-  return dom_load(ar, [] (DOMNode* data, const String& str, int64_t opts) {
-    return dom_parse_document(data, str, opts, DOM_LOAD_FILE);
-  });
-}
-
-TypedValue* HHVM_MN(DOMDocument, loadHTML)(ActRec* ar) {
-  return dom_load(ar, [] (DOMNode* data, const String& str, int64_t opts) {
-    return dom_load_html(data, str, opts, DOM_LOAD_STRING);
-  });
-}
-
-TypedValue* HHVM_MN(DOMDocument, loadHTMLFile)(ActRec* ar) {
-  return dom_load(ar, [] (DOMNode* data, const String& str, int64_t opts) {
-    return dom_load_html(data, str, opts, DOM_LOAD_FILE);
-  });
-}
-
-TypedValue* HHVM_MN(DOMDocument, loadXML)(ActRec* ar) {
-  return dom_load(ar, [] (DOMNode* data, const String& str, int64_t opts) {
-    return dom_parse_document(data, str, opts, DOM_LOAD_STRING);
-  });
-}
-
 void HHVM_METHOD(DOMDocument, normalizeDocument) {
   auto* data = Native::data<DOMNode>(this_);
   CHECK_WRITE_THIS_DOC(docp, data);
@@ -5906,10 +5862,8 @@ public:
     HHVM_ME(DOMDocument, getElementsByTagName);
     HHVM_ME(DOMDocument, getElementsByTagNameNS);
     HHVM_ME(DOMDocument, importNode);
-    HHVM_ME(DOMDocument, load);
-    HHVM_ME(DOMDocument, loadHTML);
-    HHVM_ME(DOMDocument, loadHTMLFile);
-    HHVM_ME(DOMDocument, loadXML);
+    HHVM_ME(DomDocument, _load);
+    HHVM_ME(DomDocument, _loadHTML);
     HHVM_ME(DOMDocument, normalizeDocument);
     HHVM_ME(DOMDocument, registerNodeClass);
     HHVM_ME(DOMDocument, relaxNGValidate);

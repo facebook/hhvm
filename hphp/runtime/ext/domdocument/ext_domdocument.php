@@ -598,6 +598,20 @@ class DOMDocument extends DOMNode {
   function importNode(DOMNode $importednode, bool $deep = false): mixed;
 
   /**
+   * Internal helper function for load()/loadXML()
+   */
+  <<__Native>>
+  private function _load(string $arg, int $options,
+                         bool $isFile): bool;
+
+  /**
+   * Internal helper function for loadHTMLFile()/loadHTML()
+   */
+  <<__Native>>
+  private function _loadHTML(string $arg, int $options,
+                             bool $isFile): bool;
+
+  /**
    * Loads an XML document from a file. Warning Unix style paths with forward
    *   slashes can cause significant performance degradation on Windows systems;
    *   be sure to call realpath() in such a case.
@@ -609,8 +623,16 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native("ActRec")>>
-  function load(string $filename, int $options = 0): mixed;
+  public function load($filename, $options = 0): mixed {
+    if (empty($this)) {
+      $ret = new DOMDocument;
+      if (!$ret->_load($filename, $options, true)) {
+        return null;
+      }
+      return $ret;
+    }
+    return $this->_load($filename, $options, true);
+  }
 
   /**
    * The function parses the HTML contained in the string source. Unlike
@@ -627,8 +649,17 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native("ActRec")>>
-  function loadHTML(string $source, int $options = 0): mixed;
+  public function loadHTML($source, $options = 0): mixed {
+    if (empty($this)) {
+      $ret = new DOMDocument;
+      if (!$ret->_loadHTML($source, $options, false)) {
+        return null;
+      }
+      return $ret;
+    }
+    return $this->_loadHTML($source, $options, false);
+  }
+
 
   /**
    * The function parses the HTML document in the file named filename. Unlike
@@ -646,8 +677,16 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native("ActRec")>>
-  function loadHTMLFile(string $filename, int $options = 0): mixed;
+  public function loadHTMLFile($filename, $options = 0): mixed {
+    if (empty($this)) {
+      $ret = new DOMDocument;
+      if (!$ret->_loadHTML($filename, $options, true)) {
+        return null;
+      }
+      return $ret;
+    }
+    return $this->_loadHTML($filename, $options, true);
+  }
 
   /**
    * Loads an XML document from a string.  This method may also be called
@@ -662,8 +701,17 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native("ActRec")>>
-  function loadXML(string $source, int $options = 0): mixed;
+  public function loadXML($source, $options = 0): mixed {
+    if (empty($this)) {
+      $ret = new DOMDocument;
+      if (!$ret->_load($source, $options, false)) {
+        return null;
+      }
+      return $ret;
+    }
+    return $this->_load($source, $options, false);
+  }
+
 
   /**
    * This method acts as if you saved and then loaded the document, putting

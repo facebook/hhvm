@@ -297,12 +297,13 @@ ArrayData* PackedArray::ResizeIfNeeded(ArrayData* adIn) {
 
 //////////////////////////////////////////////////////////////////////
 ALWAYS_INLINE
-void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
+void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
+                                   RefCount initial_count) {
   // Copy everything from `adIn' to `ad', including refcount, etc.
   auto const size = adIn->m_size;
   static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
   memcpy16_inline(ad, adIn, (size + 1) * 16);
-  ad->m_hdr.init(adIn->m_hdr, 1);
+  ad->m_hdr.init(adIn->m_hdr, initial_count);
 
   // Copy counted types correctly, especially RefData.
   auto data = packedData(ad);
@@ -318,8 +319,6 @@ void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
     }
     tvRefcountedIncRef(pTv);
   }
-
-  assert(ad->hasExactlyOneRef());
 }
 
 NEVER_INLINE
@@ -331,7 +330,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
     MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
 
-  CopyPackedHelper(adIn, ad);
+  CopyPackedHelper(adIn, ad, 1);
 
   assert(ad->isPacked());
   assert(ad->cap() == adIn->cap());
@@ -368,14 +367,13 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   } else {
     ad = CopyStaticHelper(adIn);
   }
-
-  CopyPackedHelper(adIn, ad);
+  CopyPackedHelper(adIn, ad, StaticValue);
 
   assert(ad->isPacked());
   assert(ad->cap() == adIn->cap());
   assert(ad->m_size == adIn->m_size);
   assert(ad->m_pos == adIn->m_pos);
-  assert(ad->hasExactlyOneRef());
+  assert(ad->isStatic());
   assert(checkInvariants(ad));
   return ad;
 }
@@ -388,11 +386,11 @@ ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = adIn->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, 1);
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticValue);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == adIn->m_size);
-  assert(ad->hasExactlyOneRef());
+  assert(ad->isStatic());
   return ad;
 }
 
@@ -407,7 +405,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = arr->m_sizeAndPos;
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, StaticValue);
     assert(ad->isPacked());
     assert(ad->cap() == cap);
     assert(ad->m_size == arr->m_size);
@@ -420,9 +418,8 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
        pos = arr->iter_advance(pos), ++data) {
     tvDupFlattenVars(arr->getValueRef(pos).asTypedValue(), data, arr);
   }
-
   assert(ad->m_pos == arr->m_pos);
-  assert(ad->hasExactlyOneRef());
+  assert(ad->isStatic());
   assert(checkInvariants(ad));
   return ad;
 }
@@ -435,11 +432,11 @@ ArrayData* PackedArray::ConvertStaticHelper(const ArrayData* arr) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = arr->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, 1);
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticValue);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == arr->m_size);
-  assert(ad->hasExactlyOneRef());
+  assert(ad->isStatic());
   return ad;
 }
 

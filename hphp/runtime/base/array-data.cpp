@@ -82,8 +82,7 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
     } else {
       ad = arr->copyStatic();
     }
-    assert(ad->hasExactlyOneRef());
-    ad->setStatic();
+    assert(ad->isStatic());
     ad->onSetEvalScalar();
     acc->second = ad;
   }

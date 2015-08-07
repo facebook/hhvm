@@ -228,7 +228,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   // `malloc' returns multiple of 16 bytes.
   bcopy32_inline(ad, &other,
                  sizeof(MixedArray) + sizeof(Elm) * other.m_used + 24);
-  ad->m_hdr.init(other.m_hdr, 1);
+  RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
+  ad->m_hdr.init(other.m_hdr, count);
   copyHash(ad->hashTab(), other.hashTab(), scale);
 
   // Bump up refcounts as needed.
@@ -261,7 +262,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   assert(ad->kind() == other.kind());
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
-  assert(ad->hasExactlyOneRef());
+  assert(mode == AllocMode::Request ? ad->hasExactlyOneRef() :
+         ad->isStatic());
   assert(ad->m_scale == scale);
   assert(ad->checkInvariants());
   return ad;
@@ -395,6 +397,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   // allocated for the MixedArray, assuming `malloc()' always allocates
   // multiple of 16 bytes.
   bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
+  ad->m_hdr.count = UncountedValue; // after bcopy, update count
   copyHash(ad->hashTab(), a->hashTab(), scale);
 
   // Need to make sure keys and values are all uncounted.
@@ -410,7 +413,6 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
     }
     ConvertTvToUncounted(&te.data);
   }
-  ad->setUncounted();
   return ad;
 }
 

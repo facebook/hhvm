@@ -27,9 +27,10 @@ namespace HPHP {
 StructArray::StructArray(
   uint32_t size,
   uint32_t pos,
-  Shape* shape
+  Shape* shape,
+  RefCount initial_count
 )
-  : ArrayData(kStructKind)
+  : ArrayData(kStructKind, initial_count)
   , m_shape(shape)
 {
   m_sizeAndPos = size | uint64_t{pos} << 32;
@@ -445,7 +446,7 @@ ArrayData* StructArray::CopyStatic(const ArrayData* ad) {
     tvDupFlattenVars(ptr, targetData, structArray);
   }
 
-  assert(ret->hasExactlyOneRef());
+  assert(ret->isStatic());
   return ret;
 }
 

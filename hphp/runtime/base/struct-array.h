@@ -147,7 +147,7 @@ struct StructArray : public ArrayData {
 private:
   template <typename F> friend void scan(const StructArray&, F&);
 
-  StructArray(uint32_t size, uint32_t pos, Shape* shape);
+  StructArray(uint32_t size, uint32_t pos, Shape* shape, RefCount = 1);
 
   static MixedArray* ToMixedHeader(size_t);
   static MixedArray* ToMixed(StructArray*);

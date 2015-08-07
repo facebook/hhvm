@@ -323,7 +323,7 @@ inline ArrayData* ArrayData::copyWithStrongIterators() const {
 
 inline ArrayData* ArrayData::copyStatic() const {
   auto ret = g_array_funcs.copyStatic[kind()](this);
-  assert(ret != this && ret->hasExactlyOneRef());
+  assert(ret != this && ret->isStatic());
   return ret;
 }
 

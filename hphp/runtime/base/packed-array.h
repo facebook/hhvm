@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/header-kind.h"
 
 namespace HPHP {
 
@@ -84,7 +85,8 @@ struct PackedArray {
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
-  static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);
+  static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
+                               RefCount initial_count);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);

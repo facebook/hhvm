@@ -210,16 +210,8 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   }
 
 #define IMPLEMENT_COUNTABLE_METHODS                     \
-  void setStatic() const {                              \
-    assert(check_refcount(m_hdr.count));                \
-    m_hdr.count = StaticValue;                          \
-  }                                                     \
   bool isStatic() const {                               \
     return CountableManip::isStatic(m_hdr.count);       \
-  }                                                     \
-  void setUncounted() const {                           \
-    assert(check_refcount(m_hdr.count));                \
-    m_hdr.count = UncountedValue;                       \
   }                                                     \
   bool isUncounted() const {                            \
     return m_hdr.count == UncountedValue;               \

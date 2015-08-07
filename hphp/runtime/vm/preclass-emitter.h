@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_CLASS_EMIT_H_
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-data.h"
 
 #include "hphp/runtime/vm/class.h"

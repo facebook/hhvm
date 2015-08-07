@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_EXT_HHBC_H_
 #define incl_HPHP_EXT_HHBC_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/preclass.h"
 
 namespace HPHP {

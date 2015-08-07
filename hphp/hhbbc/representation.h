@@ -27,7 +27,6 @@
 #include <boost/variant.hpp>
 
 #include "hphp/util/md5.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"

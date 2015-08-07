@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_
 #define incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/named-entity.h"
 
 #include <vector>

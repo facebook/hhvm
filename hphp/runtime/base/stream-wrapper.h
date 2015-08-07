@@ -18,7 +18,6 @@
 #define HPHP_STREAM_WRAPPER_H
 
 #include <string>
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/req-ptr.h"

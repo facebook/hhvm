@@ -37,7 +37,6 @@
 #include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 

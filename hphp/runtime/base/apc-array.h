@@ -18,7 +18,6 @@
 #define incl_HPHP_APC_ARRAY_H_
 
 #include "hphp/runtime/base/apc-handle-defs.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"

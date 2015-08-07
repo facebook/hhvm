@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_JIT_FUNC_PROLOGUE_H
 #define incl_HPHP_JIT_FUNC_PROLOGUE_H
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/types.h"
 

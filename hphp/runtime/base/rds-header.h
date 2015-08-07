@@ -21,7 +21,6 @@
 #include <cstddef>
 
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/minstr-state.h"
 

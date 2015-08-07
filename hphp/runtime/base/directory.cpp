@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/directory.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/base/file.h"

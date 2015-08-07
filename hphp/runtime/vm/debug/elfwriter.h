@@ -16,7 +16,6 @@
 #ifndef HPHP_ELFWRITER_H_
 #define HPHP_ELFWRITER_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/debug/dwarf.h"
 #include <elf.h>
 #include <gelf.h>

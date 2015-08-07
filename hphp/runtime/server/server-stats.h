@@ -30,7 +30,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/shared-string.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/execution-profiler.h"
 #include "hphp/runtime/server/writer.h"
 

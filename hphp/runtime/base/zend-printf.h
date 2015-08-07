@@ -18,10 +18,14 @@
 #ifndef incl_HPHP_ZEND_PRINTF_H_
 #define incl_HPHP_ZEND_PRINTF_H_
 
-#include "hphp/runtime/base/types.h"
+#include <sys/types.h>
+#include <stdarg.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class String;
+class Array;
 
 /**
  * How PHP formats a string. Called by ext/ext_string.cpp.

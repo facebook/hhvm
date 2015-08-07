@@ -191,6 +191,13 @@ using Symbol = boost::variant< StaticLocal
 enum class Mode { Normal, Local, Persistent };
 
 /*
+ * Handles into Request Data Segment.  These are offsets from
+ * rds::tl_base.
+ */
+using Handle = uint32_t;
+constexpr Handle kInvalidHandle = 0;
+
+/*
  * rds::Link<T> is a thin, typed wrapper around an rds::Handle.
  *
  * Note that nothing prevents using non-POD types with this.  But

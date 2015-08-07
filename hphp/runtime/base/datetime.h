@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_DATETIME_H_
 #define incl_HPHP_DATETIME_H_
 
-#include "hphp/runtime/base/types.h"
 #include <memory>
 
 #include "hphp/runtime/base/array-init.h"

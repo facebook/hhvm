@@ -21,7 +21,6 @@
 #include <limits>
 #include <vector>
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/string-data.h"
 
 #include "hphp/util/functional.h"

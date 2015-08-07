@@ -20,7 +20,6 @@
 
 #include <folly/Optional.h>
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include <libdwarf.h>
 #include <dwarf.h>

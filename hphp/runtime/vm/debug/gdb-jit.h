@@ -17,7 +17,6 @@
 #define GDB_JIT_H_
 
 #include "hphp/runtime/vm/debug/dwarf.h"
-#include "hphp/runtime/base/types.h"
 
 using namespace HPHP::Debug;
 

@@ -15,8 +15,7 @@
 */
 
 #include "hphp/runtime/base/url.h"
-
-#include "hphp/runtime/base/types.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 namespace URL {

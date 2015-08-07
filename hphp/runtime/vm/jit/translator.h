@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_TRANSLATOR_H_
 #define incl_HPHP_TRANSLATOR_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/debugger-hook.h"

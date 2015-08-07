@@ -18,7 +18,6 @@
 #define incl_HPHP_IP_BLOCK_MAP_H_
 
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include <netinet/in.h>
 

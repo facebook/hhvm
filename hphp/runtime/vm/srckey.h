@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_SRCKEY_H_
 #define incl_HPHP_SRCKEY_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include <boost/operators.hpp>

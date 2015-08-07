@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_VM_FUNC_EMITTER_H_
 #define incl_HPHP_VM_FUNC_EMITTER_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/datatype.h"

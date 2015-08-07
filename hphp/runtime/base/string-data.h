@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 

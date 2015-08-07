@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"

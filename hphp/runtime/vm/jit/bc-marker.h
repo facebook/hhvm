@@ -19,7 +19,6 @@
 
 #include <string>
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/srckey.h"
 

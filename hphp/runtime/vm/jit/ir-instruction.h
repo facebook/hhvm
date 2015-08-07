@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_IR_INSTRUCTION_H_
 #define incl_HPHP_IR_INSTRUCTION_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"

@@ -24,7 +24,6 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////

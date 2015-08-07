@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
 

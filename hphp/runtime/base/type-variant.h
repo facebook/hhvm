@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"

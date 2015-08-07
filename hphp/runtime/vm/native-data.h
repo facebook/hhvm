@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-object.h"
 
 namespace HPHP { namespace Native {

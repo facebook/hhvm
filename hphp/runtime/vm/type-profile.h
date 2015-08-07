@@ -17,7 +17,6 @@
 #ifndef TYPE_PROFILE_H_
 #define TYPE_PROFILE_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/hhbc.h"
 

@@ -25,6 +25,7 @@ class ObjectData;
 class Unit;
 class Class;
 class Func;
+class Object;
 } //namespace HPHP
 
 namespace HPHP { namespace SystemLib {

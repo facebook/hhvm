@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 

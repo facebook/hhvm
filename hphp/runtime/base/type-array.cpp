@@ -422,6 +422,7 @@ void Array::escalate() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
+#define ACCESSPARAMS_IMPL AccessFlags::Type flags
 
 Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
   if (m_arr) return m_arr->get((int64_t)key, flags & AccessFlags::Error);

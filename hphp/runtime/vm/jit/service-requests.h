@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_JIT_SERVICE_REQUESTS_H_
 #define incl_HPHP_JIT_SERVICE_REQUESTS_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"

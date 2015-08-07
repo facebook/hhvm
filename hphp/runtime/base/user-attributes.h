@@ -26,7 +26,6 @@
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 

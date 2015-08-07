@@ -29,6 +29,9 @@ namespace HPHP {
 
 // forward declaration
 class ArrayIter;
+class VariableUnserializer;
+
+#define ACCESSPARAMS_DECL AccessFlags::Type flags = AccessFlags::None
 
 /*
  * Array type wrapping around ArrayData to implement reference
@@ -520,5 +523,7 @@ ALWAYS_INLINE Array empty_array() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+// nobody else needs this outside the Array decl
+#undef ACCESSPARAMS_DECL
 
 #endif // incl_HPHP_ARRAY_H_

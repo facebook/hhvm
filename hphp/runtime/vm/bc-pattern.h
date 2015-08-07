@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_VM_BC_PATTERN_H_
 #define incl_HPHP_VM_BC_PATTERN_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include <initializer_list>

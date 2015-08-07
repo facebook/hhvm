@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/process/ext_process.h"
 
 namespace HPHP {

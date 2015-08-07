@@ -17,10 +17,14 @@
 #ifndef incl_HPHP_TIMESTAMP_H_
 #define incl_HPHP_TIMESTAMP_H_
 
-#include "hphp/runtime/base/types.h"
+#include <cstdint>
+#include <limits.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class Array;
+class String;
 
 /**
  * Using an integer to represent time: the value of time in seconds since 0

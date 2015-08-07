@@ -18,10 +18,10 @@
 #ifndef incl_HPHP_ZEND_SCANF_H_
 #define incl_HPHP_ZEND_SCANF_H_
 
-#include "hphp/runtime/base/types.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct Variant;
 
 /**
  * How PHP scans a string. Called by ext/ext_string.cpp.
@@ -40,4 +40,4 @@ int string_sscanf(const char *string, const char *format, int numVars,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_SCANF_H_
+#endif

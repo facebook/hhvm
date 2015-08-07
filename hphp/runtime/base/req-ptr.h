@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_REQ_PTR_H_
 #define incl_HPHP_REQ_PTR_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/compilation-flags.h"
@@ -263,6 +262,10 @@ inline auto deref(const P& p) -> decltype(P().get()) {
 }
 
 struct ResourceData;
+struct ObjectData;
+class Resource;
+class Object;
+struct Variant;
 
 ATTRIBUTE_NORETURN extern void throw_null_pointer_exception();
 ATTRIBUTE_NORETURN void throw_invalid_object_type(ResourceData* p);

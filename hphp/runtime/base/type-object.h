@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/types.h"
 
 #include <algorithm>
 

@@ -20,7 +20,6 @@
 #include "hphp/parser/location.h"
 #include "hphp/system/systemlib.h"
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/file-util.h"

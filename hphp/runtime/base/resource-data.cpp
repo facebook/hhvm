@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"

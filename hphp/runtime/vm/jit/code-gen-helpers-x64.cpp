@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"

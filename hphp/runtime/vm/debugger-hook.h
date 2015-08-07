@@ -20,7 +20,6 @@
 #include <functional>
 
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"

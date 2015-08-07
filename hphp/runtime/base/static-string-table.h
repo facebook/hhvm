@@ -20,7 +20,7 @@
 
 #include <folly/Range.h>
 
-#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/rds.h"
 
 namespace HPHP {
 

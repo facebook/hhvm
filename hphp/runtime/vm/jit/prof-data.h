@@ -22,7 +22,6 @@
 #include <unordered_map>
 
 #include "hphp/util/hash-map-typedefs.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/types.h"

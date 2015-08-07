@@ -24,7 +24,6 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/cap-code.h"
@@ -34,6 +33,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TypedValue;
+struct MArrayIter;
+class VariableSerializer;
 
 struct ArrayData {
   // Runtime type tag of possible array types.  This is intentionally

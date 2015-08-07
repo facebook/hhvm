@@ -17,7 +17,8 @@
 #ifndef HPHP_EXT_FILTER_FILTER_PRIVATE_H
 #define HPHP_EXT_FILTER_FILTER_PRIVATE_H
 
-#include "hphp/runtime/base/types.h"
+class String;
+struct Variant;
 
 #define PHP_INPUT_FILTER_PARAM_DECL const String& value, long flags, \
                                     const Variant& option_array

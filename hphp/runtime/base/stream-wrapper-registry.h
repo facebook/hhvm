@@ -20,7 +20,6 @@
 #include <map>
 #include <string>
 #include <memory>
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 

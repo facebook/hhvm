@@ -16,7 +16,6 @@
 #ifndef HPHP_USER_STREAM_WRAPPER_H
 #define HPHP_USER_STREAM_WRAPPER_H
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/user-file.h"

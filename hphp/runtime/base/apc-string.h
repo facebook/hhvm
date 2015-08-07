@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_APC_STRING_H_
 #define incl_HPHP_APC_STRING_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 

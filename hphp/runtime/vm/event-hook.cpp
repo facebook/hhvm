@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"

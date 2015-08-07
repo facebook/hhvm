@@ -20,7 +20,6 @@
 
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-handle-defs.h"

@@ -25,7 +25,6 @@
 
 #include "hphp/parser/location.h"
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/preclass.h"

@@ -39,7 +39,6 @@
 #include "hphp/util/mutex.h"
 #include "hphp/util/functional.h"
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/execution-context.h"

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/bytecode.h"

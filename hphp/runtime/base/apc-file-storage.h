@@ -18,10 +18,7 @@
 #define incl_HPHP_APC_FILE_STORAGE_H_
 
 #include <vector>
-
 #include "hphp/util/lock.h"
-
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 

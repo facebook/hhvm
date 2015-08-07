@@ -18,7 +18,6 @@
 #define incl_HPHP_VIRTUAL_HOST_H_
 
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/server/ip-block-map.h"
 #include "hphp/runtime/base/ini-setting.h"
 

@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
@@ -33,8 +32,9 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 class Array;
-class String;
 class VarNR;
+class VariableSerializer;
+class VariableUnserializer;
 
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };

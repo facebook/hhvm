@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_TEST_CONTEXT_H_
 #define incl_HPHP_TEST_CONTEXT_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP { namespace jit {

@@ -16,7 +16,6 @@
 #ifndef HPHP_PHP_STREAM_WRAPPER_H
 #define HPHP_PHP_STREAM_WRAPPER_H
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 

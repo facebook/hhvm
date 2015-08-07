@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_PRECLASS_H_
 
 #include "hphp/runtime/base/atomic-shared-ptr.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-string.h"

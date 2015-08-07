@@ -18,7 +18,6 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"

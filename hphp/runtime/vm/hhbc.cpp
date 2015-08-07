@@ -532,38 +532,28 @@ FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
     if (i == 0) return top;
     --i;
   }
+
+  // First, check for location codes that have a non-Cell stack input.
   auto const location = getMLocation(op);
   switch (location.lcode) {
-    // No stack input for the location
+    // No stack input for the location.
     case LL: case LH: case LGL: case LNL: break;
 
-    // CV on top
-    case LC: case LGC: case LNC:
-      if (i == 0) return CV;
-      --i;
-      break;
+    // CV on top. Handled below.
+    case LC: case LGC: case LNC: break;
 
-    // AV on top
-    case LSL:
+    // AV on top.
+    case LSL: case LSC:
       if (i == 0) return AV;
-      --i;
       break;
 
-    // RV on top
+    // RV on top.
     case LR:
       if (i == 0) return RV;
-      --i;
-      break;
-
-    // AV on top, CV below
-    case LSC:
-      if (i == 0) return AV;
-      if (i == 1) return CV;
-      i -= 2;
       break;
 
     case InvalidLocationCode:
-      not_reached();
+      always_assert(false);
   }
 
   if (i < getImmVector(op).numStackValues()) return CV;

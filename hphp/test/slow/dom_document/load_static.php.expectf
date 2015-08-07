@@ -1,10 +1,4 @@
 string(11) "DOMDocument"
 string(11) "DOMDocument"
-
-Warning: DOMDocument::loadXML() expects at most 2 parameters, 3 given in %s/load_static.php on line 6
-NULL
-
-Warning: DOMDocument::loadHTML() expects at most 2 parameters, 3 given in %s/load_static.php on line 7
-NULL
 string(11) "DOMDocument"
 string(11) "DOMDocument"

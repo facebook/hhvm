@@ -34,7 +34,6 @@ struct DummyResource2 : DummyResource {
     return m_class_name;
   }
   virtual bool isInvalid() const { return m_class_name.empty(); }
-  void o_setResourceId(int64_t id) { m_id = id; }
 };
 
 TEST(ReqPtr, Refcounts) {

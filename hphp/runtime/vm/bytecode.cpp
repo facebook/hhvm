@@ -781,8 +781,7 @@ static std::string toStringElm(const TypedValue* tv) {
       os << tv->m_data.pres;
       print_count();
       os << ":Resource("
-         << const_cast<ResourceData*>(tv->m_data.pres)
-              ->o_getClassName().get()->data()
+         << tv->m_data.pres->data()->o_getClassName().get()->data()
          << ")";
       continue;
     case KindOfRef:
@@ -4337,7 +4336,7 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
           return;
 
         case KindOfResource:
-          intval = val->m_data.pres->o_toInt64();
+          intval = val->m_data.pres->data()->o_toInt64();
           tvDecRef(val);
           return;
 
@@ -7861,7 +7860,7 @@ void ExecutionContext::requestInit() {
   VarEnv::createGlobal();
   vmStack().requestInit();
   ObjectData::resetMaxId();
-  ResourceData::resetMaxId();
+  ResourceHdr::resetMaxId();
   mcg->requestInit();
 
   if (RuntimeOption::EvalJitEnableRenameFunction) {

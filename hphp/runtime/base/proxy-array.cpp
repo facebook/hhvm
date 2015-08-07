@@ -499,7 +499,7 @@ void * ProxyArray::elementToData(Variant * v) const {
     return (void*)(&tv->m_data.pref);
   } else {
     always_assert(tv->m_type == KindOfResource);
-    auto elt = dynamic_cast<ZendCustomElement*>(tv->m_data.pres);
+    auto elt = dynamic_cast<ZendCustomElement*>(tv->m_data.pres->data());
     always_assert(elt);
     return elt->data();
   }

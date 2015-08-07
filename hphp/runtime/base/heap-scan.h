@@ -66,7 +66,7 @@ template<class F> void scanHeader(const Header* h, F& mark) {
     case HeaderKind::ImmSet:
       return h->obj_.scan(mark);
     case HeaderKind::Resource:
-      return h->res_.scan(mark);
+      return h->res_.data()->scan(mark);
     case HeaderKind::Ref:
       return h->ref_.scan(mark);
     case HeaderKind::String:

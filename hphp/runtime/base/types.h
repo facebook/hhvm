@@ -57,7 +57,6 @@ extern const Variant empty_string_variant_ref; // const Variant&
 class StringData;
 class ArrayData;
 class ObjectData;
-class ResourceData;
 class MArrayIter;
 
 class Class;

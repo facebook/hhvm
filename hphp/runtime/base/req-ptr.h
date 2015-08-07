@@ -262,6 +262,8 @@ inline auto deref(const P& p) -> decltype(P().get()) {
   return p.get();
 }
 
+struct ResourceData;
+
 ATTRIBUTE_NORETURN extern void throw_null_pointer_exception();
 ATTRIBUTE_NORETURN void throw_invalid_object_type(ResourceData* p);
 ATTRIBUTE_NORETURN void throw_invalid_object_type(ObjectData* p);

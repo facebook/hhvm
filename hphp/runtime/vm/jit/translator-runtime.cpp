@@ -254,10 +254,10 @@ StringData* convObjToStrHelper(ObjectData* o) {
   return o->invokeToString().detach();
 }
 
-StringData* convResToStrHelper(ResourceData* r) {
+StringData* convResToStrHelper(ResourceHdr* r) {
   // toString() returns a counted String; detach() it to move ownership
   // of the count to the caller
-  return r->o_toString().detach();
+  return r->data()->o_toString().detach();
 }
 
 TypedValue getMemoKeyHelper(TypedValue tv) {

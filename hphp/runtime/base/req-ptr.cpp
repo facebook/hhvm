@@ -51,7 +51,9 @@ void throw_invalid_object_type(const Variant& p) {
     case KindOfObject:
       throw_invalid_object_type(tv->m_data.pobj->getClassName().c_str());
     case KindOfResource:
-      throw_invalid_object_type(tv->m_data.pres->o_getClassName().c_str());
+      throw_invalid_object_type(
+          tv->m_data.pres->data()->o_getClassName().c_str()
+      );
     default:
       throw_invalid_object_type(tname(tv->m_type).c_str());
   }

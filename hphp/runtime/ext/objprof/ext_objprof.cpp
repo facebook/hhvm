@@ -382,12 +382,12 @@ std::pair<int, double> tvGetSize(
       break;
     }
     case HPHP::KindOfResource: {
-      // Not really counting the resource itself
-      ResourceData* resource = tv->m_data.pres;
+      auto resource = tv->m_data.pres;
       auto res_ref_count = resource->getCount() + ref_adjust;
-      size += sizeof(*resource);
+      auto resource_size = resource->heapSize();
+      size += resource_size;
       if (res_ref_count > 0) {
-        sized += sizeof(*resource) / (double)(res_ref_count);
+        sized += resource_size / (double)(res_ref_count);
       }
       break;
     }

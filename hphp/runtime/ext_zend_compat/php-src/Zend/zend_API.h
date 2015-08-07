@@ -590,7 +590,8 @@ END_EXTERN_C()
 #define ZVAL_RESOURCE(z, l) do {  \
     TSRMLS_FETCH();       \
     zval *__z = (z);      \
-    zval_follow_ref(*__z).m_data.pres = zend_list_id_to_resource_data(l TSRMLS_CC); \
+    zval_follow_ref(*__z).m_data.pres = \
+      zend_list_id_to_resource_data(l TSRMLS_CC)->ResourceData::hdr(); \
     Z_TYPE_P(__z) = IS_RESOURCE;\
   } while (0)
 #else

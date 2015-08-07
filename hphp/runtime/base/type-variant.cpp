@@ -108,7 +108,7 @@ Variant::Variant(const Variant& v) noexcept {
  * This is safe because we have compile time assertions that guarantee that
  * the _count field will always be exactly FAST_REFCOUNT_OFFSET bytes from
  * the beginning of the object for the StringData, ArrayData, ObjectData,
- * ResourceData, and RefData classes.
+ * ResourceHdr, and RefData classes.
  */
 
 static_assert(typeToDestrIdx(KindOfString) == 1, "String destruct index");
@@ -126,7 +126,7 @@ RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&StringData::release),
   (RawDestructor)getMethodPtr(&ArrayData::release),
   (RawDestructor)getMethodPtr(&ObjectData::release), // may replace at runtime
-  (RawDestructor)getMethodPtr(&ResourceData::release),
+  (RawDestructor)getMethodPtr(&ResourceHdr::release),
   (RawDestructor)getMethodPtr(&RefData::release),
 };
 
@@ -215,7 +215,7 @@ IMPLEMENT_PTR_SET(StringData, pstr,
                            v->isStatic() ? KindOfStaticString : KindOfString);
 IMPLEMENT_PTR_SET(ArrayData, parr, KindOfArray)
 IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
-IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
+IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
@@ -237,7 +237,7 @@ IMPLEMENT_STEAL(StringData, pstr,
                 v->isStatic() ? KindOfStaticString : KindOfString)
 IMPLEMENT_STEAL(ArrayData, parr, KindOfArray)
 IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
-IMPLEMENT_STEAL(ResourceData, pres, KindOfResource)
+IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
 
 #undef IMPLEMENT_STEAL
 
@@ -345,7 +345,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfString:        return m_data.pstr->toBoolean();
     case KindOfArray:         return !m_data.parr->empty();
     case KindOfObject:        return m_data.pobj->toBoolean();
-    case KindOfResource:      return m_data.pres->o_toBoolean();
+    case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfRef:           return m_data.pref->var()->toBoolean();
     case KindOfClass:         break;
   }
@@ -364,7 +364,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfString:        return m_data.pstr->toInt64(base);
     case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return m_data.pobj->toInt64();
-    case KindOfResource:      return m_data.pres->o_toInt64();
+    case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfRef:           return m_data.pref->var()->toInt64(base);
     case KindOfClass:         break;
   }
@@ -382,7 +382,7 @@ double Variant::toDoubleHelper() const {
     case KindOfString:        return m_data.pstr->toDouble();
     case KindOfArray:         return (double)toInt64();
     case KindOfObject:        return m_data.pobj->toDouble();
-    case KindOfResource:      return m_data.pres->o_toDouble();
+    case KindOfResource:      return m_data.pres->data()->o_toDouble();
     case KindOfRef:           return m_data.pref->var()->toDouble();
     case KindOfClass:         break;
   }
@@ -418,7 +418,7 @@ String Variant::toStringHelper() const {
       return m_data.pobj->invokeToString();
 
     case KindOfResource:
-      return m_data.pres->o_toString();
+      return m_data.pres->data()->o_toString();
 
     case KindOfRef:
       return m_data.pref->var()->toString();
@@ -440,7 +440,7 @@ Array Variant::toArrayHelper() const {
     case KindOfString:        return Array::Create(Variant{m_data.pstr});
     case KindOfArray:         return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray();
-    case KindOfResource:      return m_data.pres->o_toArray();
+    case KindOfResource:      return m_data.pres->data()->o_toArray();
     case KindOfRef:           return m_data.pref->var()->toArray();
     case KindOfClass:         break;
   }
@@ -655,7 +655,7 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
 
     case KindOfResource:
       assert(!isArrayKey);
-      serializeResource(tv->m_data.pres, serializer);
+      serializeResource(tv->m_data.pres->data(), serializer);
       return;
 
     case KindOfRef:

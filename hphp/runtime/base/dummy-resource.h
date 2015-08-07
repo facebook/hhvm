@@ -38,7 +38,7 @@ struct DummyResource : ResourceData {
   String m_class_name;
   virtual const String& o_getClassNameHook() const;
   virtual bool isInvalid() const { return m_class_name.empty(); }
-  void o_setResourceId(int64_t id) { m_id = id; }
+  void o_setResourceId(int64_t id) { hdr()->setRawId(id); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

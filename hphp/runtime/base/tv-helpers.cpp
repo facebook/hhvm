@@ -147,7 +147,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         continue;
 
       case KindOfResource:
-        b = tv->m_data.pres->o_toBoolean();
+        b = tv->m_data.pres->data()->o_toBoolean();
         tvDecRefRes(tv);
         continue;
 
@@ -203,7 +203,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfResource:
-        d = tv->m_data.pres->o_toDouble();
+        d = tv->m_data.pres->data()->o_toDouble();
         tvDecRefRes(tv);
         continue;
 
@@ -259,7 +259,7 @@ void cellCastToInt64InPlace(Cell* cell) {
         continue;
 
       case KindOfResource:
-        i = cell->m_data.pres->o_toInt64();
+        i = cell->m_data.pres->data()->o_toInt64();
         tvDecRefRes(cell);
         continue;
 
@@ -311,7 +311,7 @@ double tvCastToDouble(TypedValue* tv) {
       return tv->m_data.pobj->toDouble();
 
     case KindOfResource:
-      return tv->m_data.pres->o_toDouble();
+      return tv->m_data.pres->data()->o_toDouble();
 
     case KindOfRef:
     case KindOfClass:
@@ -365,7 +365,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
 
       case KindOfResource:
         // For resources, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pres->o_toString();
+        tvAsVariant(tv) = tv->m_data.pres->data()->o_toString();
         return;
 
       case KindOfRef:
@@ -421,7 +421,7 @@ StringData* tvCastToString(const TypedValue* tv) {
       return tv->m_data.pobj->invokeToString().detach();
 
     case KindOfResource:
-      return tv->m_data.pres->o_toString().detach();
+      return tv->m_data.pres->data()->o_toString().detach();
 
     case KindOfRef:
     case KindOfClass:
@@ -564,7 +564,7 @@ void tvCastToResourceInPlace(TypedValue* tv) {
   } while (0);
 
   tv->m_type = KindOfResource;
-  tv->m_data.pres = req::make<DummyResource>().detach();
+  tv->m_data.pres = req::make<DummyResource>().detach()->hdr();
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {

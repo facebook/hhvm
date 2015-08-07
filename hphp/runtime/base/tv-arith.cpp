@@ -67,7 +67,7 @@ TypedNum numericConvHelper(Cell cell) {
       return make_int(cell.m_data.pobj->toInt64());
 
     case KindOfResource:
-      return make_int(cell.m_data.pres->o_toInt64());
+      return make_int(cell.m_data.pres->data()->o_toInt64());
 
     case KindOfInt64:
     case KindOfDouble:

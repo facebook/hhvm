@@ -49,7 +49,7 @@ struct Header {
     ProxyArray proxy_;
     GlobalsArray globals_;
     ObjectData obj_;
-    ResourceData res_;
+    ResourceHdr res_;
     RefData ref_;
     SmallNode small_;
     BigNode big_;
@@ -104,7 +104,7 @@ inline size_t Header::size() const {
       // [ObjectData][children...]
       return awaitall_.heapSize();
     case HeaderKind::Resource:
-      // [ResourceData][subclass]
+      // [ResourceHdr][ResourceData subclass]
       return res_.heapSize();
     case HeaderKind::Ref:
       return sizeof(RefData);

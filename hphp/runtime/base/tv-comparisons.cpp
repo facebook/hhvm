@@ -86,7 +86,7 @@ bool cellRelOp(Op op, Cell cell, int64_t val) {
         : op(cell.m_data.pobj->toInt64(), val);
 
     case KindOfResource:
-      return op(cell.m_data.pres->o_toInt64(), val);
+      return op(cell.m_data.pres->data()->o_toInt64(), val);
 
     case KindOfRef:
     case KindOfClass:
@@ -130,7 +130,7 @@ bool cellRelOp(Op op, Cell cell, double val) {
         : op(cell.m_data.pobj->toDouble(), val);
 
     case KindOfResource:
-      return op(cell.m_data.pres->o_toDouble(), val);
+      return op(cell.m_data.pres->data()->o_toDouble(), val);
 
     case KindOfRef:
     case KindOfClass:
@@ -183,7 +183,7 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
 
     case KindOfResource: {
       auto const rd = cell.m_data.pres;
-      return op(rd->o_toDouble(), val->toDouble());
+      return op(rd->data()->o_toDouble(), val->toDouble());
     }
 
     case KindOfRef:
@@ -313,13 +313,17 @@ bool cellRelOp(Op op, Cell cell, const ResourceData* rd) {
       return op(true, false);
 
     case KindOfResource:
-      return op(cell.m_data.pres, rd);
+      return op(cell.m_data.pres->data(), rd);
 
     case KindOfRef:
     case KindOfClass:
       break;
   }
   not_reached();
+}
+template<class Op>
+bool cellRelOp(Op op, Cell cell, const ResourceHdr* r) {
+  return cellRelOp(op, cell, r->data());
 }
 
 template<class Op>
@@ -396,6 +400,9 @@ struct Eq {
   bool operator()(const ResourceData* od1, const ResourceData* od2) const {
     return od1 == od2;
   }
+  bool operator()(const ResourceHdr* od1, const ResourceHdr* od2) const {
+    return od1 == od2;
+  }
 
   bool collectionVsNonObj() const { return false; }
 };
@@ -424,6 +431,9 @@ struct Lt {
 
   bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
     return rd1->o_toInt64() < rd2->o_toInt64();
+  }
+  bool operator()(const ResourceHdr* rd1, const ResourceHdr* rd2) const {
+    return rd1->data()->o_toInt64() < rd2->data()->o_toInt64();
   }
 
   bool collectionVsNonObj() const {
@@ -456,6 +466,9 @@ struct Gt {
 
   bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
     return rd1->o_toInt64() > rd2->o_toInt64();
+  }
+  bool operator()(const ResourceHdr* rd1, const ResourceHdr* rd2) const {
+    return rd1->data()->o_toInt64() > rd2->data()->o_toInt64();
   }
 
   bool collectionVsNonObj() const {
@@ -548,6 +561,9 @@ bool cellEqual(Cell cell, const ObjectData* val) {
 bool cellEqual(Cell cell, const ResourceData* val) {
   return cellRelOp(Eq(), cell, val);
 }
+bool cellEqual(Cell cell, const ResourceHdr* val) {
+  return cellRelOp(Eq(), cell, val);
+}
 
 bool cellEqual(Cell c1, Cell c2) {
   return cellRelOp(Eq(), c1, c2);
@@ -584,6 +600,9 @@ bool cellLess(Cell cell, const ObjectData* val) {
 bool cellLess(Cell cell, const ResourceData* val) {
   return cellRelOp(Lt(), cell, val);
 }
+bool cellLess(Cell cell, const ResourceHdr* val) {
+  return cellRelOp(Lt(), cell, val);
+}
 
 bool cellLess(Cell c1, Cell c2) {
   return cellRelOp(Lt(), c1, c2);
@@ -618,6 +637,9 @@ bool cellGreater(Cell cell, const ObjectData* val) {
 }
 
 bool cellGreater(Cell cell, const ResourceData* val) {
+  return cellRelOp(Gt(), cell, val);
+}
+bool cellGreater(Cell cell, const ResourceHdr* val) {
   return cellRelOp(Gt(), cell, val);
 }
 

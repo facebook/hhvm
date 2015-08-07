@@ -27,36 +27,37 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // resources have a separate id space
-__thread int ResourceData::os_max_resource_id;
+static __thread int s_max_resource_id;
 
-ResourceData::ResourceData() {
-  m_hdr.init(0, HeaderKind::Resource, 1);
-  int& pmax = os_max_resource_id;
-  if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
-  m_id = ++pmax;
-  assert(MM().checkContains(this));
-  assert(hasExactlyOneRef());
+void ResourceHdr::resetMaxId() {
+  s_max_resource_id = 0;
 }
 
-void ResourceData::setId(int id) {
+void ResourceHdr::setId(int id) {
   assert(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
-  int &pmax = os_max_resource_id;
   if (m_id != id) {
-    if (m_id == pmax) --pmax;
+    if (m_id == s_max_resource_id) --s_max_resource_id;
     m_id = id;
   }
 }
 
+ResourceData::ResourceData() {
+  assert(MM().checkContains(this));
+  // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
+  if (s_max_resource_id < 3) s_max_resource_id = 3;
+  hdr()->setRawId(++s_max_resource_id);
+}
+
 ResourceData::~ResourceData() {
-  int &pmax = os_max_resource_id;
-  if (m_id && m_id == pmax) {
-    --pmax;
+  auto id = getId();
+  if (id && id == s_max_resource_id) {
+    --s_max_resource_id;
   }
-  m_id = -1;
+  hdr()->setRawId(-1);
 }
 
 String ResourceData::o_toString() const {
-  return String("Resource id #") + String(m_id);
+  return String("Resource id #") + String(getId());
 }
 
 Array ResourceData::o_toArray() const {
@@ -95,13 +96,13 @@ void serializeResource(const ResourceData* res,
   serializer->decNestedLevel((void*)res);
 }
 
-void ResourceData::compileTimeAssertions() {
-  static_assert(offsetof(ResourceData, m_hdr) == HeaderOffset, "");
+void ResourceHdr::compileTimeAssertions() {
+  static_assert(offsetof(ResourceHdr, m_hdr) == HeaderOffset, "");
 }
 
 void ResourceData::vscan(IMarker& mark) const {
   // default implementation scans for ambiguous pointers.
-  mark(this, heapSize());
+  mark(this, hdr()->heapSize() - sizeof(ResourceHdr));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

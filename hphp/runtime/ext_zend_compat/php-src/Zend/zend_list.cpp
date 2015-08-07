@@ -297,14 +297,15 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 
 int zval_get_resource_id(const zval &z) {
   zend_rsrc_list_entry* le =
-    dynamic_cast<zend_rsrc_list_entry*>(z.tv()->m_data.pres);
+    dynamic_cast<zend_rsrc_list_entry*>(z.tv()->m_data.pres->data());
   if (le) {
     return le->id;
   }
 
   int id = RL().size();
-  auto wrapper =
-    HPHP::req::make_raw<HPHP::ZendResourceWrapper>(z.tv()->m_data.pres, id);
+  auto wrapper = HPHP::req::make_raw<HPHP::ZendResourceWrapper>(
+      z.tv()->m_data.pres->data(), id
+  );
   RL().push_back(wrapper);
   return id;
 }

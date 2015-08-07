@@ -150,7 +150,7 @@ CppCall MCGenerator::getDtorCall(DataType type) {
           : &ObjectData::releaseNoObjDestructCheck
       );
     case KindOfResource:
-      return CppCall::method(&ResourceData::release);
+      return CppCall::method(&ResourceHdr::release);
     case KindOfRef:
       return CppCall::method(&RefData::release);
     DT_UNCOUNTED_CASE:

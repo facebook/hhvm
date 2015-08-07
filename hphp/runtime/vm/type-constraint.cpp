@@ -388,7 +388,8 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfString:        return "string";
     case KindOfArray:         return "array";
     case KindOfObject:        return tv->m_data.pobj->getClassName().c_str();
-    case KindOfResource:      return tv->m_data.pres->o_getClassName().c_str();
+    case KindOfResource:
+      return tv->m_data.pres->data()->o_getClassName().c_str();
 
     case KindOfRef:
     case KindOfClass:

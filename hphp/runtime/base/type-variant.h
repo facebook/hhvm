@@ -125,7 +125,7 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Resource& v) noexcept
-  : Variant(deref<ResourceData>(v)) {}
+  : Variant(v.hdr()) {}
 
   /*
    * Explicit conversion constructors. These all manipulate ref-counts of bare
@@ -289,11 +289,11 @@ struct Variant : private TypedValue {
 
   // Move ctor for resources
   /* implicit */ Variant(Resource&& v) noexcept {
-    ResourceData* pres = deref<ResourceData>(v);
-    if (pres) {
+    auto hdr = v.hdr();
+    if (hdr) {
       m_type = KindOfResource;
-      m_data.pres = pres;
-      detach<ResourceData>(std::move(v));
+      m_data.pres = hdr;
+      v.detachHdr();
     } else {
       m_type = KindOfNull;
     }
@@ -379,6 +379,9 @@ struct Variant : private TypedValue {
     return Variant{var, Attach{}};
   }
   static Variant attach(ResourceData* var) noexcept {
+    return Variant{var, Attach{}};
+  }
+  static Variant attach(ResourceHdr* var) noexcept {
     return Variant{var, Attach{}};
   }
   static Variant attach(RefData* var) noexcept {
@@ -756,10 +759,10 @@ struct Variant : private TypedValue {
   typename std::enable_if<std::is_base_of<ResourceData,T>::value, bool>::type
   isa() const {
     if (m_type == KindOfResource) {
-      return m_data.pres->instanceof<T>();
-    } else if (m_type == KindOfRef &&
-               m_data.pref->var()->m_type == KindOfResource) {
-      return m_data.pref->var()->m_data.pres->instanceof<T>();
+      return m_data.pres->data()->instanceof<T>();
+    }
+    if (m_type == KindOfRef && m_data.pref->var()->m_type == KindOfResource) {
+      return m_data.pref->var()->m_data.pres->data()->instanceof<T>();
     }
     return false;
   }
@@ -769,7 +772,8 @@ struct Variant : private TypedValue {
   isa() const {
     if (m_type == KindOfObject) {
       return m_data.pobj->instanceof<T>();
-    } else if (m_type == KindOfRef &&
+    }
+    if (m_type == KindOfRef &&
                m_data.pref->var()->m_type == KindOfObject) {
       return m_data.pref->var()->m_data.pobj->instanceof<T>();
     }
@@ -902,18 +906,18 @@ struct Variant : private TypedValue {
  private:
   ResourceData* getResourceData() const {
     assert(is(KindOfResource));
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.pres : m_data.pres;
+    return m_type == KindOfRef ? m_data.pref->var()->m_data.pres->data() :
+                                 m_data.pres->data();
   }
 
   ResourceData* detachResourceData() {
     assert(is(KindOfResource));
     if (LIKELY(m_type == KindOfResource)) {
       m_type = KindOfNull;
-      return m_data.pres;
-    } else {
-      m_type = KindOfNull;
-      return m_data.pref->tv()->m_data.pres;
+      return m_data.pres->data();
     }
+    m_type = KindOfNull;
+    return m_data.pref->tv()->m_data.pres->data();
   }
 
   ObjectData* detachObjectData() {
@@ -952,6 +956,15 @@ struct Variant : private TypedValue {
   >::type detach(Variant&& v) { return v.detachObjectData(); }
 
   explicit Variant(ResourceData* v) noexcept {
+    if (v) {
+      m_type = KindOfResource;
+      m_data.pres = v->hdr();
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  explicit Variant(ResourceHdr* v) noexcept {
     if (v) {
       m_type = KindOfResource;
       m_data.pres = v;
@@ -993,6 +1006,14 @@ struct Variant : private TypedValue {
   Variant(ResourceData* var, Attach) noexcept {
     if (var) {
       m_type = KindOfResource;
+      m_data.pres = var->hdr();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  Variant(ResourceHdr* var, Attach) noexcept {
+    if (var) {
+      m_type = KindOfResource;
       m_data.pres = var;
     } else {
       m_type = KindOfNull;
@@ -1026,21 +1047,23 @@ struct Variant : private TypedValue {
   void set(StringData  *v) noexcept;
   void set(ArrayData   *v) noexcept;
   void set(ObjectData  *v) noexcept;
-  void set(ResourceData  *v) noexcept;
-  void set(const StringData  *v) = delete;
-  void set(const ArrayData   *v) = delete;
-  void set(const ObjectData  *v) = delete;
-  void set(const ResourceData  *v) = delete;
+  void set(ResourceHdr *v) noexcept;
+  void set(ResourceData *v) noexcept { set(v->hdr()); }
+  void set(const StringData *v) = delete;
+  void set(const ArrayData *v) = delete;
+  void set(const ObjectData *v) = delete;
+  void set(const ResourceData *v) = delete;
+  void set(const ResourceHdr *v) = delete;
 
-  void set(const String& v) noexcept { return set(v.get()); }
+  void set(const String& v) noexcept { set(v.get()); }
   void set(const StaticString & v) noexcept;
-  void set(const Array& v) noexcept { return set(v.get()); }
-  void set(const Object& v) noexcept { return set(v.get()); }
-  void set(const Resource& v) noexcept { set(deref<ResourceData>(v)); }
+  void set(const Array& v) noexcept { set(v.get()); }
+  void set(const Object& v) noexcept { set(v.get()); }
+  void set(const Resource& v) noexcept { set(v.hdr()); }
 
-  void set(String&& v) noexcept { return steal(v.detach()); }
-  void set(Array&& v) noexcept { return steal(v.detach()); }
-  void set(Object&& v) noexcept { return steal(v.detach()); }
+  void set(String&& v) noexcept { steal(v.detach()); }
+  void set(Array&& v) noexcept { steal(v.detach()); }
+  void set(Object&& v) noexcept { steal(v.detach()); }
   void set(Resource&& v) noexcept { steal(detach<ResourceData>(std::move(v))); }
 
   template<typename T>
@@ -1056,7 +1079,8 @@ struct Variant : private TypedValue {
   void steal(StringData* v) noexcept;
   void steal(ArrayData* v) noexcept;
   void steal(ObjectData* v) noexcept;
-  void steal(ResourceData* v) noexcept;
+  void steal(ResourceHdr* v) noexcept;
+  void steal(ResourceData* v) noexcept { steal(v->hdr()); }
 
   static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {

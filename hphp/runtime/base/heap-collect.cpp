@@ -60,7 +60,8 @@ struct Marker {
   void operator()(const StringData*);
   void operator()(const ArrayData*);
   void operator()(const ObjectData*);
-  void operator()(const ResourceData*);
+  void operator()(const ResourceData* r) { (*this)(r->hdr()); }
+  void operator()(const ResourceHdr*);
   void operator()(const RefData*);
   void operator()(const TypedValue&);
   void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
@@ -169,7 +170,7 @@ inline DEBUG_ONLY HeaderKind kind(const void* p) {
   return static_cast<const Header*>(p)->kind();
 }
 
-void Marker::operator()(const ResourceData* p) {
+void Marker::operator()(const ResourceHdr* p) {
   if (p && mark(p)) {
     assert(kind(p) == HK::Resource);
     enqueue(p);
@@ -219,7 +220,7 @@ void Marker::operator()(const String& p)    { (*this)(p.get()); }
 void Marker::operator()(const Array& p)     { (*this)(p.get()); }
 void Marker::operator()(const ArrayNoDtor& p) { (*this)(p.arr()); }
 void Marker::operator()(const Object& p)    { (*this)(p.get()); }
-void Marker::operator()(const Resource& p)  { (*this)(deref<ResourceData>(p)); }
+void Marker::operator()(const Resource& p)  { (*this)(p.hdr()); }
 void Marker::operator()(const Variant& p)   { (*this)(*p.asTypedValue()); }
 
 void Marker::operator()(const StringBuffer& p) { p.scan(*this); }

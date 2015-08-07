@@ -69,10 +69,10 @@ array(6) {
   float(0)
 }
 
-Warning: imageaffinematrixget(): Missing x position in /home/tcolomb/hhvm/hphp/test/slow/ext_gd/imageaffinematrixget.php on line 14
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 14
 bool(false)
 
-Warning: imageaffinematrixget(): Missing x position in /home/tcolomb/hhvm/hphp/test/slow/ext_gd/imageaffinematrixget.php on line 16
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 16
 bool(false)
 array(6) {
   [0]=>
@@ -145,10 +145,10 @@ array(6) {
   float(0)
 }
 
-Warning: imageaffinematrixget(): Missing x position in /home/tcolomb/hhvm/hphp/test/slow/ext_gd/imageaffinematrixget.php on line 28
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 28
 bool(false)
 
-Warning: imageaffinematrixget(): Missing x position in /home/tcolomb/hhvm/hphp/test/slow/ext_gd/imageaffinematrixget.php on line 30
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 30
 bool(false)
 array(6) {
   [0]=>

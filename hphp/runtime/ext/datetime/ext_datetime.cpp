@@ -676,49 +676,19 @@ TypedValue* HHVM_FN(idate)(ActRec* ar) {
   GET_ARGS_AND_CALL(ar, idateImpl)
 }
 
-static Variant dateImpl(const String& format, int64_t timestamp) {
-  if (format.empty()) return empty_string_variant();
-  auto dt = req::make<DateTime>(timestamp, false);
-  String ret = dt->toString(format, false);
+template<bool gmt>
+static Variant date_impl(const String& format, int64_t timestamp) {
+  if (!gmt && format.empty()) return empty_string_variant();
+  String ret = req::make<DateTime>(timestamp, gmt)->toString(format, false);
   if (ret.isNull()) return false;
   return ret;
 }
 
-TypedValue* HHVM_FN(date)(ActRec* ar) {
-  GET_ARGS_AND_CALL(ar, dateImpl)
-}
-
-static Variant gmdateImpl(const String& format, int64_t timestamp) {
-  auto dt = req::make<DateTime>(timestamp, true);
-  String ret = dt->toString(format, false);
+template<bool gmt>
+static Variant strftime_impl(const String& format, int64_t timestamp) {
+  String ret = req::make<DateTime>(timestamp, gmt)->toString(format, true);
   if (ret.isNull()) return false;
   return ret;
-}
-
-TypedValue* HHVM_FN(gmdate)(ActRec* ar) {
-  GET_ARGS_AND_CALL(ar, gmdateImpl)
-}
-
-static Variant strftimeImpl(const String& format, int64_t timestamp) {
-  auto dt = req::make<DateTime>(timestamp, false);
-  String ret = dt->toString(format, true);
-  if (ret.isNull()) return false;
-  return ret;
-}
-
-TypedValue* HHVM_FN(strftime)(ActRec* ar) {
-  GET_ARGS_AND_CALL(ar, strftimeImpl)
-}
-
-static String gmstrftimeImpl(const String& format, int64_t timestamp) {
-  auto dt = req::make<DateTime>(timestamp, true);
-  String ret = dt->toString(format, true);
-  if (ret.isNull()) return false;
-  return ret;
-}
-
-TypedValue* HHVM_FN(gmstrftime)(ActRec* ar) {
-  GET_ARGS_AND_CALL(ar, gmstrftimeImpl)
 }
 
 static Variant strtotimeImpl(const String& input, int64_t timestamp) {
@@ -975,17 +945,17 @@ public:
     HHVM_FE(date_sun_info);
     HHVM_NAMED_FE(date_sunrise, date_sunrise_sunset<false>);
     HHVM_NAMED_FE(date_sunset, date_sunrise_sunset<true>);
-    HHVM_FE(date);
+    HHVM_NAMED_FE(date, date_impl<false>);
+    HHVM_NAMED_FE(gmdate, date_impl<true>);
     HHVM_FE(getdate);
     HHVM_FE(gettimeofday);
-    HHVM_FE(gmdate);
     HHVM_FE(gmmktime);
-    HHVM_FE(gmstrftime);
+    HHVM_NAMED_FE(strftime, strftime_impl<false>);
+    HHVM_NAMED_FE(gmstrftime, strftime_impl<true>);
     HHVM_FE(idate);
     HHVM_FE(localtime);
     HHVM_FE(microtime);
     HHVM_FE(mktime);
-    HHVM_FE(strftime);
     HHVM_FE(strptime);
     HHVM_FE(strtotime);
     HHVM_FE(time);

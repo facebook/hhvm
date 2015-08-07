@@ -1,7 +1,8 @@
 <?php
 
 function main() {
-  foreach ((new ReflectionFunction('date'))->getParameters() as $param) {
+  foreach ((new ReflectionFunction('date_sunrise'))->getParameters()
+      as $param) {
     var_dump($param->isOptional());
     var_dump($param->isDefaultValueAvailable());
     try {

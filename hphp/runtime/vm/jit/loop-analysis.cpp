@@ -172,6 +172,91 @@ void findInnerLoops(LoopAnalysis& la) {
   }
 }
 
+/*
+ * Return the `loop's preExit block if it was already created or if a
+ * suitable block already exists.  Otherwise, return nullptr.
+ */
+Block* findLoopPreExit(LoopInfo& loop) {
+  if (loop.preExit) return loop.preExit;
+  const auto preHeader = loop.preHeader;
+  if (!preHeader) return nullptr;
+  if (preHeader->preds().size() != 1) return nullptr;
+  const auto& pred = preHeader->preds().front().from();
+  if (pred->back().op() == ExitPlaceholder) loop.preExit = pred->taken();
+  return loop.preExit;
+}
+
+/*
+ * Clone the `unit's CFG starting at `startBlock', and rename SSATmps
+ * according to `tmpRenames' map along the way.  The new block
+ * corresponding to `startBlock' is returned.  All blocks reachable
+ * from `startBlock' are also cloned, so that there is no path from
+ * the cloned blocks to the original blocks in the `unit'.  Note that,
+ * as instructions are cloned into the new blocks, the dest SSATmps of
+ * these instructions also need to be renamed, so they're added to
+ * `tmpRenames' along the way.
+ */
+Block* cloneCFG(IRUnit& unit,
+                Block* startBlock,
+                jit::flat_map<SSATmp*, SSATmp*> tmpRenames) {
+  jit::queue<Block*> toClone;
+  boost::dynamic_bitset<> toCloneSet(unit.numBlocks());
+  jit::hash_map<Block*, Block*> blockRenames;
+
+  FTRACE(5, "cloneCFG: starting at B{}\n", startBlock->id());
+
+  auto push = [&](Block* b) {
+    if (!b || toCloneSet[b->id()]) return;
+    toClone.push(b);
+    toCloneSet[b->id()] = true;
+  };
+
+  // Clone each of the blocks.
+  push(startBlock);
+  while (!toClone.empty()) {
+    auto origBlock = toClone.front();
+    toClone.pop();
+    auto copyBlock = unit.defBlock(origBlock->hint());
+    blockRenames[origBlock] = copyBlock;
+    FTRACE(5, "cloneCFG: copying B{} to B{}\n",
+           origBlock->id(), copyBlock->id());
+
+    // Clone each of the instructions in the block.
+    for (auto& origInst : *origBlock) {
+      auto copyInst = unit.clone(&origInst);
+
+      // Remember the new SSATmps (the dests) which will need to be renamed.
+      for (size_t d = 0; d < origInst.numDsts(); d++) {
+        tmpRenames[origInst.dst(d)] = copyInst->dst(d);
+      }
+
+      // Rename all the source SSATmps that need renaming.
+      for (size_t s = 0; s < origInst.numSrcs(); s++) {
+        auto it = tmpRenames.find(copyInst->src(s));
+        if (it != tmpRenames.end()) {
+          auto newSrc = it->second;
+          copyInst->setSrc(s, newSrc);
+        }
+      }
+      copyBlock->push_back(copyInst);
+    }
+
+    push(origBlock->next());
+    push(origBlock->taken());
+  }
+
+  // Now go through all new blocks and reset their next/taken blocks
+  // to their corresponding new blocks.
+  for (auto& blockRename : blockRenames) {
+    auto newBlock = blockRename.second;
+    auto& lastInst = newBlock->back();
+    if (lastInst.next())  lastInst.setNext (blockRenames[lastInst.next()]);
+    if (lastInst.taken()) lastInst.setTaken(blockRenames[lastInst.taken()]);
+  }
+
+  return blockRenames[startBlock];
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool DEBUG_ONLY checkInvariants(const LoopAnalysis& la) {
@@ -249,6 +334,105 @@ LoopAnalysis identifyLoops(const IRUnit& unit, const BlockList& rpoBlocks) {
   assertx(checkInvariants(la));
 
   return la;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If loop `loopId' already contains a `preExit' block, then return
+ * it.  Otherwise, create one and return it.
+ *
+ * Creating a `preExit' requires both:
+ *   1. the loop to have a preHeader; and
+ *   2. the loop header to contain an ExitPlaceholder, optionally
+ *      preceded by a DefLabel.
+ *
+ * This function then transforms a CFG from:
+ *
+ *             |
+ *             v
+ * +--------------------------+
+ * | ...                      |  B1: oldPreHeader
+ * | Jmp ta, tb, ...          |
+ * +--------------------------+
+ *             |
+ *             v
+ * +--------------------------+
+ * | tx, ty, ... = DefLabel   |  B2: header
+ * | ExitPlaceholder origExit |
+ * +--------------------------+ --> B3: origExit (note: may use tx, ty)
+ *             |
+ *             v
+ *
+ *
+ * into the following CFG:
+ *
+ *             |
+ *             v
+ * +--------------------------+
+ * | ...                      |  B1: oldPreHeader
+ * | ExitPlaceholder preExit  |
+ * +--------------------------+ --> B4: preExit
+ *             |                 (cloned from origExit, renaming tx,ty => ta,tb)
+ *             v
+ * +--------------------------+
+ * | Jmp ta, tb, ...          |  B5: newPreHeader
+ * +--------------------------+
+ *             |
+ *             v
+ * +--------------------------+
+ * | tx, ty, ... = DefLabel   |  B2: header
+ * | ExitPlaceholder origExit |
+ * +--------------------------+ --> B3: origExit
+ *             |
+ *             v
+ *
+ */
+Block* insertLoopPreExit(IRUnit& unit,
+                         LoopAnalysis& la,
+                         LoopID loopId) {
+  auto& loop = la.loops[loopId];
+  const auto oldPreHeader = loop.preHeader;
+  assertx(oldPreHeader);
+
+  // Check if we already have a pre-exit block, return it.
+  if (auto preExit = findLoopPreExit(loop)) return preExit;
+
+  const auto header = loop.header;
+
+  auto const eph = header->skipHeader();
+  assertx(eph->is(ExitPlaceholder));
+
+  auto origExit = eph->taken();
+
+  jit::flat_map<SSATmp*, SSATmp*> tmpRenames;
+  if (header->front().is(DefLabel)) {
+    auto& defLabel = header->front();
+    auto& jmpLabel = oldPreHeader->back();
+    assertx(jmpLabel.is(Jmp));
+    assertx(jmpLabel.numSrcs() == defLabel.numDsts());
+    for (size_t i = 0; i < jmpLabel.numSrcs(); i++) {
+      tmpRenames[defLabel.dst(i)] = jmpLabel.src(i);
+    }
+  }
+
+  Block* preExit = cloneCFG(unit, origExit, tmpRenames);
+  loop.preExit = preExit;
+
+  // Split oldPreHeader before the Jmp, and append an
+  // ExitPlaceholder{ fallthru=newPreHeader, taken=preExit }.
+  auto newPreHeader = unit.defBlock(oldPreHeader->hint());
+  assertx(oldPreHeader->back().is(Jmp));
+  auto const jmp = &(oldPreHeader->back());
+  oldPreHeader->erase(jmp);
+  newPreHeader->prepend(jmp);
+  auto exitPlaceholder = unit.gen(ExitPlaceholder, jmp->marker(), preExit);
+  oldPreHeader->insert(oldPreHeader->end(), exitPlaceholder);
+  exitPlaceholder->setNext(newPreHeader);
+
+  updatePreHeader(la, loopId, newPreHeader); // also checks invariants
+
+  return preExit;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -358,10 +542,12 @@ std::string show(const LoopInfo& linfo) {
   auto ret = std::string{};
   folly::format(&ret, "Loop {}, header: B{}", linfo.id, linfo.header->id());
   if (linfo.preHeader != nullptr) {
-    folly::format(&ret, "  (pre-header: B{})\n", linfo.preHeader->id());
-  } else {
-    ret += "\n";
+    folly::format(&ret, "  (pre-header: B{})", linfo.preHeader->id());
   }
+  if (linfo.preExit != nullptr) {
+    folly::format(&ret, "  (pre-exit: B{})", linfo.preExit->id());
+  }
+  ret += "\n";
   for (auto& b : linfo.blocks) {
     folly::format(&ret, "                B{}\n", b->id());
   }

@@ -274,8 +274,9 @@ LoopInfo& linfo(LoopEnv& env) {
   return env.global.loops.loops[env.loopId];
 }
 
-Block* header(LoopEnv& env)     { return linfo(env).header; }
+Block* header(LoopEnv& env)     { return linfo(env).header;    }
 Block* pre_header(LoopEnv& env) { return linfo(env).preHeader; }
+Block* pre_exit(LoopEnv& env)   { return linfo(env).preExit;   }
 
 template<class Seen, class F>
 void visit_loop_post_order(LoopEnv& env, Seen& seen, Block* b, F f) {
@@ -651,21 +652,8 @@ void hoist_invariant_checks(LoopEnv& env) {
   }
 }
 
-/*
- * If we have an ExitPlaceholder instruction that dominates the entire loop, we
- * can use its target as a side exit target.  Otherwise we can't hoist anything
- * as a side exit, since we don't know how to side exit here safely.  The first
- * instruction in the loop header definitely dominates every block in the loop,
- * so look for it there.
- */
-Block* find_exit_placeholder(LoopEnv& env) {
-  auto const h = header(env);
-  auto const skip = h->skipHeader();
-  return skip->is(ExitPlaceholder) ? skip->taken() : nullptr;
-}
-
 void hoist_side_exits(LoopEnv& env) {
-  auto const side_exit = find_exit_placeholder(env);
+  auto const side_exit = pre_exit(env);
   assertx(side_exit);
   for (auto& check : env.hoistable_as_side_exits) {
     hoist_check_instruction(env, check, side_exit, "side-exit");
@@ -683,16 +671,21 @@ void process_loop(LoopEnv& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void insert_pre_headers(IRUnit& unit, LoopAnalysis& loops) {
-  auto added_pre_headers = false;
+void insert_pre_headers_and_exits(IRUnit& unit, LoopAnalysis& loops) {
+  auto added = false;
   for (auto& linfo : loops.loops) {
     if (!linfo.preHeader) {
       insertLoopPreHeader(unit, loops, linfo.id);
-      added_pre_headers = true;
+      added = true;
+    }
+    if (linfo.preHeader && !linfo.preExit) {
+      insertLoopPreExit(unit, loops, linfo.id);
+      added = true;
     }
   }
-  if (added_pre_headers) {
-    FTRACE(1, "Loops after adding pre-headers:\n{}\n", show(loops));
+  if (added) {
+    FTRACE(1, "Loops after adding pre-headers and pre-exits:\n{}\n",
+           show(loops));
   }
 }
 
@@ -709,7 +702,7 @@ void optimizeLoopInvariantCode(IRUnit& unit) {
   }
   FTRACE(2, "Locations:\n{}\n", show(env.ainfo));
   FTRACE(1, "Loops:\n{}\n", show(env.loops));
-  insert_pre_headers(env.unit, env.loops);
+  insert_pre_headers_and_exits(env.unit, env.loops);
 
   /*
    * Note: currently this is visiting inner loops first, but not for any strong

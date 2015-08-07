@@ -65,6 +65,19 @@ struct LoopInfo {
   Block* preHeader{nullptr};
 
   /*
+   * The `preExit' is an exit block right before the loop that is
+   * suitable to be the target of check instructions that are hoisted
+   * out of the loop.  It may not exist, and we may not be able to
+   * create one, which is only guaranteed if the loop starts with an
+   * ExitPlaceholder instruction (optionally preceded by a DefLabel).
+   * Therefore, any optimization that wants to rely on the existence
+   * of a `preExit' must also make sure to insert an ExitPlaceholder
+   * in the loop headers (see call to irgen::makeExitPlaceholder() in
+   * irGenRegion(), in translate-region.cpp).
+   */
+  Block* preExit{nullptr};
+
+  /*
    * The blocks within this loop.
    */
   jit::flat_set<Block*> blocks;
@@ -143,6 +156,8 @@ void insertLoopPreHeader(IRUnit&, LoopAnalysis&, LoopID);
  * valid as well.
  */
 void updatePreHeader(LoopAnalysis&, LoopID loopId, Block* preHeader);
+
+Block* insertLoopPreExit(IRUnit& unit, LoopAnalysis& la, LoopID loopId);
 
 //////////////////////////////////////////////////////////////////////
 

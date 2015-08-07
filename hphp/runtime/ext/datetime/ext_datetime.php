@@ -596,8 +596,8 @@ function date(string $format, int $timestamp = time()): mixed;
  * @return array
  *
  */
-<<__Native("ActRec")>>
-function getdate(int $timestamp = -1): array;
+<<__Native>>
+function getdate(int $timestamp = time()): array;
 
 /**
  * This is an interface to gettimeofday(2). It returns an associative array
@@ -697,8 +697,8 @@ function gmstrftime(string $format, int $timestamp = time()): mixed;
  *   you would expect. See the example below.
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
-function idate(string $format, int $timestamp = -1): mixed;
+<<__ParamCoerceModeFalse, __Native>>
+function idate(string $format, int $timestamp = time()): mixed;
 
 /**
  * The localtime() function returns an array identical to that of the
@@ -721,8 +721,9 @@ function idate(string $format, int $timestamp = -1): mixed;
  * @return array
  *
  */
-<<__Native("ActRec")>>
-function localtime(int $timestamp = -1, bool $is_associative = false): array;
+<<__Native>>
+function localtime(int $timestamp = time(),
+                   bool $is_associative = false): array;
 
 /**
  * microtime() returns the current Unix timestamp with microseconds. This
@@ -828,8 +829,8 @@ function strptime(string $date, string $format): mixed;
  *   to PHP 5.1.0, this function would return -1 on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
-function strtotime(string $input, int $timestamp = -1): mixed;
+<<__ParamCoerceModeFalse, __Native>>
+function strtotime(string $input, int $timestamp = time()): mixed;
 
 /**
  * Returns the current time measured in the number of seconds since the Unix

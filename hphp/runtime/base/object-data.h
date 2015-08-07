@@ -112,7 +112,7 @@ struct ObjectData {
                       NoInit) noexcept;
 
  public:
-  IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
   template<class F> void scan(F&) const;
 
   size_t heapSize() const;

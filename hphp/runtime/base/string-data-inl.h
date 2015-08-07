@@ -57,14 +57,6 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool StringData::isStatic() const {
-  return m_hdr.count == StaticValue;
-}
-
-inline bool StringData::isUncounted() const {
-  return m_hdr.count == UncountedValue;
-}
-
 inline folly::StringPiece StringData::slice() const {
   return folly::StringPiece{m_data, m_len};
 }
@@ -180,7 +172,7 @@ inline StringData::SharedPayload* StringData::sharedPayload() {
 inline bool StringData::isFlat() const { return m_data == voidPayload(); }
 inline bool StringData::isShared() const { return m_data != voidPayload(); }
 inline bool StringData::isImmutable() const {
-  return isStatic() || isShared() ||  isUncounted();
+  return !isRefCounted() || isShared();
 }
 
 //////////////////////////////////////////////////////////////////////

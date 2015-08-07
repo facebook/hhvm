@@ -195,9 +195,7 @@ struct StringData {
   /*
    * Reference-counting related.
    */
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
-  bool isStatic() const;
-  bool isUncounted() const;
+  IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC
 
   /*
    * Append the supplied range to this string.  If there is not sufficient

@@ -103,7 +103,7 @@ struct RefData {
     MM().freeSmallSize(const_cast<RefData*>(this), sizeof(RefData));
   }
 
-  IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
   /*
    * Note, despite the name, this can never return a non-Cell.

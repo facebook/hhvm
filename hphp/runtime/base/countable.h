@@ -180,7 +180,7 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
  * and define counting methods with these macros.
  */
 
-#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
+#define IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC                         \
   RefCount getCount() const {                                           \
     return CountableManip::getCount(m_hdr.count);                       \
   }                                                                     \
@@ -207,18 +207,15 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   }                                                                     \
   ALWAYS_INLINE void decRefAndRelease() {                               \
     if (decReleaseCheck()) release();                                   \
-  }
-
-#define IMPLEMENT_COUNTABLE_METHODS                     \
+  }\
   bool isStatic() const {                               \
     return CountableManip::isStatic(m_hdr.count);       \
   }                                                     \
   bool isUncounted() const {                            \
     return m_hdr.count == UncountedValue;               \
-  }                                                     \
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  }
 
-#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC                         \
+#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
   RefCount getCount() const {                                           \
     return CountableManipNS::getCount(m_hdr.count);                     \
   }                                                                     \

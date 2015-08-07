@@ -68,7 +68,7 @@ make(Args&&... args);
 struct ResourceHdr {
   static void resetMaxId();
 
-  IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
   void release() noexcept;
 
   void init(size_t size) {

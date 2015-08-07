@@ -98,7 +98,6 @@ constexpr PhysReg kHHVMCCRegs[] = {
   reg::rax, reg::r10, reg::r11, reg::r13, reg::r14
 };
 constexpr size_t kFirstVcallArg = 5; // %rdi
-constexpr size_t kFirstSvcReqArg = 4; // %r15
 constexpr size_t kNumHHVMCCRegs = sizeof(kHHVMCCRegs) / sizeof(PhysReg);
 
 /*

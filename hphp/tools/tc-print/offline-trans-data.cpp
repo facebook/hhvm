@@ -399,7 +399,7 @@ void OfflineTransData::printTransRec(TransID transId,
         while (gzgets(compressedFile, buf, BUFLEN) != Z_NULL &&
                bytesRead < length) {
           std::cout << folly::format("    {}", buf);
-          bytesRead += std::strlen(buf) + 1;
+          bytesRead += std::strlen(buf);
         }
         std::cout << '\n';
       } else {

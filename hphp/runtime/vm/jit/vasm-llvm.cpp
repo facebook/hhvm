@@ -90,6 +90,18 @@ namespace HPHP { namespace jit {
 namespace {
 
 /*
+ * HHVM calling convention regs used by LLVM.
+ */
+constexpr PhysReg kHHVMCCRegs[] = {
+  x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15,
+  reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9,
+  reg::rax, reg::r10, reg::r11, reg::r13, reg::r14
+};
+constexpr size_t kFirstVcallArg = 5; // %rdi
+constexpr size_t kFirstSvcReqArg = 4; // %r15
+constexpr size_t kNumHHVMCCRegs = sizeof(kHHVMCCRegs) / sizeof(PhysReg);
+
+/*
  * Read an unsigned LEB128 value from data, advancing it past the value.
  */
 uintptr_t readULEB128(const uint8_t*& data) {
@@ -1289,8 +1301,7 @@ VASM_OPCODES
                            llvm::FunctionType* type,
                            uint64_t address);
   llvm::CallInst* emitTraceletTailCall(llvm::Value* target, RegSet argRegs);
-  std::vector<llvm::Value*> makePhysRegArgs(
-    RegSet argRegs, std::initializer_list<PhysReg> order);
+  std::vector<llvm::Value*> makePhysRegArgs(RegSet argRegs);
 
   // Emit code for the pointer. Return value is of the given type, or
   // <i{bits} *> for the second overload.
@@ -1870,8 +1881,7 @@ void LLVMEmitter::emit(const bindcall& inst) {
   // name to ensure LLVM doesn't collapse the calls together.
   auto funcName = m_tcMM->getUniqueSymbolName("bindcall_");
   auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
-  auto args = makePhysRegArgs(
-    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
+  auto args = makePhysRegArgs(inst.args);
   auto next = makeBlock("_next");
   next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
@@ -1894,8 +1904,8 @@ void LLVMEmitter::emit(const vcallarray& inst) {
   // vcallarray is like bindcall but it's not smashable and it can take extra
   // arguments.
   auto funcName = folly::sformat("vcallarray_{}", inst.target);
-  auto args = makePhysRegArgs(
-    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15});
+  auto args = makePhysRegArgs(inst.args);
+  args.resize(kFirstVcallArg - 1, m_int64Undef);
   for (auto arg : m_unit.tuples[inst.extraArgs]) args.emplace_back(value(arg));
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
   auto funcTy = llvm::FunctionType::get(m_int64Pair, argTypes, false);
@@ -1978,25 +1988,27 @@ llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
 }
 
 /*
- * Return a vector of values for the PhysRegs in `order', using undef for any
- * PhysRegs that aren't in argRegs.
+ * Return a vector of values for the PhysRegs in HHVM calling convention order,
+ * using undef for any PhysRegs that aren't in argRegs. Trailing undef values
+ * are stripped.
  */
-std::vector<llvm::Value*> LLVMEmitter::makePhysRegArgs(
-  RegSet argRegs,
-  std::initializer_list<PhysReg> order
-) {
+std::vector<llvm::Value*> LLVMEmitter::makePhysRegArgs(RegSet argRegs) {
   RegSet passed;
   std::vector<llvm::Value*> ret;
-  ret.reserve(order.size());
+  ret.reserve(kNumHHVMCCRegs);
+  size_t lastSet = 0;
 
-  for (auto reg : order) {
+  for (unsigned i = 0; i < kNumHHVMCCRegs; ++i) {
+    auto reg = kHHVMCCRegs[i];
     if (argRegs.contains(reg)) {
       ret.emplace_back(value(reg));
       passed.add(reg);
+      lastSet = i;
     } else {
       ret.emplace_back(m_int64Undef);
     }
   }
+  ret.resize(lastSet + 1);
 
   always_assert_flog(passed == argRegs,
                      "argRegs = {}, but only passed {}",
@@ -2006,7 +2018,7 @@ std::vector<llvm::Value*> LLVMEmitter::makePhysRegArgs(
 
 llvm::CallInst* LLVMEmitter::emitTraceletTailCall(llvm::Value* target,
                                                   RegSet argRegs) {
-  auto args = makePhysRegArgs(argRegs, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
+  auto args = makePhysRegArgs(argRegs);
   auto call = m_irb.CreateCall(target, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   call->setTailCallKind(llvm::CallInst::TCK_MustTail);
@@ -2541,10 +2553,7 @@ void LLVMEmitter::emit(const jmpm& inst) {
 }
 
 void LLVMEmitter::emit(const jmpi& inst) {
-  auto args = makePhysRegArgs(
-    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15,
-      reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9,
-      reg::rax, reg::r10});
+  auto args = makePhysRegArgs(inst.args);
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
 
   auto func = emitFuncPtr(
@@ -2734,13 +2743,10 @@ void LLVMEmitter::emit(const retransopt& inst) {
   defineValue(r_svcreq_stub(), m_int64Zero);
   defineValue(r_svcreq_arg(0), cns(inst.target.toAtomicInt()));
   defineValue(r_svcreq_arg(1), cns(static_cast<uint64_t>(inst.transID)));
-  passArgs |= reg::rdi | reg::rsi | reg::rdx | reg::r10;
+  passArgs |=
+    r_svcreq_req() | r_svcreq_stub() | r_svcreq_arg(0) | r_svcreq_arg(1);
 
-  auto const args = makePhysRegArgs(
-    passArgs, {x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15,
-               reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9,
-               reg::rax, reg::r10});
-
+  auto const args = makePhysRegArgs(passArgs);
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
   auto funcType = llvm::FunctionType::get(m_void, argTypes, false);
   auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",

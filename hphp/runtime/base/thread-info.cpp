@@ -28,7 +28,9 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#ifdef ENABLE_EXTENSION_PROCESS
 #include "hphp/runtime/ext/process/ext_process.h"
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,9 +212,12 @@ size_t check_request_surprise() {
   if (do_GC) {
     MM().collect();
   }
+
+#ifdef ENABLE_EXTENSION_PROCESS
   if (do_signaled) {
     HHVM_FN(pcntl_signal_dispatch)();
   }
+#endif
 
   if (pendingException) {
     pendingException->throwException();

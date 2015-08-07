@@ -82,9 +82,12 @@ extern const int64_t k_MYSQL_TYPE_NULL;
 
 class AsyncMysqlConnectionPool {
 public:
-  AsyncMysqlConnectionPool& operator=(const AsyncMysqlConnectionPool&) = delete;
+  AsyncMysqlConnectionPool() = default;
   std::shared_ptr<am::AsyncConnectionPool> m_async_pool;
   static const StaticString s_className;
+
+  AsyncMysqlConnectionPool(const AsyncMysqlConnectionPool&) = delete;
+  AsyncMysqlConnectionPool& operator=(const AsyncMysqlConnectionPool&) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,6 +96,7 @@ public:
 class AsyncMysqlConnection {
  public:
   AsyncMysqlConnection();
+  AsyncMysqlConnection(const AsyncMysqlConnection&) = delete;
   AsyncMysqlConnection& operator=(const AsyncMysqlConnection&) = delete;
   void sweep();
   void setConnection(std::unique_ptr<am::Connection> conn);
@@ -149,14 +153,18 @@ public:
 
 class AsyncMysqlConnectResult : public AsyncMysqlResult {
  public:
+  AsyncMysqlConnectResult() = default;
   virtual ~AsyncMysqlConnectResult() {}
-  AsyncMysqlConnectResult& operator=(const AsyncMysqlConnectResult&) = delete;
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
                             db::ClientPerfStats clientStats);
 
   static Class* s_class;
   static const StaticString s_className;
+
+  AsyncMysqlConnectResult(const AsyncMysqlConnectResult&) = delete;
+  AsyncMysqlConnectResult& operator=(const AsyncMysqlConnectResult&) = delete;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,14 +172,18 @@ class AsyncMysqlConnectResult : public AsyncMysqlResult {
 
 class AsyncMysqlErrorResult : public AsyncMysqlResult {
  public:
+  AsyncMysqlErrorResult() = default;
   virtual ~AsyncMysqlErrorResult() {}
-  AsyncMysqlErrorResult& operator=(const AsyncMysqlErrorResult&) = delete;
+
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
                             db::ClientPerfStats clientStats);
 
   static Class* s_class;
   static const StaticString s_className;
+
+  AsyncMysqlErrorResult(const AsyncMysqlErrorResult&) = delete;
+  AsyncMysqlErrorResult& operator=(const AsyncMysqlErrorResult&) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,8 +192,9 @@ class AsyncMysqlErrorResult : public AsyncMysqlResult {
 class AsyncMysqlQueryErrorResult {
 public:
   AsyncMysqlQueryErrorResult();
+  AsyncMysqlQueryErrorResult(const AsyncMysqlQueryErrorResult&) = delete;
   AsyncMysqlQueryErrorResult& operator=(const AsyncMysqlQueryErrorResult&) =
-      delete;
+    delete;
   void sweep();
   void create(std::shared_ptr<am::Operation> op,
               db::ClientPerfStats values,
@@ -231,25 +244,28 @@ class FieldIndex {
 // class AsyncMysqlQueryResult
 
 class AsyncMysqlQueryResult : public AsyncMysqlResult {
-public:
- virtual ~AsyncMysqlQueryResult() {}
- AsyncMysqlQueryResult& operator=(const AsyncMysqlQueryResult&) = delete;
- void sweep();
- void create(std::shared_ptr<am::Operation> op,
-             db::ClientPerfStats values,
-             am::QueryResult query_result);
- Object buildRows(bool as_maps, bool typed_values);
- static Class* getClass();
- static Object newInstance(std::shared_ptr<am::Operation> op,
-                           db::ClientPerfStats values,
-                           am::QueryResult query_result);
+ public:
+  AsyncMysqlQueryResult() = default;
+  virtual ~AsyncMysqlQueryResult() {}
+  void sweep();
+  void create(std::shared_ptr<am::Operation> op,
+              db::ClientPerfStats values,
+              am::QueryResult query_result);
+  Object buildRows(bool as_maps, bool typed_values);
+  static Class* getClass();
+  static Object newInstance(std::shared_ptr<am::Operation> op,
+                            db::ClientPerfStats values,
+                            am::QueryResult query_result);
 
- std::unique_ptr<am::QueryResult> m_query_result;
+  std::unique_ptr<am::QueryResult> m_query_result;
 
- // Created here for buildRows and passed to RowBlocks
+  // Created here for buildRows and passed to RowBlocks
   std::shared_ptr<FieldIndex> m_field_index;
   static Class* s_class;
   static const StaticString s_className;
+
+  AsyncMysqlQueryResult(const AsyncMysqlQueryResult&) = delete;
+  AsyncMysqlQueryResult& operator=(const AsyncMysqlQueryResult&) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -324,7 +340,8 @@ class AsyncMysqlMultiQueryEvent final : public AsioExternalThreadEvent {
 
 class AsyncMysqlRowBlock {
  public:
-  AsyncMysqlRowBlock& operator=(const AsyncMysqlRowBlock&) = delete;
+  AsyncMysqlRowBlock() = default;
+
   void sweep();
   size_t getIndexFromVariant(const Variant& field);
   template <typename FieldType>
@@ -337,6 +354,9 @@ class AsyncMysqlRowBlock {
   std::shared_ptr<FieldIndex> m_field_index;
   static Class* s_class;
   static const StaticString s_className;
+
+  AsyncMysqlRowBlock(const AsyncMysqlRowBlock&) = delete;
+  AsyncMysqlRowBlock& operator=(const AsyncMysqlRowBlock&) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -344,8 +364,7 @@ class AsyncMysqlRowBlock {
 
 class AsyncMysqlRowBlockIterator {
  public:
-  AsyncMysqlRowBlockIterator& operator=(const AsyncMysqlRowBlockIterator&) =
-      delete;
+  AsyncMysqlRowBlockIterator() = default;
   static Class* getClass();
   static Object newInstance(Object row_block, size_t row_number);
 
@@ -353,14 +372,19 @@ class AsyncMysqlRowBlockIterator {
   size_t m_row_number;
   static Class* s_class;
   static const StaticString s_className;
+
+  AsyncMysqlRowBlockIterator(const AsyncMysqlRowBlockIterator&) = delete;
+  AsyncMysqlRowBlockIterator& operator=(const AsyncMysqlRowBlockIterator&) =
+      delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlRow
 
 class AsyncMysqlRow {
-public:
-  AsyncMysqlRow& operator=(const AsyncMysqlRow&) = delete;
+ public:
+  AsyncMysqlRow() = default;
+
   static Class* getClass();
   static Object newInstance(Object row_block, size_t row_number);
 
@@ -368,14 +392,18 @@ public:
   size_t m_row_number;
   static Class* s_class;
   static const StaticString s_className;
+
+  AsyncMysqlRow(const AsyncMysqlRow&) = delete;
+  AsyncMysqlRow& operator=(const AsyncMysqlRow&) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlRowIterator
 
 class AsyncMysqlRowIterator {
-public:
-  AsyncMysqlRowIterator& operator=(const AsyncMysqlRowIterator&) = delete;
+ public:
+  AsyncMysqlRowIterator() = default;
+
   static Class* getClass();
   static Object newInstance(Object row, size_t field_number);
 
@@ -383,6 +411,9 @@ public:
   size_t m_field_number;
   static Class* s_class;
   static const StaticString s_className;
+
+  AsyncMysqlRowIterator(const AsyncMysqlRowIterator&) = delete;
+  AsyncMysqlRowIterator& operator=(const AsyncMysqlRowIterator&) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

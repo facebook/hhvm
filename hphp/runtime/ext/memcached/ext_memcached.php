@@ -508,19 +508,19 @@ class Memcached {
                                  int $expiry = 0): mixed;
 
   /**
-   * Check if the instance was recently created
+   * Check if a persitent connection to memcache is being used.
    *
-   * @return bool - Returns the true if instance is recently created,
-   * false otherwise.
+   * @return bool - Returns true if Memcache instance uses a persistent
+   * connection, false otherwise.
    */
   <<__Native>>
   public function isPersistent(): bool;
 
   /**
-   * Check if a persitent connection to memcache is being used.
+   * Check if the instance was recently created
    *
-   * @return bool - Returns true if Memcache instance uses a persistent
-   * connection, false otherwise.
+   * @return bool - Returns the true if instance is recently created,
+   * false otherwise.
    */
   <<__Native>>
   public function isPristine(): bool;

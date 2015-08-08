@@ -21,7 +21,8 @@ REM 2/ generate get_build_id.gen.c
 REM 3/ start build hack with ocp-build
 :build
 if not exist "_obuild/" ocp-build init
-ocaml.exe unix.cma ./src/scripts/gen_build_id.ml ./src/utils/get_build_id.gen.c
+ocaml.exe unix.cma ./scripts/gen_build_id.ml ./src/utils/get_build_id.gen.c
+ocaml.exe unix.cma ./scripts/gen_index.ml hhi.rc hhi
 ocp-build
 md bin 2>NUL
 copy _obuild\hh_server\hh_server.asm.exe bin\hh_server.exe

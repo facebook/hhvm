@@ -53,18 +53,3 @@ let string_of_file filename =
     end in
   iter ic b s;
   Buffer.contents b
-
-let () =
-  let out_file = Sys.argv.(1) in
-  let rev =
-    try read_process_output "git" [|"git"; "rev-parse"; "HEAD"|]
-    with Failure _ ->
-      read_process_output "hg" [|"hg"; "id"; "-i"|]
-  in
-  let content =
-    Printf.sprintf "const char* const BuildInfo_kRevision = %S;\n" rev in
-  let do_dump =
-    not (Sys.file_exists out_file) || string_of_file out_file <> content in
-  if do_dump then
-    with_out_channel out_file @@ fun oc ->
-    output_string oc content

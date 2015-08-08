@@ -582,8 +582,8 @@ function date_timezone_set(DateTime $datetime, DateTimeZone $timezone): void {
  *   emitted.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
-function date(string $format, int $timestamp = time()): mixed;
+<<__ParamCoerceModeFalse, __Native("ActRec")>>
+function date(string $format, int $timestamp = -1): mixed;
 
 /**
  * Returns an associative array containing the date information of the
@@ -630,8 +630,8 @@ function gettimeofday(bool $return_float = false): mixed;
  *   emitted.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
-function gmdate(string $format, int $timestamp = time()): mixed;
+<<__ParamCoerceModeFalse, __Native("ActRec")>>
+function gmdate(string $format, int $timestamp = -1): mixed;
 
 /**
  * Identical to mktime() except the passed parameters represents a GMT date.
@@ -668,8 +668,8 @@ function gmmktime(int $hour = PHP_INT_MAX,
  *   respect the current locale set with setlocale().
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
-function gmstrftime(string $format, int $timestamp = time()): mixed;
+<<__ParamCoerceModeFalse, __Native("ActRec")>>
+function gmstrftime(string $format, int $timestamp = -1): string;
 
 /**
  * Returns a number formatted according to the given format string using the
@@ -793,8 +793,8 @@ function mktime(int $hour = PHP_INT_MAX,
  *   locale set with setlocale().
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
-function strftime(string $format, int $timestamp = time()): mixed;
+<<__ParamCoerceModeFalse, __Native("ActRec")>>
+function strftime(string $format, int $timestamp = -1): mixed;
 
 /**
  * strptime() returns an array with the date parsed, or FALSE on error.  Month

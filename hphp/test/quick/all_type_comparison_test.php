@@ -143,6 +143,23 @@ function test() {
   $clo1 = function () { return 0; };
   $clo2 = function () { return 0; };
 
+  $arr1 = array();
+  $arr2 = array(99);
+  $arr3 = array('foo');
+  $arr4 = array('foo', 'bar');
+  $arr5 = array('foo', 'bar');
+  $arr6 = array('foo', 'baz');
+  $arr7 = array(new A, new A);
+  $arr8 = array(new A, new A);
+  $arr9 = array(new A, new C);
+  $arr10 = array(new ToString('foo'), new ToString('bar'));
+  $arr11 = array(new ToString('foo'), new ToStringThrower);
+  $arr12 = array(array(1, 2), array(1, 2, 3));
+  $arr13 = array(array(1, 2), array(1, 2, 3));
+  $arr14 = array(array(1, 2), array(99));
+  $arr15 = array(Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8});
+  $arr16 = array(Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8});
+
   $f = fopen('php://stdout', 'w');
 
   $arr = array('null' => null,
@@ -160,7 +177,14 @@ function test() {
                '"99.0"' => "99.0", '"-1.0"' => "-1.0",
                '"foo"' => "foo", '"BAZ"' => "BAZ",
 
-               'array()' => array(), 'array(99)' => array(99),
+               'array arr1' => $arr1, 'array arr2' => $arr2,
+               'array arr3' => $arr3, 'array arr4' => $arr4,
+               'array arr5' => $arr5, 'array arr6' => $arr6,
+               'array arr7' => $arr7, 'array arr8' => $arr8,
+               'array arr9' => $arr9, 'array arr10' => $arr10,
+               'array arr11' => $arr11, 'array arr12' => $arr12,
+               'array arr13' => $arr13, 'array arr14' => $arr14,
+               'array arr15' => $arr15, 'array arr16' => $arr16,
 
                'object a1' => $a1, 'object a2' => $a2, 'object a3' => $a3,
                'object a4' => $a4, 'object a5' => $a5, 'object a6' => $a6,
@@ -179,7 +203,8 @@ function test() {
 
                'closure clo1' => $clo1, 'closure clo2' => $clo2,
 
-               'resource' => $f);
+               'resource' => $f
+              );
 
   echo "same    nsame   lt      lte     eq      neq     gte     gt\n\n";
   foreach ($arr as $k1 => $v1) {

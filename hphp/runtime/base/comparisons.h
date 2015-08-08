@@ -723,6 +723,45 @@ inline bool more(const Array& v1, const Resource& v2) { return true; }
 inline bool more(const Array& v1, const Variant& v2) { return v1.more(v2); }
 
 ///////////////////////////////////////////////////////////////////////////////
+// ArrayData*
+
+inline bool same(const ArrayData* v1, const ArrayData* v2) {
+  assert(v1);
+  return v1->equal(v2, true);
+}
+
+inline bool nsame(const ArrayData* v1, const ArrayData* v2) {
+  return !same(v1, v2);
+}
+
+inline bool equal(const ArrayData* v1, const ArrayData* v2) {
+  assert(v1);
+  return v1->equal(v2, false);
+}
+
+inline bool nequal(const ArrayData* v1, const ArrayData* v2) {
+  return !equal(v1, v2);
+}
+
+inline bool less(const ArrayData* v1, const ArrayData* v2) {
+  assert(v1);
+  return v1->compare(v2) < 0;
+}
+
+inline bool lessEqual(const ArrayData* v1, const ArrayData* v2) {
+  return less(v1, v2) || equal(v1, v2);
+}
+
+inline bool more(const ArrayData* v1, const ArrayData* v2) {
+  assert(v2);
+  return v2->compare(v1) < 0;
+}
+
+inline bool moreEqual(const ArrayData* v1, const ArrayData* v2) {
+  return more(v1, v2) || equal(v1, v2);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Object
 
 inline bool same(const Object& v1, bool    v2) { return same(v2, v1); }

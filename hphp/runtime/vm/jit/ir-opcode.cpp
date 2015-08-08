@@ -206,6 +206,8 @@ bool isQueryOp(Opcode opc) {
   case NeqBool:
   case SameObj:
   case NSameObj:
+  case SameArr:
+  case NSameArr:
   case Same:
   case NSame:
   case InstanceOfBitmask:
@@ -232,6 +234,12 @@ bool isSideEffectfulQueryOp(Opcode opc) {
   case LteObj:
   case EqObj:
   case NeqObj:
+  case GtArr:
+  case GteArr:
+  case LtArr:
+  case LteArr:
+  case EqArr:
+  case NeqArr:
     return true;
   default:
     return false;
@@ -306,6 +314,22 @@ bool isObjQueryOp(Opcode opc) {
   case NeqObj:
   case SameObj:
   case NSameObj:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool isArrQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtArr:
+  case GteArr:
+  case LtArr:
+  case LteArr:
+  case EqArr:
+  case NeqArr:
+  case SameArr:
+  case NSameArr:
     return true;
   default:
     return false;
@@ -408,11 +432,20 @@ Opcode commuteQueryOp(Opcode opc) {
   case GtObj:  return LtObj;
   case GteObj: return LteObj;
   case LtObj:  return GtObj;
-  case LteObj: return LteObj;
+  case LteObj: return GteObj;
   case EqObj:
   case NeqObj:
   case SameObj:
   case NSameObj:
+    return opc;
+  case GtArr:  return LtArr;
+  case GteArr: return LteArr;
+  case LtArr:  return GtArr;
+  case LteArr: return GteArr;
+  case EqArr:
+  case NeqArr:
+  case SameArr:
+  case NSameArr:
     return opc;
   case Same:  return Same;
   case NSame: return NSame;
@@ -505,6 +538,27 @@ Opcode queryToObjQueryOp(Opcode opc) {
     case Neq: return NeqObj;
     case Same: return SameObj;
     case NSame: return NSameObj;
+    default: always_assert(0);
+  }
+}
+
+Opcode queryToArrQueryOp(Opcode opc) {
+  assertx(isQueryOp(opc) || isSideEffectfulQueryOp(opc));
+  switch (opc) {
+    case GtX:
+    case Gt: return GtArr;
+    case GteX:
+    case Gte: return GteArr;
+    case LtX:
+    case Lt: return LtArr;
+    case LteX:
+    case Lte: return LteArr;
+    case EqX:
+    case Eq: return EqArr;
+    case NeqX:
+    case Neq: return NeqArr;
+    case Same: return SameArr;
+    case NSame: return NSameArr;
     default: always_assert(0);
   }
 }

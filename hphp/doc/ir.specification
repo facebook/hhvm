@@ -621,6 +621,26 @@ To string conversions:
   SameObj and NSameObj may re-enter the VM and therefore may throw
   exceptions. SameObj and NSameObj never re-enter or throw.
 
+| GtArr,                       D(Bool), S(Arr) S(Arr),                    Er
+
+| GteArr,                      D(Bool), S(Arr) S(Arr),                    Er
+
+| LtArr,                       D(Bool), S(Arr) S(Arr),                    Er
+
+| LteArr,                      D(Bool), S(Arr) S(Arr),                    Er
+
+| EqArr,                       D(Bool), S(Arr) S(Arr),                    Er
+
+| NeqArr,                      D(Bool), S(Arr) S(Arr),                    Er
+
+| SameArr,                     D(Bool), S(Arr) S(Arr),                    NF
+
+| NSameArr,                    D(Bool), S(Arr) S(Arr),                    NF
+
+  Perform comparison of arrays using PHP semantics. All versions except for
+  SameArr and NSameArr may re-enter the VM and therefore may throw
+  exceptions. SameArr and NSameArr never re-enter or throw.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait

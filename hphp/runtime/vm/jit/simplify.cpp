@@ -888,42 +888,50 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case GtStr:
   case GtBool:
   case GtObj:
+  case GtArr:
   case GtX:
   case Gt:   return a > b;
   case GteInt:
   case GteStr:
   case GteBool:
   case GteObj:
+  case GteArr:
   case GteX:
   case Gte:  return a >= b;
   case LtInt:
   case LtStr:
   case LtBool:
   case LtObj:
+  case LtArr:
   case LtX:
   case Lt:   return a < b;
   case LteInt:
   case LteStr:
   case LteBool:
   case LteObj:
+  case LteArr:
   case LteX:
   case Lte:  return a <= b;
   case Same:
   case SameStr:
   case SameObj:
+  case SameArr:
   case EqInt:
   case EqStr:
   case EqBool:
   case EqObj:
+  case EqArr:
   case EqX:
   case Eq:   return a == b;
   case NSame:
   case NSameStr:
   case NSameObj:
+  case NSameArr:
   case NeqInt:
   case NeqStr:
   case NeqBool:
   case NeqObj:
+  case NeqArr:
   case NeqX:
   case Neq:  return a != b;
   default:
@@ -944,11 +952,23 @@ SSATmp* cmpImpl(State& env,
   auto const type2 = src2->type();
 
   // Normally we wouldn't try to simplify side-effectful comparisons, but we
-  // want to at least transform object comparisons to their specific comparison
-  // ops.
+  // want to at least transform object and array comparisons to their specific
+  // comparison ops.
   if (isSideEffectfulQueryOp(opName)) {
-    if (!(type1 <= TObj || type1 <= TNull) ||
-        !(type2 <= TObj || type2 <= TNull)) {
+    // Only allow TObj/TNull <=> TObj/TNull and TArr/TNull <=> TArr/TNull.
+    if (type1 <= TObj) {
+      if (!(type2 <= TObj || type2 <= TNull)) {
+        return nullptr;
+      }
+    } else if (type1 <= TArr) {
+      if (!(type2 <= TArr || type2 <= TNull)) {
+        return nullptr;
+      }
+    } else if (type1 <= TNull) {
+      if (!(type2 <= TObj || type2 <= TArr || type2 <= TNull)) {
+        return nullptr;
+      }
+    } else {
       return nullptr;
     }
   }
@@ -971,7 +991,8 @@ SSATmp* cmpImpl(State& env,
   // Same/NSame have some special rules
   if (opName == Same || opName == NSame ||
       opName == SameStr || opName == NSameStr ||
-      opName == SameObj || opName == NSameObj) {
+      opName == SameObj || opName == NSameObj ||
+      opName == SameArr || opName == NSameArr) {
     // Same and NSame do not perform type juggling
     if (type1.toDataType() != type2.toDataType() &&
         !(type1 <= TStr && type2 <= TStr)) {
@@ -997,14 +1018,20 @@ SSATmp* cmpImpl(State& env,
         return newInst(queryToObjQueryOp(opName), src1, src2);
       }
       return nullptr;
+    } else if (type1 <= TArr && type2 <= TArr) {
+      if (!isArrQueryOp(opName)) {
+        return newInst(queryToArrQueryOp(opName), src1, src2);
+      }
+      return nullptr;
     }
 
     assertx(opName != SameStr && opName != NSameStr);
     assertx(opName != SameObj && opName != NSameObj);
+    assertx(opName != SameArr && opName != NSameArr);
 
-    // If type is a primitive type - simplify to Eq/Neq.  Str/Obj was already
+    // If type is a primitive type - simplify to Eq/Neq. Str/Obj/Arr was already
     // removed above.
-    auto const badTypes = TObj | TRes | TArr;
+    auto const badTypes = TRes;
     if (type1.maybe(badTypes) || type2.maybe(badTypes)) {
       return nullptr;
     }
@@ -1123,6 +1150,11 @@ SSATmp* cmpImpl(State& env,
     return newInst(queryToObjQueryOp(opName), src1, src2);
   }
 
+  // Lower to array-comparison if possible.
+  if (!isArrQueryOp(opName) && type1 <= TArr && type2 <= TArr) {
+    return newInst(queryToArrQueryOp(opName), src1, src2);
+  }
+
   // ---------------------------------------------------------------------
   // For same-type cmps, canonicalize any constants to the right
   // Then stop - there are no more simplifications left
@@ -1222,12 +1254,42 @@ SSATmp* cmpImpl(State& env,
   // case 5: array cmp array. No juggling to do same-type simplification is
   // performed above
 
-  // case 6: array cmp anything. Array is greater
+  // case 6: array cmp anything. Array is greater than everything except an
+  // object. We can't simplify non-equality comparisons with objects because we
+  // have to throw if the object is a collection.
   if (src1->isA(TArr)) {
-    return cns(env, bool(cmpOp(opName, 1, 0)));
+    if (src2->isA(TObj)) {
+      switch (opName) {
+        case Eq:
+        case EqX:
+        case Neq:
+        case NeqX:
+        case Same:
+        case NSame:
+          return cns(env, bool(cmpOp(opName, 0, 1)));
+        default:
+          break;
+      }
+    } else {
+      return cns(env, bool(cmpOp(opName, 1, 0)));
+    }
   }
   if (src2->isA(TArr)) {
-    return cns(env, bool(cmpOp(opName, 0, 1)));
+    if (src1->isA(TObj)) {
+      switch (opName) {
+        case Eq:
+        case EqX:
+        case Neq:
+        case NeqX:
+        case Same:
+        case NSame:
+          return cns(env, bool(cmpOp(opName, 1, 0)));
+        default:
+          break;
+      }
+    } else {
+      return cns(env, bool(cmpOp(opName, 0, 1)));
+    }
   }
 
   return nullptr;
@@ -1280,6 +1342,14 @@ X(EqObj)
 X(NeqObj)
 X(SameObj)
 X(NSameObj)
+X(GtArr)
+X(GteArr)
+X(LtArr)
+X(LteArr)
+X(EqArr)
+X(NeqArr)
+X(SameArr)
+X(NSameArr)
 #undef X
 
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
@@ -2287,6 +2357,14 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqObj)
   X(SameObj)
   X(NSameObj)
+  X(GtArr)
+  X(GteArr)
+  X(LtArr)
+  X(LteArr)
+  X(EqArr)
+  X(NeqArr)
+  X(SameArr)
+  X(NSameArr)
   X(ArrayGet)
   X(OrdStr)
   X(LdLoc)

@@ -10,6 +10,15 @@ list(APPEND ASM_SOURCES ${asmfiles})
 # sgolemon(2014-02-19)
 HHVM_REMOVE_MATCHES_FROM_LISTS(CXX_SOURCES MATCHES "/test/" "channeled-json-")
 
+if (NOT MSVC)
+  list(REMOVE_ITEM CXX_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/fnmatch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/strptime.cpp
+  )
+endif()
+
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
          "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp"

@@ -170,4 +170,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#ifndef HAVE_STRPTIME
+// These are implemented by strptime.cpp
+#include "hphp/util/locale-portability.h"
+char* strptime_l(const char* buf, const char* fmt, struct tm* tm, locale_t loc);
+char* strptime(const char* buf, const char* fmt, struct tm* tm);
+#endif
+
 #endif

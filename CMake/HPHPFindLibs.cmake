@@ -40,6 +40,12 @@ if (FEATURES_HEADER)
   add_definitions("-DHAVE_FEATURES_H=1")
 endif()
 
+# strptime
+CHECK_FUNCTION_EXISTS(strptime HAVE_STRPTIME)
+if(HAVE_STRPTIME)
+  add_definitions("-DHAVE_STRPTIME=1")
+endif()
+
 # google-glog
 find_package(Glog REQUIRED)
 include_directories(${LIBGLOG_INCLUDE_DIR})

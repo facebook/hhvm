@@ -333,11 +333,6 @@ int64_t getStackPopped(PC pc);
  */
 int64_t getStackPushed(PC pc);
 
-/*
- * Change in stack depth made by `ni'.
- */
-int getStackDelta(const NormalizedInstruction& ni);
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Control flow information.
@@ -525,7 +520,6 @@ struct InstrInfo {
   InstrFlags::Operands in;
   InstrFlags::Operands out;
   InstrFlags::OutTypeConstraints type; // How are outputs related to inputs?
-  int numPushed;
 };
 
 /*

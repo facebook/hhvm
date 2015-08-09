@@ -1,0 +1,2 @@
+
+Warning: constant(): Couldn't find constant TEST_CONSTANT_3 in %s/test/slow/constant_function/5566.php on line 3

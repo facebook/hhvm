@@ -27,12 +27,15 @@
 # The root directory to which all file paths
 # referenced by the extension are relative to.
 #
-# HHVM_EXTENSION_#_ENABLED_STATE: <int {0, 1, 2, 3}>
+# HHVM_EXTENSION_#_ENABLED_STATE: <int {0, 1, 2, 3, 4}>
 # The state of an extension's enabling. If this is 0, then the extension
 # may be enabled once dependency calculation is performed. If this is 1,
 # then the extension is enabled, and if it is 2, then it is disabled.
 # If this is 3, then the extension has been forcefully enabled, and its
-# dependencies should be checked.
+# dependencies should be checked. If this is 4, then the extension is a
+# 'wanted' extension, and we should error if dependencies for it can't
+# be resolved, unless the dependency that fails is an os* or var* dependency,
+# in which case, we don't error, but just disable the extension.
 #
 # HHVM_EXTENSION_#_SOURCE_FILES: <list>
 # The list of files to compile for the extension.
@@ -81,10 +84,12 @@
 # and it has not be explicitly enabled via `-DENABLE_EXTENSION_FOO=On`,
 # then it will be implicitly disabled by the build system.
 #
-# [EXPLICIT] (default)
+# [WANTED] (default)
 # If the library dependencies for this extension fail to resolve,
 # and it has not been explicitly disabled with `-DENABLE_EXTENSION_FOO=Off`
-# a FATAL_ERROR will be triggered.
+# a FATAL_ERROR will be triggered, unless the dependency that fails is
+# an os* or var* dependency, in which case the extension will be implicitly
+# disabled by the build system.
 #
 # Note that it does not make sense to specify more than one of the above
 # three settings as the behavior they imply is mutually exclusive.
@@ -157,11 +162,11 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
   set(extensionName "")
   set(extensionPrettyName "")
   set(extensionRequired OFF)
-  # If EXPLICIT is specified, then the extension must be explicitly disabled
+  # If WANTED is specified, then the extension must be explicitly disabled
   # If IMPLICIT is specified, then the extension will be implicitly disabled
-  #   when the dependencies are not found
-  # If neither is specified, we default to EXPLICIT anyway
-  set(extensionEnabledState 3)
+  # when the dependencies are not found
+  # If neither is specified, we default to WANTED anyway
+  set(extensionEnabledState 4)
   set(extensionSources)
   set(extensionHeaders)
   set(extensionLibrary)
@@ -209,17 +214,15 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
       endif()
       set(extensionRequired ON)
     elseif ("x${arg}" STREQUAL "xIMPLICIT")
-      if (${argumentState} EQUAL 0)
-        set(extensionEnabledState 0)
-      else()
-        message(FATAL_ERROR "The IMPLICIT modifier is only currently valid following the extension name")
+      if (NOT ${argumentState} EQUAL 0)
+        message(FATAL_ERROR "The IMPLICIT modifier should only be placed immediately after the extension's name! (while processing the '${extensionPrettyName}' extension)")
       endif()
-    elseif ("x${arg}" STREQUAL "xEXPLICIT")
-      if (${argumentState} EQUAL 0)
-        set(extensionEnabledState 3)
-      else()
-        message(FATAL_ERROR "The EXPLICIT modifier is only currently valid following the extension name")
+      set(extensionEnabledState 0)
+    elseif ("x${arg}" STREQUAL "xWANTED")
+      if (NOT ${argumentState} EQUAL 0)
+        message(FATAL_ERROR "The WANTED modifier should only be placed immediately after the extension's name! (while processing the '${extensionPrettyName}' extension)")
       endif()
+      set(extensionEnabledState 4)
     elseif ("x${arg}" STREQUAL "xOPTIONAL")
       if (${argumentState} EQUAL 7)
         list(LENGTH extensionDependenciesOptional optDepLen)
@@ -291,6 +294,8 @@ function(HHVM_DEFINE_EXTENSION extNameIn)
   if (DEFINED ENABLE_EXTENSION_${upperExtName})
     if (${ENABLE_EXTENSION_${upperExtName}})
       set(extensionEnabledState 3)
+    elseif (${extensionRequired})
+      message(WARNING "Attempt to explicitly disable the required extension '${extensionPrettyName}' by setting 'ENABLE_EXTENSION_${upperExtName}' was ignored.")
     else()
       set(extensionEnabledState 2)
     endif()
@@ -443,7 +448,8 @@ endfunction()
 function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestVar extensionID)
   # If already resolved, return that state.
   if (NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 0 AND
-      NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3)
+      NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3 AND
+      NOT HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 4)
     set(${resolvedDestVar} ${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} PARENT_SCOPE)
     return()
   endif()
@@ -478,11 +484,11 @@ function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestV
         string(SUBSTRING ${currentDependency} 3 ${depLength} varName)
         if (DEFINED ${varName})
           if (NOT ${${varName}})
-            HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency})
+            HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency} ON)
             break()
           endif()
         else()
-          HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency})
+          HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency} ON)
           break()
         endif()
       else()
@@ -491,7 +497,7 @@ function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestV
           # OS Dependency
           if (${currentDependency} STREQUAL "osPosix")
             if (MSVC)
-              HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency})
+              HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency} ON)
               break()
             endif()
           else()
@@ -509,7 +515,8 @@ function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestV
   endwhile()
 
   if (HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 0 OR
-      HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3)
+      HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 3 OR
+      HHVM_EXTENSION_${extensionID}_ENABLED_STATE EQUAL 4)
     set(HHVM_EXTENSION_${extensionID}_ENABLED_STATE 1 CACHE INTERNAL "" FORCE)
   endif()
   set(${resolvedDestVar} ${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} PARENT_SCOPE)
@@ -517,6 +524,8 @@ endfunction()
 
 # Set that an extension was disabled because of the specified dependency not being
 # possible to resolve.
+# This optionally takes a third BOOL parameter that should be set to ON only if the
+# dependency that failed to resolve is an os* or var* dependency.
 function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDependency)
   list(FIND HHVM_EXTENSION_${extensionID}_DEPENDENCIES ${failedDependency} depIdx)
   if (depIdx EQUAL -1)
@@ -525,7 +534,9 @@ function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDepende
   list(GET HHVM_EXTENSION_${extensionID}_DEPENDENCIES_OPTIONAL ${depIdx} isOptional)
 
   if (NOT ${isOptional})
-    if (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 3)
+    if (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 4 AND (NOT ${ARGC} EQUAL 3 OR NOT "${ARGV2}" STREQUAL "ON"))
+      message(FATAL_ERROR "The ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension '${ARGC}' '${ARGV2}' is an extension you probably want, but resolving the dependency '${failedDependency}' failed!")
+    elseif (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 3)
       message(FATAL_ERROR "The ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension was forcefully enabled, but resolving the dependency '${failedDependency}' failed!")
     elseif (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 1)
       # Currently only triggers for issues with find_package when applying the library dependencies.

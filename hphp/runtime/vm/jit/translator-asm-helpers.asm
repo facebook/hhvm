@@ -14,7 +14,7 @@
 ;
 ; Note that on Windows, ETCH_GET_ARG5/6 borrow r10/r11 respectively
 
-enterTCHelperSeg SEGMENT ALIGN(16) READ EXECUTE 'CODE'
+.CODE
 enterTCHelper PROC FRAME
   mov r10, [rsp + 28h]
   mov r11, [rsp + 30h]
@@ -74,13 +74,15 @@ enterTCHelper$prologue:
   jmp r8
 
 enterTCHelper ENDP
-enterTCHelperSeg ENDS
 
 ; This is the mangled name of MCGenerator::handleServiceRequest, as
 ; we can't explicitly set the name of a member's mangle in MSVC.
-?handleServiceRequest@MCGenerator@jit@HPHP@@QEAAPEAEAEAUServiceReqInfo@23@@Z PROTO
+?handleServiceRequest@MCGenerator@jit@HPHP@@QEAAPEAEAEAUReqInfo@svcreq@jit@HPHP@23@@Z PROTO
+
+.DATA?
 EXTERN mcg : QWORD
-handleSRHelperSeg SEGMENT ALIGN(16) READ EXECUTE 'CODE'
+
+.CODE
 ; handleSRHelper: Translated code will jump to this stub to perform all
 ; service requests. It calls out to C++ to handle the request, then jumps
 ; to the returned address (which may be the callToExit stub).
@@ -100,7 +102,7 @@ handleSRHelper PROC
   ; call mcg->handleServiceRequest(%rsp)
   mov rcx, mcg
   mov rdx, rsp
-  call ?handleServiceRequest@MCGenerator@jit@HPHP@@QEAAPEAEAEAUServiceReqInfo@23@@Z
+  call ?handleServiceRequest@MCGenerator@jit@HPHP@@QEAAPEAEAEAUReqInfo@svcreq@jit@HPHP@23@@Z
 
   ; Pop the ServiceReqInfo off the stack.
   add rsp, 30h
@@ -112,5 +114,4 @@ handleSRHelper PROC
 
   jmp rax
 handleSRHelper ENDP
-handleSRHelperSeg ENDS
 END

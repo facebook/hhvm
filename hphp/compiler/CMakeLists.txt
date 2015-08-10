@@ -1,15 +1,16 @@
 set(SOURCE_SUBDIRS expression statement analysis system util parser)
-set(files)
-set(CXX_SOURCES)
-set(C_SOURCES)
 
+set(CXX_SOURCES)
 auto_sources(files "*.cpp" "${SOURCE_SUBDIRS}")
 list(APPEND CXX_SOURCES ${files})
 
+set(C_SOURCES)
 auto_sources(files "*.c" "${SOURCE_SUBDIRS}")
 list(APPEND C_SOURCES ${files})
 
+set(HEADER_SOURCES)
 auto_sources(files "*.h" "{$SOURCE_SUBDIRS}")
+list(APPEND HEADER_SOURCES ${files})
 HHVM_PUBLIC_HEADERS(compiler ${files})
 
 
@@ -43,7 +44,9 @@ endforeach()
 
 add_definitions(-DALWAYS_ASSERT=1)
 
-ADD_LIBRARY(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES})
+ADD_LIBRARY(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
+auto_source_group("hphp_analysis" "${CMAKE_CURRENT_SOURCE_DIR}"
+  ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
 target_link_libraries(hphp_analysis ${Boost_LIBRARIES})
 add_dependencies(hphp_analysis hphp_parser)
 if (ENABLE_COTIRE)

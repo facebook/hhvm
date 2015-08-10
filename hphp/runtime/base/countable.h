@@ -203,6 +203,7 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     CountableManip::incRefCount(m_hdr.count);                           \
+    m_hdr.mrb = true; /* can't pass a ref to a bitfield :( */           \
   }                                                                     \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \

@@ -73,7 +73,7 @@ endforeach()
 # Generate ext_hhvm_infotabs.cpp
 add_custom_command(
   OUTPUT ${INFOTABS_SOURCE}
-  DEPENDS ${CXX_HEADERS} gen-infotabs
+  DEPENDS ${CXX_HEADERS} ${HPHP_IDLS} gen-infotabs
   COMMAND gen-infotabs
   ARGS ${INFOTABS_SOURCE} ${INFOTABS_HEADER} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})

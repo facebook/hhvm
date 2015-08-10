@@ -30,7 +30,6 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
 
-#include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"

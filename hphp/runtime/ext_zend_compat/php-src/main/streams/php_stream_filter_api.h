@@ -19,6 +19,9 @@
    +----------------------------------------------------------------------+
  */
 
+#ifndef PHP_STREAM_FILTER_API_H
+#define PHP_STREAM_FILTER_API_H
+
 /* $Id$ */
 
 /* The filter API works on the principle of "Bucket-Brigades".  This is
@@ -160,3 +163,4 @@ END_EXTERN_C()
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+#endif

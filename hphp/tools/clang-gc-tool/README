@@ -7,20 +7,40 @@ build log in order to scrape command line arguments and source files to pass
 to clang. The generate-scan-functions.sh script is used to run the whole
 process, e.g. from the clang-gc-tool directory run
 
-generate-scan-functions.sh hphp
+generate-scan-functions.sh -d hphp
 
-For a complete list of options, run generate-scan-functions.sh -h
+When running for the first time, use the '-s' flag in addition to '-d hphp'.
+This will generate a build log that the script uses to grab compiler command line
+options.  It also leaves your sandbox configured with clang as the compiler, so
+be sure to fbconfig it back once the script is finished if you don't want compile
+with clang.
+
+For a complete list of options, run 'generate-scan-functions.sh -h'.  Some
+useful options are -k which prevents any existing generated scan functions from
+being deleted and -f which uses a perl regexp to limit the files the generator
+script runs on.
 
 The plugin is initialized with several lists of interesting classes. One list
 contains all the classes that require scanning (needsScanMethods).  Any class
 that inherits from one of these classes will also be marked as needing a scan
 function.
 
-Another list contains classes that have (or should have) predefined scan
+Another set contains classes that have (or should have) predefined scan
 methods (hasScanMethods). The plugin will not generate scan methods for any
-of the classes in this set. Uninteresting classes will also get added to this
-set as the plugin runs in order to reduce the time needed to analyze remaining
-classes.
+of the classes in this set.
+
+The ignoredNames set is a blacklist of classes that are never analyzed and
+do not get generated scan functions.  Fields of any ignored type do not get
+calls to scan inside any other scan functions.  Uninteresting classes will also
+get added to this set as the plugin runs in order to reduce the time needed to
+analyze remaining classes.
+
+The gcContainers are a set of classes (usually templates) that hide their use
+of interesting types through casts or other tricks the analyzer can't yet
+understand.  But these classes still might need scan methods or calls to
+scan for fields.  So, the analyzer looks to see if any of the template
+parameters for an gcContainer class mentions an interesting type in order to
+determine if one of these classes is interesting.
 
 The final list (badContainers) contains a list of container classes that are
 not suitable for containing request-allocated objects, e.g. std::vector. These
@@ -35,7 +55,9 @@ if those require scan methods as well. In most cases a scan method will be
 generated for each one of these classes. Unions, empty classes or classes
 that contain no additional scannable fields/parent classes will not get scan
 methods. Scannable classes containing unions will need to be written by the
-user.
+user.  The plugin also searches all global, static and thread local data for
+interesting classes.  It also checks classes that are registered with the
+Native::registerNativeDataInfo template.
 
 In addition to checking for the request-allocated containers above, it checks
 for a number of other problematic situations:
@@ -104,39 +126,3 @@ Details
 Lint like checks
   make sure objects aren't stack allocated
   check for pointer/intptr tricks
-
-TODO
-----
-not fully defined class problem, e.g.
-
-A.h:
-class B;
-struct A { B* m; }; // A defined.
-
-A.cpp:
-#include "A.h"
-struct B { int x; }  // A and B defined
-
-C.cpp:
-#include "A.h"  // A defined but B not
-
-handle NativeData
-- adding all classes too permissive.  should only add ones that have a
-  "need scan" field.
-
-templates
-- generate mark for all template parameter members (or just all members?)
-
-improve warnings messages (trail of bad classes).
-
-marking for members is overly permissive (only fundamental types are excluded).
-
-warn about over allocation trick, e.g. foo elems[1];
-  see c_AsyncFunctionWaitHandle { Node m_children[1]; }
-
-clean up doc and move to doc directory
-- fix pointers in generated code to point to new location.
-
-clean up lockfiles (where they are created and delete at exit).
-
-conservatively scan unions instead of assert?

@@ -17,7 +17,7 @@
 #include "hphp/tools/clang-gc-tool/plugin-util.h"
 #include <iostream>
 #include <string>
-#include "llvm/Support/raw_ostream.h"
+#include <llvm/Support/raw_ostream.h>
 
 namespace HPHP {
 
@@ -84,7 +84,8 @@ const char* PluginUtil::getFilename(const Decl* decl) const {
 }
 
 const char* PluginUtil::getDefinitionFilename(const Decl* decl) const {
-  return getFilename(cast<CXXRecordDecl>(decl)->getDefinition());
+  auto cdecl = cast<CXXRecordDecl>(decl);
+  return getFilename(cdecl->getDefinition());
 }
 
 bool PluginUtil::inSystemHeader(const Decl* decl) const {
@@ -140,13 +141,14 @@ void PluginUtil::warning(const DeclMap& whys,
   std::cout << "\n" << std::flush;
 }
 
-const Type& PluginUtil::stripType(const Type& ty) {
-  if (isPointerOrReferenceType(ty)) {
-    return stripType(getPointeeType(ty));
-  } else if (isArrayType(ty)) {
-    return stripType(getElementType(ty));
+const Type& PluginUtil::stripType(const Type& sty) const {
+  const Type* ty = sty.getUnqualifiedDesugaredType();
+  if (isPointerOrReferenceType(*ty)) {
+    return stripType(getPointeeType(*ty));
+  } else if (isArrayType(*ty)) {
+    return stripType(getElementType(*ty));
   } else {
-    return ty;
+    return *ty;
   }
 }
 
@@ -160,11 +162,11 @@ PluginUtil::getCanonicalDef(const CXXRecordDecl* decl) const {
 }
 
 bool PluginUtil::isPointerType(const Type& ty) {
-  return isa<PointerType>(&ty);
+  return isa<PointerType>(ty.getUnqualifiedDesugaredType());
 }
 
 bool PluginUtil::isReferenceType(const Type& ty) {
-  return isa<ReferenceType>(&ty);
+  return isa<ReferenceType>(ty.getUnqualifiedDesugaredType());
 }
 
 bool PluginUtil::isPointerOrReferenceType(const Type& ty) {
@@ -172,17 +174,27 @@ bool PluginUtil::isPointerOrReferenceType(const Type& ty) {
 }
 
 bool PluginUtil::isArrayType(const Type& ty) {
-  return isa<ArrayType>(&ty);
+  return isa<ArrayType>(ty.getUnqualifiedDesugaredType());
 }
 
 bool PluginUtil::isPOD(const clang::Type& ty) {
-  auto decl = ty.getAsCXXRecordDecl();
+  auto decl = ty.getUnqualifiedDesugaredType()->getAsCXXRecordDecl();
   return decl && decl->isPOD();
+}
+
+bool PluginUtil::isOpaque(const clang::Type& ty) const {
+  auto decl = stripType(ty).getAsCXXRecordDecl();
+  return decl && !decl->hasDefinition();
 }
 
 bool PluginUtil::isSubclassOf(const NamedDecl* maybeBase,
                               const CXXRecordDecl* derived) {
-  if(auto base = dyn_cast_or_null<CXXRecordDecl>(maybeBase)) {
+
+  if (isTemplate(derived)) {
+    derived = getTemplateDef(derived)->getTemplatedDecl();
+  }
+
+  if (auto base = dyn_cast_or_null<CXXRecordDecl>(maybeBase)) {
     return (base == derived ||
             derived->isDerivedFrom(base) ||
             derived->isVirtuallyDerivedFrom(base));
@@ -198,17 +210,18 @@ bool PluginUtil::isSubclassOf(const DeclSet& maybeBases,
   return false;
 }
 
-const Type& PluginUtil::getElementType(const Type& ty) {
+const Type& PluginUtil::getElementType(const Type& ty) const {
   assert(isArrayType(ty));
-  return *cast<ArrayType>(ty).getElementType();
+  return *cast<ArrayType>(ty.getUnqualifiedDesugaredType())->getElementType();
 }
 
-const Type& PluginUtil::getPointeeType(const Type& ty) {
+const Type& PluginUtil::getPointeeType(const Type& ty) const {
   if (isPointerType(ty)) {
     return *ty.getPointeeType();
   } else {
     assert(isReferenceType(ty));
-    return *cast<ReferenceType>(&ty)->getPointeeType();
+    return *cast<ReferenceType>(
+      ty.getUnqualifiedDesugaredType())->getPointeeType();
   }
 }
 
@@ -247,17 +260,68 @@ void PluginUtil::forEachTemplateParam(
   }
 }
 
+bool PluginUtil::isInAnonymousNamespace(const CXXRecordDecl* decl) const {
+  auto p = decl->getDeclContext();
+  while (p) {
+    if (isa<NamespaceDecl>(p)) {
+      auto ns = cast<NamespaceDecl>(p);
+      if (isAnonymous(ns)) {
+        return true;
+      }
+    }
+    p = p->getParent();
+  }
+  return false;
+}
+
+std::string
+PluginUtil::addNamespaces(const Type& ty,
+                          const std::string& str,
+                          bool noClasses) const {
+  return addNamespaces(ty.getAsCXXRecordDecl(), str, noClasses);
+}
+
+std::string
+PluginUtil::addNamespaces(const NamedDecl* decl,
+                          const std::string& str,
+                          bool noClasses) const {
+  if (decl) {
+    std::vector<std::string> nsvec;
+    auto p = decl->getDeclContext();
+    while (p) {
+      if (isa<NamespaceDecl>(p)) {
+        auto ns = cast<NamespaceDecl>(p);
+        if (!isAnonymous(ns)) {
+          nsvec.push_back(getName(ns, true, true));
+        }
+      } else if (p->isRecord() && !noClasses) {
+        nsvec.push_back(getName(cast<CXXRecordDecl>(p), true, true));
+      }
+      p = p->getParent();
+    }
+    std::string res;
+    for (auto itr = nsvec.rbegin(); itr != nsvec.rend(); ++itr) {
+      res += *itr + "::";
+    }
+    return res + str;
+  }
+  return str;
+}
+
 std::string PluginUtil::getName(QualType ty,
                                 bool no_namespaces,
                                 bool suppress_tag,
                                 bool suppress_qualifiers) const {
   PrintingPolicy pp(m_context.getLangOpts());
   pp.SuppressTagKeyword = suppress_tag;
-  pp.SuppressScope = no_namespaces;
+  pp.SuppressScope = true;
+  std::string res;
   if (suppress_qualifiers) {
-    return ty.getUnqualifiedType().getAsString(pp);
+    res = ty.getUnqualifiedType().getAsString(pp);
+  } else {
+    res = ty.getAsString(pp);
   }
-  return ty.getAsString(pp);
+  return !no_namespaces ? addNamespaces(*ty, res) : res;
 }
 
 std::string PluginUtil::getName(const Type& ty,
@@ -274,6 +338,14 @@ std::string PluginUtil::getName(const CXXRecordDecl* decl,
                  suppress_tag);
 }
 
+std::string PluginUtil::getNsName(const clang::CXXRecordDecl* decl) const {
+  QualType ty(decl->getTypeForDecl(), 0);
+  PrintingPolicy pp(m_context.getLangOpts());
+  pp.SuppressTagKeyword = true;
+  pp.SuppressScope = true;
+  return addNamespaces(*ty, ty.getUnqualifiedType().getAsString(pp), true);
+}
+
 std::string PluginUtil::getName(const ClassTemplateDecl* decl,
                                 bool no_namespaces,
                                 bool suppress_tag) const {
@@ -281,9 +353,9 @@ std::string PluginUtil::getName(const ClassTemplateDecl* decl,
   llvm::raw_string_ostream ss(name);
   PrintingPolicy p(m_context.getLangOpts());
   p.SuppressTagKeyword = suppress_tag;
-  p.SuppressScope = no_namespaces;
+  p.SuppressScope = true;
   decl->getNameForDiagnostic(ss, p, true);
-  return ss.str();
+  return no_namespaces ? addNamespaces(decl, ss.str()) : ss.str();
 }
 
 std::string PluginUtil::getName(const NamedDecl* decl,
@@ -309,9 +381,38 @@ std::string PluginUtil::tagName(const CXXRecordDecl* decl) const {
   return "";
 }
 
-bool PluginUtil::isNestedDecl(const CXXRecordDecl* decl) const {
+bool PluginUtil::isNestedDecl(const CXXRecordDecl* decl) {
   auto ctx = decl->getDeclContext();
   return ctx && ctx->isRecord();
+}
+
+bool PluginUtil::isNestedInTemplate(const CXXRecordDecl* decl) {
+  auto p = decl->getDeclContext();
+  while (p) {
+    if (p->isRecord() && isTemplate(cast<CXXRecordDecl>(p))) {
+      return true;
+    }
+    p = p->getParent();
+  }
+  return false;
+}
+
+// These are necessary hacks because clang doesn't return the right
+// answer for certain decls.
+bool PluginUtil::isAnonymous(const CXXRecordDecl* decl) const {
+  return (decl->isAnonymousStructOrUnion() ||
+          getName(decl).find("(anonymous") != std::string::npos);
+}
+
+bool PluginUtil::isAnonymous(const FieldDecl* decl) const {
+  return (decl->isAnonymousStructOrUnion() ||
+          (decl->getType()->getAsCXXRecordDecl() &&
+           isAnonymous(decl->getType()->getAsCXXRecordDecl())));
+}
+
+bool PluginUtil::isAnonymous(const NamespaceDecl* decl) const {
+  return (decl->isAnonymousNamespace() ||
+          getName(decl).find("(anonymous") != std::string::npos);
 }
 
 std::vector<const NamespaceDecl*>
@@ -332,12 +433,12 @@ PluginUtil::getParentNamespaces(const CXXRecordDecl* def) {
 }
 
 std::vector<const CXXRecordDecl*>
-PluginUtil::getOuterClasses(const CXXRecordDecl* def) {
+PluginUtil::getOuterClasses(const CXXRecordDecl* def) const {
   std::vector<const CXXRecordDecl*> rvec;
   auto p = def->getDeclContext();
   while (p) {
     if(auto rec = dyn_cast<CXXRecordDecl>(p)) {
-      if (!rec->isAnonymousStructOrUnion()) {
+      if (!isAnonymous(rec)) {
         rvec.push_back(rec);
       }
     }

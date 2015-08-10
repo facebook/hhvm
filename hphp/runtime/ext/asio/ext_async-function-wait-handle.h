@@ -53,7 +53,6 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
     void onUnblocked();
 
    private:
-    template <typename F> friend void scan(const Node&, F&);
     c_WaitableWaitHandle* m_child;
     AsioBlockable m_blockable;
   };

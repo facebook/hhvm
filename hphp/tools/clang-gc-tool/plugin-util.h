@@ -28,12 +28,12 @@
 #include <unistd.h>
 #include <boost/noncopyable.hpp>
 #include <boost/format.hpp>
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTConsumer.h"
+#include <clang/AST/AST.h>
+#include <clang/AST/ASTConsumer.h>
 
 namespace HPHP {
 
-using DeclSet = std::set<const clang::NamedDecl*>;
+using DeclSet = std::set<const clang::CXXRecordDecl*>;
 using DeclMap = std::map<const clang::NamedDecl*, const clang::NamedDecl*>;
 
 template <typename C, typename K>
@@ -129,12 +129,13 @@ struct PluginUtil {
   static bool isReferenceType(const clang::Type& ty);
   static bool isPointerOrReferenceType(const clang::Type& ty);
   static bool isPOD(const clang::Type& ty);
+  bool isOpaque(const clang::Type& ty) const;
 
-  static const clang::Type& getElementType(const clang::Type& ty);
-  static const clang::Type& getPointeeType(const clang::Type& ty);
+  const clang::Type& getElementType(const clang::Type& ty) const;
+  const clang::Type& getPointeeType(const clang::Type& ty) const;
 
   // Strip pointers, references and arrays from a type.
-  static const clang::Type& stripType(const clang::Type& ty);
+  const clang::Type& stripType(const clang::Type& ty) const;
 
   const clang::CXXRecordDecl*
   getCanonicalDef(const clang::CXXRecordDecl* decl) const;
@@ -162,6 +163,8 @@ struct PluginUtil {
                       bool no_namespaces = false,
                       bool suppress_tag = true) const;
 
+  std::string getNsName(const clang::CXXRecordDecl* decl) const;
+
   std::string getName(const clang::ClassTemplateDecl* decl,
                       bool no_namespaces = false,
                       bool suppress_tag = true) const;
@@ -172,13 +175,32 @@ struct PluginUtil {
 
   std::string tagName(const clang::CXXRecordDecl* decl) const;
 
-  bool isNestedDecl(const clang::CXXRecordDecl* decl) const;
+  static bool isNestedDecl(const clang::CXXRecordDecl* decl);
+  static bool isNestedInTemplate(const clang::CXXRecordDecl* decl);
+
+  template <typename F>
+  static bool isNestedInFn(const clang::CXXRecordDecl* decl, F& fn) {
+    auto p = decl->getDeclContext();
+    while (p) {
+      if (p->isRecord() && fn(clang::cast<clang::CXXRecordDecl>(p))) {
+        return true;
+      }
+      p = p->getParent();
+    }
+    return false;
+  }
+
+  bool isInAnonymousNamespace(const clang::CXXRecordDecl* decl) const;
+
+  bool isAnonymous(const clang::CXXRecordDecl* decl) const;
+  bool isAnonymous(const clang::FieldDecl* decl) const;
+  bool isAnonymous(const clang::NamespaceDecl* decl) const;
 
   static std::vector<const clang::NamespaceDecl*>
   getParentNamespaces(const clang::CXXRecordDecl* def);
 
-  static std::vector<const clang::CXXRecordDecl*>
-  getOuterClasses(const clang::CXXRecordDecl* def);
+  std::vector<const clang::CXXRecordDecl*>
+  getOuterClasses(const clang::CXXRecordDecl* def) const;
 
   // Find comment (if any) immediately preceding decl.
   const clang::RawComment* findComment(const clang::Decl* decl) const;
@@ -187,6 +209,13 @@ struct PluginUtil {
   clang::ASTContext& m_context;
   std::set<const clang::RawComment*> m_comments;
 private:
+  std::string addNamespaces(const clang::NamedDecl* decl,
+                            const std::string& str,
+                            bool noClasses = false) const;
+  std::string addNamespaces(const clang::Type& ty,
+                            const std::string& str,
+                            bool noClasses = false) const;
+
   std::string format(boost::format& f) const {
     return boost::str(f);
   }

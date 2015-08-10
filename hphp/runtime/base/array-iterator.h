@@ -284,6 +284,7 @@ struct ArrayIter {
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
+  template<typename F> void scan(F& mark) const;
 private:
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
   template<bool withRef>
@@ -483,6 +484,7 @@ struct MArrayIter {
   bool getResetFlag() const { return m_resetFlag; }
   void setResetFlag(bool reset) { m_resetFlag = reset; }
 
+  template<typename F> void scan(F& mark) const;
 private:
   ArrayData* getData() const {
     assert(hasRef());

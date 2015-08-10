@@ -30,8 +30,9 @@ class WddxPacket: public ResourceData {
   WddxPacket(const Variant& comment, bool manualPacket, bool sVar);
 
   CLASSNAME_IS("WddxPacket");
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 
 
   bool add_var(const String& varName, bool hasVarTag);

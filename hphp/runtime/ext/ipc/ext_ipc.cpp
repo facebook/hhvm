@@ -129,8 +129,9 @@ public:
   int id;
 
   CLASSNAME_IS("MessageQueue");
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 };
 
 Variant HHVM_FUNCTION(msg_get_queue,

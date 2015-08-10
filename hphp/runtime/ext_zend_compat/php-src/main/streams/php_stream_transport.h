@@ -16,6 +16,9 @@
   +----------------------------------------------------------------------+
 */
 
+#ifndef PHP_STREAM_TRANSPORT_INCL_H_
+#define PHP_STREAM_TRANSPORT_INCL_H_
+
 /* $Id$ */
 #ifdef PHP_WIN32
 #include "config.w32.h"
@@ -209,3 +212,5 @@ END_EXTERN_C()
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
+
+#endif

@@ -211,7 +211,6 @@ public:
   }
 
 private:
-  template <typename F> friend void scan(const ProxyArray& this_, F& mark);
   // The inner array. This is mutable since zend_hash_find() etc. has a
   // const ProxyArray* as a parameter, but we need to modify the inner array
   // to box and proxy the return values, so making this mutable avoids a

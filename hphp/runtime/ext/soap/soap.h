@@ -160,8 +160,9 @@ public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader);
 
   CLASSNAME_IS("soapHeader")
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 
   sdlFunction                      *function;
   String                            function_name;

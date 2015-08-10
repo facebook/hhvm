@@ -56,6 +56,7 @@ int numInstrs(PC start, PC end) {
  */
 RegionDescPtr selectMethod(const RegionContext& context) {
   using namespace HPHP::Verifier;
+  using HPHP::Verifier::Block;
 
   if (!isFuncEntry(context.func, context.bcOffset)) return nullptr;
   if (context.func->isPseudoMain()) return nullptr;

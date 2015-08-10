@@ -35,11 +35,13 @@ using clang::CXXRecordDecl;
 using clang::NamespaceDecl;
 using clang::ClassTemplateDecl;
 using clang::ClassTemplateSpecializationDecl;
+using clang::VarDecl;
 using clang::Type;
 using clang::QualType;
 using clang::PointerType;
 using clang::ReferenceType;
 using clang::ArrayType;
+using clang::ConstantArrayType;
 using clang::TemplateTypeParmType;
 using clang::SubstTemplateTypeParmType;
 using clang::TemplateSpecializationType;
@@ -55,9 +57,12 @@ using clang::Rewriter;
 using clang::TemplateTypeParmDecl;
 using clang::NonTypeTemplateParmDecl;
 using clang::TemplateTemplateParmDecl;
+using clang::TemplateArgument;
 using clang::CXXDestructorDecl;
+using clang::CXXBaseSpecifier;
 using clang::AS_protected;
 using clang::AS_private;
+using std::placeholders::_1;
 
 bool ScanGenerator::isInDeclClass(const DeclSet& decls,
                                   const CXXRecordDecl* decl) const {
@@ -72,7 +77,9 @@ bool ScanGenerator::isGcClass(const CXXRecordDecl* decl) const {
   return isInDeclClass(m_gcClasses, decl);
 }
 
-bool ScanGenerator::isGcClass(const Type& ty) const {
+bool ScanGenerator::isGcClass(const Type& sty) const {
+  const Type *typ = sty.getUnqualifiedDesugaredType();
+  const Type& ty(*typ);
   if (auto decl = ty.getAsCXXRecordDecl()) {
     return isGcClass(decl);
   } else if (isPointerOrReferenceType(ty) || isArrayType(ty)) {
@@ -82,10 +89,16 @@ bool ScanGenerator::isGcClass(const Type& ty) const {
 }
 
 bool ScanGenerator::hasScanMethod(const CXXRecordDecl* decl) const {
-  return isInDeclClass(m_hasScanMethodSet, decl);
+  auto hasScanFn = [this](const CXXRecordDecl* d) {
+    return isTemplate(d) && this->hasScanMethod(d);
+  };
+  return (isInDeclClass(m_hasScanMethodSet, decl) ||
+          isNestedInFn(decl, hasScanFn));
 }
 
-bool ScanGenerator::hasScanMethod(const Type& ty) const {
+bool ScanGenerator::hasScanMethod(const Type& sty) const {
+  const Type *typ = sty.getUnqualifiedDesugaredType();
+  const Type& ty(*typ);
   if (auto decl = ty.getAsCXXRecordDecl()) {
     return hasScanMethod(decl);
   } else if (isPointerOrReferenceType(ty) || isArrayType(ty)) {
@@ -94,15 +107,103 @@ bool ScanGenerator::hasScanMethod(const Type& ty) const {
   return false;
 }
 
+bool ScanGenerator::isIgnored(const CXXRecordDecl* decl) const {
+  auto isIgnoredFn = [this](const CXXRecordDecl* d) {
+    return this->isIgnored(d);
+  };
+  return (decl->isLambda() ||
+          isInDeclClass(m_ignoredClasses, decl) ||
+          isNestedInFn(decl, isIgnoredFn));
+}
+
+bool ScanGenerator::isIgnored(const Type& ty) const {
+  if (auto decl = ty.getAsCXXRecordDecl()) {
+    return isIgnored(decl);
+  } else if (isPointerOrReferenceType(ty) || isArrayType(ty)) {
+    return isIgnored(stripType(ty));
+  } else if (auto tParam = dyn_cast<TemplateTypeParmType>(&ty)) {
+    auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
+    if (decl) return isIgnored(decl);
+  } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(&ty)) {
+    return isIgnored(*tParam->getReplacedParameter());
+  } else if (auto tParam = dyn_cast<TemplateSpecializationType>(&ty)) {
+    auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
+    if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
+      return isIgnored(decl->getTemplatedDecl());
+    }
+  }
+  const Type *styp = ty.getUnqualifiedDesugaredType();
+  return styp != &ty ? isIgnored(*styp) : false;
+}
+
 bool ScanGenerator::isBadContainer(const CXXRecordDecl* decl) const {
   return isInDeclClass(m_badContainers, decl);
 }
 
-bool ScanGenerator::isBadContainer(const Type& ty) const {
+bool ScanGenerator::isBadContainer(const Type& sty) const {
+  const Type *typ = sty.getUnqualifiedDesugaredType();
+  const Type& ty(*typ);
   if (auto decl = ty.getAsCXXRecordDecl()) {
     return isBadContainer(decl);
+  } else if (auto tParam = dyn_cast<TemplateTypeParmType>(&ty)) {
+    auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
+    if (decl) return isBadContainer(decl);
+  } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(&ty)) {
+    return isBadContainer(*tParam->getReplacedParameter());
+  } else if (auto tParam = dyn_cast<TemplateSpecializationType>(&ty)) {
+    auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
+    if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
+      return isBadContainer(decl->getTemplatedDecl());
+    }
+  }
+  return false;
+}
+
+bool ScanGenerator::isClonedClass(const CXXRecordDecl* decl) const {
+  return decl && isInDeclClass(m_privateDefs, decl);
+}
+
+bool ScanGenerator::isClonedClass(const Type& sty) const {
+  const Type *typ = sty.getUnqualifiedDesugaredType();
+  const Type& ty(*typ);
+  if (auto decl = ty.getAsCXXRecordDecl()) {
+    return isClonedClass(decl);
   } else if (isPointerOrReferenceType(ty) || isArrayType(ty)) {
-    return isBadContainer(stripType(ty));
+    return isClonedClass(stripType(ty));
+  } else if (auto tParam = dyn_cast<TemplateTypeParmType>(&ty)) {
+    auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
+    if (decl) return isClonedClass(decl);
+  } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(&ty)) {
+    return isClonedClass(*tParam->getReplacedParameter());
+  } else if (auto tParam = dyn_cast<TemplateSpecializationType>(&ty)) {
+    auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
+    if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
+      return isClonedClass(decl->getTemplatedDecl());
+    }
+  }
+  return false;
+}
+
+bool ScanGenerator::isReqPtr(const CXXRecordDecl* decl) const {
+  return isTemplate(decl) &&
+    getTemplateClassName(decl) == "HPHP::req::ptr";
+}
+
+bool ScanGenerator::isReqPtr(const Type& sty) const {
+  const Type *typ = sty.getUnqualifiedDesugaredType();
+  const Type& ty(*typ);
+  if (auto decl = ty.getAsCXXRecordDecl()) {
+    return isReqPtr(decl);
+  } else if (auto tParam = dyn_cast<TemplateTypeParmType>(&ty)) {
+    auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
+    if (decl) return isReqPtr(decl);
+  } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(&ty)) {
+    return isReqPtr(*tParam->getReplacedParameter());
+  } else if (auto tParam = dyn_cast<TemplateSpecializationType>(&ty)) {
+    auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
+    if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
+      return isReqPtr(decl->getTemplatedDecl());
+    }
   }
   return false;
 }
@@ -111,12 +212,18 @@ void ScanGenerator::generateWarnings(const CXXRecordDecl* decl) {
   decl = decl->getCanonicalDecl();
   if (!exists(m_checked, decl) &&
       !hasScanMethod(decl) &&
+      !isIgnored(decl) &&
       needsScanMethod(decl) == NeedsScanFlag::Yes) {
     m_checked.insert(decl);
 
-    if (isHiddenDecl(decl)) {
-      warning(decl, "private class %s needs scan", getName(decl));
+    if (isHiddenDecl(decl) && isAnonymous(decl)) {
+      warning(decl,
+              "no scan function generated for private anonymous class '%s'",
+              getName(decl));
     }
+
+    decl = decl->field_empty() ? decl->getDefinition() : decl;
+    assert(decl);
 
     for (auto itr = decl->field_begin(); itr != decl->field_end(); ++itr) {
       auto field = *itr;
@@ -134,7 +241,7 @@ void ScanGenerator::generateWarnings(const CXXRecordDecl* decl) {
                 getName(decl),
                 getName(field));
       } else if (isPointerOrReferenceType(*fieldType) &&
-                needsScanMethod(getPointeeType(*fieldType)) ==
+                 needsScanMethod(getPointeeType(*fieldType)) ==
                  NeedsScanFlag::Yes) {
         warning(m_whys,
                 field,
@@ -143,7 +250,7 @@ void ScanGenerator::generateWarnings(const CXXRecordDecl* decl) {
                 getName(decl),
                 getName(field));
       } else if (isArrayType(*fieldType) &&
-                needsScanMethod(getElementType(*fieldType)) ==
+                 needsScanMethod(getElementType(*fieldType)) ==
                  NeedsScanFlag::Yes) {
         warning(m_whys,
                 field,
@@ -151,8 +258,8 @@ void ScanGenerator::generateWarnings(const CXXRecordDecl* decl) {
                 getName(getElementType(*fieldType)),
                 getName(decl),
                 getName(field));
-      } else if(stripType(*fieldType).getAsCXXRecordDecl() &&
-                !getCanonicalDef(stripType(*fieldType).getAsCXXRecordDecl())) {
+      } else if (stripType(*fieldType).getAsCXXRecordDecl() &&
+                 !getCanonicalDef(stripType(*fieldType).getAsCXXRecordDecl())) {
         warning(m_whys,
                 field,
                 "found opaque field type %s::%s",
@@ -174,42 +281,67 @@ void ScanGenerator::generateWarnings(const CXXRecordDecl* decl) {
   }
 }
 
-// use visitor in here too.  make a closure of all types/decls that need gc
 ScanGenerator::NeedsScanFlag ScanGenerator::needsScanMethod(const Type& ty) {
+  m_visited.clear();
+  auto result = needsScanMethodImpl(ty);
+  m_visited.clear();
+  return result == NeedsScanFlag::Maybe ? NeedsScanFlag::No : result;
+}
+
+ScanGenerator::NeedsScanFlag
+ScanGenerator::needsScanMethod(const CXXRecordDecl* decl) {
+  m_visited.clear();
+  auto result = needsScanMethodImpl(decl);
+  m_visited.clear();
+  return result == NeedsScanFlag::Maybe ? NeedsScanFlag::No : result;
+}
+
+// use visitor in here too.  make a closure of all types/decls that need gc
+ScanGenerator::NeedsScanFlag
+ScanGenerator::needsScanMethodImpl(const Type& sty) {
+  const Type *typ = sty.getUnqualifiedDesugaredType();
+  const Type& ty(*typ);
   if (auto decl = ty.getAsCXXRecordDecl()) {
-    return needsScanMethod(decl);
+    return needsScanMethodImpl(decl);
   } else if (isPointerOrReferenceType(ty) || isArrayType(ty)) {
-    return needsScanMethod(stripType(ty));
+    return needsScanMethodImpl(stripType(ty));
   } else if (auto tParam = dyn_cast<TemplateTypeParmType>(&ty)) {
-    auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
-    if (decl) return needsScanMethod(decl);
+    if (tParam->getDecl()) {
+      auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
+      if (decl) return needsScanMethodImpl(decl);
+    }
   } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(&ty)) {
-    return needsScanMethod(*tParam->getReplacedParameter());
+    return needsScanMethodImpl(*tParam->getReplacedParameter());
   } else if (auto tParam = dyn_cast<TemplateSpecializationType>(&ty)) {
     auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
     if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
-      return needsScanMethod(decl->getTemplatedDecl());
+      return needsScanMethodImpl(decl->getTemplatedDecl());
     }
   }
   return NeedsScanFlag::No;
 }
 
 ScanGenerator::NeedsScanFlag
-ScanGenerator::needsScanMethod(const CXXRecordDecl* decl) {
-  // This can happen when a class is not fully defined.
-  // Hopefully, the full definition will be available
-  // elsewhere.
-  if(!getCanonicalDef(decl)) {
+ScanGenerator::needsScanMethodImpl(const CXXRecordDecl* decl) {
+  decl = decl->getCanonicalDecl();
+
+  if (isHiddenDecl(decl) && !isAnonymous(decl)) {
+    m_privateDefs.insert(decl);
+  }
+
+  // TODO (t6956600): this can happen when a class is not fully defined.
+  // Hopefully, the full definition will be available elsewhere.
+  if (!getCanonicalDef(decl) ||
+      (isTemplate(decl) &&
+       !getCanonicalDef(getTemplateDef(decl)->getTemplatedDecl()))) {
     return NeedsScanFlag::No;
   }
 
-  decl = decl->getCanonicalDecl();
-
-  if (isGcClass(decl)) {
+  if (isGcClass(decl) || isInDeclClass(m_scanClasses, decl)) {
     return NeedsScanFlag::Yes;
   }
 
-  if (hasScanMethod(decl)) {
+  if (isIgnored(decl)) {
     return NeedsScanFlag::No;
   }
 
@@ -223,16 +355,43 @@ ScanGenerator::needsScanMethod(const CXXRecordDecl* decl) {
 
   auto result = NeedsScanFlag::Maybe;
 
-  // If a class inherits from any class in gcClasses, mark it as needing
-  // a scan method.
-  bool sawSubclass = false;
-  for (auto c : m_gcClasses) {
-    if (decl->hasDefinition() && isSubclassOf(c, decl)) {
-      m_whys[decl] = c;
-      if (m_verbose) {
-        std::cout << getName(decl) << " needs scan, is subclass of "
-                  << getName(c) << "\n";
+  auto def = decl->getDefinition();
+  assert(def);
+
+  auto checkBaseClass = [&](const CXXBaseSpecifier& base) {
+    auto sugaredBaseTy = base.getType();
+    const auto baseTy = sugaredBaseTy->getUnqualifiedDesugaredType(); //?
+    if (auto baseClass = baseTy->getAsCXXRecordDecl()) {
+      return needsScanMethodImpl(baseClass);
+    } else if (auto tParam = dyn_cast<TemplateTypeParmType>(baseTy)) {
+      return needsScanMethodImpl(
+        cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext()));
+    } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(baseTy)) {
+      return needsScanMethodImpl(*tParam->getReplacedParameter());
+    } else if (auto tParam = dyn_cast<TemplateSpecializationType>(baseTy)) {
+      auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
+      if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
+        return needsScanMethodImpl(decl->getTemplatedDecl());
       }
+      assert(isa<TemplateTemplateParmDecl>(tDecl));
+    }
+    return NeedsScanFlag::No;
+  };
+
+  bool sawSubclass = false;
+
+  // Check base classes.
+  for (const auto& base : def->bases()) {
+    if (checkBaseClass(base) == NeedsScanFlag::Yes) {
+      result = NeedsScanFlag::Yes;
+      sawSubclass = true;
+      break;
+    }
+  }
+
+  // Check virtual base classes.
+  for (const auto& base : def->vbases()) {
+    if (checkBaseClass(base) == NeedsScanFlag::Yes) {
       result = NeedsScanFlag::Yes;
       sawSubclass = true;
       break;
@@ -240,86 +399,70 @@ ScanGenerator::needsScanMethod(const CXXRecordDecl* decl) {
   }
 
   // Check all fields for scannable types.
-  for (auto itr = decl->field_begin(); itr != decl->field_end(); ++itr) {
-    auto field = *itr;
-    auto needsScan = needsScanMethod(*field->getType());
+  for (const auto& field : def->fields()) {
+    auto needsScan = needsScanMethodImpl(*field->getType());
 
-    if (needsScan == NeedsScanFlag::Yes && result == NeedsScanFlag::Maybe) {
-      auto fieldTypeDecl = stripType(*field->getType()).getAsCXXRecordDecl();
+    if (needsScan == NeedsScanFlag::Yes) {
+      if (result == NeedsScanFlag::Maybe) {
+        auto fieldTypeDecl = stripType(*field->getType()).getAsCXXRecordDecl();
 
-      if (fieldTypeDecl) {
-        fieldTypeDecl = fieldTypeDecl->getCanonicalDecl();
-        m_whys[field] = fieldTypeDecl;
-      }
+        if (fieldTypeDecl) {
+          fieldTypeDecl = fieldTypeDecl->getCanonicalDecl();
+          m_whys[field] = fieldTypeDecl;
+        }
 
-      if (!sawSubclass) {
-        warning(m_whys,
-                field,
-                "'%s:%s' is not a subclass of any garbage collectible class",
-                getName(decl),
-                getName(field->getType()));
-        assert(!fieldTypeDecl ||
-               isTemplate(fieldTypeDecl) ||
-               isGcClass(fieldTypeDecl) ||
-               hasScanMethod(fieldTypeDecl));
+        // TODO (t6956600): not sure this warning is worthwhile.
+        if (0 && !sawSubclass) {
+          warning(m_whys,
+                  field,
+                  "'%s:%s' is not a subclass of any garbage collectible class",
+                  getName(decl),
+                  getName(field->getType()));
+          assert(!fieldTypeDecl ||
+                 isTemplate(fieldTypeDecl) ||
+                 isGcClass(fieldTypeDecl) ||
+                 hasScanMethod(fieldTypeDecl));
+        }
       }
       if (m_verbose) {
         std::cout << getName(decl) << " field '" << getName(field)
-             << "' of type " << getName(field->getType())
-             << " needs scan\n";
+                  << "' of type " << getName(field->getType())
+                  << " needs scan\n";
       }
-    }
-    if(needsScan == NeedsScanFlag::Yes) {
       result = NeedsScanFlag::Yes;
     }
   }
 
-  // Check base classes.
-  for (auto base = decl->bases_begin(); base != decl->bases_end(); ++base) {
-    NeedsScanFlag needsScan = NeedsScanFlag::No;
-    // If this is not true, the base class is a template specialization.
-    if (auto baseClass = base->getType()->getAsCXXRecordDecl()) {
-      needsScan = needsScanMethod(baseClass);
+  if (result == NeedsScanFlag::No &&
+      !isTemplate(decl) &&
+      !isNestedInTemplate(decl) &&
+      !hasScanMethod(decl)) {
+    if (m_verbose) {
+      std::cout << "Ignoring " << getName(decl) << "\n";
     }
-    if (needsScan == NeedsScanFlag::Yes) {
-      result = needsScan;
-    }
+    m_ignoredClasses.insert(decl->getCanonicalDecl());
   }
 
-  // Check virtual base classes.
-  for (auto base = decl->vbases_begin(); base != decl->vbases_end(); ++base) {
-    NeedsScanFlag needsScan = NeedsScanFlag::No;
-    // If this is not true, the base class is a template specialization.
-    if (auto baseClass = base->getType()->getAsCXXRecordDecl()) {
-      needsScan = needsScanMethod(baseClass);
-    }
-    if (needsScan == NeedsScanFlag::Yes) {
-      result = needsScan;
-    }
-  }
-
-  // Update gcClasses and hasScanMethod sets based on the results of
-  // the analysis.  For templates, we always make sure to store the
-  // CXXRecordDecl corresponding to the template definition rather
-  // than the ClassTemplateDecl.
-  if (result == NeedsScanFlag::Yes) {
-    if (isTemplate(decl)) {
-      m_gcClasses.insert(
-        getTemplateDef(decl)->getTemplatedDecl()->getCanonicalDecl());
-    } else {
-      m_gcClasses.insert(decl->getCanonicalDecl());
-    }
-  } else {
-    result = NeedsScanFlag::No;
-    if (isTemplate(decl)) {
-      m_hasScanMethodSet.insert(
-        getTemplateDef(decl)->getTemplatedDecl()->getCanonicalDecl());
-    } else {
-      m_hasScanMethodSet.insert(decl->getCanonicalDecl());
+  // Total hack for things like unordered_map that hide use of scanable types.
+  if (result == NeedsScanFlag::Maybe && isInDeclClass(m_gcContainers, decl)) {
+    if (auto tdecl = dyn_cast<ClassTemplateSpecializationDecl>(decl)) {
+      const auto& targs = tdecl->getTemplateArgs();
+      for (unsigned i = 0; i < targs.size(); ++i) {
+        if (targs[i].getKind() == TemplateArgument::Type) {
+          auto needsScan = needsScanMethodImpl(*(targs[i].getAsType()));
+          if (needsScan == NeedsScanFlag::Yes) {
+            if (m_verbose) {
+              std::cout << "gccontainer " << getName(decl)
+                        << " needs scan because of "
+                        << getName(*targs[i].getAsType()) << "\n";
+            }
+            result = NeedsScanFlag::Yes;
+            break;
+          }
+        }
+      }
     }
   }
-
-  assert(result == NeedsScanFlag::Yes || result == NeedsScanFlag::No);
 
   return result;
 }
@@ -353,23 +496,6 @@ const char* ScanGenerator::toStr(NeedsScanFlag flag) {
   return "";
 }
 
-void ScanGenerator::visitBaseClasses(const CXXRecordDecl* decl) {
-  assert(decl->hasDefinition());
-  for (auto base = decl->bases_begin(); base != decl->bases_end(); ++base) {
-    auto baseClass = base->getType()->getAsCXXRecordDecl();
-    if(!baseClass) continue;// XXXXXXXXXX hack (check elsewhere)
-    assert(baseClass->hasDefinition());
-    visitCXXRecordDeclCommon(baseClass);
-  }
-
-  for (auto base = decl->vbases_begin(); base != decl->vbases_end(); ++base) {
-    auto baseClass = base->getType()->getAsCXXRecordDecl();
-    if(!baseClass) continue;
-    assert(baseClass->hasDefinition());
-    visitCXXRecordDeclCommon(baseClass);
-  }
-}
-
 bool ScanGenerator::visitCXXRecordDeclCommon(const CXXRecordDecl* udecl,
                                              bool forceScan) {
   auto decl = udecl->getCanonicalDecl();
@@ -380,25 +506,34 @@ bool ScanGenerator::visitCXXRecordDeclCommon(const CXXRecordDecl* udecl,
   if (decl->hasDefinition() && !exists(m_sawDefinition, decl)) {
     m_sawDefinition.insert(decl);
 
-    if (isHiddenDecl(decl)) {
+    if (isHiddenDecl(decl) && !isAnonymous(decl)) {
       m_privateDefs.insert(decl);
     }
 
-    // visit superclasses first.
-    visitBaseClasses(decl);
-
-    if(forceScan || isSubclassOf(m_gcClasses, decl)) {
-      if(m_verbose) {
-        std::cout << "Visiting " << getName(decl) << "\n";
-      }
-      m_visited.clear();
-      needsScanMethod(decl);
-      m_visited.clear();
+    if (m_verbose) {
+      std::cout << "Visiting " << getName(decl) << "\n";
+    }
+    if (needsScanMethod(decl) != NeedsScanFlag::No) {
       generateWarnings(decl);
-      m_visited.clear();
+
+      assert(!isIgnored(decl));
+
+      if (!hasScanMethod(decl)) {
+        if (m_verbose) {
+          std::cout << getName(decl) << " needs scan.\n";
+        }
+        if (!isTemplate(decl)) {
+          m_scanClasses.insert(decl->getCanonicalDecl());
+        }
+      } else if (m_verbose) {
+        std::cout << getName(decl) << " has scan.\n";
+      }
     } else {
-      if(m_verbose) {
-        std::cout << "Skipping " << getName(decl) << "\n";
+      if (!isTemplate(decl) && !isNestedInTemplate(decl)) {
+        if (m_verbose) {
+          std::cout << "Ignoring " << getName(decl) << "\n";
+        }
+        m_ignoredClasses.insert(decl->getCanonicalDecl());
       }
     }
   }
@@ -406,13 +541,15 @@ bool ScanGenerator::visitCXXRecordDeclCommon(const CXXRecordDecl* udecl,
 }
 
 bool ScanGenerator::VisitFieldDecl(FieldDecl* decl) {
-  auto record = decl->getType()->getAsCXXRecordDecl();
-  return !record || visitCXXRecordDeclCommon(record);
+  if (auto record = decl->getType()->getAsCXXRecordDecl()) {
+    visitCXXRecordDeclCommon(record);
+  }
   return true;
 }
 
 bool ScanGenerator::VisitCXXRecordDecl(CXXRecordDecl* decl) {
-  return visitCXXRecordDeclCommon(decl);
+  visitCXXRecordDeclCommon(decl);
+  return true;
 }
 
 bool ScanGenerator::VisitClassTemplateDecl(ClassTemplateDecl* tdecl) {
@@ -420,6 +557,28 @@ bool ScanGenerator::VisitClassTemplateDecl(ClassTemplateDecl* tdecl) {
   // gcClass.
   if (tdecl->isThisDeclarationADefinition()) {
     visitCXXRecordDeclCommon(tdecl->getTemplatedDecl());
+  } else if (m_verbose) {
+    std::cout << "Skipping template " << getName(tdecl) << "\n";
+  }
+  return true;
+}
+
+bool ScanGenerator::VisitClassTemplateSpecializationDecl(
+  ClassTemplateSpecializationDecl* tdecl) {
+  // Only visit decls that are defined and a subclass of an existing
+  // gcClass.
+  if (tdecl->isThisDeclarationADefinition()) {
+    visitCXXRecordDeclCommon(tdecl);
+  } else if (m_verbose) {
+    std::cout << "Skipping template " << getName(tdecl) << "\n";
+  }
+  return true;
+}
+
+bool ScanGenerator::VisitVarDecl(VarDecl* vdecl) {
+  auto ty = vdecl->getType();  // strip typedefs?
+  if (auto cdecl = ty->getAsCXXRecordDecl()) {
+    visitCXXRecordDeclCommon(cdecl);
   }
   return true;
 }
@@ -442,7 +601,7 @@ bool ScanGenerator::VisitDeclRefExpr(clang::DeclRefExpr* declref) {
         std::cout << "Adding native data class = " << getName(decl) << "\n";
       }
 
-      if(exists(m_sawDefinition, decl)) {
+      if (exists(m_sawDefinition, decl)) {
         m_sawDefinition.erase(m_sawDefinition.find(decl));
       }
 
@@ -464,26 +623,18 @@ void ScanGenerator::dumpTemplateDecl(std::ostream& out,
       if (auto p = dyn_cast<TemplateTypeParmDecl>(param)) {
         out << (p->wasDeclaredWithTypename() ? "typename " : "class ")
             << getName(p);
+        if (p->isParameterPack()) out << "...";
       } else if (auto p = dyn_cast<NonTypeTemplateParmDecl>(param)) {
         out << getName(p->getType()) << " " << getName(p);
       } else if (auto p = dyn_cast<TemplateTemplateParmDecl>(param)) {
-        (void)p;
-        assert(0); // NYI
+        assert(!p->isParameterPack());
+        const char* prefix = "template <";
+        for (auto param : *(p->getTemplateParameters())) {
+          out << prefix << "typename " << getName(param);
+          prefix = ", ";
+        }
+        out << "> class " << getName(p);
       }
-      first = ", ";
-      return true;
-    }
-  );
-  out << ">";
-}
-
-void ScanGenerator::dumpTemplateArgs(std::ostream& out,
-                                     const char* first,
-                                     const CXXRecordDecl* def) const {
-  forEachTemplateParam(
-    def,
-    [&](const NamedDecl* param) {
-      out << first << getName(param);
       first = ", ";
       return true;
     }
@@ -497,12 +648,13 @@ void ScanGenerator::dumpTemplateArgs(std::ostream& out,
 
 void ScanGenerator::declareClass(std::ostream& out,
                                  const CXXRecordDecl* def,
-                                 bool do_close) const {
+                                 bool do_close,
+                                 const std::string& skipNs) const {
   // parent namespaces
   auto namespaces = getParentNamespaces(def);
 
   for (auto ns : namespaces) {
-    if (getName(ns) == "HPHP") continue; // hacky, skip HPHP namespace
+    if (getName(ns) == skipNs) continue; // hacky, skip HPHP namespace
     out << "namespace " << getName(ns) << " {\n";
   }
 
@@ -517,7 +669,7 @@ void ScanGenerator::declareClass(std::ostream& out,
   if (do_close) {
     out << ";\n";
     for (size_t i = 0; i < namespaces.size(); ++i) {
-      if (getName(namespaces[i]) == "HPHP") continue;
+      if (getName(namespaces[i]) == skipNs) continue;
       out << "}\n";
     }
   }
@@ -526,9 +678,10 @@ void ScanGenerator::declareClass(std::ostream& out,
 void ScanGenerator::declareClonedClass(std::ostream& out,
                                        const CXXRecordDecl* def,
                                        bool do_close) const {
+  out << "namespace HPHP {\n";
   out << "namespace Cloned {\n";
-  declareClass(out, def, do_close);
-  if (do_close) out << "}\n";
+  declareClass(out, def, do_close, "HPHP");
+  if (do_close) out << "}\n}\n";
 }
 
 std::string ScanGenerator::maybeCloneName(std::string str) const {
@@ -536,12 +689,23 @@ std::string ScanGenerator::maybeCloneName(std::string str) const {
   auto start = pos;
   if (pos != std::string::npos) pos += strlen("HPHP::");
   while (start < str.length()) {
-    if (isalnum(str[pos]) || str[pos] == '_') {
+    if (pos < str.length() &&
+        (isalnum(str[pos]) || str[pos] == '_' || str[pos] == ':')) {
       ++pos;
     } else {
-      auto candidate = str.substr(start, pos);
-      if (exists(m_clonedNames, candidate)) {
-        str = str.replace(start, strlen("HPHP::"), "Cloned::");
+      auto candidate = str.substr(start, pos - start);
+      auto itr = m_clonedNames.find(candidate);
+      if (itr != m_clonedNames.end()) {
+        auto rpos = str.rfind("::", pos);
+        if (rpos != std::string::npos) {
+          if (isNestedDecl(itr->second)) {
+            str = str.replace(start, rpos - start, "Cloned");
+          } else {
+            str = str.replace(start, strlen("HPHP"), "Cloned");
+          }
+        } else {
+          str = str.insert(start, "Cloned::");
+        }
       }
       pos = str.find("HPHP::", pos);
       start = pos;
@@ -551,50 +715,160 @@ std::string ScanGenerator::maybeCloneName(std::string str) const {
   return str;
 }
 
+void
+ScanGenerator::addScanDecls(DeclSet& decls, const CXXRecordDecl* decl) const {
+  if (auto tdecl = dyn_cast<ClassTemplateSpecializationDecl>(decl)) {
+    const auto& targs = tdecl->getTemplateArgs();
+    for (unsigned i = 0; i < targs.size(); ++i) {
+      if (targs[i].getKind() == TemplateArgument::Type) {
+        addScanDecls(decls, *(targs[i].getAsType()));
+      }
+    }
+  }
+  decls.insert(decl->getCanonicalDecl());
+}
+
+void ScanGenerator::addScanDecls(DeclSet& decls, const Type& ty) const {
+  if (auto decl = ty.getAsCXXRecordDecl()) {
+    addScanDecls(decls, decl);
+  } else if (isPointerOrReferenceType(ty) || isArrayType(ty)) {
+    addScanDecls(decls, stripType(ty));
+  } else if (auto tParam = dyn_cast<TemplateTypeParmType>(&ty)) {
+    auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
+    if (decl) addScanDecls(decls, decl);
+  } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(&ty)) {
+    addScanDecls(decls, *tParam->getReplacedParameter());
+  } else if (auto tParam = dyn_cast<TemplateSpecializationType>(&ty)) {
+    auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
+    if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
+      addScanDecls(decls, decl->getTemplatedDecl());
+    }
+ }
+}
+
+namespace {
+std::string removeAnonymous(std::string str) {
+  const char* anonymousStr = "(anonymous namespace)::";
+  auto pos = str.find(anonymousStr);
+  while (pos != std::string::npos) {
+    str = str.erase(pos, strlen(anonymousStr));
+    pos = str.find(anonymousStr);
+  }
+  return str;
+}
+std::string removeInitializer(std::string str) {
+  auto pos = str.find('{');
+  if (pos != std::string::npos) {
+    str = str.erase(pos);
+  }
+  return str;
+}
+}
+
+bool ScanGenerator::cloneDefs(std::ostream& out,
+                              std::ostream& header,
+                              const CXXRecordDecl* decl) {
+  bool res = false;
+  decl = decl->getCanonicalDecl();
+  if (decl->hasDefinition() && !exists(m_cloneVisited, decl)) {
+    m_cloneVisited.insert(decl);
+    decl = decl->getDefinition();
+    for (const auto& base : decl->bases()) {
+      auto baseType = base.getType()->getUnqualifiedDesugaredType();
+      res |= cloneDefs(out, header, *baseType);
+    }
+    for (const auto& base : decl->vbases()) {
+      auto baseType = base.getType()->getUnqualifiedDesugaredType();
+      res |= cloneDefs(out, header, *baseType);
+    }
+    for (const auto& field : decl->fields()) {
+      auto fieldType = field->getType()->getUnqualifiedDesugaredType();
+      res |= cloneDefs(out, header, *fieldType);
+    }
+    if (isHiddenDecl(decl) &&
+        !isAnonymous(decl) &&
+        !exists(m_clonedNames, getName(decl))) {
+      res |= cloneDef(out, header, decl);
+    }
+  }
+  return res;
+}
+
+bool ScanGenerator::cloneDefs(std::ostream& out,
+                              std::ostream& header,
+                              const Type& sty) {
+  const Type *typ = sty.getUnqualifiedDesugaredType();
+  const Type& ty(*typ);
+  if (auto decl = ty.getAsCXXRecordDecl()) {
+    return cloneDefs(out, header, decl);
+  } else if (isPointerOrReferenceType(ty) || isArrayType(ty)) {
+    return cloneDefs(out, header, stripType(ty));
+  } else if (auto tParam = dyn_cast<TemplateTypeParmType>(&ty)) {
+    auto decl = dyn_cast<CXXRecordDecl>(tParam->getDecl()->getDeclContext());
+    if (decl) return cloneDefs(out, header, decl);
+  } else if (auto tParam = dyn_cast<SubstTemplateTypeParmType>(&ty)) {
+    return cloneDefs(out, header, *tParam->getReplacedParameter());
+  } else if (auto tParam = dyn_cast<TemplateSpecializationType>(&ty)) {
+    auto tDecl = tParam->getTemplateName().getAsTemplateDecl();
+    if (auto decl = dyn_cast<ClassTemplateDecl>(tDecl)) {
+      return cloneDefs(out, header, decl->getTemplatedDecl());
+    }
+  }
+  return false;
+}
+
 bool ScanGenerator::cloneDef(std::ostream& out,
-                             std::ostream& friends,
+                             std::ostream& header,
                              const CXXRecordDecl* def) {
   auto outfile = getDefinitionFilename(def);
+
+  def = def->getCanonicalDecl();
 
   assert(def == def->getCanonicalDecl());
   assert(def->hasDefinition());
 
   if (needsScanMethod(def) != NeedsScanFlag::Yes) {
-    //std::cout << "cloneDef, claim " << getName(def) << " needs no scan\n";
+    if (m_verbose) {
+      std::cout << "cloneDef: " << getName(def) << " needs no scan\n";
+    }
     return false;
   }
 
-  if (exists(m_clonedNames, getName(def))) {  // XXX templates?
-    //std::cout << "cloneDef, claim " << getName(def) << " already cloned\n";
+  // TODO (t6956600): some templates and anonymous types are not handled
+  // properly by cloneDef.
+
+  if (exists(m_clonedNames, getName(def))) {
+    if (m_verbose) {
+      std::cout << "cloneDef: " << getName(def) << " already cloned\n";
+    }
     return true;
   }
 
-  m_clonedNames.insert(getName(def));  // XXX templates?
+  m_clonedNames[getName(def)] = def;
 
   def = def->getDefinition();
 
   std::stringstream os;
+  bool sawFieldScan = !isInAnonymousNamespace(def);
 
   declareClonedClass(os, def, false);
 
-  if (def->getNumBases() > 0 || def->getNumVBases() > 0) {
-    const char* sep = " : ";
-    // dump superclasses.
-    for (auto base = def->bases_begin(); base != def->bases_end(); ++base) {
-      auto baseClass = base->getType()->getAsCXXRecordDecl();
-      os << sep << "public " << maybeCloneName(getName(base->getType()));
-      sep = ", ";
-      m_scanDecls[outfile].insert(baseClass);
-    }
-    for (auto base = def->vbases_begin(); base != def->vbases_end(); ++base) {
-      auto baseClass = base->getType()->getAsCXXRecordDecl();
-      os << sep << "public virtual "
-          << maybeCloneName(getName(base->getType()));
-      sep = ", ";
-      m_scanDecls[outfile].insert(baseClass);
-    }
+  const char* sep = " : ";
+  // dump superclasses.
+  for (const auto& base : def->bases()) {
+    auto baseType = base.getType()->getUnqualifiedDesugaredType();
+    os << sep << "public " << maybeCloneName(getName(*baseType));
+    sep = ", ";
+    addScanDecls(m_scanDecls[outfile], baseType->getAsCXXRecordDecl());
   }
-  os << " {\n";
+  for (const auto& base : def->vbases()) {
+    auto baseType = base.getType()->getUnqualifiedDesugaredType();
+    os << sep << "public virtual " << maybeCloneName(getName(*baseType));
+    sep = ", ";
+    addScanDecls(m_scanDecls[outfile], baseType->getAsCXXRecordDecl());
+  }
+
+  os << " {\npublic:\n";
   // Hack to stub out any pure virtual methods from superclasses.
   for (auto itr = def->method_begin(); itr != def->method_end(); ++itr) {
     auto method = (*itr)->getCanonicalDecl();
@@ -605,35 +879,33 @@ bool ScanGenerator::cloneDef(std::ostream& out,
       auto str = maybeCloneName(ss.str());
       auto pos = str.find('{');
       if (pos != std::string::npos) { str = str.substr(0,pos); }
-      os << "  " << str << "{ throw 0; }\n";
+      os << "  " << str << " { throw 0; }\n";
+      // TODO (t6956600): addScanDecls for types in method?
     }
   }
 
   for (auto itr = def->field_begin(); itr != def->field_end(); ++itr) {
     auto field = *itr;
     auto fieldType = field->getType();
-    if (needsScanMethod(*fieldType) == NeedsScanFlag::Yes) {
+    if (needsScanMethod(*fieldType) != NeedsScanFlag::No) {
       if (m_verbose) {
         warning(field, "%s cloned field needs scan", getName(field));
       }
-      std::string fieldStr;
-      llvm::raw_string_ostream ss(fieldStr);
-      PrintingPolicy pp(m_context.getLangOpts());
-      pp.SuppressScope = true;
-      // XXX this is a bit of a hack.
+
       field->setType(fieldType.getDesugaredType(m_context));
+
+      // Make sure clones for fields are emitted first.
+      addScanDecls(m_scanDecls[outfile], *field->getType());
+
+      std::string str;
+      llvm::raw_string_ostream ss(str);
+      PrintingPolicy pp(m_context.getLangOpts());
+      pp.SuppressScope = false;
       field->print(ss, pp);
-      auto str = ss.str();
-      os << "  " << maybeCloneName(str) << ";\n";
-      if (auto fdecl = fieldType->getAsCXXRecordDecl()) {
-        // Make sure clones for fields are emitted first.
-        if (exists(m_privateDefs, fdecl->getCanonicalDecl())) {
-          cloneDef(out, friends, fdecl->getCanonicalDecl());
-        } else {
-          // XXXX deal with templates????
-        }
-        m_scanDecls[outfile].insert(fdecl->getCanonicalDecl());
-      }
+      auto fieldStr = removeInitializer(removeAnonymous(ss.str()));
+      os << "  " << maybeCloneName(fieldStr) << ";\n";
+
+      sawFieldScan = true;
     } else {
       os << "  std::aligned_storage<"
          << m_context.getTypeSize(fieldType)/8
@@ -648,21 +920,19 @@ bool ScanGenerator::cloneDef(std::ostream& out,
     if (getName(namespaces[i]) == "HPHP") continue;
     os << "}\n";
   }
-  os << "}\n";
+  os << "}\n}\n";
 
   out << os.str();
 
-  return true;
+  return sawFieldScan;
 }
 
-bool ScanGenerator::isResourceOrObject(const CXXRecordDecl* def) const {
-  return isSubclassOf(m_resourceDecl, def) || isSubclassOf(m_objectDecl, def);
-}
-
-void ScanGenerator::dumpFieldMarks(std::ostream& out,
-                                   std::ostream& friends,
+bool ScanGenerator::dumpFieldMarks(std::ostream& out,
+                                   std::ostream& header,
                                    const CXXRecordDecl* def,
-                                   bool isCloned) {
+                                   bool isCloned,
+                                   const std::string& prefix) {
+  bool sawFieldScan = false;
   assert(def->hasDefinition() && def == def->getDefinition());
 
   if (m_verbose) {
@@ -673,108 +943,254 @@ void ScanGenerator::dumpFieldMarks(std::ostream& out,
   const std::string indent = "  ";
   for (auto itr = def->field_begin(); itr != def->field_end(); ++itr) {
     auto field = *itr;
+    QualType fieldType(field->getType());
 
     if (m_verbose) {
       std::cout << getName(def) << "::" << getName(field)
            << " (" << isCloned << ") needs scan = "
-           << toStr(needsScanMethod(*field->getType())) << "\n"
+           << toStr(needsScanMethod(*fieldType)) << "\n"
            << getName(def) << "::" << getName(field)
            << " (" << isCloned << ") has scan = "
-           << hasScanMethod(*field->getType()) << "\n";
+           << hasScanMethod(*fieldType) << "\n"
+           << getName(def) << "::" << getName(field)
+           << " (" << isCloned << ") ignored = "
+           << isIgnored(*fieldType) << "\n";
     }
 
-    // TODO: This is overly persmissive....
-    // make exception for opaque/void*?
-    // See #6956600.
-    if (!stripType(*field->getType()).isFundamentalType() &&
-        (needsScanMethod(*field->getType()) == NeedsScanFlag::Yes ||
-         hasScanMethod(*field->getType()))) {
-      auto fieldName = field->getNameAsString();
+    // TODO (t6956600): make exception for opaque/void*, i.e. conservative scan?
+    if (needsScanMethod(*fieldType) == NeedsScanFlag::Yes) {
+      auto fieldName = prefix.empty()
+        ? field->getNameAsString()
+        : prefix + "." + field->getNameAsString();
+      auto fieldTypeDecl = fieldType->getAsCXXRecordDecl();
+
+      sawFieldScan = true;
 
       // For now, template classes will need to declare scan function as a
       // friend.
-      if (field->isAnonymousStructOrUnion() ||
-          field->getType()->isUnionType()) {
-        auto anonField = field->getType()->getAsCXXRecordDecl();
-        if (!anonField->isUnion()) {
-          dumpFieldMarks(out, friends, getCanonicalDef(anonField), isCloned);
+      if (isAnonymous(field) || // redundant?
+          (fieldTypeDecl && isAnonymous(fieldTypeDecl)) ||
+          fieldType->isUnionType()) {
+        if (!fieldTypeDecl->isUnion()) {
+          dumpFieldMarks(out,
+                         header,
+                         getCanonicalDef(fieldTypeDecl),
+                         isCloned,
+                         fieldName);
         } else {
           out << indent;
+          // TODO (t6956600): static assert?  or just conservative scan?
           out << "assert(0); // unions '" << fieldName << "' not handled.\n";
         }
       } else {
         out << indent;
-        out << "mark(this_." << fieldName << ");\n";
+
+        std::string fieldStr = std::string("this_.") + fieldName;
+
+        // if cloned, must cast back to original type for dispatching.
+        if (fieldTypeDecl &&
+            !isNestedDecl(fieldTypeDecl) &&
+            isClonedClass(fieldTypeDecl)) {
+          fieldStr = "reinterpret_cast<const "
+            + getName(*fieldType)
+            + "&>(" + fieldStr + ")";
+        } else if (isPointerType(*fieldType) &&
+                   isClonedClass(getPointeeType(*fieldType))) {
+          auto castType =
+            getPointeeType(*fieldType).getUnqualifiedDesugaredType();
+          if (!isPointerType(*castType)) {
+            fieldStr = "reinterpret_cast<const "
+              + getName(castType->getAsCXXRecordDecl())
+              + "*>(" + fieldStr + ")";
+          } else {
+            // TODO (t6956600): turn into static assert?
+            out << "assert(0); // multi-level pointers '"
+                << fieldName << "' not handled.\n";
+          }
+        }
+
+        if (isArrayType(*fieldType)) {
+          // TODO (t6956600): This case is not quite right.
+          // Could be array over allocation trick, e.g. if size == 1.
+          if (isa<ConstantArrayType>(*fieldType)) {
+            const auto& arrType = cast<ConstantArrayType>(*fieldType);
+
+            std::string nElemsStr;
+            llvm::raw_string_ostream ss(nElemsStr);
+            arrType.getSize().print(ss, false);
+
+            if (hasScanMethod(*fieldType)) {
+              out << "mark("
+                  << "&" << fieldStr << "[0], "
+                  << "&" << fieldStr << "[" << ss.str() << "]);\n";
+            } else {
+              if (isPointerType(getElementType(*fieldType))) {
+                fieldStr = std::string("*") + fieldStr;
+              }
+              out << "for(size_t i = 0; i < " << ss.str() << "; ++i) { ";
+              out << "scan(" << fieldStr << "[i], mark);";
+              out << " }\n";
+            }
+          } else {
+            // TODO (t6956600): Turn into static assert?
+            out << "assert(0); // variable sized arrays '"
+                << fieldName << "' not handled.\n";
+          }
+        // The check for req::ptr of a cloned field is necessary here since the
+        // compiler can't see that the non-cloned class might be a subclass of
+        // some other scanable type.  We need to extract the cloned pointer so
+        // that it will dispatch to the proper scan method for the cloned type.
+        } else if (isReqPtr(*fieldType)) {
+          out << "if (this_." << fieldName << ") ";
+          out << "mark(*" << fieldStr << ".get());\n";
+        } else {
+          if (isPointerType(*fieldType)) {
+            fieldStr = std::string("*") + fieldStr;
+            if (isPointerType(getPointeeType(*fieldType))) {
+              // TODO (t6956600): this is hacky.  turn into static assert?
+              out << "assert(0); // multi-level pointers '"
+                  << fieldName << "' not handled.\n";
+              continue;
+            }
+          }
+          if (isPointerType(*fieldType)) {
+            out << "if (this_." << fieldName << ") ";
+          }
+          if (hasScanMethod(*fieldType)) {
+            out << "mark(" << fieldStr << ");\n";
+          } else {
+            out << "scan(" << fieldStr << ", mark);\n";
+          }
+        }
       }
     }
   }
+  return sawFieldScan;
 }
 
 void ScanGenerator::dumpScanMethodDecl(std::ostream& out,
                                        const CXXRecordDecl* def,
-                                       bool declareArgs) const {
-  if (!declareArgs || !isNestedDecl(def)) {
-    bool isCloned = exists(m_privateDefs, def->getCanonicalDecl());
+                                       bool declareArgs,
+                                       bool do_close,
+                                       const std::string& instantiate,
+                                       bool forceClone) const {
+  if (!declareArgs || !isNestedDecl(def) || !instantiate.empty()) {
+    bool isCloned = isClonedClass(def);
+
+    if (declareArgs &&
+        (isInAnonymousNamespace(def) ||
+         (isAnonymous(def) && !isCloned))) {
+      return;
+    }
+
+    assert((declareArgs && instantiate.empty()) || !declareArgs);
 
     if (declareArgs) {
       declareClass(out, def, true);
       out << "\n";
     }
 
-    if (isTemplate(def)) {
-      dumpTemplateDecl(out, "template <typename F, ", def);
+    if (instantiate.empty()) {
+      out << "namespace HPHP {\n";
+      if (isTemplate(def)) {
+        dumpTemplateDecl(out, "template <typename F_scan, ", def);
+      } else {
+        out << "template <typename F_scan>";
+      }
     } else {
-      out << "template <typename F>";
+      if (isTemplate(def)) {
+        return;  // no instantiation of template functions.
+      } else {
+        out << "namespace HPHP {\n";
+        out << "template ";
+      }
     }
 
     std::string className;
-    if (isNestedDecl(def) && isCloned) {
-      className = "Cloned::" + getName(def, true);
+    if ((isNestedDecl(def) || isInAnonymousNamespace(def) || forceClone) &&
+        isCloned) {
+      className = getNsName(def);
+      auto pos = className.find("::");
+      if (pos != std::string::npos) {
+        className = std::string("Cloned") + className.substr(pos);
+      } else {
+        className = std::string("Cloned::") + className;
+      }
     } else {
-      className = getName(def, false);
+      className = getName(def);
     }
 
-    out << " void scan(const "
-        << className
-        << "& this" << (isCloned ? "__" : "_")
-        << ", F& mark)";
+    auto markType = instantiate.empty() ? "F_scan" : instantiate;
+    auto instType = instantiate.empty() ? "" : "<" + instantiate + ">";
 
-    if (declareArgs) out << ";\n\n";
+    out << " void scan"
+        << instType
+        << "(const " << className
+        << "& this" << (isCloned ? "__" : "_") << ", "
+        << markType << "& mark)";
+
+    if (declareArgs || !instantiate.empty()) {
+      out << ";\n";
+    }
+
+    if (do_close) {
+      out << "}\n";
+    }
   }
 }
 
 // Add scan method to class.
 void ScanGenerator::addScanMethod(std::ostream& res,
-                                  std::ostream& friends,
+                                  std::ostream& header,
                                   const CXXRecordDecl* def) {
   std::stringstream out;
+  std::stringstream header_out;
   const std::string indent = "  ";
 
   assert(def->hasDefinition() && def->getDefinition() == def);
 
-  if (0 && def->field_empty()) { // can't do this.....?
-    //assert(hasScanMethod(def));
-    return;
-  }
-
-  bool isCloned = exists(m_privateDefs, def->getCanonicalDecl());
+  bool isCloned = isClonedClass(def);
 
   if (isCloned) {
-    isCloned = cloneDef(out, friends, def->getCanonicalDecl());
+    m_cloneVisited.clear();
+    isCloned = cloneDefs(out, header_out, def->getCanonicalDecl());
+    isCloned = exists(m_clonedNames, getName(def));
+
+    if (isCloned) {
+      declareClonedClass(header_out, def, true);
+      dumpScanMethodDecl(header_out, def, true, true, "", true);
+    }
   }
 
-  dumpScanMethodDecl(friends, def, true);
+  dumpScanMethodDecl(header_out, def, true);
 
-  dumpScanMethodDecl(out, def);
+  dumpScanMethodDecl(out, def, false, false);
   out << " {\n";
   if (isCloned) {
-    out << "  const auto& this_ = static_cast<const Cloned::"
-        << getName(def, true) << "&>(this__);\n";
+    assert(exists(m_clonedNames, getName(def)));
+    auto cloneName = getNsName(def);
+    auto pos = cloneName.find("HPHP::");
+    if (pos != std::string::npos) {
+      cloneName = std::string("Cloned::") +
+        cloneName.substr(pos + strlen("HPHP::"));
+    } else {
+      cloneName = std::string("Cloned::") + cloneName;
+    }
+    out << "  const auto& this_ = reinterpret_cast<const "
+        << cloneName << "&>(this__);\n";
+    out << "  (void)this_;\n";
   }
+
+  out << "#ifdef SCAN_DEBUG\n";
+  out << "  std::cout << \"Scanning " << getName(def)
+      << " @ \" << &this_ << \"\\n\";\n";
+  out << "#endif\n";
 
   // Note: this assumes the sizing rules of clang/gcc are the same and that
   // these methods are generated and compiled by machines with the same
   // sizes.
+  // This is currently not enabled because clang crashes on certain
+  // template decls when calling getTypeSize().
   if (0 && !isTemplate(def)) {
     out << indent
         << "static_assert(sizeof(this_) == "
@@ -784,50 +1200,108 @@ void ScanGenerator::addScanMethod(std::ostream& res,
   }
 
   for (auto base = def->bases_begin(); base != def->bases_end(); ++base) {
-    if (isGcClass(*base->getType())) {
+    if (needsScanMethod(*base->getType()) == NeedsScanFlag::Yes) {
       out << indent;
-      out << "scan(static_cast<const " << getName(base->getType())
-          << "&>(this_), mark);\n";
+      if (isCloned) {
+        out << "scan(reinterpret_cast<const " << getName(base->getType())
+            << "&>(this_), mark);\n";
+      } else {
+        out << "scan(static_cast<const " << getName(base->getType())
+            << "&>(this_), mark);\n";
+      }
     }
   }
 
   for (auto base = def->vbases_begin(); base != def->vbases_end(); ++base) {
-    if (isGcClass(*base->getType())) {
+    if (needsScanMethod(*base->getType()) == NeedsScanFlag::Yes) {
       out << indent;
-      out << "scan(static_cast<const " << getName(base->getType())
-          << "&>(this_), mark);\n";
+      if (isCloned) {
+        out << "scan(reinterpret_cast<const " << getName(base->getType())
+            << "&>(this_), mark);\n";
+      } else {
+        out << "scan(static_cast<const " << getName(base->getType())
+            << "&>(this_), mark);\n";
+      }
     }
   }
 
-  dumpFieldMarks(out, friends, def, isCloned);
-
+  dumpFieldMarks(out, header_out, def, isCloned);
+  out << "}\n";
   out << "}\n";
 
+  dumpScanMethodDecl(out, def, false, true, "IMarker");
+
+  if (isCloned && !isInAnonymousNamespace(def) && !isNestedDecl(def)) {
+    dumpScanMethodDecl(out, def, false, false, "", true);
+    out << " {\n";
+    out << "  scan(reinterpret_cast<const " << getName(def)
+        << "&>(this__), mark);\n";
+    out << "}\n";
+    out << "}\n";
+  }
+
+  // Can't skip empty classes here because of template friend declaration issue.
+  header << header_out.str();
   res << out.str() << "\n";
 }
 
-void ScanGenerator::emitScanMethods() {
-  // XXX sort by file/location
-  for (auto def : m_gcClasses) {
-    std::stringstream scanStr, friendStr;
+namespace {
 
-    // Skip and decls that have scan methods or are anonymous.
-    // The string check here is a hack because clang doesn't return
-    // the right answer for isAnonymousStructOrUnion for certain decls.
-    auto cdef = cast<CXXRecordDecl>(def);
-
-    if(hasScanMethod(cdef)) continue;
-
-    if (cdef->isAnonymousStructOrUnion() ||
-        getName(cdef).find('.') != std::string::npos) {
-      warning(cdef, "No scan for anonymous struct/union '%s'.", getName(cdef));
-      continue;
+struct LocationSorter {
+  bool operator()(const CXXRecordDecl* a, const CXXRecordDecl* b) const {
+    assert(a->hasDefinition() && b->hasDefinition());
+    if (PluginUtil::isNestedDecl(a) && !PluginUtil::isNestedDecl(b)) {
+      return true;
+    } else {
+      return a->getLocStart() < b->getLocStart();
     }
+  }
+};
 
-    assert(cdef->hasDefinition());
-    addScanMethod(scanStr, friendStr, cdef->getDefinition());
+template <typename P>
+std::map<std::string, std::set<const CXXRecordDecl*, LocationSorter>>
+partition(const P& pf, const DeclSet& s) {
+  std::map<std::string, std::set<const CXXRecordDecl*, LocationSorter>> m;
+  for(auto def : s) {
+    m[pf(def)].insert(def);
+  }
+  return m;
+}
 
-    storeScanOutput(cdef, scanStr, friendStr);
+}
+
+void ScanGenerator::emitScanMethods() {
+  auto partitionedScanClasses = partition(
+    [this](const CXXRecordDecl* decl) {
+      return this->getDefinitionFilename(decl);
+    },
+    m_scanClasses);
+
+  for (const auto& part : partitionedScanClasses) {
+    for (auto def : part.second) {
+      std::stringstream scanStr, headerStr;
+
+      // Skip and decls that have scan methods or are anonymous.
+      // The string check here is a hack because clang doesn't return
+      // the right answer for isAnonymousStructOrUnion for certain decls.
+      auto cdef = cast<CXXRecordDecl>(def);
+
+      if (hasScanMethod(cdef)) continue;
+
+      assert(!isIgnored(cdef));
+
+      if (isAnonymous(cdef)) {
+        warning(cdef,
+                "No scan for anonymous struct/union '%s'.",
+                getName(cdef));
+        continue;
+      }
+
+      assert(cdef->hasDefinition());
+      addScanMethod(scanStr, headerStr, cdef->getDefinition());
+
+      storeScanOutput(cdef, scanStr, headerStr);
+    }
   }
 
   writeFiles();
@@ -839,8 +1313,10 @@ void ScanGenerator::emitProlog(std::ostream& os, const DeclSet& decls) const {
   os << "// override-include-guard\n";
 
   std::set<std::string> headers;
-  for (auto decl : decls) { // XXXXXX sort here.
-    auto filename = getDefinitionFilename(decl);
+  for (auto decl : decls) {
+    auto filename = decl->hasDefinition()
+      ? getDefinitionFilename(decl)
+      : getFilename(decl);
     if (strlen(filename) > 2 && filename[0] == '.' && filename[1] == '/') {
       filename += 2;
     }
@@ -855,22 +1331,18 @@ void ScanGenerator::emitProlog(std::ostream& os, const DeclSet& decls) const {
   }
 
   os << "\n";
-  os << "namespace HPHP {\n\n";
 }
 
 void ScanGenerator::emitEpilog(std::ostream& os) const {
-  os << "\n}\n";
 }
 
 void ScanGenerator::emitDeclProlog(std::ostream& os) const {
   os << "// This file is auto generated.  Do not hand edit.\n";
   os << "// See hphp/tools/clang-gc-tool/README for details.\n";
   os << "// override-include-guard\n\n";
-  os << "namespace HPHP {\n\n";
 }
 
 void ScanGenerator::emitDeclEpilog(std::ostream& os) const {
-  os << "\n}\n";
 }
 
 namespace {
@@ -956,20 +1428,20 @@ std::string ScanGenerator::getScanFilename(const std::string& file) const {
 
 void ScanGenerator::writeFiles() {
   std::map<std::string, std::stringstream> cattedScanMethods;
-  std::map<std::string, std::stringstream> cattedScanFriends;
+  std::map<std::string, std::stringstream> cattedScanHeaders;
   std::map<std::string, DeclSet> cattedScanDecls;
 
   assert(m_scanDecls.size() == m_scanMethods.size() &&
-         m_scanMethods.size() == m_scanFriends.size());
+         m_scanMethods.size() == m_scanHeaders.size());
 
   for (auto& entry : m_scanMethods) {
     const auto outfile = getScanFilename(entry.first);
     cattedScanMethods[outfile] << entry.second.str();
   }
 
-  for (auto& entry : m_scanFriends) {
+  for (auto& entry : m_scanHeaders) {
     const auto outfile = getScanFilename(entry.first);
-    cattedScanFriends[outfile] << entry.second.str();
+    cattedScanHeaders[outfile] << entry.second.str();
   }
 
   for (auto& entry : m_scanDecls) {
@@ -979,7 +1451,7 @@ void ScanGenerator::writeFiles() {
   }
 
   assert(cattedScanDecls.size() == cattedScanMethods.size() &&
-         cattedScanMethods.size() == cattedScanFriends.size());
+         cattedScanMethods.size() == cattedScanHeaders.size());
 
   for (auto& entry : cattedScanMethods) {
     if (entry.second.str().empty()) continue;
@@ -1007,60 +1479,59 @@ void ScanGenerator::writeFiles() {
     Lockfile dlf(declfile);
     if (dlf) {
       std::ofstream dfs(declfile, std::ofstream::out | std::ofstream::trunc);
-      if(!dfs) {
+      if (!dfs) {
         dlf.unlock();
         error("can't open %s", declfile);
       }
 
       emitDeclProlog(dfs);
-      auto str = cattedScanFriends[entry.first].str();
+      auto str = cattedScanHeaders[entry.first].str();
       dfs << str;
       emitDeclEpilog(dfs);
     }
   }
 }
 
-void ScanGenerator::storeScanOutput(const NamedDecl* decl,
+void ScanGenerator::storeScanOutput(const CXXRecordDecl* decl,
                                     std::stringstream& scanners,
-                                    std::stringstream& friends) {
+                                    std::stringstream& headers) {
   auto outfile = getDefinitionFilename(decl);
   m_scanMethods[outfile] << scanners.str();
-  m_scanFriends[outfile] << friends.str();
-  m_scanDecls[outfile].insert(decl);
-  //std::cout << "outfile for " << getName(decl) << " = " << outfile << "\n";
+  m_scanHeaders[outfile] << headers.str();
+  addScanDecls(m_scanDecls[outfile], decl);
 }
 
 void ScanGenerator::preVisit() {
   // Collect all comments, currently unused.
   collectComments();
 
-  for (auto decl : m_gcClasses) {
-    if (getName(decl) == "HPHP::ResourceData") {
-      m_resourceDecl = decl;
-    }
-    if (getName(decl) == "HPHP::ObjectData") {
-      m_objectDecl = decl;
-    }
-  }
+  // Initialize scanClasses with gcClasses.
+  m_scanClasses = m_gcClasses;
+  assert(std::includes(m_hasScanMethodSet.begin(),
+                       m_hasScanMethodSet.end(),
+                       m_gcClasses.begin(),
+                       m_gcClasses.end()));
 }
 
 ScanGenerator::ScanGenerator(
   ASTContext& context,
   Rewriter& rewriter,
   DeclSet& hasScanMethod,
+  DeclSet& ignoredClasses,
   const DeclSet& badContainers,
-  DeclSet& gcClasses,
+  const DeclSet& gcClasses,
+  const DeclSet& gcContainers,
   const std::string& outdir,
   bool verbose
 ) : PluginUtil(context),
     m_rewriter(rewriter),
     m_hasScanMethodSet(hasScanMethod),
+    m_ignoredClasses(ignoredClasses),
     m_badContainers(badContainers),
     m_gcClasses(gcClasses),
+    m_gcContainers(gcContainers),
     m_outdir(outdir.empty() ? "." : outdir),
-    m_verbose(verbose),
-    m_resourceDecl(nullptr),
-    m_objectDecl(nullptr)
+    m_verbose(verbose)
 { }
 
 ScanGenerator::~ScanGenerator() { }

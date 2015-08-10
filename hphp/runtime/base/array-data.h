@@ -32,6 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct String;
 struct TypedValue;
 struct MArrayIter;
 class VariableSerializer;

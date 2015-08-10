@@ -27,13 +27,13 @@ struct DummyResource2 : DummyResource {
   CLASSNAME_IS("Unknown");
   DummyResource2() {}
   String m_class_name;
-  virtual const String& o_getClassNameHook() const {
+  const String& o_getClassNameHook() const override {
     if (m_class_name.empty()) {
       return classnameof();
     }
     return m_class_name;
   }
-  virtual bool isInvalid() const { return m_class_name.empty(); }
+  bool isInvalid() const override { return m_class_name.empty(); }
 };
 
 TEST(ReqPtr, Refcounts) {

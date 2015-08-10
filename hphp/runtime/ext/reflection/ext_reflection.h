@@ -78,7 +78,6 @@ class ReflectionFuncHandle {
   }
 
  private:
-  template <typename F> friend void scan(const ReflectionFuncHandle&, F&);
   const Func* m_func{nullptr};
 };
 
@@ -124,7 +123,6 @@ class ReflectionClassHandle {
   void wakeup(const Variant& content, ObjectData* obj);
 
  private:
-  template <typename F> friend void scan(const ReflectionClassHandle&, F&);
   const Class* m_cls{nullptr};
 };
 
@@ -164,7 +162,6 @@ struct ReflectionConstHandle {
   }
 
  private:
-  template <typename F> friend void scan(const ReflectionConstHandle&, F&);
   const Class::Const* m_const;
   const Class* m_cls;
 };
@@ -202,7 +199,6 @@ class ReflectionPropHandle {
   }
 
  private:
-  template <typename F> friend void scan(const ReflectionPropHandle&, F&);
   const Class::Prop* m_prop{nullptr};
 };
 
@@ -239,7 +235,6 @@ class ReflectionSPropHandle {
   }
 
  private:
-  template <typename F> friend void scan(const ReflectionSPropHandle&, F&);
   const Class::SProp* m_sprop{nullptr};
 };
 

@@ -36,8 +36,9 @@ class BucketBrigade : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(BucketBrigade);
   CLASSNAME_IS("bucket brigade");
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 
   BucketBrigade() { };
   explicit BucketBrigade(const String& data);
@@ -57,8 +58,9 @@ class StreamFilter : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamFilter);
   CLASSNAME_IS("stream filter");
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 
   explicit StreamFilter(const Object& filter, const req::ptr<File>& stream):
       m_filter(filter), m_stream(stream) { }

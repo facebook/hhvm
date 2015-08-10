@@ -16,6 +16,9 @@
    +----------------------------------------------------------------------+
  */
 
+#ifndef PHP_STREAM_CONTEXT_INCL_H_
+#define PHP_STREAM_CONTEXT_INCL_H_
+
 /* $Id$ */
 
 /* Stream context and status notification related definitions */
@@ -126,3 +129,5 @@ END_EXTERN_C()
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+
+#endif

@@ -32,7 +32,9 @@ struct ZendCustomElement : ResourceData {
   ZendCustomElement(void* data, unsigned data_size, DtorFunc destructor);
 
   CLASSNAME_IS("ZendCustomElement");
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 
   const void * data() const { return m_data; }
   void * data() { return m_data; }

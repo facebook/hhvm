@@ -37,6 +37,7 @@
 #ifndef PHP_YAML_INT_H
 #define PHP_YAML_INT_H
 
+#include "hphp/runtime/ext_zend_compat/yaml/php_yaml.h"
 #include "hphp/runtime/base/req-containers.h"
 
 #ifdef __cplusplus

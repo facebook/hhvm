@@ -513,8 +513,6 @@ class BaseVector : public ExtCollectionObjectData {
 
   friend void collectionReserve(ObjectData* obj, int64_t sz);
   friend void collectionInitAppend(ObjectData* obj, TypedValue* val);
-
-  template <typename F> friend void scan(const BaseVector& this_, F& mark);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -705,8 +703,6 @@ class HashCollection : public ExtCollectionObjectData {
   // A pointer to an immutable collection that shares its buffer with
   // this collection.
   Object m_immCopy;
-
-  template <typename F> friend void scan(const HashCollection& this_, F& mark);
 
  protected:
   // Read the high bit of m_version to tell if this collection might contain
@@ -1228,6 +1224,14 @@ class HashCollection : public ExtCollectionObjectData {
   void ksort(int sort_flags, bool ascending);
   bool uasort(const Variant& cmp_function);
   bool uksort(const Variant& cmp_function);
+
+  template<typename F>
+  void scan(F& mark) const {
+    for (size_t i = 0; i < size(); ++i) {
+      iter_elm(nthElmPos(i))->scan(mark);
+    }
+    mark(m_immCopy);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

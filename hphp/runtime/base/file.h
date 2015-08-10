@@ -316,7 +316,6 @@ protected:
                 const String& stream_type = empty_string_ref);
 
 private:
-  template <typename F> friend void scan(const File& this_, F& mark);
   template<class ResourceList>
   String applyFilters(const String& buffer,
                       ResourceList& filters,

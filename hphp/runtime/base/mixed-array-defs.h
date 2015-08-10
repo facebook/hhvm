@@ -50,10 +50,7 @@ template<class F> void MixedArray::scan(F& mark) const {
   if (isZombie()) return;
   auto data = this->data();
   for (unsigned i = 0, n = m_used; i < n; i++) {
-    auto& e = data[i];
-    if (MixedArray::isTombstone(e.data.m_type)) continue;
-    if (e.hasStrKey()) mark(e.skey);
-    mark(e.data);
+    data[i].scan(mark);
   }
 }
 

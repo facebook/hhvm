@@ -20,7 +20,7 @@ else
     PLUGIN_VERBOSE=""
 fi
 
-MORE_ARGS="-x c++ -fexceptions -fcxx-exceptions -Wno-unused-variable -Wno-inconsistent-missing-override -Wno-deprecated-declarations"
+MORE_ARGS="-x c++ -fexceptions -fcxx-exceptions -Wno-unused-variable -Wno-inconsistent-missing-override -Wno-deprecated-declarations -w"
 
 NUM_ARGS=${#COMPILE_ARGS[@]}
 FILE=${COMPILE_ARGS[${NUM_ARGS} - 1]}

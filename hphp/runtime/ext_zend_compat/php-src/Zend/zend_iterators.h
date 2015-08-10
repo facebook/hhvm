@@ -17,6 +17,9 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef ZEND_ITERATORS_H
+#define ZEND_ITERATORS_H
+
 /* $Id$ */
 
 /* These iterators were designed to operate within the foreach()
@@ -94,3 +97,5 @@ END_EXTERN_C()
  * indent-tabs-mode: t
  * End:
  */
+
+#endif

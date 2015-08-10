@@ -47,8 +47,9 @@ public:
   MimePart();
 
   CLASSNAME_IS("mailparse_mail_structure")
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 
   bool parse(const char *buf, int bufsize);
   Variant extract(const Variant& filename, const Variant& callbackfunc, int decode,
@@ -81,8 +82,6 @@ private:
     void rfc2231_to_mime(StringBuffer &value_buf, char* value,
                          int charset_p, int prevcharset_p);
   };
-
-  template <typename F> friend void scan(const MimePart::MimeHeader&, F&);
 
 private:
   static void UpdatePositions(req::ptr<MimePart> part, int newendpos,

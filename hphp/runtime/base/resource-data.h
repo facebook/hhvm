@@ -19,18 +19,19 @@
 
 #include <iostream>
 #include <boost/noncopyable.hpp>
+#include "hphp/scan-methods/all-scan-decl.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/imarker.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {
 
 class Array;
 class String;
-struct IMarker;
 struct ResourceData;
 
 namespace req {
@@ -244,19 +245,17 @@ ALWAYS_INLINE bool decRefRes(ResourceHdr* res) {
   return res->decRefAndRelease();
 }
 
-#define RESOURCE_FRIEND(T) \
-template <typename F> friend void scan(const T& this_, F& mark);
-#define SUPPRESS_RESOURCE_FRIEND(x) x
-
 #define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                 \
   public:                                                       \
-  SUPPRESS_RESOURCE_FRIEND(RESOURCE_FRIEND(T))                  \
+  void vscan(IMarker& mark) const override {                    \
+    HPHP::scanner().scan(*this, mark);                          \
+  }                                                             \
   ALWAYS_INLINE void operator delete(void* p) {                 \
     static_assert(std::is_base_of<ResourceData,T>::value, "");  \
-    constexpr auto size = sizeof(ResourceHdr) + sizeof(T);\
-    auto h = static_cast<ResourceData*>(p)->hdr();\
-    assert(h->heapSize() == size);\
-    MM().freeSmallSize(h, size);\
+    constexpr auto size = sizeof(ResourceHdr) + sizeof(T);      \
+    auto h = static_cast<ResourceData*>(p)->hdr();              \
+    assert(h->heapSize() == size);                              \
+    MM().freeSmallSize(h, size);                                \
   }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                          \

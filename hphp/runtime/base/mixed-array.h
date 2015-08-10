@@ -114,6 +114,13 @@ public:
       return MixedArray::isTombstone(data.m_type);
     }
 
+    template<class F> void scan(F& mark) const {
+      if (!isTombstone()) {
+        if (hasStrKey()) mark(skey);
+        mark(data);
+      }
+    }
+
     static constexpr size_t dataOff() {
       return offsetof(Elm, data);
     }
@@ -364,7 +371,6 @@ private:
   friend class c_Set;
   friend class c_ImmSet;
   friend class c_AwaitAllWaitHandle;
-  template <typename F> friend void scan(const MixedArray& this_, F& mark);
   enum class ClonePacked {};
   enum class CloneMixed {};
 

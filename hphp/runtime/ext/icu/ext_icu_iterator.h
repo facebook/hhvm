@@ -99,7 +99,6 @@ public:
   icu::StringEnumeration *enumeration() const { return m_enum; }
 
 private:
-  template <typename F> friend void HPHP::scan(const IntlIterator&, F&);
   icu::StringEnumeration *m_enum = nullptr;
   int64_t m_key = -1;
   Variant m_current{Variant::NullInit()};

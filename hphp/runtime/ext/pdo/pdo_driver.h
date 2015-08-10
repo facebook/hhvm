@@ -455,8 +455,9 @@ public:
   ~PDOColumn();
 
   CLASSNAME_IS("PDOColumn")
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override {
+    return classnameof();
+  }
 
 public:
   String name;

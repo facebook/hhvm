@@ -138,7 +138,6 @@ public:
   }
 
 private:
-  template <typename F> friend void scan(const GlobalsArray&, F&);
   NameValueTable* const m_tab;
 };
 

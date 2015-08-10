@@ -383,6 +383,24 @@ value hh_shared_init(
     heap_size + page_size;
 
 #ifdef _WIN32
+  /*
+
+     We create an anonymous memory file, whose `handle` might be
+     inheriten by slave processes.
+
+     This memory file is tagged "reserved" but not "commited". Meaning
+     that the memory space will be reserved in the virtual memory
+     table but the pages will not be bound to any physical memory
+     yet. Further call to 'VirtualAlloc' will allow to "commit" page,
+     meaning they will be bound to physical memory.
+
+     This is behaviour should reflect the 'MAP_NORESERVE' flag of
+     'mmap' on Unix. But, on Unix, the "commit" is implicit.
+
+     Commiting the whole shared heap at once would require the same
+     amount of free space in memory (or in swap file).
+
+  */
   HANDLE handle = CreateFileMapping(
     INVALID_HANDLE_VALUE,
     NULL,

@@ -45,7 +45,6 @@ let filename_without_leading_path prefix s =
     then Str.matched_group 1 s
     else raise CE.Impossible
 
-(*
 let process_output_to_list2 command =
   let chan = Unix.open_process_in command in
   let res = ref ([] : string list) in
@@ -64,7 +63,6 @@ let cmd_to_list command =
   | _ -> raise (CE.CmdError (exit_status,
                          (Printf.sprintf "CMD = %s, RESULT = %s"
                              command (String.concat "\n" l))))
-*)
 
 let recursive_file_pairs src dest =
   let escaped_src =

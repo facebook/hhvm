@@ -17,13 +17,16 @@
 #define incl_HPHP_RUNTIME_IMARKER_H_
 
 #include <list>
+#include <bitset>
 #include <boost/variant.hpp>
 #include "hphp/util/range.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hphp-raw-ptr.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/indexed-string-map.h"
 
 namespace folly {
 template <class T> class Optional;
@@ -54,6 +57,9 @@ struct IMarker;
 struct AsioContext;
 struct Expression;
 struct Unit;
+struct StreamContext;
+struct DateTime;
+struct Extension;
 template <typename T, bool isLow> struct AtomicSharedPtrImpl;
 template <typename T> struct FixedVector;
 template <typename T> struct SweepableMember;
@@ -70,7 +76,12 @@ struct Block;
 struct Func;
 }
 }
-namespace jit { struct Block; }
+namespace jit {
+struct Block;
+struct ALocMeta;
+struct Type;
+struct TypeConstraint;
+}
 namespace Compiler { struct Label; }
 
 template <typename F, typename T>
@@ -88,6 +99,53 @@ void scan(Itr start, Itr end, F& mark) {
   while (start != end) scan(*start++, mark);
 }
 
+// TODO (t6956600): not 100% accurate. only checks for Builder nested class.
+template <typename T>
+struct IsIndexedStringMapBuilderHelper {
+ private:
+  using Yes = char[2];
+  using No = char[1];
+  struct Fallback { struct Builder { }; };
+  struct Derived : T, Fallback { };
+  template <typename U> static No& test(typename U::Builder*);
+  template <typename U> static Yes& test(U*);
+ public:
+  static constexpr bool value = sizeof(test<Derived>(nullptr)) == sizeof(Yes);
+};
+
+template <typename T> struct has_destructor {
+  using Yes = char[2];
+  using No = char[1];
+  template <typename U> static No& test(...);
+  template <typename U> static Yes& test(decltype(((U*)nullptr)->~U())*);
+  static constexpr bool value = sizeof(test<T>(nullptr)) == sizeof(Yes);
+};
+
+template <typename T> struct IsIndexedStringMap {
+  static constexpr bool value = false;
+};
+
+template <typename T, bool b, typename I, I v>
+struct IsIndexedStringMap<IndexedStringMap<T,b,I,v>> {
+  static constexpr bool value = true;
+};
+
+template <typename T, typename E = void>
+struct IsIndexedStringMapBuilder {
+  static constexpr bool value = false;
+};
+
+template <typename T>
+struct IsIndexedStringMapBuilder<
+  T,
+  typename std::enable_if<std::is_class<T>::value &&
+                          !std::is_same<StreamContext,T>::value &&
+                          !std::is_same<DateTime,T>::value &&
+                          has_destructor<T>::value>::type
+> {
+  static constexpr bool value = IsIndexedStringMapBuilderHelper<T>::value;
+};
+
 // Interface for marking.
 struct IMarker {
   virtual void operator()(const Resource&) = 0;
@@ -102,6 +160,7 @@ struct IMarker {
   virtual void operator()(const Stack&) = 0;
   virtual void operator()(const VarEnv&) = 0;
   virtual void operator()(const RequestEventHandler&) = 0;
+  virtual void operator()(const Extension&) = 0;
   virtual void operator()(const AsioContext&) = 0;
 
   virtual void operator()(const StringData*) = 0;
@@ -155,7 +214,22 @@ struct IMarker {
   }
 
   template <typename T>
+  void operator()(const LowStringPtr& p) {
+    if (p) scan(*p.get(), *this);
+  }
+
+  template <typename T>
+  void operator()(const AtomicLowPtr<T>& p) {
+    if (p) scan(*p.get(), *this);
+  }
+
+  template <typename T>
   void operator()(const std::shared_ptr<T>& p) {
+    if (p) scan(*p.get(), *this);
+  }
+
+  template <typename T>
+  void operator()(const hphp_raw_ptr<T>& p) {
     if (p) scan(*p.get(), *this);
   }
 
@@ -215,6 +289,15 @@ struct IMarker {
 
   template <typename A, typename B>
   typename std::enable_if<
+    (!std::is_fundamental<A>::value && !std::is_fundamental<B>::value),
+    void
+  >::type operator()(const std::pair<A, B*>& p) {
+    scan(p.first, *this);
+    if (p.second) scan(*p.second, *this);
+  }
+
+  template <typename A, typename B>
+  typename std::enable_if<
     (!std::is_fundamental<A>::value && std::is_fundamental<B>::value),
     void
   >::type operator()(const std::pair<A, B>& p) {
@@ -256,12 +339,26 @@ struct IMarker {
   }
 
   template <typename T>
+  void operator()(const std::deque<T*>& p) {
+    for (const auto& elem : p) {
+      if (elem) scan(*elem, *this);
+    }
+  }
+
+  template <typename T>
   void operator()(const std::vector<T*>& p) {
-    for (const auto& elem : p) if (elem) scan(*elem, *this);
+    for (const auto& elem : p) {
+      if (elem) scan(*elem, *this);
+    }
   }
 
   template <typename K, typename V>
   void operator()(const boost::container::flat_map<K,V>& p) {
+    for (const auto& elem : p) scan(elem, *this);
+  }
+
+  template <typename K>
+  void operator()(const boost::container::flat_set<K>& p) {
     for (const auto& elem : p) scan(elem, *this);
   }
 
@@ -306,6 +403,22 @@ struct IMarker {
     for (const auto& elem : p) scan(elem, *this);
   }
 
+  template<class T,
+           bool CaseSensitive,
+           class Index,
+           Index InvalidIndex = Index(-1)>
+  void operator()(
+    const IndexedStringMap<T,CaseSensitive,Index,InvalidIndex>& p
+  ) {
+    for (const auto& elem : p.range()) scan(elem, *this);
+  }
+
+  template<typename T>
+  typename std::enable_if<IsIndexedStringMapBuilder<T>::value, void>::type
+  operator()(const T& p) {
+    for (const auto& elem : p) scan(elem, *this);
+  }
+
   template <class T, class U, class V, class W>
   void operator()(const hphp_hash_map<T,U,V,W>& p) {
     for (const auto& elem : p) scan(elem, *this);
@@ -315,6 +428,14 @@ struct IMarker {
   void operator()(const hphp_hash_map<T,U*,V,W>& p) {
     for (const auto& elem : p) {
       scan(elem.first, *this);
+      if (elem.second) scan(*elem.second, *this);
+    }
+  }
+
+  template <class T, class U, class V, class W>
+  void operator()(const hphp_hash_map<T*,U*,V,W>& p) {
+    for (const auto& elem : p) {
+      if (elem.first) scan(*elem.first, *this);
       if (elem.second) scan(*elem.second, *this);
     }
   }
@@ -370,7 +491,11 @@ struct IMarker {
     // TODO (t6956600): do something clever here.
   }
 
-  // other half of a pair.
+  // Always ignore std::enable_shared_from_this.
+  template <typename T>
+  void operator()(const std::enable_shared_from_this<T>&) { }
+
+  // Ignored other halves of a std::pairs.
   void operator()(const Compiler::Label*) { }
   void operator()(const HHBBC::php::Block*) { }
   void operator()(const Compiler::Label&) { }
@@ -381,6 +506,9 @@ struct IMarker {
   void operator()(const Expression&) { }
   void operator()(const std::string&) { }
   void operator()(const jit::Block*) { }
+  void operator()(const jit::ALocMeta&) { }
+  void operator()(const jit::TypeConstraint&) { }
+  template <size_t N> void operator()(const std::bitset<N>&) { }
 
 protected:
   struct variant_visitor : boost::static_visitor<> {

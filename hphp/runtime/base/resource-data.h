@@ -247,9 +247,6 @@ ALWAYS_INLINE bool decRefRes(ResourceHdr* res) {
 
 #define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                 \
   public:                                                       \
-  void vscan(IMarker& mark) const override {                    \
-    HPHP::scanner().scan(*this, mark);                          \
-  }                                                             \
   ALWAYS_INLINE void operator delete(void* p) {                 \
     static_assert(std::is_base_of<ResourceData,T>::value, "");  \
     constexpr auto size = sizeof(ResourceHdr) + sizeof(T);      \

@@ -25,6 +25,7 @@ using clang::ASTContext;
 using clang::CXXRecordDecl;
 using clang::FieldDecl;
 using clang::ClassTemplateDecl;
+using clang::ClassTemplateSpecializationDecl;
 using clang::CallExpr;
 using clang::isa;
 using clang::cast;
@@ -86,6 +87,7 @@ void ResolveClassesVisitor::resolveDecl(const CXXRecordDecl* decl) {
   if (!decl->hasDefinition()) return;
 
   auto name = getName(decl);
+
   if (isTemplate(decl)) {
     decl = getTemplateDef(decl)->getTemplatedDecl()->getCanonicalDecl();
     name = name.substr(0, name.find('<'));
@@ -141,6 +143,15 @@ bool ResolveClassesVisitor::VisitFieldDecl(FieldDecl* decl) {
 bool ResolveClassesVisitor::VisitClassTemplateDecl(ClassTemplateDecl* tdecl) {
   if (tdecl->isThisDeclarationADefinition()) {
     resolveDecl(tdecl->getTemplatedDecl()->getCanonicalDecl());
+  }
+  return true;
+}
+
+bool ResolveClassesVisitor::VisitClassTemplateSpecializationDecl(
+  ClassTemplateSpecializationDecl* tdecl
+) {
+  if (tdecl->isThisDeclarationADefinition()) {
+    resolveDecl(tdecl->getSpecializedTemplate()->getTemplatedDecl());
   }
   return true;
 }

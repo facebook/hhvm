@@ -208,14 +208,14 @@ struct PluginUtil {
 
   clang::ASTContext& m_context;
   std::set<const clang::RawComment*> m_comments;
-private:
+protected:
   std::string addNamespaces(const clang::NamedDecl* decl,
                             const std::string& str,
                             bool noClasses = false) const;
   std::string addNamespaces(const clang::Type& ty,
                             const std::string& str,
                             bool noClasses = false) const;
-
+private:
   std::string format(boost::format& f) const {
     return boost::str(f);
   }

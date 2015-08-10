@@ -51,6 +51,9 @@ struct ResolveClassesVisitor
   bool VisitClassTemplateDecl(clang::ClassTemplateDecl* decl);
   bool VisitFieldDecl(clang::FieldDecl* decl);
   bool VisitCXXRecordDecl(clang::CXXRecordDecl* decl);
+  bool VisitClassTemplateSpecializationDecl(
+    clang::ClassTemplateSpecializationDecl* tdecl
+  );
   //bool VisitCallExpr(clang::CallExpr* call);
  private:
   void resolveDecl(const clang::CXXRecordDecl* decl);

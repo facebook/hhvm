@@ -90,6 +90,13 @@ struct ScanGenerator : clang::RecursiveASTVisitor<ScanGenerator>,
   void addScanDecls(DeclSet& decls, const clang::CXXRecordDecl* decl) const;
   void addScanDecls(DeclSet& decls, const clang::Type& ty) const;
 
+  void cloneField(std::ostream& out,
+                  const char* outfile,
+                  clang::FieldDecl* field);
+  bool cloneFields(std::ostream& out,
+                   std::ostream& header,
+                   const char* outfile,
+                   const clang::CXXRecordDecl* def);
   bool cloneDefs(std::ostream& os,
                  std::ostream& header,
                  const clang::Type& def);

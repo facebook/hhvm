@@ -120,6 +120,7 @@ template<class F> struct ExtMarker final: IMarker {
   void operator()(const Stack& p) override { mark_(p); }
   void operator()(const VarEnv& p) override { mark_(p); }
   void operator()(const RequestEventHandler& p) override { mark_(p); }
+  void operator()(const Extension& p) override { mark_(p); }
   void operator()(const AsioContext& p) override { mark_(p); }
 
   void operator()(const StringData* p) override { mark_(p); }

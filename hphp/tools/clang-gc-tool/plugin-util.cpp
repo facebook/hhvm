@@ -292,7 +292,11 @@ PluginUtil::addNamespaces(const NamedDecl* decl,
       if (isa<NamespaceDecl>(p)) {
         auto ns = cast<NamespaceDecl>(p);
         if (!isAnonymous(ns)) {
-          nsvec.push_back(getName(ns, true, true));
+          auto nsName = getName(ns, true, true);
+          // Ugly hack to work around clang bug.
+          if(nsName != "std" || str.find("std::") != 0) {
+            nsvec.push_back(nsName);
+          }
         }
       } else if (p->isRecord() && !noClasses) {
         nsvec.push_back(getName(cast<CXXRecordDecl>(p), true, true));

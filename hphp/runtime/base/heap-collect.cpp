@@ -127,6 +127,9 @@ struct Marker {
   // TODO (6512343): this needs to be hooked into scan methods for REHs.
   void operator()(const RequestEventHandler&) { }
 
+  // TODO (6512343): this needs to be hooked into scan methods for Extensions.
+  void operator()(const Extension&) { }
+
   // Explicitly ignored field types.
   void operator()(const LowPtr<Class>&) {}
   void operator()(const Func*) {}

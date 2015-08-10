@@ -225,8 +225,7 @@ void ScanGenerator::generateWarnings(const CXXRecordDecl* decl) {
     decl = decl->field_empty() ? decl->getDefinition() : decl;
     assert(decl);
 
-    for (auto itr = decl->field_begin(); itr != decl->field_end(); ++itr) {
-      auto field = *itr;
+    for (const auto& field : decl->fields()) {
       auto fieldType = field->getType();
       if (fieldType->isUnionType()) {
         warning(m_whys,
@@ -360,7 +359,7 @@ ScanGenerator::needsScanMethodImpl(const CXXRecordDecl* decl) {
 
   auto checkBaseClass = [&](const CXXBaseSpecifier& base) {
     auto sugaredBaseTy = base.getType();
-    const auto baseTy = sugaredBaseTy->getUnqualifiedDesugaredType(); //?
+    const auto baseTy = sugaredBaseTy->getUnqualifiedDesugaredType();
     if (auto baseClass = baseTy->getAsCXXRecordDecl()) {
       return needsScanMethodImpl(baseClass);
     } else if (auto tParam = dyn_cast<TemplateTypeParmType>(baseTy)) {
@@ -761,6 +760,10 @@ std::string removeInitializer(std::string str) {
   if (pos != std::string::npos) {
     str = str.erase(pos);
   }
+  pos = str.find('{');
+  if (pos != std::string::npos) {
+    str = str.erase(pos);
+  }
   return str;
 }
 }
@@ -790,6 +793,18 @@ bool ScanGenerator::cloneDefs(std::ostream& out,
         !exists(m_clonedNames, getName(decl))) {
       res |= cloneDef(out, header, decl);
     }
+    // If decl is a gc container, then visit all template args.
+    // TODO: fix this, load-elim.cpp, PhiKey
+    if (isInDeclClass(m_gcContainers, decl)) {
+      if (auto tdecl = dyn_cast<ClassTemplateSpecializationDecl>(decl)) {
+        const auto& targs = tdecl->getTemplateArgs();
+        for (unsigned i = 0; i < targs.size(); ++i) {
+          if (targs[i].getKind() == TemplateArgument::Type) {
+            res |= cloneDefs(out, header, *(targs[i].getAsType()));
+          }
+        }
+      }
+    }
   }
   return res;
 }
@@ -815,6 +830,86 @@ bool ScanGenerator::cloneDefs(std::ostream& out,
     }
   }
   return false;
+}
+
+void ScanGenerator::cloneField(std::ostream& os,
+                               const char* outfile,
+                               FieldDecl* field) {
+  auto fieldType = field->getType();
+  auto ft = fieldType.getDesugaredType(m_context);
+
+  field->setType(ft.getCanonicalType());
+
+  // Make sure clones for fields are emitted first.
+  addScanDecls(m_scanDecls[outfile], *field->getType());
+
+  std::string str;
+  llvm::raw_string_ostream ss(str);
+  PrintingPolicy pp(m_context.getLangOpts());
+  pp.SuppressScope = false;
+  field->print(ss, pp);
+  auto fieldStr = removeInitializer(removeAnonymous(ss.str()));
+  os << "  " << maybeCloneName(fieldStr) << ";\n";
+}
+
+bool ScanGenerator::cloneFields(std::ostream& os,
+                                std::ostream& header,
+                                const char* outfile,
+                                const CXXRecordDecl* def) {
+  bool sawFieldScan = false;
+  std::string suffix;
+  for (const auto& field : def->fields()) {
+    auto fieldType = field->getType();
+    if (needsScanMethod(*fieldType) != NeedsScanFlag::No) {
+      if (m_verbose) {
+        warning(field, "%s cloned field needs scan", getName(field));
+      }
+      auto fieldTypeDecl = fieldType->getAsCXXRecordDecl();
+      if (fieldTypeDecl && fieldTypeDecl->isUnion()) {
+        auto name = isAnonymous(fieldTypeDecl) ? "skipAnonField" + suffix
+          : getName(field);
+        // TODO: assert?  this will fail in scan generation.
+        if (m_verbose) {
+          warning(field,
+                  "Private class '%s' has union field needing scan",
+                  getName(def));
+        }
+        os << "  /* unscanable union */\n";
+        os << "  std::aligned_storage<"
+           << m_context.getTypeSize(fieldType)/8
+           << ", "
+           << m_context.getTypeAlign(fieldType)/8
+           << ">::type " << name << ";\n";
+      } else {
+        if (fieldTypeDecl && isAnonymous(fieldTypeDecl)) {
+          // dump all members
+          if (!getName(field).empty()) {
+            os << "  struct {\n";
+          }
+          sawFieldScan |= cloneFields(os,
+                                      header,
+                                      outfile,
+                                      getCanonicalDef(fieldTypeDecl));
+          if (!getName(field).empty()) {
+            os << "  } " << getName(field) << ";\n";
+          }
+        } else {
+          cloneField(os, outfile, field);
+        }
+        sawFieldScan = true;
+      }
+    } else {
+      auto name = isAnonymous(field) ? "skipAnonField" + suffix
+        : getName(field);
+      os << "  std::aligned_storage<"
+         << m_context.getTypeSize(fieldType)/8
+         << ", "
+         << m_context.getTypeAlign(fieldType)/8
+         << ">::type " << name << ";\n";
+    }
+    suffix += "_";
+  }
+  return sawFieldScan;
 }
 
 bool ScanGenerator::cloneDef(std::ostream& out,
@@ -884,36 +979,10 @@ bool ScanGenerator::cloneDef(std::ostream& out,
     }
   }
 
-  for (auto itr = def->field_begin(); itr != def->field_end(); ++itr) {
-    auto field = *itr;
-    auto fieldType = field->getType();
-    if (needsScanMethod(*fieldType) != NeedsScanFlag::No) {
-      if (m_verbose) {
-        warning(field, "%s cloned field needs scan", getName(field));
-      }
+  sawFieldScan |= cloneFields(os, header, outfile, def);
 
-      field->setType(fieldType.getDesugaredType(m_context));
-
-      // Make sure clones for fields are emitted first.
-      addScanDecls(m_scanDecls[outfile], *field->getType());
-
-      std::string str;
-      llvm::raw_string_ostream ss(str);
-      PrintingPolicy pp(m_context.getLangOpts());
-      pp.SuppressScope = false;
-      field->print(ss, pp);
-      auto fieldStr = removeInitializer(removeAnonymous(ss.str()));
-      os << "  " << maybeCloneName(fieldStr) << ";\n";
-
-      sawFieldScan = true;
-    } else {
-      os << "  std::aligned_storage<"
-         << m_context.getTypeSize(fieldType)/8
-         << ", "
-         << m_context.getTypeAlign(fieldType)/8
-         << ">::type " << getName(field) << ";\n";
-    }
-  }
+  // add dummy ctor to suppress warnings about reference fields.
+  os << "  " << getName(def, true) << "();\n";
   os << "};\n";
   auto namespaces = getParentNamespaces(def);
   for (size_t i = 0; i < namespaces.size(); ++i) {
@@ -941,8 +1010,7 @@ bool ScanGenerator::dumpFieldMarks(std::ostream& out,
   }
 
   const std::string indent = "  ";
-  for (auto itr = def->field_begin(); itr != def->field_end(); ++itr) {
-    auto field = *itr;
+  for (const auto& field : def->fields()) {
     QualType fieldType(field->getType());
 
     if (m_verbose) {
@@ -991,9 +1059,15 @@ bool ScanGenerator::dumpFieldMarks(std::ostream& out,
         if (fieldTypeDecl &&
             !isNestedDecl(fieldTypeDecl) &&
             isClonedClass(fieldTypeDecl)) {
-          fieldStr = "reinterpret_cast<const "
-            + getName(*fieldType)
-            + "&>(" + fieldStr + ")";
+          if (isInAnonymousNamespace(fieldTypeDecl)) {
+            fieldStr = "reinterpret_cast<const "
+              + maybeCloneName(getName(*fieldType))
+              + "&>(" + fieldStr + ")";
+          } else {
+            fieldStr = "reinterpret_cast<const "
+              + getName(*fieldType)
+              + "&>(" + fieldStr + ")";
+          }
         } else if (isPointerType(*fieldType) &&
                    isClonedClass(getPointeeType(*fieldType))) {
           auto castType =
@@ -1199,27 +1273,27 @@ void ScanGenerator::addScanMethod(std::ostream& res,
         << ");\n";
   }
 
-  for (auto base = def->bases_begin(); base != def->bases_end(); ++base) {
-    if (needsScanMethod(*base->getType()) == NeedsScanFlag::Yes) {
+  for (const auto& base : def->bases()) {
+    if (needsScanMethod(*base.getType()) == NeedsScanFlag::Yes) {
       out << indent;
       if (isCloned) {
-        out << "scan(reinterpret_cast<const " << getName(base->getType())
+        out << "scan(reinterpret_cast<const " << getName(base.getType())
             << "&>(this_), mark);\n";
       } else {
-        out << "scan(static_cast<const " << getName(base->getType())
+        out << "scan(static_cast<const " << getName(base.getType())
             << "&>(this_), mark);\n";
       }
     }
   }
 
-  for (auto base = def->vbases_begin(); base != def->vbases_end(); ++base) {
-    if (needsScanMethod(*base->getType()) == NeedsScanFlag::Yes) {
+  for (const auto& base : def->vbases()) {
+    if (needsScanMethod(*base.getType()) == NeedsScanFlag::Yes) {
       out << indent;
       if (isCloned) {
-        out << "scan(reinterpret_cast<const " << getName(base->getType())
+        out << "scan(reinterpret_cast<const " << getName(base.getType())
             << "&>(this_), mark);\n";
       } else {
-        out << "scan(static_cast<const " << getName(base->getType())
+        out << "scan(static_cast<const " << getName(base.getType())
             << "&>(this_), mark);\n";
       }
     }

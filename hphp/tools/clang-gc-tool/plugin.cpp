@@ -133,10 +133,10 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_needsScanMethodNames.insert("HPHP::Object");
     m_needsScanMethodNames.insert("HPHP::Resource");
     m_needsScanMethodNames.insert("HPHP::RequestEventHandler");
+    m_needsScanMethodNames.insert("HPHP::Extension");
 
     // TODO (t6956600): Add these?
     //m_needsScanMethodNames.insert("HPHP::SweepableMember");
-    //m_needsScanMethodNames.insert("HPHP::Extension");
 
     // These are classes that have scan methods already defined
     // by the heap tracer.  Scan methods will not be generated
@@ -181,10 +181,10 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_hasScanMethodNames.insert("HPHP::default_ptr");
     m_hasScanMethodNames.insert("HPHP::copy_ptr");
     m_hasScanMethodNames.insert("HPHP::Func");
+    m_hasScanMethodNames.insert("HPHP::Unit");
     m_hasScanMethodNames.insert("HPHP::ExtraArgs");
     m_hasScanMethodNames.insert("HPHP::ActRec");
     m_hasScanMethodNames.insert("HPHP::Stack");
-    m_hasScanMethodNames.insert("HPHP::Fault");
     m_hasScanMethodNames.insert("HPHP::Value");
     m_hasScanMethodNames.insert("HPHP::VarEnv");
     m_hasScanMethodNames.insert("HPHP::ApcTypedValue");
@@ -222,7 +222,6 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_hasScanMethodNames.insert("std::flat_set");
     m_hasScanMethodNames.insert("std::flat_multiset");
     m_hasScanMethodNames.insert("std::stack");
-    m_hasScanMethodNames.insert("std::map");
     m_hasScanMethodNames.insert("std::multimap");
     m_hasScanMethodNames.insert("std::set");
     m_hasScanMethodNames.insert("std::multiset");
@@ -267,8 +266,13 @@ struct AddScanMethodsAction : public PluginASTAction {
     // here because they should not be scanned or because they
     // cause problems with scan code generation.
     // TODO (t6956600) This list should be double-checked.
+
+    // Part of memory manager.
     m_ignoredNames.insert("HPHP::Header");
     m_ignoredNames.insert("HPHP::MemoryManager");
+
+    // Ignored.
+    m_ignoredNames.insert("HPHP::AsyncFunc");
 
     // Test code
     m_ignoredNames.insert("HPHP::DummyResource2");
@@ -298,125 +302,32 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_ignoredNames.insert("HPHP::SString");
     m_ignoredNames.insert("HPHP::SArray");
 
-    // compilation problems.
-    m_ignoredNames.insert("HPHP::LitstrTable");  // This causes gcc to crash.
-    m_ignoredNames.insert("HPHP::HHBBC::StepFlags");
-    m_ignoredNames.insert("HPHP::HHBBC::State");
-    m_ignoredNames.insert("HPHP::HHBBC::Type");
-    m_ignoredNames.insert("HPHP::HHBBC::ClassInfo");
-    m_ignoredNames.insert("HPHP::HHBBC::NamingEnv");
-    m_ignoredNames.insert("HPHP::Unit");
-    m_ignoredNames.insert("HPHP::JobQueueWorker");
-    m_ignoredNames.insert("HPHP::ElmKey");
-    m_ignoredNames.insert("HPHP::jit::SSATmp");
-    m_ignoredNames.insert("HPHP::jit::Type");
+    // Compilation problems.  TODO (t6956600): Whittle these down.
 
-    m_ignoredNames.insert("HPHP::HHBBC::WorkResult");
+    // Name used in template is not properly getting qualifiers, e.g.
+    // const std::enable_shared_from_this<DebuggerProxy>.
     m_ignoredNames.insert("HPHP::Eval::DebuggerProxy");
+
+    // A private class with a nested typedef used in a templatized map, e.g.
+    // AtomicHashArray<..., HPHP::PCRECache::ahm_string_data_same, ...>.
     m_ignoredNames.insert("HPHP::PCRECache");
 
-    /////////////////////////
-
-#if 1
-    // TODO (t6956600): whittle down this list.
-    m_ignoredNames.insert("HPHP::jit::IRUnit");
-    m_ignoredNames.insert("HPHP::Compiler::EmitterVisitor");
-    m_ignoredNames.insert("HPHP::jit::BlockPusher");
-    m_ignoredNames.insert("HPHP::Verifier::GraphBuilder");
-
-    m_ignoredNames.insert("HPHP::jit::Vgen");
-    m_ignoredNames.insert("HPHP::jit::AsmInfo");
-    m_ignoredNames.insert("HPHP::jit::UseVisitor");
-    m_ignoredNames.insert("HPHP::jit::Vinstr");
-    m_ignoredNames.insert("HPHP::jit::SSATmp");
-    m_ignoredNames.insert("HPHP::jit::Type");
-    m_ignoredNames.insert("HPHP::jit::Env");
-    m_ignoredNames.insert("HPHP::jit::Local");
-    m_ignoredNames.insert("HPHP::jit::RegionFormer");
-    m_ignoredNames.insert("HPHP::jit::RegionDesc");
-    m_ignoredNames.insert("HPHP::jit::RegionContext");
-    m_ignoredNames.insert("HPHP::jit::irgen::CatchMaker");
-    m_ignoredNames.insert("HPHP::jit::MCGenerator");
-    m_ignoredNames.insert("HPHP::jit::DFS");
-    m_ignoredNames.insert("HPHP::jit::Global");
+    // Causes duplicate definition of private cloned classes, e.g. see
+    // licm.cpp: Env, refcount-opts.cpp: Env.
     m_ignoredNames.insert("HPHP::jit::AliasAnalysis");
-    m_ignoredNames.insert("HPHP::VariableSerializer");
-    m_ignoredNames.insert("HPHP::UnitEmitter");
-    m_ignoredNames.insert("HPHP::PreClass");
-    m_ignoredNames.insert("HPHP::PreClassEmitter");
-    m_ignoredNames.insert("HPHP::FuncEmitter");
-    m_ignoredNames.insert("HPHP::AllClasses");
-    m_ignoredNames.insert("HPHP::ClassScope");
-    m_ignoredNames.insert("HPHP::SynchronizableMulti");
-    m_ignoredNames.insert("HPHP::QueryExpression");
-    m_ignoredNames.insert("HPHP::InvalidSetMException");
-    m_ignoredNames.insert("HPHP::FatalErrorException");
-    m_ignoredNames.insert("HPHP::Fault");
-    m_ignoredNames.insert("HPHP::LibEventTransport");
-    m_ignoredNames.insert("HPHP::EHEnt");
-    m_ignoredNames.insert("HPHP::NamedEntity");
-    m_ignoredNames.insert("HPHP::NamedEntityPairTable");
-    m_ignoredNames.insert("HPHP::MIterTable");
-    m_ignoredNames.insert("HPHP::Shape");
 
-    m_ignoredNames.insert("HPHP::XDebugCommand");
-    m_ignoredNames.insert("HPHP::XDebugProfiler");
+    // Causes downstream problems, e.g. gvn.cpp.  Instantiation of
+    // template that uses private classes as template args. Similar to
+    // PCRECache.
+    m_ignoredNames.insert("HPHP::jit::Type");
 
-    m_ignoredNames.insert("HPHP::Eval::InterruptSite");
-    m_ignoredNames.insert("HPHP::Eval::CmdConstant");
-    m_ignoredNames.insert("HPHP::Eval::CmdExtension");
-    m_ignoredNames.insert("HPHP::Eval::CmdEval");
-    m_ignoredNames.insert("HPHP::Eval::CmdGlobal");
-    m_ignoredNames.insert("HPHP::Eval::CmdInterrupt");
-    m_ignoredNames.insert("HPHP::Eval::CmdInfo");
-    m_ignoredNames.insert("HPHP::Eval::CmdList");
-    m_ignoredNames.insert("HPHP::Eval::CmdMachine");
-    m_ignoredNames.insert("HPHP::Eval::CmdNext");
-    m_ignoredNames.insert("HPHP::Eval::CmdPrint");
-    m_ignoredNames.insert("HPHP::Eval::CmdThread");
-    m_ignoredNames.insert("HPHP::Eval::CmdVariable");
-    m_ignoredNames.insert("HPHP::Eval::CmdWhere");
-    m_ignoredNames.insert("HPHP::Eval::DebuggerClient");
-    m_ignoredNames.insert("HPHP::Eval::DebuggerCommand");
+    // Causes downstream problems.
+    m_ignoredNames.insert("HPHP::jit::SSATmp");
+    m_ignoredNames.insert("HPHP::jit::StateVector");
+    m_ignoredNames.insert("HPHP::jit::NormalizedInstruction");
+    m_ignoredNames.insert("HPHP::jit::IRUnit");
 
-    m_ignoredNames.insert("HPHP::Compiler::SymbolicStack::SymEntry");
-    m_ignoredNames.insert("HPHP::Compiler::Parser");
-    m_ignoredNames.insert("HPHP::HHBBC::RunFlags");
-    m_ignoredNames.insert("HPHP::HHBBC::Bytecode");
-    m_ignoredNames.insert("HPHP::HHBBC::ActRec");
-    m_ignoredNames.insert("HPHP::HHBBC::Index");
-    m_ignoredNames.insert("HPHP::HHBBC::Type");
-    m_ignoredNames.insert("HPHP::HHBBC::Type::Data");
-    m_ignoredNames.insert("HPHP::HHBBC::MElem");
-    m_ignoredNames.insert("HPHP::HHBBC::MVector");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Class");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Unit");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Func");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Local");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Prop");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Const");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Param");
-    m_ignoredNames.insert("HPHP::HHBBC::php::Block");
-    m_ignoredNames.insert("HPHP::HHBBC::FuncAnalysis");
-    m_ignoredNames.insert("HPHP::HHBBC::ISS");
-    m_ignoredNames.insert("HPHP::HHBBC::MIS");
-    m_ignoredNames.insert("HPHP::HHBBC::Base");
-
-    // hacky types here.
-    m_ignoredNames.insert("HPHP::RequestInjectionData");
-    m_ignoredNames.insert("folly::NotificationQueue");
-    m_ignoredNames.insert("folly::FormatValue");
-    m_ignoredNames.insert("folly::SSLContext");
-    m_ignoredNames.insert("folly::EventBaseManager");
-    m_ignoredNames.insert("folly::AsyncSSLSocket");
-    m_ignoredNames.insert("folly::AsyncUDPServerSocket");
-    m_ignoredNames.insert("folly::Acceptor");
-    m_ignoredNames.insert("folly::TransportInfo");
-    m_ignoredNames.insert("folly::SSLCacheProvider");
-    m_ignoredNames.insert("folly::SSLSocket");
-    m_ignoredNames.insert("folly::Acceptor");
-    m_ignoredNames.insert("std::thread");
-#endif
+    /////////////////////////
 
     // These are classes that use malloc/new allocation internally.
     // They should generally not be used to store scanable things.

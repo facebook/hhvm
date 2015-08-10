@@ -189,7 +189,7 @@ class PreClassEmitter {
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
                    const bool typeConst = false,
-                   const ArrayData* typeStructure = nullptr);
+                   const Array typeStructure = Array::Create());
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
                            const bool typeConst = false);

@@ -881,7 +881,7 @@ TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
     req.type = AnnotType::Object;
     req.klass = klass;
   }
-  req.typeStructure = thisType->typeStructure;
+  req.typeStructure = Array(thisType->typeStructure);
   return req;
 }
 

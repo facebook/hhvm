@@ -928,13 +928,13 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
 
   // resolve type constant
   if (m_constants[clsCnsInd].isType()) {
-    ArrayData* resTS;
+    Array resTS;
     try {
       resTS = TypeStructure::resolve(m_constants[clsCnsInd], this);
     } catch (Exception &e) {
       raise_error(e.getMessage());
     }
-    auto tv = make_tv<KindOfArray>(resTS);
+    auto tv = make_tv<KindOfArray>(resTS.get());
     tv.m_aux = clsCns->m_aux;
     assert(tvIsPlausible(tv));
     clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&tv), true /* isKey */);

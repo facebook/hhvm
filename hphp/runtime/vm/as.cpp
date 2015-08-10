@@ -1924,8 +1924,7 @@ void parse_constant(AsmState& as) {
   as.pce->addConstant(makeStaticString(name),
                       staticEmptyString(), &tvInit,
                       staticEmptyString(),
-                      /* type constant = */ false,
-                      /* type structure = */ nullptr);
+                      /* type constant = */ false);
 }
 
 /*

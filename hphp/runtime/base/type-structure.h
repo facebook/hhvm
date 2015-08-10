@@ -23,7 +23,7 @@
 namespace HPHP {
 
 struct String;
-struct ArrayData;
+struct Array;
 
 /* Utility for representing full type information in the runtime. */
 namespace TypeStructure {
@@ -62,11 +62,11 @@ enum class Kind : uint8_t {
 
 bool KindOfClass(Kind kind);
 
-String toString(const ArrayData* arr);
+String toString(const Array& arr);
 
-ArrayData* resolve(const Class::Const& typeCns, const Class* typeCnsCls);
+Array resolve(const Class::Const& typeCns, const Class* typeCnsCls);
 
-ArrayData* resolve(const StringData* aliasName, const ArrayData* arr);
+Array resolve(const String& aliasName, const Array& arr);
 
 }
 

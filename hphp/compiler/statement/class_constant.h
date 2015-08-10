@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ArrayData;
+struct Array;
 
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassConstant);
@@ -42,7 +42,7 @@ public:
                     ClassScopePtr scope) override;
 
   std::string getTypeConstraint() const { return m_typeConstraint; }
-  ArrayData* getTypeStructure() const { return m_typeStructure; }
+  Array getTypeStructure() const { return m_typeStructure; }
 
   ExpressionListPtr getConList() { return m_exp; }
   bool isAbstract() { return m_abstract; }
@@ -52,7 +52,7 @@ private:
   ExpressionListPtr m_exp;
   bool m_abstract;
   bool m_typeconst;
-  ArrayData* m_typeStructure = nullptr;
+  Array m_typeStructure;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

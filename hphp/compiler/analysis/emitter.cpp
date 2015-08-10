@@ -7733,7 +7733,7 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   }
 
   TypeAlias record;
-  record.typeStructure = td->annot->getScalarArrayRep();
+  record.typeStructure = Array(td->annot->getScalarArrayRep());
   record.name     = name;
   record.value    = value;
   record.type     = type;

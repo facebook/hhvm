@@ -20,7 +20,6 @@
 
 #include "hphp/compiler/code_generator.h"
 #include "hphp/util/text-util.h"
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -370,7 +369,7 @@ const StaticString
 
 /* Turns the argsList linked list of TypeAnnotation into a positioned
  * static array. */
-ArrayData* TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
+Array TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
   int i = 0;
   auto typeargs = Array::Create();
 
@@ -380,7 +379,7 @@ ArrayData* TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
     ++i;
     typeEl = typeEl->m_typeList;
   }
-  return ArrayData::GetScalarArray(typeargs.get());
+  return typeargs;
 }
 
 void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
@@ -395,10 +394,10 @@ void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
     fields.add(String(shapeField->m_name), Variant(field.get()));
     shapeField = shapeField->m_typeList;
   }
-  rep.add(s_fields, Variant(ArrayData::GetScalarArray(fields.get())));
+  rep.add(s_fields, Variant(fields));
 }
 
-ArrayData* TypeAnnotation::getScalarArrayRep() const {
+Array TypeAnnotation::getScalarArrayRep() const {
   auto rep = Array::Create();
 
   bool nullable = (bool) m_nullable;
@@ -444,7 +443,6 @@ ArrayData* TypeAnnotation::getScalarArrayRep() const {
       ++i;
       typeEl = typeEl->m_typeList;
     }
-    accList = ArrayData::GetScalarArray(accList.get());
     rep.add(s_access_list, Variant(accList));
     break;
   }
@@ -461,7 +459,8 @@ ArrayData* TypeAnnotation::getScalarArrayRep() const {
     break;
   }
 
-  return ArrayData::GetScalarArray(rep.get());
+  rep.setEvalScalar();
+  return rep;
 }
 
 }

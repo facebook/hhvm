@@ -147,14 +147,14 @@ bool PreClassEmitter::addConstant(const StringData* n,
                                   const TypedValue* val,
                                   const StringData* phpCode,
                                   const bool typeconst,
-                                  const ArrayData* typeStructure) {
+                                  const Array typeStructure) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
   TypedValue tvVal;
-  if (typeconst && typeStructure)  {
-    tvVal = make_tv<KindOfArray>(const_cast<ArrayData*>(typeStructure));
+  if (typeconst && !typeStructure.empty())  {
+    tvVal = make_tv<KindOfArray>(typeStructure.get());
   } else {
     tvVal = *val;
   }

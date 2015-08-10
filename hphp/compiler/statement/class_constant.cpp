@@ -38,10 +38,10 @@ ClassConstant::ClassConstant
     m_typeConstraint(typeConstraint), m_exp(exp), m_abstract(abstract),
     m_typeconst(typeconst) {
   // for now only store TypeAnnotation info for type constants
-  if (typeconst) {
-    if (typeAnnot) {
-      m_typeStructure = typeAnnot->getScalarArrayRep();
-    }
+  if (typeconst && typeAnnot) {
+    m_typeStructure = Array(typeAnnot->getScalarArrayRep());
+  } else {
+    m_typeStructure = Array::Create();
   }
 }
 

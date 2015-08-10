@@ -267,7 +267,7 @@ ArrayData* deepCopyArray(ArrayData* arr) {
   for (ArrayIter iter(arr); iter; ++iter) {
     Variant v = iter.secondRef();
     deepCopy(v.asTypedValue());
-    ai.set(iter.first(), std::move(v));
+    ai.setValidKey(iter.first(), std::move(v));
   }
   return ai.toArray().detach();
 }

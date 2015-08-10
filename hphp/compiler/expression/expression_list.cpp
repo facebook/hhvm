@@ -201,7 +201,7 @@ bool ExpressionList::getScalarValue(Variant &value) {
           bool ret1 = name->getScalarValue(n);
           bool ret2 = val->getScalarValue(v);
           if (!(ret1 && ret2)) return false;
-          init.setKeyUnconverted(n, v);
+          init.setUnknownKey(n, v);
         }
       }
       value = init.toVariant();

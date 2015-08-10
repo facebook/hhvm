@@ -275,9 +275,9 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
           if (key.isInteger()) {
-            init.set(key, true);
+            init.set(key.toInt64Val(), true);
           } else {
-            init.setKeyUnconverted(key, true);
+            init.setUnknownKey(key, true);
           }
         }
         return init.toVariant();

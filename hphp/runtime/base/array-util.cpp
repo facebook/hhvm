@@ -430,7 +430,7 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
   ArrayInit ret(indices.size() - duplicates_count, ArrayInit::Map{});
   int i = 0;
   for (ArrayIter iter(input); iter; ++iter, ++i) {
-    if (!duplicates[i]) ret.set(iter.first(), iter.secondRef());
+    if (!duplicates[i]) ret.setValidKey(iter.first(), iter.secondRef());
   }
   return ret.toVariant();
 }

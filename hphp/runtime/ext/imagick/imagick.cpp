@@ -1490,7 +1490,7 @@ static Array HHVM_METHOD(Imagick, getImageProfiles,
   if (with_values) {
     ArrayInit ret(count, ArrayInit::Map{});
     for (size_t i = 0; i < count; ++i) {
-      ret.setKeyUnconverted(
+      ret.setUnknownKey(
         String(profiles[i]),
         magickGetImageProfile(wand->getWand(), profiles[i]));
     }
@@ -1519,7 +1519,7 @@ static Array HHVM_METHOD(Imagick, getImageProperties,
   if (with_values) {
     ArrayInit ret(count, ArrayInit::Map{});
     for (size_t i = 0; i < count; ++i) {
-      ret.setKeyUnconverted(
+      ret.setUnknownKey(
         String(properties[i]),
         magickGetImageProperty(wand->getWand(), properties[i]));
     }
@@ -1832,7 +1832,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   ret.set(s_mimetype, mimetype.empty() ? String(s_unknown) : mimetype);
 
   for (const auto& i: parsedIdentify) {
-    ret.setKeyUnconverted(i.first, i.second);
+    ret.setUnknownKey(i.first, i.second);
   }
 
   ret.set(s_geometry, ImageGeometry(wand->getWand()).toArray());

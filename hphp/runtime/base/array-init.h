@@ -120,9 +120,10 @@ struct ArrayInit {
     return *this;
   }
 
+  ArrayInit& set(const Variant& name, const Variant& v) = delete;
   ArrayInit& set(const Variant& name, const Variant& v,
                  bool keyConverted) = delete;
-  ArrayInit& set(const Variant& name, const Variant& v) {
+  ArrayInit& setValidKey(const Variant& name, const Variant& v) {
     performOp([&]{ return m_data->set(name, v, false); });
     return *this;
   }
@@ -134,11 +135,9 @@ struct ArrayInit {
    * using ArrayInit, and if not you should probably use toKey
    * yourself.
    */
-  ArrayInit& setKeyUnconverted(const Variant& name, const Variant& v) {
+  ArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
     VarNR k(name.toKey());
-    // XXX: the old semantics of ArrayInit used to check if k.isNull
-    // and do nothing, but that's not php semantics so we're not doing
-    // that anymore.
+    if (UNLIKELY(k.isNull())) return *this;
     performOp([&]{ return m_data->set(k, v, false); });
     return *this;
   }
@@ -159,7 +158,8 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& add(const String& name, const Variant& v, bool keyConverted = false) {
+  ArrayInit& add(const String& name, const Variant& v,
+                 bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{
         return MixedArray::AddStr(m_data, name.get(),
@@ -171,7 +171,8 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& add(const Variant& name, const Variant& v, bool keyConverted = false) {
+  ArrayInit& add(const Variant& name, const Variant& v,
+                 bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else {

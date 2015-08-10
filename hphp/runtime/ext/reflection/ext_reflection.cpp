@@ -569,7 +569,7 @@ static Array get_function_static_variables(const Func* func) {
     const Func::SVInfo &sv = staticVars[i];
     auto const refData = rds::bindStaticLocal(func, sv.name);
     // FIXME: this should not require variant hops
-    ai.setKeyUnconverted(
+    ai.setUnknownKey(
       VarNR(sv.name),
       refData->isUninitializedInRDS()
         ? null_variant
@@ -917,12 +917,12 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
       String strippedName(prop.m_name->data() + sizeof prefix - 1,
                           prop.m_name->size() - sizeof prefix + 1,
                           CopyString);
-      ai.setKeyUnconverted(VarNR(strippedName), *val);
+      ai.setUnknownKey(VarNR(strippedName), *val);
     } else {
       if (val->isReferenced()) {
         ai.setRef(VarNR(prop.m_name), *val, false /* = keyConverted */);
       } else {
-        ai.setKeyUnconverted(VarNR(prop.m_name), *val);
+        ai.setUnknownKey(VarNR(prop.m_name), *val);
       }
     }
   }
@@ -1450,7 +1450,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
   for (ArrayIter it(dynPropArray); !it.end(); it.next()) {
     Array info = Array::Create();
     set_dyn_prop_info(info, it.first(), cls->name());
-    ret.set(it.first(), VarNR(info));
+    ret.setValidKey(it.first(), VarNR(info));
   }
   return ret.toArray();
 }

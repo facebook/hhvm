@@ -669,8 +669,12 @@ ArrayData *ArrayData::Create(const Variant& value) {
 
 ArrayData *ArrayData::Create(const Variant& name, const Variant& value) {
   ArrayInit init(1, ArrayInit::Map{});
-  // There is no toKey() call on name.
-  init.set(name, value);
+  DEBUG_ONLY int64_t unused;
+  assertx(name.isString() ?
+         !name.getStringData()->isStrictlyInteger(unused) :
+         name.isInteger());
+
+  init.setValidKey(name, value);
   return init.create();
 }
 
@@ -682,7 +686,11 @@ ArrayData *ArrayData::CreateRef(Variant& value) {
 
 ArrayData *ArrayData::CreateRef(const Variant& name, Variant& value) {
   ArrayInit init(1, ArrayInit::Map{});
-  // There is no toKey() call on name.
+  DEBUG_ONLY int64_t unused;
+  assertx(name.isString() ?
+         !name.getStringData()->isStrictlyInteger(unused) :
+         name.isInteger());
+
   init.setRef(name, value, true);
   return init.create();
 }

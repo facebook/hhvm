@@ -714,7 +714,7 @@ Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
     );
 
     const Variant str = Variant(it.first);
-    objs.set(str, Variant(metrics_val));
+    objs.setValidKey(str, Variant(metrics_val));
   }
 
   return objs.toArray();
@@ -858,7 +858,7 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
         s_refs, pathIt.second.refs
       );
 
-      pathsArr.set(Variant(pathStr), Variant(path_metrics_val));
+      pathsArr.setValidKey(Variant(pathStr), Variant(path_metrics_val));
     }
 
     auto metrics_val = make_map_array(

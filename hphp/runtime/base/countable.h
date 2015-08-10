@@ -201,7 +201,7 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
     return CountableManip::maybeShared(m_hdr.mrb);                      \
   }                                                                     \
   bool cowCheck() const {                                               \
-    return hasMultipleRefs();                                           \
+    return maybeShared();                                               \
   }                                                                     \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \

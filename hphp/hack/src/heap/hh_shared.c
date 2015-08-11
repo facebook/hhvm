@@ -344,9 +344,12 @@ static void set_priorities() {
   );
   #endif
 
-  #ifndef _WIN32
   // Don't slam the CPU either, though this has much less tendency to make the
   // system totally unresponsive so we don't need to lower all the way.
+  #ifdef _WIN32
+  SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
+  // One might also try: PROCESS_MODE_BACKGROUND_BEGIN
+  #else
   int dummy = nice(10);
   (void)dummy; // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509
   #endif

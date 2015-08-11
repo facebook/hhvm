@@ -1,7 +1,7 @@
-array<[1]intersect(Tstring), [2]intersect(App \classname<App \D<>, >, App \classname<App \C2<>, >, App \classname<App \C1<>, >)>
+array<[1]intersect(Tstring), [2]intersect(App \classname<[\D]App \D<>, >, App \classname<[\C2]App \C2<>, >, App \classname<[\C1]App \C1<>, >)>
 File "array_literal_bad.php", line 11, characters 10-13:
 Invalid return type (Typing[4110])
 File "array_literal_bad.php", line 8, characters 39-39:
 This is an object of type I
-File "array_literal_bad.php", line 6, characters 7-7:
-It is incompatible with an object of type D; implicitly defined constant ::class is a string that contains the fully qualified name of D
+File "array_literal_bad.php", line 9, characters 47-54:
+It is incompatible with an object of type D

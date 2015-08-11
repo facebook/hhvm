@@ -150,7 +150,7 @@ String WddxPacket::getWddxEncoded(const String& varType,
                                   const String& varValue,
                                   const String& varName,
                                   bool hasVarTag) {
-  if (varType.compare("NULL") == 0) {
+  if (varType.compare("NULL") == 0 || varType.compare("null") == 0) {
     return wrapValue("<null/>", "", "", varName, hasVarTag);
   }
   if (varType.compare("boolean") == 0) {

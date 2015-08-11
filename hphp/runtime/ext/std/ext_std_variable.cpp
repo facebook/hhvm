@@ -43,11 +43,18 @@ const StaticString
   s_string("string"),
   s_object("object"),
   s_array("array"),
+  s_NULL("NULL"),
   s_null("null");
 
 String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.getType() == KindOfResource && v.toCResRef().isInvalid()) {
     return s_unknown_type;
+  }
+  /* Although getDataTypeString also handles the null type, it returns "null"
+   * (lower case). Unfortunately, PHP returns "NULL" (upper case) for
+   * gettype(). So we make an exception here. */
+  if (v.isNull()) {
+    return s_NULL;
   }
   return getDataTypeString(v.getType());
 }

@@ -244,9 +244,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
 
   }
 
-  if (vh["IpBlockMap"].firstChild().exists()) {
-    m_ipBlocks = std::make_shared<IpBlockMap>(ini, vh["IpBlockMap"]);
-  }
+  m_ipBlocks = std::make_shared<IpBlockMap>(ini, vh);
 
   for (Hdf hdf = vh["LogFilters"].firstChild(); hdf.exists();
        hdf = hdf.next()) {

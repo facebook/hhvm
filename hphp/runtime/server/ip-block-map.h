@@ -37,7 +37,7 @@ public:
                               int &significant_bits);
 
 public:
-  explicit IpBlockMap(const IniSetting::Map& ini, const Hdf& config);
+  IpBlockMap(const IniSetting::Map& ini, const Hdf& config);
 
   bool isBlocking(const std::string &command, const std::string &ip) const;
 

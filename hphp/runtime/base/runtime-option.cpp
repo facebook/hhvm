@@ -1373,7 +1373,7 @@ void RuntimeOption::Load(
   }
   {
     // IpBlocks
-    IpBlocks = std::make_shared<IpBlockMap>(ini, config["IpBlockMap"]);
+    IpBlocks = std::make_shared<IpBlockMap>(ini, config);
   }
   {
     if (config["Satellites"].exists()) {

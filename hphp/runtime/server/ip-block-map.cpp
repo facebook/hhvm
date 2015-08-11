@@ -154,9 +154,11 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
 void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl,
                             const IniSetting::Map& ini, const Hdf& hdf,
                             const std::string& name, bool allow) {
-  for (Hdf child = hdf[name].firstChild(); child.exists();
-       child = child.next()) {
-    std::string ip = Config::GetString(ini, child, "", "", false);
+  auto ipm_lil_callback = [acl, allow] (const IniSetting::Map &ini_ipm_lil,
+                                        const Hdf &hdf_ipm_lil,
+                                        const std::string& ini_ipm_name) {
+    std::string ip = Config::GetString(ini_ipm_lil, hdf_ipm_lil, ini_ipm_name,
+                                       "", false);
 
     int bits;
     struct in6_addr address;
@@ -166,32 +168,37 @@ void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl,
                                         bits,
                                         allow);
     }
-  }
+  };
+  Config::Iterate(ipm_lil_callback, ini, hdf, name, false);
 }
 
 IpBlockMap::IpBlockMap(const IniSetting::Map& ini, const Hdf& config) {
-  for (Hdf hdf = config.firstChild(); hdf.exists(); hdf = hdf.next()) {
+  auto ipm_callback = [&] (const IniSetting::Map &ini_ipm,
+                           const Hdf &hdf_ipm,
+                           const std::string& ini_name) {
     auto acl = std::make_shared<Acl>();
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really
     // just sets whether we deny or allow by default, I think.
-    bool allow = Config::GetBool(ini, hdf, "AllowFirst", false);
+    bool allow = Config::GetBool(ini_ipm, hdf_ipm, "AllowFirst", false, false);
     if (allow) {
       acl->m_networks.setAllowed(true);
-      LoadIpList(acl, ini, hdf, "Ip.Deny", false);
-      LoadIpList(acl, ini, hdf, "Ip.Allow", true);
+      LoadIpList(acl, ini_ipm, hdf_ipm, "Ip.Deny", false);
+      LoadIpList(acl, ini_ipm, hdf_ipm, "Ip.Allow", true);
     } else {
       acl->m_networks.setAllowed(false);
-      LoadIpList(acl, ini, hdf, "Ip.Allow", true);
-      LoadIpList(acl, ini, hdf, "Ip.Deny", false);
+      LoadIpList(acl, ini_ipm, hdf_ipm, "Ip.Allow", true);
+      LoadIpList(acl, ini_ipm, hdf_ipm, "Ip.Deny", false);
     }
 
-    std::string location = Config::GetString(ini, hdf, "Location", "", false);
+    std::string location = Config::GetString(ini_ipm, hdf_ipm, "Location", "",
+                                             false);
     if (!location.empty() && location[0] == '/') {
       location = location.substr(1);
     }
     m_acls[location] = acl;
-  }
+  };
+  Config::Iterate(ipm_callback, ini, config, "IpBlockMap", true);
 }
 
 bool IpBlockMap::isBlocking(const std::string &command,

@@ -227,9 +227,9 @@ template<class T> T decode(PC& pc) {
 std::string loc_name(const FuncInfo& finfo, uint32_t id) {
   auto const sd = finfo.func->localVarName(id);
   if (!sd || sd->empty()) {
-    always_assert(!"unnamed locals need to be supported");
+    return folly::format("_{}", id).str();
   }
-  return sd->data();
+  return folly::format("${}", sd->data()).str();
 }
 
 std::string jmp_label(const FuncInfo& finfo, Offset tgt) {
@@ -255,7 +255,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(" <{}", locationCodeString(lcode));
     if (numLocationCodeImms(lcode)) {
       always_assert(numLocationCodeImms(lcode) == 1);
-      out.fmt(":${}", loc_name(finfo, decodeVariableSizeImm(&vec)));
+      out.fmt(":{}", loc_name(finfo, decodeVariableSizeImm(&vec)));
     }
 
     while (vec < pc) {
@@ -266,7 +266,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
       case MCodeImm::None:
         break;
       case MCodeImm::Local:
-        out.fmt(":${}", loc_name(finfo, imm()));
+        out.fmt(":{}", loc_name(finfo, imm()));
         break;
       case MCodeImm::String:
         out.fmt(":{}", escaped(finfo.unit->lookupLitstrId(imm())));
@@ -342,7 +342,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_ILA    print_itertab();
 #define IMM_IVA    out.fmt(" {}", decodeVariableSizeImm(&pc));
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
-#define IMM_LA     out.fmt(" ${}", loc_name(finfo, decodeVariableSizeImm(&pc)));
+#define IMM_LA     out.fmt(" {}", loc_name(finfo, decodeVariableSizeImm(&pc)));
 #define IMM_IA     out.fmt(" {}", decodeVariableSizeImm(&pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
 #define IMM_SA     out.fmt(" {}", \
@@ -488,7 +488,7 @@ std::string func_param_list(const FuncInfo& finfo) {
     ret += opt_type_constraint(func->params()[i].userType,
                                func->params()[i].typeConstraint);
     if (func->byRef(i)) ret += "&";
-    ret += folly::format("${}", loc_name(finfo, i)).str();
+    ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
       auto const off = func->params()[i].funcletOff;
       ret += folly::format(" = {}", jmp_label(finfo, off)).str();
@@ -709,8 +709,6 @@ void print_unit(Output& out, const Unit* unit) {
  *
  * - need support for $ and :: in identifiers for traits and
  *   generators to work properly
- *
- * - Unnamed locals.
  *
  * - Static locals.
  */

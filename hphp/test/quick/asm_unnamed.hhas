@@ -1,0 +1,38 @@
+#
+# unnamed vars
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Null
+  RetC
+}
+
+.function main() {
+  Int 5
+  SetL $x
+  PopC
+
+  String "hello, "
+  SetL _1
+  PopC
+
+  String "world\n"
+  SetL _2
+  PopC
+
+  PushL _1
+  PushL _2
+  Concat
+  Print
+  PopC
+
+  CGetL $x
+  Print
+  PopC
+
+  Null
+  RetC
+}

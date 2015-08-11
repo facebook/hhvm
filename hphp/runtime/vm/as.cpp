@@ -490,6 +490,7 @@ struct AsmState : private boost::noncopyable {
     , stackHighWater(0)
     , fdescDepth(0)
     , fdescHighWater(0)
+    , maxUnnamed(-1)
   {
     currentStackDepth->setBase(*this, 0);
   }
@@ -698,6 +699,12 @@ struct AsmState : private boost::noncopyable {
     // Stack depth should be 0 at the end of a function body
     enforceStackDepth(0);
 
+    // Bump up the unnamed local count
+    int numLocals = maxUnnamed+1;
+    while (fe->numLocals() < numLocals) {
+      fe->allocUnnamedLocal();
+    }
+
     fe->maxStackCells = fe->numLocals() +
                         fe->numIterators() * kNumIterCells +
                         stackHighWater +
@@ -715,12 +722,19 @@ struct AsmState : private boost::noncopyable {
     stackHighWater = 0;
     fdescDepth = 0;
     fdescHighWater = 0;
+    maxUnnamed = -1;
     fpiToUpdate.clear();
   }
 
   int getLocalId(const std::string& name) {
+    if (name[0] == '_') {
+      int id = folly::to<int>(name.substr(1));
+      if (id > maxUnnamed) maxUnnamed = id;
+      return id;
+    }
+
     if (name[0] != '$') {
-      error("local variables must be prefixed with $");
+      error("local variables must be prefixed with $ or _");
     }
 
     const StringData* sd = makeStaticString(name.c_str() + 1);
@@ -756,6 +770,7 @@ struct AsmState : private boost::noncopyable {
   int stackHighWater;
   int fdescDepth;
   int fdescHighWater;
+  int maxUnnamed;
   std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
 };
 

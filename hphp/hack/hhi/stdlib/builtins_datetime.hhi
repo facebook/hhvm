@@ -69,7 +69,7 @@ function strptime($date, $format) { }
 function strtotime($input, $timestamp = null) { }
 function time(): int { }
 function timezone_abbreviations_list() { }
-function timezone_identifiers_list() { }
+function timezone_identifiers_list(int $what = 2047, string $country = '') { }
 function timezone_location_get($timezone) { }
 function timezone_name_from_abbr($abbr, $gmtoffset = -1, $isdst = true) { }
 function timezone_name_get($object) { }
@@ -130,7 +130,7 @@ class DateTimeZone {
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
                                  int $timestamp_end = PHP_INT_MAX) { }
   static public function listAbbreviations() { }
-  static public function listIdentifiers() { }
+  static public function listIdentifiers(int $what = 2047, string $country = '') { }
 }
 class DateInterval {
   public function __construct($interval_spec) { }

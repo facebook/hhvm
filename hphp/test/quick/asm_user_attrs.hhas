@@ -1,0 +1,25 @@
+# /home/msullivan/tmp/saved-tests/user-attrs.php starts here
+
+.filepath "/home/msullivan/tmp/saved-tests/user-attrs.php";
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class [final "Foo"("""a:0:{}""")] C {
+  .method [public
+           "Thing"("""a:1:{i:0;s:3:\"Odd\";}""")
+           "Number"("""a:1:{i:0;i:1000;}""")]
+         benchmarkEven($n) {
+    Null
+    RetC
+  }
+  .method [public mayusevv] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# /home/msullivan/tmp/saved-tests/user-attrs.php ends here

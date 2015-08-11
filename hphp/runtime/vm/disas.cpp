@@ -515,9 +515,24 @@ std::string func_flag_list(const FuncInfo& finfo) {
   return " ";
 }
 
+std::string user_attrs(const UserAttributeMap* attrsMap) {
+  if (!attrsMap || attrsMap->empty()) return "";
 
-std::string opt_attrs(AttrContext ctx, Attr attrs) {
-  auto str = attrs_to_string(ctx, attrs);
+  std::vector<std::string> attrs;
+
+  for (auto& entry : *attrsMap) {
+    attrs.push_back(
+      folly::format("{}({})", escaped(entry.first),
+                    escaped_long(entry.second)).str());
+  }
+  return folly::join(" ", attrs);
+}
+
+std::string opt_attrs(AttrContext ctx, Attr attrs,
+                      const UserAttributeMap* userAttrs = nullptr) {
+  auto str = folly::trimWhitespace(folly::format(
+               "{} {}",
+               attrs_to_string(ctx, attrs), user_attrs(userAttrs)).str()).str();
   if (!str.empty()) str = folly::format(" [{}]", str).str();
   return str;
 }
@@ -529,7 +544,7 @@ void print_func(Output& out, const Func* func) {
     out.fmtln(".main {{");
   } else {
     out.fmtln(".function{} {}{}({}){}{{",
-      opt_attrs(AttrContext::Func, func->attrs()),
+      opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
       opt_type_constraint(func->returnUserType(), func->returnTypeConstraint()),
       func->name(),
       func_param_list(finfo),
@@ -567,7 +582,7 @@ void print_property(Output& out, const PreClass::Prop* prop) {
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
   out.fmtln(".method{} {}{}({}){}{{",
-    opt_attrs(AttrContext::Func, func->attrs()),
+    opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     opt_type_constraint(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
     func_param_list(finfo),
@@ -627,6 +642,7 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
         }()
       );
     }
+
     for (auto& alias : aliasRules) {
       out.fmtln("{}{} as{}{};",
         alias.traitName()->empty()
@@ -653,7 +669,7 @@ void print_cls_directives(Output& out, const PreClass* cls) {
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   out.fmt(".class{} {}",
-    opt_attrs(AttrContext::Class, cls->attrs()),
+    opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
     cls->name());
   print_cls_inheritance_list(out, cls);
   out.fmt(" {{");

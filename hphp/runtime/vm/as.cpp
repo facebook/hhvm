@@ -1577,14 +1577,40 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
   }
 }
 
+void parse_user_attribute(AsmState& as,
+                          UserAttributeMap& userAttrs) {
+  auto name = read_litstr(as);
+  as.in.expectWs('(');
+
+  TypedValue tvInit;
+  tvWriteNull(&tvInit); // Don't confuse Variant with uninit data
+  tvAsVariant(&tvInit) = parse_php_serialized(as);
+
+  as.in.expectWs(')');
+
+  if (!isArrayType(tvInit.m_type)) {
+    as.error("user attribute values must be arrays");
+  }
+
+  tvInit = make_tv<KindOfArray>(ArrayData::GetScalarArray(tvInit.m_data.parr));
+  userAttrs[name] = tvInit;
+}
+
 /*
+ * attribute : attribute-name
+ *           | string-literal '(' long-string-literal ')'
+ *           ;
+ *
  * attribute-list : empty
- *                | '[' attribute-name* ']'
+ *                | '[' attribute* ']'
  *                ;
  *
  * The `attribute-name' rule is context-sensitive; see as-shared.cpp.
+ * The second attribute form is for user attributes and only applies
+ * if attributeMap is non null.
  */
-Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
+Attr parse_attribute_list(AsmState& as, AttrContext ctx,
+                          UserAttributeMap *userAttrs = nullptr) {
   as.in.skipWhitespace();
   int ret = AttrNone;
   if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
@@ -1599,6 +1625,10 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
   for (;;) {
     as.in.skipWhitespace();
     if (as.in.peek() == ']') break;
+    if (as.in.peek() == '"' && userAttrs) {
+      parse_user_attribute(as, *userAttrs);
+      continue;
+    }
     if (!as.in.readword(word)) break;
 
     auto const abit = string_to_attr(ctx, word);
@@ -1788,7 +1818,8 @@ void parse_function(AsmState& as) {
     as.error(".function blocks must all follow the .main block");
   }
 
-  Attr attrs = parse_attribute_list(as, AttrContext::Func);
+  UserAttributeMap userAttrs;
+  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
   auto typeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readword(name)) {
@@ -1799,6 +1830,7 @@ void parse_function(AsmState& as) {
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
               as.ue->bcPos(), attrs, true, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
+  as.fe->userAttributes = userAttrs;
 
   parse_parameter_list(as);
   parse_function_flags(as);
@@ -1816,7 +1848,8 @@ void parse_function(AsmState& as) {
 void parse_method(AsmState& as) {
   as.in.skipWhitespace();
 
-  Attr attrs = parse_attribute_list(as, AttrContext::Func);
+  UserAttributeMap userAttrs;
+  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
   auto typeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readword(name)) {
@@ -1828,6 +1861,7 @@ void parse_method(AsmState& as) {
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
               as.ue->bcPos(), attrs, true, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
+  as.fe->userAttributes = userAttrs;
 
   parse_parameter_list(as);
   parse_function_flags(as);
@@ -2095,7 +2129,8 @@ void parse_class_body(AsmState& as) {
 void parse_class(AsmState& as) {
   as.in.skipWhitespace();
 
-  Attr attrs = parse_attribute_list(as, AttrContext::Class);
+  UserAttributeMap userAttrs;
+  Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
   std::string name;
   if (!as.in.readword(name)) {
     as.error(".class must have a name");
@@ -2129,6 +2164,7 @@ void parse_class(AsmState& as) {
   for (size_t i = 0; i < ifaces.size(); ++i) {
     as.pce->addInterface(makeStaticString(ifaces[i]));
   }
+  as.pce->setUserAttributes(userAttrs);
 
   as.in.expectWs('{');
   parse_class_body(as);

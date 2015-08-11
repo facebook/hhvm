@@ -4,3 +4,5 @@ File "trait_require_param3.php", line 6, characters 25-27:
 This is an int
 File "trait_require_param3.php", line 13, characters 26-26:
 It is incompatible with a value of generic type T
+File "trait_require_param3.php", line 6, characters 25-27:
+Considering that this type argument is invariant with respect to Super

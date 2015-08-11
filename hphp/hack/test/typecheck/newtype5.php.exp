@@ -4,3 +4,5 @@ File "newtype5.php--file2.php", line 5, characters 17-19:
 This is an int
 File "newtype5.php--file2.php", line 6, characters 18-21:
 It is incompatible with a bool
+File "newtype5.php--file2.php", line 5, characters 17-19:
+Considering that this type argument is invariant with respect to a

@@ -103,7 +103,7 @@ inline void UnitEmitter::emitDouble(double n, int64_t pos) {
 
 template<>
 inline void UnitEmitter::emitIVA(bool n) {
-  emitByte(n ? 2 : 0);
+  emitByte(n << 1);
 }
 
 template<typename T>

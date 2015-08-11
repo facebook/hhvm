@@ -494,7 +494,9 @@ macro(hphp_link target)
 
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
-  target_link_libraries(${target} ${CRYPT_LIB})
+  if (CRYPT_LIB)
+    target_link_libraries(${target} ${CRYPT_LIB})
+  endif()
 
   if (LINUX OR FREEBSD)
     target_link_libraries(${target} ${RT_LIB})

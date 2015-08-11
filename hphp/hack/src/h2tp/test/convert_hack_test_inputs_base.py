@@ -358,6 +358,7 @@ OTHER_UNPARSEABLE_FILES = [
     'class_abstract_final_7.php',
     'class_abstract_final_5.php',
     'class_abstract_final_9.php',
+    'classname/new_abstract_final.php',
     'concat_untyped_with_string.php',
     'covariance7.php',
     'covariance8.php',

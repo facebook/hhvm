@@ -1,0 +1,4 @@
+File "new_abstract_final.php", line 5, characters 22-24:
+Foo is uninstantiable (Typing[4002])
+File "new_abstract_final.php", line 3, characters 22-24:
+Declaration is here

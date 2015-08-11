@@ -1358,24 +1358,23 @@ void RuntimeOption::Load(
 
   VirtualHost::SortAllowedDirectories(AllowedDirectories);
   {
-    if (config["VirtualHost"].exists()) {
-      for (Hdf hdf = config["VirtualHost"].firstChild(); hdf.exists();
-           hdf = hdf.next()) {
-        if (hdf.getName() == "default") {
-          VirtualHost::GetDefault().init(ini, hdf);
-          VirtualHost::GetDefault().addAllowedDirectories(AllowedDirectories);
-        } else {
-          auto host = std::make_shared<VirtualHost>(ini, hdf);
-          host->addAllowedDirectories(AllowedDirectories);
-          VirtualHosts.push_back(host);
-        }
+    auto vh_callback = [] (const IniSettingMap &ini_vh, const Hdf &hdf_vh,
+                           const std::string &ini_vh_key) {
+      if (VirtualHost::IsDefault(ini_vh, hdf_vh, ini_vh_key)) {
+        VirtualHost::GetDefault().init(ini_vh, hdf_vh, ini_vh_key);
+        VirtualHost::GetDefault().addAllowedDirectories(AllowedDirectories);
+      } else {
+        auto host = std::make_shared<VirtualHost>(ini_vh, hdf_vh, ini_vh_key);
+        host->addAllowedDirectories(AllowedDirectories);
+        VirtualHosts.push_back(host);
       }
-      for (unsigned int i = 0; i < VirtualHosts.size(); i++) {
-        if (!VirtualHosts[i]->valid()) {
-          throw std::runtime_error("virtual host missing prefix or pattern");
-        }
-      }
-    }
+    };
+    // Virtual Hosts have to be iterated in order. Because only the first
+    // one that matches in the VirtualHosts vector gets applied and used.
+    // Hdf's and ini (via Variant arrays) internal storage handles ordering
+    // naturally (as specified top to bottom in the file and left to right on
+    // the command line.
+    Config::Iterate(vh_callback, ini, config, "VirtualHost");
   }
   {
     // IpBlocks

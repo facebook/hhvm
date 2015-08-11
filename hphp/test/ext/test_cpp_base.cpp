@@ -41,6 +41,7 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestIpBlockMapIni);
   RUN_TEST(TestSatelliteServer);
   RUN_TEST(TestVirtualHost);
+  RUN_TEST(TestVirtualHostIni);
   RUN_TEST(TestCollectionHdf);
   RUN_TEST(TestCollectionIni);
   return ret;
@@ -383,25 +384,23 @@ bool TestCppBase::TestVirtualHost() {
   RuntimeOption::AllowedDirectories.clear();
   std::vector<VirtualHost> hosts;
   RuntimeOption::AllowedDirectories =
-    Config::GetVector(ini, hdf["Server.AllowedDirectories"]);
-  if (hdf["VirtualHost"].exists()) {
-    for (Hdf c = hdf["VirtualHost"].firstChild(); c.exists(); c = c.next()) {
-      if (c.getName() == "default") {
-        VirtualHost::GetDefault().init(ini, c);
-        VirtualHost::GetDefault().
-          addAllowedDirectories(RuntimeOption::AllowedDirectories);
-      } else {
-        auto host = VirtualHost(ini, c);
-        host.addAllowedDirectories(RuntimeOption::AllowedDirectories);
-        hosts.push_back(host);
-      }
+    Config::GetVector(ini, hdf, "Server.AllowedDirectories");
+  auto cb = [&] (const IniSetting::Map &ini_cb, const Hdf &hdf_cb,
+                 const std::string &host) {
+    if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
+      VirtualHost::GetDefault().init(ini_cb, hdf_cb, host);
+      VirtualHost::GetDefault().
+        addAllowedDirectories(RuntimeOption::AllowedDirectories);
+    } else {
+      auto vh = VirtualHost(ini_cb, hdf_cb, host);
+      // These will be added
+      // "    AllowedDirectories.* = /var/www\n"
+      // "    AllowedDirectories.* = /usr/bin\n"
+      vh.addAllowedDirectories(RuntimeOption::AllowedDirectories);
+      hosts.push_back(vh);
     }
-    for (unsigned int i = 0; i < hosts.size(); i++) {
-      if (!hosts[i].valid()) {
-        throw std::runtime_error("virtual host missing prefix or pattern");
-      }
-    }
-  }
+  };
+  Config::Iterate(cb, ini, hdf, "VirtualHost");
 
   for (auto& host : hosts) {
     VirtualHost::SetCurrent(&host);
@@ -465,6 +464,128 @@ bool TestCppBase::TestCollectionHdf() {
   Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
                hdf, "Server.HighPriorityEndPoints");
   VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
+  return Count(true);
+}
+
+bool TestCppBase::TestVirtualHostIni() {
+  std::string inistr =
+    "hhvm.server.allowed_directories[] = /var/www\n"
+    "hhvm.server.allowed_directories[] = /usr/bin\n"
+    "hhvm.virtual_host[flibtest][prefix] = flibtest.\n"
+    "hhvm.virtual_host[flibtest][path_translation] = flib/_bin\n"
+    "hhvm.virtual_host[flibtest][server_name] = flibtest.facebook.com\n"\
+    "hhvm.virtual_host[flibtest][log_filters][0][url] = function/searchme\n"
+    "hhvm.virtual_host[flibtest][log_filters][0][params][0] = v\n"
+    "hhvm.virtual_host[flibtest][log_filters][0][params][1] = t\n"
+    "hhvm.virtual_host[flibtest][log_filters][0][params][2] = btoken\n"
+    "hhvm.virtual_host[flibtest][log_filters][0][params][3] = ptoken\n"
+    "hhvm.virtual_host[flibtest][log_filters][0][value] = INSERTED\n"
+    "hhvm.virtual_host[flibtest][log_filters][1][url] = property/searchme\n"
+    "hhvm.virtual_host[flibtest][log_filters][1][pattern] = #thePattern#\n"
+    "hhvm.virtual_host[flibtest][log_filters][1][value] = BETWEEN\n"
+    "hhvm.virtual_host[upload][prefix] = upload.\n"
+    "hhvm.virtual_host[upload][server_variables][TFBENV] = 8\n"
+    "hhvm.virtual_host[upload][overwrite][server][allowed_directories][0] = "
+    "/var/www\n"
+    "hhvm.virtual_host[upload][overwrite][server][allowed_directories][1] = "
+    "/mnt\n"
+    "hhvm.virtual_host[upload][overwrite][server][allowed_directories][2] = "
+    "/tmp\n"
+    "hhvm.virtual_host[upload][overwrite][server][allowed_directories][3] = "
+    "/var/tmp/tao\n"
+    "hhvm.virtual_host[upload][overwrite][server][max_post_size] = 100MB\n"
+    "hhvm.virtual_host[upload][overwrite][server][upload]"
+    "[upload_max_file_size] = 100MB\n"
+    "hhvm.virtual_host[upload][overwrite][server]"
+    "[request_timeout_seconds] = 120\n"
+    "hhvm.virtual_host[upload][path_translation] = html\n"
+    "hhvm.virtual_host[default][path_translation] = htm\n"
+    "hhvm.virtual_host[default][log_filters][0][url] = method/searchme\n"
+    "hhvm.virtual_host[default][log_filters][0][params][0] = q\n"
+    "hhvm.virtual_host[default][log_filters][0][params][1] = s\n"
+    "hhvm.virtual_host[default][log_filters][0][params][2] = atoken\n"
+    "hhvm.virtual_host[default][log_filters][0][params][3] = otoken\n"
+    "hhvm.virtual_host[default][log_filters][0][value] = REMOVED\n"
+    "hhvm.virtual_host[default][rewrite_rules][common][pattern] = "
+    "/html/common/\n"
+    "hhvm.virtual_host[default][rewrite_rules][common][to] = "
+    "http://3v4l.org\n"
+    "hhvm.virtual_host[default][rewrite_rules][common][qsa] = true\n"
+    "hhvm.virtual_host[default][rewrite_rules][common][redirect] = 301\n";
+
+  IniSetting::Map ini = IniSetting::Map::object;
+  Hdf empty;
+  std::vector<VirtualHost> hosts;
+
+  // reset RuntimeOption::AllowedDirectories to empty because if the Hdf
+  // version of this test is run at the same time, we don't want to append
+  // the same directories to it. We want to start fresh.
+  RuntimeOption::AllowedDirectories.clear();
+  Config::ParseIniString(inistr, ini);
+  RuntimeOption::AllowedDirectories =
+    Config::GetVector(ini, empty, "Server.AllowedDirectories");
+  auto cb = [&] (const IniSetting::Map &ini_cb,
+                 const Hdf &hdf_cb,
+                 const std::string &host){
+    if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
+      VirtualHost::GetDefault().init(ini_cb, hdf_cb, host);
+      VirtualHost::GetDefault().
+        addAllowedDirectories(RuntimeOption::AllowedDirectories);
+    } else {
+      auto vh = VirtualHost(ini_cb, hdf_cb, host);
+      // These will be added
+      // "hhvm.server.allowed_directories[] = /var/www\n"
+      // "hhvm.server.allowed_directories[] = /usr/bin\n"
+      vh.addAllowedDirectories(RuntimeOption::AllowedDirectories);
+      hosts.push_back(vh);
+    }
+  };
+  Config::Iterate(cb, ini, empty, "VirtualHost");
+
+  for (auto& host : hosts) {
+    VirtualHost::SetCurrent(&host);
+    auto name = host.getName();
+    if (name == "flibtest") {
+      VERIFY(host.getPathTranslation() == "flib/_bin/"); // the / is added
+      VERIFY(host.getDocumentRoot() ==
+             RuntimeOption::SourceRoot + "flib/_bin");
+      VERIFY(host.getServerVars().size() == 0);
+      VERIFY(VirtualHost::GetAllowedDirectories().size() == 2);
+      VERIFY(host.valid() == true);
+      VERIFY(host.hasLogFilter() == true);
+      VERIFY(host.filterUrl("http://function/searchme/bar?ptoken=baz") ==
+                            "http://function/searchme/bar?ptoken=INSERTED");
+      VERIFY(host.filterUrl(
+        "http://function/searchme/thePattern?ptoken=baz") ==
+        "http://function/searchme/thePattern?ptoken=INSERTED"
+      );
+      VERIFY(host.filterUrl("http://property/searchme/foothePattern") ==
+                            "http://property/searchme/foo=BETWEEN");
+      VERIFY(host.filterUrl("foo") == "foo");
+    } else if (name == "upload") {
+      VERIFY(host.getPathTranslation() == "html/"); // the / is added
+      VERIFY(host.getDocumentRoot() ==
+             RuntimeOption::SourceRoot + "html");
+      // SortALlowedDirectories might add something and remove
+      // duplicates. In this case, /var/releases/continuous_www_scripts4
+      // was added and the duplicate /var/www was removed.s
+      VERIFY(VirtualHost::GetAllowedDirectories().size() == 6);
+      VERIFY(host.valid() == true);
+      VERIFY(host.hasLogFilter() == false);
+      VERIFY(VirtualHost::GetMaxPostSize() == 104857600);
+    }
+  }
+
+  VERIFY(VirtualHost::GetDefault().getPathTranslation() == "htm/");
+  VERIFY(VirtualHost::GetDefault().hasLogFilter() == true);
+  String rw("/html/common/");
+  String h("default");
+  bool q = false;
+  int rd = 0;
+  VirtualHost::GetDefault().rewriteURL(h, rw, q, rd);
+  VERIFY(rw.toCppString() == "http://3v4l.org");
+  VERIFY(rd == 301);
+
   return Count(true);
 }
 

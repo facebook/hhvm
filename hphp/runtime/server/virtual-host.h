@@ -35,11 +35,15 @@ public:
   static void UpdateSerializationSizeLimit();
   static const std::vector<std::string> &GetAllowedDirectories();
   static void SortAllowedDirectories(std::vector<std::string>& dirs);
+  static bool IsDefault(const IniSetting::Map &ini, const Hdf &vh,
+                        const std::string &ini_key = "");
 public:
   VirtualHost();
-  explicit VirtualHost(const IniSetting::Map& ini, Hdf vh);
+  VirtualHost(const IniSetting::Map& ini, const Hdf& vh,
+              const std::string &ini_key = "");
 
-  void init(const IniSetting::Map& ini, Hdf vh);
+  void init(const IniSetting::Map& ini, const Hdf& vh,
+            const std::string &ini_key = "");
   void addAllowedDirectories(const std::vector<std::string>& dirs);
   int getRequestTimeoutSeconds(int defaultTimeout) const;
 
@@ -105,7 +109,7 @@ private:
     int64_t serializationSizeLimit = StringData::MaxSize;
   };
 
-  void initRuntimeOption(const IniSetting::Map& ini, Hdf overwrite);
+  void initRuntimeOption(const IniSetting::Map& ini, const Hdf& overwrite);
   bool m_disabled = false;
   bool m_checkExistenceBeforeRewrite = true;
   std::string m_name;

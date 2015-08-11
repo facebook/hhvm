@@ -619,7 +619,6 @@ let mk_mapper = fun m_in ->
           let v1 = map_import_flavor v1
           and v2 = map_expr v2
           in Import ((v1, v2))
-      | Ref v1 -> let v1 = map_expr v1 in Ref v1
     in m_in.k_expr_ (k, all_mappers) expr_
   and map_use (id, is_ref) =
     let id = map_id id
@@ -671,6 +670,7 @@ let mk_mapper = fun m_in ->
     | Udecr -> Udecr
     | Upincr -> Upincr
     | Updecr -> Updecr
+    | Uref -> Uref
   and map_case =
     function
     | Default v1 -> let v1 = map_block v1 in Default ((v1))

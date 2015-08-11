@@ -82,16 +82,14 @@
 #include <caml/alloc.h>
 #include <caml/fail.h>
 
+#include <assert.h>
+
 #ifdef _WIN32
-
 #include <windows.h>
-
 #else
-
 /* define CAML_NAME_SPACE to ensure all the caml imports are prefixed with
  * 'caml_' */
 #define CAML_NAME_SPACE
-#include <assert.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <signal.h>
@@ -105,14 +103,12 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #endif
 
 #ifndef NO_LZ4
 #include <lz4.h>
 #include <lz4hc.h>
 #endif
-
 
 #ifdef _WIN32
 static int win32_getpagesize(void)

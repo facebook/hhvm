@@ -17,12 +17,15 @@
 #include "hphp/runtime/base/config.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 #include <fstream>
 
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,9 +117,57 @@ void Config::ParseIniFile(const std::string &filename) {
 void Config::ParseIniFile(const std::string &filename, IniSettingMap &ini,
                           const bool constants_only /* = false */) {
     std::ifstream ifs(filename);
-    const std::string str((std::istreambuf_iterator<char>(ifs)),
-                          std::istreambuf_iterator<char>());
-    Config::SetParsedIni(ini, str, filename, constants_only);
+    std::string str((std::istreambuf_iterator<char>(ifs)),
+                    std::istreambuf_iterator<char>());
+    std::string with_includes;
+    Config::ReplaceIncludesWithIni(filename, str, with_includes);
+    Config::SetParsedIni(ini, with_includes, filename, constants_only);
+}
+
+void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
+                                    const std::string& iniStr,
+                                    std::string& with_includes) {
+  std::istringstream iss(iniStr);
+  std::string line;
+  while (std::getline(iss, line)) {
+    // Handle cases like
+    //   #include           ""
+    //   ##includefoo barbaz"myconfig.ini" how weird is that
+    // Anything that is not a syntactically correct #include "file" after
+    // this pre-processing, will be treated as an ini comment and processed
+    // as such in the ini parser
+    auto pos = line.find_first_not_of(" ");
+    if (pos == std::string::npos ||
+        line.compare(pos, strlen("#include"), "#include") != 0) {
+      // treat as normal ini line, including comment that doesn't start with
+      // #include
+      with_includes += line + "\n";
+      continue;
+    }
+    pos += strlen("#include");
+    auto start = line.find_first_not_of(" ", pos);
+    auto end = line.find_last_not_of(" ");
+    if ((start == std::string::npos || line[start] != '"') ||
+        (end == start || line[end] != '"')) {
+      with_includes += line + "\n"; // treat as normal comment
+      continue;
+    }
+    std::string file = line.substr(start + 1, end - start - 1);
+    const std::string logger_file = file;
+    boost::filesystem::path p(file);
+    if (!p.is_absolute()) {
+      boost::filesystem::path opath(original_ini_filename);
+      p = opath.parent_path()/p;
+    }
+    if (boost::filesystem::exists(p)) {
+      std::ifstream ifs(p.string());
+      const std::string contents((std::istreambuf_iterator<char>(ifs)),
+                                 std::istreambuf_iterator<char>());
+      Config::ReplaceIncludesWithIni(p.string(), contents, with_includes);
+    } else {
+      Logger::Warning("ini include file %s not found", logger_file.c_str());
+    }
+  }
 }
 
 void Config::ParseHdfFile(const std::string &filename, Hdf &hdf) {

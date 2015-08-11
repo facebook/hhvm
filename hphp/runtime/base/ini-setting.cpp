@@ -470,6 +470,7 @@ void IniSettingMap::set(const String& key, const Variant& v) {
 void IniSetting::ParserCallback::onSection(const std::string &name, void *arg) {
   // do nothing
 }
+
 void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
   // do nothing
 }

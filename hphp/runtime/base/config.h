@@ -295,6 +295,9 @@ struct Config {
                            const std::string &value) {
     values[key] = value;
   }
+  static void ReplaceIncludesWithIni(const std::string& original_ini_filename,
+                                     const std::string& iniStr,
+                                     std::string& with_includes);
 };
 
 }

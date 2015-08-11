@@ -484,7 +484,7 @@ macro(hphp_link target)
     endif()
   endif()
 
-  if (${LIBPTHREAD_LIBRARIES})
+  if (LIBPTHREAD_LIBRARIES)
     target_link_libraries(${target} ${LIBPTHREAD_LIBRARIES})
   endif()
 

@@ -216,6 +216,8 @@ bool HHVM_FUNCTION(imagerectangle, const Resource& image,
 Variant HHVM_FUNCTION(imagerotate,
   const Resource& source_image, double angle, int64_t bgd_color,
   int64_t ignore_transparent = 0);
+Variant HHVM_FUNCTION(imagescale,const Resource& image, int64_t newwidth,
+  int64_t newheight = -1, int64_t method = -1);
 bool HHVM_FUNCTION(imagesavealpha, const Resource& image, bool saveflag);
 bool HHVM_FUNCTION(imagesetbrush, const Resource& image,
   const Resource& brush);

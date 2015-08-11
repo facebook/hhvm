@@ -10,7 +10,9 @@ SET(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
 
-PROJECT(${PACKAGE_NAME} C CXX ASM)
+# Enable both ASM and ASM_MASM. CMake will ignore whichever
+# one isn't supported by the current platform.
+PROJECT(${PACKAGE_NAME} C CXX ASM ASM_MASM)
 
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)
 IF(APPLE)

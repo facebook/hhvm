@@ -703,7 +703,7 @@ std::string Process::GetCurrentDirectory() {
 
   // Allocate additional space for kDeleted part.
   char* buf = (char*)alloca(sizeof(char) * (PATH_MAX + kDeletedLen));
-  memset(buf, 0, sizeof(buf));
+  memset(buf, 0, PATH_MAX + kDeletedLen);
   char* cwd = getcwd(buf, PATH_MAX);
 
   if (cwd != nullptr) {

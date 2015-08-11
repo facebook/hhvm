@@ -9,3 +9,5 @@ File "new_generic.php", line 17, characters 35-37:
 This is an int
 File "new_generic.php", line 19, characters 29-36:
 It is incompatible with a string
+File "new_generic.php", line 8, characters 36-39:
+Considering that this type argument is invariant with respect to C

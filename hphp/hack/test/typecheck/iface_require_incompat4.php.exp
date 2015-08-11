@@ -4,3 +4,5 @@ File "iface_require_incompat4.php", line 10, characters 25-29:
 This is a float
 File "iface_require_incompat4.php", line 6, characters 25-27:
 It is incompatible with an int
+File "iface_require_incompat4.php", line 10, characters 25-29:
+Considering that this type argument is invariant with respect to Super

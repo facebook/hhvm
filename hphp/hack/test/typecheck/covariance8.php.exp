@@ -6,3 +6,5 @@ File "covariance8.php--file2.php", line 8, characters 19-19:
 It is incompatible with an object of type B
 File "covariance8.php--file1.php", line 5, characters 22-22:
   via this generic T
+File "covariance8.php--file2.php", line 7, characters 22-22:
+Considering that this type argument is invariant with respect to ID

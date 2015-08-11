@@ -6,3 +6,6 @@ File "typedef_bad_error_message.php", line 3, characters 23-23:
   via this generic T
 File "typedef_bad_error_message.php", line 6, characters 19-22:
 It is incompatible with a string
+File "typedef_bad_error_message.php", line 3, characters 23-23:
+Considering that this type argument is invariant with respect to Vector
+Did you mean ConstVector instead?

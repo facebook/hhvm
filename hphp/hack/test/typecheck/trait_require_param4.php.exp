@@ -4,3 +4,5 @@ File "trait_require_param4.php", line 10, characters 25-29:
 This is a float
 File "trait_require_param4.php", line 13, characters 23-25:
 It is incompatible with an int
+File "trait_require_param4.php", line 10, characters 25-29:
+Considering that this type argument is invariant with respect to Super

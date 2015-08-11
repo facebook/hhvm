@@ -4,3 +4,5 @@ File "gen7.php", line 21, characters 16-16:
 This is an object of type A
 File "gen7.php", line 23, characters 19-19:
 It is incompatible with an object of type D
+File "gen7.php", line 21, characters 16-16:
+Considering that this type argument is invariant with respect to B

@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/unit.h"
@@ -35,6 +36,10 @@ using StepOutState = RequestInjectionData::StepOutState;
 
 //////////////////////////////////////////////////////////////////////////
 // DebugHookHandler implementation
+
+bool isHphpd(const DebugHookHandler* handler) {
+  return dynamic_cast<const Eval::DebuggerHookHandler*>(handler) != nullptr;
+}
 
 void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
   // legacy hphpd code expects no failure if no hook handler is attached

@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/network.h"

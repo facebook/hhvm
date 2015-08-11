@@ -933,8 +933,16 @@ static int start_server(const std::string &username, int xhprof) {
     Logger::Info("Warming up");
     if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
+    std::map<std::string, int> seen;
     for (auto& file : RuntimeOption::ServerWarmupRequests) {
-      BootTimer::Block timer(folly::sformat("warmup:{}", file));
+      // Take only the last part
+      folly::StringPiece f(file);
+      auto pos = f.rfind('/');
+      std::string str(pos == f.npos ? file : f.subpiece(pos + 1).str());
+      auto count = seen[str];
+      BootTimer::Block timer(folly::sformat("warmup:{}:{}", str, count++));
+      seen[str] = count;
+
       HttpRequestHandler handler(0);
       ReplayTransport rt;
       timespec start;

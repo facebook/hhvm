@@ -7639,6 +7639,11 @@ OPCODES
 
 template <bool breakOnCtlFlow>
 TCA dispatchImpl() {
+  // Unfortunately, MSVC doesn't support computed
+  // gotos, so use a switch instead.
+  bool collectCoverage = RID().getCoverage();
+
+#ifndef _MSC_VER
   static const void *optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
     &&Label##name,
@@ -7660,13 +7665,21 @@ TCA dispatchImpl() {
   assert(sizeof(optabDirect) / sizeof(const void *) == Op_count);
   assert(sizeof(optabDbg) / sizeof(const void *) == Op_count);
   const void **optab = optabDirect;
-  bool collectCoverage = RID().getCoverage();
   if (collectCoverage) {
     optab = optabCover;
   }
   DEBUGGER_ATTACHED_ONLY(optab = optabDbg);
+#endif
+
   bool isCtlFlow = false;
   TCA retAddr = nullptr;
+  Op op;
+
+#ifdef _MSC_VER
+# define DISPATCH_ACTUAL() goto DispatchSwitch
+#else
+# define DISPATCH_ACTUAL() goto *optab[uint8_t(op)]
+#endif
 
 #define DISPATCH() do {                                                 \
     if (breakOnCtlFlow && isCtlFlow) {                                  \
@@ -7675,12 +7688,12 @@ TCA dispatchImpl() {
                            vmfp()));                                    \
       return retAddr;                                                   \
     }                                                                   \
-    Op op = *reinterpret_cast<const Op*>(pc);                           \
+    op = *reinterpret_cast<const Op*>(pc);                              \
     COND_STACKTRACE("dispatch:                    ");                   \
     ONTRACE(1,                                                          \
             Trace::trace("dispatch: %d: %s\n", pcOff(),                 \
                          opcodeToName(op)));                            \
-    goto *optab[uint8_t(op)];                                           \
+    DISPATCH_ACTUAL();                                                  \
 } while (0)
 
   ONTRACE(1, Trace::trace("dispatch: Enter dispatch(%p)\n",
@@ -7688,14 +7701,14 @@ TCA dispatchImpl() {
   PC pc = vmpc();
   DISPATCH();
 
-#define O(name, imm, push, pop, flags)                        \
-  LabelDbg##name:                                             \
-    phpDebuggerOpcodeHook(pc);                                \
-  LabelCover##name:                                           \
-    if (collectCoverage) {                                    \
+#define OPCODE_DBG_BODY(name, imm, push, pop, flags)          \
+  phpDebuggerOpcodeHook(pc)
+#define OPCODE_COVER_BODY(name, imm, push, pop, flags)        \
+  if (collectCoverage) {                                      \
       recordCodeCoverage(pc);                                 \
-    }                                                         \
-  Label##name: {                                              \
+  }
+#define OPCODE_MAIN_BODY(name, imm, push, pop, flags)         \
+  {                                                           \
     retAddr = iopRetWrapper(iop##name, pc);                   \
     vmpc() = pc;                                              \
     if (breakOnCtlFlow) {                                     \
@@ -7703,7 +7716,7 @@ TCA dispatchImpl() {
       Stats::incOp(Op::name);                                 \
     }                                                         \
     if (UNLIKELY(!pc)) {                                      \
-      DEBUG_ONLY const Op op = Op::name;                      \
+      op = Op::name;                                          \
       assert(op == OpRetC || op == OpRetV ||                  \
              op == OpAwait || op == OpCreateCont ||           \
              op == OpYield || op == OpYieldK ||               \
@@ -7720,9 +7733,37 @@ TCA dispatchImpl() {
     assert(isCtlFlow || !retAddr);                            \
     DISPATCH();                                               \
   }
+
+#ifdef _MSC_VER
+DispatchSwitch:
+  switch (uint8_t(op)) {
+#define O(name, imm, push, pop, flags)                        \
+    case Op::name: {                                          \
+      DEBUGGER_ATTACHED_ONLY(OPCODE_DBG_BODY(name, imm, push, pop, flags)); \
+      OPCODE_COVER_BODY(name, imm, push, pop, flags)          \
+      OPCODE_MAIN_BODY(name, imm, push, pop, flags)           \
+    }
+#else
+#define O(name, imm, push, pop, flags)                        \
+  LabelDbg##name:                                             \
+    OPCODE_DBG_BODY(name, imm, push, pop, flags);             \
+  LabelCover##name:                                           \
+    OPCODE_COVER_BODY(name, imm, push, pop, flags)            \
+  Label##name:                                                \
+    OPCODE_MAIN_BODY(name, imm, push, pop, flags)
+#endif
+
   OPCODES
+
+#ifdef _MSC_VER
+    }
+#endif
 #undef O
 #undef DISPATCH
+#undef DISPATCH_ACTUAL
+#undef OPCODE_DBG_BODY
+#undef OPCODE_COVER_BODY
+#undef OPCODE_MAIN_BODY
 
   assert(retAddr == nullptr);
   return nullptr;

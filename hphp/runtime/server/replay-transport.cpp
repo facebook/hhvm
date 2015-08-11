@@ -83,11 +83,14 @@ void ReplayTransport::replayInputImpl() {
                                                            "", false));
   m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
-  for (Hdf hdf = m_hdf["headers"].firstChild(); hdf.exists();
-       hdf = hdf.next()) {
-    m_requestHeaders[Config::GetString(m_ini, hdf, "name", "", false)]
-      .push_back(Config::GetString(m_ini, hdf, "value", "", false));
-  }
+  auto headers_callback = [&] (const IniSetting::Map &ini_h,
+                               const Hdf &hdf_h, const std::string &ini_h_key) {
+    m_requestHeaders[Config::GetString(ini_h, hdf_h, "name",
+                                       "", false)].push_back(
+      Config::GetString(ini_h, hdf_h, "value", "", false)
+    );
+  };
+  Config::Iterate(headers_callback, m_ini, m_hdf, "headers", false);
 }
 
 const char *ReplayTransport::getUrl() {

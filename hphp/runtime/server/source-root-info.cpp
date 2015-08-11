@@ -145,13 +145,16 @@ void SourceRootInfo::createFromUserConfig() {
     Logger::Error("%s ignored: %s", confFileName.c_str(),
                   e.getMessage().c_str());
   }
-  if (config[(m_sandbox + ".ServerVars").c_str()]. exists()) {
-    for (Hdf hdf = config[(m_sandbox + ".ServerVars").c_str()].firstChild();
-                   hdf.exists(); hdf = hdf.next()) {
-      m_serverVars.set(String(hdf.getName()),
-                       String(Config::GetString(ini, hdf)));
-    }
-  }
+  auto sandbox_servervars_callback = [&] (const IniSetting::Map &ini_ss,
+                                          const Hdf &hdf_ss,
+                                          const std::string &ini_ss_key) {
+    std::string name = hdf_ss.exists() && !hdf_ss.isEmpty()
+                     ? hdf_ss.getName()
+                     : ini_ss_key;
+    m_serverVars.set(String(name), String(Config::GetString(ini_ss, hdf_ss)));
+  };
+  Config::Iterate(sandbox_servervars_callback, ini, config,
+                  (m_sandbox + ".ServerVars").c_str());
   if (!userOverride.empty()) {
     m_user = std::move(userOverride);
   }

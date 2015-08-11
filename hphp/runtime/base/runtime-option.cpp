@@ -831,20 +831,27 @@ void RuntimeOption::Load(
     Config::Bind(AccessLogDefaultFormat, ini, config,
                  "Log.AccessLogDefaultFormat", "%h %l %u %t \"%r\" %>s %b");
 
-    auto parseLogs = [](Hdf root, IniSetting::Map& ini, const char* name,
-                        std::map<std::string, AccessLogFileData>& logs) {
-      for (Hdf hdf = root[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
-        string logName = hdf.getName();
-        string fname = Config::GetString(ini, hdf, "File", "", false);
-        if (fname.empty()) {
-          continue;
-        }
-        string symLink = Config::GetString(ini, hdf, "SymLink", "", false);
-        string format = Config::GetString(ini, hdf, "Format",
-          AccessLogDefaultFormat, false);
+    auto parseLogs = [] (const Hdf &config, const IniSetting::Map& ini,
+                         const std::string &name,
+                         std::map<std::string, AccessLogFileData> &logs) {
+      auto parse_logs_callback = [&] (const IniSetting::Map &ini_pl,
+                                      const Hdf &hdf_pl,
+                                      const std::string &ini_pl_key) {
+        string logName = hdf_pl.exists() && !hdf_pl.isEmpty()
+                       ? hdf_pl.getName()
+                       : ini_pl_key;
+        string fname = Config::GetString(ini_pl, hdf_pl, "File", "", false);
+        if (!fname.empty()) {
+          string symlink = Config::GetString(ini_pl, hdf_pl, "SymLink", "",
+                                             false);
+          string format = Config::GetString(ini_pl, hdf_pl, "Format",
+                                            AccessLogDefaultFormat, false);
+          logs[logName] = AccessLogFileData(fname, symlink, format);
 
-        logs[logName] = AccessLogFileData(fname, symLink, format);
-      }
+
+        }
+      };
+      Config::Iterate(parse_logs_callback, ini, config, name);
     };
 
     parseLogs(config, ini, "Log.Access", AccessLogs);
@@ -885,7 +892,6 @@ void RuntimeOption::Load(
                  "ErrorHandling.WarningFrequency", 1);
   }
   {
-    Hdf rlimit = config["ResourceLimit"];
     if (Config::GetInt64(ini, config, "ResourceLimit.CoreFileSizeOverride")) {
       setResourceLimit(RLIMIT_CORE, ini,  config,
                        "ResourceLimit.CoreFileSizeOverride");

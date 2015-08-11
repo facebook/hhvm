@@ -2448,12 +2448,15 @@ void DebuggerClient::loadConfig() {
   Config::Bind(m_tutorialVisited, ini, config, "Tutorial.Visited");
   BIND(tutorial.visited, &m_tutorialVisited);
 
-  for (Hdf node = config["Macros"].firstChild(); node.exists();
-       node = node.next()) {
+  auto macros_callback = [&] (const IniSetting::Map &ini_m,
+                              const Hdf &hdf_m,
+                              const std::string &ini_m_key) {
     auto macro = std::make_shared<Macro>();
-    macro->load(ini, node);
+    macro->load(ini_m, hdf_m);
     m_macros.push_back(macro);
-  }
+  };
+  Config::Iterate(macros_callback, ini, config, "Macros");
+
   BIND(macros, IniSetting::SetAndGet<Array>(
     [this](const Array& val) {
       for (ArrayIter iter(val); iter; ++iter) {

@@ -148,23 +148,25 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
                          const Hdf &roots,
                          const std::string& name,
                          std::map<std::string, std::string> &map) {
-  if (roots.exists()) {
-    for (Hdf hdf = roots[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
-      map[Config::GetString(ini, hdf, "root", "", false)] =
-        Config::GetString(ini, hdf, "path", "", false);
-    }
-  }
+  auto root_map_callback = [&] (const IniSetting::Map &ini_rm,
+                                const Hdf &hdf_rm,
+                                const std::string &ini_rm_key) {
+    map[Config::GetString(ini_rm, hdf_rm, "root", "", false)] =
+      Config::GetString(ini_rm, hdf_rm, "path", "", false);
+  };
+  Config::Iterate(root_map_callback, ini, roots, name);
 }
 
 void Option::LoadRootHdf(const IniSetting::Map& ini,
                          const Hdf &roots,
                          const std::string& name,
                          std::vector<std::string> &vec) {
-  if (roots.exists()) {
-    for (Hdf hdf = roots[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
-      vec.push_back(Config::GetString(ini, hdf, "", "", false));
-    }
-  }
+  auto root_vec_callback = [&] (const IniSetting::Map &ini_rv,
+                                const Hdf &hdf_rv,
+                                const std::string &ini_rv_key) {
+    vec.push_back(Config::GetString(ini_rv, hdf_rv, "", "", false));
+  };
+  Config::Iterate(root_vec_callback, ini, roots, name);
 }
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
@@ -204,14 +206,20 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
 
   // build map from function names to sections
-  for (Hdf hdf = config["FunctionSections"].firstChild(); hdf.exists();
-       hdf = hdf.next()) {
-    for (Hdf hdfFunc = hdf.firstChild(); hdfFunc.exists();
-         hdfFunc = hdfFunc.next()) {
-           FunctionSections[Config::GetString(ini, hdfFunc, "", "", false)]
-             = hdf.getName();
-    }
-  }
+  auto function_sections_callback = [&] (const IniSetting::Map &ini_fs,
+                                        const Hdf &hdf_fs,
+                                        const std::string &ini_fs_key) {
+    auto function_callback = [&] (const IniSetting::Map &ini_f,
+                                 const Hdf &hdf_f,
+                                 const std::string &ini_f_key) {
+      FunctionSections[Config::GetString(ini_f, hdf_f, "", "", false)] =
+        hdf_f.exists() && !hdf_f.isEmpty() ? hdf_f.getName() : ini_f_key;
+    };
+    auto f_name = hdf_fs.exists() && !hdf_fs.isEmpty() ? hdf_fs.getName() :
+                  ini_fs_key;
+    Config::Iterate(function_callback, ini_fs, hdf_fs, f_name, false);
+  };
+  Config::Iterate(function_sections_callback, ini, config, "FunctionSections");
 
   {
     // Repo

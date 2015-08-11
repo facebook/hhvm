@@ -345,6 +345,7 @@ INTERNAL_ERRORS = {
 }
 
 OTHER_UNPARSEABLE_FILES = [
+    'abstract_final_classname.php',
     'capitalization2.php',
     'capitalization4.php',
     'class_abstract_final_1.php',

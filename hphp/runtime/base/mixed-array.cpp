@@ -397,7 +397,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   // allocated for the MixedArray, assuming `malloc()' always allocates
   // multiple of 16 bytes.
   bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
-  ad->m_hdr.count = UncountedValue; // after bcopy, update count
+  ad->m_hdr.gcbyte = UncountedGCByte; // after bcopy, update count
   copyHash(ad->hashTab(), a->hashTab(), scale);
 
   // Need to make sure keys and values are all uncounted.

@@ -44,8 +44,8 @@ struct Variant;
  */
 #define TV_GENERIC_DISPATCH(exp, func)                                  \
   HPHP::CountableManip::func(                                           \
-    *reinterpret_cast<HPHP::RefCount*>(                                 \
-      (exp).m_data.num + HPHP::FAST_REFCOUNT_OFFSET                     \
+    *reinterpret_cast<HPHP::GCByte*>(                                   \
+      (exp).m_data.num + HPHP::FAST_GC_BYTE_OFFSET                      \
     )                                                                   \
   )
 

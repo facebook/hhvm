@@ -753,6 +753,13 @@ function imagerotate(resource $source_image,
 function imagesavealpha(resource $image,
                         bool $saveflag): bool;
 
+/*
+ * imagescale - Scale an image using the given new width and height.
+ */
+<<__Native>>
+function imagescale(resource $img, int $newwidth, int $newheigh = -1,
+                               int $method = IMG_BILINEAR_FIXED): mixed;
+
 /* imagesetbrush() sets the brush image to be used by all line drawing
  * functions (such as imageline() and imagepolygon()) when drawing with the
  * special colors IMG_COLOR_BRUSHED or IMG_COLOR_STYLEDBRUSHED.

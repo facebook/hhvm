@@ -978,6 +978,10 @@ gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsig
 {
 	gdImagePtr tmp_im;
 
+	if (!src->trueColor) {
+		gdImagePaletteToTrueColor(src);
+	}
+
 	tmp_im = gdImageCreateTrueColor(new_width, src_height);
 	if (tmp_im == NULL) {
 		return NULL;

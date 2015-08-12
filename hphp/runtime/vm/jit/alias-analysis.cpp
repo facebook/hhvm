@@ -32,9 +32,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// Locations that refer to ranges of the eval stack are expanded into
-// individual stack slots only if smaller than this threshold.
-constexpr int kMaxExpandedStackRange = 16;
+// Locations that refer to ranges of the eval stack or multiple frame locals
+// are expanded into individual locations only if smaller than this threshold.
+constexpr int kMaxExpandedSize = 16;
 
 template<class Visit>
 void visit_locations(const BlockList& blocks, Visit visit) {
@@ -63,6 +63,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
 }
 
 folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
+  assertx(acls.isSingleLocation());
   auto const ins = ret.locations.insert(std::make_pair(acls, ALocMeta{}));
   if (!ins.second) return ins.first->second.index;
   if (ret.locations.size() > kMaxTrackedALocs) {
@@ -133,17 +134,32 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 
   // Handle stacks specially to be less pessimistic.  We can always use the
   // expand map to find stack locations that may alias our class.
-  {
-    auto const stk = acls.stack();
-    if (stk && stk->size > 1) {
-      auto const it = stk_expand_map.find(*stk);
-      ret |= it != end(stk_expand_map) ? it->second : all_stack;
-    } else {
-      ret |= may_alias_part(*this, acls, acls.stack(), AStackAny, all_stack);
-    }
+  auto const stk = acls.stack();
+  if (stk && stk->size > 1) {
+    auto const it = stk_expand_map.find(*stk);
+    ret |= it != end(stk_expand_map) ? it->second : all_stack;
+  } else {
+    ret |= may_alias_part(*this, acls, acls.stack(), AStackAny, all_stack);
   }
 
-  ret |= may_alias_part(*this, acls, acls.frame(), AFrameAny, all_frame);
+  if (auto const frame = acls.frame()) {
+    if (frame->ids.hasSingleValue()) {
+      if (auto const slot = find(*frame)) {
+        ret.set(slot->index);
+      }
+      // Otherwise the location is untracked.
+    } else {
+      auto const it = local_sets.find(*frame);
+      if (it != end(local_sets)) {
+        ret |= it->second;
+      } else {
+        ret |= all_frame;
+      }
+    }
+  } else if (acls.maybe(AFrameAny)) {
+    ret |= all_frame;
+  }
+
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= may_alias_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
@@ -172,7 +188,23 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     }
   }
 
-  ret |= expand_part(*this, acls, acls.frame(), AFrameAny, all_frame);
+  if (auto const frame = acls.frame()) {
+    if (frame->ids.hasSingleValue()) {
+      if (auto const meta = find(*frame)) {
+        ret.set(meta->index);
+      }
+    } else {
+      auto const it = local_sets.find(*frame);
+      if (it != end(local_sets)) {
+        ret |= it->second;
+      }
+      // We could iterate over the all the frame locals and set corresponding
+      // bits, but that seldom adds value.
+    }
+  } else if (AFrameAny <= acls) {
+    ret |= all_frame;
+  }
+
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= expand_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
@@ -219,11 +251,35 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (acls.is_frame() ||
-        acls.is_mis() ||
+    if (acls.is_mis() ||
         acls.is_iterPos() ||
         acls.is_iterBase()) {
       add_class(ret, acls);
+      return;
+    }
+
+    if (auto const frame = acls.frame()) {
+      assertx(!frame->ids.empty());
+      if (frame->ids.hasSingleValue()) {
+        add_class(ret, *frame);
+      } else {
+        auto complete = true;
+        auto range = ALocBits{};
+        if (frame->ids.size() <= kMaxExpandedSize) {
+          for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
+            if (frame->ids.test(id)) {
+              if (auto const index = add_class(ret, AFrame { frame->fp, id })) {
+                range.set(*index);
+              } else {
+                complete = false;
+              }
+            }
+          }
+        }
+        if (complete) {
+          ret.local_sets[AliasClass { *frame }] = range;
+        }
+      }
       return;
     }
 
@@ -248,7 +304,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       if (stk->size > 1) {
         ret.stk_expand_map[AliasClass { *stk }];
       }
-      if (stk->size > kMaxExpandedStackRange) return;
+      if (stk->size > kMaxExpandedSize) return;
 
       auto complete = true;
       auto range = ALocBits{};
@@ -265,8 +321,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
         FTRACE(2, "    range {}:  {}\n", show(acls), show(range));
         ret.stack_ranges[acls] = range;
       }
-
-      return;
     }
   });
 
@@ -349,6 +403,16 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
           ent.second.set(kv.second.index);
         }
       }
+    } else if (kv.first.is_frame()) {
+      for (auto& ent : ret.local_sets) {
+        if (kv.first <= ent.first) {
+          FTRACE(2, "  ({}) {} <= {}\n",
+            kv.second.index,
+            show(kv.first),
+            show(ent.first));
+          ent.second.set(kv.second.index);
+        }
+      }
     }
   }
 
@@ -385,16 +449,21 @@ std::string show(const AliasAnalysis& ainfo) {
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
-                      " {: <20}       : {}\n",
     "all props",    show(ainfo.all_props),
     "all elemIs",   show(ainfo.all_elemIs),
     "all refs",     show(ainfo.all_ref),
-    "all frame",    show(ainfo.all_frame),
     "all iterPos",  show(ainfo.all_iterPos),
     "all iterBase", show(ainfo.all_iterBase),
-    "all stack",    show(ainfo.all_stack)
+    "all frame",    show(ainfo.all_frame)
   );
-  for (auto& kv : ainfo.stk_expand_map) {
+  for (auto& kv : ainfo.local_sets) {
+    folly::format(&ret, " ex {: <17}       : {}\n",
+      show(kv.first),
+      show(kv.second));
+  }
+  folly::format(&ret, " {: <20}       : {}\n",
+     "all stack",  show(ainfo.all_stack));
+  for (auto& kv : ainfo.stack_ranges) {
     folly::format(&ret, " ex {: <17}       : {}\n",
       show(kv.first),
       show(kv.second));

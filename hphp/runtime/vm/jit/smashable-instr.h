@@ -82,11 +82,13 @@ emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc);
  * These operations are allowed to change the instructions themselves, provided
  * they still behave appropriately (e.g., a fallthrough jmp can be smashed to a
  * nop sequence).
+ *
+ * The `smash_jcc' routine leaves the condition unchanged if `cc' is CC_None.
  */
 void smash_movq(TCA inst, uint64_t imm);
 void smash_call(TCA inst, TCA target);
 void smash_jmp(TCA inst, TCA target);
-void smash_jcc(TCA inst, TCA target);
+void smash_jcc(TCA inst, TCA target, ConditionCode cc = CC_None);
 
 /*
  * Extract instruction operands from assembly.

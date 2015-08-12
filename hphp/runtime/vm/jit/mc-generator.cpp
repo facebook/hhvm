@@ -73,7 +73,6 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/align.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/debug-guards.h"
@@ -1077,16 +1076,16 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
  * offNotTaken:
  */
 TCA
-MCGenerator::bindJccFirst(TCA toSmash,
-                          SrcKey skTaken, SrcKey skNotTaken,
-                          bool taken,
-                          bool& smashed) {
+MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
+                          bool taken, bool& smashed) {
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
+
   auto const skWillExplore = taken ? skTaken : skNotTaken;
   auto const skWillDefer = taken ? skNotTaken : skTaken;
   auto const dest = skWillExplore;
-  auto cc = smashable_jcc_cond(toSmash);
+  auto cc = smashable_jcc_cond(jccAddr);
+
   TRACE(3, "bindJccFirst: explored %d, will defer %d; "
            "overwriting cc%02x taken %d\n",
         skWillExplore.offset(), skWillDefer.offset(), cc, taken);
@@ -1095,36 +1094,32 @@ MCGenerator::bindJccFirst(TCA toSmash,
   // We want the branch to point to whichever side has not been explored yet.
   if (taken) cc = ccNegate(cc);
 
-  auto& cb = code.blockFor(toSmash);
-  Asm as { cb };
-  // Its not clear where the IncomingBranch should go to if cb is code.frozen()
+  auto& cb = code.blockFor(jccAddr);
+
+  // It's not clear where the IncomingBranch should go to if cb is frozen.
   assertx(&cb != &code.frozen());
 
-  // XXX Use of kJmp*Len here is a layering violation.
-  using namespace x64;
+  auto const jmpAddr = jccAddr + sizeof_smashable_jcc();
+  auto const afterAddr = jmpAddr + sizeof_smashable_jmp();
 
-  // can we just directly fall through?
-  // a jmp + jz takes 5 + 6 = 11 bytes
-  bool const fallThru = toSmash + kJccLen + kJmpLen == cb.frontier() &&
-    !m_tx.getSrcDB().find(dest);
+  // Can we just directly fall through?
+  bool const fallThru = afterAddr == cb.frontier() &&
+                        !m_tx.getSrcDB().find(dest);
 
   auto const tDest = getTranslation(TranslArgs{dest, !fallThru});
-  if (!tDest) {
-    return 0;
-  }
+  if (!tDest) return nullptr;
 
-  auto const jmpTarget = smashable_jmp_target(toSmash + kJccLen);
-  if (jmpTarget != smashable_jcc_target(toSmash)) {
-    // someone else already smashed this one. Ideally we would
-    // just re-execute from toSmash - except the flags will have
-    // been trashed.
+  auto const jmpTarget = smashable_jmp_target(jmpAddr);
+  if (jmpTarget != smashable_jcc_target(jccAddr)) {
+    // Someone else already smashed this one.  Ideally we would just re-execute
+    // from jccAddr---except the status flags will have been trashed.
     return tDest;
   }
 
   auto const stub = svcreq::emit_bindjmp_stub(
     code.frozen(),
     liveSpOff(),
-    toSmash,
+    jccAddr,
     skWillDefer,
     TransFlags{}
   );
@@ -1132,12 +1127,13 @@ MCGenerator::bindJccFirst(TCA toSmash,
   mcg->cgFixups().process(nullptr);
   smashed = true;
   assertx(Translator::WriteLease().amOwner());
+
   /*
    * Roll over the jcc and the jmp/fallthru. E.g., from:
    *
    *     toSmash:    jcc   <jmpccFirstStub>
    *     toSmash+6:  jmp   <jmpccFirstStub>
-   *     toSmash+11: <probably the new translation == tdest>
+   *     toSmash+11: <probably the new translation == tDest>
    *
    * to:
    *
@@ -1145,9 +1141,9 @@ MCGenerator::bindJccFirst(TCA toSmash,
    *     toSmash+6:  nop5
    *     toSmash+11: newHotness
    */
-  CodeCursor cg(cb, toSmash);
-  as.jcc(cc, stub);
-  m_tx.getSrcRec(dest)->chainFrom(IncomingBranch::jmpFrom(cb.frontier()));
+  smash_jcc(jccAddr, stub, cc);
+  m_tx.getSrcRec(dest)->chainFrom(IncomingBranch::jmpFrom(jmpAddr));
+
   TRACE(5, "bindJccFirst: overwrote with cc%02x taken %d\n", cc, taken);
   return tDest;
 }

@@ -48,7 +48,7 @@ emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc);
 void smash_movq(TCA inst, uint64_t imm);
 void smash_call(TCA inst, TCA target);
 void smash_jmp(TCA inst, TCA target);
-void smash_jcc(TCA inst, TCA target);
+void smash_jcc(TCA inst, TCA target, ConditionCode cc = CC_None);
 
 uint64_t smashable_movq_imm(TCA inst);
 TCA smashable_call_target(TCA inst);

@@ -77,9 +77,9 @@ void smash_jmp(TCA inst, TCA target) {
   assertx(MCGenerator::canWrite());
   ARCH_SWITCH_CALL(smash_jmp, inst, target);
 }
-void smash_jcc(TCA inst, TCA target) {
+void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
   assertx(MCGenerator::canWrite());
-  ARCH_SWITCH_CALL(smash_jcc, inst, target);
+  ARCH_SWITCH_CALL(smash_jcc, inst, target, cc);
 }
 
 uint64_t smashable_movq_imm(TCA inst) {

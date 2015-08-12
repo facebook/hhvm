@@ -131,9 +131,17 @@ void smash_jmp(TCA inst, TCA target) {
   }
 }
 
-void smash_jcc(TCA inst, TCA target) {
+void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
   always_assert(is_aligned(inst, Alignment::SmashJcc));
-  X64Assembler::patchJcc(inst, target);
+
+  if (cc == CC_None) {
+    X64Assembler::patchJcc(inst, target);
+  } else {
+    auto& cb = mcg->code.blockFor(inst);
+    CodeCursor cursor { cb, inst };
+    X64Assembler a { cb };
+    a.jcc(cc, target);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

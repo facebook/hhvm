@@ -138,7 +138,8 @@ void smash_jmp(TCA inst, TCA target) {
   smash_ctrl_flow(inst, target, true);
 }
 
-void smash_jcc(TCA inst, TCA target) {
+void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
+  assertx(cc == CC_None);
   smash_ctrl_flow(inst, target, false);
 }
 

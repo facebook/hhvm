@@ -31,7 +31,11 @@ namespace HPHP { namespace jit { namespace arm {
  * Mirrors the API of smashable-instr.h.
  */
 
-void make_smashable(CodeBlock& cb, int nbytes, int offset = 0);
+constexpr size_t sizeof_smashable_movq() { return 0; }
+constexpr size_t sizeof_smashable_cmpq() { return 0; }
+constexpr size_t sizeof_smashable_call() { return 0; }
+constexpr size_t sizeof_smashable_jmp()  { return 0; }
+constexpr size_t sizeof_smashable_jcc()  { return 0; }
 
 TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d);
 TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);

@@ -53,11 +53,6 @@ struct BackEnd final : jit::BackEnd {
     return arm::abi;
   }
 
-  size_t cacheLineSize() override {
-    // Not necessarily correct; depends on manufacturer implementation.
-    return 64;
-  }
-
   PhysReg rSp() override {
     return PhysReg(vixl::sp);
   }
@@ -230,11 +225,6 @@ struct BackEnd final : jit::BackEnd {
   }
 
   void genCodeImpl(IRUnit& unit, CodeKind, AsmInfo*) override;
-
-private:
-  void do_moveToAlign(CodeBlock& cb, MoveToAlignFlags alignment) override {
-    // TODO(2967396) implement properly
-  }
 };
 
 }

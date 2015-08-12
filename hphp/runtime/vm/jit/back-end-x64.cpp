@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
@@ -65,10 +66,6 @@ namespace {
 struct BackEnd final : jit::BackEnd {
   Abi abi() override {
     return x64::abi;
-  }
-
-  size_t cacheLineSize() override {
-    return 64;
   }
 
   PhysReg rSp() override {
@@ -191,24 +188,6 @@ struct BackEnd final : jit::BackEnd {
   }
 
   void genCodeImpl(IRUnit& unit, CodeKind, AsmInfo*) override;
-
-private:
-  void do_moveToAlign(CodeBlock& cb, MoveToAlignFlags alignment) override {
-    size_t x64Alignment;
-
-    switch (alignment) {
-    case MoveToAlignFlags::kJmpTargetAlign:
-      x64Alignment = kJmpTargetAlign;
-      break;
-    case MoveToAlignFlags::kNonFallthroughAlign:
-      x64Alignment = jit::kNonFallthroughAlign;
-      break;
-    case MoveToAlignFlags::kCacheLineAlign:
-      x64Alignment = kCacheLineSize;
-      break;
-    }
-    x64::moveToAlign(cb, x64Alignment);
-  }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -341,7 +320,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
      */
 
     static unsigned seed = 42;
-    auto off = rand_r(&seed) & (cacheLineSize() - 1);
+    auto off = rand_r(&seed) & (kCacheLineSize - 1);
     coldCode.init(coldCodeIn.frontier() +
                    RuntimeOption::EvalJitRelocationSize + off,
                    RuntimeOption::EvalJitRelocationSize - off, "cgRelocCold");

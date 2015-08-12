@@ -13,30 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_BACK_END_X64_H
-#define incl_HPHP_JIT_BACK_END_X64_H
 
-#include "hphp/runtime/vm/jit/back-end.h"
+#include "hphp/runtime/vm/jit/align-arm.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit { namespace arm {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<BackEnd> newBackEnd();
+bool is_aligned(TCA frontier, Alignment alignment) {
+  return true;
+}
 
-//////////////////////////////////////////////////////////////////////
+void align(CodeBlock& cb, Alignment alignment, AlignContext context,
+           bool fixups /* = false */) {
+}
 
-constexpr int kCallLen = 5;
-constexpr int kJmpLen = 5;
-constexpr int kJccLen = 6;
-constexpr int kJmpImmBytes = 4;
-constexpr int kRipLeaLen = 7;
-
-constexpr int kMovLen = 10;
-constexpr int kMovImmOff = 2;
-
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}
-
-#endif

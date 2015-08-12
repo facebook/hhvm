@@ -31,6 +31,8 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -95,7 +97,7 @@ struct CodeGenFixups {
   std::set<TCA> m_addressImmediates;
   std::set<TCA*> m_codePointers;
   std::vector<TransBCMapping> m_bcMap;
-  std::multimap<TCA,std::pair<int,int>> m_alignFixups;
+  std::multimap<TCA,std::pair<Alignment,AlignContext>> m_alignFixups;
   GrowableVector<IncomingBranch> m_inProgressTailJumps;
   LiteralMap m_literals;
 

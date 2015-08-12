@@ -13,30 +13,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_BACK_END_X64_H
-#define incl_HPHP_JIT_BACK_END_X64_H
 
-#include "hphp/runtime/vm/jit/back-end.h"
+#ifndef incl_HPHP_JIT_ALIGN_H_
+#define incl_HPHP_JIT_ALIGN_H_
 
-namespace HPHP { namespace jit { namespace x64 {
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/alignment.h"
 
-//////////////////////////////////////////////////////////////////////
+#include "hphp/util/data-block.h"
 
-std::unique_ptr<BackEnd> newBackEnd();
+namespace HPHP { namespace jit {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-constexpr int kCallLen = 5;
-constexpr int kJmpLen = 5;
-constexpr int kJccLen = 6;
-constexpr int kJmpImmBytes = 4;
-constexpr int kRipLeaLen = 7;
+/*
+ * Whether `frontier' is aligned to `alignment'.
+ */
+bool is_aligned(TCA frontier, Alignment alignment);
 
-constexpr int kMovLen = 10;
-constexpr int kMovImmOff = 2;
+/*
+ * Align `cb' to `alignment' in `context'.
+ *
+ * By default, calling align() registers alignment fixups for relocation.  If
+ * this behavior is not desired (e.g., in the relocator itself), it can be
+ * disabled by passing false for `fixups'.
+ */
+void align(CodeBlock& cb, Alignment alignment, AlignContext context,
+           bool fixups = true);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 
 #endif

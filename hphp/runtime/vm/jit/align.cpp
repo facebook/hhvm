@@ -13,30 +13,27 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_BACK_END_X64_H
-#define incl_HPHP_JIT_BACK_END_X64_H
 
-#include "hphp/runtime/vm/jit/back-end.h"
+#include "hphp/runtime/vm/jit/align.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+#include "hphp/runtime/base/arch.h"
 
-//////////////////////////////////////////////////////////////////////
+#include "hphp/runtime/vm/jit/align-arm.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 
-std::unique_ptr<BackEnd> newBackEnd();
+namespace HPHP { namespace jit {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-constexpr int kCallLen = 5;
-constexpr int kJmpLen = 5;
-constexpr int kJccLen = 6;
-constexpr int kJmpImmBytes = 4;
-constexpr int kRipLeaLen = 7;
+bool is_aligned(TCA frontier, Alignment alignment) {
+  ARCH_SWITCH_CALL(is_aligned, frontier, alignment);
+}
 
-constexpr int kMovLen = 10;
-constexpr int kMovImmOff = 2;
+void align(CodeBlock& cb, Alignment alignment, AlignContext context,
+           bool fixups /* = true */) {
+  ARCH_SWITCH_CALL(align, cb, alignment, context, fixups);
+}
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-}}}
-
-#endif
+}}

@@ -29,8 +29,20 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void make_smashable(CodeBlock& cb, int nbytes, int offset) {
-  ARCH_SWITCH_CALL(make_smashable, cb, nbytes, offset);
+size_t sizeof_smashable_movq() {
+  ARCH_SWITCH_CALL(sizeof_smashable_movq);
+}
+size_t sizeof_smashable_cmpq() {
+  ARCH_SWITCH_CALL(sizeof_smashable_cmpq);
+}
+size_t sizeof_smashable_call() {
+  ARCH_SWITCH_CALL(sizeof_smashable_call);
+}
+size_t sizeof_smashable_jmp() {
+  ARCH_SWITCH_CALL(sizeof_smashable_jmp);
+}
+size_t sizeof_smashable_jcc() {
+  ARCH_SWITCH_CALL(sizeof_smashable_jcc);
 }
 
 TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {

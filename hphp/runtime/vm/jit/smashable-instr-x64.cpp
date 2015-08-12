@@ -16,7 +16,8 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 
-#include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX: remove me!
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/util/asm-x64.h"
@@ -33,40 +34,15 @@ namespace HPHP { namespace jit { namespace x64 {
  *  1/  The modification is done with a single processor store.
  *  2/  Only one instruction in the original stream is modified.
  *  3/  The modified instruction does not cross a cacheline boundary.
+ *
+ * Cache alignment is required for mutable instructions to make sure mutations
+ * don't "tear" on remote CPUs.
  */
 
-bool is_smashable(TCA frontier, int nbytes, int offset = 0) {
-  assertx(nbytes <= kCacheLineSize);
-  uintptr_t ifrontier = uintptr_t(frontier) + offset;
-  uintptr_t last_byte = uintptr_t(frontier) + nbytes - 1;
-  return (ifrontier & ~kCacheLineMask) == (last_byte & ~kCacheLineMask);
-}
-
-void make_smashable(CodeBlock& cb, int nbytes, int offset) {
-  if (is_smashable(cb.frontier(), nbytes, offset)) return;
-
-  auto const gap_sz =
-    (~(uintptr_t(cb.frontier()) + offset) & kCacheLineMask) + 1;
-
-  X64Assembler a { cb };
-  a.emitNop(gap_sz);
-
-  assertx(is_smashable(cb.frontier(), nbytes, offset));
-}
-
-void register_align_fixup(CodeBlock& cb, int nbytes, int offset = 0) {
-  mcg->cgFixups().m_alignFixups.emplace(
-    cb.frontier(),
-    std::make_pair(nbytes, offset)
-  );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-#define EMIT_BODY(cb, inst, size, ...)  \
+#define EMIT_BODY(cb, inst, Inst, ...)  \
   ([&] {                                \
-    make_smashable(cb, size);           \
-    register_align_fixup(cb, size);     \
+    align(cb, Alignment::Smash##Inst,   \
+          AlignContext::Live);          \
     auto const start = cb.frontier();   \
     X64Assembler a { cb };              \
     a.inst(__VA_ARGS__);                \
@@ -74,10 +50,10 @@ void register_align_fixup(CodeBlock& cb, int nbytes, int offset = 0) {
   }())
 
 TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
-  auto const start = EMIT_BODY(cb, movq, kMovLen, 0xdeadbeeffeedface, d);
+  auto const start = EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
 
   auto immp = reinterpret_cast<uint64_t*>(
-    cb.frontier() - kMovLen + kMovImmOff
+    cb.frontier() - sizeof_smashable_movq() + kMovImmOff
   );
   *immp = imm;
 
@@ -85,36 +61,27 @@ TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
 }
 
 TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
-  // TODO(#7831969): Get rid of this magic number when the sizeof_* API is made.
-  return EMIT_BODY(cb, cmpq, 8, imm, r[disp]);
+  return EMIT_BODY(cb, cmpq, Cmpq, imm, r[disp]);
 }
 
 TCA emit_smashable_call(CodeBlock& cb, TCA target) {
-  return EMIT_BODY(cb, call, kCallLen, target);
+  return EMIT_BODY(cb, call, Call, target);
 }
 
 TCA emit_smashable_jmp(CodeBlock& cb, TCA target) {
-  return EMIT_BODY(cb, jmp, kJmpLen, target);
+  return EMIT_BODY(cb, jmp, Jmp, target);
 }
 
 TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc) {
   assertx(cc != CC_None);
-  return EMIT_BODY(cb, jcc, kJccLen, cc, target);
+  return EMIT_BODY(cb, jcc, Jcc, cc, target);
 }
 
 std::pair<TCA,TCA>
 emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc) {
   assertx(cc != CC_None);
 
-  // Make the instructions individually smashable.
-  make_smashable(cb, kJccLen);
-  make_smashable(cb, kJccLen + kJmpLen, kJccLen);
-
-  assertx(is_smashable(cb.frontier(), kJccLen));
-  assertx(is_smashable(cb.frontier(), kJccLen + kJmpLen, kJccLen));
-
-  register_align_fixup(cb, kJccLen);
-  register_align_fixup(cb, kJccLen + kJmpLen, kJccLen);
+  align(cb, Alignment::SmashJccAndJmp, AlignContext::Live);
 
   X64Assembler a { cb };
   auto const jcc = cb.frontier();
@@ -130,12 +97,12 @@ emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void smash_movq(TCA inst, uint64_t imm) {
-  always_assert(is_smashable(inst, kMovLen));
+  always_assert(is_aligned(inst, Alignment::SmashMovq));
   *reinterpret_cast<uint64_t*>(inst + kMovImmOff) = imm;
 }
 
 void smash_call(TCA inst, TCA target) {
-  always_assert(is_smashable(inst, kCallLen));
+  always_assert(is_aligned(inst, Alignment::SmashCall));
   /*
    * TODO(#7889486): We'd like this just to be:
    *
@@ -151,13 +118,13 @@ void smash_call(TCA inst, TCA target) {
 }
 
 void smash_jmp(TCA inst, TCA target) {
-  always_assert(is_smashable(inst, kJmpLen));
+  always_assert(is_aligned(inst, Alignment::SmashJmp));
 
   auto& cb = mcg->code.blockFor(inst);
   CodeCursor cursor { cb, inst };
   X64Assembler a { cb };
 
-  if (target > inst && target - inst <= kJmpLen) {
+  if (target > inst && target - inst <= sizeof_smashable_jmp()) {
     a.emitNop(target - inst);
   } else {
     a.jmp(target);
@@ -165,7 +132,7 @@ void smash_jmp(TCA inst, TCA target) {
 }
 
 void smash_jcc(TCA inst, TCA target) {
-  always_assert(is_smashable(inst, kJccLen));
+  always_assert(is_aligned(inst, Alignment::SmashJcc));
   X64Assembler::patchJcc(inst, target);
 }
 

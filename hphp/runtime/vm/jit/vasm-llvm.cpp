@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -31,6 +32,7 @@
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
@@ -914,8 +916,12 @@ struct LLVMEmitter {
       auto doBindJmp = [&] (uint8_t* jmpIp, ConditionCode cc) {
         FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
-        auto jmpLen = (cc == CC_None) ? x64::kJmpLen : x64::kJccLen;
-        mcg->cgFixups().m_alignFixups.emplace(jmpIp, std::make_pair(jmpLen, 0));
+        auto const alignment = cc == CC_None ? Alignment::SmashJmp
+                                             : Alignment::SmashJcc;
+        mcg->cgFixups().m_alignFixups.emplace(
+          jmpIp,
+          std::make_pair(alignment, AlignContext::Live)
+        );
         mcg->setJmpTransID(jmpIp);
 
         if (found) {
@@ -938,6 +944,8 @@ struct LLVMEmitter {
                  jmpIp, newStub);
 
           // Patch the jmp to point to the new stub.
+          auto const jmpLen = cc == CC_None ? sizeof_smashable_jmp()
+                                            : sizeof_smashable_jcc();
           auto afterJmp = jmpIp + jmpLen;
           auto delta = safe_cast<int32_t>(newStub - afterJmp);
           memcpy(afterJmp - sizeof(delta), &delta, sizeof(delta));

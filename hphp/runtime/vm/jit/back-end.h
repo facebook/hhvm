@@ -45,12 +45,6 @@ struct AsmInfo;
  * This module supports both X64 and ARM behind a platform-agnostic interface.
  */
 
-enum class MoveToAlignFlags {
-  kJmpTargetAlign,
-  kNonFallthroughAlign,
-  kCacheLineAlign,
-};
-
 struct BackEnd;
 
 std::unique_ptr<BackEnd> newBackEnd();
@@ -59,22 +53,10 @@ struct BackEnd {
   virtual ~BackEnd();
 
   virtual Abi abi() = 0;
-  virtual size_t cacheLineSize() = 0;
-
-  size_t cacheLineMask() {
-    assertx((cacheLineSize() & (cacheLineSize()-1)) == 0);
-    return cacheLineSize() - 1;
-  }
 
   virtual PhysReg rSp() = 0;
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
-
-  void moveToAlign(CodeBlock& cb,
-                   MoveToAlignFlags alignment =
-                     MoveToAlignFlags::kJmpTargetAlign) {
-    do_moveToAlign(cb, alignment);
-  }
 
   virtual UniqueStubs emitUniqueStubs() = 0;
 
@@ -108,9 +90,6 @@ struct BackEnd {
 
 protected:
   BackEnd() {}
-
-private:
-  virtual void do_moveToAlign(CodeBlock&, MoveToAlignFlags) = 0;
 };
 
 }}

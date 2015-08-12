@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -181,7 +182,7 @@ struct TransRelocInfoHelper {
   std::vector<IncomingBranch::Opaque> incomingBranches;
   std::vector<uint32_t> addressImmediates;
   std::vector<uint64_t> codePointers;
-  std::vector<std::pair<uint32_t, std::pair<int,int>>> alignFixups;
+  std::vector<std::pair<uint32_t,std::pair<Alignment,AlignContext>>> alignFixups;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd
@@ -212,8 +213,7 @@ struct TransRelocInfoHelper {
       tri.fixups.m_codePointers.insert((TCA*)cp);
     }
     for (auto v : alignFixups) {
-      tri.fixups.m_alignFixups.emplace(v.first + code.base(),
-                                         v.second);
+      tri.fixups.m_alignFixups.emplace(v.first + code.base(), v.second);
     }
     return tri;
   }

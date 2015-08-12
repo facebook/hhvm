@@ -72,6 +72,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
@@ -717,14 +718,10 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   assertx(m_fixups.empty());
 
   TCA mainOrig = code.main().frontier();
+
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
-  if (((uintptr_t)code.main().frontier() & backEnd().cacheLineMask()) >=
-      (backEnd().cacheLineSize() / 2)) {
-    backEnd().moveToAlign(code.main(), MoveToAlignFlags::kCacheLineAlign);
-  }
-  m_fixups.m_alignFixups.emplace(
-    code.main().frontier(), std::make_pair(backEnd().cacheLineSize() / 2, 0));
+  align(code.main(), Alignment::CacheLineRoundUp, AlignContext::Dead);
 
   TransLocMaker maker(code);
   maker.markStart();
@@ -1798,9 +1795,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
   assertx(m_tx.getSrcDB().find(sk));
 
   TCA mainOrig = code.main().frontier();
+
   if (args.align) {
-    mcg->backEnd().moveToAlign(code.main(),
-                               MoveToAlignFlags::kNonFallthroughAlign);
+    // Align without registering fixups; we do so manually after translating
+    // the region because we may hit retries and need to roll back.
+    align(code.main(), Alignment::CacheLine, AlignContext::Dead, false);
   }
 
   TransLocMaker maker(code);
@@ -1932,7 +1931,9 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   if (args.align) {
     m_fixups.m_alignFixups.emplace(
-      loc.mainStart(), std::make_pair(backEnd().cacheLineSize() - 1, 0));
+      loc.mainStart(),
+      std::make_pair(Alignment::CacheLine, AlignContext::Dead)
+    );
   }
 
   if (RuntimeOption::EvalEnableReusableTC) {

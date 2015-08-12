@@ -37,8 +37,6 @@ namespace HPHP { namespace jit { namespace arm {
  * does, however, entail an indirect jump.
  */
 
-void make_smashable(CodeBlock& cb, int nbytes, int offset) {}
-
 TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   not_implemented();
 }

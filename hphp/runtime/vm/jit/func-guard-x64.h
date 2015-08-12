@@ -18,7 +18,7 @@
 #define incl_HPHP_JIT_FUNC_GUARD_X64_H
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"

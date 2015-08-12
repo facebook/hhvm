@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SMASHABLE_INSTR_X64_H_
-#define incl_HPHP_JIT_SMASHABLE_INSTR_X64_H_
+#ifndef incl_HPHP_JIT_ALIGN_X64_H_
+#define incl_HPHP_JIT_ALIGN_X64_H_
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/alignment.h"
 
-#include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit { namespace x64 {
@@ -28,33 +27,37 @@ namespace HPHP { namespace jit { namespace x64 {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Mirrors the API of smashable-instr.h.
+ * Mirrors the API of align.h.
  */
 
-constexpr size_t sizeof_smashable_movq() { return 10; }
-constexpr size_t sizeof_smashable_cmpq() { return 8; }
-constexpr size_t sizeof_smashable_call() { return 5; }
-constexpr size_t sizeof_smashable_jmp()  { return 5; }
-constexpr size_t sizeof_smashable_jcc()  { return 6; }
+bool is_aligned(TCA frontier, Alignment alignment);
 
-TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d);
-TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
-TCA emit_smashable_call(CodeBlock& cb, TCA target);
-TCA emit_smashable_jmp(CodeBlock& cb, TCA target);
-TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc);
-std::pair<TCA,TCA>
-emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc);
+void align(CodeBlock& cb, Alignment alignment, AlignContext context,
+           bool fixups = true);
 
-void smash_movq(TCA inst, uint64_t imm);
-void smash_call(TCA inst, TCA target);
-void smash_jmp(TCA inst, TCA target);
-void smash_jcc(TCA inst, TCA target);
+/*
+ * All the Alignments can be expressed by stipulating that the code region
+ * given by
+ *
+ *    [frontier + offset, nbytes)
+ *
+ * fits into the nearest `align'-aligned and -sized line.
+ */
+struct AlignInfo {
+  size_t align;
+  size_t nbytes;
+  size_t offset;
+};
 
-uint64_t smashable_movq_imm(TCA inst);
-TCA smashable_call_target(TCA inst);
-TCA smashable_jmp_target(TCA inst);
-TCA smashable_jcc_target(TCA inst);
-ConditionCode smashable_jcc_cond(TCA inst);
+/*
+ * Get the AlignInfo for `alignment'; used by relocation.
+ */
+const AlignInfo& alignment_info(Alignment alignment);
+
+
+constexpr size_t kJmpTargetAlign = 16;
+constexpr size_t kCacheLineSize = 64;
+constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 

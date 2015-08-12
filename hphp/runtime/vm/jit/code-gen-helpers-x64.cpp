@@ -53,24 +53,6 @@ TRACE_SET_MOD(hhir);
  * mcg that hardcode these registers.)
  */
 
-/*
- * Satisfy an alignment constraint. Bridge the gap with int3's.
- */
-void moveToAlign(CodeBlock& cb,
-                 const size_t align /* =kJmpTargetAlign */) {
-  X64Assembler a { cb };
-  assertx(folly::isPowTwo(align));
-  size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
-  if (leftInBlock == align) return;
-  if (leftInBlock > 2) {
-    a.ud2();
-    leftInBlock -= 2;
-  }
-  if (leftInBlock > 0) {
-    a.emitInt3s(leftInBlock);
-  }
-}
-
 void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   v << store{vmfp, rds[rds::kVmfpOff]};
   v << store{vmsp, rds[rds::kVmspOff]};

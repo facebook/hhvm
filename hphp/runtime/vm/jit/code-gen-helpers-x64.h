@@ -21,6 +21,7 @@
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/cpp-call.h"
@@ -47,10 +48,6 @@ namespace x64 {
 //////////////////////////////////////////////////////////////////////
 
 typedef X64Assembler Asm;
-
-constexpr size_t kJmpTargetAlign = 16;
-
-void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp);
 void emitGetGContext(Vout& as, Vreg dest);

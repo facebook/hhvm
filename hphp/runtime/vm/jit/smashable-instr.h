@@ -54,11 +54,13 @@ namespace HPHP { namespace jit {
  */
 
 /*
- * Make [cb.frontier() + offset, cb.frontier() + nbytes) smashable.
- *
- * Most clients should prefer the higher-level routines below.
+ * Size of the smashable machine code sequence.
  */
-void make_smashable(CodeBlock& cb, int nbytes, int offset = 0);
+size_t sizeof_smashable_movq();
+size_t sizeof_smashable_cmpq();
+size_t sizeof_smashable_call();
+size_t sizeof_smashable_jmp();
+size_t sizeof_smashable_jcc();
 
 /*
  * Emit a smashable instruction and return the instruction's address.
@@ -70,6 +72,7 @@ TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
 TCA emit_smashable_call(CodeBlock& cb, TCA target);
 TCA emit_smashable_jmp(CodeBlock& cb, TCA target);
 TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc);
+
 std::pair<TCA,TCA>
 emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc);
 

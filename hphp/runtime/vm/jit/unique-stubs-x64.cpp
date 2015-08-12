@@ -46,6 +46,10 @@ TRACE_SET_MOD(ustubs);
 
 namespace {
 
+void moveToAlign(CodeBlock& cb) {
+  align(cb, Alignment::JmpTarget, AlignContext::Dead);
+}
+
 TCA emitRetFromInterpretedFrame() {
   Asm a { mcg->code.cold() };
   moveToAlign(mcg->code.cold());
@@ -309,7 +313,7 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto& cb = mcg->code.hot().available() > 512 ?
     const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
   Asm a { cb };
-  moveToAlign(cb, kNonFallthroughAlign);
+  align(cb, Alignment::CacheLine, AlignContext::Dead);
   auto stubBegin = a.frontier();
 
 asm_label(a, release);
@@ -341,7 +345,7 @@ asm_label(a, doRelease);
   asm_label(a, skipDecRef);
   };
 
-  moveToAlign(cb, kJmpTargetAlign);
+  moveToAlign(cb);
   uniqueStubs.freeManyLocalsHelper = a.frontier();
   a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
@@ -462,7 +466,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
     const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
   Asm a { cb };
 
-  moveToAlign(cb, kNonFallthroughAlign);
+  align(cb, Alignment::CacheLine, AlignContext::Dead);
   uniqueStubs.fcallArrayHelper = a.frontier();
 
   /*

@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -664,7 +665,7 @@ void emitBindCallStubs(UniqueStubs& uniqueStubs) {
     Asm a{cb};
     a.  loadq  (rip[intptr_t(&mcg)], argNumToRegName[0]);
     a.  loadq  (*rsp, argNumToRegName[1]); // reconstruct toSmash from savedRip
-    a.  subq   (kCallLen, argNumToRegName[1]);
+    a.  subq   (safe_cast<int>(sizeof_smashable_call()), argNumToRegName[1]);
     a.  movq   (rVmFp, argNumToRegName[2]);
     a.  movb   (immutable, rbyte(argNumToRegName[3]));
     a.  subq   (8, rsp); // align stack

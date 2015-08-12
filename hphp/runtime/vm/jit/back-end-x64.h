@@ -26,17 +26,6 @@ std::unique_ptr<BackEnd> newBackEnd();
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr int kCallLen = 5;
-constexpr int kJmpLen = 5;
-constexpr int kJccLen = 6;
-constexpr int kJmpImmBytes = 4;
-constexpr int kRipLeaLen = 7;
-
-constexpr int kMovLen = 10;
-constexpr int kMovImmOff = 2;
-
-//////////////////////////////////////////////////////////////////////
-
 }}}
 
 #endif

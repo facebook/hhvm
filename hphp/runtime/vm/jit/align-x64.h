@@ -54,8 +54,9 @@ struct AlignInfo {
  */
 const AlignInfo& alignment_info(Alignment alignment);
 
-
-constexpr size_t kJmpTargetAlign = 16;
+/*
+ * Cache line constants.
+ */
 constexpr size_t kCacheLineSize = 64;
 constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 

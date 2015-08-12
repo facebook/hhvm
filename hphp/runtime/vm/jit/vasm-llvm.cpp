@@ -910,6 +910,37 @@ struct LLVMEmitter {
     }
   }
 
+  /*
+   * A REQ_BIND_JMP service request passes an address of a jump that can be
+   * patched.  This function lets you change this jump address for an existing
+   * REQ_BIND_JMP stub to `newJmpIp'.  The caller must indicate whether the
+   * stub was created with a target SrcKey that is a resumed function.
+   *
+   * Pre: the `stub' must be a REQ_BIND_JMP stub.
+   */
+  static void adjustBindJmpPatchableJmpAddress(TCA addr,
+                                               bool targetIsResumed,
+                                               TCA newJmpIp) {
+    assert_not_implemented(arch() == Arch::X64);
+
+    // We rely on emitServiceReqWork putting an optional lea for the SP offset
+    // first (depending on whether the target SrcKey is a resumed function),
+    // followed by an RIP relative lea of the jump address.
+    if (!targetIsResumed) {
+      DecodedInstruction instr(addr);
+      addr += instr.size();
+    }
+    auto const leaIp = addr;
+    always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
+    always_assert(leaIp[1] == 0x8d); // lea
+
+    // NB: This is x64-specific.
+    constexpr int kRipLeaLen = 7;
+    auto const afterLea = leaIp + kRipLeaLen;
+    auto const delta = safe_cast<int32_t>(newJmpIp - afterLea);
+    std::memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+  }
+
   void processSvcReqs(const LocRecs& locRecs) {
     for (auto& req : m_bindjmps) {
       bool found = false;

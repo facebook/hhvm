@@ -53,7 +53,7 @@ TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   auto const start = EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
 
   auto immp = reinterpret_cast<uint64_t*>(
-    cb.frontier() - sizeof_smashable_movq() + kMovImmOff
+    cb.frontier() - sizeof_smashable_movq() + kMovqImmOfff
   );
   *immp = imm;
 
@@ -98,7 +98,7 @@ emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc) {
 
 void smash_movq(TCA inst, uint64_t imm) {
   always_assert(is_aligned(inst, Alignment::SmashMovq));
-  *reinterpret_cast<uint64_t*>(inst + kMovImmOff) = imm;
+  *reinterpret_cast<uint64_t*>(inst + kMovqImmOfff) = imm;
 }
 
 void smash_call(TCA inst, TCA target) {
@@ -147,7 +147,7 @@ void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint64_t smashable_movq_imm(TCA inst) {
-  return *reinterpret_cast<uint64_t*>(inst + kMovImmOff);
+  return *reinterpret_cast<uint64_t*>(inst + kMovqImmOfff);
 }
 
 TCA smashable_call_target(TCA inst) {

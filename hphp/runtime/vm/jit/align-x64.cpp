@@ -35,17 +35,22 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Targets of jmps on x64 must be aligned to 16 bytes.
+ */
+constexpr size_t kJmpTargetAlign = 16;
+
+/*
  * Alignment info table.
  */
 constexpr AlignInfo s_aligns[] = {
   { kCacheLineSize,   kCacheLineSize,           0 },  // CacheLine
   { kCacheLineSize,   kCacheLineSize / 2,       0 },  // CacheLineRoundUp
   { kJmpTargetAlign,  kJmpTargetAlign,          0 },  // JmpTarget
-  { kCacheLineSize,   sizeof_smashable_movq(),  0 },  // SmashMovq
-  { kCacheLineSize,   sizeof_smashable_cmpq(),  0 },  // SmashCmpq
-  { kCacheLineSize,   sizeof_smashable_call(),  0 },  // SmashCall
-  { kCacheLineSize,   sizeof_smashable_jmp(),   0 },  // SmashJmp
-  { kCacheLineSize,   sizeof_smashable_jcc(),   0 },  // SmashJcc
+  { kCacheLineSize,   sizeof_smashable_movq(),  kMovqImmOfff },
+  { kCacheLineSize,   sizeof_smashable_cmpq(),  0 },
+  { kCacheLineSize,   sizeof_smashable_call(),  0 },
+  { kCacheLineSize,   sizeof_smashable_jmp(),   0 },
+  { kCacheLineSize,   sizeof_smashable_jcc(),   0 },
 
   // Three entries for SmashJccAndJmp, one for each half and one for both
   // together.  The implementation below relies on this being the last

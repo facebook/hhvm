@@ -206,20 +206,25 @@ TCA emit_retranslate_opt_stub(CodeBlock& cb, FPInvOffset spOff,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static constexpr int kLeaVmSpLen = 7;
+namespace x64 {
+  static constexpr int kMovLen = 10;
+  static constexpr int kLeaVmSpLen = 7;
+}
 
 size_t stub_size() {
   // The extra args are the request type and the stub address.
-  auto const total_args = kMaxArgs + 2;
+  constexpr auto kTotalArgs = kMaxArgs + 2;
 
   switch (arch()) {
     case Arch::X64:
-      return total_args * x64::kMovLen + kLeaVmSpLen;
+      return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
     case Arch::ARM:
       not_implemented();
   }
   not_reached();
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 FPInvOffset extract_spoff(TCA stub) {
   switch (arch()) {
@@ -243,30 +248,4 @@ FPInvOffset extract_spoff(TCA stub) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void adjustBindJmpPatchableJmpAddress(TCA addr,
-                                      bool targetIsResumed,
-                                      TCA newJmpIp) {
-  assert_not_implemented(arch() == Arch::X64);
-
-  // We rely on emitServiceReqWork putting an optional lea for the SP offset
-  // first (depending on whether the target SrcKey is a resumed function),
-  // followed by an RIP relative lea of the jump address.
-  if (!targetIsResumed) {
-    DecodedInstruction instr(addr);
-    addr += instr.size();
-  }
-  auto const leaIp = addr;
-  always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
-  always_assert(leaIp[1] == 0x8d); // lea
-  auto const afterLea = leaIp + x64::kRipLeaLen;
-  auto const delta = safe_cast<int32_t>(newJmpIp - afterLea);
-  std::memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}}
+}}}

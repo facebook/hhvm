@@ -56,6 +56,13 @@ TCA smashable_jmp_target(TCA inst);
 TCA smashable_jcc_target(TCA inst);
 ConditionCode smashable_jcc_cond(TCA inst);
 
+/*
+ * Smashable immediate and target offsets.
+ *
+ * These are also used by align-x64.
+ */
+constexpr size_t kMovqImmOfff = 2;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

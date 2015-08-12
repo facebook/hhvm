@@ -31,6 +31,8 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr int kJmpLen = 5;
+
 using WideJmpSet = hphp_hash_set<void*>;
 struct JmpOutOfRange : std::exception {};
 

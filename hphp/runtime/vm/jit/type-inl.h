@@ -178,36 +178,6 @@ inline bool Type::operator!=(Type rhs) const {
   return !operator==(rhs);
 }
 
-inline bool Type::operator<=(Type rhs) const {
-  auto lhs = *this;
-
-  // Check for any members in lhs.m_bits that aren't in rhs.m_bits.
-  if ((lhs.m_bits & rhs.m_bits) != lhs.m_bits) {
-    return false;
-  }
-
-  // Check for Bottom; all the remaining cases assume `lhs' is not Bottom.
-  if (lhs.m_bits == kBottom) return true;
-
-  // If `rhs' is a constant, we must be the same constant.
-  if (rhs.m_hasConstVal) {
-    assertx(!rhs.isUnion());
-    return lhs.m_hasConstVal && lhs.m_extra == rhs.m_extra;
-  }
-
-  // If `rhs' could be a pointer, we must have a subtype relation in pointer
-  // kinds or we're not a subtype.  (If `lhs' can't be a pointer, we found out
-  // above when we intersected the bits.)  If neither can be a pointer, it's an
-  // invariant that `m_ptrKind' will be Ptr::Unk so this will pass.
-  if (lhs.ptrKind() != rhs.ptrKind() &&
-      !ptr_subtype(lhs.ptrKind(), rhs.ptrKind())) {
-    return false;
-  }
-
-  // Compare specializations only if `rhs' is specialized.
-  return !rhs.isSpecialized() || lhs.spec() <= rhs.spec();
-}
-
 inline bool Type::operator>=(Type rhs) const {
   return rhs <= *this;
 }

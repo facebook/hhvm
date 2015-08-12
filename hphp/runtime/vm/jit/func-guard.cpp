@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
@@ -50,7 +51,11 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
     nbytes = kFuncGuardSmash;
     offset = kFuncGuardImm;
   }
-  mcg->backEnd().prepareForSmash(a.code(), nbytes, offset);
+  make_smashable(a.code(), nbytes, offset);
+  mcg->cgFixups().m_alignFixups.emplace(
+    a.frontier(),
+    std::make_pair(nbytes, offset)
+  );
 
   TCA start DEBUG_ONLY = a.frontier();
 

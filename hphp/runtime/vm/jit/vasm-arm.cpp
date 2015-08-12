@@ -17,13 +17,13 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/back-end-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -46,6 +46,8 @@ namespace arm { struct ImmFolder; }
 
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
+
+const TCA kEndOfTargetChain = reinterpret_cast<TCA>(0xf00ffeeffaaff11f);
 
 vixl::Register W(Vreg32 r) {
   PhysReg pr(r.asReg());
@@ -81,7 +83,6 @@ vixl::Condition C(ConditionCode cc) {
 struct Vgen {
   explicit Vgen(Venv& env)
     : text(env.text)
-    , backend(mcg->backEnd())
     , codeBlock(env.cb)
     , assem(*codeBlock)
     , a(&assem)
@@ -169,7 +170,6 @@ private:
 
 private:
   Vtext& text;
-  BackEnd& backend;
   CodeBlock* codeBlock;
   vixl::MacroAssembler assem;
   vixl::MacroAssembler* a;
@@ -188,11 +188,11 @@ private:
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
-    mcg->backEnd().smashJmp(p.instr, env.addrs[p.target]);
+    smash_jmp(p.instr, env.addrs[p.target]);
   }
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
-    mcg->backEnd().smashJcc(p.instr, env.addrs[p.target]);
+    smash_jcc(p.instr, env.addrs[p.target]);
   }
   for (auto& p : env.bccs) {
     assertx(env.addrs[p.target]);
@@ -204,7 +204,7 @@ void Vgen::patch(Venv& env) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(bindcall& i) {
-  mcg->backEnd().emitSmashableCall(*codeBlock, i.stub);
+  emit_smashable_call(*codeBlock, i.stub);
 }
 
 void Vgen::emit(copy& i) {
@@ -333,7 +333,7 @@ void Vgen::emit(jmp i) {
   if (next == i.target) return;
   jmps.push_back({a->frontier(), i.target});
   // B range is +/- 128MB but this uses BR
-  backend.emitSmashableJump(*codeBlock, kEndOfTargetChain, CC_None);
+  emit_smashable_jmp(*codeBlock, kEndOfTargetChain);
 }
 
 void Vgen::emit(jcc& i) {
@@ -345,7 +345,7 @@ void Vgen::emit(jcc& i) {
     }
     jccs.push_back({a->frontier(), i.targets[1]});
     // B.cond range is +/- 1MB but this uses BR
-    backend.emitSmashableJump(*codeBlock, kEndOfTargetChain, i.cc);
+    emit_smashable_jcc(*codeBlock, kEndOfTargetChain, i.cc);
   }
   emit(jmp{i.targets[0]});
 }

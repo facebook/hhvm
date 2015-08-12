@@ -21,17 +21,20 @@
 #include <mutex>
 #include <limits>
 
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/treadmill.h"
+
+#include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/runtime/vm/treadmill.h"
+
 #include "hphp/util/text-util.h"
 
 namespace HPHP { namespace jit {
@@ -449,14 +452,10 @@ void handlePrimeCacheInit(Entry* mce,
   if (!writer) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
-    always_assert(mcg->backEnd().isSmashable(addr, x64::kMovLen));
-    //XX these assume the immediate move was to r10
-    //assertx(addr[0] == 0x49 && addr[1] == 0xba);
-    auto const ptr = reinterpret_cast<uintptr_t*>(addr + x64::kMovImmOff);
-    if (!(*ptr & 1)) {
-      return false;
-    }
-    *ptr = value;
+    auto const imm = smashable_movq_imm(addr);
+    if (!(imm & 1)) return false;
+
+    smash_movq(addr, value);
     return true;
   };
 
@@ -503,8 +502,7 @@ void handlePrimeCacheInit(Entry* mce,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-  mcg->backEnd().smashCall(toSmash,
-                           reinterpret_cast<TCA>(handleSlowPath<fatal>));
+  smash_call(toSmash, reinterpret_cast<TCA>(handleSlowPath<fatal>));
 }
 
 template

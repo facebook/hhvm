@@ -34,11 +34,6 @@ namespace arm { struct CodeGenerator; }
 namespace x64 {
 ///////////////////////////////////////////////////////////////////////////////
 
-// Cache alignment is required for mutable instructions to make sure
-// mutations don't "tear" on remote cpus.
-constexpr size_t kCacheLineSize = 64;
-constexpr size_t kCacheLineMask = kCacheLineSize - 1;
-
 struct CodeGenerator {
   friend struct arm::CodeGenerator;
 

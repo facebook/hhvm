@@ -20,6 +20,8 @@
 
 namespace HPHP {
 
+///////////////////////////////////////////////////////////////////////////////
+
 enum class Arch {
   X64,
   ARM,
@@ -29,6 +31,20 @@ inline Arch arch() {
   if (RuntimeOption::EvalSimulateARM) return Arch::ARM;
   return Arch::X64;
 }
+
+/*
+ * Macro for defining easy arch-dispatch wrappers.
+ */
+#define ARCH_SWITCH_CALL(func, ...)  \
+  switch (arch()) {                       \
+    case Arch::X64:                       \
+      return x64::func(__VA_ARGS__);      \
+    case Arch::ARM:                       \
+      return arm::func(__VA_ARGS__);      \
+  }                                       \
+  not_reached();
+
+///////////////////////////////////////////////////////////////////////////////
 
 }
 

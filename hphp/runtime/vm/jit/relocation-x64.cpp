@@ -15,11 +15,12 @@
 */
 #include "hphp/runtime/vm/jit/relocation.h"
 
-#include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
@@ -86,9 +87,13 @@ size_t relocateImpl(RelocationInfo& rel,
         assertx(low < hi);
         if (!keepNopLow || keepNopLow > low) keepNopLow = low;
         if (!keepNopHigh || keepNopHigh < hi) keepNopHigh = hi;
+
         TCA tmp = destBlock.frontier();
-        prepareForSmashImpl(destBlock,
-                            af.first->second.first, af.first->second.second);
+        make_smashable(
+          destBlock,
+          af.first->second.first,
+          af.first->second.second
+        );
         if (destBlock.frontier() != tmp) {
           destRange += destBlock.frontier() - tmp;
           internalRefsNeedUpdating = true;
@@ -171,7 +176,7 @@ size_t relocateImpl(RelocationInfo& rel,
       }
       if (preserveAlignment && di.size() == kJmpLen &&
           di.isNop() && src + kJmpLen == end) {
-        smashJmp(dest, src + kJmpLen);
+        smash_jmp(dest, src + kJmpLen);
         dest += kJmpLen;
       } else if (di.isNop() && !preserveAlignment) {
         internalRefsNeedUpdating = true;
@@ -310,7 +315,7 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
         di.size() == kJmpLen &&
         rel.adjustedAddressAfter(srcEnd)) {
 
-      smashJmp(start - di.size(), rel.adjustedAddressAfter(end));
+      smash_jmp(start - di.size(), rel.adjustedAddressAfter(end));
     }
   }
 }

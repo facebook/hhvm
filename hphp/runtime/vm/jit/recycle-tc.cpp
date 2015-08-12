@@ -17,17 +17,22 @@
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/treadmill.h"
+
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/treadmill.h"
+
 #include "hphp/util/trace.h"
 
 #include <folly/MoveWrapper.h>
 
 namespace HPHP { namespace jit {
+
+///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(reusetc);
 
@@ -269,7 +274,7 @@ void reclaimFunction(Func* func) {
     // reachable.
     auto addr = caller.second.isGuard ? us.bindCallStub
                                       : nullptr;
-    mcg->backEnd().smashCall(caller.first, addr);
+    smash_call(caller.first, addr);
     s_smashedCalls.erase(caller.first);
   }
 
@@ -301,5 +306,7 @@ void reclaimFunction(Func* func) {
 
   s_funcTCData.erase(it);
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}

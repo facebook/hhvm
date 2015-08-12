@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
@@ -146,111 +147,10 @@ struct BackEnd final : jit::BackEnd {
     a.    popf  ();
   }
 
-  void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
-                              TestAndSmashFlags flags) override {
-    using namespace x64;
-    switch (flags) {
-      case TestAndSmashFlags::kAlignJcc:
-        prepareForSmash(cb, testBytes + kJccLen, testBytes);
-        assertx(isSmashable(cb.frontier() + testBytes, kJccLen));
-        break;
-      case TestAndSmashFlags::kAlignJccImmediate:
-        prepareForSmash(cb,
-                        testBytes + kJccLen,
-                        testBytes + kJccLen - kJmpImmBytes);
-        assertx(isSmashable(cb.frontier() + testBytes, kJccLen,
-                           kJccLen - kJmpImmBytes));
-        break;
-      case TestAndSmashFlags::kAlignJccAndJmp:
-        // Ensure that the entire jcc, and the entire jmp are smashable
-        // (but we dont need them both to be in the same cache line)
-        prepareForSmashImpl(cb, testBytes + kJccLen, testBytes);
-        prepareForSmashImpl(cb, testBytes + kJccLen + kJmpLen,
-                            testBytes + kJccLen);
-        mcg->cgFixups().m_alignFixups.emplace(
-          cb.frontier(), std::make_pair(testBytes + kJccLen, testBytes));
-        mcg->cgFixups().m_alignFixups.emplace(
-          cb.frontier(), std::make_pair(testBytes + kJccLen + kJmpLen,
-                                        testBytes + kJccLen));
-        assertx(isSmashable(cb.frontier() + testBytes, kJccLen));
-        assertx(isSmashable(cb.frontier() + testBytes + kJccLen, kJmpLen));
-        break;
-    }
-  }
-
-  void smashJmp(TCA jmpAddr, TCA newDest) override {
-    return x64::smashJmp(jmpAddr, newDest);
-  }
-
-  void smashCall(TCA callAddr, TCA newDest) override {
-    x64::smashCall(callAddr, newDest);
-  }
-
-  void smashJcc(TCA jccAddr, TCA newDest) override {
-    assertx(MCGenerator::canWrite());
-    FTRACE(2, "smashJcc: {} -> {}\n", jccAddr, newDest);
-    // Make sure the encoding is what we expect. It has to be a rip-relative jcc
-    // with a 4-byte delta.
-    assertx(*jccAddr == 0x0F && (*(jccAddr + 1) & 0xF0) == 0x80);
-    assertx(isSmashable(jccAddr, x64::kJccLen));
-
-    // Can't use the assembler to write out a new instruction, because we have
-    // to preserve the condition code.
-    auto newDelta = safe_cast<int32_t>(newDest - jccAddr - x64::kJccLen);
-    auto deltaAddr = reinterpret_cast<int32_t*>(jccAddr
-                                                + x64::kJccLen
-                                                - x64::kJmpImmBytes);
-    *deltaAddr = newDelta;
-  }
-
-  void emitSmashableJump(CodeBlock& cb, TCA dest, ConditionCode cc) override {
-    X64Assembler a { cb };
-    if (cc == CC_None) {
-      assertx(isSmashable(cb.frontier(), x64::kJmpLen));
-      a.  jmp(dest);
-    } else {
-      assertx(isSmashable(cb.frontier(), x64::kJccLen));
-      a.  jcc(cc, dest);
-    }
-  }
-
+  // TODO(#7831969): Replace this with sizeof_smashable_* API.
   TCA smashableCallFromReturn(TCA retAddr) override {
     auto addr = retAddr - x64::kCallLen;
-    assertx(isSmashable(addr, x64::kCallLen));
     return addr;
-  }
-
-  void emitSmashableCall(CodeBlock& cb, TCA dest) override {
-    X64Assembler a { cb };
-    assertx(isSmashable(cb.frontier(), x64::kCallLen));
-    a.  call(dest);
-  }
-
-  TCA jmpTarget(TCA jmp) override {
-    if (jmp[0] != 0xe9) {
-      if (jmp[0] == 0x0f &&
-          jmp[1] == 0x1f &&
-          jmp[2] == 0x44) {
-        // 5 byte nop
-        return jmp + 5;
-      }
-      return nullptr;
-    }
-    return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
-  }
-
-  TCA jccTarget(TCA jmp) override {
-    if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
-    return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
-  }
-
-  ConditionCode jccCondCode(TCA jmp) override {
-    return DecodedInstruction(jmp).jccCondCode();
-  }
-
-  TCA callTarget(TCA call) override {
-    if (call[0] != 0xE8) return nullptr;
-    return call + 5 + ((int32_t*)(call + 5))[-1];
   }
 
   void addDbgGuard(CodeBlock& codeMain,
@@ -309,39 +209,7 @@ private:
     }
     x64::moveToAlign(cb, x64Alignment);
   }
-
-  bool do_isSmashable(Address frontier, int nBytes, int offset) override {
-    return x64::isSmashable(frontier, nBytes, offset);
-  }
-
-  void do_prepareForSmash(CodeBlock& cb, int nBytes, int offset) override {
-    prepareForSmashImpl(cb, nBytes, offset);
-    mcg->cgFixups().m_alignFixups.emplace(cb.frontier(),
-                                          std::make_pair(nBytes, offset));
-  }
 };
-
-//////////////////////////////////////////////////////////////////////
-
-void smashJmpOrCall(TCA addr, TCA dest, bool isCall) {
-  // Unconditional rip-relative jmps can also be encoded with an EB as the
-  // first byte, but that means the delta is 1 byte, and we shouldn't be
-  // encoding smashable jumps that way.
-  assertx(kJmpLen == kCallLen);
-  always_assert(isSmashable(addr, kJmpLen));
-
-  auto& cb = mcg->code.blockFor(addr);
-  CodeCursor cursor { cb, addr };
-  X64Assembler a { cb };
-  if (dest > addr && dest - addr <= kJmpLen) {
-    assertx(!isCall);
-    a.  emitNop(dest - addr);
-  } else if (isCall) {
-    a.  call   (dest);
-  } else {
-    a.  jmp    (dest);
-  }
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -682,35 +550,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
   if (asmInfo) {
     printUnit(kCodeGenLevel, unit, " after code gen ", asmInfo);
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
-  assertx(nBytes <= int(kCacheLineSize));
-  uintptr_t iFrontier = uintptr_t(frontier) + offset;
-  uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
-  return (iFrontier & ~kCacheLineMask) == (lastByte & ~kCacheLineMask);
-}
-
-void prepareForSmashImpl(CodeBlock& cb, int nBytes, int offset) {
-  if (isSmashable(cb.frontier(), nBytes, offset)) return;
-  X64Assembler a { cb };
-  int gapSize = (~(uintptr_t(a.frontier()) + offset) & kCacheLineMask) + 1;
-  a.emitNop(gapSize);
-  assertx(isSmashable(a.frontier(), nBytes, offset));
-}
-
-void smashJmp(TCA jmpAddr, TCA newDest) {
-  assertx(MCGenerator::canWrite());
-  FTRACE(2, "smashJmp: {} -> {}\n", jmpAddr, newDest);
-  smashJmpOrCall(jmpAddr, newDest, false);
-}
-
-void smashCall(TCA callAddr, TCA newDest) {
-  assertx(MCGenerator::canWrite());
-  FTRACE(2, "smashCall: {} -> {}\n", callAddr, newDest);
-  smashJmpOrCall(callAddr, newDest, true);
 }
 
 //////////////////////////////////////////////////////////////////////

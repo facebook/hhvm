@@ -35,12 +35,12 @@ constexpr int kRipLeaLen = 7;
 constexpr int kMovLen = 10;
 constexpr int kMovImmOff = 2;
 
-//////////////////////////////////////////////////////////////////////
-
-bool isSmashable(Address frontier, int nBytes, int offset = 0);
-void prepareForSmashImpl(CodeBlock& cb, int nBytes, int offset);
-void smashJmp(TCA jmpAddr, TCA newDest);
-void smashCall(TCA callAddr, TCA newDest);
+/*
+ * Cache alignment is required for mutable instructions on x64 to make sure
+ * mutations don't "tear" on remote CPUs.
+ */
+constexpr size_t kCacheLineSize = 64;
+constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
 //////////////////////////////////////////////////////////////////////
 

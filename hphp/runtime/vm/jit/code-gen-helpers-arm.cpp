@@ -18,8 +18,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -143,14 +143,15 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   vixl::MacroAssembler acold { coldCode };
 
   emitTestSurpriseFlags(a, rds);
-  mcg->backEnd().emitSmashableJump(mainCode, coldCode.frontier(), CC_NZ);
+  emit_smashable_jcc(mainCode, coldCode.frontier(), CC_NZ);
 
   acold.  Mov  (argReg(0), rVmFp);
 
   auto fixupAddr =
       emitCallWithinTC(acold, mcg->tx().uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(fixupAddr, fixup);
-  mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
+
+  emit_smashable_jmp(coldCode, mainCode.frontier());
 }
 
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,

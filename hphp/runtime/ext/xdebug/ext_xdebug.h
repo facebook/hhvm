@@ -128,17 +128,14 @@ struct XDebugServer;
   XDEBUG_OPT(int, "halt_level", HaltLevel, 0) \
 
 // Config options that can also be set from HDF configs.
-#define XDEBUG_HDF_CFG                                                  \
-  XDEBUG_OPT(bool, "collect_includes", CollectIncludes, true)           \
-  XDEBUG_OPT(bool, "default_enable", DefaultEnable, true)               \
-  XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true)                   \
-  XDEBUG_OPT(bool, "dump_once", DumpOnce, true)                         \
-  XDEBUG_OPT(int, "overload_var_dump", OverloadVarDump, 1)              \
-  XDEBUG_OPT(bool, "remote_autostart", RemoteAutostart, false)          \
-  XDEBUG_OPT(bool, "remote_enable", RemoteEnable, false)                \
-                                                                        \
-  /* HHVM-specific option, toggles stacks being reported on errors. */  \
-  XDEBUG_OPT(bool, "error_report_stack", ErrorReportStack, true)        \
+#define XDEBUG_HDF_CFG \
+  XDEBUG_OPT(bool, "collect_includes", CollectIncludes, true) \
+  XDEBUG_OPT(bool, "default_enable", DefaultEnable, true) \
+  XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true) \
+  XDEBUG_OPT(bool, "dump_once", DumpOnce, true) \
+  XDEBUG_OPT(int, "overload_var_dump", OverloadVarDump, 1) \
+  XDEBUG_OPT(bool, "remote_autostart", RemoteAutostart, false) \
+  XDEBUG_OPT(bool, "remote_enable", RemoteEnable, false) \
 
 // xdebug.dump.* settings
 #define XDEBUG_DUMP_CFG \

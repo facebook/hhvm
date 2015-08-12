@@ -1,0 +1,5 @@
+resource(4) of type (stream)
+bool(true)
+bool(true)
+resource(5) of type (stream)
+string(15) "Data to be sent"

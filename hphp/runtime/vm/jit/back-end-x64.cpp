@@ -146,7 +146,7 @@ struct BackEnd final : jit::BackEnd {
 
   // TODO(#7831969): Replace this with sizeof_smashable_* API.
   TCA smashableCallFromReturn(TCA retAddr) override {
-    auto addr = retAddr - x64::kCallLen;
+    auto addr = retAddr - sizeof_smashable_call();
     return addr;
   }
 

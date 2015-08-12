@@ -1158,30 +1158,58 @@ std::string show(const RegionDesc::Block& b) {
 }
 
 std::string show(const RegionDesc& region) {
-  return folly::format(
-    "Region ({} blocks):\n{}",
-    region.blocks().size(),
-    [&]{
-      std::string ret;
-      std::string arcs;
-      for (auto& b : region.blocks()) {
-        folly::toAppend(show(*b), &ret);
-        if (auto r = region.nextRetrans(b->id())) {
-          folly::toAppend(folly::format("{} -R-> {}\n", b->id(), r.value()),
-                          &arcs);
-        }
-        for (auto s : region.succs(b->id())) {
-          folly::toAppend(folly::format("{} -> {}\n", b->id(), s), &arcs);
-        }
-      }
-      folly::toAppend("Arcs:\n" + arcs, &ret);
-      folly::toAppend("Side-exiting Blocks:\n",
-                      folly::join(", ", region.sideExitingBlocks()),
-                      "\n",
+  std::string ret{folly::sformat("Region ({} blocks):\n",
+                                 region.blocks().size())};
+
+  auto profData = mcg->tx().profData();
+
+  auto weight = [&] (RegionDesc::BlockPtr b) -> int64_t {
+    if (!profData) return 0;
+    auto tid = b->profTransID();
+    if (tid == kInvalidTransID) return 0;
+    return profData->absTransCounter(tid);
+  };
+
+  uint64_t maxBlockWgt = 1; // avoid div by 0
+
+  // Print contents of all blocks in pure text format.
+  for (auto& b : region.blocks()) {
+    folly::toAppend(show(*b), &ret);
+    auto w = weight(b);
+    if (w > maxBlockWgt) maxBlockWgt = w;
+  }
+
+  // Print CFG in dot format, coloring the blocks based on hotness.
+  // Print all the blocks first.
+  folly::toAppend("\ndigraph RegionCFG {\n node[shape=box,style=filled]\n",
+                  &ret);
+  for (auto& b : region.blocks()) {
+    auto const id = b->id();
+    uint32_t coldness = 255 - (255 * weight(b) / maxBlockWgt);
+    folly::toAppend(folly::format(" \"B{}\" [label=\"B {}\\np: {}\","
+                                  "fillcolor=\"#ff{:02x}{:02x}\"]\n",
+                                  id, id, weight(b), coldness, coldness),
+                    &ret);
+  }
+
+  // Print arcs in dot format.
+  for (auto& b : region.blocks()) {
+    if (auto r = region.nextRetrans(b->id())) {
+      folly::toAppend(folly::format(" \"B{}\" -> \"B{}\" [label=R,color=red]\n",
+                                    b->id(), r.value()), &ret);
+    }
+    for (auto s : region.succs(b->id())) {
+      folly::toAppend(folly::format(" \"B{}\" -> \"B{}\"\n", b->id(), s),
                       &ret);
-      return ret;
-    }()
-  ).str();
+    }
+  }
+
+  // Print side-exiting blocks
+  folly::toAppend("}\n\nSide-exiting Blocks:\n",
+                  folly::join(", ", region.sideExitingBlocks()),
+                  "\n",
+                  &ret);
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////

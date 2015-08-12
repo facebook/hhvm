@@ -678,8 +678,9 @@ class Framework {
     }
 
     // Get current branch/hash information
-    $git_head_file =$this->install_root."/.git/HEAD";
-    $git_head_info = trim(file_get_contents($git_head_file));
+    $git_head_info = trim(
+      exec("cd ".escapeshellarg($this->install_root)." && git rev-parse HEAD")
+    );
 
     // The commit hash has changed and we need to download new code
     if ($git_head_info !== $this->git_commit) {

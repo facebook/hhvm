@@ -257,6 +257,8 @@ class MemcachedData {
     bool compression;
     int serializer;
     int rescode;
+    bool is_persistent;
+    bool is_pristine;
   };
   MemcachedData() {}
   ~MemcachedData() {}
@@ -591,12 +593,20 @@ void HHVM_METHOD(Memcached, __construct,
   auto data = Native::data<MemcachedData>(this_);
   if (persistent_id.isNull()) {
     data->m_impl.reset(new MemcachedData::Impl);
+    data->m_impl->is_persistent = false;
+    data->m_impl->is_pristine = true;
   } else {
+    bool is_pristine = false;
     MemcachedData::ImplPtr &impl = (*data->s_persistentMap)[
       persistent_id.toString().toCppString()
     ];
-    if (!impl) impl.reset(new MemcachedData::Impl);
+    if (!impl) {
+      impl.reset(new MemcachedData::Impl);
+      is_pristine = true;
+    }
     data->m_impl = impl;
+    data->m_impl->is_persistent = true;
+    data->m_impl->is_pristine = is_pristine;
   }
 }
 
@@ -1217,6 +1227,16 @@ String HHVM_METHOD(Memcached, getresultmessage) {
   }
 }
 
+bool HHVM_METHOD(Memcached, ispersistent) {
+  auto data = Native::data<MemcachedData>(this_);
+  return data->m_impl->is_persistent;
+}
+
+bool HHVM_METHOD(Memcached, ispristine) {
+  auto data = Native::data<MemcachedData>(this_);
+  return data->m_impl->is_pristine;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
@@ -1346,6 +1366,8 @@ class MemcachedExtension final : public Extension {
     HHVM_ME(Memcached, setoption);
     HHVM_ME(Memcached, getresultcode);
     HHVM_ME(Memcached, getresultmessage);
+    HHVM_ME(Memcached, ispersistent);
+    HHVM_ME(Memcached, ispristine);
 
     Native::registerNativeDataInfo<MemcachedData>(s_MemcachedData.get());
 

@@ -5,7 +5,7 @@ object(Memcached)#1 (0) {
 Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(44) {
+array(46) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -73,26 +73,30 @@ array(44) {
   [32]=>
   string(14) "incrementByKey"
   [33]=>
-  string(7) "prepend"
+  string(12) "isPersistent"
   [34]=>
-  string(12) "prependByKey"
+  string(10) "isPristine"
   [35]=>
-  string(4) "quit"
+  string(7) "prepend"
   [36]=>
-  string(7) "replace"
+  string(12) "prependByKey"
   [37]=>
-  string(12) "replaceByKey"
+  string(4) "quit"
   [38]=>
-  string(3) "set"
+  string(7) "replace"
   [39]=>
-  string(8) "setByKey"
+  string(12) "replaceByKey"
   [40]=>
-  string(8) "setMulti"
+  string(3) "set"
   [41]=>
-  string(13) "setMultiByKey"
+  string(8) "setByKey"
   [42]=>
-  string(9) "setOption"
+  string(8) "setMulti"
   [43]=>
+  string(13) "setMultiByKey"
+  [44]=>
+  string(9) "setOption"
+  [45]=>
   string(10) "setOptions"
 }
 ================
@@ -105,7 +109,7 @@ object(A_Memcached)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(44) {
+array(46) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -173,25 +177,29 @@ array(44) {
   [32]=>
   string(14) "incrementByKey"
   [33]=>
-  string(7) "prepend"
+  string(12) "isPersistent"
   [34]=>
-  string(12) "prependByKey"
+  string(10) "isPristine"
   [35]=>
-  string(4) "quit"
+  string(7) "prepend"
   [36]=>
-  string(7) "replace"
+  string(12) "prependByKey"
   [37]=>
-  string(12) "replaceByKey"
+  string(4) "quit"
   [38]=>
-  string(3) "set"
+  string(7) "replace"
   [39]=>
-  string(8) "setByKey"
+  string(12) "replaceByKey"
   [40]=>
-  string(8) "setMulti"
+  string(3) "set"
   [41]=>
-  string(13) "setMultiByKey"
+  string(8) "setByKey"
   [42]=>
-  string(9) "setOption"
+  string(8) "setMulti"
   [43]=>
+  string(13) "setMultiByKey"
+  [44]=>
+  string(9) "setOption"
+  [45]=>
   string(10) "setOptions"
 }

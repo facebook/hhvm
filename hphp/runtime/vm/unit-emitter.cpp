@@ -233,19 +233,14 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
 ///////////////////////////////////////////////////////////////////////////////
 // PreClassEmitters.
 
-PreClassEmitter* UnitEmitter::newPreClassEmitter(
-  const StringData* name,
-  PreClass::Hoistable hoistable
-) {
-  if (hoistable && m_hoistablePreClassSet.count(name)) {
-    hoistable = PreClass::Mergeable;
+void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
+  if (pce->hoistability() && m_hoistablePreClassSet.count(pce->name())) {
+    pce->setHoistable(PreClass::Mergeable);
   }
-
-  PreClassEmitter* pce = new PreClassEmitter(*this, m_pceVec.size(),
-                                             name, hoistable);
+  auto hoistable = pce->hoistability();
 
   if (hoistable >= PreClass::MaybeHoistable) {
-    m_hoistablePreClassSet.insert(name);
+    m_hoistablePreClassSet.insert(pce->name());
     if (hoistable == PreClass::ClosureHoistable) {
       // Closures should appear at the VERY top of the file, so if any class in
       // the same file tries to use them, they are already defined. We had a
@@ -268,7 +263,23 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(
       pushMergeableClass(pce);
     }
   }
+}
+
+PreClassEmitter* UnitEmitter::newBarePreClassEmitter(
+  const StringData* name,
+  PreClass::Hoistable hoistable
+) {
+  auto pce = new PreClassEmitter(*this, m_pceVec.size(), name, hoistable);
   m_pceVec.push_back(pce);
+  return pce;
+}
+
+PreClassEmitter* UnitEmitter::newPreClassEmitter(
+  const StringData* name,
+  PreClass::Hoistable hoistable
+) {
+  PreClassEmitter* pce = newBarePreClassEmitter(name, hoistable);
+  addPreClassEmitter(pce);
   return pce;
 }
 

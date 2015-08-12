@@ -3,6 +3,11 @@
 #
 
 .main {
+  DefCls 0
+  DefCls 1
+  DefCls 2
+  DefCls 3
+  DefCls 4
   FPushFuncD 0 "main"
   FCall 0
   PopR
@@ -138,7 +143,7 @@
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "print_funk" NullThrows 
+  FPushObjMethodD 0 "print_funk" NullThrows
   FCall 0
   PopR
 

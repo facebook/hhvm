@@ -206,13 +206,26 @@ struct UnitEmitter {
   PreClassEmitter* pce(Id preClassId);
 
   /*
-   * Create a new PreClassEmitter and add it to the PCE vector.
+   * Add a PreClassEmitter to the hoistability tracking data structures.
+   *
+   * @see: PreClass::Hoistable
+   */
+  void addPreClassEmitter(PreClassEmitter* pce);
+
+  /*
+   * Create a new PreClassEmitter and add it to all the PCE data structures.
    *
    * @see: PreClass::Hoistable
    */
   PreClassEmitter* newPreClassEmitter(const StringData* name,
                                       PreClass::Hoistable hoistable);
-
+  /*
+   * Create a new PreClassEmitter without adding it to the hoistability
+   * tracking data structures.
+   * It should be added latter with addPreClassEmitter.
+   */
+  PreClassEmitter* newBarePreClassEmitter(const StringData* name,
+                                          PreClass::Hoistable hoistable);
 
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.

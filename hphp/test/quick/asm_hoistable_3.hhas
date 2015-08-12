@@ -1,0 +1,32 @@
+# Test that B *doesn't* get marked AlwaysHoistable and so
+# DefClsNop won't actually define it
+
+.main {
+  DefClsNop 0
+  DefClsNop 1
+
+  FPushClsMethodD 0 "print" "B"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+.class [unique] B extends A {
+  .default_ctor;
+
+  .method [public static] print() {
+    String "hi\n"
+    Print
+    PopC
+
+    Null
+    RetC
+  }
+
+}
+
+.class [unique] A {
+  .default_ctor;
+}

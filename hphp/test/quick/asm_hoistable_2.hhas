@@ -1,0 +1,31 @@
+# Test that things can get marked AlwaysHoistable
+
+.main {
+  DefClsNop 0
+  DefClsNop 1
+
+  FPushClsMethodD 0 "print" "B"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+.class [unique] a {
+  .default_ctor;
+}
+
+.class [unique] B extends A {
+  .default_ctor;
+
+  .method [public static] print() {
+    String "hi\n"
+    Print
+    PopC
+
+    Null
+    RetC
+  }
+
+}

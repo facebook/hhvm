@@ -3,6 +3,13 @@
 #
 
 .main {
+  DefCls 0
+  DefCls 1
+  DefCls 2
+  DefCls 3
+  DefCls 4
+  DefCls 5
+  DefCls 6
   FPushFuncD 0 "main"
   FCall 0
   UnboxR

@@ -63,7 +63,7 @@
  *   - line number information. (It might make sense to do this via
  *     something like a .line directive at some point.)
  *
- *   - non-top functions and non-hoistable classes
+ *   - non-top functions
  *
  *   - static variables in a function/method
  *
@@ -638,6 +638,7 @@ struct AsmState : private boost::noncopyable {
 
   void finishClass() {
     assert(!fe);
+    ue->addPreClassEmitter(pce);
     pce = 0;
   }
 
@@ -772,6 +773,7 @@ struct AsmState : private boost::noncopyable {
   int fdescHighWater;
   int maxUnnamed;
   std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
+  std::set<std::string,stdltistr> hoistables;
 };
 
 
@@ -2124,7 +2126,28 @@ void parse_class_body(AsmState& as) {
     as.error("unrecognized directive `" + directive + "' in class");
   }
   as.in.expect('}');
-  as.finishClass();
+}
+
+PreClass::Hoistable compute_hoistable(AsmState& as,
+                                      const std::string &name,
+                                      const std::string &parentName) {
+  auto &pce = *as.pce;
+  bool system = pce.attrs() & AttrBuiltin;
+  if (!system) {
+    if (!pce.interfaces().empty() ||
+        !pce.usedTraits().empty() ||
+        !pce.requirements().empty() ||
+        (pce.attrs() & AttrEnum)) {
+      return PreClass::Mergeable;
+    }
+    if (!parentName.empty() && !as.hoistables.count(parentName)) {
+      return PreClass::MaybeHoistable;
+    }
+  }
+  as.hoistables.insert(name);
+
+  return pce.attrs() & AttrUnique ?
+    PreClass::AlwaysHoistable : PreClass::MaybeHoistable;
 }
 
 /*
@@ -2168,8 +2191,8 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
-  as.pce = as.ue->newPreClassEmitter(makeStaticString(name),
-                                     PreClass::MaybeHoistable);
+  as.pce = as.ue->newBarePreClassEmitter(makeStaticString(name),
+                                         PreClass::MaybeHoistable);
   as.pce->init(as.in.getLineNumber(),
                as.in.getLineNumber() + 1, // XXX
                as.ue->bcPos(),
@@ -2183,6 +2206,9 @@ void parse_class(AsmState& as) {
 
   as.in.expectWs('{');
   parse_class_body(as);
+
+  as.pce->setHoistable(compute_hoistable(as, name, parentName));
+  as.finishClass();
 }
 
 /*

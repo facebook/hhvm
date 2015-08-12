@@ -8,4 +8,3 @@ File "gen_trait4.php", line 18, characters 30-30:
 It is incompatible with an object of type A
 File "gen_trait4.php", line 18, characters 30-30:
 Considering that this type argument is invariant with respect to Vector
-Did you mean ConstVector instead?

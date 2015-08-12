@@ -1,0 +1,9 @@
+File "invariant_err_msg.php", line 7, characters 10-11:
+Invalid return type (Typing[4110])
+File "invariant_err_msg.php", line 6, characters 30-30:
+This is an object of type A
+File "invariant_err_msg.php", line 6, characters 18-18:
+It is incompatible with an object of type B
+File "invariant_err_msg.php", line 6, characters 30-30:
+Considering that this type argument is invariant with respect to Set
+Did you mean ConstSet instead?

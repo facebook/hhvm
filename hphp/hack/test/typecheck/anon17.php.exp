@@ -6,4 +6,3 @@ File "anon17.php", line 6, characters 39-39:
 It is incompatible with an int
 File "anon17.php", line 3, characters 38-57:
 Considering that this type argument is invariant with respect to Vector
-Did you mean ConstVector instead?

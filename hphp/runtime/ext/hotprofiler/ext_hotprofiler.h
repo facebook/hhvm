@@ -158,14 +158,16 @@ struct Profiler {
   /**
    * Start a new frame with the specified symbol.
    */
-  virtual void beginFrame(const char *symbol) __attribute__ ((__noinline__)) ;
+  NEVER_INLINE
+  virtual void beginFrame(const char *symbol);
 
   /**
    * End top of the stack.
    */
+  NEVER_INLINE
   virtual void endFrame(const TypedValue *retval,
                         const char *symbol,
-                        bool endMain = false) __attribute__ ((__noinline__)) ;
+                        bool endMain = false);
 
   virtual void endAllFrames();
 

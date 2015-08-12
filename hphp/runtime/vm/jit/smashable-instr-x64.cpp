@@ -84,6 +84,11 @@ TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   return start;
 }
 
+TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
+  // TODO(#7831969): Get rid of this magic number when the sizeof_* API is made.
+  return EMIT_BODY(cb, cmpq, 8, imm, r[disp]);
+}
+
 TCA emit_smashable_call(CodeBlock& cb, TCA target) {
   return EMIT_BODY(cb, call, kCallLen, target);
 }

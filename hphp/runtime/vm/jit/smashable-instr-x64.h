@@ -34,6 +34,7 @@ namespace HPHP { namespace jit { namespace x64 {
 void make_smashable(CodeBlock& cb, int nbytes, int offset = 0);
 
 TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d);
+TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
 TCA emit_smashable_call(CodeBlock& cb, TCA target);
 TCA emit_smashable_jmp(CodeBlock& cb, TCA target);
 TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc);

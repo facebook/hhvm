@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
@@ -41,37 +41,19 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
 
   assertx(cross_trace_abi.gpUnreserved.contains(rax));
 
-  auto const funcImm = Immed64(func);
-  int nbytes, offset;
-
-  if (funcImm.fits(sz::dword)) {
-    nbytes = kFuncGuardShortSmash;
-    offset = kFuncGuardShortImm;
-  } else {
-    nbytes = kFuncGuardSmash;
-    offset = kFuncGuardImm;
-  }
-  make_smashable(a.code(), nbytes, offset);
-  mcg->cgFixups().m_alignFixups.emplace(
-    a.frontier(),
-    std::make_pair(nbytes, offset)
-  );
-
   TCA start DEBUG_ONLY = a.frontier();
 
+  auto const funcImm = Immed64(func);
+
   if (funcImm.fits(sz::dword)) {
-    a.  cmpq   (funcImm.l(), rVmFp[AROFF(m_func)]);
+    emit_smashable_cmpq(a.code(), funcImm.l(), rVmFp,
+                        safe_cast<int8_t>(AROFF(m_func)));
   } else {
     // Although func doesn't fit in a signed 32-bit immediate, it may still fit
     // in an unsigned one.  Rather than deal with yet another case (which only
-    // happens when we disable jemalloc), just force it to be an 8-byte
-    // immediate, and patch it up afterwards.
-    a.  movq   (0xdeadbeeffeedface, rax);
-
-    auto immptr = reinterpret_cast<uintptr_t*>(a.frontier()) - 1;
-    assertx(*immptr == 0xdeadbeeffeedface);
-    *immptr = uintptr_t(func);
-
+    // happens when we disable jemalloc), just emit a smashable mov followed by
+    // a register cmp.
+    emit_smashable_movq(a.code(), uint64_t(func), rax);
     a.  cmpq   (rax, rVmFp[AROFF(m_func)]);
   }
   a.    jnz    (mcg->tx().uniqueStubs.funcPrologueRedispatch);

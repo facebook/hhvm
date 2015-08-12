@@ -38,6 +38,9 @@ namespace HPHP { namespace jit {
  *
  *    [insts w/ smashable immediates]
  *      - movq
+ *      - cmpq:   A cmpq of a 32-bit immediate and a memory operand with 8-bit
+ *                displacement (and no index or scale).  Used for func guards.
+ *                TODO(#7831969): Add smash_cmpq and smashable_cmpq_imm().
  *
  *    [insts w/ smashable targets]
  *      - call
@@ -63,6 +66,7 @@ void make_smashable(CodeBlock& cb, int nbytes, int offset = 0);
  * For jcc_and_jmp, return a pair of (jcc_addr, jmp_addr).
  */
 TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d);
+TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
 TCA emit_smashable_call(CodeBlock& cb, TCA target);
 TCA emit_smashable_jmp(CodeBlock& cb, TCA target);
 TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc);

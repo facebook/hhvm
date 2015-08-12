@@ -36,6 +36,9 @@ void make_smashable(CodeBlock& cb, int nbytes, int offset) {
 TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   ARCH_SWITCH_CALL(emit_smashable_movq, cb, imm, d);
 }
+TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
+  ARCH_SWITCH_CALL(emit_smashable_cmpq, cb, imm, r, disp);
+}
 TCA emit_smashable_call(CodeBlock& cb, TCA target) {
   ARCH_SWITCH_CALL(emit_smashable_call, cb, target);
 }

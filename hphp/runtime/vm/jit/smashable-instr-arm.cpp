@@ -43,6 +43,10 @@ TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   not_implemented();
 }
 
+TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
+  not_implemented();
+}
+
 TCA emit_smashable_call(CodeBlock& cb, TCA target) {
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;

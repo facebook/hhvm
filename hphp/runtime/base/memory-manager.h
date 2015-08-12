@@ -351,8 +351,7 @@ struct Allocator {
   SMALL_SIZE(105,     31,       29,      2, no,               1) \
   SMALL_SIZE(106,     31,       29,      3, no,               1) \
 
-__attribute__((__aligned__(64)))
-constexpr uint8_t kSmallSize2Index[] = {
+alignas(64) constexpr uint8_t kSmallSize2Index[] = {
 #define S2I_4(i)  i,
 #define S2I_5(i)  S2I_4(i) S2I_4(i)
 #define S2I_6(i)  S2I_5(i) S2I_5(i)
@@ -373,8 +372,7 @@ constexpr uint8_t kSmallSize2Index[] = {
 #undef SMALL_SIZE
 };
 
-__attribute__((__aligned__(64)))
-constexpr uint32_t kSmallIndex2Size[] = {
+alignas(64) constexpr uint32_t kSmallIndex2Size[] = {
 #define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
   ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)),
   SMALL_SIZES

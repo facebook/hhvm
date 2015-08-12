@@ -614,7 +614,7 @@ class CufIter {
   StringData* m_name;
 };
 
-struct Iter {
+struct alignas(16) Iter {
   const ArrayIter&   arr() const { return m_u.aiter; }
   const MArrayIter& marr() const { return m_u.maiter; }
   const CufIter&     cuf() const { return m_u.cufiter; }
@@ -635,7 +635,7 @@ private:
     MArrayIter maiter;
     CufIter cufiter;
   } m_u;
-} __attribute__ ((__aligned__(16)));
+};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -59,7 +59,7 @@ namespace HPHP {
  *                        | Parent object           |
  *                        +-------------------------+ high address
  */
-struct Resumable {
+struct alignas(16) Resumable {
   // This function is used only by AFWH, temporary till AFWH is converted to HNI
   static Resumable* FromObj(ObjectData* obj) {
     return reinterpret_cast<Resumable*>(obj) - 1;
@@ -179,7 +179,7 @@ private:
     };
     uint64_t m_offsetAndSize;
   };
-} __attribute__((__aligned__(16)));
+};
 
 static_assert(Resumable::arOff() == 0,
               "ActRec must be in the beginning of Resumable");

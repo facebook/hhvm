@@ -128,7 +128,7 @@ static const char* const kPerfCounterNames[] = {
 // alignment, which causes it to emit an inlined version of memcpy which does
 // not assume 16-byte alignment. (Perversely, it also tickles the ld bug
 // differently such that it actually gets 16-byte alignment :\)
-__attribute__((__aligned__(8)))
+alignas(8)
 #endif
 __thread int64_t s_perfCounters[tpc_num_counters];
 

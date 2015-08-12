@@ -1,1 +1,2 @@
-No errors
+File "heredoc_token_inside_xhp.php", line 14, characters 13-16:
+Stray < in xhp (Parsing[1002])

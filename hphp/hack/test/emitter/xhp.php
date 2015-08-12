@@ -76,10 +76,19 @@ function escape(string $s): :lol {
   return <lol>{$s}</lol>;
 }
 
+function texty(): :lol {
+  $x = 'hi';
+  return <lol>  hmm  <!-- -->bar   amargh<!-- --> arrrrrrgh{$x}sigh
+    welp {$x}
+a </lol>;
+}
+
 function make(): :foo {
   return <foo val="test">
-           <lol></lol>
-           <lol></lol>
+           <lol>hello</lol>
+           <lol>world</lol>
+           <lol>testing...</lol>
+           <lol>...</lol>
          </foo>;
 }
 
@@ -91,6 +100,9 @@ function test(): void {
   var_dump($x->:cns);
   var_dump($x->:arg2);
   var_dump($x->:val);
+
+  var_dump(texty());
+  var_dump(texty()->getChildren());
 
   var_dump(escape("wheeeee"));
 }

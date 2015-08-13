@@ -437,8 +437,7 @@ void handlePrimeCacheInit(Entry* mce,
   always_assert(false);
 #endif
 
-  TCA toSmash =
-    mcg->backEnd().smashableCallFromReturn(TCA(framePtr->m_savedRip));
+  TCA callAddr = smashable_call_from_ret(TCA(framePtr->m_savedRip));
   TCA movAddr = TCA(rawTarget >> 1);
 
   // First fill the request local method cache for this call.
@@ -502,7 +501,7 @@ void handlePrimeCacheInit(Entry* mce,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-  smash_call(toSmash, reinterpret_cast<TCA>(handleSlowPath<fatal>));
+  smash_call(callAddr, reinterpret_cast<TCA>(handleSlowPath<fatal>));
 }
 
 template

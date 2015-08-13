@@ -73,12 +73,6 @@ struct BackEnd {
   virtual void funcPrologueSmashGuard(TCA prologue, const Func* func) = 0;
   virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
 
-  /*
-   * Find the start of a smashable call from the return address
-   * observed in the callee
-   */
-  virtual TCA smashableCallFromReturn(TCA returnAddr) = 0;
-
   virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
                            SrcKey sk, size_t dbgOff) = 0;
 

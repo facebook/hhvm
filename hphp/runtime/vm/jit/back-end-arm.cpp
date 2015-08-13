@@ -168,10 +168,6 @@ struct BackEnd final : jit::BackEnd {
     a.    Str   (rAsm, rAsm2[disp]);
   }
 
-  TCA smashableCallFromReturn(TCA retAddr) override {
-    return retAddr - 8;
-  }
-
   void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
                    SrcKey sk, size_t dbgOff) override {
     vixl::MacroAssembler a { codeMain };

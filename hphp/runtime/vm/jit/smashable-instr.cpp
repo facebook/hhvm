@@ -98,6 +98,15 @@ ConditionCode smashable_jcc_cond(TCA inst) {
   ARCH_SWITCH_CALL(smashable_jcc_cond, inst);
 }
 
+/*
+ * Right now, our smashable calls are always a known size.  If this ever
+ * changes, this implementation will need to be architecture-dependent (and
+ * the sizeof* routine will probably need to take a TCA).
+ */
+TCA smashable_call_from_ret(TCA ret) {
+  return ret - sizeof_smashable_call();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

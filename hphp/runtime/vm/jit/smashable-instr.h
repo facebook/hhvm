@@ -103,6 +103,11 @@ TCA smashable_jmp_target(TCA inst);
 TCA smashable_jcc_target(TCA inst);
 ConditionCode smashable_jcc_cond(TCA inst);
 
+/*
+ * Obtain the address of a smashable call from its return IP.
+ */
+TCA smashable_call_from_ret(TCA ret);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

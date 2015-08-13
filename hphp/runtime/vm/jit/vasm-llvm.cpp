@@ -975,8 +975,8 @@ struct LLVMEmitter {
                  jmpIp, newStub);
 
           // Patch the jmp to point to the new stub.
-          auto const jmpLen = cc == CC_None ? sizeof_smashable_jmp()
-                                            : sizeof_smashable_jcc();
+          auto const jmpLen = cc == CC_None ? smashableJmpLen()
+                                            : smashableJccLen();
           auto afterJmp = jmpIp + jmpLen;
           auto delta = safe_cast<int32_t>(newStub - afterJmp);
           memcpy(afterJmp - sizeof(delta), &delta, sizeof(delta));

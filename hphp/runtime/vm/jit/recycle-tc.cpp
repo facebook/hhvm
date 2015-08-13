@@ -274,7 +274,7 @@ void reclaimFunction(Func* func) {
     // reachable.
     auto addr = caller.second.isGuard ? us.bindCallStub
                                       : nullptr;
-    smash_call(caller.first, addr);
+    smashCall(caller.first, addr);
     s_smashedCalls.erase(caller.first);
   }
 

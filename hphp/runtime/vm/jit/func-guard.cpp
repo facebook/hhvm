@@ -46,14 +46,14 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   auto const funcImm = Immed64(func);
 
   if (funcImm.fits(sz::dword)) {
-    emit_smashable_cmpq(a.code(), funcImm.l(), rVmFp,
-                        safe_cast<int8_t>(AROFF(m_func)));
+    emitSmashableCmpq(a.code(), funcImm.l(), rVmFp,
+                      safe_cast<int8_t>(AROFF(m_func)));
   } else {
     // Although func doesn't fit in a signed 32-bit immediate, it may still fit
     // in an unsigned one.  Rather than deal with yet another case (which only
     // happens when we disable jemalloc), just emit a smashable mov followed by
     // a register cmp.
-    emit_smashable_movq(a.code(), uint64_t(func), rax);
+    emitSmashableMovq(a.code(), uint64_t(func), rax);
     a.  cmpq   (rax, rVmFp[AROFF(m_func)]);
   }
   a.    jnz    (mcg->tx().uniqueStubs.funcPrologueRedispatch);

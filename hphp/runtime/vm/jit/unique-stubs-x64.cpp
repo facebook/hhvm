@@ -665,7 +665,7 @@ void emitBindCallStubs(UniqueStubs& uniqueStubs) {
     Asm a{cb};
     a.  loadq  (rip[intptr_t(&mcg)], argNumToRegName[0]);
     a.  loadq  (*rsp, argNumToRegName[1]); // reconstruct toSmash from savedRip
-    a.  subq   (safe_cast<int>(sizeof_smashable_call()), argNumToRegName[1]);
+    a.  subq   (safe_cast<int>(smashableCallLen()), argNumToRegName[1]);
     a.  movq   (rVmFp, argNumToRegName[2]);
     a.  movb   (immutable, rbyte(argNumToRegName[3]));
     a.  subq   (8, rsp); // align stack

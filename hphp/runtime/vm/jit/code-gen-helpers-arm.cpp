@@ -143,7 +143,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   vixl::MacroAssembler acold { coldCode };
 
   emitTestSurpriseFlags(a, rds);
-  emit_smashable_jcc(mainCode, coldCode.frontier(), CC_NZ);
+  emitSmashableJcc(mainCode, coldCode.frontier(), CC_NZ);
 
   acold.  Mov  (argReg(0), rVmFp);
 
@@ -151,7 +151,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
       emitCallWithinTC(acold, mcg->tx().uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(fixupAddr, fixup);
 
-  emit_smashable_jmp(coldCode, mainCode.frontier());
+  emitSmashableJmp(coldCode, mainCode.frontier());
 }
 
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,

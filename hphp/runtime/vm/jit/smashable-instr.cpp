@@ -29,73 +29,73 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t sizeof_smashable_movq() {
-  ARCH_SWITCH_CALL(sizeof_smashable_movq);
+size_t smashableMovqLen() {
+  ARCH_SWITCH_CALL(smashableMovqLen);
 }
-size_t sizeof_smashable_cmpq() {
-  ARCH_SWITCH_CALL(sizeof_smashable_cmpq);
+size_t smashableCmpqLen() {
+  ARCH_SWITCH_CALL(smashableCmpqLen);
 }
-size_t sizeof_smashable_call() {
-  ARCH_SWITCH_CALL(sizeof_smashable_call);
+size_t smashableCallLen() {
+  ARCH_SWITCH_CALL(smashableCallLen);
 }
-size_t sizeof_smashable_jmp() {
-  ARCH_SWITCH_CALL(sizeof_smashable_jmp);
+size_t smashableJmpLen() {
+  ARCH_SWITCH_CALL(smashableJmpLen);
 }
-size_t sizeof_smashable_jcc() {
-  ARCH_SWITCH_CALL(sizeof_smashable_jcc);
+size_t smashableJccLen() {
+  ARCH_SWITCH_CALL(smashableJccLen);
 }
 
-TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
-  ARCH_SWITCH_CALL(emit_smashable_movq, cb, imm, d);
+TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d) {
+  ARCH_SWITCH_CALL(emitSmashableMovq, cb, imm, d);
 }
-TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
-  ARCH_SWITCH_CALL(emit_smashable_cmpq, cb, imm, r, disp);
+TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
+  ARCH_SWITCH_CALL(emitSmashableCmpq, cb, imm, r, disp);
 }
-TCA emit_smashable_call(CodeBlock& cb, TCA target) {
-  ARCH_SWITCH_CALL(emit_smashable_call, cb, target);
+TCA emitSmashableCall(CodeBlock& cb, TCA target) {
+  ARCH_SWITCH_CALL(emitSmashableCall, cb, target);
 }
-TCA emit_smashable_jmp(CodeBlock& cb, TCA target) {
-  ARCH_SWITCH_CALL(emit_smashable_jmp, cb, target);
+TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
+  ARCH_SWITCH_CALL(emitSmashableJmp, cb, target);
 }
-TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc) {
-  ARCH_SWITCH_CALL(emit_smashable_jcc, cb, target, cc);
+TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc) {
+  ARCH_SWITCH_CALL(emitSmashableJcc, cb, target, cc);
 }
 std::pair<TCA,TCA>
-emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc) {
-  ARCH_SWITCH_CALL(emit_smashable_jcc_and_jmp, cb, target, cc);
+emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc) {
+  ARCH_SWITCH_CALL(emitSmashableJccAndJmp, cb, target, cc);
 }
 
-void smash_movq(TCA inst, uint64_t imm) {
+void smashMovq(TCA inst, uint64_t imm) {
   assertx(MCGenerator::canWrite());
-  ARCH_SWITCH_CALL(smash_movq, inst, imm);
+  ARCH_SWITCH_CALL(smashMovq, inst, imm);
 }
-void smash_call(TCA inst, TCA target) {
+void smashCall(TCA inst, TCA target) {
   assertx(MCGenerator::canWrite());
-  ARCH_SWITCH_CALL(smash_call, inst, target);
+  ARCH_SWITCH_CALL(smashCall, inst, target);
 }
-void smash_jmp(TCA inst, TCA target) {
+void smashJmp(TCA inst, TCA target) {
   assertx(MCGenerator::canWrite());
-  ARCH_SWITCH_CALL(smash_jmp, inst, target);
+  ARCH_SWITCH_CALL(smashJmp, inst, target);
 }
-void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
+void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   assertx(MCGenerator::canWrite());
-  ARCH_SWITCH_CALL(smash_jcc, inst, target, cc);
+  ARCH_SWITCH_CALL(smashJcc, inst, target, cc);
 }
 
-uint64_t smashable_movq_imm(TCA inst) {
-  ARCH_SWITCH_CALL(smashable_movq_imm, inst);
+uint64_t smashableMovqImm(TCA inst) {
+  ARCH_SWITCH_CALL(smashableMovqImm, inst);
 }
-TCA smashable_call_target(TCA inst) {
-  ARCH_SWITCH_CALL(smashable_call_target, inst);
+TCA smashableCallTarget(TCA inst) {
+  ARCH_SWITCH_CALL(smashableCallTarget, inst);
 }
-TCA smashable_jmp_target(TCA inst) {
-  ARCH_SWITCH_CALL(smashable_jmp_target, inst);
+TCA smashableJmpTarget(TCA inst) {
+  ARCH_SWITCH_CALL(smashableJmpTarget, inst);
 }
-TCA smashable_jcc_target(TCA inst) {
-  ARCH_SWITCH_CALL(smashable_jcc_target, inst);
+TCA smashableJccTarget(TCA inst) {
+  ARCH_SWITCH_CALL(smashableJccTarget, inst);
 }
-ConditionCode smashable_jcc_cond(TCA inst) {
-  ARCH_SWITCH_CALL(smashable_jcc_cond, inst);
+ConditionCode smashableJccCond(TCA inst) {
+  ARCH_SWITCH_CALL(smashableJccCond, inst);
 }
 
 /*
@@ -103,8 +103,8 @@ ConditionCode smashable_jcc_cond(TCA inst) {
  * changes, this implementation will need to be architecture-dependent (and
  * the sizeof* routine will probably need to take a TCA).
  */
-TCA smashable_call_from_ret(TCA ret) {
-  return ret - sizeof_smashable_call();
+TCA smashableCallFromRet(TCA ret) {
+  return ret - smashableCallLen();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

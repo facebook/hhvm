@@ -31,30 +31,30 @@ namespace HPHP { namespace jit { namespace arm {
  * Mirrors the API of smashable-instr.h.
  */
 
-constexpr size_t sizeof_smashable_movq() { return 0; }
-constexpr size_t sizeof_smashable_cmpq() { return 0; }
-constexpr size_t sizeof_smashable_call() { return 0; }
-constexpr size_t sizeof_smashable_jmp()  { return 0; }
-constexpr size_t sizeof_smashable_jcc()  { return 0; }
+constexpr size_t smashableMovqLen() { return 0; }
+constexpr size_t smashableCmpqLen() { return 0; }
+constexpr size_t smashableCallLen() { return 0; }
+constexpr size_t smashableJmpLen()  { return 0; }
+constexpr size_t smashableJccLen()  { return 0; }
 
-TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d);
-TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
-TCA emit_smashable_call(CodeBlock& cb, TCA target);
-TCA emit_smashable_jmp(CodeBlock& cb, TCA target);
-TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc);
+TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
+TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
+TCA emitSmashableCall(CodeBlock& cb, TCA target);
+TCA emitSmashableJmp(CodeBlock& cb, TCA target);
+TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc);
 std::pair<TCA,TCA>
-emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc);
+emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc);
 
-void smash_movq(TCA inst, uint64_t imm);
-void smash_call(TCA inst, TCA target);
-void smash_jmp(TCA inst, TCA target);
-void smash_jcc(TCA inst, TCA target, ConditionCode cc = CC_None);
+void smashMovq(TCA inst, uint64_t imm);
+void smashCall(TCA inst, TCA target);
+void smashJmp(TCA inst, TCA target);
+void smashJcc(TCA inst, TCA target, ConditionCode cc = CC_None);
 
-uint64_t smashable_movq_imm(TCA inst);
-TCA smashable_call_target(TCA inst);
-TCA smashable_jmp_target(TCA inst);
-TCA smashable_jcc_target(TCA inst);
-ConditionCode smashable_jcc_cond(TCA inst);
+uint64_t smashableMovqImm(TCA inst);
+TCA smashableCallTarget(TCA inst);
+TCA smashableJmpTarget(TCA inst);
+TCA smashableJccTarget(TCA inst);
+ConditionCode smashableJccCond(TCA inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 

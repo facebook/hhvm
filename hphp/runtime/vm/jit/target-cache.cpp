@@ -437,7 +437,7 @@ void handlePrimeCacheInit(Entry* mce,
   always_assert(false);
 #endif
 
-  TCA callAddr = smashable_call_from_ret(TCA(framePtr->m_savedRip));
+  TCA callAddr = smashableCallFromRet(TCA(framePtr->m_savedRip));
   TCA movAddr = TCA(rawTarget >> 1);
 
   // First fill the request local method cache for this call.
@@ -451,10 +451,10 @@ void handlePrimeCacheInit(Entry* mce,
   if (!writer) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
-    auto const imm = smashable_movq_imm(addr);
+    auto const imm = smashableMovqImm(addr);
     if (!(imm & 1)) return false;
 
-    smash_movq(addr, value);
+    smashMovq(addr, value);
     return true;
   };
 
@@ -501,7 +501,7 @@ void handlePrimeCacheInit(Entry* mce,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-  smash_call(callAddr, reinterpret_cast<TCA>(handleSlowPath<fatal>));
+  smashCall(callAddr, reinterpret_cast<TCA>(handleSlowPath<fatal>));
 }
 
 template

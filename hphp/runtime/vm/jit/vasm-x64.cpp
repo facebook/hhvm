@@ -328,25 +328,24 @@ void Vgen::pad(CodeBlock& cb) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const bindcall& i) {
-  emit_smashable_call(a->code(), i.stub);
+  emitSmashableCall(a->code(), i.stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 void Vgen::emit(const bindjmp& i) {
-  auto const jmp = emit_smashable_jmp(a->code(), a->frontier());
+  auto const jmp = emitSmashableJmp(a->code(), a->frontier());
   stubs.push_back({jmp, nullptr, i});
   mcg->setJmpTransID(jmp);
 }
 
 void Vgen::emit(const bindjcc& i) {
-  auto const jcc = emit_smashable_jcc(a->code(), a->frontier(), i.cc);
+  auto const jcc = emitSmashableJcc(a->code(), a->frontier(), i.cc);
   stubs.push_back({nullptr, jcc, i});
   mcg->setJmpTransID(jcc);
 }
 
 void Vgen::emit(const bindjcc1st& i) {
-  auto const jcc_jmp =
-    emit_smashable_jcc_and_jmp(a->code(), a->frontier(), i.cc);
+  auto const jcc_jmp = emitSmashableJccAndJmp(a->code(), a->frontier(), i.cc);
 
   stubs.push_back({jcc_jmp.second, jcc_jmp.first, i});
 
@@ -361,13 +360,13 @@ void Vgen::emit(const bindaddr& i) {
 }
 
 void Vgen::emit(const fallback& i) {
-  auto const jmp = emit_smashable_jmp(a->code(), a->frontier());
+  auto const jmp = emitSmashableJmp(a->code(), a->frontier());
   stubs.push_back({jmp, nullptr, i});
   mcg->tx().getSrcRec(i.target)->registerFallbackJump(jmp, CC_None);
 }
 
 void Vgen::emit(const fallbackcc& i) {
-  auto const jcc = emit_smashable_jcc(a->code(), a->frontier(), i.cc);
+  auto const jcc = emitSmashableJcc(a->code(), a->frontier(), i.cc);
   stubs.push_back({nullptr, jcc, i});
   mcg->tx().getSrcRec(i.target)->registerFallbackJump(jcc, i.cc);
 }
@@ -466,7 +465,7 @@ void Vgen::emit(const ldimmq& i) {
 }
 
 void Vgen::emit(const ldimmqs& i) {
-  emit_smashable_movq(a->code(), i.s.q(), i.d);
+  emitSmashableMovq(a->code(), i.s.q(), i.d);
 }
 
 void Vgen::emit(const load& i) {
@@ -524,15 +523,15 @@ void Vgen::emit(const mcprep& i) {
    * Class*, so we'll always miss the inline check before it's smashed, and
    * handlePrimeCacheInit can tell it's not been smashed yet
    */
-  auto const mov_addr = emit_smashable_movq(a->code(), 0, r64(i.d));
+  auto const mov_addr = emitSmashableMovq(a->code(), 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
-  smash_movq(mov_addr, (imm << 1) | 1);
+  smashMovq(mov_addr, (imm << 1) | 1);
 
   mcg->cgFixups().m_addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }
 
 void Vgen::emit(const mccall& i) {
-  emit_smashable_call(a->code(), i.target);
+  emitSmashableCall(a->code(), i.target);
 }
 
 void Vgen::emit(const vret& i) {

@@ -41,7 +41,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
 
   // Emit a jump to the actual code.
   auto const dbgBranchGuardSrc =
-    emit_smashable_jmp(mcg->code.main(), realCode);
+    emitSmashableJmp(mcg->code.main(), realCode);
 
   // Add it to srcRec.
   srcRec->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);

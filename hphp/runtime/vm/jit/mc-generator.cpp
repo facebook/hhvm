@@ -893,13 +893,13 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   PrologueCallersRec* pcr =
     m_tx.profData()->prologueCallers(prologueTransId);
   for (TCA toSmash : pcr->mainCallers()) {
-    smash_call(toSmash, start);
+    smashCall(toSmash, start);
   }
   // If the prologue has a guard, then smash its guard-callers as well.
   if (backEnd().funcPrologueHasGuard(start, func)) {
     TCA guard = backEnd().funcPrologueToGuard(start, func);
     for (TCA toSmash : pcr->guardCallers()) {
-      smash_call(toSmash, guard);
+      smashCall(toSmash, guard);
     }
   }
   pcr->clearAllCallers();
@@ -1033,14 +1033,14 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
 
   DecodedInstruction di(toSmash);
   if (di.isBranch() && !di.isJmp()) {
-    auto const target = smashable_jcc_target(toSmash);
+    auto const target = smashableJccTarget(toSmash);
     assertx(target);
 
     // Return if already smashed.
     if (target == tDest) return tDest;
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
-    auto const target = smashable_jmp_target(toSmash);
+    auto const target = smashableJmpTarget(toSmash);
     assertx(target);
 
     // Return if already smashed.
@@ -1084,7 +1084,7 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
   auto const skWillExplore = taken ? skTaken : skNotTaken;
   auto const skWillDefer = taken ? skNotTaken : skTaken;
   auto const dest = skWillExplore;
-  auto cc = smashable_jcc_cond(jccAddr);
+  auto cc = smashableJccCond(jccAddr);
 
   TRACE(3, "bindJccFirst: explored %d, will defer %d; "
            "overwriting cc%02x taken %d\n",
@@ -1099,8 +1099,8 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
   // It's not clear where the IncomingBranch should go to if cb is frozen.
   assertx(&cb != &code.frozen());
 
-  auto const jmpAddr = jccAddr + sizeof_smashable_jcc();
-  auto const afterAddr = jmpAddr + sizeof_smashable_jmp();
+  auto const jmpAddr = jccAddr + smashableJccLen();
+  auto const afterAddr = jmpAddr + smashableJmpLen();
 
   // Can we just directly fall through?
   bool const fallThru = afterAddr == cb.frontier() &&
@@ -1109,8 +1109,8 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
   auto const tDest = getTranslation(TranslArgs{dest, !fallThru});
   if (!tDest) return nullptr;
 
-  auto const jmpTarget = smashable_jmp_target(jmpAddr);
-  if (jmpTarget != smashable_jcc_target(jccAddr)) {
+  auto const jmpTarget = smashableJmpTarget(jmpAddr);
+  if (jmpTarget != smashableJccTarget(jccAddr)) {
     // Someone else already smashed this one.  Ideally we would just re-execute
     // from jccAddr---except the status flags will have been trashed.
     return tDest;
@@ -1141,7 +1141,7 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
    *     toSmash+6:  nop5
    *     toSmash+11: newHotness
    */
-  smash_jcc(jccAddr, stub, cc);
+  smashJcc(jccAddr, stub, cc);
   m_tx.getSrcRec(dest)->chainFrom(IncomingBranch::jmpFrom(jmpAddr));
 
   TRACE(5, "bindJccFirst: overwrote with cc%02x taken %d\n", cc, taken);
@@ -1350,10 +1350,10 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
       start = getFuncPrologue(func, nArgs);
       if (!isImmutable) start = backEnd().funcPrologueToGuard(start, func);
 
-      if (start && smashable_call_target(toSmash) != start) {
-        assertx(smashable_call_target(toSmash));
+      if (start && smashableCallTarget(toSmash) != start) {
+        assertx(smashableCallTarget(toSmash));
         TRACE(2, "bindCall smash %p -> %p\n", toSmash, start);
-        smash_call(toSmash, start);
+        smashCall(toSmash, start);
 
         bool is_profiled = false;
         // For functions to be PGO'ed, if their current prologues are still

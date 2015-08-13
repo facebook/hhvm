@@ -188,11 +188,11 @@ private:
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
-    smash_jmp(p.instr, env.addrs[p.target]);
+    smashJmp(p.instr, env.addrs[p.target]);
   }
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
-    smash_jcc(p.instr, env.addrs[p.target]);
+    smashJcc(p.instr, env.addrs[p.target]);
   }
   for (auto& p : env.bccs) {
     assertx(env.addrs[p.target]);
@@ -204,7 +204,7 @@ void Vgen::patch(Venv& env) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(bindcall& i) {
-  emit_smashable_call(*codeBlock, i.stub);
+  emitSmashableCall(*codeBlock, i.stub);
 }
 
 void Vgen::emit(copy& i) {
@@ -333,7 +333,7 @@ void Vgen::emit(jmp i) {
   if (next == i.target) return;
   jmps.push_back({a->frontier(), i.target});
   // B range is +/- 128MB but this uses BR
-  emit_smashable_jmp(*codeBlock, kEndOfTargetChain);
+  emitSmashableJmp(*codeBlock, kEndOfTargetChain);
 }
 
 void Vgen::emit(jcc& i) {
@@ -345,7 +345,7 @@ void Vgen::emit(jcc& i) {
     }
     jccs.push_back({a->frontier(), i.targets[1]});
     // B.cond range is +/- 1MB but this uses BR
-    emit_smashable_jcc(*codeBlock, kEndOfTargetChain, i.cc);
+    emitSmashableJcc(*codeBlock, kEndOfTargetChain, i.cc);
   }
   emit(jmp{i.targets[0]});
 }

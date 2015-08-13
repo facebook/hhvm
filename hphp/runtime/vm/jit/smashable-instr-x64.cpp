@@ -49,36 +49,36 @@ namespace HPHP { namespace jit { namespace x64 {
     return start;                       \
   }())
 
-TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
+TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   auto const start = EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
 
   auto immp = reinterpret_cast<uint64_t*>(
-    cb.frontier() - sizeof_smashable_movq() + kMovqImmOfff
+    cb.frontier() - smashableMovqLen() + kSmashMovqImmOff
   );
   *immp = imm;
 
   return start;
 }
 
-TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
+TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
   return EMIT_BODY(cb, cmpq, Cmpq, imm, r[disp]);
 }
 
-TCA emit_smashable_call(CodeBlock& cb, TCA target) {
+TCA emitSmashableCall(CodeBlock& cb, TCA target) {
   return EMIT_BODY(cb, call, Call, target);
 }
 
-TCA emit_smashable_jmp(CodeBlock& cb, TCA target) {
+TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
   return EMIT_BODY(cb, jmp, Jmp, target);
 }
 
-TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc) {
+TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc) {
   assertx(cc != CC_None);
   return EMIT_BODY(cb, jcc, Jcc, cc, target);
 }
 
 std::pair<TCA,TCA>
-emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc) {
+emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc) {
   assertx(cc != CC_None);
 
   align(cb, Alignment::SmashJccAndJmp, AlignContext::Live);
@@ -96,12 +96,12 @@ emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void smash_movq(TCA inst, uint64_t imm) {
+void smashMovq(TCA inst, uint64_t imm) {
   always_assert(is_aligned(inst, Alignment::SmashMovq));
-  *reinterpret_cast<uint64_t*>(inst + kMovqImmOfff) = imm;
+  *reinterpret_cast<uint64_t*>(inst + kSmashMovqImmOff) = imm;
 }
 
-void smash_call(TCA inst, TCA target) {
+void smashCall(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashCall));
   /*
    * TODO(#7889486): We'd like this just to be:
@@ -117,21 +117,21 @@ void smash_call(TCA inst, TCA target) {
   a.call(target);
 }
 
-void smash_jmp(TCA inst, TCA target) {
+void smashJmp(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJmp));
 
   auto& cb = mcg->code.blockFor(inst);
   CodeCursor cursor { cb, inst };
   X64Assembler a { cb };
 
-  if (target > inst && target - inst <= sizeof_smashable_jmp()) {
+  if (target > inst && target - inst <= smashableJmpLen()) {
     a.emitNop(target - inst);
   } else {
     a.jmp(target);
   }
 }
 
-void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
+void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   always_assert(is_aligned(inst, Alignment::SmashJcc));
 
   if (cc == CC_None) {
@@ -146,16 +146,16 @@ void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-uint64_t smashable_movq_imm(TCA inst) {
-  return *reinterpret_cast<uint64_t*>(inst + kMovqImmOfff);
+uint64_t smashableMovqImm(TCA inst) {
+  return *reinterpret_cast<uint64_t*>(inst + kSmashMovqImmOff);
 }
 
-TCA smashable_call_target(TCA inst) {
+TCA smashableCallTarget(TCA inst) {
   if (inst[0] != 0xE8) return nullptr;
   return inst + 5 + ((int32_t*)(inst + 5))[-1];
 }
 
-TCA smashable_jmp_target(TCA inst) {
+TCA smashableJmpTarget(TCA inst) {
   if (inst[0] != 0xe9) {
     if (inst[0] == 0x0f &&
         inst[1] == 0x1f &&
@@ -168,12 +168,12 @@ TCA smashable_jmp_target(TCA inst) {
   return inst + 5 + ((int32_t*)(inst + 5))[-1];
 }
 
-TCA smashable_jcc_target(TCA inst) {
+TCA smashableJccTarget(TCA inst) {
   if (inst[0] != 0x0F || (inst[1] & 0xF0) != 0x80) return nullptr;
   return inst + 6 + ((int32_t*)(inst + 6))[-1];
 }
 
-ConditionCode smashable_jcc_cond(TCA inst) {
+ConditionCode smashableJccCond(TCA inst) {
   return DecodedInstruction(inst).jccCondCode();
 }
 

@@ -40,7 +40,7 @@ namespace HPHP { namespace jit {
  *      - movq
  *      - cmpq:   A cmpq of a 32-bit immediate and a memory operand with 8-bit
  *                displacement (and no index or scale).  Used for func guards.
- *                TODO(#7831969): Add smash_cmpq and smashable_cmpq_imm().
+ *                TODO(#7831969): Add smashCmpq and smashableCmpqImm().
  *
  *    [insts w/ smashable targets]
  *      - call
@@ -56,25 +56,25 @@ namespace HPHP { namespace jit {
 /*
  * Size of the smashable machine code sequence.
  */
-size_t sizeof_smashable_movq();
-size_t sizeof_smashable_cmpq();
-size_t sizeof_smashable_call();
-size_t sizeof_smashable_jmp();
-size_t sizeof_smashable_jcc();
+size_t smashableMovqLen();
+size_t smashableCmpqLen();
+size_t smashableCallLen();
+size_t smashableJmpLen();
+size_t smashableJccLen();
 
 /*
  * Emit a smashable instruction and return the instruction's address.
  *
  * For jcc_and_jmp, return a pair of (jcc_addr, jmp_addr).
  */
-TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d);
-TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
-TCA emit_smashable_call(CodeBlock& cb, TCA target);
-TCA emit_smashable_jmp(CodeBlock& cb, TCA target);
-TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc);
+TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
+TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
+TCA emitSmashableCall(CodeBlock& cb, TCA target);
+TCA emitSmashableJmp(CodeBlock& cb, TCA target);
+TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc);
 
 std::pair<TCA,TCA>
-emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc);
+emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc);
 
 /*
  * Logically smash the smashable operand of an instruction.
@@ -83,12 +83,12 @@ emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc);
  * they still behave appropriately (e.g., a fallthrough jmp can be smashed to a
  * nop sequence).
  *
- * The `smash_jcc' routine leaves the condition unchanged if `cc' is CC_None.
+ * The `smashJcc' routine leaves the condition unchanged if `cc' is CC_None.
  */
-void smash_movq(TCA inst, uint64_t imm);
-void smash_call(TCA inst, TCA target);
-void smash_jmp(TCA inst, TCA target);
-void smash_jcc(TCA inst, TCA target, ConditionCode cc = CC_None);
+void smashMovq(TCA inst, uint64_t imm);
+void smashCall(TCA inst, TCA target);
+void smashJmp(TCA inst, TCA target);
+void smashJcc(TCA inst, TCA target, ConditionCode cc = CC_None);
 
 /*
  * Extract instruction operands from assembly.
@@ -97,16 +97,16 @@ void smash_jcc(TCA inst, TCA target, ConditionCode cc = CC_None);
  * _target() routines will return nullptr, and the remaining routines will
  * produce unspecified behavior.
  */
-uint64_t smashable_movq_imm(TCA inst);
-TCA smashable_call_target(TCA inst);
-TCA smashable_jmp_target(TCA inst);
-TCA smashable_jcc_target(TCA inst);
-ConditionCode smashable_jcc_cond(TCA inst);
+uint64_t smashableMovqImm(TCA inst);
+TCA smashableCallTarget(TCA inst);
+TCA smashableJmpTarget(TCA inst);
+TCA smashableJccTarget(TCA inst);
+ConditionCode smashableJccCond(TCA inst);
 
 /*
  * Obtain the address of a smashable call from its return IP.
  */
-TCA smashable_call_from_ret(TCA ret);
+TCA smashableCallFromRet(TCA ret);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -56,12 +56,12 @@ void IncomingBranch::relocate(RelocationInfo& rel) {
 void IncomingBranch::patch(TCA dest) {
   switch (type()) {
     case Tag::JMP:
-      smash_jmp(toSmash(), dest);
+      smashJmp(toSmash(), dest);
       mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-2");
       break;
 
     case Tag::JCC:
-      smash_jcc(toSmash(), dest);
+      smashJcc(toSmash(), dest);
       mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-1");
       break;
 
@@ -78,10 +78,10 @@ void IncomingBranch::patch(TCA dest) {
 TCA IncomingBranch::target() const {
   switch (type()) {
     case Tag::JMP:
-      return smashable_jmp_target(toSmash());
+      return smashableJmpTarget(toSmash());
 
     case Tag::JCC:
-      return smashable_jcc_target(toSmash());
+      return smashableJccTarget(toSmash());
 
     case Tag::ADDR:
       return *reinterpret_cast<TCA*>(toSmash());
@@ -251,7 +251,7 @@ void SrcRec::patchIncomingBranches(TCA newStart) {
     // We have a debugger guard, so all jumps to us funnel through
     // this.  Just smash m_dbgBranchGuardSrc.
     TRACE(1, "smashing m_dbgBranchGuardSrc @%p\n", m_dbgBranchGuardSrc);
-    smash_jmp(m_dbgBranchGuardSrc, newStart);
+    smashJmp(m_dbgBranchGuardSrc, newStart);
     return;
   }
 

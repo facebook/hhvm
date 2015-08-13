@@ -37,15 +37,15 @@ namespace HPHP { namespace jit { namespace arm {
  * does, however, entail an indirect jump.
  */
 
-TCA emit_smashable_movq(CodeBlock& cb, uint64_t imm, PhysReg d) {
+TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d) {
   not_implemented();
 }
 
-TCA emit_smashable_cmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
+TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
   not_implemented();
 }
 
-TCA emit_smashable_call(CodeBlock& cb, TCA target) {
+TCA emitSmashableCall(CodeBlock& cb, TCA target) {
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
   vixl::Label target_data;
@@ -64,14 +64,14 @@ TCA emit_smashable_call(CodeBlock& cb, TCA target) {
   a.    dc64 (reinterpret_cast<int64_t>(target));
   a.    bind (&after_data);
 
-  // Keep in sync with smash_ctrl_flow().
+  // Keep in sync with smashCtrlFlow().
   assertx(target_data.target() == start + 12 ||
           target_data.target() == start + 16);
 
   return start;
 }
 
-TCA emit_smashable_jmp(CodeBlock& cb, TCA target) {
+TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
   vixl::MacroAssembler a { cb };
   vixl::Label target_data;
 
@@ -86,36 +86,36 @@ TCA emit_smashable_jmp(CodeBlock& cb, TCA target) {
   a.    bind (&target_data);
   a.    dc64 (reinterpret_cast<int64_t>(target));
 
-  // Keep in sync with smash_ctrl_flow().
+  // Keep in sync with smashCtrlFlow().
   assertx(target_data.target() == start + 8 ||
           target_data.target() == start + 12);
 
   return start;
 }
 
-TCA emit_smashable_jcc(CodeBlock& cb, TCA target, ConditionCode cc) {
+TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc) {
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
 
   auto const start = cb.frontier();
 
   a.    B    (&after_data, InvertCondition(arm::convertCC(cc)));
-  emit_smashable_jmp(cb, target);
+  emitSmashableJmp(cb, target);
   a.    bind (&after_data);
 
   return start;
 }
 
 std::pair<TCA,TCA>
-emit_smashable_jcc_and_jmp(CodeBlock& cb, TCA target, ConditionCode cc) {
-  auto const jcc = emit_smashable_jcc(cb, target, cc);
-  auto const jmp = emit_smashable_jmp(cb, target);
+emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc) {
+  auto const jcc = emitSmashableJcc(cb, target, cc);
+  auto const jmp = emitSmashableJmp(cb, target);
   return std::make_pair(jcc, jmp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void smash_ctrl_flow(TCA inst, TCA target, bool is_jmp) {
+void smashCtrlFlow(TCA inst, TCA target, bool is_jmp) {
   // We wrote two instructions for a jmp, or three for a jcc or call, and then
   // the target was written at the next 8-byte boundary.
   auto data_ptr = inst + (is_jmp ? 8 : 12);
@@ -126,30 +126,30 @@ void smash_ctrl_flow(TCA inst, TCA target, bool is_jmp) {
   *reinterpret_cast<TCA*>(data_ptr) = target;
 }
 
-void smash_movq(TCA inst, uint64_t target) {
+void smashMovq(TCA inst, uint64_t target) {
   not_implemented();
 }
 
-void smash_call(TCA inst, TCA target) {
-  smash_ctrl_flow(inst, target, false);
+void smashCall(TCA inst, TCA target) {
+  smashCtrlFlow(inst, target, false);
 }
 
-void smash_jmp(TCA inst, TCA target) {
-  smash_ctrl_flow(inst, target, true);
+void smashJmp(TCA inst, TCA target) {
+  smashCtrlFlow(inst, target, true);
 }
 
-void smash_jcc(TCA inst, TCA target, ConditionCode cc) {
+void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   assertx(cc == CC_None);
-  smash_ctrl_flow(inst, target, false);
+  smashCtrlFlow(inst, target, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-uint64_t smashable_movq_imm(TCA inst) {
+uint64_t smashableMovqImm(TCA inst) {
   not_implemented();
 }
 
-TCA smashable_call_target(TCA call) {
+TCA smashableCallTarget(TCA call) {
   using namespace vixl;
   Instruction* ldr = Instruction::Cast(call);
   if (ldr->Bits(31, 24) != 0x58) return nullptr;
@@ -165,7 +165,7 @@ TCA smashable_call_target(TCA call) {
   return *reinterpret_cast<TCA*>(dest);
 }
 
-TCA smashable_jmp_target(TCA jmp) {
+TCA smashableJmpTarget(TCA jmp) {
   // This doesn't verify that each of the two or three instructions that make
   // up this sequence matches; just the first one and the indirect jump.
   using namespace vixl;
@@ -183,7 +183,7 @@ TCA smashable_jmp_target(TCA jmp) {
   return *reinterpret_cast<TCA*>(dest);
 }
 
-TCA smashable_jcc_target(TCA jmp) {
+TCA smashableJccTarget(TCA jmp) {
   using namespace vixl;
   Instruction* b = Instruction::Cast(jmp);
   if (b->Bits(31, 24) != 0x54 || b->Bit(4) != 0) return nullptr;
@@ -199,7 +199,7 @@ TCA smashable_jcc_target(TCA jmp) {
   return *reinterpret_cast<TCA*>(dest);
 }
 
-ConditionCode smashable_jcc_cond(TCA inst) {
+ConditionCode smashableJccCond(TCA inst) {
   not_implemented();
 }
 

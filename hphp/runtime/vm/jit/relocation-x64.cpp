@@ -180,7 +180,7 @@ size_t relocateImpl(RelocationInfo& rel,
       }
       if (preserveAlignment && di.size() == kJmpLen &&
           di.isNop() && src + kJmpLen == end) {
-        smash_jmp(dest, src + kJmpLen);
+        smashJmp(dest, src + kJmpLen);
         dest += kJmpLen;
       } else if (di.isNop() && !preserveAlignment) {
         internalRefsNeedUpdating = true;
@@ -319,7 +319,7 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
         di.size() == kJmpLen &&
         rel.adjustedAddressAfter(srcEnd)) {
 
-      smash_jmp(start - di.size(), rel.adjustedAddressAfter(end));
+      smashJmp(start - di.size(), rel.adjustedAddressAfter(end));
     }
   }
 }

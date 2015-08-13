@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -63,7 +63,6 @@ struct Vgen {
     , jmps(env.jmps)
     , jccs(env.jccs)
     , catches(env.catches)
-    , stubs(env.stubs)
   {}
 
   static void patch(Venv& env);
@@ -76,16 +75,8 @@ struct Vgen {
                        vinst_names[Vinstr(i).op], size_t(current));
   }
 
-  // service requests
-  void emit(const bindcall& i);
-  void emit(const bindjmp& i);
-  void emit(const bindjcc& i);
-  void emit(const bindjcc1st& i);
-  void emit(const bindaddr& i);
-  void emit(const fallback& i);
-  void emit(const fallbackcc& i);
-
   // intrinsics
+  void emit(const bindcall& i);
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& i) { a->int3(); }
@@ -196,7 +187,6 @@ struct Vgen {
   void emit(psllq i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(const push& i) { a->push(i.s); }
-  void emit(const retransopt& i);
   void emit(const roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(const ret& i) { a->ret(); }
   void emit(const sarq& i) { unary(i); a->sarq(i.d); }
@@ -268,7 +258,6 @@ private:
   jit::vector<Venv::LabelPatch>& jmps;
   jit::vector<Venv::LabelPatch>& jccs;
   jit::vector<Venv::LabelPatch>& catches;
-  jit::vector<Venv::SvcReqPatch>& stubs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,51 +320,6 @@ void Vgen::emit(const bindcall& i) {
   emitSmashableCall(a->code(), i.stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
-
-void Vgen::emit(const bindjmp& i) {
-  auto const jmp = emitSmashableJmp(a->code(), a->frontier());
-  stubs.push_back({jmp, nullptr, i});
-  mcg->setJmpTransID(jmp);
-}
-
-void Vgen::emit(const bindjcc& i) {
-  auto const jcc = emitSmashableJcc(a->code(), a->frontier(), i.cc);
-  stubs.push_back({nullptr, jcc, i});
-  mcg->setJmpTransID(jcc);
-}
-
-void Vgen::emit(const bindjcc1st& i) {
-  auto const jcc_jmp = emitSmashableJccAndJmp(a->code(), a->frontier(), i.cc);
-
-  stubs.push_back({jcc_jmp.second, jcc_jmp.first, i});
-
-  mcg->setJmpTransID(jcc_jmp.first);
-  mcg->setJmpTransID(jcc_jmp.second);
-}
-
-void Vgen::emit(const bindaddr& i) {
-  stubs.push_back({nullptr, nullptr, i});
-  mcg->setJmpTransID(TCA(i.addr));
-  mcg->cgFixups().m_codePointers.insert(i.addr);
-}
-
-void Vgen::emit(const fallback& i) {
-  auto const jmp = emitSmashableJmp(a->code(), a->frontier());
-  stubs.push_back({jmp, nullptr, i});
-  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jmp, CC_None);
-}
-
-void Vgen::emit(const fallbackcc& i) {
-  auto const jcc = emitSmashableJcc(a->code(), a->frontier(), i.cc);
-  stubs.push_back({nullptr, jcc, i});
-  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jcc, i.cc);
-}
-
-void Vgen::emit(const retransopt& i) {
-  svcreq::emit_retranslate_opt_stub(a->code(), i.spOff, i.target, i.transID);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const copy& i) {
   if (i.s == i.d) return;

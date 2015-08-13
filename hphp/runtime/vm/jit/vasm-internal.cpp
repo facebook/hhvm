@@ -20,6 +20,8 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -148,6 +150,59 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
   assertx(catch_target);
 
   mcg->registerCatchBlock(p.instr, catch_target);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool emit(Venv& env, const bindjmp& i) {
+  auto const jmp = emitSmashableJmp(*env.cb, env.cb->frontier());
+  env.stubs.push_back({jmp, nullptr, i});
+  mcg->setJmpTransID(jmp);
+  return true;
+}
+
+bool emit(Venv& env, const bindjcc& i) {
+  auto const jcc = emitSmashableJcc(*env.cb, env.cb->frontier(), i.cc);
+  env.stubs.push_back({nullptr, jcc, i});
+  mcg->setJmpTransID(jcc);
+  return true;
+}
+
+bool emit(Venv& env, const bindjcc1st& i) {
+  auto const jcc_jmp =
+    emitSmashableJccAndJmp(*env.cb, env.cb->frontier(), i.cc);
+
+  env.stubs.push_back({jcc_jmp.second, jcc_jmp.first, i});
+
+  mcg->setJmpTransID(jcc_jmp.first);
+  mcg->setJmpTransID(jcc_jmp.second);
+  return true;
+}
+
+bool emit(Venv& env, const bindaddr& i) {
+  env.stubs.push_back({nullptr, nullptr, i});
+  mcg->setJmpTransID(TCA(i.addr));
+  mcg->cgFixups().m_codePointers.insert(i.addr);
+  return true;
+}
+
+bool emit(Venv& env, const fallback& i) {
+  auto const jmp = emitSmashableJmp(*env.cb, env.cb->frontier());
+  env.stubs.push_back({jmp, nullptr, i});
+  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jmp, CC_None);
+  return true;
+}
+
+bool emit(Venv& env, const fallbackcc& i) {
+  auto const jcc = emitSmashableJcc(*env.cb, env.cb->frontier(), i.cc);
+  env.stubs.push_back({nullptr, jcc, i});
+  mcg->tx().getSrcRec(i.target)->registerFallbackJump(jcc, i.cc);
+  return true;
+}
+
+bool emit(Venv& env, const retransopt& i) {
+  svcreq::emit_retranslate_opt_stub(*env.cb, i.spOff, i.target, i.transID);
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

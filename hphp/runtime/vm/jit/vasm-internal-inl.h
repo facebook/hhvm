@@ -97,6 +97,20 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p);
  */
 void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p);
 
+/*
+ * Arch-independent emitters.
+ *
+ * Return true if the instruction was supported.
+ */
+template<class Inst> bool emit(Venv& env, const Inst&) { return false; }
+bool emit(Venv& env, const bindjmp& i);
+bool emit(Venv& env, const bindjcc& i);
+bool emit(Venv& env, const bindjcc1st& i);
+bool emit(Venv& env, const bindaddr& i);
+bool emit(Venv& env, const fallback& i);
+bool emit(Venv& env, const fallbackcc& i);
+bool emit(Venv& env, const retransopt& i);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -105,13 +119,15 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p);
 
 template<class Vemit>
 void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
+  using namespace vasm_detail;
+
   Venv env { unit, text };
   env.addrs.resize(unit.blocks.size());
   env.points.resize(unit.next_point);
 
   auto labels = layoutBlocks(unit);
 
-  vasm_detail::IRMetadataUpdater irmu(env, asm_info);
+  IRMetadataUpdater irmu(env, asm_info);
 
   auto const area_start = [&] (Vlabel b) {
     auto area = unit.blocks[b].area;
@@ -140,14 +156,17 @@ void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
 
     // We'll replace exception edges to empty catch blocks with the catch
     // helper unique stub.
-    if (vasm_detail::is_empty_catch(block)) continue;
+    if (is_empty_catch(block)) continue;
 
     for (auto& inst : block.code) {
       irmu.register_inst(inst);
 
       switch (inst.op) {
-#define O(name, imms, uses, defs) \
-        case Vinstr::name: Vemit(env).emit(inst.name##_); break;
+#define O(name, imms, uses, defs)               \
+        case Vinstr::name:                      \
+          if (emit(env, inst.name##_)) break;   \
+          Vemit(env).emit(inst.name##_);        \
+          break;
         VASM_OPCODES
 #undef O
       }
@@ -157,18 +176,15 @@ void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
   }
 
   // Emit service request stubs and register patch points.
-  for (auto& p : env.stubs) vasm_detail::emit_svcreq_stub(env, p);
+  for (auto& p : env.stubs) emit_svcreq_stub(env, p);
 
   // Patch up jump targets and friends.
   Vemit::patch(env);
 
   // Register catch blocks.
-  for (auto& p : env.catches) {
-    vasm_detail::register_catch_block(env, p);
-  }
-  if (unit.padding) {
-    Vemit::pad(text.main().code);
-  }
+  for (auto& p : env.catches) register_catch_block(env, p);
+
+  if (unit.padding) Vemit::pad(text.main().code);
 
   irmu.finish(labels);
 }

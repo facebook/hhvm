@@ -541,7 +541,7 @@ void emitCasts(const PhpFunc& func, std::ostream& out, const char* ind) {
  */
 void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
                         std::ostream& out) {
-  out << "NEVER_INLINE [[gnu::cold]]\n";
+  out << "[[gnu::cold]] NEVER_INLINE\n";
   out << "void " << prefix << func.getUniqueName()
       << "(TypedValue* rv, ActRec* ar, int32_t count";
   if (func.usesThis()) {

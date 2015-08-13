@@ -751,7 +751,7 @@ NEVER_INLINE void copyHashFuncs() {
 # define AT_END_OF_TEXT
 #endif
 
-NEVER_INLINE AT_END_OF_TEXT [[gnu::optimize("2")]]
+[[gnu::optimize("2")]] NEVER_INLINE AT_END_OF_TEXT
 static void hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {

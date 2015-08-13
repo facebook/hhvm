@@ -6777,7 +6777,9 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
     string_md5(code.data(), code.size()).c_str()
   );
   Unit* unit = vm->compileEvalString(prefixedCode.get(), evalFilename.c_str());
-
+  if (!RuntimeOption::EvalJitEvaledCode) {
+    unit->setInterpretOnly();
+  }
   const StringData* msg;
   int line = 0;
 

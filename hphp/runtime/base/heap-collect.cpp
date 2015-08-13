@@ -20,8 +20,6 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
-#include "hphp/scan-methods/all-scan-decl.h"
-#include "hphp/scan-methods/all-scan.h"
 
 #include <vector>
 #include <unordered_map>

@@ -530,7 +530,7 @@ public:
   F(uint32_t, JitPGOMinBlockCountPercent, 0)                            \
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
-  F(bool,     JitLoops,                loopsDefault())                  \
+  F(bool,     JitLoops,                true)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRConstrictGuards,         hhirConstrictGuardsDefault())    \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \

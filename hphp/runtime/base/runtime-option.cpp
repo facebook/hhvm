@@ -415,15 +415,6 @@ static inline std::string pgoRegionSelectorDefault() {
 #endif
 }
 
-static inline bool loopsDefault() {
-#ifdef HHVM_JIT_LOOPS_BY_DEFAULT
-  return true;
-#else
-  return (RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
-          RuntimeOption::EvalJitPGORegionSelector == "hotcfg");
-#endif
-}
-
 static inline bool hhirConstrictGuardsDefault() {
 #ifdef HHVM_CONSTRICT_GUARDS_BY_DEFAULT
   return true;

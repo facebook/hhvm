@@ -150,7 +150,11 @@ null cmp closure clo1:
 F       T       T       T       F       T       F       F       
 null cmp closure clo2:
 F       T       T       T       F       T       F       F       
-null cmp resource:
+null cmp resource f1:
+F       T       T       T       F       T       F       F       
+null cmp resource f2:
+F       T       T       T       F       T       F       F       
+null cmp resource f3:
 F       T       T       T       F       T       F       F       
 false cmp null:
 F       T       F       T       T       F       T       F       
@@ -302,7 +306,11 @@ false cmp closure clo1:
 F       T       T       T       F       T       F       F       
 false cmp closure clo2:
 F       T       T       T       F       T       F       F       
-false cmp resource:
+false cmp resource f1:
+F       T       T       T       F       T       F       F       
+false cmp resource f2:
+F       T       T       T       F       T       F       F       
+false cmp resource f3:
 F       T       T       T       F       T       F       F       
 true cmp null:
 F       T       F       F       F       T       T       T       
@@ -454,7 +462,11 @@ true cmp closure clo1:
 F       T       F       T       T       F       T       F       
 true cmp closure clo2:
 F       T       F       T       T       F       T       F       
-true cmp resource:
+true cmp resource f1:
+F       T       F       T       T       F       T       F       
+true cmp resource f2:
+F       T       F       T       T       F       T       F       
+true cmp resource f3:
 F       T       F       T       T       F       T       F       
 int 0 cmp null:
 F       T       F       T       T       F       T       F       
@@ -606,7 +618,11 @@ int 0 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 int 0 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-int 0 cmp resource:
+int 0 cmp resource f1:
+F       T       T       T       F       T       F       F       
+int 0 cmp resource f2:
+F       T       T       T       F       T       F       F       
+int 0 cmp resource f3:
 F       T       T       T       F       T       F       F       
 int 99 cmp null:
 F       T       F       F       F       T       T       T       
@@ -758,7 +774,11 @@ int 99 cmp closure clo1:
 F       T       F       F       F       T       T       T       
 int 99 cmp closure clo2:
 F       T       F       F       F       T       T       T       
-int 99 cmp resource:
+int 99 cmp resource f1:
+F       T       F       F       F       T       T       T       
+int 99 cmp resource f2:
+F       T       F       F       F       T       T       T       
+int 99 cmp resource f3:
 F       T       F       F       F       T       T       T       
 int -1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -910,7 +930,11 @@ int -1 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 int -1 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-int -1 cmp resource:
+int -1 cmp resource f1:
+F       T       T       T       F       T       F       F       
+int -1 cmp resource f2:
+F       T       T       T       F       T       F       F       
+int -1 cmp resource f3:
 F       T       T       T       F       T       F       F       
 float 0 cmp null:
 F       T       F       T       T       F       T       F       
@@ -1062,7 +1086,11 @@ float 0 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 float 0 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-float 0 cmp resource:
+float 0 cmp resource f1:
+F       T       T       T       F       T       F       F       
+float 0 cmp resource f2:
+F       T       T       T       F       T       F       F       
+float 0 cmp resource f3:
 F       T       T       T       F       T       F       F       
 double 99 cmp null:
 F       T       F       F       F       T       T       T       
@@ -1214,7 +1242,11 @@ double 99 cmp closure clo1:
 F       T       F       F       F       T       T       T       
 double 99 cmp closure clo2:
 F       T       F       F       F       T       T       T       
-double 99 cmp resource:
+double 99 cmp resource f1:
+F       T       F       F       F       T       T       T       
+double 99 cmp resource f2:
+F       T       F       F       F       T       T       T       
+double 99 cmp resource f3:
 F       T       F       F       F       T       T       T       
 float 99 cmp null:
 F       T       F       F       F       T       T       T       
@@ -1366,7 +1398,11 @@ float 99 cmp closure clo1:
 F       T       F       F       F       T       T       T       
 float 99 cmp closure clo2:
 F       T       F       F       F       T       T       T       
-float 99 cmp resource:
+float 99 cmp resource f1:
+F       T       F       F       F       T       T       T       
+float 99 cmp resource f2:
+F       T       F       F       F       T       T       T       
+float 99 cmp resource f3:
 F       T       F       F       F       T       T       T       
 float -1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -1518,7 +1554,11 @@ float -1 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 float -1 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-float -1 cmp resource:
+float -1 cmp resource f1:
+F       T       T       T       F       T       F       F       
+float -1 cmp resource f2:
+F       T       T       T       F       T       F       F       
+float -1 cmp resource f3:
 F       T       T       T       F       T       F       F       
 INF cmp null:
 F       T       F       F       F       T       T       T       
@@ -1670,7 +1710,11 @@ INF cmp closure clo1:
 F       T       F       F       F       T       T       T       
 INF cmp closure clo2:
 F       T       F       F       F       T       T       T       
-INF cmp resource:
+INF cmp resource f1:
+F       T       F       F       F       T       T       T       
+INF cmp resource f2:
+F       T       F       F       F       T       T       T       
+INF cmp resource f3:
 F       T       F       F       F       T       T       T       
 -INF cmp null:
 F       T       F       F       F       T       T       T       
@@ -1822,7 +1866,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 -INF cmp closure clo2:
 F       T       T       T       F       T       F       F       
--INF cmp resource:
+-INF cmp resource f1:
+F       T       T       T       F       T       F       F       
+-INF cmp resource f2:
+F       T       T       T       F       T       F       F       
+-INF cmp resource f3:
 F       T       T       T       F       T       F       F       
 "" cmp null:
 F       T       F       T       T       F       T       F       
@@ -1974,7 +2022,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"" cmp resource:
+"" cmp resource f1:
+F       T       T       T       F       T       F       F       
+"" cmp resource f2:
+F       T       T       T       F       T       F       F       
+"" cmp resource f3:
 F       T       T       T       F       T       F       F       
 "0" cmp null:
 F       T       F       F       F       T       T       T       
@@ -2126,7 +2178,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "0" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"0" cmp resource:
+"0" cmp resource f1:
+F       T       T       T       F       T       F       F       
+"0" cmp resource f2:
+F       T       T       T       F       T       F       F       
+"0" cmp resource f3:
 F       T       T       T       F       T       F       F       
 "99" cmp null:
 F       T       F       F       F       T       T       T       
@@ -2278,7 +2334,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "99" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"99" cmp resource:
+"99" cmp resource f1:
+F       T       F       F       F       T       T       T       
+"99" cmp resource f2:
+F       T       F       F       F       T       T       T       
+"99" cmp resource f3:
 F       T       F       F       F       T       T       T       
 "-1" cmp null:
 F       T       F       F       F       T       T       T       
@@ -2430,7 +2490,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "-1" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"-1" cmp resource:
+"-1" cmp resource f1:
+F       T       T       T       F       T       F       F       
+"-1" cmp resource f2:
+F       T       T       T       F       T       F       F       
+"-1" cmp resource f3:
 F       T       T       T       F       T       F       F       
 "0.0" cmp null:
 F       T       F       F       F       T       T       T       
@@ -2582,7 +2646,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "0.0" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"0.0" cmp resource:
+"0.0" cmp resource f1:
+F       T       T       T       F       T       F       F       
+"0.0" cmp resource f2:
+F       T       T       T       F       T       F       F       
+"0.0" cmp resource f3:
 F       T       T       T       F       T       F       F       
 "99.0" cmp null:
 F       T       F       F       F       T       T       T       
@@ -2734,7 +2802,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "99.0" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"99.0" cmp resource:
+"99.0" cmp resource f1:
+F       T       F       F       F       T       T       T       
+"99.0" cmp resource f2:
+F       T       F       F       F       T       T       T       
+"99.0" cmp resource f3:
 F       T       F       F       F       T       T       T       
 "-1.0" cmp null:
 F       T       F       F       F       T       T       T       
@@ -2886,7 +2958,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "-1.0" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"-1.0" cmp resource:
+"-1.0" cmp resource f1:
+F       T       T       T       F       T       F       F       
+"-1.0" cmp resource f2:
+F       T       T       T       F       T       F       F       
+"-1.0" cmp resource f3:
 F       T       T       T       F       T       F       F       
 "foo" cmp null:
 F       T       F       F       F       T       T       T       
@@ -3038,7 +3114,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "foo" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"foo" cmp resource:
+"foo" cmp resource f1:
+F       T       T       T       F       T       F       F       
+"foo" cmp resource f2:
+F       T       T       T       F       T       F       F       
+"foo" cmp resource f3:
 F       T       T       T       F       T       F       F       
 "BAZ" cmp null:
 F       T       F       F       F       T       T       T       
@@ -3190,7 +3270,11 @@ F       T       Err     Err     F       T       Err     Err
 F       T       T       T       F       T       F       F       
 "BAZ" cmp closure clo2:
 F       T       T       T       F       T       F       F       
-"BAZ" cmp resource:
+"BAZ" cmp resource f1:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp resource f2:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp resource f3:
 F       T       T       T       F       T       F       F       
 array arr1 cmp null:
 F       T       F       T       T       F       T       F       
@@ -3342,7 +3426,11 @@ array arr1 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr1 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr1 cmp resource:
+array arr1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -3494,7 +3582,11 @@ array arr2 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr2 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr2 cmp resource:
+array arr2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr2 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr2 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr3 cmp null:
 F       T       F       F       F       T       T       T       
@@ -3646,7 +3738,11 @@ array arr3 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr3 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr3 cmp resource:
+array arr3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr3 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr4 cmp null:
 F       T       F       F       F       T       T       T       
@@ -3798,7 +3894,11 @@ array arr4 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr4 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr4 cmp resource:
+array arr4 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr4 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr4 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr5 cmp null:
 F       T       F       F       F       T       T       T       
@@ -3950,7 +4050,11 @@ array arr5 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr5 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr5 cmp resource:
+array arr5 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr5 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr5 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr6 cmp null:
 F       T       F       F       F       T       T       T       
@@ -4102,7 +4206,11 @@ array arr6 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr6 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr6 cmp resource:
+array arr6 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr6 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr6 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr7 cmp null:
 F       T       F       F       F       T       T       T       
@@ -4254,7 +4362,11 @@ array arr7 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr7 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr7 cmp resource:
+array arr7 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr7 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr7 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr8 cmp null:
 F       T       F       F       F       T       T       T       
@@ -4406,7 +4518,11 @@ array arr8 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr8 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr8 cmp resource:
+array arr8 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr8 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr8 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr9 cmp null:
 F       T       F       F       F       T       T       T       
@@ -4558,7 +4674,11 @@ array arr9 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr9 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr9 cmp resource:
+array arr9 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr9 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr9 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr10 cmp null:
 F       T       F       F       F       T       T       T       
@@ -4710,7 +4830,11 @@ array arr10 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr10 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr10 cmp resource:
+array arr10 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr10 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr10 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr11 cmp null:
 F       T       F       F       F       T       T       T       
@@ -4862,7 +4986,11 @@ array arr11 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr11 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr11 cmp resource:
+array arr11 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr11 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr11 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr12 cmp null:
 F       T       F       F       F       T       T       T       
@@ -5014,7 +5142,11 @@ array arr12 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr12 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr12 cmp resource:
+array arr12 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr12 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr12 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr13 cmp null:
 F       T       F       F       F       T       T       T       
@@ -5166,7 +5298,11 @@ array arr13 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr13 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr13 cmp resource:
+array arr13 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr13 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr13 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr14 cmp null:
 F       T       F       F       F       T       T       T       
@@ -5318,7 +5454,11 @@ array arr14 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr14 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr14 cmp resource:
+array arr14 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr14 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr14 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr15 cmp null:
 F       T       F       F       F       T       T       T       
@@ -5470,7 +5610,11 @@ array arr15 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr15 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr15 cmp resource:
+array arr15 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr15 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr15 cmp resource f3:
 F       T       F       F       F       T       T       T       
 array arr16 cmp null:
 F       T       F       F       F       T       T       T       
@@ -5622,7 +5766,11 @@ array arr16 cmp closure clo1:
 F       T       T       T       F       T       F       F       
 array arr16 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-array arr16 cmp resource:
+array arr16 cmp resource f1:
+F       T       F       F       F       T       T       T       
+array arr16 cmp resource f2:
+F       T       F       F       F       T       T       T       
+array arr16 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -5774,7 +5922,11 @@ object a1 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a1 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a1 cmp resource:
+object a1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -5926,7 +6078,11 @@ object a2 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a2 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a2 cmp resource:
+object a2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a2 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a2 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a3 cmp null:
 F       T       F       F       F       T       T       T       
@@ -6078,7 +6234,11 @@ object a3 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a3 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a3 cmp resource:
+object a3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a3 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a4 cmp null:
 F       T       F       F       F       T       T       T       
@@ -6230,7 +6390,11 @@ object a4 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a4 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a4 cmp resource:
+object a4 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a4 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a4 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a5 cmp null:
 F       T       F       F       F       T       T       T       
@@ -6382,7 +6546,11 @@ object a5 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a5 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a5 cmp resource:
+object a5 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a5 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a5 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a6 cmp null:
 F       T       F       F       F       T       T       T       
@@ -6534,7 +6702,11 @@ object a6 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a6 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a6 cmp resource:
+object a6 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a6 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a6 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a7 cmp null:
 F       T       F       F       F       T       T       T       
@@ -6686,7 +6858,11 @@ object a7 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a7 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a7 cmp resource:
+object a7 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a7 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a7 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a8 cmp null:
 F       T       F       F       F       T       T       T       
@@ -6838,7 +7014,11 @@ object a8 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a8 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a8 cmp resource:
+object a8 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a8 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a8 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a9 cmp null:
 F       T       F       F       F       T       T       T       
@@ -6990,7 +7170,11 @@ object a9 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a9 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a9 cmp resource:
+object a9 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a9 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a9 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a10 cmp null:
 F       T       F       F       F       T       T       T       
@@ -7142,7 +7326,11 @@ object a10 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a10 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a10 cmp resource:
+object a10 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a10 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a10 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a11 cmp null:
 F       T       F       F       F       T       T       T       
@@ -7294,7 +7482,11 @@ object a11 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a11 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a11 cmp resource:
+object a11 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a11 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a11 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a12 cmp null:
 F       T       F       F       F       T       T       T       
@@ -7446,7 +7638,11 @@ object a12 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a12 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a12 cmp resource:
+object a12 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a12 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a12 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a13 cmp null:
 F       T       F       F       F       T       T       T       
@@ -7598,7 +7794,11 @@ object a13 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a13 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a13 cmp resource:
+object a13 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a13 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a13 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a14 cmp null:
 F       T       F       F       F       T       T       T       
@@ -7750,7 +7950,11 @@ object a14 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a14 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a14 cmp resource:
+object a14 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a14 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a14 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a15 cmp null:
 F       T       F       F       F       T       T       T       
@@ -7902,7 +8106,11 @@ object a15 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a15 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a15 cmp resource:
+object a15 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a15 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a15 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object a16 cmp null:
 F       T       F       F       F       T       T       T       
@@ -8054,7 +8262,11 @@ object a16 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object a16 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object a16 cmp resource:
+object a16 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object a16 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object a16 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object b1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -8206,7 +8418,11 @@ object b1 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object b1 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object b1 cmp resource:
+object b1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object b1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object b1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object c1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -8358,7 +8574,11 @@ object c1 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object c1 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object c1 cmp resource:
+object c1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object c1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object c1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object s1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -8510,7 +8730,11 @@ object s1 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object s1 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object s1 cmp resource:
+object s1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object s1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object s1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object s2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -8662,7 +8886,11 @@ object s2 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object s2 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object s2 cmp resource:
+object s2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object s2 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object s2 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object s3 cmp null:
 F       T       F       F       F       T       T       T       
@@ -8814,7 +9042,11 @@ object s3 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object s3 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object s3 cmp resource:
+object s3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object s3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object s3 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object s4 cmp null:
 F       T       F       F       F       T       T       T       
@@ -8966,7 +9198,11 @@ object s4 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object s4 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object s4 cmp resource:
+object s4 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object s4 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object s4 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object t1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -9118,7 +9354,11 @@ object t1 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object t1 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object t1 cmp resource:
+object t1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object t1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object t1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object t2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -9270,7 +9510,11 @@ object t2 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object t2 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object t2 cmp resource:
+object t2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object t2 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object t2 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object t3 cmp null:
 F       T       F       F       F       T       T       T       
@@ -9422,7 +9666,11 @@ object t3 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object t3 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object t3 cmp resource:
+object t3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object t3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object t3 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object t4 cmp null:
 F       T       F       F       F       T       T       T       
@@ -9574,7 +9822,11 @@ object t4 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object t4 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object t4 cmp resource:
+object t4 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object t4 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object t4 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object t5 cmp null:
 F       T       F       F       F       T       T       T       
@@ -9726,7 +9978,11 @@ object t5 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object t5 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object t5 cmp resource:
+object t5 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object t5 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object t5 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object ao1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -9878,7 +10134,11 @@ object ao1 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object ao1 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object ao1 cmp resource:
+object ao1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object ao1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object ao1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object ao2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -10030,7 +10290,11 @@ object ao2 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object ao2 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object ao2 cmp resource:
+object ao2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object ao2 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object ao2 cmp resource f3:
 F       T       F       F       F       T       T       T       
 object ao3 cmp null:
 F       T       F       F       F       T       T       T       
@@ -10182,7 +10446,11 @@ object ao3 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 object ao3 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-object ao3 cmp resource:
+object ao3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+object ao3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+object ao3 cmp resource f3:
 F       T       F       F       F       T       T       T       
 vector v1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -10334,7 +10602,11 @@ vector v1 cmp closure clo1:
 F       T       Err     Err     F       T       Err     Err     
 vector v1 cmp closure clo2:
 F       T       Err     Err     F       T       Err     Err     
-vector v1 cmp resource:
+vector v1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+vector v1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+vector v1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 vector v2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -10486,7 +10758,11 @@ vector v2 cmp closure clo1:
 F       T       Err     Err     F       T       Err     Err     
 vector v2 cmp closure clo2:
 F       T       Err     Err     F       T       Err     Err     
-vector v2 cmp resource:
+vector v2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+vector v2 cmp resource f2:
+F       T       F       F       F       T       T       T       
+vector v2 cmp resource f3:
 F       T       F       F       F       T       T       T       
 vector v3 cmp null:
 F       T       F       F       F       T       T       T       
@@ -10638,7 +10914,11 @@ vector v3 cmp closure clo1:
 F       T       Err     Err     F       T       Err     Err     
 vector v3 cmp closure clo2:
 F       T       Err     Err     F       T       Err     Err     
-vector v3 cmp resource:
+vector v3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+vector v3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+vector v3 cmp resource f3:
 F       T       F       F       F       T       T       T       
 pair p1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -10790,7 +11070,11 @@ pair p1 cmp closure clo1:
 F       T       Err     Err     F       T       Err     Err     
 pair p1 cmp closure clo2:
 F       T       Err     Err     F       T       Err     Err     
-pair p1 cmp resource:
+pair p1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+pair p1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+pair p1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 pair p2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -10942,7 +11226,11 @@ pair p2 cmp closure clo1:
 F       T       Err     Err     F       T       Err     Err     
 pair p2 cmp closure clo2:
 F       T       Err     Err     F       T       Err     Err     
-pair p2 cmp resource:
+pair p2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+pair p2 cmp resource f2:
+F       T       F       F       F       T       T       T       
+pair p2 cmp resource f3:
 F       T       F       F       F       T       T       T       
 pair p3 cmp null:
 F       T       F       F       F       T       T       T       
@@ -11094,7 +11382,11 @@ pair p3 cmp closure clo1:
 F       T       Err     Err     F       T       Err     Err     
 pair p3 cmp closure clo2:
 F       T       Err     Err     F       T       Err     Err     
-pair p3 cmp resource:
+pair p3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+pair p3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+pair p3 cmp resource f3:
 F       T       F       F       F       T       T       T       
 closure clo1 cmp null:
 F       T       F       F       F       T       T       T       
@@ -11246,7 +11538,11 @@ closure clo1 cmp closure clo1:
 T       F       F       T       T       F       T       F       
 closure clo1 cmp closure clo2:
 F       T       F       F       F       T       F       F       
-closure clo1 cmp resource:
+closure clo1 cmp resource f1:
+F       T       F       F       F       T       T       T       
+closure clo1 cmp resource f2:
+F       T       F       F       F       T       T       T       
+closure clo1 cmp resource f3:
 F       T       F       F       F       T       T       T       
 closure clo2 cmp null:
 F       T       F       F       F       T       T       T       
@@ -11398,157 +11694,477 @@ closure clo2 cmp closure clo1:
 F       T       F       F       F       T       F       F       
 closure clo2 cmp closure clo2:
 T       F       F       T       T       F       T       F       
-closure clo2 cmp resource:
+closure clo2 cmp resource f1:
 F       T       F       F       F       T       T       T       
-resource cmp null:
+closure clo2 cmp resource f2:
 F       T       F       F       F       T       T       T       
-resource cmp false:
+closure clo2 cmp resource f3:
 F       T       F       F       F       T       T       T       
-resource cmp true:
+resource f1 cmp null:
+F       T       F       F       F       T       T       T       
+resource f1 cmp false:
+F       T       F       F       F       T       T       T       
+resource f1 cmp true:
 F       T       F       T       T       F       T       F       
-resource cmp int 0:
+resource f1 cmp int 0:
 F       T       F       F       F       T       T       T       
-resource cmp int 99:
+resource f1 cmp int 99:
 F       T       T       T       F       T       F       F       
-resource cmp int -1:
+resource f1 cmp int -1:
 F       T       F       F       F       T       T       T       
-resource cmp float 0:
+resource f1 cmp float 0:
 F       T       F       F       F       T       T       T       
-resource cmp double 99:
+resource f1 cmp double 99:
 F       T       T       T       F       T       F       F       
-resource cmp float 99:
+resource f1 cmp float 99:
 F       T       T       T       F       T       F       F       
-resource cmp float -1:
+resource f1 cmp float -1:
 F       T       F       F       F       T       T       T       
-resource cmp INF:
+resource f1 cmp INF:
 F       T       T       T       F       T       F       F       
-resource cmp -INF:
+resource f1 cmp -INF:
 F       T       F       F       F       T       T       T       
-resource cmp "":
+resource f1 cmp "":
 F       T       F       F       F       T       T       T       
-resource cmp "0":
+resource f1 cmp "0":
 F       T       F       F       F       T       T       T       
-resource cmp "99":
+resource f1 cmp "99":
 F       T       T       T       F       T       F       F       
-resource cmp "-1":
+resource f1 cmp "-1":
 F       T       F       F       F       T       T       T       
-resource cmp "0.0":
+resource f1 cmp "0.0":
 F       T       F       F       F       T       T       T       
-resource cmp "99.0":
+resource f1 cmp "99.0":
 F       T       T       T       F       T       F       F       
-resource cmp "-1.0":
+resource f1 cmp "-1.0":
 F       T       F       F       F       T       T       T       
-resource cmp "foo":
+resource f1 cmp "foo":
 F       T       F       F       F       T       T       T       
-resource cmp "BAZ":
+resource f1 cmp "BAZ":
 F       T       F       F       F       T       T       T       
-resource cmp array arr1:
+resource f1 cmp array arr1:
 F       T       T       T       F       T       F       F       
-resource cmp array arr2:
+resource f1 cmp array arr2:
 F       T       T       T       F       T       F       F       
-resource cmp array arr3:
+resource f1 cmp array arr3:
 F       T       T       T       F       T       F       F       
-resource cmp array arr4:
+resource f1 cmp array arr4:
 F       T       T       T       F       T       F       F       
-resource cmp array arr5:
+resource f1 cmp array arr5:
 F       T       T       T       F       T       F       F       
-resource cmp array arr6:
+resource f1 cmp array arr6:
 F       T       T       T       F       T       F       F       
-resource cmp array arr7:
+resource f1 cmp array arr7:
 F       T       T       T       F       T       F       F       
-resource cmp array arr8:
+resource f1 cmp array arr8:
 F       T       T       T       F       T       F       F       
-resource cmp array arr9:
+resource f1 cmp array arr9:
 F       T       T       T       F       T       F       F       
-resource cmp array arr10:
+resource f1 cmp array arr10:
 F       T       T       T       F       T       F       F       
-resource cmp array arr11:
+resource f1 cmp array arr11:
 F       T       T       T       F       T       F       F       
-resource cmp array arr12:
+resource f1 cmp array arr12:
 F       T       T       T       F       T       F       F       
-resource cmp array arr13:
+resource f1 cmp array arr13:
 F       T       T       T       F       T       F       F       
-resource cmp array arr14:
+resource f1 cmp array arr14:
 F       T       T       T       F       T       F       F       
-resource cmp array arr15:
+resource f1 cmp array arr15:
 F       T       T       T       F       T       F       F       
-resource cmp array arr16:
+resource f1 cmp array arr16:
 F       T       T       T       F       T       F       F       
-resource cmp object a1:
+resource f1 cmp object a1:
 F       T       T       T       F       T       F       F       
-resource cmp object a2:
+resource f1 cmp object a2:
 F       T       T       T       F       T       F       F       
-resource cmp object a3:
+resource f1 cmp object a3:
 F       T       T       T       F       T       F       F       
-resource cmp object a4:
+resource f1 cmp object a4:
 F       T       T       T       F       T       F       F       
-resource cmp object a5:
+resource f1 cmp object a5:
 F       T       T       T       F       T       F       F       
-resource cmp object a6:
+resource f1 cmp object a6:
 F       T       T       T       F       T       F       F       
-resource cmp object a7:
+resource f1 cmp object a7:
 F       T       T       T       F       T       F       F       
-resource cmp object a8:
+resource f1 cmp object a8:
 F       T       T       T       F       T       F       F       
-resource cmp object a9:
+resource f1 cmp object a9:
 F       T       T       T       F       T       F       F       
-resource cmp object a10:
+resource f1 cmp object a10:
 F       T       T       T       F       T       F       F       
-resource cmp object a11:
+resource f1 cmp object a11:
 F       T       T       T       F       T       F       F       
-resource cmp object a12:
+resource f1 cmp object a12:
 F       T       T       T       F       T       F       F       
-resource cmp object a13:
+resource f1 cmp object a13:
 F       T       T       T       F       T       F       F       
-resource cmp object a14:
+resource f1 cmp object a14:
 F       T       T       T       F       T       F       F       
-resource cmp object a15:
+resource f1 cmp object a15:
 F       T       T       T       F       T       F       F       
-resource cmp object a16:
+resource f1 cmp object a16:
 F       T       T       T       F       T       F       F       
-resource cmp object b1:
+resource f1 cmp object b1:
 F       T       T       T       F       T       F       F       
-resource cmp object c1:
+resource f1 cmp object c1:
 F       T       T       T       F       T       F       F       
-resource cmp object s1:
+resource f1 cmp object s1:
 F       T       T       T       F       T       F       F       
-resource cmp object s2:
+resource f1 cmp object s2:
 F       T       T       T       F       T       F       F       
-resource cmp object s3:
+resource f1 cmp object s3:
 F       T       T       T       F       T       F       F       
-resource cmp object s4:
+resource f1 cmp object s4:
 F       T       T       T       F       T       F       F       
-resource cmp object t1:
+resource f1 cmp object t1:
 F       T       T       T       F       T       F       F       
-resource cmp object t2:
+resource f1 cmp object t2:
 F       T       T       T       F       T       F       F       
-resource cmp object t3:
+resource f1 cmp object t3:
 F       T       T       T       F       T       F       F       
-resource cmp object t4:
+resource f1 cmp object t4:
 F       T       T       T       F       T       F       F       
-resource cmp object t5:
+resource f1 cmp object t5:
 F       T       T       T       F       T       F       F       
-resource cmp object ao1:
+resource f1 cmp object ao1:
 F       T       T       T       F       T       F       F       
-resource cmp object ao2:
+resource f1 cmp object ao2:
 F       T       T       T       F       T       F       F       
-resource cmp object ao3:
+resource f1 cmp object ao3:
 F       T       T       T       F       T       F       F       
-resource cmp vector v1:
+resource f1 cmp vector v1:
 F       T       T       T       F       T       F       F       
-resource cmp vector v2:
+resource f1 cmp vector v2:
 F       T       T       T       F       T       F       F       
-resource cmp vector v3:
+resource f1 cmp vector v3:
 F       T       T       T       F       T       F       F       
-resource cmp pair p1:
+resource f1 cmp pair p1:
 F       T       T       T       F       T       F       F       
-resource cmp pair p2:
+resource f1 cmp pair p2:
 F       T       T       T       F       T       F       F       
-resource cmp pair p3:
+resource f1 cmp pair p3:
 F       T       T       T       F       T       F       F       
-resource cmp closure clo1:
+resource f1 cmp closure clo1:
 F       T       T       T       F       T       F       F       
-resource cmp closure clo2:
+resource f1 cmp closure clo2:
 F       T       T       T       F       T       F       F       
-resource cmp resource:
+resource f1 cmp resource f1:
+T       F       F       T       T       F       T       F       
+resource f1 cmp resource f2:
+F       T       T       T       F       T       F       F       
+resource f1 cmp resource f3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp null:
+F       T       F       F       F       T       T       T       
+resource f2 cmp false:
+F       T       F       F       F       T       T       T       
+resource f2 cmp true:
+F       T       F       T       T       F       T       F       
+resource f2 cmp int 0:
+F       T       F       F       F       T       T       T       
+resource f2 cmp int 99:
+F       T       T       T       F       T       F       F       
+resource f2 cmp int -1:
+F       T       F       F       F       T       T       T       
+resource f2 cmp float 0:
+F       T       F       F       F       T       T       T       
+resource f2 cmp double 99:
+F       T       T       T       F       T       F       F       
+resource f2 cmp float 99:
+F       T       T       T       F       T       F       F       
+resource f2 cmp float -1:
+F       T       F       F       F       T       T       T       
+resource f2 cmp INF:
+F       T       T       T       F       T       F       F       
+resource f2 cmp -INF:
+F       T       F       F       F       T       T       T       
+resource f2 cmp "":
+F       T       F       F       F       T       T       T       
+resource f2 cmp "0":
+F       T       F       F       F       T       T       T       
+resource f2 cmp "99":
+F       T       T       T       F       T       F       F       
+resource f2 cmp "-1":
+F       T       F       F       F       T       T       T       
+resource f2 cmp "0.0":
+F       T       F       F       F       T       T       T       
+resource f2 cmp "99.0":
+F       T       T       T       F       T       F       F       
+resource f2 cmp "-1.0":
+F       T       F       F       F       T       T       T       
+resource f2 cmp "foo":
+F       T       F       F       F       T       T       T       
+resource f2 cmp "BAZ":
+F       T       F       F       F       T       T       T       
+resource f2 cmp array arr1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr4:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr5:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr6:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr7:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr8:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr9:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr10:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr11:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr12:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr13:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr14:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr15:
+F       T       T       T       F       T       F       F       
+resource f2 cmp array arr16:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a4:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a5:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a6:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a7:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a8:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a9:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a10:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a11:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a12:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a13:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a14:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a15:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object a16:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object b1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object c1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object s1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object s2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object s3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object s4:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object t1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object t2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object t3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object t4:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object t5:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object ao1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object ao2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp object ao3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp vector v1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp vector v2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp vector v3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp pair p1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp pair p2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp pair p3:
+F       T       T       T       F       T       F       F       
+resource f2 cmp closure clo1:
+F       T       T       T       F       T       F       F       
+resource f2 cmp closure clo2:
+F       T       T       T       F       T       F       F       
+resource f2 cmp resource f1:
+F       T       F       F       F       T       T       T       
+resource f2 cmp resource f2:
+T       F       F       T       T       F       T       F       
+resource f2 cmp resource f3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp null:
+F       T       F       F       F       T       T       T       
+resource f3 cmp false:
+F       T       F       F       F       T       T       T       
+resource f3 cmp true:
+F       T       F       T       T       F       T       F       
+resource f3 cmp int 0:
+F       T       F       F       F       T       T       T       
+resource f3 cmp int 99:
+F       T       T       T       F       T       F       F       
+resource f3 cmp int -1:
+F       T       F       F       F       T       T       T       
+resource f3 cmp float 0:
+F       T       F       F       F       T       T       T       
+resource f3 cmp double 99:
+F       T       T       T       F       T       F       F       
+resource f3 cmp float 99:
+F       T       T       T       F       T       F       F       
+resource f3 cmp float -1:
+F       T       F       F       F       T       T       T       
+resource f3 cmp INF:
+F       T       T       T       F       T       F       F       
+resource f3 cmp -INF:
+F       T       F       F       F       T       T       T       
+resource f3 cmp "":
+F       T       F       F       F       T       T       T       
+resource f3 cmp "0":
+F       T       F       F       F       T       T       T       
+resource f3 cmp "99":
+F       T       T       T       F       T       F       F       
+resource f3 cmp "-1":
+F       T       F       F       F       T       T       T       
+resource f3 cmp "0.0":
+F       T       F       F       F       T       T       T       
+resource f3 cmp "99.0":
+F       T       T       T       F       T       F       F       
+resource f3 cmp "-1.0":
+F       T       F       F       F       T       T       T       
+resource f3 cmp "foo":
+F       T       F       F       F       T       T       T       
+resource f3 cmp "BAZ":
+F       T       F       F       F       T       T       T       
+resource f3 cmp array arr1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr4:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr5:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr6:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr7:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr8:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr9:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr10:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr11:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr12:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr13:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr14:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr15:
+F       T       T       T       F       T       F       F       
+resource f3 cmp array arr16:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a4:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a5:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a6:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a7:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a8:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a9:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a10:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a11:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a12:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a13:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a14:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a15:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object a16:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object b1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object c1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object s1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object s2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object s3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object s4:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object t1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object t2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object t3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object t4:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object t5:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object ao1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object ao2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp object ao3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp vector v1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp vector v2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp vector v3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp pair p1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp pair p2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp pair p3:
+F       T       T       T       F       T       F       F       
+resource f3 cmp closure clo1:
+F       T       T       T       F       T       F       F       
+resource f3 cmp closure clo2:
+F       T       T       T       F       T       F       F       
+resource f3 cmp resource f1:
+F       T       F       F       F       T       T       T       
+resource f3 cmp resource f2:
+F       T       F       F       F       T       T       T       
+resource f3 cmp resource f3:
 T       F       F       T       T       F       T       F       

@@ -208,6 +208,12 @@ bool isQueryOp(Opcode opc) {
   case NSameObj:
   case SameArr:
   case NSameArr:
+  case GtRes:
+  case GteRes:
+  case LtRes:
+  case LteRes:
+  case EqRes:
+  case NeqRes:
   case Same:
   case NSame:
   case InstanceOfBitmask:
@@ -336,6 +342,20 @@ bool isArrQueryOp(Opcode opc) {
   }
 }
 
+bool isResQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtRes:
+  case GteRes:
+  case LtRes:
+  case LteRes:
+  case EqRes:
+  case NeqRes:
+    return true;
+  default:
+    return false;
+  }
+}
+
 Opcode negateQueryOp(Opcode opc) {
   assertx(isQueryOp(opc));
   switch (opc) {
@@ -369,6 +389,12 @@ Opcode negateQueryOp(Opcode opc) {
   case NeqBool:             return EqBool;
   case SameObj:             return NSameObj;
   case NSameObj:            return SameObj;
+  case GtRes:               return LteRes;
+  case GteRes:              return LtRes;
+  case LtRes:               return GteRes;
+  case LteRes:              return GtRes;
+  case EqRes:               return NeqRes;
+  case NeqRes:              return EqRes;
   case Same:                return NSame;
   case NSame:               return Same;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
@@ -447,8 +473,15 @@ Opcode commuteQueryOp(Opcode opc) {
   case SameArr:
   case NSameArr:
     return opc;
-  case Same:  return Same;
-  case NSame: return NSame;
+  case GtRes:  return LtRes;
+  case GteRes: return LteRes;
+  case LtRes:  return GtRes;
+  case LteRes: return GteRes;
+  case EqRes:
+  case NeqRes:
+    return opc;
+  case Same:   return Same;
+  case NSame:  return NSame;
   default:      always_assert(0);
   }
 }
@@ -559,6 +592,27 @@ Opcode queryToArrQueryOp(Opcode opc) {
     case Neq: return NeqArr;
     case Same: return SameArr;
     case NSame: return NSameArr;
+    default: always_assert(0);
+  }
+}
+
+Opcode queryToResQueryOp(Opcode opc) {
+  assertx(isQueryOp(opc) || isSideEffectfulQueryOp(opc));
+  switch (opc) {
+    case GtX:
+    case Gt:  return GtRes;
+    case GteX:
+    case Gte: return GteRes;
+    case LtX:
+    case Lt:  return LtRes;
+    case LteX:
+    case Lte: return LteRes;
+    case Same:
+    case EqX:
+    case Eq:  return EqRes;
+    case NSame:
+    case NeqX:
+    case Neq: return NeqRes;
     default: always_assert(0);
   }
 }

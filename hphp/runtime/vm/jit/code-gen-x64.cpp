@@ -347,6 +347,10 @@ CALL_OPCODE(EqArr);
 CALL_OPCODE(NeqArr);
 CALL_OPCODE(SameArr);
 CALL_OPCODE(NSameArr);
+CALL_OPCODE(GtRes);
+CALL_OPCODE(GteRes);
+CALL_OPCODE(LtRes);
+CALL_OPCODE(LteRes);
 
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
@@ -1241,6 +1245,30 @@ void CodeGenerator::cgNSameObj(IRInstruction* inst) {
   auto sf = v.makeReg();
   assert(inst->src(0)->type() <= TObj);
   assert(inst->src(1)->type() <= TObj);
+  v << cmpq{src0, src1, sf};
+  v << setcc{CC_NE, sf, dst};
+}
+
+void CodeGenerator::cgEqRes(IRInstruction* inst) {
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
+  auto& v = vmain();
+  auto sf = v.makeReg();
+  assert(inst->src(0)->type() <= TRes);
+  assert(inst->src(1)->type() <= TRes);
+  v << cmpq{src0, src1, sf};
+  v << setcc{CC_E, sf, dst};
+}
+
+void CodeGenerator::cgNeqRes(IRInstruction* inst) {
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
+  auto& v = vmain();
+  auto sf = v.makeReg();
+  assert(inst->src(0)->type() <= TRes);
+  assert(inst->src(1)->type() <= TRes);
   v << cmpq{src0, src1, sf};
   v << setcc{CC_NE, sf, dst};
 }

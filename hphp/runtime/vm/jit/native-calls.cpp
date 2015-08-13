@@ -60,6 +60,7 @@ using IFaceSupportFn = bool (*)(const StringData*);
 using StrCmpFn = bool (*)(const StringData*, const StringData*);
 using ObjCmpFn = bool (*)(const ObjectData*, const ObjectData*);
 using ArrCmpFn = bool (*)(const ArrayData*, const ArrayData*);
+using ResCmpFn = bool (*)(const ResourceHdr*, const ResourceHdr*);
 
 }
 
@@ -281,6 +282,14 @@ static CallMap s_callMap {
     {SameArr,            static_cast<ArrCmpFn>(same), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {NSameArr,           static_cast<ArrCmpFn>(nsame), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {GtRes,              static_cast<ResCmpFn>(more), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {GteRes,             static_cast<ResCmpFn>(moreEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LtRes,              static_cast<ResCmpFn>(less), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LteRes,             static_cast<ResCmpFn>(lessEqual), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
 
     /* Static prop helpers */

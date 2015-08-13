@@ -925,6 +925,37 @@ inline bool more(const Resource& v1, const Resource& v2) { return v1.more(v2); }
 inline bool more(const Resource& v1, const Variant& v2) { return less(v2, v1); }
 
 ///////////////////////////////////////////////////////////////////////////////
+// ResourceHdr*
+
+inline bool equal(const ResourceHdr* v1, const ResourceHdr* v2) {
+  return v1 == v2;
+}
+
+inline bool nequal(const ResourceHdr* v1, const ResourceHdr* v2) {
+  return v1 != v2;
+}
+
+inline bool less(const ResourceHdr* v1, const ResourceHdr* v2) {
+  assert(v1);
+  assert(v2);
+  return v1->data()->o_toInt64() < v2->data()->o_toInt64();
+}
+
+inline bool lessEqual(const ResourceHdr* v1, const ResourceHdr* v2) {
+  return less(v1, v2) || equal(v1, v2);
+}
+
+inline bool more(const ResourceHdr* v1, const ResourceHdr* v2) {
+  assert(v1);
+  assert(v2);
+  return v1->data()->o_toInt64() > v2->data()->o_toInt64();
+}
+
+inline bool moreEqual(const ResourceHdr* v1, const ResourceHdr* v2) {
+  return more(v1, v2) || equal(v1, v2);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_COMPARISONS_H_

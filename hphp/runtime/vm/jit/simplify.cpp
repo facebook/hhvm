@@ -889,6 +889,7 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case GtBool:
   case GtObj:
   case GtArr:
+  case GtRes:
   case GtX:
   case Gt:   return a > b;
   case GteInt:
@@ -896,6 +897,7 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case GteBool:
   case GteObj:
   case GteArr:
+  case GteRes:
   case GteX:
   case Gte:  return a >= b;
   case LtInt:
@@ -903,6 +905,7 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case LtBool:
   case LtObj:
   case LtArr:
+  case LtRes:
   case LtX:
   case Lt:   return a < b;
   case LteInt:
@@ -910,6 +913,7 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case LteBool:
   case LteObj:
   case LteArr:
+  case LteRes:
   case LteX:
   case Lte:  return a <= b;
   case Same:
@@ -921,6 +925,7 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case EqBool:
   case EqObj:
   case EqArr:
+  case EqRes:
   case EqX:
   case Eq:   return a == b;
   case NSame:
@@ -932,6 +937,7 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   case NeqBool:
   case NeqObj:
   case NeqArr:
+  case NeqRes:
   case NeqX:
   case Neq:  return a != b;
   default:
@@ -1029,12 +1035,7 @@ SSATmp* cmpImpl(State& env,
     assertx(opName != SameObj && opName != NSameObj);
     assertx(opName != SameArr && opName != NSameArr);
 
-    // If type is a primitive type - simplify to Eq/Neq. Str/Obj/Arr was already
-    // removed above.
-    auto const badTypes = TRes;
-    if (type1.maybe(badTypes) || type2.maybe(badTypes)) {
-      return nullptr;
-    }
+    // Simplify to Eq/Neq. Str/Obj/Arr was already removed above.
     return newInst(opName == Same ? Eq : Neq, src1, src2);
   }
 
@@ -1153,6 +1154,11 @@ SSATmp* cmpImpl(State& env,
   // Lower to array-comparison if possible.
   if (!isArrQueryOp(opName) && type1 <= TArr && type2 <= TArr) {
     return newInst(queryToArrQueryOp(opName), src1, src2);
+  }
+
+  // Lower to resource-comparison if possible.
+  if (!isResQueryOp(opName) && type1 <= TRes && type2 <= TRes) {
+    return newInst(queryToResQueryOp(opName), src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -1350,6 +1356,12 @@ X(EqArr)
 X(NeqArr)
 X(SameArr)
 X(NSameArr)
+X(GtRes)
+X(GteRes)
+X(LtRes)
+X(LteRes)
+X(EqRes)
+X(NeqRes)
 #undef X
 
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
@@ -2365,6 +2377,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqArr)
   X(SameArr)
   X(NSameArr)
+  X(GtRes)
+  X(GteRes)
+  X(LtRes)
+  X(LteRes)
+  X(EqRes)
+  X(NeqRes)
   X(ArrayGet)
   X(OrdStr)
   X(LdLoc)

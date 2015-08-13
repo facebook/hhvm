@@ -160,7 +160,9 @@ function test() {
   $arr15 = array(Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8});
   $arr16 = array(Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8});
 
-  $f = fopen('php://stdout', 'w');
+  $f1 = imagecreate(10, 10);
+  $f2 = imagecreate(10, 10);
+  $f3 = imagecreate(1, 1);
 
   $arr = array('null' => null,
 
@@ -203,7 +205,7 @@ function test() {
 
                'closure clo1' => $clo1, 'closure clo2' => $clo2,
 
-               'resource' => $f
+               'resource f1' => $f1, 'resource f2' => $f2, 'resource f3' => $f3,
               );
 
   echo "same    nsame   lt      lte     eq      neq     gte     gt\n\n";
@@ -213,7 +215,9 @@ function test() {
     }
   }
 
-  fclose($f);
+  imagedestroy($f1);
+  imagedestroy($f2);
+  imagedestroy($f3);
 }
 
 test();

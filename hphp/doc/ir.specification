@@ -641,6 +641,21 @@ To string conversions:
   SameArr and NSameArr may re-enter the VM and therefore may throw
   exceptions. SameArr and NSameArr never re-enter or throw.
 
+| GtRes,                       D(Bool), S(Res) S(Res),                    NF
+
+| GteRes,                      D(Bool), S(Res) S(Res),                    NF
+
+| LtRes,                       D(Bool), S(Res) S(Res),                    NF
+
+| LteRes,                      D(Bool), S(Res) S(Res),                    NF
+
+| EqRes,                       D(Bool), S(Res) S(Res),                    NF
+
+| NeqRes,                      D(Bool), S(Res) S(Res),                    NF
+
+  Perform comparison of resources using PHP semantics. Resource comparisons
+  never re-enter or throw.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait

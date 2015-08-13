@@ -56,8 +56,6 @@ struct BackEnd {
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
 
-  virtual UniqueStubs emitUniqueStubs() = 0;
-
   /*
    * Emit a small piece of code to `code' that jumps to
    * uniqueStubs.interpHelper.

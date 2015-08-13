@@ -167,6 +167,17 @@ private:
   Vout m_main;
 };
 
+/*
+ * Convenience wrapper around Vauto.
+ */
+template<class GenFunc>
+TCA vwrap(CodeBlock& cb, GenFunc gen) {
+  auto const start = cb.frontier();
+  Vauto vauto { cb };
+  gen(vauto.main());
+  return start;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

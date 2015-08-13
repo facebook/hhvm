@@ -2082,7 +2082,7 @@ void MCGenerator::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code).
                             hot(m_tx.useAHot()));
-  m_tx.uniqueStubs = backEnd().emitUniqueStubs();
+  m_tx.uniqueStubs.emitAll();
   m_fixups.process(nullptr); // in case we generated literals
 }
 

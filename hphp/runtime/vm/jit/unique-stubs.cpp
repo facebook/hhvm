@@ -16,17 +16,156 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
+#include "hphp/runtime/base/arch.h"
+
+#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/abi-x64.h" // TODO(#7969111): kill
+#include "hphp/runtime/vm/jit/align.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/unique-stubs-x64.h" // TODO(#6730846): kill
+#include "hphp/runtime/vm/jit/vasm-gen.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/data-block.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include <algorithm>
 
 namespace HPHP { namespace jit {
 
+///////////////////////////////////////////////////////////////////////////////
+
 TRACE_SET_MOD(ustubs);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+///////////////////////////////////////////////////////////////////////////////
+
+void alignJmpTarget(CodeBlock& cb) {
+  align(cb, Alignment::JmpTarget, AlignContext::Dead);
+}
+
+/*
+ * LLVM catch traces expect vmfp to be in rdx.
+ */
+RegSet syncForLLVMCatch(Vout& v) {
+  if (arch() != Arch::X64) return RegSet{};
+
+  v << copy{rvmfp(), reg::rdx};
+  return RegSet{reg::rdx};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<bool async>
+void loadGenFrame(Vout& v, Vreg d) {
+  auto const arOff = BaseGenerator::arOff() -
+    (async ? AsyncGenerator::objectOff() : Generator::objectOff());
+
+  auto const gen = v.makeReg();
+
+  // We have to get the Generator object from the current frame's $this, then
+  // load the embedded frame.
+  v << load{rvmfp()[AROFF(m_this)], gen};
+  v << lea{gen[arOff], d};
+}
+
+void debuggerRetImpl(Vout& v, Vreg ar) {
+  auto const soff = v.makeReg();
+
+  v << loadl{ar[AROFF(m_soff)], soff};
+  v << storel{soff, rvmtl()[unwinderDebuggerReturnOffOff()]};
+  v << store{rvmsp(), rvmtl()[unwinderDebuggerReturnSPOff()]};
+
+  auto const ret = v.makeReg();
+  v << vcall{
+    CppCall::direct(popDebuggerCatch),
+    v.makeVcallArgs({{ar}}),
+    v.makeTuple({ret}),
+    Fixup{},
+    DestType::SSA
+  };
+
+  auto const args = syncForLLVMCatch(v);
+  v << jmpr{ret, args};
+}
+
+TCA emitInterpRet(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  auto const start = vwrap(cb, [] (Vout& v) {
+    v << lea{rvmsp()[-AROFF(m_r)], r_svcreq_arg(0)};
+    v << copy{rvmfp(), r_svcreq_arg(1)};
+  });
+  svcreq::emit_persistent(cb, folly::none, REQ_POST_INTERP_RET);
+  return start;
+}
+
+template<bool async>
+TCA emitInterpGenRet(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  auto const start = vwrap(cb, [] (Vout& v) {
+    loadGenFrame<async>(v, r_svcreq_arg(0));
+    v << copy{rvmfp(), r_svcreq_arg(1)};
+  });
+  svcreq::emit_persistent(cb, folly::none, REQ_POST_INTERP_RET);
+  return start;
+}
+
+TCA emitDebuggerInterpRet(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [] (Vout& v) {
+    auto const ar = v.makeReg();
+    v << lea{rvmsp()[-AROFF(m_r)], ar};
+    debuggerRetImpl(v, ar);
+  });
+}
+
+template<bool async>
+TCA emitDebuggerInterpGenRet(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [] (Vout& v) {
+    auto const ar = v.makeReg();
+    loadGenFrame<async>(v, ar);
+    debuggerRetImpl(v, ar);
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void UniqueStubs::emitAll() {
+  auto& cold = mcg->code.cold();
+
+#define ADD(name, stub) name = add(#name, (stub))
+  ADD(retHelper,                  emitInterpRet(cold));
+  ADD(retInlHelper,               emitInterpRet(cold));
+  ADD(genRetHelper,               emitInterpGenRet<false>(cold));
+  ADD(asyncGenRetHelper,          emitInterpGenRet<true>(cold));
+  ADD(debuggerRetHelper,          emitDebuggerInterpRet(cold));
+  ADD(debuggerGenRetHelper,       emitDebuggerInterpGenRet<false>(cold));
+  ADD(debuggerAsyncGenRetHelper,  emitDebuggerInterpGenRet<true>(cold));
+#undef ADD
+
+  // TODO(#6730846): Kill this once all unique stubs are emitted here.
+  if (arch() == Arch::X64) x64::emitUniqueStubs(*this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 TCA UniqueStubs::add(const char* name, TCA start) {
   auto& cb = mcg->code.blockFor(start);
@@ -74,6 +213,6 @@ std::string UniqueStubs::describe(TCA address) {
   return raw();
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}

@@ -100,10 +100,6 @@ struct BackEnd final : jit::BackEnd {
     CALLEE_SAVED_BARRIER();
   }
 
-  UniqueStubs emitUniqueStubs() override {
-    return x64::emitUniqueStubs();
-  }
-
   void emitInterpReq(CodeBlock& mainCode,
                      SrcKey sk,
                      FPInvOffset spOff) override {

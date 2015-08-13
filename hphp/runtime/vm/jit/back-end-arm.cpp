@@ -27,7 +27,6 @@
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
-#include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/unwind-arm.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -125,10 +124,6 @@ struct BackEnd final : jit::BackEnd {
 
     vmRegsUnsafe().fp = (ActRec*)sim.xreg(arm::rVmFp.code());
     vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(arm::rVmSp.code());
-  }
-
-  UniqueStubs emitUniqueStubs() override {
-    return arm::emitUniqueStubs();
   }
 
   void emitInterpReq(CodeBlock& mainCode,

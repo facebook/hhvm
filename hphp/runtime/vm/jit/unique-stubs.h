@@ -51,7 +51,6 @@ struct UniqueStubs {
   TCA genRetHelper;  // version for generators
   TCA asyncGenRetHelper;  // version for async generators
 
-
   /*
    * Returning from a function when the ActRec was called from jitted code but
    * had its m_savedRip smashed by the debugger. These stubs call a helper that
@@ -179,9 +178,19 @@ struct UniqueStubs {
   TCA bindCallStub;
   TCA immutableBindCallStub;
 
+  /////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Emit one of every unique stub.
+   */
+  void emitAll();
+
   /*
    * Utility for logging stubs addresses during startup and registering the gdb
    * symbols. It's often useful to know where they were when debugging.
+   *
+   * TODO(#6730846): Kill this once we have one emitter per unique stub (or
+   * close to it).
    */
   TCA add(const char* name, TCA start);
 
@@ -193,7 +202,7 @@ struct UniqueStubs {
    */
   std::string describe(TCA addr);
 
- private:
+private:
   struct StubRange {
     std::string name;
     TCA start, end;

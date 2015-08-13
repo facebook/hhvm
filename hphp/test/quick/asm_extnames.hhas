@@ -1,0 +1,22 @@
+# test weird characters in names (like those used in closures)
+
+.main {
+  DefCls 0
+
+  FPushClsMethodD 0 "print$foo" "Uh$Foo::Bar;42"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+
+.class Uh$Foo::Bar;42 {
+  .default_ctor;
+  .method [public static] print$foo() {
+    String "hi\n"
+    Print
+    RetC
+  }
+}

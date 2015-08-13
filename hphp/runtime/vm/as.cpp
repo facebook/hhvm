@@ -71,6 +71,10 @@
  *
  *   - type aliases
  *
+ *   - while class/function names can contains ':', '$', and ';',
+ *     .use declarations can't handle those names because of syntax
+ *     conflicts
+ *
  * @author Jordan DeLong <delong.j@fb.com>
  */
 
@@ -177,7 +181,14 @@ struct Input {
     consumePred(is_bareword(), std::back_inserter(word));
     return !word.empty();
   }
-
+  // Skips whitespace, then populates name with valid extname
+  // characters.  Returns true if we read any characters into name.
+  bool readname(std::string& name) {
+    name.clear();
+    skipWhitespace();
+    consumePred(is_extname(), std::back_inserter(name));
+    return !name.empty();
+  }
   // Try to consume a bareword.  Skips whitespace.  If we can't
   // consume the specified word, returns false.
   bool tryConsume(const std::string& what) {
@@ -366,6 +377,15 @@ private:
   struct is_bareword {
     bool operator()(int i) const {
       return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
+    }
+  };
+  // whether a character is a valid part of the extended sorts of
+  // names that HHVM uses for certain generated constructs
+  // (closures, __Memoize implementations, etc)
+  struct is_extname {
+    bool operator()(int i) const {
+      is_bareword is_bw;
+      return is_bw(i) || i == ':' || i == ';' || i == '#';
     }
   };
 
@@ -1839,7 +1859,7 @@ void parse_function(AsmState& as) {
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
   auto typeInfo = parse_type_info(as);
   std::string name;
-  if (!as.in.readword(name)) {
+  if (!as.in.readname(name)) {
     as.error(".function must have a name");
   }
 
@@ -1869,7 +1889,7 @@ void parse_method(AsmState& as) {
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
   auto typeInfo = parse_type_info(as);
   std::string name;
-  if (!as.in.readword(name)) {
+  if (!as.in.readname(name)) {
     as.error(".method requires a method name");
   }
 
@@ -2170,13 +2190,13 @@ void parse_class(AsmState& as) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
   std::string name;
-  if (!as.in.readword(name)) {
+  if (!as.in.readname(name)) {
     as.error(".class must have a name");
   }
 
   std::string parentName;
   if (as.in.tryConsume("extends")) {
-    if (!as.in.readword(parentName)) {
+    if (!as.in.readname(parentName)) {
       as.error("expected parent class name after `extends'");
     }
   }
@@ -2185,7 +2205,7 @@ void parse_class(AsmState& as) {
   if (as.in.tryConsume("implements")) {
     as.in.expectWs('(');
     std::string word;
-    while (as.in.readword(word)) {
+    while (as.in.readname(word)) {
       ifaces.push_back(word);
     }
     as.in.expect(')');

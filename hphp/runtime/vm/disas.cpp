@@ -707,9 +707,6 @@ void print_unit(Output& out, const Unit* unit) {
  *
  * - .line/.srcpos directives
  *
- * - need support for $ and :: in identifiers for traits and
- *   generators to work properly
- *
  * - Static locals.
  */
 

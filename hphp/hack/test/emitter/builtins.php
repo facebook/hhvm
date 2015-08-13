@@ -13,4 +13,15 @@ function test(): void {
   var_dump(idx($x, 4, 10));
   $n = idx($x, 0, 10);
   var_dump($n);
+
+  $x = array(1, null);
+  /* HH_IGNORE_ERROR[2049] */
+  /* HH_IGNORE_ERROR[4107] */
+  var_dump(array_key_exists(0, $x));
+  /* HH_IGNORE_ERROR[2049] */
+  /* HH_IGNORE_ERROR[4107] */
+  var_dump(array_key_exists(1, $x));
+  /* HH_IGNORE_ERROR[2049] */
+  /* HH_IGNORE_ERROR[4107] */
+  var_dump(array_key_exists(2, $x));
 }

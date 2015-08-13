@@ -193,7 +193,7 @@ HostURL::HostURL(const std::string &hosturl, int port) :
       m_hosturl += hosturl.substr(extraPos);
     }
     m_ipv6 = true;
-  } else if (m_scheme == "unix") {
+  } else if (m_scheme == "unix" || m_scheme == "udg") {
     // unix socket
     m_host = hosturl.substr(spos);
     m_hosturl += m_host;

@@ -339,7 +339,9 @@ static req::ptr<Socket> create_new_socket(
 
   if (scheme == "udp" || scheme == "udg") {
     type = SOCK_DGRAM;
-  } else if (scheme == "unix") {
+  }
+
+  if (scheme == "unix" || scheme == "udg") {
     domain = AF_UNIX;
   }
 
@@ -424,7 +426,9 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
 
   if (scheme == "udp" || scheme == "udg") {
     type = SOCK_DGRAM;
-  } else if (scheme == "unix") {
+  }
+
+  if (scheme == "unix" || scheme == "udg") {
     domain = AF_UNIX;
   }
 

@@ -202,17 +202,6 @@ asm_label(a, debuggerReturn);
   uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
 }
 
-void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.cold() };
-
-  moveToAlign(mcg->code.cold());
-  uniqueStubs.stackOverflowHelper = a.frontier();
-  a.    movq   (rVmFp, argNumToRegName[0]);
-  emitCall(a, CppCall::direct(handleStackOverflow), argSet(1));
-
-  uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
-}
-
 void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label doRelease;
   Label release;
@@ -605,7 +594,6 @@ void emitUniqueStubs(UniqueStubs& us) {
     emitResumeInterpHelpers,
     emitThrowSwitchMode,
     emitCatchHelper,
-    emitStackOverflowHelper,
     emitFreeLocalsHelpers,
     emitDecRefHelper,
     emitFuncPrologueRedispatch,

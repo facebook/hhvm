@@ -32,6 +32,7 @@ struct ZendExecutorGlobals final : RequestEventHandler {
       zval_ptr_dtor(&exn);
     }
   }
+  void vscan(IMarker& mark) const override {}
 
   ~ZendExecutorGlobals() {}
 

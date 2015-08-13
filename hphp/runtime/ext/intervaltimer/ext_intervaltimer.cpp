@@ -41,6 +41,10 @@ struct TimerPool final : RequestEventHandler {
     } while (!timers.empty());
   }
 
+  void vscan(IMarker& mark) const override {
+    for (auto timer : timers) timer->scan(mark);
+  }
+
   std::unordered_set<IntervalTimer*> timers;
 };
 

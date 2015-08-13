@@ -34,6 +34,7 @@ struct SimpleCounter final : RequestEventHandler {
 
   void requestInit() override;
   void requestShutdown() override;
+  void vscan(IMarker&) const override {}
 
   static void Count(const std::string &name);
 
@@ -45,11 +46,9 @@ private:
   typedef std::map<std::string, int> CounterMap;
   typedef std::map<std::string, std::vector<std::string> > StacktraceMap;
 
-  class Comparer {
-  public:
+  struct Comparer {
     explicit Comparer(CounterMap &cm) : m_map(cm) { }
     bool operator()(const std::string &s1, const std::string &s2);
-
     CounterMap &m_map;
   };
 

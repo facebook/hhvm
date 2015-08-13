@@ -79,6 +79,10 @@ struct Session {
     Active
   };
 
+  template<class F> void scan(F& mark) const {
+    mark(ps_session_handler);
+  }
+
   std::string save_path;
   bool        reset_save_path{false};
   std::string session_name;
@@ -143,6 +147,11 @@ struct SessionRequestData final : Session {
   }
 
   void requestShutdownImpl();
+
+  template<class F> void scan(F& mark) const {
+    Session::scan(mark);
+    mark(id);
+  }
 
 public:
   String id;
@@ -1995,6 +2004,10 @@ static class SessionExtension final : public Extension {
 
   void requestInit() override {
     s_session->init();
+  }
+
+  void vscan(IMarker& mark) const override {
+    if (s_session) s_session->scan(mark);
   }
 
   /*

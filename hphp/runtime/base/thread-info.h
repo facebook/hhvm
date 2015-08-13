@@ -73,6 +73,11 @@ struct ThreadInfo {
   ThreadInfo();
   ~ThreadInfo();
 
+  template<class F> void scan(F& mark) const {
+    //if (m_profiler) m_profiler->scan(mark);
+    if (m_pendingException) m_pendingException->scan(mark);
+  }
+
   ////////////////////////////////////////////////////////////////////
 
   RequestInjectionData m_reqInjectionData;

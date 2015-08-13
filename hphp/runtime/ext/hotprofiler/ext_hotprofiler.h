@@ -243,6 +243,9 @@ struct Profiler {
     m_frame_free_list = p;
   }
 
+  virtual void vscan(IMarker&) const = 0;
+
+
 public:
   bool m_successful;
 
@@ -321,6 +324,12 @@ struct ProfilerFactory final : RequestEventHandler {
   }
   Profiler *getExternalProfiler() {
     return m_external_profiler;
+  }
+
+  void vscan(IMarker& mark) const override {
+    if (m_profiler) m_profiler->vscan(mark);
+    if (m_external_profiler) m_external_profiler->vscan(mark);
+    mark(m_artificialFrameNames);
   }
 
 private:

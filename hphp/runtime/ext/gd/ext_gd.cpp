@@ -108,7 +108,6 @@ void Image::reset() {
 Image::~Image() { reset(); }
 
 struct ImageMemoryAlloc final : RequestEventHandler {
-public:
   ImageMemoryAlloc() : m_mallocSize(0) {}
 
   void requestInit() override {
@@ -277,6 +276,8 @@ public:
     n = (i < n) ? i : n;
   }
 #endif
+
+  void vscan(IMarker&) const override {}
 
 private:
   size_t m_mallocSize;

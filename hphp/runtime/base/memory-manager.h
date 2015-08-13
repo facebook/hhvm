@@ -882,6 +882,7 @@ struct MemoryManager {
   template <typename T> bool removeRoot(const T* ptr);
   template <typename T> req::ptr<T> removeRoot(RootId token);
   template <typename F> void scanRootMaps(F& m) const;
+  template <typename F> void scanSweepLists(F& m) const;
 
   /*
    * Heap iterator methods.
@@ -892,7 +893,6 @@ struct MemoryManager {
 
   /*
    * Run the experimental collector.
-   * Has no effect other than possibly asserting.
    */
   void collect();
 
@@ -910,9 +910,11 @@ private:
     FreeNode* head = nullptr;
   };
 
+  // head node of the doubly-linked list of Sweepables
   struct SweepableList : Sweepable {
     SweepableList() : Sweepable(Init{}) {}
-    void sweep() {}
+    void sweep() override {}
+    void* owner() override { return nullptr; }
   };
 
   template <typename T>

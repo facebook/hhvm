@@ -590,8 +590,7 @@ ArrayData* move_strong_iterators(ArrayData* dest, ArrayData* src);
 
 //////////////////////////////////////////////////////////////////////
 
-class CufIter {
- public:
+struct CufIter {
   CufIter() : m_func(nullptr), m_ctx(nullptr), m_name(nullptr) {}
   ~CufIter();
   const Func* func() const { return m_func; }
@@ -608,6 +607,13 @@ class CufIter {
   static constexpr uint32_t funcOff() { return offsetof(CufIter, m_func); }
   static constexpr uint32_t ctxOff()  { return offsetof(CufIter, m_ctx); }
   static constexpr uint32_t nameOff() { return offsetof(CufIter, m_name); }
+
+  template<class F> void scan(F& mark) const {
+    if (m_ctx && intptr_t(m_ctx) % 2 == 0) {
+      mark(reinterpret_cast<const ObjectData*>(m_ctx));
+    }
+    mark(m_name);
+  }
  private:
   const Func* m_func;
   void* m_ctx;

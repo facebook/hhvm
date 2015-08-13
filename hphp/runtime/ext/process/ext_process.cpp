@@ -437,6 +437,10 @@ struct SignalHandlers final : RequestEventHandler {
     handlers.reset();
     inited.store(false);
   }
+  void vscan(IMarker& mark) const override {
+    mark(handlers);
+  }
+
   Array handlers;
   int signaled[_NSIG];
   sigset_t oldSet;

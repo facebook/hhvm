@@ -39,6 +39,13 @@ struct RequestWrappers final : RequestEventHandler {
     m_disabled.clear();
     m_wrappers.clear();
   }
+  void vscan(IMarker& mark) const override {
+    for (auto& s : m_disabled) mark(s);
+    for (auto& p : m_wrappers) {
+      mark(p.first);
+      if (p.second) p.second->vscan(mark);
+    }
+  }
 
   std::set<String> m_disabled;
   std::map<String,std::unique_ptr<Wrapper>> m_wrappers;

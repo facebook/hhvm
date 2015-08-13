@@ -117,6 +117,8 @@ static void _php_iconv_show_error(const char *func, php_iconv_err_t &err,
   }
 }
 
+const StaticString s_ISO_8859_1("ISO-8859-1");
+
 struct ICONVGlobals final : RequestEventHandler {
   String input_encoding;
   String output_encoding;
@@ -124,10 +126,16 @@ struct ICONVGlobals final : RequestEventHandler {
 
   ICONVGlobals() {}
 
+  void vscan(IMarker& mark) const override {
+    mark(input_encoding);
+    mark(output_encoding);
+    mark(internal_encoding);
+  }
+
   void requestInit() override {
-    input_encoding = "ISO-8859-1";
-    output_encoding = "ISO-8859-1";
-    internal_encoding = "ISO-8859-1";
+    input_encoding = s_ISO_8859_1;
+    output_encoding = s_ISO_8859_1;
+    internal_encoding = s_ISO_8859_1;
   }
 
   void requestShutdown() override {

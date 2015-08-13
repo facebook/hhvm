@@ -50,6 +50,10 @@ struct ZendExecutionStack final : RequestEventHandler {
   void requestShutdown() override {
     clear();
   }
+  void vscan(IMarker& mark) const override {
+    // TODO t7925750 what's in m_stack?
+    if (m_nullArg) mark(m_nullArg);
+  }
 
 private:
   static ZendExecutionStack & getStack();

@@ -2345,6 +2345,7 @@ struct Collator final : RequestEventHandler {
     }
     assert(m_ucoll);
   }
+
   void requestShutdown() override {
     m_locale.reset();
     m_errcode.clearError(false);
@@ -2352,6 +2353,10 @@ struct Collator final : RequestEventHandler {
       ucol_close(m_ucoll);
       m_ucoll = NULL;
     }
+  }
+
+  void vscan(IMarker& mark) const override {
+    mark(m_locale);
   }
 
 private:

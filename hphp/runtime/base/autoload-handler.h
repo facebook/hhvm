@@ -44,7 +44,10 @@ class AutoloadHandler final : public RequestEventHandler {
       m_handler(handler) {
       m_cufIter = std::move(cufIter);
     }
-
+    template<class F> void scan(F& mark) const {
+      mark(m_handler);
+      if (m_cufIter) m_cufIter->scan(mark);
+    }
     Variant m_handler; // used to respond to f_spl_autoload_functions
     req::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
   };
@@ -141,6 +144,18 @@ private:
 
   static String getSignature(const Variant& handler);
 
+public:
+  void vscan(IMarker& mark) const override {
+    mark(m_map);
+    mark(m_map_root);
+    mark(m_loading);
+    // handlers are only valid after requestInit. need guard?
+    for (auto& bundle : m_handlers) {
+      bundle.scan(mark);
+    }
+  }
+
+private:
   Array m_map;
   String m_map_root;
   bool m_spl_stack_inited;

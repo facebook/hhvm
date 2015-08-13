@@ -473,10 +473,8 @@ StringData* StringData::Make(const APCString* shared) {
 
 NEVER_INLINE
 void StringData::releaseDataSlowPath() {
-  assert(!isFlat());
   assert(isShared());
   assert(checkSane());
-
   sharedPayload()->shared->getHandle()->unreference();
   delist();
   MM().freeSmallSize(this, sizeof(StringData) + sizeof(SharedPayload));

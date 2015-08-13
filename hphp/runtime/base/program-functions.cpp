@@ -700,7 +700,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
       HHVM_FN(var_dump)(HHVM_FN(json_encode)(HHVM_FN(xhprof_disable)()));
     }
   }
-  g_context->onShutdownPostSend();
+  g_context->onShutdownPostSend(); // runs more php
   Eval::Debugger::InterruptPSPEnded(program);
   hphp_context_exit();
   hphp_session_exit();

@@ -86,6 +86,12 @@ struct AsioBlockableChain final {
   Array toArray();
   c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
 
+  template<class F> void scan(F& mark) const {
+    for (auto p = m_firstParent; p; p = p->getNextParent()) {
+      mark(p->getWaitHandle());
+    }
+  }
+
 private:
   AsioBlockable* m_firstParent;
 };

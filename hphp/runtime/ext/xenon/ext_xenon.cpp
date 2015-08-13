@@ -65,13 +65,16 @@ void *s_waitThread(void *arg) {
 namespace {
 struct XenonRequestLocalData final : RequestEventHandler  {
   XenonRequestLocalData();
-  virtual ~XenonRequestLocalData();
+  ~XenonRequestLocalData();
   void log(Xenon::SampleType t);
   Array createResponse();
 
   // implement RequestEventHandler
   void requestInit() override;
   void requestShutdown() override;
+  void vscan(IMarker& mark) const override {
+    mark(m_stackSnapshots);
+  }
 
   // an array of php stacks
   Array m_stackSnapshots;

@@ -227,7 +227,11 @@ public:
   }
 
   void vscan(IMarker& m) const override {
-    s_filter_request_data->vscan(m);
+    if (!s_filter_request_data.isNull()) {
+      // this also is scanned by RequestEventHandler; maybe it's redundant,
+      // or maybe the handler isn't registered yet.
+      s_filter_request_data->vscan(m);
+    }
   }
 } s_filter_extension;
 

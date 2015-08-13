@@ -21,8 +21,8 @@ namespace HPHP {
 
 static IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerNote, s_note);
 
-void get_server_note() {
-  s_note.getCheck();
+ServerNote* get_server_note() {
+  return s_note.getCheck();
 }
 
 void ServerNote::Add(const String& name, const String& value) {

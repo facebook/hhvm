@@ -25,11 +25,14 @@ struct ServerNote  {
   static void Add(const String& name, const String& value);
   static String Get(const String& name);
   static void Reset();
+  template<class F> void scan(F& mark) const {
+    mark(m_notes);
+  }
 private:
   Array m_notes;
 };
 
-void get_server_note();
+ServerNote* get_server_note();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

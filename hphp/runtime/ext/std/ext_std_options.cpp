@@ -84,6 +84,10 @@ struct OptionData final : RequestEventHandler {
     assertCallback.unset();
   }
 
+  void vscan(IMarker& mark) const override {
+    mark(assertCallback);
+  }
+
   int assertActive;
   int assertWarning;
   int assertBail;
@@ -1234,7 +1238,6 @@ void StandardExtension::initOptions() {
 
   loadSystemlib("std_options");
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

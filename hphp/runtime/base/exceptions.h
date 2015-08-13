@@ -32,6 +32,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct String;
+struct IMarker;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -62,6 +63,9 @@ struct ExtendedException : Exception {
   // a silent exception does not have its exception message logged
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }
+
+  // defined in exceptions.cpp to avoid circular include via imarker.h
+  void vscan(IMarker& mark) const override;
 
 protected:
   ExtendedException(const std::string& msg, ArrayData* backTrace)

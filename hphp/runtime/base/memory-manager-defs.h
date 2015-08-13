@@ -59,15 +59,31 @@ struct Header {
     c_AwaitAllWaitHandle awaitall_;
   };
 
-  Resumable* resumable() const {
+  const Resumable* resumable() const {
+    return reinterpret_cast<const Resumable*>(
+      (char*)this + sizeof(ResumableNode) + resumable_.framesize
+    );
+  }
+  Resumable* resumable() {
     return reinterpret_cast<Resumable*>(
       (char*)this + sizeof(ResumableNode) + resumable_.framesize
     );
   }
-  ObjectData* resumableObj() const {
+  const ObjectData* resumableObj() const {
+    DEBUG_ONLY auto const func = resumable()->actRec()->func();
+    assert(func->isAsyncFunction());
+    return reinterpret_cast<const ObjectData*>(resumable() + 1);
+  }
+  ObjectData* resumableObj() {
     DEBUG_ONLY auto const func = resumable()->actRec()->func();
     assert(func->isAsyncFunction());
     return reinterpret_cast<ObjectData*>(resumable() + 1);
+  }
+  const ObjectData* nativeObj() const {
+    return Native::obj(&native_);
+  }
+  ObjectData* nativeObj() {
+    return Native::obj(&native_);
   }
 };
 

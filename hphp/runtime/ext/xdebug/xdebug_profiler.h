@@ -37,6 +37,7 @@ struct FrameData {
   int64_t memory_usage : 63;
   bool is_func_begin : 1; // Whether or not this is an enter event
   // TODO(#3704) need a string field for serialized arguments or return value.
+  template<class F> void scan(F& mark) const {}
 };
 
 // TODO(#3704) Allow user to set maximum buffer size
@@ -119,14 +120,13 @@ struct XDebugProfiler : Profiler {
   }
 
   // Functions called on frame begin/end
-  virtual void beginFrame(const char* symbol);
-  virtual void endFrame(const TypedValue* retVal,
-                        const char* symbol,
-                        bool endMain = false);
-  virtual inline void endAllFrames() {}
+  void beginFrame(const char* symbol) override;
+  void endFrame(const TypedValue* retVal, const char* symbol,
+                bool endMain = false) override;
+  inline void endAllFrames() override {}
 
   // xdebug has no need to write stats to php array
-  virtual inline void writeStats(Array &ret) {}
+  inline void writeStats(Array &ret) override {}
 
   // TODO (#3704) Need some way to get stack time/memory information for when
   //              we print the stack trace
@@ -238,6 +238,18 @@ private:
   // Writes the given function's name in cachegrind format
   void writeCachegrindFuncName(const Func* func, bool isTopPseudoMain);
 
+public:
+  void vscan(IMarker& mark) const override {
+    if (m_frameBuffer) m_frameBuffer->scan(mark);
+    mark(m_profilingFilename);
+    for (auto& data : m_tracingStartFrameData) {
+      data.scan(mark);
+    }
+    mark(m_tracingFilename);
+    if (m_tracingPrevBegin) m_tracingPrevBegin->scan(mark);
+  }
+
+private:
   FrameData* m_frameBuffer = nullptr;
   int64_t m_frameBufferSize = 0;
   int64_t m_nextFrameIdx = 0;

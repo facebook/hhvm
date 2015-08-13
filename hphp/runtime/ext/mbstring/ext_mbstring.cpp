@@ -188,6 +188,9 @@ struct MBGlobals final : RequestEventHandler {
   OnigOptionType regex_default_options;
   OnigSyntaxType *regex_default_syntax;
 
+  void vscan(IMarker& mark) const override {
+  }
+
   MBGlobals() :
     language(mbfl_no_language_uni),
     current_language(mbfl_no_language_uni),

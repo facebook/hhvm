@@ -30,8 +30,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-
-typedef AsioBlockable::Kind Kind;
+using Kind = AsioBlockable::Kind;
 
 template<class T>
 inline T* getContainingObject(const AsioBlockable* blockable) {

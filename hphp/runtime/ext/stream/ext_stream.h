@@ -115,6 +115,11 @@ struct StreamContext final : ResourceData {
   void mergeParams(const Array& params);
   Array getParams() const;
 
+  /*void vscan(IMarker& mark) const override {
+    mark(m_options);
+    mark(m_params);
+  }*/
+
 private:
   static StaticString s_options_key;
   static StaticString s_notification_key;

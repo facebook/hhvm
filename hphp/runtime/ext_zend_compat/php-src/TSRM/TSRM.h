@@ -127,27 +127,27 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 #endif
 
 #include "hphp/util/thread-local.h"
+#include "hphp/runtime/base/imarker.h"
+
 namespace HPHP {
-typedef std::vector<void*> TSRMStorageVector;
+using TSRMStorageVector = std::vector<void*>;
 extern DECLARE_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
 void * ts_init_resource(int id);
+void ts_scan_resources(IMarker&);
 
 static inline
 void* ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
-  void * ret;
   assert(id != 0);
   if (TSRM_UNEXPECTED(vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id))) {
     return ts_init_resource(id);
-  } else {
-    ret = vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
-    if (TSRM_UNEXPECTED(ret == nullptr)) {
-      return ts_init_resource(id);
-    } else {
-      return ret;
-    }
   }
+  void* ret = vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
+  if (TSRM_UNEXPECTED(ret == nullptr)) {
+    return ts_init_resource(id);
+  }
+  return ret;
 }
-} // namespace HPHP
+} // HPHP
 
 static inline void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id) {
   assert(th_id == NULL); // unimplemented

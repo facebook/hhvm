@@ -38,6 +38,7 @@ struct Sweepable: private boost::noncopyable {
    * only non-request-allocated resources.
    */
   virtual void sweep() = 0;
+  virtual void* owner() = 0; // return ptr to object
 
   /*
    * Remove this object from the sweepable list, so it won't have
@@ -89,12 +90,17 @@ private:
  */
 template<class T>
 struct SweepableMember: Sweepable {
-  void sweep() {
+  void sweep() override {
     auto obj = reinterpret_cast<T*>(
       uintptr_t(this) - offsetof(T, m_sweepable)
     );
     obj->sweep();
   };
+  void* owner() override {
+    return reinterpret_cast<T*>(
+      uintptr_t(this) - offsetof(T, m_sweepable)
+    );
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

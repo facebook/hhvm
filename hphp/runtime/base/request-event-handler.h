@@ -33,7 +33,7 @@ struct RequestEventHandler {
 
   virtual void requestInit() = 0;
   virtual void requestShutdown() = 0;
-  virtual void vscan(IMarker&) const {} // TODO #6512343
+  virtual void vscan(IMarker&) const = 0;
   template<class F> void scan(F&) const;
 
   /*

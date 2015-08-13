@@ -98,6 +98,14 @@ void APCLocalArray::Release(ArrayData* ad) {
   MM().freeSmallSize(a, sizeof(APCLocalArray));
 }
 
+void APCLocalArray::reap() {
+  // free stuff without running destructor or decrefing contents
+  req::free(m_localCache);
+  sweep();
+  MM().removeApcArray(this);
+  MM().freeSmallSize(this, sizeof(APCLocalArray));
+}
+
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
 
 bool APCLocalArray::IsVectorData(const ArrayData* ad) {

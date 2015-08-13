@@ -538,6 +538,9 @@ struct TokenizerData final : RequestEventHandler {
   void requestShutdown() override {
     requestInit();
   }
+  void vscan(IMarker& mark) const override {
+    mark(str);
+  }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(TokenizerData, s_tokenizer_data);
 

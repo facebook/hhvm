@@ -234,6 +234,9 @@ protected:
     // object and deallocate its seat as well.
     delete this;
   }
+  void* owner() override {
+    return static_cast<ResourceData*>(this)->hdr();
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

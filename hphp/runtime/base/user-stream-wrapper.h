@@ -46,6 +46,11 @@ struct UserStreamWrapper final : Stream::Wrapper {
   bool chgrp(const String& path, int64_t gid);
   bool chgrp(const String& path, const String& gid);
 
+  void vscan(IMarker& mark) const override {
+    mark(m_name);
+    // m_cls is not in req heap
+  }
+
 private:
   String m_name;
   LowPtr<Class> m_cls;

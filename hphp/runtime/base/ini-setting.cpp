@@ -719,11 +719,11 @@ typedef std::map<std::string, Variant> SettingMap;
 
 // Set by a .ini file at the start
 static SettingMap s_system_settings;
+
 // Changed during the course of the request
 static IMPLEMENT_THREAD_LOCAL(SettingMap, s_saved_defaults);
 
-class IniSettingExtension final : public Extension {
-public:
+struct IniSettingExtension final : Extension {
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
 
   // s_saved_defaults should be clear at the beginning of any request
@@ -735,6 +735,12 @@ public:
     IniSetting::ResetSavedDefaults();
     assert(s_saved_defaults->empty());
   }
+
+  void vscan(IMarker& mark) const override {
+    for (auto& e : s_system_settings) mark(e);
+    for (auto& e : *s_saved_defaults) mark(e);
+  }
+
 } s_ini_extension;
 
 void IniSetting::Bind(

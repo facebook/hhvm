@@ -355,6 +355,31 @@ void flush() {
   }
 }
 
+/* RDS Layout:
+ * +-------------+ <-- tl_base
+ * |  Header     |
+ * +-------------+
+ * |             |
+ * |  Normal     | growing higher
+ * |    region   | vvv
+ * |             |
+ * +-------------+ <-- tl_base + s_normal_frontier
+ * | \ \ \ \ \ \ |
+ * +-------------+ <-- tl_base + s_local_frontier
+ * |             |
+ * |  Local      | ^^^
+ * |    region   | growing lower
+ * |             |
+ * +-------------+ <-- tl_base + s_persistent_base
+ * |             |
+ * | Persistent  | growing higher
+ * |     region  | vvv
+ * |             |
+ * +-------------+ <-- tl_base + s_persistent_frontier
+ * | \ \ \ \ \ \ |
+ * +-------------+ higher addresses
+ */
+
 size_t usedBytes() {
   return s_normal_frontier;
 }
@@ -372,11 +397,11 @@ folly::Range<const char*> normalSection() {
 }
 
 folly::Range<const char*> localSection() {
-  return {(const char*)s_local_frontier, usedLocalBytes()};
+  return {(const char*)tl_base + s_local_frontier, usedLocalBytes()};
 }
 
 folly::Range<const char*> persistentSection() {
-  return {(const char*)s_persistent_base, usedPersistentBytes()};
+  return {(const char*)tl_base + s_persistent_base, usedPersistentBytes()};
 }
 
 Array& s_constants() {

@@ -59,6 +59,15 @@ private:
   std::unordered_map<const void*,Meta> meta_;
 };
 
+struct Counter {
+  size_t count{0};
+  size_t bytes{0};
+  void operator+=(size_t n) {
+    bytes += n;
+    count++;
+  }
+};
+
 struct Marker {
   explicit Marker() {}
   void init();
@@ -69,7 +78,7 @@ struct Marker {
   void operator()(const StringData*);
   void operator()(const ArrayData*);
   void operator()(const ObjectData*);
-  void operator()(const ResourceData* r) { (*this)(r->hdr()); }
+  void operator()(const ResourceData*);
   void operator()(const ResourceHdr*);
   void operator()(const RefData*);
   void operator()(const TypedValue&);
@@ -93,6 +102,9 @@ struct Marker {
   void operator()(const AsioContext& p) { scanner().scan(p, *this); }
   void operator()(const VarEnv& venv) { (*this)(&venv); }
 
+  template<class T> void operator()(const req::ptr<T>& p) {
+    (*this)(p.get());
+  }
   template<class T> void operator()(const req::vector<T>& c) {
     for (auto& e : c) (*this)(e);
   }
@@ -135,6 +147,7 @@ struct Marker {
   void operator()(const Func*) {}
   void operator()(const Class*) {}
   void operator()(const Unit*) {}
+  void operator()(const std::string&) {}
   void operator()(int) {}
 
 private:
@@ -154,9 +167,7 @@ private:
   PtrMap ptrs_;
   std::vector<const Header*> work_;
   folly::Range<const char*> rds_; // full mmap'd rds section.
-  size_t total_;        // bytes allocated in heap
-  size_t marked_;       // bytes marked exactly
-  size_t ambig_marked_; // bytes marked ambiguously
+  Counter total_;        // bytes allocated in heap
 };
 
 // mark the object at p, return true if first time.
@@ -170,6 +181,8 @@ bool Marker::mark(const void* p) {
 
 void Marker::operator()(const ObjectData* p) {
   if (!p) return;
+  auto hdr = reinterpret_cast<const Header*>(p);
+  assert(isObjectKind(hdr->kind()));
   if (p->getAttribute(ObjectData::HasNativeData)) {
     // HNI style native object; mark the NativeNode header, queue the object.
     // [NativeNode][NativeData][ObjectData][props] is one allocation.
@@ -179,10 +192,9 @@ void Marker::operator()(const ObjectData* p) {
     if (mark(h)) {
       enqueue(p);
     }
-  } else if (reinterpret_cast<const Header*>(p)->kind() == HK::ResumableObj) {
-    // Resumable object. we also need to scan the actrec, locals,
-    // and iterators attached to it. It's wrapped by a ResumableNode header,
-    // which is what we need to mark.
+  } else if (hdr->kind() == HK::ResumableObj) {
+    // Resumable object, prefixed by a ResumableNode header, which is what
+    // we need to mark.
     // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
     auto r = Resumable::FromObj(p);
     auto frame = reinterpret_cast<const TypedValue*>(r) -
@@ -190,6 +202,7 @@ void Marker::operator()(const ObjectData* p) {
     auto node = reinterpret_cast<const ResumableNode*>(frame) - 1;
     assert(node->hdr.kind == HK::ResumableFrame);
     if (mark(node)) {
+      // mark the ResumableFrame prefix, but enqueue the ObjectData* to scan
       enqueue(p);
     }
   } else {
@@ -209,6 +222,13 @@ void Marker::operator()(const ResourceHdr* p) {
   if (p && mark(p)) {
     assert(kind(p) == HK::Resource);
     enqueue(p);
+  }
+}
+
+void Marker::operator()(const ResourceData* r) {
+  if (r && mark(r->hdr())) {
+    assert(kind(r->hdr()) == HK::Resource);
+    enqueue(r->hdr());
   }
 }
 
@@ -282,16 +302,23 @@ void Marker::operator()(const TypedValue& tv) {
 
 // mark ambigous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
-void Marker::operator()(const void* start, size_t len) {
-  const uintptr_t M{7}; // word size - 1
+void FOLLY_DISABLE_ADDRESS_SANITIZER
+Marker::operator()(const void* start, size_t len) {
+  constexpr uintptr_t M{7}; // word size - 1
   auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   for (; s < e; s++) {
     auto p = *s;
     auto h = ptrs_.header(p);
-    if (!h) continue;
+    if (!h) {
+      // try p-16 in case it points just past a SmallNode header
+      h = ptrs_.header((void*)(uintptr_t(p)-sizeof(SmallNode)));
+      if (!h) continue;
+    }
     // mark p if it's an interesting kind. since we have metadata for it,
     // it must have a valid header.
+    h->hdr_.cmark = true;
+    if (!mark(h)) continue; // skip if already marked.
     switch (h->kind()) {
       case HK::Apc:
       case HK::Globals:
@@ -302,8 +329,15 @@ void Marker::operator()(const void* start, size_t len) {
       case HK::Struct:
       case HK::Mixed:
       case HK::Empty:
+        enqueue(h);
+        break;
+      case HK::ResumableFrame:
+        enqueue(h->resumableObj());
+        break;
+      case HK::NativeData:
+        enqueue(h->nativeObj());
+        break;
       case HK::Object:
-      case HK::ResumableObj:
       case HK::AwaitAllWH:
       case HK::Vector:
       case HK::Map:
@@ -312,32 +346,23 @@ void Marker::operator()(const void* start, size_t len) {
       case HK::ImmVector:
       case HK::ImmMap:
       case HK::ImmSet:
-      case HK::ResumableFrame:
-      case HK::BigObj: // hmm.. what lives inside this?
-        h->hdr_.cmark = true;
-        if (mark(p)) {
-          enqueue(p);
-        }
-        break;
-      case HK::NativeData:
-        h->hdr_.cmark = true;
-        if (mark(p)) {
-          enqueue(Native::obj(&h->native_));
-        }
+      case HK::ResumableObj:
+        // clear mark, since OD::mark wants to set it again for the first time
+        h->hdr_.mark = false;
+        (*this)(&h->obj_); // call the detailed ObjectData* mark()
         break;
       case HK::String:
-        h->hdr_.cmark = true;
-        mark(p);
+        // nothing to queue since strings don't have pointers
         break;
       case HK::SmallMalloc:
       case HK::BigMalloc:
+        enqueue(h);
+        break;
       case HK::Free:
       case HK::Hole:
+      case HK::BigObj: // hmm.. what lives inside this?
         break;
     }
-    // for ObjectData embedded after NativeNode, ResumableNode, BigObj,
-    // do we want meta entries for them, directly? probably, then we can
-    // deal with pointers to either the ObjectData or the wrapper.
   }
 }
 
@@ -349,7 +374,6 @@ void Marker::operator()(const void* start, size_t len) {
 void Marker::init() {
   rds_ = folly::Range<const char*>((char*)rds::header(),
                                    RuntimeOption::EvalJitTargetCacheSize);
-  total_ = 0;
   MM().forEachHeader([&](Header* h) {
     ptrs_.insert(h);
     h->hdr_.mark = h->hdr_.cmark = false;
@@ -388,15 +412,29 @@ void Marker::init() {
         // count==0 can be witnessed, see above
         total_ += h->size();
         break;
-      case HK::ResumableFrame:
-      case HK::NativeData:
+      case HK::ResumableFrame: {
+        total_ += h->size();
+        auto h2 = reinterpret_cast<Header*>(h->resumableObj());
+        ptrs_.insert(h2);
+        h2->hdr_.mark = h2->hdr_.cmark = false;
+        break;
+      }
+      case HK::NativeData: {
+        total_ += h->size();
+        auto h2 = reinterpret_cast<Header*>(h->nativeObj());
+        ptrs_.insert(h2);
+        h2->hdr_.mark = h2->hdr_.cmark = false;
+        break;
+      }
       case HK::SmallMalloc:
       case HK::BigMalloc:
-      case HK::BigObj: // hmm.. what lives inside this?
         total_ += h->size();
         break;
       case HK::Free:
+        break;
       case HK::Hole:
+      case HK::BigObj:
+        assert(false && "skipped by forEachHeader()");
         break;
     }
   });
@@ -411,22 +449,86 @@ void Marker::trace() {
   }
 }
 
+// check that headers have a "sensible" state during sweeping.
+DEBUG_ONLY bool check_sweep_header(Header* h) {
+  switch (h->kind()) {
+    case HK::Packed:
+    case HK::Struct:
+    case HK::Mixed:
+    case HK::Empty:
+    case HK::Apc:
+    case HK::Globals:
+    case HK::Proxy:
+    case HK::String:
+    case HK::Object:
+    case HK::Vector:
+    case HK::Map:
+    case HK::Set:
+    case HK::Pair:
+    case HK::ImmVector:
+    case HK::ImmMap:
+    case HK::ImmSet:
+    case HK::ResumableObj:
+    case HK::AwaitAllWH:
+    case HK::Resource:
+    case HK::Ref:
+      // ordinary counted objects
+      break;
+    case HK::ResumableFrame:
+    case HK::NativeData:
+      // not counted but marked when embedded object is marked
+      break;
+    case HK::BigObj:
+      // these are headers that should wrap a markable or countable thing.
+      assert(!h->hdr_.mark);
+      break;
+    case HK::SmallMalloc:
+    case HK::BigMalloc:
+      // these are managed by req::malloc and should not have been marked.
+      assert(!h->hdr_.mark);
+      break;
+    case HK::Free:
+    case HK::Hole:
+      // free memory; mark implies dangling pointer bug. cmark is ok because
+      // dangling ambiguous pointers are not bugs, e.g. on the stack.
+      assert(!h->hdr_.mark);
+      break;
+  }
+  return true;
+}
+
 // another pass through the heap now that everything is marked.
 void Marker::sweep() {
-  marked_ = ambig_marked_ = 0;
-  MM().iterate([&](Header* h) {
-    if (h->hdr_.cmark) ambig_marked_ += h->size();
-    if (h->hdr_.mark) marked_ += h->size();
+  Counter marked, ambig, freed;
+  std::vector<Header*> reaped;
+  auto& mm = MM();
+  mm.iterate([&](Header* h) {
+    assert(!h->hdr_.cmark || h->hdr_.mark); // cmark implies mark
+    auto size = h->size(); // internal size
+    if (h->hdr_.mark) {
+      marked += size;
+      if (h->hdr_.cmark) ambig += size;
+      return; // continue foreach loop
+    }
+    // when freeing objects below, do not run their destructors! we don't
+    // want to execute cascading decrefs or anything. the normal release()
+    // methods of refcounted classes aren't usable because they run dtors.
+    // also, if freeing the current object causes other objects to be freed,
+    // then must initialize the FreeNode header on them, in order to continue
+    // parsing. For now, defer freeing those kinds of objects to after parsing.
+    assert(check_sweep_header(h));
     switch (h->kind()) {
       case HK::Packed:
       case HK::Struct:
       case HK::Mixed:
       case HK::Empty:
-      case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
-      case HK::String:
+      case HK::Resource:
+      case HK::Ref:
       case HK::Object:
+      case HK::ResumableObj:
+      case HK::AwaitAllWH:
       case HK::Vector:
       case HK::Map:
       case HK::Set:
@@ -434,35 +536,41 @@ void Marker::sweep() {
       case HK::ImmVector:
       case HK::ImmMap:
       case HK::ImmSet:
-      case HK::ResumableObj:
-      case HK::AwaitAllWH:
-      case HK::Resource:
-      case HK::Ref:
-        // ordinary counted objects
-        break;
       case HK::ResumableFrame:
       case HK::NativeData:
-        // not counted but marked when attached object is marked
-        break;
-      case HK::BigObj:
-        // these are headers that should wrap a markable or countable thing.
-        assert(!h->hdr_.mark);
+      case HK::Apc:
+      case HK::String:
+        freed += size;
+        reaped.push_back(h);
         break;
       case HK::SmallMalloc:
       case HK::BigMalloc:
-        // these are managed by req::malloc and should not have been marked.
-        assert(!h->hdr_.mark);
-        break;
       case HK::Free:
+        break;
       case HK::Hole:
         // free memory; mark implies dangling pointer bug. cmark is ok because
         // dangling ambiguous pointers are not bugs, e.g. on the stack.
         assert(!h->hdr_.mark);
+      case HK::BigObj:
+        assert(false && "skipped by forEachHeader()");
         break;
     }
   });
-  TRACE(1, "sweep total %lu marked %lu ambig-marked %lu\n",
-        total_, marked_, ambig_marked_);
+  // once we're done iterating the heap, it's safe to free unreachable objects.
+  for (auto h : reaped) {
+    if (h->kind() == HK::Apc) {
+      h->apc_.reap(); // calls smart_free() and smartFreeSize()
+    } else if (h->kind() == HK::String) {
+      h->str_.release(); // no destructor can run, so release() is safe.
+    } else {
+      mm.objFree(h, h->size());
+    }
+  }
+  TRACE(1, "sweep tot %lu(%lu) mk %lu(%lu) amb %lu(%lu) free %lu(%lu)\n",
+        total_.count, total_.bytes,
+        marked.count, marked.bytes,
+        ambig.count, ambig.bytes,
+        freed.count, freed.bytes);
 }
 }
 

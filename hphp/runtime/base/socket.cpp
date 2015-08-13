@@ -34,6 +34,7 @@ struct SocketState final : RequestEventHandler {
   void clear() { m_lastErrno = 0; }
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
+  void vscan(IMarker&) const override {}
   int m_lastErrno;
 };
 

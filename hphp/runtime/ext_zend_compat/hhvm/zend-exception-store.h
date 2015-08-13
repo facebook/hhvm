@@ -55,6 +55,8 @@ struct ZendExceptionStore final : RequestEventHandler {
       std::rethrow_exception(p);
     }
   }
+  void vscan(IMarker&) const override {
+  }
 
 private:
   std::exception_ptr m_ptr;

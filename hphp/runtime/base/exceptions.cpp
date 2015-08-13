@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/imarker.h"
 
 namespace HPHP {
 
@@ -48,6 +49,10 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
 
 Array ExtendedException::getBacktrace() const {
   return Array(m_btp.get());
+}
+
+void ExtendedException::vscan(IMarker& mark) const {
+  mark(m_btp);
 }
 
 const StaticString s_file("file"), s_line("line");

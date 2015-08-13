@@ -83,6 +83,10 @@ struct StreamFilterRepository {
     return m_filters.isNull();
   }
 
+  template<class F> void scan(F& mark) const {
+    mark(m_filters);
+  }
+
 private:
   Array m_filters;
 };
@@ -128,10 +132,6 @@ struct StreamUserFilters final : RequestEventHandler {
 
   void requestShutdown() override {
     m_registeredFilters.detach();
-  }
-
-  void vscan(IMarker& mark) const override {
-    mark(m_registeredFilters.filtersAsArray());
   }
 
 private:
@@ -247,6 +247,11 @@ private:
     }
 
     return req::make<StreamFilter>(obj, stream);
+  }
+
+public:
+  void vscan(IMarker& mark) const override {
+    m_registeredFilters.scan(mark);
   }
 
 public:

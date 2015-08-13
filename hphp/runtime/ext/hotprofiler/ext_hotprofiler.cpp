@@ -571,6 +571,9 @@ public:
     return m_flags & NoTrackBuiltins;
   }
 
+  void vscan(IMarker& mark) const override {
+  }
+
 private:
   uint32_t m_flags;
 };
@@ -969,6 +972,9 @@ class TraceProfiler : public Profiler {
     return m_flags & NoTrackBuiltins;
   }
 
+  void vscan(IMarker& mark) const override {
+  }
+
   TraceEntry* m_traceBuffer;
   TraceEntry m_finalEntry;
   int m_traceBufferSize;
@@ -1049,6 +1055,10 @@ public:
 
       ret.set(String(timestr), String(sample.second));
     }
+  }
+
+  void vscan(IMarker& mark) const override {
+    // nothing to mark
   }
 
 private:
@@ -1279,6 +1289,10 @@ class MemoProfiler : public Profiler {
   }
 
   struct MemberMemoInfo {
+    template<class F> void scan(F& mark) const {
+      mark(m_return_value);
+      mark(m_ret_tv);
+    }
     String m_return_value;
     TypedValue m_ret_tv;
     int m_count{0};
@@ -1286,6 +1300,11 @@ class MemoProfiler : public Profiler {
   using MemberMemoMap = hphp_hash_map<std::string, MemberMemoInfo, string_hash>;
 
   struct MemoInfo {
+    template<class F> void scan(F& mark) const {
+      for (auto& e : m_member_memos) e.second.scan(mark);
+      mark(m_return_value);
+      mark(m_ret_tv);
+    }
     MemberMemoMap m_member_memos; // Keyed by serialized args
     String m_return_value;
     TypedValue m_ret_tv;
@@ -1298,9 +1317,17 @@ class MemoProfiler : public Profiler {
 
   struct Frame {
     explicit Frame(const char* symbol) : m_symbol(symbol) {}
+    template<class F> void scan(F& mark) const {
+      mark(m_args);
+    }
     const char* m_symbol;
     String m_args;
   };
+
+  void vscan(IMarker& mark) const override {
+    for (auto& e : m_memos) e.second.scan(mark);
+    for (auto& f : m_stack) f.scan(mark);
+  }
 
 public:
   MemoMap m_memos; // Keyed by function name

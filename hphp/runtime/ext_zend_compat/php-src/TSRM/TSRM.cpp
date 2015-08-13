@@ -29,48 +29,66 @@ namespace HPHP {
 
 #define TSRM_ERROR(args)
 
-TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
-{
-  TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new resource id, %d bytes", size));
+TSRM_API ts_rsrc_id
+ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor,
+               ts_allocate_dtor dtor) {
+  TSRM_ERROR((TSRM_ERROR_LEVEL_CORE,
+             "Obtaining a new resource id, %d bytes", size));
 
+  auto& table = HPHP::resource_types_table;
   /* obtain a resource id */
-  HPHP::resource_types_table.resize(HPHP::resource_types_table.size() + 1);
-  *rsrc_id = TSRM_SHUFFLE_RSRC_ID(HPHP::resource_types_table.size() - 1);
+  table.resize(table.size() + 1);
+  *rsrc_id = TSRM_SHUFFLE_RSRC_ID(table.size() - 1);
   TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", *rsrc_id));
 
   /* store the new resource type in the resource sizes table */
-  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
-  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
-  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
-  HPHP::resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
+  auto& type = table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)];
+  type.size = size;
+  type.ctor = ctor;
+  type.dtor = dtor;
+  type.done = 0;
 
-  TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
+  TSRM_ERROR((TSRM_ERROR_LEVEL_CORE,
+             "Successfully allocated new resource id %d", *rsrc_id));
   return *rsrc_id;
 }
 
 namespace HPHP {
-  void * ts_init_resource(int id)
-  {
-    assert(id != 0);
-    TSRMLS_FETCH();
-    HPHP::TSRMStorageVector & vec = *HPHP::tsrm_thread_resources;
-    if (vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id)) {
-      vec.resize(TSRM_UNSHUFFLE_RSRC_ID(id) + 1);
+
+void* ts_init_resource(int id) {
+  assert(id != 0);
+  TSRMLS_FETCH();
+  HPHP::TSRMStorageVector& vec = *HPHP::tsrm_thread_resources;
+  auto index = TSRM_UNSHUFFLE_RSRC_ID(id);
+  if (index >= vec.size()) {
+    vec.resize(index + 1);
+  }
+  tsrm_resource_type& type = HPHP::resource_types_table.at(index);
+  if (!vec[index]) {
+    // TODO: t7925981 could we use req::malloc?
+    vec[index] = malloc(type.size);
+    if (type.ctor) {
+      type.ctor(vec[index] TSRMLS_CC);
     }
-    tsrm_resource_type & type = HPHP::resource_types_table.at(TSRM_UNSHUFFLE_RSRC_ID(id));
-    if (vec[TSRM_UNSHUFFLE_RSRC_ID(id)] == nullptr) {
-      vec[TSRM_UNSHUFFLE_RSRC_ID(id)] = malloc(type.size);
-      if (type.ctor) {
-        type.ctor(vec[TSRM_UNSHUFFLE_RSRC_ID(id)] TSRMLS_CC);
-      }
-    }
-    return vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
+  }
+  return vec[index];
+}
+
+void ts_scan_resources(IMarker& mark) {
+  HPHP::TSRMStorageVector& vec = *HPHP::tsrm_thread_resources;
+  auto ntypes = resource_types_table.size();
+  auto nres = vec.size();
+  for (size_t i = 0, n = std::min(ntypes, nres); i < n; ++i) {
+    if (!vec[i]) continue;
+    mark(vec[i], resource_types_table[i].size);
+    // maybe add scan() to tsrm_resource_type in addition to ctor/dtor
   }
 }
 
-void ts_free_id(ts_rsrc_id id)
-{
-  HPHP::TSRMStorageVector & vec = *HPHP::tsrm_thread_resources;
+} // HPHP
+
+void ts_free_id(ts_rsrc_id id) {
+  HPHP::TSRMStorageVector& vec = *HPHP::tsrm_thread_resources;
   int j = TSRM_UNSHUFFLE_RSRC_ID(id);
   assert(id != 0);
   TSRMLS_FETCH();

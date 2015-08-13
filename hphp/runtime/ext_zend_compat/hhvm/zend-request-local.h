@@ -44,9 +44,12 @@ struct ZendRequestLocalVector final : RequestEventHandler {
   static_assert(std::is_pointer<T>::value,
                 "ZendRequestLocalVector only stores pointers");
   using container = std::vector<T>;
+  container& get() { return m_container; }
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
-  container& get() { return m_container; }
+  void vscan(IMarker& mark) const override {
+    // TODO: t7925927 this is wrong when container has pointers
+  }
 private:
   void clear() {
     for (size_t i = 0; i < m_container.size(); ++i) {
@@ -71,10 +74,13 @@ private:
 
 template <class K, class V>
 struct ZendRequestLocalMap final : RequestEventHandler {
-  typedef std::unordered_map<K, V> container;
+  using container = std::unordered_map<K, V>;
+  container& get() { return m_map; }
   void requestInit() override { m_map.clear(); }
   void requestShutdown() override { m_map.clear(); }
-  container& get() { return m_map; }
+  void vscan(IMarker& mark) const override {
+    // TODO: t7925927 this is wrong when container has pointers
+  }
 private:
   container m_map;
 };

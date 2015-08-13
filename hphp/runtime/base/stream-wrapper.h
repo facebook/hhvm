@@ -67,6 +67,8 @@ class Wrapper : boost::noncopyable {
 
   virtual ~Wrapper() {}
 
+  virtual void vscan(IMarker& mark) const {}
+
   /**
    * Is there a chance that open() could return a file that is local?
    */

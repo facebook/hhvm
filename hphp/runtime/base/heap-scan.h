@@ -35,6 +35,13 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
+#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
+#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 
 namespace HPHP {
 
@@ -69,9 +76,11 @@ template<class F> void scanHeader(const Header* h, F& mark) {
       return h->res_.data()->scan(mark);
     case HeaderKind::Ref:
       return h->ref_.scan(mark);
-    case HeaderKind::String:
     case HeaderKind::SmallMalloc:
+      return mark((&h->small_)+1, h->small_.padbytes);
     case HeaderKind::BigMalloc:
+      return mark((&h->big_)+1, h->big_.nbytes);
+    case HeaderKind::String:
     case HeaderKind::BigObj:
     case HeaderKind::Free:
     case HeaderKind::ResumableFrame:
@@ -95,6 +104,21 @@ template<class F> void ObjectData::scan(F& mark) const {
     // [ObjectData][C++ fields][props]
     // TODO t6169228 virtual call for exact marking
     mark(this + 1, uintptr_t(props) - uintptr_t(this + 1));
+  } else if (m_hdr.kind == HeaderKind::ResumableObj) {
+    // scan the frame locals, iterators, and Resumable
+    auto r = Resumable::FromObj(this);
+    auto frame = reinterpret_cast<const TypedValue*>(r) -
+                 r->actRec()->func()->numSlotsInFrame();
+    mark(frame, uintptr_t(this) - uintptr_t(frame));
+  }
+  if (isObjectKind(m_hdr.kind) && getAttribute(ObjectData::IsWaitHandle)) {
+    // if we know for sure that objects with the IsWaitHandle attribute
+    // are never HNI-style native objects, never IsCppBuiltin objects,
+    // and never Resumable, then we can make this an else-if guard. if
+    // they are always IsCppBuiltin, or always HNI, then we could hoist
+    // this if into one of the two cases above.
+    auto wh = static_cast<const c_WaitHandle*>(this);
+    wh->scan(mark);
   }
   mark(m_cls);
   for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {
@@ -134,7 +158,9 @@ template<class F> struct ExtMarker final: IMarker {
   void operator()(const NameValueTable* p) override { mark_(*p); }
   void operator()(const Unit* p) override { mark_(p); }
 
-  void operator()(const void* start, size_t len) override { mark_(start, len); }
+  void operator()(const void* start, size_t len) override {
+    mark_(start, len);
+  }
 private:
   F& mark_;
 };
@@ -145,6 +171,16 @@ template<class F> void ResourceData::scan(F& mark) const {
 }
 
 template<class F> void RequestEventHandler::scan(F& mark) const {
+  ExtMarker<F> bridge(mark);
+  vscan(bridge);
+}
+
+template<class F> void scan_ezc_resources(F& mark) {
+  ExtMarker<F> bridge(mark);
+  ts_scan_resources(bridge);
+}
+
+template<class F> void Exception::scan(F& mark) const {
   ExtMarker<F> bridge(mark);
   vscan(bridge);
 }
@@ -202,10 +238,29 @@ template<class F> void scanRds(F& mark, rds::Header* rds) {
   mark(sp, (stack_end - sp) * sizeof(*sp));
 }
 
+template<class F>
+void MemoryManager::scanSweepLists(F& mark) const {
+  for (auto s = m_sweepables.next(); s != &m_sweepables; s = s->next()) {
+    if (auto h = static_cast<Header*>(s->owner())) {
+      assert(h->kind() == HeaderKind::Resource || isObjectKind(h->kind()));
+      if (isObjectKind(h->kind())) {
+        mark(&h->obj_);
+      } else {
+        mark(&h->res_);
+      }
+    }
+  }
+  for (auto node: m_natives) {
+    mark(Native::obj(node));
+  }
+}
+
 // Scan request-local roots
 template<class F> void scanRoots(F& mark) {
   // ExecutionContext
   if (!g_context.isNull()) g_context->scan(mark);
+  // ThreadInfo
+  TI().scan(mark);
   // rds, including php stack
   if (auto rds = rds::header()) scanRds(mark, rds);
   // C++ stack
@@ -216,6 +271,15 @@ template<class F> void scanRoots(F& mark) {
   ExtensionRegistry::scanExtensions(xm);
   // Root maps
   MM().scanRootMaps(mark);
+  // treat sweep lists as roots until we are ready to test what happens
+  // when we start calling various sweep() functions early.
+  MM().scanSweepLists(mark);
+  // these have rogue thread_local stuff
+  if (auto asio = AsioSession::Get()) {
+    asio->scan(mark);
+  }
+  get_server_note()->scan(mark);
+  scan_ezc_resources(mark);
 }
 
 template <typename T, typename F>

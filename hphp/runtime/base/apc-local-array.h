@@ -127,6 +127,7 @@ private:
   void sweep();
 
 public:
+  void reap();
   template<class F> void scan(F& mark) const {
     //mark(m_arr);
     if (m_localCache) {

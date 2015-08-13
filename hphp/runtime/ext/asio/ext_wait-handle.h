@@ -177,6 +177,16 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
     static_assert(offsetof(c_WaitHandle, m_ctxVecIndex) == aux, "");
   }
 
+ public:
+  template<class F> void scan(F& mark) const {
+    if (isFinished()) {
+      mark(m_resultOrException);
+    } else {
+      m_parentChain.scan(mark);
+    }
+    // TODO: t7925088 switch on kind and handle subclasses
+  }
+
  protected:
   union {
     // STATE_SUCCEEDED || STATE_FAILED

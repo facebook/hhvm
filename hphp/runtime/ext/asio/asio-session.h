@@ -172,6 +172,30 @@ struct AsioSession final {
   void onSleepCreate(c_SleepWaitHandle* waitHandle);
   void onSleepSuccess(c_SleepWaitHandle* waitHandle);
 
+  template<class F> void scan(F& mark) const {
+    for (auto cxt : m_contexts) cxt->scan(mark);
+    for (auto wh : m_sleepEvents) mark(wh);
+    m_externalThreadEventQueue.scan(mark);
+    mark(m_abruptInterruptException);
+    mark(m_onIOWaitEnter);
+    mark(m_onIOWaitExit);
+    mark(m_onJoin);
+    mark(m_onResumableCreate);
+    mark(m_onResumableAwait);
+    mark(m_onResumableSuccess);
+    mark(m_onResumableFail);
+    mark(m_onAwaitAllCreate);
+    mark(m_onGenArrayCreate);
+    mark(m_onGenMapCreate);
+    mark(m_onGenVectorCreate);
+    mark(m_onConditionCreate);
+    mark(m_onExtThreadEventCreate);
+    mark(m_onExtThreadEventSuccess);
+    mark(m_onExtThreadEventFail);
+    mark(m_onSleepCreate);
+    mark(m_onSleepSuccess);
+  }
+
 private:
   AsioSession();
 

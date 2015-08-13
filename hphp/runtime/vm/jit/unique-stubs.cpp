@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h" // TODO(#6730846): kill
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -30,6 +31,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
+#include "hphp/util/abi-cxx.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/disasm.h"
@@ -49,6 +51,10 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * TODO(#6730846): There are some arch dependencies here to be eliminated.
+ */
+
 void alignJmpTarget(CodeBlock& cb) {
   align(cb, Alignment::JmpTarget, AlignContext::Dead);
 }
@@ -61,6 +67,31 @@ RegSet syncForLLVMCatch(Vout& v) {
 
   v << copy{rvmfp(), reg::rdx};
   return RegSet{reg::rdx};
+}
+
+void loadSavedRIP(Vout& v, Vreg d) {
+  switch (arch()) {
+    case Arch::X64:
+      v << load{*reg::rsp, d};
+      return;
+    case Arch::ARM:
+      not_implemented();
+      return;
+  }
+  not_reached();
+}
+
+/*
+ * On x64, native calls assume native stack alignment.  For stubs that are
+ * invoked via call (rather than a jmp), we need to take care of this manually.
+ */
+template<class GenFunc>
+void alignNativeStack(Vout& v, GenFunc gen) {
+  if (arch() != Arch::X64) return gen(v);
+
+  v << subqi{8, reg::rsp, reg::rsp, v.makeReg()};
+  gen(v);
+  v << addqi{8, reg::rsp, reg::rsp, v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,6 +175,45 @@ TCA emitDebuggerInterpGenRet(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<bool immutable>
+TCA emitBindCallStub(CodeBlock& cb) {
+  return vwrap(cb, [] (Vout& v) {
+    auto args = VregList { v.makeReg(), v.makeReg(),
+                           v.makeReg(), v.makeReg() };
+
+    auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
+    v << loadqp{reg::rip[imcg], args[0]};
+
+    // Reconstruct the address of the call from the saved RIP.
+    auto const savedRIP = v.makeReg();
+    auto const callLen = safe_cast<int>(smashableCallLen());
+    loadSavedRIP(v, savedRIP);
+    v << subqi{callLen, savedRIP, args[1], v.makeReg()};
+
+    v << copy{rvmfp(), args[2]};
+    v << movb{v.cns(immutable), args[3]};
+
+    auto const ret = v.makeReg();
+
+    alignNativeStack(v, [&] (Vout& v) {
+      auto const handler = reinterpret_cast<void (*)()>(
+        getMethodPtr(&MCGenerator::handleBindCall)
+      );
+      v << vcall{
+        CppCall::direct(handler),
+        v.makeVcallArgs({args}),
+        v.makeTuple({ret}),
+        Fixup{},
+        DestType::SSA
+      };
+    });
+
+    v << jmpr{ret};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,6 +229,9 @@ void UniqueStubs::emitAll() {
   ADD(debuggerRetHelper,          emitDebuggerInterpRet(cold));
   ADD(debuggerGenRetHelper,       emitDebuggerInterpGenRet<false>(cold));
   ADD(debuggerAsyncGenRetHelper,  emitDebuggerInterpGenRet<true>(cold));
+
+  ADD(bindCallStub,           emitBindCallStub<false>(cold));
+  ADD(immutableBindCallStub,  emitBindCallStub<true>(cold));
 #undef ADD
 
   // TODO(#6730846): Kill this once all unique stubs are emitted here.

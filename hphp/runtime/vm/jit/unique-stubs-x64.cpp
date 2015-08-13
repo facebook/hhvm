@@ -561,29 +561,6 @@ void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
                   uniqueStubs.functionSurprisedOrStackOverflow);
 }
 
-void emitBindCallStubs(UniqueStubs& uniqueStubs) {
-  auto emitStub = [](bool immutable) {
-    auto& cb = mcg->code.cold();
-    auto const start = cb.frontier();
-    Asm a{cb};
-    a.  loadq  (rip[intptr_t(&mcg)], argNumToRegName[0]);
-    a.  loadq  (*rsp, argNumToRegName[1]); // reconstruct toSmash from savedRip
-    a.  subq   (safe_cast<int>(smashableCallLen()), argNumToRegName[1]);
-    a.  movq   (rVmFp, argNumToRegName[2]);
-    a.  movb   (immutable, rbyte(argNumToRegName[3]));
-    a.  subq   (8, rsp); // align stack
-    a.  call   (TCA(getMethodPtr(&MCGenerator::handleBindCall)));
-    a.  addq   (8, rsp);
-    a.  jmp    (rax);
-    return start;
-  };
-
-  uniqueStubs.bindCallStub = emitStub(false);
-  uniqueStubs.add("bindCallStub", uniqueStubs.bindCallStub);
-  uniqueStubs.immutableBindCallStub = emitStub(true);
-  uniqueStubs.add("immutableBindCallStub", uniqueStubs.immutableBindCallStub);
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -602,7 +579,6 @@ void emitUniqueStubs(UniqueStubs& us) {
     emitFuncBodyHelperThunk,
     emitFunctionEnterHelper,
     emitFunctionSurprisedOrStackOverflow,
-    emitBindCallStubs,
   };
   for (auto& f : functions) f(us);
 }

@@ -1,6 +1,6 @@
 File "this_as_argument.php", line 20, characters 18-19:
 Invalid argument (Typing[4110])
-File "this_as_argument.php", line 20, characters 5-20:
+File "this_as_argument.php", line 20, characters 5-5:
 This is an object of type C (known to be exactly the class 'C')
 File "this_as_argument.php", line 20, characters 5-5:
   where the class 'C' was referenced here

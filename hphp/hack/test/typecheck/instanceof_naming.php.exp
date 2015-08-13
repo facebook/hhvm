@@ -1,0 +1,2 @@
+File "instanceof_naming.php", line 4, characters 21-25:
+This instanceof has an invalid right operand. Only class identifiers, local variables, accesses of objects / classes / arrays, and function / method calls are allowed. (Naming[2067])

@@ -20,17 +20,6 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
-#include "hphp/scan-methods/all-scan-decl.h"
-
-// This suppresses a warning in a boost header file.
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#endif
-#include "hphp/scan-methods/all-scan.h"
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
 #include <vector>
 #include <unordered_map>

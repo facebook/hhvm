@@ -19,7 +19,6 @@
 
 #include <iostream>
 #include <boost/noncopyable.hpp>
-#include "hphp/scan-methods/all-scan-decl.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"

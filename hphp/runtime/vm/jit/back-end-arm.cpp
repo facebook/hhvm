@@ -49,10 +49,6 @@ struct BackEnd final : jit::BackEnd {
   BackEnd() {}
   ~BackEnd() {}
 
-  Abi abi() override {
-    return arm::abi;
-  }
-
   PhysReg rSp() override {
     return PhysReg(vixl::sp);
   }
@@ -308,7 +304,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
-    finishARM(vasm.unit(), vtext, arm::abi, state.asmInfo);
+    finishARM(vasm.unit(), vtext, abi(kind), state.asmInfo);
   }
 
   assertx(coldCodeIn.frontier() == coldStart);

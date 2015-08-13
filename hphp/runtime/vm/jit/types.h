@@ -120,8 +120,20 @@ static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
  * cross-trace code has fewer available registers.
  */
 enum class CodeKind {
+  /*
+   * Normal PHP code in the TC.
+   */
   Trace,
+
+  /*
+   * Code at the TC boundaries, e.g., service requests, unique stubs.
+   */
   CrossTrace,
+
+  /*
+   * Helper code that uses scratch registers only.
+   */
+  Helper,
 };
 
 /*

@@ -23,14 +23,18 @@
  * translator.
  */
 
-#ifndef incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
-#define incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
+#ifndef incl_HPHP_JIT_ABI_X64_H_
+#define incl_HPHP_JIT_ABI_X64_H_
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+#include "hphp/util/asm-x64.h"
+
+namespace HPHP { namespace jit {
+
+struct Abi;
+
+namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -226,25 +230,13 @@ constexpr PhysReg kSvcReqArgRegs[] = {
 #define AFWHOFF(nm) int(offsetof(c_AsyncFunctionWaitHandle, nm))
 #define GENDATAOFF(nm) int(offsetof(Generator, nm))
 
-UNUSED const Abi abi {
-  kGPUnreserved,
-  kGPReserved,
-  kXMMUnreserved,
-  kXMMReserved,
-  kCalleeSaved,
-  kSF,
-  true,
-};
+//////////////////////////////////////////////////////////////////////
 
-UNUSED const Abi cross_trace_abi {
-  abi.gp() & kScratchCrossTraceRegs,
-  abi.gp() - kScratchCrossTraceRegs,
-  abi.simd() & kScratchCrossTraceRegs,
-  abi.simd() - kScratchCrossTraceRegs,
-  abi.calleeSaved & kScratchCrossTraceRegs,
-  abi.sf,
-  false
-};
+/*
+ * Mirrors the API of abi.h.
+ */
+
+const Abi& abi(CodeKind kind = CodeKind::Trace);
 
 //////////////////////////////////////////////////////////////////////
 

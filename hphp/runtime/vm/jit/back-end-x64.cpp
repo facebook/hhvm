@@ -64,10 +64,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 struct BackEnd final : jit::BackEnd {
-  Abi abi() override {
-    return x64::abi;
-  }
-
   PhysReg rSp() override {
     return PhysReg(reg::rsp);
   }
@@ -387,9 +383,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
 
-    auto const& abi = kind == CodeKind::Trace ? x64::abi
-                                              : x64::cross_trace_abi;
-
     if (mcg->useLLVM()) {
       auto x64_unit = vunit;
       auto vasm_size = std::numeric_limits<size_t>::max();
@@ -408,7 +401,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
       // vasm, just to see how big it is. The cost of this is trivial compared
       // to the LLVM code generation.
       if (RuntimeOption::EvalJitLLVMKeepSize) {
-        optimizeX64(x64_unit, abi);
+        optimizeX64(x64_unit, abi(kind));
         optimized = true;
         emitX64(x64_unit, vtext, nullptr);
         vasm_size = vtext.main().code.frontier() - vtext.main().start;
@@ -436,7 +429,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
 
         mcg->setUseLLVM(false);
         resetCode();
-        if (!optimized) optimizeX64(x64_unit, abi);
+        if (!optimized) optimizeX64(x64_unit, abi(kind));
         emitX64(x64_unit, vtext, state.asmInfo);
 
         if (auto compare = dynamic_cast<const CompareLLVMCodeGen*>(&e)) {
@@ -444,7 +437,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
         }
       }
     } else {
-      optimizeX64(vunit, abi);
+      optimizeX64(vunit, abi(kind));
       emitX64(vunit, vtext, state.asmInfo);
     }
   }

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -32,11 +34,11 @@ template<class T> uint64_t test_const(T val) {
   using testfunc = double (*)();
   static const Abi test_abi = {
     .gpUnreserved = RegSet{},
-    .gpReserved = x64::abi.gp(),
+    .gpReserved = x64::abi().gp(),
     .simdUnreserved = RegSet{xmm0},
-    .simdReserved = x64::abi.simd() - RegSet{xmm0},
+    .simdReserved = x64::abi().simd() - RegSet{xmm0},
     .calleeSaved = x64::kCalleeSaved,
-    .sf = x64::abi.sf
+    .sf = x64::abi().sf
   };
   static uint8_t code[1000];
 

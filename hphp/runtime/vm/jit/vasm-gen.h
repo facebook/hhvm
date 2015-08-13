@@ -147,8 +147,9 @@ private:
  * it will finalize and emit any code it contains.
  */
 struct Vauto {
-  explicit Vauto(CodeBlock& code)
-    : m_text{code}
+  explicit Vauto(CodeBlock& code, CodeKind kind = CodeKind::Helper)
+    : m_kind{kind}
+    , m_text{code}
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
   {
     m_unit.entry = Vlabel(main());
@@ -160,6 +161,7 @@ struct Vauto {
   ~Vauto();
 
 private:
+  CodeKind m_kind;
   Vunit m_unit;
   Vtext m_text;
   Vout m_main;

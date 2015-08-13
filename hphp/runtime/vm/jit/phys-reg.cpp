@@ -15,20 +15,23 @@
 */
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
+
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
 namespace HPHP { namespace jit {
-using namespace x64;
+
+///////////////////////////////////////////////////////////////////////////////
 
 int PhysReg::getNumGP() {
-  return mcg->backEnd().abi().gp().size();
+  return abi().gp().size();
 }
 
 int PhysReg::getNumSIMD() {
-  return mcg->backEnd().abi().simd().size();
+  return abi().simd().size();
 }
 
 std::string show(RegSet regs) {
@@ -130,4 +133,6 @@ void PhysRegSaverParity::bytesPushed(int bytes) {
   m_adjust += bytes;
 }
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+
+}}

@@ -25,6 +25,12 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const Abi& abi(CodeKind kind) {
+  ARCH_SWITCH_CALL(abi, kind);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 PhysReg rvmfp() {
   switch (arch()) {
     case Arch::X64:
@@ -78,13 +84,7 @@ PhysReg r_svcreq_stub() {
 }
 
 PhysReg r_svcreq_sf() {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::abi.sf.findFirst();
-    case Arch::ARM:
-      return arm::abi.sf.findFirst();
-  }
-  not_implemented();
+  return abi().sf.findFirst();
 }
 
 PhysReg r_svcreq_arg(unsigned i) {

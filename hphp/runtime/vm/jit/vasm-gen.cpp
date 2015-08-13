@@ -80,18 +80,6 @@ X64Assembler& Vasm::prefix(X64Assembler& a, const Vptr& ptr) {
 ///////////////////////////////////////////////////////////////////////////////
 // Vauto.
 
-auto const vauto_gp = x64::rAsm | reg::r11;
-auto const vauto_simd = reg::xmm5 | reg::xmm6 | reg::xmm7;
-
-const Abi vauto_abi {
-  vauto_gp,
-  x64::abi.gp() - vauto_gp,
-  vauto_simd,
-  x64::abi.simd() - vauto_simd,
-  x64::abi.calleeSaved,
-  x64::abi.sf
-};
-
 Vauto::~Vauto() {
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
@@ -103,11 +91,11 @@ Vauto::~Vauto() {
 
       switch (arch()) {
         case Arch::X64:
-          optimizeX64(unit(), vauto_abi);
+          optimizeX64(unit(), abi(m_kind));
           emitX64(unit(), m_text, nullptr);
           break;
         case Arch::ARM:
-          finishARM(unit(), m_text, vauto_abi, nullptr);
+          finishARM(unit(), m_text, abi(m_kind), nullptr);
           break;
       }
       return;

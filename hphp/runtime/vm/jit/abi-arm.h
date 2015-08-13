@@ -13,20 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_JIT_ABI_ARM_H
 #define incl_HPHP_JIT_ABI_ARM_H
 
-#include <unordered_map>
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/vixl/a64/assembler-a64.h"
 #include "hphp/vixl/a64/constants-a64.h"
 
-#include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
+#include <unordered_map>
 
-namespace HPHP { namespace jit { namespace arm {
+namespace HPHP { namespace jit {
+
+struct Abi;
+
+namespace arm {
+
+///////////////////////////////////////////////////////////////////////////////
 
 inline vixl::Register x2a(PhysReg x64reg) {
   always_assert(!x64reg.isSIMD());
@@ -157,14 +162,15 @@ const RegSet kCalleeSaved = kGPCalleeSaved | kSIMDCalleeSaved;
 
 const RegSet kSF = RegSet(RegSF{0});
 
-UNUSED const Abi abi {
-  kGPUnreserved,   // gpUnreserved
-  kGPReserved,     // gpReserved
-  kSIMDUnreserved, // simdUnreserved
-  kSIMDReserved,   // simdReserved
-  kCalleeSaved,    // calleeSaved
-  kSF              // sf
-};
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Mirrors the API of abi.h.
+ */
+
+const Abi& abi(CodeKind kind = CodeKind::Trace);
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}}
 

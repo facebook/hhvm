@@ -52,8 +52,6 @@ std::unique_ptr<BackEnd> newBackEnd();
 struct BackEnd {
   virtual ~BackEnd();
 
-  virtual Abi abi() = 0;
-
   virtual PhysReg rSp() = 0;
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;

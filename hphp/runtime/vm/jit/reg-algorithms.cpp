@@ -16,8 +16,7 @@
 
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 
-#include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
 namespace HPHP { namespace jit {
@@ -40,7 +39,7 @@ bool cycleHasSIMDReg(const CycleInfo& cycle, MovePlan& moves) {
 jit::vector<VMoveInfo>
 doVregMoves(Vunit& unit, MovePlan& moves) {
   constexpr auto N = 64;
-  assertx(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
+  assertx(abi().all().size() <= N);
   jit::vector<VMoveInfo> howTo;
   CycleInfo cycles[N];
   size_t num_cycles = 0;
@@ -136,7 +135,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
 
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   constexpr auto N = 64;
-  assertx(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
+  assertx(abi().all().size() <= N);
   jit::vector<MoveInfo> howTo;
   CycleInfo cycles[N];
   size_t num_cycles = 0;

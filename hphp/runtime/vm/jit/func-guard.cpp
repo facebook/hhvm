@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
@@ -39,7 +40,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   using namespace reg;
   X64Assembler a { cb };
 
-  assertx(cross_trace_abi.gpUnreserved.contains(rax));
+  assertx(x64::abi(CodeKind::CrossTrace).gpUnreserved.contains(rax));
 
   TCA start DEBUG_ONLY = a.frontier();
 

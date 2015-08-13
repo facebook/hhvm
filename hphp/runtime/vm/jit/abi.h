@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_JIT_ABI_H
 #define incl_HPHP_JIT_ABI_H
 
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace jit {
@@ -40,6 +42,11 @@ struct Abi {
   RegSet simd() const { return simdUnreserved | simdReserved; }
   RegSet all() const { return gp() | simd() | sf; }
 };
+
+/*
+ * Return a suitable ABI for the targeted architecture and `kind'.
+ */
+const Abi& abi(CodeKind kind = CodeKind::Trace);
 
 ///////////////////////////////////////////////////////////////////////////////
 

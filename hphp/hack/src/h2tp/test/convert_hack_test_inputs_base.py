@@ -128,6 +128,9 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/*.php',
         'classname/with_tconst*.php',
     ],
+    "Memoize": [
+        'memoize/*.php',
+    ]
 }
 
 UNSUPPORTED_FILES_CONVERTER = {

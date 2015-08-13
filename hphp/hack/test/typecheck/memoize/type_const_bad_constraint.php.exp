@@ -1,0 +1,6 @@
+File "type_const_bad_constraint.php", line 10, characters 30-38:
+This is an object of type Bar (Typing[4149])
+File "type_const_bad_constraint.php", line 8, characters 30-32:
+  resulting from expanding the type constant EntPhoto::TID
+File "type_const_bad_constraint.php", line 10, characters 40-41:
+Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/manual/en/hack.attributes.memoize.php

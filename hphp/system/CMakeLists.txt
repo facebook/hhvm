@@ -25,6 +25,10 @@ if (ENABLE_ASYNC_MYSQL)
   add_dependencies(hphp_system webscalesqlclient)
 endif ()
 
+# Similar to the case in hphp_parser, class_map.cpp eventually depends on
+# all-scan-decl.h
+add_dependencies(hphp_system all-scan-header)
+
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
 # constants.h doesn't exist until build time,
 # so we need to manually inject it here

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/bstring.h"
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/actrec-args.h"
@@ -34,6 +35,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/concurrent-lru-cache.h"
 #include "hphp/zend/html-table.h"
 
 #include <folly/Unicode.h>
@@ -1716,6 +1718,204 @@ String HHVM_FUNCTION(sha1,
   return StringUtil::SHA1(str, raw_output);
 }
 
+// The WuManberReplacement class, related data structures and hash function
+// are ported from php_strtr_array_* as implemented in PHP 5.6.10.
+
+#define SHIFT_TAB_BITS  13 // should be >= HASH_TAB_BITS
+#define HASH_TAB_BITS   10 // should be less than sizeof(uint16_t)
+#define SHIFT_TAB_SIZE  (1U << SHIFT_TAB_BITS)
+#define HASH_TAB_SIZE   (1U << HASH_TAB_BITS)
+#define SHIFT_TAB_MASK ((uint16_t)(SHIFT_TAB_SIZE - 1))
+#define HASH_TAB_MASK ((uint16_t)(HASH_TAB_SIZE - 1))
+
+struct PatAndRepl {
+  const String  pat;
+  const String  repl;
+
+  uint16_t hash(int start, int len) const;
+
+  PatAndRepl(const String& pat, const String& repl) : pat(pat), repl(repl) { }
+};
+
+using ShiftTab   = std::array<size_t, SHIFT_TAB_SIZE>;
+using HashTab    = std::array<int, HASH_TAB_SIZE+1>;
+using PrefixVec  = std::vector<uint16_t>;
+using PatternVec = std::vector<PatAndRepl>;
+
+class WuManberReplacement {
+  PrefixVec   prefix;   // prefixes hashes by pat suffix hash order
+  size_t      m;        // minimum pattern length
+  int         B;        // size of suffixes
+  int         Bp;       // size of prefixes
+  PatternVec  patterns; // list of patterns and replacements
+  ShiftTab    shift;    // table mapping hash to allowed shift
+  HashTab     hash;     // table mapping hash to pos in patterns
+  bool        valid;    // can translation occur
+
+  bool initPatterns(const Array& pats);
+  void initTables();
+
+public:
+  WuManberReplacement(const Array &arr, size_t minLen)
+  : m(minLen), B(MIN(m,2)), Bp(MIN(m,2)),
+    valid(initPatterns(arr)) { }
+
+  Variant translate(String source);
+};
+
+static inline uint16_t strtr_hash(const char *str, int len) {
+    uint16_t  res = 0;
+    for (int i = 0; i < len; i++) {
+        res = res * 33 + (unsigned char)str[i];
+    }
+
+    return res;
+}
+
+static int strtr_compare_hash_suffix(const void *p_a, const void *p_b,
+                                     void *ctx_g) {
+  auto   *a    = (PatAndRepl *)p_a;
+  auto   *b    = (PatAndRepl *)p_b;
+  auto   *pair = (std::pair <size_t, int> *)ctx_g;
+  size_t m     = pair->first;
+  int    B     = pair->second;
+
+  uint16_t  hash_a = a->hash(m - B, B) & HASH_TAB_MASK,
+            hash_b = b->hash(m - B, B) & HASH_TAB_MASK;
+
+  if (hash_a > hash_b) {
+    return 1;
+  }
+  if (hash_a < hash_b) {
+    return -1;
+  }
+  // longer patterns must be sorted first
+  if (a->pat.size() > b->pat.size()) {
+    return -1;
+  }
+  if (a->pat.size() < b->pat.size()) {
+    return 1;
+  }
+  return 0;
+}
+
+uint16_t inline PatAndRepl::hash(int start, int len) const {
+  assert(pat.size() >= start + len);
+  return strtr_hash(pat.data() + start, len);
+};
+
+bool WuManberReplacement::initPatterns(const Array& arr) {
+  patterns.reserve(arr.size());
+  for (ArrayIter iter(arr); iter; ++iter) {
+    String pattern = iter.first().toString();
+    if (pattern.size() == 0) { // empty string given as pattern
+      patterns.clear();
+      return false;
+    }
+    patterns.emplace_back(pattern, iter.second().toString());
+  }
+
+  return true;
+}
+
+void WuManberReplacement::initTables() {
+  size_t max_shift = m - B + 1;
+  hash.fill(-1);
+  shift.fill(max_shift);
+  prefix.reserve(patterns.size());
+
+  std::pair <size_t, int> pair(m, B);
+  qsort_r(&patterns[0], patterns.size(), sizeof(PatAndRepl),
+          strtr_compare_hash_suffix, &pair);
+
+  {
+    uint16_t last_h = -1; // assumes not all bits are used
+    // patterns is already ordered by hash.
+    // Make hash[h] de index of the first pattern in
+    // patterns that has hash
+    int size = patterns.size();
+    for(int i = 0; i != size; ++i) {
+      // init hash tab
+      uint16_t h = patterns[i].hash(m - B, B) & HASH_TAB_MASK;
+      if (h != last_h) {
+        hash[h] = i;
+        last_h = h;
+      }
+      // init shift tab
+      for (int j = 0; j < max_shift; j++) {
+        uint16_t h = patterns[i].hash( j, B ) & SHIFT_TAB_MASK;
+        assert((long long) m - (long long) j - B >= 0);
+        shift[h] = MIN(shift[h], m - j - B);
+      }
+      // init prefix
+      prefix.push_back(patterns[i].hash(0, Bp));
+    }
+  }
+
+  hash[HASH_TAB_SIZE] = patterns.size();  // OK, we allocated SIZE+1
+  for (int i = HASH_TAB_SIZE - 1; i >= 0; i--) {
+    if (hash[i] == -1) {
+      hash[i] = hash[i + 1];
+    }
+  }
+}
+
+Variant WuManberReplacement::translate(String source) {
+  size_t  pos      = 0,
+          nextwpos = 0,
+          lastpos  = source.size() - m;
+
+  if (!valid) {
+    return false;
+  }
+
+  if (prefix.size() == 0) {
+    initTables();
+  }
+
+  StringBuffer  result(source.size());
+  while (pos <= lastpos) {
+    uint16_t h = strtr_hash(source.data() + pos + m - B, B) & SHIFT_TAB_MASK;
+    size_t shift_pos = shift[h];
+
+    if (shift_pos > 0) {
+      pos += shift_pos;
+    } else {
+      uint16_t  h2        = h & HASH_TAB_MASK,
+                prefix_h  = strtr_hash(source.data() + pos, Bp);
+      int offset_start  = hash[h2],
+          offset_end    = hash[h2 + 1], // exclusive
+          i             = 0;
+
+      for (i = offset_start; i < offset_end; i++) {
+        if (prefix[i] != prefix_h) {
+          continue;
+        }
+
+        PatAndRepl *pnr = &patterns[i];
+        if (pnr->pat.size() > source.size() - pos ||
+            memcmp(pnr->pat.data(), source.data() + pos,
+                   pnr->pat.size()) != 0) {
+          continue;
+        }
+
+        result.append(source.data() + nextwpos, pos - nextwpos);
+        result.append(pnr->repl);
+        pos += pnr->pat.size();
+        nextwpos = pos;
+        goto end_outer_loop;
+      }
+
+      pos++;
+end_outer_loop: ;
+    }
+  }
+
+  result.append(source.data() + nextwpos, source.size() - nextwpos );
+
+  return result.detach();
+}
+
 bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
                 const char*s, int& pos, int minlen, int maxlen) {
 
@@ -1783,6 +1983,10 @@ Variant strtr_fast(const String& str, const Array& arr,
 
 static constexpr int kBitsPerQword = CHAR_BIT * sizeof(uint64_t);
 
+using WuManberPtr   = std::shared_ptr<WuManberReplacement>;
+using WuManberCache = ConcurrentLRUCache<int64_t, WuManberPtr>;
+static WuManberCache wuManberCache(10);
+
 Variant HHVM_FUNCTION(strtr,
                       const String& str,
                       const Variant& from,
@@ -1821,24 +2025,32 @@ Variant HHVM_FUNCTION(strtr,
     return strtr_fast(str, arr, minlen, maxlen);
   }
 
-  const char *s = str.data();
-  int slen = str.size();
-
-  StringBuffer result(slen);
-  String key(maxlen, ReserveString);
-
-  for (int pos = 0; pos < slen; ) {
-    if ((pos + maxlen) > slen) {
-      maxlen = slen - pos;
-    }
-    bool found = strtr_slow(arr, result, key, s, pos, minlen, maxlen);
-    if (!found) {
-      result.append(s[pos++]);
-    }
+  if (arr.size() < 1000) {
+    WuManberReplacement replacer(arr, minlen);
+    return replacer.translate(str);
   }
-  return result.detach();
-}
 
+  // wu manber cost is mostly in preprocessing the patterns into
+  // tables.  this hash is much faster than initializing and most
+  // codebases likely only have a few constant sets with more than
+  // a thousand patterns.
+  int64_t hash = 0;
+  for (ArrayIter iter(arr); iter; ++iter) {
+    String pattern = iter.first().toString();
+    String replacement = iter.second().toString();
+    hash = murmur_hash_64A(pattern.data(), pattern.size(), hash);
+    hash = murmur_hash_64A(replacement.data(), replacement.size(), hash);
+  }
+  WuManberCache::ConstAccessor got;
+  WuManberPtr replacer;
+  if (wuManberCache.find(got, hash)) {
+    replacer = *got;
+  } else {
+    replacer.reset(new WuManberReplacement(arr, minlen));
+    wuManberCache.insert(hash, replacer);
+  }
+  return replacer->translate(str);
+}
 Variant HHVM_FUNCTION(setlocale,
                       int category,
                       const Variant& locale,

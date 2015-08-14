@@ -91,7 +91,7 @@ function texty(): :lol {
   $x = 'hi';
   return <lol>  hmm  <!-- -->bar   amargh<!-- --> arrrrrrgh{$x}sigh
     welp {$x}
-a </lol>;
+a \\ \n \u \'</lol>;
 }
 
 function make(): :foo {

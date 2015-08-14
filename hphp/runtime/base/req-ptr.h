@@ -34,7 +34,7 @@ const std::size_t kExpectedMPxOffset = 0;
 
 namespace req {
 
-template<typename T> struct ptr /*final*/ {
+template<typename T> struct ptr final {
   ptr() : m_px(nullptr) {}
   /* implicit */ ptr(std::nullptr_t) : m_px(nullptr) { }
   explicit ptr(T* px) : m_px(px) {

@@ -99,53 +99,6 @@ void scan(Itr start, Itr end, F& mark) {
   while (start != end) scan(*start++, mark);
 }
 
-// TODO (t6956600): not 100% accurate. only checks for Builder nested class.
-template <typename T>
-struct IsIndexedStringMapBuilderHelper {
- private:
-  using Yes = char[2];
-  using No = char[1];
-  struct Fallback { struct Builder { }; };
-  struct Derived : T, Fallback { };
-  template <typename U> static No& test(typename U::Builder*);
-  template <typename U> static Yes& test(U*);
- public:
-  static constexpr bool value = sizeof(test<Derived>(nullptr)) == sizeof(Yes);
-};
-
-template <typename T> struct has_destructor {
-  using Yes = char[2];
-  using No = char[1];
-  template <typename U> static No& test(...);
-  template <typename U> static Yes& test(decltype(((U*)nullptr)->~U())*);
-  static constexpr bool value = sizeof(test<T>(nullptr)) == sizeof(Yes);
-};
-
-template <typename T> struct IsIndexedStringMap {
-  static constexpr bool value = false;
-};
-
-template <typename T, bool b, typename I, I v>
-struct IsIndexedStringMap<IndexedStringMap<T,b,I,v>> {
-  static constexpr bool value = true;
-};
-
-template <typename T, typename E = void>
-struct IsIndexedStringMapBuilder {
-  static constexpr bool value = false;
-};
-
-template <typename T>
-struct IsIndexedStringMapBuilder<
-  T,
-  typename std::enable_if<std::is_class<T>::value &&
-                          !std::is_same<StreamContext,T>::value &&
-                          !std::is_same<DateTime,T>::value &&
-                          has_destructor<T>::value>::type
-> {
-  static constexpr bool value = IsIndexedStringMapBuilderHelper<T>::value;
-};
-
 // Interface for marking.
 struct IMarker {
   virtual void operator()(const Resource&) = 0;
@@ -411,12 +364,6 @@ struct IMarker {
     const IndexedStringMap<T,CaseSensitive,Index,InvalidIndex>& p
   ) {
     for (const auto& elem : p.range()) scan(elem, *this);
-  }
-
-  template<typename T>
-  typename std::enable_if<IsIndexedStringMapBuilder<T>::value, void>::type
-  operator()(const T& p) {
-    for (const auto& elem : p) scan(elem, *this);
   }
 
   template <class T, class U, class V, class W>

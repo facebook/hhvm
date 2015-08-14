@@ -1,0 +1,28 @@
+# Test making closures
+
+.main {
+  Int 20
+  SetL $x
+  PopC
+
+  CUGetL $x
+  CreateCl 1 "ClosureTest"
+
+  FPushFunc 0
+  FCall 0
+  UnboxR
+  Print
+  PopC
+
+  Int 1
+  RetC
+}
+
+.class [no_override unique] ClosureTest extends Closure {
+  .property [private] x = uninit;
+  .method [public static mayusevv] __invoke() isClosureBody {
+    .declvars $0Closure $x;
+    CGetL $x
+    RetC
+  }
+}

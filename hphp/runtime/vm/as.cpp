@@ -2171,6 +2171,10 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
                                       const std::string &parentName) {
   auto &pce = *as.pce;
   bool system = pce.attrs() & AttrBuiltin;
+
+  if (pce.methods().size() == 1 && pce.methods()[0]->isClosureBody) {
+    return PreClass::ClosureHoistable;
+  }
   if (!system) {
     if (!pce.interfaces().empty() ||
         !pce.usedTraits().empty() ||

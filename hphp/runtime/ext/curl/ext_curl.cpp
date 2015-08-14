@@ -81,7 +81,10 @@ Exception* getCppException(const ExceptionType& e) {
   return boost::get<Exception*>(*e);
 }
 
-void throwException(ExceptionType&& e) {
+void throwException(ExceptionType& ex) {
+  if (!ex) return;
+  auto e = std::move(ex);
+  assert(!ex);
   if (isPhpException(e)) {
     throw getPhpException(e);
   } else {
@@ -350,9 +353,7 @@ public:
   }
 
   void check_exception() {
-    if (m_exception) {
-      throwException(std::move(m_exception));
-    }
+    throwException(m_exception);
   }
 
   ExceptionType getAndClearException() {
@@ -1495,9 +1496,7 @@ public:
       }
       ex = std::move(nextException);
     }
-    if (ex) {
-      throwException(std::move(ex));
-    }
+    throwException(ex);
   }
 
   CURLM *get() {

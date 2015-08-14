@@ -63,6 +63,7 @@ abstract class :base {
 class Cns {
   const int X = 12;
 }
+class A {}
 
 class :foo extends :base {
   category %foo, %bar;
@@ -71,6 +72,10 @@ class :foo extends :base {
     int anoube = 1337,
     string val,
     int cns = Cns::X,
+    // Some objects
+    A an:obj,
+    Awaitable<int> foo,
+    arraykey ak,
     // Weird trait thing
     :blah1,
     :blah2;
@@ -103,6 +108,13 @@ function make(): :foo {
          </foo>;
 }
 
+function dump(array<string, mixed> $x): void {
+  /* HH_FIXME[2049] */
+  /* HH_FIXME[4107] */
+  ksort($x);
+  var_dump($x);
+}
+
 function test(): void {
   $x = make();
   var_dump($x);
@@ -117,5 +129,9 @@ function test(): void {
 
   var_dump(escape("wheeeee"));
 
-  var_dump(:foo::xhpCategoryDeclaration());
+  dump(:foo::xhpCategoryDeclaration());
+
+  // Testing this only works because none of the fields are marked @required,
+  // since we don't implement that yet...
+  dump(:foo::xhpAttributeDeclaration());
 }

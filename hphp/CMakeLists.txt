@@ -84,7 +84,6 @@ add_subdirectory(hack)
 add_subdirectory(hhbbc)
 add_subdirectory(neo)
 add_subdirectory(parser)
-add_subdirectory(scan-methods)
 
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext)

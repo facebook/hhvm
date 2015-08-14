@@ -72,7 +72,7 @@ struct ResourceHdr {
   void release() noexcept;
 
   void init(size_t size) {
-    m_hdr.init(size, HeaderKind::Resource, 1);
+    m_hdr.init(size, HeaderKind::Resource, UnsharedGCByte);
   }
 
   ResourceData* data() {

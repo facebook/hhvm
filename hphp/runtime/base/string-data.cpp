@@ -84,7 +84,7 @@ ALWAYS_INLINE StringData* allocFlatSmallImpl(size_t len) {
 
   sd->m_data = reinterpret_cast<char*>(sd + 1);
   // Refcount initialized to 1.
-  sd->m_hdr.init(CapCode::exact(cap), HeaderKind::String, 1);
+  sd->m_hdr.init(CapCode::exact(cap), HeaderKind::String, UnsharedGCByte);
   return sd;
 }
 
@@ -119,7 +119,7 @@ ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
   assert(cc.decode() >= len);
   sd->m_data = reinterpret_cast<char*>(sd + 1);
   // Refcount initialized to 1.
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
+  sd->m_hdr.init(cc, HeaderKind::String, UnsharedGCByte);
   return sd;
 }
 

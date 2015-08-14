@@ -4,7 +4,7 @@ function _filter_var_array_single($value, $filter, $options = array()) {
   $ret = filter_var($value, (int) $filter, $options);
 
   // Retry with default filter if failed.
-  if ($ret === false) {
+  if ($ret === false && $filter !== FILTER_VALIDATE_BOOLEAN) {
     $ret = filter_var($value, FILTER_DEFAULT, $options);
   }
 

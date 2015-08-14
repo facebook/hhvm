@@ -1476,6 +1476,22 @@ void parse_numiters(AsmState& as) {
   as.in.expectWs(';');
 }
 
+/*
+ * directive-declvars : var-name* ';'
+ *                    ;
+ *
+ * Variables are usually allocated when first seen, but
+ * declvars can be used to preallocate varibles for when
+ * the exact assignment matters (like for closures).
+ */
+void parse_declvars(AsmState& as) {
+  std::string var;
+  while (as.in.readword(var)) {
+    as.getLocalId(var);
+  }
+  as.in.expectWs(';');
+}
+
 void parse_function_body(AsmState&, int nestLevel = 0);
 
 /*
@@ -1558,6 +1574,7 @@ void parse_catch(AsmState& as, int nestLevel) {
  *               ;
  *
  * fbody-line :  ".numiters" directive-numiters
+ *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
  *            |  label-name
@@ -1587,6 +1604,7 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
     }
     if (word[0] == '.') {
       if (word == ".numiters")  { parse_numiters(as); continue; }
+      if (word == ".declvars")  { parse_declvars(as); continue; }
       if (word == ".try_fault") { parse_fault(as, nestLevel); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
       as.error("unrecognized directive `" + word + "' in function");

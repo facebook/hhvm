@@ -397,10 +397,19 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   out.nl();
 }
 
-void print_func_directives(Output& out, const Func* func) {
+void print_func_directives(Output& out, const FuncInfo& finfo) {
+  const Func* func = finfo.func;
   if (auto const niters = func->numIterators()) {
     out.fmtln(".numiters {};", niters);
   }
+  if (func->numNamedLocals() > func->numParams()) {
+    std::vector<std::string> locals;
+    for (int i = func->numParams(); i < func->numNamedLocals(); i++) {
+      locals.push_back(loc_name(finfo, i));
+    }
+    out.fmtln(".declvars {};", folly::join(" ", locals));
+  }
+
 }
 
 void print_func_body(Output& out, const FuncInfo& finfo) {
@@ -551,7 +560,7 @@ void print_func(Output& out, const Func* func) {
       func_flag_list(finfo));
   }
   indented(out, [&] {
-    print_func_directives(out, func);
+    print_func_directives(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");
@@ -588,7 +597,7 @@ void print_method(Output& out, const Func* func) {
     func_param_list(finfo),
     func_flag_list(finfo));
   indented(out, [&] {
-    print_func_directives(out, func);
+    print_func_directives(out, finfo);
     print_func_body(out, finfo);
   });
   out.fmtln("}}");

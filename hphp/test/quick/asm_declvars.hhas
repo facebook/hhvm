@@ -1,0 +1,39 @@
+#
+# test declvars
+#
+
+.main {
+  FPushFuncD 1 "main"
+  Int 12
+  FPassC 0
+  FCall 1
+  PopR
+  Null
+  RetC
+}
+
+.function main($x) {
+  # $y should get assigned to _1 even though $z is used first
+  .declvars $y $z;
+
+  String "a"
+  SetL $z
+  PopC
+
+  String "b"
+  SetL $y
+  PopC
+
+  CGetL _1
+  CGetL _2
+  Concat
+  Print
+  PopC
+
+  CGetL _0
+  Print
+  PopC
+
+  Null
+  RetC
+}

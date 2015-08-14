@@ -370,6 +370,8 @@ let unparser _env =
         StrStatement [kindStr; hintStr; varStr]
     | XhpAttr _ ->
         u_todo "XhpAttr" (fun () -> StrEmpty)
+    | XhpCategory _ ->
+        u_todo "XhpCategory" (fun () -> StrEmpty)
     | Method m -> u_method_ kind m
     | TypeConst _ -> u_todo "TypeConst" (fun () -> StrEmpty)
 

@@ -48,6 +48,15 @@ abstract class :base {
     array<string, array<int, mixed>> {
     return static::__xhpAttributeDeclaration();
   }
+
+  protected function __xhpCategoryDeclaration(): array<string, int> {
+    return array();
+  }
+  public static function xhpCategoryDeclaration(): array<string, int> {
+    /* HH_FIXME[4090]: __xhpCategoryDeclaration ought to be static but is not.
+     * See https://github.com/facebook/xhp-lib/blob/master/src/core/ComposableElement.php#L283-L285 */
+    return static::__xhpCategoryDeclaration();
+  }
 }
 ///////////////////////////////////////////////////
 
@@ -56,6 +65,8 @@ class Cns {
 }
 
 class :foo extends :base {
+  category %foo, %bar;
+
   attribute
     int anoube = 1337,
     string val,
@@ -105,4 +116,6 @@ function test(): void {
   var_dump(texty()->getChildren());
 
   var_dump(escape("wheeeee"));
+
+  var_dump(:foo::xhpCategoryDeclaration());
 }

@@ -548,7 +548,9 @@ macro(hphp_link target)
     target_link_libraries(${target} mcrouter)
   endif()
 
-  target_link_libraries(${target} afdt)
+  if (NOT MSVC)
+    target_link_libraries(${target} afdt)
+  endif()
   target_link_libraries(${target} mbfl)
 
   if (EDITLINE_LIBRARIES)

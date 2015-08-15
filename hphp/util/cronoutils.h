@@ -105,16 +105,6 @@
 # endif
 #endif
 
-#ifdef _WIN32
-#define mode_t int
-
-#define open  _open
-#define close _close
-#define read  _read
-#define write _write
-#define mkdir _mkdir
-#endif
-
 /* Some operating systems don't declare getopt() */
 
 #ifdef NEED_GETOPT_DEFS

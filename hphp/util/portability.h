@@ -125,6 +125,10 @@
 #  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
 # endif
 
+#elif defined(_M_X64)
+
+# define DECLARE_FRAME_POINTER(fp) register ActRec* fp = nullptr;
+
 #elif defined(__AARCH64EL__)
 
 # if defined(__clang__)

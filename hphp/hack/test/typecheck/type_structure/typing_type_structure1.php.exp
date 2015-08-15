@@ -1,0 +1,8 @@
+Tint
+option(Tbool)
+App \classname<App \Vector<Tint, >, >
+App \classname<App \C<Tstring, >, >
+option(App \classname<tuple(Tbool, Tbool), >)
+option(App \classname<fun App \C<Tint, >,  -> App \Vector<App \C<Tint, >, >, >)
+App \classname<[<static>][this]App \D<>, >
+No errors

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // decl
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,8 +13,7 @@
  * The following enum values are defined in
  * hphp/runtime/ext/reflection/ext_reflection-classes.php
  */
-
-enum TypeStructureKind: int {
+enum TypeStructureKind : int {
   OF_VOID = 0;
   OF_INT = 0;
   OF_BOOL = 0;

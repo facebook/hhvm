@@ -1,0 +1,8 @@
+File "typedef2.php", line 5, characters 24-33:
+Some type constraint(s) here are violated (Typing[4110])
+File "typedef2.php", line 3, characters 22-22:
+'T' is a constrained type
+File "typedef2.php", line 3, characters 27-29:
+This is a num (int/float)
+File "typedef2.php", line 5, characters 35-39:
+It is incompatible with a mixed value

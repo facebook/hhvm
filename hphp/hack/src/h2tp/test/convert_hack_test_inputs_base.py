@@ -127,6 +127,7 @@ UNSUPPORTED_FILES_UNPARSER = {
     "TypeConst": [
         'tconst/*.php',
         'classname/with_tconst*.php',
+        'constraints/class_type_constant*.php',
     ],
 }
 
@@ -413,6 +414,7 @@ OTHER_UNPARSEABLE_FILES = [
     'unsafeexpr2.php',
     'unsafeexpr3.php',
     'variadic_args1.php',
+    'constraints/tapply_is_newtype.php',
 ]
 
 UNPARSEABLE_OUTPUT = set([

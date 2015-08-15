@@ -1,0 +1,8 @@
+File "function.php", line 5, characters 14-23:
+Some type constraint(s) here are violated (Typing[4110])
+File "function.php", line 3, characters 22-22:
+'T' is a constrained type
+File "function.php", line 3, characters 27-29:
+This is a num (int/float)
+File "function.php", line 5, characters 25-28:
+It is incompatible with a nullable type

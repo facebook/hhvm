@@ -18,6 +18,6 @@ class A<T as C> extends C {
 
 }
 
-class B<T as B<A>> extends A<T> {}
+class B<T as A<C>> extends A<T> {}
 
 class D extends B<D> {}

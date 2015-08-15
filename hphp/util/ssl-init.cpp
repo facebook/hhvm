@@ -25,7 +25,7 @@ namespace HPHP {
 static Mutex *s_locks = nullptr;
 
 static unsigned long callback_thread_id() {
-  return (unsigned long)Process::GetThreadId();
+  return (unsigned long)Process::GetThreadIdForTrace();
 }
 
 static void callback_locking(int mode, int type, const char *file, int line) {

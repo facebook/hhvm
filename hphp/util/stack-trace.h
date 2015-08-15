@@ -24,7 +24,9 @@
 #include "hphp/util/portability.h"
 #include "hphp/util/compatibility.h"
 
+#ifndef _MSC_VER
 #include <dlfcn.h>
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

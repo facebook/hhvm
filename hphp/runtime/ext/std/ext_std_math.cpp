@@ -449,11 +449,13 @@ int64_t HHVM_FUNCTION(rand,
     randinit(math_generate_seed());
   }
 
+  int64_t number;
 #ifdef __APPLE__
-  int32_t number = random();
+  number = random();
 #else
-  int32_t number;
-  random_r(&s_state.data, &number);
+  int32_t numberIn;
+  random_r(&s_state.data, &numberIn);
+  number = numberIn;
 #endif
   int64_t int_max = max.isNull() ? RAND_MAX : max.toInt64();
   if (min != 0 || int_max != RAND_MAX) {

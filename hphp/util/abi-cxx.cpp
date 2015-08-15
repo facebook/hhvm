@@ -24,11 +24,14 @@
 #include <string>
 #include <unordered_map>
 
-#include <cxxabi.h>
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
 # include <windows.h>
 # include <dbghelp.h>
+# ifndef _MSC_VER
+#  include <cxxabi.h>
+# endif
 #else
+# include <cxxabi.h>
 # include <execinfo.h>
 #endif
 
@@ -75,8 +78,13 @@ std::string getNativeFunctionName(void* codeAddr) {
     functionName.assign(symbol->Name);
 
     int status;
+#ifdef _MSC_VER
+    char* demangledName = (char*)calloc(1024, sizeof(char));
+    status = !(int)UnDecorateSymbolName(symbol->Name, demangledName, 1023, UNDNAME_COMPLETE);
+#else
     char* demangledName = abi::__cxa_demangle(functionName.c_str(),
                                               0, 0, &status);
+#endif
     SCOPE_EXIT { free(demangledName); };
     if (status == 0) functionName.assign(demangledName);
 

@@ -128,6 +128,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/*.php',
         'classname/with_tconst*.php',
         'type_structure/*.php',
+        'constraints/class_type_constant*.php',
     ],
     "Memoize": [
         'memoize/*.php',
@@ -417,6 +418,7 @@ OTHER_UNPARSEABLE_FILES = [
     'unsafeexpr2.php',
     'unsafeexpr3.php',
     'variadic_args1.php',
+    'constraints/tapply_is_newtype.php',
 ]
 
 UNPARSEABLE_OUTPUT = set([

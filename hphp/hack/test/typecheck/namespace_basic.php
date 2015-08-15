@@ -38,11 +38,11 @@ namespace NS1\NS2 {
     return $x;
   }
 
-  function id2<T as C>(T $x): T {
+  function id2<T as C<int>>(T $x): T {
     return $x;
   }
 
-  function id3<T as \NS1\NS2\C>(T $x): T {
+  function id3<T as \NS1\NS2\C<int>>(T $x): T {
     return $x;
   }
 }

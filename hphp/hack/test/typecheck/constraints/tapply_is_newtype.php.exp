@@ -1,0 +1,10 @@
+File "tapply_is_newtype.php--file2.php", line 5, characters 18-30:
+Some type constraint(s) here are violated (Typing[4110])
+File "tapply_is_newtype.php--file1.php", line 4, characters 22-22:
+'T' is a constrained type
+File "tapply_is_newtype.php--file1.php", line 4, characters 27-29:
+This is a num (int/float)
+File "tapply_is_newtype.php--file2.php", line 5, characters 32-36:
+It is incompatible with a mixed value
+File "tapply_is_newtype.php--file1.php", line 6, characters 40-40:
+  via this generic T

@@ -1,0 +1,8 @@
+File "class_type_constant2.php", line 6, characters 35-44:
+Some type constraint(s) here are violated (Typing[4110])
+File "class_type_constant2.php", line 3, characters 22-22:
+'T' is a constrained type
+File "class_type_constant2.php", line 3, characters 27-29:
+This is a num (int/float)
+File "class_type_constant2.php", line 6, characters 46-51:
+It is incompatible with a string

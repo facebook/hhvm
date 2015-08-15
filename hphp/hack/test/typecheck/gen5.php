@@ -9,16 +9,15 @@
  *
  */
 
-class A<T as A> {
+class A<T as B> {
   public function bar(T $x): T { return $x; }
-  
+
 }
 
-class Z { 
+class Z {
   public function foo(): void {
   }
 }
 
 class B extends A<Z> {
 }
-

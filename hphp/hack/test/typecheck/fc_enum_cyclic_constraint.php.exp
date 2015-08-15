@@ -1,5 +1,2 @@
-File "fc_enum_cyclic_constraint.php", line 3, characters 6-6:
-This enum declaration is invalid.
-Read the following to see why: (Typing[4146])
 File "fc_enum_cyclic_constraint.php", line 3, characters 17-17:
-Cyclic enum constraint
+Cyclic enum constraint (Typing[4146])

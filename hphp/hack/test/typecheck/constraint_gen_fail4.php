@@ -8,8 +8,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-
-class B<T as B> {
+class A extends B<A> {}
+class B<T as B<A>> {
   public function get(): T {
     return $this;
   }

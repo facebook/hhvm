@@ -1,0 +1,8 @@
+File "class_method_tparam.php", line 6, characters 28-37:
+Some type constraint(s) here are violated (Typing[4110])
+File "class_method_tparam.php", line 3, characters 22-22:
+'T' is a constrained type
+File "class_method_tparam.php", line 3, characters 27-29:
+This is a num (int/float)
+File "class_method_tparam.php", line 6, characters 39-43:
+It is incompatible with a mixed value

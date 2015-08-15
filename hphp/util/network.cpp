@@ -16,10 +16,13 @@
 #include "hphp/util/network.h"
 
 #include <netinet/in.h>
-#include <arpa/nameser.h>
 #include <arpa/inet.h>
+
+#ifndef _MSC_VER
+#include <arpa/nameser.h>
 #include <resolv.h>
 #include <sys/utsname.h>
+#endif
 
 #include <folly/String.h>
 #include <folly/IPAddress.h>
@@ -28,6 +31,8 @@
 #include "hphp/util/process.h"
 
 namespace HPHP {
+
+#ifndef _MSC_VER
 ///////////////////////////////////////////////////////////////////////////////
 // without calling res_init(), any call to getaddrinfo() may leak memory:
 //  http://sources.redhat.com/ml/libc-hacker/2004-02/msg00049.html
@@ -44,6 +49,8 @@ public:
   }
 };
 static ResolverLibInitializer _resolver_lib_initializer;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
@@ -90,12 +97,23 @@ std::string GetPrimaryIPImpl(int af) {
     }
   };
 
+#ifdef _MSC_VER
+  char* nodename = nullptr;
+  char nodenamebuf[65];
+  if (gethostname(nodenamebuf, 65) < 0)
+    nodename = "localhost";
+  else
+    nodename = nodenamebuf;
+#else
+  struct utsname buf;
   uname((struct utsname *)&buf);
+  const char* nodename = buf.nodename;
+#endif
 
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = af;
 
-  error = getaddrinfo(buf.nodename, nullptr, &hints, &res);
+  error = getaddrinfo(nodename, nullptr, &hints, &res);
   if (error) {
     return s_empty;
   }

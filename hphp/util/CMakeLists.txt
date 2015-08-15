@@ -21,7 +21,7 @@ add_custom_command(
          "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp"
   COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/generate-buildinfo.sh"
   DEPENDS ${CXX_SOURCES}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
   COMMENT "Generating Repo Schema ID and Compiler ID"
   VERBATIM)
 

@@ -4,4 +4,4 @@
 class C {
 }
 
-var_dump(type_structure('C', 'T'));
+var_dump(type_structure(C::class, 'T'));

@@ -1101,5 +1101,3 @@ enum TypeStructureKind: int {
 
 <<__Native>>
 function type_structure(mixed $cls_or_obj, string $cns_name): array;
-// TODO(7657500): we need to resolve this, typeaccess, and generic
-// types to either a class, interface, enum, or alias

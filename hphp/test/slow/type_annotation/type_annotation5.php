@@ -5,4 +5,4 @@ abstract class C {
   abstract const type T;
 }
 
-var_dump(type_structure('C', 'T'));
+var_dump(type_structure(C::class, 'T'));

@@ -10543,7 +10543,7 @@ ZipDirectoryReaderTest::testMultiDisk0
 ZipDirectoryReaderTest::testNoSignature
 .
 ZipDirectoryReaderTest::testSimple
-.
+F
 ZipDirectoryReaderTest::testTrailingBytes
 .
 ZipDirectoryReaderTest::testWrongCDStart

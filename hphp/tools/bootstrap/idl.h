@@ -17,6 +17,8 @@
 #ifndef HPHP_IDL_H
 #define HPHP_IDL_H
 
+#include <cctype>
+
 #include <folly/Conv.h>
 #include <folly/DynamicConverter.h>
 #include <folly/FBString.h>

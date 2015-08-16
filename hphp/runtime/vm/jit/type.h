@@ -725,7 +725,11 @@ private:
     struct {
       bits_t m_bits : 58;
       bits_t m_ptrKind : 5;
+#ifdef HAVE_MSVC_BITFIELD_LAYOUT
+      bits_t m_hasConstVal : 1;
+#else
       bool m_hasConstVal : 1;
+#endif
     };
     uint64_t m_rawInt;
   };

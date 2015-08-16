@@ -180,6 +180,10 @@ if (ICU_FOUND)
     message(FATAL_ERROR "ICU is too old, found ${ICU_VERSION} and we need 4.2")
   endif ()
   include_directories(${ICU_INCLUDE_DIRS})
+  if (ICU_STATIC)
+    add_definitions("-DU_EXPORT=")
+    add_definitions("-DU_IMPORT=")
+  endif()
 endif (ICU_FOUND)
 
 # jemalloc/tmalloc and profiler

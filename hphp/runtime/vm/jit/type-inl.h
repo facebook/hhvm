@@ -31,8 +31,11 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 // Predefined Types
 
-constexpr inline Type::Type(bits_t bits, Ptr kind)
-  : m_bits(bits)
+constexpr inline Type::Type(bits_t bits, Ptr kind) :
+#ifdef MSVC_NO_UNION_BITFIELD_CONSTEXPR_CONSTRUCTOR
+    m_rawInt(),
+#endif
+    m_bits(bits)
   , m_ptrKind(static_cast<std::underlying_type<Ptr>::type>(kind))
   , m_hasConstVal(false)
   , m_extra(0)

@@ -188,6 +188,20 @@ typename std::enable_if<
   void
 >::type registerNativeDataInfo(const StringData* name,
                                int64_t flags = 0) {
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+  auto ndic = &nativeDataInfoCopy<T>;
+  auto ndisw = &nativeDataInfoSweep<T>;
+  auto ndisl = &nativeDataInfoSleep<T>;
+  auto ndiw = &nativeDataInfoWakeup<T>;
+
+  registerNativeDataInfo(name, sizeof(T),
+    &nativeDataInfoInit<T>,
+    (flags & NDIFlags::NO_COPY) ? nullptr : ndic,
+    &nativeDataInfoDestroy<T>,
+    (flags & NDIFlags::NO_SWEEP) ? nullptr : ndisw,
+    hasSleep<T, Variant() const>::value ? ndisl : nullptr,
+    hasWakeup<T, void(const Variant&, ObjectData*)>::value ? ndiw : nullptr);
+#else
   registerNativeDataInfo(name, sizeof(T),
                          &nativeDataInfoInit<T>,
                          (flags & NDIFlags::NO_COPY)
@@ -201,6 +215,7 @@ typename std::enable_if<
                            ? &nativeDataInfoWakeup<T> : nullptr,
                          hasScan<T, void(IMarker&)>::value
                            ? &nativeDataInfoScan<T> : nullptr);
+#endif
 }
 
 // Return the ObjectData payload allocated after this NativeNode header

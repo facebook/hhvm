@@ -654,6 +654,9 @@ struct Fault {
 
 // Interpreter evaluation stack.
 class Stack {
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+public:
+#endif
   TypedValue* m_elms;
   TypedValue* m_top;
   TypedValue* m_base; // Stack grows down, so m_base is beyond the end of
@@ -690,9 +693,13 @@ public:
     return m_top;
   }
 
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+  static constexpr size_t topOfStackOffset();
+#else
   static constexpr size_t topOfStackOffset() {
     return offsetof(Stack, m_top);
   }
+#endif
 
   static TypedValue* anyFrameStackBase(const ActRec* fp);
   static TypedValue* frameStackBase(const ActRec* fp);
@@ -1057,6 +1064,14 @@ public:
     m_top->m_type = KindOfClass;
   }
 };
+
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+constexpr size_t Stack__topOfStackOffset = offsetof(Stack, m_top);
+
+constexpr size_t Stack::topOfStackOffset() {
+  return Stack__topOfStackOffset;
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

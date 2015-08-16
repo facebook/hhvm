@@ -147,9 +147,13 @@ struct RequestInjectionData {
       m_debuggerStepOut == StepOutState::OUT;
   }
 
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+  static constexpr uint32_t debuggerReadOnlyOffset();
+#else
   static constexpr uint32_t debuggerReadOnlyOffset() {
     return offsetof(RequestInjectionData, m_debuggerAttached);
   }
+#endif
 
   bool getDebuggerIntr() const { return m_debuggerIntr; }
   void setDebuggerIntr(bool d) {
@@ -248,7 +252,13 @@ struct RequestInjectionData {
 private:
   RequestTimer m_timer;
   RequestTimer m_cpuTimer;
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+public:
+#endif
   bool m_debuggerAttached{false}; // whether there is a debugger attached.
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+private:
+#endif
   bool m_coverage{false};         // is coverage being collected
   bool m_jit{false};              // is the jit enabled
 
@@ -332,6 +342,14 @@ private:
   /* CmdInterrupts this thread is handling. */
   std::stack<void*> interrupts;
 };
+
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+constexpr uint32_t RequestInjectionData__m_debuggerAttachedOff = offsetof(RequestInjectionData, m_debuggerAttached);
+
+constexpr uint32_t RequestInjectionData::debuggerReadOnlyOffset() {
+  return RequestInjectionData__m_debuggerAttachedOff;
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

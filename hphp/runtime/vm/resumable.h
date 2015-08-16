@@ -67,6 +67,11 @@ struct alignas(16) Resumable {
   static const Resumable* FromObj(const ObjectData* obj) {
     return reinterpret_cast<const Resumable*>(obj) - 1;
   }
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+  static constexpr ptrdiff_t arOff();
+  static constexpr ptrdiff_t resumeAddrOff();
+  static constexpr ptrdiff_t resumeOffsetOff();
+#else
   static constexpr ptrdiff_t arOff() {
     return offsetof(Resumable, m_actRec);
   }
@@ -76,6 +81,7 @@ struct alignas(16) Resumable {
   static constexpr ptrdiff_t resumeOffsetOff() {
     return offsetof(Resumable, m_resumeOffset);
   }
+#endif
   static constexpr ptrdiff_t dataOff() {
     return sizeof(Resumable);
   }
@@ -162,7 +168,9 @@ struct alignas(16) Resumable {
     m_resumeOffset = resumeOffset;
   }
 
+#ifndef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
 private:
+#endif
   // ActRec of the resumed frame.
   ActRec m_actRec;
 
@@ -180,6 +188,22 @@ private:
     uint64_t m_offsetAndSize;
   };
 };
+
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+constexpr ptrdiff_t Resumable__arOff = offsetof(Resumable, m_actRec);
+constexpr ptrdiff_t Resumable__resumeAddrOff = offsetof(Resumable, m_resumeAddr);
+constexpr ptrdiff_t Resumable__resumeOffsetOff = offsetof(Resumable, m_resumeOffset);
+
+constexpr ptrdiff_t Resumable::arOff() {
+  return Resumable__arOff;
+}
+constexpr ptrdiff_t Resumable::resumeAddrOff() {
+  return Resumable__resumeAddrOff;
+}
+constexpr ptrdiff_t Resumable::resumeOffsetOff() {
+  return Resumable__resumeOffsetOff;
+}
+#endif
 
 static_assert(Resumable::arOff() == 0,
               "ActRec must be in the beginning of Resumable");

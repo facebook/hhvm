@@ -4755,8 +4755,23 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     } else if (isWInit) {
       args.imm(0);
     }
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+    TCA helperAddr;
+    if (isWInit) {
+      auto helperAddrTmp = new_iter_array_key<true>;
+      helperAddr = (TCA)helperAddrTmp;
+    } else {
+      if (isInitK) {
+        auto helperAddrTmp = new_iter_array_key<false>;
+        helperAddr = (TCA)helperAddrTmp;
+      } else {
+        helperAddr = (TCA)new_iter_array;
+      }
+    }
+#else
     TCA helperAddr = isWInit ? (TCA)new_iter_array_key<true> :
       isInitK ? (TCA)new_iter_array_key<false> : (TCA)new_iter_array;
+#endif
     cgCallHelper(
       vmain(),
       CallSpec::direct(reinterpret_cast<void (*)()>(helperAddr)),

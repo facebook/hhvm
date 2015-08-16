@@ -266,6 +266,7 @@ endif()
 
 if (NOT PCRE_LIBRARY)
   include_directories("${TP_DIR}/pcre")
+  add_definitions("-DPCRE_STATIC=1")
 endif()
 
 if (NOT FASTLZ_LIBRARY)

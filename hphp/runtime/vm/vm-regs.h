@@ -109,7 +109,9 @@ inline ActRec*& vmJitCalledFrame() {
 }
 
 inline void assert_native_stack_aligned() {
+#ifndef _MSC_VER
   assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
+#endif
 }
 
 inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {

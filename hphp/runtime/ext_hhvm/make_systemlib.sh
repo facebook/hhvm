@@ -1,12 +1,8 @@
 #!/bin/sh
 
-cd $FBCODE_DIR
-
 # fbconfig passes a couple --foo arguments.
 shift;
 shift;
-
-SYSTEMLIB=$INSTALL_DIR/systemlib.php
 
 lib=""
 if [ "$1" = "--lib" ] ; then
@@ -20,6 +16,11 @@ fi
 prefix=""
 if [ "$1" = "--rel" ] ; then
   prefix=$INSTALL_DIR/
+  shift
+fi
+
+if [ "$SYSTEMLIB" = "" ] ; then
+  SYSTEMLIB=$1/systemlib.php
   shift
 fi
 
@@ -40,8 +41,6 @@ for ii in $@; do
 
   BN=`basename $i`
   BNPHP=`basename $BN .php`
-  BNNSPHP=`basename $BN .ns.php`
-  BNHHAS=`basename $BN .hhas`
   if [ "$BNPHP.php" = "$BN" ]; then
     # First, .php files are included with their open tags stripped
     if head -1 $i | grep -qv '^<?\(php\|hh\)'; then
@@ -49,6 +48,7 @@ for ii in $@; do
       exit 1
     fi
     echo "" >> ${SYSTEMLIB}
+    BNNSPHP=`basename $BN .ns.php`
     if [ ! "$BNNSPHP.ns.php" = "$BN" ]; then
       echo "namespace {" >> ${SYSTEMLIB}
     fi
@@ -57,6 +57,7 @@ for ii in $@; do
       echo "}" >> ${SYSTEMLIB}
     fi
   else
+    BNHHAS=`basename $BN .hhas`
     if [ ! "$BNHHAS.hhas" = "$BN" ]; then
       echo "File $i is neither PHP nor HHAS source" >&2
       exit 1

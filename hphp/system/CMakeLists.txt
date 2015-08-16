@@ -54,12 +54,12 @@ endforeach()
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/systemlib.php
   DEPENDS "php.txt" ${SYSTEMLIB_SRCS}
-  COMMAND "INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR}"
-          "FBCODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../.."
-          "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_hhvm/make_systemlib.sh"
+  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_hhvm/make_systemlib.sh"
           "--install_dir=${CMAKE_CURRENT_BINARY_DIR}"
           "--fbcode_dir=${CMAKE_CURRENT_SOURCE_DIR}/.."
+          "${CMAKE_CURRENT_BINARY_DIR}"
           "${SYSTEMLIB_SRCS_STR}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../.."
   COMMENT "Generating systemlib.php")
 
 add_custom_target(

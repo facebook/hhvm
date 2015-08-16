@@ -1,0 +1,4 @@
+File "type_structure6.php", line 6, characters 28-30:
+Could not find class constant T in type C (Typing[4090])
+File "type_structure6.php", line 3, characters 7-7:
+Declaration of C is here

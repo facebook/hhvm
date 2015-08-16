@@ -1,0 +1,3 @@
+X
+File "type_structure10.php", line 8, characters 14-14:
+Type constants cannot be directly accessed. Use type_structure(ValidClassname::class, 'TypeConstName') instead (Typing[4150])

@@ -1,0 +1,5 @@
+File "type_structure5.php", line 6, characters 3-16:
+The two arguments to typc_structure() must be:
+ - first: ValidClassname::class or an object of that class
+ - second: a single-quoted string literal containing the name of a type constant of that class
+second argument is not a string (Typing[4150])

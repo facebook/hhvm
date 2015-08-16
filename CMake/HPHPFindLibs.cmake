@@ -112,6 +112,9 @@ endif()
 # CURL checks
 find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
+if (CURL_STATIC)
+  add_definitions("-DCURL_STATICLIB")
+endif()
 
 set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
 CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)

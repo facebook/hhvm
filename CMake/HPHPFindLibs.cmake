@@ -305,6 +305,9 @@ include_directories(${ONIGURUMA_INCLUDE_DIRS})
 # libpthreads
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
+if (LIBPTHREAD_STATIC)
+  add_definitions("-DPTW32_STATIC_LIB")
+endif()
 
 # Either Readline or Editline (for hphpd)
 find_package(Readline)

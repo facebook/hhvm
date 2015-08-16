@@ -31,7 +31,9 @@
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
+#ifndef _MSC_VER
 #include <folly/Subprocess.h>
+#endif
 #include <folly/String.h>
 
 #include "hphp/compiler/builtin_symbols.h"
@@ -9722,6 +9724,10 @@ UnitEmitter* makeFatalUnit(const char* filename, const MD5& md5,
 
 UnitEmitter* useExternalEmitter(const char* code, int codeLen,
                                 const char* filename, const MD5& md5) {
+#ifdef _MSC_VER
+  Logger::Error("The external emitter is not supported under MSVC!");
+  return nullptr;
+#else
   std::string hhas, errorOutput;
 
   try {
@@ -9766,6 +9772,7 @@ UnitEmitter* useExternalEmitter(const char* code, int codeLen,
     }
     return nullptr;
   }
+#endif
 }
 
 }

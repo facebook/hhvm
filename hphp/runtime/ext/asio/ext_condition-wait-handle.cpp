@@ -35,7 +35,7 @@ namespace {
   }
 
   NEVER_INLINE ATTRIBUTE_NORETURN
-  Object throwNotNotifiedException() {
+  void throwNotNotifiedException() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "ConditionWaitHandle not notified by its child");
   }

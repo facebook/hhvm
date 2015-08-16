@@ -89,12 +89,12 @@ inline bool checkSurpriseFlags() {
 }
 
 inline void setSurpriseFlag(SurpriseFlag flag) {
-  assertx(flag >= 1ul << 48);
+  assertx(flag >= 1ull << 48);
   stackLimitAndSurprise().fetch_or(flag);
 }
 
 inline bool getSurpriseFlag(SurpriseFlag flag) {
-  assertx(flag >= 1ul << 48);
+  assertx(flag >= 1ull << 48);
   return stackLimitAndSurprise().load() & flag;
 }
 

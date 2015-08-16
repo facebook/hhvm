@@ -145,7 +145,7 @@ struct CodeCache::Selector {
     Args& profile(bool isProf) { m_profile = isProf; return *this; }
 
    private:
-    friend class Selector;
+    friend struct Selector;
 
     CodeCache& m_cache;
     bool m_hot;

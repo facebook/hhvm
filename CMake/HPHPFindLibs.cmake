@@ -42,7 +42,7 @@ endif()
 
 # google-glog
 find_package(Glog REQUIRED)
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+if (LIBGLOG_STATIC)
   add_definitions("-DGOOGLE_GLOG_DLL_DECL=")
 endif()
 include_directories(${LIBGLOG_INCLUDE_DIR})

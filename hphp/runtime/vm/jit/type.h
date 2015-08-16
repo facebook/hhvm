@@ -322,7 +322,7 @@ private:
   static constexpr size_t kPtrBoxShift  = kBoxShift + kPtrShift;
 
 public:
-  enum TypedBits {
+  enum TypedBits : bits_t {
 #define IRT(name, bits)       k##name = (bits),
 #define IRTP(name, ptr, bits) k##name = (bits),
     IR_TYPES

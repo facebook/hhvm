@@ -104,6 +104,9 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
     return true;
   case AF_UNIX:
     {
+#ifdef _MSC_VER
+      address = String("Unsupported");
+#else
       // NB: an unnamed socket has no path, and sun_path should not be
       // inspected. In that case the length is just the size of the
       // struct without sun_path.
@@ -118,6 +121,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
       } else {
         address = empty_string();
       }
+#endif
     }
     return true;
 
@@ -198,12 +202,16 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
   switch (sock->getType()) {
   case AF_UNIX:
     {
+#ifdef _MSC_VER
+      return false;
+#else
       struct sockaddr_un *sa = (struct sockaddr_un *)sock_type;
       memset(sa, 0, sizeof(sa_storage));
       sa->sun_family = AF_UNIX;
       snprintf(sa->sun_path, 108, "%s", addr);
       sa_ptr = (struct sockaddr *)sa;
       sa_size = SUN_LEN(sa);
+#endif
     }
     break;
   case AF_INET:
@@ -1104,6 +1112,9 @@ Variant HHVM_FUNCTION(socket_sendto,
   switch (sock->getType()) {
   case AF_UNIX:
     {
+#ifdef _MSC_VER
+      retval = -1;
+#else
       struct sockaddr_un  s_un;
       memset(&s_un, 0, sizeof(s_un));
       s_un.sun_family = AF_UNIX;
@@ -1111,6 +1122,7 @@ Variant HHVM_FUNCTION(socket_sendto,
 
       retval = sendto(sock->fd(), buf.data(), len, flags,
                       (struct sockaddr *)&s_un, SUN_LEN(&s_un));
+#endif
     }
     break;
   case AF_INET:
@@ -1212,6 +1224,9 @@ Variant HHVM_FUNCTION(socket_recvfrom,
   switch (sock->getType()) {
   case AF_UNIX:
     {
+#ifdef _MSC_VER
+      return false;
+#else
       struct sockaddr_un s_un;
       slen = sizeof(s_un);
       memset(&s_un, 0, slen);
@@ -1227,6 +1242,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       recv_buf[retval] = 0;
       buf.assignIfRef(String(recv_buf, retval, AttachString));
       name.assignIfRef(String(s_un.sun_path, CopyString));
+#endif
     }
     break;
   case AF_INET:

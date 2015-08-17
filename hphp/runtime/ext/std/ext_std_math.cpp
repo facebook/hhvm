@@ -400,8 +400,10 @@ int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 
 // Note that MSVC's rand is actually thread-safe to begin with
 // so no changes are actually needed to make it so.
-#if defined(__APPLE__) || defined(_MSC_VER)
+#ifdef __APPLE__
 static bool s_rand_is_seeded = false;
+#elif defined(_MSC_VER)
+static __thread bool s_rand_is_seeded = false;
 #else
 struct RandomBuf {
   random_data data;
@@ -415,9 +417,12 @@ static __thread RandomBuf s_state;
 #endif
 
 static void randinit(uint32_t seed) {
-#if defined(__APPLE__) || defined(_MSC_VER)
+#ifdef __APPLE__
   s_rand_is_seeded = true;
   srandom(seed);
+#elif defined(_MSC_VER)
+  s_rand_is_seeded = true;
+  srand(seed);
 #else
   if (s_state.state == RandomBuf::Uninit) {
     initstate_r(seed, s_state.buf, sizeof s_state.buf, &s_state.data);
@@ -452,8 +457,10 @@ int64_t HHVM_FUNCTION(rand,
   }
 
   int64_t number;
-#if defined(__APPLE__) || defined(_MSC_VER)
+#ifdef __APPLE__
   number = random();
+#elif defined(_MSC_VER)
+  number = rand();
 #else
   int32_t numberIn;
   random_r(&s_state.data, &numberIn);

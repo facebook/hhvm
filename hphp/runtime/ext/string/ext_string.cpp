@@ -1772,8 +1772,15 @@ static inline uint16_t strtr_hash(const char *str, int len) {
     return res;
 }
 
+#ifdef __APPLE__
+// OS X (and I think BSD?) have the context argument to this function first, but
+// glibc has it last.
+static int strtr_compare_hash_suffix(void *ctx_g,
+                                     const void *p_a, const void *p_b) {
+#else
 static int strtr_compare_hash_suffix(const void *p_a, const void *p_b,
                                      void *ctx_g) {
+#endif
   auto   *a    = (PatAndRepl *)p_a;
   auto   *b    = (PatAndRepl *)p_b;
   auto   *pair = (std::pair <size_t, int> *)ctx_g;
@@ -1825,8 +1832,15 @@ void WuManberReplacement::initTables() {
   prefix.reserve(patterns.size());
 
   std::pair <size_t, int> pair(m, B);
+#ifdef __APPLE__
+  // OS X (and I think BSD?) have the last two arguments to qsort_r reversed
+  // from glibc.
+  qsort_r(&patterns[0], patterns.size(), sizeof(PatAndRepl),
+          &pair, strtr_compare_hash_suffix);
+#else
   qsort_r(&patterns[0], patterns.size(), sizeof(PatAndRepl),
           strtr_compare_hash_suffix, &pair);
+#endif
 
   {
     uint16_t last_h = -1; // assumes not all bits are used

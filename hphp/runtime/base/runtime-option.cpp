@@ -696,6 +696,24 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
   return messages;
 }
 
+void RuntimeOption::ReadSatelliteInfo(
+    const IniSettingMap& ini,
+    const Hdf& hdf,
+    std::vector<std::shared_ptr<SatelliteServerInfo>>& infos,
+    std::string& xboxPassword,
+    std::set<std::string>& xboxPasswords) {
+  auto ss_callback = [&] (const IniSettingMap &ini_ss, const Hdf &hdf_ss,
+                         const std::string &ini_ss_key) {
+    auto satellite = std::make_shared<SatelliteServerInfo>(ini_ss, hdf_ss,
+                                                           ini_ss_key);
+    infos.push_back(satellite);
+    if (satellite->getType() == SatelliteServer::Type::KindOfRPCServer) {
+      xboxPassword = satellite->getPassword();
+      xboxPasswords = satellite->getPasswords();
+    }
+  };
+  Config::Iterate(ss_callback, ini, hdf, "Satellites");
+}
 
 void RuntimeOption::Load(
   IniSetting::Map& ini, Hdf& config,
@@ -1372,17 +1390,8 @@ void RuntimeOption::Load(
     IpBlocks = std::make_shared<IpBlockMap>(ini, config);
   }
   {
-    if (config["Satellites"].exists()) {
-      for (Hdf hdf = config["Satellites"].firstChild(); hdf.exists();
-           hdf = hdf.next()) {
-        auto satellite = std::make_shared<SatelliteServerInfo>(ini, hdf);
-        SatelliteServerInfos.push_back(satellite);
-        if (satellite->getType() == SatelliteServer::Type::KindOfRPCServer) {
-          XboxPassword = satellite->getPassword();
-          XboxPasswords = satellite->getPasswords();
-        }
-      }
-    }
+    ReadSatelliteInfo(ini, config, SatelliteServerInfos,
+                      XboxPassword, XboxPasswords);
   }
   {
     // Xbox

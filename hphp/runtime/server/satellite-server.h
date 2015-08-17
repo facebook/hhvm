@@ -74,7 +74,8 @@ public:
   static bool checkMainURL(const std::string& path);
 
 public:
-  explicit SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf);
+  SatelliteServerInfo(const IniSetting::Map& ini, const Hdf& hdf,
+                      const std::string& ini_key = "");
 
   const std::string &getName() const { return m_name;}
   SatelliteServer::Type getType() const { return m_type;}

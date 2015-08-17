@@ -64,6 +64,14 @@ public:
     return strcmp(ExecutionMode, "cli") == 0;
   }
 
+  static void ReadSatelliteInfo(
+    const IniSettingMap& ini,
+    const Hdf& hdf,
+    std::vector<std::shared_ptr<SatelliteServerInfo>>& infos,
+    std::string& xboxPassword,
+    std::set<std::string>& xboxPasswords
+  );
+
   static const char *ExecutionMode;
   static std::string BuildId;
   static std::string InstanceId;

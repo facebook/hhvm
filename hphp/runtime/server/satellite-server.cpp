@@ -33,7 +33,11 @@ namespace HPHP {
 std::set<std::string> SatelliteServerInfo::InternalURLs;
 int SatelliteServerInfo::DanglingServerPort = 0;
 
-SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf) {
+SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
+                                         const Hdf& hdf,
+                                         const std::string& ini_key /* = "" */
+                                        ) {
+  m_name = hdf.exists() && !hdf.isEmpty() ? hdf.getName() : ini_key;
   m_name = hdf.getName();
   m_port = Config::GetUInt16(ini, hdf, "Port", 0, false);
   m_threadCount = Config::GetInt32(ini, hdf, "ThreadCount", 5, false);

@@ -42,6 +42,7 @@ class TestCppBase : public TestBase {
   bool TestIpBlockMap();
   bool TestIpBlockMapIni();
   bool TestSatelliteServer();
+  bool TestSatelliteServerIni();
   bool TestVirtualHost();
   bool TestVirtualHostIni();
   bool TestCollectionHdf();

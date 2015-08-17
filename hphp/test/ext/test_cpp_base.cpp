@@ -40,6 +40,7 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestIpBlockMap);
   RUN_TEST(TestIpBlockMapIni);
   RUN_TEST(TestSatelliteServer);
+  RUN_TEST(TestSatelliteServerIni);
   RUN_TEST(TestVirtualHost);
   RUN_TEST(TestVirtualHostIni);
   RUN_TEST(TestCollectionHdf);
@@ -282,39 +283,82 @@ bool TestCppBase::TestSatelliteServer() {
   );
 
 
-  std::vector<SatelliteServerInfo> infos;
-  if (hdf["Satellites"].exists()) {
-    for (Hdf c = hdf["Satellites"].firstChild(); c.exists(); c = c.next()) {
-      auto satellite = SatelliteServerInfo(ini, hdf);
-      infos.push_back(satellite);
-      if (satellite.getType() == SatelliteServer::Type::KindOfRPCServer) {
-        RuntimeOption::XboxPassword = satellite.getPassword();
-        RuntimeOption::XboxPasswords = satellite.getPasswords();
-      }
-    }
-  }
-
-  for (auto& info : infos) {
-    auto name = info.getName();
+  std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
+  RuntimeOption::ReadSatelliteInfo(ini, hdf, infos,
+                                   RuntimeOption::XboxPassword,
+                                   RuntimeOption::XboxPasswords);
+  for (auto& info_ptr : infos) {
+    auto info = info_ptr.get();
+    auto name = info->getName();
     if (name == "rpc") {
-      VERIFY(info.getType() == SatelliteServer::Type::KindOfRPCServer);
-      VERIFY(info.getPort() == 9999);
-      VERIFY(info.getThreadCount() == 5);
-      VERIFY(info.getTimeoutSeconds() ==
+      VERIFY(info->getType() == SatelliteServer::Type::KindOfRPCServer);
+      VERIFY(info->getPort() == 9999);
+      VERIFY(info->getThreadCount() == 5);
+      VERIFY(info->getTimeoutSeconds() ==
         std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
-      VERIFY(info.getURLs().size() == 0);
-      VERIFY(info.getMaxRequest() == 500);
-      VERIFY(info.getMaxDuration() == 120);
-      VERIFY(info.getReqInitFunc() == "init_me");
-      VERIFY(info.getReqInitDoc() == "my/rpc/rpc.php");
-      VERIFY(info.getPassword() == "abcd0987");
-      VERIFY(info.getPasswords().size() == 1);
-      VERIFY(info.getPasswords().find("abcd0987") != info.getPasswords().end());
-      VERIFY(info.alwaysReset() == false);
+      VERIFY(info->getURLs().size() == 0);
+      VERIFY(info->getMaxRequest() == 500);
+      VERIFY(info->getMaxDuration() == 120);
+      VERIFY(info->getReqInitFunc() == "init_me");
+      VERIFY(info->getReqInitDoc() == "my/rpc/rpc.php");
+      VERIFY(info->getPassword() == "abcd0987");
+      VERIFY(info->getPasswords().size() == 1);
+      VERIFY(info->getPasswords().find("abcd0987") !=
+             info->getPasswords().end());
+      VERIFY(info->alwaysReset() == false);
       VERIFY(RuntimeOption::XboxPassword == "abcd0987");
     } else if (name == "ips") {
-      VERIFY(info.getType() == SatelliteServer::Type::KindOfInternalPageServer);
-      VERIFY(info.getURLs().size() == 0);
+      VERIFY(info->getType() ==
+             SatelliteServer::Type::KindOfInternalPageServer);
+      VERIFY(info->getURLs().size() == 0);
+    }
+  }
+  return Count(true);
+}
+
+bool TestCppBase::TestSatelliteServerIni() {
+  std::string iniStr =
+    "hhvm.satellites[rpc][type] = RPCServer\n"
+    "hhvm.satellites[rpc][port] = 9999\n"
+    "hhvm.satellites[rpc][request_init_document] = my/rpc/rpc.php\n"
+    "hhvm.satellites[rpc][request_init_function] = init_me\n"
+    "hhvm.satellites[rpc][password] = abcd0987\n"
+    "hhvm.satellites[rpc][passwords][] = abcd0987\n"
+    "hhvm.satellites[ips][type] = InternalPageServer\n"
+    "hhvm.satellites[ips][block_main_server] = false\n";
+
+  IniSettingMap ini = IniSetting::Map::object;
+  Hdf empty;
+  Config::ParseIniString(iniStr, ini);
+
+  std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
+  RuntimeOption::ReadSatelliteInfo(ini, empty, infos,
+                                   RuntimeOption::XboxPassword,
+                                   RuntimeOption::XboxPasswords);
+  for (auto& info_ptr : infos) {
+    auto info = info_ptr.get();
+    auto name = info->getName();
+    if (name == "rpc") {
+      VERIFY(info->getType() == SatelliteServer::Type::KindOfRPCServer);
+      VERIFY(info->getPort() == 9999);
+      VERIFY(info->getThreadCount() == 5);
+      VERIFY(info->getTimeoutSeconds() ==
+        std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
+      VERIFY(info->getURLs().size() == 0);
+      VERIFY(info->getMaxRequest() == 500);
+      VERIFY(info->getMaxDuration() == 120);
+      VERIFY(info->getReqInitFunc() == "init_me");
+      VERIFY(info->getReqInitDoc() == "my/rpc/rpc.php");
+      VERIFY(info->getPassword() == "abcd0987");
+      VERIFY(info->getPasswords().size() == 1);
+      VERIFY(info->getPasswords().find("abcd0987") !=
+             info->getPasswords().end());
+      VERIFY(info->alwaysReset() == false);
+      VERIFY(RuntimeOption::XboxPassword == "abcd0987");
+    } else if (name == "ips") {
+      VERIFY(info->getType() ==
+             SatelliteServer::Type::KindOfInternalPageServer);
+      VERIFY(info->getURLs().size() == 0);
     }
   }
   return Count(true);

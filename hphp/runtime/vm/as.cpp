@@ -1998,7 +1998,10 @@ void parse_property(AsmState& as) {
 }
 
 /*
- * directive-const : identifier member-tv-initializer
+ * const-flags     : isType
+ *                 ;
+ *
+ * directive-const : identifier const-flags member-tv-initializer
  *                 ;
  */
 void parse_constant(AsmState& as) {
@@ -2009,11 +2012,12 @@ void parse_constant(AsmState& as) {
     as.error("expected name for constant");
   }
 
+  bool isType = as.in.tryConsume("isType");
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addConstant(makeStaticString(name),
                       staticEmptyString(), &tvInit,
                       staticEmptyString(),
-                      /* type constant = */ false);
+                      isType);
 }
 
 /*

@@ -74,25 +74,8 @@ const String& ResourceData::o_getClassNameHook() const {
   throw FatalErrorException("Resource did not provide a name");
 }
 
-static void serializeResourceImpl(const ResourceData* res,
-                                  VariableSerializer* serializer) {
-  serializer->pushResourceInfo(res->o_getResourceName(), res->getId());
-  serializeArray(empty_array(), serializer);
-  serializer->popResourceInfo();
-}
-
 const String& ResourceData::o_getResourceName() const {
   return o_getClassName();
-}
-
-void serializeResource(const ResourceData* res,
-                       VariableSerializer* serializer) {
-  if (UNLIKELY(serializer->incNestedLevel((void*)res, true))) {
-    serializer->writeOverflow((void*)res, true);
-  } else {
-    serializeResourceImpl(res, serializer);
-  }
-  serializer->decNestedLevel((void*)res);
 }
 
 void ResourceHdr::compileTimeAssertions() {

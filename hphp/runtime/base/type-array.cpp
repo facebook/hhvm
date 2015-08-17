@@ -730,18 +730,6 @@ void Array::prepend(const Variant& v) {
   if (newarr != m_arr) m_arr = Ptr::attach(newarr);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// output functions
-
-void serializeArray(const Array& arr, VariableSerializer* serializer,
-                    bool isObject /* = false */) {
-  if (!arr.isNull()) {
-    serializeArray(arr.get(), serializer, isObject);
-  } else {
-    serializer->writeNull();
-  }
-}
-
 void Array::unserialize(VariableUnserializer *uns) {
   int64_t size = uns->readInt();
   uns->expectChar(':');

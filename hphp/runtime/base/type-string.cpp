@@ -505,17 +505,6 @@ bool String::operator<(const Variant& v) const {
   return HPHP::less(get(), v);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// input/output
-
-void serializeString(const String& str, VariableSerializer* serializer) {
-  if (str) {
-    serializer->write(str.data(), str.size());
-  } else {
-    serializer->writeNull();
-  }
-}
-
 void String::unserialize(VariableUnserializer *uns,
                          char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {

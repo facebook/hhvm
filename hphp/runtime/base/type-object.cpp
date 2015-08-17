@@ -82,14 +82,6 @@ const char* Object::classname_cstr() const {
   return m_obj->getClassName().c_str();
 }
 
-void serializeObject(const Object& obj, VariableSerializer* serializer) {
-  if (obj) {
-    serializeObject(obj.get(), serializer);
-  } else {
-    serializer->writeNull();
-  }
-}
-
 void Object::setToDefaultObject() {
   raise_warning(Strings::CREATING_DEFAULT_OBJECT);
   operator=(SystemLib::AllocStdClassObject());

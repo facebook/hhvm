@@ -159,55 +159,6 @@ void unserialize(ObjectData* obj, VariableUnserializer* uns,
 
 }// namespace collections
 
-void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
-  int64_t sz = getCollectionSize(obj);
-  auto type = obj->collectionType();
-
-  if (isMapCollection(type)) {
-    serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'K');
-    serializer->writeArrayHeader(sz, false);
-    for (ArrayIter iter(obj); iter; ++iter) {
-      serializer->writeCollectionKey(iter.first());
-      serializer->writeArrayValue(iter.second());
-    }
-    serializer->writeArrayFooter();
-
-  } else {
-    assertx(isVectorCollection(type) ||
-            isSetCollection(type) ||
-            (type == CollectionType::Pair));
-    serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'V');
-    serializer->writeArrayHeader(sz, true);
-    auto ser_type = serializer->getType();
-    if (ser_type == VariableSerializer::Type::Serialize ||
-        ser_type == VariableSerializer::Type::APCSerialize ||
-        ser_type == VariableSerializer::Type::DebuggerSerialize ||
-        ser_type == VariableSerializer::Type::VarExport ||
-        ser_type == VariableSerializer::Type::PHPOutput) {
-      // For the 'V' serialization format, we don't print out keys
-      // for Serialize, APCSerialize, DebuggerSerialize
-      for (ArrayIter iter(obj); iter; ++iter) {
-        serializer->writeCollectionKeylessPrefix();
-        serializer->writeArrayValue(iter.second());
-      }
-    } else {
-      if (isSetCollection(type)) {
-        for (ArrayIter iter(obj); iter; ++iter) {
-          serializer->writeCollectionKeylessPrefix();
-          serializer->writeArrayValue(iter.second());
-        }
-      } else {
-        for (ArrayIter iter(obj); iter; ++iter) {
-          serializer->writeCollectionKey(iter.first());
-          serializer->writeArrayValue(iter.second());
-        }
-      }
-    }
-    serializer->writeArrayFooter();
-  }
-  serializer->popObjectInfo();
-}
-
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Copying

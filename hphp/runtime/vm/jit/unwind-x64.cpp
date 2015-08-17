@@ -18,7 +18,9 @@
 
 #include <vector>
 #include <memory>
+#ifndef _MSC_VER
 #include <cxxabi.h>
+#endif
 #include <boost/mpl/identity.hpp>
 
 #include "hphp/runtime/base/rds.h"
@@ -37,7 +39,7 @@
 // or use the rtlinstallfunctiontablecallback
 // register_frame and deregister_frame do not exist
 // this is a temp solution that provides empty placeholders for linking
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
 void __register_frame(const void*) {}
 void __deregister_frame(const void*) {}
 #else
@@ -146,8 +148,10 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // endCatchHelper can pass it to _Unwind_Resume when it's done.
   if (do_side_exit) {
     unwindRdsInfo->exn = nullptr;
+#ifndef _MSC_VER
     __cxxabiv1::__cxa_begin_catch(exn);
     __cxxabiv1::__cxa_end_catch();
+#endif
   } else {
     unwindRdsInfo->exn = exn;
   }
@@ -207,10 +211,14 @@ tc_unwind_personality(int version,
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
     DEBUG_ONLY auto const* unwindType =
       (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";
+#ifdef HAVE_CXXABI_H
     int status;
-    auto* exnType = __cxa_demangle(ti.name(), nullptr, nullptr, &status);
+    auto* exnType = abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assertx(status == 0);
+#else
+    auto* exnType = ti.name();
+#endif
     FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}\n",
            unwindType, exceptionObj,
            tl_regState == VMRegState::DIRTY ? "dirty" : "clean",

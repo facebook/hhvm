@@ -47,8 +47,10 @@ UNUSED static std::string statToString(const struct stat* buf) {
   os <<   "gid="                << buf->st_gid                 << ", ";
   os <<   "rdev="               << buf->st_rdev                << ", ";
   os <<   "size="               << buf->st_size                << ", ";
+#ifndef _MSC_VER
   os <<   "blksize="            << buf->st_blksize             << ", ";
   os <<   "blocks="             << buf->st_blocks              << ", ";
+#endif
   os <<   "atime="              << buf->st_atime               << ", ";
   os <<   "mtime="              << buf->st_mtime               << ", ";
   os <<   "ctime="              << buf->st_ctime;
@@ -65,8 +67,10 @@ UNUSED static bool statEquiv(const struct stat* stA, const struct stat* stB) {
           && stA->st_gid == stB->st_gid
           && stA->st_rdev == stB->st_rdev
           && stA->st_size == stB->st_size
+#ifndef _MSC_VER
           && stA->st_blksize == stB->st_blksize
           && stA->st_blocks == stB->st_blocks
+#endif
           /* Intentionally omitted:
           && stA->st_atime == stB->st_atime
           */

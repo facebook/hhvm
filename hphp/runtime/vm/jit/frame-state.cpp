@@ -133,6 +133,33 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
 
+  // The tracked FPI state must always be the same, notice that the size of the
+  // FPI stacks may differ as the FPush associated with one of the merged blocks
+  // may be outside the region. In this case we must drop the unknown state.
+  dst.fpiStack.resize(std::min(dst.fpiStack.size(), src.fpiStack.size()));
+  for (int i = 0; i < dst.fpiStack.size(); ++i) {
+    auto& dstInfo = dst.fpiStack[i];
+    auto const& srcInfo = src.fpiStack[i];
+
+    always_assert(dstInfo.returnSP == srcInfo.returnSP);
+    always_assert(dstInfo.returnSPOff == srcInfo.returnSPOff);
+
+    // If one of the merged edges was interp'ed forget the FPush kind
+    if (dstInfo.kind != srcInfo.kind) {
+      always_assert(dstInfo.kind == FPIInfo::SpillKind::FPushUnknown ||
+                    srcInfo.kind == FPIInfo::SpillKind::FPushUnknown);
+
+      dstInfo.kind = FPIInfo::SpillKind::FPushUnknown;
+      changed = true;
+    }
+
+    // Merge the contexts from the respective spills
+    if (dstInfo.ctx != srcInfo.ctx) {
+      dstInfo.ctx = least_common_ancestor(dstInfo.ctx, srcInfo.ctx);
+      changed = true;
+    }
+  }
+
   // This is available iff it's available in both states
   if (merge_util(dst.thisAvailable, dst.thisAvailable && src.thisAvailable)) {
     changed = true;
@@ -337,6 +364,10 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       }
       cur().syncedSpLevel -= extra->numParams + kNumActRecCells;
       cur().syncedSpLevel += 1;
+
+      if (!cur().fpiStack.empty()) {
+        cur().fpiStack.pop_front();
+      }
     }
     break;
 
@@ -358,6 +389,10 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
         cur().syncedSpLevel = inst->marker().spOff();
       }
       cur().syncedSpLevel -= kNumActRecCells;
+
+      if (!cur().fpiStack.empty()) {
+        cur().fpiStack.pop_front();
+      }
     }
     break;
 
@@ -515,15 +550,27 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case CufIterSpillFrame:
-    spillFrameStack(inst->extra<CufIterSpillFrame>()->spOffset);
+    spillFrameStack(inst->extra<CufIterSpillFrame>()->spOffset,
+                    cur().spOffset, nullptr);
     break;
   case SpillFrame:
-    spillFrameStack(inst->extra<SpillFrame>()->spOffset);
+    spillFrameStack(inst->extra<SpillFrame>()->spOffset,
+                    cur().syncedSpLevel, inst);
     break;
 
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
+
+    auto& iInfo = getInstrInfo(extra.opcode);
+    if (iInfo.type == jit::InstrFlags::OutFDesc) {
+      cur().fpiStack.push_front(FPIInfo { cur().spValue,
+                                          cur().spOffset,
+                                          nullptr,
+                                          FPIInfo::SpillKind::FPushUnknown });
+    } else if (isFCallStar(extra.opcode) && !cur().fpiStack.empty()) {
+      cur().fpiStack.pop_front();
+    }
 
     assertx(!extra.smashesAllLocals || extra.nChangedLocals == 0);
     if (extra.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
@@ -881,6 +928,11 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   always_assert(calleeSP == cur().spValue);
 
   /*
+   * Remove the callee from the FPI Stack.
+   */
+  cur().fpiStack.pop_front();
+
+  /*
    * Push a new state for the inlined callee; saving the state we'll need to
    * pop on return.
    */
@@ -1136,11 +1188,20 @@ void FrameStateMgr::setBoxedStkPrediction(IRSPOffset offset, Type type) {
   state.predictedType = state.type & type;
 }
 
-void FrameStateMgr::spillFrameStack(IRSPOffset offset) {
+void FrameStateMgr::spillFrameStack(IRSPOffset offset, FPInvOffset retOffset,
+                                    const IRInstruction* inst) {
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setStackValue(offset + i, nullptr);
   }
+  auto const kind =
+      !inst ? FPIInfo::SpillKind::FPushUnknown
+    : !inst->src(2) ? FPIInfo::SpillKind::FPushFunc
+    : inst->extra<ActRecInfo>()->fromFPushCtor ? FPIInfo::SpillKind::FPushCtor
+    : FPIInfo::SpillKind::FPushMethod;
+
+  auto const ctx  = inst ? inst->src(2) : nullptr;
   cur().syncedSpLevel += kNumActRecCells;
+  cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, kind });
 }
 
 void FrameStateMgr::refineStackType(IRSPOffset offset,

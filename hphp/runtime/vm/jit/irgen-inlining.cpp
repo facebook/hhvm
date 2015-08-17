@@ -54,7 +54,9 @@ bool beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
                    Offset returnBcOffset) {
-  assertx(!env.fpiStack.empty() &&
+  auto const& fpiStack = env.irb->fpiStack();
+
+  assertx(!fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
   assertx(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
   assertx(curFunc(env)->base() + returnBcOffset < curFunc(env)->past() &&
@@ -67,8 +69,8 @@ bool beginInlining(IRGS& env,
     params[numParams - i - 1] = popF(env);
   }
 
-  auto const prevSP    = env.fpiStack.top().returnSP;
-  auto const prevSPOff = env.fpiStack.top().returnSPOff;
+  auto const prevSP    = fpiStack.front().returnSP;
+  auto const prevSPOff = fpiStack.front().returnSPOff;
   spillStack(env);
   auto const calleeSP  = sp(env);
 
@@ -77,17 +79,15 @@ bool beginInlining(IRGS& env,
     "FPI stack pointer and callee stack pointer didn't match in beginInlining"
   );
 
-  // This can only happen if the code is unreachable, in which case
-  // the FPush* can punt if it gets a TBottom.
-  if (env.fpiStack.top().spillFrame == nullptr) return false;
-
-  auto const sframe = env.fpiStack.top().spillFrame;
+  always_assert(fpiStack.front().ctx ||
+                fpiStack.front().kind == FPIInfo::SpillKind::FPushFunc);
+  always_assert(fpiStack.front().kind != FPIInfo::SpillKind::FPushUnknown);
 
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
-  data.fromFPushCtor = sframe->extra<ActRecInfo>()->fromFPushCtor;
-  data.ctx           = sframe->src(2);
+  data.fromFPushCtor = fpiStack.front().kind == FPIInfo::SpillKind::FPushCtor;
+  data.ctx           = fpiStack.front().ctx;
   data.retSPOff      = prevSPOff;
   data.spOffset      = offsetFromIRSP(env, BCSPOffset{0});
 
@@ -121,15 +121,10 @@ bool beginInlining(IRGS& env,
     stLocRaw(env, argNum, calleeFP, cns(env, staticEmptyArray()));
   }
 
-  env.fpiActiveStack.push(std::make_pair(env.fpiStack.top().returnSP,
-                                         env.fpiStack.top().returnSPOff));
-  env.fpiStack.pop();
-
   return true;
 }
 
 void endInlinedCommon(IRGS& env) {
-  assertx(!env.fpiActiveStack.empty());
   assertx(!curFunc(env)->isPseudoMain());
 
   assertx(!resumed(env));
@@ -144,8 +139,6 @@ void endInlinedCommon(IRGS& env) {
   env.inlineLevel--;
   env.bcStateStack.pop_back();
   always_assert(env.bcStateStack.size() > 0);
-
-  env.fpiActiveStack.pop();
 
   updateMarker(env);
 

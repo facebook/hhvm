@@ -481,13 +481,18 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
 
   auto callee = m_inst.funcd;
 
+  auto const& fpiStack = m_irgs.irb->fpiStack();
   // Make sure the FPushOp wasn't interpreted.
-  if (m_irgs.fpiStack.empty()) {
+  if (fpiStack.empty()) {
     return refuse("fpistack empty; fpush was in a different region");
   }
-  auto spillFrame = m_irgs.fpiStack.top().spillFrame;
-  if (!spillFrame) {
+  auto const& info = fpiStack.front();
+  if (info.kind == FPIInfo::SpillKind::FPushUnknown) {
     return refuse("couldn't find SpillFrame for FPushOp");
+  }
+
+  if (info.kind != FPIInfo::SpillKind::FPushFunc && !info.ctx) {
+    return refuse("Couldn't find context for SpillFrame");
   }
 
   auto numArgs = m_inst.imm[0].u_IVA;

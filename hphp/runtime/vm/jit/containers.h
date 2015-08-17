@@ -78,6 +78,9 @@ using array = std::array<T, N>;
 template<class T>
 using vector = std::vector<T>;
 
+template<class T>
+using deque = std::deque<T>;
+
 template<class T, class Container = std::deque<T>>
 using stack = std::stack<T,Container>;
 

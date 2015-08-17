@@ -124,6 +124,7 @@ struct IRBuilder {
   FPInvOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
+  const jit::deque<FPIInfo>& fpiStack() const { return m_state.fpiStack(); }
   Type localType(uint32_t id, TypeConstraint tc);
   Type stackType(IRSPOffset, TypeConstraint tc);
   Type predictedInnerType(uint32_t id);

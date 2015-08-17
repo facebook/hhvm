@@ -42,6 +42,20 @@ struct SSATmp;
 Type refinePredictedType(Type oldPrediction, Type newPrediction, Type proven);
 Type updatePredictedType(Type predictedType, Type provenType);
 
+struct FPIInfo {
+  enum class SpillKind {
+    FPushCtor,
+    FPushMethod,
+    FPushFunc,
+    FPushUnknown
+  };
+
+  SSATmp* returnSP;
+  FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
+  SSATmp* ctx;
+  SpillKind kind;
+};
+
 struct EvalStack {
   void push(SSATmp* tmp) {
     m_vector.push_back(tmp);
@@ -190,6 +204,13 @@ struct FrameState {
   uint32_t stackDeficit{0};
   FPInvOffset syncedSpLevel{0};
   EvalStack evalStack;
+
+  /*
+   * The FPI stack is used for inlining---when we start inlining at an FCall,
+   * we look in here to find a definition of the StkPtr,offset that can be used
+   * after the inlined callee "returns".
+   */
+  jit::deque<FPIInfo> fpiStack;
 
   /*
    * The values in the eval stack that are already in memory, either above or
@@ -354,6 +375,8 @@ struct FrameStateMgr final {
   TypeSourceSet stackTypeSources(IRSPOffset) const;
   void refineStackPredictedType(IRSPOffset, Type);
 
+  const jit::deque<FPIInfo>& fpiStack() const { return cur().fpiStack; }
+
   /*
    * Call a function with const access to the LocalState& for each local we're
    * tracking.
@@ -448,7 +471,7 @@ private: // stack tracking helpers
   void refineStackType(IRSPOffset, Type, TypeSource typeSrc);
   void clearStackForCall();
   void setBoxedStkPrediction(IRSPOffset, Type type);
-  void spillFrameStack(IRSPOffset);
+  void spillFrameStack(IRSPOffset, FPInvOffset, const IRInstruction*);
 
 private:
   Status m_status{Status::None};

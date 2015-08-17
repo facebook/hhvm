@@ -429,13 +429,6 @@ void interpOne(IRGS& env,
   env.irb->exceptionStackBoundary();
   auto const op = unit->getOpcode(bcOff(env));
 
-  auto& iInfo = getInstrInfo(op);
-  if (iInfo.type == jit::InstrFlags::OutFDesc) {
-    env.fpiStack.push(FPIInfo { sp(env), env.irb->spOffset(), nullptr });
-  } else if (isFCallStar(op) && !env.fpiStack.empty()) {
-    env.fpiStack.pop();
-  }
-
   idata.bcOff = bcOff(env);
   idata.cellsPopped = popped;
   idata.cellsPushed = pushed;

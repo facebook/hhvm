@@ -35,12 +35,6 @@ struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
-struct FPIInfo {
-  SSATmp* returnSP;
-  FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
-  IRInstruction* spillFrame;
-};
-
 /*
  * IR-Generation State.
  *
@@ -102,20 +96,6 @@ struct IRGS {
    * for this region.
    */
   bool lastBcInst{false};
-
-  /*
-   * The FPI stack is used for inlining---when we start inlining at an FCall,
-   * we look in here to find a definition of the StkPtr,offset that can be used
-   * after the inlined callee "returns".
-   */
-  std::stack<FPIInfo> fpiStack;
-
-  /*
-   * When we know that a call site is being inlined we add its StkPtr
-   * offset pair to this stack to prevent it from being erroneously
-   * popped during an FCall.
-   */
-  std::stack<std::pair<SSATmp*,FPInvOffset>> fpiActiveStack;
 
   /*
    * The function to use to create catch blocks when instructions that can

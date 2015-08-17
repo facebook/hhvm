@@ -671,7 +671,6 @@ void fpushActRec(IRGS& env,
                  const StringData* invName,
                  bool fromFPushCtor) {
   spillStack(env);
-  auto const returnSPOff = env.irb->syncedSpLevel();
 
   ActRecInfo info;
   info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
@@ -686,10 +685,6 @@ void fpushActRec(IRGS& env,
     func,
     objOrClass
   );
-  auto const sframe = &env.irb->curBlock()->back();
-  assertx(sframe->is(SpillFrame));
-
-  env.fpiStack.push(FPIInfo { sp(env), returnSPOff, sframe });
 
   assertx(env.irb->stackDeficit() == 0);
 }
@@ -698,7 +693,6 @@ void fpushActRec(IRGS& env,
 
 void emitFPushCufIter(IRGS& env, int32_t numParams, int32_t itId) {
   spillStack(env);
-  env.fpiStack.push(FPIInfo { sp(env), env.irb->spOffset(), nullptr });
   gen(
     env,
     CufIterSpillFrame,
@@ -1155,10 +1149,6 @@ void emitFCall(IRGS& env, int32_t numParams) {
     sp(env),
     fp(env)
   );
-
-  if (!env.fpiStack.empty()) {
-    env.fpiStack.pop();
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

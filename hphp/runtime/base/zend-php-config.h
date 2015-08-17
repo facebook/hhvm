@@ -883,8 +883,10 @@
 /* Have HASH Extension */
 #define HAVE_HASH_EXT 1
 
+#ifndef _MSC_VER
 /* Define to 1 if you have the `hstrerror' function. */
 #define HAVE_HSTRERROR 1
+#endif
 
 /* */
 #define HAVE_HTONL 1
@@ -1823,6 +1825,7 @@
    */
 /* #undef HAVE_SYS_NDIR_H */
 
+#ifndef _MSC_VER
 /* Define to 1 if you have the <sys/param.h> header file. */
 #define HAVE_SYS_PARAM_H 1
 
@@ -1843,6 +1846,7 @@
 
 /* Define to 1 if you have the <sys/statvfs.h> header file. */
 #define HAVE_SYS_STATVFS_H 1
+#endif
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 /* #undef HAVE_SYS_STAT_H */
@@ -1853,12 +1857,15 @@
 /* Define to 1 if you have the <sys/times.h> header file. */
 /* #undef HAVE_SYS_TIMES_H */
 
+#ifndef _MSC_VER
 /* Define to 1 if you have the <sys/time.h> header file. */
 #define HAVE_SYS_TIME_H 1
+#endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
+#ifndef _MSC_VER
 /* Define to 1 if you have the <sys/un.h> header file. */
 #define HAVE_SYS_UN_H 1
 
@@ -1873,6 +1880,7 @@
 
 /* Define to 1 if you have the <sys/wait.h> header file. */
 #define HAVE_SYS_WAIT_H 1
+#endif
 
 /* Define to 1 if you have the `tempnam' function. */
 #define HAVE_TEMPNAM 1
@@ -2235,8 +2243,10 @@
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
+#ifndef _MSC_VER
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME 1
+#endif
 
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 /* #undef TM_IN_SYS_TIME */

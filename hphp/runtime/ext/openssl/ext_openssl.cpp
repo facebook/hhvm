@@ -2417,6 +2417,10 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
   long gmadjust = 0;
 #if HAVE_TM_GMTOFF
   gmadjust = thetime.tm_gmtoff;
+#elif defined(_MSC_VER)
+  TIME_ZONE_INFORMATION inf;
+  GetTimeZoneInformation(&inf);
+  gmadjust = thetime.tm_isdst ? inf.DaylightBias : inf.StandardBias;
 #else
   /**
    * If correcting for daylight savings time, we set the adjustment to

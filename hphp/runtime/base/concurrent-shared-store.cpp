@@ -675,6 +675,31 @@ void ConcurrentTableSharedStore::primeDone() {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging and info/stats support
 
+EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
+                                                    StoreValue* sval,
+                                                    int64_t curr_time) {
+  int32_t size;
+  auto type = EntryInfo::Type::Unknown;
+  auto const inMem = sval->data.match(
+      [&](APCHandle* handle) {
+        size = sval->dataSize;
+        type = EntryInfo::getAPCType(handle);
+        return true;
+      },
+      [&](char*) {
+        size = sval->getSerializedSize();
+        return false;
+      });
+
+  int64_t ttl = 0;
+  if (inMem && sval->expire) {
+    ttl = sval->expire - curr_time;
+    if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
+  }
+
+  return EntryInfo(key, inMem, size, ttl, type);
+}
+
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
   auto entries = std::vector<EntryInfo>{};
 
@@ -684,30 +709,8 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
   {
     WriteLock l(m_lock);
     for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
-      const auto key = iter->first;
-      const auto sval = &iter->second;
-
-      int32_t size;
-      auto type = EntryInfo::Type::Unknown;
-      auto const inMem = sval->data.match(
-        [&] (APCHandle* handle) {
-          size = sval->dataSize;
-          type = EntryInfo::getAPCType(handle);
-          return true;
-        },
-        [&] (char*) {
-          size = sval->getSerializedSize();
-          return false;
-        }
-      );
-
-      int64_t ttl = 0;
-      if (inMem && sval->expire) {
-        ttl = sval->expire - curr_time;
-        if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
-      }
-
-      entries.emplace_back(key, inMem, size, ttl, type);
+      entries.push_back(
+          std::move(makeEntryInfo(iter->first, &iter->second, curr_time)));
     }
   }
   std::sort(entries.begin(), entries.end(),
@@ -781,19 +784,21 @@ void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
   Logger::Info("dumping apc done");
 }
 
-void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream &out,
+void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream& out,
                                                 uint32_t count) {
+  out << "key inmem size ttl type\n";
   for (; count > 0; count--) {
-    m_vars.getRandomAPCEntry(out);
+    m_vars.dumpRandomAPCEntry(out);
   }
 }
 
 template<typename Key, typename T, typename HashCompare>
 void ConcurrentTableSharedStore
       ::APCMap<Key,T,HashCompare>
-      ::getRandomAPCEntry(std::ostream &out) {
+      ::dumpRandomAPCEntry(std::ostream &out) {
 #if TBB_VERSION_MAJOR == 4 && TBB_VERSION_MINOR == 0
   while (this->my_size > 0) {
+    int64_t curr_time = time(nullptr);
     auto randIndex = rand() % this->my_size;
     auto mahBucket = this->segment_index_of(randIndex);
     auto segmentIndex = randIndex - this->segment_base(mahBucket);
@@ -811,7 +816,12 @@ void ConcurrentTableSharedStore
         auto apcPair =
           (reinterpret_cast<std::pair<const char *, StoreValue>*>
                     (apcPairPtr));
-        out << apcPair->first << "," << apcPair->second.dataSize << "\n";
+        auto entry = makeEntryInfo(apcPair->first, &apcPair->second, curr_time);
+        out << entry.key << " "
+            << static_cast<int32_t>(entry.inMem) << " "
+            << entry.size << " "
+            << entry.ttl << " "
+            << static_cast<int32_t>(entry.type) << '\n';
         return;
       }
     }

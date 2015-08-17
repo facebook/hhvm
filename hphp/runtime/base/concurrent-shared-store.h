@@ -240,7 +240,7 @@ struct ConcurrentTableSharedStore {
   /*
    * Dump random key and entry size to output stream
    */
-  void dumpRandomKeys(std::ostream &out, uint32_t count);
+  void dumpRandomKeys(std::ostream& out, uint32_t count);
 
   /*
    * Debugging.  Access information about all the entries in this table.
@@ -290,7 +290,7 @@ private:
   template<typename Key, typename T, typename HashCompare>
   class APCMap : public tbb::concurrent_hash_map<Key,T,HashCompare> {
   public:
-    void getRandomAPCEntry(std::ostream &out);
+    void dumpRandomAPCEntry(std::ostream& out);
   };
 
   using Map = APCMap<const char*,StoreValue,CharHashCompare>;
@@ -310,6 +310,7 @@ private:
   bool handlePromoteObj(const String&, APCHandle*, const Variant&);
   APCHandle* unserialize(const String&, StoreValue*);
   void dumpKeyAndValue(std::ostream&);
+  static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);
 
 private:
   Map m_vars;

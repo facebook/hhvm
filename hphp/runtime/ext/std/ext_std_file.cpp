@@ -1011,7 +1011,7 @@ Variant HHVM_FUNCTION(filetype,
   fs::file_status sb;
   CHECK_BOOST(sb, fs::status, filename);
 
-  switch (sb.type) {
+  switch (sb.type()) {
   case fs::file_type::symlink_file:  return "link";
   case fs::file_type::fifo_file:  return "fifo";
   case fs::file_type::character_file:  return "char";
@@ -1193,7 +1193,7 @@ bool HHVM_FUNCTION(is_link,
   CHECK_PATH_FALSE(filename, 1);
   fs::file_status sb;
   CHECK_BOOST_SILENT(sb, fs::status, filename);
-  return sb.type == fs::file_type::symlink_file;
+  return sb.type() == fs::file_type::symlink_file;
 }
 
 bool HHVM_FUNCTION(is_uploaded_file,

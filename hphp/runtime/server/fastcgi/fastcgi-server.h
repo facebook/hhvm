@@ -39,10 +39,10 @@ class FastCGIServer;
  * FastCGIAcceptor accepts new connections from a listening socket, wrapping
  * each one in a FastCGISession.
  */
-struct FastCGIAcceptor : public folly::Acceptor {
-  FastCGIAcceptor(const folly::ServerSocketConfig& config,
+struct FastCGIAcceptor : public wangle::Acceptor {
+  FastCGIAcceptor(const wangle::ServerSocketConfig& config,
                   FastCGIServer *server)
-    : folly::Acceptor(config)
+    : wangle::Acceptor(config)
     , m_server(server)
   {}
 
@@ -52,7 +52,7 @@ struct FastCGIAcceptor : public folly::Acceptor {
   void onNewConnection(folly::AsyncSocket::UniquePtr sock,
                        const folly::SocketAddress* peerAddress,
                        const std::string& nextProtocolName,
-                       const folly::TransportInfo& tinfo) override;
+                       const wangle::TransportInfo& tinfo) override;
   void onConnectionsDrained() override;
 
 private:
@@ -161,7 +161,7 @@ private:
   JobQueueDispatcher<FastCGIWorker> m_dispatcher;
 
   // Configuration for accepting webserver connections
-  folly::ServerSocketConfig m_socketConfig;
+  wangle::ServerSocketConfig m_socketConfig;
   std::unique_ptr<FastCGIAcceptor> m_acceptor;
 };
 

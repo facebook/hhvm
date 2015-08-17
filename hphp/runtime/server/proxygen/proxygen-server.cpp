@@ -37,7 +37,7 @@ using folly::SocketAddress;
 using apache::thrift::async::TAsyncTimeout;
 using apache::thrift::transport::TTransportException;
 using folly::AsyncServerSocket;
-using folly::Acceptor;
+using wangle::Acceptor;
 using proxygen::SPDYCodec;
 using std::shared_ptr;
 using std::string;

@@ -64,7 +64,7 @@
 			mysqli_free_result($res);
 
 			if ($meta != $expected_lib) {
-				printf("[%04d - %s] Metadata differes from expected values\n",
+				printf("[%04d - %s] Metadata differs from expected values\n",
 					$offset + 5, $sql);
 				var_dump($meta);
 				var_dump($expected_lib);

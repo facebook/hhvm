@@ -36,12 +36,15 @@
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/server/server-note.h"
-#include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
+
+#ifdef ENABLE_ZEND_COMPAT
+#include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
+#endif
 
 namespace HPHP {
 
@@ -176,8 +179,10 @@ template<class F> void RequestEventHandler::scan(F& mark) const {
 }
 
 template<class F> void scan_ezc_resources(F& mark) {
+#ifdef ENABLE_ZEND_COMPAT
   ExtMarker<F> bridge(mark);
   ts_scan_resources(bridge);
+#endif
 }
 
 template<class F> void Exception::scan(F& mark) const {

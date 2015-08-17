@@ -687,7 +687,7 @@ Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   bool preserveOrder = flags & q_Memcached$$GET_PRESERVE_ORDER;
-  Array returnValue;
+  Array returnValue = Array::Create();
   if (!data->getMultiImpl(server_key, keys, cas_tokens.isReferenced(),
                           preserveOrder ? &returnValue : nullptr)) {
     return false;
@@ -700,6 +700,11 @@ Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
   memcached_return status;
   while (memcached_fetch_result(&data->m_impl->memcached, &result.value,
                                 &status)) {
+    if (status != MEMCACHED_SUCCESS) {
+        status = MEMCACHED_SOME_ERRORS;
+        data->handleError(status);
+        continue;
+    }
     Variant value;
     if (!data->toObject(value, result.value)) {
       data->m_impl->rescode = q_Memcached$$RES_PAYLOAD_FAILURE;
@@ -714,8 +719,6 @@ Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
       cas_tokens_arr.set(sKey, cas, true);
     }
   }
-
-  if (status != MEMCACHED_END && !data->handleError(status)) return false;
   return returnValue;
 }
 
@@ -846,6 +849,35 @@ bool HHVM_METHOD(Memcached, deletebykey, const String& server_key,
   return data->handleError(memcached_delete_by_key(&data->m_impl->memcached,
                      myServerKey.c_str(), myServerKey.length(),
                      key.c_str(), key.length(), time));
+}
+
+Variant HHVM_METHOD(Memcached, deletemultibykey, const String& server_key,
+                                         const Array& keys,
+                                         int time /*= 0*/) {
+  auto data = Native::data<MemcachedData>(this_);
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
+
+  memcached_return status_memcached;
+  bool status;
+  Array returnValue = Array::Create();
+  for (ArrayIter iter(keys); iter; ++iter) {
+    Variant vKey = iter.second();
+    if (!vKey.isString()) continue;
+    const String& key = vKey.toString();
+    if (key.empty()) continue;
+    const String& myServerKey = server_key.empty() ? key : server_key;
+    status_memcached = memcached_delete_by_key(&data->m_impl->memcached,
+                     myServerKey.c_str(), myServerKey.length(),
+                     key.c_str(), key.length(), time);
+
+    status = data->handleError(status_memcached);
+    if (!status) {
+        returnValue.set(key, status_memcached, true);
+    } else {
+        returnValue.set(key, status, true);
+    }
+  }
+  return returnValue;
 }
 
 Variant HHVM_METHOD(Memcached, increment,
@@ -1351,6 +1383,7 @@ class MemcachedExtension final : public Extension {
     HHVM_ME(Memcached, replacebykey);
     HHVM_ME(Memcached, casbykey);
     HHVM_ME(Memcached, deletebykey);
+    HHVM_ME(Memcached, deletemultibykey);
     HHVM_ME(Memcached, increment);
     HHVM_ME(Memcached, incrementbykey);
     HHVM_ME(Memcached, decrement);

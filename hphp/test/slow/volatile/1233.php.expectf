@@ -9,6 +9,8 @@ bool(false)
 bool(false)
 string(8) "constant"
 string(3) "foo"
+
+Warning: constant(): Couldn't find constant foo in %s/test/slow/volatile/1233.php on line 19
 NULL
 string(8) "constant"
 string(3) "bar"

@@ -7,6 +7,8 @@ bool(true)
 NULL
 --SID--
 bool(false)
+
+Warning: constant(): Couldn't find constant SID in %s/test/quick/constants-SID.php on line 7
 NULL
 null: NULL
 NULL: NULL

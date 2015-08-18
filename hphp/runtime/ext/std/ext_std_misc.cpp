@@ -251,12 +251,12 @@ Variant HHVM_FUNCTION(constant, const String& name) {
         return cellAsCVarRef(cns);
       }
     }
-    raise_warning("Couldn't find constant %s", data);
   } else {
     auto const cns = Unit::loadCns(name.get());
     if (cns) return tvAsCVarRef(cns);
   }
 
+  raise_warning("constant(): Couldn't find constant %s", data);
   return init_null();
 }
 

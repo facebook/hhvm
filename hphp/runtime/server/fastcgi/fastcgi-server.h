@@ -52,6 +52,7 @@ struct FastCGIAcceptor : public wangle::Acceptor {
   void onNewConnection(folly::AsyncSocket::UniquePtr sock,
                        const folly::SocketAddress* peerAddress,
                        const std::string& nextProtocolName,
+                       SecureTransportType secureProtocolType,
                        const wangle::TransportInfo& tinfo) override;
   void onConnectionsDrained() override;
 

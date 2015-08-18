@@ -584,7 +584,7 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   m(arraySetIR,  KeyType::Int,   false,      true)           \
 
 #define X(nm, keyType, checkForInt, setRef)                  \
-typename ShuffleReturn<setRef>::return_type                  \
+ShuffleReturn<setRef>::return_type                           \
 inline nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
   return arraySetImpl<keyType, checkForInt, setRef>(a, key, value, ref);\
 }

@@ -18,7 +18,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+
+#include <folly/FilePortability.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/debugger/cmd/cmd_info.h"

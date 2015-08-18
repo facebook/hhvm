@@ -21,10 +21,10 @@
 #include <string>
 #include <limits>
 
-#include <sys/time.h>
 #include <signal.h>
 
 #include <boost/filesystem.hpp>
+#include <folly/CPortability.h>
 #include <folly/Optional.h>
 
 #include "hphp/util/logger.h"

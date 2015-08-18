@@ -17,11 +17,11 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
-#include <sys/param.h>
 #include <vector>
 
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 #include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"

@@ -18,8 +18,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
-#include <sys/mman.h>
-#include <unistd.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -37,8 +35,11 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 #include <folly/Random.h>
 #include <folly/ScopeGuard.h>
+
 #include "hphp/runtime/base/memory-manager-defs.h"
 
 namespace HPHP {

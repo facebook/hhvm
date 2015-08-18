@@ -21,11 +21,10 @@
 #include <boost/filesystem.hpp>
 
 #include <sys/types.h>
-#include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <libgen.h>
 
+#include <folly/CPortability.h>
 #include <folly/String.h>
 
 #include "hphp/util/lock.h"

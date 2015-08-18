@@ -19,9 +19,9 @@
 #include <cassert>
 
 #include <sys/types.h>
-#include <sys/file.h>
 #include <sys/stat.h>
-#include <unistd.h>
+
+#include <folly/FilePortability.h>
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/array-init.h"

@@ -296,8 +296,8 @@ class CPURegList {
            ((type == CPURegister::kFPRegister) &&
             (last_reg < kNumberOfFPRegisters)));
     assert(last_reg >= first_reg);
-    list_ = (1UL << (last_reg + 1)) - 1;
-    list_ &= ~((1UL << first_reg) - 1);
+    list_ = (1ULL << (last_reg + 1)) - 1;
+    list_ &= ~((1ULL << first_reg) - 1);
     assert(IsValid());
   }
 
@@ -344,13 +344,13 @@ class CPURegList {
   inline void Combine(int code) {
     assert(IsValid());
     assert(CPURegister(code, size_, type_).IsValid());
-    list_ |= (1UL << code);
+    list_ |= (1ULL << code);
   }
 
   inline void Remove(int code) {
     assert(IsValid());
     assert(CPURegister(code, size_, type_).IsValid());
-    list_ &= ~(1UL << code);
+    list_ &= ~(1ULL << code);
   }
 
   inline RegList list() const {

@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <sys/mman.h>
-#ifndef __CYGWIN__
+#if !defined(__CYGWIN__) && !defined(_MSC_VER)
 #include <execinfo.h>
 #endif
 
@@ -470,7 +470,7 @@ void threadInit() {
     "Failed to mmap persistent RDS region. errno = {}",
     folly::errnoStr(errno).c_str()
   );
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
   // MapViewOfFileEx() requires "the specified memory region is not already in
   // use by the calling process" when mapping the shared area below. Otherwise
   // it will return MAP_FAILED. We first map the full size to make sure the
@@ -529,7 +529,7 @@ void threadExit() {
       (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
       "-rds");
   }
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
   munmap(tl_base, s_persistent_base);
   munmap((char*)tl_base + s_persistent_base,
          RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);

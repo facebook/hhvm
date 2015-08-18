@@ -50,6 +50,27 @@ const StaticString
 extern const StaticString
   s_serializedNativeDataKey(std::string("\0native", 7));
 
+/*
+ * Serialize a Variant recursively.
+ * The last param noQuotes indicates to serializer to not put the output in
+ * double quotes (used when printing the output of a __toDebugDisplay() of
+ * an object when it is a string.
+ */
+static void serializeVariant(const Variant&,
+                             VariableSerializer *serializer,
+                             bool isArrayKey = false,
+                             bool skipNestCheck = false,
+                             bool noQuotes = false);
+static void serializeObject(const Object&, VariableSerializer*);
+static void serializeObject(const ObjectData*, VariableSerializer*);
+static void serializeCollection(ObjectData* obj, VariableSerializer*);
+static void serializeArray(const Array&, VariableSerializer*,
+                           bool isObject = false);
+static void serializeArray(const ArrayData*, VariableSerializer*,
+                           bool skipNestCheck = false);
+static void serializeResource(const ResourceData*, VariableSerializer*);
+static void serializeString(const String&, VariableSerializer*);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
@@ -1248,7 +1269,7 @@ static void serializeRef(const TypedValue* tv,
   }
 }
 
-NEVER_INLINE
+NEVER_INLINE static
 void serializeVariant(const Variant& self, VariableSerializer *serializer,
                       bool isArrayKey /* = false */,
                       bool skipNestCheck /* = false */,
@@ -1313,8 +1334,8 @@ static void serializeResourceImpl(const ResourceData* res,
   serializer->popResourceInfo();
 }
 
-void serializeResource(const ResourceData* res,
-                       VariableSerializer* serializer) {
+static void serializeResource(const ResourceData* res,
+                              VariableSerializer* serializer) {
   if (UNLIKELY(serializer->incNestedLevel((void*)res, true))) {
     serializer->writeOverflow((void*)res, true);
   } else {
@@ -1323,7 +1344,7 @@ void serializeResource(const ResourceData* res,
   serializer->decNestedLevel((void*)res);
 }
 
-void serializeString(const String& str, VariableSerializer* serializer) {
+static void serializeString(const String& str, VariableSerializer* serializer) {
   if (str) {
     serializer->write(str.data(), str.size());
   } else {
@@ -1341,8 +1362,8 @@ static void serializeArrayImpl(const ArrayData* arr,
   serializer->writeArrayFooter();
 }
 
-void serializeArray(const ArrayData* arr, VariableSerializer* serializer,
-                    bool skipNestCheck /* = false */) {
+static void serializeArray(const ArrayData* arr, VariableSerializer* serializer,
+                           bool skipNestCheck /* = false */) {
   if (arr->size() == 0) {
     serializer->writeArrayHeader(0, arr->isVectorData());
     serializer->writeArrayFooter();
@@ -1362,8 +1383,8 @@ void serializeArray(const ArrayData* arr, VariableSerializer* serializer,
   }
 }
 
-void serializeArray(const Array& arr, VariableSerializer* serializer,
-                    bool isObject /* = false */) {
+static void serializeArray(const Array& arr, VariableSerializer* serializer,
+                           bool isObject /* = false */) {
   if (!arr.isNull()) {
     serializeArray(arr.get(), serializer, isObject);
   } else {
@@ -1371,6 +1392,7 @@ void serializeArray(const Array& arr, VariableSerializer* serializer,
   }
 }
 
+static
 void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
   int64_t sz = getCollectionSize(obj);
   auto type = obj->collectionType();
@@ -1677,6 +1699,7 @@ static void serializeObjectImpl(const ObjectData* obj,
   }
 }
 
+static
 void serializeObject(const ObjectData* obj, VariableSerializer* serializer) {
   if (UNLIKELY(serializer->incNestedLevel((void*)obj, true))) {
     serializer->writeOverflow((void*)obj, true);
@@ -1686,6 +1709,7 @@ void serializeObject(const ObjectData* obj, VariableSerializer* serializer) {
   serializer->decNestedLevel((void*)obj);
 }
 
+static
 void serializeObject(const Object& obj, VariableSerializer* serializer) {
   if (obj) {
     serializeObject(obj.get(), serializer);

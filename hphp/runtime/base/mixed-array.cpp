@@ -1044,7 +1044,7 @@ NEVER_INLINE MixedArray* MixedArray::resize() {
   return this;
 }
 
-MixedArray* NEVER_INLINE
+NEVER_INLINE MixedArray*
 MixedArray::InsertCheckUnbalanced(MixedArray* ad,
                                   int32_t* table,
                                   uint32_t mask,

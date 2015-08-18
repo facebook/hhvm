@@ -138,7 +138,11 @@ struct CachedUnitWithFree {
 
 struct CachedUnitNonRepo {
   std::shared_ptr<CachedUnitWithFree> cachedUnit;
+#ifdef _MSC_VER
+  time_t mtime;
+#else
   struct timespec mtime;
+#endif
   ino_t ino;
   dev_t devId;
 };
@@ -151,11 +155,13 @@ using NonRepoUnitCache = RankedCHM<
 >;
 NonRepoUnitCache s_nonRepoUnitCache;
 
+#ifndef _MSC_VER
 int64_t timespecCompare(const struct timespec& l,
                         const struct timespec& r) {
   if (l.tv_sec != r.tv_sec) return l.tv_sec - r.tv_sec;
   return l.tv_nsec - r.tv_nsec;
 }
+#endif
 
 bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
   // If the cached unit is null, we always need to consider it out of date (in
@@ -164,7 +170,11 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
   // open() it.
   return !cu.cachedUnit ||
          cu.cachedUnit->cu.unit == nullptr ||
+#ifdef _MSC_VER
+         cu.mtime - s.st_mtime < 0 ||
+#else
          timespecCompare(cu.mtime, s.st_mtim) < 0 ||
+#endif
          cu.ino != s.st_ino ||
          cu.devId != s.st_dev;
 }
@@ -259,7 +269,11 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 
     auto const cu = createUnitFromFile(rpath);
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
+#ifdef _MSC_VER
+    rpathAcc->second.mtime      = statInfo.st_mtime;
+#else
     rpathAcc->second.mtime      = statInfo.st_mtim;
+#endif
     rpathAcc->second.ino        = statInfo.st_ino;
     rpathAcc->second.devId      = statInfo.st_dev;
 
@@ -270,7 +284,11 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     NonRepoUnitCache::accessor pathAcc;
     s_nonRepoUnitCache.insert(pathAcc, path);
     pathAcc->second.cachedUnit = cuptr;
+#ifdef _MSC_VER
+    pathAcc->second.mtime      = statInfo.st_mtime;
+#else
     pathAcc->second.mtime      = statInfo.st_mtim;
+#endif
     pathAcc->second.ino        = statInfo.st_ino;
     pathAcc->second.devId      = statInfo.st_dev;
   }

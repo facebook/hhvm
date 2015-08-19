@@ -277,6 +277,7 @@ endif()
 
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")
+add_definitions("-DMBFL_STATIC")
 include_directories("${TP_DIR}/libmbfl")
 include_directories("${TP_DIR}/libmbfl/mbfl")
 include_directories("${TP_DIR}/libmbfl/filters")

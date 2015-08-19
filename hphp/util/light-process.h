@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_LIGHT_PROCESS_H_
 #define incl_HPHP_LIGHT_PROCESS_H_
 
+#ifdef _MSC_VER
+# error LightProcess is not supported under MSVC!
+#endif
+
 #include <string>
 #include <vector>
 #include <cstdio>

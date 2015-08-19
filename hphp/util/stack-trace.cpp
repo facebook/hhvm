@@ -35,7 +35,6 @@
 #include "hphp/util/process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/light-process.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hash.h"
 

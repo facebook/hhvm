@@ -1273,7 +1273,8 @@ void RuntimeOption::Load(
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
-    Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument");
+    Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",
+                 "index.php");
     Config::Bind(ErrorDocument404, ini, config, "Server.ErrorDocument404");
     normalizePath(ErrorDocument404);
     Config::Bind(ForbiddenAs404, ini, config, "Server.ForbiddenAs404");

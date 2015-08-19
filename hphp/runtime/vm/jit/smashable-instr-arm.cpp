@@ -130,6 +130,10 @@ void smashMovq(TCA inst, uint64_t target) {
   not_implemented();
 }
 
+void smashCmpq(TCA inst, uint32_t target) {
+  not_implemented();
+}
+
 void smashCall(TCA inst, TCA target) {
   smashCtrlFlow(inst, target, false);
 }
@@ -146,6 +150,10 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint64_t smashableMovqImm(TCA inst) {
+  not_implemented();
+}
+
+uint32_t smashableCmpqImm(TCA inst) {
   not_implemented();
 }
 

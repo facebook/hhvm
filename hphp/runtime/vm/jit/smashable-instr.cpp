@@ -69,6 +69,10 @@ void smashMovq(TCA inst, uint64_t imm) {
   assertx(MCGenerator::canWrite());
   ARCH_SWITCH_CALL(smashMovq, inst, imm);
 }
+void smashCmpq(TCA inst, uint32_t imm) {
+  assertx(MCGenerator::canWrite());
+  ARCH_SWITCH_CALL(smashCmpq, inst, imm);
+}
 void smashCall(TCA inst, TCA target) {
   assertx(MCGenerator::canWrite());
   ARCH_SWITCH_CALL(smashCall, inst, target);
@@ -84,6 +88,9 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
 
 uint64_t smashableMovqImm(TCA inst) {
   ARCH_SWITCH_CALL(smashableMovqImm, inst);
+}
+uint32_t smashableCmpqImm(TCA inst) {
+  ARCH_SWITCH_CALL(smashableCmpqImm, inst);
 }
 TCA smashableCallTarget(TCA inst) {
   ARCH_SWITCH_CALL(smashableCallTarget, inst);

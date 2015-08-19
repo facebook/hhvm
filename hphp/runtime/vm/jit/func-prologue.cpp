@@ -22,8 +22,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
-#include "hphp/runtime/vm/jit/func-guard-arm.h"
-#include "hphp/runtime/vm/jit/func-guard-x64.h"
+#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -60,15 +59,6 @@ TransContext prologue_context(TransID transID,
   );
 }
 
-void emit_func_guard(Func* func, CodeBlock& cb) {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::emitFuncGuard(func, cb);
-    case Arch::ARM:
-      return arm::emitFuncGuard(func, cb);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -83,7 +73,7 @@ TCA genFuncPrologue(TransID transID, Func* func, int argc) {
   auto& cb = mcg->code.main();
 
   // Dump the func guard in the TC before anything else.
-  emit_func_guard(func, cb);
+  emitFuncGuard(func, cb);
   auto const start = cb.frontier();
 
   irgen::emitFuncPrologue(env, argc, transID);

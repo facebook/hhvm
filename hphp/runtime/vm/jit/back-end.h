@@ -64,9 +64,6 @@ struct BackEnd {
                              SrcKey sk,
                              FPInvOffset spOff) = 0;
 
-  virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;
-  virtual TCA funcPrologueToGuard(TCA prologue, const Func* func) = 0;
-  virtual void funcPrologueSmashGuard(TCA prologue, const Func* func) = 0;
   virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
 
   virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,

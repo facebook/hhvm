@@ -14,35 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/func-guard.h"
-
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
-#include "hphp/runtime/vm/jit/func-guard-x64.h"
 
-#include "hphp/util/data-block.h"
-
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitFuncGuard(const Func* func, CodeBlock& cb) {
-  ARCH_SWITCH_CALL(emitFuncGuard, func, cb);
+  not_implemented();
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* func) {
-  ARCH_SWITCH_CALL(funcGuardFromPrologue, prologue, func);
+  not_implemented();
 }
 
-bool funcGuardMatches (TCA guard, const Func* func) {
-  ARCH_SWITCH_CALL(funcGuardMatches, guard, func);
+bool funcGuardMatches(TCA guard, const Func* func) {
+  not_implemented();
 }
 
 void clobberFuncGuard(TCA guard, const Func* func) {
-  ARCH_SWITCH_CALL(clobberFuncGuard, guard, func);
+  not_implemented();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}}}

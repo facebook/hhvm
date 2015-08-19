@@ -115,18 +115,6 @@ struct BackEnd final : jit::BackEnd {
     a.    jmp(mcg->tx().uniqueStubs.interpHelper);
   }
 
-  bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
-    return x64::funcPrologueHasGuard(prologue, func);
-  }
-
-  TCA funcPrologueToGuard(TCA prologue, const Func* func) override {
-    return x64::funcPrologueToGuard(prologue, func);
-  }
-
-  void funcPrologueSmashGuard(TCA prologue, const Func* func) override {
-    x64::funcPrologueSmashGuard(prologue, func);
-  }
-
   void emitIncStat(CodeBlock& cb, intptr_t disp, int n) override {
     X64Assembler a { cb };
 

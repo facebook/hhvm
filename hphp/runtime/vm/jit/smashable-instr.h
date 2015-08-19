@@ -86,6 +86,7 @@ emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc);
  * The `smashJcc' routine leaves the condition unchanged if `cc' is CC_None.
  */
 void smashMovq(TCA inst, uint64_t imm);
+void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target, ConditionCode cc = CC_None);
@@ -98,6 +99,7 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc = CC_None);
  * produce unspecified behavior.
  */
 uint64_t smashableMovqImm(TCA inst);
+uint32_t smashableCmpqImm(TCA inst);
 TCA smashableCallTarget(TCA inst);
 TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);

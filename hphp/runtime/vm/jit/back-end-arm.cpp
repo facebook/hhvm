@@ -136,18 +136,6 @@ struct BackEnd final : jit::BackEnd {
     not_implemented();
   }
 
-  bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
-    return arm::funcPrologueHasGuard(prologue, func);
-  }
-
-  TCA funcPrologueToGuard(TCA prologue, const Func* func) override {
-    return arm::funcPrologueToGuard(prologue, func);
-  }
-
-  void funcPrologueSmashGuard(TCA prologue, const Func* func) override {
-    arm::funcPrologueSmashGuard(prologue, func);
-  }
-
   void emitIncStat(CodeBlock& cb, intptr_t disp, int n) override {
     using arm::rAsm;
     using arm::rAsm2;

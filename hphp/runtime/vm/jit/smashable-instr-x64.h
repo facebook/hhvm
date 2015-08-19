@@ -46,11 +46,13 @@ std::pair<TCA,TCA>
 emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc);
 
 void smashMovq(TCA inst, uint64_t imm);
+void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target, ConditionCode cc = CC_None);
 
 uint64_t smashableMovqImm(TCA inst);
+uint32_t smashableCmpqImm(TCA inst);
 TCA smashableCallTarget(TCA inst);
 TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
@@ -62,6 +64,7 @@ ConditionCode smashableJccCond(TCA inst);
  * These are also used by align-x64.
  */
 constexpr size_t kSmashMovqImmOff = 2;
+constexpr size_t kSmashCmpqImmOff = 4;
 
 ///////////////////////////////////////////////////////////////////////////////
 

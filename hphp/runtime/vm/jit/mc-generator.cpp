@@ -76,6 +76,7 @@
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/debug-guards.h"
+#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
@@ -651,9 +652,9 @@ void
 MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
                                  const Func* func) {
   for (int i = 0; i < numPrologues; i++) {
-    if (prologues[i] != m_tx.uniqueStubs.fcallHelperThunk
-        && backEnd().funcPrologueHasGuard(prologues[i], func)) {
-      backEnd().funcPrologueSmashGuard(prologues[i], func);
+    auto const guard = funcGuardFromPrologue(prologues[i], func);
+    if (funcGuardMatches(guard, func)) {
+      clobberFuncGuard(guard, func);
     }
   }
 }
@@ -776,7 +777,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   }
   m_fixups.process(nullptr);
 
-  assertx(backEnd().funcPrologueHasGuard(start, func));
+  assertx(funcGuardMatches(funcGuardFromPrologue(start, func), func));
   assertx(isValidCodeAddress(start));
 
   TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
@@ -895,9 +896,11 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   for (TCA toSmash : pcr->mainCallers()) {
     smashCall(toSmash, start);
   }
-  // If the prologue has a guard, then smash its guard-callers as well.
-  if (backEnd().funcPrologueHasGuard(start, func)) {
-    TCA guard = backEnd().funcPrologueToGuard(start, func);
+
+  // If the prologue has a matching guard, then smash its guard-callers as
+  // well.
+  auto const guard = funcGuardFromPrologue(start, func);
+  if (funcGuardMatches(guard, func)) {
     for (TCA toSmash : pcr->guardCallers()) {
       smashCall(toSmash, guard);
     }
@@ -1334,10 +1337,10 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
   TRACE(2, "bindCall %s, ActRec %p\n", func->fullName()->data(), calleeFrame);
   TCA start = getFuncPrologue(func, nArgs);
   TRACE(2, "bindCall -> %p\n", start);
-  if (!isImmutable) {
+  if (start && !isImmutable) {
     // We dont know we're calling the right function, so adjust start to point
     // to the dynamic check of ar->m_func.
-    start = backEnd().funcPrologueToGuard(start, func);
+    start = funcGuardFromPrologue(start, func);
   } else {
     TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
   }
@@ -1348,7 +1351,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
       // Someone else may have changed the func prologue while we waited for
       // the write lease, so read it again.
       start = getFuncPrologue(func, nArgs);
-      if (!isImmutable) start = backEnd().funcPrologueToGuard(start, func);
+      if (start && !isImmutable) start = funcGuardFromPrologue(start, func);
 
       if (start && smashableCallTarget(toSmash) != start) {
         assertx(smashableCallTarget(toSmash));

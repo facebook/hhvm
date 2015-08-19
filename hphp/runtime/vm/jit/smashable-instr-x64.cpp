@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 
 #include "hphp/runtime/vm/jit/align-x64.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX: remove me!
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/util/asm-x64.h"
@@ -101,6 +100,11 @@ void smashMovq(TCA inst, uint64_t imm) {
   *reinterpret_cast<uint64_t*>(inst + kSmashMovqImmOff) = imm;
 }
 
+void smashCmpq(TCA inst, uint32_t imm) {
+  always_assert(is_aligned(inst, Alignment::SmashCmpq));
+  *reinterpret_cast<uint32_t*>(inst + kSmashCmpqImmOff) = imm;
+}
+
 void smashCall(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashCall));
   /*
@@ -148,6 +152,10 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
 
 uint64_t smashableMovqImm(TCA inst) {
   return *reinterpret_cast<uint64_t*>(inst + kSmashMovqImmOff);
+}
+
+uint32_t smashableCmpqImm(TCA inst) {
+  return *reinterpret_cast<uint32_t*>(inst + kSmashCmpqImmOff);
 }
 
 TCA smashableCallTarget(TCA inst) {

@@ -49,7 +49,7 @@ int64_t gettime_diff_us(const timespec &start, const timespec &end);
  */
 int fadvise_dontneed(int fd, off_t len);
 
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
 
 typedef struct {
   const char *dli_fname;

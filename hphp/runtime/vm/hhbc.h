@@ -781,6 +781,8 @@ auto constexpr Op_count = uint8_t(Op::HighInvalid) + 1;
   OPCODES
 #undef O
 
+// These are comparable by default under MSVC.
+#ifndef _MSC_VER
 inline constexpr bool operator<(Op a, Op b) { return uint8_t(a) < uint8_t(b); }
 inline constexpr bool operator>(Op a, Op b) { return uint8_t(a) > uint8_t(b); }
 inline constexpr bool operator<=(Op a, Op b) {
@@ -789,6 +791,7 @@ inline constexpr bool operator<=(Op a, Op b) {
 inline constexpr bool operator>=(Op a, Op b) {
   return uint8_t(a) >= uint8_t(b);
 }
+#endif
 
 inline bool isValidOpcode(Op op) {
   return op > OpLowInvalid && op < OpHighInvalid;

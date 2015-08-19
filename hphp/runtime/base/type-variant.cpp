@@ -585,6 +585,65 @@ void Variant::setEvalScalar() {
   not_reached();
 }
 
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnexpectedSep(char expect, char actual) {
+  throw Exception("Expected '%c' but got '%c'", expect, actual);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwOutOfRange(int64_t id) {
+  throw Exception("Id %" PRId64 " out of range", id);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnexpectedStr(const char* expect, const char* actual) {
+  throw Exception("Expected '%s' but got '%s'", expect, actual);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnknownType(char type) {
+  throw Exception("Unknown type '%c'", type);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwInvalidPair() {
+  throw Exception("Pair objects must have exactly 2 elements");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwInvalidOFormat(const String& clsName) {
+  throw Exception("%s does not support the 'O' serialization format",
+                  clsName.data());
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwMangledPrivateProperty() {
+  throw Exception("Mangled private object property");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnterminatedProperty() {
+  throw Exception("Object property not terminated properly");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwNotCollection(const String& clsName) {
+  throw Exception("%s is not a collection class", clsName.data());
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnexpectedType(const String& key, const ObjectData* obj,
+                                const Variant& type) {
+  auto msg = folly::format(
+    "Property {} for class {} was deserialized with type ({}) that "
+    "didn't match what we inferred in static analysis",
+    key,
+    obj->getVMClass()->name(),
+    tname(type.asTypedValue()->m_type)
+  ).str();
+  throw Exception(msg);
+}
+
 static void unserializeProp(VariableUnserializer* uns,
                             ObjectData* obj,
                             const String& key,
@@ -630,15 +689,7 @@ static void unserializeProp(VariableUnserializer* uns,
   if (LIKELY(tvMatchesRepoAuthType(*t->asTypedValue(), repoTy))) {
     return;
   }
-
-  auto msg = folly::format(
-    "Property {} for class {} was deserialized with type ({}) that "
-    "didn't match what we inferred in static analysis",
-    key,
-    obj->getVMClass()->name(),
-    tname(t->asTypedValue()->m_type)
-  ).str();
-  throw Exception(msg);
+  throwUnexpectedType(key, obj, *t);
 }
 
 /*
@@ -700,22 +751,18 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
   }
 
   if (type == 'N') {
-    if (sep != ';') throw Exception("Expected ';' but got '%c'", sep);
+    if (sep != ';') throwUnexpectedSep(';', sep);
     self.setNull(); // NULL *IS* the value, without we get undefined warnings
     return;
   }
-  if (sep != ':') {
-    throw Exception("Expected ':' but got '%c'", sep);
-  }
+  if (sep != ':') throwUnexpectedSep(':', sep);
 
   switch (type) {
   case 'r':
     {
       int64_t id = uns->readInt();
       Variant *v = uns->getByVal(id);
-      if (v == nullptr) {
-        throw Exception("Id %" PRId64 " out of range", id);
-      }
+      if (!v) throwOutOfRange(id);
       self = *v;
     }
     break;
@@ -723,9 +770,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     {
       int64_t id = uns->readInt();
       Variant *v = uns->getByRef(id);
-      if (v == nullptr) {
-        throw Exception("Id %" PRId64 " out of range", id);
-      }
+      if (!v) throwOutOfRange(id);
       self.assignRef(*v);
     }
     break;
@@ -744,15 +789,11 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       }
       if (ch == 'I') {
         uns->read(buf, 3); buf[3] = '\0';
-        if (strcmp(buf, "INF")) {
-          throw Exception("Expected 'INF' but got '%s'", buf);
-        }
+        if (strcmp(buf, "INF")) throwUnexpectedStr("INF", buf);
         v = atof("inf");
       } else if (ch == 'N') {
         uns->read(buf, 3); buf[3] = '\0';
-        if (strcmp(buf, "NAN")) {
-          throw Exception("Expected 'NAN' but got '%s'", buf);
-        }
+        if (strcmp(buf, "NAN")) throwUnexpectedStr("NAN", buf);
         v = atof("nan");
       } else {
         v = uns->readDouble();
@@ -783,7 +824,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       uns->read(u.buf, 8);
       self = u.sd;
     } else {
-      throw Exception("Unknown type '%c'", type);
+      throwUnknownType(type);
     }
     break;
   case 'a':
@@ -873,7 +914,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
           obj = Object{cls};
           if (UNLIKELY(collections::isType(cls, CollectionType::Pair) &&
                        (size != 2))) {
-            throw Exception("Pair objects must have exactly 2 elements");
+            throwInvalidPair();
           }
         }
       } else {
@@ -890,8 +931,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         if (type == 'O') {
           // Collections are not allowed
           if (obj->isCollection()) {
-            throw Exception("%s does not support the 'O' serialization "
-                            "format", clsName.data());
+            throwInvalidOFormat(clsName);
           }
 
           Variant serializedNativeData = init_null();
@@ -923,7 +963,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
                 if (subLen == ksize) {
                   raise_error("Cannot access empty property");
                 } else {
-                  throw Exception("Mangled private object property");
+                  throwMangledPrivateProperty();
                 }
               }
               String k(kdata + subLen, ksize - subLen, CopyString);
@@ -940,7 +980,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
             if (i > 0) {
               auto lastChar = uns->peekBack();
               if ((lastChar != ';') && (lastChar != '}')) {
-                throw Exception("Object property not terminated properly");
+                throwUnterminatedProperty();
               }
             }
           }
@@ -959,7 +999,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         } else {
           assert(type == 'V' || type == 'K');
           if (!obj->isCollection()) {
-            throw Exception("%s is not a collection class", clsName.data());
+            throwNotCollection(clsName);
           }
           unserializeCollection(obj.get(), uns, size, type);
         }
@@ -1012,7 +1052,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     }
     return; // object has '}' terminating
   default:
-    throw Exception("Unknown type '%c'", type);
+    throwUnknownType(type);
   }
   uns->expectChar(';');
 }

@@ -611,8 +611,7 @@ inline void* MemoryManager::realloc(void* ptr, size_t nbytes) {
   return block.ptr;
 }
 
-namespace {
-DEBUG_ONLY const char* header_names[] = {
+const char* header_names[] = {
   "Packed", "Struct", "Mixed", "Empty", "Apc", "Globals", "Proxy",
   "String", "Resource", "Ref",
   "Object", "ResumableObj", "AwaitAllWH",
@@ -621,8 +620,6 @@ DEBUG_ONLY const char* header_names[] = {
   "Free", "Hole"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
-
-}
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole(void* ptr, uint32_t size) {

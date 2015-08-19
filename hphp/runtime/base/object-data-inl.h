@@ -165,6 +165,10 @@ inline CollectionType ObjectData::collectionType() const {
   return static_cast<CollectionType>(m_hdr.kind);
 }
 
+inline HeaderKind ObjectData::headerKind() const {
+  return m_hdr.kind;
+}
+
 inline bool ObjectData::isIterator() const {
   return instanceof(SystemLib::s_IteratorClass);
 }

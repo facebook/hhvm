@@ -35,6 +35,7 @@ enum class HeaderKind : uint8_t {
   Hole, // wasted space not in any freelist
 };
 const unsigned NumHeaderKinds = unsigned(HeaderKind::Hole) + 1;
+extern const char* header_names[];
 
 /*
  * RefCount type for m_count field in refcounted objects

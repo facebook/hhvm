@@ -730,6 +730,21 @@ void Array::prepend(const Variant& v) {
   if (newarr != m_arr) m_arr = Ptr::attach(newarr);
 }
 
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwArraySizeOutOfBounds() {
+  throw Exception("Array size out of bounds");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwInvalidKey() {
+  throw Exception("Invalid key");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnterminatedElement() {
+  throw Exception("Array element not terminated properly");
+}
+
 void unserializeArray(Array& arr, VariableUnserializer* uns) {
   int64_t size = uns->readInt();
   uns->expectChar(':');
@@ -739,7 +754,7 @@ void unserializeArray(Array& arr, VariableUnserializer* uns) {
     arr = Array::Create();
   } else {
     if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
-      throw Exception("Array size out of bounds");
+      throwArraySizeOutOfBounds();
     }
     auto const scale = computeScaleFromSize(size);
     auto const allocsz = computeAllocBytes(scale);
@@ -756,7 +771,7 @@ void unserializeArray(Array& arr, VariableUnserializer* uns) {
       Variant key;
       unserializeVariant(key, uns, UnserializeMode::Key);
       if (!key.isString() && !key.isInteger()) {
-        throw Exception("Invalid key");
+        throwInvalidKey();
       }
       // for apc, we know the key can't exist, but ignore that optimization
       assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
@@ -771,7 +786,7 @@ void unserializeArray(Array& arr, VariableUnserializer* uns) {
       if (i < (size - 1)) {
         auto lastChar = uns->peekBack();
         if ((lastChar != ';' && lastChar != '}')) {
-          throw Exception("Array element not terminated properly");
+          throwUnterminatedElement();
         }
       }
     }

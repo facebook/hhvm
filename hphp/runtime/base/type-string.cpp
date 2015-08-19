@@ -505,15 +505,24 @@ bool String::operator<(const Variant& v) const {
   return HPHP::less(get(), v);
 }
 
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwLargeStringSize(int64_t size) {
+  throw Exception("Size of serialized string (%ld) exceeds max", size);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwNegativeStringSize(int64_t size) {
+  throw Exception("Size of serialized string (%ld) must not be negative", size);
+}
+
 String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
   int64_t size = uns->readInt();
   if (size >= RuntimeOption::MaxSerializedStringSize) {
-    throw Exception("Size of serialized string (%d) exceeds max", int(size));
+    throwLargeStringSize(size);
   }
   if (size < 0) {
-    throw Exception("Size of serialized string (%d) must not be negative",
-                    int(size));
+    throwNegativeStringSize(size);
   }
 
   uns->expectChar(':');

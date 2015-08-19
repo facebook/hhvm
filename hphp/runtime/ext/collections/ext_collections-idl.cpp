@@ -525,14 +525,26 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   return true;
 }
 
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwBadFormat(const ObjectData* obj, char type) {
+  throw Exception("%s does not support the '%c' serialization format",
+                  header_names[(int)obj->headerKind()], type);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwInvalidKey() {
+  throw Exception("Invalid key");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwInvalidHashKey(const ObjectData* obj) {
+  throw Exception("%s values must be integers or strings",
+                  header_names[(int)obj->headerKind()]);
+}
+
 void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
                        int64_t sz, char type) {
-  if (type != 'V') {
-    const char *imm =
-      obj->collectionType() == CollectionType::ImmVector ? "Imm" : "";
-    throw Exception("%sVector does not support the '%c' serialization format",
-                    imm, type);
-  }
+  if (type != 'V') throwBadFormat(obj, type);
   auto bvec = static_cast<BaseVector*>(obj);
   bvec->reserve(sz);
   assert(bvec->canMutateBuffer());
@@ -3221,12 +3233,7 @@ bool BaseMap::Equals(EqualityFlavor eq,
 
 void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
                     int64_t sz, char type) {
-  if (type != 'K') {
-    const char *imm =
-      obj->collectionType() == CollectionType::ImmMap ? "Imm" : "";
-    throw Exception("%sMap does not support the '%c' serialization format",
-                    imm, type);
-  }
+  if (type != 'K') throwBadFormat(obj, type);
   auto map = static_cast<BaseMap*>(obj);
   map->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
@@ -3244,7 +3251,7 @@ void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
       // Be robust against manually crafted inputs with conflicting elements
       if (UNLIKELY(!tv)) goto do_unserialize;
     } else {
-      throw Exception("Invalid key");
+      throwInvalidKey();
     }
     tv->m_type = KindOfNull;
 do_unserialize:
@@ -3562,12 +3569,7 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 
 void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
                     char type) {
-  if (type != 'V') {
-    const char *imm =
-      obj->collectionType() == CollectionType::ImmSet ? "Imm" : "";
-    throw Exception("%sSet does not support the '%c' serialization format",
-                    imm, type);
-  }
+  if (type != 'V') throwBadFormat(obj, type);
   auto set = static_cast<BaseSet*>(obj);
   set->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
@@ -3591,9 +3593,7 @@ void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
       // the key and once for the value
       cellDup(make_tv<KindOfString>(key), *tv);
     } else {
-      const char *imm =
-        obj->collectionType() == CollectionType::ImmSet ? "Imm" : "";
-      throw Exception("%sSet values must be integers or strings", imm);
+      throwInvalidHashKey(obj);
     }
   }
 }
@@ -4870,10 +4870,7 @@ bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 void unserializePair(ObjectData* obj, VariableUnserializer* uns,
                      int64_t sz, char type) {
   assert(sz == 2);
-  if (type != 'V') {
-    throw Exception("Pair does not support the '%c' serialization "
-                    "format", type);
-  }
+  if (type != 'V') throwBadFormat(obj, type);
   auto pair = static_cast<c_Pair*>(obj);
   auto elms = pair->initForUnserialize();
   unserializeVariant(tvAsVariant(&elms[0]), uns, UnserializeMode::ColValue);

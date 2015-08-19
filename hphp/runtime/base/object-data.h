@@ -171,6 +171,7 @@ struct ObjectData {
   bool isMutableCollection() const;
   bool isImmutableCollection() const;
   CollectionType collectionType() const; // asserts(isCollection())
+  HeaderKind headerKind() const;
 
   bool getAttribute(Attribute) const;
   uint16_t getAttributes() const;

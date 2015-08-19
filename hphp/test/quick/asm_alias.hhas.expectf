@@ -1,0 +1,7 @@
+Warning: Argument 1 to foo() must be of type @Foo, string given in %s on line %s
+
+Warning: Argument 1 to bar() must be of type @Bar, string given in %s on line %s
+
+Warning: Argument 1 to bar() must be of type @Bar, null given in %s on line %s
+
+Warning: Argument 1 to baz() must be of type @Baz, string given in %s on line %s

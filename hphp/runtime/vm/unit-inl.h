@@ -250,6 +250,12 @@ inline Func* Unit::firstHoistable() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Type aliases
+inline Unit::TypeAliasRange Unit::typeAliases() const {
+  return TypeAliasRange(m_typeAliases);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Class lookup.
 
 inline Class* Unit::lookupClass(const NamedEntity* ne) {

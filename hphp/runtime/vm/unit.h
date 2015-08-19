@@ -298,6 +298,7 @@ public:
   typedef MergeInfo::FuncRange FuncRange;
   typedef MergeInfo::MutableFuncRange MutableFuncRange;
   typedef Range<std::vector<PreClassPtr>> PreClassRange;
+  typedef Range<FixedVector<TypeAlias>> TypeAliasRange;
 
   /*
    * Cache for pseudomains for this unit, keyed by Class context.
@@ -633,6 +634,7 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
+  TypeAliasRange typeAliases() const;
   static const TypeAliasReq* loadTypeAlias(const StringData* name);
 
   /*

@@ -700,6 +700,17 @@ void print_cls(Output& out, const PreClass* cls) {
   out.nl();
 }
 
+void print_alias(Output& out, const TypeAlias& alias) {
+  auto flags = TypeConstraint::NoFlags;
+  if (alias.nullable) flags = flags | TypeConstraint::Nullable;
+  TypeConstraint constraint(alias.value, flags);
+
+  out.fmtln(".alias{} {} = <{}>;",
+            opt_attrs(AttrContext::Alias, alias.attrs),
+            (const StringData*)alias.name,
+            type_constraint(constraint));
+}
+
 void print_unit_metadata(Output& out, const Unit* unit) {
   out.fmtln(".filepath {};", escaped(unit->filepath()));
   for (auto i = size_t{0}; i < unit->numArrays(); ++i) {
@@ -713,8 +724,9 @@ void print_unit(Output& out, const Unit* unit) {
   out.fmtln("# {} starts here", unit->filepath());
   out.nl();
   print_unit_metadata(out, unit);
-  for (auto* func : unit->funcs())       print_func(out, func);
-  for (auto& cls : unit->preclasses())   print_cls(out, cls.get());
+  for (auto* func : unit->funcs())        print_func(out, func);
+  for (auto& cls : unit->preclasses())    print_cls(out, cls.get());
+  for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   out.fmtln("# {} ends here", unit->filepath());
 }
 

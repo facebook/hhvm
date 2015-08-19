@@ -69,7 +69,7 @@
  *
  *   - builtinType (for native funcs) field on ParamInfo
  *
- *   - type aliases
+ *   - typeStructure fields on type aliases, etc
  *
  *   - while class/function names can contains ':', '$', and ';',
  *     .use declarations can't handle those names because of syntax
@@ -2312,6 +2312,46 @@ void parse_adata(AsmState& as) {
 }
 
 /*
+ * directive-alias :  attribute-list identifier '=' type-constraint ';'
+ *                 ;
+ *
+ * We represent alias type information using the syntax for
+ * TypeConstraints. We populate the name and nullable field of the
+ * alias directly from the specified type constraint and derive the
+ * AnnotType from the compute AnnotType in the constraint.
+ */
+void parse_alias(AsmState& as) {
+  as.in.skipWhitespace();
+
+  Attr attrs = parse_attribute_list(as, AttrContext::Alias);
+  std::string name;
+  if (!as.in.readname(name)) {
+    as.error(".alias must have a name");
+  }
+  as.in.expectWs('=');
+
+  TypeConstraint ty = parse_type_constraint(as);
+
+  const StringData* typeName = ty.typeName();
+  if (!typeName) typeName = makeStaticString("");
+  const StringData* sname = makeStaticString(name);
+  // Merge to ensure namedentity creation, according to
+  // emitTypedef in emitter.cpp
+  as.ue->mergeLitstr(sname);
+  as.ue->mergeLitstr(typeName);
+
+  TypeAlias record;
+  record.name = sname;
+  record.value = typeName;
+  record.type = ty.type();
+  record.nullable = (ty.flags() & TypeConstraint::Nullable) != 0;
+  record.attrs = attrs;
+  as.ue->addTypeAlias(record);
+
+  as.in.expectWs(';');
+}
+
+/*
  * asm-file : asm-tld* <EOF>
  *          ;
  *
@@ -2320,6 +2360,7 @@ void parse_adata(AsmState& as) {
  *         |    ".function"    directive-function
  *         |    ".adata"       directive-adata
  *         |    ".class"       directive-class
+ *         |    ".alias"       directive-alias
  *         ;
  */
 void parse(AsmState& as) {
@@ -2342,6 +2383,7 @@ void parse(AsmState& as) {
     if (directive == ".function")    { parse_function(as); continue; }
     if (directive == ".adata")       { parse_adata(as);    continue; }
     if (directive == ".class")       { parse_class(as);    continue; }
+    if (directive == ".alias")       { parse_alias(as);    continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }

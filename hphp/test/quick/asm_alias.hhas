@@ -1,0 +1,117 @@
+# Test declaring type aliases
+
+.main {
+  DefCls 0
+  DefTypeAlias 0
+  DefTypeAlias 1
+  DefTypeAlias 2
+  DefTypeAlias 3
+
+  FPushFuncD 1 "foo"
+  Int 0
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "foo"
+  String "hi"
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushCtorD 0 "C"
+  FCall 0
+  PopR
+  SetL $x
+  PopC
+
+  FPushFuncD 1 "bar"
+  FPassL 0 $x
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "bar"
+  String "hi"
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "bar"
+  Null
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "baz"
+  FPassL 0 $x
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "baz"
+  String "hi"
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "baz"
+  Null
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "quux"
+  FPassL 0 $x
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "quux"
+  String "hi"
+  FPassCE 0
+  FCall 1
+  PopR
+
+  FPushFuncD 1 "quux"
+  Null
+  FPassCE 0
+  FCall 1
+  PopR
+
+  Int 1
+  RetC
+}
+
+.function [mayusevv] foo(<"@Foo" "Foo" hh_type extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function [mayusevv] bar(<"@Bar" "Bar" hh_type extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function [mayusevv] baz(<"@Baz" "Baz" hh_type extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function [mayusevv] quux(<"@Quux" "Quux" hh_type extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.class C {
+  .method [public mayusevv] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.alias Foo = <"HH\\int">;
+.alias Bar = <"C">;
+.alias Baz = <"C" nullable>;
+.alias Quux = <N>;

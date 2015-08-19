@@ -411,10 +411,6 @@ public:
   Variant dequeue();
   void prepend(const Variant& v);
 
-  /*
-   * Input/Output
-   */
-  void unserialize(VariableUnserializer* uns);
   void setEvalScalar() const;
 
  private:

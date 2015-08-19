@@ -145,6 +145,16 @@ private:
 
 void unserializeVariant(Variant&, VariableUnserializer *unserializer,
                         UnserializeMode mode = UnserializeMode::Value);
+void unserializeArray(Array&, VariableUnserializer*);
+void unserializeString(String&, VariableUnserializer*, char delimiter0 = '"',
+                       char delimiter1 = '"');
+void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
+                           int64_t sz, char type);
+void unserializeVector(ObjectData*, VariableUnserializer*, int64_t sz,
+                       char type);
+void unserializeMap(ObjectData*, VariableUnserializer*, int64_t sz, char type);
+void unserializeSet(ObjectData*, VariableUnserializer*, int64_t sz, char type);
+void unserializePair(ObjectData*, VariableUnserializer*, int64_t sz, char type);
 
 }
 

@@ -1441,7 +1441,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
   case 's':
     {
       String v;
-      v.unserialize(uns);
+      unserializeString(v, uns);
       assert(!v.isNull());
       if (v.get()->isStatic()) {
         union {
@@ -1490,7 +1490,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       buf.append(sep);
 
       String clsName;
-      clsName.unserialize(uns);
+      unserializeString(clsName, uns);
       buf.append(clsName.size());
       buf.append(":\"");
       buf.append(clsName.data(), clsName.size());
@@ -1521,7 +1521,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       buf.append(sep);
 
       String clsName;
-      clsName.unserialize(uns);
+      unserializeString(clsName, uns);
       buf.append(clsName.size());
       buf.append(":\"");
       buf.append(clsName.data(), clsName.size());
@@ -1529,7 +1529,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
 
       sep = uns->readChar(); // ':'
       String serialized;
-      serialized.unserialize(uns, '{', '}');
+      unserializeString(serialized, uns, '{', '}');
       buf.append(serialized.size());
       buf.append(":{");
       buf.append(serialized.data(), serialized.size());

@@ -525,10 +525,8 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   return true;
 }
 
-void BaseVector::Unserialize(ObjectData* obj,
-                             VariableUnserializer* uns,
-                             int64_t sz,
-                             char type) {
+void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
+                       int64_t sz, char type) {
   if (type != 'V') {
     const char *imm =
       obj->collectionType() == CollectionType::ImmVector ? "Imm" : "";
@@ -539,9 +537,8 @@ void BaseVector::Unserialize(ObjectData* obj,
   bvec->reserve(sz);
   assert(bvec->canMutateBuffer());
   for (int64_t i = 0; i < sz; ++i) {
-    auto tv = &bvec->m_data[bvec->m_size];
+    auto tv = bvec->appendForUnserialize(i);
     tv->m_type = KindOfNull;
-    bvec->incSize();
     unserializeVariant(tvAsVariant(tv), uns, UnserializeMode::ColValue);
   }
 }
@@ -3222,48 +3219,36 @@ bool BaseMap::Equals(EqualityFlavor eq,
   not_reached();
 }
 
-void BaseMap::Unserialize(ObjectData* obj,
-                          VariableUnserializer* uns,
-                          int64_t sz,
-                          char type) {
+void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
+                    int64_t sz, char type) {
   if (type != 'K') {
     const char *imm =
       obj->collectionType() == CollectionType::ImmMap ? "Imm" : "";
     throw Exception("%sMap does not support the '%c' serialization format",
                     imm, type);
   }
-  auto mp = static_cast<BaseMap*>(obj);
-  mp->reserve(sz);
+  auto map = static_cast<BaseMap*>(obj);
+  map->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
     unserializeVariant(k, uns, UnserializeMode::ColKey);
-    int32_t* p;
-    Elm* e = nullptr;
+    TypedValue* tv = nullptr;
     if (k.isInteger()) {
       auto h = k.toInt64();
-      p = mp->findForInsert(h);
-      // Check to be robust against manually crafted inputs with conflicting
-      // elements
-      if (UNLIKELY(validPos(*p))) goto do_unserialize;
-      e = &mp->allocElm(p);
-      e->setIntKey(h);
-      mp->updateNextKI(h);
+      tv = map->findForUnserialize(h);
+      // Be robust against manually crafted inputs with conflicting elements
+      if (UNLIKELY(!tv)) goto do_unserialize;
     } else if (k.isString()) {
       auto key = k.getStringData();
-      auto h = key->hash();
-      p = mp->findForInsert(key, h);
-      // Check to be robust against manually crafted inputs with conflicting
-      // elements
-      if (UNLIKELY(validPos(*p))) goto do_unserialize;
-      e = &mp->allocElm(p);
-      e->setStrKey(key, h);
-      mp->updateIntLikeStrKeys(key);
+      tv = map->findForUnserialize(key);
+      // Be robust against manually crafted inputs with conflicting elements
+      if (UNLIKELY(!tv)) goto do_unserialize;
     } else {
       throw Exception("Invalid key");
     }
-    e->data.m_type = KindOfNull;
+    tv->m_type = KindOfNull;
 do_unserialize:
-    unserializeVariant(tvAsVariant(&e->data), uns, UnserializeMode::ColValue);
+    unserializeVariant(tvAsVariant(tv), uns, UnserializeMode::ColValue);
   }
 }
 
@@ -3575,48 +3560,36 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   return true;
 }
 
-void BaseSet::Unserialize(ObjectData* obj,
-                          VariableUnserializer* uns, int64_t sz, char type) {
+void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
+                    char type) {
   if (type != 'V') {
     const char *imm =
       obj->collectionType() == CollectionType::ImmSet ? "Imm" : "";
     throw Exception("%sSet does not support the '%c' serialization format",
                     imm, type);
   }
-  auto st = static_cast<BaseSet*>(obj);
-  st->reserve(sz);
+  auto set = static_cast<BaseSet*>(obj);
+  set->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
     // When unserializing an element of a Set, we use Mode::ColKey for now.
     // This will make the unserializer to reserve an id for the element
     // but won't allow referencing the element via 'r' or 'R'.
     Variant k;
     unserializeVariant(k, uns, UnserializeMode::ColKey);
-    int32_t* p;
-    Elm* e = nullptr;
     if (k.isInteger()) {
       auto h = k.toInt64();
-      p = st->findForInsert(h);
-      // Check to be robust against manually crafted inputs with conflicting
-      // elements
-      if (UNLIKELY(validPos(*p))) continue;
-      e = &st->allocElm(p);
-      e->setIntKey(h);
-      e->data.m_type = KindOfInt64;
-      e->data.m_data.num = h;
-      st->updateNextKI(h);
+      auto tv = set->findForUnserialize(h);
+      // Be robust against manually crafted inputs with conflicting elements
+      if (UNLIKELY(!tv)) continue;
+      tv->m_type = KindOfInt64;
+      tv->m_data.num = h;
     } else if (k.isString()) {
       auto key = k.getStringData();
-      auto h = key->hash();
-      p = st->findForInsert(key, h);
-      // Check to be robust against manually crafted inputs with conflicting
-      // elements
-      if (UNLIKELY(validPos(*p))) continue;
-      e = &st->allocElm(p);
+      auto tv = set->findForUnserialize(key);
+      if (UNLIKELY(!tv)) continue;
       // This increments the string's refcount twice, once for
       // the key and once for the value
-      e->setStrKey(key, h);
-      cellDup(make_tv<KindOfString>(key), e->data);
-      st->updateIntLikeStrKeys(key);
+      cellDup(make_tv<KindOfString>(key), *tv);
     } else {
       const char *imm =
         obj->collectionType() == CollectionType::ImmSet ? "Imm" : "";
@@ -4894,21 +4867,17 @@ bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
          HPHP::equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
 }
 
-void c_Pair::Unserialize(ObjectData* obj,
-                         VariableUnserializer* uns,
-                         int64_t sz,
-                         char type) {
+void unserializePair(ObjectData* obj, VariableUnserializer* uns,
+                     int64_t sz, char type) {
   assert(sz == 2);
   if (type != 'V') {
     throw Exception("Pair does not support the '%c' serialization "
                     "format", type);
   }
   auto pair = static_cast<c_Pair*>(obj);
-  pair->m_size = 2;
-  pair->elm0.m_type = KindOfNull;
-  pair->elm1.m_type = KindOfNull;
-  unserializeVariant(tvAsVariant(&pair->elm0), uns, UnserializeMode::ColValue);
-  unserializeVariant(tvAsVariant(&pair->elm1), uns, UnserializeMode::ColValue);
+  auto elms = pair->initForUnserialize();
+  unserializeVariant(tvAsVariant(&elms[0]), uns, UnserializeMode::ColValue);
+  unserializeVariant(tvAsVariant(&elms[1]), uns, UnserializeMode::ColValue);
 }
 
 Object c_Pair::t_tovector() { return materializeImpl<c_Vector>(this); }

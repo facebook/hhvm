@@ -505,9 +505,9 @@ bool String::operator<(const Variant& v) const {
   return HPHP::less(get(), v);
 }
 
-void String::unserialize(VariableUnserializer *uns,
-                         char delimiter0 /* = '"' */,
-                         char delimiter1 /* = '"' */) {
+void unserializeString(String& str, VariableUnserializer *uns,
+                       char delimiter0 /* = '"' */,
+                       char delimiter1 /* = '"' */) {
   int64_t size = uns->readInt();
   if (size >= RuntimeOption::MaxSerializedStringSize) {
     throw Exception("Size of serialized string (%d) exceeds max", int(size));
@@ -525,7 +525,7 @@ void String::unserialize(VariableUnserializer *uns,
   assert(size <= buf.size());
   uns->read(buf.data(), size);
   px->setSize(size);
-  m_str = std::move(px);
+  str = std::move(px);
   uns->expectChar(delimiter1);
 }
 

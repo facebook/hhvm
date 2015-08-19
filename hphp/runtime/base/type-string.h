@@ -150,6 +150,10 @@ public:
     m_str = std::move(src.m_str);
     return *this;
   }
+  String& operator=(req::ptr<StringData>&& src) {
+    m_str = std::move(src);
+    return *this;
+  }
 
   // Move assign from Variant
   String& operator=(Variant&& src);
@@ -406,12 +410,6 @@ public:
    */
   char charAt(int pos) const;
   char operator[](int pos) const { return charAt(pos);}
-
-  /**
-   * Input/Output
-   */
-  void unserialize(VariableUnserializer *uns, char delimiter0 = '"',
-                   char delimiter1 = '"');
 
   /**
    * Debugging

@@ -763,7 +763,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
   case 's':
     {
       String v;
-      v.unserialize(uns);
+      unserializeString(v, uns);
       self = std::move(v);
       if (!uns->endOfBuffer()) {
         // Semicolon *should* always be required,
@@ -792,7 +792,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto v = Array::Create();
-      v.unserialize(uns);
+      unserializeArray(v, uns);
       self = std::move(v);
     }
     return; // array has '}' terminating
@@ -801,7 +801,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       int64_t id = uns->readInt();
       uns->expectChar(':');
       String rsrcName;
-      rsrcName.unserialize(uns);
+      unserializeString(rsrcName, uns);
       uns->expectChar('{');
       uns->expectChar('}');
       auto rsrc = req::make<DummyResource>();
@@ -815,7 +815,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
   case 'K':
     {
       String clsName;
-      clsName.unserialize(uns);
+      unserializeString(clsName, uns);
 
       uns->expectChar(':');
       int64_t size = uns->readInt();
@@ -964,7 +964,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
           if (!obj->isCollection()) {
             throw Exception("%s is not a collection class", clsName.data());
           }
-          collections::unserialize(obj.get(), uns, size, type);
+          unserializeCollection(obj.get(), uns, size, type);
         }
       }
       uns->expectChar('}');
@@ -985,11 +985,11 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         raise_error("Debugger shouldn't call custom unserialize method");
       }
       String clsName;
-      clsName.unserialize(uns);
+      unserializeString(clsName, uns);
 
       uns->expectChar(':');
       String serialized;
-      serialized.unserialize(uns, '{', '}');
+      unserializeString(serialized, uns, '{', '}');
 
       auto const obj = [&]() -> Object {
         if (auto const cls = Unit::loadClass(clsName.get())) {

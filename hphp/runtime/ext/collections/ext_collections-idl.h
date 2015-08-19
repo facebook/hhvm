@@ -212,6 +212,11 @@ class BaseVector : public ExtCollectionObjectData {
     --m_size;
     arrayData()->m_size = m_size;
   }
+  TypedValue* appendForUnserialize(int64_t k) {
+    assert(k == m_size);
+    incSize();
+    return &m_data[k];
+  }
 
  protected:
   template<class TVector>
@@ -220,7 +225,6 @@ class BaseVector : public ExtCollectionObjectData {
   static Clone(ObjectData* obj);
 
  public:
-
   static Array ToArray(const ObjectData* obj) {
     check_collection_cast_to_array();
     return const_cast<BaseVector*>(
@@ -449,9 +453,6 @@ class BaseVector : public ExtCollectionObjectData {
             arrayData()->hasMultipleRefs()));
     m_immCopy.reset();
   }
-
-  static void Unserialize(ObjectData* obj,
-                          VariableUnserializer* uns, int64_t sz, char type);
 
  protected:
   /**
@@ -869,6 +870,7 @@ class HashCollection : public ExtCollectionObjectData {
   int32_t* findForInsert(int64_t h) const;
   int32_t* findForInsert(const StringData* s, strhash_t h) const;
 
+ protected:
   ssize_t findForRemove(int64_t h) {
     assert(canMutateBuffer());
     return arrayData()->findForRemove(h, false);
@@ -883,6 +885,24 @@ class HashCollection : public ExtCollectionObjectData {
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
  public:
+  TypedValue* findForUnserialize(int64_t h) {
+    auto p = findForInsert(h);
+    if (UNLIKELY(validPos(*p))) return nullptr;
+    auto e = &allocElm(p);
+    e->setIntKey(h);
+    updateNextKI(h);
+    return &e->data;
+  }
+  TypedValue* findForUnserialize(StringData* key) {
+    auto h = key->hash();
+    auto p = findForInsert(key, h);
+    if (UNLIKELY(validPos(*p))) return nullptr;
+    auto e = &allocElm(p);
+    e->setStrKey(key, h);
+    updateIntLikeStrKeys(key);
+    return &e->data;
+  }
+
   /**
    * canMutateBuffer() indicates whether it is currently safe to directly
    * modify this HashCollection's buffer.
@@ -1292,9 +1312,6 @@ class BaseMap : public HashCollection {
 
   static bool Equals(EqualityFlavor eq,
                      const ObjectData* obj1, const ObjectData* obj2);
-
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
 
   void init(const Variant& t);
 
@@ -1713,9 +1730,6 @@ class BaseSet : public HashCollection {
 
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
-  static void Unserialize(ObjectData* obj,
-                          VariableUnserializer* uns, int64_t sz, char type);
-
  protected:
   // PHP-land methods exported by child classes.
   template<class TVector>
@@ -1890,9 +1904,6 @@ class c_Set : public BaseSet {
   String t___tostring();
 
  public:
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
-
   static c_Set* Clone(ObjectData* obj);
 
  protected:
@@ -1941,9 +1952,6 @@ class c_ImmSet : public BaseSet {
     : BaseSet(cls, HeaderKind::ImmSet, cap) { }
   explicit c_ImmSet(uint32_t cap, Class* cls = c_ImmSet::classof())
     : c_ImmSet(cls, cap) { }
-
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
 
   static c_ImmSet* Clone(ObjectData* obj);
 };
@@ -2079,12 +2087,17 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
 
   int64_t size() const {
     assert(isFullyConstructed());
     return 2;
+  }
+
+  TypedValue* initForUnserialize() {
+    m_size = 2;
+    elm0.m_type = KindOfNull;
+    elm1.m_type = KindOfNull;
+    return getElms();
   }
 
   static constexpr uint32_t dataOffset() { return offsetof(c_Pair, elm0); }

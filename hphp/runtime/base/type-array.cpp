@@ -730,13 +730,13 @@ void Array::prepend(const Variant& v) {
   if (newarr != m_arr) m_arr = Ptr::attach(newarr);
 }
 
-void Array::unserialize(VariableUnserializer *uns) {
+void unserializeArray(Array& arr, VariableUnserializer* uns) {
   int64_t size = uns->readInt();
   uns->expectChar(':');
   uns->expectChar('{');
 
   if (size == 0) {
-    operator=(Create());
+    arr = Array::Create();
   } else {
     if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
       throw Exception("Array size out of bounds");
@@ -751,7 +751,7 @@ void Array::unserialize(VariableUnserializer *uns) {
 
     // Pre-allocate an ArrayData of the given size, to avoid escalation in the
     // middle, which breaks references.
-    operator=(ArrayInit(size, ArrayInit::Mixed{}).toArray());
+    arr = ArrayInit(size, ArrayInit::Mixed{}).toArray();
     for (int64_t i = 0; i < size; i++) {
       Variant key;
       unserializeVariant(key, uns, UnserializeMode::Key);
@@ -760,9 +760,9 @@ void Array::unserialize(VariableUnserializer *uns) {
       }
       // for apc, we know the key can't exist, but ignore that optimization
       assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
-             !exists(key, true));
+             !arr.exists(key, true));
 
-      Variant &value = lvalAt(key, AccessFlags::Key);
+      Variant &value = arr.lvalAt(key, AccessFlags::Key);
       if (UNLIKELY(isRefcountedType(value.getRawType()))) {
         uns->putInOverwrittenList(value);
       }

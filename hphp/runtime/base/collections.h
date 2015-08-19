@@ -31,7 +31,6 @@ class c_Map;
 class c_ImmMap;
 class c_Set;
 class c_ImmSet;
-class VariableUnserializer;
 }
 
 namespace HPHP { namespace collections {
@@ -98,9 +97,6 @@ bool isType(const Class* cls, CollectionType type, Args... args) {
 
 uint32_t sizeOffset(CollectionType type);
 uint32_t dataOffset(CollectionType type);
-
-void unserialize(ObjectData* obj, VariableUnserializer* uns,
-                 int64_t sz, char type);
 
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Cloing

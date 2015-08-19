@@ -20,8 +20,10 @@
 #include "common/time/ClockGettimeNS.h"
 #endif
 
+#ifndef _MSC_VER
 #define _GNU_SOURCE 1
 #include <dlfcn.h>
+#endif
 
 #include <cstring>
 
@@ -31,6 +33,7 @@ namespace HPHP {
 static Vdso s_vdso;
 
 Vdso::Vdso() : m_handle(nullptr), m_clock_gettime_ns(nullptr) {
+#ifndef _MSC_VER
   m_handle = dlopen("linux-vdso.so.1", RTLD_LAZY | RTLD_LOCAL | RTLD_NOLOAD);
   if (!m_handle) {
     return;
@@ -40,12 +43,15 @@ Vdso::Vdso() : m_handle(nullptr), m_clock_gettime_ns(nullptr) {
     (int64_t (*)(clockid_t))dlsym(m_handle, "__vdso_clock_gettime_ns");
   m_clock_gettime =
     (int (*)(clockid_t, timespec *))dlsym(m_handle, "__vdso_clock_gettime");
+#endif
 }
 
 Vdso::~Vdso() {
+#ifndef _MSC_VER
   if (m_handle) {
     dlclose(m_handle);
   }
+#endif
 }
 
 int64_t Vdso::ClockGetTimeNS(int clk_id) {

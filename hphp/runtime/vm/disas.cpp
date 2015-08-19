@@ -474,15 +474,19 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   }
 }
 
-std::string opt_type_constraint(const StringData *userType,
-                                const TypeConstraint &tc) {
+std::string type_constraint(const TypeConstraint &tc) {
+  std::string typeName = tc.typeName() ? escaped(tc.typeName()) : "N";
+  return folly::format("{} {} ",
+                       typeName,
+                       type_flags_to_string(tc.flags())).str();
+}
+std::string opt_type_info(const StringData *userType,
+                          const TypeConstraint &tc) {
   if (userType || tc.typeName() || tc.flags()) {
     std::string utype = userType ? escaped(userType) : "N";
-    std::string typeName = tc.typeName() ? escaped(tc.typeName()) : "N";
-    return folly::format("<{} {} {}> ",
+    return folly::format("<{} {}> ",
                          utype,
-                         typeName,
-                         type_flags_to_string(tc.flags())).str();
+                         type_constraint(tc)).str();
   }
   return "";
 }
@@ -494,8 +498,8 @@ std::string func_param_list(const FuncInfo& finfo) {
   for (auto i = uint32_t{0}; i < func->numParams(); ++i) {
     if (i != 0) ret += ", ";
 
-    ret += opt_type_constraint(func->params()[i].userType,
-                               func->params()[i].typeConstraint);
+    ret += opt_type_info(func->params()[i].userType,
+                         func->params()[i].typeConstraint);
     if (func->byRef(i)) ret += "&";
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
@@ -554,7 +558,7 @@ void print_func(Output& out, const Func* func) {
   } else {
     out.fmtln(".function{} {}{}({}){}{{",
       opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
-      opt_type_constraint(func->returnUserType(), func->returnTypeConstraint()),
+      opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
       func->name(),
       func_param_list(finfo),
       func_flag_list(finfo));
@@ -593,7 +597,7 @@ void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
   out.fmtln(".method{} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
-    opt_type_constraint(func->returnUserType(), func->returnTypeConstraint()),
+    opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
     func_param_list(finfo),
     func_flag_list(finfo));
@@ -614,6 +618,12 @@ void print_cls_inheritance_list(Output& out, const PreClass* cls) {
       out.fmt("{}{}", i != 0 ? " " : "", cls->interfaces()[i].get());
     }
     out.fmt(")");
+  }
+}
+
+void print_cls_enum_ty(Output& out, const PreClass* cls) {
+  if (cls->attrs() & AttrEnum) {
+    out.fmtln(".enum_ty <{}>;", type_constraint(cls->enumBaseTy()));
   }
 }
 
@@ -670,6 +680,7 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
 }
 
 void print_cls_directives(Output& out, const PreClass* cls) {
+  print_cls_enum_ty(out, cls);
   print_cls_used_traits(out, cls);
   for (auto& c : cls->allConstants())  print_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property(out, &p);

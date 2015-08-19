@@ -647,6 +647,7 @@ struct AsmState : private boost::noncopyable {
     assert(!fe);
     ue->addPreClassEmitter(pce);
     pce = 0;
+    enumTySet = false;
   }
 
   void patchLabelOffsets(const Label& label) {
@@ -758,6 +759,7 @@ struct AsmState : private boost::noncopyable {
   std::vector<FPIReg> fpiRegs;
   std::map<std::string,Label> labelMap;
   bool numItersSet{false};
+  bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
   int stackHighWater{0};
@@ -1666,17 +1668,23 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
 }
 
 /*
- * type-constraint : empty
+ * type-info       : empty
  *                 | '<' maybe-string-literal maybe-string-literal
  *                       type-flag* '>'
  *                 ;
+ * type-constraint : empty
+ *                 | '<' maybe-string-literal
+ *                       type-flag* '>'
+ *                 ;
+ * This parses type-info if noUserType is false, type-constraint if true
  */
-std::pair<const StringData *, TypeConstraint> parse_type_info(AsmState& as) {
+std::pair<const StringData *, TypeConstraint> parse_type_info(
+    AsmState& as, bool noUserType = false) {
   as.in.skipWhitespace();
   if (as.in.peek() != '<') return {};
   as.in.getc();
 
-  const StringData *userType = read_maybe_litstr(as);
+  const StringData *userType = noUserType ? nullptr : read_maybe_litstr(as);
   const StringData *typeName = read_maybe_litstr(as);
 
   std::string word;
@@ -1696,6 +1704,9 @@ std::pair<const StringData *, TypeConstraint> parse_type_info(AsmState& as) {
   }
   as.in.expect('>');
   return std::make_pair(userType, TypeConstraint{typeName, flags});
+}
+TypeConstraint parse_type_constraint(AsmState& as) {
+  return parse_type_info(as, true).second;
 }
 
 
@@ -2109,6 +2120,22 @@ void parse_use(AsmState& as) {
 }
 
 /*
+ * directive-enum_ty : type-constraint ';'
+ *                   ;
+ *
+ */
+void parse_enum_ty(AsmState& as) {
+  if (as.enumTySet) {
+    as.error("only one .enum_ty directive may appear in a given class");
+  }
+  as.enumTySet = true;
+
+  as.pce->setEnumBaseTy(parse_type_constraint(as));
+
+  as.in.expectWs(';');
+}
+
+/*
  * class-body : class-body-line* '}'
  *            ;
  *
@@ -2117,6 +2144,7 @@ void parse_use(AsmState& as) {
  *                 | ".const"        directive-const
  *                 | ".use"          directive-use
  *                 | ".default_ctor" directive-default-ctor
+ *                 | ".enum_ty"      directive-enum-ty
  *                 ;
  */
 void parse_class_body(AsmState& as) {
@@ -2131,6 +2159,7 @@ void parse_class_body(AsmState& as) {
     if (directive == ".const")        { parse_constant(as);     continue; }
     if (directive == ".use")          { parse_use(as);          continue; }
     if (directive == ".default_ctor") { parse_default_ctor(as); continue; }
+    if (directive == ".enum_ty")      { parse_enum_ty(as);      continue; }
 
     as.error("unrecognized directive `" + directive + "' in class");
   }

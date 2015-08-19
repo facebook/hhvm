@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to test() must be an instance of Foo, string given in %s on line %s

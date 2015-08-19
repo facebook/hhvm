@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_AFDT_UTIL_H_
 #define incl_HPHP_AFDT_UTIL_H_
 
+#ifdef _MSC_VER
+# error AFDT is not currently supported for MSVC!
+#endif
+
 #include <sys/socket.h>
 #include <vector>
 #include <string>

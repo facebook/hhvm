@@ -344,7 +344,11 @@ bool Debugger::isThreadDebugging(int64_t tid) {
 // of debugging for request and other threads.
 void Debugger::registerThread() {
   TRACE(2, "Debugger::registerThread\n");
+#ifdef _MSC_VER
+  auto const tid = (int64_t)pthread_getw32threadid_np(Process::GetThreadId());
+#else
   auto const tid = (int64_t)Process::GetThreadId();
+#endif
   ThreadInfoMap::accessor acc;
   m_threadInfos.insert(acc, tid);
   acc->second = &TI();

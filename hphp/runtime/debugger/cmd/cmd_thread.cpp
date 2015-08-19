@@ -174,8 +174,15 @@ void CmdThread::debuggerInfo(InfoVec &info) {
   Add(info, "Host",       Process::GetHostName());
   Add(info, "Binary",     Process::GetAppName());
   Add(info, "Version",    HHVM_VERSION);
+#ifdef _MSC_VER
+  Add(info, "Process ID", FormatNumber("%lld",
+    (int64_t)Process::GetProcessId()));
+  Add(info, "Thread ID", FormatNumber("0x%llx",
+    (int64_t)pthread_getw32threadid_np(Process::GetThreadId())));
+#else
   Add(info, "Process ID", FormatNumber("%lld", Process::GetProcessId()));
   Add(info, "Thread ID",  FormatNumber("0x%llx", (int64_t)Process::GetThreadId()));
+#endif
 }
 
 bool CmdThread::onServer(DebuggerProxy &proxy) {

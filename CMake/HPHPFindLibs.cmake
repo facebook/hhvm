@@ -42,6 +42,9 @@ endif()
 
 # google-glog
 find_package(Glog REQUIRED)
+if (LIBGLOG_STATIC)
+  add_definitions("-DGOOGLE_GLOG_DLL_DECL=")
+endif()
 include_directories(${LIBGLOG_INCLUDE_DIR})
 
 # inotify checks

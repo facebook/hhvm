@@ -1,0 +1,13 @@
+# Check that some corner cases for string escaping work
+
+.main  {
+  String "\0441\n"
+  Print
+  PopC
+  String "\x41A\n"
+  Print
+  PopC
+
+  Int 1
+  RetC
+}

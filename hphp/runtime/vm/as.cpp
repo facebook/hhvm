@@ -238,7 +238,7 @@ struct Input {
     default:
       if (is_oct(src)) {
         auto val = int64_t{src} - '0';
-        for (auto i = int{0}; i < 3; ++i) {
+        for (auto i = int{1}; i < 3; ++i) {
           src = getc();
           if (!is_oct(src)) { ungetc(src); break; }
           val *= 8;
@@ -254,11 +254,12 @@ struct Input {
       if (src == 'x' || src == 'X') {
         auto val = uint64_t{0};
         if (!is_hex(peek())) error("\\x used without no following hex digits");
-        do {
+        for (auto i = int{0}; i < 2; ++i) {
           src = getc();
+          if (!is_hex(src)) { ungetc(src); break; }
           val *= 0x10;
           val += hex_val(src);
-        } while (is_hex(peek()));
+        }
         if (val > std::numeric_limits<uint8_t>::max()) {
           error("hex escape sequence overflowed");
         }

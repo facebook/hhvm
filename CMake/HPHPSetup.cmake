@@ -248,6 +248,8 @@ add_definitions(-DHPHP_OSS=1)
 # later versions of binutils don't play well without automake
 add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
+add_definitions(-DDEFAULT_CONFIG_DIR="${DEFAULT_CONFIG_DIR}")
+
 if (NOT LIBSQLITE3_INCLUDE_DIR)
   include_directories("${TP_DIR}/libsqlite3")
 endif()

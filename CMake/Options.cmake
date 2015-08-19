@@ -31,3 +31,8 @@ option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
 option(ENABLE_ASYNC_MYSQL "Build the async_mysql extension" ON)
 option(ENABLE_MCROUTER "Build the mcrouter library and extension" ON)
 option(ENABLE_PROXYGEN_SERVER "Build the Proxygen HTTP server" ON)
+
+IF (NOT DEFAULT_CONFIG_DIR)
+  set(DEFAULT_CONFIG_DIR "/etc/hhvm/" CACHE STRING
+    "Default directory to find php.ini")
+ENDIF()

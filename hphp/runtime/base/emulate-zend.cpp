@@ -234,8 +234,8 @@ int emulate_zend(int argc, char** argv) {
       newargv.push_back("-c");
       newargv.push_back(filename);
     };
-    add_default_config_files_globbed("/etc/hhvm/php*.ini", cb);
-    add_default_config_files_globbed("/etc/hhvm/config*.hdf", cb);
+    add_default_config_files_globbed(DEFAULT_CONFIG_DIR "/php*.ini", cb);
+    add_default_config_files_globbed(DEFAULT_CONFIG_DIR "/config*.hdf", cb);
   }
 
   if (cnt < argc && strcmp(argv[cnt], "--") == 0) cnt++;

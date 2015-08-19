@@ -88,7 +88,7 @@ int pipe2(int pipefd[2], int flags) {
 #endif
 
 static int gettime_helper(clockid_t which_clock, struct timespec *tp) {
-#if defined(__CYGWIN__)
+#if defined(__CYGWIN__) || defined(_MSC_VER)
   // let's bypass trying to load vdso
   return clock_gettime(which_clock, tp);
 #elif defined(__APPLE__) || defined(__FreeBSD__)

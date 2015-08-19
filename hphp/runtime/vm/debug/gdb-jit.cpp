@@ -19,7 +19,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
+
+#include <folly/CPortability.h>
 
 using namespace HPHP;
 

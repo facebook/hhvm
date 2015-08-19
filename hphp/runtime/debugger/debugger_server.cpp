@@ -15,8 +15,9 @@
 */
 #include "hphp/runtime/debugger/debugger_server.h"
 
-#include <poll.h>
 #include <exception>
+
+#include <folly/SocketPortability.h>
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger.h"
@@ -99,7 +100,7 @@ bool DebuggerServer::start() {
   /* use a cur pointer so we still have ai to be able to free the struct */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = cur->ai_next) {
-    int s_fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
+    int s_fd = fsp::socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
     if (s_fd < 0 && errno == EAFNOSUPPORT) {
       continue;
     }

@@ -639,7 +639,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   struct addrinfo *cur;
   for (cur = ai; cur; cur = cur->ai_next) {
     auto sock = req::make<Socket>(
-      socket(cur->ai_family, cur->ai_socktype, 0),
+      fsp::socket(cur->ai_family, cur->ai_socktype, 0),
       cur->ai_family,
       cur->ai_addr->sa_data,
       port

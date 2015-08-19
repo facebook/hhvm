@@ -16,7 +16,8 @@
 #include "hphp/runtime/base/socket.h"
 
 #include <fcntl.h>
-#include <poll.h>
+
+#include <folly/SocketPortability.h>
 
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/thread-info.h"

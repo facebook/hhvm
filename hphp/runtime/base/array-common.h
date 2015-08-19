@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_ARRAY_COMMON_H_
 #define incl_HPHP_ARRAY_COMMON_H_
 
+#include <folly/Portability.h>
 #include <sys/types.h>
 
 namespace HPHP {

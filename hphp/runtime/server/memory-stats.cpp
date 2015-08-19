@@ -16,13 +16,14 @@
 #include "hphp/runtime/server/memory-stats.h"
 
 #include <stdio.h>
-#include <unistd.h>
 #include <ios>
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+
+#include <folly/FilePortability.h>
 
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"

@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-#include <sys/mman.h>
+#include <folly/CPortability.h>
 
 namespace HPHP { namespace jit {
 TRACE_SET_MOD(txlease);

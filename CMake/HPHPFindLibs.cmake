@@ -301,6 +301,9 @@ include_directories(${ZLIB_INCLUDE_DIR})
 # oniguruma
 find_package(ONIGURUMA REQUIRED)
 include_directories(${ONIGURUMA_INCLUDE_DIRS})
+if (ONIGURUMA_STATIC)
+  add_definitions("-DONIG_EXTERN=extern")
+endif()
 
 # libpthreads
 find_package(PThread REQUIRED)

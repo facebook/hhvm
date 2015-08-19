@@ -223,9 +223,17 @@ Variant HHVM_FUNCTION(gmmktime,
                       int64_t month,
                       int64_t day,
                       int64_t year);
+TypedValue* HHVM_FN(idate)(ActRec* ar);
+TypedValue* HHVM_FN(date)(ActRec* ar);
+TypedValue* HHVM_FN(gmdate)(ActRec* ar);
+TypedValue* HHVM_FN(strftime)(ActRec* ar);
+TypedValue* HHVM_FN(gmstrftime)(ActRec* ar);
+TypedValue* HHVM_FN(getdate)(ActRec* ar);
+TypedValue* HHVM_FN(localtime)(ActRec* ar);
 Variant HHVM_FUNCTION(strptime,
                       const String& date,
                       const String& format);
+TypedValue* HHVM_FN(strtotime)(ActRec* ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 // timezone

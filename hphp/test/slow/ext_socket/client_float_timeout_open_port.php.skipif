@@ -1,0 +1,12 @@
+<?php
+
+$errno = null;
+$errstr = null;
+$timeout = 1;
+
+$sock = @fsockopen("172.0.0.1", 57894, $errno, $errstr, $timeout);
+
+// Would be "Operation timed out" if ipv4 was working.
+if ($errstr === "Network is unreachable") {
+  die("Machine doesn't have ipv4.\n");
+}

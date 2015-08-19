@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct WarmupRequestHandlerFactory;
+class WarmupRequestHandlerFactory;
 
 /**
  * WarmupRequestHandler is a small shim on top of HttpRequestHandler.

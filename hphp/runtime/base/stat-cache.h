@@ -35,7 +35,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StatCache {
-  class Node;
+  struct Node;
   typedef AtomicSharedPtr<Node> NodePtr;
   typedef tbb::concurrent_hash_map<std::string, NodePtr,
                                    stringHashCompare> NameNodeMap;

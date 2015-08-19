@@ -52,7 +52,10 @@ struct FastCGIAcceptor : public wangle::Acceptor {
   void onNewConnection(folly::AsyncSocket::UniquePtr sock,
                        const folly::SocketAddress* peerAddress,
                        const std::string& nextProtocolName,
+// This is a temporary workaround for dependent projects for OSS HHVM
+#ifdef HHVM_SECURE_PROTO_TYPE
                        SecureTransportType secureProtocolType,
+#endif
                        const wangle::TransportInfo& tinfo) override;
   void onConnectionsDrained() override;
 

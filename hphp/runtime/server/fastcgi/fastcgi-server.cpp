@@ -31,7 +31,9 @@ void FastCGIAcceptor::onNewConnection(
   folly::AsyncSocket::UniquePtr sock,
   const folly::SocketAddress* peerAddress,
   const std::string& nextProtocolName,
+#ifdef HHVM_SECURE_PROTO_TYPE
   SecureTransportType secureProtocolType,
+#endif
   const ::wangle::TransportInfo& tinfo)
 {
   folly::SocketAddress localAddress;

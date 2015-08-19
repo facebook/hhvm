@@ -815,7 +815,12 @@ static bool HHVM_METHOD(DomDocument, _load, const String& source,
   if (!newdoc) {
     return false;
   }
+
+  auto olddoc = domdoc->node() ? domdoc->doc() : nullptr;
   domdoc->setNode((xmlNodePtr)newdoc);
+  if (olddoc) {
+    domdoc->doc()->copyProperties(olddoc);
+  }
   return true;
 }
 
@@ -852,7 +857,12 @@ static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
   if (!newdoc) {
     return false;
   }
-  Native::data<DOMNode>(this_)->setNode((xmlNodePtr)newdoc);
+  auto domdoc = Native::data<DOMNode>(this_);
+  auto olddoc = domdoc->node() ? domdoc->doc() : nullptr;
+  domdoc->setNode((xmlNodePtr)newdoc);
+  if (olddoc) {
+    domdoc->doc()->copyProperties(olddoc);
+  }
   return true;
 }
 

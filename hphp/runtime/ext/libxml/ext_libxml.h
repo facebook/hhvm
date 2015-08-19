@@ -139,6 +139,17 @@ struct XMLDocumentData : XMLNodeData {
     assert(p->type == XML_HTML_DOCUMENT_NODE || p->type == XML_DOCUMENT_NODE);
   }
 
+  void copyProperties(req::ptr<XMLDocumentData> data) {
+    m_classmap           = data->m_classmap;
+    m_formatoutput       = data->m_formatoutput;
+    m_validateonparse    = data->m_validateonparse;
+    m_resolveexternals   = data->m_resolveexternals;
+    m_preservewhitespace = data->m_preservewhitespace;
+    m_substituteentities = data->m_substituteentities;
+    m_stricterror        = data->m_stricterror;
+    m_recover            = data->m_recover;
+  }
+
   xmlDocPtr docp() const { return (xmlDocPtr)m_node; }
   void attachNode() { m_liveNodes++; }
   void detachNode() {

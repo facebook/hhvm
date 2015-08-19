@@ -166,13 +166,14 @@ const StaticString s_empty("");
 String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
 
-  HostEnt result;
-  if (!safe_gethostbyname(hostname.data(), result)) {
+
+  const HostEnt *result = cached_gethostbyname(hostname.data());
+  if (result == NULL) {
     return hostname;
   }
-
   struct in_addr in;
-  memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
+  result->get_current_address(&in);
+
   try {
     return String(folly::IPAddressV4(in).str());
   } catch (folly::IPAddressFormatException &e) {
@@ -182,14 +183,15 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
 
 Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   IOStatusHelper io("gethostbynamel", hostname.data());
-  HostEnt result;
-  if (!safe_gethostbyname(hostname.data(), result)) {
+
+  const HostEnt *result = cached_gethostbyname(hostname.data());
+  if (result == NULL) {
     return false;
   }
 
   Array ret;
-  for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
-    struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
+  for (int i = 0 ; result->hostbuf.h_addr_list[i] != 0 ; i++) {
+    struct in_addr in = *(struct in_addr *)result->hostbuf.h_addr_list[i];
     try {
       ret.append(String(folly::IPAddressV4(in).str()));
     } catch (folly::IPAddressFormatException &e) {

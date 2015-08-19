@@ -762,8 +762,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     break;
   case 's':
     {
-      String v;
-      unserializeString(v, uns);
+      String v = unserializeString(uns);
       self = std::move(v);
       if (!uns->endOfBuffer()) {
         // Semicolon *should* always be required,
@@ -800,8 +799,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     {
       int64_t id = uns->readInt();
       uns->expectChar(':');
-      String rsrcName;
-      unserializeString(rsrcName, uns);
+      String rsrcName = unserializeString(uns);
       uns->expectChar('{');
       uns->expectChar('}');
       auto rsrc = req::make<DummyResource>();
@@ -814,8 +812,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
   case 'V':
   case 'K':
     {
-      String clsName;
-      unserializeString(clsName, uns);
+      String clsName = unserializeString(uns);
 
       uns->expectChar(':');
       int64_t size = uns->readInt();
@@ -984,12 +981,10 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       if (uns->type() == VariableUnserializer::Type::DebuggerSerialize) {
         raise_error("Debugger shouldn't call custom unserialize method");
       }
-      String clsName;
-      unserializeString(clsName, uns);
+      String clsName = unserializeString(uns);
 
       uns->expectChar(':');
-      String serialized;
-      unserializeString(serialized, uns, '{', '}');
+      String serialized = unserializeString(uns, '{', '}');
 
       auto const obj = [&]() -> Object {
         if (auto const cls = Unit::loadClass(clsName.get())) {

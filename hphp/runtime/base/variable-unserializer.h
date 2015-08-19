@@ -146,7 +146,7 @@ private:
 void unserializeVariant(Variant&, VariableUnserializer *unserializer,
                         UnserializeMode mode = UnserializeMode::Value);
 void unserializeArray(Array&, VariableUnserializer*);
-void unserializeString(String&, VariableUnserializer*, char delimiter0 = '"',
+String unserializeString(VariableUnserializer*, char delimiter0 = '"',
                        char delimiter1 = '"');
 void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type);

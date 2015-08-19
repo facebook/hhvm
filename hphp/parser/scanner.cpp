@@ -91,12 +91,27 @@ Scanner::Scanner(const std::string& filename, int type, bool md5 /* = false */)
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
       m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0),
       m_listener(nullptr) {
+#ifdef _MSC_VER
+  // I really don't know why this doesn't work properly with MSVC,
+  // but I know this fixes the problem, so use it instead.
+  std::ifstream ifs =
+    std::ifstream(m_filename, std::ifstream::in | std::ifstream::binary);
+  if (ifs.fail()) {
+    throw FileOpenException(m_filename);
+  }
+
+  std::stringstream ss;
+  ss << ifs.rdbuf();
+  m_stream = new std::istringstream(ss.str());
+  m_streamOwner = true;
+#else
   m_stream = new std::ifstream(m_filename);
   m_streamOwner = true;
   if (m_stream->fail()) {
     delete m_stream; m_stream = nullptr;
     throw FileOpenException(m_filename);
   }
+#endif
   if (md5) computeMd5();
   init();
 }

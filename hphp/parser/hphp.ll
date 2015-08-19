@@ -2,6 +2,7 @@
 #include "hphp/parser/scanner.h"
 #include "hphp/system/systemlib.h"
 #include <cassert>
+#include <cctype>
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"

@@ -33,6 +33,22 @@
 #include "hphp/runtime/base/array-init.h"
 
 namespace HPHP {
+
+static void unserializeVariant(Variant&, VariableUnserializer *unserializer,
+                               UnserializeMode mode = UnserializeMode::Value);
+static void unserializeArray(Array&, VariableUnserializer*);
+static String unserializeString(VariableUnserializer*, char delimiter0 = '"',
+                                char delimiter1 = '"');
+static void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
+                                  int64_t sz, char type);
+static void unserializeVector(ObjectData*, VariableUnserializer*, int64_t sz,
+                              char type);
+static void unserializeMap(ObjectData*, VariableUnserializer*, int64_t sz,
+                           char type);
+static void unserializeSet(ObjectData*, VariableUnserializer*, int64_t sz,
+                           char type);
+static void unserializePair(ObjectData*, VariableUnserializer*, int64_t sz,
+                            char type);
 ///////////////////////////////////////////////////////////////////////////////
 
 void VariableUnserializer::set(const char* buf, const char* end) {
@@ -268,7 +284,7 @@ static Class* tryAlternateCollectionClass(const StringData* clsName) {
   return altName ? Unit::getClass(altName, /* autoload */ false) : nullptr;
 }
 
-NEVER_INLINE
+NEVER_INLINE static
 void unserializeVariant(Variant& self, VariableUnserializer *uns,
                         UnserializeMode mode /* = UnserializeMode::Value */) {
 
@@ -679,6 +695,7 @@ static void throwNegativeStringSize(int64_t size) {
   throw Exception("Size of serialized string (%ld) must not be negative", size);
 }
 
+static
 String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
   int64_t size = uns->readInt();
@@ -701,6 +718,7 @@ String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
   return px;
 }
 
+static
 void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type) {
   switch (obj->collectionType()) {
@@ -734,6 +752,7 @@ static void throwInvalidHashKey(const ObjectData* obj) {
                   header_names[(int)obj->headerKind()]);
 }
 
+static
 void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
                        int64_t sz, char type) {
   if (type != 'V') throwBadFormat(obj, type);
@@ -747,6 +766,7 @@ void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
   }
 }
 
+static
 void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
                     int64_t sz, char type) {
   if (type != 'K') throwBadFormat(obj, type);
@@ -775,6 +795,7 @@ do_unserialize:
   }
 }
 
+static
 void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
                     char type) {
   if (type != 'V') throwBadFormat(obj, type);
@@ -806,6 +827,7 @@ void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
   }
 }
 
+static
 void unserializePair(ObjectData* obj, VariableUnserializer* uns,
                      int64_t sz, char type) {
   assert(sz == 2);

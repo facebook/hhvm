@@ -277,8 +277,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
         : VariableUnserializer::Type::Serialize;
 
     VariableUnserializer vu(sAddr, sval->getSerializedSize(), sType);
-    Variant v;
-    unserializeVariant(v, &vu);
+    Variant v = vu.unserialize();
     auto const pair = APCHandle::Create(v, sval->isSerializedObj());
     sval->data = pair.handle;
     sval->dataSize = pair.size;

@@ -763,7 +763,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       int64_t id = uns->readInt();
       Variant *v = uns->getByVal(id);
       if (!v) throwOutOfRange(id);
-      self = *v;
+      Variant::AssignValHelper(&self, v);
     }
     break;
   case 'R':
@@ -771,11 +771,21 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       int64_t id = uns->readInt();
       Variant *v = uns->getByRef(id);
       if (!v) throwOutOfRange(id);
-      self.assignRef(*v);
+      self.assignRefHelper(*v);
     }
     break;
-  case 'b': { int64_t v = uns->readInt(); self = (bool)v; } break;
-  case 'i': { int64_t v = uns->readInt(); self = v;       } break;
+  case 'b':
+    {
+      int64_t v = uns->readInt();
+      tvSetBool((bool)v, *self.asTypedValue());
+      break;
+    }
+  case 'i':
+    {
+      int64_t v = uns->readInt();
+      tvSetInt(v, *self.asTypedValue());
+      break;
+    }
   case 'd':
     {
       double v;
@@ -798,13 +808,13 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       } else {
         v = uns->readDouble();
       }
-      self = negative ? -v : v;
+      tvSetDouble(negative ? -v : v, *self.asTypedValue());
     }
     break;
   case 's':
     {
       String v = unserializeString(uns);
-      self = std::move(v);
+      tvMove(make_tv<KindOfString>(v.detach()), *self.asTypedValue());
       if (!uns->endOfBuffer()) {
         // Semicolon *should* always be required,
         // but PHP's implementation allows omitting it
@@ -822,7 +832,8 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         StringData *sd;
       } u;
       uns->read(u.buf, 8);
-      self = u.sd;
+      assert(u.sd->isStatic());
+      tvMove(make_tv<KindOfStaticString>(u.sd), *self.asTypedValue());
     } else {
       throwUnknownType(type);
     }
@@ -833,7 +844,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       check_recursion_throw();
       auto v = Array::Create();
       unserializeArray(v, uns);
-      self = std::move(v);
+      tvMove(make_tv<KindOfArray>(v.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'L':
@@ -846,7 +857,8 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       auto rsrc = req::make<DummyResource>();
       rsrc->o_setResourceId(id);
       rsrc->m_class_name = rsrcName;
-      self = std::move(rsrc);
+      tvMove(make_tv<KindOfResource>(rsrc.detach()->hdr()),
+             *self.asTypedValue());
     }
     return; // resource has '}' terminating
   case 'O':
@@ -889,7 +901,6 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         cls = Unit::loadClass(clsName.get()); // with autoloading
       }
 
-      Object obj;
       if (RuntimeOption::UnserializationWhitelistCheck &&
           (type == 'O') &&
           !uns->isWhitelistedClass(clsName)) {
@@ -903,6 +914,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
           raise_error(err_msg, clsName.c_str());
         }
       }
+      Object obj;
       if (cls) {
         // Only unserialize CPP extension types which can actually
         // support it. Otherwise, we risk creating a CPP object
@@ -922,7 +934,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
       }
       assert(!obj.isNull());
-      self = obj;
+      tvSet(make_tv<KindOfObject>(obj.get()), *self.asTypedValue());
 
       if (size > 0) {
         // Check stack depth to avoid overflow.
@@ -1026,7 +1038,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       uns->expectChar(':');
       String serialized = unserializeString(uns, '{', '}');
 
-      auto const obj = [&]() -> Object {
+      auto obj = [&]() -> Object {
         if (auto const cls = Unit::loadClass(clsName.get())) {
           return Object::attach(g_context->createObject(cls, init_null_variant,
                                                         false /* init */));
@@ -1048,7 +1060,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         obj.get()->clearNoDestruct();
       }
 
-      self = std::move(obj);
+      tvMove(make_tv<KindOfObject>(obj.detach()), *self.asTypedValue());
     }
     return; // object has '}' terminating
   default:

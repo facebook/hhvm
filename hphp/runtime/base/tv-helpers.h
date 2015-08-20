@@ -346,6 +346,36 @@ inline void tvSet(const Cell fr, TypedValue& inTo) {
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
+// like tvSet, but RHS is bool
+inline void tvSetBool(bool val, TypedValue& inTo) {
+  Cell* to = tvToCell(&inTo);
+  auto const oldType = to->m_type;
+  auto const oldDatum = to->m_data.num;
+  to->m_type = KindOfBoolean;
+  to->m_data.num = val;
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// like tvSet, but RHS is int
+inline void tvSetInt(int64_t val, TypedValue& inTo) {
+  Cell* to = tvToCell(&inTo);
+  auto const oldType = to->m_type;
+  auto const oldDatum = to->m_data.num;
+  to->m_type = KindOfInt64;
+  to->m_data.num = val;
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// like tvSet, but RHS is double
+inline void tvSetDouble(double val, TypedValue& inTo) {
+  Cell* to = tvToCell(&inTo);
+  auto const oldType = to->m_type;
+  auto const oldDatum = to->m_data.num;
+  to->m_type = KindOfDouble;
+  to->m_data.dbl = val;
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
 /*
  * Assign the value of the Cell in `fr' to `to', decrementing the reference
  * count of 'to', but not incrementing 'to'.

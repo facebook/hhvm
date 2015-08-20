@@ -1081,10 +1081,10 @@ struct Variant : private TypedValue {
   void steal(ResourceHdr* v) noexcept;
   void steal(ResourceData* v) noexcept { steal(v->hdr()); }
 
+ public: // for unserializeVariant
   static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {
     assert(tvIsPlausible(*self) && tvIsPlausible(*other));
-
     if (UNLIKELY(self->m_type == KindOfRef)) self = self->m_data.pref->var();
     if (UNLIKELY(other->m_type == KindOfRef)) other = other->m_data.pref->var();
     // An early check for self == other here would be faster in that case, but
@@ -1104,6 +1104,7 @@ struct Variant : private TypedValue {
     tvRefcountedDecRefHelper(stype, sdata.num);
   }
 
+ private:
   static ALWAYS_INLINE void PromoteToRef(Variant& v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
@@ -1113,10 +1114,7 @@ struct Variant : private TypedValue {
     }
   }
 
-  ALWAYS_INLINE void assignValHelper(const Variant& v) {
-    AssignValHelper(this, &v);
-  }
-
+ public:
   ALWAYS_INLINE void assignRefHelper(Variant& v) {
     assert(tvIsPlausible(*this) && tvIsPlausible(v));
 
@@ -1130,7 +1128,6 @@ struct Variant : private TypedValue {
     tvRefcountedDecRefHelper(t, d);
   }
 
-public:
   ALWAYS_INLINE void constructRefHelper(Variant& v) {
     assert(tvIsPlausible(v));
     PromoteToRef(v);

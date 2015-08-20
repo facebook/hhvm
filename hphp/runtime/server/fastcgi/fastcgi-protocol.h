@@ -18,11 +18,13 @@
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_PROTOCOL_H_
 
 #include <folly/Bits.h>
+#include <folly/Portability.h>
 
 namespace HPHP {
 namespace fcgi {
 
 namespace detail {
+FOLLY_PACK_PUSH
 template<typename T>
 struct wire {
   wire() = default;
@@ -32,7 +34,8 @@ struct wire {
 
 private:
   T raw;
-} __attribute__((__packed__));
+} FOLLY_PACK_ATTR;
+FOLLY_PACK_POP
 }
 
 /* FastCGI sends all data over the wire in big-endian format. These helper types
@@ -170,6 +173,7 @@ enum Status : uint8_t {
  * The sender is not required to send padding bytes, the receiver must ignore
  * them if sent.
  */
+FOLLY_PACK_PUSH
 struct record {
   Version version;
   Type type;
@@ -204,8 +208,7 @@ struct record {
   >::type getTyped() const {
     return reinterpret_cast<const T*>(this);
   }
-} __attribute__((__packed__));
-
+} FOLLY_PACK_ATTR;
 
 struct begin_record : public record {
   wshort role;
@@ -213,23 +216,23 @@ struct begin_record : public record {
   uint8_t reserved[5];
 
   bool keepAlive() { return flags & KEEP_CONN; }
-} __attribute__((__packed__));
+} FOLLY_PACK_ATTR;
 
-struct abort_record : public record {} __attribute__((__packed__));
+struct abort_record : public record {} FOLLY_PACK_ATTR;
 
 struct end_record : public record {
   wlong appStatus;
   Status protStatus;
   uint8_t reserved[3];
-} __attribute__((__packed__));
+} FOLLY_PACK_ATTR;
 
 struct unknown_record : public record {
   Type unknownType;
   uint8_t reserved[7];
-} __attribute__((__packed__));
+} FOLLY_PACK_ATTR;
 
 #define STREAM_RECORD(name) \
-  struct name : public record {} __attribute__((__packed__))
+  struct name : public record {} FOLLY_PACK_ATTR
 
 STREAM_RECORD(stdin_record);
 STREAM_RECORD(stdout_record);
@@ -239,6 +242,8 @@ STREAM_RECORD(values_record);
 STREAM_RECORD(values_result_record);
 
 #undef STREAM_RECORD
+
+FOLLY_PACK_POP
 
 ////////////////////////////////////////////////////////////////////////////////
 }}

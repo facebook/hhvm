@@ -967,7 +967,7 @@ bool HHVM_FUNCTION(is_writable,
   if (filename.empty()) {
     return false;
   }
-  return accessSyscall(filename, W_OK) == 0;
+  return accessSyscall(filename, W_OK);
 }
 
 bool HHVM_FUNCTION(is_writeable,
@@ -982,7 +982,7 @@ bool HHVM_FUNCTION(is_readable,
   if (filename.empty()) {
     return false;
   }
-  return accessSyscall(filename, R_OK, true) == 0;
+  return accessSyscall(filename, R_OK, true);
 }
 
 bool HHVM_FUNCTION(is_executable,
@@ -991,7 +991,7 @@ bool HHVM_FUNCTION(is_executable,
   if (filename.empty()) {
     return false;
   }
-  return accessSyscall(filename, X_OK) == 0;
+  return accessSyscall(filename, X_OK);
 }
 
 static VFileType lookupVirtualFile(const String& filename) {
@@ -1028,9 +1028,9 @@ bool HHVM_FUNCTION(is_file,
 
   struct stat sb;
   if (statSyscall(filename, &sb, true)) {
-    return false;
-  } else {
     return (sb.st_mode & S_IFMT) == S_IFREG;
+  } else {
+    return false;
   }
 }
 
@@ -1047,9 +1047,9 @@ bool HHVM_FUNCTION(is_dir,
 
   struct stat sb;
   if (statSyscall(filename, &sb, false)) {
-    return false;
-  } else {
     return (sb.st_mode & S_IFMT) == S_IFDIR;
+  } else {
+    return false;
   }
 }
 
@@ -1058,9 +1058,9 @@ bool HHVM_FUNCTION(is_link,
   CHECK_PATH_FALSE(filename, 1);
   struct stat sb;
   if (lstatSyscall(filename, &sb)) {
-    return false;
-  } else {
     return (sb.st_mode & S_IFMT) == S_IFLNK;
+  } else {
+    return false;
   }
 }
 
@@ -1540,7 +1540,7 @@ bool HHVM_FUNCTION(unlink,
   CHECK_PATH_FALSE(filename, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   if (!w) return false;
-  return w->unlink(filename) == 0;
+  return w->unlink(filename);
 }
 
 bool HHVM_FUNCTION(link,
@@ -1748,7 +1748,7 @@ bool HHVM_FUNCTION(mkdir,
   Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
   if (!w) return false;
   int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
-  return w->mkdir(pathname, mode, options) == 0;
+  return w->mkdir(pathname, mode, options);
 }
 
 bool HHVM_FUNCTION(rmdir,
@@ -1757,7 +1757,7 @@ bool HHVM_FUNCTION(rmdir,
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   if (!w) return false;
   int options = 0;
-  return w->rmdir(dirname, options) == 0;
+  return w->rmdir(dirname, options);
 }
 
 String HHVM_FUNCTION(dirname,

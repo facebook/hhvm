@@ -404,7 +404,7 @@ typedef struct nzlib_format_s {
 } nzlib_format_t;
 
 Variant HHVM_FUNCTION(nzcompress, const String& uncompressed) {
-  size_t len = compressBound(uncompressed.size());
+  uLong len = compressBound(uncompressed.size());
   String str(sizeof(nzlib_format_t) + len, ReserveString);
   nzlib_format_t* format = (nzlib_format_t*)str.mutableData();
 
@@ -430,7 +430,7 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
     return false;
   }
 
-  size_t len = ntohl(format->uncompressed_sz);
+  uLong len = ntohl(format->uncompressed_sz);
   if (len == 0) {
     return empty_string_variant();
   }

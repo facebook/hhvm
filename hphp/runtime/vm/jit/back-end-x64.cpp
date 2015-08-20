@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"

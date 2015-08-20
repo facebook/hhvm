@@ -19,14 +19,14 @@
 #include "hphp/runtime/base/arch.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/abi-x64.h" // TODO(#7969111): kill
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/unique-stubs-x64.h" // TODO(#6730846): kill
+#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -51,47 +51,38 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * TODO(#6730846): There are some arch dependencies here to be eliminated.
- */
-
 void alignJmpTarget(CodeBlock& cb) {
   align(cb, Alignment::JmpTarget, AlignContext::Dead);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
- * LLVM catch traces expect vmfp to be in rdx.
+ * Set up any registers we want live going into an LLVM catch block.
+ *
+ * Return the set of live registers.
  */
 RegSet syncForLLVMCatch(Vout& v) {
   if (arch() != Arch::X64) return RegSet{};
-
-  v << copy{rvmfp(), reg::rdx};
-  return RegSet{reg::rdx};
-}
-
-void loadSavedRIP(Vout& v, Vreg d) {
-  switch (arch()) {
-    case Arch::X64:
-      v << load{*reg::rsp, d};
-      return;
-    case Arch::ARM:
-      not_implemented();
-      return;
-  }
-  not_reached();
+  return x64::syncForLLVMCatch(v);
 }
 
 /*
- * On x64, native calls assume native stack alignment.  For stubs that are
- * invoked via call (rather than a jmp), we need to take care of this manually.
+ * Load RIP from wherever it's stashed at the beginning of a new frame.
+ */
+void loadSavedRIP(Vout& v, Vreg d) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::loadSavedRIP(v, d);
+}
+
+/*
+ * On x64, native calls assume native stack alignment.  For called stubs (as
+ * opposed to jmp target stubs), we may need to take care of this manually.
  */
 template<class GenFunc>
 void alignNativeStack(Vout& v, GenFunc gen) {
   if (arch() != Arch::X64) return gen(v);
-
-  v << subqi{8, reg::rsp, reg::rsp, v.makeReg()};
-  gen(v);
-  v << addqi{8, reg::rsp, reg::rsp, v.makeReg()};
+  return x64::alignNativeStack(v, gen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,6 +172,7 @@ TCA emitBindCallStub(CodeBlock& cb) {
     auto args = VregList { v.makeReg(), v.makeReg(),
                            v.makeReg(), v.makeReg() };
 
+    // XXX: Why does this need to be RIP-relative?
     auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
     v << loadqp{reg::rip[imcg], args[0]};
 

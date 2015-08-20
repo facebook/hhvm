@@ -133,7 +133,7 @@ int64_t gettime_diff_us(const timespec &start, const timespec &end) {
 }
 
 int fadvise_dontneed(int fd, off_t len) {
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(_MSC_VER)
   return 0;
 #else
   return posix_fadvise(fd, 0, len, POSIX_FADV_DONTNEED);

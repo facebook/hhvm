@@ -182,16 +182,16 @@ using Vreg8   = Vr<Reg8>;
 using VregSF  = Vr<RegSF>;
 
 struct VregDbl : Vr<RegXMM> {
-  explicit VregDbl(size_t rn) : Vr<RegXMM>{rn} {}
+  explicit VregDbl(size_t rn) : Vr<RegXMM>(rn) {}
   template<class... Args> /* implicit */ VregDbl(Args&&... args)
-    : Vr<RegXMM>{std::forward<Args>(args)...} {}
+    : Vr<RegXMM>(std::forward<Args>(args)...) {}
   static bool allowable(Vreg r) { return r.isVirt() || r.isSIMD(); }
 };
 
 struct Vreg128 : Vr<RegXMM> {
-  explicit Vreg128(size_t rn) : Vr<RegXMM>{rn} {}
+  explicit Vreg128(size_t rn) : Vr<RegXMM>(rn) {}
   template<class... Args> /* implicit */ Vreg128(Args&&... args)
-    : Vr<RegXMM>{std::forward<Args>(args)...}
+    : Vr<RegXMM>(std::forward<Args>(args)...)
   {}
 };
 

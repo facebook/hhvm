@@ -86,6 +86,10 @@ using StrIntCmpFnInt = int64_t (*)(const StringData*, int64_t);
 
 #ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
 static auto Generator_Create_false = &Generator::Create<false>;
+static auto c_AsyncFunctionWaitHandle_Create_true =
+  &c_AsyncFunctionWaitHandle::Create<true>;
+static auto c_AsyncFunctionWaitHandle_Create_false =
+  &c_AsyncFunctionWaitHandle::Create<false>;
 #endif
 
 /*
@@ -374,10 +378,17 @@ static CallMap s_callMap {
 #endif
 
     /* Async function support helpers */
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+    {CreateAFWH,         c_AsyncFunctionWaitHandle_Create_true, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+    {CreateAFWHNoVV,     c_AsyncFunctionWaitHandle_Create_false, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+#else
     {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create<true>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {CreateAFWHNoVV,     &c_AsyncFunctionWaitHandle::Create<false>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+#endif
     {CreateSSWH,         &c_StaticWaitHandle::CreateSucceeded, DSSA, SNone,
                            {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,

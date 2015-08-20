@@ -229,8 +229,6 @@
 # define MSVC_NO_UNION_BITFIELD_CONSTEXPR_CONSTRUCTOR 1
 // 2015 RTM doesn't like it when you try to add via a double duration.
 # define MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD 1
-// 2015 RTM doesn't let you create constexpr arrays of pointers to functions.
-# define MSVC_NO_CONSTEXPR_FUNCTION_ADDRESSES 1
 // 2015 RTM doesn't like letting you get the size of tl_miter_table.ents, even
 // though it's a constexpr member in a context that is viably constexpr.
 # define MSVC_NO_CONSTEXPR_ARRAY_MEMBER_SIZE 1

@@ -2011,31 +2011,19 @@ void emitFinalMOp(MTS& env) {
 
   // MSVC needs these to be outside of
   // the case labels.
-#ifdef MSVC_NO_CONSTEXPR_FUNCTION_ADDRESSES
   static const MemFun elemOps[] = {
-#else
-  static constexpr MemFun elemOps[] = {
-#endif
 #define MII(instr, ...) &emit##instr##Elem,
     MINSTRS
 #undef MII
   };
   
-#ifdef MSVC_NO_CONSTEXPR_FUNCTION_ADDRESSES
   static const MemFun propOps[] = {
-#else
-  static constexpr MemFun propOps[] = {
-#endif
 #define MII(instr, ...) &emit##instr##Prop,
     MINSTRS
 #undef MII
   };
   
-#ifdef MSVC_NO_CONSTEXPR_FUNCTION_ADDRESSES
   static const MemFun newOps[] = {
-#else
-  static constexpr MemFun newOps[] = {
-#endif
 #define MII(instr, attrs, bS, iS, vC, fN) &emit##fN,
     MINSTRS
 #undef MII

@@ -83,7 +83,7 @@ TCA genFuncPrologue(TransID transID, Func* func, int argc) {
   return start;
 }
 
-TCA genCallArrayPrologue(Func* func, const DVFuncletsVec& dvs) {
+TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
   auto context = prologue_context(kInvalidTransID, func, func->base());
   IRGS env{context, TransFlags{}};
 
@@ -94,7 +94,7 @@ TCA genCallArrayPrologue(Func* func, const DVFuncletsVec& dvs) {
 
   auto const start = main.frontier();
 
-  irgen::emitCallArrayPrologue(env, dvs);
+  irgen::emitFuncBodyDispatch(env, dvs);
   irgen::sealUnit(env);
   genCode(env.unit, CodeKind::CrossTrace);
 

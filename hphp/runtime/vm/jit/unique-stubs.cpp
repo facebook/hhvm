@@ -172,7 +172,7 @@ TCA emitBindCallStub(CodeBlock& cb) {
     auto args = VregList { v.makeReg(), v.makeReg(),
                            v.makeReg(), v.makeReg() };
 
-    // XXX: Why does this need to be RIP-relative?
+    // TODO(#8060678): Why does this need to be RIP-relative?
     auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
     v << loadqp{reg::rip[imcg], args[0]};
 

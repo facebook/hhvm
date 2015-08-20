@@ -374,11 +374,10 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   emitPrologueBody(env, argc, transID);
 }
 
-void emitCallArrayPrologue(IRGS& env, const DVFuncletsVec& dvs) {
+void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
   auto const func = env.context.func;
 
-  // We don't need to mask this value because CallArray calls cannot be
-  // resumed, nor be from FPushCtor, so they can't have flags set.
+  // TODO(#8060661): Why don't we need to mask out the flags?
   auto const num_args = gen(env, LdARNumArgsAndFlags, fp(env));
 
   for (auto const& dv : dvs) {

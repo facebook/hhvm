@@ -2658,7 +2658,7 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
       auto const sf = v.makeReg();
       emitCmpTVType(v, sf, KindOfRefCountThreshold, rType);
       unlikelyIfThen(v, vcold(), CC_NLE, sf, [&](Vout& v) {
-        auto const stub = mcg->tx().uniqueStubs.genDecRefHelper;
+        auto const stub = mcg->tx().uniqueStubs.decRefGeneric;
         v << copy2{rData, rType, rarg(0), rarg(1)};
         v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};
       });

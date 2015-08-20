@@ -313,7 +313,7 @@ void emitDecRefHelper(UniqueStubs& us) {
     return start;
   };
 
-  us.genDecRefHelper = us.add("genDecRefHelper", doStub(TGen));
+  us.decRefGeneric = us.add("decRefGeneric", doStub(TGen));
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {

@@ -22,24 +22,77 @@
 
 namespace HPHP { namespace jit {
 
-//////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////////////
 
 constexpr int kNumFreeLocalsHelpers = 9;
 
 /*
- * Addresses of various unique, long-lived JIT helper routines are
- * emitted when we first start up our code cache.
+ * Addresses of various unique, long-lived JIT helper routines.
+ *
+ * The global set of unique stubs is emitted when we initialize the TC.
  */
 struct UniqueStubs {
-  /*
-   * Stub that returns from this level VM-nesting to the previous one,
-   * with whatever value is on the top of the stack.
-   */
-  TCA callToExit;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Function entry.
 
   /*
-   * Returning from a function when the ActRec was pushed by the interpreter.
+   * Dynamically dispatch to the appropriate func prologue, when the called
+   * function fails the prologue's func guard.
+   *
+   * @see: emitFuncGuard()
+   */
+  TCA funcPrologueRedispatch;
+
+  /*
+   * Look up or emit a func prologue and jump to it---or, failing that, call
+   * native routines that do the same work.
+   *
+   * All entries in the prologue tables of all Funcs are initialized to this
+   * stub, so that we can lazily generate their prologues.  If codegen for the
+   * prologue succeeds, we update the prologue table to point to the new
+   * prologue instead of this stub.
+   */
+  TCA fcallHelperThunk;
+
+  /*
+   * Look up or emit a func body entry point and jump to it---or, failing that,
+   * fall back to the interpreter.
+   *
+   * This func body is just the translation for Func::base(), for functions
+   * with no DV init funclets.  For functions with DV funclets, the func body
+   * first dispatches to any necessary funclets before jumping to the base()
+   * translation.
+   *
+   * @see: MCGenerator::getFuncBody()
+   */
+  TCA funcBodyHelperThunk;
+
+  /*
+   * Call EventHook::onFunctionEnter() and handle the case where it requests
+   * that we skip the function.
+   *
+   * functionEnterHelperReturn is used by unwinder code that needs to detect
+   * calls made from this stub.
+   */
+  TCA functionEnterHelper;
+  TCA functionEnterHelperReturn;
+
+  /*
+   * Handle either a surprise condition or a stack overflow.
+   *
+   * Also gracefully handles spurious wake-ups that result from racing with a
+   * background thread clearing surprise flags.
+   */
+  TCA functionSurprisedOrStackOverflow;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Function return.
+
+  /*
+   * Return from a function when the ActRec was pushed by the interpreter.
+   *
    * The return IP on the ActRec will be set to one of these stubs, so if
    * someone tries to execute a return instruction, we get a chance to set up
    * state for a POST_INTERP_RET service request.
@@ -48,40 +101,64 @@ struct UniqueStubs {
    * the heap.
    */
   TCA retHelper;
-  TCA genRetHelper;  // version for generators
+  TCA genRetHelper;       // version for generator
   TCA asyncGenRetHelper;  // version for async generators
 
   /*
-   * Returning from a function when the ActRec was called from jitted code but
-   * had its m_savedRip smashed by the debugger. These stubs call a helper that
-   * looks up the original catch trace from the call, executes it, then executes
-   * a REQ_POST_DEBUGGER_RET.
+   * Return from a function when the ActRec was pushed by an inlined call.
+   *
+   * This is the same as retHelper, but is kept separate to aid in debugging.
+   */
+  TCA retInlHelper;
+
+  /*
+   * Return from a function when the ActRec was called from jitted code but
+   * had its m_savedRip smashed by the debugger.
+   *
+   * These stubs call a helper that looks up the original catch trace from the
+   * call, executes it, then executes a REQ_POST_DEBUGGER_RET.
    */
   TCA debuggerRetHelper;
   TCA debuggerGenRetHelper;
   TCA debuggerAsyncGenRetHelper;
 
-  /*
-   * Returning from a function where the ActRec was pushed by an
-   * inlined call.  This is the same as retHelper but separated just
-   * for debugability.
-   */
-  TCA retInlHelper;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Function calls.
 
   /*
-   * Helpers used for restarting execution based on the value of PC, after
-   * things like InterpOne of an instruction that changes PC. Assumes all VM
-   * regs are synced.
+   * Bindcall stubs for immutable/non-immutable calls.
+   */
+  TCA bindCallStub;
+  TCA immutableBindCallStub;
+
+  /*
+   * Utility routine that helps implement a fast path to avoid full VM re-entry
+   * during translations of Op::FCallArray.
+   */
+  TCA fcallArrayHelper;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Interpreter stubs.
+
+  /*
+   * Restart execution based on the value of vmpc after an instruction (e.g.,
+   * InterpOne) that changes vmpc.
+   *
+   * These expect that all VM registers are synced.
    */
   TCA resumeHelperRet;
   TCA resumeHelper;
 
   /*
    * Like resumeHelper, but interpret a basic block first to ensure we make
-   * forward progress. interpHelper expects the correct value of vmpc to be in
-   * the first argument register, and interpHelperSyncedPC expects vmpc to
-   * already be synced. Both stubs will sync the sp and fp registers to vmRegs
-   * before interpreting.
+   * forward progress.
+   *
+   * interpHelper expects the correct value of vmpc to be in the first argument
+   * register and syncs it, whereas interpHelperSyncedPC expects vmpc to be
+   * synced a priori.  Both stubs will sync the vmsp and vmfp registers to
+   * vmRegs before interpreting.
    */
   TCA interpHelper;
   TCA interpHelperSyncedPC;
@@ -97,84 +174,53 @@ struct UniqueStubs {
    */
   std::unordered_map<Op, TCA> interpOneCFHelpers;
 
-  /*
-   * Throw a VMSwitchMode exception. Used in
-   * bytecode.cpp:switchModeForDebugger().
-   */
-  TCA throwSwitchMode;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // DecRefs.
 
   /*
-   * Catch blocks jump to endCatchHelper when they've finished executing. If
-   * the unwinder has set state indicating a return address to jump to, this
-   * stub will load vmfp and vmsp and jump there. Otherwise, it calls
-   * _Unwind_Resume.
+   * Expensive, generic decref of a value with an unknown (but known to be
+   * refcounted) DataType.
+   *
+   * The value to be decref'd should be in the first two argument registers
+   * (data, type).  All GP registers are saved around the destructor call.
+   */
+  TCA decRefGeneric;
+
+  /*
+   * Perform generic decrefs of locals on function return.
+   *
+   * Each freeLocalHelpers[i] is an entry point to a partially-unrolled loop.
+   * freeManyLocalsHelper should be used instead when there are more than
+   * kNumFreeLocalsHelpers locals.
+   */
+  TCA freeLocalsHelpers[kNumFreeLocalsHelpers];
+  TCA freeManyLocalsHelper;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Other stubs.
+
+  /*
+   * Return from this VM nesting level to the previous one, with whatever value
+   * is on the top of the stack.
+   */
+  TCA callToExit;
+
+  /*
+   * Perform dispatch at the end of a catch block.
+   *
+   * If the unwinder has set state indicating a return address to jump to, we
+   * load vmfp and vmsp and jump there.  Otherwise, we call _Unwind_Resume.
    */
   TCA endCatchHelper;
   TCA endCatchHelperPast;
 
   /*
-   * Helper stubs for doing generic decrefs on a function return.  The
-   * stub is a partially-unrolled loop with kNumFreeLocalsHelpers
-   * points to call to.  The freeManyLocalsHelper entry point should
-   * be used when there's more locals than that.
+   * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
    */
-  TCA freeManyLocalsHelper;
-  TCA freeLocalsHelpers[kNumFreeLocalsHelpers];
+  TCA throwSwitchMode;
 
-  /*
-   * A cold, expensive stub to DecRef a value with an unknown (but known to be
-   * refcounted) DataType. It saves all GP registers around the destructor
-   * call. The value should be in the first two argument registers (data,
-   * type).
-   */
-  TCA genDecRefHelper;
-
-  /*
-   * When we enter a func prologue based on a prediction of which
-   * Func* we'll be calling, if the prediction was wrong we bail to
-   * this stub to redispatch.
-   */
-  TCA funcPrologueRedispatch;
-
-  /*
-   * Utility routine that helps implement a fast path to avoid full VM
-   * re-entry during translations of Op::FCallArray.
-   */
-  TCA fcallArrayHelper;
-
-  /*
-   * A Func's prologue table is initialized to this stub for every entry. The
-   * stub calls fcallHelper, which looks up or generates the appropriate
-   * prologue and returns it. The stub then dispatches to the prologue.
-   */
-  TCA fcallHelperThunk;
-
-  /*
-   * A Func's "function body entry point" is initialized to this stub. The stub
-   * calls funcBodyHelper, which creates a real translation. The stub then
-   * dispatches to the translation.
-   */
-  TCA funcBodyHelperThunk;
-
-  /*
-   * Calls EventHook::onFunctionEnter, and handles the case where it requests
-   * that we skip the function. functionEnterHelperReturn is used by unwinder
-   * code that needs to detect calls made from this stub.
-   */
-  TCA functionEnterHelper;
-  TCA functionEnterHelperReturn;
-
-  /*
-   * Unique stub that is called when a JIT'd prologue has detected /either/ a
-   * surprise condition or a stack overflow.
-   */
-  TCA functionSurprisedOrStackOverflow;
-
-  /*
-   * BindCall stubs for immutable/non-immutable calls
-   */
-  TCA bindCallStub;
-  TCA immutableBindCallStub;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -217,7 +263,7 @@ private:
   std::vector<StubRange> m_ranges;
 };
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

@@ -181,8 +181,9 @@ public:
    */
   TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
                       bool forRegeneratePrologue = false);
-  TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
+
+  TCA getFuncBody(Func* func);
 
   inline void sync() {
     if (tl_regState == VMRegState::CLEAN) return;

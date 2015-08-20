@@ -36,7 +36,7 @@ namespace irgen {
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
 
-void emitCallArrayPrologue(IRGS& env, const DVFuncletsVec& dvs);
+void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs);
 
 ///////////////////////////////////////////////////////////////////////////////
 

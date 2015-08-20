@@ -34,9 +34,28 @@ namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Emit a func prologue, preceded by its func guard, to the TC, and return the
+ * prologue's start address.
+ *
+ * Func prologues are responsible for initializing the parts of a callee's
+ * frame not set up by Call---namely, stashing the return IP and setting up all
+ * local variables, including parameters, closure use variables, and variadic
+ * arg structures.  They also take care of function entry hooks, including
+ * surprise flag and stack overflow checks.
+ *
+ * A func prologue does a large portion of the work of an interpreted FCall;
+ * the rest of it is handled by the Call instruction.
+ */
 TCA genFuncPrologue(TransID transID, Func* func, int argc);
 
-TCA genCallArrayPrologue(Func* func, const DVFuncletsVec& dvs);
+/*
+ * Emit a func body dispatch entry point to the TC.
+ *
+ * This entry point calls DV init funclets for any un-passed parameters, and
+ * then performs a bindjmp to the function's actual entry point translation.
+ */
+TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs);
 
 ///////////////////////////////////////////////////////////////////////////////
 

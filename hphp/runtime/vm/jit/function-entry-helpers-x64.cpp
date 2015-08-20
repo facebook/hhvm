@@ -95,7 +95,7 @@ TCA funcBodyHelper(ActRec* fp) {
   tl_regState = VMRegState::CLEAN;
 
   auto const func = const_cast<Func*>(fp->m_func);
-  auto tca = mcg->getCallArrayPrologue(func);
+  auto tca = mcg->getFuncBody(func);
   if (!tca) {
     tca = mcg->tx().uniqueStubs.resumeHelper;
   }

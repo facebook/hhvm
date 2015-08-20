@@ -624,8 +624,7 @@ MCGenerator::translate(const TranslArgs& args) {
   return start;
 }
 
-TCA
-MCGenerator::getCallArrayPrologue(Func* func) {
+TCA MCGenerator::getFuncBody(Func* func) {
   TCA tca = func->getFuncBody();
   if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
 
@@ -636,7 +635,7 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
-    tca = genCallArrayPrologue(func, dvs);
+    tca = genFuncBodyDispatch(func, dvs);
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base(), false);

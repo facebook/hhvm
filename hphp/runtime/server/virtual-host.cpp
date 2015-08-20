@@ -53,7 +53,8 @@ void VirtualHost::SetCurrent(VirtualHost *vhost) {
 }
 
 const VirtualHost *VirtualHost::GetCurrent() {
-  const VirtualHost *ret = g_context->getVirtualHost();
+  const VirtualHost *ret = g_context.isNull() ?
+    nullptr : g_context->getVirtualHost();
   if (!ret) ret = &VirtualHost::GetDefault();
   return ret;
 }

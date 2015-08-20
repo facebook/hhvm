@@ -155,7 +155,7 @@ Xenon& Xenon::getInstance() noexcept {
 }
 
 Xenon::Xenon() noexcept : m_stopping(false) {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   m_timerid = 0;
 #endif
 }
@@ -166,7 +166,7 @@ Xenon::Xenon() noexcept : m_stopping(false) {
 // We need to create a semaphore and a thread.
 // If all of those happen, then we need a timer attached to a signal handler.
 void Xenon::start(uint64_t msec) {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
   if (!RuntimeOption::XenonForceAlwaysOn
       && m_timerid == 0
@@ -205,7 +205,7 @@ void Xenon::start(uint64_t msec) {
 
 // If Xenon owns a pthread, tell it to stop, also clean up anything from start.
 void Xenon::stop() {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_timerid) {
     m_stopping = true;
     sem_post(&m_timerTriggered);

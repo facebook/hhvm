@@ -398,8 +398,12 @@ int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Note that MSVC's rand is actually thread-safe to begin with
+// so no changes are actually needed to make it so.
 #ifdef __APPLE__
 static bool s_rand_is_seeded = false;
+#elif defined(_MSC_VER)
+static __thread bool s_rand_is_seeded = false;
 #else
 struct RandomBuf {
   random_data data;
@@ -416,6 +420,9 @@ static void randinit(uint32_t seed) {
 #ifdef __APPLE__
   s_rand_is_seeded = true;
   srandom(seed);
+#elif defined(_MSC_VER)
+  s_rand_is_seeded = true;
+  srand(seed);
 #else
   if (s_state.state == RandomBuf::Uninit) {
     initstate_r(seed, s_state.buf, sizeof s_state.buf, &s_state.data);
@@ -441,7 +448,7 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
 int64_t HHVM_FUNCTION(rand,
                       int64_t min /* = 0 */,
                       const Variant& max /* = null_variant */) {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(_MSC_VER)
   if (!s_rand_is_seeded) {
 #else
   if (s_state.state != RandomBuf::RequestInit) {
@@ -452,6 +459,8 @@ int64_t HHVM_FUNCTION(rand,
   int64_t number;
 #ifdef __APPLE__
   number = random();
+#elif defined(_MSC_VER)
+  number = rand();
 #else
   int32_t numberIn;
   random_r(&s_state.data, &numberIn);
@@ -500,7 +509,7 @@ const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
   Native::registerConstant<KindOfDouble>(makeStaticString("M_"#nm), k_M_##nm)  \
 
 void StandardExtension::requestInit() {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (s_state.state == RandomBuf::RequestInit) {
     s_state.state = RandomBuf::ThreadInit;
   }

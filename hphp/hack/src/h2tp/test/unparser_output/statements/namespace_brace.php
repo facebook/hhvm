@@ -2,15 +2,12 @@
 namespace my\name {
   const CONNECT_OK = 1;
 }
-
 namespace my\name\foo {
   const CONNECT_OK = 2;
 }
-
 namespace somethingelse {
   const CONNECT_OK = 3;
 }
-
 namespace {
   $x = \my\name\CONNECT_OK;
   echo ($x);

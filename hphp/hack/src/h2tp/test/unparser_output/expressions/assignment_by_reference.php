@@ -25,7 +25,7 @@ $l = array(&$j, &$k[0], &$k[1]);
 $l[0]++;
 $l[1]++;
 $l[2]++;
-echo ("Ref used inside array: $j\n");
+echo ("Ref used inside array: ".$j."\n");
 var_dump($k);
 $m = array("r" => "x", "s" => "y", "t" => "z");
 foreach ($m as $key => &$value) {

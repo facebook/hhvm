@@ -1,6 +1,6 @@
 <?php
 namespace blah {
-  require_once ($GLOBALS['HACKLIB_ROOT']);
+  require_once ($GLOBALS["HACKLIB_ROOT"]);
   $v = \HH\Vector::fromItems(array(1, 2, 3));
   echo ($v->count()."\n");
   $s = \HH\Set::fromKeysOf(\HH\Map::hacklib_new(array("abc"), array("123")));

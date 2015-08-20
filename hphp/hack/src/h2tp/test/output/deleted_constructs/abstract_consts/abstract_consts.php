@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 abstract class C1 {
   const Y = 10;
 }

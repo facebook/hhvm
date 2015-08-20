@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function foo($start, $end, $magic) {
   $fn = function() use ($start, $magic) {
     $i = $start;
@@ -26,5 +26,5 @@ function foo($start, $end, $magic) {
 echo ("one\n");
 $g = foo(1, 10, 7);
 foreach ($g as $k => $v) {
-  echo ("$k = $v\n");
+  echo ($k." = ".$v."\n");
 }

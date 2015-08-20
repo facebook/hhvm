@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function check_array_cast($c) {
   $arr = (array) \hacklib_cast_as_array($c);
   echo (\hacklib_cast_as_boolean(is_array($arr)) ? "YES\n" : "NO\n");

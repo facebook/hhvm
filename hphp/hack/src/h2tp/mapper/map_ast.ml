@@ -572,10 +572,9 @@ let mk_mapper = fun m_in ->
       | Int v1 -> let v1 = map_pstring v1 in Int ((v1))
       | Float v1 -> let v1 = map_pstring v1 in Float ((v1))
       | String v1 -> let v1 = map_pstring v1 in String ((v1))
-      | String2 ((v1, v2)) ->
+      | String2 v1 ->
           let v1 = map_of_list map_expr v1
-          and v2 = map_pstring v2
-          in String2 ((v1, v2))
+          in String2 ((v1))
       | Yield v1 -> let v1 = map_afield v1 in Yield ((v1))
       | Yield_break -> Yield_break
       | Await v1 -> let v1 = map_expr v1 in Await ((v1))

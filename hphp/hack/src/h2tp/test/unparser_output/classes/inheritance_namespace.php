@@ -19,7 +19,6 @@ namespace bar {
     echo ($b->a2(10)."\n");
   }
 }
-
 namespace {
   \bar\flub();
 }

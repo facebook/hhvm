@@ -1,6 +1,6 @@
 <?php
 namespace Boo {
-  require_once ($GLOBALS['HACKLIB_ROOT']);
+  require_once ($GLOBALS["HACKLIB_ROOT"]);
   interface Foo {}
   function somedata($c) {
     $t = gettype($c);
@@ -8,39 +8,39 @@ namespace Boo {
       $t = get_class($c);
     }
     if ($c instanceof \HH\KeyedIterable) {
-      echo ("$t is a KeyedIterable\n");
+      echo ($t." is a KeyedIterable\n");
     }
-    if (\hacklib_instanceof($c, 'HH\Traversable')) {
-      echo ("$t is a Traversable\n");
+    if (\hacklib_instanceof($c, "HH\\Traversable")) {
+      echo ($t." is a Traversable\n");
     }
     if ($c instanceof \Traversable) {
-      echo ("$t is a \Traversable\n");
+      echo ($t." is a \\Traversable\n");
     }
-    if (\hacklib_instanceof($c, 'HH\Traversable')) {
-      echo ("$t is a \HH\Traversable\n");
-    }
-    if ($c instanceof \HH\Iterator) {
-      echo ("$t is an Iterator\n");
+    if (\hacklib_instanceof($c, "HH\\Traversable")) {
+      echo ($t." is a \\HH\\Traversable\n");
     }
     if ($c instanceof \HH\Iterator) {
-      echo ("$t is an \HH\Iterator\n");
+      echo ($t." is an Iterator\n");
+    }
+    if ($c instanceof \HH\Iterator) {
+      echo ($t." is an \\HH\\Iterator\n");
     }
     if ($c instanceof \Iterator) {
-      echo ("$t is an Iterator\n");
+      echo ($t." is an Iterator\n");
     }
     if ($c instanceof \HH\Vector) {
-      echo ("$t is a Vector\n");
+      echo ($t." is a Vector\n");
     }
-    $y = "HH\Traversable";
+    $y = "HH\\Traversable";
     if (\hacklib_instanceof($c, $y)) {
-      echo ("$t is a \"HH\Traversable\"\n");
+      echo ($t." is a \"HH\\Traversable\"\n");
     }
     if ($c instanceof Foo) {
-      echo ("$t is a Foo\n");
+      echo ($t." is a Foo\n");
     }
-    $y = "\Boo\Foo";
+    $y = "\\Boo\\Foo";
     if (\hacklib_instanceof($c, $y)) {
-      echo ("$t is a \"\Boo\Foo\"\n");
+      echo ($t." is a \"\\Boo\\Foo\"\n");
     }
     echo ("\n\n");
   }

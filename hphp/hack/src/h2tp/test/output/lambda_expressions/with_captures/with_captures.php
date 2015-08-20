@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 class C {
   private function stuff($a, $b) {
     return $a + $b;

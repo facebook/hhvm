@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function testIterator($b) {
   for ($i = 0; $i < 5; $i++) {
     echo ($b->current()."\n");

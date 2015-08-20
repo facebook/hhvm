@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function foo($v = \HACKLIB_UNINIT, $sep = ",") {
   if ($v === \HACKLIB_UNINIT) {
     $v = new \HH\Vector(array(1, 2, 3));
@@ -56,7 +56,7 @@ class BooImpl extends Booze implements Boo {
   }
   public function buzz($s = \HACKLIB_UNINIT) {
     if ($s === \HACKLIB_UNINIT) {
-      $s = \HH\Map::hacklib_new(array('a'), array('z'));
+      $s = \HH\Map::hacklib_new(array("a"), array("z"));
     }
     echo (join(", ", (array) \hacklib_cast_as_array($s))."\n");
   }

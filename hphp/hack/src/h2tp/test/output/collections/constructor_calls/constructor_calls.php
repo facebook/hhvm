@@ -1,6 +1,6 @@
 <?php
 namespace foo {
-  require_once ($GLOBALS['HACKLIB_ROOT']);
+  require_once ($GLOBALS["HACKLIB_ROOT"]);
   class Foo {}
   new \HH\Vector();
   new \HH\ImmVector(array());

@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 class C {
   public function foo() {
     $x = 1 + (2 * (3 - (2 / 5)));

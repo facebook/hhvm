@@ -6,8 +6,8 @@ $fn = function(&$x) use (&$b) {
   $b = "fa";
 };
 $fn($a);
-echo ("the param $a\n");
-echo ("the used $b\n");
+echo ("the param ".$a."\n");
+echo ("the used ".$b."\n");
 class C {
   public function mk_lm(&$y, $toWhat) {
     return function() use (&$y, $toWhat) {

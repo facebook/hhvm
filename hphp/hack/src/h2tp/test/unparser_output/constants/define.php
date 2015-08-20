@@ -7,8 +7,8 @@ class C {
 function foo() {
   return "Foom";
 }
-define('GREETING', "Hello");
-define('Foom', foo());
+define("GREETING", "Hello");
+define("Foom", foo());
 echo (GREETING) ;
 echo (Foom."\n");
 new C();

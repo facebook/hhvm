@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function foo($start, $end) {
   if (false) {
     yield false;
@@ -9,7 +9,7 @@ function foo($start, $end) {
 echo ("one\n");
 $g = foo(1, 10);
 foreach ($g as $k => $v) {
-  echo ("$k = $v\n");
+  echo ($k." = ".$v."\n");
 }
 function bar($start, $end) {
   if (false) {
@@ -26,5 +26,5 @@ function bar($start, $end) {
 echo ("two\n");
 $g = bar(1, 10);
 foreach ($g as $k => $v) {
-  echo ("$k = $v\n");
+  echo ($k." = ".$v."\n");
 }

@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 class Foo {
   public $prop;
   public static $s_prop;
@@ -15,7 +15,7 @@ class Foo {
   }
 }
 function test_cast($type, $b) {
-  echo ("Expression Type $type: ");
+  echo ("Expression Type ".$type.": ");
   echo (\hacklib_cast_as_boolean($b) ? "Truthy\n" : "Falsy\n");
 }
 function test_all_expression_types() {
@@ -32,7 +32,7 @@ function test_all_expression_types() {
     $i > 0, \hacklib_cast_as_boolean($v_in);
     $i++, $v_in->pop()
   ) {
-    echo ("in here at $i\n");
+    echo ("in here at ".$i."\n");
     if ($i > 5) {
       break;
     }

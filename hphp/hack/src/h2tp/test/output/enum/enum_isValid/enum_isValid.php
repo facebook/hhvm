@@ -1,13 +1,13 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 final class E2 {
   private function __construct() {}
   private static
     $hacklib_values = array(
-      'Fly' => "15",
-      'Blue' => 12,
-      'Red' => 15,
-      'Green' => "green"
+      "Fly" => "15",
+      "Blue" => 12,
+      "Red" => 15,
+      "Green" => "green"
     );
   use \HH\HACKLIB_ENUM_LIKE;
   const Fly = "15";

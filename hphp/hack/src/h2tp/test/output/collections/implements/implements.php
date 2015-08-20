@@ -1,6 +1,6 @@
 <?php
 namespace HH {
-  require_once ($GLOBALS['HACKLIB_ROOT']);
+  require_once ($GLOBALS["HACKLIB_ROOT"]);
   interface Unrelated {}
 }
 namespace {

@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 class Foo {
   public function __toString() {
     return "Foo";
@@ -10,7 +10,7 @@ class Foo {
 }
 function print_result($name, $e) {
   $e = var_export($e, true);
-  echo ("Operation $name : $e\n");
+  echo ("Operation ".$name." : ".$e."\n");
 }
 function boolean_expressions($c) {
   $t = \hacklib_cast_as_boolean(is_array($c)) ? "Array" : $c->__toString();
@@ -19,7 +19,7 @@ function boolean_expressions($c) {
       ? ((!isset($c)) || \hacklib_equals($c, false))
       : $c->isEmpty();
   $isEmptyStr = \hacklib_cast_as_boolean($isEmpty) ? "Empty" : "Not Empty";
-  echo ("\nTesting a $t that is $isEmptyStr \n");
+  echo ("\nTesting a ".$t." that is ".$isEmptyStr." \n");
   $b = (bool) \hacklib_cast_as_boolean($c);
   print_result("(bool) Cast", $b);
   $b = (boolean) \hacklib_cast_as_boolean($c);
@@ -52,7 +52,7 @@ function boolean_statements($c) {
       break;
     }
   } while (\hacklib_cast_as_boolean($c));
-  echo ("Do Loop Iterations : $i\n");
+  echo ("Do Loop Iterations : ".$i."\n");
   $i = 0;
   while (\hacklib_cast_as_boolean($c)) {
     $i++;
@@ -60,14 +60,14 @@ function boolean_statements($c) {
       break;
     }
   }
-  echo ("While loop Iterations : $i\n");
+  echo ("While loop Iterations : ".$i."\n");
   $i = 0;
   for (; \hacklib_cast_as_boolean($c); $i++) {
     if ($i > 3) {
       break;
     }
   }
-  echo ("For Loop iterations : $i\n");
+  echo ("For Loop iterations : ".$i."\n");
 }
 function test_container($c) {
   boolean_expressions($c);

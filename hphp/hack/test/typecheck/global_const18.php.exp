@@ -1,2 +1,2 @@
-File "global_const18.php", line 3, characters 12-13:
-You cannot use a local variable in a constant definition (Naming[2031])
+File "global_const18.php", line 3, characters 11-14:
+Illegal constant value (Naming[2023])

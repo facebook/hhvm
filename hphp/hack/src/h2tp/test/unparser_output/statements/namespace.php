@@ -5,8 +5,8 @@ namespace my\name {
   const MYCONST = 1;
   $a = new MyClass();
   $c = new \my\name\MyClass();
-  $a = strlen('hi');
+  $a = strlen("hi");
   $d = namespace\MYCONST;
-  $d = __NAMESPACE__.'\MYCONST';
+  $d = __NAMESPACE__."\\MYCONST";
   echo (constant($d));
 }

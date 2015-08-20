@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function var_foo($x) {
   $arg_arr = func_get_args();
   return $x + count($arg_arr);

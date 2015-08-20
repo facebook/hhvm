@@ -1,5 +1,5 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function verify_pair($p) {
   echo (\hacklib_cast_as_boolean($p->isEmpty()) ? "empty\n" : "not empty\n");
   echo ($p->count()."\n");
@@ -32,7 +32,7 @@ function verify_pair($p) {
   ;
   foreach ($p as $i => $val) {
     $out = var_export($val, true);
-    echo ("$i : $out\n");
+    echo ($i." : ".$out."\n");
   }
   $i = $p->getIterator();
   $i->next();

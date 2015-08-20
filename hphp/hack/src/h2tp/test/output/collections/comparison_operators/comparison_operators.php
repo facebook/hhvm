@@ -1,8 +1,8 @@
 <?php
-require_once ($GLOBALS['HACKLIB_ROOT']);
+require_once ($GLOBALS["HACKLIB_ROOT"]);
 function print_res($name, $c) {
   echo
-    ("$name : ".(\hacklib_cast_as_boolean($c) ? " TRUE " : " FALSE ")."\n")
+    ($name." : ".(\hacklib_cast_as_boolean($c) ? " TRUE " : " FALSE ")."\n")
   ;
 }
 $o1 = 10;

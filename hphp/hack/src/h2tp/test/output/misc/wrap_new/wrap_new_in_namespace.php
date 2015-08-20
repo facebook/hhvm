@@ -1,6 +1,6 @@
 <?php
 namespace foo\bar\baz {
-  require_once ($GLOBALS['HACKLIB_ROOT']);
+  require_once ($GLOBALS["HACKLIB_ROOT"]);
   function display($x) {
     echo ($x);
   }
@@ -13,7 +13,6 @@ namespace cdef {
   }
   class D {
     public $state = "";
-
     public function __construct($foo, $bar) {
       return $this->state = $foo.$bar;
     }

@@ -819,9 +819,12 @@ let unparser _env =
       in StrList [ funStr; paramStr ]
     | Int i -> u_pstring i
     | Float f -> u_pstring f
-    | String s -> StrList [Str "'"; u_pstring s; Str "'"]
-    | String2 (_exprList, pstring) ->
-        StrList [ Str "\""; u_pstring pstring; Str "\""]
+    | String (p, s) ->
+      StrList [Str "\""; u_pstring (p, Php_escaping.escape s); Str "\""]
+    | String2 elems ->
+      (* build the string back by concatenating the parts *)
+      List.map ~f:u_expr elems |>
+      fun els -> StrList (List.intersperse ~sep:(Str ".") els)
     | Yield afield ->
         StrWords [Str "yield"; u_afield afield]
     | Yield_break -> u_todo "Yield_break" (fun () -> StrEmpty)

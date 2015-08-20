@@ -4,7 +4,7 @@ function everything_is_elephant($foo, &$bar, $baz) {
 }
 $a = $b = $c = "giraffe";
 everything_is_elephant($a, $b, $c);
-echo ("$a $b $c \n");
+echo ($a." ".$b." ".$c." \n");
 class Giraffe {
   public function changeMe(&$zee) {
     $zee = "giraffe";

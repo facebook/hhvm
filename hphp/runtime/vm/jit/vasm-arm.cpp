@@ -405,10 +405,10 @@ void lower(Vunit& unit) {
       auto& inst = unit.blocks[b].code[i];
       switch (inst.op) {
         case Vinstr::defvmsp:
-          inst = copy{PhysReg{arm::rVmSp}, inst.defvmsp_.d};
+          inst = copy{PhysReg{arm::rvmsp()}, inst.defvmsp_.d};
           break;
         case Vinstr::syncvmsp:
-          inst = copy{inst.syncvmsp_.s, PhysReg{arm::rVmSp}};
+          inst = copy{inst.syncvmsp_.s, PhysReg{arm::rvmsp()}};
           break;
         default:
           break;

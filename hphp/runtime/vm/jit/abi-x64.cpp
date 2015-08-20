@@ -27,6 +27,59 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+const RegSet kGPCallerSaved =
+  reg::rax | reg::rcx | reg::rdx |
+  reg::r8  | reg::r9  | reg::r10 | reg::r11;
+
+const RegSet kGPCalleeSaved =
+  reg::rbx | reg::rsi | reg::rdi | reg::r13 | reg::r14 | reg::r15;
+#else
+const RegSet kGPCallerSaved =
+  reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi |
+  reg::r8  | reg::r9  | reg::r10 | reg::r11;
+
+const RegSet kGPCalleeSaved =
+  reg::rbx | reg::r13 | reg::r14 | reg::r15;
+#endif
+
+const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
+const RegSet kGPReserved = reg::rsp | x64::rvmfp() | x64::rvmtl();
+const RegSet kGPRegs = kGPUnreserved | kGPReserved;
+
+const RegSet kXMMCallerSaved =
+  reg::xmm0  | reg::xmm1  | reg::xmm2  | reg::xmm3 |
+  reg::xmm4  | reg::xmm5  | reg::xmm6  | reg::xmm7 |
+  reg::xmm8  | reg::xmm9  | reg::xmm10 | reg::xmm11 |
+  reg::xmm12 | reg::xmm13 | reg::xmm14 | reg::xmm15;
+
+const RegSet kXMMCalleeSaved;
+
+const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
+const RegSet kXMMReserved;
+const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
+
+const RegSet kCallerSaved = kGPCallerSaved | kXMMCallerSaved;
+const RegSet kCalleeSaved = kGPCalleeSaved | kXMMCalleeSaved;
+
+const RegSet kSF = RegSet(RegSF{0});
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Registers that can safely be used for scratch purposes in-between traces.
+ */
+const RegSet kScratchCrossTraceRegs =
+  kXMMCallerSaved | (kGPUnreserved - vm_regs_with_sp());
+
+/*
+ * Helper code ABI registers.
+ */
+const RegSet kGPHelperRegs = x64::rAsm | reg::r11;
+const RegSet kXMMHelperRegs = reg::xmm5 | reg::xmm6 | reg::xmm7;
+
+///////////////////////////////////////////////////////////////////////////////
+
 const Abi trace_abi {
   kGPUnreserved,
   kGPReserved,
@@ -47,17 +100,39 @@ const Abi cross_trace_abi {
   false
 };
 
-auto const helper_gp = x64::rAsm | reg::r11;
-auto const helper_simd = reg::xmm5 | reg::xmm6 | reg::xmm7;
-
 const Abi helper_abi {
-  helper_gp,
-  trace_abi.gp() - helper_gp,
-  helper_simd,
-  trace_abi.simd() - helper_simd,
+  kGPHelperRegs,
+  trace_abi.gp() - kGPHelperRegs,
+  kXMMHelperRegs,
+  trace_abi.simd() - kXMMHelperRegs,
   trace_abi.calleeSaved,
   trace_abi.sf,
   false
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+// x64 INTEGER class argument registers.
+constexpr PhysReg gp_args[] = {
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  reg::rcx, reg::rdx, reg::r8, reg::r9
+#else
+  reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
+#endif
+};
+
+// x64 SSE class argument registers.
+constexpr PhysReg simd_args[] = {
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
+#else
+  reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
+  reg::xmm4, reg::xmm5, reg::xmm6, reg::xmm7,
+#endif
+};
+
+constexpr PhysReg svcreq_args[] = {
+  reg::rsi, reg::rdx, reg::rcx, reg::r8
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,6 +151,35 @@ const Abi& abi(CodeKind kind) {
       return helper_abi;
   }
   not_reached();
+}
+
+RegSet interp_one_cf_regs() {
+  return vm_regs_with_sp() | rAsm;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+PhysReg rarg(size_t i) {
+  assertx(i < num_arg_regs());
+  return gp_args[i];
+}
+PhysReg rarg_simd(size_t i) {
+  assertx(i < num_arg_regs_simd());
+  return simd_args[i];
+}
+
+size_t num_arg_regs() {
+  return sizeof(gp_args) / sizeof(PhysReg);
+}
+size_t num_arg_regs_simd() {
+  return sizeof(simd_args) / sizeof(PhysReg);
+}
+
+PhysReg r_svcreq_sf() {
+  return abi().sf.findFirst();
+}
+PhysReg r_svcreq_arg(size_t i) {
+  return svcreq_args[i];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

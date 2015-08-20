@@ -136,7 +136,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
-  // we have a pointer to an AR that is not in rVmFp.
+  // we have a pointer to an AR that is not in rvmfp().
   if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(TFramePtr)) {
     return rvmfp();
   }
@@ -239,7 +239,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       defs = abi.all();
       switch (arch()) {
       case Arch::ARM: break;
-      case Arch::X64: defs.remove(x64::rVmTl); break;
+      case Arch::X64: defs.remove(x64::rvmtl()); break;
       }
       break;
     case Vinstr::contenter:
@@ -247,11 +247,11 @@ void getEffects(const Abi& abi, const Vinstr& i,
       defs = abi.all() - RegSet(rvmfp());
       switch (arch()) {
       case Arch::ARM: break;
-      case Arch::X64: defs.remove(x64::rVmTl); break;
+      case Arch::X64: defs.remove(x64::rvmtl()); break;
       }
       break;
     case Vinstr::callfaststub:
-      defs = abi.all() - abi.calleeSaved - x64::kGPCallerSaved;
+      defs = abi.all() - abi.calleeSaved - abi.gpUnreserved;
       break;
     case Vinstr::cqo:
       uses = RegSet(reg::rax);

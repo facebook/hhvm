@@ -65,9 +65,9 @@ struct BackEnd final : jit::BackEnd {
     sim.   set_xreg(arm::rGContextReg.code(), g_context.getNoCheck());
 
     auto& vmRegs = vmRegsUnsafe();
-    sim.   set_xreg(arm::rVmFp.code(), vmRegs.fp);
-    sim.   set_xreg(arm::rVmSp.code(), vmRegs.stack.top());
-    sim.   set_xreg(arm::rVmTl.code(), rds::tl_base);
+    sim.   set_xreg(x2a(rvmfp()).code(), vmRegs.fp);
+    sim.   set_xreg(x2a(rvmsp()).code(), vmRegs.stack.top());
+    sim.   set_xreg(x2a(rvmtl()).code(), rds::tl_base);
 
     // Leave space for register spilling and MInstrState.
     assertx(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
@@ -122,8 +122,8 @@ struct BackEnd final : jit::BackEnd {
 
     assertx(sim.sp() == spOnEntry);
 
-    vmRegsUnsafe().fp = (ActRec*)sim.xreg(arm::rVmFp.code());
-    vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(arm::rVmSp.code());
+    vmRegsUnsafe().fp = (ActRec*)sim.xreg(x2a(rvmfp()).code());
+    vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(x2a(rvmsp()).code());
   }
 
   void emitInterpReq(CodeBlock& mainCode,

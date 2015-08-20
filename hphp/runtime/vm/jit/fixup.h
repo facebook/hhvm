@@ -86,7 +86,7 @@ namespace HPHP { namespace jit {
  *        +------------------------------+  <call to C++>
  *        |    RetIP to the dtor stub    |
  *        |--                          --|
- *        |         saved rVmFp          |  push %rbp; mov %rsp, %rbp
+ *        |         saved rvmfp()          |  push %rbp; mov %rsp, %rbp
  *    +-->|--                          --|
  *    |   |    < C++ local variables>    |
  *    |   +------------------------------+

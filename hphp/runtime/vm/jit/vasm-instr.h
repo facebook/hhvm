@@ -430,7 +430,7 @@ struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
 
 /*
- * Increment the bytecode counter at `base', which should be rVmTl.
+ * Increment the bytecode counter at `base', which should be rvmtl().
  */
 struct countbytecode { Vreg base; VregSF sf; };
 
@@ -538,7 +538,7 @@ struct vret { Vptr retAddr; Vptr prevFP; Vreg d; RegSet args; };
 // Boundary intrinsics.
 
 /*
- * Copy rVmSp into `d'.
+ * Copy rvmsp() into `d'.
  *
  * Used when reentering translated code after an ABI boundary, such as the
  * beginning of a tracelet or right after a bindcall.
@@ -546,7 +546,7 @@ struct vret { Vptr retAddr; Vptr prevFP; Vreg d; RegSet args; };
 struct defvmsp { Vreg d; };
 
 /*
- * Copy `s' into rVmSp.
+ * Copy `s' into rvmsp().
  *
  * Used right before leaving translated code for an ABI boundary, such as
  * bindjmp or fallbackcc.

@@ -804,7 +804,7 @@ void CodeGenerator::cgCallHelper(Vout& v,
 
   RegSet argRegs;
   for (size_t i = 0; i < args.numGpArgs(); i++) {
-    PhysReg r(argReg(i));
+    auto const r = rarg(i);
     args.gpArg(i).setDstReg(r);
     argRegs.add(r);
   }
@@ -1017,14 +1017,14 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
-    PhysReg vmfp(rVmFp), vmsp(rVmSp), rds(rVmTl);
+    PhysReg vmfp(rvmfp()), vmsp(rvmsp()), rds(rvmtl());
     auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff();
     v << store{vmfp, rds[rds::kVmfpOff]};
     v << store{vmsp, rds[rds::kVmspOff]};
     v << store{v.cns(pc), rds[rds::kVmpcOff]};
   }
 
-  PhysReg mis(rVmTl);
+  PhysReg mis(rvmtl());
 
   auto callArgs = argGroup();
   if (isBuiltinByRef(funcReturnType)) {
@@ -1233,7 +1233,7 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   auto dst = dstLoc(0).reg();
   auto const name = inst->extra<LdFuncCachedData>()->name;
   auto const ch = NamedEntity::get(name)->getFuncHandle();
-  PhysReg rds(rVmTl);
+  PhysReg rds(rvmtl());
   auto& v = vmain();
 
   auto dst1 = v.makeReg();
@@ -1284,7 +1284,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
   auto& v = vmain();
-  PhysReg rds(rVmTl), fp(rVmFp), sp(rVmSp);
+  PhysReg rds(rvmtl()), fp(rvmfp()), sp(rvmsp());
   v << load{rds[rds::kVmfpOff], fp};
   v << load{rds[rds::kVmspOff], sp};
   v << jmpi{mcg->tx().uniqueStubs.resumeHelper};

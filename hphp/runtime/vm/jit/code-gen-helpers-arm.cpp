@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -46,7 +47,7 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
     a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call.address()));
     break;
   case CppCall::Kind::Virtual:
-    a. Ldr  (rHostCallReg, argReg(0)[0]);
+    a. Ldr  (rHostCallReg, x2a(rarg(0))[0]);
     a. Ldr  (rHostCallReg, rHostCallReg[call.vtableOffset()]);
     break;
   case CppCall::Kind::ArrayVirt:
@@ -70,7 +71,7 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
 }
 
 Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
-  PhysReg arg0(argReg(0));
+  PhysReg arg0(x2a(rarg(0)));
   PhysReg rHostCall(rHostCallReg);
   switch (call.kind()) {
   case CppCall::Kind::Direct:
@@ -145,7 +146,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   emitTestSurpriseFlags(a, rds);
   emitSmashableJcc(mainCode, coldCode.frontier(), CC_NZ);
 
-  acold.  Mov  (argReg(0), rVmFp);
+  acold.  Mov  (x2a(rarg(0)), vixl::Register(rvmfp()));
 
   auto fixupAddr =
       emitCallWithinTC(acold, mcg->tx().uniqueStubs.functionEnterHelper);
@@ -157,7 +158,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,
                                  jit::Fixup fixup) {
   // keep this in sync with arm version above
-  PhysReg fp{rVmFp}, arg0{argReg(0)};
+  PhysReg fp{rvmfp()}, arg0{x2a(rarg(0))};
   auto surprise = vc.makeBlock();
   auto done = v.makeBlock();
   auto sf = emitTestSurpriseFlags(v, rds);
@@ -165,7 +166,7 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,
 
   vc = surprise;
   vc << copy{fp, arg0};
-  vc << callr{vc.cns(mcg->tx().uniqueStubs.functionEnterHelper), argSet(1)};
+  vc << callr{vc.cns(mcg->tx().uniqueStubs.functionEnterHelper), arg_regs(1)};
   vc << syncpoint{fixup};
   vc << jmp{done};
   v = done;

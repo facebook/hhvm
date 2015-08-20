@@ -85,9 +85,9 @@ struct BackEnd final : jit::BackEnd {
    * enterTCHelper is a handwritten assembly function that transfers control in
    * and out of the TC.
    */
-  static_assert(x64::rVmSp == rbx &&
-                x64::rVmFp == rbp &&
-                x64::rVmTl == r12,
+  static_assert(x64::rvmsp() == rbx &&
+                x64::rvmfp() == rbp &&
+                x64::rvmtl() == r12,
                 "__enterTCHelper needs to be modified to use the correct ABI");
 
   void enterTCHelper(TCA start, ActRec* stashedAR) override {
@@ -108,9 +108,9 @@ struct BackEnd final : jit::BackEnd {
     if (RuntimeOption::EvalJitTransCounters) {
       x64::emitTransCounterInc(a);
     }
-    a.    emitImmReg(uint64_t(sk.pc()), argNumToRegName[0]);
+    a.    emitImmReg(uint64_t(sk.pc()), rarg(0));
     if (!sk.resumed()) {
-      a.  lea(x64::rVmFp[-cellsToBytes(spOff.offset)], x64::rVmSp);
+      a.  lea(x64::rvmfp()[-cellsToBytes(spOff.offset)], x64::rvmsp());
     }
     a.    jmp(mcg->tx().uniqueStubs.interpHelper);
   }
@@ -138,11 +138,11 @@ struct BackEnd final : jit::BackEnd {
 
     if (!sk.resumed()) {
       auto const off = mcg->tx().getSrcRec(sk)->nonResumedSPOff();
-      a. lea    (x64::rVmFp[-cellsToBytes(off.offset)], x64::rVmSp);
+      a. lea    (x64::rvmfp()[-cellsToBytes(off.offset)], x64::rvmsp());
     }
 
     // Branch to interpHelper if attached
-    a.   emitImmReg(uint64_t(sk.pc()), argNumToRegName[0]);
+    a.   emitImmReg(uint64_t(sk.pc()), rarg(0));
     a.   jnz    (mcg->tx().uniqueStubs.interpHelper);
   }
 

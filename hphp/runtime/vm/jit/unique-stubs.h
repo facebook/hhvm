@@ -87,10 +87,13 @@ struct UniqueStubs {
   TCA interpHelperSyncedPC;
 
   /*
-   * For every bytecode with the CF flag, a stub will exist here to interpOne
-   * that bytecode, followed by a call to resumeHelper. The stubs expect rVmFp
-   * and rVmSp to be live, and rAsm must contain the offset to the bytecode to
-   * interpret.
+   * Stubs for each bytecode with the CF flag, which InterpOne the bytecode and
+   * then call resumeHelper.
+   *
+   * These stubs expect rvmfp() and rvmsp() to be live, and rAsm to contain the
+   * offset to the bytecode to interpret.
+   *
+   * TODO(#6730846): Use an architecture-independent argument register API.
    */
   std::unordered_map<Op, TCA> interpOneCFHelpers;
 

@@ -43,7 +43,7 @@ constexpr auto kNumPhysRegs = 1;
 
 folly::Optional<int32_t> phys_reg_index(Vreg reg) {
   assert(reg.isPhys());
-  if (reg == x64::rVmFp) return 0;
+  if (reg == x64::rvmfp()) return 0;
   return folly::none;
 }
 
@@ -165,16 +165,16 @@ void analyze_inst_physical(Env& env,
        * a RegSet---we cannot mis-optimize any of its args based on the state
        * we're tracking for the frame pointer.
        *
-       * We also skip over bindcall's definition of rVmFp for this reason.
+       * We also skip over bindcall's definition of rvmfp() for this reason.
        * Really bindcall only preserves rbp if we properly set up the rbp arg
        * to it, but the program is ill-formed if it's not doing that so it's ok
        * to just ignore that definition here.
        */
-      if (next && next->op == Vinstr::bindcall && dst == x64::rVmFp) {
+      if (next && next->op == Vinstr::bindcall && dst == x64::rvmfp()) {
         FTRACE(3, "      post-dominated by bindcall---preserving frame ptr\n");
         return;
       }
-      if (inst.op == Vinstr::bindcall && dst == x64::rVmFp) return;
+      if (inst.op == Vinstr::bindcall && dst == x64::rvmfp()) return;
 
       FTRACE(3, "      kill {}\n", show(dst));
       state.phys_altered[*idx] = true;
@@ -369,7 +369,7 @@ void optimize(Env& env) {
  * offset.  It then folds offsets in memory operands to try to require fewer
  * registers.  The main motivation for this is to generally eliminate the need
  * for a separate stack pointer (the result of HHIR's DefSP instruction, which
- * will just be an lea off of the rVmFp physical register).
+ * will just be an lea off of the rvmfp() physical register).
  */
 void optimizeCopies(Vunit& unit, const Abi& abi) {
   VpassTracer tracer{&unit, Trace::vasm_copy, "vasm-copy"};

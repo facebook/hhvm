@@ -13,15 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/fixup.h"
 
-#include "hphp/vixl/a64/simulator-a64.h"
-
 #include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
 #include "hphp/util/data-block.h"
+#include "hphp/vixl/a64/simulator-a64.h"
 
 namespace HPHP { namespace jit {
 
@@ -108,7 +110,8 @@ void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   // uniqueStub.
   for (int i = ec->m_activeSims.size() - 1; i >= 0; --i) {
     auto const* sim = ec->m_activeSims[i];
-    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(jit::arm::rVmFp.code()));
+    auto const fp = arm::x2a(arm::rvmfp());
+    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(fp.code()));
     auto tca = reinterpret_cast<TCA>(sim->pc());
     TRACE(2, "considering frame %p, %p\n", rbp, tca);
 

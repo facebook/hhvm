@@ -23,6 +23,7 @@
 #include "hphp/util/disasm.h"
 
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -94,25 +95,25 @@ void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
   Label resumeRaw;
 
   uniqueStubs.interpHelper = a.frontier();
-  a.    storeq (argNumToRegName[0], rVmTl[rds::kVmpcOff]);
+  a.    storeq (rarg(0), rvmtl()[rds::kVmpcOff]);
   uniqueStubs.interpHelperSyncedPC = a.frontier();
-  a.    storeq (rVmSp, rVmTl[rds::kVmspOff]);
-  a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
-  a.    movb   (1, rbyte(argNumToRegName[1])); // interpFirst
+  a.    storeq (rvmsp(), rvmtl()[rds::kVmspOff]);
+  a.    storeq (rvmfp(), rvmtl()[rds::kVmfpOff]);
+  a.    movb   (1, rbyte(rarg(1))); // interpFirst
   a.    jmp8   (resumeHelper);
 
   uniqueStubs.resumeHelperRet = a.frontier();
-  a.    pop   (rVmFp[AROFF(m_savedRip)]);
+  a.    pop   (rvmfp()[AROFF(m_savedRip)]);
   uniqueStubs.resumeHelper = a.frontier();
-  a.    movb  (0, rbyte(argNumToRegName[1])); // interpFirst
+  a.    movb  (0, rbyte(rarg(1))); // interpFirst
 asm_label(a, resumeHelper);
-  a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
-  a.    loadq (rip[intptr_t(&mcg)], argNumToRegName[0]);
+  a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
+  a.    loadq (rip[intptr_t(&mcg)], rarg(0));
   a.    call  (TCA(getMethodPtr(&MCGenerator::handleResume)));
 asm_label(a, resumeRaw);
-  a.    loadq (rVmTl[rds::kVmspOff], rVmSp);
-  a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
-  a.    movq  (rVmFp, rdx); // llvm catch traces expect rVmFp to be in rdx.
+  a.    loadq (rvmtl()[rds::kVmspOff], rvmsp());
+  a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
+  a.    movq  (rvmfp(), rdx); // llvm catch traces expect rvmfp() to be in rdx.
   a.    jmp   (rax);
 
   uniqueStubs.add("resumeInterpHelpers", uniqueStubs.interpHelper);
@@ -122,9 +123,9 @@ asm_label(a, resumeRaw);
     moveToAlign(mcg->code.cold());
     auto const start = a.frontier();
 
-    a.  movq(rVmFp, argNumToRegName[0]);
-    a.  movq(rVmSp, argNumToRegName[1]);
-    a.  movl(r32(rAsm), r32(argNumToRegName[2]));
+    a.  movq(rvmfp(), rarg(0));
+    a.  movq(rvmsp(), rarg(1));
+    a.  movl(r32(rAsm), r32(rarg(2)));
     a.  call(TCA(interpOneEntryPoints[size_t(op)]));
     a.  testq(rax, rax);
     a.  jnz(resumeRaw);
@@ -171,14 +172,14 @@ void emitCatchHelper(UniqueStubs& uniqueStubs) {
   Label resumeCppUnwind;
 
   uniqueStubs.endCatchHelper = a.frontier();
-  a.    cmpq (0, rVmTl[unwinderDebuggerReturnSPOff()]);
+  a.    cmpq (0, rvmtl()[unwinderDebuggerReturnSPOff()]);
   a.    jne8 (debuggerReturn);
 
   // Normal endCatch situation: call back to tc_unwind_resume, which returns
   // the catch trace (or null) in rax and the new vmfp in rdx.
-  a.    movq (rVmFp, argNumToRegName[0]);
+  a.    movq (rvmfp(), rarg(0));
   a.    call (TCA(tc_unwind_resume));
-  a.    movq (rdx, rVmFp);
+  a.    movq (rdx, rvmfp());
   a.    testq(rax, rax);
   a.    jz8  (resumeCppUnwind);
   a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
@@ -189,14 +190,14 @@ asm_label(a, resumeCppUnwind);
   auto vptr = emitTLSAddr(a, tl_regState, rax);
   Vasm::prefix(a, vptr).
         storeb(static_cast<int32_t>(VMRegState::CLEAN), vptr.mr());
-  a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
-  emitCall(a, TCA(_Unwind_Resume), argSet(1));
+  a.    loadq(rvmtl()[unwinderExnOff()], rarg(0));
+  emitCall(a, TCA(_Unwind_Resume), arg_regs(1));
   uniqueStubs.endCatchHelperPast = a.frontier();
   a.    ud2();
 
 asm_label(a, debuggerReturn);
-  a.    loadq (rVmTl[unwinderDebuggerReturnSPOff()], rVmSp);
-  a.    storeq(0, rVmTl[unwinderDebuggerReturnSPOff()]);
+  a.    loadq (rvmtl()[unwinderDebuggerReturnSPOff()], rvmsp());
+  a.    storeq(0, rvmtl()[unwinderDebuggerReturnSPOff()]);
   svcreq::emit_persistent(a.code(), folly::none, REQ_POST_DEBUGGER_RET);
 
   uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
@@ -207,9 +208,9 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label release;
   Label loopHead;
 
-  auto const rData     = argNumToRegName[0]; // not live coming in, but used
+  auto const rData     = rarg(0); // not live coming in, but used
                                              // for destructor calls
-  auto const rIter     = argNumToRegName[1]; // live coming in
+  auto const rIter     = rarg(1); // live coming in
   auto const rFinished = rdx;
   auto const rType     = ecx;
   int const tvSize     = sizeof(TypedValue);
@@ -251,7 +252,7 @@ asm_label(a, doRelease);
 
   moveToAlign(cb);
   uniqueStubs.freeManyLocalsHelper = a.frontier();
-  a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
+  a.    lea    (rvmfp()[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
 
   // Loop for the first few locals, but unroll the final kNumFreeLocalsHelpers.
@@ -280,8 +281,8 @@ asm_label(a, loopHead);
 
 void emitDecRefHelper(UniqueStubs& us) {
   auto& cold = mcg->code.cold();
-  const Vreg rData{argNumToRegName[0]};
-  const Vreg rType{argNumToRegName[1]};
+  const Vreg rData{rarg(0)};
+  const Vreg rType{rarg(1)};
 
   auto doStub = [&](Type ty) {
     assert(ty.maybe(TCounted));
@@ -290,7 +291,7 @@ void emitDecRefHelper(UniqueStubs& us) {
     auto& v = vasm.main();
 
     auto destroy = [&](Vout& v) {
-      auto toSave = kGPCallerSaved;
+      auto const toSave = abi().gpUnreserved - abi().calleeSaved;
       PhysRegSaverStub save{v, toSave};
 
       assert(!ty.isKnownDataType() && ty.maybe(TCounted));
@@ -302,7 +303,7 @@ void emitDecRefHelper(UniqueStubs& us) {
       v << shrli{kShiftDataTypeToDestrIndex, rType, rType, v.makeReg()};
       auto const dtor_table =
         safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
-      v << callm{Vptr{Vreg{}, rType, 8, dtor_table}, argSet(1)};
+      v << callm{Vptr{Vreg{}, rType, 8, dtor_table}, arg_regs(1)};
       v << syncpoint{makeIndirectFixup(save.dwordsPushed())};
     };
 
@@ -323,18 +324,14 @@ void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   moveToAlign(cb);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
-  assertx(kScratchCrossTraceRegs.contains(rax));
-  assertx(kScratchCrossTraceRegs.contains(rdx));
-  assertx(kScratchCrossTraceRegs.contains(rcx));
-
   Label actualDispatch;
   Label numParamsCheck;
 
   // rax := called func
   // edx := num passed parameters
   // ecx := num declared parameters
-  a.    loadq  (rVmFp[AROFF(m_func)], rax);
-  a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], edx);
+  a.    loadq  (rvmfp()[AROFF(m_func)], rax);
+  a.    loadl  (rvmfp()[AROFF(m_numArgsAndFlags)], edx);
   a.    andl   (ActRec::kNumArgsMask, edx);
   a.    loadl  (rax[Func::paramCountsOff()], ecx);
   // see Func::finishedEmittingParams and Func::numParams for rationale
@@ -388,42 +385,42 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
    * interpreter will have popped the pre-live ActRec for us).
    *
    * NOTE: Our ABI for php-level calls only has two callee-saved registers:
-   * rVmFp and rVmTl, so we're allowed to use any other regs without saving
+   * rvmfp() and rvmtl(), so we're allowed to use any other regs without saving
    * them.
    */
 
   Label noCallee;
 
-  auto const rPCOff  = argNumToRegName[0];
-  auto const rPCNext = argNumToRegName[1];
+  auto const rPCOff  = rarg(0);
+  auto const rPCNext = rarg(1);
   auto const rBC     = r13;
 
-  a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
-  a.    storeq (rVmSp, rVmTl[rds::kVmspOff]);
+  a.    storeq (rvmfp(), rvmtl()[rds::kVmfpOff]);
+  a.    storeq (rvmsp(), rvmtl()[rds::kVmspOff]);
 
   // rBC := fp -> m_func -> m_unit -> m_bc
-  a.    loadq  (rVmFp[AROFF(m_func)], rBC);
+  a.    loadq  (rvmfp()[AROFF(m_func)], rBC);
   a.    loadq  (rBC[Func::unitOff()], rBC);
   a.    loadq  (rBC[Unit::bcOff()],   rBC);
   // Convert offsets into PC's and sync the PC
   a.    addq   (rBC,    rPCOff);
-  a.    storeq (rPCOff, rVmTl[rds::kVmpcOff]);
+  a.    storeq (rPCOff, rvmtl()[rds::kVmpcOff]);
   a.    addq   (rBC,    rPCNext);
 
   a.    subq   (8, rsp);  // stack parity
 
-  a.    movq   (rPCNext, argNumToRegName[0]);
+  a.    movq   (rPCNext, rarg(0));
   a.    call   (TCA(&doFCallArrayTC));
 
-  a.    loadq  (rVmTl[rds::kVmspOff], rVmSp);
+  a.    loadq  (rvmtl()[rds::kVmspOff], rvmsp());
 
   a.    testb  (rbyte(rax), rbyte(rax));
   a.    jz8    (noCallee);
 
   a.    addq   (8, rsp);
-  a.    loadq  (rVmTl[rds::kVmfpOff], rVmFp);
-  a.    pop    (rVmFp[AROFF(m_savedRip)]);
-  a.    loadq  (rVmFp[AROFF(m_func)], rax);
+  a.    loadq  (rvmtl()[rds::kVmfpOff], rvmfp());
+  a.    pop    (rvmfp()[AROFF(m_savedRip)]);
+  a.    loadq  (rvmfp()[AROFF(m_func)], rax);
   a.    loadq  (rax[Func::funcBodyOff()], rax);
   a.    jmp    (rax);
   a.    ud2    ();
@@ -452,22 +449,22 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   // to pop the return address into r15 + m_savedRip before calling
   // fcallHelper, and then push it back from r15 + m_savedRip after
   // fcallHelper returns in case it has changed it.
-  a.    pop    (rVmFp[AROFF(m_savedRip)]);
-  a.    movq   (rVmFp, argNumToRegName[0]); // live for helper calls below
-  emitCall(a, CppCall::direct(helper), argSet(1));
+  a.    pop    (rvmfp()[AROFF(m_savedRip)]);
+  a.    movq   (rvmfp(), rarg(0)); // live for helper calls below
+  emitCall(a, CppCall::direct(helper), arg_regs(1));
   if (debug) {
-    a.  movq   (0x1, rVmSp);  // "assert" nothing reads it
+    a.  movq   (0x1, rvmsp());  // "assert" nothing reads it
   }
   a.    testq  (rax, rax);
   a.    js8    (skip);
-  a.    push   (rVmFp[AROFF(m_savedRip)]);
+  a.    push   (rvmfp()[AROFF(m_savedRip)]);
   a.    jmp    (rax);
   a.    ud2    ();
 
 asm_label(a, skip);
   a.    neg    (rax);
-  a.    loadq  (rVmTl[rds::kVmfpOff], rVmFp);
-  a.    loadq  (rVmTl[rds::kVmspOff], rVmSp);
+  a.    loadq  (rvmtl()[rds::kVmfpOff], rvmfp());
+  a.    loadq  (rvmtl()[rds::kVmspOff], rvmsp());
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -483,8 +480,8 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
 
   // This helper is called via a direct jump from the TC (from
   // fcallArrayHelper). So the stack parity is already correct.
-  a.    movq   (rVmFp, argNumToRegName[0]);
-  emitCall(a, CppCall::direct(helper), argSet(1));
+  a.    movq   (rvmfp(), rarg(0));
+  emitCall(a, CppCall::direct(helper), arg_regs(1));
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -500,30 +497,30 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
 
   Label skip;
 
-  PhysReg ar = argNumToRegName[0];
+  PhysReg ar = rarg(0);
 
-  a.   movq    (rVmFp, ar);
-  a.   push    (rVmFp);
-  a.   movq    (rsp, rVmFp);
+  a.   movq    (rvmfp(), ar);
+  a.   push    (rvmfp());
+  a.   movq    (rsp, rvmfp());
   a.   push    (ar[AROFF(m_savedRip)]);
   a.   push    (ar[AROFF(m_sfp)]);
-  a.   movq    (EventHook::NormalFunc, argNumToRegName[1]);
-  emitCall(a, CppCall::direct(helper), argSet(2));
+  a.   movq    (EventHook::NormalFunc, rarg(1));
+  emitCall(a, CppCall::direct(helper), arg_regs(2));
   uniqueStubs.functionEnterHelperReturn = a.frontier();
   a.   testb   (al, al);
   a.   je8     (skip);
   a.   addq    (16, rsp);
-  a.   pop     (rVmFp);
+  a.   pop     (rvmfp());
   a.   ret     ();
 
 asm_label(a, skip);
   // The event hook has already cleaned up the stack/actrec so that we're ready
   // to continue from the original call site.  Just need to grab the fp/rip
-  // from the original frame, and sync rVmSp to the execution-context's copy.
-  a.   pop     (rVmFp);
+  // from the original frame, and sync rvmsp() to the execution-context's copy.
+  a.   pop     (rvmfp());
   a.   pop     (rsi);
   a.   addq    (16, rsp); // drop our call frame
-  a.   loadq   (rVmTl[rds::kVmspOff], rVmSp);
+  a.   loadq   (rvmtl()[rds::kVmspOff], rvmsp());
   a.   jmp     (rsi);
   a.   ud2     ();
 
@@ -551,8 +548,8 @@ void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
   // If handlePossibleStackOverflow returns, it was not a stack overflow, so we
   // need to go through event hook processing.
   a.    subq   (8, rsp);  // align native stack
-  a.    movq   (rVmFp, argNumToRegName[0]);
-  emitCall(a, CppCall::direct(handlePossibleStackOverflow), argSet(1));
+  a.    movq   (rvmfp(), rarg(0));
+  emitCall(a, CppCall::direct(handlePossibleStackOverflow), arg_regs(1));
   a.    addq   (8, rsp);
   a.    jmp    (uniqueStubs.functionEnterHelper);
   a.    ud2    ();

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
@@ -709,20 +710,21 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
 
   // Get the arguments in the proper registers.
   RegSet argRegs;
-  auto doArgs = [&](const VregList& srcs, const PhysReg argNames[]) {
+  auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
     VregList argDests;
-    for (size_t i = 0; i < srcs.size(); ++i) {
-      auto reg = argNames[i];
+    for (size_t i = 0, n = srcs.size(); i < n; ++i) {
+      auto const reg = r(i);
       argDests.push_back(reg);
       argRegs |= reg;
     }
+
     if (argDests.size()) {
       v << copyargs{v.makeTuple(srcs),
                     v.makeTuple(std::move(argDests))};
     }
   };
-  doArgs(vargs.args, argNumToRegName);
-  doArgs(vargs.simdArgs, argNumToSIMDRegName);
+  doArgs(vargs.args, rarg);
+  doArgs(vargs.simdArgs, rarg_simd);
 
   // Emit the call.
   if (is_smashable) v << mccall{(TCA)call.address(), argRegs};
@@ -830,8 +832,8 @@ void lower_vcallarray(Vunit& unit, Vlabel b) {
   auto const& srcs = unit.tuples[inst.extraArgs];
   jit::vector<Vreg> dsts;
   for (int i = 0; i < srcs.size(); ++i) {
-    dsts.emplace_back(argNumToRegName[i]);
-    argRegs |= argNumToRegName[i];
+    dsts.emplace_back(rarg(i));
+    argRegs |= rarg(i);
   }
 
   code.back() = copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
@@ -886,11 +888,11 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
           break;
 
         case Vinstr::defvmsp:
-          inst = copy{rVmSp, inst.defvmsp_.d};
+          inst = copy{rvmsp(), inst.defvmsp_.d};
           break;
 
         case Vinstr::syncvmsp:
-          inst = copy{inst.syncvmsp_.s, rVmSp};
+          inst = copy{inst.syncvmsp_.s, rvmsp()};
           break;
 
         case Vinstr::movtqb:

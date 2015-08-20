@@ -275,10 +275,11 @@ implTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
 template<typename T>
 inline void
 emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
-  PhysRegSaver(v, kGPCallerSaved); // we don't know for sure what's alive
-  v << ldimmq{datum.m_key, argNumToRegName[0]};
+  // We don't know for sure what's alive.
+  PhysRegSaver(v, abi().gpUnreserved - abi().calleeSaved);
+  v << ldimmq{datum.m_key, rarg(0)};
   const CodeAddress addr = (CodeAddress)pthread_getspecific;
-  v << call{addr, argSet(1)};
+  v << call{addr, arg_regs(1)};
   if (dest != Vreg(reg::rax)) {
     v << copy{reg::rax, dest};
   }
@@ -287,10 +288,11 @@ emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
 template<typename T>
 inline void
 emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
-  PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
-  a.    emitImmReg(datum.m_key, argNumToRegName[0]);
+  // We don't know for sure what's alive.
+  PhysRegSaver(a, abi().gpUnreserved - abi().calleeSaved);
+  a.    emitImmReg(datum.m_key, rarg(0));
   const TCA addr = (TCA)pthread_getspecific;
-  emitCall(a, addr, argSet(1));
+  emitCall(a, addr, arg_regs(1));
   if (dest != reg::rax) {
     a.    movq(reg::rax, dest);
   }

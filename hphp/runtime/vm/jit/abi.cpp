@@ -25,88 +25,40 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const Abi& abi(CodeKind kind) {
-  ARCH_SWITCH_CALL(abi, kind);
-}
+const Abi& abi(CodeKind kind) { ARCH_SWITCH_CALL(abi, kind); }
+
+PhysReg rvmfp() { ARCH_SWITCH_CALL(rvmfp); }
+PhysReg rvmsp() { ARCH_SWITCH_CALL(rvmsp); }
+PhysReg rvmtl() { ARCH_SWITCH_CALL(rvmtl); }
+
+RegSet vm_regs_with_sp() { ARCH_SWITCH_CALL(vm_regs_with_sp); }
+RegSet vm_regs_no_sp() { ARCH_SWITCH_CALL(vm_regs_no_sp); }
+
+RegSet interp_one_cf_regs() { ARCH_SWITCH_CALL(interp_one_cf_regs); }
+
+PhysReg rarg(size_t i) { ARCH_SWITCH_CALL(rarg, i); }
+PhysReg rarg_simd(size_t i) { ARCH_SWITCH_CALL(rarg_simd, i); }
+
+size_t num_arg_regs() { ARCH_SWITCH_CALL(num_arg_regs); }
+size_t num_arg_regs_simd() { ARCH_SWITCH_CALL(num_arg_regs_simd); }
+
+PhysReg r_svcreq_req() { ARCH_SWITCH_CALL(r_svcreq_req); }
+PhysReg r_svcreq_stub() { ARCH_SWITCH_CALL(r_svcreq_stub); }
+PhysReg r_svcreq_sf() { ARCH_SWITCH_CALL(r_svcreq_sf); }
+PhysReg r_svcreq_arg(size_t i) { ARCH_SWITCH_CALL(r_svcreq_arg, i); }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PhysReg rvmfp() {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::rVmFp;
-    case Arch::ARM:
-      return arm::rVmFp;
-  }
-  not_reached();
+RegSet arg_regs(size_t n) {
+  RegSet regs;
+  for (auto i = 0; i < n; i++) regs |= rarg(i);
+  return regs;
 }
 
-PhysReg rvmsp() {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::rVmSp;
-    case Arch::ARM:
-      return arm::rVmSp;
-  }
-  not_reached();
-}
-
-PhysReg rvmtl() {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::rVmTl;
-    case Arch::ARM:
-      return arm::rVmTl;
-  }
-  not_reached();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-PhysReg r_svcreq_req() {
-  switch (arch()) {
-    case Arch::X64:
-      return reg::rdi;
-    case Arch::ARM:
-      not_implemented();
-  }
-  not_reached();
-}
-
-PhysReg r_svcreq_stub() {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::rAsm;
-    case Arch::ARM:
-      not_implemented();
-  }
-  not_reached();
-}
-
-PhysReg r_svcreq_sf() {
-  return abi().sf.findFirst();
-}
-
-PhysReg r_svcreq_arg(unsigned i) {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::kSvcReqArgRegs[i];
-    case Arch::ARM:
-      return arm::svcReqArgReg(i);
-  }
-  not_reached();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-RegSet leave_trace_regs() {
-  switch (arch()) {
-    case Arch::X64:
-      return x64::kLeaveTraceRegs;
-    case Arch::ARM:
-      not_implemented();
-  }
-  not_reached();
+RegSet arg_regs_simd(size_t n) {
+  RegSet regs;
+  for (auto i = 0; i < n; i++) regs |= rarg_simd(i);
+  return regs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

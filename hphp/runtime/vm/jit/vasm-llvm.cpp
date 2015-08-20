@@ -95,7 +95,7 @@ namespace {
  * HHVM calling convention regs used by LLVM.
  */
 constexpr PhysReg kHHVMCCRegs[] = {
-  x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15,
+  x64::rvmsp(), x64::rvmtl(), x64::rvmfp(), reg::r15,
   reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9,
   reg::rax, reg::r10, reg::r11, reg::r13, reg::r14
 };
@@ -567,12 +567,12 @@ struct LLVMEmitter {
     m_blocks[unit.entry] = m_irb.GetInsertBlock();
 
     auto args = m_function->arg_begin();
-    args->setName("rVmSp");
-    defineValue(x64::rVmSp, args++);
-    args->setName("rVmTl");
-    defineValue(x64::rVmTl, args++);
-    args->setName("rVmFp");
-    defineValue(x64::rVmFp, args++);
+    args->setName("rvmsp");
+    defineValue(x64::rvmsp(), args++);
+    args->setName("rvmtl");
+    defineValue(x64::rvmtl(), args++);
+    args->setName("rvmfp");
+    defineValue(x64::rvmfp(), args++);
 
     // Commonly used types and values.
     m_void = m_irb.getVoidTy();
@@ -1390,7 +1390,7 @@ VASM_OPCODES
   // Vlabel -> llvm::BasicBlock map
   jit::vector<llvm::BasicBlock*> m_blocks;
 
-  // Vlabel -> Value for rVmFp/rVmSp entering a vasm block
+  // Vlabel -> Value for rvmfp()/rvmsp() entering a vasm block
   jit::vector<llvm::Value*> m_incomingVmFp;
   jit::vector<llvm::Value*> m_incomingVmSp;
 
@@ -1473,19 +1473,19 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     m_irb.SetInsertPoint(block(label));
 
     // If this isn't the first block of the unit, load the incoming value of
-    // rVmFp/rVmSp from our pred(s).
+    // rvmfp()/rvmsp() from our pred(s).
     if (label != labels.front()) {
       if (auto inFp = m_incomingVmFp[label]) {
-        defineValue(x64::rVmFp, inFp);
+        defineValue(x64::rvmfp(), inFp);
       } else {
         // Only catch blocks are allowed to not have an incoming vmfp.
         always_assert(b.code.front().op == Vinstr::landingpad);
       }
 
-      // Only some instructions propagate a value for rVmSp to their
+      // Only some instructions propagate a value for rvmsp() to their
       // successor(s).
       auto inSp = m_incomingVmSp[label];
-      if (inSp) defineValue(x64::rVmSp, inSp);
+      if (inSp) defineValue(x64::rvmsp(), inSp);
     }
 
     for (auto& inst : b.code) {
@@ -1718,20 +1718,20 @@ void LLVMEmitter::handleOutgoingPhysRegs(
   const Vblock& b,
   const boost::dynamic_bitset<>& backedge_targets
 ) {
-  // rVmFp isn't SSA in vasm code, so we manually propagate its value across
+  // rvmfp() isn't SSA in vasm code, so we manually propagate its value across
   // control flow edges, creating phi nodes when appropriate. We conservatively
   // create phis at all back-edge targets and rely on LLVM to clean up the
   // unnecessary ones.
   for (auto succ : succs(b)) {
     // Catch traces from PHP calls have a weird ABI and define their own value
-    // for rVmFp from the landingpad instruction, so we skip those here.
+    // for rvmfp() from the landingpad instruction, so we skip those here.
     auto& front = m_unit.blocks[succ].code.front();
     if (front.op == Vinstr::landingpad && front.landingpad_.fromPHPCall) {
       continue;
     }
 
     auto& inFp = m_incomingVmFp[succ];
-    auto const outFp = value(x64::rVmFp);
+    auto const outFp = value(x64::rvmfp());
     auto const target = block(succ);
 
     // When inFp already comes from a phi node in the successor, add this new
@@ -1752,7 +1752,7 @@ void LLVMEmitter::handleOutgoingPhysRegs(
     if ((inFp == nullptr && backedge_targets.test(succ)) ||
         (inFp != nullptr && inFp != outFp)) {
       FTRACE(2, "Creating phi node for {}\n", succ);
-      auto const phi = llvm::PHINode::Create(m_int64, 2, "rVmFp");
+      auto const phi = llvm::PHINode::Create(m_int64, 2, "rvmfp");
       target->getInstList().insert(target->begin(), phi);
       phi->addIncoming(outFp, m_irb.GetInsertBlock());
       if (inFp != nullptr) {
@@ -1781,8 +1781,8 @@ void LLVMEmitter::handleOutgoingPhysRegs(
   // Make sure we don't let any values from this block go to the next RPO
   // block. PhysReg values are explicitly passed along edges as needed (see
   // above).
-  defineValue(x64::rVmSp, nullptr);
-  defineValue(x64::rVmFp, nullptr);
+  defineValue(x64::rvmsp(), nullptr);
+  defineValue(x64::rvmfp(), nullptr);
   defineValue(x64::rAsm, nullptr);
 }
 
@@ -1928,13 +1928,14 @@ void LLVMEmitter::emit(const bindcall& inst) {
   call->setSmashable();
   m_irb.SetInsertPoint(next);
 
-  // Register the new value of rVmFp.
-  defineValue(x64::rVmFp, m_irb.CreateExtractValue(call, 1, "rVmFp"));
+  // Register the new value of rvmfp().
+  defineValue(x64::rvmfp(), m_irb.CreateExtractValue(call, 1, "rvmfp"));
 
-  // bindcall is followed by a defvmsp to copy rVmSp into a Vreg, but it's not
-  // in this block. Pass the value to our next block. This is necessary because
-  // rVmSp's value isn't automatically propagated between blocks like rVmFp is.
-  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rVmSp");
+  // bindcall is followed by a defvmsp to copy rvmsp() into a Vreg, but it's
+  // not in this block. Pass the value to our next block. This is necessary
+  // because rvmsp()'s value isn't automatically propagated between blocks like
+  // rvmfp() is.
+  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rvmsp");
   m_irb.CreateBr(block(inst.targets[0]));
 }
 
@@ -1955,9 +1956,9 @@ void LLVMEmitter::emit(const vcallarray& inst) {
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   m_irb.SetInsertPoint(next);
 
-  // Register new rVmSp/rVmFp, just like bindcall.
-  defineValue(x64::rVmFp, m_irb.CreateExtractValue(call, 1, "rVmFp"));
-  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rVmSp");
+  // Register new rvmsp()/rvmfp(), just like bindcall.
+  defineValue(x64::rvmfp(), m_irb.CreateExtractValue(call, 1, "rvmfp"));
+  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rvmsp");
   m_irb.CreateBr(block(inst.targets[0]));
 }
 
@@ -2008,7 +2009,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
 }
 
 void LLVMEmitter::emit(const defvmsp& inst) {
-  defineValue(inst.d, value(x64::rVmSp));
+  defineValue(inst.d, value(x64::rvmsp()));
 }
 
 llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
@@ -2099,7 +2100,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   }
 
   std::vector<llvm::Type*> argTypes = { m_int64 };
-  std::vector<llvm::Value*> args = { value(x64::rVmFp) };
+  std::vector<llvm::Value*> args = { value(x64::rvmfp()) };
   auto doArgs = [&] (const VregList& srcs, bool isDbl = false) {
     for(int i = 0; i < srcs.size(); ++i) {
       auto arg = value(srcs[i]);
@@ -2123,7 +2124,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   // regs, we need to manually insert the padding arg.
   if (vargs.stkArgs.size() &&
       vargs.stkArgs[0].isGP() &&
-      vargs.args.size() == x64::kNumRegisterArgs - 1) {
+      vargs.args.size() == num_arg_regs() - 1) {
     args.push_back(m_int64Undef);
     argTypes.push_back(m_int64);
   }
@@ -3055,7 +3056,7 @@ void LLVMEmitter::emit(const subsd& inst) {
 }
 
 void LLVMEmitter::emit(const syncvmsp& inst) {
-  defineValue(x64::rVmSp, value(inst.s));
+  defineValue(x64::rvmsp(), value(inst.s));
 }
 
 void LLVMEmitter::emit(const testb& inst) {
@@ -3141,9 +3142,9 @@ void LLVMEmitter::emit(const landingpad& inst) {
 
   if (inst.fromPHPCall) {
     // bindcall destroys all registers, so tc_unwind_resume gives us the
-    // correct value of rVmFp in the second unwinder scratch register.
-    auto newFp = m_irb.CreateExtractValue(pad, 1, "rVmFp");
-    defineValue(x64::rVmFp, newFp);
+    // correct value of rvmfp() in the second unwinder scratch register.
+    auto newFp = m_irb.CreateExtractValue(pad, 1, "rvmfp");
+    defineValue(x64::rvmfp(), newFp);
   }
 }
 

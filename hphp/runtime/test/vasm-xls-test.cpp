@@ -37,7 +37,7 @@ template<class T> uint64_t test_const(T val) {
     .gpReserved = x64::abi().gp(),
     .simdUnreserved = RegSet{xmm0},
     .simdReserved = x64::abi().simd() - RegSet{xmm0},
-    .calleeSaved = x64::kCalleeSaved,
+    .calleeSaved = x64::abi().calleeSaved,
     .sf = x64::abi().sf
   };
   static uint8_t code[1000];

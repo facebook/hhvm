@@ -69,8 +69,8 @@ void emit_svcreq(CodeBlock& cb,
   { Vauto vasm{stub};
     auto& v = vasm.main();
 
-    // If we have an spOff, materialize rVmSp so that handleSRHelper() can do a
-    // VM reg sync.  (When we don't have an spOff, the caller of the service
+    // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do
+    // a VM reg sync.  (When we don't have an spOff, the caller of the service
     // request was responsible for making sure rvmsp already contained the top
     // of the stack.)
     if (spOff) {

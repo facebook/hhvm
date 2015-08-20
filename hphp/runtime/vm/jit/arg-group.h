@@ -190,19 +190,7 @@ struct ArgGroup {
   /*
    * Pass tmp as a TypedValue passed by value.
    */
-  ArgGroup& typedValue(int i) {
-    // If there's exactly one register argument slot left, the whole TypedValue
-    // goes on the stack instead of being split between a register and the
-    // stack.
-    if (m_gpArgs.size() == x64::kNumRegisterArgs - 1) {
-      m_override = &m_stkArgs;
-    }
-    static_assert(offsetof(TypedValue, m_data) == 0, "");
-    static_assert(offsetof(TypedValue, m_type) == 8, "");
-    ssa(i).type(i);
-    m_override = nullptr;
-    return *this;
-  }
+  ArgGroup& typedValue(int i);
 
   ArgGroup& memberKeyIS(int i) {
     return memberKeyImpl(i, true);
@@ -217,25 +205,8 @@ struct ArgGroup {
   }
 
 private:
-  void push_arg(const ArgDesc& arg) {
-    // If m_override is set, use it unconditionally. Otherwise, select
-    // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
-    ArgVec* args = m_override;
-    if (!args) {
-      args = m_gpArgs.size() < x64::kNumRegisterArgs ? &m_gpArgs : &m_stkArgs;
-    }
-    args->push_back(arg);
-  }
-
-  void push_SIMDarg(const ArgDesc& arg) {
-    // See push_arg above
-    ArgVec* args = m_override;
-    if (!args) {
-      args = m_simdArgs.size() < x64::kNumSIMDRegisterArgs
-           ? &m_simdArgs : &m_stkArgs;
-    }
-    args->push_back(arg);
-  }
+  void push_arg(const ArgDesc& arg);
+  void push_SIMDarg(const ArgDesc& arg);
 
   /*
    * For passing the m_type field of a TypedValue.

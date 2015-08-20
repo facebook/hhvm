@@ -45,7 +45,7 @@ namespace x64 {
  * LLVM catch traces expect vmfp to be in rdx.
  */
 inline RegSet syncForLLVMCatch(Vout& v) {
-  v << copy{rVmFp, reg::rdx};
+  v << copy{rvmfp(), reg::rdx};
   return RegSet{reg::rdx};
 }
 

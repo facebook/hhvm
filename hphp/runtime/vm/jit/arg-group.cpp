@@ -15,11 +15,17 @@
 */
 
 #include "hphp/runtime/vm/jit/arg-group.h"
+
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 
 namespace HPHP { namespace jit {
 
+///////////////////////////////////////////////////////////////////////////////
+
 TRACE_SET_MOD(hhir);
+
+///////////////////////////////////////////////////////////////////////////////
 
 const char* destTypeName(DestType dt) {
   switch (dt) {
@@ -70,5 +76,43 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
   m_typeImm = tmp->type().toDataType();
   m_kind = Kind::TypeImm;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+ArgGroup& ArgGroup::typedValue(int i) {
+  // If there's exactly one register argument slot left, the whole TypedValue
+  // goes on the stack instead of being split between a register and the
+  // stack.
+  if (m_gpArgs.size() == num_arg_regs() - 1) {
+    m_override = &m_stkArgs;
+  }
+  static_assert(offsetof(TypedValue, m_data) == 0, "");
+  static_assert(offsetof(TypedValue, m_type) == 8, "");
+  ssa(i).type(i);
+  m_override = nullptr;
+  return *this;
+}
+
+void ArgGroup::push_arg(const ArgDesc& arg) {
+  // If m_override is set, use it unconditionally. Otherwise, select
+  // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
+  ArgVec* args = m_override;
+  if (!args) {
+    args = m_gpArgs.size() < num_arg_regs() ? &m_gpArgs : &m_stkArgs;
+  }
+  args->push_back(arg);
+}
+
+void ArgGroup::push_SIMDarg(const ArgDesc& arg) {
+  // See push_arg above
+  ArgVec* args = m_override;
+  if (!args) {
+    args = m_simdArgs.size() < num_arg_regs_simd()
+         ? &m_simdArgs : &m_stkArgs;
+  }
+  args->push_back(arg);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}

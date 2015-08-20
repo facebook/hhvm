@@ -85,7 +85,8 @@ Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {
 
   Array assoc;
   for (ArrayIter iter(ret); iter; ++iter) {
-    Array tokens = HHVM_FN(explode)(": ", iter.second(), 2).toArray();
+    Array tokens =
+      HHVM_FN(explode)(": ", iter.second().toString(), 2).toArray();
     if (tokens.size() == 2) {
       assoc.set(tokens[0], tokens[1]);
     } else {

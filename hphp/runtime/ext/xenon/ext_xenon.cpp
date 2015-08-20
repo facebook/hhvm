@@ -40,13 +40,16 @@ TRACE_SET_MOD(xenon);
 void *s_waitThread(void *arg) {
   TRACE(1, "s_waitThread Starting\n");
   sem_t* sem = static_cast<sem_t*>(arg);
-  while (sem_wait(sem) == 0) {
-    TRACE(1, "s_waitThread Fired\n");
-    if (Xenon::getInstance().m_stopping) {
-      TRACE(1, "s_waitThread is exiting\n");
-      return nullptr;
+  while (true) {
+    if (sem_wait(sem) == 0) {
+      TRACE(1, "s_waitThread Fired\n");
+      if (Xenon::getInstance().m_stopping) {
+        TRACE(1, "s_waitThread is exiting\n");
+        return nullptr;
+      }
+      Xenon::getInstance().surpriseAll();
     }
-    Xenon::getInstance().surpriseAll();
+    if (errno != EINTR) break;
   }
   TRACE(1, "s_waitThread Ending\n");
   return nullptr;

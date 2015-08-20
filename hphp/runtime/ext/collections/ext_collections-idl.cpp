@@ -525,36 +525,6 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   return true;
 }
 
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwBadFormat(const ObjectData* obj, char type) {
-  throw Exception("%s does not support the '%c' serialization format",
-                  header_names[(int)obj->headerKind()], type);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidKey() {
-  throw Exception("Invalid key");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidHashKey(const ObjectData* obj) {
-  throw Exception("%s values must be integers or strings",
-                  header_names[(int)obj->headerKind()]);
-}
-
-void unserializeVector(ObjectData* obj, VariableUnserializer* uns,
-                       int64_t sz, char type) {
-  if (type != 'V') throwBadFormat(obj, type);
-  auto bvec = static_cast<BaseVector*>(obj);
-  bvec->reserve(sz);
-  assert(bvec->canMutateBuffer());
-  for (int64_t i = 0; i < sz; ++i) {
-    auto tv = bvec->appendForUnserialize(i);
-    tv->m_type = KindOfNull;
-    unserializeVariant(tvAsVariant(tv), uns, UnserializeMode::ColValue);
-  }
-}
-
 // Helpers
 
 NEVER_INLINE
@@ -3231,34 +3201,6 @@ bool BaseMap::Equals(EqualityFlavor eq,
   not_reached();
 }
 
-void unserializeMap(ObjectData* obj, VariableUnserializer* uns,
-                    int64_t sz, char type) {
-  if (type != 'K') throwBadFormat(obj, type);
-  auto map = static_cast<BaseMap*>(obj);
-  map->reserve(sz);
-  for (int64_t i = 0; i < sz; ++i) {
-    Variant k;
-    unserializeVariant(k, uns, UnserializeMode::ColKey);
-    TypedValue* tv = nullptr;
-    if (k.isInteger()) {
-      auto h = k.toInt64();
-      tv = map->findForUnserialize(h);
-      // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
-    } else if (k.isString()) {
-      auto key = k.getStringData();
-      tv = map->findForUnserialize(key);
-      // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) goto do_unserialize;
-    } else {
-      throwInvalidKey();
-    }
-    tv->m_type = KindOfNull;
-do_unserialize:
-    unserializeVariant(tvAsVariant(tv), uns, UnserializeMode::ColValue);
-  }
-}
-
 Object BaseMap::t_tovector() { return materializeImpl<c_Vector>(this); }
 
 Object BaseMap::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
@@ -3565,37 +3507,6 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
     }
   }
   return true;
-}
-
-void unserializeSet(ObjectData* obj, VariableUnserializer* uns, int64_t sz,
-                    char type) {
-  if (type != 'V') throwBadFormat(obj, type);
-  auto set = static_cast<BaseSet*>(obj);
-  set->reserve(sz);
-  for (int64_t i = 0; i < sz; ++i) {
-    // When unserializing an element of a Set, we use Mode::ColKey for now.
-    // This will make the unserializer to reserve an id for the element
-    // but won't allow referencing the element via 'r' or 'R'.
-    Variant k;
-    unserializeVariant(k, uns, UnserializeMode::ColKey);
-    if (k.isInteger()) {
-      auto h = k.toInt64();
-      auto tv = set->findForUnserialize(h);
-      // Be robust against manually crafted inputs with conflicting elements
-      if (UNLIKELY(!tv)) continue;
-      tv->m_type = KindOfInt64;
-      tv->m_data.num = h;
-    } else if (k.isString()) {
-      auto key = k.getStringData();
-      auto tv = set->findForUnserialize(key);
-      if (UNLIKELY(!tv)) continue;
-      // This increments the string's refcount twice, once for
-      // the key and once for the value
-      cellDup(make_tv<KindOfString>(key), *tv);
-    } else {
-      throwInvalidHashKey(obj);
-    }
-  }
 }
 
 template<class TSet>
@@ -4865,16 +4776,6 @@ bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   assert(pair2->isFullyConstructed());
   return HPHP::equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
          HPHP::equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
-}
-
-void unserializePair(ObjectData* obj, VariableUnserializer* uns,
-                     int64_t sz, char type) {
-  assert(sz == 2);
-  if (type != 'V') throwBadFormat(obj, type);
-  auto pair = static_cast<c_Pair*>(obj);
-  auto elms = pair->initForUnserialize();
-  unserializeVariant(tvAsVariant(&elms[0]), uns, UnserializeMode::ColValue);
-  unserializeVariant(tvAsVariant(&elms[1]), uns, UnserializeMode::ColValue);
 }
 
 Object c_Pair::t_tovector() { return materializeImpl<c_Vector>(this); }

@@ -136,31 +136,6 @@ COLLECTIONS_ALL_TYPES(X)
   not_reached();
 }
 
-} // namespace collections
-
-void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
-                           int64_t sz, char type) {
-  switch (obj->collectionType()) {
-    case CollectionType::Pair:
-      unserializePair(obj, uns, sz, type);
-      break;
-    case CollectionType::Vector:
-    case CollectionType::ImmVector:
-      unserializeVector(obj, uns, sz, type);
-      break;
-    case CollectionType::Map:
-    case CollectionType::ImmMap:
-      unserializeMap(obj, uns, sz, type);
-      break;
-    case CollectionType::Set:
-    case CollectionType::ImmSet:
-      unserializeSet(obj, uns, sz, type);
-      break;
-  }
-}
-
-namespace collections {
-
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Copying
 

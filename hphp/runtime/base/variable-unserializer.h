@@ -155,6 +155,7 @@ void unserializeVector(ObjectData*, VariableUnserializer*, int64_t sz,
 void unserializeMap(ObjectData*, VariableUnserializer*, int64_t sz, char type);
 void unserializeSet(ObjectData*, VariableUnserializer*, int64_t sz, char type);
 void unserializePair(ObjectData*, VariableUnserializer*, int64_t sz, char type);
+void reserialize(VariableUnserializer *uns, StringBuffer &buf);
 
 }
 

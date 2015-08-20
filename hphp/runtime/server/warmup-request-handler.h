@@ -43,6 +43,7 @@ public:
   void teardownRequest(Transport* transport) noexcept override;
   void handleRequest(Transport* transport) override;
   void abortRequest(Transport* transport) override;
+  void logToAccessLog(Transport* transport) override;
 
 private:
   std::shared_ptr<WarmupRequestHandlerFactory> m_factory;

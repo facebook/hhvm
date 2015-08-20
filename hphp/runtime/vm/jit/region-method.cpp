@@ -158,7 +158,6 @@ RegionDescPtr selectMethod(const RegionContext& context) {
    * Fill the first block predictions with the live types.
    */
   assertx(!ret->empty());
-  auto const startSK = ret->start();
   for (auto& lt : context.liveTypes) {
     typedef RegionDesc::Location::Tag LTag;
 
@@ -169,7 +168,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
       if (lt.location.localId() < context.func->numParams()) {
         // Only predict objectness, not the specific class type.
         auto const type = lt.type < TObj ? TObj : lt.type;
-        ret->entry()->addPreCondition(startSK, {lt.location, type});
+        ret->entry()->addPreCondition({lt.location, type});
       }
       break;
     }

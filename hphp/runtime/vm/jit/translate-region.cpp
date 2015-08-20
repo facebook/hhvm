@@ -211,9 +211,9 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
                           bool isEntry) {
   auto const sk = block->start();
   auto const bcOff = sk.offset();
-  auto typePredictions = makeMapWalker(block->typePredictions());
-  auto typePreConditions = makeMapWalker(block->typePreConditions());
-  auto refPreds  = makeMapWalker(block->reffinessPreds());
+  auto& typePredictions = block->typePredictions();
+  auto& typePreConditions = block->typePreConditions();
+  auto& refPreds = block->reffinessPreds();
 
   // If the block has a next retranslations in the chain that is a
   // merge point in the region, then we need to call
@@ -230,16 +230,14 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
   }
 
   // Emit type predictions.
-  while (typePredictions.hasNext(sk)) {
-    auto const& pred = typePredictions.next();
+  for (auto const& pred : typePredictions) {
     auto type = pred.type;
     auto loc  = pred.location;
     irgen::predictTypeLocation(irgs, loc, type);
   }
 
   // Emit type guards/preconditions.
-  while (typePreConditions.hasNext(sk)) {
-    auto const& preCond = typePreConditions.next();
+  for (auto const& preCond : typePreConditions) {
     auto type = preCond.type;
     auto loc  = preCond.location;
     if (type <= TCls) {
@@ -256,8 +254,7 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
   }
 
   // Emit reffiness predictions.
-  while (refPreds.hasNext(sk)) {
-    auto const& pred = refPreds.next();
+  for (auto const& pred : refPreds) {
     irgen::checkRefs(irgs, pred.arSpOffset, pred.mask, pred.vals, bcOff);
   }
 
@@ -292,9 +289,6 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
         break;
     }
   }
-
-  assertx(!typePredictions.hasNext());
-  assertx(!refPreds.hasNext());
 }
 
 void initNormalizedInstruction(

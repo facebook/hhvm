@@ -158,10 +158,10 @@ RegionDescPtr RegionFormer::go() {
     auto t = lt.type;
     if (t <= TCls) {
       irgen::assertTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPreCondition(m_sk, {lt.location, t});
+      m_curBlock->addPreCondition({lt.location, t});
     } else if (emitPredictions) {
       irgen::predictTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPredicted(m_sk, {lt.location, t});
+      m_curBlock->addPredicted({lt.location, t});
     } else {
       irgen::checkTypeLocation(m_irgs, lt.location, t, m_ctx.bcOffset,
                                true /* outerOnly */);
@@ -549,14 +549,12 @@ void RegionFormer::recordDependencies() {
   assertx(!m_region->empty());
   auto& frontBlock = *m_region->blocks().front();
   for (auto const& dep : m_refDeps.m_arMap) {
-    frontBlock.addReffinessPred(m_startSk, {dep.second.m_mask,
-                                            dep.second.m_vals,
-                                            dep.first});
+    frontBlock.addReffinessPred({dep.second.m_mask, dep.second.m_vals,
+                                 dep.first});
   }
 
   // Relax guards and record the ones that survived.
   auto& firstBlock = *m_region->blocks().front();
-  auto blockStart = firstBlock.start();
   auto& unit = m_irgs.unit;
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
   bool changed = false;
@@ -594,7 +592,7 @@ void RegionFormer::recordDependencies() {
         hint_it->second
       };
       FTRACE(1, "selectTracelet adding prediction {}\n", show(pred));
-      firstBlock.addPredicted(blockStart, pred);
+      firstBlock.addPredicted(pred);
     }
     if (kv.second == TGen) {
       // Guard was relaxed to Gen---don't record it.  But if there's a hint, we
@@ -603,7 +601,7 @@ void RegionFormer::recordDependencies() {
     }
     auto const preCond = RegionDesc::TypedLocation { kv.first, kv.second };
     ITRACE(1, "selectTracelet adding guard {}\n", show(preCond));
-    firstBlock.addPreCondition(blockStart, preCond);
+    firstBlock.addPreCondition(preCond);
   }
 
   if (changed) {

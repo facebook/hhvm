@@ -96,11 +96,7 @@ bool preconds_may_pass(const RegionDesc::Block& block,
   }
 
   auto const& preConds = block.typePreConditions();
-  auto preCond_it = preConds.find(block.start());
-  for (;
-      preCond_it != end(preConds) && preCond_it->first == block.start();
-      ++preCond_it) {
-    auto const preCond = preCond_it->second;
+  for (auto const& preCond : preConds) {
     using L = RegionDesc::Location::Tag;
     switch (preCond.location.tag()) {
     case L::Stack: break;

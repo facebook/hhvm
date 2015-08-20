@@ -541,30 +541,25 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   m_length = newLen;
   m_last = final.offset();
 
-  truncateMap(m_typePredictions, final);
-  truncateMap(m_typePreConditions, final);
   truncateMap(m_byRefs, final);
-  truncateMap(m_refPreds, final);
   truncateMap(m_knownFuncs, final);
 
   checkInstructions();
   checkMetadata();
 }
 
-void RegionDesc::Block::addPredicted(SrcKey sk, TypedLocation locType) {
-  FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(locType));
+void RegionDesc::Block::addPredicted(TypedLocation locType) {
+  FTRACE(2, "Block::addPredicted({})\n", show(locType));
   assertx(locType.type != TBottom);
   assertx(locType.type <= TStkElem);
-  assertx(contains(sk));
-  m_typePredictions.insert(std::make_pair(sk, locType));
+  m_typePredictions.push_back(locType);
 }
 
-void RegionDesc::Block::addPreCondition(SrcKey sk, TypedLocation locType) {
-  FTRACE(2, "Block::addPreCondition({}, {})\n", showShort(sk), show(locType));
+void RegionDesc::Block::addPreCondition(TypedLocation locType) {
+  FTRACE(2, "Block::addPreCondition({})\n", show(locType));
   assertx(locType.type != TBottom);
   assertx(locType.type <= TStkElem);
-  assertx(contains(sk));
-  m_typePreConditions.insert(std::make_pair(sk, locType));
+  m_typePreConditions.push_back(locType);
 }
 
 void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
@@ -575,10 +570,9 @@ void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
   m_byRefs.insert(std::make_pair(sk, byRef));
 }
 
-void RegionDesc::Block::addReffinessPred(SrcKey sk, const ReffinessPred& pred) {
-  FTRACE(2, "Block::addReffinessPred({}, {})\n", showShort(sk), show(pred));
-  assertx(contains(sk));
-  m_refPreds.insert(std::make_pair(sk, pred));
+void RegionDesc::Block::addReffinessPred(const ReffinessPred& pred) {
+  FTRACE(2, "Block::addReffinessPred({})\n", show(pred));
+  m_refPreds.push_back(pred);
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
@@ -656,10 +650,9 @@ void RegionDesc::Block::checkMetadata() const {
     }
   };
 
-  auto checkTypedLocations = [&](const char* msg, const TypedLocMap& map) {
-    for (auto& typedLoc : map) {
-      rangeCheck("type prediction", typedLoc.first.offset());
-      auto& loc = typedLoc.second.location;
+  auto checkTypedLocations = [&](const char* msg, const TypedLocVec& vec) {
+    for (auto& typedLoc : vec) {
+      auto& loc = typedLoc.location;
       switch (loc.tag()) {
       case Location::Tag::Local: assertx(loc.localId() < m_func->numLocals());
                                  break;
@@ -674,9 +667,6 @@ void RegionDesc::Block::checkMetadata() const {
 
   for (auto& byRef : m_byRefs) {
     rangeCheck("parameter reference flag", byRef.first.offset());
-  }
-  for (auto& refPred : m_refPreds) {
-    rangeCheck("reffiness prediction", refPred.first.offset());
   }
   for (auto& func : m_knownFuncs) {
     rangeCheck("known Func*", func.first.offset());
@@ -774,9 +764,8 @@ static bool postCondMismatch(const RegionDesc::TypedLocation& postCond,
 bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
                           const TypedLocations& prevPostConds) {
   const auto& preConds = block->typePreConditions();
-  for (const auto& it : preConds) {
+  for (const auto& preCond : preConds) {
     for (const auto& post : prevPostConds) {
-      const RegionDesc::TypedLocation& preCond = it.second;
       if (postCondMismatch(post, preCond)) {
         FTRACE(6, "preCondsAreSatisfied: postcondition check failed!\n"
                "  postcondition was {}, precondition was {}\n",
@@ -1082,28 +1071,26 @@ std::string show(const RegionDesc::Block& b) {
                   &ret
                  );
 
-  auto predictions = makeMapWalker(b.typePredictions());
-  auto preconditions = makeMapWalker(b.typePreConditions());
-  auto byRefs    = makeMapWalker(b.paramByRefs());
-  auto refPreds  = makeMapWalker(b.reffinessPreds());
-  auto knownFuncs= makeMapWalker(b.knownFuncs());
-  auto skIter    = b.start();
+  auto& predictions   = b.typePredictions();
+  auto& preconditions = b.typePreConditions();
+  auto  byRefs        = makeMapWalker(b.paramByRefs());
+  auto& refPreds      = b.reffinessPreds();
+  auto  knownFuncs    = makeMapWalker(b.knownFuncs());
+  auto  skIter        = b.start();
 
   const Func* topFunc = nullptr;
 
-  for (int i = 0; i < b.length(); ++i) {
-    while (predictions.hasNext(skIter)) {
-      folly::toAppend("  predict: ", show(predictions.next()), "\n", &ret);
-    }
-    while (preconditions.hasNext(skIter)) {
-      folly::toAppend("  precondition: ", show(preconditions.next()), "\n",
-          &ret);
-    }
-    while (refPreds.hasNext(skIter)) {
-      folly::toAppend("  predict reffiness: ", show(refPreds.next()), "\n",
-                      &ret);
-    }
+  for (auto const& p : predictions) {
+    folly::toAppend("  predict: ", show(p), "\n", &ret);
+  }
+  for (auto const& p : preconditions) {
+    folly::toAppend("  precondition: ", show(p), "\n", &ret);
+  }
+  for (auto const& rp : refPreds) {
+    folly::toAppend("  predict reffiness: ", show(rp), "\n", &ret);
+  }
 
+  for (int i = 0; i < b.length(); ++i) {
     std::string knownFunc;
     if (knownFuncs.hasNext(skIter)) {
       topFunc = knownFuncs.next();

@@ -305,10 +305,10 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
  * at various execution points, including at entry to the block.
  */
 struct RegionDesc::Block {
-  using TypedLocMap = boost::container::flat_multimap<SrcKey, TypedLocation>;
+  using TypedLocVec   = jit::vector<TypedLocation>;
+  using RefPredVec    = jit::vector<ReffinessPred>;
   using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
-  using RefPredMap = boost::container::flat_multimap<SrcKey,ReffinessPred>;
-  using KnownFuncMap = boost::container::flat_map<SrcKey,const Func*>;
+  using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
   explicit Block(const Func* func, bool resumed, Offset start, int length,
                  FPInvOffset initSpOff);
@@ -348,20 +348,16 @@ struct RegionDesc::Block {
 
   /*
    * Add a predicted type to this block.
-   *
-   * Pre: sk is in the region delimited by this block.
    */
-  void addPredicted(SrcKey sk, TypedLocation);
+  void addPredicted(TypedLocation);
 
   /*
    * Add a precondition type to this block. Preconditions have no effects on
    * correctness, but entering a block with a known type that violates a
    * precondition is likely to result in a side exit after little to no
    * forward progress.
-   *
-   * Pre: sk is in the region delimited by this block.
    */
-  void addPreCondition(SrcKey sk, TypedLocation);
+  void addPreCondition(TypedLocation);
 
   /*
    * Add information about parameter reffiness to this block.
@@ -371,7 +367,7 @@ struct RegionDesc::Block {
   /*
    * Add a reffiness prediction about a pre-live ActRec.
    */
-  void addReffinessPred(SrcKey, const ReffinessPred&);
+  void addReffinessPred(const ReffinessPred&);
 
   /*
    * Update the statically known Func*. It remains active until another is
@@ -391,10 +387,10 @@ struct RegionDesc::Block {
    * iterate over the information is using a MapWalker, since they're all
    * backed by a sorted map.
    */
-  const TypedLocMap&    typePredictions()   const { return m_typePredictions;  }
-  const TypedLocMap&    typePreConditions() const { return m_typePreConditions;}
+  const TypedLocVec&    typePredictions()   const { return m_typePredictions;  }
+  const TypedLocVec&    typePreConditions() const { return m_typePreConditions;}
   const ParamByRefMap&  paramByRefs()       const { return m_byRefs;           }
-  const RefPredMap&     reffinessPreds()    const { return m_refPreds;         }
+  const RefPredVec&     reffinessPreds()    const { return m_refPreds;         }
   const KnownFuncMap&   knownFuncs()        const { return m_knownFuncs;       }
   const PostConditions& postConds()         const { return m_postConds;        }
 
@@ -414,10 +410,10 @@ private:
   int             m_length;
   FPInvOffset     m_initialSpOffset;
   TransID         m_profTransID;
-  TypedLocMap     m_typePredictions;
-  TypedLocMap     m_typePreConditions;
+  TypedLocVec     m_typePredictions;
+  TypedLocVec     m_typePreConditions;
   ParamByRefMap   m_byRefs;
-  RefPredMap      m_refPreds;
+  RefPredVec      m_refPreds;
   KnownFuncMap    m_knownFuncs;
   PostConditions  m_postConds;
 };

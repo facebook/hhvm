@@ -721,10 +721,10 @@ void FrameStateMgr::syncPrediction(SlotState<Stack>& slot) {
   auto it = map.find(canonValue);
   if (it == map.end()) {
     ITRACE(4, "No prediction in map; slot has {}\n", prediction);
-    if (prediction < slot.default_type) map.emplace(canonValue, prediction);
+    if (prediction < slot.default_type()) map.emplace(canonValue, prediction);
     return;
   }
-  if (prediction == slot.default_type) {
+  if (prediction == slot.default_type()) {
     ITRACE(4, "No prediction in slot; map has {}\n", it->second);
     prediction = it->second;
     return;

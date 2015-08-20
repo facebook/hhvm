@@ -101,7 +101,9 @@ private:
  */
 template<bool Stack>
 struct SlotState {
-  static constexpr Type default_type = Stack ? TStkElem : TGen;
+  static constexpr Type default_type() {
+    return Stack ? TStkElem : TGen;
+  }
 
   /*
    * The current value of the or stack slot.
@@ -116,7 +118,7 @@ struct SlotState {
    * incoming edges.  However, whenever we have a value, the type of
    * the SSATmp must match this `type' field.
    */
-  Type type{default_type};
+  Type type{default_type()};
 
   /*
    * Prediction for the type of a local or stack slot, if it's boxed or if
@@ -125,7 +127,7 @@ struct SlotState {
    * Invariants:
    *   always a subtype of `type'
    */
-  Type predictedType{default_type};
+  Type predictedType{default_type()};
 
   /*
    * The sources of the currently known type. They may be values. If the value
@@ -140,8 +142,6 @@ struct SlotState {
    */
   bool maybeChanged{false};
 };
-
-template<bool Stack> constexpr Type SlotState<Stack>::default_type;
 
 using LocalState = SlotState<false>;
 using StackState = SlotState<true>;

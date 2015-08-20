@@ -81,7 +81,7 @@ T* UnionFind<T>::find(T* tmp) const {
 
 template <typename T>
 typename UnionFind<T>::Node* UnionFind<T>::traverseToRoot(
-  UnionFind<T>::Node& start
+  typename UnionFind<T>::Node& start
 ) {
   auto current = &start;
   while (current->parent) {

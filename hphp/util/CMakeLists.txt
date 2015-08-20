@@ -36,6 +36,11 @@ add_custom_command(
 #  include_directories(${LIBNUMA_INCLUDE_DIRS})
 #endif()
 
+if(MSVC)
+  list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/light-process.cpp")
+  list(REMOVE_ITEM HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/light-process.h")
+endif()
+
 add_library(hphp_util STATIC ${CXX_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp")

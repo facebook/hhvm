@@ -58,11 +58,9 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
-        assert(check_refcount_ns(cell.m_data.pobj->getCount()));
         return;
       case KindOfResource:
         assertPtr(cell.m_data.pres);
-        assert(check_refcount_ns(cell.m_data.pres->getCount()));
         return;
       case KindOfRef:
         assert(!"KindOfRef found in a Cell");

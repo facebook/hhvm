@@ -1666,7 +1666,12 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
     if (timeout_ms > 0) {
       m_timeout = std::shared_ptr<CurlTimeoutHandler>
         (new CurlTimeoutHandler(s_asio_event_base.get(), this));
-      s_asio_event_base->runInEventBaseThread([this, timeout_ms]{
+
+#ifdef FOLLY_SINGLETON_TRY_GET
+      s_asio_event_base.try_get()->runInEventBaseThread([this,timeout_ms]{
+#else
+      s_asio_event_base->runInEventBaseThread([this,timeout_ms]{
+#endif
         m_timeout->scheduleTimeout(timeout_ms);
       });
     }
@@ -1678,7 +1683,11 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
     }
     if (m_timeout) {
       std::shared_ptr<CurlTimeoutHandler> to = m_timeout;
+#ifdef FOLLY_SINGLETON_TRY_GET
+      s_asio_event_base.try_get()->runInEventBaseThreadAndWait([to]{
+#else
       s_asio_event_base->runInEventBaseThreadAndWait([to]{
+#endif
         to.get()->cancelTimeout();
       });
       m_timeout.reset();

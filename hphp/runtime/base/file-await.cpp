@@ -31,7 +31,11 @@ FileAwait::FileAwait(int fd, uint16_t events, double timeout) {
   if (timeout_ms > 0) {
     m_timeout = std::make_shared<FileTimeoutHandler>
       (s_asio_event_base.get(), this);
+#ifdef FOLLY_SINGLETON_TRY_GET
+    s_asio_event_base.try_get()->runInEventBaseThread([this,timeout_ms]{
+#else
     s_asio_event_base->runInEventBaseThread([this,timeout_ms]{
+#endif
       if (m_timeout) {
         m_timeout->scheduleTimeout(timeout_ms);
       }
@@ -53,7 +57,11 @@ FileAwait::~FileAwait() {
     m_timeout->m_fileAwait = nullptr;
 
     std::shared_ptr<FileTimeoutHandler> to = m_timeout;
+#ifdef FOLLY_SINGLETON_TRY_GET
+    s_asio_event_base.try_get()->runInEventBaseThread([to]{
+#else
     s_asio_event_base->runInEventBaseThread([to]{
+#endif
       to.get()->cancelTimeout();
     });
     m_timeout.reset();

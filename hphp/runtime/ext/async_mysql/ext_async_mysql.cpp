@@ -86,9 +86,19 @@ DEFINE_CONSTANT(MYSQL_TYPE_ENUM);
 DEFINE_CONSTANT(MYSQL_TYPE_GEOMETRY);
 DEFINE_CONSTANT(MYSQL_TYPE_NULL);
 
+#ifdef FOLLY_SINGLETON_TRY_GET
+
+static std::shared_ptr<am::AsyncMysqlClient> getDefaultClient() {
+  return am::AsyncMysqlClient::defaultClient();
+}
+
+#else
+
 static am::AsyncMysqlClient* getDefaultClient() {
   return am::AsyncMysqlClient::defaultClient();
 }
+
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClientStats

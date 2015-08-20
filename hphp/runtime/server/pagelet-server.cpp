@@ -358,7 +358,13 @@ void PageletServer::Restart() {
          RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
          RuntimeOption::PageletServerThreadDropStack,
          nullptr);
+
+#ifdef FOLLY_SINGLETON_TRY_GET
+      auto monitor = folly::Singleton<HostHealthMonitor>::try_get();
+#else
       auto monitor = folly::Singleton<HostHealthMonitor>::get();
+#endif
+
       monitor->subscribe(s_dispatcher);
       monitor->start();
     }
@@ -369,7 +375,13 @@ void PageletServer::Restart() {
 
 void PageletServer::Stop() {
   if (s_dispatcher) {
+
+#ifdef FOLLY_SINGLETON_TRY_GET
+    auto monitor = folly::Singleton<HostHealthMonitor>::try_get();
+#else
     auto monitor = folly::Singleton<HostHealthMonitor>::get();
+#endif
+
     monitor->stop();
     s_dispatcher->stop();
     Lock l(s_dispatchMutex);

@@ -105,6 +105,13 @@
     return false;                                         \
   }                                                       \
 
+#define CHECK_SYSTEM_SILENT(exp)                          \
+  if ((exp) != 0) {                                       \
+    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
+                    folly::errnoStr(errno).c_str());      \
+    return false;                                         \
+  }                                                       \
+
 // libxml/xpathInternals.h defines CHECK_ERROR,
 // we need to undef it first
 #ifdef CHECK_ERROR
@@ -967,7 +974,30 @@ bool HHVM_FUNCTION(is_writable,
   if (filename.empty()) {
     return false;
   }
-  return accessSyscall(filename, W_OK);
+  CHECK_SYSTEM_SILENT(accessSyscall(filename, W_OK));
+  return true;
+  /*
+  int mask = S_IWOTH;
+  if (sb.st_uid == getuid()) {
+    mask = S_IWUSR;
+  } else if (sb.st_gid == getgid()) {
+    mask = S_IWGRP;
+  } else {
+    int groups = getgroups(0, NULL);
+    if (groups > 0) {
+      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
+      int n = getgroups(groups, gids);
+      for (int i = 0; i < n; i++) {
+        if (sb.st_gid == gids[i]) {
+          mask = S_IWGRP;
+          break;
+        }
+      }
+      free(gids);
+    }
+  }
+  return sb.st_mode & mask;
+  */
 }
 
 bool HHVM_FUNCTION(is_writeable,
@@ -982,7 +1012,30 @@ bool HHVM_FUNCTION(is_readable,
   if (filename.empty()) {
     return false;
   }
-  return accessSyscall(filename, R_OK, true);
+  CHECK_SYSTEM_SILENT(accessSyscall(filename, R_OK, true));
+  return true;
+  /*
+  int mask = S_IROTH;
+  if (sb.st_uid == getuid()) {
+    mask = S_IRUSR;
+  } else if (sb.st_gid == getgid()) {
+    mask = S_IRGRP;
+  } else {
+    int groups = getgroups(0, NULL);
+    if (groups > 0) {
+      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
+      int n = getgroups(groups, gids);
+      for (int i = 0; i < n; i++) {
+        if (sb.st_gid == gids[i]) {
+          mask = S_IRGRP;
+          break;
+        }
+      }
+      free(gids);
+    }
+  }
+  return sb.st_mode & mask;
+  */
 }
 
 bool HHVM_FUNCTION(is_executable,
@@ -991,7 +1044,30 @@ bool HHVM_FUNCTION(is_executable,
   if (filename.empty()) {
     return false;
   }
-  return accessSyscall(filename, X_OK);
+  CHECK_SYSTEM_SILENT(accessSyscall(filename, X_OK));
+  return true;
+  /*
+  int mask = S_IXOTH;
+  if (sb.st_uid == getuid()) {
+    mask = S_IXUSR;
+  } else if (sb.st_gid == getgid()) {
+    mask = S_IXGRP;
+  } else {
+    int groups = getgroups(0, NULL);
+    if (groups > 0) {
+      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
+      int n = getgroups(groups, gids);
+      for (int i = 0; i < n; i++) {
+        if (sb.st_gid == gids[i]) {
+          mask = S_IXGRP;
+          break;
+        }
+      }
+      free(gids);
+    }
+  }
+  return (sb.st_mode & mask) && (sb.st_mode & S_IFMT) != S_IFDIR;
+  */
 }
 
 static VFileType lookupVirtualFile(const String& filename) {
@@ -1027,11 +1103,8 @@ bool HHVM_FUNCTION(is_file,
   }
 
   struct stat sb;
-  if (statSyscall(filename, &sb, true)) {
-    return (sb.st_mode & S_IFMT) == S_IFREG;
-  } else {
-    return false;
-  }
+  CHECK_SYSTEM_SILENT(statSyscall(filename, &sb, true));
+  return (sb.st_mode & S_IFMT) == S_IFREG;
 }
 
 bool HHVM_FUNCTION(is_dir,
@@ -1046,22 +1119,16 @@ bool HHVM_FUNCTION(is_dir,
   }
 
   struct stat sb;
-  if (statSyscall(filename, &sb, false)) {
-    return (sb.st_mode & S_IFMT) == S_IFDIR;
-  } else {
-    return false;
-  }
+  CHECK_SYSTEM_SILENT(statSyscall(filename, &sb, false));
+  return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 
 bool HHVM_FUNCTION(is_link,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
   struct stat sb;
-  if (lstatSyscall(filename, &sb)) {
-    return (sb.st_mode & S_IFMT) == S_IFLNK;
-  } else {
-    return false;
-  }
+  CHECK_SYSTEM_SILENT(lstatSyscall(filename, &sb));
+  return (sb.st_mode & S_IFMT) == S_IFLNK;
 }
 
 bool HHVM_FUNCTION(is_uploaded_file,
@@ -1540,7 +1607,8 @@ bool HHVM_FUNCTION(unlink,
   CHECK_PATH_FALSE(filename, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   if (!w) return false;
-  return w->unlink(filename);
+  CHECK_SYSTEM_SILENT(w->unlink(filename));
+  return true;
 }
 
 bool HHVM_FUNCTION(link,
@@ -1748,7 +1816,8 @@ bool HHVM_FUNCTION(mkdir,
   Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
   if (!w) return false;
   int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
-  return w->mkdir(pathname, mode, options);
+  CHECK_SYSTEM_SILENT(w->mkdir(pathname, mode, options));
+  return true;
 }
 
 bool HHVM_FUNCTION(rmdir,
@@ -1757,7 +1826,8 @@ bool HHVM_FUNCTION(rmdir,
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   if (!w) return false;
   int options = 0;
-  return w->rmdir(dirname, options);
+  CHECK_SYSTEM_SILENT(w->rmdir(dirname, options));
+  return true;
 }
 
 String HHVM_FUNCTION(dirname,

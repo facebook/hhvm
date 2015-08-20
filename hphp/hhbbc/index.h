@@ -124,7 +124,7 @@ struct ClassInfo;
  *
  * These represent handles to program entities that may have variable
  * amounts of information.  For example, we may know the name of a
- * class in a res::Class, but not know for sure which php::Class
+ * class in a res::Class, but do not know for sure which php::Class
  * struct is actually associated with it.
  */
 namespace res {

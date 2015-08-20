@@ -51,7 +51,6 @@ class apcExtension final : public Extension {
   static int TTLLimit;
   static bool UseFileStorage;
   static int64_t FileStorageChunkSize;
-  static int64_t FileStorageMaxSize;
   static std::string FileStoragePrefix;
   static int FileStorageAdviseOutPeriod;
   static std::string FileStorageFlagKey;

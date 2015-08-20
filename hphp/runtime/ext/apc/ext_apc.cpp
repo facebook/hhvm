@@ -140,9 +140,9 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   FileStorageChunkSize = Config::GetInt64(ini, config,
                                           "Server.APC.FileStorage.ChunkSize",
                                           1LL << 29);
-  FileStorageMaxSize = Config::GetInt64(ini, config,
-                                        "Server.APC.FileStorage.MaxSize",
-                                        1LL << 32);
+  // TODO(markdrayton): remove FileStorageMaxSize once FileStorage.MaxSize has
+  // been removed from config.hdf (see D2360365)
+  Config::GetInt64(ini, config, "Server.APC.FileStorage.MaxSize", 1LL << 32);
   Config::Bind(FileStoragePrefix, ini, config, "Server.APC.FileStorage.Prefix",
                "/tmp/apc_store");
   Config::Bind(FileStorageFlagKey, ini, config,
@@ -172,9 +172,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
 void apcExtension::moduleInit() {
   if (UseFileStorage) {
-    s_apc_file_storage.enable(FileStoragePrefix,
-                              FileStorageChunkSize,
-                              FileStorageMaxSize);
+    s_apc_file_storage.enable(FileStoragePrefix, FileStorageChunkSize);
   }
 
   REGISTER_CONSTANT(APC_ITER_TYPE);
@@ -238,7 +236,6 @@ bool apcExtension::AllowObj = false;
 int apcExtension::TTLLimit = -1;
 bool apcExtension::UseFileStorage = false;
 int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
-int64_t apcExtension::FileStorageMaxSize = int64_t(1LL << 32);
 std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";
 int apcExtension::FileStorageAdviseOutPeriod = 1800;
 std::string apcExtension::FileStorageFlagKey = "_madvise_out";

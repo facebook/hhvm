@@ -45,7 +45,7 @@ struct APCFileStorage {
   APCFileStorage(const APCFileStorage&) = delete;
   APCFileStorage& operator=(const APCFileStorage&) = delete;
 
-  void enable(const std::string& prefix, int64_t chunkSize, int64_t maxSize);
+  void enable(const std::string& prefix, int64_t chunkSize);
   char *put(const char *data, int32_t len);
   void seal();
   void adviseOut();
@@ -60,7 +60,6 @@ private:
   std::vector<void*> m_chunks;
   std::string m_prefix;
   int64_t m_chunkSize;
-  int64_t m_maxSize;
   StorageState m_state;
   char *m_current;
   int32_t m_chunkRemain;

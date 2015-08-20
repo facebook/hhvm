@@ -88,7 +88,7 @@ std::unique_ptr<Store> new_store() {
  * Make an APC table with some things primed for tests to use.
  */
 std::unique_ptr<Store> new_primed_store() {
-  s_apc_file_storage.enable("/tmp/apc_unit_test", 1ul << 20, 1ul << 32);
+  s_apc_file_storage.enable("/tmp/apc_unit_test", 1ul << 20);
 
   auto ret = folly::make_unique<Store>();
   ret->prime(primable_ints(*ret));

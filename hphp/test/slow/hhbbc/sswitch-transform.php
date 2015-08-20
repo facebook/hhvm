@@ -1,6 +1,6 @@
 <?php
 
-function cleanPagePath(string $path)
+function cleanPagePath($path)
 {
 	$path = strtolower($path);
 	$tmp = '';

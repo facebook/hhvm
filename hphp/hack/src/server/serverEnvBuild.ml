@@ -27,7 +27,7 @@ let make_genv options config watch_paths =
     else
       Some (Worker.make nbr_procs gc_control) in
   let dfind =
-    if Sys.win32 || check_mode then
+    if check_mode then
       None
     else
       Some (DfindLib.init watch_paths) in

@@ -1863,7 +1863,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     }
 
     auto result = TranslateResult::Retry;
-    auto regionInterps = RegionBlacklist{};
+    TranslateRetryContext retry;
     initSpOffset = region ? region->entry()->initialSpOffset()
                           : liveSpOff();
     while (region && result == TranslateResult::Retry) {
@@ -1882,8 +1882,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         assertCleanState();
         maker.markStart();
 
-        result = translateRegion(irgs, *region, regionInterps, args.flags,
-                                 pconds);
+        result = translateRegion(irgs, *region, retry, args.flags, pconds);
         hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(irgs.unit);
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {

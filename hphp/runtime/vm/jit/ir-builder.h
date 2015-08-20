@@ -183,7 +183,7 @@ public:
   /*
    * Create a new block corresponding to bytecode control flow.
    */
-  Block* makeBlock(Offset offset);
+  Block* makeBlock(SrcKey sk);
 
   /*
    * Clear the map from bytecode offsets to Blocks.
@@ -192,14 +192,14 @@ public:
 
   /*
    * Checks whether or not there's a block associated with the given
-   * bytecode offset.
+   * SrcKey offset.
    */
-  bool hasBlock(Offset offset) const;
+  bool hasBlock(SrcKey sk) const;
 
   /*
-   * Set the block associated with the given offset in the offset->block map.
+   * Set the block associated with the given offset in the SrcKey->block map.
    */
-  void setBlock(Offset offset, Block* block);
+  void setBlock(SrcKey sk, Block* block);
 
   /*
    * Get the block that we're currently emitting code to.
@@ -335,10 +335,7 @@ private:
   GuardConstraints m_constraints;
 
   // Keep track of blocks created to support bytecode control flow.
-  //
-  // TODO(t3730559): Offset is used here since it's passed from
-  // emitJmp*, but SrcKey might be better in case of inlining.
-  jit::flat_map<Offset,Block*> m_offsetToBlockMap;
+  jit::flat_map<SrcKey,Block*> m_skToBlockMap;
 
   // Keeps the block to branch to (if any) in case a guard fails.
   // This holds nullptr if the guard failures should perform a service

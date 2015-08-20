@@ -906,27 +906,27 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   return true;
 }
 
-Block* IRBuilder::makeBlock(Offset offset) {
-  auto it = m_offsetToBlockMap.find(offset);
-  if (it == m_offsetToBlockMap.end()) {
+Block* IRBuilder::makeBlock(SrcKey sk) {
+  auto it = m_skToBlockMap.find(sk);
+  if (it == m_skToBlockMap.end()) {
     auto const block = m_unit.defBlock();
-    m_offsetToBlockMap.insert(std::make_pair(offset, block));
+    m_skToBlockMap.emplace(sk, block);
     return block;
   }
   return it->second;
 }
 
 void IRBuilder::resetOffsetMapping() {
-  m_offsetToBlockMap.clear();
+  m_skToBlockMap.clear();
 }
 
-bool IRBuilder::hasBlock(Offset offset) const {
-  return m_offsetToBlockMap.count(offset);
+bool IRBuilder::hasBlock(SrcKey sk) const {
+  return m_skToBlockMap.count(sk);
 }
 
-void IRBuilder::setBlock(Offset offset, Block* block) {
-  assertx(!hasBlock(offset));
-  m_offsetToBlockMap[offset] = block;
+void IRBuilder::setBlock(SrcKey sk, Block* block) {
+  assertx(!hasBlock(sk));
+  m_skToBlockMap[sk] = block;
 }
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b) {

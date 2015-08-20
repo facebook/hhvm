@@ -1088,6 +1088,22 @@ constexpr bool isFPush(Op opcode) {
   return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
 }
 
+constexpr bool isFPushCuf(Op opcode) {
+  return opcode >= OpFPushCufIter && opcode <= OpFPushCufSafe;
+}
+
+constexpr bool isFPushClsMethod(Op opcode) {
+  return opcode >= OpFPushClsMethod && opcode <= OpFPushClsMethodD;
+}
+
+constexpr bool isFPushCtor(Op opcode) {
+  return opcode == OpFPushCtor || opcode == OpFPushCtorD;
+}
+
+constexpr bool isFPushFunc(Op opcode) {
+  return opcode >= OpFPushFunc && opcode <= OpFPushFuncU;
+}
+
 inline bool isFCallStar(Op opcode) {
   switch (opcode) {
     case Op::FCall:
@@ -1121,6 +1137,10 @@ inline bool isFPassStar(Op opcode) {
 
 constexpr bool isRet(Op op) {
   return op == OpRetC || op == OpRetV;
+}
+
+constexpr bool isReturnish(Op op) {
+  return isRet(op) || op == Op::NativeImpl;
 }
 
 constexpr bool isSwitch(Op op) {

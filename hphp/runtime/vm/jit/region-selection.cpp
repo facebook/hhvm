@@ -136,11 +136,10 @@ SrcKey RegionDesc::lastSrcKey() const {
 
 RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
                                         int         length,
-                                        FPInvOffset spOffset,
-                                        uint16_t    inlineLevel) {
+                                        FPInvOffset spOffset) {
   m_blocks.push_back(
     std::make_shared<Block>(sk.func(), sk.resumed(), sk.offset(), length,
-                            spOffset, inlineLevel));
+                            spOffset));
   BlockPtr block = m_blocks.back();
   m_data[block->id()] = BlockData(block);
   return block.get();
@@ -493,8 +492,7 @@ RegionDesc::Block::Block(const Func* func,
                          bool        resumed,
                          Offset      start,
                          int         length,
-                         FPInvOffset initSpOff,
-                         uint16_t    inlineLevel)
+                         FPInvOffset initSpOff)
   : m_id(s_nextId--)
   , m_func(func)
   , m_resumed(resumed)
@@ -502,8 +500,6 @@ RegionDesc::Block::Block(const Func* func,
   , m_last(kInvalidOffset)
   , m_length(length)
   , m_initialSpOffset(initSpOff)
-  , m_inlinedCallee(nullptr)
-  , m_inlineLevel(inlineLevel)
   , m_profTransID(kInvalidTransID)
 {
   assertx(length >= 0);
@@ -533,8 +529,6 @@ void RegionDesc::Block::addInstruction() {
 }
 
 void RegionDesc::Block::truncateAfter(SrcKey final) {
-  assert_not_implemented(!m_inlinedCallee);
-
   auto skIter = start();
   int newLen = -1;
   for (int i = 0; i < m_length; ++i, skIter.advance(unit())) {
@@ -1083,7 +1077,6 @@ std::string show(const RegionDesc::Block& b) {
                   b.start().resumed() ? "r" : "",
                   " length ", b.length(),
                   " initSpOff ", b.initialSpOffset().offset,
-                  " inlineLevel ", b.inlineLevel(),
                   " profTransID ", b.profTransID(),
                   '\n',
                   &ret
@@ -1117,15 +1110,8 @@ std::string show(const RegionDesc::Block& b) {
     }
     if (topFunc) {
       const char* inlined = "";
-      if (i == b.length() - 1 && b.inlinedCallee()) {
-        assertx(topFunc == b.inlinedCallee());
-        inlined = " (call is inlined)";
-      }
       knownFunc = folly::format(" (top func: {}{})",
                                 topFunc->fullName(), inlined).str();
-    } else {
-      assertx((i < b.length() - 1 || !b.inlinedCallee()) &&
-             "inlined FCall without a known funcd");
     }
 
     std::string byRef;

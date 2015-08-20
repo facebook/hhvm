@@ -2135,12 +2135,30 @@ void Parser::onGoto(Token &out, Token &label, bool limited) {
   out->stmt = NEW_STMT(GotoStatement, label.text());
 }
 
+/* save the type variables before pushTypeScope clears it out; for
+ * typedefs only */
+void Parser::setTypeVars(Token &out, const Token &name) {
+  out = name;
+  if (!out.typeAnnotation) {
+    out.typeAnnotation =
+      std::make_shared<TypeAnnotation>(name.text(), TypeAnnotationPtr());
+  }
+  std::string tvars;
+  folly::join(",", m_typeVars, tvars);
+  out.typeAnnotation->setGenerics(tvars);
+}
+
 void Parser::onTypedef(Token& out, const Token& name, const Token& type) {
   // Note: we don't always get TypeAnnotations (e.g. for shape types
   // currently).
-  auto const annot = type.typeAnnotation
-    ? type.typeAnnotation
-    : std::make_shared<TypeAnnotation>(type.text(), TypeAnnotationPtr());
+  auto annot = type.typeAnnotation;
+  if (!annot) {
+    annot = std::make_shared<TypeAnnotation>(type.text(), TypeAnnotationPtr());
+  }
+  // save the type variables (generics)
+  if (name.typeAnnotation) {
+    annot->setGenerics(name.typeAnnotation->getGenerics());
+  }
 
   auto td_stmt = NEW_STMT(TypedefStatement, name.text(), annot);
   td_stmt->onParse(m_ar, m_file);

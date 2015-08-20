@@ -1,5 +1,5 @@
 TypeAlias [ Matrix : ?HH\Vector<HH\Vector<T>> ]
-array(5) {
+array(6) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
@@ -26,6 +26,8 @@ array(5) {
       }
     }
   }
+  ["typevars"]=>
+  string(1) "T"
   ["alias"]=>
   string(6) "Matrix"
 }

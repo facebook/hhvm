@@ -58,7 +58,9 @@ const StaticString
   s_self("self"),
   s_parent("parent"),
   s_callable("callable"),
-  s_alias("alias")
+  s_alias("alias"),
+  s_typevars("typevars"),
+  s_typevar_types("typevar_types")
 ;
 
 const std::string
@@ -439,15 +441,11 @@ void resolveClass(Array& ret,
   ret.add(s_classname, Variant(makeStaticString(cls->name())));
 }
 
-void resolveGenerics(Array& ret,
-                     const Array& arr,
-                     const Class::Const& typeCns,
-                     const Class* typeCnsCls){
-  if (arr.exists(s_generic_types)) {
-    auto genericsArr = arr[s_generic_types].toArray();
-    auto genericTypes = resolveList(genericsArr, typeCns, typeCnsCls);
-    ret.add(s_generic_types, Variant(genericTypes));
-  }
+Array resolveGenerics(const Array& arr,
+                      const Class::Const& typeCns,
+                      const Class* typeCnsCls) {
+  auto genericsArr = arr[s_generic_types].toArray();
+  return resolveList(genericsArr, typeCns, typeCnsCls);
 }
 
 Array resolveTS(const Array& arr,
@@ -482,7 +480,10 @@ Array resolveTS(const Array& arr,
       break;
     }
     case TypeStructure::Kind::T_array: {
-      resolveGenerics(newarr, arr, typeCns, typeCnsCls);
+      if (arr.exists(s_generic_types)) {
+        newarr.add(s_generic_types,
+                   Variant(resolveGenerics(arr, typeCns, typeCnsCls)));
+      }
       break;
     }
     case TypeStructure::Kind::T_shape: {
@@ -494,21 +495,30 @@ Array resolveTS(const Array& arr,
       assert(arr.exists(s_classname));
       auto const clsName = arr[s_classname].toCStrRef();
       auto ts = getAlias(clsName);
-      if (!ts.empty()) return ts;
+      if (!ts.empty()) {
+        if (arr.exists(s_generic_types)) {
+          ts.add(s_typevar_types,
+                 Variant(resolveGenerics(arr, typeCns, typeCnsCls)));
+        }
+        ts.setEvalScalar();
+        return ts;
+      }
 
-      /* Special cases for 'callable': Hack typechecker throws a naming
-       * error (unbound name), however, hhvm still supports this type
-       * hint to be compatible with php. We simply return as a
-       * OF_CLASS with class name set to 'callable'. */
+      /* Special cases for 'callable': Hack typechecker throws a
+       * naming error (unbound name), however, hhvm still supports
+       * this type hint to be compatible with php. We simply return as
+       * a OF_CLASS with class name set to 'callable'. */
       if (clsName.same(s_callable)) {
         newarr.add(s_kind,
                    Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
         newarr.add(s_classname, Variant(clsName));
         break;
       }
-
       resolveClass(newarr, clsName, typeCns, typeCnsCls);
-      resolveGenerics(newarr, arr, typeCns, typeCnsCls);
+      if (arr.exists(s_generic_types)) {
+        newarr.add(s_generic_types,
+                   Variant(resolveGenerics(arr, typeCns, typeCnsCls)));
+      }
       break;
     }
     case TypeStructure::Kind::T_typeaccess: {
@@ -563,6 +573,8 @@ Array resolveTS(const Array& arr,
     default:
       return Array(arr);
   }
+
+  if (arr.exists(s_typevars)) newarr.add(s_typevars, arr[s_typevars]);
 
   newarr.setEvalScalar();
   return newarr;

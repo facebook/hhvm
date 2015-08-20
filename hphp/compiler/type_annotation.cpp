@@ -364,7 +364,8 @@ const StaticString
   s_access_list("access_list"),
   s_fields("fields"),
   s_is_cls_cns("is_cls_cns"),
-  s_value("value")
+  s_value("value"),
+  s_typevars("typevars")
 ;
 
 /* Turns the argsList linked list of TypeAnnotation into a positioned
@@ -457,6 +458,10 @@ Array TypeAnnotation::getScalarArrayRep() const {
     break;
   default:
     break;
+  }
+
+  if (!m_generics.empty()) {
+    rep.add(s_typevars, Variant(m_generics));
   }
 
   rep.setEvalScalar();

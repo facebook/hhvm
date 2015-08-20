@@ -3028,7 +3028,8 @@ hh_name_with_typevar:  /* foo -> foo<X,Y>; this adds a typevar scope
   | ident
     T_TYPELIST_LT
     hh_typevar_list
-    T_TYPELIST_GT                      { _p->pushTypeScope(); $$ = $1; }
+    T_TYPELIST_GT                      { Token t; _p->setTypeVars(t, $1);
+                                         _p->pushTypeScope(); $$ = t; }
 ;
 
 hh_typeargs_opt:

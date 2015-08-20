@@ -119,6 +119,9 @@ public:
   void setTypeAccess() { m_typeaccess = true; }
   void setShape() { m_shape = true; }
   void setClsCnsShapeField() { m_clsCnsShapeField = true; }
+  void setGenerics(const std::string& generics) { m_generics = generics; }
+
+  const std::string& getGenerics() const { return m_generics; }
 
   bool isNullable() const { return m_nullable; }
   bool isSoft() const { return m_soft; }
@@ -237,6 +240,7 @@ private:
 
 private:
   std::string m_name;
+  std::string m_generics; // store typevars as comma separated string: Tk,Tv,...
   TypeAnnotationPtr m_typeArgs;
   TypeAnnotationPtr m_typeList;
   unsigned m_nullable : 1;

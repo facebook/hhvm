@@ -26,14 +26,16 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
 
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/alias-analysis.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/pass-tracer.h"
-#include "hphp/runtime/vm/jit/loop-analysis.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/loop-analysis.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 
 namespace HPHP { namespace jit {
 
@@ -526,7 +528,9 @@ bool may_have_side_effects(const IRInstruction& inst) {
 void find_invariant_code(LoopEnv& env) {
   auto may_still_hoist_checks = true;
   auto visited_block = boost::dynamic_bitset<>(env.global.unit.numBlocks());
-
+  auto profData = mcg->tx().profData();
+  auto numInvocations = linfo(env).numInvocations;
+  FTRACE(4, "numInvocations: {}\n", numInvocations);
   for (auto& b : rpo_sort_loop(env)) {
     FTRACE(2, "  B{}:\n", b->id());
     if (may_still_hoist_checks && b != header(env)) {
@@ -537,6 +541,26 @@ void find_invariant_code(LoopEnv& env) {
           may_still_hoist_checks = false;
         }
       });
+    }
+
+    // Skip this block if its profile weight is less than the number
+    // of times the loop is invoked, since otherwise we're likely to
+    // executed the instruction more by hoisting it out of the loop.
+    auto tid = b->front().marker().profTransID();
+    auto profCount = profData->absTransCounter(tid);
+    if (profCount < numInvocations) {
+      FTRACE(4, "   skipping Block {} because of low profile weight ({})\n",
+             b->id(), profCount);
+      if (may_still_hoist_checks) {
+        for (auto& inst : b->instrs()) {
+          if (may_have_side_effects(inst)) {
+            FTRACE(5, "      may_still_hoist_checks = false\n");
+            may_still_hoist_checks = false;
+            break;
+          }
+        }
+      }
+      continue;
     }
 
     for (auto& inst : b->instrs()) {
@@ -747,5 +771,4 @@ void optimizeLoopInvariantCode(IRUnit& unit) {
  *
  *   o More kinds of checks for hoisting (CheckType, CheckTypeMem).
  *
- *   o Maybe support for only hoisting things that dominate all the loop exits.
  */

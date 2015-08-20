@@ -86,6 +86,12 @@ struct LoopInfo {
    * The loop's back-edges.
    */
   jit::flat_set<Edge*> backEdges;
+
+  /*
+   * Number of times that the loop was invoked (i.e. entered) during
+   * profiling.
+   */
+  uint64_t numInvocations{0};
 };
 
 /*

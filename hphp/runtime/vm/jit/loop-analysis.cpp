@@ -20,10 +20,12 @@
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 
 namespace HPHP { namespace jit {
 
@@ -259,6 +261,59 @@ Block* cloneCFG(IRUnit& unit,
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Search the HHIR control-flow graph backwards starting at `b' for
+ * the first blocks not in `visited' that belong to a Profile
+ * translation other than `headerTID', and add those blocks' TransIDs
+ * to `set'.
+ */
+void findPredTransIDs(TransID headerTID, Block* b,
+                      boost::dynamic_bitset<>& visited,
+                      TransIDSet& set) {
+  if (visited[b->id()]) return;
+  visited[b->id()] = true;
+  auto bTID = b->front().marker().profTransID();
+  if (set.count(bTID)) return;
+  if (bTID != headerTID) {
+    set.insert(bTID);
+    return;
+  }
+  // Keep searching.
+  for (auto& predEdge : b->preds()) {
+    findPredTransIDs(headerTID, predEdge.from(), visited, set);
+  }
+}
+
+/*
+ * Computes the approximate number of times that `loop' was invoked
+ * (i.e. entered) using profiling data.  This value is computed by
+ * adding up the profiling weights of all the Profile translations
+ * that may execute immediately before the Profile translation
+ * containing the loop header.
+ */
+uint64_t countInvocations(const LoopInfo& loop, const IRUnit& unit) {
+  always_assert(mcg->tx().profData());
+
+  // Find the predecessor TransIDs along each non-back-edge
+  // predecessor of the loop header.
+  boost::dynamic_bitset<> visited(unit.numBlocks());
+  TransIDSet predTIDs;
+  auto headerTID = loop.header->front().marker().profTransID();
+  for (auto& predEdge : loop.header->preds()) {
+    if (loop.backEdges.count(&predEdge) == 0) {
+      findPredTransIDs(headerTID, predEdge.from(), visited, predTIDs);
+    }
+  }
+  auto const profData = mcg->tx().profData();
+  uint64_t count = 0;
+  for (auto tid : predTIDs) {
+    count += profData->absTransCounter(tid);
+  }
+  return count;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool DEBUG_ONLY checkInvariants(const LoopAnalysis& la) {
   always_assert(la.backEdges.size() >= la.loops.size());
 
@@ -326,6 +381,7 @@ LoopAnalysis identifyLoops(const IRUnit& unit, const BlockList& rpoBlocks) {
     auto header = loop.header;
     findLoop(env, header, loop.backEdges, loop.blocks);
     loop.preHeader = findPreHeader(header, la.backEdges);
+    loop.numInvocations = countInvocations(loop, unit);
   }
 
   findParents(env, la);
@@ -450,9 +506,9 @@ void insertLoopPreHeader(IRUnit& unit,
   // Find all non-back-edge predecessors.  They'll be rechained to go to the
   // new pre-header.
   jit::vector<Block*> preds;
-  for (auto& pred_edge : header->preds()) {
-    if (la.backEdges.count(&pred_edge) == 0) {
-      preds.push_back(pred_edge.from());
+  for (auto& predEdge : header->preds()) {
+    if (la.backEdges.count(&predEdge) == 0) {
+      preds.push_back(predEdge.from());
     }
   }
   always_assert(!preds.empty());
@@ -548,6 +604,7 @@ std::string show(const LoopInfo& linfo) {
     folly::format(&ret, "  (pre-exit: B{})", linfo.preExit->id());
   }
   ret += "\n";
+  folly::format(&ret, "        numInvocations: {}\n", linfo.numInvocations);
   for (auto& b : linfo.blocks) {
     folly::format(&ret, "                B{}\n", b->id());
   }

@@ -72,7 +72,6 @@ private:
   RefDeps m_refDeps;
   uint32_t m_numJmps;
   uint32_t m_numBCInstrs{0};
-  uint32_t m_pendingInlinedInstrs{0};
   // This map memoizes reachability of IR blocks during tracelet
   // formation.  A block won't have it's reachability stored in this
   // map until it's been computed.

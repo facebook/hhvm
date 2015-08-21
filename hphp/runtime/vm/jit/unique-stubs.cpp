@@ -103,6 +103,53 @@ void alignNativeStack(Vout& v, GenFunc gen) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitFuncPrologueRedispatch(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [] (Vout& v) {
+    auto const func = v.makeReg();
+    v << load{rvmfp()[AROFF(m_func)], func};
+
+    auto const argc = v.makeReg();
+    auto const naaf = v.makeReg();
+    v << loadl{rvmfp()[AROFF(m_numArgsAndFlags)], naaf};
+    v << andli{ActRec::kNumArgsMask, naaf, argc, v.makeReg()};
+
+    auto const nparams = v.makeReg();
+    auto const pcounts = v.makeReg();
+    v << loadl{func[Func::paramCountsOff()], pcounts};
+    v << shrli{0x1, pcounts, nparams, v.makeReg()};
+
+    auto const sf = v.makeReg();
+    v << cmpl{argc, nparams, sf};
+
+    auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+
+    // If we passed more args than declared, we might need to dispatch to the
+    // "too many arguments" prologue.
+    ifThen(v, CC_L, sf, [&] (Vout& v) {
+      auto const sf = v.makeReg();
+
+      // If we passed fewer than kNumFixedPrologues, argc is still a valid
+      // index into the prologue table.
+      v << cmpli{kNumFixedPrologues, argc, sf};
+
+      ifThen(v, CC_NL, sf, [&] (Vout& v) {
+        auto const dest = v.makeReg();
+
+        // Too many gosh-darned arguments passed.  Go to the (nparams + 1)-th
+        // prologue, which is always the "too many args" entry point.
+        v << load{func[nparams * 8 + (pTabOff + int32_t(sizeof(TCA)))], dest};
+        v << jmpr{dest};
+      });
+    });
+
+    auto const dest = v.makeReg();
+    v << load{func[argc * 8 + pTabOff], dest};
+    v << jmpr{dest};
+  });
+}
+
 TCA emitFCallHelperThunk(CodeBlock& cb) {
   alignJmpTarget(cb);
 
@@ -270,11 +317,18 @@ TCA emitBindCallStub(CodeBlock& cb) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void UniqueStubs::emitAll() {
+  auto& main = mcg->code.main();
   auto& cold = mcg->code.cold();
 
+  auto const hot = [&]() -> CodeBlock& {
+    auto& hot = const_cast<CodeBlock&>(mcg->code.hot());
+    return hot.available() > 512 ? hot : main;
+  };
+
 #define ADD(name, stub) name = add(#name, (stub))
-  ADD(fcallHelperThunk,     emitFCallHelperThunk(cold));
-  ADD(funcBodyHelperThunk,  emitFuncBodyHelperThunk(cold));
+  ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot()));
+  ADD(fcallHelperThunk,       emitFCallHelperThunk(cold));
+  ADD(funcBodyHelperThunk,    emitFuncBodyHelperThunk(cold));
 
   ADD(retHelper,                  emitInterpRet(cold));
   ADD(genRetHelper,               emitInterpGenRet<false>(cold));

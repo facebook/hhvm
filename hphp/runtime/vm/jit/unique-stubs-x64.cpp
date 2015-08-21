@@ -316,52 +316,6 @@ void emitDecRefHelper(UniqueStubs& us) {
   us.decRefGeneric = us.add("decRefGeneric", doStub(TGen));
 }
 
-void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
-  auto& cb = mcg->code.hot().available() > 512 ?
-    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
-  Asm a { cb };
-
-  moveToAlign(cb);
-  uniqueStubs.funcPrologueRedispatch = a.frontier();
-
-  Label actualDispatch;
-  Label numParamsCheck;
-
-  // rax := called func
-  // edx := num passed parameters
-  // ecx := num declared parameters
-  a.    loadq  (rvmfp()[AROFF(m_func)], rax);
-  a.    loadl  (rvmfp()[AROFF(m_numArgsAndFlags)], edx);
-  a.    andl   (ActRec::kNumArgsMask, edx);
-  a.    loadl  (rax[Func::paramCountsOff()], ecx);
-  // see Func::finishedEmittingParams and Func::numParams for rationale
-  a.    shrl   (0x1, ecx);
-
-  // If we passed more args than declared, jump to the numParamsCheck.
-  a.    cmpl   (edx, ecx);
-  a.    jl8    (numParamsCheck);
-
-asm_label(a, actualDispatch);
-  a.    loadq  (rax[rdx*8 + Func::prologueTableOff()], rax);
-  a.    jmp    (rax);
-  a.    ud2    ();
-
-  // Hmm, more parameters passed than the function expected. Did we
-  // pass kNumFixedPrologues or more? If not, %rdx is still a
-  // perfectly legitimate index into the func prologue table.
-asm_label(a, numParamsCheck);
-  a.    cmpl   (kNumFixedPrologues, edx);
-  a.    jl8    (actualDispatch);
-
-  // Too many gosh-darned parameters passed. Go to numExpected + 1, which
-  // is always a "too many params" entry point.
-  a.    loadq  (rax[rcx*8 + Func::prologueTableOff() + sizeof(TCA)], rax);
-  a.    jmp    (rax);
-  a.    ud2    ();
-
-  uniqueStubs.add("funcPrologueRedispatch", uniqueStubs.funcPrologueRedispatch);
-}
-
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   auto& cb = mcg->code.hot().available() > 512 ?
     const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
@@ -516,7 +470,6 @@ void emitUniqueStubs(UniqueStubs& us) {
     emitCatchHelper,
     emitFreeLocalsHelpers,
     emitDecRefHelper,
-    emitFuncPrologueRedispatch,
     emitFCallArrayHelper,
     emitFunctionEnterHelper,
     emitFunctionSurprisedOrStackOverflow,

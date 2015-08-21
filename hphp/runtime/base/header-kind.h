@@ -94,6 +94,11 @@ template<class T = uint16_t> struct HeaderWord {
         static_cast<uint16_t>(h.aux) |
         gc << (8 * offsetof(HeaderWord, gcbyte));
   }
+
+  void initFree(uint32_t size) {
+    q = static_cast<uint32_t>(HeaderKind::Free) << (8 * offsetof(HeaderWord, kind)) |
+        uint64_t(size) << 32;
+  }
 };
 
 constexpr auto HeaderOffset = sizeof(void*);

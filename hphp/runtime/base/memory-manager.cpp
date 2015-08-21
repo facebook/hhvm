@@ -220,7 +220,10 @@ void MemoryManager::resetRuntimeOptions() {
     checkHeap();
     // check that every allocation in heap has been freed before reset
     iterate([&](Header* h) {
-      assert(h->kind() == HeaderKind::Free);
+      assert(h->kind() == HeaderKind::Free || h->hdr_.mrb);
+      if (h->hdr_.mrb) {
+        TRACE(1, "leaked due to mrb: hdr %p\n", h);
+      }
     });
   }
   MemoryManager::TlsWrapper::destroy(); // ~MemoryManager()
@@ -639,7 +642,7 @@ void MemoryManager::initFree() {
   initHole();
   for (auto i = 0; i < kNumSmallSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->hdr.init(HeaderKind::Free, smallIndex2Size(i));
+      n->hdr.initFree(smallIndex2Size(i));
     }
   }
   m_needInitFree = false;

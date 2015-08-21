@@ -23,15 +23,17 @@
 #include <arpa/inet.h>
 #if defined(__FreeBSD__)
 # include <sys/endian.h>
-# elif defined(__APPLE__)
+#elif defined(__APPLE__)
 # include <machine/endian.h>
 # include <libkern/OSByteOrder.h>
+#elif defined(_MSC_VER)
+# include <stdlib.h>
 #else
 # include <byteswap.h>
-#include <map>
-#include <memory>
-#include <utility>
-#include <vector>
+# include <map>
+# include <memory>
+# include <utility>
+# include <vector>
 #endif
 
 #if !defined(htonll) && !defined(ntohll)
@@ -43,13 +45,16 @@
 # elif defined(__APPLE__)
 #  define htonll(x) OSSwapInt64(x)
 #  define ntohll(x) OSSwapInt64(x)
+# elif defined(_MSC_VER)
+#  define htonll(x) _byteswap_uint64(x)
+#  define ntohll(x) _byteswap_uint64(x)
 # else
 #  define htonll(x) bswap_64(x)
 #  define ntohll(x) bswap_64(x)
 # endif
 #else
-#define htonll(x) (x)
-#define ntohll(x) (x)
+# define htonll(x) (x)
+# define ntohll(x) (x)
 #endif
 
 #endif

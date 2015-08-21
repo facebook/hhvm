@@ -23,7 +23,9 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/bstring.h"
+#ifndef _MSC_VER
 #include <langinfo.h>
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

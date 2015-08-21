@@ -67,7 +67,7 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
     createFromCommonRoot(sandboxName);
   } else {
     Array pair = StringUtil::Explode(
-      matches.toArray().rvalAt(1), "-", 2).toArray();
+      matches.toArray().rvalAt(1).toString(), "-", 2).toArray();
     m_user = pair.rvalAt(0).toString();
     bool defaultSb = pair.size() == 1;
     if (defaultSb) {

@@ -1845,7 +1845,7 @@ bool HHVM_FUNCTION(chdir,
                    const String& directory) {
   CHECK_PATH_FALSE(directory, 1);
   if (HHVM_FN(is_dir)(directory)) {
-    g_context->setCwd(HHVM_FN(realpath)(directory));
+    g_context->setCwd(HHVM_FN(realpath)(directory).toString());
     return true;
   }
   raise_warning("No such file or directory (errno 2)");

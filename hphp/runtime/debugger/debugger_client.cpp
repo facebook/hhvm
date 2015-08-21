@@ -1558,7 +1558,7 @@ void DebuggerClient::tutorial(const char *text) {
   sb.append(BOX_VL); sb.append(hr); sb.append(BOX_VR); sb.append("\n");
   for (ArrayIter iter(lines); iter; ++iter) {
     sb.append(BOX_V); sb.append(' ');
-    sb.append(StringUtil::Pad(iter.second(), LineWidth - 4));
+    sb.append(StringUtil::Pad(iter.second().toString(), LineWidth - 4));
     sb.append(' '); sb.append(BOX_V); sb.append("\n");
   }
   sb.append(BOX_LL); sb.append(hr); sb.append(BOX_LR); sb.append("\n");

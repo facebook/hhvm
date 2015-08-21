@@ -2364,9 +2364,15 @@ fully_qualified_class_name:
 ;
 static_class_name:
     fully_qualified_class_name         { _p->onName($$,$1,Parser::StringName);}
+  | common_scalar                      { _p->onName($$,$1,Parser::StringName);}
   | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
   | reference_variable                 { _p->onName($$,$1,
                                          Parser::StaticClassExprName);}
+  | '(' expr_no_variable ')'           { _p->onName($$,$2,
+                                         Parser::StaticClassExprName);}
+  | static_class_name
+    T_DOUBLE_COLON
+    variable_no_objects                { _p->onStaticMember($$,$1,$3);}
 ;
 class_name_reference:
     fully_qualified_class_name         { _p->onName($$,$1,Parser::StringName);}

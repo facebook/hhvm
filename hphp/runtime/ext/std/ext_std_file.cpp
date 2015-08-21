@@ -588,9 +588,21 @@ Variant HHVM_FUNCTION(file_put_contents,
                       int flags /* = 0 */,
                       const Variant& context /* = null */) {
   CHECK_PATH(filename, 1);
+
+  char mode[3] = "wb";
+  if (flags & PHP_FILE_APPEND) {
+    mode[0] = 'a';
+  } else if (flags & LOCK_EX) {
+    // Open in "create" mode (writing only, create if needed, no truncate)
+    // so that the file is not modified before we attempt to aquire the
+    // requested lock.
+    mode[0] = 'c';
+  }
+  mode[2] = '\0';
+
   auto file = File::Open(
     filename,
-    (flags & PHP_FILE_APPEND) ? "ab" : "wb",
+    mode,
     flags,
     dyn_cast_or_null<StreamContext>(context)
   );
@@ -611,6 +623,10 @@ Variant HHVM_FUNCTION(file_put_contents,
     if (!file->lock(LOCK_EX)) {
       return false;
     }
+  }
+
+  if (mode[0] == 'c') {
+    file->truncate(0);
   }
 
   int numbytes = 0;

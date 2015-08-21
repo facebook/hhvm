@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -55,6 +56,21 @@ void alignJmpTarget(CodeBlock& cb) {
   align(cb, Alignment::JmpTarget, AlignContext::Dead);
 }
 
+/*
+ * Convenience wrapper around a simple vcall to `helper', with a single `arg'
+ * and a return value in `d'.
+ */
+template<class F>
+Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
+  return vcall{
+    CppCall::direct(helper),
+    v.makeVcallArgs({{arg}}),
+    v.makeTuple({d}),
+    Fixup{},
+    DestType::SSA
+  };
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -87,6 +103,55 @@ void alignNativeStack(Vout& v, GenFunc gen) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitFCallHelperThunk(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap2(cb, [] (Vout& v, Vout& vcold) {
+    auto const dest = v.makeReg();
+
+    alignNativeStack(v, [&] (Vout& v) {
+      // fcallHelper asserts native stack alignment for us.
+      TCA (*helper)(ActRec*) = &fcallHelper;
+      v << simplecall(v, helper, rvmfp(), dest);
+    });
+
+    // Clobber rvmsp in debug builds.
+    if (debug) v << copy{v.cns(0x1), rvmsp()};
+
+    auto const sf = v.makeReg();
+    v << testq{dest, dest, sf};
+
+    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+      // A nullptr dest means the callee was intercepted and should be skipped.
+      // Just return to the caller after syncing VM regs.
+      v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+      v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+
+      v << ret{};
+    });
+
+    // Jump to the func prologue.
+    v << jmpr{dest};
+  });
+}
+
+TCA emitFuncBodyHelperThunk(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [] (Vout& v) {
+    TCA (*helper)(ActRec*) = &funcBodyHelper;
+    auto const dest = v.makeReg();
+
+    // The funcBodyHelperThunk stub is reached via a jmp from the TC, so the
+    // stack parity is already correct.
+    v << simplecall(v, helper, rvmfp(), dest);
+
+    v << jmpr{dest};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 template<bool async>
 void loadGenFrame(Vout& v, Vreg d) {
   auto const arOff = BaseGenerator::arOff() -
@@ -108,13 +173,7 @@ void debuggerRetImpl(Vout& v, Vreg ar) {
   v << store{rvmsp(), rvmtl()[unwinderDebuggerReturnSPOff()]};
 
   auto const ret = v.makeReg();
-  v << vcall{
-    CppCall::direct(popDebuggerCatch),
-    v.makeVcallArgs({{ar}}),
-    v.makeTuple({ret}),
-    Fixup{},
-    DestType::SSA
-  };
+  v << simplecall(v, popDebuggerCatch, ar, ret);
 
   auto const args = syncForLLVMCatch(v);
   v << jmpr{ret, args};
@@ -214,10 +273,13 @@ void UniqueStubs::emitAll() {
   auto& cold = mcg->code.cold();
 
 #define ADD(name, stub) name = add(#name, (stub))
+  ADD(fcallHelperThunk,     emitFCallHelperThunk(cold));
+  ADD(funcBodyHelperThunk,  emitFuncBodyHelperThunk(cold));
+
   ADD(retHelper,                  emitInterpRet(cold));
-  ADD(retInlHelper,               emitInterpRet(cold));
   ADD(genRetHelper,               emitInterpGenRet<false>(cold));
   ADD(asyncGenRetHelper,          emitInterpGenRet<true>(cold));
+  ADD(retInlHelper,               emitInterpRet(cold));
   ADD(debuggerRetHelper,          emitDebuggerInterpRet(cold));
   ADD(debuggerGenRetHelper,       emitDebuggerInterpGenRet<false>(cold));
   ADD(debuggerAsyncGenRetHelper,  emitDebuggerInterpGenRet<true>(cold));

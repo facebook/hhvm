@@ -25,6 +25,8 @@
 
 #include "hphp/util/data-block.h"
 
+#include <boost/type_traits.hpp>
+
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -149,14 +151,16 @@ private:
 struct Vauto {
   explicit Vauto(CodeBlock& code, CodeKind kind = CodeKind::Helper)
     : m_kind{kind}
-    , m_text{code}
+    , m_text{code, code}
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
+    , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
   {
     m_unit.entry = Vlabel(main());
   }
 
   Vunit& unit() { return m_unit; }
   Vout& main() { return m_main; }
+  Vout& cold() { return m_cold; }
 
   ~Vauto();
 
@@ -165,16 +169,24 @@ private:
   Vunit m_unit;
   Vtext m_text;
   Vout m_main;
+  Vout m_cold;
 };
 
 /*
- * Convenience wrapper around Vauto for cross-trace code.
+ * Convenience wrappers around Vauto for cross-trace code.
  */
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, GenFunc gen) {
   auto const start = cb.frontier();
   Vauto vauto { cb, CodeKind::CrossTrace };
   gen(vauto.main());
+  return start;
+}
+template<class GenFunc>
+TCA vwrap2(CodeBlock& cb, GenFunc gen) {
+  auto const start = cb.frontier();
+  Vauto vauto { cb, CodeKind::CrossTrace };
+  gen(vauto.main(), vauto.cold());
   return start;
 }
 

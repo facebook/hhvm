@@ -85,6 +85,7 @@ Vauto::~Vauto() {
     if (!b.code.empty()) {
       // Found at least one nonempty block.  Finish up.
       if (!main().closed()) main() << fallthru{};
+      if (!cold().closed()) cold() << fallthru{};
 
       // Prevent spurious printir traces.
       Trace::Bump bumper{Trace::printir, 10};

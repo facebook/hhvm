@@ -434,60 +434,6 @@ asm_label(a, noCallee);
 
 //////////////////////////////////////////////////////////////////////
 
-void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*) = &fcallHelper;
-  Asm a { mcg->code.cold() };
-
-  moveToAlign(mcg->code.cold());
-  uniqueStubs.fcallHelperThunk = a.frontier();
-
-  Label skip;
-
-  // fcallHelper may call doFCall. doFCall changes the return ip
-  // pointed to by r15 so that it points to MCGenerator::m_retHelper,
-  // which does a REQ_POST_INTERP_RET service request. So we need to
-  // to pop the return address into r15 + m_savedRip before calling
-  // fcallHelper, and then push it back from r15 + m_savedRip after
-  // fcallHelper returns in case it has changed it.
-  a.    pop    (rvmfp()[AROFF(m_savedRip)]);
-  a.    movq   (rvmfp(), rarg(0)); // live for helper calls below
-  emitCall(a, CppCall::direct(helper), arg_regs(1));
-  if (debug) {
-    a.  movq   (0x1, rvmsp());  // "assert" nothing reads it
-  }
-  a.    testq  (rax, rax);
-  a.    js8    (skip);
-  a.    push   (rvmfp()[AROFF(m_savedRip)]);
-  a.    jmp    (rax);
-  a.    ud2    ();
-
-asm_label(a, skip);
-  a.    neg    (rax);
-  a.    loadq  (rvmtl()[rds::kVmfpOff], rvmfp());
-  a.    loadq  (rvmtl()[rds::kVmspOff], rvmsp());
-  a.    jmp    (rax);
-  a.    ud2    ();
-
-  uniqueStubs.add("fcallHelperThunk", uniqueStubs.fcallHelperThunk);
-}
-
-void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*) = &funcBodyHelper;
-  Asm a { mcg->code.cold() };
-
-  moveToAlign(mcg->code.cold());
-  uniqueStubs.funcBodyHelperThunk = a.frontier();
-
-  // This helper is called via a direct jump from the TC (from
-  // fcallArrayHelper). So the stack parity is already correct.
-  a.    movq   (rvmfp(), rarg(0));
-  emitCall(a, CppCall::direct(helper), arg_regs(1));
-  a.    jmp    (rax);
-  a.    ud2    ();
-
-  uniqueStubs.add("funcBodyHelperThunk", uniqueStubs.funcBodyHelperThunk);
-}
-
 void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
   Asm a { mcg->code.cold() };
@@ -572,8 +518,6 @@ void emitUniqueStubs(UniqueStubs& us) {
     emitDecRefHelper,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,
-    emitFCallHelperThunk,
-    emitFuncBodyHelperThunk,
     emitFunctionEnterHelper,
     emitFunctionSurprisedOrStackOverflow,
   };

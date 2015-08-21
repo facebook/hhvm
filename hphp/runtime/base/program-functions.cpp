@@ -1025,22 +1025,37 @@ static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   int ret_code = -1;
   try {
-    initialize_repo();
-    ret_code = execute_program_impl(argc, argv);
-  } catch (const Exception &e) {
-    Logger::Error("Uncaught exception: %s", e.what());
-  } catch (const FailedAssertion& fa) {
-    fa.print();
-    StackTraceNoHeap::AddExtraLogging("Assertion failure", fa.summary);
-    abort();
-  } catch (const std::exception &e) {
-    Logger::Error("Uncaught exception: %s", e.what());
+    try {
+      initialize_repo();
+      ret_code = execute_program_impl(argc, argv);
+    } catch (const Exception &e) {
+      Logger::Error("Uncaught exception: %s", e.what());
+      throw;
+    } catch (const FailedAssertion& fa) {
+      fa.print();
+      StackTraceNoHeap::AddExtraLogging("Assertion failure", fa.summary);
+      abort();
+    } catch (const std::exception &e) {
+      Logger::Error("Uncaught exception: %s", e.what());
+      throw;
+    } catch (...) {
+      Logger::Error("Uncaught exception: (unknown)");
+      throw;
+    }
+    if (tempFile.length() && boost::filesystem::exists(tempFile)) {
+      boost::filesystem::remove(tempFile);
+    }
   } catch (...) {
-    Logger::Error("Uncaught exception: (unknown)");
+    if (HttpServer::Server ||
+        folly::SingletonVault::singleton()->livingSingletonCount()) {
+      // an exception was thrown that prevented proper shutdown. Its not
+      // safe to destroy the globals, or run atexit handlers.
+      // abort() so it shows up as a crash, and we can diagnose/fix the
+      // exception
+      abort();
+    }
   }
-  if (tempFile.length() && boost::filesystem::exists(tempFile)) {
-    boost::filesystem::remove(tempFile);
-  }
+
   return ret_code;
 }
 

@@ -44,7 +44,7 @@
         thread_policy_set(mach_thread_self(), THREAD_AFFINITY_POLICY, \
                           (int *)mask, THREAD_AFFINITY_POLICY_COUNT)
 
-#elif (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#elif defined(__CYGWIN__) || defined(__MINGW__)
 #include <windows.h>
 typedef DWORD_PTR cpu_set_t;
 

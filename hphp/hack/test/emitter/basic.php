@@ -52,6 +52,9 @@ function test(): void {
   nots(0);
   nots(1);
   nots(30);
+  /* HH_FIXME[2049] */
+  /* HH_FIXME[4106] */
+  var_dump(PHP_EOL);
 }
 
 

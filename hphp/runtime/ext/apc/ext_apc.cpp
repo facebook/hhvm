@@ -18,7 +18,9 @@
 
 #include <fstream>
 
+#ifndef _MSC_VER
 #include <dlfcn.h>
+#endif
 #include <sys/time.h> // gettimeofday
 #include <limits>
 #include <memory>
@@ -533,6 +535,9 @@ struct cache_info {
 
 static Mutex dl_mutex;
 static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
+#ifdef _MSC_VER
+  throw Exception("apc_load_func is not currently supported under MSVC!");
+#else
   Lock lock(dl_mutex);
   dlerror(); // clear errors
   PFUNC_APC_LOAD p = (PFUNC_APC_LOAD)dlsym(handle, name);
@@ -543,6 +548,7 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
                     error ? error : "(unknown error)");
   }
   return p;
+#endif
 }
 
 class ApcLoadJob {
@@ -567,6 +573,7 @@ static size_t s_const_map_size = 0;
 
 EXTERNALLY_VISIBLE
 void apc_load(int thread) {
+#ifndef _MSC_VER
   static void *handle = nullptr;
   if (handle ||
       apcExtension::PrimeLibrary.empty() ||
@@ -653,6 +660,7 @@ void apc_load(int thread) {
 
   // We've copied all the data out, so close it out.
   dlclose(handle);
+#endif
 }
 
 size_t get_const_map_size() {

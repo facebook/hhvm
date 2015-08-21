@@ -549,40 +549,6 @@ bool LightProcess::initShadow(int afdt_lid,
   return true;
 }
 
-void LightProcess::Close() {
-  boost::scoped_array<LightProcess> procs;
-  procs.swap(g_procs);
-  int count = g_procsCount;
-  g_procs.reset();
-  g_procsCount = 0;
-
-  for (int i = 0; i < count; i++) {
-    procs[i].closeShadow();
-  }
-}
-
-void LightProcess::closeShadow() {
-  Lock lock(m_procMutex);
-  if (m_shadowProcess) {
-    lwp_write(m_afdt_fd, "exit");
-    // removes the "zombie" process, so not to interfere with later waits
-    ::waitpid(m_shadowProcess, nullptr, 0);
-    m_shadowProcess = 0;
-  }
-  closeFiles();
-}
-
-void LightProcess::closeFiles() {
-  if (m_afdt_fd >= 0) {
-    ::close(m_afdt_fd);
-    m_afdt_fd = -1;
-  }
-}
-
-bool LightProcess::Available() {
-  return g_procsCount > 0;
-}
-
 void LightProcess::runShadow(int afdt_fd) {
   std::string buf;
 
@@ -628,8 +594,76 @@ void LightProcess::runShadow(int afdt_fd) {
   _Exit(0);
 }
 
-int LightProcess::GetId() {
+namespace {
+
+int GetId() {
   return (long)pthread_self() % g_procsCount;
+}
+
+NEVER_INLINE
+void handleException(const char* call) {
+  try {
+    throw;
+  } catch (const std::exception& e) {
+    Logger::Error("LightProcess::%s failed due to exception: %s",
+                  call, e.what());
+  } catch (...) {
+    Logger::Error("LightProcess::%s failed due to unknown exception",
+                  call);
+  }
+}
+
+template <class R, class F1>
+R runLight(const char* call, F1 body, R failureResult) {
+  try {
+    auto proc = &g_procs[GetId()];
+    Lock lock(proc->mutex());
+
+    return body(proc);
+  } catch (...) {
+    handleException(call);
+  }
+  return failureResult;
+}
+
+}
+
+void LightProcess::Close() {
+  boost::scoped_array<LightProcess> procs;
+  procs.swap(g_procs);
+  int count = g_procsCount;
+  g_procs.reset();
+  g_procsCount = 0;
+
+  for (int i = 0; i < count; i++) {
+    procs[i].closeShadow();
+  }
+}
+
+void LightProcess::closeShadow() {
+  Lock lock(m_procMutex);
+  if (m_shadowProcess) {
+    try {
+      lwp_write(m_afdt_fd, "exit");
+    } catch (...) {
+      handleException("closeShadow");
+    }
+    // removes the "zombie" process, so not to interfere with later waits
+    ::waitpid(m_shadowProcess, nullptr, 0);
+    m_shadowProcess = 0;
+  }
+  closeFiles();
+}
+
+void LightProcess::closeFiles() {
+  if (m_afdt_fd >= 0) {
+    ::close(m_afdt_fd);
+    m_afdt_fd = -1;
+  }
+}
+
+bool LightProcess::Available() {
+  return g_procsCount > 0;
 }
 
 FILE *LightProcess::popen(const char *cmd, const char *type,
@@ -679,31 +713,30 @@ FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
 
 FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
                                    const char *cwd) {
-  int id = GetId();
-  Lock lock(g_procs[id].m_procMutex);
+  return runLight("popen", [&] (LightProcess* proc) -> FILE* {
+      auto afdt_fd = proc->m_afdt_fd;
+      lwp_write(afdt_fd, "popen", type, cmd, cwd ? cwd : "");
 
-  auto afdt_fd = g_procs[id].m_afdt_fd;
-  lwp_write(afdt_fd, "popen", type, cmd, cwd ? cwd : "");
+      std::string buf;
+      lwp_read(afdt_fd, buf);
+      if (buf == "error") {
+        return nullptr;
+      }
 
-  std::string buf;
-  lwp_read(afdt_fd, buf);
-  if (buf == "error") {
-    return nullptr;
-  }
-
-  pid_t pid;
-  lwp_read(afdt_fd, pid);
-  assert(pid);
-  int fd = recv_fd(afdt_fd);
-  if (fd < 0) {
-    Logger::Error("Light process failed to send the file descriptor.");
-    return nullptr;
-  }
-  FILE *f = fdopen(fd, type);
-  if (f) {
-    g_procs[id].m_popenMap[f] = pid;
-  }
-  return f;
+      pid_t pid;
+      lwp_read(afdt_fd, pid);
+      assert(pid);
+      int fd = recv_fd(afdt_fd);
+      if (fd < 0) {
+        Logger::Error("Light process failed to send the file descriptor.");
+        return nullptr;
+      }
+      FILE *f = fdopen(fd, type);
+      if (f) {
+        proc->m_popenMap[f] = pid;
+      }
+      return f;
+    }, static_cast<FILE*>(nullptr));
 }
 
 int LightProcess::pclose(FILE *f) {
@@ -734,43 +767,43 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
                               const std::vector<int> &desired,
                               const char *cwd,
                               const std::vector<std::string> &env) {
-  int id = GetId();
-  Lock lock(g_procs[id].m_procMutex);
   always_assert(Available());
   always_assert(created.size() == desired.size());
 
-  auto fout = g_procs[id].m_afdt_fd;
-  lwp_write(fout, "proc_open", cmd, cwd ? cwd : "",
-            env, desired);
+  return runLight("proc_open", [&] (LightProcess* proc) -> pid_t {
+      auto fout = proc->m_afdt_fd;
+      lwp_write(fout, "proc_open", cmd, cwd ? cwd : "",
+                env, desired);
 
-  bool error_send = false;
-  int save_errno = 0;
-  for (auto cfd : created) {
-    if (!send_fd(g_procs[id].m_afdt_fd, cfd)) {
-      error_send = true;
-      save_errno = errno;
-      break;
-    }
-  }
+      bool error_send = false;
+      int save_errno = 0;
+      for (auto cfd : created) {
+        if (!send_fd(proc->m_afdt_fd, cfd)) {
+          error_send = true;
+          save_errno = errno;
+          break;
+        }
+      }
 
-  std::string buf;
-  auto fin = g_procs[id].m_afdt_fd;
-  lwp_read(fin, buf);
-  if (buf == "error") {
-    lwp_read(fin, errno);
-    if (error_send) {
-      // On this error, the receiver side returns dummy errno,
-      // use the sender side errno here.
-      errno = save_errno;
-    }
-    return -1;
-  }
-  always_assert_flog(buf == "success",
-                     "Unexpected message from light process: `{}'", buf);
-  pid_t pid = -1;
-  lwp_read(fin, pid);
-  always_assert(pid);
-  return pid;
+      std::string buf;
+      auto fin = proc->m_afdt_fd;
+      lwp_read(fin, buf);
+      if (buf == "error") {
+        lwp_read(fin, errno);
+        if (error_send) {
+          // On this error, the receiver side returns dummy errno,
+          // use the sender side errno here.
+          errno = save_errno;
+        }
+        return -1;
+      }
+      always_assert_flog(buf == "success",
+                         "Unexpected message from light process: `{}'", buf);
+      pid_t pid = -1;
+      lwp_read(fin, pid);
+      always_assert(pid);
+      return pid;
+    }, static_cast<pid_t>(-1));
 }
 
 pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
@@ -785,31 +818,28 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
     return ret;
   }
 
-  int id = GetId();
-  Lock lock(g_procs[id].m_procMutex);
+  return runLight("waitpid", [&] (LightProcess* proc) -> pid_t {
+      lwp_write(proc->m_afdt_fd, "waitpid", pid, options, timeout);
 
-  auto fout = g_procs[id].m_afdt_fd;
-  lwp_write(fout, "waitpid", pid, options, timeout);
+      pid_t ret;
+      int stat;
+      int err;
+      int64_t time_us, events[3];
+      lwp_read(proc->m_afdt_fd, ret, err, stat,
+               time_us, events[0], events[1], events[2]);
 
-  pid_t ret;
-  int stat;
-  auto fin = g_procs[id].m_afdt_fd;
-  int err;
-  int64_t time_us, events[3];
-  lwp_read(fin, ret, err, stat,
-           time_us, events[0], events[1], events[2]);
+      *stat_loc = stat;
+      if (ret < 0) {
+        errno = err;
+      } else if (s_trackProcessTimes) {
+        s_extra_request_microseconds += time_us;
+        HardwareCounter::IncInstructionCount(events[0]);
+        HardwareCounter::IncLoadCount(events[1]);
+        HardwareCounter::IncStoreCount(events[2]);
+      }
 
-  *stat_loc = stat;
-  if (ret < 0) {
-    errno = err;
-  } else if (s_trackProcessTimes) {
-    s_extra_request_microseconds += time_us;
-    HardwareCounter::IncInstructionCount(events[0]);
-    HardwareCounter::IncLoadCount(events[1]);
-    HardwareCounter::IncStoreCount(events[2]);
-  }
-
-  return ret;
+      return ret;
+    }, static_cast<pid_t>(-1));
 }
 
 pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {

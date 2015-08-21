@@ -42,6 +42,8 @@ public:
   LightProcess();
   ~LightProcess();
 
+  Mutex& mutex() { return m_procMutex; }
+
   static void Close();
   static bool Available();
   static void Initialize(const std::string &prefix, int count,
@@ -80,7 +82,6 @@ public:
   static pid_t pcntl_waitpid(pid_t pid, int *stat_loc, int options);
 
 private:
-  static int GetId();
   static void SigChldHandler(int sig, siginfo_t* info, void* ctx);
 
   bool initShadow(int afdt_listen,

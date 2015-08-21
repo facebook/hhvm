@@ -48,8 +48,9 @@ void *s_waitThread(void *arg) {
         return nullptr;
       }
       Xenon::getInstance().surpriseAll();
+    } else if (errno != EINTR) {
+      break;
     }
-    if (errno != EINTR) break;
   }
   TRACE(1, "s_waitThread Ending\n");
   return nullptr;

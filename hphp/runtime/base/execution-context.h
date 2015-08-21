@@ -504,7 +504,7 @@ public:
     mark(m_liveBCObjs);
     mark(m_apcMemSize);
     //mark(m_apcHandles);
-    mark(dynPropTable);
+    //mark(dynPropTable); // don't root objects with dyn props
     mark(m_globalVarEnv);
     mark(m_evaledFiles);
     mark(m_evaledFilesOrder);

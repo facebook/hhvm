@@ -223,8 +223,8 @@ void MemoryManager::resetRuntimeOptions() {
       assert(h->kind() == HeaderKind::Free);
     });
   }
-  MemoryManager::TlsWrapper::destroy();
-  MemoryManager::TlsWrapper::getCheck();
+  MemoryManager::TlsWrapper::destroy(); // ~MemoryManager()
+  MemoryManager::TlsWrapper::getCheck(); // new MemeoryManager()
 }
 
 void MemoryManager::resetStatsImpl(bool isInternalCall) {

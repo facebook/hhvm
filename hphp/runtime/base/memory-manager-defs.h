@@ -60,11 +60,13 @@ struct Header {
   };
 
   const Resumable* resumable() const {
+    assert(kind() == HeaderKind::ResumableFrame);
     return reinterpret_cast<const Resumable*>(
       (char*)this + sizeof(ResumableNode) + resumable_.framesize
     );
   }
   Resumable* resumable() {
+    assert(kind() == HeaderKind::ResumableFrame);
     return reinterpret_cast<Resumable*>(
       (char*)this + sizeof(ResumableNode) + resumable_.framesize
     );
@@ -80,10 +82,21 @@ struct Header {
     return reinterpret_cast<ObjectData*>(resumable() + 1);
   }
   const ObjectData* nativeObj() const {
+    assert(kind() == HeaderKind::NativeData);
     return Native::obj(&native_);
   }
   ObjectData* nativeObj() {
+    assert(kind() == HeaderKind::NativeData);
     return Native::obj(&native_);
+  }
+
+  // if this header is one of the types that contains an ObjectData,
+  // return the (possibly inner ptr) ObjectData*
+  const ObjectData* obj() const {
+    return isObjectKind(kind()) ? &obj_ :
+           kind() == HeaderKind::ResumableFrame ? resumableObj() :
+           kind() == HeaderKind::NativeData ? nativeObj() :
+           nullptr;
   }
 };
 
@@ -137,7 +150,7 @@ inline size_t Header::size() const {
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       // Generators -
       // [NativeNode][NativeData<locals><Resumable><GeneratorData>][ObjectData]
-      return native_.obj_offset + Native::obj(&native_)->heapSize();
+      return native_.obj_offset + nativeObj()->heapSize();
     case HeaderKind::Free:
     case HeaderKind::Hole:
       return free_.size();
@@ -235,7 +248,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
         ptrs.push_back(h->resumableObj());
         break;
       case HeaderKind::NativeData:
-        ptrs.push_back(Native::obj(&h->native_));
+        ptrs.push_back(h->nativeObj());
         break;
       case HeaderKind::Packed:
       case HeaderKind::Struct:

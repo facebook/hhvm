@@ -243,9 +243,10 @@ create_link(const char *pfilename,
           fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
         }
     }
-#endif
+#else
     fprintf(stderr, "Creating link from %s to %s not supported",
             pfilename, linkname);
+#endif
 }
 
 /* Examine the log file name specifier for strftime conversion
@@ -735,5 +736,3 @@ timestamp(time_t thetime)
     strftime(retval, 80, "%Y/%m/%d-%H:%M:%S %Z", tm);
     return retval;
 }
-
-

@@ -4759,14 +4759,14 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     // the template overload, so use a temporary and
     // let the optimizer sort it out.
     TCA helperAddr;
-    if (isWinit) {
+    if (isWInit) {
       auto tmp = new_iter_array_key<true>;
       helperAddr = (TCA)tmp;
     } else if (isInitK) {
       auto tmp = new_iter_array_key<false>;
       helperAddr = (TCA)tmp;
     } else {
-      helperAddr = (TA)new_iter_array;
+      helperAddr = (TCA)new_iter_array;
     }
     cgCallHelper(
       vmain(),

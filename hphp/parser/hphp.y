@@ -2743,7 +2743,15 @@ dimmable_variable:
 callable_variable:
     variable_no_objects                { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
+  | simple_function_call               { $$ = $1;}
+  | array_literal                      { $$ = $1;}
+  | common_scalar                      { $$ = $1;}
   | '(' variable ')'                   { $$ = $2;}
+  | '(' expr_no_variable ')'           { $$ = $2;}
+  | lambda_or_closure_with_parens '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
+  | callable_variable '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
 ;
 
 lambda_or_closure_with_parens:

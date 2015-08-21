@@ -1,0 +1,5 @@
+App \classname<App \IChild<>, >
+File "type_structure_abstract2.php", line 10, characters 33-35:
+Cannot reference abstract constant C::T directly (Typing[4129])
+File "type_structure_abstract2.php", line 8, characters 23-23:
+Declaration is here

@@ -1,0 +1,3 @@
+App \classname<[<static>::T][this::T][\C::T]App \IBase<>, >
+App \classname<App \IChild<>, >
+No errors

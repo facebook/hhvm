@@ -58,6 +58,9 @@ struct TypedValue;
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+#endif
 struct ObjectData {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
@@ -440,6 +443,9 @@ private:
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
 };
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 struct GlobalsArray;
 typedef GlobalsArray GlobalVariables;

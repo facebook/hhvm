@@ -853,7 +853,7 @@ bool HHVM_METHOD(Memcached, deletebykey, const String& server_key,
 
 Variant HHVM_METHOD(Memcached, deletemultibykey, const String& server_key,
                                          const Array& keys,
-                                         int time /*= 0*/) {
+                                         int64_t time /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 

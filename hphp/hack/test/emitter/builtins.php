@@ -1,5 +1,10 @@
 <?hh // strict
 
+function f(int $n): int {
+  echo "hi\n";
+  return $n;
+}
+
 function test(): void {
   var_dump(is_null(5));
   var_dump(is_null(null));
@@ -24,4 +29,28 @@ function test(): void {
   /* HH_IGNORE_ERROR[2049] */
   /* HH_IGNORE_ERROR[4107] */
   var_dump(array_key_exists(2, $x));
+
+
+  $foo = array(1, 2, 3);
+  /* HH_FIXME[4016] */
+  var_dump(empty($foo[1]));
+  /* HH_FIXME[4016] */
+  var_dump(isset($foo[1]));
+  unset($foo[1]);
+  /* HH_FIXME[4016] */
+  var_dump(isset($foo[1]));
+  /* HH_FIXME[4016] */
+  var_dump(isset($foo[f(1)], $foo[f(2)]));
+  /* HH_FIXME[4016] */
+  var_dump(isset($foo));
+  /* HH_FIXME[4135] */
+  unset($foo, $x);
+  /* HH_FIXME[4016] */
+  var_dump(isset($foo));
+  /* HH_FIXME[4016] */
+  var_dump(isset($x));
+  /* HH_FIXME[4016] */
+  var_dump(isset($n, $foo));
+  /* HH_FIXME[4016] */
+  var_dump(isset($n, $x));
 }

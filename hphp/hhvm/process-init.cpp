@@ -53,6 +53,7 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 #undef pinitSentinel
 #undef STRINGIZE_CLASS_NAME
 
+void tweak_variant_dtors();
 void ProcessInit() {
   // Create the global mcg object
   jit::mcg = new jit::MCGenerator();
@@ -174,7 +175,6 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = ah;
   Option::WholeProgram = wp;
 
-  void tweak_variant_dtors();
   tweak_variant_dtors();
 
   folly::SingletonVault::singleton()->registrationComplete();

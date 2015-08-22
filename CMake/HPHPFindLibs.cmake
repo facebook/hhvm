@@ -590,4 +590,8 @@ macro(hphp_link target)
   if (LINUX)
     target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
   endif()
+
+  if (MSVC)
+    target_link_libraries(${target} dbghelp.lib dnsapi.lib)
+  endif()
 endmacro()

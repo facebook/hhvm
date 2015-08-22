@@ -75,8 +75,13 @@ static Array convert_to_array(const ObjectData* obj, Class* cls) {
   return tvAsCVarRef(prop).toArray();
 }
 
+#ifdef _MSC_VER
+static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 20),
+              "Change this only on purpose");
+#else
 static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 24),
               "Change this only on purpose");
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

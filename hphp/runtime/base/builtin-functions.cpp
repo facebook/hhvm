@@ -747,7 +747,7 @@ Variant unserialize_ex(const char* str, int len,
   } catch (FatalErrorException &e) {
     throw;
   } catch (Exception &e) {
-    raise_notice("Unable to unserialize: [%s]. %s.", str,
+    raise_notice("Unable to unserialize: [%.1000s]. %s.", str,
                  e.getMessage().c_str());
     return false;
   }

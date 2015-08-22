@@ -546,7 +546,9 @@ MCGenerator::createTranslation(const TranslArgs& args) {
                                   TransFlags().packed);
   } else {
     auto const stubsize = svcreq::stub_size();
-    auto newStart = code.cold().allocInner(stubsize) ?: code.cold().frontier();
+    auto newStart = code.cold().allocInner(stubsize);
+    if (!newStart)
+      newStart = code.cold().frontier();
     // Ensure that the anchor translation is a known size so that it can be
     // reclaimed when the function is freed
     req = svcreq::emit_ephemeral(code.cold(),

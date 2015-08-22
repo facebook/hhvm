@@ -2647,6 +2647,11 @@ and expr_atomic_word env last_tok = function
       expect "(" env;
       right env array_body;
       expect ")" env
+  | "empty" | "unset" | "isset" as v ->
+      out v env;
+      expect "(" env;
+      right env construct_body;
+      expect ")" env
   | "new" ->
       last_token env;
       space env;
@@ -2817,6 +2822,31 @@ and arrow_opt env =
         (fun env -> newline env; right env expr)
   | _ ->
       back env
+
+(*****************************************************************************)
+(* Language constructs *)
+(*****************************************************************************)
+
+and construct_body env =
+  Try.one_line env
+    construct_one_line
+    construct_multi_line
+
+and construct_one_line env =
+  list_comma_single construct_element_single env
+
+and construct_multi_line env =
+  list_comma_multi_nl ~trailing:false construct_element_multi env
+
+and construct_element_single env =
+  expr env;
+  arrow_opt env
+
+and construct_element_multi env = wrap env begin fun _ ->
+  back env;
+  newline env;
+  expr env;
+end
 
 (*****************************************************************************)
 (* The outside API *)

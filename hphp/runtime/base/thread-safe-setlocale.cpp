@@ -303,6 +303,7 @@ void ThreadSafeLocaleHandler::generate_LC_ALL_String() {
 
 }
 
+#ifndef _MSC_VER
 extern "C" char* setlocale(int category, const char* locale) {
   /* The returned char* is exactly what was passed in. */
   return const_cast<char*>
@@ -312,3 +313,4 @@ extern "C" char* setlocale(int category, const char* locale) {
 extern "C" struct lconv* localeconv() {
   return HPHP::g_thread_safe_locale_handler->localeconv();
 }
+#endif

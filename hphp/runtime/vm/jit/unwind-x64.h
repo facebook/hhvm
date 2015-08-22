@@ -56,9 +56,16 @@ typedef int _Unwind_Action;
 
 typedef void _Unwind_Context;
 
-inline uintptr_t _Unwind_GetGR(_Unwind_Context*, int) { return 0; }
-inline uintptr_t _Unwind_GetIP(_Unwind_Context*) { return 0; }
-inline void _Unwind_SetIP(_Unwind_Context*, uint64_t) { }
+inline uintptr_t _Unwind_GetGR(_Unwind_Context*, int) {
+  always_assert(false);
+  return 0;
+}
+inline uintptr_t _Unwind_GetIP(_Unwind_Context*) {
+  always_assert(false);
+  return 0;
+}
+inline void _Unwind_Resume() { always_assert(false); }
+inline void _Unwind_SetIP(_Unwind_Context*, uint64_t) { always_assert(false); }
 #endif
 
 namespace HPHP {

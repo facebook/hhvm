@@ -411,8 +411,10 @@ static int statFill(Variant stat_array, struct stat* stat_sb)
   stat_sb->st_atime = a->get(s_atime.get()).toInt64();
   stat_sb->st_mtime = a->get(s_mtime.get()).toInt64();
   stat_sb->st_ctime = a->get(s_ctime.get()).toInt64();
+#ifndef _MSC_VER
   stat_sb->st_blksize = a->get(s_blksize.get()).toInt64();
   stat_sb->st_blocks = a->get(s_blocks.get()).toInt64();
+#endif
   return 0;
 }
 
@@ -450,8 +452,13 @@ int UserFile::access(const String& path, int mode) {
   }
 
   // The mode flags in stat are different from the flags used by access.
+#ifdef _MSC_VER
+  auto uid = -1;
+  auto gid = -1;
+#else
   auto uid = geteuid();
   auto gid = getegid();
+#endif
   switch (mode) {
     case R_OK: // Test for read permission.
       return simulateAccessResult(

@@ -18,7 +18,11 @@
 
 #include "hphp/runtime/base/type-string.h"
 
+#ifdef _MSC_VER
+#include "hphp/util/process.h"
+#else
 #include "hphp/util/light-process.h"
+#endif
 
 namespace HPHP {
 
@@ -36,8 +40,15 @@ bool Pipe::open(const String& filename, const String& mode) {
   assert(m_stream == nullptr);
   assert(getFd() == -1);
 
+#ifdef _MSC_VER
+  auto old_cwd = Process::GetCurrentDirectory();
+  chdir(g_context->getCwd().data());
+  FILE* f = _popen(filename.data(), mode.data());
+  chdir(old_cwd.c_str());
+#else
   FILE *f = LightProcess::popen(filename.data(), mode.data(),
                                 g_context->getCwd().data());
+#endif
   if (!f) {
     return false;
   }
@@ -56,8 +67,12 @@ bool Pipe::closeImpl() {
   s_pcloseRet = 0;
   if (valid() && !isClosed()) {
     assert(m_stream);
+#ifdef _MSC_VER
+    int pcloseRet = _pclose(m_stream);
+#else
     int pcloseRet = LightProcess::pclose(m_stream);
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
+#endif
     s_pcloseRet = pcloseRet;
     ret = (pcloseRet == 0);
     setIsClosed(true);

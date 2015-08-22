@@ -602,7 +602,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<> void ThreadLocalNoCheck<ExecutionContext>::destroy();
+void ThreadLocalNoCheck<ExecutionContext>::destroy();
 
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 

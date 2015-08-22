@@ -398,8 +398,8 @@ DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
 
 %%
 
-[[gnu::unused]]
-static void suppress_defined_but_not_used_warnings() {
+static void __attribute__((__unused__))
+suppress_defined_but_not_used_warnings() {
   yyunput(0, 0);
   yy_top_state();
 }

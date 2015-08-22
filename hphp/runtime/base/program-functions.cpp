@@ -751,8 +751,8 @@ NEVER_INLINE void copyHashFuncs() {
 # define AT_END_OF_TEXT
 #endif
 
-[[gnu::optimize("2")]] NEVER_INLINE AT_END_OF_TEXT
-static void hugifyText(char* from, char* to) {
+static void NEVER_INLINE AT_END_OF_TEXT __attribute__((__optimize__("2")))
+hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {
     // This shouldn't happen if HHVM is behaving correctly (I think),

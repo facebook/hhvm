@@ -19,6 +19,7 @@
 
 #include <folly/Hash.h>
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/tv-helpers.h"

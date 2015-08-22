@@ -183,7 +183,6 @@ tc_unwind_personality(int version,
                       uint64_t exceptionClass,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context) {
-  using namespace abi;
   // Exceptions thrown by g++-generated code will have the class "GNUCC++"
   // packed into a 64-bit int. libc++ has the class "CLNGC++". For now we
   // shouldn't be seeing exceptions from any other runtimes but this may
@@ -211,7 +210,7 @@ tc_unwind_personality(int version,
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
     DEBUG_ONLY auto const* unwindType =
       (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";
-#ifdef HAVE_CXXABI_H
+#ifndef _MSC_VER
     int status;
     auto* exnType = abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };

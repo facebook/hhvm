@@ -1,0 +1,2 @@
+File "reserved_name4.php", line 5, characters 7-14:
+Noreturn cannot be used as it is reserved. (Naming[2068])

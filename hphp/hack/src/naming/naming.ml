@@ -535,6 +535,26 @@ module Env = struct
           SMap.add name pos_and_id env, SMap.add name_key name canon_names;
         pos_and_id
 
+  let check_not_typehint (p, name) =
+    let x = canon_key (Utils.strip_all_ns name) in
+    match x with
+    | x when x = SN.Typehints.void -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.noreturn -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.int -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.bool -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.float -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.num -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.string -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.resource -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.mixed -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.array -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.arraykey -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.integer -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.boolean -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.double -> Errors.name_is_reserved name p; false
+    | x when x = SN.Typehints.real -> Errors.name_is_reserved name p; false
+    | _ -> true
+
   let resilient_new_var env (p, x) =
     if SMap.mem x !env
     then begin
@@ -554,12 +574,17 @@ module Env = struct
     ignore (resilient_new_canon_var genv.funs x)
 
   let new_class_id genv x =
-    ignore (resilient_new_canon_var genv.classes x)
+    if check_not_typehint x then ignore (resilient_new_canon_var genv.classes x)
+    else ()
 
   let new_typedef_id genv x =
-    let v = resilient_new_canon_var genv.classes x in
-    genv.typedefs := SMap.add (snd x) v !(genv.typedefs);
-    ()
+    if check_not_typehint x
+    then begin
+      let v = resilient_new_canon_var genv.classes x in
+      genv.typedefs := SMap.add (snd x) v !(genv.typedefs);
+      ()
+    end
+    else ()
 
   let new_global_const_id genv x =
     let v = resilient_new_var genv.gconsts x in

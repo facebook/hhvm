@@ -38,16 +38,13 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/network.h"
 #include <memory>
-#include <unistd.h>
 #include <fcntl.h>
-#include <poll.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
-#if defined(AF_UNIX)
-#include <sys/un.h>
 #include <algorithm>
-#endif
+
+#include <folly/FilePortability.h>
+#include <folly/SocketPortability.h>
 
 #define PHP_STREAM_COPY_ALL     (-1)
 

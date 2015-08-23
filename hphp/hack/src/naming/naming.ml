@@ -538,21 +538,23 @@ module Env = struct
   let check_not_typehint (p, name) =
     let x = canon_key (Utils.strip_all_ns name) in
     match x with
-    | x when x = SN.Typehints.void -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.noreturn -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.int -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.bool -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.float -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.num -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.string -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.resource -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.mixed -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.array -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.arraykey -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.integer -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.boolean -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.double -> Errors.name_is_reserved name p; false
-    | x when x = SN.Typehints.real -> Errors.name_is_reserved name p; false
+    | x when (
+        x = SN.Typehints.void ||
+        x = SN.Typehints.noreturn ||
+        x = SN.Typehints.int ||
+        x = SN.Typehints.bool ||
+        x = SN.Typehints.float ||
+        x = SN.Typehints.num ||
+        x = SN.Typehints.string ||
+        x = SN.Typehints.resource ||
+        x = SN.Typehints.mixed ||
+        x = SN.Typehints.array ||
+        x = SN.Typehints.arraykey ||
+        x = SN.Typehints.integer ||
+        x = SN.Typehints.boolean ||
+        x = SN.Typehints.double ||
+        x = SN.Typehints.real
+      ) -> Errors.name_is_reserved name p; false
     | _ -> true
 
   let resilient_new_var env (p, x) =

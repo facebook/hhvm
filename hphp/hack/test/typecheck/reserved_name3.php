@@ -1,3 +1,3 @@
 <?hh
 
-class noreturn {}
+class String {}

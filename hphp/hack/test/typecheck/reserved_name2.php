@@ -2,4 +2,4 @@
 
 namespace Foo;
 
-class Void {}
+class void {}

@@ -25,11 +25,12 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 #ifndef _MSC_VER
 #include <cxxabi.h>
 #endif
+
+#include <folly/FilePortability.h>
 
 #ifdef HAVE_LIBBFD
 #include <bfd.h>

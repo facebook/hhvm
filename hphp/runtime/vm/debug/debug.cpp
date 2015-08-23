@@ -27,7 +27,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#ifndef _MSC_VER
 #include <cxxabi.h>
+#endif
 
 #ifdef HAVE_LIBBFD
 #include <bfd.h>

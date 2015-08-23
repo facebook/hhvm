@@ -4159,8 +4159,13 @@ bool HHVM_FUNCTION(mb_send_mail,
   }
 
   struct {
+#ifdef HAVE_MSVC_BITFIELD_LAYOUT
+    unsigned int cnt_type : 1;
+    unsigned int cnt_trans_enc : 1;
+#else
     int cnt_type:1;
     int cnt_trans_enc:1;
+#endif
   } suppressed_hdrs = { 0, 0 };
 
   static const StaticString s_CONTENT_TYPE("CONTENT-TYPE");

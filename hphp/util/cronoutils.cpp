@@ -189,11 +189,7 @@ create_subdirs(char *filename)
 	    else
 	    {
 		CRONO_DEBUG(("Directory \"%s\" does not exist -- creating\n", dirname));
-#ifndef _MSC_VER
                 if ((mkdir(dirname, DIR_MODE) < 0) && (errno != EEXIST))
-#else
-                if ((mkdir(dirname) < 0) && (errno != EEXIST))
-#endif
                 {
 		    perror(dirname);
 		    return;

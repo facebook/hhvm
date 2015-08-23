@@ -156,11 +156,11 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
   return vwrap2(cb, [] (Vout& v, Vout& vcold) {
     auto const dest = v.makeReg();
 
-    alignNativeStack(v, [&] (Vout& v) {
-      // fcallHelper asserts native stack alignment for us.
-      TCA (*helper)(ActRec*) = &fcallHelper;
-      v << simplecall(v, helper, rvmfp(), dest);
-    });
+    v << popm{rvmfp()[AROFF(m_savedRip)]};
+    // fcallHelper asserts native stack alignment for us.
+    TCA (*helper)(ActRec*) = &fcallHelper;
+    v << simplecall(v, helper, rvmfp(), dest);
+    v << pushm{rvmfp()[AROFF(m_savedRip)]};
 
     // Clobber rvmsp in debug builds.
     if (debug) v << copy{v.cns(0x1), rvmsp()};

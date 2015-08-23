@@ -195,6 +195,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::pop:
     case Vinstr::popm:
     case Vinstr::push:
+    case Vinstr::pushm:
     case Vinstr::ret:
     case Vinstr::retransopt:
     case Vinstr::store:

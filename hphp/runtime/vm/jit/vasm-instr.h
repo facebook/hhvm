@@ -197,6 +197,7 @@ struct Vunit;
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
+  O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -722,6 +723,7 @@ struct orqim { Immed s0; Vptr m; VregSF sf; };
 struct pop { Vreg64 d; };
 struct popm { Vptr d; };
 struct push { Vreg64 s; };
+struct pushm { Vptr s; };
 struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };

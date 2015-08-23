@@ -823,7 +823,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           // ActRec, but AliasClass needs an offset to the highest cell it will
           // store.
           spOffset.offset + int32_t{kNumActRecCells} - 1,
-          kNumActRecCells
+          int32_t{kNumActRecCells}
         },
         AStack {
           inst.src(0),
@@ -1316,7 +1316,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // store.
         inst.extra<DbgTrashFrame>()->offset.offset +
           int32_t{kNumActRecCells} - 1,
-        kNumActRecCells
+        int32_t{kNumActRecCells}
       }
     };
   case DbgTrashMem:

@@ -36,6 +36,7 @@ const int64_t k_JSON_UNESCAPED_SLASHES       = 1<<6;
 const int64_t k_JSON_PRETTY_PRINT            = 1<<7;
 const int64_t k_JSON_UNESCAPED_UNICODE       = 1<<8;
 const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
+const int64_t k_JSON_PRESERVE_ZERO_FRACTION  = 1<<10;
 
 // json_decode() options
 const int64_t k_JSON_BIGINT_AS_STRING  = 1<<1;
@@ -227,6 +228,7 @@ const StaticString
   s_JSON_PRETTY_PRINT("JSON_PRETTY_PRINT"),
   s_JSON_UNESCAPED_UNICODE("JSON_UNESCAPED_UNICODE"),
   s_JSON_PARTIAL_OUTPUT_ON_ERROR("JSON_PARTIAL_OUTPUT_ON_ERROR"),
+  s_JSON_PRESERVE_ZERO_FRACTION("JSON_PRESERVE_ZERO_FRACTION"),
   s_JSON_BIGINT_AS_STRING("JSON_BIGINT_AS_STRING"),
   s_JSON_FB_LOOSE("JSON_FB_LOOSE"),
   s_JSON_FB_UNLIMITED("JSON_FB_UNLIMITED"),
@@ -276,6 +278,9 @@ class JsonExtension final : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_JSON_PARTIAL_OUTPUT_ON_ERROR.get(), k_JSON_PARTIAL_OUTPUT_ON_ERROR
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_JSON_PRESERVE_ZERO_FRACTION.get(), k_JSON_PRESERVE_ZERO_FRACTION
     );
     Native::registerConstant<KindOfInt64>(
       s_JSON_BIGINT_AS_STRING.get(), k_JSON_BIGINT_AS_STRING

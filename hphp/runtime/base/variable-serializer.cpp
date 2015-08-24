@@ -240,12 +240,15 @@ void VariableSerializer::write(double v) {
     if (!std::isinf(v) && !std::isnan(v)) {
       char *buf;
       vspprintf(&buf, 0, "%.*k", precision, v);
+      if (m_option & k_JSON_PRESERVE_ZERO_FRACTION
+          && strchr(buf, '.') == nullptr) {
+        free(buf);
+        asprintf(&buf, "%.1f", v);
+      }
       m_buf->append(buf);
       free(buf);
     } else {
-      if (std::isnan(v) || std::isinf(v)) {
-        json_set_last_error_code(json_error_codes::JSON_ERROR_INF_OR_NAN);
-      }
+      json_set_last_error_code(json_error_codes::JSON_ERROR_INF_OR_NAN);
 
       m_buf->append('0');
     }

@@ -195,26 +195,6 @@ bool TimeZone::SetCurrent(const char* name) {
   return true;
 }
 
-Array TimeZone::GetNamesToCountryCodes() {
-  const timelib_tzdb *tzdb = timelib_builtin_db();
-  int item_count = tzdb->index_size;
-  const timelib_tzdb_index_entry *table = tzdb->index;
-
-  Array ret;
-  for (int i = 0; i < item_count; ++i) {
-    // This string is what PHP considers as "data" or "info" which is basically
-    // the string of "PHP1xx" where xx is country code that uses this timezone.
-    // When country code is unknown or not in use anymore, ?? is used instead.
-    // There is no known better way to extract this information out.
-    const char* infoString = (const char*)&tzdb->data[table[i].pos];
-    const char* countryCode = &infoString[5];
-
-    ret.set(String(table[i].id, CopyString),
-            String(countryCode, 2, CopyString));
-  }
-  return ret;
-}
-
 const StaticString
   s_dst("dst"),
   s_offset("offset"),

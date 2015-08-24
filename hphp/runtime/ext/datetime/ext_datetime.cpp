@@ -399,8 +399,6 @@ Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations) {
 Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
                            int64_t what,
                            const String& country) {
-  Array all = TimeZone::GetNamesToCountryCodes();
-
   // This is the same check that PHP5 performs, no validation needed.
   // See ext/date/php_date.c lines 4496-4499
   if (what == q_DateTimeZone$$PER_COUNTRY && country.length() != 2) {
@@ -408,20 +406,26 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
     return false;
   }
 
-  Array result = Array::Create();
-  for (ArrayIter iter(all); iter; ++iter) {
-    const Variant& tzid = iter.first();
-    const Variant& tzcountry = iter.second();
+  const timelib_tzdb *tzdb = timelib_builtin_db();
+  int item_count = tzdb->index_size;
+  const timelib_tzdb_index_entry *table = tzdb->index;
 
-    if (what == q_DateTimeZone$$PER_COUNTRY && equal(country, tzcountry)) {
-      result.append(tzid);
-    } else if (what == q_DateTimeZone$$ALL_WITH_BC ||
-               check_id_allowed(tzid.toStrNR(), what)) {
-      result.append(tzid);
+  Array ret;
+  for (int i = 0; i < item_count; ++i) {
+    // This string is what PHP considers as "data" or "info" which is basically
+    // the string of "PHP1xx" where xx is country code that uses this timezone.
+    // When country code is unknown or not in use anymore, ?? is used instead.
+    // There is no known better way to extract this information out.      
+    const char* infoString = (const char*)&tzdb->data[table[i].pos];
+    String countryCode = String(&infoString[5], 2, CopyString);
+    if ((what == q_DateTimeZone$$PER_COUNTRY && equal(country, countryCode))
+        || what == q_DateTimeZone$$ALL_WITH_BC
+        || (check_id_allowed(table[i].id, what) && tzdb->data[table[i].pos + 4] == '\1')) {
+
+      ret.set(String(table[i].id, CopyString), countryCode);
     }
   }
-
-  return result;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

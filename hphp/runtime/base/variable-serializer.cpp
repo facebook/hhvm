@@ -34,7 +34,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// static strings
+
+extern const StaticString
+  s_serializedNativeDataKey(std::string("\0native", 7));
 
 const StaticString
   s_JsonSerializable("JsonSerializable"),
@@ -46,9 +48,6 @@ const StaticString
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
   s_debugInfo("__debugInfo");
-
-extern const StaticString
-  s_serializedNativeDataKey(std::string("\0native", 7));
 
 /*
  * Serialize a Variant recursively.
@@ -70,6 +69,11 @@ static void serializeArray(const ArrayData*, VariableSerializer*,
                            bool skipNestCheck = false);
 static void serializeResource(const ResourceData*, VariableSerializer*);
 static void serializeString(const String&, VariableSerializer*);
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwNestingException() {
+  throw ExtendedException("Nesting level too deep - recursive dependency?");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -714,7 +718,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     break;
   case Type::VarExport:
   case Type::PHPOutput:
-    throw ExtendedException("Nesting level too deep - recursive dependency?");
+    throwNestingException();
   case Type::VarDump:
   case Type::DebugDump:
   case Type::DebuggerDump:

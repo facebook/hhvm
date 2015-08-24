@@ -49,88 +49,6 @@ static void unserializeSet(ObjectData*, VariableUnserializer*, int64_t sz,
                            char type);
 static void unserializePair(ObjectData*, VariableUnserializer*, int64_t sz,
                             char type);
-///////////////////////////////////////////////////////////////////////////////
-
-void VariableUnserializer::set(const char* buf, const char* end) {
-  m_buf = buf;
-  m_end = end;
-}
-
-Variant VariableUnserializer::unserialize() {
-  Variant v;
-  unserializeVariant(v, this);
-  return v;
-}
-
-static std::pair<int64_t,const char*> hh_strtoll_base10(const char* p) {
-  int64_t x = 0;
-  bool neg = false;
-  if (*p == '-') {
-    neg = true;
-    ++p;
-  }
-  while (*p >= '0' && *p <= '9') {
-    x = (x * 10) + ('0' - *p);
-    ++p;
-  }
-  if (!neg) {
-    x = -x;
-  }
-  return std::pair<int64_t,const char*>(x, p);
-}
-
-int64_t VariableUnserializer::readInt() {
-  check();
-  auto r = hh_strtoll_base10(m_buf);
-  m_buf = r.second;
-  return r.first;
-}
-
-double VariableUnserializer::readDouble() {
-  check();
-  const char* newBuf;
-  double r = zend_strtod(m_buf, &newBuf);
-  m_buf = newBuf;
-  return r;
-}
-
-void VariableUnserializer::read(char* buf, unsigned n) {
-  check();
-  auto const bufferLimit = std::min(size_t(m_end - m_buf), size_t(n));
-  memcpy(buf, m_buf, bufferLimit);
-  m_buf += bufferLimit;
-}
-
-void VariableUnserializer::throwUnexpected(char expected, char got) {
-  throw Exception("Expected '%c' but got '%c'", expected, got);
-}
-
-bool VariableUnserializer::isWhitelistedClass(const String& clsName) const {
-  if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
-    return true;
-  }
-  if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
-    for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
-      const Variant& value(iter.secondRef());
-      if (HHVM_FN(is_subclass_of)(clsName, value.toString()) ||
-          same(value, clsName)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-void VariableUnserializer::putInOverwrittenList(const Variant& v) {
-  m_overwrittenList.append(v);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_unserialize("unserialize"),
-  s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
-  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 
 NEVER_INLINE ATTRIBUTE_NORETURN
 static void throwUnexpectedSep(char expect, char actual) {
@@ -190,6 +108,129 @@ static void throwUnexpectedType(const String& key, const ObjectData* obj,
   ).str();
   throw Exception(msg);
 }
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwArraySizeOutOfBounds() {
+  throw Exception("Array size out of bounds");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwInvalidKey() {
+  throw Exception("Invalid key");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnterminatedElement() {
+  throw Exception("Array element not terminated properly");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwLargeStringSize(int64_t size) {
+  throw Exception("Size of serialized string (%ld) exceeds max", size);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwNegativeStringSize(int64_t size) {
+  throw Exception("Size of serialized string (%ld) must not be negative", size);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwBadFormat(const ObjectData* obj, char type) {
+  throw Exception("%s does not support the '%c' serialization format",
+                  header_names[(int)obj->headerKind()], type);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwInvalidHashKey(const ObjectData* obj) {
+  throw Exception("%s values must be integers or strings",
+                  header_names[(int)obj->headerKind()]);
+}
+
+const StaticString
+  s_unserialize("unserialize"),
+  s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
+
+///////////////////////////////////////////////////////////////////////////////
+
+void VariableUnserializer::set(const char* buf, const char* end) {
+  m_buf = buf;
+  m_end = end;
+}
+
+Variant VariableUnserializer::unserialize() {
+  Variant v;
+  unserializeVariant(v, this);
+  return v;
+}
+
+static std::pair<int64_t,const char*> hh_strtoll_base10(const char* p) {
+  int64_t x = 0;
+  bool neg = false;
+  if (*p == '-') {
+    neg = true;
+    ++p;
+  }
+  while (*p >= '0' && *p <= '9') {
+    x = (x * 10) + ('0' - *p);
+    ++p;
+  }
+  if (!neg) {
+    x = -x;
+  }
+  return std::pair<int64_t,const char*>(x, p);
+}
+
+int64_t VariableUnserializer::readInt() {
+  check();
+  auto r = hh_strtoll_base10(m_buf);
+  m_buf = r.second;
+  return r.first;
+}
+
+double VariableUnserializer::readDouble() {
+  check();
+  const char* newBuf;
+  double r = zend_strtod(m_buf, &newBuf);
+  m_buf = newBuf;
+  return r;
+}
+
+void VariableUnserializer::read(char* buf, unsigned n) {
+  check();
+  auto const bufferLimit = std::min(size_t(m_end - m_buf), size_t(n));
+  memcpy(buf, m_buf, bufferLimit);
+  m_buf += bufferLimit;
+}
+
+void VariableUnserializer::expectChar(char expected) {
+  char ch = readChar();
+  if (UNLIKELY(ch != expected)) {
+    throwUnexpectedSep(expected, ch);
+  }
+}
+
+bool VariableUnserializer::isWhitelistedClass(const String& clsName) const {
+  if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
+    return true;
+  }
+  if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
+    for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
+      const Variant& value(iter.secondRef());
+      if (HHVM_FN(is_subclass_of)(clsName, value.toString()) ||
+          same(value, clsName)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void VariableUnserializer::putInOverwrittenList(const Variant& v) {
+  m_overwrittenList.append(v);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
 static void unserializeProp(VariableUnserializer* uns,
@@ -618,21 +659,6 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
   uns->expectChar(';');
 }
 
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwArraySizeOutOfBounds() {
-  throw Exception("Array size out of bounds");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidKey() {
-  throw Exception("Invalid key");
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnterminatedElement() {
-  throw Exception("Array element not terminated properly");
-}
-
 void unserializeArray(Array& arr, VariableUnserializer* uns) {
   int64_t size = uns->readInt();
   uns->expectChar(':');
@@ -685,16 +711,6 @@ void unserializeArray(Array& arr, VariableUnserializer* uns) {
   uns->expectChar('}');
 }
 
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwLargeStringSize(int64_t size) {
-  throw Exception("Size of serialized string (%ld) exceeds max", size);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwNegativeStringSize(int64_t size) {
-  throw Exception("Size of serialized string (%ld) must not be negative", size);
-}
-
 static
 String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
@@ -738,18 +754,6 @@ void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
       unserializeSet(obj, uns, sz, type);
       break;
   }
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwBadFormat(const ObjectData* obj, char type) {
-  throw Exception("%s does not support the '%c' serialization format",
-                  header_names[(int)obj->headerKind()], type);
-}
-
-NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwInvalidHashKey(const ObjectData* obj) {
-  throw Exception("%s values must be integers or strings",
-                  header_names[(int)obj->headerKind()]);
 }
 
 static
@@ -971,7 +975,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
     }
     break;
   default:
-    throw Exception("Unknown type '%c'", type);
+    throwUnknownType(type);
   }
 
   sep = uns->readChar(); // the last ';'

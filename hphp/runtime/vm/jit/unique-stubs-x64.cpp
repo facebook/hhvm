@@ -233,6 +233,9 @@ asm_label(a, doRelease);
   a.    push    (rIter);
   a.    push    (rFinished);
   a.    call    (lookupDestructor(a, PhysReg(rType)));
+  // Three quads between where %rsp is now and the saved RIP of the call into
+  // the stub: two from the pushes above, and one for the saved RIP of the call
+  // to `release' done below (e.g., in emitDecLocal).
   mcg->fixupMap().recordFixup(a.frontier(), makeIndirectFixup(3));
   a.    pop     (rFinished);
   a.    pop     (rIter);

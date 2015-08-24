@@ -29,26 +29,26 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-bool FixupMap::getFrameRegs(const ActRec* ar,
-                            const ActRec* prevAr,
-                            VMRegs* outVMRegs) const {
+bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
   CTCA tca = (CTCA)ar->m_savedRip;
+
+  auto ent = m_fixups.find(tca);
+  if (!ent) return false;
+
+  // Note: If indirect fixups happen frequently enough, we could just compare
+  // savedRip to be less than some threshold where stubs in a.code stop.
+  if (ent->isIndirect()) {
+    auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
+                        ent->indirect.returnIpDisp;
+    ent = m_fixups.find(*reinterpret_cast<CTCA*>(savedRIPAddr));
+    assertx(ent && !ent->isIndirect());
+  }
+
   // Non-obvious off-by-one fun: if the *return address* points into the TC,
   // then the frame we were running on in the TC is actually the previous
   // frame.
   ar = ar->m_sfp;
-  auto* ent = m_fixups.find(tca);
-  if (!ent) return false;
-  if (ent->isIndirect()) {
-    // Note: if indirect fixups happen frequently enough, we could
-    // just compare savedRip to be less than some threshold where
-    // stubs in a.code stop.
-    assertx(prevAr);
-    auto pRealRip = ent->indirect.returnIpDisp +
-      uintptr_t(prevAr->m_sfp);
-    ent = m_fixups.find(*reinterpret_cast<CTCA*>(pRealRip));
-    assertx(ent && !ent->isIndirect());
-  }
+
   regsFromActRec(tca, ar, ent->fixup, outVMRegs);
   return true;
 }
@@ -58,10 +58,10 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
 
   TRACE(1, "fixup(begin):\n");
 
-  auto* nextRbp = rbp;
+  auto nextRbp = rbp;
   rbp = 0;
+
   do {
-    auto* prevRbp = rbp;
     rbp = nextRbp;
     assertx(rbp && "Missing fixup for native call");
     nextRbp = rbp->m_sfp;
@@ -71,7 +71,7 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
       TRACE(2, "fixup checking vm frame %s\n",
                nextRbp->m_func->name()->data());
       VMRegs regs;
-      if (getFrameRegs(rbp, prevRbp, &regs)) {
+      if (getFrameRegs(rbp, &regs)) {
         TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
               regs.fp->m_func->name()->data(),
               regs.fp, regs.sp, regs.pc);

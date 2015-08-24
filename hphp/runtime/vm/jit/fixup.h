@@ -86,7 +86,7 @@ namespace HPHP { namespace jit {
  *        +------------------------------+  <call to C++>
  *        |    RetIP to the dtor stub    |
  *        |--                          --|
- *        |         saved rvmfp()          |  push %rbp; mov %rsp, %rbp
+ *        |         saved rvmfp()        |  push %rbp; mov %rsp, %rbp
  *    +-->|--                          --|
  *    |   |    < C++ local variables>    |
  *    |   +------------------------------+
@@ -163,8 +163,7 @@ struct FixupMap {
     return &ent->fixup;
   }
 
-  bool getFrameRegs(const ActRec* ar, const ActRec* prevAr,
-                    VMRegs* outVMRegs) const;
+  bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const;
 
   void fixup(ExecutionContext* ec) const;
   void fixupWork(ExecutionContext* ec, ActRec* rbp) const;

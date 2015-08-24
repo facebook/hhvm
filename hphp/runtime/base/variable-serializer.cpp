@@ -242,8 +242,11 @@ void VariableSerializer::write(double v) {
       vspprintf(&buf, 0, "%.*k", precision, v);
       if (m_option & k_JSON_PRESERVE_ZERO_FRACTION
           && strchr(buf, '.') == nullptr) {
-        free(buf);
-        asprintf(&buf, "%.1f", v);
+        int buflen = strlen(buf);
+        buf = (char *) realloc(buf, buflen + 3);
+        buf[buflen++] = '.';
+        buf[buflen++] = '0';
+        buf[buflen] = '\0';
       }
       m_buf->append(buf);
       free(buf);

@@ -103,6 +103,7 @@ let is_associative = function
   | Eqeq | EQeqeq | Diff | Diff2 | Ltlt
   | Gtgt | Percent | Eq _ -> false
 
+module Unparse = struct
 (*
   unparsers for simple and predefined types.
 *)
@@ -159,8 +160,7 @@ let u_of_smap _ _ = u_todo "smap"  (fun () -> StrEmpty)
 let is_empty_ns ns =
     if (ns = Namespace_env.empty) then true else false
 
-let unparser _env =
-  let rec u_program v = u_of_list_spc u_def v
+let rec u_program v = u_of_list_spc u_def v
   and u_in_mode _ f = u_todo "mode" f
   and u_def =
     function
@@ -962,8 +962,11 @@ let unparser _env =
     | Default block ->
         case_expr (Str "default") block
     | Case (expr, block) ->
-        case_expr (StrWords [Str "case"; u_expr expr;]) block in
-  u_program
+        case_expr (StrWords [Str "case"; u_expr expr;]) block
+      let unparser _env = u_program
+end
+
+open Unparse
 
 let unparse_internal program =
   (*

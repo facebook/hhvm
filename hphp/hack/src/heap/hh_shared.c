@@ -581,6 +581,36 @@ static intptr_t decompress(const decompress_args* args) {
   return args->compressed_size == actual_compressed_size;
 }
 
+#ifdef _WIN32
+
+void join_thread(HANDLE thread)
+{
+  DWORD rc = WaitForSingleObject(thread, INFINITE);
+  if (rc == WAIT_FAILED) {
+    win32_maperr(GetLastError());
+    uerror("WaitForSingleObject", Nothing);
+  }
+  assert(rc == WAIT_OBJECT_0);
+  if(!GetExitCodeThread(thread, &rc)) {
+    win32_maperr(GetLastError());
+    uerror("GetExitCode", Nothing);
+  }
+  assert(rc == 0);
+  CloseHandle(thread);
+}
+
+#else
+
+void join_thread(pthread_t thread)
+{
+  intptr_t success = 0;
+  int rc = pthread_join(thread, (void*)&success);
+  assert(rc == 0);
+  assert(success);
+}
+
+#endif
+
 void hh_load(value in_filename) {
   CAMLparam1(in_filename);
   FILE* fp = fopen(String_val(in_filename), "rb");
@@ -607,10 +637,14 @@ void hh_load(value in_filename) {
   read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
   char* chunk_start = save_start();
 
+#ifdef _WIN32
+  HANDLE thread = NULL;
+#else
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   pthread_t thread;
+#endif
   decompress_args args;
   int thread_started = 0;
 
@@ -622,29 +656,24 @@ void hh_load(value in_filename) {
     read_all(fileno(fp), (void*)&chunk_size, sizeof chunk_size);
     read_all(fileno(fp), compressed, compressed_size * sizeof(char));
     if (thread_started) {
-      intptr_t success = 0;
-      int rc = pthread_join(thread, (void*)&success);
+      join_thread(thread);
       free(args.compressed);
-      assert(rc == 0);
-      assert(success);
     }
     args.compressed = compressed;
     args.compressed_size = compressed_size;
     args.decompress_start = chunk_start;
     args.decompressed_size = chunk_size;
+#ifdef _WIN32
+    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)decompress, &args, 0, NULL);
+#else
     pthread_create(&thread, &attr, (void* (*)(void*))decompress, &args);
+#endif
     thread_started = 1;
     chunk_start += chunk_size;
     read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
   }
 
-  if (thread_started) {
-    int success;
-    int rc = pthread_join(thread, (void*)&success);
-    free(args.compressed);
-    assert(rc == 0);
-    assert(success);
-  }
+  if (thread_started) join_thread(thread);
 
   fclose(fp);
   CAMLreturn0;

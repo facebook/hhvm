@@ -406,7 +406,7 @@ let create_program_init genv env = fun () ->
   | Some load_script -> run_load_script genv env load_script
 
 let save _genv env fn =
-  let chan = open_out_no_fail fn in
+  let chan = open_out_bin_no_fail fn in
   Marshal.to_channel chan env [];
   Program.marshal chan;
   close_out_no_fail fn chan;

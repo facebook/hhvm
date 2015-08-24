@@ -10,12 +10,9 @@ SET(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
 
-PROJECT(${PACKAGE_NAME} C CXX)
+PROJECT(${PACKAGE_NAME} C CXX ASM)
 if (MSVC)
-  enable_language(ASM)
   enable_language(ASM_MASM)
-else()
-  enable_language(ASM)
 endif()
 
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)

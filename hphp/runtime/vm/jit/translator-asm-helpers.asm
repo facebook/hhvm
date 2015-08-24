@@ -1,8 +1,11 @@
 ;
-; enterTCHelper
+; enterTCHelper - MSVC Edition
 ;
 ; This helper routine is written in assembly to take care of the details
 ; when transferring control between jitted code and the translator.
+;
+; Note that this is only used when compiling under MSVC. The .S version
+; of this file is used by everything else.
 ;
 ; The columns are registers of Linux and Mac ABI / Windows ABI / ARM ABI.
 ;   rdi / rcx   / x0:  Cell* vm_sp

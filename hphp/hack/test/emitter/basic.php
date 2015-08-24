@@ -143,6 +143,11 @@ function for_loop(int $x, int $y): int {
     if ($i != 4) continue;
     var_dump('four');
   }
+
+  for ($i = 0; $i < $x; ) {
+    $i++;
+  }
+
   return $i;
 }
 

@@ -76,6 +76,11 @@ PhysReg rvmsp();
  */
 PhysReg rvmtl();
 
+/*
+ * Native stack pointer.
+ */
+PhysReg rsp();
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // JIT and TC boundary ABI registers.

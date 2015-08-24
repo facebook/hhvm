@@ -64,10 +64,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 struct BackEnd final : jit::BackEnd {
-  PhysReg rSp() override {
-    return PhysReg(reg::rsp);
-  }
-
   /*
    * enterTCHelper does not save callee-saved registers except %rbp. This means
    * when we call it from C++, we have to tell gcc to clobber all the other
@@ -113,37 +109,6 @@ struct BackEnd final : jit::BackEnd {
       a.  lea(x64::rvmfp()[-cellsToBytes(spOff.offset)], x64::rvmsp());
     }
     a.    jmp(mcg->tx().uniqueStubs.interpHelper);
-  }
-
-  void emitIncStat(CodeBlock& cb, intptr_t disp, int n) override {
-    X64Assembler a { cb };
-
-    a.    pushf ();
-    //    addq $n, [%fs:disp]
-    a.    fs().addq(n, baseless(disp));
-    a.    popf  ();
-  }
-
-  void addDbgGuard(CodeBlock& codeMain,
-                   CodeBlock& codeCold,
-                   SrcKey sk,
-                   size_t dbgOff) override {
-    Asm a { codeMain };
-
-    // Emit the checks for debugger attach
-    auto rtmp = rAsm;
-    emitTLSLoad(a, ThreadInfo::s_threadInfo, rtmp);
-    a.   loadb  (rtmp[dbgOff], rbyte(rtmp));
-    a.   testb  ((int8_t)0xff, rbyte(rtmp));
-
-    if (!sk.resumed()) {
-      auto const off = mcg->tx().getSrcRec(sk)->nonResumedSPOff();
-      a. lea    (x64::rvmfp()[-cellsToBytes(off.offset)], x64::rvmsp());
-    }
-
-    // Branch to interpHelper if attached
-    a.   emitImmReg(uint64_t(sk.pc()), rarg(0));
-    a.   jnz    (mcg->tx().uniqueStubs.interpHelper);
   }
 
   void streamPhysReg(std::ostream& os, PhysReg reg) override {

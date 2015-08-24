@@ -285,19 +285,6 @@ emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
   }
 }
 
-template<typename T>
-inline void
-emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
-  // We don't know for sure what's alive.
-  PhysRegSaver(a, abi().gpUnreserved - abi().calleeSaved);
-  a.    emitImmReg(datum.m_key, rarg(0));
-  const TCA addr = (TCA)pthread_getspecific;
-  emitCall(a, addr, arg_regs(1));
-  if (dest != reg::rax) {
-    a.    movq(reg::rax, dest);
-  }
-}
-
 #endif // USE_GCC_FAST_TLS
 
 // Emit a load of a low pointer.

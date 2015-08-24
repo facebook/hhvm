@@ -158,6 +158,17 @@ inline std::string areaAsString(AreaIndex area) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Some data structures are accessed often enough from translated code that we
+ * have shortcuts for getting offsets into them.
+ */
+#define TVOFF(nm) int(offsetof(TypedValue, nm))
+#define AROFF(nm) int(offsetof(ActRec, nm))
+#define AFWHOFF(nm) int(offsetof(c_AsyncFunctionWaitHandle, nm))
+#define GENDATAOFF(nm) int(offsetof(Generator, nm))
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

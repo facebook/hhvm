@@ -2505,14 +2505,6 @@ void MCGenerator::setJmpTransID(TCA jmp) {
   m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
 }
 
-void
-emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index, int n, bool force) {
-  if (!force && !Stats::enabled()) return;
-  intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
-
-  mcg->backEnd().emitIncStat(cb, disp, n);
-}
-
 void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
   if (!force && !Stats::enabled()) return;
   intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();

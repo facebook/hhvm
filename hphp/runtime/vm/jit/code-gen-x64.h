@@ -18,11 +18,13 @@
 #define incl_HPHP_VM_CG_X64_H_
 
 #include "hphp/runtime/vm/jit/code-gen.h"
+
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////

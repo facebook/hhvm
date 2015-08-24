@@ -42,6 +42,7 @@ const Abi& abi(CodeKind kind = CodeKind::Trace);
 inline PhysReg rvmfp() { return vixl::x29; }
 inline PhysReg rvmsp() { return vixl::x19; }
 inline PhysReg rvmtl() { return vixl::x20; }
+inline PhysReg rsp()   { return vixl::sp; }
 
 namespace detail {
   const RegSet kVMRegs      = rvmfp() | rvmtl();

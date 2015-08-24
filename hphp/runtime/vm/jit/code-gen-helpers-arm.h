@@ -122,28 +122,17 @@ inline void emitCmpClass(Vout& v, Vreg sf, Vreg reg, const Class* c) {
  */
 #ifdef USE_GCC_FAST_TLS
 template<typename T>
-inline void emitTLSLoad(vixl::MacroAssembler& a,
+inline void emitTLSLoad(Vout& v,
                         const ThreadLocalNoCheck<T>& datum,
-                        const vixl::Register& destReg) {
-  using namespace vixl;
-  a.   Mov  (rHostCallReg, jit::tlsBaseNoInline);
-  a.   Push (x30, x29);
-  a.   HostCall(0);
-  // tlsBaseNoInline doesn't need a sync point
-  a.   Pop  (x29, x30);
-
-  a.   Add  (rReturnReg, rReturnReg,
-             uintptr_t(&datum.m_node.m_p) - tlsBase());
-  // Now rReturnReg holds a pointer to *a pointer to* the object.
-  a.   Ldr  (destReg, rReturnReg[0]);
+                        Vreg dst) {
+  not_implemented();
 }
-
 
 #else
 template<typename T>
-inline void emitTLSLoad(vixl::MacroAssembler& a,
+inline void emitTLSLoad(Vout& v,
                         const ThreadLocalNoCheck<T>& datum,
-                        const vixl::Register& destReg) {
+                        Vreg dst) {
   // ARM-simulation mode isn't supported yet if FAST_TLS is off.
   not_implemented();
 }

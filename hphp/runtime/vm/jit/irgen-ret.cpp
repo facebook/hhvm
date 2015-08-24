@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"

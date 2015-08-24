@@ -67,7 +67,7 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     Label ok;
     a.emitImmReg(uintptr_t(enterTCExit), rax);
-    a.cmpq(rax, *rsp);
+    a.cmpq(rax, *rsp());
     a.je8 (ok);
     a.ud2();
   asm_label(a, ok);
@@ -77,7 +77,7 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   // unbalancing the return stack buffer. The call from enterTCHelper() that
   // got us into the TC was popped off the RSB by the ret that got us to this
   // stub.
-  a.addq(8, rsp);
+  a.addq(8, rsp());
   a.jmp(TCA(enterTCExit));
 
   // On a backtrace, gdb tries to locate the calling frame at address
@@ -364,7 +364,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    storeq (rPCOff, rvmtl()[rds::kVmpcOff]);
   a.    addq   (rBC,    rPCNext);
 
-  a.    subq   (8, rsp);  // stack parity
+  a.    subq   (8, rsp());  // stack parity
 
   a.    movq   (rPCNext, rarg(0));
   a.    call   (TCA(&doFCallArrayTC));
@@ -374,7 +374,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    testb  (rbyte(rax), rbyte(rax));
   a.    jz8    (noCallee);
 
-  a.    addq   (8, rsp);
+  a.    addq   (8, rsp());
   a.    loadq  (rvmtl()[rds::kVmfpOff], rvmfp());
   a.    pop    (rvmfp()[AROFF(m_savedRip)]);
   a.    loadq  (rvmfp()[AROFF(m_func)], rax);
@@ -383,7 +383,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    ud2    ();
 
 asm_label(a, noCallee);
-  a.    addq   (8, rsp);
+  a.    addq   (8, rsp());
   a.    ret    ();
 
   uniqueStubs.add("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
@@ -404,7 +404,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
 
   a.   movq    (rvmfp(), ar);
   a.   push    (rvmfp());
-  a.   movq    (rsp, rvmfp());
+  a.   movq    (rsp(), rvmfp());
   a.   push    (ar[AROFF(m_savedRip)]);
   a.   push    (ar[AROFF(m_sfp)]);
   a.   movq    (EventHook::NormalFunc, rarg(1));
@@ -412,7 +412,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   uniqueStubs.functionEnterHelperReturn = a.frontier();
   a.   testb   (al, al);
   a.   je8     (skip);
-  a.   addq    (16, rsp);
+  a.   addq    (16, rsp());
   a.   pop     (rvmfp());
   a.   ret     ();
 
@@ -422,7 +422,7 @@ asm_label(a, skip);
   // from the original frame, and sync rvmsp() to the execution-context's copy.
   a.   pop     (rvmfp());
   a.   pop     (rsi);
-  a.   addq    (16, rsp); // drop our call frame
+  a.   addq    (16, rsp()); // drop our call frame
   a.   loadq   (rvmtl()[rds::kVmspOff], rvmsp());
   a.   jmp     (rsi);
   a.   ud2     ();
@@ -450,10 +450,10 @@ void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
 
   // If handlePossibleStackOverflow returns, it was not a stack overflow, so we
   // need to go through event hook processing.
-  a.    subq   (8, rsp);  // align native stack
+  a.    subq   (8, rsp());  // align native stack
   a.    movq   (rvmfp(), rarg(0));
   emitCall(a, CppCall::direct(handlePossibleStackOverflow), arg_regs(1));
-  a.    addq   (8, rsp);
+  a.    addq   (8, rsp());
   a.    jmp    (uniqueStubs.functionEnterHelper);
   a.    ud2    ();
 

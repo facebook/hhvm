@@ -17,22 +17,22 @@
 #ifndef incl_HPHP_VM_CODEGENHELPERS_H_
 #define incl_HPHP_VM_CODEGENHELPERS_H_
 
-#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/member-operations.h"
+
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/vasm-gen.h"
-#include "hphp/runtime/vm/jit/vasm-instr.h"
-#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/abi-cxx.h"
 
 namespace HPHP { namespace jit {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Information about an array key (this represents however much we know about
- * whether the key is going to behave like an integer or a string).
+ * Information about an array key.
+ *
+ * This represents however much we know about whether the key is going to
+ * behave like an integer or a string.
  */
 struct ArrayKeyInfo {
   int64_t convertedInt{0};
@@ -70,7 +70,7 @@ inline ArrayKeyInfo checkStrictlyInteger(Type key) {
   return ret;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

@@ -744,7 +744,7 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
       auto& taken = unit.blocks[targets[1]].code;
       assertx(taken.front().op == Vinstr::landingpad ||
              taken.front().op == Vinstr::jmp);
-      Vinstr v{lea{rsp[rspOffset], rsp}};
+      Vinstr v{lea{reg::rsp[rspOffset], reg::rsp}};
       v.origin = taken.front().origin;
       if (taken.front().op == Vinstr::jmp) {
         taken.insert(taken.begin(), v);

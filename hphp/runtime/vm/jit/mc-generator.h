@@ -400,15 +400,6 @@ TCA fcallHelper(ActRec*);
 TCA funcBodyHelper(ActRec*);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
-// Both emitIncStat()s push/pop flags but don't clobber any registers.
-void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
-                 int n = 1, bool force = false);
-
-inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
-                        bool force = false) {
-  emitIncStat(cb, &Stats::tl_counters[0], stat, n, force);
-}
-
 /*
  * Look up the catch block associated with the return address in ar and save it
  * in a queue. This is called by debugger helpers right before smashing the

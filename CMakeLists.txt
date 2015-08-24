@@ -12,6 +12,7 @@ SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
 
 PROJECT(${PACKAGE_NAME} C CXX)
 if (MSVC)
+  enable_language(ASM)
   enable_language(ASM_MASM)
 else()
   enable_language(ASM)

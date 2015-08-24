@@ -22,7 +22,7 @@ if [[ $LOCAL_PID != $HHVM_PID ]] ; then
     cp $HHVM_ROOT/tmp/perf-$LOCAL_PID.map $HHVM_ROOT/tmp/perf-$HHVM_PID.map
 fi
 
-${PERF_PATH}perf script -i /tmp/perf.data -f comm,ip -chhvm | grep -A2 hhvm | sed 's/--/ /' | $GZIP -c > $TMPDIR/perf.pds.gz
+${PERF_PATH}perf script -i /tmp/perf.data -f comm,ip -chhvm | sed -ne '/^[^ 	]/,+2p' | $GZIP -c > $TMPDIR/perf.pds.gz
 
 nm -S /proc/$HHVM_PID/exe > $TMPDIR/hhvm.nm
 

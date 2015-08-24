@@ -15,13 +15,16 @@
 */
 #include "hphp/runtime/base/thread-hooks.h"
 #include <stdio.h>
-#include <dlfcn.h>
 #include <string.h>
+#ifndef _MSC_VER
 #include <execinfo.h>
+#include <dlfcn.h>
+#endif
 #include <unistd.h>
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/mutex.h"
 
 namespace HPHP {

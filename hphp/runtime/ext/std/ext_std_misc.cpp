@@ -37,7 +37,9 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
+#ifndef _MSC_VER
 #include <sys/param.h> // MAXPATHLEN is here
+#endif
 #include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP {

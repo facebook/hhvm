@@ -17,6 +17,8 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
@@ -54,6 +56,12 @@ namespace {
 
 void alignJmpTarget(CodeBlock& cb) {
   align(cb, Alignment::JmpTarget, AlignContext::Dead);
+}
+
+void assertNativeStackAligned(Vout& v) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    v << call{TCA(assert_native_stack_aligned)};
+  }
 }
 
 /*
@@ -230,6 +238,7 @@ TCA emitInterpRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   auto const start = vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
     v << lea{rvmsp()[-AROFF(m_r)], r_svcreq_arg(0)};
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
@@ -242,6 +251,7 @@ TCA emitInterpGenRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   auto const start = vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
     loadGenFrame<async>(v, r_svcreq_arg(0));
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
@@ -253,6 +263,8 @@ TCA emitDebuggerInterpRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   return vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
+
     auto const ar = v.makeReg();
     v << lea{rvmsp()[-AROFF(m_r)], ar};
     debuggerRetImpl(v, ar);
@@ -264,6 +276,8 @@ TCA emitDebuggerInterpGenRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   return vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
+
     auto const ar = v.makeReg();
     loadGenFrame<async>(v, ar);
     debuggerRetImpl(v, ar);

@@ -32,6 +32,50 @@ constexpr int kNumFreeLocalsHelpers = 9;
  * The global set of unique stubs is emitted when we initialize the TC.
  */
 struct UniqueStubs {
+  /*
+   * Unique stubs and stack alignment.
+   *
+   * A lot of complex control flow occurs amongst the various unique stubs, as
+   * well as between the unique stubs and the TC.  This is obviously important
+   * to understanding the control flow of jitted code in general, but is also
+   * critical to performance-correct implementations of the unique stubs on
+   * platforms that care about stack alignment.
+   *
+   * On x64, for example, the calling convention is that the stack is 16-byte
+   * aligned before calls, which allows the compiler to safely use aligned movs
+   * for, e.g., saving callee-saved XMM registers---after pushing the old RIP
+   * (from the call) and %rbp (in the callee) which puts the stack back into
+   * alignment.
+   *
+   * We make the following assumption about stack alignment:
+   *
+   *    - Stack alignment is a parity condition; i.e., a valid stack pointer is
+   *      only ever aligned or one-off from being aligned.  This is the case on
+   *      x64.  Platforms with no alignment constraints also satisfy this
+   *      assumption, but platforms with higher-order alignments will have a
+   *      bad time without big changes to the system.
+   *
+   * Additionally, we maintain the following alignment invariants:
+   *
+   *    - When executing the body of any PHP function in the TC, the native
+   *      stack is aligned.  (This need not hold in the func prologue until the
+   *      EnterFrame IR instruction is executed.)
+   *
+   *    - The native stack is aligned on every call to a native function from
+   *      anywhere in the TC.
+   *
+   * Notably, we do /not/ unconditionally maintain stack alignment in the
+   * bodies of the unique stubs.  For x64, which relies on the native calling
+   * convention (pushing %rbp at the beginning of each frame) to maintain
+   * alignment, this means we need to know how we reached a given stub, and
+   * from where, in order to determine whether we need to manually realign the
+   * stack when we do native calls or return to the TC.
+   *
+   * How each stub is reached is documented below.  Whether the stack is
+   * aligned on entry to the stub is also documented---these are x64 specific
+   * (since a `call' instruction on x64 unbalances the stack until the %rbp
+   * push, or a manual alignment operation simulating it).
+   */
 
   /////////////////////////////////////////////////////////////////////////////
   // Function entry.
@@ -40,7 +84,8 @@ struct UniqueStubs {
    * Dynamically dispatch to the appropriate func prologue, when the called
    * function fails the prologue's func guard.
    *
-   * @see: emitFuncGuard()
+   * @reached:  jmp from func guard
+   * @aligned:  false (func guards are pre-EnterFrame, hence unaligned)
    */
   TCA funcPrologueRedispatch;
 
@@ -52,6 +97,12 @@ struct UniqueStubs {
    * stub, so that we can lazily generate their prologues.  If codegen for the
    * prologue succeeds, we update the prologue table to point to the new
    * prologue instead of this stub.
+   *
+   * @reached:  bindcall from TC; or
+   *            jmp from bindCallStub; or
+   *            jmp from funcPrologueRedispatch
+   *            (same callsites as func prologues)
+   * @aligned:  false
    */
   TCA fcallHelperThunk;
 
@@ -64,7 +115,8 @@ struct UniqueStubs {
    * first dispatches to any necessary funclets before jumping to the base()
    * translation.
    *
-   * @see: MCGenerator::getFuncBody()
+   * @reached:  call from enterTCHelper
+   * @aligned:  true (we ensure alignment when entering the TC)
    */
   TCA funcBodyHelperThunk;
 
@@ -72,8 +124,11 @@ struct UniqueStubs {
    * Call EventHook::onFunctionEnter() and handle the case where it requests
    * that we skip the function.
    *
-   * functionEnterHelperReturn is used by unwinder code that needs to detect
-   * calls made from this stub.
+   * functionEnterHelperReturn is only used by unwinder code to detect calls
+   * made from this stub.
+   *
+   * @reached:  vinvoke from TC (func prologue after EnterFrame)
+   * @aligned:  false
    */
   TCA functionEnterHelper;
   TCA functionEnterHelperReturn;
@@ -83,6 +138,9 @@ struct UniqueStubs {
    *
    * Also gracefully handles spurious wake-ups that result from racing with a
    * background thread clearing surprise flags.
+   *
+   * @reached:  vinvoke from TC (func prologue after EnterFrame)
+   * @aligned:  false
    */
   TCA functionSurprisedOrStackOverflow;
 
@@ -99,6 +157,9 @@ struct UniqueStubs {
    *
    * Generators need a different stub because the ActRec for a generator is in
    * the heap.
+   *
+   * @reached:  ret from TC
+   * @aligned:  true
    */
   TCA retHelper;
   TCA genRetHelper;       // version for generator
@@ -108,6 +169,9 @@ struct UniqueStubs {
    * Return from a function when the ActRec was pushed by an inlined call.
    *
    * This is the same as retHelper, but is kept separate to aid in debugging.
+   *
+   * @reached:  ret from TC
+   * @aligned:  true
    */
   TCA retInlHelper;
 
@@ -117,6 +181,9 @@ struct UniqueStubs {
    *
    * These stubs call a helper that looks up the original catch trace from the
    * call, executes it, then executes a REQ_POST_DEBUGGER_RET.
+   *
+   * @reached:  ret from TC
+   * @aligned:  true
    */
   TCA debuggerRetHelper;
   TCA debuggerGenRetHelper;
@@ -128,6 +195,9 @@ struct UniqueStubs {
 
   /*
    * Bindcall stubs for immutable/non-immutable calls.
+   *
+   * @reached:  bindcall from TC
+   * @aligned:  false
    */
   TCA bindCallStub;
   TCA immutableBindCallStub;
@@ -135,6 +205,9 @@ struct UniqueStubs {
   /*
    * Utility routine that helps implement a fast path to avoid full VM re-entry
    * during translations of Op::FCallArray.
+   *
+   * @reached:  vcallarray from TC
+   * @aligned:  false
    */
   TCA fcallArrayHelper;
 
@@ -143,13 +216,23 @@ struct UniqueStubs {
   // Interpreter stubs.
 
   /*
-   * Restart execution based on the value of vmpc after an instruction (e.g.,
-   * InterpOne) that changes vmpc.
+   * Restart execution based on the value of vmpc.  Used, e.g., to resume
+   * execution after an InterpOne.
    *
-   * These expect that all VM registers are synced.
+   * Expects that all VM registers are synced.
+   *
+   * @reached:  jmp from funcBodyHelperThunk, call from enterTCHelper
+   * @aligned:  true
+   */
+  TCA resumeHelper;
+
+  /*
+   * Like resumeHelper, but specifically for an interpreted FCall.
+   *
+   * @reached:  jmp from fcallHelperThunk
+   * @aligned:  false
    */
   TCA resumeHelperRet;
-  TCA resumeHelper;
 
   /*
    * Like resumeHelper, but interpret a basic block first to ensure we make
@@ -158,7 +241,10 @@ struct UniqueStubs {
    * interpHelper expects the correct value of vmpc to be in the first argument
    * register and syncs it, whereas interpHelperSyncedPC expects vmpc to be
    * synced a priori.  Both stubs will sync the vmsp and vmfp registers to
-   * vmRegs before interpreting.
+   * vmRegs before passing control to the interpreter.
+   *
+   * @reached:  jmp from TC
+   * @aligned:  true
    */
   TCA interpHelper;
   TCA interpHelperSyncedPC;
@@ -171,6 +257,9 @@ struct UniqueStubs {
    * offset to the bytecode to interpret.
    *
    * TODO(#6730846): Use an architecture-independent argument register API.
+   *
+   * @reached:  jmp from TC
+   * @aligned:  true
    */
   std::unordered_map<Op, TCA> interpOneCFHelpers;
 
@@ -184,6 +273,9 @@ struct UniqueStubs {
    *
    * The value to be decref'd should be in the first two argument registers
    * (data, type).  All GP registers are saved around the destructor call.
+   *
+   * @reached:  callfaststub from TC
+   * @aligned:  false
    */
   TCA decRefGeneric;
 
@@ -193,6 +285,9 @@ struct UniqueStubs {
    * Each freeLocalHelpers[i] is an entry point to a partially-unrolled loop.
    * freeManyLocalsHelper should be used instead when there are more than
    * kNumFreeLocalsHelpers locals.
+   *
+   * @reached:  vcall from TC
+   * @aligned:  false
    */
   TCA freeLocalsHelpers[kNumFreeLocalsHelpers];
   TCA freeManyLocalsHelper;

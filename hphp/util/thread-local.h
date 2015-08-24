@@ -78,7 +78,7 @@ inline uintptr_t tlsBase() {
     !defined(__CYGWIN__) && !defined(__MINGW__) &&            \
    ((__llvm__ && __clang__) ||                                \
    __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||   \
-   __INTEL_COMPILER)
+   __INTEL_COMPILER || _MSC_VER)
 #define USE_GCC_FAST_TLS
 #endif
 

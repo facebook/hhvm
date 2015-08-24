@@ -7,6 +7,8 @@ list(APPEND HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/version.h")
 if(NOT LINUX)
   list(REMOVE_ITEM CXX_SOURCES
        ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
+  list(REMOVE_ITEM HEADER_SOURCES
+       ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.h)
 endif()
 
 if(NOT ENABLE_FASTCGI)

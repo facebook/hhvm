@@ -153,6 +153,115 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
+VariableUnserializer::RefInfo::RefInfo(Variant* v)
+    : m_data(reinterpret_cast<uintptr_t>(v))
+{}
+
+VariableUnserializer::RefInfo
+VariableUnserializer::RefInfo::makeNonRefable(Variant* v) {
+  RefInfo r(v);
+  r.m_data |= 1;
+  return r;
+}
+
+Variant* VariableUnserializer::RefInfo::var() const  {
+  return reinterpret_cast<Variant*>(m_data & ~1);
+}
+
+bool VariableUnserializer::RefInfo::canBeReferenced() const {
+  return !(m_data & 1);
+}
+
+VariableUnserializer::VariableUnserializer(
+  const char* str,
+  size_t len,
+  Type type,
+  bool allowUnknownSerializableClass,
+  const Array& classWhitelist)
+    : m_type(type)
+    , m_buf(str)
+    , m_end(str + len)
+    , m_unknownSerializable(allowUnknownSerializableClass)
+    , m_classWhiteList(classWhitelist)
+{}
+
+VariableUnserializer::Type VariableUnserializer::type() const {
+  return m_type;
+}
+
+bool VariableUnserializer::allowUnknownSerializableClass() const {
+  return m_unknownSerializable;
+}
+
+const char* VariableUnserializer::head() const {
+  return m_buf;
+}
+
+char VariableUnserializer::peek() const {
+  check();
+  return *m_buf;
+}
+
+char VariableUnserializer::peekBack() const {
+  return m_buf[-1];
+}
+
+bool VariableUnserializer::endOfBuffer() const {
+  return m_buf >= m_end;
+}
+
+char VariableUnserializer::readChar() {
+  check();
+  return *(m_buf++);
+}
+
+void VariableUnserializer::add(Variant* v, UnserializeMode mode) {
+  if (mode == UnserializeMode::Value) {
+    m_refs.emplace_back(RefInfo(v));
+  } else if (mode == UnserializeMode::Key) {
+    // do nothing
+  } else if (mode == UnserializeMode::ColValue) {
+    m_refs.emplace_back(RefInfo::makeNonRefable(v));
+  } else {
+    assert(mode == UnserializeMode::ColKey);
+    // We don't currently support using the 'r' encoding to refer
+    // to collection keys, but eventually we'll need to make this
+    // work to allow objects as keys. For now we encode collections
+    // keys in m_refs using a null pointer.
+    m_refs.emplace_back(RefInfo(nullptr));
+  }
+}
+
+Variant* VariableUnserializer::getByVal(int id) {
+  if (id <= 0 || id > (int)m_refs.size()) return nullptr;
+  Variant* ret = m_refs[id-1].var();
+  if (!ret) {
+    throw Exception("Referring to collection keys using the 'r' encoding "
+                    "is not supported");
+  }
+  return ret;
+}
+
+Variant* VariableUnserializer::getByRef(int id) {
+  if (id <= 0 || id > (int)m_refs.size()) return nullptr;
+  if (!m_refs[id-1].canBeReferenced()) {
+    // If the low bit is set, that means the value cannot
+    // be taken by reference
+    throw Exception("Collection values cannot be taken by reference");
+  }
+  Variant* ret = m_refs[id-1].var();
+  if (!ret) {
+    throw Exception("Collection keys cannot be taken by reference");
+  }
+  return ret;
+}
+
+void VariableUnserializer::check() const {
+  if (m_buf >= m_end) {
+    throw Exception("Unexpected end of buffer during unserialization");
+  }
+}
+
 void VariableUnserializer::set(const char* buf, const char* end) {
   m_buf = buf;
   m_end = end;

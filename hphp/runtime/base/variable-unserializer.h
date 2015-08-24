@@ -144,6 +144,4 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf);
 
 }
 
-#include "hphp/runtime/base/variable-unserializer-inl.h"
-
 #endif // incl_HPHP_VARIABLE_UNSERIALIZER_H_

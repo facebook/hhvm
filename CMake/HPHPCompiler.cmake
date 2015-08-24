@@ -250,6 +250,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     "4702" # Unreachable code.
     "4706" # Assignment within conditional expression.
     "4710" # Function was not inlined.
+    "4711" # Function was selected for automated inlining. This produces tens of thousands of warnings in release mode if you leave it enabled, which will completely break Visual Studio, so don't enable it.
     "4714" # Function marked as __forceinline not inlined.
     "4774" # Format string expected in argument is not a string literal.
     "4820" # Padding added after data member.
@@ -328,7 +329,6 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     "DYNAMICBASE:NO" # Don't randomize the base address.
     "FIXED" # The program can only be loaded at its preferred base address.
     "STACK:8388608,8388608" # Set the stack reserve,commit to 8mb. Reserve should probably be higher.
-    "INCREMENTAL:NO" # Disable incremental linking, because it takes absolutely forever with HHVM.
     "time" # Output some timing information about the link.
   )
 
@@ -383,18 +383,6 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     endif()
   endforeach()
 
-  # We have to remove the incremental flags, so that we can explicitly disable it
-  # for all builds.
-  foreach(flag_var
-      CMAKE_EXE_LINKER_FLAGS_DEBUG
-      CMAKE_EXE_LINKER_FLAGS_RELEASE
-      CMAKE_EXE_LINKER_FLAGS_MINSIZEREL
-      CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO)
-    if (NOT ${flag_var} MATCHES "/INCREMENTAL:NO" AND ${flag_var} MATCHES "/INCREMENTAL")
-      string(REGEX REPLACE "/INCREMENTAL" "" ${flag_var} "${${flag_var}}")
-    endif()
-  endforeach()
-
   # In order for /Zc:inline, which speeds up the build significantly, to work
   # we need to remove the /Ob0 parameter that CMake adds by default, because that
   # would normally disable all inlining.
@@ -403,6 +391,10 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
       string(REGEX REPLACE "/Ob0" "" ${flag_var} "${${flag_var}}")
     endif()
   endforeach()
+
+  # Ignore a warning about an object file not defining any symbols,
+  # these are known, and we don't care.
+  set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} /ignore:4221")
 
   ############################################################
   # And finally, we can set all the flags we've built up.

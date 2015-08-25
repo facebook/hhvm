@@ -4,6 +4,8 @@
  * This helper routine is written in assembly to take care of the details
  * when transferring control between jitted code and the translator.
  *
+ * Note that MSVC uses translator-asm-helpers.asm instead of this.
+ *
  * The columns are registers of Linux and Mac ABI / Windows ABI / ARM ABI.
  *   rdi / rcx   / x0:  Cell* vm_sp
  *   rsi / rdx   / x1:  Cell* vm_fp

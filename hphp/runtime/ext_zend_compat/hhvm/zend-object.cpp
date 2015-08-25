@@ -63,9 +63,10 @@ void ZendObject::nativeDataCopy(ObjectData* dest, ObjectData* src) {
     raise_error("Trying to clone uncloneable object of class %s",
         src->getVMClass()->name()->data());
   }
-  TypedValue tv_src = make_tv<KindOfObject>(src);
-  tvBox(&tv_src);
-  zend_object_value ov = clone_call(tv_src.m_data.pref TSRMLS_CC);
+  TypedValue tv;
+  tvWriteObject(src, &tv);
+  auto ref = req::ptr<RefData>::attach(RefData::Make(tv));
+  zend_object_value ov = clone_call(ref.get() TSRMLS_CC);
 
   zop_dest->setHandle(ov.handle);
   zop_dest->setHandlers(ov.handlers);

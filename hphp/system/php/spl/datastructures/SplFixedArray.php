@@ -192,7 +192,15 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
    * @return     mixed   No value is returned.
    */
   public function setSize($size) {
+    if (is_bool($size) || is_float($size) || $size === null) {
+      $size = (int) $size;
+    }
     if (!is_numeric($size)) {
+      trigger_error(
+        sprintf("SplFixedArray::setSize() expects parameter 1 to be long,".
+                " %s given", gettype($size)
+               ),
+        E_WARNING);
       return;
     }
     if ($size < 0) {

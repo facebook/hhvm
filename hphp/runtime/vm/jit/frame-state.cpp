@@ -133,6 +133,8 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
 
+  always_assert(dst.mbase == src.mbase);
+
   // The tracked FPI state must always be the same, notice that the size of the
   // FPI stacks may differ as the FPush associated with one of the merged blocks
   // may be outside the region. In this case we must drop the unknown state.
@@ -629,6 +631,11 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().syncedSpLevel -= extra.cellsPopped;
     assertx(cur().evalStack.size() == 0);
     assertx(cur().stackDeficit == 0);
+
+    if (isMemberBaseOp(extra.opcode) || isMemberDimOp(extra.opcode) ||
+        isMemberFinalOp(extra.opcode)) {
+      cur().mbase = nullptr;
+    }
     break;
   }
 
@@ -660,6 +667,11 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case WIterNext:
     // kill the local to which this instruction stores iter's value
     killIterLocals({inst->extra<IterData>()->valId});
+    break;
+
+  case StMBase:
+  case FinishMemberOp:
+    cur().mbase = nullptr;
     break;
 
   default:
@@ -1027,9 +1039,10 @@ void FrameStateMgr::clearForUnprocessedPred() {
     }
   }
 
-  // These two values must go toward their conservative state.
+  // These values must go toward their conservative state.
   cur().thisAvailable    = false;
   cur().frameMaySpanCall = true;
+  cur().mbase            = nullptr;
 
   clearLocals();
 }
@@ -1118,6 +1131,14 @@ void FrameStateMgr::syncEvalStack() {
   cur().evalStack.clear();
   cur().stackDeficit = 0;
   FTRACE(2, "syncEvalStack --- level {}\n", cur().syncedSpLevel.offset);
+}
+
+void FrameStateMgr::setMemberBaseValue(SSATmp* value) {
+  cur().mbase = value;
+}
+
+SSATmp* FrameStateMgr::memberBaseValue() const {
+  return cur().mbase;
 }
 
 SSATmp* FrameStateMgr::localValue(uint32_t id) const {

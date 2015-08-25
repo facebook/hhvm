@@ -221,6 +221,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckRange:
   case LdARInvName:
   case PackMagicArgs:
+  case LdMBase:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -520,6 +521,8 @@ bool canDCE(IRInstruction* inst) {
   case ThrowOutOfBounds:
   case ThrowInvalidOperation:
   case MapIdx:
+  case StMBase:
+  case FinishMemberOp:
     return false;
   }
   not_reached();

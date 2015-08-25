@@ -4827,7 +4827,7 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
       case MOpFlags::Warn:
         return Prop<true, false, false>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Define:
-      case MOpFlags::Reffy:
+      case MOpFlags::DefineReffy:
         return Prop<false, true, false>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Unset:
         return Prop<false, false, true>(mstate.tvRef, ctx, mstate.base, key);
@@ -4854,7 +4854,7 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
       break;
 
     case MOpFlags::Define:
-    case MOpFlags::Reffy:
+    case MOpFlags::DefineReffy:
     case MOpFlags::Unset:
     case MOpFlags::WarnDefine:
       always_assert(false);
@@ -4879,7 +4879,7 @@ static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
           Elem<true>(mstate.tvRef, mstate.base, key));
       case MOpFlags::Define:
         return ElemD<false,false>(mstate.tvRef, mstate.base, key);
-      case MOpFlags::Reffy:
+      case MOpFlags::DefineReffy:
         return ElemD<false,true>(mstate.tvRef, mstate.base, key);
       case MOpFlags::Unset:
         return ElemU(mstate.tvRef, mstate.base, key);

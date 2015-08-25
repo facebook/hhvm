@@ -167,6 +167,13 @@ struct FrameState {
   FPInvOffset spOffset;   // delta from vmfp to spvalue
 
   /*
+   * The member base register is almost always a PtrToGen, but we often know
+   * which specific value it points to (right after BaseL or BaseH, for
+   * example). That value is stored here.
+   */
+  SSATmp* mbase{nullptr};
+
+  /*
    * m_thisAvailable tracks whether the current frame is known to have a
    * non-null $this pointer.
    */
@@ -352,6 +359,8 @@ struct FrameStateMgr final {
   EvalStack& evalStack() { return cur().evalStack; }
   FPInvOffset syncedSpLevel() const { return cur().syncedSpLevel; }
   void syncEvalStack();
+  void setMemberBaseValue(SSATmp*);
+  SSATmp* memberBaseValue() const;
 
   void refinePredictedTmpType(SSATmp*, Type);
   Type predictedTmpType(SSATmp*) const;

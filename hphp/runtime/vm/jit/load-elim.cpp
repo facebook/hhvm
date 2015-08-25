@@ -693,12 +693,16 @@ void optimize_inst(Local& env, IRInstruction& inst, Flags flags) {
              flags.knownType.toString(),
              resolved->toString());
 
-      env.global.unit.replace(
-        &inst,
-        AssertType,
-        flags.knownType,
-        resolved
-      );
+      if (resolved->type().subtypeOfAny(TGen, TCls)) {
+        env.global.unit.replace(
+          &inst,
+          AssertType,
+          flags.knownType,
+          resolved
+        );
+      } else {
+        env.global.unit.replace(&inst, Mov, resolved);
+      }
     },
 
     [&] (FReducible flags) { reduce_inst(env, inst, flags); },

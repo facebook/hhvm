@@ -277,6 +277,7 @@ NOOP_OPCODE(ExitPlaceholder);
 NOOP_OPCODE(HintLocInner)
 NOOP_OPCODE(HintStkInner)
 NOOP_OPCODE(AssertStk)
+NOOP_OPCODE(FinishMemberOp)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -3679,6 +3680,18 @@ void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
   vmain() << lea{rvmtl()[rds::kVmMInstrStateOff], dstLoc(inst, 0).reg()};
+}
+
+void CodeGenerator::cgLdMBase(IRInstruction* inst) {
+  vmain() << load{rvmtl()[rds::kVmMInstrStateOff + offsetof(MInstrState, base)],
+                  dstLoc(inst, 0).reg()};
+}
+
+void CodeGenerator::cgStMBase(IRInstruction* inst) {
+  vmain() << store{
+    srcLoc(inst, 0).reg(),
+    rvmtl()[rds::kVmMInstrStateOff + offsetof(MInstrState, base)]
+  };
 }
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {

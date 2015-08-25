@@ -2108,12 +2108,25 @@ To string conversions:
 
 | DefMIStateBase, D(PtrToMISGen), NA, NF
 
-  Declares a base register for MInstrState. Currently this is always %rsp.
+  Returns a pointer to the base of the current MInstrState.
 
 | LdMIStateAddr, DofS(0), S(PtrToMISGen) C(Int), NF
 
   Load an MInstrState address. Returns a pointer to (S0 + S1) with the same
   type as S0. S0 must be the output of a DefMIStateBase.
+
+| LdMBase, D(PtrToGen), NA, NF
+
+  Load the current value of the member base register.
+
+| StMBase, ND, S(PtrToGen), NF
+
+  Store a new value to the member base register.
+
+| FinishMemberOp, ND, NA, NF
+
+  Mark the end of a member operation. This has no effect at runtime but exists
+  to provide information for certain optimizations.
 
 All of the remaining opcodes in this section are simple wrappers around helper
 functions (specified in S0) to perform the corresponding vector operation. If
@@ -2227,11 +2240,11 @@ fields of that struct for holding intermediate values.
   Get intermediate element with key S1 from base S0. The base will not be
   modified.
 
-| ElemArray, D(PtrToMembGen), S(PtrToGen) S(Int,Str), Er
+| ElemArray, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-| ElemArrayW, D(PtrToMembGen), S(PtrToGen) S(Int,Str), Er
+| ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-  Similar to ElemX, but assumes the base S0 is an array and the key S1 is an
+  Similar to ElemX, but the base S0 is an array and the key S1 is an
   int/str.  The ElemArrayW version is for Warn member instrs.
 
 | ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er

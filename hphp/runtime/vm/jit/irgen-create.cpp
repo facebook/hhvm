@@ -196,7 +196,7 @@ void emitNewMixedArray(IRGS& env, int32_t capacity) {
 
 void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
   auto const ldrefExit = makeExit(env);
-  auto const ldPMExit = makeExit(env);
+  auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
 
   SSATmp* arr;

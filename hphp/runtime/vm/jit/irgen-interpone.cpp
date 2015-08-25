@@ -496,22 +496,6 @@ void emitDefFunc(IRGS& env, int32_t)          { INTERP }
 void emitCatch(IRGS& env)                     { INTERP }
 void emitHighInvalid(IRGS& env)               { std::abort(); }
 
-void emitBaseL(IRGS& env, int32_t, MOpFlags)                        { INTERP }
-void emitBaseH(IRGS& env)                                           { INTERP }
-void emitDimL(IRGS& env, int32_t, PropElemOp, MOpFlags)             { INTERP }
-void emitDimC(IRGS& env, int32_t, PropElemOp, MOpFlags)             { INTERP }
-void emitDimInt(IRGS& env, int64_t, PropElemOp, MOpFlags)           { INTERP }
-void emitDimStr(IRGS& env, const StringData*, PropElemOp, MOpFlags) { INTERP }
-void emitQueryML(IRGS& env, int32_t, QueryMOp, PropElemOp, int32_t) { INTERP }
-void emitQueryMC(IRGS& env, int32_t, QueryMOp, PropElemOp)          { INTERP }
-void emitQueryMInt(IRGS& env, int32_t, QueryMOp, PropElemOp, int64_t) {
-  INTERP
-}
-void emitQueryMStr(IRGS& env, int32_t, QueryMOp,
-                   PropElemOp, const StringData*) {
-  INTERP
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

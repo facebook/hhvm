@@ -436,9 +436,7 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
 }
 
 template<KeyType keyType, bool checkForInt, bool warn>
-inline const TypedValue* elemArrayImpl(TypedValue* a, key_type<keyType> key) {
-  assertx(a->m_type == KindOfArray);
-  auto const ad = a->m_data.parr;
+inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   auto const ret = checkForInt ? checkedGet(ad, key) : ad->nvGet(key);
   return ret ? ret : elemArrayNotFound<warn>(key);
 }
@@ -453,8 +451,8 @@ inline const TypedValue* elemArrayImpl(TypedValue* a, key_type<keyType> key) {
   m(elemArrayIW,   KeyType::Int,       false,  true)    \
 
 #define X(nm, keyType, checkForInt, warn)               \
-inline const TypedValue* nm(TypedValue* a, key_type<keyType> key) { \
-  return elemArrayImpl<keyType, checkForInt, warn>(a, key);\
+inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
+  return elemArrayImpl<keyType, checkForInt, warn>(ad, key);\
 }
 ELEM_ARRAY_HELPER_TABLE(X)
 #undef X

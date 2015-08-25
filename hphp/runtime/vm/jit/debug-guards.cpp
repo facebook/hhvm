@@ -55,9 +55,15 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr) {
 
     auto const done = v.makeBlock();
 
+#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
+    constexpr size_t reqInjOff = offsetof(ThreadInfo, m_reqInjectionData);
+    constexpr size_t dbgOff =
+      reqInjOff + RequestInjectionData::debuggerReadOnlyOffset();
+#else
     constexpr size_t dbgOff =
       offsetof(ThreadInfo, m_reqInjectionData) +
       RequestInjectionData::debuggerReadOnlyOffset();
+#endif
 
     v << ldimmq{reinterpret_cast<uintptr_t>(sk.pc()), rarg(0)};
 

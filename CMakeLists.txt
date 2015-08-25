@@ -65,9 +65,7 @@ SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 file(GLOB subdirs ${CMAKE_CURRENT_SOURCE_DIR}/hphp/runtime/ext/*)
 foreach (dir ${subdirs})
   if (IS_DIRECTORY ${dir})
-    if (EXISTS "${dir}/config.cmake"
-      AND NOT ${dir} MATCHES "/gd/"
-      AND NOT ${dir} MATCHES "/imap/")
+    if (EXISTS "${dir}/config.cmake")
       set(HRE_CURRENT_EXT_PATH "${dir}")
       include("${dir}/config.cmake")
     endif()

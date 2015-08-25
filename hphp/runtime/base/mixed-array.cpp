@@ -484,7 +484,12 @@ void MixedArray::Release(ArrayData* in) {
 
     for (auto ptr = data; ptr != stop; ++ptr) {
       if (isTombstone(ptr->data.m_type)) continue;
-      if (ptr->hasStrKey()) decRefStr(ptr->skey);
+      if (ptr->hasStrKey()) {
+        decRefStr(ptr->skey);
+        // Keep GC from asserting on freed string in debug mode. GC will ignore
+        // pointers to freed memory gracefully in prod mode.
+        if (debug) ptr->skey = nullptr;
+      }
       tvRefcountedDecRef(&ptr->data);
     }
 

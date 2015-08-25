@@ -166,6 +166,9 @@ inline void tvDecRef(TypedValue* tv) {
 ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
   if (isRefcountedType(tv->m_type)) {
     tvDecRef(tv);
+    // If we're in debug mode, turn the entry into null so that the GC doesn't
+    // assert if it tries to follow it.
+    if (debug) tv->m_type = KindOfNull;
   }
 }
 

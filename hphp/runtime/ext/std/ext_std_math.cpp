@@ -499,7 +499,7 @@ Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
   if (divisor == 0) {
     raise_warning("intdiv(): Division by zero");
     return false;
-  } else if (divisor == -1 && numerator == LONG_MIN) {
+  } else if (divisor == -1 && numerator == std::numeric_limits<int64_t>::min()) {
     return 0;
   }
   return numerator/divisor;

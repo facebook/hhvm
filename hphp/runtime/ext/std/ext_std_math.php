@@ -609,6 +609,7 @@ function lcg_value(): float;
 
 /**
  * intdiv() Integer division.
+ *
  * @param int numerator - Number to be divided.
  * @param int divisor - Number which divides the numerator.
  *

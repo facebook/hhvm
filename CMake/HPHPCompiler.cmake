@@ -163,6 +163,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   set(MSVC_FAVORED_ARCHITECTURE "blend" CACHE STRING "One of 'blend', 'AMD64', 'INTEL64', or 'ATOM'. This tells the compiler to generate code optimized to run best on the specified architecture.")
   set(MSVC_ENABLE_LTCG OFF CACHE BOOL "If enabled, use Link Time Code Generation for Release builds.")
   set(MSVC_ENABLE_STATIC_ANALYSIS OFF CACHE BOOL "If enabled, do more complex static analysis and generate warnings appropriately.")
+  set(MSVC_ENABLE_PCH ON CACHE BOOL "If enabled, use precompiled headers to speed up the build.")
 
   # The general options passed:
   list(APPEND MSVC_GENERAL_OPTIONS

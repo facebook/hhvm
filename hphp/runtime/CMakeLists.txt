@@ -34,9 +34,16 @@ add_custom_command(
   COMMENT "Generating HHIR opcode table"
   VERBATIM)
 
+set(PCH_SOURCES)
+add_precompiled_header(
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_static.h"
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_static.cpp"
+  PCH_SOURCES
+)
+
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}
-            "ir-opcode-generated.h")
+            ${PCH_SOURCES} "ir-opcode-generated.h")
 auto_source_group("hphp_runtime_static" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")

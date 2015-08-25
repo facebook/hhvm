@@ -2282,15 +2282,23 @@ static Variant php_mb_substr(const String& str, int from,
     }
   }
 
-  int size;
+  int len = vlen.toInt64();
+  int size = 0;
+
   if (substr) {
-    size = mbfl_strlen(&string);
+    int size_tmp = -1;
+    if (vlen.isNull() || len == 0x7FFFFFFF) {
+      size_tmp = mbfl_strlen(&string);
+      len = size_tmp;
+    }
+    if (from < 0 || len < 0) {
+      size = size_tmp < 0 ? mbfl_strlen(&string) : size_tmp;
+    }
   } else {
     size = str.size();
-  }
-  int len = vlen.toInt64();
-  if (vlen.isNull() || len == 0x7FFFFFFF) {
-    len = size;
+    if (vlen.isNull() || len == 0x7FFFFFFF) {
+      len = size;
+    }
   }
 
   /* if "from" position is negative, count start position from the end
@@ -2313,11 +2321,8 @@ static Variant php_mb_substr(const String& str, int from,
     }
   }
 
-  if (from > size) {
-    if (!substr) {
-      return false;
-    }
-    from = size;
+  if (!substr && from > size) {
+    return false;
   }
 
   mbfl_string result;

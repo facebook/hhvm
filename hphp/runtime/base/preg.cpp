@@ -1649,6 +1649,13 @@ Variant preg_split(const String& pattern, const String& subject,
                           start_offset, g_notempty | utf8_check,
                           offsets, size_offsets);
 
+    /* Subsequent calls to pcre_exec don't need to bother with the
+     * utf8 validity check: if the subject isn't valid, the first
+     * call to pcre_exec will have failed, and as long as we only
+     * set start_offset to known character boundaries we won't
+     * supply an invalid offset. */
+    utf8_check = PCRE_NO_UTF8_CHECK;
+
     /* Check for too many substrings condition. */
     if (count == 0) {
       raise_warning("Matched, but too many substrings");
@@ -1657,13 +1664,6 @@ Variant preg_split(const String& pattern, const String& subject,
 
     /* If something matched */
     if (count > 0) {
-      /* Subsequent calls to pcre_exec don't need to bother with the
-       * utf8 validity check: if the subject isn't valid, the first
-       * call to pcre_exec will have failed, and as long as we only
-       * set start_offset to known character boundaries we won't
-       * supply an invalid offset. */
-      utf8_check = PCRE_NO_UTF8_CHECK;
-
       if (!no_empty || subject.data() + offsets[0] != last_match) {
         if (offset_capture) {
           /* Add (match, offset) pair to the return value */
@@ -1721,7 +1721,7 @@ Variant preg_split(const String& pattern, const String& subject,
           init_local_extra(&bump_extra, bump_pce->extra);
           count = pcre_exec(bump_pce->re, &bump_extra, subject.data(),
                             subject.size(), start_offset,
-                            0, offsets, size_offsets);
+                            utf8_check, offsets, size_offsets);
           if (count < 1) {
             raise_warning("Unknown error");
             offsets[0] = start_offset;

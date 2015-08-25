@@ -410,7 +410,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
   int item_count = tzdb->index_size;
   const timelib_tzdb_index_entry *table = tzdb->index;
 
-  Array ret;
+  Array ret = Array::Create();
   for (int i = 0; i < item_count; ++i) {
     // This string is what PHP considers as "data" or "info" which is basically
     // the string of "PHP1xx" where xx is country code that uses this timezone.
@@ -420,9 +420,10 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
     String countryCode = String(&infoString[5], 2, CopyString);
     if ((what == q_DateTimeZone$$PER_COUNTRY && equal(country, countryCode))
         || what == q_DateTimeZone$$ALL_WITH_BC
-        || (check_id_allowed(table[i].id, what) && tzdb->data[table[i].pos + 4] == '\1')) {
+        || (check_id_allowed(table[i].id, what) 
+            && tzdb->data[table[i].pos + 4] == '\1')) {
 
-      ret.set(String(table[i].id, CopyString), countryCode);
+      ret.append(String(table[i].id, CopyString));
     }
   }
   return ret;

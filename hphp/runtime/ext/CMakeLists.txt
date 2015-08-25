@@ -30,7 +30,6 @@ include(HHVMExtensionConfig)
 file(GLOB subdirs ${CMAKE_CURRENT_SOURCE_DIR}/*)
 foreach (dir ${subdirs})
   if (IS_DIRECTORY ${dir})
-      # Otherwise the sources are already known.
     if (NOT EXISTS "${dir}/config.cmake")
       HHVM_SELECT_SOURCES(${dir})
     endif()

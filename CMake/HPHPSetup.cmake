@@ -264,6 +264,7 @@ endif()
 
 if (NOT LIBZIP_INCLUDE_DIR_ZIP)
   include_directories("${TP_DIR}/libzip")
+  add_definitions("-DZIP_EXTERN=")
 endif()
 
 if (NOT PCRE_LIBRARY)

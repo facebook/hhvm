@@ -100,13 +100,11 @@ template<class F> void ObjectData::scan(F& mark) const {
   if (getAttribute(HasNativeData)) {
     // [NativeNode][NativeData][ObjectData][props]
     // TODO t6169196 indirect NativeDataInfo call for exact marking
-    auto ndi = m_cls->getNativeDataInfo();
-    auto size = alignTypedValue(ndi->sz);
-    mark((char*)this - size, ndi->sz);
-  } else if (getAttribute(IsCppBuiltin)) {
-    // [ObjectData][C++ fields][props]
-    // TODO t6169228 virtual call for exact marking
-    mark(this + 1, uintptr_t(props) - uintptr_t(this + 1));
+    auto h = reinterpret_cast<const Header*>(
+      Native::getNativeNode(this, m_cls->getNativeDataInfo())
+    );
+    assert(h->kind() == HeaderKind::NativeData);
+    mark(h, h->size() - sizeof(ObjectData));
   } else if (m_hdr.kind == HeaderKind::ResumableObj) {
     // scan the frame locals, iterators, and Resumable
     auto r = Resumable::FromObj(this);
@@ -114,14 +112,11 @@ template<class F> void ObjectData::scan(F& mark) const {
                  r->actRec()->func()->numSlotsInFrame();
     mark(frame, uintptr_t(this) - uintptr_t(frame));
   }
-  if (isObjectKind(m_hdr.kind) && getAttribute(ObjectData::IsWaitHandle)) {
-    // if we know for sure that objects with the IsWaitHandle attribute
-    // are never HNI-style native objects, never IsCppBuiltin objects,
-    // and never Resumable, then we can make this an else-if guard. if
-    // they are always IsCppBuiltin, or always HNI, then we could hoist
-    // this if into one of the two cases above.
-    auto wh = static_cast<const c_WaitHandle*>(this);
-    wh->scan(mark);
+
+  if (getAttribute(IsCppBuiltin)) {
+    // [ObjectData][C++ fields][props]
+    // TODO t6169228 virtual call for exact marking
+    mark(this + 1, uintptr_t(props) - uintptr_t(this + 1));
   }
   mark(m_cls);
   for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {

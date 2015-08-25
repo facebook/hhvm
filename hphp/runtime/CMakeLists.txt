@@ -34,7 +34,7 @@ add_custom_command(
   COMMENT "Generating HHIR opcode table"
   VERBATIM)
 
-ADD_LIBRARY(hphp_runtime_static STATIC
+ADD_LIBRARY(hphp_runtime_static OBJECT
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}
             "ir-opcode-generated.h")
 auto_source_group("hphp_runtime_static" "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -45,7 +45,6 @@ SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 
 SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 
-hphp_link(hphp_runtime_static)
 HHVM_PUBLIC_HEADERS(runtime ${HEADER_SOURCES})
 
 if (ENABLE_COTIRE)

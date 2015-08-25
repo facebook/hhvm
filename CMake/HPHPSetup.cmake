@@ -52,7 +52,7 @@ elseif(CYGWIN)
   -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 elseif (MSVC)
   set(ENABLE_FASTCGI 1)
-  set(HHVM_ANCHOR_SYMS ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
+  set(HHVM_ANCHOR_SYMS)
 else()
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS

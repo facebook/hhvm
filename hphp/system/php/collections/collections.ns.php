@@ -38,8 +38,20 @@ interface OutputCollection {
 
 namespace HH {
 
+/**
+ * Collection is the primary collection interface for mutable collections.
+ * Assuming you want the ability to clear out your collection, you would
+ * implement this (or a child of this) interface. Otherwise, you can implement
+ * @OutputCollection only. If your collection to be immutable, implement
+ * @ConstCollection only instead.
+ */
 interface Collection extends \ConstCollection,
                              \OutputCollection {
+  /**
+   * Removes all items from the collection
+   *
+   * @return void
+   */
   public function clear();
 }
 

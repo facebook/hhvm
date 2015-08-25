@@ -114,6 +114,11 @@ struct ExtraArgs : private boost::noncopyable {
    */
   TypedValue* getExtraArg(unsigned argInd) const;
 
+  template<class F> void scan(F& mark, unsigned int nargs) const {
+    for (unsigned i = 0; i < nargs; ++i) {
+      mark(*(m_extraArgs + i));
+    }
+  }
 private:
   ExtraArgs();
   ~ExtraArgs();
@@ -150,11 +155,7 @@ class VarEnv {
   const bool m_global;
 
  public:
-  template<class F> void scan(F& mark) const {
-    mark(m_nvTable);
-    // TODO #6511877 scan ExtraArgs. requires calculating numExtra
-    //mark(m_extraArgs);
-  }
+  template<class F> void scan(F& mark) const;
 
  public:
   explicit VarEnv();
@@ -1122,6 +1123,17 @@ void pushLocalsAndIterators(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template<class F> void VarEnv::scan(F& mark) const {
+  mark(m_nvTable);
+  if (m_extraArgs) {
+    if (const auto ar = m_nvTable.getFP()) {
+      const int numExtra =
+        ar->numArgs() - ar->m_func->numNonVariadicParams();
+      m_extraArgs->scan(mark, numExtra);
+    }
+  }
+}
 
 }
 

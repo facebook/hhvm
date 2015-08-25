@@ -495,6 +495,17 @@ int64_t HHVM_FUNCTION(mt_rand,
 
 double HHVM_FUNCTION(lcg_value) { return math_combined_lcg();}
 
+Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
+  if (divisor == 0) {
+    raise_warning("intdiv(): Division by zero");
+    return false;
+  } else if (divisor == -1 &&
+             numerator == std::numeric_limits<int64_t>::min()) {
+    return 0;
+  }
+  return numerator/divisor;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_PHP_ROUND_HALF_UP("PHP_ROUND_HALF_UP");
@@ -587,6 +598,7 @@ void StandardExtension::initMath() {
   HHVM_FE(mt_srand);
   HHVM_FE(mt_rand);
   HHVM_FE(lcg_value);
+  HHVM_FE(intdiv);
 
   loadSystemlib("std_math");
 }

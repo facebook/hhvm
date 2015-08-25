@@ -1,0 +1,10 @@
+int(1)
+int(-1)
+int(-1)
+int(1)
+int(1)
+int(1)
+int(0)
+
+Warning: intdiv(): Division by zero in %s/test/slow/ext_math/intdiv.php on line 9
+bool(false)

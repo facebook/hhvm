@@ -61,9 +61,9 @@ HHVM_DEFINE_EXTENSION("gd"
     ext_exif.php
     ext_gd.php
   DEPENDS
-    libIConv
+    libFreetype OPTIONAL
     libJpeg
+    libIConv
     libPng
     libVpx OPTIONAL
-    libFreetype OPTIONAL
 )

@@ -2,9 +2,30 @@
 
 namespace {
 
+/**
+ * The base interface implemented for a collection type so that base information
+ * such as count and its items are available.
+ *
+ */
 interface ConstCollection extends Countable {
+  /**
+   * Is the collection empty?
+   *
+   * @return bool - Returns TRUE if the collection is empty; FASLE otherswise.
+   */
   public function isEmpty();
+  /**
+   * Get the number of items in the collection. Cannot be negative.
+   *
+   * @return int - Returns the number of items in the collection
+   */
   public function count();
+  /**
+   * Get access to the items in the collection. Can be empty.
+   *
+   * @return Iterable - Returns an iterable with access to all of the items in
+   *   the collection.
+   */
   public function items();
 }
 

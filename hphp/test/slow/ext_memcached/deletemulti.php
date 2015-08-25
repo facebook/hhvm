@@ -5,22 +5,22 @@ $m->addServer('localhost', '11211');
 
 function has_all_keys($keys, $array, $check_true = false)
 {
-	foreach ($keys as $key) {
-		if (!isset($array[$key]))
-			return false;
-		
-		if ($check_true && $array[$key] !== true)
-			return false;
-	}
-	return true;
+    foreach ($keys as $key) {
+        if (!isset($array[$key]))
+            return false;
+
+        if ($check_true && $array[$key] !== true)
+            return false;
+    }
+    return true;
 }
 
 $data = array(
-	'foo' => 'foo-data',
-	'bar' => 'bar-data',
-	'baz' => 'baz-data',
-	'lol' => 'lol-data',
-	'kek' => 'kek-data',
+    'foo' => 'foo-data',
+    'bar' => 'bar-data',
+    'baz' => 'baz-data',
+    'lol' => 'lol-data',
+    'kek' => 'kek-data',
 );
 
 $keys = array_keys($data);
@@ -63,4 +63,3 @@ foreach ($retval as $key => $value) {
         echo "$key NOT FOUND\n";
     }
 }
-

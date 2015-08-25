@@ -4,7 +4,7 @@ $m = new Memcached();
 $m->addServer('localhost', '11211');
 
 function dump_types($v, $k) {
-	echo gettype($v) . "\n";
+    echo gettype($v) . "\n";
 }
 
 $keys = array(100, 'str');

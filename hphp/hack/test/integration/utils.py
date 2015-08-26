@@ -8,6 +8,8 @@ import signal
 import subprocess
 import sys
 
+test_env = dict(os.environ, **{'HH_TEST_MODE': '1'})
+
 def touch(fn):
     with open(fn, 'a'):
         os.utime(fn, None)
@@ -34,6 +36,7 @@ def proc_call(args, stdin=None):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            env=test_env,
             universal_newlines=True)
     (stdout_data, stderr_data) = proc.communicate(stdin)
     sys.stderr.write(stderr_data)

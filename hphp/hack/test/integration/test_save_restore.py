@@ -11,7 +11,8 @@ import tempfile
 import time
 import unittest
 
-from utils import touch, write_files, proc_call, ensure_output_contains
+from utils import touch, write_files, proc_call, ensure_output_contains, \
+        test_env
 
 def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     """
@@ -108,7 +109,7 @@ class TestSaveRestore(unittest.TestCase):
             cls.hh_server,
             '--check', init_dir,
             '--save', os.path.join(cls.saved_state_dir, 'foo'),
-        ])
+        ], env=test_env)
 
         shutil.rmtree(init_dir)
 
@@ -123,7 +124,8 @@ class TestSaveRestore(unittest.TestCase):
         print(" ".join(cmd), file=sys.stderr)
         return subprocess.Popen(
                 cmd,
-                stderr=subprocess.PIPE)
+                stderr=subprocess.PIPE,
+                env=test_env)
 
     def setUp(self):
         write_files(self.files, self.repo_dir)
@@ -133,7 +135,7 @@ class TestSaveRestore(unittest.TestCase):
             self.hh_client,
             'stop',
             self.repo_dir
-        ])
+        ], env=test_env)
         for p in glob.glob(os.path.join(self.repo_dir, '*')):
             os.remove(p)
 

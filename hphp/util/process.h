@@ -22,13 +22,11 @@
 #include <cstdio>
 
 #include <sys/types.h>
-#ifdef _MSC_VER
-# include <windows.h>
-#else
-# include <sys/syscall.h>
-# include <unistd.h>
-#endif
 #include <pthread.h>
+
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
+#include <folly/WindowsPortability.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

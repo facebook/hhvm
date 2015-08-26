@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
+#include <folly/FilePortability.h>
 
 #ifdef __APPLE__
 #include <mach-o/getsect.h>

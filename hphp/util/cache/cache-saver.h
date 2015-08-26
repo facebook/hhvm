@@ -75,13 +75,13 @@
 #define incl_HPHP_CACHE_SAVER_H_
 
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
 #include <boost/utility.hpp>
+#include <folly/FilePortability.h>
 
 namespace HPHP {
 

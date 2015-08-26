@@ -17,9 +17,6 @@
 
 #include <atomic>
 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/mman.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -29,6 +26,7 @@
 #endif
 
 #include <folly/Bits.h>
+#include <folly/CPortability.h>
 #include <folly/Format.h>
 
 #include "hphp/util/logger.h"

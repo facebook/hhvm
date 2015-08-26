@@ -18,7 +18,7 @@
 
 #include <cstdio>
 #include <atomic>
-#include <unistd.h>
+#include <folly/FilePortability.h>
 
 #include "hphp/util/compatibility.h"
 

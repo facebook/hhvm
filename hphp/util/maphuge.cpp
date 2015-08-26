@@ -17,8 +17,8 @@
 #include "hphp/util/maphuge.h"
 #include "hphp/util/kernel-version.h"
 
-#include <unistd.h>
-#include <sys/mman.h>
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 
 namespace HPHP {
 

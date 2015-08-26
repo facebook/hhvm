@@ -17,12 +17,12 @@
 #include "hphp/util/cache/cache-saver.h"
 
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
+#include <folly/FilePortability.h>
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include "hphp/util/cache/magic-numbers.h"

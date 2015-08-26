@@ -83,16 +83,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <io.h>
-#include <direct.h>
-#endif
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <folly/FilePortability.h>
 
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>

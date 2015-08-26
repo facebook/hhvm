@@ -15,7 +15,7 @@
 */
 
 #include "hphp/util/current-executable.h"
-#include <unistd.h>
+#include <folly/FilePortability.h>
 #include <limits.h>
 
 #ifdef __APPLE__

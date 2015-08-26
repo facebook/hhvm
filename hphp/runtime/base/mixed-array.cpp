@@ -59,7 +59,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   ad->initHash(hash, scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
-  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->m_hdr.init(HeaderKind::Mixed, UnsharedGCByte);
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
@@ -96,7 +96,7 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = size; // pos=0
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UnsharedGCByte);
     assert(ad->m_size == size);
     assert(ad->kind() == kPackedKind);
     assert(ad->cap() == cap);
@@ -141,7 +141,7 @@ ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = size; // pos=0
-  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UnsharedGCByte);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
   assert(ad->kind() == kPackedKind);
@@ -163,7 +163,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   ad->initHash(hash, scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->m_hdr.init(HeaderKind::Mixed, UnsharedGCByte);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -228,8 +228,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   // `malloc' returns multiple of 16 bytes.
   bcopy32_inline(ad, &other,
                  sizeof(MixedArray) + sizeof(Elm) * other.m_used + 24);
-  RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
-  ad->m_hdr.init(other.m_hdr, count);
+  GCByte gcbyte = mode == AllocMode::Request ? UnsharedGCByte : StaticGCByte;
+  ad->m_hdr.init(other.m_hdr, gcbyte);
   copyHash(ad->hashTab(), other.hashTab(), scale);
 
   // Bump up refcounts as needed.
@@ -397,7 +397,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   // allocated for the MixedArray, assuming `malloc()' always allocates
   // multiple of 16 bytes.
   bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
-  ad->m_hdr.count = UncountedValue; // after bcopy, update count
+  ad->m_hdr.gcbyte = UncountedGCByte; // after bcopy, update count
   copyHash(ad->hashTab(), a->hashTab(), scale);
 
   // Need to make sure keys and values are all uncounted.
@@ -430,7 +430,7 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = array->m_sizeAndPos;
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UncountedValue);
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UncountedGCByte);
     assert(ad->kind() == ArrayData::kPackedKind);
     assert(ad->cap() == cap);
     assert(ad->m_size == size);
@@ -460,7 +460,7 @@ ArrayData* MixedArray::MakeUncountedPackedHelper(ArrayData* array) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = array->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, UncountedValue);
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, UncountedGCByte);
   assert(ad->kind() == ArrayData::kPackedKind);
   assert(ad->cap() == cap);
   assert(ad->m_size == array->m_size);
@@ -632,7 +632,6 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
-  assert(getCount() != 0);
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(MixedArray::HashSize(m_scale) ==
          folly::nextPowTwo<uint64_t>(capacity()));
@@ -1073,7 +1072,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   auto ad            = reqAllocArray(newScale);
   auto const oldUsed = old->m_used;
   ad->m_sizeAndPos   = old->m_sizeAndPos;
-  ad->m_hdr.init(old->m_hdr, 1);
+  ad->m_hdr.init(old->m_hdr, UnsharedGCByte);
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
@@ -1596,7 +1595,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->m_hdr.init(src->m_hdr, 1);
+  ad->m_hdr.init(src->m_hdr, UnsharedGCByte);
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1697,7 +1696,7 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   auto const neededSize = ad->size() + elems->size();
 
   auto ret =
-    ad->hasMultipleRefs() ? CopyReserve(asMixed(ad), neededSize) :
+    ad->cowCheck() ? CopyReserve(asMixed(ad), neededSize) :
     asMixed(ad);
 
   if (UNLIKELY(!elems->isMixed())) {
@@ -1795,7 +1794,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
 
 ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asMixed(ad);
-  if (a->hasMultipleRefs()) a = a->copyMixed();
+  if (a->cowCheck()) a = a->copyMixed();
   auto elms = a->data();
   if (a->m_size) {
     ssize_t pos = IterLast(a);
@@ -1818,7 +1817,7 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
 
 ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   auto a = asMixed(adInput);
-  if (a->hasMultipleRefs()) a = a->copyMixed();
+  if (a->cowCheck()) a = a->copyMixed();
   auto elms = a->data();
   if (a->m_size) {
     ssize_t pos = a->nextElm(elms, -1);
@@ -1843,7 +1842,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
                               const Variant& v,
                               bool copy) {
   auto a = asMixed(adInput);
-  if (a->hasMultipleRefs()) a = a->copyMixedAndResizeIfNeeded();
+  if (a->cowCheck()) a = a->copyMixedAndResizeIfNeeded();
 
   auto elms = a->data();
   if (a->m_used == 0 || !isTombstone(elms[0].data.m_type)) {

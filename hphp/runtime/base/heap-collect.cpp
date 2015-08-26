@@ -141,7 +141,7 @@ struct Marker {
 
 private:
   template<class T> static bool counted(T* p) {
-    return p && p->getCount() >= 0;
+    return p && p->isRefCounted();
   }
   bool mark(const void*);
   bool inRds(const void* vp) {
@@ -370,7 +370,6 @@ void Marker::init() {
       case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
-        assert(h->hdr_.count > 0);
         total_ += h->size();
         break;
       case HK::Ref:

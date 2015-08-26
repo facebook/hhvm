@@ -218,7 +218,7 @@ inline ObjectData*
 newInstance(Class* cls) {
   assert(cls);
   auto* inst = ObjectData::newInstance(cls);
-  assert(inst->getCount() > 0);
+  assert(inst->isRefCounted());
   Stats::inc(cls->getDtor() ? Stats::ObjectData_new_dtor_yes
                             : Stats::ObjectData_new_dtor_no);
 

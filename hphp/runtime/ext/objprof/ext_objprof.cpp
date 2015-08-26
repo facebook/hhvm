@@ -184,7 +184,6 @@ std::pair<int, double> sizeOfArray(
             key_size_pair.first,
             key_size_pair.second
           );
-          str->decRefCount();
           break;
         }
         case HPHP::KindOfInt64: {
@@ -264,7 +263,6 @@ void stringsOfArray(
           StringData* str = key.m_data.pstr;
           val = MixedArray::NvGetStr(props, str);
           auto key_str = str->toCppString();
-          str->decRefCount();
           tvGetStrings(&key, metrics, path, pointers);
           path->push_back(std::string("[\"" + key_str + "\"]"));
           break;
@@ -366,28 +364,28 @@ std::pair<int, double> tvGetSize(
     }
     case HPHP::KindOfArray: {
       ArrayData* arr = tv->m_data.parr;
-      auto arr_ref_count = arr->getCount() + ref_adjust;
-      FTRACE(3, " ArrayData tv: at {} that with ref count {} after adjust {}\n",
+      auto arr_mrb = arr->hasMultipleRefs() ? 2 : 1;
+      FTRACE(3, " ArrayData tv: at {} that with mrb {} before adjust {}\n",
         (void*)arr,
-        arr_ref_count,
+        arr_mrb,
         ref_adjust
       );
       auto size_of_array_pair = sizeOfArray(arr, source, stack, paths);
       size += sizeof(*arr);
       size += size_of_array_pair.first;
-      if (arr_ref_count > 0) {
-        sized += sizeof(*arr) / (double)arr_ref_count;
-        sized += size_of_array_pair.second / (double)(arr_ref_count);
+      if (arr_mrb > 0) {
+        sized += sizeof(*arr) / (double)arr_mrb;
+        sized += size_of_array_pair.second / (double)(arr_mrb);
       }
       break;
     }
     case HPHP::KindOfResource: {
       auto resource = tv->m_data.pres;
-      auto res_ref_count = resource->getCount() + ref_adjust;
+      auto res_mrb = resource->hasMultipleRefs() ? 2 : 1 + ref_adjust;
       auto resource_size = resource->heapSize();
       size += resource_size;
-      if (res_ref_count > 0) {
-        sized += resource_size / (double)(res_ref_count);
+      if (res_mrb > 0) {
+        sized += resource_size / (double)(res_mrb);
       }
       break;
     }
@@ -396,10 +394,10 @@ std::pair<int, double> tvGetSize(
       size += sizeof(*ref);
       sized += sizeof(*ref);
 
-      auto ref_ref_count = ref->getRealCount() + ref_adjust;
-      FTRACE(3, " RefData tv at {} that with ref count {} after adjust {}\n",
+      auto ref_mrb = ref->hasMultipleRefs() ? 2 : 1;
+      FTRACE(3, " RefData tv at {} that with mrb {} before adjust {}\n",
         (void*)ref,
-        ref_ref_count,
+        ref_mrb,
         ref_adjust
       );
 
@@ -408,8 +406,8 @@ std::pair<int, double> tvGetSize(
         tvGetSize((TypedValue*)cell, 0, source, stack, paths, 0);
       size += size_of_tv_pair.first;
 
-      if (ref_ref_count > 0) {
-        sized += size_of_tv_pair.second / (double)(ref_ref_count);
+      if (ref_mrb > 0) {
+        sized += size_of_tv_pair.second / (double)(ref_mrb);
       }
       break;
     }
@@ -417,16 +415,16 @@ std::pair<int, double> tvGetSize(
     case HPHP::KindOfString: {
       StringData* str = tv->m_data.pstr;
       size += str->size();
-      auto str_ref_count = str->getCount() + ref_adjust;
-      FTRACE(3, " String tv: {} string at {} ref count: {} after adjust {}\n",
+      auto str_mrb = str->hasMultipleRefs() ? 2 : 1;
+      FTRACE(3, " String tv: {} string at {} mrb: {} before adjust {}\n",
         str->data(),
         (void*)str,
-        str_ref_count,
+        str_mrb,
         ref_adjust
       );
 
-      if (str_ref_count > 0) {
-        sized += (str->size() / (double)(str_ref_count));
+      if (str_mrb > 0) {
+        sized += (str->size() / (double)(str_mrb));
       }
       break;
     }
@@ -491,7 +489,7 @@ void tvGetStrings(
         pointers->insert(str);
         str_agg.dups++;
       }
-      if (str->getCount() < 0) {
+      if (!str->isRefCounted()) {
         str_agg.srefs++;
       }
 

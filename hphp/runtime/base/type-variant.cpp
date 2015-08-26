@@ -227,10 +227,10 @@ int Variant::getRefCount() const noexcept {
   switch (m_type) {
     DT_UNCOUNTED_CASE:
       return 1;
-    case KindOfString:    return m_data.pstr->getCount();
-    case KindOfArray:     return m_data.parr->getCount();
-    case KindOfObject:    return m_data.pobj->getCount();
-    case KindOfResource:  return m_data.pres->getCount();
+    case KindOfString:    return m_data.pstr->hasMultipleRefs() ? 2 : 1;
+    case KindOfArray:     return m_data.parr->hasMultipleRefs() ? 2 : 1;
+    case KindOfObject:    return m_data.pobj->hasMultipleRefs() ? 2 : 1;
+    case KindOfResource:  return m_data.pres->hasMultipleRefs() ? 2 : 1;
     case KindOfRef:       return m_data.pref->var()->getRefCount();
     case KindOfClass:     break;
   }

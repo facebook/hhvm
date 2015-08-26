@@ -134,7 +134,7 @@ public:
    * Initialize an empty small mixed array with given field. This should be
    * inlined.
    */
-  static void InitSmall(MixedArray* a, RefCount count, uint32_t size,
+  static void InitSmall(MixedArray* a, GCByte gc, uint32_t size,
                         int64_t nextIntKey);
 
   /*
@@ -210,7 +210,6 @@ public:
     return nextElm(data(), 0);
   }
 
-  using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;
   using ArrayData::incRefCount;

@@ -1314,7 +1314,6 @@ public:
 
   ~VarNR() {
     if (debug) {
-      checkRefCount();
       memset(this, kTVTrashFill2, sizeof(*this));
     }
   }
@@ -1337,31 +1336,6 @@ private:
   }
   Variant *asVariant() {
     return (Variant*)this;
-  }
-  void checkRefCount() {
-    assert(m_type != KindOfRef);
-    assert(isRefcountedType(m_type) ? varNrFlag() == NR_FLAG : true);
-
-    switch (m_type) {
-      DT_UNCOUNTED_CASE:
-        return;
-      case KindOfString:
-        assert(check_refcount(m_data.pstr->getCount()));
-        return;
-      case KindOfArray:
-        assert(check_refcount(m_data.parr->getCount()));
-        return;
-      case KindOfObject:
-        assert(check_refcount(m_data.pobj->getCount()));
-        return;
-      case KindOfResource:
-        assert(check_refcount(m_data.pres->getCount()));
-        return;
-      case KindOfRef:
-      case KindOfClass:
-        break;
-    }
-    not_reached();
   }
 };
 
@@ -1411,7 +1385,7 @@ inline Variant &concat_assign(Variant &v1, const char* s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
-    if (str.get()->hasExactlyOneRef()) {
+    if (!str.get()->cowCheck()) {
       str += s2.slice();
       return v1;
     }

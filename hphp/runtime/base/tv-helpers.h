@@ -44,8 +44,8 @@ struct Variant;
  */
 #define TV_GENERIC_DISPATCH(exp, func)                                  \
   HPHP::CountableManip::func(                                           \
-    *reinterpret_cast<HPHP::RefCount*>(                                 \
-      (exp).m_data.num + HPHP::FAST_REFCOUNT_OFFSET                     \
+    *reinterpret_cast<HPHP::GCByte*>(                                   \
+      (exp).m_data.num + HPHP::FAST_GC_BYTE_OFFSET                      \
     )                                                                   \
   )
 
@@ -151,9 +151,7 @@ inline void tvRefcountedDecRef(TypedValue v) {
 }
 
 inline void tvRefcountedDecRefNZ(TypedValue tv) {
-  if (isRefcountedType(tv.m_type)) {
-    TV_GENERIC_DISPATCH(tv, decRefCount);
-  }
+
 }
 
 // Assumes 'tv' is live
@@ -175,7 +173,6 @@ ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
 // decref when the count is known not to reach zero
 ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
   assert(!tvDecRefWillCallHelper(tv));
-  tvRefcountedDecRefNZ(*tv);
 }
 
 // Assumes 'tv' is live

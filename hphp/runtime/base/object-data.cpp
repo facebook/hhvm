@@ -112,13 +112,12 @@ NEVER_INLINE bool ObjectData::destructImpl() {
   // resurrect themselves in their destructors, so make sure count is
   // consistent here.
   assert(!hasMultipleRefs());
-  m_hdr.count = 0;
 
   // We raise the refcount around the call to __destruct(). This is to
   // prevent the refcount from going to zero when the destructor returns.
   CountableHelper h(this);
   invoke_destructor(this, dtor);
-  return getCount() == 1;
+  return hasExactlyOneRef();
 }
 
 void ObjectData::destructForExit() {

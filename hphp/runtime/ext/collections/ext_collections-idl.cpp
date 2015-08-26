@@ -571,7 +571,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   m_data = packedData(MixedArray::MakeReserve(newCap));
   m_capacity = arrayData()->cap();
   arrayData()->m_size = m_size;
-  if (LIKELY(!oldAd->hasMultipleRefs())) {
+  if (LIKELY(!oldAd->cowCheck())) {
     std::memcpy(m_data, oldBuf, m_size * sizeof(TypedValue));
     // Mark oldAd as having 0 elements so that the array release logic doesn't
     // decRef the elements (since we teleported the elements to a new array)
@@ -586,7 +586,6 @@ void BaseVector::reserveImpl(uint32_t newCap) {
     for (; src != stop; ++src, ++dst) {
       cellDup(*src, *dst);
     }
-    oldAd->decRefCount();
   }
 }
 
@@ -653,7 +652,6 @@ void BaseVector::mutateImpl() {
   }
   assert(arrayData()->hasMultipleRefs());
   if (!m_size) {
-    arrayData()->decRefCount();
     m_data = packedData(staticEmptyArray());
     m_capacity = 0;
     return;
@@ -661,7 +659,6 @@ void BaseVector::mutateImpl() {
   auto* oldAd = arrayData();
   m_data = packedData(PackedArray::Copy(oldAd));
   assert(oldAd->hasMultipleRefs());
-  oldAd->decRefCount();
 }
 
 template<class TVector>
@@ -1330,7 +1327,7 @@ EmptyMixedArrayStorage s_theEmptyMixedArray;
 struct HashCollection::EmptyMixedInitializer {
   EmptyMixedInitializer() {
     auto a = reinterpret_cast<MixedArray*>(&s_theEmptyMixedArray);
-    MixedArray::InitSmall(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
+    MixedArray::InitSmall(a, StaticGCByte, 0/*used*/, 0/*nextIntKey*/);
   }
 };
 
@@ -1393,7 +1390,6 @@ void HashCollection::mutateImpl() {
     reinterpret_cast<MixedArray*>(MixedArray::Copy(oldAd))
   );
   assert(oldAd->hasMultipleRefs());
-  oldAd->decRefCount();
 }
 
 NEVER_INLINE
@@ -1669,7 +1665,7 @@ void HashCollection::grow(uint32_t newScale) {
   assert(m_size <= newCap);
   auto oldAd = arrayData();
   dropImmCopy();
-  if (m_size > 0 && !oldAd->hasMultipleRefs()) {
+  if (m_size > 0 && !oldAd->cowCheck()) {
     // MixedArray::Grow can only handle non-empty cases where the
     // buffer's refcount is 1.
     m_data = mixedData(MixedArray::Grow(oldAd, newScale));
@@ -1686,7 +1682,7 @@ void HashCollection::grow(uint32_t newScale) {
 void HashCollection::compact() {
   assert(isDensityTooLow());
   dropImmCopy();
-  if (!arrayData()->hasMultipleRefs()) {
+  if (!arrayData()->cowCheck()) {
     // MixedArray::compact can only handle cases where the buffer's
     // refcount is 1.
     arrayData()->compact(false);
@@ -1728,7 +1724,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   assert(SmallSize <= newCap && newCap <= MaxSize);
   assert(m_size <= newCap);
   auto* oldAd = arrayData();
-  if (!oldAd->hasMultipleRefs()) {
+  if (!oldAd->cowCheck()) {
     // If the buffer's refcount is 1, we can teleport the elements
     // to a new buffer
     auto* oldBuf = data();

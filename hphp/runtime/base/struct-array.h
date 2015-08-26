@@ -145,7 +145,7 @@ struct StructArray : public ArrayData {
   template<class F> void scan(F&) const;
 
 private:
-  StructArray(uint32_t size, uint32_t pos, Shape* shape, RefCount = 1);
+  StructArray(uint32_t size, uint32_t pos, Shape* shape, GCByte = UnsharedGCByte);
 
   static MixedArray* ToMixedHeader(size_t);
   static MixedArray* ToMixed(StructArray*);

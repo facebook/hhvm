@@ -135,8 +135,8 @@ void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
   }
 
   auto const sf = v.makeReg();
-  v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
-  static_assert(UncountedValue < 0 && StaticValue < 0, "");
+  v << cmpbim{0, loc.reg()[FAST_GC_BYTE_OFFSET], sf};
+  static_assert((int8_t)UncountedGCByte < 0 && (int8_t)StaticGCByte < 0, "");
   ifThen(v, CC_GE, sf, then);
 }
 
@@ -2421,15 +2421,9 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                v.makeReg()};
   }
 
-  if (!ty.maybe(TStatic)) {
-    auto const sf = v.makeReg();
-    v << declm{base[FAST_REFCOUNT_OFFSET], sf};
-    emitAssertFlagsNonNegative(v, sf);
-    ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
-    return;
-  }
-
-  emitDecRefWork(v, vcold(), base, destroy, unlikelyDestroy);
+  auto const sf = v.makeReg();
+  v << testbim{FAST_MRB_MASK, base[FAST_GC_BYTE_OFFSET], sf};
+  ifThen(v, vcold(), CC_Z, sf, destroy, unlikelyDestroy);
 }
 
 void CodeGenerator::emitDecRefTypeStat(Vout& v, const IRInstruction* inst) {
@@ -2496,16 +2490,6 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   emitIncStat(vmain(), Stats::TC_DecRef_NZ);
   emitDecRefTypeStat(vmain(), inst);
-  auto const ty = inst->src(0)->type();
-  ifRefCountedNonStatic(
-    vmain(), ty, srcLoc(inst, 0),
-    [&] (Vout& v) {
-      auto const base = srcLoc(inst, 0).reg();
-      auto const sf = v.makeReg();
-      v << declm{base[FAST_REFCOUNT_OFFSET], sf};
-      emitAssertFlagsNonNegative(v, sf);
-    }
-  );
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
@@ -2542,10 +2526,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testq{name, name, sf};
   ifThenElse(v, CC_NZ, sf, [&](Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
-    static_assert(UncountedValue < 0 && StaticValue < 0, "");
-    ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
+    emitIncRef(v, name);
     v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
     auto const encoded = ActRec::encodeNumArgsAndFlags(
       safe_cast<int32_t>(nArgs),
@@ -3288,15 +3269,14 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   auto& v = vmain();
 
   // If we're here, the target-cache-local RefData is all zeros, so we
-  // can initialize it by storing the new value into it's TypedValue
-  // and incrementing the RefData reference count (which will set it
-  // to 1).
+  // can initialize it by storing the new value into it's TypedValue.
+  // There is no reference count, and the GC word can be initialized to 
+  // all zeros as well.
   //
   // We are storing the rdSrc value into the static, but we don't need
   // to inc ref it because it's a bytecode invariant that it's not a
   // reference counted type.
   emitStoreTV(v, rdSrc[RefData::tvOffset()], srcLoc(inst, 1), inst->src(1));
-  v << inclm{rdSrc[FAST_REFCOUNT_OFFSET], v.makeReg()};
   v << storebi{uint8_t(HeaderKind::Ref), rdSrc[HeaderKindOffset]};
   static_assert(sizeof(HeaderKind) == 1, "");
 }
@@ -3552,16 +3532,17 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
 
   // Vector::m_data field holds an address of an ArrayData plus
   // sizeof(ArrayData) bytes. We need to check this ArrayData's
-  // m_count field to see if we need to call Vector::triggerCow().
+  // mrb field to see if we need to call Vector::triggerCow().
   auto rawPtrOffset = collections::dataOffset(CollectionType::Vector) +
                       kExpectedMPxOffset;
-  auto countOffset = (int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData);
+  auto mrbOffset = (int64_t)FAST_GC_BYTE_OFFSET - (int64_t)sizeof(ArrayData);
 
   auto ptr = v.makeReg();
   v << load{vecReg[rawPtrOffset], ptr};
   auto const sf = v.makeReg();
-  v << cmplim{1, ptr[countOffset], sf};
-  v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
+  // check if mrb is set
+  v << testbim{FAST_MRB_MASK, ptr[mrbOffset], sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 /**
@@ -3794,7 +3775,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       srcType.subtypeOfAny(TStr, TArr) &&
       srcType.maybe(typeParam)) {
     assertx(srcType.maybe(TStatic));
-    v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
+    v << cmpbim{0, rData[FAST_GC_BYTE_OFFSET], sf};
     doJcc(CC_L, sf);
     doMov();
     return;
@@ -5233,12 +5214,7 @@ void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
-  ifRefCountedType(
-    vmain(), vmain(), inst->src(0)->type(), srcLoc(inst, 0),
-    [&] (Vout& v) {
-      emitAssertRefCount(v, srcLoc(inst, 0).reg());
-    }
-  );
+
 }
 
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {

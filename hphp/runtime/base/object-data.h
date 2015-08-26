@@ -455,7 +455,6 @@ struct CountableHelper : private boost::noncopyable {
     object->incRefCount();
   }
   ~CountableHelper() {
-    m_object->decRefCount();
   }
 private:
   ObjectData *m_object;

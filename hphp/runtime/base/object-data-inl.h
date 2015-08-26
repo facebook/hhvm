@@ -34,7 +34,7 @@ inline ObjectData::ObjectData(Class* cls)
 inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
 {
-  m_hdr.init(flags, kind, 1);
+  m_hdr.init(flags, kind, UnsharedGCByte);
   assert(m_hdr.aux == flags && hasExactlyOneRef());
   assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
@@ -53,7 +53,7 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
 inline ObjectData::ObjectData(Class* cls, NoInit) noexcept
   : m_cls(cls)
 {
-  m_hdr.init(0, HeaderKind::Object, 1);
+  m_hdr.init(0, HeaderKind::Object, UnsharedGCByte);
   assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && hasExactlyOneRef());
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
@@ -65,7 +65,7 @@ inline ObjectData::ObjectData(Class* cls,
                               NoInit) noexcept
   : m_cls(cls)
 {
-  m_hdr.init(flags, kind, 1);
+  m_hdr.init(flags, kind, UnsharedGCByte);
   assert(m_hdr.aux == flags && hasExactlyOneRef());
   assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
@@ -84,7 +84,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   }
   if (auto const ctor = cls->instanceCtor()) {
     auto obj = ctor(cls);
-    assert(obj->getCount() > 0);
+    assert(obj->isRefCounted());
     return obj;
   }
   Attr attrs = cls->attrs();
@@ -111,7 +111,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   }
 
   // callCustomInstanceInit may have inc-refd.
-  assert(obj->getCount() > 0);
+  assert(obj->isRefCounted());
   return obj;
 }
 

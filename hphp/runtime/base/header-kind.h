@@ -41,6 +41,7 @@ extern const char* header_names[];
  * RefCount type for m_count field in refcounted objects
  */
 using RefCount = int32_t;
+using GCByte = uint8_t;
 
 /*
  * Common header for all heap-allocated objects. Layout is carefully
@@ -54,8 +55,17 @@ template<class T = uint16_t> struct HeaderWord {
         struct {
           T aux;
           HeaderKind kind;
-          mutable uint8_t mark:1;
-          mutable uint8_t cmark:1;
+          union {
+            struct {
+              mutable uint8_t mark:1;
+              mutable uint8_t cmark:1;
+              mutable uint8_t mrb:1;
+              uint8_t spare:3;
+              mutable uint8_t uncounted:1;
+              mutable uint8_t _static:1;
+            };
+            mutable GCByte gcbyte;
+          };
         };
         uint32_t lo32;
       };
@@ -67,20 +77,27 @@ template<class T = uint16_t> struct HeaderWord {
     uint64_t q;
   };
 
-  void init(HeaderKind kind, RefCount count) {
+  void init(HeaderKind kind, GCByte gc) {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
-        uint64_t(count) << 32;
+        gc << (8 * offsetof(HeaderWord, gcbyte));
   }
 
-  void init(T aux, HeaderKind kind, RefCount count) {
+  void init(T aux, HeaderKind kind, GCByte gc) {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         static_cast<uint16_t>(aux) |
-        uint64_t(count) << 32;
+        gc << (8 * offsetof(HeaderWord, gcbyte));
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
-  void init(const HeaderWord<T>& h, RefCount count) {
-    q = h.lo32 | uint64_t(count) << 32;
+  void init(const HeaderWord<T>& h, GCByte gc) {
+    q = static_cast<uint32_t>(h.kind) << (8 * offsetof(HeaderWord, kind)) |
+        static_cast<uint16_t>(h.aux) |
+        gc << (8 * offsetof(HeaderWord, gcbyte));
+  }
+
+  void initFree(uint32_t size) {
+    q = static_cast<uint32_t>(HeaderKind::Free) << (8 * offsetof(HeaderWord, kind)) |
+        uint64_t(size) << 32;
   }
 };
 
@@ -88,6 +105,10 @@ constexpr auto HeaderOffset = sizeof(void*);
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
 constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
                                       offsetof(HeaderWord<>, count);
+constexpr auto FAST_GC_BYTE_OFFSET = HeaderOffset +
+                                      offsetof(HeaderWord<>, gcbyte);
+constexpr int8_t FAST_MRB_MASK = 1 << 2;
+constexpr int8_t FAST_UNCOUNTED_MASK = 1 << 6;
 
 inline bool isObjectKind(HeaderKind k) {
   return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;

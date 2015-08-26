@@ -1193,7 +1193,7 @@ class HashCollection : public ExtCollectionObjectData {
    */
   void mutate() {
     assert(IMPLIES(!m_immCopy.isNull(), arrayData()->hasMultipleRefs()));
-    if (arrayData()->hasMultipleRefs()) {
+    if (arrayData()->cowCheck()) {
       // mutateImpl() does two things for us. First it drops the the
       // immutable collection held by m_immCopy (if m_immCopy is not
       // null). Second, it takes care of copying the buffer if needed.

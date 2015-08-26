@@ -223,11 +223,8 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
 
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
-  a.    cmpl   (1, rData[FAST_REFCOUNT_OFFSET]);
-  jccBlock<CC_L>(a, [&] {
-    a.  jz8    (doRelease);
-    a.  decl   (rData[FAST_REFCOUNT_OFFSET]);
-  });
+  a.    testb  (FAST_MRB_MASK, rData[FAST_GC_BYTE_OFFSET]);
+  a.    jz8    (doRelease);
   a.    ret    ();
 asm_label(a, doRelease);
   a.    push    (rIter);

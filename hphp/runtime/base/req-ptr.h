@@ -126,7 +126,7 @@ template<typename T> struct ptr final {
   /**
    * Get count.
    */
-  RefCount use_count() const { return m_px ? m_px->getCount() : 0; }
+  RefCount use_count() const { return m_px ? (m_px->maybeShared() ? 2 : 1) : 0; }
 
   /**
    * Check if it is unique.

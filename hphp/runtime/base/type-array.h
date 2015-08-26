@@ -433,7 +433,7 @@ public:
   template<typename T>
   void removeImpl(const T& key) {
     if (m_arr) {
-      ArrayData* escalated = m_arr->remove(key, (m_arr->hasMultipleRefs()));
+      ArrayData* escalated = m_arr->remove(key, (m_arr->cowCheck()));
       if (escalated != m_arr) m_arr = Ptr::attach(escalated);
     }
   }
@@ -442,7 +442,7 @@ public:
   Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
     Variant* ret = nullptr;
-    ArrayData* escalated = m_arr->lval(key, ret, m_arr->hasMultipleRefs());
+    ArrayData* escalated = m_arr->lval(key, ret, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
     assert(ret);
     return *ret;

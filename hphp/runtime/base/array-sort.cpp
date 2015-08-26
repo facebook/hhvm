@@ -121,7 +121,7 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   // if (a->m_size <= 1 && !isSortFamily(sf)) {
   //   return a;
   // }
-  if (UNLIKELY(hasUserDefinedCmp(sf) || a->hasMultipleRefs())) {
+  if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copyMixed();
     assert(ret->hasExactlyOneRef());
     return ret;
@@ -138,7 +138,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     return ad;                          // trivial for packed arrays.
   }
   if (isSortFamily(sf)) {               // sort/rsort/usort
-    if (UNLIKELY(ad->hasMultipleRefs())) {
+    if (UNLIKELY(ad->cowCheck())) {
       auto ret = PackedArray::Copy(ad);
       assert(ret->hasExactlyOneRef());
       return ret;

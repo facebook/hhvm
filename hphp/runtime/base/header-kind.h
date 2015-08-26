@@ -56,6 +56,7 @@ template<class T = uint16_t> struct HeaderWord {
           HeaderKind kind;
           mutable uint8_t mark:1;
           mutable uint8_t cmark:1;
+          mutable uint8_t mrb:1;
         };
         uint32_t lo32;
       };
@@ -70,17 +71,26 @@ template<class T = uint16_t> struct HeaderWord {
   void init(HeaderKind kind, RefCount count) {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         uint64_t(count) << 32;
+    // TODO make fast
+    if ((uint32_t)count <= 1) mrb = false;
+    else mrb = true; 
   }
 
   void init(T aux, HeaderKind kind, RefCount count) {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         static_cast<uint16_t>(aux) |
         uint64_t(count) << 32;
+    // TODO make fast
+    if ((uint32_t)count <= 1) mrb = false;
+    else mrb = true; 
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
   void init(const HeaderWord<T>& h, RefCount count) {
     q = h.lo32 | uint64_t(count) << 32;
+    // TODO make fast
+    if ((uint32_t)count <= 1) mrb = false;
+    else mrb = true; 
   }
 };
 

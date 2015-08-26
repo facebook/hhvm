@@ -189,6 +189,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::nothrow:
     case Vinstr::orqim:
     case Vinstr::orwim:
+    case Vinstr::orbim:
     case Vinstr::phidef:
     case Vinstr::phijcc:
     case Vinstr::phijmp:

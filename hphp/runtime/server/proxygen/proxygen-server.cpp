@@ -662,6 +662,9 @@ void ProxygenServer::onRequestError(Transport* transport) {
   }
 
   try {
+    timespec start;
+    Timer::GetMonotonicTime(start);
+    transport->onRequestStart(start);
     m_handler->logToAccessLog(transport);
   } catch (...) {}
 }

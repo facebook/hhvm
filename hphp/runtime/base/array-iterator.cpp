@@ -841,7 +841,7 @@ ArrayData* MArrayIter::cowCheck() {
   if (hasRef()) {
     auto data = getData();
     if (!data) return nullptr;
-    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
+    if (data->cowCheck() && !data->noCopyOnWrite()) {
       data = data->copyWithStrongIterators();
       cellMove(make_tv<KindOfArray>(data), *getRef()->tv());
     }
@@ -850,7 +850,7 @@ ArrayData* MArrayIter::cowCheck() {
 
   assert(hasAd());
   auto const data = getAd();
-  if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
+  if (data->cowCheck() && !data->noCopyOnWrite()) {
     ArrayData* copied = data->copyWithStrongIterators();
     assert(data != copied);
     decRefArr(data);

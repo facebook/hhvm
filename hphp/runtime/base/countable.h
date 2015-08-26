@@ -109,6 +109,10 @@ inline bool hasExactlyOneRef(RefCount count) {
   return (uint32_t)count == 1;
 }
 
+inline bool maybeShared(bool mrb) {
+  return mrb;
+}
+
 inline bool isStatic(RefCount count) {
   return count == StaticValue;
 }
@@ -193,9 +197,16 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   bool hasExactlyOneRef() const {                                       \
     return CountableManip::hasExactlyOneRef(m_hdr.count);               \
   }                                                                     \
+  bool maybeShared() const {                                            \
+    return CountableManip::maybeShared(m_hdr.mrb);                      \
+  }                                                                     \
+  bool cowCheck() const {                                               \
+    return maybeShared();                                               \
+  }                                                                     \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     CountableManip::incRefCount(m_hdr.count);                           \
+    m_hdr.mrb = true; /* can't pass a ref to a bitfield :( */           \
   }                                                                     \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \

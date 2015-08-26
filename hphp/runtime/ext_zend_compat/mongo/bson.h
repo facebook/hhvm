@@ -101,6 +101,10 @@ void mongo_buf_append(char *dest, char *piece);
 int mongo_get_limit(mongo_cursor *cursor);
 
 
+namespace {
+template <typename T> inline T mongo_bson_helper_id(T t) { return t; }
+}
+
 #if PHP_C_BIGENDIAN
 /* Reverse the bytes in an int, wheeee stupid byte tricks */
 # define BYTE1_32(b) ((b & 0xff000000) >> 24)
@@ -119,8 +123,8 @@ int mongo_get_limit(mongo_cursor *cursor);
 # define BYTE8_64(b) ((b & 0x00000000000000ffll) << 56)
 # define MONGO_64(b) (BYTE8_64(b) | BYTE7_64(b) | BYTE6_64(b) | BYTE5_64(b) | BYTE4_64(b) | BYTE3_64(b) | BYTE2_64(b) | BYTE1_64(b))
 #else
-# define MONGO_32(b) (b)
-# define MONGO_64(b) (b)
+# define MONGO_32(b) mongo_bson_helper_id(b)
+# define MONGO_64(b) mongo_bson_helper_id(b)
 #endif
 
 #endif

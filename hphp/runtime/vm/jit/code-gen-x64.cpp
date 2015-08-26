@@ -3486,7 +3486,8 @@ void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   assertx(vec->type() < TObj);
   assertx(collections::isType(vec->type().clsSpec().cls(),
-                              CollectionType::Vector));
+                              CollectionType::Vector,
+                              CollectionType::ImmVector));
   vmain() << loadzlq{vecReg[collections::sizeOffset(CollectionType::Vector)],
                      dstReg};
 }
@@ -3497,7 +3498,8 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   assertx(vec->type() < TObj);
   assertx(collections::isType(vec->type().clsSpec().cls(),
-                              CollectionType::Vector));
+                              CollectionType::Vector,
+                              CollectionType::ImmVector));
   auto& v = vmain();
   auto arr = v.makeReg();
   v << load{vecReg[BaseVector::arrOffset()], arr};

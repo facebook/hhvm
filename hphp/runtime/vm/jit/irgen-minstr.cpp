@@ -632,20 +632,23 @@ SimpleOp computeSimpleCollectionOp(
     } else if (baseType < TObj) {
       const Class* klass = baseType.clsSpec().cls();
       auto const isVector = collections::isType(klass, CollectionType::Vector);
+      auto const isImmVector =
+        collections::isType(klass, CollectionType::ImmVector);
       auto const isPair   = collections::isType(klass, CollectionType::Pair);
       auto const isMap    = collections::isType(klass, CollectionType::Map);
+      auto const isImmMap = collections::isType(klass, CollectionType::ImmMap);
 
-      if (isVector || isPair) {
+      if (isVector || isPair || (isImmVector && readInst)) {
         if (mcodeMaybeVectorKey(ni.immVecM[0])) {
           auto const keyType = getType(env, ni.inputs[mii.valCount() + 1]);
           if (keyType <= TInt) {
             // We don't specialize setting pair elements.
             if (isPair && op == Op::SetM) return SimpleOp::None;
-
-            return isVector ? SimpleOp::Vector : SimpleOp::Pair;
+            return (isImmVector || isVector)
+              ? SimpleOp::Vector : SimpleOp::Pair;
           }
         }
-      } else if (isMap) {
+      } else if (isMap || (isImmMap && readInst)) {
         if (mcodeIsElem(ni.immVecM[0])) {
           auto const keyType = getType(env, ni.inputs[mii.valCount() + 1]);
           if (keyType <= TInt || keyType <= TStr) {

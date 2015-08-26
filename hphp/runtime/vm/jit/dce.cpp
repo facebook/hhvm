@@ -70,23 +70,17 @@ bool canDCE(IRInstruction* inst) {
   case ConvBoolToDbl:
   case ConvIntToDbl:
   case ConvStrToDbl:
+  case ConvResToDbl:
   case ConvArrToInt:
   case ConvBoolToInt:
   case ConvDblToInt:
   case ConvStrToInt:
+  case ConvResToInt:
   case ConvBoolToStr:
   case ConvDblToStr:
   case ConvIntToStr:
   case ConvClsToCctx:
   case NewColFromArray:
-  case Gt:
-  case Gte:
-  case Lt:
-  case Lte:
-  case Eq:
-  case Neq:
-  case Same:
-  case NSame:
   case GtInt:
   case GteInt:
   case LtInt:
@@ -107,6 +101,12 @@ bool canDCE(IRInstruction* inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case GtStrInt:
+  case GteStrInt:
+  case LtStrInt:
+  case LteStrInt:
+  case EqStrInt:
+  case NeqStrInt:
   case GtBool:
   case GteBool:
   case LtBool:
@@ -133,12 +133,14 @@ bool canDCE(IRInstruction* inst) {
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
+  case HasToString:
   case IsType:
   case IsNType:
   case IsTypeMem:
   case IsNTypeMem:
   case IsScalarType:
   case IsWaitHandle:
+  case IsCol:
   case ClsNeq:
   case UnboxPtr:
   case BoxPtr:
@@ -266,12 +268,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvObjToStr:
   case ConvResToStr:
   case ConvCellToStr:
-  case GtX:
-  case GteX:
-  case LtX:
-  case LteX:
-  case EqX:
-  case NeqX:
   case GtObj:
   case GteObj:
   case LtObj:
@@ -522,6 +518,7 @@ bool canDCE(IRInstruction* inst) {
   case StARInvName:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
+  case ThrowInvalidOperation:
   case MapIdx:
     return false;
   }

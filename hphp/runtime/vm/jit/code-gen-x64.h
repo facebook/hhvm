@@ -103,13 +103,6 @@ private:
   void emitCmpBool(IRInstruction* inst, ConditionCode cc);
   void emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred);
   void emitCmpRelDbl(IRInstruction* inst, ConditionCode cc, bool flipOperands);
-  void cgCmpHelper(IRInstruction* inst, ConditionCode cc,
-                   int64_t (*str_cmp_str)(StringData*, StringData*),
-                   int64_t (*str_cmp_int)(StringData*, int64_t),
-                   int64_t (*str_cmp_obj)(StringData*, ObjectData*),
-                   int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
-                   int64_t (*obj_cmp_int)(ObjectData*, int64_t),
-                   int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
   void cgCoerceHelper(IRInstruction* inst, Vreg base, int offset,
                       Func const* callee, int argNum);

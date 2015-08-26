@@ -30,6 +30,8 @@ extern const StaticString s_self;
 extern const StaticString s_parent;
 extern const StaticString s_static;
 
+extern const StaticString s_cmpWithCollection;
+
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
@@ -117,6 +119,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 bool is_constructor_name(const char* func);
 void throw_instance_method_fatal(const char *name);
 
+ATTRIBUTE_NORETURN void throw_invalid_operation_exception(StringData*);
 ATTRIBUTE_NORETURN void throw_iterator_not_valid();
 ATTRIBUTE_NORETURN void throw_collection_modified();
 ATTRIBUTE_NORETURN void throw_collection_property_exception();

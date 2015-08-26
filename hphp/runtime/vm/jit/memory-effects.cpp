@@ -1003,6 +1003,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StContArValue:
   case StRetVal:
   case ConvStrToInt:
+  case ConvResToInt:
   case OrdStr:
   case CreateSSWH:
   case NewLikeArray:
@@ -1049,15 +1050,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsInt:
   case InterfaceSupportsStr:
   case IsWaitHandle:
+  case IsCol:
+  case HasToString:
   case DbgAssertRefCount:
-  case NSame:
-  case Same:
-  case Gt:
-  case Gte:
-  case Eq:
-  case Lt:
-  case Lte:
-  case Neq:
   case GtStr:
   case GteStr:
   case LtStr:
@@ -1066,6 +1061,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case GtStrInt:
+  case GteStrInt:
+  case LtStrInt:
+  case LteStrInt:
+  case EqStrInt:
+  case NeqStrInt:
   case SameArr:
   case NSameArr:
   case GtRes:
@@ -1083,6 +1084,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvStrToArr:   // decrefs src, but src is a string
   case ConvStrToBool:
   case ConvStrToDbl:
+  case ConvResToDbl:
   case DerefClsRDSHandle:
   case EagerSyncVMRegs:
   case ExtendsClass:
@@ -1210,12 +1212,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CIterFree:  // decrefs context object in iter
   case MIterFree:
   case IterFree:
-  case EqX:
-  case GteX:
-  case GtX:
-  case LteX:
-  case LtX:
-  case NeqX:
   case GtObj:
   case GteObj:
   case LtObj:
@@ -1281,6 +1277,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConcatStr4:
   case ConvCellToDbl:
   case ThrowOutOfBounds:
+  case ThrowInvalidOperation:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals

@@ -452,6 +452,8 @@ To double conversions:
 
 | ConvStrToDbl,                 D(Dbl), S(Str),                           NF
 
+| ConvResToDbl,                 D(Dbl), S(Res),                           NF
+
 | ConvCellToDbl,                D(Dbl), S(Cell),                          Er
 
 
@@ -466,6 +468,8 @@ To int conversions:
 | ConvObjToInt,                 D(Int), S(Obj),                           Er
 
 | ConvStrToInt,                 D(Int), S(Str),                           NF
+
+| ConvResToInt,                 D(Int), S(Res),                           NF
 
 | ConvCellToInt,                D(Int), S(Cell),                          Er
 
@@ -504,40 +508,6 @@ To string conversions:
 
 
 4. Boolean predicates
-
-| Gt,                          D(Bool), S(Gen) S(Gen), NF
-
-| GtX,                         D(Bool), S(Gen) S(Gen), Er
-
-| Gte,                         D(Bool), S(Gen) S(Gen), NF
-
-| GteX,                        D(Bool), S(Gen) S(Gen), Er
-
-| Lt,                          D(Bool), S(Gen) S(Gen), NF
-
-| LtX,                         D(Bool), S(Gen) S(Gen), Er
-
-| Lte,                         D(Bool), S(Gen) S(Gen), NF
-
-| LteX,                        D(Bool), S(Gen) S(Gen), Er
-
-| Eq,                          D(Bool), S(Gen) S(Gen), NF
-
-| EqX,                         D(Bool), S(Gen) S(Gen), Er
-
-| Neq,                         D(Bool), S(Gen) S(Gen), NF
-
-| NeqX,                        D(Bool), S(Gen) S(Gen), Er
-
-| Same,                        D(Bool), S(Gen) S(Gen), NF
-
-| NSame,                       D(Bool), S(Gen) S(Gen), NF
-
-  Perform comparisons with PHP semantics on S0 and S1, and put the result in D.
-  The -X versions may re-enter the VM when comparing an Object with a string,
-  and therefore may throw exceptions. The non-X versions must not be passed
-  (Object,String) pairs, and do not throw. Note that Same and NSame never
-  re-enter or throw, for any types.
 
 | GtInt,                       D(Bool), S(Int) S(Int),                    NF
 
@@ -586,6 +556,20 @@ To string conversions:
 | NSameStr,                    D(Bool), S(Str) S(Str),                    NF
 
   Performs comparison of strings using PHP semantics.
+
+| GtStrInt,                    D(Bool), S(Str) S(Int),                    NF
+
+| GteStrInt,                   D(Bool), S(Str) S(Int),                    NF
+
+| LtStrInt,                    D(Bool), S(Str) S(Int),                    NF
+
+| LteStrInt,                   D(Bool), S(Str) S(Int),                    NF
+
+| EqStrInt,                    D(Bool), S(Str) S(Int),                    NF
+
+| NeqStrInt,                   D(Bool), S(Str) S(Int),                    NF
+
+  Performs comparison of strings with integers using PHP semantics.
 
 | GtBool,                      D(Bool), S(Bool) S(Bool),                  NF
 
@@ -697,6 +681,10 @@ To string conversions:
 
   Returns whether t instanceof S0 returns true when t is of the given type.
 
+| HasToString, D(Bool), S(Obj), NF
+
+  Returns whether the object S0 has a toString method.
+
 | IsType<T>, D(Bool), S(Cell), NF
 
   Sets D to true iff S0 holds a value that is of type T.
@@ -723,6 +711,10 @@ To string conversions:
 | IsWaitHandle, D(Bool), S(Obj), NF
 
   Sets D to true iff S0 is a subclass of WaitHandle.
+
+| IsCol, D(Bool), S(Obj), NF
+
+  Sets D to true iff S0 is a collection.
 
 
 5. Branches
@@ -2379,7 +2371,11 @@ fields of that struct for holding intermediate values.
 
 | ThrowOutOfBounds, ND, S(Int), Er|T
 
-  Throws and OutOfBoundsException with a message indicating S0.
+  Throws an OutOfBoundsException with a message indicating S0.
+
+| ThrowInvalidOperation, ND, S(Str), Er|T
+
+  Throws an InvalidOperationException with a message indicating S0.
 
 | ProfilePackedArray, ND, S(Arr), NF
 

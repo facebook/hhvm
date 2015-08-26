@@ -299,6 +299,10 @@ inline bool equal(int64_t v1, const Variant& v2) {
   return equal(v2, v1);
 }
 
+inline bool nequal(int64_t v1, const StringData* v2) {
+  return !equal(v1, v2);
+}
+
 inline bool less(int64_t v1, bool    v2) { return more(v2, v1); }
 inline bool less(int64_t v1, int     v2) { return more(v2, v1); }
 inline bool less(int64_t v1, int64_t v2) { return v1 < v2; }
@@ -316,6 +320,8 @@ inline bool less(int64_t v1, const Variant& v2) {
   return more(v2, v1);
 }
 
+bool lessEqual(int64_t v1, const StringData* v2);
+
 inline bool more(int64_t v1, bool    v2) { return less(v2, v1); }
 inline bool more(int64_t v1, int     v2) { return less(v2, v1); }
 inline bool more(int64_t v1, int64_t v2) { return v1 > v2; }
@@ -331,6 +337,8 @@ inline bool more(int64_t v1, const Resource& v2) {
   return more(v1, v2.toInt64());
 }
 inline bool more(int64_t v1, const Variant& v2) { return less(v2, v1); }
+
+bool moreEqual(int64_t v1, const StringData* v2);
 
 ///////////////////////////////////////////////////////////////////////////////
 // double
@@ -461,6 +469,7 @@ inline bool equal(const StringData *v1, const Object& v2) {
   if (!v2->hasToString()) return false;
   return equal(v1, v2.toString());
 }
+
 inline bool equal(const StringData *v1, const Resource& v2) {
   if (!v1 || !v2) {
     return equal(toBoolean(v1), v2.toBoolean());
@@ -472,6 +481,9 @@ inline bool equal(const StringData *v1, const Variant& v2) {
 }
 
 inline bool nequal(const StringData* v1, const StringData* v2) {
+  return !equal(v1, v2);
+}
+inline bool nequal(const StringData* v1, int64_t v2) {
   return !equal(v1, v2);
 }
 
@@ -517,6 +529,9 @@ inline bool lessEqual(const StringData* v1, const StringData* v2) {
   if (v2 == nullptr) return v1->empty();
   return v1->compare(v2) <= 0;
 }
+inline bool lessEqual(const StringData* v1, int64_t v2) {
+  return moreEqual(v2, v1);
+}
 
 inline bool more(const StringData *v1, bool    v2) { return less(v2, v1); }
 inline bool more(const StringData *v1, int     v2) { return less(v2, v1); }
@@ -556,6 +571,9 @@ inline bool more(const StringData *v1, const Variant& v2) {
 }
 
 inline bool moreEqual(const StringData* v1, const StringData* v2) {
+  return lessEqual(v2, v1);
+}
+inline bool moreEqual(const StringData* v1, int64_t v2) {
   return lessEqual(v2, v1);
 }
 

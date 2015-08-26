@@ -210,12 +210,20 @@ ArrayData* convCellToArrHelper(TypedValue tv) {
   return tv.m_data.parr;
 }
 
+int64_t convObjToDblHelper(const ObjectData* o) {
+  return reinterpretDblAsInt(o->toDouble());
+}
+
 int64_t convArrToDblHelper(ArrayData* a) {
   return reinterpretDblAsInt(a->empty() ? 0 : 1);
 }
 
 int64_t convStrToDblHelper(const StringData* s) {
   return reinterpretDblAsInt(s->toDouble());
+}
+
+int64_t convResToDblHelper(const ResourceHdr* r) {
+  return reinterpretDblAsInt(r->getId());
 }
 
 int64_t convCellToDblHelper(TypedValue tv) {

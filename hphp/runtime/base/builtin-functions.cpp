@@ -67,6 +67,11 @@ const StaticString
   s_parent("parent"),
   s_static("static");
 
+const StaticString s_cmpWithCollection(
+  "Cannot use relational comparison operators (<, <=, >, >=) to compare "
+  "a collection with an integer, double, string, array, or object"
+);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool array_is_valid_callback(const Array& arr) {
@@ -547,11 +552,12 @@ void throw_collection_property_exception() {
     "Cannot access a property on a collection");
 }
 
+void throw_invalid_operation_exception(StringData* str) {
+  SystemLib::throwInvalidOperationExceptionObject(Variant{str});
+}
+
 void throw_collection_compare_exception() {
-  static const string msg(
-    "Cannot use relational comparison operators (<, <=, >, >=) to compare "
-    "a collection with an integer, double, string, array, or object");
-  SystemLib::throwInvalidOperationExceptionObject(msg);
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithCollection);
 }
 
 void throw_param_is_not_container() {

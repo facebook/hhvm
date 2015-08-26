@@ -305,11 +305,13 @@ CALL_OPCODE(ConvCellToBool);
 CALL_OPCODE(ConvArrToDbl);
 CALL_OPCODE(ConvObjToDbl);
 CALL_OPCODE(ConvStrToDbl);
+CALL_OPCODE(ConvResToDbl);
 CALL_OPCODE(ConvCellToDbl);
 
 CALL_OPCODE(ConvArrToInt);
 CALL_OPCODE(ConvObjToInt);
 CALL_OPCODE(ConvStrToInt);
+CALL_OPCODE(ConvResToInt);
 CALL_OPCODE(ConvCellToInt);
 
 CALL_OPCODE(ConvCellToObj);
@@ -334,6 +336,12 @@ CALL_OPCODE(EqStr);
 CALL_OPCODE(NeqStr);
 CALL_OPCODE(SameStr);
 CALL_OPCODE(NSameStr);
+CALL_OPCODE(GtStrInt);
+CALL_OPCODE(GteStrInt);
+CALL_OPCODE(LtStrInt);
+CALL_OPCODE(LteStrInt);
+CALL_OPCODE(EqStrInt);
+CALL_OPCODE(NeqStrInt);
 CALL_OPCODE(GtObj);
 CALL_OPCODE(GteObj);
 CALL_OPCODE(LtObj);
@@ -352,6 +360,9 @@ CALL_OPCODE(GtRes);
 CALL_OPCODE(GteRes);
 CALL_OPCODE(LtRes);
 CALL_OPCODE(LteRes);
+
+CALL_OPCODE(ThrowInvalidOperation);
+CALL_OPCODE(HasToString);
 
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
@@ -907,194 +918,6 @@ void CodeGenerator::cgShr(IRInstruction* inst) {
 // Comparison Operators
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DISPATCHER(name)\
-  int64_t ccmp_ ## name (StringData* a1, StringData* a2)\
-  { return name(a1, a2); }\
-  int64_t ccmp_ ## name (StringData* a1, int64_t a2)\
-  { return name(a1, a2); }\
-  int64_t ccmp_ ## name (StringData* a1, ObjectData* a2)\
-  { return name(a1, Object(a2)); }\
-  int64_t ccmp_ ## name (ObjectData* a1, ObjectData* a2)\
-  { return name(Object(a1), Object(a2)); }\
-  int64_t ccmp_ ## name (ObjectData* a1, int64_t a2)\
-  { return name(Object(a1), a2); }\
-  int64_t ccmp_ ## name (ArrayData* a1, ArrayData* a2)\
-  { return name(Array(a1), Array(a2)); }
-
-DISPATCHER(same)
-DISPATCHER(equal)
-DISPATCHER(more)
-DISPATCHER(less)
-
-#undef DISPATCHER
-
-template <typename A, typename B>
-inline int64_t ccmp_nsame(A a, B b) { return !ccmp_same(a, b); }
-
-template <typename A, typename B>
-inline int64_t ccmp_nequal(A a, B b) { return !ccmp_equal(a, b); }
-
-// TODO Task #2661083: We cannot assume that "(a <= b) === !(a > b)" for
-// all types. In particular, this assumption does not hold when comparing
-// two arrays or comparing two objects. We should fix this.
-template <typename A, typename B>
-inline int64_t ccmp_lte(A a, B b) { return !ccmp_more(a, b); }
-
-template <typename A, typename B>
-inline int64_t ccmp_gte(A a, B b) { return !ccmp_less(a, b); }
-
-#define CG_OP_CMP(inst, cc, name)                                   \
-  cgCmpHelper(inst, cc, ccmp_ ## name, ccmp_ ## name,               \
-              ccmp_ ## name, ccmp_ ## name, ccmp_ ## name, ccmp_ ## name)
-
-// SON - string, object, or number
-static bool typeIsSON(Type t) {
-  return t.subtypeOfAny(TStr, TObj, TInt, TDbl);
-}
-
-void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
-          int64_t (*str_cmp_str)(StringData*, StringData*),
-          int64_t (*str_cmp_int)(StringData*, int64_t),
-          int64_t (*str_cmp_obj)(StringData*, ObjectData*),
-          int64_t (*obj_cmp_obj)(ObjectData*, ObjectData*),
-          int64_t (*obj_cmp_int)(ObjectData*, int64_t),
-          int64_t (*arr_cmp_arr)(ArrayData*,  ArrayData*)
-        ) {
-  SSATmp* src1  = inst->src(0);
-  SSATmp* src2  = inst->src(1);
-
-  Type type1 = src1->type();
-  Type type2 = src2->type();
-
-  auto& v = vmain();
-
-  // case 1: string cmp string
-  // We should only get these if the simplifer didn't run.
-  if (type1 <= TStr && type2 <= TStr) {
-    CG_PUNT(inst->marker(), cgOpCmpHelper_strstr);
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // case 2: bool/null cmp anything
-  // We should only get these if the simplifer didn't run.
-  else if (type1 <= TBool && type2 <= TBool) {
-    CG_PUNT(inst->marker(), cgOpCmpHelper_boolbool);
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // case 3, 4, and 7: string/resource/object/number (sron) cmp sron
-  // These cases must be amalgamated because TObj can refer to an object
-  //  or to a resource.
-  // strings are canonicalized to the left, ints to the right
-  else if (typeIsSON(type1) && typeIsSON(type2)) {
-    if (type1 <= TStr) {
-      // string cmp string is dealt with in case 1
-      // string cmp double is punted above
-
-      if (type2 <= TInt) {
-        cgCallHelper(v, CppCall::direct(str_cmp_int), callDest(inst),
-                     SyncOptions::kSyncPoint, argGroup(inst).ssa(0).ssa(1));
-      } else if (type2 <= TObj) {
-        cgCallHelper(v, CppCall::direct(str_cmp_obj), callDest(inst),
-                     SyncOptions::kSyncPoint, argGroup(inst).ssa(0).ssa(1));
-      } else {
-        CG_PUNT(inst->marker(), cgOpCmpHelper_sx);
-      }
-    }
-
-    else if (type1 <= TObj) {
-      // string cmp object is dealt with above
-      // object cmp double is punted above
-
-      if (type2 <= TObj) {
-        cgCallHelper(v, CppCall::direct(obj_cmp_obj), callDest(inst),
-                     SyncOptions::kSyncPoint, argGroup(inst).ssa(0).ssa(1));
-      } else if (type2 <= TInt) {
-        cgCallHelper(v, CppCall::direct(obj_cmp_int), callDest(inst),
-                     SyncOptions::kSyncPoint, argGroup(inst).ssa(0).ssa(1));
-      } else {
-        CG_PUNT(inst->marker(), cgOpCmpHelper_ox);
-      }
-    }
-    else {
-      CG_PUNT(inst->marker(), cgOpCmpHelper_SON);
-    }
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // case 5: array cmp array
-  else if (type1 <= TArr && type2 <= TArr) {
-    cgCallHelper(v, CppCall::direct(arr_cmp_arr),
-      callDest(inst), SyncOptions::kSyncPoint, argGroup(inst).ssa(0).ssa(1));
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // case 6: array cmp anything
-  // simplifyCmp has already dealt with this case.
-
-  /////////////////////////////////////////////////////////////////////////////
-  else {
-    // We have a type which is not a common type. It might be a cell or a box.
-    CG_PUNT(inst->marker(), cgOpCmpHelper_unimplemented);
-  }
-}
-
-void CodeGenerator::cgEq(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_E, equal);
-}
-
-void CodeGenerator::cgEqX(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_E, equal);
-}
-
-void CodeGenerator::cgNeq(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_NE, nequal);
-}
-
-void CodeGenerator::cgNeqX(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_NE, nequal);
-}
-
-void CodeGenerator::cgSame(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_E, same);
-}
-
-void CodeGenerator::cgNSame(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_NE, nsame);
-}
-
-void CodeGenerator::cgLt(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_L, less);
-}
-
-void CodeGenerator::cgLtX(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_L, less);
-}
-
-void CodeGenerator::cgGt(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_G, more);
-}
-
-void CodeGenerator::cgGtX(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_G, more);
-}
-
-void CodeGenerator::cgLte(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_LE, lte);
-}
-
-void CodeGenerator::cgLteX(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_LE, lte);
-}
-
-void CodeGenerator::cgGte(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_GE, gte);
-}
-
-void CodeGenerator::cgGteX(IRInstruction* inst) {
-  CG_OP_CMP(inst, CC_GE, gte);
-}
-
 void CodeGenerator::emitCmpInt(IRInstruction* inst, ConditionCode cc) {
   auto dst = dstLoc(inst, 0).reg();
   auto src0 = srcLoc(inst, 0).reg();
@@ -1202,29 +1025,12 @@ void CodeGenerator::emitCmpBool(IRInstruction* inst,
   v << setcc{cc, sf, dstReg};
 }
 
-void CodeGenerator::cgGtBool(IRInstruction* inst) {
-  emitCmpBool(inst, CC_G);
-}
-
-void CodeGenerator::cgGteBool(IRInstruction* inst) {
-  emitCmpBool(inst, CC_GE);
-}
-
-void CodeGenerator::cgLtBool(IRInstruction* inst) {
-  emitCmpBool(inst, CC_L);
-}
-
-void CodeGenerator::cgLteBool(IRInstruction* inst) {
-  emitCmpBool(inst, CC_LE);
-}
-
-void CodeGenerator::cgEqBool(IRInstruction* inst) {
-  emitCmpBool(inst, CC_E);
-}
-
-void CodeGenerator::cgNeqBool(IRInstruction* inst) {
-  emitCmpBool(inst, CC_NE);
-}
+void CodeGenerator::cgGtBool(IRInstruction* inst) { emitCmpBool(inst, CC_G); }
+void CodeGenerator::cgGteBool(IRInstruction* inst) { emitCmpBool(inst, CC_GE); }
+void CodeGenerator::cgLtBool(IRInstruction* inst) { emitCmpBool(inst, CC_L); }
+void CodeGenerator::cgLteBool(IRInstruction* inst) { emitCmpBool(inst, CC_LE); }
+void CodeGenerator::cgEqBool(IRInstruction* inst) { emitCmpBool(inst, CC_E); }
+void CodeGenerator::cgNeqBool(IRInstruction* inst) { emitCmpBool(inst, CC_NE); }
 
 void CodeGenerator::cgSameObj(IRInstruction* inst) {
   auto dst = dstLoc(inst, 0).reg();
@@ -1736,6 +1542,16 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
       return dst2;
     }
   );
+}
+
+void CodeGenerator::cgIsCol(IRInstruction* inst) {
+  assertx(inst->src(0)->type() <= TObj);
+  auto const rdst = dstLoc(inst, 0).reg();
+  auto const rsrc = srcLoc(inst, 0).reg();
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  v << testwim{ObjectData::IsCollection, rsrc[ObjectData::attributeOff()], sf};
+  v << setcc{CC_NE, sf, rdst};
 }
 
 void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {

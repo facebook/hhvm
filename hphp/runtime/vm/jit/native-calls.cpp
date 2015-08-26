@@ -61,6 +61,7 @@ using StrCmpFn = bool (*)(const StringData*, const StringData*);
 using ObjCmpFn = bool (*)(const ObjectData*, const ObjectData*);
 using ArrCmpFn = bool (*)(const ArrayData*, const ArrayData*);
 using ResCmpFn = bool (*)(const ResourceHdr*, const ResourceHdr*);
+using StrIntCmpFn = bool (*)(const StringData*, int64_t);
 
 }
 
@@ -119,19 +120,23 @@ static CallMap s_callMap {
 
     {ConvArrToDbl,       convArrToDblHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvObjToDbl,       convCellToDblHelper, DSSA, SSync,
-                           {{TV, 0}}},
+    {ConvObjToDbl,       convObjToDblHelper, DSSA, SSync,
+                           {{SSA, 0}}},
     {ConvStrToDbl,       convStrToDblHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvCellToDbl,       convCellToDblHelper, DSSA, SSync,
+    {ConvResToDbl,       convResToDblHelper, DSSA, SNone,
+                           {{SSA, 0}}},
+    {ConvCellToDbl,      convCellToDblHelper, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvArrToInt,       convArrToIntHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvObjToInt,       cellToInt, DSSA, SSync,
-                           {{TV, 0}}},
+    {ConvObjToInt,       &ObjectData::toInt64, DSSA, SSync,
+                           {{SSA, 0}}},
     {ConvStrToInt,       &StringData::toInt64, DSSA, SNone,
                            {{SSA, 0}, immed(10)}},
+    {ConvResToInt,       &ResourceHdr::getId, DSSA, SNone,
+                           {{SSA, 0}}},
     {ConvCellToInt,      cellToInt, DSSA, SSync,
                            {{TV, 0}}},
 
@@ -237,6 +242,10 @@ static CallMap s_callMap {
                           {{TV, 0}, {TV, 1}, {TV, 2}}},
     {MapIdx,             mapIdx, DTV, SSync,
                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
+    {ThrowInvalidOperation, throw_invalid_operation_exception,
+                          DNone, SSync, {{SSA, 0}}},
+    {HasToString,        &ObjectData::hasToString, DSSA, SSync,
+                          {{SSA, 0}}},
 
     /* Type specialized comparison operators */
     {GtStr,              static_cast<StrCmpFn>(more), DSSA, SSync,
@@ -254,6 +263,18 @@ static CallMap s_callMap {
     {SameStr,            static_cast<StrCmpFn>(same), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {NSameStr,           static_cast<StrCmpFn>(nsame), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {GtStrInt,           static_cast<StrIntCmpFn>(more), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {GteStrInt,          static_cast<StrIntCmpFn>(moreEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LtStrInt,           static_cast<StrIntCmpFn>(less), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LteStrInt,          static_cast<StrIntCmpFn>(lessEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {EqStrInt,           static_cast<StrIntCmpFn>(equal), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {NeqStrInt,          static_cast<StrIntCmpFn>(nequal), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GtObj,              static_cast<ObjCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},

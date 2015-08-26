@@ -510,7 +510,6 @@ void CodeGenerator::cgIssetEmptyElemImpl(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
-      .ssa(2)
   );
 }
 

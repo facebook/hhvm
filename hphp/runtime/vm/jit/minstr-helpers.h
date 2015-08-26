@@ -321,8 +321,7 @@ INCDECPROP_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template <bool useEmpty, bool isObj>
-bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
-                        TypedValue key) {
+bool issetEmptyPropImpl(Class* ctx, TypedValue* base, TypedValue key) {
   return HPHP::IssetEmptyProp<useEmpty, isObj>(ctx, base, key);
 }
 
@@ -343,8 +342,7 @@ ISSET_EMPTY_PROP_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, bool warn, bool define, bool reffy,
-          bool unset>
+template <KeyType keyType, bool warn, bool define, bool reffy, bool unset>
 TypedValue* elemImpl(TypedValue* base,
                      key_type<keyType> key,
                      MInstrState* mis) {
@@ -656,12 +654,8 @@ UNSET_ELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 template <KeyType keyType, bool isEmpty>
-bool issetEmptyElemImpl(TypedValue* base,
-                        key_type<keyType> key,
-                        MInstrState* mis) {
-  // mis == nullptr if we proved that it won't be used.  mis->tvRef is ok
-  // because it gets passed by reference.
-  return HPHP::IssetEmptyElem<isEmpty, keyType>(mis->tvRef, base, key);
+bool issetEmptyElemImpl(TypedValue* base, key_type<keyType> key) {
+  return HPHP::IssetEmptyElem<isEmpty, keyType>(base, key);
 }
 
 #define ISSET_EMPTY_ELEM_HELPER_TABLE(m)        \
@@ -671,11 +665,11 @@ bool issetEmptyElemImpl(TypedValue* base,
   m(issetElemI,   KeyType::Int, false)          \
   m(issetElemIE,  KeyType::Int,  true)          \
   m(issetElemS,   KeyType::Str, false)          \
-  m(issetElemSE,  KeyType::Str,  true)
+  m(issetElemSE,  KeyType::Str,  true)          \
 
-#define X(nm, kt, isEmpty)                                              \
-inline uint64_t nm(TypedValue* base, key_type<kt> key, MInstrState* mis) { \
-  return issetEmptyElemImpl<kt, isEmpty>(base, key, mis);               \
+#define X(nm, kt, isEmpty)                                \
+inline uint64_t nm(TypedValue* base, key_type<kt> key) {  \
+  return issetEmptyElemImpl<kt, isEmpty>(base, key);      \
 }
 ISSET_EMPTY_ELEM_HELPER_TABLE(X)
 #undef X

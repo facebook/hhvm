@@ -2356,11 +2356,11 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| IssetElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), Er
+| IssetElem, D(Bool), S(PtrToGen) S(Cell), Er
 
   Returns true iff the element at key S1 in S0 is set.
 
-| EmptyElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), Er
+| EmptyElem, D(Bool), S(PtrToGen) S(Cell), Er
 
   Returns true iff the element at key S1 in S0 is set and not equal (as defined
   by the hhbc Eq instruction) to false.

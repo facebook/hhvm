@@ -1605,28 +1605,24 @@ inline void UnsetElem(TypedValue* base, key_type<keyType> key) {
  * IssetEmptyElem when base is an Object
  */
 template<bool useEmpty, KeyType keyType>
-inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
-                              key_type<keyType> key) {
+bool IssetEmptyElemObj(ObjectData* instance, key_type<keyType> key) {
   auto scratchKey = initScratchKey(key);
-
-  if (useEmpty) {
-    if (LIKELY(instance->isCollection())) {
-      return collections::empty(instance, &scratchKey);
-    }
-    return objOffsetEmpty(instance, scratchKey);
-  } else {
-    if (LIKELY(instance->isCollection())) {
-      return collections::isset(instance, &scratchKey);
-    }
-    return objOffsetIsset(instance, scratchKey);
+  if (LIKELY(instance->isCollection())) {
+    return useEmpty
+      ? collections::empty(instance, &scratchKey)
+      : collections::isset(instance, &scratchKey);
   }
+
+  return useEmpty
+    ? objOffsetEmpty(instance, scratchKey)
+    : objOffsetIsset(instance, scratchKey);
 }
 
 /**
  * IssetEmptyElem when base is a String
  */
 template <bool useEmpty, KeyType keyType>
-inline bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
+bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
   // TODO Task #2716479: Fix this so that the warnings raised match
   // PHP5.
   auto scratchKey = initScratchKey(key);
@@ -1675,7 +1671,7 @@ inline bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
  * IssetEmptyElem when base is an Array
  */
 template <bool useEmpty, KeyType keyType>
-inline bool IssetEmptyElemArray(TypedValue* base, key_type<keyType> key) {
+bool IssetEmptyElemArray(TypedValue* base, key_type<keyType> key) {
   auto const result = ElemArray<false, keyType>(base->m_data.parr, key);
   if (useEmpty) {
     return !cellToBool(*tvToCell(result));
@@ -1687,12 +1683,7 @@ inline bool IssetEmptyElemArray(TypedValue* base, key_type<keyType> key) {
  * isset/empty($base[$key])
  */
 template <bool useEmpty, KeyType keyType>
-NEVER_INLINE
-bool IssetEmptyElemSlow(
-  TypedValue& tvRef,
-  TypedValue* base,
-  key_type<keyType> key
-) {
+NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
@@ -1711,11 +1702,7 @@ bool IssetEmptyElemSlow(
       return IssetEmptyElemArray<useEmpty, keyType>(base, key);
 
     case KindOfObject:
-      return IssetEmptyElemObj<useEmpty, keyType>(
-        tvRef,
-        base->m_data.pobj,
-        key
-      );
+      return IssetEmptyElemObj<useEmpty, keyType>(base->m_data.pobj, key);
 
     case KindOfRef:
     case KindOfClass:
@@ -1728,15 +1715,11 @@ bool IssetEmptyElemSlow(
  * Fast path for IssetEmptyElem assuming base is an Array
  */
 template <bool useEmpty, KeyType keyType = KeyType::Any>
-inline bool IssetEmptyElem(
-  TypedValue& tvRef,
-  TypedValue* base,
-  key_type<keyType> key
-) {
+bool IssetEmptyElem(TypedValue* base, key_type<keyType> key) {
   if (LIKELY(base->m_type == KindOfArray)) {
     return IssetEmptyElemArray<useEmpty, keyType>(base, key);
   }
-  return IssetEmptyElemSlow<useEmpty, keyType>(tvRef, base, key);
+  return IssetEmptyElemSlow<useEmpty, keyType>(base, key);
 }
 
 template <bool warn>

@@ -1912,7 +1912,7 @@ void emitIssetElem(MTS& env) {
   case SimpleOp::None:
     {
       auto const key = getKey(env);
-      env.result = gen(env, IssetElem, env.base.value, key, misPtr(env));
+      env.result = gen(env, IssetElem, env.base.value, key);
     }
     break;
   }
@@ -1920,7 +1920,7 @@ void emitIssetElem(MTS& env) {
 
 void emitEmptyElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, EmptyElem, env.base.value, key, misPtr(env));
+  env.result = gen(env, EmptyElem, env.base.value, key);
 }
 
 void emitSetNewElem(MTS& env) {

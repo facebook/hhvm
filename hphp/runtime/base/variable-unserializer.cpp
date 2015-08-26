@@ -36,7 +36,7 @@ namespace HPHP {
 
 static void unserializeVariant(Variant&, VariableUnserializer *unserializer,
                                UnserializeMode mode = UnserializeMode::Value);
-static void unserializeArray(Array&, VariableUnserializer*);
+static Array unserializeArray(VariableUnserializer*);
 static String unserializeString(VariableUnserializer*, char delimiter0 = '"',
                                 char delimiter1 = '"');
 static void unserializeCollection(ObjectData* obj, VariableUnserializer* uns,
@@ -439,8 +439,8 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
                         UnserializeMode mode /* = UnserializeMode::Value */) {
 
   // NOTE: If you make changes to how serialization and unserialization work,
-  // make sure to update the reserialize() method in "runtime/ext/ext_apc.cpp"
-  // and to update test_apc_reserialize() in "test/ext/test_ext_apc.cpp".
+  // make sure to update reserialize() here and test_apc_reserialize()
+  // in "test/ext/test_ext_apc.cpp".
 
   char type = uns->readChar();
   char sep = uns->readChar();
@@ -541,9 +541,8 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
-      auto v = Array::Create();
-      unserializeArray(v, uns);
-      tvMove(make_tv<KindOfArray>(v.detach()), *self.asTypedValue());
+      auto a = unserializeArray(uns);
+      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'L':
@@ -768,56 +767,54 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
   uns->expectChar(';');
 }
 
-void unserializeArray(Array& arr, VariableUnserializer* uns) {
+Array unserializeArray(VariableUnserializer* uns) {
   int64_t size = uns->readInt();
   uns->expectChar(':');
   uns->expectChar('{');
-
   if (size == 0) {
-    arr = Array::Create();
-  } else {
-    if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
-      throwArraySizeOutOfBounds();
+    uns->expectChar('}');
+    return Array::Create(); // static empty array
+  }
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+  auto const scale = computeScaleFromSize(size);
+  auto const allocsz = computeAllocBytes(scale);
+
+  // For large arrays, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+
+  // Pre-allocate an ArrayData of the given size, to avoid escalation in the
+  // middle, which breaks references.
+  Array arr = ArrayInit(size, ArrayInit::Mixed{}).toArray();
+  for (int64_t i = 0; i < size; i++) {
+    Variant key;
+    unserializeVariant(key, uns, UnserializeMode::Key);
+    if (!key.isString() && !key.isInteger()) {
+      throwInvalidKey();
     }
-    auto const scale = computeScaleFromSize(size);
-    auto const allocsz = computeAllocBytes(scale);
+    // for apc, we know the key can't exist, but ignore that optimization
+    assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
+           !arr.exists(key, true));
 
-    // For large arrays, do a naive pre-check for OOM.
-    if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-      check_request_surprise_unlikely();
+    Variant &value = arr.lvalAt(key, AccessFlags::Key);
+    if (UNLIKELY(isRefcountedType(value.getRawType()))) {
+      uns->putInOverwrittenList(value);
     }
+    unserializeVariant(value, uns);
 
-    // Pre-allocate an ArrayData of the given size, to avoid escalation in the
-    // middle, which breaks references.
-    arr = ArrayInit(size, ArrayInit::Mixed{}).toArray();
-    for (int64_t i = 0; i < size; i++) {
-      Variant key;
-      unserializeVariant(key, uns, UnserializeMode::Key);
-      if (!key.isString() && !key.isInteger()) {
-        throwInvalidKey();
-      }
-      // for apc, we know the key can't exist, but ignore that optimization
-      assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
-             !arr.exists(key, true));
-
-      Variant &value = arr.lvalAt(key, AccessFlags::Key);
-      if (UNLIKELY(isRefcountedType(value.getRawType()))) {
-        uns->putInOverwrittenList(value);
-      }
-      unserializeVariant(value, uns);
-
-      if (i < (size - 1)) {
-        auto lastChar = uns->peekBack();
-        if ((lastChar != ';' && lastChar != '}')) {
-          throwUnterminatedElement();
-        }
+    if (i < (size - 1)) {
+      auto lastChar = uns->peekBack();
+      if ((lastChar != ';' && lastChar != '}')) {
+        throwUnterminatedElement();
       }
     }
   }
-
   check_request_surprise_unlikely();
-
   uns->expectChar('}');
+  return arr;
 }
 
 static

@@ -30,6 +30,8 @@ struct StringBufferLimitException : FatalErrorException {
     : FatalErrorException(0, "StringBuffer exceeded %d bytes of memory", size),
       m_result(partialResult) {}
 
+  void vscan(IMarker& mark) const override;
+
   String m_result;
 };
 

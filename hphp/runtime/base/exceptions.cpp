@@ -27,16 +27,19 @@ std::atomic<int> ExitException::ExitCode{0};  // XXX: this should not be static
 
 ExtendedException::ExtendedException() : Exception() {
   computeBacktrace();
+  MM().addExceptionRoot(this);
 }
 
 ExtendedException::ExtendedException(const std::string &msg) {
   m_msg = msg;
   computeBacktrace();
+  MM().addExceptionRoot(this);
 }
 
 ExtendedException::ExtendedException(SkipFrame, const std::string &msg) {
   m_msg = msg;
   computeBacktrace(true);
+  MM().addExceptionRoot(this);
 }
 
 ExtendedException::ExtendedException(const char *fmt, ...) {
@@ -45,6 +48,56 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   format(fmt, ap);
   va_end(ap);
   computeBacktrace();
+  MM().addExceptionRoot(this);
+}
+
+ExtendedException::ExtendedException(const std::string& msg,
+                                     ArrayData* backTrace)
+  : m_btp(backTrace)
+{
+  m_msg = msg;
+  MM().addExceptionRoot(this);
+}
+
+/*
+ * Normally we wouldn't need an explicit copy/move-constructors, or
+ * copy/move-assignment operators, but we have to make sure m_key isn't copied.
+ */
+
+ExtendedException::ExtendedException(const ExtendedException& other)
+  : Exception(other),
+    m_btp(other.m_btp),
+    m_silent(other.m_silent)
+{
+  MM().addExceptionRoot(this);
+}
+
+ExtendedException::ExtendedException(ExtendedException&& other) noexcept
+  : Exception(std::move(other)),
+    m_btp(std::move(other.m_btp)),
+    m_silent(other.m_silent)
+{
+  MM().addExceptionRoot(this);
+}
+
+ExtendedException::~ExtendedException() {
+  MM().removeExceptionRoot(this);
+}
+
+ExtendedException&
+ExtendedException::operator=(const ExtendedException& other) {
+  Exception::operator=(other);
+  m_btp = other.m_btp;
+  m_silent = other.m_silent;
+  return *this;
+}
+
+ExtendedException&
+ExtendedException::operator=(ExtendedException&& other) noexcept {
+  Exception::operator=(std::move(other));
+  m_btp = std::move(other.m_btp);
+  m_silent = other.m_silent;
+  return *this;
 }
 
 Array ExtendedException::getBacktrace() const {

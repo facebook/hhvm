@@ -180,7 +180,7 @@ template<class F> void scan_ezc_resources(F& mark) {
 #endif
 }
 
-template<class F> void Exception::scan(F& mark) const {
+template<class F> void ExtendedException::scan(F& mark) const {
   ExtMarker<F> bridge(mark);
   vscan(bridge);
 }
@@ -252,6 +252,23 @@ void MemoryManager::scanSweepLists(F& mark) const {
   }
   for (auto node: m_natives) {
     mark(Native::obj(node));
+  }
+}
+
+template <typename F>
+void MemoryManager::scanRootMaps(F& m) const {
+  if (m_objectRoots) {
+    for(const auto& root : *m_objectRoots) {
+      scan(root.second, m);
+    }
+  }
+  if (m_resourceRoots) {
+    for(const auto& root : *m_resourceRoots) {
+      scan(root.second, m);
+    }
+  }
+  for (const auto& root : m_exceptionRoots) {
+    root->scan(m);
   }
 }
 

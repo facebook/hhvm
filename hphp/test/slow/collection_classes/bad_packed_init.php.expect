@@ -1,0 +1,6 @@
+object(HH\ImmMap)#1 (2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "baz"
+}

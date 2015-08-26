@@ -8858,6 +8858,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
   auto nElms = el->getCount();
   auto useArray = !!nElms;
   auto hasVectorData = true;
+  int64_t max = 0;
   for (int i = 0; i < nElms; i++) {
     auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     auto key = ap->getName();
@@ -8875,7 +8876,12 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
           useArray = false;
         }
       } else if (vkey.isInteger()) {
-        if (vkey.asInt64Val() != i) hasVectorData = false;
+        auto val = vkey.asInt64Val();
+        if (val > max || val < 0) {
+          hasVectorData = false;
+        } else if (val == max) {
+          ++max;
+        }
       } else {
         useArray = false;
       }

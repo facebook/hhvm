@@ -3498,8 +3498,10 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   assertx(vec->type() < TObj);
   assertx(collections::isType(vec->type().clsSpec().cls(),
                               CollectionType::Vector));
-  vmain() << load{vecReg[collections::dataOffset(CollectionType::Vector)],
-                  dstReg};
+  auto& v = vmain();
+  auto arr = v.makeReg();
+  v << load{vecReg[BaseVector::arrOffset()], arr};
+  v << lea{arr[PackedArray::entriesOffset()], dstReg};
 }
 
 void CodeGenerator::cgLdColArray(IRInstruction* inst) {
@@ -3512,12 +3514,7 @@ void CodeGenerator::cgLdColArray(IRInstruction* inst) {
   auto const isVector    = collections::isType(cls, CollectionType::Vector);
   auto const isImmVector = collections::isType(cls, CollectionType::ImmVector);
   if (isVector || isImmVector) {
-    auto const rdata = v.makeReg();
-    auto const offset =
-      collections::dataOffset(isVector ? CollectionType::Vector
-                                       : CollectionType::ImmVector);
-    v << load{rsrc[offset], rdata};
-    v << addqi{-int32_t{sizeof(ArrayData)}, rdata, rdst, v.makeReg()};
+    v << load{rsrc[BaseVector::arrOffset()], rdst};
     return;
   }
 
@@ -3550,17 +3547,10 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   assertx(collections::isType(vec->type().clsSpec().cls(),
                               CollectionType::Vector));
 
-  // Vector::m_data field holds an address of an ArrayData plus
-  // sizeof(ArrayData) bytes. We need to check this ArrayData's
-  // m_count field to see if we need to call Vector::triggerCow().
-  auto rawPtrOffset = collections::dataOffset(CollectionType::Vector) +
-                      kExpectedMPxOffset;
-  auto countOffset = (int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData);
-
-  auto ptr = v.makeReg();
-  v << load{vecReg[rawPtrOffset], ptr};
+  auto arr = v.makeReg();
+  v << load{vecReg[BaseVector::arrOffset()], arr};
   auto const sf = v.makeReg();
-  v << cmplim{1, ptr[countOffset], sf};
+  v << cmplim{1, arr[FAST_REFCOUNT_OFFSET], sf};
   v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
 }
 

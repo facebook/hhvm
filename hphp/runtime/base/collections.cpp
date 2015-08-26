@@ -129,9 +129,13 @@ uint32_t sizeOffset(CollectionType ctype) {
 
 uint32_t dataOffset(CollectionType ctype) {
   switch (ctype) {
-#define X(type) case CollectionType::type: return c_##type::dataOffset();
-COLLECTIONS_ALL_TYPES(X)
-#undef X
+    case CollectionType::Map:       return c_Map::dataOffset();
+    case CollectionType::ImmMap:    return c_ImmMap::dataOffset();
+    case CollectionType::Set:       return c_Set::dataOffset();
+    case CollectionType::ImmSet:    return c_ImmSet::dataOffset();
+    case CollectionType::Pair:      return c_Pair::dataOffset();
+    case CollectionType::Vector:    break;
+    case CollectionType::ImmVector: break;
   }
   not_reached();
 }
@@ -232,7 +236,7 @@ void deepCopy(TypedValue* tv) {
         assertx(vec->canMutateBuffer());
         auto sz = vec->m_size;
         for (size_t i = 0; i < sz; ++i) {
-          deepCopy(&vec->m_data[i]);
+          deepCopy(&vec->data()[i]);
         }
         return o.detach();
       };

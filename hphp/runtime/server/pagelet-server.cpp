@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/util/boot_timer.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -359,11 +360,7 @@ void PageletServer::Restart() {
          RuntimeOption::PageletServerThreadDropStack,
          nullptr);
 
-#ifdef FOLLY_SINGLETON_TRY_GET
-      auto monitor = folly::Singleton<HostHealthMonitor>::try_get();
-#else
-      auto monitor = folly::Singleton<HostHealthMonitor>::get();
-#endif
+      auto monitor = getSingleton<HostHealthMonitor>();
 
       monitor->subscribe(s_dispatcher);
       monitor->start();
@@ -376,11 +373,7 @@ void PageletServer::Restart() {
 void PageletServer::Stop() {
   if (s_dispatcher) {
 
-#ifdef FOLLY_SINGLETON_TRY_GET
-    auto monitor = folly::Singleton<HostHealthMonitor>::try_get();
-#else
-    auto monitor = folly::Singleton<HostHealthMonitor>::get();
-#endif
+    auto monitor = getSingleton<HostHealthMonitor>();
 
     monitor->stop();
     s_dispatcher->stop();

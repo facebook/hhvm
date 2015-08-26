@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/lock.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
@@ -1664,14 +1665,11 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
     // Add optional timeout
     int64_t timeout_ms = timeout * 1000;
     if (timeout_ms > 0) {
-      m_timeout = std::shared_ptr<CurlTimeoutHandler>
-        (new CurlTimeoutHandler(s_asio_event_base.get(), this));
+      auto asio_event_base = getSingleton<AsioEventBase>();
+      m_timeout = std::make_shared<CurlTimeoutHandler>(asio_event_base.get(),
+                                                       this);
 
-#ifdef FOLLY_SINGLETON_TRY_GET
-      s_asio_event_base.try_get()->runInEventBaseThread([this,timeout_ms]{
-#else
-      s_asio_event_base->runInEventBaseThread([this,timeout_ms]{
-#endif
+      asio_event_base->runInEventBaseThread([this,timeout_ms] {
         m_timeout->scheduleTimeout(timeout_ms);
       });
     }
@@ -1682,15 +1680,11 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
       handler->unregisterHandler();
     }
     if (m_timeout) {
-      std::shared_ptr<CurlTimeoutHandler> to = m_timeout;
-#ifdef FOLLY_SINGLETON_TRY_GET
-      s_asio_event_base.try_get()->runInEventBaseThreadAndWait([to]{
-#else
-      s_asio_event_base->runInEventBaseThreadAndWait([to]{
-#endif
+      auto asio_event_base = getSingleton<AsioEventBase>();
+      auto to = std::move(m_timeout);
+      asio_event_base->runInEventBaseThreadAndWait([to] {
         to.get()->cancelTimeout();
       });
-      m_timeout.reset();
     }
     m_handlers.clear();
   }
@@ -1712,8 +1706,9 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
 
  private:
   void addHandle(int fd, int events) {
+    auto asio_event_base = getSingleton<AsioEventBase>();
     auto handler =
-      std::make_shared<CurlEventHandler>(s_asio_event_base.get(), fd, this);
+      std::make_shared<CurlEventHandler>(asio_event_base.get(), fd, this);
     handler->registerHandler(events);
     m_handlers.push_back(handler);
   }

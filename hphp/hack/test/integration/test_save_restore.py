@@ -6,6 +6,7 @@ import glob
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -118,8 +119,10 @@ class TestSaveRestore(unittest.TestCase):
 
     @classmethod
     def start_hh_server(cls):
+        cmd = [cls.hh_server, cls.repo_dir]
+        print(" ".join(cmd), file=sys.stderr)
         return subprocess.Popen(
-                [cls.hh_server, cls.repo_dir],
+                cmd,
                 stderr=subprocess.PIPE)
 
     def setUp(self):
@@ -140,7 +143,7 @@ class TestSaveRestore(unittest.TestCase):
             self.hh_client,
             'check',
             '--retries',
-            '5',
+            '20',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
             stdin=stdin)
@@ -410,11 +413,7 @@ echo "$2" >> {out}
 load_script = %s
             """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
-        proc_call([
-            self.hh_client,
-            'start',
-            self.repo_dir
-        ])
+        self.check_cmd(self.initial_errors)
 
         version = proc_call([
             self.hh_server,

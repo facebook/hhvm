@@ -19,7 +19,8 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include <netinet/in.h>
+
+#include <folly/SocketPortability.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

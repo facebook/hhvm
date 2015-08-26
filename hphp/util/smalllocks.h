@@ -17,13 +17,14 @@
 #define incl_HPHP_SMALLLOCKS_H_
 
 #include <atomic>
-#include <unistd.h>
 #include <iostream>
 #ifdef __linux__
 #include <syscall.h>
 #include <linux/futex.h>
 #include <sys/time.h>
 #endif
+
+#include <folly/FilePortability.h>
 
 namespace HPHP {
 

@@ -25,12 +25,13 @@
 
 #include <sqlite3.h>
 
-// For sysconf(3).
-#include <unistd.h>
 // For getpwuid_r(3).
 #include <sys/types.h>
+#ifndef _MSC_VER
 #include <pwd.h>
+#endif
 
+#include <folly/FilePortability.h>
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/litstr-repo-proxy.h"

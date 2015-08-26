@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/filter/logical_filters.h"
 
-#include <arpa/inet.h>
+#include <folly/SocketPortability.h>
 #include <pcre.h>
 
 #include "hphp/runtime/base/array-init.h"

@@ -23,8 +23,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
+#include <folly/FilePortability.h>
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/lock.h"

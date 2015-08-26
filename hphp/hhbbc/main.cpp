@@ -22,7 +22,6 @@
 #include <memory>
 #include <cstdint>
 #include <algorithm>
-#include <unistd.h>
 #include <exception>
 #include <utility>
 #include <vector>
@@ -30,6 +29,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
+#include <folly/FilePortability.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 

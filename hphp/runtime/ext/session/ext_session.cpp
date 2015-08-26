@@ -19,13 +19,12 @@
 #include <string>
 
 #include <sys/types.h>
-#include <sys/time.h>
 #include <sys/stat.h>
-#include <sys/file.h>
 #include <fcntl.h>
-#include <dirent.h>
 #include <vector>
 
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 #include <folly/String.h>
 
 #include "hphp/util/lock.h"

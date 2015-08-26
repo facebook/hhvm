@@ -17,14 +17,14 @@
 #include "hphp/compiler/package.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <fstream>
 #include <map>
 #include <memory>
 #include <set>
 #include <utility>
 #include <vector>
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 #include <folly/String.h>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"

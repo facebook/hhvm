@@ -1244,8 +1244,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupCns:
   case LookupCnsE:
   case LookupCnsU:
-  case StringGet:   // raise_warning
-  case ArrayAdd:    // decrefs source
+  case StringGet:      // raise_warning
+  case ArrayAdd:       // decrefs source
   case AddElemIntKey:  // decrefs value
   case AddElemStrKey:  // decrefs value
   case AddNewElem:     // decrefs value
@@ -1253,7 +1253,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArrayIsset:     // kVPackedKind warnings
   case ArraySet:       // kVPackedKind warnings
   case ArraySetRef:    // kVPackedKind warnings
-  case GetMemoKey:  // re-enters to call getInstanceKey() in some cases
+  case GetMemoKey:     // re-enters to call getInstanceKey() in some cases
   case LdClsCtor:
   case ConcatStrStr:
   case PrintStr:

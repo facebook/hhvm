@@ -248,7 +248,7 @@ inline int64_t ElemStringPre(TypedValue key) {
  * Elem when base is a String
  */
 template <bool warn, KeyType keyType>
-inline const TypedValue* ElemString(TypedValue& tvScratch,
+inline const TypedValue* ElemString(TypedValue& tvRef,
                                     TypedValue* base,
                                     key_type<keyType> key) {
   auto offset = ElemStringPre(key);
@@ -257,15 +257,12 @@ inline const TypedValue* ElemString(TypedValue& tvScratch,
     if (warn && RuntimeOption::EnableHipHopSyntax) {
       raise_warning("Out of bounds");
     }
-    static StringData* sd = makeStaticString("");
-    tvScratch.m_data.pstr = sd;
-    tvScratch.m_type = KindOfStaticString;
+    tvRef = make_tv<KindOfStaticString>(staticEmptyString());
   } else {
-    tvScratch.m_data.pstr = base->m_data.pstr->getChar(offset);
-    assert(tvScratch.m_data.pstr->isStatic());
-    tvScratch.m_type = KindOfStaticString;
+    tvRef = make_tv<KindOfStaticString>(base->m_data.pstr->getChar(offset));
+    assert(tvRef.m_data.pstr->isStatic());
   }
-  return &tvScratch;
+  return &tvRef;
 }
 
 /**
@@ -298,8 +295,7 @@ inline const TypedValue* ElemObject(TypedValue& tvRef,
  * $result = $base[$key];
  */
 template <bool warn, KeyType keyType>
-NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvScratch,
-                                        TypedValue& tvRef,
+NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
                                         TypedValue* base,
                                         key_type<keyType> key) {
   base = tvToCell(base);
@@ -315,7 +311,7 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvScratch,
       return ElemScalar();
     case KindOfStaticString:
     case KindOfString:
-      return ElemString<warn, keyType>(tvScratch, base, key);
+      return ElemString<warn, keyType>(tvRef, base, key);
     case KindOfArray:
       return ElemArray<warn, keyType>(base->m_data.parr, key);
     case KindOfObject:
@@ -332,12 +328,13 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvScratch,
  * pointer.
  */
 template <bool warn, KeyType keyType = KeyType::Any>
-inline const TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                              TypedValue* base, key_type<keyType> key) {
+inline const TypedValue* Elem(TypedValue& tvRef,
+                              TypedValue* base,
+                              key_type<keyType> key) {
   if (LIKELY(base->m_type == KindOfArray)) {
     return ElemArray<warn, keyType>(base->m_data.parr, key);
   }
-  return ElemSlow<warn, keyType>(tvScratch, tvRef, base, key);
+  return ElemSlow<warn, keyType>(tvRef, base, key);
 }
 
 template<KeyType kt>
@@ -397,21 +394,21 @@ inline TypedValue* ElemDEmptyish(TypedValue* base, key_type<keyType> key) {
 /**
  * ElemD when base is an Int64, Double, or Resource.
  */
-inline TypedValue* ElemDScalar(TypedValue& tvScratch) {
-  // TODO Task #2757837: Get rid of tvScratch
+inline TypedValue* ElemDScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteUninit(&tvScratch);
-  return &tvScratch;
+  tvWriteUninit(&tvRef);
+  return &tvRef;
 }
 
 /**
  * ElemD when base is a Boolean
  */
 template <bool warn, KeyType keyType>
-inline TypedValue* ElemDBoolean(TypedValue& tvScratch, TypedValue* base,
+inline TypedValue* ElemDBoolean(TypedValue& tvRef,
+                                TypedValue* base,
                                 key_type<keyType> key) {
   if (base->m_data.num) {
-    return ElemDScalar(tvScratch);
+    return ElemDScalar(tvRef);
   }
   return ElemDEmptyish<warn, keyType>(base, key);
 }
@@ -463,19 +460,18 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
  * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
 template <bool warn, bool reffy, KeyType keyType = KeyType::Any>
-inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
-                         TypedValue* base, key_type<keyType> key) {
+TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
       return ElemDEmptyish<warn, keyType>(base, key);
     case KindOfBoolean:
-      return ElemDBoolean<warn, keyType>(tvScratch, base, key);
+      return ElemDBoolean<warn, keyType>(tvRef, base, key);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return ElemDScalar(tvScratch);
+      return ElemDScalar(tvRef);
     case KindOfStaticString:
     case KindOfString:
       return ElemDString<warn, keyType>(base, key);
@@ -507,7 +503,8 @@ inline TypedValue* ElemUArrayImpl<KeyType::Any>(Array& base, TypedValue key) {
  * ElemU when base is an Array
  */
 template <KeyType keyType>
-inline TypedValue* ElemUArray(TypedValue& tvScratch, TypedValue* base,
+inline TypedValue* ElemUArray(TypedValue& tvRef,
+                              TypedValue* base,
                               key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
   bool defined = baseArr.exists(keyAsValue(key));
@@ -515,8 +512,8 @@ inline TypedValue* ElemUArray(TypedValue& tvScratch, TypedValue* base,
     return ElemUArrayImpl<keyType>(baseArr, key);
   }
 
-  tvWriteUninit(&tvScratch);
-  return &tvScratch;
+  tvWriteUninit(&tvRef);
+  return &tvRef;
 }
 
 /**
@@ -539,8 +536,7 @@ inline TypedValue* ElemUObject(TypedValue& tvRef, TypedValue* base,
  * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
 template <KeyType keyType = KeyType::Any>
-inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
-                         TypedValue* base, key_type<keyType> key) {
+TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
@@ -557,7 +553,7 @@ inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
       return nullptr;
     case KindOfArray:
-      return ElemUArray<keyType>(tvScratch, base, key);
+      return ElemUArray<keyType>(tvRef, base, key);
     case KindOfObject:
       return ElemUObject<keyType>(tvRef, base, key);
     case KindOfRef:
@@ -581,18 +577,18 @@ inline TypedValue* NewElemEmptyish(TypedValue* base) {
  * NewElem when base is not a valid type (a number, true boolean,
  * non-empty string, etc.)
  */
-inline TypedValue* NewElemInvalid(TypedValue& tvScratch) {
+inline TypedValue* NewElemInvalid(TypedValue& tvRef) {
   raise_warning("Cannot use a scalar value as an array");
-  tvWriteUninit(&tvScratch);
-  return &tvScratch;
+  tvWriteUninit(&tvRef);
+  return &tvRef;
 }
 
 /**
  * NewElem when base is a Boolean
  */
-inline TypedValue* NewElemBoolean(TypedValue& tvScratch, TypedValue* base) {
+inline TypedValue* NewElemBoolean(TypedValue& tvRef, TypedValue* base) {
   if (base->m_data.num) {
-    return NewElemInvalid(tvScratch);
+    return NewElemInvalid(tvRef);
   }
   return NewElemEmptyish(base);
 }
@@ -600,11 +596,11 @@ inline TypedValue* NewElemBoolean(TypedValue& tvScratch, TypedValue* base) {
 /**
  * NewElem when base is a String
  */
-inline TypedValue* NewElemString(TypedValue& tvScratch, TypedValue* base) {
+inline TypedValue* NewElemString(TypedValue& tvRef, TypedValue* base) {
   if (base->m_data.pstr->size() == 0) {
     return NewElemEmptyish(base);
   }
-  return NewElemInvalid(tvScratch);
+  return NewElemInvalid(tvRef);
 }
 
 /**
@@ -636,7 +632,7 @@ inline TypedValue* NewElemObject(TypedValue& tvRef, TypedValue* base) {
  * $result = ($base[] = ...);
  */
 template <bool reffy>
-inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* NewElem(TypedValue& tvRef,
                            TypedValue* base) {
   base = tvToCell(base);
   switch (base->m_type) {
@@ -644,14 +640,14 @@ inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
     case KindOfNull:
       return NewElemEmptyish(base);
     case KindOfBoolean:
-      return NewElemBoolean(tvScratch, base);
+      return NewElemBoolean(tvRef, base);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return NewElemInvalid(tvScratch);
+      return NewElemInvalid(tvRef);
     case KindOfStaticString:
     case KindOfString:
-      return NewElemString(tvScratch, base);
+      return NewElemString(tvRef, base);
     case KindOfArray:
       return NewElemArray<reffy>(base);
     case KindOfObject:
@@ -1100,16 +1096,16 @@ inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
 /**
  * SetOpElem when base is Int64 or Double
  */
-inline TypedValue* SetOpElemScalar(TypedValue& tvScratch) {
+inline TypedValue* SetOpElemScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&tvScratch);
-  return &tvScratch;
+  tvWriteNull(&tvRef);
+  return &tvRef;
 }
 
 /**
  * $result = ($base[$x] <op>= $y)
  */
-inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* SetOpElem(TypedValue& tvRef,
                              SetOpOp op, TypedValue* base,
                              TypedValue key, Cell* rhs) {
   base = tvToCell(base);
@@ -1120,14 +1116,14 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return SetOpElemScalar(tvScratch);
+        return SetOpElemScalar(tvRef);
       }
       return SetOpElemEmptyish(op, base, key, rhs);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return SetOpElemScalar(tvScratch);
+      return SetOpElemScalar(tvRef);
 
     case KindOfStaticString:
     case KindOfString:
@@ -1176,12 +1172,12 @@ inline TypedValue* SetOpNewElemEmptyish(SetOpOp op,
   SETOP_BODY(result, op, rhs);
   return result;
 }
-inline TypedValue* SetOpNewElemScalar(TypedValue& tvScratch) {
+inline TypedValue* SetOpNewElemScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&tvScratch);
-  return &tvScratch;
+  tvWriteNull(&tvRef);
+  return &tvRef;
 }
-inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* SetOpNewElem(TypedValue& tvRef,
                                 SetOpOp op, TypedValue* base,
                                 Cell* rhs) {
   base = tvToCell(base);
@@ -1192,14 +1188,14 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return SetOpNewElemScalar(tvScratch);
+        return SetOpNewElemScalar(tvRef);
       }
       return SetOpNewElemEmptyish(op, base, rhs);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return SetOpNewElemScalar(tvScratch);
+      return SetOpNewElemScalar(tvRef);
 
     case KindOfStaticString:
     case KindOfString:
@@ -1723,18 +1719,18 @@ bool IssetEmptyElem(TypedValue* base, key_type<keyType> key) {
 }
 
 template <bool warn>
-inline TypedValue* propPreNull(TypedValue& tvScratch) {
-  tvWriteNull(&tvScratch);
+inline TypedValue* propPreNull(TypedValue& tvRef) {
+  tvWriteNull(&tvRef);
   if (warn) {
     raise_notice("Cannot access property on non-object");
   }
-  return &tvScratch;
+  return &tvRef;
 }
 
 template <bool warn, bool define>
-inline TypedValue* propPreStdclass(TypedValue& tvScratch, TypedValue* base) {
+TypedValue* propPreStdclass(TypedValue& tvRef, TypedValue* base) {
   if (!define) {
-    return propPreNull<warn>(tvScratch);
+    return propPreNull<warn>(tvRef);
   }
 
   // TODO(#1124706): We don't want to do this anymore.
@@ -1753,33 +1749,34 @@ inline TypedValue* propPreStdclass(TypedValue& tvScratch, TypedValue* base) {
 }
 
 template <bool warn, bool define>
-inline TypedValue* propPre(TypedValue& tvScratch, TypedValue* base) {
+TypedValue* propPre(TypedValue& tvRef, TypedValue* base) {
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return propPreStdclass<warn, define>(tvScratch, base);
+      return propPreStdclass<warn, define>(tvRef, base);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return propPreNull<warn>(tvScratch);
+        return propPreNull<warn>(tvRef);
       }
-      return propPreStdclass<warn, define>(tvScratch, base);
+      return propPreStdclass<warn, define>(tvRef, base);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return propPreNull<warn>(tvScratch);
+      return propPreNull<warn>(tvRef);
 
     case KindOfStaticString:
     case KindOfString:
       if (base->m_data.pstr->size() != 0) {
-        return propPreNull<warn>(tvScratch);
+        return propPreNull<warn>(tvRef);
       }
-      return propPreStdclass<warn, define>(tvScratch, base);
+      return propPreStdclass<warn, define>(tvRef, base);
 
     case KindOfArray:
-      return propPreNull<warn>(tvScratch);
+
+      return propPreNull<warn>(tvRef);
 
     case KindOfObject:
       return base;
@@ -1791,15 +1788,16 @@ inline TypedValue* propPre(TypedValue& tvScratch, TypedValue* base) {
   unknownBaseType(base);
 }
 
-inline TypedValue* nullSafeProp(TypedValue& tvScratch, TypedValue& tvRef,
-                                Class* ctx, TypedValue* base,
+inline TypedValue* nullSafeProp(TypedValue& tvRef,
+                                Class* ctx,
+                                TypedValue* base,
                                 StringData* key) {
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      tvWriteNull(&tvScratch);
-      return &tvScratch;
+      tvWriteNull(&tvRef);
+      return &tvRef;
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
@@ -1807,11 +1805,11 @@ inline TypedValue* nullSafeProp(TypedValue& tvScratch, TypedValue& tvRef,
     case KindOfStaticString:
     case KindOfString:
     case KindOfArray:
-      tvWriteNull(&tvScratch);
+      tvWriteNull(&tvRef);
       raise_notice("Cannot access property on non-object");
-      return &tvScratch;
+      return &tvRef;
     case KindOfObject:
-      return base->m_data.pobj->prop(&tvScratch, &tvRef, ctx, key);
+      return base->m_data.pobj->prop(&tvRef, ctx, key);
     case KindOfRef:
     case KindOfClass:
       always_assert(false);
@@ -1827,14 +1825,16 @@ inline TypedValue* nullSafeProp(TypedValue& tvScratch, TypedValue& tvRef,
  */
 template <bool warn, bool define, bool unset, bool baseIsObj = false,
           KeyType keyType = KeyType::Any>
-inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
-                        Class* ctx, TypedValue* base, key_type<keyType> key) {
+inline TypedValue* Prop(TypedValue& tvRef,
+                        Class* ctx,
+                        TypedValue* base,
+                        key_type<keyType> key) {
   assert(!warn || !unset);
   ObjectData* instance;
   if (baseIsObj) {
     instance = reinterpret_cast<ObjectData*>(base);
   } else {
-    auto result = propPre<warn, define>(tvScratch, base);
+    auto result = propPre<warn, define>(tvRef, base);
     if (result->m_type == KindOfNull) {
       return result;
     }
@@ -1849,12 +1849,12 @@ inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
 
   if (warn) {
     return define ?
-      instance->propWD(&tvScratch, &tvRef, ctx, keySD) :
-      instance->propW(&tvScratch, &tvRef, ctx, keySD);
+      instance->propWD(&tvRef, ctx, keySD) :
+      instance->propW(&tvRef, ctx, keySD);
   }
 
-  if (define || unset) return instance->propD(&tvScratch, &tvRef, ctx, keySD);
-  return instance->prop(&tvScratch, &tvRef, ctx, keySD);
+  if (define || unset) return instance->propD(&tvRef, ctx, keySD);
+  return instance->prop(&tvRef, ctx, keySD);
 }
 
 template <bool useEmpty>
@@ -1869,7 +1869,7 @@ inline bool IssetEmptyPropObj(Class* ctx, ObjectData* instance,
 }
 
 template <bool useEmpty, bool isObj = false>
-inline bool IssetEmptyProp(Class* ctx, TypedValue* base, TypedValue key) {
+bool IssetEmptyProp(Class* ctx, TypedValue* base, TypedValue key) {
   if (isObj) {
     auto obj = reinterpret_cast<ObjectData*>(base);
     return IssetEmptyPropObj<useEmpty>(ctx, obj, key);
@@ -1959,10 +1959,10 @@ inline void SetProp(Class* ctx, TypedValue* base, key_type<keyType> key,
   unknownBaseType(base);
 }
 
-inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
+inline TypedValue* SetOpPropNull(TypedValue& tvRef) {
   raise_warning("Attempt to assign property of non-object");
-  tvWriteNull(&tvScratch);
-  return &tvScratch;
+  tvWriteNull(&tvRef);
+  return &tvRef;
 }
 inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                      TypedValue* base, TypedValue key,
@@ -1992,7 +1992,7 @@ inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
 
 // $base->$key <op>= $rhs
 template<bool isObj = false>
-inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* SetOpProp(TypedValue& tvRef,
                              Class* ctx, SetOpOp op,
                              TypedValue* base, TypedValue key,
                              Cell* rhs) {
@@ -2010,7 +2010,7 @@ inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return SetOpPropNull(tvScratch);
+        return SetOpPropNull(tvRef);
       }
       return SetOpPropStdclass(tvRef, op, base, key, rhs);
 
@@ -2018,12 +2018,12 @@ inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
     case KindOfDouble:
     case KindOfArray:
     case KindOfResource:
-      return SetOpPropNull(tvScratch);
+      return SetOpPropNull(tvRef);
 
     case KindOfStaticString:
     case KindOfString:
       if (base->m_data.pstr->size() != 0) {
-        return SetOpPropNull(tvScratch);
+        return SetOpPropNull(tvRef);
       }
       return SetOpPropStdclass(tvRef, op, base, key, rhs);
 

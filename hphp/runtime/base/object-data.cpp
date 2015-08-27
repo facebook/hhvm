@@ -1192,7 +1192,6 @@ bool ObjectData::invokeNativeUnsetProp(TypedValue* retval,
 
 template <bool warn, bool define>
 TypedValue* ObjectData::propImpl(
-  TypedValue* tvScratch,
   TypedValue* tvRef,
   Class* ctx,
   const StringData* key
@@ -1232,8 +1231,8 @@ TypedValue* ObjectData::propImpl(
       key->data()
     );
 
-    *tvScratch = make_tv<KindOfUninit>();
-    return tvScratch;
+    *tvRef = make_tv<KindOfUninit>();
+    return tvRef;
   }
 
   // First see if native getter is implemented.
@@ -1248,8 +1247,8 @@ TypedValue* ObjectData::propImpl(
 
   if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
-    *tvScratch = make_tv<KindOfUninit>();
-    return tvScratch;
+    *tvRef = make_tv<KindOfUninit>();
+    return tvRef;
   }
 
   if (warn) raiseUndefProp(key);
@@ -1263,39 +1262,35 @@ TypedValue* ObjectData::propImpl(
 }
 
 TypedValue* ObjectData::prop(
-  TypedValue* tvScratch,
   TypedValue* tvRef,
   Class* ctx,
   const StringData* key
 ) {
-  return propImpl<false, false>(tvScratch, tvRef, ctx, key);
+  return propImpl<false, false>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propD(
-  TypedValue* tvScratch,
   TypedValue* tvRef,
   Class* ctx,
   const StringData* key
 ) {
-  return propImpl<false, true>(tvScratch, tvRef, ctx, key);
+  return propImpl<false, true>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propW(
-  TypedValue* tvScratch,
   TypedValue* tvRef,
   Class* ctx,
   const StringData* key
 ) {
-  return propImpl<true, false>(tvScratch, tvRef, ctx, key);
+  return propImpl<true, false>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propWD(
-  TypedValue* tvScratch,
   TypedValue* tvRef,
   Class* ctx,
   const StringData* key
 ) {
-  return propImpl<true, true>(tvScratch, tvRef, ctx, key);
+  return propImpl<true, true>(tvRef, ctx, key);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

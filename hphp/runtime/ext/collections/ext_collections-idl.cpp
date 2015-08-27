@@ -2123,6 +2123,8 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
       ne.ikey = e.ikey;
       ne.data.hash() = e.data.hash();
       mp->incSize();
+      // Needed so that the new elements are accounted for when GC scanning.
+      mp->incPosLimit();
     }
   }
   return Object{std::move(mp)};

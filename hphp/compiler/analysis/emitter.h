@@ -164,11 +164,6 @@ struct SymbolicStack {
     CLS_PARENT
   };
 
-  enum MetaType {
-    META_NONE,
-    META_LITSTR,
-  };
-
 private:
   /**
    * Symbolic stack (m_symStack)
@@ -188,17 +183,14 @@ private:
   struct SymEntry {
     explicit SymEntry(char s = 0)
       : sym(s)
-      , metaType(META_NONE)
+      , name(nullptr)
       , className(nullptr)
       , intval(-1)
       , unnamedLocalStart(InvalidAbsoluteOffset)
       , clsBaseType(CLS_INVALID)
     {}
     char sym;
-    MetaType metaType;
-    union {
-      const StringData* name;   // META_LITSTR
-    }   metaData;
+    const StringData* name;
     const StringData* className;
     int64_t intval; // used for L and I symbolic flavors
 
@@ -212,6 +204,8 @@ private:
     // early.  How this works depends on the type of class base---see
     // emitResolveClsBase for details.
     ClassBaseType clsBaseType;
+
+    std::string pretty() const;
   };
   std::vector<SymEntry> m_symStack;
 
@@ -251,7 +245,8 @@ public:
   bool isCls(int index) const;
   bool isTypePredicted(int index = -1 /* stack top */) const;
   void set(int index, char sym);
-  unsigned size() const;
+  size_t size() const;
+  size_t actualSize() const;
   bool empty() const;
   void clear();
 
@@ -677,6 +672,8 @@ public:
   void buildVectorImm(std::vector<unsigned char>& vectorImm,
                       int iFirst, int iLast, bool allowW,
                       Emitter& e);
+  bool emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
+               MOpFlags baseFlags, MOpFlags dimFlags);
   enum class PassByRefKind {
     AllowCell,
     WarnOnCell,

@@ -447,6 +447,7 @@ int instrNumPops(const Op* opcode) {
 #define C_MMANY -2
 #define V_MMANY -2
 #define R_MMANY -2
+#define MFINAL -3
 #define FMANY -3
 #define CVMANY -3
 #define CVUMANY -3
@@ -463,6 +464,7 @@ int instrNumPops(const Op* opcode) {
 #undef C_MMANY
 #undef V_MMANY
 #undef R_MMANY
+#undef MFINAL
 #undef FMANY
 #undef CVMANY
 #undef CVUMANY
@@ -474,8 +476,8 @@ int instrNumPops(const Op* opcode) {
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // FCall and NewPackedArray specify how many values are popped in their
-  // first immediate
+  // FCall, NewPackedArray, and final member operations specify how many values
+  // are popped in their first immediate
   if (n == -3) return getImm(opcode, 0).u_IVA;
   // For instructions with vector immediates, we have to scan the
   // contents of the vector immediate to determine how many values
@@ -580,6 +582,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #define C_MMANY return minstrFlavor(op, idx, CV);
 #define V_MMANY return minstrFlavor(op, idx, VV);
 #define R_MMANY return minstrFlavor(op, idx, RV);
+#define MFINAL return manyFlavor(op, idx, CRV);
 #define FMANY return manyFlavor(op, idx, FV);
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
@@ -599,6 +602,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #undef C_MMANY
 #undef V_MMANY
 #undef R_MMANY
+#undef MFINAL
 #undef FMANY
 #undef CVMANY
 #undef CVUMANY
@@ -1130,6 +1134,18 @@ static const char* SwitchKind_names[] = {
 #undef KIND
 };
 
+static const char* QueryMOp_names[] = {
+#define OP(x) #x,
+  QUERY_M_OPS
+#undef OP
+};
+
+static const char* PropElemOp_names[] = {
+#define OP(x) #x,
+  PROP_ELEM_OPS
+#undef OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1180,8 +1196,32 @@ X(SilenceOp)
 X(OODeclExistsOp)
 X(ObjMethodOp)
 X(SwitchKind)
+X(QueryMOp)
+X(PropElemOp)
 
 #undef X
+
+/*
+ * MOpFlags is a bitmask so it doesn't fit into the [0,n) pattern of the other
+ * subops above.
+ */
+const char* subopToName(MOpFlags f) {
+  switch (f) {
+#define FLAG(name, val) case MOpFlags::name: return #name;
+  M_OP_FLAGS
+#undef FLAG
+  }
+  always_assert_flog(false, "Invalid MOpFlags: {}", uint8_t(f));
+}
+
+template<>
+folly::Optional<MOpFlags> nameToSubop<MOpFlags>(const char* str) {
+#define FLAG(name, val) if (!strcmp(str, #name)) return MOpFlags::name;
+  M_OP_FLAGS
+#undef FLAG
+
+  return folly::none;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1397,6 +1437,15 @@ const MInstrInfo& getMInstrInfo(Op op) {
 #undef MII
   default: not_reached();
   }
+}
+
+MOpFlags getMOpFlags(QueryMOp op) {
+  switch (op) {
+    case QueryMOp::CGet:  return MOpFlags::Warn;
+    case QueryMOp::Isset:
+    case QueryMOp::Empty: return MOpFlags::None;
+  }
+  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

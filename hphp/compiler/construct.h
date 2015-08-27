@@ -317,7 +317,8 @@ public:
   /**
    * Get canonicalized PHP source code for this construct.
    */
-  std::string getText(AnalysisResultPtr ar = AnalysisResultPtr());
+  std::string getText(AnalysisResultPtr ar);
+  std::string getText();
 
   void recomputeEffects();
 

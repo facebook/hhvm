@@ -20,21 +20,21 @@
 namespace HPHP {
 
 /*
- * MInstrState is used as scratch space by the VM while executing member
+ * MInstrState contains VM registers used while executing member
  * instructions. It lives with the other VM registers in the RDS header, and is
  * also saved and restored with them when we reenter the VM.
  */
 struct MInstrState {
   union {
-    // This space is used for both vector instructions and
-    // the return value of builtin functions that return by reference.
-    // Since we don't ever use the two at the same time, it is
-    // OK to use a union.
+    // This space is used for both member instructions and the return value of
+    // builtin functions that return by reference.  Since we don't ever use the
+    // two at the same time, it is OK to use a union.
     TypedValue tvScratch;
     TypedValue tvBuiltinReturn;
   };
   TypedValue tvRef;
   TypedValue tvRef2;
+  TypedValue* base;
 };
 
 }

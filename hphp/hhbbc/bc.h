@@ -193,7 +193,7 @@ namespace bc {
 #define IMM_NAME_RATA(n)    rat
 #define IMM_NAME_AA(n)      arr##n
 #define IMM_NAME_BA(n)      target
-#define IMM_NAME_OA_IMPL(n) subop
+#define IMM_NAME_OA_IMPL(n) subop##n
 #define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
 #define IMM_NAME_VSA(n)     keys
 
@@ -310,6 +310,9 @@ namespace bc {
 #define POP_V_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
+#define POP_MFINAL  uint32_t numPop() const { not_implemented(); } \
+                    Flavor popFlavor(uint32_t) const { not_implemented(); }
+
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
                       assert(i < numPop());                   \
@@ -422,6 +425,7 @@ OPCODES
 #undef POP_C_MMANY
 #undef POP_R_MMANY
 #undef POP_V_MMANY
+#undef POP_MFINAL
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_FMANY

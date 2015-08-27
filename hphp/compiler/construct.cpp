@@ -143,6 +143,10 @@ std::string Construct::getText(AnalysisResultPtr ar
   return o.str();
 }
 
+std::string Construct::getText() {
+  return getText(AnalysisResultPtr{});
+}
+
 void Construct::serialize(JSON::CodeError::OutputStream &out) const {
   JSON::CodeError::ListStream ls(out);
   auto scope = getFileScope();

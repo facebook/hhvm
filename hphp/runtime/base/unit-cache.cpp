@@ -405,7 +405,8 @@ CachedUnit checkoutFile(StringData* path, const struct stat& statInfo) {
 
 std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
-    + (RuntimeOption::EnableEmitSwitch ? '1' : '0')
+    + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
+    + (RuntimeOption::EvalEmitNewMInstrs ? '1' : '0')
     + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')

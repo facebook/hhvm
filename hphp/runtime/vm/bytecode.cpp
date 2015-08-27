@@ -252,6 +252,9 @@ inline const char* prettytype(BareThisOp) { return "BareThisOp"; }
 inline const char* prettytype(InitPropOp) { return "InitPropOp"; }
 inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
 inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
+inline const char* prettytype(MOpFlags) { return "MOpFlags"; }
+inline const char* prettytype(QueryMOp) { return "QueryMOp"; }
+inline const char* prettytype(PropElemOp) { return "PropElemOp"; }
 
 // load a T value from *pc without incrementing
 template<class T> T peek(PC pc) {
@@ -4784,6 +4787,233 @@ OPTBLD_INLINE void iopCGetM(IOP_ARGS) {
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
   }
+}
+
+OPTBLD_INLINE void iopBaseL(IOP_ARGS) {
+  pc++;
+  auto localId = decode_la(pc);
+  auto flags = decode_oa<MOpFlags>(pc);
+  auto& mstate = vmMInstrState();
+
+  tvWriteUninit(&mstate.tvRef);
+  tvWriteUninit(&mstate.tvRef2);
+
+  auto local = frame_local_inner(vmfp(), localId);
+  if (flags & MOpFlags::Warn && local->m_type == KindOfUninit) {
+    raise_notice(Strings::UNDEFINED_VARIABLE,
+                 vmfp()->m_func->localVarName(localId)->data());
+  }
+
+  mstate.base = local;
+}
+
+OPTBLD_INLINE void iopBaseH(IOP_ARGS) {
+  pc++;
+  auto& mstate = vmMInstrState();
+
+  tvWriteUninit(&mstate.tvRef);
+  tvWriteUninit(&mstate.tvRef2);
+
+  mstate.tvScratch = make_tv<KindOfObject>(vmfp()->getThis());
+  mstate.base = &mstate.tvScratch;
+}
+
+static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
+  auto& mstate = vmMInstrState();
+  auto ctx = arGetContextClass(vmfp());
+
+  auto result = [&]{
+    switch (flags) {
+      case MOpFlags::None:
+        return Prop<false, false, false>(
+          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+      case MOpFlags::Warn:
+        return Prop<true, false, false>(
+          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+      case MOpFlags::Define:
+      case MOpFlags::Reffy:
+        return Prop<false, true, false>(
+          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+      case MOpFlags::Unset:
+        return Prop<false, false, true>(
+          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+      case MOpFlags::WarnDefine:
+        return Prop<true, true, false>(
+          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+    }
+    always_assert(false);
+  }();
+
+  ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
+  mstate.base = result;
+}
+
+static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
+  auto& mstate = vmMInstrState();
+  auto ctx = arGetContextClass(vmfp());
+
+  TypedValue* result;
+  switch (flags) {
+    case MOpFlags::None:
+    case MOpFlags::Warn:
+      assert(key.m_type == KindOfStaticString);
+      result = nullSafeProp(
+        mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
+      break;
+
+    case MOpFlags::Define:
+    case MOpFlags::Reffy:
+    case MOpFlags::Unset:
+    case MOpFlags::WarnDefine:
+      always_assert(false);
+  }
+
+  ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
+  mstate.base = result;
+}
+
+static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
+  auto& mstate = vmMInstrState();
+
+  auto result = [&] {
+    switch (flags) {
+      case MOpFlags::None:
+        // We're not actually going to modify it, so this is "safe".
+        return const_cast<TypedValue*>(
+          Elem<false>(mstate.tvScratch, mstate.tvRef, mstate.base, key));
+      case MOpFlags::Warn:
+        // We're not actually going to modify it, so this is "safe".
+        return const_cast<TypedValue*>(
+          Elem<true>(mstate.tvScratch, mstate.tvRef, mstate.base, key));
+      case MOpFlags::Define:
+        return ElemD<false,false>(
+          mstate.tvScratch, mstate.tvRef, mstate.base, key);
+      case MOpFlags::Reffy:
+        return ElemD<false,true>(
+          mstate.tvScratch, mstate.tvRef, mstate.base, key);
+      case MOpFlags::Unset:
+        return ElemU(mstate.tvScratch, mstate.tvRef, mstate.base, key);
+      case MOpFlags::WarnDefine:
+        return ElemD<true,false>(
+          mstate.tvScratch, mstate.tvRef, mstate.base, key);
+    }
+    always_assert(false);
+  }();
+
+  ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
+  mstate.base = result;
+}
+
+template<typename F>
+static OPTBLD_INLINE void dimImpl(PC& pc, F decode_key) {
+  pc++;
+  auto key = decode_key(pc);
+  auto op = decode_oa<PropElemOp>(pc);
+  auto flags = decode_oa<MOpFlags>(pc);
+
+  switch (op) {
+    case PropElemOp::Prop:
+      propDispatch(flags, key);
+      break;
+    case PropElemOp::PropQ:
+      propQDispatch(flags, key);
+      break;
+    case PropElemOp::Elem:
+      elemDispatch(flags, key);
+      break;
+  }
+}
+
+OPTBLD_INLINE void iopDimL(IOP_ARGS) {
+  dimImpl(pc, [](PC& pc) {
+    return *frame_local_inner(vmfp(), decode_la(pc));
+  });
+}
+
+OPTBLD_INLINE void iopDimC(IOP_ARGS) {
+  dimImpl(pc, [](PC& pc) {
+    return *vmStack().indC(decode_iva(pc));
+  });
+}
+
+OPTBLD_INLINE void iopDimInt(IOP_ARGS) {
+  dimImpl(pc, [](PC& pc) {
+    return make_tv<KindOfInt64>(decode<int64_t>(pc));
+  });
+}
+
+OPTBLD_INLINE void iopDimStr(IOP_ARGS) {
+  dimImpl(pc, [](PC& pc) {
+    return make_tv<KindOfStaticString>(decode_litstr(pc));
+  });
+}
+
+template<typename F>
+static OPTBLD_INLINE void queryMImpl(PC& pc, F decode_key) {
+  pc++;
+  auto nDiscard = decode_iva(pc);
+  auto op = decode_oa<QueryMOp>(pc);
+  auto flags = getMOpFlags(op);
+  auto propElem = decode_oa<PropElemOp>(pc);
+  auto key = decode_key(pc);
+
+  switch (propElem) {
+    case PropElemOp::Prop:
+      propDispatch(flags, key);
+      break;
+    case PropElemOp::PropQ:
+      propQDispatch(flags, key);
+      break;
+    case PropElemOp::Elem:
+      elemDispatch(flags, key);
+      break;
+  }
+
+  auto& mstate = vmMInstrState();
+  TypedValue result;
+  switch (op) {
+    case QueryMOp::CGet:
+      if (mstate.base->m_type == KindOfRef) {
+        mstate.base = mstate.base->m_data.pref->tv();
+      }
+      tvDup(*mstate.base, result);
+      break;
+
+    case QueryMOp::Isset:
+    case QueryMOp::Empty:
+      not_implemented();
+      break;
+  }
+
+  for (auto i = 0; i < nDiscard; ++i) vmStack().popTV();
+  tvCopy(result, *vmStack().allocTV());
+
+  tvUnlikelyRefcountedDecRef(mstate.tvRef);
+  tvUnlikelyRefcountedDecRef(mstate.tvRef2);
+}
+
+OPTBLD_INLINE void iopQueryML(IOP_ARGS) {
+  queryMImpl(pc, [](PC& pc) {
+    return *frame_local_inner(vmfp(), decode_la(pc));
+  });
+}
+
+OPTBLD_INLINE void iopQueryMC(IOP_ARGS) {
+  queryMImpl(pc, [](PC& pc) {
+    return *vmStack().topC();
+  });
+}
+
+OPTBLD_INLINE void iopQueryMInt(IOP_ARGS) {
+  queryMImpl(pc, [](PC& pc) {
+    return make_tv<KindOfInt64>(decode<int64_t>(pc));
+  });
+}
+
+OPTBLD_INLINE void iopQueryMStr(IOP_ARGS) {
+  queryMImpl(pc, [](PC& pc) {
+    return make_tv<KindOfStaticString>(decode_litstr(pc));
+  });
 }
 
 static inline void vgetl_body(TypedValue* fr, TypedValue* to) {

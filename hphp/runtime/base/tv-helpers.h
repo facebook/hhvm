@@ -146,6 +146,13 @@ inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
   }
 }
 
+// Assumes 'tv' is live and unlikely to be a refcounted type
+inline void tvUnlikelyRefcountedDecRef(TypedValue tv) {
+  if (UNLIKELY(isRefcountedType(tv.m_type))) {
+    tvDecRefHelper(tv.m_type, tv.m_data.num);
+  }
+}
+
 inline void tvRefcountedDecRef(TypedValue v) {
   return tvRefcountedDecRefHelper(v.m_type, v.m_data.num);
 }

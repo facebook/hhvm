@@ -107,8 +107,13 @@
 
 #define CHECK_SYSTEM_SILENT(exp)                          \
   if ((exp) != 0) {                                       \
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
-                    folly::errnoStr(errno).c_str());      \
+    std::string msg = folly::errnoStr(errno).c_str();     \
+    auto const ee = ExtendedException(msg);               \
+    auto fileAndLine = ee.getFileAndLine();               \
+    std::string prefix = __FUNCTION__;                    \
+    prefix += ": ";                                       \
+    Logger::Log(Logger::LogVerbose, prefix.data(), ee,    \
+        fileAndLine.first.c_str(), fileAndLine.second);   \
     return false;                                         \
   }                                                       \
 

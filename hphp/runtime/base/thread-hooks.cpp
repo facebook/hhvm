@@ -55,10 +55,12 @@ PthreadInfo::PthreadInfo(start_routine_t start, void* arg) :
 }
 
 PthreadInfo::~PthreadInfo() {
-#ifndef _MSC_VER
-  free(parent_bt_names);
-  free(start_name_ptr);
-#endif
+  if (parent_bt_names) {
+    free(parent_bt_names);
+  }
+  if (start_name_ptr) {
+    free(start_name_ptr);
+  }
 }
 
 std::string get_thread_mem_usage() {

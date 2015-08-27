@@ -234,13 +234,15 @@ public:
   HostEntCache hostEntCache;
 
   NetworkData() :lastCleanup(0) {
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "hhvm.server.dns_cache.enable", "false", &s_dns_cache_enable);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "hhvm.server.dns_cache.ttl", "60", &s_dns_cache_ttl);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+        "hhvm.server.dns_cache.enable", "false", &s_dns_cache_enable);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+        "hhvm.server.dns_cache.ttl", "60", &s_dns_cache_ttl);
   }
 
   void cleanupCache() {
     // If DNS cache is deactivated, we just always clean the hash table
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
 
     if (!s_dns_cache_enable || (now > lastCleanup + s_dns_cache_ttl)) {
       hostEntCache.clear();
@@ -267,7 +269,7 @@ const HostEnt *cached_gethostbyname(const char *address) {
   HostEnt *result = new HostEnt;
   if (!safe_gethostbyname(address, *result)) {
     delete result;
-    return NULL;
+    return nullptr;
   }
 
   s_networkData->hostEntCache[address] = *result;

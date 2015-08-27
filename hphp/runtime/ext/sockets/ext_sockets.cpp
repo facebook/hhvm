@@ -174,7 +174,7 @@ static bool php_set_inet_addr(struct sockaddr_in *sin,
     sin->sin_addr.s_addr = tmp.s_addr;
   } else {
     const HostEnt *result = cached_gethostbyname(address);
-    if (result == NULL) {
+    if (result == nullptr) {
       /* Note: < -10000 indicates a host lookup error */
       SOCKET_ERROR(sock, "Host lookup failed", errno);
       return false;
@@ -529,7 +529,7 @@ Variant HHVM_FUNCTION(socket_create_listen,
                       int port,
                       int backlog /* = 128 */) {
   const HostEnt *result = cached_gethostbyname("0.0.0.0");
-  if (result == NULL) {
+  if (result == nullptr) {
     return false;
   }
 

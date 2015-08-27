@@ -168,7 +168,7 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
 
 
   const HostEnt *result = cached_gethostbyname(hostname.data());
-  if (result == NULL) {
+  if (result == nullptr) {
     return hostname;
   }
   struct in_addr in;
@@ -185,7 +185,7 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   IOStatusHelper io("gethostbynamel", hostname.data());
 
   const HostEnt *result = cached_gethostbyname(hostname.data());
-  if (result == NULL) {
+  if (result == nullptr) {
     return false;
   }
 

@@ -146,7 +146,7 @@ void reclaimTranslation(TransLoc loc);
  * This function should only be called from Func::destroy() and may access the
  * fullname and ID of the function.
  */
-void reclaimFunction(Func* func);
+void reclaimFunction(const Func* func);
 
 /*
  * Information about the number of bound calls, branches, and tracked functions

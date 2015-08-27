@@ -209,7 +209,7 @@ struct Func {
    *
    * @requires: isPreFunc()
    */
-  void freeClone() const;
+  void freeClone();
 
   /*
    * Rename a function and reload it.
@@ -929,7 +929,7 @@ struct Func {
   /*
    * Smash prologue guards to prevent function from being called.
    */
-  void smashPrologues();
+  void smashPrologues() const;
 
 
   /////////////////////////////////////////////////////////////////////////////

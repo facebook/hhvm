@@ -68,7 +68,14 @@ static MySQLStaticInitializer s_mysql_initializer;
 int MySQLUtil::set_mysql_timeout(MYSQL *mysql,
                                  MySQLUtil::TimeoutType type,
                                  int ms) {
-   mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
+#ifdef __APPLE__
+  // Work around a bug in webscalesql where setting a read or write timeout
+  // causes most mysql connections to fail (depending on the exact timing of
+  // packets). See https://github.com/webscalesql/webscalesql-5.6/issues/23
+  return 0;
+#endif
+
+  mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
 #ifdef MYSQL_MILLISECOND_TIMEOUT
   switch (type) {
    case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;

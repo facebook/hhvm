@@ -34,7 +34,7 @@ namespace jit {
 
 struct IRUnit;
 struct IRInstruction;
-struct SSATmp;
+class SSATmp;
 struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////

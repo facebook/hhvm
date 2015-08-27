@@ -23,7 +23,7 @@ struct RepoAuthType;
 struct StringData;
 }
 namespace HPHP { namespace jit {
-struct SSATmp;
+class SSATmp;
 struct IRGS;
 struct Type;
 }}

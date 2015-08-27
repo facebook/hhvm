@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Array;
+class Array;
 
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassConstant);

@@ -22,7 +22,7 @@
 
 namespace HPHP {
 struct ObjectData;
-class Unit;
+struct Unit;
 struct Class;
 struct Func;
 class Object;

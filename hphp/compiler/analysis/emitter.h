@@ -54,7 +54,7 @@ DECLARE_BOOST_TYPES(ListAssignment);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionCall);
-DECLARE_BOOST_TYPES(SimpleFunctionCall);
+DECLARE_BOOST_TYPES_STRUCT(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(SwitchStatement);
 DECLARE_BOOST_TYPES(ForEachStatement);
 class StaticClassName;
@@ -313,7 +313,7 @@ public:
   Label m_entry;
 };
 
-DECLARE_BOOST_TYPES(ControlTarget);
+DECLARE_BOOST_TYPES_STRUCT(ControlTarget);
 /*
  * The structure represents a code path that potentially requires
  * running finally blocks. A code path has an assigned state ID that

@@ -39,12 +39,12 @@ DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(Expression);
-DECLARE_BOOST_TYPES(SimpleFunctionCall);
+DECLARE_BOOST_TYPES_STRUCT(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(ParameterExpression);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-struct CodeGenerator;
+class CodeGenerator;
 
 typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
                                         AnalysisResultConstPtr ar,

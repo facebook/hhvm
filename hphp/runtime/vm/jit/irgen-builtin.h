@@ -17,7 +17,7 @@
 #define incl_HPHP_JIT_IRGEN_BUILTIN_H_
 
 namespace HPHP { namespace jit {
-struct SSATmp;
+class SSATmp;
 struct IRGS;
 }}
 

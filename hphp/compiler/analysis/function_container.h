@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct CodeGenerator;
+class CodeGenerator;
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(ClassScope);

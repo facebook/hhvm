@@ -35,7 +35,7 @@ namespace jit {
 
 struct BlocksWithIds;
 struct IRInstruction;
-struct SSATmp;
+class SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 

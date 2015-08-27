@@ -45,7 +45,7 @@ namespace HPHP { namespace jit {
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
 typedef hphp_hash_map<uint64_t,const uint64_t*> LiteralMap;
 
-class Label;
+struct Label;
 struct MCGenerator;
 struct AsmInfo;
 struct IRGS;

@@ -33,7 +33,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct CodeGenerator;
+class CodeGenerator;
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(VariableTable);

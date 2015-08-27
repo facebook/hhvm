@@ -32,10 +32,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct String;
+class String;
 struct TypedValue;
 struct MArrayIter;
-class VariableSerializer;
+struct VariableSerializer;
 
 struct ArrayData {
   // Runtime type tag of possible array types.  This is intentionally

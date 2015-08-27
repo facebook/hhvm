@@ -46,7 +46,7 @@ namespace HPHP {
 struct APCLocalArray;
 struct MemoryManager;
 struct ObjectData;
-class ResourceData;
+struct ResourceData;
 
 namespace req {
 struct root_handle;

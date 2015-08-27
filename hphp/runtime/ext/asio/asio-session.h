@@ -28,7 +28,7 @@ namespace HPHP {
 
 struct ActRec;
 class c_WaitHandle;
-class c_AwaitAllWaitHandle;
+struct c_AwaitAllWaitHandle;
 class c_GenArrayWaitHandle;
 class c_GenMapWaitHandle;
 class c_GenVectorWaitHandle;

@@ -40,7 +40,7 @@ template<class T,
          class Index,
          Index InvalidIndex = Index(-1)>
 struct IndexedStringMap {
-  struct Builder;
+  class Builder;
 
   explicit IndexedStringMap() {
     setSize(0);

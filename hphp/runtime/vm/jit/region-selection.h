@@ -64,8 +64,8 @@ enum class PGORegionMode {
  */
 struct RegionDesc {
   struct Block;
-  class Arc;
-  class Location;
+  struct Arc;
+  struct Location;
   struct TypedLocation;
   struct GuardedLocation;
   struct ReffinessPred;

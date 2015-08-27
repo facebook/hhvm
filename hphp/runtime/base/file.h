@@ -31,7 +31,7 @@ struct stat;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamContext;
+struct StreamContext;
 class StreamFilter;
 
 extern int __thread s_pcloseRet;

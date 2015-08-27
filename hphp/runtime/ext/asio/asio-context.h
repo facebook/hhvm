@@ -31,7 +31,7 @@ class c_WaitableWaitHandle;
 class c_ResumableWaitHandle;
 class c_RescheduleWaitHandle;
 class c_SleepWaitHandle;
-class c_ExternalThreadEventWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
 class c_AsyncFunctionWaitHandle;
 
 typedef uint8_t context_idx_t;

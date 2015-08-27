@@ -116,6 +116,8 @@ struct ObjectData {
 
  public:
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  bool kindIsValid() const { return isObjectKind(headerKind()); }
+
   template<class F> void scan(F&) const;
 
   size_t heapSize() const;

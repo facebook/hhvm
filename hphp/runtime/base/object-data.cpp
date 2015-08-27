@@ -150,6 +150,7 @@ static void freeDynPropArray(ObjectData* inst) {
 
 NEVER_INLINE
 void ObjectData::releaseNoObjDestructCheck() noexcept {
+  assert(kindIsValid());
   assert(!hasMultipleRefs());
 
   auto const attrs = getAttributes();
@@ -198,6 +199,7 @@ static void tail_call_remove_live_bc_obj(ObjectData* obj) {
 }
 
 void ObjectData::release() noexcept {
+  assert(kindIsValid());
   assert(!hasMultipleRefs());
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
     return tail_call_remove_live_bc_obj(this);
@@ -213,6 +215,7 @@ StrNR ObjectData::getClassName() const {
 }
 
 bool ObjectData::instanceof(const String& s) const {
+  assert(kindIsValid());
   auto const cls = Unit::lookupClass(s.get());
   return cls && instanceof(cls);
 }
@@ -301,6 +304,8 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 Variant* ObjectData::realPropImpl(const String& propName, int flags,
                                   const String& context,
                                   bool copyDynArray) {
+  assert(kindIsValid());
+
   /*
    * Returns a pointer to a place for a property value. This should never
    * call the magic methods __get or __set. The flags argument describes the
@@ -346,6 +351,8 @@ inline Variant ObjectData::o_getImpl(const String& propName,
                                      int flags,
                                      bool error /* = true */,
                                      const String& context /*= null_string*/) {
+  assert(kindIsValid());
+
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
@@ -379,6 +386,8 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
 template <class T>
 ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
                                             const String& context) {
+  assert(kindIsValid());
+
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
@@ -447,6 +456,8 @@ void ObjectData::o_setArray(const Array& properties) {
 }
 
 void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
+  assert(kindIsValid());
+
   // Fast path for classes with no declared properties
   if (!m_cls->numDeclProperties() && getAttribute(HasDynPropArr)) {
     props = dynPropArray();
@@ -490,6 +501,8 @@ const int64_t ARRAYOBJ_STD_PROP_LIST = 1;
 const StaticString s_flags("flags");
 
 Array ObjectData::toArray(bool pubOnly /* = false */) const {
+  assert(kindIsValid());
+
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {

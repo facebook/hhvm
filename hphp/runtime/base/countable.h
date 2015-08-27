@@ -182,69 +182,88 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
 
 #define IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC                         \
   RefCount getCount() const {                                           \
+    assert(kindIsValid());                                              \
     return CountableManip::getCount(m_hdr.count);                       \
   }                                                                     \
   bool isRefCounted() const {                                           \
+    assert(kindIsValid());                                              \
     return CountableManip::isRefCounted(m_hdr.count);                   \
   }                                                                     \
   bool hasMultipleRefs() const {                                        \
+    assert(kindIsValid());                                              \
     return CountableManip::hasMultipleRefs(m_hdr.count);                \
   }                                                                     \
   bool hasExactlyOneRef() const {                                       \
+    assert(kindIsValid());                                              \
     return CountableManip::hasExactlyOneRef(m_hdr.count);               \
   }                                                                     \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
     CountableManip::incRefCount(m_hdr.count);                           \
   }                                                                     \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
     return CountableManip::decRefCount(m_hdr.count);                    \
   }                                                                     \
   ALWAYS_INLINE bool decReleaseCheck() {                                \
     assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
     return CountableManip::decReleaseCheck(m_hdr.count);                \
   }                                                                     \
   ALWAYS_INLINE void decRefAndRelease() {                               \
+    assert(kindIsValid());                                              \
     if (decReleaseCheck()) release();                                   \
-  }\
-  bool isStatic() const {                               \
-    return CountableManip::isStatic(m_hdr.count);       \
-  }                                                     \
-  bool isUncounted() const {                            \
-    return m_hdr.count == UncountedValue;               \
+  }                                                                     \
+  bool isStatic() const {                                               \
+    assert(kindIsValid());                                              \
+    return CountableManip::isStatic(m_hdr.count);                       \
+  }                                                                     \
+  bool isUncounted() const {                                            \
+    assert(kindIsValid());                                              \
+    return m_hdr.count == UncountedValue;                               \
   }
 
 #define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
   RefCount getCount() const {                                           \
+    assert(kindIsValid());                                              \
     return CountableManipNS::getCount(m_hdr.count);                     \
   }                                                                     \
   bool isRefCounted() const {                                           \
+    assert(kindIsValid());                                              \
     return CountableManipNS::isRefCounted(m_hdr.count);                 \
   }                                                                     \
   bool hasMultipleRefs() const {                                        \
+    assert(kindIsValid());                                              \
     return CountableManipNS::hasMultipleRefs(m_hdr.count);              \
   }                                                                     \
   bool hasExactlyOneRef() const {                                       \
+    assert(kindIsValid());                                              \
     return CountableManipNS::hasExactlyOneRef(m_hdr.count);             \
   }                                                                     \
   bool isStatic() const {                                               \
+    assert(kindIsValid());                                              \
     return CountableManipNS::isStatic(m_hdr.count);                     \
   }                                                                     \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
     CountableManipNS::incRefCount(m_hdr.count);                         \
   }                                                                     \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
     return CountableManipNS::decRefCount(m_hdr.count);                  \
   }                                                                     \
   ALWAYS_INLINE bool decReleaseCheck() {                                \
     assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
     return CountableManipNS::decReleaseCheck(m_hdr.count);              \
   }                                                                     \
   ALWAYS_INLINE bool decRefAndRelease() {                               \
     assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
     assert(check_refcount_ns_nz(m_hdr.count));                          \
     if (!--m_hdr.count) {                                               \
       release();                                                        \

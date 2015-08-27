@@ -89,6 +89,7 @@ struct RefData {
    * Deallocate a RefData.
    */
   void release() noexcept {
+    assert(kindIsValid());
     assert(!hasMultipleRefs());
     if (UNLIKELY(m_hdr.aux.cow)) {
       m_hdr.count = 1;
@@ -104,16 +105,17 @@ struct RefData {
   }
 
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  bool kindIsValid() const { return m_hdr.kind == HeaderKind::Ref; }
 
   /*
    * Note, despite the name, this can never return a non-Cell.
    */
   const Cell* tv() const {
-    assert(m_hdr.kind == HeaderKind::Ref);
+    assert(kindIsValid());
     return &m_tv;
   }
   Cell* tv() {
-    assert(m_hdr.kind == HeaderKind::Ref);
+    assert(kindIsValid());
     return &m_tv;
   }
 
@@ -122,16 +124,16 @@ struct RefData {
 
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
-  void assertValid() const {
-    assert(m_hdr.kind == HeaderKind::Ref);
-  }
+  void assertValid() const { assert(kindIsValid()); }
 
   int32_t getRealCount() const {
+    assert(kindIsValid());
     assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
     return m_hdr.count + m_hdr.aux.cow;
   }
 
   bool isReferenced() const {
+    assert(kindIsValid());
     assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
     return m_hdr.count >= 2 && !m_hdr.aux.cow;
   }
@@ -151,6 +153,7 @@ struct RefData {
   }
 
   bool zIsRef() const {
+    assert(kindIsValid());
     assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
     return !m_hdr.aux.cow && (m_hdr.count >= 2 || m_hdr.aux.z);
   }
@@ -215,6 +218,7 @@ struct RefData {
   }
 
   void zSetRefcount(int val) {
+    assert(kindIsValid());
     if (val < 0) {
       val = 0;
     }

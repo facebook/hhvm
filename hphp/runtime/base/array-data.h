@@ -86,6 +86,8 @@ protected:
 public:
   IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC
 
+  bool kindIsValid() const { return isArrayKind(m_hdr.kind); }
+
   /**
    * Create a new ArrayData with specified array element(s).
    */
@@ -113,6 +115,7 @@ public:
    * return the array kind for fast typechecks
    */
   ArrayKind kind() const {
+    assert(kindIsValid());
     return static_cast<ArrayKind>(m_hdr.kind);
   }
 

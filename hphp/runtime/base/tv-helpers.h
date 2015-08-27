@@ -40,14 +40,36 @@ struct Variant;
  * of the pointer types, the compiler cannot use type aliasing assumptions to
  * miscompile.
  *
+ * If we're in debug mode, switch on the type and call the appropriate function
+ * directly. This is slightly slower, but gives us the benefit of extra
+ * assertions.
+ *
  * This assumes isRefcountedType() is true.
  */
-#define TV_GENERIC_DISPATCH(exp, func)                                  \
+#define TV_GENERIC_DISPATCH_FAST(exp, func)                             \
   HPHP::CountableManip::func(                                           \
     *reinterpret_cast<HPHP::RefCount*>(                                 \
       (exp).m_data.num + HPHP::FAST_REFCOUNT_OFFSET                     \
     )                                                                   \
   )
+
+#define TV_GENERIC_DISPATCH_SLOW(exp, func) \
+  [](HPHP::TypedValue tv) {                                     \
+    switch (tv.m_type) {                                        \
+      case HPHP::KindOfString: return tv.m_data.pstr->func();   \
+      case HPHP::KindOfArray: return tv.m_data.parr->func();    \
+      case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
+      case HPHP::KindOfResource: return tv.m_data.pres->func(); \
+      case HPHP::KindOfRef: return tv.m_data.pref->func();      \
+      default: assert(false);                                   \
+    }                                                           \
+  }(exp)
+
+#ifdef DEBUG
+#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_SLOW(exp, func)
+#else
+#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_FAST(exp, func)
+#endif
 
 /*
  * Assertions on Cells and TypedValues.  Should usually only happen

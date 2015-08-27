@@ -565,7 +565,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "editline" OR
     ${libraryName} STREQUAL "fastlz" OR
     ${libraryName} STREQUAL "folly" OR
-    ${libraryName} STREQUAL "iconv" OR
     ${libraryName} STREQUAL "lz4" OR
     ${libraryName} STREQUAL "mbfl" OR
     ${libraryName} STREQUAL "mcrouter" OR
@@ -665,6 +664,21 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       include_directories(${GMP_INCLUDE_DIR})
       link_libraries(${GMP_LIBRARY})
       add_definitions("-DHAVE_LIBGMP")
+    endif()
+  elseif (${libraryName} STREQUAL "iconv")
+    find_package(Libiconv ${requiredVersion})
+    if (NOT LIBICONV_INCLUDE_DIR OR NOT LIBICONV_LIBRARY)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      include_directories(${LIBICONV_INCLUDE_DIR})
+      link_libraries(${LIBICONV_LIBRARY})
+      if (LIBICONV_CONST)
+        message(STATUS "Using const for input to iconv() call")
+        add_definitions("-DICONV_CONST=const")
+      endif()
     endif()
   elseif (${libraryName} STREQUAL "icu")
     find_package(ICU ${requiredVersion})

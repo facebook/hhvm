@@ -854,16 +854,13 @@ void hh_call_after_init() {
  */
 /*****************************************************************************/
 void hh_collect(value aggressive_val) {
-#ifdef _WIN32
-  // TODO GRGR
-  return;
-#else
   int aggressive  = Bool_val(aggressive_val);
+  char* tmp_heap, *dest;
+  size_t mem_size = 0;
+#ifndef _WIN32
   int flags       = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
   int prot        = PROT_READ | PROT_WRITE;
-  char* dest;
-  size_t mem_size = 0;
-  char* tmp_heap;
+#endif
 
   float space_overhead = aggressive ? 1.2 : 2.0;
   if(used_heap_size() < (size_t)(space_overhead * heap_init_size)) {
@@ -871,14 +868,21 @@ void hh_collect(value aggressive_val) {
     return;
   }
 
+#ifdef _WIN32
+  tmp_heap = VirtualAlloc(NULL, heap_size, MEM_RESERVE, PAGE_READWRITE);
+  if (!tmp_heap) {
+    win32_maperr(GetLastError());
+    uerror("VirtualAlloc3", Nothing);
+  }
+#else
   tmp_heap = (char*)mmap(NULL, heap_size, prot, flags, 0, 0);
-  dest = tmp_heap;
-
   if(tmp_heap == MAP_FAILED) {
     printf("Error while collecting: %s\n", strerror(errno));
     exit(2);
   }
+#endif
 
+  dest = tmp_heap;
   assert(my_pid == master_pid); // Comes from the master
 
   // Walking the table
@@ -889,6 +893,12 @@ void hh_collect(value aggressive_val) {
       size_t aligned_size = ALIGNED(bl_size);
       char* addr          = Get_buf(hashtbl[i].addr);
 
+      #ifdef _WIN32
+      if (!VirtualAlloc(dest, bl_size, MEM_COMMIT, PAGE_READWRITE)) {
+        win32_maperr(GetLastError());
+        uerror("VirtualAlloc4", Nothing);
+      }
+      #endif
       memcpy(dest, addr, bl_size);
       // This is where the data ends up after the copy
       hashtbl[i].addr = heap_init + mem_size + sizeof(size_t);
@@ -901,6 +911,12 @@ void hh_collect(value aggressive_val) {
   memcpy(heap_init, tmp_heap, mem_size);
   *heap = heap_init + mem_size;
 
+#ifdef _WIN32
+  if(!VirtualFree(tmp_heap, 0, MEM_RELEASE)) {
+    win32_maperr(GetLastError());
+    uerror("VirtualFree", Nothing);
+  }
+#else
   if(munmap(tmp_heap, heap_size) == -1) {
     printf("Error while collecting: %s\n", strerror(errno));
     exit(2);

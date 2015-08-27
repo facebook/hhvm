@@ -20,7 +20,7 @@ $data = array(
     'bar' => 'bar-data',
     'baz' => 'baz-data',
     'lol' => 'lol-data',
-    'kek' => 'kek-data',
+    'kek' => 'kek-data'
 );
 
 $keys = array_keys($data);

@@ -1,0 +1,10 @@
+<?php
+
+if (!method_exists("memcached", "touchByKey")) die ("skip memcached::touchByKey is not available");
+
+$memc = new Memcached();
+$memc->addServer('localhost', '11211');
+$version = $memc->getVersion();
+if (!$version) {
+  echo "SKIP No Memcached running";
+}

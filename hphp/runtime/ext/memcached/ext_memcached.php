@@ -689,6 +689,33 @@ class Memcached {
     return true;
   }
 
+  /**
+   * Set a new expiration on an item
+   *
+   * @param string $key -
+   * @param int $expiration -
+   *
+   * @return bool -
+   */
+  public function touch(mixed $key,
+                      mixed $expiration = 0): bool {
+    return $this->touchByKey('', $key, $expiration);
+  }
+
+  /**
+   * Set a new expiration on an item on a specific server
+   *
+   * @param string $server_key -
+   * @param string $key -
+   * @param int $expiration -
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  public function touchByKey(string $server_key,
+                           string $key,
+                           int $expiration = 0): bool;
+
 }
 
 class MemcachedException {

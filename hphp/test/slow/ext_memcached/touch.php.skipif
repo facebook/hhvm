@@ -1,0 +1,3 @@
+<?php
+
+if (!method_exists("memcached", "touch")) die ("skip memcached::touch is not available");

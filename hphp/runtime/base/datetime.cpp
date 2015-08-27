@@ -441,9 +441,16 @@ void DateTime::setTimezone(req::ptr<TimeZone> timezone) {
 }
 
 void DateTime::modify(const String& diff) {
+  timelib_error_container* error = nullptr;
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
-                                             nullptr, TimeZone::GetDatabase(),
+                                             &error, TimeZone::GetDatabase(),
                                              TimeZone::GetTimeZoneInfoRaw);
+  if (error && error->error_count > 0) {
+    raise_warning("DateTime::modify(): Failed to parse time string (%s) at position %d (%c): %s",
+      diff.c_str(), error->error_messages[0].position,
+      error->error_messages[0].character, error->error_messages[0].message
+    );
+  }
   internalModify(tmp_time);
   timelib_time_dtor(tmp_time);
 }

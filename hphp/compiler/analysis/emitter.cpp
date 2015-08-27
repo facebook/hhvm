@@ -9902,9 +9902,13 @@ namespace {
 bool startsWith(const char* big, const char* small) {
   return strncmp(big, small, strlen(small)) == 0;
 }
-bool isFileHackStrict(const char* code, int codeLen) {
-  return codeLen > strlen("<?hh // strict") &&
-    (startsWith(code, "<?hh // strict") || startsWith(code, "<?hh //strict"));
+bool isFileHack(const char* code, int codeLen, bool allowPartial) {
+  if (allowPartial) {
+    return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
+  } else {
+    return codeLen > strlen("<?hh // strict") &&
+      (startsWith(code, "<?hh // strict") || startsWith(code, "<?hh //strict"));
+  }
 }
 
 UnitEmitter* makeFatalUnit(const char* filename, const MD5& md5,
@@ -10044,7 +10048,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // systemlib because the external emitter can't handle that yet.
     if (!ue &&
         !RuntimeOption::EvalUseExternalEmitter.empty() &&
-        isFileHackStrict(code, codeLen) &&
+        isFileHack(code, codeLen,
+                   RuntimeOption::EvalExternalEmitterAllowPartial) &&
         SystemLib::s_inited) {
       ue.reset(useExternalEmitter(code, codeLen, filename, md5));
     }

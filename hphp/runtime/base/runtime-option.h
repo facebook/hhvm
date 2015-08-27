@@ -444,6 +444,7 @@ public:
      2 - Fallback to builtin emitter if external emitter fails and
          don't log anything */                                          \
   F(int, ExternalEmitterFallback,      0)                               \
+  F(bool, ExternalEmitterAllowPartial, false)                           \
   F(bool, EmitSwitch,                  true)                            \
   F(bool, EmitNewMInstrs,              newMInstrsDefault())             \
   F(bool, LogThreadCreateBacktraces,   false)                           \

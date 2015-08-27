@@ -164,6 +164,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   set(MSVC_ENABLE_LTCG OFF CACHE BOOL "If enabled, use Link Time Code Generation for Release builds.")
   set(MSVC_ENABLE_STATIC_ANALYSIS OFF CACHE BOOL "If enabled, do more complex static analysis and generate warnings appropriately.")
   set(MSVC_NO_ASSERT_IN_DEBUG OFF CACHE BOOL "If enabled, don't do asserts in debug mode. The reduces the size of hphp_runtime_static by ~300mb.")
+  set(MSVC_ENABLE_PCH ON CACHE BOOL "If enabled, use precompiled headers to speed up the build.")
 
   # The general options passed:
   list(APPEND MSVC_GENERAL_OPTIONS

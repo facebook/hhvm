@@ -36,6 +36,12 @@ add_custom_command(
   COMMENT "Generating HHIR opcode table"
   VERBATIM)
 
+add_precompiled_header(
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_static.h"
+  "${HPHP_HOME}/hphp/pch/hphp_runtime_static.cpp"
+  CXX_SOURCES
+)
+
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}
             "ir-opcode-generated.h")

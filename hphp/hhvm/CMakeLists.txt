@@ -27,8 +27,9 @@ if (GOLD_FOUND)
   add_executable(hhvm ${CXX_SOURCES})
   target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES} ${LINKER_SCRIPT})
 else()
-  add_executable(hhvm ${CXX_SOURCES})
+  add_executable(hhvm ${CXX_SOURCES} $<TARGET_OBJECTS:hphp_runtime_static> $<TARGET_OBJECTS:hphp_runtime_ext>)
   target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES})
+  hphp_link(hhvm)
 endif()
 
 # cygwin has an issue with linking to crypt and intl

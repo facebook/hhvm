@@ -63,14 +63,17 @@ struct RequestLocal {
     }
     if (!m_node.m_p->getInited()) {
       m_node.m_p->setInited(true);
+      // This registration makes sure obj->requestShutdown() will be called. Do
+      // it before calling requestInit() so that obj is reachable to the GC no
+      // matter what the callback does.
+      auto index = g_context->registerRequestEventHandler(m_node.m_p);
       try {
         m_node.m_p->requestInit();
       } catch (...) {
         m_node.m_p->setInited(false);
+        g_context->unregisterRequestEventHandler(m_node.m_p, index);
         throw;
       }
-      // this registration makes sure m_p->requestShutdown() will be called
-      g_context->registerRequestEventHandler(m_node.m_p);
     }
     return m_node.m_p;
   }
@@ -138,15 +141,17 @@ public:
     T *obj = m_tlsObjects.get();
     if (!obj->getInited()) {
       obj->setInited(true);
+      // This registration makes sure obj->requestShutdown() will be called. Do
+      // it before calling requestInit() so that obj is reachable to the GC no
+      // matter what the callback does.
+      auto index = g_context->registerRequestEventHandler(obj);
       try {
         obj->requestInit();
       } catch (...) {
         obj->setInited(false);
+        g_context->unregisterRequestEventHandler(obj, index);
         throw;
       }
-
-      // this registration makes sure obj->requestShutdown() will be called
-      g_context->registerRequestEventHandler(obj);
     }
     return obj;
   }

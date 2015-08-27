@@ -197,7 +197,9 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
-  void registerRequestEventHandler(RequestEventHandler* handler);
+  std::size_t registerRequestEventHandler(RequestEventHandler* handler);
+  void unregisterRequestEventHandler(RequestEventHandler* handler,
+                                     std::size_t index);
   void registerShutdownFunction(const Variant& function, Array arguments,
                                 ShutdownType type);
   bool removeShutdownFunction(const Variant& function, ShutdownType type);

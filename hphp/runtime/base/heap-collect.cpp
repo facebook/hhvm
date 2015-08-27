@@ -165,8 +165,7 @@ struct Marker {
   void operator()(const ActRec&) { }
   void operator()(const Stack&) { }
 
-  // TODO (6512343): this needs to be hooked into scan methods for REHs.
-  void operator()(const RequestEventHandler&) { }
+  void operator()(const RequestEventHandler& h) { (*this)(&h); }
 
   // TODO (6512343): this needs to be hooked into scan methods for Extensions.
   void operator()(const Extension&) { }

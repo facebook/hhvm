@@ -514,15 +514,31 @@ void ExecutionContext::popUserExceptionHandler() {
   }
 }
 
-void ExecutionContext::registerRequestEventHandler(
+std::size_t ExecutionContext::registerRequestEventHandler(
   RequestEventHandler *handler) {
   assert(handler && handler->getInited());
   m_requestEventHandlers.push_back(handler);
+  return m_requestEventHandlers.size()-1;
+}
+
+void ExecutionContext::unregisterRequestEventHandler(
+  RequestEventHandler* handler,
+  std::size_t index) {
+  assert(index < m_requestEventHandlers.size() &&
+         m_requestEventHandlers[index] == handler);
+  assert(!handler->getInited());
+  if (index == m_requestEventHandlers.size()-1) {
+    m_requestEventHandlers.pop_back();
+  } else {
+    m_requestEventHandlers[index] = nullptr;
+  }
 }
 
 static bool requestEventHandlerPriorityComp(RequestEventHandler *a,
                                             RequestEventHandler *b) {
-  return a->priority() < b->priority();
+  if (!a) return b;
+  else if (!b) return false;
+  else return a->priority() < b->priority();
 }
 
 void ExecutionContext::onRequestShutdown() {
@@ -537,6 +553,7 @@ void ExecutionContext::onRequestShutdown() {
     sort(tmp.begin(), tmp.end(),
          requestEventHandlerPriorityComp);
     for (auto* handler : tmp) {
+      if (!handler) continue;
       assert(handler->getInited());
       handler->requestShutdown();
       handler->setInited(false);

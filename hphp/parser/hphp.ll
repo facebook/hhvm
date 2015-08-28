@@ -1471,8 +1471,7 @@ namespace HPHP {
     yylex_destroy(m_yyscanner);
   }
 
-  [[gnu::unused]]
-  static void suppress_unused_errors();
+  static void suppress_unused_errors() __attribute__((unused));
   static void suppress_unused_errors() {
     yyinput(yyscan_t());
     yyunput(0,0,0);

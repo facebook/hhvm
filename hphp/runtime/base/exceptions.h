@@ -54,6 +54,12 @@ struct ExtendedException : Exception {
   explicit ExtendedException(const std::string& msg);
   explicit ExtendedException(SkipFrame frame, const std::string& msg);
   explicit ExtendedException(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  ExtendedException(const ExtendedException& other);
+  ExtendedException(ExtendedException&& other) noexcept;
+  ~ExtendedException();
+
+  ExtendedException& operator=(const ExtendedException& other);
+  ExtendedException& operator=(ExtendedException&& other) noexcept;
 
   EXCEPTION_COMMON_IMPL(ExtendedException);
 
@@ -64,15 +70,10 @@ struct ExtendedException : Exception {
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }
 
-  // defined in exceptions.cpp to avoid circular include via imarker.h
-  void vscan(IMarker& mark) const override;
-
+  virtual void vscan(IMarker&) const;
+  template<class F> void scan(F& mark) const;
 protected:
-  ExtendedException(const std::string& msg, ArrayData* backTrace)
-    : m_btp(backTrace)
-  {
-    m_msg = msg;
-  }
+  ExtendedException(const std::string& msg, ArrayData* backTrace);
 
 private:
   void computeBacktrace(bool skipFrame = false);
@@ -80,6 +81,9 @@ private:
 private:
   Array m_btp;
   bool m_silent{false};
+  MemoryManager::ExceptionRootKey m_key;
+
+  friend class MemoryManager;
 };
 
 struct FatalErrorException : ExtendedException {

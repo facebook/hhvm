@@ -704,12 +704,12 @@ void StringData::dump() const {
   printf("]\n");
 }
 
-StringData *StringData::getChar(int offset) const {
+StringData* StringData::getChar(int offset) const {
   if (offset >= 0 && offset < size()) {
     return makeStaticString(m_data[offset]);
   }
   raise_notice("Uninitialized string offset: %d", offset);
-  return makeStaticString("");
+  return staticEmptyString();
 }
 
 StringData* StringData::increment() {

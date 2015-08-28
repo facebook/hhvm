@@ -85,7 +85,7 @@ ALocBits may_alias_part(const AliasAnalysis& aa,
                         AliasClass any,
                         ALocBits pessimistic) {
   if (proj) {
-    if (auto const meta = aa.find(*proj)) {
+    if (auto meta = aa.find(*proj)) {
       return ALocBits{meta->conflicts}.set(meta->index);
     }
     assertx(acls.maybe(any));
@@ -126,7 +126,7 @@ folly::Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
 }
 
 ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
-  if (auto const meta = find(acls)) {
+  if (auto meta = find(acls)) {
     return ALocBits{meta->conflicts}.set(meta->index);
   }
 

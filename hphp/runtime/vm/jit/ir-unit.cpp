@@ -110,6 +110,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case JmpSSwitchDest:
     case JmpSwitchDest:
     case RaiseError:
+    case ThrowOutOfBounds:
+    case ThrowInvalidOperation:
       return instSk == sk;;
 
     // The RetCtrl is generally ending a bytecode instruction, with the

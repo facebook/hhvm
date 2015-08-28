@@ -546,7 +546,10 @@ MCGenerator::createTranslation(const TranslArgs& args) {
                                   TransFlags().packed);
   } else {
     auto const stubsize = svcreq::stub_size();
-    auto newStart = code.cold().allocInner(stubsize) ?: code.cold().frontier();
+    auto newStart = code.cold().allocInner(stubsize);
+    if (!newStart) {
+      newStart = code.cold().frontier();
+    }
     // Ensure that the anchor translation is a known size so that it can be
     // reclaimed when the function is freed
     req = svcreq::emit_ephemeral(code.cold(),
@@ -1398,6 +1401,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
 }
 
 TCA MCGenerator::handleResume(bool interpFirst) {
+  assert_native_stack_aligned();
   FTRACE(1, "handleResume({})\n", interpFirst);
 
   if (!vmRegsUnsafe().pc) return m_tx.uniqueStubs.callToExit;
@@ -2500,14 +2504,6 @@ void MCGenerator::setJmpTransID(TCA jmp) {
   TransID transId = m_tx.profData()->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
   m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
-}
-
-void
-emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index, int n, bool force) {
-  if (!force && !Stats::enabled()) return;
-  intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
-
-  mcg->backEnd().emitIncStat(cb, disp, n);
 }
 
 void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {

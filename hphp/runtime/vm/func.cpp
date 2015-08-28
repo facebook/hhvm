@@ -128,7 +128,21 @@ void Func::destroy(Func* func) {
   low_free(func);
 }
 
-void Func::smashPrologues() {
+void Func::freeClone() {
+  assert(isPreFunc());
+  if (m_funcId != InvalidFuncId) {
+    if (mcg && RuntimeOption::EvalEnableReusableTC) {
+      // Free TC-space associated with func
+      jit::reclaimFunction(this);
+    } else {
+      smashPrologues();
+    }
+    m_funcId = InvalidFuncId;
+  }
+  m_cloned.flag.clear();
+}
+
+void Func::smashPrologues() const {
   int maxNumPrologues = getMaxNumPrologues(numParams());
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues

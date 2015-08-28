@@ -256,6 +256,9 @@ static Variant HHVM_FUNCTION(get_cfg_var, const String& option) {
 }
 
 static String HHVM_FUNCTION(get_current_user) {
+#ifdef _MSC_VER
+  return Process::GetCurrentUser();
+#else
   int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
   if (pwbuflen < 1) {
     return empty_string();
@@ -270,6 +273,7 @@ static String HHVM_FUNCTION(get_current_user) {
   String ret(pw.pw_name, CopyString);
   req::free(pwbuf);
   return ret;
+#endif
 }
 
 static Array HHVM_FUNCTION(get_defined_constants, bool categorize /*=false */) {

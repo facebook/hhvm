@@ -359,6 +359,10 @@ template<class T> T decode(PC& pc) {
   return ret;
 }
 
+template<class T> void decode(PC& pc, T& val) {
+  val = decode<T>(pc);
+}
+
 template<class FindBlock>
 void populate_block(ParseUnitState& puState,
                     const FuncEmitter& fe,
@@ -489,8 +493,8 @@ void populate_block(ParseUnitState& puState,
 #define IMM_BA(n)      assert(next == past); \
                        auto target = findBlock(  \
                          opPC + decode<Offset>(pc) - ue.bc());
-#define IMM_OA_IMPL(n) decode<uint8_t>(pc);
-#define IMM_OA(type)   auto subop = (type)IMM_OA_IMPL
+#define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
+#define IMM_OA(type)   type IMM_OA_IMPL
 #define IMM_VSA(n)     auto keys = decode_stringvec();
 
 #define IMM_NA

@@ -197,6 +197,8 @@ struct StringData {
    */
   IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC
 
+  bool kindIsValid() const { return m_hdr.kind == HeaderKind::String; }
+
   /*
    * Append the supplied range to this string.  If there is not sufficient
    * capacity in this string to contain the range, a new string may be

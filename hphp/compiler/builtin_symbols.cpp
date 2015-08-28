@@ -33,7 +33,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/logger.h"
-#include <dlfcn.h>
 #include <vector>
 
 using namespace HPHP;

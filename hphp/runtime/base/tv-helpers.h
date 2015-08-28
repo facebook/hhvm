@@ -40,14 +40,36 @@ struct Variant;
  * of the pointer types, the compiler cannot use type aliasing assumptions to
  * miscompile.
  *
+ * If we're in debug mode, switch on the type and call the appropriate function
+ * directly. This is slightly slower, but gives us the benefit of extra
+ * assertions.
+ *
  * This assumes isRefcountedType() is true.
  */
-#define TV_GENERIC_DISPATCH(exp, func)                                  \
+#define TV_GENERIC_DISPATCH_FAST(exp, func)                             \
   HPHP::CountableManip::func(                                           \
     *reinterpret_cast<HPHP::RefCount*>(                                 \
       (exp).m_data.num + HPHP::FAST_REFCOUNT_OFFSET                     \
     )                                                                   \
   )
+
+#define TV_GENERIC_DISPATCH_SLOW(exp, func) \
+  [](HPHP::TypedValue tv) {                                     \
+    switch (tv.m_type) {                                        \
+      case HPHP::KindOfString: return tv.m_data.pstr->func();   \
+      case HPHP::KindOfArray: return tv.m_data.parr->func();    \
+      case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
+      case HPHP::KindOfResource: return tv.m_data.pres->func(); \
+      case HPHP::KindOfRef: return tv.m_data.pref->func();      \
+      default: assert(false);                                   \
+    }                                                           \
+  }(exp)
+
+#ifdef DEBUG
+#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_SLOW(exp, func)
+#else
+#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_FAST(exp, func)
+#endif
 
 /*
  * Assertions on Cells and TypedValues.  Should usually only happen
@@ -146,6 +168,13 @@ inline void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
   }
 }
 
+// Assumes 'tv' is live and unlikely to be a refcounted type
+inline void tvUnlikelyRefcountedDecRef(TypedValue tv) {
+  if (UNLIKELY(isRefcountedType(tv.m_type))) {
+    tvDecRefHelper(tv.m_type, tv.m_data.num);
+  }
+}
+
 inline void tvRefcountedDecRef(TypedValue v) {
   return tvRefcountedDecRefHelper(v.m_type, v.m_data.num);
 }
@@ -166,6 +195,9 @@ inline void tvDecRef(TypedValue* tv) {
 ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
   if (isRefcountedType(tv->m_type)) {
     tvDecRef(tv);
+    // If we're in debug mode, turn the entry into null so that the GC doesn't
+    // assert if it tries to follow it.
+    if (debug) tv->m_type = KindOfNull;
   }
 }
 

@@ -110,10 +110,6 @@ const Abi& abi(CodeKind kind) {
   not_reached();
 }
 
-RegSet interp_one_cf_regs() {
-  not_implemented();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 PhysReg rarg(size_t i) {

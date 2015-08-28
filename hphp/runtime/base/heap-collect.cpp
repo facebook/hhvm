@@ -21,8 +21,9 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
 
+#include <algorithm>
+#include <iterator>
 #include <vector>
-#include <unordered_map>
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -33,19 +34,58 @@ namespace {
 
 // information about heap objects, indexed by valid object starts.
 struct PtrMap {
-  void insert(const Header* p) {
-    meta_[p] = Meta{};
+  void insert(const Header* h) {
+    assert(!sorted_);
+    regions_.emplace_back(h, h->size());
   }
   const Header* header(const void* p) const {
-    auto it = meta_.find(p);
-    return it != meta_.end() ? static_cast<const Header*>(p) : nullptr;
+    assert(sorted_);
+    // Find the first region which begins beyond p.
+    auto it =
+      std::upper_bound(
+        regions_.begin(),
+        regions_.end(),
+        p,
+        [](const void* p,
+           const std::pair<const Header*, std::size_t>& region) {
+          return p < region.first;
+        }
+      );
+    // If its the first region, p is before any region, so there's no
+    // header. Otherwise, backup to the previous region.
+    if (it == regions_.begin()) return nullptr;
+    --it;
+    // p can only potentially point within this previous region, so check that.
+    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ?
+      it->first : nullptr;
   }
-  bool contains(const void* p) const {
-    return header(p) != nullptr;
+  bool isHeader(const void* p) const {
+    auto h = header(p);
+    return h && h == p;
+  }
+
+  void prepare() {
+    assert(!sorted_);
+    std::sort(regions_.begin(), regions_.end());
+    assert(sanityCheck());
+    sorted_ = true;
   }
 private:
-  struct Meta {};
-  std::unordered_map<const void*,Meta> meta_;
+  bool sanityCheck() const {
+    // Verify that all the regions are in increasing and non-overlapping order.
+    void* last = nullptr;
+    for (const auto& region : regions_) {
+      if (!last || last <= region.first) {
+        last = (void*)(uintptr_t(region.first) + region.second);
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  std::vector<std::pair<const Header*, std::size_t>> regions_;
+  bool sorted_ = false;
 };
 
 struct Counter {
@@ -125,8 +165,7 @@ struct Marker {
   void operator()(const ActRec&) { }
   void operator()(const Stack&) { }
 
-  // TODO (6512343): this needs to be hooked into scan methods for REHs.
-  void operator()(const RequestEventHandler&) { }
+  void operator()(const RequestEventHandler& h) { (*this)(&h); }
 
   // TODO (6512343): this needs to be hooked into scan methods for Extensions.
   void operator()(const Extension&) { }
@@ -148,8 +187,13 @@ private:
     auto p = reinterpret_cast<const char*>(vp);
     return p >= rds_.begin() && p < rds_.end();
   }
-  template<class T> void enqueue(T* p) {
-    work_.push_back(reinterpret_cast<const Header*>(p));
+  template<class T> void enqueue(const T* p) {
+    auto h = reinterpret_cast<const Header*>(p);
+    assert(h &&
+           h->kind() <= HK::BigMalloc &&
+           h->kind() != HK::ResumableFrame &&
+           h->kind() != HK::NativeData);
+    work_.push_back(h);
   }
 
 private:
@@ -161,27 +205,33 @@ private:
 
 // mark the object at p, return true if first time.
 bool Marker::mark(const void* p) {
-  assert(ptrs_.contains(p));
+  assert(p && ptrs_.isHeader(p));
   auto h = static_cast<const Header*>(p);
+  assert(h->kind() <= HK::BigMalloc && h->kind() != HK::ResumableObj);
   auto first = !h->hdr_.mark;
   h->hdr_.mark = true;
   return first;
 }
 
+// Utility to just extract the kind field from an arbitrary Header ptr.
+inline DEBUG_ONLY HeaderKind kind(const void* p) {
+  return static_cast<const Header*>(p)->kind();
+}
+
 void Marker::operator()(const ObjectData* p) {
   if (!p) return;
-  auto hdr = reinterpret_cast<const Header*>(p);
-  assert(isObjectKind(hdr->kind()));
+  assert(isObjectKind(p->headerKind()));
   if (p->getAttribute(ObjectData::HasNativeData)) {
     // HNI style native object; mark the NativeNode header, queue the object.
     // [NativeNode][NativeData][ObjectData][props] is one allocation.
     // For generators -
     // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
     auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
+    assert(h->hdr.kind == HK::NativeData);
     if (mark(h)) {
       enqueue(p);
     }
-  } else if (hdr->kind() == HK::ResumableObj) {
+  } else if (p->headerKind() == HK::ResumableObj) {
     // Resumable object, prefixed by a ResumableNode header, which is what
     // we need to mark.
     // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
@@ -202,11 +252,6 @@ void Marker::operator()(const ObjectData* p) {
   }
 }
 
-// Utility to just extract the kind field from an arbitrary Header ptr.
-inline DEBUG_ONLY HeaderKind kind(const void* p) {
-  return static_cast<const Header*>(p)->kind();
-}
-
 void Marker::operator()(const ResourceHdr* p) {
   if (p && mark(p)) {
     assert(kind(p) == HK::Resource);
@@ -223,19 +268,22 @@ void Marker::operator()(const ResourceData* r) {
 
 // ArrayData objects could be static
 void Marker::operator()(const ArrayData* p) {
-  if (counted(p) && mark(p)) {
+  if (p && counted(p) && mark(p)) {
+    assert(isArrayKind(kind(p)));
     enqueue(p);
   }
 }
 
 // RefData objects contain at most one ptr, scan it eagerly.
 void Marker::operator()(const RefData* p) {
+  if (!p) return;
   if (inRds(p)) {
     // p is a static local, initialized by RefData::initInRDS().
     // we already scanned p's body as part of scanning RDS.
     return;
   }
   if (mark(p)) {
+    assert(kind(p) == HK::Ref);
     enqueue(p);
   }
 }
@@ -243,7 +291,10 @@ void Marker::operator()(const RefData* p) {
 // The only thing interesting in a string is a possible APCString*,
 // which is not a request-local allocation.
 void Marker::operator()(const StringData* p) {
-  if (counted(p)) mark(p);
+  if (p && counted(p)) {
+    assert(kind(p) == HK::String);
+    mark(p);
+  }
 }
 
 // NVTs live inside VarEnv, and GlobalsArray has an interior ptr to one.
@@ -299,11 +350,7 @@ Marker::operator()(const void* start, size_t len) {
   for (; s < e; s++) {
     auto p = *s;
     auto h = ptrs_.header(p);
-    if (!h) {
-      // try p-16 in case it points just past a SmallNode header
-      h = ptrs_.header((void*)(uintptr_t(p)-sizeof(SmallNode)));
-      if (!h) continue;
-    }
+    if (!h) continue;
     // mark p if it's an interesting kind. since we have metadata for it,
     // it must have a valid header.
     h->hdr_.cmark = true;
@@ -318,13 +365,9 @@ Marker::operator()(const void* start, size_t len) {
       case HK::Struct:
       case HK::Mixed:
       case HK::Empty:
+      case HK::SmallMalloc:
+      case HK::BigMalloc:
         enqueue(h);
-        break;
-      case HK::ResumableFrame:
-        enqueue(h->resumableObj());
-        break;
-      case HK::NativeData:
-        enqueue(h->nativeObj());
         break;
       case HK::Object:
       case HK::AwaitAllWH:
@@ -335,21 +378,28 @@ Marker::operator()(const void* start, size_t len) {
       case HK::ImmVector:
       case HK::ImmMap:
       case HK::ImmSet:
-      case HK::ResumableObj:
-        // clear mark, since OD::mark wants to set it again for the first time
-        h->hdr_.mark = false;
-        (*this)(&h->obj_); // call the detailed ObjectData* mark()
+        // Object kinds. None of these should have native-data, because if they
+        // do, the mapped header should be for the NativeData prefix.
+        assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
+        enqueue(h);
+        break;
+      case HK::ResumableFrame:
+        enqueue(h->resumableObj());
+        break;
+      case HK::NativeData:
+        enqueue(h->nativeObj());
         break;
       case HK::String:
         // nothing to queue since strings don't have pointers
         break;
-      case HK::SmallMalloc:
-      case HK::BigMalloc:
-        enqueue(h);
-        break;
+      case HK::ResumableObj:
+      case HK::BigObj:
       case HK::Free:
       case HK::Hole:
-      case HK::BigObj: // hmm.. what lives inside this?
+        // None of these kinds should be encountered because they're either not
+        // interesting to begin with, or are mapped to different headers, so we
+        // shouldn't get these from the pointer map.
+        always_assert(false && "bad header kind");
         break;
     }
   }
@@ -364,30 +414,32 @@ void Marker::init() {
   rds_ = folly::Range<const char*>((char*)rds::header(),
                                    RuntimeOption::EvalJitTargetCacheSize);
   MM().forEachHeader([&](Header* h) {
-    ptrs_.insert(h);
     h->hdr_.mark = h->hdr_.cmark = false;
     switch (h->kind()) {
       case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
+      case HK::Packed:
+      case HK::Mixed:
+      case HK::Struct:
+      case HK::Empty:
+      case HK::String:
         assert(h->hdr_.count > 0);
+        ptrs_.insert(h);
         total_ += h->size();
         break;
       case HK::Ref:
         // EZC non-ref refdatas sometimes have count==0
         assert(h->hdr_.count > 0 || !h->ref_.zIsRef());
+        ptrs_.insert(h);
         total_ += h->size();
         break;
       case HK::Resource:
         // ZendNormalResourceData objects sometimes never incref'd
         // TODO: t5969922, t6545412 might be a real bug.
+        ptrs_.insert(h);
         total_ += h->size();
         break;
-      case HK::Packed:
-      case HK::Struct:
-      case HK::Mixed:
-      case HK::Empty:
-      case HK::String:
       case HK::Object:
       case HK::Vector:
       case HK::Map:
@@ -396,37 +448,52 @@ void Marker::init() {
       case HK::ImmVector:
       case HK::ImmMap:
       case HK::ImmSet:
-      case HK::ResumableObj:
       case HK::AwaitAllWH:
         // count==0 can be witnessed, see above
         total_ += h->size();
+        if (!h->obj_.getAttribute(ObjectData::HasNativeData)) {
+          ptrs_.insert(h);
+        } else {
+          // Objects with native-data shouldn't be encountered on their own
+          // because they should be prefixed by a NativeData allocation.
+          assert(false && "object with native-data from forEachHeader()");
+        }
         break;
       case HK::ResumableFrame: {
+        // Pointers to either the frame or the object will be mapped to the
+        // frame.
         total_ += h->size();
-        auto h2 = reinterpret_cast<Header*>(h->resumableObj());
-        ptrs_.insert(h2);
-        h2->hdr_.mark = h2->hdr_.cmark = false;
+        ptrs_.insert(h);
+        auto obj = reinterpret_cast<const Header*>(h->resumableObj());
+        obj->hdr_.mark = obj->hdr_.cmark = false;
         break;
       }
       case HK::NativeData: {
+        // Pointers to either the native data or the object will be mapped to
+        // the native data.
         total_ += h->size();
-        auto h2 = reinterpret_cast<Header*>(h->nativeObj());
-        ptrs_.insert(h2);
-        h2->hdr_.mark = h2->hdr_.cmark = false;
+        ptrs_.insert(h);
+        auto obj = reinterpret_cast<const Header*>(h->nativeObj());
+        obj->hdr_.mark = obj->hdr_.cmark = false;
         break;
       }
       case HK::SmallMalloc:
       case HK::BigMalloc:
         total_ += h->size();
+        ptrs_.insert(h);
         break;
       case HK::Free:
         break;
+      case HK::ResumableObj:
+        // These shouldn't be encountered on their own, they should always be
+        // prefixed by a ResumableFrame allocation.
       case HK::Hole:
       case HK::BigObj:
         assert(false && "skipped by forEachHeader()");
         break;
     }
   });
+  ptrs_.prepare();
 }
 
 void Marker::trace() {
@@ -439,7 +506,8 @@ void Marker::trace() {
 }
 
 // check that headers have a "sensible" state during sweeping.
-DEBUG_ONLY bool check_sweep_header(Header* h) {
+DEBUG_ONLY bool check_sweep_header(const Header* h) {
+  assert(!h->hdr_.cmark || h->hdr_.mark); // cmark implies mark
   switch (h->kind()) {
     case HK::Packed:
     case HK::Struct:
@@ -449,6 +517,10 @@ DEBUG_ONLY bool check_sweep_header(Header* h) {
     case HK::Globals:
     case HK::Proxy:
     case HK::String:
+    case HK::Resource:
+    case HK::Ref:
+      // ordinary counted objects
+      break;
     case HK::Object:
     case HK::Vector:
     case HK::Map:
@@ -457,30 +529,28 @@ DEBUG_ONLY bool check_sweep_header(Header* h) {
     case HK::ImmVector:
     case HK::ImmMap:
     case HK::ImmSet:
-    case HK::ResumableObj:
     case HK::AwaitAllWH:
-    case HK::Resource:
-    case HK::Ref:
-      // ordinary counted objects
+      // objects; should not have native-data
+      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
       break;
     case HK::ResumableFrame:
     case HK::NativeData:
       // not counted but marked when embedded object is marked
       break;
-    case HK::BigObj:
-      // these are headers that should wrap a markable or countable thing.
-      assert(!h->hdr_.mark);
-      break;
     case HK::SmallMalloc:
     case HK::BigMalloc:
-      // these are managed by req::malloc and should not have been marked.
-      assert(!h->hdr_.mark);
+      // not counted but can be marked.
       break;
     case HK::Free:
-    case HK::Hole:
-      // free memory; mark implies dangling pointer bug. cmark is ok because
-      // dangling ambiguous pointers are not bugs, e.g. on the stack.
+      // free memory; these should not be marked.
       assert(!h->hdr_.mark);
+      break;
+    case HK::ResumableObj:
+    case HK::BigObj:
+    case HK::Hole:
+      // These should never be encountered because they don't represent
+      // independent allocations.
+      assert(false && "invalid header kind");
       break;
   }
   return true;
@@ -492,7 +562,7 @@ void Marker::sweep() {
   std::vector<Header*> reaped;
   auto& mm = MM();
   mm.iterate([&](Header* h) {
-    assert(!h->hdr_.cmark || h->hdr_.mark); // cmark implies mark
+    assert(check_sweep_header(h));
     auto size = h->size(); // internal size
     if (h->hdr_.mark) {
       marked += size;
@@ -505,7 +575,6 @@ void Marker::sweep() {
     // also, if freeing the current object causes other objects to be freed,
     // then must initialize the FreeNode header on them, in order to continue
     // parsing. For now, defer freeing those kinds of objects to after parsing.
-    assert(check_sweep_header(h));
     switch (h->kind()) {
       case HK::Packed:
       case HK::Struct:
@@ -516,7 +585,6 @@ void Marker::sweep() {
       case HK::Resource:
       case HK::Ref:
       case HK::Object:
-      case HK::ResumableObj:
       case HK::AwaitAllWH:
       case HK::Vector:
       case HK::Map:
@@ -534,13 +602,13 @@ void Marker::sweep() {
         break;
       case HK::SmallMalloc:
       case HK::BigMalloc:
+        // Don't free malloc-ed allocations even if they're not reachable.
+        break;
       case HK::Free:
         break;
       case HK::Hole:
-        // free memory; mark implies dangling pointer bug. cmark is ok because
-        // dangling ambiguous pointers are not bugs, e.g. on the stack.
-        assert(!h->hdr_.mark);
       case HK::BigObj:
+      case HK::ResumableObj:
         assert(false && "skipped by forEachHeader()");
         break;
     }

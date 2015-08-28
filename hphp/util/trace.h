@@ -99,6 +99,7 @@ namespace Trace {
       TM(debuggerflow)  \
       TM(debuginfo)     \
       TM(dispatchBB)    \
+      TM(emitter)       \
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \

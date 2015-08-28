@@ -17,6 +17,10 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
@@ -56,6 +60,23 @@ void alignJmpTarget(CodeBlock& cb) {
   align(cb, Alignment::JmpTarget, AlignContext::Dead);
 }
 
+void assertNativeStackAligned(Vout& v) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    v << call{TCA(assert_native_stack_aligned)};
+  }
+}
+
+void loadVMRegs(Vout& v) {
+  v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+  v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+}
+
+void loadMCG(Vout& v, Vreg d) {
+  // TODO(#8060678): Why does this need to be RIP-relative?
+  auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
+  v << loadqp{reg::rip[imcg], d};
+}
+
 /*
  * Convenience wrapper around a simple vcall to `helper', with a single `arg'
  * and a return value in `d'.
@@ -84,7 +105,7 @@ RegSet syncForLLVMCatch(Vout& v) {
 }
 
 /*
- * Load RIP from wherever it's stashed at the beginning of a new frame.
+ * Load RIP from wherever it's stashed at the beginning of a new native frame.
  */
 void loadSavedRIP(Vout& v, Vreg d) {
   if (arch() != Arch::X64) not_implemented();
@@ -92,8 +113,18 @@ void loadSavedRIP(Vout& v, Vreg d) {
 }
 
 /*
- * On x64, native calls assume native stack alignment.  For called stubs (as
- * opposed to jmp target stubs), we may need to take care of this manually.
+ * Stash the saved RIP of the native frame in the VM frame's m_savedRip, and
+ * also align the native stack.
+ *
+ * TODO(#7728856): Use this for EnterFrame as well.
+ */
+void stashSavedRIP(Vout& v, Vreg fp) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::stashSavedRIP(v, fp);
+}
+
+/*
+ * Align the native stack in an architecture-specific way.
  */
 template<class GenFunc>
 void alignNativeStack(Vout& v, GenFunc gen) {
@@ -156,11 +187,11 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
   return vwrap2(cb, [] (Vout& v, Vout& vcold) {
     auto const dest = v.makeReg();
 
-    alignNativeStack(v, [&] (Vout& v) {
-      // fcallHelper asserts native stack alignment for us.
-      TCA (*helper)(ActRec*) = &fcallHelper;
-      v << simplecall(v, helper, rvmfp(), dest);
-    });
+    v << popm{rvmfp()[AROFF(m_savedRip)]};
+    // fcallHelper asserts native stack alignment for us.
+    TCA (*helper)(ActRec*) = &fcallHelper;
+    v << simplecall(v, helper, rvmfp(), dest);
+    v << pushm{rvmfp()[AROFF(m_savedRip)]};
 
     // Clobber rvmsp in debug builds.
     if (debug) v << copy{v.cns(0x1), rvmsp()};
@@ -171,9 +202,7 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
     unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
       // A nullptr dest means the callee was intercepted and should be skipped.
       // Just return to the caller after syncing VM regs.
-      v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
-      v << load{rvmtl()[rds::kVmspOff], rvmsp()};
-
+      loadVMRegs(v);
       v << ret{};
     });
 
@@ -230,6 +259,7 @@ TCA emitInterpRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   auto const start = vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
     v << lea{rvmsp()[-AROFF(m_r)], r_svcreq_arg(0)};
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
@@ -242,6 +272,7 @@ TCA emitInterpGenRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   auto const start = vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
     loadGenFrame<async>(v, r_svcreq_arg(0));
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
@@ -253,6 +284,8 @@ TCA emitDebuggerInterpRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   return vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
+
     auto const ar = v.makeReg();
     v << lea{rvmsp()[-AROFF(m_r)], ar};
     debuggerRetImpl(v, ar);
@@ -264,6 +297,8 @@ TCA emitDebuggerInterpGenRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   return vwrap(cb, [] (Vout& v) {
+    assertNativeStackAligned(v);
+
     auto const ar = v.makeReg();
     loadGenFrame<async>(v, ar);
     debuggerRetImpl(v, ar);
@@ -277,10 +312,7 @@ TCA emitBindCallStub(CodeBlock& cb) {
   return vwrap(cb, [] (Vout& v) {
     auto args = VregList { v.makeReg(), v.makeReg(),
                            v.makeReg(), v.makeReg() };
-
-    // TODO(#8060678): Why does this need to be RIP-relative?
-    auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
-    v << loadqp{reg::rip[imcg], args[0]};
+    loadMCG(v, args[0]);
 
     // Reconstruct the address of the call from the saved RIP.
     auto const savedRIP = v.makeReg();
@@ -308,6 +340,105 @@ TCA emitBindCallStub(CodeBlock& cb) {
 
     v << jmpr{ret};
   });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct ResumeHelper {
+  TCA handle_resume;
+  TCA reenter_tc;
+};
+
+ResumeHelper resumeHelperBody(CodeBlock& cb) {
+  auto const handle_resume = vwrap(cb, [] (Vout& v) {
+    v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+    loadMCG(v, rarg(0));
+
+    auto const handler = reinterpret_cast<TCA>(
+      getMethodPtr(&MCGenerator::handleResume)
+    );
+    v << call{handler, arg_regs(2)};
+  });
+
+  auto const reenter_tc = vwrap(cb, [] (Vout& v) {
+    loadVMRegs(v);
+    auto const args = syncForLLVMCatch(v);
+    v << jmpr{rret(), args};
+  });
+
+  return ResumeHelper { handle_resume, reenter_tc };
+}
+
+TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us) {
+  alignJmpTarget(cb);
+
+  us.resumeHelperRet = vwrap(cb, [] (Vout& v) {
+    stashSavedRIP(v, rvmfp());
+  });
+  us.resumeHelper = vwrap(cb, [] (Vout& v) {
+    v << ldimmb{0, rarg(1)};
+  });
+  auto const body = resumeHelperBody(cb).handle_resume;
+
+  us.interpHelper = vwrap(cb, [] (Vout& v) {
+    v << store{rarg(0), rvmtl()[rds::kVmpcOff]};
+  });
+  us.interpHelperSyncedPC = vwrap(cb, [&] (Vout& v) {
+    v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
+    v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
+    v << ldimmb{1, rarg(1)};
+    v << jmpi{body, RegSet(rarg(1))};
+  });
+
+  return us.resumeHelperRet;
+}
+
+TCA emitInterpOneCFHelper(CodeBlock& cb, Op op, ResumeHelper rh) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [&] (Vout& v) {
+    v << copy2{rvmfp(), rvmsp(), rarg(0), rarg(1)};
+    // rarg(2) is set at the stub callsite.
+
+    auto const handler = reinterpret_cast<TCA>(
+      interpOneEntryPoints[static_cast<size_t>(op)]
+    );
+    v << call{handler, arg_regs(3)};
+
+    auto const sf = v.makeReg();
+    auto const next = v.makeBlock();
+
+    v << testq{rret(), rret(), sf};
+    v << jcci{CC_NZ, sf, next, rh.reenter_tc};
+    v = next;
+    v << jmpi{rh.handle_resume};
+  });
+}
+
+void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us) {
+  alignJmpTarget(cb);
+  auto const rh = resumeHelperBody(cb);
+
+  auto const emit = [&] (Op op, const char* name) {
+    auto const stub = emitInterpOneCFHelper(cb, op, rh);
+    us.interpOneCFHelpers[op] = stub;
+    us.add(name, stub);
+  };
+
+#define O(name, imm, in, out, flags)          \
+  if (((flags) & CF) || ((flags) & TF)) {     \
+    emit(Op::name, "interpOneCFHelper"#name); \
+  }
+  OPCODES
+#undef O
+
+  // Exit is a very special snowflake.  Because it can appear in PHP
+  // expressions, the emitter pretends that it pushed a value on the eval stack
+  // (and iopExit actually does push Null right before throwing).  Marking it
+  // as TF would mess up any bytecodes that want to consume its output value,
+  // so we can't do that.  But we also don't want to extend regions past it, so
+  // the JIT treats it as terminal and uses InterpOneCF to execute it.
+  emit(Op::Exit, "interpOneCFHelperExit");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,6 +472,9 @@ void UniqueStubs::emitAll() {
   ADD(bindCallStub,           emitBindCallStub<false>(cold));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold));
 #undef ADD
+
+  add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this));
+  emitInterpOneCFHelpers(cold, *this);
 
   // TODO(#6730846): Kill this once all unique stubs are emitted here.
   if (arch() == Arch::X64) x64::emitUniqueStubs(*this);
@@ -392,6 +526,12 @@ std::string UniqueStubs::describe(TCA address) {
     return folly::sformat("{}+{:#x}", lower->name, address - lower->start);
   }
   return raw();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+RegSet interp_one_cf_regs() {
+  return vm_regs_with_sp() | rarg(2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

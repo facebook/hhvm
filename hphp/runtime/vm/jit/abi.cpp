@@ -30,12 +30,12 @@ const Abi& abi(CodeKind kind) { ARCH_SWITCH_CALL(abi, kind); }
 PhysReg rvmfp() { ARCH_SWITCH_CALL(rvmfp); }
 PhysReg rvmsp() { ARCH_SWITCH_CALL(rvmsp); }
 PhysReg rvmtl() { ARCH_SWITCH_CALL(rvmtl); }
+PhysReg rsp() { ARCH_SWITCH_CALL(rsp); }
 
 RegSet vm_regs_with_sp() { ARCH_SWITCH_CALL(vm_regs_with_sp); }
 RegSet vm_regs_no_sp() { ARCH_SWITCH_CALL(vm_regs_no_sp); }
 
-RegSet interp_one_cf_regs() { ARCH_SWITCH_CALL(interp_one_cf_regs); }
-
+PhysReg rret() { ARCH_SWITCH_CALL(rret); }
 PhysReg rarg(size_t i) { ARCH_SWITCH_CALL(rarg, i); }
 PhysReg rarg_simd(size_t i) { ARCH_SWITCH_CALL(rarg_simd, i); }
 

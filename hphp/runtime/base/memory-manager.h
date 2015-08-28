@@ -47,6 +47,7 @@ struct APCLocalArray;
 struct MemoryManager;
 struct ObjectData;
 struct ResourceData;
+struct ExtendedException;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -882,6 +883,16 @@ struct MemoryManager {
   template <typename F> void scanRootMaps(F& m) const;
   template <typename F> void scanSweepLists(F& m) const;
 
+  // Opaque type used to allow for quick removal of exception roots. Should be
+  // embedded in ExtendedException.
+  struct ExceptionRootKey {
+    std::size_t m_index = 0;
+  };
+
+  // Add/remove exceptions as GC roots.
+  void addExceptionRoot(ExtendedException* exn);
+  void removeExceptionRoot(ExtendedException* exn);
+
   /*
    * Heap iterator methods.
    */
@@ -1045,6 +1056,7 @@ private:
 
   mutable RootMap<ResourceData>* m_resourceRoots{nullptr};
   mutable RootMap<ObjectData>* m_objectRoots{nullptr};
+  mutable std::vector<ExtendedException*> m_exceptionRoots;
 
   bool m_sweeping;
   bool m_statsIntervalActive;

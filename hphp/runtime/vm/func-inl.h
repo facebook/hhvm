@@ -68,11 +68,6 @@ inline bool Func::ParamInfo::isVariadic() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Func.
 
-inline void Func::freeClone() const {
-  assert(isPreFunc());
-  m_cloned.flag.clear();
-}
-
 inline void Func::validate() const {
 #ifdef DEBUG
   assert(m_magic == kMagic);

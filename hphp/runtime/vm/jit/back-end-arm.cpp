@@ -48,10 +48,6 @@ struct BackEnd final : jit::BackEnd {
   BackEnd() {}
   ~BackEnd() {}
 
-  PhysReg rSp() override {
-    return PhysReg(vixl::sp);
-  }
-
 #define CALLEE_SAVED_BARRIER() \
   asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
                "x26", "x27", "x28")
@@ -134,44 +130,6 @@ struct BackEnd final : jit::BackEnd {
       arm::emitTransCounterInc(a);
     }
     not_implemented();
-  }
-
-  void emitIncStat(CodeBlock& cb, intptr_t disp, int n) override {
-    using arm::rAsm;
-    using arm::rAsm2;
-    vixl::MacroAssembler a { cb };
-
-    a.    Mrs   (rAsm2, vixl::TPIDR_EL0);
-    a.    Ldr   (rAsm, rAsm2[disp]);
-    a.    Add   (rAsm, rAsm, n);
-    a.    Str   (rAsm, rAsm2[disp]);
-  }
-
-  void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
-                   SrcKey sk, size_t dbgOff) override {
-    vixl::MacroAssembler a { codeMain };
-
-    vixl::Label after;
-    vixl::Label interpReqAddr;
-
-    // Get the debugger-attached flag from thread-local storage. Don't bother
-    // saving caller-saved regs around the host call; this is between blocks.
-    emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rAsm);
-
-    // Is the debugger attached?
-    a.   Ldr  (rAsm.W(), rAsm[dbgOff]);
-    a.   Tst  (rAsm, 0xff);
-    // skip jump to cold if no debugger attached
-    a.   B    (&after, vixl::eq);
-    a.   Ldr  (rAsm, &interpReqAddr);
-    a.   Br   (rAsm);
-    if (!a.isFrontierAligned(8)) {
-      a. Nop  ();
-      assertx(a.isFrontierAligned(8));
-    }
-    a.   bind (&interpReqAddr);
-    not_implemented();
-    a.   bind (&after);
   }
 
   void streamPhysReg(std::ostream& os, PhysReg reg) override {

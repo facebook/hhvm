@@ -501,6 +501,8 @@ enum Operands {
   StackN          = 1 << 15, // pop N cells from stack; n = imm[0].u_IVA
   BStackN         = 1 << 16, // consume N cells from stack for builtin call;
                              // n = imm[0].u_IVA
+  StackI          = 1 << 17, // consume 1 cell at index imm[0].u_IVA
+  MBase           = 1 << 18, // member operation base
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };

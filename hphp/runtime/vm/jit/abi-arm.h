@@ -42,6 +42,7 @@ const Abi& abi(CodeKind kind = CodeKind::Trace);
 inline PhysReg rvmfp() { return vixl::x29; }
 inline PhysReg rvmsp() { return vixl::x19; }
 inline PhysReg rvmtl() { return vixl::x20; }
+inline PhysReg rsp()   { return vixl::sp; }
 
 namespace detail {
   const RegSet kVMRegs      = rvmfp() | rvmtl();
@@ -51,7 +52,7 @@ namespace detail {
 inline RegSet vm_regs_with_sp() { return detail::kVMRegs; }
 inline RegSet vm_regs_no_sp()   { return detail::kVMRegsNoSP; }
 
-RegSet interp_one_cf_regs();
+inline PhysReg rret() { not_implemented(); }
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);

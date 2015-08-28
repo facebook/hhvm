@@ -607,6 +607,9 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
 
    case AF_UNIX:
      {
+#ifdef _MSC_VER
+       always_assert(false);
+#else
        struct sockaddr_un *ua = (struct sockaddr_un*)sa;
 
        if (sl == sizeof(sa_family_t)) {
@@ -623,6 +626,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
          textaddr = strndup(ua->sun_path, textaddrlen);
        }
        break;
+#endif
     }
 
   default:

@@ -188,6 +188,7 @@ struct Vgen {
   void emit(psllq i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(const push& i) { a->push(i.s); }
+  void emit(const pushm& i) { a->push(i.s); }
   void emit(const roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(const ret& i) { a->ret(); }
   void emit(const sarq& i) { unary(i); a->sarq(i.d); }
@@ -743,7 +744,7 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
       auto& taken = unit.blocks[targets[1]].code;
       assertx(taken.front().op == Vinstr::landingpad ||
              taken.front().op == Vinstr::jmp);
-      Vinstr v{lea{rsp[rspOffset], rsp}};
+      Vinstr v{lea{reg::rsp[rspOffset], reg::rsp}};
       v.origin = taken.front().origin;
       if (taken.front().op == Vinstr::jmp) {
         taken.insert(taken.begin(), v);

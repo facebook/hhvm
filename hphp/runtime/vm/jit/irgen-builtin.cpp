@@ -325,7 +325,14 @@ SSATmp* minmax(IRGS& env, const bool is_max) {
   return cond(
     env,
     [&] (Block* taken) {
-      auto const cmp = gen(env, is_max ? Gte : Lte, val1, val2);
+      SSATmp* cmp;
+      if (ty1 <= TInt && ty2 <= TInt) {
+        cmp = gen(env, is_max ? GteInt : LteInt, val1, val2);
+      } else {
+        auto conv1 = (ty1 <= TDbl) ? val1 : gen(env, ConvIntToDbl, val1);
+        auto conv2 = (ty2 <= TDbl) ? val2 : gen(env, ConvIntToDbl, val2);
+        cmp = gen(env, is_max ? GteDbl : LteDbl, conv1, conv2);
+      }
       gen(env, JmpZero, taken, cmp);
     },
     [&] {

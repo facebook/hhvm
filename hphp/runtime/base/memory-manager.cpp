@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
@@ -198,9 +199,32 @@ MemoryManager::MemoryManager()
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
 }
 
+void MemoryManager::addExceptionRoot(ExtendedException* exn) {
+  m_exceptionRoots.push_back(exn);
+  // The key is the index into the exception root list (biased by 1).
+  exn->m_key.m_index = m_exceptionRoots.size();
+}
+
+void MemoryManager::removeExceptionRoot(ExtendedException* exn) {
+  // Swap the exception being removed with the last exception in the list (which
+  // might be the same one). This lets us remove from the vector in constant
+  // time.
+  assert(exn->m_key.m_index > 0 &&
+         exn->m_key.m_index <= m_exceptionRoots.size());
+  auto& removed = m_exceptionRoots[exn->m_key.m_index-1];
+  assert(removed == exn);
+  auto& back = m_exceptionRoots.back();
+  assert(back->m_key.m_index == m_exceptionRoots.size());
+  back->m_key = removed->m_key;
+  removed->m_key.m_index = 0;
+  removed = back;
+  m_exceptionRoots.pop_back();
+}
+
 void MemoryManager::dropRootMaps() {
   m_objectRoots = nullptr;
   m_resourceRoots = nullptr;
+  m_exceptionRoots = std::vector<ExtendedException*>();
 }
 
 void MemoryManager::deleteRootMaps() {
@@ -212,6 +236,7 @@ void MemoryManager::deleteRootMaps() {
     req::destroy_raw(m_resourceRoots);
     m_resourceRoots = nullptr;
   }
+  m_exceptionRoots = std::vector<ExtendedException*>();
 }
 
 void MemoryManager::resetRuntimeOptions() {
@@ -513,6 +538,7 @@ void MemoryManager::flush() {
   m_heap.flush();
   m_apc_arrays = std::vector<APCLocalArray*>();
   m_natives = std::vector<NativeNode*>();
+  m_exceptionRoots = std::vector<ExtendedException*>();
 }
 
 /*

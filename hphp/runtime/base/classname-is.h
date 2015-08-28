@@ -34,7 +34,7 @@ struct InstantStatic {
 };
 
 template <class T, class TInit, TInit init()>
-T InstantStatic<T, TInit, init>::value { init() };
+T InstantStatic<T, TInit, init>::value(init());
 
 #define CLASSNAME_IS(str)                                               \
   static const char *GetClassName() { return str; }                     \

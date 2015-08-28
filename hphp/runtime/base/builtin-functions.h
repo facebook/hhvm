@@ -30,6 +30,8 @@ extern const StaticString s_self;
 extern const StaticString s_parent;
 extern const StaticString s_static;
 
+extern const StaticString s_cmpWithCollection;
+
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
@@ -117,6 +119,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
 bool is_constructor_name(const char* func);
 void throw_instance_method_fatal(const char *name);
 
+ATTRIBUTE_NORETURN void throw_invalid_operation_exception(StringData*);
 ATTRIBUTE_NORETURN void throw_iterator_not_valid();
 ATTRIBUTE_NORETURN void throw_collection_modified();
 ATTRIBUTE_NORETURN void throw_collection_property_exception();
@@ -138,19 +141,19 @@ Object init_object(const String& s, const Array &params, ObjectData* o);
  *   - When level is 1, it's from system funcs that turn both into warnings
  *   - When level is 0, it's from user funcs that turn missing arg in warnings
  */
-[[gnu::cold]]
 void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
                                    const char *expectDesc, int level = 0,
-                                   TypedValue *rv = nullptr);
-[[gnu::cold]]
+                                   TypedValue *rv = nullptr)
+  __attribute__((__cold__));
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0, TypedValue *rv = nullptr);
-[[gnu::cold]]
+                                int level = 0, TypedValue *rv = nullptr)
+  __attribute__((__cold__));
 void throw_toomany_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0, TypedValue *rv = nullptr);
-[[gnu::cold]]
+                                int level = 0, TypedValue *rv = nullptr)
+  __attribute__((__cold__));
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level = 0, TypedValue *rv = nullptr);
+                              int level = 0, TypedValue *rv = nullptr)
+  __attribute__((__cold__));
 
 /**
  * Handler for exceptions thrown from user functions that we don't
@@ -168,8 +171,8 @@ void handle_destructor_exception(const char* situation = "Destructor");
 void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_expected_array_exception(const char* fn = nullptr);
 void throw_expected_array_or_collection_exception(const char* fn = nullptr);
-[[gnu::cold]]
-void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
+   __attribute__((__cold__));
 
 /**
  * Unsetting ClassName::StaticProperty.

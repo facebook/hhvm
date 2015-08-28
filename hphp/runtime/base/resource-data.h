@@ -69,6 +69,7 @@ struct ResourceHdr {
   static void resetMaxId();
 
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  bool kindIsValid() const { return m_hdr.kind == HeaderKind::Resource; }
   void release() noexcept;
 
   void init(size_t size) {
@@ -76,13 +77,16 @@ struct ResourceHdr {
   }
 
   ResourceData* data() {
+    assert(kindIsValid());
     return reinterpret_cast<ResourceData*>(this + 1);
   }
   const ResourceData* data() const {
+    assert(kindIsValid());
     return reinterpret_cast<const ResourceData*>(this + 1);
   }
 
   size_t heapSize() const {
+    assert(kindIsValid());
     assert(m_hdr.aux != 0);
     return m_hdr.aux;
   }
@@ -149,6 +153,7 @@ struct ResourceData : private boost::noncopyable {
 };
 
 inline void ResourceHdr::release() noexcept {
+  assert(kindIsValid());
   assert(!hasMultipleRefs());
   delete data();
 }

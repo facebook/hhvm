@@ -13,46 +13,33 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_JIT_BACK_END_H
 #define incl_HPHP_JIT_BACK_END_H
 
-#include <iosfwd>
-
-#include <folly/Optional.h>
-
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
-#include "hphp/runtime/vm/jit/unique-stubs.h"
 
-namespace HPHP { namespace jit {
+#include "hphp/util/data-block.h"
 
-struct Abi;
-struct Block;
-struct CodeGenerator;
-struct CodegenState;
-struct Constraint;
-struct IRInstruction;
+namespace HPHP {
+
+struct ActRec;
+struct SrcKey;
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace jit {
+
+struct AsmInfo;
 struct IRUnit;
 struct PhysReg;
-struct RelocationInfo;
-struct CodeGenFixups;
-struct RegAllocInfo;
-struct AsmInfo;
 
-/*
- * This module supports both X64 and ARM behind a platform-agnostic interface.
- */
-
-struct BackEnd;
-
-std::unique_ptr<BackEnd> newBackEnd();
+///////////////////////////////////////////////////////////////////////////////
 
 struct BackEnd {
   virtual ~BackEnd();
-
-  virtual PhysReg rSp() = 0;
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
 
@@ -64,11 +51,6 @@ struct BackEnd {
                              SrcKey sk,
                              FPInvOffset spOff) = 0;
 
-  virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
-
-  virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
-                           SrcKey sk, size_t dbgOff) = 0;
-
   virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
   virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
                            TCA begin, TCA end) = 0;
@@ -78,6 +60,10 @@ struct BackEnd {
 protected:
   BackEnd() {}
 };
+
+std::unique_ptr<BackEnd> newBackEnd();
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

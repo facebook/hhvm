@@ -42,7 +42,7 @@ struct VectorIterator {
     if (m_pos >= vec->m_size) {
       throw_iterator_not_valid();
     }
-    return tvAsCVarRef(&vec->m_data[m_pos]);
+    return tvAsCVarRef(&vec->data()[m_pos]);
   }
 
   int64_t key() const {

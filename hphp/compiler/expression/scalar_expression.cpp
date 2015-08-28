@@ -36,6 +36,7 @@
 #include <folly/Conv.h>
 
 #include <sstream>
+#include <cctype>
 #include <cmath>
 #include <limits.h>
 

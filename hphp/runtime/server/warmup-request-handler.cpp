@@ -51,7 +51,8 @@ void WarmupRequestHandler::logToAccessLog(Transport *transport) {
 }
 
 std::unique_ptr<RequestHandler> WarmupRequestHandlerFactory::createHandler() {
-  return make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
+  return
+    folly::make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
 }
 
 void WarmupRequestHandlerFactory::bumpReqCount() {

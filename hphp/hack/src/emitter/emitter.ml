@@ -445,6 +445,7 @@ let emit_class nenv env (_, x) =
   let env = emit_const_init env uninit_consts in
 
   let env = emit_exit env in
+  let env = { env with self_name = None; parent_name = None; } in
 
   emit_str env ""
 
@@ -467,6 +468,9 @@ let emit_closure (name, {full_name; closure_counter; is_static; tparams},
    * (see emitMethodMetadata in emitter.cpp) *)
   let declvars = "$0Closure" :: names in
 
+  (* Closures don't close over self_name/parent_made, but it would
+   * be nice, possibly. emitter.cpp doesn't, though, and just uses
+   * Self/Parent. *)
   let m = fun_to_method fun_ in
   let env = emit_method_or_func env ~is_method:true
     ~closure_vars:declvars
@@ -540,8 +544,7 @@ let emit_main env ~is_test ast =
   emit_str env ""
 
 let emit_file ~is_test nenv filename ast
-    {FileInfo.file_mode; funs; classes; typedefs; consts; _} =
-  assert (file_mode = Some FileInfo.Mstrict);
+    {FileInfo.funs; classes; typedefs; consts; _} =
   if consts <> [] then unimpl "global consts";
 
   let env = new_env () in

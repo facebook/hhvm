@@ -547,6 +547,7 @@ void Repo::initCentral() {
     }
   }
 
+#ifndef _MSC_VER
   // Try the equivalent of "$HOME/.hhvm.hhbc", but look up the home directory
   // in the password database.
   {
@@ -565,6 +566,7 @@ void Repo::initCentral() {
       }
     }
   }
+#endif
 
 #ifdef _WIN32
   // Try "$HOMEDRIVE$HOMEPATH/.hhvm.hhbc"

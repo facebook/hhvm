@@ -117,6 +117,18 @@ bool less(int64_t v1, const StringData *v2) {
   }
 }
 
+bool lessEqual(int64_t v1, const StringData *v2) {
+  int64_t lval; double dval;
+  DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  if (ret == KindOfInt64) {
+    return v1 <= lval;
+  }
+  if (ret == KindOfDouble) {
+    return (double)v1 <= dval;
+  }
+  return v1 <= 0;
+}
+
 bool more(int v1, const StringData *v2) {
   return more((int64_t)v1, v2);
 }
@@ -131,6 +143,18 @@ bool more(int64_t v1, const StringData *v2) {
   } else {
     return v1 > 0;
   }
+}
+
+bool moreEqual(int64_t v1, const StringData *v2) {
+  int64_t lval; double dval;
+  DataType ret = v2->isNumericWithVal(lval, dval, 1);
+  if (ret == KindOfInt64) {
+    return v1 >= lval;
+  }
+  if (ret == KindOfDouble) {
+    return (double)v1 >= dval;
+  }
+  return v1 >= 0;
 }
 
 //////////////////////////////////////////////////////////////////////

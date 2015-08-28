@@ -30,8 +30,11 @@
 #include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/util/lock.h"
+#include "hphp/util/portability.h"
 
+#ifndef _MSC_VER
 #include <glob.h>
+#endif
 
 #define __STDC_LIMIT_MACROS
 #include <cstdint>

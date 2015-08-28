@@ -74,20 +74,28 @@ struct Header {
   const ObjectData* resumableObj() const {
     DEBUG_ONLY auto const func = resumable()->actRec()->func();
     assert(func->isAsyncFunction());
-    return reinterpret_cast<const ObjectData*>(resumable() + 1);
+    auto obj = reinterpret_cast<const ObjectData*>(resumable() + 1);
+    assert(obj->headerKind() == HeaderKind::ResumableObj);
+    return obj;
   }
   ObjectData* resumableObj() {
     DEBUG_ONLY auto const func = resumable()->actRec()->func();
     assert(func->isAsyncFunction());
-    return reinterpret_cast<ObjectData*>(resumable() + 1);
+    auto obj = reinterpret_cast<ObjectData*>(resumable() + 1);
+    assert(obj->headerKind() == HeaderKind::ResumableObj);
+    return obj;
   }
   const ObjectData* nativeObj() const {
     assert(kind() == HeaderKind::NativeData);
-    return Native::obj(&native_);
+    auto obj = Native::obj(&native_);
+    assert(isObjectKind(obj->headerKind()));
+    return obj;
   }
   ObjectData* nativeObj() {
     assert(kind() == HeaderKind::NativeData);
-    return Native::obj(&native_);
+    auto obj = Native::obj(&native_);
+    assert(isObjectKind(obj->headerKind()));
+    return obj;
   }
 
   // if this header is one of the types that contains an ObjectData,

@@ -57,6 +57,7 @@ struct State {
   bool* iters;      // defined/not-defined state of each iter var.
   int stklen;       // length of evaluation stack.
   int fpilen;       // length of FPI stack.
+  bool mbr_live;    // liveness of member base register
 };
 
 /**
@@ -581,10 +582,28 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
              InvalidAbsoluteOffset);
       break;
     case OA: { // secondary opcode
-      assert(int(*pc) >= 0); // guaranteed because PC is unsigned char*
-      int op = int(*pc);
+      auto checkPropElemOp = [&](uint8_t op) {
+#define OP(x) if (op == static_cast<uint8_t>(PropElemOp::x)) return;
+        PROP_ELEM_OPS
+#undef OP
+        error("invalid PropElemOp: %d\n", op);
+        ok = false;
+      };
+
+      auto checkMOpFlags = [&](uint8_t op) {
+#define FLAG(x, v) if (op == static_cast<uint8_t>(MOpFlags::x)) return;
+        M_OP_FLAGS
+#undef FLAG
+        error("invalid MOpFlags: %d\n", op);
+        ok = false;
+      };
+
+      const uint8_t op = *pc;
       switch (*instr) {
-      default: assert(false && "Unexpected opcode with immType OA");
+      default:
+        error("Unexpected opcode %s with immType OA\n", opcodeToName(*instr));
+        ok = false;
+        break;
       case Op::IsTypeC: case Op::IsTypeL:
 #define ISTYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
         ISTYPE_OPS
@@ -658,6 +677,27 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         error("invalid kind for Switch: %d\n", op);
         ok = false;
         break;
+      case OpBaseL: case OpDimL: case OpDimC: case OpDimInt: case OpDimStr:
+        if (i == 1) {
+          checkPropElemOp(op);
+        } else {
+          assert(i == 2);
+          checkMOpFlags(op);
+        }
+        break;
+      case OpQueryML: case OpQueryMC:
+      case OpQueryMInt: case OpQueryMStr:
+        if (i == 1) {
+#define OP(x) if (op == static_cast<uint8_t>(QueryMOp::x)) break;
+          QUERY_M_OPS
+#undef OP
+          error("invalid QueryMOp: %d\n", op);
+          ok = false;
+          break;
+        }
+        assert(i == 2);
+        checkPropElemOp(op);
+        break;
       }
     }
     case RATA:
@@ -677,6 +717,7 @@ static const char* stkflav(FlavorDesc f) {
   case RV:   return "R";
   case FV:   return "F";
   case UV:   return "U";
+  case CRV:  return "C|R";
   case CUV:  return "C|U";
   case CVV:  return "C|V";
   case CVUV: return "C|V|U";
@@ -684,14 +725,22 @@ static const char* stkflav(FlavorDesc f) {
   not_reached();
 }
 
+static bool checkArg(FlavorDesc expect, FlavorDesc check) {
+  if (expect == check) return true;
+
+  switch (expect) {
+    case CVV:  return check == CV || check == VV;
+    case CRV:  return check == CV || check == RV;
+    case CUV:  return check == CV || check == UV;
+    case CVUV: return check == CV || check == VV || check == UV || check == CUV;
+    default:   return false;
+  }
+}
+
 bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
                            const FlavorDesc* sig) {
   for (int i = 0; i < len; ++i) {
-    if (args[i] != (FlavorDesc)sig[i] &&
-        !((FlavorDesc)sig[i] == CVV && (args[i] == CV || args[i] == VV)) &&
-        !((FlavorDesc)sig[i] == CUV && (args[i] == CV || args[i] == UV)) &&
-        !((FlavorDesc)sig[i] == CVUV && (args[i] == CV || args[i] == VV ||
-                                         args[i] == UV || args[i] == CUV))) {
+    if (!checkArg(sig[i], args[i])) {
       error("flavor mismatch at %d, got %s expected %s\n",
              offset(pc), stkToString(len, args).c_str(),
              sigToString(len, sig).c_str());
@@ -736,7 +785,7 @@ const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
 }
 
 const FlavorDesc* FuncChecker::sig(PC pc) {
-  static const FlavorDesc inputSigs[][3] = {
+  static const FlavorDesc inputSigs[][4] = {
   #define NOV { },
   #define FMANY { },
   #define CVMANY { },
@@ -751,6 +800,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define C_MMANY { },
   #define V_MMANY { },
   #define R_MMANY { },
+  #define MFINAL { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
@@ -758,6 +808,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef V_MMANY
   #undef R_MMANY
   #undef MMANY
+  #undef MFINAL
   #undef FMANY
   #undef CVMANY
   #undef CVUMANY
@@ -787,6 +838,14 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return vectorSig(pc, NOV);
   case Op::SetWithRefRM://ONE(MA),   R_MMANY, NOV
     return vectorSig(pc, RV);
+  case Op::QueryML:
+  case Op::QueryMC:
+  case Op::QueryMInt:
+  case Op::QueryMStr:
+    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
+      m_tmp_sig[i] = CRV;
+    }
+    return m_tmp_sig;
   case Op::FCall:       // ONE(IVA),     FMANY,   ONE(RV)
   case Op::FCallD:      // THREE(IVA,SA,SA), FMANY,   ONE(RV)
   case Op::FCallUnpack: // ONE(IVA), FMANY, ONE(RV)
@@ -826,7 +885,13 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
     return false;
   }
   cur->stklen -= info.numPops;
-  return checkSig(pc, info.numPops, &cur->stk[cur->stklen], sig(pc));
+  auto ok = checkSig(pc, info.numPops, &cur->stk[cur->stklen], sig(pc));
+  auto const op = *(Op*)pc;
+  if (cur->mbr_live != (isMemberDimOp(op) || isMemberFinalOp(op))) {
+    error("Member base register live coming into %s", opcodeToName(op));
+    ok = false;
+  }
+  return ok;
 }
 
 bool FuncChecker::checkTerminal(State* cur, PC pc) {
@@ -987,6 +1052,10 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       fpi.stkmin = cur->stklen;
     }
   }
+
+  auto const op = *(Op*)pc;
+  cur->mbr_live = isMemberBaseOp(op) || isMemberDimOp(op);
+
   return ok;
 }
 
@@ -1039,6 +1108,7 @@ void FuncChecker::initState(State* s) {
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
   s->stklen = 0;
   s->fpilen = 0;
+  s->mbr_live = false;
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -1049,6 +1119,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
   to->stklen = from->stklen;
   to->fpilen = from->fpilen;
+  to->mbr_live = from->mbr_live;
 }
 
 /**
@@ -1142,6 +1213,11 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     for (BlockPtrRange i = succBlocks(b); !i.empty(); ) {
       ok &= checkEdge(b, *cur, i.popFront());
     }
+  }
+  if (cur->mbr_live) {
+    // MBR must not be live across control flow edges.
+    error("Member base register live at end of B%d", b->id);
+    ok = false;
   }
   return ok;
 }

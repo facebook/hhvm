@@ -67,7 +67,7 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     Label ok;
     a.emitImmReg(uintptr_t(enterTCExit), rax);
-    a.cmpq(rax, *rsp);
+    a.cmpq(rax, *rsp());
     a.je8 (ok);
     a.ud2();
   asm_label(a, ok);
@@ -77,7 +77,7 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   // unbalancing the return stack buffer. The call from enterTCHelper() that
   // got us into the TC was popped off the RSB by the ret that got us to this
   // stub.
-  a.addq(8, rsp);
+  a.addq(8, rsp());
   a.jmp(TCA(enterTCExit));
 
   // On a backtrace, gdb tries to locate the calling frame at address
@@ -86,72 +86,6 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   // record the tracelet address as starting from this callToExit-1,
   // so gdb does not barf.
   uniqueStubs.callToExit = uniqueStubs.add("callToExit", stub);
-}
-
-void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
-  moveToAlign(mcg->code.main());
-  Label resumeHelper;
-  Label resumeRaw;
-
-  uniqueStubs.interpHelper = a.frontier();
-  a.    storeq (rarg(0), rvmtl()[rds::kVmpcOff]);
-  uniqueStubs.interpHelperSyncedPC = a.frontier();
-  a.    storeq (rvmsp(), rvmtl()[rds::kVmspOff]);
-  a.    storeq (rvmfp(), rvmtl()[rds::kVmfpOff]);
-  a.    movb   (1, rbyte(rarg(1))); // interpFirst
-  a.    jmp8   (resumeHelper);
-
-  uniqueStubs.resumeHelperRet = a.frontier();
-  a.    pop   (rvmfp()[AROFF(m_savedRip)]);
-  uniqueStubs.resumeHelper = a.frontier();
-  a.    movb  (0, rbyte(rarg(1))); // interpFirst
-asm_label(a, resumeHelper);
-  a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
-  a.    loadq (rip[intptr_t(&mcg)], rarg(0));
-  a.    call  (TCA(getMethodPtr(&MCGenerator::handleResume)));
-asm_label(a, resumeRaw);
-  a.    loadq (rvmtl()[rds::kVmspOff], rvmsp());
-  a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
-  a.    movq  (rvmfp(), rdx); // llvm catch traces expect rvmfp() to be in rdx.
-  a.    jmp   (rax);
-
-  uniqueStubs.add("resumeInterpHelpers", uniqueStubs.interpHelper);
-
-  auto emitInterpOneStub = [&](const Op op) {
-    Asm a{mcg->code.cold()};
-    moveToAlign(mcg->code.cold());
-    auto const start = a.frontier();
-
-    a.  movq(rvmfp(), rarg(0));
-    a.  movq(rvmsp(), rarg(1));
-    a.  movl(r32(rAsm), r32(rarg(2)));
-    a.  call(TCA(interpOneEntryPoints[size_t(op)]));
-    a.  testq(rax, rax);
-    a.  jnz(resumeRaw);
-    a.  jmp(uniqueStubs.resumeHelper);
-
-    uniqueStubs.interpOneCFHelpers[op] = start;
-    uniqueStubs.add(
-      folly::sformat("interpOneCFHelper-{}", opcodeToName(op)).c_str(),
-      start
-    );
-  };
-
-# define O(name, imm, in, out, flags)                       \
-  if (bool((flags) & CF) || bool((flags) & TF)) {           \
-    emitInterpOneStub(Op::name);                            \
-  }
-  OPCODES
-# undef O
-  // Exit is a very special snowflake: because it can appear in PHP
-  // expressions, the emitter pretends that it pushed a value on the eval stack
-  // (and iopExit actually does push Null right before throwing). Marking it as
-  // TF would mess up any bytecodes that want to consume its output value, so
-  // we can't do that. But we also don't want to extend tracelets past it, so
-  // the JIT treats it as terminal and uses InterpOneCF to execute it. So,
-  // manually make sure we have an interpOneExit stub.
-  emitInterpOneStub(Op::Exit);
 }
 
 void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
@@ -233,6 +167,9 @@ asm_label(a, doRelease);
   a.    push    (rIter);
   a.    push    (rFinished);
   a.    call    (lookupDestructor(a, PhysReg(rType)));
+  // Three quads between where %rsp is now and the saved RIP of the call into
+  // the stub: two from the pushes above, and one for the saved RIP of the call
+  // to `release' done below (e.g., in emitDecLocal).
   mcg->fixupMap().recordFixup(a.frontier(), makeIndirectFixup(3));
   a.    pop     (rFinished);
   a.    pop     (rIter);
@@ -361,7 +298,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    storeq (rPCOff, rvmtl()[rds::kVmpcOff]);
   a.    addq   (rBC,    rPCNext);
 
-  a.    subq   (8, rsp);  // stack parity
+  a.    subq   (8, rsp());  // stack parity
 
   a.    movq   (rPCNext, rarg(0));
   a.    call   (TCA(&doFCallArrayTC));
@@ -371,7 +308,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    testb  (rbyte(rax), rbyte(rax));
   a.    jz8    (noCallee);
 
-  a.    addq   (8, rsp);
+  a.    addq   (8, rsp());
   a.    loadq  (rvmtl()[rds::kVmfpOff], rvmfp());
   a.    pop    (rvmfp()[AROFF(m_savedRip)]);
   a.    loadq  (rvmfp()[AROFF(m_func)], rax);
@@ -380,7 +317,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    ud2    ();
 
 asm_label(a, noCallee);
-  a.    addq   (8, rsp);
+  a.    addq   (8, rsp());
   a.    ret    ();
 
   uniqueStubs.add("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
@@ -401,7 +338,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
 
   a.   movq    (rvmfp(), ar);
   a.   push    (rvmfp());
-  a.   movq    (rsp, rvmfp());
+  a.   movq    (rsp(), rvmfp());
   a.   push    (ar[AROFF(m_savedRip)]);
   a.   push    (ar[AROFF(m_sfp)]);
   a.   movq    (EventHook::NormalFunc, rarg(1));
@@ -409,7 +346,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   uniqueStubs.functionEnterHelperReturn = a.frontier();
   a.   testb   (al, al);
   a.   je8     (skip);
-  a.   addq    (16, rsp);
+  a.   addq    (16, rsp());
   a.   pop     (rvmfp());
   a.   ret     ();
 
@@ -419,7 +356,7 @@ asm_label(a, skip);
   // from the original frame, and sync rvmsp() to the execution-context's copy.
   a.   pop     (rvmfp());
   a.   pop     (rsi);
-  a.   addq    (16, rsp); // drop our call frame
+  a.   addq    (16, rsp()); // drop our call frame
   a.   loadq   (rvmtl()[rds::kVmspOff], rvmsp());
   a.   jmp     (rsi);
   a.   ud2     ();
@@ -447,10 +384,10 @@ void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
 
   // If handlePossibleStackOverflow returns, it was not a stack overflow, so we
   // need to go through event hook processing.
-  a.    subq   (8, rsp);  // align native stack
+  a.    subq   (8, rsp());  // align native stack
   a.    movq   (rvmfp(), rarg(0));
   emitCall(a, CppCall::direct(handlePossibleStackOverflow), arg_regs(1));
-  a.    addq   (8, rsp);
+  a.    addq   (8, rsp());
   a.    jmp    (uniqueStubs.functionEnterHelper);
   a.    ud2    ();
 
@@ -465,7 +402,6 @@ void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
 void emitUniqueStubs(UniqueStubs& us) {
   auto functions = {
     emitCallToExit,
-    emitResumeInterpHelpers,
     emitThrowSwitchMode,
     emitCatchHelper,
     emitFreeLocalsHelpers,

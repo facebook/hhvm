@@ -468,20 +468,6 @@ bool MemoryManager::removeRoot(const T* ptr) {
   return (bool)removeRoot<T>(ptr->getId());
 }
 
-template <typename F>
-void MemoryManager::scanRootMaps(F& m) const {
-  if (m_objectRoots) {
-    for(const auto& root : *m_objectRoots) {
-      scan(root.second, m);
-    }
-  }
-  if (m_resourceRoots) {
-    for(const auto& root : *m_resourceRoots) {
-      scan(root.second, m);
-    }
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }

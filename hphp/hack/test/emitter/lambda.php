@@ -13,9 +13,14 @@ function double_foo(int $x): void {
 
 class C {
   public function __construct(public int $z) { }
+  public static function func(): void { echo "hi\n"; }
   public function foo(int $x): (function(int): int) {
     $r = 4;
-    $f = $y ==> $x * $y * $r * $this->z;
+    $f = $y ==> {
+      self::func();
+      static::func();
+      return $x * $y * $r * $this->z;
+    };
     return $f;
   }
 }

@@ -72,7 +72,6 @@ struct VariableUnserializer {
    * Read a character and throw if it differs from expected.
    */
   void expectChar(char expected);
-  void throwUnexpected(char expected, char got);
 
   /*
    * Accessors.
@@ -144,7 +143,5 @@ private:
 void reserialize(VariableUnserializer *uns, StringBuffer &buf);
 
 }
-
-#include "hphp/runtime/base/variable-unserializer-inl.h"
 
 #endif // incl_HPHP_VARIABLE_UNSERIALIZER_H_

@@ -247,7 +247,7 @@ void reclaimTranslation(TransLoc loc) {
   }
 }
 
-void reclaimFunction(Func* func) {
+void reclaimFunction(const Func* func) {
   BlockingLeaseHolder writer(Translator::WriteLease());
   if (!writer) return;
 

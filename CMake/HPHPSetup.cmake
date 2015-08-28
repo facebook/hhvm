@@ -172,8 +172,13 @@ if(CMAKE_CONFIGURATION_TYPES)
   if(NOT MSVC)
     message(FATAL_ERROR "Adding the appropriate defines for multi-config targets using anything other than MSVC is not yet supported!")
   endif()
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D DEBUG")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D DEBUG")
+  if (MSVC_NO_ASSERT_IN_DEBUG)
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D RELEASE=1 /D NDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D RELEASE=1 /D NDEBUG")
+  else()
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D DEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D DEBUG")
+  endif()
   foreach(flag_var
       CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
       CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
@@ -264,6 +269,7 @@ endif()
 
 if (NOT LIBZIP_INCLUDE_DIR_ZIP)
   include_directories("${TP_DIR}/libzip")
+  add_definitions("-DZIP_EXTERN=")
 endif()
 
 if (NOT PCRE_LIBRARY)

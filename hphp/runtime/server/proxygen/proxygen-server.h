@@ -24,7 +24,7 @@
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>
 #include <proxygen/lib/services/WorkerThread.h>
 #include <proxygen/lib/ssl/SSLContextConfig.h>
-#include <thrift/lib/cpp/async/TNotificationQueue.h>
+#include <folly/io/async/NotificationQueue.h>
 
 #include <algorithm>
 #include <folly/io/async/EventBaseManager.h>
@@ -71,7 +71,7 @@ class HPHPSessionAcceptor : public proxygen::HTTPSessionAcceptor {
   ProxygenServer *m_server;
 };
 
-typedef apache::thrift::async::TNotificationQueue<ResponseMessage>
+typedef folly::NotificationQueue<ResponseMessage>
   ResponseMessageQueue;
 
 class HPHPWorkerThread : public proxygen::WorkerThread {

@@ -416,15 +416,28 @@ static const struct {
 
   { OpWHResult,    {Stack1,           Stack1,       OutUnknown      }},
   { OpAwait,       {Stack1,           Stack1,       OutUnknown      }},
+
+  /*** 16. Member instructions ***/
+
+  { OpBaseL,       {Local,            MBase,        OutNone         }},
+  { OpBaseH,       {None,             MBase,        OutNone         }},
+  { OpDimL,        {Local|MBase,      MBase,        OutNone         }},
+  { OpDimC,        {StackI|MBase,     MBase,        OutNone         }},
+  { OpDimInt,      {MBase,            MBase,        OutNone         }},
+  { OpDimStr,      {MBase,            MBase,        OutNone         }},
+  { OpDimStr,      {MBase,            MBase,        OutNone         }},
+  { OpQueryML,     {Local|MBase,      Stack1,       OutUnknown      }},
+  { OpQueryMC,     {Stack1|MBase,     Stack1,       OutUnknown      }},
+  { OpQueryMInt,   {MBase,            Stack1,       OutUnknown      }},
+  { OpQueryMStr,   {MBase,            Stack1,       OutUnknown      }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;
 static bool instrInfoInited;
 static void initInstrInfo() {
   if (!instrInfoInited) {
-    for (size_t i = 0; i < sizeof(instrInfoSparse) / sizeof(instrInfoSparse[0]);
-         i++) {
-      instrInfo[instrInfoSparse[i].op] = instrInfoSparse[i].info;
+    for (auto& info : instrInfoSparse) {
+      instrInfo[info.op] = info.info;
     }
     if (!RuntimeOption::EvalCheckReturnTypeHints) {
       for (size_t j = 0; j < 2; ++j) {
@@ -445,7 +458,7 @@ const InstrInfo& getInstrInfo(Op op) {
 namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
-    DontGuardStack1 | IgnoreInnerType | DontGuardAny | This;
+    DontGuardStack1 | IgnoreInnerType | DontGuardAny | This | MBase | StackI;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -476,6 +489,8 @@ int64_t getStackPopped(PC pc) {
     case Op::FCallD:       return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
+    case Op::QueryML:   case Op::QueryMC:
+    case Op::QueryMInt: case Op::QueryMStr:
     case Op::NewPackedArray:
     case Op::ConcatN:
     case Op::FCallBuiltin:
@@ -714,6 +729,9 @@ static void getInputsImpl(NormalizedInstruction* ni,
         // fallthrough
       case OpFPassL:
         loc = ni->imm[1].u_IVA;
+        break;
+      case OpQueryML:
+        loc = ni->imm[3].u_IVA;
         break;
 
       default:
@@ -958,6 +976,16 @@ bool dontGuardAnyInputs(Op op) {
   case Op::VerifyRetTypeV:
   case Op::WHResult:
   case Op::Xor:
+  case Op::BaseL:
+  case Op::BaseH:
+  case Op::DimL:
+  case Op::DimC:
+  case Op::DimInt:
+  case Op::DimStr:
+  case Op::QueryML:
+  case Op::QueryMC:
+  case Op::QueryMInt:
+  case Op::QueryMStr:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
@@ -1228,7 +1256,7 @@ Type flavorToType(FlavorDesc f) {
     case UV: return TUninit;
     case VV: return TBoxedInitCell;
     case AV: return TCls;
-    case RV: case FV: case CVV: case CVUV: return TGen;
+    case RV: case CRV: case FV: case CVV: case CVUV: return TGen;
   }
   not_reached();
 }

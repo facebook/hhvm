@@ -351,7 +351,6 @@ public:
   static bool EnableAspTags;
   static bool EnableXHP;
   static bool EnableObjDestructCall;
-  static bool EnableEmitSwitch;
   static bool EnableEmitterStats;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
@@ -445,6 +444,9 @@ public:
      2 - Fallback to builtin emitter if external emitter fails and
          don't log anything */                                          \
   F(int, ExternalEmitterFallback,      0)                               \
+  F(bool, ExternalEmitterAllowPartial, false)                           \
+  F(bool, EmitSwitch,                  true)                            \
+  F(bool, EmitNewMInstrs,              newMInstrsDefault())             \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.

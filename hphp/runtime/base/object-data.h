@@ -116,6 +116,8 @@ struct ObjectData {
 
  public:
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  bool kindIsValid() const { return isObjectKind(headerKind()); }
+
   template<class F> void scan(F&) const;
 
   size_t heapSize() const;
@@ -333,7 +335,6 @@ struct ObjectData {
  private:
   template <bool warn, bool define>
   TypedValue* propImpl(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
@@ -360,28 +361,24 @@ struct ObjectData {
 
  public:
   TypedValue* prop(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
   );
 
   TypedValue* propD(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
   );
 
   TypedValue* propW(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key
   );
 
   TypedValue* propWD(
-    TypedValue* tvScratch,
     TypedValue* tvRef,
     Class* ctx,
     const StringData* key

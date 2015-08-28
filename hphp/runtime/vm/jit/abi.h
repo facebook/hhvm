@@ -76,6 +76,11 @@ PhysReg rvmsp();
  */
 PhysReg rvmtl();
 
+/*
+ * Native stack pointer.
+ */
+PhysReg rsp();
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // JIT and TC boundary ABI registers.
@@ -123,14 +128,14 @@ inline RegSet php_return_regs() { return vm_regs_with_sp(); }
  */
 inline RegSet fcall_array_regs() { return vm_regs_with_sp(); }
 
-/*
- * Registers that are live on entry to an interpOneCFHelper.
- */
-RegSet interp_one_cf_regs();
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calling convention registers.
+
+/*
+ * GP register for integer returns.
+ */
+PhysReg rret();
 
 /*
  * Native argument registers.

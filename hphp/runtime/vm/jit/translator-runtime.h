@@ -98,8 +98,10 @@ TypedValue incDecElem(TypedValue* base, TypedValue key,
  * complicated to inline
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
+int64_t convObjToDblHelper(const ObjectData* o);
 int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);
+int64_t convResToDblHelper(const ResourceHdr* r);
 int64_t convCellToDblHelper(TypedValue tv);
 int64_t convArrToIntHelper(ArrayData* a);
 ObjectData* convCellToObjHelper(TypedValue tv);

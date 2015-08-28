@@ -1439,14 +1439,14 @@ void miFinal(MIS& env, const bc::SetM& op) {
 }
 
 void miFinal(MIS& env, const bc::SetOpM& op) {
-  if (mcodeIsElem(env.mcode())) return miFinalSetOpElem(env, op.subop);
-  if (mcodeIsProp(env.mcode())) return miFinalSetOpProp(env, op.subop);
+  if (mcodeIsElem(env.mcode())) return miFinalSetOpElem(env, op.subop1);
+  if (mcodeIsProp(env.mcode())) return miFinalSetOpProp(env, op.subop1);
   return miFinalSetOpNewElem(env);
 }
 
 void miFinal(MIS& env, const bc::IncDecM& op) {
-  if (mcodeIsElem(env.mcode())) return miFinalIncDecElem(env, op.subop);
-  if (mcodeIsProp(env.mcode())) return miFinalIncDecProp(env, op.subop);
+  if (mcodeIsElem(env.mcode())) return miFinalIncDecElem(env, op.subop1);
+  if (mcodeIsProp(env.mcode())) return miFinalIncDecProp(env, op.subop1);
   return miFinalIncDecNewElem(env);
 }
 

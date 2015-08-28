@@ -20,13 +20,15 @@
 #include <stdint.h>
 #include <type_traits>
 
+#include <folly/Portability.h>
+
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void compiler_membar( ) {
-  asm volatile("" : : :"memory");
+  folly::asm_volatile_memory();
 }
 
 template<class T>
@@ -39,7 +41,7 @@ inline void assert_address_is_atomically_accessible(T* address) {
     "Atomic operations only supported for built in integer, floating point "
     "and pointer types.");
 
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_M_X64)
   assert(((uintptr_t(address) + sizeof(T) - 1) & ~63ul) ==
          ( uintptr_t(address)                  & ~63ul) &&
         "Atomically accessed addresses may not span cache lines");

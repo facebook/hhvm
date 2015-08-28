@@ -176,16 +176,18 @@ private:
  * Convenience wrappers around Vauto for cross-trace code.
  */
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, GenFunc gen) {
+TCA vwrap(CodeBlock& cb, GenFunc gen,
+          CodeKind kind = CodeKind::CrossTrace) {
   auto const start = cb.frontier();
-  Vauto vauto { cb, CodeKind::CrossTrace };
+  Vauto vauto { cb, kind };
   gen(vauto.main());
   return start;
 }
 template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, GenFunc gen) {
+TCA vwrap2(CodeBlock& cb, GenFunc gen,
+           CodeKind kind = CodeKind::CrossTrace) {
   auto const start = cb.frontier();
-  Vauto vauto { cb, CodeKind::CrossTrace };
+  Vauto vauto { cb, kind };
   gen(vauto.main(), vauto.cold());
   return start;
 }

@@ -1,0 +1,16 @@
+array(7) {
+  ["true"]=>
+  bool(true)
+  ["false"]=>
+  bool(false)
+  ["badbool"]=>
+  NULL
+  ["bademail"]=>
+  bool(false)
+  ["badfloat"]=>
+  bool(false)
+  ["badint"]=>
+  bool(false)
+  ["badip"]=>
+  bool(false)
+}

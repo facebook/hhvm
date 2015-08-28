@@ -284,3 +284,21 @@ let splitext filename =
   let ext_length = String.length filename - root_length - 1 in
   let ext = String.sub filename (root_length + 1) ext_length in
   root, ext
+
+let is_test_mode () =
+  try
+    ignore @@ Sys.getenv "HH_TEST_MODE";
+    true
+  with _ -> false
+
+let symlink =
+  (* Dummy implementation of `symlink` on Windows: we create a text
+     file containing the targeted-file's path. Symlink are available
+     on Windows since Vista, but until Seven (included), one should
+     have administratrive rights in order to create symlink. *)
+  let win32_symlink source dest = write_file ~file:dest source in
+  if Sys.win32 then win32_symlink else Unix.symlink
+
+let setsid =
+  (* Not implemented on Windows. Let's just return the pid *)
+  if Sys.win32 then Unix.getpid else Unix.setsid

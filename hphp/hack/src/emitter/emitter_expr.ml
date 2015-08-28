@@ -127,7 +127,7 @@ and emit_lval_inner env (_, expr_) =
     env, Lglobal
 
   | Lvar id -> env, llocal id
-  | Lplaceholder (_, s) -> env, Llocal s
+  | Lplaceholder _ -> env, Llocal SN.SpecialIdents.placeholder
   | Array_get (e1, maybe_e2) ->
     let env, base = emit_base env e1 in
     let env, member = (match maybe_e2 with
@@ -278,12 +278,21 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
     emit_FPushObjMethodD env nargs name (fmt_null_flavor null_flavor)
 
   | Class_const (cid, (_, field)) ->
-    (match resolve_class_id env cid with
-    | RCstatic class_name -> emit_FPushClsMethodD env nargs field class_name
-    | RCdynamic dyid ->
-        let env = emit_String env field in
-        let env = emit_dynamic_class_id env dyid in
-        emit_FPushClsMethod env nargs)
+    let emit_dynamic_call env emit_op =
+      let env = emit_String env field in
+      let env = emit_class_id env (resolve_class_id env cid) in
+      emit_op env nargs
+    in
+
+    (match cid with
+    | CI (_, s) -> emit_FPushClsMethodD env nargs field (fmt_name s)
+    | CIself | CIparent ->
+      (* Calls through self:: or parent:: need to be "forwarding"
+       * calls that preserve the late static binding "called class".
+       * FPushClsMethodF is forwarding, the others aren't *)
+      emit_dynamic_call env emit_FPushClsMethodF
+    | CIexpr _ | CIstatic ->
+      emit_dynamic_call env emit_FPushClsMethod)
 
   (* what all is even allowed here? *)
   | _ ->
@@ -525,7 +534,7 @@ and emit_expr env (pos, expr_ as expr) =
   (* comma operator: evaluate all the expressions, ignoring all but the last *)
   | Expr_list es ->
     (match List.rev es with
-    | [] -> env
+    | [] -> emit_Null env (* output a dummy value *)
     | last :: rest ->
       let env = List.fold_right
         ~f:(fun e env -> emit_ignored_expr env e) ~init:env rest in
@@ -713,9 +722,9 @@ and emit_expr env (pos, expr_ as expr) =
     { env with
       pending_closures = (name, cstate, (fun_, vars)) :: env.pending_closures }
 
+
+  | Id (_, id) when SN.PseudoConsts.is_pseudo_const id -> unimpl "pseudo consts"
   (* In this context, Id is a global constant *)
-  (* XXX: we should support all the pseudoconstants but Naming translates
-   * them to bogus strings and integers! *)
   | Id (_, id) -> emit_Cns env id
 
   | Assert _ -> unimpl "Assert"

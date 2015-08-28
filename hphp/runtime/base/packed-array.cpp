@@ -489,7 +489,7 @@ void PackedArray::Release(ArrayData* ad) {
   auto const data = packedData(ad);
   auto const stop = data + size;
   for (auto ptr = data; ptr != stop; ++ptr) {
-    tvRefcountedDecRef(*ptr);
+    tvRefcountedDecRef(ptr);
   }
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);

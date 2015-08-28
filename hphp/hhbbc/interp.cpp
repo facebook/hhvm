@@ -575,10 +575,10 @@ void in(ISS& env, const bc::JmpZ& op)  { jmpImpl<false>(env, op); }
 
 template<class JmpOp>
 void group(ISS& env, const bc::IsTypeL& istype, const JmpOp& jmp) {
-  if (istype.subop == IsTypeOp::Scalar) return impl(env, istype, jmp);
+  if (istype.subop2 == IsTypeOp::Scalar) return impl(env, istype, jmp);
 
   auto const loc = derefLoc(env, istype.loc1);
-  auto const testTy = type_of_istype(istype.subop);
+  auto const testTy = type_of_istype(istype.subop2);
   if (loc.subtypeOf(testTy) || !loc.couldBe(testTy)) {
     return impl(env, istype, jmp);
   }
@@ -672,8 +672,8 @@ void group(ISS& env,
   impl(env, cgetl, fpush);
   if (!is_specialized_obj(obj)) {
     setLoc(env, cgetl.loc1,
-           fpush.subop == ObjMethodOp::NullThrows ? TObj : TOptObj);
-  } else if (is_opt(obj) && fpush.subop == ObjMethodOp::NullThrows) {
+           fpush.subop3 == ObjMethodOp::NullThrows ? TObj : TOptObj);
+  } else if (is_opt(obj) && fpush.subop3 == ObjMethodOp::NullThrows) {
     setLoc(env, cgetl.loc1, unopt(obj));
   }
 }
@@ -1008,10 +1008,10 @@ template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
   auto const loc = locAsCell(env, op.loc1);
-  switch (op.subop) {
+  switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, loc);
-  default: return isTypeImpl(env, loc, type_of_istype(op.subop));
+  default: return isTypeImpl(env, loc, type_of_istype(op.subop2));
   }
 }
 
@@ -1019,10 +1019,10 @@ template<class Op>
 void isTypeCImpl(ISS& env, const Op& op) {
   nothrow(env);
   auto const t1 = popC(env);
-  switch (op.subop) {
+  switch (op.subop1) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, t1);
-  default: return isTypeImpl(env, t1, type_of_istype(op.subop));
+  default: return isTypeImpl(env, t1, type_of_istype(op.subop1));
   }
 }
 
@@ -1135,7 +1135,7 @@ void in(ISS& env, const bc::SetOpL& op) {
     auto resultTy = eval_cell([&] {
       Cell c = *locVal;
       Cell rhs = *v1;
-      SETOP_BODY_CELL(&c, op.subop, &rhs);
+      SETOP_BODY_CELL(&c, op.subop2, &rhs);
       return c;
     });
     if (!resultTy) resultTy = TInitCell;
@@ -1151,7 +1151,7 @@ void in(ISS& env, const bc::SetOpL& op) {
     return;
   }
 
-  auto const resultTy = typeSetOp(op.subop, loc, t1);
+  auto const resultTy = typeSetOp(op.subop2, loc, t1);
   setLoc(env, op.loc1, resultTy);
   push(env, resultTy);
 }
@@ -1192,8 +1192,8 @@ void in(ISS& env, const bc::SetOpS&) {
 
 void in(ISS& env, const bc::IncDecL& op) {
   auto const loc = locAsCell(env, op.loc1);
-  auto const newT = typeIncDec(op.subop, loc);
-  auto const pre = isPre(op.subop);
+  auto const newT = typeIncDec(op.subop2, loc);
+  auto const pre = isPre(op.subop2);
 
   // If it's a non-numeric string, this may cause it to exceed the max length.
   if (!locCouldBeUninit(env, op.loc1) &&
@@ -1214,7 +1214,7 @@ void in(ISS& env, const bc::IncDecN& op) {
     : nullptr;
   if (knownLoc) {
     return reduce(env, bc::PopC {},
-                       bc::IncDecL { knownLoc, op.subop });
+                       bc::IncDecL { knownLoc, op.subop1 });
   }
   popC(env);
   loseNonRefLocalTypes(env);
@@ -1307,6 +1307,17 @@ void in(ISS& env, const bc::IncDecM& op)      { minstr(env, op); }
 void in(ISS& env, const bc::UnsetM& op)       { minstr(env, op); }
 void in(ISS& env, const bc::BindM& op)        { minstr(env, op); }
 
+void in(ISS& env, const bc::BaseL& op)     { not_implemented(); }
+void in(ISS& env, const bc::BaseH& op)     { not_implemented(); }
+void in(ISS& env, const bc::DimL& op)      { not_implemented(); }
+void in(ISS& env, const bc::DimC& op)      { not_implemented(); }
+void in(ISS& env, const bc::DimInt& op)    { not_implemented(); }
+void in(ISS& env, const bc::DimStr& op)    { not_implemented(); }
+void in(ISS& env, const bc::QueryML& op)   { not_implemented(); }
+void in(ISS& env, const bc::QueryMC& op)   { not_implemented(); }
+void in(ISS& env, const bc::QueryMInt& op) { not_implemented(); }
+void in(ISS& env, const bc::QueryMStr& op) { not_implemented(); }
+
 void in(ISS& env, const bc::UnsetL& op) {
   nothrow(env);
   setLocRaw(env, op.loc1, TUninit);
@@ -1361,7 +1372,7 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto t1 = popC(env);
-  if (is_opt(t1) && op.subop == ObjMethodOp::NullThrows) {
+  if (is_opt(t1) && op.subop3 == ObjMethodOp::NullThrows) {
     t1 = unopt(t1);
   }
   auto const clsTy = objcls(t1);
@@ -1384,7 +1395,7 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
     return reduce(
       env,
       bc::PopC {},
-      bc::FPushObjMethodD { op.arg1, v1->m_data.pstr, op.subop }
+      bc::FPushObjMethodD { op.arg1, v1->m_data.pstr, op.subop2 }
     );
   }
   popC(env);
@@ -1923,13 +1934,13 @@ void in(ISS& env, const bc::CheckThis&) {
 
 void in(ISS& env, const bc::BareThis& op) {
   if (thisAvailable(env)) {
-    if (op.subop != BareThisOp::NeverNull) {
+    if (op.subop1 != BareThisOp::NeverNull) {
       return reduce(env, bc::BareThis { BareThisOp::NeverNull });
     }
   }
 
   auto const ty = thisType(env);
-  switch (op.subop) {
+  switch (op.subop1) {
   case BareThisOp::Notice:
     break;
   case BareThisOp::NoNotice:
@@ -2163,7 +2174,7 @@ void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
 
 void in(ISS& env, const bc::InitProp& op) {
   auto const t = popC(env);
-  switch (op.subop) {
+  switch (op.subop2) {
   case InitPropOp::Static:
     mergeSelfProp(env, op.str1, t);
     if (auto c = env.collect.publicStatics) {
@@ -2180,7 +2191,7 @@ void in(ISS& env, const bc::InitProp& op) {
 
 void in(ISS& env, const bc::Silence& op) {
   nothrow(env);
-  switch (op.subop) {
+  switch (op.subop2) {
     case SilenceOp::Start:
       setLoc(env, op.loc1, TInt);
       break;

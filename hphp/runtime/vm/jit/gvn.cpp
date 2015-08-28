@@ -251,14 +251,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvDblToInt:
   case ConvBoolToStr:
   case ConvClsToCctx:
-  case Gt:
-  case Gte:
-  case Lt:
-  case Lte:
-  case Eq:
-  case Neq:
-  case Same:
-  case NSame:
   case GtInt:
   case GteInt:
   case LtInt:
@@ -279,6 +271,12 @@ bool supportsGVN(const IRInstruction* inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case GtStrInt:
+  case GteStrInt:
+  case LtStrInt:
+  case LteStrInt:
+  case EqStrInt:
+  case NeqStrInt:
   case GtBool:
   case GteBool:
   case LtBool:
@@ -305,10 +303,12 @@ bool supportsGVN(const IRInstruction* inst) {
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
+  case HasToString:
   case IsType:
   case IsNType:
   case IsScalarType:
   case IsWaitHandle:
+  case IsCol:
   case ClsNeq:
   case LdStkAddr:
   case LdLocAddr:

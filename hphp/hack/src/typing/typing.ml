@@ -1146,7 +1146,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
         )
       )
     )
-  | Lplaceholder (p, _name) ->
+  | Lplaceholder p ->
     let r = Reason.Rplaceholder p in
     let ty = r, Tprim Tvoid in
     env, ty
@@ -1333,7 +1333,6 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
       let env, _class = instantiable_cid p env cid in
       env, (Reason.Rwitness p, Tprim Tbool)
   | Efun (f, _idl) ->
-      NastCheck.fun_ env f (Nast.assert_named_body f.f_body);
       let env, ft = fun_decl_in_env env f in
       (* When creating a closure, the 'this' type will mean the late bound type
        * of the current enclosing class

@@ -48,7 +48,9 @@ struct ZendRequestLocalVector final : RequestEventHandler {
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
   void vscan(IMarker& mark) const override {
-    // TODO: t7925927 this is wrong when container has pointers
+    for (const auto& p : m_container) {
+      if (p) p->scan(mark);
+    }
   }
 private:
   void clear() {
@@ -79,7 +81,11 @@ struct ZendRequestLocalMap final : RequestEventHandler {
   void requestInit() override { m_map.clear(); }
   void requestShutdown() override { m_map.clear(); }
   void vscan(IMarker& mark) const override {
-    // TODO: t7925927 this is wrong when container has pointers
+    // TODO: t7925927 this is wrong when container has pointers. The below is
+    // sufficient for the current usage of this class.
+    for (const auto& pair : m_map) {
+      mark(&pair.second, sizeof(pair.second));
+    }
   }
 private:
   container m_map;

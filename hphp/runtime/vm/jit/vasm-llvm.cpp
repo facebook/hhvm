@@ -1673,6 +1673,7 @@ O(unpcklpd)
       case Vinstr::psrlq:
       case Vinstr::fallthru:
       case Vinstr::popm:  // currently used in cgEnterFrame
+      case Vinstr::pushm: // used for unique stubs
       case Vinstr::callfaststub:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",

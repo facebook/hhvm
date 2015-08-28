@@ -184,12 +184,12 @@ class BaseVector : public ExtCollectionObjectData {
 
  public:
   ArrayData* arrayData() {
-    auto* ret = getArrayFromPackedData(m_data);
+    auto* ret = getArrayFromPackedData(data());
     assert(ret == staticEmptyArray() || ret->isPacked());
     return ret;
   }
   const ArrayData* arrayData() const {
-    auto* ret = getArrayFromPackedData(m_data);
+    auto* ret = getArrayFromPackedData(data());
     assert(ret == staticEmptyArray() || ret->isPacked());
     return ret;
   }
@@ -215,7 +215,7 @@ class BaseVector : public ExtCollectionObjectData {
   TypedValue* appendForUnserialize(int64_t k) {
     assert(k == m_size);
     incSize();
-    return &m_data[k];
+    return &data()[k];
   }
 
  protected:
@@ -259,7 +259,7 @@ class BaseVector : public ExtCollectionObjectData {
       throwOOB(key);
       return nullptr;
     }
-    return &m_data[key];
+    return &data()[key];
   }
   TypedValue* at(const TypedValue* key) {
     assert(key->m_type != KindOfRef);
@@ -273,7 +273,7 @@ class BaseVector : public ExtCollectionObjectData {
     if ((uint64_t)key >= (uint64_t)m_size) {
       return nullptr;
     }
-    return &m_data[key];
+    return &data()[key];
   }
   TypedValue* get(const TypedValue* key) {
     assert(key->m_type != KindOfRef);
@@ -302,7 +302,7 @@ class BaseVector : public ExtCollectionObjectData {
   void reserve(int64_t sz);
 
   static constexpr size_t sizeOffset() { return offsetof(BaseVector, m_size); }
-  static constexpr size_t dataOffset() { return offsetof(BaseVector, m_data); }
+  static constexpr size_t arrOffset() { return offsetof(BaseVector, m_arr); }
   static constexpr size_t immCopyOffset() {
     return offsetof(BaseVector, m_immCopy);
   }
@@ -317,13 +317,13 @@ class BaseVector : public ExtCollectionObjectData {
     : ExtCollectionObjectData(cls, kind)
     , m_size(0)
     , m_versionAndCap(0)
-    , m_data(packedData(staticEmptyArray()))
+    , m_arr(staticEmptyArray())
   {}
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
     : ExtCollectionObjectData(cls, kind)
     , m_size(arr->size())
     , m_versionAndCap(arr->cap())
-    , m_data(packedData(arr))
+    , m_arr(arr)
   {
     assertx(arr == staticEmptyArray() || arr->isPacked());
   }
@@ -331,7 +331,7 @@ class BaseVector : public ExtCollectionObjectData {
 
   ~BaseVector();
 
-  Cell* data() const { return m_data; }
+  Cell* data() const { return packedData(m_arr); }
   void grow();
   void reserveImpl(uint32_t newCap);
 
@@ -351,7 +351,7 @@ class BaseVector : public ExtCollectionObjectData {
       mutateAndBump();
     }
     assert(canMutateBuffer());
-    cellDup(*val, m_data[m_size]);
+    cellDup(*val, data()[m_size]);
     incSize();
   }
 
@@ -376,7 +376,7 @@ class BaseVector : public ExtCollectionObjectData {
       throwOOB(key);
       return;
     }
-    TypedValue* tv = &m_data[key];
+    TypedValue* tv = &data()[key];
     DataType oldType = tv->m_type;
     uint64_t oldDatum = tv->m_data.num;
     cellDup(*val, *tv);
@@ -449,7 +449,7 @@ class BaseVector : public ExtCollectionObjectData {
 
   void dropImmCopy() {
     assert(m_immCopy.isNull() ||
-           (m_data == ((BaseVector*)m_immCopy.get())->m_data &&
+           (data() == ((BaseVector*)m_immCopy.get())->data() &&
             arrayData()->hasMultipleRefs()));
     m_immCopy.reset();
   }
@@ -478,12 +478,10 @@ class BaseVector : public ExtCollectionObjectData {
   };
 
 
-  // m_data is an interior pointer into an ArrayData as computed by the
-  // packedData() helper function. The ArrayData's address can be computed
-  // from m_data via the getArrayFromPackedData() helper function. When
-  // capacity is non-zero, m_data points to the beginning of the element
-  // store within a packed array.
-  TypedValue* m_data;
+  // The ArrayData's element area can be computed from m_arr via the
+  // packedData() helper function. When capacity is non-zero, m_arr points
+  // to a PackedArray.
+  ArrayData* m_arr;
 
   // m_immCopy is a smart pointer to an ImmVector that is an up-to-date
   // shallow copy of this Vector (or m_immCopy is null). We maintain the
@@ -1403,7 +1401,7 @@ class BaseMap : public HashCollection {
     target->reserve(sz);
     assert(target->canMutateBuffer());
     target->setSize(sz);
-    auto* out = target->m_data;
+    auto* out = target->data();
     auto* eLimit = elmLimit();
     for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
       cellDup(e->data, *out);
@@ -1421,11 +1419,11 @@ class BaseMap : public HashCollection {
     ssize_t j = 0;
     for (; e != eLimit; e = nextElm(e, eLimit), vec->incSize(), ++j) {
       if (e->hasIntKey()) {
-        vec->m_data[j].m_data.num = e->ikey;
-        vec->m_data[j].m_type = KindOfInt64;
+        vec->data()[j].m_data.num = e->ikey;
+        vec->data()[j].m_type = KindOfInt64;
       } else {
         assert(e->hasStrKey());
-        cellDup(make_tv<KindOfString>(e->skey), vec->m_data[j]);
+        cellDup(make_tv<KindOfString>(e->skey), vec->data()[j]);
       }
     }
     return Object{std::move(vec)};

@@ -76,7 +76,9 @@
 #include "hphp/util/current-executable.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/hardware-counter.h"
+#ifndef _MSC_VER
 #include "hphp/util/light-process.h"
+#endif
 #include "hphp/util/process.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/service-data.h"
@@ -751,8 +753,8 @@ NEVER_INLINE void copyHashFuncs() {
 # define AT_END_OF_TEXT
 #endif
 
-[[gnu::optimize("2")]] NEVER_INLINE AT_END_OF_TEXT
-static void hugifyText(char* from, char* to) {
+static void NEVER_INLINE AT_END_OF_TEXT __attribute__((__optimize__("2")))
+hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {
     // This shouldn't happen if HHVM is behaving correctly (I think),
@@ -1539,6 +1541,7 @@ static int execute_program_impl(int argc, char** argv) {
     }
   }
 
+#ifndef _MSC_VER
   // Defer the initialization of light processes until the log file handle is
   // created, so that light processes can log to the right place. If we ever
   // lose a light process, stop the server instead of proceeding in an
@@ -1553,6 +1556,7 @@ static int execute_program_impl(int argc, char** argv) {
                            RuntimeOption::LightProcessCount,
                            RuntimeOption::EvalRecordSubprocessTimes,
                            inherited_fds);
+#endif
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
     exit(HPHP_EXIT_FAILURE);
@@ -1799,6 +1803,7 @@ std::string get_systemlib(std::string* hhas,
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
 
+#ifndef _MSC_VER
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
     auto data = (RequestTimer*)info->si_value.sival_ptr;
@@ -1809,6 +1814,7 @@ static void on_timeout(int sig, siginfo_t* info, void* context) {
     }
   }
 }
+#endif
 
 /*
  * Update constants to their real values and sync some runtime options
@@ -1884,10 +1890,12 @@ void hphp_process_init() {
 
   hphp_thread_init();
 
+#ifndef _MSC_VER
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
   sigaction(SIGVTALRM, &action, nullptr);
+#endif
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
   BootTimer::mark("xenon");
@@ -2193,7 +2201,9 @@ void hphp_process_exit() {
   Eval::Debugger::Stop();
   g_context.destroy();
   ExtensionRegistry::moduleShutdown();
+#ifndef _MSC_VER
   LightProcess::Close();
+#endif
   InitFiniNode::ProcessFini();
   delete jit::mcg;
   jit::mcg = nullptr;

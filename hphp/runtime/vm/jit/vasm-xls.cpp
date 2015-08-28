@@ -159,7 +159,7 @@ struct Vxls {
   Vxls(Vunit& unit, const Abi& abi)
     : unit(unit)
     , m_abi(abi)
-    , m_sp(mcg->backEnd().rSp())
+    , m_sp(rsp())
   {
     switch (arch()) {
       case Arch::X64:

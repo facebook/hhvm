@@ -337,7 +337,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
 #define IMM_RATA(n)    encodeRAT(ue, data.rat);
 #define IMM_AA(n)      ue.emitInt32(ue.mergeArray(data.arr##n));
-#define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop));
+#define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop##n));
 #define IMM_OA(type)   IMM_OA_IMPL
 #define IMM_BA(n)      emit_branch(*data.target);
 #define IMM_VSA(n)     emit_vsa(data.keys);
@@ -357,6 +357,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_C_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_R_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_V_MMANY    pop(1); pop(count_stack_elems(data.mvec));
+#define POP_MFINAL     not_implemented();
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);
@@ -429,6 +430,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_C_MMANY
 #undef POP_R_MMANY
 #undef POP_V_MMANY
+#undef POP_MFINAL
 
 #undef PUSH_NOV
 #undef PUSH_ONE

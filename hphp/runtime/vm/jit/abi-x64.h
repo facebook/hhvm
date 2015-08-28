@@ -38,6 +38,7 @@ const Abi& abi(CodeKind kind = CodeKind::Trace);
 constexpr PhysReg rvmfp() { return reg::rbp; }
 constexpr PhysReg rvmsp() { return reg::rbx; }
 constexpr PhysReg rvmtl() { return reg::r12; }
+constexpr PhysReg rsp()   { return reg::rsp; }
 
 namespace detail {
   const RegSet kVMRegs      = rvmfp() | rvmtl() | rvmsp();
@@ -47,7 +48,7 @@ namespace detail {
 inline RegSet vm_regs_with_sp() { return detail::kVMRegs; }
 inline RegSet vm_regs_no_sp()   { return detail::kVMRegsNoSP; }
 
-RegSet interp_one_cf_regs();
+constexpr PhysReg rret() { return reg::rax; }
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
@@ -66,17 +67,6 @@ PhysReg r_svcreq_arg(size_t i);
  * Scratch register.
  */
 constexpr Reg64 rAsm = reg::r10;
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Some data structures are accessed often enough from translated code
- * that we have shortcuts for getting offsets into them.
- */
-#define TVOFF(nm) int(offsetof(TypedValue, nm))
-#define AROFF(nm) int(offsetof(ActRec, nm))
-#define AFWHOFF(nm) int(offsetof(c_AsyncFunctionWaitHandle, nm))
-#define GENDATAOFF(nm) int(offsetof(Generator, nm))
 
 ///////////////////////////////////////////////////////////////////////////////
 

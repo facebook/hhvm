@@ -229,7 +229,7 @@ int FileUtil::copy(const char *srcfile, const char *dstfile) {
 }
 
 static int force_sync(int fd) {
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(_MSC_VER)
   return fsync(fd);
 #else
   return fdatasync(fd);

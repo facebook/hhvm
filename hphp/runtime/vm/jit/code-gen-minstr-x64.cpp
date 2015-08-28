@@ -93,7 +93,6 @@ void CodeGenerator::cgPropQ(IRInstruction* inst) {
   );
 }
 
-
 void CodeGenerator::cgCGetProp(IRInstruction* inst) {
   using namespace MInstrHelpers;
   auto const base    = inst->src(0);
@@ -109,7 +108,6 @@ void CodeGenerator::cgCGetProp(IRInstruction* inst) {
       .immPtr(getClass(inst->marker()))
       .ssa(0)
       .memberKeyS(1)
-      .ssa(2)
   );
 }
 
@@ -119,8 +117,7 @@ void CodeGenerator::cgCGetPropQ(IRInstruction* inst) {
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .ssa(2);
+      .ssa(1);
 
   if (inst->src(0)->isA(TObj)) {
     cgCallHelper(
@@ -395,7 +392,6 @@ void CodeGenerator::cgCGetElem(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
-      .ssa(2)
   );
 }
 
@@ -510,7 +506,6 @@ void CodeGenerator::cgIssetEmptyElemImpl(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
-      .ssa(2)
   );
 }
 

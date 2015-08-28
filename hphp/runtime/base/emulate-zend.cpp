@@ -32,6 +32,7 @@ namespace HPHP {
 int execute_program(int argc, char **argv);
 
 bool check_option(const char *option) {
+#ifndef _MSC_VER
   // Parameters that can be directly passed through to hhvm.
   static const char *passthru[] = {
   };
@@ -39,16 +40,23 @@ bool check_option(const char *option) {
   for (int i = 0; i < sizeof(passthru) / sizeof(const char *); i++) {
     if (strcmp(option, passthru[i]) == 0) return true;
   }
+#endif
   return false;
 }
 
 static int get_tempfile_if_not_exists(int ini_fd, char ini_path[]) {
   if (ini_fd == -1) {
-     ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
-     if (ini_fd == -1) {
-       fprintf(stderr, "Error: unable to open temporary file");
-       exit(EXIT_FAILURE);
-     }
+#ifdef _MSC_VER
+    // MSVC doesn't require the characters to be the last
+    // 6 in the string.
+    ini_fd = open(mktemp(ini_path), O_RDWR | O_EXCL);
+#else
+    ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
+#endif
+    if (ini_fd == -1) {
+      fprintf(stderr, "Error: unable to open temporary file");
+      exit(EXIT_FAILURE);
+    }
   }
   return ini_fd;
 }

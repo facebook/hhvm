@@ -275,7 +275,8 @@ void findPredTransIDs(TransID headerTID, Block* b,
   auto bTID = b->front().marker().profTransID();
   if (set.count(bTID)) return;
   if (bTID != headerTID) {
-    set.insert(bTID);
+    if (bTID != kInvalidTransID) set.insert(bTID);
+    else assertx(b->id() == 0); // only the entry block may have no ProfTransID
     return;
   }
   // Keep searching.

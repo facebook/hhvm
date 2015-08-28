@@ -347,9 +347,8 @@ std::string show(const Bytecode& bc) {
 #define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
 #define IMM_AA(n)      ret += " " + array_string(data.arr##n);
 #define IMM_BA(n)      folly::toAppend(" <blk:", data.target->id, ">", &ret);
-#define IMM_OA_IMPL(n) /* empty */
-#define IMM_OA(type)   folly::toAppend(" ", subopToName(data.subop), &ret); \
-                       IMM_OA_IMPL
+#define IMM_OA_IMPL(n) folly::toAppend(" ", subopToName(data.subop##n), &ret);
+#define IMM_OA(type)   IMM_OA_IMPL
 #define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
 
 #define IMM_NA

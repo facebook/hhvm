@@ -31,7 +31,9 @@
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
+#ifndef _MSC_VER
 #include <folly/Subprocess.h>
+#endif
 #include <folly/String.h>
 
 #include "hphp/compiler/builtin_symbols.h"
@@ -98,6 +100,7 @@
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/hhbbc/hhbbc.h"
 
+#include "hphp/util/trace.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/job-queue.h"
@@ -130,6 +133,8 @@
 namespace HPHP {
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
+
+TRACE_SET_MOD(emitter);
 
 const StaticString
   s_trigger_error("trigger_error"),
@@ -176,6 +181,23 @@ namespace StackSym {
 
   char GetSymFlavor(char sym) { return (sym & 0x0F); }
   char GetMarker(char sym) { return (sym & 0xF0); }
+
+  /*
+   * Return whether or not sym represents a symbolic stack element, rather than
+   * an actual stack element. Symbolic stack elements do not have corresponding
+   * values on the real eval stack at runtime, and represent things like local
+   * variable ids or literal ints and strings.
+   */
+  bool IsSymbolic(char sym) {
+    auto const flavor = GetSymFlavor(sym);
+    if (flavor == L || flavor == T || flavor == I || flavor == H) return true;
+
+    auto const marker = GetMarker(sym);
+    if (marker == W || marker == K) return true;
+
+    return false;
+  }
+
   std::string ToString(char sym) {
     char symFlavor = StackSym::GetSymFlavor(sym);
     std::string res;
@@ -221,7 +243,7 @@ namespace StackSym {
   Logger::Warning(__VA_ARGS__);                             \
   Logger::Warning("Eval stack at the time of error: %s",    \
                   m_evalStack.pretty().c_str());            \
-  assert(false);                                            \
+  assertx(false);                                            \
 } while (0)
 
 // RAII guard for function creation.
@@ -293,17 +315,33 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define O(name, imm, pop, push, flags)                                  \
   void Emitter::name(imm) {                                             \
     auto const opcode = Op::name;                                       \
+    ITRACE(2, "{}\n", #name);                                           \
+    Trace::Indent indent;                                               \
+    ITRACE(3, "before: {}\n", m_ev.getEvalStack().pretty());            \
+    /* Process opcode's effects on the EvalStack and emit it */         \
     Offset curPos UNUSED = getUnitEmitter().bcPos();                    \
-    getEmitterVisitor().prepareEvalStack();                             \
-    POP_##pop;                                                          \
-    const int nIn UNUSED = COUNT_##pop;                                 \
-    POP_LA_##imm;                                                       \
-    PUSH_##push;                                                        \
-    getUnitEmitter().emitOp(Op##name);                                  \
-    IMPL_##imm;                                                         \
-    getUnitEmitter().recordSourceLocation(m_tempLoc ? *m_tempLoc : \
-                                          m_node->getRange(), curPos); \
-    if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack();   \
+    {                                                                   \
+      Trace::Indent indent;                                             \
+      getEmitterVisitor().prepareEvalStack();                           \
+      POP_##pop;                                                        \
+      const int nIn UNUSED = COUNT_##pop;                               \
+      POP_LA_##imm;                                                     \
+      PUSH_##push;                                                      \
+      getUnitEmitter().emitOp(Op##name);                                \
+      IMPL_##imm;                                                       \
+    }                                                                   \
+    ITRACE(3, "after: {}\n", m_ev.getEvalStack().pretty());             \
+    auto& loc = m_tempLoc ? *m_tempLoc : m_node->getRange();            \
+    auto UNUSED opPtr = reinterpret_cast<const Op*>(m_ue.bc() + curPos);\
+    ITRACE(2, "{}: {}\n", curPos, instrToString(opPtr));                \
+    ITRACE(2, "lines [{},{}] chars [{},{}]\n",                          \
+           loc.line0, loc.line1, loc.char0, loc.char1);                 \
+    /* Update various other metadata */                                 \
+    getUnitEmitter().recordSourceLocation(loc, curPos);                 \
+    if (flags & TF) {                                                   \
+      getEmitterVisitor().restoreJumpTargetEvalStack();                 \
+      ITRACE(3, "   jmp: {}\n", m_ev.getEvalStack().pretty());          \
+    }                                                                   \
     if (opcode == Op::FCall) getEmitterVisitor().recordCall();          \
     getEmitterVisitor().setPrevOpcode(opcode);                          \
   }
@@ -317,6 +355,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_C_MMANY 0
 #define COUNT_R_MMANY 0
 #define COUNT_V_MMANY 0
+#define COUNT_MFINAL 0
 #define COUNT_FMANY 0
 #define COUNT_CVMANY 0
 #define COUNT_CVUMANY 0
@@ -373,6 +412,8 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStackMMany()
 #define POP_R_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::R); \
+  getEmitterVisitor().popEvalStackMMany()
+#define POP_MFINAL \
   getEmitterVisitor().popEvalStackMMany()
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
@@ -637,6 +678,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_C_MMANY
 #undef POP_V_MMANY
 #undef POP_R_MMANY
+#undef POP_MFINAL
 #undef POP_CV
 #undef POP_VV
 #undef POP_HV
@@ -756,14 +798,14 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 static void checkJmpTargetEvalStack(const SymbolicStack& source,
                                     const SymbolicStack& dest) {
   if (source.size() != dest.size()) {
-    Logger::Warning("Emitter detected a point in the bytecode where the "
-                    "depth of the stack is not the same for all possible "
-                    "control flow paths. source size: %d. dest size: %d",
-                    source.size(),
-                    dest.size());
+    Logger::FWarning("Emitter detected a point in the bytecode where the "
+                     "depth of the stack is not the same for all possible "
+                     "control flow paths. source size: {}. dest size: {}",
+                     source.size(),
+                     dest.size());
     Logger::Warning("src stack : %s", source.pretty().c_str());
     Logger::Warning("dest stack: %s", dest.pretty().c_str());
-    assert(false);
+    assertx(false);
     return;
   }
 
@@ -785,37 +827,46 @@ static void checkJmpTargetEvalStack(const SymbolicStack& source,
   }
 }
 
+std::string SymbolicStack::SymEntry::pretty() const {
+  std::string ret;
+  ret += StackSym::ToString(sym);
+  char flavor = StackSym::GetSymFlavor(sym);
+  if (flavor == StackSym::L || flavor == StackSym::I) {
+    folly::toAppend(':', intval, &ret);
+  } else if (flavor == StackSym::T && name) {
+    folly::toAppend(':', name->data(), &ret);
+  }
+  return ret;
+}
+
 std::string SymbolicStack::pretty() const {
   std::ostringstream out;
-  out << " [" << std::hex;
+  out << "[" << std::hex;
   size_t j = 0;
+  auto sep = "";
   for (size_t i = 0; i < m_symStack.size(); ++i) {
+    out << sep;
+    sep = " ";
     while (j < m_actualStack.size() && m_actualStack[j] < int(i)) {
       ++j;
     }
     if (j < m_actualStack.size() && m_actualStack[j] == int(i)) {
       out << "*";
     }
-    out << StackSym::ToString(m_symStack[i].sym);
-    char flavor = StackSym::GetSymFlavor(m_symStack[i].sym);
-    if (flavor == StackSym::L || flavor == StackSym::I) {
-      out << ":" << m_symStack[i].intval;
-    } else if (flavor == StackSym::T) {
-      out << ":" << m_symStack[i].metaData.name->data();
-    }
-    out << ' ';
+    out << m_symStack[i].pretty();
   }
+  out << ']';
   return out.str();
 }
 
 void SymbolicStack::push(char sym) {
-  if (sym != StackSym::W && sym != StackSym::K && sym != StackSym::L &&
-      sym != StackSym::T && sym != StackSym::I && sym != StackSym::H) {
+  if (!StackSym::IsSymbolic(sym)) {
     m_actualStack.push_back(m_symStack.size());
     *m_actualStackHighWaterPtr = std::max(*m_actualStackHighWaterPtr,
                                           (int)m_actualStack.size());
   }
   m_symStack.push_back(SymEntry(sym));
+  ITRACE(4, "push: {}\n", m_symStack.back().pretty());
 }
 
 void SymbolicStack::pop() {
@@ -829,6 +880,7 @@ void SymbolicStack::pop() {
     assert(!m_actualStack.empty());
     m_actualStack.pop_back();
   }
+  ITRACE(4, "pop: {}\n", m_symStack.back().pretty());
   m_symStack.pop_back();
 }
 
@@ -844,10 +896,7 @@ char SymbolicStack::get(int index) const {
 
 const StringData* SymbolicStack::getName(int index) const {
   assert(index >= 0 && index < (int)m_symStack.size());
-  if (m_symStack[index].metaType == META_LITSTR) {
-    return m_symStack[index].metaData.name;
-  }
-  return nullptr;
+  return m_symStack[index].name;
 }
 
 const StringData* SymbolicStack::getClsName(int index) const {
@@ -863,13 +912,8 @@ bool SymbolicStack::isCls(int index) const {
 void SymbolicStack::setString(const StringData* s) {
   assert(m_symStack.size());
   SymEntry& se = m_symStack.back();
-  if (se.metaType == META_LITSTR) {
-    assert(se.metaData.name == s);
-  } else {
-    assert(se.metaType == META_NONE);
-  }
-  se.metaData.name = s;
-  se.metaType = META_LITSTR;
+  assert(!se.name || se.name == s);
+  se.name = s;
 }
 
 void SymbolicStack::setKnownCls(const StringData* s, bool nonNull) {
@@ -887,7 +931,7 @@ void SymbolicStack::setInt(int64_t v) {
 void SymbolicStack::cleanTopMeta() {
   SymEntry& se = m_symStack.back();
   se.clsBaseType = CLS_INVALID;
-  se.metaType = META_NONE;
+  se.name = nullptr;
 }
 
 void SymbolicStack::setClsBaseType(ClassBaseType type) {
@@ -910,10 +954,15 @@ void SymbolicStack::set(int index, char sym) {
   // XXX Add assert in debug build to make sure W is not getting
   // written or overwritten by something else
   m_symStack[index].sym = sym;
+  ITRACE(4, "   set: {} -> {}\n", index, m_symStack[index].pretty());
 }
 
-unsigned SymbolicStack::size() const {
+size_t SymbolicStack::size() const {
   return m_symStack.size();
+}
+
+size_t SymbolicStack::actualSize() const {
+  return m_actualStack.size();
 }
 
 bool SymbolicStack::empty() const {
@@ -1054,6 +1103,7 @@ void Label::set(Emitter& e) {
       checkJmpTargetEvalStack(m_evalStack, ev.getEvalStack());
     } else {
       // Assume the current eval stack matches that of the forward branch
+      ITRACE(3, "bind: {}\n", m_evalStack.pretty());
       ev.setEvalStack(m_evalStack);
     }
     // Fix up the EmitterVisitor's table of jump targets
@@ -1975,8 +2025,12 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
 }
 
 void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
-  // Special case for instructions that consume the loc below the
-  // top.
+  // Special case for instructions that consume the loc below the top, or don't
+  // actually consume from the eval stack.
+  if (op == OpBaseL || op == OpDimL || op == OpQueryML) {
+    return;
+  }
+
   int belowTop = -1;
   if (op == OpCGetL3) {
     belowTop = 3;
@@ -1999,6 +2053,10 @@ void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
 }
 
 void EmitterVisitor::popEvalStackMMany() {
+  ITRACE(3, "popEvalStackMMany()\n");
+  Trace::Indent i;
+
+  ITRACE(3, "popping member codes\n");
   while (!m_evalStack.empty()) {
     char sym = m_evalStack.top();
     char symFlavor = StackSym::GetSymFlavor(sym);
@@ -2042,6 +2100,8 @@ void EmitterVisitor::popEvalStackMMany() {
                        m_ue.bcPos());
     return;
   }
+
+  ITRACE(3, "popping location\n");
   char sym = m_evalStack.top();
   char symFlavor = StackSym::GetSymFlavor(sym);
   m_evalStack.pop();
@@ -2444,6 +2504,10 @@ void EmitterVisitor::visit(FileScopePtr file) {
   FunctionScopePtr func(file->getPseudoMain());
   if (!func) return;
 
+  SCOPE_ASSERT_DETAIL("visit FileScope") { return m_evalStack.pretty(); };
+  ITRACE(1, "Emitting file {}\n", file->getName());
+  Trace::Indent indent;
+
   m_file = file;
   assignLocalVariableIds(func);
 
@@ -2813,6 +2877,8 @@ void EmitterVisitor::emitCall(Emitter& e,
 bool EmitterVisitor::visit(ConstructPtr node) {
   if (!node) return false;
 
+  SCOPE_ASSERT_DETAIL("visit Construct") { return node->getText(); };
+
   Emitter e(node, m_ue, *this);
 
   switch (node->getKindOf()) {
@@ -3136,7 +3202,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     Id tempLocal = -1;
     Offset start = InvalidAbsoluteOffset;
 
-    bool enabled = RuntimeOption::EnableEmitSwitch;
+    bool enabled = RuntimeOption::EvalEmitSwitch;
     auto call = dynamic_pointer_cast<SimpleFunctionCall>(subject);
 
     SwitchState state;
@@ -4873,8 +4939,8 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
 }
 
 int EmitterVisitor::scanStackForLocation(int iLast) {
-  assert(iLast >= 0);
-  assert(iLast < (int)m_evalStack.size());
+  assertx(iLast >= 0);
+  assertx(iLast < (int)m_evalStack.size());
   for (int i = iLast; i >= 0; --i) {
     char marker = StackSym::GetMarker(m_evalStack.get(i));
     if (marker != StackSym::E && marker != StackSym::W &&
@@ -4889,6 +4955,105 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   return 0;
 }
 
+bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
+                             MOpFlags baseFlags, MOpFlags dimFlags) {
+  // Until we can emit all member operations, we have to do a quick pass over
+  // what would be the member vector to look for unsupported operations.
+  for (auto i = iFirst + 1; i < iLast; ++i) {
+    auto sym = m_evalStack.get(i);
+    UNUSED auto flavor = StackSym::GetSymFlavor(sym);
+    switch (StackSym::GetMarker(sym)) {
+      case StackSym::M:
+        always_assert(flavor == StackSym::A);
+        break;
+      case StackSym::P:
+      case StackSym::Q:
+      case StackSym::E:
+        break;
+      case StackSym::W:
+        return false;
+      case StackSym::S:
+      default:
+        always_assert(false && "Bad intermediate marker");
+    }
+  }
+
+  // Emit the base location operation.
+  auto sym = m_evalStack.get(iFirst);
+  auto flavor = StackSym::GetSymFlavor(sym);
+  switch (StackSym::GetMarker(sym)) {
+    case StackSym::N:
+    case StackSym::G:
+    case StackSym::S:
+      return false;
+
+    case StackSym::None:
+      switch (flavor) {
+        case StackSym::L:
+          e.BaseL(m_evalStack.getLoc(iFirst), baseFlags);
+          break;
+
+        case StackSym::H:
+          e.BaseH();
+          break;
+
+        default:
+          return false;
+      }
+      break;
+
+    default:
+      always_assert(false && "Bad base marker");
+  }
+
+  if (StackSym::GetMarker(m_evalStack.get(iLast)) == StackSym::M) {
+    not_implemented();
+    --iLast;
+  }
+
+  // Emit all intermediate operations, leaving the final operation up to our
+  // caller.
+  for (auto i = iFirst + 1; i < iLast; ++i) {
+    auto sym = m_evalStack.get(i);
+    auto flavor = StackSym::GetSymFlavor(sym);
+
+    auto doDim = [&](PropElemOp op) {
+      if (flavor == StackSym::L) {
+        e.DimL(m_evalStack.getLoc(i), op, dimFlags);
+      } else if (flavor == StackSym::I) {
+        e.DimInt(m_evalStack.getInt(i), op, dimFlags);
+      } else if (flavor == StackSym::T) {
+        e.DimStr(m_evalStack.getName(i), op, dimFlags);
+      } else {
+        auto idx = m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
+        e.DimC(idx, op, dimFlags);
+      }
+    };
+
+    switch (StackSym::GetMarker(sym)) {
+      case StackSym::M:
+        always_assert(false); // should only be final stack element
+        break;
+      case StackSym::P:
+        doDim(PropElemOp::Prop);
+        break;
+      case StackSym::Q:
+        doDim(PropElemOp::PropQ);
+        break;
+      case StackSym::E:
+        doDim(PropElemOp::Elem);
+        break;
+      case StackSym::W:
+        not_implemented();
+      case StackSym::S:
+      default:
+        always_assert(false && "Bad intermediate marker");
+    }
+  }
+
+  return true;
+}
+
 void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
                                     int iFirst, int iLast, bool allowW,
                                     Emitter& e) {
@@ -4898,67 +5063,61 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
   vectorImm.clear();
   vectorImm.reserve(iLast - iFirst + 1);
 
-  int metaI = 1;
+  // Because of php's order of evaluation rules, we store the classref for
+  // certain types of S-vectors at the end, instead of the front. See emitCls
+  // for details.
 
-  /*
-   * Because of php's order of evaluation rules, we store the classref
-   * for certain types of S-vectors at the end, instead of the front.
-   * See emitCls for details.
-   */
-
-  {
-    char sym = m_evalStack.get(iFirst);
-    char symFlavor = StackSym::GetSymFlavor(sym);
-    char marker = StackSym::GetMarker(sym);
-    switch (marker) {
-      case StackSym::N: {
-        if (symFlavor == StackSym::C) {
-          vectorImm.push_back(LNC);
-        } else if (symFlavor == StackSym::L) {
-          vectorImm.push_back(LNL);
-        } else {
-          assert(false);
-        }
-      } break;
-      case StackSym::G: {
-        if (symFlavor == StackSym::C) {
-          vectorImm.push_back(LGC);
-        } else if (symFlavor == StackSym::L) {
-          vectorImm.push_back(LGL);
-        } else {
-          assert(false);
-        }
-      } break;
-      case StackSym::S: {
-        if (symFlavor != StackSym::L && symFlavor != StackSym::C) {
-          unexpectedStackSym(sym, "S-vector base, prop name");
-        }
-        if (m_evalStack.get(iLast) != StackSym::AM) {
-          unexpectedStackSym(sym, "S-vector base, class ref");
-        }
-        const bool curIsLoc = symFlavor == StackSym::L;
-        vectorImm.push_back(curIsLoc ? LSL : LSC);
-      } break;
-      case StackSym::None: {
-        if (symFlavor == StackSym::L) {
-          vectorImm.push_back(LL);
-        } else if (symFlavor == StackSym::C) {
-          vectorImm.push_back(LC);
-        } else if (symFlavor == StackSym::R) {
-          vectorImm.push_back(LR);
-        } else if (symFlavor == StackSym::H) {
-          vectorImm.push_back(LH);
-        } else {
-          not_reached();
-        }
-      } break;
-      default: {
+  char sym = m_evalStack.get(iFirst);
+  char symFlavor = StackSym::GetSymFlavor(sym);
+  char marker = StackSym::GetMarker(sym);
+  switch (marker) {
+    case StackSym::N: {
+      if (symFlavor == StackSym::C) {
+        vectorImm.push_back(LNC);
+      } else if (symFlavor == StackSym::L) {
+        vectorImm.push_back(LNL);
+      } else {
+        always_assert(false);
+      }
+    } break;
+    case StackSym::G: {
+      if (symFlavor == StackSym::C) {
+        vectorImm.push_back(LGC);
+      } else if (symFlavor == StackSym::L) {
+        vectorImm.push_back(LGL);
+      } else {
+        always_assert(false);
+      }
+    } break;
+    case StackSym::S: {
+      if (symFlavor != StackSym::L && symFlavor != StackSym::C) {
+        unexpectedStackSym(sym, "S-vector base, prop name");
+      }
+      if (m_evalStack.get(iLast) != StackSym::AM) {
+        unexpectedStackSym(sym, "S-vector base, class ref");
+      }
+      const bool curIsLoc = symFlavor == StackSym::L;
+      vectorImm.push_back(curIsLoc ? LSL : LSC);
+    } break;
+    case StackSym::None: {
+      if (symFlavor == StackSym::L) {
+        vectorImm.push_back(LL);
+      } else if (symFlavor == StackSym::C) {
+        vectorImm.push_back(LC);
+      } else if (symFlavor == StackSym::R) {
+        vectorImm.push_back(LR);
+      } else if (symFlavor == StackSym::H) {
+        vectorImm.push_back(LH);
+      } else {
         not_reached();
       }
+    } break;
+    default: {
+      not_reached();
     }
-    if (symFlavor == StackSym::L) {
-      encodeIvaToVector(vectorImm, m_evalStack.getLoc(iFirst));
-    }
+  }
+  if (symFlavor == StackSym::L) {
+    encodeIvaToVector(vectorImm, m_evalStack.getLoc(iFirst));
   }
 
   int i = iFirst + 1;
@@ -5012,7 +5171,7 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
       case StackSym::S: {
         assert(false);
       }
-      default: assert(false); break;
+      default: always_assert(false); break;
     }
 
     if (symFlavor == StackSym::L) {
@@ -5025,7 +5184,6 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
     }
 
     ++i;
-    if (marker != StackSym::W) ++metaI;
   }
 }
 
@@ -5135,8 +5293,54 @@ void EmitterVisitor::emitCGet(Emitter& e) {
       }
     }
   } else {
+    size_t stackCount = 0;
+    for (size_t idx = i; idx <= iLast; ++idx) {
+      if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
+    }
+
+    if (!Option::WholeProgram /* no hhbbc support yet */ &&
+        RuntimeOption::EvalEmitNewMInstrs &&
+        emitMOp(i, iLast, false, e, MOpFlags::Warn, MOpFlags::Warn)) {
+      auto sym = m_evalStack.get(iLast);
+      auto flavor = StackSym::GetSymFlavor(sym);
+      auto marker = StackSym::GetMarker(sym);
+      auto op = QueryMOp::CGet;
+
+      auto propElemOp = [&](PropElemOp pe) {
+        if (flavor == StackSym::L) {
+          e.QueryML(stackCount, op, pe, m_evalStack.getLoc(iLast));
+        } else if (flavor == StackSym::I) {
+          e.QueryMInt(stackCount, op, pe, m_evalStack.getInt(iLast));
+        } else if (flavor == StackSym::T) {
+          e.QueryMStr(stackCount, op, pe, m_evalStack.getName(iLast));
+        } else {
+          e.QueryMC(stackCount, op, pe);
+        }
+      };
+
+      switch (marker) {
+        case StackSym::P:
+          propElemOp(PropElemOp::Prop);
+          break;
+        case StackSym::E:
+          propElemOp(PropElemOp::Elem);
+          break;
+        case StackSym::Q:
+          propElemOp(PropElemOp::PropQ);
+          break;
+        case StackSym::W:
+          throw IncludeTimeFatalException(e.getNode(),
+                                          "Cannot use [] for reading");
+        default:
+          always_assert(false);
+      }
+
+      return;
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
+    assert(countStackValues(vectorImm) == stackCount);
     e.CGetM(vectorImm);
   }
 }
@@ -6101,9 +6305,10 @@ void EmitterVisitor::markSProp(Emitter& e) {
 #define MARK_NAME_BODY(index, requiredStackSize)            \
   if (m_evalStack.size() < requiredStackSize) {             \
     InvariantViolation(                                     \
-      "Emitter encountered an evaluation stack with %d "    \
-      "elements inside the %s function (at offset %d)",     \
-      m_evalStack.size(), __FUNCTION__, m_ue.bcPos());      \
+      "Emitter encountered an evaluation stack with %lu"    \
+      " elements inside the %s function (at offset %d)",    \
+      (unsigned long)m_evalStack.size(),                    \
+      __FUNCTION__, m_ue.bcPos());                          \
     return;                                                 \
   }                                                         \
   char sym = m_evalStack.get(index);                        \
@@ -8856,6 +9061,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
   auto nElms = el->getCount();
   auto useArray = !!nElms;
   auto hasVectorData = true;
+  int64_t max = 0;
   for (int i = 0; i < nElms; i++) {
     auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     auto key = ap->getName();
@@ -8873,7 +9079,12 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
           useArray = false;
         }
       } else if (vkey.isInteger()) {
-        if (vkey.asInt64Val() != i) hasVectorData = false;
+        auto val = vkey.asInt64Val();
+        if (val > max || val < 0) {
+          hasVectorData = false;
+        } else if (val == max) {
+          ++max;
+        }
       } else {
         useArray = false;
       }
@@ -9691,9 +9902,13 @@ namespace {
 bool startsWith(const char* big, const char* small) {
   return strncmp(big, small, strlen(small)) == 0;
 }
-bool isFileHackStrict(const char* code, int codeLen) {
-  return codeLen > strlen("<?hh // strict") &&
-    (startsWith(code, "<?hh // strict") || startsWith(code, "<?hh //strict"));
+bool isFileHack(const char* code, int codeLen, bool allowPartial) {
+  if (allowPartial) {
+    return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
+  } else {
+    return codeLen > strlen("<?hh // strict") &&
+      (startsWith(code, "<?hh // strict") || startsWith(code, "<?hh //strict"));
+  }
 }
 
 UnitEmitter* makeFatalUnit(const char* filename, const MD5& md5,
@@ -9722,6 +9937,10 @@ UnitEmitter* makeFatalUnit(const char* filename, const MD5& md5,
 
 UnitEmitter* useExternalEmitter(const char* code, int codeLen,
                                 const char* filename, const MD5& md5) {
+#ifdef _MSC_VER
+  Logger::Error("The external emitter is not supported under MSVC!");
+  return nullptr;
+#else
   std::string hhas, errorOutput;
 
   try {
@@ -9766,6 +9985,7 @@ UnitEmitter* useExternalEmitter(const char* code, int codeLen,
     }
     return nullptr;
   }
+#endif
 }
 
 }
@@ -9802,6 +10022,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     return nullptr;
   }
 
+  SCOPE_ASSERT_DETAIL("hphp_compiler_parse") { return filename; };
+
   try {
     UnitOrigin unitOrigin = UnitOrigin::File;
     if (!filename) {
@@ -9826,7 +10048,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // systemlib because the external emitter can't handle that yet.
     if (!ue &&
         !RuntimeOption::EvalUseExternalEmitter.empty() &&
-        isFileHackStrict(code, codeLen) &&
+        isFileHack(code, codeLen,
+                   RuntimeOption::EvalExternalEmitterAllowPartial) &&
         SystemLib::s_inited) {
       ue.reset(useExternalEmitter(code, codeLen, filename, md5));
     }

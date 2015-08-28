@@ -129,11 +129,13 @@ static void bt_handler(int sig) {
 }
 
 void install_crash_reporter() {
+#ifndef _MSC_VER
   signal(SIGQUIT, bt_handler);
+  signal(SIGBUS,  bt_handler);
+#endif
   signal(SIGILL,  bt_handler);
   signal(SIGFPE,  bt_handler);
   signal(SIGSEGV, bt_handler);
-  signal(SIGBUS,  bt_handler);
   signal(SIGABRT, bt_handler);
 
   register_assert_fail_logger(&StackTraceNoHeap::AddExtraLogging);

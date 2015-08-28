@@ -3432,8 +3432,66 @@ identical, but each instruction utilizes a distinct set of operations. For each
 member instruction, first use a Base* operation depending on the kind of
 location code. Next perform a series of intermediate operations depending on
 member code to process all but the last member. Finally, perform a final
-operation depending on member code to process the last member. See the
-instruction-specific tables for details.
+operation depending on member code to process the last member. We currently
+have two ways to encode this sequence of operations: a single bytecode with a
+variable-length vector of subops, or a variable-length series of bytecodes,
+each representing a single operation. Work is underway to replace the member
+vector instructions with the smaller, simpler bytecodes.
+
+10.1 New member instructions
+----------------------------
+
+All bytecodes in this section produce and/or consume a value in the member base
+register (often referred to as MBR or just "member base"). The MBR is live
+starting after a Base* bytecode, modified by zero or more Dim* bytecodes, then
+finally consumed by a final operation:
+
+  bytecode  | MBR in-state | MBR out-state
+  ----------+--------------+--------------
+  Base*     | dead         | live
+  Dim*      | live         | live
+  Final Ops | live         | dead
+
+The bytecodes in this section also refer to member operations in section 9 to
+describe their semantics. Once the bytecodes in section 10.2 are eliminated,
+the documentation from section 9 can be folded into this section.
+
+10.1a Base Operations
+---------------------
+
+BaseL <local variable id> <member op flags>    []  ->  []
+
+Base{L,LW,LD,LWD} member operation, depending on the flags immediate.
+
+BaseH    []  ->  []
+
+BaseH member operation.
+
+10.1b Intermediate operations
+-----------------------------
+
+DimL <local variable id> <prop/elem op> <member op flags>    []  ->  []
+DimC <stack index> <prop/elem op> <member op flags>    []  ->  []
+DimInt <64-bit signed int> <prop/elem op> <member op flags>    []  ->  []
+DimStr <litstr id> <prop/elem op> <member op flags>    []  ->  []
+
+{Prop,Elem}{L,C,I,T}{W,D,WD,U} member operation, depending on the prop/elem op
+and flags immediates.
+
+10.1c Final operations
+----------------------
+
+QueryML <stack count> <local variable id> <query op> <prop/elem op>    [...]  ->  [C]
+QueryMC <stack count> <query op> <prop/elem op>    [...]  ->  [C]
+QueryMInt <stack count> <local variable id> <query op> <prop/elem op>    [...]  ->  [C]
+QueryMStr <stack count> <local variable id> <query op> <prop/elem op>    [...]  ->  [C]
+
+{CGet,Isset,Empty}{Prop,Elem}{L,C,I,T} member operation, depending on the query
+op and prop/elem op immediates. <stack count> elements are consumed from the
+eval stack before pushing the final result.
+
+10.2 Legacy member instructions
+-------------------------------
 
 The member codes that represent immediate literal data (ET, EI, PT) are
 implemented using the corresponding EC or PC intermediate operation: they

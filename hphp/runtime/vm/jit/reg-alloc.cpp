@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include <boost/dynamic_bitset.hpp>
 

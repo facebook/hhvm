@@ -342,7 +342,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case OrdStr:
   case CheckRange:
   case CountArrayFast:
-  case DefMIStateBase:
     return true;
   default:
     return false;

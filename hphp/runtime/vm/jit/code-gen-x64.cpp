@@ -3612,9 +3612,9 @@ Fixup CodeGenerator::makeFixup(const BCMarker& marker, SyncOptions sync) {
 }
 
 void CodeGenerator::cgLdMIStateAddr(IRInstruction* inst) {
-  auto base = srcLoc(inst, 0).reg();
-  int64_t offset = inst->src(1)->intVal();
-  vmain() << lea{base[offset], dstLoc(inst, 0).reg()};
+  auto const base = rvmtl();
+  int64_t offset = inst->src(0)->intVal();
+  vmain() << lea{base[rds::kVmMInstrStateOff + offset], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
@@ -3676,10 +3676,6 @@ void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
   auto const baseOff = localOffset(inst->extra<CheckLoc>()->locId);
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->taken());
-}
-
-void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
-  vmain() << lea{rvmtl()[rds::kVmMInstrStateOff], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgLdMBase(IRInstruction* inst) {

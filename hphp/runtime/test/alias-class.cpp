@@ -303,7 +303,7 @@ TEST(AliasClass, SpecializedUnions) {
   EXPECT_TRUE(stk_and_prop.maybe(rel_stk_and_frame));
   EXPECT_FALSE(rel_stk_and_frame <= stk_and_prop);
 
-  AliasClass const some_mis = AMIState { 0x10 };
+  AliasClass const some_mis = AMIState::fromTV(0x10);
   {
     AliasClass const some_heap = AElemIAny;
     auto const u1 = some_heap | some_mis;

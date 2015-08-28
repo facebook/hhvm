@@ -74,9 +74,7 @@ AliasClass pointee(const SSATmp* ptr) {
 
     if (typeNR <= TPtrToMISGen) {
       if (sinst->is(LdMIStateAddr)) {
-        return AliasClass {
-          AMIState { safe_cast<int32_t>(sinst->src(1)->intVal()) }
-        };
+        return AliasClass { AMIState::fromTV(sinst->src(0)->intVal()) };
       }
       return AMIStateAny;
     }
@@ -379,8 +377,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case AsyncRetCtrl:
     return ReturnEffects {
-      stack_below(inst.src(0), inst.extra<AsyncRetCtrl>()->offset.offset - 1) |
-        AMIStateAny
+      *stack_below(inst.src(0), inst.extra<AsyncRetCtrl>()->offset.offset - 1).
+        precise_union(AMIStateAny)
     };
 
   case GenericRetDecRefs:
@@ -636,12 +634,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LdMBase:
     return PureLoad {
-      AMIState { offsetof(MInstrState, base) }
+      AMIState::fromPtr(offsetof(MInstrState, base))
     };
 
   case StMBase:
     return PureStore {
-      AMIState { offsetof(MInstrState, base) },
+      AMIState::fromPtr(offsetof(MInstrState, base)),
       inst.src(0)
     };
 
@@ -970,7 +968,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ClsNeq:
   case Mod:
   case Conjure:
-  case DefMIStateBase:
   case Halt:
   case ConvBoolToInt:
   case ConvBoolToDbl:

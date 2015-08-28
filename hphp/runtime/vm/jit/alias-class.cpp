@@ -169,7 +169,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_stack.offset,
                                      acls.m_stack.size);
   case STag::MIState:
-    return folly::hash::hash_combine(hash, acls.m_mis.offset);
+    return folly::hash::hash_combine(hash, acls.m_mis.bits.to_ulong());
   case STag::Ref:
     return folly::hash::hash_combine(hash, acls.m_ref.boxed);
   }
@@ -301,7 +301,7 @@ bool AliasClass::equivData(AliasClass o) const {
                               m_elemS.key == o.m_elemS.key;
   case STag::Stack:    return m_stack.offset == o.m_stack.offset &&
                               m_stack.size == o.m_stack.size;
-  case STag::MIState:  return m_mis.offset == o.m_mis.offset;
+  case STag::MIState:  return m_mis.bits == o.m_mis.bits;
   case STag::Ref:      return m_ref.boxed == o.m_ref.boxed;
   }
   not_reached();
@@ -323,11 +323,14 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
-  case STag::MIState:
   case STag::Ref:
   case STag::IterBoth:
     assertx(!a.equivData(b));
     break;
+  case STag::MIState:
+    {
+      return AMIState::fromBits(a.m_mis.bits | b.m_mis.bits);
+    }
   case STag::Frame:
     {
       auto ret = AliasClass{newBits};
@@ -497,9 +500,10 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
-  case STag::MIState:
   case STag::Ref:
     return equivData(o);
+  case STag::MIState:
+    return (m_mis.bits & o.m_mis.bits) == m_mis.bits;
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.ids <= o.m_frame.ids;
   case STag::Stack:
@@ -649,7 +653,7 @@ bool AliasClass::maybeData(AliasClass o) const {
     }
 
   case STag::MIState:
-    return m_mis.offset == o.m_mis.offset;
+    return (m_mis.bits & o.m_mis.bits).any();
 
   /*
    * Two boxed cells can generally refer to the same RefData.
@@ -772,9 +776,19 @@ std::string show(AliasClass acls) {
         : folly::sformat(";{}", acls.m_stack.size)
     );
     break;
-  case A::STag::MIState:
-    folly::format(&ret, "Mis {}", acls.m_mis.offset);
+  case A::STag::MIState: {
+    ret += "Mis {";
+    auto bits = acls.m_mis.bits;
+    auto sep = "";
+    for (auto i = 0; i < bits.size(); ++i) {
+      if (bits.test(i)) {
+        folly::toAppend(sep, i * 8, &ret);
+        sep = ",";
+      }
+    }
+    ret += '}';
     break;
+  }
   case A::STag::Ref:
     folly::format(&ret, "Ref {}", acls.m_ref.boxed->id());
     break;

@@ -2106,14 +2106,10 @@ To string conversions:
 
 18. Member instruction support
 
-| DefMIStateBase, D(PtrToMISGen), NA, NF
+| LdMIStateAddr, D(PtrToMISGen), C(Int), NF
 
-  Returns a pointer to the base of the current MInstrState.
-
-| LdMIStateAddr, DofS(0), S(PtrToMISGen) C(Int), NF
-
-  Load an MInstrState address. Returns a pointer to (S0 + S1) with the same
-  type as S0. S0 must be the output of a DefMIStateBase.
+  Load an MInstrState address. Returns a pointer to offset S0 within the
+  current MInstrState.
 
 | LdMBase, D(PtrToGen), NA, NF
 

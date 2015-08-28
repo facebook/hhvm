@@ -75,8 +75,8 @@ inline TypedValue* baseGWD(TypedValue key) {
 
 template <MInstrAttr attrs, bool isObj>
 TypedValue* propImpl(Class* ctx, TypedValue* base,
-                     TypedValue key, MInstrState* mis) {
-  return Prop<WDU(attrs), isObj>(mis->tvRef, ctx, base, key);
+                     TypedValue key, TypedValue& tvRef) {
+  return Prop<WDU(attrs), isObj>(tvRef, ctx, base, key);
 }
 
 #define PROP_HELPER_TABLE(m)                        \
@@ -94,22 +94,22 @@ TypedValue* propImpl(Class* ctx, TypedValue* base,
 
 #define X(nm, ...)                                                      \
 inline TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,     \
-               MInstrState* mis) {                                      \
-  return propImpl<__VA_ARGS__>(ctx, base, key, mis);                    \
+                      TypedValue& tvRef) {                              \
+  return propImpl<__VA_ARGS__>(ctx, base, key, tvRef);                  \
 }
 PROP_HELPER_TABLE(X)
 #undef X
 
 // NullSafe prop.
 inline TypedValue* propCQ(Class* ctx, TypedValue* base, StringData* key,
-                          MInstrState* mis) {
-  return nullSafeProp(mis->tvRef, ctx, base, key);
+                          TypedValue& tvRef) {
+  return nullSafeProp(tvRef, ctx, base, key);
 }
 
 // NullSafe prop with object base.
 inline TypedValue* propCOQ(Class* ctx, ObjectData* base, StringData* key,
-                           MInstrState* mis) {
-  return base->prop(&mis->tvRef, ctx, key);
+                           TypedValue& tvRef) {
+  return base->prop(&tvRef, ctx, key);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -180,9 +180,9 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
 
 template <KeyType keyType, bool isObj>
 RefData* vGetPropImpl(Class* ctx, TypedValue* base,
-                      key_type<keyType> key, MInstrState* mis) {
+                      key_type<keyType> key, TypedValue& tvRef) {
   auto result = Prop<false, true, false, isObj, keyType>(
-    mis->tvRef,
+    tvRef,
     ctx,
     base,
     key
@@ -203,10 +203,10 @@ RefData* vGetPropImpl(Class* ctx, TypedValue* base,
   m(vGetPropS,   KeyType::Str, false)  \
   m(vGetPropSO,  KeyType::Str,  true)
 
-#define X(nm, kt, isObj)                                           \
-inline RefData* nm(Class* ctx, TypedValue* base, key_type<kt> key, \
-                   MInstrState* mis) {                             \
-  return vGetPropImpl<kt, isObj>(ctx, base, key, mis);             \
+#define X(nm, kt, isObj)                                              \
+inline RefData* nm(Class* ctx, TypedValue* base, key_type<kt> key,    \
+                   TypedValue& tvRef) {                               \
+  return vGetPropImpl<kt, isObj>(ctx, base, key, tvRef);              \
 }
 VGETPROP_HELPER_TABLE(X)
 #undef X
@@ -215,8 +215,8 @@ VGETPROP_HELPER_TABLE(X)
 
 template <bool isObj>
 void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
-                  RefData* val, MInstrState* mis) {
-  auto prop = Prop<false, true, false, isObj>(mis->tvRef, ctx, base, key);
+                  RefData* val, TypedValue& tvRef) {
+  auto prop = Prop<false, true, false, isObj>(tvRef, ctx, base, key);
   tvBindRef(val, prop);
 }
 
@@ -227,8 +227,8 @@ void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
 
 #define X(nm, ...)                                                      \
 inline void nm(Class* ctx, TypedValue* base, TypedValue key,            \
-               RefData* val, MInstrState* mis) {                        \
-  bindPropImpl<__VA_ARGS__>(ctx, base, key, val, mis);                  \
+               RefData* val, TypedValue& tvRef) {                       \
+  bindPropImpl<__VA_ARGS__>(ctx, base, key, val, tvRef);                \
 }
 BINDPROP_HELPER_TABLE(X)
 #undef X
@@ -278,8 +278,8 @@ UNSETPROP_HELPER_TABLE(X)
 template <bool isObj>
 TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
                          TypedValue key,
-                         Cell val, MInstrState* mis, SetOpOp op) {
-  auto result = HPHP::SetOpProp<isObj>(mis->tvRef, ctx, op, base, key, &val);
+                         Cell val, TypedValue& tvRef, SetOpOp op) {
+  auto result = HPHP::SetOpProp<isObj>(tvRef, ctx, op, base, key, &val);
 
   Cell ret;
   cellDup(*tvToCell(result), ret);
@@ -293,8 +293,8 @@ TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
 
 #define X(nm, ...)                                                     \
 inline TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,     \
-              Cell val, MInstrState* mis, SetOpOp op) {                \
-  return setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, mis, op);     \
+              Cell val, TypedValue& tvRef, SetOpOp op) {                \
+  return setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, tvRef, op);     \
 }
 SETOPPROP_HELPER_TABLE(X)
 #undef X
@@ -358,16 +358,16 @@ ISSET_EMPTY_PROP_HELPER_TABLE(X)
 template <KeyType keyType, bool warn, bool define, bool reffy, bool unset>
 TypedValue* elemImpl(TypedValue* base,
                      key_type<keyType> key,
-                     MInstrState* mis) {
+                     TypedValue& tvRef) {
   if (unset) {
-    return ElemU<keyType>(mis->tvRef, base, key);
+    return ElemU<keyType>(tvRef, base, key);
   }
   if (define) {
-    return ElemD<warn, reffy, keyType>(mis->tvRef, base, key);
+    return ElemD<warn, reffy, keyType>(tvRef, base, key);
   }
   // We won't really modify the TypedValue in the non-D case, so
   // this const_cast is safe.
-  return const_cast<TypedValue*>(Elem<warn, keyType>(mis->tvRef, base, key));
+  return const_cast<TypedValue*>(Elem<warn, keyType>(tvRef, base, key));
 }
 
 #define ELEM_HELPER_TABLE(m)                     \
@@ -397,8 +397,8 @@ TypedValue* elemImpl(TypedValue* base,
 #define X(nm, keyType, attrs)                             \
 inline TypedValue* nm(TypedValue* base,                   \
                       key_type<keyType> key,              \
-                      MInstrState* mis) {                 \
-  return elemImpl<keyType, WDRU(attrs)>(base, key, mis);  \
+                      TypedValue& tvRef) {                 \
+  return elemImpl<keyType, WDRU(attrs)>(base, key, tvRef);  \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
@@ -509,8 +509,8 @@ CGETELEM_HELPER_TABLE(X)
 
 template <KeyType keyType>
 RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key,
-                      MInstrState* mis) {
-  auto result = HPHP::ElemD<false, true, keyType>(mis->tvRef, base, key);
+                      TypedValue& tvRef) {
+  auto result = HPHP::ElemD<false, true, keyType>(tvRef, base, key);
 
   if (result->m_type != KindOfRef) {
     tvBox(result);
@@ -527,8 +527,8 @@ RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key,
   m(vGetElemS,    KeyType::Str)
 
 #define X(nm, kt)                                                       \
-inline RefData* nm(TypedValue* base, key_type<kt> key, MInstrState* mis) { \
-  return vGetElemImpl<kt>(base, key,  mis);                             \
+inline RefData* nm(TypedValue* base, key_type<kt> key, TypedValue& tvRef) { \
+  return vGetElemImpl<kt>(base, key,  tvRef);                             \
 }
 VGETELEM_HELPER_TABLE(X)
 #undef X

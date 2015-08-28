@@ -1397,6 +1397,26 @@ int instrSpToArDelta(const Op* opcode) {
   return numPops + numExtra;
 }
 
+std::string show(MInstrAttr mia) {
+  if (mia == MIA_none) return "none";
+
+  std::string ret;
+  auto sep = "";
+#define X(n) if (mia & MIA_##n) {               \
+    folly::toAppend(sep, #n, &ret);             \
+    sep = "|";                                  \
+  }
+  X(warn);
+  X(define);
+  X(reffy);
+  X(unset);
+  X(new);
+  X(final_get);
+#undef X
+
+  return ret;
+}
+
 const MInstrInfo& getMInstrInfo(Op op) {
   static const MInstrInfo mInstrInfo[] = {
 #define MII(instr, attrs, bS, iS, vC, fN)                               \

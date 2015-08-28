@@ -117,9 +117,6 @@ struct MTS {
 
   bool needMIS{true};
 
-  // The base for any accesses to the current MInstrState.
-  SSATmp* misBase{nullptr};
-
   /*
    * The value of the base for the next member operation. Starts as the base
    * for the whole instruction and is updated as the translator makes
@@ -304,17 +301,6 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Returns a pointer to the base of the current MInstrState struct.
- *
- * Must not be called if !env.needMIS.
- */
-SSATmp* misPtr(MTS& env) {
-  assertx(env.base.value && "misPtr called before emitBaseOp");
-  assertx(env.needMIS && "Asking for misPtr without needing it");
-  return env.misBase;
-}
-
-/*
  * Returns a pointer to a particular field in the MInstrState structure.
  *
  * Must not be called if !env.needMIS.
@@ -322,7 +308,11 @@ SSATmp* misPtr(MTS& env) {
 SSATmp* misLea(MTS& env, ptrdiff_t offset) {
   assertx(env.needMIS);
   auto const offvalue = cns(env, safe_cast<int32_t>(offset));
-  return gen(env, LdMIStateAddr, env.misBase, offvalue);
+  return gen(env, LdMIStateAddr, offvalue);
+}
+
+SSATmp* tvRefPtr(MTS& env) {
+  return misLea(env, offsetof(MInstrState, tvRef));
 }
 
 SSATmp* ptrToInitNull(IRGS& env) {
@@ -1029,7 +1019,7 @@ void emitPropGeneric(MTS& env) {
         MInstrAttrData { mia },
         env.base.value,
         key,
-        misPtr(env)
+        tvRefPtr(env)
       )
     );
   } else {
@@ -1041,7 +1031,7 @@ void emitPropGeneric(MTS& env) {
             PropQ,
             env.base.value,
             key,
-            misPtr(env)
+            tvRefPtr(env)
           )
         : gen(
             env,
@@ -1049,7 +1039,7 @@ void emitPropGeneric(MTS& env) {
             MInstrAttrData { mia },
             env.base.value,
             key,
-            misPtr(env)
+            tvRefPtr(env)
           )
     );
   }
@@ -1116,7 +1106,7 @@ void emitElem(MTS& env) {
           MInstrAttrData { mia },
           env.base.value,
           key,
-          misPtr(env))
+          tvRefPtr(env))
     );
     return;
   }
@@ -1127,7 +1117,7 @@ void emitElem(MTS& env) {
         MInstrAttrData { mia },
         env.base.value,
         key,
-        misPtr(env))
+        tvRefPtr(env))
   );
 }
 
@@ -1304,7 +1294,6 @@ void emitMPre(MTS& env) {
   checkMIState(env);
   computeRatchets(env);
   if (env.needMIS) {
-    env.misBase = gen(env, DefMIStateBase);
     auto const uninit = cns(env, TUninit);
     if (env.numLogicalRatchets > 0) {
       gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef)), uninit);
@@ -1715,7 +1704,7 @@ void emitVGetProp(MTS& env) {
       cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR))
     );
   }
-  env.result = gen(env, VGetProp, env.base.value, key, misPtr(env));
+  env.result = gen(env, VGetProp, env.base.value, key, tvRefPtr(env));
 }
 
 void emitIssetProp(MTS& env) {
@@ -1765,7 +1754,7 @@ void emitSetOpProp(MTS& env) {
   auto const key = getKey(env);
   auto const value = getValue(env);
   env.result = gen(env, SetOpProp, SetOpData { op },
-                   env.base.value, key, value, misPtr(env));
+                   env.base.value, key, value, tvRefPtr(env));
 }
 
 void emitIncDecProp(MTS& env) {
@@ -1799,7 +1788,7 @@ void emitIncDecProp(MTS& env) {
 void emitBindProp(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  gen(env, BindProp, env.base.value, key, box, misPtr(env));
+  gen(env, BindProp, env.base.value, key, box, tvRefPtr(env));
   env.result = box;
 }
 
@@ -1845,7 +1834,7 @@ void emitCGetElem(MTS& env) {
 
 void emitVGetElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, VGetElem, env.base.value, key, misPtr(env));
+  env.result = gen(env, VGetElem, env.base.value, key, tvRefPtr(env));
 }
 
 void emitIssetElem(MTS& env) {
@@ -1898,7 +1887,7 @@ void emitSetWithRefRProp(MTS& env) { emitSetWithRefLProp(env); }
 
 void emitSetWithRefNewElem(MTS& env) {
   auto const val = getValue(env);
-  gen(env, SetWithRefNewElem, env.base.value, val, misPtr(env));
+  gen(env, SetWithRefNewElem, env.base.value, val, tvRefPtr(env));
   env.result = nullptr;
 }
 
@@ -1952,7 +1941,7 @@ void emitSetElem(MTS& env) {
 void emitSetWithRefElem(MTS& env) {
   auto const key = getUnconstrainedKey(env);
   auto const val = getUnconstrainedValue(env);
-  gen(env, SetWithRefElem, env.base.value, key, val, misPtr(env));
+  gen(env, SetWithRefElem, env.base.value, key, val, tvRefPtr(env));
   env.result = nullptr;
 }
 
@@ -1963,19 +1952,19 @@ void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);
   env.result = gen(env, SetOpElem, SetOpData{op},
                    env.base.value, getKey(env), getValue(env),
-                   misPtr(env));
+                   tvRefPtr(env));
 }
 
 void emitIncDecElem(MTS& env) {
   auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   env.result = gen(env, IncDecElem, IncDecData { op },
-                   env.base.value, getKey(env), misPtr(env));
+                   env.base.value, getKey(env), tvRefPtr(env));
 }
 
 void emitBindElem(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  gen(env, BindElem, env.base.value, key, box, misPtr(env));
+  gen(env, BindElem, env.base.value, key, box, tvRefPtr(env));
   env.result = box;
 }
 
@@ -2016,7 +2005,7 @@ void emitIncDecNewElem(MTS& env) {
 
 void emitBindNewElem(MTS& env) {
   auto const box = getValue(env);
-  gen(env, BindNewElem, env.base.value, box, misPtr(env));
+  gen(env, BindNewElem, env.base.value, box, tvRefPtr(env));
   env.result = box;
 }
 
@@ -2315,46 +2304,34 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst) {
 }
 
 /*
- * Return a pointer to the MInstrState.
+ * Returns a pointer to a specific value in MInstrState.
  */
-SSATmp* misPtr(IRGS& env) {
-  return gen(env, DefMIStateBase);
+SSATmp* misLea(IRGS& env, int32_t offset) {
+  return gen(env, LdMIStateAddr, cns(env, offset));
 }
 
-/*
- * Returns a pointer to a specific value in MInstrState, optionally reusing an
- * existing base.
- */
-SSATmp* misLea(IRGS& env, int32_t offset, SSATmp* base = nullptr) {
-  if (!base) base = misPtr(env);
-  return gen(env, LdMIStateAddr, base, cns(env, offset));
+SSATmp* tvRefPtr(IRGS& env) {
+  return misLea(env, offsetof(MInstrState, tvRef));
 }
 
-constexpr int32_t tvRefOffs[] = {
-  offsetof(MInstrState, tvRef),
-  offsetof(MInstrState, tvRef2)
-};
+SSATmp* tvRef2Ptr(IRGS& env) {
+  return misLea(env, offsetof(MInstrState, tvRef2));
+}
 
 /*
  * Store Uninit to tvRef and tvRef2.
  */
 void initTvRefs(IRGS& env) {
-  auto base = gen(env, DefMIStateBase);
-  for (auto offset : tvRefOffs) {
-    auto const addr = misLea(env, offset, base);
-    gen(env, StMem, addr, cns(env, TUninit));
-  }
+  gen(env, StMem, tvRefPtr(env), cns(env, TUninit));
+  gen(env, StMem, tvRef2Ptr(env), cns(env, TUninit));
 }
 
 /*
  * DecRef tvRef and tvRef2.
  */
 void cleanTvRefs(IRGS& env) {
-  auto base = gen(env, DefMIStateBase);
-  for (auto offset : tvRefOffs) {
-    auto const addr = misLea(env, offset, base);
-    auto const val  = gen(env, LdMem, TGen, addr);
-    gen(env, DecRef, val);
+  for (auto ptr : {tvRefPtr(env), tvRef2Ptr(env)}) {
+    gen(env, DecRef, gen(env, LdMem, TGen, ptr));
   }
 }
 
@@ -2363,31 +2340,30 @@ void cleanTvRefs(IRGS& env) {
  * storing Uninit to tvRef.
  */
 SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
-  auto misBase = gen(env, DefMIStateBase);
-  auto tvRefPtr = misLea(env, tvRefOffs[0], misBase);
+  auto tvRef = tvRefPtr(env);
 
   return cond(
     env,
     [&](Block* taken) {
-      gen(env, CheckTypeMem, taken, TUninit, tvRefPtr);
+      gen(env, CheckTypeMem, taken, TUninit, tvRef);
     },
     [&] { // Next: tvRef is Uninit. Do nothing.
       return base;
     },
     [&] { // Taken: tvRef isn't Uninit. Ratchet the refs
-      auto tvRef2Ptr = misLea(env, tvRefOffs[1], misBase);
+      auto tvRef2 = tvRef2Ptr(env);
       // Clean up tvRef2 before overwriting it.
-      auto const oldRef2 = gen(env, LdMem, TGen, tvRef2Ptr);
+      auto const oldRef2 = gen(env, LdMem, TGen, tvRef2);
       gen(env, DecRef, oldRef2);
 
       // Copy tvRef to tvRef2.
-      auto const tvRef = gen(env, LdMem, TGen, tvRefPtr);
-      gen(env, StMem, tvRef2Ptr, tvRef);
+      auto const tvRefVal = gen(env, LdMem, TGen, tvRef);
+      gen(env, StMem, tvRef2, tvRefVal);
       // Reset tvRef.
-      gen(env, StMem, tvRefPtr, cns(env, TUninit));
+      gen(env, StMem, tvRef, cns(env, TUninit));
 
       // Adjust base pointer.
-      return tvRef2Ptr;
+      return tvRef2;
     }
   );
 }
@@ -2416,13 +2392,13 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
       return ptrToInitNull(env);
     }
 
-    return gen(env, PropDX, miaData, base, key, misPtr(env));
+    return gen(env, PropDX, miaData, base, key, tvRefPtr(env));
   }
 
   if (nullsafe) {
-    return gen(env, PropQ, base, key, misPtr(env));
+    return gen(env, PropQ, base, key, tvRefPtr(env));
   }
-  return gen(env, PropX, miaData, base, key, misPtr(env));
+  return gen(env, PropX, miaData, base, key, tvRefPtr(env));
 }
 
 SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
@@ -2454,7 +2430,7 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
 
   auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
   auto const op = define ? ElemDX : unset ? ElemUX : ElemX;
-  return gen(env, op, miaData, basePtr, key, misPtr(env));
+  return gen(env, op, miaData, basePtr, key, tvRefPtr(env));
 }
 
 void dimImpl(IRGS& env, PropElemOp propElem, MOpFlags flags, SSATmp* key) {

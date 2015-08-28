@@ -17,9 +17,11 @@
 #define incl_HPHP_ALIAS_CLASS_H_
 
 #include "hphp/runtime/vm/jit/alias-id-set.h"
+#include "hphp/runtime/vm/minstr-state.h"
 
 #include <folly/Optional.h>
 
+#include <bitset>
 #include <string>
 #include <cstdint>
 
@@ -150,9 +152,50 @@ struct AStack {
 };
 
 /*
- * One of the MInstrState TypedValues, at a particular offset in bytes.
+ * One or more of the values in MInstrState, represented as a bitset where each
+ * bit represents an 8-byte chunk (so TypedValues are two bits and TypedValue*
+ * is one bit).
  */
-struct AMIState { int32_t offset; };
+struct AMIState {
+  static_assert(sizeof(MInstrState) % 8 == 0, "");
+
+  using mis_bits = std::bitset<sizeof(MInstrState) / 8>;
+
+  static constexpr size_t kBitSize = 8;
+
+  // We intentionally don't have a constructor that takes mis_bits. std::bitset
+  // has implicit constructors from unsigned long (long) and we don't want to
+  // allow constructing AMIState from integral values. Any non-default
+  // construction should be done with the static functions below.
+  AMIState() noexcept {}
+
+  static AMIState fromBits(mis_bits bits) noexcept {
+    AMIState ret;
+    ret.bits = bits;
+    return ret;
+  }
+
+  // Construct an AMIState for a single TypedValue within MInstrState.
+  static AMIState fromTV(ptrdiff_t offset) noexcept {
+    assert(offset % kBitSize == 0);
+    AMIState ret;
+    static_assert(kBitSize * 2 == sizeof(TypedValue), "");
+    ret.bits.set(offset / kBitSize);
+    ret.bits.set(offset / kBitSize + 1);
+    return ret;
+  }
+
+  // Construct an AMIState for a single TypedValue* within MInstrState.
+  static AMIState fromPtr(ptrdiff_t offset) noexcept {
+    assert(offset % kBitSize == 0);
+    AMIState ret;
+    static_assert(kBitSize == sizeof(TypedValue*), "");
+    ret.bits.set(offset / kBitSize);
+    return ret;
+  }
+
+  mis_bits bits;
+};
 
 /*
  * A RefData referenced by a BoxedCell.

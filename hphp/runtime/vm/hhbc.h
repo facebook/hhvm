@@ -241,6 +241,8 @@ enum MInstrAttr {
 #endif
 };
 
+std::string show(MInstrAttr);
+
 // MII(instr,  * in *M
 //     attrs,  operation attributes
 //     bS,     base operation suffix

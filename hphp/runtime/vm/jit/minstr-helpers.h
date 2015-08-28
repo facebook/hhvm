@@ -76,7 +76,8 @@ inline TypedValue* baseGWD(TypedValue key) {
 template <MInstrAttr attrs, bool isObj>
 TypedValue* propImpl(Class* ctx, TypedValue* base,
                      TypedValue key, MInstrState* mis) {
-  return Prop<WDU(attrs), isObj>(mis->tvRef, ctx, base, key);
+  return Prop<WDU(attrs), isObj>(
+    mis->tvScratch, mis->tvRef, ctx, base, key);
 }
 
 #define PROP_HELPER_TABLE(m)                        \
@@ -103,13 +104,13 @@ PROP_HELPER_TABLE(X)
 // NullSafe prop.
 inline TypedValue* propCQ(Class* ctx, TypedValue* base, StringData* key,
                           MInstrState* mis) {
-  return nullSafeProp(mis->tvRef, ctx, base, key);
+  return nullSafeProp(mis->tvScratch, mis->tvRef, ctx, base, key);
 }
 
 // NullSafe prop with object base.
 inline TypedValue* propCOQ(Class* ctx, ObjectData* base, StringData* key,
                            MInstrState* mis) {
-  return base->prop(&mis->tvRef, ctx, key);
+  return base->prop(&mis->tvScratch, &mis->tvRef, ctx, key);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -136,8 +137,10 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
 
 template <KeyType keyType, bool isObj>
 TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
+  TypedValue scratch;
   TypedValue localTvRef;
   auto result = Prop<true, false, false, isObj, keyType>(
+    scratch,
     localTvRef,
     ctx,
     base,
@@ -164,15 +167,17 @@ CGETPROP_HELPER_TABLE(X)
 
 // NullSafe prop.
 inline TypedValue cGetPropSQ(Class* ctx, TypedValue* base, StringData* key) {
+  TypedValue scratch;
   TypedValue localTvRef;
-  auto result = nullSafeProp(localTvRef, ctx, base, key);
+  auto result = nullSafeProp(scratch, localTvRef, ctx, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
 // NullSafe prop with object base.
 inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
+  TypedValue scratch;
   TypedValue localTvRef;
-  auto result = base->prop(&localTvRef, ctx, key);
+  auto result = base->prop(&scratch, &localTvRef, ctx, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -181,17 +186,13 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
 template <KeyType keyType, bool isObj>
 RefData* vGetPropImpl(Class* ctx, TypedValue* base,
                       key_type<keyType> key, MInstrState* mis) {
-  auto result = Prop<false, true, false, isObj, keyType>(
-    mis->tvRef,
-    ctx,
-    base,
-    key
-  );
+  TypedValue* result = Prop<false, true, false, isObj, keyType>(
+    mis->tvScratch, mis->tvRef, ctx, base, key);
 
   if (result->m_type != KindOfRef) {
     tvBox(result);
   }
-  auto ref = result->m_data.pref;
+  RefData* ref = result->m_data.pref;
   ref->incRefCount();
   return ref;
 }
@@ -216,8 +217,11 @@ VGETPROP_HELPER_TABLE(X)
 template <bool isObj>
 void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
                   RefData* val, MInstrState* mis) {
-  auto prop = Prop<false, true, false, isObj>(mis->tvRef, ctx, base, key);
-  tvBindRef(val, prop);
+  TypedValue* prop = Prop<false, true, false, isObj>(
+    mis->tvScratch, mis->tvRef, ctx, base, key);
+  if (!(prop == &mis->tvScratch && prop->m_type == KindOfUninit)) {
+    tvBindRef(val, prop);
+  }
 }
 
 #define BINDPROP_HELPER_TABLE(m)   \
@@ -279,7 +283,8 @@ template <bool isObj>
 TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
                          TypedValue key,
                          Cell val, MInstrState* mis, SetOpOp op) {
-  auto result = HPHP::SetOpProp<isObj>(mis->tvRef, ctx, op, base, key, &val);
+  TypedValue* result = HPHP::SetOpProp<isObj>(
+    mis->tvScratch, mis->tvRef, ctx, op, base, key, &val);
 
   Cell ret;
   cellDup(*tvToCell(result), ret);
@@ -360,14 +365,16 @@ TypedValue* elemImpl(TypedValue* base,
                      key_type<keyType> key,
                      MInstrState* mis) {
   if (unset) {
-    return ElemU<keyType>(mis->tvRef, base, key);
+    return ElemU<keyType>(mis->tvScratch, mis->tvRef, base, key);
   }
   if (define) {
-    return ElemD<warn, reffy, keyType>(mis->tvRef, base, key);
+    return ElemD<warn, reffy, keyType>(mis->tvScratch, mis->tvRef, base, key);
   }
   // We won't really modify the TypedValue in the non-D case, so
   // this const_cast is safe.
-  return const_cast<TypedValue*>(Elem<warn, keyType>(mis->tvRef, base, key));
+  return const_cast<TypedValue*>(
+    Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base, key)
+  );
 }
 
 #define ELEM_HELPER_TABLE(m)                     \
@@ -489,8 +496,9 @@ ARRAYGET_HELPER_TABLE(X)
 
 template <KeyType keyType>
 TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key) {
+  TypedValue scratch;
   TypedValue localTvRef;
-  auto result = Elem<true, keyType>(localTvRef, base, key);
+  auto result = Elem<true, keyType>(scratch, localTvRef, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -512,12 +520,13 @@ CGETELEM_HELPER_TABLE(X)
 template <KeyType keyType>
 RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key,
                       MInstrState* mis) {
-  auto result = HPHP::ElemD<false, true, keyType>(mis->tvRef, base, key);
+  TypedValue* result = HPHP::ElemD<false, true, keyType>(
+    mis->tvScratch, mis->tvRef, base, key);
 
   if (result->m_type != KindOfRef) {
     tvBox(result);
   }
-  auto ref = result->m_data.pref;
+  RefData* ref = result->m_data.pref;
   ref->incRefCount();
   return ref;
 }

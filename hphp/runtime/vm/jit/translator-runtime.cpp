@@ -146,7 +146,8 @@ void setNewElemArray(TypedValue* base, Cell val) {
 
 TypedValue setOpElem(TypedValue* base, TypedValue key,
                      Cell val, MInstrState* mis, SetOpOp op) {
-  auto result = HPHP::SetOpElem(mis->tvRef, op, base, key, &val);
+  TypedValue* result =
+    HPHP::SetOpElem(mis->tvScratch, mis->tvRef, op, base, key, &val);
 
   Cell ret;
   cellDup(*tvToCell(result), ret);
@@ -166,8 +167,10 @@ TypedValue incDecElem(
 }
 
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
-  auto elem = HPHP::NewElem<true>(mis->tvRef, base);
-  tvBindRef(val, elem);
+  base = HPHP::NewElem<true>(mis->tvScratch, mis->tvRef, base);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvBindRef(val, base);
+  }
 }
 
 RefData* boxValue(TypedValue tv) {
@@ -1240,14 +1243,14 @@ void throwSwitchMode() {
 
 namespace MInstrHelpers {
 
-StringData* stringGetI(StringData* base, uint64_t x) {
-  if (LIKELY(x < base->size())) {
-    return base->getChar(x);
+StringData* stringGetI(StringData* str, uint64_t x) {
+  if (LIKELY(x < str->size())) {
+    return str->getChar(x);
   }
   if (RuntimeOption::EnableHipHopSyntax) {
     raise_warning("Out of bounds");
   }
-  return staticEmptyString();
+  return s_empty.get();
 }
 
 uint64_t pairIsset(c_Pair* pair, int64_t index) {
@@ -1262,20 +1265,30 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
 
 void bindElemC(TypedValue* base, TypedValue key, RefData* val,
                MInstrState* mis) {
-  auto elem = HPHP::ElemD<false, true>(mis->tvRef, base, key);
-  tvBindRef(val, elem);
+  base = HPHP::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, key);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvBindRef(val, base);
+  }
 }
 
 void setWithRefElemC(TypedValue* base, TypedValue keyTV, TypedValue val,
                      MInstrState* mis) {
   auto const keyC = tvToCell(&keyTV);
-  auto elem = HPHP::ElemD<false, false>(mis->tvRef, base, *keyC);
-  tvDup(val, *elem);
+  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, *keyC);
+  if (base != &mis->tvScratch) {
+    tvDup(val, *base);
+  } else {
+    assertx(base->m_type == KindOfUninit);
+  }
 }
 
 void setWithRefNewElem(TypedValue* base, TypedValue val, MInstrState* mis) {
-  auto elem = NewElem<false>(mis->tvRef, base);
-  tvDup(val, *elem);
+  base = NewElem<false>(mis->tvScratch, mis->tvRef, base);
+  if (base != &mis->tvScratch) {
+    tvDup(val, *base);
+  } else {
+    assertx(base->m_type == KindOfUninit);
+  }
 }
 
 }

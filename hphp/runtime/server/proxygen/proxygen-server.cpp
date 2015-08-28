@@ -265,17 +265,12 @@ void ProxygenServer::start() {
       failedToListen(ex, m_httpsConfig.bindAddress);
     }
   }
-  m_worker.getEventBase()->runInEventBaseThread([this] {
-      if (!m_httpServerSocket) {
-        // someone called stop before we got here
-        return;
-      }
-      m_httpServerSocket->startAccepting();
-      if (m_httpsServerSocket) {
-        m_httpsServerSocket->startAccepting();
-      }
-      startConsuming(m_worker.getEventBase(), &m_responseQueue);
-    });
+  m_httpServerSocket->startAccepting();
+  if (m_httpsServerSocket) {
+    m_httpsServerSocket->startAccepting();
+  }
+  startConsuming(m_worker.getEventBase(), &m_responseQueue);
+
   setStatus(RunStatus::RUNNING);
   TAsyncTimeout::attachEventBase(m_worker.getEventBase());
   m_worker.start();

@@ -398,6 +398,9 @@
     commit: 6225b22de9dcf36546be3a0b2fa8e3d986153f57
     install_root: monolog
     test_root: monolog
+    flakey:
+      # writes to a fixed location
+      - monolog/tests/Monolog/Handler/RotatingFileHandlerTest.php
   mustache:
     url: https://github.com/bobthecow/mustache.php.git
     branch: v2.5.1

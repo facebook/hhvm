@@ -303,20 +303,26 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 
 //////////////////////////////////////////////////////////////////////
 
-// Returns a pointer to the base of the current MInstrState struct, or a null
-// pointer if it's not needed.
+/*
+ * Returns a pointer to the base of the current MInstrState struct.
+ *
+ * Must not be called if !env.needMIS.
+ */
 SSATmp* misPtr(MTS& env) {
   assertx(env.base.value && "misPtr called before emitBaseOp");
-  if (env.needMIS) return env.misBase;
-  return cns(env, Type::cns(nullptr, TPtrToMISUninit));
+  assertx(env.needMIS && "Asking for misPtr without needing it");
+  return env.misBase;
 }
 
-// Returns a pointer to a particular field in the MInstrState structure.  Must
-// not be called if !env.needsMIS.
+/*
+ * Returns a pointer to a particular field in the MInstrState structure.
+ *
+ * Must not be called if !env.needMIS.
+ */
 SSATmp* misLea(MTS& env, ptrdiff_t offset) {
   assertx(env.needMIS);
-  return gen(env, LdMIStateAddr, env.misBase,
-    cns(env, safe_cast<int32_t>(offset)));
+  auto const offvalue = cns(env, safe_cast<int32_t>(offset));
+  return gen(env, LdMIStateAddr, env.misBase, offvalue);
 }
 
 SSATmp* ptrToInitNull(IRGS& env) {
@@ -425,80 +431,59 @@ bool isOptimizableCollectionClass(const Class* klass) {
                                     CollectionType::Pair);
 }
 
-// Inspect the instruction we're about to translate and determine if it can be
-// executed without using an MInstrState struct.
+/*
+ * Inspect the instruction we're about to translate and determine if it can be
+ * executed without using an MInstrState struct.
+ */
 void checkMIState(MTS& env) {
-  if (env.immVec.locationCode() == LNL ||
-      env.immVec.locationCode() == LNC) {
-    // We're definitely going to punt in emitBaseN, so we might not
-    // have guarded the base's type.
+  // We're definitely going to punt in emitBaseN, so we might not have guarded
+  // the base's type.
+  if (env.immVec.locationCode() == LNL || env.immVec.locationCode() == LNC) {
     return;
   }
 
-  Type baseType             = env.base.type.derefIfPtr();
-  const bool baseArr        = baseType <= TArr;
-  const bool isCGetM        = env.op == Op::CGetM;
-  const bool isSetM         = env.op == Op::SetM;
-  const bool isIssetM       = env.op == Op::IssetM;
-  const bool isUnsetM       = env.op == Op::UnsetM;
-  const bool isSingle       = env.immVecM.size() == 1;
+  Type baseType       = env.base.type.derefIfPtr();
+  auto const isCGetM  = env.op == Op::CGetM;
+  auto const isSetM   = env.op == Op::SetM;
+  auto const isIssetM = env.op == Op::IssetM;
+  auto const isUnsetM = env.op == Op::UnsetM;
+  auto const isSingle = env.immVecM.size() == 1;
 
-  if (baseType.maybe(TCell) &&
-      baseType.maybe(TBoxedCell)) {
-    // We don't need to bother with weird base types.
+  // We don't need to bother with weird base types.
+  if (baseType.maybe(TCell) && baseType.maybe(TBoxedCell)) {
     return;
   }
+
   if (baseType <= TBoxedCell) {
     baseType = ldRefReturn(baseType.unbox());
   }
 
-  // CGetM or SetM with no unknown property offsets
-  const bool simpleProp = [&]() {
+  // CGetM or SetM with no unknown property offsets.
+  auto const simpleProp = [&]() {
     if (!isCGetM && !isSetM) return false;
     if (mInstrHasUnknownOffsets(env)) return false;
-    auto cls = baseType.clsSpec().cls();
-    if (!cls) return false;
+    auto const cls = baseType.clsSpec().cls();
+    if (cls == nullptr) return false;
     return !constrainBase(env, TypeConstraint(cls).setWeak());
   }();
 
-  // SetM with only one vector element, for props and elems
-  const bool singleSet = isSingle && isSetM;
+  // Final operations that don't use MIState.
+  auto const simpleFinal = isCGetM || isSetM || isIssetM || isUnsetM;
 
-  // CGetM with only one vector element, for props and elems.
-  const bool singleCGet = isSingle && isCGetM;
-
-  // Element access with one element in the vector
-  const bool singleElem = isSingle && mcodeIsElem(env.immVecM[0]);
-
-  // IssetM with one vector array element and an Arr base
-  const bool simpleArrayIsset = isIssetM && singleElem && baseArr;
-
-  // IssetM with one vector array element and a collection type
-  const bool simpleCollectionIsset =
-    isIssetM && singleElem && baseType < TObj &&
-    isOptimizableCollectionClass(baseType.clsSpec().cls());
-
-  // UnsetM on an array with one vector element
-  const bool simpleArrayUnset = isUnsetM && singleElem &&
-    baseType <= TArr;
-
-  // CGetM on an array with a base that won't use MInstrState. Str
-  // will use tvScratch and Obj will fatal or use tvRef.
-  const bool simpleArrayGet = isCGetM && singleElem &&
-    !baseType.maybe(TStr | TObj);
-  const bool simpleCollectionGet =
-    isCGetM && singleElem && baseType < TObj &&
-    isOptimizableCollectionClass(baseType.clsSpec().cls());
-  const bool simpleStringOp = (isCGetM || isIssetM) && isSingle &&
-    isSimpleBase(env) && mcodeMaybeArrayIntKey(env.immVecM[0]) &&
-    baseType <= TStr;
-
-  if (simpleProp || singleSet || singleCGet ||
-      simpleArrayGet || simpleCollectionGet ||
-      simpleArrayUnset || simpleCollectionIsset ||
-      simpleArrayIsset || simpleStringOp) {
+  if (simpleProp || (isSingle && simpleFinal)) {
     env.needMIS = false;
-    if (simpleCollectionGet || simpleCollectionIsset) {
+
+    // Element access with one element in the vector.
+    auto const singleElem = isSingle && mcodeIsElem(env.immVecM[0]);
+
+    // CGetM or IssetM with one vector array element and a collection type.
+    auto const simpleCollection =
+      (isIssetM || isCGetM) &&
+      singleElem &&
+      baseType < TObj &&
+      isOptimizableCollectionClass(baseType.clsSpec().cls());
+
+    if (simpleCollection) {
       constrainBase(env, TypeConstraint(baseType.clsSpec().cls()));
     } else {
       constrainBase(env, DataTypeSpecific);
@@ -637,8 +622,7 @@ SimpleOp computeSimpleCollectionOp(
           return SimpleOp::Array;
         }
       }
-    } else if (baseType <= TStr &&
-               mcodeMaybeArrayIntKey(ni.immVecM[0])) {
+    } else if (baseType <= TStr && mcodeMaybeArrayIntKey(ni.immVecM[0])) {
       auto const keyType = getType(env, ni.inputs[mii.valCount() + 1]);
       if (keyType <= TInt) {
         // Don't bother with SetM on strings, because profile data

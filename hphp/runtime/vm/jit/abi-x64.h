@@ -50,6 +50,8 @@ inline RegSet vm_regs_no_sp()   { return detail::kVMRegsNoSP; }
 
 RegSet interp_one_cf_regs();
 
+constexpr PhysReg rret() { return reg::rax; }
+
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
 

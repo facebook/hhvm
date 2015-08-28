@@ -64,6 +64,17 @@ void assertNativeStackAligned(Vout& v) {
   }
 }
 
+void loadVMRegs(Vout& v) {
+  v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+  v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+}
+
+void loadMCG(Vout& v, Vreg d) {
+  // TODO(#8060678): Why does this need to be RIP-relative?
+  auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
+  v << loadqp{reg::rip[imcg], d};
+}
+
 /*
  * Convenience wrapper around a simple vcall to `helper', with a single `arg'
  * and a return value in `d'.
@@ -92,7 +103,7 @@ RegSet syncForLLVMCatch(Vout& v) {
 }
 
 /*
- * Load RIP from wherever it's stashed at the beginning of a new frame.
+ * Load RIP from wherever it's stashed at the beginning of a new native frame.
  */
 void loadSavedRIP(Vout& v, Vreg d) {
   if (arch() != Arch::X64) not_implemented();
@@ -100,8 +111,18 @@ void loadSavedRIP(Vout& v, Vreg d) {
 }
 
 /*
- * On x64, native calls assume native stack alignment.  For called stubs (as
- * opposed to jmp target stubs), we may need to take care of this manually.
+ * Stash the saved RIP of the native frame in the VM frame's m_savedRip, and
+ * also align the native stack.
+ *
+ * TODO(#7728856): Use this for EnterFrame as well.
+ */
+void stashSavedRIP(Vout& v, Vreg fp) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::stashSavedRIP(v, fp);
+}
+
+/*
+ * Align the native stack in an architecture-specific way.
  */
 template<class GenFunc>
 void alignNativeStack(Vout& v, GenFunc gen) {
@@ -179,9 +200,7 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
     unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
       // A nullptr dest means the callee was intercepted and should be skipped.
       // Just return to the caller after syncing VM regs.
-      v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
-      v << load{rvmtl()[rds::kVmspOff], rvmsp()};
-
+      loadVMRegs(v);
       v << ret{};
     });
 
@@ -291,10 +310,7 @@ TCA emitBindCallStub(CodeBlock& cb) {
   return vwrap(cb, [] (Vout& v) {
     auto args = VregList { v.makeReg(), v.makeReg(),
                            v.makeReg(), v.makeReg() };
-
-    // TODO(#8060678): Why does this need to be RIP-relative?
-    auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
-    v << loadqp{reg::rip[imcg], args[0]};
+    loadMCG(v, args[0]);
 
     // Reconstruct the address of the call from the saved RIP.
     auto const savedRIP = v.makeReg();
@@ -322,6 +338,57 @@ TCA emitBindCallStub(CodeBlock& cb) {
 
     v << jmpr{ret};
   });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct ResumeHelper {
+  TCA handle_resume;
+  TCA reenter_tc;
+};
+
+ResumeHelper resumeHelperBody(CodeBlock& cb) {
+  auto const handle_resume = vwrap(cb, [] (Vout& v) {
+    v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+    loadMCG(v, rarg(0));
+
+    auto const handler = reinterpret_cast<TCA>(
+      getMethodPtr(&MCGenerator::handleResume)
+    );
+    v << call{handler, arg_regs(2)};
+  });
+
+  auto const reenter_tc = vwrap(cb, [] (Vout& v) {
+    loadVMRegs(v);
+    auto const args = syncForLLVMCatch(v);
+    v << jmpr{rret(), args};
+  });
+
+  return ResumeHelper { handle_resume, reenter_tc };
+}
+
+TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us) {
+  alignJmpTarget(cb);
+
+  us.resumeHelperRet = vwrap(cb, [] (Vout& v) {
+    stashSavedRIP(v, rvmfp());
+  });
+  us.resumeHelper = vwrap(cb, [] (Vout& v) {
+    v << ldimmb{0, rarg(1)};
+  });
+  auto const body = resumeHelperBody(cb).handle_resume;
+
+  us.interpHelper = vwrap(cb, [] (Vout& v) {
+    v << store{rarg(0), rvmtl()[rds::kVmpcOff]};
+  });
+  us.interpHelperSyncedPC = vwrap(cb, [&] (Vout& v) {
+    v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
+    v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
+    v << ldimmb{1, rarg(1)};
+    v << jmpi{body, RegSet(rarg(1))};
+  });
+
+  return us.resumeHelperRet;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -355,6 +422,8 @@ void UniqueStubs::emitAll() {
   ADD(bindCallStub,           emitBindCallStub<false>(cold));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold));
 #undef ADD
+
+  add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this));
 
   // TODO(#6730846): Kill this once all unique stubs are emitted here.
   if (arch() == Arch::X64) x64::emitUniqueStubs(*this);

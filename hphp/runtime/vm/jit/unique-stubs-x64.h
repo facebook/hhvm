@@ -53,6 +53,18 @@ inline void loadSavedRIP(Vout& v, Vreg d) {
   v << load{*reg::rsp, d};
 }
 
+inline void stashSavedRIP(Vout& v, Vreg fp) {
+  v << popm{fp[AROFF(m_savedRip)]};
+}
+
+/*
+ * On x64, we need to align the native stack to 16 bytes before calls as an ABI
+ * restriction; see documentation in unique-stubs-x64.h.
+ *
+ * We do this manually for calls in the appropriate stubs, which simulates the
+ * alignment that results from the usual convention of pushing %rbp at the
+ * start of every function.
+ */
 template<class GenFunc>
 void alignNativeStack(Vout& v, GenFunc gen) {
   v << subqi{8, reg::rsp, reg::rsp, v.makeReg()};

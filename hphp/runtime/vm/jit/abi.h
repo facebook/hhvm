@@ -138,6 +138,11 @@ RegSet interp_one_cf_regs();
 // Calling convention registers.
 
 /*
+ * GP register for integer returns.
+ */
+PhysReg rret();
+
+/*
  * Native argument registers.
  */
 PhysReg rarg(size_t i);

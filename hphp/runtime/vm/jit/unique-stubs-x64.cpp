@@ -94,18 +94,6 @@ void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
   Label resumeHelper;
   Label resumeRaw;
 
-  uniqueStubs.interpHelper = a.frontier();
-  a.    storeq (rarg(0), rvmtl()[rds::kVmpcOff]);
-  uniqueStubs.interpHelperSyncedPC = a.frontier();
-  a.    storeq (rvmsp(), rvmtl()[rds::kVmspOff]);
-  a.    storeq (rvmfp(), rvmtl()[rds::kVmfpOff]);
-  a.    movb   (1, rbyte(rarg(1))); // interpFirst
-  a.    jmp8   (resumeHelper);
-
-  uniqueStubs.resumeHelperRet = a.frontier();
-  a.    pop   (rvmfp()[AROFF(m_savedRip)]);
-  uniqueStubs.resumeHelper = a.frontier();
-  a.    movb  (0, rbyte(rarg(1))); // interpFirst
 asm_label(a, resumeHelper);
   a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
   a.    loadq (rip[intptr_t(&mcg)], rarg(0));
@@ -115,8 +103,6 @@ asm_label(a, resumeRaw);
   a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
   a.    movq  (rvmfp(), rdx); // llvm catch traces expect rvmfp() to be in rdx.
   a.    jmp   (rax);
-
-  uniqueStubs.add("resumeInterpHelpers", uniqueStubs.interpHelper);
 
   auto emitInterpOneStub = [&](const Op op) {
     Asm a{mcg->code.cold()};

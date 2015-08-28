@@ -189,6 +189,13 @@ void ProxygenServer::removeTakeoverListener(TakeoverListener* listener) {
 void ProxygenServer::start() {
   m_httpServerSocket.reset(new AsyncServerSocket(m_worker.getEventBase()));
   bool needListen = true;
+  auto failedToListen = [](const std::exception& ex,
+                           const folly::SocketAddress& addr) {
+    Logger::Error("%s", ex.what());
+    throw FailedToListenException(addr.getAddressStr(),
+                                  addr.getPort());
+  };
+
   try {
     if (m_accept_sock >= 0) {
       Logger::Info("inheritfd: using inherited fd %d for server",
@@ -212,9 +219,7 @@ void ProxygenServer::start() {
       }
     }
     if (!takoverSucceeded) {
-      Logger::Error("%s", ex.what());
-      throw FailedToListenException(m_httpConfig.bindAddress.getAddressStr(),
-                                    m_httpConfig.bindAddress.getPort());
+      failedToListen(ex, m_httpConfig.bindAddress);
     }
   }
   if (m_takeover_agent) {
@@ -235,9 +240,7 @@ void ProxygenServer::start() {
         m_httpsServerSocket->bind(m_httpsConfig.bindAddress);
       }
     } catch (const TTransportException& ex) {
-      Logger::Error("%s", ex.what());
-      throw FailedToListenException(m_httpsConfig.bindAddress.getAddressStr(),
-                                    m_httpsConfig.bindAddress.getPort());
+      failedToListen(ex, m_httpsConfig.bindAddress);
     }
 
     m_httpsAcceptor.reset(new HPHPSessionAcceptor(m_httpsConfig, this));
@@ -245,22 +248,30 @@ void ProxygenServer::start() {
       m_httpsAcceptor->init(m_httpsServerSocket.get(), m_worker.getEventBase());
     } catch (const std::exception& ex) {
       // Could be some cert thing
-      Logger::Error("%s", ex.what());
-      throw FailedToListenException(m_httpsConfig.bindAddress.getAddressStr(),
-                                    m_httpsConfig.bindAddress.getPort());
+      failedToListen(ex, m_httpsConfig.bindAddress);
     }
   }
-  m_worker.getEventBase()->runInEventBaseThread([this, needListen] {
+  if (needListen) {
+    try {
+      m_httpServerSocket->listen(m_httpConfig.acceptBacklog);
+    } catch (const std::system_error& ex) {
+      failedToListen(ex, m_httpConfig.bindAddress);
+    }
+  }
+  if (m_httpsServerSocket) {
+    try {
+      m_httpsServerSocket->listen(m_httpsConfig.acceptBacklog);
+    } catch (const std::system_error& ex) {
+      failedToListen(ex, m_httpsConfig.bindAddress);
+    }
+  }
+  m_worker.getEventBase()->runInEventBaseThread([this] {
       if (!m_httpServerSocket) {
         // someone called stop before we got here
         return;
       }
-      if (needListen) {
-        m_httpServerSocket->listen(m_httpConfig.acceptBacklog);
-      }
       m_httpServerSocket->startAccepting();
       if (m_httpsServerSocket) {
-        m_httpsServerSocket->listen(m_httpsConfig.acceptBacklog);
         m_httpsServerSocket->startAccepting();
       }
       startConsuming(m_worker.getEventBase(), &m_responseQueue);

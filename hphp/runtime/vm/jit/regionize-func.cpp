@@ -317,13 +317,15 @@ void regionizeFunc(const Func* func,
       switch (regionMode) {
         case PGORegionMode::Hottrace:
           region = selectHotTrace(newHead, profData, cfg,
+                                  RuntimeOption::EvalJitMaxRegionInstrs,
                                   selectedSet, &selectedVec);
           break;
 
         case PGORegionMode::WholeCFG:
         case PGORegionMode::HotCFG:
-          region = selectHotCFG(newHead, profData, cfg, selectedSet,
-                                &selectedVec);
+          region = selectHotCFG(newHead, profData, cfg,
+                                RuntimeOption::EvalJitMaxRegionInstrs,
+                                selectedSet, &selectedVec);
           break;
 
         case PGORegionMode::Hotblock:

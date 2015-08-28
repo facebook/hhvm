@@ -163,7 +163,8 @@ private:
  */
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
-                                 const IRGS& irgs);
+                                 const IRGS& irgs,
+                                 int32_t maxBCInstrs);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

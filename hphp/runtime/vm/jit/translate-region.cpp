@@ -539,7 +539,8 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        const Func* callee,
                                        TranslateRetryContext& retry,
                                        InliningDecider& inl,
-                                       const IRGS& irgs) {
+                                       const IRGS& irgs,
+                                       int32_t maxBCInstrs) {
   if (psk.srcKey.op() != Op::FCall &&
       psk.srcKey.op() != Op::FCallD) {
     return nullptr;
@@ -569,8 +570,11 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   // Look up or select a region for `callee'.
   if (retry.inlines.count(psk)) {
     calleeRegion = retry.inlines[psk];
+    if (!calleeRegion || calleeRegion->instrSize() > maxBCInstrs) {
+      return nullptr;
+    }
   } else {
-    calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs);
+    calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, maxBCInstrs);
     retry.inlines[psk] = calleeRegion;
   }
   if (!calleeRegion) return nullptr;
@@ -584,7 +588,8 @@ TranslateResult irGenRegion(IRGS& irgs,
                             const RegionDesc& region,
                             TranslateRetryContext& retry,
                             TransFlags trflags,
-                            InliningDecider& inl) {
+                            InliningDecider& inl,
+                            int32_t& budgetBCInstrs) {
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
@@ -596,6 +601,10 @@ TranslateResult irGenRegion(IRGS& irgs,
   always_assert_flog(check(region, errorMsg), "{}", errorMsg);
 
   auto& irb = *irgs.irb;
+
+  auto regionSize = region.instrSize();
+  always_assert(regionSize <= budgetBCInstrs);
+  budgetBCInstrs -= regionSize;
 
   // Create a map from region blocks to their corresponding initial IR blocks.
   auto blockIdToIRBlock = createBlockMap(irgs, region);
@@ -725,7 +734,7 @@ TranslateResult irGenRegion(IRGS& irgs,
       // singleton inliner isn't actively inlining.
       if (!skipTrans) {
         calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, retry, inl,
-                                                irgs);
+                                                irgs, budgetBCInstrs);
       }
 
       if (calleeRegion) {
@@ -733,7 +742,9 @@ TranslateResult irGenRegion(IRGS& irgs,
         auto const* callee = inst.funcd;
 
         // We shouldn't be inlining profiling translations.
-        assert(mcg->tx().mode() != TransKind::Profile);
+        assertx(mcg->tx().mode() != TransKind::Profile);
+
+        assertx(calleeRegion->instrSize() <= budgetBCInstrs);
 
         FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
                "and stack:\n{}\n",
@@ -754,7 +765,10 @@ TranslateResult irGenRegion(IRGS& irgs,
           irb.resetOffsetMapping();
           irb.resetGuardFailBlock();
 
-          auto result = irGenRegion(irgs, *calleeRegion, retry, trflags, inl);
+          auto result = irGenRegion(irgs, *calleeRegion, retry, trflags, inl,
+                                    budgetBCInstrs);
+          assertx(budgetBCInstrs >= 0);
+
           inl.registerEndInlining(callee);
 
           if (result != TranslateResult::Success) {
@@ -898,7 +912,11 @@ TranslateResult translateRegion(IRGS& irgs,
   InliningDecider inl(region.entry()->func());
   if (mcg->tx().mode() == TransKind::Profile) inl.disable();
 
-  auto irGenResult = irGenRegion(irgs, region, retry, trflags, inl);
+  int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
+  auto irGenResult = irGenRegion(irgs, region, retry, trflags, inl,
+                                 budgetBCInstrs);
+  assertx(budgetBCInstrs >= 0);
+  FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
   if (irGenResult != TranslateResult::Success) return irGenResult;
 
   // For profiling translations, grab the postconditions to be used

@@ -47,12 +47,13 @@ const StaticString s_switchProfile("SwitchProfile");
 //////////////////////////////////////////////////////////////////////
 
 struct DFS {
-  DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv)
+  DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv,
+      int32_t maxBCInstrs)
     : m_profData(p)
     , m_cfg(c)
     , m_selectedSet(ts)
     , m_selectedVec(tv)
-    , m_numBCInstrs(0)
+    , m_numBCInstrs(maxBCInstrs)
   {}
 
   RegionDescPtr formRegion(TransID head) {
@@ -169,7 +170,8 @@ private:
   void visit(TransID tid) {
     auto tidRegion = m_profData->transRegion(tid);
     auto tidInstrs = tidRegion->instrSize();
-    if (m_numBCInstrs + tidInstrs > RuntimeOption::EvalJitMaxRegionInstrs) {
+    if (tidInstrs > m_numBCInstrs) {
+      ITRACE(5, "- visit: skipping {} due to region size\n", tid);
       return;
     }
 
@@ -185,7 +187,7 @@ private:
 
     if (!m_visited.insert(tid).second) return;
     m_visiting.insert(tid);
-    m_numBCInstrs += tidInstrs;
+    m_numBCInstrs -= tidInstrs;
     ITRACE(5, "- visit: adding {} ({})\n", tid, tidWeight);
 
     auto const termSk = m_profData->transLastSrcKey(tid);
@@ -246,7 +248,7 @@ private:
     m_region->prepend(*tidRegion);
     m_selectedSet.insert(tid);
     if (m_selectedVec) m_selectedVec->push_back(tid);
-    always_assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
+    always_assert(m_numBCInstrs >= 0);
 
     m_visiting.erase(tid);
   }
@@ -257,7 +259,7 @@ private:
   TransIDSet&                  m_selectedSet;
   TransIDVec*                  m_selectedVec;
   RegionDescPtr                m_region;
-  uint32_t                     m_numBCInstrs;
+  int32_t                      m_numBCInstrs;
   jit::hash_set<TransID>       m_visiting;
   jit::hash_set<TransID>       m_visited;
   jit::vector<RegionDesc::Arc> m_arcs;
@@ -272,11 +274,12 @@ private:
 RegionDescPtr selectHotCFG(TransID head,
                            const ProfData* profData,
                            const TransCFG& cfg,
+                           int32_t maxBCInstrs,
                            TransIDSet& selectedSet,
                            TransIDVec* selectedVec) {
-  ITRACE(1, "selectHotCFG\n");
+  ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", maxBCInstrs);
   auto const region =
-    DFS(profData, cfg, selectedSet, selectedVec)
+    DFS(profData, cfg, selectedSet, selectedVec, maxBCInstrs)
       .formRegion(head);
   ITRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
          show(*region));

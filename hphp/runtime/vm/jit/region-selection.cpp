@@ -690,7 +690,8 @@ RegionDescPtr selectRegion(const RegionContext& context,
         case RegionMode::Method:
           return selectMethod(context);
         case RegionMode::Tracelet:
-          return selectTracelet(context, kind == TransKind::Profile);
+          return selectTracelet(context, RuntimeOption::EvalJitMaxRegionInstrs,
+                                kind == TransKind::Profile);
       }
       not_reached();
     } catch (const std::exception& e) {
@@ -724,7 +725,9 @@ RegionDescPtr selectHotRegion(TransID transId,
   RegionDescPtr region;
   switch (pgoRegionMode(func)) {
     case PGORegionMode::Hottrace:
-      region = selectHotTrace(transId, profData, cfg, selectedTIDs);
+      region = selectHotTrace(transId, profData, cfg,
+                              RuntimeOption::EvalJitMaxRegionInstrs,
+                              selectedTIDs);
       break;
 
     case PGORegionMode::Hotblock:
@@ -733,7 +736,9 @@ RegionDescPtr selectHotRegion(TransID transId,
 
     case PGORegionMode::WholeCFG:
     case PGORegionMode::HotCFG:
-      region = selectHotCFG(transId, profData, cfg, selectedTIDs);
+      region = selectHotCFG(transId, profData, cfg,
+                            RuntimeOption::EvalJitMaxRegionInstrs,
+                            selectedTIDs);
       break;
   }
   assertx(region);

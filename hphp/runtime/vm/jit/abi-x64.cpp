@@ -153,10 +153,6 @@ const Abi& abi(CodeKind kind) {
   not_reached();
 }
 
-RegSet interp_one_cf_regs() {
-  return vm_regs_with_sp() | rAsm;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 PhysReg rarg(size_t i) {

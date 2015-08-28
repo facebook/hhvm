@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -391,6 +393,54 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us) {
   return us.resumeHelperRet;
 }
 
+TCA emitInterpOneCFHelper(CodeBlock& cb, Op op, ResumeHelper rh) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [&] (Vout& v) {
+    v << copy2{rvmfp(), rvmsp(), rarg(0), rarg(1)};
+    // rarg(2) is set at the stub callsite.
+
+    auto const handler = reinterpret_cast<TCA>(
+      interpOneEntryPoints[static_cast<size_t>(op)]
+    );
+    v << call{handler, arg_regs(3)};
+
+    auto const sf = v.makeReg();
+    auto const next = v.makeBlock();
+
+    v << testq{rret(), rret(), sf};
+    v << jcci{CC_NZ, sf, next, rh.reenter_tc};
+    v = next;
+    v << jmpi{rh.handle_resume};
+  });
+}
+
+void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us) {
+  alignJmpTarget(cb);
+  auto const rh = resumeHelperBody(cb);
+
+  auto const emit = [&] (Op op, const char* name) {
+    auto const stub = emitInterpOneCFHelper(cb, op, rh);
+    us.interpOneCFHelpers[op] = stub;
+    us.add(name, stub);
+  };
+
+#define O(name, imm, in, out, flags)          \
+  if (((flags) & CF) || ((flags) & TF)) {     \
+    emit(Op::name, "interpOneCFHelper"#name); \
+  }
+  OPCODES
+#undef O
+
+  // Exit is a very special snowflake.  Because it can appear in PHP
+  // expressions, the emitter pretends that it pushed a value on the eval stack
+  // (and iopExit actually does push Null right before throwing).  Marking it
+  // as TF would mess up any bytecodes that want to consume its output value,
+  // so we can't do that.  But we also don't want to extend regions past it, so
+  // the JIT treats it as terminal and uses InterpOneCF to execute it.
+  emit(Op::Exit, "interpOneCFHelperExit");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -424,6 +474,7 @@ void UniqueStubs::emitAll() {
 #undef ADD
 
   add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this));
+  emitInterpOneCFHelpers(cold, *this);
 
   // TODO(#6730846): Kill this once all unique stubs are emitted here.
   if (arch() == Arch::X64) x64::emitUniqueStubs(*this);
@@ -475,6 +526,12 @@ std::string UniqueStubs::describe(TCA address) {
     return folly::sformat("{}+{:#x}", lower->name, address - lower->start);
   }
   return raw();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+RegSet interp_one_cf_regs() {
+  return vm_regs_with_sp() | rarg(2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

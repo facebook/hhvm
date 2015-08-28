@@ -52,8 +52,6 @@ namespace detail {
 inline RegSet vm_regs_with_sp() { return detail::kVMRegs; }
 inline RegSet vm_regs_no_sp()   { return detail::kVMRegsNoSP; }
 
-RegSet interp_one_cf_regs();
-
 inline PhysReg rret() { not_implemented(); }
 
 PhysReg rarg(size_t i);

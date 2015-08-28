@@ -16,9 +16,10 @@
 #ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
 #define incl_HPHP_JIT_UNIQUE_STUBS_H_
 
-#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/hhbc.h"
+
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace jit {
 
@@ -256,8 +257,6 @@ struct UniqueStubs {
    * These stubs expect rvmfp() and rvmsp() to be live, and rAsm to contain the
    * offset to the bytecode to interpret.
    *
-   * TODO(#6730846): Use an architecture-independent argument register API.
-   *
    * @reached:  jmp from TC
    * @aligned:  true
    */
@@ -357,6 +356,11 @@ private:
 
   std::vector<StubRange> m_ranges;
 };
+
+/*
+ * Registers that are live on entry to an interpOneCFHelper.
+ */
+RegSet interp_one_cf_regs();
 
 ///////////////////////////////////////////////////////////////////////////////
 

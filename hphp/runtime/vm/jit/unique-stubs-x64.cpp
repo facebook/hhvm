@@ -88,58 +88,6 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   uniqueStubs.callToExit = uniqueStubs.add("callToExit", stub);
 }
 
-void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
-  moveToAlign(mcg->code.main());
-  Label resumeHelper;
-  Label resumeRaw;
-
-asm_label(a, resumeHelper);
-  a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
-  a.    loadq (rip[intptr_t(&mcg)], rarg(0));
-  a.    call  (TCA(getMethodPtr(&MCGenerator::handleResume)));
-asm_label(a, resumeRaw);
-  a.    loadq (rvmtl()[rds::kVmspOff], rvmsp());
-  a.    loadq (rvmtl()[rds::kVmfpOff], rvmfp());
-  a.    movq  (rvmfp(), rdx); // llvm catch traces expect rvmfp() to be in rdx.
-  a.    jmp   (rax);
-
-  auto emitInterpOneStub = [&](const Op op) {
-    Asm a{mcg->code.cold()};
-    moveToAlign(mcg->code.cold());
-    auto const start = a.frontier();
-
-    a.  movq(rvmfp(), rarg(0));
-    a.  movq(rvmsp(), rarg(1));
-    a.  movl(r32(rAsm), r32(rarg(2)));
-    a.  call(TCA(interpOneEntryPoints[size_t(op)]));
-    a.  testq(rax, rax);
-    a.  jnz(resumeRaw);
-    a.  jmp(uniqueStubs.resumeHelper);
-
-    uniqueStubs.interpOneCFHelpers[op] = start;
-    uniqueStubs.add(
-      folly::sformat("interpOneCFHelper-{}", opcodeToName(op)).c_str(),
-      start
-    );
-  };
-
-# define O(name, imm, in, out, flags)                       \
-  if (bool((flags) & CF) || bool((flags) & TF)) {           \
-    emitInterpOneStub(Op::name);                            \
-  }
-  OPCODES
-# undef O
-  // Exit is a very special snowflake: because it can appear in PHP
-  // expressions, the emitter pretends that it pushed a value on the eval stack
-  // (and iopExit actually does push Null right before throwing). Marking it as
-  // TF would mess up any bytecodes that want to consume its output value, so
-  // we can't do that. But we also don't want to extend tracelets past it, so
-  // the JIT treats it as terminal and uses InterpOneCF to execute it. So,
-  // manually make sure we have an interpOneExit stub.
-  emitInterpOneStub(Op::Exit);
-}
-
 void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
   Asm a{mcg->code.frozen()};
   moveToAlign(a.code());
@@ -454,7 +402,6 @@ void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
 void emitUniqueStubs(UniqueStubs& us) {
   auto functions = {
     emitCallToExit,
-    emitResumeInterpHelpers,
     emitThrowSwitchMode,
     emitCatchHelper,
     emitFreeLocalsHelpers,

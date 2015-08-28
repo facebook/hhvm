@@ -4626,9 +4626,12 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   auto const adjustedSp = v.makeReg();
   v << lea{srcLoc(inst, 0).reg()[cellsToBytes(spOff.offset)], adjustedSp};
   v << syncvmsp{adjustedSp};
-  v << ldimmq{pcOff, rAsm}; // pcOff is int32_t but ldimmq keeps the type
-                            // system happy and generates the same code.
+
   assertx(mcg->tx().uniqueStubs.interpOneCFHelpers.count(op));
+
+  // We pass the Offset in the third argument register.  This needs to be a
+  // 64-bit mov for now because LLVM exclusively uses i64 types.
+  v << ldimmq{pcOff, rarg(2)};
   v << jmpi{mcg->tx().uniqueStubs.interpOneCFHelpers[op],
             interp_one_cf_regs()};
 }

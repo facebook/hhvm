@@ -238,6 +238,8 @@
       # starting with '0x', and gmp is available, it will error out saying it's
       # an invalid conversion. Also true on php5.
       - mediawiki-core/tests/phpunit/includes/GlobalFunctions/wfBaseConvertTest.php
+      # tests a directory listing in a predefined, written-to location
+      - mediawiki-core/tests/phpunit/includes/filebackend/FileBackendTest.php
   jshrink:
     url: https://github.com/tedivm/JShrink.git
     branch: master

@@ -2250,7 +2250,9 @@ fields of that struct for holding intermediate values.
 
 | StringGet, D(StaticStr), S(Str) S(Int), PRc|Er
 
-  Get string representing character at position S1 from base string S0.
+  Get string representing character at position S1 from base string S0.  Raises
+  a warning if the position is out of bounds, or a notice if the position is
+  not an integer.
 
 | MapGet, D(Cell), S(Obj) S(Int,Str), PRc|Er
 

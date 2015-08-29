@@ -1504,11 +1504,6 @@ void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
   env.result = emitArrayGet(env, key);
 }
 
-void emitStringGet(MTS& env, SSATmp* key) {
-  assertx(key->isA(TInt));
-  env.result = gen(env, StringGet, env.base.value, key);
-}
-
 void checkBounds(MTS& env, SSATmp* idx, SSATmp* limit) {
   ifThen(
     env,
@@ -1845,7 +1840,7 @@ void emitCGetElem(MTS& env) {
     emitProfiledStructArrayGet(env, key);
     break;
   case SimpleOp::String:
-    emitStringGet(env, key);
+    env.result = gen(env, StringGet, env.base.value, key);
     break;
   case SimpleOp::Vector:
     emitVectorGet(env, key);
@@ -1891,10 +1886,7 @@ void emitIssetElem(MTS& env) {
     env.result = gen(env, MapIsset, env.base.value, getKey(env));
     break;
   case SimpleOp::None:
-    {
-      auto const key = getKey(env);
-      env.result = gen(env, IssetElem, env.base.value, key);
-    }
+    env.result = gen(env, IssetElem, env.base.value, getKey(env));
     break;
   }
 }

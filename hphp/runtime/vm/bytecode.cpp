@@ -3034,8 +3034,9 @@ struct MemberState {
   unsigned ndiscard;
   MemberCode mcode{MEL};
   TypedValue* base;
-  TypedValue scratch;
+  TypedValue tempBase;
   TypedValue literal;
+  TypedValue result;
   Variant ref;
   Variant ref2;
   TypedValue* curMember{nullptr};
@@ -3068,17 +3069,20 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
   }
 
   mstate.ndiscard = immVec.numStackValues();
-  int depth = mdepth + mstate.ndiscard - 1;
-  const LocationCode lcode = LocationCode(*vec++);
+  auto depth = mdepth + mstate.ndiscard - 1;
+  auto const lcode = LocationCode(*vec++);
 
   TypedValue* loc = nullptr;
-  Class* const ctx = arGetContextClass(vmfp());
+  auto const ctx = arGetContextClass(vmfp());
 
   StringData* name;
   TypedValue* fr = nullptr;
   TypedValue* cref;
   TypedValue* pname;
-  tvWriteUninit(&mstate.scratch);
+
+  tvWriteUninit(&mstate.literal);
+  tvWriteUninit(mstate.ref.asTypedValue());
+  tvWriteUninit(mstate.ref2.asTypedValue());
 
   switch (lcode) {
   case LNL:
@@ -3098,8 +3102,8 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      tvWriteNull(&mstate.scratch);
-      loc = &mstate.scratch;
+      tvWriteNull(&mstate.tempBase);
+      loc = &mstate.tempBase;
     } else {
       loc = fr;
     }
@@ -3123,8 +3127,8 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      tvWriteNull(&mstate.scratch);
-      loc = &mstate.scratch;
+      tvWriteNull(&mstate.tempBase);
+      loc = &mstate.tempBase;
     } else {
       loc = fr;
     }
@@ -3172,9 +3176,8 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     break;
   case LH:
     assert(vmfp()->hasThis());
-    mstate.scratch.m_type = KindOfObject;
-    mstate.scratch.m_data.pobj = vmfp()->getThis();
-    loc = &mstate.scratch;
+    mstate.tempBase = make_tv<KindOfObject>(vmfp()->getThis());
+    loc = &mstate.tempBase;
     break;
 
   case InvalidLocationCode:
@@ -3182,15 +3185,12 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
   }
 
   mstate.base = loc;
-  tvWriteUninit(&mstate.literal);
-  tvWriteUninit(mstate.ref.asTypedValue());
-  tvWriteUninit(mstate.ref2.asTypedValue());
 
   // Iterate through the members.
   while (vec < pc) {
     mstate.mcode = MemberCode(*vec++);
     if (memberCodeHasImm(mstate.mcode)) {
-      int64_t memberImm = decodeMemberCodeImm(&vec, mstate.mcode);
+      auto const memberImm = decodeMemberCodeImm(&vec, mstate.mcode);
       if (memberCodeImmIsString(mstate.mcode)) {
         tvAsVariant(&mstate.literal) =
           vmfp()->m_func->unit()->lookupLitstrId(memberImm);
@@ -3222,17 +3222,23 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     case MET:
     case MEI:
       if (unset) {
-        result = ElemU(mstate.scratch, *mstate.ref.asTypedValue(), mstate.base,
-                       *mstate.curMember);
+        result = ElemU(
+          *mstate.ref.asTypedValue(),
+          mstate.base,
+          *mstate.curMember
+        );
       } else if (define) {
-        result = ElemD<warn,reffy>(mstate.scratch, *mstate.ref.asTypedValue(),
-                                   mstate.base, *mstate.curMember);
+        result = ElemD<warn,reffy>(
+          *mstate.ref.asTypedValue(),
+          mstate.base,
+          *mstate.curMember
+        );
       } else {
         result =
           // We're not really going to modify it in the non-D case, so
           // this is safe.
           const_cast<TypedValue*>(
-            Elem<warn>(mstate.scratch, *mstate.ref.asTypedValue(),
+            Elem<warn>(*mstate.ref.asTypedValue(),
                        mstate.base, *mstate.curMember)
           );
       }
@@ -3241,8 +3247,7 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     case MPC:
     case MPT:
       result = Prop<warn,define,unset>(
-        mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
-        *mstate.curMember
+        *mstate.ref.asTypedValue(), ctx, mstate.base, *mstate.curMember
       );
       break;
     case MQT:
@@ -3250,16 +3255,14 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
         raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
       }
       result = nullSafeProp(
-        mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
+        *mstate.ref.asTypedValue(), ctx, mstate.base,
         mstate.curMember->m_data.pstr
       );
       break;
     case MW:
       if (setMember) {
         assert(define);
-        result = NewElem<reffy>(
-          mstate.scratch, *mstate.ref.asTypedValue(), mstate.base
-        );
+        result = NewElem<reffy>(*mstate.ref.asTypedValue(), mstate.base);
       } else {
         raise_error("Cannot use [] for reading");
         result = nullptr;
@@ -3273,8 +3276,7 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     ratchetRefs(result, *mstate.ref.asTypedValue(),
                 *mstate.ref2.asTypedValue());
     // Check whether an error occurred (i.e. no result was set).
-    if (setMember && result == &mstate.scratch &&
-        result->m_type == KindOfUninit) {
+    if (!unset && setMember && result->m_type == KindOfUninit) {
       return true;
     }
     mstate.base = result;
@@ -3293,15 +3295,10 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
 
   if (saveResult) {
     assert(!setMember);
-    // If requested, save a copy of the result.  If base already points to
-    // mstate.scratch, no reference counting is necessary, because (with the
-    // exception of the following block), mstate.scratch is never populated
-    // such that it owns a reference that must be accounted for.
-    if (mstate.base != &mstate.scratch) {
-      // Acquire a reference to the result via tvDup(); base points to the
-      // result but does not own a reference.
-      tvDup(*mstate.base, mstate.scratch);
-    }
+    // If requested, save a copy of the result.  Acquire a reference to the
+    // result via tvDup(); base points to the result but does not own a
+    // reference.
+    tvDup(*mstate.base, mstate.result);
   }
 
   return false;
@@ -3312,17 +3309,17 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
 // mstate
 //  ndiscard:  number of stack elements to discard
 //  base:      ultimate result of the vector-get
-//  scratch:   temporary result storage
+//  tempBase:  TypedValue containing $this base, if used
+//  result:    temporary result storage
 //  ref:       temporary result storage
 //  ref2:      temporary result storage
 //  mcode:     output MemberCode for the last member if LeaveLast
 //  curMember: output last member value one if LeaveLast; but undefined
 //             if the last mcode == MW
 //
-// If saveResult is true, then upon completion of getHelperPre(),
-// mstate.scratch contains a reference to the result (a duplicate of what
-// base refers to).  getHelperPost<true>(...)  then saves the result
-// to its final location.
+// If saveResult is true, then upon completion of getHelperPre(), mstate.result
+// contains a reference to the result (a duplicate of what base refers to).
+// getHelperPost<true>(...)  then saves the result to its final location.
 template<bool warn,bool saveResult,VectorLeaveCode mleave>
 OPTBLD_INLINE void getHelperPre(PC& pc, MemberState& mstate) {
   memberHelperPre<false,warn,false,false,false,0,mleave,saveResult>(
@@ -3355,8 +3352,8 @@ TypedValue* getHelper(PC& pc, MemberState& mstate) {
   getHelperPre<true, true, VectorLeaveCode::ConsumeAll>(pc, mstate);
   auto tvRet = getHelperPost(mstate.ndiscard);
   // If tvRef wasn't just allocated, we've already decref'd it in
-  // the loop above. (XXX tvRef? or mstate.ref/scratch/tvRet)
-  tvCopy(mstate.scratch, *tvRet);
+  // the loop above. (XXX tvRef? or mstate.ref/result/tvRet)
+  tvCopy(mstate.result, *tvRet);
   return tvRet;
 }
 
@@ -3365,7 +3362,8 @@ TypedValue* getHelper(PC& pc, MemberState& mstate) {
 // mstate
 //  ndiscard:   number of stack elements to discard
 //  base:       ultimate result of the vector-get
-//  scratch:    temporary result storage
+//  tempBase:   TypedValue containing $this base, if used
+//  result:     temporary result storage
 //  ref:        temporary result storage
 //  ref2:       temporary result storage
 //  mcode:      output MemberCode for the last member if LeaveLast
@@ -4814,8 +4812,8 @@ OPTBLD_INLINE void iopBaseH(IOP_ARGS) {
   tvWriteUninit(&mstate.tvRef);
   tvWriteUninit(&mstate.tvRef2);
 
-  mstate.tvScratch = make_tv<KindOfObject>(vmfp()->getThis());
-  mstate.base = &mstate.tvScratch;
+  mstate.tvTempBase = make_tv<KindOfObject>(vmfp()->getThis());
+  mstate.base = &mstate.tvTempBase;
 }
 
 static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
@@ -4825,21 +4823,16 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
   auto result = [&]{
     switch (flags) {
       case MOpFlags::None:
-        return Prop<false, false, false>(
-          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+        return Prop<false, false, false>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Warn:
-        return Prop<true, false, false>(
-          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+        return Prop<true, false, false>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Define:
       case MOpFlags::Reffy:
-        return Prop<false, true, false>(
-          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+        return Prop<false, true, false>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Unset:
-        return Prop<false, false, true>(
-          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+        return Prop<false, false, true>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::WarnDefine:
-        return Prop<true, true, false>(
-          mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key);
+        return Prop<true, true, false>(mstate.tvRef, ctx, mstate.base, key);
     }
     always_assert(false);
   }();
@@ -4857,8 +4850,7 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
     case MOpFlags::None:
     case MOpFlags::Warn:
       assert(key.m_type == KindOfStaticString);
-      result = nullSafeProp(
-        mstate.tvScratch, mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
+      result = nullSafeProp(mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
       break;
 
     case MOpFlags::Define:
@@ -4880,22 +4872,19 @@ static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
       case MOpFlags::None:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<false>(mstate.tvScratch, mstate.tvRef, mstate.base, key));
+          Elem<false>(mstate.tvRef, mstate.base, key));
       case MOpFlags::Warn:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<true>(mstate.tvScratch, mstate.tvRef, mstate.base, key));
+          Elem<true>(mstate.tvRef, mstate.base, key));
       case MOpFlags::Define:
-        return ElemD<false,false>(
-          mstate.tvScratch, mstate.tvRef, mstate.base, key);
+        return ElemD<false,false>(mstate.tvRef, mstate.base, key);
       case MOpFlags::Reffy:
-        return ElemD<false,true>(
-          mstate.tvScratch, mstate.tvRef, mstate.base, key);
+        return ElemD<false,true>(mstate.tvRef, mstate.base, key);
       case MOpFlags::Unset:
-        return ElemU(mstate.tvScratch, mstate.tvRef, mstate.base, key);
+        return ElemU(mstate.tvRef, mstate.base, key);
       case MOpFlags::WarnDefine:
-        return ElemD<true,false>(
-          mstate.tvScratch, mstate.tvRef, mstate.base, key);
+        return ElemD<true,false>(mstate.tvRef, mstate.base, key);
     }
     always_assert(false);
   }();
@@ -5576,21 +5565,21 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
 
     switch (mstate.mcode) {
       case MW:
-        result = SetOpNewElem(mstate.scratch, *mstate.ref.asTypedValue(),
+        result = SetOpNewElem(*mstate.ref.asTypedValue(),
                               op, mstate.base, rhs);
         break;
       case MEL:
       case MEC:
       case MET:
       case MEI:
-        result = SetOpElem(mstate.scratch, *mstate.ref.asTypedValue(),
+        result = SetOpElem(*mstate.ref.asTypedValue(),
                            op, mstate.base, *mstate.curMember, rhs);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class *ctx = arGetContextClass(vmfp());
-        result = SetOpProp(mstate.scratch, *mstate.ref.asTypedValue(),
+        result = SetOpProp(*mstate.ref.asTypedValue(),
                            ctx, op, mstate.base, *mstate.curMember, rhs);
         break;
       }

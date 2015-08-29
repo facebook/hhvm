@@ -2504,7 +2504,7 @@ and expr_remain lowest env =
       lowest
   | Tlp ->
       let env = { env with break_on = 0 } in
-      out tok_str env;
+      back env;
       arg_list env;
       lowest
   | Tlb ->
@@ -2646,7 +2646,6 @@ and expr_atomic_word env last_tok = function
       expect ")" env
   | "empty" | "unset" | "isset" as v ->
       out v env;
-      expect "(" env;
       arg_list ~trailing:false env
   | "new" ->
       last_token env;
@@ -2824,6 +2823,7 @@ and arrow_opt env =
 (*****************************************************************************)
 
 and arg_list ?(trailing=true) env =
+  expect "(" env;
   keep_comment env;
   if next_token env <> Trp
   then right env (expr_call_list ~trailing);

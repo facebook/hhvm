@@ -118,7 +118,7 @@ struct BCSPOffset {
   }
 
   BCSPOffset operator++(int) {
-    auto before = BCSPOffset{offset};
+    auto before = *this;
     offset++;
     return before;
   }
@@ -131,6 +131,12 @@ struct BCSPOffset {
   BCSPOffset operator-() const { return BCSPOffset{-offset}; }
 
   BCSPOffset operator-(int32_t delta) { return BCSPOffset{offset - delta}; }
+
+  BCSPOffset operator--(int) {
+    auto before = *this;
+    offset--;
+    return before;
+  }
 };
 
 struct FPInvOffset {

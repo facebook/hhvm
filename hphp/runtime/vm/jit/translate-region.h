@@ -39,11 +39,6 @@ const char* show(TranslateResult);
 struct TranslateRetryContext {
   // Instructions that must be interpreted.
   ProfSrcKeySet toInterp;
-
-  // Inlined regions.
-  std::unordered_map<ProfSrcKey,
-                     RegionDescPtr,
-                     ProfSrcKey::Hasher> inlines;
 };
 
 /*

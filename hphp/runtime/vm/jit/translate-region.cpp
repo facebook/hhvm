@@ -566,17 +566,8 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  RegionDescPtr calleeRegion;
-  // Look up or select a region for `callee'.
-  if (retry.inlines.count(psk)) {
-    calleeRegion = retry.inlines[psk];
-    if (!calleeRegion || calleeRegion->instrSize() > maxBCInstrs) {
-      return nullptr;
-    }
-  } else {
-    calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, maxBCInstrs);
-    retry.inlines[psk] = calleeRegion;
-  }
+  // Select a region for `callee'.
+  auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, maxBCInstrs);
   if (!calleeRegion) return nullptr;
 
   // Return the callee region if it's inlinable and update `inl'.

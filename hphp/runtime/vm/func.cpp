@@ -130,15 +130,21 @@ void Func::destroy(Func* func) {
 
 void Func::freeClone() {
   assert(isPreFunc());
+  assert(m_cloned.flag.test_and_set());
+
+  if (mcg && RuntimeOption::EvalEnableReusableTC) {
+    // Free TC-space associated with func
+    jit::reclaimFunction(this);
+  } else {
+    smashPrologues();
+  }
+
   if (m_funcId != InvalidFuncId) {
-    if (mcg && RuntimeOption::EvalEnableReusableTC) {
-      // Free TC-space associated with func
-      jit::reclaimFunction(this);
-    } else {
-      smashPrologues();
-    }
+    DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
+    assert(oldVal == this);
     m_funcId = InvalidFuncId;
   }
+
   m_cloned.flag.clear();
 }
 

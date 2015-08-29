@@ -10,8 +10,7 @@
  */
 
 trait DynamicYield {
-  public function __call(string $name, array<mixed> $args = array()): void {
-  }
+  public function __call(string $name, array<mixed> $args = array()): void {}
 }
 
 interface IUseDynamicYield {}

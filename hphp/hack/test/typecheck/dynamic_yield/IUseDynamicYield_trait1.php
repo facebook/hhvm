@@ -12,8 +12,7 @@
 interface IUseDynamicYield {}
 
 trait DynamicYield implements IUseDynamicYield {
-  public function __call(string $name, array<mixed> $args = array()): void {
-  }
+  public function __call(string $name, array<mixed> $args = array()): void {}
 }
 
 trait TFoo {

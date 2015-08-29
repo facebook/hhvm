@@ -2505,10 +2505,7 @@ and expr_remain lowest env =
   | Tlp ->
       let env = { env with break_on = 0 } in
       out tok_str env;
-      keep_comment env;
-      if next_token env <> Trp
-      then right env expr_call_list;
-      expect ")" env;
+      arg_list env;
       lowest
   | Tlb ->
       last_token env;
@@ -2650,8 +2647,7 @@ and expr_atomic_word env last_tok = function
   | "empty" | "unset" | "isset" as v ->
       out v env;
       expect "(" env;
-      right env construct_body;
-      expect ")" env
+      arg_list ~trailing:false env
   | "new" ->
       last_token env;
       space env;
@@ -2700,9 +2696,9 @@ and expr_atomic_word env last_tok = function
             back env
       end
 
-and expr_call_list env =
+and expr_call_list ?(trailing=true) env =
   let env = { env with break_on = 0; priority = 0 } in
-  list_comma_nl ~trailing:true expr_call_elt env
+  list_comma_nl ~trailing expr_call_elt env
 
 and expr_call_elt env = wrap env begin function
   | Tellipsis -> seq env [last_token; expr]
@@ -2824,29 +2820,14 @@ and arrow_opt env =
       back env
 
 (*****************************************************************************)
-(* Language constructs *)
+(* Argument lists *)
 (*****************************************************************************)
 
-and construct_body env =
-  Try.one_line env
-    construct_one_line
-    construct_multi_line
-
-and construct_one_line env =
-  list_comma_single construct_element_single env
-
-and construct_multi_line env =
-  list_comma_multi_nl ~trailing:false construct_element_multi env
-
-and construct_element_single env =
-  expr env;
-  arrow_opt env
-
-and construct_element_multi env = wrap env begin fun _ ->
-  back env;
-  newline env;
-  expr env;
-end
+and arg_list ?(trailing=true) env =
+  keep_comment env;
+  if next_token env <> Trp
+  then right env (expr_call_list ~trailing);
+  expect ")" env
 
 (*****************************************************************************)
 (* The outside API *)

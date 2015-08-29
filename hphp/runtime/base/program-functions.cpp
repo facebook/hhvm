@@ -974,7 +974,17 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (RuntimeOption::EvalEnableNuma) {
 #ifdef USE_JEMALLOC
-    mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
+    uint64_t epoch = 1;
+    unsigned narenas;
+    size_t sz = sizeof(narenas);
+    size_t mib[3];
+    size_t miblen = 3;
+    if (mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch)) == 0 &&
+        mallctl("arenas.narenas", &narenas, &sz, nullptr, 0) == 0 &&
+        mallctlnametomib("arena.0.purge", mib, &miblen) == 0) {
+      mib[1] = size_t(narenas);
+      mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
+    }
 #endif
     enable_numa(RuntimeOption::EvalEnableNumaLocal);
     BootTimer::mark("enable_numa");

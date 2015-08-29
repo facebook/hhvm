@@ -533,17 +533,50 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
 #ifdef USE_JEMALLOC
     if (mallctl) {
+      assert(mallctlnametomib && mallctlbymib);
       if (cmd == "free-mem") {
         // Purge all dirty unused pages.
-        int err = mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
+        uint64_t epoch = 1;
+        int err = mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
         if (err) {
           std::ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"arenas.purge\", ...)"
-            << endl;
+          estr << "Error " << err << " in mallctl(\"epoch\", ...)" << endl;
           transport->sendString(estr.str());
-        } else {
-          transport->sendString("OK\n");
+          break;
         }
+
+        unsigned narenas;
+        size_t sz = sizeof(narenas);
+        err = mallctl("arenas.narenas", &narenas, &sz, nullptr, 0);
+        if (err) {
+          std::ostringstream estr;
+          estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
+               << endl;
+          transport->sendString(estr.str());
+          break;
+        }
+
+        size_t mib[3];
+        size_t miblen = 3;
+        err = mallctlnametomib("arena.0.purge", mib, &miblen);
+        if (err) {
+          std::ostringstream estr;
+          estr << "Error " << err
+               << " in mallctlnametomib(\"arenas.narenas\", ...)" << endl;
+          transport->sendString(estr.str());
+          break;
+        }
+        mib[1] = narenas;
+
+        err = mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
+        if (err) {
+          std::ostringstream estr;
+          estr << "Error " << err << " in mallctlbymib([\"arena." << narenas
+            << ".purge\"], ...)" << endl;
+          transport->sendString(estr.str());
+          break;
+        }
+        transport->sendString("OK\n");
         break;
       }
       if (cmd == "jemalloc-stats") {

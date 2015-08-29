@@ -43,7 +43,7 @@ def proc_call(args, stdin=None):
     sys.stderr.flush()
     return stdout_data
 
-def ensure_output_contains(f, s, timeout=5):
+def ensure_output_contains(f, s, timeout=20):
     """
     Looks for a match in a process' output, subject to a timeout in case the
     process hangs

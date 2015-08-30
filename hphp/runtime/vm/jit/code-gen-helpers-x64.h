@@ -136,18 +136,18 @@ inline Vptr getTLSVptr(const T& data) {
   uintptr_t virtualAddress = uintptr_t(&data) - tlsBase();
   return Vptr{baseless(virtualAddress), Vptr::FS};
 }
-}
 
 template<typename T>
 inline Vptr
-emitTLSAddr(Vout& v, T& data, Vreg) {
+implTLSAddr(Vout& v, T& data, Vreg) {
   return detail::getTLSVptr(data);
 }
 
 template<typename T>
 inline Vptr
-emitTLSAddr(X64Assembler& a, T& data, Reg64) {
+implTLSAddr(X64Assembler& a, T& data, Reg64) {
    return detail::getTLSVptr(data);
+}
 }
 #else
 /*
@@ -214,15 +214,6 @@ implTLSAddr(Asm& a, long* addr, Reg64 scratch) {
 
 }
 
-#define getGlobalAddrForTls(datum) ([] {                \
-    long* ret;                                          \
-    __asm__("lea %1, %%rax\nmov %%rdi, %0" :            \
-            "=r"(ret) : "m"(datum));                    \
-    return ret;                                         \
-  }())
-
-#define emitTLSAddr(x, datum, r)                        \
-  detail::implTLSAddr((x), getGlobalAddrForTls(datum), r)
 #endif
 
 #ifdef USE_GCC_FAST_TLS
@@ -232,27 +223,31 @@ implTLSAddr(Asm& a, long* addr, Reg64 scratch) {
  * We support both linux and MacOS
  */
 
+namespace detail {
 #ifndef __APPLE__
+
 template<typename T>
 inline void
-emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg reg) {
+implTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum,
+            long* unused, Vreg reg) {
   v << load{detail::getTLSVptr(datum.m_node.m_p), reg};
 }
 
 template<typename T>
 inline void
-emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 reg) {
+implTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
+            long* unused, Reg64 reg) {
   auto ptr = detail::getTLSVptr(datum.m_node.m_p);
   Vasm::prefix(a, ptr).loadq(ptr.mr(), reg);
 }
-#else
 
-namespace detail {
+#else
 
 template<typename T>
 inline void
 implTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, long* addr, Vreg dst) {
-  auto ptr = detail::implTLSAddr(v, addr, dst);
+  auto tmp = v.makeReg();
+  auto ptr = detail::implTLSAddr(v, addr, tmp);
   v << load{ptr, dst};
 }
 
@@ -263,12 +258,9 @@ implTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
   auto ptr = detail::implTLSAddr(a, addr, dst);
   Vasm::prefix(a, ptr).loadq(ptr, dst);
 }
-}
-
-#define emitTLSLoad(x, datum, reg)                            \
-  detail::implTLSLoad(x, datum, getGlobalAddrForTls(datum), reg)
 
 #endif
+}
 
 #else // USE_GCC_FAST_TLS
 

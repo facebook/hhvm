@@ -70,6 +70,27 @@ inline ArrayKeyInfo checkStrictlyInteger(Type key) {
   return ret;
 }
 
+#ifdef USE_GCC_FAST_TLS
+#ifdef __APPLE__
+#define getGlobalAddrForTls(datum) ([] {                \
+    long* ret;                                          \
+    __asm__("lea %1, %%rax\nmov %%rdi, %0" :            \
+            "=r"(ret) : "m"(datum));                    \
+    return ret;                                         \
+  }())
+
+#define emitTLSAddr(x, datum, r)                        \
+  detail::implTLSAddr((x), getGlobalAddrForTls(datum), (r))
+#define emitTLSLoad(x, datum, reg)                      \
+  detail::implTLSLoad((x), (datum), getGlobalAddrForTls(datum), (reg))
+#else
+#define emitTLSAddr(x, datum, r)                        \
+  detail::implTLSAddr((x),(datum),(r))
+#define emitTLSLoad(x, datum, reg)                      \
+  detail::implTLSLoad((x), (datum), nullptr, (reg))
+#endif
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

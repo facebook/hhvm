@@ -39,7 +39,7 @@ bool HHVM_FUNCTION(ob_start, const Variant& output_callback = uninit_null(),
                              int chunk_size = 0,
                              int flags = k_PHP_OUTPUT_HANDLER_STDFLAGS);
 void HHVM_FUNCTION(ob_clean);
-void HHVM_FUNCTION(ob_flush);
+bool HHVM_FUNCTION(ob_flush);
 bool HHVM_FUNCTION(ob_end_clean);
 bool HHVM_FUNCTION(ob_end_flush);
 void HHVM_FUNCTION(flush);

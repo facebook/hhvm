@@ -61,8 +61,9 @@ static void throwOutOfRange(int64_t id) {
 }
 
 NEVER_INLINE ATTRIBUTE_NORETURN
-static void throwUnexpectedStr(const char* expect, const char* actual) {
-  throw Exception("Expected '%s' but got '%s'", expect, actual);
+static void throwUnexpectedStr(const char* expect, folly::StringPiece& actual) {
+  throw Exception("Expected '%s' but got '%.*s'", expect,
+                  (int)actual.size(), actual.data());
 }
 
 NEVER_INLINE ATTRIBUTE_NORETURN
@@ -305,11 +306,12 @@ double VariableUnserializer::readDouble() {
   return r;
 }
 
-void VariableUnserializer::read(char* buf, unsigned n) {
+folly::StringPiece VariableUnserializer::readStr(unsigned n) {
   check();
   auto const bufferLimit = std::min(size_t(m_end - m_buf), size_t(n));
-  memcpy(buf, m_buf, bufferLimit);
+  auto str = folly::StringPiece(m_buf, bufferLimit);
   m_buf += bufferLimit;
+  return str;
 }
 
 void VariableUnserializer::expectChar(char expected) {
@@ -487,23 +489,26 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     }
   case 'd':
     {
-      double v;
       char ch = uns->peek();
       bool negative = false;
-      char buf[4];
       if (ch == '-') {
         negative = true;
-        ch = uns->readChar();
+        uns->readChar();
         ch = uns->peek();
       }
+      double v;
       if (ch == 'I') {
-        uns->read(buf, 3); buf[3] = '\0';
-        if (strcmp(buf, "INF")) throwUnexpectedStr("INF", buf);
-        v = atof("inf");
+        auto str = uns->readStr(3);
+        if (str.size() != 3 || str[1] != 'N' || str[2] != 'F') {
+          throwUnexpectedStr("INF", str);
+        }
+        v = std::numeric_limits<double>::infinity();
       } else if (ch == 'N') {
-        uns->read(buf, 3); buf[3] = '\0';
-        if (strcmp(buf, "NAN")) throwUnexpectedStr("NAN", buf);
-        v = atof("nan");
+        auto str = uns->readStr(3);
+        if (str.size() != 3 || str[1] != 'A' || str[2] != 'N') {
+          throwUnexpectedStr("NAN", str);
+        }
+        v = std::numeric_limits<double>::quiet_NaN();
       } else {
         v = uns->readDouble();
       }
@@ -526,13 +531,11 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
     return;
   case 'S':
     if (uns->type() == VariableUnserializer::Type::APCSerialize) {
-      union {
-        char buf[8];
-        StringData *sd;
-      } u;
-      uns->read(u.buf, 8);
-      assert(u.sd->isStatic());
-      tvMove(make_tv<KindOfStaticString>(u.sd), *self.asTypedValue());
+      auto str = uns->readStr(8);
+      assert(str.size() == 8);
+      auto sdp = reinterpret_cast<StringData*const*>(&str[0]);
+      assert((*sdp)->isStatic());
+      tvMove(make_tv<KindOfStaticString>(*sdp), *self.asTypedValue());
     } else {
       throwUnknownType(type);
     }
@@ -827,17 +830,12 @@ String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
   if (size < 0) {
     throwNegativeStringSize(size);
   }
-
   uns->expectChar(':');
   uns->expectChar(delimiter0);
-
-  String px(size, ReserveString);
-  auto const buf = px.bufferSlice();
-  assert(size <= buf.size());
-  uns->read(buf.data(), size);
-  px.setSize(size);
+  auto r = uns->readStr(size);
+  auto str = String::attach(StringData::Make(r, CopyString));
   uns->expectChar(delimiter1);
-  return px;
+  return str;
 }
 
 static
@@ -980,9 +978,8 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       // shouldn't happen, but keep the code here anyway.
       buf.append(type);
       buf.append(sep);
-      char pointer[8];
-      uns->read(pointer, 8);
-      buf.append(pointer, 8);
+      auto str = uns->readStr(8);
+      buf.append(str.data(), str.size());
     }
     break;
   case 's':

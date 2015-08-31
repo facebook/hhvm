@@ -66,7 +66,9 @@ struct VariableUnserializer {
   int64_t readInt();
   double readDouble();
   char readChar();
-  void read(char* buf, unsigned n);
+
+  // Return a StringPiece of up to n characters pointing into m_buf
+  folly::StringPiece readStr(unsigned n);
 
   /*
    * Read a character and throw if it differs from expected.

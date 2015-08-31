@@ -26,6 +26,8 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/process.h"
+#include "hphp/runtime/base/ini-setting.h"
+
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,6 +74,13 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
     hstbuflen *= 2;
     result.tmphstbuf = (char*)realloc(result.tmphstbuf, hstbuflen);
   }
+
+  result.index = 0;
+  result.n_addrs = 0;
+  for(char** addr = result.hostbuf.h_addr_list; *addr; addr++) {
+    result.n_addrs++;
+  }
+
   return !res && hp;
 #endif
 }
@@ -217,6 +226,54 @@ HostURL::HostURL(const std::string &hosturl, int port) :
     m_ipv6 = false;
   }
   m_valid = true;
+}
+
+typedef hphp_hash_map<std::string, HostEnt> HostEntCache;
+class NetworkData {
+public:
+  HostEntCache hostEntCache;
+
+  NetworkData() :lastCleanup(0) {
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+        "hhvm.server.dns_cache.enable", "false", &s_dns_cache_enable);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+        "hhvm.server.dns_cache.ttl", "60", &s_dns_cache_ttl);
+  }
+
+  void cleanupCache() {
+    // If DNS cache is deactivated, we just always clean the hash table
+    time_t now = time(nullptr);
+
+    if (!s_dns_cache_enable || (now > lastCleanup + s_dns_cache_ttl)) {
+      hostEntCache.clear();
+      lastCleanup = now;
+    }
+  }
+private:
+  time_t lastCleanup;
+  bool s_dns_cache_enable;
+  int s_dns_cache_ttl;
+};
+
+static IMPLEMENT_THREAD_LOCAL(NetworkData, s_networkData);
+
+const HostEnt *cached_gethostbyname(const char *address) {
+  s_networkData->cleanupCache();
+
+  HostEntCache::iterator cached = s_networkData->hostEntCache.find(address);
+  if (cached != s_networkData->hostEntCache.end()) {
+    cached->second.rotate_index();
+    return &cached->second;
+  }
+
+  HostEnt *result = new HostEnt;
+  if (!safe_gethostbyname(address, *result)) {
+    delete result;
+    return nullptr;
+  }
+
+  s_networkData->hostEntCache[address] = *result;
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

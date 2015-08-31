@@ -314,12 +314,6 @@ These are experimental LFU settings.
 
     }
 
-    # DNS cache
-    DnsCache {
-      Enable = false
-      TTL = 600   # in seconds
-    }
-
     # Light process has very little forking cost, because they are pre-forked
     # Recommend to turn it on for faster shell command execution.
     LightProcessFilePrefix = ./lightprocess

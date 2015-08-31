@@ -33,12 +33,22 @@ namespace HPHP {
 
 class HostEnt {
 public:
-  HostEnt() : tmphstbuf(nullptr) {}
+  HostEnt() : tmphstbuf(nullptr), index(0), n_addrs(0) {}
   ~HostEnt() { if (tmphstbuf) free(tmphstbuf);}
+
+  void rotate_index() {
+    if (++index >= n_addrs) index = 0;
+  }
+
+  void get_current_address(struct in_addr *in) const {
+     memcpy(&(in->s_addr), hostbuf.h_addr_list[index], hostbuf.h_length);
+  }
 
   struct hostent hostbuf;
   char *tmphstbuf;
   int herr;
+  // Index to rotate through all available adresses
+  int index, n_addrs;
 };
 
 // Extract out the scheme, host and port from a URL
@@ -71,6 +81,7 @@ private:
 };
 
 bool safe_gethostbyname(const char *address, HostEnt &result);
+const HostEnt *cached_gethostbyname(const char *address);
 
 ///////////////////////////////////////////////////////////////////////////////
 /**

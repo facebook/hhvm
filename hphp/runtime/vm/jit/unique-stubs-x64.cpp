@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -229,7 +230,7 @@ void emitDecRefHelper(UniqueStubs& us) {
 
     auto destroy = [&](Vout& v) {
       auto const toSave = abi().gpUnreserved - abi().calleeSaved;
-      PhysRegSaverStub save{v, toSave};
+      PhysRegSaver save{v, toSave, false /* aligned */};
 
       assert(!ty.isKnownDataType() && ty.maybe(TCounted));
       // We've saved all caller-saved registers so it's ok to use them as

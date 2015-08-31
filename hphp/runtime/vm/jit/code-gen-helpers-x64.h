@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/phys-reg-saver.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -268,7 +269,7 @@ template<typename T>
 inline void
 emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
   // We don't know for sure what's alive.
-  PhysRegSaver(v, abi().gpUnreserved - abi().calleeSaved);
+  PhysRegSaver(v, abi().gpUnreserved - abi().calleeSaved, true /* aligned */);
   v << ldimmq{datum.m_key, rarg(0)};
   const CodeAddress addr = (CodeAddress)pthread_getspecific;
   v << call{addr, arg_regs(1)};

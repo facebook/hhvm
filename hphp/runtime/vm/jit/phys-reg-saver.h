@@ -14,39 +14,49 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/phys-reg.h"
+#ifndef incl_HPHP_JIT_PHYS_REG_SAVER_H_
+#define incl_HPHP_JIT_PHYS_REG_SAVER_H_
 
-#include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int PhysReg::getNumGP() {
-  return abi().gp().size();
-}
+struct Vout;
 
-int PhysReg::getNumSIMD() {
-  return abi().simd().size();
-}
+///////////////////////////////////////////////////////////////////////////////
 
-std::string show(RegSet regs) {
-  auto& backEnd = mcg->backEnd();
-  std::ostringstream out;
-  auto sep = "";
+/*
+ * RAII wrapper for pushing and popping registers around a call in vasm.
+ *
+ * This is useful if we are emitting code with an ABI that bans vasm-xls from
+ * spilling to the stack (e.g., cross-trace code), or if we need to be able to
+ * introspect about how many spills we made (which vasm-xls hides).
+ *
+ * PhysRegSaver also maintains stack alignment; see unique-stubs.h for some
+ * documentation around this behavior.
+ */
+struct PhysRegSaver {
+  PhysRegSaver(Vout& v, RegSet regs, bool aligned);
+  ~PhysRegSaver();
 
-  out << '{';
-  regs.forEach([&](PhysReg r) {
-    out << sep;
-    backEnd.streamPhysReg(out, r);
-    sep = ", ";
-  });
-  out << '}';
+  PhysRegSaver(const PhysRegSaver&) = delete;
+  PhysRegSaver(PhysRegSaver&&) noexcept = default;
+  PhysRegSaver& operator=(const PhysRegSaver&) = delete;
+  PhysRegSaver& operator=(PhysRegSaver&&) = default;
 
-  return out.str();
-}
+  size_t rspAdjustment() const;
+  size_t dwordsPushed() const;
+
+private:
+  Vout& m_v;
+  RegSet m_regs;
+  int m_adjust;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
+
+#endif

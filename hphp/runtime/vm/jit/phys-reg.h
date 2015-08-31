@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VM_PHYSREG_H_
-#define incl_HPHP_VM_PHYSREG_H_
+
+#ifndef incl_HPHP_JIT_PHYSREG_H_
+#define incl_HPHP_JIT_PHYSREG_H_
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
@@ -396,50 +397,6 @@ std::string show(RegSet regs);
 
 static_assert(std::is_trivially_destructible<RegSet>::value,
               "RegSet must have a trivial destructor");
-
-//////////////////////////////////////////////////////////////////////
-
-struct PhysRegSaverParity {
-  PhysRegSaverParity(int parity, X64Assembler& as, RegSet regs);
-  PhysRegSaverParity(int parity, Vout& as, RegSet regs);
-  ~PhysRegSaverParity();
-
-  static void emitPops(X64Assembler& as, RegSet regs);
-  static void emitPops(Vout&, RegSet regs);
-
-  PhysRegSaverParity(const PhysRegSaverParity&) = delete;
-  PhysRegSaverParity(PhysRegSaverParity&&) noexcept = default;
-  PhysRegSaverParity& operator=(const PhysRegSaverParity&) = delete;
-  PhysRegSaverParity& operator=(PhysRegSaverParity&&) = default;
-
-  int rspAdjustment() const;
-  int dwordsPushed() const;
-  void bytesPushed(int bytes);
-
-private:
-  X64Assembler* m_as;
-  Vout* m_v;
-  RegSet m_regs;
-  int m_adjust;
-};
-
-struct PhysRegSaverStub : public PhysRegSaverParity {
-  PhysRegSaverStub(X64Assembler& as, RegSet regs)
-      : PhysRegSaverParity(0, as, regs)
-  {}
-  PhysRegSaverStub(Vout& v, RegSet regs)
-      : PhysRegSaverParity(0, v, regs)
-  {}
-};
-
-struct PhysRegSaver : public PhysRegSaverParity {
-  PhysRegSaver(X64Assembler& as, RegSet regs)
-      : PhysRegSaverParity(1, as, regs)
-  {}
-  PhysRegSaver(Vout& v, RegSet regs)
-      : PhysRegSaverParity(1, v, regs)
-  {}
-};
 
 //////////////////////////////////////////////////////////////////////
 

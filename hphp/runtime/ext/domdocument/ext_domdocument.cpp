@@ -3667,7 +3667,7 @@ Variant HHVM_METHOD(DOMDocument, save,
                     const String& file,
                     int64_t options /* = 0 */) {
   if (file.empty()) {
-    raise_warning("filename is missing");
+    raise_warning("DOMDocument::save(): Invalid Filename");
     return false;
   }
   auto* data = Native::data<DOMNode>(this_);

@@ -64,7 +64,7 @@ bool beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
-  SSATmp* params[numParams];
+  SSATmp** params = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (unsigned i = 0; i < numParams; ++i) {
     params[numParams - i - 1] = popF(env);
   }

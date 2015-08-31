@@ -255,7 +255,7 @@ int emulate_zend(int argc, char** argv) {
     }
   }
 
-  char *newargv_array[newargv.size() + 1];
+  char** newargv_array = (char**)alloca(sizeof(char*) * (newargv.size() + 1));
   for (unsigned i = 0; i < newargv.size(); i++) {
     // printf("%s\n", newargv[i].data());
     newargv_array[i] = (char *)newargv[i].data();

@@ -3614,7 +3614,7 @@ OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   pc++;
   auto n = decode<uint32_t>(pc); // number of keys and elements
   assert(n > 0 && n <= StructArray::MaxMakeSize);
-  StringData* names[n];
+  StringData** names = (StringData**)alloca(sizeof(StringData*) * n);
   for (size_t i = 0; i < n; i++) {
     names[i] = decode_litstr(pc);
   }

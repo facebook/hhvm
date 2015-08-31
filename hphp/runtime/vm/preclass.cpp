@@ -195,7 +195,8 @@ void PreClass::Const::prettyPrint(std::ostream& out,
 
 PreClass::TraitAliasRule::NamePair
 PreClass::TraitAliasRule::asNamePair() const {
-  char buf[traitName()->size() + origMethodName()->size() + 9];
+  char* buf = (char*)alloca(sizeof(char) *
+    (traitName()->size() + origMethodName()->size() + 9));
   sprintf(buf, "%s::%s",
           traitName()->empty() ? "(null)" : traitName()->data(),
           origMethodName()->data());

@@ -17,7 +17,9 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -25,7 +27,11 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h" // TODO(#7728856)
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/phys-reg-saver.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
@@ -443,6 +449,53 @@ void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitDecRefGeneric(CodeBlock& cb) {
+  return vwrap(cb, [] (Vout& v) {
+    auto const rdata = rarg(0);
+    auto const rtype = rarg(1);
+
+    auto const destroy = [&] (Vout& v) {
+      // decRefGeneric is called via callfaststub, whose ABI claims that all
+      // registers are preserved.  This is true in the fast path, but in the
+      // slow path we need to manually save caller-saved registers.
+      auto const callerSaved = abi().gpUnreserved - abi().calleeSaved;
+      PhysRegSaver prs{v, callerSaved, false /* aligned */};
+
+      // As a consequence of being called via callfaststub, we can't safely use
+      // any Vregs here except for status flags registers, at least not with
+      // the default vwrap() ABI.  Just use the argument registers instead.
+      assertx(callerSaved.contains(rdata));
+      assertx(callerSaved.contains(rtype));
+
+      v << movzbq{rtype, rtype};
+      v << shrli{kShiftDataTypeToDestrIndex, rtype, rtype, v.makeReg()};
+
+      auto const dtor_table =
+        safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
+      v << callm{baseless(rtype * 8 + dtor_table), arg_regs(1)};
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
+    };
+
+    // TODO(#7728856): Pull this stuff out of x64 namespace; it's not actually
+    // x64-dependent.
+    x64::emitDecRefWork(v, v, rdata, destroy, false);
+    v << ret{};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TCA emitThrowSwitchMode(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [] (Vout& v) {
+    v << call{TCA(throwSwitchMode)};
+    v << ud2{};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -450,6 +503,7 @@ void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us) {
 void UniqueStubs::emitAll() {
   auto& main = mcg->code.main();
   auto& cold = mcg->code.cold();
+  auto& frozen = mcg->code.frozen();
 
   auto const hot = [&]() -> CodeBlock& {
     auto& hot = const_cast<CodeBlock&>(mcg->code.hot());
@@ -471,6 +525,10 @@ void UniqueStubs::emitAll() {
 
   ADD(bindCallStub,           emitBindCallStub<false>(cold));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold));
+
+  ADD(decRefGeneric,  emitDecRefGeneric(cold));
+
+  ADD(throwSwitchMode,  emitThrowSwitchMode(frozen));
 #undef ADD
 
   add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this));

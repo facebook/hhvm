@@ -89,17 +89,6 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   uniqueStubs.callToExit = uniqueStubs.add("callToExit", stub);
 }
 
-void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
-  Asm a{mcg->code.frozen()};
-  moveToAlign(a.code());
-
-  uniqueStubs.throwSwitchMode = a.frontier();
-  a.    call(TCA(throwSwitchMode));
-  a.    ud2();
-
-  uniqueStubs.add("throwSwitchMode", uniqueStubs.throwSwitchMode);
-}
-
 void emitCatchHelper(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.frozen() };
   moveToAlign(mcg->code.frozen());
@@ -215,43 +204,6 @@ asm_label(a, loopHead);
                 (a.frontier() - stubBegin <= 4 * kX64CacheLineSize));
 
   uniqueStubs.add("freeLocalsHelpers", stubBegin);
-}
-
-void emitDecRefHelper(UniqueStubs& us) {
-  auto& cold = mcg->code.cold();
-  const Vreg rData{rarg(0)};
-  const Vreg rType{rarg(1)};
-
-  auto doStub = [&](Type ty) {
-    assert(ty.maybe(TCounted));
-    auto const start = cold.frontier();
-    Vauto vasm{cold};
-    auto& v = vasm.main();
-
-    auto destroy = [&](Vout& v) {
-      auto const toSave = abi().gpUnreserved - abi().calleeSaved;
-      PhysRegSaver save{v, toSave, false /* aligned */};
-
-      assert(!ty.isKnownDataType() && ty.maybe(TCounted));
-      // We've saved all caller-saved registers so it's ok to use them as
-      // scratch, including rType. This duplicates work done in
-      // lookupDestructor() but we have to be careful to not use arbitrary
-      // Vregs for anything other than status flags in this stub.
-      v << movzbq{rType, rType};
-      v << shrli{kShiftDataTypeToDestrIndex, rType, rType, v.makeReg()};
-      auto const dtor_table =
-        safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
-      v << callm{Vptr{Vreg{}, rType, 8, dtor_table}, arg_regs(1)};
-      v << syncpoint{makeIndirectFixup(save.dwordsPushed())};
-    };
-
-    emitDecRefWork(v, v, rData, destroy, false);
-
-    v << ret{};
-    return start;
-  };
-
-  us.decRefGeneric = us.add("decRefGeneric", doStub(TGen));
 }
 
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
@@ -403,10 +355,8 @@ void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
 void emitUniqueStubs(UniqueStubs& us) {
   auto functions = {
     emitCallToExit,
-    emitThrowSwitchMode,
     emitCatchHelper,
     emitFreeLocalsHelpers,
-    emitDecRefHelper,
     emitFCallArrayHelper,
     emitFunctionEnterHelper,
     emitFunctionSurprisedOrStackOverflow,

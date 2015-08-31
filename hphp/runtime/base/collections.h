@@ -87,19 +87,13 @@ void initMapElem(ObjectData* obj, TypedValue* key, TypedValue* val);
 void initElem(ObjectData* obj, TypedValue* val);
 
 /////////////////////////////////////////////////////////////////////////////
-// Misc
+// Casting and Cloing
 
 bool isType(const Class* cls, CollectionType type);
 template<typename ...Args>
 bool isType(const Class* cls, CollectionType type, Args... args) {
   return isType(cls, type) || isType(cls, args...);
 }
-
-uint32_t sizeOffset(CollectionType type);
-uint32_t dataOffset(CollectionType type);
-
-/////////////////////////////////////////////////////////////////////////////
-// Casting and Cloing
 
 Array toArray(const ObjectData* obj);
 bool toBool(const ObjectData* obj);

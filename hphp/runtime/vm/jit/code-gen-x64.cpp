@@ -3488,8 +3488,7 @@ void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   assertx(collections::isType(vec->type().clsSpec().cls(),
                               CollectionType::Vector,
                               CollectionType::ImmVector));
-  vmain() << loadzlq{vecReg[collections::sizeOffset(CollectionType::Vector)],
-                     dstReg};
+  vmain() << loadzlq{vecReg[BaseVector::sizeOffset()], dstReg};
 }
 
 void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
@@ -3513,31 +3512,17 @@ void CodeGenerator::cgLdColArray(IRInstruction* inst) {
   auto const rdst = dstLoc(inst, 0).reg();
   auto& v = vmain();
 
-  auto const isVector    = collections::isType(cls, CollectionType::Vector);
-  auto const isImmVector = collections::isType(cls, CollectionType::ImmVector);
-  if (isVector || isImmVector) {
-    v << load{rsrc[BaseVector::arrOffset()], rdst};
-    return;
-  }
-
-  auto const isMap    = collections::isType(cls, CollectionType::Map);
-  auto const isImmMap = collections::isType(cls, CollectionType::ImmMap);
-  auto const isSet    = collections::isType(cls, CollectionType::Set);
-  auto const isImmSet = collections::isType(cls, CollectionType::ImmSet);
-  if (isMap || isImmMap || isSet || isImmSet) {
-    auto const rdata = v.makeReg();
-    auto const offset =
-      collections::dataOffset(isMap ? CollectionType::Map :
-                              isImmMap ? CollectionType::ImmMap :
-                              isSet ? CollectionType::Set :
-                              /*isImmSet ? */CollectionType::ImmSet);
-    v << load{rsrc[offset], rdata};
-    v << addqi{-int32_t{sizeof(MixedArray)}, rdata, rdst, v.makeReg()};
-    return;
-  }
-
-  always_assert_flog(0, "LdColArray received an unsupported type: {}\n",
-    src->type().toString());
+  always_assert_flog(
+    collections::isType(cls, CollectionType::Vector, CollectionType::ImmVector,
+                        CollectionType::Map, CollectionType::ImmMap,
+                        CollectionType::Set, CollectionType::ImmSet),
+    "LdColArray received an unsupported type: {}\n",
+    src->type().toString()
+  );
+  auto offset = collections::isType(cls, CollectionType::Vector,
+                                    CollectionType::ImmVector) ?
+    BaseVector::arrOffset() : HashCollection::arrOffset();
+  v << load{rsrc[offset], rdst};
 }
 
 void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
@@ -3577,8 +3562,7 @@ void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   assertx(pair->type() < TObj);
   assertx(collections::isType(pair->type().clsSpec().cls(),
                               CollectionType::Pair));
-  vmain() << lea{pairReg[collections::dataOffset(CollectionType::Pair)],
-                 dstLoc(inst, 0).reg()};
+  vmain() << lea{pairReg[c_Pair::dataOffset()], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgLdElem(IRInstruction* inst) {

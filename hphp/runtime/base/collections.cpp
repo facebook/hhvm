@@ -118,28 +118,6 @@ COLLECTIONS_ALL_TYPES(X)
   not_reached();
 }
 
-uint32_t sizeOffset(CollectionType ctype) {
-  switch (ctype) {
-    case CollectionType::Vector:    return c_Vector::sizeOffset();
-    case CollectionType::ImmVector: return c_ImmVector::sizeOffset();
-    default:
-      always_assert(false);
-  }
-}
-
-uint32_t dataOffset(CollectionType ctype) {
-  switch (ctype) {
-    case CollectionType::Map:       return c_Map::dataOffset();
-    case CollectionType::ImmMap:    return c_ImmMap::dataOffset();
-    case CollectionType::Set:       return c_Set::dataOffset();
-    case CollectionType::ImmSet:    return c_ImmSet::dataOffset();
-    case CollectionType::Pair:      return c_Pair::dataOffset();
-    case CollectionType::Vector:    break;
-    case CollectionType::ImmVector: break;
-  }
-  not_reached();
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Copying
 

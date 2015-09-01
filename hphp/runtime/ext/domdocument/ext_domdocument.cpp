@@ -3668,10 +3668,11 @@ bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const String& source) {
 Variant HHVM_METHOD(DOMDocument, save,
                     const String& file,
                     int64_t options /* = 0 */) {
-  if (boost::filesystem::path(file.data()).empty() || boost::filesystem::is_directory(file.data())) {
-    raise_error("DOMDocument::save(): Invalid Filename");
-    return false;
-  }
+  VMRegAnchor _;
+//  if (boost::filesystem::path(file.data()).empty() || boost::filesystem::is_directory(file.data())) {
+//    raise_error("DOMDocument::save(): Invalid Filename");
+//    return false;
+//  }
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0, saveempty = 0;

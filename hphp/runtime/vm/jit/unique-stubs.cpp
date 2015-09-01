@@ -77,6 +77,11 @@ void loadVMRegs(Vout& v) {
   v << load{rvmtl()[rds::kVmspOff], rvmsp()};
 }
 
+void storeVMRegs(Vout& v) {
+  v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
+  v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
+}
+
 void loadMCG(Vout& v, Vreg d) {
   // TODO(#8060678): Why does this need to be RIP-relative?
   auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
@@ -348,6 +353,64 @@ TCA emitBindCallStub(CodeBlock& cb) {
   });
 }
 
+TCA emitFCallArrayHelper(CodeBlock& cb) {
+  align(cb, Alignment::CacheLine, AlignContext::Dead);
+
+  return vwrap2(cb, [] (Vout& v, Vout& vcold) {
+    storeVMRegs(v);
+
+    auto const func = v.makeReg();
+    auto const unit = v.makeReg();
+    auto const bc = v.makeReg();
+
+    // Load fp->m_func->m_unit->m_bc.
+    v << load{rvmfp()[AROFF(m_func)], func};
+    v << load{func[Func::unitOff()], unit};
+    v << load{unit[Unit::bcOff()], bc};
+
+    auto const pc = v.makeReg();
+    auto const next = v.makeReg();
+
+    // Convert offsets into PCs, and sync the PC.
+    v << addq{bc, rarg(0), pc, v.makeReg()};
+    v << store{pc, rvmtl()[rds::kVmpcOff]};
+    v << addq{bc, rarg(1), next, v.makeReg()};
+
+    auto const res = v.makeReg();
+
+    alignNativeStack(v, [&] (Vout& v) {
+      bool (*helper)(PC) = &doFCallArrayTC;
+      v << simplecall(v, helper, next, res);
+    });
+    v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+
+    auto const sf = v.makeReg();
+    v << testb{res, res, sf};
+
+    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+      // If false was returned, we should skip the callee.  The interpreter
+      // will have popped the pre-live ActRec already, so we can just return to
+      // the caller.
+      v << ret{};
+    });
+    v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+
+    // If true was returned, head to the func body.  Stashing the saved RIP
+    // here performs the same work as EnterFrame in func prologues.
+    stashSavedRIP(v, rvmfp());
+
+    auto const callee = v.makeReg();
+    auto const body = v.makeReg();
+
+    v << load{rvmfp()[AROFF(m_func)], callee};
+    v << load{callee[Func::funcBodyOff()], body};
+
+    // We jmp directly to the func body---this keeps the return stack buffer
+    // balanced between the call to this stub and the ret from the callee.
+    v << jmpr{body};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ResumeHelper {
@@ -390,8 +453,7 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us) {
     v << store{rarg(0), rvmtl()[rds::kVmpcOff]};
   });
   us.interpHelperSyncedPC = vwrap(cb, [&] (Vout& v) {
-    v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
-    v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
+    storeVMRegs(v);
     v << ldimmb{1, rarg(1)};
     v << jmpi{body, RegSet(rarg(1))};
   });
@@ -525,6 +587,7 @@ void UniqueStubs::emitAll() {
 
   ADD(bindCallStub,           emitBindCallStub<false>(cold));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold));
+  ADD(fcallArrayHelper,       emitFCallArrayHelper(hot()));
 
   ADD(decRefGeneric,  emitDecRefGeneric(cold));
 

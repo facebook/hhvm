@@ -206,76 +206,6 @@ asm_label(a, loopHead);
   uniqueStubs.add("freeLocalsHelpers", stubBegin);
 }
 
-void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
-  auto& cb = mcg->code.hot().available() > 512 ?
-    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
-  Asm a { cb };
-
-  align(cb, Alignment::CacheLine, AlignContext::Dead);
-  uniqueStubs.fcallArrayHelper = a.frontier();
-
-  /*
-   * When translating FCallArray, we have a pre-live ActRec on the stack and an
-   * Array of the parameters.  This stub uses the interpreter functions to
-   * enter the ActRec, but those functions may also tell us not to run it.  We
-   * reach this stub using a call instruction from the TC.
-   *
-   * In the case we're told to run it, we pop the return IP from the call and
-   * put it in the pre-live ActRec, link it as the frame pointer, and then jump
-   * directly to the prologue for the function being called.  This is done to
-   * keep the return stack buffer balanced with the call to this stub.  If
-   * we're told not to (e.g. the call_user_func_array was intercepted), we just
-   * return to our caller in the TC after re-loading the VM regs (the
-   * interpreter will have popped the pre-live ActRec for us).
-   *
-   * NOTE: Our ABI for php-level calls only has two callee-saved registers:
-   * rvmfp() and rvmtl(), so we're allowed to use any other regs without saving
-   * them.
-   */
-
-  Label noCallee;
-
-  auto const rPCOff  = rarg(0);
-  auto const rPCNext = rarg(1);
-  auto const rBC     = r13;
-
-  a.    storeq (rvmfp(), rvmtl()[rds::kVmfpOff]);
-  a.    storeq (rvmsp(), rvmtl()[rds::kVmspOff]);
-
-  // rBC := fp -> m_func -> m_unit -> m_bc
-  a.    loadq  (rvmfp()[AROFF(m_func)], rBC);
-  a.    loadq  (rBC[Func::unitOff()], rBC);
-  a.    loadq  (rBC[Unit::bcOff()],   rBC);
-  // Convert offsets into PC's and sync the PC
-  a.    addq   (rBC,    rPCOff);
-  a.    storeq (rPCOff, rvmtl()[rds::kVmpcOff]);
-  a.    addq   (rBC,    rPCNext);
-
-  a.    subq   (8, rsp());  // stack parity
-
-  a.    movq   (rPCNext, rarg(0));
-  a.    call   (TCA(&doFCallArrayTC));
-
-  a.    loadq  (rvmtl()[rds::kVmspOff], rvmsp());
-
-  a.    testb  (rbyte(rax), rbyte(rax));
-  a.    jz8    (noCallee);
-
-  a.    addq   (8, rsp());
-  a.    loadq  (rvmtl()[rds::kVmfpOff], rvmfp());
-  a.    pop    (rvmfp()[AROFF(m_savedRip)]);
-  a.    loadq  (rvmfp()[AROFF(m_func)], rax);
-  a.    loadq  (rax[Func::funcBodyOff()], rax);
-  a.    jmp    (rax);
-  a.    ud2    ();
-
-asm_label(a, noCallee);
-  a.    addq   (8, rsp());
-  a.    ret    ();
-
-  uniqueStubs.add("fcallArrayHelper", uniqueStubs.fcallArrayHelper);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
@@ -357,7 +287,6 @@ void emitUniqueStubs(UniqueStubs& us) {
     emitCallToExit,
     emitCatchHelper,
     emitFreeLocalsHelpers,
-    emitFCallArrayHelper,
     emitFunctionEnterHelper,
     emitFunctionSurprisedOrStackOverflow,
   };

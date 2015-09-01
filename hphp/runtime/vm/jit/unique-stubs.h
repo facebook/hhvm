@@ -117,7 +117,9 @@ struct UniqueStubs {
    * translation.
    *
    * @reached:  call from enterTCHelper
-   * @aligned:  true (we ensure alignment when entering the TC)
+   *            jmp from fcallArrayHelper
+   * @aligned:  true (we ensure alignment when entering the TC, and
+   *            fcallArrayHelper performs the EnterFrame of func prologues)
    */
   TCA funcBodyHelperThunk;
 
@@ -204,8 +206,8 @@ struct UniqueStubs {
   TCA immutableBindCallStub;
 
   /*
-   * Utility routine that helps implement a fast path to avoid full VM re-entry
-   * during translations of Op::FCallArray.
+   * Use interpreter functions to enter the pre-live ActRec that we place on
+   * the stack (along with the Array of parameters) in a CallArray instruction.
    *
    * @reached:  vcallarray from TC
    * @aligned:  false

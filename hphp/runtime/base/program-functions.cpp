@@ -422,8 +422,7 @@ static void handle_exception_helper(bool& ret,
                                     bool richErrorMsg) {
   // Clear oom/timeout while handling exception and restore them afterwards.
   auto& flags = stackLimitAndSurprise();
-  auto const origFlags = flags.load() & ResourceFlags;
-  flags.fetch_and(~ResourceFlags);
+  auto const origFlags = flags.fetch_and(~ResourceFlags) & ResourceFlags;
 
   SCOPE_EXIT {
     flags.fetch_or(origFlags);

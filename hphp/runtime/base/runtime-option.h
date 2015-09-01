@@ -369,6 +369,9 @@ public:
   static bool LookForTypechecker;
   static bool AutoTypecheck;
 
+  static bool PHP7;
+  static bool PHP7_UVS;
+
   static int64_t HeapSizeMB;
   static int64_t HeapResetCountBase;
   static int64_t HeapResetCountMultiple;

@@ -403,6 +403,14 @@ CachedUnit checkoutFile(StringData* path, const struct stat& statInfo) {
 
 //////////////////////////////////////////////////////////////////////
 
+const std::string mangleUnitPHP7Options() {
+  // As the list of options increases, we may want to do something smarter here?
+  std::string s;
+  s +=
+    (RuntimeOption::PHP7_UVS ? '1' : '0');
+  return s;
+}
+
 std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
@@ -416,7 +424,8 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
     + RuntimeOption::EvalUseExternalEmitter + '\0'
     + (RuntimeOption::EvalExternalEmitterFallback ? '1' : '0')
-    + (RuntimeOption::EvalExternalEmitterAllowPartial ? '1' : '0');
+    + (RuntimeOption::EvalExternalEmitterAllowPartial ? '1' : '0')
+    + mangleUnitPHP7Options();
   return string_md5(t.c_str(), t.size());
 }
 

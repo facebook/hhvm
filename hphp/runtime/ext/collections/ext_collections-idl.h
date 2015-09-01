@@ -1274,14 +1274,14 @@ class BaseMap : public HashCollection {
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
     assertx(key->m_type != KindOfRef);
-    auto mp = static_cast<BaseMap*>(obj);
+    auto map = static_cast<BaseMap*>(obj);
     if (key->m_type == KindOfInt64) {
-      return throwOnMiss ? mp->at(key->m_data.num)
-                         : mp->get(key->m_data.num);
+      return throwOnMiss ? map->at(key->m_data.num)
+                         : map->get(key->m_data.num);
     }
     if (isStringType(key->m_type)) {
-      return throwOnMiss ? mp->at(key->m_data.pstr)
-                         : mp->get(key->m_data.pstr);
+      return throwOnMiss ? map->at(key->m_data.pstr)
+                         : map->get(key->m_data.pstr);
     }
     throwBadKeyType();
     return nullptr;
@@ -1686,17 +1686,17 @@ class BaseSet : public HashCollection {
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
     assertx(key->m_type != KindOfRef);
-    auto st = static_cast<BaseSet*>(obj);
+    auto set = static_cast<BaseSet*>(obj);
     ssize_t p;
     if (key->m_type == KindOfInt64) {
-      p = st->find(key->m_data.num);
+      p = set->find(key->m_data.num);
     } else if (isStringType(key->m_type)) {
-      p = st->find(key->m_data.pstr, key->m_data.pstr->hash());
+      p = set->find(key->m_data.pstr, key->m_data.pstr->hash());
     } else {
       BaseSet::throwBadValueType();
     }
     if (LIKELY(p != Empty)) {
-      return reinterpret_cast<TypedValue*>(&st->data()[p].data);
+      return reinterpret_cast<TypedValue*>(&set->data()[p].data);
     }
     if (!throwOnMiss) {
       return nullptr;

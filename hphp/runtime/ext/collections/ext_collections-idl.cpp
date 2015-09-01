@@ -2012,9 +2012,9 @@ BaseMap::php_differenceByKey(const Variant& it) {
   auto ret = Object::attach(target);
   if (obj->isCollection()) {
     if (isMapCollection(obj->collectionType())) {
-      auto mp = static_cast<BaseMap*>(obj);
-      auto* eLimit = mp->elmLimit();
-      for (auto* e = mp->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+      auto map = static_cast<BaseMap*>(obj);
+      auto* eLimit = map->elmLimit();
+      for (auto* e = map->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
         if (e->hasIntKey()) {
           target->remove((int64_t)e->ikey);
         } else {
@@ -2080,14 +2080,14 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto mp = req::make<TMap>();
-  if (!m_size) return Object{std::move(mp)};
+  auto map = req::make<TMap>();
+  if (!m_size) return Object{std::move(map)};
   assert(posLimit() != 0);
   assert(hashSize() > 0);
-  assert(mp->arrayData() == staticEmptyMixedArray());
-  mp->m_arr = MixedArray::asMixed(MixedArray::MakeReserveMixed(cap()));
-  mp->setIntLikeStrKeys(intLikeStrKeys());
-  wordcpy(mp->hashTab(), hashTab(), hashSize());
+  assert(map->arrayData() == staticEmptyMixedArray());
+  map->m_arr = MixedArray::asMixed(MixedArray::MakeReserveMixed(cap()));
+  map->setIntLikeStrKeys(intLikeStrKeys());
+  wordcpy(map->hashTab(), hashTab(), hashSize());
   {
     uint32_t used = posLimit();
     int32_t version = m_version;
@@ -2096,12 +2096,12 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
     // make sure that posLimit() get set to the correct value and
     // that m_pos gets set to point to the first element.
     SCOPE_EXIT {
-      mp->setPosLimit(i);
-      mp->arrayData()->m_pos = mp->nthElmPos(0);
+      map->setPosLimit(i);
+      map->arrayData()->m_pos = map->nthElmPos(0);
     };
     for (; i < used; ++i) {
       const Elm& e = data()[i];
-      Elm& ne = mp->data()[i];
+      Elm& ne = map->data()[i];
       if (isTombstone(i)) {
         ne.data.m_type = e.data.m_type;
         continue;
@@ -2118,12 +2118,12 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
       }
       ne.ikey = e.ikey;
       ne.data.hash() = e.data.hash();
-      mp->incSize();
+      map->incSize();
       // Needed so that the new elements are accounted for when GC scanning.
-      mp->incPosLimit();
+      map->incPosLimit();
     }
   }
-  return Object{std::move(mp)};
+  return Object{std::move(map)};
 }
 
 Object c_ImmMap::t_values() {
@@ -2253,11 +2253,11 @@ typename std::enable_if<
 BaseMap::php_zip(const Variant& iterable) const {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto mp = req::make<TMap>();
+  auto map = req::make<TMap>();
   if (!m_size) {
-    return Object{std::move(mp)};
+    return Object{std::move(map)};
   }
-  mp->reserve(std::min(sz, size_t(m_size)));
+  map->reserve(std::min(sz, size_t(m_size)));
   uint32_t used = posLimit();
   for (uint32_t i = 0; i < used && iter; ++i) {
     if (isTombstone(i)) continue;
@@ -2270,14 +2270,14 @@ BaseMap::php_zip(const Variant& iterable) const {
     tv.m_data.pobj = pair.detach();
     tv.m_type = KindOfObject;
     if (e.hasIntKey()) {
-      mp->setRaw(e.ikey, &tv);
+      map->setRaw(e.ikey, &tv);
     } else {
       assert(e.hasStrKey());
-      mp->setRaw(e.skey, &tv);
+      map->setRaw(e.skey, &tv);
     }
     ++iter;
   }
-  return Object{std::move(mp)};
+  return Object{std::move(map)};
 }
 
 Object c_ImmMap::t_zip(const Variant& iterable) {
@@ -3126,11 +3126,11 @@ Object c_Map::getImmutableCopy() {
 bool BaseMap::Equals(EqualityFlavor eq,
                      const ObjectData* obj1, const ObjectData* obj2) {
 
-  auto mp1 = static_cast<const BaseMap*>(obj1);
-  auto mp2 = static_cast<const BaseMap*>(obj2);
-  auto size = mp1->size();
+  auto map1 = static_cast<const BaseMap*>(obj1);
+  auto map2 = static_cast<const BaseMap*>(obj2);
+  auto size = map1->size();
 
-  if (size != mp2->size()) { return false; }
+  if (size != map2->size()) { return false; }
   if (size == 0) { return true; }
 
   switch (eq) {
@@ -3138,15 +3138,15 @@ bool BaseMap::Equals(EqualityFlavor eq,
       // obj1 and obj2 must have the exact same set of keys, and the values
       // for each key must compare equal (==). This equality behavior
       // matches that of == on two PHP (associative) arrays.
-      for (uint32_t i = 0; i < mp1->posLimit(); ++i) {
-        if (mp1->isTombstone(i)) continue;
-        const HashCollection::Elm& e = mp1->data()[i];
+      for (uint32_t i = 0; i < map1->posLimit(); ++i) {
+        if (map1->isTombstone(i)) continue;
+        const HashCollection::Elm& e = map1->data()[i];
         TypedValue* tv2;
         if (e.hasIntKey()) {
-          tv2 = mp2->get(e.ikey);
+          tv2 = map2->get(e.ikey);
         } else {
           assert(e.hasStrKey());
-          tv2 = mp2->get(e.skey);
+          tv2 = map2->get(e.skey);
         }
         if (!tv2) return false;
         if (!HPHP::equal(tvAsCVarRef(&e.data), tvAsCVarRef(tv2))) return false;
@@ -3159,10 +3159,10 @@ bool BaseMap::Equals(EqualityFlavor eq,
       // same iteration order.
       uint32_t compared = 0;
       for (uint32_t ix1 = 0, ix2 = 0;
-           ix1 < mp1->posLimit() && ix2 < mp2->posLimit() ; ) {
+           ix1 < map1->posLimit() && ix2 < map2->posLimit() ; ) {
 
-        auto tomb1 = mp1->isTombstone(ix1);
-        auto tomb2 = mp2->isTombstone(ix2);
+        auto tomb1 = map1->isTombstone(ix1);
+        auto tomb2 = map2->isTombstone(ix2);
 
         if (tomb1 || tomb2) {
           if (tomb1) { ++ix1; }
@@ -3170,8 +3170,8 @@ bool BaseMap::Equals(EqualityFlavor eq,
           continue;
         }
 
-        const HashCollection::Elm& e1 = mp1->data()[ix1];
-        const HashCollection::Elm& e2 = mp2->data()[ix2];
+        const HashCollection::Elm& e1 = map1->data()[ix1];
+        const HashCollection::Elm& e2 = map2->data()[ix2];
 
         if (e1.hasIntKey()) {
           if (!e2.hasIntKey() ||
@@ -3474,12 +3474,12 @@ bool BaseSet::ToBool(const ObjectData* obj) {
 // already exist) and then return it
 Object c_Set::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto st = req::make<c_ImmSet>();
-    st->m_size = m_size;
-    st->m_version = m_version;
-    st->m_arr = m_arr;
-    st->setIntLikeStrKeys(intLikeStrKeys());
-    m_immCopy = std::move(st);
+    auto set = req::make<c_ImmSet>();
+    set->m_size = m_size;
+    set->m_version = m_version;
+    set->m_arr = m_arr;
+    set->setIntLikeStrKeys(intLikeStrKeys());
+    m_immCopy = std::move(set);
     arrayData()->incRefCount();
   }
   assert(!m_immCopy.isNull());
@@ -3547,52 +3547,52 @@ Object c_Set::t_remove(const Variant& key) {
 
 bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto st = static_cast<BaseSet*>(obj);
+  auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
-    return st->contains(key->m_data.num);
-  } else if (isStringType(key->m_type)) {
-    return st->contains(key->m_data.pstr);
-  } else {
-    throwBadValueType();
-    return false;
+    return set->contains(key->m_data.num);
   }
+  if (isStringType(key->m_type)) {
+    return set->contains(key->m_data.pstr);
+  }
+  throwBadValueType();
+  return false;
 }
 
 bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto st = static_cast<BaseSet*>(obj);
+  auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
-    return st->contains(key->m_data.num) ? !cellToBool(*key) : true;
-  } else if (isStringType(key->m_type)) {
-    return st->contains(key->m_data.pstr) ? !cellToBool(*key) : true;
-  } else {
-    throwBadValueType();
-    return true;
+    return set->contains(key->m_data.num) ? !cellToBool(*key) : true;
   }
+  if (isStringType(key->m_type)) {
+    return set->contains(key->m_data.pstr) ? !cellToBool(*key) : true;
+  }
+  throwBadValueType();
+  return true;
 }
 
 bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto st = static_cast<BaseSet*>(obj);
+  auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
-    return st->contains(key->m_data.num);
-  } else if (isStringType(key->m_type)) {
-    return st->contains(key->m_data.pstr);
-  } else {
-    throwBadValueType();
-    return false;
+    return set->contains(key->m_data.num);
   }
+  if (isStringType(key->m_type)) {
+    return set->contains(key->m_data.pstr);
+  }
+  throwBadValueType();
+  return false;
 }
 
 void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto st = static_cast<BaseSet*>(obj);
+  auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
-    st->remove(key->m_data.num);
+    set->remove(key->m_data.num);
     return;
   }
   if (isStringType(key->m_type)) {
-    st->remove(key->m_data.pstr);
+    set->remove(key->m_data.pstr);
     return;
   }
   throwBadValueType();
@@ -3615,14 +3615,14 @@ BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto st = req::make<TSet>();
-  if (!m_size) return Object{std::move(st)};
+  auto set = req::make<TSet>();
+  if (!m_size) return Object{std::move(set)};
   assert(posLimit() != 0);
   assert(hashSize() > 0);
-  assert(st->arrayData() == staticEmptyMixedArray());
-  auto oldCap = st->cap();
-  st->reserve(posLimit()); // presume minimum collisions ...
-  assert(st->canMutateBuffer());
+  assert(set->arrayData() == staticEmptyMixedArray());
+  auto oldCap = set->cap();
+  set->reserve(posLimit()); // presume minimum collisions ...
+  assert(set->canMutateBuffer());
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     auto* e = iter_elm(pos);
     TypedValue tvCbRet;
@@ -3632,11 +3632,11 @@ BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
     // Now that tvCbRet is live, make sure to decref even if we throw.
     SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
-    st->addRaw(&tvCbRet);
+    set->addRaw(&tvCbRet);
   }
   // ... and shrink back if that was incorrect
-  st->shrinkIfCapacityTooHigh(oldCap);
-  return Object{std::move(st)};
+  set->shrinkIfCapacityTooHigh(oldCap);
+  return Object{std::move(set)};
 }
 
 template<typename TSet, class MakeArgs>

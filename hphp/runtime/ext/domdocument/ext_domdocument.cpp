@@ -3669,10 +3669,6 @@ Variant HHVM_METHOD(DOMDocument, save,
                     const String& file,
                     int64_t options /* = 0 */) {
   VMRegAnchor _;
-//  if (boost::filesystem::path(file.data()).empty() || boost::filesystem::is_directory(file.data())) {
-//    raise_error("DOMDocument::save(): Invalid Filename");
-//    return false;
-//  }
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0, saveempty = 0;

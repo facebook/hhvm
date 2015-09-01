@@ -1395,12 +1395,13 @@ void HashCollection::mutateImpl() {
 NEVER_INLINE
 void HashCollection::throwTooLarge() {
   assert(getClassName().size() == 6);
+  auto clsName = getClassName().get()->slice();
   String msg(130, ReserveString);
   auto buf = msg.bufferSlice();
   auto sz = snprintf(buf.data(), buf.size() + 1,
     "%s object has reached its maximum capacity of %u element "
     "slots and does not have room to add a new element",
-    getClassName().data() + 3, // strip "HH\" prefix
+    clsName.data() + 3, // strip "HH\" prefix
     MaxSize
   );
   msg.setSize(std::min<int>(sz, buf.size()));
@@ -1410,11 +1411,12 @@ void HashCollection::throwTooLarge() {
 NEVER_INLINE
 void HashCollection::throwReserveTooLarge() {
   assert(getClassName().size() == 6);
+  auto clsName = getClassName().get()->slice();
   String msg(80, ReserveString);
   auto buf = msg.bufferSlice();
   auto sz = snprintf(buf.data(), buf.size() + 1,
     "%s does not support reserving room for more than %u elements",
-    getClassName().data() + 3, // strip "HH\" prefix
+    clsName.data() + 3, // strip "HH\" prefix
     MaxReserveSize
   );
   msg.setSize(std::min<int>(sz, buf.size()));

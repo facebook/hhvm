@@ -19,8 +19,6 @@
 
 #include <map>
 
-#include <boost/filesystem.hpp>
-
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"

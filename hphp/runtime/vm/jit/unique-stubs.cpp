@@ -18,12 +18,14 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -145,6 +147,28 @@ void alignNativeStack(Vout& v, GenFunc gen) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitFunctionEnterHelper(cb, us);
+}
+
+TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitFreeLocalsHelpers(cb, us);
+}
+
+TCA emitCallToExit(CodeBlock& cb) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitCallToExit(cb);
+}
+
+TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitEndCatchHelper(cb, us);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TCA emitFuncPrologueRedispatch(CodeBlock& cb) {
   alignJmpTarget(cb);
 
@@ -234,6 +258,19 @@ TCA emitFuncBodyHelperThunk(CodeBlock& cb) {
     v << simplecall(v, helper, rvmfp(), dest);
 
     v << jmpr{dest};
+  });
+}
+
+TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& cb,
+                                         const UniqueStubs& us) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [&] (Vout& v) {
+    alignNativeStack(v, [&] (Vout& v) {
+      v << vcall{CppCall::direct(handlePossibleStackOverflow),
+                 v.makeVcallArgs({{rvmfp()}}), v.makeTuple({})};
+    });
+    v << jmpi{us.functionEnterHelper};
   });
 }
 
@@ -576,6 +613,9 @@ void UniqueStubs::emitAll() {
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot()));
   ADD(fcallHelperThunk,       emitFCallHelperThunk(cold));
   ADD(funcBodyHelperThunk,    emitFuncBodyHelperThunk(cold));
+  ADD(functionEnterHelper,    emitFunctionEnterHelper(cold, *this));
+  ADD(functionSurprisedOrStackOverflow,
+      emitFunctionSurprisedOrStackOverflow(cold, *this));
 
   ADD(retHelper,                  emitInterpRet(cold));
   ADD(genRetHelper,               emitInterpGenRet<false>(cold));
@@ -591,14 +631,14 @@ void UniqueStubs::emitAll() {
 
   ADD(decRefGeneric,  emitDecRefGeneric(cold));
 
+  ADD(callToExit,       emitCallToExit(main));
+  ADD(endCatchHelper,   emitEndCatchHelper(frozen, *this));
   ADD(throwSwitchMode,  emitThrowSwitchMode(frozen));
 #undef ADD
 
+  add("freeLocalsHelpers",  emitFreeLocalsHelpers(hot(), *this));
   add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this));
   emitInterpOneCFHelpers(cold, *this);
-
-  // TODO(#6730846): Kill this once all unique stubs are emitted here.
-  if (arch() == Arch::X64) x64::emitUniqueStubs(*this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

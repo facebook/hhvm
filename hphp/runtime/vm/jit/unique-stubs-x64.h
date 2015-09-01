@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit {
 
@@ -74,7 +75,10 @@ void alignNativeStack(Vout& v, GenFunc gen) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitUniqueStubs(UniqueStubs&);
+TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us);
+TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us);
+TCA emitCallToExit(CodeBlock& cb);
+TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us);
 
 ///////////////////////////////////////////////////////////////////////////////
 

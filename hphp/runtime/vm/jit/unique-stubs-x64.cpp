@@ -13,121 +13,88 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include <boost/implicit_cast.hpp>
-#include <sstream>
+#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 
-#include "hphp/util/abi-cxx.h"
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/disasm.h"
+#include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/event-hook.h"
 
-#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
-#include "hphp/runtime/vm/jit/code-gen-cf.h"
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 using namespace jit::reg;
-using boost::implicit_cast;
 
 TRACE_SET_MOD(ustubs);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-void moveToAlign(CodeBlock& cb) {
+static void alignJmpTarget(CodeBlock& cb) {
   align(cb, Alignment::JmpTarget, AlignContext::Dead);
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-extern "C" void enterTCExit();
+TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
+  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
+  Asm a { cb };
 
-void emitCallToExit(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
+  alignJmpTarget(cb);
+  auto const start = a.frontier();
 
-  // Emit a byte of padding. This is a kind of hacky way to avoid
-  // hitting an assert in recordGdbStub when we call it with stub - 1
-  // as the start address.
-  a.emitNop(1);
-  auto const stub = a.frontier();
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    Label ok;
-    a.emitImmReg(uintptr_t(enterTCExit), rax);
-    a.cmpq(rax, *rsp());
-    a.je8 (ok);
-    a.ud2();
-  asm_label(a, ok);
-  }
+  Label skip;
 
-  // Emulate a ret to enterTCExit without actually doing one to avoid
-  // unbalancing the return stack buffer. The call from enterTCHelper() that
-  // got us into the TC was popped off the RSB by the ret that got us to this
-  // stub.
-  a.addq(8, rsp());
-  a.jmp(TCA(enterTCExit));
+  PhysReg ar = rarg(0);
 
-  // On a backtrace, gdb tries to locate the calling frame at address
-  // returnRIP-1. However, for the first VM frame, there is no code at
-  // returnRIP-1, since the AR was set up manually. For this frame,
-  // record the tracelet address as starting from this callToExit-1,
-  // so gdb does not barf.
-  uniqueStubs.callToExit = uniqueStubs.add("callToExit", stub);
+  a.   movq    (rvmfp(), ar);
+  a.   push    (rvmfp());
+  a.   movq    (rsp(), rvmfp());
+  a.   push    (ar[AROFF(m_savedRip)]);
+  a.   push    (ar[AROFF(m_sfp)]);
+  a.   movq    (EventHook::NormalFunc, rarg(1));
+  emitCall(a, CppCall::direct(helper), arg_regs(2));
+  us.functionEnterHelperReturn = a.frontier();
+  a.   testb   (al, al);
+  a.   je8     (skip);
+  a.   addq    (16, rsp());
+  a.   pop     (rvmfp());
+  a.   ret     ();
+
+asm_label(a, skip);
+  // The event hook has already cleaned up the stack/actrec so that we're ready
+  // to continue from the original call site.  Just need to grab the fp/rip
+  // from the original frame, and sync rvmsp() to the execution-context's copy.
+  a.   pop     (rvmfp());
+  a.   pop     (rsi);
+  a.   addq    (16, rsp()); // drop our call frame
+  a.   loadq   (rvmtl()[rds::kVmspOff], rvmsp());
+  a.   jmp     (rsi);
+  a.   ud2     ();
+
+  return start;
 }
 
-void emitCatchHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.frozen() };
-  moveToAlign(mcg->code.frozen());
-  Label debuggerReturn;
-  Label resumeCppUnwind;
+///////////////////////////////////////////////////////////////////////////////
 
-  uniqueStubs.endCatchHelper = a.frontier();
-  a.    cmpq (0, rvmtl()[unwinderDebuggerReturnSPOff()]);
-  a.    jne8 (debuggerReturn);
-
-  // Normal endCatch situation: call back to tc_unwind_resume, which returns
-  // the catch trace (or null) in rax and the new vmfp in rdx.
-  a.    movq (rvmfp(), rarg(0));
-  a.    call (TCA(tc_unwind_resume));
-  a.    movq (rdx, rvmfp());
-  a.    testq(rax, rax);
-  a.    jz8  (resumeCppUnwind);
-  a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
-
-asm_label(a, resumeCppUnwind);
-  static_assert(sizeof(tl_regState) == 1,
-                "The following store must match the size of tl_regState");
-  auto vptr = emitTLSAddr(a, tl_regState, rax);
-  Vasm::prefix(a, vptr).
-        storeb(static_cast<int32_t>(VMRegState::CLEAN), vptr.mr());
-  a.    loadq(rvmtl()[unwinderExnOff()], rarg(0));
-  emitCall(a, TCA(_Unwind_Resume), arg_regs(1));
-  uniqueStubs.endCatchHelperPast = a.frontier();
-  a.    ud2();
-
-asm_label(a, debuggerReturn);
-  a.    loadq (rvmtl()[unwinderDebuggerReturnSPOff()], rvmsp());
-  a.    storeq(0, rvmtl()[unwinderDebuggerReturnSPOff()]);
-  svcreq::emit_persistent(a.code(), folly::none, REQ_POST_DEBUGGER_RET);
-
-  uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
-}
-
-void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
+TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
   Label doRelease;
   Label release;
   Label loopHead;
@@ -139,11 +106,9 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto const rType     = ecx;
   int const tvSize     = sizeof(TypedValue);
 
-  auto& cb = mcg->code.hot().available() > 512 ?
-    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
   Asm a { cb };
   align(cb, Alignment::CacheLine, AlignContext::Dead);
-  auto stubBegin = a.frontier();
+  auto const start = a.frontier();
 
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
@@ -177,8 +142,8 @@ asm_label(a, doRelease);
   asm_label(a, skipDecRef);
   };
 
-  moveToAlign(cb);
-  uniqueStubs.freeManyLocalsHelper = a.frontier();
+  alignJmpTarget(cb);
+  us.freeManyLocalsHelper = a.frontier();
   a.    lea    (rvmfp()[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
 
@@ -190,7 +155,7 @@ asm_label(a, loopHead);
   a.    jnz8   (loopHead);
 
   for (int i = 0; i < kNumFreeLocalsHelpers; ++i) {
-    uniqueStubs.freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.frontier();
+    us.freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.frontier();
     emitDecLocal();
     if (i != kNumFreeLocalsHelpers - 1) {
       a.addq   (tvSize, rIter);
@@ -201,98 +166,85 @@ asm_label(a, loopHead);
 
   // Keep me small!
   always_assert(Stats::enabled() ||
-                (a.frontier() - stubBegin <= 4 * kX64CacheLineSize));
+                (a.frontier() - start <= 4 * kX64CacheLineSize));
 
-  uniqueStubs.add("freeLocalsHelpers", stubBegin);
+  return start;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
-  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
-  Asm a { mcg->code.cold() };
+extern "C" void enterTCExit();
 
-  moveToAlign(mcg->code.cold());
-  uniqueStubs.functionEnterHelper = a.frontier();
+TCA emitCallToExit(CodeBlock& cb) {
+  Asm a { cb };
 
-  Label skip;
+  // Emit a byte of padding. This is a kind of hacky way to avoid
+  // hitting an assert in recordGdbStub when we call it with stub - 1
+  // as the start address.
+  a.emitNop(1);
+  auto const start = a.frontier();
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    Label ok;
+    a.emitImmReg(uintptr_t(enterTCExit), rax);
+    a.cmpq(rax, *rsp());
+    a.je8 (ok);
+    a.ud2();
+  asm_label(a, ok);
+  }
 
-  PhysReg ar = rarg(0);
+  // Emulate a ret to enterTCExit without actually doing one to avoid
+  // unbalancing the return stack buffer. The call from enterTCHelper() that
+  // got us into the TC was popped off the RSB by the ret that got us to this
+  // stub.
+  a.addq(8, rsp());
+  a.jmp(TCA(enterTCExit));
 
-  a.   movq    (rvmfp(), ar);
-  a.   push    (rvmfp());
-  a.   movq    (rsp(), rvmfp());
-  a.   push    (ar[AROFF(m_savedRip)]);
-  a.   push    (ar[AROFF(m_sfp)]);
-  a.   movq    (EventHook::NormalFunc, rarg(1));
-  emitCall(a, CppCall::direct(helper), arg_regs(2));
-  uniqueStubs.functionEnterHelperReturn = a.frontier();
-  a.   testb   (al, al);
-  a.   je8     (skip);
-  a.   addq    (16, rsp());
-  a.   pop     (rvmfp());
-  a.   ret     ();
-
-asm_label(a, skip);
-  // The event hook has already cleaned up the stack/actrec so that we're ready
-  // to continue from the original call site.  Just need to grab the fp/rip
-  // from the original frame, and sync rvmsp() to the execution-context's copy.
-  a.   pop     (rvmfp());
-  a.   pop     (rsi);
-  a.   addq    (16, rsp()); // drop our call frame
-  a.   loadq   (rvmtl()[rds::kVmspOff], rvmsp());
-  a.   jmp     (rsi);
-  a.   ud2     ();
-
-  uniqueStubs.add("functionEnterHelper", uniqueStubs.functionEnterHelper);
+  // On a backtrace, gdb tries to locate the calling frame at address
+  // returnRIP-1. However, for the first VM frame, there is no code at
+  // returnRIP-1, since the AR was set up manually. For this frame,
+  // record the tracelet address as starting from this callToExit-1,
+  // so gdb does not barf.
+  return start;
 }
 
-void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.cold() };
+TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
+  Asm a { cb };
+  alignJmpTarget(cb);
+  Label debuggerReturn;
+  Label resumeCppUnwind;
 
-  moveToAlign(mcg->code.main());
-  uniqueStubs.functionSurprisedOrStackOverflow = a.frontier();
+  auto const start = a.frontier();
+  a.    cmpq (0, rvmtl()[unwinderDebuggerReturnSPOff()]);
+  a.    jne8 (debuggerReturn);
 
-  /*
-   * We might be here because of a stack overflow, or because of a real
-   * surprise, or because of a spurious wake up where we raced with a
-   * background thread clearing surprise flags.
-   *
-   * We need to verify whether it is a stack overflow, because the handling of
-   * that is different.  However, if it was a spurious wake up it's fine to
-   * just pretend we had a real surprise---the surprise handler rechecks all
-   * the flags and clears them as necessary.  It will set the stack top trigger
-   * back if no flags are actually set.
-   */
+  // Normal endCatch situation: call back to tc_unwind_resume, which returns
+  // the catch trace (or null) in rax and the new vmfp in rdx.
+  a.    movq (rvmfp(), rarg(0));
+  a.    call (TCA(tc_unwind_resume));
+  a.    movq (rdx, rvmfp());
+  a.    testq(rax, rax);
+  a.    jz8  (resumeCppUnwind);
+  a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
 
-  // If handlePossibleStackOverflow returns, it was not a stack overflow, so we
-  // need to go through event hook processing.
-  a.    subq   (8, rsp());  // align native stack
-  a.    movq   (rvmfp(), rarg(0));
-  emitCall(a, CppCall::direct(handlePossibleStackOverflow), arg_regs(1));
-  a.    addq   (8, rsp());
-  a.    jmp    (uniqueStubs.functionEnterHelper);
-  a.    ud2    ();
+asm_label(a, resumeCppUnwind);
+  static_assert(sizeof(tl_regState) == 1,
+                "The following store must match the size of tl_regState");
+  auto vptr = emitTLSAddr(a, tl_regState, rax);
+  Vasm::prefix(a, vptr).
+        storeb(static_cast<int32_t>(VMRegState::CLEAN), vptr.mr());
+  a.    loadq(rvmtl()[unwinderExnOff()], rarg(0));
+  emitCall(a, TCA(_Unwind_Resume), arg_regs(1));
+  us.endCatchHelperPast = a.frontier();
+  a.    ud2();
 
-  uniqueStubs.add("functionSurprisedOrStackOverflow",
-                  uniqueStubs.functionSurprisedOrStackOverflow);
+asm_label(a, debuggerReturn);
+  a.    loadq (rvmtl()[unwinderDebuggerReturnSPOff()], rvmsp());
+  a.    storeq(0, rvmtl()[unwinderDebuggerReturnSPOff()]);
+  svcreq::emit_persistent(a.code(), folly::none, REQ_POST_DEBUGGER_RET);
+
+  return start;
 }
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void emitUniqueStubs(UniqueStubs& us) {
-  auto functions = {
-    emitCallToExit,
-    emitCatchHelper,
-    emitFreeLocalsHelpers,
-    emitFunctionEnterHelper,
-    emitFunctionSurprisedOrStackOverflow,
-  };
-  for (auto& f : functions) f(us);
-}
-
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

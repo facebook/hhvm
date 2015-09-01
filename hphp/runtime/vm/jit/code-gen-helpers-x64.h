@@ -21,7 +21,7 @@
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/align-x64.h"
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/cpp-call.h"

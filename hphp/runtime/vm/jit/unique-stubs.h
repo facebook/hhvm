@@ -327,18 +327,15 @@ struct UniqueStubs {
 
   /*
    * Utility for logging stubs addresses during startup and registering the gdb
-   * symbols. It's often useful to know where they were when debugging.
-   *
-   * TODO(#6730846): Kill this once we have one emitter per unique stub (or
-   * close to it).
+   * symbols.  It's often useful to know where they were when debugging.
    */
   TCA add(const char* name, TCA start);
 
   /*
    * If the given address is within one of the registered stubs, return a
-   * string indicating which stub and how far in it is:
-   * "fcallArrayHelper+0xfa". Otherwise, return a string representation of the
-   * raw address: "0xabcdef".
+   * string indicating which stub and how far in it is: "retHelper+0xfa".
+   *
+   * Otherwise, return a string representation of the raw address: "0xabcdef".
    */
   std::string describe(TCA addr);
 

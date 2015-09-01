@@ -28,7 +28,7 @@ endif ()
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
 # constants.h doesn't exist until build time,
 # so we need to manually inject it here
-list(APPEND files "${CMAKE_CURRENT_SOURCE_DIR}/constants.h")
+list(APPEND files "${CMAKE_CURRENT_BINARY_DIR}/constants.h")
 HHVM_PUBLIC_HEADERS(system ${files})
 
 # Needed to force system/constants.h to generate prior to files which need it

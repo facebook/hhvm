@@ -1630,7 +1630,7 @@ NEVER_INLINE void HashCollection::reserve(int64_t sz) {
     // which case we do nothing and return.
     compactOrShrinkIfDensityTooLow();
     assert(sz + int64_t(posLimit() - m_size) <= cap);
-    assert(canMutateBuffer());
+    mutate();
     return;
   }
   // If we reach this case, then density is not too low and sz > m_size and

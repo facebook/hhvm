@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -345,6 +346,9 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
     normalized = String("/") + normalized;
   }
 
+  Logger::Verbose("Matching host:%s url:%s using vhost:%s",
+                  host.c_str(), url.c_str(), m_name.c_str());
+
   for (unsigned int i = 0; i < m_rewriteRules.size(); i++) {
     const RewriteRule &rule = m_rewriteRules[i];
 
@@ -370,6 +374,8 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
                            normalized,
                            &matches).toInt64();
     if (count > 0) {
+      Logger::Verbose("Matched pattern %s", rule.pattern.c_str());
+
       const char *s = rule.to.c_str();
       StringBuffer ret;
       while (*s) {
@@ -413,6 +419,8 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
       qsa = rule.qsa;
       redirect = rule.redirect;
       return true;
+    } else {
+      Logger::Verbose("Did not match pattern %s", rule.pattern.c_str());
     }
   }
   return false;

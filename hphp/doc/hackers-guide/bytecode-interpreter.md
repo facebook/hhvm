@@ -44,24 +44,18 @@ This is the function that implements the interpreter. Two different
 versions are instantiated, one with breakOnCtlFlow set to true and one
 with it set to false. Since these are constants, the compiler is smart
 enough to elide the “if” statements that check breakOnCtlFlow. Instead,
-the bodies of the “if”s are never executed or always executed. The
-effect is as though something like
-
-```
-#ifdef BREAK_ON_CTL_FLOW
-
-#endif
-```
-
-had been used.
+the bodies of the “if”s are either never executed or always executed.
+While at first glance it appears that we're paying the cost of runtime
+checks, that's not actually the case.
 
 When breakOnCtlFlow is true, the function will return to the caller when
 a control flow (i.e. branch) instruction is encountered. If breakOnCtlFlow
 is false, the interpreter will continue executing instructions until a
-return, await, createCont, Yield, or nativeImpl opcode.
+function-exiting instruction is reached. Examples of these function-exiting
+instructions are RetC, RetV, NativeImpl, Await, CreateCont, Yield, and YieldK.
 
-The recent addition of Windows support has further complicated the code.
-The Windows version (indicated with _MSC_VER) implements a standard
+There are two versions of the interpreter loop. The Windows version
+(indicated with _MSC_VER) implements an ordinary switch-based
 interpreter loop, while the gcc version implements a threaded interpreter.
 In a threaded interpreter, the handler for each bytecode jumps directly to
 the handler for the next bytecode rather than going to a single central
@@ -128,7 +122,8 @@ macros involved in creating the interpreter body.
 The OPCODES macro is also used to create a set of functions named
 interpOneNop(), interpOnePopA(), interpOnePopC(), etc. These functions can
 be used to invoke each of the individual bytecode handlers, with logging
-and statistics code also included.
+and statistics code also included. interpOneEntryPoints[] contains a table
+of these functions, allowing them to be called from JIT code.
 
 The last piece to understanding the interpreter is iopRetWrapper(). These
 are a pair of function which are called by the OPCODE_MAIN_BODY macro.
@@ -139,10 +134,6 @@ return a TCA, the OPCODE_MAIN_BODY macro doesn’t have to see the difference.
 The iopRetWrapper() functions in turn call the bytecode handlers which are
 named iopXXXX (where XXXX is the name of the bytecode). The iopRetWrapper()
 functions and all the bytecode handlers are declared OPTBLD_INLINE. This is
-a macro that is empty for a debug build or
-inline __attribute__((__always_inline__)) for a release
+a macro that is empty for a debug build or ALWAYS_INLINE for a release
 build. Thus all the code gets inlined in to the interpreter loop for a
 release build.
-
-So there you have it. The interpreter loop really is there. It’s just hidden
-really well.

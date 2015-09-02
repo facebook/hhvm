@@ -51,8 +51,9 @@ checks, that's not actually the case.
 When breakOnCtlFlow is true, the function will return to the caller when
 a control flow (i.e. branch) instruction is encountered. If breakOnCtlFlow
 is false, the interpreter will continue executing instructions until a
-function-exiting instruction is reached. Examples of these function-exiting
-instructions are RetC, RetV, NativeImpl, Await, CreateCont, Yield, and YieldK.
+function-exiting instruction is reached. As of this writing, the
+function-exiting instructions are RetC, RetV, NativeImpl, Await, CreateCont,
+Yield, and YieldK. This list could change in the future.
 
 There are two versions of the interpreter loop. The Windows version
 (indicated with _MSC_VER) implements an ordinary switch-based

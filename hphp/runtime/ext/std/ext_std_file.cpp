@@ -110,10 +110,11 @@
     std::string msg = folly::errnoStr(errno).c_str();     \
     auto const ee = ExtendedException(msg);               \
     auto fileAndLine = ee.getFileAndLine();               \
-    std::string prefix = __FUNCTION__;                    \
-    prefix += ": ";                                       \
-    Logger::Log(Logger::LogVerbose, prefix.data(), ee,    \
-        fileAndLine.first.c_str(), fileAndLine.second);   \
+    std::ostringstream os;                                \
+    os <<__FUNCTION__ <<": " <<msg                        \
+      <<" in " <<fileAndLine.first.c_str()                \
+      <<" on line " <<fileAndLine.second;                 \
+    Logger::Verbose(os.str());                            \
     return false;                                         \
   }                                                       \
 

@@ -2024,6 +2024,7 @@ void hphp_session_init() {
   g_context.getCheck();
   AsioSession::Init();
   InitFiniNode::RequestInit();
+  Socket::clearLastError();
   TI().onSessionInit();
   MM().resetExternalStats();
 

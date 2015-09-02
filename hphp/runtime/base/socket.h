@@ -81,7 +81,8 @@ struct Socket : File {
 
   void setError(int err);
   int getError() const { return m_data->m_error;}
-  static int getLastError();
+  static int getLastError() { return s_lastErrno; }
+  static void clearLastError() { s_lastErrno = 0; }
   int getType() const { return m_data->m_type;}
 
   // This is only for updating a local copy of timeouts set by setsockopt()
@@ -116,6 +117,7 @@ protected:
 private:
   void inferStreamType();
   SocketData* m_data;
+  static __thread int s_lastErrno;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -117,7 +117,9 @@ struct UniqueStubs {
    * translation.
    *
    * @reached:  call from enterTCHelper
-   * @aligned:  true (we ensure alignment when entering the TC)
+   *            jmp from fcallArrayHelper
+   * @aligned:  true (we ensure alignment when entering the TC, and
+   *            fcallArrayHelper performs the EnterFrame of func prologues)
    */
   TCA funcBodyHelperThunk;
 
@@ -204,8 +206,8 @@ struct UniqueStubs {
   TCA immutableBindCallStub;
 
   /*
-   * Utility routine that helps implement a fast path to avoid full VM re-entry
-   * during translations of Op::FCallArray.
+   * Use interpreter functions to enter the pre-live ActRec that we place on
+   * the stack (along with the Array of parameters) in a CallArray instruction.
    *
    * @reached:  vcallarray from TC
    * @aligned:  false
@@ -325,18 +327,15 @@ struct UniqueStubs {
 
   /*
    * Utility for logging stubs addresses during startup and registering the gdb
-   * symbols. It's often useful to know where they were when debugging.
-   *
-   * TODO(#6730846): Kill this once we have one emitter per unique stub (or
-   * close to it).
+   * symbols.  It's often useful to know where they were when debugging.
    */
   TCA add(const char* name, TCA start);
 
   /*
    * If the given address is within one of the registered stubs, return a
-   * string indicating which stub and how far in it is:
-   * "fcallArrayHelper+0xfa". Otherwise, return a string representation of the
-   * raw address: "0xabcdef".
+   * string indicating which stub and how far in it is: "retHelper+0xfa".
+   *
+   * Otherwise, return a string representation of the raw address: "0xabcdef".
    */
   std::string describe(TCA addr);
 

@@ -8,6 +8,8 @@
  *
  *)
 
+(* Code for emitting expressions and various related forms (like lvalues) *)
+
 open Core
 open Utils
 open Nast
@@ -384,6 +386,20 @@ and emit_call env (pos, expr_ as expr) args uargs =
     (* emit a dummy null so the expression has a return value *)
     emit_Null env, FC
 
+  (* Functions that call set_frame_metadata need an "86metadata" local
+   * allocated. *)
+  | Id (_, "\\HH\\set_frame_metadata"), _  -> unimpl "set_frame_metadata"
+  (* Different variants of call_user_func;
+   * see emitCallUserFunc in emitter.cpp *)
+  | Id (_, ("\\call_user_func_array" |
+            "\\forward_static_call" |
+            "\\forward_static_call_array" |
+            "\\fb_call_user_func_safe" |
+            "\\fb_call_user_func_array_safe" |
+            "\\fb_call_user_func_safe_return")), _  ->
+    unimpl "call_user_func"
+
+
   (* TODO: a billion other builtins *)
 
   | _ -> emit_normal_call env expr args uargs
@@ -498,6 +514,11 @@ and emit_expr env (pos, expr_ as expr) =
     emit_label env end_label
 
   (* Normal binops *)
+  (* HHVM can sometimes evaluate binops (and some other things) right to left
+   * if the LHS is a variable. We don't do this (because it seems silly),
+   * but it wouldn't be that hard to handle. *Most* situations where it
+   * it actually observable are ruled out by the typechecker, but it can
+   * be observed with effectful __toString() methods or HH_FIXME. *)
   | Binop (bop, e1, e2) ->
     let env = emit_expr env e1 in
     let env = emit_expr env e2 in
@@ -548,7 +569,7 @@ and emit_expr env (pos, expr_ as expr) =
   | String (_, s) -> emit_String env s
 
   | String2 [] -> bug "empty String2"
-  (* If we there are multiple parts of the String2, they will get
+  (* If there are multiple parts of the String2, they will get
    * stringified when they get concatenated. If there is just one
    * we need to cast it manually. *)
   | String2 [e] ->

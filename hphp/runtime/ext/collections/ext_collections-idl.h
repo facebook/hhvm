@@ -672,21 +672,20 @@ ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
 ///////////////////////////////////////////////////////////////////////////////
 // class HashCollection
 
-class HashCollection : public ExtCollectionObjectData {
- public:
+struct HashCollection : ExtCollectionObjectData {
   explicit HashCollection(Class* cls, HeaderKind kind)
     : ExtCollectionObjectData(cls, kind)
     , m_versionAndSize(0)
-    , m_data(mixedData(staticEmptyMixedArray()))
+    , m_arr(staticEmptyMixedArray())
   {}
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
     : ExtCollectionObjectData(cls, kind)
     , m_versionAndSize(arr->m_size)
-    , m_data(mixedData(MixedArray::asMixed(arr)))
+    , m_arr(MixedArray::asMixed(arr))
   {}
   explicit HashCollection(Class* cls, HeaderKind kind, uint32_t cap);
 
-  typedef MixedArray::Elm Elm;
+  using Elm = MixedArray::Elm;
 
  protected:
   union {
@@ -697,7 +696,7 @@ class HashCollection : public ExtCollectionObjectData {
     int64_t m_versionAndSize;
   };
 
-  Elm* m_data;           // Elm store.
+  MixedArray* m_arr;      // Elm store.
 
   // A pointer to an immutable collection that shares its buffer with
   // this collection.
@@ -742,29 +741,17 @@ class HashCollection : public ExtCollectionObjectData {
     tvRefcountedIncRef(&toE.data);
   }
 
-  MixedArray* arrayData() {
-    auto* ret = getArrayFromMixedData(m_data);
-    assert(ret == staticEmptyMixedArray() || ret->isMixed());
-    return ret;
-  }
-  const MixedArray* arrayData() const {
-    auto* ret = getArrayFromMixedData(m_data);
-    assert(ret == staticEmptyMixedArray() || ret->isMixed());
-    return ret;
-  }
+  MixedArray* arrayData() { return m_arr; }
+  const MixedArray* arrayData() const { return m_arr; }
 
  protected:
-  inline Elm* data() { return m_data; }
-  inline const Elm* data() const { return m_data; }
-  inline int32_t* hashTab() const {
-    return reinterpret_cast<int32_t*>(
-      m_data + static_cast<size_t>(arrayData()->scale()) * 3
-    );
-  }
+  Elm* data() { return m_arr->data(); }
+  const Elm* data() const { return m_arr->data(); }
+  int32_t* hashTab() const { return m_arr->hashTab(); }
 
   void setSize(uint32_t sz) {
     assert(sz <= cap());
-    if (m_data == mixedData(staticEmptyMixedArray())) {
+    if (m_arr == staticEmptyMixedArray()) {
       assert(sz == 0);
       return;
     }
@@ -784,24 +771,24 @@ class HashCollection : public ExtCollectionObjectData {
     --m_size;
     arrayData()->m_size = m_size;
   }
-  inline uint32_t scale() const {
+  uint32_t scale() const {
     return arrayData()->scale();
   }
-  inline uint32_t cap() const {
+  uint32_t cap() const {
     return arrayData()->capacity();
   }
-  inline uint32_t tableMask() const {
+  uint32_t tableMask() const {
     return arrayData()->mask();
   }
-  inline uint32_t posLimit() const {
+  uint32_t posLimit() const {
     return arrayData()->m_used;
   }
-  inline void incPosLimit() {
+  void incPosLimit() {
     assert(!arrayData()->hasMultipleRefs());
     assert(posLimit() + 1 <= cap());
     arrayData()->m_used++;
   }
-  inline void setPosLimit(uint32_t limit) {
+  void setPosLimit(uint32_t limit) {
     auto* a = arrayData();
     if (a == staticEmptyMixedArray()) {
       assert(limit == 0);
@@ -910,8 +897,8 @@ class HashCollection : public ExtCollectionObjectData {
     return !arrayData()->hasMultipleRefs();
   }
 
-  static constexpr ptrdiff_t dataOffset() {
-    return offsetof(HashCollection, m_data);
+  static constexpr ptrdiff_t arrOffset() {
+    return offsetof(HashCollection, m_arr);
   }
 
   static bool validPos(ssize_t pos) {
@@ -937,35 +924,35 @@ class HashCollection : public ExtCollectionObjectData {
   }
 
   int32_t skipTombstonesNoBoundsCheck(int32_t pos) {
-    return skipTombstonesNoBoundsCheck(pos, posLimit(), m_data);
+    return skipTombstonesNoBoundsCheck(pos, posLimit(), data());
   }
 
-  inline const Elm* firstElmImpl() const {
+  const Elm* firstElmImpl() const {
     const Elm* e = data();
     const Elm* eLimit = elmLimit();
     for (; e != eLimit && isTombstone(e); ++e) {}
     return (Elm*)e;
   }
-  inline Elm* firstElm() {
+  Elm* firstElm() {
     return (Elm*)firstElmImpl();
   }
-  inline const Elm* firstElm() const {
+  const Elm* firstElm() const {
     return firstElmImpl();
   }
 
-  inline Elm* elmLimit() {
+  Elm* elmLimit() {
     return data() + posLimit();
   }
-  inline const Elm* elmLimit() const {
+  const Elm* elmLimit() const {
     return data() + posLimit();
   }
 
-  inline static Elm* nextElm(Elm* e, Elm* eLimit) {
+  static Elm* nextElm(Elm* e, Elm* eLimit) {
     assert(e != eLimit);
     for (++e; e != eLimit && isTombstone(e); ++e) {}
     return e;
   }
-  inline static const Elm* nextElm(const Elm* e, const Elm* eLimit) {
+  static const Elm* nextElm(const Elm* e, const Elm* eLimit) {
     return (const Elm*)nextElm((Elm*)e, (Elm*)eLimit);
   }
 
@@ -1016,7 +1003,7 @@ class HashCollection : public ExtCollectionObjectData {
 
   bool isDensityTooLow() const {
     bool b = (m_size < posLimit() / 2);
-    assert(IMPLIES(m_data == mixedData(staticEmptyMixedArray()), !b));
+    assert(IMPLIES(data() == mixedData(staticEmptyMixedArray()), !b));
     assert(IMPLIES(cap() == 0, !b));
     return b;
   }
@@ -1026,7 +1013,7 @@ class HashCollection : public ExtCollectionObjectData {
     // if current capacity is at least 8x greater than the minimum capacity
     bool b = ((uint64_t(cap()) >= uint64_t(m_size) * 8) &&
               (cap() >= HashCollection::SmallSize * 8));
-    assert(IMPLIES(m_data == mixedData(staticEmptyMixedArray()), !b));
+    assert(IMPLIES(data() == mixedData(staticEmptyMixedArray()), !b));
     assert(IMPLIES(cap() == 0, !b));
     return b;
   }
@@ -1205,7 +1192,7 @@ class HashCollection : public ExtCollectionObjectData {
 
   void dropImmCopy() {
     assert(m_immCopy.isNull() ||
-           (m_data == ((HashCollection*)m_immCopy.get())->m_data &&
+           (data() == ((HashCollection*)m_immCopy.get())->data() &&
             arrayData()->hasMultipleRefs()));
     m_immCopy.reset();
   }
@@ -1287,14 +1274,14 @@ class BaseMap : public HashCollection {
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
     assertx(key->m_type != KindOfRef);
-    auto mp = static_cast<BaseMap*>(obj);
+    auto map = static_cast<BaseMap*>(obj);
     if (key->m_type == KindOfInt64) {
-      return throwOnMiss ? mp->at(key->m_data.num)
-                         : mp->get(key->m_data.num);
+      return throwOnMiss ? map->at(key->m_data.num)
+                         : map->get(key->m_data.num);
     }
     if (isStringType(key->m_type)) {
-      return throwOnMiss ? mp->at(key->m_data.pstr)
-                         : mp->get(key->m_data.pstr);
+      return throwOnMiss ? map->at(key->m_data.pstr)
+                         : map->get(key->m_data.pstr);
     }
     throwBadKeyType();
     return nullptr;
@@ -1699,17 +1686,17 @@ class BaseSet : public HashCollection {
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
     assertx(key->m_type != KindOfRef);
-    auto st = static_cast<BaseSet*>(obj);
+    auto set = static_cast<BaseSet*>(obj);
     ssize_t p;
     if (key->m_type == KindOfInt64) {
-      p = st->find(key->m_data.num);
+      p = set->find(key->m_data.num);
     } else if (isStringType(key->m_type)) {
-      p = st->find(key->m_data.pstr, key->m_data.pstr->hash());
+      p = set->find(key->m_data.pstr, key->m_data.pstr->hash());
     } else {
       BaseSet::throwBadValueType();
     }
     if (LIKELY(p != Empty)) {
-      return reinterpret_cast<TypedValue*>(&st->data()[p].data);
+      return reinterpret_cast<TypedValue*>(&set->data()[p].data);
     }
     if (!throwOnMiss) {
       return nullptr;

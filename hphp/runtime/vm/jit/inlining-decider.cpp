@@ -427,7 +427,8 @@ void InliningDecider::registerEndInlining(const Func* callee) {
 
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
-                                 const IRGS& irgs) {
+                                 const IRGS& irgs,
+                                 int32_t maxBCInstrs) {
   auto const op = reinterpret_cast<const Op*>(sk.pc());
 
   auto const numArgs = getImm(op, 0).u_IVA;
@@ -459,7 +460,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   }
 
   // Produce a tracelet for the callee.
-  return selectTracelet(ctx, false /* profiling */, true /* inlining */);
+  return selectTracelet(ctx, maxBCInstrs, false /* profiling */,
+                        true /* inlining */);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -201,6 +201,10 @@ inline Vptr operator+(Vptr lhs, intptr_t d) {
               safe_cast<int32_t>(lhs.disp + d));
 }
 
+inline Vptr baseless(VscaledDisp vd) {
+  return Vptr(Vreg{}, vd.vs.index, vd.vs.scale, vd.disp);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Vloc.
 

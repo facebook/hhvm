@@ -17,15 +17,23 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h" // TODO(#7728856)
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/phys-reg-saver.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
@@ -69,6 +77,11 @@ void assertNativeStackAligned(Vout& v) {
 void loadVMRegs(Vout& v) {
   v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
   v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+}
+
+void storeVMRegs(Vout& v) {
+  v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
+  v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
 }
 
 void loadMCG(Vout& v, Vreg d) {
@@ -130,6 +143,28 @@ template<class GenFunc>
 void alignNativeStack(Vout& v, GenFunc gen) {
   if (arch() != Arch::X64) return gen(v);
   return x64::alignNativeStack(v, gen);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitFunctionEnterHelper(cb, us);
+}
+
+TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitFreeLocalsHelpers(cb, us);
+}
+
+TCA emitCallToExit(CodeBlock& cb) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitCallToExit(cb);
+}
+
+TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::emitEndCatchHelper(cb, us);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,6 +258,19 @@ TCA emitFuncBodyHelperThunk(CodeBlock& cb) {
     v << simplecall(v, helper, rvmfp(), dest);
 
     v << jmpr{dest};
+  });
+}
+
+TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& cb,
+                                         const UniqueStubs& us) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [&] (Vout& v) {
+    alignNativeStack(v, [&] (Vout& v) {
+      v << vcall{CppCall::direct(handlePossibleStackOverflow),
+                 v.makeVcallArgs({{rvmfp()}}), v.makeTuple({})};
+    });
+    v << jmpi{us.functionEnterHelper};
   });
 }
 
@@ -342,6 +390,64 @@ TCA emitBindCallStub(CodeBlock& cb) {
   });
 }
 
+TCA emitFCallArrayHelper(CodeBlock& cb) {
+  align(cb, Alignment::CacheLine, AlignContext::Dead);
+
+  return vwrap2(cb, [] (Vout& v, Vout& vcold) {
+    storeVMRegs(v);
+
+    auto const func = v.makeReg();
+    auto const unit = v.makeReg();
+    auto const bc = v.makeReg();
+
+    // Load fp->m_func->m_unit->m_bc.
+    v << load{rvmfp()[AROFF(m_func)], func};
+    v << load{func[Func::unitOff()], unit};
+    v << load{unit[Unit::bcOff()], bc};
+
+    auto const pc = v.makeReg();
+    auto const next = v.makeReg();
+
+    // Convert offsets into PCs, and sync the PC.
+    v << addq{bc, rarg(0), pc, v.makeReg()};
+    v << store{pc, rvmtl()[rds::kVmpcOff]};
+    v << addq{bc, rarg(1), next, v.makeReg()};
+
+    auto const res = v.makeReg();
+
+    alignNativeStack(v, [&] (Vout& v) {
+      bool (*helper)(PC) = &doFCallArrayTC;
+      v << simplecall(v, helper, next, res);
+    });
+    v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+
+    auto const sf = v.makeReg();
+    v << testb{res, res, sf};
+
+    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+      // If false was returned, we should skip the callee.  The interpreter
+      // will have popped the pre-live ActRec already, so we can just return to
+      // the caller.
+      v << ret{};
+    });
+    v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+
+    // If true was returned, head to the func body.  Stashing the saved RIP
+    // here performs the same work as EnterFrame in func prologues.
+    stashSavedRIP(v, rvmfp());
+
+    auto const callee = v.makeReg();
+    auto const body = v.makeReg();
+
+    v << load{rvmfp()[AROFF(m_func)], callee};
+    v << load{callee[Func::funcBodyOff()], body};
+
+    // We jmp directly to the func body---this keeps the return stack buffer
+    // balanced between the call to this stub and the ret from the callee.
+    v << jmpr{body};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ResumeHelper {
@@ -384,8 +490,7 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us) {
     v << store{rarg(0), rvmtl()[rds::kVmpcOff]};
   });
   us.interpHelperSyncedPC = vwrap(cb, [&] (Vout& v) {
-    v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
-    v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
+    storeVMRegs(v);
     v << ldimmb{1, rarg(1)};
     v << jmpi{body, RegSet(rarg(1))};
   });
@@ -443,6 +548,53 @@ void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitDecRefGeneric(CodeBlock& cb) {
+  return vwrap(cb, [] (Vout& v) {
+    auto const rdata = rarg(0);
+    auto const rtype = rarg(1);
+
+    auto const destroy = [&] (Vout& v) {
+      // decRefGeneric is called via callfaststub, whose ABI claims that all
+      // registers are preserved.  This is true in the fast path, but in the
+      // slow path we need to manually save caller-saved registers.
+      auto const callerSaved = abi().gpUnreserved - abi().calleeSaved;
+      PhysRegSaver prs{v, callerSaved, false /* aligned */};
+
+      // As a consequence of being called via callfaststub, we can't safely use
+      // any Vregs here except for status flags registers, at least not with
+      // the default vwrap() ABI.  Just use the argument registers instead.
+      assertx(callerSaved.contains(rdata));
+      assertx(callerSaved.contains(rtype));
+
+      v << movzbq{rtype, rtype};
+      v << shrli{kShiftDataTypeToDestrIndex, rtype, rtype, v.makeReg()};
+
+      auto const dtor_table =
+        safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
+      v << callm{baseless(rtype * 8 + dtor_table), arg_regs(1)};
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
+    };
+
+    // TODO(#7728856): Pull this stuff out of x64 namespace; it's not actually
+    // x64-dependent.
+    x64::emitDecRefWork(v, v, rdata, destroy, false);
+    v << ret{};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TCA emitThrowSwitchMode(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, [] (Vout& v) {
+    v << call{TCA(throwSwitchMode)};
+    v << ud2{};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -450,6 +602,7 @@ void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us) {
 void UniqueStubs::emitAll() {
   auto& main = mcg->code.main();
   auto& cold = mcg->code.cold();
+  auto& frozen = mcg->code.frozen();
 
   auto const hot = [&]() -> CodeBlock& {
     auto& hot = const_cast<CodeBlock&>(mcg->code.hot());
@@ -460,6 +613,9 @@ void UniqueStubs::emitAll() {
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot()));
   ADD(fcallHelperThunk,       emitFCallHelperThunk(cold));
   ADD(funcBodyHelperThunk,    emitFuncBodyHelperThunk(cold));
+  ADD(functionEnterHelper,    emitFunctionEnterHelper(cold, *this));
+  ADD(functionSurprisedOrStackOverflow,
+      emitFunctionSurprisedOrStackOverflow(cold, *this));
 
   ADD(retHelper,                  emitInterpRet(cold));
   ADD(genRetHelper,               emitInterpGenRet<false>(cold));
@@ -471,13 +627,18 @@ void UniqueStubs::emitAll() {
 
   ADD(bindCallStub,           emitBindCallStub<false>(cold));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold));
+  ADD(fcallArrayHelper,       emitFCallArrayHelper(hot()));
+
+  ADD(decRefGeneric,  emitDecRefGeneric(cold));
+
+  ADD(callToExit,       emitCallToExit(main));
+  ADD(endCatchHelper,   emitEndCatchHelper(frozen, *this));
+  ADD(throwSwitchMode,  emitThrowSwitchMode(frozen));
 #undef ADD
 
+  add("freeLocalsHelpers",  emitFreeLocalsHelpers(hot(), *this));
   add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this));
   emitInterpOneCFHelpers(cold, *this);
-
-  // TODO(#6730846): Kill this once all unique stubs are emitted here.
-  if (arch() == Arch::X64) x64::emitUniqueStubs(*this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

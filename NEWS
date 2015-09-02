@@ -1,3 +1,28 @@
+"Rogers" 10-Sep-2015
+- Update to jemalloc 4.0.0.
+- Convert more architecture dependent code to VASM.
+- Large bout of fixes for compiling hhvm under MSVC.
+- Have hh_emitter support more of HHBC.
+- Remove MInstrState from CGetM and IssetM's final operations.
+- Refactor [un]serialize functions.
+- Use profiling counters to decide whether to apply LICM.
+- Move inlining to translateRegion.
+- Implement intdiv function.
+- Remove joomla and joomlacms from hhvm test suite.
+- [hack] Add a --stats option to the client.
+- [hack] GC the shared memory area more aggressively.
+- [hack] Rework the representation of strings.
+- Fix bug #70014 - use RAND_bytes instead of deprecated RAND_pseudo_bytes
+- Fix bug #69545 - avoid overflow when reading list and improve fix for bug #69545
+- Fix #66387: Stack overflow with imagefilltoborder
+- Fix #70064: imagescale(..., IMG_BICUBIC) leaks memory and Fix #69024: imagescale segfault with palette based image
+
+"Quake" 27-Aug-2015
+- ??
+
+"Park" 13-Aug-2015
+- ???
+
 "Osborne" 30-Jul-2015
 - Remove global LDAP requirement
 - Don't require libXSLT globally

@@ -138,7 +138,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
 
   gen(env, StClosureCtx, closure, ctx);
 
-  SSATmp* args[numParams];
+  SSATmp** args = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (int32_t i = 0; i < numParams; ++i) {
     args[numParams - i - 1] = popF(env);
   }

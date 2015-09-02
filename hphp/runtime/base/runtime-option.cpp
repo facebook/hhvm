@@ -370,6 +370,9 @@ HackStrictOption
 bool RuntimeOption::LookForTypechecker = true;
 bool RuntimeOption::AutoTypecheck = true;
 
+bool RuntimeOption::PHP7 = false;
+bool RuntimeOption::PHP7_UVS = false;
+
 int RuntimeOption::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
@@ -1135,6 +1138,22 @@ void RuntimeOption::Load(
     // some reason.
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
                  LookForTypechecker);
+  }
+  {
+    // Options for PHP7 features which break BC. (Features which do not break
+    // BC don't need options here and can just always be turned on.)
+    //
+    // NB that the "PHP7.all" option is intended to be only a master switch;
+    // all runtime behavior gating should be based on sub-options. Also don't
+    // forget to update mangleUnitPHP7Options if needed.
+    //
+    // TODO: we may eventually want to make an option which specifies
+    // directories or filenames to exclude from PHP7 behavior, and so checking
+    // these may want to be per-file. We originally planned to do this from the
+    // get-go, but threading that through turns out to be kind of annoying and
+    // of questionable value, so just doing this for now.
+    Config::Bind(PHP7, ini, config, "PHP7.all", false);
+    Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", PHP7);
   }
   {
     // Server

@@ -54,17 +54,6 @@ template<class F> void MixedArray::scan(F& mark) const {
   }
 }
 
-ALWAYS_INLINE
-MixedArray* getArrayFromMixedData(const MixedArray::Elm* elms) {
-  // Note: changes to this scheme will require changes in the JIT for
-  // LdColArray.
-  auto a = const_cast<MixedArray*>(
-    reinterpret_cast<const MixedArray*>(elms) - 1
-  );
-  assert(mixedData(a) == elms);
-  return a;
-}
-
 inline ArrayData::~ArrayData() {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(this);

@@ -7,6 +7,7 @@ HHVM_DEFINE_EXTENSION("hash"
     hash_furc.cpp
     hash_gost.cpp
     hash_haval.cpp
+    hash_keccak.cpp
     hash_md.cpp
     hash_murmur.cpp
     hash_ripemd.cpp
@@ -24,6 +25,7 @@ HHVM_DEFINE_EXTENSION("hash"
     hash_furc.h
     hash_gost.h
     hash_haval.h
+    hash_keccak.h
     hash_md.h
     hash_murmur.h
     hash_ripemd.h

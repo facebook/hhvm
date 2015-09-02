@@ -1445,7 +1445,7 @@ VarEnv* ExecutionContext::getOrCreateVarEnv(int frame) {
 
 VarEnv* ExecutionContext::hasVarEnv(int frame) {
   auto const fp = getFrameAtDepth(frame);
-  if (fp->func()->attrs() & AttrMayUseVV) {
+  if (fp && (fp->func()->attrs() & AttrMayUseVV)) {
     if (fp->hasVarEnv()) return fp->getVarEnv();
   }
   return nullptr;
@@ -3034,6 +3034,7 @@ struct MemberState {
   unsigned ndiscard;
   MemberCode mcode{MEL};
   TypedValue* base;
+  TypedValue tempBase;
   TypedValue literal;
   TypedValue result;
   Variant ref;
@@ -3079,10 +3080,6 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
   TypedValue* cref;
   TypedValue* pname;
 
-  // Holds the base when the actual base is either an undefined variable, or
-  // $this.
-  TypedValue tempBase;
-
   tvWriteUninit(&mstate.literal);
   tvWriteUninit(mstate.ref.asTypedValue());
   tvWriteUninit(mstate.ref2.asTypedValue());
@@ -3105,8 +3102,8 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      tvWriteNull(&tempBase);
-      loc = &tempBase;
+      tvWriteNull(&mstate.tempBase);
+      loc = &mstate.tempBase;
     } else {
       loc = fr;
     }
@@ -3130,8 +3127,8 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      tvWriteNull(&tempBase);
-      loc = &tempBase;
+      tvWriteNull(&mstate.tempBase);
+      loc = &mstate.tempBase;
     } else {
       loc = fr;
     }
@@ -3179,8 +3176,8 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     break;
   case LH:
     assert(vmfp()->hasThis());
-    tempBase = make_tv<KindOfObject>(vmfp()->getThis());
-    loc = &tempBase;
+    mstate.tempBase = make_tv<KindOfObject>(vmfp()->getThis());
+    loc = &mstate.tempBase;
     break;
 
   case InvalidLocationCode:
@@ -3312,6 +3309,7 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
 // mstate
 //  ndiscard:  number of stack elements to discard
 //  base:      ultimate result of the vector-get
+//  tempBase:  TypedValue containing $this base, if used
 //  result:    temporary result storage
 //  ref:       temporary result storage
 //  ref2:      temporary result storage
@@ -3364,6 +3362,7 @@ TypedValue* getHelper(PC& pc, MemberState& mstate) {
 // mstate
 //  ndiscard:   number of stack elements to discard
 //  base:       ultimate result of the vector-get
+//  tempBase:   TypedValue containing $this base, if used
 //  result:     temporary result storage
 //  ref:        temporary result storage
 //  ref2:       temporary result storage
@@ -3615,7 +3614,7 @@ OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   pc++;
   auto n = decode<uint32_t>(pc); // number of keys and elements
   assert(n > 0 && n <= StructArray::MaxMakeSize);
-  StringData* names[n];
+  StringData** names = (StringData**)alloca(sizeof(StringData*) * n);
   for (size_t i = 0; i < n; i++) {
     names[i] = decode_litstr(pc);
   }

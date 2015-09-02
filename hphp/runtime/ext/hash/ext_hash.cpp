@@ -34,6 +34,7 @@
 #include "hphp/runtime/ext/hash/hash_fnv1.h"
 #include "hphp/runtime/ext/hash/hash_furc.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
+#include "hphp/runtime/ext/hash/hash_keccak.h"
 #include "hphp/system/constants.h"
 
 #if defined(HPHP_OSS)
@@ -123,6 +124,10 @@ public:
     HashEngines["fnv1a32"]    = HashEnginePtr(new hash_fnv132(true));
     HashEngines["fnv164"]     = HashEnginePtr(new hash_fnv164(false));
     HashEngines["fnv1a64"]    = HashEnginePtr(new hash_fnv164(true));
+    HashEngines["sha3-224"]   = HashEnginePtr(new hash_keccak( 448, 28));
+    HashEngines["sha3-256"]   = HashEnginePtr(new hash_keccak( 512, 32));
+    HashEngines["sha3-384"]   = HashEnginePtr(new hash_keccak( 768, 48));
+    HashEngines["sha3-512"]   = HashEnginePtr(new hash_keccak(1024, 64));
   }
 };
 

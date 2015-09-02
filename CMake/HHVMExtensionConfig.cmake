@@ -677,7 +677,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       endif()
     endif()
   elseif (${libraryName} STREQUAL "freetype")
-    find_package(LibFreetype ${requiredVersion})
+    find_package(Freetype ${requiredVersion})
     if (NOT FREETYPE_INCLUDE_DIRS OR NOT FREETYPE_LIBRARIES)
       HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
       return()

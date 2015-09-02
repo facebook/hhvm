@@ -263,8 +263,14 @@ let append_file ~file s =
 let filemtime file =
   (Unix.stat file).Unix.st_mtime
 
-let try_touch file =
-  try Unix.utimes file 0.0 0.0 with _ -> ()
+external lutimes : string -> unit = "hh_lutimes"
+
+let try_touch ~follow_symlinks file =
+  try
+    if follow_symlinks then Unix.utimes file 0.0 0.0
+    else lutimes file
+  with _ ->
+    ()
 
 (* Emulate "mkdir -p", i.e., no error if already exists. *)
 let mkdir_no_fail dir =
@@ -302,3 +308,11 @@ let symlink =
 let setsid =
   (* Not implemented on Windows. Let's just return the pid *)
   if Sys.win32 then Unix.getpid else Unix.setsid
+
+let set_signal = if not Sys.win32 then Sys.set_signal else (fun _ _ -> ())
+
+external get_total_ram : unit -> int = "hh_sysinfo_totalram"
+external nproc: unit -> int = "nproc"
+
+let total_ram = get_total_ram ()
+let nbr_procs = nproc ()

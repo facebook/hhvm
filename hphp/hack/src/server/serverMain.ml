@@ -181,8 +181,12 @@ module Program : SERVER_PROGRAM =
          ServerConvert.go genv env dirname;
          exit 0
 
-    let process_updates _genv _env updates =
-      Relative_path.relativize_set Relative_path.Root updates
+    let process_updates genv _env updates =
+      let root = Path.to_string @@ ServerArgs.root genv.options in
+      (* Because of symlinks, we can have updates from files that aren't in
+       * the .hhconfig directory *)
+      let updates = SSet.filter (fun p -> str_starts_with p root) updates in
+      Relative_path.(relativize_set Root updates)
 
     let should_recheck update =
       FindUtils.is_php (Relative_path.suffix update)
@@ -284,19 +288,28 @@ let recheck genv old_env updates =
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
 let rec recheck_loop i rechecked_count genv env =
+  let t = Unix.time () in
   let raw_updates =
     match genv.dfind with
     | None -> SSet.empty
-    | Some dfind -> DfindLib.get_changes dfind in
+    | Some dfind ->
+        (try
+          with_timeout 60
+            ~on_timeout:(fun _ -> Exit_status.(exit Dfind_unresponsive))
+            ~do_:(fun () -> DfindLib.get_changes dfind)
+        with _ -> Exit_status.(exit Dfind_died))
+  in
   if SSet.is_empty raw_updates then
     i, rechecked_count, env
-  else
+  else begin
+    HackEventLogger.dfind_returned t (SSet.cardinal raw_updates);
     let updates = Program.process_updates genv env raw_updates in
     let env, rechecked = recheck genv env updates in
     let rechecked_count =
       rechecked_count + (Relative_path.Set.cardinal rechecked)
     in
     recheck_loop (i + 1) rechecked_count genv env
+  end
 
 let recheck_loop = recheck_loop 0 0
 
@@ -423,6 +436,10 @@ let save _genv env fn =
  * we look if env.modified changed.
  *)
 let daemon_main options =
+  (* The OCaml default is 500, but we care about minimizing the memory
+   * overhead *)
+  let gc_control = Gc.get () in
+  Gc.set {gc_control with Gc.max_overhead = 200};
   Relative_path.set_path_prefix Relative_path.Root (ServerArgs.root options);
   let config = Program.load_config () in
   let root = ServerArgs.root options in

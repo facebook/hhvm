@@ -121,13 +121,15 @@ inline void emitCmpClass(Vout& v, Vreg sf, Vreg reg, const Class* c) {
  * works.
  */
 #ifdef USE_GCC_FAST_TLS
+namespace detail {
 template<typename T>
-inline void emitTLSLoad(Vout& v,
+inline void implTLSLoad(Vout& v,
                         const ThreadLocalNoCheck<T>& datum,
+                        long *datum_info,
                         Vreg dst) {
   not_implemented();
 }
-
+}
 #else
 template<typename T>
 inline void emitTLSLoad(Vout& v,

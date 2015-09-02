@@ -291,10 +291,26 @@ function get_options($argv) {
   );
   $options = array();
   $files = array();
+
+  /*
+   * '-' argument causes all future arguments to be treated as filenames, even
+   * if they would otherwise match a valid option. Otherwise, arguments starting
+   * with '-' MUST match a valid option.
+   */
+  $force_file = false;
+
   for ($i = 1; $i < count($argv); $i++) {
     $arg = $argv[$i];
-    $found = false;
-    if ($arg && $arg[0] == '-') {
+
+    if (strlen($arg) == 0) {
+      continue;
+    } else if ($force_file) {
+      $files[] = $arg;
+    } else if ($arg === '-') {
+      $forcefile = true;
+    } else if ($arg[0] === '-') {
+      $found = false;
+
       foreach ($parameters as $long => $short) {
         if ($arg == '-'.str_replace(':', '', $short) ||
             $arg == '--'.str_replace(':', '', $long)) {
@@ -308,8 +324,11 @@ function get_options($argv) {
           break;
         }
       }
-    }
-    if (!$found && $arg) {
+
+      if (!$found) {
+        error(sprintf("Invalid argument: '%s'\nSee $argv[0] --help", $arg));
+      }
+    } else {
       $files[] = $arg;
     }
   }
@@ -326,7 +345,7 @@ function get_options($argv) {
  * We support some 'special' file names, that just know where the test
  * suites are, to avoid typing 'hphp/test/foo'.
  */
-function map_convenience_filename($file) {
+function find_test_files($file) {
   $mappage = array(
     'quick'      => 'hphp/test/quick',
     'slow'       => 'hphp/test/slow',
@@ -346,10 +365,18 @@ function map_convenience_filename($file) {
     'zend_bad'    => 'hphp/test/zend/bad',
   );
 
-  if (!isset($mappage[$file])) {
-    return $file;
+  if (isset($mappage[$file])) {
+    $matches = glob(hphp_home().'/'.$mappage[$file]);
+    if (count($matches) == 0) {
+      error(sprintf(
+        "Convenience test name '%s' is recognized but does not match any test ".
+        "files (pattern = '%s', hphp_home = '%s')",
+        $file, $mappage[$file], hphp_home()));
+    }
+    return $matches;
+  } else {
+    return array($file, );
   }
-  return hphp_home().'/'.$mappage[$file];
 }
 
 // Some tests have to be run together in the same test bucket, one after the
@@ -382,12 +409,10 @@ function find_tests($files, array $options = null) {
   }
   $ft = array();
   foreach ($files as $file) {
-    $globbed = glob(map_convenience_filename($file));
-    $ft = array_merge($ft, $globbed);
+    $ft = array_merge($ft, find_test_files($file));
   }
   $files = $ft;
   foreach ($files as &$file) {
-    $file = map_convenience_filename($file);
     if (!@stat($file)) {
       error("Not valid file or directory: '$file'");
     }

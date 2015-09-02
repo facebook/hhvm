@@ -53,6 +53,7 @@ namespace {
 struct RegionFormer {
   RegionFormer(const RegionContext& ctx,
                InterpSet& interp,
+               int32_t maxBCInstrs,
                bool profiling,
                bool inlining);
 
@@ -71,7 +72,7 @@ private:
   jit::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
   uint32_t m_numJmps;
-  uint32_t m_numBCInstrs{0};
+  int32_t m_numBCInstrs;
   // This map memoizes reachability of IR blocks during tracelet
   // formation.  A block won't have it's reachability stored in this
   // map until it's been computed.
@@ -96,6 +97,7 @@ private:
 
 RegionFormer::RegionFormer(const RegionContext& ctx,
                            InterpSet& interp,
+                           int32_t maxBCInstrs,
                            bool profiling,
                            bool inlining)
   : m_ctx(ctx)
@@ -110,6 +112,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
   , m_irgs(TransContext{kInvalidTransID, m_sk, ctx.spOffset}, TransFlags{0})
   , m_arStates(1)
   , m_numJmps(0)
+  , m_numBCInstrs(maxBCInstrs)
   , m_profiling(profiling)
   , m_inlining(inlining)
 {}
@@ -172,10 +175,9 @@ RegionDescPtr RegionFormer::go() {
   if (!RuntimeOption::EvalHHIRConstrictGuards) irgen::gen(m_irgs, EndGuards);
 
   for (bool firstInst = true; true; firstInst = false) {
-    assertx(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
-    if (m_numBCInstrs == RuntimeOption::EvalJitMaxRegionInstrs) {
-      FTRACE(1, "selectTracelet: breaking region due to size limit ({})\n",
-             m_numBCInstrs);
+    assertx(m_numBCInstrs >= 0);
+    if (m_numBCInstrs == 0) {
+      FTRACE(1, "selectTracelet: breaking region due to size limit\n");
       break;
     }
 
@@ -354,7 +356,7 @@ void RegionFormer::addInstruction() {
 
   FTRACE(2, "selectTracelet adding instruction {}\n", m_inst.toString());
   m_curBlock->addInstruction();
-  m_numBCInstrs++;
+  m_numBCInstrs--;
 }
 
 bool RegionFormer::traceThroughJmp() {
@@ -612,14 +614,17 @@ void RegionFormer::recordDependencies() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
-                             bool inlining /* = false */) {
+RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
+                             bool profiling, bool inlining /* = false */) {
   Timer _t(Timer::selectTracelet);
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;
 
-  while (!(region = RegionFormer(ctx, interp, profiling, inlining).go())) {
+  FTRACE(1, "selectTracelet: starting with maxBCInstrs = {}\n", maxBCInstrs);
+
+  while (!(region = RegionFormer(ctx, interp, maxBCInstrs, profiling,
+                                 inlining).go())) {
     ++tries;
   }
 

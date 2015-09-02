@@ -2630,13 +2630,11 @@ Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
   String s = String(length, ReserveString);
   buffer = (unsigned char *)s.mutableData();
 
-  int crypto_strength = 0;
-
-  if ((crypto_strength = RAND_pseudo_bytes(buffer, length)) < 0) {
+  if (RAND_bytes(buffer, length) <= 0) {
     crypto_strong.assignIfRef(false);
     return false;
   } else {
-    crypto_strong.assignIfRef((bool)crypto_strength);
+    crypto_strong.assignIfRef(true);
     s.setSize(length);
     return s;
   }

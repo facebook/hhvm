@@ -72,7 +72,7 @@ OPCODE_DEBUG_BODY, OPCODE_COVER_BODY, and OPCODE_MAIN_BODY macros
 respectively. In the Windows case, these are just called sequentially. For
 gcc code, it’s a little more complicated. Threaded interpreting uses a table
 of labels to dispatch to the next handler. HHVM makes use of three such
-tables. The first is called optabDirect. It contains labels that allowing
+tables. The first is called optabDirect. It contains labels that allow
 jumping directly to OPCODE_MAIN_BODY. The second table is called optabCover. It
 contains labels that cause jumping to OPCODE_COVER_BODY. OPCODE_COVER_BODY
 then falls through to the OPCODE_MAIN_BODY. Lastly there is optabDbg. Its

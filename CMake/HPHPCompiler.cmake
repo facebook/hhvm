@@ -17,11 +17,10 @@ endif()
 
 # using Clang
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-  # march=native is a rather ham-fisted approach to try to work around a clang
-  # ICE where it can't figure out what to do when we request to use a crc32
-  # intrinsic. This might affect portability of binaries, and should probably be
-  # revisited.
-  set(LLVM_OPT "-march=native")
+  # For unclear reasons, our detection for what crc32 intrinsics you have will
+  # cause clang to ICE. Specifying a baseline here works around the issue.
+  # (SSE4.2 has been available on processors for quite some time now.)
+  set(LLVM_OPT "-msse4.2")
   execute_process(
     COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version COMMAND head -1
     OUTPUT_VARIABLE _clang_version_info)

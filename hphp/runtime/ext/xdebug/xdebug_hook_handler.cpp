@@ -428,7 +428,8 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
       // Grab the breakpoint message and do the break
       const Variant msg = get_breakpoint_message<type>(bi);
       if (!XDEBUG_GLOBAL(Server)->breakpoint(bp, msg)) {
-        XDebugServer::detach(); // Kill the server if there's an error
+        // Kill the server if there's an error.
+        XDebugServer::detach();
         return;
       }
     }
@@ -445,6 +446,9 @@ const StaticString s_GET_MESSAGE("getMessage");
 
 void XDebugHookHandler::onOpcode(PC pc) {
   auto server = XDEBUG_GLOBAL(Server);
+  if (server == nullptr) {
+    return;
+  }
 
   // Likely case is that there was no break command.
   auto brk = server->getAndClearBreak();

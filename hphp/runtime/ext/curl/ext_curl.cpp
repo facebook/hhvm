@@ -1485,19 +1485,27 @@ public:
   }
 
   void check_exceptions() {
-    ExceptionType ex;
-    Object lastPhpException;
+    Exception* cppException = nullptr;
+    Object phpException;
     for (ArrayIter iter(m_easyh); iter; ++iter) {
       auto curl = cast<CurlResource>(iter.second());
       ExceptionType nextException(curl->getAndClearException());
+      if (!nextException) continue;
       if (isPhpException(nextException)) {
-        Object phpException(getPhpException(nextException));
-        phpException->o_set(s_previous, lastPhpException, s_exception);
-        lastPhpException = std::move(phpException);
+        Object e(getPhpException(nextException));
+        e->o_set(s_previous, phpException, s_exception);
+        phpException = std::move(e);
+      } else {
+        auto e = getCppException(nextException);
+        if (auto f = dynamic_cast<FatalErrorException*>(e)) {
+          if (!f->isRecoverable()) f->throwException();
+        }
+        delete cppException;
+        cppException = e;
       }
-      ex = std::move(nextException);
     }
-    throwException(ex);
+    if (cppException) cppException->throwException();
+    if (!phpException.isNull()) throw phpException;
   }
 
   CURLM *get() {

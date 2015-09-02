@@ -114,7 +114,8 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
         " -vRepo.Authoritative=true";
     }
 
-    $cmd = "exec env MALLOC_CONF=junk:true TESTID={$test_run_id} " . $hhvm .
+    $cmd = "exec env MALLOC_CONF=junk:true TESTID={$test_run_id} " .
+      "SERVERPORT={$serverPort} $hhvm" .
       ' --mode=server' . $serverConfig . $logFileConfig .
       ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
       ' --instance-id=' . $test_run_id .

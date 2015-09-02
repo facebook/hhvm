@@ -70,3 +70,5 @@ array(5) {
     string(%d) "%s"
   }
 }"
+Requesting 'test_curl_multi_except.php'
+string(%d) "Hello, World!%d:::Exception: oops"

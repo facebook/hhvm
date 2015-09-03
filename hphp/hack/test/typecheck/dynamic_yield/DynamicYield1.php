@@ -10,8 +10,7 @@
  */
 
 trait DynamicYield {
-  public function __call(string $name, array $args = array()) {
-  }
+  public function __call(string $name, array $args = array()) {}
 }
 
 function prep<T>(Awaitable<T> $awaitable): T {

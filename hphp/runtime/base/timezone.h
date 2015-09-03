@@ -52,7 +52,6 @@ public:
    */
   static bool IsValid(const char* name);
   static Array GetAbbreviations();
-  static Array GetNamesToCountryCodes();
   static String AbbreviationToName(String abbr, int utcoffset = -1,
                                    int isdst = 1);
 

@@ -602,6 +602,11 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// MSVC doesn't instantiate this, causing an undefined symbol at link time
+// if the template<> is present, but other compilers require it.
+#ifndef _MSC_VER
+template<>
+#endif
 void ThreadLocalNoCheck<ExecutionContext>::destroy();
 
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);

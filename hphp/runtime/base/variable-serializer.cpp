@@ -278,11 +278,13 @@ void VariableSerializer::write(double v) {
       char *buf;
       vspprintf(&buf, 0, "%.*k", precision, v);
       m_buf->append(buf);
+      if (m_option & k_JSON_PRESERVE_ZERO_FRACTION
+          && strchr(buf, '.') == nullptr) {
+        m_buf->append(".0");
+      }
       free(buf);
     } else {
-      if (std::isnan(v) || std::isinf(v)) {
-        json_set_last_error_code(json_error_codes::JSON_ERROR_INF_OR_NAN);
-      }
+      json_set_last_error_code(json_error_codes::JSON_ERROR_INF_OR_NAN);
 
       m_buf->append('0');
     }

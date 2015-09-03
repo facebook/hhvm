@@ -30,6 +30,7 @@ const int JSON_UNESCAPED_SLASHES       = 1<<6;
 const int JSON_PRETTY_PRINT            = 1<<7;
 const int JSON_UNESCAPED_UNICODE       = 1<<8;
 const int JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
+const int JSON_PRESERVE_ZERO_FRACTION  = 1<<10;
 
 // json_decode
 const int JSON_BIGINT_AS_STRING = 1;

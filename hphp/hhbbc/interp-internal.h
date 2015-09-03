@@ -197,6 +197,12 @@ Type popF(ISS& env)  { return popT(env); }
 Type popCV(ISS& env) { return popT(env); }
 Type popU(ISS& env)  { return popT(env); }
 
+void discard(ISS& env, int n) {
+  for (auto i = 0; i < n; ++i) {
+    popT(env);
+  }
+}
+
 Type topT(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1];

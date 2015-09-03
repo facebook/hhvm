@@ -50,17 +50,7 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-#define MII(m, ...) void minstr(ISS&, const bc::m##M&);
-MINSTRS
-#undef MII
-
-void builtin(ISS&, const bc::FCallBuiltin&);
-
-//////////////////////////////////////////////////////////////////////
-
 namespace {
-
-//////////////////////////////////////////////////////////////////////
 
 const StaticString s_Exception("Exception");
 const StaticString s_empty("");
@@ -69,12 +59,6 @@ const StaticString s_86ctor("86ctor");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
-
-//////////////////////////////////////////////////////////////////////
-
-#define O(opcode, ...) void in(ISS&, const bc::opcode&);
-OPCODES
-#undef O
 
 //////////////////////////////////////////////////////////////////////
 
@@ -143,7 +127,21 @@ void reduce(ISS& env, const Bytecodes&... hhbc) {
   }
 }
 
+}
+
 //////////////////////////////////////////////////////////////////////
+
+namespace interp_step {
+
+/*
+ * An interp_step::in(ISS&, const bc::op&) function exists for every
+ * bytecode. Most are defined in this file, but some (like FCallBuiltin and
+ * member instructions) are defined elsewhere.
+ */
+#define O(opcode, ...) void in(ISS&, const bc::opcode&);
+OPCODES
+#undef O
+
 
 void in(ISS& env, const bc::Nop&)  { nothrow(env); }
 void in(ISS& env, const bc::PopA&) { nothrow(env); popA(env); }
@@ -1295,29 +1293,6 @@ void in(ISS& env, const bc::BindS&) {
   push(env, TRef);
 }
 
-void in(ISS& env, const bc::EmptyM& op)       { minstr(env, op); }
-void in(ISS& env, const bc::IssetM& op)       { minstr(env, op); }
-void in(ISS& env, const bc::CGetM& op)        { minstr(env, op); }
-void in(ISS& env, const bc::VGetM& op)        { minstr(env, op); }
-void in(ISS& env, const bc::SetM& op)         { minstr(env, op); }
-void in(ISS& env, const bc::SetWithRefLM& op) { minstr(env, op); }
-void in(ISS& env, const bc::SetWithRefRM& op) { minstr(env, op); }
-void in(ISS& env, const bc::SetOpM& op)       { minstr(env, op); }
-void in(ISS& env, const bc::IncDecM& op)      { minstr(env, op); }
-void in(ISS& env, const bc::UnsetM& op)       { minstr(env, op); }
-void in(ISS& env, const bc::BindM& op)        { minstr(env, op); }
-
-void in(ISS& env, const bc::BaseL& op)     { not_implemented(); }
-void in(ISS& env, const bc::BaseH& op)     { not_implemented(); }
-void in(ISS& env, const bc::DimL& op)      { not_implemented(); }
-void in(ISS& env, const bc::DimC& op)      { not_implemented(); }
-void in(ISS& env, const bc::DimInt& op)    { not_implemented(); }
-void in(ISS& env, const bc::DimStr& op)    { not_implemented(); }
-void in(ISS& env, const bc::QueryML& op)   { not_implemented(); }
-void in(ISS& env, const bc::QueryMC& op)   { not_implemented(); }
-void in(ISS& env, const bc::QueryMInt& op) { not_implemented(); }
-void in(ISS& env, const bc::QueryMStr& op) { not_implemented(); }
-
 void in(ISS& env, const bc::UnsetL& op) {
   nothrow(env);
   setLocRaw(env, op.loc1, TUninit);
@@ -1728,8 +1703,6 @@ void in(ISS& env, const bc::FCallUnpack& op) {
   for (auto i = uint32_t{0}; i < op.arg1; ++i) { popF(env); }
   fcallArrayImpl(env);
 }
-
-void in(ISS& env, const bc::FCallBuiltin& op) { builtin(env, op); }
 
 void in(ISS& env, const bc::CufSafeArray&) {
   popR(env); popC(env); popC(env);
@@ -2203,10 +2176,12 @@ void in(ISS& env, const bc::Silence& op) {
 void in(ISS& env, const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
 void in(ISS& env, const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
 
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void dispatch(ISS& env, const Bytecode& op) {
-#define O(opcode, ...) case Op::opcode: in(env, op.opcode); return;
+#define O(opcode, ...) case Op::opcode: interp_step::in(env, op.opcode); return;
   switch (op.op) { OPCODES }
 #undef O
   not_reached();
@@ -2225,7 +2200,7 @@ void group(ISS& env, Iterator& it, Args&&... args) {
     return ret;
   }());
   it += sizeof...(Args);
-  return group(env, std::forward<Args>(args)...);
+  return interp_step::group(env, std::forward<Args>(args)...);
 }
 
 template<class Iterator>
@@ -2312,8 +2287,6 @@ StepFlags interpOps(Interp& interp,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-}
 
 RunFlags run(Interp& interp, PropagateFn propagate) {
   SCOPE_EXIT {

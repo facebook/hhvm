@@ -307,6 +307,9 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       break;
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
+      // CR is only consumed by member operations that can't be constant
+      // propagated.
+    case Flavor::CR: not_reached();    break;
     case Flavor::CVU:
       // Note that we only support C's for CVU so far (this only comes up with
       // FCallBuiltin)---we'll fail the verifier if something changes to send

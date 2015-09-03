@@ -681,6 +681,9 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
       }
     }
   }
+  if (input & StackI) {
+    inputs.emplace_back(Location(BCSPOffset{ni.imm[0].u_IVA}));
+  }
   if (input & StackN) {
     int numArgs = (ni.op() == Op::NewPackedArray ||
                    ni.op() == Op::ConcatN)

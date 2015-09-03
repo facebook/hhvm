@@ -887,8 +887,11 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   cur->stklen -= info.numPops;
   auto ok = checkSig(pc, info.numPops, &cur->stk[cur->stklen], sig(pc));
   auto const op = *(Op*)pc;
-  if (cur->mbr_live != (isMemberDimOp(op) || isMemberFinalOp(op))) {
-    error("Member base register live coming into %s", opcodeToName(op));
+  auto const need_live = isMemberDimOp(op) || isMemberFinalOp(op);
+  auto const live_ok = need_live || isTypeAssert(op);
+  if ((need_live && !cur->mbr_live) || (cur->mbr_live && !live_ok)) {
+    error("Member base register %s coming into %s\n",
+          cur->mbr_live ? "live" : "dead", opcodeToName(op));
     ok = false;
   }
   return ok;
@@ -1054,7 +1057,8 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   }
 
   auto const op = *(Op*)pc;
-  cur->mbr_live = isMemberBaseOp(op) || isMemberDimOp(op);
+  if (isMemberBaseOp(op))       cur->mbr_live = true;
+  else if (isMemberFinalOp(op)) cur->mbr_live = false;
 
   return ok;
 }
@@ -1216,7 +1220,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   }
   if (cur->mbr_live) {
     // MBR must not be live across control flow edges.
-    error("Member base register live at end of B%d", b->id);
+    error("Member base register live at end of B%d\n", b->id);
     ok = false;
   }
   return ok;

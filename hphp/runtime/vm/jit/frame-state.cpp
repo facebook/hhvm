@@ -133,7 +133,10 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
 
-  always_assert(dst.mbase == src.mbase);
+  if (dst.mbase != src.mbase) {
+    dst.mbase = nullptr;
+    changed = true;
+  }
 
   // The tracked FPI state must always be the same, notice that the size of the
   // FPI stacks may differ as the FPush associated with one of the merged blocks

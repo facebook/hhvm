@@ -357,7 +357,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_C_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_R_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_V_MMANY    pop(1); pop(count_stack_elems(data.mvec));
-#define POP_MFINAL     not_implemented();
+#define POP_MFINAL     pop(data.arg1);
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);

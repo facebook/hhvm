@@ -396,7 +396,7 @@ static inline bool newMInstrsDefault() {
 #ifdef HHVM_NEW_MINSTRS
   return true;
 #else
-  return false;
+  return getenv("HHVM_NEW_MINSTRS");
 #endif
 }
 

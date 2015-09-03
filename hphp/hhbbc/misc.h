@@ -58,7 +58,7 @@ using SArray  = const ArrayData*;
 /*
  * HHBC evaluation stack flavors.
  */
-enum class Flavor { C, V, A, R, F, U, CVU };
+enum class Flavor { C, V, A, R, F, U, CR, CVU };
 
 /*
  * Types of parameter preparation (or unknown).

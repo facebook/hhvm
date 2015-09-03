@@ -1197,7 +1197,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
 #define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
 
-// FCall and NewPackedArray need to know the the first imm do POP_*MANY.
+// Some bytecodes need to know the the first iva imm for POP_*.
 #define IMM_IVA do {                            \
     int imm = read_opcode_arg<int64_t>(as);     \
     as.ue->emitIVA(imm);                        \
@@ -1287,7 +1287,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_V_MMANY (1 + vecImmStackValues)
 #define NUM_POP_R_MMANY (1 + vecImmStackValues)
 #define NUM_POP_C_MMANY (1 + vecImmStackValues)
-#define NUM_POP_MFINAL (assert(false), 0)
+#define NUM_POP_MFINAL immIVA
 #define NUM_POP_FMANY immIVA /* number of arguments */
 #define NUM_POP_CVMANY immIVA /* number of arguments */
 #define NUM_POP_CVUMANY immIVA /* number of arguments */

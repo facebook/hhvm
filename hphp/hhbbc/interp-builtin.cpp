@@ -346,7 +346,9 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 
 }
 
-void builtin(ISS& env, const bc::FCallBuiltin& op) {
+namespace interp_step {
+
+void in(ISS& env, const bc::FCallBuiltin& op) {
   if (options.ConstantFoldBuiltins) {
     if (auto const val = const_fold(env, op)) {
       constprop(env);
@@ -363,6 +365,8 @@ void builtin(ISS& env, const bc::FCallBuiltin& op) {
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
   specialFunctionEffects(env, name);
   push(env, rt);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////

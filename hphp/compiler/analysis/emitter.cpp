@@ -4957,25 +4957,11 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
 
 bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
                              MOpFlags baseFlags, MOpFlags dimFlags) {
-  // Until we can emit all member operations, we have to do a quick pass over
-  // what would be the member vector to look for unsupported operations.
+  // W (NewElem) operations aren't yet supported, so scan the vector before
+  // emitting any code.
   for (auto i = iFirst + 1; i < iLast; ++i) {
     auto sym = m_evalStack.get(i);
-    UNUSED auto flavor = StackSym::GetSymFlavor(sym);
-    switch (StackSym::GetMarker(sym)) {
-      case StackSym::M:
-        always_assert(flavor == StackSym::A);
-        break;
-      case StackSym::P:
-      case StackSym::Q:
-      case StackSym::E:
-        break;
-      case StackSym::W:
-        return false;
-      case StackSym::S:
-      default:
-        always_assert(false && "Bad intermediate marker");
-    }
+    if (StackSym::GetMarker(sym) == StackSym::W) return false;
   }
 
   // Emit the base location operation.
@@ -5298,8 +5284,7 @@ void EmitterVisitor::emitCGet(Emitter& e) {
       if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
     }
 
-    if (!Option::WholeProgram /* no hhbbc support yet */ &&
-        RuntimeOption::EvalEmitNewMInstrs &&
+    if (RuntimeOption::EvalEmitNewMInstrs &&
         emitMOp(i, iLast, false, e, MOpFlags::Warn, MOpFlags::Warn)) {
       auto sym = m_evalStack.get(iLast);
       auto flavor = StackSym::GetSymFlavor(sym);

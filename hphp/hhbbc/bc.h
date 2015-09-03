@@ -310,8 +310,8 @@ namespace bc {
 #define POP_V_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_MFINAL  uint32_t numPop() const { not_implemented(); } \
-                    Flavor popFlavor(uint32_t) const { not_implemented(); }
+#define POP_MFINAL  uint32_t numPop() const { return arg1; } \
+                    Flavor popFlavor(uint32_t) const { return Flavor::CR; }
 
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \

@@ -802,13 +802,9 @@ class TraceProfiler : public Profiler {
     // from the memory field to use as a flag. We want to keep this
     // data structure small since we need a huge number of them during
     // a profiled run.
-    int64_t memory : 63; // Total memory, or memory allocated depending on flags
-#ifdef HAVE_MSVC_BITFIELD_LAYOUT
+    uint64_t memory : 63; // Total memory, or memory allocated depending on flags
     uint64_t is_func_exit : 1; // Is the entry for a function exit?
-#else
-    bool is_func_exit : 1; // Is the entry for a function exit?
-#endif
-    int64_t peak_memory : 63; // Peak memory, or memory freed depending on flags
+    uint64_t peak_memory : 63; // Peak memory, or memory freed depending on flags
     uint64_t unused : 1; // Unused, to keep memory and peak_memory the same size
 
     void clear() {

@@ -155,13 +155,8 @@ private:
     struct {
       FuncId m_funcID;
       uint32_t m_offset : 30;
-#ifdef HAVE_MSVC_BITFIELD_LAYOUT
       uint32_t m_prologue : 1;
       uint32_t m_resumed : 1;
-#else
-      bool m_prologue : 1;
-      bool m_resumed : 1;
-#endif
     };
   };
 };

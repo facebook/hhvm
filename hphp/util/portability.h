@@ -184,14 +184,4 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
-// This is used to make it easy to locate all places where changes
-// were required due to the way MSVC lays out bitfields.
-//
-// Basically, the issue is that MSVC will only put two fields in
-// the same byte if the type of both fields is the same size,
-// otherwise it starts a new byte.
-# define HAVE_MSVC_BITFIELD_LAYOUT 1
-#endif
-
 #endif

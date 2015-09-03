@@ -101,11 +101,7 @@ private:
   /*
    * Mask of specializations that a given ArraySpec represents.
    */
-#ifdef HAVE_MSVC_BITFIELD_LAYOUT
   enum SortOf : uintptr_t {
-#else
-  enum SortOf : uint8_t {
-#endif
     IsTop     = 0, // top
     IsBottom  = 1 << 0,
     HasKind   = 1 << 1,
@@ -198,11 +194,7 @@ private:
   /*
    * Sort tag.
    */
-#ifdef HAVE_MSVC_BITFIELD_LAYOUT
   enum SortOf : uintptr_t {
-#else
-  enum SortOf : uint8_t {
-#endif
     IsTop,
     IsBottom,
     IsSub,

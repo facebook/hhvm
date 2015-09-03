@@ -14,3 +14,4 @@ src/parsing/parser.mli
 *.opt
 _obuild/
 .ocp/
+hhi/**/INDEX

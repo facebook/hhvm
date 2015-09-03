@@ -86,7 +86,6 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
 ///////////////////////////////////////////////////////////////////////////////
 std::string GetPrimaryIPImpl(int af) {
   const static std::string s_empty;
-  struct utsname buf;
   struct addrinfo hints;
   struct addrinfo *res = nullptr;
   int error;

@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
+#include <signal.h>
 
 namespace HPHP {
 

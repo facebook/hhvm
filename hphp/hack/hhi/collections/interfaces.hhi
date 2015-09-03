@@ -1,8 +1,29 @@
 <?hh // decl
 
+/**
+ * The base interface implemented for a collection type so that base information
+ * such as count and its items are available.
+ *
+ */
 interface ConstCollection<+Te> extends Countable {
+  /**
+   * Is the collection empty?
+   *
+   * @return bool - Returns TRUE if the collection is empty; FASLE otherswise.
+   */
   public function isEmpty(): bool;
+  /**
+   * Get the number of items in the collection. Cannot be negative.
+   *
+   * @return int - Returns the number of items in the collection
+   */
   public function count(): int;
+  /**
+   * Get access to the items in the collection. Can be empty.
+   *
+   * @return Iterable - Returns an iterable with access to all of the items in
+   *   the collection.
+   */
   public function items(): Iterable<Te>;
 }
 
@@ -11,8 +32,20 @@ interface OutputCollection<-Te> {
   public function addAll(?Traversable<Te> $traversable): this;
 }
 
+/**
+ * Collection is the primary collection interface for mutable collections.
+ * Assuming you want the ability to clear out your collection, you would
+ * implement this (or a child of this) interface. Otherwise, you can implement
+ * @OutputCollection only. If your collection to be immutable, implement
+ * @ConstCollection only instead.
+ */
 interface Collection<Te> extends ConstCollection<Te>,
                                  OutputCollection<Te> {
+  /**
+   * Removes all items from the collection
+   *
+   * @return void
+   */
   public function clear();
 }
 

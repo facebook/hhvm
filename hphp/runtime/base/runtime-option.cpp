@@ -438,7 +438,7 @@ static inline bool hhirRelaxGuardsDefault() {
 }
 
 static inline bool evalJitDefault() {
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(_MSC_VER)
   return false;
 #else
   return true;

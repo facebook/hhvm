@@ -111,9 +111,9 @@
     auto const ee = ExtendedException(msg);               \
     auto fileAndLine = ee.getFileAndLine();               \
     std::ostringstream os;                                \
-    os <<__FUNCTION__ <<": " <<msg                        \
-      <<" in " <<fileAndLine.first.c_str()                \
-      <<" on line " <<fileAndLine.second;                 \
+    os << __FUNCTION__ << ": " << msg                     \
+      << " in " << fileAndLine.first.c_str()              \
+      << " on line " << fileAndLine.second;               \
     Logger::Verbose(os.str());                            \
     return false;                                         \
   }                                                       \

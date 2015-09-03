@@ -182,14 +182,19 @@ const RegionDesc::BlockIdSet& RegionDesc::preds(BlockId id) const {
   return const_cast<RegionDesc*>(this)->data(id).preds;
 }
 
+folly::Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
+  return const_cast<RegionDesc*>(this)->data(id).prevRetrans;
+}
+
 folly::Optional<RegionDesc::BlockId> RegionDesc::nextRetrans(BlockId id) const {
   return const_cast<RegionDesc*>(this)->data(id).nextRetrans;
 }
 
 void RegionDesc::setNextRetrans(BlockId id, BlockId next) {
   assertx(!data(id).nextRetrans);
+  assertx(!data(next).prevRetrans);
   data(id).nextRetrans = next;
-  data(next).preds.insert(id);
+  data(next).prevRetrans = id;
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {
@@ -452,6 +457,7 @@ void RegionDesc::chainRetransBlocks() {
       for (auto other : c.blocks) {
         if (other == selectedSucc) continue;
         succSet.erase(other);
+        data(other).preds.erase(b->id());
       }
     }
   }
@@ -880,6 +886,9 @@ struct DFSChecker {
  *
  *  10) The block-retranslation chains cannot have cycles.
  *
+ *  11) All successors and predecessors sets are consistent (i.e., if
+ *      B is a successor of A, then A is a predecessor of B).  This
+ *      also applies to nextRetrans and prevRetrans.
  */
 bool check(const RegionDesc& region, std::string& error) {
 
@@ -917,6 +926,12 @@ bool check(const RegionDesc& region, std::string& error) {
                                   bid, succ));
       }
 
+      // 11) Successors and predecessors sets are consistent.
+      if (region.preds(succ).count(bid) == 0) {
+        return bad(folly::sformat("arc missing in succ's pred set: {} -> {}",
+                                  bid, succ));
+      }
+
       // Checks 4) and 5) below don't make sense for arcs corresponding
       // to inlined calls and returns, so skip them in such cases.
       // This won't be possible once task #4076399 is done.
@@ -942,6 +957,11 @@ bool check(const RegionDesc& region, std::string& error) {
         return bad(folly::sformat("arc with src not in the region: {} -> {}",
                                   pred, bid));
       }
+      // 11) Successors and predecessors sets are consistent.
+      if (region.succs(pred).count(bid) == 0) {
+        return bad(folly::sformat("arc missing in pred's succ set: {} -> {}",
+                                  pred, bid));
+      }
     }
   }
 
@@ -961,7 +981,12 @@ bool check(const RegionDesc& region, std::string& error) {
   auto& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
     auto bid = blocks[i]->id();
+    unsigned nAllPreds = region.preds(bid).size();
     unsigned nVisited = 0;
+    if (auto prevRetrans = region.prevRetrans(bid)) {
+      nAllPreds++;
+      nVisited += visited.count(prevRetrans.value());
+    }
     for (auto pred : region.preds(bid)) {
       nVisited += visited.count(pred);
     }
@@ -972,10 +997,33 @@ bool check(const RegionDesc& region, std::string& error) {
                                 bid));
     }
     // 9) The region is topologically sorted unless loops are enabled.
-    if (!RuntimeOption::EvalJitLoops && nVisited != region.preds(bid).size()) {
+    if (!RuntimeOption::EvalJitLoops && nVisited != nAllPreds) {
       return bad(folly::sformat("non-topological order (bid: {})", bid));
     }
     visited.insert(bid);
+  }
+
+  // 11) nextRetrans and prevRetrans are consistent.
+  for (unsigned i = 0; i < blocks.size(); i++) {
+    auto bid = blocks[i]->id();
+    auto nextRetrans = region.nextRetrans(bid);
+    if (nextRetrans) {
+      auto nextRetransId = nextRetrans.value();
+      auto nextPrevId = region.prevRetrans(nextRetransId);
+      if (!nextPrevId || nextPrevId.value() != bid) {
+        return bad(folly::sformat("block {}'s nextRetrans (block {}) has non-"
+                                  "matching prevRetrans", bid, nextRetransId));
+      }
+    }
+    auto prevRetrans = region.prevRetrans(bid);
+    if (prevRetrans) {
+      auto prevRetransId = prevRetrans.value();
+      auto prevNextId = region.nextRetrans(prevRetransId);
+      if (!prevNextId || prevNextId.value() != bid) {
+        return bad(folly::sformat("block {}'s prevRetrans (block {}) has non-"
+                                  "matching nextRetrans", bid, prevRetransId));
+      }
+    }
   }
 
   // 10) The block-retranslation chains cannot have cycles.

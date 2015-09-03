@@ -116,6 +116,7 @@ struct RegionDesc {
   void              removeArc(BlockId src, BlockId dst);
   void              setSideExitingBlock(BlockId bid);
   bool              isSideExitingBlock(BlockId bid) const;
+  folly::Optional<BlockId> prevRetrans(BlockId id) const;
   folly::Optional<BlockId> nextRetrans(BlockId id) const;
   void              setNextRetrans(BlockId id, BlockId next);
   void              append(const RegionDesc&  other);
@@ -132,6 +133,7 @@ private:
     BlockPtr                 block;
     BlockIdSet               preds;
     BlockIdSet               succs;
+    folly::Optional<BlockId> prevRetrans;
     folly::Optional<BlockId> nextRetrans;
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };

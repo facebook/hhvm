@@ -126,6 +126,11 @@ bool blockHasUnprocessedPred(
       return true;
     }
   }
+  if (auto prevRetrans = region.prevRetrans(blockId)) {
+    if (processedBlocks.count(prevRetrans.value()) == 0) {
+      return true;
+    }
+  }
   return false;
 }
 
@@ -140,13 +145,15 @@ bool blockHasUnprocessedPred(
  */
 bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
   auto const& preds = region.preds(blockId);
-  if (preds.size() == 0)               return false;
-  if (preds.size() > 1)                return true;
+  auto const prevRetrans = region.prevRetrans(blockId);
+  auto const nPreds = preds.size() + (prevRetrans ? 1 : 0);
+  if (nPreds == 0)                     return false;
+  if (nPreds > 1)                      return true;
   if (blockId == region.entry()->id()) return true;
 
   // The destination of a conditional jump is a merge point if both
   // the fallthru and taken offsets are the same.
-  auto predId   = *preds.begin();
+  auto predId   = prevRetrans ? prevRetrans.value() : *preds.begin();
   Op* predOpPtr = (Op*)(region.block(predId)->last().pc());
   auto predOp   = *predOpPtr;
   if (!instrHasConditionalBranch(predOp)) return false;

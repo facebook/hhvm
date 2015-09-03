@@ -496,7 +496,7 @@ Variant HHVM_METHOD(DateInterval, __get,
       return data->m_di->getSeconds();
     }
     if (same(member, s_invert)) {
-      return data->m_di->isInverted();
+      return data->m_di->isInverted() ? 1 : 0;
     }
     if (same(member, s_days)) {
       if (data->m_di->haveTotalDays()) {

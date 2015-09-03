@@ -332,7 +332,7 @@ const StaticString s_UREGEX_OFFSET_CAPTURE("UREGEX_OFFSET_CAPTURE");
 
 void IntlExtension::initICU() {
   // We need this initialization to be done late
-  // so that ICU's assembly constructors have had
+  // so that ICU's dynamic initializers have had
   // a chance to run, which is important if we've
   // linked against a static libICU.
   s_transliterator.initialize();

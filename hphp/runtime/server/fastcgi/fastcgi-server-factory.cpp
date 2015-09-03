@@ -32,16 +32,14 @@ public:
 
 }
 
-extern "C" {
-
 /*
- * Automatically register FastCGIServerFactory on program start
- */
-void register_fastcgi_server() __attribute__((__constructor__));
-void register_fastcgi_server() {
-  auto registry = HPHP::ServerFactoryRegistry::getInstance();
-  auto factory = std::make_shared<HPHP::FastCGIServerFactory>();
-  registry->registerFactory("fastcgi", factory);
-}
-
-}
+* Automatically register FastCGIServerFactory on program start
+*/
+static struct RegisterFastCGIServer {
+public:
+  RegisterFastCGIServer() {
+    auto registry = HPHP::ServerFactoryRegistry::getInstance();
+    auto factory = std::make_shared<HPHP::FastCGIServerFactory>();
+    registry->registerFactory("fastcgi", factory);
+  }
+} s_RegisterFastCGIServer;

@@ -29,16 +29,14 @@ public:
 
 }
 
-extern "C" {
-
 /*
- * Automatically register ProxygenServerFactory on program start
- */
-void register_proxygen_server() __attribute__((__constructor__));
-void register_proxygen_server() {
-  auto registry = HPHP::ServerFactoryRegistry::getInstance();
-  auto factory = std::make_shared<HPHP::ProxygenServerFactory>();
-  registry->registerFactory("proxygen", factory);
-}
-
-}
+* Automatically register ProxygenServerFactory on program start
+*/
+static struct RegisterProxygenServer {
+public:
+  RegisterProxygenServer() {
+    auto registry = HPHP::ServerFactoryRegistry::getInstance();
+    auto factory = std::make_shared<HPHP::ProxygenServerFactory>();
+    registry->registerFactory("proxygen", factory);
+  }
+} s_RegisterProxygenServer;

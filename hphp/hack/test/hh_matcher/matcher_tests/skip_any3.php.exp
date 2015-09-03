@@ -1,0 +1,10 @@
+4: class Foo {
+5:   public function bar(): void {
+14:       switch ($var) {
+15:         case 1:
+17:           return;
+18:           break;
+19:         case 2:
+21:           return;
+22:           break;
+28:     return;

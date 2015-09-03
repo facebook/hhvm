@@ -1,0 +1,61 @@
+7: newtype TestType = (int, int);
+9: function test_fun(bool $a, int $b): void {
+10:   if ($a) {
+11:     echo '} } {';
+12:   } else if ($a) {
+13:     echo '( ( ( )';
+14:   } elseif ($a) {
+15:     echo '{ { { }';
+17:     echo "\" { { } }";
+20:   switch ($b) {
+21:     case 1:
+22:       echo "1";
+23:       break;
+24:     case 2:
+25:       echo "1";
+26:       break;
+27:     case 4:
+28:       echo " () (";
+31:       echo "hi";
+32:       break;
+35:   $i = 0;
+36:   while ($i < 5) {
+37:     $i++;
+38:     if ($i == 3) continue;
+39:     echo $i;
+43:     $i++;
+44:   } while ($a && (($i < 10) && true));
+46:   $arr = array(1, 2, 3);
+47:   list($el1, $el2, $el3) = $arr;
+49:   foreach ($arr as $elem) {
+50:     echo $elem;
+53:   throw new \Exception('Test Exception');
+56: class Foo {
+58:   public function my_method(): void {
+60:       test_fun(true, 1);
+61:     } catch (\Exception $e) {
+62:       echo $e->getMessage();
+64:     $astring = "astring";
+65:     $anint = (int) $astring;
+66:     $anint = $anint + ($anint + 1);
+67:     $a = new Bar();
+68:     $c = new \my\name\Foo();
+69:     $d = namespace\A_CONST;
+70:     $e = function() use ($a) {
+71:       $f = (function() use ($a) {
+72:           echo "Hello {}";
+73:           echo 'parenthesis )';
+74:           do { $i++; } while ($a);
+79:   public function my_generator (): Traversable<int> {
+80:     for ($k = 1; $k < 10; $k++) {
+81:       yield $k;
+85:   public function php_closure (string $who): void  {
+86:     $var = function() use ($who) {
+87:       echo "Hello $who";
+92: class Bar {}
+94: async function gen_foo(int $a): Awaitable<?Foo> {
+95:   $bar = await gen_bar($a);
+96:   return new Foo();
+99: async function gen_bar(int $a): Awaitable<?Bar> {
+100:   return new Bar();
+103: const int A_CONST = 500;

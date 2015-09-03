@@ -1,0 +1,4 @@
+4: class Foo {
+5:   public function bar(): void {
+6:     array("array one", "more elements");
+7:     array("map array" => "mapped_elem", "elem 2" => "ele2");

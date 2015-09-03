@@ -1,0 +1,22 @@
+
+<?hh // strict
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+  // TODO make this test not cause an exception (address
+  // leading and trailing commas
+class Foo {
+  public function bar(): void {
+    "Stmt 1";
+    if ($val) {
+      "nested stmt";
+      $var->afun("arg1");
+    } else {
+      "else clause";
+      $var->afun("arg1");
+    }
+    "Not nested";
+    $var->afun("arg1");
+  }
+}
+
+

@@ -1,0 +1,12 @@
+4: class Bar {
+5:   public function baz(): int {
+6:     return 5;
+10: class Foo {
+11:   public function bar(): void {
+12:     $foo = $bar = 0;
+13:     $foo++;
+14:     --$foo;
+15:     $c = $foo + 1;
+16:     $c += d;
+17:     $f = new Bar();
+18:     $g = $f->baz();

@@ -1,0 +1,743 @@
+on_program:
+
+class :fb:event:base-two-ents extends :fb:event:base-list-ents {
+
+  final protected function render() {
+    $ents = $this->:ents;
+    $ents = array_values($ents);
+
+    $display_count = count($ents);
+
+    switch ($display_count) {
+      case 0:
+        return null;
+      case 1:
+        return $this->getProfileName(head($ents));
+      case 2:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>;
+      default:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>;
+    }
+  }
+}
+
+=====
+
+on_def:
+
+class :fb:event:base-two-ents extends :fb:event:base-list-ents {
+
+  final protected function render() {
+    $ents = $this->:ents;
+    $ents = array_values($ents);
+
+    $display_count = count($ents);
+
+    switch ($display_count) {
+      case 0:
+        return null;
+      case 1:
+        return $this->getProfileName(head($ents));
+      case 2:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>;
+      default:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>;
+    }
+  }
+}
+
+=====
+
+on_class_:
+
+class :fb:event:base-two-ents extends :fb:event:base-list-ents {
+
+  final protected function render() {
+    $ents = $this->:ents;
+    $ents = array_values($ents);
+
+    $display_count = count($ents);
+
+    switch ($display_count) {
+      case 0:
+        return null;
+      case 1:
+        return $this->getProfileName(head($ents));
+      case 2:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>;
+      default:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>;
+    }
+  }
+}
+
+=====
+
+on_hint:
+
+:fb:event:base-list-ents
+
+=====
+
+on_method_:
+
+function render() {
+    $ents = $this->:ents;
+    $ents = array_values($ents);
+
+    $display_count = count($ents);
+
+    switch ($display_count) {
+      case 0:
+        return null;
+      case 1:
+        return $this->getProfileName(head($ents));
+      case 2:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>;
+      default:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>;
+    }
+  }
+
+=====
+
+on_stmt:
+
+$ents = $this->:ents
+
+=====
+
+on_expr:
+
+$ents = $this->:ents
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_expr:
+
+$this->:ents
+
+=====
+
+on_expr:
+
+$this
+
+=====
+
+on_expr:
+
+:ents
+
+=====
+
+on_stmt:
+
+$ents = array_values($ents)
+
+=====
+
+on_expr:
+
+$ents = array_values($ents)
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_expr:
+
+array_values($ents)
+
+=====
+
+on_expr:
+
+array_values
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_stmt:
+
+$display_count = count($ents)
+
+=====
+
+on_expr:
+
+$display_count = count($ents)
+
+=====
+
+on_expr:
+
+$display_count
+
+=====
+
+on_expr:
+
+count($ents)
+
+=====
+
+on_expr:
+
+count
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_stmt:
+
+switch ($display_count) {
+      case 0:
+        return null;
+      case 1:
+        return $this->getProfileName(head($ents));
+      case 2:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>;
+      default:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>;
+    }
+
+=====
+
+on_switch:
+
+switch ($display_count) {
+      case 0:
+        return null;
+      case 1:
+        return $this->getProfileName(head($ents));
+      case 2:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>;
+      default:
+        return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>;
+    }
+
+=====
+
+on_expr:
+
+$display_count
+
+=====
+
+on_expr:
+
+0
+
+=====
+
+on_stmt:
+
+return null
+
+=====
+
+on_expr:
+
+null
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_stmt:
+
+return $this->getProfileName(head($ents))
+
+=====
+
+on_expr:
+
+$this->getProfileName(head($ents))
+
+=====
+
+on_expr:
+
+$this->getProfileName
+
+=====
+
+on_expr:
+
+$this
+
+=====
+
+on_expr:
+
+getProfileName
+
+=====
+
+on_expr:
+
+head($ents)
+
+=====
+
+on_expr:
+
+head
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_expr:
+
+2
+
+=====
+
+on_stmt:
+
+return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>
+
+=====
+
+on_expr:
+
+fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+          </fbt>
+
+=====
+
+on_expr:
+
+"events"
+
+=====
+
+on_expr:
+
+"List of names"
+
+=====
+
+on_expr:
+
+fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param>
+
+=====
+
+on_expr:
+
+"first name"
+
+=====
+
+on_expr:
+
+$this->getProfileName($ents[0])
+
+=====
+
+on_expr:
+
+$this->getProfileName
+
+=====
+
+on_expr:
+
+$this
+
+=====
+
+on_expr:
+
+getProfileName
+
+=====
+
+on_expr:
+
+$ents[0]
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_expr:
+
+0
+
+=====
+
+on_expr:
+
+> and
+            <
+
+=====
+
+on_expr:
+
+fbt:param name="other name">
+              {$this->getProfileName($ents[1])}
+            </fbt:param>
+
+=====
+
+on_expr:
+
+"other name"
+
+=====
+
+on_expr:
+
+$this->getProfileName($ents[1])
+
+=====
+
+on_expr:
+
+$this->getProfileName
+
+=====
+
+on_expr:
+
+$this
+
+=====
+
+on_expr:
+
+getProfileName
+
+=====
+
+on_expr:
+
+$ents[1]
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_stmt:
+
+return
+          <fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>
+
+=====
+
+on_expr:
+
+fbt project="events" desc="List of names">
+            <fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param> and
+            <fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+          </fbt>
+
+=====
+
+on_expr:
+
+"events"
+
+=====
+
+on_expr:
+
+"List of names"
+
+=====
+
+on_expr:
+
+fbt:param name="first name">
+              {$this->getProfileName($ents[0])}
+            </fbt:param>
+
+=====
+
+on_expr:
+
+"first name"
+
+=====
+
+on_expr:
+
+$this->getProfileName($ents[0])
+
+=====
+
+on_expr:
+
+$this->getProfileName
+
+=====
+
+on_expr:
+
+$this
+
+=====
+
+on_expr:
+
+getProfileName
+
+=====
+
+on_expr:
+
+$ents[0]
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_expr:
+
+0
+
+=====
+
+on_expr:
+
+> and
+            <
+
+=====
+
+on_expr:
+
+fbt:param name="number of others">
+              {$this->renderOtherProfiles(array_slice($ents, 1))}
+            </fbt:param>
+
+=====
+
+on_expr:
+
+"number of others"
+
+=====
+
+on_expr:
+
+$this->renderOtherProfiles(array_slice($ents, 1))
+
+=====
+
+on_expr:
+
+$this->renderOtherProfiles
+
+=====
+
+on_expr:
+
+$this
+
+=====
+
+on_expr:
+
+renderOtherProfiles
+
+=====
+
+on_expr:
+
+array_slice($ents, 1)
+
+=====
+
+on_expr:
+
+array_slice
+
+=====
+
+on_expr:
+
+$ents
+
+=====
+
+on_expr:
+
+1
+
+=====
+

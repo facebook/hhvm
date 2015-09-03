@@ -1,0 +1,4 @@
+4: class Foo { }
+6: class Bar {
+7:   public function bar(): void {
+8:     $f = new Foo();

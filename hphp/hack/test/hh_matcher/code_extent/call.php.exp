@@ -1,0 +1,2252 @@
+on_program:
+
+newtype TestType = (int, int);
+
+function test_fun(bool $a, int $b): array<int> {
+  if ( $a) {
+    echo '} } {';
+  } else if ($a) {
+    echo '( ( ( )';
+  } elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+  switch ($b) {
+    case 1:
+      echo "1";
+      break;
+    case 2:
+      $heredoc = <<<TAG
+some random
+multiline
+text
+TAG;
+      echo "1";
+      break;
+    case 4:
+      echo " () (";
+      // FALLTHROUGH
+    default:
+      echo "hi";
+      break;
+  }
+
+  $i = 0;
+  while ($i < 5) {
+    $i++;
+    if ($i == 3) continue;
+    if ($i == 4) break;
+    if ($i == 5) return;
+    echo $i;
+  }
+
+  do {
+    $i++;
+  } while ($a && (($i < 10) && true));
+
+  $arr = array(1, 2, 3);
+  list($el1, $el2, $el3) = $arr;
+
+  foreach ($arr as $elem) {
+    echo $elem;
+  }
+
+  throw new \Exception('Test Exception');
+
+  return $arr;
+}
+
+class Foo {
+
+  public function my_method(): void {
+    try {
+      test_fun(true, 1);
+    } catch (\Exception $e) {
+      echo $e->getMessage();
+    }
+    $astring = "astring";
+    $anint = (int) $astring;
+    $anint = $anint + ( $anint + 1);
+    $a = new Bar();
+    $c = new \my\name\Foo();
+    $d = namespace\A_CONST;
+    $e = function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    };
+  }
+
+  public function my_generator (): Traversable<array<int>> {
+    for ($k = 1; $k < 10; $k++) {
+      yield array($k);
+    }
+  }
+
+  public function php_closure (string $who): void  {
+    $var = function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    };
+  }
+}
+
+class Bar {}
+
+async function gen_foo(int $a): Awaitable<?Foo> {
+  $bar = await gen_bar($a);
+  return new Foo();
+}
+
+async function gen_bar(int $a): Awaitable<?Bar> {
+  return new Bar();
+}
+
+const int A_CONST = 500
+
+=====
+
+on_def:
+
+newtype TestType = (int, int)
+
+=====
+
+on_hint:
+
+(int, int)
+
+=====
+
+on_def:
+
+function test_fun(bool $a, int $b): array<int> {
+  if ( $a) {
+    echo '} } {';
+  } else if ($a) {
+    echo '( ( ( )';
+  } elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+  switch ($b) {
+    case 1:
+      echo "1";
+      break;
+    case 2:
+      $heredoc = <<<TAG
+some random
+multiline
+text
+TAG;
+      echo "1";
+      break;
+    case 4:
+      echo " () (";
+      // FALLTHROUGH
+    default:
+      echo "hi";
+      break;
+  }
+
+  $i = 0;
+  while ($i < 5) {
+    $i++;
+    if ($i == 3) continue;
+    if ($i == 4) break;
+    if ($i == 5) return;
+    echo $i;
+  }
+
+  do {
+    $i++;
+  } while ($a && (($i < 10) && true));
+
+  $arr = array(1, 2, 3);
+  list($el1, $el2, $el3) = $arr;
+
+  foreach ($arr as $elem) {
+    echo $elem;
+  }
+
+  throw new \Exception('Test Exception');
+
+  return $arr;
+}
+
+=====
+
+on_fun_:
+
+function test_fun(bool $a, int $b): array<int> {
+  if ( $a) {
+    echo '} } {';
+  } else if ($a) {
+    echo '( ( ( )';
+  } elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+  switch ($b) {
+    case 1:
+      echo "1";
+      break;
+    case 2:
+      $heredoc = <<<TAG
+some random
+multiline
+text
+TAG;
+      echo "1";
+      break;
+    case 4:
+      echo " () (";
+      // FALLTHROUGH
+    default:
+      echo "hi";
+      break;
+  }
+
+  $i = 0;
+  while ($i < 5) {
+    $i++;
+    if ($i == 3) continue;
+    if ($i == 4) break;
+    if ($i == 5) return;
+    echo $i;
+  }
+
+  do {
+    $i++;
+  } while ($a && (($i < 10) && true));
+
+  $arr = array(1, 2, 3);
+  list($el1, $el2, $el3) = $arr;
+
+  foreach ($arr as $elem) {
+    echo $elem;
+  }
+
+  throw new \Exception('Test Exception');
+
+  return $arr;
+}
+
+=====
+
+on_hint:
+
+bool
+
+=====
+
+on_hint:
+
+int
+
+=====
+
+on_stmt:
+
+if ( $a) {
+    echo '} } {';
+  } else if ($a) {
+    echo '( ( ( )';
+  } elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+=====
+
+on_if:
+
+if ( $a) {
+    echo '} } {';
+  } else if ($a) {
+    echo '( ( ( )';
+  } elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+=====
+
+on_expr:
+
+$a
+
+=====
+
+on_stmt:
+
+echo '} } {'
+
+=====
+
+on_stmt:
+
+echo '} } {'
+
+=====
+
+on_expr:
+
+echo '} } {'
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+'} } {'
+
+=====
+
+on_stmt:
+
+if ($a) {
+    echo '( ( ( )';
+  } elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+=====
+
+on_if:
+
+if ($a) {
+    echo '( ( ( )';
+  } elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+=====
+
+on_expr:
+
+$a
+
+=====
+
+on_stmt:
+
+echo '( ( ( )'
+
+=====
+
+on_stmt:
+
+echo '( ( ( )'
+
+=====
+
+on_expr:
+
+echo '( ( ( )'
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+'( ( ( )'
+
+=====
+
+on_stmt:
+
+elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+=====
+
+on_if:
+
+elseif ($a) {
+    echo '{ { { }';
+  } else {
+    echo "\" { { } }";
+  }
+
+=====
+
+on_expr:
+
+$a
+
+=====
+
+on_stmt:
+
+echo '{ { { }'
+
+=====
+
+on_stmt:
+
+echo '{ { { }'
+
+=====
+
+on_expr:
+
+echo '{ { { }'
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+'{ { { }'
+
+=====
+
+on_stmt:
+
+echo "\" { { } }"
+
+=====
+
+on_stmt:
+
+echo "\" { { } }"
+
+=====
+
+on_expr:
+
+echo "\" { { } }"
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+"\" { { } }"
+
+=====
+
+on_stmt:
+
+switch ($b) {
+    case 1:
+      echo "1";
+      break;
+    case 2:
+      $heredoc = <<<TAG
+some random
+multiline
+text
+TAG;
+      echo "1";
+      break;
+    case 4:
+      echo " () (";
+      // FALLTHROUGH
+    default:
+      echo "hi";
+      break;
+  }
+
+=====
+
+on_switch:
+
+switch ($b) {
+    case 1:
+      echo "1";
+      break;
+    case 2:
+      $heredoc = <<<TAG
+some random
+multiline
+text
+TAG;
+      echo "1";
+      break;
+    case 4:
+      echo " () (";
+      // FALLTHROUGH
+    default:
+      echo "hi";
+      break;
+  }
+
+=====
+
+on_expr:
+
+$b
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_stmt:
+
+echo "1"
+
+=====
+
+on_expr:
+
+echo "1"
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+"1"
+
+=====
+
+on_stmt:
+
+break
+
+=====
+
+on_expr:
+
+2
+
+=====
+
+on_stmt:
+
+$heredoc = <<<TAG
+
+=====
+
+on_expr:
+
+$heredoc = <<<TAG
+
+=====
+
+on_expr:
+
+$heredoc
+
+=====
+
+on_expr:
+
+TAG
+
+=====
+
+on_stmt:
+
+echo "1"
+
+=====
+
+on_expr:
+
+echo "1"
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+"1"
+
+=====
+
+on_stmt:
+
+break
+
+=====
+
+on_expr:
+
+4
+
+=====
+
+on_stmt:
+
+echo " () ("
+
+=====
+
+on_expr:
+
+echo " () ("
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+" () ("
+
+=====
+
+on_stmt:
+
+Unable to print range.
+
+=====
+
+on_stmt:
+
+echo "hi"
+
+=====
+
+on_expr:
+
+echo "hi"
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+"hi"
+
+=====
+
+on_stmt:
+
+break
+
+=====
+
+on_stmt:
+
+$i = 0
+
+=====
+
+on_expr:
+
+$i = 0
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+0
+
+=====
+
+on_stmt:
+
+while ($i < 5) {
+    $i++;
+    if ($i == 3) continue;
+    if ($i == 4) break;
+    if ($i == 5) return;
+    echo $i;
+  }
+
+=====
+
+on_while:
+
+while ($i < 5) {
+    $i++;
+    if ($i == 3) continue;
+    if ($i == 4) break;
+    if ($i == 5) return;
+    echo $i;
+  }
+
+=====
+
+on_expr:
+
+$i < 5
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+5
+
+=====
+
+on_stmt:
+
+$i++;
+    if ($i == 3) continue;
+    if ($i == 4) break;
+    if ($i == 5) return;
+    echo $i
+
+=====
+
+on_stmt:
+
+$i++
+
+=====
+
+on_expr:
+
+$i++
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_stmt:
+
+if ($i == 3) continue
+
+=====
+
+on_if:
+
+if ($i == 3) continue
+
+=====
+
+on_expr:
+
+$i == 3
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+3
+
+=====
+
+on_stmt:
+
+continue
+
+=====
+
+on_stmt:
+
+Unable to print range.
+
+=====
+
+on_stmt:
+
+if ($i == 4) break
+
+=====
+
+on_if:
+
+if ($i == 4) break
+
+=====
+
+on_expr:
+
+$i == 4
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+4
+
+=====
+
+on_stmt:
+
+break
+
+=====
+
+on_stmt:
+
+Unable to print range.
+
+=====
+
+on_stmt:
+
+if ($i == 5) return
+
+=====
+
+on_if:
+
+if ($i == 5) return
+
+=====
+
+on_expr:
+
+$i == 5
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+5
+
+=====
+
+on_stmt:
+
+return
+
+=====
+
+on_stmt:
+
+Unable to print range.
+
+=====
+
+on_stmt:
+
+echo $i
+
+=====
+
+on_expr:
+
+echo $i
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_stmt:
+
+do {
+    $i++;
+  } while ($a && (($i < 10) && true))
+
+=====
+
+on_do:
+
+do {
+    $i++;
+  } while ($a && (($i < 10) && true))
+
+=====
+
+on_stmt:
+
+$i++
+
+=====
+
+on_stmt:
+
+$i++
+
+=====
+
+on_expr:
+
+$i++
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+$a && (($i < 10) && true)
+
+=====
+
+on_expr:
+
+$a
+
+=====
+
+on_expr:
+
+(($i < 10) && true)
+
+=====
+
+on_expr:
+
+($i < 10)
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+10
+
+=====
+
+on_expr:
+
+true
+
+=====
+
+on_stmt:
+
+$arr = array(1, 2, 3)
+
+=====
+
+on_expr:
+
+$arr = array(1, 2, 3)
+
+=====
+
+on_expr:
+
+$arr
+
+=====
+
+on_expr:
+
+array(1, 2, 3)
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_expr:
+
+2
+
+=====
+
+on_expr:
+
+3
+
+=====
+
+on_stmt:
+
+list($el1, $el2, $el3) = $arr
+
+=====
+
+on_expr:
+
+list($el1, $el2, $el3) = $arr
+
+=====
+
+on_expr:
+
+list($el1, $el2, $el3)
+
+=====
+
+on_expr:
+
+$el1
+
+=====
+
+on_expr:
+
+$el2
+
+=====
+
+on_expr:
+
+$el3
+
+=====
+
+on_expr:
+
+$arr
+
+=====
+
+on_stmt:
+
+foreach ($arr as $elem) {
+    echo $elem;
+  }
+
+=====
+
+on_foreach:
+
+foreach ($arr as $elem) {
+    echo $elem;
+  }
+
+=====
+
+on_expr:
+
+$arr
+
+=====
+
+on_expr:
+
+$elem
+
+=====
+
+on_stmt:
+
+echo $elem
+
+=====
+
+on_stmt:
+
+echo $elem
+
+=====
+
+on_expr:
+
+echo $elem
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+$elem
+
+=====
+
+on_stmt:
+
+throw new \Exception('Test Exception')
+
+=====
+
+on_throw:
+
+throw new \Exception('Test Exception')
+
+=====
+
+on_expr:
+
+new \Exception('Test Exception')
+
+=====
+
+on_expr:
+
+\Exception
+
+=====
+
+on_expr:
+
+'Test Exception'
+
+=====
+
+on_stmt:
+
+return $arr
+
+=====
+
+on_expr:
+
+$arr
+
+=====
+
+on_hint:
+
+array<int>
+
+=====
+
+on_def:
+
+class Foo {
+
+  public function my_method(): void {
+    try {
+      test_fun(true, 1);
+    } catch (\Exception $e) {
+      echo $e->getMessage();
+    }
+    $astring = "astring";
+    $anint = (int) $astring;
+    $anint = $anint + ( $anint + 1);
+    $a = new Bar();
+    $c = new \my\name\Foo();
+    $d = namespace\A_CONST;
+    $e = function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    };
+  }
+
+  public function my_generator (): Traversable<array<int>> {
+    for ($k = 1; $k < 10; $k++) {
+      yield array($k);
+    }
+  }
+
+  public function php_closure (string $who): void  {
+    $var = function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    };
+  }
+}
+
+=====
+
+on_class_:
+
+class Foo {
+
+  public function my_method(): void {
+    try {
+      test_fun(true, 1);
+    } catch (\Exception $e) {
+      echo $e->getMessage();
+    }
+    $astring = "astring";
+    $anint = (int) $astring;
+    $anint = $anint + ( $anint + 1);
+    $a = new Bar();
+    $c = new \my\name\Foo();
+    $d = namespace\A_CONST;
+    $e = function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    };
+  }
+
+  public function my_generator (): Traversable<array<int>> {
+    for ($k = 1; $k < 10; $k++) {
+      yield array($k);
+    }
+  }
+
+  public function php_closure (string $who): void  {
+    $var = function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    };
+  }
+}
+
+=====
+
+on_method_:
+
+function my_method(): void {
+    try {
+      test_fun(true, 1);
+    } catch (\Exception $e) {
+      echo $e->getMessage();
+    }
+    $astring = "astring";
+    $anint = (int) $astring;
+    $anint = $anint + ( $anint + 1);
+    $a = new Bar();
+    $c = new \my\name\Foo();
+    $d = namespace\A_CONST;
+    $e = function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    };
+  }
+
+=====
+
+on_hint:
+
+void
+
+=====
+
+on_stmt:
+
+try {
+      test_fun(true, 1);
+    } catch (\Exception $e) {
+      echo $e->getMessage();
+    }
+
+=====
+
+on_try:
+
+try {
+      test_fun(true, 1);
+    } catch (\Exception $e) {
+      echo $e->getMessage();
+    }
+
+=====
+
+on_stmt:
+
+test_fun(true, 1)
+
+=====
+
+on_stmt:
+
+test_fun(true, 1)
+
+=====
+
+on_expr:
+
+test_fun(true, 1)
+
+=====
+
+on_expr:
+
+test_fun
+
+=====
+
+on_expr:
+
+true
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_catch:
+
+catch (\Exception $e) {
+      echo $e->getMessage();
+    }
+
+=====
+
+on_stmt:
+
+echo $e->getMessage()
+
+=====
+
+on_stmt:
+
+echo $e->getMessage()
+
+=====
+
+on_expr:
+
+echo $e->getMessage()
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+$e->getMessage()
+
+=====
+
+on_expr:
+
+$e->getMessage
+
+=====
+
+on_expr:
+
+$e
+
+=====
+
+on_expr:
+
+getMessage
+
+=====
+
+on_stmt:
+
+$astring = "astring"
+
+=====
+
+on_expr:
+
+$astring = "astring"
+
+=====
+
+on_expr:
+
+$astring
+
+=====
+
+on_expr:
+
+"astring"
+
+=====
+
+on_stmt:
+
+$anint = (int) $astring
+
+=====
+
+on_expr:
+
+$anint = (int) $astring
+
+=====
+
+on_expr:
+
+$anint
+
+=====
+
+on_expr:
+
+(int) $astring
+
+=====
+
+on_expr:
+
+$astring
+
+=====
+
+on_hint:
+
+int
+
+=====
+
+on_stmt:
+
+$anint = $anint + ( $anint + 1)
+
+=====
+
+on_expr:
+
+$anint = $anint + ( $anint + 1)
+
+=====
+
+on_expr:
+
+$anint
+
+=====
+
+on_expr:
+
+$anint + ( $anint + 1)
+
+=====
+
+on_expr:
+
+$anint
+
+=====
+
+on_expr:
+
+( $anint + 1)
+
+=====
+
+on_expr:
+
+$anint
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_stmt:
+
+$a = new Bar()
+
+=====
+
+on_expr:
+
+$a = new Bar()
+
+=====
+
+on_expr:
+
+$a
+
+=====
+
+on_expr:
+
+new Bar()
+
+=====
+
+on_expr:
+
+Bar
+
+=====
+
+on_stmt:
+
+$c = new \my\name\Foo()
+
+=====
+
+on_expr:
+
+$c = new \my\name\Foo()
+
+=====
+
+on_expr:
+
+$c
+
+=====
+
+on_expr:
+
+new \my\name\Foo()
+
+=====
+
+on_expr:
+
+\my\name\Foo
+
+=====
+
+on_stmt:
+
+$d = namespace\A_CONST
+
+=====
+
+on_expr:
+
+$d = namespace\A_CONST
+
+=====
+
+on_expr:
+
+$d
+
+=====
+
+on_expr:
+
+namespace\A_CONST
+
+=====
+
+on_stmt:
+
+$e = function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    }
+
+=====
+
+on_expr:
+
+$e = function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    }
+
+=====
+
+on_expr:
+
+$e
+
+=====
+
+on_expr:
+
+function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    }
+
+=====
+
+on_efun:
+
+function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    }
+
+=====
+
+on_fun_:
+
+function() use ($a) {
+      $f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        });
+    }
+
+=====
+
+on_stmt:
+
+$f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        })
+
+=====
+
+on_expr:
+
+$f = (function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        })
+
+=====
+
+on_expr:
+
+$f
+
+=====
+
+on_expr:
+
+(function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        })
+
+=====
+
+on_efun:
+
+function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        }
+
+=====
+
+on_fun_:
+
+function() use ($a) {
+          echo "Hello {}";
+          echo 'parenthesis )';
+          do { $i++; } while ($a);
+        }
+
+=====
+
+on_stmt:
+
+echo "Hello {}"
+
+=====
+
+on_expr:
+
+echo "Hello {}"
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+"Hello {}"
+
+=====
+
+on_stmt:
+
+echo 'parenthesis )'
+
+=====
+
+on_expr:
+
+echo 'parenthesis )'
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+'parenthesis )'
+
+=====
+
+on_stmt:
+
+do { $i++; } while ($a)
+
+=====
+
+on_do:
+
+do { $i++; } while ($a)
+
+=====
+
+on_stmt:
+
+$i++
+
+=====
+
+on_stmt:
+
+$i++
+
+=====
+
+on_expr:
+
+$i++
+
+=====
+
+on_expr:
+
+$i
+
+=====
+
+on_expr:
+
+$a
+
+=====
+
+on_method_:
+
+function my_generator (): Traversable<array<int>> {
+    for ($k = 1; $k < 10; $k++) {
+      yield array($k);
+    }
+  }
+
+=====
+
+on_hint:
+
+Traversable<array<int>>
+
+=====
+
+on_stmt:
+
+for ($k = 1; $k < 10; $k++) {
+      yield array($k);
+    }
+
+=====
+
+on_for:
+
+for ($k = 1; $k < 10; $k++) {
+      yield array($k);
+    }
+
+=====
+
+on_expr:
+
+($k = 1;
+
+=====
+
+on_expr:
+
+$k = 1
+
+=====
+
+on_expr:
+
+$k
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_expr:
+
+; $k < 10;
+
+=====
+
+on_expr:
+
+$k < 10
+
+=====
+
+on_expr:
+
+$k
+
+=====
+
+on_expr:
+
+10
+
+=====
+
+on_expr:
+
+; $k++)
+
+=====
+
+on_expr:
+
+$k++
+
+=====
+
+on_expr:
+
+$k
+
+=====
+
+on_stmt:
+
+yield array($k)
+
+=====
+
+on_stmt:
+
+yield array($k)
+
+=====
+
+on_expr:
+
+yield array($k)
+
+=====
+
+on_expr:
+
+array($k)
+
+=====
+
+on_expr:
+
+$k
+
+=====
+
+on_method_:
+
+function php_closure (string $who): void  {
+    $var = function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    };
+  }
+
+=====
+
+on_hint:
+
+string
+
+=====
+
+on_hint:
+
+void
+
+=====
+
+on_stmt:
+
+$var = function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    }
+
+=====
+
+on_expr:
+
+$var = function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    }
+
+=====
+
+on_expr:
+
+$var
+
+=====
+
+on_expr:
+
+function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    }
+
+=====
+
+on_efun:
+
+function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    }
+
+=====
+
+on_fun_:
+
+function() use ($who) {
+      // FIXME: AST changes broke handling interpolated strings
+      //echo "Hello $who {$who + 1}";
+      echo "$who{$who + 1}";
+    }
+
+=====
+
+on_stmt:
+
+echo "$who{$who + 1}"
+
+=====
+
+on_expr:
+
+echo "$who{$who + 1}"
+
+=====
+
+on_expr:
+
+echo
+
+=====
+
+on_expr:
+
+"$who{$who + 1}"
+
+=====
+
+on_expr:
+
+$who
+
+=====
+
+on_expr:
+
+$who + 1
+
+=====
+
+on_expr:
+
+$who
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_def:
+
+class Bar
+
+=====
+
+on_class_:
+
+class Bar
+
+=====
+
+on_def:
+
+function gen_foo(int $a): Awaitable<?Foo> {
+  $bar = await gen_bar($a);
+  return new Foo();
+}
+
+=====
+
+on_fun_:
+
+function gen_foo(int $a): Awaitable<?Foo> {
+  $bar = await gen_bar($a);
+  return new Foo();
+}
+
+=====
+
+on_hint:
+
+int
+
+=====
+
+on_stmt:
+
+$bar = await gen_bar($a)
+
+=====
+
+on_expr:
+
+$bar = await gen_bar($a)
+
+=====
+
+on_expr:
+
+$bar
+
+=====
+
+on_expr:
+
+await gen_bar($a)
+
+=====
+
+on_expr:
+
+gen_bar($a)
+
+=====
+
+on_expr:
+
+gen_bar
+
+=====
+
+on_expr:
+
+$a
+
+=====
+
+on_stmt:
+
+return new Foo()
+
+=====
+
+on_expr:
+
+new Foo()
+
+=====
+
+on_expr:
+
+Foo
+
+=====
+
+on_hint:
+
+Awaitable<?Foo>
+
+=====
+
+on_def:
+
+function gen_bar(int $a): Awaitable<?Bar> {
+  return new Bar();
+}
+
+=====
+
+on_fun_:
+
+function gen_bar(int $a): Awaitable<?Bar> {
+  return new Bar();
+}
+
+=====
+
+on_hint:
+
+int
+
+=====
+
+on_stmt:
+
+return new Bar()
+
+=====
+
+on_expr:
+
+new Bar()
+
+=====
+
+on_expr:
+
+Bar
+
+=====
+
+on_hint:
+
+Awaitable<?Bar>
+
+=====
+
+on_def:
+
+const int A_CONST = 500
+
+=====
+
+on_expr:
+
+500
+
+=====
+
+on_hint:
+
+int
+
+=====
+

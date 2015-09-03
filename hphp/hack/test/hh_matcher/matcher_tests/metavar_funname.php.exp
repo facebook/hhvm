@@ -1,0 +1,4 @@
+4:   class Foo {
+5:     public function bar(): void { }
+7:     public function baz(): void {
+8:       bar();

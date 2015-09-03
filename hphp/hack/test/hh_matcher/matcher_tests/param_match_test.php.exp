@@ -1,0 +1,2 @@
+8: function bar(int $arg1, float $arg2) : bool {
+9:   return $arg1 === $arg2;

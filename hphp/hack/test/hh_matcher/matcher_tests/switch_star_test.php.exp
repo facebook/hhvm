@@ -1,0 +1,7 @@
+4: class Foo {
+5:   public function foo() : void {
+6:     $anint = 5;
+7:     switch ($anint) {
+11:       case 2:
+13:         return;
+14:         break;

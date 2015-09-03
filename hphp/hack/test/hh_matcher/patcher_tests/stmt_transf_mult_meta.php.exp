@@ -1,0 +1,14 @@
+
+<?hh //strict
+
+class Foo {
+  public function bar(): void {
+    while (true) {
+      "stmt 1";
+      "stmt 2";
+    }
+    return;
+  }
+}
+
+

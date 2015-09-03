@@ -1,0 +1,13 @@
+
+<?hh // strict
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+class Foo {
+  public function bar(): void {
+    "STMT 1";
+    "STMT 3.5";
+    $var->afun("arg1");
+  }
+}
+
+

@@ -1,0 +1,12 @@
+
+<?hh //strict
+
+class Foo {
+  public function bar(): void {
+    baz("arg5");
+    bar("moreargs");
+    return;
+  }
+}
+
+

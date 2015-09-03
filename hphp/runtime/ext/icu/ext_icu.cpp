@@ -133,7 +133,7 @@ static Variant HHVM_FUNCTION(icu_match, const String& pattern,
 
 class TransliteratorWrapper {
 public:
-  TransliteratorWrapper() {
+  void initialize() {
     UnicodeString basicID("Any-Latin ; NFKD; [:nonspacing mark:] Remove");
     UnicodeString basicIDAccent("Any-Latin ; NFKC");
     UErrorCode status = U_ZERO_ERROR;
@@ -331,6 +331,12 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
 const StaticString s_UREGEX_OFFSET_CAPTURE("UREGEX_OFFSET_CAPTURE");
 
 void IntlExtension::initICU() {
+  // We need this initialization to be done late
+  // so that ICU's assembly constructors have had
+  // a chance to run, which is important if we've
+  // linked against a static libICU.
+  s_transliterator.initialize();
+
   HHVM_FE(icu_match);
   HHVM_FE(icu_transliterate);
   HHVM_FE(icu_tokenize);

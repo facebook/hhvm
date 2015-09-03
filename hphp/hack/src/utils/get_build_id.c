@@ -45,8 +45,12 @@ value hh_get_build_id(void) {
 }
 
 value hh_get_build_time(void) {
-  struct tm tm;
-  char* success = strptime(build_time, "%b %d %Y %H:%M:%S", &tm);
-  assert(success != NULL && "Failed to parse build time");
-  return Val_long(mktime(&tm));
+  CAMLparam0();
+  CAMLlocal1(result);
+  size_t timelen = strlen(build_time);
+  result = caml_alloc_string(timelen);
+
+  memcpy(String_val(result), build_time, timelen);
+
+  CAMLreturn(result);
 }

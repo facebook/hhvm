@@ -577,6 +577,7 @@ struct DefInlineFPData : IRExtraData {
   Offset retBCOff;
   FPInvOffset retSPOff;
   IRSPOffset spOffset;  // offset from caller SP to bottom of callee's ActRec
+  uint32_t numNonDefault;
 };
 
 struct CallArrayData : IRExtraData {

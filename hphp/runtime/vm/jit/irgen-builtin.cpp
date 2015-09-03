@@ -1106,13 +1106,14 @@ void nativeImplInlined(IRGS& env) {
     return gen(env, CastCtxThis, ctx);
   }();
 
+  auto numNonDefault = fp(env)->inst()->extra<DefInlineFP>()->numNonDefault;
   auto params = prepare_params(
     env,
     callee,
     paramThis,
     nullptr,
     numArgs,
-    numArgs, // numNonDefault is equal to numArgs here.
+    numNonDefault,
     nullptr,
     [&] (uint32_t i, const Type) {
       auto ret = ldLoc(env, i, nullptr, DataTypeSpecific);
@@ -1138,7 +1139,7 @@ void nativeImplInlined(IRGS& env) {
     &params
   };
 
-  push(env, builtinCall(env, callee, params, numArgs, catcher));
+  push(env, builtinCall(env, callee, params, numNonDefault, catcher));
 }
 
 //////////////////////////////////////////////////////////////////////

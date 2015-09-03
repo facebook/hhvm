@@ -99,6 +99,7 @@ bool beginInlining(IRGS& env,
   data.ctx           = ctx;
   data.retSPOff      = prevSPOff;
   data.spOffset      = offsetFromIRSP(env, BCSPOffset{0});
+  data.numNonDefault = numParams;
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.

@@ -71,7 +71,7 @@ inline int64_t toInt64(double  v) {
   // Intel, you get 0x800..00, a.k.a. the minimum int64_t. We mimic that on all
   // platforms, though this makes us sad.
   return (v >= 0
-          ? (v > std::numeric_limits<uint64_t>::max() ? 0u : (uint64_t)v)
+          ? (v < std::numeric_limits<uint64_t>::max() ? (uint64_t)v : 0u)
           : (v < 0 ? (int64_t)v : std::numeric_limits<int64_t>::min()));
 }
 inline int64_t toInt64(const char* v) = delete;

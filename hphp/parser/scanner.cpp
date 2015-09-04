@@ -523,6 +523,94 @@ static bool isUnresolved(int tokid) {
          tokid == T_UNRESOLVED_OP;
 }
 
+static bool isValidClassConstantName(int tokid) {
+  switch (tokid) {
+  case T_STRING:
+  case T_SUPER:
+  case T_XHP_ATTRIBUTE:
+  case T_XHP_CATEGORY:
+  case T_XHP_CHILDREN:
+  case T_XHP_REQUIRED:
+  case T_ENUM:
+  case T_WHERE:
+  case T_JOIN:
+  case T_ON:
+  case T_IN:
+  case T_EQUALS:
+  case T_INTO:
+  case T_LET:
+  case T_ORDERBY:
+  case T_ASCENDING:
+  case T_DESCENDING:
+  case T_SELECT:
+  case T_GROUP:
+  case T_BY:
+  case T_CALLABLE:
+  case T_TRAIT:
+  case T_EXTENDS:
+  case T_IMPLEMENTS:
+  case T_STATIC:
+  case T_ABSTRACT:
+  case T_FINAL:
+  case T_PRIVATE:
+  case T_PROTECTED:
+  case T_PUBLIC:
+  case T_CONST:
+  case T_ENDDECLARE:
+  case T_ENDFOR:
+  case T_ENDFOREACH:
+  case T_ENDIF:
+  case T_ENDWHILE:
+  case T_LOGICAL_AND:
+  case T_GLOBAL:
+  case T_GOTO:
+  case T_INSTANCEOF:
+  case T_INSTEADOF:
+  case T_INTERFACE:
+  case T_NAMESPACE:
+  case T_NEW:
+  case T_LOGICAL_OR:
+  case T_LOGICAL_XOR:
+  case T_TRY:
+  case T_USE:
+  case T_VAR:
+  case T_EXIT:
+  case T_LIST:
+  case T_CLONE:
+  case T_INCLUDE:
+  case T_INCLUDE_ONCE:
+  case T_THROW:
+  case T_ARRAY:
+  case T_PRINT:
+  case T_ECHO:
+  case T_REQUIRE:
+  case T_REQUIRE_ONCE:
+  case T_RETURN:
+  case T_ELSE:
+  case T_ELSEIF:
+  case T_DEFAULT:
+  case T_BREAK:
+  case T_CONTINUE:
+  case T_SWITCH:
+  case T_YIELD:
+  case T_FUNCTION:
+  case T_IF:
+  case T_ENDSWITCH:
+  case T_FINALLY:
+  case T_FOR:
+  case T_FOREACH:
+  case T_DECLARE:
+  case T_CASE:
+  case T_DO:
+  case T_WHILE:
+  case T_AS:
+  case T_CATCH:
+    return true;
+  default:
+    return false;
+  }
+}
+
 int Scanner::getNextToken(ScannerToken &t, Location &l) {
   int tokid;
   bool la = !m_lookahead.empty();
@@ -552,7 +640,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     auto pos = m_lookahead.begin();
     auto typePos = pos;
     nextLookahead(pos);
-    if (pos->t == T_STRING) {
+    if (isValidClassConstantName(pos->t)) {
       typePos->t = tokid == T_UNRESOLVED_TYPE ? T_TYPE : T_NEWTYPE;
     } else {
       typePos->t = T_STRING;

@@ -397,7 +397,8 @@ function get_unit_testing_infra_dependencies(): void {
   if (!file_exists($stamp_file)) {
     invariant(
       file_exists($cache_file) || !Options::$local_source_only,
-      '--local-source-only specified, but no vendor cache'
+      '--local-source-only specified, but no vendor cache (expected: %s)',
+      $cache_file
     );
     if ($cache_dir && file_exists($cache_file)) {
       human("Extracting vendor cache, eg PHPUnit...\n");

@@ -29,6 +29,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/util/htonll.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -75,24 +76,6 @@ const StaticString
   s_getInstanceKey("getInstanceKey");
 
 ///////////////////////////////////////////////////////////////////////////////
-
-#if defined __BYTE_ORDER && defined __BIG_ENDIAN
-/* Linux and other systems don't currently support a ntohx or htonx
-   set of functions for 64-bit values.  We've implemented our own here
-   which is based off of GNU Net's implementation with some slight
-   modifications (changed to macro's rather than functions). */
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define ntohll(n) (n)
-#define htonll(n) (n)
-#else
-#define ntohll(n)                                                       \
-  ( (((uint64_t)ntohl(n)) << 32)                                        \
-    | ((uint64_t)ntohl((n) >> 32) & 0x00000000ffffffff) )
-#define htonll(n)                                                       \
-  ( (((uint64_t)htonl(n)) << 32)                                        \
-    | ((uint64_t)htonl((n) >> 32) & 0x00000000ffffffff) )
-#endif
-#endif
 
 /* enum of thrift types */
 enum TType {

@@ -122,8 +122,11 @@ template<class F> void ObjectData::scan(F& mark) const {
   for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {
     mark(props[i]);
   }
-  // nb: dynamic property arrays are pointed to by ExecutionContext,
-  // which is marked as a root.
+  if (getAttribute(HasDynPropArr)) {
+    // nb: dynamic property arrays are pointed to by ExecutionContext,
+    // which is marked as a root.
+    mark(g_context->dynPropTable[this].arr());
+  }
 }
 
 // bridge between the templated-based marker interface and the

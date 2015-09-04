@@ -286,14 +286,15 @@ public:
   static void Bind(const Extension* extension, const Mode mode,
                    const std::string& name, const char *defaultValue,
                    SetAndGet<T> callbacks, T* p = nullptr) {
-    auto setter = [callbacks, p](const Variant &value) {
+    auto callback_set = callbacks.setter;
+    auto setter = [callback_set, p](const Variant &value) {
       T v;
       auto ret = ini_on_update(value, v);
       if (!ret) {
         return false;
       }
-      if (callbacks.setter) {
-        ret = callbacks.setter(v);
+      if (callback_set) {
+        ret = callback_set(v);
         if (!ret) {
           return false;
         }
@@ -303,19 +304,17 @@ public:
       }
       return true;
     };
-    auto getter = [callbacks, p]() {
+    auto callback_get = callbacks.getter;
+    auto getter = [callback_get, p]() {
       T v;
-      if (callbacks.getter) {
-        v = callbacks.getter();
+      if (callback_get) {
+        v = callback_get();
       } else if (p) {
         v = *p;
       }
       return ini_get(v);
     };
-    auto initter = [callbacks, p]() {
-      return callbacks.initter ? callbacks.initter() : nullptr;
-    };
-    Bind(extension, mode, name, setter, getter, initter);
+    Bind(extension, mode, name, setter, getter, callbacks.initter);
     auto hasSystemDefault = ResetSystemDefault(name);
     if (!hasSystemDefault && defaultValue) {
       setter(defaultValue);

@@ -364,11 +364,16 @@ bool mightCallMagicPropMethod(MInstrAttr mia, PropInfo propInfo) {
   }
   auto const cls = propInfo.baseClass;
   if (!cls) return true;
+  // NB: this function can't yet be used for unset or isset contexts.  Just get
+  // and set.
+  auto const relevant_attrs =
+    // Magic getters can be invoked both in define contexts and non-define
+    // contexts.
+    AttrNoOverrideMagicGet |
+    // But magic setters are only possible in define contexts.
+    ((mia & MIA_define) ? AttrNoOverrideMagicSet : AttrNone);
   bool const no_override_magic =
-    // NB: this function can't yet be used for unset or isset contexts.  Just
-    // get and set.
-    (mia & MIA_define) ? cls->attrs() & AttrNoOverrideMagicSet
-                       : cls->attrs() & AttrNoOverrideMagicGet;
+    (cls->attrs() & relevant_attrs) == relevant_attrs;
   return !no_override_magic;
 }
 

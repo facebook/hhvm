@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/hash/hash_keccak.h"
 
+#include <algorithm>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

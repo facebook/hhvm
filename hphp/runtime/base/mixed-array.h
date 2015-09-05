@@ -328,7 +328,7 @@ private:
   friend struct EmptyArray;
   friend struct PackedArray;
   friend struct StructArray;
-  friend class HashCollection;
+  friend struct HashCollection;
   friend class BaseMap;
   friend class c_Map;
   friend class c_ImmMap;

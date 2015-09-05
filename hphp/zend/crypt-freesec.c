@@ -67,8 +67,6 @@
 
 #include "crypt-freesec.h"
 
-#define _PASSWORD_EFMT1 '_'
-
 static u_char  IP[64] = {
   58, 50, 42, 34, 26, 18, 10,  2, 60, 52, 44, 36, 28, 20, 12,  4,
   62, 54, 46, 38, 30, 22, 14,  6, 64, 56, 48, 40, 32, 24, 16,  8,
@@ -632,7 +630,7 @@ _crypt_extended_r(const char *key, const char *setting,
   if (des_setkey((u_char *) keybuf, data))
     return(NULL);
 
-  if (*setting == _PASSWORD_EFMT1) {
+  if (*setting == '_') {
     /*
      * "new"-style:
      *  setting - underscore, 4 chars of count, 4 chars of salt

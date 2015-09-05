@@ -222,7 +222,7 @@ char *string_crypt(const char *key, const char *salt) {
         out = php_md5_crypt_r(key, salt, output);
         if (out)
           return strdup(out);
-        return NULL;
+        return nullptr;
       }
       else if (salt[0] == '$' && salt[1] == '6' && salt[2] == '$') {
         char output[PHP_MAX_SALT_LEN + 1];
@@ -230,7 +230,7 @@ char *string_crypt(const char *key, const char *salt) {
         crypt_res = php_sha512_crypt_r(key, salt, output, PHP_MAX_SALT_LEN);
         if (!crypt_res) {
           SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
-          return NULL;
+          return nullptr;
         }
         else {
           char* result = strdup(output);
@@ -244,7 +244,7 @@ char *string_crypt(const char *key, const char *salt) {
         crypt_res = php_sha256_crypt_r(key, salt, output, PHP_MAX_SALT_LEN);
         if (!crypt_res) {
           SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
-          return NULL;
+          return nullptr;
         }
         else {
           char* result = strdup(output);
@@ -263,7 +263,7 @@ char *string_crypt(const char *key, const char *salt) {
         crypt_res = php_crypt_blowfish_rn(key, salt, output, sizeof(output));
         if (!crypt_res) {
           SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
-          return NULL;
+          return nullptr;
         }
         else {
           char* result = strdup(output);
@@ -272,7 +272,7 @@ char *string_crypt(const char *key, const char *salt) {
         }
       }
       else if (salt[0] == '*' && (salt[1] == '0' || salt[1] == '1')) {
-        return NULL;
+        return nullptr;
       }
       else {
         struct php_crypt_extended_data buffer;
@@ -282,7 +282,7 @@ char *string_crypt(const char *key, const char *salt) {
 
         char* crypt_res = _crypt_extended_r(key, salt, &buffer);
         if (!crypt_res || (salt[0] == '*' && salt[1] == '0'))
-          return NULL;
+          return nullptr;
         else
           return strdup(crypt_res);
       }

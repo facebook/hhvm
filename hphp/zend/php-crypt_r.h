@@ -26,12 +26,6 @@ extern "C"
 #endif
 #include "crypt-freesec.h"
 
-#ifndef __const
-#define __CONST
-#else
-#define __CONST __const
-#endif
-
 void php_init_crypt_r();
 void php_shutdown_crypt_r();
 

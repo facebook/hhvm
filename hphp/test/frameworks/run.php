@@ -381,12 +381,12 @@ function get_unit_testing_infra_dependencies(): void {
     }
   }
 
-  $checksum = md5(serialize([
-    // Use both in case composer.json has been changed, but the lock file
-    // hasn't been updated yet.
-    file_get_contents(__DIR__.'/composer.json'),
-    file_get_contents(__DIR__.'/composer.lock'),
-  ]));
+
+  // Use both in case composer.json has been changed, but the lock file
+  // hasn't been updated yet.
+  $checksum = md5(file_get_contents(__DIR__.'/composer.json'));
+  $checksum .= '-';
+  $checksum .= md5(file_get_contents(__DIR__.'/composer.lock'));
   $stamp_file = __DIR__.'/vendor/'.$checksum.'.stamp';
   if (file_exists($stamp_file)) {
     return;

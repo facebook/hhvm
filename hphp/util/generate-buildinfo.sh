@@ -33,6 +33,9 @@ else
     if hg root >& /dev/null; then
         scm=hg
         root=$(hg root)
+        if [ -f "$root/fbcode/.projectid" ]; then
+          root="$root/fbcode"
+        fi
         compiler="hg log -r . --template '{branch}-0-g{gitnode}' 2> /dev/null"
         compiler="$compiler || hg log -r . --template '{branch}-0-h{node}'"
         find_files="hg files -I hphp/"

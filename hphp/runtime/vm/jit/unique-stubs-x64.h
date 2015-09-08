@@ -58,6 +58,10 @@ inline void stashSavedRIP(Vout& v, Vreg fp) {
   v << popm{fp[AROFF(m_savedRip)]};
 }
 
+inline void unstashSavedRIP(Vout& v, Vreg fp) {
+  v << pushm{fp[AROFF(m_savedRip)]};
+}
+
 /*
  * On x64, we need to align the native stack to 16 bytes before calls as an ABI
  * restriction; see documentation in unique-stubs-x64.h.

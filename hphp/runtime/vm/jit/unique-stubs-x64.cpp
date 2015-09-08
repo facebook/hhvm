@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/align-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -33,6 +34,8 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
@@ -54,40 +57,63 @@ static void alignJmpTarget(CodeBlock& cb) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
-  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
-  Asm a { cb };
-
   alignJmpTarget(cb);
-  auto const start = a.frontier();
 
-  Label skip;
+  auto const start = vwrap(cb, [&] (Vout& v) {
+    auto const ar = v.makeReg();
 
-  PhysReg ar = rarg(0);
+    v << copy{rvmfp(), ar};
 
-  a.   movq    (rvmfp(), ar);
-  a.   push    (rvmfp());
-  a.   movq    (rsp(), rvmfp());
-  a.   push    (ar[AROFF(m_savedRip)]);
-  a.   push    (ar[AROFF(m_sfp)]);
-  a.   movq    (EventHook::NormalFunc, rarg(1));
-  emitCall(a, CppCall::direct(helper), arg_regs(2));
-  us.functionEnterHelperReturn = a.frontier();
-  a.   testb   (al, al);
-  a.   je8     (skip);
-  a.   addq    (16, rsp());
-  a.   pop     (rvmfp());
-  a.   ret     ();
+    // Set up the call frame for the stub.  We can't skip this like we do in
+    // other stubs because we need the return IP for this frame in the %rbp
+    // chain, in order to find the proper fixup for the VMRegAnchor in the
+    // intercept handler.
+    v << push{rvmfp()};
+    v << copy{rsp(), rvmfp()};
 
-asm_label(a, skip);
-  // The event hook has already cleaned up the stack/actrec so that we're ready
-  // to continue from the original call site.  Just need to grab the fp/rip
-  // from the original frame, and sync rvmsp() to the execution-context's copy.
-  a.   pop     (rvmfp());
-  a.   pop     (rsi);
-  a.   addq    (16, rsp()); // drop our call frame
-  a.   loadq   (rvmtl()[rds::kVmspOff], rvmsp());
-  a.   jmp     (rsi);
-  a.   ud2     ();
+    // When we call the event hook, it might tell us to skip the callee
+    // (because of fb_intercept).  If that happens, we need to return to the
+    // caller, but the handler will have already popped the callee's frame.
+    // So, we need to save these values for later.
+    v << pushm{ar[AROFF(m_savedRip)]};
+    v << pushm{ar[AROFF(m_sfp)]};
+
+    v << copy2{ar, v.cns(EventHook::NormalFunc), rarg(0), rarg(1)};
+
+    bool (*hook)(const ActRec*, int) = &EventHook::onFunctionCall;
+    v << call{TCA(hook)};
+  });
+
+  us.functionEnterHelperReturn = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
+    auto const sf = v.makeReg();
+    v << testb{rret(), rret(), sf};
+
+    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+      auto const saved_rip = v.makeReg();
+
+      // The event hook has already cleaned up the stack and popped the
+      // callee's frame, so we're ready to continue from the original call
+      // site.  We just need to grab the fp/rip of the original frame that we
+      // saved earlier, and sync rvmsp().
+      v << pop{rvmfp()};
+      v << pop{saved_rip};
+
+      // Drop our call frame.
+      v << addqi{16, rsp(), rsp(), v.makeReg()};
+
+      // Sync vmsp and return to the caller.  This unbalances the return stack
+      // buffer, but if we're intercepting, we probably don't care.
+      v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+      v << jmpr{saved_rip};
+    });
+
+    // Skip past the stuff we saved for the intercept case.
+    v << addqi{16, rsp(), rsp(), v.makeReg()};
+
+    // Execute a leave, returning us to the callee's prologue.
+    v << pop{rvmfp()};
+    v << ret{};
+  });
 
   return start;
 }
@@ -208,41 +234,52 @@ TCA emitCallToExit(CodeBlock& cb) {
 }
 
 TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
-  Asm a { cb };
+  auto const udrspo = rvmtl()[unwinderDebuggerReturnSPOff()];
+
+  auto const debuggerReturn = vwrap(cb, [&] (Vout& v) {
+    v << load{udrspo, rvmsp()};
+    v << storeqi{0, udrspo};
+  });
+  svcreq::emit_persistent(cb, folly::none, REQ_POST_DEBUGGER_RET);
+
+  auto const resumeCPPUnwind = vwrap(cb, [] (Vout& v) {
+    static_assert(sizeof(tl_regState) == 1,
+                  "The following store must match the size of tl_regState.");
+    auto const regstate = emitTLSAddr(v, tl_regState, v.makeReg());
+    v << storebi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
+
+    v << load{rvmtl()[unwinderExnOff()], rarg(0)};
+    v << call{TCA(_Unwind_Resume), arg_regs(1)};
+  });
+  us.endCatchHelperPast = cb.frontier();
+  vwrap(cb, [] (Vout& v) { v << ud2{}; });
+
   alignJmpTarget(cb);
-  Label debuggerReturn;
-  Label resumeCppUnwind;
 
-  auto const start = a.frontier();
-  a.    cmpq (0, rvmtl()[unwinderDebuggerReturnSPOff()]);
-  a.    jne8 (debuggerReturn);
+  return vwrap(cb, [&] (Vout& v) {
+    auto const done1 = v.makeBlock();
+    auto const sf1 = v.makeReg();
 
-  // Normal endCatch situation: call back to tc_unwind_resume, which returns
-  // the catch trace (or null) in rax and the new vmfp in rdx.
-  a.    movq (rvmfp(), rarg(0));
-  a.    call (TCA(tc_unwind_resume));
-  a.    movq (rdx, rvmfp());
-  a.    testq(rax, rax);
-  a.    jz8  (resumeCppUnwind);
-  a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
+    v << cmpqim{0, udrspo, sf1};
+    v << jcci{CC_NE, sf1, done1, debuggerReturn};
+    v = done1;
 
-asm_label(a, resumeCppUnwind);
-  static_assert(sizeof(tl_regState) == 1,
-                "The following store must match the size of tl_regState");
-  auto vptr = emitTLSAddr(a, tl_regState, rax);
-  Vasm::prefix(a, vptr).
-        storeb(static_cast<int32_t>(VMRegState::CLEAN), vptr.mr());
-  a.    loadq(rvmtl()[unwinderExnOff()], rarg(0));
-  emitCall(a, TCA(_Unwind_Resume), arg_regs(1));
-  us.endCatchHelperPast = a.frontier();
-  a.    ud2();
+    // Normal end catch situation: call back to tc_unwind_resume, which returns
+    // the catch trace (or null) in %rax, and the new vmfp in %rdx.
+    v << copy{rvmfp(), rarg(0)};
+    v << call{TCA(tc_unwind_resume)};
+    v << copy{reg::rdx, rvmfp()};
 
-asm_label(a, debuggerReturn);
-  a.    loadq (rvmtl()[unwinderDebuggerReturnSPOff()], rvmsp());
-  a.    storeq(0, rvmtl()[unwinderDebuggerReturnSPOff()]);
-  svcreq::emit_persistent(a.code(), folly::none, REQ_POST_DEBUGGER_RET);
+    auto const done2 = v.makeBlock();
+    auto const sf2 = v.makeReg();
 
-  return start;
+    v << testq{reg::rax, reg::rax, sf2};
+    v << jcci{CC_Z, sf2, done2, resumeCPPUnwind};
+    v = done2;
+
+    // We need to do a syncForLLVMCatch(), but vmfp is already in rdx.
+    v << jmpr{reg::rax};
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -137,6 +137,14 @@ void stashSavedRIP(Vout& v, Vreg fp) {
 }
 
 /*
+ * Do the inverse of stashSavedRIP().
+ */
+void unstashSavedRIP(Vout& v, Vreg fp) {
+  if (arch() != Arch::X64) not_implemented();
+  return x64::unstashSavedRIP(v, fp);
+}
+
+/*
  * Align the native stack in an architecture-specific way.
  */
 template<class GenFunc>
@@ -222,11 +230,16 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
   return vwrap2(cb, [] (Vout& v, Vout& vcold) {
     auto const dest = v.makeReg();
 
-    v << popm{rvmfp()[AROFF(m_savedRip)]};
+    // We need to align the native stack, but we also need to fill m_savedRip
+    // in the frame in case we throw from fcallHelper (e.g., due to stack
+    // overflow).
+    stashSavedRIP(v, rvmfp());
+
     // fcallHelper asserts native stack alignment for us.
     TCA (*helper)(ActRec*) = &fcallHelper;
     v << simplecall(v, helper, rvmfp(), dest);
-    v << pushm{rvmfp()[AROFF(m_savedRip)]};
+
+    unstashSavedRIP(v, rvmfp());
 
     // Clobber rvmsp in debug builds.
     if (debug) v << copy{v.cns(0x1), rvmsp()};

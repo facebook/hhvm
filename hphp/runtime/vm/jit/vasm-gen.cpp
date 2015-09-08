@@ -68,15 +68,6 @@ Vout& Vasm::out(AreaIndex area) {
   return m_outs[a];
 }
 
-X64Assembler& Vasm::prefix(X64Assembler& a, const Vptr& ptr) {
-  if (ptr.seg == Vptr::Segment::FS) {
-    a.fs();
-  } else if (ptr.seg == Vptr::Segment::GS) {
-    a.gs();
-  }
-  return a;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Vauto.
 

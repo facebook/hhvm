@@ -295,6 +295,18 @@ template<class Inst> void Vgen::commute(Inst& i) {
   }
 }
 
+/*
+ * Helper for emitting instructions whose Vptr operand specifies a segment.
+ */
+X64Assembler& prefix(X64Assembler& a, const Vptr& ptr) {
+  if (ptr.seg == Vptr::Segment::FS) {
+    a.fs();
+  } else if (ptr.seg == Vptr::Segment::GS) {
+    a.gs();
+  }
+  return a;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::patch(Venv& env) {
@@ -415,7 +427,7 @@ void Vgen::emit(const ldimmqs& i) {
 }
 
 void Vgen::emit(const load& i) {
-  Vasm::prefix(*a, i.s);
+  prefix(*a, i.s);
   auto mref = i.s.mr();
   if (i.d.isGP()) {
     a->loadq(mref, i.d);
@@ -506,7 +518,7 @@ void Vgen::emit(const unwind& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const addqim& i) {
-  Vasm::prefix(*a, i.m).addq(i.s0, i.m.mr());
+  prefix(*a, i.m).addq(i.s0, i.m.mr());
 }
 
 void Vgen::emit(const call& i) {
@@ -596,7 +608,7 @@ void Vgen::emit(const lea& i) {
 }
 
 void Vgen::emit(const storebi& i) {
-  Vasm::prefix(*a, i.m).storeb(i.s, i.m.mr());
+  prefix(*a, i.m).storeb(i.s, i.m.mr());
 }
 
 void Vgen::emit(const testwim& i) {

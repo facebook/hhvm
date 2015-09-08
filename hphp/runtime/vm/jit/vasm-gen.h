@@ -130,8 +130,6 @@ struct Vasm {
   Vout& cold() { return out(AreaIndex::Cold); }
   Vout& frozen() { return out(AreaIndex::Frozen); }
 
-  static X64Assembler& prefix(X64Assembler& a, const Vptr& ptr);
-
 private:
   Vout& out(AreaIndex i);
 

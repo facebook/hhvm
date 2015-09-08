@@ -225,6 +225,7 @@ implTLSAddr(Asm& a, long* addr, Reg64 scratch) {
  */
 
 namespace detail {
+
 #ifndef __APPLE__
 
 template<typename T>
@@ -232,14 +233,6 @@ inline void
 implTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum,
             long* unused, Vreg reg) {
   v << load{detail::getTLSVptr(datum.m_node.m_p), reg};
-}
-
-template<typename T>
-inline void
-implTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
-            long* unused, Reg64 reg) {
-  auto ptr = detail::getTLSVptr(datum.m_node.m_p);
-  Vasm::prefix(a, ptr).loadq(ptr.mr(), reg);
 }
 
 #else
@@ -250,14 +243,6 @@ implTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, long* addr, Vreg dst) {
   auto tmp = v.makeReg();
   auto ptr = detail::implTLSAddr(v, addr, tmp);
   v << load{ptr, dst};
-}
-
-template<typename T>
-inline void
-implTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
-            long* addr, Reg64 dst) {
-  auto ptr = detail::implTLSAddr(a, addr, dst);
-  Vasm::prefix(a, ptr).loadq(ptr, dst);
 }
 
 #endif

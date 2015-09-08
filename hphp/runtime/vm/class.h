@@ -105,50 +105,59 @@ struct Class : AtomicCountable {
    * Instance property information.
    */
   struct Prop {
-    // m_name is "" for inaccessible properties (i.e. private properties
-    // declared by parents).
-    LowStringPtr m_name;
-    LowStringPtr m_mangledName;
-    LowStringPtr m_originalMangledName;
-    // First parent class that declares this property.
-    LowPtr<Class> m_class;
-    Attr m_attrs;
-    LowStringPtr m_typeConstraint;
-    // When built in RepoAuthoritative mode, this is a control-flow
-    // insensitive, always-true type assertion for this property.  (It may be
-    // Gen if there was nothing interesting known.)
-    RepoAuthType m_repoAuthType;
-    LowStringPtr m_docComment;
-    int m_idx;
+    /*
+     * name is "" for inaccessible properties (i.e. private properties declared
+     * by parents).
+     */
+    LowStringPtr name;
+    LowStringPtr mangledName;
+    LowStringPtr originalMangledName;
+
+    /* First parent class that declares this property. */
+    LowPtr<Class> cls;
+
+    Attr attrs;
+    LowStringPtr typeConstraint;
+    /*
+     * When built in RepoAuthoritative mode, this is a control-flow insensitive,
+     * always-true type assertion for this property.  (It may be Gen if there
+     * was nothing interesting known.)
+     */
+    RepoAuthType repoAuthType;
+    LowStringPtr docComment;
+    int idx;
   };
 
   /*
    * Static property information.
    */
   struct SProp {
-    LowStringPtr m_name;
-    Attr m_attrs;
-    LowStringPtr m_typeConstraint;
-    LowStringPtr m_docComment;
-    // Most derived class that declared this property.
-    LowPtr<Class> m_class;
-    int m_idx;
-    // Used if (m_class == this).
-    TypedValue m_val;
-    RepoAuthType m_repoAuthType;
+    LowStringPtr name;
+    Attr attrs;
+    LowStringPtr typeConstraint;
+    LowStringPtr docComment;
+
+    /* Most derived class that declared this property. */
+    LowPtr<Class> cls;
+    int idx;
+
+    /* Used if (cls == this). */
+    TypedValue val;
+
+    RepoAuthType repoAuthType;
   };
 
   /*
    * Class constant information.
    */
   struct Const {
-    // Most derived class that declared this constant.
-    LowPtr<Class> m_class;
-    LowStringPtr m_name;
-    TypedValueAux m_val;
+    /* Most derived class that declared this constant. */
+    LowPtr<Class> cls;
+    LowStringPtr name;
+    TypedValueAux val;
 
-    bool isAbstract()      const { return m_val.constModifiers().m_isAbstract; }
-    bool isType()          const { return m_val.constModifiers().m_isType; }
+    bool isAbstract() const { return val.constModifiers().m_isAbstract; }
+    bool isType()     const { return val.constModifiers().m_isType; }
   };
 
   /*

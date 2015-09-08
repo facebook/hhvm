@@ -299,10 +299,10 @@ const std::string resolveContextMsg(const Class::Const& typeCns,
   std::string msg("when resolving ");
   if (typeCnsCls) {
     folly::toAppend("type constant ", typeCnsCls->name()->data(),
-                    "::", typeCns.m_name->data(),
+                    "::", typeCns.name->data(),
                     &msg);
   } else {
-    folly::toAppend("type alias ", typeCns.m_name->data(), &msg);
+    folly::toAppend("type alias ", typeCns.name->data(), &msg);
   }
   return msg;
 }
@@ -328,7 +328,7 @@ const Class* getClass(const String& clsName,
       return typeCnsCls;
     }
 
-    auto declCls = typeCns.m_class;
+    auto declCls = typeCns.cls;
     // self
     if (clsName.same(s_self)) {
       return declCls;
@@ -601,11 +601,11 @@ String TypeStructure::toString(const Array& arr) {
 Array TypeStructure::resolve(const Class::Const& typeCns,
                              const Class* typeCnsCls) {
   assert(typeCns.isType());
-  assert(typeCns.m_val.m_type == KindOfArray);
-  assert(typeCns.m_name);
+  assert(typeCns.val.m_type == KindOfArray);
+  assert(typeCns.name);
   assert(typeCnsCls);
 
-  Array arr(typeCns.m_val.m_data.parr);
+  Array arr(typeCns.val.m_data.parr);
   return resolveTS(arr, typeCns, typeCnsCls);
 }
 
@@ -614,7 +614,7 @@ Array TypeStructure::resolve(const String& aliasName,
                              const Array& arr) {
   // use a bogus constant to store the name
   Class::Const cns;
-  cns.m_name = aliasName.get();
+  cns.name = aliasName.get();
 
   auto newarr = resolveTS(arr, cns, nullptr);
   newarr.add(s_alias, Variant(aliasName));

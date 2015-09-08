@@ -251,14 +251,14 @@ void getClassSymbolNames(
     }
     for (Slot i = 0; i < c->numDeclProperties(); i++) {
       auto& prop = c->declProperties()[i];
-      if (prop.m_class != c) continue;
-      auto prop_name = c->nameStr() + s_propSep + StrNR(prop.m_name);
+      if (prop.cls != c) continue;
+      auto prop_name = c->nameStr() + s_propSep + StrNR(prop.name);
       clsProperties.push_back(prop_name.get()->toCppString());
     }
     for (Slot i = 0; i < c->numConstants(); i++) {
       auto& cns = c->constants()[i];
-      if (cns.m_class != c) continue;
-      auto const_name = c->nameStr() + s_constSep + StrNR(cns.m_name);
+      if (cns.cls != c) continue;
+      auto const_name = c->nameStr() + s_constSep + StrNR(cns.name);
       clsConstants.push_back(const_name.get()->toCppString());
     }
   }

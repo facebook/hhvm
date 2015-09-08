@@ -603,7 +603,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
     const auto* props = m_cls->declProperties();
     auto numDeclProp = m_cls-> numDeclProperties();
     for (size_t i = 0; i < numDeclProp; i++) {
-      const auto* key = props[i].m_name.get();
+      const auto* key = props[i].name.get();
       if (!retArray.get()->exists(key)) {
         accessibleProps = getPropertyIfAccessible(
             this, ctx, key, mode, retArray, accessibleProps);
@@ -1221,7 +1221,7 @@ TypedValue* ObjectData::propImpl(
     // Property exists, but it is either protected or private since accessible
     // is false.
     auto const propInd = m_cls->lookupDeclProp(key);
-    auto const attrs = m_cls->declProperties()[propInd].m_attrs;
+    auto const attrs = m_cls->declProperties()[propInd].attrs;
     auto const priv = (attrs & AttrPrivate) ? "private" : "protected";
 
     raise_error(
@@ -1716,7 +1716,7 @@ void ObjectData::getProp(const Class* klass,
       !inserted[propInd]) {
     inserted[propInd] = true;
     props.lvalAt(
-      StrNR(klass->declProperties()[propInd].m_mangledName).asString())
+      StrNR(klass->declProperties()[propInd].mangledName).asString())
       .setWithRef(tvAsCVarRef(propVal));
   }
 }

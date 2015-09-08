@@ -72,7 +72,7 @@ Array c_Closure::t___debuginfo() {
     auto propsInfo = getVMClass()->declProperties();
     for (int i = 0; i < getVMClass()->numDeclProperties(); ++i) {
       TypedValue* value = &propValues[i];
-      use.setWithRef(Variant(StrNR(propsInfo[i].m_name)), tvAsCVarRef(value));
+      use.setWithRef(Variant(StrNR(propsInfo[i].name)), tvAsCVarRef(value));
     }
 
     if (!use.empty()) {

@@ -128,13 +128,13 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
-    if (consts[i].m_class == cls && !consts[i].isAbstract() &&
+    if (consts[i].cls == cls && !consts[i].isAbstract() &&
         !consts[i].isType()) {
-      auto const name  = const_cast<StringData*>(consts[i].m_name.get());
-      Cell value = consts[i].m_val;
+      auto const name  = const_cast<StringData*>(consts[i].name.get());
+      Cell value = consts[i].val;
       // Handle dynamically set constants
       if (value.m_type == KindOfUninit) {
-        value = cls->clsCnsGet(consts[i].m_name);
+        value = cls->clsCnsGet(consts[i].name);
       }
       assert(value.m_type != KindOfUninit);
       arrayInit.set(name, cellAsCVarRef(value));
@@ -172,7 +172,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
   for (size_t i = 0; i < numDeclProps; ++i) {
-    StringData* name = const_cast<StringData*>(propInfo[i].m_name.get());
+    StringData* name = const_cast<StringData*>(propInfo[i].name.get());
     // Empty names are used for invisible/private parent properties; skip them
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
@@ -182,10 +182,10 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   }
 
   for (size_t i = 0; i < numSProps; ++i) {
-    auto const lookup = cls->getSProp(ctx, sPropInfo[i].m_name);
+    auto const lookup = cls->getSProp(ctx, sPropInfo[i].name);
     if (lookup.accessible) {
       arr.set(
-        const_cast<StringData*>(sPropInfo[i].m_name.get()),
+        const_cast<StringData*>(sPropInfo[i].name.get()),
         tvAsCVarRef(lookup.prop)
       );
     }

@@ -1606,7 +1606,7 @@ static void serializeObjectImpl(const ObjectData* obj,
           if (lookup.accessible) {
             auto const prop = &obj->propVec()[propIdx];
             if (prop->m_type != KindOfUninit) {
-              auto const attrs = obj_cls->declProperties()[propIdx].m_attrs;
+              auto const attrs = obj_cls->declProperties()[propIdx].attrs;
               if (attrs & AttrPrivate) {
                 memberName = concat4(s_zero, ctx->nameStr(),
                                      s_zero, memberName);

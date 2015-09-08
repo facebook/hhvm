@@ -336,7 +336,7 @@ static Array get_object_props(ObjectData* obj) {
     auto const& prop = staticProperties[i];
     auto val = cls->getSPropData(i);
     if (val != nullptr) {
-      auto const prop_name = prop.m_name.get();
+      auto const prop_name = prop.name.get();
       props.set(String(const_cast<StringData*>(prop_name)), tvAsVariant(val));
     }
   }

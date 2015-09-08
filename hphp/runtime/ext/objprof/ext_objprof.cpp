@@ -810,7 +810,7 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
 
       FTRACE(2, "Traversing static prop {}::{}\n",
         cls->name()->data(),
-        StrNR(prop.m_name).data()
+        StrNR(prop.name).data()
       );
 
       ObjprofStack stack;
@@ -819,7 +819,7 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
       auto refname = std::string(
         "ClassProperty:" +
         cls->name()->toCppString() + ":" +
-        StrNR(prop.m_name).data()
+        StrNR(prop.name).data()
       );
 
       if (tv->m_data.num == 0) {

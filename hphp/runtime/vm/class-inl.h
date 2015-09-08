@@ -224,11 +224,11 @@ inline Slot Class::lookupSProp(const StringData* sPropName) const {
 }
 
 inline RepoAuthType Class::declPropRepoAuthType(Slot index) const {
-  return m_declProperties[index].m_repoAuthType;
+  return m_declProperties[index].repoAuthType;
 }
 
 inline RepoAuthType Class::staticPropRepoAuthType(Slot index) const {
-  return m_staticProperties[index].m_repoAuthType;
+  return m_staticProperties[index].repoAuthType;
 }
 
 inline bool Class::hasDeepInitProps() const {

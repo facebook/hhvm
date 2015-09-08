@@ -42,7 +42,10 @@ public:
   ClassScopeRawPtr getOriginalClassScope() const;
 
   bool hasClass() const = delete;
-  bool isColonColonClass() const { return m_varName == "class"; }
+  bool isColonColonClass() const {
+    return (m_varName.size() == strlen("class")) &&
+           !strcasecmp(m_varName.c_str(), "class");
+  }
 private:
   std::string m_varName;
   bool m_depsSet;

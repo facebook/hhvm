@@ -31,11 +31,15 @@ StaticClassName::StaticClassName(ExpressionPtr classExp)
       m_self(false), m_parent(false), m_static(false),
       m_redeclared(false), m_present(false), m_unknown(true) {
   updateClassName();
-  if (m_origClassName == "parent") {
+  auto const isame = [](const std::string& a, const std::string& b) {
+    return (a.size() == b.size()) &&
+           !strncasecmp(a.c_str(), b.c_str(), a.size());
+  };
+  if (isame(m_origClassName, "parent")) {
     m_parent = true;
-  } else if (m_origClassName == "self") {
+  } else if (isame(m_origClassName, "self")) {
     m_self = true;
-  } else if (m_origClassName == "static") {
+  } else if (isame(m_origClassName, "static")) {
     m_static = true;
     m_present = true;
     m_class = classExp;

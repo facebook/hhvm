@@ -3704,7 +3704,14 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         auto scalar = dynamic_pointer_cast<ScalarExpression>(second);
         bool notQuoted = scalar && !scalar->isQuoted();
         std::string s = second->getLiteralString();
-        if (s == "static" && notQuoted) {
+
+        const auto isame =
+          [](const std::string& a, const std::string& b) {
+            return (a.size() == b.size()) &&
+                   !strncasecmp(a.c_str(), b.c_str(), a.size());
+          };
+
+        if (notQuoted && isame(s, "static")) {
           // Can't resolve this to a literal name at emission time
           static const StringData* fname
             = makeStaticString("get_called_class");
@@ -3719,14 +3726,14 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         } else if (s != "") {
           ClassScopeRawPtr cls = second->getClassScope();
           bool isTrait = cls && cls->isTrait();
-          bool isSelf = s == "self" && notQuoted;
-          bool isParent = s == "parent" && notQuoted;
+          bool isSelf = notQuoted && isame(s, "self");
+          bool isParent = notQuoted && isame(s, "parent");
 
           if (isTrait && (isSelf || isParent)) {
             emitConvertToCell(e);
-            if (s == "self" && notQuoted) {
+            if (isSelf) {
               e.Self();
-            } else if (s == "parent" && notQuoted) {
+            } else if (isParent) {
               e.Parent();
             }
 

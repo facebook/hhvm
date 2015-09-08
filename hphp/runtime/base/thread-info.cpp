@@ -208,7 +208,7 @@ size_t check_request_surprise() {
     }
   }
   if (do_GC) {
-    MM().collect();
+    MM().collect("surprise");
   }
   if (do_signaled) {
     HHVM_FN(pcntl_signal_dispatch)();

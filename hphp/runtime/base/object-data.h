@@ -413,11 +413,10 @@ struct ObjectData {
     return offsetof(ObjectData, m_hdr) +
            offsetof(HeaderWord<uint16_t>, aux);
   }
+  const char* classname_cstr() const;
 
 private:
   friend struct MemoryProfile;
-
-  const char* classname_cstr() const;
 
   static void compileTimeAssertions();
 

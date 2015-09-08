@@ -31,7 +31,7 @@ static void HHVM_FUNCTION(gc_disable) {
 }
 
 static int64_t HHVM_FUNCTION(gc_collect_cycles) {
-  MM().collect();
+  MM().collect("gc_collect_cycles");
   return 0; // seriously, count cycles?
 }
 

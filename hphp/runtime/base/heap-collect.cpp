@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/heap-graph.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
 
@@ -27,7 +28,7 @@
 #include <folly/Range.h>
 
 namespace HPHP {
-TRACE_SET_MOD(heaptrace);
+TRACE_SET_MOD(gc);
 using HK = HeaderKind;
 
 namespace {
@@ -102,6 +103,9 @@ struct Marker {
   void init();
   void trace();
   void sweep();
+
+  // scanners can tell us where the pointers are seated.
+  void where(const char* area) {}
 
   // mark exact pointers
   void operator()(const StringData*);
@@ -636,8 +640,11 @@ void Marker::sweep() {
 }
 }
 
-void MemoryManager::collect() {
+void MemoryManager::collect(const char* phase) {
   if (!RuntimeOption::EvalEnableGC || empty()) return;
+  if (Trace::moduleEnabled(Trace::heapreport)) {
+    printHeapReport(makeHeapGraph(), phase);
+  }
   Marker mkr;
   mkr.init();
   mkr.trace();

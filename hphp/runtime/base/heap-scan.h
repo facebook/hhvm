@@ -83,13 +83,18 @@ template<class F> void scanHeader(const Header* h, F& mark) {
       return mark((&h->small_)+1, h->small_.padbytes);
     case HeaderKind::BigMalloc:
       return mark((&h->big_)+1, h->big_.nbytes);
-    case HeaderKind::String:
-    case HeaderKind::BigObj:
-    case HeaderKind::Free:
-    case HeaderKind::ResumableFrame:
     case HeaderKind::NativeData:
+      return h->nativeObj()->scan(mark);
+    case HeaderKind::ResumableFrame:
+      return h->resumableObj()->scan(mark);
+    case HeaderKind::String:
+    case HeaderKind::Free:
+      // these don't have pointers. some clients might generically
+      // scan them even if they aren't interesting.
+      return;
+    case HeaderKind::BigObj:
     case HeaderKind::Hole:
-      always_assert(false && "unexpected header in worklist");
+      // these aren't legitimate headers, and heap iteration should skip them.
       break;
   }
   always_assert(false && "corrupt header in worklist");
@@ -232,10 +237,14 @@ template<class F> void scanRds(F& mark, rds::Header* rds) {
   auto markSection = [&](folly::Range<const char*> r) {
     mark(r.begin(), r.size());
   };
+  mark.where("rds-normal");
   markSection(rds::normalSection());
+  mark.where("rds-local");
   markSection(rds::localSection());
+  mark.where("rds-persistent");
   markSection(rds::persistentSection());
   // php stack TODO #6509338 exactly scan the php stack.
+  mark.where("php-stack");
   auto stack_end = (TypedValue*)rds->vmRegs.stack.getStackHighAddress();
   auto sp = rds->vmRegs.stack.top();
   mark(sp, (stack_end - sp) * sizeof(*sp));
@@ -277,28 +286,41 @@ void MemoryManager::scanRootMaps(F& m) const {
 
 // Scan request-local roots
 template<class F> void scanRoots(F& mark) {
-  // ExecutionContext
-  if (!g_context.isNull()) g_context->scan(mark);
-  // ThreadInfo
-  TI().scan(mark);
   // rds, including php stack
-  if (auto rds = rds::header()) scanRds(mark, rds);
+  if (auto rds = rds::header()) {
+    scanRds(mark, rds);
+  }
+  // ExecutionContext
+  if (!g_context.isNull()) {
+    mark.where("g_context");
+    g_context->scan(mark);
+  }
+  // ThreadInfo
+  mark.where("ThreadInfo");
+  TI().scan(mark);
   // C++ stack
+  mark.where("cpp-stack");
   auto sp = stack_top_ptr();
   mark(sp, s_stackLimit + s_stackSize - uintptr_t(sp));
   // Extension thread locals
+  mark.where("extensions");
   ExtMarker<F> xm(mark);
   ExtensionRegistry::scanExtensions(xm);
   // Root maps
+  mark.where("rootmaps");
   MM().scanRootMaps(mark);
   // treat sweep lists as roots until we are ready to test what happens
   // when we start calling various sweep() functions early.
+  mark.where("sweeplists");
   MM().scanSweepLists(mark);
   // these have rogue thread_local stuff
   if (auto asio = AsioSession::Get()) {
+    mark.where("AsioSession");
     asio->scan(mark);
   }
+  mark.where("get_server_note");
   get_server_note()->scan(mark);
+  mark.where("ezc resources");
   scan_ezc_resources(mark);
 }
 

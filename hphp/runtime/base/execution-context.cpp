@@ -108,6 +108,7 @@ void ExecutionContext::cleanup() {
 
   // Discard all units that were created via create_function().
   for (auto& v : m_createdFuncs) delete v;
+  m_createdFuncs.clear();
 
   always_assert(m_activeSims.empty());
 }

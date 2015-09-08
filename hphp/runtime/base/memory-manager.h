@@ -903,7 +903,7 @@ struct MemoryManager {
   /*
    * Run the experimental collector.
    */
-  void collect();
+  void collect(const char* phase);
 
   /////////////////////////////////////////////////////////////////////////////
 

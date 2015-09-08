@@ -37,6 +37,10 @@ enum class HeaderKind : uint8_t {
 const unsigned NumHeaderKinds = unsigned(HeaderKind::Hole) + 1;
 extern const char* header_names[];
 
+inline bool haveCount(HeaderKind k) {
+  return uint8_t(k) < uint8_t(HeaderKind::ResumableFrame);
+}
+
 /*
  * RefCount type for m_count field in refcounted objects
  */

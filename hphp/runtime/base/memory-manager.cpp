@@ -469,7 +469,7 @@ template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 void MemoryManager::sweep() {
   assert(!sweeping());
   if (debug) checkHeap();
-  collect();
+  collect("MM::sweep");
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
   DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;

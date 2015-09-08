@@ -70,7 +70,7 @@ const RegSet kSF = RegSet(RegSF{0});
  * Registers that can safely be used for scratch purposes in-between traces.
  */
 const RegSet kScratchCrossTraceRegs =
-  kXMMCallerSaved | (kGPUnreserved - vm_regs_with_sp());
+  kXMMCallerSaved | (kGPUnreserved - detail::kVMRegs);
 
 /*
  * Helper code ABI registers.

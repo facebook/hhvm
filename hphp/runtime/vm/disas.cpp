@@ -23,16 +23,17 @@
 
 #include <folly/String.h>
 
-#include "hphp/util/match.h"
-#include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/base/builtin-functions.h" // f_serialize
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/builtin-functions.h" // f_serialize
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/util/match.h"
 
 namespace HPHP {
 
@@ -158,16 +159,16 @@ FuncInfo find_func_info(const Func* func) {
   };
 
   auto find_jump_targets = [&] {
-    auto it           = func->unit()->at(func->base());
+    auto pc           = func->unit()->at(func->base());
     auto const stop   = func->unit()->at(func->past());
-    auto const bcBase = reinterpret_cast<const Op*>(func->unit()->at(0));
+    auto const bcBase = func->unit()->at(0);
 
-    for (; it != stop; it += instrLen(reinterpret_cast<const Op*>(it))) {
-      auto const pop = reinterpret_cast<const Op*>(it);
-      auto const off = func->unit()->offsetOf(it);
-      if (isSwitch(*pop)) {
-        foreachSwitchTarget(pop, [&] (Offset off) {
-          add_target("L", pop - bcBase + off);
+    for (; pc != stop; pc += instrLen(pc)) {
+      auto const op = peek_op(pc);
+      auto const off = func->unit()->offsetOf(pc);
+      if (isSwitch(op)) {
+        foreachSwitchTarget(pc, [&] (Offset off) {
+          add_target("L", pc - bcBase + off);
         });
         continue;
       }
@@ -367,10 +368,10 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt("{}", #opcode);                               \
     IMM_##imms                                            \
     break;
-  switch (*reinterpret_cast<const Op*>(pc)) { OPCODES }
+  switch (peek_op(pc)) { OPCODES }
 #undef O
 
-  assert(pc == startPc + instrLen(reinterpret_cast<const Op*>(startPc)));
+  assert(pc == startPc + instrLen(startPc));
 
 #undef IMM_NA
 #undef IMM_ONE
@@ -470,7 +471,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
 
     print_instr(out, finfo, bcIter);
 
-    bcIter += instrLen(reinterpret_cast<const Op*>(bcIter));
+    bcIter += instrLen(bcIter);
   }
 }
 

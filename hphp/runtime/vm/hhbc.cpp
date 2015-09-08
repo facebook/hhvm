@@ -21,12 +21,13 @@
 #include <cstring>
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -49,7 +50,7 @@ int numImmediates(Op opcode) {
 #undef THREE
 #undef FOUR
   };
-  return values[uint8_t(opcode)];
+  return values[size_t(opcode)];
 }
 
 ArgType immType(const Op opcode, int idx) {
@@ -120,7 +121,7 @@ ArgType immType(const Op opcode, int idx) {
 #undef THREE
 #undef FOUR
   };
-  auto opInt = uint8_t(opcode);
+  auto opInt = size_t(opcode);
   switch (idx) {
     case 0: return (ArgType)arg0Types[opInt];
     case 1: return (ArgType)arg1Types[opInt];
@@ -130,9 +131,11 @@ ArgType immType(const Op opcode, int idx) {
   }
 }
 
-int immSize(const Op* opcode, int idx) {
-  assert(idx >= 0 && idx < numImmediates(*opcode));
-  always_assert(idx < 4); // No opcodes have more than four immediates
+int immSize(PC origPC, int idx) {
+  auto pc = origPC;
+  auto const op = decode_op(pc);
+  assert(idx >= 0 && idx < numImmediates(op));
+  always_assert(idx < 4); // No origPCs have more than four immediates
   static const int8_t argTypeToSizes[] = {
 #define ARGTYPE(nm, type) sizeof(type),
 #define ARGTYPEVEC(nm, type) 0,
@@ -141,33 +144,31 @@ int immSize(const Op* opcode, int idx) {
 #undef ARGTYPEVEC
   };
 
-  if (immType(*opcode, idx) == IVA ||
-      immType(*opcode, idx) == LA ||
-      immType(*opcode, idx) == IA) {
-    intptr_t offset = 1;
-    if (idx >= 1) offset += immSize(opcode, 0);
-    if (idx >= 2) offset += immSize(opcode, 1);
-    if (idx >= 3) offset += immSize(opcode, 2);
-    unsigned char imm = *(const unsigned char*)(opcode + offset);
+  if (immType(op, idx) == IVA ||
+      immType(op, idx) == LA ||
+      immType(op, idx) == IA) {
+    if (idx >= 1) pc += immSize(origPC, 0);
+    if (idx >= 2) pc += immSize(origPC, 1);
+    if (idx >= 3) pc += immSize(origPC, 2);
+    auto const imm = decode_raw<uint8_t>(pc);
+
     // Low order bit set => 4-byte.
     return (imm & 0x1 ? sizeof(int32_t) : sizeof(unsigned char));
   }
 
-  if (immType(*opcode, idx) == RATA) {
-    intptr_t offset = 1;
-    if (idx >= 1) offset += immSize(opcode, 0);
-    if (idx >= 2) offset += immSize(opcode, 1);
-    if (idx >= 3) offset += immSize(opcode, 2);
-    return encodedRATSize(reinterpret_cast<PC>(opcode) + offset);
+  if (immType(op, idx) == RATA) {
+    if (idx >= 1) pc += immSize(origPC, 0);
+    if (idx >= 2) pc += immSize(origPC, 1);
+    if (idx >= 3) pc += immSize(origPC, 2);
+    return encodedRATSize(pc);
   }
 
-  if (immIsVector(*opcode, idx)) {
-    intptr_t offset = 1;
-    if (idx >= 1) offset += immSize(opcode, 0);
-    if (idx >= 2) offset += immSize(opcode, 1);
-    if (idx >= 3) offset += immSize(opcode, 2);
+  if (immIsVector(op, idx)) {
+    if (idx >= 1) pc += immSize(origPC, 0);
+    if (idx >= 2) pc += immSize(origPC, 1);
+    if (idx >= 3) pc += immSize(origPC, 2);
     int prefixes, vecElemSz;
-    auto itype = immType(*opcode, idx);
+    auto itype = immType(op, idx);
     if (itype == MA) {
       prefixes = 2;
       vecElemSz = sizeof(uint8_t);
@@ -186,10 +187,10 @@ int immSize(const Op* opcode, int idx) {
       vecElemSz = sizeof(StrVecItem);
     }
     return prefixes * sizeof(int32_t) +
-      vecElemSz * *(int32_t*)((int8_t*)opcode + offset);
+      vecElemSz * decode_raw<int32_t>(pc);
   }
 
-  ArgType type = immType(*opcode, idx);
+  ArgType type = immType(op, idx);
   return (type >= 0) ? argTypeToSizes[type] : 0;
 }
 
@@ -207,38 +208,40 @@ bool hasImmVector(Op opcode) {
   return false;
 }
 
-ArgUnion getImm(const Op* opcode, int idx) {
-  const Op* p = opcode + 1;
-  assert(idx >= 0 && idx < numImmediates(*opcode));
+ArgUnion getImm(PC const origPC, int idx) {
+  auto pc = origPC;
+  auto const UNUSED op = decode_op(pc);
+  assert(idx >= 0 && idx < numImmediates(op));
   ArgUnion retval;
   retval.u_NA = 0;
   int cursor = 0;
   for (cursor = 0; cursor < idx; cursor++) {
     // Advance over this immediate.
-    p += immSize(opcode, cursor);
+    pc += immSize(origPC, cursor);
   }
   always_assert(cursor == idx);
-  auto const type = immType(*opcode, idx);
+  auto const type = immType(op, idx);
   if (type == IVA || type == LA || type == IA) {
-    retval.u_IVA = decodeVariableSizeImm((const uint8_t**)&p);
-  } else if (!immIsVector(*opcode, cursor)) {
+    retval.u_IVA = decodeVariableSizeImm(&pc);
+  } else if (!immIsVector(op, cursor)) {
     always_assert(type != RATA);  // Decode RATAs with a different function.
-    memcpy(&retval.bytes, p, immSize(opcode, idx));
+    memcpy(&retval.bytes, pc, immSize(origPC, idx));
   }
-  always_assert(numImmediates(*opcode) > idx);
+  always_assert(numImmediates(op) > idx);
   return retval;
 }
 
-ArgUnion* getImmPtr(const Op* opcode, int idx) {
-  assert(immType(*opcode, idx) != IVA);
-  assert(immType(*opcode, idx) != LA);
-  assert(immType(*opcode, idx) != IA);
-  assert(immType(*opcode, idx) != RATA);
-  const Op* ptr = opcode + 1;
+ArgUnion* getImmPtr(PC const origPC, int idx) {
+  auto pc = origPC;
+  auto const UNUSED op = decode_op(pc);
+  assert(immType(op, idx) != IVA);
+  assert(immType(op, idx) != LA);
+  assert(immType(op, idx) != IA);
+  assert(immType(op, idx) != RATA);
   for (int i = 0; i < idx; i++) {
-    ptr += immSize(opcode, i);
+    pc += immSize(origPC, i);
   }
-  return (ArgUnion*)ptr;
+  return (ArgUnion*)pc;
 }
 
 template<typename T>
@@ -288,17 +291,17 @@ void encodeIvaToVector(std::vector<unsigned char>& out, int32_t val) {
   out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
 }
 
-int instrLen(const Op* opcode) {
-  auto op = *opcode;
-  int len = 1;
+int instrLen(PC const origPC) {
+  auto pc = origPC;
+  auto op = decode_op(pc);
   int nImm = numImmediates(op);
   for (int i = 0; i < nImm; i++) {
-    len += immSize(opcode, i);
+    pc += immSize(origPC, i);
   }
-  return len;
+  return pc - origPC;
 }
 
-Offset* instrJumpOffset(const Op* instr) {
+Offset* instrJumpOffset(PC const origPC) {
   static const int8_t jumpMask[] = {
 #define IMM_NA 0
 #define IMM_MA 0
@@ -345,21 +348,22 @@ Offset* instrJumpOffset(const Op* instr) {
 #undef O
   };
 
-  assert(!isSwitch(*instr));  // BLA doesn't work here
+  auto pc = origPC;
+  auto const op = decode_op(pc);
+  assert(!isSwitch(op));  // BLA doesn't work here
 
-  if (Op(*instr) == OpIterBreak) {
-    uint32_t veclen;
-    std::memcpy(&veclen, instr + 1, sizeof veclen);
+  if (op == OpIterBreak) {
+    auto const veclen = decode_raw<uint32_t>(pc);
     assert(veclen > 0);
     auto const target = const_cast<Offset*>(
       reinterpret_cast<const Offset*>(
-        reinterpret_cast<const uint32_t*>(instr + 1) + 2 * veclen + 1
+        reinterpret_cast<const uint32_t*>(pc) + 2 * veclen
       )
     );
     return target;
   }
 
-  int mask = jumpMask[uint8_t(*instr)];
+  int mask = jumpMask[size_t(op)];
   if (mask == 0) {
     return nullptr;
   }
@@ -373,10 +377,10 @@ Offset* instrJumpOffset(const Op* instr) {
   default: assert(false); return nullptr;
   }
 
-  return &getImmPtr(instr, immNum)->u_BA;
+  return &getImmPtr(origPC, immNum)->u_BA;
 }
 
-Offset instrJumpTarget(const Op* instrs, Offset pos) {
+Offset instrJumpTarget(PC instrs, Offset pos) {
   Offset* offset = instrJumpOffset(instrs + pos);
 
   if (!offset) {
@@ -386,25 +390,26 @@ Offset instrJumpTarget(const Op* instrs, Offset pos) {
   }
 }
 
-OffsetSet instrSuccOffsets(Op* opc, const Unit* unit) {
+OffsetSet instrSuccOffsets(PC opc, const Unit* unit) {
   OffsetSet succBcOffs;
-  Op* bcStart = (Op*)(unit->entry());
+  auto const bcStart = unit->entry();
+  auto const op = peek_op(opc);
 
-  if (!instrIsControlFlow(*opc)) {
+  if (!instrIsControlFlow(op)) {
     Offset succOff = opc + instrLen(opc) - bcStart;
     succBcOffs.insert(succOff);
     return succBcOffs;
   }
 
-  if (instrAllowsFallThru(*opc)) {
+  if (instrAllowsFallThru(op)) {
     Offset succOff = opc + instrLen(opc) - bcStart;
     succBcOffs.insert(succOff);
   }
 
-  if (isSwitch(*opc)) {
-    foreachSwitchTarget(opc, [&](Offset& offset) {
-        succBcOffs.insert(offset + opc - bcStart);
-      });
+  if (isSwitch(op)) {
+    foreachSwitchTarget(opc, [&](Offset offset) {
+      succBcOffs.insert(offset + opc - bcStart);
+    });
   } else {
     Offset target = instrJumpTarget(bcStart, opc - bcStart);
     if (target != InvalidAbsoluteOffset) {
@@ -418,16 +423,18 @@ OffsetSet instrSuccOffsets(Op* opc, const Unit* unit) {
  * Return the number of successor-edges including fall-through paths but not
  * implicit exception paths.
  */
-int numSuccs(const Op* instr) {
-  if ((instrFlags(*instr) & TF) != 0) {
-    if (isSwitch(*instr)) {
-      return *(int*)(instr + 1);
+int numSuccs(PC const origPC) {
+  auto pc = origPC;
+  auto const op = decode_op(pc);
+  if ((instrFlags(op) & TF) != 0) {
+    if (isSwitch(op)) {
+      return decode_raw<int32_t>(pc);
     }
-    if (isUnconditionalJmp(*instr) || *instr == OpIterBreak) return 1;
+    if (isUnconditionalJmp(op) || op == OpIterBreak) return 1;
     return 0;
   }
-  if (!instrIsControlFlow(*instr)) return 1;
-  if (instrJumpOffset(const_cast<Op*>(instr))) return 2;
+  if (!instrIsControlFlow(op)) return 1;
+  if (instrJumpOffset(origPC)) return 2;
   return 1;
 }
 
@@ -436,7 +443,7 @@ int numSuccs(const Op* instr) {
  * for a given push/pop instruction. For peek/poke instructions, this
  * function returns 0.
  */
-int instrNumPops(const Op* opcode) {
+int instrNumPops(PC opcode) {
   static const int8_t numberOfPops[] = {
 #define NOV 0
 #define ONE(...) 1
@@ -472,7 +479,7 @@ int instrNumPops(const Op* opcode) {
 #undef SMANY
 #undef O
   };
-  int n = numberOfPops[uint8_t(*opcode)];
+  int n = numberOfPops[size_t(peek_op(opcode))];
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
@@ -497,7 +504,7 @@ int instrNumPops(const Op* opcode) {
  * for a given push/pop instruction. For peek/poke instructions or
  * InsertMid instructions, this function returns 0.
  */
-int instrNumPushes(const Op* opcode) {
+int instrNumPushes(PC pc) {
   static const int8_t numberOfPushes[] = {
 #define NOV 0
 #define ONE(...) 1
@@ -517,7 +524,8 @@ int instrNumPushes(const Op* opcode) {
 #undef INS_2
 #undef O
   };
-  return numberOfPushes[uint8_t(*opcode)];
+  auto const op = peek_op(pc);
+  return numberOfPushes[size_t(op)];
 }
 
 namespace {
@@ -529,7 +537,7 @@ FlavorDesc doFlavor(uint32_t i, FlavorDesc f, Args&&... args) {
   return i == 0 ? f : doFlavor(i - 1, std::forward<Args>(args)...);
 }
 
-FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
+FlavorDesc minstrFlavor(PC op, uint32_t i, FlavorDesc top) {
   if (top != NOV) {
     if (i == 0) return top;
     --i;
@@ -562,7 +570,7 @@ FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
   always_assert(0 && "Invalid stack index");
 }
 
-FlavorDesc manyFlavor(const Op* op, uint32_t i, FlavorDesc flavor) {
+FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   always_assert(i < uint32_t(instrNumPops(op)));
   return flavor;
 }
@@ -571,7 +579,7 @@ FlavorDesc manyFlavor(const Op* op, uint32_t i, FlavorDesc flavor) {
 /**
  * Returns the expected input flavor of stack slot idx.
  */
-FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
+FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
   auto constexpr nov = NOV;
 #define NOV always_assert(0 && "Opcode has no stack inputs");
 #define ONE(f1) return doFlavor(idx, f1);
@@ -589,7 +597,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
-  switch (*op) {
+  switch (peek_op(op)) {
     OPCODES
   }
   not_reached();
@@ -611,7 +619,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #undef O
 }
 
-StackTransInfo instrStackTransInfo(const Op* opcode) {
+StackTransInfo instrStackTransInfo(PC opcode) {
   static const StackTransInfo::Kind transKind[] = {
 #define NOV StackTransInfo::Kind::PushPop
 #define ONE(...) StackTransInfo::Kind::PushPop
@@ -651,7 +659,8 @@ StackTransInfo instrStackTransInfo(const Op* opcode) {
 #undef O
   };
   StackTransInfo ret;
-  ret.kind = transKind[uint8_t(*opcode)];
+  auto const op = peek_op(opcode);
+  ret.kind = transKind[size_t(op)];
   switch (ret.kind) {
   case StackTransInfo::Kind::PushPop:
     ret.pos = 0;
@@ -661,7 +670,7 @@ StackTransInfo instrStackTransInfo(const Op* opcode) {
   case StackTransInfo::Kind::InsertMid:
     ret.numPops = 0;
     ret.numPushes = 0;
-    ret.pos = peekPokeType[uint8_t(*opcode)];
+    ret.pos = peekPokeType[size_t(op)];
     return ret;
   }
   not_reached();
@@ -842,22 +851,19 @@ MemberCode parseMemberCode(const char* s) {
   return InvalidMemberCode;
 }
 
-std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
+std::string instrToString(PC it, const Unit* u /* = NULL */) {
   std::stringstream out;
-  PC iStart = reinterpret_cast<PC>(it);
-  Op op = *it;
-  ++it;
+  PC iStart = it;
+  Op op = decode_op(it);
 
   auto readRATA = [&] {
     if (!u) {
-      auto const pc = reinterpret_cast<const unsigned char*>(it);
+      auto const pc = it;
       it += encodedRATSize(pc);
       out << " <RepoAuthType>";
       return;
     }
-    auto pc = reinterpret_cast<const unsigned char*>(it);
-    auto const rat = decodeRAT(u, pc);
-    it = reinterpret_cast<const Op*>(pc);
+    auto const rat = decodeRAT(u, it);
     out << ' ' << show(rat);
   };
 
@@ -934,7 +940,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 } while (false)
 
 #define READLITSTR(sep) do {                                      \
-  Id id = readData<Id>(it);                                       \
+  Id id = decode_raw<Id>(it);                                       \
   if (id < 0) {                                                   \
     assert(op == OpSSwitch);                                      \
     out << sep << "-";                                            \
@@ -948,7 +954,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 } while (false)
 
 #define READSVEC() do {                         \
-  int sz = readData<int>(it);                   \
+  int sz = decode_raw<int>(it);                   \
   out << " <";                                  \
   const char* sep = "";                         \
   for (int i = 0; i < sz; ++i) {                \
@@ -957,7 +963,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
       READLITSTR("");                           \
       out << ":";                               \
     }                                           \
-    Offset o = readData<Offset>(it);            \
+    Offset o = decode_raw<Offset>(it);            \
     if (u != nullptr) {                         \
       if (iStart + o == u->entry() - 1) {       \
         out << "Invalid";                       \
@@ -973,18 +979,18 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 } while (false)
 
 #define READIVEC() do {                           \
-  int sz = readData<int>(it);                     \
+  int sz = decode_raw<int>(it);                     \
   out << " <";                                    \
   const char* sep = "";                           \
   for (int i = 0; i < sz; ++i) {                  \
     out << sep;                                   \
-    IterKind k = (IterKind)readData<Id>(it);      \
+    IterKind k = (IterKind)decode_raw<Id>(it);      \
     switch(k) {                                   \
       case KindOfIter:  out << "(Iter) ";  break; \
       case KindOfMIter: out << "(MIter) "; break; \
       case KindOfCIter: out << "(CIter) "; break; \
     }                                             \
-    out << readData<Id>(it);                      \
+    out << decode_raw<Id>(it);                      \
     sep = ", ";                                   \
   }                                               \
   out << ">";                                     \
@@ -1017,7 +1023,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   }                                                           \
   it += sizeof(Id)
 #define H_VSA do {                                      \
-  int sz = readData<int32_t>(it);                       \
+  int sz = decode_raw<int32_t>(it);                       \
   out << " <";                                          \
   for (int i = 0; i < sz; ++i) {                        \
     H_SA;                                               \
@@ -1067,7 +1073,7 @@ const char* opcodeToName(Op op) {
 #undef O
   };
   if (op >= Op::LowInvalid && op <= Op::HighInvalid) {
-    return namesArr[uint8_t(op)];
+    return namesArr[size_t(op)];
   }
   return "Invalid";
 }
@@ -1280,10 +1286,11 @@ bool instrReadsCurrentFpi(Op opcode) {
   return (opFlags & FF) != 0;
 }
 
-ImmVector getImmVector(const Op* opcode) {
-  int numImm = numImmediates(*opcode);
+ImmVector getImmVector(PC opcode) {
+  auto const op = peek_op(opcode);
+  int numImm = numImmediates(op);
   for (int k = 0; k < numImm; ++k) {
-    ArgType t = immType(*opcode, k);
+    ArgType t = immType(op, k);
     if (t == MA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
@@ -1293,7 +1300,7 @@ ImmVector getImmVector(const Op* opcode) {
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp));
     } else if (t == VSA) {
-      const int32_t* vp = (int32_t*) getImmPtr(opcode, k);
+      const int32_t* vp = (int32_t*)getImmPtr(opcode, k);
       return ImmVector(reinterpret_cast<const uint8_t*>(vp + 1),
                        vp[0], vp[0]);
     }
@@ -1302,7 +1309,7 @@ ImmVector getImmVector(const Op* opcode) {
   not_reached();
 }
 
-MInstrLocation getMLocation(const Op* opcode) {
+MInstrLocation getMLocation(PC opcode) {
   auto immVec = getImmVector(opcode);
   auto vec = immVec.vec();
   auto const lcode = LocationCode(*vec++);
@@ -1319,7 +1326,7 @@ bool hasMVector(Op op) {
   return false;
 }
 
-std::vector<MVectorItem> getMVector(const Op* opcode) {
+std::vector<MVectorItem> getMVector(PC opcode) {
   auto immVec = getImmVector(opcode);
   std::vector<MVectorItem> result;
   auto it = immVec.vec();
@@ -1381,10 +1388,11 @@ bool ImmVector::decodeLastMember(const Unit* u,
   return false;
 }
 
-int instrSpToArDelta(const Op* opcode) {
+int instrSpToArDelta(PC opcode) {
   // This function should only be called for instructions that read
   // the current FPI
-  assert(instrReadsCurrentFpi(*opcode));
+  auto const op = peek_op(opcode);
+  assert(instrReadsCurrentFpi(op));
   // The delta from sp to ar is equal to the number of values on the stack
   // that will be consumed by this instruction (numPops) plus the number of
   // parameters pushed onto the stack so far that are not being consumed by
@@ -1393,7 +1401,7 @@ int instrSpToArDelta(const Op* opcode) {
   // instructions, numExtra will be 0 because all of the parameters on the
   // stack are already accounted for by numPops.
   int numPops = instrNumPops(opcode);
-  int numExtra = isFCallStar(*opcode) ? 0 : getImm(opcode, 0).u_IVA;
+  int numExtra = isFCallStar(op) ? 0 : getImm(opcode, 0).u_IVA;
   return numPops + numExtra;
 }
 

@@ -364,7 +364,7 @@ public:
   /*
    * Get the Op at `instrOffset'.
    */
-  Op getOpcode(size_t instrOffset) const;
+  Op getOp(Offset instrOffset) const;
 
 
   /////////////////////////////////////////////////////////////////////////////

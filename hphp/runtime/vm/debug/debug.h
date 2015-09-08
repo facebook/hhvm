@@ -32,7 +32,7 @@ struct DebugInfo {
 
   void recordTracelet(TCRange range,
                       const Func* func,
-                      const Op* instr, bool exit,
+                      PC instr, bool exit,
                       bool inPrologue);
   void recordStub(TCRange range, const std::string&);
   void recordPerfMap(TCRange range, const Func* func, bool exit,

@@ -316,10 +316,10 @@ struct UnitEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.
   //
-  // These methods emit values to bc() at bcPos() and then updates bcPos(),
-  // realloc-ing the bytecode region if necessary.
+  // These methods emit values to bc() at bcPos() (or pos, if given) and then
+  // update bcPos(), realloc-ing the bytecode region if necessary.
 
-  void emitOp(Op op, int64_t pos = -1);
+  void emitOp(Op op);
   void emitByte(unsigned char n, int64_t pos = -1);
 
   void emitInt32(int n, int64_t pos = -1);

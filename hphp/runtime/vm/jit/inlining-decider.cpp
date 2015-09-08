@@ -89,7 +89,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
       return refuse("callee has variadic capture and MayUseVV");
     }
     // Refuse if the variadic parameter actually captures something.
-    auto pc = reinterpret_cast<const Op*>(callSK.pc());
+    auto pc = callSK.pc();
     auto const numArgs = getImm(pc, 0).u_IVA;
     auto const numParams = callee->numParams();
     if (numArgs >= numParams) {
@@ -124,7 +124,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee) {
     return traceRefusal(callSK.func(), callee, why);
   };
 
-  auto pc = reinterpret_cast<const Op*>(callSK.pc());
+  auto pc = callSK.pc();
   auto const numArgs = getImm(pc, 0).u_IVA;
   auto const numParams = callee->numParams();
 
@@ -394,7 +394,7 @@ bool InliningDecider::shouldInline(const Func* callee,
       cost += 1;
 
       // Add the size of immediate vectors to the cost.
-      auto const pc = reinterpret_cast<const Op*>(sk.pc());
+      auto const pc = sk.pc();
       if (hasMVector(op)) {
         cost += getMVector(pc).size();
       } else if (hasImmVector(op)) {
@@ -429,7 +429,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const IRGS& irgs,
                                  int32_t maxBCInstrs) {
-  auto const op = reinterpret_cast<const Op*>(sk.pc());
+  auto const op = sk.pc();
 
   auto const numArgs = getImm(op, 0).u_IVA;
   auto const numParams = callee->numParams();

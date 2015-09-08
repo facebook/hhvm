@@ -18,6 +18,8 @@
 #error "unit-emitter-inl.h should only be included by unit-emitter.h"
 #endif
 
+#include "hphp/runtime/vm/hhbc-codec.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Basic info.
@@ -81,8 +83,8 @@ inline const LineTable& UnitEmitter::lineTable() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode emit.
 
-inline void UnitEmitter::emitOp(Op op, int64_t pos) {
-  emitByte((unsigned char)op, pos);
+inline void UnitEmitter::emitOp(Op op) {
+  encode_op(op, [&](uint8_t byte) { emitByte(byte); });
 }
 
 inline void UnitEmitter::emitByte(unsigned char n, int64_t pos) {

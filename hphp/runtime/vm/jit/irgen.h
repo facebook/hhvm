@@ -220,8 +220,8 @@ bool isInlining(const IRGS&);
  * This is exposed publically because the region translator drives inlining
  * decisions.
  */
-void inlSingletonSProp(IRGS&, const Func*, const Op* clsOp, const Op* propOp);
-void inlSingletonSLoc(IRGS&, const Func*, const Op* op);
+void inlSingletonSProp(IRGS&, const Func*, PC clsOp, PC propOp);
+void inlSingletonSLoc(IRGS&, const Func*, PC op);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -125,7 +125,7 @@ ExtOpcode getExtOpcode(TCA addr,
         (bcMap[i].afrozenStart <= addr && bcMap[i+1].afrozenStart > addr)) {
       auto* unit = g_repo->getUnit(bcMap[i].md5);
       always_assert(unit);
-      return (ExtOpcode)unit->getOpcode(bcMap[i].bcStart);
+      return (ExtOpcode)unit->getOp(bcMap[i].bcStart);
     }
   }
 

@@ -235,16 +235,16 @@ Offset ProfData::transLastBcOff(TransID id) const {
   return m_transRecs[id]->lastBcOff();
 }
 
-Op* ProfData::transLastInstr(TransID id) const {
+PC ProfData::transLastInstr(TransID id) const {
   Unit* unit = transFunc(id)->unit();
   Offset lastBcOff = transLastBcOff(id);
-  return (Op*)(unit->at(lastBcOff));
+  return unit->at(lastBcOff);
 }
 
 Offset ProfData::transStopBcOff(TransID id) const {
   Unit*  unit      = m_transRecs[id]->func()->unit();
   Offset lastBcOff = transLastBcOff(id);
-  return lastBcOff + instrLen((Op*)(unit->at(lastBcOff)));
+  return lastBcOff + instrLen(unit->at(lastBcOff));
 }
 
 FuncId ProfData::transFuncId(TransID id) const {

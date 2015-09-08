@@ -16,11 +16,12 @@
 
 #include "hphp/runtime/vm/jit/annotation.h"
 
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/repo.h"
 
 namespace HPHP { namespace jit {
 
@@ -62,7 +63,7 @@ const void annotate(NormalizedInstruction* i,
                     const StringData* clsName, const StringData* funcName) {
   auto const fpi      = i->func()->findFPI(i->source.offset());
   auto pc             = i->m_unit->at(fpi->m_fpushOff);
-  auto const pushOp   = static_cast<Op>(*pc++);
+  auto const pushOp   = decode_op(pc);
   auto const isStatic = pushOp == Op::FPushClsMethodD ||
     pushOp == Op::FPushClsMethodF ||
     pushOp == Op::FPushClsMethod;

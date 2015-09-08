@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/litstr-table.h"
 
 namespace HPHP {
@@ -172,9 +173,9 @@ inline bool Unit::contains(PC pc) const {
   return pc >= m_bc && pc <= m_bc + m_bclen;
 }
 
-inline Op Unit::getOpcode(size_t instrOffset) const {
+inline Op Unit::getOp(Offset instrOffset) const {
   assert(instrOffset < m_bclen);
-  return static_cast<Op>(m_bc[instrOffset]);
+  return peek_op(m_bc + instrOffset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

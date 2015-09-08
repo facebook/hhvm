@@ -50,7 +50,7 @@ namespace x64 {
 
 typedef X64Assembler Asm;
 
-void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp);
+void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
 void emitGetGContext(Vout& as, Vreg dest);
 
 void emitTransCounterInc(Asm& a);

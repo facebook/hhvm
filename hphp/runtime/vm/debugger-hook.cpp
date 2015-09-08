@@ -15,14 +15,16 @@
 */
 
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
-#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/pc-filter.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -87,7 +89,7 @@ namespace {
 void blacklistRangesInJit(const Unit* unit, const OffsetRangeVec& offsets) {
   for (auto const& range : offsets) {
     for (PC pc = unit->at(range.base); pc < unit->at(range.past);
-         pc += instrLen((Op*)pc)) {
+         pc += instrLen(pc)) {
       mcg->tx().addDbgBLPC(pc);
     }
   }
@@ -205,7 +207,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   // (matching hphpd).
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::OUT &&
       req_data.getDebuggerStackDepth() < req_data.getDebuggerFlowDepth() &&
-      *reinterpret_cast<const Op*>(pc) != OpPopR)) {
+      peek_op(pc) != OpPopR)) {
     req_data.setDebuggerStepOut(StepOutState::NONE);
     if (!req_data.getDebuggerNext()) {
       // Next command not active, break
@@ -489,8 +491,8 @@ void phpAddBreakPointFuncExit(const Func* f) {
   // Iterate through the function's opcodes and place breakpoints on each RetC
   const Unit* unit = f->unit();
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
-       pc += instrLen((Op*) pc)) {
-    if (*reinterpret_cast<const Op*>(pc) != OpRetC) {
+       pc += instrLen(pc)) {
+    if (peek_op(pc) != OpRetC) {
       continue;
     }
 
@@ -539,8 +541,8 @@ void phpRemoveBreakPointFuncExit(const Func* f) {
   const Unit* unit = f->unit();
   auto& req_data = RID();
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
-       pc += instrLen((Op*) pc)) {
-    if (*reinterpret_cast<const Op*>(pc) == OpRetC) {
+       pc += instrLen(pc)) {
+    if (peek_op(pc) == OpRetC) {
       req_data.m_retBreakPointFilter.removePC(pc);
     }
   }

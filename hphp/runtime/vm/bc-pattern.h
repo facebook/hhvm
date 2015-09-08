@@ -178,7 +178,7 @@ public:
 
 private:
   PC next(PC pc) {
-    return pc + instrLen((Op*)pc);
+    return pc + instrLen(pc);
   }
 
   void matchAnchored(const Expr& pattern, PC start, PC end, Result& result);

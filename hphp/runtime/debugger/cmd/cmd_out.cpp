@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_out.h"
 
 #include "hphp/runtime/debugger/debugger_client.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -84,7 +85,7 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   if (depth == 0) {
     PC pc = vmpc();
     // Step over PopR following a call
-    if (*reinterpret_cast<const Op*>(pc) == Op::PopR) {
+    if (peek_op(pc) == Op::PopR) {
       m_skippingOverPopR = true;
       m_needsVMInterrupt = true;
     } else {

@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
@@ -218,8 +219,7 @@ void emitAwait(IRGS& env, int32_t numIters) {
    */
   auto const knownTy = [&] {
     auto pc = curUnit(env)->at(resumeOffset);
-    if (*reinterpret_cast<const Op*>(pc) != Op::AssertRATStk) return TInitCell;
-    ++pc;
+    if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
     auto const stkLoc = decodeVariableSizeImm(&pc);
     if (stkLoc != 0) return TInitCell;
     auto const rat = decodeRAT(curUnit(env), pc);

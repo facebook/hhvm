@@ -19,11 +19,12 @@
 #define incl_HPHP_EXT_GENERATOR_H_
 
 
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -63,11 +64,13 @@ public:
     assert(func->isGenerator());
     auto base = func->base();
 
-    DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
-    assert(op[0] == OpCreateCont);
-    assert(op[1] == OpPopC);
+    auto pc = func->unit()->at(base);
+    auto DEBUG_ONLY op1 = decode_op(pc);
+    auto DEBUG_ONLY op2 = decode_op(pc);
+    assert(op1 == OpCreateCont);
+    assert(op2 == OpPopC);
 
-    return base + 2;
+    return func->unit()->offsetOf(pc);
   }
 
   static size_t genSize(size_t ndSize, size_t frameSz) {

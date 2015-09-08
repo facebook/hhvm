@@ -332,8 +332,8 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     }                                                                   \
     ITRACE(3, "after: {}\n", m_ev.getEvalStack().pretty());             \
     auto& loc = m_tempLoc ? *m_tempLoc : m_node->getRange();            \
-    auto UNUSED opPtr = reinterpret_cast<const Op*>(m_ue.bc() + curPos);\
-    ITRACE(2, "{}: {}\n", curPos, instrToString(opPtr));                \
+    auto UNUSED pc = m_ue.bc() + curPos;                                \
+    ITRACE(2, "{}: {}\n", curPos, instrToString(pc));                   \
     ITRACE(2, "lines [{},{}] chars [{},{}]\n",                          \
            loc.line0, loc.line1, loc.char0, loc.char1);                 \
     /* Update various other metadata */                                 \

@@ -314,10 +314,10 @@ bool RegionFormer::prepareInstruction() {
     // Reffiness guards are always at the beginning of the trace for now, so
     // calculate the delta from the original sp to the ar.
     auto argNum = m_inst.imm[0].u_IVA;
-    size_t entryArDelta = instrSpToArDelta((Op*)m_inst.pc()) -
+    size_t entryArDelta = instrSpToArDelta(m_inst.pc()) -
       (irgen::logicalStackDepth(m_irgs) - m_ctx.spOffset);
     FTRACE(5, "entryArDelta info: {} {} {}\n",
-      instrSpToArDelta((Op*)m_inst.pc()),
+      instrSpToArDelta(m_inst.pc()),
       irgen::logicalStackDepth(m_irgs).offset,
       m_ctx.spOffset.offset);
     try {

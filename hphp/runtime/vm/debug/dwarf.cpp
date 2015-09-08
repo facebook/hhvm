@@ -180,14 +180,14 @@ const char *DwarfInfo::lookupFile(const Unit *unit) {
 
 void DwarfInfo::addLineEntries(TCRange range,
                                const Unit *unit,
-                               const Op* instr,
+                               PC instr,
                                FunctionInfo* f) {
   if (unit == nullptr || instr == nullptr) {
     // For stubs, just add line 0
     f->m_lineTable.push_back(LineEntry(range, 0));
     return;
   }
-  Offset offset = unit->offsetOf(reinterpret_cast<PC>(instr));
+  Offset offset = unit->offsetOf(instr);
 
   int lineNum = unit->getLineNumber(offset);
   if (lineNum >= 0) {
@@ -234,7 +234,7 @@ static Mutex s_lock(RankLeaf);
 DwarfChunk* DwarfInfo::addTracelet(TCRange range,
                                    folly::Optional<std::string> name,
                                    const Func *func,
-                                   const Op* instr,
+                                   PC instr,
                                    bool exit,
                                    bool inPrologue) {
   DwarfChunk* chunk = nullptr;

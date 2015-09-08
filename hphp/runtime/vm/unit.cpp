@@ -62,6 +62,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/hh-utils.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -1726,9 +1727,9 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
 
     out << std::string(opts.indentSize, ' ')
         << std::setw(4) << (it - m_bc) << ": "
-        << instrToString((Op*)it, this)
+        << instrToString(it, this)
         << std::endl;
-    it += instrLen((Op*)it);
+    it += instrLen(it);
   }
 }
 
@@ -1749,21 +1750,20 @@ std::string Unit::toString() const {
 // Other methods.
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
-  auto entry = reinterpret_cast<const Op*>(getMain()->getEntry());
+  auto entry = getMain()->getEntry();
   auto pc = entry;
   // String <id>; Fatal;
   // ^^^^^^
-  if (*pc != Op::String) {
+  if (decode_op(pc) != Op::String) {
     return false;
   }
-  pc++;
   // String <id>; Fatal;
   //        ^^^^
   Id id = *(Id*)pc;
   pc += sizeof(Id);
   // String <id>; Fatal;
   //              ^^^^^
-  if (*pc != Op::Fatal) {
+  if (decode_op(pc) != Op::Fatal) {
     return false;
   }
   msg = lookupLitstrId(id);
@@ -1778,9 +1778,12 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
 
   auto pc = getMain()->getEntry();
 
-  // two opcodes + String's ID
-  pc += sizeof(Id) + 2;
+  // String <id>
+  decode_op(pc);
+  pc += sizeof(Id);
 
+  // Fatal <kind>
+  decode_op(pc);
   auto kind_char = *pc;
   return kind_char == static_cast<uint8_t>(FatalOp::Parse);
 }

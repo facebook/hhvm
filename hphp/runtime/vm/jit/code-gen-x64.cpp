@@ -37,7 +37,9 @@
 #include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
+
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -2183,7 +2185,7 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   auto& v = vmain();
   auto const sync_sp = v.makeReg();
   v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff)], sync_sp};
-  emitEagerSyncPoint(v, reinterpret_cast<const Op*>(inst->marker().sk().pc()),
+  emitEagerSyncPoint(v, inst->marker().sk().pc(),
                      rvmtl(), srcLoc(inst, 0).reg(), sync_sp);
 }
 
@@ -2826,8 +2828,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     // The assumption here is that for builtins, the generated func contains
     // only a single opcode (NativeImpl), and there are no non-argument locals.
     assertx(argc == callee->numLocals() && callee->numIterators() == 0);
-    assertx(*reinterpret_cast<const Op*>(callee->getEntry()) == Op::NativeImpl);
-    assertx(instrLen((Op*)callee->getEntry()) == callee->past()-callee->base());
+    assertx(peek_op(callee->getEntry()) == Op::NativeImpl);
+    assertx(instrLen(callee->getEntry()) == callee->past() - callee->base());
     auto retAddr = (int64_t)mcg->tx().uniqueStubs.retHelper;
     v << store{v.cns(retAddr),
                sync_sp[cellsToBytes(argc) + AROFF(m_savedRip)]};
@@ -2842,8 +2844,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     // We sometimes call this while curFunc() isn't really the builtin, so
     // make sure to record the sync point as if we are inside the builtin.
     if (mcg->fixupMap().eagerRecord(callee)) {
-      emitEagerSyncPoint(v, reinterpret_cast<const Op*>(callee->getEntry()),
-                         rds, rvmfp(), sync_sp);
+      emitEagerSyncPoint(v, callee->getEntry(), rds, rvmfp(), sync_sp);
     }
     // Call the native implementation. This will free the locals for us in the
     // normal case. In the case where an exception is thrown, the VM unwinder
@@ -3017,7 +3018,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     v << lea{rSP[spOffset], synced_sp};
     emitEagerSyncPoint(
       v,
-      reinterpret_cast<const Op*>(pc),
+      pc,
       rvmtl(),
       srcLoc(inst, 0).reg(),
       synced_sp
@@ -3174,8 +3175,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   auto sp = srcLoc(inst, 1).reg();
 
   if (FixupMap::eagerRecord(func)) {
-    emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
-                       rvmtl(), fp, sp);
+    emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
   }
   v << vinvoke{
     CppCall::direct(builtinFuncPtr),

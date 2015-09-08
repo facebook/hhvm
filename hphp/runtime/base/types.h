@@ -99,7 +99,7 @@ struct AccessFlags {
  * during a given instruction it is incremented while decoding
  * immediates and may point to arbitrary bytes.
  */
-using PC = const unsigned char*;
+using PC = const uint8_t*;
 
 /*
  * Id type for various components of a unit that have to have unique

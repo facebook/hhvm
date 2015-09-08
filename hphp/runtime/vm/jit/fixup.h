@@ -139,7 +139,7 @@ struct FixupMap {
   TRACE_SET_MOD(fixup);
 
   struct VMRegs {
-    const Op* pc;
+    PC pc;
     TypedValue* sp;
     const ActRec* fp;
   };
@@ -203,7 +203,7 @@ private:
     TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
           (void*)tca, fixup.pcOffset, fixup.spOffset);
     assertx(fixup.spOffset >= 0);
-    outRegs->pc = reinterpret_cast<const Op*>(pc(ar, f, fixup));
+    outRegs->pc = pc(ar, f, fixup);
     outRegs->fp = ar;
 
     if (UNLIKELY(ar->resumed())) {

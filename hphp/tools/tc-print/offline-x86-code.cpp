@@ -444,8 +444,7 @@ size_t OfflineX86Code::printBCMapping(BCMappingInfo bcMappingInfo,
 
   if (currBC < mappingSize && x86Start == ip) {
     if (auto currUnit = g_repo->getUnit(curr.md5)) {
-      auto bcPast = curr.bcStart + instrLen(
-        reinterpret_cast<const Op*>(currUnit->at(curr.bcStart)));
+      auto bcPast = curr.bcStart + instrLen(currUnit->at(curr.bcStart));
 
       currUnit->prettyPrint(std::cout,
                             Unit::PrintOpts().range(curr.bcStart,

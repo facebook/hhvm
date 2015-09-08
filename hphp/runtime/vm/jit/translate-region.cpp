@@ -26,8 +26,9 @@
 
 #include "hphp/runtime/vm/bc-pattern.h"
 
-#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -154,8 +155,8 @@ bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
   // The destination of a conditional jump is a merge point if both
   // the fallthru and taken offsets are the same.
   auto predId   = prevRetrans ? prevRetrans.value() : *preds.begin();
-  Op* predOpPtr = (Op*)(region.block(predId)->last().pc());
-  auto predOp   = *predOpPtr;
+  auto predOpPtr = region.block(predId)->last().pc();
+  auto predOp   = peek_op(predOpPtr);
   if (!instrHasConditionalBranch(predOp)) return false;
   Offset fallthruOffset = instrLen(predOpPtr);
   Offset    takenOffset = *instrJumpOffset(predOpPtr);
@@ -387,11 +388,11 @@ bool tryTranslateSingletonInline(IRGS& irgs,
   auto has_same_local = [] (PC pc, const Captures& captures) {
     if (captures.size() == 0) return false;
 
-    auto cgetl = (const Op*)pc;
-    auto sli = (const Op*)captures[0];
+    auto cgetl = pc;
+    auto sli = captures[0];
 
-    assertx(*cgetl == Op::CGetL);
-    assertx(*sli == Op::StaticLocInit);
+    assertx(peek_op(cgetl) == Op::CGetL);
+    assertx(peek_op(sli) == Op::StaticLocInit);
 
     return (getImm(sli, 0).u_IVA == getImm(cgetl, 0).u_IVA);
   };
@@ -418,7 +419,7 @@ bool tryTranslateSingletonInline(IRGS& irgs,
       irgen::inlSingletonSLoc(
         irgs,
         funcd,
-        (const Op*)result.getCapture(0)
+        result.getCapture(0)
       );
     } catch (const FailedIRGen& e) {
       return false;
@@ -437,10 +438,10 @@ bool tryTranslateSingletonInline(IRGS& irgs,
   // String opcode.
   auto same_string_as = [&] (int i) {
     return Atom(Op::String).onlyif([=] (PC pc, const Captures& captures) {
-      auto string1 = (const Op*)pc;
-      auto string2 = (const Op*)captures[i];
-      assertx(*string1 == Op::String);
-      assertx(*string2 == Op::String);
+      auto string1 = pc;
+      auto string2 = captures[i];
+      assertx(peek_op(string1) == Op::String);
+      assertx(peek_op(string2) == Op::String);
 
       auto const unit = funcd->unit();
       auto sd1 = unit->lookupLitstrId(getImmPtr(string1, 0)->u_SA);
@@ -476,8 +477,8 @@ bool tryTranslateSingletonInline(IRGS& irgs,
       irgen::inlSingletonSProp(
         irgs,
         funcd,
-        (const Op*)result.getCapture(1),
-        (const Op*)result.getCapture(0)
+        result.getCapture(1),
+        result.getCapture(0)
       );
     } catch (const FailedIRGen& e) {
       return false;

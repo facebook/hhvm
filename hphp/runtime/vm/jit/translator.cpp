@@ -43,6 +43,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -483,10 +484,10 @@ int64_t countOperands(uint64_t mask) {
 }
 
 int64_t getStackPopped(PC pc) {
-  auto const op = *reinterpret_cast<const Op*>(pc);
+  auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
-    case Op::FCallD:       return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCall:        return getImm(pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCallD:       return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
     case Op::QueryML:   case Op::QueryMC:
@@ -494,9 +495,9 @@ int64_t getStackPopped(PC pc) {
     case Op::NewPackedArray:
     case Op::ConcatN:
     case Op::FCallBuiltin:
-    case Op::CreateCl:     return getImm((Op*)pc, 0).u_IVA;
+    case Op::CreateCl:     return getImm(pc, 0).u_IVA;
 
-    case Op::NewStructArray: return getImmVector((Op*)pc).size();
+    case Op::NewStructArray: return getImmVector(pc).size();
 
     default:             break;
   }
@@ -508,7 +509,7 @@ int64_t getStackPopped(PC pc) {
   assertx((mask & (StackN | BStackN)) == 0);
 
   if (mask & MVector) {
-    count += getImmVector((Op*)pc).numStackValues();
+    count += getImmVector(pc).numStackValues();
     mask &= ~MVector;
   }
 
@@ -516,7 +517,7 @@ int64_t getStackPopped(PC pc) {
 }
 
 int64_t getStackPushed(PC pc) {
-  return countOperands(getInstrInfo(*reinterpret_cast<const Op*>(pc)).out);
+  return countOperands(getInstrInfo(peek_op(pc)).out);
 }
 
 bool isAlwaysNop(Op op) {
@@ -568,7 +569,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
    * ids (i.e. string ids), this analysis step is going to have to be
    * a bit wiser.
    */
-  auto opPtr = (const Op*)ni.source.pc();
+  auto opPtr = ni.source.pc();
   auto const location = getMLocation(opPtr);
   auto const lcode = location.lcode;
 
@@ -1061,8 +1062,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
 
   const FPIEnt *fpi = caller->findFPI(inst.source.offset());
   assertx(fpi);
-  Op* fpushPc = (Op*)unit->at(fpi->m_fpushOff);
-  auto const op = *fpushPc;
+  auto const fpushPc = unit->at(fpi->m_fpushOff);
+  auto const op = peek_op(fpushPc);
 
   if (op == OpFPushFunc) {
     // If the call has any arguments, the FPushFunc will be in a different
@@ -1126,13 +1127,12 @@ Translator::isSrcKeyInBL(SrcKey sk) {
   // opcodes.
   PC pc = nullptr;
   do {
-    pc = (pc == nullptr) ?
-      unit->at(sk.offset()) : pc + instrLen((Op*) pc);
+    pc = (pc == nullptr) ? unit->at(sk.offset()) : pc + instrLen(pc);
     if (m_dbgBLPC.checkPC(pc)) {
       m_dbgBLSrcKey.insert(sk);
       return true;
     }
-  } while (!opcodeBreaksBB(*reinterpret_cast<const Op*>(pc)));
+  } while (!opcodeBreaksBB(peek_op(pc)));
   return false;
 }
 
@@ -1452,7 +1452,7 @@ void translateInstr(
     auto str = ni.m_unit->lookupLitstrId(ni.imm[2].u_SA);
     builtinFunc = Unit::lookupFunc(str);
   }
-  auto pc = reinterpret_cast<const Op*>(ni.pc());
+  auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type =
       !builtinFunc ? flavorToType(instrInputFlavor(pc, i)) :

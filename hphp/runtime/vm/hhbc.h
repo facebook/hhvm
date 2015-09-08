@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_HHBC_H_
 #define incl_HPHP_VM_HHBC_H_
 
+#include <type_traits>
+
 #include <folly/Optional.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -842,32 +844,34 @@ constexpr int32_t kMaxConcatN = 4;
                                        MFINAL,          ONE(CV),    NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
-enum class Op : uint8_t {
+enum class Op : uint16_t {
 #define O(name, ...) name,
   OPCODES
 #undef O
 };
-auto constexpr Op_count = uint8_t(Op::HighInvalid) + 1;
+auto constexpr Op_count = size_t(Op::HighInvalid) + 1;
 
-/* Also put Op* in the enclosing namespace, to avoid having to change
- * every existing usage site of the enum values. */
+/*
+ * Also put Op* in the enclosing namespace, to avoid having to change every
+ * existing usage site of the enum values.
+ */
 #define O(name, ...) UNUSED auto constexpr Op##name = Op::name;
   OPCODES
 #undef O
 
 // These are comparable by default under MSVC.
 #ifndef _MSC_VER
-inline constexpr bool operator<(Op a, Op b) { return uint8_t(a) < uint8_t(b); }
-inline constexpr bool operator>(Op a, Op b) { return uint8_t(a) > uint8_t(b); }
+inline constexpr bool operator<(Op a, Op b) { return size_t(a) < size_t(b); }
+inline constexpr bool operator>(Op a, Op b) { return size_t(a) > size_t(b); }
 inline constexpr bool operator<=(Op a, Op b) {
-  return uint8_t(a) <= uint8_t(b);
+  return size_t(a) <= size_t(b);
 }
 inline constexpr bool operator>=(Op a, Op b) {
-  return uint8_t(a) >= uint8_t(b);
+  return size_t(a) >= size_t(b);
 }
 #endif
 
-inline bool isValidOpcode(Op op) {
+constexpr bool isValidOpcode(Op op) {
   return op > OpLowInvalid && op < OpHighInvalid;
 }
 
@@ -982,7 +986,7 @@ private:
 };
 
 // Must be an opcode that actually has an ImmVector.
-ImmVector getImmVector(const Op* opcode);
+ImmVector getImmVector(PC opcode);
 
 struct MInstrLocation {
   LocationCode lcode;
@@ -994,7 +998,7 @@ struct MInstrLocation {
     return count;
   }
 };
-MInstrLocation getMLocation(const Op* opcode);
+MInstrLocation getMLocation(PC opcode);
 
 struct MVectorItem {
   MemberCode mcode;
@@ -1005,16 +1009,16 @@ struct MVectorItem {
   }
 };
 bool hasMVector(Op op);
-std::vector<MVectorItem> getMVector(const Op* opcode);
+std::vector<MVectorItem> getMVector(PC opcode);
 
 // Some decoding helper functions.
 int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
-int immSize(const Op* opcode, int idx);
+int immSize(PC opcode, int idx);
 bool immIsVector(Op opcode, int idx);
 bool hasImmVector(Op opcode);
-int instrLen(const Op* opcode);
-int numSuccs(const Op* opcode);
+int instrLen(PC opcode);
+int numSuccs(PC opcode);
 bool pushesActRec(Op opcode);
 
 /*
@@ -1022,10 +1026,10 @@ bool pushesActRec(Op opcode);
  *
  * Don't use with RATA immediates.
  */
-ArgUnion getImm(const Op* opcode, int idx);
+ArgUnion getImm(PC opcode, int idx);
 
 // Don't use this with variable-sized immediates!
-ArgUnion* getImmPtr(const Op* opcode, int idx);
+ArgUnion* getImmPtr(PC opcode, int idx);
 
 // Pass a pointer to the pointer to the immediate; this function will advance
 // the pointer past the immediate
@@ -1060,7 +1064,7 @@ void encodeToVector(std::vector<unsigned char>& vec, T val) {
 
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
-std::string instrToString(const Op* it, const Unit* u = nullptr);
+std::string instrToString(PC it, const Unit* u = nullptr);
 void staticArrayStreamer(ArrayData*, std::ostream&);
 
 /*
@@ -1093,18 +1097,18 @@ folly::Optional<SubOpType> nameToSubop(const char*);
 // returns a pointer to the location within the bytecode containing the jump
 //   Offset, or NULL if the instruction cannot jump. Note that this offset is
 //   relative to the current instruction.
-Offset* instrJumpOffset(const Op* instr);
+Offset* instrJumpOffset(PC instr);
 
 // returns absolute address of target, or InvalidAbsoluteOffset if instruction
 //   cannot jump
-Offset instrJumpTarget(const Op* instrs, Offset pos);
+Offset instrJumpTarget(PC instrs, Offset pos);
 
 /*
  * Returns the set of bytecode offsets for the instructions that may
  * be executed immediately after opc.
  */
 using OffsetSet = hphp_hash_set<Offset>;
-OffsetSet instrSuccOffsets(Op* opc, const Unit* unit);
+OffsetSet instrSuccOffsets(PC opc, const Unit* unit);
 
 struct StackTransInfo {
   enum class Kind {
@@ -1144,7 +1148,7 @@ constexpr InstrFlags instrFlagsData[] = {
 };
 
 constexpr InstrFlags instrFlags(Op opcode) {
-  return instrFlagsData[uint8_t(opcode)];
+  return instrFlagsData[size_t(opcode)];
 }
 
 constexpr bool instrIsControlFlow(Op opcode) {
@@ -1267,41 +1271,11 @@ inline bool isMemberFinalOp(Op op) {
   }
 }
 
-template<typename Out, typename In>
-Out& readData(In*& it) {
-  Out& r = *(Out*)it;
-  // XXX: illegal wrt strict-aliasing?
-  (char*&)it += sizeof(Out);
-  return r;
-}
-
-template<typename L>
-void foreachSwitchTarget(const Op* op, L func) {
-  assert(isSwitch(*op));
-  bool isStr = readData<Op>(op) == OpSSwitch;
-  int32_t size = readData<int32_t>(op);
-  for (int i = 0; i < size; ++i) {
-    if (isStr) readData<Id>(op);
-    func(readData<Offset>(op));
-  }
-}
-
-template<typename L>
-void foreachSwitchString(const Op* op, L func) {
-  assert(*op == Op::SSwitch);
-  readData<Op>(op);
-  int32_t size = readData<int32_t>(op) - 1; // the last item is the default
-  for (int i = 0; i < size; ++i) {
-    func(readData<Id>(op));
-    readData<Offset>(op);
-  }
-}
-
-int instrNumPops(const Op* opcode);
-int instrNumPushes(const Op* opcode);
-FlavorDesc instrInputFlavor(const Op* op, uint32_t idx);
-StackTransInfo instrStackTransInfo(const Op* opcode);
-int instrSpToArDelta(const Op* opcode);
+int instrNumPops(PC opcode);
+int instrNumPushes(PC opcode);
+FlavorDesc instrInputFlavor(PC op, uint32_t idx);
+StackTransInfo instrStackTransInfo(PC opcode);
+int instrSpToArDelta(PC opcode);
 
 constexpr bool mcodeIsLiteral(MemberCode mcode) {
   return mcode == MET || mcode == MEI || mcode == MPT || mcode == MQT;

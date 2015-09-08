@@ -203,13 +203,13 @@ struct DwarfInfo {
 
   const char *lookupFile(const Unit *unit);
   void addLineEntries(TCRange range, const Unit *unit,
-                      const Op* instr, FunctionInfo* f);
+                      PC instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
   DwarfChunk* addTracelet(TCRange range,
                           folly::Optional<std::string> name,
                           const Func* func,
-                          const Op* instr,
+                          PC instr,
                           bool exit,
                           bool inPrologue);
   void syncChunks();

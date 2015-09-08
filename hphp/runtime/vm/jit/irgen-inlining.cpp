@@ -21,6 +21,8 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
+#include "hphp/runtime/vm/hhbc-codec.h"
+
 namespace HPHP { namespace jit { namespace irgen {
 
 bool isInlining(const IRGS& env) {
@@ -174,8 +176,8 @@ void retFromInlined(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void inlSingletonSLoc(IRGS& env, const Func* func, const Op* op) {
-  assertx(*op == Op::StaticLocInit);
+void inlSingletonSLoc(IRGS& env, const Func* func, PC op) {
+  assertx(peek_op(op) == Op::StaticLocInit);
 
   TransFlags trflags;
   trflags.noinlineSingleton = true;
@@ -198,10 +200,10 @@ void inlSingletonSLoc(IRGS& env, const Func* func, const Op* op) {
 
 void inlSingletonSProp(IRGS& env,
                        const Func* func,
-                       const Op* clsOp,
-                       const Op* propOp) {
-  assertx(*clsOp == Op::String);
-  assertx(*propOp == Op::String);
+                       PC clsOp,
+                       PC propOp) {
+  assertx(peek_op(clsOp) == Op::String);
+  assertx(peek_op(propOp) == Op::String);
 
   TransFlags trflags;
   trflags.noinlineSingleton = true;

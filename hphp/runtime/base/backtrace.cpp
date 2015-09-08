@@ -140,7 +140,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     ArrayInit frame(7, ArrayInit::Map{});
 
     auto const curUnit = fp->func()->unit();
-    auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
+    auto const curOp = curUnit->getOp(pc);
     auto const isReturning =
       curOp == Op::RetC || curOp == Op::RetV ||
       curOp == Op::CreateCont || curOp == Op::Await ||
@@ -164,8 +164,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // instruction. Exception handling and the other opcodes (ex. BoxR)
       // already do the right thing. The emitter associates object access with
       // the subsequent expression and this would be difficult to modify.
-      auto const opAtPrevPc =
-        *reinterpret_cast<const Op*>(prevUnit->at(prevPc));
+      auto const opAtPrevPc = prevUnit->getOp(prevPc);
       Offset pcAdjust = 0;
       if (opAtPrevPc == Op::PopR ||
           opAtPrevPc == Op::UnboxR ||

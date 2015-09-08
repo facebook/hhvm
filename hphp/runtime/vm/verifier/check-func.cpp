@@ -82,7 +82,7 @@ class FuncChecker {
                    const char* regionName, Offset base, Offset past,
                    bool check_instrs = true);
   bool checkSection(bool main, const char* name, Offset base, Offset past);
-  bool checkImmediates(const char* name, const Op* instr);
+  bool checkImmediates(const char* name, PC instr);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
@@ -284,15 +284,15 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   PC bc = unit()->entry();
   // Find instruction boundaries and branch instructions.
   for (InstrRange i(at(base), at(past)); !i.empty();) {
-    if (!checkImmediates(name, (Op*)i.front())) return false;
+    if (!checkImmediates(name, i.front())) return false;
     PC pc = i.popFront();
+    auto const op = peek_op(pc);
     m_instrs.set(offset(pc) - m_func->base());
-    if (isSwitch(*reinterpret_cast<const Op*>(pc)) ||
-        instrJumpTarget((Op*)bc, offset(pc)) != InvalidAbsoluteOffset) {
-      if (*reinterpret_cast<const Op*>(pc) == OpSwitch &&
-          getImm((Op*)pc, 2).u_IVA != 0) {
-        int64_t switchBase = getImm((Op*)pc, 1).u_I64A;
-        int32_t len = getImmVector((Op*)pc).size();
+    if (isSwitch(op) ||
+        instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
+      if (op == OpSwitch && getImm(pc, 2).u_IVA != 0) {
+        int64_t switchBase = getImm(pc, 1).u_I64A;
+        int32_t len = getImmVector(pc).size();
         if (len <= 2) {
           error("Bounded switch must have a vector of length > 2 [%d:%d]\n",
                 base, past);
@@ -300,28 +300,28 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         if (switchBase > std::numeric_limits<int64_t>::max() - len + 2) {
           error("Overflow in Switch bounds [%d:%d]\n", base, past);
         }
-      } else if (*reinterpret_cast<const Op*>(pc) == Op::SSwitch) {
-        foreachSwitchString(reinterpret_cast<const Op*>(pc), [&](Id& id) {
+      } else if (op == Op::SSwitch) {
+        foreachSwitchString(pc, [&](Id id) {
           ok &= checkString(pc, id);
         });
       }
       branches.push_back(pc);
     }
     if (i.empty()) {
-      if (offset(pc + instrLen((Op*)pc)) != past) {
+      if (offset(pc + instrLen(pc)) != past) {
         error("Last instruction in %s at %d overflows [%d:%d]\n",
                name, offset(pc), base, past);
         ok = false;
       }
-      if (!isTF(pc)) {
+      if ((instrFlags(op) & TF) == 0) {
         error("Last instruction in %s is not terminal %d:%s\n",
-               name, offset(pc), instrToString((Op*)pc, unit()).c_str());
+               name, offset(pc), instrToString(pc, unit()).c_str());
         ok = false;
       } else {
         if (isRet(pc) && !is_main) {
           error("Ret* may not appear in %s\n", name);
           ok = false;
-        } else if (Op(*pc) == OpUnwind && is_main) {
+        } else if (op == Op::Unwind && is_main) {
           error("Unwind may not appear in %s\n", name);
           ok = false;
         }
@@ -331,8 +331,8 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   // Check each branch target lands on a valid instruction boundary
   // within this region.
   for (auto branch : branches) {
-    if (isSwitch(*reinterpret_cast<const Op*>(branch))) {
-      foreachSwitchTarget((Op*)branch, [&](Offset& o) {
+    if (isSwitch(peek_op(branch))) {
+      foreachSwitchTarget(branch, [&](Offset o) {
         // TODO(#2464197): dce breaks switch for verify
         if (offset(branch + o) != -1) {
           ok &= checkOffset("switch target", offset(branch + o),
@@ -340,9 +340,9 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         }
       });
     } else {
-      Offset target = instrJumpTarget((Op*)bc, offset(branch));
+      Offset target = instrJumpTarget(bc, offset(branch));
       ok &= checkOffset("branch target", target, name, base, past);
-      if (*(Op*)branch == Op::JmpNS && target == offset(branch)) {
+      if (peek_op(branch) == Op::JmpNS && target == offset(branch)) {
         error("JmpNS may not have zero offset in %s\n", name);
         ok = false;
       }
@@ -368,7 +368,7 @@ Offset decodeOffset(PC* ppc) {
  */
 class ImmVecRange {
  public:
-  explicit ImmVecRange(const Op* instr) : v(getImmVector(instr)),
+  explicit ImmVecRange(PC instr) : v(getImmVector(instr)),
       vecp(v.vec() + 1), // skip location code
       loc(v.locationCode()),
       loc_local(numLocationCodeImms(loc) ? decodeVariableSizeImm(&vecp) : -1) {
@@ -433,29 +433,30 @@ bool FuncChecker::checkString(PC pc, Id id) {
  * Check instruction and its immediates, return false if we can't continue
  * because we don't know the length of this instruction
  */
-bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
-  if (!isValidOpcode(*instr)) {
+bool FuncChecker::checkImmediates(const char* name, PC const instr) {
+  auto pc = instr;
+  auto const op = decode_op(pc);
+  if (!isValidOpcode(op)) {
     error("Invalid opcode %d in section %s at offset %d\n",
-           uint8_t(*instr), name, offset(PC(instr)));
+          size_t(op), name, offset(instr));
     return false;
   }
   bool ok = true;
-  PC pc = (PC)instr + 1;
-  for (int i = 0, n = numImmediates(*instr); i < n;
+  for (int i = 0, n = numImmediates(op); i < n;
        pc += immSize(instr, i), i++) {
-    switch (immType(*instr, i)) {
+    switch (immType(op, i)) {
     case NA: always_assert(false && "Unexpected immType");
     case MA: { // member vector
       ImmVecRange vr(instr);
       if (vr.size() < 2) {
         // vector must at least have a LocationCode and 1+ MemberCodes
         error("invalid vector size %d at %d\n",
-               vr.size(), offset((PC)instr));
+               vr.size(), offset(instr));
         return false;
       } else {
         if (vr.loc < 0 || vr.loc >= NumLocationCodes) {
           error("invalid location code %d in vector at %d\n",
-                 (int)vr.loc, offset((PC)instr));
+                 (int)vr.loc, offset(instr));
           ok = false;
         }
         if (vr.loc_local != -1) checkLocal(pc, vr.loc_local);
@@ -463,7 +464,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
           MemberCode member = vr.frontMember();
           if (member < 0 || member >= NumMemberCodes) {
             error("invalid member code %d in vector at %d\n",
-                   (int) member, offset((PC)instr));
+                   (int) member, offset(instr));
             ok = false;
           }
           if (vr.frontLocal() != -1) {
@@ -472,7 +473,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
             ok &= checkString(pc, vr.frontString());
           }
           if (member == MQT) {
-            switch (*instr) {
+            switch (op) {
               case Op::CGetM:
               case Op::IssetM:
               case Op::EmptyM:
@@ -483,7 +484,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
               default:
                 error(
                   "Illegal QT member code at %d: %s\n",
-                  offset((PC)instr),
+                  offset(instr),
                   instrToString(instr).c_str()
                 );
                 ok = false;
@@ -504,7 +505,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       int32_t k = decodeVariableSizeImm(&ia_pc);
       if (k >= numIters()) {
         error("invalid iterator variable id %d at %d\n",
-               k, offset((PC)instr));
+               k, offset(instr));
         ok = false;
       }
       break;
@@ -512,7 +513,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
     case IVA: { // variable size int
       PC iva_pc = pc;
       int32_t k = decodeVariableSizeImm(&iva_pc);
-      switch (*instr) {
+      switch (op) {
         case Op::ConcatN:
           ok &= (k >= 2 && k <= kMaxConcatN);
           break;
@@ -523,7 +524,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         case Op::VerifyParamType:
           if (k >= numParams()) {
             error("invalid parameter id %d at %d\n",
-                   k, offset((PC)instr));
+                   k, offset(instr));
             ok = false;
           }
           break;
@@ -578,125 +579,127 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
     }
     case BA: // bytecode address
       // we check branch offsets in checkSection(). ignore here.
-      assert(instrJumpTarget((Op*)unit()->entry(), offset((PC)instr)) !=
+      assert(instrJumpTarget(unit()->entry(), offset(instr)) !=
              InvalidAbsoluteOffset);
       break;
     case OA: { // secondary opcode
-      auto checkPropElemOp = [&](uint8_t op) {
-#define OP(x) if (op == static_cast<uint8_t>(PropElemOp::x)) return;
+      auto checkPropElemOp = [&](uint8_t subop) {
+#define OP(x) if (subop == static_cast<uint8_t>(PropElemOp::x)) return;
         PROP_ELEM_OPS
 #undef OP
-        error("invalid PropElemOp: %d\n", op);
+        error("invalid PropElemOp: %d\n", subop);
         ok = false;
       };
 
-      auto checkMOpFlags = [&](uint8_t op) {
-#define FLAG(x, v) if (op == static_cast<uint8_t>(MOpFlags::x)) return;
+      auto checkMOpFlags = [&](uint8_t subop) {
+#define FLAG(x, v) if (subop == static_cast<uint8_t>(MOpFlags::x)) return;
         M_OP_FLAGS
 #undef FLAG
-        error("invalid MOpFlags: %d\n", op);
+        error("invalid MOpFlags: %d\n", subop);
         ok = false;
       };
 
-      const uint8_t op = *pc;
-      switch (*instr) {
+      const uint8_t subop = *pc;
+      switch (op) {
       default:
-        error("Unexpected opcode %s with immType OA\n", opcodeToName(*instr));
+        error("Unexpected opcode %s with immType OA\n", opcodeToName(op));
         ok = false;
         break;
       case Op::IsTypeC: case Op::IsTypeL:
-#define ISTYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
+#define ISTYPE_OP(x)  if (subop == static_cast<uint8_t>(IsTypeOp::x)) break;
         ISTYPE_OPS
 #undef ISTYPE_OP
-        error("invalid operation for IsType*: %d\n", op);
+        error("invalid operation for IsType*: %d\n", subop);
         ok = false;
         break;
       case Op::InitProp:
-#define INITPROP_OP(x) if (op == static_cast<uint8_t>(InitPropOp::x)) break;
+#define INITPROP_OP(x) if (subop == static_cast<uint8_t>(InitPropOp::x)) break;
         INITPROP_OPS
 #undef INITPROP_OP
-        error("invalid operation for InitProp: %d\n", op);
+        error("invalid operation for InitProp: %d\n", subop);
         ok = false;
         break;
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
-#define INCDEC_OP(x)   if (op == static_cast<uint8_t>(IncDecOp::x)) break;
+#define INCDEC_OP(x)   if (subop == static_cast<uint8_t>(IncDecOp::x)) break;
         INCDEC_OPS
 #undef INCDEC_OP
-        error("invalid operation for IncDec*: %d\n", op);
+        error("invalid operation for IncDec*: %d\n", subop);
         ok = false;
         break;
       case OpSetOpL: case OpSetOpN: case OpSetOpG: case OpSetOpS:
       case OpSetOpM:
-#define SETOP_OP(x, y) if (op == static_cast<uint8_t>(SetOpOp::x)) break;
+#define SETOP_OP(x, y) if (subop == static_cast<uint8_t>(SetOpOp::x)) break;
         SETOP_OPS
 #undef SETOP_OP
-        error("invalid operation for SetOp*: %d\n", op);
+        error("invalid operation for SetOp*: %d\n", subop);
         ok = false;
         break;
       case OpBareThis:
-#define BARETHIS_OP(x) if (op == static_cast<uint8_t>(BareThisOp::x)) break;
+#define BARETHIS_OP(x) if (subop == static_cast<uint8_t>(BareThisOp::x)) break;
         BARETHIS_OPS
 #undef BARETHIS_OP
-        error("invalid BareThisOp: %d\n", op);
+        error("invalid BareThisOp: %d\n", subop);
         ok = false;
         break;
       case OpFatal:
-#define FATAL_OP(x)   if (op == static_cast<uint8_t>(FatalOp::x)) break;
+#define FATAL_OP(x)   if (subop == static_cast<uint8_t>(FatalOp::x)) break;
         FATAL_OPS
 #undef FATAL_OP
-        error("invalid error kind for Fatal: %d\n", op);
+        error("invalid error kind for Fatal: %d\n", subop);
         ok = false;
         break;
       case OpSilence:
-#define SILENCE_OP(x) if (op == static_cast<uint8_t>(SilenceOp::x)) break;
+#define SILENCE_OP(x) if (subop == static_cast<uint8_t>(SilenceOp::x)) break;
         SILENCE_OPS
 #undef SILENCE_OP
-        error("invalid operation for Silence: %d\n", op);
+        error("invalid operation for Silence: %d\n", subop);
         ok = false;
         break;
       case OpOODeclExists:
-#define OO_DECL_EXISTS_OP(x) if (op == static_cast<uint8_t>(OODeclExistsOp::x)) break;
+#define OO_DECL_EXISTS_OP(x)                                    \
+  if (subop == static_cast<uint8_t>(OODeclExistsOp::x)) break;
         OO_DECL_EXISTS_OPS
 #undef OO_DECL_EXISTS_OP
-        error("invalid operation for OODeclExists: %d\n", op);
+        error("invalid operation for OODeclExists: %d\n", subop);
         ok = false;
         break;
       case OpFPushObjMethodD:
       case OpFPushObjMethod:
-#define OBJMETHOD_OP(x) if (op == static_cast<uint8_t>(ObjMethodOp::x)) break;
+#define OBJMETHOD_OP(x)                                         \
+  if (subop == static_cast<uint8_t>(ObjMethodOp::x)) break;
         OBJMETHOD_OPS
 #undef OBJMETHOD_OP
-        error("invalid operation for FPushObjMethod*: %d\n", op);
+        error("invalid operation for FPushObjMethod*: %d\n", subop);
         ok = false;
         break;
       case OpSwitch:
-#define KIND(x) if (op == static_cast<uint8_t>(SwitchKind::x)) break;
+#define KIND(x) if (subop == static_cast<uint8_t>(SwitchKind::x)) break;
         SWITCH_KINDS
 #undef KIND
-        error("invalid kind for Switch: %d\n", op);
+        error("invalid kind for Switch: %d\n", subop);
         ok = false;
         break;
       case OpBaseL: case OpDimL: case OpDimC: case OpDimInt: case OpDimStr:
         if (i == 1) {
-          checkPropElemOp(op);
+          checkPropElemOp(subop);
         } else {
           assert(i == 2);
-          checkMOpFlags(op);
+          checkMOpFlags(subop);
         }
         break;
       case OpQueryML: case OpQueryMC:
       case OpQueryMInt: case OpQueryMStr:
         if (i == 1) {
-#define OP(x) if (op == static_cast<uint8_t>(QueryMOp::x)) break;
+#define OP(x) if (subop == static_cast<uint8_t>(QueryMOp::x)) break;
           QUERY_M_OPS
 #undef OP
-          error("invalid QueryMOp: %d\n", op);
+          error("invalid QueryMOp: %d\n", subop);
           ok = false;
           break;
         }
         assert(i == 2);
-        checkPropElemOp(op);
+        checkPropElemOp(subop);
         break;
       }
     }
@@ -759,7 +762,7 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
  *   [uint8 MemberCode; [IVA imm for member]]
  */
 const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
-  ImmVecRange vr((Op*)pc);
+  ImmVecRange vr(pc);
   int n = 0;
   if (vr.loc_local != -1 ||
       vr.loc == LH ||
@@ -780,7 +783,7 @@ const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
   }
   if (vr.loc == LSC || vr.loc == LSL) m_tmp_sig[n++] = AV; // extra classref
   if (rhs_flavor != NOV) m_tmp_sig[n++] = rhs_flavor; // extra rhs value for Set
-  assert(n == instrNumPops((Op*)pc));
+  assert(n == instrNumPops(pc));
   return m_tmp_sig;
 }
 
@@ -820,7 +823,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef ONE
   #undef NOV
   };
-  switch (*reinterpret_cast<const Op*>(pc)) {
+  switch (peek_op(pc)) {
   case Op::CGetM:     // ONE(LA),      MMANY, ONE(CV)
   case Op::VGetM:     // ONE(LA),      MMANY, ONE(VV)
   case Op::IssetM:    // ONE(LA),      MMANY, ONE(CV)
@@ -842,7 +845,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::QueryMC:
   case Op::QueryMInt:
   case Op::QueryMStr:
-    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
     return m_tmp_sig;
@@ -850,34 +853,34 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FCallD:      // THREE(IVA,SA,SA), FMANY,   ONE(RV)
   case Op::FCallUnpack: // ONE(IVA), FMANY, ONE(RV)
   case Op::FCallArray:  // NA,           ONE(FV), ONE(RV)
-    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
     return m_tmp_sig;
   case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(RV)
-    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
   case Op::CreateCl:  // TWO(IVA,SA),  CVUMANY,   ONE(CV)
-    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
-    for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
   default:
-    return &inputSigs[uint8_t(*pc)][0];
+    return &inputSigs[size_t(peek_op(pc))][0];
   }
 }
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
-  StackTransInfo info = instrStackTransInfo((Op*)pc);
+  StackTransInfo info = instrStackTransInfo(pc);
   int min = cur->fpilen > 0 ? cur->fpi[cur->fpilen - 1].stkmin : 0;
   if (info.numPops > 0 && cur->stklen - info.numPops < min) {
     reportStkUnderflow(b, *cur, pc);
@@ -886,7 +889,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   }
   cur->stklen -= info.numPops;
   auto ok = checkSig(pc, info.numPops, &cur->stk[cur->stklen], sig(pc));
-  auto const op = *(Op*)pc;
+  auto const op = peek_op(pc);
   auto const need_live = isMemberDimOp(op) || isMemberFinalOp(op);
   auto const live_ok = need_live || isTypeAssert(op);
   if ((need_live && !cur->mbr_live) || (cur->mbr_live && !live_ok)) {
@@ -898,7 +901,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 }
 
 bool FuncChecker::checkTerminal(State* cur, PC pc) {
-  if (isRet(pc) || *reinterpret_cast<const Op*>(pc) == Op::Unwind) {
+  if (isRet(pc) || peek_op(pc) == Op::Unwind) {
     if (cur->stklen != 0) {
       error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
              cur->stklen);
@@ -915,9 +918,9 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   }
   bool ok = true;
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  if (isFCallStar(*reinterpret_cast<const Op*>(pc))) {
+  auto const op = peek_op(pc);
+  if (isFCallStar(op)) {
     --cur->fpilen;
-    auto const op = static_cast<Op>(*pc);
     int call_params = op == Op::FCallArray ? 1 : getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
@@ -965,7 +968,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   assert(isIter(pc));
   int id = getImmIva(pc);
   bool ok = true;
-  auto op = *reinterpret_cast<const Op*>(pc);
+  auto op = peek_op(pc);
   if (op == Op::IterInit || op == Op::IterInitK ||
       op == Op::WIterInit || op == Op::WIterInitK ||
       op == Op::MIterInit || op == Op::MIterInitK ||
@@ -1025,7 +1028,8 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef NOV
   };
   bool ok = true;
-  StackTransInfo info = instrStackTransInfo((Op*)pc);
+  auto const op = peek_op(pc);
+  StackTransInfo info = instrStackTransInfo(pc);
   if (info.kind == StackTransInfo::Kind::InsertMid) {
     int index = cur->stklen - info.pos - 1;
     if (index < 0) {
@@ -1034,7 +1038,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     }
     memmove(&cur->stk[index + 1], &cur->stk[index],
            (info.pos + 1) * sizeof(*cur->stk));
-    cur->stk[index] = outputSigs[uint8_t(*reinterpret_cast<const Op*>(pc))][0];
+    cur->stk[index] = outputSigs[size_t(op)][0];
     cur->stklen++;
   } else {
     int pushes = info.numPushes;
@@ -1042,8 +1046,8 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     FlavorDesc *outs = &cur->stk[cur->stklen];
     cur->stklen += pushes;
     for (int i = 0; i < pushes; ++i)
-      outs[i] = outputSigs[uint8_t(*reinterpret_cast<const Op*>(pc))][i];
-    if (isFPush(*reinterpret_cast<const Op*>(pc))) {
+      outs[i] = outputSigs[size_t(op)][i];
+    if (isFPush(op)) {
       if (cur->fpilen >= maxFpi()) {
         error("%s", "more FPush* instructions than FPI regions\n");
         return false;
@@ -1056,7 +1060,6 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     }
   }
 
-  auto const op = *(Op*)pc;
   if (isMemberBaseOp(op))       cur->mbr_live = true;
   else if (isMemberFinalOp(op)) cur->mbr_live = false;
 
@@ -1153,11 +1156,13 @@ bool FuncChecker::checkFlow() {
       if (m_verbose) {
         std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
                      stateToString(cur) << " " <<
-                     instrToString((Op*)pc, unit()) << std::endl;
+                     instrToString(pc, unit()) << std::endl;
       }
       ok &= checkInputs(&cur, pc, b);
-      if (isTF(pc)) ok &= checkTerminal(&cur, pc);
-      if (isFF(pc)) ok &= checkFpi(&cur, pc, b);
+      auto const op = peek_op(pc);
+      auto const flags = instrFlags(op);
+      if (flags & TF) ok &= checkTerminal(&cur, pc);
+      if (flags & FF) ok &= checkFpi(&cur, pc, b);
       if (isIter(pc)) ok &= checkIter(&cur, pc);
       ok &= checkOutputs(&cur, pc, b);
     }
@@ -1191,10 +1196,11 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.
     int id = getImmIva(b->last);
+    auto const last_op = peek_op(b->last);
     bool taken_state =
-      (Op(*b->last) == OpIterNext || Op(*b->last) == OpIterNextK ||
-       Op(*b->last) == OpMIterNext || Op(*b->last) == OpMIterNextK ||
-       Op(*b->last) == OpWIterNext || Op(*b->last) == OpWIterNextK);
+      (last_op == OpIterNext || last_op == OpIterNextK ||
+       last_op == OpMIterNext || last_op == OpMIterNextK ||
+       last_op == OpWIterNext || last_op == OpWIterNextK);
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
     if (m_verbose) {

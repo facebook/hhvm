@@ -73,7 +73,7 @@ std::string show(const IRGS& irgs) {
   auto checkFpi = [&]() {
     if (fpi && spOffset + frameCells == fpi->m_fpOff) {
       auto fpushOff = fpi->m_fpushOff;
-      auto after = fpushOff + instrLen((Op*)irgen::curUnit(irgs)->at(fpushOff));
+      auto after = fpushOff + instrLen(irgen::curUnit(irgs)->at(fpushOff));
       std::ostringstream msg;
       msg << "ActRec from ";
       irgen::curUnit(irgs)->prettyPrint(

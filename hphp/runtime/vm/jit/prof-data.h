@@ -187,7 +187,7 @@ public:
   SrcKey                  transLastSrcKey(TransID id) const;
   Offset                  transStartBcOff(TransID id) const;
   Offset                  transLastBcOff(TransID id)  const;
-  Op*                     transLastInstr(TransID id)  const;
+  PC                      transLastInstr(TransID id)  const;
   Offset                  transStopBcOff(TransID id)  const;
   FuncId                  transFuncId(TransID id)     const;
   Func*                   transFunc(TransID id)       const;

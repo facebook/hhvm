@@ -224,7 +224,7 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 }
 
 void DebugInfo::recordTracelet(TCRange range, const Func* func,
-    const Op* instr, bool exit, bool inPrologue) {
+    PC instr, bool exit, bool inPrologue) {
   if (range.isAcold()) {
     m_acoldDwarfInfo.addTracelet(range, folly::none, func,
                                  instr, exit, inPrologue);

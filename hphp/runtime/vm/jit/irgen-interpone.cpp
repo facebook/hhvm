@@ -427,7 +427,7 @@ void interpOne(IRGS& env,
   auto const unit = curUnit(env);
   spillStack(env);
   env.irb->exceptionStackBoundary();
-  auto const op = unit->getOpcode(bcOff(env));
+  auto const op = unit->getOp(bcOff(env));
 
   idata.bcOff = bcOff(env);
   idata.cellsPopped = popped;

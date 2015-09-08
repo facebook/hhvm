@@ -1161,7 +1161,7 @@ std::string show(const RegionDesc::Block& b) {
     }
 
     std::string instrString;
-    folly::toAppend(instrToString((Op*)b.unit()->at(skIter.offset()), b.unit()),
+    folly::toAppend(instrToString(b.unit()->at(skIter.offset()), b.unit()),
                     byRef,
                     &instrString);
 

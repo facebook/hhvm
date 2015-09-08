@@ -72,6 +72,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
@@ -1482,7 +1483,7 @@ void handleStackOverflow(ActRec* calleeAR) {
     const FPIEnt* fe = liveFunc()->findPrecedingFPI(
       liveUnit()->offsetOf(vmpc()));
     vmpc() = liveUnit()->at(fe->m_fcallOff);
-    assertx(isFCallStar(*reinterpret_cast<const Op*>(vmpc())));
+    assertx(isFCallStar(peek_op(vmpc())));
     raise_error("Stack overflow");
   } else {
     /*
@@ -1973,7 +1974,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
       if (!cur.aStart) continue;
       if (prev.aStart) {
         if (prev.bcStart < unit->bclen()) {
-          recordBCInstr(unit->entry()[prev.bcStart],
+          recordBCInstr(uint32_t(unit->getOp(prev.bcStart)),
                         prev.aStart, cur.aStart, false);
         }
       } else {
@@ -2227,10 +2228,8 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
     if (!RuntimeOption::EvalJitNoGdb) {
       m_debugInfo.recordTracelet(rangeFrom(cb, start, &cb == &code.cold()),
                                  srcFunc,
-                                 reinterpret_cast<const Op*>(
-                                   srcFunc->unit() ?
-                                     srcFunc->unit()->at(sk.offset()) : nullptr
-                                 ),
+                                 srcFunc->unit() ?
+                                   srcFunc->unit()->at(sk.offset()) : nullptr,
                                  exit, inPrologue);
     }
     if (RuntimeOption::EvalPerfPidMap) {

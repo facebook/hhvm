@@ -18,6 +18,8 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/runtime/vm/hhbc-codec.h"
+
 namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
@@ -25,10 +27,11 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 bool branchesToItself(SrcKey sk) {
-  auto op = (Op*)sk.pc();
-  if (!instrIsControlFlow(*op)) return false;
-  if (isSwitch(*op)) return false;
-  auto const branchOffsetPtr = instrJumpOffset(op);
+  auto const pc = sk.pc();
+  auto const op = peek_op(pc);
+  if (!instrIsControlFlow(op)) return false;
+  if (isSwitch(op)) return false;
+  auto const branchOffsetPtr = instrJumpOffset(pc);
   return branchOffsetPtr != nullptr && *branchOffsetPtr == 0;
 }
 

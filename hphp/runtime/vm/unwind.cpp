@@ -21,14 +21,16 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
+
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -162,7 +164,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
 ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
                           ObjectData* phpException) {
   auto const func = fp->func();
-  auto const curOp = *reinterpret_cast<const Op*>(pc);
+  auto const curOp = peek_op(pc);
   auto const prevFp = fp->sfp();
   auto const soff = fp->m_soff;
 

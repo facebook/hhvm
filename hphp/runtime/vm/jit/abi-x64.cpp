@@ -171,6 +171,13 @@ size_t num_arg_regs_simd() {
   return sizeof(simd_args) / sizeof(PhysReg);
 }
 
+RegSet arg_regs(size_t n) {
+  return jit::arg_regs(n);
+}
+RegSet arg_regs_simd(size_t n) {
+  return jit::arg_regs_simd(n);
+}
+
 PhysReg r_svcreq_sf() {
   return abi().sf.findFirst();
 }

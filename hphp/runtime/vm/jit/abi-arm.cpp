@@ -120,6 +120,13 @@ PhysReg rarg_simd(size_t i) {
   not_implemented();
 }
 
+RegSet arg_regs(size_t n) {
+  return jit::arg_regs(n);
+}
+RegSet arg_regs_simd(size_t n) {
+  return jit::arg_regs_simd(n);
+}
+
 PhysReg r_svcreq_req() { not_implemented(); }
 PhysReg r_svcreq_stub() { not_implemented(); }
 PhysReg r_svcreq_sf() { not_implemented(); }

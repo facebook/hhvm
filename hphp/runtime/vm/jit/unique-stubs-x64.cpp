@@ -23,8 +23,8 @@
 #include "hphp/runtime/vm/event-hook.h"
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/align.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"

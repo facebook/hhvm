@@ -191,20 +191,17 @@ struct PropInfo {
 };
 
 /*
- * Try to find a property offset for the given key in baseClass. Will return -1
- * if the mapping from baseClass's name to the Class* can change (which happens
- * in sandbox mode when the ctx class is unrelated to baseClass).
+ * Try to find a property offset for the given key in baseClass. Will return a
+ * PropInfo with an offset of -1 if the mapping from baseClass's name to the
+ * Class* can change (which happens in sandbox mode when the ctx class is
+ * unrelated to baseClass).
  */
 PropInfo getPropertyOffset(IRGS& env,
                            const Class* ctx,
                            const Class* baseClass,
-                           Location keyLoc) {
+                           Type keyType) {
   if (!baseClass) return PropInfo();
 
-  // This doesn't constrain the key type, but it's ok because we only use the
-  // type if it's a constant string (which can never come directly from a
-  // guard).
-  auto const keyType = provenTypeFromLocation(env, keyLoc);
   if (!keyType.hasConstVal(TStr)) return PropInfo();
   auto const name = keyType.strVal();
 
@@ -393,10 +390,11 @@ bool mInstrHasUnknownOffsets(IRGS& env) {
     auto const mc = ni.immVecM[mi];
     if (!mcodeIsProp(mc)) return true;
 
+    auto const keyType = provenTypeFromLocation(env, ni.inputs[ii]);
     auto propInfo = getPropertyOffset(env,
                                       curClass(env),
                                       baseType.clsSpec().cls(),
-                                      ni.inputs[ii]);
+                                      keyType);
     if (propInfo.offset == -1 ||
         mightCallMagicPropMethod(mii.getAttr(mc), propInfo)) {
       return true;
@@ -717,7 +715,7 @@ void emitBaseLCR(MTS& env) {
 
   // Check for common cases where we can pass the base by value, we unboxed
   // above if it was needed.
-  if ((baseType.subtypeOfAny(TObj) && mcodeIsProp(env.immVecM[0])) ||
+  if ((baseType <= TObj && mcodeIsProp(env.immVecM[0])) ||
       env.simpleOp != SimpleOp::None) {
     // Register that we care about the specific type of the base, though, and
     // might care about its specialized type.
@@ -813,26 +811,33 @@ void emitBaseOp(MTS& env) {
 //////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
-PropInfo getCurrentPropertyOffset(MTS& env) {
+PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base,
+                                  Type baseType, Type keyType) {
   // We allow the use of clases from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
-  auto const baseType = env.base.type.derefIfPtr();
+  baseType = baseType.derefIfPtr();
   if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) return PropInfo{};
 
   auto const baseCls = baseType.clsSpec().cls();
-  auto const info = getPropertyOffset(env, curClass(env), baseCls,
-                                      env.ni.inputs[env.iInd]);
+  auto const info = getPropertyOffset(env, curClass(env), baseCls, keyType);
   if (info.offset == -1) return info;
 
-  if (env.irb.constrainValue(env.base.value,
-                             TypeConstraint(baseCls).setWeak())) {
+  if (env.irb->constrainValue(base,
+                              TypeConstraint(baseCls).setWeak())) {
     // We can't use this specialized class without making a guard more
     // expensive, so don't do it.
     return PropInfo{};
   }
 
   return info;
+}
+
+PropInfo getCurrentPropertyOffset(MTS& env) {
+  return getCurrentPropertyOffset(
+    env, env.base.value, env.base.type,
+    provenTypeFromLocation(env, env.ni.inputs[env.iInd])
+  );
 }
 
 /*
@@ -843,21 +848,19 @@ PropInfo getCurrentPropertyOffset(MTS& env) {
  * We can omit the uninit check for properties that we know may not be uninit
  * due to the frontend's type inference.
  */
-SSATmp* checkInitProp(MTS& env,
+SSATmp* checkInitProp(IRGS& env,
                       SSATmp* baseAsObj,
                       SSATmp* propAddr,
+                      SSATmp* key,
                       bool doWarn,
                       bool doDefine) {
-  auto const key = getKey(env);
   assertx(key->isA(TStaticStr));
   assertx(baseAsObj->isA(TObj));
   assertx(propAddr->type() <= TPtrToGen);
+  assertx(!doWarn || !doDefine);
 
   auto const needsCheck =
-    TUninit <= propAddr->type().deref() &&
-    // The m_mInd check is to avoid initializing a property to
-    // InitNull right before it's going to be set to something else.
-    (doWarn || (doDefine && env.mInd < env.immVecM.size() - 1));
+    TUninit <= propAddr->type().deref() && doWarn;
 
   if (!needsCheck) return propAddr;
 
@@ -876,27 +879,25 @@ SSATmp* checkInitProp(MTS& env,
       if (doWarn && wantPropSpecializedWarnings()) {
         gen(env, RaiseUndefProp, baseAsObj, key);
       }
-      if (doDefine) {
-        gen(env, StMem, propAddr, cns(env, TInitNull));
-        return propAddr;
-      }
       return ptrToInitNull(env);
     }
   );
 }
 
-void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
+SSATmp* emitPropSpecialized(
+  IRGS& env,
+  SSATmp* base,
+  Type baseType,
+  SSATmp* key,
+  bool nullsafe,
+  const MInstrAttr mia,
+  PropInfo propInfo
+) {
   assertx(!(mia & MIA_warn) || !(mia & MIA_unset));
   const bool doWarn   = mia & MIA_warn;
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
 
   auto const initNull = ptrToInitNull(env);
-
-  SCOPE_EXIT {
-    // After this function, m_base is either a pointer to init_null_variant or
-    // a property in the object that we've verified isn't uninit.
-    assertx(env.base.type <= TPtrToGen);
-  };
 
   /*
    * Normal case, where the base is an object (and not a pointer to
@@ -904,22 +905,16 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
    * analysis.  The caller of this function will use it to know whether it can
    * avoid a generic incref, unbox, etc.
    */
-  if (env.base.type <= TObj) {
+  if (baseType <= TObj) {
     auto const propAddr = gen(
       env,
       LdPropAddr,
       PropOffset { propInfo.offset },
       typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
-      env.base.value
+      base
     );
-    setBase(
-      env,
-      checkInitProp(env, env.base.value, propAddr, doWarn, doDefine)
-    );
-    return;
+    return checkInitProp(env, base, propAddr, key, doWarn, doDefine);
   }
-
-  auto const nullsafe = (env.immVecM[env.mInd] == MQT);
 
   /*
    * We also support nullable objects for the base.  This is a frequent result
@@ -931,19 +926,14 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
    * otherwise we just give out a pointer to the init_null_variant (after
    * raising the appropriate warnings).
    */
-  auto const newBase = cond(
+  return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckTypeMem, TObj, taken, env.base.value);
+      gen(env, CheckTypeMem, TObj, taken, base);
     },
     [&] {
       // Next: Base is an object. Load property and check for uninit.
-      auto const obj = gen(
-        env,
-        LdMem,
-        env.base.type.deref() & TObj,
-        env.base.value
-      );
+      auto const obj = gen(env, LdMem, baseType.deref() & TObj, base);
       auto const propAddr = gen(
         env,
         LdPropAddr,
@@ -951,7 +941,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
         typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
         obj
       );
-      return checkInitProp(env, obj, propAddr, doWarn, doDefine);
+      return checkInitProp(env, obj, propAddr, key, doWarn, doDefine);
     },
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
       hint(env, Block::Hint::Unlikely);
@@ -990,7 +980,14 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
       return initNull;
     }
   );
-  setBase(env, newBase);
+}
+
+SSATmp* emitPropSpecialized(MTS& env, const MInstrAttr mia,
+                            PropInfo propInfo) {
+  return emitPropSpecialized(
+    env, env.base.value, env.base.type, getKey(env),
+    env.immVecM[env.mInd] == MQT, mia, propInfo
+  );
 }
 
 void emitPropGeneric(MTS& env) {
@@ -1057,7 +1054,7 @@ void emitProp(MTS& env) {
       mightCallMagicPropMethod(mia, propInfo)) {
     emitPropGeneric(env);
   } else {
-    emitPropSpecialized(env, mia, propInfo);
+    setBase(env, emitPropSpecialized(env, mia, propInfo));
   }
 }
 
@@ -1179,8 +1176,10 @@ bool needFirstRatchet(MTS& env) {
   }
 
   if (firstCls->hasNativePropHandler()) {
-    auto propInfo = getPropertyOffset(env, curClass(env), firstCls,
-                                      env.ni.inputs[env.mii.valCount() + 1]);
+    auto propInfo = getPropertyOffset(
+      env, curClass(env), firstCls,
+      provenTypeFromLocation(env, env.ni.inputs[env.mii.valCount() + 1])
+    );
     // For native properties if the property is declared then we know don't
     // call the native handler
     if (propInfo.offset == -1) return true;
@@ -1671,11 +1670,11 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCGetProp(MTS& env) {
-  const auto propInfo   = getCurrentPropertyOffset(env);
+  const auto propInfo = getCurrentPropertyOffset(env);
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MIA_none, propInfo)) {
-    emitPropSpecialized(env, MIA_warn, propInfo);
+    setBase(env, emitPropSpecialized(env, MIA_warn, propInfo));
 
     if (!RuntimeOption::RepoAuthoritative) {
       auto const cellPtr = gen(env, UnboxPtr, env.base.value);
@@ -1730,7 +1729,7 @@ void emitSetProp(MTS& env) {
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MIA_define, propInfo)) {
-    emitPropSpecialized(env, MIA_define, propInfo);
+    setBase(env, emitPropSpecialized(env, MIA_define, propInfo));
 
     auto cellTy = env.base.type.deref();
     auto cellPtr = env.base.value;
@@ -1776,7 +1775,7 @@ void emitIncDecProp(MTS& env) {
     if (env.base.type <= TObj &&
         propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
       DEBUG_ONLY auto const propIntTy = TInt.ptr(Ptr::Prop);
-      emitPropSpecialized(env, MIA_define, propInfo);
+      setBase(env, emitPropSpecialized(env, MIA_define, propInfo));
       assertx(env.base.value->type() <= propIntTy);
       auto const prop = gen(env, LdMem, TInt, env.base.value);
       auto const result = incDec(env, op, prop);
@@ -2373,6 +2372,25 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
   );
 }
 
+SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
+                        bool nullsafe) {
+  auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
+  if (flags & MOpFlags::Define) {
+    if (nullsafe) {
+      gen(env, RaiseError,
+          cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
+      return ptrToInitNull(env);
+    }
+
+    return gen(env, PropDX, miaData, base, key, tvRefPtr(env));
+  }
+
+  if (nullsafe) {
+    return gen(env, PropQ, base, key, tvRefPtr(env));
+  }
+  return gen(env, PropX, miaData, base, key, tvRefPtr(env));
+}
+
 SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
   auto base = env.irb->fs().memberBaseValue();
   auto const basePtr = gen(env, LdMBase);
@@ -2389,21 +2407,16 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
     base = basePtr;
   }
 
-  auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
-  if (flags & MOpFlags::Define) {
-    if (nullsafe) {
-      gen(env, RaiseError,
-          cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
-      return ptrToInitNull(env);
-    }
-
-    return gen(env, PropDX, miaData, base, key, tvRefPtr(env));
+  auto const mia = mOpFlagsToAttr(flags);
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, base->type(), key->type());
+  if (propInfo.offset == -1 || (flags & MOpFlags::Unset) ||
+      mightCallMagicPropMethod(mia, propInfo)) {
+    return propGenericImpl(env, flags, base, key, nullsafe);
   }
 
-  if (nullsafe) {
-    return gen(env, PropQ, base, key, tvRefPtr(env));
-  }
-  return gen(env, PropX, miaData, base, key, tvRefPtr(env));
+  return emitPropSpecialized(env, base, base->type(), key,
+                             nullsafe, mia, propInfo);
 }
 
 SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
@@ -2467,6 +2480,37 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
   gen(env, FinishMemberOp);
 }
 
+SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key, bool nullsafe) {
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, base->type(), key->type());
+
+  if (propInfo.offset != -1 &&
+      !mightCallMagicPropMethod(MIA_none, propInfo)) {
+    auto propAddr = emitPropSpecialized(
+      env, base, base->type(), key,
+      nullsafe, MIA_warn, propInfo
+    );
+
+    if (!RuntimeOption::RepoAuthoritative) {
+      auto const cellPtr = gen(env, UnboxPtr, base);
+      auto const result = gen(env, LdMem, TCell, cellPtr);
+      gen(env, IncRef, result);
+      return result;
+    }
+
+    auto const ty = propAddr->type().deref();
+    auto const cellPtr = ty.maybe(TBoxedCell)
+      ? gen(env, UnboxPtr, propAddr)
+      : propAddr;
+
+    auto const result = gen(env, LdMem, ty.unbox(), cellPtr);
+    gen(env, IncRef, result);
+    return result;
+  }
+
+  return gen(env, nullsafe ? CGetPropQ : CGetProp, base, key);
+}
+
 void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
                 PropElemOp propElem, SSATmp* key) {
   auto basePtr = gen(env, LdMBase);
@@ -2487,9 +2531,9 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
       case QueryMOp::CGet:
         switch (propElem) {
           case PropElemOp::Prop:
-            return gen(env, CGetProp, objBase, key);
+            return cGetPropImpl(env, objBase, key, false);
           case PropElemOp::PropQ:
-            return gen(env, CGetPropQ, objBase, key);
+            return cGetPropImpl(env, objBase, key, true);
           case PropElemOp::Elem:
             auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
             return emitCGetElem(env, realBase, key, simpleOp);

@@ -582,7 +582,7 @@ function date_timezone_set(DateTime $datetime, DateTimeZone $timezone): void {
  *   emitted.
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
 function date(string $format, int $timestamp = -1): mixed;
 
 /**
@@ -630,7 +630,7 @@ function gettimeofday(bool $return_float = false): mixed;
  *   emitted.
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
 function gmdate(string $format, int $timestamp = -1): mixed;
 
 /**
@@ -668,8 +668,8 @@ function gmmktime(int $hour = PHP_INT_MAX,
  *   respect the current locale set with setlocale().
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
-function gmstrftime(string $format, int $timestamp = -1): string;
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
+function gmstrftime(string $format, int $timestamp = -1): mixed;
 
 /**
  * Returns a number formatted according to the given format string using the
@@ -793,7 +793,7 @@ function mktime(int $hour = PHP_INT_MAX,
  *   locale set with setlocale().
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
 function strftime(string $format, int $timestamp = -1): mixed;
 
 /**

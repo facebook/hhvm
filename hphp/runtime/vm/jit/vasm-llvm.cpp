@@ -366,11 +366,13 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
 
     // We override/ignore the alignment and use skew value to compensate.
     uint8_t* ret = code.alloc<uint8_t>(1, Size);
-    assertx(Alignment < x64::kCacheLineSize &&
+    assertx(Alignment < x64::cache_line_size() &&
            "alignment exceeds cache line size");
     always_assert(
-      codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1)) &&
-      "drift in code skew detected");
+      codeSkew == (reinterpret_cast<size_t>(ret) &
+                   (x64::cache_line_size() - 1)) &&
+      "drift in code skew detected"
+    );
 
     FTRACE(1, "Allocate code section \"{}\" id={} at addr={}, size={},"
            " alignment={}, skew={}\n",
@@ -781,10 +783,10 @@ struct LLVMEmitter {
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
     module->addModuleFlag(llvm::Module::Error, "code_skew",
-                          tcMM->computeCodeSkew(x64::kCacheLineSize,
+                          tcMM->computeCodeSkew(x64::cache_line_size(),
                                                   AreaIndex::Main));
     module->addModuleFlag(llvm::Module::Error, "cold_code_skew",
-                          tcMM->computeCodeSkew(x64::kCacheLineSize,
+                          tcMM->computeCodeSkew(x64::cache_line_size(),
                                                 AreaIndex::Cold));
 
     // Record start of cold block. Alas there's no better way to find where

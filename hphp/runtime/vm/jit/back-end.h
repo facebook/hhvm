@@ -55,8 +55,6 @@ struct BackEnd {
   virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
                            TCA begin, TCA end) = 0;
 
-  virtual void genCodeImpl(IRUnit& unit, CodeKind, AsmInfo*) = 0;
-
 protected:
   BackEnd() {}
 };

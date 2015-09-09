@@ -156,105 +156,12 @@ struct BackEnd final : jit::BackEnd {
       dec.Decode(Instruction::Cast(begin));
     }
   }
-
-  void genCodeImpl(IRUnit& unit, CodeKind, AsmInfo*) override;
 };
 
 }
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {
   return folly::make_unique<BackEnd>();
-}
-
-static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
-  FTRACE(6, "genBlock: {}\n", block->id());
-  CodeGenerator cg(state, v, vc);
-  size_t hhir_count{0};
-  for (IRInstruction& inst : *block) {
-    hhir_count++;
-    if (inst.is(EndGuards)) state.pastGuards = true;
-    v.setOrigin(&inst);
-    vc.setOrigin(&inst);
-    cg.cgInst(&inst);
-  }
-  return hhir_count;
-}
-
-void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
-  Timer _t(Timer::codeGen);
-  CodeBlock& mainCodeIn   = mcg->code.main();
-  CodeBlock& coldCodeIn   = mcg->code.cold();
-  CodeBlock* frozenCode   = &mcg->code.frozen();
-
-  CodeBlock mainCode;
-  CodeBlock coldCode;
-  /*
-   * Use separate code blocks, so that attempts to use the mcg's
-   * code blocks directly will fail (eg by overwriting the same
-   * memory being written through these locals).
-   */
-  coldCode.init(coldCodeIn.frontier(), coldCodeIn.available(),
-                coldCodeIn.name().c_str());
-  mainCode.init(mainCodeIn.frontier(), mainCodeIn.available(),
-                mainCodeIn.name().c_str());
-
-  if (frozenCode == &coldCodeIn) {
-    frozenCode = &coldCode;
-  }
-  auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
-  auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
-  size_t hhir_count{0};
-
-  {
-    mcg->code.lock();
-    mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
-
-    SCOPE_EXIT {
-      mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
-      mcg->code.unlock();
-    };
-
-    CodegenState state(unit, asmInfo, *frozenCode);
-    auto const blocks = rpoSortCfg(unit);
-    Vasm vasm;
-    auto& vunit = vasm.unit();
-    // create the initial set of vasm numbered the same as hhir blocks.
-    for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
-      state.labels[i] = vunit.makeBlock(AreaIndex::Main);
-    }
-    // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, blocks);
-    vunit.entry = state.labels[unit.entry()];
-
-    Vtext vtext { mainCode, coldCode, *frozenCode };
-
-    for (auto block : blocks) {
-      auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
-               block->hint() == Block::Hint::Unused ? vasm.frozen() :
-               vasm.main();
-      FTRACE(6, "genBlock {} on {}\n", block->id(),
-             area_names[(unsigned)v.area()]);
-      auto b = state.labels[block];
-      vunit.blocks[b].area = v.area();
-      v.use(b);
-      hhir_count += genBlock(state, v, vasm.cold(), block);
-      assertx(v.closed());
-      assertx(vasm.main().empty() || vasm.main().closed());
-      assertx(vasm.cold().empty() || vasm.cold().closed());
-      assertx(vasm.frozen().empty() || vasm.frozen().closed());
-    }
-    printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
-    assertx(check(vunit));
-    finishARM(vasm.unit(), vtext, abi(kind), state.asmInfo);
-  }
-
-  assertx(coldCodeIn.frontier() == coldStart);
-  assertx(mainCodeIn.frontier() == mainStart);
-  coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
-  mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
-  if (asmInfo) {
-    printUnit(kCodeGenLevel, unit, " after code gen ", asmInfo);
-  }
 }
 
 }}}

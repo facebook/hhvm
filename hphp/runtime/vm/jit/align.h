@@ -41,6 +41,11 @@ bool is_aligned(TCA frontier, Alignment alignment);
 void align(CodeBlock& cb, Alignment alignment, AlignContext context,
            bool fixups = true);
 
+/*
+ * Size of a cache line, in bytes.
+ */
+size_t cache_line_size();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

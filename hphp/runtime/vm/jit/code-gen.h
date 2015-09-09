@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TransLoc;
@@ -86,12 +87,17 @@ struct CodegenState {
   StateVector<SSATmp,Vloc> locs;
 };
 
-// Generate machine code; converts to vasm, optionally converts to llvm,
-// further optimizes, emits code into main/cold/frozen sections, allocates rds
-// and global data, and adds fixup metadata.
+/*
+ * Generate machine code.
+ *
+ * Lower HHIR to vasm, optionally lower vasm to LLIR, run optimization passes,
+ * emit code into main/cold/frozen sections, allocate RDS and global data, and
+ * add fixup metadata.
+ */
 void genCode(IRUnit& unit, CodeKind kind = CodeKind::Trace);
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

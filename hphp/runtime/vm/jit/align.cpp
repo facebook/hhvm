@@ -34,6 +34,10 @@ void align(CodeBlock& cb, Alignment alignment, AlignContext context,
   ARCH_SWITCH_CALL(align, cb, alignment, context, fixups);
 }
 
+size_t cache_line_size() {
+  ARCH_SWITCH_CALL(cache_line_size);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

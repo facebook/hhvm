@@ -43,23 +43,23 @@ constexpr size_t kJmpTargetAlign = 16;
  * Alignment info table.
  */
 constexpr AlignInfo s_aligns[] = {
-  { kCacheLineSize,   kCacheLineSize,      0 },  // CacheLine
-  { kCacheLineSize,   kCacheLineSize / 2,  0 },  // CacheLineRoundUp
-  { kJmpTargetAlign,  kJmpTargetAlign,     0 },  // JmpTarget
-  { kCacheLineSize,   smashableMovqLen(),  kSmashMovqImmOff },
-  { kCacheLineSize,   smashableCmpqLen(),  kSmashCmpqImmOff },
-  { kCacheLineSize,   smashableCallLen(),  0 },
-  { kCacheLineSize,   smashableJmpLen(),   0 },
-  { kCacheLineSize,   smashableJccLen(),   0 },
+  { cache_line_size(),  cache_line_size(),      0 },  // CacheLine
+  { cache_line_size(),  cache_line_size() / 2,  0 },  // CacheLineRoundUp
+  { kJmpTargetAlign,    kJmpTargetAlign,        0 },  // JmpTarget
+  { cache_line_size(),  smashableMovqLen(),     kSmashMovqImmOff },
+  { cache_line_size(),  smashableCmpqLen(),     kSmashCmpqImmOff },
+  { cache_line_size(),  smashableCallLen(),     0 },
+  { cache_line_size(),  smashableJmpLen(),      0 },
+  { cache_line_size(),  smashableJccLen(),      0 },
 
   // Three entries for SmashJccAndJmp, one for each half and one for both
   // together.  The implementation below relies on this being the last
   // sequential enum value.
-  { kCacheLineSize,   smashableJccLen(),   0 },
-  { kCacheLineSize,   smashableJccLen() +
-                      smashableJmpLen(),   smashableJccLen() },
-  { kCacheLineSize,   smashableJccLen() +
-                      smashableJmpLen(),   0 }
+  { cache_line_size(),  smashableJccLen(),  0 },
+  { cache_line_size(),  smashableJccLen() +
+                        smashableJmpLen(),  smashableJccLen() },
+  { cache_line_size(),  smashableJccLen() +
+                        smashableJmpLen(),  0 }
 };
 
 bool is_aligned(TCA frontier, const AlignInfo& a) {

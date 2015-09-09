@@ -35,6 +35,8 @@ bool is_aligned(TCA frontier, Alignment alignment);
 void align(CodeBlock& cb, Alignment alignment, AlignContext context,
            bool fixups = true);
 
+constexpr size_t cache_line_size() { return 64; }
+
 /*
  * All the Alignments can be expressed by stipulating that the code region
  * given by
@@ -53,12 +55,6 @@ struct AlignInfo {
  * Get the AlignInfo for `alignment'; used by relocation.
  */
 const AlignInfo& alignment_info(Alignment alignment);
-
-/*
- * Cache line constants.
- */
-constexpr size_t kCacheLineSize = 64;
-constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 

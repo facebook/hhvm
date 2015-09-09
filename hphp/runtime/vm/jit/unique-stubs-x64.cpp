@@ -229,7 +229,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
 
   // This stub is hot, so make sure to keep it small.
   always_assert(Stats::enabled() ||
-                (cb.frontier() - release <= 4 * x64::kCacheLineSize));
+                (cb.frontier() - release <= 4 * x64::cache_line_size()));
 
   return release;
 }

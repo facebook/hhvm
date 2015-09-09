@@ -80,9 +80,8 @@ bool HHVM_FUNCTION(key_exists,
                    const Variant& key,
                    const Variant& search);
 Variant array_keys_helper(const Variant& input,
-                          const Variant& search_value = uninit_null(),
+                          const Variant& search_value = null_variant,
                           bool strict = false);
-TypedValue* HHVM_FN(array_keys)(ActRec* ar);
 Variant HHVM_FUNCTION(array_map, const Variant& callback,
                                  const Variant& arr1,
                                  const Array& _argv = null_array);

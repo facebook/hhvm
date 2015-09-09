@@ -162,7 +162,7 @@ function key_exists(mixed $key, mixed $search): bool;
  * @return mixed - Returns an array of all the keys in input.
  *
  */
-<<__Native("ActRec"), __IsFoldable>>
+<<__Native("NumArgs"), __IsFoldable>>
 function array_keys(mixed $input,
                     mixed $search_value = null,
                     bool $strict = false): mixed;

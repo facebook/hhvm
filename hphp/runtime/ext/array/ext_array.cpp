@@ -384,17 +384,16 @@ Variant array_keys_helper(const Variant& input,
   }
 }
 
-TypedValue* HHVM_FN(array_keys)(ActRec* ar) {
-  int32_t argc = ar->numArgs();
-  if (argc < 1 || argc > 3) {
-    throw_wrong_arguments_nr(ar->m_func->name()->data(), argc, 1, 3);
-    return arReturn(ar, init_null());
-  }
-
-  Variant key = getArgVariant(ar, 0);
-  Variant search_value = argc > 1 ? getArgVariant(ar, 1) : uninit_null();
-  bool strict = argc > 2 ? getArg<KindOfBoolean>(ar, 2) : false;
-  return arReturn(ar, array_keys_helper(key, search_value, strict));
+static
+Variant HHVM_FUNCTION(array_keys, int64_t argc,
+                                  const Variant& input,
+                                  const Variant& search_value /*=null*/,
+                                  bool strict /*=false*/) {
+  return array_keys_helper(
+    input,
+    argc < 2 ? null_variant : search_value,
+    strict
+  );
 }
 
 static void php_array_merge(Array &arr1, const Array& arr2) {

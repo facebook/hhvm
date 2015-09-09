@@ -25,7 +25,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-constexpr int kNumFreeLocalsHelpers = 9;
+constexpr int kNumFreeLocalsHelpers = 8;
 
 /*
  * Addresses of various unique, long-lived JIT helper routines.
@@ -286,6 +286,10 @@ struct UniqueStubs {
    * Each freeLocalHelpers[i] is an entry point to a partially-unrolled loop.
    * freeManyLocalsHelper should be used instead when there are more than
    * kNumFreeLocalsHelpers locals.
+   *
+   * These helpers expect the address of the frame's last local variable (which
+   * has the lowest address) to be passed in the second argument register.  The
+   * first argument register is ignored.
    *
    * @reached:  vcall from TC
    * @aligned:  false

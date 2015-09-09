@@ -44,8 +44,6 @@ namespace HPHP { namespace jit { namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using namespace jit::reg;
-
 TRACE_SET_MOD(ustubs);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,81 +118,120 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
-  Label doRelease;
-  Label release;
-  Label loopHead;
+/*
+ * Helper for the freeLocalsHelpers which does the actual work of decrementing
+ * a value's refcount or releasing it.
+ *
+ * This helper is reached via call from the various freeLocalHelpers.  It
+ * expects `tv' to be the address of a TypedValue with refcounted type `type'
+ * (though it may be static, and we will do nothing in that case).
+ *
+ * The `saved' register should be a callee-saved GP register that the helper
+ * can use to preserve `tv' across native calls.
+ */
+static TCA emitDecRefHelper(CodeBlock& cb, PhysReg tv, PhysReg type,
+                            RegSet live) {
+  return vwrap(cb, [&] (Vout& v) {
+    // We use the first argument register for the TV data because we may pass
+    // it to the release routine.  It's not live when we enter the helper.
+    auto const data = rarg(0);
+    v << load{tv[TVOFF(m_data)], data};
 
-  auto const rData     = rarg(0); // not live coming in, but used
-                                             // for destructor calls
-  auto const rIter     = rarg(1); // live coming in
-  auto const rFinished = rdx;
-  auto const rType     = ecx;
-  int const tvSize     = sizeof(TypedValue);
+    auto const sf = v.makeReg();
+    v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
 
-  Asm a { cb };
-  align(cb, Alignment::CacheLine, AlignContext::Dead);
-  auto const start = a.frontier();
+    ifThen(v, CC_NL, sf, [&] (Vout& v) {
+      // The refcount is positive, so the value is refcounted.  We need to
+      // either decref or release.
+      ifThen(v, CC_NE, sf, [&] (Vout& v) {
+        // The refcount is greater than 1; decref it.
+        v << declm{data[FAST_REFCOUNT_OFFSET], v.makeReg()};
+        v << ret{};
+      });
 
-asm_label(a, release);
-  a.    loadq  (rIter[TVOFF(m_data)], rData);
-  a.    cmpl   (1, rData[FAST_REFCOUNT_OFFSET]);
-  jccBlock<CC_L>(a, [&] {
-    a.  jz8    (doRelease);
-    a.  decl   (rData[FAST_REFCOUNT_OFFSET]);
+      // Note that the stack is aligned since we called to this helper from an
+      // stack-unaligned stub.
+      PhysRegSaver prs{v, live, true /* aligned */};
+
+      // The refcount is exactly 1; release the value.
+      v << callm{lookupDestructor(v, type)};
+
+      // Between where %rsp is now and the saved RIP of the call into the
+      // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
+      // saved RIP of the call from the stub to this helper.
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed() + 1)};
+      // fallthru
+    });
+
+    // Either we did a decref, or the value was static.
+    v << ret{};
   });
-  a.    ret    ();
-asm_label(a, doRelease);
-  a.    push    (rIter);
-  a.    push    (rFinished);
-  a.    call    (lookupDestructor(a, PhysReg(rType)));
-  // Three quads between where %rsp is now and the saved RIP of the call into
-  // the stub: two from the pushes above, and one for the saved RIP of the call
-  // to `release' done below (e.g., in emitDecLocal).
-  mcg->fixupMap().recordFixup(a.frontier(), makeIndirectFixup(3));
-  a.    pop     (rFinished);
-  a.    pop     (rIter);
-  a.    ret     ();
+}
 
-  auto emitDecLocal = [&]() {
-    Label skipDecRef;
+TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
+  // The address of the first local is passed in the second argument register.
+  // We use the third and fourth as scratch registers.
+  auto const local = rarg(1);
+  auto const last = rarg(2);
+  auto const type = rarg(3);
 
-    // Zero-extend the type while loading so it can be used as an array index
-    // to lookupDestructor() above.
-    emitLoadTVType(a, rIter[TVOFF(m_type)], rType);
-    emitCmpTVType(a, KindOfRefCountThreshold, rbyte(rType));
-    a.  jle8   (skipDecRef);
-    a.  call   (release);
-  asm_label(a, skipDecRef);
+  // This stub is very hot; keep it cache-aligned.
+  align(cb, Alignment::CacheLine, AlignContext::Dead);
+  auto const release = emitDecRefHelper(cb, local, type, local | last);
+
+  auto const decref_local = [&] (Vout& v) {
+    auto const sf = v.makeReg();
+
+    // We can't use emitLoadTVType() here because it does a byte load, and we
+    // need to sign-extend since we use `type' as a 32-bit array index to the
+    // destructor table.
+    v << loadzbl{local[TVOFF(m_type)], type};
+    emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
+
+    ifThen(v, CC_G, sf, [&] (Vout& v) {
+      v << call{release, arg_regs(3)};
+    });
+  };
+
+  auto const next_local = [&] (Vout& v) {
+    v << addqi{static_cast<int>(sizeof(TypedValue)),
+               local, local, v.makeReg()};
   };
 
   alignJmpTarget(cb);
-  us.freeManyLocalsHelper = a.frontier();
-  a.    lea    (rvmfp()[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
-                rFinished);
 
-  // Loop for the first few locals, but unroll the final kNumFreeLocalsHelpers.
-asm_label(a, loopHead);
-  emitDecLocal();
-  a.    addq   (tvSize, rIter);
-  a.    cmpq   (rIter, rFinished);
-  a.    jnz8   (loopHead);
+  us.freeManyLocalsHelper = vwrap(cb, [&] (Vout& v) {
+    // We always unroll the final `kNumFreeLocalsHelpers' decrefs, so only loop
+    // until we hit that point.
+    v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
 
-  for (int i = 0; i < kNumFreeLocalsHelpers; ++i) {
-    us.freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.frontier();
-    emitDecLocal();
-    if (i != kNumFreeLocalsHelpers - 1) {
-      a.addq   (tvSize, rIter);
-    }
+    doWhile(v, CC_NZ, {},
+      [&] (const VregList& in, const VregList& out) {
+        auto const sf = v.makeReg();
+
+        decref_local(v);
+        next_local(v);
+        v << cmpq{local, last, sf};
+        return sf;
+      }
+    );
+  });
+
+  for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
+    us.freeLocalsHelpers[i] = vwrap(cb, [&] (Vout& v) {
+      decref_local(v);
+      if (i != 0) next_local(v);
+    });
   }
 
-  a.    ret    ();
+  // All the stub entrypoints share the same ret.
+  vwrap(cb, [] (Vout& v) { v << ret{}; });
 
-  // Keep me small!
+  // This stub is hot, so make sure to keep it small.
   always_assert(Stats::enabled() ||
-                (a.frontier() - start <= 4 * kX64CacheLineSize));
+                (cb.frontier() - release <= 4 * x64::kCacheLineSize));
 
-  return start;
+  return release;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -211,8 +248,8 @@ TCA emitCallToExit(CodeBlock& cb) {
   auto const start = a.frontier();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     Label ok;
-    a.emitImmReg(uintptr_t(enterTCExit), rax);
-    a.cmpq(rax, *rsp());
+    a.emitImmReg(uintptr_t(enterTCExit), reg::rax);
+    a.cmpq(reg::rax, *rsp());
     a.je8 (ok);
     a.ud2();
   asm_label(a, ok);

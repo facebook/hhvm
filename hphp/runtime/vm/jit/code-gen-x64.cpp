@@ -2308,7 +2308,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
     : mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
   auto const iterReg = v.makeReg();
-  v << lea{rFp[-numLocals * sizeof(TypedValue)], iterReg};
+  v << lea{rFp[localOffset(numLocals - 1)], iterReg};
 
   auto const& marker = inst->marker();
   auto const fix = Fixup{

@@ -104,15 +104,18 @@ void ThreadInfo::onSessionInit() {
 void ThreadInfo::clearPendingException() {
   m_reqInjectionData.clearFlag(PendingExceptionFlag);
 
-  if (m_pendingException != nullptr) delete m_pendingException;
-  m_pendingException = nullptr;
+  if (auto tmp = m_pendingException) {
+    m_pendingException = nullptr;
+    delete tmp;
+  }
 }
 
 void ThreadInfo::setPendingException(Exception* e) {
   m_reqInjectionData.setFlag(PendingExceptionFlag);
 
-  if (m_pendingException != nullptr) delete m_pendingException;
+  auto tmp = m_pendingException;
   m_pendingException = e;
+  delete tmp;
 }
 
 void ThreadInfo::onSessionExit() {

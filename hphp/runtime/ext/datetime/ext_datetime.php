@@ -596,7 +596,7 @@ function date(string $format, int $timestamp = -1): mixed;
  * @return array
  *
  */
-<<__Native("ActRec")>>
+<<__Native("NumArgs")>>
 function getdate(int $timestamp = -1): array;
 
 /**
@@ -697,7 +697,7 @@ function gmstrftime(string $format, int $timestamp = -1): string;
  *   you would expect. See the example below.
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
 function idate(string $format, int $timestamp = -1): mixed;
 
 /**
@@ -721,8 +721,9 @@ function idate(string $format, int $timestamp = -1): mixed;
  * @return array
  *
  */
-<<__Native("ActRec")>>
-function localtime(int $timestamp = -1, bool $is_associative = false): array;
+<<__Native("NumArgs")>>
+function localtime(int $timestamp = -1,
+                   bool $is_associative = false): array;
 
 /**
  * microtime() returns the current Unix timestamp with microseconds. This
@@ -828,7 +829,7 @@ function strptime(string $date, string $format): mixed;
  *   to PHP 5.1.0, this function would return -1 on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native("ActRec")>>
+<<__ParamCoerceModeFalse, __Native("NumArgs")>>
 function strtotime(string $input, int $timestamp = -1): mixed;
 
 /**

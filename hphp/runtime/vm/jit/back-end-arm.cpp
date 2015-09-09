@@ -24,8 +24,6 @@
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/code-gen-arm.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/unwind-arm.h"
@@ -125,10 +123,6 @@ struct BackEnd final : jit::BackEnd {
   void emitInterpReq(CodeBlock& mainCode,
                      SrcKey sk,
                      FPInvOffset spOff) override {
-    if (RuntimeOption::EvalJitTransCounters) {
-      vixl::MacroAssembler a { mainCode };
-      arm::emitTransCounterInc(a);
-    }
     not_implemented();
   }
 

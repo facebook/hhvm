@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -26,6 +25,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -230,7 +230,11 @@ void Vgen::emit(copy2& i) {
     if (how.m_kind == MoveInfo::Kind::Move) {
       a->Mov(X(how.m_dst), X(how.m_src));
     } else {
-      emitXorSwap(*a, X(how.m_dst), X(how.m_src));
+      auto const d = X(how.m_dst);
+      auto const s = X(how.m_src);
+      a->Eor(d, d, s);
+      a->Eor(s, d, s);
+      a->Eor(d, d, s);
     }
   }
 }
@@ -278,7 +282,7 @@ void Vgen::emit(ldimmq& i) {
   }
 }
 
-static void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
+void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
   if (val == 0) {
     a->Fmov(D(d), vixl::xzr);
   } else {

@@ -1016,28 +1016,6 @@ other_files = (
     '/Zend/tests/use_function/includes/global_baz.php',
 )
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "-o",
-    "--only",
-    type=str,
-    action='append',
-    help="only import tests whose path contains this substring."
-)
-parser.add_argument(
-    "--dirty",
-    action='store_true',
-    help="leave around test/zend/all directory."
-)
-parser.add_argument(
-    "-v",
-    "--verbose",
-    action='store_true',
-    help="print out extra stuff."
-)
-args = parser.parse_args()
-
-
 def mkdir_p(path):
     try:
         os.makedirs(path)
@@ -1051,8 +1029,10 @@ def walk(filename, dest_subdir):
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
 
     # Exactly mirror zend's directories incase some tests depend on random crap.
-    # We'll only move things we want into 'good'
-    shutil.copyfile(filename, full_dest_filename)
+    # We'll only move things we want into 'good'. The condition below is in case
+    # of using --local on a file already in the current workind directory.
+    if os.path.abspath(filename) != os.path.abspath(full_dest_filename):
+        shutil.copyfile(filename, full_dest_filename)
 
     full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
@@ -1667,6 +1647,49 @@ def should_import(filename):
         if bad in filename:
             return False
     return True
+
+# -- main --
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-o",
+    "--only",
+    type=str,
+    action='append',
+    help="only import tests whose path contains this substring."
+)
+parser.add_argument(
+    "--dirty",
+    action='store_true',
+    help="leave around test/zend/all directory."
+)
+parser.add_argument(
+    "-v",
+    "--verbose",
+    action='store_true',
+    help="print out extra stuff."
+)
+parser.add_argument(
+    "--local",
+    type=str,
+    help="Convert a single local .phpt into *.php and expect files in the CWD.")
+args = parser.parse_args()
+
+if args.local:
+    if args.only:
+        print("--only and --local are not compatible; choose one.")
+        sys.exit(1)
+    if not os.path.exists(args.local):
+        print("--local file not found")
+        sys.exit(1)
+    if not args.local.endswith('.phpt'):
+        print("Invalid --local file. Must be a .phpt file")
+        sys.exit(1)
+
+    print("Converting %s into php and expect files..." % (args.local, ))
+    walk(args.local, os.getcwd())
+
+    sys.exit(0)
 
 script_dir = os.path.dirname(__file__)
 zend_dir = os.path.normpath(os.path.join(script_dir, '../zend'))

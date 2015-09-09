@@ -399,7 +399,7 @@ CachedUnit checkoutFile(StringData* path, const struct stat& statInfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
+} // end empty namespace
 
 //////////////////////////////////////////////////////////////////////
 
@@ -407,7 +407,8 @@ const std::string mangleUnitPHP7Options() {
   // As the list of options increases, we may want to do something smarter here?
   std::string s;
   s +=
-    (RuntimeOption::PHP7_UVS ? '1' : '0');
+    (RuntimeOption::PHP7_UVS ? '1' : '0') +
+    (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0');
   return s;
 }
 

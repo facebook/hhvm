@@ -370,8 +370,10 @@ HackStrictOption
 bool RuntimeOption::LookForTypechecker = true;
 bool RuntimeOption::AutoTypecheck = true;
 
+// PHP7 is off by default (false)
 bool RuntimeOption::PHP7 = false;
 bool RuntimeOption::PHP7_UVS = false;
+bool RuntimeOption::PHP7_NoHexNumerics = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1154,6 +1156,7 @@ void RuntimeOption::Load(
     // of questionable value, so just doing this for now.
     Config::Bind(PHP7, ini, config, "PHP7.all", false);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", PHP7);
+    Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics", PHP7);
   }
   {
     // Server

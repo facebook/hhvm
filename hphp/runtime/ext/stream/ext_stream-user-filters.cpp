@@ -266,12 +266,11 @@ int64_t StreamFilter::invokeFilter(const req::ptr<BucketBrigade>& in,
                                    const req::ptr<BucketBrigade>& out,
                                    bool closing) {
   auto consumedTV = make_tv<KindOfInt64>(0);
-  auto consumedRef = RefData::Make(consumedTV);
-
+  auto consumedRef = Variant::attach(RefData::Make(consumedTV));
   PackedArrayInit params(4);
   params.append(Variant(in));
   params.append(Variant(out));
-  params.append(Variant{consumedRef});
+  params.append(consumedRef);
   params.append(closing);
   return m_filter->o_invoke(s_filter, params.toArray()).toInt64();
 }

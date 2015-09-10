@@ -32,10 +32,11 @@ public:
 
 }
 
+namespace {
 /*
 * Automatically register FastCGIServerFactory on program start
 */
-static struct RegisterFastCGIServer {
+struct RegisterFastCGIServer {
 public:
   RegisterFastCGIServer() {
     auto registry = HPHP::ServerFactoryRegistry::getInstance();
@@ -43,3 +44,4 @@ public:
     registry->registerFactory("fastcgi", factory);
   }
 } s_RegisterFastCGIServer;
+}

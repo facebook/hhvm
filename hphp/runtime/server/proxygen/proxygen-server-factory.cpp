@@ -29,10 +29,11 @@ public:
 
 }
 
+namespace {
 /*
 * Automatically register ProxygenServerFactory on program start
 */
-static struct RegisterProxygenServer {
+struct RegisterProxygenServer {
 public:
   RegisterProxygenServer() {
     auto registry = HPHP::ServerFactoryRegistry::getInstance();
@@ -40,3 +41,4 @@ public:
     registry->registerFactory("proxygen", factory);
   }
 } s_RegisterProxygenServer;
+}

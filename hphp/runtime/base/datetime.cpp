@@ -273,10 +273,18 @@ DateTime::DateTime(int64_t timestamp, bool utc /* = false */) {
   fromTimeStamp(timestamp, utc);
 }
 
-DateTime::DateTime(int64_t timestamp, req::ptr<TimeZone> tz): m_tz(tz) {
+DateTime::DateTime(int64_t timestamp, req::ptr<TimeZone> tz) : m_tz(tz) {
   fromTimeStamp(timestamp);
 }
 
+DateTime::DateTime(const DateTime& dt) :
+  m_tz(dt.m_tz),
+  m_timestamp(dt.m_timestamp),
+  m_timestampSet(dt.m_timestampSet) {
+
+  auto t = timelib_time_clone(dt.m_time.get());
+  m_time = TimePtr(t, time_deleter());
+}
 
 void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   m_timestamp = timestamp;
@@ -902,10 +910,7 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
 }
 
 req::ptr<DateTime> DateTime::cloneDateTime() const {
-  bool err;
-  auto ret = req::make<DateTime>(toTimeStamp(err), true);
-  ret->setTimezone(m_tz);
-  return ret;
+  return req::make<DateTime>(*this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

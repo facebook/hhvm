@@ -228,6 +228,7 @@ public:
 public:
   // constructor
   DateTime();
+  DateTime(const DateTime&);
   explicit DateTime(int64_t timestamp, bool utc = false); // from a timestamp
   explicit DateTime(int64_t timestamp, req::ptr<TimeZone> tz);
 

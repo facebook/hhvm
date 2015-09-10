@@ -26,6 +26,7 @@ class StandardExtension final : public Extension {
     initFile();
     initIntrinsics();
     initMath();
+    initProcess();
   }
 
   void threadInit() override {
@@ -49,6 +50,7 @@ class StandardExtension final : public Extension {
   void initFile();
   void initIntrinsics();
   void initMath();
+  void initProcess();
 
   void threadInitMisc();
 };

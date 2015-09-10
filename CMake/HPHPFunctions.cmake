@@ -110,12 +110,10 @@ endmacro()
 
 function(append_systemlib TARGET SOURCE SECTNAME)
   if(CYGWIN OR MSVC OR MINGW)
-    # for each library append the following line to embed.rc
-    # $sectionname RCDATA "$source"
-    add_custom_command(TARGET generate_rc
-      COMMAND echo "${SECTNAME} RCDATA \"${SOURCE}\"" >> embed.rc
-      COMMENT "Adding ${SOURCE} as ${SECTNAME} to embed.rc"
-      )
+    list(APPEND ${TARGET}_SLIBS_NAMES "${SECTNAME}")
+    set(${TARGET}_SLIBS_NAMES ${${TARGET}_SLIBS_NAMES} PARENT_SCOPE)
+    list(APPEND ${TARGET}_SLIBS_SOURCES "${SOURCE}")
+    set(${TARGET}_SLIBS_SOURCES ${${TARGET}_SLIBS_SOURCES} PARENT_SCOPE)
   else()
     if (APPLE)
       set(${TARGET}_SLIBS ${${TARGET}_SLIBS} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE} PARENT_SCOPE)
@@ -132,7 +130,14 @@ function(embed_systemlibs TARGET DEST)
   if (APPLE)
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
   elseif(CYGWIN OR MSVC OR MINGW)
-    # nothing to do
+    set(RESOURCE_FILE "LANGUAGE 0, 0\n")
+    set(i 0)
+    foreach (nm ${${TARGET}_SLIBS_NAMES})
+      list(GET ${TARGET}_SLIBS_SOURCES ${i} source)
+      set(RESOURCE_FILE "${RESOURCE_FILE}${nm} RCDATA \"${source}\"\n")
+      math(EXPR i "${i} + 1")
+    endforeach()
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/embed.rc "${RESOURCE_FILE}")
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"

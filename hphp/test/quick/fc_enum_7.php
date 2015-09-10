@@ -13,6 +13,9 @@ enum Bar : string as string {
   BAZ = '10';
 }
 
+enum Baz : int {
+}
+
 class Stringy {
   function __toString(): string {
     return 'foo';
@@ -36,6 +39,10 @@ var_dump(Foo::isValid(null));
 echo "getValues/getNames tests on Bar\n";
 var_dump(Bar::getValues());
 var_dump(Bar::getNames());
+
+echo "getValues/getNames tests on Baz\n";
+var_dump(Baz::getValues());
+var_dump(Baz::getNames());
 
 echo "coerce() on Foo\n";
 var_dump(Foo::coerce(Foo::FOO));

@@ -65,16 +65,16 @@ EnumCache::~EnumCache() {
 const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
                                                        bool recurse) {
   auto const numConstants = klass->numConstants();
-  size_t foundOnClass = 0;
-  Array values;
-  Array names;
+  auto values = Array::Create();
+  auto names = Array::Create();
   auto const consts = klass->constants();
   for (size_t i = 0; i < numConstants; i++) {
     if (consts[i].isAbstract() || consts[i].isType()) {
       continue;
     }
-    if (consts[i].cls == klass) foundOnClass++;
-    else if (!recurse) continue;
+    if (consts[i].cls != klass && !recurse) {
+      continue;
+    }
     Cell value = consts[i].val;
     // Handle dynamically set constants
     if (value.m_type == KindOfUninit) {
@@ -92,12 +92,6 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
     }
     values.set(StrNR(consts[i].name), cellAsCVarRef(value));
     names.set(cellAsCVarRef(value), VarNR(consts[i].name));
-  }
-  if (UNLIKELY(foundOnClass == 0)) {
-    std::string msg;
-    msg += klass->name()->data();
-    msg += " enum must contain values";
-    EnumCache::failLookup(msg);
   }
 
   {

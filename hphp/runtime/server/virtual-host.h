@@ -63,9 +63,13 @@ public:
   bool checkExistenceBeforeRewrite() const {
     return m_checkExistenceBeforeRewrite;
   }
+  // should we always decode the post data as if it were
+  // application/x-www-form-urlencoded
+  bool alwaysDecodePostData(const String& url) const;
 
   // url rewrite rules
-  bool rewriteURL(const String& host, String &url, bool &qsa, int &redirect) const;
+  bool rewriteURL(const String& host, String &url,
+                  bool &qsa, int &redirect) const;
 
   // ip blocking rules
   bool isBlocking(const std::string &command, const std::string &ip) const;
@@ -112,6 +116,8 @@ private:
   void initRuntimeOption(const IniSetting::Map& ini, const Hdf& overwrite);
   bool m_disabled = false;
   bool m_checkExistenceBeforeRewrite = true;
+  bool m_alwaysDecodePostData = true;
+  std::set<std::string, stdltistr> m_decodePostDataBlackList;
   std::string m_name;
   std::string m_prefix;
   std::string m_pattern;

@@ -87,6 +87,12 @@ void VirtualHost::UpdateSerializationSizeLimit() {
   }
 }
 
+bool VirtualHost::alwaysDecodePostData(const String& origPath) const {
+  if (!m_alwaysDecodePostData) return false;
+  if (m_decodePostDataBlackList.empty()) return true;
+  return !m_decodePostDataBlackList.count(origPath.toCppString());
+}
+
 const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
@@ -214,6 +220,12 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
 
   m_checkExistenceBeforeRewrite =
     Config::GetBool(ini, vh, "CheckExistenceBeforeRewrite", true, false);
+
+  m_alwaysDecodePostData =
+    Config::GetBool(ini, vh, "AlwaysDecodePostData", true, false);
+
+  m_decodePostDataBlackList =
+    Config::GetSetC(ini, vh, "DecodePostDataBlackList");
 
   auto rr_callback = [&] (const IniSetting::Map &ini_rr,
                           const Hdf &hdf_rr,

@@ -44,7 +44,8 @@ struct HttpProtocol {
   static void PreparePostVariables(Array& post,
                                    Variant& raw_post,
                                    Array& files,
-                                   Transport *transport);
+                                   Transport* transport,
+                                   const RequestURI& r);
   static bool PrepareCookieVariable(Array& cookie,
                                     Transport *transport);
   static void PrepareServerVariable(Array& server,

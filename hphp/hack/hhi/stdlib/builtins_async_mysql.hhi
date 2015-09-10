@@ -114,6 +114,7 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
   public function __construct() { parent::__construct(); }
   public function mysql_errno() { }
   public function mysql_error() { }
+  public function mysql_normalize_error() { }
   public function failureType() { }
 }
 class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {

@@ -756,6 +756,11 @@ String HHVM_METHOD(AsyncMysqlErrorResult, mysql_error) {
   return data->m_op->mysql_error();
 }
 
+String HHVM_METHOD(AsyncMysqlErrorResult, mysql_normalize_error) {
+  auto* data = Native::data<AsyncMysqlErrorResult>(this_);
+  return data->m_op->mysql_normalize_error();
+}
+
 String HHVM_METHOD(AsyncMysqlErrorResult, failureType) {
   auto* data = Native::data<AsyncMysqlErrorResult>(this_);
   return data->m_op->resultString().toString();
@@ -1469,6 +1474,7 @@ public:
     HHVM_ME(AsyncMysqlErrorResult, clientStats);
     HHVM_ME(AsyncMysqlErrorResult, mysql_errno);
     HHVM_ME(AsyncMysqlErrorResult, mysql_error);
+    HHVM_ME(AsyncMysqlErrorResult, mysql_normalize_error);
     HHVM_ME(AsyncMysqlErrorResult, failureType);
     Native::registerNativeDataInfo<AsyncMysqlErrorResult>(
       AsyncMysqlErrorResult::s_className.get(), Native::NDIFlags::NO_COPY);

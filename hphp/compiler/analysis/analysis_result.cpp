@@ -997,8 +997,9 @@ std::string AnalysisResult::prepareFile(const char *root,
                                         bool chop,
                                         bool stripPath /* = true */) {
   std::string fullPath = root;
-  if (!fullPath.empty() && fullPath[fullPath.size() - 1] != '/') {
-    fullPath += "/";
+  if (!fullPath.empty() &&
+    !FileUtil::isDirSeparator(fullPath[fullPath.size() - 1])) {
+    fullPath += FileUtil::getDirSeparator();
   }
 
   auto file = fileName;
@@ -1015,7 +1016,7 @@ std::string AnalysisResult::prepareFile(const char *root,
     fullPath += file;
   }
   for (size_t pos = strlen(root); pos < fullPath.size(); pos++) {
-    if (fullPath[pos] == '/') {
+    if (FileUtil::isDirSeparator(fullPath[pos])) {
       mkdir(fullPath.substr(0, pos).c_str(), 0777);
     }
   }

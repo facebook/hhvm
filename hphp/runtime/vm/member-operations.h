@@ -1232,65 +1232,16 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
   unknownBaseType(base);
 }
 
-template <bool setResult>
-NEVER_INLINE
-void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to) {
-  assert(cellIsPlausible(*fr));
-  assert(fr->m_type != KindOfUninit);
+void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to);
 
-  auto dup = [&]() { if (setResult) cellDup(*fr, *to); };
-
-  switch (op) {
-  case IncDecOp::PreInc:
-    cellInc(*fr);
-    dup();
-    return;
-  case IncDecOp::PostInc:
-    dup();
-    cellInc(*fr);
-    return;
-  case IncDecOp::PreDec:
-    cellDec(*fr);
-    dup();
-    return;
-  case IncDecOp::PostDec:
-    dup();
-    cellDec(*fr);
-    return;
-  default: break;
-  }
-
-  switch (op) {
-  case IncDecOp::PreIncO:
-    cellIncO(*fr);
-    dup();
-    return;
-  case IncDecOp::PostIncO:
-    dup();
-    cellIncO(*fr);
-    return;
-  case IncDecOp::PreDecO:
-    cellDecO(*fr);
-    dup();
-    return;
-  case IncDecOp::PostDecO:
-    dup();
-    cellDecO(*fr);
-    return;
-  default: break;
-  }
-  not_reached();
-}
-
-template <bool setResult>
 inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
   assert(cellIsPlausible(*fr));
 
   if (UNLIKELY(fr->m_type != KindOfInt64)) {
-    return incDecBodySlow<setResult>(op, fr, to);
+    return incDecBodySlow(op, fr, to);
   }
 
-  auto copy = [&]() { if (setResult) cellCopy(*fr, *to); };
+  auto copy = [&]() { cellCopy(*fr, *to); };
 
   // fast cases, assuming integers overflow to ints
   switch (op) {
@@ -1336,7 +1287,6 @@ inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
   not_reached();
 }
 
-template <bool setResult>
 inline void IncDecElemEmptyish(
   IncDecOp op,
   TypedValue* base,
@@ -1351,16 +1301,14 @@ inline void IncDecElemEmptyish(
                  tvAsCVarRef(&key).toString().data());
   }
   assert(result->m_type == KindOfNull);
-  IncDecBody<setResult>(op, result, &dest);
+  IncDecBody(op, result, &dest);
 }
 
-template <bool setResult>
 inline void IncDecElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  if (setResult) tvWriteNull(&dest);
+  tvWriteNull(&dest);
 }
 
-template <bool setResult>
 inline void IncDecElem(
   TypedValue& tvRef,
   IncDecOp op,
@@ -1372,18 +1320,18 @@ inline void IncDecElem(
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecElemEmptyish<setResult>(op, base, key, dest);
+      return IncDecElemEmptyish(op, base, key, dest);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return IncDecElemScalar<setResult>(dest);
+        return IncDecElemScalar(dest);
       }
-      return IncDecElemEmptyish<setResult>(op, base, key, dest);
+      return IncDecElemEmptyish(op, base, key, dest);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return IncDecElemScalar<setResult>(dest);
+      return IncDecElemScalar(dest);
 
     case KindOfStaticString:
     case KindOfString:
@@ -1391,12 +1339,12 @@ inline void IncDecElem(
         raise_error("Cannot increment/decrement overloaded objects "
           "nor string offsets");
       }
-      return IncDecElemEmptyish<setResult>(op, base, key, dest);
+      return IncDecElemEmptyish(op, base, key, dest);
 
     case KindOfArray: {
       auto result =
         ElemDArray<MoreWarnings, /* reffy */ false, KeyType::Any>(base, key);
-      return IncDecBody<setResult>(op, tvToCell(result), &dest);
+      return IncDecBody(op, tvToCell(result), &dest);
     }
 
     case KindOfObject: {
@@ -1408,7 +1356,7 @@ inline void IncDecElem(
         tvRef = objOffsetGet(instanceFromTv(base), key);
         result = tvToCell(&tvRef);
       }
-      return IncDecBody<setResult>(op, result, &dest);
+      return IncDecBody(op, result, &dest);
     }
 
     case KindOfRef:
@@ -1418,7 +1366,6 @@ inline void IncDecElem(
   unknownBaseType(base);
 }
 
-template <bool setResult>
 inline void IncDecNewElemEmptyish(
   IncDecOp op,
   TypedValue* base,
@@ -1428,16 +1375,14 @@ inline void IncDecNewElemEmptyish(
   auto result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
   assert(result->m_type == KindOfNull);
-  IncDecBody<setResult>(op, result, &dest);
+  IncDecBody(op, result, &dest);
 }
 
-template <bool setResult>
 inline void IncDecNewElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  if (setResult) tvWriteNull(&dest);
+  tvWriteNull(&dest);
 }
 
-template <bool setResult>
 inline void IncDecNewElem(
   TypedValue& tvRef,
   IncDecOp op,
@@ -1448,30 +1393,30 @@ inline void IncDecNewElem(
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecNewElemEmptyish<setResult>(op, base, dest);
+      return IncDecNewElemEmptyish(op, base, dest);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return IncDecNewElemScalar<setResult>(dest);
+        return IncDecNewElemScalar(dest);
       }
-      return IncDecNewElemEmptyish<setResult>(op, base, dest);
+      return IncDecNewElemEmptyish(op, base, dest);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return IncDecNewElemScalar<setResult>(dest);
+      return IncDecNewElemScalar(dest);
 
     case KindOfStaticString:
     case KindOfString:
       if (base->m_data.pstr->size() != 0) {
         raise_error("[] operator not supported for strings");
       }
-      return IncDecNewElemEmptyish<setResult>(op, base, dest);
+      return IncDecNewElemEmptyish(op, base, dest);
 
     case KindOfArray: {
       TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
       assert(result->m_type == KindOfNull);
-      return IncDecBody<setResult>(op, tvToCell(result), &dest);
+      return IncDecBody(op, tvToCell(result), &dest);
     }
 
     case KindOfObject: {
@@ -1482,7 +1427,7 @@ inline void IncDecNewElem(
       } else {
         tvRef = objOffsetGet(instanceFromTv(base), make_tv<KindOfNull>());
         result = tvToCell(&tvRef);
-        IncDecBody<setResult>(op, result, &dest);
+        IncDecBody(op, result, &dest);
       }
       return;
     }
@@ -2037,14 +1982,11 @@ inline TypedValue* SetOpProp(TypedValue& tvRef,
   unknownBaseType(base);
 }
 
-template <bool setResult>
 inline void IncDecPropNull(TypedValue& dest) {
   raise_warning("Attempt to increment/decrement property of non-object");
-  if (setResult) {
-    tvWriteNull(&dest);
-  }
+  tvWriteNull(&dest);
 }
-template <bool setResult>
+
 inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
                                TypedValue key, TypedValue& dest) {
   auto const obj = newInstance(SystemLib::s_stdclassClass);
@@ -2057,22 +1999,11 @@ inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
   SCOPE_EXIT { decRefStr(keySD); };
   TypedValue tv;
   tvWriteNull(&tv);
-  if (setResult) {
-    IncDecBody<true>(op, &tv, &dest);
-    obj->setProp(nullptr, keySD, &dest);
-  } else {
-    // The caller doesn't actually want the result set, but we have to do so in
-    // order to call obj->setProp().
-    TypedValue tDest;
-    tvWriteUninit(&tDest);
-    IncDecBody<true>(op, &tv, &tDest);
-    obj->setProp(nullptr, keySD, &tDest);
-    assert(!isRefcountedType(tDest.m_type));
-  }
+  IncDecBody(op, &tv, &dest);
+  obj->setProp(nullptr, keySD, &dest);
   assert(!isRefcountedType(tv.m_type));
 }
 
-template <bool setResult>
 inline void IncDecPropObj(Class* ctx,
                           IncDecOp op,
                           ObjectData* base,
@@ -2080,10 +2011,10 @@ inline void IncDecPropObj(Class* ctx,
                           TypedValue& dest) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
-  base->incDecProp<setResult>(ctx, op, keySD, dest);
+  base->incDecProp(ctx, op, keySD, dest);
 }
 
-template <bool setResult, bool isObj = false>
+template <bool isObj = false>
 inline void IncDecProp(
   Class* ctx,
   IncDecOp op,
@@ -2093,7 +2024,7 @@ inline void IncDecProp(
 ) {
   if (isObj) {
     auto obj = reinterpret_cast<ObjectData*>(base);
-    IncDecPropObj<setResult>(ctx, op, obj, key, dest);
+    IncDecPropObj(ctx, op, obj, key, dest);
     return;
   }
 
@@ -2101,29 +2032,29 @@ inline void IncDecProp(
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecPropStdclass<setResult>(op, base, key, dest);
+      return IncDecPropStdclass(op, base, key, dest);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return IncDecPropNull<setResult>(dest);
+        return IncDecPropNull(dest);
       }
-      return IncDecPropStdclass<setResult>(op, base, key, dest);
+      return IncDecPropStdclass(op, base, key, dest);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfArray:
     case KindOfResource:
-      return IncDecPropNull<setResult>(dest);
+      return IncDecPropNull(dest);
 
     case KindOfStaticString:
     case KindOfString:
       if (base->m_data.pstr->size() != 0) {
-        return IncDecPropNull<setResult>(dest);
+        return IncDecPropNull(dest);
       }
-      return IncDecPropStdclass<setResult>(op, base, key, dest);
+      return IncDecPropStdclass(op, base, key, dest);
 
     case KindOfObject:
-      return IncDecPropObj<setResult>(ctx, op, instanceFromTv(base), key, dest);
+      return IncDecPropObj(ctx, op, instanceFromTv(base), key, dest);
 
     case KindOfRef:
     case KindOfClass:

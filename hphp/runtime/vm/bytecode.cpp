@@ -5498,7 +5498,7 @@ OPTBLD_INLINE void iopIncDecL(IOP_ARGS) {
   } else {
     fr = tvToCell(fr);
   }
-  IncDecBody<true>(op, fr, to);
+  IncDecBody(op, fr, to);
 }
 
 OPTBLD_INLINE void iopIncDecN(IOP_ARGS) {
@@ -5509,7 +5509,7 @@ OPTBLD_INLINE void iopIncDecN(IOP_ARGS) {
   lookupd_var(vmfp(), name, nameCell, local);
   SCOPE_EXIT { decRefStr(name); };
   assert(local != nullptr);
-  IncDecBody<true>(op, tvToCell(local), nameCell);
+  IncDecBody(op, tvToCell(local), nameCell);
 }
 
 OPTBLD_INLINE void iopIncDecG(IOP_ARGS) {
@@ -5520,7 +5520,7 @@ OPTBLD_INLINE void iopIncDecG(IOP_ARGS) {
   lookupd_gbl(vmfp(), name, nameCell, gbl);
   SCOPE_EXIT { decRefStr(name); };
   assert(gbl != nullptr);
-  IncDecBody<true>(op, tvToCell(gbl), nameCell);
+  IncDecBody(op, tvToCell(gbl), nameCell);
 }
 
 OPTBLD_INLINE void iopIncDecS(IOP_ARGS) {
@@ -5532,7 +5532,7 @@ OPTBLD_INLINE void iopIncDecS(IOP_ARGS) {
                 ss.name->data());
   }
   tvRefcountedDecRef(ss.nameCell);
-  IncDecBody<true>(op, tvToCell(ss.val), ss.output);
+  IncDecBody(op, tvToCell(ss.val), ss.output);
   vmStack().discard();
 }
 
@@ -5544,20 +5544,20 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
     switch (mstate.mcode) {
       case MW:
-        IncDecNewElem<true>(*mstate.ref.asTypedValue(), op, mstate.base, to);
+        IncDecNewElem(*mstate.ref.asTypedValue(), op, mstate.base, to);
         break;
       case MEL:
       case MEC:
       case MET:
       case MEI:
-        IncDecElem<true>(*mstate.ref.asTypedValue(), op, mstate.base,
-                         *mstate.curMember, to);
+        IncDecElem(*mstate.ref.asTypedValue(), op, mstate.base,
+                   *mstate.curMember, to);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class* ctx = arGetContextClass(vmfp());
-        IncDecProp<true>(ctx, op, mstate.base, *mstate.curMember, to);
+        IncDecProp(ctx, op, mstate.base, *mstate.curMember, to);
         break;
       }
       case MQT:

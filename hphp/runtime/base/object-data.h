@@ -392,13 +392,8 @@ struct ObjectData {
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
 
-  template <bool setResult>
-  void incDecProp(
-    Class* ctx,
-    IncDecOp op,
-    const StringData* key,
-    TypedValue& dest
-  );
+  void incDecProp(Class* ctx, IncDecOp op, const StringData* key,
+                  TypedValue& dest);
 
   void unsetProp(Class* ctx, const StringData* key);
 

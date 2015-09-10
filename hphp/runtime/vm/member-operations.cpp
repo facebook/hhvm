@@ -187,5 +187,53 @@ void throw_cannot_use_newelem_for_lval_read() {
     "Cannot use [] with collections for reading in an lvalue context");
 }
 
+void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to) {
+  assert(cellIsPlausible(*fr));
+  assert(fr->m_type != KindOfUninit);
+
+  auto dup = [&]() { cellDup(*fr, *to); };
+
+  switch (op) {
+  case IncDecOp::PreInc:
+    cellInc(*fr);
+    dup();
+    return;
+  case IncDecOp::PostInc:
+    dup();
+    cellInc(*fr);
+    return;
+  case IncDecOp::PreDec:
+    cellDec(*fr);
+    dup();
+    return;
+  case IncDecOp::PostDec:
+    dup();
+    cellDec(*fr);
+    return;
+  default: break;
+  }
+
+  switch (op) {
+  case IncDecOp::PreIncO:
+    cellIncO(*fr);
+    dup();
+    return;
+  case IncDecOp::PostIncO:
+    dup();
+    cellIncO(*fr);
+    return;
+  case IncDecOp::PreDecO:
+    cellDecO(*fr);
+    dup();
+    return;
+  case IncDecOp::PostDecO:
+    dup();
+    cellDecO(*fr);
+    return;
+  default: break;
+  }
+  not_reached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

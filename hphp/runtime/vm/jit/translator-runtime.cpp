@@ -160,7 +160,7 @@ TypedValue incDecElem(
   IncDecOp op
 ) {
   TypedValue result;
-  HPHP::IncDecElem<true>(mis->tvRef, op, base, key, result);
+  HPHP::IncDecElem(mis->tvRef, op, base, key, result);
   assertx(result.m_type != KindOfRef);
   return result;
 }

@@ -309,7 +309,7 @@ TypedValue incDecPropImpl(
   IncDecOp op
 ) {
   auto result = make_tv<KindOfUninit>();
-  HPHP::IncDecProp<true, isObj>(ctx, op, base, key, result);
+  HPHP::IncDecProp<isObj>(ctx, op, base, key, result);
   assertx(result.m_type != KindOfRef);
   return result;
 }

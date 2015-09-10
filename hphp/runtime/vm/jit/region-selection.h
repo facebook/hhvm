@@ -24,6 +24,7 @@
 #include <boost/container/flat_map.hpp>
 
 #include <folly/Format.h>
+#include <folly/Hash.h>
 #include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
@@ -66,6 +67,7 @@ struct RegionDesc {
   struct Arc;
   struct Location;
   struct TypedLocation;
+  struct GuardedLocation;
   struct ReffinessPred;
   using BlockPtr = std::shared_ptr<Block>;
   using BlockId = TransID;
@@ -85,10 +87,16 @@ struct RegionDesc {
   BlockPtr          entry() const;
   const BlockVec&   blocks() const;
   BlockPtr          block(BlockId id) const;
-  const BlockIdSet& succs(BlockId bid) const;
-  const BlockIdSet& preds(BlockId bid) const;
+  const BlockIdSet& succs(BlockId id) const;
+  const BlockIdSet& preds(BlockId id) const;
   const BlockIdSet& sideExitingBlocks() const;
-  bool              isExit(BlockId bid) const;
+  bool              isExit(BlockId id) const;
+
+  /*
+   * Returns the set of blocks that got merged into block `id' by
+   * guard relaxation.
+   */
+  const BlockIdSet& merged(BlockId id) const;
 
   /*
    * Modify this RegionDesc so that its list of blocks is sorted in a reverse
@@ -110,14 +118,18 @@ struct RegionDesc {
   SrcKey            lastSrcKey() const;
 
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
+  void              replaceBlock(BlockId bid, BlockPtr newBlock);
   void              deleteBlock(BlockId bid);
   void              renumberBlock(BlockId oldId, BlockId newId);
   void              addArc(BlockId src, BlockId dst);
   void              removeArc(BlockId src, BlockId dst);
+  void              addMerged(BlockId fromId, BlockId intoId);
   void              setSideExitingBlock(BlockId bid);
   bool              isSideExitingBlock(BlockId bid) const;
   folly::Optional<BlockId> prevRetrans(BlockId id) const;
   folly::Optional<BlockId> nextRetrans(BlockId id) const;
+  void              clearPrevRetrans(BlockId id);
+  void              clearNextRetrans(BlockId id);
   void              setNextRetrans(BlockId id, BlockId next);
   void              append(const RegionDesc&  other);
   void              prepend(const RegionDesc& other);
@@ -133,6 +145,7 @@ private:
     BlockPtr                 block;
     BlockIdSet               preds;
     BlockIdSet               succs;
+    BlockIdSet               merged; // other blocks that got merged into this
     folly::Optional<BlockId> prevRetrans;
     folly::Optional<BlockId> nextRetrans;
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
@@ -225,6 +238,8 @@ struct RegionDesc::Location {
     return false;
   }
 
+  struct Hash { size_t operator()(Location loc) const; };
+
 private:
   Tag m_tag;
   union {
@@ -253,6 +268,23 @@ struct RegionDesc::TypedLocation {
 inline bool operator==(const RegionDesc::TypedLocation& a,
                        const RegionDesc::TypedLocation& b) {
   return a.location == b.location && a.type == b.type;
+}
+
+/*
+ * Information about a location that is guarded in a RegionDesc.
+ * Includes the type and the DataTypeCategory.
+ */
+struct RegionDesc::GuardedLocation {
+  Location         location;
+  Type             type;
+  DataTypeCategory category;
+};
+
+inline bool operator==(const RegionDesc::GuardedLocation& a,
+                       const RegionDesc::GuardedLocation& b) {
+  return a.location == b.location &&
+         a.type     == b.type     &&
+         a.category == b.category;
 }
 
 /*
@@ -302,12 +334,19 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
   return a.mask == b.mask && a.vals == b.vals && a.arSpOffset == b.arSpOffset;
 }
 
+
+inline bool operator!=(const RegionDesc::ReffinessPred& a,
+                       const RegionDesc::ReffinessPred& b) {
+  return !(a == b);
+}
+
 /*
  * A basic block in the region, with type predictions for conditions
  * at various execution points, including at entry to the block.
  */
 struct RegionDesc::Block {
   using TypedLocVec   = jit::vector<TypedLocation>;
+  using GuardedLocVec = jit::vector<GuardedLocation>;
   using RefPredVec    = jit::vector<ReffinessPred>;
   using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
   using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
@@ -359,7 +398,7 @@ struct RegionDesc::Block {
    * precondition is likely to result in a side exit after little to no
    * forward progress.
    */
-  void addPreCondition(TypedLocation);
+  void addPreCondition(const GuardedLocation&);
 
   /*
    * Add information about parameter reffiness to this block.
@@ -384,13 +423,18 @@ struct RegionDesc::Block {
   void setPostConds(const PostConditions&);
 
   /*
+   * Clears the block's type pre-conditions.
+   */
+  void clearPreConditions();
+
+  /*
    * The following getters return references to the metadata maps holding the
    * information added using the add* and set* methods above. The best way to
    * iterate over the information is using a MapWalker, since they're all
    * backed by a sorted map.
    */
   const TypedLocVec&    typePredictions()   const { return m_typePredictions;  }
-  const TypedLocVec&    typePreConditions() const { return m_typePreConditions;}
+  const GuardedLocVec&  typePreConditions() const { return m_typePreConditions;}
   const ParamByRefMap&  paramByRefs()       const { return m_byRefs;           }
   const RefPredVec&     reffinessPreds()    const { return m_refPreds;         }
   const KnownFuncMap&   knownFuncs()        const { return m_knownFuncs;       }
@@ -413,12 +457,17 @@ private:
   FPInvOffset     m_initialSpOffset;
   TransID         m_profTransID;
   TypedLocVec     m_typePredictions;
-  TypedLocVec     m_typePreConditions;
+  GuardedLocVec   m_typePreConditions;
   ParamByRefMap   m_byRefs;
   RefPredVec      m_refPreds;
   KnownFuncMap    m_knownFuncs;
   PostConditions  m_postConds;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
+                const RegionDesc::Block::RefPredVec& reffys2);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -558,6 +607,13 @@ void regionizeFunc(const Func*  func,
                    RegionVec&   regions);
 
 /*
+ * Optimize the guards of `region'.
+ *
+ * The `region' must have its retranslation blocks already chained.
+ */
+void optimizeGuards(RegionDesc& region, const ProfData& profData);
+
+/*
  * Returns the PGO region selector to be used for the given `func'.
  * This depends on the values of RuntimeOption::EvalJitPGORegionSelector
  * and RuntimeOption::EvalJitPGOCFGHotFuncOnly and the given `func'.
@@ -581,6 +637,8 @@ bool check(const RegionDesc& region, std::string& error);
  */
 std::string show(RegionDesc::Location);
 std::string show(RegionDesc::TypedLocation);
+std::string show(const RegionDesc::GuardedLocation&);
+std::string show(const RegionDesc::Block::GuardedLocVec&);
 std::string show(const PostConditions&);
 std::string show(const RegionDesc::ReffinessPred&);
 std::string show(RegionContext::LiveType);

@@ -546,10 +546,12 @@ public:
   F(uint32_t, JitPGOMinBlockCountPercent, 0)                            \
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
+  F(uint32_t, JitPGORelaxPercent,      100)                             \
   F(bool,     JitLoops,                true)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRConstrictGuards,         hhirConstrictGuardsDefault())    \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
+  F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \

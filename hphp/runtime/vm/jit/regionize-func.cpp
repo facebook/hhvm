@@ -53,15 +53,16 @@ TransIDSet findRetransSet(const RegionDesc& region, RegionDesc::BlockId bid) {
 }
 
 /**
- * Add `arc' to `coveredArcs', as well as any other arcs going from
- * arc.src into a retranslation of arc.dst in the `region'.
+ * Add to `coveredArcs' all `cfg's arcs going from `src' to 'dst' or
+ * any of `dst's retranslations in `dstRegion'.
  */
-void markCoveredArc(const TransCFG::Arc& arc,
+void markCoveredArc(TransID src,
+                    TransID dst,
                     const TransCFG& cfg,
                     const RegionDesc& dstRegion,
                     TransCFG::ArcPtrSet& coveredArcs) {
-  auto dstRetransSet = findRetransSet(dstRegion, arc.dst());
-  for (auto outArc : cfg.outArcs(arc.src())) {
+  auto dstRetransSet = findRetransSet(dstRegion, dst);
+  for (auto outArc : cfg.outArcs(src)) {
     if (hasTransID(outArc->dst())) {
       auto dstTid = getTransID(outArc->dst());
       if (dstRetransSet.count(dstTid)) {
@@ -93,31 +94,35 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
   for (auto arc : cfg.inArcs(newHead)) {
     TransID src = arc->src();
     if (coveredNodes.count(src)) {
-      markCoveredArc(*arc, cfg, *region, coveredArcs);
+      markCoveredArc(src, arc->dst(), cfg, *region, coveredArcs);
     }
   }
 
   // Mark all CFG arcs within the region as covered.
   region->forEachArc([&](RegionDesc::BlockId src, RegionDesc::BlockId dst) {
     if (!hasTransID(dst)) return;
-    TransID srcTid = region->block(src)->profTransID();
     TransID dstTid = region->block(dst)->profTransID();
-    assertx(cfg.hasArc(srcTid, dstTid));
-    bool foundArc = false;
-    for (auto arc : cfg.outArcs(srcTid)) {
-      if (arc->dst() == dstTid) {
-        markCoveredArc(*arc, cfg, *region, coveredArcs);
-        foundArc = true;
+    auto markOutgoing = [&](TransID srcTid) {
+      for (auto arc : cfg.outArcs(srcTid)) {
+        if (arc->dst() == dstTid) {
+          markCoveredArc(srcTid, arc->dst(), cfg, *region, coveredArcs);
+        }
       }
+    };
+    TransID srcTid = region->block(src)->profTransID();
+    markOutgoing(srcTid);
+    for (auto mergedSrcId : region->merged(src)) {
+      if (!hasTransID(mergedSrcId)) continue;
+      markOutgoing(getTransID(mergedSrcId));
     }
-    always_assert(foundArc);
   });
 
   // Mark all outgoing arcs from the region to a head node as covered.
   for (auto node : selectedVec) {
     for (auto arc : cfg.outArcs(node)) {
       if (heads.count(arc->dst())) {
-        markCoveredArc(*arc, cfg, *headToRegion[arc->dst()], coveredArcs);
+        markCoveredArc(arc->src(), arc->dst(), cfg, *headToRegion[arc->dst()],
+                       coveredArcs);
       }
     }
   }

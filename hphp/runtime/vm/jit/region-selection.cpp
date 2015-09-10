@@ -28,6 +28,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
@@ -95,6 +96,32 @@ PGORegionMode pgoRegionMode(const Func& func) {
 
 //////////////////////////////////////////////////////////////////////
 
+size_t RegionDesc::Location::Hash::operator()(RegionDesc::Location loc) const {
+  return folly::hash::hash_combine(uint32_t(loc.m_tag), loc.m_local.locId);
+}
+
+/*
+ * Checks whether two RefPredVecs contain the same elements, which may
+ * appear in different orders.
+ */
+bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
+                const RegionDesc::Block::RefPredVec& reffys2) {
+  if (reffys1.size() != reffys2.size()) return false;
+
+  for (size_t r1 = 0; r1 < reffys1.size(); r1++) {
+    size_t r2 = 0;
+    for (; r2 < reffys2.size(); r2++) {
+      if (reffys1[r1].arSpOffset == reffys2[r2].arSpOffset) break;
+    }
+    if (r2 == reffys2.size()) return false;
+    if (reffys1[r1] != reffys2[r2]) return false;
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool RegionDesc::empty() const {
   return m_blocks.empty();
 }
@@ -145,14 +172,36 @@ RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
   return block.get();
 }
 
+void RegionDesc::replaceBlock(BlockId bid, BlockPtr newBlock) {
+  auto oldBlock = block(bid);
+  m_data[bid].block = newBlock;
+  auto it = std::find(m_blocks.begin(), m_blocks.end(), oldBlock);
+  assertx(it != m_blocks.end());
+  *it = newBlock;
+}
+
 void RegionDesc::deleteBlock(BlockId bid) {
   auto it = std::find_if(m_blocks.begin(), m_blocks.end(),
                          [&](const BlockPtr b) { return b->id() == bid; });
   if (it == m_blocks.end()) return;
+
+  for (auto pid : preds(bid)) removeArc(pid, bid);
+  for (auto sid : succs(bid)) removeArc(bid, sid);
+
+  if (auto nextR = nextRetrans(bid)) {
+    auto prevR = prevRetrans(bid);
+    clearPrevRetrans(nextR.value());
+    if (prevR) {
+      clearNextRetrans(prevR.value());
+      setNextRetrans(prevR.value(), nextR.value());
+    } else {
+      clearPrevRetrans(nextR.value());
+    }
+  } else if (auto prevR = prevRetrans(bid)) {
+    clearNextRetrans(prevR.value());
+  }
+
   m_blocks.erase(it);
-  auto d = data(bid);
-  always_assert(d.succs.empty() && d.preds.empty() &&
-                "RegionDesc::deleteBlock needs support for blocks with arcs");
   m_data.erase(bid);
 }
 
@@ -182,6 +231,10 @@ const RegionDesc::BlockIdSet& RegionDesc::preds(BlockId id) const {
   return const_cast<RegionDesc*>(this)->data(id).preds;
 }
 
+const RegionDesc::BlockIdSet& RegionDesc::merged(BlockId id) const {
+  return const_cast<RegionDesc*>(this)->data(id).merged;
+}
+
 folly::Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
   return const_cast<RegionDesc*>(this)->data(id).prevRetrans;
 }
@@ -197,6 +250,14 @@ void RegionDesc::setNextRetrans(BlockId id, BlockId next) {
   data(next).prevRetrans = id;
 }
 
+void RegionDesc::clearNextRetrans(BlockId id) {
+  data(id).nextRetrans = folly::none;
+}
+
+void RegionDesc::clearPrevRetrans(BlockId id) {
+  data(id).prevRetrans = folly::none;
+}
+
 const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {
   return m_sideExitingBlocks;
 }
@@ -209,6 +270,10 @@ void RegionDesc::addArc(BlockId srcId, BlockId dstId) {
 void RegionDesc::removeArc(BlockId srcID, BlockId dstID) {
   data(srcID).succs.erase(dstID);
   data(dstID).preds.erase(srcID);
+}
+
+void RegionDesc::addMerged(BlockId fromId, BlockId intoId) {
+  data(intoId).merged.insert(fromId);
 }
 
 void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
@@ -305,7 +370,15 @@ void RegionDesc::sortBlocks() {
   RegionDesc::BlockIdVec reverse;
 
   postOrderSort(entry()->id(), visited, reverse);
-  assertx(m_blocks.size() == reverse.size());
+  assertx(m_blocks.size() >= reverse.size());
+
+  // Remove unreachable blocks from `m_data'.
+  for (auto& b : m_blocks) {
+    auto bid = b->id();
+    if (visited.count(bid) == 0) {
+      deleteBlock(bid);
+    }
+  }
 
   // Update `m_blocks' vector.
   m_blocks.clear();
@@ -561,11 +634,13 @@ void RegionDesc::Block::addPredicted(TypedLocation locType) {
   m_typePredictions.push_back(locType);
 }
 
-void RegionDesc::Block::addPreCondition(TypedLocation locType) {
-  FTRACE(2, "Block::addPreCondition({})\n", show(locType));
-  assertx(locType.type != TBottom);
-  assertx(locType.type <= TStkElem);
-  m_typePreConditions.push_back(locType);
+void RegionDesc::Block::addPreCondition(const GuardedLocation& locGuard) {
+  FTRACE(2, "Block::addPreCondition({})\n", show(locGuard));
+  assertx(locGuard.type != TBottom);
+  assertx(locGuard.type <= TStkElem);
+  assertx(locGuard.type.isSpecialized() ||
+          typeFitsConstraint(locGuard.type, locGuard.category));
+  m_typePreConditions.push_back(locGuard);
 }
 
 void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
@@ -600,6 +675,10 @@ void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
 
 void RegionDesc::Block::setPostConds(const PostConditions& conds) {
   m_postConds = conds;
+}
+
+void RegionDesc::Block::clearPreConditions() {
+  m_typePreConditions.clear();
 }
 
 /*
@@ -668,8 +747,22 @@ void RegionDesc::Block::checkMetadata() const {
     }
   };
 
+  auto checkGuardedLocations = [&](const char* msg, const GuardedLocVec& vec) {
+    for (auto& guardedLoc : vec) {
+      assertx(guardedLoc.type.isSpecialized() ||
+              typeFitsConstraint(guardedLoc.type, guardedLoc.category));
+      auto& loc = guardedLoc.location;
+      switch (loc.tag()) {
+      case Location::Tag::Local: assertx(loc.localId() < m_func->numLocals());
+                                 break;
+      case Location::Tag::Stack: // Unchecked
+                                 break;
+      }
+    }
+  };
+
   checkTypedLocations("type prediction", m_typePredictions);
-  checkTypedLocations("type precondition", m_typePreConditions);
+  checkGuardedLocations("type precondition", m_typePreConditions);
 
   for (auto& byRef : m_byRefs) {
     rangeCheck("parameter reference flag", byRef.first.offset());
@@ -767,7 +860,7 @@ RegionDescPtr selectHotRegion(TransID transId,
 //////////////////////////////////////////////////////////////////////
 
 static bool postCondMismatch(const RegionDesc::TypedLocation& postCond,
-                             const RegionDesc::TypedLocation& preCond) {
+                             const RegionDesc::GuardedLocation& preCond) {
   return postCond.location == preCond.location &&
          !preCond.type.maybe(postCond.type);
 }
@@ -1065,6 +1158,23 @@ std::string show(RegionDesc::TypedLocation ta) {
   ).str();
 }
 
+std::string show(const RegionDesc::GuardedLocation& guardedLoc) {
+  return folly::format(
+    "{} :: {} ({})",
+    show(guardedLoc.location),
+    guardedLoc.type.toString(),
+    typeCategoryName(guardedLoc.category)
+  ).str();
+}
+
+std::string show(const RegionDesc::Block::GuardedLocVec& guardedLocVec) {
+  std::string ret;
+  for (auto& guardedLoc : guardedLocVec) {
+    folly::format(&ret, "{} ; ", show(guardedLoc));
+  }
+  return ret;
+}
+
 std::string show(const PostConditions& pconds) {
   std::string ret;
   for (const auto& postCond : pconds.changed) {
@@ -1211,11 +1321,13 @@ std::string show(const RegionDesc& region) {
                   &ret);
   for (auto& b : region.blocks()) {
     auto const id = b->id();
+    auto const& mergedSet = region.merged(id);
+    std::string mergedStr = mergedSet.empty() ? "" :
+                            (" (" + folly::join(",", mergedSet) + ")");
     uint32_t coldness = 255 - (255 * weight(b) / maxBlockWgt);
-    folly::toAppend(folly::format(" \"B{}\" [label=\"B {}\\np: {}\","
-                                  "fillcolor=\"#ff{:02x}{:02x}\"]\n",
-                                  id, id, weight(b), coldness, coldness),
-                    &ret);
+    folly::format(&ret, " \"B{}\" [label=\"B {}{}\\np: {}\","
+                  "fillcolor=\"#ff{:02x}{:02x}\"]\n",
+                  id, id, mergedStr, weight(b), coldness, coldness);
   }
 
   // Print arcs in dot format.

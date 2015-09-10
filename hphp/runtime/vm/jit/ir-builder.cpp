@@ -699,7 +699,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     // Relax typeParam with its current constraint. This is used below to
     // recursively relax the constraint on the source, if needed.
     auto constraint = applyConstraint(m_constraints.guards[inst], guardTc);
-    auto const knownType = relaxType(typeParam, constraint);
+    auto const knownType = relaxType(typeParam, constraint.category);
 
     if (!typeFitsConstraint(knownType, tc)) {
       auto const newTc = relaxConstraint(tc, knownType, srcType);
@@ -808,7 +808,7 @@ bool IRBuilder::constrainSlot(int32_t idOrOffset,
   // Relax typeParam with its current constraint.  This is used below to
   // recursively relax the constraint on the source, if needed.
   auto constraint = applyConstraint(m_constraints.guards[guard], guardTc);
-  auto const knownType = relaxType(typeParam, constraint);
+  auto const knownType = relaxType(typeParam, constraint.category);
 
   if (!typeFitsConstraint(knownType, tc)) {
     auto const newTc = relaxConstraint(tc, knownType, prevType);

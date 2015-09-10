@@ -54,7 +54,12 @@ bool relaxGuards(IRUnit&, const GuardConstraints& guards,
  */
 bool typeFitsConstraint(Type t, TypeConstraint cat);
 
-Type relaxType(Type t, TypeConstraint cat);
+/*
+ * Returns the least specific supertype of t that maintains the properties
+ * required by tc.
+ */
+Type relaxType(Type t, DataTypeCategory cat);
+
 TypeConstraint relaxConstraint(const TypeConstraint origTc,
                                const Type knownType, const Type toRelax);
 TypeConstraint applyConstraint(TypeConstraint origTc, TypeConstraint newTc);

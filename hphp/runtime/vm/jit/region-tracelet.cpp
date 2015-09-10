@@ -30,6 +30,8 @@
 
 #include "hphp/util/trace.h"
 
+#include <folly/MapUtil.h>
+
 #include <algorithm>
 #include <vector>
 
@@ -160,7 +162,7 @@ RegionDescPtr RegionFormer::go() {
     auto t = lt.type;
     if (t <= TCls) {
       irgen::assertTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPreCondition({lt.location, t});
+      m_curBlock->addPreCondition({lt.location, t, DataTypeGeneric});
     } else if (emitPredictions) {
       irgen::predictTypeLocation(m_irgs, lt.location, t);
       m_curBlock->addPredicted({lt.location, t});
@@ -505,7 +507,7 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
 
 
 using VisitGuardFn =
-  std::function<void(const RegionDesc::Location&, Type, bool)>;
+  std::function<void(IRInstruction*, const RegionDesc::Location&, Type, bool)>;
 
 /*
  * For every instruction in trace representing a tracelet guard, call func with
@@ -515,13 +517,14 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   using L = RegionDesc::Location;
   auto blocks = rpoSortCfg(unit);
   for (auto* block : blocks) {
-    for (auto const& inst : *block) {
+    for (auto& inst : *block) {
       switch (inst.op()) {
         case EndGuards:
           return;
         case HintLocInner:
         case CheckLoc:
-          func(L::Local{inst.extra<LocalId>()->locId},
+          func(&inst,
+               L::Local{inst.extra<LocalId>()->locId},
                inst.typeParam(),
                inst.is(HintLocInner));
           break;
@@ -530,7 +533,9 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
         {
           auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
           auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
-          func(L::Stack{offsetFromFp}, inst.typeParam(),
+          func(&inst,
+               L::Stack{offsetFromFp},
+               inst.typeParam(),
                inst.is(HintStkInner));
           break;
         }
@@ -570,15 +575,28 @@ void RegionFormer::recordDependencies() {
   auto guardMap = std::map<RegionDesc::Location,Type>{};
   ITRACE(2, "Visiting guards\n");
   auto hintMap = std::map<RegionDesc::Location,Type>{};
-  visitGuards(unit, [&](const RegionDesc::Location& loc, Type type, bool hint) {
+  auto catMap = std::map<RegionDesc::Location,DataTypeCategory>{};
+  const auto& guards = m_irgs.irb->guards()->guards;
+  visitGuards(unit, [&](IRInstruction* guard, const RegionDesc::Location& loc,
+                        Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
     if (type <= TCls) return;
     auto& whichMap = hint ? hintMap : guardMap;
     auto inret = whichMap.insert(std::make_pair(loc, type));
-    if (inret.second) return;
+    if (inret.second) {
+      if (!hint) {
+        catMap[loc] = folly::get_default(guards, guard).category;
+      }
+      return;
+    }
     auto& oldTy = inret.first->second;
     oldTy &= type;
+    if (!hint) {
+      auto& oldCat = catMap[loc];
+      auto newCat = folly::get_default(guards, guard).category;
+      oldCat = std::max(oldCat, newCat);
+    }
   });
 
   for (auto& kv : guardMap) {
@@ -600,7 +618,8 @@ void RegionFormer::recordDependencies() {
       // may have needed that (recorded already above).
       continue;
     }
-    auto const preCond = RegionDesc::TypedLocation { kv.first, kv.second };
+    auto const preCond = RegionDesc::GuardedLocation { kv.first, kv.second,
+                                                       catMap[kv.first] };
     ITRACE(1, "selectTracelet adding guard {}\n", show(preCond));
     firstBlock.addPreCondition(preCond);
   }

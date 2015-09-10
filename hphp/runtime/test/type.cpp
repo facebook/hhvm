@@ -180,10 +180,10 @@ TEST(Type, TypeConstraints) {
 }
 
 TEST(Type, RelaxType) {
-  EXPECT_EQ(TGen, relaxType(TBoxedStr, {DataTypeGeneric}));
+  EXPECT_EQ(TGen, relaxType(TBoxedStr, DataTypeGeneric));
   EXPECT_EQ(TBoxedInitCell | TUncounted,
             relaxType(TBoxedObj | TInitNull,
-                      {DataTypeCountness}));
+                      DataTypeCountness));
 
 
   auto tc = TypeConstraint{DataTypeSpecialized};
@@ -191,7 +191,7 @@ TEST(Type, RelaxType) {
   tc.category = DataTypeSpecialized;
   auto type = Type::SubObj(SystemLib::s_IteratorClass);
   EXPECT_EQ("Obj<=Iterator", type.toString());
-  EXPECT_EQ(type, relaxType(type, tc));
+  EXPECT_EQ(type, relaxType(type, tc.category));
 
   EXPECT_EQ(TBoxedInitCell,
             relaxType(TBoxedInitCell, DataTypeCountnessInit));

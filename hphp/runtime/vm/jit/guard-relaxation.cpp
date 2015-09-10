@@ -155,10 +155,10 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
   }
 }
 
-Type relaxCell(Type t, TypeConstraint tc) {
+Type relaxCell(Type t, DataTypeCategory cat) {
   assertx(t <= TCell);
 
-  switch (tc.category) {
+  switch (cat) {
     case DataTypeGeneric:
       return TGen;
 
@@ -174,21 +174,7 @@ Type relaxCell(Type t, TypeConstraint tc) {
       return t.unspecialize();
 
     case DataTypeSpecialized:
-      assertx(tc.wantClass() ^ tc.wantArrayKind());
-
-      if (tc.wantClass()) {
-        // We could try to relax t's specialized class to tc.desiredClass() if
-        // they're related but not the same, but we only support guarding on
-        // final classes so the resulting guard would be bogus.
-      } else {
-        // t might have a RepoAuthType::Array that wasn't asked for in tc, but
-        // RATArrays always come from static analysis and never guards, so we
-        // don't need to eliminate it here. Just make sure t actually fits the
-        // constraint.
-        assertx(t < TArr && t.arrSpec().kind());
-        assertx(!tc.wantArrayShape() || t.arrSpec().shape());
-      }
-
+      assertx(t.isSpecialized());
       return t;
   }
 
@@ -233,7 +219,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
       simplifyCategory(constraint.category);
 
       auto const oldType = inst.typeParam();
-      auto newType = relaxType(oldType, constraint);
+      auto newType = relaxType(oldType, constraint.category);
 
       if (oldType != newType) {
         ITRACE(1, "relaxGuards changing {}'s type to {}\n", inst, newType);
@@ -314,15 +300,11 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
   not_reached();
 }
 
-/*
- * Returns the least specific supertype of t that maintains the properties
- * required by tc.
- */
-Type relaxType(Type t, TypeConstraint tc) {
+Type relaxType(Type t, DataTypeCategory cat) {
   always_assert_flog(t <= TGen && t != TBottom, "t = {}", t);
-  if (tc.category == DataTypeGeneric) return TGen;
+  if (cat == DataTypeGeneric) return TGen;
   auto const relaxed =
-    (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, tc);
+    (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, cat);
   return t <= TCell ? relaxed : relaxed | TBoxedInitCell;
 }
 
@@ -333,8 +315,8 @@ static void incCategory(DataTypeCategory& c) {
 
 /*
  * relaxConstraint returns the least specific TypeConstraint 'tc' that doesn't
- * prevent the intersection of knownType and relaxType(toRelax, tc) from
- * satisfying origTc. It is used in IRBuilder::constrainValue and
+ * prevent the intersection of knownType and relaxType(toRelax, tc.category)
+ * from satisfying origTc. It is used in IRBuilder::constrainValue and
  * IRBuilder::constrainStack to determine how to constrain the typeParam and
  * src values of CheckType/CheckStk instructions, and the src values of
  * AssertType/AssertStk instructions.
@@ -372,7 +354,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
       if (origTc.wantClass()) newTc.setDesiredClass(origTc.desiredClass());
     }
 
-    auto const relaxed = relaxType(toRelax, newTc);
+    auto const relaxed = relaxType(toRelax, newTc.category);
     auto const newDstType = relaxed & knownType;
     if (typeFitsConstraint(newDstType, origTc)) break;
 

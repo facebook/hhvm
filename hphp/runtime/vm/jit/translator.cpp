@@ -1392,7 +1392,7 @@ void emitInputChecks(
     auto typeToCheck = predictedType <= TCls
       ? predictedType
       : relaxType(predictedType,
-                  constraintForInput(irgs, ni, i, predictedType));
+                  constraintForInput(irgs, ni, i, predictedType).category);
 
     // Make sure typeToCheck is checkable.
     if (!(typeToCheck <= TCell || typeToCheck <= TBoxedInitCell)) {

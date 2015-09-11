@@ -62,7 +62,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr) {
 
     x64::emitTLSLoad(v, ThreadInfo::s_threadInfo, tinfo);
     v << loadb{tinfo[dbgOff], attached};
-    v << testbi{static_cast<int8_t>(0xff), attached, sf};
+    v << testbi{static_cast<int8_t>(0xffu), attached, sf};
 
     v << jcci{CC_NZ, sf, done, mcg->tx().uniqueStubs.interpHelper};
 

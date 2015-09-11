@@ -60,7 +60,7 @@ void encode_op(Op op, F write_byte) {
                 "Op encoding scheme doesn't support Ops >= 0x1fe");
   auto rawVal = static_cast<size_t>(op);
   if (rawVal >= 0xff) {
-    write_byte(static_cast<uint8_t>(~0xff));
+    write_byte(static_cast<uint8_t>(0));
     rawVal -= 0xff;
   }
   assert(rawVal < 0xff);

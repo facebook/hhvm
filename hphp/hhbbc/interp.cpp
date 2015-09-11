@@ -1133,7 +1133,7 @@ void in(ISS& env, const bc::SetOpL& op) {
     auto resultTy = eval_cell([&] {
       Cell c = *locVal;
       Cell rhs = *v1;
-      SETOP_BODY_CELL(&c, op.subop2, &rhs);
+      setopBodyCell(&c, op.subop2, &rhs);
       return c;
     });
     if (!resultTy) resultTy = TInitCell;

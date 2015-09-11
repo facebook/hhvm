@@ -48,7 +48,7 @@ struct Resumable;
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
 ALWAYS_INLINE
-void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
+void setopBodyCell(Cell* lhs, SetOpOp op, Cell* rhs) {
   assert(cellIsPlausible(*lhs));
   assert(cellIsPlausible(*rhs));
 
@@ -75,8 +75,8 @@ void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
 }
 
 ALWAYS_INLINE
-void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
-  SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
+void setopBody(TypedValue* lhs, SetOpOp op, Cell* rhs) {
+  setopBodyCell(tvToCell(lhs), op, rhs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

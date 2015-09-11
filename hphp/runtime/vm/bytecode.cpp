@@ -5382,7 +5382,7 @@ OPTBLD_INLINE void iopSetOpL(IOP_ARGS) {
   auto op = decode_oa<SetOpOp>(pc);
   Cell* fr = vmStack().topC();
   Cell* to = tvToCell(frame_local(vmfp(), local));
-  SETOP_BODY_CELL(to, op, fr);
+  setopBodyCell(to, op, fr);
   tvRefcountedDecRef(fr);
   cellDup(*to, *fr);
 }
@@ -5397,7 +5397,7 @@ OPTBLD_INLINE void iopSetOpN(IOP_ARGS) {
   lookupd_var(vmfp(), name, tv2, to);
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
-  SETOP_BODY(to, op, fr);
+  setopBody(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
   cellDup(*tvToCell(to), *tv2);
@@ -5414,7 +5414,7 @@ OPTBLD_INLINE void iopSetOpG(IOP_ARGS) {
   lookupd_gbl(vmfp(), name, tv2, to);
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
-  SETOP_BODY(to, op, fr);
+  setopBody(to, op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
   cellDup(*tvToCell(to), *tv2);
@@ -5437,7 +5437,7 @@ OPTBLD_INLINE void iopSetOpS(IOP_ARGS) {
                 classref->m_data.pcls->name()->data(),
                 name->data());
   }
-  SETOP_BODY(val, op, fr);
+  setopBody(val, op, fr);
   tvRefcountedDecRef(propn);
   tvRefcountedDecRef(fr);
   cellDup(*tvToCell(val), *output);

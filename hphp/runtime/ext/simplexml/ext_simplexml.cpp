@@ -1624,7 +1624,6 @@ Variant c_SimpleXMLElement::t_getiterator() {
                              Array(), false);
   auto iter = cast<c_SimpleXMLElementIterator>(obj);
   iter->sxe = this;
-  iter->sxe->incRefCount();
   return obj;
 }
 

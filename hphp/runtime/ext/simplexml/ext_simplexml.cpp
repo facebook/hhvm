@@ -1658,7 +1658,12 @@ c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
     ExtObjectData(cb), sxe(nullptr) {
 }
 
-c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() { }
+c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
+    if (sxe) {
+        decRefObj(sxe.get());
+        sxe = nullptr;
+    }
+}
 
 void c_SimpleXMLElementIterator::t___construct() {
 }

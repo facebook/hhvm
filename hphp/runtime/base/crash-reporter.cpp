@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/util/stack-trace.h"
-#include "hphp/util/light-process.h"
+#include "hphp/util/process.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
+#include <signal.h>
 
 namespace HPHP {
 

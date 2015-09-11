@@ -49,6 +49,7 @@
 
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
+#define st_ctim st_ctimespec
 #endif
 
 namespace HPHP {
@@ -142,6 +143,7 @@ struct CachedUnitNonRepo {
   time_t mtime;
 #else
   struct timespec mtime;
+  struct timespec ctime;
 #endif
   ino_t ino;
   dev_t devId;
@@ -174,6 +176,7 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
          cu.mtime - s.st_mtime < 0 ||
 #else
          timespecCompare(cu.mtime, s.st_mtim) < 0 ||
+         timespecCompare(cu.ctime, s.st_ctim) < 0 ||
 #endif
          cu.ino != s.st_ino ||
          cu.devId != s.st_dev;
@@ -181,7 +184,7 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
 
 folly::Optional<String> readFileAsString(const StringData* path) {
   auto const fd = open(path->data(), O_RDONLY);
-  if (!fd) return folly::none;
+  if (fd < 0) return folly::none;
   auto file = req::make<PlainFile>(fd);
   return file->read();
 }
@@ -273,6 +276,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     rpathAcc->second.mtime      = statInfo.st_mtime;
 #else
     rpathAcc->second.mtime      = statInfo.st_mtim;
+    rpathAcc->second.ctime      = statInfo.st_ctim;
 #endif
     rpathAcc->second.ino        = statInfo.st_ino;
     rpathAcc->second.devId      = statInfo.st_dev;
@@ -288,6 +292,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     pathAcc->second.mtime      = statInfo.st_mtime;
 #else
     pathAcc->second.mtime      = statInfo.st_mtim;
+    pathAcc->second.ctime      = statInfo.st_ctim;
 #endif
     pathAcc->second.ino        = statInfo.st_ino;
     pathAcc->second.devId      = statInfo.st_dev;

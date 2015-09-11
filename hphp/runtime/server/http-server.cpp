@@ -373,6 +373,8 @@ static void exit_on_timeout(int sig) {
 }
 
 void HttpServer::stop(const char* stopReason) {
+  if (m_stopped) return;
+
   if (RuntimeOption::ServerGracefulShutdownWait) {
     signal(SIGALRM, exit_on_timeout);
     alarm(RuntimeOption::ServerGracefulShutdownWait);

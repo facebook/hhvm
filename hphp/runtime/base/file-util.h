@@ -83,7 +83,7 @@ String canonicalize(const char* path, size_t len,
 * Check if the given character is a directory separator
 * for the current platform.
 */
-bool isDirSeparator(char c) {
+inline bool isDirSeparator(char c) {
 #ifdef _MSC_VER
   return c == '/' || c == '\\';
 #else
@@ -95,7 +95,7 @@ bool isDirSeparator(char c) {
  * Check if the given path is an absolute path. This
  * does not guarantee that the path is canonicalized.
  */
-bool isAbsolutePath(const char* path) {
+inline bool isAbsolutePath(const char* path) {
 #ifdef _MSC_VER
   int len = strlen(path);
   if (len > 1) {
@@ -112,11 +112,11 @@ bool isAbsolutePath(const char* path) {
 #endif
 }
 
-bool isAbsolutePath(const String& path) {
+inline bool isAbsolutePath(const String& path) {
   return isAbsolutePath(path.data());
 }
 
-bool isAbsolutePath(const std::string& path) {
+inline bool isAbsolutePath(const std::string& path) {
   return isAbsolutePath((const char*)path.data());
 }
 
@@ -124,7 +124,7 @@ bool isAbsolutePath(const std::string& path) {
  * Get the preferred directory separator for the current
  * platform.
  */
-char getDirSeparator() {
+inline char getDirSeparator() {
 #ifdef _MSC_VER
   return '\\';
 #else

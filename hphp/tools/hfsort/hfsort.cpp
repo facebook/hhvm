@@ -21,6 +21,7 @@
 #include <zlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <cxxabi.h>
 
 #include <folly/Format.h>
 #include "hphp/util/text-util.h"

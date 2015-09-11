@@ -24,8 +24,6 @@
 #include <unordered_map>
 #include <map>
 
-#include <cxxabi.h>
-
 namespace HPHP { namespace hfsort {
 
 // The number of pages to reserve for the functions with highest

@@ -95,7 +95,11 @@ ExecutionContext::ExecutionContext()
     RuntimeOption::SerializationSizeLimit;
 }
 
-template<> void ThreadLocalNoCheck<ExecutionContext>::destroy() {
+// See header for why this is required.
+#ifndef _MSC_VER
+template<>
+#endif
+void ThreadLocalNoCheck<ExecutionContext>::destroy() {
   if (!isNull()) {
     getNoCheck()->sweep();
     setNull();

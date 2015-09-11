@@ -164,6 +164,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   set(MSVC_ENABLE_STATIC_ANALYSIS OFF CACHE BOOL "If enabled, do more complex static analysis and generate warnings appropriately.")
   set(MSVC_NO_ASSERT_IN_DEBUG OFF CACHE BOOL "If enabled, don't do asserts in debug mode. The reduces the size of hphp_runtime_static by ~300mb.")
   set(MSVC_ENABLE_PCH ON CACHE BOOL "If enabled, use precompiled headers to speed up the build.")
+  set(MSVC_ENABLE_DEBUG_INLINING ON CACHE BOOL "If enabled, enable inlining in the debug configuration. This allows /Zc:inline to be far more effective, resulting in hphp_runtime_static being ~450mb smaller.")
 
   # The general options passed:
   list(APPEND MSVC_GENERAL_OPTIONS
@@ -335,10 +336,14 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 
   # The options to pass to the compiler for debug builds:
   list(APPEND MSVC_DEBUG_OPTIONS
-    "Ob2" # Enable inlining. Needed to enable /Zc:inline
     "Gy-" # Disable function level linking.
     "GF-" # Disable string pooling.
   )
+
+  # Add /Ob2 if allowing inlining in debug mode:
+  if (MSVC_ENABLE_DEBUG_INLINING)
+    list(APPEND MSVC_DEBUG_OPTIONS "Ob2")
+  endif()
 
   # The options to pass to the compiler for release builds:
   list(APPEND MSVC_RELEASE_OPTIONS

@@ -98,7 +98,7 @@ TransCFG::TransCFG(FuncId funcId,
     // This will skip DV Funclets if they were already
     // retranslated w/ the prologues:
     if (!profData->optimized(profData->transSrcKey(tid))) {
-      int64_t weight = profData->absTransCounter(tid);
+      int64_t weight = profData->transCounter(tid);
       addNode(tid, weight);
     }
   }

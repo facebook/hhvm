@@ -308,7 +308,7 @@ uint64_t countInvocations(const LoopInfo& loop, const IRUnit& unit) {
   auto const profData = mcg->tx().profData();
   uint64_t count = 0;
   for (auto tid : predTIDs) {
-    count += profData->absTransCounter(tid);
+    count += profData->transCounter(tid);
   }
   return count;
 }

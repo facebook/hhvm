@@ -137,7 +137,7 @@ TransID Scale::findProfTransID(Vlabel blk) const {
 int64_t Scale::findProfWeight(Vlabel blk) const {
   auto profTransID = findProfTransID(blk);
   return profTransID == kInvalidTransID ? 0
-                                        : m_prof.absTransCounter(profTransID);
+                                        : m_prof.transCounter(profTransID);
 }
 
 void Scale::computeBlockWeights() {

@@ -963,10 +963,9 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
 
   std::sort(prologTransIDs.begin(), prologTransIDs.end(),
           [&](TransID t1, TransID t2) -> bool {
-            // This will sort in ascending order. Note that transCounters start
-            // at JitPGOThreshold and count down.
-            return m_tx.profData()->transCounter(t1) >
-                   m_tx.profData()->transCounter(t2);
+            // This will sort in ascending order.
+            return m_tx.profData()->transCounter(t2) >
+                   m_tx.profData()->transCounter(t1);
           });
 
   // Next, we're going to regenerate each prologue along with its DV

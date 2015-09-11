@@ -76,7 +76,7 @@ BlockDataVec createBlockData(const RegionDesc&   region,
   auto bid = rootId;
   while (true) {
     const auto block = region.block(bid);
-    auto weight = profData.absTransCounter(bid);
+    auto weight = profData.transCounter(bid);
     data.push_back({ bid, block->typePreConditions(), jit::vector<Type>(),
                      false, false, false, weight });
     std::sort(data.back().guards.begin(), data.back().guards.end(),
@@ -311,7 +311,7 @@ void updateWeights(const RegionDesc&   region,
                    const ProfData&     profData) {
   auto bid = rootId;
   while (true) {
-    auto blockWeight = profData.absTransCounter(bid);
+    auto blockWeight = profData.transCounter(bid);
     for (auto& bd : blockData) {
       if (!bd.deleted && bd.blockId != bid &&
           passesGuards(region, *region.block(bid), bd)) {

@@ -38,10 +38,10 @@
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
-#include "hphp/runtime/ext/pdo/pdo_mysql.h"
+#include "hphp/runtime/ext/pdo_mysql/pdo_mysql.h"
 #endif
 #ifdef ENABLE_EXTENSION_PDO_SQLITE
-#include "hphp/runtime/ext/pdo/pdo_sqlite.h"
+#include "hphp/runtime/ext/pdo_sqlite/pdo_sqlite.h"
 #endif
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"

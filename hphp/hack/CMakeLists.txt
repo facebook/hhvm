@@ -28,7 +28,7 @@ if (OCAMLC_FOUND)
     list(APPEND extra_lib_paths ${pth})
   else()
     list(APPEND extra_include_paths "${TP_DIR}/lz4")
-    list(APPEND extra_lib_paths "${TP_BUILD_DIR}/lz4")
+    list(APPEND extra_lib_paths "${TP_DIR}/lz4")
   endif()
   list(APPEND extra_native_libraries "lz4")
 

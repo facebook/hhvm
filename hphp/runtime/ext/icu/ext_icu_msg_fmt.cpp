@@ -21,7 +21,7 @@ public:
     MessageFormatAdapter() = delete;
 
     static const Formattable::Type* getArgTypeListHHVM(const MessageFormat& m,
-                                                   int32_t& count) {
+                                                       int32_t& count) {
       return m.getArgTypeList(count);
     }
 

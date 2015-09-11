@@ -91,7 +91,7 @@ void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
     : : "r"(a) : "xmm0"
   );
 #else
-  auto const hash = a->hashTab();
+  auto const hash = mixedHash(mixedData(a), MixedArray::SmallScale);
   auto const emptyVal = int64_t{MixedArray::Empty};
   reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
   reinterpret_cast<int64_t*>(hash)[1] = emptyVal;

@@ -19,36 +19,16 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/runtime.h"
 
-#include <fstream>
+#include <folly/Random.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// @TODO Make this a shared class in runtime/base/ dir?
 // @TODO Throw exceptions instead of raising warnings
 static bool getRandomBytes(void *bytes, size_t length) {
-  // @TODO Check for sources of random at compile time
-  // @TODO Add file pointer caching of some sort?
-  std::ifstream randomSource ("/dev/urandom", std::ios::binary);
-  if (!randomSource.is_open()) {
-    raise_warning(
-      "Cannot open source device"
-    );
-    return false;
-  }
 
-  randomSource.seekg(0, randomSource.beg);
-  randomSource.read((char*)bytes, length);
-
-  if (!randomSource) {
-    raise_warning(
-      "Could not gather sufficient random data"
-    );
-    randomSource.close();
-		return false;
-	}
-
-  randomSource.close();
+  // @TODO Need better error handling
+  folly::Random::secureRandom(bytes, length);
 
   return true;
 }

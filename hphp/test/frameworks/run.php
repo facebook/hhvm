@@ -415,6 +415,10 @@ function get_unit_testing_infra_dependencies(): void {
 
   // We don't have a cached vendor/, but as --local-source-only wasn't
   // specified, we can try to download it.
+  invariant(
+    !Options::$local_source_only,
+    'trying to re-run composer, but --local-source-only specified',
+  );
 
   // Quick hack to make sure we get the latest phpunit binary from composer
   $md5_file = __DIR__."/composer.json.md5";

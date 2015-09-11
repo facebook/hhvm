@@ -333,7 +333,7 @@ size_t FileUtil::dirname_helper(char *path, int len) {
   }
   if (end < path) {
     /* The path only contained slashes */
-    path[0] = getDirSeperator();
+    path[0] = getDirSeparator();
     path[1] = '\0';
     return 1;
   }

@@ -74,8 +74,7 @@ Variant HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
   }
 
   // Special case where no modulus is required
-  // @TODO Replace literal with HHVM equivalent of ZEND_ULONG_MAX
-	if (umax == 0xffffffffffffffff) {
+	if (umax == std::numeric_limits<uint64_t>::max()) {
     return result;
 	}
 
@@ -84,8 +83,8 @@ Variant HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
 
   // Powers of two are not biased
 	if ((umax & (umax - 1)) != 0) {
-		// Ceiling under which 0xffffffffffffffff % max == 0
-		int64_t limit = 0xffffffffffffffff - (0xffffffffffffffff % umax) - 1;
+		// Ceiling under which std::numeric_limits<uint64_t>::max() % max == 0
+		int64_t limit = std::numeric_limits<uint64_t>::max() - (std::numeric_limits<uint64_t>::max() % umax) - 1;
 
 		// Discard numbers over the limit to avoid modulo bias
 		while (result > limit) {

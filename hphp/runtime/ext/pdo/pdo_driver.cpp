@@ -16,33 +16,16 @@
 */
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
-#ifdef ENABLE_EXTENSION_PDO_SQLITE
-#include "hphp/runtime/ext/pdo_sqlite/pdo_sqlite.h"
-#endif
-#ifdef ENABLE_EXTENSION_PDO_MYSQL
-#include "hphp/runtime/ext/pdo_mysql/pdo_mysql.h"
-#endif
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// This needs to get created first.
-PDODriverMap PDODriver::s_drivers;
-
-// We will have to list them all here for proper static initialization.
-#ifdef ENABLE_EXTENSION_PDO_SQLITE
-static PDOSqlite s_sqlite_driver;
-#endif
-#ifdef ENABLE_EXTENSION_PDO_MYSQL
-static PDOMySql s_mysql_driver;
-#endif
-
 const StaticString s_general_error_code("HY000");
 
 PDODriver::PDODriver(const char *name) : m_name(name) {
-  s_drivers[name] = this;
+  GetMutableDrivers()[name] = this;
 }
 
 req::ptr<PDOResource> PDODriver::createResource(const String& datasource,

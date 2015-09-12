@@ -46,6 +46,8 @@ These are the allowed extensions:
 * `.php` - The source of the test.
 * `.php.expect` - The exact string expected output.
 * `.php.expectf` - The exact string expected output with formating characters.
+* `.php.hhvm.expect` - The exact string expected output. Same as `.php.expect`.
+* `.php.hhvm.expectf` - The exact string expected output with formating characters. Same as `.php.expectf`.
 * `.php.typechecker.expect` - The exact string expected output for typechecker tests.
 * `.php.typechecker.expectf` - The exact string expected output for typechecker tests with formatting characters.
 * `.php.expectregex` - A regex that matches the output.
@@ -61,12 +63,14 @@ These are the allowed extensions:
 * `inc.php` - Use this extension for `require` or `include` files if you are going to have a typechecker test that uses them. For now, make sure they are in the same directory as the test. They will be copied along with the core test files when the test runner is executing.
 
 You must have one `.php`; if you are running tests against HHVM, you must have 
-one and only one of `.php.expect`, `.php.expectf`, or `.php.expectregex`; if 
-you are running tests against the typechecker, you must have one and only one 
-of `.php.typechecker.expect` or `.php.typechecker.expectf` and you must have a 
-`.php.hhconfig` file as well; and the rest are optional.
+one and only one of `.php.expect`, `.php.hhvm.expect`, `.php.expectf`, 
+`.php.hhvm.expectf`, or `.php.expectregex`; if you are running tests against 
+the typechecker, you must have one and only one of `.php.typechecker.expect` 
+or `.php.typechecker.expectf` and you must have a `.php.hhconfig` file as 
+well; and the rest are optional.
 
-NOTE: You can have both a `.php.expect[f]` and a `.php.typechecker.expect[f]`.
+NOTE: You can have both a `.php.[hhvm].expect[f]` and a 
+`.php.typechecker.expect[f]`.
 
 Any suite can have a `config.hdf` file in it that will be used. If one isn't
 present, then the parent suite it checked recursively until we use

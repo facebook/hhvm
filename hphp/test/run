@@ -15,7 +15,8 @@ function get_expect_file_and_type($test, $options) {
   if (isset($options['typechecker'])) {
     $types = array('typechecker.expect', 'typechecker.expectf');
   } else {
-    $types = array('expect', 'expectf', 'expectregex');
+    $types = array('expect', 'hhvm.expect', 'expectf', 'hhvm.expectf',
+                   'expectregex');
   }
   if (isset($options['repo'])) {
     foreach ($types as $type) {
@@ -1438,6 +1439,7 @@ function run_config_post($outputs, $test, $options) {
   if ($file === null || $type === null) {
     file_put_contents(
       "$test.diff", "No $test.expect, $test.expectf, " .
+      "$test.hhvm.expect, $test.hhvm.expectf, " .
       "$test.typechecker.expect, $test.typechecker.expectf, " .
       "nor $test.expectregex. Is $test even a test?"
     );
@@ -1445,7 +1447,7 @@ function run_config_post($outputs, $test, $options) {
   }
 
   $is_tc = isset($options['typechecker']);
-  if ((!$is_tc && $type === 'expect') ||
+  if ((!$is_tc && ($type === 'expect' || $type === 'hhvm.expect')) ||
       ($is_tc && $type === 'typechecker.expect')) {
     $wanted = trim(file_get_contents($file));
     if (!$repeats) {
@@ -1456,7 +1458,7 @@ function run_config_post($outputs, $test, $options) {
       return $passed;
     }
     $wanted_re = preg_quote($wanted);
-  } else if ((!$is_tc && $type === 'expectf') ||
+  } else if ((!$is_tc && ($type === 'expectf' || $type === 'hhvm.expectf')) ||
              ($is_tc && $type === 'typechecker.expectf')) {
     $wanted = trim(file_get_contents($file));
     $wanted_re = $wanted;

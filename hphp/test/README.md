@@ -62,12 +62,13 @@ These are the allowed extensions:
 * `.php.hhconfig` - A blank or syntactically valid Hack typechecker configuration file if you want the test to be able to be run in typechecker mode.
 * `inc.php` - Use this extension for `require` or `include` files if you are going to have a typechecker test that uses them. For now, make sure they are in the same directory as the test. They will be copied along with the core test files when the test runner is executing.
 
-You must have one `.php`; if you are running tests against HHVM, you must have 
-one and only one of `.php.expect`, `.php.hhvm.expect`, `.php.expectf`, 
-`.php.hhvm.expectf`, or `.php.expectregex`; if you are running tests against 
-the typechecker, you must have one and only one of `.php.typechecker.expect` 
-or `.php.typechecker.expectf` and you must have a `.php.hhconfig` file as 
-well; and the rest are optional.
+You must have one `.php` (or `.php.type-errors` file -- see below); if you are
+running tests against HHVM, you must have one and only one of `.php.expect`,
+`.php.hhvm.expect`, `.php.expectf`, `.php.hhvm.expectf`, or
+`.php.expectregex`; if you are running tests against the  typechecker, you
+must have one and only one of `.php.typechecker.expect` or
+`.php.typechecker.expectf`, and you must have a `.php.hhconfig` file as well;
+and the rest are optional.
 
 NOTE: You can have both a `.php.[hhvm].expect[f]` and a 
 `.php.typechecker.expect[f]`.
@@ -83,6 +84,16 @@ the command line. (`_dir_` will be replaced by path of the suite directory.)
 Name your test in a descriptive manner and when in doubt break your test into
 many files. You can use comments too so future engineers know if it is a real
 breakage or they need to change the expected output.
+
+## `.php.type-errors` Source File Suffix
+
+The test runner will look for source code files with the `.php.type-errors`
+suffix as well as `.php` files. The use case for this type of file is create a
+test runner compliant source file, but to also allow the actual typechecker
+`hh_client` ignore the file when run on its own. For example, in our doc repo
+https://github.com/hhvm/user-documentation, we use these files to have a clean
+`hh_client` run on our examples, but still can have examples showing
+typechecker errors as well.
 
 ## Format Characters
 

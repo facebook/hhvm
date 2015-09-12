@@ -26,11 +26,14 @@ all sub-suites.
 * Slow tests with the JIT in PGO mode -
 `test/run test/slow -m pgo`
 
-* PHP Specification tests with JIT
+* PHP Specification tests with JIT -
 `test/run test/spec`
 
 * Run everything that is supposed to pass -
 `test/run all`
+
+* Run just the slow Hack typechecker tests -
+`test/run --typechecker slow`
 
 # File Layout
 
@@ -43,6 +46,8 @@ These are the allowed extensions:
 * `.php` - The source of the test.
 * `.php.expect` - The exact string expected output.
 * `.php.expectf` - The exact string expected output with formating characters.
+* `.php.typechecker.expect` - The exact string expected output for typechecker tests.
+* `.php.typechecker.expectf` - The exact string expected output for typechecker tests with formatting characters.
 * `.php.expectregex` - A regex that matches the output.
 * `.php.in` - When you run the test, the input will be obtained from here.
 * `.php.out` - When you run the test, the output will be stored here.
@@ -52,12 +57,19 @@ These are the allowed extensions:
 * `.hhas` - HipHop Assembly.
 * `.php.norepo` - don't run the test in repo mode
 * `.php.noserver` - don't run the test in server mode
+* `.php.hhconfig` - A blank or syntactically valid Hack typechecker configuration file if you want the test to be able to be run in typechecker mode.
+* `inc.php` - Use this extension for `require` or `include` files if you are going to have a typechecker test that uses them. For now, make sure they are in the same directory as the test. They will be copied along with the core test files when the test runner is executing.
 
-You must have one `.php`; one and only one of `.php.expect`, `.php.expectf`, and
-`.php.expectregex`; and the rest are optional.
+You must have one `.php`; if you are running tests against HHVM, you must have 
+one and only one of `.php.expect`, `.php.expectf`, or `.php.expectregex`; if 
+you are running tests against the typechecker, you must have one and only one 
+of `.php.typechecker.expect` or `.php.typechecker.expectf` and you must have a 
+`.php.hhconfig` file as well; and the rest are optional.
+
+NOTE: You can have both a `.php.expect[f]` and a `.php.typechecker.expect[f]`.
 
 Any suite can have a `config.hdf` file in it that will be used. If one isn't
-present, then the parent suite it checked recusrivly until we use
+present, then the parent suite it checked recursively until we use
 test/config.hdf.
 
 If a suite contains an `hphpd.ini` file, all of the files in the suite will be
@@ -70,7 +82,7 @@ breakage or they need to change the expected output.
 
 ## Format Characters
 
-These can appear in `.expectf` files.
+These can appear in `.expectf` or `typechecker.expectf` files.
 
 | Char    | Description                                | Regex
 |---------|--------------------------------------------|-------

@@ -10,7 +10,13 @@ function is_testing_dso_extension() {
 }
 
 function get_expect_file_and_type($test, $options) {
-  $types = array('expect', 'expectf', 'expectregex');
+  // .typechecker files are for typechecker (hh_server --check) test runs
+  $types = null;
+  if (isset($options['typechecker'])) {
+    $types = array('typechecker.expect', 'typechecker.expectf');
+  } else {
+    $types = array('expect', 'expectf', 'expectregex');
+  }
   if (isset($options['repo'])) {
     foreach ($types as $type) {
       $fname = "$test.$type-repo";
@@ -96,6 +102,16 @@ Examples:
   # run 3 * 2 times.
   % $argv[0] --relocate 3 test/quick/silencer.php
 
+  # Run the Hack typechecker against quick typechecker.expect[f] files
+  # Could explcitly use quick here too
+  # $argv[0] --typechecker
+
+  # Run the Hack typechecker against typechecker.expect[f] files in the slow
+  # directory
+  # $argv[0] --typechecker slow
+
+  # Run the Hack typechecker against the typechecker.expect[f] file in this test
+  # $argv[0] --typechecker test/slow/test_runner_typechecker_mode/basic.php
 EOT;
   return usage().$help;
 }
@@ -198,6 +214,27 @@ function bin_root() {
   ;
 }
 
+function hh_server_path() {
+  $file = hh_server_bin_root().'/hh_server';
+  if (!is_file($file)) {
+    error("$file doesn't exist. Did you forget to build first?");
+  }
+  return rel_path($file);
+}
+
+function hh_server_bin_root() {
+  $dir = hphp_home() . "/";
+  if (getenv("FBMAKE_BIN_ROOT") !== false) {
+    $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hack/src';
+  } else {
+    $dir .= "_bin/hphp/hack/src";
+  }
+  return is_dir($dir) ?
+    $dir :      # fbmake
+    hphp_home() . "/hphp/hack/bin" # github / cmake
+  ;
+}
+
 function verify_hhbc() {
   if (getenv("VERIFY_HHBC") !== false) {
     return getenv($env_hhbc);
@@ -288,6 +325,7 @@ function get_options($argv) {
     'list-tests' => '',
     'relocate:' => '',
     'hhvm-binary-path:' => 'b:',
+    'typechecker' => '',
   );
   $options = array();
   $files = array();
@@ -421,11 +459,36 @@ function find_tests($files, array $options = null) {
   }
   $files = array_map('escapeshellarg', $files);
   $files = implode(' ', $files);
-  $tests = explode("\n", shell_exec(
-    "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
-  ));
+  if (isset($options['typechecker'])) {
+    $tests = explode("\n", shell_exec(
+      "find $files -name '*.php'"
+    ));
+    // The above will get all the php files. Now filter out only the ones
+    // that have a .hhconfig associated with it.
+    $tests = array_filter(
+      $tests,
+      function($test) {
+        return (file_exists($test . '.typechecker.expect') ||
+                file_exists($test . '.typechecker.expectf')) &&
+                file_exists($test . '.hhconfig'); }
+    );
+  } else {
+    $tests = explode("\n", shell_exec(
+      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
+    ));
+    $tests = array_filter(
+      $tests,
+      function($test) {
+        return file_exists($test . '.expect') ||
+               file_exists($test . '.expectf');
+      }
+    );
+  }
   if (!$tests) {
-    error(usage());
+    error("Could not find any tests associated with your options.\n" .
+          "Make sure your test path is correct and that you have " .
+          "the right expect files for the tests you are trying to run.\n" .
+          usage());
   }
   asort($tests);
   $tests = array_filter($tests);
@@ -678,6 +741,31 @@ function hhbbc_cmd($options, $test) {
   ));
 }
 
+function hh_server_cmd($options, $test) {
+  // In order to run hh_server --check on only one file, we copy all of the
+  // files associated with the test to a temporary directory, rename the
+  // basename($test_file).hhconfig file to just .hhconfig and set the command
+  // appropriately.
+  $temp_dir = uniqid('/tmp/hh-test-runner-');
+  mkdir($temp_dir);
+  foreach (glob($test . '*') as $test_file) {
+    copy($test_file, $temp_dir . '/' . basename($test_file));
+  }
+  // Just copy all the .php.inc files, even if they are not related since
+  // unrelated ones will be ignored anyway. This just makes it easier to
+  // start with instead of doing a search inside the test file for requires
+  // and includes and extracting it.
+  foreach (glob(dirname($test) . "/*.inc.php") as $inc_file) {
+    copy($inc_file, $temp_dir . '/' . basename($inc_file));
+  }
+  rename(
+    $temp_dir . '/' . basename($test) . '.hhconfig',
+    $temp_dir . '/.hhconfig'
+  );
+  $cmd = hh_server_path() .  ' --check ' . $temp_dir;
+  return array($cmd, ' ', $temp_dir);
+}
+
 class Status {
   private static $results = array();
   private static $mode = 0;
@@ -812,7 +900,8 @@ class Status {
                                        'end_time' => $etime,
                                        'time' => $time));
     }
-    self::send(self::MSG_TEST_SKIP, array($test, $reason, $time, $stime, $etime));
+    self::send(self::MSG_TEST_SKIP,
+               array($test, $reason, $time, $stime, $etime));
   }
 
   public static function fail($test, $time, $stime, $etime) {
@@ -997,7 +1086,9 @@ function clean_intermediate_files($test, $options) {
         foreach(new RecursiveIteratorIterator(new
             RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS),
             RecursiveIteratorIterator::CHILD_FIRST) as $path) {
-          $path->isDir() ? rmdir($path->getPathname()) : unlink($path->getPathname());
+          $path->isDir()
+          ? rmdir($path->getPathname())
+          : unlink($path->getPathname());
         }
         rmdir($file);
       } else {
@@ -1089,10 +1180,12 @@ function comp_line($l1, $l2, $is_reg) {
   }
 }
 
-function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2, $steps) {
+function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2,
+                          $steps) {
   $equal = 0;
 
-  while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
+  while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2],
+                                                     $is_reg)) {
     $idx1++;
     $idx2++;
     $equal++;
@@ -1103,7 +1196,8 @@ function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2, $
     $st = $steps / 2;
 
     for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st-- > 0; $ofs1++) {
-      $eq = @count_array_diff($ar1, $ar2, $is_reg, $w, $ofs1, $idx2, $cnt1, $cnt2, $st);
+      $eq = @count_array_diff($ar1, $ar2, $is_reg, $w, $ofs1, $idx2, $cnt1,
+                              $cnt2, $st);
 
       if ($eq > $eq1) {
         $eq1 = $eq;
@@ -1145,8 +1239,10 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
       continue;
     } else {
 
-      $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1+1, $idx2, $cnt1, $cnt2, 10);
-      $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2+1, $cnt1, $cnt2, 10);
+      $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1+1, $idx2, $cnt1,
+                              $cnt2, 10);
+      $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2+1, $cnt1,
+                              $cnt2, 10);
 
       if ($c1 > $c2) {
         $old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
@@ -1281,10 +1377,10 @@ function run_config_server($options, $test) {
   return array($output, '');
 }
 
-function run_config_cli($options, $test, $hhvm, $hhvm_env) {
-  if (isset($options['log'])) {
-    $hhvm_env['TRACE'] = 'printir:1';
-    $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
+function run_config_cli($options, $test, $cmd, $cmd_env) {
+  if (isset($options['log']) && !isset($options['typechecker'])) {
+    $cmd_env['TRACE'] = 'printir:1';
+    $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
 
   $descriptorspec = array(
@@ -1293,9 +1389,15 @@ function run_config_cli($options, $test, $hhvm, $hhvm_env) {
     2 => array("pipe", "w"),
   );
   $pipes = null;
-  $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
+  if (isset($options['typechecker'])) {
+    $process = proc_open(
+      "$cmd 2>/dev/null", $descriptorspec, $pipes, null, $cmd_env
+    );
+  } else {
+    $process = proc_open("$cmd 2>&1", $descriptorspec, $pipes, null, $cmd_env);
+  }
   if (!is_resource($process)) {
-    file_put_contents("$test.diff", "Couldn't invoke $hhvm");
+    file_put_contents("$test.diff", "Couldn't invoke $cmd");
     return false;
   }
 
@@ -1334,12 +1436,17 @@ function run_config_post($outputs, $test, $options) {
 
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file === null || $type === null) {
-    file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
-      "nor $test.expectregex. Is $test even a test?");
+    file_put_contents(
+      "$test.diff", "No $test.expect, $test.expectf, " .
+      "$test.typechecker.expect, $test.typechecker.expectf, " .
+      "nor $test.expectregex. Is $test even a test?"
+    );
     return false;
   }
 
-  if ($type === 'expect') {
+  $is_tc = isset($options['typechecker']);
+  if ((!$is_tc && $type === 'expect') ||
+      ($is_tc && $type === 'typechecker.expect')) {
     $wanted = trim(file_get_contents($file));
     if (!$repeats) {
       $passed = !strcmp($output, $wanted);
@@ -1349,7 +1456,8 @@ function run_config_post($outputs, $test, $options) {
       return $passed;
     }
     $wanted_re = preg_quote($wanted);
-  } else if ($type === 'expectf') {
+  } else if ((!$is_tc && $type === 'expectf') ||
+             ($is_tc && $type === 'typechecker.expectf')) {
     $wanted = trim(file_get_contents($file));
     $wanted_re = $wanted;
 
@@ -1422,7 +1530,7 @@ function run_config_post($outputs, $test, $options) {
     // Normalize newlines
     $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
     $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
-  } else if ($type === 'expectregex') {
+  } else if (!$is_tc && $type === 'expectregex') {
     $wanted_re = trim(file_get_contents($file));
   } else {
     throw new Exception("Unsupported expect file type: ".$type);
@@ -1445,8 +1553,8 @@ function run_config_post($outputs, $test, $options) {
   return $passed;
 }
 
-function run_one_config($options, $test, $hhvm, $hhvm_env) {
-  $outputs = run_config_cli($options, $test, $hhvm, $hhvm_env);
+function run_one_config($options, $test, $cmd, $cmd_env) {
+  $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
   if ($outputs === false) return false;
   return run_config_post($outputs, $test, $options);
 }
@@ -1454,9 +1562,30 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
 function run_and_lock_test($options, $test) {
   $lock = fopen($test, 'r');
   if (!flock($lock, LOCK_EX)) return false;
-  $result = run_test($options, $test);
+  if (isset($options['typechecker'])) {
+    $result = run_typechecker_test($options, $test);
+  } else {
+    $result = run_test($options, $test);
+  }
   if (!flock($lock, LOCK_UN)) return false;
   fclose($lock);
+  return $result;
+}
+
+function run_typechecker_test($options, $test) {
+  if (skip_test($options, $test)) return 'skip';
+  if (!file_exists($test . ".hhconfig")) return 'skip';
+  list($hh_server, $hh_server_env, $temp_dir) = hh_server_cmd($options, $test);
+  if (is_executable('/usr/bin/timeout')) {
+    $hh_server = '/usr/bin/timeout 300 ' . $hh_server;
+  } else {
+    $hh_server = __DIR__.'/../tools/timeout.sh -t 300 '. $hh_server;
+  }
+  $result =  run_one_config($options, $test, $hh_server, $hh_server_env);
+  // Remove the temporary directory
+  if (!isset($options['no-clean'])) {
+    shell_exec('rm -rf ' . $temp_dir);
+  }
   return $result;
 }
 
@@ -1536,7 +1665,11 @@ function print_commands($tests, $options) {
   print make_header("Run these by hand:");
 
   foreach ($tests as $test) {
-    list($command, $_) = hhvm_cmd($options, $test);
+    if (isset($options['typechecker'])) {
+      list($command, $_, ) = hh_server_cmd($options, $test);
+    } else {
+      list($command, $_) = hhvm_cmd($options, $test);
+    }
     if (!isset($options['repo'])) {
       print "$command\n";
       continue;
@@ -2012,20 +2145,28 @@ function main($argv) {
     shuffle($tests);
   }
 
-  // Explicit path given by --hhvm-binary-path takes priority
-  // Then, if an HHVM_BIN env var exists, and the file it points to exists,
-  // that trumps any default hhvm executable path
+  if (isset($options['repo']) && isset($options['typechecker'])) {
+    error("Repo mode and typechecker mode are not compatible");
+  }
+
   $binary_path = "";
-  if (isset($options['hhvm-binary-path'])) {
-    $binary_path = realpath($options['hhvm-binary-path']);
-    check_hhvm_executable($binary_path);
-    putenv("HHVM_BIN=" . $binary_path);
-  } else if (getenv("HHVM_BIN") !== false) {
-    $binary_path = realpath(getenv("HHVM_BIN"));
-    check_hhvm_executable($binary_path);
+  if (isset($options['typechecker'])) {
+    $binary_path = hh_server_path();
   } else {
-    check_for_multiple_default_hhvm_binaries();
-    $binary_path = hhvm_path();
+    // Explicit path given by --hhvm-binary-path takes priority
+    // Then, if an HHVM_BIN env var exists, and the file it points to exists,
+    // that trumps any default hhvm executable path
+    if (isset($options['hhvm-binary-path'])) {
+      $binary_path = realpath($options['hhvm-binary-path']);
+      check_hhvm_executable($binary_path);
+      putenv("HHVM_BIN=" . $binary_path);
+    } else if (getenv("HHVM_BIN") !== false) {
+      $binary_path = realpath(getenv("HHVM_BIN"));
+      check_hhvm_executable($binary_path);
+    } else {
+      check_for_multiple_default_hhvm_binaries();
+      $binary_path = hhvm_path();
+    }
   }
 
   if (isset($options['verbose'])) {
@@ -2036,7 +2177,7 @@ function main($argv) {
 
   $servers = null;
   if (isset($options['server'])) {
-    if (isset($options['repo'])) {
+    if (isset($options['repo']) || isset($options['typechecker'])) {
       error("Server mode repo tests are not supported");
     }
     $configs = array();

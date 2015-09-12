@@ -295,7 +295,7 @@ bool XDebugThreadBreakpoints::updateBreakpointHitValue(int id, int hitValue) {
   return true;
 }
 
-IMPLEMENT_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Debug Hook Handling
@@ -501,7 +501,7 @@ void XDebugHookHandler::onExceptionThrown(ObjectData* exception) {
 
 void XDebugHookHandler::onFlowBreak(const Unit* unit, int line) {
   if (XDEBUG_GLOBAL(Server) != nullptr) {
-    // Translate the unit filepath and then break
+    // Translate the unit filepath and then break.
     auto const filepath = String(const_cast<StringData*>(unit->filepath()));
     auto const transpath = File::TranslatePath(filepath);
     XDEBUG_GLOBAL(Server)->breakpoint(transpath, init_null(),
@@ -516,7 +516,7 @@ void XDebugHookHandler::onFileLoad(Unit* unit) {
 
   // Loop over all unmatched breakpoints
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
-    XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
+    auto& bp = BREAKPOINT_MAP.at(*iter);
     if (bp.type != BreakType::LINE || bp.fileName != filename) {
       ++iter;
       continue;
@@ -543,12 +543,12 @@ void XDebugHookHandler::onDefClass(const Class* cls) {
   }
 
   // Loop through the unmatched breakpoints
-  const StringData* className = cls->name();
+  auto const className = cls->name();
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
     // Grab the breakpoint, ignore it if it is the wrong type or the classname
     // doesn't match. Note that a classname does not have to exist as the user
     // can specify method bar on class Foo with "Foo::bar"
-    XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
+    auto& bp = BREAKPOINT_MAP.at(*iter);
     if ((bp.type != BreakType::CALL && bp.type != BreakType::RETURN) ||
         (!bp.className.isNull() &&
          !className->equal(bp.className.toString().get()))) {
@@ -568,7 +568,7 @@ void XDebugHookHandler::onDefClass(const Class* cls) {
 void XDebugHookHandler::onDefFunc(const Func* func) {
   // Loop through unmatched function breakpoints
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
-    XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
+    auto& bp = BREAKPOINT_MAP.at(*iter);
     if (bp.type != BreakType::CALL && bp.type != BreakType::RETURN) {
       ++iter;
       continue;

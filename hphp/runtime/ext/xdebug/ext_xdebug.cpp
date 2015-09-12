@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
+#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -1008,6 +1009,10 @@ void XDebugExtension::requestInit() {
   // Let the server do initialization
   XDebugServer::onRequestInit();
 
+  // Initialize our breakpoint maps.
+  assert(s_xdebug_breakpoints.isNull());
+  s_xdebug_breakpoints.getCheck();
+
   // Potentially attach the xdebug profiler
   if (XDebugProfiler::isAttachNeeded()) {
     attach_xdebug_profiler();
@@ -1018,6 +1023,8 @@ void XDebugExtension::requestShutdown() {
   if (!Enable) {
     return;
   }
+
+  s_xdebug_breakpoints.destroy();
 
   // Potentially kill the profiler
   if (XDEBUG_GLOBAL(ProfilerAttached)) {

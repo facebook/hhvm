@@ -24,6 +24,17 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static req::ptr<File> get_valid_file_resource(const Resource& fp) {
+  auto f = dyn_cast_or_null<File>(fp);
+  if (f == nullptr || f->isClosed()) {
+    raise_warning("Not a valid stream resource");
+    return nullptr;
+  }
+  return f;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 Resource HHVM_FUNCTION(mailparse_msg_create) {
   return Resource(req::make<MimePart>());
 }
@@ -143,9 +154,12 @@ bool HHVM_FUNCTION(mailparse_stream_encode,
                    const Resource& sourcefp,
                    const Resource& destfp,
                    const String& encoding) {
-  auto srcstream = dyn_cast_or_null<File>(sourcefp);
-  auto deststream = dyn_cast_or_null<File>(destfp);
-  if (!srcstream || !deststream) {
+  auto srcstream = get_valid_file_resource(sourcefp);
+  if (!srcstream) {
+    return false;
+  }
+  auto deststream = get_valid_file_resource(destfp);
+  if (!deststream) {
     return false;
   }
 
@@ -259,7 +273,10 @@ const StaticString
   s_origfilename("origfilename");
 
 Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
-  auto instream = cast<File>(fp);
+  auto instream = get_valid_file_resource(fp);
+  if (!instream) {
+    return false;
+  }
   instream->rewind();
 
   auto outstream = req::make<TempFile>(false);
@@ -321,7 +338,10 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 
 Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
                       const Resource& fp) {
-  auto stream = cast<File>(fp);
+  auto stream = get_valid_file_resource(fp);
+  if (!stream) {
+    return false;
+  }
   stream->rewind();
 
   int linelen = 0;

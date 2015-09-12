@@ -168,11 +168,12 @@ void handle_destructor_exception(const char* situation = "Destructor");
  *
  * Don't use in new code.
  */
-void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+void throw_bad_type_exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1,2);
 void throw_expected_array_exception(const char* fn = nullptr);
 void throw_expected_array_or_collection_exception(const char* fn = nullptr);
-void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
-   __attribute__((__cold__));
+void throw_invalid_argument(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1,2) __attribute__((__cold__));
 
 /**
  * Unsetting ClassName::StaticProperty.

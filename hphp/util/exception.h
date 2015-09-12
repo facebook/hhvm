@@ -30,13 +30,15 @@ struct IMarker;
 
 struct Exception : std::exception {
   explicit Exception() = default;
-  explicit Exception(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  explicit Exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   explicit Exception(const std::string& msg);
   Exception(const Exception &e);
 
   // Try not to use this function (or the other varargs-based things) in new
   // code.  (You probably shouldn't be using Exception directly either.)
-  void format(const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
+  void format(ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF(2,0);
 
   void setMessage(const char *msg) { m_msg = msg ? msg : "";}
 

@@ -380,7 +380,8 @@ private:
  */
 class HdfException : public Exception {
 public:
-  HdfException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  HdfException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   EXCEPTION_COMMON_IMPL(HdfException);
 };
 

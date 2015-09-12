@@ -53,7 +53,8 @@ struct ExtendedException : Exception {
   explicit ExtendedException();
   explicit ExtendedException(const std::string& msg);
   explicit ExtendedException(SkipFrame frame, const std::string& msg);
-  explicit ExtendedException(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  explicit ExtendedException(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   ExtendedException(const ExtendedException& other);
   ExtendedException(ExtendedException&& other) noexcept;
   ~ExtendedException();
@@ -90,7 +91,8 @@ struct FatalErrorException : ExtendedException {
   explicit FatalErrorException(const char *msg)
     : ExtendedException("%s", msg)
   {}
-  FatalErrorException(int, const char *msg, ...) ATTRIBUTE_PRINTF(3,4);
+  FatalErrorException(int, ATTRIBUTE_PRINTF_STRING const char *msg, ...)
+    ATTRIBUTE_PRINTF(3,4);
   FatalErrorException(const std::string&, const Array& backtrace,
                       bool isRecoverable = false);
 

@@ -51,7 +51,8 @@ const StaticString
   s_directory_iterator("DirectoryIterator");
 
 
-void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+void throw_spl_exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(1,2);
 void throw_spl_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);

@@ -44,7 +44,8 @@ enum RepoId {
 };
 
 struct RepoExc : std::exception {
-  RepoExc(const char* fmt, ...) ATTRIBUTE_PRINTF(2, 3) {
+  RepoExc(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2, 3) {
     va_list(ap);
     va_start(ap, fmt);
     char* msg;

@@ -679,7 +679,7 @@ void pdo_raise_impl_error(sp_PDOResource rsrc, sp_PDOStatement stmt,
 void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
                           const char *sqlstate, const char *supp);
 void throw_pdo_exception(const Variant& code, const Variant& info,
-                         const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
+  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

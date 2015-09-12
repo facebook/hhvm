@@ -100,7 +100,7 @@ IMAGICK_DEFINE_CLASS(ImagickPixelIterator)
 
 template<typename T>
 ATTRIBUTE_NORETURN
-void imagickThrow(const char* fmt, ...)
+void imagickThrow(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
   ATTRIBUTE_PRINTF(1, 2);
 
 template<typename T>

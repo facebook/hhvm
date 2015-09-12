@@ -126,7 +126,8 @@ public:
   // implementing ParserBase
   virtual bool parseImpl();
   bool parse();
-  virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  virtual void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   IMPLEMENT_XHP_ATTRIBUTES;
 
   virtual void fatal(const Location* loc, const char* msg);

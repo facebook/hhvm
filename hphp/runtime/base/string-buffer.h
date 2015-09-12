@@ -191,7 +191,8 @@ struct StringBuffer {
   /*
    * Append to this string using a printf-style format specification.
    */
-  void printf(const char* format, ...) ATTRIBUTE_PRINTF(2,3);
+  void printf(ATTRIBUTE_PRINTF_STRING const char* format, ...)
+    ATTRIBUTE_PRINTF(2,3);
 
   /*
    * Read a file into this buffer. Use a larger page size to read more bytes

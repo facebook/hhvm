@@ -373,7 +373,8 @@ private:
  */
 class ServerException : public Exception {
 public:
-  ServerException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  ServerException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
 };
 
 class FailedToListenException : public ServerException {

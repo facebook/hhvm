@@ -66,7 +66,7 @@ const void *buffer_append(const void *buf1, int size1,
  * printf into a std::string.
  */
 void string_printf(std::string &msg,
-                   const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
 /**
  * Escaping strings for code generation.

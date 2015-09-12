@@ -275,8 +275,10 @@ public:
     incLoc(rawText, rawLeng, type);
   }
   // also used for YY_FATAL_ERROR in hphp.x
-  void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void warn(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void warn(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   std::string escape(const char *str, int len, char quote_type) const;
 
   /**

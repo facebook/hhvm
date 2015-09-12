@@ -350,7 +350,8 @@ void analyze_block(LoopEnv& env, Block* blk) {
 
       [&] (IrrelevantEffects) {},
 
-      [&] (ReturnEffects)     { assertx(inst.is(InlineReturn)); },
+      [&] (ReturnEffects)     { assertx(inst.is(InlineReturn) ||
+                                        inst.is(InlineReturnNoFrame)); },
       [&] (ExitEffects)       { assertx(!"tried to exit in a loop"); }
     );
   }

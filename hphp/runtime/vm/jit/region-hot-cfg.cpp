@@ -48,12 +48,14 @@ const StaticString s_switchProfile("SwitchProfile");
 
 struct DFS {
   DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv,
-      int32_t maxBCInstrs)
+      int32_t maxBCInstrs,
+      bool inlining)
     : m_profData(p)
     , m_cfg(c)
     , m_selectedSet(ts)
     , m_selectedVec(tv)
     , m_numBCInstrs(maxBCInstrs)
+    , m_inlining(inlining)
   {}
 
   RegionDescPtr formRegion(TransID head) {
@@ -224,7 +226,7 @@ private:
 
         // Skip dst if we already generated a region starting at that SrcKey.
         auto dstSK = m_profData->transSrcKey(dst);
-        if (m_profData->optimized(dstSK)) {
+        if (!m_inlining && m_profData->optimized(dstSK)) {
           ITRACE(5, "- visit: skipping {} because SrcKey was already "
                  "optimize", showShort(dstSK));
           continue;
@@ -265,6 +267,7 @@ private:
   jit::vector<RegionDesc::Arc> m_arcs;
   double                       m_minBlockWeight;
   double                       m_minArcProb;
+  bool                         m_inlining;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -276,11 +279,15 @@ RegionDescPtr selectHotCFG(TransID head,
                            const TransCFG& cfg,
                            int32_t maxBCInstrs,
                            TransIDSet& selectedSet,
-                           TransIDVec* selectedVec) {
+                           TransIDVec* selectedVec /* = nullptr */,
+                           bool inlining /* = false */) {
   ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", maxBCInstrs);
   auto const region =
-    DFS(profData, cfg, selectedSet, selectedVec, maxBCInstrs)
+    DFS(profData, cfg, selectedSet, selectedVec, maxBCInstrs, inlining)
       .formRegion(head);
+
+  if (region->empty()) return nullptr;
+
   ITRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
          show(*region));
   region_prune_arcs(*region);

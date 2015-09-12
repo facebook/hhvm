@@ -125,7 +125,8 @@ struct InliningDecider {
    * If inlining is not performed when true is returned, registerEndInlining()
    * must be called immediately to correctly reset the internal inlining costs.
    */
-  bool shouldInline(const Func* callee, const RegionDesc& region);
+  bool shouldInline(const Func* callee, const RegionDesc& region,
+                    bool& needsMerge);
 
   /*
    * Update internal state for when an inlining event ends.

@@ -522,6 +522,7 @@ bool canDCE(IRInstruction* inst) {
   case MapIdx:
   case StMBase:
   case FinishMemberOp:
+  case InlineReturnNoFrame:
     return false;
   }
   not_reached();
@@ -697,8 +698,41 @@ bool findWeakActRecUses(const BlockList& blocks,
         if (frameUses - (weakUses + 1) == 0) {
           ITRACE(1, "killing frame {}\n", *frameInst);
           killedFrames = true;
-          state[inst].setDead();
           state[frameInst].setDead();
+
+          // Ensure that the frame is still dead for the purposes of
+          // memory-effects
+          auto const spInst = frameInst->src(0)->inst();
+          InlineReturnNoFrameData data {
+            // +-------------------+
+            // |                   |
+            // | Outer Frame       |
+            // |                   |  <-- FP    --- ---
+            // +-------------------+             |   |
+            // |                   |             |   |  B: DefSP.offset
+            // | ...               |             |   |     (FPInvOffset, >= 0)
+            // +-------------------+             |   |
+            // |                   |  <-- SP     |  ---
+            // +-------------------+           C |   |
+            // |                   |             |   |
+            // | ...               |             |   |  A: DefInlineFP.spOffset
+            // +-------------------+             |   |     (IRSPRelOffset, <= 0)
+            // |                   |            ---  |
+            // | Callee Frame      |                 |
+            // |                   |                ---
+            // +-------------------+
+            //
+            // What we're trying to compute is C, a FPRelOffset (<0) from the
+            // Outer FP to the top cell in the Callee Frame. From the picture,
+            // we have |C| = |A| + |B| - 2. To get the negative result, A
+            // already has the correct sign, but we need to negate B and the
+            // minus 2 becomes +2, so: C = A - B + 2.
+            FPRelOffset {
+              frameInst->extra<DefInlineFP>()->spOffset.offset -
+              spInst->extra<DefSP>()->offset.offset + 2
+            }
+          };
+          unit.replace(inst, InlineReturnNoFrame, data);
         }
       }
       break;

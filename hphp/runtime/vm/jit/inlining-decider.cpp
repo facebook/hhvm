@@ -24,7 +24,9 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/util/trace.h"
@@ -286,7 +288,8 @@ bool isInliningVVSafe(Op op) {
 }
 
 bool InliningDecider::shouldInline(const Func* callee,
-                                   const RegionDesc& region) {
+                                   const RegionDesc& region,
+                                   bool& needsMerge) {
   auto sk = region.empty() ? SrcKey() : region.start();
   assertx(callee);
   assertx(sk.func() == callee);
@@ -377,7 +380,7 @@ bool InliningDecider::shouldInline(const Func* callee,
 
       // Count the returns.
       if (isReturnish(op)) {
-        if (++numRets > 1) {
+        if (++numRets > RuntimeOption::EvalHHIRInliningMaxReturns) {
           return refuse("region has too many returns");
         }
         continue;
@@ -408,9 +411,10 @@ bool InliningDecider::shouldInline(const Func* callee,
     }
   }
 
-  if (numRets != 1) {
+  if (numRets == 0) {
     return refuse("region has no returns");
   }
+  needsMerge = numRets > 1;
   return accept("small region with single return");
 }
 
@@ -425,13 +429,11 @@ void InliningDecider::registerEndInlining(const Func* callee) {
   m_stackDepth -= callee->maxStackCells();
 }
 
-RegionDescPtr selectCalleeRegion(const SrcKey& sk,
-                                 const Func* callee,
-                                 const IRGS& irgs,
-                                 int32_t maxBCInstrs) {
-  auto const op = sk.pc();
-
-  auto const numArgs = getImm(op, 0).u_IVA;
+namespace {
+RegionDescPtr selectCalleeTracelet(const Func* callee,
+                                   const int numArgs,
+                                   std::vector<Type>& argTypes,
+                                   int32_t maxBCInstrs) {
   auto const numParams = callee->numParams();
 
   // Set up the RegionContext for the tracelet selector.
@@ -441,16 +443,10 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   ctx.spOffset = FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())};
   ctx.resumed = false;
 
-  for (int i = 0; i < numArgs; ++i) {
-    // DataTypeGeneric is used because we're just passing the locals into the
-    // callee.  It's up to the callee to constrain further if needed.
-    auto type = irgen::publicTopType(irgs, BCSPOffset{i});
-
-    // If we don't have sufficient type information to inline the region
-    // return early
-    if (!(type <= TGen) && !(type <= TCls)) return nullptr;
-    uint32_t paramIdx = numArgs - 1 - i;
-    ctx.liveTypes.push_back({RegionDesc::Location::Local{paramIdx}, type});
+  for (uint32_t i = 0; i < numArgs; ++i) {
+    auto type = argTypes[i];
+    assertx((type <= TGen) || (type <= TCls));
+    ctx.liveTypes.push_back({RegionDesc::Location::Local{i}, type});
   }
 
   for (unsigned i = numArgs; i < numParams; ++i) {
@@ -462,6 +458,83 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   // Produce a tracelet for the callee.
   return selectTracelet(ctx, maxBCInstrs, false /* profiling */,
                         true /* inlining */);
+}
+
+TransID findTransIDForCallee(const Func* callee, const int numArgs,
+                             std::vector<Type>& argTypes) {
+  using LTag = RegionDesc::Location::Tag;
+
+  auto const profData = mcg->tx().profData();
+  auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
+
+  auto const offset = callee->getEntryForNumArgs(numArgs);
+  for (auto const id : idvec) {
+    if (profData->transStartBcOff(id) != offset) continue;
+    auto const region = profData->transRegion(id);
+
+    auto const isvalid = [&] () {
+      for (auto const& typeloc : region->entry()->typePreConditions()) {
+        if (typeloc.location.tag() != LTag::Local) continue;
+        auto const locId = typeloc.location.localId();
+
+        if (locId < numArgs && !(argTypes[locId] <= typeloc.type)) {
+          return false;
+        }
+      }
+      return true;
+    }();
+
+    if (isvalid) return id;
+  }
+  return kInvalidTransID;
+}
+
+RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
+                              std::vector<Type>& argTypes,
+                              int32_t maxBCInstrs) {
+  auto const profData = mcg->tx().profData();
+  if (!profData || !profData->profiling(callee->getFuncId())) return nullptr;
+
+  auto const dvID = findTransIDForCallee(callee, numArgs, argTypes);
+  if (dvID == kInvalidTransID) {
+    return nullptr;
+  }
+
+  TransIDSet selectedTIDs;
+  TransCFG cfg(callee->getFuncId(), profData, mcg->tx().getSrcDB(),
+               mcg->getJmpToTransIDMap(), true /* inlining */);
+
+  return selectHotCFG(dvID, profData, cfg, maxBCInstrs, selectedTIDs,
+                      nullptr /* selectedVec */, true /* inlining */);
+}
+}
+
+RegionDescPtr selectCalleeRegion(const SrcKey& sk,
+                                 const Func* callee,
+                                 const IRGS& irgs,
+                                 int32_t maxBCInstrs) {
+  auto const op = sk.pc();
+  auto const numArgs = getImm(op, 0).u_IVA;
+
+  std::vector<Type> argTypes;
+  for (int i = numArgs - 1; i >= 0; --i) {
+    // DataTypeGeneric is used because we're just passing the locals into the
+    // callee.  It's up to the callee to constrain further if needed.
+    auto type = irgen::publicTopType(irgs, BCSPOffset{i});
+
+    // If we don't have sufficient type information to inline the region
+    // return early
+    if (!(type <= TGen) && !(type <= TCls)) return nullptr;
+    argTypes.push_back(type);
+  }
+
+  if (RuntimeOption::EvalInlineRegionMode != "tracelet") {
+    auto region = selectCalleeCFG(callee, numArgs, argTypes, maxBCInstrs);
+    if (region) return region;
+    if (RuntimeOption::EvalInlineRegionMode != "both") return nullptr;
+  }
+
+  return selectCalleeTracelet(callee, numArgs, argTypes, maxBCInstrs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

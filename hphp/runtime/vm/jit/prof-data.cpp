@@ -340,6 +340,9 @@ bool ProfData::profiling(FuncId funcId) const {
 
 void ProfData::setProfiling(FuncId funcId) {
   m_profilingFuncs.insert(funcId);
+  if (m_funcProfTrans.find(funcId) == m_funcProfTrans.end()) {
+    m_funcProfTrans[funcId] = TransIDVec();
+  }
 }
 
 RegionDescPtr ProfData::transRegion(TransID id) const {

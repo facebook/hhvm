@@ -492,6 +492,11 @@ void visit(Local& env, IRInstruction& inst) {
         return;
       }
 
+      if (inst.is(InlineReturnNoFrame)) {
+        mustStore(env, l.kills);
+        return;
+      }
+
       // Return from the main function.  Locations other than the frame and
       // stack (e.g. object properties and whatnot) are always live on a
       // function return---so mark everything read before we start killing

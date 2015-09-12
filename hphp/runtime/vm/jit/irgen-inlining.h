@@ -25,6 +25,7 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
+void endInlining(IRGS&);
 void endInlinedCommon(IRGS&);
 void retFromInlined(IRGS&);
 

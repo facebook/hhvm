@@ -55,7 +55,9 @@ bool isInlining(const IRGS& env) {
 bool beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
-                   Offset returnBcOffset) {
+                   Offset returnBcOffset,
+                   Block* returnTarget,
+                   bool multipleReturns) {
   auto const& fpiStack = env.irb->fpiStack();
 
   assertx(!fpiStack.empty() &&
@@ -111,6 +113,9 @@ bool beginInlining(IRGS& env,
     false
   };
   env.bcStateStack.emplace_back(key);
+  env.inlineReturnTarget.emplace_back(
+    ReturnTarget { returnTarget, multipleReturns }
+  );
   env.inlineLevel++;
   updateMarker(env);
 
@@ -150,6 +155,7 @@ void endInlinedCommon(IRGS& env) {
   // updateMarker() below, where the caller state isn't entirely set up.
   env.inlineLevel--;
   env.bcStateStack.pop_back();
+  env.inlineReturnTarget.pop_back();
   always_assert(env.bcStateStack.size() > 0);
 
   updateMarker(env);
@@ -168,10 +174,18 @@ void endInlinedCommon(IRGS& env) {
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
 }
 
-void retFromInlined(IRGS& env) {
+void endInlining(IRGS& env) {
   auto const retVal = pop(env, DataTypeGeneric);
   endInlinedCommon(env);
   push(env, retVal);
+}
+
+void retFromInlined(IRGS& env) {
+  if (env.inlineReturnTarget.back().needsMerge) {
+    prepareForHHBCMergePoint(env);
+  }
+
+  gen(env, Jmp, env.inlineReturnTarget.back().target);
 }
 
 //////////////////////////////////////////////////////////////////////

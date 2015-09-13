@@ -12,7 +12,11 @@
 
 let () =
   let out_file = Sys.argv.(1) in
-  let rev = read_process_output "git" [|"git"; "rev-parse"; "HEAD"|] in
+  let rev =
+    try read_process_output "git" [|"git"; "rev-parse"; "HEAD"|]
+    with Failure _ ->
+      read_process_output "hg" [|"hg"; "id"; "-i"|]
+  in
   let content =
     Printf.sprintf "const char* const BuildInfo_kRevision = %S;\n" rev in
   let do_dump =

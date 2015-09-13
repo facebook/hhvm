@@ -386,3 +386,14 @@
 
 /* Define as `fork' if `vfork' does not work. */
 /* #undef vfork */
+
+// This only bothers to undefine the things that break the MSVC build.
+// Everything else is ignored, even if the define for it is wrong.
+#ifdef _MSC_VER
+# undef HAVE_DAYLIGHT
+# undef HAVE_STRUCT_TM_TM_ZONE
+# undef HAVE_UTIME
+# undef HAVE_UTIMES
+# undef HAVE_UTIME_H
+# undef HAVE_VISIBILITY
+#endif

@@ -23,8 +23,9 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/htonll.h"
 
+#include <folly/FilePortability.h>
+
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdexcept>
 
 namespace HPHP { namespace thrift {

@@ -382,8 +382,9 @@ bool findFileWrapper(const String& file, void* ctx) {
   std::string server_root(SourceRootInfo::GetCurrentSourceRoot());
   if (server_root.empty()) {
     server_root = std::string(g_context->getCwd().data());
-    if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
-      server_root += "/";
+    if (server_root.empty() ||
+        FileUtil::isDirSeparator(server_root[server_root.size() - 1])) {
+      server_root += FileUtil::getDirSeparator();
     }
   }
   String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));

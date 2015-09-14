@@ -2729,7 +2729,12 @@ object_property_name_no_variables:
 
 object_property_name:
     object_property_name_no_variables  { $$ = $1;}
+  /* !PHP5_ONLY */
   | variable_no_objects                { $$ = $1; $$ = HPHP::ObjPropNormal;}
+  /* !END */
+  /* !PHP7_ONLY */
+  | compound_variable                  { $$ = $1; $$ = HPHP::ObjPropNormal;}
+  /* !END */
 ;
 
 object_method_name_no_variables:
@@ -2739,7 +2744,12 @@ object_method_name_no_variables:
 
 object_method_name:
     object_method_name_no_variables    { $$ = $1;}
+  /* !PHP5_ONLY */
   | variable_no_objects                { $$ = $1;}
+  /* !END */
+  /* !PHP7_ONLY */
+  | compound_variable                  { $$ = $1;}
+  /* !END */
 ;
 
 array_access:
@@ -2851,7 +2861,12 @@ dimmable_variable:
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | variable object_operator
+    /* !PHP5_ONLY */
     object_property_name_no_variables
+    /* !END */
+    /* !PHP7_ONLY */
+    object_property_name
+    /* !END */
                                     { _p->onObjectProperty(
                                         $$,
                                         $1,

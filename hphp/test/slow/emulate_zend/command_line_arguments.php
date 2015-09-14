@@ -9,3 +9,7 @@ system($cmd);
 $cmd = PHP_BINARY.' --php -n < '.SCRIPT_NAME;
 var_dump($cmd);
 system($cmd);
+
+$cmd = PHP_BINARY.' --php --define date.timezone=America/New_York '.SCRIPT_NAME;
+var_dump($cmd);
+system($cmd);

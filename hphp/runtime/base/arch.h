@@ -18,14 +18,13 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
+#include <boost/type_traits.hpp>
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class Arch {
-  X64,
-  ARM,
-};
+enum class Arch { X64, ARM, };
 
 inline Arch arch() {
   if (RuntimeOption::EvalSimulateARM) return Arch::ARM;
@@ -34,15 +33,19 @@ inline Arch arch() {
 
 /*
  * Macro for defining easy arch-dispatch wrappers.
+ *
+ * We need to specify the return type explicitly, or else we may drop refs.
  */
-#define ARCH_SWITCH_CALL(func, ...)  \
-  switch (arch()) {                       \
-    case Arch::X64:                       \
-      return x64::func(__VA_ARGS__);      \
-    case Arch::ARM:                       \
-      return arm::func(__VA_ARGS__);      \
-  }                                       \
-  not_reached();
+#define ARCH_SWITCH_CALL(func, ...)     \
+  ([&]() -> boost::function_traits<decltype(x64::func)>::result_type {  \
+    switch (arch()) {                   \
+      case Arch::X64:                   \
+        return x64::func(__VA_ARGS__);  \
+      case Arch::ARM:                   \
+        return arm::func(__VA_ARGS__);  \
+    }                                   \
+    not_reached();                      \
+  }())
 
 ///////////////////////////////////////////////////////////////////////////////
 

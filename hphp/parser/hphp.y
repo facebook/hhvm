@@ -2450,7 +2450,13 @@ static_class_name:
                                          Parser::StaticClassExprName);}
   | static_class_name
     T_DOUBLE_COLON
-    variable_no_objects                { _p->onStaticMember($$,$1,$3);}
+    /* !PHP5_ONLY */
+    variable_no_objects
+    /* !END */
+    /* !PHP7_ONLY */
+    compound_variable
+    /* !END */
+                                       { _p->onStaticMember($$,$1,$3);}
 ;
 class_name_reference:
     fully_qualified_class_name         { _p->onName($$,$1,Parser::StringName);}
@@ -2825,7 +2831,13 @@ variable:
                                     }
   | static_class_name
     T_DOUBLE_COLON
-    variable_no_objects                { _p->onStaticMember($$,$1,$3);}
+    /* !PHP5_ONLY */
+    variable_no_objects
+    /* !END */
+    /* !PHP7_ONLY */
+    compound_variable
+    /* !END */
+                                       { _p->onStaticMember($$,$1,$3);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | lambda_or_closure_with_parens '('
@@ -2853,6 +2865,11 @@ dimmable_variable:
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | '(' variable ')'                   { $$ = $2;}
+  /* !PHP7_ONLY */
+  | static_class_name
+    T_DOUBLE_COLON
+    compound_variable                  { _p->onStaticMember($$,$1,$3);}
+  /* !END */
 ;
 
 callable_variable:
@@ -2895,7 +2912,12 @@ class_method_call:
     function_call_parameter_list ')'   { _p->onCall($$,0,$3,$6,&$1);}
   | static_class_name
     T_DOUBLE_COLON
+    /* !PHP5_ONLY */
     variable_no_objects '('
+    /* !END */
+    /* !PHP7_ONLY */
+    compound_variable '('
+    /* !END */
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
   | static_class_name
     T_DOUBLE_COLON

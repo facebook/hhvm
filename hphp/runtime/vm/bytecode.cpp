@@ -4670,22 +4670,23 @@ struct SpropState {
   ~SpropState();
   StringData* name;
   TypedValue* clsref;
-  TypedValue* nameCell;
   TypedValue* output;
   TypedValue* val;
+  TypedValue oldNameCell;
   bool visible;
   bool accessible;
 };
 
 SpropState::SpropState(Stack& vmstack) {
   clsref = vmstack.topTV();
-  nameCell = vmstack.indTV(1);
-  output = nameCell;
+  auto nameCell = output = vmstack.indTV(1);
   lookup_sprop(vmfp(), clsref, name, nameCell, val, visible, accessible);
+  oldNameCell = *nameCell;
 }
 
 SpropState::~SpropState() {
   decRefStr(name);
+  tvRefcountedDecRef(oldNameCell);
 }
 
 template<bool box> void getS(PC& pc) {
@@ -5507,7 +5508,11 @@ OPTBLD_INLINE void iopIncDecN(IOP_ARGS) {
   TypedValue* nameCell = vmStack().topTV();
   TypedValue* local = nullptr;
   lookupd_var(vmfp(), name, nameCell, local);
-  SCOPE_EXIT { decRefStr(name); };
+  auto oldNameCell = *nameCell;
+  SCOPE_EXIT {
+    decRefStr(name);
+    tvRefcountedDecRef(oldNameCell);
+  };
   assert(local != nullptr);
   IncDecBody(op, tvToCell(local), nameCell);
 }
@@ -5518,7 +5523,11 @@ OPTBLD_INLINE void iopIncDecG(IOP_ARGS) {
   TypedValue* nameCell = vmStack().topTV();
   TypedValue* gbl = nullptr;
   lookupd_gbl(vmfp(), name, nameCell, gbl);
-  SCOPE_EXIT { decRefStr(name); };
+  auto oldNameCell = *nameCell;
+  SCOPE_EXIT {
+    decRefStr(name);
+    tvRefcountedDecRef(oldNameCell);
+  };
   assert(gbl != nullptr);
   IncDecBody(op, tvToCell(gbl), nameCell);
 }
@@ -5531,7 +5540,6 @@ OPTBLD_INLINE void iopIncDecS(IOP_ARGS) {
                 ss.clsref->m_data.pcls->name()->data(),
                 ss.name->data());
   }
-  tvRefcountedDecRef(ss.nameCell);
   IncDecBody(op, tvToCell(ss.val), ss.output);
   vmStack().discard();
 }

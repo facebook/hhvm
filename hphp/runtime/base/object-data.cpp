@@ -1526,29 +1526,29 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   return prop;
 }
 
+// writes result into dest without decreffing old value.
 void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
                             TypedValue& dest) {
   auto const lookup = getProp(ctx, key);
   auto prop = lookup.prop;
 
-  auto tv = make_tv<KindOfUninit>();
-
   if (prop && lookup.accessible) {
-    auto tvResult = make_tv<KindOfNull>();
-    if (prop->m_type == KindOfUninit &&
-        getAttribute(UseGet) &&
-        invokeGet(&tvResult, key)) {
-      IncDecBody(op, &tvResult, &dest);
-      TypedValue ignored;
-      if (getAttribute(UseSet) && invokeSet(&ignored, key, &tvResult)) {
-        tvRefcountedDecRef(&ignored);
-        prop = &tvResult;
-      } else {
-        memcpy(prop, &tvResult, sizeof(TypedValue));
+    auto get_result = make_tv<KindOfNull>();
+    if (prop->m_type == KindOfUninit && getAttribute(UseGet) &&
+        invokeGet(&get_result, key)) {
+      SCOPE_EXIT { tvRefcountedDecRef(get_result); };
+      IncDecBody(op, &get_result, &dest);
+      if (getAttribute(UseSet)) {
+        TypedValue set_result;
+        if (invokeSet(&set_result, key, &get_result)) {
+          tvRefcountedDecRef(&set_result);
+        }
+        return;
       }
+      memcpy(prop, &get_result, sizeof(TypedValue));
+      get_result.m_type = KindOfNull; // suppress decref
       return;
     }
-
     if (prop->m_type == KindOfUninit) {
       tvWriteNull(prop);
     } else {
@@ -1562,12 +1562,14 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
 
   // Native accessors.
   if (getAttribute(HasNativePropHandler)) {
-    if (invokeNativeGetProp(&tv, key)) {
-      tvUnboxIfNeeded(&tv);
-      IncDecBody(op, &tv, &dest);
-      TypedValue ignored;
-      if (invokeNativeSetProp(&ignored, key, &tv)) {
-        tvRefcountedDecRef(&ignored);
+    auto get_result = make_tv<KindOfUninit>();
+    if (invokeNativeGetProp(&get_result, key)) {
+      SCOPE_EXIT { tvRefcountedDecRef(get_result); };
+      tvUnboxIfNeeded(&get_result);
+      IncDecBody(op, &get_result, &dest);
+      TypedValue set_result;
+      if (invokeNativeSetProp(&set_result, key, &get_result)) {
+        tvRefcountedDecRef(&set_result);
         return;
       }
     }
@@ -1577,12 +1579,12 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
   auto const useGet = getAttribute(UseGet);
 
   if (useGet && !useSet) {
-    auto tvResult = make_tv<KindOfNull>();
-    // If invokeGet fails due to recursion, it leaves the KindOfNull
-    // in tvResult.
-    invokeGet(&tvResult, key);
-    tvUnboxIfNeeded(&tvResult);
-    IncDecBody(op, &tvResult, &dest);
+    auto get_result = make_tv<KindOfNull>();
+    // If invokeGet fails due to recursion, it leaves KindOfNull in get_result.
+    invokeGet(&get_result, key);
+    SCOPE_EXIT { tvRefcountedDecRef(get_result); };
+    tvUnboxIfNeeded(&get_result);
+    IncDecBody(op, &get_result, &dest);
     if (prop) raise_error("Cannot access protected property");
     prop = reinterpret_cast<TypedValue*>(
       &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
@@ -1592,17 +1594,19 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     // unlike the non-magic case below, we may have already created it
     // under the recursion into invokeGet above, so we need to do a
     // tvSet here.
-    tvSet(tvResult, *prop);
+    tvSet(get_result, *prop);
     return;
   }
 
   if (useGet && useSet) {
-    if (invokeGet(&tv, key)) {
-      tvUnboxIfNeeded(&tv);
-      IncDecBody(op, &tv, &dest);
-      TypedValue ignored;
-      if (invokeSet(&ignored, key, &tv)) {
-        tvRefcountedDecRef(&ignored);
+    auto get_result = make_tv<KindOfUninit>();
+    if (invokeGet(&get_result, key)) {
+      SCOPE_EXIT { tvRefcountedDecRef(get_result); };
+      tvUnboxIfNeeded(&get_result);
+      IncDecBody(op, &get_result, &dest);
+      TypedValue set_result;
+      if (invokeSet(&set_result, key, &get_result)) {
+        tvRefcountedDecRef(&set_result);
       }
       return;
     }

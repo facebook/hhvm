@@ -1232,8 +1232,10 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
   unknownBaseType(base);
 }
 
+// Writes result in *to without decreffing old value
 void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to);
 
+// Writes result in *to without decreffing old value
 inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
   assert(cellIsPlausible(*fr));
 

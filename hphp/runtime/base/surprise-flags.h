@@ -50,7 +50,6 @@ enum SurpriseFlag : size_t {
   PendingGCFlag        = 1ull << 60,
 
   ResourceFlags =
-    MemExceededFlag |
     TimedOutFlag |
     CPUTimedOutFlag |
     PendingGCFlag,
@@ -68,9 +67,8 @@ enum SurpriseFlag : size_t {
     InterceptFlag |
     XenonSignalFlag |
     IntervalTimerFlag |
-    TimedOutFlag |
-    CPUTimedOutFlag |
-    PendingGCFlag,
+    MemExceededFlag |
+    ResourceFlags,
 };
 
 /*

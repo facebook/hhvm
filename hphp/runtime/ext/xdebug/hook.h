@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_XDEBUG_HOOK_HANDLER_H_
-#define incl_HPHP_XDEBUG_HOOK_HANDLER_H_
+#ifndef incl_HPHP_XDEBUG_HOOK_H_
+#define incl_HPHP_XDEBUG_HOOK_H_
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
@@ -146,10 +146,10 @@ extern DECLARE_THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints,
   (s_xdebug_breakpoints->m_breakMap)
 
 ////////////////////////////////////////////////////////////////////////////////
-// XDebugHookHandler
+// XDebugHook
 
-struct XDebugHookHandler : DebugHookHandler {
-  static DebugHookHandler* GetInstance();
+struct XDebugHook : DebuggerHook {
+  static DebuggerHook* GetInstance();
   // Starting the server on request init
   void onRequestInit() override {
     if (XDebugServer::isNeeded()) {
@@ -249,11 +249,11 @@ struct XDebugHookHandler : DebugHookHandler {
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
  private:
-  XDebugHookHandler() {}
-  ~XDebugHookHandler() override {}
+  XDebugHook() {}
+  ~XDebugHook() override {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_XDEBUG_HOOK_HANDLER_H_
+#endif

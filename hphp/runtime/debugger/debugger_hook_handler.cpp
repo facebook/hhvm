@@ -117,12 +117,12 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
   }
 }
 
-DebugHookHandler* DebuggerHookHandler::GetInstance() {
-  static DebugHookHandler* instance = new DebuggerHookHandler;
+DebuggerHook* HphpdHook::GetInstance() {
+  static DebuggerHook* instance = new HphpdHook();
   return instance;
 }
 
-void DebuggerHookHandler::onFileLoad(Unit* unit) {
+void HphpdHook::onFileLoad(Unit* unit) {
   DebuggerProxy* proxy = Debugger::GetProxy().get();
   if (proxy == nullptr) return;
 
@@ -139,7 +139,7 @@ void DebuggerHookHandler::onFileLoad(Unit* unit) {
   }
 }
 
-void DebuggerHookHandler::onDefClass(const Class* cls) {
+void HphpdHook::onDefClass(const Class* cls) {
   // Make sure we have a proxy
   DebuggerProxy* proxy = Debugger::GetProxy().get();
   if (proxy == nullptr) return;
@@ -169,7 +169,7 @@ void DebuggerHookHandler::onDefClass(const Class* cls) {
   }
 }
 
-void DebuggerHookHandler::onDefFunc(const Func* f) {
+void HphpdHook::onDefFunc(const Func* f) {
   // Make sure we have a proxy
   DebuggerProxyPtr proxy = Debugger::GetProxy();
   if (proxy == nullptr) return;

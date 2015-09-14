@@ -141,7 +141,7 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
   } else {
     hphp_invoke_simple(options.extension, false /* warmup only */);
   }
-  DebugHookHandler::attach<DebuggerHookHandler>();
+  DebuggerHook::attach<HphpdHook>();
   if (!restart) {
     DebuggerDummyEnv dde;
     Debugger::InterruptSessionStarted(options.fileName.c_str());
@@ -182,7 +182,7 @@ void Debugger::LogShutdown(ShutdownKind shutdownKind) {
 void Debugger::InterruptSessionStarted(const char *file,
                                        const char *error /* = NULL */) {
   TRACE(2, "Debugger::InterruptSessionStarted\n");
-  DebugHookHandler::attach<DebuggerHookHandler>();
+  DebuggerHook::attach<HphpdHook>();
   s_debugger.registerThread(); // Register this thread as being debugged
   Interrupt(SessionStarted, file, nullptr, error);
 }
@@ -396,7 +396,7 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   // Find out whether this sandbox is being debugged.
   auto proxy = findProxy(sid);
   if (proxy) {
-    DebugHookHandler::attach<DebuggerHookHandler>(ti);
+    DebuggerHook::attach<HphpdHook>(ti);
   }
 }
 
@@ -443,9 +443,9 @@ void Debugger::setDebuggerFlag(const StringData* sandboxId, bool flag) {
   TRACE(2, "Debugger::setDebuggerFlag\n");
   FOREACH_SANDBOX_THREAD_BEGIN(sandboxId, ti)
     if (flag) {
-      DebugHookHandler::attach<DebuggerHookHandler>(ti);
+      DebuggerHook::attach<HphpdHook>(ti);
     } else {
-      DebugHookHandler::detach(ti);
+      DebuggerHook::detach(ti);
     }
   FOREACH_SANDBOX_THREAD_END()
 }

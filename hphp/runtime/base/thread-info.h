@@ -28,7 +28,7 @@ namespace HPHP {
 struct MemoryManager;
 struct Profiler;
 struct CodeCoverage;
-struct DebugHookHandler;
+struct DebuggerHook;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -89,8 +89,8 @@ struct ThreadInfo {
 
   CodeCoverage* m_coverage{nullptr};
 
-  /* Set by DebugHookHandler::attach(). */
-  DebugHookHandler* m_debugHookHandler{nullptr};
+  /* Set by DebuggerHook::attach(). */
+  DebuggerHook* m_debuggerHook{nullptr};
 
   /* A C++ exception which will be thrown by the next surprise check. */
   Exception* m_pendingException{nullptr};

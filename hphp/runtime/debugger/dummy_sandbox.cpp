@@ -66,7 +66,7 @@ struct CLISession : private boost::noncopyable {
   ~CLISession() {
     TRACE(2, "CLISession::~CLISession\n");
     Debugger::UnregisterSandbox(g_context->getSandboxId());
-    DebugHookHandler::detach();
+    DebuggerHook::detach();
     execute_command_line_end(0, false, nullptr);
   }
 };
@@ -124,7 +124,7 @@ void DummySandbox::run() {
         g_context->setSandboxId(m_proxy->getDummyInfo().id());
       }
 
-      DebugHookHandler::attach<DebuggerHookHandler>(ti);
+      DebuggerHook::attach<HphpdHook>(ti);
       {
         DebuggerDummyEnv dde;
         // This is really the entire point of having the dummy sandbox. This

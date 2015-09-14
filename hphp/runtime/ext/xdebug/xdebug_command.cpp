@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
-#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
+#include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 

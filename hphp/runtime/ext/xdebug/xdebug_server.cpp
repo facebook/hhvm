@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 
+#include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
-#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
 #include "hphp/runtime/base/externals.h"
@@ -316,7 +316,7 @@ void XDebugServer::pollSocketLoop() {
       always_assert(old == nullptr);
 
       // Force request thread to run in the interpreter, and hit
-      // XDebugHookHandler::onOpcode().
+      // XDebugHook::onOpcode().
       m_requestThread->m_reqInjectionData.setDebuggerIntr(true);
       m_requestThread->m_reqInjectionData.setFlag(DebuggerSignalFlag);
     } catch (const XDebugExn&) {
@@ -356,7 +356,7 @@ void XDebugServer::onRequestInit() {
 
   // Need to turn on debugging regardless of the remote mode in order to
   // capture exceptions/errors
-  if (!DebugHookHandler::attach<XDebugHookHandler>()) {
+  if (!DebuggerHook::attach<XDebugHook>()) {
     raise_warning("Could not attach xdebug remote debugger to the current "
                   "thread. A debugger is already attached.");
     return;

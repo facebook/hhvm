@@ -1,9 +1,9 @@
 HHVM_DEFINE_EXTENSION("xdebug"
   SOURCES
     ext_xdebug.cpp
+    hook.cpp
     status.cpp
     xdebug_command.cpp
-    xdebug_hook_handler.cpp
     xdebug_profiler.cpp
     xdebug_server.cpp
     xdebug_utils.cpp
@@ -12,9 +12,9 @@ HHVM_DEFINE_EXTENSION("xdebug"
     php5_xdebug/xdebug_xml.cpp
   HEADERS
     ext_xdebug.h
+    hook.h
     status.h
     xdebug_command.h
-    xdebug_hook_handler.h
     xdebug_profiler.h
     xdebug_server.h
     xdebug_utils.h

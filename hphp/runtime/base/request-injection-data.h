@@ -124,7 +124,7 @@ struct RequestInjectionData {
   }
 
   bool getDebuggerAttached() { return m_debuggerAttached; }
-  // Should only be set by DebuggerHookHandler::attach
+  // Should only be set by HphpdHook::attach
   void setDebuggerAttached(bool d) {
     m_debuggerAttached = d;
     updateJit();

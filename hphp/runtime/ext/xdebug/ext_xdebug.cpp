@@ -29,7 +29,7 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
-#include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
+#include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"

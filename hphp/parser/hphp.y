@@ -3063,7 +3063,7 @@ encaps_var_offset:
 ;
 
 internal_functions:
-    T_ISSET '(' variable_list ')'      { UEXP($$,$3,T_ISSET,1);}
+    T_ISSET '(' expr_list ')'          { UEXP($$,$3,T_ISSET,1);}
   | T_EMPTY '(' variable ')'           { UEXP($$,$3,T_EMPTY,1);}
   | T_EMPTY '(' expr_no_variable ')'   { UEXP($$,$3,'!',1);}
   | T_EMPTY '(' lambda_or_closure ')'  { UEXP($$,$3,'!',1);}

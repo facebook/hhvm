@@ -2905,8 +2905,10 @@ class_method_call:
 
 variable_no_objects:
     reference_variable                 { $$ = $1;}
+  /* !PHP5_ONLY */
   | simple_indirect_reference
     reference_variable                 { _p->onIndirectRef($$,$1,$2);}
+  /* !END */
 ;
 
 reference_variable:
@@ -2915,19 +2917,26 @@ reference_variable:
   | reference_variable '{' expr '}'    { _p->onRefDim($$, $1, $3);}
   | compound_variable                  { $$ = $1;}
 ;
+
 compound_variable:
     T_VARIABLE                         { _p->onSimpleVariable($$, $1);}
   | '$' '{' expr '}'                   { _p->onDynamicVariable($$, $3, 0);}
+  /* !PHP7_ONLY */
+  | '$' compound_variable              { $1 = 1; _p->onIndirectRef($$, $1, $2);}
+  /* !END */
 ;
+
 dim_offset:
     expr                               { $$ = $1;}
   |                                    { $$.reset();}
 ;
 
+/* !PHP5_ONLY */
 simple_indirect_reference:
     '$'                                { $$ = 1;}
   | simple_indirect_reference '$'      { $$++;}
 ;
+/* !END */
 
 variable_no_calls:
     variable_no_objects                { $$ = $1;}

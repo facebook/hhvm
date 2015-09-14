@@ -402,12 +402,9 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
     }
   }
 
-  TypedValue ignored;
-  if (useSet &&
-      invokeSet(&ignored, propName.get(), (TypedValue*)(&variant(v)))) {
-    tvRefcountedDecRef(&ignored);
+  if (useSet) {
+    invokeSet(propName.get(), (TypedValue*)(&variant(v)));
   }
-
   return variant(v);
 }
 
@@ -1053,8 +1050,7 @@ struct PropRecurInfo {
 __thread PropRecurInfo propRecurInfo;
 
 template<class Invoker>
-bool magic_prop_impl(TypedValue* retval,
-                     const StringData* key,
+bool magic_prop_impl(const StringData* key,
                      const PropAccessInfo& info,
                      Invoker invoker) {
   if (UNLIKELY(propRecurInfo.activePropInfo != nullptr)) {
@@ -1105,28 +1101,24 @@ struct MagicInvoker {
 
 }
 
-bool ObjectData::invokeSet(TypedValue* retval, const StringData* key,
-                           TypedValue* val) {
+bool ObjectData::invokeSet(const StringData* key, TypedValue* val) {
+  TypedValue ignored;
   auto const info = PropAccessInfo { this, key, UseSet };
-  return magic_prop_impl(
-    retval,
-    key,
-    info,
-    [&] {
-      auto const meth = m_cls->lookupMethod(s___set.get());
-      TypedValue args[2] = {
-        make_tv<KindOfString>(const_cast<StringData*>(key)),
-        *tvToCell(val)
-      };
-      *retval = g_context->invokeMethod(this, meth, folly::range(args));
-    }
-  );
+  auto ok = magic_prop_impl(key, info, [&] {
+    auto const meth = m_cls->lookupMethod(s___set.get());
+    TypedValue args[2] = {
+      make_tv<KindOfString>(const_cast<StringData*>(key)),
+      *tvToCell(val)
+    };
+    ignored = g_context->invokeMethod(this, meth, folly::range(args));
+  });
+  if (ok) tvRefcountedDecRef(ignored);
+  return ok;
 }
 
 bool ObjectData::invokeGet(TypedValue* retval, const StringData* key) {
   auto const info = PropAccessInfo { this, key, UseGet };
   return magic_prop_impl(
-    retval,
     key,
     info,
     MagicInvoker { retval, s___get.get(), info }
@@ -1136,21 +1128,19 @@ bool ObjectData::invokeGet(TypedValue* retval, const StringData* key) {
 bool ObjectData::invokeIsset(TypedValue* retval, const StringData* key) {
   auto const info = PropAccessInfo { this, key, UseIsset };
   return magic_prop_impl(
-    retval,
     key,
     info,
     MagicInvoker { retval, s___isset.get(), info }
   );
 }
 
-bool ObjectData::invokeUnset(TypedValue* retval, const StringData* key) {
+bool ObjectData::invokeUnset(const StringData* key) {
+  TypedValue ignored;
   auto const info = PropAccessInfo { this, key, UseUnset };
-  return magic_prop_impl(
-    retval,
-    key,
-    info,
-    MagicInvoker { retval, s___unset.get(), info }
-  );
+  auto ok = magic_prop_impl(key, info,
+                            MagicInvoker{&ignored, s___unset.get(), info});
+  if (ok) tvRefcountedDecRef(ignored);
+  return ok;
 }
 
 static bool guardedNativePropResult(TypedValue* retval, Variant result) {
@@ -1167,13 +1157,13 @@ bool ObjectData::invokeNativeGetProp(TypedValue* retval,
                                  Native::getProp(Object{this}, StrNR(key)));
 }
 
-bool ObjectData::invokeNativeSetProp(TypedValue* retval,
-                                     const StringData* key,
-                                     TypedValue* val) {
-  return guardedNativePropResult(
-    retval,
+bool ObjectData::invokeNativeSetProp(const StringData* key, TypedValue* val) {
+  TypedValue ignored;
+  auto ok = guardedNativePropResult(&ignored,
     Native::setProp(Object{this}, StrNR(key), tvAsVariant(val))
   );
+  if (ok) tvRefcountedDecRef(ignored);
+  return ok;
 }
 
 bool ObjectData::invokeNativeIssetProp(TypedValue* retval,
@@ -1182,10 +1172,12 @@ bool ObjectData::invokeNativeIssetProp(TypedValue* retval,
                                  Native::issetProp(Object{this}, StrNR(key)));
 }
 
-bool ObjectData::invokeNativeUnsetProp(TypedValue* retval,
-                                       const StringData* key) {
-  return guardedNativePropResult(retval,
-                                 Native::unsetProp(Object{this}, StrNR(key)));
+bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
+  TypedValue ignored;
+  auto ok = guardedNativePropResult(&ignored,
+                               Native::unsetProp(Object{this}, StrNR(key)));
+  if (ok) tvRefcountedDecRef(ignored);
+  return ok;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1369,32 +1361,25 @@ void ObjectData::setProp(Class* ctx,
   auto const prop = lookup.prop;
 
   if (prop && lookup.accessible) {
-    TypedValue ignored;
     if (prop->m_type != KindOfUninit ||
         !getAttribute(UseSet) ||
-        !invokeSet(&ignored, key, val)) {
+        !invokeSet(key, val)) {
       if (UNLIKELY(bindingAssignment)) {
         tvBind(val, prop);
       } else {
         tvSet(*val, *prop);
       }
-      return;
     }
-    tvRefcountedDecRef(&ignored);
     return;
   }
 
-  TypedValue ignored;
-
   // First see if native setter is implemented.
-  if (getAttribute(HasNativePropHandler) &&
-    invokeNativeSetProp(&ignored, key, val)) {
-    tvRefcountedDecRef(&ignored);
+  if (getAttribute(HasNativePropHandler) && invokeNativeSetProp(key, val)) {
     return;
   }
 
   // Then go to user-level `__set`.
-  if (!getAttribute(UseSet) || !invokeSet(&ignored, key, val)) {
+  if (!getAttribute(UseSet) || !invokeSet(key, val)) {
     if (prop) {
       /*
        * Note: this differs from Zend right now in the case of a
@@ -1420,8 +1405,6 @@ void ObjectData::setProp(Class* ctx,
     }
     return;
   }
-
-  tvRefcountedDecRef(&ignored);
 }
 
 TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
@@ -1440,9 +1423,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
         if (getAttribute(UseSet)) {
           assert(tvRef.m_type == KindOfUninit);
           cellDup(*tvToCell(&tvResult), tvRef);
-          TypedValue ignored;
-          if (invokeSet(&ignored, key, &tvRef)) {
-            tvRefcountedDecRef(&ignored);
+          if (invokeSet(key, &tvRef)) {
             return &tvRef;
           }
           tvRef.m_type = KindOfUninit;
@@ -1463,9 +1444,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   if (getAttribute(HasNativePropHandler)) {
     if (invokeNativeGetProp(&tvRef, key)) {
       setopBody(&tvRef, op, val);
-      TypedValue ignored;
-      if (invokeNativeSetProp(&ignored, key, &tvRef)) {
-        tvRefcountedDecRef(&ignored);
+      if (invokeNativeSetProp(key, &tvRef)) {
         return &tvRef;
       }
     }
@@ -1505,10 +1484,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
       // value that gets passed to the magic setter, though, since
       // __set functions can't take parameters by reference.)
       setopBody(&tvRef, op, val);
-      TypedValue ignored;
-      if (invokeSet(&ignored, key, &tvRef)) {
-        tvRefcountedDecRef(&ignored);
-      }
+      invokeSet(key, &tvRef);
       return &tvRef;
     }
   }
@@ -1539,10 +1515,7 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
       SCOPE_EXIT { tvRefcountedDecRef(get_result); };
       IncDecBody(op, &get_result, &dest);
       if (getAttribute(UseSet)) {
-        TypedValue set_result;
-        if (invokeSet(&set_result, key, &get_result)) {
-          tvRefcountedDecRef(&set_result);
-        }
+        invokeSet(key, &get_result);
         return;
       }
       memcpy(prop, &get_result, sizeof(TypedValue));
@@ -1567,9 +1540,7 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
       SCOPE_EXIT { tvRefcountedDecRef(get_result); };
       tvUnboxIfNeeded(&get_result);
       IncDecBody(op, &get_result, &dest);
-      TypedValue set_result;
-      if (invokeNativeSetProp(&set_result, key, &get_result)) {
-        tvRefcountedDecRef(&set_result);
+      if (invokeNativeSetProp(key, &get_result)) {
         return;
       }
     }
@@ -1604,10 +1575,7 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
       SCOPE_EXIT { tvRefcountedDecRef(get_result); };
       tvUnboxIfNeeded(&get_result);
       IncDecBody(op, &get_result, &dest);
-      TypedValue set_result;
-      if (invokeSet(&set_result, key, &get_result)) {
-        tvRefcountedDecRef(&set_result);
-      }
+      invokeSet(key, &get_result);
       return;
     }
   }
@@ -1640,12 +1608,8 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
-  TypedValue ignored;
-
   // Native unset first.
-  if (getAttribute(HasNativePropHandler) &&
-      invokeNativeUnsetProp(&ignored, key)) {
-    tvRefcountedDecRef(&ignored);
+  if (getAttribute(HasNativePropHandler) && invokeNativeUnsetProp(key)) {
     return;
   }
 
@@ -1656,15 +1620,12 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     raise_error("Cannot unset inaccessible property");
   }
 
-  if (!tryUnset || !invokeUnset(&ignored, key)) {
+  if (!tryUnset || !invokeUnset(key)) {
     if (UNLIKELY(!*key->data())) {
       throw_invalid_property_name(StrNR(key));
     }
-
     return;
   }
-
-  tvRefcountedDecRef(&ignored);
 }
 
 void ObjectData::raiseObjToIntNotice(const char* clsName) {

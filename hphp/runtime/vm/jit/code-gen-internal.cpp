@@ -14,47 +14,41 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_BACK_END_H
-#define incl_HPHP_JIT_BACK_END_H
+#include "hphp/runtime/vm/jit/code-gen-internal.h"
 
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/member-operations.h"
 
-#include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP {
-
-struct ActRec;
-struct SrcKey;
+namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace jit {
+ArrayKeyInfo checkStrictlyInteger(Type key) {
+  auto ret = ArrayKeyInfo{};
 
-struct AsmInfo;
-struct IRUnit;
-struct PhysReg;
+  if (key <= TInt) {
+    ret.type = KeyType::Int;
+    return ret;
+  }
+  assertx(key <= TStr);
+  ret.type = KeyType::Str;
 
-///////////////////////////////////////////////////////////////////////////////
+  if (key.hasConstVal()) {
+    int64_t i;
+    if (key.strVal()->isStrictlyInteger(i)) {
+      ret.converted    = true;
+      ret.type         = KeyType::Int;
+      ret.convertedInt = i;
+    }
+  } else {
+    ret.checkForInt = true;
+  }
 
-struct BackEnd {
-  virtual ~BackEnd();
-
-  virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
-
-  virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
-  virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
-                           TCA begin, TCA end) = 0;
-
-protected:
-  BackEnd() {}
-};
-
-std::unique_ptr<BackEnd> newBackEnd();
+  return ret;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

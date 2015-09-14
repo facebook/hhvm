@@ -14,47 +14,38 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_BACK_END_H
-#define incl_HPHP_JIT_BACK_END_H
+#ifndef incl_HPHP_VM_CODE_GEN_TLS_H_
+#define incl_HPHP_VM_CODE_GEN_TLS_H_
 
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/stack-offsets.h"
-
-#include "hphp/util/data-block.h"
-
-namespace HPHP {
-
-struct ActRec;
-struct SrcKey;
+namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace jit {
+#ifdef USE_GCC_FAST_TLS
+#ifdef __APPLE__
+#define getGlobalAddrForTLS(datum) ([] {                \
+    long* ret;                                          \
+    __asm__("lea %1, %%rax\nmov %%rdi, %0" :            \
+            "=r"(ret) : "m"(datum));                    \
+    return ret;                                         \
+  }())
 
-struct AsmInfo;
-struct IRUnit;
-struct PhysReg;
-
-///////////////////////////////////////////////////////////////////////////////
-
-struct BackEnd {
-  virtual ~BackEnd();
-
-  virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
-
-  virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
-  virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
-                           TCA begin, TCA end) = 0;
-
-protected:
-  BackEnd() {}
-};
-
-std::unique_ptr<BackEnd> newBackEnd();
+#define emitTLSAddr(x, datum, r)                        \
+  detail::implTLSAddr((x), getGlobalAddrForTLS(datum), (r))
+#define emitTLSLoad(x, datum, reg)                      \
+  detail::implTLSLoad((x), (datum), getGlobalAddrForTLS(datum), (reg))
+#else // __APPLE__
+#define emitTLSAddr(x, datum, r)                        \
+  detail::implTLSAddr((x), (datum), (r))
+#define emitTLSLoad(x, datum, reg)                      \
+  detail::implTLSLoad((x), (datum), nullptr, (reg))
+#endif // __APPLE__
+#endif // USE_GCC_FAST_TLS
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
+
+#include "hphp/runtime/vm/jit/code-gen-tls-x64.h"
 
 #endif

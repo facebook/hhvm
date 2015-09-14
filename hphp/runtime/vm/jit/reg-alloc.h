@@ -26,10 +26,11 @@
 
 namespace HPHP { namespace jit {
 
-struct IRUnit;
-struct Vunit;
-struct Vinstr;
+struct Abi;
 struct CodegenState;
+struct IRUnit;
+struct Vinstr;
+struct Vunit;
 
 // Native stack layout:
 // | enterTCHelper |

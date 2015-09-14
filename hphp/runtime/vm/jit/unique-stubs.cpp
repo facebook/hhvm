@@ -23,19 +23,22 @@
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h" // TODO(#7728856)
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -588,9 +591,7 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
       v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
     };
 
-    // TODO(#7728856): Pull this stuff out of x64 namespace; it's not actually
-    // x64-dependent.
-    x64::emitDecRefWork(v, v, rdata, destroy, false);
+    emitDecRefWork(v, v, rdata, destroy, false);
     v << ret{};
   });
 }
@@ -706,6 +707,16 @@ std::string UniqueStubs::describe(TCA address) {
 
 RegSet interp_one_cf_regs() {
   return vm_regs_with_sp() | rarg(2);
+}
+
+void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
+  if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(v);
+
+  if (!sk.resumed()) {
+    v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
+  }
+  v << copy{v.cns(sk.pc()), rarg(0)};
+  v << jmpi{mcg->tx().uniqueStubs.interpHelper, arg_regs(1)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

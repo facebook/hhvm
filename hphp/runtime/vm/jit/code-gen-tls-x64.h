@@ -14,99 +14,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODEGENHELPERS_X64_H_
-#define incl_HPHP_VM_CODEGENHELPERS_X64_H_
+#ifndef incl_HPHP_VM_CODE_GEN_TLS_X64_H_
+#define incl_HPHP_VM_CODE_GEN_TLS_X64_H_
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/ringbuffer.h"
-
-#include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/align-x64.h"
-#include "hphp/runtime/vm/jit/code-gen-cf.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/cpp-call.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/thread-local.h"
+
 namespace HPHP {
-//////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct Func;
 
 namespace jit {
-//////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct Fixup;
 struct SSATmp;
 
 namespace x64 {
-//////////////////////////////////////////////////////////////////////
 
-typedef X64Assembler Asm;
-
-void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
-void emitGetGContext(Vout& as, Vreg dest);
-
-void emitTransCounterInc(Asm& a);
-void emitTransCounterInc(Vout&);
-
-void emitAssertFlagsNonNegative(Vout& v, Vreg sf);
-
-/*
- * Assuming rData is the data pointer for a refcounted (but possibly static)
- * value, emit a static check and DecRef, executing the code emitted by
- * `destroy' if the count would go to zero.
- */
-template<class Destroy>
-void emitDecRefWork(Vout& v, Vout& vcold, Vreg rData,
-                    Destroy destroy, bool unlikelyDestroy) {
-  auto const sf = v.makeReg();
-  v << cmplim{1, rData[FAST_REFCOUNT_OFFSET], sf};
-  ifThenElse(
-    v, vcold, CC_E, sf,
-    destroy,
-    [&] (Vout& v) {
-      // If it's not static, actually reduce the reference count.  This does
-      // another branch using the same status flags from the cmplim above.
-      ifThen(
-        v, CC_NL, sf,
-        [&] (Vout& v) {
-          auto const sf = v.makeReg();
-          v << declm{rData[FAST_REFCOUNT_OFFSET], sf};
-          emitAssertFlagsNonNegative(v, sf);
-        }
-      );
-    },
-    unlikelyDestroy
-  );
-}
-
-void emitIncRef(Vout& v, Vreg base);
-
-void emitAssertFlagsNonNegative(Vout& v, Vreg sf);
-void emitAssertRefCount(Vout& v, Vreg base);
-
-Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg);
-Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg);
-
-void emitCall(Asm& as, TCA dest, RegSet args);
-void emitCall(Asm& as, CppCall call, RegSet args);
-void emitCall(Vout& v, CppCall call, RegSet args);
-
-// store imm to the 8-byte memory location at ref. Warning: don't use this
-// if you wanted an atomic store; large imms cause two stores.
-void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
-
-void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
-
-void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg fp, Vreg rds,
-                                 Fixup fixup, Vlabel catchBlock);
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Direct access to __thread variables.
@@ -142,12 +76,6 @@ template<typename T>
 inline Vptr
 implTLSAddr(Vout& v, T& data, Vreg) {
   return detail::getTLSVptr(data);
-}
-
-template<typename T>
-inline Vptr
-implTLSAddr(X64Assembler& a, T& data, Reg64) {
-   return detail::getTLSVptr(data);
 }
 }
 #else
@@ -207,12 +135,6 @@ implTLSAddr(Vout& v, long* addr, Vreg scratch) {
   return scratch[addr[2]];
 }
 
-inline Vptr
-implTLSAddr(Asm& a, long* addr, Reg64 scratch) {
-  a.gs().loadq(baseless(addr[1] * 8), scratch);
-  return scratch[addr[2]];
-}
-
 }
 
 #endif
@@ -265,72 +187,7 @@ emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
 
 #endif // USE_GCC_FAST_TLS
 
-// Emit a load of a low pointer.
-void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size);
-
-void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem);
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem);
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
-
-void emitCmpVecLen(Vout& v, Vreg sf, Vptr mem, Immed val);
-
-void copyTV(Vout& v, Vloc src, Vloc dst, Type destType);
-void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0);
-
-Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg);
-
-template<ConditionCode Jcc, class Lambda>
-void jccBlock(Asm& a, Lambda body) {
-  Label exit;
-  exit.jcc8(a, Jcc);
-  body();
-  asm_label(a, exit);
-}
-
-/*
- * lookupDestructor --
- *
- * Return a MemoryRef pointer to the destructor for the type in typeReg.
- */
-
-inline MemoryRef lookupDestructor(X64Assembler& a, PhysReg typeReg) {
-  auto const table = reinterpret_cast<intptr_t>(g_destructors);
-  always_assert_flog(deltaFits(table, sz::dword),
-    "Destructor function table is expected to be in the data "
-    "segment, with addresses less than 2^31"
-  );
-  static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&
-                (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
-                (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
-                (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
-                (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
-                "lookup of destructors depends on KindOf* values");
-  a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
-  return baseless(typeReg*8 + table);
-}
-
-inline Vptr lookupDestructor(Vout& v, Vreg typeReg) {
-  auto const table = reinterpret_cast<intptr_t>(g_destructors);
-  always_assert_flog(deltaFits(table, sz::dword),
-    "Destructor function table is expected to be in the data "
-    "segment, with addresses less than 2^31"
-  );
-  static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&
-                (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
-                (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
-                (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
-                (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
-                "lookup of destructors depends on KindOf* values");
-  auto shiftedType = v.makeReg();
-  v << shrli{kShiftDataTypeToDestrIndex, typeReg, shiftedType, v.makeReg()};
-  return Vptr{Vreg{}, shiftedType, 8, safe_cast<int>(table)};
-}
-
-inline ptrdiff_t genOffset(bool isAsync) {
-  return isAsync ? AsyncGenerator::objectOff() : Generator::objectOff();
-}
-
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}}
 

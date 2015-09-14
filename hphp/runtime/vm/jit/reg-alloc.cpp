@@ -240,7 +240,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       defs = abi.all();
       switch (arch()) {
       case Arch::ARM: break;
-      case Arch::X64: defs.remove(x64::rvmtl()); break;
+      case Arch::X64: defs.remove(rvmtl()); break;
       }
       break;
     case Vinstr::contenter:
@@ -248,7 +248,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       defs = abi.all() - RegSet(rvmfp());
       switch (arch()) {
       case Arch::ARM: break;
-      case Arch::X64: defs.remove(x64::rvmtl()); break;
+      case Arch::X64: defs.remove(rvmtl()); break;
       }
       break;
     case Vinstr::callfaststub:

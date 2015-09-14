@@ -120,12 +120,6 @@ struct BackEnd final : jit::BackEnd {
     vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(x2a(rvmsp()).code());
   }
 
-  void emitInterpReq(CodeBlock& mainCode,
-                     SrcKey sk,
-                     FPInvOffset spOff) override {
-    not_implemented();
-  }
-
   void streamPhysReg(std::ostream& os, PhysReg reg) override {
     if (reg.isSF()) {
       os << "statusFlags";

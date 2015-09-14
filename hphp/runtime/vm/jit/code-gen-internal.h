@@ -14,44 +14,37 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_BACK_END_H
-#define incl_HPHP_JIT_BACK_END_H
+#ifndef incl_HPHP_VM_CODE_GEN_INTERNAL_H_
+#define incl_HPHP_VM_CODE_GEN_INTERNAL_H_
 
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/member-operations.h"
 
-#include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP {
-
-struct ActRec;
-struct SrcKey;
+namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace jit {
+/*
+ * Information about an array key.
+ *
+ * This represents however much we know about whether the key is going to
+ * behave like an integer or a string.
+ */
+struct ArrayKeyInfo {
+  int64_t convertedInt{0};
+  KeyType type{KeyType::Any};
 
-struct AsmInfo;
-struct IRUnit;
-struct PhysReg;
+  // If true, the string could dynamically contain an integer-like string,
+  // which needs to be checked.
+  bool checkForInt{false};
 
-///////////////////////////////////////////////////////////////////////////////
-
-struct BackEnd {
-  virtual ~BackEnd();
-
-  virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
-
-  virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
-  virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
-                           TCA begin, TCA end) = 0;
-
-protected:
-  BackEnd() {}
+  // If true, useKey is an integer constant we've materialized, by converting a
+  // string `key' that was strictly an integer.
+  bool converted{false};
 };
 
-std::unique_ptr<BackEnd> newBackEnd();
+ArrayKeyInfo checkStrictlyInteger(Type key);
 
 ///////////////////////////////////////////////////////////////////////////////
 

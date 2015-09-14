@@ -32,6 +32,8 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+
 namespace HPHP { namespace jit { namespace irgen {
 
 namespace {

@@ -35,11 +35,14 @@
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
-using namespace x64;
+
+///////////////////////////////////////////////////////////////////////////////
+
 using Trace::RingBufferType;
 using Trace::ringbufferName;
 
 const char* area_names[] = { "main", "cold", "frozen" };
+
 namespace {
 
 const char* vixl_ccs[] = {
@@ -393,5 +396,7 @@ void printUnit(int level, const std::string& caption, const Vunit& unit) {
     banner("")
   );
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}

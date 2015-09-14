@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -522,7 +522,6 @@ void Vgen::emit(const addqim& i) {
 }
 
 void Vgen::emit(const call& i) {
-  // warning: this is a copy of emitCall(TCA) in code-gen-helpers-x64.cpp
   if (a->jmpDeltaFits(i.target)) {
     a->call(i.target);
   } else {

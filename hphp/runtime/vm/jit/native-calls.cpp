@@ -16,21 +16,31 @@
 
 #include "hphp/runtime/vm/jit/native-calls.h"
 
-#include "hphp/util/abi-cxx.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/runtime.h"
+
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
+
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/ext/array/ext_array.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
-namespace HPHP { namespace jit { namespace NativeCalls {
+#include "hphp/util/abi-cxx.h"
+
+namespace HPHP { namespace jit {
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace NativeCalls {
+
+///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
@@ -425,7 +435,11 @@ const CallInfo& CallMap::info(Opcode op) {
   return it->second;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 } // NativeCalls
+
+///////////////////////////////////////////////////////////////////////////////
 
 using namespace NativeCalls;
 ArgGroup toArgGroup(const CallInfo& info,
@@ -451,4 +465,6 @@ ArgGroup toArgGroup(const CallInfo& info,
   return argGroup;
 }
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+
+}}

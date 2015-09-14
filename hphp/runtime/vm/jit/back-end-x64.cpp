@@ -25,8 +25,8 @@
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -98,21 +98,6 @@ struct BackEnd final : jit::BackEnd {
     jit::enterTCHelper(regs.stack.top(), regs.fp, start,
                        vmFirstAR(), rds::tl_base, stashedAR);
     CALLEE_SAVED_BARRIER();
-  }
-
-  void emitInterpReq(CodeBlock& mainCode,
-                     SrcKey sk,
-                     FPInvOffset spOff) override {
-    Asm a { mainCode };
-    // Add a counter for the translation if requested
-    if (RuntimeOption::EvalJitTransCounters) {
-      x64::emitTransCounterInc(a);
-    }
-    a.    emitImmReg(uint64_t(sk.pc()), rarg(0));
-    if (!sk.resumed()) {
-      a.  lea(x64::rvmfp()[-cellsToBytes(spOff.offset)], x64::rvmsp());
-    }
-    a.    jmp(mcg->tx().uniqueStubs.interpHelper);
   }
 
   void streamPhysReg(std::ostream& os, PhysReg reg) override {

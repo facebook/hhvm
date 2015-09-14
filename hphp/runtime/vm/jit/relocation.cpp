@@ -725,7 +725,7 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
     auto clearRange = [](TCA start, TCA end) {
       CodeBlock cb;
       cb.init(start, end - start, "Dead code");
-      Asm a {cb};
+      X64Assembler a {cb};
       while (cb.available() >= 2) a.ud2();
       if (cb.available() > 0) a.int3();
       always_assert(!cb.available());

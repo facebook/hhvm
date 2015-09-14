@@ -77,7 +77,8 @@ printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n", crop->x,
 		unsigned int dst_y = 0;
 		while (y < (crop->y + (crop->height - 1))) {
 			/* TODO: replace 4 w/byte per channel||pitch once available */
-			memcpy(dst->tpixels[dst_y++], src->tpixels[y++] + crop->x, crop->width * 4);
+			memcpy(dst->tpixels[dst_y++], src->tpixels[y++] + crop->x,
+			       crop->width * 4);
 		}
 	} else {
 		int x;

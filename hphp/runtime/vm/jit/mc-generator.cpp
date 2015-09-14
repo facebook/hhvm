@@ -54,6 +54,7 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
@@ -2029,6 +2030,11 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease("%s", getUsageString().c_str());
   }
+
+  // Report jit maturity based on the amount of code emitted.
+  auto percent = code.mainUsed() * 100 / RuntimeOption::EvalJitAMaxUsage;
+  if (percent > 100) percent = 100;
+  ServiceData::createCounter("jit.maturity")->setValue(percent);
 
   return loc.mainStart();
 }

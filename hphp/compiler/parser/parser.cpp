@@ -188,6 +188,14 @@ Parser::Parser(Scanner &scanner, const char *fileName,
   m_ar->addFileScope(m_file);
 }
 
+bool Parser::parseImpl() {
+  if (RuntimeOption::PHP7_UVS) {
+    return parseImpl7();
+  } else {
+    return parseImpl5();
+  }
+}
+
 bool Parser::parse() {
   try {
     if (!parseImpl()) {

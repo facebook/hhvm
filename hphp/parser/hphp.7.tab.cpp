@@ -65,14 +65,14 @@
 #define YYLSP_NEEDED 1
 
 /* Substitute the variable and function names.  */
-#define yyparse         Compilerparse
-#define yylex           Compilerlex
-#define yyerror         Compilererror
-#define yylval          Compilerlval
-#define yychar          Compilerchar
-#define yydebug         Compilerdebug
-#define yynerrs         Compilernerrs
-#define yylloc          Compilerlloc
+#define yyparse         Compiler7parse
+#define yylex           Compiler7lex
+#define yyerror         Compiler7error
+#define yylval          Compiler7lval
+#define yychar          Compiler7char
+#define yydebug         Compiler7debug
+#define yynerrs         Compiler7nerrs
+#define yylloc          Compiler7lloc
 
 /* Copy the first part of user declarations.  */
 
@@ -648,7 +648,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 
 /* Line 189 of yacc.c  */
-#line 651 "hphp.tab.cpp"
+#line 651 "hphp.7.tab.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -882,7 +882,7 @@ typedef struct YYLTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 885 "hphp.tab.cpp"
+#line 885 "hphp.7.tab.cpp"
 
 #ifdef short
 # undef short
@@ -14466,7 +14466,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 14468 "hphp.tab.cpp"
+#line 14468 "hphp.7.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -14688,7 +14688,12 @@ yyreturn:
 /* Line 1675 of yacc.c  */
 #line 3318 "hphp.y"
 
-bool Parser::parseImpl() {
+/* !PHP5_ONLY*/
+/* REMOVED */
+/* !END */
+/* !PHP7_ONLY*/
+bool Parser::parseImpl7() {
+/* !END */
   return yyparse(this) == 0;
 }
 

@@ -3316,6 +3316,11 @@ hh_type_opt:
 ;
 
 %%
-bool Parser::parseImpl() {
+/* !PHP5_ONLY*/
+bool Parser::parseImpl5() {
+/* !END */
+/* !PHP7_ONLY*/
+bool Parser::parseImpl7() {
+/* !END */
   return yyparse(this) == 0;
 }

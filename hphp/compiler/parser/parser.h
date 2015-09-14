@@ -125,6 +125,8 @@ public:
 
   // implementing ParserBase
   virtual bool parseImpl();
+  virtual bool parseImpl5();
+  virtual bool parseImpl7();
   bool parse();
   virtual void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
     ATTRIBUTE_PRINTF(2,3);

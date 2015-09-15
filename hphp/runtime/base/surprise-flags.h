@@ -49,16 +49,16 @@ enum SurpriseFlag : size_t {
   /* Set if a GC should be run at the next safe point. */
   PendingGCFlag        = 1ull << 60,
 
+  ResourceFlags =
+    TimedOutFlag |
+    CPUTimedOutFlag |
+    PendingGCFlag,
+
   /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to
    * PHP-visible signals/exceptions and resource limits.
    */
-  ResourceFlags =
-    MemExceededFlag |
-    TimedOutFlag |
-    CPUTimedOutFlag |
-    PendingGCFlag,
 
   StickyFlags =
     AsyncEventHookFlag |
@@ -67,6 +67,7 @@ enum SurpriseFlag : size_t {
     InterceptFlag |
     XenonSignalFlag |
     IntervalTimerFlag |
+    MemExceededFlag |
     ResourceFlags,
 };
 

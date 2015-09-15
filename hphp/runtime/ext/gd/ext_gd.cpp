@@ -3674,8 +3674,10 @@ bool HHVM_FUNCTION(imagegd2, const Resource& image,
 }
 
 bool HHVM_FUNCTION(imagedestroy, const Resource& image) {
-  if (!image) return false;
-  cast<Image>(image)->reset();
+  auto img_res = cast<Image>(image);
+  gdImagePtr im = img_res->get();
+  if (!im) return false;
+  img_res->reset();
   return true;
 }
 

@@ -1253,8 +1253,10 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
   }
 
 #if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX < 0x01000016
-  if (memcached_behavior_get(data->m_impl->memcached, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL)) {
-    raise_warning("using touch command with binary protocol is not recommended with libmemcached versions below 1.0.16");
+  if (memcached_behavior_get(data->m_impl->memcached,
+                             MEMCACHED_BEHAVIOR_BINARY_PROTOCOL)) {
+    raise_warning("using touch command with binary protocol is not "
+                  "recommended with libmemcached versions below 1.0.16");
   }
 #endif
 
@@ -1646,7 +1648,8 @@ class MemcachedExtension final : public Extension {
       q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
     );
     Native::registerClassConstant<KindOfInt64>(
-      s_Memcached.get(), s_LIBMEMCACHED_VERSION_HEX.get(), LIBMEMCACHED_VERSION_HEX
+      s_Memcached.get(), s_LIBMEMCACHED_VERSION_HEX.get(),
+      LIBMEMCACHED_VERSION_HEX
     );
     Native::registerClassConstant<KindOfBoolean>(
       s_Memcached.get(), s_GET_ERROR_RETURN_VALUE.get(), false

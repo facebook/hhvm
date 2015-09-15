@@ -119,14 +119,14 @@ Variant HHVM_FUNCTION(ldap_compare,
                       const String& dn,
                       const String& attribute,
                       const String& value);
-int64_t HHVM_FUNCTION(ldap_errno,
+Variant HHVM_FUNCTION(ldap_errno,
                       const Resource& link);
-String HHVM_FUNCTION(ldap_error,
+Variant HHVM_FUNCTION(ldap_error,
                      const Resource& link);
 Variant HHVM_FUNCTION(ldap_get_dn,
                       const Resource& link,
                       const Resource& result_entry);
-int64_t HHVM_FUNCTION(ldap_count_entries,
+Variant HHVM_FUNCTION(ldap_count_entries,
                       const Resource& link,
                       const Resource& result);
 Variant HHVM_FUNCTION(ldap_get_entries,
@@ -138,7 +138,7 @@ Variant HHVM_FUNCTION(ldap_first_entry,
 Variant HHVM_FUNCTION(ldap_next_entry,
                       const Resource& link,
                       const Resource& result_entry);
-Array HHVM_FUNCTION(ldap_get_attributes,
+Variant HHVM_FUNCTION(ldap_get_attributes,
                     const Resource& link,
                     const Resource& result_entry);
 Variant HHVM_FUNCTION(ldap_first_attribute,

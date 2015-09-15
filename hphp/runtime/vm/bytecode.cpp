@@ -3594,18 +3594,26 @@ OPTBLD_INLINE void iopNewPackedArray(IOP_ARGS) {
 OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   auto n = decode<uint32_t>(pc); // number of keys and elements
   assert(n > 0 && n <= StructArray::MaxMakeSize);
-  StringData** names = (StringData**)alloca(sizeof(StringData*) * n);
-  for (size_t i = 0; i < n; i++) {
-    names[i] = decode_litstr(pc);
+
+  req::vector<StringData*> names;
+  names.reserve(n);
+
+  for (size_t i = 0; i < n; ++i) {
+    names.push_back(decode_litstr(pc));
   }
+
   // This constructor moves values, no inc/decref is necessary.
   ArrayData* a;
   Shape* shape;
   if (!RuntimeOption::EvalDisableStructArray &&
-      (shape = Shape::create(names, n))) {
+      (shape = Shape::create(names.data(), n))) {
     a = MixedArray::MakeStructArray(n, vmStack().topC(), shape);
   } else {
-    a = MixedArray::MakeStruct(n, names, vmStack().topC())->asArrayData();
+    a = MixedArray::MakeStruct(
+      n,
+      names.data(),
+      vmStack().topC()
+    )->asArrayData();
   }
   vmStack().ndiscard(n);
   vmStack().pushArrayNoRc(a);

@@ -9,7 +9,6 @@
  *
  */
 class Memcached {
-
   const OPT_COMPRESSION = 0;
   const OPT_SERIALIZER = 0;
   const SERIALIZER_PHP = 0;

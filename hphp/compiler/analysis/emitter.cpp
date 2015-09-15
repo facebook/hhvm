@@ -9340,6 +9340,7 @@ StaticString s_raise("raise");
 StaticString s_valid("valid");
 StaticString s_current("current");
 StaticString s_key("key");
+StaticString s_throw("throw");
 
 StaticString genCls("Generator");
 StaticString asyncGenCls("HH\\AsyncGenerator");
@@ -9355,7 +9356,8 @@ ContMethMapT s_genMethods = {
     {s_raise, GeneratorMethod::METH_RAISE},
     {s_valid, GeneratorMethod::METH_VALID},
     {s_current, GeneratorMethod::METH_CURRENT},
-    {s_key, GeneratorMethod::METH_KEY}
+    {s_key, GeneratorMethod::METH_KEY},
+    {s_throw, GeneratorMethod::METH_RAISE}
   };
 }
 

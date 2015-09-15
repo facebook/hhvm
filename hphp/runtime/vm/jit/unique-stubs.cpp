@@ -466,13 +466,24 @@ TCA emitFCallArrayHelper(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ResumeHelper {
-  TCA handle_resume;
-  TCA reenter_tc;
+struct ResumeHelperEntryPoints {
+  TCA resumeHelperRet;
+  TCA resumeHelper;
+  TCA handleResume;
+  TCA reenterTC;
 };
 
-ResumeHelper resumeHelperBody(CodeBlock& cb) {
-  auto const handle_resume = vwrap(cb, [] (Vout& v) {
+ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb) {
+  ResumeHelperEntryPoints rh;
+
+  rh.resumeHelperRet = vwrap(cb, [] (Vout& v) {
+    stashSavedRIP(v, rvmfp());
+  });
+  rh.resumeHelper = vwrap(cb, [] (Vout& v) {
+    v << ldimmb{0, rarg(1)};
+  });
+
+  rh.handleResume = vwrap(cb, [] (Vout& v) {
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
     loadMCG(v, rarg(0));
 
@@ -482,25 +493,23 @@ ResumeHelper resumeHelperBody(CodeBlock& cb) {
     v << call{handler, arg_regs(2)};
   });
 
-  auto const reenter_tc = vwrap(cb, [] (Vout& v) {
+  rh.reenterTC = vwrap(cb, [] (Vout& v) {
     loadVMRegs(v);
     auto const args = syncForLLVMCatch(v);
     v << jmpr{rret(), args};
   });
 
-  return ResumeHelper { handle_resume, reenter_tc };
+  return rh;
 }
 
-TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us) {
+TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us,
+                            ResumeHelperEntryPoints& rh) {
   alignJmpTarget(cb);
 
-  us.resumeHelperRet = vwrap(cb, [] (Vout& v) {
-    stashSavedRIP(v, rvmfp());
-  });
-  us.resumeHelper = vwrap(cb, [] (Vout& v) {
-    v << ldimmb{0, rarg(1)};
-  });
-  auto const body = resumeHelperBody(cb).handle_resume;
+  rh = emitResumeHelpers(cb);
+
+  us.resumeHelperRet = rh.resumeHelperRet;
+  us.resumeHelper = rh.resumeHelper;
 
   us.interpHelper = vwrap(cb, [] (Vout& v) {
     v << store{rarg(0), rvmtl()[rds::kVmpcOff]};
@@ -508,13 +517,14 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us) {
   us.interpHelperSyncedPC = vwrap(cb, [&] (Vout& v) {
     storeVMRegs(v);
     v << ldimmb{1, rarg(1)};
-    v << jmpi{body, RegSet(rarg(1))};
+    v << jmpi{rh.handleResume, RegSet(rarg(1))};
   });
 
   return us.resumeHelperRet;
 }
 
-TCA emitInterpOneCFHelper(CodeBlock& cb, Op op, ResumeHelper rh) {
+TCA emitInterpOneCFHelper(CodeBlock& cb, Op op,
+                          const ResumeHelperEntryPoints& rh) {
   alignJmpTarget(cb);
 
   return vwrap(cb, [&] (Vout& v) {
@@ -530,15 +540,15 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, Op op, ResumeHelper rh) {
     auto const next = v.makeBlock();
 
     v << testq{rret(), rret(), sf};
-    v << jcci{CC_NZ, sf, next, rh.reenter_tc};
+    v << jcci{CC_NZ, sf, next, rh.reenterTC};
     v = next;
-    v << jmpi{rh.handle_resume};
+    v << jmpi{rh.resumeHelper};
   });
 }
 
-void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us) {
+void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us,
+                            const ResumeHelperEntryPoints& rh) {
   alignJmpTarget(cb);
-  auto const rh = resumeHelperBody(cb);
 
   auto const emit = [&] (Op op, const char* name) {
     auto const stub = emitInterpOneCFHelper(cb, op, rh);
@@ -651,8 +661,10 @@ void UniqueStubs::emitAll() {
 #undef ADD
 
   add("freeLocalsHelpers",  emitFreeLocalsHelpers(hot(), *this));
-  add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this));
-  emitInterpOneCFHelpers(cold, *this);
+
+  ResumeHelperEntryPoints rh;
+  add("resumeInterpHelpers",  emitResumeInterpHelpers(main, *this, rh));
+  emitInterpOneCFHelpers(cold, *this, rh);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1089,7 +1089,7 @@ inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(&key).toString().data());
   }
-  setopBodyCell(result, op, rhs);
+  setopBody(result, op, rhs);
   return result;
 }
 
@@ -1139,7 +1139,7 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
                           false /* reffy */,
                           KeyType::Any>(base, key);
       result = tvToCell(result);
-      setopBodyCell(result, op, rhs);
+      setopBody(result, op, rhs);
       return result;
     }
 
@@ -1147,11 +1147,11 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
       TypedValue* result;
       if (LIKELY(base->m_data.pobj->isCollection())) {
         result = collections::atRw(base->m_data.pobj, &key);
-        setopBody(result, op, rhs);
+        setopBody(tvToCell(result), op, rhs);
       } else {
         tvRef = objOffsetGet(instanceFromTv(base), key);
         result = &tvRef;
-        setopBody(result, op, rhs);
+        setopBody(tvToCell(result), op, rhs);
         objOffsetSet(instanceFromTv(base), key, result, false);
       }
       return result;
@@ -1169,7 +1169,7 @@ inline TypedValue* SetOpNewElemEmptyish(SetOpOp op,
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
-  setopBody(result, op, rhs);
+  setopBody(tvToCell(result), op, rhs);
   return result;
 }
 inline TypedValue* SetOpNewElemScalar(TypedValue& tvRef) {
@@ -1207,7 +1207,7 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
     case KindOfArray: {
       TypedValue* result;
       result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
-      setopBody(result, op, rhs);
+      setopBody(tvToCell(result), op, rhs);
       return result;
     }
 
@@ -1219,7 +1219,7 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
       } else {
         tvRef = objOffsetGet(instanceFromTv(base), make_tv<KindOfNull>());
         result = &tvRef;
-        setopBody(result, op, rhs);
+        setopBody(tvToCell(result), op, rhs);
         objOffsetAppend(instanceFromTv(base), result, false);
       }
       return result;
@@ -1923,7 +1923,7 @@ inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
   StringData* keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
   tvWriteNull(&tvRef);
-  setopBody(&tvRef, op, rhs);
+  setopBody(tvToCell(&tvRef), op, rhs);
   obj->setProp(nullptr, keySD, &tvRef);
   return &tvRef;
 }

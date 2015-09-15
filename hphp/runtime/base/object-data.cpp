@@ -1419,7 +1419,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
       auto tvResult = make_tv<KindOfUninit>();
       if (invokeGet(&tvResult, key)) {
-        setopBody(&tvResult, op, val);
+        setopBody(tvToCell(&tvResult), op, val);
         if (getAttribute(UseSet)) {
           assert(tvRef.m_type == KindOfUninit);
           cellDup(*tvToCell(&tvResult), tvRef);
@@ -1434,7 +1434,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     }
 
     prop = tvToCell(prop);
-    setopBodyCell(prop, op, val);
+    setopBody(prop, op, val);
     return prop;
   }
 
@@ -1443,7 +1443,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   // Native accessors.
   if (getAttribute(HasNativePropHandler)) {
     if (invokeNativeGetProp(&tvRef, key)) {
-      setopBody(&tvRef, op, val);
+      setopBody(tvToCell(&tvRef), op, val);
       if (invokeNativeSetProp(key, &tvRef)) {
         return &tvRef;
       }
@@ -1461,7 +1461,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
     // here, even though it comes before the IncDecOp in the analogous
     // situation in incDecProp.  This is to match zend 5.5 behavior.
-    setopBody(&tvResult, op, val);
+    setopBody(tvToCell(&tvResult), op, val);
     tvUnboxIfNeeded(&tvResult);
 
     if (prop) raise_error("Cannot access protected property");
@@ -1483,7 +1483,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
       // operation, but setop doesn't need to here.  (We'll unbox the
       // value that gets passed to the magic setter, though, since
       // __set functions can't take parameters by reference.)
-      setopBody(&tvRef, op, val);
+      setopBody(tvToCell(&tvRef), op, val);
       invokeSet(key, &tvRef);
       return &tvRef;
     }
@@ -1498,7 +1498,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
   );
   assert(prop->m_type == KindOfNull); // cannot exist yet
-  setopBodyCell(prop, op, val);
+  setopBody(prop, op, val);
   return prop;
 }
 

@@ -169,6 +169,10 @@ struct HashContext : SweepableResourceData {
     free(key);
   }
 
+  bool isInvalid() const override {
+    return context == nullptr;
+  }
+
   CLASSNAME_IS("Hash Context")
   DECLARE_RESOURCE_ALLOCATION(HashContext)
 
@@ -182,6 +186,21 @@ struct HashContext : SweepableResourceData {
 };
 
 IMPLEMENT_RESOURCE_ALLOCATION(HashContext)
+
+///////////////////////////////////////////////////////////////////////////////
+
+static req::ptr<HashContext> get_valid_hash_context_resource(const Resource& context,
+                                                             const char* func_name) {
+  auto hash = dyn_cast_or_null<HashContext>(context);
+  if (hash == nullptr || hash->isInvalid()) {
+    raise_warning(
+      "%s(): supplied resource is not a valid Hash Context resource",
+      func_name + 2
+    );
+    return nullptr;
+  }
+  return hash;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // hash functions
@@ -327,7 +346,10 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
 }
 
 bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
-  auto hash = dyn_cast<HashContext>(context);
+  auto hash = get_valid_hash_context_resource(context, __FUNCTION__);
+  if (!hash) {
+    return false;
+  }
   hash->ops->hash_update(hash->context, (unsigned char *)data.data(),
                          data.size());
   return true;
@@ -335,12 +357,8 @@ bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
 
 Variant HHVM_FUNCTION(hash_final, const Resource& context,
                                  bool raw_output /* = false */) {
-  auto hash = dyn_cast<HashContext>(context);
-
-  if (hash->context == nullptr) {
-    raise_warning(
-      "hash_final(): supplied resource is not a valid Hash Context resource"
-    );
+  auto hash = get_valid_hash_context_resource(context, __FUNCTION__);
+  if (!hash) {
     return false;
   }
 
@@ -361,8 +379,11 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
   return HHVM_FN(bin2hex)(raw);
 }
 
-Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
-  auto oldhash = dyn_cast<HashContext>(context);
+Variant HHVM_FUNCTION(hash_copy, const Resource& context) {
+  auto oldhash = get_valid_hash_context_resource(context, __FUNCTION__);
+  if (!oldhash) {
+    return false;
+  }
   return Resource(req::make<HashContext>(std::move(oldhash)));
 }
 

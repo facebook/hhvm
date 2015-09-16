@@ -1232,7 +1232,14 @@ Variant HHVM_FUNCTION(readlink,
 Variant HHVM_FUNCTION(realpath,
                       const String& path) {
   CHECK_PATH(path, 1);
-  String translated = File::TranslatePath(path);
+
+  String translated;
+  if (path.empty()) {
+    translated = File::TranslatePath(g_context->getCwd());
+  } else {
+    translated = File::TranslatePath(path);
+  }
+
   if (translated.empty()) {
     return false;
   }
@@ -1518,6 +1525,10 @@ bool HHVM_FUNCTION(touch,
                    int64_t mtime /* = 0 */,
                    int64_t atime /* = 0 */) {
   CHECK_PATH_FALSE(filename, 1);
+
+  if (filename.empty()) {
+    return false;
+  }
 
   // If filename points to a user file, invoke UserStreamWrapper::touch(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);

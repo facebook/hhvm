@@ -2040,14 +2040,12 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
   /* Open origin file */
   org_file = php_open_plain_file(f_org, "rb", &org);
   if (!org_file) {
-    raise_warning("Unable to open '%s' for reading", f_org.c_str());
     return false;
   }
 
   /* Open destination file */
   dest_file = php_open_plain_file(f_dest, "wb", &dest);
   if (!dest_file) {
-    raise_warning("Unable to open '%s' for writing", f_dest.c_str());
     return false;
   }
 

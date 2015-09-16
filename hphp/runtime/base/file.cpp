@@ -107,11 +107,17 @@ String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
 }
 
 String File::TranslatePath(const String& filename) {
-  if (filename.charAt(0) != '/') {
+  if (filename.empty()) {
+    // Special case: an empty string should continue to be an empty string.
+    // Otherwise it would be canonicalized to CWD, which is inconsistent with
+    // PHP and most filesystem utilities.
+    return filename;
+  } else if (filename.charAt(0) != '/') {
     String cwd = g_context->getCwd();
     return TranslatePathKeepRelative(cwd + "/" + filename);
+  } else {
+    return TranslatePathKeepRelative(filename);
   }
-  return TranslatePathKeepRelative(filename);
 }
 
 String File::TranslatePathWithFileCache(const String& filename) {

@@ -2348,7 +2348,7 @@ private:
  */
 void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                                             IndexChain& indexChain,
-                                            std::vector<IndexChain*>& all) {
+                                            std::vector<IndexPair>& all) {
   if (!exp) {
     // Empty slot
     return;
@@ -2367,20 +2367,55 @@ void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
   } else {
     // Reached a "leaf".  Lock in this index chain and deal with this exp.
     assert(!indexChain.empty());
-    all.push_back(new IndexChain(indexChain));
-    visit(exp);
-    emitClsIfSPropBase(e);
+    all.emplace_back(exp, IndexChain(indexChain));
+
+    // First: the order we visit the LHS elements matters, as does whether we
+    // do the RHS or LHS first, for things like:
+    // list($a[$n++], $b[$n++]) = $c[$n++]
+    //
+    // In PHP5 mode, we visit the LHS elements of the list() now. This does
+    // two things: it causes their side effects to happen in LTR order, but
+    // since they are pushed onto the m_evalStack they are actually asigned to
+    // in LIFO order, e.g., RTL, in listAssignmentAssignElements below.
+    //
+    // In PHP7 mode, we need to visit the elements in LTR order so their side
+    // effects take place in that order, but we *also* need to assign them in
+    // LTR order, so we can't push them onto the m_evalStack right now. Since
+    // visit() does both of these things, we need to delay calling visit()
+    // until listAssignmentAssignElements below. This also has the side effect
+    // of making isRhsFirst() effectively always on in PHP7 mode when doing
+    // list() assignment (since we delay the visit() until after the check
+    // anyways), which turns out to be the right behavior.
+    if (!RuntimeOption::PHP7_LTR_assign) {
+      visit(exp);
+      emitClsIfSPropBase(e);
+    }
   }
 }
 
 void EmitterVisitor::listAssignmentAssignElements(
   Emitter& e,
-  std::vector<IndexChain*>& indexChains,
+  std::vector<IndexPair>& indexPairs,
   std::function<void()> emitSrc
 ) {
-  for (int i = (int)indexChains.size() - 1; i >= 0; --i) {
-    IndexChain* currIndexChain = indexChains[i];
-    if (currIndexChain->empty()) {
+
+  // PHP5 does list() assignments RTL, PHP7 does them LTR, so this loop can go
+  // either way and looks a little ugly. The assignment order normally isn't
+  // visible, but it is if you do something like:
+  // list($a[], $a[]) = $foo
+  auto const ltr = RuntimeOption::PHP7_LTR_assign;
+  for (int i = ltr ? 0 : (int)indexPairs.size() - 1;
+       i >= 0 && i < (int)indexPairs.size();
+       ltr ? i++ : i--) {
+    if (ltr) {
+      // Visit now, so we can both eval LTR and assign LTR. See comment in
+      // listAssignmentVisitLHS.
+      visit(indexPairs[i].first);
+      emitClsIfSPropBase(e);
+    }
+
+    IndexChain& currIndexChain = indexPairs[i].second;
+    if (currIndexChain.empty()) {
       continue;
     }
 
@@ -2388,17 +2423,16 @@ void EmitterVisitor::listAssignmentAssignElements(
       e.Null();
     } else {
       emitSrc();
-      for (int j = 0; j < (int)currIndexChain->size(); ++j) {
+      for (int j = 0; j < (int)currIndexChain.size(); ++j) {
         m_evalStack.push(StackSym::I);
-        m_evalStack.setInt((*currIndexChain)[j]);
+        m_evalStack.setInt(currIndexChain[j]);
         markElem(e);
       }
       emitCGet(e);
     }
+
     emitSet(e);
     emitPop(e);
-
-    delete currIndexChain;
   }
 }
 
@@ -4214,9 +4248,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     assert(rhs);
 
     bool nullRHS = la->getRHSKind() == ListAssignment::Null;
-    // Assign RHS to temp local, unless it's already a simple variable
+    // If the RHS is not a simple variable, we need to evaluate it and assign
+    // it to a temp local. If it is, whether or not we directly use it or copy
+    // it into a temp local is visible in perverse statements like:
+    // list($a, $b) = $a
+    // The behavior of that changed between PHP5 and PHP7; in PHP5 we directly
+    // use the temp local, in PHP7 we need to copy it.
     bool simpleRHS = rhs->is(Construct::KindOfSimpleVariable)
-      && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash();
+      && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash()
+      && !RuntimeOption::PHP7_LTR_assign;
     Id tempLocal = -1;
     Offset start = InvalidAbsoluteOffset;
 
@@ -4228,9 +4268,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     // We use "index chains" to deal with nested list assignment.  We will
     // end up with one index chain per expression we need to assign to.
     // The helper function will populate indexChains.
-    std::vector<IndexChain*> indexChains;
+    //
+    // In PHP5 mode, this will also evaluate the LHS; in PHP7 mode, that is
+    // always delayed until listAssignmentAssignElements below. This means
+    // that isRhsFirst() has no effect in PHP7 mode. See comments in
+    // listAssignmentVisitLHS and listAssignmentAssignElements for more
+    // explanation.
+    std::vector<IndexPair> indexPairs;
     IndexChain workingChain;
-    listAssignmentVisitLHS(e, la, workingChain, indexChains);
+    listAssignmentVisitLHS(e, la, workingChain, indexPairs);
 
     if (!simpleRHS && !la->isRhsFirst()) {
       assert(tempLocal == -1);
@@ -4241,12 +4287,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     // Assign elements.
     if (nullRHS) {
-      listAssignmentAssignElements(e, indexChains, nullptr);
+      listAssignmentAssignElements(e, indexPairs, nullptr);
     } else if (simpleRHS) {
-      listAssignmentAssignElements(e, indexChains, [&] { visit(rhs); });
+      listAssignmentAssignElements(e, indexPairs, [&] { visit(rhs); });
     } else {
       listAssignmentAssignElements(
-        e, indexChains,
+        e, indexPairs,
         [&] { emitVirtualLocal(tempLocal); }
       );
     }
@@ -8342,15 +8388,15 @@ class ForeachIterGuard {
 void EmitterVisitor::emitForeachListAssignment(Emitter& e,
                                                ListAssignmentPtr la,
                                                std::function<void()> emitSrc) {
-  std::vector<IndexChain*> indexChains;
+  std::vector<IndexPair> indexPairs;
   IndexChain workingChain;
-  listAssignmentVisitLHS(e, la, workingChain, indexChains);
+  listAssignmentVisitLHS(e, la, workingChain, indexPairs);
 
-  if (indexChains.size() == 0) {
+  if (indexPairs.size() == 0) {
     throw IncludeTimeFatalException(la, "Cannot use empty list");
   }
 
-  listAssignmentAssignElements(e, indexChains, emitSrc);
+  listAssignmentAssignElements(e, indexPairs, emitSrc);
 }
 
 void EmitterVisitor::emitForeach(Emitter& e,

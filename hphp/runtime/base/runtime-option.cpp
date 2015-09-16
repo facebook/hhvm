@@ -372,8 +372,9 @@ bool RuntimeOption::AutoTypecheck = true;
 
 // PHP7 is off by default (false)
 bool RuntimeOption::PHP7 = false;
-bool RuntimeOption::PHP7_UVS = false;
+bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
+bool RuntimeOption::PHP7_UVS = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1155,8 +1156,9 @@ void RuntimeOption::Load(
     // get-go, but threading that through turns out to be kind of annoying and
     // of questionable value, so just doing this for now.
     Config::Bind(PHP7, ini, config, "PHP7.all", false);
-    Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", PHP7);
+    Config::Bind(PHP7_LTR_assign, ini, config, "PHP7.LTRAssign", PHP7);
     Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics", PHP7);
+    Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", PHP7);
   }
   {
     // Server

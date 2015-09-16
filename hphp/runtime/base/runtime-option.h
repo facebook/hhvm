@@ -371,8 +371,9 @@ public:
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7;
-  static bool PHP7_UVS;
+  static bool PHP7_LTR_assign;
   static bool PHP7_NoHexNumerics;
+  static bool PHP7_UVS;
 
   static int64_t HeapSizeMB;
   static int64_t HeapResetCountBase;

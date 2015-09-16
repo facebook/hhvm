@@ -517,6 +517,8 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   } else {
     Array info = Array::Create();
     info.append(String(*pdo_err, CopyString));
+    info.append(Variant((unsigned long) einfo->errcode));
+    info.append(String(einfo->errmsg, CopyString));
     if (stmt) {
       stmt->dbh->conn()->fetchErr(stmt, info);
     }

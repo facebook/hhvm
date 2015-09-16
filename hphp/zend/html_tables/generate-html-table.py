@@ -182,8 +182,15 @@ print header
 add_basic_codes('ents_basic.txt')
 add_basic_codes('ents_basic_apos.txt')
 
+# 8859-15, CP866, and ROMAN all cause issues with this generator.
 output_mapping('mappings/8859-1.TXT', 'entity_table_cs_8859_1')
+output_mapping('mappings/8859-5.TXT', 'entity_table_cs_8859_5')
+#output_mapping('mappings/8859-15.TXT', 'entity_table_cs_8859_15')
+#output_mapping('mappings/CP866.TXT', 'entity_table_cs_866')
+output_mapping('mappings/CP1251.TXT', 'entity_table_cs_cp1251')
 output_mapping('mappings/CP1252.TXT', 'entity_table_cs_cp1252')
+output_mapping('mappings/KOI8-R.TXT', 'entity_table_cs_koi8r')
+#output_mapping('mappings/ROMAN.TXT', 'entity_table_cs_macroman')
 
 # table for encoding csjis is esentially empty
 write_mapping_table('entity_table_cs_sjis', [])
@@ -213,7 +220,10 @@ const charset_table_t* get_charset_table(entity_charset charset) {
   using namespace entity_charset_enum;
   switch (charset) {
     case cs_8859_1: return &entity_table_cs_8859_1;
+    case cs_8859_5: return &entity_table_cs_8859_5;
+    case cs_cp1251: return &entity_table_cs_cp1251;
     case cs_cp1252: return &entity_table_cs_cp1252;
+    case cs_koi8r: return &entity_table_cs_koi8r;
     case cs_sjis: return &entity_table_cs_sjis;
     default: return &entity_table_cs_8859_1;
   }

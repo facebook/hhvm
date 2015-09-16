@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -50,7 +51,7 @@
 #include <cstring>
 #include <sstream>
 
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace irlower {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,12 +64,12 @@ namespace {
 /*
  * Lower `block' from HHIR to vasm.
  */
-size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block& block) {
+size_t genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
   FTRACE(6, "genBlock: {}\n", block.id());
 
-  state.vmain = &v;
-  state.vcold = &vc;
-  x64::CodeGenerator cg(state);
+  env.vmain = &v;
+  env.vcold = &vc;
+  CodeGenerator cg(env);
 
   size_t hhir_count{0};
   for (auto& inst : block) {
@@ -373,19 +374,19 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
     auto& vunit = vasm.unit();
     SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
 
-    CodegenState state(unit);
+    IRLS env(unit);
     auto const blocks = rpoSortCfg(unit);
 
     // Create the initial set of vasm blocks, numbered the same as the
     // corresponding HHIR blocks.
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
-      state.labels[i] = vunit.makeBlock(AreaIndex::Main);
+      env.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
 
     // Create Vregs for all relevant SSATmps.
-    assignRegs(unit, vunit, state, blocks);
+    assignRegs(unit, vunit, env, blocks);
 
-    vunit.entry = state.labels[unit.entry()];
+    vunit.entry = env.labels[unit.entry()];
     Vtext vtext { main, cold, *frozen };
 
     for (auto block : blocks) {
@@ -395,11 +396,11 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
       FTRACE(6, "genBlock {} on {}\n", block->id(),
              area_names[(unsigned)v.area()]);
 
-      auto b = state.labels[block];
+      auto b = env.labels[block];
       vunit.blocks[b].area = v.area();
       v.use(b);
 
-      hhir_count += genBlock(state, v, vasm.cold(), *block);
+      hhir_count += genBlock(env, v, vasm.cold(), *block);
 
       assertx(v.closed());
       assertx(vasm.main().empty() || vasm.main().closed());
@@ -450,4 +451,4 @@ void genCode(IRUnit& unit, CodeKind kind /* = CodeKind::Trace */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}}}

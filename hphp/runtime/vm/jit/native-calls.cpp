@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
@@ -44,8 +45,8 @@ namespace NativeCalls {
 
 namespace {
 
-constexpr SyncOptions SNone = SyncOptions::kNoSyncPoint;
-constexpr SyncOptions SSync = SyncOptions::kSyncPoint;
+constexpr irlower::SyncOptions SNone = irlower::SyncOptions::kNoSyncPoint;
+constexpr irlower::SyncOptions SSync = irlower::SyncOptions::kSyncPoint;
 
 constexpr DestType DSSA  = DestType::SSA;
 constexpr DestType DTV   = DestType::TV;

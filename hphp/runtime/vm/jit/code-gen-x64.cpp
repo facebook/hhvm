@@ -50,6 +50,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-internal.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -79,7 +80,7 @@
 
 #define rvmsp() DontUseRVmSpInThisFile
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit { namespace irlower {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -250,15 +251,15 @@ ptrdiff_t genOffset(bool isAsync) {
 //////////////////////////////////////////////////////////////////////
 
 Vloc CodeGenerator::srcLoc(const IRInstruction* inst, unsigned i) const {
-  return m_state.locs[inst->src(i)];
+  return irlower::srcLoc(m_state, inst, i);
 }
 
 Vloc CodeGenerator::dstLoc(const IRInstruction* inst, unsigned i) const {
-  return m_state.locs[inst->dst(i)];
+  return irlower::dstLoc(m_state, inst, i);
 }
 
 ArgGroup CodeGenerator::argGroup(const IRInstruction* inst) const {
-  return ArgGroup(inst, m_state.locs);
+  return irlower::argGroup(m_state, inst);
 }
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
@@ -287,12 +288,15 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
 #define NOOP_OPCODE(opcode) \
   void CodeGenerator::cg##opcode(IRInstruction*) {}
 
-#define CALL_OPCODE(opcode) \
-  void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(vmain(), i); }
+#define CALL_OPCODE(opcode)                           \
+  void CodeGenerator::cg##opcode(IRInstruction* i) {  \
+    cgCallNative(vmain(), i);                         \
+  }
 
-#define CALL_STK_OPCODE(opcode) \
-  CALL_OPCODE(opcode)           \
-  CALL_OPCODE(opcode ## Stk)
+#define DELEGATE_OPCODE(opcode)                       \
+  void CodeGenerator::cg##opcode(IRInstruction* i) {  \
+    irlower::cg##opcode(m_state, i);                  \
+  }
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
@@ -473,19 +477,40 @@ CALL_OPCODE(OODeclExists)
 
 CALL_OPCODE(GetMemoKey)
 
+DELEGATE_OPCODE(AddInt)
+DELEGATE_OPCODE(SubInt)
+DELEGATE_OPCODE(MulInt)
+DELEGATE_OPCODE(AddIntO)
+DELEGATE_OPCODE(SubIntO)
+DELEGATE_OPCODE(MulIntO)
+DELEGATE_OPCODE(AddDbl)
+DELEGATE_OPCODE(SubDbl)
+DELEGATE_OPCODE(MulDbl)
+DELEGATE_OPCODE(DivDbl)
+DELEGATE_OPCODE(Mod)
+DELEGATE_OPCODE(Floor)
+DELEGATE_OPCODE(Ceil)
+DELEGATE_OPCODE(AbsDbl)
+DELEGATE_OPCODE(Sqrt)
+DELEGATE_OPCODE(AndInt)
+DELEGATE_OPCODE(OrInt)
+DELEGATE_OPCODE(XorInt)
+DELEGATE_OPCODE(Shl)
+DELEGATE_OPCODE(Shr)
+DELEGATE_OPCODE(XorBool)
+
 #undef NOOP_OPCODE
+#undef DELEGATE_OPCODE
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Vlabel CodeGenerator::label(Block* b) {
-  return m_state.labels[b];
+  return irlower::label(m_state, b);
 }
 
 void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf,
                                Block* target) {
-  auto next = v.makeBlock();
-  v << jcc{cc, sf, {next, m_state.labels[target]}};
-  v = next;
+  irlower::fwdJcc(v, m_state, cc, sf, target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -757,193 +782,6 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
 void CodeGenerator::cgMov(IRInstruction* inst) {
   always_assert(inst->src(0)->numWords() == inst->dst(0)->numWords());
   copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0), inst->dst()->type());
-}
-
-void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
-  auto src = srcLoc(inst, 0).reg();
-  auto dst = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << absdbl{src, dst};
-}
-
-Vreg CodeGenerator::emitAddInt(Vout& v, IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto const sf = v.makeReg();
-  v << addq{s1, s0, d, sf};
-  return sf;
-}
-
-Vreg CodeGenerator::emitSubInt(Vout& v, IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto const sf = v.makeReg();
-  v << subq{s1, s0, d, sf};
-  return sf;
-}
-
-Vreg CodeGenerator::emitMulInt(Vout& v, IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto const sf = v.makeReg();
-
-  v << imul{s1, s0, d, sf};
-  return sf;
-}
-
-void CodeGenerator::cgAddIntO(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitAddInt(v, inst);
-  v << jcc{CC_O, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgSubIntO(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitSubInt(v, inst);
-  assertx(sf != InvalidReg);
-  v << jcc{CC_O, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgMulIntO(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitMulInt(v, inst);
-  v << jcc{CC_O, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgFloor(IRInstruction* inst) {
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  vmain() << roundsd{RoundDirection::floor, srcReg, dstReg};
-}
-
-void CodeGenerator::cgCeil(IRInstruction* inst) {
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  vmain() << roundsd{RoundDirection::ceil, srcReg, dstReg};
-}
-
-void CodeGenerator::cgAddInt(IRInstruction* inst) {
-  emitAddInt(vmain(), inst);
-}
-
-void CodeGenerator::cgSubInt(IRInstruction* inst) {
-  emitSubInt(vmain(), inst);
-}
-
-void CodeGenerator::cgMulInt(IRInstruction* inst) {
-  emitMulInt(vmain(), inst);
-}
-
-void CodeGenerator::cgAddDbl(IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  vmain() << addsd{s1, s0, d};
-}
-
-void CodeGenerator::cgSubDbl(IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  vmain() << subsd{s1, s0, d};
-}
-
-void CodeGenerator::cgMulDbl(IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << mulsd{s1, s0, d};
-}
-
-void CodeGenerator::cgDivDbl(IRInstruction* inst) {
-  auto srcReg0 = srcLoc(inst, 0).reg(); // dividend
-  auto srcReg1 = srcLoc(inst, 1).reg(); // divisor
-  auto dstReg  = dstLoc(inst, 0).reg();
-  auto exit = inst->taken();
-  auto& v = vmain();
-
-  // divide by zero check
-  auto const sf = v.makeReg();
-  v << ucomisd{v.cns(0), srcReg1, sf};
-  unlikelyIfThen(v, vcold(), CC_NP, sf, [&] (Vout& v) {
-    emitFwdJcc(v, CC_E, sf, exit);
-  });
-  v << divsd{srcReg1, srcReg0, dstReg};
-}
-
-void CodeGenerator::cgAndInt(IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << andq{s1, s0, d, v.makeReg()};
-}
-
-void CodeGenerator::cgOrInt(IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << orq{s1, s0, d, v.makeReg()};
-}
-
-void CodeGenerator::cgXorInt(IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << xorq{s1, s0, d, v.makeReg()};
-}
-
-void CodeGenerator::cgXorBool(IRInstruction* inst) {
-  auto s0 = srcLoc(inst, 0).reg();
-  auto s1 = srcLoc(inst, 1).reg();
-  auto d = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << xorb{s1, s0, d, v.makeReg()};
-}
-
-void CodeGenerator::cgMod(IRInstruction* inst) {
-  auto const dst = dstLoc(inst, 0).reg();
-  auto const dividend = srcLoc(inst, 0).reg();
-  auto const divisor = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-
-  v << srem{dividend, divisor, dst};
-}
-
-void CodeGenerator::cgSqrt(IRInstruction* inst) {
-  auto src = srcLoc(inst, 0).reg();
-  auto dst = dstLoc(inst, 0).reg();
-  vmain() << sqrtsd{src, dst};
-}
-
-template<class Op, class Opi>
-void CodeGenerator::cgShiftCommon(IRInstruction* inst) {
-  auto const src1 = inst->src(1);
-  auto const srcReg0 = srcLoc(inst, 0).reg();
-  auto const srcReg1 = srcLoc(inst, 1).reg();
-  auto const dstReg  = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  if (src1->hasConstVal()) {
-    int n = src1->intVal() & 0x3f; // only use low 6 bits.
-    v << Opi{n, srcReg0, dstReg, v.makeReg()};
-  } else {
-    v << Op{srcReg1, srcReg0, dstReg, v.makeReg()};
-  }
-}
-
-void CodeGenerator::cgShl(IRInstruction* inst) {
-  cgShiftCommon<shl,shlqi>(inst);
-}
-
-void CodeGenerator::cgShr(IRInstruction* inst) {
-  cgShiftCommon<sar,sarqi>(inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5719,5 +5557,7 @@ void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
                kVoidDest, SyncOptions::kNoSyncPoint,
                argGroup(inst).reg(profile).ssa(0));
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

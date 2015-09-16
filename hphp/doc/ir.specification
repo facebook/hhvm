@@ -336,15 +336,17 @@ exceptions depending on how coercion is implemented.
 
 2. Arithmetic
 
-| AbsDbl, D(Dbl), S(Dbl), NF
-
 | AddInt, D(Int), S(Int) S(Int), NF
 
 | SubInt, D(Int), S(Int) S(Int), NF
 
 | MulInt, D(Int), S(Int) S(Int), NF
 
-| AndInt, D(Int), S(Int) S(Int), NF
+| AddIntO, D(Int), S(Int) S(Int), B
+
+| SubIntO, D(Int), S(Int) S(Int), B
+
+| MulIntO, D(Int), S(Int) S(Int), B
 
 | AddDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
@@ -354,7 +356,15 @@ exceptions depending on how coercion is implemented.
 
 | DivDbl, D(Dbl), S(Dbl) S(Dbl), B
 
+| Floor, D(Dbl), S(Dbl), NF
+
+| Ceil, D(Dbl), S(Dbl), NF
+
+| AbsDbl, D(Dbl), S(Dbl), NF
+
 | Sqrt, D(Dbl), S(Dbl), NF
+
+| AndInt, D(Int), S(Int) S(Int), NF
 
 | OrInt, D(Int), S(Int) S(Int), NF
 
@@ -363,16 +373,6 @@ exceptions depending on how coercion is implemented.
 | Shl, D(Int), S(Int) S(Int), NF
 
 | Shr, D(Int), S(Int) S(Int), NF
-
-| Floor, D(Dbl), S(Dbl), NF
-
-| Ceil, D(Dbl), S(Dbl), NF
-
-| AddIntO, D(Int), S(Int) S(Int), B
-
-| SubIntO, D(Int), S(Int) S(Int), B
-
-| MulIntO, D(Int), S(Int) S(Int), B
 
   Double arithmetic, integer arithmetic, and integer bitwise operations.
   Performs the operation described by the opcode name on S0 and S1, and puts

@@ -17,16 +17,16 @@
 #ifndef incl_HPHP_VM_TRANSL_HOPT_NATIVECALLS_H_
 #define incl_HPHP_VM_TRANSL_HOPT_NATIVECALLS_H_
 
-#include <initializer_list>
-#include <functional>
-#include <vector>
-#include <algorithm>
-
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/cpp-call.h"
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/irlower.h"
+
+#include <algorithm>
+#include <functional>
+#include <initializer_list>
+#include <vector>
 
 namespace HPHP { namespace jit {
 
@@ -104,7 +104,7 @@ struct CallInfo {
   Opcode op;
   FuncPtr func;
   DestType dest;
-  SyncOptions sync;
+  irlower::SyncOptions sync;
   std::vector<Arg> args;
 };
 

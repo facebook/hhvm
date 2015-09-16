@@ -26,11 +26,16 @@
 
 namespace HPHP { namespace jit {
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct Abi;
-struct CodegenState;
 struct IRUnit;
 struct Vinstr;
 struct Vunit;
+
+namespace irlower { struct IRLS; }
+
+///////////////////////////////////////////////////////////////////////////////
 
 // Native stack layout:
 // | enterTCHelper |
@@ -45,14 +50,14 @@ struct Vunit;
 //
 
 /*
- * Return the byte offset to a spill slot
+ * Return the byte offset to a spill slot.
  */
 inline uint32_t slotOffset(uint32_t slot) {
   return slot * sizeof(uint64_t);
 }
 
 /*
- * return true if the offset of this spill slot is 16-byte aligned
+ * Return true if the offset of this spill slot is 16-byte aligned.
  */
 inline bool isSlotAligned(uint32_t slot) {
   return slot % 2 == 0;
@@ -60,16 +65,24 @@ inline bool isSlotAligned(uint32_t slot) {
 
 const size_t kMaxSpillSlots = 128;
 
-// Return InvalidReg, or a specific register to force tmp to use
+/*
+ * Return InvalidReg, or a specific register to force `tmp' to use.
+ */
 PhysReg forceAlloc(const SSATmp& tmp);
 
-// Assign virtual registers to all SSATmps used or defined in reachable blocks.
-void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
+/*
+ * Assign virtual registers to all SSATmps used or defined in reachable blocks.
+ */
+void assignRegs(IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
                 const BlockList& blocks);
 
-// Return the set of physical registers implicitly accessed (used or defined)
+/*
+ * Return the set of physical registers implicitly accessed (used or defined).
+ */
 void getEffects(const Abi& abi, const Vinstr& i,
                 RegSet& uses, RegSet& across, RegSet& defs);
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

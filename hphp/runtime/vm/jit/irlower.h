@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_CODE_GEN_H_
-#define incl_HPHP_JIT_CODE_GEN_H_
+#ifndef incl_HPHP_JIT_IRLOWER_H_
+#define incl_HPHP_JIT_IRLOWER_H_
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
@@ -26,6 +26,10 @@ namespace HPHP { namespace jit {
 
 struct IRUnit;
 struct Vout;
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace irlower {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -43,11 +47,11 @@ enum class CatchCall {
 };
 
 /*
- * State updated and tracked across code generation of individual instructions
+ * State updated and tracked across vasm generation for individual instructions
  * and blocks.
  */
-struct CodegenState {
-  explicit CodegenState(const IRUnit& unit)
+struct IRLS {
+  explicit IRLS(const IRUnit& unit)
     : unit(unit)
     , labels(unit, Vlabel())
     , locs(unit, Vloc{})
@@ -99,6 +103,6 @@ void genCode(IRUnit& unit, CodeKind kind = CodeKind::Trace);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}}}
 
 #endif

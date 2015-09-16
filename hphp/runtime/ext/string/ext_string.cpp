@@ -818,7 +818,7 @@ String HHVM_FUNCTION(str_pad,
 
 String HHVM_FUNCTION(str_repeat,
                      const String& input,
-                     int multiplier) {
+                     int64_t multiplier) {
   if (input.empty()) {
     return input;
   }
@@ -838,6 +838,12 @@ String HHVM_FUNCTION(str_repeat,
     memset(ret.mutableData(), *input.data(), multiplier);
     ret.setSize(multiplier);
     return ret;
+  }
+
+  auto size = multiplier * size_t(input.size());
+  if (multiplier >= StringData::MaxSize || size > StringData::MaxSize) {
+    throw
+      FatalErrorException(0, "String length exceeded 2^31-2: %" PRIu64, size);
   }
 
   StringBuffer ret(input.size() * multiplier);

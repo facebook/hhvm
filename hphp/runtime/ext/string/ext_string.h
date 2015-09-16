@@ -124,7 +124,7 @@ String HHVM_FUNCTION(str_pad,
                      int pad_type = k_STR_PAD_RIGHT);
 String HHVM_FUNCTION(str_repeat,
                      const String& input,
-                     int multiplier);
+                     int64_t multiplier);
 
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding

@@ -32,7 +32,7 @@ bool HHVM_FUNCTION(define, const String& name, const Variant& value,
                    bool case_insensitive = false);
 bool HHVM_FUNCTION(defined, const String& name, bool autoload = true);
 int64_t HHVM_FUNCTION(ignore_user_abort, bool setting = false);
-TypedValue* HHVM_FUNCTION(pack, ActRec* ar);
+Variant HHVM_FUNCTION(pack, const String& format, const Array& argv);
 int64_t HHVM_FUNCTION(sleep, int seconds);
 void HHVM_FUNCTION(usleep, int micro_seconds);
 Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds);

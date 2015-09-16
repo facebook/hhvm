@@ -296,19 +296,9 @@ int64_t HHVM_FUNCTION(ignore_user_abort, bool setting /* = false */) {
   return 0;
 }
 
-TypedValue* HHVM_FUNCTION(pack, ActRec* ar) {
-  int num = ar->numArgs();
-  String format(getArg<KindOfString>(ar,0));
-  Array extra = Array::Create();
-  for (int i = 1; i<num; i++) {
-    extra.append(getArgVariant(ar,i));
-  }
-  Variant result = ZendPack().pack(format, extra);
-  // pack() returns false if there was an error
-  if (!result.isBoolean()) {
-    tvCastToStringInPlace(result.asTypedValue());
-  }
-  return arReturn(ar, std::move(result));
+Variant HHVM_FUNCTION(pack, const String& format, const Array& argv) {
+  // pack() returns false if there was an error, String otherwise
+  return ZendPack().pack(format, argv);
 }
 
 int64_t HHVM_FUNCTION(sleep, int seconds) {

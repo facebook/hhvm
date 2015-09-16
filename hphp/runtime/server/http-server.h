@@ -57,6 +57,8 @@ public:
 
   HPHP::Server *getPageServer() { return m_pageServer.get(); }
   void getSatelliteStats(std::vector<std::pair<std::string, int>> *stats);
+  // Get total ongoing/queued request count for all satellite servers.
+  std::pair<int, int> getSatelliteRequestCount() const;
 
   void stopOnSignal(int sig);
 

@@ -5720,8 +5720,4 @@ void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
                argGroup(inst).reg(profile).ssa(0));
 }
 
-void CodeGenerator::print() const {
-  jit::print(std::cout, m_state.unit, m_state.asmInfo);
-}
-
 }}}

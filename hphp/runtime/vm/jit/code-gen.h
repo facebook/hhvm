@@ -17,19 +17,17 @@
 #ifndef incl_HPHP_JIT_CODE_GEN_H_
 #define incl_HPHP_JIT_CODE_GEN_H_
 
-#include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/util/code-cache.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
 
-///////////////////////////////////////////////////////////////////////////////
+struct IRUnit;
+struct Vout;
 
-struct TransLoc;
+///////////////////////////////////////////////////////////////////////////////
 
 enum class SyncOptions {
   kNoSyncPoint,
@@ -44,47 +42,50 @@ enum class CatchCall {
   CPP,
 };
 
-// Stuff we need to preserve between blocks while generating code,
-// and address information produced during codegen.
+/*
+ * State updated and tracked across code generation of individual instructions
+ * and blocks.
+ */
 struct CodegenState {
-  CodegenState(const IRUnit& unit, AsmInfo* asmInfo, CodeBlock& frozen)
+  explicit CodegenState(const IRUnit& unit)
     : unit(unit)
-    , asmInfo(asmInfo)
-    , frozen(frozen)
-    , catch_offsets(unit, 0)
-    , catch_calls(unit, CatchCall::Uninit)
     , labels(unit, Vlabel())
     , locs(unit, Vloc{})
+    , catch_calls(unit, CatchCall::Uninit)
   {}
 
+  /*
+   * The unit being lowered to vasm.
+   */
   const IRUnit& unit;
 
-  // Output: start/end ranges of machine code addresses of each instruction.
-  AsmInfo* asmInfo;
+  /*
+   * The vasm output streams.
+   *
+   * These may be updated during codegen of an instruction to point to new
+   * Vblocks.
+   */
+  Vout* vmain{nullptr};
+  Vout* vcold{nullptr};
 
-  // Frozen code section, when we need to eagerly generate stubs
-  CodeBlock& frozen;
-
-  // Each catch block needs to know the number of bytes pushed at the
-  // callsite so it can fix rsp before executing the catch block.
-  StateVector<Block,Offset> catch_offsets;
-
-  // Catch blocks that are targets of php calls (bindcall, contenter, callarray)
-  // are handled specially. This StateVector is used to propagate information
-  // from the cg* function that detects this situation to cgBeginCatch, which
-  // encodes the information in the landingpad{} instruction.
-  StateVector<Block,CatchCall> catch_calls;
-
-  // Have we progressed past the guards? Used to suppress TransBCMappings until
-  // we're translating code that can properly be attributed to specific
-  // bytecode.
-  bool pastGuards{false};
-
-  // vasm block labels, one for each hhir block
+  /*
+   * Vasm block labels, one for each HHIR block.
+   */
   StateVector<Block,Vlabel> labels;
 
-  // vlocs for each SSATmp used or defined in reachable blocks
+  /*
+   * Vlocs for each SSATmp used or defined in a reachable block.
+   */
   StateVector<SSATmp,Vloc> locs;
+
+  /*
+   * Metadata used to handle catch blocks that are targets of calls.
+   *
+   * This StateVector is used to propagate information from the cg* function
+   * which produces the call, to cgBeginCatch(), which encodes the information
+   * in the landingpad{} instruction.
+   */
+  StateVector<Block,CatchCall> catch_calls;
 };
 
 /*

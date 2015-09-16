@@ -65,11 +65,14 @@ namespace {
  */
 size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block& block) {
   FTRACE(6, "genBlock: {}\n", block.id());
-  x64::CodeGenerator cg(state, v, vc);
+
+  state.vmain = &v;
+  state.vcold = &vc;
+  x64::CodeGenerator cg(state);
+
   size_t hhir_count{0};
   for (auto& inst : block) {
     hhir_count++;
-    if (inst.is(EndGuards)) state.pastGuards = true;
     v.setOrigin(&inst);
     vc.setOrigin(&inst);
     cg.cgInst(&inst);
@@ -366,12 +369,12 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
       mcg->code.unlock();
     };
 
-    CodegenState state(unit, ai, *frozen);
-    auto const blocks = rpoSortCfg(unit);
-
     Vasm vasm;
     auto& vunit = vasm.unit();
     SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
+
+    CodegenState state(unit);
+    auto const blocks = rpoSortCfg(unit);
 
     // Create the initial set of vasm blocks, numbered the same as the
     // corresponding HHIR blocks.
@@ -408,9 +411,9 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
 
     if (mcg->useLLVM()) {
       always_assert(arch() == Arch::X64);
-      genLLVM(vunit, vtext, kind, state.asmInfo, unit);
+      genLLVM(vunit, vtext, kind, ai, unit);
     } else {
-      genArch(vunit, vtext, kind, state.asmInfo);
+      genArch(vunit, vtext, kind, ai);
     }
   }
 

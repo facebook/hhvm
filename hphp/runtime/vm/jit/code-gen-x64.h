@@ -37,13 +37,7 @@ namespace x64 {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CodeGenerator {
-  friend struct arm::CodeGenerator;
-
-  CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
-    : m_state(state)
-    , m_vmain(main)
-    , m_vcold(cold)
-  {}
+  explicit CodeGenerator(CodegenState& state) : m_state(state) {}
 
   void cgInst(IRInstruction* inst);
 
@@ -173,16 +167,11 @@ private:
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
   void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
 
-  // This is for printing partially-generated traces when debugging
-  void print() const;
-
-  Vout& vmain() { return m_vmain; }
-  Vout& vcold() { return m_vcold; }
+  Vout& vmain() { assert(m_state.vmain); return *m_state.vmain; }
+  Vout& vcold() { assert(m_state.vcold); return *m_state.vcold; }
 
 private:
   CodegenState&       m_state;
-  Vout&               m_vmain;
-  Vout&               m_vcold;
 };
 
 // Helpers to compute a reference to a TypedValue type and data

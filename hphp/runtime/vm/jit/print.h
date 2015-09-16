@@ -17,12 +17,13 @@
 #ifndef incl_HPHP_VM_PRINT_H_
 #define incl_HPHP_VM_PRINT_H_
 
-#include <iosfwd>
-#include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
+
+#include "hphp/util/trace.h"
+
+#include <iosfwd>
 
 namespace HPHP { namespace jit {
 

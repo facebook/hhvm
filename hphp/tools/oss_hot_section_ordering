@@ -1,3 +1,8 @@
+.text._ZN4HPHP9isVMFrameEPKNS_6ActRecE
+.text._ZN4HPHPL13iopRetWrapperEPFvRPKhES2_
+.text._ZN4HPHP12dispatchImplILb0EEEPhv
+.text._ZN4HPHP10decode_ivaERPKh
+.text._ZN4HPHP9decode_laERPKh
 .text._ZN4HPHP11PackedArray7IterEndEPKNS_9ArrayDataE
 .text._ZN4HPHP17iter_next_key_indEPNS_4IterEPNS_10TypedValueES3_
 .text._ZN4HPHP3jit18ldGblAddrDefHelperEPNS_10StringDataE
@@ -111,6 +116,7 @@
 .text._ZN4HPHP3jit13MInstrHelpers9arrayGetSEPNS_9ArrayDataEPNS_10StringDataE
 .text._ZN4HPHP3jit18tv_release_genericEPNS_10TypedValueE
 .text._ZN4HPHP3jit24shuffleExtraArgsMayUseVVEPNS_6ActRecE
+.text._ZN4HPHP9ExtraArgs8allocMemEj
 .text._ZN4HPHP9ExtraArgs12allocateCopyEPNS_10TypedValueEj
 .text._ZN4HPHP10ObjectData7propVecEv
 .text._ZN4HPHP13f_str_replaceERKNS_7VariantES2_S2_RKNS_14VRefParamValueE
@@ -136,6 +142,8 @@
 .text._ZNK4HPHP11NamedEntity13getCachedFuncEv
 .text._ZN4HPHP10bstrcaseeqEPKcS1_m
 .text._ZN4HPHP4Unit8loadFuncEPKNS_11NamedEntityEPKNS_10StringDataE
+.text._ZN4HPHP5tvSetENS_10TypedValueERS0_.isra.137
+.text._ZN4HPHP7cellDupENS_10TypedValueERS0_.isra.25
 .text._ZN4HPHP12f_preg_splitERKNS_6StringES2_ii
 .text._ZN4HPHP12f_array_keysERKNS_7VariantES2_b
 .text._ZN4HPHP11PackedArray6AppendEPNS_9ArrayDataERKNS_7VariantEb

@@ -2317,7 +2317,7 @@ class ReflectionTypeConstant implements Reflector {
    * type constant. The structure of this shape is specified in
    * reflection.hhi. */
   public function getTypeStructure() {
-    return type_structure(
+    return HH\type_structure(
       $this->getDeclaringClassname(),
       $this->getName()
     );

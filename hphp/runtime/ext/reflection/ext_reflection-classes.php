@@ -1071,33 +1071,55 @@ class ReflectionExtension implements Reflector {
   }
 }
 
-/* These enum values correspond to the 'kind' field in the
- * TypeStructure shape returned by type_structure() or
- * ReflectionTypeConstant::getTypeStructure(). The following enum
- * values are replicated in hphp/runtime/base/type-structure.h
- */
-enum TypeStructureKind: int {
-  OF_VOID = 0;
-  OF_INT = 1;
-  OF_BOOL = 2;
-  OF_FLOAT = 3;
-  OF_STRING = 4;
-  OF_RESOURCE = 5;
-  OF_NUM = 6;
-  OF_ARRAYKEY = 7;
-  OF_NORETURN = 8;
-  OF_MIXED = 9;
-  OF_TUPLE = 10;
-  OF_FUNCTION = 11;
-  OF_ARRAY = 12;
-  OF_GENERIC = 13;
-  OF_SHAPE = 14;
-  OF_CLASS = 15;
-  OF_INTERFACE = 16;
-  OF_TRAIT = 17;
-  OF_ENUM = 18;
-  OF_UNRESOLVED = 101; // for type aliases only
-}
+namespace HH {
+  /* These enum values correspond to the 'kind' field in the
+   * TypeStructure shape returned by type_structure() or
+   * ReflectionTypeConstant::getTypeStructure(). The following enum
+   * values are replicated in hphp/runtime/base/type-structure.h
+   */
+  enum TypeStructureKind: int {
+    OF_VOID = 0;
+    OF_INT = 1;
+    OF_BOOL = 2;
+    OF_FLOAT = 3;
+    OF_STRING = 4;
+    OF_RESOURCE = 5;
+    OF_NUM = 6;
+    OF_ARRAYKEY = 7;
+    OF_NORETURN = 8;
+    OF_MIXED = 9;
+    OF_TUPLE = 10;
+    OF_FUNCTION = 11;
+    OF_ARRAY = 12;
+    OF_GENERIC = 13;
+    OF_SHAPE = 14;
+    OF_CLASS = 15;
+    OF_INTERFACE = 16;
+    OF_TRAIT = 17;
+    OF_ENUM = 18;
+    OF_UNRESOLVED = 101; // for type aliases only
+  }
 
-<<__Native>>
-function type_structure(mixed $cls_or_obj, string $cns_name): array;
+  type TypeStructure<T> = shape(
+    'kind' => TypeStructureKind,
+    'nullable' => ?bool,
+    // classname for classes, interfaces, enums, or traits
+    'classname' => ?classname<T>,
+    // for tuples
+    'elem_types' => ?array,
+    // for functions
+    'param_types' => ?array,
+    'return_type' => ?array,
+    // for arrays, classes
+    'generic_types' => ?array,
+    // for shapes
+    'fields' => ?array,
+    // name for generics (type variables)
+    'name' => ?string,
+    // for type aliases
+    'alias' => ?string,
+  );
+
+  <<__Native>>
+  function type_structure(mixed $cls_or_obj, string $cns_name): array;
+}

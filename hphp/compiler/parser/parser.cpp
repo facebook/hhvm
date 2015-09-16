@@ -536,6 +536,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
            stripped == "idx" ||
+           stripped == "type_structure" ||
            stripped == "asio_get_current_context_idx" ||
            stripped == "asio_get_running_in_context" ||
            stripped == "asio_get_running" ||
@@ -2449,6 +2450,8 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     AliasEntry{"InvariantException", "HH\\InvariantException"},
     AliasEntry{"IMemoizeParam", "HH\\IMemoizeParam"},
     AliasEntry{"Shapes", "HH\\Shapes"},
+    AliasEntry{"TypeStructureKind", "HH\\TypeStructureKind"},
+    AliasEntry{"TypeStructure", "HH\\TypeStructure"},
 
     AliasEntry{"Awaitable", "HH\\Awaitable"},
     AliasEntry{"AsyncGenerator", "HH\\AsyncGenerator"},

@@ -1747,7 +1747,7 @@ class ReflectionExtension final : public Extension {
     HHVM_FE(hphp_invoke_method);
     HHVM_FE(hphp_set_property);
     HHVM_FE(hphp_set_static_property);
-    HHVM_FE(type_structure);
+    HHVM_FALIAS(HH\\type_structure, type_structure);
 
     HHVM_ME(ReflectionFunctionAbstract, getName);
     HHVM_ME(ReflectionFunctionAbstract, isHack);

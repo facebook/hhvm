@@ -449,6 +449,20 @@ void binOpBoolImpl(ISS& env, Fun fun) {
   push(env, TBool);
 }
 
+template<class Fun>
+void binOpInt64Impl(ISS& env, Fun fun) {
+  auto const t1 = popC(env);
+  auto const t2 = popC(env);
+  auto const v1 = tv(t1);
+  auto const v2 = tv(t2);
+  if (v1 && v2) {
+    constprop(env);
+    return push(env, ival(fun(*v2, *v1)));
+  }
+  // TODO_4: evaluate when these can throw, non-constant type stuff.
+  push(env, TInt);
+}
+
 void in(ISS& env, const bc::Eq&) {
   binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellEqual(c1, c2); });
 }
@@ -463,6 +477,10 @@ void in(ISS& env, const bc::Gt&) {
 }
 void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, cellLessOrEqual); }
 void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, cellGreaterOrEqual); }
+
+void in(ISS& env, const bc::Cmp&) {
+  binOpInt64Impl(env, [&] (Cell c1, Cell c2) { return cellCompare(c1, c2); });
+}
 
 void in(ISS& env, const bc::Xor&) {
   binOpBoolImpl(env, [&] (Cell c1, Cell c2) {

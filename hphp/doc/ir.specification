@@ -521,6 +521,7 @@ To string conversions:
 
 | NeqInt,                      D(Bool), S(Int) S(Int),                    NF
 
+| CmpInt,                      D(Int),  S(Int) S(Int),                    NF
 
   Perform 64-bit integer comparisons.
 
@@ -535,6 +536,8 @@ To string conversions:
 | EqDbl,                       D(Bool), S(Dbl) S(Dbl),                    NF
 
 | NeqDbl,                      D(Bool), S(Dbl) S(Dbl),                    NF
+
+| CmpDbl,                      D(Int),  S(Dbl) S(Dbl),                    NF
 
   Perform comparisons of doubles. Comparisons that are unordered according to
   IEEE 754 (such as when at least one operand is NaN) result in false.
@@ -555,6 +558,8 @@ To string conversions:
 
 | NSameStr,                    D(Bool), S(Str) S(Str),                    NF
 
+| CmpStr,                      D(Int),  S(Str) S(Str),                    NF
+
   Performs comparison of strings using PHP semantics.
 
 | GtStrInt,                    D(Bool), S(Str) S(Int),                    NF
@@ -569,6 +574,8 @@ To string conversions:
 
 | NeqStrInt,                   D(Bool), S(Str) S(Int),                    NF
 
+| CmpStrInt,                   D(Int),  S(Str) S(Int),                    NF
+
   Performs comparison of strings with integers using PHP semantics.
 
 | GtBool,                      D(Bool), S(Bool) S(Bool),                  NF
@@ -582,6 +589,8 @@ To string conversions:
 | EqBool,                      D(Bool), S(Bool) S(Bool),                  NF
 
 | NeqBool,                     D(Bool), S(Bool) S(Bool),                  NF
+
+| CmpBool,                     D(Int),  S(Bool) S(Bool),                  NF
 
   Performs comparison of booleans.
 
@@ -600,6 +609,8 @@ To string conversions:
 | SameObj,                     D(Bool), S(Obj) S(Obj),                    NF
 
 | NSameObj,                    D(Bool), S(Obj) S(Obj),                    NF
+
+| CmpObj,                      D(Int),  S(Obj) S(Obj),                    Er
 
   Perform comparison of objects using PHP semantics. All versions except for
   SameObj and NSameObj may re-enter the VM and therefore may throw
@@ -621,6 +632,8 @@ To string conversions:
 
 | NSameArr,                    D(Bool), S(Arr) S(Arr),                    NF
 
+| CmpArr,                      D(Int),  S(Arr) S(Arr),                    Er
+
   Perform comparison of arrays using PHP semantics. All versions except for
   SameArr and NSameArr may re-enter the VM and therefore may throw
   exceptions. SameArr and NSameArr never re-enter or throw.
@@ -636,6 +649,8 @@ To string conversions:
 | EqRes,                       D(Bool), S(Res) S(Res),                    NF
 
 | NeqRes,                      D(Bool), S(Res) S(Res),                    NF
+
+| CmpRes,                      D(Int),  S(Res) S(Res),                    NF
 
   Perform comparison of resources using PHP semantics. Resource comparisons
   never re-enter or throw.

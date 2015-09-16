@@ -87,12 +87,14 @@ bool canDCE(IRInstruction* inst) {
   case LteInt:
   case EqInt:
   case NeqInt:
+  case CmpInt:
   case GtDbl:
   case GteDbl:
   case LtDbl:
   case LteDbl:
   case EqDbl:
   case NeqDbl:
+  case CmpDbl:
   case GtStr:
   case GteStr:
   case LtStr:
@@ -101,18 +103,21 @@ bool canDCE(IRInstruction* inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case CmpStr:
   case GtStrInt:
   case GteStrInt:
   case LtStrInt:
   case LteStrInt:
   case EqStrInt:
   case NeqStrInt:
+  case CmpStrInt:
   case GtBool:
   case GteBool:
   case LtBool:
   case LteBool:
   case EqBool:
   case NeqBool:
+  case CmpBool:
   case SameObj:
   case NSameObj:
   case SameArr:
@@ -123,6 +128,7 @@ bool canDCE(IRInstruction* inst) {
   case LteRes:
   case EqRes:
   case NeqRes:
+  case CmpRes:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -274,12 +280,14 @@ bool canDCE(IRInstruction* inst) {
   case LteObj:
   case EqObj:
   case NeqObj:
+  case CmpObj:
   case GtArr:
   case GteArr:
   case LtArr:
   case LteArr:
   case EqArr:
   case NeqArr:
+  case CmpArr:
   case JmpZero:
   case JmpNZero:
   case JmpSSwitchDest:

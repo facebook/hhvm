@@ -103,6 +103,7 @@ static int getNextTokenType(int t) {
     case T_IS_NOT_IDENTICAL:
     case T_IS_SMALLER_OR_EQUAL:
     case T_IS_GREATER_OR_EQUAL:
+    case T_SPACESHIP:
     case T_PLUS_EQUAL:
     case T_MINUS_EQUAL:
     case T_MUL_EQUAL:
@@ -464,6 +465,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"!="|"<>"            { RETSTEP(T_IS_NOT_EQUAL);}
 <ST_IN_SCRIPTING>"<="                 { RETSTEP(T_IS_SMALLER_OR_EQUAL);}
 <ST_IN_SCRIPTING>">="                 { RETSTEP(T_IS_GREATER_OR_EQUAL);}
+<ST_IN_SCRIPTING>"<=>"                { RETSTEP(T_SPACESHIP);}
 <ST_IN_SCRIPTING>"+="                 { RETSTEP(T_PLUS_EQUAL);}
 <ST_IN_SCRIPTING>"-="                 { RETSTEP(T_MINUS_EQUAL);}
 <ST_IN_SCRIPTING>"*="                 { RETSTEP(T_MUL_EQUAL);}

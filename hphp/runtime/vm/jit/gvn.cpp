@@ -257,12 +257,14 @@ bool supportsGVN(const IRInstruction* inst) {
   case LteInt:
   case EqInt:
   case NeqInt:
+  case CmpInt:
   case GtDbl:
   case GteDbl:
   case LtDbl:
   case LteDbl:
   case EqDbl:
   case NeqDbl:
+  case CmpDbl:
   case GtStr:
   case GteStr:
   case LtStr:
@@ -271,18 +273,21 @@ bool supportsGVN(const IRInstruction* inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case CmpStr:
   case GtStrInt:
   case GteStrInt:
   case LtStrInt:
   case LteStrInt:
   case EqStrInt:
   case NeqStrInt:
+  case CmpStrInt:
   case GtBool:
   case GteBool:
   case LtBool:
   case LteBool:
   case EqBool:
   case NeqBool:
+  case CmpBool:
   case SameObj:
   case NSameObj:
   case SameArr:
@@ -293,6 +298,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LteRes:
   case EqRes:
   case NeqRes:
+  case CmpRes:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:

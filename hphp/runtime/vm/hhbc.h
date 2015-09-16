@@ -631,6 +631,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(Lte,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Gt,              NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Gte,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(Cmp,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(BitAnd,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(BitOr,           NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(BitXor,          NA,               TWO(CV,CV),      ONE(CV),    NF) \

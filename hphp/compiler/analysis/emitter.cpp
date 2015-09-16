@@ -3801,6 +3801,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case T_IS_SMALLER_OR_EQUAL: e.Lte(); break;
       case '>': e.Gt(); break;
       case T_IS_GREATER_OR_EQUAL: e.Gte(); break;
+      case T_SPACESHIP: e.Cmp(); break;
       case T_POW: e.Pow(); break;
       default: assert(false);
     }

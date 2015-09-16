@@ -205,6 +205,7 @@ struct ObjectData {
   bool equal(const ObjectData&) const;
   bool less(const ObjectData&) const;
   bool more(const ObjectData&) const;
+  int64_t compare(const ObjectData&) const;
 
   /*
    * Call this object's destructor, if it has one. No restrictions are placed

@@ -828,6 +828,26 @@ bool ObjectData::more(const ObjectData& other) const {
   return toArray().more(other.toArray());
 }
 
+int64_t ObjectData::compare(const ObjectData& other) const {
+  if (isCollection() || other.isCollection()) {
+    throw_collection_compare_exception();
+  }
+  if (this == &other) return 0;
+  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
+               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    auto t1 = DateTimeData::getTimestamp(this);
+    auto t2 = DateTimeData::getTimestamp(&other);
+    return (t1 < t2) ? -1 : ((t1 > t2) ? 1 : 0);
+  }
+  // Return 1 for different classes to match PHP7 behavior.
+  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    // First comparison already proves they are different
+    return 1;
+  }
+  if (getVMClass() != other.getVMClass()) return 1;
+  return toArray().compare(other.toArray());
+}
+
 Variant ObjectData::offsetGet(Variant key) {
   assert(instanceof(SystemLib::s_ArrayAccessClass));
 

@@ -589,7 +589,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left '^'
 %left '&'
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL
-%nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL T_SPACESHIP
 %left T_SL T_SR
 %left '+' '-' '.'
 %left '*' '/' '%'
@@ -1942,6 +1942,7 @@ expr_no_variable:
   | expr '>' expr                      { BEXP($$,$1,$3,'>');}
   | expr T_IS_GREATER_OR_EQUAL expr    { BEXP($$,$1,$3,
                                               T_IS_GREATER_OR_EQUAL);}
+  | expr T_SPACESHIP expr              { BEXP($$,$1,$3,T_SPACESHIP);}
   | expr T_INSTANCEOF
     class_name_reference               { BEXP($$,$1,$3,T_INSTANCEOF);}
   | '(' expr_no_variable ')'           { $$ = $2;}
@@ -2557,6 +2558,10 @@ static_expr:
     T_IS_GREATER_OR_EQUAL
     static_expr                        { BEXP($$,$1,$3,
                                               T_IS_GREATER_OR_EQUAL);}
+  | static_expr
+    T_SPACESHIP
+    static_expr                        { BEXP($$,$1,$3,T_SPACESHIP);}
+
   | static_expr '?' static_expr ':'
     static_expr                        { _p->onQOp($$, $1, &$3, $5);}
   | static_expr '?' ':' static_expr    { _p->onQOp($$, $1,   0, $4);}

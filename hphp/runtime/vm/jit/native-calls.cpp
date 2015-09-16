@@ -73,6 +73,12 @@ using ArrCmpFn = bool (*)(const ArrayData*, const ArrayData*);
 using ResCmpFn = bool (*)(const ResourceHdr*, const ResourceHdr*);
 using StrIntCmpFn = bool (*)(const StringData*, int64_t);
 
+using StrCmpFnInt = int64_t (*)(const StringData*, const StringData*);
+using ObjCmpFnInt = int64_t (*)(const ObjectData*, const ObjectData*);
+using ArrCmpFnInt = int64_t (*)(const ArrayData*, const ArrayData*);
+using ResCmpFnInt = int64_t (*)(const ResourceHdr*, const ResourceHdr*);
+using StrIntCmpFnInt = int64_t (*)(const StringData*, int64_t);
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -274,6 +280,8 @@ static CallMap s_callMap {
                           {{SSA, 0}, {SSA, 1}}},
     {NSameStr,           static_cast<StrCmpFn>(nsame), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
+    {CmpStr,             static_cast<StrCmpFnInt>(compare), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
     {GtStrInt,           static_cast<StrIntCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GteStrInt,          static_cast<StrIntCmpFn>(moreEqual), DSSA, SSync,
@@ -286,6 +294,8 @@ static CallMap s_callMap {
                           {{SSA, 0}, {SSA, 1}}},
     {NeqStrInt,          static_cast<StrIntCmpFn>(nequal), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
+    {CmpStrInt,          static_cast<StrIntCmpFnInt>(compare), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
     {GtObj,              static_cast<ObjCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GteObj,             static_cast<ObjCmpFn>(moreEqual), DSSA, SSync,
@@ -297,6 +307,8 @@ static CallMap s_callMap {
     {EqObj,              static_cast<ObjCmpFn>(equal), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {NeqObj,             static_cast<ObjCmpFn>(nequal), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {CmpObj,             static_cast<ObjCmpFnInt>(compare), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GtArr,              static_cast<ArrCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
@@ -314,6 +326,8 @@ static CallMap s_callMap {
                           {{SSA, 0}, {SSA, 1}}},
     {NSameArr,           static_cast<ArrCmpFn>(nsame), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
+    {CmpArr,             static_cast<ArrCmpFnInt>(compare), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
     {GtRes,              static_cast<ResCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GteRes,             static_cast<ResCmpFn>(moreEqual), DSSA, SSync,
@@ -321,6 +335,8 @@ static CallMap s_callMap {
     {LtRes,              static_cast<ResCmpFn>(less), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {LteRes,             static_cast<ResCmpFn>(lessEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {CmpRes,             static_cast<ResCmpFnInt>(compare), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
 
     /* Static prop helpers */

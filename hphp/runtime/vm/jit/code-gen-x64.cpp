@@ -363,18 +363,21 @@ CALL_OPCODE(EqStr);
 CALL_OPCODE(NeqStr);
 CALL_OPCODE(SameStr);
 CALL_OPCODE(NSameStr);
+CALL_OPCODE(CmpStr);
 CALL_OPCODE(GtStrInt);
 CALL_OPCODE(GteStrInt);
 CALL_OPCODE(LtStrInt);
 CALL_OPCODE(LteStrInt);
 CALL_OPCODE(EqStrInt);
 CALL_OPCODE(NeqStrInt);
+CALL_OPCODE(CmpStrInt);
 CALL_OPCODE(GtObj);
 CALL_OPCODE(GteObj);
 CALL_OPCODE(LtObj);
 CALL_OPCODE(LteObj);
 CALL_OPCODE(EqObj);
 CALL_OPCODE(NeqObj);
+CALL_OPCODE(CmpObj);
 CALL_OPCODE(GtArr);
 CALL_OPCODE(GteArr);
 CALL_OPCODE(LtArr);
@@ -383,10 +386,12 @@ CALL_OPCODE(EqArr);
 CALL_OPCODE(NeqArr);
 CALL_OPCODE(SameArr);
 CALL_OPCODE(NSameArr);
+CALL_OPCODE(CmpArr);
 CALL_OPCODE(GtRes);
 CALL_OPCODE(GteRes);
 CALL_OPCODE(LtRes);
 CALL_OPCODE(LteRes);
+CALL_OPCODE(CmpRes);
 
 CALL_OPCODE(ThrowInvalidOperation);
 CALL_OPCODE(HasToString);
@@ -1105,6 +1110,53 @@ void CodeGenerator::cgNeqRes(IRInstruction* inst) {
   assert(inst->src(1)->type() <= TRes);
   v << cmpq{src0, src1, sf};
   v << setcc{CC_NE, sf, dst};
+}
+
+void CodeGenerator::cgCmpBool(IRInstruction* inst) {
+  auto& v = vmain();
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
+  auto extended0 = v.makeReg();
+  auto extended1 = v.makeReg();
+  auto sf = v.makeReg();
+  assert(inst->src(0)->type() <= TBool);
+  assert(inst->src(1)->type() <= TBool);
+  v << movzbq{src0, extended0};
+  v << movzbq{src1, extended1};
+  v << subq{extended1, extended0, dst, sf};
+}
+
+void CodeGenerator::cgCmpInt(IRInstruction* inst) {
+  auto& v = vmain();
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
+  auto sf = v.makeReg();
+  auto tmp1 = v.makeReg();
+  auto tmp2 = v.makeReg();
+  assert(inst->src(0)->type() <= TInt);
+  assert(inst->src(1)->type() <= TInt);
+  v << cmpq{src1, src0, sf};
+  v << setcc{CC_G, sf, tmp1};
+  v << movzbq{tmp1, tmp2};
+  v << cmovq{CC_L, sf, tmp2, v.cns(-1), dst};
+}
+
+void CodeGenerator::cgCmpDbl(IRInstruction* inst) {
+  auto& v = vmain();
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
+  auto sf = v.makeReg();
+  auto tmp1 = v.makeReg();
+  auto tmp2 = v.makeReg();
+  assert(inst->src(0)->type() <= TDbl);
+  assert(inst->src(1)->type() <= TDbl);
+  v << ucomisd{src0, src1, sf};
+  v << cmovq{CC_A, sf, v.cns(-1), v.cns(1), tmp1};
+  v << cmovq{CC_NE, sf, v.cns(0), tmp1, tmp2};
+  v << cmovq{CC_P, sf, tmp2, v.cns(-1), dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -648,7 +648,8 @@ const int UserTokenId_T_POW_EQUAL = 433;
 const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 434;
 const int UserTokenId_T_HASHBANG = 435;
 const int UserTokenId_T_SUPER = 436;
-const int MaxUserTokenId = 437; // Marker, not a real user token ID
+const int UserTokenId_T_SPACESHIP = 437;
+const int MaxUserTokenId = 438; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

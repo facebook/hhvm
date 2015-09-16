@@ -47,12 +47,12 @@ namespace {
  */
 
 template<class Op>
-bool cellRelOp(Op op, Cell cell, bool val) {
+typename Op::RetType cellRelOp(Op op, Cell cell, bool val) {
   return op(cellToBool(cell), val);
 }
 
 template<class Op>
-bool cellRelOp(Op op, Cell cell, int64_t val) {
+typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -96,7 +96,7 @@ bool cellRelOp(Op op, Cell cell, int64_t val) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, Cell cell, double val) {
+typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -140,7 +140,7 @@ bool cellRelOp(Op op, Cell cell, double val) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, Cell cell, const StringData* val) {
+typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -194,7 +194,7 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, Cell cell, const ArrayData* ad) {
+typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -236,7 +236,7 @@ bool cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
+typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -283,7 +283,7 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
 }
 
 template<class Op>
-bool cellRelOp(Op op, Cell cell, const ResourceData* rd) {
+typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -322,12 +322,12 @@ bool cellRelOp(Op op, Cell cell, const ResourceData* rd) {
   not_reached();
 }
 template<class Op>
-bool cellRelOp(Op op, Cell cell, const ResourceHdr* r) {
+typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceHdr* r) {
   return cellRelOp(op, cell, r->data());
 }
 
 template<class Op>
-bool cellRelOp(Op op, Cell c1, Cell c2) {
+typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   assert(cellIsPlausible(c1));
   assert(cellIsPlausible(c2));
 
@@ -355,7 +355,7 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
 }
 
 template<class Op>
-bool tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
+typename Op::RetType tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
   assert(tvIsPlausible(tv1));
   assert(tvIsPlausible(tv2));
   return cellRelOp(op, *tvToCell(&tv1), *tvToCell(&tv2));
@@ -372,10 +372,12 @@ bool tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
  * vs obj function should handle the collection vs collection and
  * collection vs non-collection object cases.)  This is just to handle
  * that php operator == returns false in these cases, while the Lt/Gt
- * operators throw and exception.
+ * operators throw an exception.
  */
 
 struct Eq {
+  using RetType = bool;
+
   template<class T, class U>
   typename std::enable_if<
     !std::is_pointer<T>::value &&
@@ -408,6 +410,8 @@ struct Eq {
 };
 
 struct Lt {
+  using RetType = bool;
+
   template<class T, class U>
   typename std::enable_if<
     !std::is_pointer<T>::value &&
@@ -438,11 +442,12 @@ struct Lt {
 
   bool collectionVsNonObj() const {
     throw_collection_compare_exception();
-    not_reached();
   }
 };
 
 struct Gt {
+  using RetType = bool;
+
   template<class T, class U>
   typename std::enable_if<
     !std::is_pointer<T>::value &&
@@ -473,7 +478,44 @@ struct Gt {
 
   bool collectionVsNonObj() const {
     throw_collection_compare_exception();
-    not_reached();
+  }
+};
+
+struct Cmp {
+  using RetType = int64_t;
+
+  template<class T, class U>
+  typename std::enable_if<
+    !std::is_pointer<T>::value &&
+    !std::is_pointer<U>::value,
+    int64_t
+  >::type operator()(T t, U u) const {
+    // This ordering is required so that -1 is returned for NaNs (to match PHP7
+    // behavior).
+    return (t == u) ? 0 : ((t > u) ? 1 : -1);
+  }
+
+  int64_t operator()(const StringData* sd1, const StringData* sd2) const {
+    return HPHP::compare(sd1, sd2);
+  }
+
+  int64_t operator()(const ArrayData* ad1, const ArrayData* ad2) const {
+    return HPHP::compare(ad1, ad2);
+  }
+
+  int64_t operator()(const ObjectData* od1, const ObjectData* od2) const {
+    return HPHP::compare(od1, od2);
+  }
+
+  int64_t operator()(const ResourceData* rd1, const ResourceData* rd2) const {
+    return HPHP::compare(rd1->hdr(), rd2->hdr());
+  }
+  int64_t operator()(const ResourceHdr* rd1, const ResourceHdr* rd2) const {
+    return HPHP::compare(rd1, rd2);
+  }
+
+  int64_t collectionVsNonObj() const {
+    throw_collection_compare_exception();
   }
 };
 
@@ -649,6 +691,47 @@ bool cellGreater(Cell c1, Cell c2) {
 
 bool tvGreater(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Gt(), tv1, tv2);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int64_t cellCompare(Cell cell, bool val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+
+int64_t cellCompare(Cell cell, int64_t val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+
+int64_t cellCompare(Cell cell, double val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+
+int64_t cellCompare(Cell cell, const StringData* val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+
+int64_t cellCompare(Cell cell, const ArrayData* val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+
+int64_t cellCompare(Cell cell, const ObjectData* val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+
+int64_t cellCompare(Cell cell, const ResourceData* val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+int64_t cellCompare(Cell cell, const ResourceHdr* val) {
+  return cellRelOp(Cmp(), cell, val);
+}
+
+int64_t cellCompare(Cell c1, Cell c2) {
+  return cellRelOp(Cmp(), c1, c2);
+}
+
+int64_t tvCompare(TypedValue tv1, TypedValue tv2) {
+  return tvRelOp(Cmp(), tv1, tv2);
 }
 
 //////////////////////////////////////////////////////////////////////

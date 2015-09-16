@@ -3851,6 +3851,16 @@ OPTBLD_INLINE void implCellBinOpBool(PC& pc, Op op) {
   vmStack().popC();
 }
 
+template<class Op>
+OPTBLD_INLINE void implCellBinOpInt64(PC& pc, Op op) {
+  auto const c1 = vmStack().topC();
+  auto const c2 = vmStack().indC(1);
+  auto const result = op(*c2, *c1);
+  tvRefcountedDecRef(c2);
+  *c2 = make_tv<KindOfInt64>(result);
+  vmStack().popC();
+}
+
 OPTBLD_INLINE void iopAdd(IOP_ARGS) {
   implCellBinOp(pc, cellAdd);
 }
@@ -3945,6 +3955,12 @@ OPTBLD_INLINE void iopGt(IOP_ARGS) {
 
 OPTBLD_INLINE void iopGte(IOP_ARGS) {
   implCellBinOpBool(pc, cellGreaterOrEqual);
+}
+
+OPTBLD_INLINE void iopCmp(IOP_ARGS) {
+  implCellBinOpInt64(pc, [&] (Cell c1, Cell c2) {
+    return cellCompare(c1, c2);
+  });
 }
 
 OPTBLD_INLINE void iopShl(IOP_ARGS) {

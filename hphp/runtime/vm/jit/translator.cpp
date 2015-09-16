@@ -167,6 +167,7 @@ static const struct {
   { OpLte,         {StackTop2,        Stack1,       OutBoolean      }},
   { OpGt,          {StackTop2,        Stack1,       OutBoolean      }},
   { OpGte,         {StackTop2,        Stack1,       OutBoolean      }},
+  { OpCmp,         {StackTop2,        Stack1,       OutInt64        }},
   /* Bitwise ops */
   { OpBitAnd,      {StackTop2,        Stack1,       OutBitOp        }},
   { OpBitOr,       {StackTop2,        Stack1,       OutBitOp        }},
@@ -802,6 +803,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Lte:
   case Op::Gt:
   case Op::Gte:
+  case Op::Cmp:
   case Op::SetOpL:
   case Op::InitProp:
   case Op::BreakTraceHint:

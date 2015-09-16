@@ -24,6 +24,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
@@ -1275,6 +1276,98 @@ X(NeqRes, Res)
 
 #undef X
 
+SSATmp* simplifyCmpBool(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  assertx(left->type() <= TBool);
+  assertx(right->type() <= TBool);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, HPHP::compare(left->boolVal(), right->boolVal()));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyCmpInt(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  assertx(left->type() <= TInt);
+  assertx(right->type() <= TInt);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, HPHP::compare(left->intVal(), right->intVal()));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyCmpStr(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+
+  assertx(left->type() <= TStr);
+  assertx(right->type() <= TStr);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
+
+  if (left->hasConstVal()) {
+    if (right->hasConstVal()) {
+      return cns(env, HPHP::compare(left->strVal(), right->strVal()));
+    } else if (left->strVal()->empty()) {
+      // Comparisons against the empty string can be optimized to a comparison
+      // on the string length.
+      return newInst(CmpInt, cns(env, 0), gen(env, LdStrLen, right));
+    }
+  } else if (right->hasConstVal() && right->strVal()->empty()) {
+    return newInst(CmpInt, gen(env, LdStrLen, left), cns(env, 0));
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyCmpStrInt(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+
+  assertx(left->type() <= TStr);
+  assertx(right->type() <= TInt);
+
+  auto newInst = [&](Opcode op, SSATmp* src1, SSATmp* src2) {
+    return gen(env, op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
+  };
+
+  // If the string operand has a constant value, convert it to the appropriate
+  // numeric and lower to a numeric comparison.
+  if (left->hasConstVal()) {
+    int64_t si;
+    double sd;
+    auto type =
+      left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
+    if (type == KindOfDouble) {
+      return newInst(
+        CmpDbl,
+        cns(env, sd),
+        gen(env, ConvIntToDbl, right)
+      );
+    } else {
+      return newInst(
+        CmpInt,
+        cns(env, type == KindOfNull ? (int64_t)0 : si),
+        right
+      );
+    }
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  assertx(left->type() <= TRes);
+  assertx(right->type() <= TRes);
+  return (left == right) ? cns(env, 0) : nullptr;
+}
+
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   bool const trueSense = inst->op() == IsType;
   auto const type      = inst->typeParam();
@@ -2295,12 +2388,14 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LteBool)
   X(EqBool)
   X(NeqBool)
+  X(CmpBool)
   X(GtInt)
   X(GteInt)
   X(LtInt)
   X(LteInt)
   X(EqInt)
   X(NeqInt)
+  X(CmpInt)
   X(GtStr)
   X(GteStr)
   X(LtStr)
@@ -2309,12 +2404,14 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqStr)
   X(SameStr)
   X(NSameStr)
+  X(CmpStr)
   X(GtStrInt)
   X(GteStrInt)
   X(LtStrInt)
   X(LteStrInt)
   X(EqStrInt)
   X(NeqStrInt)
+  X(CmpStrInt)
   X(GtObj)
   X(GteObj)
   X(LtObj)
@@ -2337,6 +2434,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LteRes)
   X(EqRes)
   X(NeqRes)
+  X(CmpRes)
   X(ArrayGet)
   X(OrdStr)
   X(LdLoc)

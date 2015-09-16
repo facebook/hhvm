@@ -195,6 +195,7 @@ bool hasObviousStackOutput(Op op) {
   case Op::Gt:
   case Op::Lte:
   case Op::Gte:
+  case Op::Cmp:
   case Op::Shl:
   case Op::Shr:
   case Op::CastBool:

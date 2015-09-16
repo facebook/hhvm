@@ -1321,6 +1321,11 @@ Gte    [C C]  ->  [C:Bool]
 
   Greater than or equal to (>=). Pushes ($2 >= $1) onto the stack.
 
+Cmp    [C C]  ->  [C:Int]
+
+  Comparison. Pushes either -1, 0, or 1 onto the stack if ($1 < $2), ($1 ==
+  $2), or ($1 > $2), respectively.
+
 BitAnd    [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Str || T2 != Str)
           [C:Str C:Str]  ->  [C:Str]
 

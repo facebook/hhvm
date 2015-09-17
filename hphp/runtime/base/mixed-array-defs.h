@@ -143,17 +143,17 @@ MixedArray::copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
   bcopy32_inline(&(to->m_nextKI), &(from->m_nextKI), sizeof(Elm) * nElems + 32);
 }
 
-extern int32_t* warnUnbalanced(size_t n, int32_t* ei);
+extern int32_t* warnUnbalanced(MixedArray*, size_t n, int32_t* ei);
 
 ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
-                                            size_t h0) const {
+                                            size_t h0) {
   assert(!isPacked());
   uint32_t balanceLimit = RuntimeOption::MaxArrayChain;
   for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) {
-      return LIKELY(i <= balanceLimit) ? ei : warnUnbalanced(i, ei);
+      return LIKELY(i <= balanceLimit) ? ei : warnUnbalanced(this, i, ei);
     }
     probe += i;
     assertx(i <= mask);

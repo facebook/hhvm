@@ -132,9 +132,12 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     doPass(unit, insertAsserts, DCE::None);
   }
 
-  // Perform a final clean pass to collapse any critical edges that were
-  // split.
+  // Perform final cleanup passes to collapse any critical edges that were
+  // split, and simplify our instructions before shipping off to codegen.
   doPass(unit, cleanCfg, DCE::None);
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
+    doPass(unit, simplifyPass, DCE::Full);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

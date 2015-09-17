@@ -41,7 +41,7 @@ const RegSet kGPCallerSaved =
 const RegSet kGPCalleeSaved =
   // x19 = rvmsp()
   // x20 = rvmtl()
-  vixl::x22 | vixl::x23 |
+  vixl::x21 | vixl::x22 | vixl::x23 |
   // x24 = rGContextReg
   vixl::x25 | vixl::x26 | vixl::x27 | vixl::x28;
   // x29 = rvmfp()
@@ -84,6 +84,11 @@ const RegSet kSF = RegSet(RegSF{0});
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const RegSet kScratchCrossTraceRegs =
+  kSIMDCallerSaved | (kGPUnreserved - detail::kVMRegs);
+
+///////////////////////////////////////////////////////////////////////////////
+
 const Abi trace_abi {
   kGPUnreserved,
   kGPReserved,
@@ -91,6 +96,16 @@ const Abi trace_abi {
   kSIMDReserved,
   kCalleeSaved,
   kSF
+};
+
+const Abi cross_trace_abi {
+  trace_abi.gp() & kScratchCrossTraceRegs,
+  trace_abi.gp() - kScratchCrossTraceRegs,
+  trace_abi.simd() & kScratchCrossTraceRegs,
+  trace_abi.simd() - kScratchCrossTraceRegs,
+  trace_abi.calleeSaved & kScratchCrossTraceRegs,
+  trace_abi.sf,
+  false
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,7 +120,7 @@ const Abi& abi(CodeKind kind) {
       return trace_abi;
     case CodeKind::CrossTrace:
     case CodeKind::Helper:
-      not_implemented();
+      return cross_trace_abi;
   }
   not_reached();
 }
@@ -127,10 +142,10 @@ RegSet arg_regs_simd(size_t n) {
   return jit::arg_regs_simd(n);
 }
 
-PhysReg r_svcreq_req() { not_implemented(); }
-PhysReg r_svcreq_stub() { not_implemented(); }
-PhysReg r_svcreq_sf() { not_implemented(); }
-PhysReg r_svcreq_arg(size_t i) { not_implemented(); }
+PhysReg r_svcreq_req() { return rarg(0); }
+PhysReg r_svcreq_stub() { return rarg(1); }
+PhysReg r_svcreq_sf() { return abi().sf.findFirst(); }
+PhysReg r_svcreq_arg(size_t i) { return rarg(i + 2); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

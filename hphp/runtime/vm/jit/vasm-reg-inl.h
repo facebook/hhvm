@@ -193,12 +193,13 @@ inline bool Vptr::operator!=(const Vptr& other) const {
 }
 
 inline Vptr operator+(Vptr lhs, int32_t d) {
-  return Vptr(lhs.base, lhs.index, lhs.scale, lhs.disp + d);
+  auto copy = lhs;
+  copy.disp += d;
+  return copy;
 }
 
 inline Vptr operator+(Vptr lhs, intptr_t d) {
-  return Vptr(lhs.base, lhs.index, lhs.scale,
-              safe_cast<int32_t>(lhs.disp + d));
+  return lhs + safe_cast<int32_t>(d);
 }
 
 inline Vptr baseless(VscaledDisp vd) {

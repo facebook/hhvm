@@ -283,7 +283,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
   auto const resumeCPPUnwind = vwrap(cb, [] (Vout& v) {
     static_assert(sizeof(tl_regState) == 1,
                   "The following store must match the size of tl_regState.");
-    auto const regstate = emitTLSAddr(v, tl_regState, v.makeReg());
+    auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
     v << storebi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
 
     v << load{rvmtl()[unwinderExnOff()], rarg(0)};

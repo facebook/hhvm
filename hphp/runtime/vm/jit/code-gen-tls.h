@@ -17,35 +17,76 @@
 #ifndef incl_HPHP_VM_CODE_GEN_TLS_H_
 #define incl_HPHP_VM_CODE_GEN_TLS_H_
 
+#include "hphp/util/thread-local.h"
+
 namespace HPHP { namespace jit {
+
+struct Vout;
+struct Vreg;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef USE_GCC_FAST_TLS
-#ifdef __APPLE__
-#define getGlobalAddrForTLS(datum) ([] {                \
-    long* ret;                                          \
-    __asm__("lea %1, %%rax\nmov %%rdi, %0" :            \
-            "=r"(ret) : "m"(datum));                    \
-    return ret;                                         \
-  }())
+/*
+ * Thread-local variable abstraction.
+ *
+ * This serves as a typed wrapper for the thread-local variables accepted by
+ * the emit routines below.
+ *
+ * It exists in order to provide some encapsulation for the tricky macrology
+ * required on x64 OSX to obtain the memory locations of thread locals.
+ */
+template<typename T>
+struct TLSDatum {
+  explicit TLSDatum(const T& var) : tls{&var} {}
+  explicit TLSDatum(const long* addr) : raw{addr} {}
 
-#define emitTLSAddr(x, datum, r)                        \
-  detail::implTLSAddr((x), getGlobalAddrForTLS(datum), (r))
-#define emitTLSLoad(x, datum, reg)                      \
-  detail::implTLSLoad((x), (datum), getGlobalAddrForTLS(datum), (reg))
-#else // __APPLE__
-#define emitTLSAddr(x, datum, r)                        \
-  detail::implTLSAddr((x), (datum), (r))
-#define emitTLSLoad(x, datum, reg)                      \
-  detail::implTLSLoad((x), (datum), nullptr, (reg))
-#endif // __APPLE__
-#endif // USE_GCC_FAST_TLS
+  union {
+    const T* tls;
+    const long* raw;
+  };
+};
+
+#if !(defined(__x86_64__) && defined(__APPLE__))
+/*
+ * Wrapper helper for TLSDatum.
+ */
+template<typename T>
+TLSDatum<T> tls_datum(const T& var) { return TLSDatum<T>(var); }
+
+#else
+/*
+ * See code-gen-tls-x64.h for an explanation of this assembly.
+ */
+#define tls_datum(var) ([] {                \
+  long* ret;                                \
+  __asm__("lea %1, %%rax\nmov %%rdi, %0" :  \
+          "=r"(ret) : "m"(var));            \
+  return TLSDatum<decltype(var)>(ret);      \
+}())
+
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return the Vptr for the location of a __thread variable `datum'.
+ */
+template<typename T>
+Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum);
+
+/*
+ * Load the value of the ThreadLocalNoCheck `datum' into `d'.
+ */
+template<typename T>
+void emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
 
 #include "hphp/runtime/vm/jit/code-gen-tls-x64.h"
+
+// This has to follow all the arch-specific includes.
+#include "hphp/runtime/vm/jit/code-gen-tls-inl.h"
 
 #endif

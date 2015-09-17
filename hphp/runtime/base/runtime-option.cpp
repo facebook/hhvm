@@ -370,8 +370,12 @@ HackStrictOption
 bool RuntimeOption::LookForTypechecker = true;
 bool RuntimeOption::AutoTypecheck = true;
 
-// PHP7 is off by default (false)
-bool RuntimeOption::PHP7 = false;
+// PHP7 is off by default (false). s_PHP7_master is not a static member of
+// RuntimeOption so that it's private to this file and not exposed -- it's a
+// master switch only, and not to be used for any actual gating, use the more
+// granular options instead. (It can't be a local since Config::Bind will take
+// and store a pointer to it.)
+static bool s_PHP7_master = false;
 bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_UVS = false;
@@ -1147,7 +1151,8 @@ void RuntimeOption::Load(
     // BC don't need options here and can just always be turned on.)
     //
     // NB that the "PHP7.all" option is intended to be only a master switch;
-    // all runtime behavior gating should be based on sub-options. Also don't
+    // all runtime behavior gating should be based on sub-options (that's why
+    // it's a file static not a static member of RuntimeOption). Also don't
     // forget to update mangleUnitPHP7Options if needed.
     //
     // TODO: we may eventually want to make an option which specifies
@@ -1155,10 +1160,12 @@ void RuntimeOption::Load(
     // these may want to be per-file. We originally planned to do this from the
     // get-go, but threading that through turns out to be kind of annoying and
     // of questionable value, so just doing this for now.
-    Config::Bind(PHP7, ini, config, "PHP7.all", false);
-    Config::Bind(PHP7_LTR_assign, ini, config, "PHP7.LTRAssign", PHP7);
-    Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics", PHP7);
-    Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", PHP7);
+    Config::Bind(s_PHP7_master, ini, config, "PHP7.all", false);
+    Config::Bind(PHP7_LTR_assign, ini, config, "PHP7.LTRAssign",
+                 s_PHP7_master);
+    Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics",
+                 s_PHP7_master);
+    Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
   }
   {
     // Server

@@ -17,6 +17,8 @@
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/alignment.h"
+#include "hphp/runtime/vm/jit/align-arm.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
@@ -46,6 +48,8 @@ TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
 }
 
 TCA emitSmashableCall(CodeBlock& cb, TCA target) {
+  align(cb, Alignment::SmashCall, AlignContext::Live);
+
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
   vixl::Label target_data;
@@ -56,22 +60,19 @@ TCA emitSmashableCall(CodeBlock& cb, TCA target) {
   a.    Blr  (arm::rAsm);
   // When the call returns, jump over the data.
   a.    B    (&after_data);
-  if (!cb.isFrontierAligned(8)) {
-    a.  Nop  ();
-    assertx(cb.isFrontierAligned(8));
-  }
+  assertx(cb.isFrontierAligned(8));
+
+  // Emit the call target into the instruction stream.
   a.    bind (&target_data);
   a.    dc64 (reinterpret_cast<int64_t>(target));
   a.    bind (&after_data);
-
-  // Keep in sync with smashCtrlFlow().
-  assertx(target_data.target() == start + 12 ||
-          target_data.target() == start + 16);
 
   return start;
 }
 
 TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
+  align(cb, Alignment::SmashJmp, AlignContext::Live);
+
   vixl::MacroAssembler a { cb };
   vixl::Label target_data;
 
@@ -79,21 +80,18 @@ TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
 
   a.    Ldr  (arm::rAsm, &target_data);
   a.    Br   (arm::rAsm);
-  if (!cb.isFrontierAligned(8)) {
-    a.  Nop  ();
-    assertx(cb.isFrontierAligned(8));
-  }
+  assertx(cb.isFrontierAligned(8));
+
+  // Emit the jmp target into the instruction stream.
   a.    bind (&target_data);
   a.    dc64 (reinterpret_cast<int64_t>(target));
-
-  // Keep in sync with smashCtrlFlow().
-  assertx(target_data.target() == start + 8 ||
-          target_data.target() == start + 12);
 
   return start;
 }
 
 TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc) {
+  align(cb, Alignment::SmashJcc, AlignContext::Live);
+
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
 
@@ -115,15 +113,8 @@ emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void smashCtrlFlow(TCA inst, TCA target, bool is_jmp) {
-  // We wrote two instructions for a jmp, or three for a jcc or call, and then
-  // the target was written at the next 8-byte boundary.
-  auto data_ptr = inst + (is_jmp ? 8 : 12);
-  if ((uintptr_t(data_ptr) & 7) != 0) {
-    data_ptr += 4;
-    assertx((uintptr_t(data_ptr) & 7) == 0);
-  }
-  *reinterpret_cast<TCA*>(data_ptr) = target;
+static void smashCtrlFlow(TCA inst, TCA target, size_t sz) {
+  *reinterpret_cast<TCA*>(inst + sz - 8) = target;
 }
 
 void smashMovq(TCA inst, uint64_t target) {
@@ -135,16 +126,16 @@ void smashCmpq(TCA inst, uint32_t target) {
 }
 
 void smashCall(TCA inst, TCA target) {
-  smashCtrlFlow(inst, target, false);
+  smashCtrlFlow(inst, target, smashableCallLen());
 }
 
 void smashJmp(TCA inst, TCA target) {
-  smashCtrlFlow(inst, target, true);
+  smashCtrlFlow(inst, target, smashableJmpLen());
 }
 
 void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   assertx(cc == CC_None);
-  smashCtrlFlow(inst, target, false);
+  smashCtrlFlow(inst, target, smashableJccLen());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -166,10 +157,8 @@ TCA smashableCallTarget(TCA call) {
   if (blr->Bits(31, 10) != 0x358FC0 || blr->Bits(4, 0) != 0) return nullptr;
 
   uintptr_t dest = reinterpret_cast<uintptr_t>(blr + 8);
-  if ((dest & 7) != 0) {
-    dest += 4;
-    assertx((dest & 7) == 0);
-  }
+  assertx((dest & 7) == 0);
+
   return *reinterpret_cast<TCA*>(dest);
 }
 
@@ -184,10 +173,8 @@ TCA smashableJmpTarget(TCA jmp) {
   if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
 
   uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
-  if ((dest & 7) != 0) {
-    dest += 4;
-    assertx((dest & 7) == 0);
-  }
+  assertx((dest & 7) == 0);
+
   return *reinterpret_cast<TCA*>(dest);
 }
 
@@ -200,10 +187,8 @@ TCA smashableJccTarget(TCA jmp) {
   if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
 
   uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 12);
-  if ((dest & 7) != 0) {
-    dest += 4;
-    assertx((dest & 7) == 0);
-  }
+  assertx((dest & 7) == 0);
+
   return *reinterpret_cast<TCA*>(dest);
 }
 

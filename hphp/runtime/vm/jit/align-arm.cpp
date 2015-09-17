@@ -16,6 +16,9 @@
 
 #include "hphp/runtime/vm/jit/align-arm.h"
 
+#include "hphp/util/data-block.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
+
 namespace HPHP { namespace jit { namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,6 +29,32 @@ bool is_aligned(TCA frontier, Alignment alignment) {
 
 void align(CodeBlock& cb, Alignment alignment, AlignContext context,
            bool fixups /* = false */) {
+  vixl::MacroAssembler a { cb };
+
+  switch (alignment) {
+    case Alignment::CacheLine:
+    case Alignment::CacheLineRoundUp:
+    case Alignment::JmpTarget:
+      break;
+
+    case Alignment::SmashMovq:
+    case Alignment::SmashCmpq:
+      break;
+
+    case Alignment::SmashJmp:
+      // A smashable jmp is two instructions plus inline 64-bit data, so it
+      // needs to be 8-byte aligned.
+      if (!cb.isFrontierAligned(8)) a.Nop();
+      break;
+
+    case Alignment::SmashCall:
+    case Alignment::SmashJcc:
+    case Alignment::SmashJccAndJmp:
+      // Other smashable control flow is three instructions plus inline 64-bit
+      // data, so it needs to be one instruction off from 8-byte alignment.
+      if (cb.isFrontierAligned(8)) a.Nop();
+      break;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

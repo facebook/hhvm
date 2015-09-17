@@ -33,9 +33,9 @@ namespace HPHP { namespace jit { namespace arm {
 
 constexpr size_t smashableMovqLen() { return 0; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 0; }
-constexpr size_t smashableJmpLen()  { return 0; }
-constexpr size_t smashableJccLen()  { return 0; }
+constexpr size_t smashableCallLen() { return 12 + 8; }
+constexpr size_t smashableJmpLen()  { return 8 + 8; }
+constexpr size_t smashableJccLen()  { return 12 + 8; }
 
 TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
 TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);

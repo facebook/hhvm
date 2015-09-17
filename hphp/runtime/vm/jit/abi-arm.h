@@ -53,7 +53,7 @@ namespace detail {
 inline RegSet vm_regs_with_sp() { return detail::kVMRegs; }
 inline RegSet vm_regs_no_sp()   { return detail::kVMRegsNoSP; }
 
-inline PhysReg rret() { not_implemented(); }
+inline PhysReg rret() { return vixl::x0; }
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
@@ -123,7 +123,6 @@ const vixl::Register rAsm(vixl::x9);
 const vixl::Register rAsm2(vixl::x10);
 const vixl::Register rGContextReg(vixl::x24);
 const vixl::Register rLinkReg(vixl::x30);
-const vixl::Register rReturnReg(vixl::x0);
 const vixl::Register rHostCallReg(vixl::x16);
 
 ///////////////////////////////////////////////////////////////////////////////

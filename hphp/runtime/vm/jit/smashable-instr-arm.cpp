@@ -40,7 +40,24 @@ namespace HPHP { namespace jit { namespace arm {
  */
 
 TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d) {
-  not_implemented();
+  align(cb, Alignment::SmashMovq, AlignContext::Live);
+
+  vixl::MacroAssembler a { cb };
+  vixl::Label imm_data;
+  vixl::Label after_data;
+
+  auto const start = cb.frontier();
+
+  a.    Ldr  (x2a(d), &imm_data);
+  a.    B    (&after_data);
+  assertx(cb.isFrontierAligned(8));
+
+  // Emit the immediate into the instruction stream.
+  a.    bind (&imm_data);
+  a.    dc64 (imm);
+  a.    bind (&after_data);
+
+  return start;
 }
 
 TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
@@ -56,8 +73,8 @@ TCA emitSmashableCall(CodeBlock& cb, TCA target) {
 
   auto const start = cb.frontier();
 
-  a.    Ldr  (arm::rAsm, &target_data);
-  a.    Blr  (arm::rAsm);
+  a.    Ldr  (rAsm, &target_data);
+  a.    Blr  (rAsm);
   // When the call returns, jump over the data.
   a.    B    (&after_data);
   assertx(cb.isFrontierAligned(8));
@@ -78,8 +95,8 @@ TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
 
   auto const start = cb.frontier();
 
-  a.    Ldr  (arm::rAsm, &target_data);
-  a.    Br   (arm::rAsm);
+  a.    Ldr  (rAsm, &target_data);
+  a.    Br   (rAsm);
   assertx(cb.isFrontierAligned(8));
 
   // Emit the jmp target into the instruction stream.
@@ -113,12 +130,13 @@ emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void smashCtrlFlow(TCA inst, TCA target, size_t sz) {
-  *reinterpret_cast<TCA*>(inst + sz - 8) = target;
+template<typename T>
+static void smashInstr(TCA inst, T target, size_t sz) {
+  *reinterpret_cast<T*>(inst + sz - 8) = target;
 }
 
 void smashMovq(TCA inst, uint64_t target) {
-  not_implemented();
+  smashInstr(inst, target, smashableMovqLen());
 }
 
 void smashCmpq(TCA inst, uint32_t target) {
@@ -126,22 +144,22 @@ void smashCmpq(TCA inst, uint32_t target) {
 }
 
 void smashCall(TCA inst, TCA target) {
-  smashCtrlFlow(inst, target, smashableCallLen());
+  smashInstr(inst, target, smashableCallLen());
 }
 
 void smashJmp(TCA inst, TCA target) {
-  smashCtrlFlow(inst, target, smashableJmpLen());
+  smashInstr(inst, target, smashableJmpLen());
 }
 
 void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   assertx(cc == CC_None);
-  smashCtrlFlow(inst, target, smashableJccLen());
+  smashInstr(inst, target, smashableJccLen());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 uint64_t smashableMovqImm(TCA inst) {
-  not_implemented();
+  return *reinterpret_cast<uint64_t*>(inst + smashableMovqLen() - 8);
 }
 
 uint32_t smashableCmpqImm(TCA inst) {

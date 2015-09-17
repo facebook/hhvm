@@ -37,21 +37,22 @@ void align(CodeBlock& cb, Alignment alignment, AlignContext context,
     case Alignment::JmpTarget:
       break;
 
-    case Alignment::SmashMovq:
     case Alignment::SmashCmpq:
       break;
 
+    case Alignment::SmashMovq:
     case Alignment::SmashJmp:
-      // A smashable jmp is two instructions plus inline 64-bit data, so it
-      // needs to be 8-byte aligned.
+      // Smashable movs and jmps are two instructions plus inline 64-bit data,
+      // so they need to be 8-byte aligned.
       if (!cb.isFrontierAligned(8)) a.Nop();
       break;
 
     case Alignment::SmashCall:
     case Alignment::SmashJcc:
     case Alignment::SmashJccAndJmp:
-      // Other smashable control flow is three instructions plus inline 64-bit
-      // data, so it needs to be one instruction off from 8-byte alignment.
+      // Other smashable control flow instructions are three instructions plus
+      // inline 64-bit data, so it needs to be one instruction off from 8-byte
+      // alignment.
       if (cb.isFrontierAligned(8)) a.Nop();
       break;
   }

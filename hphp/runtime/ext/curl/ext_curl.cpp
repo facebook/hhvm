@@ -1677,7 +1677,7 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
       m_timeout = std::make_shared<CurlTimeoutHandler>(asio_event_base.get(),
                                                        this);
 
-      asio_event_base->runInEventBaseThread([this,timeout_ms] {
+      asio_event_base->runInEventBaseThreadAndWait([this,timeout_ms] {
         m_timeout->scheduleTimeout(timeout_ms);
       });
     }

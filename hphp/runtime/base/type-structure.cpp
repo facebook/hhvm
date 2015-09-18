@@ -500,6 +500,11 @@ Array resolveTS(const Array& arr,
           ts.add(s_typevar_types,
                  Variant(resolveGenerics(arr, typeCns, typeCnsCls)));
         }
+
+        if (arr.exists(s_nullable)) {
+          ts.add(s_nullable, true_varNR);
+        }
+
         ts.setEvalScalar();
         return ts;
       }

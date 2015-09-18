@@ -1,0 +1,4 @@
+File "string_newline.php", line 20, characters 3-7:
+You are trying to access an element of this container but the container could be null.  (Typing[4063])
+File "string_newline.php", line 7, characters 15-20:
+This is what makes me believe it can be null

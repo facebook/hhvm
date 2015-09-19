@@ -81,11 +81,11 @@ function timezone_transitions_get(DateTimeZone $object,
 function timezone_version_get() { }
 
 interface DateTimeInterface {
-  public function diff(DateTimeInterface $datetime2, bool $absolute = false): DateInterval;
-  public function format(string $format): string;
-  public function getOffset(): int;
-  public function getTimestamp(): int;
-  public function getTimezone(): DateTimeZone;
+  public function diff(DateTimeInterface $datetime2, bool $absolute = false);
+  public function format(string $format);
+  public function getOffset();
+  public function getTimestamp();
+  public function getTimezone();
 }
 
 class DateTime implements DateTimeInterface {
@@ -101,24 +101,24 @@ class DateTime implements DateTimeInterface {
   const RSS = '';
   const W3C = '';
   public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
-  public function add(DateInterval $interval): DateTime;
-  public function modify(string $modify): DateTime;
-  public function getOffset(): int { }
-  public function getTimestamp(): int {}
-  public function getTimezone(): DateTimeZone {}
-  public function setDate(int $year, int $month, int $day): DateTime;
-  public function setISODate(int $year, int $week, int $day = 1): DateTime;
-  public function setTime(int $hour, int $minute, int $second = 0): DateTime;
-  public function setTimestamp(int $unixtimestamp): DateTime;
-  public function setTimezone(DateTimeZone $timezone): DateTime;
-  public function sub(DateInterval $interval): DateTime { }
-  public function diff(DateTimeInterface $datetime2, bool $absolute = false): DateInterval { }
-  public function format(string $format): string { }
+  public function add(DateInterval $interval);
+  public function modify(string $modify);
+  public function getOffset();
+  public function getTimestamp();
+  public function getTimezone();
+  public function setDate(int $year, int $month, int $day);
+  public function setISODate(int $year, int $week, int $day = 1);
+  public function setTime(int $hour, int $minute, int $second = 0);
+  public function setTimestamp(int $unixtimestamp);
+  public function setTimezone(DateTimeZone $timezone);
+  public function sub(DateInterval $interval) { }
+  public function diff(DateTimeInterface $datetime2, bool $absolute = false);
+  public function format(string $format);
   public static function createFromFormat(
     string $format,
     string $time,
     ?DateTimeZone $timezone = null,
-  ): mixed;
+  );
   public static function getLastErrors(): array;
 }
 
@@ -126,25 +126,25 @@ class DateTimeImmutable implements DateTimeInterface {
   private DateTime $data;
 
   public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
-  public function add(DateInterval $interval): DateTimeImmutable;
-  public function modify(string $modify): DateTimeImmutable;
-  public function getOffset(): int { }
-  public function getTimestamp(): int {}
-  public function getTimezone(): DateTimeZone {}
-  public function setDate(int $year, int $month, int $day): DateTimeImmutable;
-  public function setISODate(int $year, int $week, int $day = 1): DateTimeImmutable;
-  public function setTime(int $hour, int $minute, int $second = 0): DateTimeImmutable;
-  public function setTimestamp(int $unixtimestamp): DateTimeImmutable;
-  public function setTimezone(DateTimeZone $timezone): DateTimeImmutable;
-  public function sub(DateInterval $interval): DateTimeImmutable;
-  public function diff(DateTimeInterface $datetime2, bool $absolute = false): DateInterval { }
-  public function format(string $format): string;
+  public function add(DateInterval $interval);
+  public function modify(string $modify);
+  public function getOffset();
+  public function getTimestamp();
+  public function getTimezone();
+  public function setDate(int $year, int $month, int $day);
+  public function setISODate(int $year, int $week, int $day = 1);
+  public function setTime(int $hour, int $minute, int $second = 0);
+  public function setTimestamp(int $unixtimestamp);
+  public function setTimezone(DateTimeZone $timezone);
+  public function sub(DateInterval $interval);
+  public function diff(DateTimeInterface $datetime2, bool $absolute = false);
+  public function format(string $format);
   public static function createFromFormat(
     string $format,
     string $time,
     ?DateTimeZone $timezone = null,
-  ): mixed;
-  public static function createFromMutable(DateTime $datetime): mixed;
+  );
+  public static function createFromMutable(DateTime $datetime);
   public static function getLastErrors(): array;
   public function __clone();
 }
@@ -164,22 +164,22 @@ class DateTimeZone {
   const ALL = 0;
   const ALL_WITH_BC = 0;
   const PER_COUNTRY = 0;
-  public function __construct(string $timezone) { }
+  public function __construct(string $timezone);
   public function getLocation(): array { }
   public function getName(): string { }
-  public function getOffset(DateTime $datetime): int { }
+  public function getOffset(DateTime $datetime);
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
-                                 int $timestamp_end = PHP_INT_MAX): array { }
-  static public function listAbbreviations(): array { }
-  static public function listIdentifiers(int $what = 2047, string $country = ''): array { }
+                                 int $timestamp_end = PHP_INT_MAX);
+  static public function listAbbreviations();
+  static public function listIdentifiers(int $what = 2047, string $country = '');
 }
 
 class DateInterval {
-  public function __construct(string $interval_spec) { }
-  public function __get($member) { }
-  public function __set($member, $value) { }
-  static public function createFromDateString(string $time): DateInterval { }
-  public function format(string $format): string { }
+  public function __construct(string $interval_spec);
+  public function __get($member);
+  public function __set($member, $value);
+  static public function createFromDateString(string $time);
+  public function format(string $format);
 }
 
 class DatePeriod implements Iterator<DateTime> {

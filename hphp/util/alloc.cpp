@@ -229,8 +229,9 @@ static void initNuma() {
 }
 
 static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
-  size_t miblen = 3;
-  size_t mib[miblen];
+  constexpr size_t max_miblen = 3;
+  size_t miblen = max_miblen;
+  size_t mib[max_miblen];
   if (mallctlnametomib("arena.0.lg_dirty_mult", mib, &miblen) == 0) {
     mib[1] = arena;
     int err = mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,

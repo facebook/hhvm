@@ -34,7 +34,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class vinst>
-void cgUnop(Vout& v, IRLS& env, const IRInstruction* inst) {
+void implUnop(Vout& v, IRLS& env, const IRInstruction* inst) {
   auto const s = srcLoc(env, inst, 0).reg();
   auto const d = dstLoc(env, inst, 0).reg();
 
@@ -42,7 +42,7 @@ void cgUnop(Vout& v, IRLS& env, const IRInstruction* inst) {
 }
 
 template<class vinst>
-void cgBinop(Vout& v, IRLS& env, const IRInstruction* inst) {
+void implBinop(Vout& v, IRLS& env, const IRInstruction* inst) {
   auto const s0 = srcLoc(env, inst, 0).reg();
   auto const s1 = srcLoc(env, inst, 1).reg();
   auto const d  = dstLoc(env, inst, 0).reg();
@@ -51,7 +51,7 @@ void cgBinop(Vout& v, IRLS& env, const IRInstruction* inst) {
 }
 
 template<class vinst>
-Vreg cgBinopSF(Vout& v, IRLS& env, const IRInstruction* inst) {
+Vreg implBinopSF(Vout& v, IRLS& env, const IRInstruction* inst) {
   auto const s0 = srcLoc(env, inst, 0).reg();
   auto const s1 = srcLoc(env, inst, 1).reg();
   auto const d  = dstLoc(env, inst, 0).reg();
@@ -62,20 +62,20 @@ Vreg cgBinopSF(Vout& v, IRLS& env, const IRInstruction* inst) {
 }
 
 template<class vinst>
-void cgArithO(Vout& v, IRLS& env, const IRInstruction* inst) {
-  auto const sf = cgBinopSF<vinst>(v, env, inst);
+void implArithO(Vout& v, IRLS& env, const IRInstruction* inst) {
+  auto const sf = implBinopSF<vinst>(v, env, inst);
   v << jcc{CC_O, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 template<RoundDirection rd>
-void cgRound(Vout& v, IRLS& env, const IRInstruction* inst) {
+void implRound(Vout& v, IRLS& env, const IRInstruction* inst) {
   auto const s = srcLoc(env, inst, 0).reg();
   auto const d = dstLoc(env, inst, 0).reg();
   v << roundsd{rd, s, d};
 }
 
 template<class vinst, class vinsti>
-void cgShift(Vout& v, IRLS& env, const IRInstruction* inst) {
+void implShift(Vout& v, IRLS& env, const IRInstruction* inst) {
   auto const shift = inst->src(1);
   auto const s0 = srcLoc(env, inst, 0).reg();  // bytes to be shifted
   auto const s1 = srcLoc(env, inst, 1).reg();  // shift amount
@@ -114,8 +114,8 @@ void cgShift(Vout& v, IRLS& env, const IRInstruction* inst) {
   AO(XorBool, BinopSF,  xorb)   \
 
 #define AO(Inst, Impl, vinst)                           \
-  void cg##Inst(IRLS& env, const IRInstruction* inst) {  \
-    cg##Impl<vinst>(vmain(env), env, inst);             \
+  void cg##Inst(IRLS& env, const IRInstruction* inst) { \
+    impl##Impl<vinst>(vmain(env), env, inst);           \
   }
 ARITH_OPS
 #undef AO
@@ -125,17 +125,17 @@ ARITH_OPS
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgFloor(IRLS& env, const IRInstruction* inst) {
-  cgRound<RoundDirection::floor>(vmain(env), env, inst);
+  implRound<RoundDirection::floor>(vmain(env), env, inst);
 }
 void cgCeil(IRLS& env, const IRInstruction* inst) {
-  cgRound<RoundDirection::ceil>(vmain(env), env, inst);
+  implRound<RoundDirection::ceil>(vmain(env), env, inst);
 }
 
 void cgShl(IRLS& env, const IRInstruction* inst) {
-  cgShift<shl,shlqi>(vmain(env), env, inst);
+  implShift<shl,shlqi>(vmain(env), env, inst);
 }
 void cgShr(IRLS& env, const IRInstruction* inst) {
-  cgShift<sar,sarqi>(vmain(env), env, inst);
+  implShift<sar,sarqi>(vmain(env), env, inst);
 }
 
 void cgDivDbl(IRLS& env, const IRInstruction* inst) {

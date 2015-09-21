@@ -499,6 +499,32 @@ DELEGATE_OPCODE(Shl)
 DELEGATE_OPCODE(Shr)
 DELEGATE_OPCODE(XorBool)
 
+DELEGATE_OPCODE(GtInt)
+DELEGATE_OPCODE(GteInt)
+DELEGATE_OPCODE(LtInt)
+DELEGATE_OPCODE(LteInt)
+DELEGATE_OPCODE(EqInt)
+DELEGATE_OPCODE(NeqInt)
+DELEGATE_OPCODE(CmpInt)
+DELEGATE_OPCODE(GtBool)
+DELEGATE_OPCODE(GteBool)
+DELEGATE_OPCODE(LtBool)
+DELEGATE_OPCODE(LteBool)
+DELEGATE_OPCODE(EqBool)
+DELEGATE_OPCODE(NeqBool)
+DELEGATE_OPCODE(CmpBool)
+DELEGATE_OPCODE(GtDbl)
+DELEGATE_OPCODE(GteDbl)
+DELEGATE_OPCODE(LtDbl)
+DELEGATE_OPCODE(LteDbl)
+DELEGATE_OPCODE(EqDbl)
+DELEGATE_OPCODE(NeqDbl)
+DELEGATE_OPCODE(CmpDbl)
+DELEGATE_OPCODE(SameObj)
+DELEGATE_OPCODE(NSameObj)
+DELEGATE_OPCODE(EqRes)
+DELEGATE_OPCODE(NeqRes)
+
 #undef NOOP_OPCODE
 #undef DELEGATE_OPCODE
 
@@ -782,219 +808,6 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
 void CodeGenerator::cgMov(IRInstruction* inst) {
   always_assert(inst->src(0)->numWords() == inst->dst(0)->numWords());
   copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0), inst->dst()->type());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Comparison Operators
-///////////////////////////////////////////////////////////////////////////////
-
-void CodeGenerator::emitCmpInt(IRInstruction* inst, ConditionCode cc) {
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  auto sf = v.makeReg();
-  // Note the reverse syntax in the assembler: will compute src0 - src1
-  v << cmpq{src1, src0, sf};
-  v << setcc{cc, sf, dst};
-}
-
-void CodeGenerator::cgEqInt(IRInstruction* inst)  { emitCmpInt(inst, CC_E); }
-void CodeGenerator::cgNeqInt(IRInstruction* inst) { emitCmpInt(inst, CC_NE); }
-void CodeGenerator::cgLtInt(IRInstruction* inst)  { emitCmpInt(inst, CC_L); }
-void CodeGenerator::cgGtInt(IRInstruction* inst)  { emitCmpInt(inst, CC_G); }
-void CodeGenerator::cgLteInt(IRInstruction* inst) { emitCmpInt(inst, CC_LE); }
-void CodeGenerator::cgGteInt(IRInstruction* inst) { emitCmpInt(inst, CC_GE); }
-
-void CodeGenerator::emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg0 = srcLoc(inst, 0).reg();
-  auto srcReg1 = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  auto tmp = v.makeReg();
-  v << cmpsd{pred, srcReg0, srcReg1, tmp};
-  v << andbi{1, tmp, dstReg, v.makeReg()};
-}
-
-void CodeGenerator::emitCmpRelDbl(IRInstruction* inst, ConditionCode cc,
-                                  bool flipOperands) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg0 = srcLoc(inst, 0).reg();
-  auto srcReg1 = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  if (flipOperands) {
-    std::swap(srcReg0, srcReg1);
-  }
-  auto const sf = v.makeReg();
-  v << ucomisd{srcReg0, srcReg1, sf};
-  v << setcc{cc, sf, dstReg};
-}
-
-void CodeGenerator::cgEqDbl(IRInstruction* inst)  {
-  emitCmpEqDbl(inst, ComparisonPred::eq_ord);
-}
-
-void CodeGenerator::cgNeqDbl(IRInstruction* inst) {
-  emitCmpEqDbl(inst, ComparisonPred::ne_unord);
-}
-
-void CodeGenerator::cgLtDbl(IRInstruction* inst)  {
-  // This is a little tricky, because "unordered" is a thing.
-  //
-  //         ZF  PF  CF
-  // x ?= y   1   1   1
-  // x <  y   0   0   1
-  // x == y   1   0   0
-  // x >  y   0   0   0
-  //
-  // This trick lets us avoid needing to handle the unordered case specially.
-  // The condition codes B and BE are true if CF == 1, which it is in the
-  // unordered case, and that'll give incorrect results. So we just invert the
-  // condition code (A and AE don't get set if CF == 1) and flip the operands.
-  emitCmpRelDbl(inst, CC_A, true);
-}
-
-void CodeGenerator::cgGtDbl(IRInstruction* inst)  {
-  emitCmpRelDbl(inst, CC_A, false);
-}
-
-void CodeGenerator::cgLteDbl(IRInstruction* inst) {
-  emitCmpRelDbl(inst, CC_AE, true);
-}
-
-void CodeGenerator::cgGteDbl(IRInstruction* inst) {
-  emitCmpRelDbl(inst, CC_AE, false);
-}
-
-void CodeGenerator::emitCmpBool(IRInstruction* inst,
-                                ConditionCode cc) {
-  DEBUG_ONLY auto src0  = inst->src(0);
-  auto src1  = inst->src(1);
-  auto src0Reg = srcLoc(inst, 0).reg();
-  auto src1Reg = srcLoc(inst, 1).reg();
-  auto dstReg  = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto sf = v.makeReg();
-
-  assert(src0->type() <= TBool);
-  assert(src1->type() <= TBool);
-
-  if (src1->hasConstVal()) {
-    // Emit testb when possible to enable more optimizations later on.
-    if (cc == CC_E || cc == CC_NE) {
-      if (src1->boolVal()) {
-        cc = ccNegate(cc);
-      }
-      v << testb{src0Reg, src0Reg, sf};
-    } else {
-      v << cmpbi{src1->boolVal(), src0Reg, sf};
-    }
-  } else {
-    v << cmpb{src1Reg, src0Reg, sf};
-  }
-  v << setcc{cc, sf, dstReg};
-}
-
-void CodeGenerator::cgGtBool(IRInstruction* inst) { emitCmpBool(inst, CC_G); }
-void CodeGenerator::cgGteBool(IRInstruction* inst) { emitCmpBool(inst, CC_GE); }
-void CodeGenerator::cgLtBool(IRInstruction* inst) { emitCmpBool(inst, CC_L); }
-void CodeGenerator::cgLteBool(IRInstruction* inst) { emitCmpBool(inst, CC_LE); }
-void CodeGenerator::cgEqBool(IRInstruction* inst) { emitCmpBool(inst, CC_E); }
-void CodeGenerator::cgNeqBool(IRInstruction* inst) { emitCmpBool(inst, CC_NE); }
-
-void CodeGenerator::cgSameObj(IRInstruction* inst) {
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  auto sf = v.makeReg();
-  assert(inst->src(0)->type() <= TObj);
-  assert(inst->src(1)->type() <= TObj);
-  v << cmpq{src0, src1, sf};
-  v << setcc{CC_E, sf, dst};
-}
-
-void CodeGenerator::cgNSameObj(IRInstruction* inst) {
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  auto sf = v.makeReg();
-  assert(inst->src(0)->type() <= TObj);
-  assert(inst->src(1)->type() <= TObj);
-  v << cmpq{src0, src1, sf};
-  v << setcc{CC_NE, sf, dst};
-}
-
-void CodeGenerator::cgEqRes(IRInstruction* inst) {
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  auto sf = v.makeReg();
-  assert(inst->src(0)->type() <= TRes);
-  assert(inst->src(1)->type() <= TRes);
-  v << cmpq{src0, src1, sf};
-  v << setcc{CC_E, sf, dst};
-}
-
-void CodeGenerator::cgNeqRes(IRInstruction* inst) {
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  auto sf = v.makeReg();
-  assert(inst->src(0)->type() <= TRes);
-  assert(inst->src(1)->type() <= TRes);
-  v << cmpq{src0, src1, sf};
-  v << setcc{CC_NE, sf, dst};
-}
-
-void CodeGenerator::cgCmpBool(IRInstruction* inst) {
-  auto& v = vmain();
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto extended0 = v.makeReg();
-  auto extended1 = v.makeReg();
-  auto sf = v.makeReg();
-  assert(inst->src(0)->type() <= TBool);
-  assert(inst->src(1)->type() <= TBool);
-  v << movzbq{src0, extended0};
-  v << movzbq{src1, extended1};
-  v << subq{extended1, extended0, dst, sf};
-}
-
-void CodeGenerator::cgCmpInt(IRInstruction* inst) {
-  auto& v = vmain();
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto sf = v.makeReg();
-  auto tmp1 = v.makeReg();
-  auto tmp2 = v.makeReg();
-  assert(inst->src(0)->type() <= TInt);
-  assert(inst->src(1)->type() <= TInt);
-  v << cmpq{src1, src0, sf};
-  v << setcc{CC_G, sf, tmp1};
-  v << movzbq{tmp1, tmp2};
-  v << cmovq{CC_L, sf, tmp2, v.cns(-1), dst};
-}
-
-void CodeGenerator::cgCmpDbl(IRInstruction* inst) {
-  auto& v = vmain();
-  auto dst = dstLoc(inst, 0).reg();
-  auto src0 = srcLoc(inst, 0).reg();
-  auto src1 = srcLoc(inst, 1).reg();
-  auto sf = v.makeReg();
-  auto tmp1 = v.makeReg();
-  auto tmp2 = v.makeReg();
-  assert(inst->src(0)->type() <= TDbl);
-  assert(inst->src(1)->type() <= TDbl);
-  v << ucomisd{src0, src1, sf};
-  v << cmovq{CC_A, sf, v.cns(-1), v.cns(1), tmp1};
-  v << cmovq{CC_NE, sf, v.cns(0), tmp1, tmp2};
-  v << cmovq{CC_P, sf, tmp2, v.cns(-1), dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -93,11 +93,6 @@ private:
   Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                     rds::Handle ch);
 
-  void emitCmpInt(IRInstruction* inst, ConditionCode cc);
-  void emitCmpBool(IRInstruction* inst, ConditionCode cc);
-  void emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred);
-  void emitCmpRelDbl(IRInstruction* inst, ConditionCode cc, bool flipOperands);
-
   void cgCoerceHelper(IRInstruction* inst, Vreg base, int offset,
                       Func const* callee, int argNum);
   void cgCastHelper(IRInstruction* inst, Vreg base, int offset);

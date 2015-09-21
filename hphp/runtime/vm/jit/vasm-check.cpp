@@ -114,9 +114,6 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
     bool unwind_valid = false;
     bool nothrow_valid = false;
     bool sync_valid = false;
-    bool hcunwind_valid = false;
-    bool hcsync_valid = false;
-    bool hcnocatch_valid = false;
     for (auto& inst : unit.blocks[b].code) {
       switch (inst.op) {
         case Vinstr::call:
@@ -125,6 +122,7 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
         case Vinstr::callarray:
         case Vinstr::mccall:
         case Vinstr::contenter:
+        case Vinstr::hostcall:
           sync_valid = unwind_valid = nothrow_valid = true;
           break;
         case Vinstr::syncpoint:
@@ -139,24 +137,8 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
           assertx(nothrow_valid);
           unwind_valid = nothrow_valid = false;
           break;
-        case Vinstr::hostcall:
-          hcsync_valid = hcunwind_valid = hcnocatch_valid = true;
-          break;
-        case Vinstr::hcsync:
-          assertx(hcsync_valid);
-          hcsync_valid = false;
-          break;
-        case Vinstr::hcunwind:
-          assertx(hcunwind_valid);
-          hcunwind_valid = hcnocatch_valid = false;
-          break;
-        case Vinstr::hcnocatch:
-          assertx(hcnocatch_valid);
-          hcunwind_valid = hcnocatch_valid = false;
-          break;
         default:
           unwind_valid = nothrow_valid = sync_valid = false;
-          hcunwind_valid = hcnocatch_valid = hcsync_valid = false;
           break;
       }
     }

@@ -93,7 +93,6 @@ struct FormatVisitor {
   void imm(TCA* addr) {
     str << sep() << folly::format("{}", addr);
   }
-  void imm(Vpoint p) { str << sep() << '@' << (size_t)p; }
   void imm(const CppCall& cppcall) {
     switch (cppcall.kind()) {
     default:

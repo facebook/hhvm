@@ -1693,9 +1693,6 @@ O(unpcklpd)
       // ARM opcodes:
       case Vinstr::brk:
       case Vinstr::cbcc:
-      case Vinstr::hcsync:
-      case Vinstr::hcnocatch:
-      case Vinstr::hcunwind:
       case Vinstr::hostcall:
       case Vinstr::tbcc:
         throw FailedLLVMCodeGen("Unsupported opcode in B{}: {}",

@@ -41,10 +41,6 @@ inline AreaIndex Vout::area() const {
   return m_unit.blocks[m_block].area;
 }
 
-inline Vpoint Vout::makePoint() {
-  return Vpoint{m_unit.next_point++};
-}
-
 inline Vreg Vout::makeReg() {
   return m_unit.makeReg();
 }

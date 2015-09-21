@@ -106,10 +106,7 @@ struct Vunit;
   /* arm instructions */\
   O(brk, I(code), Un, Dn)\
   O(cbcc, I(cc), U(s), Dn)\
-  O(hcsync, I(fix) I(call), Un, Dn)\
-  O(hcnocatch, I(call), Un, Dn)\
-  O(hcunwind, I(call), Un, Dn)\
-  O(hostcall, I(argc) I(syncpoint), U(args), Dn)\
+  O(hostcall, I(argc), U(args), Dn)\
   O(tbcc, I(cc) I(bit), U(s), Dn)\
   /* x64 instructions */\
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -603,17 +600,14 @@ struct srem { Vreg s0, s1, d; };
 // ARM.
 
 /*
- * ARM-specific intrinsics.
+ * ARM emulator native call intrinsic.
  */
-struct hcsync { Fixup fix; Vpoint call; };
-struct hcnocatch { Vpoint call; };
-struct hcunwind { Vpoint call; Vlabel targets[2]; };
+struct hostcall { RegSet args; uint8_t argc; };
 
 /*
  * ARM-specific instructions.
  */
 struct brk { uint16_t code; };
-struct hostcall { RegSet args; uint8_t argc; Vpoint syncpoint; };
 struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
 struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
 

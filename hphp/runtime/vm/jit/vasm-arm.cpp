@@ -89,7 +89,6 @@ struct Vgen {
     , a(&assem)
     , current(env.current)
     , next(env.next)
-    , points(env.points)
     , jmps(env.jmps)
     , jccs(env.jccs)
     , bccs(env.bccs)
@@ -111,17 +110,18 @@ struct Vgen {
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& i) { a->Brk(0); }
-  void emit(const hcsync& i);
-  void emit(const hcnocatch& i);
-  void emit(const hcunwind& i);
-  void emit(const hostcall& i);
+  void emit(const hostcall& i) { a->HostCall(i.argc); }
   void emit(const ldimmq& i);
   void emit(const ldimml& i);
   void emit(const ldimmb& i);
   void emit(const ldimmqs& i) { not_implemented(); }
   void emit(const load& i);
   void emit(const store& i);
+
+  // boundaries
+  void emit(const nothrow& i);
   void emit(const syncpoint& i);
+  void emit(const unwind& i);
 
   // instructions
   void emit(const addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
@@ -177,7 +177,6 @@ private:
 
   const Vlabel current;
   const Vlabel next;
-  jit::vector<CodeAddress>& points;
   jit::vector<Venv::LabelPatch>& jmps;
   jit::vector<Venv::LabelPatch>& jccs;
   jit::vector<Venv::LabelPatch>& bccs;
@@ -238,26 +237,6 @@ void Vgen::emit(const copy2& i) {
       a->Eor(d, d, s);
     }
   }
-}
-
-void Vgen::emit(const hcsync& i) {
-  assertx(points[i.call]);
-  mcg->recordSyncPoint(points[i.call], i.fix);
-}
-
-void Vgen::emit(const hcnocatch& i) {
-  // register a null catch trace at the position of the call
-  mcg->registerCatchBlock(points[i.call], nullptr);
-}
-
-void Vgen::emit(const hcunwind& i) {
-  catches.push_back({points[i.call], i.targets[1]});
-  emit(jmp{i.targets[0]});
-}
-
-void Vgen::emit(const hostcall& i) {
-  points[i.syncpoint] = a->frontier();
-  a->HostCall(i.argc);
 }
 
 void Vgen::emit(const ldimmq& i) {
@@ -326,10 +305,21 @@ void Vgen::emit(const store& i) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const nothrow& i) {
+  mcg->registerCatchBlock(a->frontier(), nullptr);
+}
+
 void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
          i.fix.pcOffset, i.fix.spOffset);
   mcg->recordSyncPoint(a->frontier(), i.fix);
+}
+
+void Vgen::emit(const unwind& i) {
+  catches.push_back({a->frontier(), i.targets[1]});
+  emit(jmp{i.targets[0]});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

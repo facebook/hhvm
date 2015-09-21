@@ -127,9 +127,10 @@ struct IRBuilder {
   const jit::deque<FPIInfo>& fpiStack() const { return m_state.fpiStack(); }
   Type localType(uint32_t id, TypeConstraint tc);
   Type stackType(IRSPOffset, TypeConstraint tc);
-  Type predictedInnerType(uint32_t id);
-  Type predictedLocalType(uint32_t id);
-  Type predictedStackType(IRSPOffset);
+  Type predictedLocalType(uint32_t id) const;
+  Type predictedInnerType(uint32_t id) const;
+  Type predictedStackType(IRSPOffset) const;
+  Type predictedStackInnerType(IRSPOffset) const;
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   SSATmp* stackValue(IRSPOffset offset, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
@@ -139,7 +140,6 @@ struct IRBuilder {
     return m_state.stackTypeSources(offset);
   }
   bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
-  Type stackInnerTypePrediction(IRSPOffset) const;
   const PostConditions& postConds(Block* b) const {
     return m_state.postConds(b);
   }

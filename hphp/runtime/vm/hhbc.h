@@ -824,8 +824,20 @@ constexpr int32_t kMaxConcatN = 4;
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \
+  O(BaseNC,          TWO(IVA, OA(MOpFlags)),                            \
+                                       NOV,             NOV,        NF) \
+  O(BaseNL,          TWO(LA, OA(MOpFlags)),                             \
+                                       NOV,             NOV,        NF) \
+  O(BaseGC,          TWO(IVA, OA(MOpFlags)),                            \
+                                       NOV,             NOV,        NF) \
+  O(BaseGL,          TWO(LA, OA(MOpFlags)),                             \
+                                       NOV,             NOV,        NF) \
+  O(BaseSC,          TWO(IVA, IVA),    IDX_A,           IDX_A,      NF) \
+  O(BaseSL,          TWO(LA, IVA),     IDX_A,           IDX_A,      NF) \
   O(BaseL,           TWO(LA, OA(MOpFlags)),                             \
                                        NOV,             NOV,        NF) \
+  O(BaseC,           ONE(IVA),         NOV,             NOV,        NF) \
+  O(BaseR,           ONE(IVA),         NOV,             NOV,        NF) \
   O(BaseH,           NA,               NOV,             NOV,        NF) \
   O(DimL,            THREE(LA, OA(PropElemOp), OA(MOpFlags)),           \
                                        NOV,             NOV,        NF) \
@@ -835,6 +847,7 @@ constexpr int32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(DimStr,          THREE(SA, OA(PropElemOp), OA(MOpFlags)),           \
                                        NOV,             NOV,        NF) \
+  O(DimNewElem,      ONE(OA(MOpFlags)),NOV,             NOV,        NF) \
   O(QueryML,         FOUR(IVA, OA(QueryMOp), OA(PropElemOp), LA),       \
                                        MFINAL,          ONE(CV),    NF) \
   O(QueryMC,         THREE(IVA, OA(QueryMOp), OA(PropElemOp)),          \
@@ -1237,7 +1250,15 @@ constexpr bool isTypeAssert(Op op) {
 
 inline bool isMemberBaseOp(Op op) {
   switch (op) {
+    case OpBaseNC:
+    case OpBaseNL:
+    case OpBaseGC:
+    case OpBaseGL:
+    case OpBaseSC:
+    case OpBaseSL:
     case OpBaseL:
+    case OpBaseC:
+    case OpBaseR:
     case OpBaseH:
       return true;
 
@@ -1252,6 +1273,7 @@ inline bool isMemberDimOp(Op op) {
     case OpDimC:
     case OpDimInt:
     case OpDimStr:
+    case OpDimNewElem:
       return true;
 
     default:

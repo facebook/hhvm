@@ -343,9 +343,9 @@ void handleInPublicStaticElemD(ISS& env) {
 
 // Currently NewElem and Elem InFoo effects don't need to do
 // anything different from each other.
-void handleInThisNewElem(MIS& env) { handleInThisElemD(env); }
-void handleInSelfNewElem(MIS& env) { handleInSelfElemD(env); }
-void handleInPublicStaticNewElem(MIS& env) { handleInPublicStaticElemD(env); }
+void handleInThisNewElem(ISS& env) { handleInThisElemD(env); }
+void handleInSelfNewElem(ISS& env) { handleInSelfElemD(env); }
+void handleInPublicStaticNewElem(ISS& env) { handleInPublicStaticElemD(env); }
 
 void handleInSelfElemU(ISS& env) {
   if (!couldBeInSelf(env, env.state.base)) return;
@@ -534,7 +534,7 @@ void handleBaseElemD(ISS& env) {
   }
 }
 
-void handleBaseNewElem(MIS& env) {
+void handleBaseNewElem(ISS& env) {
   handleBaseElemD(env);
   // Technically we don't need to do TStr case.
 }
@@ -605,7 +605,7 @@ Base miBaseLoc(ISS& env, borrowed_ptr<php::Local> locBase, bool isDefine) {
                 locBase };
 }
 
-Base miBaseSProp(MIS& env, Type cls, Type tprop) {
+Base miBaseSProp(ISS& env, Type cls, Type tprop) {
   auto const self = selfCls(env);
   auto const prop = tv(tprop);
   auto const name = prop && prop->m_type == KindOfStaticString
@@ -650,9 +650,12 @@ Base miBase(MIS& env) {
     // The first moveBase() on these unknown local bases will cause
     // a env.loseNonRefLocalTypes.
   case LNL:
+    locAsCell(env, env.mvec.locBase);
+    readUnknownLocals(env);
     return Base { TInitCell, BaseLoc::Frame };
   case LNC:
     topC(env, --env.stackIdx);
+    readUnknownLocals(env);
     return Base { TInitCell, BaseLoc::Frame };
 
   case LSL:
@@ -819,12 +822,7 @@ void miElem(ISS& env, MInstrAttr attr, Type key) {
   moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop });
 }
 
-void miNewElem(MIS& env) {
-  if (!env.info.newElem()) {
-    moveBase(env, Base { TInitCell, BaseLoc::Fataled });
-    return;
-  }
-
+void miNewElem(ISS& env) {
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
   handleInPublicStaticNewElem(env);
@@ -859,6 +857,9 @@ void miIntermediate(MIS& env) {
   }
   if (mcodeIsElem(mcode)) {
     return miElem(env, env.info.getAttr(mcode), mcodeKey(env));
+  }
+  if (!env.info.newElem()) {
+    return moveBase(env, Base { TInitCell, BaseLoc::Fataled });
   }
   return miNewElem(env);
 }
@@ -1401,10 +1402,10 @@ void miImpl(ISS& baseEnv, const Op& op,
   }
   miFinal(env, op);
 
-  // If the final operation was either a define, a NewElem, or an
-  // unset, there may be pending effects in local array chains or on
-  // local types, so we need to move the base one last time.  The
-  // other cases should have no effects here.
+  // If the final operation was either a define, a NewElem, or an unset, there
+  // may be pending effects in local array chains or on local types, so we need
+  // to move the base one last time.  The other cases should have no effects
+  // here.
   moveBase(env, folly::none);
 }
 
@@ -1445,6 +1446,13 @@ void miQuery(ISS& env, int32_t nDiscard, QueryMOp op, PropElemOp propElem,
   }
 }
 
+void miBaseSImpl(ISS& env, bool hasRhs, Type prop) {
+  auto rhs = hasRhs ? popC(env) : TTop;
+  auto const cls = popA(env);
+  env.state.base = miBaseSProp(env, cls, prop);
+  if (hasRhs) push(env, rhs);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template<typename MInstr>
@@ -1470,9 +1478,59 @@ void in(ISS& env, const bc::BindM& op)        { minstr(env, op); }
 
 //////////////////////////////////////////////////////////////////////
 
+void in(ISS& env, const bc::BaseNC& op) {
+  assert(env.state.arrayChain.empty());
+  topC(env, op.arg1);
+  readUnknownLocals(env);
+  env.state.base = Base{TInitCell, BaseLoc::Frame};
+}
+
+void in(ISS& env, const bc::BaseNL& op) {
+  assert(env.state.arrayChain.empty());
+  locAsCell(env, op.loc1);
+  readUnknownLocals(env);
+  env.state.base = Base{TInitCell, BaseLoc::Frame};
+}
+
+void in(ISS& env, const bc::BaseGC& op) {
+  assert(env.state.arrayChain.empty());
+  topC(env, op.arg1);
+  env.state.base = Base{TInitCell, BaseLoc::Global};
+}
+
+void in(ISS& env, const bc::BaseGL& op) {
+  assert(env.state.arrayChain.empty());
+  locAsCell(env, op.loc1);
+  env.state.base = Base{TInitCell, BaseLoc::Global};
+}
+
+void in(ISS& env, const bc::BaseSC& op) {
+  assert(env.state.arrayChain.empty());
+  auto const prop = topC(env, op.arg1);
+  miBaseSImpl(env, op.arg2 == 1, prop);
+}
+
+void in(ISS& env, const bc::BaseSL& op) {
+  assert(env.state.arrayChain.empty());
+  auto const prop = locAsCell(env, op.loc1);
+  miBaseSImpl(env, op.arg2 == 1, prop);
+}
+
 void in(ISS& env, const bc::BaseL& op) {
   assert(env.state.arrayChain.empty());
   env.state.base = miBaseLoc(env, op.loc1, op.subop2 & MOpFlags::Define);
+}
+
+void in(ISS& env, const bc::BaseC& op) {
+  assert(env.state.arrayChain.empty());
+  env.state.base = Base{topC(env, op.arg1), BaseLoc::EvalStack};
+}
+
+void in(ISS& env, const bc::BaseR& op) {
+  assert(env.state.arrayChain.empty());
+  auto const ty = topR(env, op.arg1);
+  env.state.base = Base{ty.subtypeOf(TInitCell) ? ty : TInitCell,
+                        BaseLoc::EvalStack};
 }
 
 void in(ISS& env, const bc::BaseH& op) {
@@ -1495,6 +1553,10 @@ void in(ISS& env, const bc::DimInt& op) {
 
 void in(ISS& env, const bc::DimStr& op) {
   miDim(env, op.subop2, op.subop3, sval(op.str1));
+}
+
+void in(ISS& env, const bc::DimNewElem& op) {
+  miNewElem(env);
 }
 
 void in(ISS& env, const bc::QueryML& op) {

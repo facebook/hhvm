@@ -42,7 +42,7 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
   auto const exit  = makeExit(env);
   spillStack(env);
   env.irb->exceptionStackBoundary();
-  auto const pred  = env.irb->stackInnerTypePrediction(
+  auto const pred  = env.irb->predictedStackInnerType(
     offsetFromIRSP(env, BCSPOffset{0}));
   auto const src   = topV(env);
 

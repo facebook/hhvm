@@ -443,8 +443,8 @@ int numSuccs(PC const origPC) {
  * for a given push/pop instruction. For peek/poke instructions, this
  * function returns 0.
  */
-int instrNumPops(PC opcode) {
-  static const int8_t numberOfPops[] = {
+int instrNumPops(PC pc) {
+  static const int32_t numberOfPops[] = {
 #define NOV 0
 #define ONE(...) 1
 #define TWO(...) 2
@@ -460,6 +460,7 @@ int instrNumPops(PC opcode) {
 #define CVUMANY -3
 #define CMANY -3
 #define SMANY -1
+#define IDX_A -4
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
 #undef NOV
@@ -477,20 +478,24 @@ int instrNumPops(PC opcode) {
 #undef CVUMANY
 #undef CMANY
 #undef SMANY
+#undef IDX_A
 #undef O
   };
-  int n = numberOfPops[size_t(peek_op(opcode))];
+  int n = numberOfPops[size_t(peek_op(pc))];
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
+  // BaseSC and BaseSL remove an A that may be on the top of the stack or one
+  // element below the top, depending on the second immediate.
+  if (n == -4) return getImm(pc, 1).u_IVA + 1;
   // FCall, NewPackedArray, and final member operations specify how many values
   // are popped in their first immediate
-  if (n == -3) return getImm(opcode, 0).u_IVA;
+  if (n == -3) return getImm(pc, 0).u_IVA;
   // For instructions with vector immediates, we have to scan the
   // contents of the vector immediate to determine how many values
   // are popped
   assert(n == -1 || n == -2);
-  ImmVector iv = getImmVector(opcode);
+  ImmVector iv = getImmVector(pc);
   // Count the number of values on the stack accounted for by the
   // ImmVector's location and members
   int k = iv.numStackValues();
@@ -513,6 +518,7 @@ int instrNumPushes(PC pc) {
 #define FOUR(...) 4
 #define INS_1(...) 0
 #define INS_2(...) 0
+#define IDX_A -1
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -522,10 +528,16 @@ int instrNumPushes(PC pc) {
 #undef FOUR
 #undef INS_1
 #undef INS_2
+#undef IDX_A
 #undef O
   };
   auto const op = peek_op(pc);
-  return numberOfPushes[size_t(op)];
+  auto const pushes = numberOfPushes[size_t(op)];
+
+  // BaseSC and BaseSL may push back a C that was on top of the A they removed.
+  if (pushes == -1) return getImm(pc, 1).u_IVA;
+
+  return pushes;
 }
 
 namespace {
@@ -574,6 +586,12 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   always_assert(i < uint32_t(instrNumPops(op)));
   return flavor;
 }
+
+FlavorDesc baseSFlavor(PC pc, uint32_t i) {
+  always_assert(i <= 1);
+  auto clsIdx = getImm(pc, 1).u_IVA;
+  return i == clsIdx ? AV : CV;
+}
 }
 
 /**
@@ -596,6 +614,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
+#define IDX_A return baseSFlavor(op, idx);
 #define O(name, imm, pop, push, flags) case Op::name: pop
   switch (peek_op(op)) {
     OPCODES
@@ -616,6 +635,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef CVUMANY
 #undef CMANY
 #undef SMANY
+#undef IDX_A
 #undef O
 }
 
@@ -626,6 +646,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define TWO(...) StackTransInfo::Kind::PushPop
 #define THREE(...) StackTransInfo::Kind::PushPop
 #define FOUR(...) StackTransInfo::Kind::PushPop
+#define IDX_A StackTransInfo::Kind::PushPop
 #define INS_1(...) StackTransInfo::Kind::InsertMid
 #define INS_2(...) StackTransInfo::Kind::InsertMid
 #define O(name, imm, pop, push, flags) push,
@@ -637,6 +658,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef FOUR
 #undef INS_1
 #undef INS_2
+#undef IDX_A
 #undef O
   };
   static const int8_t peekPokeType[] = {
@@ -647,6 +669,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define FOUR(...) -1
 #define INS_1(...) 0
 #define INS_2(...) 1
+#define IDX_A 0
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -656,6 +679,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef FOUR
 #undef INS_2
 #undef INS_1
+#undef IDX_A
 #undef O
   };
   StackTransInfo ret;

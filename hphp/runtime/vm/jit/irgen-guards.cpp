@@ -132,7 +132,7 @@ void checkTypeStack(IRGS& env,
       auto stk = gen(env, LdStk, TBoxedInitCell,
                      IRSPOffsetData{soff.irSpOffset}, sp(env));
       gen(env, CheckRefInner,
-          env.irb->stackInnerTypePrediction(soff.irSpOffset),
+          env.irb->predictedStackInnerType(soff.irSpOffset),
           exit, stk);
     }
     return;

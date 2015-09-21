@@ -361,6 +361,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
 #define COUNT_SMANY 0
+#define COUNT_IDX_A 0
 
 #define ONE(t) \
   DEC_##t a1
@@ -424,6 +425,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 #define POP_SMANY \
   getEmitterVisitor().popEvalStackMany(a1.size(), StackSym::C)
+#define POP_IDX_A \
+  if (a2 == 1) getEmitterVisitor().popEvalStack(StackSym::C); \
+  getEmitterVisitor().popEvalStack(StackSym::A)
 
 #define POP_CV(i) getEmitterVisitor().popEvalStack(StackSym::C, i, curPos)
 #define POP_VV(i) getEmitterVisitor().popEvalStack(StackSym::V, i, curPos)
@@ -500,6 +504,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 #define PUSH_INS_2_CV \
   getEmitterVisitor().getEvalStack().insertAt(2, StackSym::C);
+
+#define PUSH_IDX_A \
+  if (a2 == 1) getEmitterVisitor().pushEvalStack(StackSym::C);
 
 #define IMPL_NA
 #define IMPL_ONE(t) \
@@ -691,6 +698,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_CVUMANY
 #undef POP_CMANY
 #undef POP_SMANY
+#undef POP_IDX_A
 #undef POP_LA_ONE
 #undef POP_LA_TWO
 #undef POP_LA_THREE
@@ -721,6 +729,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef PUSH_AV
 #undef PUSH_RV
 #undef PUSH_FV
+#undef PUSH_IDX_A
 #undef IMPL_ONE
 #undef IMPL_TWO
 #undef IMPL_THREE
@@ -2025,9 +2034,9 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
 }
 
 void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
-  // Special case for instructions that consume the loc below the top, or don't
-  // actually consume from the eval stack.
-  if (op == OpBaseL || op == OpDimL || op == OpQueryML) {
+  // A number of member instructions read locals without consuming an L from
+  // the symbolic stack through the normal path.
+  if (isMemberBaseOp(op) || isMemberDimOp(op) || isMemberFinalOp(op)) {
     return;
   }
 
@@ -5009,36 +5018,89 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   return 0;
 }
 
-bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
-                             MOpFlags baseFlags, MOpFlags dimFlags) {
-  // W (NewElem) operations aren't yet supported, so scan the vector before
-  // emitting any code.
-  for (auto i = iFirst + 1; i < iLast; ++i) {
-    auto sym = m_evalStack.get(i);
-    if (StackSym::GetMarker(sym) == StackSym::W) return false;
-  }
+void EmitterVisitor::emitMOp(
+  int iFirst,
+  int& iLast,
+  bool allowW,
+  bool rhsVal,
+  Emitter& e,
+  MOpFlags baseFlags,
+  MOpFlags dimFlags
+) {
+  auto stackIdx = [&](int i) {
+    return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
+  };
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
   auto flavor = StackSym::GetSymFlavor(sym);
   switch (StackSym::GetMarker(sym)) {
     case StackSym::N:
+      switch (flavor) {
+        case StackSym::C:
+          e.BaseNC(stackIdx(iFirst), baseFlags);
+          break;
+        case StackSym::L:
+          e.BaseNL(m_evalStack.getLoc(iFirst), baseFlags);
+          break;
+        default:
+          always_assert(false);
+      }
+      break;
+
     case StackSym::G:
-    case StackSym::S:
-      return false;
+      switch (flavor) {
+        case StackSym::C:
+          e.BaseGC(stackIdx(iFirst), baseFlags);
+          break;
+        case StackSym::L:
+          e.BaseGL(m_evalStack.getLoc(iFirst), baseFlags);
+          break;
+        default:
+          always_assert(false);
+      }
+      break;
+
+    case StackSym::S: {
+      if (m_evalStack.get(iLast) != StackSym::AM) {
+        unexpectedStackSym(sym, "S-vector base, class ref");
+      }
+
+      auto const clsIdx = rhsVal ? 1 : 0;
+      switch (flavor) {
+        case StackSym::C:
+          e.BaseSC(stackIdx(iFirst), clsIdx);
+          break;
+        case StackSym::L:
+          e.BaseSL(m_evalStack.getLoc(iFirst), clsIdx);
+          break;
+        default:
+          unexpectedStackSym(sym, "S-vector base, prop name");
+          break;
+      }
+      // The BaseS* bytecodes consume the Class from the eval stack so the
+      // final operations don't have to expect an A-flavored input. Adjust
+      // iLast accordingly.
+      --iLast;
+      break;
+    }
 
     case StackSym::None:
       switch (flavor) {
         case StackSym::L:
           e.BaseL(m_evalStack.getLoc(iFirst), baseFlags);
           break;
-
+        case StackSym::C:
+          e.BaseC(stackIdx(iFirst));
+          break;
+        case StackSym::R:
+          e.BaseR(stackIdx(iFirst));
+          break;
         case StackSym::H:
           e.BaseH();
           break;
-
         default:
-          return false;
+          always_assert(false);
       }
       break;
 
@@ -5046,10 +5108,7 @@ bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
       always_assert(false && "Bad base marker");
   }
 
-  if (StackSym::GetMarker(m_evalStack.get(iLast)) == StackSym::M) {
-    not_implemented();
-    --iLast;
-  }
+  assert(StackSym::GetMarker(m_evalStack.get(iLast)) != StackSym::M);
 
   // Emit all intermediate operations, leaving the final operation up to our
   // caller.
@@ -5065,8 +5124,7 @@ bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
       } else if (flavor == StackSym::T) {
         e.DimStr(m_evalStack.getName(i), op, dimFlags);
       } else {
-        auto idx = m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
-        e.DimC(idx, op, dimFlags);
+        e.DimC(stackIdx(i), op, dimFlags);
       }
     };
 
@@ -5084,14 +5142,18 @@ bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
         doDim(PropElemOp::Elem);
         break;
       case StackSym::W:
-        not_implemented();
+        if (allowW) {
+          e.DimNewElem(dimFlags);
+        } else {
+          throw IncludeTimeFatalException(e.getNode(),
+                                          "Cannot use [] for reading");
+        }
+        break;
       case StackSym::S:
       default:
         always_assert(false && "Bad intermediate marker");
     }
   }
-
-  return true;
 }
 
 void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
@@ -5333,13 +5395,13 @@ void EmitterVisitor::emitCGet(Emitter& e) {
       }
     }
   } else {
-    size_t stackCount = 0;
-    for (size_t idx = i; idx <= iLast; ++idx) {
-      if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
-    }
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      emitMOp(i, iLast, false, false, e, MOpFlags::Warn, MOpFlags::Warn);
+      size_t stackCount = 0;
+      for (size_t idx = i; idx <= iLast; ++idx) {
+        if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
+      }
 
-    if (RuntimeOption::EvalEmitNewMInstrs &&
-        emitMOp(i, iLast, false, e, MOpFlags::Warn, MOpFlags::Warn)) {
       auto sym = m_evalStack.get(iLast);
       auto flavor = StackSym::GetSymFlavor(sym);
       auto marker = StackSym::GetMarker(sym);
@@ -5379,7 +5441,6 @@ void EmitterVisitor::emitCGet(Emitter& e) {
 
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
-    assert(countStackValues(vectorImm) == stackCount);
     e.CGetM(vectorImm);
   }
 }
@@ -6621,6 +6682,9 @@ void EmitterVisitor::emitPostponedMeths() {
     PostponedMeth& p = m_postponedMeths.front();
     MethodStatementPtr meth = p.m_meth;
     FuncEmitter* fe = p.m_fe;
+
+    ITRACE(1, "Emitting postponed method {}\n", meth->getOriginalFullName());
+    Trace::Indent indent;
 
     if (!fe) {
       assert(p.m_top);

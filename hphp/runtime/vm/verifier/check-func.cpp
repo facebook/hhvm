@@ -680,13 +680,21 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
         error("invalid kind for Switch: %d\n", subop);
         ok = false;
         break;
-      case OpBaseL: case OpDimL: case OpDimC: case OpDimInt: case OpDimStr:
+      case OpBaseNC: case OpBaseNL: case OpBaseGC: case OpBaseGL: case OpBaseL:
+        assert(i == 1);
+        checkPropElemOp(subop);
+        break;
+      case OpDimL: case OpDimC: case OpDimInt: case OpDimStr:
         if (i == 1) {
           checkPropElemOp(subop);
         } else {
           assert(i == 2);
           checkMOpFlags(subop);
         }
+        break;
+      case OpDimNewElem:
+        assert(i == 0);
+        checkMOpFlags(subop);
         break;
       case OpQueryML: case OpQueryMC:
       case OpQueryMInt: case OpQueryMStr:
@@ -804,6 +812,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define V_MMANY { },
   #define R_MMANY { },
   #define MFINAL { },
+  #define IDX_A { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
@@ -822,6 +831,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef TWO
   #undef ONE
   #undef NOV
+  #undef IDX_A
   };
   switch (peek_op(pc)) {
   case Op::CGetM:     // ONE(LA),      MMANY, ONE(CV)
@@ -874,6 +884,18 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
+  case Op::BaseSC:   // TWO(IVA, IVA),    IDX_A,           IDX_A
+  case Op::BaseSL: { // TWO(LA, IVA),    IDX_A,           IDX_A
+    auto const pops = instrNumPops(pc);
+    assert(pops == 2 || pops == 1);
+    if (pops == 1) {
+      m_tmp_sig[0] = AV;
+    } else {
+      m_tmp_sig[0] = CV;
+      m_tmp_sig[1] = AV;
+    }
+    return m_tmp_sig;
+  }
   default:
     return &inputSigs[size_t(peek_op(pc))][0];
   }
@@ -994,7 +1016,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
 }
 
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
-  static const FlavorDesc outputSigs[][3] = {
+  static const FlavorDesc outputSigs[][4] = {
   #define NOV { },
   #define FMANY { },
   #define CMANY { },
@@ -1009,6 +1031,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define C_MMANY() { },
   #define V_MMANY() { },
   #define R_MMANY() { },
+  #define IDX_A { },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
@@ -1026,6 +1049,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef TWO
   #undef ONE
   #undef NOV
+  #undef IDX_A
   };
   bool ok = true;
   auto const op = peek_op(pc);
@@ -1045,8 +1069,13 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
     FlavorDesc *outs = &cur->stk[cur->stklen];
     cur->stklen += pushes;
-    for (int i = 0; i < pushes; ++i)
-      outs[i] = outputSigs[size_t(op)][i];
+    if (op == Op::BaseSC || op == Op::BaseSL) {
+      if (pushes == 1) outs[0] = CV;
+    } else {
+      for (int i = 0; i < pushes; ++i) {
+        outs[i] = outputSigs[size_t(op)][i];
+      }
+    }
     if (isFPush(op)) {
       if (cur->fpilen >= maxFpi()) {
         error("%s", "more FPush* instructions than FPI regions\n");

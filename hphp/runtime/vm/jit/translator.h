@@ -503,6 +503,8 @@ enum Operands {
                              // n = imm[0].u_IVA
   StackI          = 1 << 17, // consume 1 cell at index imm[0].u_IVA
   MBase           = 1 << 18, // member operation base
+  IdxA            = 1 << 19, // consume 1 A at idx imm[0].u_IVA, preserving an
+                             // optional C on top of it
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };

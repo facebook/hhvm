@@ -673,8 +673,8 @@ public:
   void buildVectorImm(std::vector<unsigned char>& vectorImm,
                       int iFirst, int iLast, bool allowW,
                       Emitter& e);
-  bool emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
-               MOpFlags baseFlags, MOpFlags dimFlags);
+  void emitMOp(int iFirst, int& iLast, bool allowW, bool rhsVal,
+               Emitter& e, MOpFlags baseFlags, MOpFlags dimFlags);
   enum class PassByRefKind {
     AllowCell,
     WarnOnCell,

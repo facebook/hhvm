@@ -18,7 +18,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+
+#include <folly/FilePortability.h>
 
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/base/array-init.h"

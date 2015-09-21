@@ -16,24 +16,9 @@ __BEGIN_DECLS
 
 #include <stdarg.h>
 #include <sys/types.h>
-#include "hphp/neo/ulist.h"
 
-#ifdef _MSC_VER
-typedef unsigned short mode_t;
-#endif
-
-
-typedef int (* MATCH_FUNC)(void *rock, const char *filename);
-
-NEOERR *ne_mkdirs (const char *path, mode_t mode);
 NEOERR *ne_load_file (const char *path, char **str);
 NEOERR *ne_load_file_len (const char *path, char **str, int *len);
-NEOERR *ne_save_file (const char *path, char *str);
-NEOERR *ne_remove_dir (const char *path);
-NEOERR *ne_listdir(const char *path, ULIST **files);
-NEOERR *ne_listdir_match(const char *path, ULIST **files, const char *match);
-NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch,
-                          void *rock);
 
 __END_DECLS
 

@@ -597,6 +597,7 @@ void ExecutionContext::onShutdownPreSend() {
     try { obFlushAll(); } catch (...) {}
   };
 
+  MM().resetCouldOOM(isStandardRequest());
   executeFunctions(ShutDown);
 }
 

@@ -32,13 +32,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
-#define O_RDONLY _O_RDONLY
-#include "win32/param.h"
-#else
-#include <sys/param.h>
-#endif
-
 #include "ext/standard/head.h"
 #include "zend_compile.h"
 #include "php_network.h"

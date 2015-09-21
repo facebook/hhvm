@@ -25,9 +25,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef PHP_WIN32
-#include "win32/time.h"
-#else
+#ifndef PHP_WIN32
 #include <sys/time.h>
 #endif
 
@@ -82,7 +80,11 @@ static void lcg_seed(TSRMLS_D) /* {{{ */
     LCG(s1) = 1;
   }
 #ifdef ZTS
+#ifdef _MSC_VER
+  LCG(s2) = (long)pthread_getw32threadid_np(pthread_self());
+#else
   LCG(s2) = (long) tsrm_thread_id();
+#endif
 #else
   LCG(s2) = (long) getpid();
 #endif

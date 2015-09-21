@@ -23,12 +23,8 @@
 
 #include <php.h>
 
-#ifdef PHP_WIN32
-# include <win32/inet.h>
-#else
-# undef closesocket
-# define closesocket close
-#endif
+#undef closesocket
+#define closesocket close
 
 #ifndef HAVE_SHUTDOWN
 #undef shutdown

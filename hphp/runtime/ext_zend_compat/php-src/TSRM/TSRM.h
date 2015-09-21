@@ -20,13 +20,7 @@
 # include <tsrm_config.h>
 #endif
 
-#ifdef TSRM_WIN32
-#  ifdef TSRM_EXPORTS
-#    define TSRM_API __declspec(dllexport)
-#  else
-#    define TSRM_API __declspec(dllimport)
-#  endif
-#elif defined(__GNUC__) && __GNUC__ >= 4
+#if defined(__GNUC__) && __GNUC__ >= 4
 #  define TSRM_API __attribute__ ((__visibility__("default")))
 #else
 #  define TSRM_API
@@ -49,6 +43,7 @@ typedef unsigned long tsrm_uintptr_t;
 # endif
 # include <windows.h>
 # include <shellapi.h>
+# include <pthread.h>
 #elif defined(GNUPTH)
 # include <pth.h>
 #elif defined(PTHREADS)
@@ -64,8 +59,8 @@ typedef int ts_rsrc_id;
 
 /* Define THREAD_T and MUTEX_T */
 #ifdef TSRM_WIN32
-# define THREAD_T DWORD
-# define MUTEX_T CRITICAL_SECTION *
+# define THREAD_T pthread_t
+# define MUTEX_T pthread_mutex_t *
 #elif defined(GNUPTH)
 # define THREAD_T pth_t
 # define MUTEX_T pth_mutex_t *

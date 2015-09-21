@@ -25,22 +25,13 @@
 #include "zend_API.h"
 #include "zend_llist.h"
 #include "zend_operators.h"
-#ifdef PHP_WIN32
-#include "win95nt.h"
-#endif
 #include <sys/stat.h>
 
 #define SAPI_OPTION_NO_CHDIR 1
 
 #define SAPI_POST_BLOCK_SIZE 4000
 
-#ifdef PHP_WIN32
-#  ifdef SAPI_EXPORTS
-#    define SAPI_API __declspec(dllexport) 
-#  else
-#    define SAPI_API __declspec(dllimport) 
-#  endif
-#elif defined(__GNUC__) && __GNUC__ >= 4
+#if defined(__GNUC__) && __GNUC__ >= 4
 #  define SAPI_API __attribute__ ((__visibility__("default")))
 #else
 #  define SAPI_API

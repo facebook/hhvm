@@ -21,7 +21,7 @@
 
 /* $Id$ */
 #ifdef PHP_WIN32
-#include "config.w32.h"
+#include "../php_config.h"
 #include <Ws2tcpip.h>
 #endif
 

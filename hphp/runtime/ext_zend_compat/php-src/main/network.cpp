@@ -25,8 +25,6 @@
 
 #include <stddef.h>
 
-#include <sys/param.h>
-
 #include <sys/types.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -43,15 +41,9 @@
 #include <sys/poll.h>
 #endif
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netdb.h>
+#include <folly/SocketPortability.h>
+#ifndef _MSC_VER
 #include <sys/select.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
 #endif
 
 #ifndef HAVE_INET_ATON
@@ -59,10 +51,6 @@ int inet_aton(const char *, struct in_addr *);
 #endif
 
 #include "php_network.h"
-
-#if defined(AF_UNIX)
-#include <sys/un.h>
-#endif
 
 #include <ext/standard/file.h>
 
@@ -164,7 +152,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
   if (ipv6_borked == -1) {
     int s;
 
-    s = socket(PF_INET6, SOCK_DGRAM, 0);
+    s = fsp::socket(PF_INET6, SOCK_DGRAM, 0);
     if (s == SOCK_ERR) {
       ipv6_borked = 1;
     } else {
@@ -419,7 +407,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
         break;
 #endif
-#ifdef AF_UNIX
+#if HAVE_UNIX_SOCKETS
       case AF_UNIX:
         {
           struct sockaddr_un *ua = (struct sockaddr_un*)sa;
@@ -588,7 +576,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
     sa = *sal;
 
     /* create a socket for this address */
-    sock = socket(sa->sa_family, socktype, 0);
+    sock = fsp::socket(sa->sa_family, socktype, 0);
 
     if (sock == SOCK_ERR) {
       continue;
@@ -756,7 +744,7 @@ PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
   case AF_INET6:
     return sizeof(struct sockaddr_in6);
 #endif
-#ifdef AF_UNIX
+#if HAVE_UNIX_SOCKETS
   case AF_UNIX:
     return sizeof(struct sockaddr_un);
 #endif
@@ -828,7 +816,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 #ifdef PHP_WIN32
   /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
   flags = !block;
-  if (ioctlsocket(socketd, FIONBIO, &flags) == SOCKET_ERROR) {
+  if (ioctlsocket(socketd, FIONBIO, (u_long*)&flags) == SOCKET_ERROR) {
     ret = FAILURE;
   }
 #else

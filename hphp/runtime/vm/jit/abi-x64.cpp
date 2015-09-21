@@ -155,6 +155,15 @@ const Abi& abi(CodeKind kind) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+PhysReg rret(size_t i) {
+  assertx(i < 2);
+  return i == 0 ? reg::rax : reg::rdx;
+}
+PhysReg rret_simd(size_t i) {
+  assertx(i == 0);
+  return reg::xmm0;
+}
+
 PhysReg rarg(size_t i) {
   assertx(i < num_arg_regs());
   return gp_args[i];

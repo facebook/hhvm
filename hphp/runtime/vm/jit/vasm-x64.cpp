@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
+#include "hphp/runtime/vm/jit/vasm-lower.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
@@ -693,146 +694,6 @@ void lowerAbsdbl(Vunit& unit, Vlabel b, size_t iInst) {
   vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
 }
 
-void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
-  auto& blocks = unit.blocks;
-  auto& inst = blocks[b].code[iInst];
-  auto const is_vcall = inst.op == Vinstr::vcall;
-  auto const vcall = inst.vcall_;
-  auto const vinvoke = inst.vinvoke_;
-
-  // Extract all the relevant information from the appropriate instruction.
-  auto const is_smashable = !is_vcall && vinvoke.smashable;
-  auto const call = is_vcall ? vcall.call : vinvoke.call;
-  auto const& vargs = unit.vcallArgs[is_vcall ? vcall.args : vinvoke.args];
-  auto const& stkArgs = vargs.stkArgs;
-  auto const dests = unit.tuples[is_vcall ? vcall.d : vinvoke.d];
-  auto const fixup = is_vcall ? vcall.fixup : vinvoke.fixup;
-  auto const destType = is_vcall ? vcall.destType : vinvoke.destType;
-
-  auto scratch = unit.makeScratchBlock();
-  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, inst.origin);
-
-  int32_t const adjust = (stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
-  if (adjust) v << subqi{adjust, reg::rsp, reg::rsp, v.makeReg()};
-
-  // Push stack arguments, in reverse order.
-  for (int i = stkArgs.size() - 1; i >= 0; --i) v << push{stkArgs[i]};
-
-  // Get the arguments in the proper registers.
-  RegSet argRegs;
-  auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
-    VregList argDests;
-    for (size_t i = 0, n = srcs.size(); i < n; ++i) {
-      auto const reg = r(i);
-      argDests.push_back(reg);
-      argRegs |= reg;
-    }
-
-    if (argDests.size()) {
-      v << copyargs{v.makeTuple(srcs),
-                    v.makeTuple(std::move(argDests))};
-    }
-  };
-  doArgs(vargs.args, rarg);
-  doArgs(vargs.simdArgs, rarg_simd);
-
-  // Emit the call.
-  if (is_smashable) v << mccall{(TCA)call.address(), argRegs};
-  else              emitCall(v, call, argRegs);
-
-  // Handle fixup and unwind information.
-  if (fixup.isValid()) v << syncpoint{fixup};
-
-  if (!is_vcall) {
-    auto& targets = vinvoke.targets;
-    v << unwind{{targets[0], targets[1]}};
-
-    // Insert an lea fixup for any stack args at the beginning of the catch
-    // block.
-    if (auto rspOffset = ((stkArgs.size() + 1) & ~1) * sizeof(uintptr_t)) {
-      auto& taken = unit.blocks[targets[1]].code;
-      assertx(taken.front().op == Vinstr::landingpad ||
-             taken.front().op == Vinstr::jmp);
-      Vinstr v{lea{reg::rsp[rspOffset], reg::rsp}};
-      v.origin = taken.front().origin;
-      if (taken.front().op == Vinstr::jmp) {
-        taken.insert(taken.begin(), v);
-      } else {
-        taken.insert(taken.begin() + 1, v);
-      }
-    }
-
-    // Write out the code so far to the end of b. Remaining code will be
-    // emitted to the next block.
-    vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
-  } else if (vcall.nothrow) {
-    v << nothrow{};
-  }
-
-  // Copy the call result to the destination register(s)
-  switch (destType) {
-    case DestType::TV: {
-      // rax contains m_type and m_aux but we're expecting just the type in
-      // the lower bits, so shift the type result register.
-      static_assert(offsetof(TypedValue, m_data) == 0, "");
-      static_assert(offsetof(TypedValue, m_type) == 8, "");
-      if (dests.size() == 2) {
-        v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
-      } else {
-        // We have cases where we statically know the type but need the value
-        // from native call. Even if the type does not really need a register
-        // (e.g., InitNull), a Vreg is still allocated in assignRegs(), so the
-        // following assertion holds.
-        assertx(dests.size() == 1);
-        v << copy{reg::rax, dests[0]};
-      }
-      break;
-    }
-    case DestType::SIMD: {
-      // rax contains m_type and m_aux but we're expecting just the type in
-      // the lower bits, so shift the type result register.
-      static_assert(offsetof(TypedValue, m_data) == 0, "");
-      static_assert(offsetof(TypedValue, m_type) == 8, "");
-      assertx(dests.size() == 1);
-      pack2(v, reg::rax, reg::rdx, dests[0]);
-      break;
-    }
-    case DestType::SSA:
-    case DestType::Byte:
-      // copy the single-register result to dests[0]
-      assertx(dests.size() == 1);
-      assertx(dests[0].isValid());
-      v << copy{reg::rax, dests[0]};
-      break;
-    case DestType::None:
-      assertx(dests.empty());
-      break;
-    case DestType::Dbl:
-      // copy the single-register result to dests[0]
-      assertx(dests.size() == 1);
-      assertx(dests[0].isValid());
-      v << copy{reg::xmm0, dests[0]};
-      break;
-  }
-
-  if (stkArgs.size() > 0) {
-    v << addqi{safe_cast<int32_t>(stkArgs.size() * sizeof(uintptr_t)
-                                  + adjust),
-               reg::rsp,
-               reg::rsp,
-               v.makeReg()};
-  }
-
-  // Insert new instructions to the appropriate block
-  if (is_vcall) {
-    vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
-  } else {
-    vector_splice(blocks[vinvoke.targets[0]].code, 0, 0,
-                  blocks[scratch].code);
-  }
-}
-
 void lower_vcallarray(Vunit& unit, Vlabel b) {
   auto& code = unit.blocks[b].code;
   // vcallarray can only appear at the end of a block.
@@ -857,9 +718,7 @@ void lower_vcallarray(Vunit& unit, Vlabel b) {
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
-void lowerForX64(Vunit& unit, const Abi& abi) {
-  Timer _t(Timer::vasm_lower);
-
+void lowerForX64(Vunit& unit) {
   // This pass relies on having no critical edges in the unit.
   splitCriticalEdges(unit);
 
@@ -867,8 +726,9 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
   // iterators.
   auto& blocks = unit.blocks;
 
-  PostorderWalker{unit}.dfs([&](Vlabel ib) {
+  PostorderWalker{unit}.dfs([&] (Vlabel ib) {
     assertx(!blocks[ib].code.empty());
+
     auto& back = blocks[ib].code.back();
     if (back.op == Vinstr::vcallarray) {
       lower_vcallarray(unit, Vlabel{ib});
@@ -876,12 +736,10 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
 
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
       auto& inst = blocks[ib].code[ii];
-      switch (inst.op) {
-        case Vinstr::vcall:
-        case Vinstr::vinvoke:
-          lowerVcall(unit, Vlabel{ib}, ii);
-          break;
 
+      vlower(unit, ib, ii);
+
+      switch (inst.op) {
         case Vinstr::srem:
           lowerSrem(unit, Vlabel{ib}, ii);
           break;
@@ -896,14 +754,6 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::absdbl:
           lowerAbsdbl(unit, Vlabel{ib}, ii);
-          break;
-
-        case Vinstr::defvmsp:
-          inst = copy{rvmsp(), inst.defvmsp_.d};
-          break;
-
-        case Vinstr::syncvmsp:
-          inst = copy{inst.syncvmsp_.s, rvmsp()};
           break;
 
         case Vinstr::movtqb:
@@ -940,7 +790,7 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   optimizeJmps(unit);
   optimizeExits(unit);
 
-  lowerForX64(unit, abi);
+  lowerForX64(unit);
 
   simplify(unit);
 

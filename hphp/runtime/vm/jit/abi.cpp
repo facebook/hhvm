@@ -35,7 +35,9 @@ PhysReg rsp() { return ARCH_SWITCH_CALL(rsp); }
 RegSet vm_regs_with_sp() { return ARCH_SWITCH_CALL(vm_regs_with_sp); }
 RegSet vm_regs_no_sp() { return ARCH_SWITCH_CALL(vm_regs_no_sp); }
 
-PhysReg rret() { return ARCH_SWITCH_CALL(rret); }
+PhysReg rret(size_t i) { return ARCH_SWITCH_CALL(rret, i); }
+PhysReg rret_simd(size_t i) { return ARCH_SWITCH_CALL(rret_simd, i); }
+
 PhysReg rarg(size_t i) { return ARCH_SWITCH_CALL(rarg, i); }
 PhysReg rarg_simd(size_t i) { return ARCH_SWITCH_CALL(rarg_simd, i); }
 

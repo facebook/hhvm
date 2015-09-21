@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
+#include "hphp/runtime/vm/jit/vasm-lower.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
@@ -400,27 +401,6 @@ void Vgen::emit(tbcc i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower(Vunit& unit) {
-  Timer _t(Timer::vasm_lower);
-  for (size_t b = 0; b < unit.blocks.size(); ++b) {
-    auto& code = unit.blocks[b].code;
-    if (code.empty()) continue;
-    for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
-      auto& inst = unit.blocks[b].code[i];
-      switch (inst.op) {
-        case Vinstr::defvmsp:
-          inst = copy{PhysReg{arm::rvmsp()}, inst.defvmsp_.d};
-          break;
-        case Vinstr::syncvmsp:
-          inst = copy{inst.syncvmsp_.s, PhysReg{arm::rvmsp()}};
-          break;
-        default:
-          break;
-      }
-    }
-  }
-}
-
 /*
  * Some vasm opcodes don't have equivalent single instructions on ARM, and the
  * equivalent instruction sequences require scratch registers.  We have to
@@ -489,11 +469,11 @@ void lowerForARM(Vunit& unit) {
 
 void finishARM(Vunit& unit, Vtext& text, const Abi& abi, AsmInfo* asmInfo) {
   optimizeExits(unit);
-  lower(unit);
   simplify(unit);
   if (!unit.constToReg.empty()) {
     foldImms<arm::ImmFolder>(unit);
   }
+  vlower(unit);
   lowerForARM(unit);
   if (unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);

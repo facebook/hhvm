@@ -127,6 +127,15 @@ const Abi& abi(CodeKind kind) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+PhysReg rret(size_t i) {
+  assertx(i < 2);
+  return i == 0 ? vixl::x0 : vixl::x1;
+}
+PhysReg rret_simd(size_t i) {
+  assertx(i == 0);
+  return vixl::d0;
+}
+
 PhysReg rarg(size_t i) {
   assertx(i < num_arg_regs());
   return vixl::Register::XRegFromCode(i);

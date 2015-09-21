@@ -310,6 +310,9 @@ const std::string resolveContextMsg(const Class::Const& typeCns,
 /* returns the resolved TypeStructure; if aliasName is not an alias,
  * return nullptr. */
 Array getAlias(const String& aliasName) {
+  if (aliasName.same(s_this)) {
+    return Array::Create();
+  }
   auto typeAliasReq = Unit::loadTypeAlias(aliasName.get());
   if (!typeAliasReq) return Array::Create();
 

@@ -56,8 +56,6 @@ struct BackEnd final : jit::BackEnd {
    */
   uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
                                  ActRec* saved_rStashedAr) {
-    sim.   set_xreg(arm::rGContextReg.code(), g_context.getNoCheck());
-
     auto& vmRegs = vmRegsUnsafe();
     sim.   set_xreg(x2a(rvmfp()).code(), vmRegs.fp);
     sim.   set_xreg(x2a(rvmsp()).code(), vmRegs.stack.top());

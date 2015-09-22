@@ -120,9 +120,8 @@ inline vixl::Register svcReqArgReg(unsigned index) {
   return x2a(rarg(index + 1));
 }
 
+// vixl MacroAssembler uses ip0/ip1 (x16-17) for macro instructions
 const vixl::Register rAsm(vixl::x9);
-const vixl::Register rAsm2(vixl::x10);
-const vixl::Register rGContextReg(vixl::x24);
 const vixl::Register rLinkReg(vixl::x30);
 const vixl::Register rHostCallReg(vixl::x16);
 

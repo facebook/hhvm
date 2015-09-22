@@ -105,8 +105,11 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   endif()
 
   # No optimizations for debug builds.
-  set(CMAKE_C_FLAGS_DEBUG    "-Og -g")
-  set(CMAKE_CXX_FLAGS_DEBUG  "-Og -g")
+  # -Og enables some optimizations, but makes debugging harder by optimizing
+  # away some functions and locals. -O0 is more debuggable.
+  # -O0-ggdb was reputed to cause gdb to crash (github #4450)
+  set(CMAKE_C_FLAGS_DEBUG    "-O0 -g")
+  set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
 
   # Generic GCC flags and Optional flags
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")

@@ -756,6 +756,19 @@ function hh_server_cmd($options, $test) {
   mkdir($temp_dir);
   foreach (glob($test . '*') as $test_file) {
     copy($test_file, $temp_dir . '/' . basename($test_file));
+    if (strpos($test_file, '.hhconfig') !== false) {
+      rename(
+        $temp_dir . '/' . basename($test) . '.hhconfig',
+        $temp_dir . '/.hhconfig'
+      );
+    } else if (strpos($test_file, '.type-errors') !== false) {
+      // In order to actually run hh_server --check successfully, all files
+      // named *.php.type-errors have to be renamed *.php
+      rename(
+        $temp_dir . '/' . basename($test_file),
+        $temp_dir . '/' . str_replace('.type-errors', '', basename($test_file))
+      );
+    }
   }
   // Just copy all the .php.inc files, even if they are not related since
   // unrelated ones will be ignored anyway. This just makes it easier to
@@ -764,10 +777,6 @@ function hh_server_cmd($options, $test) {
   foreach (glob(dirname($test) . "/*.inc.php") as $inc_file) {
     copy($inc_file, $temp_dir . '/' . basename($inc_file));
   }
-  rename(
-    $temp_dir . '/' . basename($test) . '.hhconfig',
-    $temp_dir . '/.hhconfig'
-  );
   $cmd = hh_server_path() .  ' --check ' . $temp_dir;
   return array($cmd, ' ', $temp_dir);
 }

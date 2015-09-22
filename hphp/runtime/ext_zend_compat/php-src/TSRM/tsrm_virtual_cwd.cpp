@@ -4,7 +4,7 @@
 
 #ifdef TSRM_WIN32
 #include <winioctl.h>
-typedef struct {
+struct REPARSE_DATA_BUFFER {
   unsigned long  ReparseTag;
   unsigned short ReparseDataLength;
   unsigned short Reserved;
@@ -28,7 +28,7 @@ typedef struct {
       unsigned char  ReparseTarget[1];
     } GenericReparseBuffer;
   };
-} REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
+};
 #endif
 
 #define CWD_STATE_COPY(d, s)                       \

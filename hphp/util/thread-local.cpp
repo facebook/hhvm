@@ -16,14 +16,18 @@
 
 #include "hphp/util/thread-local.h"
 
-#ifdef __linux__
+#if defined(__linux__) && defined(__x86_64__)
+#define HAVE_ARCH_PRCTL 1
+#endif
+
+#ifdef HAVE_ARCH_PRCTL
 #include <link.h>
 #include <asm/prctl.h>
 #include <sys/prctl.h>
 extern "C" {
 extern int arch_prctl(int, unsigned long*);
 }
-#endif //__linux__
+#endif //HAVE_ARCH_PRCTL
 
 namespace HPHP {
 
@@ -71,7 +75,7 @@ ThreadLocalManager::ThreadLocalList::ThreadLocalList() {
 
 #endif
 
-#ifdef __linux__
+#ifdef HAVE_ARCH_PRCTL
 
 static int visit_phdr(dl_phdr_info* info, size_t, void*) {
   for (size_t i = 0, n = info->dlpi_phnum; i < n; ++i) {
@@ -103,6 +107,6 @@ std::pair<void*,size_t> getCppTdata() {
   return {nullptr, 0};
 }
 
-#endif //__linux__
+#endif //HAVE_ARCH_PRCTL
 
 }

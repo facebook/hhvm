@@ -123,12 +123,14 @@ function output_function($fp, $func, $indent = '') {
         case 'isprotected':    if ($indent) $modifiers[] = 'protected'; break;
         case 'isprivate':      if ($indent) $modifiers[] = 'private'; break;
         case 'isstatic':       if ($indent) $modifiers[] = 'static'; break;
+        case 'isfinal':        if ($indent) $modifiers[] = 'final'; break;
         case 'functionisfoldable':
         case 'isfoldable':     $ua[] = '__IsFoldable'; break;
         case 'hiphopspecific': $ua[] = '__HipHopSpecific'; break;
         case 'noinjection':    $nativea[] = '"NoInjection"'; break;
         case 'paramcoercemodefalse': $ua[] = '__ParamCoerceModeFalse'; break;
         case 'paramcoercemodenull': $ua[] = '__ParamCoerceModeNull'; break;
+        case 'nofcallbuiltin': $nativea[] = '"NoFCallBuiltin"'; break;
         case 'variablearguments':
         case 'refvariablearguments':
         case 'mixedvariablearguments': $variadic = true; break;

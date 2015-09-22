@@ -541,6 +541,8 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "asio_get_running_in_context" ||
            stripped == "asio_get_running" ||
            stripped == "xenon_get_data" ||
+           stripped == "thread_memory_stats" ||
+           stripped == "thread_mark_stack" ||
            stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
            stripped == "objprof_get_paths" ||

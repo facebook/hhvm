@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/iterators.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 
@@ -51,6 +52,8 @@ TRACE_SET_MOD(objprof);
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
+  s_cpp_stack("cpp_stack"),
+  s_cpp_stack_peak("cpp_stack_peak"),
   s_dups("dups"),
   s_refs("refs"),
   s_srefs("srefs"),
@@ -876,6 +879,62 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t get_thread_stack_size() {
+  auto sp = stack_top_ptr();
+  return s_stackLimit + s_stackSize - uintptr_t(sp);
+}
+
+size_t get_thread_stack_peak_size() {
+  size_t consecutive = 0;
+  size_t total = 0;
+  uint8_t marker = 0x00;
+  uint8_t* cursor = &marker;
+  uintptr_t cursor_p = uintptr_t(&marker);
+  for (;cursor_p > s_stackLimit; cursor_p--, cursor--) {
+    total++;
+    if (*cursor == 0x00) {
+      if (++consecutive == s_pageSize) {
+        return get_thread_stack_size() + total - consecutive;
+      }
+    } else {
+      consecutive = 0;
+    }
+  }
+
+  return s_stackSize;
+}
+
+void HHVM_FUNCTION(thread_mark_stack, void) {
+  size_t consecutive = 0;
+  uint8_t marker = 0x00;
+  uint8_t* cursor = &marker;
+  uintptr_t cursor_p = uintptr_t(&marker);
+  for (;cursor_p > s_stackLimit; cursor_p--, cursor--) {
+    if (*cursor == 0x00) {
+      if (++consecutive == s_pageSize) {
+        return;
+      }
+    } else {
+      consecutive = 0;
+      *cursor = 0x00;
+    }
+  }
+}
+
+Array HHVM_FUNCTION(thread_memory_stats, void) {
+  auto stack_size = get_thread_stack_size();
+  auto stack_size_peak = get_thread_stack_peak_size();
+
+  auto stats = make_map_array(
+      s_cpp_stack, Variant(stack_size),
+      s_cpp_stack_peak, Variant(stack_size_peak)
+  );
+
+  return stats;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 class objprofExtension final : public Extension {
@@ -886,6 +945,8 @@ public:
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
     HHVM_FALIAS(HH\\objprof_get_strings, objprof_get_strings);
     HHVM_FALIAS(HH\\objprof_get_paths, objprof_get_paths);
+    HHVM_FALIAS(HH\\thread_memory_stats, thread_memory_stats);
+    HHVM_FALIAS(HH\\thread_mark_stack, thread_mark_stack);
     loadSystemlib();
   }
 } s_objprof_extension;

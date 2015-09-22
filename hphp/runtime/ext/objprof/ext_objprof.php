@@ -39,4 +39,10 @@ function objprof_get_strings(int $min_dup): array<string, ObjprofStringStats>;
 <<__Native>>
 function objprof_get_paths(): array<string, ObjprofObjectStats>;
 
+<<__Native>>
+function thread_memory_stats(): array<string, int>;
+
+<<__Native>>
+function thread_mark_stack(): void;
+
 }

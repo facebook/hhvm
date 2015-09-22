@@ -470,8 +470,11 @@ function find_tests($files, array $options = null) {
       $tests,
       function($test) {
         return (file_exists($test . '.typechecker.expect') ||
-                file_exists($test . '.typechecker.expectf')) &&
-                file_exists($test . '.hhconfig'); }
+                file_exists($test . '.typechecker.expectf') ||
+                file_exists($test . '.type-errors.typechecker.expect') ||
+                file_exists($test . '.type-errors.typechecker.expectf')) &&
+                file_exists($test . '.hhconfig');
+      }
     );
   } else {
     $tests = explode("\n", shell_exec(
@@ -481,7 +484,9 @@ function find_tests($files, array $options = null) {
       $tests,
       function($test) {
         return file_exists($test . '.expect') ||
-               file_exists($test . '.expectf');
+               file_exists($test . '.expectf') ||
+               file_exists($test . '.hhvm.expect') ||
+               file_exists($test . '.hhvm.expectf');
       }
     );
   }

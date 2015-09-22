@@ -961,9 +961,15 @@ static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
 }
 
 String HHVM_FUNCTION(sys_get_temp_dir) {
+#ifdef WIN32
+  char buf[PATH_MAX];
+  auto len = GetTempPathA(PATH_MAX, buf);
+  return String(buf, len, CopyString);
+#else
   char *env = getenv("TMPDIR");
   if (env && *env) return String(env, CopyString);
   return s_SLASH_TMP;
+#endif
 }
 
 static String HHVM_FUNCTION(zend_version) {

@@ -100,7 +100,7 @@ class DateTime implements DateTimeInterface {
   const RFC3339 = '';
   const RSS = '';
   const W3C = '';
-  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
+  public function __construct(mixed $time = 'now', ?DateTimeZone $timezone = null);
   public function add(DateInterval $interval);
   public function modify(string $modify);
   public function getOffset();
@@ -116,7 +116,7 @@ class DateTime implements DateTimeInterface {
   public function format(string $format);
   public static function createFromFormat(
     string $format,
-    string $time,
+    mixed $time,
     ?DateTimeZone $timezone = null,
   );
   public static function getLastErrors(): array;
@@ -125,7 +125,7 @@ class DateTime implements DateTimeInterface {
 class DateTimeImmutable implements DateTimeInterface {
   private DateTime $data;
 
-  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
+  public function __construct(mixed $time = 'now', ?DateTimeZone $timezone = null);
   public function add(DateInterval $interval);
   public function modify(string $modify);
   public function getOffset();
@@ -141,7 +141,7 @@ class DateTimeImmutable implements DateTimeInterface {
   public function format(string $format);
   public static function createFromFormat(
     string $format,
-    string $time,
+    mixed $time,
     ?DateTimeZone $timezone = null,
   );
   public static function createFromMutable(DateTime $datetime);

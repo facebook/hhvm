@@ -46,9 +46,15 @@ gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop)
 
 	if (src->trueColor) {
 		dst = gdImageCreateTrueColor(crop->width, crop->height);
+		if (dst == nullptr) {
+			return nullptr;
+		}
 		gdImageSaveAlpha(dst, 1);
 	} else {
 		dst = gdImageCreate(crop->width, crop->height);
+		if (dst == nullptr) {
+			return nullptr;
+		}
 		gdImagePaletteCopy(dst, src);
 	}
 	dst->transparent = src->transparent;
@@ -59,29 +65,30 @@ gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop)
 	if (src->sy < (crop->y + crop->height -1)) {
 		crop->height = src->sy - crop->y + 1;
 	}
+
+	if (crop->x < 0 || crop->x>=src->sx || crop->y<0 || crop->y>=src->sy) {
+		return dst;
+	}
 #if 0
 printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n", crop->x, crop->y, crop->width, crop->height);
 #endif
-	if (dst == NULL) {
-		return NULL;
+	int y = crop->y;
+	if (src->trueColor) {
+		unsigned int dst_y = 0;
+		while (y < (crop->y + (crop->height - 1))) {
+			/* TODO: replace 4 w/byte per channel||pitch once available */
+			memcpy(dst->tpixels[dst_y++], src->tpixels[y++] + crop->x,
+			       crop->width * 4);
+		}
 	} else {
-		int y = crop->y;
-		if (src->trueColor) {
-			unsigned int dst_y = 0;
-			while (y < (crop->y + (crop->height - 1))) {
-				/* TODO: replace 4 w/byte per channel||pitch once available */
-				memcpy(dst->tpixels[dst_y++], src->tpixels[y++] + crop->x, crop->width * 4);
-			}
-		} else {
-			int x;
-			for (y = crop->y; y < (crop->y + (crop->height - 1)); y++) {
-				for (x = crop->x; x < (crop->x + (crop->width - 1)); x++) {
-					dst->pixels[y - crop->y][x - crop->x] = src->pixels[y][x];
-				}
+		int x;
+		for (y = crop->y; y < (crop->y + (crop->height - 1)); y++) {
+			for (x = crop->x; x < (crop->x + (crop->width - 1)); x++) {
+				dst->pixels[y - crop->y][x - crop->x] = src->pixels[y][x];
 			}
 		}
-		return dst;
 	}
+	return dst;
 }
 
 /**

@@ -741,6 +741,7 @@ other_files = (
     '/ext/gd/tests/test8859.ttf',
     '/ext/gd/tests/test.png',
     '/ext/gd/tests/Tuffy.ttf',
+    '/ext/gd/tests/logo_noise.jpg',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.mo',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.po',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest_switched.po',

@@ -48,22 +48,13 @@ extern const int64_t k_UCOL_STRENGTH;
 extern const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE;
 extern const int64_t k_UCOL_NUMERIC_COLLATION;
 
-Variant HHVM_FUNCTION(array_change_key_case,
-                      const Variant& input,
-                      int64_t case_ = 0);
 Variant HHVM_FUNCTION(array_chunk,
                       const Variant& input,
                       int size,
                       bool preserve_keys = false);
-Variant HHVM_FUNCTION(array_column,
-                      const Variant& arr,
-                      const Variant& val_key,
-                      const Variant& idx_key = null_variant);
 Variant HHVM_FUNCTION(array_combine,
                       const Variant& keys,
                       const Variant& values);
-Variant HHVM_FUNCTION(array_count_values,
-                      const Variant& input);
 Variant HHVM_FUNCTION(array_fill_keys,
                       const Variant& keys,
                       const Variant& value);
@@ -90,11 +81,6 @@ Variant HHVM_FUNCTION(array_merge_recursive,
                       const Variant& array1,
                       const Variant& array2 = null_variant,
                       const Array& args = null_array);
-Variant HHVM_FUNCTION(array_merge,
-                      int64_t numArgs,
-                      const Variant& array1,
-                      const Variant& array2 = null_variant,
-                      const Array& args = null_array);
 Variant HHVM_FUNCTION(array_replace_recursive,
                       const Variant& array1,
                       const Variant& array2 = null_variant,
@@ -107,8 +93,6 @@ Variant HHVM_FUNCTION(array_pad,
                       const Variant& input,
                       int pad_size,
                       const Variant& pad_value);
-Variant HHVM_FUNCTION(array_pop,
-                      VRefParam array);
 Variant HHVM_FUNCTION(array_product,
                       const Variant& array);
 Variant HHVM_FUNCTION(array_push,
@@ -118,20 +102,12 @@ Variant HHVM_FUNCTION(array_push,
 Variant HHVM_FUNCTION(array_rand,
                       const Variant& input,
                       int num_req = 1);
-Variant HHVM_FUNCTION(array_reverse,
-                      const Variant& array,
-                      bool preserve_keys = false);
 Variant HHVM_FUNCTION(array_search,
                       const Variant& needle,
                       const Variant& haystack,
                       bool strict = false);
 Variant HHVM_FUNCTION(array_shift,
                       VRefParam array);
-Variant HHVM_FUNCTION(array_slice,
-                      const Variant& array,
-                      int64_t offset,
-                      const Variant& length = null_variant,
-                      bool preserve_keys = false);
 Variant HHVM_FUNCTION(array_splice,
                       VRefParam input,
                       int offset,

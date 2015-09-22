@@ -80,11 +80,10 @@ DEFINE_CONSTANT(UCOL_NUMERIC_COLLATION);
 
 #undef DEFINE_CONSTANT
 
-Variant HHVM_FUNCTION(array_change_key_case,
-                      const Variant& input,
-                      int64_t case_ /* = 0 */) {
-  getCheckedArrayRet(input, false);
-  return ArrayUtil::ChangeKeyCase(arr_input, !case_);
+TypedValue HHVM_FUNCTION(array_change_key_case,
+                         ArrayArg input,
+                         int64_t case_ /* = 0 */) {
+  return tvReturn(ArrayUtil::ChangeKeyCase(ArrNR(input.get()), !case_));
 }
 
 Variant HHVM_FUNCTION(array_chunk,
@@ -146,19 +145,19 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
   }
 }
 
-Variant HHVM_FUNCTION(array_column,
-                      const Variant& input,
-                      const Variant& val_key,
-                      const Variant& idx_key /* = null_variant */) {
-  /* Be strict about array type */
-  getCheckedArrayColumnRet(input, uninit_null());
+TypedValue HHVM_FUNCTION(array_column,
+                         ArrayArg input,
+                         const Variant& val_key,
+                         const Variant& idx_key /* = null_variant */) {
+
+  ArrNR arr_input(input.get());
   Variant val = val_key, idx = idx_key;
   if (!array_column_coerce_key(val, "column") ||
       !array_column_coerce_key(idx, "index")) {
-    return false;
+    return make_tv<KindOfBoolean>(false);
   }
-  ArrayInit ret(arr_input.size(), ArrayInit::Map{});
-  for(auto it = arr_input.begin(); !it.end(); it.next()) {
+  ArrayInit ret(input->size(), ArrayInit::Map{});
+  for(auto it = arr_input.asArray().begin(); !it.end(); it.next()) {
     if (!it.second().isArray()) {
       continue;
     }
@@ -182,7 +181,7 @@ Variant HHVM_FUNCTION(array_column,
       ret.setUnknownKey(sub[idx], elem);
     }
   }
-  return ret.toVariant();
+  return tvReturn(ret.toVariant());
 }
 
 Variant HHVM_FUNCTION(array_combine,
@@ -214,10 +213,9 @@ Variant HHVM_FUNCTION(array_combine,
   return ret;
 }
 
-Variant HHVM_FUNCTION(array_count_values,
-                      const Variant& input) {
-  getCheckedArray(input);
-  return ArrayUtil::CountValues(arr_input);
+TypedValue HHVM_FUNCTION(array_count_values,
+                         ArrayArg input) {
+  return tvReturn(ArrayUtil::CountValues(ArrNR(input.get())));
 }
 
 Variant HHVM_FUNCTION(array_fill_keys,
@@ -525,30 +523,29 @@ Variant HHVM_FUNCTION(array_map, const Variant& callback,
   return ret_ai.toVariant();
 }
 
-Variant HHVM_FUNCTION(array_merge,
-                      int64_t numArgs,
-                      const Variant& array1,
-                      const Variant& array2 /* = null_variant */,
-                      const Array& args /* = null array */) {
-  getCheckedArray(array1);
+TypedValue HHVM_FUNCTION(array_merge,
+                         int64_t numArgs,
+                         ArrayArg array1,
+                         const Variant& array2 /* = null_variant */,
+                         const Array& args /* = null array */) {
   Array ret = Array::Create();
-  php_array_merge(ret, arr_array1);
+  php_array_merge(ret, ArrNR(array1.get()));
 
-  if (UNLIKELY(numArgs < 2)) return ret;
+  if (UNLIKELY(numArgs < 2)) return tvReturn(ret);
 
-  getCheckedArray(array2);
+  getCheckedArrayRet(array2, make_tv<KindOfNull>());
   php_array_merge(ret, arr_array2);
 
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
       throw_expected_array_exception("array_merge");
-      return init_null();
+      return make_tv<KindOfNull>();
     }
     const Array& arr_v = v.asCArrRef();
     php_array_merge(ret, arr_v);
   }
-  return ret;
+  return tvReturn(ret);
 }
 
 Variant HHVM_FUNCTION(array_merge_recursive,
@@ -849,30 +846,13 @@ Variant HHVM_FUNCTION(array_rand,
   return ArrayUtil::RandomKeys(arr_input, num_req);
 }
 
-Variant HHVM_FUNCTION(array_reverse,
-                      const Variant& input,
-                      bool preserve_keys /* = false */) {
+TypedValue HHVM_FUNCTION(array_reverse,
+                         ArrayArg input,
+                         bool preserve_keys /* = false */) {
 
-  const auto& cell_input = *input.asCell();
-  if (UNLIKELY(!isContainer(cell_input))) {
-    raise_warning("Invalid operand type was used: %s expects "
-                  "an array or collection as argument 1",
-                  __FUNCTION__+2);
-    return init_null();
-  }
-
-  if (LIKELY(cell_input.m_type == KindOfArray)) {
-    ArrNR arrNR(cell_input.m_data.parr);
-    const Array& arr = arrNR.asArray();
-    return ArrayUtil::Reverse(arr, preserve_keys);
-  }
-
-  // For collections, we convert to their array representation and then
-  // reverse it, rather than building a reversed version of ArrayIter
-  assert(cell_input.m_type == KindOfObject);
-  ObjectData* obj = cell_input.m_data.pobj;
-  assert(obj && obj->isCollection());
-  return ArrayUtil::Reverse(obj->toArray(), preserve_keys);
+  ArrNR arrNR(input.get());
+  const Array& arr = arrNR.asArray();
+  return tvReturn(ArrayUtil::Reverse(arr, preserve_keys));
 }
 
 Variant HHVM_FUNCTION(array_shift,
@@ -902,11 +882,10 @@ Variant HHVM_FUNCTION(array_shift,
 }
 
 Variant HHVM_FUNCTION(array_slice,
-                      const Variant& input,
+                      TypedValue cell_input,
                       int64_t offset,
                       const Variant& length /* = null_variant */,
                       bool preserve_keys /* = false */) {
-  const auto& cell_input = *input.asCell();
   if (UNLIKELY(!isContainer(cell_input))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1",
@@ -939,11 +918,14 @@ Variant HHVM_FUNCTION(array_slice,
   // preserve_keys is true, or when preserve_keys is false but the container
   // is packed so we know the keys already map to [0,N].
   if (offset == 0 && len == num_in && (preserve_keys || input_is_packed)) {
-    return input.toArray();
+    if (cell_input.m_type == KindOfArray) {
+      return Variant(cell_input.m_data.parr);
+    }
+    return cell_input.m_data.pobj->toArray();
   }
 
   int pos = 0;
-  ArrayIter iter(input);
+  ArrayIter iter(cell_input);
   for (; pos < offset && iter; ++pos, ++iter) {}
 
   if (input_is_packed && (offset == 0 || !preserve_keys)) {

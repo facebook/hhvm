@@ -281,7 +281,7 @@ function get_runtime_build(bool $use_php = false): string {
       // This may be a Pear thing, a PHPUnit running phpt thing, or
       // or something else. Until we know for sure, let's just create
       // a php symlink to hhvm
-      if (!file_exists($oss_root_dir).'/hhvm/php') {
+      if (!file_exists($oss_root_dir.'/hhvm/php')) {
         symlink($oss_root_dir."/hhvm/hhvm", $oss_root_dir."/hhvm/php");
       }
 

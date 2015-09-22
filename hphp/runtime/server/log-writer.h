@@ -1,0 +1,240 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+#ifndef incl_HPHP_LOG_WRITER_H_
+#define incl_HPHP_LOG_WRITER_H_
+
+#include <string>
+
+#include <folly/Conv.h>
+#include <folly/Format.h>
+
+#include "hphp/runtime/base/timestamp.h"
+#include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/request-uri.h"
+#include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/server.h"
+#include "hphp/runtime/server/transport.h"
+#include "hphp/runtime/server/virtual-host.h"
+#include "hphp/util/hardware-counter.h"
+#include "hphp/util/timer.h"
+
+
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+class ClassicWriter final : public LogWriter {
+public:
+  ClassicWriter(const AccessLogFileData& alfd, LogChannel chan)
+    : LogWriter(chan)
+    , m_logdata(alfd)
+  {}
+  virtual ~ClassicWriter();
+  void init(const std::string& username,
+            AccessLog::GetThreadDataFunc fn) override;
+  void write(Transport* transport, const VirtualHost* vhost) override;
+  const static std::string handle;
+private:
+  const AccessLogFileData m_logdata;
+  static bool parseConditions(const char*& fmt, int code);
+  static std::string parseArgument(const char*& fmt);
+  static void skipField(const char*& fmt);
+};
+
+class FieldGenerator {
+public:
+  FieldGenerator(Transport* t, const VirtualHost* vh,
+                 AccessLog::ThreadData* tdata)
+    : transport(t)
+    , vhost(vh)
+    , threadData(tdata)
+  {}
+  template<typename T>
+  bool gen(char field, const std::string& arg, T& out);
+private:
+  static std::string escapeData(const char* s, int len);
+  Transport* transport;
+  const VirtualHost* vhost;
+  AccessLog::ThreadData* threadData;
+};
+
+template<typename T>
+bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
+  int responseSize = transport->getResponseSize();
+  int code = transport->getResponseCode();
+
+  switch (field) {
+  case 'b':
+    if (responseSize == 0) return false;
+    // Fall through
+  case 'B':
+    out = folly::to<T>(responseSize);
+    break;
+  case 'C':
+    {
+      if (arg.empty()) return false;
+      std::string cookie = transport->getCookie(arg);
+      if (cookie.empty()) return false;
+      out = folly::to<T>(escapeData(cookie.c_str(), cookie.size()));
+    }
+    break;
+  case 'D':
+    {
+      struct timespec now;
+      Timer::GetMonotonicTime(now);
+      out = folly::to<T>(gettime_diff_us(transport->getWallTime(), now));
+    }
+    break;
+  case 'd':
+    {
+#ifdef CLOCK_THREAD_CPUTIME_ID
+      struct timespec now;
+      gettime(CLOCK_THREAD_CPUTIME_ID, &now);
+      out = folly::to<T>(gettime_diff_us(transport->getCpuTime(), now));
+#else
+      return false;
+#endif
+    }
+    break;
+  case 'h':
+    {
+       std::string host = transport->getRemoteHost();
+       if (host.empty()) host = transport->getRemoteAddr();
+       out = folly::to<T>(host);
+    }
+    break;
+  case 'i':
+    {
+      if (arg.empty()) return false;
+      std::string header = transport->getHeader(arg.c_str());
+      if (header.empty()) return false;
+      if (vhost && vhost->hasLogFilter() &&
+          strcasecmp(arg.c_str(), "Referer") == 0) {
+        out = folly::to<T>(vhost->filterUrl(header));
+      } else {
+        out = folly::to<T>(header);
+      }
+    }
+    break;
+  case 'I':
+    out = folly::to<T>(transport->getRequestSize());
+    break;
+  case 'n':
+    if (arg.empty()) return false;
+    {
+      String note = ServerNote::Get(arg);
+      if (note.isNull()) return false;
+      out = folly::to<T>(note.data());
+    }
+    break;
+  case 'o':
+    out = folly::to<T>(ServerStats::Get("request.memory_exceeded.non_psp"));
+    break;
+  case 'O':
+    out = folly::to<T>(ServerStats::Get("request.memory_exceeded.psp"));
+    break;
+  case 'p':
+    out = folly::to<T>(ServerStats::Get("request.timed_out.non_psp"));
+    break;
+  case 'P':
+    out = folly::to<T>(ServerStats::Get("request.timed_out.psp"));
+    break;
+  case 'r':
+    {
+      const char *method = transport->getMethodName();
+      if (!method || !method[0]) return false;
+      const char *url = transport->getUrl();
+      out = folly::to<T>(folly::sformat(
+        "{} {} HTTP/{}", method,
+        (vhost && vhost->hasLogFilter()) ?  vhost->filterUrl(url) : url,
+        transport->getHTTPVersion()
+      ));
+    }
+    break;
+  case 's':
+    out = folly::to<T>(code);
+    break;
+  case 'S':
+    // %S is not defined in Apache, we grab it here
+    {
+      const std::string& info(transport->getResponseInfo());
+      if (info.empty()) return false;
+      out = folly::to<T>(info);
+    }
+    break;
+  case 't':
+    {
+      const char *fmt = arg.empty() ? "[%d/%b/%Y:%H:%M:%S %z]" : arg.c_str();
+      char buf[256];
+      time_t rawtime;
+      struct tm timeinfo;
+      time(&rawtime);
+      localtime_r(&rawtime, &timeinfo);
+      strftime(buf, 256, fmt, &timeinfo);
+      out = folly::to<T>(buf);
+    }
+    break;
+  case 'T':
+    out = folly::to<T>(threadData ?
+                       TimeStamp::Current() - threadData->startTime : 0);
+    break;
+  case 'U':
+    {
+      String b, q;
+      RequestURI::splitURL(transport->getUrl(), b, q);
+      out = folly::to<T>(b.c_str());
+    }
+    break;
+  case 'u':
+    out = folly::to<T>(TimeStamp::Current() - HttpServer::StartTime);
+    break;
+  case 'v':
+    {
+      std::string host = transport->getHeader("Host");
+      const std::string &sname = VirtualHost::GetCurrent()->serverName(host);
+      if (sname.empty() || RuntimeOption::ForceServerNameToHeader) {
+        out = folly::to<T>(host);
+      } else {
+        out = folly::to<T>(sname);
+      }
+    }
+    break;
+  case 'Y':
+    {
+      int64_t now = HardwareCounter::GetInstructionCount();
+      out = folly::to<T>(now - transport->getInstructions());
+    }
+    break;
+  case 'y':
+    out = folly::to<T>(ServerStats::Get("page.inst.psp"));
+    break;
+  case 'Z':
+     out = folly::to<T>(ServerStats::Get("page.wall.psp"));
+     break;
+  case 'z':
+     out = folly::to<T>(ServerStats::Get("page.cpu.psp"));
+     break;
+  default:
+    return false;
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+#endif // incl_HPHP_LOG_WRITER_H_

@@ -18,41 +18,40 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/transport.h"
+#include "hphp/runtime/server/virtual-host.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/cronolog.h"
 #include "hphp/util/log-file-flusher.h"
 
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-class LogFileData {
-public:
-  LogFileData() : log(nullptr) {}
-  explicit LogFileData(FILE *f) : log(f) {}
-  LogFileData(const LogFileData& rhs) : log(rhs.log) {
-  }
-  LogFileData& operator=(const LogFileData& rhs) {
-    log = rhs.log;
-    return *this;
-  }
-
-  FILE *log;
-  LogFileFlusher flusher;
-};
+class LogWriter;
+enum class LogChannel {CRONOLOG, THREADLOCAL, REGULAR};
 
 class AccessLogFileData {
 public:
   AccessLogFileData() {}
-  AccessLogFileData(const std::string &fil,
-                    const std::string &lnk,
-                    const std::string &fmt) :
-    file(fil), symLink(lnk), format(fmt) {}
+  AccessLogFileData(const std::string& fil,
+                    const std::string& lnk,
+                    const std::string& fmt);
   std::string file;
   std::string symLink;
   std::string format;
+  // Concrete LogWriter factories to be used depending on the handle
+  using factory_t = std::function<
+    std::unique_ptr<LogWriter>(const AccessLogFileData&, LogChannel)>;
+  // Ask a registered factory for a new LogWriter instance
+  std::unique_ptr<LogWriter> Writer(LogChannel chan) const;
+  static void registerWriter(const std::string& handle, factory_t factory);
+private:
+  std::string m_logOutputType;
+  static Mutex m_lock;
+  static std::unordered_map<std::string, factory_t> m_factories;
 };
+
 
 class AccessLog {
 public:
@@ -65,7 +64,7 @@ public:
   };
   typedef ThreadData* (*GetThreadDataFunc)();
   explicit AccessLog(GetThreadDataFunc f) :
-      m_initialized(false), m_fGetThreadData(f) {}
+    m_initialized(false), m_fGetThreadData(f) {}
   ~AccessLog();
   void init(const std::string &defaultFormat,
             std::vector<AccessLogFileData> &files,
@@ -79,27 +78,34 @@ public:
   bool setThreadLog(const char *file);
   void clearThreadLog();
   void onNewRequest();
-  std::string &defaultFormat() { return m_defaultFormat; }
-  std::vector<AccessLogFileData> &files() { return m_files; }
 private:
-  bool parseConditions(const char* &format, int code);
-  std::string parseArgument(const char* &format);
-  bool genField(std::ostringstream &out, const char* &format,
-                Transport *transport, const VirtualHost *vhost,
-                const std::string &arg);
-  void skipField(const char* &format);
-  int writeLog(Transport *transport, const VirtualHost *vhost,
-               FILE *outFile, const char *format);
 
-  std::vector<LogFileData> m_output;
-  std::vector<std::shared_ptr<Cronolog>> m_cronOutput;
   bool m_initialized;
-  GetThreadDataFunc m_fGetThreadData;
-  std::string m_defaultFormat;
-  std::vector<AccessLogFileData> m_files;
-
-  void openFiles(const std::string &username);
   Mutex m_lock;
+  GetThreadDataFunc m_fGetThreadData;
+  std::unique_ptr<LogWriter> m_defaultWriter;
+  std::vector<std::shared_ptr<LogWriter>> m_files;
+};
+
+
+class LogWriter {
+public:
+  explicit LogWriter(LogChannel chan)
+    : m_channel(chan)
+  {}
+  virtual ~LogWriter() {};
+  virtual void init(const std::string& username,
+                    AccessLog::GetThreadDataFunc fn) = 0;
+  virtual void write(Transport* transport, const VirtualHost* vhost) = 0;
+protected:
+  const LogChannel m_channel;
+  FILE* m_filelog{nullptr};
+  std::unique_ptr<Cronolog> m_cronolog;
+  AccessLog::GetThreadDataFunc m_threadDataFn{nullptr};
+  LogFileFlusher m_flusher;
+protected:
+  FILE* getOutputFile() const;
+  void recordWriteAndMaybeDropCaches(FILE* out, int bytes);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

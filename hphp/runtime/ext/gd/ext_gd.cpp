@@ -4725,7 +4725,7 @@ const StaticString s_size("size");
 
 Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
     const String& jpeg_file_name, int64_t spool /* = 0 */) {
-  char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
+  char psheader[] = "\xFF\xED\0\0Photoshop 3.0\x008BIM\x04\x04\0\0\0\0";
   unsigned int iptcdata_len = iptcdata.length();
   unsigned int marker, inx;
   unsigned char *spoolbuf = nullptr, *poi = nullptr;

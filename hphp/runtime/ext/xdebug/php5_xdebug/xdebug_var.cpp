@@ -257,7 +257,7 @@ static void xdebug_object_element_export_xml_node(xdebug_xml_node& parent,
   }
 
   // This is public if it is visible and accessible from the nullptr context
-  auto const is_public = visible && accessible;
+  auto const is_public = obj->isCollection() || (visible && accessible);
 
   // Compute the property name and full name
   const char* name;
@@ -303,10 +303,13 @@ static void xdebug_object_element_export_xml_node(xdebug_xml_node& parent,
 
   // Recursively write the this property. The duplications are necessary due to
   // the xdebug xml api
-  xdebug_xml_node* child = xdebug_var_export_xml_node(xdstrdup(name),
-                                                      xdstrdup(full_name),
-                                                      xdstrdup(facet),
-                                                      val, exporter);
+  auto child = xdebug_var_export_xml_node(
+    xdstrdup(name),
+    xdstrdup(full_name),
+    xdstrdup(facet),
+    val,
+    exporter
+  );
   xdebug_xml_add_child(&parent, child);
 }
 
@@ -350,7 +353,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
                                             const Variant& var,
                                             XDebugExporter& exporter) {
   // Setup the node. Each const cast is necessary due to xml api
-  xdebug_xml_node* node = xdebug_xml_node_init("property");
+  auto const node = xdebug_xml_node_init("property");
   if (name != nullptr) {
     xdebug_xml_add_attribute_ex(node, "name", const_cast<char*>(name), 0, 1);
   }
@@ -433,12 +436,17 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
   } else if (var.isObject()) {
     // TODO(#3704) This could be merged into the above array code. For now,
     // it's separate as this was pulled originally from xdebug
-    ObjectData* obj = var.toObject().get();
-    Class* cls = obj->getVMClass();
-    Array props = get_object_props(obj);
+    auto const obj = var.toObject().get();
 
-    // Add object info
+    // Collections don't store their elements as regular object properties, so
+    // get them by converting the collection to an array.
+    auto const props = obj->isCollection()
+      ? obj->toArray()
+      : get_object_props(obj);
+
+    // Add object info.
     xdebug_xml_add_attribute(node, "type", "object");
+    auto const cls = obj->getVMClass();
     xdebug_xml_add_attribute_ex(node, "classname",
                                 xdstrdup(cls->name()->data()), 0, 1);
     xdebug_xml_add_attribute(node, "children",
@@ -446,13 +454,13 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     Tracker track(exporter, obj);
 
-    // If we've already seen this object, return
+    // If we've already seen this object, return.
     if (track.seen) {
       xdebug_xml_add_attribute(node, "recursive", "1");
       return node;
     }
 
-    // Add the # of props then short circuit if we are too deep
+    // Add the # of props then short circuit if we are too deep.
     xdebug_xml_add_attribute_ex(node, "numchildren",
                                 xdebug_sprintf("%d", props.size()), 0, 1);
     if (exporter.level++ >= exporter.max_depth) {
@@ -461,9 +469,9 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // Compute the page and the start/end indices
     // Note that php xdebug doesn't support pages except for at the top level
-    uint32_t page = exporter.level == 1 ? exporter.page : 0;
-    uint32_t start = page * exporter.max_children;
-    uint32_t end = (page + 1) * exporter.max_children;
+    auto const page = exporter.level == 1 ? exporter.page : 0;
+    auto const start = page * exporter.max_children;
+    auto const end = (page + 1) * exporter.max_children;
     xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", page), 0, 1);
     xdebug_xml_add_attribute_ex(node, "pagesize",
                                 xdebug_sprintf("%d", exporter.max_children),

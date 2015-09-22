@@ -166,10 +166,10 @@ public:
  *
  * In newer code you'll generally want to use raise_error.
  */
-ATTRIBUTE_NORETURN void throw_null_pointer_exception();
-ATTRIBUTE_NORETURN void throw_invalid_object_type(const char* clsName);
-ATTRIBUTE_NORETURN void throw_not_implemented(const char* feature);
-ATTRIBUTE_NORETURN
+[[noreturn]] void throw_null_pointer_exception();
+[[noreturn]] void throw_invalid_object_type(const char* clsName);
+[[noreturn]] void throw_not_implemented(const char* feature);
+[[noreturn]]
 void throw_not_supported(const char* feature, const char* reason);
 
 //////////////////////////////////////////////////////////////////////

@@ -448,16 +448,20 @@ bool optimizedFCallBuiltin(IRGS& env,
  * returns TBottom.
  */
 Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
-  if (callee->hasVariadicCaptureParam() &&
-      paramIdx == (callee->numParams() - 1)) {
-    return Type(KindOfArray);
-  }
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
   if (tc.isNullable() && !callee->byRef(paramIdx)) {
     auto const dt = tc.underlyingDataType();
     if (!dt) return TBottom;
     return TNull | Type(*dt);
+  }
+  if (callee->byRef(paramIdx) && pi.nativeArg) {
+    return TBoxedCell;
+  }
+  if (!pi.builtinType) return TBottom;
+  if (pi.builtinType == KindOfObject &&
+      pi.defaultValue.m_type == KindOfNull) {
+    return TNullableObj;
   }
   return pi.builtinType ? Type(*pi.builtinType) : TBottom;
 }
@@ -469,8 +473,9 @@ struct ParamPrep {
 
   struct Info {
     SSATmp* value{nullptr};
-    bool throughStack{false};
+    bool passByAddr{false};
     bool needsConversion{false};
+    bool isOutputArg{false};
   };
 
   const Info& operator[](size_t idx) const { return info[idx]; }
@@ -480,7 +485,7 @@ struct ParamPrep {
   SSATmp* thiz{nullptr};       // may be null if call is not a method
   SSATmp* count{nullptr};      // if non-null, the count of arguments
   jit::vector<Info> info;
-  uint32_t numThroughStack{0};
+  uint32_t numByAddr{0};
 
   // if set, coerceFailure determines the target of a failed coercion;
   // if not set, we side-exit to the next byte-code instruction (only
@@ -514,22 +519,25 @@ ParamPrep prepare_params(IRGS& env,
   for (auto offset = uint32_t{numArgs}; offset-- > 0;) {
     auto const ty = param_coerce_type(callee, offset);
     auto &cur = ret[offset];
+    auto &pi = callee->params()[offset];
 
     cur.value = loadParam(offset, ty);
+    cur.isOutputArg = pi.nativeArg && ty == TBoxedCell;
     // If ty > TBottom, it had some kind of type hint.
-    cur.needsConversion = offset < numNonDefault && ty > TBottom;
-
+    // A by-reference parameter thats defaulted will get a plain
+    // value (typically null), rather than a BoxedCell; so we still
+    // need to apply a conversion there.
+    cur.needsConversion = cur.isOutputArg ||
+      (offset < numNonDefault && ty > TBottom);
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
-    // on the stack.
-    if (ty == TBool || ty == TInt || ty == TDbl ||
-        cur.value->type() <= TPtrToGen) {
-      cur.throughStack = false;
+    // by address unless its flagged "nativeArg".
+    if (ty == TBool || ty == TInt || ty == TDbl || pi.nativeArg) {
       continue;
     }
 
-    ++ret.numThroughStack;
-    cur.throughStack = true;
+    ++ret.numByAddr;
+    cur.passByAddr = true;
   }
 
   return ret;
@@ -647,6 +655,10 @@ struct CatchMaker {
     return exit;
   }
 
+  void decRefByPopping() const {
+    decRefForUnwind();
+  }
+
 private:
   void prepareForCatch() const {
     if (inlining()) {
@@ -687,9 +699,9 @@ private:
 
   void decRefForUnwind() const {
     if (m_params.forNativeImpl) return;
-    for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
+    for (auto i = m_params.size(); i--; ) {
       auto const &pi = m_params[i];
-      if (pi.throughStack) {
+      if (pi.passByAddr) {
         popDecRef(env);
       } else {
         gen(env, DecRef, pi.value);
@@ -699,8 +711,9 @@ private:
 
   // Same work as above, but opposite order.
   void decRefForSideExit() const {
+    assertx(!m_params.forNativeImpl);
     spillStack(env);
-    int32_t stackIdx = safe_cast<int32_t>(m_params.numThroughStack);
+    int32_t stackIdx = safe_cast<int32_t>(m_params.numByAddr);
 
     // Make sure we have loads for all of the stack elements.  We need to do
     // this in forward order before we decref in backward order because
@@ -711,7 +724,7 @@ private:
     }
 
     for (auto i = m_params.size(); i-- > 0;) {
-      if (m_params[i].throughStack) {
+      if (m_params[i].passByAddr) {
         --stackIdx;
         auto const val = top(env, BCSPOffset{stackIdx}, DataTypeGeneric);
         gen(env, DecRef, val);
@@ -719,7 +732,7 @@ private:
         gen(env, DecRef, m_params[i].value);
       }
     }
-    discard(env, m_params.numThroughStack);
+    discard(env, m_params.numByAddr);
   }
 
 private:
@@ -737,37 +750,60 @@ SSATmp* coerce_value(IRGS& env,
                      SSATmp* oldVal,
                      uint32_t paramIdx,
                      const CatchMaker& maker) {
-  if (!callee->isParamCoerceMode()) {
+  auto const result = [&] () -> SSATmp* {
+    if (!callee->isParamCoerceMode()) {
+      if (ty <= TInt) {
+        return gen(env, ConvCellToInt, maker.makeUnusualCatch(), oldVal);
+      }
+      if (ty <= TDbl) {
+        return gen(env, ConvCellToDbl, maker.makeUnusualCatch(), oldVal);
+      }
+      if (ty <= TBool) {
+        return gen(env, ConvCellToBool, oldVal);
+      }
+
+      always_assert(false);
+    }
+
     if (ty <= TInt) {
-      return gen(env, ConvCellToInt, maker.makeUnusualCatch(), oldVal);
+      return gen(env,
+                 CoerceCellToInt,
+                 FuncArgData(callee, paramIdx + 1),
+                 maker.makeParamCoerceCatch(),
+                 oldVal);
     }
     if (ty <= TDbl) {
-      return gen(env, ConvCellToDbl, maker.makeUnusualCatch(), oldVal);
+      return gen(env,
+                 CoerceCellToDbl,
+                 FuncArgData(callee, paramIdx + 1),
+                 maker.makeParamCoerceCatch(),
+                 oldVal);
     }
-    always_assert(ty <= TBool);
-    return gen(env, ConvCellToBool, oldVal);
+    if (ty <= TBool) {
+      return gen(env,
+                 CoerceCellToBool,
+                 FuncArgData(callee, paramIdx + 1),
+                 maker.makeParamCoerceCatch(),
+                 oldVal);
+    }
+
+    return nullptr;
+  }();
+
+  if (result) {
+    gen(env, DecRef, oldVal);
+    return result;
   }
 
-  if (ty <= TInt) {
-    return gen(env,
-               CoerceCellToInt,
-               FuncArgData(callee, paramIdx + 1),
-               maker.makeParamCoerceCatch(),
-               oldVal);
-  }
-  if (ty <= TDbl) {
-    return gen(env,
-               CoerceCellToDbl,
-               FuncArgData(callee, paramIdx + 1),
-               maker.makeParamCoerceCatch(),
-               oldVal);
-  }
-  always_assert(ty <= TBool);
-  return gen(env,
-             CoerceCellToBool,
-             FuncArgData(callee, paramIdx + 1),
-             maker.makeParamCoerceCatch(),
-             oldVal);
+  always_assert(ty.subtypeOfAny(TArr, TStr, TObj, TRes) &&
+                callee->params()[paramIdx].nativeArg);
+  auto const misAddr = gen(env, LdMIStateAddr,
+                           cns(env, offsetof(MInstrState, tvBuiltinReturn)));
+  gen(env, StMem, misAddr, oldVal);
+  gen(env, CoerceMem, ty,
+      CoerceMemData { callee, paramIdx + 1 },
+      maker.makeParamCoerceCatch(), misAddr);
+  return gen(env, LdMem, ty, misAddr);
 }
 
 void coerce_stack(IRGS& env,
@@ -831,8 +867,8 @@ SSATmp* realize_param(IRGS& env,
     auto const baseTy = targetTy - TNull;
     assert(baseTy.isKnownDataType());
     auto const convertTy =
-      !callee->isParamCoerceMode() && targetTy == TNullableObj ?
-      targetTy : baseTy;
+      (!callee->isParamCoerceMode() &&
+       targetTy == TNullableObj) ? targetTy : baseTy;
 
     if (auto const value = cond(
           env,
@@ -862,6 +898,7 @@ SSATmp* realize_param(IRGS& env,
       param.value = value;
     }
   }
+
   return realize();
 }
 
@@ -885,27 +922,25 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 
   assertx(!params.count || callee->attrs() & AttrNumArgs);
 
+  DEBUG_ONLY auto usedStack = false;
   auto stackIdx = uint32_t{0};
   for (auto paramIdx = uint32_t{0}; paramIdx < params.size(); ++paramIdx) {
     auto& param = params[paramIdx];
-    auto const targetTy = [&]() -> Type {
-      auto const mi = callee->methInfo();
-      if (callee->params()[paramIdx].builtinType == KindOfObject && mi &&
-          mi->parameters[paramIdx]->valueLen > 0) {
-        return TNullableObj;
-      }
-      return param_coerce_type(callee, paramIdx);
-    }();
+    auto const targetTy = param_coerce_type(callee, paramIdx);
 
     if (param.value->type() <= TPtrToGen) {
       ret[argIdx++] = realize_param(
         env, param, callee, targetTy,
         [&] (const Type& ty, Block* fail) -> SSATmp* {
           gen(env, CheckTypeMem, ty, fail, param.value);
-          return nullptr;
+          return param.isOutputArg ?
+            gen(env, LdMem, TBoxedCell, param.value) : nullptr;
         },
         [&] (const Type& ty) -> SSATmp* {
           hint(env, Block::Hint::Unlikely);
+          if (param.isOutputArg) {
+            return cns(env, TNullptr);
+          }
           if (callee->isParamCoerceMode()) {
             gen(env,
                 CoerceMem,
@@ -923,12 +958,14 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           return nullptr;
         },
         [&] {
-          if (param.needsConversion &&
-              (targetTy == TBool ||
-               targetTy == TInt ||
-               targetTy == TDbl)) {
+          if (!param.passByAddr && !param.isOutputArg) {
+            assertx(targetTy == TBool ||
+                    targetTy == TInt ||
+                    targetTy == TDbl ||
+                    callee->params()[paramIdx].nativeArg);
             return gen(env, LdMem,
-                       targetTy == TBool ? TInt : targetTy,
+                       targetTy == TBool || targetTy == TBoxedCell ?
+                       TInt : targetTy == TBottom ? TCell : targetTy,
                        param.value);
           }
           return param.value;
@@ -936,7 +973,8 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
       continue;
     }
 
-    if (!param.throughStack) {
+    if (!param.passByAddr) {
+      auto const oldVal = params[paramIdx].value;
       ret[argIdx++] = realize_param(
         env, param, callee, targetTy,
         [&] (const Type& ty, Block* fail) {
@@ -945,26 +983,51 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           return ret;
         },
         [&] (const Type& ty) {
-          auto const oldVal = params[paramIdx].value;
-          auto const newVal = coerce_value(
-            env,
-            ty,
-            callee,
-            oldVal,
-            paramIdx,
-            maker
-          );
-          gen(env, DecRef, oldVal);
-          return newVal;
+          if (param.isOutputArg) return cns(env, TNullptr);
+          return coerce_value(
+              env,
+              ty,
+              callee,
+              oldVal,
+              paramIdx,
+              maker
+            );
         },
         [&] {
-          return param.value;
+          /*
+           * This gets tricky:
+           *   - if we had a ref-counted type, and it was converted
+           *     to a Bool, Int or Dbl above, we explicitly DecReffed it
+           *     (in coerce_value).
+           *   - if we had a non-RefData nativeArg, we did a CoerceMem
+           *     which implicitly DecReffed the old value
+           * In either case, the old value is taken care of, and any future
+           * DecRefs (from exceptions, or after the call on the normal flow
+           * of execution) should DecRef param.value (ie the post-coercion
+           * value).
+           *
+           * But if we had an OutputArg, we did not DecRef the old value,
+           * and the post-coercion value is a RefData* or nullptr.
+           * If its a RefData*, we need to DecRef that - but in that case
+           * the new value is the same as the old.
+           * If its Nullptr, we need to DecRef the old value.
+           *
+           * So in both cases we actually want to DecRef the *old* value, so
+           * we have to restore it here (because realize_param replaced it
+           * with the new value).
+           */
+          auto v = param.value;
+          if (param.isOutputArg) {
+            param.value = oldVal;
+          }
+          return v;
         });
       continue;
     }
 
+    usedStack = true;
     auto const offset = BCSPOffset{safe_cast<int32_t>(
-        params.numThroughStack - stackIdx - 1)};
+        params.numByAddr - stackIdx - 1)};
 
     ret[argIdx++] = realize_param(
       env, param, callee, targetTy,
@@ -986,7 +1049,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     ++stackIdx;
   }
 
-  assertx(stackIdx == params.numThroughStack);
+  assertx(!usedStack || stackIdx == params.numByAddr);
   assertx(argIdx == cbNumArgs);
 
   return ret;
@@ -1003,17 +1066,17 @@ SSATmp* builtinCall(IRGS& env,
     /*
      * Everything that needs to be on the stack gets spilled now.
      *
-     * If we're not inlining, the reason we do this even when numThroughStack is
+     * If we're not inlining, the reason we do this even when numByAddr is
      * zero is to make it so that in either case the stack depth when we enter
-     * our catch blocks is always the same as the numThroughStack value, in all
+     * our catch blocks is always the same as the numByAddr value, in all
      * situations.  If we didn't do this, then when we aren't inlining, and
-     * numThroughStack is zero, we'd have the stack depth be the total num
+     * numByAddr is zero, we'd have the stack depth be the total num
      * params (the depth before the FCallBuiltin), which would add more cases
      * to handle in the catch blocks.
      */
-    if (params.numThroughStack != 0 || !catchMaker.inlining()) {
+    if (params.numByAddr != 0 || !catchMaker.inlining()) {
       for (auto i = uint32_t{0}; i < params.size(); ++i) {
-        if (params[i].throughStack) {
+        if (params[i].passByAddr) {
           push(env, params[i].value);
         }
       }
@@ -1062,19 +1125,12 @@ SSATmp* builtinCall(IRGS& env,
   );
 
   if (!params.forNativeImpl) {
-    // Pop the stack params
     if (params.thiz && params.thiz->type() <= TObj) {
       gen(env, DecRef, params.thiz);
     }
-    for (auto i = uint32_t{0}; i < params.numThroughStack; ++i) {
-      popDecRef(env);
-    }
+    catchMaker.decRefByPopping();
   }
 
-  // We don't need to decref the non-state param values, because they are only
-  // non-reference counted types.  (At this point we've gotten through all our
-  // coersions, so even if they started refcounted we've already decref'd them
-  // as appropriate.)
   return ret;
 }
 

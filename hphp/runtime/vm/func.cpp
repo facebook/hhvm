@@ -714,6 +714,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_isPairGenerator(false)
   , m_isGenerated(false)
   , m_hasExtendedSharedData(false)
+  , m_returnByValue(false)
   , m_originalFilename(nullptr)
 {
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);

@@ -556,12 +556,23 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
 
 void frame_free_locals_no_hook(ActRec* fp);
 
-inline TypedValue* arReturn(ActRec* ar, Variant&& value) {
-  frame_free_locals_no_hook(ar);
-  ar->m_r = *value.asTypedValue();
-  tvWriteNull(value.asTypedValue());
-  return &ar->m_r;
-}
+#define arReturn(a, x)                          \
+  ([&] {                                        \
+    ActRec* ar_ = (a);                          \
+    TypedValue val_;                            \
+    new (&val_) Variant(x);                     \
+    frame_free_locals_no_hook(ar_);             \
+    ar_->m_r = val_;                            \
+    return &ar_->m_r;                           \
+  }())
+
+#define tvReturn(x)                                                     \
+  ([&] {                                                                \
+    TypedValue val_;                                                    \
+    new (&val_) Variant(x);                                             \
+    assert(val_.m_type != KindOfRef && val_.m_type != KindOfUninit);    \
+    return val_;                                                        \
+  }())
 
 template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
 template <> Class* arGetContextClassImpl<true>(const ActRec* ar);

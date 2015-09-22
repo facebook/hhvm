@@ -6923,7 +6923,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
             break;
           }
         }
-        bif = Native::getWrapper(pce, usesDouble, variadic);
+        bif = Native::getWrapper(pce, usesDouble);
       }
     }
   }

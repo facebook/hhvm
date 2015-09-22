@@ -663,7 +663,7 @@ CallDest CodeGenerator::callDest(Vreg reg0) const {
 }
 
 CallDest CodeGenerator::callDest(Vreg reg0, Vreg reg1) const {
-  return { DestType::SSA, reg0, reg1 };
+  return { DestType::TV, reg0, reg1 };
 }
 
 CallDest CodeGenerator::callDest(const IRInstruction* inst) const {
@@ -2736,6 +2736,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto const numNonDefault  = inst->extra<CallBuiltin>()->numNonDefault;
   auto const returnType     = inst->typeParam();
   auto const funcReturnType = callee->returnType();
+  auto const returnByValue  = callee->isReturnByValue();
   auto& v = vmain();
 
   int returnOffset = rds::kVmMInstrStateOff +
@@ -2763,19 +2764,21 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   PhysReg rdsReg(rvmtl());
 
   auto callArgs = argGroup(inst);
-  if (isBuiltinByRef(funcReturnType)) {
-    // First arg is pointer to storage for that return value
-    if (isReqPtrRef(funcReturnType)) {
-      returnOffset += TVOFF(m_data);
+  if (!returnByValue) {
+    if (isBuiltinByRef(funcReturnType)) {
+      // First arg is pointer to storage for that return value
+      if (isReqPtrRef(funcReturnType)) {
+        returnOffset += TVOFF(m_data);
+      }
+      // Pass the address of tvBuiltinReturn to the native function as the
+      // location it can construct the return Array, String, Object, or Variant.
+      callArgs.addr(rdsReg, returnOffset); // &rdsReg[returnOffset]
     }
-    // Pass the address of tvBuiltinReturn to the native function as the
-    // location it can construct the return Array, String, Object, or Variant.
-    callArgs.addr(rdsReg, returnOffset); // &rdsReg[returnOffset]
   }
 
-  // Non-pointer args are plain values passed by value.  String, Array,
-  // Object, and Variant are passed by const&, ie a pointer to stack memory
-  // holding the value, so expect PtrToT types for these.
+  // Non-pointer and nativeArg args, are passed by value.  String,
+  // Array, Object, and Variant are passed by const&, ie a pointer to stack
+  // memory holding the value, so expect PtrToT types for these.
   // Pointers to req::ptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   auto srcNum = uint32_t{2};
@@ -2805,25 +2808,40 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
-    if (TVOFF(m_data) && isReqPtrRef(pi.builtinType)) {
+    if (TVOFF(m_data) &&
+        !pi.nativeArg &&
+        isReqPtrRef(pi.builtinType)) {
       assertx(inst->src(srcNum)->type() <= TPtrToGen);
       callArgs.addr(srcLoc(inst, srcNum).reg(), TVOFF(m_data));
+    } else if (pi.nativeArg && !pi.builtinType && !callee->byRef(i)) {
+      callArgs.typedValue(srcNum);
     } else {
       callArgs.ssa(srcNum, pi.builtinType == KindOfDouble);
     }
   }
 
-  // If the return value is returned by reference, we don't need the
-  // return value from this call since we know where the value is.
-  auto dest = isBuiltinByRef(funcReturnType) ? kVoidDest :
-              funcReturnType == KindOfDouble ? callDestDbl(inst) :
-              callDest(inst);
+  auto dest = [&] () -> CallDest {
+    if (isBuiltinByRef(funcReturnType)) {
+      if (returnByValue) {
+        if (!funcReturnType) {
+          return callDest(dstReg, dstType);
+        }
+        return callDest(dstReg);
+      }
+      return kVoidDest;
+    }
+    if (funcReturnType == KindOfDouble) {
+      return callDestDbl(inst);
+    }
+    return callDest(inst);
+  }();
+
   cgCallHelper(v, CppCall::direct(callee->nativeFuncPtr()),
                dest, SyncOptions::kSyncPoint, callArgs);
 
-  // For primitive return types (int, bool, double), the return value
-  // is already in dstReg (the builtin call returns in rax or xmm0).
-  if (returnType.isSimpleType()) {
+  // For primitive return types (int, bool, double), and returnByValue,
+  // the return value is already in dstReg/dstType
+  if (returnType.isSimpleType() || returnByValue) {
     return;
   }
 

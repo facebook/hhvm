@@ -214,6 +214,10 @@ inline MaybeDataType Func::returnType() const {
   return shared()->m_returnType;
 }
 
+inline bool Func::isReturnByValue() const {
+  return shared()->m_returnByValue;
+}
+
 inline bool Func::isReturnRef() const {
   return m_attrs & AttrReference;
 }

@@ -1367,7 +1367,7 @@ To string conversions:
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
 
-| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen,Cls), Er|PRc
+| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen,Cls,Nullptr), Er|PRc
 
   Call builtin function with N arguments. S0 and S1 should be the current vmfp
   and vmsp, respectively.

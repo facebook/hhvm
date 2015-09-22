@@ -102,9 +102,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   case StStk:
     return srcIdx == 1;
 
-  case CallBuiltin:
-    return srcIdx < inst.numSrcs();
-
   default:
     return false;
   }

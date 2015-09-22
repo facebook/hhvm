@@ -83,7 +83,7 @@ class AsyncMysqlConnection {
   public function __construct() { }
   public function query(string $query, int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>{ }
   public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): Awaitable<AsyncMysqlQueryResult>{ }
-  public function multiQuery(Vector<string> $query, int $timeout_micros = -1) { }
+  public function multiQuery(Traversable<string> $query, int $timeout_micros = -1) { }
   public function escapeString(string $data): string { }
   public function close(): void{ }
   public function releaseConnection() { }

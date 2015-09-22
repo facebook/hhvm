@@ -614,6 +614,16 @@ struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
 ///////////////////////////////////////////////////////////////////////////////
 // x64.
 
+/*
+ * Unless specifically noted otherwise, instructions with a Vreg8 or Vreg16
+ * dest preserve the upper 56 or 48 bits. However, instructions with a Vreg32
+ * dest zero the upper 32 bits.
+ *
+ * This reflects the behavior of using x86-64's byte and word-sized registers
+ * such as AL, CL, etc and AX, CX, etc. Starting with x86-64, 32-bit
+ * operations zero the upper bits of 64-bit registers.
+ */
+
 struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct addlm { Vreg32 s0; Vptr m; VregSF sf; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; };

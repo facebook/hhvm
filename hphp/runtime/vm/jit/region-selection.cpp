@@ -183,8 +183,12 @@ void RegionDesc::replaceBlock(BlockId bid, BlockPtr newBlock) {
 void RegionDesc::deleteBlock(BlockId bid) {
   auto it = std::find_if(m_blocks.begin(), m_blocks.end(),
                          [&](const BlockPtr b) { return b->id() == bid; });
-  if (it == m_blocks.end()) return;
+  if (it != m_blocks.end()) deleteBlock(it);
+}
 
+RegionDesc::BlockVec::iterator
+RegionDesc::deleteBlock(RegionDesc::BlockVec::iterator it) {
+  const auto bid = (*it)->id();
   for (auto pid : preds(bid)) removeArc(pid, bid);
   for (auto sid : succs(bid)) removeArc(bid, sid);
 
@@ -201,8 +205,8 @@ void RegionDesc::deleteBlock(BlockId bid) {
     clearNextRetrans(prevR.value());
   }
 
-  m_blocks.erase(it);
   m_data.erase(bid);
+  return m_blocks.erase(it);
 }
 
 const RegionDesc::BlockVec& RegionDesc::blocks() const {
@@ -373,10 +377,12 @@ void RegionDesc::sortBlocks() {
   assertx(m_blocks.size() >= reverse.size());
 
   // Remove unreachable blocks from `m_data'.
-  for (auto& b : m_blocks) {
-    auto bid = b->id();
+  for (auto it = m_blocks.begin(); it != m_blocks.end();) {
+    auto bid = (*it)->id();
     if (visited.count(bid) == 0) {
-      deleteBlock(bid);
+      it = deleteBlock(it);
+    } else {
+      it++;
     }
   }
 

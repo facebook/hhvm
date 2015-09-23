@@ -594,6 +594,10 @@ let mk_mapper = fun m_in ->
           and v2 = map_of_option map_expr v2
           and v3 = map_expr v3
           in Eif ((v1, v2, v3))
+      | NullCoalesce ((v1, v2)) ->
+          let v1 = map_expr v1
+          and v2 = map_expr v2
+          in NullCoalesce ((v1, v2))
       | InstanceOf ((v1, v2)) ->
           let v1 = map_expr v1 and v2 = map_expr v2 in InstanceOf ((v1, v2))
       | New ((v1, v2, v3)) ->

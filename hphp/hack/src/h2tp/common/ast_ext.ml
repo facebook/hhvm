@@ -159,7 +159,7 @@ let rec is_collection_expr_ = function
   | New ((_, Id (_, _)), _, _) -> Some false
   | Lvar _ | Clone _ | Obj_get _ | Array_get _ | Class_get _  | Yield _
   (* casts to object are the only type we need to worry about *)
-  | Cast ((_, Happly ((_, "object"), [])), _) | Eif _ | Call _
+  | Cast ((_, Happly ((_, "object"), [])), _) | Eif _ | NullCoalesce _ | Call _
   | Unsafeexpr _ | Expr_list _ | New _ -> None
   | Binop ((Eq None), _, (_, e)) | Unop (Uref, (_, e)) -> is_collection_expr_ e
   | Array _  | Shape _ | Null | True | False | Class_const _ | Int _

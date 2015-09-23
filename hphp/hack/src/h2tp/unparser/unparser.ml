@@ -744,6 +744,7 @@ let rec u_program v = u_of_list_spc u_def v
       | Unop _
       | Binop _
       | Eif _
+      | NullCoalesce _
       | InstanceOf _
       | New _
       | Efun _
@@ -844,6 +845,12 @@ let rec u_program v = u_of_list_spc u_def v
           Str "?";
           u_of_option u_expr_nested trueExprOption;
           Str ":";
+          u_expr_nested falseExpr;
+        ]
+    | NullCoalesce (trueExpr, falseExpr) ->
+        StrWords [
+          u_expr_nested trueExpr;
+          Str "??";
           u_expr_nested falseExpr;
         ]
     | InstanceOf (instExpr, hintExpr) ->

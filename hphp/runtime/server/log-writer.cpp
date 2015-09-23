@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/log-writer.h"
 
+#include <cctype>
 #include <sstream>
 #include <map>
 

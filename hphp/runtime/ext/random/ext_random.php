@@ -6,12 +6,13 @@
  *
  * @param int $length - The length of the random string in bytes.
  *
- * @return mixed - The crypto-secure random bytes in binary format, or FALSE
- *                 on failure.
+ * @return string - The crypto-secure random bytes in binary format.
+ *
+ * @throws Exception - If generating sufficiently random data fails.
  *
  */
 <<__Native>>
-function random_bytes(int $length): mixed;
+function random_bytes(int $length): string;
 
 /**
  * Generates cryptographic random integers that are suitable for use where
@@ -20,8 +21,11 @@ function random_bytes(int $length): mixed;
  * @param int $min - The lowest value to be returned down to PHP_INT_MIN.
  * @param int $max - The highest value to be returned up to PHP_INT_MAX.
  *
- * @return mixed - The crypto-secure random integer, or FALSE on failure.
+ * @return int - The crypto-secure random integer.
+ *
+ * @throws Exception - If generating sufficiently random data fails.
+ * @throws Error - If $min > $max.
  *
  */
 <<__Native>>
-function random_int(int $min, int $max): mixed;
+function random_int(int $min, int $max): int;

@@ -24,75 +24,70 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// @TODO Throw exceptions instead of raising warnings
 static bool getRandomBytes(void *bytes, size_t length) {
 
-  // @TODO Need better error handling
+  // @TODO SystemLib::throwExceptionObject from here
   folly::Random::secureRandom(bytes, length);
 
   return true;
 }
 
-Variant HHVM_FUNCTION(random_bytes, int64_t length) {
+String HHVM_FUNCTION(random_bytes, int64_t length) {
   if (length < 1) {
-    raise_warning(
-      "Length must be greater than 0"
-    );
-		return false;
-	}
+    // @TODO Make this throw PHP 7 `Error` when it's implemented
+    SystemLib::throwExceptionObject("Length must be greater than 0");
+  }
 
   char *bytes = (char*)calloc(length, 1);
 
   if (bytes == NULL) {
-    raise_warning(
-      "Cannot allocate memory"
-    );
-		return false;
+    SystemLib::throwExceptionObject("Cannot allocate memory");
   }
 
   if (!getRandomBytes(bytes, length)) {
     free(bytes);
-    return false;
+    SystemLib::throwExceptionObject("Could not gather sufficient random data");
   }
 
   return String(bytes, length, AttachString);
 }
 
-Variant HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
-  if (min >= max) {
-    raise_warning(
-      "Minimum value must be less than the maximum value"
-    );
-		return false;
-	}
+int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
+  if (min > max) {
+    // @TODO Make this throw PHP 7 `Error` when it's implemented
+    SystemLib::throwExceptionObject("Minimum value must be less than or equal to the maximum value");
+  }
 
+  if (min == max) {
+    return min;
+  }
 
-	uint64_t umax = max - min;
+  uint64_t umax = max - min;
   uint64_t result;
   if(!getRandomBytes(&result, sizeof(result))) {
-    return false;
+    SystemLib::throwExceptionObject("Could not gather sufficient random data");
   }
 
   // Special case where no modulus is required
-	if (umax == std::numeric_limits<uint64_t>::max()) {
+  if (umax == std::numeric_limits<uint64_t>::max()) {
     return result;
-	}
+  }
 
-	// Increment the max so the range is inclusive of max
-	umax++;
+  // Increment the max so the range is inclusive of max
+  umax++;
 
   // Powers of two are not biased
-	if ((umax & (umax - 1)) != 0) {
-		// Ceiling under which std::numeric_limits<uint64_t>::max() % max == 0
-		int64_t limit = std::numeric_limits<uint64_t>::max() - (std::numeric_limits<uint64_t>::max() % umax) - 1;
+  if ((umax & (umax - 1)) != 0) {
+    // Ceiling under which std::numeric_limits<uint64_t>::max() % max == 0
+    int64_t limit = std::numeric_limits<uint64_t>::max() - (std::numeric_limits<uint64_t>::max() % umax) - 1;
 
-		// Discard numbers over the limit to avoid modulo bias
-		while (result > limit) {
+    // Discard numbers over the limit to avoid modulo bias
+    while (result > limit) {
       if(!getRandomBytes(&result, sizeof(result))) {
-        return false;
+        SystemLib::throwExceptionObject("Could not gather sufficient random data");
       }
-		}
-	}
+    }
+  }
 
   return (int64_t) ((result % umax) + min);
 }

@@ -47,6 +47,24 @@ function image2wbmp(resource $image,
                     string $filename = "",
                     int $threshold = -1): bool;
 
+/* Return an image containing the affine tramsformed src image, using
+ * an optional clipping area.
+ */
+<<__Native>>
+function imageaffine(resource $image, array $affine = [],
+                            array $clip = []): mixed;
+
+/* Concat two matrices.
+ */
+<<__Native>>
+function imageaffinematrixconcat(array $m1, array $m2): mixed;
+
+/* Return an image containing the affine tramsformed src image, using
+ * an optional clipping area.
+ */
+<<__Native>>
+function imageaffinematrixget(int $type, mixed $options = []): mixed;
+
 /* imagealphablending() allows for two different modes of drawing on truecolor
  * images. In blending mode, the alpha channel component of the color supplied
  * to all drawing function, such as imagesetpixel() determines how much of the
@@ -496,6 +514,17 @@ function imagecreatefromxpm(string $filename): mixed;
 function imagecreatetruecolor(int $width,
                               int $height): mixed;
 
+/* Crop an image using the given coordinates and size, x, y, width and height.
+ */
+<<__Native>>
+function imagecrop(resource $image, array $rect): mixed;
+
+/* Crop an image automatically using one of the available modes.
+ */
+<<__Native>>
+function imagecropauto(resource $image, int $mode = -1,
+                       float $threshold = 0.5, int $color = -1): mixed;
+
 /* This function is deprecated. Use combination of imagesetstyle() and
  * imageline() instead.
  */
@@ -521,6 +550,12 @@ function imageellipse(resource $image,
                       int $width,
                       int $height,
                       int $color): bool;
+
+/* Draws an ellipse centered at the specified coordinates.
+ */
+<<__Native>>
+function imageflip(resource $image,
+                      int $mode = IMG_FLIP_HORIZONTAL): bool;
 
 /* Performs a flood fill starting at the given coordinate (top left is 0, 0)
  * with the given color in the image.

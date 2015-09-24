@@ -129,6 +129,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'classname/with_tconst*.php',
         'type_structure/*.php',
         'constraints/class_type_constant*.php',
+        'instantiate_from_unresolved_class_id_type.php',
     ],
     "Memoize": [
         'memoize/*.php',
@@ -160,7 +161,11 @@ UNSUPPORTED_FILES_CONVERTER = {
     ],
     "Collection initializers in instance variables are currently not supported. (Other[0])": [
         "reset_after_foreach.php",
-        "static_collection_init.php"
+        "static_collection_init.php",
+        "class_property_initialization/map_non_static.php",
+        "class_property_initialization/collection_non_static.php",
+        "class_property_initialization/"
+        "initialize_property_with_static_literal.php",
     ],
     "Unsupported collection type StableMap (Other[0])": [
         "collection_literals.php",

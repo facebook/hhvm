@@ -348,6 +348,23 @@ Flags handle_general_effects(Local& env,
     }
     break;
 
+  case CheckInitMem:
+    {
+      auto const meta = env.global.ainfo.find(canonicalize(m.loads));
+      auto const tloc = find_tracked(env, inst, meta);
+      if (!tloc) break;
+      if (!tloc->knownType.maybe(TUninit)) {
+        return FJmpNext{};
+      }
+      if (tloc->knownType <= TUninit) {
+        return FJmpTaken{};
+      }
+      if (tloc->knownValue != nullptr) {
+        return FReducible { tloc->knownValue, tloc->knownType, meta->index };
+      }
+    }
+    break;
+
   case CastStk:
   case CoerceStk:
     {
@@ -637,7 +654,7 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
   DEBUG_ONLY Opcode oldOp = inst.op();
   DEBUG_ONLY Opcode newOp;
 
-  auto const reduce_to = [&] (Opcode op, Type typeParam) {
+  auto const reduce_to = [&] (Opcode op, folly::Optional<Type> typeParam) {
     auto const taken = hasEdges(op) ? inst.taken() : nullptr;
     auto const newInst = env.global.unit.gen(
       op,
@@ -661,6 +678,10 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
   case CheckStk:
   case CheckRefInner:
     reduce_to(CheckType, inst.typeParam());
+    break;
+
+  case CheckInitMem:
+    reduce_to(CheckInit, folly::none);
     break;
 
   case AssertLoc:

@@ -547,7 +547,7 @@ void Repo::initCentral() {
     }
   }
 
-#ifndef _MSC_VER
+#ifndef _WIN32
   // Try the equivalent of "$HOME/.hhvm.hhbc", but look up the home directory
   // in the password database.
   {
@@ -555,7 +555,8 @@ void Repo::initCentral() {
     struct passwd* pwbufp;
     long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize != -1) {
-      char buf[size_t(bufsize)];
+      auto buf = new char[bufsize];
+      SCOPE_EXIT { delete buf; };
       if (!getpwuid_r(getuid(), &pwbuf, buf, size_t(bufsize), &pwbufp)
           && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
         std::string centralPath = pwbufp->pw_dir;
@@ -566,9 +567,7 @@ void Repo::initCentral() {
       }
     }
   }
-#endif
-
-#ifdef _WIN32
+#else // _WIN32
   // Try "$HOMEDRIVE$HOMEPATH/.hhvm.hhbc"
   char* HOMEDRIVE = getenv("HOMEDRIVE");
   if (HOMEDRIVE != nullptr) {

@@ -188,6 +188,14 @@ Parser::Parser(Scanner &scanner, const char *fileName,
   m_ar->addFileScope(m_file);
 }
 
+bool Parser::parseImpl() {
+  if (RuntimeOption::PHP7_UVS) {
+    return parseImpl7();
+  } else {
+    return parseImpl5();
+  }
+}
+
 bool Parser::parse() {
   try {
     if (!parseImpl()) {
@@ -528,10 +536,13 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
            stripped == "idx" ||
+           stripped == "type_structure" ||
            stripped == "asio_get_current_context_idx" ||
            stripped == "asio_get_running_in_context" ||
            stripped == "asio_get_running" ||
            stripped == "xenon_get_data" ||
+           stripped == "thread_memory_stats" ||
+           stripped == "thread_mark_stack" ||
            stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
            stripped == "objprof_get_paths" ||
@@ -2441,6 +2452,8 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     AliasEntry{"InvariantException", "HH\\InvariantException"},
     AliasEntry{"IMemoizeParam", "HH\\IMemoizeParam"},
     AliasEntry{"Shapes", "HH\\Shapes"},
+    AliasEntry{"TypeStructureKind", "HH\\TypeStructureKind"},
+    AliasEntry{"TypeStructure", "HH\\TypeStructure"},
 
     AliasEntry{"Awaitable", "HH\\Awaitable"},
     AliasEntry{"AsyncGenerator", "HH\\AsyncGenerator"},

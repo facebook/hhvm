@@ -105,8 +105,11 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   endif()
 
   # No optimizations for debug builds.
-  set(CMAKE_C_FLAGS_DEBUG    "-Og -g")
-  set(CMAKE_CXX_FLAGS_DEBUG  "-Og -g")
+  # -Og enables some optimizations, but makes debugging harder by optimizing
+  # away some functions and locals. -O0 is more debuggable.
+  # -O0-ggdb was reputed to cause gdb to crash (github #4450)
+  set(CMAKE_C_FLAGS_DEBUG    "-O0 -g")
+  set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
 
   # Generic GCC flags and Optional flags
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
@@ -116,7 +119,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
   set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} ${GNUCC_OPT} -w")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -ffunction-sections -fdata-sections -fno-gcse -fno-omit-frame-pointer -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations -Wno-unused-function ${GNUCC_OPT} ${GNUCC_PLAT_OPT}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -ffunction-sections -fdata-sections -fno-gcse -fno-omit-frame-pointer -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations -Wno-unused-function -Wvla ${GNUCC_OPT} ${GNUCC_PLAT_OPT}")
   if(STATIC_CXX_LIB)
     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
   endif()

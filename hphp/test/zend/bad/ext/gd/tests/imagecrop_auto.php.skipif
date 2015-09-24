@@ -1,3 +1,0 @@
-<?php  
-if ( ! extension_loaded('gd') || !function_exists('imagecrop')) die( 'skip GD imagecropauto not present; skipping test' ); 
-?> 

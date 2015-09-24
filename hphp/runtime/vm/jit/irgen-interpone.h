@@ -22,12 +22,14 @@ namespace HPHP { namespace jit {
 struct IRGS;
 struct Type;
 struct InterpOneData;
+struct NormalizedInstruction;
 }}
 
 namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
+void interpOne(IRGS&, const NormalizedInstruction&);
 void interpOne(IRGS&, int popped);
 void interpOne(IRGS&, Type t, int popped);
 void interpOne(IRGS&, folly::Optional<Type>, int popped, int pushed,

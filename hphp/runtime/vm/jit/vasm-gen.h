@@ -95,7 +95,6 @@ struct Vout {
   /*
    * Vunit delegations.
    */
-  Vpoint makePoint();
   Vreg makeReg();
   Vtuple makeTuple(const VregList& regs) const;
   Vtuple makeTuple(VregList&& regs) const;

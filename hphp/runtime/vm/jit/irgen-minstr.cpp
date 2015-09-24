@@ -26,11 +26,14 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
+#include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -2341,7 +2344,8 @@ void cleanTvRefs(IRGS& env) {
 
 /*
  * If tvRef contains a value, DecRef tvRef2 and move tvRef's value to tvRef2,
- * storing Uninit to tvRef.
+ * storing Uninit to tvRef. Returns the adjusted base, which may point to
+ * tvRef2.
  */
 SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
   auto tvRef = tvRefPtr(env);
@@ -2370,6 +2374,38 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
       return tvRef2;
     }
   );
+}
+
+void baseGImpl(IRGS& env, SSATmp* name, MOpFlags flags) {
+  if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
+  auto gblPtr = gen(env, BaseG, MInstrAttrData{mOpFlagsToAttr(flags)}, name);
+  gen(env, StMBase, gblPtr);
+}
+
+void baseSImpl(IRGS& env, SSATmp* name, int32_t clsIdx) {
+  SSATmp* rhsVal;
+  if (clsIdx == 1) rhsVal = popC(env, DataTypeGeneric);
+  auto cls = popA(env);
+  if (clsIdx == 1) push(env, rhsVal);
+
+  auto spropPtr = ldClsPropAddr(env, cls, name, true);
+  gen(env, StMBase, spropPtr);
+}
+
+void simpleBaseImpl(IRGS& env, SSATmp* base, Type innerTy) {
+  checkGenBase(base->type());
+
+  if (base->isA(TBoxedCell)) {
+    env.irb->constrainValue(base, DataTypeSpecific);
+    gen(env, CheckRefInner, innerTy, makeExit(env), base);
+    base = gen(env, LdRef, innerTy, base);
+  }
+
+  env.irb->fs().setMemberBaseValue(base);
+
+  // TODO(t2598894): We do this for consistency with the old guard relaxation
+  // code, but may change it in the future.
+  env.irb->constrainValue(base, DataTypeSpecific);
 }
 
 SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
@@ -2551,35 +2587,78 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
 
 }
 
+void emitBaseNC(IRGS& env, int32_t idx, MOpFlags flags) {
+  interpOne(env, *env.currentNormalizedInstruction);
+}
+
+void emitBaseNL(IRGS& env, int32_t locId, MOpFlags flags) {
+  interpOne(env, *env.currentNormalizedInstruction);
+}
+
+void emitBaseGC(IRGS& env, int32_t idx, MOpFlags flags) {
+  initTvRefs(env);
+  auto name = top(env, BCSPOffset{idx});
+  baseGImpl(env, name, flags);
+}
+
+void emitBaseGL(IRGS& env, int32_t locId, MOpFlags flags) {
+  initTvRefs(env);
+  auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
+                         DataTypeSpecific);
+  baseGImpl(env, name, flags);
+}
+
+void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx) {
+  initTvRefs(env);
+  auto name = top(env, BCSPOffset{propIdx});
+  baseSImpl(env, name, clsIdx);
+}
+
+void emitBaseSL(IRGS& env, int32_t locId, int32_t clsIdx) {
+  initTvRefs(env);
+  auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
+                         DataTypeSpecific);
+  baseSImpl(env, name, clsIdx);
+}
+
 void emitBaseL(IRGS& env, int32_t locId, MOpFlags flags) {
   initTvRefs(env);
   gen(env, StMBase, ldLocAddr(env, locId));
 
   auto base = ldLoc(env, locId, makePseudoMainExit(env), DataTypeGeneric);
-  checkGenBase(base->type());
-
-  if (base->isA(TBoxedCell)) {
-    env.irb->constrainLocal(locId, DataTypeCountness, "emitBaseL: boxed");
-    auto const innerTy = env.irb->predictedInnerType(locId);
-    gen(env, CheckRefInner, innerTy, makeExit(env), base);
-    base = gen(env, LdRef, innerTy, base);
-  }
-
-  env.irb->fs().setMemberBaseValue(base);
 
   if (base->isA(TUninit) && (flags & MOpFlags::Warn)) {
-    env.irb->constrainLocal(locId, DataTypeCountnessInit,
-                           "emitBaseL: Uninit base local");
+    env.irb->constrainLocal(locId, DataTypeSpecific,
+                            "emitBaseL: Uninit base local");
     gen(env, RaiseUninitLoc, cns(env, curFunc(env)->localVarName(locId)));
   }
 
-  // TODO(t2598894): We do this for consistency with the old guard relaxation
-  // code, but may change it in the future.
-  env.irb->constrainLocal(locId, DataTypeSpecific, "emitBaseL");
+  auto innerTy = base->isA(TBoxedCell) ? env.irb->predictedInnerType(locId)
+                                       : TTop;
+  simpleBaseImpl(env, base, innerTy);
+}
+
+void emitBaseC(IRGS& env, int32_t idx) {
+  initTvRefs(env);
+  spillStack(env);
+  env.irb->exceptionStackBoundary();
+
+  auto const bcOff = BCSPOffset{idx};
+  auto const irOff = offsetFromIRSP(env, bcOff);
+  gen(env, StMBase, ldStkAddr(env, bcOff));
+
+  auto base = top(env, bcOff);
+  auto innerTy = base->isA(TBoxedCell) ? env.irb->predictedStackInnerType(irOff)
+                                       : TTop;
+  simpleBaseImpl(env, top(env, bcOff), innerTy);
+}
+
+void emitBaseR(IRGS& env, int32_t idx) {
+  emitBaseC(env, idx);
 }
 
 void emitBaseH(IRGS& env) {
-  if (!curClass(env)) PUNT(Unreachable-LdThis);
+  if (!curClass(env)) return interpOne(env, *env.currentNormalizedInstruction);
 
   initTvRefs(env);
   auto base = ldThis(env);
@@ -2606,6 +2685,10 @@ void emitDimInt(IRGS& env, int64_t key, PropElemOp propElem, MOpFlags flags) {
 void emitDimStr(IRGS& env, const StringData* key,
                 PropElemOp propElem, MOpFlags flags) {
   dimImpl(env, propElem, flags, cns(env, key));
+}
+
+void emitDimNewElem(IRGS& env, MOpFlags flags) {
+  interpOne(env, *env.currentNormalizedInstruction);
 }
 
 void emitQueryML(IRGS& env, int32_t nDiscard, QueryMOp query,

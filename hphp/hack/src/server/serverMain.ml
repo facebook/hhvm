@@ -15,14 +15,21 @@ open ServerUtils
 open Utils
 
 exception State_not_found
+exception Load_state_disabled
 
 let sprintf = Printf.sprintf
 
-type recheck_loop_acc = {
+type recheck_loop_stats = {
   rechecked_batches : int;
   rechecked_count : int;
   (* includes dependencies *)
   total_rechecked_count : int;
+}
+
+let empty_recheck_loop_stats = {
+  rechecked_batches = 0;
+  rechecked_count = 0;
+  total_rechecked_count = 0;
 }
 
 (*****************************************************************************)
@@ -42,20 +49,26 @@ end = struct
     ignore(Lock.release (ServerFiles.init_file root))
 
   let wakeup_client oc msg =
-    Option.iter oc
-      ~f:(fun oc ->
-          try
-            output_string oc (msg ^ "\n");
-            flush oc
-          with _ ->
-            (* In case the client don't care... *)
-            ())
+    Option.iter oc begin fun oc ->
+      try
+        output_string oc (msg ^ "\n");
+        flush oc
+      with
+      (* The client went away *)
+      | Sys_error ("Broken pipe") -> ()
+      | e ->
+          Printf.eprintf "wakeup_client: %s\n%!" (Printexc.to_string e)
+    end
 
   let close_waiting_channel oc =
-    Option.iter oc
-      ~f:(fun oc ->
-          try close_out oc
-          with exn -> Printf.eprintf "Close: %S\n%!" (Printexc.to_string exn))
+    Option.iter oc begin fun oc ->
+      try close_out oc
+      with
+      (* The client went away *)
+      | Sys_error ("Broken pipe") -> ()
+      | e ->
+          Printf.eprintf "close_waiting_channel: %s\n%!" (Printexc.to_string e)
+    end
 
   (* This code is only executed when the options --check is NOT present *)
   let go options init_fun =
@@ -70,7 +83,9 @@ end = struct
     wakeup_client waiting_channel "starting";
     (* note: we only run periodical tasks on the root, not extras *)
     ServerIdle.init root;
-    let env = init_fun () in
+    let init_id = Random_id.short_string () in
+    Hh_logger.log "Init id: %s" init_id;
+    let env = HackEventLogger.with_id ~stage:`Init init_id init_fun in
     release_init_lock root;
     Hh_logger.log "Server is READY";
     wakeup_client waiting_channel "ready";
@@ -133,9 +148,10 @@ module Program : SERVER_PROGRAM =
         Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos)
 
     let make_next_files dir =
-      let php_next_files = Find.make_next_files FindUtils.is_php dir in
-      let js_next_files = Find.make_next_files FindUtils.is_js dir in
-      fun () -> php_next_files () @ js_next_files ()
+      Find.make_next_files begin fun f ->
+        (FindUtils.is_php f && not (FilesToIgnore.should_ignore f))
+        || FindUtils.is_js f
+      end dir
 
     let stamp_file = Filename.concat GlobalConfig.tmp_dir "stamp"
     let touch_stamp () =
@@ -294,7 +310,7 @@ let recheck genv old_env updates =
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
 let rec recheck_loop acc genv env =
-  let t = Unix.time () in
+  let t = Unix.gettimeofday () in
   let raw_updates =
     match genv.dfind with
     | None -> SSet.empty
@@ -329,6 +345,8 @@ let recheck_loop = recheck_loop {
 let serve genv env socket =
   let root = ServerArgs.root genv.options in
   let env = ref env in
+  let last_stats = ref empty_recheck_loop_stats in
+  let recheck_id = ref (Random_id.short_string ()) in
   while true do
     let lock_file = ServerFiles.lock_file root in
     if not (Lock.grab lock_file) then
@@ -338,24 +356,44 @@ let serve genv env socket =
     let has_client = sleep_and_check socket in
     let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
     if not has_client && not has_parsing_hook
-    then ServerIdle.go ();
-    let start_t = Unix.time () in
-    let acc, new_env = recheck_loop genv !env in
+    then begin
+      (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
+       * count so that we can figure out if the largest reclamations
+       * correspond to massive rebases. However, the logging call is done in
+       * the SharedMem module, which doesn't know anything about Server stuff.
+       * So we wrap the call here. *)
+      HackEventLogger.with_rechecked_stats
+        !last_stats.rechecked_batches
+        !last_stats.rechecked_count
+        !last_stats.total_rechecked_count
+        ServerIdle.go;
+      recheck_id := Random_id.short_string ();
+    end;
+    let start_t = Unix.gettimeofday () in
+    HackEventLogger.with_id ~stage:`Recheck !recheck_id @@ fun () ->
+    let stats, new_env = recheck_loop genv !env in
     env := new_env;
-    if acc.rechecked_batches > 0 then
-      HackEventLogger.recheck_end start_t
-        has_parsing_hook
-        acc.rechecked_batches acc.rechecked_count acc.total_rechecked_count;
+    if stats.rechecked_count > 0 then begin
+      HackEventLogger.recheck_end start_t has_parsing_hook
+        stats.rechecked_batches
+        stats.rechecked_count
+        stats.total_rechecked_count;
+      Hh_logger.log "Recheck id: %s" !recheck_id
+    end;
+    last_stats := stats;
     if has_client then handle_connection genv !env socket;
   done
 
 let load genv filename to_recheck =
+  let t = Unix.gettimeofday () in
   let chan = open_in filename in
   let env = Marshal.from_channel chan in
   Program.unmarshal chan;
   close_in chan;
   SharedMem.load (filename^".sharedmem");
-  HackEventLogger.load_read_end filename;
+  HackEventLogger.load_read_end t filename;
+  let t = Hh_logger.log_duration "Loading saved state" t in
+
   let to_recheck =
     List.rev_append (BuildMain.get_all_targets ()) to_recheck in
   let paths_to_recheck =
@@ -364,14 +402,15 @@ let load genv filename to_recheck =
     List.fold_left paths_to_recheck
       ~f:(fun acc update -> Relative_path.Set.add update acc)
       ~init:Relative_path.Set.empty in
-  let start_t = Unix.time () in
   let env, rechecked, total_rechecked = recheck genv env updates in
   let rechecked_count = Relative_path.Set.cardinal rechecked in
-  HackEventLogger.load_recheck_end start_t rechecked_count total_rechecked;
+  HackEventLogger.load_recheck_end t rechecked_count total_rechecked;
+  let _t = Hh_logger.log_duration "Post-load rechecking" t in
   env
 
 let run_load_script genv env cmd =
   try
+    let t = Unix.gettimeofday () in
     let cmd =
       sprintf
         "%s %s %s"
@@ -386,6 +425,7 @@ let run_load_script genv env cmd =
           try input_line ic
           with End_of_file -> raise State_not_found
         in
+        if state_fn = "DISABLED" then raise Load_state_disabled;
         let to_recheck = ref [] in
         begin
           try
@@ -405,7 +445,7 @@ let run_load_script genv env cmd =
     Hh_logger.log
       "Load state found at %s. %d files to recheck\n%!"
       state_fn (List.length to_recheck);
-    HackEventLogger.load_script_done ();
+    HackEventLogger.load_script_done t;
     let env = load genv state_fn to_recheck in
     HackEventLogger.init_done "load";
     env
@@ -415,6 +455,11 @@ let run_load_script genv env cmd =
      Hh_logger.log "Starting from a fresh state instead...";
      let env = Program.init genv env in
      HackEventLogger.init_done "load_state_not_found";
+     env
+  | Load_state_disabled ->
+     Hh_logger.log "Load state disabled!";
+     let env = Program.init genv env in
+     HackEventLogger.init_done "load_state_disabled";
      env
   | e ->
      let msg = Printexc.to_string e in
@@ -432,7 +477,8 @@ let create_program_init genv env = fun () ->
      let env = Program.init genv env in
      HackEventLogger.init_done "fresh";
      env
-  | Some load_script -> run_load_script genv env load_script
+  | Some load_script ->
+      run_load_script genv env load_script
 
 let save _genv env fn =
   let chan = open_out_no_fail fn in

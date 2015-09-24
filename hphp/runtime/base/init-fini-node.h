@@ -31,6 +31,7 @@ struct InitFiniNode {
       ThreadFini,
       ProcessInit,
       ProcessExit,
+      ServerPreInit,
       ServerInit,
       ServerExit,
       GlobalsInit,
@@ -47,15 +48,16 @@ struct InitFiniNode {
     n = this;
   }
 
-  static void RequestInit() { iterate(When::RequestInit); }
-  static void RequestFini() { iterate(When::RequestFini); }
-  static void ThreadInit()  { iterate(When::ThreadInit);  }
-  static void ThreadFini()  { iterate(When::ThreadFini);  }
-  static void ProcessInit() { iterate(When::ProcessInit); }
-  static void ProcessFini() { iterate(When::ProcessExit); }
-  static void ServerInit()  { iterate(When::ServerInit);  }
-  static void ServerFini()  { iterate(When::ServerExit);  }
-  static void GlobalsInit() { iterate(When::GlobalsInit); }
+  static void RequestInit()   { iterate(When::RequestInit);   }
+  static void RequestFini()   { iterate(When::RequestFini);   }
+  static void ThreadInit()    { iterate(When::ThreadInit);    }
+  static void ThreadFini()    { iterate(When::ThreadFini);    }
+  static void ProcessInit()   { iterate(When::ProcessInit);   }
+  static void ProcessFini()   { iterate(When::ProcessExit);   }
+  static void ServerPreInit() { iterate(When::ServerPreInit); }
+  static void ServerInit()    { iterate(When::ServerInit);    }
+  static void ServerFini()    { iterate(When::ServerExit);    }
+  static void GlobalsInit()   { iterate(When::GlobalsInit);   }
 
  private:
   static InitFiniNode*& node(When when) {

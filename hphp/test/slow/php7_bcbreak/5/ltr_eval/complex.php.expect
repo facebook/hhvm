@@ -1,0 +1,18 @@
+foo(0): n = 1
+foo(10): n = 2
+foo(20): n = 3
+foo(2): n = 4
+bar(0): n = 5
+bar(10): n = 6
+bar(20): n = 7
+bar(2): n = 8
+array(4) {
+  [3]=>
+  string(9) "S2: n = 7"
+  [2]=>
+  string(9) "T1: n = 6"
+  [1]=>
+  string(9) "T0: n = 5"
+  [0]=>
+  string(9) "S0: n = 4"
+}

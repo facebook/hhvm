@@ -56,8 +56,6 @@ struct BackEnd final : jit::BackEnd {
    */
   uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
                                  ActRec* saved_rStashedAr) {
-    sim.   set_xreg(arm::rGContextReg.code(), g_context.getNoCheck());
-
     auto& vmRegs = vmRegsUnsafe();
     sim.   set_xreg(x2a(rvmfp()).code(), vmRegs.fp);
     sim.   set_xreg(x2a(rvmsp()).code(), vmRegs.stack.top());
@@ -118,12 +116,6 @@ struct BackEnd final : jit::BackEnd {
 
     vmRegsUnsafe().fp = (ActRec*)sim.xreg(x2a(rvmfp()).code());
     vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(x2a(rvmsp()).code());
-  }
-
-  void emitInterpReq(CodeBlock& mainCode,
-                     SrcKey sk,
-                     FPInvOffset spOff) override {
-    not_implemented();
   }
 
   void streamPhysReg(std::ostream& os, PhysReg reg) override {

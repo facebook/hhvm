@@ -17,7 +17,7 @@ open Sys_utils
 (*****************************************************************************)
 
 type mode =
-  | Ai of string
+  | Ai of Ai_options.prepared
   | Autocomplete
   | Color
   | Coverage
@@ -169,7 +169,8 @@ let what_builtins mode = match mode with
   "const string __DIR__ = '';\n"^
   "const string __FUNCTION__ = '';\n"^
   "const string __METHOD__ = '';\n"^
-  "const string __NAMESPACE__ = '';\n"
+  "const string __NAMESPACE__ = '';\n"^
+  "interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}\n"
 
 
 (*****************************************************************************)
@@ -192,7 +193,7 @@ let parse_options () =
     if !mode <> Errors
     then raise (Arg.Bad "only a single mode should be specified")
     else mode := x in
-  let set_ai x = set_mode (Ai x) () in
+  let set_ai x = set_mode (Ai (Ai_options.prepare x)) () in
   let options = [
     "--ai",
       Arg.String (set_ai),

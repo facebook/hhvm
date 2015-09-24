@@ -123,7 +123,6 @@ void vasm_emit(const Vunit& unit, Vtext& text, AsmInfo* asm_info) {
 
   Venv env { unit, text };
   env.addrs.resize(unit.blocks.size());
-  env.points.resize(unit.next_point);
 
   auto labels = layoutBlocks(unit);
 

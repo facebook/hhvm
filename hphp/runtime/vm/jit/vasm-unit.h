@@ -189,7 +189,6 @@ struct Vunit {
   // Data members.
 
   unsigned next_vr{Vreg::V0};
-  unsigned next_point{0};
   Vlabel entry;
   jit::vector<Vblock> blocks;
   jit::hash_map<Vconst,Vreg,Vconst::Hash> constToReg;

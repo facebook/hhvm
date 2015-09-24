@@ -23,7 +23,8 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/code-gen-tls.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -60,7 +61,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr) {
 
     v << ldimmq{reinterpret_cast<uintptr_t>(sk.pc()), rarg(0)};
 
-    x64::emitTLSLoad(v, ThreadInfo::s_threadInfo, tinfo);
+    emitTLSLoad(v, tls_datum(ThreadInfo::s_threadInfo), tinfo);
     v << loadb{tinfo[dbgOff], attached};
     v << testbi{static_cast<int8_t>(0xffu), attached, sf};
 

@@ -511,6 +511,16 @@ void HttpServer::getSatelliteStats(
   }
 }
 
+std::pair<int, int> HttpServer::getSatelliteRequestCount() const {
+  int inflight = 0;
+  int queued = 0;
+  for (const auto& i : m_satellites) {
+    inflight += i->getActiveWorker();
+    queued += i->getQueuedJobs();
+  }
+  return std::make_pair(inflight, queued);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // page server
 

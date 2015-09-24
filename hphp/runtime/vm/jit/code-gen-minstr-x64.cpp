@@ -16,14 +16,15 @@
 
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 
-#include "hphp/util/trace.h"
-
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/code-gen-internal.h"
+
+#include "hphp/util/trace.h"
 
 // This file does ugly things with macros so include last.
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit { namespace irlower {
 
 TRACE_SET_MOD(hhir);
 

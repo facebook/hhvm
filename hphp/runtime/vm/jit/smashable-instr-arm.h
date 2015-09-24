@@ -31,11 +31,15 @@ namespace HPHP { namespace jit { namespace arm {
  * Mirrors the API of smashable-instr.h.
  */
 
-constexpr size_t smashableMovqLen() { return 0; }
+/*
+ * Number of instructions (each of which is four bytes) in the sequence, plus
+ * the size of the smashable immediate.
+ */
+constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 0; }
-constexpr size_t smashableJmpLen()  { return 0; }
-constexpr size_t smashableJccLen()  { return 0; }
+constexpr size_t smashableCallLen() { return 3 * 4 + 8; }
+constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
+constexpr size_t smashableJccLen()  { return 3 * 4 + 8; }
 
 TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
 TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);

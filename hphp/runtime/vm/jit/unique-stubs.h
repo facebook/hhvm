@@ -20,8 +20,13 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+
+struct SrcKey;
+
+namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -360,10 +365,17 @@ private:
   std::vector<StubRange> m_ranges;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Registers that are live on entry to an interpOneCFHelper.
  */
 RegSet interp_one_cf_regs();
+
+/*
+ * Emit code to `v' which jumps to interpHelper with the proper arguments.
+ */
+void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff);
 
 ///////////////////////////////////////////////////////////////////////////////
 

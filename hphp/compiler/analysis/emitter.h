@@ -434,6 +434,7 @@ class EmitterVisitor {
   friend class FuncFinisher;
 public:
   typedef std::vector<int> IndexChain;
+  typedef std::pair<ExpressionPtr, IndexChain> IndexPair;
   typedef Emitter::IterPair IterPair;
   typedef std::vector<IterPair> IterVec;
 
@@ -450,9 +451,9 @@ public:
 
   void listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
-                              std::vector<IndexChain*>& chainList);
+                              std::vector<IndexPair>& chainList);
   void listAssignmentAssignElements(Emitter& e,
-                                    std::vector<IndexChain*>& indexChains,
+                                    std::vector<IndexPair>& indexChains,
                                     std::function<void()> emitSrc);
 
   void visitIfCondition(ExpressionPtr cond, Emitter& e, Label& tru, Label& fals,
@@ -672,8 +673,8 @@ public:
   void buildVectorImm(std::vector<unsigned char>& vectorImm,
                       int iFirst, int iLast, bool allowW,
                       Emitter& e);
-  bool emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
-               MOpFlags baseFlags, MOpFlags dimFlags);
+  void emitMOp(int iFirst, int& iLast, bool allowW, bool rhsVal,
+               Emitter& e, MOpFlags baseFlags, MOpFlags dimFlags);
   enum class PassByRefKind {
     AllowCell,
     WarnOnCell,

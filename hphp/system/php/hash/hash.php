@@ -244,7 +244,7 @@ function hash_update_stream(mixed $context, mixed $handle,
  * @return resource - Returns a copy of Hashing Context resource.
  */
 <<__Native>>
-function hash_copy(resource $context): resource;
+function hash_copy(resource $context): mixed;
 
 /**
  * hash_pbkdf2 - http://php.net/function.hash-pbkdf2.php

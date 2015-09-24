@@ -28,6 +28,9 @@ namespace {
 bool is_nop(const copy& i) { return i.s == i.d; }
 bool is_nop(const copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
 
+// movb r,r is a nop, however movl is not since it zeros upper bits.
+bool is_nop(const movb& i) { return i.s == i.d; }
+
 bool is_nop(const lea& i) {
   if (i.s.disp != 0) return false;
   return
@@ -47,6 +50,7 @@ bool is_trivial_nop(const Vinstr& inst) {
     (inst.op == Vinstr::copy && is_nop(inst.copy_)) ||
     (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
     (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
+    (inst.op == Vinstr::movb && is_nop(inst.movb_)) ||
     inst.op == Vinstr::nop;
 }
 

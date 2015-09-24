@@ -25,6 +25,9 @@
 
 namespace HPHP {
 
+// return the location of the current thread's tdata section
+std::pair<void*,size_t> getCppTdata();
+
 inline uintptr_t tlsBase() {
   uintptr_t retval;
 #if defined(__x86_64__)
@@ -140,13 +143,18 @@ struct ThreadLocalNode {
   T * m_p;
   void (*m_on_thread_exit_fn)(void * p);
   void * m_next;
+  size_t m_size;
 };
 
 struct ThreadLocalManager {
   template<class T>
-  static void PushTop(ThreadLocalNode<T>& node) { PushTop(&node); }
+  static void PushTop(ThreadLocalNode<T>& node) {
+    PushTop(&node, sizeof(T));
+  }
+  template<class F> void scan(F& mark) const;
+
 private:
-  static void PushTop(void* node);
+  static void PushTop(void* node, size_t size);
   struct ThreadLocalList {
     void* head{nullptr};
 #ifdef __APPLE__

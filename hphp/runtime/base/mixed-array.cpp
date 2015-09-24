@@ -809,8 +809,9 @@ ssize_t MixedArray::find(const StringData* s, strhash_t h) const {
 }
 
 NEVER_INLINE
-int32_t* warnUnbalanced(size_t n, int32_t* ei) {
+int32_t* warnUnbalanced(MixedArray* a, size_t n, int32_t* ei) {
   if (n > size_t(RuntimeOption::MaxArrayChain)) {
+    decRefArr(a->asArrayData()); // otherwise, a leaks when exn propagates
     raise_error("Array is too unbalanced (%lu)", n);
   }
   return ei;

@@ -519,6 +519,9 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     info.append(String(*pdo_err, CopyString));
     if (stmt) {
       stmt->dbh->conn()->fetchErr(stmt, info);
+    } else {
+      info.append(Variant((unsigned long) einfo->errcode));
+      info.append(String(einfo->errmsg, CopyString));
     }
     throw_pdo_exception(String(*pdo_err, CopyString), info,
                         "SQLSTATE[%s] [%d] %s",

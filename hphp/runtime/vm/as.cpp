@@ -1197,7 +1197,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
 #define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
 
-// Some bytecodes need to know the the first iva imm for POP_*.
+// Some bytecodes need to know the the first iva imm for (PUSH|POP)_*.
 #define IMM_IVA do {                            \
     int imm = read_opcode_arg<int64_t>(as);     \
     as.ue->emitIVA(imm);                        \
@@ -1279,6 +1279,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
 #define NUM_PUSH_INS_2(a) 1
+#define NUM_PUSH_IDX_A immIVA
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
@@ -1293,6 +1294,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_CVUMANY immIVA /* number of arguments */
 #define NUM_POP_CMANY immIVA /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
+#define NUM_POP_IDX_A immIVA + 1
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
@@ -1368,6 +1370,7 @@ OPCODES
 #undef NUM_PUSH_THREE
 #undef NUM_PUSH_POS_N
 #undef NUM_PUSH_INS_1
+#undef NUM_PUSH_IDX_A
 #undef NUM_POP_NOV
 #undef NUM_POP_ONE
 #undef NUM_POP_TWO
@@ -1383,6 +1386,7 @@ OPCODES
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY
+#undef NUM_POP_IDX_A
 
 void initialize_opcode_map() {
 #define O(name, imm, pop, push, flags) \

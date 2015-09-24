@@ -40,24 +40,24 @@ Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(preg_match,
-                      const String& pattern, const String& subject,
-                      VRefParam matches /* = null */,
-                      int flags /* = 0 */, int offset /* = 0 */) {
-  return preg_match(pattern, subject,
-                    matches.getVariantOrNull(),
-                    flags, offset);
+TypedValue HHVM_FUNCTION(preg_match,
+                         StringArg pattern, StringArg subject,
+                         OutputArg matches /* = null */,
+                         int flags /* = 0 */, int offset /* = 0 */) {
+  return tvReturn(preg_match(StrNR(pattern.get()), StrNR(subject.get()),
+                             matches.get() ? matches->var() : nullptr,
+                             flags, offset));
 }
 
-Variant HHVM_FUNCTION(preg_match_all,
-                      const String& pattern,
-                      const String& subject,
-                      VRefParam matches /* = null */,
-                      int flags /* = 0 */,
-                      int offset /* = 0 */) {
-  return preg_match_all(pattern, subject,
-                        matches.getVariantOrNull(),
-                        flags, offset);
+TypedValue HHVM_FUNCTION(preg_match_all,
+                         const String& pattern,
+                         const String& subject,
+                         OutputArg matches /* = null */,
+                         int flags /* = 0 */,
+                         int offset /* = 0 */) {
+  return tvReturn(preg_match_all(pattern, subject,
+                                 matches.get() ? matches->var() : nullptr,
+                                 flags, offset));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

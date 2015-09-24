@@ -137,6 +137,8 @@ struct Func {
     MaybeDataType builtinType{folly::none};
     // True if this is a `...' parameter.
     bool variadic{false};
+    // Does this use a NativeArg?
+    bool nativeArg{false};
     // DV initializer funclet offset.
     Offset funcletOff{InvalidAbsoluteOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
@@ -433,6 +435,10 @@ struct Func {
    */
   MaybeDataType returnType() const;
 
+  /*
+   * For builtins, whether the return value is returned in registers.
+   */
+  bool isReturnByValue() const;
   /*
    * Whether this function returns by reference.
    */
@@ -1067,7 +1073,7 @@ private:
     FPIEntVec m_fpitab;
 
     // One byte worth of bools right now.  Check what it does to
-    // sizeof(SharedData) if you are trying to add more than one more ...
+    // sizeof(SharedData) if you are trying to add any more ...
     bool m_top : 1;
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
@@ -1075,6 +1081,7 @@ private:
     bool m_isPairGenerator : 1;
     bool m_isGenerated : 1;
     bool m_hasExtendedSharedData : 1;
+    bool m_returnByValue : 1; // only for builtins
 
     MaybeDataType m_returnType;
     LowStringPtr m_retUserType;

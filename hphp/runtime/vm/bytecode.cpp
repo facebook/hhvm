@@ -3006,8 +3006,8 @@ static UNUSED int innerCount(const TypedValue* tv) {
   return -1;
 }
 
-static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
-                               TypedValue& tvRef2) {
+static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
+                                      TypedValue& tvRef2) {
   TRACE(5, "Ratchet: result %p(k%d c%d), ref %p(k%d c%d) ref2 %p(k%d c%d)\n",
         result, result->m_type, innerCount(result),
         &tvRef, tvRef.m_type, innerCount(&tvRef),
@@ -3033,8 +3033,10 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
     // either tvRef is KindOfUninit, or tvRef contains a valid object that
     // result points to.
     assert(result == &tvRef);
-    result = &tvRef2;
+    return &tvRef2;
   }
+
+  return result;
 }
 
 struct MemberState {
@@ -3278,12 +3280,11 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
       }
       break;
     case InvalidMemberCode:
-      assert(false);
-      result = nullptr; // Silence compiler warning.
+      always_assert(false);
     }
     assert(result != nullptr);
-    ratchetRefs(result, *mstate.ref.asTypedValue(),
-                *mstate.ref2.asTypedValue());
+    result = ratchetRefs(result, *mstate.ref.asTypedValue(),
+                         *mstate.ref2.asTypedValue());
     // Check whether an error occurred (i.e. no result was set).
     if (!unset && setMember && result->m_type == KindOfUninit) {
       return true;
@@ -3594,18 +3595,26 @@ OPTBLD_INLINE void iopNewPackedArray(IOP_ARGS) {
 OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   auto n = decode<uint32_t>(pc); // number of keys and elements
   assert(n > 0 && n <= StructArray::MaxMakeSize);
-  StringData** names = (StringData**)alloca(sizeof(StringData*) * n);
-  for (size_t i = 0; i < n; i++) {
-    names[i] = decode_litstr(pc);
+
+  req::vector<StringData*> names;
+  names.reserve(n);
+
+  for (size_t i = 0; i < n; ++i) {
+    names.push_back(decode_litstr(pc));
   }
+
   // This constructor moves values, no inc/decref is necessary.
   ArrayData* a;
   Shape* shape;
   if (!RuntimeOption::EvalDisableStructArray &&
-      (shape = Shape::create(names, n))) {
+      (shape = Shape::create(names.data(), n))) {
     a = MixedArray::MakeStructArray(n, vmStack().topC(), shape);
   } else {
-    a = MixedArray::MakeStruct(n, names, vmStack().topC())->asArrayData();
+    a = MixedArray::MakeStruct(
+      n,
+      names.data(),
+      vmStack().topC()
+    )->asArrayData();
   }
   vmStack().ndiscard(n);
   vmStack().pushArrayNoRc(a);
@@ -3843,6 +3852,16 @@ OPTBLD_INLINE void implCellBinOpBool(PC& pc, Op op) {
   vmStack().popC();
 }
 
+template<class Op>
+OPTBLD_INLINE void implCellBinOpInt64(PC& pc, Op op) {
+  auto const c1 = vmStack().topC();
+  auto const c2 = vmStack().indC(1);
+  auto const result = op(*c2, *c1);
+  tvRefcountedDecRef(c2);
+  *c2 = make_tv<KindOfInt64>(result);
+  vmStack().popC();
+}
+
 OPTBLD_INLINE void iopAdd(IOP_ARGS) {
   implCellBinOp(pc, cellAdd);
 }
@@ -3937,6 +3956,12 @@ OPTBLD_INLINE void iopGt(IOP_ARGS) {
 
 OPTBLD_INLINE void iopGte(IOP_ARGS) {
   implCellBinOpBool(pc, cellGreaterOrEqual);
+}
+
+OPTBLD_INLINE void iopCmp(IOP_ARGS) {
+  implCellBinOpInt64(pc, [&] (Cell c1, Cell c2) {
+    return cellCompare(c1, c2);
+  });
 }
 
 OPTBLD_INLINE void iopShl(IOP_ARGS) {
@@ -4719,13 +4744,111 @@ OPTBLD_INLINE void iopCGetM(IOP_ARGS) {
   }
 }
 
+static inline MInstrState& initMState() {
+  auto& mstate = vmMInstrState();
+  tvWriteUninit(&mstate.tvRef);
+  tvWriteUninit(&mstate.tvRef2);
+  return mstate;
+}
+
+using LookupNameFn = void (*)(ActRec*, StringData*&, TypedValue*, TypedValue*&);
+
+static inline void baseNGImpl(TypedValue* key, MOpFlags flags,
+                              LookupNameFn lookupd, LookupNameFn lookup) {
+  auto& mstate = initMState();
+  StringData* name;
+  TypedValue* baseVal;
+
+  if (flags & MOpFlags::Define) lookupd(vmfp(), name, key, baseVal);
+  else                          lookup(vmfp(), name, key, baseVal);
+  SCOPE_EXIT { decRefStr(name); };
+
+  if (baseVal == nullptr) {
+    assert(!(flags & MOpFlags::Define));
+    if (flags & MOpFlags::Warn) {
+      raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
+    }
+    tvWriteNull(&mstate.tvTempBase);
+    mstate.base = &mstate.tvTempBase;
+    return;
+  }
+
+  mstate.base = baseVal;
+}
+
+static inline void baseNImpl(TypedValue* key, MOpFlags flags) {
+  baseNGImpl(key, flags, lookupd_var, lookup_var);
+}
+
+OPTBLD_INLINE void iopBaseNC(IOP_ARGS) {
+  auto const idx = decode_iva(pc);
+  auto const flags = decode_oa<MOpFlags>(pc);
+  baseNImpl(vmStack().indTV(idx), flags);
+}
+
+OPTBLD_INLINE void iopBaseNL(IOP_ARGS) {
+  auto const localId = decode_la(pc);
+  auto const flags = decode_oa<MOpFlags>(pc);
+  baseNImpl(frame_local_inner(vmfp(), localId), flags);
+}
+
+static inline void baseGImpl(TypedValue* key, MOpFlags flags) {
+  baseNGImpl(key, flags, lookupd_gbl, lookup_gbl);
+}
+
+OPTBLD_INLINE void iopBaseGC(IOP_ARGS) {
+  auto const idx = decode_iva(pc);
+  auto const flags = decode_oa<MOpFlags>(pc);
+  baseGImpl(vmStack().indTV(idx), flags);
+}
+
+OPTBLD_INLINE void iopBaseGL(IOP_ARGS) {
+  auto const localId = decode_la(pc);
+  auto const flags = decode_oa<MOpFlags>(pc);
+  baseGImpl(frame_local_inner(vmfp(), localId), flags);
+}
+
+static inline TypedValue* baseSImpl(int32_t clsIdx, TypedValue* key) {
+  auto& stack = vmStack();
+  auto const class_ = stack.indTV(clsIdx)->m_data.pcls;
+  // Discard the class, preserving the RHS value if it's there.
+  if (clsIdx == 1) {
+    tvCopy(*stack.indTV(0), *stack.indTV(1));
+    stack.discard();
+  } else {
+    stack.popA();
+  }
+
+  auto const name = lookup_name(key);
+  SCOPE_EXIT { decRefStr(name); };
+  auto const lookup = class_->getSProp(arGetContextClass(vmfp()), name);
+  if (!lookup.prop || !lookup.accessible) {
+    raise_error("Invalid static property access: %s::%s",
+                class_->name()->data(),
+                name->data());
+  }
+
+  return lookup.prop;
+}
+
+OPTBLD_INLINE void iopBaseSC(IOP_ARGS) {
+  auto const keyIdx = decode_iva(pc);
+  auto const clsIdx = decode_iva(pc);
+  auto& mstate = initMState();
+  mstate.base = baseSImpl(clsIdx, vmStack().indTV(keyIdx));
+}
+
+OPTBLD_INLINE void iopBaseSL(IOP_ARGS) {
+  auto const keyLoc = decode_la(pc);
+  auto const clsIdx = decode_iva(pc);
+  auto& mstate = initMState();
+  mstate.base = baseSImpl(clsIdx, frame_local_inner(vmfp(), keyLoc));
+}
+
 OPTBLD_INLINE void iopBaseL(IOP_ARGS) {
   auto localId = decode_la(pc);
   auto flags = decode_oa<MOpFlags>(pc);
-  auto& mstate = vmMInstrState();
-
-  tvWriteUninit(&mstate.tvRef);
-  tvWriteUninit(&mstate.tvRef2);
+  auto& mstate = initMState();
 
   auto local = frame_local_inner(vmfp(), localId);
   if (flags & MOpFlags::Warn && local->m_type == KindOfUninit) {
@@ -4736,11 +4859,18 @@ OPTBLD_INLINE void iopBaseL(IOP_ARGS) {
   mstate.base = local;
 }
 
-OPTBLD_INLINE void iopBaseH(IOP_ARGS) {
-  auto& mstate = vmMInstrState();
+OPTBLD_INLINE void iopBaseC(IOP_ARGS) {
+  auto const idx = decode_iva(pc);
+  auto& mstate = initMState();
+  mstate.base = vmStack().indTV(idx);
+}
 
-  tvWriteUninit(&mstate.tvRef);
-  tvWriteUninit(&mstate.tvRef2);
+OPTBLD_INLINE void iopBaseR(IOP_ARGS) {
+  iopBaseC(pc);
+}
+
+OPTBLD_INLINE void iopBaseH(IOP_ARGS) {
+  auto& mstate = initMState();
 
   mstate.tvTempBase = make_tv<KindOfObject>(vmfp()->getThis());
   mstate.base = &mstate.tvTempBase;
@@ -4767,8 +4897,7 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
     always_assert(false);
   }();
 
-  ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
-  mstate.base = result;
+  mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
 static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
@@ -4790,8 +4919,7 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
       always_assert(false);
   }
 
-  ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
-  mstate.base = result;
+  mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
 static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
@@ -4819,13 +4947,10 @@ static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
     always_assert(false);
   }();
 
-  ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
-  mstate.base = result;
+  mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
-template<typename F>
-static OPTBLD_INLINE void dimImpl(PC& pc, F decode_key) {
-  auto key = decode_key(pc);
+static OPTBLD_INLINE void dimImpl(PC& pc, TypedValue key) {
   auto op = decode_oa<PropElemOp>(pc);
   auto flags = decode_oa<MOpFlags>(pc);
 
@@ -4843,27 +4968,32 @@ static OPTBLD_INLINE void dimImpl(PC& pc, F decode_key) {
 }
 
 OPTBLD_INLINE void iopDimL(IOP_ARGS) {
-  dimImpl(pc, [](PC& pc) {
-    return *frame_local_inner(vmfp(), decode_la(pc));
-  });
+  dimImpl(pc, *frame_local_inner(vmfp(), decode_la(pc)));
 }
 
 OPTBLD_INLINE void iopDimC(IOP_ARGS) {
-  dimImpl(pc, [](PC& pc) {
-    return *vmStack().indC(decode_iva(pc));
-  });
+  dimImpl(pc, *vmStack().indC(decode_iva(pc)));
 }
 
 OPTBLD_INLINE void iopDimInt(IOP_ARGS) {
-  dimImpl(pc, [](PC& pc) {
-    return make_tv<KindOfInt64>(decode<int64_t>(pc));
-  });
+  dimImpl(pc, make_tv<KindOfInt64>(decode<int64_t>(pc)));
 }
 
 OPTBLD_INLINE void iopDimStr(IOP_ARGS) {
-  dimImpl(pc, [](PC& pc) {
-    return make_tv<KindOfStaticString>(decode_litstr(pc));
-  });
+  dimImpl(pc, make_tv<KindOfStaticString>(decode_litstr(pc)));
+}
+
+OPTBLD_INLINE void iopDimNewElem(IOP_ARGS) {
+  auto& mstate = vmMInstrState();
+  auto const flags = decode_oa<MOpFlags>(pc);
+  auto result = [&] {
+    if (flags & MOpFlags::DefineReffy) {
+      return NewElem<true>(mstate.tvRef, mstate.base);
+    }
+    return NewElem<false>(mstate.tvRef, mstate.base);
+  }();
+
+  mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
 template<typename F>
@@ -5383,7 +5513,7 @@ OPTBLD_INLINE void iopSetOpL(IOP_ARGS) {
   auto op = decode_oa<SetOpOp>(pc);
   Cell* fr = vmStack().topC();
   Cell* to = tvToCell(frame_local(vmfp(), local));
-  setopBodyCell(to, op, fr);
+  setopBody(to, op, fr);
   tvRefcountedDecRef(fr);
   cellDup(*to, *fr);
 }
@@ -5398,7 +5528,7 @@ OPTBLD_INLINE void iopSetOpN(IOP_ARGS) {
   lookupd_var(vmfp(), name, tv2, to);
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
-  setopBody(to, op, fr);
+  setopBody(tvToCell(to), op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
   cellDup(*tvToCell(to), *tv2);
@@ -5415,7 +5545,7 @@ OPTBLD_INLINE void iopSetOpG(IOP_ARGS) {
   lookupd_gbl(vmfp(), name, tv2, to);
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
-  setopBody(to, op, fr);
+  setopBody(tvToCell(to), op, fr);
   tvRefcountedDecRef(fr);
   tvRefcountedDecRef(tv2);
   cellDup(*tvToCell(to), *tv2);
@@ -5438,7 +5568,7 @@ OPTBLD_INLINE void iopSetOpS(IOP_ARGS) {
                 classref->m_data.pcls->name()->data(),
                 name->data());
   }
-  setopBody(val, op, fr);
+  setopBody(tvToCell(val), op, fr);
   tvRefcountedDecRef(propn);
   tvRefcountedDecRef(fr);
   cellDup(*tvToCell(val), *output);
@@ -6396,10 +6526,8 @@ OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
     if (func->hasVariadicCaptureParam()) {
       assertx(numArgs > 0);
       assertx(args[1-numArgs].m_type == KindOfArray);
-      Native::callFunc<true, true>(func, nullptr, args, numNonDefault, ret);
-    } else {
-      Native::callFunc<true, false>(func, nullptr, args, numNonDefault, ret);
     }
+    Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
   } else {
     if (func->attrs() & AttrParamCoerceModeNull) {
       ret.m_type = KindOfNull;
@@ -6591,26 +6719,17 @@ OPTBLD_INLINE void iopWIterInitK(IOP_ARGS) {
   }
 }
 
-
-inline bool initIteratorM(PC& pc, PC& origPc, Iter* it, Offset offset,
-                          Ref* r1, TypedValue *val, TypedValue *key) {
-  bool hasElems = false;
+inline bool initIteratorM(Iter* it, Offset offset, Ref* r1,
+                          TypedValue *val, TypedValue *key) {
   TypedValue* rtv = r1->m_data.pref->tv();
   if (rtv->m_type == KindOfArray) {
-    hasElems = new_miter_array_key(it, r1->m_data.pref, val, key);
-  } else if (rtv->m_type == KindOfObject)  {
+    return new_miter_array_key(it, r1->m_data.pref, val, key);
+  }
+  if (rtv->m_type == KindOfObject)  {
     Class* ctx = arGetContextClass(vmfp());
-    hasElems = new_miter_object(it, r1->m_data.pref, ctx, val, key);
-  } else {
-    hasElems = new_miter_other(it, r1->m_data.pref);
+    return new_miter_object(it, r1->m_data.pref, ctx, val, key);
   }
-
-  if (!hasElems) {
-    pc = origPc + offset;
-  }
-
-  vmStack().popV();
-  return hasElems;
+  return new_miter_other(it, r1->m_data.pref);
 }
 
 OPTBLD_INLINE void iopMIterInit(IOP_ARGS) {
@@ -6622,7 +6741,10 @@ OPTBLD_INLINE void iopMIterInit(IOP_ARGS) {
   assert(r1->m_type == KindOfRef);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
-  initIteratorM(pc, origPc, it, offset, r1, tv1, nullptr);
+  if (!initIteratorM(it, offset, r1, tv1, nullptr)) {
+    pc = origPc + offset; // nothing to iterate; exit foreach loop.
+  }
+  vmStack().popV();
 }
 
 OPTBLD_INLINE void iopMIterInitK(IOP_ARGS) {
@@ -6636,7 +6758,10 @@ OPTBLD_INLINE void iopMIterInitK(IOP_ARGS) {
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   TypedValue* tv2 = frame_local(vmfp(), key);
-  initIteratorM(pc, origPc, it, offset, r1, tv1, tv2);
+  if (!initIteratorM(it, offset, r1, tv1, tv2)) {
+    pc = origPc + offset; // nothing to iterate; exit foreach loop.
+  }
+  vmStack().popV();
 }
 
 OPTBLD_INLINE void iopIterNext(IOP_ARGS) {

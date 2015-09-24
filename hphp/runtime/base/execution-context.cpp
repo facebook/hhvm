@@ -597,6 +597,7 @@ void ExecutionContext::onShutdownPreSend() {
     try { obFlushAll(); } catch (...) {}
   };
 
+  MM().resetCouldOOM(isStandardRequest());
   executeFunctions(ShutDown);
 }
 
@@ -743,21 +744,17 @@ void ExecutionContext::handleError(const std::string& msg,
 
     if (RID().hasTrackErrors() && fp) {
       // Set $php_errormsg in the parent scope
-      Variant varFrom(ee.getMessage());
-      const auto tvFrom(varFrom.asTypedValue());
+      Variant msg(ee.getMessage());
       if (fp->func()->isBuiltin()) {
         fp = getPrevVMState(fp);
       }
       assert(fp);
       auto id = fp->func()->lookupVarId(s_php_errormsg.get());
       if (id != kInvalidId) {
-        auto tvTo = frame_local(fp, id);
-        if (tvTo->m_type == KindOfRef) {
-          tvTo = tvTo->m_data.pref->tv();
-        }
-        tvDup(*tvFrom, *tvTo);
+        auto local = frame_local(fp, id);
+        tvSet(*msg.asTypedValue(), *tvToCell(local));
       } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-        fp->getVarEnv()->set(s_php_errormsg.get(), tvFrom);
+        fp->getVarEnv()->set(s_php_errormsg.get(), msg.asTypedValue());
       }
     }
 

@@ -37,11 +37,11 @@ bool is_trivial_nop(const Vinstr&);
 bool splitCriticalEdges(Vunit& unit);
 
 /*
- * Move all the elements of in into out, replacing count elements of out
- * starting at idx. in be will be cleared at the end.
+ * Move all the elements of `in' into `out', replacing `count' elements of
+ * `out' starting at `idx'.  `in' is cleared at the end.
  *
- * Example: vector_splice([1, 2, 3, 4, 5], 2, 1, [10, 11, 12]) will change out
- * to [1, 2, 10, 11, 12, 4, 5].
+ * Example: vector_splice([1, 2, 3, 4, 5], 2, 1, [10, 11, 12]) will change
+ * `out' to [1, 2, 10, 11, 12, 4, 5].
  */
 template<typename V>
 void vector_splice(V& out, size_t idx, size_t count, V& in) {
@@ -54,7 +54,7 @@ void vector_splice(V& out, size_t idx, size_t count, V& in) {
   std::move_backward(out.begin() + idx + count, out.begin() + out_size,
                      out.end());
 
-  // Move the new elements in
+  // Move the new elements in.
   std::move(in.begin(), in.end(), out.begin() + idx);
   in.clear();
 }

@@ -106,10 +106,7 @@ struct Vunit;
   /* arm instructions */\
   O(brk, I(code), Un, Dn)\
   O(cbcc, I(cc), U(s), Dn)\
-  O(hcsync, I(fix) I(call), Un, Dn)\
-  O(hcnocatch, I(call), Un, Dn)\
-  O(hcunwind, I(call), Un, Dn)\
-  O(hostcall, I(argc) I(syncpoint), U(args), Dn)\
+  O(hostcall, I(argc), U(args), Dn)\
   O(tbcc, I(cc) I(bit), U(s), Dn)\
   /* x64 instructions */\
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -603,22 +600,29 @@ struct srem { Vreg s0, s1, d; };
 // ARM.
 
 /*
- * ARM-specific intrinsics.
+ * ARM emulator native call intrinsic.
  */
-struct hcsync { Fixup fix; Vpoint call; };
-struct hcnocatch { Vpoint call; };
-struct hcunwind { Vpoint call; Vlabel targets[2]; };
+struct hostcall { RegSet args; uint8_t argc; };
 
 /*
  * ARM-specific instructions.
  */
 struct brk { uint16_t code; };
-struct hostcall { RegSet args; uint8_t argc; Vpoint syncpoint; };
 struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
 struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // x64.
+
+/*
+ * Unless specifically noted otherwise, instructions with a Vreg8 or Vreg16
+ * dest preserve the upper 56 or 48 bits. However, instructions with a Vreg32
+ * dest zero the upper 32 bits.
+ *
+ * This reflects the behavior of using x86-64's byte and word-sized registers
+ * such as AL, CL, etc and AX, CX, etc. Starting with x86-64, 32-bit
+ * operations zero the upper bits of 64-bit registers.
+ */
 
 struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct addlm { Vreg32 s0; Vptr m; VregSF sf; };

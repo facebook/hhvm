@@ -361,6 +361,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
 #define COUNT_SMANY 0
+#define COUNT_IDX_A 0
 
 #define ONE(t) \
   DEC_##t a1
@@ -424,6 +425,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 #define POP_SMANY \
   getEmitterVisitor().popEvalStackMany(a1.size(), StackSym::C)
+#define POP_IDX_A \
+  if (a2 == 1) getEmitterVisitor().popEvalStack(StackSym::C); \
+  getEmitterVisitor().popEvalStack(StackSym::A)
 
 #define POP_CV(i) getEmitterVisitor().popEvalStack(StackSym::C, i, curPos)
 #define POP_VV(i) getEmitterVisitor().popEvalStack(StackSym::V, i, curPos)
@@ -500,6 +504,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 #define PUSH_INS_2_CV \
   getEmitterVisitor().getEvalStack().insertAt(2, StackSym::C);
+
+#define PUSH_IDX_A \
+  if (a2 == 1) getEmitterVisitor().pushEvalStack(StackSym::C);
 
 #define IMPL_NA
 #define IMPL_ONE(t) \
@@ -691,6 +698,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_CVUMANY
 #undef POP_CMANY
 #undef POP_SMANY
+#undef POP_IDX_A
 #undef POP_LA_ONE
 #undef POP_LA_TWO
 #undef POP_LA_THREE
@@ -721,6 +729,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef PUSH_AV
 #undef PUSH_RV
 #undef PUSH_FV
+#undef PUSH_IDX_A
 #undef IMPL_ONE
 #undef IMPL_TWO
 #undef IMPL_THREE
@@ -2025,9 +2034,9 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
 }
 
 void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
-  // Special case for instructions that consume the loc below the top, or don't
-  // actually consume from the eval stack.
-  if (op == OpBaseL || op == OpDimL || op == OpQueryML) {
+  // A number of member instructions read locals without consuming an L from
+  // the symbolic stack through the normal path.
+  if (isMemberBaseOp(op) || isMemberDimOp(op) || isMemberFinalOp(op)) {
     return;
   }
 
@@ -2348,7 +2357,7 @@ private:
  */
 void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                                             IndexChain& indexChain,
-                                            std::vector<IndexChain*>& all) {
+                                            std::vector<IndexPair>& all) {
   if (!exp) {
     // Empty slot
     return;
@@ -2367,20 +2376,55 @@ void EmitterVisitor::listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
   } else {
     // Reached a "leaf".  Lock in this index chain and deal with this exp.
     assert(!indexChain.empty());
-    all.push_back(new IndexChain(indexChain));
-    visit(exp);
-    emitClsIfSPropBase(e);
+    all.emplace_back(exp, IndexChain(indexChain));
+
+    // First: the order we visit the LHS elements matters, as does whether we
+    // do the RHS or LHS first, for things like:
+    // list($a[$n++], $b[$n++]) = $c[$n++]
+    //
+    // In PHP5 mode, we visit the LHS elements of the list() now. This does
+    // two things: it causes their side effects to happen in LTR order, but
+    // since they are pushed onto the m_evalStack they are actually asigned to
+    // in LIFO order, e.g., RTL, in listAssignmentAssignElements below.
+    //
+    // In PHP7 mode, we need to visit the elements in LTR order so their side
+    // effects take place in that order, but we *also* need to assign them in
+    // LTR order, so we can't push them onto the m_evalStack right now. Since
+    // visit() does both of these things, we need to delay calling visit()
+    // until listAssignmentAssignElements below. This also has the side effect
+    // of making isRhsFirst() effectively always on in PHP7 mode when doing
+    // list() assignment (since we delay the visit() until after the check
+    // anyways), which turns out to be the right behavior.
+    if (!RuntimeOption::PHP7_LTR_assign) {
+      visit(exp);
+      emitClsIfSPropBase(e);
+    }
   }
 }
 
 void EmitterVisitor::listAssignmentAssignElements(
   Emitter& e,
-  std::vector<IndexChain*>& indexChains,
+  std::vector<IndexPair>& indexPairs,
   std::function<void()> emitSrc
 ) {
-  for (int i = (int)indexChains.size() - 1; i >= 0; --i) {
-    IndexChain* currIndexChain = indexChains[i];
-    if (currIndexChain->empty()) {
+
+  // PHP5 does list() assignments RTL, PHP7 does them LTR, so this loop can go
+  // either way and looks a little ugly. The assignment order normally isn't
+  // visible, but it is if you do something like:
+  // list($a[], $a[]) = $foo
+  auto const ltr = RuntimeOption::PHP7_LTR_assign;
+  for (int i = ltr ? 0 : (int)indexPairs.size() - 1;
+       i >= 0 && i < (int)indexPairs.size();
+       ltr ? i++ : i--) {
+    if (ltr) {
+      // Visit now, so we can both eval LTR and assign LTR. See comment in
+      // listAssignmentVisitLHS.
+      visit(indexPairs[i].first);
+      emitClsIfSPropBase(e);
+    }
+
+    IndexChain& currIndexChain = indexPairs[i].second;
+    if (currIndexChain.empty()) {
       continue;
     }
 
@@ -2388,17 +2432,16 @@ void EmitterVisitor::listAssignmentAssignElements(
       e.Null();
     } else {
       emitSrc();
-      for (int j = 0; j < (int)currIndexChain->size(); ++j) {
+      for (int j = 0; j < (int)currIndexChain.size(); ++j) {
         m_evalStack.push(StackSym::I);
-        m_evalStack.setInt((*currIndexChain)[j]);
+        m_evalStack.setInt(currIndexChain[j]);
         markElem(e);
       }
       emitCGet(e);
     }
+
     emitSet(e);
     emitPop(e);
-
-    delete currIndexChain;
   }
 }
 
@@ -3801,6 +3844,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case T_IS_SMALLER_OR_EQUAL: e.Lte(); break;
       case '>': e.Gt(); break;
       case T_IS_GREATER_OR_EQUAL: e.Gte(); break;
+      case T_SPACESHIP: e.Cmp(); break;
       case T_POW: e.Pow(); break;
       default: assert(false);
     }
@@ -4213,9 +4257,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     assert(rhs);
 
     bool nullRHS = la->getRHSKind() == ListAssignment::Null;
-    // Assign RHS to temp local, unless it's already a simple variable
+    // If the RHS is not a simple variable, we need to evaluate it and assign
+    // it to a temp local. If it is, whether or not we directly use it or copy
+    // it into a temp local is visible in perverse statements like:
+    // list($a, $b) = $a
+    // The behavior of that changed between PHP5 and PHP7; in PHP5 we directly
+    // use the temp local, in PHP7 we need to copy it.
     bool simpleRHS = rhs->is(Construct::KindOfSimpleVariable)
-      && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash();
+      && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash()
+      && !RuntimeOption::PHP7_LTR_assign;
     Id tempLocal = -1;
     Offset start = InvalidAbsoluteOffset;
 
@@ -4227,9 +4277,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     // We use "index chains" to deal with nested list assignment.  We will
     // end up with one index chain per expression we need to assign to.
     // The helper function will populate indexChains.
-    std::vector<IndexChain*> indexChains;
+    //
+    // In PHP5 mode, this will also evaluate the LHS; in PHP7 mode, that is
+    // always delayed until listAssignmentAssignElements below. This means
+    // that isRhsFirst() has no effect in PHP7 mode. See comments in
+    // listAssignmentVisitLHS and listAssignmentAssignElements for more
+    // explanation.
+    std::vector<IndexPair> indexPairs;
     IndexChain workingChain;
-    listAssignmentVisitLHS(e, la, workingChain, indexChains);
+    listAssignmentVisitLHS(e, la, workingChain, indexPairs);
 
     if (!simpleRHS && !la->isRhsFirst()) {
       assert(tempLocal == -1);
@@ -4240,12 +4296,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     // Assign elements.
     if (nullRHS) {
-      listAssignmentAssignElements(e, indexChains, nullptr);
+      listAssignmentAssignElements(e, indexPairs, nullptr);
     } else if (simpleRHS) {
-      listAssignmentAssignElements(e, indexChains, [&] { visit(rhs); });
+      listAssignmentAssignElements(e, indexPairs, [&] { visit(rhs); });
     } else {
       listAssignmentAssignElements(
-        e, indexChains,
+        e, indexPairs,
         [&] { emitVirtualLocal(tempLocal); }
       );
     }
@@ -4962,36 +5018,89 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   return 0;
 }
 
-bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
-                             MOpFlags baseFlags, MOpFlags dimFlags) {
-  // W (NewElem) operations aren't yet supported, so scan the vector before
-  // emitting any code.
-  for (auto i = iFirst + 1; i < iLast; ++i) {
-    auto sym = m_evalStack.get(i);
-    if (StackSym::GetMarker(sym) == StackSym::W) return false;
-  }
+void EmitterVisitor::emitMOp(
+  int iFirst,
+  int& iLast,
+  bool allowW,
+  bool rhsVal,
+  Emitter& e,
+  MOpFlags baseFlags,
+  MOpFlags dimFlags
+) {
+  auto stackIdx = [&](int i) {
+    return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
+  };
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
   auto flavor = StackSym::GetSymFlavor(sym);
   switch (StackSym::GetMarker(sym)) {
     case StackSym::N:
+      switch (flavor) {
+        case StackSym::C:
+          e.BaseNC(stackIdx(iFirst), baseFlags);
+          break;
+        case StackSym::L:
+          e.BaseNL(m_evalStack.getLoc(iFirst), baseFlags);
+          break;
+        default:
+          always_assert(false);
+      }
+      break;
+
     case StackSym::G:
-    case StackSym::S:
-      return false;
+      switch (flavor) {
+        case StackSym::C:
+          e.BaseGC(stackIdx(iFirst), baseFlags);
+          break;
+        case StackSym::L:
+          e.BaseGL(m_evalStack.getLoc(iFirst), baseFlags);
+          break;
+        default:
+          always_assert(false);
+      }
+      break;
+
+    case StackSym::S: {
+      if (m_evalStack.get(iLast) != StackSym::AM) {
+        unexpectedStackSym(sym, "S-vector base, class ref");
+      }
+
+      auto const clsIdx = rhsVal ? 1 : 0;
+      switch (flavor) {
+        case StackSym::C:
+          e.BaseSC(stackIdx(iFirst), clsIdx);
+          break;
+        case StackSym::L:
+          e.BaseSL(m_evalStack.getLoc(iFirst), clsIdx);
+          break;
+        default:
+          unexpectedStackSym(sym, "S-vector base, prop name");
+          break;
+      }
+      // The BaseS* bytecodes consume the Class from the eval stack so the
+      // final operations don't have to expect an A-flavored input. Adjust
+      // iLast accordingly.
+      --iLast;
+      break;
+    }
 
     case StackSym::None:
       switch (flavor) {
         case StackSym::L:
           e.BaseL(m_evalStack.getLoc(iFirst), baseFlags);
           break;
-
+        case StackSym::C:
+          e.BaseC(stackIdx(iFirst));
+          break;
+        case StackSym::R:
+          e.BaseR(stackIdx(iFirst));
+          break;
         case StackSym::H:
           e.BaseH();
           break;
-
         default:
-          return false;
+          always_assert(false);
       }
       break;
 
@@ -4999,10 +5108,7 @@ bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
       always_assert(false && "Bad base marker");
   }
 
-  if (StackSym::GetMarker(m_evalStack.get(iLast)) == StackSym::M) {
-    not_implemented();
-    --iLast;
-  }
+  assert(StackSym::GetMarker(m_evalStack.get(iLast)) != StackSym::M);
 
   // Emit all intermediate operations, leaving the final operation up to our
   // caller.
@@ -5018,8 +5124,7 @@ bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
       } else if (flavor == StackSym::T) {
         e.DimStr(m_evalStack.getName(i), op, dimFlags);
       } else {
-        auto idx = m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
-        e.DimC(idx, op, dimFlags);
+        e.DimC(stackIdx(i), op, dimFlags);
       }
     };
 
@@ -5037,14 +5142,18 @@ bool EmitterVisitor::emitMOp(int iFirst, int& iLast, bool allowW, Emitter& e,
         doDim(PropElemOp::Elem);
         break;
       case StackSym::W:
-        not_implemented();
+        if (allowW) {
+          e.DimNewElem(dimFlags);
+        } else {
+          throw IncludeTimeFatalException(e.getNode(),
+                                          "Cannot use [] for reading");
+        }
+        break;
       case StackSym::S:
       default:
         always_assert(false && "Bad intermediate marker");
     }
   }
-
-  return true;
 }
 
 void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
@@ -5286,13 +5395,13 @@ void EmitterVisitor::emitCGet(Emitter& e) {
       }
     }
   } else {
-    size_t stackCount = 0;
-    for (size_t idx = i; idx <= iLast; ++idx) {
-      if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
-    }
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      emitMOp(i, iLast, false, false, e, MOpFlags::Warn, MOpFlags::Warn);
+      size_t stackCount = 0;
+      for (size_t idx = i; idx <= iLast; ++idx) {
+        if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
+      }
 
-    if (RuntimeOption::EvalEmitNewMInstrs &&
-        emitMOp(i, iLast, false, e, MOpFlags::Warn, MOpFlags::Warn)) {
       auto sym = m_evalStack.get(iLast);
       auto flavor = StackSym::GetSymFlavor(sym);
       auto marker = StackSym::GetMarker(sym);
@@ -5332,7 +5441,6 @@ void EmitterVisitor::emitCGet(Emitter& e) {
 
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
-    assert(countStackValues(vectorImm) == stackCount);
     e.CGetM(vectorImm);
   }
 }
@@ -6575,6 +6683,9 @@ void EmitterVisitor::emitPostponedMeths() {
     MethodStatementPtr meth = p.m_meth;
     FuncEmitter* fe = p.m_fe;
 
+    ITRACE(1, "Emitting postponed method {}\n", meth->getOriginalFullName());
+    Trace::Indent indent;
+
     if (!fe) {
       assert(p.m_top);
       const StringData* methName = makeStaticString(meth->getOriginalName());
@@ -6812,7 +6923,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
             break;
           }
         }
-        bif = Native::getWrapper(pce, usesDouble, variadic);
+        bif = Native::getWrapper(pce, usesDouble);
       }
     }
   }
@@ -8341,15 +8452,15 @@ class ForeachIterGuard {
 void EmitterVisitor::emitForeachListAssignment(Emitter& e,
                                                ListAssignmentPtr la,
                                                std::function<void()> emitSrc) {
-  std::vector<IndexChain*> indexChains;
+  std::vector<IndexPair> indexPairs;
   IndexChain workingChain;
-  listAssignmentVisitLHS(e, la, workingChain, indexChains);
+  listAssignmentVisitLHS(e, la, workingChain, indexPairs);
 
-  if (indexChains.size() == 0) {
+  if (indexPairs.size() == 0) {
     throw IncludeTimeFatalException(la, "Cannot use empty list");
   }
 
-  listAssignmentAssignElements(e, indexChains, emitSrc);
+  listAssignmentAssignElements(e, indexPairs, emitSrc);
 }
 
 void EmitterVisitor::emitForeach(Emitter& e,
@@ -9340,6 +9451,7 @@ StaticString s_raise("raise");
 StaticString s_valid("valid");
 StaticString s_current("current");
 StaticString s_key("key");
+StaticString s_throw("throw");
 
 StaticString genCls("Generator");
 StaticString asyncGenCls("HH\\AsyncGenerator");
@@ -9355,7 +9467,8 @@ ContMethMapT s_genMethods = {
     {s_raise, GeneratorMethod::METH_RAISE},
     {s_valid, GeneratorMethod::METH_VALID},
     {s_current, GeneratorMethod::METH_CURRENT},
-    {s_key, GeneratorMethod::METH_KEY}
+    {s_key, GeneratorMethod::METH_KEY},
+    {s_throw, GeneratorMethod::METH_RAISE}
   };
 }
 

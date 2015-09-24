@@ -54,9 +54,8 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
 }
 
 bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
-                   VRefParam name /* = null */) {
-  return is_callable(v, syntax, name.isReferenced() ?
-                     name.wrapped().asTypedValue()->m_data.pref : nullptr);
+                   OutputArg name /* = null */) {
+  return is_callable(v, syntax, name.get());
 }
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,

@@ -172,7 +172,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  requests\n"
         "/check-pl-queued: how many pagelet requests are queued waiting to\n"
         "                  be handled\n"
-        "/check-mem:       report memory quick statistics in log file\n"
         "/check-sql:       report SQL table statistics\n"
         "/check-sat        how many satellite threads are actively handling\n"
         "                  requests and queued waiting to be handled\n"
@@ -879,7 +878,7 @@ bool AdminRequestHandler::handleMemoryRequest(const std::string &cmd,
       return true;
   }
   if (cmd == "memory.html" || cmd == "memory.htm") {
-      MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::XML);
+      MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::HTML);
       transport->replaceHeader("Content-Type","application/html");
       transport->sendString(out);
       return true;

@@ -16,9 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-llvm.h"
 
-#include "hphp/util/assertions.h"
-#include "hphp/util/disasm.h"
-
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/init-fini-node.h"
 
@@ -43,6 +40,10 @@
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
+
+#include "hphp/util/abi-cxx.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/disasm.h"
 
 #ifdef USE_LLVM
 
@@ -1692,9 +1693,6 @@ O(unpcklpd)
       // ARM opcodes:
       case Vinstr::brk:
       case Vinstr::cbcc:
-      case Vinstr::hcsync:
-      case Vinstr::hcnocatch:
-      case Vinstr::hcunwind:
       case Vinstr::hostcall:
       case Vinstr::tbcc:
         throw FailedLLVMCodeGen("Unsupported opcode in B{}: {}",

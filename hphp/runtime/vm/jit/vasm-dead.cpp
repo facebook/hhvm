@@ -168,9 +168,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::fallback:
     case Vinstr::fallbackcc:
     case Vinstr::fallthru:
-    case Vinstr::hcnocatch:
-    case Vinstr::hcsync:
-    case Vinstr::hcunwind:
     case Vinstr::hostcall:
     case Vinstr::idiv:
     case Vinstr::inclm:

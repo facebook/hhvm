@@ -589,7 +589,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left '^'
 %left '&'
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL
-%nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL T_SPACESHIP
 %left T_SL T_SR
 %left '+' '-' '.'
 %left '*' '/' '%'
@@ -1942,6 +1942,7 @@ expr_no_variable:
   | expr '>' expr                      { BEXP($$,$1,$3,'>');}
   | expr T_IS_GREATER_OR_EQUAL expr    { BEXP($$,$1,$3,
                                               T_IS_GREATER_OR_EQUAL);}
+  | expr T_SPACESHIP expr              { BEXP($$,$1,$3,T_SPACESHIP);}
   | expr T_INSTANCEOF
     class_name_reference               { BEXP($$,$1,$3,T_INSTANCEOF);}
   | '(' expr_no_variable ')'           { $$ = $2;}
@@ -2450,7 +2451,13 @@ static_class_name:
                                          Parser::StaticClassExprName);}
   | static_class_name
     T_DOUBLE_COLON
-    variable_no_objects                { _p->onStaticMember($$,$1,$3);}
+    /* !PHP5_ONLY */
+    variable_no_objects
+    /* !END */
+    /* !PHP7_ONLY */
+    compound_variable
+    /* !END */
+                                       { _p->onStaticMember($$,$1,$3);}
 ;
 class_name_reference:
     fully_qualified_class_name         { _p->onName($$,$1,Parser::StringName);}
@@ -2551,6 +2558,10 @@ static_expr:
     T_IS_GREATER_OR_EQUAL
     static_expr                        { BEXP($$,$1,$3,
                                               T_IS_GREATER_OR_EQUAL);}
+  | static_expr
+    T_SPACESHIP
+    static_expr                        { BEXP($$,$1,$3,T_SPACESHIP);}
+
   | static_expr '?' static_expr ':'
     static_expr                        { _p->onQOp($$, $1, &$3, $5);}
   | static_expr '?' ':' static_expr    { _p->onQOp($$, $1,   0, $4);}
@@ -2723,7 +2734,12 @@ object_property_name_no_variables:
 
 object_property_name:
     object_property_name_no_variables  { $$ = $1;}
+  /* !PHP5_ONLY */
   | variable_no_objects                { $$ = $1; $$ = HPHP::ObjPropNormal;}
+  /* !END */
+  /* !PHP7_ONLY */
+  | compound_variable                  { $$ = $1; $$ = HPHP::ObjPropNormal;}
+  /* !END */
 ;
 
 object_method_name_no_variables:
@@ -2733,7 +2749,12 @@ object_method_name_no_variables:
 
 object_method_name:
     object_method_name_no_variables    { $$ = $1;}
+  /* !PHP5_ONLY */
   | variable_no_objects                { $$ = $1;}
+  /* !END */
+  /* !PHP7_ONLY */
+  | compound_variable                  { $$ = $1;}
+  /* !END */
 ;
 
 array_access:
@@ -2825,7 +2846,13 @@ variable:
                                     }
   | static_class_name
     T_DOUBLE_COLON
-    variable_no_objects                { _p->onStaticMember($$,$1,$3);}
+    /* !PHP5_ONLY */
+    variable_no_objects
+    /* !END */
+    /* !PHP7_ONLY */
+    compound_variable
+    /* !END */
+                                       { _p->onStaticMember($$,$1,$3);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | lambda_or_closure_with_parens '('
@@ -2839,7 +2866,12 @@ dimmable_variable:
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | variable object_operator
+    /* !PHP5_ONLY */
     object_property_name_no_variables
+    /* !END */
+    /* !PHP7_ONLY */
+    object_property_name
+    /* !END */
                                     { _p->onObjectProperty(
                                         $$,
                                         $1,
@@ -2853,6 +2885,11 @@ dimmable_variable:
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | '(' variable ')'                   { $$ = $2;}
+  /* !PHP7_ONLY */
+  | static_class_name
+    T_DOUBLE_COLON
+    compound_variable                  { _p->onStaticMember($$,$1,$3);}
+  /* !END */
 ;
 
 callable_variable:
@@ -2895,7 +2932,12 @@ class_method_call:
     function_call_parameter_list ')'   { _p->onCall($$,0,$3,$6,&$1);}
   | static_class_name
     T_DOUBLE_COLON
+    /* !PHP5_ONLY */
     variable_no_objects '('
+    /* !END */
+    /* !PHP7_ONLY */
+    compound_variable '('
+    /* !END */
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
   | static_class_name
     T_DOUBLE_COLON
@@ -2905,8 +2947,10 @@ class_method_call:
 
 variable_no_objects:
     reference_variable                 { $$ = $1;}
+  /* !PHP5_ONLY */
   | simple_indirect_reference
     reference_variable                 { _p->onIndirectRef($$,$1,$2);}
+  /* !END */
 ;
 
 reference_variable:
@@ -2915,19 +2959,26 @@ reference_variable:
   | reference_variable '{' expr '}'    { _p->onRefDim($$, $1, $3);}
   | compound_variable                  { $$ = $1;}
 ;
+
 compound_variable:
     T_VARIABLE                         { _p->onSimpleVariable($$, $1);}
   | '$' '{' expr '}'                   { _p->onDynamicVariable($$, $3, 0);}
+  /* !PHP7_ONLY */
+  | '$' compound_variable              { $1 = 1; _p->onIndirectRef($$, $1, $2);}
+  /* !END */
 ;
+
 dim_offset:
     expr                               { $$ = $1;}
   |                                    { $$.reset();}
 ;
 
+/* !PHP5_ONLY */
 simple_indirect_reference:
     '$'                                { $$ = 1;}
   | simple_indirect_reference '$'      { $$++;}
 ;
+/* !END */
 
 variable_no_calls:
     variable_no_objects                { $$ = $1;}
@@ -3316,6 +3367,11 @@ hh_type_opt:
 ;
 
 %%
-bool Parser::parseImpl() {
+/* !PHP5_ONLY*/
+bool Parser::parseImpl5() {
+/* !END */
+/* !PHP7_ONLY*/
+bool Parser::parseImpl7() {
+/* !END */
   return yyparse(this) == 0;
 }

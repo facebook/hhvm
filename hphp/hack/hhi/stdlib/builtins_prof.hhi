@@ -22,6 +22,8 @@
  */
 function xenon_get_data(): array<array>; // auto-imported from HH namespace
 
+function thread_memory_stats(): array<string, int>; // auto-imported from HH namespace
+
 function objprof_start(): void; // auto-imported from HH namespace
 
 function objprof_get_data(): array<string, array>; // auto-imported from HH namespace

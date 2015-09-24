@@ -17,33 +17,30 @@
 #ifndef incl_HPHP_VM_CG_X64_H_
 #define incl_HPHP_VM_CG_X64_H_
 
-#include "hphp/runtime/vm/jit/code-gen.h"
-
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
 namespace HPHP { namespace jit {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Vout;
-namespace NativeCalls { struct CallInfo; }
-namespace arm { struct CodeGenerator; }
 
-namespace x64 {
+namespace NativeCalls { struct CallInfo; }
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace irlower {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CodeGenerator {
-  friend struct arm::CodeGenerator;
-
-  CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
-    : m_state(state)
-    , m_vmain(main)
-    , m_vcold(cold)
-  {}
+  explicit CodeGenerator(IRLS& state) : m_state(state) {}
 
   void cgInst(IRInstruction* inst);
 
@@ -89,20 +86,12 @@ private:
   void emitTypeCheck(Type type, Loc typeSrc,
                      Loc dataSrc, Block* taken);
 
-  template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
-  template<class Op, class Opi> void cgShiftCommon(IRInstruction*);
-
   void emitVerifyCls(IRInstruction* inst);
 
   void emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx, bool staticCallee);
 
   Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                     rds::Handle ch);
-
-  void emitCmpInt(IRInstruction* inst, ConditionCode cc);
-  void emitCmpBool(IRInstruction* inst, ConditionCode cc);
-  void emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred);
-  void emitCmpRelDbl(IRInstruction* inst, ConditionCode cc, bool flipOperands);
 
   void cgCoerceHelper(IRInstruction* inst, Vreg base, int offset,
                       Func const* callee, int argNum);
@@ -111,9 +100,6 @@ private:
   template<class Inst>
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,
                   SSATmp* src1, Vloc loc1, Vreg& sf);
-  Vreg emitAddInt(Vout& v, IRInstruction* inst);
-  Vreg emitSubInt(Vout& v, IRInstruction* inst);
-  Vreg emitMulInt(Vout& v, IRInstruction* inst);
 
 private:
   Vreg selectScratchReg(IRInstruction* inst);
@@ -173,16 +159,11 @@ private:
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
   void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
 
-  // This is for printing partially-generated traces when debugging
-  void print() const;
-
-  Vout& vmain() { return m_vmain; }
-  Vout& vcold() { return m_vcold; }
+  Vout& vmain() { assert(m_state.vmain); return *m_state.vmain; }
+  Vout& vcold() { assert(m_state.vcold); return *m_state.vcold; }
 
 private:
-  CodegenState&       m_state;
-  Vout&               m_vmain;
-  Vout&               m_vcold;
+  IRLS& m_state;
 };
 
 // Helpers to compute a reference to a TypedValue type and data
@@ -203,6 +184,7 @@ inline Vptr refTVData(Vptr ref) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }}}
 
 #endif

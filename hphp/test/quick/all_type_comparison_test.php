@@ -92,6 +92,13 @@ function test_pair($k1, $v1, $k2, $v2) {
   } catch (Exception $e) {
     echo "Err     ";
   }
+  try {
+    $cmp = $v1 <=> $v2;
+    echo "$cmp";
+  } catch (Exception $e) {
+    echo "Err";
+  }
+
   echo "\n";
 }
 
@@ -165,6 +172,10 @@ function test() {
   $arr17 = array(1, NAN);
   $arr18 = array(1, NAN);
   $arr19 = array(NAN, 1);
+  $arr20 = array(1, NAN, 2);
+  $arr21 = array('key1' => 1, 'key2' => 2, 'key3' => 3);
+  $arr22 = array('key1' => 1, 'key2' => 2, 'key3' => 3);
+  $arr23 = array('key1' => 1, 'key2-other' => 2, 'key3' => 3);
 
   $f1 = imagecreate(10, 10);
   $f2 = imagecreate(10, 10);
@@ -194,7 +205,9 @@ function test() {
                'array arr13' => $arr13, 'array arr14' => $arr14,
                'array arr15' => $arr15, 'array arr16' => $arr16,
                'array arr17' => $arr17, 'array arr18' => $arr18,
-               'array arr19' => $arr19,
+               'array arr19' => $arr19, 'array arr20' => $arr20,
+               'array arr21' => $arr21, 'array arr22' => $arr22,
+               'array arr23' => $arr23,
 
                'object a1' => $a1, 'object a2' => $a2, 'object a3' => $a3,
                'object a4' => $a4, 'object a5' => $a5, 'object a6' => $a6,
@@ -216,7 +229,7 @@ function test() {
                'resource f1' => $f1, 'resource f2' => $f2, 'resource f3' => $f3,
               );
 
-  echo "same    nsame   lt      lte     eq      neq     gte     gt\n\n";
+  echo "same    nsame   lt      lte     eq      neq     gte     gt      cmp\n\n";
   foreach ($arr as $k1 => $v1) {
     foreach ($arr as $k2 => $v2) {
       test_pair($k1, $v1, $k2, $v2);

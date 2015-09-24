@@ -53,7 +53,7 @@ struct Venv {
   Vlabel current{0};
   Vlabel next{0};
 
-  jit::vector<CodeAddress> addrs, points;
+  jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jmps, jccs, bccs;
   jit::vector<LabelPatch> catches;
 

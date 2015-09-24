@@ -290,6 +290,7 @@ public:
   bool more (const Array& v2, bool flip = true) const;
   bool more (const Object& v2) const;
   bool more (const Variant& v2) const;
+  int compare (const Array& v2, bool flip = false) const;
 
   /*
    * Offset

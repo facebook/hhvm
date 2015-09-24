@@ -134,6 +134,35 @@ bool cellGreaterOrEqual(Cell, Cell);
 
 //////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////
+// Php's operator <=>
+
+/*
+ * Returns a Cell's comparison against an unpackaged type, in the sense of php's
+ * <=> operator.
+ */
+int64_t cellCompare(Cell, bool);
+int64_t cellCompare(Cell, int);
+int64_t cellCompare(Cell, int64_t);
+int64_t cellCompare(Cell, double);
+int64_t cellCompare(Cell, const StringData*);
+int64_t cellCompare(Cell, const ArrayData*);
+int64_t cellCompare(Cell, const ObjectData*);
+int64_t cellCompare(Cell, const ResourceData*);
+
+/*
+ * Returns the result of a Cell's comparison against another Cell, in the sense
+ * of php's <=> operator.
+ */
+int64_t cellCompare(Cell, Cell);
+
+/*
+ * Returns the result of tv1's comparison against tv2, as in php's <=> operator.
+ */
+int64_t tvCompare(TypedValue, TypedValue);
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #include "hphp/runtime/base/tv-comparisons-inl.h"

@@ -1,0 +1,4 @@
+File "always_true.php", line 4, characters 7-19:
+This expression is always true (Typing[4151])
+File "always_true.php", line 3, characters 14-18:
+This is an array (used like a vector) and cannot be null

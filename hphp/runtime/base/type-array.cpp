@@ -406,6 +406,14 @@ bool Array::more(const Variant& v2) const {
   return HPHP::less(v2, *this);
 }
 
+int Array::compare(const Array& v2, bool flip /* = false */) const {
+  if (m_arr == nullptr || v2.get() == nullptr) {
+    return HPHP::compare(toBoolean(), v2.toBoolean());
+  }
+  if (flip) return -v2.get()->compare(get());
+  return m_arr->compare(v2.get());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // iterator
 

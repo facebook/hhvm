@@ -120,6 +120,7 @@ struct RegionDesc {
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
   void              replaceBlock(BlockId bid, BlockPtr newBlock);
   void              deleteBlock(BlockId bid);
+  BlockVec::iterator deleteBlock(RegionDesc::BlockVec::iterator it);
   void              renumberBlock(BlockId oldId, BlockId newId);
   void              addArc(BlockId src, BlockId dst);
   void              removeArc(BlockId src, BlockId dst);

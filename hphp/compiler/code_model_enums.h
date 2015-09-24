@@ -61,6 +61,7 @@ namespace HPHP {
     PHP_SHIFT_RIGHT = 38,
     PHP_XOR_ASSIGN = 39,
     PHP_XOR = 40,
+    PHP_SPACESHIP = 41,
   };
 
   /** The kinds of operations that IUnaryOpExpressions can perform. */

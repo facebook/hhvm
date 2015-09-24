@@ -406,6 +406,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case T_IS_GREATER_OR_EQUAL:
           result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell());
           break;
+        case T_SPACESHIP:
+          result = cellCompare(*v1.asCell(), *v2.asCell());
+          break;
         case '+':
           *result.asCell() = add(*v1.asCell(), *v2.asCell());
           break;
@@ -615,6 +618,7 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
     case T_IS_SMALLER_OR_EQUAL: op = PHP_IS_SMALLER_OR_EQUAL; break;
     case '>': op = PHP_IS_GREATER; break;
     case T_IS_GREATER_OR_EQUAL: op = PHP_IS_GREATER_OR_EQUAL;  break;
+    case T_SPACESHIP: op = PHP_SPACESHIP; break;
     case T_INSTANCEOF: op = PHP_INSTANCEOF;  break;
     default:
       assert(false);
@@ -670,6 +674,7 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_IS_SMALLER_OR_EQUAL: cg_printf(" <= ");         break;
   case '>':                   cg_printf(" > ");          break;
   case T_IS_GREATER_OR_EQUAL: cg_printf(" >= ");         break;
+  case T_SPACESHIP:           cg_printf(" <=> ");        break;
   case T_INSTANCEOF:          cg_printf(" instanceof "); break;
   case T_COLLECTION: {
     auto el = static_pointer_cast<ExpressionList>(m_exp2);

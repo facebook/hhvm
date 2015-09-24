@@ -827,24 +827,24 @@ Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
   return m_state.localType(id);
 }
 
-Type IRBuilder::predictedInnerType(uint32_t id) {
-  auto const ty = m_state.predictedLocalType(id);
+Type IRBuilder::predictedLocalType(uint32_t id) const {
+  return m_state.predictedLocalType(id);
+}
+
+Type IRBuilder::predictedInnerType(uint32_t id) const {
+  auto const ty = predictedLocalType(id);
   assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
-Type IRBuilder::stackInnerTypePrediction(IRSPOffset offset) const {
-  auto const ty = m_state.predictedStackType(offset);
-  assertx(ty <= TBoxedCell);
-  return ldRefReturn(ty.unbox());
-}
-
-Type IRBuilder::predictedStackType(IRSPOffset offset) {
+Type IRBuilder::predictedStackType(IRSPOffset offset) const {
   return m_state.predictedStackType(offset);
 }
 
-Type IRBuilder::predictedLocalType(uint32_t id) {
-  return m_state.predictedLocalType(id);
+Type IRBuilder::predictedStackInnerType(IRSPOffset offset) const {
+  auto const ty = predictedStackType(offset);
+  assertx(ty <= TBoxedCell);
+  return ldRefReturn(ty.unbox());
 }
 
 SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {

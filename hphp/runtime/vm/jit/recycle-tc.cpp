@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 
+#include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
 #include <folly/MoveWrapper.h>
@@ -230,7 +231,7 @@ void reclaimTranslation(TransLoc loc) {
     // Ensure no one calls into the function
     ITRACE(1, "Overwriting function\n");
     auto clearBlock = [] (CodeBlock& cb) {
-      Asm a {cb};
+      X64Assembler a {cb};
       while (cb.available() >= 2) a.ud2();
       if (cb.available() > 0) a.int3();
       always_assert(!cb.available());

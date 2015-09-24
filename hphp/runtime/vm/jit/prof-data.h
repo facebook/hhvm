@@ -226,6 +226,8 @@ public:
   void                    clearOptimized(SrcKey sk);
   bool                    profiling(FuncId funcId) const;
   void                    setProfiling(FuncId funcId);
+  void                    free();
+  bool                    freed() const;
 
   /*
    * Called when we've finished promoting all the profiling translations for
@@ -246,6 +248,7 @@ private:
   uint32_t                m_numTrans;
   std::vector<ProfTransRecPtr>
                           m_transRecs;
+  bool                    m_freed;
   FuncProfTransMap        m_funcProfTrans;
   ProfCounters<int64_t>   m_counters;
   SrcKeySet               m_optimizedSKs;   // set of SrcKeys already optimized

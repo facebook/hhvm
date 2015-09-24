@@ -54,6 +54,7 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
@@ -75,12 +76,13 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/check.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/debug-guards.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -104,8 +106,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
-
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 
 namespace HPHP { namespace jit {
 
@@ -629,6 +629,11 @@ MCGenerator::translate(const TranslArgs& args) {
   SKTRACE(1, args.sk, "translate moved head from %p to %p\n",
           getTopTranslation(args.sk), start);
 
+  // In PGO mode, we free all the profiling data once the TC is full.
+  if (RuntimeOption::EvalJitPGO &&
+      code.mainUsed() >= RuntimeOption::EvalJitAMaxUsage) {
+    m_tx.profData()->free();
+  }
   return start;
 }
 
@@ -1372,7 +1377,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
         int calleeNumParams = func->numNonVariadicParams();
         int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                    nArgs :  calleeNumParams + 1);
-        if (code.prof().contains(start)) {
+        if (code.prof().contains(start) && !m_tx.profData()->freed()) {
           if (isImmutable) {
             m_tx.profData()->addPrologueMainCaller(
               func, calledPrologNumArgs, toSmash);
@@ -1792,8 +1797,7 @@ bool CodeGenFixups::empty() const {
     m_literals.empty();
 }
 
-TCA
-MCGenerator::translateWork(const TranslArgs& args) {
+TCA MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t(Timer::translate);
   auto sk = args.sk;
 
@@ -1928,7 +1932,9 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
     FTRACE(1, "emitting dispatchBB interp request for failed "
       "translation (spOff = {})\n", initSpOffset.offset);
-    backEnd().emitInterpReq(code.main(), sk, initSpOffset);
+    vwrap(code.main(),
+          [&] (Vout& v) { emitInterpReq(v, sk, initSpOffset); },
+          CodeKind::Helper);
     // Fall through.
   }
 
@@ -2030,6 +2036,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
     Trace::traceRelease("%s", getUsageString().c_str());
   }
 
+  // Report jit maturity based on the amount of code emitted.
+  auto percent = code.mainUsed() * 100 / RuntimeOption::EvalJitAMaxUsage;
+  if (percent > 100) percent = 100;
+  ServiceData::createCounter("jit.maturity")->setValue(percent);
+
   return loc.mainStart();
 }
 
@@ -2052,7 +2063,7 @@ void MCGenerator::traceCodeGen(IRGS& irgs) {
   finishPass(" after optimizing ", kOptLevel);
 
   always_assert(this == mcg);
-  genCode(unit);
+  irlower::genCode(unit);
 
   m_numTrans++;
   assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);

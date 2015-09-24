@@ -43,14 +43,6 @@ struct BackEnd {
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
 
-  /*
-   * Emit a small piece of code to `code' that jumps to
-   * uniqueStubs.interpHelper.
-   */
-  virtual void emitInterpReq(CodeBlock& code,
-                             SrcKey sk,
-                             FPInvOffset spOff) = 0;
-
   virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
   virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
                            TCA begin, TCA end) = 0;

@@ -10,3 +10,11 @@ array(2) {
   ["alias"]=>
   string(6) "MyType"
 }
+array(3) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(6) "MyType"
+  ["nullable"]=>
+  bool(true)
+}

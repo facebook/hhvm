@@ -224,18 +224,23 @@ struct Vptr {
     , index(Vreg{})
     , disp(0)
   {}
-  template<class Base> Vptr(Base b, int d)
+
+  template<class Base>
+  Vptr(Base b, int d)
     : base(b)
     , index(Vreg{})
     , scale(1)
     , disp(d)
   {}
-  template<class Base, class Index> Vptr(Base b, Index i, int s, int d)
+
+  template<class Base, class Index>
+  Vptr(Base b, Index i, int s, int d)
     : base(b)
     , index(i)
     , scale(s)
     , disp(d)
   {}
+
   /* implicit */ Vptr(MemoryRef m, Segment s = DS)
     : base(m.r.base)
     , index(m.r.index)
@@ -244,12 +249,14 @@ struct Vptr {
     , disp(m.r.disp)
   {}
 
+  Vptr(const Vptr& o) = default;
+  Vptr& operator=(const Vptr& o) = default;
+
   MemoryRef mr() const;
   /* implicit */ operator MemoryRef() const;
 
   bool operator==(const Vptr&) const;
   bool operator!=(const Vptr&) const;
-
 
   Vreg64 base;      // optional, for baseless mode
   Vreg64 index;     // optional

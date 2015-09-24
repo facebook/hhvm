@@ -199,7 +199,7 @@ bool coerceFCallArgs(TypedValue* args,
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
-template<bool usesDoubles, bool variadic>
+template<bool usesDoubles>
 void callFunc(const Func* func, void* ctx,
               TypedValue* args, int32_t numNonDefault,
               TypedValue& ret);
@@ -224,7 +224,7 @@ const StringData* getInvokeName(ActRec* ar);
  * ret c_class_ni_method(ObjectData* this_, type arg1, type arg2, ...)
  * ret c_class_ns_method(Class* self_, type arg1, type arg2, ...)
  */
-BuiltinFunction getWrapper(bool method, bool usesDoubles, bool variadic);
+BuiltinFunction getWrapper(bool method, bool usesDoubles);
 
 /**
  * Fallback method bound to declared methods with no matching
@@ -233,26 +233,60 @@ BuiltinFunction getWrapper(bool method, bool usesDoubles, bool variadic);
 TypedValue* unimplementedWrapper(ActRec* ar);
 
 #define NATIVE_TYPES                                \
-  /* kind     arg type              return type */  \
-  X(Int32,    int32_t,              int32_t)        \
-  X(Int64,    int64_t,              int64_t)        \
-  X(Double,   double,               double)         \
-  X(Bool,     bool,                 bool)           \
-  X(Object,   const Object&,        Object)         \
-  X(String,   const String&,        String)         \
-  X(Array,    const Array&,         Array)          \
-  X(Resource, const Resource&,      Resource)       \
-  X(Mixed,    const Variant&,       Variant)        \
-  X(ARReturn, TypedValue*,          TypedValue*)    \
-  X(MixedRef, const VRefParamValue&,VRefParamValue) \
-  X(VarArgs,  ActRec*,              ActRec*)        \
-  X(This,     ObjectData*,          ObjectData*)    \
-  X(Class,    const Class*,         const Class*)   \
-  X(Void,     void,                 void)           \
-  X(Zend,     ZendFuncType,         ZendFuncType)   \
+  /* kind       arg type              return type */  \
+  X(Int32,      int32_t,              int32_t)        \
+  X(Int64,      int64_t,              int64_t)        \
+  X(Double,     double,               double)         \
+  X(Bool,       bool,                 bool)           \
+  X(Object,     const Object&,        Object)         \
+  X(String,     const String&,        String)         \
+  X(Array,      const Array&,         Array)          \
+  X(Resource,   const Resource&,      Resource)       \
+  X(Mixed,      const Variant&,       Variant)        \
+  X(ObjectArg,  ObjectArg,            ObjectArg)      \
+  X(StringArg,  StringArg,            StringArg)      \
+  X(ArrayArg,   ArrayArg,             ArrayArg)       \
+  X(ResourceArg,ResourceArg,          ResourceArg)    \
+  X(OutputArg,  OutputArg,            OutputArg)      \
+  X(ARReturn,   TypedValue*,          TypedValue*)    \
+  X(MixedTV,    TypedValue,           TypedValue)     \
+  X(MixedRef,   const VRefParamValue&,VRefParamValue) \
+  X(VarArgs,    ActRec*,              ActRec*)        \
+  X(This,       ObjectData*,          ObjectData*)    \
+  X(Class,      const Class*,         const Class*)   \
+  X(Void,       void,                 void)           \
+  X(Zend,       ZendFuncType,         ZendFuncType)   \
   /**/
 
 enum class ZendFuncType {};
+
+template <class T>
+struct NativeArg {
+  /*
+   * If we define, or delete a copy/move constructor,
+   * the class will be passed by address, which would
+   * defeat the point.
+   * However, deleting a move assignment operator causes
+   * the copy constructor to be implicitly deleted, and
+   * its still passed in registers. tada!
+   */
+  NativeArg& operator=(NativeArg&&) = delete;
+  T* operator->()        { return m_px; }
+  T* get()               { return m_px; }
+  bool operator!() const { return m_px == nullptr; }
+  bool isNull() const    { return m_px == nullptr; }
+private:
+  T* m_px;
+};
+}
+
+using ObjectArg   = Native::NativeArg<ObjectData>;
+using StringArg   = Native::NativeArg<StringData>;
+using ArrayArg    = Native::NativeArg<ArrayData>;
+using ResourceArg = Native::NativeArg<ResourceData>;
+using OutputArg   = Native::NativeArg<RefData>;
+
+namespace Native {
 
 struct NativeSig {
   enum class Type : uint8_t {

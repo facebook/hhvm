@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
+#include "hphp/runtime/vm/jit/vasm-lower.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
@@ -88,7 +89,6 @@ struct Vgen {
     , a(&assem)
     , current(env.current)
     , next(env.next)
-    , points(env.points)
     , jmps(env.jmps)
     , jccs(env.jccs)
     , bccs(env.bccs)
@@ -106,64 +106,65 @@ struct Vgen {
   }
 
   // intrinsics
-  void emit(bindcall& i);
-  void emit(copy& i);
-  void emit(copy2& i);
-  void emit(debugtrap& i) { a->Brk(0); }
-  void emit(hcsync& i);
-  void emit(hcnocatch& i);
-  void emit(hcunwind& i);
-  void emit(hostcall& i);
-  void emit(ldimmq& i);
-  void emit(ldimml& i);
-  void emit(ldimmb& i);
-  void emit(ldimmqs& i) { not_implemented(); }
-  void emit(load& i);
-  void emit(store& i);
-  void emit(syncpoint& i);
+  void emit(const bindcall& i);
+  void emit(const copy& i);
+  void emit(const copy2& i);
+  void emit(const debugtrap& i) { a->Brk(0); }
+  void emit(const hostcall& i) { a->HostCall(i.argc); }
+  void emit(const ldimmq& i);
+  void emit(const ldimml& i);
+  void emit(const ldimmb& i);
+  void emit(const ldimmqs& i) { not_implemented(); }
+  void emit(const load& i);
+  void emit(const store& i);
+
+  // boundaries
+  void emit(const nothrow& i);
+  void emit(const syncpoint& i);
+  void emit(const unwind& i);
 
   // instructions
-  void emit(addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), vixl::SetFlags); }
-  void emit(addq& i) { a->Add(X(i.d), X(i.s1), X(i.s0), vixl::SetFlags); }
-  void emit(addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.l(), vixl::SetFlags); }
-  void emit(andq& i) { a->And(X(i.d), X(i.s1), X(i.s0) /* xxx flags */); }
-  void emit(andqi& i) { a->And(X(i.d), X(i.s1), i.s0.l() /* xxx flags */); }
-  void emit(sar& i) { a->asrv(X(i.d), X(i.s0), X(i.s1)); }
-  void emit(brk& i) { a->Brk(i.code); }
-  void emit(cbcc& i);
-  void emit(callr& i) { a->Blr(X(i.target)); }
-  void emit(cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
-  void emit(cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
-  void emit(cmpqi& i) { a->Cmp(X(i.s1), i.s0.l()); }
-  void emit(decq& i) { a->Sub(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
-  void emit(incq& i) { a->Add(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
-  void emit(jcc& i);
+  void emit(const addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
+  void emit(const addq& i) { a->Add(X(i.d), X(i.s1), X(i.s0), SetFlags); }
+  void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.l(), SetFlags); }
+  void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0) /* flags? */); }
+  void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.l() /* flags? */); }
+  void emit(const sar& i) { a->asrv(X(i.d), X(i.s0), X(i.s1)); }
+  void emit(const brk& i) { a->Brk(i.code); }
+  void emit(cbcc i);
+  void emit(const callr& i) { a->Blr(X(i.target)); }
+  void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
+  void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
+  void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
+  void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.l()); }
+  void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1LL, SetFlags); }
+  void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1LL, SetFlags); }
+  void emit(jcc i);
   void emit(jmp i);
-  void emit(lea& i);
-  void emit(loadl& i) { a->Ldr(W(i.d), M(i.s)); /* assume 0-extends */ }
-  void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
-  void emit(shl& i) { a->lslv(X(i.d), X(i.s0), X(i.s1)); }
-  void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
-  void emit(movzbq& i) { a->Uxtb(W(Vreg32(size_t(i.d))), W(i.s)); }
-  void emit(imul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
-  void emit(neg& i) { a->Neg(X(i.d), X(i.s), vixl::SetFlags); }
-  void emit(not& i) { a->Mvn(X(i.d), X(i.s)); }
-  void emit(orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* xxx flags? */); }
-  void emit(orqi& i) { a->Orr(X(i.d), X(i.s1), i.s0.l() /* xxx flags? */); }
-  void emit(ret& i) { a->Ret(); }
-  void emit(storeb& i) { a->Strb(W(i.s), M(i.m)); }
-  void emit(storel& i) { a->Str(W(i.s), M(i.m)); }
-  void emit(setcc& i) { PhysReg r(i.d.asReg()); a->Cset(X(r), C(i.cc)); }
-  void emit(subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), vixl::SetFlags); }
-  void emit(subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), vixl::SetFlags); }
-  void emit(subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.l(), vixl::SetFlags); }
-  void emit(tbcc& i);
-  void emit(testl& i) { a->Tst(W(i.s1), W(i.s0)); }
-  void emit(testli& i) { a->Tst(W(i.s1), i.s0.l()); }
-  void emit(ud2& i) { a->Brk(1); }
-  void emit(xorq& i) { a->Eor(X(i.d), X(i.s1), X(i.s0) /* xxx flags */); }
-  void emit(xorqi& i) { a->Eor(X(i.d), X(i.s1), i.s0.l() /* xxx flags */); }
+  void emit(const lea& i);
+  void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); /* 0-extends? */ }
+  void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
+  void emit(const shl& i) { a->lslv(X(i.d), X(i.s0), X(i.s1)); }
+  void emit(const movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
+  void emit(const movzbq& i) { a->Uxtb(W(Vreg32(size_t(i.d))), W(i.s)); }
+  void emit(const imul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
+  void emit(const neg& i) { a->Neg(X(i.d), X(i.s), vixl::SetFlags); }
+  void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
+  void emit(const orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* flags? */); }
+  void emit(const orqi& i) { a->Orr(X(i.d), X(i.s1), i.s0.l() /* flags? */); }
+  void emit(const ret& i) { a->Ret(); }
+  void emit(const storeb& i) { a->Strb(W(i.s), M(i.m)); }
+  void emit(const storel& i) { a->Str(W(i.s), M(i.m)); }
+  void emit(const setcc& i) { PhysReg r(i.d.asReg()); a->Cset(X(r), C(i.cc)); }
+  void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
+  void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), SetFlags); }
+  void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.l(), SetFlags); }
+  void emit(tbcc i);
+  void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
+  void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
+  void emit(const ud2& i) { a->Brk(1); }
+  void emit(const xorq& i) { a->Eor(X(i.d), X(i.s1), X(i.s0) /* flags? */); }
+  void emit(const xorqi& i) { a->Eor(X(i.d), X(i.s1), i.s0.l() /* flags? */); }
 
 private:
   CodeBlock& frozen() { return text.frozen().code; }
@@ -176,7 +177,6 @@ private:
 
   const Vlabel current;
   const Vlabel next;
-  jit::vector<CodeAddress>& points;
   jit::vector<Venv::LabelPatch>& jmps;
   jit::vector<Venv::LabelPatch>& jccs;
   jit::vector<Venv::LabelPatch>& bccs;
@@ -203,11 +203,11 @@ void Vgen::patch(Venv& env) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(bindcall& i) {
+void Vgen::emit(const bindcall& i) {
   emitSmashableCall(*codeBlock, i.stub);
 }
 
-void Vgen::emit(copy& i) {
+void Vgen::emit(const copy& i) {
   if (i.s.isGP() && i.d.isGP()) {
     a->Mov(X(i.d), X(i.s));
   } else if (i.s.isSIMD() && i.d.isGP()) {
@@ -220,7 +220,7 @@ void Vgen::emit(copy& i) {
   }
 }
 
-void Vgen::emit(copy2& i) {
+void Vgen::emit(const copy2& i) {
   PhysReg::Map<PhysReg> moves;
   Reg64 d0 = i.d0, d1 = i.d1, s0 = i.s0, s1 = i.s1;
   moves[d0] = s0;
@@ -239,27 +239,7 @@ void Vgen::emit(copy2& i) {
   }
 }
 
-void Vgen::emit(hcsync& i) {
-  assertx(points[i.call]);
-  mcg->recordSyncPoint(points[i.call], i.fix);
-}
-
-void Vgen::emit(hcnocatch& i) {
-  // register a null catch trace at the position of the call
-  mcg->registerCatchBlock(points[i.call], nullptr);
-}
-
-void Vgen::emit(hcunwind& i) {
-  catches.push_back({points[i.call], i.targets[1]});
-  emit(jmp{i.targets[0]});
-}
-
-void Vgen::emit(hostcall& i) {
-  points[i.syncpoint] = a->frontier();
-  a->HostCall(i.argc);
-}
-
-void Vgen::emit(ldimmq& i) {
+void Vgen::emit(const ldimmq& i) {
   union { double dval; int64_t ival; };
   ival = i.s.q();
   if (i.d.isSIMD()) {
@@ -291,7 +271,7 @@ void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
   }
 }
 
-void Vgen::emit(ldimml& i) {
+void Vgen::emit(const ldimml& i) {
   if (i.d.isSIMD()) {
     emitSimdImmInt(a, i.s.q(), i.d);
   } else {
@@ -300,7 +280,7 @@ void Vgen::emit(ldimml& i) {
   }
 }
 
-void Vgen::emit(ldimmb& i) {
+void Vgen::emit(const ldimmb& i) {
   if (i.d.isSIMD()) {
     emitSimdImmInt(a, i.s.q(), i.d);
   } else {
@@ -309,7 +289,7 @@ void Vgen::emit(ldimmb& i) {
   }
 }
 
-void Vgen::emit(load& i) {
+void Vgen::emit(const load& i) {
   if (i.d.isGP()) {
     a->Ldr(X(i.d), M(i.s));
   } else {
@@ -317,7 +297,7 @@ void Vgen::emit(load& i) {
   }
 }
 
-void Vgen::emit(store& i) {
+void Vgen::emit(const store& i) {
   if (i.s.isGP()) {
     a->Str(X(i.s), M(i.d));
   } else {
@@ -325,10 +305,21 @@ void Vgen::emit(store& i) {
   }
 }
 
-void Vgen::emit(syncpoint& i) {
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const nothrow& i) {
+  mcg->registerCatchBlock(a->frontier(), nullptr);
+}
+
+void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
          i.fix.pcOffset, i.fix.spOffset);
   mcg->recordSyncPoint(a->frontier(), i.fix);
+}
+
+void Vgen::emit(const unwind& i) {
+  catches.push_back({a->frontier(), i.targets[1]});
+  emit(jmp{i.targets[0]});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -340,7 +331,7 @@ void Vgen::emit(jmp i) {
   emitSmashableJmp(*codeBlock, kEndOfTargetChain);
 }
 
-void Vgen::emit(jcc& i) {
+void Vgen::emit(jcc i) {
   assertx(i.cc != CC_None);
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
@@ -354,13 +345,13 @@ void Vgen::emit(jcc& i) {
   emit(jmp{i.targets[0]});
 }
 
-void Vgen::emit(lea& i) {
+void Vgen::emit(const lea& i) {
   assertx(!i.s.index.isValid());
   assertx(i.s.scale == 1);
   a->Add(X(i.d), X(i.s.base), i.s.disp);
 }
 
-void Vgen::emit(cbcc& i) {
+void Vgen::emit(cbcc i) {
   assertx(i.cc == vixl::ne || i.cc == vixl::eq);
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
@@ -379,7 +370,7 @@ void Vgen::emit(cbcc& i) {
   emit(jmp{i.targets[0]});
 }
 
-void Vgen::emit(tbcc& i) {
+void Vgen::emit(tbcc i) {
   assertx(i.cc == vixl::ne || i.cc == vixl::eq);
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
@@ -399,27 +390,6 @@ void Vgen::emit(tbcc& i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void lower(Vunit& unit) {
-  Timer _t(Timer::vasm_lower);
-  for (size_t b = 0; b < unit.blocks.size(); ++b) {
-    auto& code = unit.blocks[b].code;
-    if (code.empty()) continue;
-    for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
-      auto& inst = unit.blocks[b].code[i];
-      switch (inst.op) {
-        case Vinstr::defvmsp:
-          inst = copy{PhysReg{arm::rvmsp()}, inst.defvmsp_.d};
-          break;
-        case Vinstr::syncvmsp:
-          inst = copy{inst.syncvmsp_.s, PhysReg{arm::rvmsp()}};
-          break;
-        default:
-          break;
-      }
-    }
-  }
-}
 
 /*
  * Some vasm opcodes don't have equivalent single instructions on ARM, and the
@@ -489,11 +459,11 @@ void lowerForARM(Vunit& unit) {
 
 void finishARM(Vunit& unit, Vtext& text, const Abi& abi, AsmInfo* asmInfo) {
   optimizeExits(unit);
-  lower(unit);
   simplify(unit);
   if (!unit.constToReg.empty()) {
     foldImms<arm::ImmFolder>(unit);
   }
+  vlower(unit);
   lowerForARM(unit);
   if (unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);

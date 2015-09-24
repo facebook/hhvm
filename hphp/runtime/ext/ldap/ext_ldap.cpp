@@ -123,6 +123,10 @@ public:
     rebindproc.unset();
   }
 
+  bool isInvalid() const override {
+    return link == nullptr;
+  }
+
 private:
   void closeImpl();
 
@@ -183,6 +187,10 @@ public:
     }
   }
 
+  bool isInvalid() const override {
+    return data == nullptr;
+  }
+
   CLASSNAME_IS("ldap result");
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof();}
@@ -207,6 +215,10 @@ public:
     data = NULL;
   }
 
+  bool isInvalid() const override {
+    return data == nullptr;
+  }
+
   CLASSNAME_IS("ldap result entry");
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -222,6 +234,36 @@ void LdapResultEntry::sweep() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<typename T>
+static req::ptr<LdapLink> get_valid_ldap_link_resource(const T& link) {
+  auto ld = dyn_cast_or_null<LdapLink>(link);
+  if (ld == nullptr || ld->isInvalid()) {
+    raise_warning("Not a valid ldap link resource");
+    return nullptr;
+  }
+  return ld;
+}
+
+static req::ptr<LdapResult> get_valid_ldap_result_resource(const Resource& result) {
+  auto res = dyn_cast_or_null<LdapResult>(result);
+  if (res == nullptr || res->isInvalid()) {
+    raise_warning("Not a valid ldap result resource");
+    return nullptr;
+  }
+  return res;
+}
+
+static req::ptr<LdapResultEntry> get_valid_ldap_result_entry_resource(const Resource& result_entry) {
+  auto entry = dyn_cast_or_null<LdapResultEntry>(result_entry);
+  if (entry == nullptr || entry->isInvalid()) {
+    raise_warning("Not a valid ldap result entry resource");
+    return nullptr;
+  }
+  return entry;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static int _get_lderrno(LDAP *ldap) {
   int lderr;
   ldap_get_option(ldap, LDAP_OPT_ERROR_NUMBER, &lderr);
@@ -233,7 +275,10 @@ static bool php_ldap_do_modify(const Resource& link, const String& dn, const Arr
   bool is_full_add = false; /* flag for full add operation so ldap_mod_add
                                can be put back into oper, gerrit THomson */
 
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
 
   int num_attribs = entry.size();
   LDAPMod **ldap_mods =
@@ -455,7 +500,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
     ArrayIter iterdn(base_dn.toArray());
     ArrayIter iterfilter(filter.toArray());
     for (int i = 0; i < nlinks; i++) {
-      ld = dyn_cast_or_null<LdapLink>(iter.second());
+      ld = get_valid_ldap_link_resource(iter.second());
       if (!ld) {
         ldap_err = 0;
         goto cleanup;
@@ -512,7 +557,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       ldap_base_dn = (char*)base_dn.toString().data();
     }
 
-    ld = dyn_cast_or_null<LdapLink>(link);
+    ld = get_valid_ldap_link_resource(link);
     if (!ld) {
       ldap_err = 0;
       goto cleanup;
@@ -742,6 +787,11 @@ bool HHVM_FUNCTION(ldap_bind,
                    const Variant& bind_rdn /* = null_variant */,
                    const Variant& bind_password /* = null_variant */) {
 
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+
   const String& str_bind_rdn = bind_rdn.isNull()
                              ? null_string
                              : bind_rdn.toString();
@@ -760,7 +810,6 @@ bool HHVM_FUNCTION(ldap_bind,
   }
 
   int rc;
-  auto ld = cast<LdapLink>(link);
   if ((rc = ldap_bind_s(ld->link, (char*)str_bind_rdn.data(),
                         (char*)str_bind_password.data(),
                         LDAP_AUTH_SIMPLE)) != LDAP_SUCCESS) {
@@ -773,7 +822,10 @@ bool HHVM_FUNCTION(ldap_bind,
 bool HHVM_FUNCTION(ldap_set_rebind_proc,
                    const Resource& link,
                    const Variant& callback) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
 
   if (callback.isString() && callback.toString().empty()) {
     /* unregister rebind procedure */
@@ -807,8 +859,14 @@ bool HHVM_FUNCTION(ldap_sort,
                    const Resource& link,
                    const Resource& result,
                    const String& sortfilter) {
-  auto ld = cast<LdapLink>(link);
-  auto res = cast<LdapResult>(result);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
 
   if (ldap_sort_entries(ld->link, &res->data,
                         !sortfilter.empty() ? (char*)sortfilter.data() : NULL,
@@ -821,7 +879,10 @@ bool HHVM_FUNCTION(ldap_sort,
 
 bool HHVM_FUNCTION(ldap_start_tls,
                    const Resource& link) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
   int rc, protocol = LDAP_VERSION3;
   if (((rc = ldap_set_option(ld->link, LDAP_OPT_PROTOCOL_VERSION, &protocol))
        != LDAP_SUCCESS) ||
@@ -833,7 +894,11 @@ bool HHVM_FUNCTION(ldap_start_tls,
 }
 
 bool HHVM_FUNCTION(ldap_unbind, const Resource& link) {
-  cast<LdapLink>(link)->close();
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  ld->close();
   return true;
 }
 
@@ -841,7 +906,10 @@ bool HHVM_FUNCTION(ldap_get_option,
                    const Resource& link,
                    int option,
                    VRefParam retval) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
 
   switch (option) {
   /* options with int value */
@@ -934,7 +1002,11 @@ bool HHVM_FUNCTION(ldap_set_option,
                    const Variant& newval) {
   LDAP *ldap = NULL;
   if (!link.isNull()) {
-    ldap = cast<LdapLink>(link)->link;
+    auto ld = get_valid_ldap_link_resource(link);
+    if (!ld) {
+      return false;
+    }
+    ldap = ld->link;
   }
 
   switch (option) {
@@ -1125,7 +1197,11 @@ bool HHVM_FUNCTION(ldap_rename,
                    const String& newrdn,
                    const String& newparent,
                    bool deleteoldrdn) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+
   int rc = ldap_rename_s(ld->link, (char*)dn.data(), (char*)newrdn.data(),
                          !newparent.empty() ? (char*)newparent.data() : NULL,
                          deleteoldrdn, NULL, NULL);
@@ -1135,7 +1211,11 @@ bool HHVM_FUNCTION(ldap_rename,
 bool HHVM_FUNCTION(ldap_delete,
                    const Resource& link,
                    const String& dn) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+
   int rc;
   if ((rc = ldap_delete_s(ld->link, (char*)dn.data())) != LDAP_SUCCESS) {
     raise_warning("Delete: %s", ldap_err2string(rc));
@@ -1149,7 +1229,11 @@ Variant HHVM_FUNCTION(ldap_compare,
                       const String& dn,
                       const String& attribute,
                       const String& value) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return -1LL;
+  }
+
   int rc = ldap_compare_s(ld->link, (char*)dn.data(), (char*)attribute.data(),
                           (char*)value.data());
   switch (rc) {
@@ -1160,15 +1244,23 @@ Variant HHVM_FUNCTION(ldap_compare,
   return -1LL;
 }
 
-int64_t HHVM_FUNCTION(ldap_errno,
+Variant HHVM_FUNCTION(ldap_errno,
                       const Resource& link) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+
   return _get_lderrno(ld->link);
 }
 
-String HHVM_FUNCTION(ldap_error,
+Variant HHVM_FUNCTION(ldap_error,
                      const Resource& link) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+
   int ld_errno = _get_lderrno(ld->link);
   return String(ldap_err2string(ld_errno), CopyString);
 }
@@ -1176,8 +1268,14 @@ String HHVM_FUNCTION(ldap_error,
 Variant HHVM_FUNCTION(ldap_get_dn,
                       const Resource& link,
                       const Resource& result_entry) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
 
   char *text = ldap_get_dn(ld->link, entry->data);
   if (text) {
@@ -1188,19 +1286,32 @@ Variant HHVM_FUNCTION(ldap_get_dn,
   return false;
 }
 
-int64_t HHVM_FUNCTION(ldap_count_entries,
+Variant HHVM_FUNCTION(ldap_count_entries,
                       const Resource& link,
                       const Resource& result) {
-  auto ld = cast<LdapLink>(link);
-  auto res = cast<LdapResult>(result);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
+
   return ldap_count_entries(ld->link, res->data);
 }
 
 Variant HHVM_FUNCTION(ldap_get_entries,
                       const Resource& link,
                       const Resource& result) {
-  auto ld = cast<LdapLink>(link);
-  auto res = cast<LdapResult>(result);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
 
   LDAP *ldap = ld->link;
 
@@ -1238,8 +1349,14 @@ Variant HHVM_FUNCTION(ldap_get_entries,
 Variant HHVM_FUNCTION(ldap_first_entry,
                       const Resource& link,
                       const Resource& result) {
-  auto ld = cast<LdapLink>(link);
-  auto res = cast<LdapResult>(result);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
 
   LDAPMessage *entry;
   if ((entry = ldap_first_entry(ld->link, res->data)) == NULL) {
@@ -1252,8 +1369,14 @@ Variant HHVM_FUNCTION(ldap_first_entry,
 Variant HHVM_FUNCTION(ldap_next_entry,
                       const Resource& link,
                       const Resource& result_entry) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
 
   LDAPMessage *msg;
   if ((msg = ldap_next_entry(ld->link, entry->data)) == NULL) {
@@ -1263,11 +1386,18 @@ Variant HHVM_FUNCTION(ldap_next_entry,
   return Variant(req::make<LdapResultEntry>(msg, entry->result));
 }
 
-Array HHVM_FUNCTION(ldap_get_attributes,
+Variant HHVM_FUNCTION(ldap_get_attributes,
                     const Resource& link,
                     const Resource& result_entry) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
+
   Array ret = Array::Create();
   get_attributes(ret, ld->link, entry->data, false);
   return ret;
@@ -1276,8 +1406,14 @@ Array HHVM_FUNCTION(ldap_get_attributes,
 Variant HHVM_FUNCTION(ldap_first_attribute,
                       const Resource& link,
                       const Resource& result_entry) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
 
   char *attribute;
   if ((attribute =
@@ -1292,8 +1428,14 @@ Variant HHVM_FUNCTION(ldap_first_attribute,
 Variant HHVM_FUNCTION(ldap_next_attribute,
                       const Resource& link,
                       const Resource& result_entry) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
 
   if (entry->ber == NULL) {
     raise_warning("called before calling ldap_first_attribute() or "
@@ -1318,8 +1460,14 @@ Variant HHVM_FUNCTION(ldap_next_attribute,
 Variant HHVM_FUNCTION(ldap_first_reference,
                       const Resource& link,
                       const Resource& result) {
-  auto ld = cast<LdapLink>(link);
-  auto res = cast<LdapResult>(result);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
 
   LDAPMessage *entry;
   if ((entry = ldap_first_reference(ld->link, res->data)) == NULL) {
@@ -1332,8 +1480,14 @@ Variant HHVM_FUNCTION(ldap_first_reference,
 Variant HHVM_FUNCTION(ldap_next_reference,
                       const Resource& link,
                       const Resource& result_entry) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
 
   LDAPMessage *entry_next;
   if ((entry_next = ldap_next_reference(ld->link, entry->data)) == NULL) {
@@ -1347,8 +1501,14 @@ bool HHVM_FUNCTION(ldap_parse_reference,
                    const Resource& link,
                    const Resource& result_entry,
                    VRefParam referrals) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
 
   char **lreferrals, **refp;
   if (ldap_parse_reference(ld->link, entry->data, &lreferrals,
@@ -1376,8 +1536,14 @@ bool HHVM_FUNCTION(ldap_parse_result,
                    VRefParam matcheddn /* = null */,
                    VRefParam errmsg /* = null */,
                    VRefParam referrals /* = null */) {
-  auto ld = cast<LdapLink>(link);
-  auto res = cast<LdapResult>(result);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
 
   int lerrcode;
   char **lreferrals, **refp;
@@ -1422,7 +1588,11 @@ bool HHVM_FUNCTION(ldap_parse_result,
 
 bool HHVM_FUNCTION(ldap_free_result,
                    const Resource& result) {
-  cast<LdapResult>(result)->close();
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
+  res->close();
   return true;
 }
 
@@ -1430,8 +1600,14 @@ Variant HHVM_FUNCTION(ldap_get_values_len,
                       const Resource& link,
                       const Resource& result_entry,
                       const String& attribute) {
-  auto ld = cast<LdapLink>(link);
-  auto entry = cast<LdapResultEntry>(result_entry);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto entry = get_valid_ldap_result_entry_resource(result_entry);
+  if (!entry) {
+    return false;
+  }
 
   struct berval **ldap_value_len;
   if ((ldap_value_len =
@@ -1465,7 +1641,10 @@ bool HHVM_FUNCTION(ldap_control_paged_result,
                    int pagesize,
                    bool iscritical,
                    const String& cookie) {
-  auto ld = cast<LdapLink>(link);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
   LDAPControl ctrl, *ctrlsp[2];
   int rc;
   struct berval lcookie;
@@ -1509,8 +1688,14 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
                    const Resource& result,
                    VRefParam cookie,
                    VRefParam estimated) {
-  auto ld = cast<LdapLink>(link);
-  auto res = cast<LdapResult>(result);
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+  auto res = get_valid_ldap_result_resource(result);
+  if (!res) {
+    return false;
+  }
   int rc, lerrcode;
   LDAPControl **lserverctrls, *lctrl;
   BerElement *ber;

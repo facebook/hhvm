@@ -115,9 +115,10 @@ inline RegSet fcall_array_regs() { return vm_regs_with_sp(); }
 // Calling convention registers.
 
 /*
- * GP register for integer returns.
+ * Native return value registers.
  */
-PhysReg rret();
+PhysReg rret(size_t i = 0);
+PhysReg rret_simd(size_t i);
 
 /*
  * Native argument registers.

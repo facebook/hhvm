@@ -26,16 +26,16 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool is_aligned(TCA frontier, Alignment alignment) {
-  ARCH_SWITCH_CALL(is_aligned, frontier, alignment);
+  return ARCH_SWITCH_CALL(is_aligned, frontier, alignment);
 }
 
 void align(CodeBlock& cb, Alignment alignment, AlignContext context,
            bool fixups /* = true */) {
-  ARCH_SWITCH_CALL(align, cb, alignment, context, fixups);
+  return ARCH_SWITCH_CALL(align, cb, alignment, context, fixups);
 }
 
 size_t cache_line_size() {
-  ARCH_SWITCH_CALL(cache_line_size);
+  return ARCH_SWITCH_CALL(cache_line_size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -665,10 +665,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsNTypeMem:
   case IsTypeMem:
   case CheckTypeMem:
-  case DbgAssertPtr:
-    return may_load_store(pointee(inst.src(0)), AEmpty);
-
   case CheckInitMem:
+  case DbgAssertPtr:
     return may_load_store(pointee(inst.src(0)), AEmpty);
 
   //////////////////////////////////////////////////////////////////////
@@ -959,6 +957,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NSameObj:
   case EqRes:
   case NeqRes:
+  case CmpBool:
+  case CmpInt:
+  case CmpDbl:
   case SubDbl:
   case SubInt:
   case SubIntO:
@@ -1088,18 +1089,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NeqStr:
   case SameStr:
   case NSameStr:
+  case CmpStr:
   case GtStrInt:
   case GteStrInt:
   case LtStrInt:
   case LteStrInt:
   case EqStrInt:
   case NeqStrInt:
+  case CmpStrInt:
   case SameArr:
   case NSameArr:
   case GtRes:
   case GteRes:
   case LtRes:
   case LteRes:
+  case CmpRes:
   case IncTransCounter:
   case LdBindAddr:
   case LdAsyncArParentChain:
@@ -1245,12 +1249,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LteObj:
   case EqObj:
   case NeqObj:
+  case CmpObj:
   case GtArr:
   case GteArr:
   case LtArr:
   case LteArr:
   case EqArr:
   case NeqArr:
+  case CmpArr:
   case DecodeCufIter:
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src

@@ -28,19 +28,19 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitFuncGuard(const Func* func, CodeBlock& cb) {
-  ARCH_SWITCH_CALL(emitFuncGuard, func, cb);
+  return ARCH_SWITCH_CALL(emitFuncGuard, func, cb);
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* func) {
-  ARCH_SWITCH_CALL(funcGuardFromPrologue, prologue, func);
+  return ARCH_SWITCH_CALL(funcGuardFromPrologue, prologue, func);
 }
 
-bool funcGuardMatches (TCA guard, const Func* func) {
-  ARCH_SWITCH_CALL(funcGuardMatches, guard, func);
+bool funcGuardMatches(TCA guard, const Func* func) {
+  return ARCH_SWITCH_CALL(funcGuardMatches, guard, func);
 }
 
 void clobberFuncGuard(TCA guard, const Func* func) {
-  ARCH_SWITCH_CALL(clobberFuncGuard, guard, func);
+  return ARCH_SWITCH_CALL(clobberFuncGuard, guard, func);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

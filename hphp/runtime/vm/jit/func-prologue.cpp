@@ -21,12 +21,12 @@
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -78,7 +78,8 @@ TCA genFuncPrologue(TransID transID, Func* func, int argc) {
 
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
-  genCode(env.unit, CodeKind::CrossTrace);
+
+  irlower::genCode(env.unit, CodeKind::CrossTrace);
 
   return start;
 }
@@ -96,7 +97,8 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
 
   irgen::emitFuncBodyDispatch(env, dvs);
   irgen::sealUnit(env);
-  genCode(env.unit, CodeKind::CrossTrace);
+
+  irlower::genCode(env.unit, CodeKind::CrossTrace);
 
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;

@@ -284,6 +284,17 @@ void MemoryManager::scanRootMaps(F& m) const {
   }
 }
 
+template<class F>
+void ThreadLocalManager::scan(F& mark) const {
+  auto list = getList(pthread_getspecific(m_key));
+  if (!list) return;
+  for (auto p = list->head; p != nullptr;) {
+    auto node = static_cast<ThreadLocalNode<void>*>(p);
+    mark(node->m_p, node->m_size);
+    p = node->m_next;
+  }
+}
+
 // Scan request-local roots
 template<class F> void scanRoots(F& mark) {
   // rds, including php stack
@@ -302,6 +313,17 @@ template<class F> void scanRoots(F& mark) {
   mark.where("cpp-stack");
   auto sp = stack_top_ptr();
   mark(sp, s_stackLimit + s_stackSize - uintptr_t(sp));
+  // C++ threadlocal data, but don't scan MemoryManager
+  auto tdata = getCppTdata(); // tdata = { ptr, size }
+  if (tdata.second > 0) {
+    auto tm = (char*)tdata.first;
+    auto tm_end = tm + tdata.second;
+    auto mm = (char*)&MM();
+    auto mm_end = mm + sizeof(MemoryManager);
+    assert(mm >= tm && mm_end <= tm_end);
+    mark(tm, mm - tm);
+    mark(mm_end, tm_end - mm_end);
+  }
   // Extension thread locals
   mark.where("extensions");
   ExtMarker<F> xm(mark);

@@ -572,9 +572,9 @@ void cellMulEq(Cell& c1, Cell c2) {
   cellOpEq(MulEq(), c1, c2);
 }
 
-void cellAddEqO(Cell& c1, Cell c2) { cellCopy(cellAddO(c1, c2), c1); }
-void cellSubEqO(Cell& c1, Cell c2) { cellCopy(cellSubO(c1, c2), c1); }
-void cellMulEqO(Cell& c1, Cell c2) { cellCopy(cellMulO(c1, c2), c1); }
+void cellAddEqO(Cell& c1, Cell c2) { cellSet(cellAddO(c1, c2), c1); }
+void cellSubEqO(Cell& c1, Cell c2) { cellSet(cellSubO(c1, c2), c1); }
+void cellMulEqO(Cell& c1, Cell c2) { cellSet(cellMulO(c1, c2), c1); }
 
 void cellDivEq(Cell& c1, Cell c2) {
   assert(cellIsPlausible(c1));
@@ -605,8 +605,8 @@ void cellBitXorEq(Cell& c1, Cell c2) {
   cellBitOpEq(cellBitXor, c1, c2);
 }
 
-void cellShlEq(Cell& c1, Cell c2) { cellCopy(cellShl(c1, c2), c1); }
-void cellShrEq(Cell& c1, Cell c2) { cellCopy(cellShr(c1, c2), c1); }
+void cellShlEq(Cell& c1, Cell c2) { cellSet(cellShl(c1, c2), c1); }
+void cellShrEq(Cell& c1, Cell c2) { cellSet(cellShr(c1, c2), c1); }
 
 void cellInc(Cell& cell) { cellIncDecOp(Inc(), cell); }
 void cellIncO(Cell& cell) { cellIncDecOp(IncO(), cell); }

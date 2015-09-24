@@ -828,6 +828,26 @@ bool ObjectData::more(const ObjectData& other) const {
   return toArray().more(other.toArray());
 }
 
+int64_t ObjectData::compare(const ObjectData& other) const {
+  if (isCollection() || other.isCollection()) {
+    throw_collection_compare_exception();
+  }
+  if (this == &other) return 0;
+  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
+               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    auto t1 = DateTimeData::getTimestamp(this);
+    auto t2 = DateTimeData::getTimestamp(&other);
+    return (t1 < t2) ? -1 : ((t1 > t2) ? 1 : 0);
+  }
+  // Return 1 for different classes to match PHP7 behavior.
+  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+    // First comparison already proves they are different
+    return 1;
+  }
+  if (getVMClass() != other.getVMClass()) return 1;
+  return toArray().compare(other.toArray());
+}
+
 Variant ObjectData::offsetGet(Variant key) {
   assert(instanceof(SystemLib::s_ArrayAccessClass));
 
@@ -1417,24 +1437,24 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
 
   if (prop && lookup.accessible) {
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
-      auto tvResult = make_tv<KindOfUninit>();
-      if (invokeGet(&tvResult, key)) {
-        setopBody(&tvResult, op, val);
+      auto get_result = make_tv<KindOfUninit>();
+      if (invokeGet(&get_result, key)) {
+        SCOPE_EXIT { tvRefcountedDecRef(get_result); };
+        setopBody(tvToCell(&get_result), op, val);
         if (getAttribute(UseSet)) {
           assert(tvRef.m_type == KindOfUninit);
-          cellDup(*tvToCell(&tvResult), tvRef);
+          cellDup(*tvToCell(&get_result), tvRef);
           if (invokeSet(key, &tvRef)) {
             return &tvRef;
           }
           tvRef.m_type = KindOfUninit;
         }
-        cellDup(*tvToCell(&tvResult), *prop);
+        cellDup(*tvToCell(&get_result), *prop);
         return prop;
       }
     }
-
     prop = tvToCell(prop);
-    setopBodyCell(prop, op, val);
+    setopBody(prop, op, val);
     return prop;
   }
 
@@ -1443,7 +1463,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   // Native accessors.
   if (getAttribute(HasNativePropHandler)) {
     if (invokeNativeGetProp(&tvRef, key)) {
-      setopBody(&tvRef, op, val);
+      setopBody(tvToCell(&tvRef), op, val);
       if (invokeNativeSetProp(key, &tvRef)) {
         return &tvRef;
       }
@@ -1454,15 +1474,16 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   auto const useGet = getAttribute(UseGet);
 
   if (useGet && !useSet) {
-    auto tvResult = make_tv<KindOfNull>();
+    auto get_result = make_tv<KindOfNull>();
     // If invokeGet fails due to recursion, it leaves the KindOfNull.
-    invokeGet(&tvResult, key);
+    invokeGet(&get_result, key);
+    SCOPE_EXIT { tvRefcountedDecRef(get_result); };
 
     // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
     // here, even though it comes before the IncDecOp in the analogous
     // situation in incDecProp.  This is to match zend 5.5 behavior.
-    setopBody(&tvResult, op, val);
-    tvUnboxIfNeeded(&tvResult);
+    setopBody(tvToCell(&get_result), op, val);
+    tvUnboxIfNeeded(&get_result);
 
     if (prop) raise_error("Cannot access protected property");
     prop = reinterpret_cast<TypedValue*>(
@@ -1473,7 +1494,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     // unlike the non-magic case below, we may have already created it
     // under the recursion into invokeGet above, so we need to do a
     // tvSet here.
-    tvSet(tvResult, *prop);
+    tvSet(get_result, *prop);
     return prop;
   }
 
@@ -1483,7 +1504,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
       // operation, but setop doesn't need to here.  (We'll unbox the
       // value that gets passed to the magic setter, though, since
       // __set functions can't take parameters by reference.)
-      setopBody(&tvRef, op, val);
+      setopBody(tvToCell(&tvRef), op, val);
       invokeSet(key, &tvRef);
       return &tvRef;
     }
@@ -1498,7 +1519,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
   );
   assert(prop->m_type == KindOfNull); // cannot exist yet
-  setopBodyCell(prop, op, val);
+  setopBody(prop, op, val);
   return prop;
 }
 

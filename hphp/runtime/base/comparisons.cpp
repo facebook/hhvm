@@ -157,5 +157,18 @@ bool moreEqual(int64_t v1, const StringData *v2) {
   return v1 >= 0;
 }
 
+int64_t compare(const StringData* v1, int64_t v2) {
+  assert(v1);
+  int64_t lval;
+  double dval;
+  auto ret = v1->isNumericWithVal(lval, dval, 1);
+  if (ret == KindOfInt64) {
+    return compare(lval, v2);
+  } else if (ret == KindOfDouble) {
+    return compare(dval, (double)v2);
+  }
+  return compare((int64_t)0, v2);
+}
+
 //////////////////////////////////////////////////////////////////////
 }

@@ -470,7 +470,7 @@ private:
   int32_t* findForNewInsert(size_t h0) const;
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
   int32_t* findForNewInsertCheckUnbalanced(int32_t* table,
-                                           size_t mask, size_t h0) const;
+                                           size_t mask, size_t h0);
 
   bool nextInsert(const Variant& data);
   ArrayData* nextInsertRef(Variant& data);

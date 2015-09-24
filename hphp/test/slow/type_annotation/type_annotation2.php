@@ -3,7 +3,7 @@
 class C {
   const type T = Vector<?int>;
 
-  static public function check(array $other) : bool {
+  static public function check<Ts>(TypeStructure<Ts> $other) : bool {
     $info = type_structure(__CLASS__, 'T');
     return ($info === $other);
   }

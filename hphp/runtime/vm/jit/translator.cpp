@@ -167,6 +167,7 @@ static const struct {
   { OpLte,         {StackTop2,        Stack1,       OutBoolean      }},
   { OpGt,          {StackTop2,        Stack1,       OutBoolean      }},
   { OpGte,         {StackTop2,        Stack1,       OutBoolean      }},
+  { OpCmp,         {StackTop2,        Stack1,       OutInt64        }},
   /* Bitwise ops */
   { OpBitAnd,      {StackTop2,        Stack1,       OutBitOp        }},
   { OpBitOr,       {StackTop2,        Stack1,       OutBitOp        }},
@@ -420,13 +421,21 @@ static const struct {
 
   /*** 16. Member instructions ***/
 
+  { OpBaseNC,      {StackI,           MBase,        OutNone         }},
+  { OpBaseNL,      {Local,            MBase,        OutNone         }},
+  { OpBaseGC,      {StackI,           MBase,        OutNone         }},
+  { OpBaseGL,      {Local,            MBase,        OutNone         }},
+  { OpBaseSC,      {StackI|IdxA,      MBase|IdxA,   OutUnknown      }},
+  { OpBaseSL,      {Local|IdxA,       MBase|IdxA,   OutUnknown      }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
+  { OpBaseC,       {StackI,           MBase,        OutNone         }},
+  { OpBaseR,       {StackI,           MBase,        OutNone         }},
   { OpBaseH,       {None,             MBase,        OutNone         }},
   { OpDimL,        {Local|MBase,      MBase,        OutNone         }},
   { OpDimC,        {StackI|MBase,     MBase,        OutNone         }},
   { OpDimInt,      {MBase,            MBase,        OutNone         }},
   { OpDimStr,      {MBase,            MBase,        OutNone         }},
-  { OpDimStr,      {MBase,            MBase,        OutNone         }},
+  { OpDimNewElem,  {MBase,            MBase,        OutNone         }},
   { OpQueryML,     {Local|MBase,      Stack1,       OutUnknown      }},
   { OpQueryMC,     {Stack1|MBase,     Stack1,       OutUnknown      }},
   { OpQueryMInt,   {MBase,            Stack1,       OutUnknown      }},
@@ -459,7 +468,8 @@ const InstrInfo& getInstrInfo(Op op) {
 namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
-    DontGuardStack1 | IgnoreInnerType | DontGuardAny | This | MBase | StackI;
+    DontGuardStack1 | IgnoreInnerType | DontGuardAny | This |
+    MBase | StackI | IdxA;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -499,6 +509,8 @@ int64_t getStackPopped(PC pc) {
 
     case Op::NewStructArray: return getImmVector(pc).size();
 
+    case Op::BaseSC: case Op::BaseSL: return getImm(pc, 1).u_IVA + 1;
+
     default:             break;
   }
 
@@ -517,7 +529,10 @@ int64_t getStackPopped(PC pc) {
 }
 
 int64_t getStackPushed(PC pc) {
-  return countOperands(getInstrInfo(peek_op(pc)).out);
+  auto const op = peek_op(pc);
+  if (op == Op::BaseSC || op == Op::BaseSL) return getImm(pc, 1).u_IVA;
+
+  return countOperands(getInstrInfo(op).out);
 }
 
 bool isAlwaysNop(Op op) {
@@ -802,6 +817,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Lte:
   case Op::Gt:
   case Op::Gte:
+  case Op::Cmp:
   case Op::SetOpL:
   case Op::InitProp:
   case Op::BreakTraceHint:
@@ -952,12 +968,21 @@ bool dontGuardAnyInputs(Op op) {
   case Op::VerifyRetTypeV:
   case Op::WHResult:
   case Op::Xor:
+  case Op::BaseNC:
+  case Op::BaseNL:
+  case Op::BaseGC:
+  case Op::BaseGL:
+  case Op::BaseSC:
+  case Op::BaseSL:
   case Op::BaseL:
+  case Op::BaseC:
+  case Op::BaseR:
   case Op::BaseH:
   case Op::DimL:
   case Op::DimC:
   case Op::DimInt:
   case Op::DimStr:
+  case Op::DimNewElem:
   case Op::QueryML:
   case Op::QueryMC:
   case Op::QueryMInt:

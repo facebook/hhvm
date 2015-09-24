@@ -35,11 +35,14 @@
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
-using namespace x64;
+
+///////////////////////////////////////////////////////////////////////////////
+
 using Trace::RingBufferType;
 using Trace::ringbufferName;
 
 const char* area_names[] = { "main", "cold", "frozen" };
+
 namespace {
 
 const char* vixl_ccs[] = {
@@ -90,7 +93,6 @@ struct FormatVisitor {
   void imm(TCA* addr) {
     str << sep() << folly::format("{}", addr);
   }
-  void imm(Vpoint p) { str << sep() << '@' << (size_t)p; }
   void imm(const CppCall& cppcall) {
     switch (cppcall.kind()) {
     default:
@@ -393,5 +395,7 @@ void printUnit(int level, const std::string& caption, const Vunit& unit) {
     banner("")
   );
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}

@@ -43,7 +43,7 @@ constexpr auto kNumPhysRegs = 1;
 
 folly::Optional<int32_t> phys_reg_index(Vreg reg) {
   assert(reg.isPhys());
-  if (reg == x64::rvmfp()) return 0;
+  if (reg == rvmfp()) return 0;
   return folly::none;
 }
 
@@ -170,11 +170,11 @@ void analyze_inst_physical(Env& env,
        * to it, but the program is ill-formed if it's not doing that so it's ok
        * to just ignore that definition here.
        */
-      if (next && next->op == Vinstr::bindcall && dst == x64::rvmfp()) {
+      if (next && next->op == Vinstr::bindcall && dst == rvmfp()) {
         FTRACE(3, "      post-dominated by bindcall---preserving frame ptr\n");
         return;
       }
-      if (inst.op == Vinstr::bindcall && dst == x64::rvmfp()) return;
+      if (inst.op == Vinstr::bindcall && dst == rvmfp()) return;
 
       FTRACE(3, "      kill {}\n", show(dst));
       state.phys_altered[*idx] = true;

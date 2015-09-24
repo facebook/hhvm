@@ -21,6 +21,8 @@
 
 #include <folly/MapUtil.h>
 
+#include "hphp/util/logger.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -200,6 +202,7 @@ PrologueCallersRec* ProfTransRec::prologueCallers() const {
 
 ProfData::ProfData()
     : m_numTrans(0)
+    , m_freed(false)
     , m_counters(RuntimeOption::EvalJitPGOThreshold) {
 }
 
@@ -455,6 +458,20 @@ void ProfData::freeFuncData(FuncId funcId) {
   // We don't need the cached block offsets anymore.  They are only used when
   // generating profiling translations.
   m_blockEndOffsets.erase(funcId);
+}
+
+bool ProfData::freed() const {
+  return m_freed;
+}
+
+void ProfData::free() {
+  if (m_freed) return;
+  m_freed = true;
+  Logger::Info("Freeing JIT profiling data");
+  for (auto& trec : m_transRecs) {
+    trec.reset();
+  }
+  m_blockEndOffsets.clear();
 }
 
 bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {

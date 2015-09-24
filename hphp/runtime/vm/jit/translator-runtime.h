@@ -19,10 +19,8 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
-
 #include "hphp/runtime/vm/bytecode.h"
 
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 struct _Unwind_Exception;

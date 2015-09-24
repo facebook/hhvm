@@ -164,20 +164,6 @@ void binaryArith(IRGS& env, Op op) {
 
 // Helpers for comparison generation:
 
-Op commuteCmpOp(Op op) {
-  switch (op) {
-    case Op::Gt:    return Op::Lt;
-    case Op::Gte:   return Op::Lte;
-    case Op::Lt:    return Op::Gt;
-    case Op::Lte:   return Op::Gte;
-    case Op::Eq:    return Op::Eq;
-    case Op::Same:  return Op::Same;
-    case Op::Neq:   return Op::Neq;
-    case Op::NSame: return Op::NSame;
-    default: always_assert(false);
-  }
-}
-
 Opcode toBoolCmpOpcode(Op op) {
   switch (op) {
     case Op::Gt:    return GtBool;
@@ -188,6 +174,7 @@ Opcode toBoolCmpOpcode(Op op) {
     case Op::Same:  return EqBool;
     case Op::Neq:
     case Op::NSame: return NeqBool;
+    case Op::Cmp:   return CmpBool;
     default: always_assert(false);
   }
 }
@@ -202,6 +189,7 @@ Opcode toIntCmpOpcode(Op op) {
     case Op::Same:  return EqInt;
     case Op::Neq:
     case Op::NSame: return NeqInt;
+    case Op::Cmp:   return CmpInt;
     default: always_assert(false);
   }
 }
@@ -216,6 +204,7 @@ Opcode toDblCmpOpcode(Op op) {
     case Op::Same:  return EqDbl;
     case Op::Neq:
     case Op::NSame: return NeqDbl;
+    case Op::Cmp:   return CmpDbl;
     default: always_assert(false);
   }
 }
@@ -230,6 +219,7 @@ Opcode toStrCmpOpcode(Op op) {
     case Op::Same:  return SameStr;
     case Op::Neq:   return NeqStr;
     case Op::NSame: return NSameStr;
+    case Op::Cmp:   return CmpStr;
     default: always_assert(false);
   }
 }
@@ -244,6 +234,7 @@ Opcode toStrIntCmpOpcode(Op op) {
     case Op::Same:  return EqStrInt;
     case Op::Neq:
     case Op::NSame: return NeqStrInt;
+    case Op::Cmp:   return CmpStrInt;
     default: always_assert(false);
   }
 }
@@ -258,6 +249,7 @@ Opcode toObjCmpOpcode(Op op) {
     case Op::Same:  return SameObj;
     case Op::Neq:   return NeqObj;
     case Op::NSame: return NSameObj;
+    case Op::Cmp:   return CmpObj;
     default: always_assert(false);
   }
 }
@@ -272,6 +264,7 @@ Opcode toArrCmpOpcode(Op op) {
     case Op::Same:  return SameArr;
     case Op::Neq:   return NeqArr;
     case Op::NSame: return NSameArr;
+    case Op::Cmp:   return CmpArr;
     default: always_assert(false);
   }
 }
@@ -286,6 +279,30 @@ Opcode toResCmpOpcode(Op op) {
     case Op::Same:  return EqRes;
     case Op::Neq:
     case Op::NSame: return NeqRes;
+    case Op::Cmp:   return CmpRes;
+    default: always_assert(false);
+  }
+}
+
+// Emit a commuted version of the specified operation. The given callable is
+// invoked with the adjusted (if any) opcode to use. The callable should
+// generate the proper instruction(s) to perform the comparison operation which
+// matches the given opcode. The result from those instructions may be used as
+// inputs to additional instructions. Regardless, the return value is the result
+// of the commuted comparison.
+template <typename F>
+SSATmp* emitCommutedOp(IRGS& env, Op op, F f) {
+  switch (op) {
+    case Op::Gt:    return f(Op::Lt);
+    case Op::Gte:   return f(Op::Lte);
+    case Op::Lt:    return f(Op::Gt);
+    case Op::Lte:   return f(Op::Gte);
+    case Op::Eq:    return f(Op::Eq);
+    case Op::Same:  return f(Op::Same);
+    case Op::Neq:   return f(Op::Neq);
+    case Op::NSame: return f(Op::NSame);
+    case Op::Cmp:
+      return gen(env, SubInt, cns(env, 0), f(Op::Cmp));
     default: always_assert(false);
   }
 }
@@ -312,6 +329,7 @@ SSATmp* emitCollectionCheck(IRGS& env, Op op, SSATmp* src, F f) {
         case Op::Gte:
         case Op::Lt:
         case Op::Lte:
+        case Op::Cmp:
           gen(
             env,
             ThrowInvalidOperation,
@@ -350,6 +368,7 @@ SSATmp* emitObjStrCmp(IRGS& env, Op op, SSATmp* obj, SSATmp* str) {
         case Op::Eq:
         case Op::Lt:
         case Op::Lte: return cns(env, false);
+        case Op::Cmp: return cns(env, 1);
         default: always_assert(false);
       }
     },
@@ -426,11 +445,14 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TStr) {
     // If compared against a string, commute the expression and do a specialized
     // string-int comparison.
-    push(env,
-         gen(env,
-             toStrIntCmpOpcode(commuteCmpOp(op)),
-             right,
-             left));
+    push(
+      env,
+      emitCommutedOp(
+        env,
+        op,
+        [&](Op op){ return gen(env, toStrIntCmpOpcode(op), right, left); }
+      )
+    );
   } else if (rightTy.subtypeOfAny(TNull, TBool)) {
     // If compared against null or bool, convert both sides to bools.
     push(env,
@@ -607,7 +629,13 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         env,
         op,
         right,
-        [&]{ return emitObjStrCmp(env, commuteCmpOp(op), right, left); }
+        [&]{
+          return emitCommutedOp(
+            env,
+            op,
+            [&](Op op) { return emitObjStrCmp(env, op, right, left); }
+          );
+        }
       )
     );
   } else {
@@ -1228,6 +1256,7 @@ void emitEq(IRGS& env)     { implCmp(env, Op::Eq);    }
 void emitNeq(IRGS& env)    { implCmp(env, Op::Neq);   }
 void emitSame(IRGS& env)   { implCmp(env, Op::Same);  }
 void emitNSame(IRGS& env)  { implCmp(env, Op::NSame); }
+void emitCmp(IRGS& env)    { implCmp(env, Op::Cmp); }
 
 void emitAdd(IRGS& env)    { implAdd(env, Op::Add); }
 void emitAddO(IRGS& env)   { implAdd(env, Op::AddO); }

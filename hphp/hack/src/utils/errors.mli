@@ -263,6 +263,8 @@ val using_internal_class : Pos.t -> string -> unit
 val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
 val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list
   -> (Pos.t * string) list -> Pos.t list -> Pos.t list -> unit
+val trivial_strict_not_nullable_compare_null : Pos.t -> string
+  -> (Pos.t * string) list -> unit
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
 val noreturn_usage : Pos.t -> (Pos.t * string) list -> unit
 val generic_at_runtime : Pos.t -> unit
@@ -294,6 +296,7 @@ val cyclic_enum_constraint : Pos.t -> unit
 val invalid_classname : Pos.t -> unit
 val illegal_type_structure : Pos.t -> string -> unit
 val illegal_typeconst_direct_access : Pos.t -> unit
+val class_property_only_static_literal : Pos.t -> unit
 
 val to_json : Pos.absolute error_ -> Hh_json.json
 val to_string : Pos.absolute error_ -> string

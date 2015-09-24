@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/log-writer.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
@@ -68,7 +69,10 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
+
 #include "hphp/system/constants.h"
+
+#include "hphp/util/abi-cxx.h"
 #include "hphp/util/boot_timer.h"
 #include "hphp/util/code-cache.h"
 #include "hphp/util/compatibility.h"
@@ -883,6 +887,7 @@ static void set_execution_mode(folly::StringPiece mode) {
 }
 
 static int start_server(const std::string &username, int xhprof) {
+  InitFiniNode::ServerPreInit();
   BootTimer::start();
 
   // Before we start the webserver, make sure the entire

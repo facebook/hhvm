@@ -1488,7 +1488,7 @@ public:
     HHVM_ME(AsyncMysqlQueryResult, elapsedMicros);
     HHVM_ME(AsyncMysqlQueryResult, startTime);
     HHVM_ME(AsyncMysqlQueryResult, endTime);
-    HHVM_ME(AsyncMysqlErrorResult, clientStats);
+    HHVM_ME(AsyncMysqlQueryResult, clientStats);
     HHVM_ME(AsyncMysqlQueryResult, numRowsAffected);
     HHVM_ME(AsyncMysqlQueryResult, lastInsertId);
     HHVM_ME(AsyncMysqlQueryResult, numRows);

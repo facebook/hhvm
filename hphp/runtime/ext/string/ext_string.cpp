@@ -818,7 +818,7 @@ String HHVM_FUNCTION(str_pad,
 
 String HHVM_FUNCTION(str_repeat,
                      const String& input,
-                     int multiplier) {
+                     int64_t multiplier) {
   if (input.empty()) {
     return input;
   }
@@ -838,6 +838,12 @@ String HHVM_FUNCTION(str_repeat,
     memset(ret.mutableData(), *input.data(), multiplier);
     ret.setSize(multiplier);
     return ret;
+  }
+
+  auto size = multiplier * size_t(input.size());
+  if (multiplier >= StringData::MaxSize || size > StringData::MaxSize) {
+    throw
+      FatalErrorException(0, "String length exceeded 2^31-2: %" PRIu64, size);
   }
 
   StringBuffer ret(input.size() * multiplier);
@@ -1953,12 +1959,13 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
   return false;
 }
 
-#ifndef _MSC_VER
 Variant strtr_fast(const String& str, const Array& arr,
                    int minlen, int maxlen) {
-  uint64_t mask[maxlen][256];
-
-  memset(&mask[0][0], 0, sizeof(mask));
+  using PatternMask = uint64_t[256];
+  auto mask = static_cast<PatternMask*>(
+    req::calloc(maxlen, sizeof(PatternMask))
+  );
+  SCOPE_EXIT { req::free(mask); };
 
   int pattern_id = 0;
   for (ArrayIter iter(arr); iter; ++iter, pattern_id++) {
@@ -1966,7 +1973,7 @@ Variant strtr_fast(const String& str, const Array& arr,
     auto slice = search.slice();
 
     for (auto i = 0; i < slice.size(); i++) {
-      mask[i][(unsigned char)slice.data()[i]] |= (1 << pattern_id);
+      mask[i][(unsigned char)slice.data()[i]] |= (1LL << pattern_id);
     }
   }
   auto s = str.data();
@@ -1999,7 +2006,6 @@ Variant strtr_fast(const String& str, const Array& arr,
   }
   return result.detach();
 }
-#endif
 
 static constexpr int kBitsPerQword = CHAR_BIT * sizeof(uint64_t);
 
@@ -2041,11 +2047,9 @@ Variant HHVM_FUNCTION(strtr,
     if (minlen == -1 || minlen > len) minlen = len;
   }
 
-#ifndef _MSC_VER
   if (arr.size() <= kBitsPerQword && maxlen <= 16) {
     return strtr_fast(str, arr, minlen, maxlen);
   }
-#endif
 
   if (arr.size() < 1000) {
     WuManberReplacement replacer(arr, minlen);

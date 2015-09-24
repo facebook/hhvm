@@ -89,9 +89,9 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
   }
 
   // Try to find if the function have __Native("VariadicByRef")
-  auto params = getUserAttributeStringParams("__native");
+  auto params = getUserAttributeParams("__native");
   for (auto &param : params) {
-    if (param.compare("VariadicByRef") == 0) {
+    if (param->getString().compare("VariadicByRef") == 0) {
       setVariableArgument(1);
       break;
     }
@@ -533,10 +533,10 @@ void FunctionScope::addModifier(int mod) {
   m_modifiers->add(mod);
 }
 
-std::vector<std::string> FunctionScope::getUserAttributeStringParams(
+std::vector<ScalarExpressionPtr> FunctionScope::getUserAttributeParams(
     const std::string& key) {
 
-  std::vector<std::string> ret;
+  std::vector<ScalarExpressionPtr> ret;
   auto native = m_userAttributes.find(key);
   if (native == m_userAttributes.end()) {
     return ret;
@@ -558,7 +558,7 @@ std::vector<std::string> FunctionScope::getUserAttributeStringParams(
 
     auto value = dynamic_pointer_cast<ScalarExpression>(pairExp->getValue());
     if (value) {
-      ret.push_back(value->getString());
+      ret.push_back(value);
     }
   }
 

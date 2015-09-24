@@ -283,7 +283,8 @@ public:
 
   UserAttributeMap& userAttributes() { return m_userAttributes;}
 
-  std::vector<std::string> getUserAttributeStringParams(const std::string& key);
+  std::vector<ScalarExpressionPtr> getUserAttributeParams(
+      const std::string& key);
 
   /**
    * Override BlockScope::outputPHP() to generate return type.

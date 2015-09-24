@@ -18,8 +18,9 @@
 
 #include <iostream>
 
-#include <folly/Likely.h>
 #include <folly/Format.h>
+#include <folly/Likely.h>
+#include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -309,6 +310,15 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
   return false;
 }
 
+bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
+                   int sample_rate,
+                   int error_type /* = k_E_USER_NOTICE */) {
+  if (!folly::Random::oneIn(sample_rate)) {
+    return true;
+  }
+  return HHVM_FN(trigger_error)(error_msg, error_type);
+}
+
 bool HHVM_FUNCTION(user_error, const String& error_msg,
                                int error_type /* = k_E_USER_NOTICE */) {
   return HHVM_FN(trigger_error)(error_msg, error_type);
@@ -331,6 +341,7 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(hphp_throw_fatal_error);
   HHVM_FE(hphp_clear_unflushed);
   HHVM_FE(trigger_error);
+  HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
 
 #define INTCONST(v) Native::registerConstant<KindOfInt64> \

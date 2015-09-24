@@ -64,6 +64,9 @@ void HHVM_FUNCTION(hphp_throw_fatal_error, const String& error_msg);
 void HHVM_FUNCTION(hphp_clear_unflushed);
 bool HHVM_FUNCTION(trigger_error, const String& error_msg,
                                   int error_type = k_E_USER_NOTICE);
+bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
+                                          int sample_rate,
+                                          int error_type = k_E_USER_NOTICE);
 bool HHVM_FUNCTION(user_error, const String& error_msg,
                                int error_type = k_E_USER_NOTICE);
 

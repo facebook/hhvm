@@ -138,6 +138,7 @@ TRACE_SET_MOD(emitter);
 
 const StaticString
   s_trigger_error("trigger_error"),
+  s_trigger_sampled_error("trigger_sampled_error"),
   s_is_deprecated("deprecated function");
 
 using uchar = unsigned char;
@@ -7144,10 +7145,13 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
   assert(userAttributes.find(attr_Deprecated) != userAttributes.end());
 
   // Include the message from <<__Deprecated('<message>')>> in the warning
-  auto deprArgs = funcScope->getUserAttributeStringParams(attr_Deprecated);
+  auto deprArgs = funcScope->getUserAttributeParams(attr_Deprecated);
   auto deprMessage = deprArgs.empty()
     ? s_is_deprecated.data()
-    : deprArgs.front();
+    : deprArgs.front()->getString();
+
+  // how often to display the warning (1 / rate)
+  auto rate = deprArgs.size() > 1 ? deprArgs[1]->getLiteralInteger() : 1;
 
   { // preface the message with the name of the offending function
     auto funcName = funcScope->getScopeName();
@@ -7169,9 +7173,10 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
     }
   }
 
+  e.Int(rate);
   e.Int((funcScope->isSystem() || funcScope->isNative())
         ? k_E_DEPRECATED : k_E_USER_DEPRECATED);
-  e.FCallBuiltin(2, 2, s_trigger_error.get());
+  e.FCallBuiltin(3, 3, s_trigger_sampled_error.get());
   emitPop(e);
 }
 

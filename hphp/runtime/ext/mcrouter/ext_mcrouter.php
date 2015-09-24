@@ -184,7 +184,7 @@ class MCRouter {
   public function del(string $key): Awaitable<void>;
 
   /**
-   * Flush deleted/expired values
+   * Flush all key/value pairs
    *
    * @param int $delay - Amount of time to delay before flush
    *

@@ -179,8 +179,14 @@ class MCRouterResult : public AsioExternalThreadEvent {
         case mc_op_replace:
         case mc_op_prepend:
         case mc_op_append:
-        case mc_op_flushall:
           if (!msg->reply.isStored()) {
+            setResultException(msg);
+            break;
+          }
+          break;
+
+        case mc_op_flushall:
+          if (msg->reply.result() != mc_res_ok) {
             setResultException(msg);
             break;
           }

@@ -1188,6 +1188,12 @@ const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
 }
 
 template<class T, size_t Sz>
+bool subopValidImpl(const char* (&arr)[Sz], T op) {
+  auto const raw = static_cast<typename std::underlying_type<T>::type>(op);
+  return raw >= 0 && raw < Sz;
+}
+
+template<class T, size_t Sz>
 folly::Optional<T> nameToSubopImpl(const char* (&arr)[Sz], const char* str) {
   for (auto i = size_t{0}; i < Sz; ++i) {
     if (!strcmp(str, arr[i])) return static_cast<T>(i);
@@ -1206,6 +1212,9 @@ template<class T> folly::Optional<T> nameToSubop(const char* str) {
 #define X(subop)                                            \
   const char* subopToName(subop op) {                       \
     return subopToNameImpl(subop##_names, op);              \
+  }                                                         \
+  template<> bool subopValid(subop op) {                    \
+    return subopValidImpl(subop##_names, op);               \
   }                                                         \
   namespace {                                               \
   template<> struct NameToSubopHelper<subop> {              \
@@ -1242,6 +1251,16 @@ const char* subopToName(MOpFlags f) {
 #undef FLAG
   }
   always_assert_flog(false, "Invalid MOpFlags: {}", uint8_t(f));
+}
+
+template<>
+bool subopValid(MOpFlags f) {
+  switch (f) {
+#define FLAG(name, val) case MOpFlags::name: return true;
+  M_OP_FLAGS
+#undef FLAG
+  }
+  return false;
 }
 
 template<>

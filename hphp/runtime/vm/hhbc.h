@@ -1045,21 +1045,6 @@ ArgUnion getImm(PC opcode, int idx);
 // Don't use this with variable-sized immediates!
 ArgUnion* getImmPtr(PC opcode, int idx);
 
-// Pass a pointer to the pointer to the immediate; this function will advance
-// the pointer past the immediate
-ALWAYS_INLINE
-int32_t decodeVariableSizeImm(const unsigned char** immPtr) {
-  const unsigned char small = **immPtr;
-  if (UNLIKELY(small & 0x1)) {
-    const unsigned int large = *((const unsigned int*)*immPtr);
-    *immPtr += sizeof(large);
-    return (int32_t)(large >> 1);
-  } else {
-    *immPtr += sizeof(small);
-    return (int32_t)(small >> 1);
-  }
-}
-
 int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode);
 
 // Encodes a variable sized immediate for `val' into `buf'.  Returns
@@ -1098,6 +1083,12 @@ const char* subopToName(SwitchKind);
 const char* subopToName(MOpFlags);
 const char* subopToName(QueryMOp);
 const char* subopToName(PropElemOp);
+
+/*
+ * Returns true iff the given SubOp is in the valid range for its type.
+ */
+template<class Subop>
+bool subopValid(Subop);
 
 /*
  * Try to parse a string into a subop name of a given type.

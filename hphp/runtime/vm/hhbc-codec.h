@@ -51,6 +51,10 @@ T decode_raw(PC& in) {
   return data;
 }
 
+inline uint8_t decode_byte(PC& pc) {
+  return decode_raw<uint8_t>(pc);
+}
+
 /*
  * Encode the given Op, using write_byte to write a byte at a time.
  */
@@ -75,9 +79,9 @@ void encode_op(Op op, F write_byte) {
  * decoding scheme with arbitrary values.
  */
 inline Op decode_op_unchecked(PC& pc) {
-  size_t rawVal = static_cast<uint8_t>(~decode_raw<uint8_t>(pc));
+  size_t rawVal = static_cast<uint8_t>(~decode_byte(pc));
   if (rawVal == 0xff) {
-    auto const byte = static_cast<uint8_t>(~decode_raw<uint8_t>(pc));
+    auto const byte = static_cast<uint8_t>(~decode_byte(pc));
     assert(byte < 0xff);
     rawVal += byte;
   }
@@ -107,6 +111,33 @@ inline Op peek_op(PC pc) {
  */
 constexpr size_t encoded_op_size(Op op) {
   return static_cast<size_t>(op) < 0xff ? 1 : 2;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Read various immediate types from a pc, optionally advancing pc past the
+ * read data.
+ */
+
+template<class T> T decode_oa(PC& pc) {
+  return decode_raw<T>(pc);
+}
+
+ALWAYS_INLINE
+int32_t decodeVariableSizeImm(PC* immPtr) {
+  auto const small = **immPtr;
+  if (UNLIKELY(small & 0x1)) {
+    auto const large = decode_raw<uint32_t>(*immPtr);
+    return (int32_t)(large >> 1);
+  }
+
+  (*immPtr)++;
+  return (int32_t)(small >> 1);
+}
+
+inline int32_t decode_iva(PC& pc) {
+  return decodeVariableSizeImm(&pc);
 }
 
 //////////////////////////////////////////////////////////////////////

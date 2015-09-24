@@ -2043,6 +2043,10 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
   MovePlan moves;
   jit::vector<Vinstr> loads;
   for (auto dst : copies) {
+    // Work around what appears to be a bug in GCC 5. The MovePlan is
+    // initialized with register #0 instead of InvalidReg (-1).
+    moves[dst] = InvalidReg;
+
     auto ivl = copies[dst];
     if (!ivl) continue;
     if (ivl->reg != InvalidReg) {

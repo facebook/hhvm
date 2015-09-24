@@ -89,7 +89,7 @@ function imagefilledpolygon($image, $points, $num_points, $color) { }
 function imagefilledrectangle($image, $x1, $y1, $x2, $y2, $color) { }
 function imagefilltoborder($image, $x, $y, $border, $color) { }
 function imagefilter($image, $filtertype, $arg1 = 0, $arg2 = 0, $arg3 = 0, $arg4 = 0) { }
-function imageflip($image, $mode = IMG_FLIP_HORIZONTAL) { }
+function imageflip($image, $mode = 1) { }
 function imagefontheight($font) { }
 function imagefontwidth($font) { }
 function imageftbbox($size, $angle, $font_file, $text, $extrainfo = null) { }

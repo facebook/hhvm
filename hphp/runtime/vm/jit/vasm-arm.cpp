@@ -222,11 +222,6 @@ void Vgen::emit(const copy& i) {
 
 void Vgen::emit(const copy2& i) {
   MovePlan moves;
-  for (auto reg : moves) {
-    // Work around what appears to be a bug in GCC 5. The MovePlan is
-    // initialized with register #0 instead of InvalidReg (-1).
-    moves[reg] = InvalidReg;
-  }
   Reg64 d0 = i.d0, d1 = i.d1, s0 = i.s0, s1 = i.s1;
   moves[d0] = s0;
   moves[d1] = s1;

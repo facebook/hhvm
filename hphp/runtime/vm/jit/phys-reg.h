@@ -150,7 +150,9 @@ struct PhysReg {
    */
   template<typename T>
   struct Map {
-    Map() : m_elms() {
+  Map() {
+      for (int i = 0; i < kMaxRegs; i++)
+        m_elms[i] = T();
     }
 
     T& operator[](const PhysReg& r) {
@@ -204,7 +206,7 @@ struct PhysReg {
       return { m_elms, sizeof(m_elms) / sizeof(m_elms[0]) };
     }
 
-   private:
+  private:
     T m_elms[kMaxRegs];
   };
 

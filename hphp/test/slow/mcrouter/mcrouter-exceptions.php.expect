@@ -1,4 +1,0 @@
-string(83) "get failed with result mc_res_remote_error: invalid key: space or control character"
-string(19) "Utterly Invalid Key"
-string(3) "get"
-string(19) "mc_res_remote_error"

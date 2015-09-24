@@ -1,1 +1,2 @@
-<?php (new DOMDocument)->save(""); ?>
+<?php
+(new DOMDocument)->save("");

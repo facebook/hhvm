@@ -201,6 +201,7 @@ class AsyncMysqlException extends Exception {
   public function mysqlErrorCode(): int;
   public function mysqlErrorString(): string;
   public function timedOut(): bool;
+  public function failed(): bool;
   public function getResult(): AsyncMysqlErrorResult;
 }
 class AsyncMysqlConnectException extends AsyncMysqlException {}

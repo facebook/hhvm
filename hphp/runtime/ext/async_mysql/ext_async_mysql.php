@@ -437,6 +437,15 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
   function mysql_error(): string;
 
   /**
+   * An alternative, normalized version of the error message provided by
+   * mysql_error. Sometimes the message is the same, depending on if
+   * there was an explicit normalized string provided by the MySQL
+   * client.
+   */
+  <<__HipHopSpecific, __Native>>
+  function mysql_normalize_error(): string;
+
+  /**
    * The type of failure (either 'TimedOut', representing a timeout, or
    *   'Failed', representing the server rejecting our connection or query)
    *

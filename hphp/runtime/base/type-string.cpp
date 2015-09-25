@@ -156,9 +156,18 @@ String String::substr(int start, int length /* = 0x7FFFFFFF */,
   auto r = slice();
   // string_substr_check() will update start & length to a legal range.
   if (string_substr_check(r.size(), start, length)) {
+    if (start == 0 && length >= r.size()) {
+      return *this;
+    }
+
+    // No length check covers 'start == r.size()' due to string_substr_check
+    if (length == 0) {
+      return empty_string();
+    }
+
     return String(r.data() + start, length, CopyString);
   }
-  return nullable ? String() : String("", 0, CopyString);
+  return nullable ? String() : empty_string();
 }
 
 int String::find(char ch, int pos /* = 0 */,

@@ -230,87 +230,96 @@ static void xdebug_array_element_export_xml_node(xdebug_xml_node& parent,
   xdebug_xml_add_child(&parent, child);
 }
 
-static void xdebug_object_element_export_xml_node(xdebug_xml_node& parent,
-                                                  const char* parentName,
-                                                  const ObjectData* obj,
-                                                  const Variant& key,
-                                                  const Variant& val,
-                                                  XDebugExporter& exporter) {
-  auto const prop_str = key.toString();
+static void object_instance_property_export_xml_node(xdebug_xml_node& parent,
+                                                     const char* parentName,
+                                                     const ObjectData* obj,
+                                                     const Variant& key,
+                                                     const Variant& val,
+                                                     XDebugExporter& exporter) {
+  auto const info = demangle_prop(key.toString());
+  auto const& prop_name = info.prop_name;
+
+  auto const make_full_name = [parentName] (const char* name) -> const char* {
+    if (parentName == nullptr) return nullptr;
+    return xdebug_sprintf("%s->%s", parentName, name);
+  };
+
+  if (obj->isCollection() || key.isInteger()) {
+    auto child = xdebug_var_export_xml_node(
+      xdstrdup(prop_name.data()),
+      make_full_name(prop_name.data()),
+      xdstrdup("public"),
+      val,
+      exporter
+    );
+    xdebug_xml_add_child(&parent, child);
+    return;
+  }
+
+  auto const name = [&] {
+    // Prepend the class that declared the private property if it isn't us.
+    if (info.modifier == PropModifier::Private &&
+        !info.cls_name.get()->isame(obj->getClassName().get())) {
+      return xdebug_sprintf("*%s*%s", info.cls_name.data(), prop_name.data());
+    }
+    return xdstrdup(prop_name.data());
+  }();
+
+  auto const full_name = make_full_name(name);
+
+  // Compute the facet (static/non-static + public/private).
+  auto const facet = xdstrdup(modifier_str(info.modifier));
+
+  // Recursively write the this property.
+  auto xml = xdebug_var_export_xml_node(name, full_name, facet, val, exporter);
+  xdebug_xml_add_child(&parent, xml);
+}
+
+static void object_static_property_export_xml_node(xdebug_xml_node& parent,
+                                                   const char* parentName,
+                                                   const ObjectData* obj,
+                                                   const Variant& key,
+                                                   const Variant& val,
+                                                   XDebugExporter& exporter) {
+  auto const sprop_name = key.toString();
+
+  if (obj->isCollection() || key.isInteger()) {
+    auto full_name = parentName == nullptr
+      ? nullptr
+      : xdebug_sprintf("%s::%s", parentName, sprop_name.data());
+
+    auto child = xdebug_var_export_xml_node(
+      xdstrdup(sprop_name.data()),
+      full_name,
+      xdstrdup("static public"),
+      val,
+      exporter
+    );
+    xdebug_xml_add_child(&parent, child);
+    return;
+  }
+
+  auto const name = xdstrdup(sprop_name.data());
+  auto const full_name = parentName == nullptr
+    ? nullptr
+    : xdebug_sprintf("%s::%s", parentName, name);
+
   auto const cls = obj->getVMClass();
-  auto const cls_name = cls->name()->data();
+  auto const sprop_idx = cls->lookupSProp(sprop_name.get());
 
-  // Compute whether the property is static
+  // Isn't expecting to get private static properties of super classes just yet.
+  assertx(sprop_idx != kInvalidSlot);
 
-  auto const sLookup = cls->getSProp(nullptr, prop_str.get());
+  auto const& sprop = cls->staticProperties()[sprop_idx];
 
-  auto const is_static = sLookup.prop != nullptr;
-  bool visible = is_static;
-  bool accessible = sLookup.accessible;
-
-  // If the property is not static, we know it's a member, but need to grab the
-  // visibility
-  if (!is_static) {
-    auto const lookup = obj->getProp(nullptr, prop_str.get());
-    visible = lookup.prop != nullptr;
-    accessible = lookup.accessible;
-  }
-
-  // This is public if it is visible and accessible from the nullptr context
-  auto const is_public = obj->isCollection() || (visible && accessible);
-
-  // Compute the property name and full name
-  const char* name;
-  const char* full_name = nullptr;
-  if (!val.isInteger()) {
-    // Compute the property name
-    if (is_public) {
-      name = xdstrdup(prop_str.data());
-    } else {
-      name = xdebug_sprintf("*%s*%s", cls_name, prop_str.data());
-    }
-
-    // Compute the property full name if we have a parent name
-    if (parentName != nullptr) {
-      if (is_public && is_static) {
-        full_name = xdebug_sprintf("%s::%s", parentName, prop_str.data());
-      } else if (is_public && !is_static) {
-        full_name = xdebug_sprintf("%s->%s", parentName, prop_str.data());
-      } else if (!is_public && is_static) {
-        full_name = xdebug_sprintf("%s::*%s*%s", parentName, "::",
-                                   cls_name, prop_str.data());
-      } else if (!is_public && !is_static) {
-        full_name = xdebug_sprintf("%s->*%s*%s", parentName, "->",
-                                   cls_name, prop_str.data());
-      }
-    }
-  } else {
-    // Compute the name + full name if we have a parent name
-    name = xdebug_sprintf("%ld", key.toInt64());
-    if (parentName != nullptr) {
-      if (is_static) {
-        full_name = xdebug_sprintf("%s::%ld", parentName, key.toInt64());
-      } else {
-        full_name = xdebug_sprintf("%s->%ld", parentName, key.toInt64());
-      }
-    }
-  }
-
-  // Compute the facet (static/non-static + public/private)
-  const char* facet = xdebug_sprintf("%s%s",
-                                     is_static ? "static " : "",
-                                     is_public ? "public" : "private");
-
-  // Recursively write the this property. The duplications are necessary due to
-  // the xdebug xml api
-  auto child = xdebug_var_export_xml_node(
-    xdstrdup(name),
-    xdstrdup(full_name),
-    xdstrdup(facet),
-    val,
-    exporter
+  auto const facet = xdebug_sprintf(
+    "static %s",
+    attrToVisibilityStr(sprop.attrs)
   );
-  xdebug_xml_add_child(&parent, child);
+
+  // Recursively write the this property.
+  auto xml = xdebug_var_export_xml_node(name, full_name, facet, val, exporter);
+  xdebug_xml_add_child(&parent, xml);
 }
 
 static char* prepare_variable_name(const char* name) {
@@ -323,18 +332,14 @@ static char* prepare_variable_name(const char* name) {
   return tmp_name;
 }
 
-// Return an array of prop name => prop val. This is taken (and modified) from
-// ext_reflection.cpp
-static Array get_object_props(ObjectData* obj) {
-  // Grab the properties on the object. o_toIterArray does this for us.
+static Array get_static_props(ObjectData* obj) {
   auto const cls = obj->getVMClass();
-  auto const cls_name = cls->name();
-  auto props = obj->o_toIterArray(String(const_cast<StringData*>(cls_name)),
-                                  ObjectData::EraseRefs);
 
   // Grab the static properties from the class.
   auto const staticProperties = cls->staticProperties();
   auto const nSProps = cls->numStaticProperties();
+
+  Array props;
   for (Slot i = 0; i < nSProps; ++i) {
     auto const& prop = staticProperties[i];
     auto val = cls->getSPropData(i);
@@ -438,19 +443,18 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     // it's separate as this was pulled originally from xdebug
     auto const obj = var.toObject().get();
 
-    // Collections don't store their elements as regular object properties, so
-    // get them by converting the collection to an array.
-    auto const props = obj->isCollection()
-      ? obj->toArray()
-      : get_object_props(obj);
-
-    // Add object info.
     xdebug_xml_add_attribute(node, "type", "object");
     auto const cls = obj->getVMClass();
     xdebug_xml_add_attribute_ex(node, "classname",
                                 xdstrdup(cls->name()->data()), 0, 1);
-    xdebug_xml_add_attribute(node, "children",
-                             const_cast<char*>(props.size() ? "1" : "0"));
+
+    auto const inst_props   = obj->toArray();
+    auto const static_props = get_static_props(obj);
+
+    auto const prop_count = inst_props.size() + static_props.size();
+
+    auto const has_props = prop_count != 0 ? "1" : "0";
+    xdebug_xml_add_attribute(node, "children", const_cast<char*>(has_props));
 
     Tracker track(exporter, obj);
 
@@ -462,7 +466,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // Add the # of props then short circuit if we are too deep.
     xdebug_xml_add_attribute_ex(node, "numchildren",
-                                xdebug_sprintf("%d", props.size()), 0, 1);
+                                xdebug_sprintf("%d", prop_count), 0, 1);
     if (exporter.level++ >= exporter.max_depth) {
       return node;
     }
@@ -477,14 +481,31 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
                                 xdebug_sprintf("%d", exporter.max_children),
                                 0, 1);
 
-    // Add each property
-    ArrayIter iter(props);
+    ArrayIter iter(inst_props);
     iter.setPos(start);
-    for (uint32_t i = start; i < end && iter; i++, ++iter) {
-      xdebug_object_element_export_xml_node(*node, name, obj,
-                                            iter.first(),
-                                            iter.second(),
-                                            exporter);
+    uint32_t i = start;
+    for ( ; i < end && iter; i++, ++iter) {
+      object_instance_property_export_xml_node(
+        *node,
+        name,
+        obj,
+        iter.first(),
+        iter.second(),
+        exporter
+      );
+    }
+
+    ArrayIter iter2(static_props);
+    iter2.setPos(i - inst_props.size());
+    for ( ; i < end && iter2; i++, ++iter2) {
+      object_static_property_export_xml_node(
+        *node,
+        name,
+        obj,
+        iter2.first(),
+        iter2.second(),
+        exporter
+      );
     }
 
     // Done at this level

@@ -598,7 +598,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
   if (!RuntimeOption::RepoAuthoritative && accessibleProps > 0) {
     // we may have properties from traits
     const auto* props = m_cls->declProperties();
-    auto numDeclProp = m_cls-> numDeclProperties();
+    auto numDeclProp = m_cls->numDeclProperties();
     for (size_t i = 0; i < numDeclProp; i++) {
       const auto* key = props[i].name.get();
       if (!retArray.get()->exists(key)) {

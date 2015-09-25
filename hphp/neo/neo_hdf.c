@@ -1673,7 +1673,6 @@ static NEOERR* hdf_read_file_internal (HDF *hdf, const char *path,
   char fpath[PATH_BUF_SIZE];
   char *ibuf = NULL;
   const char *ptr = NULL;
-  HDF *top = hdf->top;
   NEOSTRING line;
 
   string_init(&line);

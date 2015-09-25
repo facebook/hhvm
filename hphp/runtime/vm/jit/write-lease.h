@@ -38,6 +38,9 @@ struct Lease {
   friend struct LeaseHolderBase;
 
   static const int64_t kStandardHintExpireInterval = 1500; // in microseconds
+  // We can increase the priority of the thread holding the lease, so that it
+  // can hopefully return the lease sooner.
+  static bool s_TryBumpPriority;
   pthread_t       m_owner;
   pthread_mutex_t m_lock;
   // m_held: since there's no portable, universally invalid pthread_t,

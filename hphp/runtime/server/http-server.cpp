@@ -81,7 +81,8 @@ HttpServer::HttpServer()
 
   int startingThreadCount = RuntimeOption::ServerThreadCount;
   uint32_t additionalThreads = 0;
-  if (RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
+  if (!RuntimeOption::EvalJitHighPri &&
+      RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
       RuntimeOption::ServerThreadCount > kNumProcessors) {
     startingThreadCount = kNumProcessors;
     additionalThreads = RuntimeOption::ServerThreadCount - startingThreadCount;

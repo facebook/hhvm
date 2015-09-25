@@ -26,6 +26,9 @@ TRACE_SET_MOD(txlease);
 
 static __thread bool threadCanAcquire = true;
 
+// Update this after we start to run server.
+bool Lease::s_TryBumpPriority = false;
+
 bool Lease::amOwner() const {
   return m_held && m_owner == pthread_self();
 }
@@ -54,7 +57,12 @@ void Lease::gremlinLock() {
     drop();
   }
   pthread_mutex_lock(&m_lock);
-  TRACE(2, "Lease: gremlin grabbed lock\n ");
+  if (s_TryBumpPriority) {
+    if (!Process::RunThreadAtHighPriority()) {
+      TRACE(2, "Lease: gremlin failed to bump thread priority\n");
+    }
+  }
+  TRACE(2, "Lease: gremlin grabbed lock\n");
   m_held = true;
   m_owner = gremlinize_threadid(pthread_self());
 }
@@ -63,6 +71,12 @@ void Lease::gremlinUnlockImpl() {
   if (m_held && m_owner == gremlinize_threadid(pthread_self())) {
     TRACE(2, "Lease: gremlin dropping lock\n ");
     pthread_mutex_unlock(&m_lock);
+    if (s_TryBumpPriority) {
+      if (!Process::RunThreadAtNormalPriority()) {
+        LOG(WARNING) << "Failed to reset thread priority "
+          "after releasing the lease";
+      }
+    }
     m_held = false;
   }
 }
@@ -86,6 +100,11 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   if (0 == (blocking ?
             pthread_mutex_lock(&m_lock) :
             pthread_mutex_trylock(&m_lock))) {
+    if (s_TryBumpPriority) {
+      if (!Process::RunThreadAtHighPriority()) {
+        TRACE(2, "Lease: failed to bump thread priority\n");
+      }
+    }
     TRACE(4, "thr%" PRIx64 ": acquired lease, called by %p,%p\n",
           Process::GetThreadIdForTrace(), __builtin_return_address(0),
           __builtin_return_address(1));
@@ -126,6 +145,10 @@ void Lease::drop(int64_t hintExpireDelay) {
     Timer::GetCurrentTimeMicros() + hintExpireDelay : 0;
   m_held = false;
   pthread_mutex_unlock(&m_lock);
+  if (!Process::RunThreadAtNormalPriority()) {
+    LOG(WARNING) << "Failed to reset thread priority "
+      "after releasing the lease";
+  }
 }
 
 LeaseHolderBase::LeaseHolderBase(Lease& l, LeaseAcquire acquire)

@@ -149,6 +149,10 @@ bool Capability::SetDumpable() {
   return true;
 }
 
+bool Capability::CheckSysNice() {
+  return prctl(PR_CAPBSET_READ, CAP_SYS_NICE, 0, 0, 0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -30,6 +30,8 @@
 #endif
 #include <pthread.h>
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helper class
@@ -67,6 +69,7 @@ public:
   // Cached process statics
   static std::string HostName;
   static std::string CurrentWorkingDirectory;
+
   static void InitProcessStatics();
 
   /**
@@ -154,6 +157,26 @@ public:
 #else
     return syscall(SYS_gettid);
 #endif
+  }
+
+  /**
+   * Run the current thread under SCHED_RR with an optional priority (default
+   * to 5 here).
+   */
+  static bool RunThreadAtHighPriority(int pri = 5) {
+    struct sched_param param;
+    param.sched_priority = pri;
+    // 0 is returned upon success, and we return true.
+    return !pthread_setschedparam(pthread_self(), SCHED_RR, &param);
+  }
+
+  /**
+   * Run the current thread under SCHED_OTHER.
+   */
+  static bool RunThreadAtNormalPriority() {
+    struct sched_param param;
+    param.sched_priority = 0;
+    return !pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
   }
 
   /**

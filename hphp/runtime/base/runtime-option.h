@@ -439,6 +439,9 @@ public:
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
+  /* If JitHighPri is enabled, the thread holding the write lease will
+     be scheduled using a higher priority. */                           \
+  F(bool, JitHighPri,                  false)                           \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \

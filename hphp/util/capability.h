@@ -29,12 +29,16 @@ namespace HPHP {
 class Capability {
 public:
   /**
-   * This sets the  effective user ID of the current process, leaving
+   * This sets the effective user ID of the current process, leaving
    * capability of binding to system ports (< 1024) to the user.
    */
   static bool ChangeUnixUser(uid_t uid);
   static bool ChangeUnixUser(const std::string &username);
   static bool SetDumpable();
+  /*
+   * Check capabilities of the calling process.
+   */
+  static bool CheckSysNice();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

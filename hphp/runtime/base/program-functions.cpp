@@ -916,6 +916,9 @@ static int start_server(const std::string &username, int xhprof) {
     LightProcess::ChangeUser(username);
   }
   Capability::SetDumpable();
+  if (RuntimeOption::EvalJitHighPri) {
+    jit::Lease::s_TryBumpPriority = Capability::CheckSysNice();
+  }
 #endif
 
   // Create the HttpServer before any warmup requests to properly

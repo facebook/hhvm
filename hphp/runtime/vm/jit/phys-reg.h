@@ -150,9 +150,12 @@ struct PhysReg {
    */
   template<typename T>
   struct Map {
-  Map() {
-      for (int i = 0; i < kMaxRegs; i++)
-        m_elms[i] = T();
+    Map() {
+      // Workaround for a potential GCC 5 bug, value initializing m_elms seems to
+      // use zero-initialization instead of default initialization.
+      for (auto& elm : m_elms) {
+        elm = T();
+      }
     }
 
     T& operator[](const PhysReg& r) {

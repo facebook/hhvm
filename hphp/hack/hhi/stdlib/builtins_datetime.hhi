@@ -133,6 +133,15 @@ class DateTimeZone {
   static public function listIdentifiers(int $what = 2047, string $country = '') { }
 }
 class DateInterval {
+  public int $y;
+  public int $m;
+  public int $d;
+  public int $h;
+  public int $i;
+  public int $s;
+  public int $invert;
+  public mixed $days;
+
   public function __construct($interval_spec) { }
   public function __get($member) { }
   public function __set($member, $value) { }

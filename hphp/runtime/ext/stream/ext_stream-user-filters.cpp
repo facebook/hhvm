@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std.h"
-#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

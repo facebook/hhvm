@@ -22,7 +22,7 @@
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
 
-ATTRIBUTE_NORETURN void error(const std::string& msg);
+[[noreturn]] void error(const std::string& msg);
 
 extern HPHP::jit::RepoWrapper* g_repo;
 extern HPHP::jit::OfflineTransData* g_transData;

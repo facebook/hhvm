@@ -103,19 +103,19 @@ Object AllocLazyKVZipIterableObject(const Variant& mp);
 Object AllocLazyIterableViewObject(const Variant& iterable);
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
 
-ATTRIBUTE_NORETURN void throwExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]] void throwExceptionObject(const Variant& message);
+[[noreturn]]
 void throwBadMethodCallExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void throwInvalidArgumentExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN void throwRuntimeExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN void throwOutOfBoundsExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]] void throwRuntimeExceptionObject(const Variant& message);
+[[noreturn]] void throwOutOfBoundsExceptionObject(const Variant& message);
+[[noreturn]]
 void throwInvalidOperationExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void throwDOMExceptionObject(const Variant& message,
                              const Variant& code);
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void throwSoapFaultObject(const Variant& code,
                           const Variant& message,
                           const Variant& actor = null_variant,

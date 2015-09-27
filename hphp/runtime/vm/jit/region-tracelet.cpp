@@ -55,8 +55,8 @@ namespace {
 struct RegionFormer {
   RegionFormer(const RegionContext& ctx,
                InterpSet& interp,
-               bool profiling,
-               bool inlining);
+               InliningDecider& inl,
+               bool profiling);
 
   RegionDescPtr go();
 
@@ -74,13 +74,14 @@ private:
   RefDeps m_refDeps;
   uint32_t m_numJmps;
   uint32_t m_numBCInstrs{0};
+  uint32_t m_pendingInlinedInstrs{0};
   // This map memoizes reachability of IR blocks during tracelet
   // formation.  A block won't have it's reachability stored in this
   // map until it's been computed.
   jit::hash_map<unsigned,bool> m_irReachableBlocks;
 
+  InliningDecider& m_inl;
   const bool m_profiling;
-  const bool m_inlining;
 
   const Func* curFunc() const;
   const Unit* curUnit() const;
@@ -91,6 +92,7 @@ private:
   void addInstruction();
   bool consumeInput(int i, const InputInfo& ii);
   bool traceThroughJmp();
+  bool tryInline(uint32_t& instrSize);
   void recordDependencies();
   void truncateLiterals();
   bool irBlockReachable(Block* block);
@@ -98,22 +100,22 @@ private:
 
 RegionFormer::RegionFormer(const RegionContext& ctx,
                            InterpSet& interp,
-                           bool profiling,
-                           bool inlining)
+                           InliningDecider& inl,
+                           bool profiling)
   : m_ctx(ctx)
   , m_interp(interp)
   , m_sk(ctx.func, ctx.bcOffset, ctx.resumed)
   , m_startSk(m_sk)
   , m_region(std::make_shared<RegionDesc>())
-  , m_curBlock(m_region->addBlock(m_sk, 0, ctx.spOffset))
+  , m_curBlock(m_region->addBlock(m_sk, 0, ctx.spOffset, 0))
   , m_blockFinished(false)
   // TODO(#5703534): this is using a different TransContext than actual
   // translation will use.
   , m_irgs(TransContext{kInvalidTransID, m_sk, ctx.spOffset}, TransFlags{0})
   , m_arStates(1)
   , m_numJmps(0)
+  , m_inl(inl)
   , m_profiling(profiling)
-  , m_inlining(inlining)
 {}
 
 const Func* RegionFormer::curFunc() const {
@@ -195,6 +197,32 @@ RegionDescPtr RegionFormer::go() {
 
     m_inst.interp = m_interp.count(m_sk);
 
+    uint32_t calleeInstrSize;
+    if (tryInline(calleeInstrSize)) {
+      // If m_inst is an FCall and the callee is suitable for inlining, we can
+      // translate the callee and potentially use its return type to extend the
+      // tracelet.
+
+      auto callee = m_inst.funcd;
+      FTRACE(1, "\nselectTracelet starting inlined call from {} to "
+             "{} with stack:\n{}\n", curFunc()->fullName()->data(),
+             callee->fullName()->data(), show(m_irgs));
+      auto returnSk = m_inst.nextSk();
+      auto returnFuncOff = returnSk.offset() - curFunc()->base();
+
+      m_arStates.back().pop();
+      m_arStates.emplace_back();
+      m_curBlock->setInlinedCallee(callee);
+      irgen::beginInlining(m_irgs, m_inst.imm[0].u_IVA, callee, returnFuncOff);
+
+      m_sk = irgen::curSrcKey(m_irgs);
+      m_blockFinished = true;
+      m_pendingInlinedInstrs += calleeInstrSize;
+      continue;
+    }
+
+    auto const inlineReturn = irgen::isInlining(m_irgs) &&
+      (isRet(m_inst.op()) || m_inst.op() == OpNativeImpl);
     try {
       translateInstr(m_irgs, m_inst, true /* checkOuterTypeOnly */, firstInst);
     } catch (const FailedIRGen& exn) {
@@ -210,6 +238,16 @@ RegionDescPtr RegionFormer::go() {
     }
 
     irgen::finishHHBC(m_irgs);
+
+    // If we just translated a return from an inlined call, grab the updated
+    // SrcKey from m_ht and clean up.
+    if (inlineReturn) {
+      m_inl.registerEndInlining(m_sk.func());
+      m_sk = irgen::curSrcKey(m_irgs).advanced(curUnit());
+      m_arStates.pop_back();
+      m_blockFinished = true;
+      continue;
+    }
 
     if (!instrAllowsFallThru(m_inst.op())) {
       FTRACE(1, "selectTracelet: tracelet broken after instruction with no "
@@ -246,14 +284,25 @@ RegionDescPtr RegionFormer::go() {
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
   }
 
+  // If we failed while trying to inline, trigger retry without inlining.
+  if (m_region && !m_region->empty() && irgen::isInlining(m_irgs)) {
+    // We can recover from this situation just fine, but it's more often
+    // than not indicative of a real bug somewhere else in the system.
+    // TODO: 5515310 investigate whether legit bugs cause this.
+    FTRACE(1, "selectTracelet: Failed while inlining:\n{}\n{}",
+           show(*m_region), show(m_irgs.irb->unit()));
+    m_inl.disable();
+    m_region.reset();
+  }
+
   if (m_region && !m_region->empty()) {
     // Make sure we end the region before trying to print the IRUnit.
     irgen::endRegion(m_irgs, m_sk);
 
     printUnit(
       kTraceletLevel, m_irgs.irb->unit(),
-      m_inlining ? " after inlining tracelet formation "
-                 : " after tracelet formation ",
+      m_inl.depth() || m_inl.disabled() ? " after inlining tracelet formation "
+                                        : " after tracelet formation ",
       nullptr,
       m_irgs.irb->guards()
     );
@@ -348,7 +397,8 @@ void RegionFormer::addInstruction() {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(m_sk), show(*m_curBlock));
     always_assert(m_sk.func() == curFunc());
-    auto newCurBlock = m_region->addBlock(m_sk, 0, curSpOffset());
+    auto newCurBlock = m_region->addBlock(m_sk, 0, curSpOffset(),
+                                          m_irgs.inlineLevel);
     m_region->addArc(m_curBlock->id(), newCurBlock->id());
     m_curBlock = newCurBlock;
     m_blockFinished = false;
@@ -357,35 +407,39 @@ void RegionFormer::addInstruction() {
   FTRACE(2, "selectTracelet adding instruction {}\n", m_inst.toString());
   m_curBlock->addInstruction();
   m_numBCInstrs++;
+  if (irgen::isInlining(m_irgs)) m_pendingInlinedInstrs--;
 }
 
 bool RegionFormer::traceThroughJmp() {
+  // This flag means "if we are currently inlining, or we are generating a
+  // tracelet for inlining analysis".  The latter is the case when inlining is
+  // disabled (because our caller wants to peek at our region without us
+  // inlining ourselves).
+  bool inlining = m_inl.depth() || m_inl.disabled();
+
   // We only trace through unconditional jumps and conditional jumps with const
   // inputs while inlining.
   if (!isUnconditionalJmp(m_inst.op()) &&
-      !(m_inlining && isConditionalJmp(m_inst.op()) &&
+      !(inlining && isConditionalJmp(m_inst.op()) &&
         irgen::publicTopType(m_irgs, BCSPOffset{0}).hasConstVal())) {
     return false;
   }
 
-  // We want to keep profiling translations to basic blocks, inlining shouldn't
-  // happen in profiling translations
-  if (m_profiling) {
-    assert(!m_inlining);
-    return false;
-  }
+  // Normally we want to keep profiling translations to basic blocks, but if
+  // we're inlining we want to analyze as much of the callee as possible.
+  if (m_profiling && !inlining) return false;
 
   // Don't trace through too many jumps, unless we're inlining. We want to make
   // sure we don't break a tracelet in the middle of an inlined call; if the
   // inlined callee becomes too big that's caught in shouldIRInline.
-  if (m_numJmps == Translator::MaxJmpsTracedThrough && !m_inlining) {
+  if (m_numJmps == Translator::MaxJmpsTracedThrough && !inlining) {
     return false;
   }
 
   auto offset = m_inst.imm[0].u_BA;
   // Only trace through backwards jumps if it's a JmpNS and we're
   // inlining. This is to get DV funclets.
-  if (offset <= 0 && (m_inst.op() != OpJmpNS || !m_inlining)) {
+  if (offset <= 0 && (m_inst.op() != OpJmpNS || !inlining)) {
     return false;
   }
 
@@ -407,6 +461,83 @@ bool RegionFormer::traceThroughJmp() {
 
   m_numJmps++;
   m_blockFinished = true;
+  return true;
+}
+
+bool RegionFormer::tryInline(uint32_t& instrSize) {
+  assertx(m_inst.source == m_sk);
+  assertx(m_inst.func() == curFunc());
+  assertx(m_sk.resumed() == resumed());
+
+  instrSize = 0;
+
+  if (!m_inl.canInlineAt(m_inst.source, m_inst.funcd, *m_region)) {
+    return false;
+  }
+
+  auto refuse = [this](const std::string& str) {
+    FTRACE(2, "selectTracelet not inlining {}: {}\n",
+           m_inst.toString(), str);
+    return false;
+  };
+
+  auto callee = m_inst.funcd;
+
+  auto const& fpiStack = m_irgs.irb->fpiStack();
+  // Make sure the FPushOp wasn't interpreted.
+  if (fpiStack.empty()) {
+    return refuse("fpistack empty; fpush was in a different region");
+  }
+  auto const& info = fpiStack.front();
+  if (info.kind == FPIInfo::SpillKind::FPushUnknown) {
+    return refuse("couldn't find SpillFrame for FPushOp");
+  }
+
+  if (info.kind != FPIInfo::SpillKind::FPushFunc && !info.ctx) {
+    return refuse("Couldn't find context for SpillFrame");
+  }
+
+  auto numArgs = m_inst.imm[0].u_IVA;
+  auto numParams = callee->numParams();
+
+  // Set up the region context, mapping stack slots in the caller to locals in
+  // the callee.
+  RegionContext ctx;
+  ctx.func = callee;
+  ctx.bcOffset = callee->getEntryForNumArgs(numArgs);
+  ctx.spOffset = FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())};
+  ctx.resumed = false;
+  for (int i = 0; i < numArgs; ++i) {
+    auto type = irgen::publicTopType(m_irgs, BCSPOffset{i});
+    if (!type.subtypeOfAny(TCell, TBoxedInitCell)) {
+      return refuse(folly::sformat("argument {}'s type was too strange ({})",
+                                   i, type.toString()));
+    }
+    uint32_t paramIdx = numArgs - 1 - i;
+    ctx.liveTypes.push_back({RegionDesc::Location::Local{paramIdx}, type});
+  }
+
+  for (unsigned i = numArgs; i < numParams; ++i) {
+    // These locals will be populated by DV init funclets but they'll start
+    // out as Uninit.
+    ctx.liveTypes.push_back({RegionDesc::Location::Local{i}, TUninit});
+  }
+
+  FTRACE(1, "selectTracelet analyzing callee {} with context:\n{}",
+         callee->fullName()->data(), show(ctx));
+  auto region = selectTracelet(ctx, m_profiling, false /* noinline */);
+  if (!region) {
+    return refuse("failed to select region in callee");
+  }
+
+  instrSize = region->instrSize();
+  auto newInstrSize = instrSize + m_numBCInstrs + m_pendingInlinedInstrs;
+  if (newInstrSize > RuntimeOption::EvalJitMaxRegionInstrs) {
+    return refuse("new region would be too large");
+  }
+  if (!m_inl.shouldInline(callee, *region)) {
+    return refuse("shouldIRInline failed");
+  }
   return true;
 }
 
@@ -632,14 +763,18 @@ void RegionFormer::recordDependencies() {
 }
 
 RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
-                             bool inlining /* = false */) {
+                             bool allowInlining /* = true */) {
   Timer _t(Timer::selectTracelet);
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;
 
-  while (!(region = RegionFormer(ctx, interp, profiling, inlining).go())) {
+  InliningDecider inl(ctx.func);
+  if (!allowInlining) inl.disable();
+
+  while (!(region = RegionFormer(ctx, interp, inl, profiling).go())) {
     ++tries;
+    inl.resetState();
   }
 
   if (region->empty() || region->blocks().front()->length() == 0) {
@@ -647,8 +782,8 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
     return RegionDescPtr { nullptr };
   }
 
-  FTRACE(1, "selectTracelet returning, {}, {} tries:\n{}\n",
-         inlining ? "inlining" : "not inlining", tries, show(*region));
+  FTRACE(1, "selectTracelet returning, inlining {}, {} tries:\n{}\n",
+         allowInlining ? "allowed" : "disallowed", tries, show(*region));
   if (region->blocks().back()->length() == 0) {
     // If the final block is empty because it would've only contained
     // instructions producing literal values, kill it.

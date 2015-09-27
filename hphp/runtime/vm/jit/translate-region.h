@@ -34,24 +34,23 @@ enum class TranslateResult {
 const char* show(TranslateResult);
 
 /*
- * Data used by translateRegion() to pass information between retries.
+ * Blacklisted instruction set.
+ *
+ * Used by translateRegion() to track instructions that must be interpreted.
  */
-struct TranslateRetryContext {
-  // Instructions that must be interpreted.
-  ProfSrcKeySet toInterp;
-};
+using RegionBlacklist = ProfSrcKeySet;
 
 /*
  * Translate `region'.
  *
- * The caller is expected to continue calling translateRegion() until either
- * Success or Failure is returned.  Otherwise, Retry is returned, and the
- * caller is responsible for threading the same RetryContext through to the
- * retried translations.
+ * The `toInterp' RegionBlacklist is a set of instructions which must be
+ * interpreted.  When an instruction fails in translation, Retry is returned,
+ * and the instruction is added to `interp' so that it will be interpreted on
+ * the next attempt.
  */
-TranslateResult translateRegion(IRGS& irgs,
-                                const RegionDesc& region,
-                                TranslateRetryContext& retry,
+TranslateResult translateRegion(IRGS&,
+                                const RegionDesc&,
+                                RegionBlacklist& toInterp,
                                 TransFlags trflags,
                                 PostConditions& pconds);
 

@@ -179,6 +179,20 @@ void region_prune_arcs(RegionDesc& region) {
     auto& binfo = blockInfos[rpoID];
     FTRACE(4, "B{}\n", binfo.blockID);
 
+    /*
+     * This code currently assumes inlined functions were entirely contained
+     * within a single profiling translation, and will need updates if we
+     * inline bigger things in a way visible to region selection.
+     *
+     * Note: inlined blocks /may/ have postConditions, if they are the last
+     * blocks from profiling translations.  Currently any locations referred to
+     * in postconditions for these blocks are for the outermost caller, so this
+     * code handles that correctly.
+     */
+    if (region.block(binfo.blockID)->inlineLevel() != 0) {
+      assertx(region.block(binfo.blockID)->typePreConditions().empty());
+    }
+
     binfo.out = binfo.in;
     apply_transfer_function(
       binfo.out,

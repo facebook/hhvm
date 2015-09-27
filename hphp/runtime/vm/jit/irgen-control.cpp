@@ -37,14 +37,13 @@ void surpriseCheck(IRGS& env, Offset relOffset) {
  * offset is in the current RegionDesc.
  */
 Block* getBlock(IRGS& env, Offset offset) {
-  SrcKey sk(curSrcKey(env), offset);
   // If hasBlock returns true, then IRUnit already has a block for that offset
   // and makeBlock will just return it.  This will be the proper successor
   // block set by setSuccIRBlocks.  Otherwise, the given offset doesn't belong
   // to the region, so we just create an exit block.
-  if (!env.irb->hasBlock(sk)) return makeExit(env, offset);
+  if (!env.irb->hasBlock(offset)) return makeExit(env, offset);
 
-  return env.irb->makeBlock(sk);
+  return env.irb->makeBlock(offset);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -185,8 +184,7 @@ void emitSwitch(IRGS& env,
   // included in the region.
   auto const shouldLower =
     std::any_of(offsets.begin(), offsets.end(), [&](Offset o) {
-      SrcKey sk(curSrcKey(env), bcOff(env) + o);
-      return env.irb->hasBlock(sk);
+      return env.irb->hasBlock(bcOff(env) + o);
     });
   if (shouldLower && profile.optimizing()) {
     auto const values = sortedSwitchProfile(profile, iv.size());
@@ -201,8 +199,7 @@ void emitSwitch(IRGS& env,
     // fully-generic JmpSwitchDest at the end if nothing matches.
     for (auto const& val : values) {
       auto targetOff = bcOff(env) + offsets[val.caseIdx];
-      SrcKey sk(curSrcKey(env), targetOff);
-      if (!env.irb->hasBlock(sk)) continue;
+      if (!env.irb->hasBlock(targetOff)) continue;
 
       if (bounded && val.caseIdx == iv.size() - 2) {
         // If we haven't checked bounds yet and this is the "first non-zero"

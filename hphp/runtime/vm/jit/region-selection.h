@@ -117,7 +117,8 @@ struct RegionDesc {
    */
   SrcKey            lastSrcKey() const;
 
-  Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
+  Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset,
+                             uint16_t inlineLevel);
   void              replaceBlock(BlockId bid, BlockPtr newBlock);
   void              deleteBlock(BlockId bid);
   BlockVec::iterator deleteBlock(RegionDesc::BlockVec::iterator it);
@@ -353,7 +354,7 @@ struct RegionDesc::Block {
   using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
   explicit Block(const Func* func, bool resumed, Offset start, int length,
-                 FPInvOffset initSpOff);
+                 FPInvOffset initSpOff, uint16_t inlineLevel);
 
   Block& operator=(const Block&) = delete;
 
@@ -372,11 +373,25 @@ struct RegionDesc::Block {
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
   FPInvOffset initialSpOffset()   const { return m_initialSpOffset; }
+  uint16_t    inlineLevel()       const { return m_inlineLevel; }
   TransID     profTransID()       const { return m_profTransID; }
 
   void setID(BlockId id)                  { m_id = id; }
   void setProfTransID(TransID ptid)       { m_profTransID = ptid; }
   void setInitialSpOffset(FPInvOffset sp) { m_initialSpOffset = sp; }
+
+  /*
+   * Set and get whether or not this block ends with an inlined FCall. Inlined
+   * FCalls should not emit any code themselves, and they will be followed by
+   * one or more blocks from the callee.
+   */
+  void setInlinedCallee(const Func* callee) {
+    assertx(callee);
+    m_inlinedCallee = callee;
+  }
+  const Func* inlinedCallee() const {
+    return m_inlinedCallee;
+  }
 
   /*
    * Increase the length of the Block by 1.
@@ -456,6 +471,8 @@ private:
   Offset          m_last;
   int             m_length;
   FPInvOffset     m_initialSpOffset;
+  const Func*     m_inlinedCallee;
+  uint16_t        m_inlineLevel; // 0 means the outer-most function
   TransID         m_profTransID;
   TypedLocVec     m_typePredictions;
   GuardedLocVec   m_typePreConditions;
@@ -561,7 +578,7 @@ RegionDescPtr selectHotRegion(TransID transId,
  * whose shape will be analyzed by the InliningDecider.
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
-                             bool inlining = false);
+                             bool allowInlining = true);
 
 /*
  * Select the hottest trace beginning with triggerId.

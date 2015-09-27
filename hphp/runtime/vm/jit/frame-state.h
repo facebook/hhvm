@@ -43,12 +43,17 @@ Type refinePredictedType(Type oldPrediction, Type newPrediction, Type proven);
 Type updatePredictedType(Type predictedType, Type provenType);
 
 struct FPIInfo {
+  enum class SpillKind {
+    FPushCtor,
+    FPushMethod,
+    FPushFunc,
+    FPushUnknown
+  };
+
   SSATmp* returnSP;
   FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
   SSATmp* ctx;
-  Op fpushOpc; // bytecode for FPush*
-  bool interp;
-  bool spansCall;
+  SpillKind kind;
 };
 
 struct EvalStack {

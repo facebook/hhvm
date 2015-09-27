@@ -148,18 +148,13 @@ bool merge_into(FrameState& dst, const FrameState& src) {
 
     always_assert(dstInfo.returnSP == srcInfo.returnSP);
     always_assert(dstInfo.returnSPOff == srcInfo.returnSPOff);
-    always_assert(isFPush(dstInfo.fpushOpc) &&
-                  dstInfo.fpushOpc == srcInfo.fpushOpc);
 
-    // If one of the merged edges was interp'ed mark the result as interp'ed
-    if (!dstInfo.interp && srcInfo.interp) {
-      dstInfo.interp = true;
-      changed = true;
-    }
+    // If one of the merged edges was interp'ed forget the FPush kind
+    if (dstInfo.kind != srcInfo.kind) {
+      always_assert(dstInfo.kind == FPIInfo::SpillKind::FPushUnknown ||
+                    srcInfo.kind == FPIInfo::SpillKind::FPushUnknown);
 
-    // If one of the merged edges spans a call then mark them both as spanning
-    if (!dstInfo.spansCall && srcInfo.spansCall) {
-      dstInfo.spansCall = true;
+      dstInfo.kind = FPIInfo::SpillKind::FPushUnknown;
       changed = true;
     }
 
@@ -378,9 +373,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       if (!cur().fpiStack.empty()) {
         cur().fpiStack.pop_front();
       }
-      for (auto& st : m_stack) {
-        for (auto& fpi : st.fpiStack) fpi.spansCall = true;
-      }
     }
     break;
 
@@ -405,9 +397,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
       if (!cur().fpiStack.empty()) {
         cur().fpiStack.pop_front();
-      }
-      for (auto& st : m_stack) {
-        for (auto& fpi : st.fpiStack) fpi.spansCall = true;
       }
     }
     break;
@@ -567,7 +556,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case CufIterSpillFrame:
     spillFrameStack(inst->extra<CufIterSpillFrame>()->spOffset,
-                    cur().spOffset, inst);
+                    cur().spOffset, nullptr);
     break;
   case SpillFrame:
     spillFrameStack(inst->extra<SpillFrame>()->spOffset,
@@ -583,9 +572,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       cur().fpiStack.push_front(FPIInfo { cur().spValue,
                                           cur().spOffset,
                                           nullptr,
-                                          extra.opcode,
-                                          true /* interp */,
-                                          false /* spansCall */});
+                                          FPIInfo::SpillKind::FPushUnknown });
     } else if (isFCallStar(extra.opcode) && !cur().fpiStack.empty()) {
       cur().fpiStack.pop_front();
     }
@@ -1230,12 +1217,15 @@ void FrameStateMgr::spillFrameStack(IRSPOffset offset, FPInvOffset retOffset,
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setStackValue(offset + i, nullptr);
   }
-  auto const opc = inst->marker().sk().op();
+  auto const kind =
+      !inst ? FPIInfo::SpillKind::FPushUnknown
+    : !inst->src(2) ? FPIInfo::SpillKind::FPushFunc
+    : inst->extra<ActRecInfo>()->fromFPushCtor ? FPIInfo::SpillKind::FPushCtor
+    : FPIInfo::SpillKind::FPushMethod;
 
-  auto const ctx  = inst->op() == SpillFrame ? inst->src(2) : nullptr;
+  auto const ctx  = inst ? inst->src(2) : nullptr;
   cur().syncedSpLevel += kNumActRecCells;
-  cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, opc,
-                                      false /* interp */, false /* spans */ });
+  cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, kind });
 }
 
 void FrameStateMgr::refineStackType(IRSPOffset offset,

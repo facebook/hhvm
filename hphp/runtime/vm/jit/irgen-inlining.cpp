@@ -81,24 +81,15 @@ bool beginInlining(IRGS& env,
     "FPI stack pointer and callee stack pointer didn't match in beginInlining"
   );
 
-  auto const& info = fpiStack.front();
-  always_assert(!isFPushCuf(info.fpushOpc) && !info.interp);
-
-  auto ctx = [&] {
-    if (info.ctx || isFPushFunc(info.fpushOpc)) {
-      return info.ctx;
-    }
-
-    constexpr int32_t adjust = offsetof(ActRec, m_r) - offsetof(ActRec, m_this);
-    IRSPOffset ctxOff{invSPOff(env) - info.returnSPOff - adjust};
-    return gen(env, LdStk, TCtx, IRSPOffsetData{ctxOff}, sp(env));
-  }();
+  always_assert(fpiStack.front().ctx ||
+                fpiStack.front().kind == FPIInfo::SpillKind::FPushFunc);
+  always_assert(fpiStack.front().kind != FPIInfo::SpillKind::FPushUnknown);
 
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
-  data.fromFPushCtor = isFPushCtor(info.fpushOpc);
-  data.ctx           = ctx;
+  data.fromFPushCtor = fpiStack.front().kind == FPIInfo::SpillKind::FPushCtor;
+  data.ctx           = fpiStack.front().ctx;
   data.retSPOff      = prevSPOff;
   data.spOffset      = offsetFromIRSP(env, BCSPOffset{0});
   data.numNonDefault = numParams;

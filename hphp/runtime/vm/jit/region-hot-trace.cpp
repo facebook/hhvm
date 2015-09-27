@@ -61,7 +61,6 @@ static void mergePostConds(TypedLocations& dst,
 RegionDescPtr selectHotTrace(TransID triggerId,
                              const ProfData* profData,
                              TransCFG& cfg,
-                             int32_t numBCInstrs,
                              TransIDSet& selectedSet,
                              TransIDVec* selectedVec) {
   auto region = std::make_shared<RegionDesc>();
@@ -77,7 +76,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
   // pre-conditions of the successor block.
   hphp_hash_map<RegionDesc::BlockId, TypedLocations> blockPostConds;
 
-  FTRACE(1, "selectHotTrace: starting with maxBCInstrs = {}\n", numBCInstrs);
+  uint32_t numBCInstrs = 0;
 
   while (!selectedSet.count(tid)) {
 
@@ -85,9 +84,11 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     if (blockRegion == nullptr) break;
 
     // Break if region would be larger than the specified limit.
-    if (blockRegion->instrSize() > numBCInstrs) {
+    auto newInstrSize = numBCInstrs + blockRegion->instrSize();
+    if (newInstrSize > RuntimeOption::EvalJitMaxRegionInstrs) {
       FTRACE(2, "selectHotTrace: breaking region at Translation {} because "
-             "size would exceed of maximum translation limit\n", tid);
+             "size ({}) would exceed of maximum translation limit\n",
+             tid, newInstrSize);
       break;
     }
 
@@ -130,8 +131,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
 
     // Add blockRegion's blocks and arcs to region.
     region->append(*blockRegion);
-    numBCInstrs -= blockRegion->instrSize();
-    assertx(numBCInstrs >= 0);
+    numBCInstrs += blockRegion->instrSize();
 
     if (hasPredBlock) {
       region->addArc(predBlockId, newFirstBlockId);

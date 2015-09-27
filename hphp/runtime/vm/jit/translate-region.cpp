@@ -547,8 +547,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        const Func* callee,
                                        TranslateRetryContext& retry,
                                        InliningDecider& inl,
-                                       const IRGS& irgs,
-                                       int32_t maxBCInstrs) {
+                                       const IRGS& irgs) {
   if (psk.srcKey.op() != Op::FCall &&
       psk.srcKey.op() != Op::FCallD) {
     return nullptr;
@@ -578,8 +577,14 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  // Select a region for `callee'.
-  auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, maxBCInstrs);
+  RegionDescPtr calleeRegion;
+  // Look up or select a region for `callee'.
+  if (retry.inlines.count(psk)) {
+    calleeRegion = retry.inlines[psk];
+  } else {
+    calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs);
+    retry.inlines[psk] = calleeRegion;
+  }
   if (!calleeRegion) return nullptr;
 
   // Return the callee region if it's inlinable and update `inl'.
@@ -591,8 +596,7 @@ TranslateResult irGenRegion(IRGS& irgs,
                             const RegionDesc& region,
                             TranslateRetryContext& retry,
                             TransFlags trflags,
-                            InliningDecider& inl,
-                            int32_t& budgetBCInstrs) {
+                            InliningDecider& inl) {
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
@@ -604,10 +608,6 @@ TranslateResult irGenRegion(IRGS& irgs,
   always_assert_flog(check(region, errorMsg), "{}", errorMsg);
 
   auto& irb = *irgs.irb;
-
-  auto regionSize = region.instrSize();
-  always_assert(regionSize <= budgetBCInstrs);
-  budgetBCInstrs -= regionSize;
 
   // Create a map from region blocks to their corresponding initial IR blocks.
   auto blockIdToIRBlock = createBlockMap(irgs, region);
@@ -737,7 +737,7 @@ TranslateResult irGenRegion(IRGS& irgs,
       // singleton inliner isn't actively inlining.
       if (!skipTrans) {
         calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, retry, inl,
-                                                irgs, budgetBCInstrs);
+                                                irgs);
       }
 
       if (calleeRegion) {
@@ -745,9 +745,7 @@ TranslateResult irGenRegion(IRGS& irgs,
         auto const* callee = inst.funcd;
 
         // We shouldn't be inlining profiling translations.
-        assertx(mcg->tx().mode() != TransKind::Profile);
-
-        assertx(calleeRegion->instrSize() <= budgetBCInstrs);
+        assert(mcg->tx().mode() != TransKind::Profile);
 
         FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
                "and stack:\n{}\n",
@@ -768,10 +766,7 @@ TranslateResult irGenRegion(IRGS& irgs,
           irb.resetOffsetMapping();
           irb.resetGuardFailBlock();
 
-          auto result = irGenRegion(irgs, *calleeRegion, retry, trflags, inl,
-                                    budgetBCInstrs);
-          assertx(budgetBCInstrs >= 0);
-
+          auto result = irGenRegion(irgs, *calleeRegion, retry, trflags, inl);
           inl.registerEndInlining(callee);
 
           if (result != TranslateResult::Success) {
@@ -915,11 +910,7 @@ TranslateResult translateRegion(IRGS& irgs,
   InliningDecider inl(region.entry()->func());
   if (mcg->tx().mode() == TransKind::Profile) inl.disable();
 
-  int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
-  auto irGenResult = irGenRegion(irgs, region, retry, trflags, inl,
-                                 budgetBCInstrs);
-  assertx(budgetBCInstrs >= 0);
-  FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
+  auto irGenResult = irGenRegion(irgs, region, retry, trflags, inl);
   if (irGenResult != TranslateResult::Success) return irGenResult;
 
   // For profiling translations, grab the postconditions to be used

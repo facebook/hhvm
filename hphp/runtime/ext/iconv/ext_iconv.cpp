@@ -2026,10 +2026,11 @@ public:
     HHVM_FE(iconv_substr);
     HHVM_FE(iconv);
     HHVM_FE(ob_iconv_handler);
-
-    loadSystemlib();
   }
 
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "iconv" });
+  }
 } s_iconv_extension;
 
 /////////////////////////////////////////////////////////////////////////////

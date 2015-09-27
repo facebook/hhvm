@@ -23,8 +23,8 @@ static class HHClientExtension final : Extension {
  public:
   HHClientExtension(): Extension("hh_client", NO_EXTENSION_VERSION_YET) { }
 
-  void moduleInit() override {
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "hh_client" });
   }
 
   virtual const DependencySet getDeps() const override {

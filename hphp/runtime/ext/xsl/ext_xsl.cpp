@@ -764,8 +764,10 @@ class XSLExtension final : public Extension {
 
       Native::
         registerNativeDataInfo<XSLTProcessorData>(s_XSLTProcessorData.get());
+    }
 
-      loadSystemlib();
+    virtual const SystemlibSet getSystemlibSources() const override {
+      return SystemlibSet({ "xsl" });
     }
 } s_xsl_extension;
 

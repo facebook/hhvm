@@ -376,8 +376,9 @@ public:
     HHVM_FE(spl_autoload_functions);
     HHVM_FE(spl_autoload_register);
     HHVM_FE(spl_autoload_unregister);
-
-    loadSystemlib();
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "spl" });
   }
 } s_SPL_extension;
 

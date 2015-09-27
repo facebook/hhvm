@@ -3276,8 +3276,10 @@ class CurlExtension final : public Extension {
         CurlHandlePool::namedPools[poolname] = hp;
       }
     }
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "curl" });
   }
 
   void moduleShutdown() override {

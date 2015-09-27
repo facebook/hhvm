@@ -286,7 +286,10 @@ static class ReadlineExtension final : public Extension {
       HHVM_FE(readline_info);
       HHVM_FE(readline_read_history);
       HHVM_FE(readline_write_history);
-      loadSystemlib();
+    }
+
+    virtual const SystemlibSet getSystemlibSources() const override {
+      return SystemlibSet({ "readline" });
     }
 
     void requestShutdown() override {

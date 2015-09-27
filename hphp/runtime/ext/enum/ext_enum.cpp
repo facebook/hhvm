@@ -87,7 +87,10 @@ class enumExtension final : public Extension {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, coerce, BuiltinEnum, coerce);
-    loadSystemlib();
+  }
+
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "enum" });
   }
 } s_enum_extension;
 

@@ -159,9 +159,12 @@ public:
     Native::registerNativeDataInfo<Generator>(
       Generator::s_className.get(),
       Native::NDIFlags::NO_SWEEP);
-    loadSystemlib("generator");
     Generator::s_class = Unit::lookupClass(Generator::s_className.get());
     assert(Generator::s_class);
+  }
+
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "generator" });
   }
 };
 

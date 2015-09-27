@@ -133,8 +133,6 @@ void IntlExtension::initNormalizer() {
   CONST_NORM(KD);
   CONST_NORM(C);
   CONST_NORM(KC);
-
-  loadSystemlib("icu_normalizer");
 }
 
 //////////////////////////////////////////////////////////////////////////////

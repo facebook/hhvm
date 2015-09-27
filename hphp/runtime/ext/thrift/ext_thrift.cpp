@@ -30,8 +30,9 @@ public:
     HHVM_FE(thrift_protocol_write_compact);
     HHVM_FE(thrift_protocol_read_compact);
     HHVM_FE(thrift_protocol_read_compact_struct);
-
-    loadSystemlib("thrift");
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "thrift" });
   }
 } s_thrift_extension;
 

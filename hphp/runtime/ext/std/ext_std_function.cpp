@@ -285,8 +285,6 @@ void StandardExtension::initFunction() {
   HHVM_FALIAS(__SystemLib\\func_num_arg_, SystemLib_func_num_arg_);
   HHVM_FE(register_postsend_function);
   HHVM_FE(register_shutdown_function);
-
-  loadSystemlib("std_function");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -42,7 +42,6 @@ void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
   HHVM_FALIAS(__hhvm_intrinsics\\disable_inlining, disable_inlining);
-  loadSystemlib("std_intrinsics");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

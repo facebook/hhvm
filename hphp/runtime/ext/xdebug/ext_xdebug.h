@@ -196,6 +196,10 @@ struct XDebugExtension final : Extension {
   void requestInit() override;
   void requestShutdown() override;
 
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "xdebug" });
+  }
+
   // Standard config options
   #define XDEBUG_OPT(T, name, sym, val) static DECLARE_THREAD_LOCAL(T, sym);
   XDEBUG_CFG

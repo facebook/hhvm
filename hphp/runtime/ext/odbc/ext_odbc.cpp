@@ -892,8 +892,10 @@ static class ODBCExtension final : public Extension {
     HHVM_FE(odbc_num_rows);
     HHVM_FE(odbc_prepare);
     HHVM_FE(odbc_rollback);
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "odbc" });
   }
 } s_odbc_extension;
 

@@ -42,8 +42,6 @@ void CollectionsExtension::initVector() {
     s_VectorIterator.get(),
     Native::NDIFlags::NO_SWEEP
   );
-
-  loadSystemlib("collections-vector");
 }
 
 /////////////////////////////////////////////////////////////////////////////

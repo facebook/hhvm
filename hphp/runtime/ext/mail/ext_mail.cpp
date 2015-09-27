@@ -200,7 +200,9 @@ class MailExtension final : public Extension {
   void moduleInit() override {
     HHVM_FE(mail);
     HHVM_FE(ezmlm_hash);
-    loadSystemlib();
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "mail" });
   }
 } s_mail_extension;
 

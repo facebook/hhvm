@@ -367,8 +367,9 @@ class StandardURLExtension final : public Extension {
     HHVM_FE(rawurlencode);
     HHVM_FE(urldecode);
     HHVM_FE(urlencode);
-
-    loadSystemlib();
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "url" });
   }
 } s_standardurl_extension;
 

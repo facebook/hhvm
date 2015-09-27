@@ -45,6 +45,10 @@ public:
     initFunctions();
   }
 
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "asio", "async-generator" });
+  }
+
 private:
   void initAsyncGenerator();
   void initFunctions();

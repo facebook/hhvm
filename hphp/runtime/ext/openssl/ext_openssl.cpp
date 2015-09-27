@@ -2984,8 +2984,9 @@ class opensslExtension final : public Extension {
     HHVM_FE(openssl_digest);
     HHVM_FE(openssl_get_cipher_methods);
     HHVM_FE(openssl_get_md_methods);
-
-    loadSystemlib();
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "openssl" });
   }
 } s_openssl_extension;
 

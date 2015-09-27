@@ -332,8 +332,10 @@ class JsonExtension final : public Extension {
     HHVM_FE(json_last_error_msg);
     HHVM_FE(json_encode);
     HHVM_FE(json_decode);
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "json" });
   }
 } s_json_extension;
 

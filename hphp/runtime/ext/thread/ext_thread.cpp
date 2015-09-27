@@ -28,8 +28,9 @@ public:
   void moduleInit() override {
     HHVM_FE(hphp_get_thread_id);
     HHVM_FE(hphp_gettid);
-
-    loadSystemlib();
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "thread" });
   }
 } s_thread_extension;
 

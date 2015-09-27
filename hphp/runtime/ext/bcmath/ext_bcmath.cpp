@@ -256,7 +256,10 @@ class bcmathExtension final : public Extension {
     HHVM_FE(bcpow);
     HHVM_FE(bcpowmod);
     HHVM_FE(bcsqrt);
-    loadSystemlib();
+  }
+
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "bcmath" });
   }
 
   void threadInit() override {

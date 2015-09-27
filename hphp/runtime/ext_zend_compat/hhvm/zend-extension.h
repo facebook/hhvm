@@ -19,6 +19,7 @@ public:
   void requestInit() override;
   void requestShutdown() override;
   bool moduleEnabled() const override;
+  virtual const SystemlibSet getSystemlibSources() const override;
   static ZendExtension* GetByModuleNumber(int module_number);
 };
 

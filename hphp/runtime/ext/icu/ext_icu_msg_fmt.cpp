@@ -505,8 +505,6 @@ void IntlExtension::initMessageFormatter() {
   HHVM_ME(MessageFormatter, setPattern);
 
   Native::registerNativeDataInfo<MessageFormatter>(s_MessageFormatter.get());
-
-  loadSystemlib("icu_msg_fmt");
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -6,6 +6,8 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/hdf.h"
 
+#include <vector>
+
 namespace HPHP { namespace ExtensionRegistry {
 /////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +44,9 @@ void requestShutdown();
 bool modulesInitialised();
 
 void scanExtensions(IMarker&);
+
+std::vector<std::pair<std::string, std::set<std::string>>>
+getAllExtensionSystemlibSources();
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::ExtensionRegistry

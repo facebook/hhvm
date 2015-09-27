@@ -127,6 +127,16 @@ class IntlExtension final : public Extension {
     initTransliterator();
   }
 
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ 
+      "icu", "icu_break_iterator", "icu_calendar", "icu_collator",
+      "icu_date_fmt", "icu_date_pattern_gen", "icu_grapheme", "icu_iterator",
+      "icu_locale", "icu_misc", "icu_msg_fmt", "icu_normalizer",
+      "icu_num_fmt", "icu_rsrc_bundle", "icu_timezone", "icu_transliterator",
+      "icu_uchar", "icu_uconverter", "icu_ucsdet", "icu_uspoof",
+    });
+  }
+
   void threadInit() override {
     bindIniSettings();
   }

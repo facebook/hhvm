@@ -32,6 +32,10 @@ class ApacheExtension final : public Extension {
   static bool Enable;
   bool moduleEnabled() const override { return Enable; }
 
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "apache" });
+  }
+
   static void UpdateHealthLevel(HealthLevel newStatus) {
     m_healthLevel = newStatus;
   }

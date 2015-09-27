@@ -2181,8 +2181,6 @@ void StandardExtension::initFile() {
   HHVM_FE(rewinddir);
   HHVM_FE(scandir);
   HHVM_FE(closedir);
-
-  loadSystemlib("std_file");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

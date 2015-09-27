@@ -28,6 +28,15 @@ class StandardExtension final : public Extension {
     initMath();
   }
 
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({
+      "std_classobj", "std_errorfunc", "std_file", "std_function",
+      "std_gc", "std_intrinsics", "std_math", "std_misc",
+      "std_network", "std_options", "std_output", "std_process",
+      "std_string", "std_variable", "stream-user-filters"
+    });
+  }
+
   void threadInit() override {
     threadInitMisc();
   }

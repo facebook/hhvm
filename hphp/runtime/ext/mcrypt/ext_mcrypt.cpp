@@ -935,8 +935,10 @@ class McryptExtension final : public Extension {
     HHVM_FE(mdecrypt_generic);
     HHVM_FE(mcrypt_generic_deinit);
     HHVM_FE(mcrypt_generic_end);
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "mcrypt" });
   }
 } s_mcrypt_extension;
 

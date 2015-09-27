@@ -425,8 +425,6 @@ void IntlExtension::initBreakIterator() {
 #undef BI_CONST
 
   Native::registerNativeDataInfo<IntlBreakIterator>(s_IntlBreakIterator.get());
-
-  loadSystemlib("icu_break_iterator");
 }
 
 //////////////////////////////////////////////////////////////////////////////

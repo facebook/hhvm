@@ -1823,6 +1823,31 @@ static std::string systemlib_join(const std::string& manifest,
       }
     }
   }
+
+  for (auto& ext : ExtensionRegistry::getAllExtensionSystemlibSources()) {
+    for (auto& src : ext.second) {
+      ret += "namespace {\n";
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+      std::string section("ext_");
+#else
+      std::string section("ext.");
+#endif
+      section += HHVM_FN(md5)(src, false).substr(0, 12).data();
+      embedded_data desc;
+      always_assert(get_embedded_data(section.c_str(), &desc, ext.first));
+      auto data = desc.data();
+      if (data.length() >= 5 && data.substr(0, 5) == "<?php") {
+        ret += data.substr(5) + "\n";
+      } else if (data.length() >= 4 && data.substr(0, 4) == "<?hh") {
+        ret += data.substr(4) + "\n";
+      } else {
+        // It's not PHP nor Hack.
+        always_assert(false);
+      }
+      ret += "}\n";
+    }
+  }
+
   if (hhas != nullptr) {
     *hhas = hhasRet;
   }

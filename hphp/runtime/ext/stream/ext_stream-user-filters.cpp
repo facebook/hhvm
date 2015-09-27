@@ -399,8 +399,6 @@ void StandardExtension::initStreamUserFilters() {
   HHVM_FE(stream_bucket_make_writeable);
   HHVM_FE(stream_bucket_append);
   HHVM_FE(stream_bucket_prepend);
-
-  loadSystemlib("stream-user-filters");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

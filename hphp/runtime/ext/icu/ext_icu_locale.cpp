@@ -715,8 +715,6 @@ void IntlExtension::initLocale() {
   ULOC_LOCALE_CONST(ACTUAL_LOCALE);
   ULOC_LOCALE_CONST(VALID_LOCALE);
 #undef ULOC_LOCALE_CONST
-
-  loadSystemlib("icu_locale");
 }
 
 //////////////////////////////////////////////////////////////////////////////

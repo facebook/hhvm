@@ -209,7 +209,6 @@ void apcExtension::moduleInit() {
   HHVM_FE(apc_exists);
   HHVM_FE(apc_cache_info);
   HHVM_FE(apc_sma_info);
-  loadSystemlib();
 }
 
 void apcExtension::moduleShutdown() {

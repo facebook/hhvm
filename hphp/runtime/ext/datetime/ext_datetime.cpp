@@ -957,8 +957,10 @@ public:
     SUNFUNCS_CNS(STRING, String);
     SUNFUNCS_CNS(TIMESTAMP, TimeStamp);
 #undef SUNFUNCS_CNS
+  }
 
-    loadSystemlib("datetime");
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "datetime" });
   }
 
   void threadInit() override {

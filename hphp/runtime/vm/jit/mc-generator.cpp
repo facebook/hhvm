@@ -373,11 +373,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     }
   }
 
-  // We need to hold on to PGO data for optimized functions if we plan to use
-  // it for inlining later
-  if (RuntimeOption::EvalInlineRegionMode == "tracelet") {
-    m_tx.profData()->freeFuncData(funcId);
-  }
+  m_tx.profData()->freeFuncData(funcId);
 
   return start;
 }

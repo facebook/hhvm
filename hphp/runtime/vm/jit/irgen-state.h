@@ -35,15 +35,6 @@ struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
-struct ReturnTarget {
-  // Block that will contain the InlineReturn and serve as a branch target for
-  // returning to the caller
-  Block* target;
-  // If the inlined region has multiple returns and will require a merge into
-  // the returnStub and target blocks
-  bool needsMerge;
-};
-
 /*
  * IR-Generation State.
  *
@@ -77,13 +68,6 @@ struct IRGS {
    * The current inlining level.  0 means we're not inlining.
    */
   uint16_t inlineLevel{0};
-
-  /*
-   * Tracks the branch target for all inlined blocks return to caller. The
-   * target block will Phi the return values in the case of multiple returns
-   * and contain the InlineReturn
-   */
-  std::vector<ReturnTarget> inlineReturnTarget;
 
   /*
    * The id of the profiling translation for the code we're currently

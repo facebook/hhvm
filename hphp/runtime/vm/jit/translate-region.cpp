@@ -548,8 +548,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        TranslateRetryContext& retry,
                                        InliningDecider& inl,
                                        const IRGS& irgs,
-                                       int32_t maxBCInstrs,
-                                       bool& needsMerge) {
+                                       int32_t maxBCInstrs) {
   if (psk.srcKey.op() != Op::FCall &&
       psk.srcKey.op() != Op::FCallD) {
     return nullptr;
@@ -579,19 +578,13 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  if (retry.inlineBlacklist.find(psk) != retry.inlineBlacklist.end()) {
-    return nullptr;
-  }
-
+  // Select a region for `callee'.
   auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, maxBCInstrs);
-  if (!calleeRegion || calleeRegion->instrSize() > maxBCInstrs) {
-    return nullptr;
-  }
+  if (!calleeRegion) return nullptr;
 
   // Return the callee region if it's inlinable and update `inl'.
-  return inl.shouldInline(callee, *calleeRegion, needsMerge)
-    ? calleeRegion
-    : nullptr;
+  return inl.shouldInline(callee, *calleeRegion) ? calleeRegion
+                                                 : nullptr;
 }
 
 TranslateResult irGenRegion(IRGS& irgs,
@@ -739,14 +732,12 @@ TranslateResult irGenRegion(IRGS& irgs,
         }
       }
 
-      bool calleeIsMerge = false;
       RegionDescPtr calleeRegion{nullptr};
       // See if we have a callee region we can inline---but only if the
       // singleton inliner isn't actively inlining.
       if (!skipTrans) {
         calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, retry, inl,
-                                                irgs, budgetBCInstrs,
-                                                calleeIsMerge);
+                                                irgs, budgetBCInstrs);
       }
 
       if (calleeRegion) {
@@ -766,11 +757,10 @@ TranslateResult irGenRegion(IRGS& irgs,
                show(irgs));
 
         auto returnSk = inst.nextSk();
-        auto returnBlock = irb.unit().defBlock();
         auto returnFuncOff = returnSk.offset() - block->func()->base();
 
-        if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee, returnFuncOff,
-                                 returnBlock, calleeIsMerge)) {
+        if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee,
+                                 returnFuncOff)) {
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
             { return show(*calleeRegion); };
 
@@ -789,25 +779,18 @@ TranslateResult irGenRegion(IRGS& irgs,
             return result;
           }
 
-          // Native calls end inlining before CallBuiltin
-          if (!callee->isCPPBuiltin()) {
+          // If this block isn't empty create a new block for the remaining
+          // instructions
+          if (!lastInstr) {
+            auto nextBlock = irb.unit().defBlock();
+            irb.setBlock(inst.nextSk(), nextBlock);
+            irgen::endBlock(irgs, inst.nextSk().offset(), inst.nextIsMerge);
+
             // Start a new IR block to hold the remainder of this block.
             auto const did_start =
-              irb.startBlock(returnBlock, false /* unprocessedPred */);
-
-            // If the inlined region failed to contain any returns then the
-            // rest of this block is dead- we could continue but there's no
-            // benefit to inlining this call if it ends in a ReqRetranslate or
-            // ReqBind* so instead we mark it as uninlinable and retry.
-            if (!did_start) {
-              retry.inlineBlacklist.insert(psk);
-              return TranslateResult::Retry;
-            }
-
-            irgen::endInlining(irgs);
-          } else {
-            // For native calls we don't use a return block
-            assertx(returnBlock->empty());
+              irb.startBlock(nextBlock, false /* unprocessedPred */);
+            always_assert_flog(did_start,
+              "Failed to start block following inlined region.");
           }
 
           // Recursive calls to irGenRegion will reset the successor block
@@ -848,8 +831,10 @@ TranslateResult irGenRegion(IRGS& irgs,
       // to be translated.
       if (lastInstr) {
         if (region.isExit(blockId)) {
-          if (!inl.inlining() || !isReturnish(inst.op())) {
+          if (!inl.inlining()) {
             irgen::endRegion(irgs);
+          } else {
+            assertx(isReturnish(inst.op()));
           }
         } else if (instrAllowsFallThru(inst.op())) {
           if (region.isSideExitingBlock(blockId)) {
@@ -868,6 +853,9 @@ TranslateResult irGenRegion(IRGS& irgs,
 
   if (!inl.inlining()) {
     irgen::sealUnit(irgs);
+  } else {
+    always_assert_flog(irgs.inlineLevel == inl.depth() - 1,
+                       "Tried to inline a region with no return.");
   }
 
   irGenTimer.stop();

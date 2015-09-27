@@ -1847,16 +1847,6 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   vmain() << load{fpReg[AROFF(m_sfp)], rvmfp()};
 }
 
-void CodeGenerator::cgInlineReturnNoFrame(IRInstruction* inst) {
-  if (debug) {
-    auto const offset = cellsToBytes(
-      inst->extra<InlineReturnNoFrame>()->frameOffset.offset);
-    for (auto i = 0; i < kNumActRecCells; ++i) {
-      emitTrashTV(rvmfp(), offset - cellsToBytes(i), kTVTrashJITFrame);
-    }
-  }
-}
-
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   auto ptr = srcLoc(inst, 0).reg();
   auto off = AROFF(m_sfp);

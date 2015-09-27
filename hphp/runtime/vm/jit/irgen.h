@@ -205,14 +205,7 @@ void sealUnit(IRGS&);
 bool beginInlining(IRGS&,
                    unsigned numParams,
                    const Func* target,
-                   Offset returnBcOffset,
-                   Block* returnTarget,
-                   bool multipleReturns);
-
-/*
- * Called when all blocks of the inner most inlined frame have been emitted
- */
-void endInlining(IRGS& env);
+                   Offset returnBcOffset);
 
 /*
  * Returns whether the IRGS is currently inlining or not.

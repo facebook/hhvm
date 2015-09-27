@@ -82,8 +82,7 @@ class TransCFG {
   TransCFG(FuncId funcId,
            const ProfData* profData,
            const SrcDB& srcDB,
-           const TcaTransIDMap& jmpToTransID,
-           bool inlining = false);
+           const TcaTransIDMap& jmpToTransID);
 
   const std::vector<TransID>& nodes() const { return m_transIds; }
   ArcPtrVec                   arcs()  const;

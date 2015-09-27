@@ -39,9 +39,6 @@ const char* show(TranslateResult);
 struct TranslateRetryContext {
   // Instructions that must be interpreted.
   ProfSrcKeySet toInterp;
-
-  // Regions to not inline
-  std::unordered_set<ProfSrcKey, ProfSrcKey::Hasher> inlineBlacklist;
 };
 
 /*

@@ -584,8 +584,7 @@ RegionDescPtr selectHotCFG(TransID headId,
                            const TransCFG& cfg,
                            int32_t maxBCInstrs,
                            TransIDSet& selectedSet,
-                           TransIDVec* selectedVec = nullptr,
-                           bool inlining = false);
+                           TransIDVec* selectedVec = nullptr);
 
 /*
  * Checks whether the type predictions at the beginning of block

@@ -580,15 +580,6 @@ struct DefInlineFPData : IRExtraData {
   uint32_t numNonDefault;
 };
 
-struct InlineReturnNoFrameData : IRExtraData {
-  explicit InlineReturnNoFrameData(FPRelOffset off) : frameOffset(off) {}
-  std::string show() const {
-    return folly::to<std::string>(frameOffset.offset);
-  }
-
-  FPRelOffset frameOffset;
-};
-
 struct CallArrayData : IRExtraData {
   explicit CallArrayData(IRSPOffset spOffset,
                          Offset pcOffset,
@@ -1155,7 +1146,6 @@ X(DefSP,                        FPInvOffsetData);
 X(LdStk,                        IRSPOffsetData);
 X(LdStkAddr,                    IRSPOffsetData);
 X(DefInlineFP,                  DefInlineFPData);
-X(InlineReturnNoFrame,          InlineReturnNoFrameData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            ReqRetranslateOptData);

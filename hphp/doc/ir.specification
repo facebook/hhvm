@@ -1336,13 +1336,6 @@ To string conversions:
 
   Unlinks a frame constructed by DefInlineFP.
 
-| InlineReturnNoFrame<InlineFrameStart>, ND, NA, NF
-
-  Mark the end of an inlined function for which no DefInlineFP was required. The
-  primary purpose of this instruction is to mark the result of a SpillFrame as
-  dead. InlineFrameStart is the caller FP-relative offset of the start of the
-  callee frame. Everything below InlineFrameStart is dead.
-
 | CallArray<spOffset,returnOff,after,destroyLocals>, ND,
 |                                                    S(StkPtr) S(FramePtr),
 |                                                    Er

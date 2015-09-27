@@ -437,14 +437,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InlineReturn:
     return ReturnEffects { stack_below(inst.src(0), 2) | AMIStateAny };
 
-  case InlineReturnNoFrame:
-    return ReturnEffects {
-      AliasClass(AStack {
-        inst.extra<InlineReturnNoFrame>()->frameOffset.offset,
-        std::numeric_limits<int32_t>::max()
-      }) | AMIStateAny
-    };
-
   case InterpOne:
     return interp_one_effects(inst);
   case InterpOneCF:

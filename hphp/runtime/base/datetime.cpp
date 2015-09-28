@@ -492,13 +492,11 @@ void DateTime::internalModifyRelative(timelib_rel_time *rel,
   m_time->relative.s = rel->s * bias;
   m_time->relative.weekday = rel->weekday;
   m_time->have_relative = have_relative;
-#ifdef TIMELIB_HAVE_INTERVAL
   m_time->relative.special = rel->special;
   m_time->relative.have_special_relative = rel->have_special_relative;
   m_time->relative.have_weekday_relative = rel->have_weekday_relative;
   m_time->relative.weekday_behavior = rel->weekday_behavior;
   m_time->relative.first_last_day_of = rel->first_last_day_of;
-#endif
   m_time->sse_uptodate = 0;
   update();
   timelib_update_from_sse(m_time.get());
@@ -506,12 +504,12 @@ void DateTime::internalModifyRelative(timelib_rel_time *rel,
 
 void DateTime::add(const req::ptr<DateInterval>& interval) {
   timelib_rel_time *rel = interval->get();
-  internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
+  internalModifyRelative(rel, true, rel->invert ? -1 :  1);
 }
 
 void DateTime::sub(const req::ptr<DateInterval>& interval) {
   timelib_rel_time *rel = interval->get();
-  internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
+  internalModifyRelative(rel, true, rel->invert ?  1 : -1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -851,13 +849,9 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
   struct timelib_error_container *error;
   timelib_time *t;
   if (format) {
-#ifdef TIMELIB_HAVE_INTERVAL
     t = timelib_parse_from_format((char*)format, (char*)input.data(),
                                   input.size(), &error, TimeZone::GetDatabase(),
                                   TimeZone::GetTimeZoneInfoRaw);
-#else
-    throw_not_implemented("timelib version too old");
-#endif
   } else {
     t = timelib_strtotime((char*)input.data(), input.size(),
                                  &error, TimeZone::GetDatabase(),
@@ -918,15 +912,11 @@ req::ptr<DateTime> DateTime::cloneDateTime() const {
 
 req::ptr<DateInterval>
 DateTime::diff(req::ptr<DateTime> datetime2, bool absolute) {
-#ifdef TIMELIB_HAVE_INTERVAL
   timelib_rel_time *rel = timelib_diff(m_time.get(), datetime2.get()->m_time.get());
   if (absolute) {
-    TIMELIB_REL_INVERT_SET(rel, 0);
+    rel->invert = 0;
   }
   return req::make<DateInterval>(rel);
-#else
-  throw_not_implemented("timelib version too old");
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

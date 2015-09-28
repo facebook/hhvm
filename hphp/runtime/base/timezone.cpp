@@ -343,14 +343,10 @@ Array TimeZone::getLocation() const {
   Array ret;
   if (!m_tzi) return ret;
 
-#ifdef TIMELIB_HAVE_TZLOCATION
   ret.set(s_country_code, String(m_tzi->location.country_code, CopyString));
   ret.set(s_latitude,     m_tzi->location.latitude);
   ret.set(s_longitude,    m_tzi->location.longitude);
   ret.set(s_comments,     String(m_tzi->location.comments, CopyString));
-#else
-  throw_not_implemented("timelib version too old");
-#endif
 
   return ret;
 }

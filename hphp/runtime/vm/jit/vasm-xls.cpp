@@ -1002,11 +1002,6 @@ void Vxls::walkIntervals() {
   }
 }
 
-void erase(jit::vector<Interval*>& list, jit::vector<Interval*>::iterator i) {
-  *i = list.back();
-  list.pop_back();
-}
-
 // Update active and inactive lists based on pos
 void Vxls::update(unsigned pos) {
   auto free_spill_slot = [this] (Interval* ivl) {
@@ -1024,31 +1019,32 @@ void Vxls::update(unsigned pos) {
   };
 
   // check for active intervals in that are expired or inactive
-  for (auto i = active.begin(); i != active.end();) {
+  jit::vector<Interval*> newActive;
+  for (auto i = active.begin(); i != active.end(); i++) {
     auto ivl = *i;
     if (pos >= ivl->end()) {
-      erase(active, i);
       if (!ivl->next) free_spill_slot(ivl);
     } else if (!ivl->covers(pos)) {
-      erase(active, i);
       inactive.push_back(ivl);
     } else {
-      i++;
+      newActive.push_back(ivl);
     }
   }
+  active = newActive;
+
   // check for intervals that are expired or active
-  for (auto i = inactive.begin(); i != inactive.end();) {
+  jit::vector<Interval*> newInactive;
+  for (auto i = inactive.begin(); i != inactive.end(); i++) {
     auto ivl = *i;
     if (pos >= ivl->end()) {
-      erase(inactive, i);
       if (!ivl->next) free_spill_slot(ivl);
     } else if (ivl->covers(pos)) {
-      erase(inactive, i);
       active.push_back(ivl);
     } else {
-      i++;
+      newInactive.push_back(ivl);
     }
   }
+  inactive = newInactive;
 }
 
 PhysReg find(const PosVec& posns) {
@@ -1323,26 +1319,33 @@ void Vxls::spill(Interval* ivl) {
 // again before their first use position that requires a register.
 void Vxls::spillOthers(Interval* current, PhysReg r) {
   auto cur_start = current->start();
-  for (auto i = active.begin(); i != active.end();) {
+
+  jit::vector<Interval*> newActive;
+  for (auto i = active.begin(); i != active.end(); i++) {
     auto other = *i;
     if (other->fixed() || r != other->reg) {
-      i++; continue;
+      newActive.push_back(other);
+      continue;
     }
-    erase(active, i);
     spillAfter(other, cur_start);
   }
-  for (auto i = inactive.begin(); i != inactive.end();) {
+  active = newActive;
+
+  jit::vector<Interval*> newInactive;
+  for (auto i = inactive.begin(); i != inactive.end(); i++) {
     auto other = *i;
     if (other->fixed() || r != other->reg) {
-      i++; continue;
+      newInactive.push_back(other);
+      continue;
     }
     auto intersect = nextIntersect(current, other);
     if (intersect >= current->end()) {
-      i++; continue;
+      newInactive.push_back(other);
+      continue;
     }
-    erase(inactive, i);
     spillAfter(other, cur_start);
   }
+  inactive = newInactive;
 }
 
 // Assign the next available spill slot to interval

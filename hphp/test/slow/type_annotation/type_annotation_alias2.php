@@ -16,3 +16,6 @@ $x = new ReflectionTypeConstant(C::class, 'T');
 var_dump($x->getAssignedTypeText());
 
 var_dump(type_structure(C::class, 'T'));
+var_dump(type_structure(MyAlias1::class));
+var_dump(type_structure(MyAlias2::class));
+var_dump(type_structure(MyAlias3::class));

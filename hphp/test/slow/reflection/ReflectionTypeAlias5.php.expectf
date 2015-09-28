@@ -1,1 +1,1 @@
-ReflectionException: resolving type alias MyAlias failed. Have you declared all classes appeared in the type alias?
+Fatal error: resolving type alias MyAlias failed. Have you declared all classes in the type alias in %s/ReflectionTypeAlias5.php on line 7

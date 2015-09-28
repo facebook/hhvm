@@ -462,7 +462,35 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
  * constant.
  */
 Array HHVM_FUNCTION(type_structure,
-                    const Variant& cls_or_obj, const String& cns_name) {
+                    const Variant& cls_or_obj, const Variant& cns_name) {
+  auto const cns_sd = cns_name.getStringDataOrNull();
+  if (!cns_sd) {
+    auto name = cls_or_obj.toString();
+
+    auto ne = NamedEntity::get(name.get(), /* allowCreate = */ false);
+    if (!ne) {
+      raise_error("Non-existent type alias %s", name.get()->data());
+    }
+
+    auto const typeAlias = ne->getCachedTypeAlias();
+    if (!typeAlias) {
+      raise_error("Non-existent type alias %s", name.get()->data());
+    }
+
+    auto const typeStructure = typeAlias->typeStructure;
+    assert(!typeStructure.empty());
+    Array resolved;
+    try {
+      resolved = TypeStructure::resolve(name, typeStructure);
+    } catch (Exception& e) {
+      raise_error("resolving type alias %s failed. "
+                  "Have you declared all classes in the type alias",
+                  name.get()->data());
+    }
+    assert(!resolved.empty());
+    return resolved;
+  }
+
   auto const cls = get_cls(cls_or_obj);
 
   if (!cls) {
@@ -473,7 +501,6 @@ Array HHVM_FUNCTION(type_structure,
   }
 
   auto const cls_sd = cls->name();
-  auto const cns_sd = cns_name.get();
   auto typeCns = cls->clsCnsGet(cns_sd, true);
   if (typeCns.m_type == KindOfUninit) {
     if (cls->hasTypeConstant(cns_sd, true)) {
@@ -1708,22 +1735,6 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   return typeStructure;
 }
 
-static Array HHVM_METHOD(ReflectionTypeAlias, __getResolvedTypeStructure) {
-  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
-  assert(req);
-  auto const typeStructure = req->typeStructure;
-  assert(!typeStructure.empty());
-  Array resolved;
-  try {
-    auto name = const_cast<StringData*>(req->name.get());
-    resolved = TypeStructure::resolve(String(name), typeStructure);
-  } catch (Exception &e) {
-    return Array::Create();
-  }
-  assert(!resolved.empty());
-  return resolved;
-}
-
 static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
   assert(req);
@@ -1795,7 +1806,6 @@ class ReflectionExtension final : public Extension {
 
     HHVM_ME(ReflectionTypeAlias, __init);
     HHVM_ME(ReflectionTypeAlias, getTypeStructure);
-    HHVM_ME(ReflectionTypeAlias, __getResolvedTypeStructure);
     HHVM_ME(ReflectionTypeAlias, getAssignedTypeText);
 
     HHVM_ME(ReflectionClass, __init);

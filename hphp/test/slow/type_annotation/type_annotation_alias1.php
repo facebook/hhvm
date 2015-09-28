@@ -13,3 +13,6 @@ class C {
 var_dump(type_structure(C::class, 'T'));
 var_dump(type_structure(C::class, 'U'));
 var_dump(type_structure(C::class, 'V'));
+
+var_dump(type_structure(MyType::class));
+var_dump(type_structure(MyClass::class));

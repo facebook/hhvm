@@ -2369,17 +2369,8 @@ class ReflectionTypeAlias implements Reflector {
    * @return    array  The resolved type structure of the type alias.
    */
   public function getResolvedTypeStructure() {
-    $ts = $this->__getResolvedTypeStructure();
-    if (empty($ts)) {
-      throw new ReflectionException(
-        "resolving type alias {$this->name} failed. Have you declared all ".
-        "classes appeared in the type alias?");
-    }
-    return $ts;
+    return HH\type_structure($this->name);
   }
-
-  <<__Native>>
-  private function __getResolvedTypeStructure(): array;
 
   /**
    * Get the assigned type as a string.

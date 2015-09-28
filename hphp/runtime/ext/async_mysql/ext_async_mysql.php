@@ -272,6 +272,7 @@ final class AsyncMysqlConnection {
  * performance state can be logged.
  *
  */
+<<__NativeData("AsyncMysqlClientStats")>>
 class AsyncMysqlClientStats {
   private function __construct(): void {
     throw new InvalidOperationException(
@@ -300,6 +301,7 @@ class AsyncMysqlClientStats {
  *   information about a query or connection.
  *
  */
+<<__NativeData("AsyncMysqlResult")>>
 abstract class AsyncMysqlResult {
 
   private function __construct(): void {

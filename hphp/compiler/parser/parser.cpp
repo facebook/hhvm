@@ -2488,6 +2488,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     AliasEntry{"void", "HH\\void"},
     AliasEntry{"this", "HH\\this"},
     AliasEntry{"classname", "HH\\string"}, // for ::class
+    AliasEntry{"typename", "HH\\string"}, // for ::class
 
     // Support a handful of synonyms for backwards compat with code written
     // against older versions of HipHop, and to be consistent with PHP5 casting

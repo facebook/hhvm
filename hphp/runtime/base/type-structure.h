@@ -66,7 +66,9 @@ String toString(const Array& arr);
 
 Array resolve(const Class::Const& typeCns, const Class* typeCnsCls);
 
-Array resolve(const String& aliasName, const Array& arr);
+Array resolve(const String& aliasName,
+              const Array& arr,
+              const Array& generics = Array());
 
 }
 

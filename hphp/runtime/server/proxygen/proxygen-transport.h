@@ -25,7 +25,7 @@
 #include "hphp/util/synchronizable.h"
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <thrift/lib/cpp/async/TAsyncTransport.h>
-#include <thrift/lib/cpp/async/TAsyncTimeout.h>
+#include <folly/io/async/AsyncTimeout.h>
 #include <folly/IPAddress.h>
 
 namespace HPHP {
@@ -97,7 +97,7 @@ class PushTxnHandler;
 class ProxygenTransport : public Transport,
   public proxygen::HTTPTransactionHandler,
   public std::enable_shared_from_this<ProxygenTransport>,
-  public apache::thrift::async::TAsyncTimeout,
+  public folly::AsyncTimeout,
   public Synchronizable {
 public:
   explicit ProxygenTransport(ProxygenServer *server,

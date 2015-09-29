@@ -904,6 +904,7 @@ struct MemoryManager {
    * Run the experimental collector.
    */
   void collect(const char* phase);
+  void quarantine(); // turn free objects into holes
 
   /////////////////////////////////////////////////////////////////////////////
 

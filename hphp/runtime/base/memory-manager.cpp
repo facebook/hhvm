@@ -671,6 +671,17 @@ void MemoryManager::initFree() {
   m_needInitFree = false;
 }
 
+// turn free blocks into holes, leave freelists empty.
+void MemoryManager::quarantine() {
+  for (auto i = 0; i < kNumSmallSizes; i++) {
+    auto size = smallIndex2Size(i);
+    while (auto n = m_freelists[i].maybePop()) {
+      memset(n, 0x8a, size);
+      static_cast<FreeNode*>(n)->hdr.init(HeaderKind::Hole, size);
+    }
+  }
+}
+
 // test iterating objects in slabs
 void MemoryManager::checkHeap() {
   size_t bytes=0;

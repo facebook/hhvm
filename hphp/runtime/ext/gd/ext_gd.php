@@ -51,8 +51,9 @@ function image2wbmp(resource $image,
  * an optional clipping area.
  */
 <<__Native>>
-function imageaffine(resource $image, array $affine = [],
-                            array $clip = []): mixed;
+function imageaffine(resource $image,
+                     array $affine = [],
+                     array $clip = []): mixed;
 
 /* Concat two matrices.
  */
@@ -554,8 +555,7 @@ function imageellipse(resource $image,
 /* Draws an ellipse centered at the specified coordinates.
  */
 <<__Native>>
-function imageflip(resource $image,
-                      int $mode = IMG_FLIP_HORIZONTAL): bool;
+function imageflip(resource $image, int $mode = -1): bool;
 
 /* Performs a flood fill starting at the given coordinate (top left is 0, 0)
  * with the given color in the image.

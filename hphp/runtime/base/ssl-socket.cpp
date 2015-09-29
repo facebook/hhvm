@@ -461,10 +461,6 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     m_data->m_client = true;
     smethod = SSLv23_client_method();
     break;
-  case CryptoMethod::ClientSSLv3:
-    m_data->m_client = true;
-    smethod = SSLv3_client_method();
-    break;
   case CryptoMethod::ClientTLS:
     m_data->m_client = true;
     smethod = TLSv1_client_method();
@@ -473,10 +469,22 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     m_data->m_client = false;
     smethod = SSLv23_server_method();
     break;
+
+#ifndef OPENSSL_NO_SSL3
+  case CryptoMethod::ClientSSLv3:
+    m_data->m_client = true;
+    smethod = SSLv3_client_method();
+    break;
   case CryptoMethod::ServerSSLv3:
     m_data->m_client = false;
     smethod = SSLv3_server_method();
     break;
+#else
+  case CryptoMethod::ClientSSLv3:
+  case CryptoMethod::ServerSSLv3:
+    raise_warning("OpenSSL library does not support SSL3 protocol");
+    return false;
+#endif
 
   /* SSLv2 protocol might be disabled in the OpenSSL library */
 #ifndef OPENSSL_NO_SSL2

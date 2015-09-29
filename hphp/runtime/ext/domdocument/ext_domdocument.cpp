@@ -62,7 +62,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(dom, 20031129);
 #endif
 
 // defined in ext_simplexml.cpp
-extern xmlNodePtr simplexml_export_node(c_SimpleXMLElement* sxe);
+extern xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe);
 
 #define IMPLEMENT_GET_CLASS_FUNCTION(CLASS)                                    \
 Class* get ## CLASS ## Class() {                                               \
@@ -5793,8 +5793,7 @@ Variant HHVM_METHOD(DOMNodeIterator, valid) {
 
 Variant HHVM_FUNCTION(dom_import_simplexml,
                       const Object& node) {
-  auto elem = cast<c_SimpleXMLElement>(node);
-  xmlNodePtr nodep = simplexml_export_node(elem.get());
+  xmlNodePtr nodep = SimpleXMLElement_exportNode(node);
 
   if (nodep && (nodep->type == XML_ELEMENT_NODE ||
                 nodep->type == XML_ATTRIBUTE_NODE)) {

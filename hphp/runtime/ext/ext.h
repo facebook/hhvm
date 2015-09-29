@@ -40,9 +40,6 @@
 #ifdef ENABLE_EXTENSION_FB
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #endif
-#ifdef ENABLE_EXTENSION_SIMPLEXML
-#include "hphp/runtime/ext/simplexml/ext_simplexml.h"
-#endif
 
 // half-IDL, half-HNI
 #ifdef ENABLE_EXTENSION_ASIO

@@ -227,10 +227,10 @@ bool ObjectData::toBooleanImpl() const noexcept {
     return collections::toBool(this);
   }
 
-  if (instanceof(c_SimpleXMLElement::classof())) {
+  if (instanceof(SimpleXMLElement_classof())) {
     // SimpleXMLElement is the only non-collection class that has custom bool
     // casting.
-    return c_SimpleXMLElement::ToBool(this);
+    return SimpleXMLElement_objectCast(this, KindOfBoolean).toBoolean();
   }
 
   always_assert(false);
@@ -239,14 +239,14 @@ bool ObjectData::toBooleanImpl() const noexcept {
 
 int64_t ObjectData::toInt64Impl() const noexcept {
   // SimpleXMLElement is the only class that has proper custom int casting.
-  assert(instanceof(c_SimpleXMLElement::classof()));
-  return c_SimpleXMLElement::ToInt64(this);
+  assert(instanceof(SimpleXMLElement_classof()));
+  return SimpleXMLElement_objectCast(this, KindOfInt64).toInt64();
 }
 
 double ObjectData::toDoubleImpl() const noexcept {
   // SimpleXMLElement is the only class that has custom double casting.
-  assert(instanceof(c_SimpleXMLElement::classof()));
-  return c_SimpleXMLElement::ToDouble(this);
+  assert(instanceof(SimpleXMLElement_classof()));
+  return SimpleXMLElement_objectCast(this, KindOfDouble).toDouble();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -272,12 +272,12 @@ Object ObjectData::iterableObject(bool& isIterable,
     }
     obj.reset(o);
   }
-  if (!isIterator() && obj->instanceof(c_SimpleXMLElement::classof())) {
-    auto iterator = cast<c_SimpleXMLElement>(obj)
-      ->t_getiterator()
-      .toObject();
+  if (!isIterator() && obj->instanceof(SimpleXMLElement_classof())) {
     isIterable = true;
-    return iterator;
+    return create_object(
+      s_SimpleXMLElementIterator,
+      make_packed_array(obj)
+    );
   }
   isIterable = false;
   return obj;
@@ -507,8 +507,8 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
   } else if (UNLIKELY(getAttribute(CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
-    assert(instanceof(c_SimpleXMLElement::classof()));
-    return c_SimpleXMLElement::ToArray(this);
+    assert(instanceof(SimpleXMLElement_classof()));
+    return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
     auto const lookup = getProp(SystemLib::s_ArrayObjectClass, s_flags.get());
     auto const flags = lookup.prop;
@@ -758,8 +758,6 @@ ObjectData* ObjectData::clone() {
       return collections::clone(this);
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
-    } else if (instanceof(c_SimpleXMLElement::classof())) {
-      return c_SimpleXMLElement::Clone(this);
     }
     always_assert(false);
   }
@@ -1366,8 +1364,8 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
 
 bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
   if (UNLIKELY(getAttribute(HasPropEmpty))) {
-    if (instanceof(c_SimpleXMLElement::classof())) {
-      return c_SimpleXMLElement::PropEmpty(this, key);
+    if (instanceof(SimpleXMLElement_classof())) {
+      return SimpleXMLElement_propEmpty(this, key);
     }
   }
   return propEmptyImpl(ctx, key);

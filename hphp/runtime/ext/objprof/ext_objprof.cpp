@@ -524,7 +524,7 @@ bool supportsToArray(ObjectData* obj) {
     assertx(isValidCollection(obj->collectionType()));
     return true;
   } else if (UNLIKELY(obj->getAttribute(ObjectData::CallToImpl))) {
-    return obj->instanceof(c_SimpleXMLElement::classof());
+    return obj->instanceof(SimpleXMLElement_classof());
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayObjectClass))) {
     return true;
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {

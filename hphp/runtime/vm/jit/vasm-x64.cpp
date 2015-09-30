@@ -84,6 +84,13 @@ struct Vgen {
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
   void emit(const ldimmqs& i);
+  void emit(const zerob& i) { emit(xorb{i.d, i.d, i.d, i.sf}); }
+  void emit(const zerol& i) { emit(xorl{i.d, i.d, i.d, i.sf}); }
+  // assume 32-bit ops zero upper bits
+  void emit(const zeroq& i) {
+    Vreg32 d(static_cast<size_t>(i.d));
+    emit(xorl{d, d, d, i.sf});
+  }
   void emit(const load& i);
   void emit(const store& i);
   void emit(const mcprep& i);

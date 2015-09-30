@@ -74,6 +74,9 @@ struct Vunit;
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
   O(ldimmqs, I(s), Un, D(d))\
+  O(zerob, Inone, Un, D(d) D(sf))\
+  O(zerol, Inone, Un, D(d) D(sf))\
+  O(zeroq, Inone, Un, D(d) D(sf))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) U(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -445,6 +448,13 @@ struct ldimmb { Immed s; Vreg d; };
 struct ldimml { Immed s; Vreg d; };
 struct ldimmq { Immed64 s; Vreg d; };
 struct ldimmqs { Immed64 s; Vreg d; };
+
+/*
+ * Zero registers.
+ */
+struct zerob { Vreg8 d; VregSF sf; };
+struct zerol { Vreg32 d; VregSF sf; };
+struct zeroq { Vreg64 d; VregSF sf; };
 
 /*
  * Memory operand load and store.

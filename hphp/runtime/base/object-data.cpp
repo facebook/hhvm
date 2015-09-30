@@ -597,13 +597,11 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
   }
   if (!RuntimeOption::RepoAuthoritative && accessibleProps > 0) {
     // we may have properties from traits
-    const auto* props = m_cls->declProperties();
-    auto numDeclProp = m_cls->numDeclProperties();
-    for (size_t i = 0; i < numDeclProp; i++) {
-      const auto* key = props[i].name.get();
+    for (auto const& prop : m_cls->declProperties()) {
+      auto const key = prop.name.get();
       if (!retArray.get()->exists(key)) {
         accessibleProps = getPropertyIfAccessible(
-            this, ctx, key, mode, retArray, accessibleProps);
+          this, ctx, key, mode, retArray, accessibleProps);
         if (accessibleProps == 0) break;
       }
     }

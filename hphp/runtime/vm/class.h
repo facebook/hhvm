@@ -564,8 +564,8 @@ public:
   /*
    * The info vector for declared instance properties or static properties.
    */
-  const Prop* declProperties() const;
-  const SProp* staticProperties() const;
+  folly::Range<const Prop*> declProperties() const;
+  folly::Range<const SProp*> staticProperties() const;
 
   /*
    * Look up the index of a declared instance property or static property.

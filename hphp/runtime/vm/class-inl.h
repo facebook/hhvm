@@ -207,12 +207,12 @@ inline uint32_t Class::declPropNumAccessible() const {
   return m_declPropNumAccessible;
 }
 
-inline const Class::Prop* Class::declProperties() const {
-  return m_declProperties.accessList();
+inline folly::Range<const Class::Prop*> Class::declProperties() const {
+  return m_declProperties.range();
 }
 
-inline const Class::SProp* Class::staticProperties() const {
-  return m_staticProperties.accessList();
+inline folly::Range<const Class::SProp*> Class::staticProperties() const {
+  return m_staticProperties.range();
 }
 
 inline Slot Class::lookupDeclProp(const StringData* propName) const {

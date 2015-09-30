@@ -802,11 +802,11 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
     if (cls->needsInitSProps()) {
       continue;
     }
-    auto staticProps = cls->staticProperties();
-    const size_t nSProps = cls->numStaticProperties();
+    auto const staticProps = cls->staticProperties();
+    auto const nSProps = cls->numStaticProperties();
     for (Slot i = 0; i < nSProps; ++i) {
-      auto prop = staticProps[i];
-      TypedValue* tv = cls->getSPropData(i);
+      auto const& prop = staticProps[i];
+      auto tv = cls->getSPropData(i);
       if (tv == nullptr) {
         continue;
       }

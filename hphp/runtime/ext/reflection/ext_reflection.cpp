@@ -930,8 +930,7 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
 
   auto clsName = cls->nameStr();
 
-  for (Slot i = 0; i < size; ++i) {
-    auto const& prop = cls->declProperties()[i];
+  for (auto const& prop : cls->declProperties()) {
     auto val = closure.get()->o_realProp(StrNR(prop.name),
                                          ObjectData::RealPropExist, clsName);
     assert(val);
@@ -1405,24 +1404,24 @@ static Array HHVM_METHOD(ReflectionClass, getClassPropertyInfo) {
    */
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
-  Array arrProp = Array::Create();
-  Array arrPriv = Array::Create();
-  Array arrIdx = Array::Create();
-  Array arrPrivIdx = Array::Create();
+  auto arrProp    = Array::Create();
+  auto arrPriv    = Array::Create();
+  auto arrIdx     = Array::Create();
+  auto arrPrivIdx = Array::Create();
 
-  const Class::Prop* properties = cls->declProperties();
+  auto const properties = cls->declProperties();
   cls->initialize();
 
   auto const& propInitVec = cls->getPropData()
     ? *cls->getPropData()
     : cls->declPropInit();
 
-  const size_t nProps = cls->numDeclProperties();
+  auto const nProps = cls->numDeclProperties();
 
   for (Slot i = 0; i < nProps; ++i) {
-    const Class::Prop& prop = properties[i];
-    Array info = Array::Create();
+    auto const& prop = properties[i];
     auto const& default_val = tvAsCVarRef(&propInitVec[i]);
+    auto info = Array::Create();
     if ((prop.attrs & AttrPrivate) == AttrPrivate) {
       if (prop.cls == cls) {
         set_instance_prop_info(info, &prop, default_val);
@@ -1436,12 +1435,8 @@ static Array HHVM_METHOD(ReflectionClass, getClassPropertyInfo) {
     arrIdx.set(StrNR(prop.name), prop.idx);
   }
 
-  const Class::SProp* staticProperties = cls->staticProperties();
-  const size_t nSProps = cls->numStaticProperties();
-
-  for (Slot i = 0; i < nSProps; ++i) {
-    auto const& prop = staticProperties[i];
-    Array info = Array::Create();
+  for (auto const& prop : cls->staticProperties()) {
+    auto info = Array::Create();
     if ((prop.attrs & AttrPrivate) == AttrPrivate) {
       if (prop.cls == cls) {
         set_static_prop_info(info, &prop);
@@ -1635,15 +1630,15 @@ static Variant HHVM_METHOD(ReflectionProperty, __init,
     ? *cls->getPropData()
     : cls->declPropInit();
 
-  const size_t nProps = cls->numDeclProperties();
-  const Class::Prop* properties = cls->declProperties();
+  auto const nProps = cls->numDeclProperties();
+  auto const properties = cls->declProperties();
 
   // index for the candidate property
   Slot cInd = -1;
   const Class::Prop* cProp = nullptr;
 
   for (Slot i = 0; i < nProps; i++) {
-    const Class::Prop& prop = properties[i];
+    auto const& prop = properties[i];
     if (prop_name.same(prop.name)) {
       if (cls == prop.cls.get()) {
         // found match for the exact child class
@@ -1660,19 +1655,16 @@ static Variant HHVM_METHOD(ReflectionProperty, __init,
 
   if (cProp != nullptr) {
     ReflectionPropHandle::Get(this_)->setProp(cProp);
-    Array info = Array::Create();
+    auto info = Array::Create();
     auto const& default_val = tvAsCVarRef(&propInitVec[cInd]);
     set_instance_prop_info(info, cProp, default_val);
     return Variant(info);
   }
 
   // for static property
-  const size_t nSProps = cls->numStaticProperties();
-  const Class::SProp* staticProperties = cls->staticProperties();
   const Class::SProp* cSProp = nullptr;
 
-  for (Slot i = 0; i < nSProps; i++) {
-    const Class::SProp& sprop = staticProperties[i];
+  for (auto const& sprop : cls->staticProperties()) {
     if (prop_name.same(sprop.name)) {
       if (cls == sprop.cls.get()) {
         cSProp = &sprop;
@@ -1684,20 +1676,20 @@ static Variant HHVM_METHOD(ReflectionProperty, __init,
   }
   if (cSProp != nullptr) {
     ReflectionSPropHandle::Get(this_)->setSProp(cSProp);
-    Array info = Array::Create();
+    auto info = Array::Create();
     set_static_prop_info(info, cSProp);
     return Variant(info);
   }
 
   // check for dynamic properties
   if (cls_or_obj.is(KindOfObject)) {
-    ObjectData* obj = cls_or_obj.toCObjRef().get();
+    auto obj = cls_or_obj.toCObjRef().get();
     assert(cls == obj->getVMClass());
     if (obj->hasDynProps()) {
       auto const dynPropArray = obj->dynPropArray().get();
       for (ArrayIter it(dynPropArray); !it.end(); it.next()) {
         if (prop_name.same(it.first().getStringData())) {
-          Array info = Array::Create();
+          auto info = Array::Create();
           set_dyn_prop_info(info, it.first(), cls->name());
           return Variant(info);
         }
@@ -2084,19 +2076,19 @@ Array get_class_info(const String& name) {
 
   // properties
   {
-    Array arr = Array::Create();
-    Array arrPriv = Array::Create();
-    Array arrIdx = Array::Create();
-    Array arrPrivIdx = Array::Create();
+    auto arr        = Array::Create();
+    auto arrPriv    = Array::Create();
+    auto arrIdx     = Array::Create();
+    auto arrPrivIdx = Array::Create();
 
-    const Class::Prop* properties = cls->declProperties();
+    auto const properties = cls->declProperties();
     auto const& propInitVec = cls->declPropInit();
-    const size_t nProps = cls->numDeclProperties();
+    auto const nProps = cls->numDeclProperties();
 
     for (Slot i = 0; i < nProps; ++i) {
-      const Class::Prop& prop = properties[i];
-      Array info = Array::Create();
+      auto const& prop = properties[i];
       auto const& default_val = tvAsCVarRef(&propInitVec[i]);
+      auto info = Array::Create();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_instance_prop_info(info, &prop, default_val);
@@ -2110,12 +2102,8 @@ Array get_class_info(const String& name) {
       arrIdx.set(StrNR(prop.name), prop.idx);
     }
 
-    const Class::SProp* staticProperties = cls->staticProperties();
-    const size_t nSProps = cls->numStaticProperties();
-
-    for (Slot i = 0; i < nSProps; ++i) {
-      auto const& prop = staticProperties[i];
-      Array info = Array::Create();
+    for (auto const& prop : cls->staticProperties()) {
+      auto info = Array::Create();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_static_prop_info(info, &prop);

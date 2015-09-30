@@ -70,8 +70,8 @@ Array c_Closure::t___debuginfo() {
     Array use;
 
     auto propsInfo = getVMClass()->declProperties();
-    for (int i = 0; i < getVMClass()->numDeclProperties(); ++i) {
-      TypedValue* value = &propValues[i];
+    for (size_t i = 0; i < getVMClass()->numDeclProperties(); ++i) {
+      auto value = &propValues[i];
       use.setWithRef(Variant(StrNR(propsInfo[i].name)), tvAsCVarRef(value));
     }
 

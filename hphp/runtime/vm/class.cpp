@@ -1756,9 +1756,7 @@ void Class::setProperties() {
     // from an ancestor class. We still get correct behavior in these cases,
     // so it works out okay.
     m_hasDeepInitProps = m_parent->m_hasDeepInitProps;
-    for (Slot slot = 0; slot < m_parent->m_declProperties.size(); ++slot) {
-      const Prop& parentProp = m_parent->m_declProperties[slot];
-
+    for (auto const& parentProp : m_parent->declProperties()) {
       // Copy parent's declared property.  Protected properties may be
       // weakened to public below, but otherwise, the parent's properties
       // will stay the same for this class.
@@ -1787,8 +1785,7 @@ void Class::setProperties() {
       }
     }
     m_declPropInit = m_parent->m_declPropInit;
-    for (Slot slot = 0; slot < m_parent->m_staticProperties.size(); ++slot) {
-      const SProp& parentProp = m_parent->m_staticProperties[slot];
+    for (auto const& parentProp : m_parent->staticProperties()) {
       if (parentProp.attrs & AttrPrivate) continue;
 
       // Alias parent's static property.
@@ -2172,19 +2169,19 @@ void Class::importTraitProps(int idxOffset,
                              SPropMap::Builder& curSPropMap) {
   if (attrs() & AttrNoExpandTrait) return;
   for (auto const& t : m_extra->m_usedTraits) {
-    Class* trait = t.get();
+    auto trait = t.get();
 
     // instance properties
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
-      Prop& traitProp          = trait->m_declProperties[p];
-      TypedValue& traitPropVal = trait->m_declPropInit[p];
+      auto& traitProp    = trait->m_declProperties[p];
+      auto& traitPropVal = trait->m_declPropInit[p];
       importTraitInstanceProp(trait, traitProp, traitPropVal, idxOffset,
                               curPropMap);
     }
 
     // static properties
     for (Slot p = 0; p < trait->m_staticProperties.size(); ++p) {
-      SProp& traitProp = trait->m_staticProperties[p];
+      auto& traitProp = trait->m_staticProperties[p];
       importTraitStaticProp(trait, traitProp, idxOffset, curPropMap,
                             curSPropMap);
     }

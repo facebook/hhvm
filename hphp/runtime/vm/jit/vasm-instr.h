@@ -442,7 +442,7 @@ struct debugtrap {};
 struct fallthru {};
 
 /*
- * Load an immedate value without mutating status flags.
+ * Load an immediate value without mutating status flags.
  */
 struct ldimmb { Immed s; Vreg d; };
 struct ldimml { Immed s; Vreg d; };

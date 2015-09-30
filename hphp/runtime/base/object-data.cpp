@@ -628,14 +628,17 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
         case CreateRefs: {
           auto& lval = dynProps->lvalAt(key.m_data.num);
           retArray.setRef(key.m_data.num, lval);
+          break;
         }
         case EraseRefs: {
           auto const val = dynProps->get()->nvGet(key.m_data.num);
           retArray.set(key.m_data.num, tvAsCVarRef(val));
+          break;
         }
         case PreserveRefs: {
           auto const val = dynProps->get()->nvGet(key.m_data.num);
           retArray.setWithRef(key.m_data.num, tvAsCVarRef(val));
+          break;
         }
         }
         continue;
@@ -646,14 +649,17 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       case CreateRefs: {
         auto& lval = dynProps->lvalAt(StrNR(strKey), AccessFlags::Key);
         retArray.setRef(StrNR(strKey), lval, true /* isKey */);
+        break;
       }
       case EraseRefs: {
         auto const val = dynProps->get()->nvGet(strKey);
         retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        break;
       }
       case PreserveRefs: {
         auto const val = dynProps->get()->nvGet(strKey);
         retArray.setWithRef(VarNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        break;
       }
       }
       decRefStr(strKey);

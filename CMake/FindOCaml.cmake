@@ -1,6 +1,11 @@
 set(OCAMLC_FOUND FALSE)
 set(OCAMLC_OPT_SUFFIX "")
 
+if(IS_PPC64)
+  # No OCaml port for PPC64 yet, skip it
+  return()
+endif()
+
 find_program(OCAMLC_EXECUTABLE ocamlc DOC "path to ocamlc")
 mark_as_advanced(OCAMLC_EXECUTABLE)
 

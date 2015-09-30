@@ -483,7 +483,7 @@ void DateTime::internalModify(timelib_time *t) {
 }
 
 void DateTime::internalModifyRelative(timelib_rel_time *rel,
-                              bool have_relative, char bias) {
+                              bool have_relative, int8_t bias) {
   m_time->relative.y = rel->y * bias;
   m_time->relative.m = rel->m * bias;
   m_time->relative.d = rel->d * bias;

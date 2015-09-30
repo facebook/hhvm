@@ -76,6 +76,10 @@ struct BackEnd final : jit::BackEnd {
   // Unfortunately, we have no way to tell MSVC to do this, so we'll
   // probably have to use a pair of assembly stubs to manage this.
   #define CALLEE_SAVED_BARRIER() always_assert(false);
+#elif defined (__powerpc64__)
+  // PPC64 port under development
+  #define CALLEE_SAVED_BARRIER()                                    \
+      not_implemented();
 #else
   #define CALLEE_SAVED_BARRIER()                                    \
       asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");

@@ -32,14 +32,26 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* func) {
+#if defined(__powerpc64__)
+  // Returning null since PPC64 specific code is under development
+  return nullptr;
+#endif
   return ARCH_SWITCH_CALL(funcGuardFromPrologue, prologue, func);
 }
 
 bool funcGuardMatches(TCA guard, const Func* func) {
+#if defined(__powerpc64__)
+  // Returning false since PPC64 specific code is under development
+  return false;
+#endif
   return ARCH_SWITCH_CALL(funcGuardMatches, guard, func);
 }
 
 void clobberFuncGuard(TCA guard, const Func* func) {
+#if defined(__powerpc64__)
+  // Returning since PPC64 specific code is under development
+  return;
+#endif
   return ARCH_SWITCH_CALL(clobberFuncGuard, guard, func);
 }
 

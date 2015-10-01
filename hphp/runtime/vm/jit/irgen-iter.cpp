@@ -40,8 +40,6 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
   // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
 
   auto const exit  = makeExit(env);
-  spillStack(env);
-  env.irb->exceptionStackBoundary();
   auto const pred  = env.irb->predictedStackInnerType(
     offsetFromIRSP(env, BCSPOffset{0}));
   auto const src   = topV(env);
@@ -310,9 +308,7 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
     implCondJmp(env, bcOff(env) + relOffset, true, res);
   } else {
     gen(env, DecRef, src);
-    jmpImpl(env,
-            bcOff(env) + relOffset,
-            instrJmpFlags(*env.currentNormalizedInstruction));
+    jmpImpl(env, bcOff(env) + relOffset);
   }
 }
 

@@ -56,9 +56,7 @@ std::string show(const IRGS& irgs) {
   const int32_t frameCells = irgen::resumed(irgs)
     ? 0
     : irgen::curFunc(irgs)->numSlotsInFrame();
-  auto const stackDepth = irgs.irb->syncedSpLevel().offset +
-      safe_cast<int32_t>(irgs.irb->evalStack().size()) -
-      safe_cast<int32_t>(irgs.irb->stackDeficit()) - frameCells;
+  auto const stackDepth = irgs.irb->syncedSpLevel().offset - frameCells;
   assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
@@ -95,22 +93,9 @@ std::string show(const IRGS& irgs) {
     return false;
   };
 
-  header(folly::format(" {} stack element(s); m_evalStack: ",
+  header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
-  for (auto i = 0; i < irgs.irb->evalStack().size(); ++i) {
-    while (checkFpi());
-    auto const value = irgen::top(const_cast<IRGS&>(irgs),
-                                  BCSPOffset{i}, DataTypeGeneric);
-    std::string elemStr = value->inst()->toString();
-    auto const predicted = irgs.irb->fs().predictedTmpType(value);
-    if (predicted < value->type()) {
-      elemStr += folly::sformat(" (predict: {})", predicted);
-    }
-    elem(elemStr);
-  }
-
-  header(" in-memory ");
-  for (auto i = irgs.irb->evalStack().size(); spOffset > 0; ) {
+  for (auto i = 0; spOffset > 0; ) {
     assertx(i < irgen::curFunc(irgs)->maxStackCells());
     if (checkFpi()) {
       i += kNumActRecCells;

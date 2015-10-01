@@ -32,37 +32,21 @@ Block* create_catch_block(IRGS& env) {
   auto const catchBlock = env.irb->unit().defBlock(Block::Hint::Unused);
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
-  // Install the exception stack state so that spillStack and other stuff
-  // behaves appropriately.  We've already asserted that sp(env) was the same
-  // as the exception state version.
   auto const& exnState = env.irb->exceptionStackState();
-  env.irb->evalStack() = exnState.evalStack;
-  env.irb->setStackDeficit(exnState.stackDeficit);
+  env.irb->fs().setSyncedSpLevel(exnState.syncedSpLevel);
 
   gen(env, BeginCatch);
-  spillStack(env);
   gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-    fp(env), sp(env));
+      fp(env), sp(env));
   return catchBlock;
 }
 
 void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
-  auto const& exnStack = env.irb->exceptionStackState();
   always_assert_flog(
-    exnStack.sp == sp(env) &&
-      exnStack.syncedSpLevel == env.irb->syncedSpLevel() &&
-      exnStack.spOffset == env.irb->spOffset(),
-    "catch block would have had a mismatched stack pointer:\n"
-    "     inst: {}\n"
-    "       sp: {}\n"
-    " expected: {}\n"
-    "  spLevel: {}\n"
-    " expected: {}\n",
-    inst->toString(),
-    sp(env)->toString(),
-    exnStack.sp->toString(),
-    exnStack.syncedSpLevel.offset,
-    env.irb->syncedSpLevel().offset
+    !env.irb->fs().stackModified(),
+    "catch block used after writing to stack\n"
+    "     inst: {}\n",
+    inst->toString()
   );
 }
 
@@ -95,8 +79,8 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
 
   if (inst->mayRaiseError() && !inst->taken()) {
     FTRACE(1, "{}: creating {}catch block\n",
-      inst->toString(),
-      env.catchCreator ? "custom " : "");
+           inst->toString(),
+           env.catchCreator ? "custom " : "");
     /*
      * If you hit this assertion, you're gen'ing an IR instruction that can
      * throw after gen'ing one that could write to the evaluation stack.  This
@@ -106,9 +90,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      */
     check_catch_stack_state(env, inst);
     inst->setTaken(
-      env.catchCreator
-        ? env.catchCreator()
-        : create_catch_block(env)
+      env.catchCreator ? env.catchCreator() : create_catch_block(env)
     );
   }
 
@@ -163,8 +145,6 @@ void prepareEntry(IRGS& env) {
   ldCtx(env);
 }
 
-void prepareForSideExit(IRGS& env) { spillStack(env); }
-
 void endRegion(IRGS& env) {
   auto const curSk  = curSrcKey(env);
   if (!instrAllowsFallThru(curSk.op())) return; // nothing to do here
@@ -180,7 +160,6 @@ void endRegion(IRGS& env, SrcKey nextSk) {
     // try to go to the next part of it.
     return;
   }
-  spillStack(env);
   auto const data = ReqBindJmpData {
     nextSk,
     invSPOff(env),
@@ -199,10 +178,6 @@ Type predictedTypeFromLocal(const IRGS& env, uint32_t locId) {
 }
 
 Type predictedTypeFromStack(const IRGS& env, BCSPOffset offset) {
-  if (offset < env.irb->evalStack().size()) {
-    return env.irb->fs().predictedTmpType(
-      env.irb->evalStack().top(offset.offset));
-  }
   return env.irb->predictedStackType(offsetFromIRSP(env, offset));
 }
 
@@ -239,9 +214,6 @@ Type provenTypeFromLocal(const IRGS& env, uint32_t locId) {
 }
 
 Type provenTypeFromStack(const IRGS& env, BCSPOffset offset) {
-  if (offset < env.irb->evalStack().size()) {
-    return env.irb->evalStack().top(offset.offset)->type();
-  }
   return env.irb->stackType(offsetFromIRSP(env, offset), DataTypeGeneric);
 }
 
@@ -270,7 +242,7 @@ Type provenTypeFromLocation(const IRGS& env, const Location& loc) {
   not_reached();
 }
 
-void endBlock(IRGS& env, Offset next, bool nextIsMerge) {
+void endBlock(IRGS& env, Offset next) {
   if (!fp(env)) {
     // If there's no fp, we've already executed a RetCtrl or similar, so
     // there's no reason to try to jump anywhere now.
@@ -282,7 +254,7 @@ void endBlock(IRGS& env, Offset next, bool nextIsMerge) {
   if (auto const curBlock = env.irb->curBlock()) {
     if (!curBlock->empty() && curBlock->back().isTerminal()) return;
   }
-  jmpImpl(env, next, nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone);
+  jmpImpl(env, next);
 }
 
 void prepareForNextHHBC(IRGS& env,
@@ -318,10 +290,6 @@ void prepareForNextHHBC(IRGS& env,
 
 void finishHHBC(IRGS& env) {
   env.firstBcInst = false;
-}
-
-void prepareForHHBCMergePoint(IRGS& env) {
-  spillStack(env);
 }
 
 FPInvOffset logicalStackDepth(const IRGS& env) {

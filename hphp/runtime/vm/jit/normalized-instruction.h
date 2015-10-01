@@ -52,7 +52,6 @@ struct NormalizedInstruction {
   std::vector<MemberCode> immVecM;
 
   bool endsRegion:1;
-  bool nextIsMerge:1;
   bool preppedByRef:1;
   bool ignoreInnerType:1;
 

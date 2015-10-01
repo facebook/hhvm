@@ -51,46 +51,6 @@ struct FPIInfo {
   bool spansCall;
 };
 
-struct EvalStack {
-  void push(SSATmp* tmp) {
-    m_vector.push_back(tmp);
-  }
-
-  SSATmp* pop() {
-    if (m_vector.size() == 0) {
-      return nullptr;
-    }
-    auto tmp = m_vector.back();
-    m_vector.pop_back();
-    return tmp;
-  }
-
-  SSATmp* top(uint32_t offset = 0) const {
-    if (offset >= m_vector.size()) {
-      return nullptr;
-    }
-    uint32_t index = m_vector.size() - 1 - offset;
-    return m_vector[index];
-  }
-
-  void replace(uint32_t offset, SSATmp* tmp) {
-    assertx(offset < m_vector.size());
-    uint32_t index = m_vector.size() - 1 - offset;
-    m_vector[index] = tmp;
-  }
-
-  bool empty() const { return m_vector.empty(); }
-  int  size()  const { return m_vector.size(); }
-  void clear()       { m_vector.clear(); }
-
-  void swap(jit::vector<SSATmp*>& vector) {
-    m_vector.swap(vector);
-  }
-
-private:
-  jit::vector<SSATmp*> m_vector;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -186,26 +146,21 @@ struct FrameState {
   bool frameMaySpanCall{false};
 
   /*
-   * Tracking of the not-in-memory state of the virtual execution stack:
+   * syncedSpLevel indicates the depth of the in-memory eval stack.
    *
-   *   During the IR-generation step, these stacks contain SSATmp
-   *   values representing the execution stack state since the last
-   *   spillStack() call.
-   *
-   *   The EvalStack contains cells that need to be spilled in order to
-   *   materialize the stack.
-   *
-   *   stackDeficit represents the number of cells we've popped off the virtual
-   *   stack since the last sync.
-   *
-   *   syncedSpLevel indicates the depth that has been spilled to memory.
-   *
-   * TODO(#5868851): these fields just dangle meaninglessly when FrameState is
+   * TODO(#5868851): this field just dangles meaninglessly when FrameState is
    * being used in LegacyReoptimize mode.
    */
-  uint32_t stackDeficit{0};
   FPInvOffset syncedSpLevel{0};
-  EvalStack evalStack;
+
+  /*
+   * stackModified is reset to false by exceptionStackBoundary() and set to
+   * true by anything that modifies the eval stack. It's used to verify that
+   * the stack is not modified between the beginning of a bytecode's
+   * translation and creation of any catch traces, unless
+   * exceptionStackBoundary() is explicitly called.
+   */
+  bool stackModified{false};
 
   /*
    * The FPI stack is used for inlining---when we start inlining at an FCall,
@@ -215,11 +170,11 @@ struct FrameState {
   jit::deque<FPIInfo> fpiStack;
 
   /*
-   * The values in the eval stack that are already in memory, either above or
-   * below the current spValue pointer.  These are indexed relative to the base
-   * of the eval stack for the whole function.
+   * The values in the eval stack in memory, either above or below the current
+   * spValue pointer.  These are indexed relative to the base of the eval stack
+   * for the whole function.
    */
-  jit::vector<StackState> memoryStack;
+  jit::vector<StackState> stack;
 
   /*
    * Vector of local variable inforation; sized for numLocals on the curFunc
@@ -352,13 +307,10 @@ struct FrameStateMgr final {
   void setThisAvailable() { cur().thisAvailable = true; }
   bool frameMaySpanCall() const { return cur().frameMaySpanCall; }
   unsigned inlineDepth() const { return m_stack.size() - 1; }
-  uint32_t stackDeficit() const { return cur().stackDeficit; }
-  void incStackDeficit() { cur().stackDeficit++; }
-  void clearStackDeficit() { cur().stackDeficit = 0; }
-  void setStackDeficit(uint32_t d) { cur().stackDeficit = d; }
-  EvalStack& evalStack() { return cur().evalStack; }
   FPInvOffset syncedSpLevel() const { return cur().syncedSpLevel; }
-  void syncEvalStack();
+  void setSyncedSpLevel(FPInvOffset o) { cur().syncedSpLevel = o; }
+  void incSyncedSpLevel(int32_t n = 1) { cur().syncedSpLevel += n; }
+  void decSyncedSpLevel(int32_t n = 1) { cur().syncedSpLevel -= n; }
   void setMemberBaseValue(SSATmp*);
   SSATmp* memberBaseValue() const;
 
@@ -378,6 +330,8 @@ struct FrameStateMgr final {
   SSATmp* stackValue(IRSPOffset) const;
   TypeSourceSet stackTypeSources(IRSPOffset) const;
   void refineStackPredictedType(IRSPOffset, Type);
+  bool stackModified() const { return cur().stackModified; }
+  void resetStackModified() { cur().stackModified = false; }
 
   const jit::deque<FPIInfo>& fpiStack() const { return cur().fpiStack; }
 

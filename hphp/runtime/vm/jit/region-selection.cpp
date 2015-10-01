@@ -262,10 +262,6 @@ void RegionDesc::clearPrevRetrans(BlockId id) {
   data(id).prevRetrans = folly::none;
 }
 
-const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {
-  return m_sideExitingBlocks;
-}
-
 void RegionDesc::addArc(BlockId srcId, BlockId dstId) {
   data(srcId).succs.insert(dstId);
   data(dstId).preds.insert(srcId);
@@ -305,14 +301,6 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   }
 }
 
-void RegionDesc::setSideExitingBlock(BlockId bid) {
-  m_sideExitingBlocks.insert(bid);
-}
-
-bool RegionDesc::isSideExitingBlock(BlockId bid) const {
-  return m_sideExitingBlocks.count(bid);
-}
-
 void RegionDesc::copyArcsFrom(const RegionDesc& srcRegion) {
   for (auto const b : srcRegion.m_blocks) {
     auto bid = b->id();
@@ -334,15 +322,11 @@ void RegionDesc::copyBlocksFrom(const RegionDesc&  other,
 void RegionDesc::append(const RegionDesc& other) {
   copyBlocksFrom(other, m_blocks.end());
   copyArcsFrom(other);
-  m_sideExitingBlocks.insert(other.m_sideExitingBlocks.begin(),
-                             other.m_sideExitingBlocks.end());
 }
 
 void RegionDesc::prepend(const RegionDesc& other) {
   copyBlocksFrom(other, m_blocks.begin());
   copyArcsFrom(other);
-  m_sideExitingBlocks.insert(other.m_sideExitingBlocks.begin(),
-                             other.m_sideExitingBlocks.end());
 }
 
 /*
@@ -1348,11 +1332,6 @@ std::string show(const RegionDesc& region) {
     }
   }
 
-  // Print side-exiting blocks
-  folly::toAppend("}\n\nSide-exiting Blocks:\n",
-                  folly::join(", ", region.sideExitingBlocks()),
-                  "\n",
-                  &ret);
   return ret;
 }
 

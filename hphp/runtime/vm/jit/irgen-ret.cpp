@@ -113,8 +113,6 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
   gen(env, StAsyncArResult, fp(env), retval);
   gen(env, ABCUnblock, parentChain);
 
-  spillStack(env);
-
   // Must load this before FreeActRec, which adjusts fp(env).
   auto const resumableObj = gen(env, LdResumableArObj, fp(env));
 
@@ -148,7 +146,6 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   // Push return value of next()/send()/raise().
   push(env, cns(env, TInitNull));
 
-  spillStack(env);
   gen(
     env,
     RetCtrl,

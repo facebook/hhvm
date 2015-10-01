@@ -123,14 +123,12 @@ void fpushObjMethodUnknown(IRGS& env,
                            int32_t numParams,
                            bool shouldFatal) {
   emitIncStat(env, Stats::ObjMethod_cached, 1);
-  spillStack(env);
   fpushActRec(env,
               cns(env, TNullptr),  // Will be set by LdObjMethod
               obj,
               numParams,
               nullptr,
               false);
-  spillStack(env);
   auto const objCls = gen(env, LdObjClass, obj);
 
   // This is special.  We need to move the stackpointer in case LdObjMethod
@@ -481,7 +479,6 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
     nullptr,
     false
   );
-  spillStack(env);
 
   // This is special. We need to move the stackpointer incase LdArrFuncCtx
   // calls a destructor. Otherwise it would clobber the ActRec we just
@@ -515,7 +512,6 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
     nullptr,
     false
   );
-  spillStack(env);
 
   /*
    * This is a similar case to lookup for functions in FPushFunc or
@@ -670,8 +666,6 @@ void fpushActRec(IRGS& env,
                  int32_t numArgs,
                  const StringData* invName,
                  bool fromFPushCtor) {
-  spillStack(env);
-
   ActRecInfo info;
   info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
   info.numArgs = numArgs;
@@ -685,14 +679,11 @@ void fpushActRec(IRGS& env,
     func,
     objOrClass
   );
-
-  assertx(env.irb->stackDeficit() == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitFPushCufIter(IRGS& env, int32_t numParams, int32_t itId) {
-  spillStack(env);
   gen(
     env,
     CufIterSpillFrame,
@@ -936,7 +927,6 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
               numParams,
               nullptr,
               false);
-  spillStack(env);
 
   /*
    * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec on the
@@ -1036,7 +1026,6 @@ void emitFPassL(IRGS& env, int32_t argNum, int32_t id) {
   } else {
     emitCGetL(env, id);
   }
-  spillStack(env);
 }
 
 void emitFPassS(IRGS& env, int32_t argNum) {
@@ -1045,7 +1034,6 @@ void emitFPassS(IRGS& env, int32_t argNum) {
   } else {
     emitCGetS(env);
   }
-  spillStack(env);
 }
 
 void emitFPassG(IRGS& env, int32_t argNum) {
@@ -1054,7 +1042,6 @@ void emitFPassG(IRGS& env, int32_t argNum) {
   } else {
     emitCGetG(env);
   }
-  spillStack(env);
 }
 
 void emitFPassR(IRGS& env, int32_t argNum) {
@@ -1063,7 +1050,6 @@ void emitFPassR(IRGS& env, int32_t argNum) {
   }
 
   implUnboxR(env);
-  spillStack(env);
 }
 
 void emitFPassM(IRGS& env, int32_t, int x) {
@@ -1072,7 +1058,6 @@ void emitFPassM(IRGS& env, int32_t, int x) {
   } else {
     emitCGetM(env, x);
   }
-  spillStack(env);
 }
 
 void emitUnboxR(IRGS& env) { implUnboxR(env); }
@@ -1086,7 +1071,6 @@ void emitFPassV(IRGS& env, int32_t argNum) {
   auto const tmp = popV(env);
   pushIncRef(env, gen(env, LdRef, TInitCell, tmp));
   gen(env, DecRef, tmp);
-  spillStack(env);
 }
 
 void emitFPassCE(IRGS& env, int32_t argNum) {
@@ -1094,7 +1078,6 @@ void emitFPassCE(IRGS& env, int32_t argNum) {
     // Need to raise an error
     PUNT(FPassCE-byRef);
   }
-  spillStack(env);
 }
 
 void emitFPassCW(IRGS& env, int32_t argNum) {
@@ -1102,20 +1085,17 @@ void emitFPassCW(IRGS& env, int32_t argNum) {
     // Need to raise a warning
     PUNT(FPassCW-byRef);
   }
-  spillStack(env);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallArray(IRGS& env) {
-  spillStack(env);
   auto const data = CallArrayData {
     offsetFromIRSP(env, BCSPOffset{0}),
     bcOff(env),
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
   };
-  env.irb->exceptionStackBoundary();
   gen(env, CallArray, data, sp(env), fp(env));
 }
 
@@ -1134,8 +1114,6 @@ void emitFCall(IRGS& env, int32_t numParams) {
     curFunc(env)
   );
 
-  spillStack(env);
-  env.irb->exceptionStackBoundary();
   gen(
     env,
     Call,

@@ -89,7 +89,6 @@ struct RegionDesc {
   BlockPtr          block(BlockId id) const;
   const BlockIdSet& succs(BlockId id) const;
   const BlockIdSet& preds(BlockId id) const;
-  const BlockIdSet& sideExitingBlocks() const;
   bool              isExit(BlockId id) const;
 
   /*
@@ -125,8 +124,6 @@ struct RegionDesc {
   void              addArc(BlockId src, BlockId dst);
   void              removeArc(BlockId src, BlockId dst);
   void              addMerged(BlockId fromId, BlockId intoId);
-  void              setSideExitingBlock(BlockId bid);
-  bool              isSideExitingBlock(BlockId bid) const;
   folly::Optional<BlockId> prevRetrans(BlockId id) const;
   folly::Optional<BlockId> nextRetrans(BlockId id) const;
   void              clearPrevRetrans(BlockId id);
@@ -163,9 +160,6 @@ private:
 
   std::vector<BlockPtr>             m_blocks;
   hphp_hash_map<BlockId, BlockData> m_data;
-  // Set of blocks that that can possibly side exit the region. This
-  // is just a hint to the region translator.
-  BlockIdSet                        m_sideExitingBlocks;
 };
 
 using RegionDescPtr = std::shared_ptr<RegionDesc>;

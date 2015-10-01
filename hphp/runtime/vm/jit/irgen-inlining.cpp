@@ -75,7 +75,6 @@ bool beginInlining(IRGS& env,
 
   auto const prevSP    = fpiStack.front().returnSP;
   auto const prevSPOff = fpiStack.front().returnSPOff;
-  spillStack(env);
   auto const calleeSP  = sp(env);
 
   always_assert_flog(
@@ -160,17 +159,6 @@ void endInlinedCommon(IRGS& env) {
 
   updateMarker(env);
 
-  /*
-   * After the end of inlining, we are restoring to a previously defined stack
-   * that we know is entirely materialized (i.e. in memory), so stackDeficit
-   * needs to be slammed to zero.
-   *
-   * The push of the return value in the caller of this function is not yet
-   * materialized.
-   */
-  assertx(env.irb->evalStack().empty());
-  env.irb->clearStackDeficit();
-
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
 }
 
@@ -181,10 +169,6 @@ void endInlining(IRGS& env) {
 }
 
 void retFromInlined(IRGS& env) {
-  if (env.inlineReturnTarget.back().needsMerge) {
-    prepareForHHBCMergePoint(env);
-  }
-
   gen(env, Jmp, env.inlineReturnTarget.back().target);
 }
 

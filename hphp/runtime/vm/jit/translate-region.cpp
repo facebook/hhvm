@@ -136,47 +136,6 @@ bool blockHasUnprocessedPred(
 }
 
 /*
- * Returns whether or not block `blockId' is a merge point in the
- * `region'.  Normally, blocks are merge points if they have more than
- * one predecessor.  However, the region's entry block is a
- * merge-point if it has any successor, since it has an implicit arc
- * coming from outside of the region.  Additionally, a block with a
- * single predecessor is a merge point if it's the target of both the
- * fallthru and the taken paths.
- */
-bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
-  auto const& preds = region.preds(blockId);
-  auto const prevRetrans = region.prevRetrans(blockId);
-  auto const nPreds = preds.size() + (prevRetrans ? 1 : 0);
-  if (nPreds == 0)                     return false;
-  if (nPreds > 1)                      return true;
-  if (blockId == region.entry()->id()) return true;
-
-  // The destination of a conditional jump is a merge point if both
-  // the fallthru and taken offsets are the same.
-  auto predId   = prevRetrans ? prevRetrans.value() : *preds.begin();
-  auto predOpPtr = region.block(predId)->last().pc();
-  auto predOp   = peek_op(predOpPtr);
-  if (!instrHasConditionalBranch(predOp)) return false;
-  Offset fallthruOffset = instrLen(predOpPtr);
-  Offset    takenOffset = *instrJumpOffset(predOpPtr);
-  return fallthruOffset == takenOffset;
-}
-
-/*
- * Returns whether any successor of `blockId' in the `region' is a
- * merge-point within the `region'.
- */
-bool hasMergeSucc(const RegionDesc& region,
-                  RegionDesc::BlockId blockId) {
-  for (auto succ : region.succs(blockId)) {
-    if (isMerge(region, succ)) return true;
-  }
-  return false;
-}
-
-
-/*
  * If this region's entry block is at the entry point for a function, we have
  * some additional information we can assume about the types of non-parameter
  * local variables.
@@ -222,15 +181,6 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
   auto& typePredictions = block->typePredictions();
   auto& typePreConditions = block->typePreConditions();
   auto& refPreds = block->reffinessPreds();
-
-  // If the block has a next retranslations in the chain that is a
-  // merge point in the region, then we need to call
-  // prepareForHHBCMergePoint to spill the stack.
-  if (auto retrans = region.nextRetrans(block->id())) {
-    if (isMerge(region, retrans.value())) {
-      irgen::prepareForHHBCMergePoint(irgs);
-    }
-  }
 
   if (isEntry) {
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
@@ -313,7 +263,6 @@ void initNormalizedInstruction(
 
   if (lastInstr) {
     inst.endsRegion  = region.isExit(blockId);
-    inst.nextIsMerge = hasMergeSucc(region, blockId);
   }
 
   // We can get a more precise output type for interpOne if we know all of
@@ -635,7 +584,7 @@ TranslateResult irGenRegion(IRGS& irgs,
     // Set the first callee block as a successor to the FCall's block and
     // "fallthrough" from the caller into the callee's first block.
     setIRBlock(irgs, region.entry()->id(), region, blockIdToIRBlock);
-    irgen::endBlock(irgs, region.start().offset(), false);
+    irgen::endBlock(irgs, region.start().offset());
   }
 
   RegionDesc::BlockIdSet processedBlocks;
@@ -852,10 +801,7 @@ TranslateResult irGenRegion(IRGS& irgs,
             irgen::endRegion(irgs);
           }
         } else if (instrAllowsFallThru(inst.op())) {
-          if (region.isSideExitingBlock(blockId)) {
-            irgen::prepareForSideExit(irgs);
-          }
-          irgen::endBlock(irgs, inst.nextSk().offset(), inst.nextIsMerge);
+          irgen::endBlock(irgs, inst.nextSk().offset());
         }
       }
     }

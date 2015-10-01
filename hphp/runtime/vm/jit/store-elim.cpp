@@ -405,6 +405,7 @@ void addLoadSet(Local& env, const ALocBits& bits) {
 }
 
 void addAllLoad(Local& env) {
+  FTRACE(4, "           load: -1\n");
   env.mayLoad.set();
   env.antLoc.reset();
 }

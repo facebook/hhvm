@@ -1022,6 +1022,8 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
 
   if (auto const result = incDec(env, subop, src)) {
     pushIncRef(env, isPre(subop) ? result : src);
+    // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
+    updateMarker(env);
     stLoc(env, id, ldrefExit, ldPMExit, result);
     return;
   }

@@ -221,7 +221,6 @@ void emitNewPackedArray(IRGS& env, int32_t numArgs) {
   );
   static constexpr auto kMaxUnrolledInitArray = 8;
   if (numArgs > kMaxUnrolledInitArray) {
-    spillStack(env);
     gen(
       env,
       InitPackedArrayLoop,
@@ -252,13 +251,6 @@ void emitNewPackedArray(IRGS& env, int32_t numArgs) {
 void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
-
-  // The NewPackedArray opcode's helper needs array values passed to it
-  // via the stack.  We use spillStack() to flush the eval stack and
-  // obtain a pointer to the topmost item; if over-flushing becomes
-  // a problem then we should refactor the NewPackedArray opcode to
-  // take its values directly as SSA operands.
-  spillStack(env);
 
   NewStructData extra;
   extra.offset  = offsetFromIRSP(env, BCSPOffset{0});

@@ -292,6 +292,13 @@ class TestSaveRestore(unittest.TestCase):
         Move a file containing errors + a file referenced from an error
         originating in another file.
         """
+
+        write_load_config(
+            self.repo_dir,
+            os.path.join(self.saved_state_dir, 'foo'),
+            ['foo_2.php', 'bar_2.php', 'foo_3.php', 'bar_3.php']
+        )
+
         os.rename(
             os.path.join(self.repo_dir, 'foo_2.php'),
             os.path.join(self.repo_dir, 'bar_2.php'),
@@ -299,12 +306,6 @@ class TestSaveRestore(unittest.TestCase):
         os.rename(
             os.path.join(self.repo_dir, 'foo_3.php'),
             os.path.join(self.repo_dir, 'bar_3.php'),
-        )
-
-        write_load_config(
-            self.repo_dir,
-            os.path.join(self.saved_state_dir, 'foo'),
-            ['foo_2.php', 'bar_2.php', 'foo_3.php', 'bar_3.php']
         )
 
         try:

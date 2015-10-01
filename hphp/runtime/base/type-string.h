@@ -566,10 +566,7 @@ private:
  * so that they won't be garbage collected by MemoryManager. This is used by
  * constant strings, so they can be pre-allocated before request handling.
  */
-class StaticString : public String {
-public:
-  friend class StringUtil;
-
+struct StaticString : String {
   explicit StaticString(const char* s);
   StaticString(const char* s, int length); // binary string
   explicit StaticString(std::string s);
@@ -578,12 +575,7 @@ public:
     detach();
   }
   StaticString& operator=(const StaticString &str);
-
-private:
-  void insert();
 };
-
-#define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 
 StaticString getDataTypeString(DataType t);
 

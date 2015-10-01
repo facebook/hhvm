@@ -862,14 +862,14 @@ Variant ObjectData::offsetGet(Variant key) {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s___get(LITSTR_INIT("__get")),
-  s___set(LITSTR_INIT("__set")),
-  s___isset(LITSTR_INIT("__isset")),
-  s___unset(LITSTR_INIT("__unset")),
-  s___init__(LITSTR_INIT("__init__")),
-  s___sleep(LITSTR_INIT("__sleep")),
-  s___toDebugDisplay(LITSTR_INIT("__toDebugDisplay")),
-  s___wakeup(LITSTR_INIT("__wakeup"));
+  s___get("__get"),
+  s___set("__set"),
+  s___isset("__isset"),
+  s___unset("__unset"),
+  s___init__("__init__"),
+  s___sleep("__sleep"),
+  s___toDebugDisplay("__toDebugDisplay"),
+  s___wakeup("__wakeup");
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {

@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class String;
-class StaticString;
+struct StaticString;
 class Array;
 class Variant;
 class VarNR;

@@ -133,7 +133,7 @@ const int64_t q_PDO$$NULL_NATURAL             = PDO_NULL_NATURAL;
 const int64_t q_PDO$$NULL_EMPTY_STRING        = PDO_NULL_EMPTY_STRING;
 const int64_t q_PDO$$NULL_TO_STRING           = PDO_NULL_TO_STRING;
 
-const StaticString q_PDO$$ERR_NONE(LITSTR_INIT(PDO_ERR_NONE));
+const StaticString q_PDO$$ERR_NONE(PDO_ERR_NONE);
 
 const int64_t q_PDO$$FETCH_ORI_NEXT           = PDO_FETCH_ORI_NEXT;
 const int64_t q_PDO$$FETCH_ORI_PRIOR          = PDO_FETCH_ORI_PRIOR;

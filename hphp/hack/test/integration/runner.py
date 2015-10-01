@@ -6,16 +6,18 @@ import argparse
 import sys
 import unittest
 
-from test_save_restore import TestSaveRestore
+import test_save_restore
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('hh_server')
     parser.add_argument('hh_client')
     args = parser.parse_args()
-    TestSaveRestore.init_class(args.hh_server, args.hh_client)
+    test_save_restore.hh_server = args.hh_server
+    test_save_restore.hh_client = args.hh_client
 
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestSaveRestore)
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(
+            test_save_restore.TestSaveRestore)
 
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():

@@ -11,6 +11,7 @@ import tempfile
 import time
 import unittest
 
+from hh_paths import hh_server, hh_client
 from utils import touch, write_files, proc_call, ensure_output_contains, \
         test_env
 
@@ -41,16 +42,6 @@ load_script = %s
         """ % os.path.join(repo_dir, 'server_options.sh'))
 
 class TestSaveRestore(unittest.TestCase):
-    @classmethod
-    def init_class(cls, hh_server, hh_client):
-        """
-        Should be called before tests are run. This is an awkward hack to allow
-        us to pass command-line options to unittests, but Python doesn't
-        provide any nicer way.
-        """
-        cls.hh_server = hh_server
-        cls.hh_client = hh_client
-
     @classmethod
     def setUpClass(cls):
         cls.maxDiff = 2000
@@ -106,7 +97,7 @@ class TestSaveRestore(unittest.TestCase):
         write_files(cls.files, cls.repo_dir)
 
         subprocess.call([
-            cls.hh_server,
+            hh_server,
             '--check', init_dir,
             '--save', os.path.join(cls.saved_state_dir, 'foo'),
         ], env=test_env)
@@ -120,7 +111,7 @@ class TestSaveRestore(unittest.TestCase):
 
     @classmethod
     def start_hh_server(cls):
-        cmd = [cls.hh_server, cls.repo_dir]
+        cmd = [hh_server, cls.repo_dir]
         print(" ".join(cmd), file=sys.stderr)
         return subprocess.Popen(
                 cmd,
@@ -132,7 +123,7 @@ class TestSaveRestore(unittest.TestCase):
 
     def tearDown(self):
         subprocess.call([
-            self.hh_client,
+            hh_client,
             'stop',
             self.repo_dir
         ], env=test_env)
@@ -142,7 +133,7 @@ class TestSaveRestore(unittest.TestCase):
     def check_cmd(self, expected_output, stdin=None, options=[]):
         root = self.repo_dir + os.path.sep
         output = proc_call([
-            self.hh_client,
+            hh_client,
             'check',
             '--retries',
             '20',
@@ -419,7 +410,7 @@ load_script = %s
         self.check_cmd(self.initial_errors)
 
         version = proc_call([
-            self.hh_server,
+            hh_server,
             '--version'
         ])
 

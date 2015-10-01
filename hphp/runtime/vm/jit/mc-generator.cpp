@@ -2428,7 +2428,7 @@ bool MCGenerator::dumpTCCode(const char* filename) {
 }
 
 // Returns true on success
-bool MCGenerator::dumpTC(bool ignoreLease) {
+bool MCGenerator::dumpTC(bool ignoreLease /* =false */) {
   folly::Optional<BlockingLeaseHolder> writer;
   if (!ignoreLease) {
     writer.emplace(Translator::WriteLease());
@@ -2442,8 +2442,8 @@ bool MCGenerator::dumpTC(bool ignoreLease) {
 }
 
 // Returns true on success
-bool tc_dump(void) {
-  return mcg && mcg->dumpTC();
+bool tc_dump(bool ignoreLease /* =false */) {
+  return mcg && mcg->dumpTC(ignoreLease);
 }
 
 // Returns true on success

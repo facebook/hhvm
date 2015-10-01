@@ -455,6 +455,12 @@ void handleStackOverflow(ActRec* calleeAR);
  */
 void handlePossibleStackOverflow(ActRec* calleeAR);
 
+/*
+ * Dumps the contents of the Translation Cache.
+ * Returns whether or not it succeeded.
+ */
+bool tc_dump(bool ignoreLease=false);
+
 }}
 
 #endif

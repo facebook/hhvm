@@ -23,6 +23,8 @@
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include <signal.h>
 
 namespace HPHP {
@@ -93,6 +95,10 @@ static void bt_handler(int sig) {
               debug_string_backtrace(false).data());
     }
     ::close(fd);
+  }
+
+  if (jit::Translator::isTransDBEnabled()) {
+    jit::tc_dump(true);
   }
 
   if (!RuntimeOption::CoreDumpEmail.empty()) {

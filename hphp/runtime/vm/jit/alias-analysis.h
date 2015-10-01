@@ -128,7 +128,9 @@ struct AliasAnalysis {
    * contained in `acls'.  This function may conservatively return a smaller
    * set of bits: every bit that is set in the returned ALocBits is contained
    * in `acls', but there may be locations contained in `acls' that don't have
-   * a bit set in the returned vector.
+   * a bit set in the returned vector. As a consequence of this, any caller of
+   * expand() must produce correct (but potentially suboptimal) results if
+   * expand is hardcoded to always return an empty bitset.
    *
    * This should generally be used with AliasClasses that are exhaustive,
    * must-style information.  That is, AliasClasses that should be interpreted

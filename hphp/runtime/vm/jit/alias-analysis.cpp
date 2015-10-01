@@ -186,6 +186,8 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     } else {
       ret |= expand_part(*this, acls, stk, AStackAny, all_stack);
     }
+  } else if (AStackAny <= acls) {
+    ret |= all_stack;
   }
 
   if (auto const frame = acls.frame()) {

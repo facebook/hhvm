@@ -106,14 +106,16 @@ XDebugServer::XDebugServer(Mode mode)
   }
 
   // Create the socket
-  m_socket = createSocket(hostname, port);
-  if (m_socket == -1) {
+  auto const status = createSocket(hostname, port);
+  if (status == -1) {
     log("E: Could not connect to client. :-(\n");
     goto failure;
-  } else if (m_socket == -2) {
+  } else if (status == -2) {
     log("E: Time-out connecting to client. :-(\n");
     goto failure;
   }
+
+  assert(status == 0);
 
   // Get the requested handler
   log("I: Connected to client. :-)\n");
@@ -171,11 +173,13 @@ int XDebugServer::createSocket(const char* hostname, int port) {
 
   // Create the socket
   auto const sockfd = socket(address.sin_family, SOCK_STREAM, 0);
-  if (sockfd == -1) {
+  if (sockfd < 0) {
     log("create_debugger_socket(\"%s\", %d) socket: %s\n",
         hostname, port, folly::errnoStr(errno).c_str());
     return -1;
   }
+
+  m_socket = sockfd;
 
   // Put socket in non-blocking mode so we can use poll() for timeouts.
   fcntl(sockfd, F_SETFL, O_NONBLOCK);
@@ -222,7 +226,7 @@ int XDebugServer::createSocket(const char* hostname, int port) {
   fcntl(sockfd, F_SETFL, 0);
   long optval = 1;
   setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
-  return sockfd;
+  return 0;
 }
 
 void XDebugServer::destroySocket() {

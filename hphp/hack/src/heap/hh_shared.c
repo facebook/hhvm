@@ -587,6 +587,36 @@ static intptr_t decompress(const decompress_args* args) {
   return args->compressed_size == actual_compressed_size;
 }
 
+#ifdef _WIN32
+
+void join_thread(HANDLE thread)
+{
+  DWORD rc = WaitForSingleObject(thread, INFINITE);
+  if (rc == WAIT_FAILED) {
+    win32_maperr(GetLastError());
+    uerror("WaitForSingleObject", Nothing);
+  }
+  assert(rc == WAIT_OBJECT_0);
+  if(!GetExitCodeThread(thread, &rc)) {
+    win32_maperr(GetLastError());
+    uerror("GetExitCode", Nothing);
+  }
+  assert(rc == 0);
+  CloseHandle(thread);
+}
+
+#else
+
+void join_thread(pthread_t thread)
+{
+  intptr_t success = 0;
+  int rc = pthread_join(thread, (void*)&success);
+  assert(rc == 0);
+  assert(success);
+}
+
+#endif
+
 void hh_load(value in_filename) {
   CAMLparam1(in_filename);
   FILE* fp = fopen(String_val(in_filename), "rb");
@@ -613,10 +643,14 @@ void hh_load(value in_filename) {
   read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
   char* chunk_start = save_start();
 
+#ifdef _WIN32
+  HANDLE thread = NULL;
+#else
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   pthread_t thread;
+#endif
   decompress_args args;
   int thread_started = 0;
 
@@ -628,29 +662,24 @@ void hh_load(value in_filename) {
     read_all(fileno(fp), (void*)&chunk_size, sizeof chunk_size);
     read_all(fileno(fp), compressed, compressed_size * sizeof(char));
     if (thread_started) {
-      intptr_t success = 0;
-      int rc = pthread_join(thread, (void*)&success);
+      join_thread(thread);
       free(args.compressed);
-      assert(rc == 0);
-      assert(success);
     }
     args.compressed = compressed;
     args.compressed_size = compressed_size;
     args.decompress_start = chunk_start;
     args.decompressed_size = chunk_size;
+#ifdef _WIN32
+    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)decompress, &args, 0, NULL);
+#else
     pthread_create(&thread, &attr, (void* (*)(void*))decompress, &args);
+#endif
     thread_started = 1;
     chunk_start += chunk_size;
     read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
   }
 
-  if (thread_started) {
-    int success;
-    int rc = pthread_join(thread, (void*)&success);
-    free(args.compressed);
-    assert(rc == 0);
-    assert(success);
-  }
+  if (thread_started) join_thread(thread);
 
   fclose(fp);
   CAMLreturn0;
@@ -860,16 +889,13 @@ void hh_call_after_init() {
  */
 /*****************************************************************************/
 void hh_collect(value aggressive_val) {
-#ifdef _WIN32
-  // TODO GRGR
-  return;
-#else
   int aggressive  = Bool_val(aggressive_val);
+  char* tmp_heap, *dest;
+  size_t mem_size = 0;
+#ifndef _WIN32
   int flags       = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
   int prot        = PROT_READ | PROT_WRITE;
-  char* dest;
-  size_t mem_size = 0;
-  char* tmp_heap;
+#endif
 
   float space_overhead = aggressive ? 1.2 : 2.0;
   if(used_heap_size() < (size_t)(space_overhead * heap_init_size)) {
@@ -877,14 +903,21 @@ void hh_collect(value aggressive_val) {
     return;
   }
 
+#ifdef _WIN32
+  tmp_heap = VirtualAlloc(NULL, heap_size, MEM_RESERVE, PAGE_READWRITE);
+  if (!tmp_heap) {
+    win32_maperr(GetLastError());
+    uerror("VirtualAlloc3", Nothing);
+  }
+#else
   tmp_heap = (char*)mmap(NULL, heap_size, prot, flags, 0, 0);
-  dest = tmp_heap;
-
   if(tmp_heap == MAP_FAILED) {
     printf("Error while collecting: %s\n", strerror(errno));
     exit(2);
   }
+#endif
 
+  dest = tmp_heap;
   assert(my_pid == master_pid); // Comes from the master
 
   // Walking the table
@@ -895,6 +928,12 @@ void hh_collect(value aggressive_val) {
       size_t aligned_size = ALIGNED(bl_size);
       char* addr          = Get_buf(hashtbl[i].addr);
 
+      #ifdef _WIN32
+      if (!VirtualAlloc(dest, bl_size, MEM_COMMIT, PAGE_READWRITE)) {
+        win32_maperr(GetLastError());
+        uerror("VirtualAlloc4", Nothing);
+      }
+      #endif
       memcpy(dest, addr, bl_size);
       // This is where the data ends up after the copy
       hashtbl[i].addr = heap_init + mem_size + sizeof(size_t);
@@ -907,6 +946,12 @@ void hh_collect(value aggressive_val) {
   memcpy(heap_init, tmp_heap, mem_size);
   *heap = heap_init + mem_size;
 
+#ifdef _WIN32
+  if(!VirtualFree(tmp_heap, 0, MEM_RELEASE)) {
+    win32_maperr(GetLastError());
+    uerror("VirtualFree", Nothing);
+  }
+#else
   if(munmap(tmp_heap, heap_size) == -1) {
     printf("Error while collecting: %s\n", strerror(errno));
     exit(2);

@@ -109,10 +109,14 @@ struct ResourceData : private boost::noncopyable {
   ResourceData();
 
   const ResourceHdr* hdr() const {
-    return reinterpret_cast<const ResourceHdr*>(this) - 1;
+    auto h = reinterpret_cast<const ResourceHdr*>(this) - 1;
+    assert(h->kindIsValid());
+    return h;
   }
   ResourceHdr* hdr() {
-    return reinterpret_cast<ResourceHdr*>(this) - 1;
+    auto h = reinterpret_cast<ResourceHdr*>(this) - 1;
+    assert(h->kindIsValid());
+    return h;
   }
 
   // delegate refcount operations to base.
@@ -158,6 +162,12 @@ inline void ResourceHdr::release() noexcept {
   delete data();
 }
 
+inline ResourceData* safedata(ResourceHdr* hdr) {
+  return hdr ? hdr->data() : nullptr;
+}
+inline const ResourceData* safedata(const ResourceHdr* hdr) {
+  return hdr ? hdr->data() : nullptr;
+}
 inline ResourceHdr* safehdr(ResourceData* data) {
   return data ? data->hdr() : nullptr;
 }

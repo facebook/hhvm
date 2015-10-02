@@ -161,12 +161,13 @@ void InterruptSite::Initialize(ActRec *fp) {
 // is destructed, so do not hold on to the returned object for
 // longer than there is a guarantee that this site will be alive.
 const InterruptSite *InterruptSite::getCallingSite() const {
-  if (m_callingSite != nullptr) return m_callingSite.get();
+  if (m_callingSite) return m_callingSite.get();
   auto const context = g_context.getNoCheck();
   Offset parentOffset;
   auto parentFp = context->getPrevVMState(m_activationRecord, &parentOffset);
   if (parentFp == nullptr) return nullptr;
-  m_callingSite.reset(new InterruptSite(parentFp, parentOffset, m_error));
+  m_callingSite = req::make_unique<InterruptSite>(parentFp, parentOffset,
+                                                  m_error);
   return m_callingSite.get();
 }
 

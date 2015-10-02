@@ -146,7 +146,7 @@ struct Allocator {
     typedef Allocator<U> other;
   };
 
-  pointer address(reference value) const {
+  pointer address(reference value) {
     return &value;
   }
   const_pointer address(const_reference value) const {
@@ -177,7 +177,7 @@ struct Allocator {
   }
 
   void deallocate(pointer p, size_type num) {
-    req::free(p);
+    req::free((void*)p);
   }
 
   template<class U> bool operator==(const Allocator<U>&) const {

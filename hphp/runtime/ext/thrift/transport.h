@@ -242,20 +242,21 @@ struct PHPInputTransport {
       m_transport->o_invoke_few_args(s_putBack,
                            1, String(buffer_ptr, buffer_used, CopyString));
     }
+    buffer = String();
     buffer_used = 0;
-    buffer_ptr = buffer;
+    buffer_ptr = nullptr;
   }
 
   void skip(size_t len) {
     while (len) {
       size_t chunk_size = len < buffer_used ? len : buffer_used;
       if (chunk_size) {
-        buffer_ptr = reinterpret_cast<char*>(buffer_ptr) + chunk_size;
+        buffer_ptr += chunk_size;
         buffer_used -= chunk_size;
         len -= chunk_size;
       }
       if (! len) break;
-      refill();
+      refill(len);
     }
   }
 
@@ -264,13 +265,13 @@ struct PHPInputTransport {
       size_t chunk_size = len < buffer_used ? len : buffer_used;
       if (chunk_size) {
         memcpy(buf, buffer_ptr, chunk_size);
-        buffer_ptr = reinterpret_cast<char*>(buffer_ptr) + chunk_size;
+        buffer_ptr += chunk_size;
         buffer_used -= chunk_size;
         buf = reinterpret_cast<char*>(buf) + chunk_size;
         len -= chunk_size;
       }
       if (! len) break;
-      refill();
+      refill(len);
     }
   }
 
@@ -299,17 +300,17 @@ struct PHPInputTransport {
   }
 
 private:
-  void refill() {
+  void refill(size_t len) {
     assert(buffer_used == 0);
-    String ret =
-      m_transport->o_invoke_few_args(s_read, 1, (int64_t)SIZE);
-    buffer_used = ret.size();
-    memcpy(buffer, ret.data(), buffer_used);
-    buffer_ptr = buffer;
+    len = std::max<size_t>(len, SIZE);
+    buffer =
+      m_transport->o_invoke_few_args(s_read, 1, (int64_t)len);
+    buffer_used = buffer.size();
+    buffer_ptr = buffer.data();
   }
 
-  char buffer[SIZE];
-  char* buffer_ptr{buffer};
+  String buffer;
+  const char* buffer_ptr{nullptr};
   size_t buffer_used{0};
 
   Object m_transport;

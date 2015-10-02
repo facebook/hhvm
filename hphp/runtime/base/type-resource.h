@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Object type wrapping around ObjectData to implement reference count.
+ * Resource type wrapping around ResourceData to implement reference count.
  */
 class Resource {
   using Ptr = req::ptr<ResourceHdr>;
@@ -70,12 +70,12 @@ public:
 
   template <typename T> // T must extend ResourceData
   explicit Resource(req::ptr<T>&& src)
-  : m_res(src.detach()->ResourceData::hdr(), NoIncRef{})
+  : m_res((src ? src.detach()->ResourceData::hdr() : nullptr), NoIncRef{})
   {}
 
   template <typename T> // T must extend resourceData
   explicit Resource(const req::ptr<T>& src)
-  : m_res(src.get()->ResourceData::hdr()) // causes incref
+  : m_res(safehdr(src.get())) // causes incref
   {}
 
   // Move ctor

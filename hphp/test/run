@@ -721,6 +721,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
 }
 
 function hphp_cmd($options, $test) {
+  $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
   return implode(" ", array(
     "HHVM_DISABLE_HHBBC2=1",
     hhvm_path(),
@@ -729,6 +730,7 @@ function hphp_cmd($options, $test) {
     find_file($test, 'hphp_config.ini'),
     read_opts_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o \"$test.repo\" \"$test\"",
+    $extra_args
   ));
 }
 

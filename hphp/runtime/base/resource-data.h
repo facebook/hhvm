@@ -158,6 +158,13 @@ inline void ResourceHdr::release() noexcept {
   delete data();
 }
 
+inline ResourceHdr* safehdr(ResourceData* data) {
+  return data ? data->hdr() : nullptr;
+}
+inline const ResourceHdr* safehdr(const ResourceData* data) {
+  return data ? data->hdr() : nullptr;
+}
+
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes
  * ==============================================================

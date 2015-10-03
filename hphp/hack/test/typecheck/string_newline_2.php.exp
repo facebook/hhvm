@@ -1,0 +1,6 @@
+File "string_newline_2.php", line 11, characters 10-12:
+Invalid return type (Typing[4110])
+File "string_newline_2.php", line 3, characters 15-17:
+This is an int
+File "string_newline_2.php", line 11, characters 10-12:
+It is incompatible with a string

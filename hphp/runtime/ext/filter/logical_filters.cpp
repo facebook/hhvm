@@ -432,9 +432,6 @@ Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
       s++;
     }
 
-    if (*(e - 1) == '.') {
-      goto bad_url;
-    }
   }
 
   if (

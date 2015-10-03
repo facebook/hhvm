@@ -263,7 +263,7 @@ private:
  * Example: Native::getProp(this, propName);
  */
 Variant getProp(const Object& obj, const String& name);
-Variant setProp(const Object& obj, const String& name, Variant& value);
+Variant setProp(const Object& obj, const String& name, const Variant& value);
 Variant issetProp(const Object& obj, const String& name);
 Variant unsetProp(const Object& obj, const String& name);
 

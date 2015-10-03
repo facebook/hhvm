@@ -24,6 +24,10 @@
  * since Windows only has four registers args in its ABI */
 #define ETCH_GET_ARG5   mov 0x28(%rsp), %r10
 #define ETCH_GET_ARG6   mov 0x30(%rsp), %r11
+/* VM Registers must match definition on abi-x64.h */
+#define ETCH_R_VM_FP    %rbp
+#define ETCH_R_VM_SP    %rbx
+#define ETCH_R_VM_TL    %r12
 
 #elif defined(__APPLE__)
 #define CFI(x)          .cfi_##x
@@ -46,6 +50,10 @@
 #define ETCH_ARG6       %r9
 #define ETCH_GET_ARG5   /* not used */
 #define ETCH_GET_ARG6   /* not used */
+/* VM Registers must match definition on abi-x64.h */
+#define ETCH_R_VM_FP    %rbp
+#define ETCH_R_VM_SP    %rbx
+#define ETCH_R_VM_TL    %r12
 
 #else /* Other x86 (e.g. linux) */
 #define CFI(x)          .cfi_##x
@@ -68,6 +76,10 @@
 #define ETCH_ARG6       %r9
 #define ETCH_GET_ARG5   /* not used */
 #define ETCH_GET_ARG6   /* not used */
+/* VM Registers must match definition on abi-x64.h */
+#define ETCH_R_VM_FP    %rbp
+#define ETCH_R_VM_SP    %rbx
+#define ETCH_R_VM_TL    %r12
 #endif
 
 #endif // incl_ETCH_HELPERS_H

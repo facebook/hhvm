@@ -6,6 +6,7 @@ import argparse
 import sys
 import unittest
 
+import test_save_mini
 import test_save_restore
 
 if __name__ == '__main__':
@@ -16,9 +17,12 @@ if __name__ == '__main__':
     test_save_restore.hh_server = args.hh_server
     test_save_restore.hh_client = args.hh_client
 
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(
+    save_suite = unittest.defaultTestLoader.loadTestsFromTestCase(
             test_save_restore.TestSaveRestore)
+    save_mini_suite = unittest.defaultTestLoader.loadTestsFromTestCase(
+            test_save_mini.TestSaveMiniState)
+    save_suite.addTests(save_mini_suite)
 
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    result = unittest.TextTestRunner(verbosity=2).run(save_suite)
     if not result.wasSuccessful():
         sys.exit(1)

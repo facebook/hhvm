@@ -1253,7 +1253,7 @@ void remove_helper(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Walk through each block, and remove nearby IncRef/DecRefNZ pairs that
+ * Walk through each block, and remove nearby IncRef/DecRef[NZ] pairs that
  * operate on the same must-alias-set, if there are obviously no instructions
  * in between them that could read the reference count of that object.
  */
@@ -1269,7 +1269,7 @@ void remove_trivial_incdecs(Env& env) {
         continue;
       }
 
-      if (inst.is(DecRefNZ)) {
+      if (inst.is(DecRef, DecRefNZ)) {
         if (incs.empty()) continue;
         auto const setID = env.asetMap[inst.src(0)];
         auto const to_rm = [&] () -> IRInstruction* {
@@ -1280,7 +1280,7 @@ void remove_trivial_incdecs(Env& env) {
               return candidate;
             }
           }
-          // This DecRefNZ may rely on one of the IncRefs, since we aren't
+          // This DecRef may rely on one of the IncRefs, since we aren't
           // handling may-alias stuff here.
           incs.clear();
           return nullptr;

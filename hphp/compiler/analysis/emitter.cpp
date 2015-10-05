@@ -9885,6 +9885,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HardTypeHints            = Option::HardTypeHints;
   gd.HardReturnTypeHints      = Option::HardReturnTypeHints;
   gd.UsedHHBBC                = Option::UseHHBBC;
+  gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
   gd.HardPrivatePropInference = true;
 
   if (arrTable) gd.arrayTypeTable.repopulate(*arrTable);

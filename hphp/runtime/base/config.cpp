@@ -355,18 +355,15 @@ void Config::Iterate(std::function<void (const IniSettingMap&,
                      const IniSettingMap &ini, const Hdf& config,
                      const std::string &name,
                      const bool prepend_hhvm /* = true */) {
-  // We shouldn't be passing a leaf here. That's why name is not
-  // optional.
-  assert(!name.empty());
-  Hdf hdf = config[name];
+  Hdf hdf = name.empty() ? config : config[name];
   if (hdf.exists() && !hdf.isEmpty()) {
     for (Hdf c = hdf.firstChild(); c.exists(); c = c.next()) {
       cb(IniSetting::Map::object, c, "");
     }
   } else {
     Hdf empty;
-    auto ini_name = IniName(name, prepend_hhvm);
-    auto ini_value = ini_iterate(ini, ini_name);
+    auto ini_value = name.empty() ? ini :
+      ini_iterate(ini, IniName(name, prepend_hhvm));
     if (ini_value.isArray()) {
       for (ArrayIter iter(ini_value.toArray()); iter; ++iter) {
         cb(iter.second(), empty, iter.first().toString().toCppString());

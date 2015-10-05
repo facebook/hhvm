@@ -2190,7 +2190,7 @@ void hphp_session_exit() {
   // finishes.
   Treadmill::finishRequest();
 
-  TI().clearPendingException();
+  TI().onSessionExit();
 
   {
     ServerStatsHelper ssh("rollback");
@@ -2200,7 +2200,6 @@ void hphp_session_exit() {
     free_global_variables_after_sweep();
   }
 
-  TI().onSessionExit();
   assert(MM().empty());
 
   s_sessionInitialized = false;

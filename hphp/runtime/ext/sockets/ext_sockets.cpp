@@ -1398,9 +1398,19 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   if (persistent) {
     key = hosturl.getHostURL() + ":" +
           folly::to<std::string>(hosturl.getPort());
+
+    // Check our persistent storage and determine if it's an SSLSocket
+    // or just a regular socket.
     auto sockItr = s_sockets.find(key);
     if (sockItr != s_sockets.end()) {
-      auto sock = req::make<Socket>(sockItr->second);
+      req::ptr<Socket> sock;
+      if (std::dynamic_pointer_cast<SSLSocketData>(sockItr->second)) {
+        auto sslSocketData =
+          std::static_pointer_cast<SSLSocketData>(sockItr->second);
+        sock = req::make<SSLSocket>(sslSocketData);
+      } else {
+        sock = req::make<Socket>(sockItr->second);
+      }
 
       if (sock->getError() == 0 && sock->checkLiveness()) {
         return Variant(sock);

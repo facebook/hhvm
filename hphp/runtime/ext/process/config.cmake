@@ -1,4 +1,4 @@
-HHVM_DEFINE_EXTENSION("process" REQUIRED
+HHVM_DEFINE_EXTENSION("process"
   SOURCES
     ext_process.cpp
   HEADERS

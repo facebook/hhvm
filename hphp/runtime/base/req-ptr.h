@@ -124,16 +124,6 @@ template<typename T> struct ptr final {
   explicit operator bool() const { return m_px != nullptr; }
 
   /**
-   * Get count.
-   */
-  RefCount use_count() const { return m_px ? m_px->getCount() : 0; }
-
-  /**
-   * Check if it is unique.
-   */
-  bool unique() const { return m_px && m_px->hasExactlyOneRef(); }
-
-  /**
    * Magic delegation.
    */
   T* operator->() const {

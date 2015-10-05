@@ -272,7 +272,7 @@ TEST(Variant, MoveCasts) {
     auto res = cast<DummyResource>(std::move(dummyRef));
     EXPECT_EQ(res, dummy);
     EXPECT_TRUE(dummyRef.isNull());
-    EXPECT_EQ(dummy.use_count(), 2);
+    EXPECT_TRUE(dummy->hasMultipleRefs());
   }
 }
 

@@ -314,12 +314,12 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
       // first entry, otherwise find the transition before `timestamp_begin`
       uint32_t idx = 0;
       if (timecnt && m_tzi->trans) {
-          while (idx < timecnt && m_tzi->trans[idx] < timestamp_begin) {
-              idx++;
-          }
+        while (idx < timecnt && m_tzi->trans[idx] < timestamp_begin) {
+          idx++;
+        }
 
-          if (idx > 0) idx--;
-          idx = m_tzi->trans_idx[idx];
+        if (idx > 0) idx--;
+        idx = m_tzi->trans_idx[idx];
       }
       ret.append(make_map_array(
             s_ts, timestamp_begin,

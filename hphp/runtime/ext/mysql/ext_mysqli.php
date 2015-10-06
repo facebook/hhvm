@@ -256,16 +256,19 @@ class mysqli {
     return $this->real_escape_string($escapestr);
   }
 
-  /**
+ /**
    * Returns a character set object
    *
-   * @return object - The function returns a character set object with
-   *   the following properties:   charset Character set name   collation
-   *   Collation name   dir Directory the charset description was fetched
-   *   from (?) or "" for built-in character sets   min_length Minimum
-   *   character length in bytes   max_length Maximum character length in
-   *   bytes   number Internal character set number   state Character set
-   *   status (?)
+   * @return object - The function returns a character set object with the
+   *   following properties:
+   *   - charset Character set name
+   *   - collation Collation name
+   *   - dir Directory the charset description was fetched from (?) or "" for
+   *         built-in character sets
+   *   - min_length Minimum character length in bytes
+   *   - max_length Maximum character length in bytes
+   *   - number Internal character set number
+   *   - state Character set status (?)
    */
   <<__Native>>
   public function get_charset(): mixed;
@@ -1714,14 +1717,17 @@ function mysqli_field_count(mysqli $link): ?int {
  * @param mysqli $link -
  *
  * @return object - The function returns a character set object with the
- *   following properties:   charset Character set name   collation
- *   Collation name   dir Directory the charset description was fetched
- *   from (?) or "" for built-in character sets   min_length Minimum
- *   character length in bytes   max_length Maximum character length in
- *   bytes   number Internal character set number   state Character set
- *   status (?)
+ *   following properties:
+ *   - charset Character set name
+ *   - collation Collation name
+ *   - dir Directory the charset description was fetched from (?) or "" for
+ *         built-in character sets
+ *   - min_length Minimum character length in bytes
+ *   - max_length Maximum character length in bytes
+ *   - number Internal character set number
+ *   - state Character set status (?)
  */
-function mysqli_get_charset(mysqli $link): object {
+function mysqli_get_charset(mysqli $link): mixed {
   return $link->get_charset();
 }
 

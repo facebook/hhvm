@@ -1,0 +1,121 @@
+array(1) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(1301574225)
+    ["time"]=>
+    string(24) "2011-03-31T12:23:45+0000"
+    ["offset"]=>
+    int(0)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "UTC"
+  }
+}
+array(8) {
+  [0]=>
+  array(5) {
+    ["ts"]=>
+    int(1301574225)
+    ["time"]=>
+    string(24) "2011-03-31T12:23:45+0000"
+    ["offset"]=>
+    int(46800)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(4) "NZDT"
+  }
+  [1]=>
+  array(5) {
+    ["ts"]=>
+    int(1301752800)
+    ["time"]=>
+    string(24) "2011-04-02T14:00:00+0000"
+    ["offset"]=>
+    int(43200)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(4) "NZST"
+  }
+  [2]=>
+  array(5) {
+    ["ts"]=>
+    int(1316872800)
+    ["time"]=>
+    string(24) "2011-09-24T14:00:00+0000"
+    ["offset"]=>
+    int(46800)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(4) "NZDT"
+  }
+  [3]=>
+  array(5) {
+    ["ts"]=>
+    int(1333202400)
+    ["time"]=>
+    string(24) "2012-03-31T14:00:00+0000"
+    ["offset"]=>
+    int(43200)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(4) "NZST"
+  }
+  [4]=>
+  array(5) {
+    ["ts"]=>
+    int(1348927200)
+    ["time"]=>
+    string(24) "2012-09-29T14:00:00+0000"
+    ["offset"]=>
+    int(46800)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(4) "NZDT"
+  }
+  [5]=>
+  array(5) {
+    ["ts"]=>
+    int(1365256800)
+    ["time"]=>
+    string(24) "2013-04-06T14:00:00+0000"
+    ["offset"]=>
+    int(43200)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(4) "NZST"
+  }
+  [6]=>
+  array(5) {
+    ["ts"]=>
+    int(1380376800)
+    ["time"]=>
+    string(24) "2013-09-28T14:00:00+0000"
+    ["offset"]=>
+    int(46800)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(4) "NZDT"
+  }
+  [7]=>
+  array(5) {
+    ["ts"]=>
+    int(1396706400)
+    ["time"]=>
+    string(24) "2014-04-05T14:00:00+0000"
+    ["offset"]=>
+    int(43200)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(4) "NZST"
+  }
+}

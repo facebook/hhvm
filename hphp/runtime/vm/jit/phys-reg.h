@@ -151,8 +151,8 @@ struct PhysReg {
   template<typename T>
   struct Map {
     Map() {
-      // Workaround for a potential GCC 5 bug, value initializing m_elms seems to
-      // use zero-initialization instead of default initialization.
+      // Workaround for a potential GCC 5 bug, value initializing m_elms seems
+      // to use zero-initialization instead of default initialization.
       for (auto& elm : m_elms) {
         elm = T();
       }

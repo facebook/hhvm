@@ -135,6 +135,28 @@ class Object;
 #define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))
 
+/* Macros related to declaring/registering constants. Note that the
+ * HHVM_RCC_* macros expect a StaticString to be present via s_##class_name.
+ */
+#define HHVM_RC_S(const_name, const_value)                          \
+  Native::registerConstant<KindOfString>(                           \
+    makeStaticString(#const_name), makeStaticString(const_value));
+#define HHVM_RC_I(const_name, const_value)                          \
+  Native::registerConstant<KindOfInt64>(                            \
+    makeStaticString(#const_name), (int64_t)const_value);
+#define HHVM_RC_SAME_S(const_name)                                  \
+  Native::registerConstant<KindOfString>(                           \
+    makeStaticString(#const_name), makeStaticString(const_name));
+#define HHVM_RC_SAME_I(const_name)                                  \
+  Native::registerConstant<KindOfInt64>(                            \
+    makeStaticString(#const_name), (int64_t)const_name);
+#define HHVM_RCC_S(class_name, const_name, const_value)             \
+  Native::registerClassConstant<KindOfString>(s_##class_name.get(), \
+    makeStaticString(#const_name), makeStaticString(const_value));
+#define HHVM_RCC_I(class_name, const_name, const_value)             \
+  Native::registerClassConstant<KindOfInt64>(s_##class_name.get(),  \
+    makeStaticString(#const_name), (int64_t)const_value);
+
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 

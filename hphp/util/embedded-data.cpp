@@ -44,7 +44,9 @@ namespace HPHP {
 
 std::string embedded_data::data() {
 #if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
-  return std::string((const char*)LockResource(m_handle), m_len);
+  auto ret = std::string((const char*)LockResource(m_handle), m_len);
+  UnlockResource(m_handle);
+  return ret;
 #else
   std::ifstream ifs(m_filename);
   if (!ifs.good()) return "";

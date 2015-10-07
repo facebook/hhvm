@@ -518,6 +518,70 @@ void first_pass(const Index& index,
 }
 
 //////////////////////////////////////////////////////////////////////
+const StaticString s_ord("ord");
+
+void second_pass(const Index& index,
+  FuncAnalysis& ainfo,
+  borrowed_ptr<php::Block> const blk,
+  State state) {
+  std::vector<Bytecode> newBCs;
+  newBCs.reserve(blk->hhbcs.size());
+
+  for (auto& op : blk->hhbcs) {
+    FTRACE(2, "  == {}\n", show(op));
+
+    auto gen = [&](const Bytecode& newBC) {
+      const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
+      FTRACE(2, "   + {}\n", show(newBC));
+      newBCs.push_back(newBC);
+    };
+
+    if (op.op == Op::SSwitch) {
+      // Tranform SSwitches on single characters into a Switch
+      // which operates on integers instead.
+      bool opt = true;
+      unsigned char min = 0xFFu;
+      unsigned char max = '\0';
+      // We have to ignore the last target in this check, as that
+      // is the default case.
+      for (size_t i = 0; i < op.SSwitch.targets.size() - 1; i++) {
+        auto& targ = op.SSwitch.targets[i];
+        if (targ.first->size() != 1) {
+          opt = false;
+          break;
+        } else {
+          unsigned char c = targ.first->data()[0];
+          if (c > max)
+            max = c;
+          if (c < min)
+            min = c;
+        }
+      }
+
+      if (opt && min < max) {
+        SwitchTab t{};
+        t.reserve(max - min + 3);
+        for (size_t i = 0; i < max - min + 3; i++) {
+          t.push_back(op.SSwitch.targets.back().second);
+        }
+        for (size_t i = 0; i < op.SSwitch.targets.size() - 1; i++) {
+          auto& targ = op.SSwitch.targets[i];
+          t[targ.first->data()[0] - min] = targ.second;
+        }
+        gen(bc::FCallBuiltin{ 1, 1, s_ord.get() });
+        gen(bc::UnboxRNop{});
+        gen(bc::Switch{ t, min, SwitchKind::Bounded });
+      } else {
+        gen(op);
+      }
+    } else {
+      gen(op);
+    }
+  }
+  blk->hhbcs = std::move(newBCs);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 template<class BlockContainer, class AInfo, class Fun>
 void visit_blocks_impl(const char* what,
@@ -565,6 +629,7 @@ void do_optimize(const Index& index, FuncAnalysis ainfo) {
   FTRACE(2, "{:-^70}\n", "Optimize Func");
 
   visit_blocks_mutable("first pass", index, ainfo, first_pass);
+  visit_blocks_mutable("second pass", index, ainfo, second_pass);
 
   /*
    * Note: it's useful to do dead block removal before DCE, so it can remove

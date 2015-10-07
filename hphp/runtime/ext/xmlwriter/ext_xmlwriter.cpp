@@ -617,21 +617,23 @@ void XMLWriterResource::sweep() {
 #define MACRO_OVERLOAD(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,   \
                        arg9, arg10, arg11, MACRO_NAME, ...) MACRO_NAME         \
 
-#define EXTRACT_ARGS(...) MACRO_OVERLOAD(__VA_ARGS__,                          \
+#define MACRO_OVERLOAD_(tuple) MACRO_OVERLOAD tuple
+
+#define EXTRACT_ARGS(...) MACRO_OVERLOAD_((__VA_ARGS__,                        \
                                          EXTRACT_ARGS6, _,                     \
                                          EXTRACT_ARGS5, _,                     \
                                          EXTRACT_ARGS4, _,                     \
                                          EXTRACT_ARGS3, _,                     \
                                          EXTRACT_ARGS2, _,                     \
-                                         EXTRACT_ARGS1)(__VA_ARGS__)           \
+                                         EXTRACT_ARGS1))(__VA_ARGS__)          \
 
-#define CREATE_PARAMS(...) MACRO_OVERLOAD(__VA_ARGS__,                         \
+#define CREATE_PARAMS(...) MACRO_OVERLOAD_((__VA_ARGS__,                       \
                                          CREATE_PARAMS6, _,                    \
                                          CREATE_PARAMS5, _,                    \
                                          CREATE_PARAMS4, _,                    \
                                          CREATE_PARAMS3, _,                    \
                                          CREATE_PARAMS2, _,                    \
-                                         CREATE_PARAMS1)(__VA_ARGS__)          \
+                                         CREATE_PARAMS1))(__VA_ARGS__)         \
 
 #define XMLWRITER_METHOD(return_type, method_name, ...)                        \
   static return_type HHVM_METHOD(XMLWriter, method_name,                       \

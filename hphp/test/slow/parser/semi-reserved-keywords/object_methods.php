@@ -1,4 +1,5 @@
 <?hh
+// This tests the parser. The actual values are arbitrary.
 
 class Bar {
   public static function foreach(): string {
@@ -198,6 +199,9 @@ class Foo {
   public function parent(): int {
     return 63;
   }
+  public function unset(): int {
+    return 64;
+  }
 }
 
 echo Bar::forEach();
@@ -266,4 +270,5 @@ echo $foo->catch();
 //echo $foo->die();
 echo $foo->self();
 echo $foo->parent();
+echo $foo->unset();
 echo "Done\n";

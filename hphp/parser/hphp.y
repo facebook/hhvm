@@ -861,8 +861,9 @@ ident_for_class_const:
   | T_AS
   | T_CATCH
   /* no T_DIE ? */
-  /* no T_SELF ? */
-  /* no T_PARENT ? */
+  /** The following must be made semi-reserved since they were keywords in HHVM
+    * but not PHP. */
+  | T_UNSET
 ;
 
 ident:

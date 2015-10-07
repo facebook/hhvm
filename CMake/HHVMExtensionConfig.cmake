@@ -563,7 +563,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
   if (
     ${libraryName} STREQUAL "boost" OR
     ${libraryName} STREQUAL "editline" OR
-    ${libraryName} STREQUAL "fastlz" OR
     ${libraryName} STREQUAL "folly" OR
     ${libraryName} STREQUAL "iconv" OR
     ${libraryName} STREQUAL "lz4" OR
@@ -689,6 +688,37 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       add_definitions("-DHAVE_LIBFREETYPE")
       add_definitions("-DHAVE_GD_FREETYPE")
       add_definitions("-DENABLE_GD_TTF")
+    endif()
+  elseif (${libraryName} STREQUAL "fastlz")
+    find_package(FastLZ ${requiredVersion})
+    if (NOT FASTLZ_INCLUDE_DIR OR NOT LIBFASTLZ_LIBRARY)
+      if (NOT DEFINED HHVM_USE_BUNDLED_FASTLZ OR HHVM_USE_BUNDLED_FASTLZ)
+        message(STATUS "Failed to find fastlz, so using bundled version.")
+        set(HHVM_USE_BUNDLED_FASTLZ ON CACHE BOOL "If true, use the bundled fastlz library rather than the system one.")
+      else()
+        message("Was told not to use the bundled fastlz, but failed to find the system one!")
+        HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+        return()
+      endif()
+    endif()
+
+    if (${addPaths})
+      if (NOT DEFINED HHVM_USE_BUNDLED_FASTLZ OR NOT HHVM_USE_BUNDLED_FASTLZ)
+        include_directories(${FASTLZ_INCLUDE_DIR})
+        link_libraries(${LIBFASTLZ_LIBRARY})
+      else()
+        include_directories("${TP_DIR}/fastlz")
+        # Shut newer versions of CMake up, because this generator command does in fact,
+        # only emit the dependency if the target is not fastlz, CMake just can't seem
+        # to figure that out, and complains about it. The OLD behavior here tells cmake
+        # to simply not emit the dependency for itself. (which doesn't really exist to
+        # begin with)
+        if(POLICY CMP0038)
+          cmake_policy(SET CMP0038 OLD)
+        endif()
+        link_libraries("$<$<NOT:$<STREQUAL:fastlz,$<TARGET_PROPERTY:NAME>>>:$<TARGET_NAME:fastlz>>")
+      endif()
+      add_definitions("-DHAVE_LIBFASTLZ")
     endif()
   elseif (${libraryName} STREQUAL "fribidi")
     find_package(fribidi ${requiredVersion})

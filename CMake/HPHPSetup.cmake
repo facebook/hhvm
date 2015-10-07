@@ -277,10 +277,6 @@ if (NOT PCRE_LIBRARY)
   add_definitions("-DPCRE_STATIC=1")
 endif()
 
-if (NOT FASTLZ_LIBRARY)
-  include_directories("${TP_DIR}/fastlz")
-endif()
-
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")
 add_definitions("-DMBFL_STATIC")

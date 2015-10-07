@@ -52,7 +52,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
   /**
    * Returns an array containing the values from this Vector.
    */
-  public function toArray(): array;
+  public function toArray(): array<Tv>;
 
   /**
    * Returns an array containing the values from this Vector.

@@ -57,12 +57,12 @@ final class Vector<Tv> implements MutableVector<Tv> {
   /**
    * Returns an array containing the values from this Vector.
    */
-  public function toValuesArray(): array;
+  public function toValuesArray(): array<Tv>;
 
   /**
    * Returns an array whose values are the keys from this Vector.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): array<int>;
 
   public function toVector(): Vector<Tv>;
   public function toImmVector(): ImmVector<Tv>;

@@ -446,12 +446,22 @@ extern __thread int64_t s_perfCounters[];
 #define INC_TPC(n) ++jit::s_perfCounters[jit::tpc_##n];
 
 /*
+ * Return whether the `calleeAR' frame overflows the stack.
+ *
+ * Expects `calleeAR' and its arguments to be on the VM stack.
+ */
+bool checkCalleeStackOverflow(const ActRec* calleeAR);
+
+/*
  * Handle a VM stack overflow condition by throwing an appropriate exception.
  */
 void handleStackOverflow(ActRec* calleeAR);
 
 /*
  * Determine whether something is a stack overflow, and if so, handle it.
+ *
+ * NB: This only works when called from a particular point in a func prologue,
+ * and should probably be renamed.  (Fortunately, that's the only callsite.)
  */
 void handlePossibleStackOverflow(ActRec* calleeAR);
 

@@ -16,6 +16,7 @@
 #ifndef _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 #define _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 
+#include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-object.h"
@@ -31,6 +32,7 @@ struct NativeDataInfo {
   typedef void (*SweepFunc)(ObjectData *sweep);
   typedef Variant (*SleepFunc)(const ObjectData *sleep);
   typedef void (*WakeupFunc)(ObjectData *wakeup, const Variant& data);
+  typedef void (*ScanFunc)(const ObjectData *obj, IMarker& mark);
 
   size_t sz;
   uint16_t odattrs;
@@ -40,6 +42,7 @@ struct NativeDataInfo {
   SweepFunc sweep; // sweep $obj
   SleepFunc sleep; // serialize($obj)
   WakeupFunc wakeup; // unserialize($obj)
+  ScanFunc scan;
 
   bool isSerializable() const {
     return sleep != nullptr && wakeup != nullptr;
@@ -85,7 +88,8 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::DestroyFunc destroy,
                             NativeDataInfo::SweepFunc sweep,
                             NativeDataInfo::SleepFunc sleep,
-                            NativeDataInfo::WakeupFunc wakeup);
+                            NativeDataInfo::WakeupFunc wakeup,
+                            NativeDataInfo::ScanFunc scan);
 
 template<class T>
 void nativeDataInfoInit(ObjectData* obj) {
@@ -152,6 +156,22 @@ void>::type nativeDataInfoWakeup(ObjectData* obj, const Variant& content) {
   always_assert(0);
 }
 
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasScan, scan);
+
+void conservativeScan(const ObjectData* obj, IMarker& mark);
+
+template<class T>
+typename std::enable_if<hasScan<T, void(IMarker&)>::value,
+void>::type nativeDataInfoScan(const ObjectData* obj, IMarker& mark) {
+  data<T>(obj)->scan(mark);
+}
+
+template<class T>
+typename std::enable_if<!hasScan<T, void(IMarker&)>::value,
+void>::type nativeDataInfoScan(const ObjectData* obj, IMarker& mark) {
+  conservativeScan(obj, mark);
+}
+
 enum NDIFlags {
   NONE           = 0,
   // Skipping the ctor/dtor is generally a bad idea
@@ -178,7 +198,9 @@ typename std::enable_if<
                          hasSleep<T, Variant() const>::value
                            ? &nativeDataInfoSleep<T> : nullptr,
                          hasWakeup<T, void(const Variant&, ObjectData*)>::value
-                           ? &nativeDataInfoWakeup<T> : nullptr);
+                           ? &nativeDataInfoWakeup<T> : nullptr,
+                         hasScan<T, void(IMarker&)>::value
+                           ? &nativeDataInfoScan<T> : nullptr);
 }
 
 // Return the ObjectData payload allocated after this NativeNode header
@@ -201,6 +223,15 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 
 Variant nativeDataSleep(const ObjectData* obj);
 void nativeDataWakeup(ObjectData* obj, const Variant& data);
+
+template <typename F>
+void nativeDataScan(const ObjectData* obj, F& mark) {
+  auto ndi = obj->getVMClass()->getNativeDataInfo();
+  assert(ndi);
+  assert(ndi->scan);
+  ExtMarker<F> bridge(mark);
+  ndi->scan(obj, bridge);
+}
 
 size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi);
 

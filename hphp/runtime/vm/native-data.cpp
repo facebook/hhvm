@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/native-data.h"
 
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
@@ -40,6 +41,15 @@ size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
   return ndsize(ndi->sz);
 }
 
+void conservativeScan(const ObjectData* obj, IMarker& mark) {
+  // Conservative scan.
+  auto h = reinterpret_cast<const Header*>(
+    Native::getNativeNode(obj, obj->getVMClass()->getNativeDataInfo())
+  );
+  assert(h->kind() == HeaderKind::NativeData);
+  mark(h, h->size() - sizeof(ObjectData));
+}
+
 void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,
@@ -47,7 +57,8 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::DestroyFunc destroy,
                             NativeDataInfo::SweepFunc sweep,
                             NativeDataInfo::SleepFunc sleep,
-                            NativeDataInfo::WakeupFunc wakeup) {
+                            NativeDataInfo::WakeupFunc wakeup,
+                            NativeDataInfo::ScanFunc scan) {
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   assert((sleep == nullptr && wakeup == nullptr) ||
          (sleep != nullptr && wakeup != nullptr));
@@ -60,6 +71,7 @@ void registerNativeDataInfo(const StringData* name,
   info.sweep = sweep;
   info.sleep = sleep;
   info.wakeup = wakeup;
+  info.scan = scan ? scan : conservativeScan;
   s_nativedatainfo[name] = info;
 }
 

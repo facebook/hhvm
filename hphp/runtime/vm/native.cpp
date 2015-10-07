@@ -250,7 +250,6 @@ void callFunc(const Func* func, void *ctx,
 //////////////////////////////////////////////////////////////////////////////
 
 #define COERCE_OR_CAST(kind, warn_kind)                 \
-  if (paramCoerceMode) {                                \
     if (!tvCoerceParamTo##kind##InPlace(&args[-i])) {   \
       raise_param_type_warning(                         \
         func->name()->data(),                           \
@@ -259,10 +258,7 @@ void callFunc(const Func* func, void *ctx,
         args[-i].m_type                                 \
       );                                                \
       return false;                                     \
-    }                                                   \
-  } else {                                              \
-    tvCastTo##kind##InPlace(&args[-i]);                 \
-  }
+    }
 
 #define CASE(kind)                                      \
   case KindOf##kind:                                    \
@@ -273,8 +269,7 @@ bool coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func) {
   assert(numArgs == func->numParams());
-
-  bool paramCoerceMode = func->isParamCoerceMode();
+  assert(func->isParamCoerceMode());
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];
@@ -309,15 +304,14 @@ bool coerceFCallArgs(TypedValue* args,
       CASE(Array)
       CASE(Resource)
 
-      case KindOfObject: {
-        auto mpi = func->methInfo() ? func->methInfo()->parameters[i] : nullptr;
-        if (pi.hasDefaultValue() || (mpi && mpi->valueLen > 0)) {
+      case KindOfObject:
+        assert(!func->methInfo());
+        if (pi.hasDefaultValue()) {
           COERCE_OR_CAST(NullableObject, Object);
         } else {
           COERCE_OR_CAST(Object, Object);
         }
         break;
-      }
 
       case KindOfUninit:
       case KindOfNull:

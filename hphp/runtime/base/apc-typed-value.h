@@ -93,6 +93,11 @@ struct APCTypedValue {
     return m_data.arr;
   }
 
+  static APCTypedValue* tvUninit();
+  static APCTypedValue* tvNull();
+  static APCTypedValue* tvTrue();
+  static APCTypedValue* tvFalse();
+
   void deleteUncounted();
 
 private:

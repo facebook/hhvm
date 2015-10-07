@@ -33,14 +33,17 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
                                   bool unserializeObj) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
-    case KindOfUninit:
+    case KindOfUninit: {
+      auto value = APCTypedValue::tvUninit();
+      return {value->getHandle(), sizeof(APCTypedValue)};
+    }
     case KindOfNull: {
-      auto value = new APCTypedValue(type);
+      auto value = APCTypedValue::tvNull();
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfBoolean: {
-      auto value = new APCTypedValue(type,
-          static_cast<int64_t>(source.getBoolean()));
+      auto value = source.getBoolean() ? APCTypedValue::tvTrue()
+                                       : APCTypedValue::tvFalse();
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfInt64: {
@@ -140,6 +143,7 @@ void APCHandle::deleteShared() {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
+      return;
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:

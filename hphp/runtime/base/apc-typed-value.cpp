@@ -21,6 +21,30 @@
 
 namespace HPHP {
 
+APCTypedValue* APCTypedValue::tvUninit() {
+  static APCTypedValue* value = new APCTypedValue(KindOfUninit);
+  return value;
+}
+
+APCTypedValue* APCTypedValue::tvNull() {
+  static APCTypedValue* value = new APCTypedValue(KindOfNull);
+  return value;
+}
+
+APCTypedValue* APCTypedValue::tvTrue() {
+  static APCTypedValue* value = new APCTypedValue(
+      KindOfBoolean,
+      static_cast<int64_t>(true));
+  return value;
+}
+
+APCTypedValue* APCTypedValue::tvFalse() {
+  static APCTypedValue* value = new APCTypedValue(
+      KindOfBoolean,
+      static_cast<int64_t>(false));
+  return value;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {

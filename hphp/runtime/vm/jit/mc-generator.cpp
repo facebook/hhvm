@@ -625,11 +625,6 @@ MCGenerator::translate(const TranslArgs& args) {
   SKTRACE(1, args.sk, "translate moved head from %p to %p\n",
           getTopTranslation(args.sk), start);
 
-  // In PGO mode, we free all the profiling data once the TC is full.
-  if (RuntimeOption::EvalJitPGO &&
-      code.mainUsed() >= RuntimeOption::EvalJitAMaxUsage) {
-    m_tx.profData()->free();
-  }
   return start;
 }
 
@@ -1373,7 +1368,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
         int calleeNumParams = func->numNonVariadicParams();
         int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                    nArgs :  calleeNumParams + 1);
-        if (code.prof().contains(start) && !m_tx.profData()->freed()) {
+        if (code.prof().contains(start)) {
           if (isImmutable) {
             m_tx.profData()->addPrologueMainCaller(
               func, calledPrologNumArgs, toSmash);

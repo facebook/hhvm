@@ -148,7 +148,7 @@ int emulate_zend(int argc, char** argv) {
         exit(EXIT_FAILURE);
       }
     }
-    if (strcmp(argv[cnt], "-d")  == 0) {
+    if (strcmp(argv[cnt], "-d")  == 0 || strcmp(argv[cnt], "--define") == 0) {
       ini_fd = get_tempfile_if_not_exists(ini_fd, ini_path);
 
       std::string line = argv[cnt+1];

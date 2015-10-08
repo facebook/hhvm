@@ -44,21 +44,22 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   std::string fname(filename.empty() ? current_executable_path() : filename);
 
 #if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  HMODULE moduleHandle = GetModuleHandleA(fname.data());
   HGLOBAL loadedResource;
   HRSRC   resourceInfo;
   DWORD   resourceSize;
 
-  resourceInfo = FindResource(nullptr, section, RT_RCDATA);
+  resourceInfo = FindResource(moduleHandle, section, RT_RCDATA);
   if (!resourceInfo) {
     return false;
   }
 
-  loadedResource = LoadResource(nullptr, resourceInfo);
+  loadedResource = LoadResource(moduleHandle, resourceInfo);
   if (!loadedResource) {
     return false;
   }
 
-  resourceSize = SizeofResource(nullptr, resourceInfo);
+  resourceSize = SizeofResource(moduleHandle, resourceInfo);
 
   desc->m_filename = fname;
   desc->m_handle = loadedResource;

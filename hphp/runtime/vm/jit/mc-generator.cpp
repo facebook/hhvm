@@ -1509,20 +1509,30 @@ void handleStackOverflow(ActRec* calleeAR) {
   not_reached();
 }
 
-void handlePossibleStackOverflow(ActRec* calleeAR) {
-  assert_native_stack_aligned();
+///////////////////////////////////////////////////////////////////////////////
+
+bool checkCalleeStackOverflow(const ActRec* calleeAR) {
   auto const func = calleeAR->func();
   auto const limit = func->maxStackCells() + kStackCheckPadding;
-  void* const needed_top = reinterpret_cast<TypedValue*>(calleeAR) - limit;
-  void* const limit_addr =
+
+  const void* const needed_top =
+    reinterpret_cast<const TypedValue*>(calleeAR) - limit;
+
+  const void* const limit_addr =
     static_cast<char*>(vmRegsUnsafe().stack.getStackLowAddress()) +
     Stack::sSurprisePageSize;
-  if (needed_top >= limit_addr) {
-    // It was probably a surprise flag trip.  But we can't assert that it is
-    // because background threads are allowed to clear surprise bits
-    // concurrently, so it could be cleared again by now.
-    return;
-  }
+
+  return needed_top < limit_addr;
+}
+
+void handlePossibleStackOverflow(ActRec* calleeAR) {
+  assert_native_stack_aligned();
+
+  // If it's not an overflow, it was probably a surprise flag trip.  But we
+  // can't assert that it is because background threads are allowed to clear
+  // surprise bits concurrently, so it could be cleared again by now.
+  if (!checkCalleeStackOverflow(calleeAR)) return;
+  auto const func = calleeAR->func();
 
   /*
    * Stack overflows in this situation are a slightly different case than

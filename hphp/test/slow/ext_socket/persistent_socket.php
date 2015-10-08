@@ -1,16 +1,14 @@
 <?php
-$port = rand(50000, 60000);
-
-$server = stream_socket_server(
-  "tcp://127.0.0.1:$port",
-  $errno,
-  $errstr,
-  STREAM_SERVER_BIND|STREAM_SERVER_LISTEN
-);
-
-
-if( !$server ) {
-  die("Failed to start server: $errstr ($errno)");
+$port = 0;
+$server = null;
+while (!$server) {
+  $port = rand(50000, 65535);
+  $server = @stream_socket_server(
+    "tcp://127.0.0.1:$port",
+    $errno,
+    $errstr,
+    STREAM_SERVER_BIND|STREAM_SERVER_LISTEN
+  );
 }
 
 $pid = pcntl_fork();

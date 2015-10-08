@@ -109,7 +109,7 @@ void emit_svcreq(CodeBlock& cb,
       }
       live_out |= r;
     }
-    FTRACE(2, ") : stub@{}");
+    FTRACE(2, ") : stub@");
 
     if (persist) {
       FTRACE(2, "<none>");

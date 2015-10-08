@@ -221,7 +221,7 @@ void Vgen::emit(const copy& i) {
 }
 
 void Vgen::emit(const copy2& i) {
-  PhysReg::Map<PhysReg> moves;
+  MovePlan moves;
   Reg64 d0 = i.d0, d1 = i.d1, s0 = i.s0, s1 = i.s1;
   moves[d0] = s0;
   moves[d1] = s1;

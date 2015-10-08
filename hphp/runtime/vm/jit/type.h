@@ -725,7 +725,7 @@ private:
     struct {
       bits_t m_bits : 58;
       bits_t m_ptrKind : 5;
-      bool m_hasConstVal : 1;
+      bits_t m_hasConstVal : 1;
     };
     uint64_t m_rawInt;
   };

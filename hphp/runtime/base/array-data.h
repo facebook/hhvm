@@ -50,7 +50,7 @@ struct ArrayData {
   // a few places in the code that depends on the order or the numeric
   // values. Also, all of the values need to be continuous from 0 to =
   // kNumKinds-1 since we use these values to index into a table.
-  enum ArrayKind : uint8_t {
+  enum ArrayKind : uintptr_t {
     kPackedKind = 0,  // PackedArray with keys in range [0..size)
     kStructKind = 1,  // StructArray with static string keys
     kMixedKind = 2,   // MixedArray arbitrary int or string keys, maybe holes

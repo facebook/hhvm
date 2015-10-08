@@ -101,7 +101,7 @@ private:
   /*
    * Mask of specializations that a given ArraySpec represents.
    */
-  enum SortOf : uint8_t {
+  enum SortOf : uintptr_t {
     IsTop     = 0, // top
     IsBottom  = 1 << 0,
     HasKind   = 1 << 1,
@@ -194,7 +194,12 @@ private:
   /*
    * Sort tag.
    */
-  enum SortOf : uint8_t { IsTop, IsBottom, IsSub, IsExact, };
+  enum SortOf : uintptr_t {
+    IsTop,
+    IsBottom,
+    IsSub,
+    IsExact,
+  };
 
   /*
    * Data members.

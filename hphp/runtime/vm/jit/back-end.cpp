@@ -28,6 +28,10 @@ std::unique_ptr<BackEnd> newBackEnd() {
     return x64::newBackEnd();
   case Arch::ARM:
     return arm::newBackEnd();
+  case Arch::PPC64:
+    // Return null to enable interpreter mode
+    // JIT for PPC64 in under development
+    return nullptr;
   }
   not_reached();
 }

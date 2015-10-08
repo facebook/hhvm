@@ -29,6 +29,8 @@ ClassConstantMapMap s_class_constant_map;
 static size_t numGPRegArgs() {
 #ifdef __AARCH64EL__
   return 8; // r0-r7
+#elif defined(__powerpc64__)
+  return 31;
 #else // amd64
   if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
     return 8;
@@ -90,6 +92,12 @@ static void populateArgs(const Func* func,
     if (type == KindOfDouble) {
       if (SIMD_count < kNumSIMDRegs) {
         SIMD_args[SIMD_count++] = args[-i].m_data.dbl;
+#if defined(__powerpc64__)
+      // According with ABI, the GP index must be incremented after
+      // a floating point function argument
+      if (GP_count < numGP)
+        GP_args[GP_count++] = 0;
+#endif
       } else if (GP_count < numGP) {
         // We have enough double args to hit the stack
         // but we haven't finished filling the GP regs yet.

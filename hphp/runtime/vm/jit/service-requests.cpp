@@ -219,6 +219,8 @@ size_t stub_size() {
       return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
     case Arch::ARM:
       not_implemented();
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -240,6 +242,9 @@ FPInvOffset extract_spoff(TCA stub) {
       }
 
     case Arch::ARM:
+      not_implemented();
+
+    case Arch::PPC64:
       not_implemented();
   }
   not_reached();

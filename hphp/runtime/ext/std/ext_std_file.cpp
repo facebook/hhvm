@@ -1019,8 +1019,8 @@ Variant HHVM_FUNCTION(filetype,
   case fs::file_type::block_file:  return "block";
   case fs::file_type::regular_file:  return "file";
   case fs::file_type::socket_file: return "socket";
+  default: return "unknown";
   }
-  return "unknown";
 }
 
 Variant HHVM_FUNCTION(linkinfo,

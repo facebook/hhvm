@@ -63,12 +63,12 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   /**
    * Returns an array containing the values from this Map.
    */
-  public function toValuesArray(): array;
+  public function toValuesArray(): array<Tv>;
 
   /**
    * Returns an array whose values are this map's keys.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): array<Tk>;
 
   public function toVector(): Vector<Tv>;
   public function toImmVector(): ImmVector<Tv>;

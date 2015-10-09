@@ -1,4 +1,1 @@
-[1]intersect(tuple([2]intersect(X), Tstring, Tint), tuple(Tint, Tstring))
-intersect([2]intersect(X), Tint)
-intersect(intersect(X), Tint)
 No errors

@@ -1,0 +1,26 @@
+array(3) {
+  [0]=>
+  string(16) "Aaafaaba BbaCZbx"
+  [1]=>
+  string(35) "34wad3423 basd3z34qwe &&$#7723ABaac"
+  [2]=>
+  string(38) "kjklsdfjkldsiu3dklj12kl dsf;s4a;as bas"
+}
+array(3) {
+  [0]=>
+  string(5) "f CZx"
+  [1]=>
+  string(28) "34wd3423 sd3z34qwe &&$#7723c"
+  [2]=>
+  string(34) "kjklsdfjkldsiu3dklj12kl dsf;s4;s s"
+}
+int(17)
+array(1) {
+  [0]=>
+  string(38) "kjklsdfjkldsiu3dklj12kl dsf;s4a;as bas"
+}
+array(1) {
+  [0]=>
+  string(34) "kjklsdfjkldsiu3dklj12kl dsf;s4;s s"
+}
+int(4)

@@ -28,6 +28,12 @@ echo %s
             os.fchmod(f.fileno(), 0o700)
 
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+            f.write(r"""
+# some comment
+use_mini_state = true
+""")
+
+        with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             # we can't just write 'echo ...' inline because Hack server will
             # be passing this command some command-line options
             f.write(r"""
@@ -35,12 +41,6 @@ echo %s
 assume_php = false
 load_mini_script = %s
 """ % os.path.join(self.repo_dir, 'server_options.sh'))
-
-        with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
-            f.write(r"""
-# some comment
-assume_php = false
-""")
 
     def check_cmd(self, expected_output, stdin=None, options=None):
         options = [] if options is None else options

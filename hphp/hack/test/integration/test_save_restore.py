@@ -43,6 +43,7 @@ echo %s
             # be passing this command some command-line options
             f.write(r"""
 # some comment
+assume_php = false
 load_script = %s
 """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
@@ -60,20 +61,11 @@ load_script = %s
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
 
-    def test_mtime_update(self):
-        """
-        Update mtimes of files and check that errors remain unchanged.
-        """
+    def test_server_output(self):
         self.write_load_config()
         server_proc = self.start_hh_server()
         ensure_output_contains(server_proc.stderr,
                 'Load state found at %s.' % self.saved_state_path())
-
-        self.check_cmd(self.initial_errors)
-        touch(os.path.join(self.repo_dir, 'foo_1.php'))
-        self.check_cmd(self.initial_errors)
-        touch(os.path.join(self.repo_dir, 'foo_2.php'))
-        self.check_cmd(self.initial_errors)
 
     def test_options_cmd(self):
         """
@@ -91,10 +83,11 @@ echo "$2" >> {out}
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             f.write(r"""
 # some comment
+assume_php = false
 load_script = %s
             """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
-        self.check_cmd(self.initial_errors)
+        self.check_cmd(['No errors!'])
 
         version = proc_call([
             hh_server,

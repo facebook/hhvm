@@ -29,6 +29,13 @@
 #define ETCH_R_VM_FP      %rbp
 #define ETCH_R_VM_SP      %rbx
 #define ETCH_R_VM_TL      %r12
+/* Service Request Registers must match svcreq_args list on abi-x64.cpp */
+#define ETCH_SVCREQ_REQ   %rdi
+#define ETCH_SVCREQ_STUB  %r10
+#define ETCH_SVCREQ_ARG1  %rsi
+#define ETCH_SVCREQ_ARG2  %rdx
+#define ETCH_SVCREQ_ARG3  %rcx
+#define ETCH_SVCREQ_ARG4  %r8
 
 #elif defined(__APPLE__)
 #define CFI(x)            .cfi_##x
@@ -56,6 +63,13 @@
 #define ETCH_R_VM_FP      %rbp
 #define ETCH_R_VM_SP      %rbx
 #define ETCH_R_VM_TL      %r12
+/* Service Request Registers must match svcreq_args list on abi-x64.cpp */
+#define ETCH_SVCREQ_REQ   %rdi
+#define ETCH_SVCREQ_STUB  %r10
+#define ETCH_SVCREQ_ARG1  %rsi
+#define ETCH_SVCREQ_ARG2  %rdx
+#define ETCH_SVCREQ_ARG3  %rcx
+#define ETCH_SVCREQ_ARG4  %r8
 
 #else /* Other x86 (e.g. linux) */
 #define CFI(x)            .cfi_##x
@@ -83,6 +97,13 @@
 #define ETCH_R_VM_FP      %rbp
 #define ETCH_R_VM_SP      %rbx
 #define ETCH_R_VM_TL      %r12
+/* Service Request Registers must match svcreq_args list on abi-x64.cpp */
+#define ETCH_SVCREQ_REQ   %rdi
+#define ETCH_SVCREQ_STUB  %r10
+#define ETCH_SVCREQ_ARG1  %rsi
+#define ETCH_SVCREQ_ARG2  %rdx
+#define ETCH_SVCREQ_ARG3  %rcx
+#define ETCH_SVCREQ_ARG4  %r8
 #endif
 
 #endif // incl_ETCH_HELPERS_H

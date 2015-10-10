@@ -103,9 +103,22 @@ ETCH_LABEL(enterTCHelper$prologue):
   CFI(endproc)
   ETCH_SIZE(enterTCHelper)
 
-  // handleSRHelper: Translated code will jump to this stub to perform all
-  // service requests. It calls out to C++ to handle the request, then jumps
-  // to the returned address (which may be the callToExit stub).
+/*
+ * handleSRHelper
+ *
+ * Translated code will jump to this stub to perform all
+ * service requests. It calls out to C++ to handle the request, then jumps
+ * to the returned address (which may be the callToExit stub).
+ *
+ * The columns are registers of:
+ * X64 ABI
+ *   rdi:  ServiceRequest req (r_svcreq_req)
+ *   r10:  TCA stub (r_svcreq_stub)
+ *   rsi:  args[0]
+ *   rdx:  args[1]
+ *   rcx:  args[2]
+ *   r8 :  args[3]
+ */
   ETCH_ALIGN16
   ETCH_SECTION(handleSRHelper)
   .globl ETCH_NAME(handleSRHelper)
@@ -117,12 +130,12 @@ ETCH_NAME(handleSRHelper):
   mov ETCH_R_VM_FP, 0x20(ETCH_R_VM_TL)
 
   // Push a ReqInfo struct onto the stack and call handleServiceRequest.
-  push %r8
-  push %rcx
-  push %rdx
-  push %rsi
-  push %r10
-  push %rdi
+  push ETCH_SVCREQ_ARG4
+  push ETCH_SVCREQ_ARG3
+  push ETCH_SVCREQ_ARG2
+  push ETCH_SVCREQ_ARG1
+  push ETCH_SVCREQ_STUB
+  push ETCH_SVCREQ_REQ
   CFI2(adjust_cfa_offset, 0x30)
 
   // call mcg->handleServiceRequest(%rsp)
@@ -139,7 +152,8 @@ ETCH_NAME(handleSRHelper):
   mov 0x10(ETCH_R_VM_TL), ETCH_R_VM_SP
   mov 0x20(ETCH_R_VM_TL), ETCH_R_VM_FP
 
-  jmp *%rax
+  jmp *ETCH_RET1
+
   CFI(endproc)
   ETCH_SIZE(handleSRHelper)
 

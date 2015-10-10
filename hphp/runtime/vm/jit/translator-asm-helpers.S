@@ -116,7 +116,7 @@ ETCH_NAME(handleSRHelper):
   mov ETCH_R_VM_SP, 0x10(ETCH_R_VM_TL)
   mov ETCH_R_VM_FP, 0x20(ETCH_R_VM_TL)
 
-  // Push a ServiceReqInfo struct onto the stack and call handleServiceRequest.
+  // Push a ReqInfo struct onto the stack and call handleServiceRequest.
   push %r8
   push %rcx
   push %rdx
@@ -130,7 +130,7 @@ ETCH_NAME(handleSRHelper):
   mov %rsp, ETCH_ARG2
   call MCGenerator_handleServiceRequest
 
-  // Pop the ServiceReqInfo off the stack.
+  // Pop the ReqInfo struct off the stack.
   add $0x30, %rsp
   CFI2(adjust_cfa_offset, -0x30)
 

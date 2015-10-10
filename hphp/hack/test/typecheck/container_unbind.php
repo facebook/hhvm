@@ -100,3 +100,15 @@ function testShape(): void {
 
   take_int($x[0]);
 }
+
+function testShapeLikeArray(): void {
+  $x = Vector {4};
+  $y = Vector {'zzz'};
+
+  $m = new MyContainer();
+
+  $m->setMapArray(array('x' => $x[0]));
+  $m->setMapArray(array('x' => $y[0]));
+
+  take_int($x[0]);
+}

@@ -690,7 +690,10 @@ Variant HHVM_FUNCTION(stream_socket_client,
                       int flags /* = 0 */,
                       const Variant& context /* = null_variant */) {
   HostURL hosturl(static_cast<const std::string>(remote_socket));
-  return sockopen_impl(hosturl, errnum, errstr, timeout, false, context);
+  bool persistent = (flags & k_STREAM_CLIENT_PERSISTENT) ==
+    k_STREAM_CLIENT_PERSISTENT;
+
+  return sockopen_impl(hosturl, errnum, errstr, timeout, persistent, context);
 }
 
 bool HHVM_FUNCTION(stream_socket_enable_crypto,

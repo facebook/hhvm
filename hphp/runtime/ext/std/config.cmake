@@ -10,6 +10,8 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
     ext_std_math.cpp
     ext_std_misc.cpp
     ext_std_network.cpp
+    ext_std_network-posix.cpp
+    ext_std_network-win.cpp
     ext_std_options.cpp
     ext_std_output.cpp
     ext_std_string.cpp
@@ -24,6 +26,7 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
     ext_std_math.h
     ext_std_misc.h
     ext_std_network.h
+    ext_std_network-internal.h
     ext_std_options.h
     ext_std_output.h
     ext_std_string.h

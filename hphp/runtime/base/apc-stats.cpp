@@ -183,17 +183,12 @@ APCStats::APCStats() : m_valueSize(nullptr)
                      , m_primedEntries(nullptr)
                      , m_livePrimedEntries(nullptr)
                      , m_detailedStats(nullptr) {
-  m_valueSize = ServiceData::createTimeseries(
-      "apc.value_size", {ServiceData::StatsType::SUM});
-  m_keySize = ServiceData::createTimeseries(
-      "apc.key_size", {ServiceData::StatsType::SUM});
-  m_inFileSize = ServiceData::createTimeseries(
-      "apc.in_file_size", {ServiceData::StatsType::SUM});
-  m_livePrimedSize = ServiceData::createTimeseries(
-      "apc.primed_live_size", {ServiceData::StatsType::SUM});
-  m_pendingDeleteSize = ServiceData::createTimeseries(
-      "apc.pending_delete_size", {ServiceData::StatsType::SUM});
-
+  m_valueSize = ServiceData::createCounter("apc.value_size.sum");
+  m_keySize = ServiceData::createCounter("apc.key_size.sum");
+  m_inFileSize = ServiceData::createCounter("apc.in_file_size.sum");
+  m_livePrimedSize = ServiceData::createCounter("apc.primed_live_size.sum");
+  m_pendingDeleteSize =
+    ServiceData::createCounter("apc.pending_delete_size.sum");
   m_entries = ServiceData::createCounter("apc.entries");
   m_primedEntries = ServiceData::createCounter("apc.primed_entries");
   m_livePrimedEntries =
@@ -209,13 +204,13 @@ APCStats::~APCStats() {
 
 std::string APCStats::getStatsInfo() const {
   std::string info("APC info\nValue size: ");
-  info += std::to_string(m_valueSize->getSum()) +
+  info += std::to_string(m_valueSize->getValue()) +
           "\nKey size: " +
-          std::to_string(m_keySize->getSum()) +
+          std::to_string(m_keySize->getValue()) +
           "\nMapped to file data size: " +
-          std::to_string(m_inFileSize->getSum()) +
+          std::to_string(m_inFileSize->getValue()) +
           "\nIn memory primed data size: " +
-          std::to_string(m_livePrimedSize->getSum()) +
+          std::to_string(m_livePrimedSize->getValue()) +
           "\nEntries count: " +
           std::to_string(m_entries->getValue()) +
           "\nPrimed entries count: " +
@@ -224,7 +219,7 @@ std::string APCStats::getStatsInfo() const {
           std::to_string(m_livePrimedEntries->getValue());
   if (apcExtension::UseUncounted) {
     info += "\nPending deletes via treadmill size: " +
-            std::to_string(m_pendingDeleteSize->getSum());
+            std::to_string(m_pendingDeleteSize->getValue());
   }
   if (m_detailedStats) {
     info += m_detailedStats->getStatsInfo();
@@ -253,19 +248,19 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
                                             m_livePrimedEntries->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_valuesSize.get(),
-                                            m_valueSize->getSum()));
+                                            m_valueSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_keysSize.get(),
-                                            m_keySize->getSum()));
+                                            m_keySize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primedInFileSize.get(),
-                                            m_inFileSize->getSum()));
+                                            m_inFileSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primeLiveSize.get(),
-                                            m_livePrimedSize->getSum()));
+                                            m_livePrimedSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_pendingDeleteSize.get(),
-                                            m_pendingDeleteSize->getSum()));
+                                            m_pendingDeleteSize->getValue()));
   if (m_detailedStats) {
     m_detailedStats->collectStats(stats);
   }

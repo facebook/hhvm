@@ -181,6 +181,9 @@ class ExportedCounter {
   ExportedCounter() : m_value(0) {}
   void increment() { m_value.fetch_add(1, std::memory_order_relaxed); }
   void decrement() { m_value.fetch_sub(1, std::memory_order_relaxed); }
+  void addValue(int64_t value) {
+    m_value.fetch_add(value, std::memory_order_relaxed);
+  }
   void setValue(int64_t value) {
     m_value.store(value, std::memory_order_relaxed);
   }

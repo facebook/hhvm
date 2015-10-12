@@ -101,7 +101,7 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
     assert(!features.isCircular);
     if (!features.hasObjectOrResource) {
       return WrapArray(
-        { APCTypedValue::MakeSharedArray(const_cast<ArrayData*>(array)),
+        { APCArray::MakeUncountedArray(const_cast<ArrayData*>(array)),
           getMemSize(array) + sizeof(APCTypedValue) },
         obj->collectionType()
       );

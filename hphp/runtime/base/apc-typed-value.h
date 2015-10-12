@@ -24,34 +24,41 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct APCTypedValue {
-  /*
-   * TODO(#7411437): This function should not be here.
-   */
-  static APCHandle* MakeSharedArray(ArrayData* array);
-
-  APCTypedValue(DataType type, int64_t data) : m_handle(type) {
+  // Int or bool
+  enum class Bool {};
+  APCTypedValue(Bool, bool data) : m_handle(KindOfBoolean) {
     m_data.num = data;
   }
 
-  APCTypedValue(DataType type, double data) : m_handle(type) {
+  explicit APCTypedValue(int64_t data) : m_handle(KindOfInt64) {
+    m_data.num = data;
+  }
+
+  explicit APCTypedValue(double data) : m_handle(KindOfDouble) {
     m_data.dbl = data;
   }
 
-  APCTypedValue(DataType type, StringData* data) : m_handle(type) {
+  enum class StaticStr {};
+  APCTypedValue(StaticStr, StringData* data) : m_handle(KindOfStaticString) {
+    assert(data->isStatic());
     m_data.str = data;
   }
 
-  explicit APCTypedValue(StringData* data) : m_handle(KindOfString) {
+  enum class UncountedStr {};
+  APCTypedValue(UncountedStr, StringData* data) : m_handle(KindOfString) {
+    assert(data->isUncounted());
     m_handle.setUncounted();
     m_data.str = data;
   }
 
   explicit APCTypedValue(ArrayData* data) : m_handle(KindOfArray) {
+    assert(data->isUncounted());
     m_handle.setUncounted();
     m_data.arr = data;
   }
 
   explicit APCTypedValue(DataType type) : m_handle(type) {
+    assert(isNullType(type)); // Uninit or Null
     m_data.num = 0;
   }
 

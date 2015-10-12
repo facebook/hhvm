@@ -32,33 +32,16 @@ APCTypedValue* APCTypedValue::tvNull() {
 }
 
 APCTypedValue* APCTypedValue::tvTrue() {
-  static APCTypedValue* value = new APCTypedValue(
-      KindOfBoolean,
-      static_cast<int64_t>(true));
+  static auto value = new APCTypedValue(APCTypedValue::Bool{}, true);
   return value;
 }
 
 APCTypedValue* APCTypedValue::tvFalse() {
-  static APCTypedValue* value = new APCTypedValue(
-      KindOfBoolean,
-      static_cast<int64_t>(false));
+  static auto value = new APCTypedValue(APCTypedValue::Bool{}, false);
   return value;
 }
 
 //////////////////////////////////////////////////////////////////////
-
-APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
-  assert(apcExtension::UseUncounted);
-  APCTypedValue* value;
-  if (array->isPacked()) {
-    value = new APCTypedValue(MixedArray::MakeUncountedPacked(array));
-  } else if (array->isStruct()) {
-    value = new APCTypedValue(StructArray::MakeUncounted(array));
-  } else {
-    value = new APCTypedValue(MixedArray::MakeUncounted(array));
-  }
-  return value->getHandle();
-}
 
 void APCTypedValue::deleteUncounted() {
   assert(m_handle.isUncounted());

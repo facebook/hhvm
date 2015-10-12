@@ -1202,15 +1202,23 @@ void emitMod(IRGS& env) {
       gen(env, JmpZero, taken, tr);
     },
     [&] {
-      // Make progress before side-exiting to the next instruction: raise a
-      // warning and push false.
       hint(env, Block::Hint::Unlikely);
-      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
-      gen(env, RaiseWarning, msg);
-      gen(env, DecRef, btr);
-      gen(env, DecRef, btl);
-      push(env, cns(env, false));
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+
+      if (RuntimeOption::PHP7_IntSemantics) {
+        // TODO(https://github.com/facebook/hhvm/issues/6012)
+        // This should throw a DivisionByZeroError.
+        auto const msg = cns(env, makeStaticString(Strings::MODULO_BY_ZERO));
+        gen(env, ThrowInvalidOperation, msg);
+      } else {
+        // Make progress before side-exiting to the next instruction: raise a
+        // warning and push false.
+        auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+        gen(env, RaiseWarning, msg);
+        gen(env, DecRef, btr);
+        gen(env, DecRef, btl);
+        push(env, cns(env, false));
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      }
     }
   );
 

@@ -77,6 +77,10 @@ using std::abs;
 
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 /* only used here, let do a generic fixed point integers later if required by other
    part of GD */
 typedef long gdFixed;

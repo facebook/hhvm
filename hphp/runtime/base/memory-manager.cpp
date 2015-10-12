@@ -704,7 +704,7 @@ void MemoryManager::checkHeap() {
         apc_arrays.insert(&h->apc_);
         break;
       case HeaderKind::String:
-        if (h->str_.isShared()) apc_strings.insert(&h->str_);
+        if (h->str_.isProxy()) apc_strings.insert(&h->str_);
         break;
       case HeaderKind::Packed:
       case HeaderKind::Struct:
@@ -756,7 +756,7 @@ void MemoryManager::checkHeap() {
   for (StringDataNode *next, *n = m_strings.next; n != &m_strings; n = next) {
     next = n->next;
     auto const s = StringData::node2str(n);
-    assert(s->isShared());
+    assert(s->isProxy());
     assert(apc_strings.find(s) != apc_strings.end());
     apc_strings.erase(s);
   }

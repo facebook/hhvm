@@ -54,12 +54,12 @@ enum CopyStringMode { CopyString };
  * StringData's have two different modes, not all of which we want to
  * keep forever.  The main mode is Flat, which means StringData is a
  * header in a contiguous allocation with the character array for the
- * string.  The other is for APCString-backed StringDatas.
+ * string.  The other (Proxy) is for APCString-backed StringDatas.
  *
  * StringDatas can also be allocated in multiple ways.  Normally, they
  * are created through one of the Make overloads, which drops them in
  * the request-local heap.  They can also be low-malloced (for static
- * strings), or malloc'd (MakeMalloc) for APC strings.
+ * strings), or malloc'd (MakeMalloc) for APC shared or uncounted strings.
  *
  * Here's a breakdown of string modes, and which configurations are
  * allowed in which allocation mode:
@@ -67,7 +67,7 @@ enum CopyStringMode { CopyString };
  *          | Static | Malloced | Normal (request local)
  *          +--------+----------+-----------------------
  *   Flat   |   X    |     X    |    X
- *   Shared |        |          |    X
+ *   Proxy  |        |          |    X
  */
 struct StringData {
   friend class APCString;
@@ -131,10 +131,10 @@ struct StringData {
   static StringData* Make(size_t reserve);
 
   /*
-   * Create a request-local StringData that wraps an APCString that contains a
-   * string. Ref-count is pre-initialized to 1.
+   * Create a request-local "Proxy" StringData that wraps an APCString.
+   * Ref-count is pre-initialized to 1.
    */
-  static StringData* Make(const APCString* shared);
+  static StringData* MakeProxy(const APCString* apcstr);
 
   /*
    * Allocate a string with malloc, using the low-memory allocator if
@@ -166,7 +166,7 @@ struct StringData {
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
 
   /*
-   * Shared StringData's have a sweep list running through them for
+   * Proxy StringData's have a sweep list running through them for
    * decrefing the APCString they are fronting.  This function
    * must be called at request cleanup time to handle this.
    */
@@ -438,31 +438,31 @@ struct StringData {
 
   static StringData* node2str(StringDataNode* node) {
     return reinterpret_cast<StringData*>(
-      uintptr_t(node) - offsetof(SharedPayload, node)
+      uintptr_t(node) - offsetof(Proxy, node)
                    - sizeof(StringData)
     );
   }
-  bool isShared() const;
+  bool isProxy() const;
 
 private:
-  struct SharedPayload {
+  struct Proxy {
     StringDataNode node;
-    const APCString* shared;
+    const APCString* apcstr;
   };
 
 private:
   static StringData* MakeShared(folly::StringPiece sl, bool trueStatic);
-  static StringData* MakeAPCSlowPath(const APCString*);
+  static StringData* MakeProxySlowPath(const APCString*);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
   ~StringData() = delete;
 
 private:
-  const void* voidPayload() const;
-  void* voidPayload();
-  const SharedPayload* sharedPayload() const;
-  SharedPayload* sharedPayload();
+  const void* payload() const;
+  void* payload();
+  const Proxy* proxy() const;
+  Proxy* proxy();
 
   bool isFlat() const;
   bool isImmutable() const;

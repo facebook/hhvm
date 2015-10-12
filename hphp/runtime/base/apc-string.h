@@ -42,7 +42,9 @@ struct APCString {
     if (handle->isUncounted()) {
       return Variant{APCTypedValue::fromHandle(handle)->getStringData()};
     }
-    return Variant::attach(StringData::Make(APCString::fromHandle(handle)));
+    return Variant::attach(
+      StringData::MakeProxy(APCString::fromHandle(handle))
+    );
   }
 
   static APCString* fromHandle(APCHandle* handle) {

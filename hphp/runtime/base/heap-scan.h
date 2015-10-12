@@ -80,9 +80,9 @@ template<class F> void scanHeader(const Header* h, F& mark) {
     case HeaderKind::Ref:
       return h->ref_.scan(mark);
     case HeaderKind::SmallMalloc:
-      return mark((&h->small_)+1, h->small_.padbytes);
+      return mark((&h->small_)+1, h->small_.padbytes - sizeof(SmallNode));
     case HeaderKind::BigMalloc:
-      return mark((&h->big_)+1, h->big_.nbytes);
+      return mark((&h->big_)+1, h->big_.nbytes - sizeof(BigNode));
     case HeaderKind::NativeData:
       return h->nativeObj()->scan(mark);
     case HeaderKind::ResumableFrame:

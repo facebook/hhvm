@@ -21,52 +21,11 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/htonll.h"
 
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <unistd.h>
-#if defined(__FreeBSD__)
-# include <sys/endian.h>
-#elif defined(__APPLE__)
-# include <machine/endian.h>
-# include <libkern/OSByteOrder.h>
-#else
-# include <endian.h>
-# include <byteswap.h>
-#endif
 #include <stdexcept>
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-# define htolell(x) (x)
-# define letohll(x) (x)
-# ifndef htonll
-# if defined(__FreeBSD__)
-#  define htonll(x) bswap64(x)
-#  define ntohll(x) bswap64(x)
-# elif defined(__APPLE__)
-#  define htonll(x) OSSwapInt64(x)
-#  define ntohll(x) OSSwapInt64(x)
-# else
-#  define htonll(x) bswap_64(x)
-#  define ntohll(x) bswap_64(x)
-# endif
-# endif
-#else
-# if defined(__FreeBSD__)
-#  define htolell(x) bswap64(x)
-#  define letohll(x) bswap64(x)
-# elif defined(__APPLE__)
-#  define htolell(x) OSSwapInt64(x)
-#  define letohll(x) OSSwapInt64(x)
-# else
-#  define htolell(x) bswap_64(x)
-#  define letohll(x) bswap_64(x)
-# endif
-# ifndef htonll
-# define htonll(x) (x)
-# define ntohll(x) (x)
-# endif
-#endif
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////

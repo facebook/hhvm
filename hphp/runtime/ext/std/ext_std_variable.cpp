@@ -259,8 +259,8 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
-                                   const Array& class_whitelist /* =[] */) {
-  return unserialize_from_string(str, class_whitelist);
+                                   const Array& options /* =[] */) {
+  return unserialize_from_string(str, options);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -53,7 +53,7 @@ struct VariableUnserializer {
     size_t len,
     Type type,
     bool allowUnknownSerializableClass = false,
-    const Array& classWhitelist = null_array);
+    const Array& options = null_array);
 
   /*
    * Main API; unserialize the buffer and return as a Variant.
@@ -88,7 +88,7 @@ struct VariableUnserializer {
   /*
    * True if clsName is allowed to be unserialized.
    */
-  bool isWhitelistedClass(const String& clsName) const;
+  bool whitelistCheck(const String& clsName) const;
 
   /*
    * Set the beginning and end of internal buffer.
@@ -139,7 +139,7 @@ private:
   const char* m_end;
   req::vector<RefInfo> m_refs;
   bool m_unknownSerializable;
-  const Array& m_classWhiteList;    // classes allowed to be unserialized
+  const Array& m_options; // e.g. classes allowed to be unserialized
 };
 
 void reserialize(VariableUnserializer *uns, StringBuffer &buf);

@@ -192,21 +192,21 @@ char const kUnserializableString[] = "\x01";
 String f_serialize(const Variant& value);
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
-                       const Array& class_whitelist = null_array);
+                       const Array& options = null_array);
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
-                       const Array& class_whitelist = null_array);
+                       const Array& options = null_array);
 
 inline Variant unserialize_from_buffer(const char* str, int len,
-                                       const Array& class_whitelist = null_array) {
+                                       const Array& options = null_array) {
   return unserialize_ex(str, len,
                         VariableUnserializer::Type::Serialize,
-                        class_whitelist);
+                        options);
 }
 
 inline Variant unserialize_from_string(const String& str,
-                                       const Array& class_whitelist = null_array) {
-  return unserialize_from_buffer(str.data(), str.size(), class_whitelist);
+                                       const Array& options = null_array) {
+  return unserialize_from_buffer(str.data(), str.size(), options);
 }
 
 String resolve_include(const String& file, const char* currentDir,

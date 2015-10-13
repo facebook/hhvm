@@ -52,7 +52,7 @@ void HHVM_FUNCTION(var_dump,
 void HHVM_FUNCTION(debug_zval_dump, const Variant& variable);
 String HHVM_FUNCTION(serialize, const Variant& value);
 Variant HHVM_FUNCTION(unserialize, const String& str,
-                      const Array& class_whitelist = empty_array_ref);
+                      const Array& options = empty_array_ref);
 
 ///////////////////////////////////////////////////////////////////////////////
 // variable table

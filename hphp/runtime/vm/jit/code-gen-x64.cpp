@@ -19,8 +19,10 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
-#include <unwind.h>
 #include <vector>
+#ifndef _MSC_VER
+#include <unwind.h>
+#endif
 
 #include <folly/ScopeGuard.h>
 #include <folly/Format.h>

@@ -24,7 +24,9 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#ifndef _MSC_VER
 #include <unwind.h>
+#endif
 
 #include <algorithm>
 #include <exception>

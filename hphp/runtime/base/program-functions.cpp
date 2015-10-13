@@ -1269,6 +1269,7 @@ static int execute_program_impl(int argc, char** argv) {
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
+    ("modules", "display modules")
     ("php", "emulate the standard php command line")
     ("compiler-id", "display the git hash for the compiler")
     ("repo-schema", "display the repository schema id")
@@ -1452,6 +1453,14 @@ static int execute_program_impl(int argc, char** argv) {
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
+    return 0;
+  }
+  if (vm.count("modules")) {
+    Array exts = ExtensionRegistry::getLoaded();
+    cout << "[PHP Modules]" << "\n";
+    for (ArrayIter iter(exts); iter; ++iter) {
+      cout << iter.second().toString().toCppString() << "\n";
+    }
     return 0;
   }
   if (vm.count("compiler-id")) {

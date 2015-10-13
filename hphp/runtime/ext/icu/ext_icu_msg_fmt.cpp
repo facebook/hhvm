@@ -20,8 +20,8 @@ class MessageFormatAdapter {
 public:
     MessageFormatAdapter() = delete;
 
-    static const Formattable::Type* getArgTypeList(const MessageFormat& m,
-                                                   int32_t& count) {
+    static const Formattable::Type* getArgTypeListHHVM(const MessageFormat& m,
+                                                       int32_t& count) {
       return m.getArgTypeList(count);
     }
 
@@ -196,7 +196,7 @@ bool MessageFormatter::processNamedTypes() {
 bool MessageFormatter::processNumericTypes() {
   auto formatter = formatterObj();
   int32_t count = 0;
-  auto types = MessageFormatAdapter::getArgTypeList(*formatter, count);
+  auto types = MessageFormatAdapter::getArgTypeListHHVM(*formatter, count);
 
   clearError();
   m_namedParts.clear();

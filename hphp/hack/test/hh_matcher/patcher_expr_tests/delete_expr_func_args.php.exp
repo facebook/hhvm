@@ -1,0 +1,20 @@
+
+<?hh // strict
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+class Foo {
+  public function bar(): void {
+    "Stmt 1";
+    if ($val) {
+      "nested stmt";
+      $var->afun("arg3");
+    } else {
+      "else clause";
+      $var->afun("arg3");
+    }
+    "Not nested";
+    $var->afun("arg3");
+  }
+}
+
+

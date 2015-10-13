@@ -124,6 +124,13 @@ int emulate_zend(int argc, char** argv) {
       need_file = false;
       break;
     }
+    if (strcmp(argv[cnt], "--modules") == 0) { 
+    // zend has a -m flag but we're already using it for --mode
+      newargv.push_back("--modules");
+      cnt = argc; // no need to check the rest of options and arguments
+      need_file = false;
+      break;
+    }
     if (strcmp(argv[cnt], "-f") == 0 || strcmp(argv[cnt], "--file") == 0) {
       cnt++;
       newargv.push_back(lint ? "-l" : "-f");

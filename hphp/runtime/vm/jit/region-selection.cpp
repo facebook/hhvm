@@ -1332,6 +1332,8 @@ std::string show(const RegionDesc& region) {
     }
   }
 
+  ret += "}\n";
+
   return ret;
 }
 

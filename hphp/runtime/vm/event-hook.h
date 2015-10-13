@@ -45,6 +45,14 @@ class EventHook {
     PseudoMain,
     Eval,
   };
+  enum {
+    ProfileEnters = 1,
+    ProfileExits = 2,
+    ProfileDefault = 3,
+    ProfileFramePointers = 4,
+    ProfileConstructors = 8,
+  };
+
 
   static void Enable();
   static void Disable();

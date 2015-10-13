@@ -598,6 +598,7 @@ private:
   int m_lastErrorLine;
 public:
   Variant m_setprofileCallback;
+  uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::vector<vixl::Simulator*> m_activeSims;
 };

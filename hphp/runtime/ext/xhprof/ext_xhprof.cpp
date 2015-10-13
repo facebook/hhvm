@@ -8,12 +8,16 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-void HHVM_FUNCTION(fb_setprofile, const Variant& callback) {
+void HHVM_FUNCTION(fb_setprofile,
+  const Variant& callback,
+  int64_t flags = EventHook::ProfileDefault
+) {
   if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it
     return;
   }
   g_context->m_setprofileCallback = callback;
+  g_context->m_setprofileFlags = flags;
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
   } else {
@@ -112,7 +116,12 @@ const StaticString
   s_XHPROF_FLAGS_TRACE("XHPROF_FLAGS_TRACE"),
   s_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE("XHPROF_FLAGS_MEASURE_XHPROF_DISABLE"),
   s_XHPROF_FLAGS_MALLOC("XHPROF_FLAGS_MALLOC"),
-  s_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY("XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY");
+  s_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY("XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY"),
+  s_SETPROFILE_FLAGS_ENTERS("SETPROFILE_FLAGS_ENTERS"),
+  s_SETPROFILE_FLAGS_EXITS("SETPROFILE_FLAGS_EXITS"),
+  s_SETPROFILE_FLAGS_DEFAULT("SETPROFILE_FLAGS_DEFAULT"),
+  s_SETPROFILE_FLAGS_FRAME_PTRS("SETPROFILE_FLAGS_FRAME_PTRS"),
+  s_SETPROFILE_FLAGS_CTORS("SETPROFILE_FLAGS_CTORS");
 
 class XHProfExtension : public Extension {
  public:
@@ -128,6 +137,11 @@ class XHProfExtension : public Extension {
     XHPROFCNS(XHPROF_FLAGS_MEASURE_XHPROF_DISABLE, MeasureXhprofDisable);
     XHPROFCNS(XHPROF_FLAGS_MALLOC, TrackMalloc);
     XHPROFCNS(XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY, IHaveInfiniteMemory);
+    XHPROFCNS(SETPROFILE_FLAGS_ENTERS, EventHook::ProfileEnters);
+    XHPROFCNS(SETPROFILE_FLAGS_EXITS, EventHook::ProfileExits);
+    XHPROFCNS(SETPROFILE_FLAGS_DEFAULT, EventHook::ProfileDefault);
+    XHPROFCNS(SETPROFILE_FLAGS_FRAME_PTRS, EventHook::ProfileFramePointers);
+    XHPROFCNS(SETPROFILE_FLAGS_CTORS, EventHook::ProfileConstructors);
 #undef XHPROFCNS
 
     HHVM_FE(fb_setprofile);

@@ -19,7 +19,7 @@ Variant HHVM_FUNCTION(xhprof_run_trace, const String& packedTrace,
                                         int64_t flags);
 void HHVM_FUNCTION(xhprof_sample_enable);
 Variant HHVM_FUNCTION(xhprof_sample_disable);
-void HHVM_FUNCTION(fb_setprofile, const Variant& callback);
+void HHVM_FUNCTION(fb_setprofile, const Variant& callback, int64_t flags);
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

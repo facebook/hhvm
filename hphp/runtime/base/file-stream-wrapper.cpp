@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
+#include <boost/filesystem/operations.hpp>
+
 #include <memory>
 
 namespace HPHP {
@@ -92,6 +94,23 @@ req::ptr<Directory> FileStreamWrapper::opendir(const String& path) {
     return nullptr;
   }
   return dir;
+}
+
+int FileStreamWrapper::unlink(const String& path) {
+  // Unfortunately, Windows requires a special set of permissions to create
+  // or delete symlinks or hardlinks, so just calling ::unlink won't work.
+  // Instead we leave the task of acquiring the necessary permissions to boost.
+  boost::system::error_code ec;
+  boost::filesystem::remove(File::TranslatePath(path).toCppString(), ec);
+  if (ec) {
+    raise_warning(
+      "%s(%s): %s",
+      __FUNCTION__,
+      path.c_str(),
+      ec.message().c_str()
+    );
+  }
+  return ec.value();
 }
 
 int FileStreamWrapper::rename(const String& oldname, const String& newname) {

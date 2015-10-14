@@ -1008,18 +1008,27 @@ Variant HHVM_FUNCTION(filectime,
 Variant HHVM_FUNCTION(filetype,
                       const String& filename) {
   CHECK_PATH(filename, 1);
-  fs::file_status sb;
-  CHECK_BOOST(sb, fs::status, filename);
+  // There is no symlink_dir, and a symlinked dir has a file_type of
+  // directory_file in the file_status, so we need to use is_symlink
+  // to emulate the behavior.
+  bool isLink = false;
+  CHECK_BOOST_SILENT(isLink, fs::is_symlink, filename);
+  if (isLink) {
+    return "link";
+  } else {
+    fs::file_status sb;
+    CHECK_BOOST(sb, fs::status, filename);
 
-  switch (sb.type()) {
-  case fs::file_type::symlink_file:  return "link";
-  case fs::file_type::fifo_file:  return "fifo";
-  case fs::file_type::character_file:  return "char";
-  case fs::file_type::directory_file:  return "dir";
-  case fs::file_type::block_file:  return "block";
-  case fs::file_type::regular_file:  return "file";
-  case fs::file_type::socket_file: return "socket";
-  default: return "unknown";
+    switch (sb.type()) {
+    case fs::file_type::symlink_file:  return "link";
+    case fs::file_type::fifo_file:  return "fifo";
+    case fs::file_type::character_file:  return "char";
+    case fs::file_type::directory_file:  return "dir";
+    case fs::file_type::block_file:  return "block";
+    case fs::file_type::regular_file:  return "file";
+    case fs::file_type::socket_file: return "socket";
+    default: return "unknown";
+    }
   }
 }
 
@@ -1191,9 +1200,9 @@ bool HHVM_FUNCTION(is_dir,
 bool HHVM_FUNCTION(is_link,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
-  fs::file_status sb;
-  CHECK_BOOST_SILENT(sb, fs::status, filename);
-  return sb.type() == fs::file_type::symlink_file;
+  bool isLink = false;
+  CHECK_BOOST_SILENT(isLink, fs::is_symlink, filename);
+  return isLink;
 }
 
 bool HHVM_FUNCTION(is_uploaded_file,
@@ -1727,9 +1736,15 @@ bool HHVM_FUNCTION(symlink,
                    const String& link) {
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
-  CHECK_BOOST_ASSIGN(fs::create_symlink,
-                     File::TranslatePathKeepRelative(target),
-                     File::TranslatePath(link).toCppString());
+  if (HHVM_FN(is_dir)(target)) {
+    CHECK_BOOST_ASSIGN(fs::create_directory_symlink,
+                       File::TranslatePathKeepRelative(target),
+                       File::TranslatePath(link).toCppString());
+  } else {
+    CHECK_BOOST_ASSIGN(fs::create_symlink,
+                       File::TranslatePathKeepRelative(target),
+                       File::TranslatePath(link).toCppString());
+  }
   return true;
 }
 

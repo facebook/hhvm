@@ -52,6 +52,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
@@ -1788,6 +1789,58 @@ static std::string systemlib_split(const std::string& slib, std::string* hhas) {
   return slib;
 }
 
+static const StaticString s_ns_php(".ns.php"),
+                          s_hhas(".hhas");
+static std::string systemlib_join(const std::string& manifest,
+                                  const std::string& filename,
+                                  std::string* hhas) {
+  std::string ret = "<?hh\n";
+  std::string hhasRet = "";
+
+  std::stringstream ss(manifest);
+  std::string piece;
+
+  while (std::getline(ss, piece)) {
+    auto trimmedPiece = HHVM_FN(trim)(piece);
+    if (trimmedPiece.length() && trimmedPiece[0] != '#') {
+      std::string section("sys_");
+      section += HHVM_FN(md5)(trimmedPiece, false).substr(0, 12).data();
+      bool isHHAS =
+        trimmedPiece.length() >= 5
+        && trimmedPiece.substr(trimmedPiece.length() - 5, 5) == s_hhas;
+
+      embedded_data desc;
+      always_assert(get_embedded_data(section.c_str(), &desc, filename));
+      auto data = desc.data();
+      if (isHHAS) {
+        hhasRet += data + "\n";
+      } else {
+        bool needsNamespace =
+          trimmedPiece.length() >= 7
+          && trimmedPiece.substr(trimmedPiece.length() - 7, 7) != s_ns_php;
+        if (needsNamespace) {
+          ret += "namespace {\n";
+        }
+        if (data.length() >= 5 && data.substr(0, 5) == "<?php") {
+          ret += data.substr(5) + "\n";
+        } else if (data.length() >= 4 && data.substr(0, 4) == "<?hh") {
+          ret += data.substr(4) + "\n";
+        } else {
+          // It's not PHP nor Hack.
+          always_assert(false);
+        }
+        if (needsNamespace) {
+          ret += "}\n";
+        }
+      }
+    }
+  }
+  if (hhas != nullptr) {
+    *hhas = hhasRet;
+  }
+  return ret;
+}
+
 // Retrieve a systemlib (or mini systemlib) from the
 // current executable or another ELF object file.
 //
@@ -1806,24 +1859,16 @@ std::string get_systemlib(std::string* hhas,
                                  std::istreambuf_iterator<char>()), hhas);
       }
     }
+
+    embedded_data desc;
+    if (!get_embedded_data("sys_manifest", &desc, filename)) return "";
+    return systemlib_join(desc.data(), filename, hhas);
   }
 
   embedded_data desc;
   if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  auto const ret = systemlib_split(std::string(
-                                     (const char*)LockResource(desc.m_handle),
-                                     desc.m_len), hhas);
-#else
-  std::ifstream ifs(desc.m_filename);
-  if (!ifs.good()) return "";
-  ifs.seekg(desc.m_start, std::ios::beg);
-  std::unique_ptr<char[]> data(new char[desc.m_len]);
-  ifs.read(data.get(), desc.m_len);
-  auto const ret = systemlib_split(std::string(data.get(), desc.m_len), hhas);
-#endif
-  return ret;
+  return systemlib_split(desc.data(), hhas);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

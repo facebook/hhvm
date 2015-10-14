@@ -98,15 +98,15 @@ inline bool isDirSeparator(char c) {
 inline bool isAbsolutePath(const char* path) {
 #ifdef _MSC_VER
   int len = strlen(path);
-  if (len > 1) {
-    // NOTE: Boost actually checks if the last character of the first
-    // path element is a colon, rather than if the first character is an
-    // alpha followed by a colon. This is fine for now, as I don't know
-    // of any other forms of paths that would allow.
-    return (isDirSeparator(path[0]) && isDirSeparator(path[1])) ||
-      (isalpha(path[0]) && path[1] == ':');
+  if (len < 2) {
+    return false;
   }
-  return false;
+  // NOTE: Boost actually checks if the last character of the first
+  // path element is a colon, rather than if the first character is an
+  // alpha followed by a colon. This is fine for now, as I don't know
+  // of any other forms of paths that would allow.
+  return (isDirSeparator(path[0]) && isDirSeparator(path[1])) ||
+    (isalpha(path[0]) && path[1] == ':');
 #else
   return path[0] == '/';
 #endif

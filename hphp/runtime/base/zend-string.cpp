@@ -1624,13 +1624,14 @@ String string_escape_shell_cmd(const char *str) {
       cmd[y++] = str[x];
       break;
 #else
-      /* % is Windows specific for environmental variables, ^%PATH% will
-      output PATH while ^%PATH^% will not. escapeshellcmd->val will escape all % and !.
-      */
-      case '%':
-      case '!':
-      case '"':
-      case '\'':
+    /* % is Windows specific for environmental variables, ^%PATH% will
+    output PATH while ^%PATH^% will not. escapeshellcmd->val will
+    escape all % and !.
+    */
+    case '%':
+    case '!':
+    case '"':
+    case '\'':
 #endif
     case '#': /* This is character-set independent */
     case '&':

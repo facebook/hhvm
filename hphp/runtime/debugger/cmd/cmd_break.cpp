@@ -445,10 +445,10 @@ void ReportBreakpointBindState(DebuggerClient& client, BreakPointInfoPtr bpi) {
   case BreakPointInfo::Unknown:
     client.info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
     if (!bpi->getClass().empty()) {
-      client.info("But wont break until class %s has been loaded.",
+      client.info("But won't break until class %s has been loaded.",
                   bpi->getClass().c_str());
     } else if (!bpi->getFuncName().empty()) {
-      client.info("But wont break until function %s has been loaded.",
+      client.info("But won't break until function %s has been loaded.",
                   bpi->getFuncName().c_str());
     } else if (!bpi->getExceptionClass().empty()) {
       client.info("But note that class %s has yet been loaded.",
@@ -457,10 +457,10 @@ void ReportBreakpointBindState(DebuggerClient& client, BreakPointInfoPtr bpi) {
         bpi->m_interruptType == RequestEnded ||
         bpi->m_interruptType == PSPEnded) {
       if (client.isLocal()) {
-        client.info("But wont break until connected to a server.");
+        client.info("But won't break until connected to a server.");
       }
     } else {
-      client.info("But wont break until file %s has been loaded.",
+      client.info("But won't break until file %s has been loaded.",
                   bpi->m_file.c_str());
     }
     break;

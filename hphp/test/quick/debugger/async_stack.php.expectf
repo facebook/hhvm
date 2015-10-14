@@ -1,22 +1,22 @@
 Program %s/async_stack.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break async_stack.php:8
 Breakpoint 1 set on line 8 of async_stack.php
-But wont break until file async_stack.php has been loaded.
+But won't break until file async_stack.php has been loaded.
 break async_stack.php:9
 Breakpoint 2 set on line 9 of async_stack.php
-But wont break until file async_stack.php has been loaded.
+But won't break until file async_stack.php has been loaded.
 break async_stack.php:15
 Breakpoint 3 set on line 15 of async_stack.php
-But wont break until file async_stack.php has been loaded.
+But won't break until file async_stack.php has been loaded.
 break async_stack.php:24
 Breakpoint 4 set on line 24 of async_stack.php
-But wont break until file async_stack.php has been loaded.
+But won't break until file async_stack.php has been loaded.
 break async_stack.php:31
 Breakpoint 5 set on line 31 of async_stack.php
-But wont break until file async_stack.php has been loaded.
+But won't break until file async_stack.php has been loaded.
 break async_stack.php:39
 Breakpoint 6 set on line 39 of async_stack.php
-But wont break until file async_stack.php has been loaded.
+But won't break until file async_stack.php has been loaded.
 continue
 In genFoo
 int(42)

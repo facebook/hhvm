@@ -37,13 +37,13 @@ $x = "test_break1"
 $y = "test_break1_suffix"
 break start
 Breakpoint 2 set start of request
-But wont break until connected to a server.
+But won't break until connected to a server.
 break end
 Breakpoint 3 set end of request or start of psp
-But wont break until connected to a server.
+But won't break until connected to a server.
 break psp
 Breakpoint 4 set end of psp
-But wont break until connected to a server.
+But won't break until connected to a server.
 break list
   1%r\x09%rALWAYS    on line 7 of break1.php
   2%r\x09%rALWAYS    start of request (unbound)
@@ -122,7 +122,7 @@ Because method cls::nosuchMethod does not exist.
 break list
 break noSuchFunction()
 Breakpoint 1 set upon entering noSuchFunction()
-But wont break until function noSuchFunction has been loaded.
+But won't break until function noSuchFunction has been loaded.
 break list
   1%r\x09%rALWAYS    upon entering noSuchFunction() (unbound)
 break clear all

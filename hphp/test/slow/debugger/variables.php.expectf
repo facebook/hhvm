@@ -1,7 +1,7 @@
 Program %s/variables.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break variables.php:5
 Breakpoint 1 set on line 5 of variables.php
-But wont break until file variables.php has been loaded.
+But won't break until file variables.php has been loaded.
 continue
 Breakpoint 1 reached at foo() on line 5 of %s/variables.php
    4   $a = array_fill(0, 5000000, "abcdefghijklmn");

@@ -196,7 +196,7 @@ void RequestTimer::setTimeout(int seconds) {
 
   /*
    * There is a potential race here. Callers want to assume that
-   * if they cancel the timeout (seconds = 0), they *wont* get
+   * if they cancel the timeout (seconds = 0), they *won't* get
    * a signal after they call this (although they may get a signal
    * during the call).
    * So we need to clear the timeout, wait (if necessary) for a

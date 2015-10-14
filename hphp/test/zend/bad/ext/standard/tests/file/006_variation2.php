@@ -1,10 +1,10 @@
 <?php
-/* 
+/*
   Prototype: int fileperms ( string $filename );
   Description: Returns the permissions on the file, or FALSE in case of an error
 
   Prototype: bool chmod ( string $filename, int $mode );
-  Description: Attempts to change the mode of the file specified by 
+  Description: Attempts to change the mode of the file specified by
                filename to that given in mode
 */
 
@@ -52,7 +52,7 @@ foreach($perms_array as $permission) {
   printf("%o", fileperms($file_name) );
   echo "\n";
   clearstatcache();
- 
+
   var_dump( chmod($dir_name, $permission) );
   printf("%o", fileperms($dir_name) );
   echo "\n";

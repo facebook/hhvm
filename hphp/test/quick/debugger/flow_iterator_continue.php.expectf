@@ -1,7 +1,7 @@
 Program %s/flow_iterator_continue.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break A::current()
 Breakpoint 1 set upon entering A::current()
-But wont break until class A has been loaded.
+But won't break until class A has been loaded.
 continue
 Breakpoint 1 reached at A::current() on line 5 of %s/flow_iterator_continue.php
    4   public function current() {

@@ -2726,6 +2726,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, const Variant& data,
       if (!--max_reallocs) break;
     }
 
+#ifndef _MSC_VER
     /* Time zone support */
     snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d",
              (ta->tm_gmtoff < 0) ? '-' : '+', (int)abs(ta->tm_gmtoff / 3600),
@@ -2736,6 +2737,8 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, const Variant& data,
     } else {
       real_len += 6;
     }
+#endif
+
     if (real_len >= buf_len) {
       buf = (char *)req::realloc(buf, real_len+1);
     }

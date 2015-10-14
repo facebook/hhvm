@@ -423,10 +423,13 @@ String HHVM_FUNCTION(lcfirst,
 }
 
 String HHVM_FUNCTION(ucwords,
-                     const String& str) {
+                     const String& str,
+                     const String& delimiters /* = " \t\r\n\f\v"*/) {
+  char* string = str.mutableData();
+  *string = toupper(*string);
   char last = ' ';
   return stringForEachFast(str, [&] (char c) {
-    char ret = isspace(last) ? toupper(c) : c;
+    char ret = delimiters.find(last) >= 0 ? toupper(c) : c;
     last = c;
     return ret;
   });

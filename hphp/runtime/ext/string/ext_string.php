@@ -225,7 +225,7 @@ function lcfirst(string $str): string;
  *
  */
 <<__Native>>
-function ucwords(string $str): string;
+function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string;
 
 /**
  * This function tries to return a string with all NUL bytes, HTML and PHP

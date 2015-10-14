@@ -36,7 +36,18 @@ enum TypeStructureKind : int {
   OF_UNRESOLVED = 0;
 }
 
-type TypeStructure<T> = shape(
+newtype TypeStructure<T> as shape(
+  'kind' => TypeStructureKind,
+  'nullable' => ?bool,
+  'classname' => ?classname<T>,
+  'elem_types' => ?array,
+  'param_types' => ?array,
+  'return_type' => ?array,
+  'generic_types' => ?array,
+  'fields' => ?array,
+  'name' => ?string,
+  'alias' => ?string,
+) = shape(
   'kind' => TypeStructureKind,
   'nullable' => ?bool,
   // classname for classes, interfaces, enums, or traits

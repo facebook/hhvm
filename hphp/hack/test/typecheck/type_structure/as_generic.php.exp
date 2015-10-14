@@ -1,0 +1,11 @@
+Tint
+option(Tstring)
+option(Tstring)
+option(App \classname<generic T, >)
+option(array)
+option(array)
+option(Tbool)
+option(array)
+option(array)
+option(array)
+No errors

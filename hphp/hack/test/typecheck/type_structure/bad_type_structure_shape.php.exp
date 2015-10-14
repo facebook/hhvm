@@ -1,0 +1,24 @@
+Tint
+option(Tstring)
+option(Tstring)
+shape<FieldsPartiallyKnown(unset fields:)>()
+X
+X
+X
+X
+X
+X
+Tint
+Tint
+option(Tstring)
+option(Tstring)
+shape<FieldsPartiallyKnown(unset fields:)>()
+X
+X
+X
+X
+X
+option(array)
+Tint
+File "bad_type_structure_shape.php", line 10, characters 15-25:
+The field classname is undefined (Typing[4108])

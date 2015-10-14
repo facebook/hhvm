@@ -30,6 +30,10 @@ namespace HPHP {
 using namespace entity_charset_enum;
 
 static entity_table_t ent_cp_866[] = {
+  "Acy", "Bcy", "Vcy", "Gcy", "Dcy", "IEcy", "ZHcy", "Zcy",
+  "Icy", "Jcy", "Kcy", "Lcy", "Mcy", "Ncy", "Ocy", "Pcy",
+  "Rcy", "Scy", "Tcy", "Ucy", "Fcy", "KHcy", "TScy", "CHcy",
+  "SHcy", "SHCHcy", "HARDcy", "Ycy", "SOFTcy", "Ecy", "YUcy", "YAcy",
   "acy", "bcy", "vcy", "gcy", "dcy", "iecy", "zhcy", "zcy",
   "icy", "jcy", "kcy", "lcy", "mcy", "ncy", "ocy", "pcy",
   "blk14", "blk12", "blk34", "boxv", "boxvl", "boxvL", "boxVl", "boxDl",

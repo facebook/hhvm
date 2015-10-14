@@ -478,6 +478,8 @@ static void populateLiveContext(RegionContext& ctx) {
   const ActRec*     const fp {vmfp()};
   const TypedValue* const sp {vmsp()};
 
+  always_assert(ctx.func == fp->m_func);
+
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
       { L::Local{i}, typeFromTV(frame_local(fp, i)) }

@@ -168,6 +168,12 @@ bool merge_into(FrameState& dst, const FrameState& src) {
       dstInfo.ctx = least_common_ancestor(dstInfo.ctx, srcInfo.ctx);
       changed = true;
     }
+
+    // Merge the Funcs
+    if (dstInfo.func != nullptr && dstInfo.func != srcInfo.func) {
+      dstInfo.func = nullptr;
+      changed = true;
+    }
   }
 
   // This is available iff it's available in both states
@@ -592,6 +598,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
                                           cur().spOffset,
                                           nullptr,
                                           extra.opcode,
+                                          nullptr,
                                           true /* interp */,
                                           false /* spansCall */});
     } else if (isFCallStar(extra.opcode) && !cur().fpiStack.empty()) {
@@ -1220,16 +1227,34 @@ void FrameStateMgr::setBoxedStkPrediction(IRSPOffset offset, Type type) {
   state.predictedType = state.type & type;
 }
 
+static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
+  if (!inst->is(SpillFrame)) return nullptr;
+
+  const auto funcTmp = inst->src(1);
+  if (!funcTmp->hasConstVal(TFunc)) return nullptr;
+
+  const auto callee = funcTmp->funcVal();
+  if (!callee->isMethod()) return callee;
+
+  const auto ctx = inst->src(2);
+  const auto ctxType = ctx->type();
+  if (ctxType < TObj && ctxType.clsSpec().exact()) return callee;
+
+  return nullptr;
+}
+
 void FrameStateMgr::spillFrameStack(IRSPOffset offset, FPInvOffset retOffset,
                                     const IRInstruction* inst) {
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setStackValue(offset + i, nullptr);
   }
   auto const opc = inst->marker().sk().op();
+  auto const ctx = inst->op() == SpillFrame ? inst->src(2) : nullptr;
 
-  auto const ctx  = inst->op() == SpillFrame ? inst->src(2) : nullptr;
+  const Func* func = getSpillFrameKnownCallee(inst);
+
   cur().syncedSpLevel += kNumActRecCells;
-  cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, opc,
+  cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, opc, func,
                                       false /* interp */, false /* spans */ });
 }
 

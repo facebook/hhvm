@@ -95,6 +95,18 @@ bool beginInlining(IRGS& env,
     return gen(env, LdStk, TCtx, IRSPOffsetData{ctxOff}, sp(env));
   }();
 
+  if (debug) {
+    IRSPOffset arOff = offsetFromIRSP(env, BCSPOffset{0});
+    auto arFunc = gen(env, LdARFuncPtr, IRSPOffsetData{arOff}, sp(env));
+    gen(env, DbgAssertFunc, arFunc, cns(env, target));
+  }
+
+  auto fpiFunc = fpiStack.front().func;
+  always_assert_flog(fpiFunc == nullptr || fpiFunc == target,
+                     "fpiFunc = {}  ;  target = {}",
+                     fpiFunc ? fpiFunc->fullName()->data() : "null",
+                     target  ? target->fullName()->data()  : "null");
+
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;

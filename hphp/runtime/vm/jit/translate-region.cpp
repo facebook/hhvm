@@ -666,6 +666,15 @@ TranslateResult irGenRegion(IRGS& irgs,
       if (knownFuncs.hasNext(sk)) {
         topFunc = knownFuncs.next();
       }
+      // HHIR may have figured the topFunc even though the RegionDesc
+      // didn't know it.  When that happens, update topFunc.
+      if (!topFunc && !irb.fpiStack().empty()) {
+        auto& fpiInfo = irb.fpiStack().front();
+        auto func = fpiInfo.func;
+        if (func && func->isNameBindingImmutable(block->unit())) {
+          topFunc = func;
+        }
+      }
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());

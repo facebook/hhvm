@@ -4995,6 +4995,17 @@ void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
     });
 }
 
+void CodeGenerator::cgDbgAssertFunc(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  auto r0 = srcLoc(inst, 0).reg(0);
+  auto r1 = srcLoc(inst, 1).reg(0);
+  v << cmpq{r0, r1, sf};
+  ifThen(v, CC_NE, sf, [&](Vout& v) {
+    v << ud2{};
+  });
+}
+
 void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
   auto const objClass = inst->src(0);
   auto const objClassReg = srcLoc(inst, 0).reg();

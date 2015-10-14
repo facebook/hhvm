@@ -47,6 +47,7 @@ struct FPIInfo {
   FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
   SSATmp* ctx;
   Op fpushOpc; // bytecode for FPush*
+  const Func* func;
   bool interp;
   bool spansCall;
 };

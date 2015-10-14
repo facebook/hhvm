@@ -647,19 +647,10 @@ void RegionDesc::Block::addReffinessPred(const ReffinessPred& pred) {
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
-  if (func == nullptr && m_knownFuncs.empty()) return;
-
   FTRACE(2, "Block::setKnownFunc({}, {})\n", showShort(sk),
          func ? func->fullName()->data() : "nullptr");
   assertx(m_knownFuncs.find(sk) == m_knownFuncs.end());
   assertx(contains(sk));
-  auto it = m_knownFuncs.lower_bound(sk);
-  if (it != m_knownFuncs.begin() && (--it)->second == func) {
-    // Adding func at this sk won't add any new information.
-    FTRACE(2, "  func exists at {}, not adding\n", showShort(it->first));
-    return;
-  }
-
   m_knownFuncs.insert(std::make_pair(sk, func));
 }
 

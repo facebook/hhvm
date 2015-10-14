@@ -2013,6 +2013,11 @@ To string conversions:
   When EvalHHIRGenerateAsserts is on, this instruction is inserted at the
   start of each region, to emit some sanity checking code.
 
+| DbgAssertFunc, ND, S(Func) S(Func), NF
+
+  Assert that S0 and S1 are the same function at runtime. If the assertion
+  fails, execution is aborted via a hardware exception.
+
 | RBTraceEntry, ND, NA, NF
 
 | RBTraceMsg, ND, NA, NF

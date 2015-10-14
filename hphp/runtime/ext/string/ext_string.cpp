@@ -2442,8 +2442,9 @@ public:
     HHVM_FE(similar_text);
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
-
-    loadSystemlib();
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "string" });
   }
 } s_string_extension;
 

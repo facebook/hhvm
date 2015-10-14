@@ -571,8 +571,6 @@ void IntlExtension::initUConverter() {
 #undef UCNV_TYPE_CONST
 
   Native::registerNativeDataInfo<IntlUConverter>(s_UConverter.get());
-
-  loadSystemlib("icu_uconverter");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

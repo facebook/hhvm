@@ -20,6 +20,9 @@
 
 #include <folly/ScopeGuard.h>
 
+#include <fstream>
+#include <memory>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -38,6 +41,19 @@
 #endif
 
 namespace HPHP {
+
+std::string embedded_data::data() {
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  return std::string((const char*)LockResource(m_handle), m_len);
+#else
+  std::ifstream ifs(m_filename);
+  if (!ifs.good()) return "";
+  ifs.seekg(m_start, std::ios::beg);
+  std::unique_ptr<char[]> data(new char[m_len]);
+  ifs.read(data.get(), m_len);
+  return std::string(data.get(), m_len);
+#endif
+}
 
 bool get_embedded_data(const char *section, embedded_data* desc,
                        const std::string &filename /*= "" */) {

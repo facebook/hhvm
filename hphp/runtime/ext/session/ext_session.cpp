@@ -1900,8 +1900,10 @@ static class SessionExtension final : public Extension {
     HHVM_NAMED_FE(__SystemLib\\session_set_save_handler,
                   HHVM_FN(session_set_save_handler)
     );
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "session" });
   }
 
   void threadInit() override {

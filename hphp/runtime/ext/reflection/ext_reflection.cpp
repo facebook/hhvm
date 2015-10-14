@@ -1865,14 +1865,15 @@ class ReflectionExtension final : public Extension {
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);
-
-    loadSystemlib();
-    loadSystemlib("reflection-classes");
-    loadSystemlib("reflection-internals-functions");
-    loadSystemlib("reflection_hni");
-
     Reflection::s_ReflectionExceptionClass =
         Unit::lookupClass(s_reflectionexception.get());
+  }
+
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({
+      "reflection", "reflection-classes",
+      "reflection-internals-functions", "reflection_hni"
+    });
   }
 } s_reflection_extension;
 

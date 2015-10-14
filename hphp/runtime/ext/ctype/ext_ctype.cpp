@@ -115,8 +115,10 @@ class CtypeExtension final : public Extension {
     HHVM_FE(ctype_space);
     HHVM_FE(ctype_upper);
     HHVM_FE(ctype_xdigit);
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "ctype" });
   }
 } s_ctype_extension;
 

@@ -153,8 +153,10 @@ class XHProfExtension : public Extension {
     HHVM_FE(xhprof_network_disable);
     HHVM_FE(xhprof_sample_enable);
     HHVM_FE(xhprof_sample_disable);
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "xhprof" });
   }
 } s_xhprof_extension;
 

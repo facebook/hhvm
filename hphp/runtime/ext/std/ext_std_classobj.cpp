@@ -377,8 +377,6 @@ void StandardExtension::initClassobj() {
   HHVM_FE(property_exists);
   HHVM_FE(get_object_vars);
   HHVM_FE(call_user_method_array);
-
-  loadSystemlib("std_classobj");
 }
 
 

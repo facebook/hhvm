@@ -371,8 +371,6 @@ void StandardExtension::initErrorFunc() {
   INTCONST(E_USER_DEPRECATED);
   INTCONST(E_ALL);
 #undef INTCONST
-
-  loadSystemlib("std_errorfunc");
 }
 
 }

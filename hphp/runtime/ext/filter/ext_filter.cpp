@@ -213,8 +213,10 @@ public:
     HHVM_FE(filter_list);
     HHVM_FE(filter_id);
     HHVM_FE(filter_var);
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "filter" });
   }
 
   void threadInit() override {

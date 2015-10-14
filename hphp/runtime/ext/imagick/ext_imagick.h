@@ -43,6 +43,10 @@ class ImagickExtension final : public Extension {
   static bool hasLocaleFix();
   static bool hasProgressMonitor();
 
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "imagick" });
+  }
+
  private:
   struct ImagickIniSetting {
     bool m_locale_fix;

@@ -91,8 +91,6 @@ void IntlExtension::initUSpoof() {
   HHVM_ME(SpoofChecker, setChecks);
 
   Native::registerNativeDataInfo<SpoofChecker>(s_SpoofChecker.get());
-
-  loadSystemlib("icu_uspoof");
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -287,7 +287,10 @@ class fileinfoExtension final : public Extension {
     HHVM_FE(finfo_set_flags);
     HHVM_FE(finfo_close);
     HHVM_FE(mime_content_type);
-    loadSystemlib();
+  }
+
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "fileinfo" });
   }
 } s_fileinfo_extension;
 

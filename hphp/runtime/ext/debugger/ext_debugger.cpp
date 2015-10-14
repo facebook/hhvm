@@ -35,7 +35,10 @@ class DebuggerExtension final : public Extension {
     HHVM_NAMED_FE(__SystemLib\\debugger_get_info, HHVM_FN(debugger_get_info));
     HHVM_FE(hphpd_break);
     HHVM_FE(hphp_debugger_attached);
-    loadSystemlib();
+  }
+
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "debugger" });
   }
 } s_debugger_extension;
 

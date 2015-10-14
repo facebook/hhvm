@@ -697,8 +697,6 @@ class LibXMLExtension final : public Extension {
       HHVM_FE(libxml_disable_entity_loader);
       HHVM_FE(libxml_set_streams_context);
 
-      loadSystemlib();
-
       s_LibXMLError_class = Unit::lookupClass(s_LibXMLError.get());
 
       // Set up callbacks to support stream wrappers for reading and writing
@@ -707,6 +705,10 @@ class LibXMLExtension final : public Extension {
       xmlOutputBufferCreateFilenameDefault(libxml_create_output_buffer);
       s_default_entity_loader = xmlGetExternalEntityLoader();
       xmlSetExternalEntityLoader(libxml_ext_entity_loader);
+    }
+
+    virtual const SystemlibSet getSystemlibSources() const override {
+      return SystemlibSet({ "libxml" });
     }
 
     void requestInit() override {

@@ -2873,8 +2873,10 @@ public:
     HHVM_FE(i18n_loc_get_error_code);
     HHVM_FE(hphp_array_idx);
     HHVM_FE(array_multisort);
+  }
 
-    loadSystemlib();
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "array" });
   }
 } s_array_extension;
 

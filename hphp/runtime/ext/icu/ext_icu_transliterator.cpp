@@ -177,8 +177,6 @@ void IntlExtension::initTransliterator() {
     (s_Transliterator.get(), s_REVERSE.get(), UTRANS_REVERSE);
 
   Native::registerNativeDataInfo<Transliterator>(s_Transliterator.get());
-
-  loadSystemlib("icu_transliterator");
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -140,7 +140,6 @@ void ApacheExtension::moduleInit() {
     HHVM_FALIAS(getallheaders, apache_request_headers);
     HHVM_FE(apache_get_config);
     HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
-    loadSystemlib();
   }
 }
 

@@ -310,12 +310,14 @@ public:
     HHVM_FE(spliti);
     HHVM_FE(sql_regcase);
 
-    loadSystemlib();
-
     pcre_config(PCRE_CONFIG_JIT, &s_pcre_has_jit);
     IniSetting::Bind(this, IniSetting::PHP_INI_ONLY,
                      "hhvm.pcre.jit",
                      &s_pcre_has_jit);
+  }
+
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "pcre" });
   }
 
   void threadInit() override {

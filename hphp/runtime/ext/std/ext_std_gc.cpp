@@ -40,7 +40,6 @@ void StandardExtension::initGc() {
   HHVM_FE(gc_enable);
   HHVM_FE(gc_disable);
   HHVM_FE(gc_collect_cycles);
-  loadSystemlib("std_gc");
 }
 
 }

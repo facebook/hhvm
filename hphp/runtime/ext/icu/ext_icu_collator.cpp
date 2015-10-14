@@ -364,8 +364,6 @@ void IntlExtension::initCollator() {
     (s_Collator.get(), s_DEFAULT_VALUE.get(), UCOL_DEFAULT);
 
   Native::registerNativeDataInfo<Collator>(s_Collator.get());
-
-  loadSystemlib("icu_collator");
 }
 
 //////////////////////////////////////////////////////////////////////////////

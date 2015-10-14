@@ -178,8 +178,6 @@ void StandardExtension::initMisc() {
     bindTokenConstants();
     Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
                                           get_user_token_id(T_DOUBLE_COLON));
-
-    loadSystemlib("std_misc");
   }
 
 // Make sure "tokenizer" gets added to the list of extensions

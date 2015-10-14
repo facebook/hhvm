@@ -397,7 +397,9 @@ class MailparseExtension final : public Extension {
     HHVM_FE(mailparse_stream_encode);
     HHVM_FE(mailparse_uudecode_all);
     HHVM_FE(mailparse_determine_best_xfer_encoding);
-    loadSystemlib();
+  }
+  virtual const SystemlibSet getSystemlibSources() const override {
+    return SystemlibSet({ "mailparse" });
   }
 } s_mailparse_extension;
 

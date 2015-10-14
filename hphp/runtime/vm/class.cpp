@@ -1185,8 +1185,30 @@ void Class::setSpecial() {
   }
 
   if (!(attrs() & AttrTrait)) {
-    // Look for Foo::Foo() declared in this class
+    // Look for Foo::Foo() (old style constructor) declared in this class
+    // and deprecate warning if we are in PHP 7 mode
     if (matchedClassOrIsTrait(m_preClass->name())) {
+      // https://wiki.php.net/rfc/remove_php4_constructors
+      // Check for PHP 4 style constructors. For PHP 7 support, in certain
+      // scenarios, we throw a deprecation warning and then for PHP 8+ support
+      // we will not support them at all.
+      // We know we Foo:Foo() since we are in this if statement
+      // Now, if the PHP 7 runtime option is set and the class:
+      //   1. does not have an explicit constructor with __construct
+      //   2. is not in a namespace (namespaced classes treat methods with the
+      //      same name as the class as just normal methods, not a constructor)
+      // then we give the deprecation warning.
+      if (
+        RuntimeOption::PHP7_DeprecateOldStyleCtors && // In PHP 7 mode
+        !this->instanceCtor() && // No explicit __construct
+        this->name()->toCppString().find("\\") == std::string::npos // no NS
+      ) {
+        const char *deprecated_msg =
+          "Methods with the same name as their class will not be "
+          "constructors in a future version of PHP; %s has a deprecated "
+          "constructor";
+        raise_deprecated(deprecated_msg, this->name()->toCppString().c_str());
+      }
       return;
     }
   }

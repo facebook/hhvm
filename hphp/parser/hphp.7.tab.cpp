@@ -14131,7 +14131,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 3179 "hphp.y"
     { (yyvsp[(3) - (6)]).setText(_p->nsClassDecl((yyvsp[(3) - (6)]).text()));
-                                         _p->onTypedef((yyval), (yyvsp[(3) - (6)]), (yyvsp[(5) - (6)]));
+                                         _p->onTypedef((yyval), (yyvsp[(3) - (6)]), (yyvsp[(5) - (6)]), &(yyvsp[(1) - (6)]));
                                          _p->popTypeScope(); ;}
     break;
 
@@ -14149,7 +14149,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 3188 "hphp.y"
     { (yyvsp[(3) - (7)]).setText(_p->nsClassDecl((yyvsp[(3) - (7)]).text()));
-                                         _p->onTypedef((yyval), (yyvsp[(3) - (7)]), (yyvsp[(6) - (7)]));
+                                         _p->onTypedef((yyval), (yyvsp[(3) - (7)]), (yyvsp[(6) - (7)]), &(yyvsp[(1) - (7)]));
                                          _p->popTypeScope(); ;}
     break;
 

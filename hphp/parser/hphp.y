@@ -3177,7 +3177,7 @@ hh_type_alias_statement:
   | non_empty_user_attributes
     T_TYPE hh_name_no_semireserved_with_typevar
       '=' hh_type ';'                  { $3.setText(_p->nsClassDecl($3.text()));
-                                         _p->onTypedef($$, $3, $5);
+                                         _p->onTypedef($$, $3, $5, &$1);
                                          _p->popTypeScope(); }
   | T_NEWTYPE hh_name_no_semireserved_with_typevar
     hh_opt_constraint '=' hh_type ';'  { $2.setText(_p->nsClassDecl($2.text()));
@@ -3186,7 +3186,7 @@ hh_type_alias_statement:
   | non_empty_user_attributes
     T_NEWTYPE hh_name_no_semireserved_with_typevar
     hh_opt_constraint '=' hh_type ';'  { $3.setText(_p->nsClassDecl($3.text()));
-                                         _p->onTypedef($$, $3, $6);
+                                         _p->onTypedef($$, $3, $6, &$1);
                                          _p->popTypeScope(); }
 ;
 

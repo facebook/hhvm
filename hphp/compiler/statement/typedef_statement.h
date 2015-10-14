@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
@@ -29,6 +30,7 @@ namespace HPHP {
 struct TypedefStatement : Statement, IParseHandler {
   explicit TypedefStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                             const std::string& name,
+                            const ExpressionListPtr& attrList,
                             const TypeAnnotationPtr& typeAnnotation);
   ~TypedefStatement();
 
@@ -39,6 +41,7 @@ public: // IParseHandler
 
 public:
   const std::string name;
+  const ExpressionListPtr attrList;
   const TypeAnnotationPtr annot;
 };
 

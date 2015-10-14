@@ -85,6 +85,7 @@ struct CodeCache {
     return const_cast<CodeCache&>(*this).frozen();
   }
 
+  CodeBlock& realMain()   { return m_main;   }
   CodeBlock& realCold()   { return m_cold;   }
   CodeBlock& realFrozen() { return m_frozen; }
 

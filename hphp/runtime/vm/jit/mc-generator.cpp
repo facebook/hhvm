@@ -2425,16 +2425,16 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   size_t count = code.hot().used();
   bool result = (fwrite(code.hot().base(), 1, count, ahotFile) == count);
   if (result) {
-    count = code.main().used();
-    result = (fwrite(code.main().base(), 1, count, aFile) == count);
+    count = code.realMain().used();
+    result = (fwrite(code.realMain().base(), 1, count, aFile) == count);
   }
   if (result) {
     count = code.prof().used();
     result = (fwrite(code.prof().base(), 1, count, aprofFile) == count);
   }
   if (result) {
-    count = code.cold().used();
-    result = (fwrite(code.cold().base(), 1, count, acoldFile) == count);
+    count = code.realCold().used();
+    result = (fwrite(code.realCold().base(), 1, count, acoldFile) == count);
   }
   if (result) {
     count = code.frozen().used();
@@ -2481,9 +2481,9 @@ bool MCGenerator::dumpTCData() {
                 "afrozen.frontier = %p\n\n",
                 kRepoSchemaId,
                 code.hot().base(), code.hot().frontier(),
-                code.main().base(), code.main().frontier(),
+                code.realMain().base(), code.realMain().frontier(),
                 code.prof().base(), code.prof().frontier(),
-                code.cold().base(), code.cold().frontier(),
+                code.realCold().base(), code.realCold().frontier(),
                 code.frozen().base(), code.frozen().frontier())) {
     return false;
   }

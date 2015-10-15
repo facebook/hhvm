@@ -45,7 +45,7 @@ function strtolower($str);
 function strtoupper($str);
 function ucfirst($str);
 function lcfirst($str);
-function ucwords($str);
+function ucwords($str, $delimiters = " \t\r\n\f\v");
 function trim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
 function ltrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
 function rtrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;

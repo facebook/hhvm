@@ -139,7 +139,8 @@ Variant HHVM_FUNCTION(dcngettext, const String& domain, const String& msgid1,
   CHECK_GETTEXT_LENGTH("msgid1", msgid1.length());
   CHECK_GETTEXT_LENGTH("msgid2", msgid2.length());
 
-  auto msgstr = dngettext(domain.data(), msgid1.data(), msgid2.data(), count);
+  auto msgstr = dcngettext(domain.data(), msgid1.data(),
+                           msgid2.data(), count, category);
   if (!msgstr) {
     return false;
   }

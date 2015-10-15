@@ -18,6 +18,7 @@
 
 #include <folly/Likely.h>
 
+#include "hphp/hphp-config.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"

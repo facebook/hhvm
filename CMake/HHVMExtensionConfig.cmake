@@ -350,7 +350,6 @@ function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
         math(EXPR i2 "${i2} + 1")
       endwhile()
 
-      add_definitions("-DENABLE_EXTENSION_${upperExtName}")
       if (HHVM_EXTENSION_${i}_REQUIRED)
         set(ENABLE_EXTENSION_${upperExtName} ON CACHE INTERNAL "Enable the ${HHVM_EXTENSION_${i}_PRETTY_NAME} extension.")
       else()
@@ -396,6 +395,23 @@ function (HHVM_EXTENSION_BUILD_SOURCE_LISTS)
   set(PHP_SOURCES ${PHP_SOURCES} PARENT_SCOPE)
   set(IDL_SOURCES ${IDL_SOURCES} PARENT_SCOPE)
   set(IDL_DEFINES ${IDL_DEFINES} PARENT_SCOPE)
+endfunction()
+
+# This builds a string to define the macros for all enabled extensions.
+function(HHVM_EXTENSION_BUILD_DEFINE_STRING destVarName)
+  set(builtString "/* Extensions */")
+  set(i 0)
+  while (i LESS HHVM_EXTENSION_COUNT)
+    string(TOUPPER ${HHVM_EXTENSION_${i}_NAME} upperExtName)
+    if (${HHVM_EXTENSION_${i}_ENABLED_STATE} EQUAL 1)
+      set(builtString "${builtString}\n#define ENABLE_EXTENSION_${upperExtName} 1")
+    else()
+      set(builtString "${builtString}\n/* #undef ENABLE_EXTENSION_${upperExtName} */")
+    endif()
+    math(EXPR i "${i} + 1")
+  endwhile()
+
+  set(${destVarName} "${builtString}" PARENT_SCOPE)
 endfunction()
 
 # Sort out all the files into their appropriate variable, as well as transform the paths

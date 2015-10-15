@@ -1,0 +1,11 @@
+#pragma once
+
+#cmakedefine ENABLE_AVX2 1
+#cmakedefine ENABLE_ZEND_COMPAT 1
+#cmakedefine EXECUTION_PROFILER 1
+
+#ifndef FACEBOOK
+# define HPHP_OSS 1
+#endif
+
+${HHVM_EXTENSIONS_ENABLED_DEFINE_STRING}

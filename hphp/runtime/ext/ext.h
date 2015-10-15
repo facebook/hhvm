@@ -21,13 +21,11 @@
 #ifndef incl_EXT_LIST_EXT_H_
 #define incl_EXT_LIST_EXT_H_
 
+#include "hphp/hphp-config.h"
+
 // Super temporary
 #ifndef USE_CMAKE
 #include "hphp/facebook/extensions/phpmc/ext_phpmc.h"
-#define ENABLE_EXTENSION_ASIO
-#define ENABLE_EXTENSION_CLOSURE
-#define ENABLE_EXTENSION_COLLECTIONS
-#define ENABLE_EXTENSION_SIMPLEXML
 #endif
 
 #ifdef ENABLE_EXTENSION_CLOSURE

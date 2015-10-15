@@ -56,7 +56,7 @@ add_custom_command(
   DEPENDS "php.txt" ${SYSTEMLIB_SRCS}
   COMMAND "INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR}"
           "FBCODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../.."
-          "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_hhvm/make_systemlib.sh"
+          "${CMAKE_CURRENT_SOURCE_DIR}/make_systemlib.sh"
           "--install_dir=${CMAKE_CURRENT_BINARY_DIR}"
           "--fbcode_dir=${CMAKE_CURRENT_SOURCE_DIR}/.."
           "${SYSTEMLIB_SRCS_STR}"

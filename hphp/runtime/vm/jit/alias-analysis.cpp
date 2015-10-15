@@ -160,9 +160,26 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     ret |= all_frame;
   }
 
+  if (auto const mis = acls.mis()) {
+    auto const add_mis = [&] (AliasClass cls) {
+      assertx(cls.isSingleLocation());
+      if (cls <= *mis) {
+        if (auto const meta = find(cls)) {
+          ret |= ALocBits{meta->conflicts}.set(meta->index);
+        } else {
+          ret |= all_mistate;
+        }
+      }
+    };
+
+    add_mis(AMIStateTempBase);
+    add_mis(AMIStateTvRef);
+    add_mis(AMIStateTvRef2);
+    add_mis(AMIStateBase);
+  }
+
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
-  ret |= may_alias_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
   ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= may_alias_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= may_alias_part(*this, acls, acls.iterBase(), AIterBaseAny,
@@ -207,9 +224,24 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     ret |= all_frame;
   }
 
+  if (auto const mis = acls.mis()) {
+    auto const add_mis = [&] (AliasClass cls) {
+      assertx(cls.isSingleLocation());
+      if (cls <= *mis) {
+        if (auto const meta = find(cls)) {
+          ret.set(meta->index);
+        }
+      }
+    };
+
+    add_mis(AMIStateTempBase);
+    add_mis(AMIStateTvRef);
+    add_mis(AMIStateTvRef2);
+    add_mis(AMIStateBase);
+  }
+
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
-  ret |= expand_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
   ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
@@ -253,9 +285,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (acls.is_mis() ||
-        acls.is_iterPos() ||
-        acls.is_iterBase()) {
+    if (acls.is_mis() && acls.isSingleLocation()) {
+      add_class(ret, acls);
+      return;
+    }
+
+    if (acls.is_iterPos() || acls.is_iterBase()) {
       add_class(ret, acls);
       return;
     }

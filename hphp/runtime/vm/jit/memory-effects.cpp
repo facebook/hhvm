@@ -74,9 +74,9 @@ AliasClass pointee(const SSATmp* ptr) {
 
     if (typeNR <= TPtrToMISGen) {
       if (sinst->is(LdMIStateAddr)) {
-        return AliasClass { AMIState::fromTV(sinst->src(0)->intVal()) };
+        return mis_from_offset(sinst->src(0)->intVal());
       }
-      return AMIStateAny;
+      return AMIStateTV;
     }
 
     if (typeNR <= TPtrToArrGen) {
@@ -105,7 +105,7 @@ AliasClass pointee(const SSATmp* ptr) {
   if (typeNR.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
   if (typeNR.maybe(TPtrToPropGen))    ret = ret | APropAny;
   if (typeNR.maybe(TPtrToArrGen))     ret = ret | AElemAny;
-  if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateAny;
+  if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateTV;
   if (typeNR.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
   return ret;
@@ -418,11 +418,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_reenter(inst,
                        may_load_store_kill(AUnknown, AUnknown, AMIStateAny));
 
-  case EndCatch:
+  case EndCatch: {
+    auto const stack_kills = stack_below(
+      inst.src(1),
+      inst.extra<EndCatch>()->offset.offset - 1
+    );
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1), inst.extra<EndCatch>()->offset.offset - 1)
+      stack_kills | AMIStateTempBase | AMIStateBase
     };
+  }
 
   /*
    * DefInlineFP has some special treatment here.
@@ -665,15 +670,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case LdMBase:
-    return PureLoad {
-      AMIState::fromPtr(offsetof(MInstrState, base))
-    };
+    return PureLoad { AMIStateBase };
 
   case StMBase:
-    return PureStore {
-      AMIState::fromPtr(offsetof(MInstrState, base)),
-      inst.src(0)
-    };
+    return PureStore { AMIStateBase, inst.src(0) };
 
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);

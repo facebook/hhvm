@@ -47,7 +47,7 @@ namespace HPHP {
 
 #define CHECK_GETTEXT_LENGTH(check_name, check_len) \
   if (check_len > PHP_GETTEXT_MAX_MSGID_LENGTH) { \
-    raise_warning("%s passed too long", check_len); \
+    raise_warning("%s passed too long", check_name); \
     return false; \
   }
 
@@ -87,7 +87,7 @@ Variant HHVM_FUNCTION(bindtextdomain, const String& domain, const String& dir) {
     return false;
   }
 
-  char dirName[MAX_PATH];
+  char dirName[PATH_MAX];
   if (dir.length() && dir != String("0")) {
     auto tmp = File::TranslatePath(dir);
     if (tmp.empty()) {
@@ -96,7 +96,7 @@ Variant HHVM_FUNCTION(bindtextdomain, const String& domain, const String& dir) {
     if (!realpath(tmp.c_str(), dirName)) {
       return false;
     }
-  } else if (!getcwd(dirName, MAX_PATH)) {
+  } else if (!getcwd(dirName, PATH_MAX)) {
     return false;
   }
 
@@ -180,6 +180,7 @@ void GettextExtension::moduleInit() {
 #if HAVE_BIND_TEXTDOMAIN_CODESET
   HHVM_FE(bind_textdomain_codeset);
 #endif
+  loadSystemlib();
 }
 
 void GettextExtension::moduleInfo(Array &info) {

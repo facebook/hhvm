@@ -133,6 +133,11 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
 
+  if (dst.needRatchet != src.needRatchet) {
+    dst.needRatchet = true;
+    changed = true;
+  }
+
   if (dst.mbase != src.mbase) {
     dst.mbase = nullptr;
     changed = true;

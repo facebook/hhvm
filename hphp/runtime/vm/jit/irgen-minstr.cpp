@@ -118,6 +118,10 @@ struct MTS {
   bool needFirstRatchet;
   bool needFinalRatchet;
 
+  /*
+   * Old minstrs use this flag to determine whether they can elide all
+   * operations to MInstrState.
+   */
   bool needMIS{true};
 
   /*
@@ -307,6 +311,7 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
  */
 SSATmp* misLea(MTS& env, ptrdiff_t offset) {
   assertx(env.needMIS);
+  env.irb.fs().setNeedRatchet(true);
   auto const offvalue = cns(env, safe_cast<int32_t>(offset));
   return gen(env, LdMIStateAddr, offvalue);
 }
@@ -1207,8 +1212,8 @@ bool needFinalRatchet(const MTS& env) { return env.mii.finalGet(); }
 //   SetElemL
 //     no ratchet
 unsigned nLogicalRatchets(MTS& env) {
-  // If we've proven elsewhere that we don't need an MInstrState struct, we
-  // know this translation won't need any ratchets
+  // If we've proven elsewhere that we don't need an MInstrState struct, we know
+  // this translation won't need any ratchets.
   if (!env.needMIS) return 0;
 
   unsigned ratchets = env.immVecM.size();
@@ -1233,6 +1238,10 @@ void computeRatchets(MTS& env) {
 
 void emitRatchetRefs(MTS& env) {
   if (ratchetInd(env) < 0 || ratchetInd(env) >= int(env.numLogicalRatchets)) {
+    return;
+  }
+
+  if (!env.irb.fs().needRatchet()) {
     return;
   }
 
@@ -2288,6 +2297,7 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst) {
  * Returns a pointer to a specific value in MInstrState.
  */
 SSATmp* misLea(IRGS& env, int32_t offset) {
+  env.irb->fs().setNeedRatchet(true);
   return gen(env, LdMIStateAddr, cns(env, offset));
 }
 
@@ -2322,6 +2332,10 @@ void cleanTvRefs(IRGS& env) {
  * tvRef2.
  */
 SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
+  if (!env.irb->fs().needRatchet()) {
+    return base;
+  }
+
   auto tvRef = tvRefPtr(env);
 
   return cond(
@@ -2462,6 +2476,10 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
 }
 
 void dimImpl(IRGS& env, PropElemOp propElem, MOpFlags flags, SSATmp* key) {
+  // Eagerly mark us as not needing ratchets.  If the intermediate operation
+  // ends up calling misLea(), this will be set to true.
+  env.irb->fs().setNeedRatchet(false);
+
   auto newBase = [&] {
     switch (propElem) {
       case PropElemOp::Prop:

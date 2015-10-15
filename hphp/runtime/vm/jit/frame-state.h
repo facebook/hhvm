@@ -135,6 +135,12 @@ struct FrameState {
   SSATmp* mbase{nullptr};
 
   /*
+   * Tracks whether we will need to ratchet tvRef and tvRef2 after emitting an
+   * intermediate member instruction.
+   */
+  bool needRatchet{false};
+
+  /*
    * m_thisAvailable tracks whether the current frame is known to have a
    * non-null $this pointer.
    */
@@ -304,6 +310,8 @@ struct FrameStateMgr final {
   FPInvOffset spOffset() const { return cur().spOffset; }
   SSATmp* sp() const { return cur().spValue; }
   SSATmp* fp() const { return cur().fpValue; }
+  bool needRatchet() const { return cur().needRatchet; }
+  void setNeedRatchet(bool b) { cur().needRatchet = b; }
   bool thisAvailable() const { return cur().thisAvailable; }
   void setThisAvailable() { cur().thisAvailable = true; }
   bool frameMaySpanCall() const { return cur().frameMaySpanCall; }

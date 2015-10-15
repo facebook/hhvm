@@ -427,13 +427,11 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       stats.usage, stats.totalAlloc);
 }
 #endif
+  assert(stats.maxBytes > 0);
+  if (live && stats.usage > stats.maxBytes && m_couldOOM) {
+    refreshStatsHelperExceeded();
+  }
   if (stats.usage > stats.peakUsage) {
-    // NOTE: the peak memory usage monotonically increases, so there cannot
-    // be a second OOM exception in one request.
-    assert(stats.maxBytes > 0);
-    if (live && m_couldOOM && stats.usage > stats.maxBytes) {
-      refreshStatsHelperExceeded();
-    }
     // Check whether the process's active memory limit has been exceeded, and
     // if so, stop the server.
     //

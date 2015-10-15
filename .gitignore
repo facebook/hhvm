@@ -86,7 +86,6 @@ CPackSourceConfig.cmake
 
 # windows files
 *.exe
-*.rc
 
 # python scripts
 *.pyc

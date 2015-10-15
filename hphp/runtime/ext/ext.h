@@ -32,7 +32,7 @@
 #endif
 
 #ifdef ENABLE_EXTENSION_CLOSURE
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #endif
 #ifdef ENABLE_EXTENSION_COLLECTIONS
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"

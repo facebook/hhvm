@@ -76,7 +76,7 @@
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 

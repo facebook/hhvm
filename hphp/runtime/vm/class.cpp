@@ -1662,7 +1662,6 @@ void Class::setConstants() {
                     iConst.cls->name()->data(),
                     existingConst.cls->name()->data());
       }
-      builder.add(iConst.name, iConst);
     }
   }
 

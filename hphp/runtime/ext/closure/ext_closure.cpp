@@ -279,5 +279,43 @@ Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {
   return Object(clone);
 }
 
+Variant c_Closure::t_call(int64_t param_count, const Variant& newthis,
+                          const Array& params) {
+  if (newthis.isNull() || !newthis.isObject()) {
+    raise_warning(
+      "Closure::call() expects parameter 1 to be object, %s given",
+      getDataTypeString(newthis.getType()).c_str()
+    );
+    return init_null();
+  }
+
+  // So, with bind/bindTo, if we are trying to bind an instance to a static
+  // closure, we just raise a warning and continue on. However, with call
+  // we are supposed to just return null (according to the PHP 7 implementation)
+  // Here is that speciality check, then. Do it here so we don't have to go
+  // through the rigormorale of binding if this is the case.
+  if (getVMClass()->getCachedInvoke()->isStatic()) {
+    raise_warning("Cannot bind an instance to a static closure");
+    return init_null();
+  }
+
+  auto bound = this->t_bindto(newthis, newthis);
+  // If something went wrong in the binding (warning, for example), then
+  // we can get an empty object back. And an empty object is null by
+  // default. Return null if that is the case.
+  if (bound.isNull()) {
+    return init_null();
+  }
+
+  Variant ret;
+  // Could call vm_user_func(bound, params) here which goes through a
+  // whole decode function process to get a Func*. But we know this
+  // is a closure, and we can get a Func* via getInvokeFunc(), so just
+  // bypass all that decode process to save time.
+  g_context->invokeFunc((TypedValue*)&ret, this->getInvokeFunc(), params,
+                        bound.get(), nullptr, nullptr, nullptr,
+                        ExecutionContext::InvokeCuf);
+  return ret;
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

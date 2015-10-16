@@ -104,7 +104,10 @@ struct c_Closure : ExtObjectDataFlags<ObjectData::HasClone> {
   static Object ti_bind(const Variant& closure, const Variant& newthis,
                         const Variant& scope);
   Object t_bindto(const Variant& newthis, const Variant& scope);
-
+  // param_count and params for varargs that can come with parameters to the
+  // closure function
+  Variant t_call(int64_t param_count, const Variant& newthis,
+                 const Array& params = null_array);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

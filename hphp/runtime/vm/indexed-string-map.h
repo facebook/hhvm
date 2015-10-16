@@ -187,7 +187,9 @@ public:
       abort();
     }
 
-    m_map[name] = m_list.size();
+    if (!m_map.emplace(name, m_list.size()).second) {
+      abort();
+    }
     m_list.push_back(t);
   }
 

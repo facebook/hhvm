@@ -140,6 +140,11 @@ inline bool PreClass::ClassRequirement::is_implements() const {
   return !is_extends();
 }
 
+inline bool PreClass::ClassRequirement::is_same(
+    const ClassRequirement* other) const {
+  return m_word == other->m_word;
+}
+
 /*
  * Deserialization.
  */

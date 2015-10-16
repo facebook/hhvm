@@ -2476,19 +2476,29 @@ void Class::setInterfaceVtables() {
 void Class::setRequirements() {
   RequirementMap::Builder reqBuilder;
 
+  auto addReq = [&](const PreClass::ClassRequirement* req) {
+    auto it = reqBuilder.find(req->name());
+    if (it == reqBuilder.end()) {
+      reqBuilder.add(req->name(), req);
+      return;
+    }
+    assert(reqBuilder[it->second]->is_same(req));
+  };
+
   if (m_parent.get() != nullptr) {
     for (auto const& req : m_parent->allRequirements().range()) {
+      // no need for addReq; parent won't have duplicates
       reqBuilder.add(req->name(), req);
     }
   }
   for (auto const& iface : m_interfaces.range()) {
     for (auto const& req : iface->allRequirements().range()) {
-      reqBuilder.add(req->name(), req);
+      addReq(req);
     }
   }
   for (auto const& ut : m_extra->m_usedTraits) {
     for (auto const& req : ut->allRequirements().range()) {
-      reqBuilder.add(req->name(), req);
+      addReq(req);
     }
   }
 
@@ -2521,7 +2531,7 @@ void Class::setRequirements() {
         }
       }
 
-      reqBuilder.add(reqName, &req);
+      addReq(&req);
     }
   } else if (attrs() & AttrInterface) {
     // Check that requirements are semantically valid
@@ -2542,7 +2552,7 @@ void Class::setRequirements() {
                     reqName->data(),
                     reqName->data());
       }
-      reqBuilder.add(reqName, &req);
+      addReq(&req);
     }
   } else if (RuntimeOption::RepoAuthoritative) {
     // The flattening of traits may result in requirements migrating from
@@ -2573,7 +2583,7 @@ void Class::setRequirements() {
                       reqName->data());
         }
       }
-      reqBuilder.add(reqName, &req);
+      addReq(&req);
     }
   }
 

@@ -49,12 +49,12 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
   /**
    * Returns an array containing the values from this ImmMap.
    */
-  public function toValuesArray(): array;
+  public function toValuesArray(): array<Tv>;
 
   /**
    * Returns an array whose values are this ImmMap's keys.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): array<Tk>;
 
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe

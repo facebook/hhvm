@@ -8,9 +8,7 @@
  *
  *)
 
-val make_genv: 
-  ServerArgs.options -> ServerConfig.t -> Path.t list
-  -> ServerEnv.genv
+val make_genv:
+  ServerArgs.options -> ServerConfig.t -> ServerLocalConfig.t -> ServerEnv.genv
 
-val make_env:
-  ServerArgs.options -> ServerConfig.t -> ServerEnv.env
+val make_env: ServerConfig.t -> ServerEnv.env

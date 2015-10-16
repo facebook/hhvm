@@ -178,12 +178,12 @@ VariableUnserializer::VariableUnserializer(
   size_t len,
   Type type,
   bool allowUnknownSerializableClass,
-  const Array& classWhitelist)
+  const Array& options)
     : m_type(type)
     , m_buf(str)
     , m_end(str + len)
     , m_unknownSerializable(allowUnknownSerializableClass)
-    , m_classWhiteList(classWhitelist)
+    , m_options(options)
 {}
 
 VariableUnserializer::Type VariableUnserializer::type() const {
@@ -321,20 +321,63 @@ void VariableUnserializer::expectChar(char expected) {
   }
 }
 
-bool VariableUnserializer::isWhitelistedClass(const String& clsName) const {
-  if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
-    return true;
-  }
-  if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
-    for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
-      const Variant& value(iter.secondRef());
-      if (HHVM_FN(is_subclass_of)(clsName, value.toString()) ||
-          same(value, clsName)) {
+static bool isWhitelistClass(const String& clsName, const Array& list) {
+  if (!list.empty()) {
+    for (ArrayIter iter(list); iter; ++iter) {
+      auto val = iter.second().toString();
+      if (val.get()->isame(clsName.get())) {
         return true;
       }
     }
   }
   return false;
+}
+
+const StaticString s_allowed_classes("allowed_classes");
+
+bool VariableUnserializer::whitelistCheck(const String& clsName) const {
+  if (m_type != Type::Serialize || m_options.isNull()) {
+    return true;
+  }
+
+  // PHP7-style class whitelisting
+  // Allowed classes are allowed,
+  // all others result in __Incomplete_PHP_Class
+  if (m_options.exists(s_allowed_classes)) {
+    auto allowed_classes = m_options[s_allowed_classes];
+    if (allowed_classes.isArray()) {
+      return isWhitelistClass(clsName, allowed_classes.toArray());
+    }
+    return allowed_classes.toBoolean();
+  }
+
+  if (!RuntimeOption::UnserializationWhitelistCheck) {
+    // No need for BC HHVM-style whitelist check,
+    // since the check isn't enabled.
+    // Go with PHP5 default behavior of allowing all
+    return true;
+  }
+
+  // Check for old-style whitelist
+  if (isWhitelistClass(clsName, m_options)) {
+    return true;
+  }
+
+  // Non-whitelisted class with a check enabled,
+  // are we willing to hard-error over it?
+  const char* err_msg =
+    "The object being unserialized with class name '%s' "
+    "is not in the given whitelist.";
+
+  if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
+    // Nope, just whine to the user and let it through
+    raise_warning(err_msg, clsName.c_str());
+    return true;
+  } else {
+    // Yes, shut it down.
+    raise_error(err_msg, clsName.c_str());
+    return false;
+  }
 }
 
 void VariableUnserializer::putInOverwrittenList(const Variant& v) {
@@ -602,19 +645,10 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
         cls = Unit::loadClass(clsName.get()); // with autoloading
       }
 
-      if (RuntimeOption::UnserializationWhitelistCheck &&
-          (type == 'O') &&
-          !uns->isWhitelistedClass(clsName)) {
-        const char* err_msg =
-          "The object being unserialized with class name '%s' "
-          "is not in the given whitelist. "
-          "See http://fburl.com/SafeSerializable for more detail";
-        if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
-          raise_warning(err_msg, clsName.c_str());
-        } else {
-          raise_error(err_msg, clsName.c_str());
-        }
+      if ((type == 'O') && !uns->whitelistCheck(clsName)) {
+        cls = nullptr;
       }
+
       Object obj;
       if (cls) {
         // Only unserialize CPP extension types which can actually

@@ -150,7 +150,12 @@ struct PhysReg {
    */
   template<typename T>
   struct Map {
-    Map() : m_elms() {
+    Map() {
+      // Workaround for a potential GCC 5 bug, value initializing m_elms seems
+      // to use zero-initialization instead of default initialization.
+      for (auto& elm : m_elms) {
+        elm = T();
+      }
     }
 
     T& operator[](const PhysReg& r) {
@@ -204,7 +209,7 @@ struct PhysReg {
       return { m_elms, sizeof(m_elms) / sizeof(m_elms[0]) };
     }
 
-   private:
+  private:
     T m_elms[kMaxRegs];
   };
 

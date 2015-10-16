@@ -405,6 +405,7 @@ void addLoadSet(Local& env, const ALocBits& bits) {
 }
 
 void addAllLoad(Local& env) {
+  FTRACE(4, "           load: -1\n");
   env.mayLoad.set();
   env.antLoc.reset();
 }
@@ -428,6 +429,12 @@ void mustStoreSet(Local& env, const ALocBits& bits) {
   env.reStores &= ~bits;
 }
 
+void killSet(Local& env, const ALocBits& bits) {
+  FTRACE(4, "           kill: {}\n", show(bits));
+  env.mayLoad &= ~bits;
+  mustStoreSet(env, bits);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void load(Local& env, AliasClass acls) {
@@ -442,12 +449,12 @@ void mayStore(Local& env, AliasClass acls) {
   env.reStores &= ~mayStore;
 }
 
-void mustStore(Local& env, AliasClass acls) {
+void kill(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);
-  auto const kill = env.global.ainfo.expand(canon);
-  mayStore(env, acls);
-  mustStoreSet(env, kill);
+  killSet(env, env.global.ainfo.expand(canon));
 }
+
+//////////////////////////////////////////////////////////////////////
 
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
   if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
@@ -477,23 +484,24 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, l.src);
     },
-    [&] (GeneralEffects l)  { load(env, l.loads);
-                              mayStore(env, l.stores);
-                              mustStore(env, l.kills); },
+    [&] (GeneralEffects l)  {
+      load(env, l.loads);
+      mayStore(env, l.stores);
+      kill(env, l.kills);
+    },
 
     [&] (ReturnEffects l) {
       if (inst.is(InlineReturn)) {
         // Returning from an inlined function.  This adds nothing to gen, but
         // kills frame and stack locations for the callee.
         auto const fp = inst.src(0);
-        auto const killSet = env.global.ainfo.per_frame_bits[fp];
-        mustStoreSet(env, killSet);
-        mustStore(env, l.kills);
+        killSet(env, env.global.ainfo.per_frame_bits[fp]);
+        kill(env, l.kills);
         return;
       }
 
       if (inst.is(InlineReturnNoFrame)) {
-        mustStore(env, l.kills);
+        kill(env, l.kills);
         return;
       }
 
@@ -502,13 +510,13 @@ void visit(Local& env, IRInstruction& inst) {
       // function return---so mark everything read before we start killing
       // things.
       addAllLoad(env);
-      mustStoreSet(env, env.global.ainfo.all_frame);
-      mustStore(env, l.kills);
+      killSet(env, env.global.ainfo.all_frame);
+      kill(env, l.kills);
     },
 
     [&] (ExitEffects l) {
       load(env, l.live);
-      mustStore(env, l.kills);
+      kill(env, l.kills);
     },
 
     /*
@@ -522,7 +530,7 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrameAny);  // Not necessary for some builtin calls, but it
                              // depends which builtin...
       load(env, l.stack);
-      mustStore(env, l.kills);
+      kill(env, l.kills);
     },
 
     [&] (PureStore l) {

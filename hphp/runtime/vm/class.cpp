@@ -1185,8 +1185,30 @@ void Class::setSpecial() {
   }
 
   if (!(attrs() & AttrTrait)) {
-    // Look for Foo::Foo() declared in this class
+    // Look for Foo::Foo() (old style constructor) declared in this class
+    // and deprecate warning if we are in PHP 7 mode
     if (matchedClassOrIsTrait(m_preClass->name())) {
+      // https://wiki.php.net/rfc/remove_php4_constructors
+      // Check for PHP 4 style constructors. For PHP 7 support, in certain
+      // scenarios, we throw a deprecation warning and then for PHP 8+ support
+      // we will not support them at all.
+      // We know we Foo:Foo() since we are in this if statement
+      // Now, if the PHP 7 runtime option is set and the class:
+      //   1. does not have an explicit constructor with __construct
+      //   2. is not in a namespace (namespaced classes treat methods with the
+      //      same name as the class as just normal methods, not a constructor)
+      // then we give the deprecation warning.
+      if (
+        RuntimeOption::PHP7_DeprecateOldStyleCtors && // In PHP 7 mode
+        !this->instanceCtor() && // No explicit __construct
+        this->name()->toCppString().find("\\") == std::string::npos // no NS
+      ) {
+        const char *deprecated_msg =
+          "Methods with the same name as their class will not be "
+          "constructors in a future version of PHP; %s has a deprecated "
+          "constructor";
+        raise_deprecated(deprecated_msg, this->name()->toCppString().c_str());
+      }
       return;
     }
   }
@@ -1756,9 +1778,7 @@ void Class::setProperties() {
     // from an ancestor class. We still get correct behavior in these cases,
     // so it works out okay.
     m_hasDeepInitProps = m_parent->m_hasDeepInitProps;
-    for (Slot slot = 0; slot < m_parent->m_declProperties.size(); ++slot) {
-      const Prop& parentProp = m_parent->m_declProperties[slot];
-
+    for (auto const& parentProp : m_parent->declProperties()) {
       // Copy parent's declared property.  Protected properties may be
       // weakened to public below, but otherwise, the parent's properties
       // will stay the same for this class.
@@ -1787,8 +1807,7 @@ void Class::setProperties() {
       }
     }
     m_declPropInit = m_parent->m_declPropInit;
-    for (Slot slot = 0; slot < m_parent->m_staticProperties.size(); ++slot) {
-      const SProp& parentProp = m_parent->m_staticProperties[slot];
+    for (auto const& parentProp : m_parent->staticProperties()) {
       if (parentProp.attrs & AttrPrivate) continue;
 
       // Alias parent's static property.
@@ -2172,19 +2191,19 @@ void Class::importTraitProps(int idxOffset,
                              SPropMap::Builder& curSPropMap) {
   if (attrs() & AttrNoExpandTrait) return;
   for (auto const& t : m_extra->m_usedTraits) {
-    Class* trait = t.get();
+    auto trait = t.get();
 
     // instance properties
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
-      Prop& traitProp          = trait->m_declProperties[p];
-      TypedValue& traitPropVal = trait->m_declPropInit[p];
+      auto& traitProp    = trait->m_declProperties[p];
+      auto& traitPropVal = trait->m_declPropInit[p];
       importTraitInstanceProp(trait, traitProp, traitPropVal, idxOffset,
                               curPropMap);
     }
 
     // static properties
     for (Slot p = 0; p < trait->m_staticProperties.size(); ++p) {
-      SProp& traitProp = trait->m_staticProperties[p];
+      auto& traitProp = trait->m_staticProperties[p];
       importTraitStaticProp(trait, traitProp, idxOffset, curPropMap,
                             curSPropMap);
     }

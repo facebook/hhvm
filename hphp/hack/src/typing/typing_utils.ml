@@ -170,21 +170,34 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
         on_common_field (env, acc) name ty1 ty2
   end fdm1 (env, acc)
 
-and shape_field_name env p field =
+let shape_field_name_ env field =
   let open Nast in match field with
-    | String name -> SFlit name
-    | Class_const (CI x, y) -> SFclass_const (x, y)
+    | String name -> Result.Ok (SFlit name)
+    | Class_const (CI x, y) -> Result.Ok (SFclass_const (x, y))
     | Class_const (CIself, y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
       | Tclass (sid, _) ->
-        SFclass_const(sid, y)
+        Result.Ok (SFclass_const(sid, y))
       | _ ->
+        Result.Error `Expected_class)
+    | _ -> Result.Error `Invalid_shape_field_name
+
+let maybe_shape_field_name env field =
+  match shape_field_name_ env field with
+    | Result.Ok x -> Some x
+    | Result.Error _ -> None
+
+let shape_field_name env p field =
+  match shape_field_name_ env field with
+    | Result.Ok x -> x
+    | Result.Error `Expected_class ->
         Errors.expected_class p;
         (* Should never get here. But we have to return something anyway *)
-        SFlit (p, "self"))
-    | _ -> Errors.invalid_shape_field_name p;
-      SFlit (p, "")
+        Nast.SFlit (p, "self")
+    | Result.Error `Invalid_shape_field_name ->
+        Errors.invalid_shape_field_name p;
+        Nast.SFlit (p, "")
 
 (*****************************************************************************)
 (* Try to unify all the types in a intersection *)
@@ -276,6 +289,16 @@ let unresolved env ty =
   | _, Tunresolved _ -> in_var env ety
   | _ -> in_var env (fst ty, Tunresolved [ty])
 
+let unwrap_class_or_interface_hint = function
+  | (_, N.Happly ((pos, class_name), type_parameters)) ->
+      pos, class_name, type_parameters
+  | p, N.Habstr(_, _) ->
+      Errors.expected_class ~suffix:"or interface but got a generic" p;
+      Pos.none, "", []
+  | p, _ ->
+      Errors.expected_class ~suffix:"or interface" p;
+      Pos.none, "", []
+
 (*****************************************************************************)
 (* Function checking if an array is used as a tuple *)
 (*****************************************************************************)
@@ -341,6 +364,8 @@ end = struct
         | AKvec ty -> this#on_type acc ty
         | AKmap (tk, tv) ->
           (this#on_type acc tk) || (this#on_type acc tv)
+        | AKshape fdm -> ShapeMap.exists (fun _ (tk, tv) ->
+          (this#on_type acc tk) || (this#on_type acc tv)) fdm
     end
   let check ty = visitor#on_type false ty
 end

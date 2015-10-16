@@ -213,7 +213,7 @@ static Variant impl_assert(const Variant& assertion,
     raise_warning("%s%s", name.data(),  str.data());
   }
   if (s_option_data->assertBail) {
-    throw ExtendedException("An assertion was raised.");
+    throw ExitException(1);
   }
 
   return init_null();

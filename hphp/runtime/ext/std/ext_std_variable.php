@@ -156,7 +156,7 @@ function serialize(mixed $value): string;
 
 <<__Native>>
 function unserialize(string $str,
-                     array $class_whitelist = []): mixed;
+                     array $options = []): mixed;
 
 /* This function returns a multidimensional array containing a list of all
  * defined variables, be they environment, server or user-defined

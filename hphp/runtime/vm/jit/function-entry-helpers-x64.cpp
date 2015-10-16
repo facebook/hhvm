@@ -49,15 +49,21 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
 
 TCA fcallHelper(ActRec* ar) {
   assert_native_stack_aligned();
-  try {
-    assertx(!ar->resumed());
-    auto const tca = mcg->getFuncPrologue(
-      const_cast<Func*>(ar->m_func),
-      ar->numArgs(),
-      ar
-    );
-    if (tca) return tca;
 
+  assertx(!ar->resumed());
+  auto const tca = mcg->getFuncPrologue(
+    const_cast<Func*>(ar->m_func),
+    ar->numArgs(),
+    ar
+  );
+  if (tca) return tca;
+
+  // Check for stack overflow in the same place func prologues make their
+  // StackCheck::Early check (see irgen-func-prologue.cpp).  This handler also
+  // cleans and syncs vmRegs for us.
+  if (checkCalleeStackOverflow(ar)) handleStackOverflow(ar);
+
+  try {
     VMRegAnchor _(ar);
     if (doFCall(ar, vmpc())) {
       return mcg->tx().uniqueStubs.resumeHelperRet;
@@ -66,22 +72,9 @@ TCA fcallHelper(ActRec* ar) {
     // have already been fixed; indicate this with a nullptr return.
     return nullptr;
   } catch (...) {
-    // We cleaned the VM registers above, but we need to tell the unwinder.
+    // The VMRegAnchor above took care of us, but we need to tell the unwinder
+    // (since ~VMRegAnchor() will have reset tl_regState).
     tl_regState = VMRegState::CLEAN;
-    if (ar < vmfp()) {
-      // We're in a really weird state; fcallHelper's frame points to
-      // ar, but ar isn't active yet (it probably failed the stack
-      // check).
-      // Make it look like we were called directly from ar's caller
-      DECLARE_FRAME_POINTER(framePtr);
-      framePtr->m_sfp = ar->m_sfp;
-      framePtr->m_savedRip = ar->m_savedRip;
-
-      while (vmsp() < static_cast<void*>(ar)) {
-        vmStack().popTV();
-      }
-      vmStack().popAR();
-    }
     throw;
   }
 }

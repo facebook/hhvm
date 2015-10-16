@@ -38,6 +38,8 @@ namespace HPHP {
 
 const StaticString
   s_args("args"),
+  s_frame_ptr("frame_ptr"),
+  s_parent_frame_ptr("parent_frame_ptr"),
   s_enter("enter"),
   s_exit("exit"),
   s_exception("exception"),
@@ -104,14 +106,28 @@ bool shouldRunUserProfiler(const Func* func) {
   }
   // Don't profile 86ctor, since its an implementation detail,
   // and we dont guarantee to call it
-  if (func->cls() && func == func->cls()->getCtor() &&
+  if ((g_context->m_setprofileFlags & EventHook::ProfileConstructors) == 0 &&
+      func->cls() && func == func->cls()->getCtor() &&
       Func::isSpecial(func->name())) {
     return false;
   }
   return true;
 }
 
+ALWAYS_INLINE
+ActRec* getParentFrame(const ActRec* ar) {
+  ActRec* ret = g_context->getPrevVMState(ar);
+  while (ret != nullptr && ret->skipFrame()) {
+    ret = g_context->getPrevVMState(ret);
+  }
+  return ret;
+}
+
 void runUserProfilerOnFunctionEnter(const ActRec* ar) {
+  if ((g_context->m_setprofileFlags & EventHook::ProfileEnters) == 0) {
+    return;
+  }
+
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
@@ -121,6 +137,13 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
 
   Array frameinfo;
   frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
+  if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) != 0) {
+    frameinfo.set(s_frame_ptr, Variant(intptr_t(ar)));
+    ActRec* parent_ar = getParentFrame(ar);
+    if (parent_ar != nullptr) {
+      frameinfo.set(s_parent_frame_ptr, Variant(intptr_t(parent_ar)));
+    }
+  }
   params.append(frameinfo);
 
   vm_call_user_func(g_context->m_setprofileCallback, params);
@@ -128,6 +151,10 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
                                    ObjectData* exception) {
+  if ((g_context->m_setprofileFlags & EventHook::ProfileExits) == 0) {
+    return;
+  }
+
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
@@ -140,6 +167,13 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo.set(s_return, tvAsCVarRef(retval));
   } else if (exception) {
     frameinfo.set(s_exception, Variant{exception});
+  }
+  if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) != 0) {
+    frameinfo.set(s_frame_ptr, Variant(intptr_t(ar)));
+    ActRec* parent_ar = getParentFrame(ar);
+    if (parent_ar != nullptr) {
+      frameinfo.set(s_parent_frame_ptr, Variant(intptr_t(parent_ar)));
+    }
   }
   params.append(frameinfo);
 

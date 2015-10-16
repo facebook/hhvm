@@ -65,8 +65,9 @@ bool HHVM_FUNCTION(image2wbmp, const Resource& image,
 Variant HHVM_FUNCTION(imageaffine, const Resource& image,
   const Array& affine = Array(), const Array& clip = Array());
 Variant HHVM_FUNCTION(imageaffinematrixconcat, const Array& m1,
-  const Array& m2);Variant
-HHVM_FUNCTION(imageaffinematrixget, int64_t type, const Variant& otpions);
+  const Array& m2);
+Variant HHVM_FUNCTION(imageaffinematrixget, int64_t type,
+  const Variant& options = Array());
 bool HHVM_FUNCTION(imagealphablending, const Resource& image, bool blendmode);
 bool HHVM_FUNCTION(imageantialias, const Resource& image, bool on);
 bool HHVM_FUNCTION(imagearc, const Resource& image,

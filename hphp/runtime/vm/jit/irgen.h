@@ -168,27 +168,12 @@ void prepareForNextHHBC(IRGS&,
 void finishHHBC(IRGS&);
 
 /*
- * This is called before emitting instructions that can jump to a
- * block corresponding to a control-flow merge point at the bytecode
- * level.
- */
-void prepareForHHBCMergePoint(IRGS&);
-
-/*
- * This is called by the region translator to force the stack to be
- * spilled due to a potential side exit.  This is just an
- * optimization, which enables smashing a branch in the main code
- * region.
- */
-void prepareForSideExit(IRGS&);
-
-/*
  * When done translating a region, or a block in a region, these calls are
  * made.
  */
 void endRegion(IRGS&);
 void endRegion(IRGS&, SrcKey);
-void endBlock(IRGS&, Offset next, bool nextIsMerge);
+void endBlock(IRGS&, Offset next);
 
 /*
  * When we're done creating the IRUnit, this function must be called to ensure

@@ -1,0 +1,10 @@
+
+<?hh // strict
+
+class Foo {
+  public function bar(): void {
+    $foo = "A Different String";
+  }
+}
+
+

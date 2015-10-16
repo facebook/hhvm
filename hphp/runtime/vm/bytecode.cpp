@@ -76,7 +76,7 @@
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
@@ -85,6 +85,7 @@
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/hash/hash_murmur.h"
 
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -1392,6 +1393,39 @@ Array ExecutionContext::getCallerInfo() {
     ar = getPrevVMState(ar, &pc);
   }
   return result;
+}
+
+int64_t ExecutionContext::getDebugBacktraceHash() {
+  VMRegAnchor _;
+  ActRec* ar = vmfp();
+  int64_t hash = 0x9e3779b9;
+  Unit* prev_unit = nullptr;
+
+  while (ar != nullptr) {
+    if (!ar->skipFrame()) {
+      Unit* unit = ar->m_func->unit();
+
+      // Only do a filehash if the file changed. It is very common
+      // to see sequences of calls within the same file
+      // File paths are already hashed, and the hash bits are random enough
+      // That allows us to do a faster combination of hashes using a known
+      // implementation (boost::hash_combine)
+      if (prev_unit != unit) {
+        prev_unit = unit;
+        auto filehash = unit->filepath()->hash();
+        hash ^= filehash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+      }
+
+      // Function names are already hashed, and the hash bits are random enough
+      // That allows us to do a faster combination of hashes using a known
+      // implementation (boost::hash_combine)
+      auto funchash = ar->m_func->fullName()->hash();
+      hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    }
+    ar = getPrevVMState(ar);
+  }
+
+  return hash;
 }
 
 Array getDefinedVariables(const ActRec* fp) {
@@ -6468,7 +6502,6 @@ bool doFCall(ActRec* ar, PC& pc) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->m_func->unit()->entry(),
         int(vmfp()->m_func->base()));
-  checkStack(vmStack(), ar->m_func, 0);
   prepareFuncEntry(ar, pc, StackArgsState::Untrimmed);
   vmpc() = pc;
   if (EventHook::FunctionCall(ar, EventHook::NormalFunc)) return true;
@@ -6480,6 +6513,7 @@ OPTBLD_INLINE void iopFCall(IOP_ARGS) {
   auto const ar = arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FCall));
   UNUSED auto numArgs = decode_iva(pc);
   assert(numArgs == ar->numArgs());
+  checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
 }
@@ -6494,6 +6528,7 @@ OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
     assert(ar->m_func->name()->isame(funcName));
   }
   assert(numArgs == ar->numArgs());
+  checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
 }

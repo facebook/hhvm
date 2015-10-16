@@ -1,0 +1,12 @@
+object(C)#%d (0) {
+}
+object(__PHP_Incomplete_Class)#%d (1) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "C"
+}
+object(__PHP_Incomplete_Class)#%d (1) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "D"
+}
+object(D)#%d (0) {
+}

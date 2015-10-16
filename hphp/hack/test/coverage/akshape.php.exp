@@ -1,0 +1,18 @@
+== call ==
+Unchecked: 1
+Partial: 0
+Checked: 1
+Checked / Total: 0.500000
+(Checked + Partial * 0.5) / Total: 0.500000
+== lvar ==
+Unchecked: 0
+Partial: 4
+Checked: 3
+Checked / Total: 0.428571
+(Checked + Partial * 0.5) / Total: 0.714286
+== total ==
+Unchecked: 1
+Partial: 4
+Checked: 4
+Checked / Total: 0.444444
+(Checked + Partial * 0.5) / Total: 0.666667

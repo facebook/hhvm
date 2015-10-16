@@ -523,8 +523,14 @@ Cell cellMod(Cell c1, Cell c2) {
   auto const i1 = cellToInt(c1);
   auto const i2 = cellToInt(c2);
   if (UNLIKELY(i2 == 0)) {
-    raise_warning(Strings::DIVISION_BY_ZERO);
-    return make_tv<KindOfBoolean>(false);
+    if (RuntimeOption::PHP7_IntSemantics) {
+      // TODO(https://github.com/facebook/hhvm/issues/6012)
+      // This should throw a DivisionByZeroError.
+      SystemLib::throwInvalidOperationExceptionObject(Strings::MODULO_BY_ZERO);
+    } else {
+      raise_warning(Strings::DIVISION_BY_ZERO);
+      return make_tv<KindOfBoolean>(false);
+    }
   }
 
   // This is to avoid SIGFPE in the case of INT64_MIN % -1.

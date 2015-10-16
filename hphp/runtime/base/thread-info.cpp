@@ -101,15 +101,6 @@ void ThreadInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
 }
 
-void ThreadInfo::clearPendingException() {
-  m_reqInjectionData.clearFlag(PendingExceptionFlag);
-
-  if (auto tmp = m_pendingException) {
-    m_pendingException = nullptr;
-    delete tmp;
-  }
-}
-
 void ThreadInfo::setPendingException(Exception* e) {
   m_reqInjectionData.setFlag(PendingExceptionFlag);
 
@@ -125,6 +116,16 @@ void ThreadInfo::onSessionExit() {
   m_reqInjectionData.setCPUTimeout(0);
 
   m_reqInjectionData.reset();
+
+  if (auto tmp = m_pendingException) {
+    m_pendingException = nullptr;
+    // request memory has already been freed
+    if (auto ee = dynamic_cast<ExtendedException*>(tmp)) {
+      ee->leakBacktrace();
+    }
+    delete tmp;
+  }
+
   rds::requestExit();
 }
 

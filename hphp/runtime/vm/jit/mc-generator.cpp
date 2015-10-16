@@ -24,7 +24,9 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#ifndef _MSC_VER
 #include <unwind.h>
+#endif
 
 #include <algorithm>
 #include <exception>
@@ -65,7 +67,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -318,7 +320,15 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
   m_tx.setMode(profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live);
   SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
-  return translate(args);
+  auto start = translate(args);
+
+  // In PGO mode, we free all the profiling data once the TC is full.
+  if (RuntimeOption::EvalJitPGO &&
+      code.mainUsed() >= RuntimeOption::EvalJitAMaxUsage) {
+    m_tx.profData()->free();
+  }
+
+  return start;
 }
 
 TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
@@ -373,10 +383,10 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     }
   }
 
-  // We need to hold on to PGO data for optimized functions if we plan to use
-  // it for inlining later
-  if (RuntimeOption::EvalInlineRegionMode == "tracelet") {
-    m_tx.profData()->freeFuncData(funcId);
+  // In PGO mode, we free all the profiling data once the TC is full.
+  if (RuntimeOption::EvalJitPGO &&
+      code.mainUsed() >= RuntimeOption::EvalJitAMaxUsage) {
+    m_tx.profData()->free();
   }
 
   return start;
@@ -467,6 +477,8 @@ static void populateLiveContext(RegionContext& ctx) {
 
   const ActRec*     const fp {vmfp()};
   const TypedValue* const sp {vmsp()};
+
+  always_assert(ctx.func == fp->m_func);
 
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
@@ -628,12 +640,6 @@ MCGenerator::translate(const TranslArgs& args) {
   }
   SKTRACE(1, args.sk, "translate moved head from %p to %p\n",
           getTopTranslation(args.sk), start);
-
-  // In PGO mode, we free all the profiling data once the TC is full.
-  if (RuntimeOption::EvalJitPGO &&
-      code.mainUsed() >= RuntimeOption::EvalJitAMaxUsage) {
-    m_tx.profData()->free();
-  }
   return start;
 }
 
@@ -1509,20 +1515,30 @@ void handleStackOverflow(ActRec* calleeAR) {
   not_reached();
 }
 
-void handlePossibleStackOverflow(ActRec* calleeAR) {
-  assert_native_stack_aligned();
+///////////////////////////////////////////////////////////////////////////////
+
+bool checkCalleeStackOverflow(const ActRec* calleeAR) {
   auto const func = calleeAR->func();
   auto const limit = func->maxStackCells() + kStackCheckPadding;
-  void* const needed_top = reinterpret_cast<TypedValue*>(calleeAR) - limit;
-  void* const limit_addr =
+
+  const void* const needed_top =
+    reinterpret_cast<const TypedValue*>(calleeAR) - limit;
+
+  const void* const limit_addr =
     static_cast<char*>(vmRegsUnsafe().stack.getStackLowAddress()) +
     Stack::sSurprisePageSize;
-  if (needed_top >= limit_addr) {
-    // It was probably a surprise flag trip.  But we can't assert that it is
-    // because background threads are allowed to clear surprise bits
-    // concurrently, so it could be cleared again by now.
-    return;
-  }
+
+  return needed_top < limit_addr;
+}
+
+void handlePossibleStackOverflow(ActRec* calleeAR) {
+  assert_native_stack_aligned();
+
+  // If it's not an overflow, it was probably a surprise flag trip.  But we
+  // can't assert that it is because background threads are allowed to clear
+  // surprise bits concurrently, so it could be cleared again by now.
+  if (!checkCalleeStackOverflow(calleeAR)) return;
+  auto const func = calleeAR->func();
 
   /*
    * Stack overflows in this situation are a slightly different case than
@@ -2409,16 +2425,16 @@ bool MCGenerator::dumpTCCode(const char* filename) {
   size_t count = code.hot().used();
   bool result = (fwrite(code.hot().base(), 1, count, ahotFile) == count);
   if (result) {
-    count = code.main().used();
-    result = (fwrite(code.main().base(), 1, count, aFile) == count);
+    count = code.realMain().used();
+    result = (fwrite(code.realMain().base(), 1, count, aFile) == count);
   }
   if (result) {
     count = code.prof().used();
     result = (fwrite(code.prof().base(), 1, count, aprofFile) == count);
   }
   if (result) {
-    count = code.cold().used();
-    result = (fwrite(code.cold().base(), 1, count, acoldFile) == count);
+    count = code.realCold().used();
+    result = (fwrite(code.realCold().base(), 1, count, acoldFile) == count);
   }
   if (result) {
     count = code.frozen().used();
@@ -2428,7 +2444,7 @@ bool MCGenerator::dumpTCCode(const char* filename) {
 }
 
 // Returns true on success
-bool MCGenerator::dumpTC(bool ignoreLease) {
+bool MCGenerator::dumpTC(bool ignoreLease /* =false */) {
   folly::Optional<BlockingLeaseHolder> writer;
   if (!ignoreLease) {
     writer.emplace(Translator::WriteLease());
@@ -2442,8 +2458,8 @@ bool MCGenerator::dumpTC(bool ignoreLease) {
 }
 
 // Returns true on success
-bool tc_dump(void) {
-  return mcg && mcg->dumpTC();
+bool tc_dump(bool ignoreLease /* =false */) {
+  return mcg && mcg->dumpTC(ignoreLease);
 }
 
 // Returns true on success
@@ -2465,9 +2481,9 @@ bool MCGenerator::dumpTCData() {
                 "afrozen.frontier = %p\n\n",
                 kRepoSchemaId,
                 code.hot().base(), code.hot().frontier(),
-                code.main().base(), code.main().frontier(),
+                code.realMain().base(), code.realMain().frontier(),
                 code.prof().base(), code.prof().frontier(),
-                code.cold().base(), code.cold().frontier(),
+                code.realCold().base(), code.realCold().frontier(),
                 code.frozen().base(), code.frozen().frontier())) {
     return false;
   }

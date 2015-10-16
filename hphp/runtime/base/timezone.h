@@ -21,10 +21,11 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/system/constants.h"
 
-extern "C" {
-#include <timelib.h>
 #include <map>
 #include <memory>
+
+extern "C" {
+#include <timelib.h>
 }
 
 namespace HPHP {

@@ -185,6 +185,8 @@ RegionDescPtr RegionFormer::go() {
 
     if (!prepareInstruction()) break;
 
+    m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
+
     if (traceThroughJmp()) {
       // We're going to skip the call to translateInstr, which is what
       // inserts the EndGuards when HHIRConstrictGuards is enabled.
@@ -192,8 +194,6 @@ RegionDescPtr RegionFormer::go() {
       if (RuntimeOption::EvalHHIRConstrictGuards) irgen::gen(m_irgs, EndGuards);
       continue;
     }
-
-    m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
 
     m_inst.interp = m_interp.count(m_sk);
 

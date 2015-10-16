@@ -470,11 +470,11 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
     if (doc == nullptr) {
       raise_error("Unable to import stylesheet");
     }
-  } else if (stylesheet.instanceof(c_SimpleXMLElement::classof())) {
-    auto elem = cast<c_SimpleXMLElement>(stylesheet);
+  } else if (stylesheet.instanceof(SimpleXMLElement_classof())) {
+    auto ssNode = SimpleXMLElement_exportNode(stylesheet);
     // This doc will be freed by xsltFreeStylesheet.
     doc = xmlNewDoc((const xmlChar*)"1.0");
-    xmlNodePtr node = xmlCopyNode(elem->nodep(), /*extended*/ 1);
+    xmlNodePtr node = xmlCopyNode(ssNode, /*extended*/ 1);
     if (doc == nullptr || node == nullptr) {
       raise_error("Unable to import stylesheet");
     }

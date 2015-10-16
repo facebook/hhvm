@@ -226,8 +226,9 @@ void hash_tiger::hash_final(unsigned char *digest, void *context_) {
   TigerFinalize(context);
 
   for(int i = 0; i < (m_digest >> 3); ++i) {
+    auto b = i % 8;
     digest[i] = (unsigned char) ((context->state[i >> 3] >>
-                                    ((m_invert ? (7 - i) : i) << 3))
+                                    ((m_invert ? (7 - b) : b) << 3))
                                     & 0xff);
   }
 

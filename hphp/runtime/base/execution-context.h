@@ -356,6 +356,7 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
+  int64_t getDebugBacktraceHash();
   bool evalUnit(Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, const Unit* unit);
   Unit* compileEvalString(StringData* code,
@@ -598,6 +599,7 @@ private:
   int m_lastErrorLine;
 public:
   Variant m_setprofileCallback;
+  uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::vector<vixl::Simulator*> m_activeSims;
 };

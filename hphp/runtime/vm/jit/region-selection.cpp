@@ -262,10 +262,6 @@ void RegionDesc::clearPrevRetrans(BlockId id) {
   data(id).prevRetrans = folly::none;
 }
 
-const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {
-  return m_sideExitingBlocks;
-}
-
 void RegionDesc::addArc(BlockId srcId, BlockId dstId) {
   data(srcId).succs.insert(dstId);
   data(dstId).preds.insert(srcId);
@@ -305,14 +301,6 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   }
 }
 
-void RegionDesc::setSideExitingBlock(BlockId bid) {
-  m_sideExitingBlocks.insert(bid);
-}
-
-bool RegionDesc::isSideExitingBlock(BlockId bid) const {
-  return m_sideExitingBlocks.count(bid);
-}
-
 void RegionDesc::copyArcsFrom(const RegionDesc& srcRegion) {
   for (auto const b : srcRegion.m_blocks) {
     auto bid = b->id();
@@ -334,15 +322,11 @@ void RegionDesc::copyBlocksFrom(const RegionDesc&  other,
 void RegionDesc::append(const RegionDesc& other) {
   copyBlocksFrom(other, m_blocks.end());
   copyArcsFrom(other);
-  m_sideExitingBlocks.insert(other.m_sideExitingBlocks.begin(),
-                             other.m_sideExitingBlocks.end());
 }
 
 void RegionDesc::prepend(const RegionDesc& other) {
   copyBlocksFrom(other, m_blocks.begin());
   copyArcsFrom(other);
-  m_sideExitingBlocks.insert(other.m_sideExitingBlocks.begin(),
-                             other.m_sideExitingBlocks.end());
 }
 
 /*
@@ -663,19 +647,10 @@ void RegionDesc::Block::addReffinessPred(const ReffinessPred& pred) {
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
-  if (func == nullptr && m_knownFuncs.empty()) return;
-
   FTRACE(2, "Block::setKnownFunc({}, {})\n", showShort(sk),
          func ? func->fullName()->data() : "nullptr");
   assertx(m_knownFuncs.find(sk) == m_knownFuncs.end());
   assertx(contains(sk));
-  auto it = m_knownFuncs.lower_bound(sk);
-  if (it != m_knownFuncs.begin() && (--it)->second == func) {
-    // Adding func at this sk won't add any new information.
-    FTRACE(2, "  func exists at {}, not adding\n", showShort(it->first));
-    return;
-  }
-
   m_knownFuncs.insert(std::make_pair(sk, func));
 }
 
@@ -1348,11 +1323,8 @@ std::string show(const RegionDesc& region) {
     }
   }
 
-  // Print side-exiting blocks
-  folly::toAppend("}\n\nSide-exiting Blocks:\n",
-                  folly::join(", ", region.sideExitingBlocks()),
-                  "\n",
-                  &ret);
+  ret += "}\n";
+
   return ret;
 }
 

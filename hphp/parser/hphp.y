@@ -861,8 +861,9 @@ ident_for_class_const:
   | T_AS
   | T_CATCH
   /* no T_DIE ? */
-  /* no T_SELF ? */
-  /* no T_PARENT ? */
+  /** The following must be made semi-reserved since they were keywords in HHVM
+    * but not PHP. */
+  | T_UNSET
 ;
 
 ident:
@@ -1855,6 +1856,7 @@ yield_expr:
     T_YIELD                            { _p->onYield($$, NULL);}
   | T_YIELD expr                       { _p->onYield($$, &$2);}
   | T_YIELD expr T_DOUBLE_ARROW expr   { _p->onYieldPair($$, &$2, &$4);}
+  | '(' yield_expr ')'                 { $$ = $2; }
 ;
 
 yield_assign_expr:
@@ -3175,7 +3177,7 @@ hh_type_alias_statement:
   | non_empty_user_attributes
     T_TYPE hh_name_no_semireserved_with_typevar
       '=' hh_type ';'                  { $3.setText(_p->nsClassDecl($3.text()));
-                                         _p->onTypedef($$, $3, $5);
+                                         _p->onTypedef($$, $3, $5, &$1);
                                          _p->popTypeScope(); }
   | T_NEWTYPE hh_name_no_semireserved_with_typevar
     hh_opt_constraint '=' hh_type ';'  { $2.setText(_p->nsClassDecl($2.text()));
@@ -3184,7 +3186,7 @@ hh_type_alias_statement:
   | non_empty_user_attributes
     T_NEWTYPE hh_name_no_semireserved_with_typevar
     hh_opt_constraint '=' hh_type ';'  { $3.setText(_p->nsClassDecl($3.text()));
-                                         _p->onTypedef($$, $3, $6);
+                                         _p->onTypedef($$, $3, $6, &$1);
                                          _p->popTypeScope(); }
 ;
 

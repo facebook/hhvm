@@ -1,7 +1,7 @@
 Program %s/where-serialize.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break bar()
 Breakpoint 1 set upon entering bar()
-But wont break until function bar has been loaded.
+But won't break until function bar has been loaded.
 run
 Breakpoint 1 reached at bar() on line 22 of %s/where-serialize.php
   21 function bar($b) {

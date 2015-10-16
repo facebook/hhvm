@@ -105,7 +105,7 @@ inline uint32_t StringData::capacity() const {
 
 inline size_t StringData::heapSize() const {
   return isFlat() ? sizeof(StringData) + 1 + capacity() :
-         sizeof(StringData) + sizeof(SharedPayload);
+         sizeof(StringData) + sizeof(Proxy);
 }
 
 inline bool StringData::isStrictlyInteger(int64_t& res) const {
@@ -130,7 +130,7 @@ inline StringData* StringData::modifyChar(int offset, char c) {
   assert(offset >= 0 && offset < size());
   assert(!hasMultipleRefs());
 
-  auto const sd = isShared() ? escalate(size()) : this;
+  auto const sd = isProxy() ? escalate(size()) : this;
   sd->m_data[offset] = c;
   sd->m_hash = 0;
   return sd;
@@ -159,20 +159,20 @@ inline bool StringData::isame(const StringData* s) const {
 
 //////////////////////////////////////////////////////////////////////
 
-inline const void* StringData::voidPayload() const { return this + 1; }
-inline void* StringData::voidPayload() { return this + 1; }
+inline const void* StringData::payload() const { return this + 1; }
+inline void* StringData::payload() { return this + 1; }
 
-inline const StringData::SharedPayload* StringData::sharedPayload() const {
-  return static_cast<const SharedPayload*>(voidPayload());
+inline const StringData::Proxy* StringData::proxy() const {
+  return static_cast<const Proxy*>(payload());
 }
-inline StringData::SharedPayload* StringData::sharedPayload() {
-  return static_cast<SharedPayload*>(voidPayload());
+inline StringData::Proxy* StringData::proxy() {
+  return static_cast<Proxy*>(payload());
 }
 
-inline bool StringData::isFlat() const { return m_data == voidPayload(); }
-inline bool StringData::isShared() const { return m_data != voidPayload(); }
+inline bool StringData::isFlat() const { return m_data == payload(); }
+inline bool StringData::isProxy() const { return m_data != payload(); }
 inline bool StringData::isImmutable() const {
-  return !isRefCounted() || isShared();
+  return !isRefCounted() || isProxy();
 }
 
 //////////////////////////////////////////////////////////////////////

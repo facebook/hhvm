@@ -376,6 +376,8 @@ bool RuntimeOption::AutoTypecheck = true;
 // granular options instead. (It can't be a local since Config::Bind will take
 // and store a pointer to it.)
 static bool s_PHP7_master = false;
+bool RuntimeOption::PHP7_DeprecateOldStyleCtors = false;
+bool RuntimeOption::PHP7_IntSemantics = false;
 bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_UVS = false;
@@ -445,7 +447,8 @@ static inline bool hhirRelaxGuardsDefault() {
 }
 
 static inline bool evalJitDefault() {
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+// Disable JIT for PPC64 - Port under development
+#if defined(__CYGWIN__) || defined(_MSC_VER) || defined(__powerpc64__)
   return false;
 #else
   return true;
@@ -1161,6 +1164,10 @@ void RuntimeOption::Load(
     // get-go, but threading that through turns out to be kind of annoying and
     // of questionable value, so just doing this for now.
     Config::Bind(s_PHP7_master, ini, config, "PHP7.all", false);
+    Config::Bind(PHP7_DeprecateOldStyleCtors, ini, config,
+                 "PHP7.DeprecateOldStyleCtors", s_PHP7_master);
+    Config::Bind(PHP7_IntSemantics, ini, config, "PHP7.IntSemantics",
+                 s_PHP7_master);
     Config::Bind(PHP7_LTR_assign, ini, config, "PHP7.LTRAssign",
                  s_PHP7_master);
     Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics",

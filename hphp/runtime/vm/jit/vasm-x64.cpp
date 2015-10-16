@@ -735,10 +735,9 @@ void lowerForX64(Vunit& unit) {
     }
 
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
-      auto& inst = blocks[ib].code[ii];
-
       vlower(unit, ib, ii);
 
+      auto& inst = blocks[ib].code[ii];
       switch (inst.op) {
         case Vinstr::srem:
           lowerSrem(unit, Vlabel{ib}, ii);

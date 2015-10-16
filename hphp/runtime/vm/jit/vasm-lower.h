@@ -36,7 +36,7 @@ void vlower(Vunit& unit);
  * Lower a single instruction.
  *
  * Replaces the instruction at `unit.blocks[b].code[i]` with an appropriate
- * sequence of zero or more instructions.
+ * sequence of one or more instructions.
  */
 void vlower(Vunit& unit, Vlabel b, size_t i);
 

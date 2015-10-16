@@ -2363,23 +2363,31 @@ class ReflectionTypeAlias implements Reflector {
   public function getTypeStructure(): array;
 
   /**
+   * Gets all attributes
+   *
+   * @return  array<arraykey, array<int, mixed>>
+   */
+  <<__Native>>
+  final public function getAttributes(): array;
+
+  /**
+   * Returns all attributes with given key.
+   *
+   * @return  ?array<int, mixed>
+   */
+  final public function getAttribute(string $name) {
+    return hphp_array_idx($this->getAttributes(), $name, null);
+  }
+
+  /**
    * Get the TypeStructure with type information resolved. Call at
    * your own peril as non-hoisted classes might cause fatal.
    *
    * @return    array  The resolved type structure of the type alias.
    */
   public function getResolvedTypeStructure() {
-    $ts = $this->__getResolvedTypeStructure();
-    if (empty($ts)) {
-      throw new ReflectionException(
-        "resolving type alias {$this->name} failed. Have you declared all ".
-        "classes appeared in the type alias?");
-    }
-    return $ts;
+    return HH\type_structure($this->name);
   }
-
-  <<__Native>>
-  private function __getResolvedTypeStructure(): array;
 
   /**
    * Get the assigned type as a string.

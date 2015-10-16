@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/logger.h"
@@ -741,12 +741,12 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
 
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
-                       const Array& class_whitelist /* = null_array */) {
+                       const Array& options /* = null_array */) {
   if (str == nullptr || len <= 0) {
     return false;
   }
 
-  VariableUnserializer vu(str, len, type, true, class_whitelist);
+  VariableUnserializer vu(str, len, type, true, options);
   Variant v;
   try {
     v = vu.unserialize();
@@ -762,8 +762,8 @@ Variant unserialize_ex(const char* str, int len,
 
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
-                       const Array& class_whitelist /* = null_array */) {
-  return unserialize_ex(str.data(), str.size(), type, class_whitelist);
+                       const Array& options /* = null_array */) {
+  return unserialize_ex(str.data(), str.size(), type, options);
 }
 
 String concat3(const String& s1, const String& s2, const String& s3) {

@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/bz2/bz2-file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/util/alloc.h"
 #include <folly/String.h>
 
@@ -30,6 +32,44 @@
   }
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+// compress.zlib:// stream wrapper
+
+namespace {
+static struct BZ2StreamWrapper : Stream::Wrapper {
+  virtual req::ptr<File> open(const String& filename,
+                              const String& mode,
+                              int options,
+                              const req::ptr<StreamContext>& context) {
+    static const char cz[] = "compress.bzip2://";
+
+    if (strncmp(filename.c_str(), cz, sizeof(cz) - 1)) {
+      assert(false);
+      return nullptr;
+    }
+
+    String fname(filename.substr(sizeof(cz) - 1));
+    String translated;
+    if (fname.find("://") == -1) {
+      translated = File::TranslatePath(fname);
+      if (auto file = FileStreamWrapper::openFromCache(translated, mode)) {
+        file->unzip();
+        return file;
+      }
+    } else {
+      translated = fname;
+    }
+
+    auto file = req::make<BZ2File>();
+    if (!file->open(translated, mode)) {
+      raise_warning("%s", file->getLastError().c_str());
+      return nullptr;
+    }
+    return file;
+  }
+} s_bzip2_stream_wrapper;
+} // nil namespace
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(bzclose, const Resource& bz) {
@@ -204,6 +244,11 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
 class bz2Extension final : public Extension {
  public:
   bz2Extension() : Extension("bz2") {}
+
+  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
+    s_bzip2_stream_wrapper.registerAs("compress.bzip2");
+  }
+
   void moduleInit() override {
     HHVM_FE(bzclose);
     HHVM_FE(bzread);

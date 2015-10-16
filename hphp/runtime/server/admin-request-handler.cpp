@@ -34,7 +34,9 @@
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#ifdef ENABLE_EXTENSION_MYSQL
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
+#endif
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -839,7 +841,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
   if (cmd == "check-sql") {
     string stats = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     stats += "<SQL>\n";
+#ifdef ENABLE_EXTENSION_MYSQL
     stats += MySqlStats::ReportStats();
+#endif
     stats += "</SQL>\n";
     transport->sendString(stats);
     return true;

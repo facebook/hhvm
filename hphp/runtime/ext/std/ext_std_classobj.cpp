@@ -151,41 +151,44 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   }
   cls->initialize();
 
-  const Class::SProp* sPropInfo = cls->staticProperties();
-  const size_t numSProps = cls->numStaticProperties();
-  const Class::Prop* propInfo = cls->declProperties();
-  const size_t numDeclProps = cls->numDeclProperties();
+
+  auto const propInfo = cls->declProperties();
+
+  auto const numDeclProps = cls->numDeclProperties();
+  auto const numSProps    = cls->numStaticProperties();
 
   // The class' instance property initialization template is in different
   // places, depending on whether it has any request-dependent initializers
   // (i.e. constants)
-  const Class::PropInitVec& declPropInitVec = cls->declPropInit();
-  const Class::PropInitVec* propVals = !cls->pinitVec().empty()
-    ? cls->getPropData() : &declPropInitVec;
-  assert(propVals != NULL);
+  auto const& declPropInitVec = cls->declPropInit();
+  auto const propVals = !cls->pinitVec().empty()
+    ? cls->getPropData()
+    : &declPropInitVec;
+
+  assert(propVals != nullptr);
   assert(propVals->size() == numDeclProps);
 
   // For visibility checks
   CallerFrame cf;
-  Class* ctx = arGetContextClass(cf());
+  auto ctx = arGetContextClass(cf());
 
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
   for (size_t i = 0; i < numDeclProps; ++i) {
-    StringData* name = const_cast<StringData*>(propInfo[i].name.get());
-    // Empty names are used for invisible/private parent properties; skip them
+    auto const name = const_cast<StringData*>(propInfo[i].name.get());
+    // Empty names are used for invisible/private parent properties; skip them.
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
-      const TypedValue* value = &((*propVals)[i]);
+      auto const value = &((*propVals)[i]);
       arr.set(name, tvAsCVarRef(value));
     }
   }
 
-  for (size_t i = 0; i < numSProps; ++i) {
-    auto const lookup = cls->getSProp(ctx, sPropInfo[i].name);
+  for (auto const& sprop : cls->staticProperties()) {
+    auto const lookup = cls->getSProp(ctx, sprop.name);
     if (lookup.accessible) {
       arr.set(
-        const_cast<StringData*>(sPropInfo[i].name.get()),
+        const_cast<StringData*>(sprop.name.get()),
         tvAsCVarRef(lookup.prop)
       );
     }
@@ -201,7 +204,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
     // No arg passed.
     String ret;
     CallerFrame cf;
-    Class* cls = arGetContextClassImpl<true>(cf());
+    auto cls = arGetContextClassImpl<true>(cf());
     if (cls) {
       ret = String(cls->nameStr());
     }

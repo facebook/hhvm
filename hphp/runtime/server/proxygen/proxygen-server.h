@@ -85,7 +85,7 @@ class HPHPWorkerThread : public proxygen::WorkerThread {
 
 class ProxygenServer : public Server,
                        public ResponseMessageQueue::Consumer,
-                       public apache::thrift::async::TAsyncTimeout,
+                       public folly::AsyncTimeout,
                        public TakeoverAgent::Callback {
  public:
   explicit ProxygenServer(const ServerOptions& options);

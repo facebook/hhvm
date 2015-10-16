@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Object type wrapping around ObjectData to implement reference count.
+ * Resource type wrapping around ResourceData to implement reference count.
  */
 class Resource {
   using Ptr = req::ptr<ResourceHdr>;
@@ -40,14 +40,14 @@ public:
   Resource() {}
 
   void reset(ResourceData* res = nullptr) {
-    m_res.reset(res ? res->hdr() : nullptr);
+    m_res.reset(safehdr(res));
   }
   void reset(ResourceHdr* res = nullptr) {
     m_res.reset(res);
   }
 
   ResourceData* operator->() const {
-    return m_res ? m_res.get()->data() : nullptr;
+    return safedata(m_res.get());
   }
 
   ResourceHdr* hdr() const {
@@ -62,7 +62,7 @@ public:
    * Constructors
    */
   explicit Resource(ResourceData *data)
-    : m_res(data ? data->hdr() : nullptr) {}
+    : m_res(safehdr(data)) {}
   explicit Resource(ResourceHdr *hdr)
     : m_res(hdr) {}
 
@@ -70,12 +70,12 @@ public:
 
   template <typename T> // T must extend ResourceData
   explicit Resource(req::ptr<T>&& src)
-  : m_res(src.detach()->ResourceData::hdr(), NoIncRef{})
+  : m_res(safehdr(src.detach()), NoIncRef{})
   {}
 
   template <typename T> // T must extend resourceData
   explicit Resource(const req::ptr<T>& src)
-  : m_res(src.get()->ResourceData::hdr()) // causes incref
+  : m_res(safehdr(src.get())) // causes incref
   {}
 
   // Move ctor
@@ -182,8 +182,7 @@ private:
     std::is_base_of<ResourceData,T>::value,
     ResourceData*
   >::type deref(const Resource& r) {
-    auto hdr = r.m_res.get();
-    return hdr ? hdr->data() : nullptr;
+    return safedata(r.m_res.get());
   }
 
   template <typename T>
@@ -191,8 +190,7 @@ private:
     std::is_base_of<ResourceData,T>::value,
     ResourceData*
   >::type detach(Resource&& r) {
-    auto hdr = r.m_res.detach();
-    return hdr ? hdr->data() : nullptr;
+    return safedata(r.m_res.detach());
   }
 
   static void compileTimeAssertions();

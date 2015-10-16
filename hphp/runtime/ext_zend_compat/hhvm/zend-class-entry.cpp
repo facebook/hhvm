@@ -84,14 +84,12 @@ zend_class_entry* zend_hphp_register_internal_class_entry(StringData* name)
 }
 
 const Class::SProp* zce_find_static_prop(const zend_class_entry* ce,
-                                               const char* name,
-                                               size_t len) {
-  auto const* sprops = ce->hphp_class->staticProperties();
-  for (size_t i = 0; i < ce->hphp_class->numStaticProperties(); ++i) {
-    auto const* sprop = &sprops[i];
+                                         const char* name,
+                                         size_t len) {
+  for (auto const& sprop : ce->hphp_class->staticProperties()) {
     auto str = String::attach(StringData::Make(name, len, CopyString));
-    if (sprop->name->isame(str.get())) {
-      return sprop;
+    if (sprop.name->isame(str.get())) {
+      return &sprop;
     }
   }
   return nullptr;

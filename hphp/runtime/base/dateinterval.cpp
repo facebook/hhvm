@@ -71,15 +71,11 @@ bool DateInterval::setInterval(const String& date_interval) {
   timelib_rel_time *di = nullptr;
   timelib_error_container *errors = nullptr;
 
-#ifdef TIMELIB_HAVE_INTERVAL
   timelib_time *start = nullptr, *end = nullptr;
   int r = 0;
 
   timelib_strtointerval((char*)date_interval.data(), date_interval.size(),
                         &start, &end, &di, &r, &errors);
-#else
-  throw_not_implemented("timelib too old");
-#endif
 
   int error_count  = errors->error_count;
   DateTime::setLastErrors(errors);
@@ -87,13 +83,11 @@ bool DateInterval::setInterval(const String& date_interval) {
     timelib_rel_time_dtor(di);
     return false;
   } else {
-#ifdef TIMELIB_HAVE_INTERVAL
     if (UNLIKELY(!di && start && end)) {
       timelib_update_ts(start, nullptr);
       timelib_update_ts(end, nullptr);
       di = timelib_diff(start, end);
     }
-#endif
     m_di = DateIntervalPtr(di, dateinterval_deleter());
     return true;
   }

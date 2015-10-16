@@ -33,7 +33,6 @@ endif()
 if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
-    -Wl,-u,_register_fastcgi_server
     -Wl,-pagezero_size,0x00001000
     # Set the .text.keep section to be executable.
     -Wl,-segprot,.text,rx,rx)
@@ -56,7 +55,6 @@ elseif (MSVC)
 else()
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
-    -Wl,-uregister_libevent_server,-uregister_fastcgi_server
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 endif()
 
@@ -77,6 +75,7 @@ set(HHVM_LINK_LIBRARIES
   hphp_util
   hphp_hhbbc
   jit_sort
+  ppc64-asm
   vixl neo)
 
 if(ENABLE_FASTCGI)

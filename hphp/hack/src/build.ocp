@@ -58,6 +58,7 @@ end
 
 begin library "hh-fsnotify-darwin"
   if not (system = "macosx" && os_type = "Unix") then enabled = false
+  requires += [ "ROOTPROJECT" ]
   cclib = [
     "-sectcreate" "-__text" "hhi" "%{ROOTPROJECT_FULL_SRC_DIR}%/bin/hhi.tar.gz"
     "-framework" "CoreServices"
@@ -68,13 +69,16 @@ begin library "hh-fsnotify-darwin"
     "fsevents/fsevents.ml"
     "fsnotify_darwin/fsnotify.ml"
   ]
-  requires += [ "ROOTPROJECT" ]
+  requires += [ "hh-utils-core" ]
 end
 
 begin library "hh-fsnotify-win"
   if not (os_type = "Win32") then enabled = false
-  requires += [ "ROOTPROJECT" ]
-  files = [ "fsnotify_win/fsnotify.ml" ]
+  files = [
+    "fsnotify_win/fsnotify_stubs.c"
+    "fsnotify_win/fsnotify.ml"
+  ]
+  requires += [ "hh-utils-core" ]
 end
 
 begin library "hh-fsnotify"
@@ -108,6 +112,7 @@ begin library "hh-utils-common"
     "utils/ident.ml"
     "utils/utils.ml"
     "utils/hh_json.ml"
+    "utils/json.ml"
     "utils/sys_utils.ml"
     "utils/path.ml"
     "utils/relative_path.ml"
@@ -134,7 +139,6 @@ begin library "hh-utils"
     "utils/tty.ml"
     "utils/printSignal.ml"
     "utils/trie.ml"
-    "utils/find.ml"
     "utils/stats.ml"
     "utils/hh_logger.ml"
     "utils/exit_status.ml"
@@ -162,6 +166,14 @@ begin library "hh-stubs"
     "stubs/buildMain.ml"
     "stubs/prolog.ml"
     "stubs/clientMessages.ml"
+  ]
+end
+
+begin library "hh-find"
+  requires += [ "hh-utils-common" "hh-stubs" "hh-third-party" ]
+  files = [
+    "find/find.mli"
+    "find/find.ml"
   ]
 end
 
@@ -228,13 +240,21 @@ begin library "hh-typing-base"
 end
 
 begin library "hh-dfind"
-  requires += [ "hh-third-party" "hh-fsnotify" "hh-utils" ]
+  requires += [ "hh-third-party" "hh-fsnotify" "hh-utils" "hh-stubs" ]
   files = [
     "dfind/dfindEnv.ml"
     "dfind/dfindMaybe.ml"
     "dfind/dfindAddFile.ml"
     "dfind/dfindServer.ml"
     "dfind/dfindLib.ml"
+  ]
+end
+
+begin library "hh-watchman"
+  requires += [ "hh-third-party" "hh-procs" "hh-utils" "hh-stubs" ]
+  files = [
+    "watchman/watchman.mli"
+    "watchman/watchman.ml"
   ]
 end
 
@@ -288,6 +308,7 @@ begin library "hh-typing"
     "typing/typing.ml"
     "typing/typing_dynamic_yield.ml"
     "typing/typing_inherit.ml"
+    "typing/typing_decl_deps.ml"
     "typing/typing_decl.ml"
     "typing/typing_decl_service.ml"
     "typing/typing_check_service.ml"
@@ -363,7 +384,7 @@ begin library "hh-hhi"
 end
 
 begin library "hh-server-base"
-  requires += [ "hh-third-party" "hh-utils" "hh-typing"  "hh-search"
+  requires += [ "hh-third-party" "hh-utils" "hh-find" "hh-typing"  "hh-search"
                 "hh-stubs" "hh-stubs-ai"  "hh-socket" "hh-dfind" "hh-hhi" ]
   files = [
     "server/serverFiles.ml"
@@ -390,6 +411,7 @@ begin library "hh-server-base"
     "server/serverIdentifyFunction.ml"
     "server/serverInferType.ml"
     "server/serverLint.ml"
+    "server/serverLocalConfig.ml"
     "server/serverMonitor.ml"
     "server/serverRefactor.ml"
     "server/serverSearch.ml"
@@ -409,7 +431,7 @@ begin library "hh-server"
   requires += [
     "hh-third-party" "hh-utils" "hh-typing"
     "hh-search"  "hh-stubs"  "hh-stubs-ai"
-    "hh-socket"  "hh-dfind" "hh-server-base"
+    "hh-socket"  "hh-dfind" "hh-watchman" "hh-server-base"
   ]
   files = [
     "server/serverEnvBuild.ml"
@@ -446,6 +468,7 @@ begin library "hh-client"
     "client/clientOutline.ml"
     "client/clientRefactor.ml"
     "client/clientSearch.ml"
+    "client/clientAiInfo.ml"
     "client/clientSymbolInfo.ml"
     "client/clientTypeAtPos.ml"
     "client/clientCheck.ml"

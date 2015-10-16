@@ -353,9 +353,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tabstract (AKgeneric (_, Some _), _)),
       (_, Tabstract (AKgeneric _, _)) ->
       typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub)
-  | (_, Tclass ((_, stringish), _)), (_, Tabstract (ak, _))
-    when stringish = SN.Classes.cStringish &&
-      AbstractKind.is_classname ak -> env
   | (p_super, (Tclass (x_super, tyl_super) as ty_super_)),
       (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_)) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
@@ -441,9 +438,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
   | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
-  | (_, Tprim (Nast.Tstring | Nast.Tarraykey)), (_, Tabstract (ak, _))
-    when AbstractKind.is_classname ak -> env
-  | (_, Tclass ((_, coll), [tv_super])), (_, Tarraykind akind)
+  | (_, Tclass ((_, coll), [tv_super])), (r, Tarraykind akind)
     when (coll = SN.Collections.cTraversable ||
         coll = SN.Collections.cContainer) ->
       (match akind with
@@ -453,6 +448,10 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
           sub_type env tv_super tv
       | AKmap (_, tv) ->
           sub_type env tv_super tv
+      | AKshape fdm ->
+          Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+            sub_type env ty_super ty_sub
+          end env r fdm
       )
   | (_, Tclass ((_, coll), [tk_super; tv_super])), (r, Tarraykind akind)
     when (coll = SN.Collections.cKeyedTraversable
@@ -467,6 +466,10 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       | AKmap (tk, tv) ->
         let env = sub_type env tk_super tk in
         sub_type env tv_super tv
+      | AKshape fdm ->
+        Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+          sub_type env ty_super ty_sub
+        end env r fdm
       )
   | (_, Tclass ((_, stringish), _)), (_, Tprim Nast.Tstring)
     when stringish = SN.Classes.cStringish -> env
@@ -482,6 +485,10 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       let int_reason = Reason.Ridx (Reason.to_pos reason) in
       let int_type = int_reason, Tprim Nast.Tint in
       sub_type env ty_super (reason, Tarraykind (AKmap (int_type, elt_ty)))
+  | _, (r, Tarraykind AKshape fdm_sub) ->
+      Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+        sub_type env ty_super ty_sub
+      end env r fdm_sub
   | _, (_, Tany) -> env
   | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
     (* recording seen_tvars for Toption variants to avoid infinte recursion
@@ -592,23 +599,20 @@ and is_sub_type env ty_super ty_sub =
     (fun () -> ignore(sub_type env ty_super ty_sub); true)
     (fun _ -> false)
 
-and sub_string p env ty2 =
-  let env, ety2 = Env.expand_type env ty2 in
+and sub_string ?(seen = ISet.empty) p env ty2 =
+  let env, seen, ety2 = Env.expand_type_recorded env seen ty2 in
   match ety2 with
-  | (_, Toption ty2) -> sub_string p env ty2
+  | (_, Toption ty2) -> sub_string ~seen p env ty2
   | (_, Tunresolved tyl) ->
-      List.fold_left tyl ~f:(sub_string p) ~init:env
+      List.fold_left tyl ~f:(sub_string ~seen p) ~init:env
   | (_, Tprim _) ->
       env
   | (_, Tabstract (AKenum _, _)) ->
       (* Enums are either ints or strings, and so can always be used in a
        * stringish context *)
       env
-  | (_, Tabstract (ak, _)) when AbstractKind.is_classname ak ->
-      (* A classname is the string 'Foo' obtained via Foo::class *)
-      env
   | (_, Tabstract (_, Some ty)) ->
-      sub_string p env ty
+      sub_string ~seen p env ty
   | (r2, Tclass (x, _)) ->
       let class_ = Env.get_class env (snd x) in
       (match class_ with

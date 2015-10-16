@@ -63,13 +63,13 @@ void IRUnit::expandLabel(IRInstruction* label, unsigned extraDst) {
 
 void IRUnit::expandJmp(IRInstruction* jmp, SSATmp* value) {
   assertx(jmp->is(Jmp));
-  std::vector<SSATmp*> newSrcs(jmp->numSrcs() + 1);
+  auto const newSrcs = new (m_arena) SSATmp*[jmp->numSrcs() + 1];
   size_t i = 0;
   for (auto src : jmp->srcs()) {
     newSrcs[i++] = src;
   }
   newSrcs[i++] = value;
-  replace(jmp, Jmp, jmp->taken(), std::make_pair(i, &newSrcs[0]));
+  jmp->setSrcs(i, newSrcs);
 }
 
 Block* IRUnit::defBlock(Block::Hint hint) {

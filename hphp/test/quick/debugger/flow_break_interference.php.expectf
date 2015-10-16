@@ -1,10 +1,10 @@
 Program %s/flow_break_interference.php loaded. Type '[r]un' or '[c]ontinue' to go.
 b flow_break_interference.php:15
 Breakpoint 1 set on line 15 of flow_break_interference.php
-But wont break until file flow_break_interference.php has been loaded.
+But won't break until file flow_break_interference.php has been loaded.
 b flow_break_interference.php:27
 Breakpoint 2 set on line 27 of flow_break_interference.php
-But wont break until file flow_break_interference.php has been loaded.
+But won't break until file flow_break_interference.php has been loaded.
 c
 int(8)
 Breakpoint 1 reached at genFoo() on line 15 of %s/flow_break_interference.php

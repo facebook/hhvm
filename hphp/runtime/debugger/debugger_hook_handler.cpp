@@ -79,7 +79,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
       for (auto& kv : g_context->m_evaledFiles) {
         auto const unit = kv.second;
         if (!BreakPointInfo::MatchFile(fileName,
-                                       unit->filepath()->data())) {
+                            unit->filepath()->toCppString())) {
           continue;
         }
         addBreakPointInUnit(bp, unit);
@@ -133,7 +133,7 @@ void HphpdHook::onFileLoad(Unit* unit) {
   for (unsigned int i = 0; i < bps.size(); i++) {
     BreakPointInfoPtr bp = bps[i];
     if (BreakPointInfo::MatchFile(bp->m_file,
-                                        unit->filepath()->data())) {
+                                        unit->filepath()->toCppString())) {
       addBreakPointInUnit(bp, unit);
     }
   }

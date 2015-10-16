@@ -87,6 +87,10 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
   return g_context->getCallerInfo();
 }
 
+int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash) {
+  return g_context->getDebugBacktraceHash();
+}
+
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
                                           int64_t limit /* = 0 */) {
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
@@ -329,6 +333,7 @@ bool HHVM_FUNCTION(user_error, const String& error_msg,
 void StandardExtension::initErrorFunc() {
   HHVM_FE(debug_backtrace);
   HHVM_FE(hphp_debug_caller_info);
+  HHVM_FE(hphp_debug_backtrace_hash);
   HHVM_FE(debug_print_backtrace);
   HHVM_FE(error_get_last);
   HHVM_FE(error_log);

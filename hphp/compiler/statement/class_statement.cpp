@@ -91,7 +91,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
 
   std::vector<UserAttributePtr> attrs;
   if (m_attrList) {
-    for (int i = 0; i < m_attrList->getCount(); ++i) {
+      for (int i = 0; i < m_attrList->getCount(); ++i) {
       auto a = dynamic_pointer_cast<UserAttribute>((*m_attrList)[i]);
       attrs.push_back(a);
     }

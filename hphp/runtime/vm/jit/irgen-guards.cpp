@@ -98,15 +98,8 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
 }
 
 void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
-  if (idx.offset < env.irb->evalStack().size()) {
-    // We're asserting a new type so we don't care about the previous type.
-    auto const tmp = top(env, idx, DataTypeGeneric);
-    assertx(tmp);
-    env.irb->evalStack().replace(idx.offset, gen(env, AssertType, type, tmp));
-  } else {
-    gen(env, AssertStk, type,
-        IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
-  }
+  gen(env, AssertStk, type,
+      IRSPOffsetData { offsetFromIRSP(env, idx) }, sp(env));
 }
 
 void checkTypeStack(IRGS& env,
@@ -120,7 +113,6 @@ void checkTypeStack(IRGS& env,
   if (exit == nullptr) exit = makeExit(env, dest);
 
   if (type <= TBoxedInitCell) {
-    spillStack(env); // don't bother with the case that it's not spilled.
     auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
     profiledGuard(env, TBoxedInitCell, ProfGuard::CheckStk,
                   idx.offset, exit);
@@ -138,17 +130,6 @@ void checkTypeStack(IRGS& env,
     return;
   }
 
-  if (idx.offset < env.irb->evalStack().size()) {
-    FTRACE(1, "checkTypeStack({}): generating CheckType for {}\n",
-           idx.offset, type.toString());
-    // CheckType only cares about its input type if the simplifier does
-    // something with it and that's handled if and when it happens.
-    auto const tmp = top(env, idx, DataTypeGeneric);
-    assertx(tmp);
-    auto const ctype = gen(env, CheckType, type, exit, tmp);
-    env.irb->evalStack().replace(idx.offset, ctype);
-    return;
-  }
   FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx.offset, type.toString());
   // Just like CheckType, CheckStk only cares about its input type if the
   // simplifier does something with it.
@@ -160,15 +141,6 @@ void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
   assert(type <= TGen);
 
   auto const irSPOff = offsetFromIRSP(env, offset);
-  if (offset.offset < env.irb->evalStack().size()) {
-    auto const tmp = top(env, offset, DataTypeGeneric);
-    assertx(tmp);
-    auto const oldType = env.irb->fs().predictedTmpType(tmp);
-    auto const newType = refinePredictedType(oldType, type, tmp->type());
-    env.irb->fs().refinePredictedTmpType(tmp, newType);
-    return;
-  }
-
   env.irb->fs().refineStackPredictedType(irSPOff, type);
 }
 

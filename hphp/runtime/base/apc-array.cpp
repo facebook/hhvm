@@ -47,7 +47,7 @@ APCArray::MakeSharedArray(ArrayData* arr, bool inner, bool unserializeObj) {
 
     if (apcExtension::UseUncounted && !features.hasObjectOrResource &&
         !arr->empty()) {
-      return {APCTypedValue::MakeSharedArray(arr),
+      return {MakeUncountedArray(arr),
               getMemSize(arr) + sizeof(APCTypedValue)};
     }
   }
@@ -88,6 +88,19 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, bool unserializeObj) {
   }
 
   return {ret->getHandle(), size};
+}
+
+APCHandle* APCArray::MakeUncountedArray(ArrayData* array) {
+  assert(apcExtension::UseUncounted);
+  APCTypedValue* value;
+  if (array->isPacked()) {
+    value = new APCTypedValue(MixedArray::MakeUncountedPacked(array));
+  } else if (array->isStruct()) {
+    value = new APCTypedValue(StructArray::MakeUncounted(array));
+  } else {
+    value = new APCTypedValue(MixedArray::MakeUncounted(array));
+  }
+  return value->getHandle();
 }
 
 APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {

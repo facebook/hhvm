@@ -21,5 +21,6 @@ function hphp_set_error_page($page) { }
 function hphp_throw_fatal_error($error_msg) { }
 function hphp_clear_unflushed() { }
 function hphp_debug_caller_info() { }
+function hphp_debug_backtrace_hash() { }
 function trigger_error($error_msg, $error_type = E_USER_NOTICE) { }
 function user_error($error_msg, $error_type = E_USER_NOTICE) { }

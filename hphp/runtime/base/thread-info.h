@@ -63,10 +63,9 @@ struct ThreadInfo {
   void onSessionExit();
 
   /*
-   * Setting and clearing the pending exception.
+   * Setting the pending exception.
    */
   void setPendingException(Exception*);
-  void clearPendingException();
 
   static bool valid(ThreadInfo*);
 

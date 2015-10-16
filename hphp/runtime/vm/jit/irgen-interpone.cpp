@@ -425,8 +425,6 @@ void interpOne(IRGS& env,
                int pushed,
                InterpOneData& idata) {
   auto const unit = curUnit(env);
-  spillStack(env);
-  env.irb->exceptionStackBoundary();
   auto const op = unit->getOp(bcOff(env));
 
   idata.bcOff = bcOff(env);
@@ -442,7 +440,6 @@ void interpOne(IRGS& env,
     sp(env),
     fp(env)
   );
-  assertx(env.irb->stackDeficit() == 0);
 }
 
 //////////////////////////////////////////////////////////////////////

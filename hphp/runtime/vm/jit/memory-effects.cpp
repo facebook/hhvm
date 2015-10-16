@@ -74,9 +74,9 @@ AliasClass pointee(const SSATmp* ptr) {
 
     if (typeNR <= TPtrToMISGen) {
       if (sinst->is(LdMIStateAddr)) {
-        return AliasClass { AMIState::fromTV(sinst->src(0)->intVal()) };
+        return mis_from_offset(sinst->src(0)->intVal());
       }
-      return AMIStateAny;
+      return AMIStateTV;
     }
 
     if (typeNR <= TPtrToArrGen) {
@@ -105,22 +105,26 @@ AliasClass pointee(const SSATmp* ptr) {
   if (typeNR.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
   if (typeNR.maybe(TPtrToPropGen))    ret = ret | APropAny;
   if (typeNR.maybe(TPtrToArrGen))     ret = ret | AElemAny;
-  if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateAny;
+  if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateTV;
   if (typeNR.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
+  return ret;
+}
+
+AliasClass all_pointees(folly::Range<SSATmp**> srcs) {
+  auto ret = AliasClass{AEmpty};
+  for (auto const& src : srcs) {
+    if (src->isA(TPtrToGen)) {
+      ret = ret | pointee(src);
+    }
+  }
   return ret;
 }
 
 // Return an AliasClass containing all locations pointed to by any PtrToGen
 // sources to an instruction.
 AliasClass all_pointees(const IRInstruction& inst) {
-  auto ret = AliasClass{AEmpty};
-  for (auto& src : inst.srcs()) {
-    if (src->type() <= TPtrToGen) {
-      ret = ret | pointee(src);
-    }
-  }
-  return ret;
+  return all_pointees(inst.srcs());
 }
 
 // Return an AliasClass representing a range of the eval stack that contains
@@ -297,6 +301,26 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
   return may_raise(inst, may_load_store_kill(loads, stores, kills));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Construct effects for member instructions that take &tvRef as their last
+ * argument.
+ *
+ * These instructions never load tvRef, but they might store to it.
+ */
+MemEffects minstr_with_tvref(const IRInstruction& inst) {
+  auto const srcs = inst.srcs();
+  assertx(srcs.back()->isA(TPtrToMISGen));
+  return may_raise(
+    inst,
+    may_load_store(
+      AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 1)),
+      AHeapAny | all_pointees(inst)
+    )
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 MemEffects memory_effects_impl(const IRInstruction& inst) {
@@ -394,11 +418,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_reenter(inst,
                        may_load_store_kill(AUnknown, AUnknown, AMIStateAny));
 
-  case EndCatch:
+  case EndCatch: {
+    auto const stack_kills = stack_below(
+      inst.src(1),
+      inst.extra<EndCatch>()->offset.offset - 1
+    );
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1), inst.extra<EndCatch>()->offset.offset - 1)
+      stack_kills | AMIStateTempBase | AMIStateBase
     };
+  }
 
   /*
    * DefInlineFP has some special treatment here.
@@ -641,15 +670,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case LdMBase:
-    return PureLoad {
-      AMIState::fromPtr(offsetof(MInstrState, base))
-    };
+    return PureLoad { AMIStateBase };
 
   case StMBase:
-    return PureStore {
-      AMIState::fromPtr(offsetof(MInstrState, base)),
-      inst.src(0)
-    };
+    return PureStore { AMIStateBase, inst.src(0) };
 
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
@@ -739,22 +763,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * from if present.
    */
   case CGetElem:
-  case ElemX:
   case EmptyElem:
   case IssetElem:
-  case BindElem:
-  case BindNewElem:
-  case ElemDX:
-  case ElemUX:
-  case IncDecElem:
   case SetElem:
   case SetNewElemArray:
   case SetNewElem:
-  case SetOpElem:
-  case SetWithRefElem:
-  case SetWithRefNewElem:
   case UnsetElem:
-  case VGetElem:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
     assertx(inst.src(0)->type() <= TPtrToGen);
@@ -762,6 +776,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     ));
+
+  case ElemX:
+  case ElemDX:
+  case ElemUX:
+  case BindElem:
+  case BindNewElem:
+  case IncDecElem:
+  case SetOpElem:
+  case SetWithRefElem:
+  case SetWithRefNewElem:
+  case VGetElem:
+    assertx(inst.src(0)->isA(TPtrToGen));
+    return minstr_with_tvref(inst);
 
   /*
    * These minstr opcodes either take a PtrToGen or an Obj as the base.  The
@@ -773,19 +800,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CGetPropQ:
   case EmptyProp:
   case IssetProp:
-  case PropX:
-  case PropQ:
   case UnsetProp:
-  case BindProp:
   case IncDecProp:
-  case PropDX:
-  case SetOpProp:
   case SetProp:
-  case VGetProp:
     return may_raise(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     ));
+
+  case PropX:
+  case PropDX:
+  case PropQ:
+  case BindProp:
+  case SetOpProp:
+  case VGetProp:
+    return minstr_with_tvref(inst);
 
   /*
    * Collection accessors can read from their inner array buffer, but stores
@@ -981,6 +1010,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvBoolToInt:
   case ConvBoolToDbl:
   case DbgAssertType:
+  case DbgAssertFunc:
   case DefConst:
   case LdLocAddr:
   case Sqrt:

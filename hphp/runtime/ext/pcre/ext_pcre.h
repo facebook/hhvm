@@ -24,17 +24,25 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // pcre
 
-Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& replacement,
-                                   const Variant& subject, int limit = -1,
+Variant HHVM_FUNCTION(preg_filter, const Variant& pattern,
+                                   const Variant& replacement,
+                                   const Variant& subject,
+                                   int limit = -1,
                                    VRefParam count = uninit_null());
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
                                  int flags = 0);
 Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
                                     const Variant& subject, int limit = -1,
                                     VRefParam count = uninit_null());
-Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern, const Variant& callback,
-                                const Variant& subject, int limit = -1,
-                                VRefParam count = uninit_null());
+Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern,
+                                             const Variant& callback,
+                                             const Variant& subject,
+                                             int limit = -1,
+                                             VRefParam count = uninit_null());
+Variant HHVM_FUNCTION(
+    preg_replace_callback_array, const Variant& patterns_and_callbacks,
+                                 const Variant& subject, int limit = -1,
+                                 VRefParam count = uninit_null());
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
                                   int limit = -1, int flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,

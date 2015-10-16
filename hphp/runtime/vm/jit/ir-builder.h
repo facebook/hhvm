@@ -39,11 +39,7 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct ExnStackState {
-  FPInvOffset spOffset;
-  FPInvOffset syncedSpLevel;
-  uint32_t stackDeficit;
-  EvalStack evalStack;
-  SSATmp* sp;
+  FPInvOffset syncedSpLevel{0};
 };
 
 /*
@@ -115,12 +111,6 @@ struct IRBuilder {
   FPInvOffset spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
   SSATmp* fp() const { return m_state.fp(); }
-  uint32_t stackDeficit() const { return m_state.stackDeficit(); }
-  void incStackDeficit() { m_state.incStackDeficit(); }
-  void clearStackDeficit() { m_state.clearStackDeficit(); }
-  void setStackDeficit(uint32_t d) { m_state.setStackDeficit(d); }
-  void syncEvalStack() { m_state.syncEvalStack(); }
-  EvalStack& evalStack() { return m_state.evalStack(); }
   FPInvOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
@@ -321,13 +311,7 @@ private:
    */
   jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
-  ExnStackState m_exnStack{
-    FPInvOffset{0},
-    FPInvOffset{0},
-    0,
-    EvalStack{},
-    nullptr
-  };
+  ExnStackState m_exnStack;
 
   bool m_enableSimplification{false};
   bool m_constrainGuards;

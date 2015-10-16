@@ -427,13 +427,11 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       stats.usage, stats.totalAlloc);
 }
 #endif
+  assert(stats.maxBytes > 0);
+  if (live && stats.usage > stats.maxBytes && m_couldOOM) {
+    refreshStatsHelperExceeded();
+  }
   if (stats.usage > stats.peakUsage) {
-    // NOTE: the peak memory usage monotonically increases, so there cannot
-    // be a second OOM exception in one request.
-    assert(stats.maxBytes > 0);
-    if (live && m_couldOOM && stats.usage > stats.maxBytes) {
-      refreshStatsHelperExceeded();
-    }
     // Check whether the process's active memory limit has been exceeded, and
     // if so, stop the server.
     //
@@ -671,6 +669,17 @@ void MemoryManager::initFree() {
   m_needInitFree = false;
 }
 
+// turn free blocks into holes, leave freelists empty.
+void MemoryManager::quarantine() {
+  for (auto i = 0; i < kNumSmallSizes; i++) {
+    auto size = smallIndex2Size(i);
+    while (auto n = m_freelists[i].maybePop()) {
+      memset(n, 0x8a, size);
+      static_cast<FreeNode*>(n)->hdr.init(HeaderKind::Hole, size);
+    }
+  }
+}
+
 // test iterating objects in slabs
 void MemoryManager::checkHeap() {
   size_t bytes=0;
@@ -693,7 +702,7 @@ void MemoryManager::checkHeap() {
         apc_arrays.insert(&h->apc_);
         break;
       case HeaderKind::String:
-        if (h->str_.isShared()) apc_strings.insert(&h->str_);
+        if (h->str_.isProxy()) apc_strings.insert(&h->str_);
         break;
       case HeaderKind::Packed:
       case HeaderKind::Struct:
@@ -745,7 +754,7 @@ void MemoryManager::checkHeap() {
   for (StringDataNode *next, *n = m_strings.next; n != &m_strings; n = next) {
     next = n->next;
     auto const s = StringData::node2str(n);
-    assert(s->isShared());
+    assert(s->isProxy());
     assert(apc_strings.find(s) != apc_strings.end());
     apc_strings.erase(s);
   }

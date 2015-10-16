@@ -131,7 +131,7 @@ function determine_flags(OptionMap $opts): string {
     'dump-hhbc'       => '-v Eval.DumpBytecode=1 ',
     'dump-hhas'       => '-v Eval.DumpHhas=true ',
     'dump-tc'         => '-v Eval.DumpTC=1 ',
-    'php7'            => '-d hhvm.php7.all=1',
+    'php7'            => '-d hhvm.php7.all=1 ',
     'opt-ir'          => '-v Eval.HHIRGenerateAsserts=0 ',
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
@@ -204,13 +204,16 @@ function argv_for_shell(): string {
 function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   $echo_command = $opts->containsKey('print-command');
   echo "Compiling with hphp...";
-
+  $runtime_flags = determine_flags($opts);
+  $hphpc_flags = preg_replace("/-v\s*/", "-vRuntime.", $runtime_flags);
   $hphp_out='/tmp/hphp_out'.posix_getpid();
   $cmd = get_paths($opts)['hphp'].' '.
     '-v EnableHipHopSyntax=1 '.
     '-v EnableHipHopExperimentalSyntax=1 '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
+    ($opts->containsKey('php7') ? '-d hhvm.php7.all=1 ' : '').
     '-t hhbc -k1 -l3 '.
+    $hphpc_flags.
     argv_for_shell().
     " >$hphp_out 2>&1";
   if ($echo_command) {

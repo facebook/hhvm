@@ -24,11 +24,14 @@ TEST_DIRS=$(dirname $0)/..
 #
 find $TEST_DIRS -name \*.log* -exec sed -i \
     -e 's/TCA: 0x[0-9a-f]*/TCA: 0xdeadbeef/g' \
-    -e's/TCA: 0x[0-9a-f]*(0x[0-9a-f]*)/TCA: 0xdeadbeef(0xdeadbeef)/g' \
+    -e 's/TCA: 0x[0-9a-f]*(0x[0-9a-f]*)/TCA: 0xdeadbeef(0xdeadbeef)/g' \
     -e 's/PtrToGen(0x[0-9a-f]*)/PtrToGen(0xdeadbeef)/g' \
     -e 's/Array(0x[0-9a-f]*)/Array(0xdeadbeef)/g' \
     -e 's/NamedEntity(0x[0-9a-f]*)/NamedEntity(0xdeadbeef)/g' \
     -e 's/VerifyParamCls.*/VerifyParamCls/g' \
+    -e 's/VerifyRetCls.*/VerifyRetCls/g' \
+    -e 's/main delta after relocation:.*/main delta after relocation/g' \
+    -e 's/cold delta after relocation:.*/cold delta after relocation/g' \
     -e 's/code-gen.cpp [0-9]* /code-gen.cpp 0000 /g' \
     -e 's/0x[0-9a-f]*/0xdeadbeef/g' \
     -e 's/Arr<[0-9]>/Arr/g' \

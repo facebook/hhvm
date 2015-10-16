@@ -1,10 +1,10 @@
 Program %s/break_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break gen1()
 Breakpoint 1 set upon entering gen1()
-But wont break until function gen1 has been loaded.
+But won't break until function gen1 has been loaded.
 b main()
 Breakpoint 2 set upon entering main()
-But wont break until function main has been loaded.
+But won't break until function main has been loaded.
 continue
 Breakpoint 2 reached at main() on line 43 of %s/break_async.php
   42 function main($a) {

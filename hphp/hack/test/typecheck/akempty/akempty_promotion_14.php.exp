@@ -1,0 +1,6 @@
+File "akempty_promotion_14.php", line 11, characters 10-11:
+Invalid return type (Typing[4110])
+File "akempty_promotion_14.php", line 7, characters 50-55:
+This is a string
+File "akempty_promotion_14.php", line 10, characters 18-18:
+It is incompatible with an int

@@ -3204,8 +3204,11 @@ Variant HHVM_FUNCTION(imagecrop, const Resource& image, const Array& rect) {
   return Variant(req::make<Image>(imcropped));
 }
 
-Variant HHVM_FUNCTION(imagecropauto, const Resource& image, int64_t mode,
-                      double threshold, int64_t color) {
+Variant HHVM_FUNCTION(imagecropauto,
+                      const Resource& image,
+                      int64_t mode /* = -1 */,
+                      double threshold /* = 0.5f */,
+                      int64_t color /* = -1 */) {
   gdImagePtr im = cast<Image>(image)->get();
   gdImagePtr imcropped = nullptr;
   if (!im) return false;
@@ -3328,8 +3331,10 @@ bool HHVM_FUNCTION(imagefilledarc, const Resource& image,
   return true;
 }
 
-Variant HHVM_FUNCTION(imageaffine, const Resource& image, const Array& affine,
-    const Array& clip) {
+Variant HHVM_FUNCTION(imageaffine,
+                      const Resource& image,
+                      const Array& affine /* = Array() */,
+                      const Array& clip /* = Array() */) {
   gdImagePtr src = cast<Image>(image)->get();
   if (!src) return false;
   gdImagePtr dst = nullptr;
@@ -3394,8 +3399,9 @@ Variant HHVM_FUNCTION(imageaffine, const Resource& image, const Array& affine,
   return Variant(req::make<Image>(dst));
 }
 
-Variant HHVM_FUNCTION(imageaffinematrixconcat, const Array& m1,
-    const Array& m2) {
+Variant HHVM_FUNCTION(imageaffinematrixconcat,
+                      const Array& m1,
+                      const Array& m2) {
   int nelem1 = m1.size();
   int nelem2 = m2.size();
   int i;
@@ -3440,8 +3446,9 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat, const Array& m1,
   return ret;
 }
 
-Variant HHVM_FUNCTION(imageaffinematrixget, int64_t type,
-    const Variant& options) {
+Variant HHVM_FUNCTION(imageaffinematrixget,
+                      int64_t type,
+                      const Variant& options /* = Array() */) {
   Array ret = Array::Create();
   double affine[6];
   int res = GD_FALSE, i;
@@ -4457,8 +4464,7 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
   return false;
 }
 
-bool HHVM_FUNCTION(imageflip, const Resource& image,
-    int64_t mode /*=GD_FLIP_HORINZONTAL*/) {
+bool HHVM_FUNCTION(imageflip, const Resource& image, int64_t mode /* = -1 */) {
   gdImagePtr im = cast<Image>(image)->get();
   if (!im) return false;
   if (mode == -1) mode = GD_FLIP_HORINZONTAL;
@@ -4725,7 +4731,7 @@ const StaticString s_size("size");
 
 Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
     const String& jpeg_file_name, int64_t spool /* = 0 */) {
-  char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
+  char psheader[] = "\xFF\xED\0\0Photoshop 3.0\x008BIM\x04\x04\0\0\0\0";
   unsigned int iptcdata_len = iptcdata.length();
   unsigned int marker, inx;
   unsigned char *spoolbuf = nullptr, *poi = nullptr;

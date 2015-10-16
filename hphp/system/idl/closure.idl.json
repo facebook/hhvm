@@ -142,6 +142,25 @@
                             "value": "\"static\""
                         }
                     ]
+                },
+                {
+                    "name": "call",
+                    "desc": "Binds and calls the closure. Temporarily binds the closure to newthis, and calls it with any given parameters.",
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the return value of the closure."
+                    },
+                    "flags": [
+                      "IsFinal",
+                      "VariableArguments"
+                    ],
+                    "args": [
+                        {
+                            "name": "newthis",
+                            "type": "Variant",
+                            "desc": "The object to bind the closure to for the duration of the call."
+                        }
+                    ]
                 }
             ],
             "consts": [

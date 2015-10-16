@@ -32,16 +32,13 @@
 #endif
 
 #ifdef ENABLE_EXTENSION_CLOSURE
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #endif
 #ifdef ENABLE_EXTENSION_COLLECTIONS
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #endif
 #ifdef ENABLE_EXTENSION_FB
 #include "hphp/runtime/ext/fb/ext_fb.h"
-#endif
-#ifdef ENABLE_EXTENSION_SIMPLEXML
-#include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #endif
 
 // half-IDL, half-HNI

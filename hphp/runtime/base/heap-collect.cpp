@@ -617,14 +617,22 @@ void Marker::sweep() {
         break;
     }
   });
+  TRACE(1, "sweep tot %lu(%lu) mk %lu(%lu) amb %lu(%lu) free %lu(%lu)\n",
+        total_.count, total_.bytes,
+        marked.count, marked.bytes,
+        ambig.count, ambig.bytes,
+        freed.count, freed.bytes);
   // once we're done iterating the heap, it's safe to free unreachable objects.
   for (auto h : reaped) {
     if (h->kind() == HK::Apc) {
-      h->apc_.reap(); // calls smart_free() and smartFreeSize()
+      // frees localCache, delists, decref apc-array, free array
+      h->apc_.reap();
     } else if (h->kind() == HK::String) {
+      // decref apc shared str, free str
       h->str_.release(); // no destructor can run, so release() is safe.
     } else if (auto obj = h->obj()) {
       if (obj->getAttribute(ObjectData::HasDynPropArr)) {
+        // dynPropTable is a req::hash_map, so this will req::free junk
         g_context->dynPropTable.erase(obj);
       }
       mm.objFree(h, h->size());
@@ -632,11 +640,9 @@ void Marker::sweep() {
       mm.objFree(h, h->size());
     }
   }
-  TRACE(1, "sweep tot %lu(%lu) mk %lu(%lu) amb %lu(%lu) free %lu(%lu)\n",
-        total_.count, total_.bytes,
-        marked.count, marked.bytes,
-        ambig.count, ambig.bytes,
-        freed.count, freed.bytes);
+  if (RuntimeOption::EvalEagerGCProbability > 0) {
+    mm.quarantine();
+  }
 }
 }
 

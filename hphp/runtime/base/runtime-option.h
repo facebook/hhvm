@@ -370,6 +370,8 @@ public:
   static bool AutoTypecheck;
 
   // ENABLED (1) selects PHP7 behavior.
+  static bool PHP7_DeprecateOldStyleCtors;
+  static bool PHP7_IntSemantics;
   static bool PHP7_LTR_assign;
   static bool PHP7_NoHexNumerics;
   static bool PHP7_UVS;

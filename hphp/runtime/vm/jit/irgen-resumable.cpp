@@ -126,7 +126,6 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
 
-  spillStack(env);
   auto const stack    = sp(env);
   auto const frame    = fp(env);
   auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
@@ -137,7 +136,6 @@ void yieldReturnControl(IRGS& env) {
   // Push return value of next()/send()/raise().
   push(env, cns(env, TInitNull));
 
-  spillStack(env);
   auto const stack    = sp(env);
   auto const frame    = fp(env);
   auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
@@ -309,8 +307,6 @@ void emitContEnter(IRGS& env) {
   // Exit to interpreter if resume address is not known.
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);
 
-  spillStack(env);
-  env.irb->exceptionStackBoundary();
   auto returnBcOffset = returnOffset - curFunc(env)->base();
   gen(
     env,

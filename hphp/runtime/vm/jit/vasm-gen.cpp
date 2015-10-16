@@ -89,6 +89,9 @@ Vauto::~Vauto() {
         case Arch::ARM:
           finishARM(unit(), m_text, abi(m_kind), nullptr);
           break;
+        case Arch::PPC64:
+          not_implemented();
+          break;
       }
       return;
     }

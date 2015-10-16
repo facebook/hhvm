@@ -587,15 +587,10 @@ void IRBuilder::exceptionStackBoundary() {
    * If this assert fires, we're trying to put things on the stack in a catch
    * trace that the unwinder won't be able to see.
    */
-  assertx(
-    syncedSpLevel() + m_state.evalStack().size() - m_state.stackDeficit() ==
-      m_curMarker.spOff()
-  );
-  m_exnStack.spOffset      = m_state.spOffset();
+  FTRACE(2, "exceptionStackBoundary()\n");
+  assertx(syncedSpLevel() == m_curMarker.spOff());
   m_exnStack.syncedSpLevel = m_state.syncedSpLevel();
-  m_exnStack.stackDeficit  = m_state.stackDeficit();
-  m_exnStack.evalStack     = m_state.evalStack();
-  m_exnStack.sp            = m_state.sp();
+  m_state.resetStackModified();
 }
 
 /*

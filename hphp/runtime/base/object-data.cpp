@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
@@ -227,10 +227,10 @@ bool ObjectData::toBooleanImpl() const noexcept {
     return collections::toBool(this);
   }
 
-  if (instanceof(c_SimpleXMLElement::classof())) {
+  if (instanceof(SimpleXMLElement_classof())) {
     // SimpleXMLElement is the only non-collection class that has custom bool
     // casting.
-    return c_SimpleXMLElement::ToBool(this);
+    return SimpleXMLElement_objectCast(this, KindOfBoolean).toBoolean();
   }
 
   always_assert(false);
@@ -239,14 +239,14 @@ bool ObjectData::toBooleanImpl() const noexcept {
 
 int64_t ObjectData::toInt64Impl() const noexcept {
   // SimpleXMLElement is the only class that has proper custom int casting.
-  assert(instanceof(c_SimpleXMLElement::classof()));
-  return c_SimpleXMLElement::ToInt64(this);
+  assert(instanceof(SimpleXMLElement_classof()));
+  return SimpleXMLElement_objectCast(this, KindOfInt64).toInt64();
 }
 
 double ObjectData::toDoubleImpl() const noexcept {
   // SimpleXMLElement is the only class that has custom double casting.
-  assert(instanceof(c_SimpleXMLElement::classof()));
-  return c_SimpleXMLElement::ToDouble(this);
+  assert(instanceof(SimpleXMLElement_classof()));
+  return SimpleXMLElement_objectCast(this, KindOfDouble).toDouble();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -272,12 +272,12 @@ Object ObjectData::iterableObject(bool& isIterable,
     }
     obj.reset(o);
   }
-  if (!isIterator() && obj->instanceof(c_SimpleXMLElement::classof())) {
-    auto iterator = cast<c_SimpleXMLElement>(obj)
-      ->t_getiterator()
-      .toObject();
+  if (!isIterator() && obj->instanceof(SimpleXMLElement_classof())) {
     isIterable = true;
-    return iterator;
+    return create_object(
+      s_SimpleXMLElementIterator,
+      make_packed_array(obj)
+    );
   }
   isIterable = false;
   return obj;
@@ -507,8 +507,8 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
   } else if (UNLIKELY(getAttribute(CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
-    assert(instanceof(c_SimpleXMLElement::classof()));
-    return c_SimpleXMLElement::ToArray(this);
+    assert(instanceof(SimpleXMLElement_classof()));
+    return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
     auto const lookup = getProp(SystemLib::s_ArrayObjectClass, s_flags.get());
     auto const flags = lookup.prop;
@@ -597,13 +597,11 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
   }
   if (!RuntimeOption::RepoAuthoritative && accessibleProps > 0) {
     // we may have properties from traits
-    const auto* props = m_cls->declProperties();
-    auto numDeclProp = m_cls->numDeclProperties();
-    for (size_t i = 0; i < numDeclProp; i++) {
-      const auto* key = props[i].name.get();
+    for (auto const& prop : m_cls->declProperties()) {
+      auto const key = prop.name.get();
       if (!retArray.get()->exists(key)) {
         accessibleProps = getPropertyIfAccessible(
-            this, ctx, key, mode, retArray, accessibleProps);
+          this, ctx, key, mode, retArray, accessibleProps);
         if (accessibleProps == 0) break;
       }
     }
@@ -628,14 +626,17 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
         case CreateRefs: {
           auto& lval = dynProps->lvalAt(key.m_data.num);
           retArray.setRef(key.m_data.num, lval);
+          break;
         }
         case EraseRefs: {
           auto const val = dynProps->get()->nvGet(key.m_data.num);
           retArray.set(key.m_data.num, tvAsCVarRef(val));
+          break;
         }
         case PreserveRefs: {
           auto const val = dynProps->get()->nvGet(key.m_data.num);
           retArray.setWithRef(key.m_data.num, tvAsCVarRef(val));
+          break;
         }
         }
         continue;
@@ -646,14 +647,17 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       case CreateRefs: {
         auto& lval = dynProps->lvalAt(StrNR(strKey), AccessFlags::Key);
         retArray.setRef(StrNR(strKey), lval, true /* isKey */);
+        break;
       }
       case EraseRefs: {
         auto const val = dynProps->get()->nvGet(strKey);
         retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        break;
       }
       case PreserveRefs: {
         auto const val = dynProps->get()->nvGet(strKey);
         retArray.setWithRef(VarNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        break;
       }
       }
       decRefStr(strKey);
@@ -758,8 +762,6 @@ ObjectData* ObjectData::clone() {
       return collections::clone(this);
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
-    } else if (instanceof(c_SimpleXMLElement::classof())) {
-      return c_SimpleXMLElement::Clone(this);
     }
     always_assert(false);
   }
@@ -860,14 +862,14 @@ Variant ObjectData::offsetGet(Variant key) {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s___get(LITSTR_INIT("__get")),
-  s___set(LITSTR_INIT("__set")),
-  s___isset(LITSTR_INIT("__isset")),
-  s___unset(LITSTR_INIT("__unset")),
-  s___init__(LITSTR_INIT("__init__")),
-  s___sleep(LITSTR_INIT("__sleep")),
-  s___toDebugDisplay(LITSTR_INIT("__toDebugDisplay")),
-  s___wakeup(LITSTR_INIT("__wakeup"));
+  s___get("__get"),
+  s___set("__set"),
+  s___isset("__isset"),
+  s___unset("__unset"),
+  s___init__("__init__"),
+  s___sleep("__sleep"),
+  s___toDebugDisplay("__toDebugDisplay"),
+  s___wakeup("__wakeup");
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
@@ -1366,8 +1368,8 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
 
 bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
   if (UNLIKELY(getAttribute(HasPropEmpty))) {
-    if (instanceof(c_SimpleXMLElement::classof())) {
-      return c_SimpleXMLElement::PropEmpty(this, key);
+    if (instanceof(SimpleXMLElement_classof())) {
+      return SimpleXMLElement_propEmpty(this, key);
     }
   }
   return propEmptyImpl(ctx, key);

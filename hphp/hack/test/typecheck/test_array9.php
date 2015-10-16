@@ -11,7 +11,7 @@
 
 class A {}
 
-function test(): void {
-  $v = array('field1' => 1, 'field2' => new A());
-  $v['field1']->unknownFunction();
+function test(string $field1): void {
+  $v = array($field1 => 1, 'field2' => new A());
+  $v[$field1]->unknownFunction();
 }

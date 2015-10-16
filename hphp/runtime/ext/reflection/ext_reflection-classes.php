@@ -1120,6 +1120,21 @@ namespace HH {
     'alias' => ?string,
   );
 
+  /**
+   * Retrieves the TypeStructure for a type constant or a type alias.
+   *
+   * @cls_or_obj    mixed    An instance of a class or the name of a class. If
+   *                         @cns_name is null or not provided, then this must
+   *                         the name of a type alias.
+   *
+   * @cns_name      ?string  If @cls_or_obj references a class, then this is
+   *                         the name of the type constant whose TypeStructure
+   *                         is being retrieved. This is null when retrieving
+   *                         the type constant for a type alias.
+   *
+   * @return        array    The resolved type structure for either a type
+   *                         constant or a type alias.
+   */
   <<__Native>>
-  function type_structure(mixed $cls_or_obj, string $cns_name): array;
+  function type_structure(mixed $cls_or_obj, ?string $cns_name = null): array;
 }

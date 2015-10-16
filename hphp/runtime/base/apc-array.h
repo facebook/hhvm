@@ -33,6 +33,9 @@ struct APCLocalArray;
 struct APCArray {
   static APCHandle::Pair MakeSharedArray(ArrayData* data, bool inner,
                                          bool unserializeObj);
+
+  static APCHandle* MakeUncountedArray(ArrayData* array);
+
   static APCHandle::Pair MakeSharedEmptyArray();
   static Variant MakeArray(const APCHandle* handle);
   static void Delete(APCHandle* handle);

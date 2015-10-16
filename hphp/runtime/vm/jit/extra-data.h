@@ -471,10 +471,10 @@ struct ReqBindJmpData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::to<std::string>(target.offset(), ',',
-                                  invSPOff.offset, ',',
-                                  irSPOff.offset, ',',
-                                  trflags.packed);
+    return folly::sformat(
+      "{}, FPInv {}, IRSP {}, Flags {}",
+      target.offset(), invSPOff.offset, irSPOff.offset, trflags.packed
+    );
   }
 
   SrcKey target;
@@ -883,7 +883,7 @@ struct CoerceStkData : IRExtraData {
 
   std::string show() const {
     return folly::sformat(
-      "{},{},{}",
+      "IRSP {},{},{}",
       offset.offset,
       callee->name(),
       argNum

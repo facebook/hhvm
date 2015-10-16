@@ -122,6 +122,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
@@ -8129,13 +8130,29 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
     }
   }
 
+  UserAttributeMap userAttrs;
+  ExpressionListPtr attrList = td->attrList;
+  if (attrList) {
+    for (int i = 0; i < attrList->getCount(); ++i) {
+      auto attr = dynamic_pointer_cast<UserAttribute>((*attrList)[i]);
+      auto const uaName = makeStaticString(attr->getName());
+      auto uaValue = attr->getExp();
+      assert(uaValue);
+      assert(uaValue->isScalar());
+      TypedValue tv;
+      initScalar(tv, uaValue);
+      userAttrs[uaName] = tv;
+    }
+  }
+
   TypeAlias record;
   record.typeStructure = Array(td->annot->getScalarArrayRep());
-  record.name     = name;
-  record.value    = value;
-  record.type     = type;
+  record.name = name;
+  record.value = value;
+  record.type = type;
   record.nullable = nullable;
-  record.attrs    = !SystemLib::s_inited ? AttrPersistent : AttrNone;
+  record.userAttrs = userAttrs;
+  record.attrs = !SystemLib::s_inited ? AttrPersistent : AttrNone;
   Id id = m_ue.addTypeAlias(record);
   e.DefTypeAlias(id);
 
@@ -9885,6 +9902,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HardTypeHints            = Option::HardTypeHints;
   gd.HardReturnTypeHints      = Option::HardReturnTypeHints;
   gd.UsedHHBBC                = Option::UseHHBBC;
+  gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
   gd.HardPrivatePropInference = true;
 
   if (arrTable) gd.arrayTypeTable.repopulate(*arrTable);

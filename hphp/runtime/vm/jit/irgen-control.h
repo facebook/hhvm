@@ -17,7 +17,6 @@
 #define incl_HPHP_JIT_IRGEN_CONTROL_H_
 
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/jit/jmpflags.h"
 
 namespace HPHP { namespace jit {
 struct IRGS;
@@ -40,7 +39,7 @@ Block* getBlock(IRGS& env, Offset offset);
  * Helpers for unconditional and conditional jumps.
  */
 void surpriseCheck(IRGS&, Offset);
-void jmpImpl(IRGS&, Offset, JmpFlags);
+void jmpImpl(IRGS&, Offset);
 void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
 
 //////////////////////////////////////////////////////////////////////

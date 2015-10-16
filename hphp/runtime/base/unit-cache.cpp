@@ -412,7 +412,8 @@ const std::string mangleUnitPHP7Options() {
   // As the list of options increases, we may want to do something smarter here?
   std::string s;
   s +=
-      (RuntimeOption::PHP7_LTR_assign ? '1' : '0')
+      (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
+    + (RuntimeOption::PHP7_LTR_assign ? '1' : '0')
     + (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0')
     + (RuntimeOption::PHP7_UVS ? '1' : '0');
   return s;
@@ -524,6 +525,7 @@ void preloadRepo() {
   std::atomic<size_t> index{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     workers.push_back(std::thread([&] {
+      hphp_thread_init();
       hphp_session_init();
       hphp_context_init();
 
@@ -546,7 +548,6 @@ void preloadRepo() {
       hphp_context_exit();
       hphp_session_exit();
       hphp_thread_exit();
-
     }));
   }
   for (auto& worker : workers) {

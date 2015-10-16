@@ -1,7 +1,7 @@
 array<[1]intersect(Tstring), [2]intersect(App \classname<[\D]App \D<>, >, App \classname<[\C2]App \C2<>, >, App \classname<[\C1]App \C1<>, >)>
 File "array_literal_bad.php", line 11, characters 10-13:
 Invalid return type (Typing[4110])
-File "array_literal_bad.php", line 8, characters 39-39:
+File "array_literal_bad.php", line 8, characters 52-52:
 This is an object of type I
-File "array_literal_bad.php", line 9, characters 47-47:
+File "array_literal_bad.php", line 9, characters 46-46:
 It is incompatible with an object of type D

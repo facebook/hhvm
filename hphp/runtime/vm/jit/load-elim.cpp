@@ -256,6 +256,10 @@ TrackedLoc* find_tracked(Local& env,
 Flags load(Local& env,
            const IRInstruction& inst,
            AliasClass acls) {
+  // Bail out early when the instruction is in a catch block.  We don't want to
+  // increase lifetimes of values because of cold paths.
+  if (inst.block()->hint() == Block::Hint::Unused) return FNone{};
+
   acls = canonicalize(acls);
 
   auto const meta = env.global.ainfo.find(acls);

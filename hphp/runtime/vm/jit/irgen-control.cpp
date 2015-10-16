@@ -49,23 +49,13 @@ Block* getBlock(IRGS& env, Offset offset) {
 
 //////////////////////////////////////////////////////////////////////
 
-void jmpImpl(IRGS& env, Offset offset, JmpFlags flags) {
-  if (flags & JmpFlagNextIsMerge) {
-    prepareForHHBCMergePoint(env);
-  }
+void jmpImpl(IRGS& env, Offset offset) {
   auto target = getBlock(env, offset);
   assertx(target != nullptr);
   gen(env, Jmp, target);
 }
 
 void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
-  auto const flags = instrJmpFlags(*env.currentNormalizedInstruction);
-  if (flags & JmpFlagEndsRegion) {
-    spillStack(env);
-  }
-  if ((flags & JmpFlagNextIsMerge) != 0) {
-    prepareForHHBCMergePoint(env);
-  }
   auto const target = getBlock(env, taken);
   assertx(target != nullptr);
   auto const boolSrc = gen(env, ConvCellToBool, src);
@@ -78,12 +68,11 @@ void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
 void emitJmp(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const offset = bcOff(env) + relOffset;
-  jmpImpl(env, offset, instrJmpFlags(*env.currentNormalizedInstruction));
+  jmpImpl(env, offset);
 }
 
 void emitJmpNS(IRGS& env, Offset relOffset) {
-  jmpImpl(env, bcOff(env) + relOffset,
-    instrJmpFlags(*env.currentNormalizedInstruction));
+  jmpImpl(env, bcOff(env) + relOffset);
 }
 
 void emitJmpZ(IRGS& env, Offset relOffset) {
@@ -123,10 +112,6 @@ void emitSwitch(IRGS& env,
     zeroOff = bcOff(env) + iv.vec32()[0 - base];
   } else {
     zeroOff = defaultOff;
-  }
-
-  if (instrJmpFlags(*env.currentNormalizedInstruction) & JmpFlagNextIsMerge) {
-    prepareForHHBCMergePoint(env);
   }
 
   if (type <= TNull) {
@@ -241,7 +226,6 @@ void emitSwitch(IRGS& env,
   data.invSPOff    = invSPOff(env);
   data.irSPOff     = offsetFromIRSP(env, BCSPOffset{0});
 
-  spillStack(env);
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
 

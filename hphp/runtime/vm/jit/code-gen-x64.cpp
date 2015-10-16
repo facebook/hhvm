@@ -19,8 +19,10 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
-#include <unwind.h>
 #include <vector>
+#ifndef _MSC_VER
+#include <unwind.h>
+#endif
 
 #include <folly/ScopeGuard.h>
 #include <folly/Format.h>
@@ -74,7 +76,7 @@
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
@@ -4991,6 +4993,17 @@ void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
         v << ud2{};
       });
     });
+}
+
+void CodeGenerator::cgDbgAssertFunc(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  auto r0 = srcLoc(inst, 0).reg(0);
+  auto r1 = srcLoc(inst, 1).reg(0);
+  v << cmpq{r0, r1, sf};
+  ifThen(v, CC_NE, sf, [&](Vout& v) {
+    v << ud2{};
+  });
 }
 
 void CodeGenerator::emitVerifyCls(IRInstruction* inst) {

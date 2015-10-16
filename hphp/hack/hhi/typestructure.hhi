@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -35,3 +35,42 @@ enum TypeStructureKind : int {
   OF_ENUM = 0;
   OF_UNRESOLVED = 0;
 }
+
+newtype TypeStructure<T> as shape(
+  'kind' => TypeStructureKind,
+  'nullable' => ?bool,
+  'classname' => ?classname<T>,
+  'elem_types' => ?array,
+  'param_types' => ?array,
+  'return_type' => ?array,
+  'generic_types' => ?array,
+  'fields' => ?array,
+  'name' => ?string,
+  'alias' => ?string,
+) = shape(
+  'kind' => TypeStructureKind,
+  'nullable' => ?bool,
+  // classname for classes, interfaces, enums, or traits
+  'classname' => ?classname<T>,
+  // for tuples
+  'elem_types' => ?array,
+  // for functions
+  'param_types' => ?array,
+  'return_type' => ?array,
+  // for arrays, classes
+  'generic_types' => ?array,
+  // for shapes
+  'fields' => ?array,
+  // name for generics (type variables)
+  'name' => ?string,
+  // for type aliases
+  'alias' => ?string,
+);
+
+/*
+ * returns the shape associated with the type constant.
+ */
+function type_structure(mixed $cls_or_obj, string $cns_name);
+// becomes:
+// type_structure(C::class or new C, 'type_const_name')
+//   : TypeStructure

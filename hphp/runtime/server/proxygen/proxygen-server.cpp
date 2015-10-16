@@ -34,7 +34,7 @@ namespace HPHP {
 
 using folly::EventBase;
 using folly::SocketAddress;
-using apache::thrift::async::TAsyncTimeout;
+using folly::AsyncTimeout;
 using apache::thrift::transport::TTransportException;
 using folly::AsyncServerSocket;
 using wangle::Acceptor;
@@ -272,7 +272,7 @@ void ProxygenServer::start() {
   startConsuming(m_worker.getEventBase(), &m_responseQueue);
 
   setStatus(RunStatus::RUNNING);
-  TAsyncTimeout::attachEventBase(m_worker.getEventBase());
+  AsyncTimeout::attachEventBase(m_worker.getEventBase());
   m_worker.start();
   m_dispatcher.start();
 }

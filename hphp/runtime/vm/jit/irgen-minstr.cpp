@@ -118,6 +118,10 @@ struct MTS {
   bool needFirstRatchet;
   bool needFinalRatchet;
 
+  /*
+   * Old minstrs use this flag to determine whether they can elide all
+   * operations to MInstrState.
+   */
   bool needMIS{true};
 
   /*
@@ -307,6 +311,7 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
  */
 SSATmp* misLea(MTS& env, ptrdiff_t offset) {
   assertx(env.needMIS);
+  env.irb.fs().setNeedRatchet(true);
   auto const offvalue = cns(env, safe_cast<int32_t>(offset));
   return gen(env, LdMIStateAddr, offvalue);
 }
@@ -674,30 +679,13 @@ void emitBaseLCR(MTS& env) {
     PUNT(MInstr-GenBase);
   }
 
-  if (baseL.isLocal()) {
-    // Check for Uninit and warn/promote to InitNull as appropriate
-    if (baseType <= TUninit) {
-      if (mia & MIA_warn) {
-        env.irb.constrainLocal(baseL.offset, DataTypeSpecific,
-                              "emitBaseLCR: Uninit base local");
-        gen(env,
-            RaiseUninitLoc,
-            cns(env, curFunc(env)->localVarName(baseL.offset)));
-      }
-      if (mia & MIA_define) {
-        env.irb.constrainLocal(baseL.offset, DataTypeSpecific,
-                              "emitBaseLCR: Uninit base local");
-        base = cns(env, TInitNull);
-        baseType = TInitNull;
-        gen(
-          env,
-          StLoc,
-          LocalId(baseL.offset),
-          fp(env),
-          base
-        );
-      }
-    }
+  // Check for Uninit and warn if needed.
+  if (baseL.isLocal() && (mia & MIA_warn) && baseType <= TUninit) {
+    env.irb.constrainLocal(baseL.offset, DataTypeSpecific,
+                           "emitBaseLCR: Uninit base local");
+    gen(env,
+        RaiseUninitLoc,
+        cns(env, curFunc(env)->localVarName(baseL.offset)));
   }
 
   /*
@@ -743,13 +731,10 @@ void emitBaseLCR(MTS& env) {
     );
   } else {
     assertx(baseL.space == Location::Stack);
-    // Make sure the stack is clean before getting a pointer to one of its
-    // elements.
-    spillStack(env);
-    env.irb.exceptionStackBoundary();
     auto const stkType = env.irb.stackType(
       offsetFromIRSP(env, baseL.bcRelOffset),
-      DataTypeGeneric);
+      DataTypeGeneric
+    );
     setBase(
       env,
       ldStkAddr(env, baseL.bcRelOffset),
@@ -846,7 +831,7 @@ PropInfo getCurrentPropertyOffset(MTS& env) {
 /*
  * Helper for emitPropSpecialized to check if a property is Uninit. It returns
  * a pointer to the property's address, or init_null_variant if the property
- * was Uninit and doDefine is false.
+ * was Uninit and doWarn is true.
  *
  * We can omit the uninit check for properties that we know may not be uninit
  * due to the frontend's type inference.
@@ -862,9 +847,7 @@ SSATmp* checkInitProp(IRGS& env,
   assertx(propAddr->type() <= TPtrToGen);
   assertx(!doWarn || !doDefine);
 
-  auto const needsCheck =
-    TUninit <= propAddr->type().deref() && doWarn;
-
+  auto const needsCheck = doWarn && propAddr->type().deref().maybe(TUninit);
   if (!needsCheck) return propAddr;
 
   return cond(
@@ -875,11 +858,10 @@ SSATmp* checkInitProp(IRGS& env,
     [&] { // Next: Property isn't Uninit. Do nothing.
       return propAddr;
     },
-    [&] { // Taken: Property is Uninit. Raise a warning and return
-          // a pointer to InitNull, either in the object or
+    [&] { // Taken: Property is Uninit. Raise a warning and return a pointer to
           // init_null_variant.
       hint(env, Block::Hint::Unlikely);
-      if (doWarn && wantPropSpecializedWarnings()) {
+      if (wantPropSpecializedWarnings()) {
         gen(env, RaiseUndefProp, baseAsObj, key);
       }
       return ptrToInitNull(env);
@@ -1230,8 +1212,8 @@ bool needFinalRatchet(const MTS& env) { return env.mii.finalGet(); }
 //   SetElemL
 //     no ratchet
 unsigned nLogicalRatchets(MTS& env) {
-  // If we've proven elsewhere that we don't need an MInstrState struct, we
-  // know this translation won't need any ratchets
+  // If we've proven elsewhere that we don't need an MInstrState struct, we know
+  // this translation won't need any ratchets.
   if (!env.needMIS) return 0;
 
   unsigned ratchets = env.immVecM.size();
@@ -1256,6 +1238,10 @@ void computeRatchets(MTS& env) {
 
 void emitRatchetRefs(MTS& env) {
   if (ratchetInd(env) < 0 || ratchetInd(env) >= int(env.numLogicalRatchets)) {
+    return;
+  }
+
+  if (!env.irb.fs().needRatchet()) {
     return;
   }
 
@@ -1630,10 +1616,10 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
     // newArr has already been incref'd in the helper.
     gen(env, StLoc, LocalId(baseLoc.offset), fp(env), newArr);
   } else if (baseLoc.space == Location::Stack) {
-    extendStack(env, BCSPOffset{baseStkIdx});
-    env.irb.evalStack().replace(baseStkIdx, newArr);
+    auto const offset = offsetFromIRSP(env, BCSPOffset{baseStkIdx});
+    gen(env, StStk, IRSPOffsetData{offset}, sp(env), newArr);
   } else {
-    not_reached();
+    always_assert(false);
   }
 
   env.result = value;
@@ -2126,7 +2112,6 @@ Block* makeMISCatch(MTS& env) {
   BlockPusher bp(env.irb, makeMarker(env, bcOff(env)), exit);
   gen(env, BeginCatch);
   cleanTvRefs(env);
-  spillStack(env);
   gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     fp(env), sp(env));
   return exit;
@@ -2140,7 +2125,6 @@ Block* makeCatchSet(MTS& env) {
 
   BlockPusher bp(env.irb, makeMarker(env, bcOff(env)), env.failedSetBlock);
   gen(env, BeginCatch);
-  spillStack(env);
 
   ifThen(
     env,
@@ -2182,6 +2166,7 @@ void emitMPost(MTS& env) {
 
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromMain);
   discard(env, stackCnt);
+  cleanTvRefs(env);
 
   // Push result, if one was produced. If we had a predicted result
   // (strTestResult case), it was already guarded on above.
@@ -2192,8 +2177,6 @@ void emitMPost(MTS& env) {
             env.op == Op::SetWithRefLM ||
             env.op == Op::SetWithRefRM);
   }
-
-  cleanTvRefs(env);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2314,6 +2297,7 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst) {
  * Returns a pointer to a specific value in MInstrState.
  */
 SSATmp* misLea(IRGS& env, int32_t offset) {
+  env.irb->fs().setNeedRatchet(true);
   return gen(env, LdMIStateAddr, cns(env, offset));
 }
 
@@ -2348,6 +2332,10 @@ void cleanTvRefs(IRGS& env) {
  * tvRef2.
  */
 SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
+  if (!env.irb->fs().needRatchet()) {
+    return base;
+  }
+
   auto tvRef = tvRefPtr(env);
 
   return cond(
@@ -2488,6 +2476,10 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
 }
 
 void dimImpl(IRGS& env, PropElemOp propElem, MOpFlags flags, SSATmp* key) {
+  // Eagerly mark us as not needing ratchets.  If the intermediate operation
+  // ends up calling misLea(), this will be set to true.
+  env.irb->fs().setNeedRatchet(false);
+
   auto newBase = [&] {
     switch (propElem) {
       case PropElemOp::Prop:
@@ -2510,8 +2502,8 @@ void dimImpl(IRGS& env, PropElemOp propElem, MOpFlags flags, SSATmp* key) {
  */
 void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
   for (auto i = 0; i < nDiscard; ++i) popDecRef(env);
-  if (result) push(env, result);
   cleanTvRefs(env);
+  if (result) push(env, result);
 
   gen(env, FinishMemberOp);
 }
@@ -2640,8 +2632,6 @@ void emitBaseL(IRGS& env, int32_t locId, MOpFlags flags) {
 
 void emitBaseC(IRGS& env, int32_t idx) {
   initTvRefs(env);
-  spillStack(env);
-  env.irb->exceptionStackBoundary();
 
   auto const bcOff = BCSPOffset{idx};
   auto const irOff = offsetFromIRSP(env, bcOff);

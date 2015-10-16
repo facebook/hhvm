@@ -626,6 +626,9 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     case Arch::ARM:
       envArr.set(s_HHVM_ARCH, "arm");
       break;
+    case Arch::PPC64:
+      envArr.set(s_HHVM_ARCH, "ppc64");
+      break;
     }
     php_global_set(s__ENV, envArr);
   }
@@ -1266,6 +1269,7 @@ static int execute_program_impl(int argc, char** argv) {
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
+    ("modules", "display modules")
     ("php", "emulate the standard php command line")
     ("compiler-id", "display the git hash for the compiler")
     ("repo-schema", "display the repository schema id")
@@ -1449,6 +1453,14 @@ static int execute_program_impl(int argc, char** argv) {
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
+    return 0;
+  }
+  if (vm.count("modules")) {
+    Array exts = ExtensionRegistry::getLoaded();
+    cout << "[PHP Modules]" << "\n";
+    for (ArrayIter iter(exts); iter; ++iter) {
+      cout << iter.second().toString().toCppString() << "\n";
+    }
     return 0;
   }
   if (vm.count("compiler-id")) {
@@ -2190,7 +2202,7 @@ void hphp_session_exit() {
   // finishes.
   Treadmill::finishRequest();
 
-  TI().clearPendingException();
+  TI().onSessionExit();
 
   {
     ServerStatsHelper ssh("rollback");
@@ -2200,7 +2212,6 @@ void hphp_session_exit() {
     free_global_variables_after_sweep();
   }
 
-  TI().onSessionExit();
   assert(MM().empty());
 
   s_sessionInitialized = false;

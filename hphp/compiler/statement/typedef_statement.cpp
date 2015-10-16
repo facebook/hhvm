@@ -24,9 +24,11 @@ namespace HPHP {
 TypedefStatement::TypedefStatement(
     STATEMENT_CONSTRUCTOR_PARAMETERS,
     const std::string& name,
+    const ExpressionListPtr& attrList,
     const TypeAnnotationPtr& annot)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(TypedefStatement))
   , name(name)
+  , attrList(attrList)
   , annot(annot)
 {}
 

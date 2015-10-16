@@ -109,17 +109,22 @@ struct ResourceData : private boost::noncopyable {
   ResourceData();
 
   const ResourceHdr* hdr() const {
-    return reinterpret_cast<const ResourceHdr*>(this) - 1;
+    auto h = reinterpret_cast<const ResourceHdr*>(this) - 1;
+    assert(h->kindIsValid());
+    return h;
   }
   ResourceHdr* hdr() {
-    return reinterpret_cast<ResourceHdr*>(this) - 1;
+    auto h = reinterpret_cast<ResourceHdr*>(this) - 1;
+    assert(h->kindIsValid());
+    return h;
   }
 
   // delegate refcount operations to base.
   RefCount getCount() const { return hdr()->getCount(); }
   void incRefCount() const { hdr()->incRefCount(); }
-  bool decRefAndRelease() { return hdr()->decRefAndRelease(); }
+  void decRefAndRelease() { hdr()->decRefAndRelease(); }
   bool hasExactlyOneRef() const { return hdr()->hasExactlyOneRef(); }
+  bool hasMultipleRefs() const { return hdr()->hasMultipleRefs(); }
   int32_t getId() const { return hdr()->getId(); }
   void setId(int32_t id) { hdr()->setId(id); }
 
@@ -156,6 +161,19 @@ inline void ResourceHdr::release() noexcept {
   assert(kindIsValid());
   assert(!hasMultipleRefs());
   delete data();
+}
+
+inline ResourceData* safedata(ResourceHdr* hdr) {
+  return hdr ? hdr->data() : nullptr;
+}
+inline const ResourceData* safedata(const ResourceHdr* hdr) {
+  return hdr ? hdr->data() : nullptr;
+}
+inline ResourceHdr* safehdr(ResourceData* data) {
+  return data ? data->hdr() : nullptr;
+}
+inline const ResourceHdr* safehdr(const ResourceData* data) {
+  return data ? data->hdr() : nullptr;
 }
 
 /**
@@ -245,11 +263,11 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE bool decRefRes(ResourceData* res) {
-  return res->hdr()->decRefAndRelease();
+ALWAYS_INLINE void decRefRes(ResourceData* res) {
+  res->hdr()->decRefAndRelease();
 }
-ALWAYS_INLINE bool decRefRes(ResourceHdr* res) {
-  return res->decRefAndRelease();
+ALWAYS_INLINE void decRefRes(ResourceHdr* res) {
+  res->decRefAndRelease();
 }
 
 #define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                 \

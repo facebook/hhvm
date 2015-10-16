@@ -518,8 +518,8 @@ ParamPrep prepare_params(IRGS& env,
   // what loadParam wants to do).
   for (auto offset = uint32_t{numArgs}; offset-- > 0;) {
     auto const ty = param_coerce_type(callee, offset);
-    auto &cur = ret[offset];
-    auto &pi = callee->params()[offset];
+    auto& cur = ret[offset];
+    auto& pi = callee->params()[offset];
 
     cur.value = loadParam(offset, ty);
     cur.isOutputArg = pi.nativeArg && ty == TBoxedCell;
@@ -635,6 +635,10 @@ struct CatchMaker {
       }
     );
 
+    // prepareForCatch() in the ifThen() above messed with irb's marker, so we
+    // have to update it on the fallthru path here.
+    updateMarker(env);
+
     if (m_params.coerceFailure) {
       gen(env, Jmp, m_params.coerceFailure);
     } else {
@@ -678,7 +682,6 @@ private:
      * So before we leave, update the marker to placate EndCatch assertions,
      * which is trying to detect failure to do this properly.
      */
-    spillStack(env);
     auto const spOff = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
     gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
@@ -712,7 +715,6 @@ private:
   // Same work as above, but opposite order.
   void decRefForSideExit() const {
     assertx(!m_params.forNativeImpl);
-    spillStack(env);
     int32_t stackIdx = safe_cast<int32_t>(m_params.numByAddr);
 
     // Make sure we have loads for all of the stack elements.  We need to do
@@ -1080,9 +1082,6 @@ SSATmp* builtinCall(IRGS& env,
           push(env, params[i].value);
         }
       }
-      // We're going to do ldStkAddrs on these, so the stack must be
-      // materialized:
-      spillStack(env);
       /*
        * This marker update is to make sure rbx points to the bottom of our
        * stack if we enter a catch trace.  It's also necessary because we might
@@ -1092,9 +1091,8 @@ SSATmp* builtinCall(IRGS& env,
       updateMarker(env);
     }
 
-    // If we're not inlining, we've spilled the stack and are about to do things
-    // that can throw.  If we are inlining, we've done various DefInlineFP-type
-    // stuff and possibly also spilled the stack.
+    // If we are inlining, we've done various DefInlineFP-type stuff that can
+    // affect stack depth.
     env.irb->exceptionStackBoundary();
   }
 
@@ -1288,6 +1286,16 @@ void emitNativeImpl(IRGS& env) {
   if (!callee->nativeFuncPtr() || callee->builtinFuncPtr() == zend_wrap_func) {
     genericNativeImpl();
     return;
+  }
+
+  // CallBuiltin doesn't understand IDL instance methods that have variable
+  // arguments.
+  if (auto const info = callee->methInfo()) {
+    if (info->attribute & (ClassInfo::VariableArguments |
+                           ClassInfo::RefVariableArguments)) {
+      genericNativeImpl();
+      return;
+    }
   }
 
   auto thiz = callee->isMethod() && (!callee->isStatic() || callee->isNative())

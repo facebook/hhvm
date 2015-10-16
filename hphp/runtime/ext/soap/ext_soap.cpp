@@ -1352,7 +1352,7 @@ static xmlDocPtr serialize_response_call(
     if (version == SOAP_1_1) {
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST("faultcode"));
-        String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
+        String str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
                                             StringUtil::QuoteStyle::Double,
                                             "UTF-8", true, true);
         xmlAddChild(param, node);
@@ -1382,7 +1382,7 @@ static xmlDocPtr serialize_response_call(
     } else {
       if (!obj->o_get("faultcode").toString().empty()) {
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), nullptr);
-        String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
+        String str = StringUtil::HtmlEncode(obj->o_get("faultcode").toString(),
                                             StringUtil::QuoteStyle::Double,
                                             "UTF-8", true, true);
         node = xmlNewChild(node, ns, BAD_CAST("Value"), nullptr);

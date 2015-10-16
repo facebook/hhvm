@@ -46,7 +46,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
   /**
    * Returns an array containing the values from this ImmSet.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): array<Tv>;
 
   /**
    * Returns an array containing the values from this ImmSet.

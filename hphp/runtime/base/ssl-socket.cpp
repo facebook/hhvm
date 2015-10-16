@@ -764,8 +764,7 @@ bool SSLSocket::checkLiveness() {
   return true;
 }
 
-SSLSocket::CryptoMethod SSLSocket::getCryptoMethod()
-{
+SSLSocket::CryptoMethod SSLSocket::getCryptoMethod() {
   return m_data->m_method;
 }
 

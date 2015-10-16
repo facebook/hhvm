@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/pdo/pdo_sqlite.h"
+#include "hphp/runtime/ext/pdo_sqlite/pdo_sqlite.h"
 #include "hphp/runtime/ext/sqlite3/ext_sqlite3.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"

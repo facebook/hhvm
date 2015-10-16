@@ -469,7 +469,7 @@ std::vector<int> toBoundIntVector(const Array& arr, int64_t max) {
 ///////////////////////////////////////////////////////////////////////////////
 // Exports
 
-Variant HHVM_FUNCTION(heapgraph_create, void) {
+Resource HHVM_FUNCTION(heapgraph_create, void) {
   HeapGraph hg = makeHeapGraph();
   std::vector<CapturedNode> cnodes;
   std::vector<CapturedPtr> cptrs;

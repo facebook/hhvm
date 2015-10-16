@@ -41,9 +41,6 @@ struct SocketData : FileData {
   virtual bool closeImpl();
   ~SocketData();
 
- protected:
-  int getPort() { return m_port; }
-  std::string getAddress() { return m_address; }
  private:
   friend class Socket;
   std::string m_address;

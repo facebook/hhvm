@@ -1,0 +1,6 @@
+File "array_get_generic_lvalue_array_append.php", line 9, characters 10-11:
+Invalid return type (Typing[4110])
+File "array_get_generic_lvalue_array_append.php", line 7, characters 40-41:
+This is a value of generic type Tv
+File "array_get_generic_lvalue_array_append.php", line 7, characters 18-22:
+It is incompatible with an array (used like a vector)

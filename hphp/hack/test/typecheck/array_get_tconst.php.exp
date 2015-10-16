@@ -1,0 +1,12 @@
+File "array_get_tconst.php", line 8, characters 12-13:
+Invalid return type (Typing[4110])
+File "array_get_tconst.php", line 6, characters 43-55:
+This is the expression dependent type <static>::MyArray
+File "array_get_tconst.php", line 4, characters 34-38:
+  resulting from expanding the type constant C::MyArray
+File "array_get_tconst.php", line 6, characters 43-46:
+  where '<static>' refers to the late bound type of the enclosing class
+File "array_get_tconst.php", line 6, characters 24-36:
+It is incompatible with an array (used like a hashtable)
+File "array_get_tconst.php", line 4, characters 34-38:
+  resulting from expanding the type constant C::MyArray

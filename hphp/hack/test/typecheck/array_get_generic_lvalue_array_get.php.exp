@@ -1,0 +1,6 @@
+File "array_get_generic_lvalue_array_get.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+File "array_get_generic_lvalue_array_get.php", line 6, characters 56-57:
+This is a value of generic type Tv
+File "array_get_generic_lvalue_array_get.php", line 6, characters 18-31:
+It is incompatible with an object of type KeyedContainer

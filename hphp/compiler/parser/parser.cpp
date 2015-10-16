@@ -547,6 +547,17 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "objprof_get_data" ||
            stripped == "objprof_get_paths" ||
            stripped == "objprof_start" ||
+           stripped == "heapgraph_create" ||
+           stripped == "heapgraph_stats" ||
+           stripped == "heapgraph_foreach_node" ||
+           stripped == "heapgraph_foreach_edge" ||
+           stripped == "heapgraph_foreach_root" ||
+           stripped == "heapgraph_dfs_nodes" ||
+           stripped == "heapgraph_dfs_edges" ||
+           stripped == "heapgraph_node" ||
+           stripped == "heapgraph_edge" ||
+           stripped == "heapgraph_node_in_edges" ||
+           stripped == "heapgraph_node_out_edges" ||
            stripped == "server_warmup_status"
           )) {
         funcName = "HH\\" + stripped;

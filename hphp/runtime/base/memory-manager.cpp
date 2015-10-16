@@ -636,8 +636,8 @@ inline void* MemoryManager::realloc(void* ptr, size_t nbytes) {
 }
 
 const char* header_names[] = {
-  "Packed", "Struct", "Mixed", "Empty", "Apc", "Globals", "Proxy",
-  "String", "Resource", "Ref",
+  "PackedArray", "StructArray", "MixedArray", "EmptyArray", "ApcArray",
+  "GlobalsArray", "ProxyArray", "String", "Resource", "Ref",
   "Object", "ResumableObj", "AwaitAllWH",
   "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "Resumable", "Native", "SmallMalloc", "BigMalloc", "BigObj",

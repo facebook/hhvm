@@ -50,6 +50,10 @@ struct HeapGraph {
     for (int p = nodes[n].succ; p != -1; p = ptrs[p].succ) f(p);
   }
 
+  template<class F> void eachPredPtr(int n, F f) const {
+    for (int p = nodes[n].pred; p != -1; p = ptrs[p].pred) f(p);
+  }
+
   template<class F> void eachPred(int n, F f) const {
     for (int p = nodes[n].pred; p != -1; p = ptrs[p].pred) f(ptrs[p]);
   }

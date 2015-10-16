@@ -108,11 +108,24 @@ void findHeapCycles(const HeapGraph& g, Live live, Leaked leaked) {
   scc.visitAll(leaked);
 }
 
+template<class Pre>
+void dfs_nodes(
+  const HeapGraph& g,
+  const std::vector<int>& root_nodes,
+  Pre pre
+) {
+  dfs_nodes(g, root_nodes, {}, pre);
+}
+
 // non-recursive depth-first-search over nodes, using a vector of
 // nodes as the root set.
 template<class Pre>
-void dfs_nodes(const HeapGraph& g,
-               const std::vector<int>& root_nodes, Pre pre) {
+void dfs_nodes(
+  const HeapGraph& g,
+  const std::vector<int>& root_nodes,
+  const std::vector<int>& skip_nodes,
+  Pre pre
+) {
   boost::dynamic_bitset<> marks(g.nodes.size());
   struct Action {
     enum { Start, Finish } cmd;
@@ -120,6 +133,7 @@ void dfs_nodes(const HeapGraph& g,
   };
   std::vector<Action> work;
   for (auto r : root_nodes) work.push_back({Action::Start, r});
+  for (auto s : skip_nodes) marks.set(s);
   while (!work.empty()) {
     auto cmd = work.back().cmd;
     auto n = work.back().node;
@@ -135,12 +149,24 @@ void dfs_nodes(const HeapGraph& g,
     }
   }
 };
+template<class Pre>
+void dfs_ptrs(
+  const HeapGraph& g,
+  const std::vector<int>& root_ptrs,
+  Pre pre
+) {
+  dfs_ptrs(g, root_ptrs, {}, pre);
+}
 
 // depth first search over nodes, using a vector of pointer ids as the
 // root set (the "to" nodes are the effective root set).
 template<class Pre>
-void dfs_ptrs(const HeapGraph& g,
-              const std::vector<int>& root_ptrs, Pre pre) {
+void dfs_ptrs(
+  const HeapGraph& g,
+  const std::vector<int>& root_ptrs,
+  const std::vector<int>& skip_nodes,
+  Pre pre
+) {
   boost::dynamic_bitset<> marks(g.nodes.size());
   struct Action {
     enum { Explore, Finish } cmd;
@@ -148,6 +174,7 @@ void dfs_ptrs(const HeapGraph& g,
   };
   std::vector<Action> work;
   for (auto r : root_ptrs) work.push_back({Action::Explore, r});
+  for (auto s : skip_nodes) marks.set(s);
   while (!work.empty()) {
     auto cmd = work.back().cmd;
     auto ptr = work.back().ptr;

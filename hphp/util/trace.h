@@ -168,6 +168,7 @@ namespace Trace {
       TM(ustubs)        \
       TM(xenon)         \
       TM(objprof)       \
+      TM(heapgraph)     \
       TM(xls)           \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \

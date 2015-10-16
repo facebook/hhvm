@@ -878,13 +878,13 @@ use_declarations:
 ;
 
 use_fn_declarations:
-    use_fn_declaration ','
+    use_fn_declarations ','
     use_fn_declaration                 { }
   | use_fn_declaration                 { }
 ;
 
 use_const_declarations:
-    use_const_declaration ','
+    use_const_declarations ','
     use_const_declaration              { }
   | use_const_declaration              { }
 ;

@@ -225,9 +225,10 @@ struct IRInstruction {
   folly::Range<SSATmp**> dsts();
 
   /*
-   * Set the ith src.
+   * Set a single src or all srcs.
    */
   void setSrc(uint32_t i, SSATmp* newSrc);
+  void setSrcs(uint32_t numSrcs, SSATmp** newSrcs);
 
   /*
    * Set the dsts, either as a single dst, or as `numDsts' dsts (if the

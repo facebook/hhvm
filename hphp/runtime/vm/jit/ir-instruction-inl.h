@@ -175,6 +175,11 @@ inline void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   m_srcs[i] = newSrc;
 }
 
+inline void IRInstruction::setSrcs(uint32_t numSrcs, SSATmp** newSrcs) {
+  m_numSrcs = numSrcs;
+  m_srcs = newSrcs;
+}
+
 inline void IRInstruction::setDst(SSATmp* newDst) {
   assertx(hasDst());
   m_dest = newDst;

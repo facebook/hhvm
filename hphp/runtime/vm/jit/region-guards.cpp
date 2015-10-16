@@ -219,11 +219,15 @@ void removeDuplicates(BlockDataVec& data, RegionDesc& region) {
         const auto d = data[i].blockId == entryId ? j : i;
         const auto m = i + j - d;
         assertx(data[d].blockId != entryId);
-        assertx(!data[d].merged);
         assertx(!data[m].deleted);
         data[d].deleted = true;
         data[m].merged  = true;
         region.addMerged(data[d].blockId, data[m].blockId);
+        if (data[d].merged) {
+          for (auto mid : region.merged(data[d].blockId)) {
+            region.addMerged(mid, data[m].blockId);
+          }
+        }
         FTRACE(2, "removeDuplicates(): merging Block {} into Block {}\n",
                data[d].blockId, data[m].blockId);
         break;

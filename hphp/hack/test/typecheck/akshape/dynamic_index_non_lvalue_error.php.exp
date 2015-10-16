@@ -1,0 +1,6 @@
+File "dynamic_index_non_lvalue_error.php", line 13, characters 15-22:
+Invalid argument (Typing[4110])
+File "dynamic_index_non_lvalue_error.php", line 16, characters 22-27:
+This is a string
+File "dynamic_index_non_lvalue_error.php", line 10, characters 14-14:
+It is incompatible with an int

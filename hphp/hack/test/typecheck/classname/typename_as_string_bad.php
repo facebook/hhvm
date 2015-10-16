@@ -9,13 +9,10 @@
  *
  */
 
-interface DateTimeInterface {
+type C = string;
 
-  // Methods
-  public function diff(DateTimeInterface $datetime2, $absolute = false);
-  public function format($format);
-  public function getOffset();
-  public function getTimestamp();
-  public function getTimezone();
-
+function f(): int {
+  return C::class;
 }
+
+f();

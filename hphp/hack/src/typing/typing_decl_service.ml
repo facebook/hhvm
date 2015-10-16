@@ -19,7 +19,7 @@ open Utils
 (* The set of files that failed *)
 type failed = Relative_path.Set.t
 
-(* The result excepted from the service *)
+(* The result expected from the service *)
 type result = Errors.t * failed
 
 (*****************************************************************************)
@@ -68,7 +68,7 @@ let merge_decl (errors1, failed1) (errors2, failed2) =
 (* We need to know all the classes defined, because we want to declare
  * the types in their topological order.
  * We keep the files in which the classes are defined, sometimes there
- * can be more that one file when there are name collitions.
+ * can be more that one file when there are name collisions.
  *)
 (*****************************************************************************)
 

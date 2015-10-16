@@ -29,6 +29,7 @@ const char* const CONSTANTS_MUST_BE_SCALAR =
   "Constants may only evaluate to scalar values";
 const char* const CONSTANTS_CASE_SENSITIVE =
   "Case insensitive constant names are not supported in HipHop";
+const char* const MODULO_BY_ZERO = "Modulo by zero";
 const char* const DIVISION_BY_ZERO =
   "Division by zero";
 const char* const UNDEFINED_CONSTANT =

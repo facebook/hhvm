@@ -497,11 +497,15 @@ double HHVM_FUNCTION(lcg_value) { return math_combined_lcg();}
 
 Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
   if (divisor == 0) {
-    raise_warning("intdiv(): Division by zero");
-    return false;
+    // TODO(https://github.com/facebook/hhvm/issues/6012)
+    // This should throw a DivisionByZeroError.
+    SystemLib::throwInvalidOperationExceptionObject(Strings::DIVISION_BY_ZERO);
   } else if (divisor == -1 &&
              numerator == std::numeric_limits<int64_t>::min()) {
-    return 0;
+    // TODO(https://github.com/facebook/hhvm/issues/6012)
+    // This should throw an ArithmeticError.
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Division of PHP_INT_MIN by -1 is not an integer");
   }
   return numerator/divisor;
 }

@@ -1838,7 +1838,12 @@ and expr_ env = function
   | Class_get (x1, x2) ->
       N.Class_get (make_class_id env x1, x2)
   | Class_const (x1, x2) ->
-      N.Class_const (make_class_id env x1, x2)
+      let (genv, _) = env in
+      let (_, name) = Namespaces.elaborate_id genv.namespace x1 in
+      if SMap.mem name !(genv.typedefs) && (snd x2) = "class" then
+        N.Typename (Env.class_name env x1)
+      else
+        N.Class_const (make_class_id env x1, x2)
   | Call ((_, Id (p, pseudo_func)), el, uel)
       when pseudo_func = SN.SpecialFunctions.echo ->
       arg_unpack_unexpected uel ;
@@ -2360,7 +2365,7 @@ let add_files_to_rename nenv failed defl defs_in_env =
 let ndecl_file fn
     {FileInfo.file_mode; funs;
      classes; typedefs; consts; consider_names_just_for_autoload; comments}
-    (errorl, failed, nenv) =
+    nenv =
   let errors, nenv = Errors.do_ begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
     if consider_names_just_for_autoload
@@ -2369,7 +2374,7 @@ let ndecl_file fn
   end
   in
   match errors with
-  | [] -> errorl, failed, nenv
+  | [] -> [], Relative_path.Set.empty, nenv
   | l ->
   (* IMPORTANT:
    * If a file has name collisions, we MUST add the list of files that
@@ -2398,8 +2403,9 @@ let ndecl_file fn
    * This way, when the user removes foo.php, A.php and B.php are recomputed
    * and the naming environment is in a sane state.
    *)
+  let failed = Relative_path.Set.empty in
   let failed = add_files_to_rename nenv failed funs (fst nenv.ifuns) in
   let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
   let failed = add_files_to_rename nenv failed typedefs nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in
-  List.rev_append l errorl, Relative_path.Set.add fn failed, nenv
+  l, failed, nenv

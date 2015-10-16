@@ -172,6 +172,12 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
       continue;
     }
 
+    // TODO: this should probably read out the other elements of the global data
+    // which control Option or RuntimeOption values -- the others are read out
+    // in an inconsistent and ad-hoc manner. But I don't understand their uses
+    // and interactions well enough to feel comfortable fixing now.
+    RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
+
     return;
   }
 

@@ -59,7 +59,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Returns an array containing the values from this Set.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): array<Tv>;
 
   /**
    * Returns an array containing the values from this Set.

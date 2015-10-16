@@ -26,7 +26,10 @@ class CommonSaveStateTests(object):
         cls.saved_state_dir = tempfile.mkdtemp()
         cls.saved_state_name = 'foo'
 
-        touch(os.path.join(init_dir, '.hhconfig'))
+        with open(os.path.join(init_dir, '.hhconfig'), 'w') as f:
+            f.write(r"""
+# some comment
+assume_php = false""")
 
         cls.files = {}
 
@@ -39,15 +42,15 @@ class CommonSaveStateTests(object):
 
         cls.files['foo_2.php'] = """
         <?hh
-        function g(): string {
-            return "a";
+        function g(): int {
+            return 0;
         }
         """
 
         cls.files['foo_3.php'] = """
         <?hh
         function h(): string {
-            return 1;
+            return "a";
         }
 
         class Foo {}
@@ -57,15 +60,6 @@ class CommonSaveStateTests(object):
             h();
         }
         """
-
-        cls.initial_errors = [
-            '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
-            '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-            '  {root}foo_2.php:3:23,28: It is incompatible with a string',
-            '{root}foo_3.php:4:20,20: Invalid return type (Typing[4110])',
-            '  {root}foo_3.php:3:23,28: This is a string',
-            '  {root}foo_3.php:4:20,20: It is incompatible with an int',
-        ]
 
         write_files(cls.files, init_dir)
         write_files(cls.files, cls.repo_dir)
@@ -114,9 +108,9 @@ class CommonSaveStateTests(object):
     def check_cmd(self, expected_output, stdin=None, options=None):
         raise NotImplementedError()
 
-    def test_new_error(self):
+    def test_modify_file(self):
         """
-        Replace an error in an existing file with a new one.
+        Add an error to a file that previously had none.
         """
         with open(os.path.join(self.repo_dir, 'foo_2.php'), 'w') as f:
             f.write("""
@@ -132,34 +126,6 @@ class CommonSaveStateTests(object):
             '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
             '  {root}foo_2.php:3:27,29: This is an int',
             '  {root}foo_2.php:4:24,26: It is incompatible with a string',
-            '{root}foo_3.php:4:20,20: Invalid return type (Typing[4110])',
-            '  {root}foo_3.php:3:23,28: This is a string',
-            '  {root}foo_3.php:4:20,20: It is incompatible with an int',
-        ])
-
-    def test_new_error_after_load(self):
-        """
-        Replace an error in an existing file with a new one after restoring
-        from saved state.
-        """
-
-        self.write_load_config('foo_2.php')
-
-        with open(os.path.join(self.repo_dir, 'foo_2.php'), 'w') as f:
-            f.write("""
-            <?hh
-            function g(): int {
-                return 'a';
-            }
-            """)
-
-        self.check_cmd([
-            '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
-            '  {root}foo_2.php:3:27,29: This is an int',
-            '  {root}foo_2.php:4:24,26: It is incompatible with a string',
-            '{root}foo_3.php:4:20,20: Invalid return type (Typing[4110])',
-            '  {root}foo_3.php:3:23,28: This is a string',
-            '  {root}foo_3.php:4:20,20: It is incompatible with an int',
         ])
 
     def test_new_file(self):
@@ -176,7 +142,7 @@ class CommonSaveStateTests(object):
 
         self.write_load_config('foo_4.php')
 
-        self.check_cmd(self.initial_errors + [
+        self.check_cmd([
             '{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])',
             '  {root}foo_4.php:3:27,29: This is an int',
             '  {root}foo_4.php:4:24,26: It is incompatible with a string',
@@ -184,75 +150,46 @@ class CommonSaveStateTests(object):
 
     def test_deleted_file(self):
         """
-        Delete a file containing an error.
+        Delete a file that still has dangling references before restoring from
+        a saved state.
         """
-        os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
 
-        self.write_load_config('foo_3.php')
+        self.write_load_config('foo_2.php')
 
         self.check_cmd([
-            '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
-            '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-            '  {root}foo_2.php:3:23,28: It is incompatible with a string',
-        ])
+            '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
+            '{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])',
+            ])
 
-    def test_deleted_file_after_load(self):
+    def test_moved_file(self):
         """
-        Delete a file containing an error after restoring from a saved state.
-        """
-        self.write_load_config('foo_3.php')
-
-        os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
-
-        self.check_cmd([
-            '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
-            '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-            '  {root}foo_2.php:3:23,28: It is incompatible with a string',
-        ])
-
-    def test_moved_files(self):
-        """
-        Move a file containing errors + a file referenced from an error
-        originating in another file.
+        Move a file, then create an error that references a definition in it.
+        Check that the new file name is displayed in the error.
         """
 
         self.write_load_config(
-            'foo_2.php', 'bar_2.php', 'foo_3.php', 'bar_3.php'
+            'foo_1.php', 'foo_2.php', 'bar_2.php',
         )
 
         os.rename(
             os.path.join(self.repo_dir, 'foo_2.php'),
             os.path.join(self.repo_dir, 'bar_2.php'),
         )
-        os.rename(
-            os.path.join(self.repo_dir, 'foo_3.php'),
-            os.path.join(self.repo_dir, 'bar_3.php'),
-        )
 
-        try:
-            self.check_cmd([
-                '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
-                '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-                '  {root}bar_2.php:3:23,28: It is incompatible with a string',
-                '{root}bar_3.php:4:20,20: Invalid return type (Typing[4110])',
-                '  {root}bar_3.php:3:23,28: This is a string',
-                '  {root}bar_3.php:4:20,20: It is incompatible with an int',
-            ])
-        except AssertionError:
-            # FIXME: figure out why moving a file sometimes duplicates
-            # errors. this occurs regardless of whether we are restoring from
-            # a saved state or are running from a fresh initialized state,
-            # and seems to be due to a race condition
-            self.check_cmd([
-                '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
-                '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-                '  {root}bar_2.php:3:23,28: It is incompatible with a string',
-                '{root}bar_3.php:4:20,20: Invalid return type (Typing[4110])',
-                '  {root}bar_3.php:3:23,28: This is a string',
-                '  {root}bar_3.php:4:20,20: It is incompatible with an int',
-                '{root}bar_3.php:4:20,20: Invalid return type (Typing[4110])',
-                '  {root}bar_3.php:3:23,28: This is a string',
-                '  {root}bar_3.php:4:20,20: It is incompatible with an int',
+        with open(os.path.join(self.repo_dir, 'foo_1.php'), 'w') as f:
+            f.write("""
+            <?hh
+            function f(): string {
+                return g();
+            }
+            """)
+
+        self.check_cmd([
+            '{root}foo_1.php:4:24,26: Invalid return type (Typing[4110])',
+            '  {root}foo_1.php:3:27,32: This is a string',
+            '  {root}bar_2.php:3:23,25: It is incompatible with an int',
+
             ])
 
     def test_ide_tools(self):
@@ -290,11 +227,6 @@ class CommonSaveStateTests(object):
             ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
 
         self.check_cmd([
-            '{root}foo_1.php',
-            '{root}foo_3.php',
-            ], options=['--list-files'])
-
-        self.check_cmd([
             # the doubled curly braces are because this string gets passed
             # through format()
             '[{{"name":"some_long_function_name",'
@@ -315,3 +247,8 @@ class CommonSaveStateTests(object):
             ],
             options=['--identify-function', '1:51'],
             stdin='<?hh class Foo { private function bar() { $this->bar() }}')
+
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        self.check_cmd([
+            '{root}foo_1.php',
+            ], options=['--list-files'])

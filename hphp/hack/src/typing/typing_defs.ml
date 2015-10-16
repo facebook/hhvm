@@ -222,6 +222,9 @@ and array_kind =
   | AKmap of locl ty * locl ty
   (* This is a type created when we see array() literal *)
   | AKempty
+  (* Array "used like a shape" - initialized with array() literal and
+   * indexed with keys that are only string/class constats *)
+  | AKshape of (locl ty * locl ty) Nast.ShapeMap.t
 
 (* An abstract type derived from either a newtype, a type parameter, or some
  * dependent type
@@ -443,12 +446,6 @@ module AbstractKind = struct
              let display_id = Reason.get_expr_display_id i in
              "<expr#"^string_of_int display_id^">" in
        String.concat "::" (dt::ids)
-
-  let is_classname = function
-    | AKnewtype (name, _) -> (name = Naming_special_names.Classes.cClassname)
-    | AKenum _ -> false
-    | AKgeneric _ -> false
-    | AKdependent _ -> false
 end
 
 (*****************************************************************************)

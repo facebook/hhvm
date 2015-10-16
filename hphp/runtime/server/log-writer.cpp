@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/log-writer.h"
 
+#include <cctype>
 #include <sstream>
 #include <map>
 
@@ -92,17 +93,16 @@ void ClassicWriter::write(Transport* transport, const VirtualHost* vhost) {
   auto outfile = getOutputFile();
   if (!outfile) return;
   char c;
+  std::ostringstream out;
   const auto* format = m_logdata.format.c_str();
   FieldGenerator fieldGen{
     transport,
     vhost,
     (m_threadDataFn ? m_threadDataFn() : nullptr)
   };
-  int nbytes = 0;
   while ((c = *format++)) {
     if (c != '%') {
-      fputc(c, outfile);
-      ++nbytes;
+      out << c;
       continue;
     }
     if (parseConditions(format, transport->getResponseCode())) {
@@ -110,19 +110,19 @@ void ClassicWriter::write(Transport* transport, const VirtualHost* vhost) {
       std::string arg = parseArgument(format);
       while (!std::isalpha(*format)) format++;
       if (fieldGen.gen<std::string>(*format++, arg, field)) {
-        nbytes += fwrite(field.data(), 1, field.length(), outfile);
+        out << field;
       } else {
-        fputc('-', outfile);
-        ++nbytes;
+        out << '-';
       }
     } else {
       skipField(format);
-      fputc('-', outfile);
-      ++nbytes;
+      out << '-';
     }
   }
-  fputc('\n', outfile);
-  ++nbytes;
+  out << std::endl;
+
+  auto str = out.str();
+  int nbytes = fwrite(str.data(), 1, str.size(), outfile);
   fflush(outfile);
 
   if (m_channel != LogChannel::REGULAR || m_logdata.file[0] != '|') {

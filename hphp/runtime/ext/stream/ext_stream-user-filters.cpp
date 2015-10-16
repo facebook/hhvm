@@ -97,6 +97,14 @@ struct StreamUserFilters final : RequestEventHandler {
   virtual ~StreamUserFilters() {}
 
   bool registerFilter(const String& name, const String& class_name) {
+    if (name.empty()) {
+      raise_warning("stream_filter_register(): Filter name cannot be empty");
+      return false;
+    }
+    if (class_name.empty()) {
+      raise_warning("stream_filter_register(): Class name cannot be empty");
+      return false;
+    }
     if (m_registeredFilters.exists(name)) {
       return false;
     }

@@ -99,12 +99,7 @@ module Program =
   struct
     let name = "hh_server"
 
-    let config_filename_ =
-      Relative_path.concat Relative_path.Root ".hhconfig"
-
-    let config_filename () = config_filename_
-
-    let load_config () = ServerConfig.load config_filename_
+    let load_config () = ServerConfig.(load filename)
 
     let validate_config genv =
       let new_config = load_config () in
@@ -148,8 +143,8 @@ module Program =
       if length_greater_than 5 l1 || length_greater_than 5 l2 || l1 <> l2
       then touch_stamp ()
 
-    let init ?wait_for_deps genv env =
-      let env = ServerInit.init ?wait_for_deps genv env in
+    let init ?load_mini_script genv =
+      let env = ServerInit.init ?load_mini_script genv in
       touch_stamp ();
       env
 
@@ -169,11 +164,9 @@ module Program =
       let root = Path.to_string @@ ServerArgs.root genv.options in
       (* Because of symlinks, we can have updates from files that aren't in
        * the .hhconfig directory *)
-      let updates = SSet.filter (fun p -> str_starts_with p root) updates in
+      let updates = SSet.filter (fun p ->
+        str_starts_with p root && ServerEnv.file_filter p) updates in
       Relative_path.(relativize_set Root updates)
-
-    let should_recheck update =
-      FindUtils.is_php (Relative_path.suffix update)
 
     let recheck genv old_env typecheck_updates =
       if Relative_path.Set.is_empty typecheck_updates then
@@ -251,8 +244,9 @@ let handle_connection genv env socket =
 
 let recheck genv old_env updates =
   let to_recheck =
-    Relative_path.Set.filter Program.should_recheck updates in
-  let config = Program.config_filename () in
+    Relative_path.Set.filter
+      (fun update -> FindUtils.is_php (Relative_path.suffix update)) updates in
+  let config = ServerConfig.filename in
   let config_in_updates = Relative_path.Set.mem config updates in
   if config_in_updates && not (Program.validate_config genv) then
     (Hh_logger.log
@@ -347,21 +341,17 @@ let load genv filename to_recheck =
   let t = Hh_logger.log_duration "Loading saved state" t in
 
   let to_recheck =
-    if Sys_utils.is_test_mode () then to_recheck
-    else List.rev_append (BuildMain.get_all_targets ()) to_recheck in
+    List.rev_append (BuildMain.get_all_targets ()) to_recheck in
   let paths_to_recheck =
     List.map to_recheck (Relative_path.concat Relative_path.Root) in
-  let updates =
-    List.fold_left paths_to_recheck
-      ~f:(fun acc update -> Relative_path.Set.add update acc)
-      ~init:Relative_path.Set.empty in
+  let updates = Relative_path.set_of_list paths_to_recheck in
   let env, rechecked, total_rechecked = recheck genv env updates in
   let rechecked_count = Relative_path.Set.cardinal rechecked in
   HackEventLogger.load_recheck_end t rechecked_count total_rechecked;
   let _t = Hh_logger.log_duration "Post-load rechecking" t in
   env
 
-let run_load_script genv env cmd =
+let run_load_script genv cmd =
   try
     let t = Unix.gettimeofday () in
     let cmd =
@@ -422,57 +412,30 @@ let run_load_script genv env cmd =
         "load_error"
     in
     let env = HackEventLogger.with_init_type init_type begin fun () ->
-      Program.init genv env
+      Program.init genv
     end in
     env, init_type
   end
 
-let load_deps root cmd (_ic, oc) =
-  let start_time = Unix.gettimeofday () in
-  begin try
-    let cmd =
-      sprintf
-        "%s %s %s"
-        (Filename.quote (Path.to_string cmd))
-        (Filename.quote (Path.to_string root))
-        (Filename.quote Build_id.build_id_ohai) in
-    Hh_logger.log "Running load_mini script: %s\n%!" cmd;
-    let filename = Sys_utils.exec_read cmd in
-    SharedMem.load_dep_table (filename^".deptable");
-  with e ->
-    Hh_logger.exc e;
-    (* This is fine; we will just have to compute the dependencies ourselves *)
-    ()
-  end;
-  let end_time = Unix.gettimeofday () in
-  Daemon.to_channel oc (start_time, end_time)
-
-let program_init genv env =
+let program_init genv =
   let env, init_type =
-    match genv.local_config.ServerLocalConfig.load_mini_script with
-    | None -> begin
+    if genv.local_config.ServerLocalConfig.use_mini_state then
+      match ServerConfig.load_mini_script genv.config with
+      | None ->
+          let env = Program.init genv in
+          env, "fresh"
+      | Some load_mini_script ->
+          let env = Program.init ~load_mini_script genv in
+          env, "mini_load"
+    else
       match ServerConfig.load_script genv.config with
       | None ->
-          let env = Program.init genv env in
+          let env = Program.init genv in
           env, "fresh"
       | Some load_script ->
-          run_load_script genv env load_script
-    end
-    | Some cmd ->
-        (* Spawn this first so that it can run in the background while
-         * parsing is going on *)
-        let {Daemon.channels = (ic, _oc); pid} =
-          let root = ServerArgs.root genv.options in
-          Daemon.fork (load_deps root cmd) in
-        let wait_for_deps () =
-          let result = Daemon.from_channel ic in
-          let _, status = Unix.waitpid [] pid in
-          assert (status = Unix.WEXITED 0);
-          result
-        in
-        let env = Program.init ~wait_for_deps genv env in
-        env, "mini_load"
+          run_load_script genv load_script
   in
+  HackEventLogger.init_end init_type;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();
   HackEventLogger.init_really_end init_type;
@@ -486,18 +449,12 @@ let save_complete env fn =
   (* We cannot save the shared memory to `chan` because the OCaml runtime
    * does not expose the underlying file descriptor to C code; so we use
    * a separate ".sharedmem" file. *)
-  SharedMem.save (fn^".sharedmem");
-  HackEventLogger.init_end "save"
-
-let save_dep_table fn =
-  let t = Unix.gettimeofday () in
-  SharedMem.save_dep_table (fn^".deptable");
-  ignore @@ Hh_logger.log_duration "Saving" t
+  SharedMem.save (fn^".sharedmem")
 
 let save _genv env (kind, fn) =
   match kind with
   | ServerArgs.Complete -> save_complete env fn
-  | ServerArgs.Mini -> save_dep_table fn
+  | ServerArgs.Mini -> ServerInit.save_state env fn
 
 (* The main entry point of the daemon
  * the only trick to understand here, is that env.modified is the set
@@ -531,10 +488,9 @@ let daemon_main options =
   PidLog.init (ServerFiles.pids_file root);
   PidLog.log ~reason:"main" (Unix.getpid());
   let genv = ServerEnvBuild.make_genv options config local_config in
-  let env = ServerEnvBuild.make_env options config in
   let is_check_mode = ServerArgs.check_mode genv.options in
   if is_check_mode then
-    let env = program_init genv env in
+    let env = program_init genv in
     Option.iter (ServerArgs.save_filename genv.options) (save genv env);
     Program.run_once_and_exit genv env
   else
@@ -551,7 +507,7 @@ let daemon_main options =
      * socket and get blocked on it -- otherwise, trying to open a socket with
      * no server on the other end is an immediate error. *)
     let socket = Socket.init_unix_socket (ServerFiles.socket_file root) in
-    let env = MainInit.go options (fun () -> program_init genv env) in
+    let env = MainInit.go options (fun () -> program_init genv) in
     serve genv env socket
 
 let main_entry =

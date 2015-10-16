@@ -248,6 +248,37 @@ class Memcached {
   }
 
   /**
+   * Add an item under a new key on a specific server
+   *
+   * @param string $server_key - The key identifying the server to store the value on
+   * or retrieve it from. Instead of hashing on the actual key for the item, we
+   * hash on the server key when deciding which memcached server to talk to.
+   * This allows related items to be grouped together on a single server for
+   * efficiency with multi operations..
+   * @param array $keys - The keys to be deleted.
+   * @param int $time - The amount of time the server will wait to delete
+   *   the items.
+   *
+   * @return array
+   */
+  <<__Native>>
+  public function deleteMultiByKey(string $server_key, array $keys,
+                                   int $time = 0): mixed;
+
+  /**
+   * Add an item under a new key on a specific server
+   *
+   * @param array $keys - The keys to be deleted.
+   * @param int $time - The amount of time the server will wait to delete
+   *   the items.
+   *
+   * @return array
+   */
+  public function deleteMulti(array $keys, int $time = 0): mixed {
+    return $this->deleteMultiByKey('', $keys, $time);
+  }
+
+  /**
    * Delete an item from a specific server
    *
    * @param string $server_key -

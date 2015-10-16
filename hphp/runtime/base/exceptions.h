@@ -65,6 +65,7 @@ struct ExtendedException : Exception {
   EXCEPTION_COMMON_IMPL(ExtendedException);
 
   Array getBacktrace() const;
+  void leakBacktrace() { m_btp.detach(); }
   std::pair<String,int> getFileAndLine() const;
 
   // a silent exception does not have its exception message logged

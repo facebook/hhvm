@@ -674,30 +674,13 @@ void emitBaseLCR(MTS& env) {
     PUNT(MInstr-GenBase);
   }
 
-  if (baseL.isLocal()) {
-    // Check for Uninit and warn/promote to InitNull as appropriate
-    if (baseType <= TUninit) {
-      if (mia & MIA_warn) {
-        env.irb.constrainLocal(baseL.offset, DataTypeSpecific,
-                              "emitBaseLCR: Uninit base local");
-        gen(env,
-            RaiseUninitLoc,
-            cns(env, curFunc(env)->localVarName(baseL.offset)));
-      }
-      if (mia & MIA_define) {
-        env.irb.constrainLocal(baseL.offset, DataTypeSpecific,
-                              "emitBaseLCR: Uninit base local");
-        base = cns(env, TInitNull);
-        baseType = TInitNull;
-        gen(
-          env,
-          StLoc,
-          LocalId(baseL.offset),
-          fp(env),
-          base
-        );
-      }
-    }
+  // Check for Uninit and warn if needed.
+  if (baseL.isLocal() && (mia & MIA_warn) && baseType <= TUninit) {
+    env.irb.constrainLocal(baseL.offset, DataTypeSpecific,
+                           "emitBaseLCR: Uninit base local");
+    gen(env,
+        RaiseUninitLoc,
+        cns(env, curFunc(env)->localVarName(baseL.offset)));
   }
 
   /*
@@ -843,7 +826,7 @@ PropInfo getCurrentPropertyOffset(MTS& env) {
 /*
  * Helper for emitPropSpecialized to check if a property is Uninit. It returns
  * a pointer to the property's address, or init_null_variant if the property
- * was Uninit and doDefine is false.
+ * was Uninit and doWarn is true.
  *
  * We can omit the uninit check for properties that we know may not be uninit
  * due to the frontend's type inference.
@@ -859,9 +842,7 @@ SSATmp* checkInitProp(IRGS& env,
   assertx(propAddr->type() <= TPtrToGen);
   assertx(!doWarn || !doDefine);
 
-  auto const needsCheck =
-    TUninit <= propAddr->type().deref() && doWarn;
-
+  auto const needsCheck = doWarn && propAddr->type().deref().maybe(TUninit);
   if (!needsCheck) return propAddr;
 
   return cond(
@@ -872,11 +853,10 @@ SSATmp* checkInitProp(IRGS& env,
     [&] { // Next: Property isn't Uninit. Do nothing.
       return propAddr;
     },
-    [&] { // Taken: Property is Uninit. Raise a warning and return
-          // a pointer to InitNull, either in the object or
+    [&] { // Taken: Property is Uninit. Raise a warning and return a pointer to
           // init_null_variant.
       hint(env, Block::Hint::Unlikely);
-      if (doWarn && wantPropSpecializedWarnings()) {
+      if (wantPropSpecializedWarnings()) {
         gen(env, RaiseUndefProp, baseAsObj, key);
       }
       return ptrToInitNull(env);

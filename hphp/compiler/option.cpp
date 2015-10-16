@@ -207,17 +207,15 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   // build map from function names to sections
   auto function_sections_callback = [&] (const IniSetting::Map &ini_fs,
-                                        const Hdf &hdf_fs,
-                                        const std::string &ini_fs_key) {
+                                         const Hdf &hdf_fs,
+                                         const std::string &ini_fs_key) {
     auto function_callback = [&] (const IniSetting::Map &ini_f,
-                                 const Hdf &hdf_f,
-                                 const std::string &ini_f_key) {
+                                  const Hdf &hdf_f,
+                                  const std::string &ini_f_key) {
       FunctionSections[Config::GetString(ini_f, hdf_f, "", "", false)] =
-        hdf_f.exists() && !hdf_f.isEmpty() ? hdf_f.getName() : ini_f_key;
+        hdf_fs.exists() && !hdf_fs.isEmpty() ? hdf_fs.getName() : ini_fs_key;
     };
-    auto f_name = hdf_fs.exists() && !hdf_fs.isEmpty() ? hdf_fs.getName() :
-                  ini_fs_key;
-    Config::Iterate(function_callback, ini_fs, hdf_fs, f_name, false);
+    Config::Iterate(function_callback, ini_fs, hdf_fs, "", false);
   };
   Config::Iterate(function_sections_callback, ini, config, "FunctionSections");
 

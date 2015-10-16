@@ -76,6 +76,11 @@ struct SSLSocket : Socket {
   virtual int64_t writeImpl(const char *buffer, int64_t length) override;
   virtual bool checkLiveness() override;
 
+  explicit SSLSocket(std::shared_ptr<SSLSocketData> data);
+  std::shared_ptr<SSLSocketData> getData() const {
+    return std::static_pointer_cast<SSLSocketData>(Socket::getData());
+  }
+
 private:
   bool handleError(int64_t nr_bytes, bool is_init);
 

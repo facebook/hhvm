@@ -206,6 +206,11 @@ SSLSocket::SSLSocket()
   m_data(static_cast<SSLSocketData*>(getSocketData()))
 {}
 
+SSLSocket::SSLSocket(std::shared_ptr<SSLSocketData> data)
+: Socket(data),
+  m_data(static_cast<SSLSocketData*>(getSocketData()))
+{}
+
 StaticString s_ssl("ssl");
 
 SSLSocket::SSLSocket(int sockfd, int type, const req::ptr<StreamContext>& ctx,

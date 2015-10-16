@@ -1028,8 +1028,10 @@ bool FrameStateMgr::checkInvariants() const {
 /*
  * Modify state to conservative values given an unprocessed predecessor.
  *
- * The fpValue, spOffset, and curFunc must agree at bytecode
- * control-flow merge points, so these are not cleared.
+ * The fpValue, spOffset, and curFunc are not cleared because they
+ * must agree at bytecode-level control-flow merge points (which can
+ * be either merge points at the bytecode or due to retranslated
+ * blocks).
  */
 void FrameStateMgr::clearForUnprocessedPred() {
   FTRACE(1, "clearForUnprocessedPred\n");
@@ -1046,6 +1048,7 @@ void FrameStateMgr::clearForUnprocessedPred() {
   cur().frameMaySpanCall = true;
   cur().mbase            = nullptr;
 
+  cur().fpiStack.clear();
   clearLocals();
 }
 

@@ -29,6 +29,8 @@ ClassConstantMapMap s_class_constant_map;
 static size_t numGPRegArgs() {
 #ifdef __AARCH64EL__
   return 8; // r0-r7
+#elif defined(__powerpc64__)
+  return 31;
 #else // amd64
   if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
     return 8;
@@ -90,6 +92,12 @@ static void populateArgs(const Func* func,
     if (type == KindOfDouble) {
       if (SIMD_count < kNumSIMDRegs) {
         SIMD_args[SIMD_count++] = args[-i].m_data.dbl;
+#if defined(__powerpc64__)
+      // According with ABI, the GP index must be incremented after
+      // a floating point function argument
+      if (GP_count < numGP)
+        GP_args[GP_count++] = 0;
+#endif
       } else if (GP_count < numGP) {
         // We have enough double args to hit the stack
         // but we haven't finished filling the GP regs yet.
@@ -250,7 +258,6 @@ void callFunc(const Func* func, void *ctx,
 //////////////////////////////////////////////////////////////////////////////
 
 #define COERCE_OR_CAST(kind, warn_kind)                 \
-  if (paramCoerceMode) {                                \
     if (!tvCoerceParamTo##kind##InPlace(&args[-i])) {   \
       raise_param_type_warning(                         \
         func->name()->data(),                           \
@@ -259,10 +266,7 @@ void callFunc(const Func* func, void *ctx,
         args[-i].m_type                                 \
       );                                                \
       return false;                                     \
-    }                                                   \
-  } else {                                              \
-    tvCastTo##kind##InPlace(&args[-i]);                 \
-  }
+    }
 
 #define CASE(kind)                                      \
   case KindOf##kind:                                    \
@@ -273,8 +277,7 @@ bool coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func) {
   assert(numArgs == func->numParams());
-
-  bool paramCoerceMode = func->isParamCoerceMode();
+  assert(func->isParamCoerceMode());
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];
@@ -309,15 +312,14 @@ bool coerceFCallArgs(TypedValue* args,
       CASE(Array)
       CASE(Resource)
 
-      case KindOfObject: {
-        auto mpi = func->methInfo() ? func->methInfo()->parameters[i] : nullptr;
-        if (pi.hasDefaultValue() || (mpi && mpi->valueLen > 0)) {
+      case KindOfObject:
+        assert(!func->methInfo());
+        if (pi.hasDefaultValue()) {
           COERCE_OR_CAST(NullableObject, Object);
         } else {
           COERCE_OR_CAST(Object, Object);
         }
         break;
-      }
 
       case KindOfUninit:
       case KindOfNull:

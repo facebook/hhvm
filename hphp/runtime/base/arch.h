@@ -24,11 +24,15 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class Arch { X64, ARM, };
+enum class Arch { X64, ARM, PPC64, };
 
 inline Arch arch() {
+#if defined(__powerpc64__)
+  return Arch::PPC64;
+#else
   if (RuntimeOption::EvalSimulateARM) return Arch::ARM;
   return Arch::X64;
+#endif
 }
 
 /*
@@ -43,6 +47,9 @@ inline Arch arch() {
         return x64::func(__VA_ARGS__);  \
       case Arch::ARM:                   \
         return arm::func(__VA_ARGS__);  \
+      case Arch::PPC64:                 \
+        not_implemented();              \
+        break;                          \
     }                                   \
     not_reached();                      \
   }())

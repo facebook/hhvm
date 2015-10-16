@@ -33,31 +33,37 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
                                   bool unserializeObj) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
-    case KindOfUninit:
+    case KindOfUninit: {
+      auto value = APCTypedValue::tvUninit();
+      return {value->getHandle(), sizeof(APCTypedValue)};
+    }
     case KindOfNull: {
-      auto value = new APCTypedValue(type);
+      auto value = APCTypedValue::tvNull();
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfBoolean: {
-      auto value = new APCTypedValue(type,
-          static_cast<int64_t>(source.getBoolean()));
+      auto value = source.getBoolean() ? APCTypedValue::tvTrue()
+                                       : APCTypedValue::tvFalse();
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfInt64: {
-      auto value = new APCTypedValue(type, source.getInt64());
+      auto value = new APCTypedValue(source.getInt64());
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfDouble: {
-      auto value = new APCTypedValue(type, source.getDouble());
+      auto value = new APCTypedValue(source.getDouble());
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfStaticString: {
-      if (serialized) goto StringCase;
-
-      auto value = new APCTypedValue(type, source.getStringData());
+      StringData* s = source.getStringData();
+      if (serialized) {
+        // It is priming, and there might not be the right class definitions
+        // for unserialization.
+        return APCObject::MakeSerializedObj(apc_reserialize(String{s}));
+      }
+      auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
-StringCase:
     case KindOfString: {
       StringData* s = source.getStringData();
       if (serialized) {
@@ -68,14 +74,14 @@ StringCase:
 
       auto const st = lookupStaticString(s);
       if (st) {
-        APCTypedValue* value = new APCTypedValue(KindOfStaticString, st);
+        auto value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
 
       assert(!s->isStatic()); // would've been handled above
       if (!inner && apcExtension::UseUncounted) {
-        StringData* st = StringData::MakeUncounted(s->slice());
-        APCTypedValue* value = new APCTypedValue(st);
+        auto st = StringData::MakeUncounted(s->slice());
+        auto value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
         return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
       }
       return APCString::MakeSharedString(type, s);
@@ -140,6 +146,7 @@ void APCHandle::deleteShared() {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
+      return;
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:

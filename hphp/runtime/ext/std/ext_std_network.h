@@ -73,6 +73,8 @@ bool HHVM_FUNCTION(openlog, const String& ident, int option, int facility);
 bool HHVM_FUNCTION(closelog);
 bool HHVM_FUNCTION(syslog, int priority, const String& message);
 
+bool validate_dns_arguments(const String& host, const String& type,
+                            int& ntype);
 }
 
 #endif // incl_HPHP_EXT_NETWORK_H_

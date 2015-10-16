@@ -52,6 +52,8 @@ module ErrorString = struct
                          -> array (Some x, None)
     | Tarraykind (AKmap (x, y))
                          -> array (Some x, Some y)
+    | Tarraykind (AKshape _)
+                         -> "an array (used like a shape)"
     | Ttuple _           -> "a tuple"
     | Tmixed             -> "a mixed value"
     | Toption _          -> "a nullable type"
@@ -60,12 +62,16 @@ module ErrorString = struct
     | Tanon _    -> "a function"
     | Tfun _     -> "a function"
     | Tgeneric (x, _)    -> "a value of declared generic type "^x
-    | Tabstract (ak, _)
-        when AbstractKind.is_classname ak -> "a classname string"
+    | Tabstract (AKnewtype (x, _), _)
+        when x = SN.Classes.cClassname -> "a classname string"
+    | Tabstract (AKnewtype (x, _), _)
+        when x = SN.Classes.cTypename -> "a typename string"
     | Tabstract (ak, cstr) -> abstract ak cstr
     | Tclass ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tapply ((_, x), _)
         when x = SN.Classes.cClassname -> "a classname string"
+    | Tapply ((_, x), _)
+        when x = SN.Classes.cTypename -> "a typename string"
     | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tobject            -> "an object"
     | Tshape _           -> "a shape"
@@ -235,6 +241,7 @@ module Full = struct
     | Tarray (Some x, None) -> o "array<"; k x; o ">"
     | Tarray (Some x, Some y) -> o "array<"; k x; o ", "; k y; o ">"
     | Tarraykind (AKmap (x, y)) -> o "array<"; k x; o ", "; k y; o ">"
+    | Tarraykind (AKshape _) -> o "[shape-like array]"
     | Tarray (None, Some _) -> assert false
     | Tclass ((_, s), []) -> o s
     | Tapply ((_, s), []) -> o s

@@ -1,4 +1,5 @@
 <?hh
+// This tests the parser. The actual values are arbitrary.
 
 enum Foo: int {
   callable = 0;
@@ -64,6 +65,7 @@ enum Foo: int {
   // die = 61;
   self = 62;
   parent = 63;
+  unset = 64;
 }
 echo Foo::callable;
 echo Foo::trait;
@@ -128,4 +130,5 @@ echo Foo::catch;
 // echo Foo::die;
 echo Foo::self;
 echo Foo::parent;
+echo Foo::unset;
 echo "Done\n";

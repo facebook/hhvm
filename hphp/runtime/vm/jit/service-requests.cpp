@@ -109,7 +109,7 @@ void emit_svcreq(CodeBlock& cb,
       }
       live_out |= r;
     }
-    FTRACE(2, ") : stub@{}");
+    FTRACE(2, ") : stub@");
 
     if (persist) {
       FTRACE(2, "<none>");
@@ -219,6 +219,8 @@ size_t stub_size() {
       return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
     case Arch::ARM:
       not_implemented();
+    case Arch::PPC64:
+      not_implemented();
   }
   not_reached();
 }
@@ -240,6 +242,9 @@ FPInvOffset extract_spoff(TCA stub) {
       }
 
     case Arch::ARM:
+      not_implemented();
+
+    case Arch::PPC64:
       not_implemented();
   }
   not_reached();

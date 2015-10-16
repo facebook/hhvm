@@ -353,9 +353,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tabstract (AKgeneric (_, Some _), _)),
       (_, Tabstract (AKgeneric _, _)) ->
       typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub)
-  | (_, Tclass ((_, stringish), _)), (_, Tabstract (ak, _))
-    when stringish = SN.Classes.cStringish &&
-      AbstractKind.is_classname ak -> env
   | (p_super, (Tclass (x_super, tyl_super) as ty_super_)),
       (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_)) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
@@ -441,8 +438,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
   | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
-  | (_, Tprim (Nast.Tstring | Nast.Tarraykey)), (_, Tabstract (ak, _))
-    when AbstractKind.is_classname ak -> env
   | (_, Tclass ((_, coll), [tv_super])), (_, Tarraykind akind)
     when (coll = SN.Collections.cTraversable ||
         coll = SN.Collections.cContainer) ->
@@ -453,6 +448,9 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
           sub_type env tv_super tv
       | AKmap (_, tv) ->
           sub_type env tv_super tv
+      | AKshape _ ->
+        let env, ty_sub = Typing_arrays.downcast_akshape_to_akmap env ty_sub in
+        sub_type env ty_super ty_sub
       )
   | (_, Tclass ((_, coll), [tk_super; tv_super])), (r, Tarraykind akind)
     when (coll = SN.Collections.cKeyedTraversable
@@ -467,6 +465,9 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       | AKmap (tk, tv) ->
         let env = sub_type env tk_super tk in
         sub_type env tv_super tv
+      | AKshape _ ->
+        let env, ty_sub = Typing_arrays.downcast_akshape_to_akmap env ty_sub in
+        sub_type env ty_super ty_sub
       )
   | (_, Tclass ((_, stringish), _)), (_, Tprim Nast.Tstring)
     when stringish = SN.Classes.cStringish -> env
@@ -482,6 +483,9 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       let int_reason = Reason.Ridx (Reason.to_pos reason) in
       let int_type = int_reason, Tprim Nast.Tint in
       sub_type env ty_super (reason, Tarraykind (AKmap (int_type, elt_ty)))
+  | _, (_, Tarraykind AKshape _) ->
+      let env, ty_sub = Typing_arrays.downcast_akshape_to_akmap env ty_sub in
+      sub_type env ty_super ty_sub
   | _, (_, Tany) -> env
   | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
     (* recording seen_tvars for Toption variants to avoid infinte recursion
@@ -603,9 +607,6 @@ and sub_string p env ty2 =
   | (_, Tabstract (AKenum _, _)) ->
       (* Enums are either ints or strings, and so can always be used in a
        * stringish context *)
-      env
-  | (_, Tabstract (ak, _)) when AbstractKind.is_classname ak ->
-      (* A classname is the string 'Foo' obtained via Foo::class *)
       env
   | (_, Tabstract (_, Some ty)) ->
       sub_string p env ty

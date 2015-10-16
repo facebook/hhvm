@@ -80,9 +80,9 @@ template<class F> void scanHeader(const Header* h, F& mark) {
     case HeaderKind::Ref:
       return h->ref_.scan(mark);
     case HeaderKind::SmallMalloc:
-      return mark((&h->small_)+1, h->small_.padbytes);
+      return mark((&h->small_)+1, h->small_.padbytes - sizeof(SmallNode));
     case HeaderKind::BigMalloc:
-      return mark((&h->big_)+1, h->big_.nbytes);
+      return mark((&h->big_)+1, h->big_.nbytes - sizeof(BigNode));
     case HeaderKind::NativeData:
       return h->nativeObj()->scan(mark);
     case HeaderKind::ResumableFrame:
@@ -104,12 +104,7 @@ template<class F> void ObjectData::scan(F& mark) const {
   auto props = propVec();
   if (getAttribute(HasNativeData)) {
     // [NativeNode][NativeData][ObjectData][props]
-    // TODO t6169196 indirect NativeDataInfo call for exact marking
-    auto h = reinterpret_cast<const Header*>(
-      Native::getNativeNode(this, m_cls->getNativeDataInfo())
-    );
-    assert(h->kind() == HeaderKind::NativeData);
-    mark(h, h->size() - sizeof(ObjectData));
+    Native::nativeDataScan(this, mark);
   } else if (m_hdr.kind == HeaderKind::ResumableObj) {
     // scan the frame locals, iterators, and Resumable
     auto r = Resumable::FromObj(this);
@@ -133,43 +128,6 @@ template<class F> void ObjectData::scan(F& mark) const {
     mark(g_context->dynPropTable[this].arr());
   }
 }
-
-// bridge between the templated-based marker interface and the
-// virtual-call based marker interface.
-template<class F> struct ExtMarker final: IMarker {
-  explicit ExtMarker(F& mark) : mark_(mark) {}
-  void operator()(const Array& p) override { mark_(p); }
-  void operator()(const Object& p) override { mark_(p); }
-  void operator()(const Resource& p) override { mark_(p); }
-  void operator()(const String& p) override { mark_(p); }
-  void operator()(const Variant& p) override { mark_(p); }
-  void operator()(const ArrayIter& p) override { mark_(p); }
-  void operator()(const MArrayIter& p) override { mark_(p); }
-  void operator()(const StringBuffer& p) override { mark_(p); }
-  void operator()(const ActRec& p) override { mark_(p); }
-  void operator()(const Stack& p) override { mark_(p); }
-  void operator()(const VarEnv& p) override { mark_(p); }
-  void operator()(const RequestEventHandler& p) override { mark_(p); }
-  void operator()(const Extension& p) override { mark_(p); }
-  void operator()(const AsioContext& p) override { mark_(p); }
-
-  void operator()(const StringData* p) override { mark_(p); }
-  void operator()(const ArrayData* p) override { mark_(p); }
-  void operator()(const ObjectData* p) override { mark_(p); }
-  void operator()(const ResourceData* p) override { mark_(p); }
-  void operator()(const RefData* p) override { mark_(p); }
-  void operator()(const Func* p) override { mark_(p); }
-  void operator()(const Class* p) override { mark_(p); }
-  void operator()(const TypedValue* p) override { mark_(*p); }
-  void operator()(const NameValueTable* p) override { mark_(*p); }
-  void operator()(const Unit* p) override { mark_(p); }
-
-  void operator()(const void* start, size_t len) override {
-    mark_(start, len);
-  }
-private:
-  F& mark_;
-};
 
 template<class F> void ResourceData::scan(F& mark) const {
   ExtMarker<F> bridge(mark);

@@ -235,6 +235,10 @@ void genArch(Vunit& vunit, Vtext& vtext, CodeKind kind, AsmInfo* ai) {
     case Arch::ARM:
       finishARM(vunit, vtext, abi(kind), ai);
       return;
+
+    case Arch::PPC64:
+      not_implemented();
+      return;
   }
   not_reached();
 }

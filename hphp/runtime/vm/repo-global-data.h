@@ -70,6 +70,15 @@ struct Repo::GlobalData {
    */
   bool HardReturnTypeHints = false;
 
+  /*
+   * Indicates whether the repo was compiled with PHP7 integer semantics. This
+   * slightly changes the way certain arithmetic operations are evaluated, in
+   * small enough ways that don't warrant new bytecodes, but in ways that do
+   * affect everything from hphpc's constant folding up through the JIT, and
+   * so need to be kept consistent.
+   */
+  bool PHP7_IntSemantics = false;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (HardTypeHints)
@@ -77,6 +86,7 @@ struct Repo::GlobalData {
       (arrayTypeTable)
       (DisallowDynamicVarEnvFuncs)
       (HardReturnTypeHints)
+      (PHP7_IntSemantics)
       ;
   }
 };

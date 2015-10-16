@@ -142,9 +142,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   FileStorageChunkSize = Config::GetInt64(ini, config,
                                           "Server.APC.FileStorage.ChunkSize",
                                           1LL << 29);
-  // TODO(markdrayton): remove FileStorageMaxSize once FileStorage.MaxSize has
-  // been removed from config.hdf (see D2360365)
-  Config::GetInt64(ini, config, "Server.APC.FileStorage.MaxSize", 1LL << 32);
   Config::Bind(FileStoragePrefix, ini, config, "Server.APC.FileStorage.Prefix",
                "/tmp/apc_store");
   Config::Bind(FileStorageFlagKey, ini, config,

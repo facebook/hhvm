@@ -9,16 +9,17 @@
  *)
 
 open Config_file.Getters
-open Utils
 
 type t = {
   use_watchman: bool;
-  load_mini_script: Path.t option;
+  use_mini_state: bool;
+  load_mini_script_timeout: int; (* in seconds *)
 }
 
 let default = {
   use_watchman = false;
-  load_mini_script = None;
+  use_mini_state = false;
+  load_mini_script_timeout = 20;
 }
 
 let path =
@@ -28,11 +29,13 @@ let path =
 let load_ fn =
   let config = Config_file.parse fn in
   let use_watchman = bool_ "use_watchman" ~default:false config in
-  let load_mini_script =
-    Option.map (SMap.get "load_mini_script" config) Path.make in
+  let use_mini_state = bool_ "use_mini_state" ~default:false config in
+  let load_mini_script_timeout =
+    int_ "load_mini_script_timeout" ~default:20 config in
   {
     use_watchman;
-    load_mini_script;
+    use_mini_state;
+    load_mini_script_timeout;
   }
 
 let load () =

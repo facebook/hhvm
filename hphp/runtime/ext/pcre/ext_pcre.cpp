@@ -85,6 +85,92 @@ Variant HHVM_FUNCTION(preg_replace_callback,
                            limit, count.getVariantOrNull(), true, false);
 }
 
+static Variant preg_replace_callback_array_impl(
+  const Variant& patterns_and_callbacks,
+  const Array& subjects,
+  int limit,
+  VRefParam count) {
+
+  Array ret = Array::Create();
+  auto key = 0;
+  auto total_replacement_count = 0;
+  for (ArrayIter s_iter(subjects); s_iter; ++s_iter) {
+    assert(s_iter.second().isString());
+    auto subj = s_iter.second();
+    for (ArrayIter pc_iter(patterns_and_callbacks.toArray());
+                           pc_iter; ++pc_iter) {
+      Variant pattern(pc_iter.first());
+      assert(pattern.isString());
+      Variant callback(pc_iter.second());
+      subj = HHVM_FN(preg_replace_callback)(pattern, callback, subj, limit,
+                                            count);
+      // If we got an error on the replacement, the subject will be null,
+      // and then we will return null.
+      if (subj.isNull()) {
+        return init_null();
+      }
+
+      if (count.isReferenced()) {
+        total_replacement_count += count.toInt64();
+      }
+    }
+    ret.add(key++, subj);
+  }
+
+  // If count was passed in as an explicit reference, we will assign it to our
+  // total replacement count; otherwise, count will just remained unassigned
+  count.assignIfRef(total_replacement_count);
+
+  // If there were no replacements (i.e., matches) return original subject(s)
+  if (ret.empty()) {
+    return subjects;
+  }
+  return ret;
+}
+
+Variant HHVM_FUNCTION(preg_replace_callback_array,
+                      const Variant& patterns_and_callbacks,
+                      const Variant& subject,
+                      int limit /* = -1 */,
+                      VRefParam count /* = uninit_null() */) {
+  if (!patterns_and_callbacks.isArray()) {
+    raise_warning(
+      "%s() expects parameter 1 to be an array, %s given",
+      __FUNCTION__+2 /* +2 removes the "f_" prefix */,
+      getDataTypeString(patterns_and_callbacks.getType()).c_str()
+    );
+    return init_null();
+  }
+
+  // Now see if we need to raise any warnings because of not having a
+  // valid callback function
+  for (ArrayIter iter(patterns_and_callbacks.toArray()); iter; ++iter) {
+    if (!is_callable(iter.second())) {
+      raise_warning("Not a valid callback function %s",
+                    iter.second().toString().data());
+      return subject.isString() ? empty_string_variant()
+                                : Variant(empty_array());
+    }
+  }
+
+  if (subject.isString()) {
+    Array subject_arr = Array::Create();
+    subject_arr.add(0, subject.toString());
+    Variant ret = preg_replace_callback_array_impl(
+      patterns_and_callbacks, subject_arr, limit, count
+    );
+    // ret[0] could be an empty string
+    return ret.isArray() ? ret.toArray()[0] : init_null();
+  } else if (subject.isArray()) {
+    return preg_replace_callback_array_impl(
+      patterns_and_callbacks, subject.toArray(), limit, count
+    );
+  } else {
+    // No warning is given here, just return null
+    return init_null();
+  }
+}
+
 Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callback,
                                    const Variant& subject, int limit /* = -1 */,
                                    VRefParam count /* = null */) {
@@ -212,6 +298,7 @@ public:
     HHVM_FE(preg_match_all);
     HHVM_FE(preg_replace);
     HHVM_FE(preg_replace_callback);
+    HHVM_FE(preg_replace_callback_array);
     HHVM_FE(preg_split);
     HHVM_FE(preg_quote);
     HHVM_FE(preg_last_error);

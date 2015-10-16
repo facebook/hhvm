@@ -56,13 +56,13 @@ foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV'] as
     fwrite($fp, "      switch (SIMD_count) {\n");
     $simdargs = [];
     for($simd = 0; $simd <= NUM_SIMD_ARGS; ++$simd) {
-      $argsD = implode(',', array_merge($simdargs, $gpargs));
+      $argsD = implode(',', array_merge($gpargs, $simdargs));
       $argsC = [];
-      for ($i = 0; $i < $simd; ++$i) {
-        $argsC[] = "SIMD[$i]";
-      }
       for ($i = 0; $i < $gp; ++$i) {
         $argsC[] = "GP[$i]";
+      }
+      for ($i = 0; $i < $simd; ++$i) {
+        $argsC[] = "SIMD[$i]";
       }
       $argsC = implode(',', $argsC);
       fwrite($fp, "        case ${simd}:\n");

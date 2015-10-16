@@ -66,6 +66,7 @@ module type MapSig = sig
   val split: key -> 'a t -> 'a t * 'a option * 'a t
   val keys: 'a t -> key list
   val values: 'a t -> 'a list
+  val min_binding : 'a t -> key * 'a
 
   val map_env: ('c -> 'a -> 'c * 'b) -> 'c -> 'a t -> 'c * 'b t
   (* use only in testing code *)
@@ -283,11 +284,6 @@ let try_with_channel oc f1 f2 =
   with e ->
     close_out oc;
     f2 e
-
-let rec cut_after n = function
-  | [] -> []
-  | l when n <= 0 -> []
-  | x :: rl -> x :: cut_after (n-1) rl
 
 let iter_n_acc n f acc =
   let acc = ref acc in

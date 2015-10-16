@@ -92,3 +92,26 @@ echo %s
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Could not load mini state', logs)
+
+    def test_hhconfig_change(self):
+        """
+        Start hh_server, then change .hhconfig and check that the server
+        restarts itself
+        """
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
+            f.write(r"""
+# some comment
+assume_php = true
+load_mini_script = %s
+""" % os.path.join(self.repo_dir, 'server_options.sh'))
+
+        # this should start a new server
+        self.check_cmd(['No errors!'])
+        # check how the old one exited
+        log_file =\
+            proc_call([hh_client, '--logname', self.repo_dir]).strip() + '.old'
+        with open(log_file) as f:
+            logs = f.read()
+            self.assertIn('.hhconfig changed in an incompatible way', logs)

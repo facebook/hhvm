@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/server/server-stats.h"
 #include <folly/String.h>
 #include <poll.h>
 #include <sys/time.h>
@@ -409,6 +410,10 @@ bool SSLSocket::waitForData() {
 int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
   int64_t nr_bytes = 0;
   if (m_data->m_ssl_active) {
+    IOStatusHelper io("sslsocket::recv",
+                      m_data->getAddress().c_str(),
+                      m_data->getPort());
+
     bool retry = true;
     do {
       if (m_data->m_is_blocked) {
@@ -432,6 +437,10 @@ int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
 int64_t SSLSocket::writeImpl(const char *buffer, int64_t length) {
   int didwrite;
   if (m_data->m_ssl_active) {
+    IOStatusHelper io("sslsocket::send",
+                      m_data->getAddress().c_str(),
+                      m_data->getPort());
+
     bool retry = true;
     do {
       didwrite = SSL_write(m_data->m_handle, buffer, length);

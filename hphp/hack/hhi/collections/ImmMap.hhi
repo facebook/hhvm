@@ -44,7 +44,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
   /**
    * Returns an array containing the key/value pairs from this ImmMap
    */
-  public function toArray(): array;
+  public function toArray(): array<Tk, Tv>;
 
   /**
    * Returns an array containing the values from this ImmMap.

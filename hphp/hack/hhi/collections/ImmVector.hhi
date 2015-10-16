@@ -81,12 +81,12 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
   /**
    * Returns an array containing the values from this ImmVector.
    */
-  public function toValuesArray(): array;
+  public function toValuesArray(): array<Tv>;
 
   /**
    * Returns an array whose values are the keys from this ImmVector.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): array<Tv>;
 
   /**
    * Returns an iterator that points to the beginning of this ImmVector.

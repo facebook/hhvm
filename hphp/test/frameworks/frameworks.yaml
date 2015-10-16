@@ -435,6 +435,10 @@
     clowns:
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
+    flakey:
+      # last data set intermittently fails, spent too long trying to get debug
+      # # data out of it and getting nowhere
+      - twig/test/Twig/Tests/IntegrationTest.php
   typo3:
     url: git://github.com/TYPO3/TYPO3.CMS.git
     branch: TYPO3_6-2

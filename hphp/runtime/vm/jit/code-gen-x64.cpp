@@ -1664,13 +1664,24 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (sp < (Cell*)fp) assertTv(sp);
 }
 
-void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sp = srcLoc(inst, 0).reg();
-  auto const fp = srcLoc(inst, 1).reg();
+static Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
+  auto const adjust = inst->extra<RetCtrlData>()->spOffset.offset;
+
+  auto& v = vmain(env);
+  auto const sp = srcLoc(env, inst, 0).reg();
   auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(inst->extra<RetCtrl>()->spOffset.offset)], sync_sp};
+
+  v << lea{sp[cellsToBytes(adjust)], sync_sp};
   v << syncvmsp{sync_sp};
+
+  return sync_sp;
+}
+
+void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 1).reg();
+  auto const sync_sp = adjustSPForReturn(m_state, inst);
+
+  auto& v = vmain();
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     auto ripReg = v.makeReg();
@@ -1681,18 +1692,17 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{prev_fp, sync_sp, ripReg}}), v.makeTuple({})};
   }
 
-  v << vret{fp[AROFF(m_savedRip)], fp[AROFF(m_sfp)], rvmfp(),
-    php_return_regs()};
+  v << vret{
+    fp[AROFF(m_savedRip)],
+    fp[AROFF(m_sfp)],
+    rvmfp(),
+    php_return_regs()
+  };
 }
 
 void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sp = srcLoc(inst, 0).reg();
-  auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(inst->extra<AsyncRetCtrl>()->offset.offset)],
-           sync_sp};
-  v << syncvmsp{sync_sp};
-  v << leavetc{php_return_regs()};
+  adjustSPForReturn(m_state, inst);
+  vmain() << leavetc{php_return_regs()};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {

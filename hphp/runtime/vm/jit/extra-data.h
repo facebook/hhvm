@@ -683,8 +683,8 @@ struct RetCtrlData : IRExtraData {
   // purposes) before returning.
   IRSPOffset spOffset;
 
-  // Indicates that the current generator frame is being suspended without
-  // decrefing locals. Used by refcount optimizer.
+  // Indicates that the current resumable frame is being suspended without
+  // decrefing locals.  Used by refcount optimizer.
   bool suspendingResumed;
 };
 
@@ -1165,7 +1165,7 @@ X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
-X(AsyncRetCtrl,                 IRSPOffsetData);
+X(AsyncRetCtrl,                 RetCtrlData);
 X(LdArrFuncCtx,                 IRSPOffsetData);
 X(LdArrFPushCuf,                IRSPOffsetData);
 X(LdStrFPushCuf,                IRSPOffsetData);

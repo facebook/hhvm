@@ -126,10 +126,10 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
 
-  auto const stack    = sp(env);
-  auto const frame    = fp(env);
+  auto const stack = sp(env);
+  auto const frame = fp(env);
   auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, RetCtrl, RetCtrlData(spAdjust, true), stack, frame);
+  gen(env, AsyncRetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
 }
 
 void yieldReturnControl(IRGS& env) {

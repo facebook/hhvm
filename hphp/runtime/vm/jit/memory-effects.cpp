@@ -400,9 +400,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case AsyncRetCtrl:
+    if (inst.extra<AsyncRetCtrl>()->suspendingResumed) {
+      return UnknownEffects {};
+    }
     return ReturnEffects {
-      *stack_below(inst.src(0), inst.extra<AsyncRetCtrl>()->offset.offset - 1).
-        precise_union(AMIStateAny)
+      *stack_below(
+        inst.src(0),
+        inst.extra<AsyncRetCtrl>()->spOffset.offset - 1
+      ).precise_union(AMIStateAny)
     };
 
   case GenericRetDecRefs:

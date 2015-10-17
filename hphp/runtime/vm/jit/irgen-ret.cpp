@@ -119,10 +119,11 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
   gen(env, FreeActRec, fp(env));
   gen(env, DecRef, resumableObj);
 
+  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
   gen(
     env,
     AsyncRetCtrl,
-    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    RetCtrlData { spAdjust, false },
     sp(env),
     fp(env)
   );

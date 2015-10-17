@@ -150,7 +150,7 @@ assume_php = false""")
 
     def test_deleted_file(self):
         """
-        Delete a file that still has dangling references before restoring from
+        Delete a file that still has dangling references after restoring from
         a saved state.
         """
         os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
@@ -161,6 +161,21 @@ assume_php = false""")
             '{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])',
             '{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])',
             ])
+
+    def test_duplicated_file(self):
+        self.write_load_config('foo_2.php')
+        self.check_cmd(['No errors!'])
+
+        shutil.copyfile(
+                os.path.join(self.repo_dir, 'foo_2.php'),
+                os.path.join(self.repo_dir, 'foo_2_dup.php'))
+
+        self.check_cmd([
+            '{root}foo_2_dup.php:3:18,18: Name already bound: g (Naming[2012])',
+            '  {root}foo_2.php:3:18,18: Previous definition is here'])
+
+        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
+        self.check_cmd(['No errors!'])
 
     def test_moved_file(self):
         """

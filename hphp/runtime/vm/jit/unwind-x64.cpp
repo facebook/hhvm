@@ -296,7 +296,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
 
     // When we're unwinding through a TC frame (as opposed to stopping at a
     // handler frame), we need to make sure that if we later return from this
-    // VM frame in translated code, we don't resume after the bindcall that may
+    // VM frame in translated code, we don't resume after the PHP call that may
     // be expecting things to still live in its spill space. If the return
     // address is in functionEnterHelper or callToExit, rvmfp() won't contain a
     // real VM frame, so we skip those.

@@ -1514,7 +1514,6 @@ O(andl) \
 O(andli) \
 O(andq) \
 O(andqi) \
-O(bindcall) \
 O(vcallarray) \
 O(bindjcc1st) \
 O(bindjcc) \
@@ -1522,6 +1521,7 @@ O(bindjmp) \
 O(bindaddr) \
 O(debugtrap) \
 O(defvmsp) \
+O(callphp) \
 O(cloadq) \
 O(cmovq) \
 O(cmpb) \
@@ -1639,7 +1639,7 @@ O(xorq) \
 O(xorqi) \
 O(landingpad) \
 O(leavetc) \
-O(vret) \
+O(phpret) \
 O(absdbl) \
 O(phijmp) \
 O(phijcc) \
@@ -1661,23 +1661,29 @@ O(unpcklpd)
       case Vinstr::call:
       case Vinstr::callm:
       case Vinstr::callr:
+      case Vinstr::ret:
+      case Vinstr::stublogue:
+      case Vinstr::stubret:
+      case Vinstr::callstub:
+      case Vinstr::tailcallstub:
+      case Vinstr::callfaststub:
+      case Vinstr::phplogue:
+      case Vinstr::tailcallphp:
       case Vinstr::callarray:
-      case Vinstr::unwind:
       case Vinstr::nothrow:
       case Vinstr::syncpoint:
+      case Vinstr::unwind:
       case Vinstr::cqo:
       case Vinstr::idiv:
       case Vinstr::sarq:
       case Vinstr::shlq:
-      case Vinstr::ret:
       case Vinstr::push:
+      case Vinstr::pushm:
       case Vinstr::pop:
+      case Vinstr::popm:
       case Vinstr::psllq:
       case Vinstr::psrlq:
       case Vinstr::fallthru:
-      case Vinstr::popm:  // currently used in cgEnterFrame
-      case Vinstr::pushm: // used for unique stubs
-      case Vinstr::callfaststub:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
@@ -1685,7 +1691,7 @@ O(unpcklpd)
       // Not yet implemented opcodes:
       case Vinstr::jcci:
       case Vinstr::contenter:
-      case Vinstr::mccall:
+      case Vinstr::calls:
       case Vinstr::mcprep:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
@@ -1915,10 +1921,10 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   );
 }
 
-void LLVMEmitter::emit(const bindcall& inst) {
-  // All bindcall instructions use the same stub so we have to provide a unique
+void LLVMEmitter::emit(const callphp& inst) {
+  // All callphp instructions use the same stub so we have to provide a unique
   // name to ensure LLVM doesn't collapse the calls together.
-  auto funcName = m_tcMM->getUniqueSymbolName("bindcall_");
+  auto funcName = m_tcMM->getUniqueSymbolName("callphp_");
   auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
   auto args = makePhysRegArgs(inst.args);
   auto next = makeBlock("_next");
@@ -1932,7 +1938,7 @@ void LLVMEmitter::emit(const bindcall& inst) {
   // Register the new value of rvmfp().
   defineValue(x64::rvmfp(), m_irb.CreateExtractValue(call, 1, "rvmfp"));
 
-  // bindcall is followed by a defvmsp to copy rvmsp() into a Vreg, but it's
+  // callphp{} is followed by a defvmsp to copy rvmsp() into a Vreg, but it's
   // not in this block. Pass the value to our next block. This is necessary
   // because rvmsp()'s value isn't automatically propagated between blocks like
   // rvmfp() is.
@@ -1941,7 +1947,7 @@ void LLVMEmitter::emit(const bindcall& inst) {
 }
 
 void LLVMEmitter::emit(const vcallarray& inst) {
-  // vcallarray is like bindcall but it's not smashable and it can take extra
+  // vcallarray is like callphp{} but it's not smashable and it can take extra
   // arguments.
   auto funcName = folly::sformat("vcallarray_{}", inst.target);
   auto args = makePhysRegArgs(inst.args);
@@ -1957,7 +1963,7 @@ void LLVMEmitter::emit(const vcallarray& inst) {
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM);
   m_irb.SetInsertPoint(next);
 
-  // Register new rvmsp()/rvmfp(), just like bindcall.
+  // Register new rvmsp()/rvmfp(), just like callphp{}.
   defineValue(x64::rvmfp(), m_irb.CreateExtractValue(call, 1, "rvmfp"));
   m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rvmsp");
   m_irb.CreateBr(block(inst.targets[0]));
@@ -2852,12 +2858,15 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
   call->setCallingConv(llvm::CallingConv::C);
 }
 
-void LLVMEmitter::emit(const vret& inst) {
+void LLVMEmitter::emit(const phpret& inst) {
   // We emit volatile loads for return addresses to prevent LLVM from
   // generating move from memory to register via another register.
-  auto const retPtr = emitPtr(inst.retAddr, ptrType(ptrType(m_traceletFnTy)));
+  auto const retPtr = emitPtr(inst.fp[AROFF(m_savedRip)],
+                              ptrType(ptrType(m_traceletFnTy)));
   auto const retAddr = m_irb.CreateLoad(retPtr, true);
-  auto const prevFP = m_irb.CreateLoad(emitPtr(inst.prevFP, 64), true);
+
+  auto const prevFPPtr = emitPtr(inst.fp[AROFF(m_sfp)], 64);
+  auto const prevFP = m_irb.CreateLoad(prevFPPtr, true);
   defineValue(inst.d, prevFP);
 
   // "Return" with a tail call to the loaded address
@@ -3148,7 +3157,7 @@ void LLVMEmitter::emit(const landingpad& inst) {
   pad->setCleanup(true);
 
   if (inst.fromPHPCall) {
-    // bindcall destroys all registers, so tc_unwind_resume gives us the
+    // callphp{} destroys all registers, so tc_unwind_resume gives us the
     // correct value of rvmfp() in the second unwinder scratch register.
     auto newFp = m_irb.CreateExtractValue(pad, 1, "rvmfp");
     defineValue(x64::rvmfp(), newFp);

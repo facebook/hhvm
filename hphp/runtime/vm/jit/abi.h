@@ -94,7 +94,7 @@ inline RegSet leave_trace_regs() { return vm_regs_with_sp(); }
  * Registers that are live during a PHP function call, between the caller and
  * the callee.
  */
-inline RegSet cross_call_regs() { return cross_trace_regs(); }
+inline RegSet php_call_regs() { return cross_trace_regs(); }
 
 /*
  * Registers that are live after a PHP function return.

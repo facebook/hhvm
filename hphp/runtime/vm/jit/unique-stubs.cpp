@@ -120,42 +120,6 @@ RegSet syncForLLVMCatch(Vout& v) {
   return x64::syncForLLVMCatch(v);
 }
 
-/*
- * Load RIP from wherever it's stashed at the beginning of a new native frame.
- */
-void loadSavedRIP(Vout& v, Vreg d) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::loadSavedRIP(v, d);
-}
-
-/*
- * Stash the saved RIP of the native frame in the VM frame's m_savedRip, and
- * also align the native stack.
- *
- * TODO(#7728856): Use this for EnterFrame as well.
- */
-void stashSavedRIP(Vout& v, Vreg fp) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::stashSavedRIP(v, fp);
-}
-
-/*
- * Do the inverse of stashSavedRIP().
- */
-void unstashSavedRIP(Vout& v, Vreg fp) {
-  if (arch() != Arch::X64) not_implemented();
-  return x64::unstashSavedRIP(v, fp);
-}
-
-/*
- * Align the native stack in an architecture-specific way.
- */
-template<class GenFunc>
-void alignNativeStack(Vout& v, GenFunc gen) {
-  if (arch() != Arch::X64) return gen(v);
-  return x64::alignNativeStack(v, gen);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
@@ -231,18 +195,12 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
   alignJmpTarget(cb);
 
   return vwrap2(cb, [] (Vout& v, Vout& vcold) {
-    auto const dest = v.makeReg();
-
-    // We need to align the native stack, but we also need to fill m_savedRip
-    // in the frame in case we throw from fcallHelper (e.g., due to stack
-    // overflow).
-    stashSavedRIP(v, rvmfp());
+    v << phplogue{rvmfp()};
 
     // fcallHelper asserts native stack alignment for us.
     TCA (*helper)(ActRec*) = &fcallHelper;
+    auto const dest = v.makeReg();
     v << simplecall(v, helper, rvmfp(), dest);
-
-    unstashSavedRIP(v, rvmfp());
 
     // Clobber rvmsp in debug builds.
     if (debug) v << copy{v.cns(0x1), rvmsp()};
@@ -254,11 +212,11 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
       // A nullptr dest means the callee was intercepted and should be skipped.
       // Just return to the caller after syncing VM regs.
       loadVMRegs(v);
-      v << ret{};
+      v << phpret{rvmfp(), rvmfp(), php_return_regs(), true};
     });
 
     // Jump to the func prologue.
-    v << jmpr{dest};
+    v << tailcallphp{dest, rvmfp(), php_call_regs()};
   });
 }
 
@@ -268,11 +226,7 @@ TCA emitFuncBodyHelperThunk(CodeBlock& cb) {
   return vwrap(cb, [] (Vout& v) {
     TCA (*helper)(ActRec*) = &funcBodyHelper;
     auto const dest = v.makeReg();
-
-    // The funcBodyHelperThunk stub is reached via a jmp from the TC, so the
-    // stack parity is already correct.
     v << simplecall(v, helper, rvmfp(), dest);
-
     v << jmpr{dest};
   });
 }
@@ -282,11 +236,10 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& cb,
   alignJmpTarget(cb);
 
   return vwrap(cb, [&] (Vout& v) {
-    alignNativeStack(v, [&] (Vout& v) {
-      v << vcall{CallSpec::direct(handlePossibleStackOverflow),
-                 v.makeVcallArgs({{rvmfp()}}), v.makeTuple({})};
-    });
-    v << jmpi{us.functionEnterHelper};
+    v << stublogue{};
+    v << vcall{CallSpec::direct(handlePossibleStackOverflow),
+               v.makeVcallArgs({{rvmfp()}}), v.makeTuple({})};
+    v << tailcallstub{us.functionEnterHelper};
   });
 }
 
@@ -374,6 +327,8 @@ TCA emitDebuggerInterpGenRet(CodeBlock& cb) {
 template<bool immutable>
 TCA emitBindCallStub(CodeBlock& cb) {
   return vwrap(cb, [] (Vout& v) {
+    v << phplogue{rvmfp()};
+
     auto args = VregList { v.makeReg(), v.makeReg(),
                            v.makeReg(), v.makeReg() };
     loadMCG(v, args[0]);
@@ -381,28 +336,26 @@ TCA emitBindCallStub(CodeBlock& cb) {
     // Reconstruct the address of the call from the saved RIP.
     auto const savedRIP = v.makeReg();
     auto const callLen = safe_cast<int>(smashableCallLen());
-    loadSavedRIP(v, savedRIP);
+    v << load{rvmfp()[AROFF(m_savedRip)], savedRIP};
     v << subqi{callLen, savedRIP, args[1], v.makeReg()};
 
     v << copy{rvmfp(), args[2]};
     v << movb{v.cns(immutable), args[3]};
 
+    auto const handler = reinterpret_cast<void (*)()>(
+      getMethodPtr(&MCGenerator::handleBindCall)
+    );
     auto const ret = v.makeReg();
 
-    alignNativeStack(v, [&] (Vout& v) {
-      auto const handler = reinterpret_cast<void (*)()>(
-        getMethodPtr(&MCGenerator::handleBindCall)
-      );
-      v << vcall{
-        CallSpec::direct(handler),
-        v.makeVcallArgs({args}),
-        v.makeTuple({ret}),
-        Fixup{},
-        DestType::SSA
-      };
-    });
+    v << vcall{
+      CallSpec::direct(handler),
+      v.makeVcallArgs({args}),
+      v.makeTuple({ret}),
+      Fixup{},
+      DestType::SSA
+    };
 
-    v << jmpr{ret};
+    v << tailcallphp{ret, rvmfp(), php_call_regs()};
   });
 }
 
@@ -410,6 +363,14 @@ TCA emitFCallArrayHelper(CodeBlock& cb) {
   align(cb, Alignment::CacheLine, AlignContext::Dead);
 
   return vwrap2(cb, [] (Vout& v, Vout& vcold) {
+    // We reach fcallArrayHelper in the same context as a func prologue, so
+    // this should really be a phplogue{}---but we don't need the return
+    // address in the ActRec until later, and in the event the callee is
+    // intercepted, we must save it on the stack because the callee frame will
+    // already have been popped.  So use a stublogue and "convert" it manually
+    // later.
+    v << stublogue{};
+
     storeVMRegs(v);
 
     auto const func = v.makeReg();
@@ -429,12 +390,10 @@ TCA emitFCallArrayHelper(CodeBlock& cb) {
     v << store{pc, rvmtl()[rds::kVmpcOff]};
     v << addq{bc, rarg(1), next, v.makeReg()};
 
+    bool (*helper)(PC) = &doFCallArrayTC;
     auto const res = v.makeReg();
+    v << simplecall(v, helper, next, res);
 
-    alignNativeStack(v, [&] (Vout& v) {
-      bool (*helper)(PC) = &doFCallArrayTC;
-      v << simplecall(v, helper, next, res);
-    });
     v << load{rvmtl()[rds::kVmspOff], rvmsp()};
 
     auto const sf = v.makeReg();
@@ -444,13 +403,14 @@ TCA emitFCallArrayHelper(CodeBlock& cb) {
       // If false was returned, we should skip the callee.  The interpreter
       // will have popped the pre-live ActRec already, so we can just return to
       // the caller.
-      v << ret{};
+      v << stubret{};
     });
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
 
-    // If true was returned, head to the func body.  Stashing the saved RIP
-    // here performs the same work as EnterFrame in func prologues.
-    stashSavedRIP(v, rvmfp());
+    // If true was returned, we're calling the callee, so manually undo the
+    // stublogue{}, and simulate the work of a phplogue{}.
+    v << addqi{8, rsp(), rsp(), v.makeReg()};
+    v << popm{rvmfp()[AROFF(m_savedRip)]};
 
     auto const callee = v.makeReg();
     auto const body = v.makeReg();
@@ -477,7 +437,7 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb) {
   ResumeHelperEntryPoints rh;
 
   rh.resumeHelperRet = vwrap(cb, [] (Vout& v) {
-    stashSavedRIP(v, rvmfp());
+    v << phplogue{rvmfp()};
   });
   rh.resumeHelper = vwrap(cb, [] (Vout& v) {
     v << ldimmb{0, rarg(1)};

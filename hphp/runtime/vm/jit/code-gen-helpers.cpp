@@ -162,7 +162,7 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       return;
 
     case CallSpec::Kind::Smashable:
-      v << mccall{static_cast<TCA>(target.address()), args};
+      v << calls{static_cast<TCA>(target.address()), args};
       return;
 
     case CallSpec::Kind::ArrayVirt: {
@@ -191,7 +191,7 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
     } return;
 
     case CallSpec::Kind::Stub:
-      v << call{target.stubAddr(), args};
+      v << callstub{target.stubAddr(), args};
       return;
   }
   not_reached();

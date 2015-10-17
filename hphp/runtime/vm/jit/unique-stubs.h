@@ -39,48 +39,67 @@ constexpr int kNumFreeLocalsHelpers = 8;
  */
 struct UniqueStubs {
   /*
-   * Unique stubs and stack alignment.
+   * Unique stubs, ABIs, and stack alignment.
    *
    * A lot of complex control flow occurs amongst the various unique stubs, as
-   * well as between the unique stubs and the TC.  This is obviously important
-   * to understanding the control flow of jitted code in general, but is also
-   * critical to performance-correct implementations of the unique stubs on
-   * platforms that care about stack alignment.
+   * well as between the unique stubs and the TC.  This complexity is
+   * exacerbated by the profusion of different ABIs used when entering and
+   * exiting the stubs.
    *
-   * On x64, for example, the calling convention is that the stack is 16-byte
-   * aligned before calls, which allows the compiler to safely use aligned movs
-   * for, e.g., saving callee-saved XMM registers---after pushing the old RIP
-   * (from the call) and %rbp (in the callee) which puts the stack back into
-   * alignment.
+   * The goal of the documentation in this file is to enumerate all the ways
+   * each stub is reached, as well as to clarify the ABI boundaries they
+   * implement to, if any.
    *
-   * We make the following assumption about stack alignment:
+   * Among the most important ABI invariants in jitted code is this:
    *
-   *    - Stack alignment is a parity condition; i.e., a valid stack pointer is
-   *      only ever aligned or one-off from being aligned.  This is the case on
-   *      x64.  Platforms with no alignment constraints also satisfy this
-   *      assumption, but platforms with higher-order alignments will have a
-   *      bad time without big changes to the system.
+   *    - In the body of a PHP function, after the initial instructions of the
+   *      func prologue, the native stack pointer is always 16-byte aligned.
    *
-   * Additionally, we maintain the following alignment invariants:
+   * This holds even when the register allocator inserts stack spills; we
+   * always offset the native stack pointer in increments of 16.
    *
-   *    - When executing the body of any PHP function in the TC, the native
-   *      stack is aligned.  (This need not hold in the func prologue until the
-   *      EnterFrame IR instruction is executed.)
+   * Many target architectures have 16-byte stack alignment restrictions.  On
+   * x64, for example, the stack must be 16-byte aligned before calls, to allow
+   * the compiler to safely use aligned movs, e.g., for saving callee-saved XMM
+   * registers.  On AArch64, attempting to address the stack pointer when it is
+   * not 16-byte aligned results in a fault.
    *
-   *    - The native stack is aligned on every call to a native function from
-   *      anywhere in the TC.
+   * Our alignment invariant should be sufficient for architectures with
+   * 16-byte (or looser) alignment constraints.  We don't currently support any
+   * higher- order alignment restrictions.
    *
-   * Notably, we do /not/ unconditionally maintain stack alignment in the
-   * bodies of the unique stubs.  For x64, which relies on the native calling
-   * convention (pushing %rbp at the beginning of each frame) to maintain
-   * alignment, this means we need to know how we reached a given stub, and
-   * from where, in order to determine whether we need to manually realign the
-   * stack when we do native calls or return to the TC.
+   * Our other ABI concern is calling convention.  HHVM supports three distinct
+   * calling conventions:
+   *    - native: C++ helper calls on the targeted architecture
+   *    - PHP:    calls between PHP functions, as well as to those unique stubs
+   *              which play the same role as various parts of PHP functions
+   *    - stub:   calls to unique stubs that implement helper routines
    *
-   * How each stub is reached is documented below.  Whether the stack is
-   * aligned on entry to the stub is also documented---these are x64 specific
-   * (since a `call' instruction on x64 unbalances the stack until the %rbp
-   * push, or a manual alignment operation simulating it).
+   * Maintaining native stack alignment, and appropriately stashing the return
+   * address, is shared between the call, return, and callee prologue
+   * instructions for each convention:
+   *
+   *            +---------------------+---------+-----------+
+   *            | main call instrs    | return  | prologue  |
+   *  +---------+---------------------+---------+-----------+
+   *  | native  | call{,r,m,s}        | ret     | N/A       |
+   *  +---------+---------------------+---------+-----------+
+   *  | PHP     | phpcall, callarray  | phpret  | phplogue  |
+   *  +---------+---------------------+---------+----------+
+   *  | stub    | callstub            | stubret | stublogue |
+   *  +---------+---------------------+---------+-----------+
+   *
+   * Further documentation on these calling conventions can be found in
+   * vasm-instr.h, alongside the corresponding instructions.
+   *
+   * Each stub is documented below with a (hopefully) exhaustive list of ways
+   * it is reached, as well as the context under which it is reached:
+   *    - func guard:     pre-phplogue{}; an intermediate state where
+   *                      addressing the stack and making native calls are
+   *                      forbidden
+   *    - func prologue:  implements a phplogue{}
+   *    - func body:      dominated by a phplogue{}; already ABI-conforming
+   *    - stub:           implements a stublogue{}
    */
 
   /////////////////////////////////////////////////////////////////////////////
@@ -91,7 +110,7 @@ struct UniqueStubs {
    * function fails the prologue's func guard.
    *
    * @reached:  jmp from func guard
-   * @aligned:  false (func guards are pre-EnterFrame, hence unaligned)
+   * @context:  func guard
    */
   TCA funcPrologueRedispatch;
 
@@ -104,11 +123,10 @@ struct UniqueStubs {
    * prologue succeeds, we update the prologue table to point to the new
    * prologue instead of this stub.
    *
-   * @reached:  bindcall from TC; or
-   *            jmp from bindCallStub; or
+   * @reached:  callphp from TC
+   *            jmp from bindCallStub
    *            jmp from funcPrologueRedispatch
-   *            (same callsites as func prologues)
-   * @aligned:  false
+   * @context:  func prologue
    */
   TCA fcallHelperThunk;
 
@@ -121,10 +139,9 @@ struct UniqueStubs {
    * first dispatches to any necessary funclets before jumping to the base()
    * translation.
    *
-   * @reached:  call from enterTCHelper
+   * @reached:  call from enterTCHelper$callTC
    *            jmp from fcallArrayHelper
-   * @aligned:  true (we ensure alignment when entering the TC, and
-   *            fcallArrayHelper performs the EnterFrame of func prologues)
+   * @context:  func body
    */
   TCA funcBodyHelperThunk;
 
@@ -135,8 +152,9 @@ struct UniqueStubs {
    * functionEnterHelperReturn is only used by unwinder code to detect calls
    * made from this stub.
    *
-   * @reached:  vinvoke from TC (func prologue after EnterFrame)
-   * @aligned:  false
+   * @reached:  vinvoke from func prologue
+   *            jmp from functionSurprisedOrStackOverflow
+   * @context:  stub
    */
   TCA functionEnterHelper;
   TCA functionEnterHelperReturn;
@@ -147,8 +165,8 @@ struct UniqueStubs {
    * Also gracefully handles spurious wake-ups that result from racing with a
    * background thread clearing surprise flags.
    *
-   * @reached:  vinvoke from TC (func prologue after EnterFrame)
-   * @aligned:  false
+   * @reached:  vinvoke from func prologue
+   * @context:  stub
    */
   TCA functionSurprisedOrStackOverflow;
 
@@ -166,8 +184,8 @@ struct UniqueStubs {
    * Generators need a different stub because the ActRec for a generator is in
    * the heap.
    *
-   * @reached:  ret from TC
-   * @aligned:  true
+   * @reached:  phpret from TC
+   * @context:  func body (after returning to caller)
    */
   TCA retHelper;
   TCA genRetHelper;       // version for generator
@@ -178,8 +196,8 @@ struct UniqueStubs {
    *
    * This is the same as retHelper, but is kept separate to aid in debugging.
    *
-   * @reached:  ret from TC
-   * @aligned:  true
+   * @reached:  phpret from TC
+   * @context:  func body (after returning to caller)
    */
   TCA retInlHelper;
 
@@ -190,8 +208,8 @@ struct UniqueStubs {
    * These stubs call a helper that looks up the original catch trace from the
    * call, executes it, then executes a REQ_POST_DEBUGGER_RET.
    *
-   * @reached:  ret from TC
-   * @aligned:  true
+   * @reached:  phpret from TC
+   * @context:  func body (after returning to caller)
    */
   TCA debuggerRetHelper;
   TCA debuggerGenRetHelper;
@@ -202,10 +220,10 @@ struct UniqueStubs {
   // Function calls.
 
   /*
-   * Bindcall stubs for immutable/non-immutable calls.
+   * Stubs for immutable/non-immutable PHP calls.
    *
-   * @reached:  bindcall from TC
-   * @aligned:  false
+   * @reached:  callphp from TC
+   * @context:  func prologue
    */
   TCA bindCallStub;
   TCA immutableBindCallStub;
@@ -214,8 +232,8 @@ struct UniqueStubs {
    * Use interpreter functions to enter the pre-live ActRec that we place on
    * the stack (along with the Array of parameters) in a CallArray instruction.
    *
-   * @reached:  vcallarray from TC
-   * @aligned:  false
+   * @reached:  callarray from TC
+   * @context:  func prologue
    */
   TCA fcallArrayHelper;
 
@@ -229,8 +247,9 @@ struct UniqueStubs {
    *
    * Expects that all VM registers are synced.
    *
-   * @reached:  jmp from funcBodyHelperThunk, call from enterTCHelper
-   * @aligned:  true
+   * @reached:  jmp from funcBodyHelperThunk
+   *            call from enterTCHelper
+   * @context:  func body
    */
   TCA resumeHelper;
 
@@ -238,7 +257,7 @@ struct UniqueStubs {
    * Like resumeHelper, but specifically for an interpreted FCall.
    *
    * @reached:  jmp from fcallHelperThunk
-   * @aligned:  false
+   * @context:  func prologue
    */
   TCA resumeHelperRet;
 
@@ -252,7 +271,7 @@ struct UniqueStubs {
    * vmRegs before passing control to the interpreter.
    *
    * @reached:  jmp from TC
-   * @aligned:  true
+   * @context:  func body
    */
   TCA interpHelper;
   TCA interpHelperSyncedPC;
@@ -265,7 +284,7 @@ struct UniqueStubs {
    * offset to the bytecode to interpret.
    *
    * @reached:  jmp from TC
-   * @aligned:  true
+   * @context:  func body
    */
   std::unordered_map<Op, TCA> interpOneCFHelpers;
 
@@ -281,7 +300,7 @@ struct UniqueStubs {
    * (data, type).  All GP registers are saved around the destructor call.
    *
    * @reached:  callfaststub from TC
-   * @aligned:  false
+   * @context:  stub
    */
   TCA decRefGeneric;
 
@@ -297,7 +316,7 @@ struct UniqueStubs {
    * first argument register is ignored.
    *
    * @reached:  vcall from TC
-   * @aligned:  false
+   * @context:  stub
    */
   TCA freeLocalsHelpers[kNumFreeLocalsHelpers];
   TCA freeManyLocalsHelper;
@@ -307,8 +326,12 @@ struct UniqueStubs {
   // Other stubs.
 
   /*
-   * Return from this VM nesting level to the previous one, with whatever value
-   * is on the top of the stack.
+   * Return from this VM nesting level to the previous one.
+   *
+   * This has the same effect as a leavetc{} instruction---it pops the address
+   * of enterTCExit off the stack and transfers control to it.
+   *
+   * @reached:  phpret from TC
    */
   TCA callToExit;
 

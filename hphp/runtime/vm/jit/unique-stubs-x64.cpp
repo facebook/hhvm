@@ -63,11 +63,11 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
 
     v << copy{rvmfp(), ar};
 
-    // Set up the call frame for the stub.  We can't skip this like we do in
-    // other stubs because we need the return IP for this frame in the %rbp
+    // Fully set up the call frame for the stub.  We can't skip this like we do
+    // in other stubs because we need the return IP for this frame in the %rbp
     // chain, in order to find the proper fixup for the VMRegAnchor in the
     // intercept handler.
-    v << push{rvmfp()};
+    v << stublogue{true};
     v << copy{rsp(), rvmfp()};
 
     // When we call the event hook, it might tell us to skip the callee
@@ -97,7 +97,8 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
       v << pop{rvmfp()};
       v << pop{saved_rip};
 
-      // Drop our call frame.
+      // Drop our call frame; the stublogue{} instruction guarantees that this
+      // is exactly 16 bytes.
       v << addqi{16, rsp(), rsp(), v.makeReg()};
 
       // Sync vmsp and return to the caller.  This unbalances the return stack
@@ -109,9 +110,8 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
     // Skip past the stuff we saved for the intercept case.
     v << addqi{16, rsp(), rsp(), v.makeReg()};
 
-    // Execute a leave, returning us to the callee's prologue.
-    v << pop{rvmfp()};
-    v << ret{};
+    // Restore rvmfp() and return to the callee's func prologue.
+    v << stubret{RegSet(), true};
   });
 
   return start;

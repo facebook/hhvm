@@ -56,7 +56,6 @@ struct Vunit;
  */
 #define VASM_OPCODES\
   /* service requests */\
-  O(bindcall, I(stub), U(args), Dn)\
   O(bindjmp, I(target) I(spOff) I(trflags), U(args), Dn)\
   O(bindjcc, I(cc) I(target) I(spOff) I(trflags), U(sf) U(args), Dn)\
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]) I(spOff), U(sf) U(args), Dn)\
@@ -76,24 +75,37 @@ struct Vunit;
   O(ldimmq, I(s), Un, D(d))\
   O(ldimmqs, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
+  O(store, Inone, U(s) U(d), Dn)\
+  O(mcprep, Inone, Un, D(d))\
   O(phidef, Inone, Un, D(defs))\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(phijmp, Inone, U(uses), Dn)\
-  O(store, Inone, U(s) U(d), Dn)\
-  /* call and return intrinsics */\
-  O(callarray, I(target), U(args), Dn)\
-  O(vcallarray, I(target), U(args) U(extraArgs), Dn)\
-  O(callfaststub, I(fix), U(args), Dn)\
-  O(contenter, Inone, U(fp) U(target) U(args), Dn)\
-  O(leavetc, Inone, U(args), Dn)\
-  O(mcprep, Inone, Un, D(d))\
-  O(mccall, I(target), U(args), Dn)\
+  /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
-  O(vret, Inone, U(retAddr) U(prevFP) U(args), D(d))\
-  /* boundary intrinsics */\
+  O(call, I(target), U(args), Dn)\
+  O(callm, Inone, U(target) U(args), Dn)\
+  O(callr, Inone, U(target) U(args), Dn)\
+  O(calls, I(target), U(args), Dn)\
+  O(ret, Inone, U(args), Dn)\
+  /* stub function abi */\
+  O(stublogue, Inone, Un, Dn)\
+  O(stubret, Inone, U(args), Dn)\
+  O(callstub, I(target), U(args), Dn)\
+  O(callfaststub, I(fix), U(args), Dn)\
+  O(tailcallstub, I(target), U(args), Dn)\
+  /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
+  O(phplogue, Inone, U(fp), Dn)\
+  O(phpret, Inone, U(fp) U(args), D(d))\
+  O(callphp, I(stub), U(args), Dn)\
+  O(tailcallphp, Inone, U(target) U(fp) U(args), Dn)\
+  O(callarray, I(target), U(args), Dn)\
+  O(vcallarray, I(target), U(args) U(extraArgs), Dn)\
+  O(contenter, Inone, U(fp) U(target) U(args), Dn)\
+  O(leavetc, Inone, U(args), Dn)\
+  /* exception intrinsics */\
   O(landingpad, I(fromPHPCall), Un, Dn)\
   O(nothrow, Inone, Un, Dn)\
   O(syncpoint, I(fix), Un, Dn)\
@@ -122,9 +134,6 @@ struct Vunit;
   O(andli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(andq, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(andqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
-  O(call, I(target), U(args), Dn)\
-  O(callm, Inone, U(target) U(args), Dn)\
-  O(callr, Inone, U(target) U(args), Dn)\
   O(cloadq, I(cc), U(sf) U(f) U(t), D(d))\
   O(cmovq, I(cc), U(sf) U(f) U(t), D(d))\
   O(cmpb, Inone, U(s0) U(s1), D(sf))\
@@ -195,7 +204,6 @@ struct Vunit;
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
-  O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
@@ -263,25 +271,6 @@ struct Vunit;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Service requests.
-
-/*
- * PHP function call: Smashable call with custom ABI.
- */
-struct bindcall {
-  explicit bindcall(TCA stub,
-                    RegSet args,
-                    std::array<Vlabel,2> targets)
-    : stub{stub}
-    , args{args}
-  {
-    this->targets[0] = targets[0];
-    this->targets[1] = targets[1];
-  }
-
-  TCA stub;
-  RegSet args;
-  Vlabel targets[2];
-};
 
 struct bindjmp {
   explicit bindjmp(SrcKey target,
@@ -462,6 +451,13 @@ struct load { Vptr s; Vreg d; };
 struct store { Vreg s; Vptr d; };
 
 /*
+ * Method cache smashable prime data.
+ *
+ * @see: cgLdObjMethod()
+ */
+struct mcprep { Vreg64 d; };
+
+/*
  * Phis.
  *
  * @see: doWhile(), for an example usage.
@@ -471,22 +467,79 @@ struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Call, return, resumable, and exception intrinsics.
+// Native function ABI.
 
 /*
- * Non-smashable PHP function call with (almost) the same ABI as bindcall.
+ * Native or stub function call, without or with exception edges, respectively.
  *
- * NB: The only difference is that callarray preserves vmfp.  Currently only
- * used by the CallArray instruction.
+ * Contains information about a helper call (i.e., any non-PHP function call)
+ * needed for lowering to different target architectures.
  */
-struct callarray { TCA target; RegSet args; };
+struct vcall { CallSpec call; VcallArgsId args; Vtuple d;
+               Fixup fixup; DestType destType; bool nothrow; };
+struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
+                 Fixup fixup; DestType destType; };
 
 /*
- * Non-smashable PHP function call with exception edges and additional integer
- * arguments.
+ * C++ function call using the native ABI.
+ *
+ * Comes in four flavors:
+ *    call:  direct call
+ *    callm: indirect call via memory operand
+ *    callr: indirect call via register
+ *    calls: direct call with smashable target
+ *
+ * (These follow the same suffix conventions described below.)
  */
-struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
-                    Vlabel targets[2]; };
+struct call  { CodeAddress target; RegSet args; };
+struct callm { Vptr target; RegSet args; };
+struct callr { Vreg64 target; RegSet args; };
+struct calls { CodeAddress target; RegSet args; };
+
+/*
+ * Native function return.
+ */
+struct ret { RegSet args; };
+
+///////////////////////////////////////////////////////////////////////////////
+// Stub function ABI.
+
+/*
+ * Stub function prologue.
+ *
+ * Set up the native stack as follows:
+ *
+ *    +-----------------------+   <- native stack pointer, pre-call
+ *    |     return address    |
+ *    +-----------------------+
+ *    | <junk> or saved rvmfp |
+ *    +-----------------------+   <- native stack pointer, after prologue
+ *
+ * This resembles the frame layout of some architectures, like x64---however,
+ * the frame pointer is only optionally saved, when the stub (or any native
+ * helpers it calls) requires it by setting `saveframe' to true.
+ *
+ * Stubs are not allowed to spill registers to the stack, so the native stack
+ * pointer will only be adjusted if the stub code does so intentionally.
+ */
+struct stublogue { bool saveframe; };
+
+/*
+ * Return from a stub.
+ *
+ * Return to the address saved on the stack, and restore the native stack
+ * pointer to wherever it was before the stub call.  See the diagram for
+ * stublogue{}, above; `saveframe' has the same meaning as it does there.
+ */
+struct stubret { RegSet args; bool saveframe; };
+
+/*
+ * Direct call to the unique stub at `target'.
+ *
+ * The `target' should begin with a stublogue{} instruction, which together
+ * with callstub{} should implement the ABI described above.
+ */
+struct callstub { CodeAddress target; RegSet args; };
 
 /*
  * Call a "fast" stub, a stub that preserves more registers than a normal call.
@@ -497,49 +550,25 @@ struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
 struct callfaststub { TCA target; Fixup fix; RegSet args; };
 
 /*
- * Enter a continuation.
- */
-struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
-
-/*
- * Execute a ret instruction directly, returning to enterTCHelper().
+ * Make a direct tail call to a stub.
  *
- * Used to relinquish control to the async scheduler from an async function.
- */
-struct leavetc { RegSet args; };
-
-/*
- * Method cache smashable prime data and smashable call.
+ * As in the usual sense of tail call, this is really a jmp which will cause
+ * the callee's return to serve as the caller's return.
  *
- * @see: cgLdObjMethod()
+ * This instruction jumps from a context dominated by stublogue{} to a context
+ * which wants to execute a logically identical prologue, so it needs to revert
+ * the world to a pre-stublogue{} state before jumping.
  */
-struct mcprep { Vreg64 d; };
-struct mccall { CodeAddress target; RegSet args; };
-
-/*
- * Native function call, without or with exception edges, respectively.
- *
- * Contains information about a C++ helper call needed for lowering to
- * different target architectures.
- */
-struct vcall { CallSpec call; VcallArgsId args; Vtuple d;
-               Fixup fixup; DestType destType; bool nothrow; };
-struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
-                 Fixup fixup; DestType destType; };
-
-/*
- * Load `prevFP' into `d' and return to `retAddr'.
- */
-struct vret { Vptr retAddr; Vptr prevFP; Vreg d; RegSet args; };
+struct tailcallstub { CodeAddress target; RegSet args; };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Boundary intrinsics.
+// PHP function ABI.
 
 /*
  * Copy rvmsp() into `d'.
  *
- * Used when reentering translated code after an ABI boundary, such as the
- * beginning of a tracelet or right after a bindcall.
+ * Used once per region when reentering a resumed function after an ABI
+ * boundary.
  */
 struct defvmsp { Vreg d; };
 
@@ -547,9 +576,110 @@ struct defvmsp { Vreg d; };
  * Copy `s' into rvmsp().
  *
  * Used right before leaving translated code for an ABI boundary, such as
- * bindjmp or fallbackcc.
+ * bindjmp{} or fallbackcc{}.
  */
 struct syncvmsp { Vreg s; };
+
+/*
+ * PHP function prologue.
+ *
+ * Save the return instruction pointer in m_savedRip on the current VM frame,
+ * `fp', and ensure that the native stack pointer is in the same position as it
+ * was before the instruction that transferred control to us.
+ *
+ * The phplogue should dominate all code that is logically part of a PHP func
+ * prologue or func body (but /not/ the func guard, which precedes it).  Note
+ * that this includes unique stubs like fcallHelperThunk, which are reached by
+ * PHP function call.
+ *
+ * Ultimately, anytime we hit a phplogue, we came from enterTCHelper, which
+ * means that after the phplogue (since we maintain the native stack pointer),
+ * the stack looks like this:
+ *
+ *    +-----------------------+
+ *    |  addr of enterTCExit  |
+ *    +-----------------------+   <- native stack pointer
+ *
+ * The native stack continues to point here as long as we are in the TC, modulo
+ * register allocator spill space.
+ */
+struct phplogue { Vreg fp; };
+
+/*
+ * Load fp[m_sfp] into `d' and return to m_savedRip on `fp'.
+ *
+ * If `noframe' is set, `d' is not changed.
+ */
+struct phpret { Vreg fp; Vreg d; RegSet args; bool noframe; };
+
+/*
+ * Call a PHP function.
+ *
+ * This is a smashable call that begins its life as a request to translate the
+ * callee, and winds up as a direct call to the callee's func guard or
+ * prologue.
+ */
+struct callphp {
+  explicit callphp(TCA stub,
+                   RegSet args,
+                   std::array<Vlabel,2> targets)
+    : stub{stub}
+    , args{args}
+  {
+    this->targets[0] = targets[0];
+    this->targets[1] = targets[1];
+  }
+
+  TCA stub;
+  RegSet args;
+  Vlabel targets[2];
+};
+
+/*
+ * Make an indirect tail call to a PHP function.
+ *
+ * Analogous to tailcallstub{}; undoes phplogue{} and then jumps to `target',
+ * which begins with a logically identical phplogue{}.
+ */
+struct tailcallphp { Vreg target; Vreg fp; RegSet args; };
+
+/*
+ * Non-smashable PHP function call with (almost) the same ABI as callphp{}.
+ *
+ * NB: The only difference is that callarray preserves vmfp.  Currently only
+ * used by the CallArray instruction.
+ */
+struct callarray { TCA target; RegSet args; };
+
+/*
+ * High-level version of callarray.
+ *
+ * Has exception edges and additional integer args (used by the `target' stub).
+ */
+struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
+                    Vlabel targets[2]; };
+
+/*
+ * Enter a continuation (with exception edges).
+ *
+ * `fp' is the continuation's frame pointer, and `target' is the code address
+ * at which to resume execution.
+ *
+ * Since `target' is dominated by a phplogue{}, we must implement to its ABI.
+ * For most architectures, this will probably require calling a small stub
+ * function.
+ */
+struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
+
+/*
+ * Pop the address of enterTCExit off the stack, and return to it.
+ *
+ * Used to relinquish control to the async scheduler from an async function.
+ */
+struct leavetc { RegSet args; };
+
+///////////////////////////////////////////////////////////////////////////////
+// Exception intrinsics.
 
 /*
  * Header for catch blocks.
@@ -637,9 +767,6 @@ struct andl  { Vreg32 s0, s1, d; VregSF sf; };
 struct andli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct andq  { Vreg64 s0, s1, d; VregSF sf; };
 struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct call { CodeAddress target; RegSet args; };
-struct callm { Vptr target; RegSet args; };
-struct callr { Vreg64 target; RegSet args; };
 
 /*
  * Implements the equivalent of:
@@ -728,7 +855,6 @@ struct pop { Vreg64 d; };
 struct popm { Vptr d; };
 struct push { Vreg64 s; };
 struct pushm { Vptr s; };
-struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
 // shifts are att-style: s1<<{s0|ecx} => d,sf

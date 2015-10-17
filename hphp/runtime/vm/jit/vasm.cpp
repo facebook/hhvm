@@ -34,7 +34,7 @@ rds::Link<uint64_t> g_bytecodesVasm{rds::kInvalidHandle};
 
 folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
-    case Vinstr::bindcall:    return {inst.bindcall_.targets, 2};
+    case Vinstr::callphp:     return {inst.callphp_.targets, 2};
     case Vinstr::contenter:   return {inst.contenter_.targets, 2};
     case Vinstr::jcc:         return {inst.jcc_.targets, 2};
     case Vinstr::jcci:        return {&inst.jcci_.target, 1};

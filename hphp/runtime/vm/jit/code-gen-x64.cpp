@@ -1692,12 +1692,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{prev_fp, sync_sp, ripReg}}), v.makeTuple({})};
   }
 
-  v << vret{
-    fp[AROFF(m_savedRip)],
-    fp[AROFF(m_sfp)],
-    rvmfp(),
-    php_return_regs()
-  };
+  v << phpret{fp, rvmfp(), php_return_regs()};
 }
 
 void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
@@ -2620,7 +2615,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     emitImmStoreq(v, kUninitializedRIP, rvmfp()[AROFF(m_savedRip)]);
   }
   auto next = v.makeBlock();
-  v << bindcall{addr, cross_call_regs(), {{next, catchBlock}}};
+  v << callphp{addr, php_call_regs(), {{next, catchBlock}}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
 }
@@ -5213,8 +5208,7 @@ void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgEnterFrame(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  vmain() << popm{fp[AROFF(m_savedRip)]};
+  vmain() << phplogue{srcLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgCheckStackOverflow(IRInstruction* inst) {

@@ -155,26 +155,26 @@ void analyze_inst_physical(Env& env,
     if (auto const idx = phys_reg_index(dst)) {
       /*
        * A common pattern for us is to load an address into the frame pointer
-       * right before a bindcall.  In this case, if the frame pointer was not
+       * right before a PHP call.  In this case, if the frame pointer was not
        * altered before this redefinition, it will effectively still be
-       * not-altered after the bindcall, because bindcall restores it to the
+       * not-altered after the call, because callphp{} restores it to the
        * previous value.
        *
        * We don't need to worry about not setting the altered flag in between
-       * this instruction and the bindcall, because bindcall's uses are only of
-       * a RegSet---we cannot mis-optimize any of its args based on the state
-       * we're tracking for the frame pointer.
+       * this instruction and the callphp{}, because callphp{}'s uses are only
+       * of a RegSet---we cannot mis-optimize any of its args based on the
+       * state we're tracking for the frame pointer.
        *
-       * We also skip over bindcall's definition of rvmfp() for this reason.
-       * Really bindcall only preserves rbp if we properly set up the rbp arg
-       * to it, but the program is ill-formed if it's not doing that so it's ok
-       * to just ignore that definition here.
+       * We also skip over callphp{}'s definition of rvmfp() for this reason.
+       * Really callphp{} only preserves rvmfp() if we properly set up the
+       * rvmfp() arg to it, but the program is ill-formed if it's not doing
+       * that so it's ok to just ignore that definition here.
        */
-      if (next && next->op == Vinstr::bindcall && dst == rvmfp()) {
-        FTRACE(3, "      post-dominated by bindcall---preserving frame ptr\n");
+      if (next && next->op == Vinstr::callphp && dst == rvmfp()) {
+        FTRACE(3, "      post-dominated by callphp---preserving frame ptr\n");
         return;
       }
-      if (inst.op == Vinstr::bindcall && dst == rvmfp()) return;
+      if (inst.op == Vinstr::callphp && dst == rvmfp()) return;
 
       FTRACE(3, "      kill {}\n", show(dst));
       state.phys_altered[*idx] = true;

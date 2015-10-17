@@ -119,8 +119,9 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
         case Vinstr::call:
         case Vinstr::callm:
         case Vinstr::callr:
+        case Vinstr::calls:
+        case Vinstr::callstub:
         case Vinstr::callarray:
-        case Vinstr::mccall:
         case Vinstr::contenter:
         case Vinstr::hostcall:
           sync_valid = unwind_valid = nothrow_valid = true;

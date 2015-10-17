@@ -226,39 +226,43 @@ void getEffects(const Abi& abi, const Vinstr& i,
                 RegSet& uses, RegSet& across, RegSet& defs) {
   uses = defs = across = RegSet();
   switch (i.op) {
-    case Vinstr::mccall:
     case Vinstr::call:
     case Vinstr::callm:
     case Vinstr::callr:
+    case Vinstr::calls:
+    case Vinstr::callstub:
       defs = abi.all() - (abi.calleeSaved | rvmfp());
 
       switch (arch()) {
-      case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
-      case Arch::X64: break;
-      case Arch::PPC64: not_implemented(); break;
+        case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
+        case Arch::X64: break;
+        case Arch::PPC64: not_implemented(); break;
       }
       break;
 
-    case Vinstr::bindcall:
-      defs = abi.all();
-      switch (arch()) {
-      case Arch::ARM: break;
-      case Arch::X64: defs.remove(rvmtl()); break;
-      case Arch::PPC64: not_implemented(); break;
-      }
-      break;
-    case Vinstr::contenter:
-    case Vinstr::callarray:
-      defs = abi.all() - RegSet(rvmfp());
-      switch (arch()) {
-      case Arch::ARM: break;
-      case Arch::X64: defs.remove(rvmtl()); break;
-      case Arch::PPC64: not_implemented(); break;
-      }
-      break;
     case Vinstr::callfaststub:
       defs = abi.all() - abi.calleeSaved - abi.gpUnreserved;
       break;
+
+    case Vinstr::callphp:
+      defs = abi.all();
+      switch (arch()) {
+        case Arch::ARM: break;
+        case Arch::X64: defs.remove(rvmtl()); break;
+        case Arch::PPC64: not_implemented(); break;
+      }
+      break;
+
+    case Vinstr::callarray:
+    case Vinstr::contenter:
+      defs = abi.all() - RegSet(rvmfp());
+      switch (arch()) {
+        case Arch::ARM: break;
+        case Arch::X64: defs.remove(rvmtl()); break;
+        case Arch::PPC64: not_implemented(); break;
+      }
+      break;
+
     case Vinstr::cqo:
       uses = RegSet(reg::rax);
       defs = reg::rax | reg::rdx;
@@ -270,15 +274,18 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::sarq:
       across = RegSet(reg::rcx);
       break;
+
     // arm instrs
     case Vinstr::hostcall:
       defs = (abi.all() - abi.calleeSaved) |
              RegSet(PhysReg(arm::rHostCallReg));
       break;
+
     case Vinstr::vcall:
     case Vinstr::vinvoke:
     case Vinstr::vcallarray:
       always_assert(false && "Unsupported instruction in vxls");
+
     default:
       break;
   }

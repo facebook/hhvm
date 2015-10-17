@@ -36,7 +36,7 @@ enterTCHelper PROC FRAME
   sub rsp, 8
 
   ; If we're entering the TC at a function prologue, make it look like we got
-  ; there via a bindcall by pushing return addresses, setting the callee frame
+  ; there via a callphp{} by pushing return addresses, setting the callee frame
   ; pointer, then jumping to the prologue. We leave the TC with a ret
   ; instruction, so if we enter it with a jmp, that will unbalance the RSB and
   ; cause tons of branch mispredictions in the frames above us. To avoid this,

@@ -106,7 +106,6 @@ struct Vgen {
   }
 
   // intrinsics
-  void emit(const bindcall& i);
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& i) { a->Brk(0); }
@@ -118,7 +117,12 @@ struct Vgen {
   void emit(const load& i);
   void emit(const store& i);
 
-  // boundaries
+  // functions
+  void emit(const callr& i) { a->Blr(X(i.target)); }
+  void emit(const ret& i) { a->Ret(); }
+  void emit(const callphp& i);
+
+  // exceptions
   void emit(const nothrow& i);
   void emit(const syncpoint& i);
   void emit(const unwind& i);
@@ -132,7 +136,6 @@ struct Vgen {
   void emit(const sar& i) { a->asrv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const brk& i) { a->Brk(i.code); }
   void emit(cbcc i);
-  void emit(const callr& i) { a->Blr(X(i.target)); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -152,7 +155,6 @@ struct Vgen {
   void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
   void emit(const orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* flags? */); }
   void emit(const orqi& i) { a->Orr(X(i.d), X(i.s1), i.s0.l() /* flags? */); }
-  void emit(const ret& i) { a->Ret(); }
   void emit(const storeb& i) { a->Strb(W(i.s), M(i.m)); }
   void emit(const storel& i) { a->Str(W(i.s), M(i.m)); }
   void emit(const setcc& i) { PhysReg r(i.d.asReg()); a->Cset(X(r), C(i.cc)); }
@@ -203,7 +205,7 @@ void Vgen::patch(Venv& env) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const bindcall& i) {
+void Vgen::emit(const callphp& i) {
   emitSmashableCall(*codeBlock, i.stub);
 }
 

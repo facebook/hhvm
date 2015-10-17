@@ -36,8 +36,6 @@ const char* vinst_names[] = {
 bool isBlockEnd(const Vinstr& inst) {
   switch (inst.op) {
     // service request-y things
-    case Vinstr::bindcall:
-    case Vinstr::contenter:
     case Vinstr::bindjcc1st:
     case Vinstr::bindjmp:
     case Vinstr::fallback:
@@ -51,13 +49,19 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::jmpi:
     case Vinstr::phijmp:
     case Vinstr::phijcc:
+    case Vinstr::tailcallstub:
+    case Vinstr::callphp:
+    case Vinstr::tailcallphp:
+    // exception edges
+    case Vinstr::unwind:
+    case Vinstr::vinvoke:
+    case Vinstr::vcallarray:
+    case Vinstr::contenter:
     // terminal
     case Vinstr::ud2:
-    case Vinstr::unwind:
-    case Vinstr::vcallarray:
-    case Vinstr::vinvoke:
     case Vinstr::ret:
-    case Vinstr::vret:
+    case Vinstr::stubret:
+    case Vinstr::phpret:
     case Vinstr::leavetc:
     case Vinstr::fallthru:
     // arm specific

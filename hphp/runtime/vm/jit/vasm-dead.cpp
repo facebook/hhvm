@@ -148,16 +148,18 @@ bool effectful(Vinstr& inst) {
     case Vinstr::addqim:
     case Vinstr::andbim:
     case Vinstr::bindaddr:
-    case Vinstr::bindcall:
     case Vinstr::bindjcc1st:
     case Vinstr::bindjcc:
     case Vinstr::bindjmp:
     case Vinstr::brk:
     case Vinstr::call:
+    case Vinstr::callarray:
     case Vinstr::callfaststub:
     case Vinstr::callm:
+    case Vinstr::callphp:
     case Vinstr::callr:
-    case Vinstr::callarray:
+    case Vinstr::calls:
+    case Vinstr::callstub:
     case Vinstr::cbcc:
     case Vinstr::contenter:
     case Vinstr::cqo:
@@ -181,7 +183,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::jmpr:
     case Vinstr::jmpi:
     case Vinstr::landingpad:
-    case Vinstr::mccall:
+    case Vinstr::leavetc:
     case Vinstr::mcprep:
     case Vinstr::nothrow:
     case Vinstr::orqim:
@@ -189,6 +191,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::phidef:
     case Vinstr::phijcc:
     case Vinstr::phijmp:
+    case Vinstr::phplogue:
+    case Vinstr::phpret:
     case Vinstr::pop:
     case Vinstr::popm:
     case Vinstr::push:
@@ -205,16 +209,18 @@ bool effectful(Vinstr& inst) {
     case Vinstr::storesd:
     case Vinstr::storew:
     case Vinstr::storewi:
+    case Vinstr::stublogue:
+    case Vinstr::stubret:
     case Vinstr::syncpoint:
     case Vinstr::syncvmsp:
+    case Vinstr::tailcallphp:
+    case Vinstr::tailcallstub:
     case Vinstr::tbcc:
     case Vinstr::ud2:
     case Vinstr::unwind:
     case Vinstr::vcall:
     case Vinstr::vcallarray:
     case Vinstr::vinvoke:
-    case Vinstr::vret:
-    case Vinstr::leavetc:
       return true;
   }
   always_assert(false);

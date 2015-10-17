@@ -77,7 +77,6 @@ struct Vgen {
   }
 
   // intrinsics
-  void emit(const bindcall& i);
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& i) { a->int3(); }
@@ -88,17 +87,30 @@ struct Vgen {
   void emit(const ldimmqs& i);
   void emit(const load& i);
   void emit(const store& i);
+  void emit(const mcprep& i);
 
-  // calls/rets
-  void emit(const callarray& i);
+  // native function abi
+  void emit(const call& i);
+  void emit(const callm& i) { a->call(i.target); }
+  void emit(const callr& i) { a->call(i.target); }
+  void emit(const calls& i);
+  void emit(const ret& i) { a->ret(); }
+
+  // stub function abi
+  void emit(const stubret& i);
+  void emit(const callstub& i);
   void emit(const callfaststub& i);
+  void emit(const tailcallstub& i);
+
+  // php function abi
+  void emit(const phpret& i);
+  void emit(const callphp& i);
+  void emit(const tailcallphp& i);
+  void emit(const callarray& i);
   void emit(const contenter& i);
   void emit(const leavetc&) { a->ret(); }
-  void emit(const mcprep& i);
-  void emit(const mccall& i);
-  void emit(const vret& i);
 
-  // boundaries
+  // exceptions
   void emit(const landingpad& i) {}
   void emit(const nothrow& i);
   void emit(const syncpoint& i);
@@ -118,9 +130,6 @@ struct Vgen {
   void emit(addqi i) { binary(i); a->addq(i.s0, i.d); }
   void emit(const addqim& i);
   void emit(addsd i) { commute(i); a->addsd(i.s0, i.d); }
-  void emit(const call& i);
-  void emit(const callm& i) { a->call(i.target); }
-  void emit(const callr& i) { a->call(i.target); }
   void emit(const cloadq& i);
   void emit(const cmovq& i);
   void emit(const cmpb& i) { a->cmpb(i.s0, i.s1); }
@@ -190,7 +199,6 @@ struct Vgen {
   void emit(const push& i) { a->push(i.s); }
   void emit(const pushm& i) { a->push(i.s); }
   void emit(const roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
-  void emit(const ret& i) { a->ret(); }
   void emit(const sarq& i) { unary(i); a->sarq(i.d); }
   void emit(sarqi i) { binary(i); a->sarq(i.s0, i.d); }
   void emit(const setcc& i) { a->setcc(i.cc, i.d); }
@@ -330,11 +338,6 @@ void Vgen::pad(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const bindcall& i) {
-  emitSmashableCall(a->code(), i.stub);
-  emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
 void Vgen::emit(const copy& i) {
   if (i.s == i.d) return;
   if (i.s.isGP()) {
@@ -446,32 +449,6 @@ void Vgen::emit(const store& i) {
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const callarray& i) {
-  emit(call{i.target, i.args});
-}
-
-void Vgen::emit(const callfaststub& i) {
-  emit(call{i.target, i.args});
-  emit(syncpoint{i.fix});
-}
-
-void Vgen::emit(const contenter& i) {
-  Label Stub, End;
-  Reg64 fp = i.fp, target = i.target;
-  a->jmp8(End);
-
-  asm_label(*a, Stub);
-  a->pop(fp[AROFF(m_savedRip)]);
-  a->jmp(target);
-
-  asm_label(*a, End);
-  a->call(Stub);
-  // m_savedRip will point here.
-  emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
 void Vgen::emit(const mcprep& i) {
   /*
    * Initially, we set the cache to hold (addr << 1) | 1 (where `addr' is the
@@ -488,14 +465,88 @@ void Vgen::emit(const mcprep& i) {
   mcg->cgFixups().m_addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }
 
-void Vgen::emit(const mccall& i) {
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const call& i) {
+  if (a->jmpDeltaFits(i.target)) {
+    a->call(i.target);
+  } else {
+    // can't do a near call; store address in data section.
+    // call by loading the address using rip-relative addressing.  This
+    // assumes the data section is near the current code section.  Since
+    // this sequence is directly in-line, rip-relative like this is
+    // more compact than loading a 64-bit immediate.
+    auto addr = mcg->allocLiteral((uint64_t)i.target);
+    a->call(rip[(intptr_t)addr]);
+  }
+}
+
+void Vgen::emit(const calls& i) {
   emitSmashableCall(a->code(), i.target);
 }
 
-void Vgen::emit(const vret& i) {
-  a->push(i.retAddr);
-  a->loadq(i.prevFP, i.d);
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const stubret& i) {
+  if (i.saveframe) {
+    a->pop(rvmfp());
+  } else {
+    a->addq(8, reg::rsp);
+  }
   a->ret();
+}
+
+void Vgen::emit(const callstub& i) {
+  emit(call{i.target, i.args});
+}
+
+void Vgen::emit(const callfaststub& i) {
+  emit(call{i.target, i.args});
+  emit(syncpoint{i.fix});
+}
+
+void Vgen::emit(const tailcallstub& i) {
+  a->addq(8, reg::rsp);
+  emit(jmpi{i.target, i.args});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const phpret& i) {
+  a->push(i.fp[AROFF(m_savedRip)]);
+  if (!i.noframe) {
+    a->loadq(i.fp[AROFF(m_sfp)], i.d);
+  }
+  a->ret();
+}
+
+void Vgen::emit(const callphp& i) {
+  emitSmashableCall(a->code(), i.stub);
+  emit(unwind{{i.targets[0], i.targets[1]}});
+}
+
+void Vgen::emit(const tailcallphp& i) {
+  emit(pushm{i.fp[AROFF(m_savedRip)]});
+  emit(jmpr{i.target, i.args});
+}
+
+void Vgen::emit(const callarray& i) {
+  emit(call{i.target, i.args});
+}
+
+void Vgen::emit(const contenter& i) {
+  Label Stub, End;
+  Reg64 fp = i.fp, target = i.target;
+  a->jmp8(End);
+
+  asm_label(*a, Stub);
+  a->pop(fp[AROFF(m_savedRip)]);
+  a->jmp(target);
+
+  asm_label(*a, End);
+  a->call(Stub);
+  // m_savedRip will point here.
+  emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -519,20 +570,6 @@ void Vgen::emit(const unwind& i) {
 
 void Vgen::emit(const addqim& i) {
   prefix(*a, i.m).addq(i.s0, i.m.mr());
-}
-
-void Vgen::emit(const call& i) {
-  if (a->jmpDeltaFits(i.target)) {
-    a->call(i.target);
-  } else {
-    // can't do a near call; store address in data section.
-    // call by loading the address using rip-relative addressing.  This
-    // assumes the data section is near the current code section.  Since
-    // this sequence is directly in-line, rip-relative like this is
-    // more compact than loading a 64-bit immediate.
-    auto addr = mcg->allocLiteral((uint64_t)i.target);
-    a->call(rip[(intptr_t)addr]);
-  }
 }
 
 void Vgen::emit(const cloadq& i) {
@@ -739,33 +776,40 @@ void lowerForX64(Vunit& unit) {
 
       auto& inst = blocks[ib].code[ii];
       switch (inst.op) {
-        case Vinstr::srem:
-          lowerSrem(unit, Vlabel{ib}, ii);
+        case Vinstr::countbytecode:
+          inst = incqm{inst.countbytecode_.base[g_bytecodesVasm.handle()],
+                       inst.countbytecode_.sf};
           break;
 
-        case Vinstr::sar:
-          lowerShift<sar, sarq>(unit, Vlabel{ib}, ii);
+        case Vinstr::stublogue:
+          if (inst.stublogue_.saveframe) {
+            inst = push{rvmfp()};
+          } else {
+            inst = subqi{8, reg::rsp, reg::rsp, unit.makeReg()};
+          }
           break;
-
-        case Vinstr::shl:
-          lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
+        case Vinstr::phplogue:
+          inst = popm{inst.phplogue_.fp[AROFF(m_savedRip)]};
           break;
 
         case Vinstr::absdbl:
           lowerAbsdbl(unit, Vlabel{ib}, ii);
           break;
+        case Vinstr::sar:
+          lowerShift<sar, sarq>(unit, Vlabel{ib}, ii);
+          break;
+        case Vinstr::shl:
+          lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
+          break;
+        case Vinstr::srem:
+          lowerSrem(unit, Vlabel{ib}, ii);
+          break;
 
         case Vinstr::movtqb:
           inst = copy{inst.movtqb_.s, inst.movtqb_.d};
           break;
-
         case Vinstr::movtql:
           inst = copy{inst.movtql_.s, inst.movtql_.d};
-          break;
-
-        case Vinstr::countbytecode:
-          inst = incqm{inst.countbytecode_.base[g_bytecodesVasm.handle()],
-                       inst.countbytecode_.sf};
           break;
 
         default:

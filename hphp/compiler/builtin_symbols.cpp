@@ -91,11 +91,6 @@ int BuiltinSymbols::NumGlobalNames() {
     sizeof(BuiltinSymbols::GlobalNames[0]);
 }
 
-const StaticString
-  s_fb_call_user_func_safe("fb_call_user_func_safe"),
-  s_fb_call_user_func_safe_return("fb_call_user_func_safe_return"),
-  s_fb_call_user_func_array_safe("fb_call_user_func_array_safe");
-
 FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(
   AnalysisResultPtr ar,
   const ClassInfo* cls,
@@ -126,14 +121,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(
   f->setClassInfoAttribute(attrs);
   f->setDocComment(method->docComment);
 
-  if (!isMethod && (attrs & ClassInfo::HasOptFunction)) {
-    // Legacy optimization functions
-    if (method->name.same(s_fb_call_user_func_safe) ||
-        method->name.same(s_fb_call_user_func_safe_return) ||
-        method->name.same(s_fb_call_user_func_array_safe)) {
-      f->setOptFunction(hphp_opt_fb_call_user_func);
-    }
-  }
+  assert(!(attrs & ClassInfo::HasOptFunction));
 
   if (isMethod) {
     if (attrs & ClassInfo::IsProtected) {

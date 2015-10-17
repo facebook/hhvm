@@ -8,8 +8,6 @@ HHVM_DEFINE_EXTENSION("fb"
     VariantController.h
   SYSTEMLIB
     ext_fb.php
-  IDL
-    ../../../system/idl/fb.idl.json
   DEPENDS
     libFolly
     libICU

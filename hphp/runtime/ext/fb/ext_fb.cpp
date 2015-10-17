@@ -1036,25 +1036,29 @@ bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
 // call_user_func extensions
 // Linked in via fb.json.idl for now - Need OptFunc solution...
 
-Array f_fb_call_user_func_safe(int _argc, const Variant& function,
-                               const Array& _argv /* = null_array */) {
-  return f_fb_call_user_func_array_safe(function, _argv);
+Array HHVM_FUNCTION(fb_call_user_func_safe,
+                    const Variant& function,
+                    const Array& argv) {
+  return HHVM_FN(fb_call_user_func_array_safe)(function, argv);
 }
 
-Variant f_fb_call_user_func_safe_return(int _argc, const Variant& function,
-                                        const Variant& def,
-                                        const Array& _argv /* = null_array */) {
+Variant HHVM_FUNCTION(fb_call_user_func_safe_return,
+                      const Variant& function,
+                      const Variant& def,
+                      const Array& argv) {
   if (is_callable(function)) {
-    return vm_call_user_func(function, _argv);
+    return vm_call_user_func(function, argv);
   }
   return def;
 }
 
-Array f_fb_call_user_func_array_safe(const Variant& function, const Array& params) {
+Array HHVM_FUNCTION(fb_call_user_func_array_safe,
+                    const Variant& function,
+                    const Array& params) {
   if (is_callable(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }
-  return make_packed_array(false, uninit_null());
+  return make_packed_array(false, null_variant);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1196,6 +1200,9 @@ class FBExtension : public Extension {
     HHVM_FE(fb_get_last_flush_size);
     HHVM_FE(fb_lazy_lstat);
     HHVM_FE(fb_lazy_realpath);
+    HHVM_FE(fb_call_user_func_safe);
+    HHVM_FE(fb_call_user_func_safe_return);
+    HHVM_FE(fb_call_user_func_array_safe);
 
     loadSystemlib();
   }

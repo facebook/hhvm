@@ -34,10 +34,9 @@ namespace irlower {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class SyncOptions {
-  kNoSyncPoint,
-  kSyncPoint,
-  kSyncPointAdjustOne,
-  kSmashableAndSyncPoint,
+  None,
+  Sync,
+  SyncAdjustOne,
 };
 
 enum class CatchCall {

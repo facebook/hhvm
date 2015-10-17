@@ -93,23 +93,22 @@ struct FormatVisitor {
   void imm(TCA* addr) {
     str << sep() << folly::format("{}", addr);
   }
-  void imm(const CppCall& cppcall) {
-    switch (cppcall.kind()) {
+  void imm(const CallSpec& call) {
+    switch (call.kind()) {
     default:
       str << sep() << "<unknown>";
       break;
-    case CppCall::Kind::Direct:
-      return imm((TCA)cppcall.address());
-    case CppCall::Kind::Virtual:
-      str << sep() << folly::format("<virtual at 0x{:08x}>",
-                                    cppcall.vtableOffset());
+    case CallSpec::Kind::Direct:
+    case CallSpec::Kind::Smashable:
+      return imm((TCA)call.address());
+    case CallSpec::Kind::ArrayVirt:
+      str << sep() << folly::format("ArrayVirt({})", call.arrayTable());
       break;
-    case CppCall::Kind::ArrayVirt:
-      str << sep() << folly::format("ArrayVirt({})", cppcall.arrayTable());
+    case CallSpec::Kind::Destructor:
+      str << sep() << folly::format("destructor({})", show(call.reg()));
       break;
-    case CppCall::Kind::Destructor:
-      str << sep() << folly::format("destructor({})", show(cppcall.reg()));
-      break;
+    case CallSpec::Kind::Stub:
+      return imm(call.stubAddr());
     }
   }
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
-#include "hphp/runtime/vm/jit/cpp-call.h"
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -120,7 +120,7 @@ void emitAssertRefCount(Vout& v, Vreg data);
 ///////////////////////////////////////////////////////////////////////////////
 // Calls.
 
-void emitCall(Vout& v, CppCall call, RegSet args);
+void emitCall(Vout& v, CallSpec call, RegSet args);
 
 /*
  * Return a Vptr to the native destructor function for values of type `type'.

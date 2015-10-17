@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/vm/jit/cpp-call.h"
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -522,10 +522,10 @@ struct mccall { CodeAddress target; RegSet args; };
  * Contains information about a C++ helper call needed for lowering to
  * different target architectures.
  */
-struct vcall { CppCall call; VcallArgsId args; Vtuple d;
+struct vcall { CallSpec call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
-struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
-                 Fixup fixup; DestType destType; bool smashable; };
+struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
+                 Fixup fixup; DestType destType; };
 
 /*
  * Load `prevFP' into `d' and return to `retAddr'.

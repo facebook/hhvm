@@ -40,7 +40,6 @@ namespace HPHP { namespace jit {
  *      - movq
  *      - cmpq:   A cmpq of a 32-bit immediate and a memory operand with 8-bit
  *                displacement (and no index or scale).  Used for func guards.
- *                TODO(#7831969): Add smashCmpq and smashableCmpqImm().
  *
  *    [insts w/ smashable targets]
  *      - call

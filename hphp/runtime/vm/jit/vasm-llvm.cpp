@@ -2136,18 +2136,18 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
 
   llvm::Value* funcPtr = nullptr;
   switch (call.kind()) {
-    case CppCall::Kind::Direct:
+    case CallSpec::Kind::Direct:
+    case CallSpec::Kind::Smashable:
       funcPtr = emitFuncPtr(getNativeFunctionName(call.address()),
                             funcType,
                             uint64_t(call.address()));
       break;
 
-    case CppCall::Kind::Virtual:
-    case CppCall::Kind::ArrayVirt:
+    case CallSpec::Kind::ArrayVirt:
       throw FailedLLVMCodeGen("Unsupported call type: {}",
                               (int)call.kind());
 
-    case CppCall::Kind::Destructor: {
+    case CallSpec::Kind::Destructor: {
       assertx(vargs.args.size() == 1);
       llvm::Value* type = value(call.reg());
       type = m_irb.CreateLShr(type, kShiftDataTypeToDestrIndex, "typeIdx");
@@ -2158,6 +2158,12 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
       funcPtr = m_irb.CreateExtractElement(m_irb.CreateLoad(destructors), type);
       break;
     }
+
+    case CallSpec::Kind::Stub:
+      funcPtr = emitFuncPtr(getNativeFunctionName((void*)call.stubAddr()),
+                            funcType,
+                            uint64_t(call.stubAddr()));
+      break;
   }
 
   llvm::Instruction* callInst = nullptr;

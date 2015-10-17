@@ -22,8 +22,9 @@
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/class.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
-#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -154,37 +155,43 @@ Vreg emitDecRef(Vout& v, Vreg base) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitCall(Vout& v, CppCall target, RegSet args) {
+void emitCall(Vout& v, CallSpec target, RegSet args) {
   switch (target.kind()) {
-    case CppCall::Kind::Direct:
+    case CallSpec::Kind::Direct:
       v << call{static_cast<TCA>(target.address()), args};
       return;
-    case CppCall::Kind::Virtual:
-      // Virtual call.  Load method's address from proper offset off of object in
-      // rdi, using rax as scratch.
-      v << load{*reg::rdi, reg::rax};
-      v << callm{reg::rax[target.vtableOffset()], args};
+
+    case CallSpec::Kind::Smashable:
+      v << mccall{static_cast<TCA>(target.address()), args};
       return;
-    case CppCall::Kind::ArrayVirt: {
+
+    case CallSpec::Kind::ArrayVirt: {
       auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
-      v << loadzbl{reg::rdi[HeaderKindOffset], reg::eax};
+
+      auto const arrkind = v.makeReg();
+      v << loadzbl{rarg(0)[HeaderKindOffset], arrkind};
+
       if (deltaFits(addr, sz::dword)) {
-        v << callm{baseless(reg::rax * 8 + addr), args};
+        v << callm{baseless(arrkind * 8 + addr), args};
       } else {
         auto const base = v.makeReg();
         v << ldimmq{addr, base};
-        v << callm{base[reg::rax * 8], args};
+        v << callm{base[arrkind * 8], args};
       }
       static_assert(sizeof(HeaderKind) == 1, "");
-      return;
-    }
-    case CppCall::Kind::Destructor:
+    } return;
+
+    case CallSpec::Kind::Destructor: {
       // this movzbq is only needed because callers aren't required to
       // zero-extend the type.
       auto zextType = v.makeReg();
       v << movzbq{target.reg(), zextType};
       auto dtor_ptr = lookupDestructor(v, zextType);
       v << callm{dtor_ptr, args};
+    } return;
+
+    case CallSpec::Kind::Stub:
+      v << call{target.stubAddr(), args};
       return;
   }
   not_reached();
@@ -283,7 +290,7 @@ void emitTransCounterInc(Vout& v) {
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) return;
-  v << vcall{CppCall::direct(Trace::ringbufferMsg),
+  v << vcall{CallSpec::direct(Trace::ringbufferMsg),
              v.makeVcallArgs({{v.cns(msg), v.cns(strlen(msg)), v.cns(t)}}),
              v.makeTuple({})};
 }

@@ -37,9 +37,9 @@ void CodeGenerator::cgBaseG(IRInstruction* inst) {
   auto const mia = inst->extra<BaseG>()->mia;
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFuncs[mia & MIA_base]),
+    CallSpec::direct(opFuncs[mia & MIA_base]),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .typedValue(0)
   );
@@ -51,9 +51,9 @@ void CodeGenerator::cgPropImpl(IRInstruction* inst) {
   BUILD_OPTAB(PROP_HELPER_TABLE, mia, inst->src(0)->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -77,9 +77,9 @@ void CodeGenerator::cgPropQ(IRInstruction* inst) {
   if (inst->src(0)->isA(TObj)) {
     cgCallHelper(
       vmain(),
-      CppCall::direct(propCOQ),
+      CallSpec::direct(propCOQ),
       callDest(inst),
-      SyncOptions::kSyncPoint,
+      SyncOptions::Sync,
       args
     );
     return;
@@ -87,9 +87,9 @@ void CodeGenerator::cgPropQ(IRInstruction* inst) {
 
   cgCallHelper(
     vmain(),
-    CppCall::direct(propCQ),
+    CallSpec::direct(propCQ),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     args
   );
 }
@@ -102,9 +102,9 @@ void CodeGenerator::cgCGetProp(IRInstruction* inst) {
   BUILD_OPTAB(CGETPROP_HELPER_TABLE, keyType, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -123,9 +123,9 @@ void CodeGenerator::cgCGetPropQ(IRInstruction* inst) {
   if (inst->src(0)->isA(TObj)) {
     cgCallHelper(
       vmain(),
-      CppCall::direct(cGetPropSOQ),
+      CallSpec::direct(cGetPropSOQ),
       callDestTV(inst),
-      SyncOptions::kSyncPoint,
+      SyncOptions::Sync,
       args
     );
     return;
@@ -133,9 +133,9 @@ void CodeGenerator::cgCGetPropQ(IRInstruction* inst) {
 
   cgCallHelper(
     vmain(),
-    CppCall::direct(cGetPropSQ),
+    CallSpec::direct(cGetPropSQ),
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     args
   );
 }
@@ -148,9 +148,9 @@ void CodeGenerator::cgVGetProp(IRInstruction* inst) {
   BUILD_OPTAB(VGETPROP_HELPER_TABLE, keyType, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -164,9 +164,9 @@ void CodeGenerator::cgBindProp(IRInstruction* inst) {
   BUILD_OPTAB(BINDPROP_HELPER_TABLE, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -181,9 +181,9 @@ void CodeGenerator::cgSetProp(IRInstruction* inst) {
   BUILD_OPTAB(SETPROP_HELPER_TABLE, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     kVoidDest,
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -197,9 +197,9 @@ void CodeGenerator::cgUnsetProp(IRInstruction* inst) {
   BUILD_OPTAB(UNSETPROP_HELPER_TABLE, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     kVoidDest,
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -213,9 +213,9 @@ void CodeGenerator::cgSetOpProp(IRInstruction* inst) {
   BUILD_OPTAB(SETOPPROP_HELPER_TABLE, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -232,9 +232,9 @@ void CodeGenerator::cgIncDecProp(IRInstruction* inst) {
   BUILD_OPTAB(INCDECPROP_HELPER_TABLE, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -249,9 +249,9 @@ void CodeGenerator::cgIssetEmptyPropImpl(IRInstruction* inst) {
   BUILD_OPTAB(ISSET_EMPTY_PROP_HELPER_TABLE, isEmpty, base->isA(TObj));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
@@ -268,9 +268,9 @@ void CodeGenerator::cgElemImpl(IRInstruction* inst) {
   BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mia);
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
@@ -300,9 +300,9 @@ void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
 
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     args
   );
 }
@@ -326,9 +326,9 @@ void CodeGenerator::cgArrayGet(IRInstruction* inst) {
 
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     args
   );
 }
@@ -336,13 +336,13 @@ void CodeGenerator::cgArrayGet(IRInstruction* inst) {
 void CodeGenerator::cgMapGet(IRInstruction* inst) {
   auto const target =
     inst->src(1)->isA(TInt)
-      ? CppCall::direct(MInstrHelpers::mapGetImpl<KeyType::Int>)
-      : CppCall::direct(MInstrHelpers::mapGetImpl<KeyType::Str>);
+      ? CallSpec::direct(MInstrHelpers::mapGetImpl<KeyType::Int>)
+      : CallSpec::direct(MInstrHelpers::mapGetImpl<KeyType::Str>);
   cgCallHelper(
     vmain(),
     target,
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .ssa(1)
@@ -352,13 +352,13 @@ void CodeGenerator::cgMapGet(IRInstruction* inst) {
 void CodeGenerator::cgMapSet(IRInstruction* inst) {
   auto const target =
     inst->src(1)->isA(TInt)
-      ? CppCall::direct(MInstrHelpers::mapSetImpl<KeyType::Int>)
-      : CppCall::direct(MInstrHelpers::mapSetImpl<KeyType::Str>);
+      ? CallSpec::direct(MInstrHelpers::mapSetImpl<KeyType::Int>)
+      : CallSpec::direct(MInstrHelpers::mapSetImpl<KeyType::Str>);
   cgCallHelper(
     vmain(),
     target,
     kVoidDest,
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .ssa(1)
@@ -369,13 +369,13 @@ void CodeGenerator::cgMapSet(IRInstruction* inst) {
 void CodeGenerator::cgMapIsset(IRInstruction* inst) {
   auto const target =
     inst->src(1)->isA(TInt)
-      ? CppCall::direct(MInstrHelpers::mapIssetImpl<KeyType::Int>)
-      : CppCall::direct(MInstrHelpers::mapIssetImpl<KeyType::Str>);
+      ? CallSpec::direct(MInstrHelpers::mapIssetImpl<KeyType::Int>)
+      : CallSpec::direct(MInstrHelpers::mapIssetImpl<KeyType::Str>);
   cgCallHelper(
     vmain(),
     target,
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .ssa(1)
@@ -387,9 +387,9 @@ void CodeGenerator::cgCGetElem(IRInstruction* inst) {
   BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
@@ -401,9 +401,9 @@ void CodeGenerator::cgVGetElem(IRInstruction* inst) {
   BUILD_OPTAB(VGETELEM_HELPER_TABLE, getKeyType(key));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
@@ -433,9 +433,9 @@ void CodeGenerator::cgArraySetImpl(IRInstruction* inst) {
 
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     args
   );
 }
@@ -448,9 +448,9 @@ void CodeGenerator::cgSetElem(IRInstruction* inst) {
   BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(key));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
@@ -474,9 +474,9 @@ void CodeGenerator::cgArrayIsset(IRInstruction* inst) {
 
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     args
   );
 }
@@ -486,9 +486,9 @@ void CodeGenerator::cgUnsetElem(IRInstruction* inst) {
   BUILD_OPTAB(UNSET_ELEM_HELPER_TABLE, getKeyType(key));
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     kVoidDest,
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
@@ -501,9 +501,9 @@ void CodeGenerator::cgIssetEmptyElemImpl(IRInstruction* inst) {
   BUILD_OPTAB(ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), isEmpty);
   cgCallHelper(
     vmain(),
-    CppCall::direct(opFunc),
+    CallSpec::direct(opFunc),
     callDest(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
@@ -519,14 +519,14 @@ void CodeGenerator::cgArrayIdx(IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(key->type());
 
-  auto const target = [&] () -> CppCall {
+  auto const target = [&] () -> CallSpec {
     if (keyInfo.checkForInt) {
-      return CppCall::direct(arrayIdxSi);
+      return CallSpec::direct(arrayIdxSi);
     }
     if (keyInfo.type == KeyType::Int) {
-      return CppCall::direct(arrayIdxI);
+      return CallSpec::direct(arrayIdxI);
     }
-    return CppCall::direct(arrayIdxS);
+    return CallSpec::direct(arrayIdxS);
   }();
 
   auto args = argGroup(inst).ssa(0);
@@ -541,7 +541,7 @@ void CodeGenerator::cgArrayIdx(IRInstruction* inst) {
     vmain(),
     target,
     callDestTV(inst),
-    SyncOptions::kSyncPoint,
+    SyncOptions::Sync,
     args
   );
 }

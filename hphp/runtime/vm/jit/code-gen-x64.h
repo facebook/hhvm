@@ -63,7 +63,7 @@ private:
   CallDest callDestDbl(const IRInstruction*) const;
 
   // Main call helper:
-  void cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
+  void cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,
                     SyncOptions sync, const ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
@@ -150,7 +150,7 @@ private:
   };
 
   Fixup makeFixup(const BCMarker& marker,
-                  SyncOptions sync = SyncOptions::kSyncPoint);
+                  SyncOptions sync = SyncOptions::Sync);
   int iterOffset(const BCMarker& marker, uint32_t id);
 
   void emitConvBoolOrIntToDbl(IRInstruction* inst);

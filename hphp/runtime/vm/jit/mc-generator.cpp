@@ -142,22 +142,22 @@ static __thread size_t s_initialTCSize;
 // The global MCGenerator object.
 MCGenerator* mcg;
 
-CppCall MCGenerator::getDtorCall(DataType type) {
+CallSpec MCGenerator::getDtorCall(DataType type) {
   switch (type) {
     case KindOfString:
-      return CppCall::method(&StringData::release);
+      return CallSpec::method(&StringData::release);
     case KindOfArray:
-      return CppCall::method(&ArrayData::release);
+      return CallSpec::method(&ArrayData::release);
     case KindOfObject:
-      return CppCall::method(
+      return CallSpec::method(
         RuntimeOption::EnableObjDestructCall
           ? &ObjectData::release
           : &ObjectData::releaseNoObjDestructCheck
       );
     case KindOfResource:
-      return CppCall::method(&ResourceHdr::release);
+      return CallSpec::method(&ResourceHdr::release);
     case KindOfRef:
-      return CppCall::method(&RefData::release);
+      return CallSpec::method(&RefData::release);
     DT_UNCOUNTED_CASE:
     case KindOfClass:
       break;

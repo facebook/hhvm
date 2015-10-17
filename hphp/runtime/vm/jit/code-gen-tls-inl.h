@@ -58,7 +58,7 @@ emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d) {
   PhysRegSaver(v, abi().gpUnreserved - abi().calleeSaved, true /* aligned */);
 
   v << vcall{
-    CppCall::direct(pthread_getspecific),
+    CallSpec::direct(pthread_getspecific),
     v.makeVcallArgs({{v.cns(datum.tls->m_key)}}),
     v.makeTuple({d}),
     Fixup{},

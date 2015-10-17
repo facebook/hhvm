@@ -19,8 +19,8 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 
 #include <algorithm>
@@ -44,17 +44,17 @@ struct FuncPtr {
 
   template<class Ret, class... Args>
   /* implicit */ FuncPtr(Ret (*fp)(Args...))
-    : call(CppCall::direct(fp))
+    : call(CallSpec::direct(fp))
   {}
 
   template<class Ret, class Cls, class... Args>
   /* implicit */ FuncPtr(Ret (Cls::*fp)(Args...))
-    : call(CppCall::method(fp))
+    : call(CallSpec::method(fp))
   {}
 
   template<class Ret, class Cls, class... Args>
   /* implicit */ FuncPtr(Ret (Cls::*fp)(Args...) const)
-    : call(CppCall::method(fp))
+    : call(CallSpec::method(fp))
   {}
 
   /*
@@ -66,13 +66,13 @@ struct FuncPtr {
    */
   template<class Ret, class... Args>
   /* implicit */ FuncPtr(Ret (*const (*p)[ArrayData::kNumKinds])(Args...))
-    : call(CppCall::array(p))
+    : call(CallSpec::array(p))
   {
     always_assert(0 && "This code needs to be conditional on "
                        "deltaFits(p, sz::dword) before using it");
   }
 
-  union { CppCall call; };
+  union { CallSpec call; };
 };
 
 enum class ArgType : unsigned {

@@ -100,7 +100,7 @@ void loadMCG(Vout& v, Vreg d) {
 template<class F>
 Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
   return vcall{
-    CppCall::direct(helper),
+    CallSpec::direct(helper),
     v.makeVcallArgs({{arg}}),
     v.makeTuple({d}),
     Fixup{},
@@ -283,7 +283,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& cb,
 
   return vwrap(cb, [&] (Vout& v) {
     alignNativeStack(v, [&] (Vout& v) {
-      v << vcall{CppCall::direct(handlePossibleStackOverflow),
+      v << vcall{CallSpec::direct(handlePossibleStackOverflow),
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({})};
     });
     v << jmpi{us.functionEnterHelper};
@@ -394,7 +394,7 @@ TCA emitBindCallStub(CodeBlock& cb) {
         getMethodPtr(&MCGenerator::handleBindCall)
       );
       v << vcall{
-        CppCall::direct(handler),
+        CallSpec::direct(handler),
         v.makeVcallArgs({args}),
         v.makeTuple({ret}),
         Fixup{},

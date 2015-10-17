@@ -45,8 +45,8 @@ namespace NativeCalls {
 
 namespace {
 
-constexpr irlower::SyncOptions SNone = irlower::SyncOptions::kNoSyncPoint;
-constexpr irlower::SyncOptions SSync = irlower::SyncOptions::kSyncPoint;
+constexpr irlower::SyncOptions SNone = irlower::SyncOptions::None;
+constexpr irlower::SyncOptions SSync = irlower::SyncOptions::Sync;
 
 constexpr DestType DSSA  = DestType::SSA;
 constexpr DestType DTV   = DestType::TV;

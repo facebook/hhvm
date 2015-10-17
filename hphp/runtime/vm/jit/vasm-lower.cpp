@@ -46,8 +46,6 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   auto const vcall = vinstr.vcall_;
   auto const vinvoke = vinstr.vinvoke_;
 
-  auto const is_smashable = !is_vcall && vinvoke.smashable;
-
   // We lower vinvoke in two phases, and `inst' is overwritten after the first
   // phase.  We need to save any of its parameters that we care about in the
   // second phase ahead of time.
@@ -84,12 +82,8 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   doArgs(vargs.args, rarg);
   doArgs(vargs.simdArgs, rarg_simd);
 
-  // Emit the call.
-  if (is_smashable) {
-    v << mccall{reinterpret_cast<TCA>(inst.call.address()), argRegs};
-  } else {
-    emitCall(v, inst.call, argRegs);
-  }
+  // Emit the appropriate call instruction sequence.
+  emitCall(v, inst.call, argRegs);
 
   // Handle fixup and unwind information.
   if (inst.fixup.isValid()) {

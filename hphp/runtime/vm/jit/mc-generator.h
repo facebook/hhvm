@@ -34,9 +34,9 @@
 
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/back-end.h"
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -146,7 +146,7 @@ struct MCGenerator : private boost::noncopyable {
     return !mcg || Translator::WriteLease().amOwner();
   }
 
-  static CppCall getDtorCall(DataType type);
+  static CallSpec getDtorCall(DataType type);
 
 public:
   MCGenerator();

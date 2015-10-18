@@ -71,6 +71,8 @@ Variant HHVM_FUNCTION(mb_encode_numericentity,
                       const Variant& convmap,
                       const Variant& opt_encoding = null_variant,
                       bool is_hex = false);
+Variant HHVM_FUNCTION(mb_encoding_aliases,
+                      const String& name);
 bool HHVM_FUNCTION(mb_ereg_match,
                    const String& pattern,
                    const String& str,

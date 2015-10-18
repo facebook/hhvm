@@ -454,18 +454,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * removing that set.
    */
   case DefInlineFP:
-    return may_load_store(
+    return may_load_store_kill(
       AFrameAny | inline_fp_frame(&inst),
       /*
-       * Note that although DefInlineFP is going to store some things into the
-       * memory for the new frame (m_soff, etc), it's as part of converting it
-       * from a pre-live frame to a live frame.  We don't need to report those
-       * effects on memory because they are logically to a 'different location
-       * class' (i.e. an activation record for the callee) than the AStack
-       * locations that represented the pre-live ActRec, even though they are at
-       * the same physical addresses in memory.
+       * This prevents stack slots from the caller from being sunk into the
+       * callee. Note that some of these stack slots overlap with the frame
+       * locals of the callee-- those slots are inacessible in the inlined
+       * call as frame and stack locations may not alias.
        */
-      AEmpty
+      stack_below(inst.dst(), 0),
+      /*
+       * While not required for correctness adding these slots to the kill set
+       * will hopefully avoid some extra stores.
+       */
+      stack_below(inst.dst(), 0)
     );
 
   case InlineReturn:

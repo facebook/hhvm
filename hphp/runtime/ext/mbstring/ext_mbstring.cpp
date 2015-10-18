@@ -1034,7 +1034,8 @@ Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
   const mbfl_encoding *encoding;
   encoding = mbfl_name2encoding(name.data());
   if (!encoding) {
-    raise_warning("mb_encoding_aliases(): Unknown encoding \"%s\"", name.data());
+    raise_warning("mb_encoding_aliases(): Unknown encoding \"%s\"",
+                  name.data());
     return false;
   }
 

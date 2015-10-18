@@ -1039,7 +1039,7 @@ Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
     return false;
   }
 
-  Array ret;
+  Array ret = Array::Create();;
   if (encoding->aliases != NULL) {
     const char **alias;
     for (alias = *encoding->aliases; *alias; ++alias) {

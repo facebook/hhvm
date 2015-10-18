@@ -449,6 +449,8 @@ void Vgen::emit(const store& i) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 void Vgen::emit(const mcprep& i) {
   /*
    * Initially, we set the cache to hold (addr << 1) | 1 (where `addr' is the
@@ -689,47 +691,85 @@ void Vgen::emit(const testqim& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
-  auto const& inst = unit.blocks[b].code[iInst];
-  auto const& srem = inst.srem_;
-  auto scratch = unit.makeScratchBlock();
-  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, inst.origin);
-  v << copy{srem.s0, rax};
-  v << cqo{};                      // sign-extend rax => rdx:rax
-  v << idiv{srem.s1, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
-  v << copy{rdx, srem.d};
+template<typename Lower>
+void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
+  auto& blocks = unit.blocks;
+  auto const& vinstr = blocks[b].code[i];
 
-  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+  auto const scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, vinstr.origin);
+
+  lower(v);
+
+  vector_splice(blocks[b].code, i, 1, blocks[scratch].code);
 }
 
-template<typename FromOp, typename ToOp>
-void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
-  auto const& inst = unit.blocks[b].code[iInst];
-  auto const& shift = inst.get<FromOp>();
-  auto scratch = unit.makeScratchBlock();
-  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, inst.origin);
-  v << copy{shift.s0, rcx};
-  v << ToOp{shift.s1, shift.d, shift.sf};
+template<typename Inst>
+void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
 
-  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+///////////////////////////////////////////////////////////////////////////////
+
+void lower(Vunit& unit, countbytecode& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = incqm{inst.base[g_bytecodesVasm.handle()], inst.sf};
 }
 
-void lowerAbsdbl(Vunit& unit, Vlabel b, size_t iInst) {
-  auto const& inst = unit.blocks[b].code[iInst];
-  auto const& absdbl = inst.absdbl_;
-  auto scratch = unit.makeScratchBlock();
-  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, inst.origin);
-
-  // clear the high bit
-  auto tmp = v.makeReg();
-  v << psllq{1, absdbl.s, tmp};
-  v << psrlq{1, tmp, absdbl.d};
-
-  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
+  if (inst.saveframe) {
+    unit.blocks[b].code[i] = push{rvmfp()};
+  } else {
+    unit.blocks[b].code[i] = subqi{8, reg::rsp, reg::rsp, unit.makeReg()};
+  }
 }
+
+void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = popm{inst.fp[AROFF(m_savedRip)]};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void lower(Vunit& unit, absdbl& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    // Clear the high bit.
+    auto tmp = v.makeReg();
+    v << psllq{1, inst.s, tmp};
+    v << psrlq{1, tmp, inst.d};
+  });
+}
+
+void lower(Vunit& unit, sar& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << copy{inst.s0, rcx};
+    v << sarq{inst.s1, inst.d, inst.sf};
+  });
+}
+
+void lower(Vunit& unit, shl& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << copy{inst.s0, rcx};
+    v << shlq{inst.s1, inst.d, inst.sf};
+  });
+}
+
+void lower(Vunit& unit, srem& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << copy{inst.s0, rax};
+    v << cqo{};                      // sign-extend rax => rdx:rax
+    v << idiv{inst.s1, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
+    v << copy{rdx, inst.d};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void lower(Vunit& unit, movtqb& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
+void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void lower_vcallarray(Vunit& unit, Vlabel b) {
   auto& code = unit.blocks[b].code;
@@ -751,6 +791,8 @@ void lower_vcallarray(Vunit& unit, Vlabel b) {
   code.emplace_back(unwind{{inst.targets[0], inst.targets[1]}});
   code.back().origin = origin;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
@@ -776,44 +818,13 @@ void lowerForX64(Vunit& unit) {
 
       auto& inst = blocks[ib].code[ii];
       switch (inst.op) {
-        case Vinstr::countbytecode:
-          inst = incqm{inst.countbytecode_.base[g_bytecodesVasm.handle()],
-                       inst.countbytecode_.sf};
+#define O(name, ...)                          \
+        case Vinstr::name:                    \
+          lower(unit, inst.name##_, ib, ii);  \
           break;
 
-        case Vinstr::stublogue:
-          if (inst.stublogue_.saveframe) {
-            inst = push{rvmfp()};
-          } else {
-            inst = subqi{8, reg::rsp, reg::rsp, unit.makeReg()};
-          }
-          break;
-        case Vinstr::phplogue:
-          inst = popm{inst.phplogue_.fp[AROFF(m_savedRip)]};
-          break;
-
-        case Vinstr::absdbl:
-          lowerAbsdbl(unit, Vlabel{ib}, ii);
-          break;
-        case Vinstr::sar:
-          lowerShift<sar, sarq>(unit, Vlabel{ib}, ii);
-          break;
-        case Vinstr::shl:
-          lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
-          break;
-        case Vinstr::srem:
-          lowerSrem(unit, Vlabel{ib}, ii);
-          break;
-
-        case Vinstr::movtqb:
-          inst = copy{inst.movtqb_.s, inst.movtqb_.d};
-          break;
-        case Vinstr::movtql:
-          inst = copy{inst.movtql_.s, inst.movtql_.d};
-          break;
-
-        default:
-          break;
+        VASM_OPCODES
+#undef O
       }
     }
   });

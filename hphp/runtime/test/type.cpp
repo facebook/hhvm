@@ -431,6 +431,7 @@ TEST(Type, PtrRefs) {
   EXPECT_EQ(TBottom, TPtrToRPropCell & TPtrToFrameBool);
   EXPECT_FALSE(TPtrToRPropCell.maybe(TPtrToFrameBool));
 
+  EXPECT_EQ(TPtrToGen, TPtrToGen - TPtrToRefGen);
   EXPECT_EQ(TPtrToPropCell, TPtrToPropGen - TPtrToBoxedCell);
   EXPECT_EQ(TPtrToPropInt, TPtrToRPropInt - TPtrToRefCell);
   EXPECT_EQ(TPtrToPropInt, TPtrToRPropInt - TPtrToRStkCell);

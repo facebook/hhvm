@@ -199,6 +199,12 @@ MemEffects memory_effects(const IRInstruction&);
 MemEffects canonicalize(MemEffects);
 
 /*
+ * Return an alias class representing the pointee of the given value, which
+ * must be <= TPtrToGen.
+ */
+AliasClass pointee(const SSATmp*);
+
+/*
  * Produces a string about some MemEffects for debug-printing.
  */
 std::string show(MemEffects);

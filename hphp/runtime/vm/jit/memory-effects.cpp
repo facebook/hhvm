@@ -28,10 +28,6 @@
 
 namespace HPHP { namespace jit {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
 AliasClass pointee(const SSATmp* ptr) {
   auto const type = ptr->type();
   always_assert(type <= TPtrToGen);
@@ -110,6 +106,10 @@ AliasClass pointee(const SSATmp* ptr) {
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
   return ret;
 }
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
 
 AliasClass all_pointees(folly::Range<SSATmp**> srcs) {
   auto ret = AliasClass{AEmpty};

@@ -178,7 +178,12 @@ ALWAYS_INLINE folly::Optional<Ptr> operator-(Ptr a, Ptr b) {
 
 bool ptr_subtype(Ptr a, Ptr b) {
   if (a == b) return true;
+
+  // Unk is weird but easy to handle, so check for it in a or b before doing
+  // anything else.
+  if (a == Ptr::Unk) return false;
   if (b == Ptr::Unk) return true;
+
   if (b == Ptr::RMemb) {
     return ptr_subtype(a, Ptr::Memb) ||
            a == Ptr::Ref ||
@@ -191,6 +196,7 @@ bool ptr_subtype(Ptr a, Ptr b) {
            a == Ptr::Prop ||
            a == Ptr::Arr;
   }
+
   // All the remaining cases are just the maybe-ref version of each pointer
   // type.  (Equality was handled first.)
   if (has_ref(b)) {

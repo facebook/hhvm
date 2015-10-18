@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace jit {
@@ -456,6 +457,14 @@ TEST(AliasClass, IterUnion) {
     // too big for that right now.
     EXPECT_TRUE(!u1.precise_union(iterP1));
   }
+}
+
+TEST(AliasClass, Pointees) {
+  IRUnit unit{test_context};
+  auto const marker = BCMarker::Dummy();
+  auto ptr = unit.gen(LdMBase, marker)->dst();
+  auto const acls = pointee(ptr);
+  EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTV, acls);
 }
 
 //////////////////////////////////////////////////////////////////////

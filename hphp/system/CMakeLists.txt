@@ -13,8 +13,6 @@ add_custom_command(
        "${CMAKE_CURRENT_BINARY_DIR}/constants.h"
        "${CMAKE_CURRENT_SOURCE_DIR}/idl/constants.idl.json"
        ${EXTENSION_IDL_SOURCES}
-       # TODO: This will get moved into a config.cmake soon, until then...
-       "${CMAKE_CURRENT_SOURCE_DIR}/idl/closure.idl.json"
   COMMENT "Generating class_map.cpp and constants.h")
 
 set(CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"

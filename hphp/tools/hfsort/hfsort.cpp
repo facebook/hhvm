@@ -140,6 +140,17 @@ void readEdgcntData(FILE* file) {
   }
 }
 
+std::string getNameWithoutSuffix(std::string str) {
+  int suffixStartPosition = str.find(".");
+  if (suffixStartPosition == -1) {
+    // if no suffix is found, just add the wildcard
+    return str + "*";
+  } else {
+    // replace sufix with wildcard
+    return str.substr(0, suffixStartPosition) + "*";
+  }
+}
+
 void print(const std::vector<Cluster*>& clusters) {
   FILE* outfile = fopen("hotfuncs.txt", "wt");
   if (!outfile) error("opening output file hotfuncs.txt");
@@ -158,7 +169,7 @@ void print(const std::vector<Cluster*>& clusters) {
         int space = 0;
         for (const auto& mangledName : cg.funcs[fid].mangledNames) {
           fprintf(outfile, "%.*s*.text.%s\n",
-                  space, " ", mangledName.c_str());
+                  space, " ", getNameWithoutSuffix(mangledName).c_str());
           space = 1;
         }
         HFTRACE(1, "start = %6u : %s\n", totalSize,

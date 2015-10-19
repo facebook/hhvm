@@ -44,6 +44,15 @@
 namespace HPHP {
 
 static Mutex s_mutex;
+
+const int64_t k_ENT_COMPAT = 2;
+const int64_t k_ENT_NOQUOTES = 0;
+const int64_t k_ENT_QUOTES = 3;
+const int64_t k_ENT_IGNORE = 4;
+const int64_t k_ENT_SUBSTITUTE = 8;
+const int64_t k_ENT_FB_UTF8 = 32768;
+const int64_t k_ENT_FB_UTF8_ONLY = 65536;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class Op> ALWAYS_INLINE
@@ -2348,6 +2357,13 @@ String HHVM_FUNCTION(hebrevc,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+const StaticString s_ENT_COMPAT("ENT_COMPAT");
+const StaticString s_ENT_NOQUOTES("ENT_NOQUOTES");
+const StaticString s_ENT_QUOTES("ENT_QUOTES");
+const StaticString s_ENT_IGNORE("ENT_IGNORE");
+const StaticString s_ENT_SUBSTITUTE("ENT_SUBSTITUTE");
+const StaticString s_ENT_FB_UTF8("ENT_FB_UTF8");
+const StaticString s_ENT_FB_UTF8_ONLY("ENT_FB_UTF8_ONLY");
 
 class StringExtension final : public Extension {
 public:
@@ -2442,6 +2458,28 @@ public:
     HHVM_FE(similar_text);
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
+
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_COMPAT.get(), k_ENT_COMPAT
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_NOQUOTES.get(), k_ENT_NOQUOTES
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_QUOTES.get(), k_ENT_QUOTES
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_IGNORE.get(), k_ENT_IGNORE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_SUBSTITUTE.get(), k_ENT_SUBSTITUTE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_FB_UTF8.get(), k_ENT_FB_UTF8
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_FB_UTF8_ONLY.get(), k_ENT_FB_UTF8_ONLY
+    );
 
     loadSystemlib();
   }

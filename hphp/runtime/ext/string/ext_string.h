@@ -34,6 +34,12 @@ namespace HPHP {
 extern const HPHP::StaticString k_HPHP_TRIM_CHARLIST;
 extern const int64_t k_STR_PAD_RIGHT;
 extern const int64_t k_ENT_COMPAT;
+extern const int64_t k_ENT_NOQUOTES;
+extern const int64_t k_ENT_QUOTES;
+extern const int64_t k_ENT_IGNORE;
+extern const int64_t k_ENT_SUBSTITUTE;
+extern const int64_t k_ENT_FB_UTF8;
+extern const int64_t k_ENT_FB_UTF8_ONLY;
 
 String HHVM_FUNCTION(addcslashes,
                      const String& str,

@@ -503,34 +503,6 @@
             "value": 4
         },
         {
-            "name": "ENT_COMPAT",
-            "value": 2
-        },
-        {
-            "name": "ENT_NOQUOTES",
-            "value": 0
-        },
-        {
-            "name": "ENT_QUOTES",
-            "value": 3
-        },
-        {
-            "name": "ENT_IGNORE",
-            "value": 4
-        },
-        {
-            "name": "ENT_SUBSTITUTE",
-            "value": 8
-        },
-        {
-            "name": "ENT_FB_UTF8",
-            "value": 32768
-        },
-        {
-            "name": "ENT_FB_UTF8_ONLY",
-            "value": 65536
-        },
-        {
             "name": "ERA",
             "value": 131116
         },
@@ -1295,14 +1267,6 @@
             "value": 16
         },
         {
-            "name": "PASSWORD_BCRYPT",
-            "value": 1
-        },
-        {
-            "name": "PASSWORD_DEFAULT",
-            "value": 1
-        },
-        {
             "name": "PATHINFO_BASENAME",
             "value": 2
         },
@@ -1430,30 +1394,6 @@
         },
         {
             "name": "PRIO_USER",
-            "value": 2
-        },
-        {
-            "name": "PSFS_ERR_FATAL",
-            "value": 0
-        },
-        {
-            "name": "PSFS_FEED_ME",
-            "value": 1
-        },
-        {
-            "name": "PSFS_FLAG_FLUSH_CLOSE",
-            "value": 2
-        },
-        {
-            "name": "PSFS_FLAG_FLUSH_INC",
-            "value": 1
-        },
-        {
-            "name": "PSFS_FLAG_NORMAL",
-            "value": 0
-        },
-        {
-            "name": "PSFS_PASS_ON",
             "value": 2
         },
         {

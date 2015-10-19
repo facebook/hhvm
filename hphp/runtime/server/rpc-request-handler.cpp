@@ -35,7 +35,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/server/satellite-server.h"
-#include "hphp/system/constants.h"
 
 #include <folly/ScopeGuard.h>
 

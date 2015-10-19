@@ -30,7 +30,6 @@
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/system/constants.h"
 
 namespace HPHP {
 

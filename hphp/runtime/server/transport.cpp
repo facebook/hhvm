@@ -32,7 +32,6 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
-#include "hphp/system/constants.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/hardware-counter.h"

@@ -22,6 +22,13 @@
 
 namespace HPHP {
 
+  const int64_t k_PSFS_ERR_FATAL = 0;
+  const int64_t k_PSFS_FEED_ME = 1;
+  const int64_t k_PSFS_FLAG_FLUSH_CLOSE = 2;
+  const int64_t k_PSFS_FLAG_FLUSH_INC = 1;
+  const int64_t k_PSFS_FLAG_NORMAL = 0;
+  const int64_t k_PSFS_PASS_ON = 2;
+
   const int64_t k_STREAM_CLIENT_CONNECT = 4;
   const int64_t k_STREAM_CLIENT_ASYNC_CONNECT = 2;
   const int64_t k_STREAM_CLIENT_PERSISTENT = 1;

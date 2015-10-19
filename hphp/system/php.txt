@@ -103,7 +103,6 @@ hphp/system/php/misc/fb_autoload_map.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/idx.php
 hphp/system/php/misc/php_strip_whitespace.php
-hphp/system/php/password/password.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php

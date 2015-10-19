@@ -29,12 +29,11 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/virtual-host.h"
-
-#include "hphp/system/constants.h"
 
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/util/logger.h"

@@ -21,7 +21,6 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/system/constants.h"
 
 namespace HPHP {
 

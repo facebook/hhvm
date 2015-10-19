@@ -565,7 +565,7 @@ bool HHVM_FUNCTION(stream_wrapper_unregister,
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-static req::ptr<Socket> socket_accept_impl(
+static Variant socket_accept_impl(
   const Resource& socket,
   struct sockaddr *addr,
   socklen_t *addrlen
@@ -598,7 +598,7 @@ static req::ptr<Socket> socket_accept_impl(
     return false;
   }
 
-  return new_sock;
+  return Variant(std::move(new_sock));
 }
 
 static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
@@ -684,7 +684,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
     if (auto ref = peername.getVariantOrNull()) {
       *ref = get_sockaddr_name(&sa, salen);
     }
-    if (new_sock) return Resource(new_sock);
+    return new_sock;
   } else if (n < 0) {
     sock->setError(errno);
   } else {

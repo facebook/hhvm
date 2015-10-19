@@ -1,0 +1,11 @@
+
+<?hh // strict
+
+class Foo {
+  public function bar(): void {
+    $foo = Vector {1, 2, 3, 4, 5};
+    return;
+  }
+}
+
+

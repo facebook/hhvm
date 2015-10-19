@@ -75,16 +75,34 @@ AliasClass pointee(const SSATmp* ptr) {
       return AMIStateTV;
     }
 
-    if (typeNR <= TPtrToArrGen) {
-      if (sinst->is(LdPackedArrayElemAddr)) {
-        if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
-          return AliasClass {
-            AElemI { sinst->src(0), sinst->src(1)->intVal() }
-          };
-        }
+    auto elem = [&] () -> AliasClass {
+      auto base = sinst->src(0);
+      auto key  = sinst->src(1);
+
+      always_assert(base->isA(TArr));
+
+      if (key->isA(TInt)) {
+        if (key->hasConstVal()) return AElemI { base, key->intVal() };
         return AElemIAny;
       }
+      if (key->hasConstVal(TStr)) {
+        int64_t n;
+        if (key->strVal()->isStrictlyInteger(n)) return AElemI { base, n };
+        return AElemS { base, key->strVal() };
+      }
       return AElemAny;
+    };
+
+    if (typeNR <= TPtrToArrGen) {
+      if (sinst->is(LdPackedArrayElemAddr)) return elem();
+      return AElemAny;
+    }
+
+    // The result of ElemArray{,W} is either the address of an array element, or
+    // &init_null_variant().
+    if (typeNR <= TPtrToMembGen) {
+      if (sinst->is(ElemArray, ElemArrayW)) return elem();
+      return folly::none;
     }
 
     return folly::none;

@@ -33,7 +33,11 @@ namespace HPHP {
 #define k_STDIN (BuiltinFiles::GetSTDIN())
 #define k_STDOUT (BuiltinFiles::GetSTDOUT())
 #define k_STDERR (BuiltinFiles::GetSTDERR())
+#ifdef _MSC_VER
+const StaticString s_DIRECTORY_SEPARATOR("\\");
+#else
 const StaticString s_DIRECTORY_SEPARATOR("/");
+#endif
 const int64_t k_FILE_USE_INCLUDE_PATH = 1;
 const int64_t k_FILE_IGNORE_NEW_LINES = 2;
 const int64_t k_FILE_SKIP_EMPTY_LINES = 4;

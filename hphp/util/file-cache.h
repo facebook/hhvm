@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/util/cache/cache-manager.h"
 
 namespace HPHP {
@@ -63,7 +64,7 @@ class FileCache {
 
   // Check if path is file, directory, unknown, or not in cache
   VFileType getFileType(const char* name) const {
-    if (name && *name == '/') {
+    if (name && FileUtil::isAbsolutePath(name)) {
       return cache_manager_->getFileType(GetRelativePath(name).c_str());
     }
     return cache_manager_->getFileType(name);
@@ -71,7 +72,7 @@ class FileCache {
 
   // Read list of files in directory
   std::vector<std::string> readDirectory(const char* name) const {
-    if (name && *name == '/') {
+    if (name && FileUtil::isAbsolutePath(name)) {
       return cache_manager_->readDirectory(GetRelativePath(name).c_str());
     }
     return cache_manager_->readDirectory(name);

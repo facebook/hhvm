@@ -81,7 +81,7 @@ void Package::addInputList(const char *listFileName) {
     if (fileName[len - 1] == '\n') fileName[len - 1] = '\0';
     len = strlen(fileName);
     if (len) {
-      if (fileName[len - 1] == '/') {
+      if (FileUtil::isDirSeparator(fileName[len - 1])) {
         addDirectory(fileName, false);
       } else {
         addSourceFile(fileName);
@@ -284,7 +284,7 @@ bool Package::parseImpl(const char *fileName) {
   if (fileName[0] == 0) return false;
 
   std::string fullPath;
-  if (fileName[0] == '/') {
+  if (FileUtil::isDirSeparator(fileName[0])) {
     fullPath = fileName;
   } else {
     fullPath = m_root + fileName;

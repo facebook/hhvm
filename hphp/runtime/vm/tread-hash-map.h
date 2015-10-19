@@ -209,7 +209,7 @@ private:
     auto newTable = allocTable(old->capac * 2);
     for (auto i = 0; i < old->capac; ++i) {
       value_type* ent = old->entries + i;
-      if (ent->first) {
+      if (ent->first.load()) {
         insertImpl(newTable, ent->first, ent->second);
       }
     }

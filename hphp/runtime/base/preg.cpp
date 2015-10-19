@@ -193,7 +193,7 @@ public:
   }
 
   ~PCRECache() {
-    if (m_kind == CacheKind::Static && m_staticCache) {
+    if (m_kind == CacheKind::Static && m_staticCache.load()) {
       DestroyStatic(m_staticCache);
     }
   }
@@ -276,7 +276,7 @@ void PCRECache::DestroyStatic(StaticCache* cache) {
 void PCRECache::reinit(CacheKind kind) {
   switch (m_kind) {
     case CacheKind::Static:
-      if (m_staticCache) {
+      if (m_staticCache.load()) {
         DestroyStatic(m_staticCache);
         m_staticCache = nullptr;
       }
@@ -312,7 +312,7 @@ bool PCRECache::find(Accessor& accessor,
   switch (m_kind) {
     case CacheKind::Static:
       {
-        assert(m_staticCache);
+        assert(m_staticCache.load());
         StaticCache::iterator it;
         auto cache = m_staticCache.load(std::memory_order_acquire);
         if ((it = cache->find(regex.get())) != cache->end()) {
@@ -363,7 +363,7 @@ void PCRECache::insert(
   switch (m_kind) {
     case CacheKind::Static:
       {
-        assert(m_staticCache);
+        assert(m_staticCache.load());
         // Clear the cache if we haven't refreshed it in a while
         if (time(nullptr) > m_expire) {
           clearStatic();

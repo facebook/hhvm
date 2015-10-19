@@ -131,7 +131,7 @@ Value AtomicVector<Value>::exchange(size_t i, const Value& val) {
     return oldVal;
   }
 
-  assert(m_next);
+  assert(m_next.load());
   return m_next.load(std::memory_order_acquire)->exchange(i - m_size, val);
 }
 
@@ -149,7 +149,7 @@ bool AtomicVector<Value>::compare_exchange(size_t i,
     return oldVal;
   }
 
-  assert(m_next);
+  assert(m_next.load());
   return m_next.load(std::memory_order_acquire)->
                      compare_exchange(i - m_size, expect,  val);
 }
@@ -163,7 +163,7 @@ Value AtomicVector<Value>::get(size_t i) const {
     return val;
   }
 
-  assert(m_next);
+  assert(m_next.load());
   return m_next.load(std::memory_order_acquire)->get(i - m_size);
 }
 

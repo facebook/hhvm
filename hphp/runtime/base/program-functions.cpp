@@ -2088,6 +2088,13 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   bool isServer = RuntimeOption::ServerExecutionMode();
   error = false;
 
+  // Make sure we have the right current working directory within the repo
+  // based on what server.source_root was set to (current process directory
+  // being the default)
+  if (RuntimeOption::RepoAuthoritative) {
+    context->setCwd(RuntimeOption::SourceRoot);
+  }
+
   String oldCwd;
   if (isServer) {
     oldCwd = context->getCwd();

@@ -1306,8 +1306,9 @@ void RuntimeOption::Load(
     Config::Bind(TLSClientCipherSpec, ini, config,
                  "Server.TLSClientCipherSpec");
 
-    string srcRoot = FileUtil::normalizeDir(
-      Config::GetString(ini, config, "Server.SourceRoot"));
+    // SourceRoot has been default to: Process::GetCurrentDirectory() + '/'
+    Config::Bind(SourceRoot, ini, config, "Server.SourceRoot", SourceRoot);
+    string srcRoot = FileUtil::normalizeDir(SourceRoot);
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 

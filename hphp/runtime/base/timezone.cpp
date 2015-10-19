@@ -269,6 +269,7 @@ String TimeZone::name() const {
 
 String TimeZone::abbr(int type /* = 0 */) const {
   if (!m_tzi) return String();
+  assert(type < m_tzi->typecnt);
   return String(&m_tzi->timezone_abbr[m_tzi->type[type].abbr_idx], CopyString);
 }
 
@@ -296,19 +297,6 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
                             int64_t timestamp_end /* = k_PHP_INT_MAX */) const {
   Array ret;
   if (m_tzi) {
-    // If explicitly provided add the beginning timestamp to the ret array
-    if (timestamp_begin > k_PHP_INT_MIN) {
-      auto dt = req::make<DateTime>(timestamp_begin);
-      auto idx = m_tzi->trans_idx[0];
-      ret.append(make_map_array(
-            s_ts, timestamp_begin,
-            s_time, dt->toString(DateTime::DateFormat::ISO8601),
-            s_offset, m_tzi->type[idx].offset,
-            s_isdst, (bool)m_tzi->type[idx].isdst,
-            s_abbr, String(m_tzi->timezone_abbr + m_tzi->type[idx].abbr_idx,
-                           CopyString)
-          ));
-    }
     uint32_t timecnt;
 #ifdef FACEBOOK
     // Internal builds embed tzdata into HHVM by keeping timelib updated
@@ -318,17 +306,45 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
     // as this format must be stable, we're keeping timelib stable too
     timecnt = m_tzi->timecnt;
 #endif
+
+    // If explicitly provided add the beginning timestamp to the ret array
+    if (timestamp_begin > k_PHP_INT_MIN) {
+      DateTime dt(timestamp_begin);
+      // Find the appropriate transition, if there are no transitions, use the
+      // first entry, otherwise find the transition before `timestamp_begin`
+      uint32_t idx = 0;
+      if (timecnt && m_tzi->trans) {
+        while (idx < timecnt && m_tzi->trans[idx] < timestamp_begin) {
+          idx++;
+        }
+
+        if (idx > 0) idx--;
+        idx = m_tzi->trans_idx[idx];
+      }
+      ret.append(make_map_array(
+            s_ts, timestamp_begin,
+            s_time, dt.toString(DateTime::DateFormat::ISO8601),
+            s_offset, m_tzi->type[idx].offset,
+            s_isdst, (bool)m_tzi->type[idx].isdst,
+            s_abbr, String(m_tzi->timezone_abbr + m_tzi->type[idx].abbr_idx,
+                           CopyString)
+          ));
+    }
+
+    // No transitions, just return the array here
+    if (!m_tzi->trans) return ret;
+
     for (uint32_t i = 0; i < timecnt; ++i) {
       int timestamp = m_tzi->trans[i];
       if (timestamp > timestamp_begin && timestamp <= timestamp_end) {
         int index = m_tzi->trans_idx[i];
-        auto dt = req::make<DateTime>(timestamp);
+        DateTime dt(timestamp);
         ttinfo &offset = m_tzi->type[index];
         const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
 
         ret.append(make_map_array(
           s_ts, timestamp,
-          s_time, dt->toString(DateTime::DateFormat::ISO8601),
+          s_time, dt.toString(DateTime::DateFormat::ISO8601),
           s_offset, offset.offset,
           s_isdst, (bool)offset.isdst,
           s_abbr, String(abbr, CopyString)

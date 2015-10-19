@@ -25,7 +25,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs, bool aligned)
+PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
   : m_v(v)
   , m_regs(regs)
 {
@@ -33,7 +33,7 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs, bool aligned)
   auto xmm = m_regs & abi().simd();
   auto const sp = rsp();
 
-  m_adjust = (aligned & 0x1) == (gpr.size() & 0x1) ? 8 : 0;
+  m_adjust = gpr.size() & 0x1 ? 8 : 0;
 
   if (!xmm.empty()) {
     v << subqi{16 * xmm.size(), sp, sp, v.makeReg()};

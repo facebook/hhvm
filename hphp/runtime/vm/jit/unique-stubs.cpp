@@ -536,6 +536,8 @@ void emitInterpOneCFHelpers(CodeBlock& cb, UniqueStubs& us,
 
 TCA emitDecRefGeneric(CodeBlock& cb) {
   return vwrap(cb, [] (Vout& v) {
+    v << stublogue{};
+
     auto const rdata = rarg(0);
     auto const rtype = rarg(1);
 
@@ -544,7 +546,7 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
       // registers are preserved.  This is true in the fast path, but in the
       // slow path we need to manually save caller-saved registers.
       auto const callerSaved = abi().gpUnreserved - abi().calleeSaved;
-      PhysRegSaver prs{v, callerSaved, false /* aligned */};
+      PhysRegSaver prs{v, callerSaved};
 
       // As a consequence of being called via callfaststub, we can't safely use
       // any Vregs here except for status flags registers, at least not with
@@ -558,11 +560,14 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
       auto const dtor_table =
         safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
       v << callm{baseless(rtype * 8 + dtor_table), arg_regs(1)};
-      v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
+
+      // The stub frame's saved RIP is at %rsp[8] before we saved the
+      // caller-saved registers.
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed() + 1)};
     };
 
     emitDecRefWork(v, v, rdata, destroy, false);
-    v << ret{};
+    v << stubret{};
   });
 }
 

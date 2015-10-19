@@ -38,7 +38,7 @@ struct Vout;
  * documentation around this behavior.
  */
 struct PhysRegSaver {
-  PhysRegSaver(Vout& v, RegSet regs, bool aligned);
+  PhysRegSaver(Vout& v, RegSet regs);
   ~PhysRegSaver();
 
   PhysRegSaver(const PhysRegSaver&) = delete;

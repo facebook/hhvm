@@ -152,7 +152,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, PhysReg tv, PhysReg type,
 
       // Note that the stack is aligned since we called to this helper from an
       // stack-unaligned stub.
-      PhysRegSaver prs{v, live, true /* aligned */};
+      PhysRegSaver prs{v, live};
 
       // The refcount is exactly 1; release the value.
       v << callm{lookupDestructor(v, type)};

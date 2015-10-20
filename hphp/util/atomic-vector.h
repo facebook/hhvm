@@ -131,7 +131,11 @@ Value AtomicVector<Value>::exchange(size_t i, const Value& val) {
     return oldVal;
   }
 
+#ifdef MSVC_NO_NONVOID_ATOMIC_IF
+  assert(m_next.load());
+#else
   assert(m_next);
+#endif
   return m_next.load(std::memory_order_acquire)->exchange(i - m_size, val);
 }
 
@@ -149,7 +153,11 @@ bool AtomicVector<Value>::compare_exchange(size_t i,
     return oldVal;
   }
 
+#ifdef MSVC_NO_NONVOID_ATOMIC_IF
+  assert(m_next.load());
+#else
   assert(m_next);
+#endif
   return m_next.load(std::memory_order_acquire)->
                      compare_exchange(i - m_size, expect,  val);
 }
@@ -163,7 +171,11 @@ Value AtomicVector<Value>::get(size_t i) const {
     return val;
   }
 
+#ifdef MSVC_NO_NONVOID_ATOMIC_IF
+  assert(m_next.load());
+#else
   assert(m_next);
+#endif
   return m_next.load(std::memory_order_acquire)->get(i - m_size);
 }
 

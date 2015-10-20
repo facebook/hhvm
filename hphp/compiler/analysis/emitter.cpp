@@ -9469,6 +9469,7 @@ enum GeneratorMethod {
   METH_VALID,
   METH_CURRENT,
   METH_KEY,
+  METH_REWIND,
 };
 
 typedef hphp_hash_map<const StringData*, GeneratorMethod,
@@ -9483,6 +9484,7 @@ StaticString s_valid("valid");
 StaticString s_current("current");
 StaticString s_key("key");
 StaticString s_throw("throw");
+StaticString s_rewind("rewind");
 
 StaticString genCls("Generator");
 StaticString asyncGenCls("HH\\AsyncGenerator");
@@ -9499,15 +9501,47 @@ ContMethMapT s_genMethods = {
     {s_valid, GeneratorMethod::METH_VALID},
     {s_current, GeneratorMethod::METH_CURRENT},
     {s_key, GeneratorMethod::METH_KEY},
-    {s_throw, GeneratorMethod::METH_RAISE}
+    {s_throw, GeneratorMethod::METH_RAISE},
+    {s_rewind, GeneratorMethod::METH_REWIND}
   };
 }
 
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
-                                   GeneratorMethod m) {
+                                   GeneratorMethod m,
+                                   bool isAsync) {
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
+
+  if (!isAsync && RuntimeOption::AutoprimeGenerators) {
+    // Create a dummy Emitter, so it's possible to emit jump instructions
+    EmitterVisitor ev(ue);
+    Emitter e(ConstructPtr(), ue, ev);
+    Location::Range loc;
+    if (ue.bcPos() > 0) loc.line0 = -1;
+    e.setTempLocation(loc);
+
+    // Check if the generator has started yet
+    Label started;
+    e.ContStarted();
+    e.JmpNZ(started);
+
+    // If it hasn't started, perform one "next" operation before
+    // the actual operation (auto-priming)
+    e.ContCheck(false);
+    e.Null();
+    e.ContEnter();
+    e.PopC();
+    started.set(e);
+  }
+
+  if (!RuntimeOption::AutoprimeGenerators && m == METH_REWIND) {
+    // In non-autopriming mode the rewind function will always call next, when
+    // autopriming is enabled, rewind matches PHP behavior and will only advance
+    // the generator when it has not yet been started.
+    m = METH_NEXT;
+  }
+
   switch (m) {
     case METH_SEND:
     case METH_RAISE:
@@ -9559,7 +9593,11 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
       ue.emitOp(OpRetC);
       break;
     }
-
+    case METH_REWIND: {
+      ue.emitOp(OpNull);
+      ue.emitOp(OpRetC);
+      break;
+    }
     default:
       not_reached();
   }
@@ -9578,10 +9616,10 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
 
   if (genCls.same(s_class) &&
       (cmeth = folly::get_ptr(s_genMethods, s_func))) {
-    return emitGeneratorMethod(m_ue, fe, *cmeth);
+    return emitGeneratorMethod(m_ue, fe, *cmeth, false);
   } else if (asyncGenCls.same(s_class) &&
       (cmeth = folly::get_ptr(s_asyncGenMethods, s_func))) {
-    return emitGeneratorMethod(m_ue, fe, *cmeth);
+    return emitGeneratorMethod(m_ue, fe, *cmeth, true);
   }
 
   throw IncludeTimeFatalException(meth,

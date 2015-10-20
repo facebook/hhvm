@@ -87,6 +87,7 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
+bool RuntimeOption::AutoprimeGenerators = true;
 
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
@@ -1148,6 +1149,13 @@ void RuntimeOption::Load(
     // some reason.
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
                  LookForTypechecker);
+
+    // The default behavior in PHP is to auto-prime generators. For now we leave
+    // this disabled in HipHop syntax mode to deal with incompatibilities in
+    // existing code-bases.
+    Config::Bind(AutoprimeGenerators, ini, config,
+                 "Hack.Lang.AutoprimeGenerators",
+                 true);
   }
   {
     // Options for PHP7 features which break BC. (Features which do not break

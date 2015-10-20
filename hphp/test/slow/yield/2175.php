@@ -16,7 +16,6 @@ foreach (gen() as $x) {
  var_dump($x);
  }
 $g = gen();
-$g->next();
 var_dump($g->current());
 $g->next();
 var_dump($g->current());

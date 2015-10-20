@@ -385,10 +385,18 @@ void emitContValid(IRGS& env) {
     IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
 }
 
+void emitContStarted(IRGS& env) {
+  assert(curClass(env));
+  auto const cont = ldThis(env);
+  push(env, gen(env, ContStarted, cont));
+}
+
 void emitContKey(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
+  if (!RuntimeOption::AutoprimeGenerators) {
+    gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
+  }
   auto const offset = cns(env,
     offsetof(Generator, m_key) - Generator::objectOff());
   auto const value = gen(env, LdContField, TCell, cont, offset);
@@ -398,7 +406,9 @@ void emitContKey(IRGS& env) {
 void emitContCurrent(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
+  if (!RuntimeOption::AutoprimeGenerators) {
+    gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
+  }
   auto const offset = cns(env,
     offsetof(Generator, m_value) - Generator::objectOff());
   auto const value = gen(env, LdContField, TCell, cont, offset);

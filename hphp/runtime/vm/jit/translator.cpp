@@ -411,6 +411,7 @@ static const struct {
   { OpYieldK,      {StackTop2,        Stack1,       OutUnknown      }},
   { OpContCheck,   {None,             None,         OutNone         }},
   { OpContValid,   {None,             Stack1,       OutBoolean      }},
+  { OpContStarted, {None,             Stack1,       OutBoolean      }},
   { OpContKey,     {None,             Stack1,       OutUnknown      }},
   { OpContCurrent, {None,             Stack1,       OutUnknown      }},
 
@@ -891,6 +892,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::ContCurrent:
   case Op::ContKey:
   case Op::ContValid:
+  case Op::ContStarted:
   case Op::CreateCl:
   case Op::DefCns:
   case Op::DefFunc:

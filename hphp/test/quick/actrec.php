@@ -29,7 +29,7 @@ function test() {
 function main() {
   global $g;
   $g = test();
-  for ($g->next(); $g && $g->valid(); $g->next())
+  for ($g->rewind(); $g && $g->valid(); $g->next())
     var_dump($g->current());
   var_dump($g);
   global $e;

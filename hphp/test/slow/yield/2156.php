@@ -6,7 +6,7 @@ function f() {
  yield $b;
 }
 $c = f();
-$c->next();
+$c->rewind();
 var_dump($c->current());
 $c->send(2);
 var_dump($c->current());

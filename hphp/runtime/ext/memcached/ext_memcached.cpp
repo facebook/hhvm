@@ -100,6 +100,8 @@ const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
 #endif
 const int64_t q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
           = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
+const int64_t q_Memcached$$OPT_LIBKETAMA_HASH
+          = MEMCACHED_BEHAVIOR_KETAMA_HASH;
 const int64_t q_Memcached$$OPT_BUFFER_WRITES
           = MEMCACHED_BEHAVIOR_BUFFER_REQUESTS;
 const int64_t q_Memcached$$OPT_BINARY_PROTOCOL
@@ -1303,6 +1305,7 @@ const StaticString s_OPT_DEAD_TIMEOUT("OPT_DEAD_TIMEOUT");
 const StaticString s_OPT_DISTRIBUTION("OPT_DISTRIBUTION");
 const StaticString s_OPT_HASH("OPT_HASH");
 const StaticString s_OPT_LIBKETAMA_COMPATIBLE("OPT_LIBKETAMA_COMPATIBLE");
+const StaticString s_OPT_LIBKETAMA_HASH("OPT_LIBKETAMA_HASH");
 const StaticString s_OPT_NO_BLOCK("OPT_NO_BLOCK");
 const StaticString s_OPT_POLL_TIMEOUT("OPT_POLL_TIMEOUT");
 const StaticString s_OPT_PREFIX_KEY("OPT_PREFIX_KEY");
@@ -1488,6 +1491,10 @@ class MemcachedExtension final : public Extension {
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_OPT_LIBKETAMA_COMPATIBLE.get(),
       q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_LIBKETAMA_HASH.get(),
+      q_Memcached$$OPT_LIBKETAMA_HASH
     );
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_OPT_NO_BLOCK.get(), q_Memcached$$OPT_NO_BLOCK

@@ -288,6 +288,8 @@ UNSUPPORTED_FILES_CONVERTER = {
         'yield_wait_forva_bad1.php',
         'yield_wait_forvr.php',
         'yield_wait_forvr_result_bad1.php',
+        'akshape/gena_ok.php',
+        'akshape/gena_error.php',
     ],
     "await is currently not supported. (Other[0])": [
         'dynamic_yield/IUseDynamicYield_interface1.php',

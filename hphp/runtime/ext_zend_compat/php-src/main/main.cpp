@@ -29,10 +29,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #ifdef PHP_WIN32
-#include "win32/time.h"
-#include "win32/signal.h"
-#include "win32/php_win32_globals.h"
-#include "win32/winutil.h"
 #include <process.h>
 #elif defined(NETWARE)
 #include <sys/timeval.h>
@@ -60,11 +56,6 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_string.h"
 #include "php_variables.h"
-#ifdef PHP_WIN32
-#include <io.h>
-#include "win32/php_registry.h"
-#include "ext/standard/flock_compat.h"
-#endif
 #include "Zend/zend_exceptions.h"
 
 #if PHP_SIGCHILD

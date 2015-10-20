@@ -72,9 +72,15 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
   *use_copy = 1;
 }
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
-void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((__alias__("zend_error"),noreturn));
-#endif
+ATTRIBUTE_NORETURN
+void zend_error_noreturn(int type, const char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+  HPHP::raise_message(static_cast<HPHP::ErrorMode>(type), format, ap);
+  va_end(ap);
+  // Stop GCC from complaining about a noreturn function possibly returning.
+  throw HPHP::Exception("This should never be reached!");
+}
 
 ZEND_API void zend_error(int type, const char *format, ...) {
   va_list ap;

@@ -8,6 +8,7 @@ CMAKE_DEPENDENT_OPTION(ENABLE_EZC_TEST
 set(CXX_SOURCES)
 set(C_SOURCES)
 set(ASM_SOURCES)
+set(HEADER_SOURCES)
 set(ZEND_COMPAT_LINK_LIBRARIES)
 set(PHP_SOURCES)
 set(EZC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -75,7 +76,9 @@ endif()
 set(EZC_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
 
 add_library(hphp_ext_zend_compat STATIC ${CXX_SOURCES} ${C_SOURCES}
-            ${ASM_SOURCES})
+            ${ASM_SOURCES} ${HEADER_SOURCES})
+auto_source_group("hphp_ext_zend_compat" "${CMAKE_CURRENT_SOURCE_DIR}"
+  ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 if (ZEND_COMPAT_LINK_LIBRARIES)
   target_link_libraries(hphp_ext_zend_compat ${ZEND_COMPAT_LINK_LIBRARIES})
 endif()

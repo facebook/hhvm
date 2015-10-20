@@ -443,7 +443,7 @@ static inline bool hhirConstrictGuardsDefault() {
 }
 
 static inline bool hhirRelaxGuardsDefault() {
-  return !RuntimeOption::EvalHHIRConstrictGuards;
+  return false;
 }
 
 static inline bool evalJitDefault() {

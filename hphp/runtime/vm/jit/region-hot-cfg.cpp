@@ -300,11 +300,11 @@ RegionDescPtr selectHotCFG(TransID head,
   // relax the guards when they were obtained through that mechanism.
   if (RuntimeOption::EvalRegionRelaxGuards &&
       !RuntimeOption::EvalHHIRConstrictGuards) {
-    ITRACE(3, "selectHotCFG: before optimizeGuards:\n{}\n",
+    ITRACE(3, "selectHotCFG: before optimizeProfiledGuards:\n{}\n",
            show(*region));
-    optimizeGuards(*region, *profData);
+    optimizeProfiledGuards(*region, *profData);
   }
-  ITRACE(3, "selectHotCFG: after optimizeGuards:\n{}\n",
+  ITRACE(3, "selectHotCFG: after optimizeProfiledGuards:\n{}\n",
          show(*region));
   return region;
 }

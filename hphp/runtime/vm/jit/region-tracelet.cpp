@@ -652,13 +652,20 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
     return RegionDescPtr { nullptr };
   }
 
-  FTRACE(1, "selectTracelet returning, {}, {} tries:\n{}\n",
-         inlining ? "inlining" : "not inlining", tries, show(*region));
   if (region->blocks().back()->length() == 0) {
     // If the final block is empty because it would've only contained
     // instructions producing literal values, kill it.
     region->deleteBlock(region->blocks().back()->id());
   }
+
+  if (RuntimeOption::EvalRegionRelaxGuards) {
+    FTRACE(1, "selectTracelet: before optimizeGuards:\n{}\n",
+           show(*region));
+    optimizeGuards(*region, profiling);
+  }
+
+  FTRACE(1, "selectTracelet returning, {}, {} tries:\n{}\n",
+         inlining ? "inlining" : "not inlining", tries, show(*region));
   return region;
 }
 

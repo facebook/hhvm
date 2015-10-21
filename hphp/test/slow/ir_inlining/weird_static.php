@@ -8,6 +8,7 @@ final class Constants {
 
 function main() {
   $g = Constants::gen();
+  $g->next();
   var_dump($g->current());
 }
 

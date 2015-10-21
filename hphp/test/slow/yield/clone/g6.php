@@ -14,11 +14,10 @@ $foo = function () use ($a1, &$a2) {
 };
 $x = $foo();
 $a2 = 2;
-$x->rewind();
+$x->next();
 $y1 = clone $x;
 $y2 = clone $x;
-for ($y1->next(); $y1->valid(); $y1->next()) {
-  $v = $y1->current();
+foreach ($y1 as $v) {
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
   echo $v1 . " " . $v2 . "\n";
@@ -27,8 +26,7 @@ for ($y1->next(); $y1->valid(); $y1->next()) {
 echo "--------\n";
 var_dump($a1, $a2);
 echo "========\n";
-for ($y2->next(); $y2->valid(); $y2->next()) {
-  $v = $y2->current();
+foreach ($y2 as $v) {
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
   echo $v1 . " " . $v2 . "\n";
@@ -37,8 +35,7 @@ for ($y2->next(); $y2->valid(); $y2->next()) {
 echo "--------\n";
 var_dump($a1, $a2);
 echo "========\n";
-for ($x->next(); $x->valid(); $x->next()) {
-  $v = $x->current();
+foreach ($x as $v) {
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
   echo $v1 . " " . $v2 . "\n";

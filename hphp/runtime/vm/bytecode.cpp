@@ -7467,20 +7467,15 @@ OPTBLD_INLINE void iopContValid(IOP_ARGS) {
     this_generator(vmfp())->getState() != BaseGenerator::State::Done);
 }
 
-OPTBLD_INLINE void iopContStarted(IOP_ARGS) {
-  vmStack().pushBool(
-    this_generator(vmfp())->getState() != BaseGenerator::State::Created);
-}
-
 OPTBLD_INLINE void iopContKey(IOP_ARGS) {
   Generator* cont = this_generator(vmfp());
-  if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+  cont->startedCheck();
   cellDup(cont->m_key, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopContCurrent(IOP_ARGS) {
   Generator* cont = this_generator(vmfp());
-  if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+  cont->startedCheck();
   cellDup(cont->m_value, *vmStack().allocC());
 }
 

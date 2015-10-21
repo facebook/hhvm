@@ -12,4 +12,5 @@ function gen() {
 }
 
 $gen = gen();
+$gen->next();
 var_dump($gen->throw(new RuntimeException('throw')));

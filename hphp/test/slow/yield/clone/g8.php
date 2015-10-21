@@ -9,17 +9,17 @@ function foo() {
   yield $x;
 }
 $x = foo();
-$x->rewind();
+$x->next();
 $y1 = clone $x;
 $y2 = clone $x;
-for ($x->next(); $x->valid(); $x->next()) {
-  echo $x->current() . "\n";
+foreach ($x as $v) {
+  echo $v . "\n";
 }
 echo "========\n";
-for ($y1->next(); $y1->valid(); $y1->next()) {
-  echo $y1->current() . "\n";
+foreach ($y1 as $v) {
+  echo $v . "\n";
 }
 echo "========\n";
-for ($y2->next(); $y2->valid(); $y2->next()) {
-  echo $y2->current() . "\n";
+foreach ($y2 as $v) {
+  echo $v . "\n";
 }

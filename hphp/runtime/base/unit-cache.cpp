@@ -434,7 +434,6 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + RuntimeOption::EvalUseExternalEmitter + '\0'
     + (RuntimeOption::EvalExternalEmitterFallback ? '1' : '0')
     + (RuntimeOption::EvalExternalEmitterAllowPartial ? '1' : '0')
-    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
     + mangleUnitPHP7Options();
   return string_md5(t.c_str(), t.size());
 }

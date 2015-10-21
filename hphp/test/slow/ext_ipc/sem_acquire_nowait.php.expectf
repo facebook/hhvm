@@ -1,0 +1,11 @@
+Parent.
+Child.
+P: got semaphore Resource id #%d.
+C: got semaphore Resource id #%d.
+P: success acquire semaphore Resource id #%d.
+P: releases.
+C: success acquire semaphore Resource id #%d.
+C: releases.
+C: fail to acquire semaphore Resource id #%d.
+P: success acquire semaphore Resource id #%d.
+P: cleanup.

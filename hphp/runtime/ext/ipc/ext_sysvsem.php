@@ -15,7 +15,7 @@
  *
  */
 <<__Native>>
-function sem_acquire(resource $sem_identifier): bool;
+function sem_acquire(resource $sem_identifier, bool $nowait = false): bool;
 
 /**
  * sem_get() returns an id that can be used to access the System V semaphore

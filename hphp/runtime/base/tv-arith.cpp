@@ -170,7 +170,12 @@ struct Div {
   Cell operator()(int64_t t, int64_t u) const {
     if (UNLIKELY(u == 0)) {
       raise_warning(Strings::DIVISION_BY_ZERO);
-      return make_tv<KindOfBoolean>(false);
+      if (RuntimeOption::PHP7_IntSemantics) {
+        // PHP7 uses the IEEE definition (+/- INF and NAN).
+        return make_dbl(t / 0.0);
+      } else {
+        return make_tv<KindOfBoolean>(false);
+      }
     }
 
     // Avoid SIGFPE when dividing the miniumum respresentable integer
@@ -190,7 +195,12 @@ struct Div {
   >::type operator()(T t, U u) const {
     if (UNLIKELY(u == 0)) {
       raise_warning(Strings::DIVISION_BY_ZERO);
-      return make_tv<KindOfBoolean>(false);
+      if (RuntimeOption::PHP7_IntSemantics) {
+        // PHP7 uses the IEEE definition (+/- INF and NAN).
+        return make_dbl(t / u);
+      } else {
+        return make_tv<KindOfBoolean>(false);
+      }
     }
     return make_dbl(t / u);
   }

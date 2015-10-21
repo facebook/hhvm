@@ -1184,7 +1184,7 @@ void emitDiv(IRGS& env) {
         divisorVal = divisor->boolVal();
       }
 
-      if (divisorVal == 0) {
+      if (divisorVal == 0 && !RuntimeOption::PHP7_IntSemantics) {
         popC(env);
         popC(env);
         gen(env, RaiseWarning,
@@ -1203,7 +1203,11 @@ void emitDiv(IRGS& env) {
         }
         popC(env);
         popC(env);
-        if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
+        if (!divisorVal) {
+          gen(env, RaiseWarning,
+              cns(env, makeStaticString(Strings::DIVISION_BY_ZERO)));
+          push(env, cns(env, dividendVal / 0.0));
+        } else if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
           push(env, cns(env, (double)dividendVal / divisorVal));
         } else {
           push(env, cns(env, dividendVal / divisorVal));
@@ -1229,24 +1233,31 @@ void emitDiv(IRGS& env) {
   divisor  = make_double(popC(env));
   dividend = make_double(popC(env));
 
-  SSATmp* divVal = nullptr;  // edge-defined value
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      divVal = gen(env, DivDbl, taken, dividend, divisor);
-    },
-    [&] {
-      // Make progress by raising a warning and pushing false before
-      // side-exiting to the next instruction.
-      hint(env, Block::Hint::Unlikely);
-      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
-      gen(env, RaiseWarning, msg);
-      push(env, cns(env, false));
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
-    }
-  );
+  if (!divisor->hasConstVal() || divisor->dblVal() == 0.0) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const checkZero = gen(env, EqDbl, divisor, cns(env, 0.0));
+        gen(env, JmpNZero, taken, checkZero);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+        gen(env, RaiseWarning, msg);
 
-  push(env, divVal);
+        // PHP5 results in false; we side exit since the type of the result
+        // has now dramatically changed. PHP7 falls through to the IEEE
+        // division semantics below (and doesn't side exit since the type is
+        // still a double).
+        if (!RuntimeOption::PHP7_IntSemantics) {
+          push(env, cns(env, false));
+          gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        }
+      }
+    );
+  }
+
+  push(env, gen(env, DivDbl, dividend, divisor));
 }
 
 void emitMod(IRGS& env) {

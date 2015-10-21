@@ -354,7 +354,7 @@ exceptions depending on how coercion is implemented.
 
 | MulDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
-| DivDbl, D(Dbl), S(Dbl) S(Dbl), B
+| DivDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
 | Floor, D(Dbl), S(Dbl), NF
 
@@ -383,10 +383,9 @@ exceptions depending on how coercion is implemented.
 
   AbsDbl computes the absolute value of a double-precision value.
 
-  DivDbl will branch to block B when S1 is zero (signed or unsigned). When the
-  result of the division is a real valued number DivDbl conforms to IEEE 754.
-  In particular should the result of a division be zero the sign will follow
-  normal sign rules for division.
+  DivDbl conforms to IEEE 754. In particular, division by zero returns +/- INF
+  or NAN depending on the dividend; and should the result of a division be zero
+  the sign will follow the normal sign rules for division.
 
   Note that Shr is an arithmetic right shift: The MSB is sign-extended.
 

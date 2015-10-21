@@ -120,7 +120,6 @@ struct ResourceData : private boost::noncopyable {
   }
 
   // delegate refcount operations to base.
-  RefCount getCount() const { return hdr()->getCount(); }
   void incRefCount() const { hdr()->incRefCount(); }
   void decRefAndRelease() { hdr()->decRefAndRelease(); }
   bool hasExactlyOneRef() const { return hdr()->hasExactlyOneRef(); }

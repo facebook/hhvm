@@ -88,10 +88,9 @@ inline bool check_refcount_ns_nz(int32_t count) {
  */
 namespace CountableManip {
 
-// Clowny... but needed so we can handle the functions generically
-inline RefCount getCount(RefCount count) {
-  assert(check_refcount(count));
-  return count;
+inline bool checkCount(RefCount count) {
+  return count == StaticValue || count == UncountedValue ||
+         count > 0;
 }
 
 inline bool isRefCounted(RefCount count) {
@@ -111,6 +110,10 @@ inline bool hasExactlyOneRef(RefCount count) {
 
 inline bool isStatic(RefCount count) {
   return count == StaticValue;
+}
+
+inline bool isUncounted(RefCount count) {
+  return count == UncountedValue;
 }
 
 inline void incRefCount(RefCount& count) {
@@ -137,9 +140,8 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
  */
 namespace CountableManipNS {
 
-inline RefCount getCount(RefCount count) {
-  assert(check_refcount_ns(count));
-  return count;
+inline bool checkCount(RefCount count) {
+  return count > 0;
 }
 
 inline bool isRefCounted(RefCount count) { return true; }
@@ -155,6 +157,7 @@ inline bool hasExactlyOneRef(RefCount count) {
 }
 
 inline bool isStatic(RefCount count) { return false; }
+inline bool isUncounted(RefCount count) { return false; }
 
 inline void incRefCount(RefCount& count) {
   assert(check_refcount_ns(count));
@@ -181,9 +184,9 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
  */
 
 #define IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC                         \
-  RefCount getCount() const {                                           \
+  bool checkCount() const {                                             \
     assert(kindIsValid());                                              \
-    return CountableManip::getCount(m_hdr.count);                       \
+    return CountableManip::checkCount(m_hdr.count);                     \
   }                                                                     \
   bool isRefCounted() const {                                           \
     assert(kindIsValid());                                              \
@@ -226,9 +229,9 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   }
 
 #define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
-  RefCount getCount() const {                                           \
+  bool checkCount() const {                                             \
     assert(kindIsValid());                                              \
-    return CountableManipNS::getCount(m_hdr.count);                     \
+    return CountableManipNS::checkCount(m_hdr.count);                   \
   }                                                                     \
   bool isRefCounted() const {                                           \
     assert(kindIsValid());                                              \
@@ -245,6 +248,10 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   bool isStatic() const {                                               \
     assert(kindIsValid());                                              \
     return CountableManipNS::isStatic(m_hdr.count);                     \
+  }                                                                     \
+  bool isUncounted() const {                                            \
+    assert(kindIsValid());                                              \
+    return CountableManipNS::isUncounted(m_hdr.count);                  \
   }                                                                     \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \

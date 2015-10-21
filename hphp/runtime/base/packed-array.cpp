@@ -35,7 +35,7 @@ namespace HPHP {
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->isPacked());
-  assert(arr->getCount() != 0);
+  assert(arr->checkCount());
   assert(arr->m_size <= arr->cap());
   assert(arr->m_pos >= 0 && arr->m_pos <= arr->m_size);
   static_assert(ArrayData::kPackedKind == 0, "");

@@ -369,24 +369,34 @@ std::pair<int, double> tvGetSize(
     }
     case HPHP::KindOfArray: {
       ArrayData* arr = tv->m_data.parr;
-      auto arr_ref_count = arr->getCount() + ref_adjust;
-      FTRACE(3, " ArrayData tv: at {} that with ref count {} after adjust {}\n",
-        (void*)arr,
-        arr_ref_count,
-        ref_adjust
-      );
-      auto size_of_array_pair = sizeOfArray(arr, source, stack, paths);
-      size += sizeof(*arr);
-      size += size_of_array_pair.first;
-      if (arr_ref_count > 0) {
-        sized += sizeof(*arr) / (double)arr_ref_count;
-        sized += size_of_array_pair.second / (double)(arr_ref_count);
+      if (arr->isRefCounted()) {
+        auto arr_ref_count = tvGetCount(tv) + ref_adjust;
+        FTRACE(3, " ArrayData tv: at {} with ref count {} after adjust {}\n",
+          (void*)arr,
+          arr_ref_count,
+          ref_adjust
+        );
+        auto size_of_array_pair = sizeOfArray(arr, source, stack, paths);
+        size += sizeof(*arr);
+        size += size_of_array_pair.first;
+        if (arr_ref_count > 0) {
+          sized += sizeof(*arr) / (double)arr_ref_count;
+          sized += size_of_array_pair.second / (double)(arr_ref_count);
+        }
+      } else {
+        // static or uncounted array
+        FTRACE(3, " ArrayData tv: at {} not refcounted, after adjust {}\n",
+          (void*)arr, ref_adjust
+        );
+        auto size_of_array_pair = sizeOfArray(arr, source, stack, paths);
+        size += sizeof(*arr);
+        size += size_of_array_pair.first;
       }
       break;
     }
     case HPHP::KindOfResource: {
+      auto res_ref_count = tvGetCount(tv) + ref_adjust;
       auto resource = tv->m_data.pres;
-      auto res_ref_count = resource->getCount() + ref_adjust;
       auto resource_size = resource->heapSize();
       size += resource_size;
       if (res_ref_count > 0) {
@@ -420,16 +430,20 @@ std::pair<int, double> tvGetSize(
     case HPHP::KindOfString: {
       StringData* str = tv->m_data.pstr;
       size += str->size();
-      auto str_ref_count = str->getCount() + ref_adjust;
-      FTRACE(3, " String tv: {} string at {} ref count: {} after adjust {}\n",
-        str->data(),
-        (void*)str,
-        str_ref_count,
-        ref_adjust
-      );
-
-      if (str_ref_count > 0) {
+      if (str->isRefCounted()) {
+        auto str_ref_count = tvGetCount(tv) + ref_adjust;
+        FTRACE(3, " String tv: {} string at {} ref count: {} after adjust {}\n",
+          str->data(),
+          (void*)str,
+          str_ref_count,
+          ref_adjust
+        );
         sized += (str->size() / (double)(str_ref_count));
+      } else {
+        // static or uncounted string
+        FTRACE(3, " String tv: {} string at {} uncounted, after adjust {}\n",
+          str->data(), (void*)str, ref_adjust
+        );
       }
       break;
     }
@@ -494,7 +508,7 @@ void tvGetStrings(
         pointers->insert(str);
         str_agg.dups++;
       }
-      if (str->getCount() < 0) {
+      if (!str->isRefCounted()) {
         str_agg.srefs++;
       }
 

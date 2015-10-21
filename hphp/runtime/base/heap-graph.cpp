@@ -136,7 +136,7 @@ struct PtrFilter: F {
 private:
   F& next() { return *this; }
   template<class T> static bool counted(T* p) {
-    return p->getCount() >= 0;
+    return p->isRefCounted();
   }
 };
 

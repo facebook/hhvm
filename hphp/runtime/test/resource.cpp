@@ -27,7 +27,7 @@ TEST(Resource, Refcounts) {
     auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     Resource r(std::move(ptr));
-    EXPECT_TRUE(r->getCount() == 1);
+    EXPECT_TRUE(r->hasExactlyOneRef());
   }
 
   {
@@ -35,8 +35,8 @@ TEST(Resource, Refcounts) {
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     {
       Resource r(ptr);
-      EXPECT_TRUE(ptr->getCount() == 2);
-      EXPECT_TRUE(r->getCount() == 2);
+      EXPECT_TRUE(ptr->hasMultipleRefs()); // count==2
+      EXPECT_TRUE(r->hasMultipleRefs());
     }
     EXPECT_TRUE(ptr->hasExactlyOneRef());
   }

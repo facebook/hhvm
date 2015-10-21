@@ -1346,16 +1346,16 @@ private:
       DT_UNCOUNTED_CASE:
         return;
       case KindOfString:
-        assert(check_refcount(m_data.pstr->getCount()));
+        assert(m_data.pstr->checkCount());
         return;
       case KindOfArray:
-        assert(check_refcount(m_data.parr->getCount()));
+        assert(m_data.parr->checkCount());
         return;
       case KindOfObject:
-        assert(check_refcount(m_data.pobj->getCount()));
+        assert(m_data.pobj->checkCount());
         return;
       case KindOfResource:
-        assert(check_refcount(m_data.pres->getCount()));
+        assert(m_data.pres->checkCount());
         return;
       case KindOfRef:
       case KindOfClass:

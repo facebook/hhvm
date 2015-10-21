@@ -163,7 +163,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     &retVal,
     func,
     init_null_variant,
-    nullptr,
+    curFP->hasThis() ? curFP->getThis() : nullptr,
     nullptr,
     varEnv,
     nullptr,

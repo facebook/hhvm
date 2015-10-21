@@ -33,8 +33,7 @@ TRACE_SET_MOD(hhir);
 using Trace::Indent;
 
 bool shouldHHIRRelaxGuards() {
-  assert(!(RuntimeOption::EvalHHIRRelaxGuards &&
-           RuntimeOption::EvalHHIRConstrictGuards));
+  assert(!RuntimeOption::EvalHHIRRelaxGuards);
   return RuntimeOption::EvalHHIRRelaxGuards &&
     // TODO (#5792564): Guard relaxation doesn't work with loops.
     // TODO (#6599498): Guard relaxation is broken in wholecfg mode.

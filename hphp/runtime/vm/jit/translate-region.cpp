@@ -218,9 +218,7 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
 
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {
-    // With HHIRConstrictGuards, the EndGuards instruction is emitted
-    // after the guards for the first bytecode instruction.
-    if (!RuntimeOption::EvalHHIRConstrictGuards) irgen::gen(irgs, EndGuards);
+    irgen::gen(irgs, EndGuards);
 
     if (RuntimeOption::EvalJitTransCounters) {
       irgen::incTransCounter(irgs);

@@ -156,25 +156,18 @@ RegionDescPtr RegionFormer::go() {
                           *m_region, show(m_irgs.irb->unit()));
   };
 
-  const bool emitPredictions = RuntimeOption::EvalHHIRConstrictGuards;
-
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
     if (t <= TCls) {
       irgen::assertTypeLocation(m_irgs, lt.location, t);
       m_curBlock->addPreCondition({lt.location, t, DataTypeGeneric});
-    } else if (emitPredictions) {
-      irgen::predictTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPredicted({lt.location, t});
     } else {
       irgen::checkTypeLocation(m_irgs, lt.location, t, m_ctx.bcOffset,
                                true /* outerOnly */);
     }
   }
 
-  // With HHIRConstrictGuards, the EndGuards instruction is emitted
-  // after the guards for the first bytecode instruction.
-  if (!RuntimeOption::EvalHHIRConstrictGuards) irgen::gen(m_irgs, EndGuards);
+  irgen::gen(m_irgs, EndGuards);
 
   for (bool firstInst = true; true; firstInst = false) {
     assertx(m_numBCInstrs >= 0);
@@ -187,13 +180,7 @@ RegionDescPtr RegionFormer::go() {
 
     m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
 
-    if (traceThroughJmp()) {
-      // We're going to skip the call to translateInstr, which is what
-      // inserts the EndGuards when HHIRConstrictGuards is enabled.
-      // So we need to emit the EndGuards here instead.
-      if (RuntimeOption::EvalHHIRConstrictGuards) irgen::gen(m_irgs, EndGuards);
-      continue;
-    }
+    if (traceThroughJmp()) continue;
 
     m_inst.interp = m_interp.count(m_sk);
 

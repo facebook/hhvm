@@ -1449,22 +1449,28 @@ Array getDefinedVariables(const ActRec* fp) {
 ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   VMRegAnchor _;
   auto fp = vmfp();
-  for (; frame > 0; --frame) {
-    if (!fp) break;
-    fp = getPrevVMState(fp);
-  }
   if (UNLIKELY(!fp)) return nullptr;
+  auto pc = fp->func()->unit()->offsetOf(vmpc());
+  for (; frame > 0; --frame) {
+    fp = getPrevVMState(fp, &pc);
+    if (UNLIKELY(!fp)) return nullptr;
+  }
   if (fp->skipFrame()) {
-    fp = getPrevVMState(fp);
+    fp = getPrevVMState(fp, &pc);
   }
   if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
+  auto const curOp = fp->func()->unit()->getOp(pc);
+  if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetV ||
+               curOp == Op::CreateCont || curOp == Op::Await)) {
+    return nullptr;
+  }
   assert(!fp->magicDispatch());
   return fp;
 }
 
 VarEnv* ExecutionContext::getOrCreateVarEnv(int frame) {
   auto const fp = getFrameAtDepth(frame);
-  if (!(fp->func()->attrs() & AttrMayUseVV)) {
+  if (!fp || !(fp->func()->attrs() & AttrMayUseVV)) {
     raise_error("Could not create variable environment");
   }
   if (!fp->hasVarEnv()) {

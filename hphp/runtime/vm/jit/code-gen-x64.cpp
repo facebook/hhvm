@@ -1196,7 +1196,15 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
     }, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
       return cond(v, CC_P, sf, v.makeReg(), [&](Vout& v) {
-        return dst1;
+        // PF = 1 -> unordered, i.e., we are doing an int cast of NaN. PHP5
+        // didn't formally define this, but observationally returns the
+        // truncated value (i.e., what dst1 currently holds). PHP7 formally
+        // defines this case to return 0.
+        if (RuntimeOption::PHP7_IntSemantics) {
+          return v.cns(0);
+        } else {
+          return dst1;
+        }
       }, [&](Vout& v) {
         auto const sf = v.makeReg();
         v << ucomisd{v.cns(maxULongAsDouble), srcReg, sf};

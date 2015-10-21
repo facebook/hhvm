@@ -1041,26 +1041,62 @@ void emitXor(IRGS& env) {
   gen(env, DecRef, btr);
 }
 
-void emitShl(IRGS& env) {
+void implShift(IRGS& env, Opcode op) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
   auto const lhsInt         = gen(env, ConvCellToInt, lhs);
   auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
 
-  push(env, gen(env, Shl, lhsInt, shiftAmountInt));
+  // - PHP7 defines shifts of width >= 64 to return the value you get from a
+  //   naive shift, i.e., either 0 or -1 depending on the shift and value. This
+  //   is notably *not* the semantics of the x86 shift instructions, so we need
+  //   to do some comparison logic here.
+  // - PHP5 semantics for such operations are machine-dependent.
+  if (RuntimeOption::PHP7_IntSemantics &&
+      !(shiftAmountInt->hasConstVal() &&
+        shiftAmountInt->intVal() < 64)) {
+    push(env, cond(
+      env,
+      [&] (Block* taken) {
+        auto const checkShift = gen(env, GteInt, shiftAmountInt, cns(env, 64));
+        gen(env, JmpNZero, taken, checkShift);
+      },
+      [&] {
+        return gen(env, op, lhsInt, shiftAmountInt);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+
+        if (op != Shr) {
+          return cns(env, 0);
+        }
+
+        if (lhsInt->hasConstVal()) {
+          int64_t lhsConst = lhsInt->intVal();
+          if (lhsConst >= 0) {
+            return cns(env, 0);
+          } else {
+            return cns(env, -1);
+          }
+        }
+
+        return gen(env, op, lhsInt, cns(env, 63));
+      }
+    ));
+  } else {
+    push(env, gen(env, op, lhsInt, shiftAmountInt));
+  }
+
   gen(env, DecRef, lhs);
   gen(env, DecRef, shiftAmount);
 }
 
-void emitShr(IRGS& env) {
-  auto const shiftAmount    = popC(env);
-  auto const lhs            = popC(env);
-  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
-  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
+void emitShl(IRGS& env) {
+  implShift(env, Shl);
+}
 
-  push(env, gen(env, Shr, lhsInt, shiftAmountInt));
-  gen(env, DecRef, lhs);
-  gen(env, DecRef, shiftAmount);
+void emitShr(IRGS& env) {
+  implShift(env, Shr);
 }
 
 void emitPow(IRGS& env) {

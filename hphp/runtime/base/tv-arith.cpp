@@ -559,11 +559,29 @@ Cell cellBitXor(Cell c1, Cell c2) {
 }
 
 Cell cellShl(Cell c1, Cell c2) {
-  return make_int(cellToInt(c1) << cellToInt(c2));
+  int64_t lhs = cellToInt(c1);
+  int64_t shift = cellToInt(c2);
+
+  if (RuntimeOption::PHP7_IntSemantics) {
+    if (UNLIKELY(shift >= 64)) {
+      return make_int(0);
+    }
+  }
+
+  return make_int(lhs << (shift & 63));
 }
 
 Cell cellShr(Cell c1, Cell c2) {
-  return make_int(cellToInt(c1) >> cellToInt(c2));
+  int64_t lhs = cellToInt(c1);
+  int64_t shift = cellToInt(c2);
+
+  if (RuntimeOption::PHP7_IntSemantics) {
+    if (UNLIKELY(shift >= 64)) {
+      return make_int(lhs >= 0 ? 0 : -1);
+    }
+  }
+
+  return make_int(lhs >> (shift & 63));
 }
 
 void cellAddEq(Cell& c1, Cell c2) {

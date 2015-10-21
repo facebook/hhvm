@@ -430,12 +430,28 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           }
           *result.asCell() = cellMod(*v1.asCell(), *v2.asCell());
           break;
-        case T_SL:
-          result = v1.toInt64() << v2.toInt64();
+        case T_SL: {
+          int64_t shift = v2.toInt64();
+          if (!RuntimeOption::PHP7_IntSemantics) {
+            result = v1.toInt64() << (shift & 63);
+          } else if (shift >= 64) {
+            result = 0;
+          } else {
+            result = v1.toInt64() << (shift & 63);
+          }
           break;
-        case T_SR:
-          result = v1.toInt64() >> v2.toInt64();
+        }
+        case T_SR: {
+          int64_t shift = v2.toInt64();
+          if (!RuntimeOption::PHP7_IntSemantics) {
+            result = v1.toInt64() >> (shift & 63);
+          } else if (shift >= 64) {
+            result = v1.toInt64() >= 0 ? 0 : -1;
+          } else {
+            result = v1.toInt64() >> (shift & 63);
+          }
           break;
+        }
         case T_BOOLEAN_OR:
           result = v1.toBoolean() || v2.toBoolean(); break;
         case T_BOOLEAN_AND:

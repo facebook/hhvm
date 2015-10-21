@@ -46,6 +46,7 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
+#include "hphp/util/code-cache.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/disasm.h"
@@ -268,7 +269,7 @@ bool MCGenerator::profileSrcKey(SrcKey sk) const {
   // Don't start profiling new functions if the size of either main or
   // prof is already above Eval.JitAMaxUsage.
   auto tcUsage = std::max(code.mainUsed(), code.profUsed());
-  if (tcUsage >= RuntimeOption::EvalJitAMaxUsage) {
+  if (tcUsage >= CodeCache::AMaxUsage) {
     return false;
   }
 
@@ -324,7 +325,7 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
 
   // In PGO mode, we free all the profiling data once the TC is full.
   if (RuntimeOption::EvalJitPGO &&
-      code.mainUsed() >= RuntimeOption::EvalJitAMaxUsage) {
+      code.mainUsed() >= CodeCache::AMaxUsage) {
     m_tx.profData()->free();
   }
 
@@ -385,7 +386,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   // In PGO mode, we free all the profiling data once the TC is full.
   if (RuntimeOption::EvalJitPGO &&
-      code.mainUsed() >= RuntimeOption::EvalJitAMaxUsage) {
+      code.mainUsed() >= CodeCache::AMaxUsage) {
     m_tx.profData()->free();
   }
 
@@ -467,7 +468,7 @@ bool MCGenerator::shouldTranslate(const Func* func) const {
   if (!shouldTranslateNoSizeLimit(func)) return false;
   // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do
   // allow Optimize translations past that limit.
-  return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage ||
+  return code.mainUsed() < CodeCache::AMaxUsage ||
          m_tx.mode() == TransKind::Optimize;
 }
 
@@ -2053,7 +2054,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   }
 
   // Report jit maturity based on the amount of code emitted.
-  auto percent = code.mainUsed() * 100 / RuntimeOption::EvalJitAMaxUsage;
+  auto percent = code.mainUsed() * 100 / CodeCache::AMaxUsage;
   if (percent > 100) percent = 100;
   ServiceData::createCounter("jit.maturity")->setValue(percent);
 

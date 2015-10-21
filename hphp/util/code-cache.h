@@ -41,6 +41,24 @@ struct CodeCache {
 
   struct Selector;
 
+  /* Code block sizes read from configs. */
+  static uint64_t AHotSize;
+  static uint64_t ASize;
+  static uint64_t AProfSize;
+  static uint64_t AColdSize;
+  static uint64_t AFrozenSize;
+
+  static uint64_t GlobalDataSize;
+
+  static uint64_t AMaxUsage;
+
+  static bool MapTCHuge;
+
+  static uint32_t AutoTCShift;
+
+  static uint32_t TCNumHugeHotMB;
+  static uint32_t TCNumHugeColdMB;
+
   CodeCache();
   ~CodeCache();
 

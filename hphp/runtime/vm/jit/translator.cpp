@@ -1151,8 +1151,7 @@ Translator::Translator()
   , m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
   , m_mode(TransKind::Invalid)
   , m_profData(nullptr)
-  , m_useAHot(RuntimeOption::RepoAuthoritative &&
-              RuntimeOption::EvalJitAHotSize > 0)
+  , m_useAHot(RuntimeOption::RepoAuthoritative && CodeCache::AHotSize > 0)
 {
   initInstrInfo();
   if (RuntimeOption::EvalJitPGO) {

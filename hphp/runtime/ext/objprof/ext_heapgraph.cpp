@@ -133,67 +133,6 @@ static HeapGraphContextPtr get_valid_heapgraph_context_resource(
 ///////////////////////////////////////////////////////////////////////////////
 // TRAVERSAL FUNCTIONS
 
-std::string getArrayConnectionName(
-  const ArrayData* props,
-  const void* target
-) {
-  ssize_t iter = props->iter_begin();
-  auto pos_limit = props->iter_end();
-
-  if (props->isMixed()) {
-    while (iter != pos_limit) {
-      // Get key
-      TypedValue key;
-      MixedArray::NvGetKey(props, &key, iter);
-      // Measure val
-      const TypedValue* val;
-      switch (key.m_type) {
-        case HPHP::KindOfString: {
-          StringData* str = key.m_data.pstr;
-          val = MixedArray::NvGetStr(props, str);
-          auto key_str = str->toCppString();
-          str->decRefCount();
-          if ((void*)val->m_data.pobj == target) {
-            return std::string("ArrayKey:" + key_str);
-          }
-          break;
-        }
-        case HPHP::KindOfInt64: {
-          int64_t num = key.m_data.num;
-          val = MixedArray::NvGetInt(props, num);
-          auto key_str = std::to_string(num);
-          if ((void*)val->m_data.pobj == target) {
-            return std::string("ArrayKey:" + key_str);
-          }
-          break;
-        }
-        default:
-          always_assert(false);
-      }
-
-      iter = MixedArray::IterAdvance(props, iter);
-    }
-  } else if (props->isPacked()) {
-    while (iter != pos_limit) {
-      const TypedValue* val = props->getValueRef(iter).asTypedValue();
-      if ((void*)val->m_data.pobj == target) {
-        return "ArrayIndex";
-      }
-      iter = PackedArray::IterAdvance(props, iter);
-    }
-  } else if (props->isStruct()) {
-    while (iter != pos_limit) {
-      const TypedValue* val = props->getValueRef(iter).asTypedValue();
-      if ((void*)val->m_data.pobj == target) {
-        return "StructIndex";
-      }
-      iter = StructArray::IterAdvance(props, iter);
-    }
-  }
-
-  return "";
-}
-
 bool supportsToArray(ObjectData* obj) {
   if (obj->isCollection()) {
     assertx(isValidCollection(obj->collectionType()));
@@ -325,18 +264,12 @@ std::string getNodesConnectionName(
     auto th = g.nodes[to].h;
     const void* target_ptr = &th->obj_;
     ObjectData* obj;
-    ArrayData* arr;
     std::string conn_name;
 
     switch (h->kind()) {
       // Known generalized cases that don't really need pointer kind
       case HeaderKind::Struct: // Not implemented yet
       case HeaderKind::Mixed:
-        arr = const_cast<ArrayData*>(&h->arr_);
-        conn_name = getArrayConnectionName(arr, target_ptr);
-        if (!conn_name.empty()) {
-          return  conn_name;
-        }
         return "ArrayKeyValue";
 
       // Obvious cases that do not need pointer type

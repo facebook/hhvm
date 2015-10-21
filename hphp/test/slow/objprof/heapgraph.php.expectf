@@ -25,7 +25,6 @@ ParentWithClosureTarget
 RootClass
 
 Traversing edges for first capture:
-ArrayKey:MemoizedSingleton
 ClassProperty:RootClass:getinstance$memoize_cache
 Property:child
 Property:children
@@ -53,7 +52,7 @@ String
 Doing DFS from root class on nodes (skipping root):
 
 Doing DFS from memoize cache edge on edges and nodes:
-ArrayKey:MemoizedSingleton-->ChildWithClosureMember
+ArrayKeyValue-->ChildWithClosureMember
 ClassProperty:RootClass:getinstance$memoize_cache-->Closure$ParentWithClosureTarget::createClosure;%d
 MixedArray
 ParentWithClosureTarget

@@ -144,9 +144,15 @@ namespace {
 
 using PtrMap = std::unordered_map<const Header*,int>;
 
-void addNode(HeapGraph& g, PtrMap& ids, const Header* h) {
-  ids[h] = g.nodes.size();
+void addNode(HeapGraph& g, const Header* h) {
   g.nodes.push_back(HeapGraph::Node{h, -1, -1});
+}
+
+void idNodes(HeapGraph& g, PtrMap& ids) {
+  for (int i = 0; i < g.nodes.size(); ++i) {
+    const Header* h = g.nodes[i].h;
+    ids[h] = i;
+  }
 }
 
 void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
@@ -238,15 +244,19 @@ HeapGraph makeHeapGraph() {
 
   // parse the heap once to create nodes.
   MM().forEachHeader([&](Header* h) {
-    addNode(g, ids, h);
+    addNode(g, h);
     // NativeData and ResumableFrame headers wrap around an inner ObjectData,
     // which we also want to track.
     if (h->kind() == HeaderKind::NativeData) {
-      addNode(g, ids, (Header*)h->nativeObj());
+      addNode(g, (Header*)h->nativeObj());
     } else if (h->kind() == HeaderKind::ResumableFrame) {
-      addNode(g, ids, (Header*)h->resumableObj());
+      addNode(g, (Header*)h->resumableObj());
     }
   });
+
+  // Give ids to all the nodes
+  ids.reserve(g.nodes.size());
+  idNodes(g, ids);
 
   // find roots
   PtrFilter<RootMarker> rmark(g, ids);

@@ -14,22 +14,24 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/mixed-array.h"
+
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/util/trace.h"
-#include "hphp/util/text-util.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/util/text-util.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 
@@ -175,7 +177,7 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname /* = nullptr */) {
-  auto md5string = string_md5(s, sz);
+  auto md5string = mangleUnitMd5(string_md5(s, sz));
   MD5 md5(md5string.c_str());
   Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
   if (u != nullptr) {
@@ -191,7 +193,9 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
     String systemName = String("/:") + String(fname);
-    MD5 md5;
+    MD5 md5 {
+      mangleUnitMd5(string_md5(s, sz)).c_str()
+    };
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
                              md5)) {

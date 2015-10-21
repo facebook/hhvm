@@ -84,7 +84,7 @@ rds::Handle FuncCache::alloc() {
 }
 
 const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
-  Func* func;
+  const Func* func;
   auto const thiz = handleToPtr<FuncCache>(handle);
   auto const pair = keyToPair(thiz, sd);
   const StringData* pairSd = pair->m_key;
@@ -93,7 +93,17 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
     func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
       VMRegAnchor _;
-      func = Unit::loadFunc(sd);
+      ObjectData *this_ = nullptr;
+      Class* self_ = nullptr;
+      StringData* inv = nullptr;
+      func = vm_decode_function(
+        String(sd),
+        vmfp(),
+        false /* forward */,
+        this_,
+        self_,
+        inv,
+        false /* warn */);
       if (!func) {
         raise_error("Call to undefined function %s()", sd->data());
       }

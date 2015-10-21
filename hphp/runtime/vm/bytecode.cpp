@@ -5943,31 +5943,13 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
 OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
   auto numArgs = decode_iva(pc);
   Cell* c1 = vmStack().topC();
-  const Func* func = nullptr;
-
-  // Throughout this function, we save obj/string/array and defer
-  // refcounting them until after the stack has been discarded.
-
-  if (isStringType(c1->m_type)) {
-    StringData* origSd = c1->m_data.pstr;
-    func = Unit::loadFunc(origSd);
-    if (func == nullptr) {
-      raise_error("Call to undefined function %s()", c1->m_data.pstr->data());
-    }
-
-    vmStack().discard();
-    ActRec* ar = fPushFuncImpl(func, numArgs);
-    ar->setThis(nullptr);
-    decRefStr(origSd);
-    return;
-  }
 
   if (c1->m_type == KindOfObject) {
     // this covers both closures and functors
     static StringData* invokeName = makeStaticString("__invoke");
     ObjectData* origObj = c1->m_data.pobj;
     const Class* cls = origObj->getVMClass();
-    func = cls->lookupMethod(invokeName);
+    auto const func = cls->lookupMethod(invokeName);
     if (func == nullptr) {
       raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
     }
@@ -5985,40 +5967,58 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
     return;
   }
 
-  if (c1->m_type == KindOfArray) {
-    // support: array($instance, 'method') and array('Class', 'method')
-    // which are both valid callables
-    ArrayData* origArr = c1->m_data.parr;
-    ObjectData* arrThis = nullptr;
-    HPHP::Class* arrCls = nullptr;
+  if ((c1->m_type == KindOfArray) ||
+      isStringType(c1->m_type)) {
+    // support:
+    //   array($instance, 'method')
+    //   array('Class', 'method'),
+    //   'func_name'
+    //   'class::method'
+    // which are all valid callables
+    auto origCell = *c1;
+    ObjectData* thiz = nullptr;
+    HPHP::Class* cls = nullptr;
     StringData* invName = nullptr;
 
-    func = vm_decode_function(
+    auto const func = vm_decode_function(
       tvAsCVarRef(c1),
       vmfp(),
       /* forwarding */ false,
-      arrThis,
-      arrCls,
+      thiz,
+      cls,
       invName,
       /* warn */ false
     );
     if (func == nullptr) {
-      raise_error("Invalid callable (array)");
+      if (origCell.m_type == KindOfArray) {
+        raise_error("Invalid callable (array)");
+      } else {
+        assert(isStringType(origCell.m_type));
+        raise_error("Call to undefined function %s()",
+                    origCell.m_data.pstr->data());
+      }
     }
-    assert(arrCls != nullptr);
 
     vmStack().discard();
     auto const ar = fPushFuncImpl(func, numArgs);
-    if (arrThis) {
-      arrThis->incRefCount();
-      ar->setThis(arrThis);
+    if (thiz) {
+      thiz->incRefCount();
+      ar->setThis(thiz);
+    } else if (cls) {
+      ar->setClass(cls);
     } else {
-      ar->setClass(arrCls);
+      ar->setThis(nullptr);
     }
+
     if (UNLIKELY(invName != nullptr)) {
       ar->setMagicDispatch(invName);
     }
-    decRefArr(origArr);
+    if (origCell.m_type == KindOfArray) {
+      decRefArr(origCell.m_data.parr);
+    } else {
+      assert(isStringType(origCell.m_type));
+      decRefStr(origCell.m_data.pstr);
+    }
     return;
   }
 

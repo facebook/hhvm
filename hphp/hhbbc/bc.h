@@ -304,14 +304,17 @@ namespace bc {
 #define POP_C_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_R_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
-                    Flavor popFlavor(uint32_t) const { not_reached(); }
-
-#define POP_V_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
-                    Flavor popFlavor(uint32_t) const { not_reached(); }
+#define POP_R_MMANY POP_C_MMANY
+#define POP_V_MMANY POP_C_MMANY
 
 #define POP_MFINAL  uint32_t numPop() const { return arg1; } \
-                    Flavor popFlavor(uint32_t) const { return Flavor::CR; }
+                    Flavor popFlavor(uint32_t) const { not_reached(); }
+
+#define POP_C_MFINAL uint32_t numPop() const { return arg1 + 1; } \
+                     Flavor popFlavor(uint32_t) const { not_reached(); }
+
+#define POP_R_MFINAL POP_C_MFINAL
+#define POP_V_MFINAL POP_C_MFINAL
 
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
@@ -409,6 +412,9 @@ OPCODES
 #undef POP_R_MMANY
 #undef POP_V_MMANY
 #undef POP_MFINAL
+#undef POP_C_MFINAL
+#undef POP_R_MFINAL
+#undef POP_V_MFINAL
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_FMANY

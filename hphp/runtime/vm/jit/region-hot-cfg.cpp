@@ -304,7 +304,7 @@ RegionDescPtr selectHotCFG(TransID head,
            show(*region));
     optimizeProfiledGuards(*region, *profData);
   }
-  ITRACE(3, "selectHotCFG: after optimizeProfiledGuards:\n{}\n",
+  ITRACE(1, "selectHotCFG: final version after optimizeProfiledGuards:\n{}\n",
          show(*region));
   return region;
 }

@@ -3508,14 +3508,29 @@ DimStr <litstr id>   <prop/elem op> <member op flags>    []  ->  []
 10.1c Final operations
 ----------------------
 
+All final operations take a <stack count> immediate as %0, which indicates the
+number of member keys on the eval stack that must be consumed before pushing
+the final result, if any.
+
 QueryML   <stack count> <query op> <prop/elem op> <local id>    [...]  ->  [C]
 QueryMC   <stack count> <query op> <prop/elem op>               [...]  ->  [C]
 QueryMInt <stack count> <query op> <prop/elem op> <int64>       [...]  ->  [C]
 QueryMStr <stack count> <query op> <prop/elem op> <litstr id>   [...]  ->  [C]
 
   {CGet,Isset,Empty}{Prop,Elem}{L,C,I,T} member operation, depending on the
-  query op and prop/elem op immediates. <stack count> elements are consumed
-  from the eval stack before pushing the final result.
+  query op and prop/elem op immediates.
+
+SetML   <stack count> <prop/elem op> <local id>     [... C]  ->  [C]
+SetMC   <stack count> <prop/elem op>                [... C]  ->  [C]
+SetMInt <stack count> <prop/elem op> <int64>        [... C]  ->  [C]
+SetMStr <stack count> <prop/elem op> <litstr id>    [... C]  ->  [C]
+
+  Set{Prop,Elem}{L,C,I,T} member operation, depending on the prop/elem op
+  immediate.
+
+SetMNewElem <stack count>
+
+  SetNewElem member operation.
 
 10.2 Legacy member instructions
 -------------------------------

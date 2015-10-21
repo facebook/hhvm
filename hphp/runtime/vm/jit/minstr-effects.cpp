@@ -108,11 +108,6 @@ MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Unk;
   baseType = origBase.derefIfPtr();
 
-  // Only certain types of bases are supported now but this list may expand in
-  // the future.
-  assert_not_implemented(
-      is_ptr || baseType.subtypeOfAny(TObj, TArr));
-
   baseTypeChanged = baseValChanged = false;
 
   // Process the inner and outer types separately and then recombine them,

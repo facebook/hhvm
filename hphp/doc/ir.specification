@@ -2145,13 +2145,15 @@ To string conversions:
   Load an MInstrState address. Returns a pointer to offset S0 within the
   current MInstrState.
 
-| LdMBase, D(PtrToGen), NA, NF
+| LdMBase, DParam, NA, NF
 
   Load the current value of the member base register.
 
 | StMBase, ND, S(PtrToGen), NF
 
-  Store a new value to the member base register.
+  Store a new value to the member base register. It is illegal for any
+  instruction other than StMBase or InterpOne (when interpreting a member
+  instruction) to modify the member base register.
 
 | FinishMemberOp, ND, NA, NF
 
@@ -2320,9 +2322,9 @@ fields of that struct for holding intermediate values.
 
 | ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedCell), CRc|Er
 
-  Like ArraySet, but for binding operations on the array. The parameter in S3
-  must point to a RefData with an array type when this instruction is executed,
-  and it must be the same array that is in S0.
+  Like ArraySet, but for binding operations on the array. S3 must point to a
+  RefData with an array type when this instruction is executed, and it must be
+  the same array that is in S0.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), Er
 

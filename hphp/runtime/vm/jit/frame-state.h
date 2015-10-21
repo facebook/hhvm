@@ -128,11 +128,23 @@ struct FrameState {
   FPInvOffset spOffset;   // delta from vmfp to spvalue
 
   /*
-   * The member base register is almost always a PtrToGen, but we often know
-   * which specific value it points to (right after BaseL or BaseH, for
-   * example). That value is stored here.
+   * Here we keep track of the raw pointer value of the member base register,
+   * the type of the pointer, as well as the value it points to, which we often
+   * know after simple base operations like BaseH or BaseL. These are used for
+   * some gen-time load elimination to preserve important information about the
+   * base.
    */
-  SSATmp* mbase{nullptr};
+  struct {
+    SSATmp* ptr{nullptr};
+    Type ptrType{TPtrToGen};
+    SSATmp* value{nullptr};
+
+    void reset() {
+      ptr = nullptr;
+      ptrType = TPtrToGen;
+      value = nullptr;
+    }
+  } mbase;
 
   /*
    * Tracks whether we will need to ratchet tvRef and tvRef2 after emitting an
@@ -320,6 +332,8 @@ struct FrameStateMgr final {
   void setSyncedSpLevel(FPInvOffset o) { cur().syncedSpLevel = o; }
   void incSyncedSpLevel(int32_t n = 1) { cur().syncedSpLevel += n; }
   void decSyncedSpLevel(int32_t n = 1) { cur().syncedSpLevel -= n; }
+  SSATmp* memberBasePtr() const;
+  Type memberBasePtrType() const;
   void setMemberBaseValue(SSATmp*);
   SSATmp* memberBaseValue() const;
 
@@ -405,6 +419,7 @@ private:
   StackState& stackState(IRSPOffset offset);
   const StackState& stackState(IRSPOffset offset) const;
   void collectPostConds(Block* exitBlock);
+  void updateMInstr(const IRInstruction*);
 
 private:
   FrameState& cur() {
@@ -418,6 +433,20 @@ private:
   template<bool Stack>
   void syncPrediction(SlotState<Stack>&);
 
+  /*
+   * refine(Local|Stack)Type() are used when the value of a slot hasn't changed
+   * but we have more information about its type, from a guard or type assert.
+   *
+   * set(Local|Stack)Type() are used to change the type of a slot when we have
+   * a brand new type because the value might have changed. These operations
+   * clear the typeSrcs of the slot, so new type may not be derived from the
+   * old type in any way.
+   *
+   * widen(Local|Stack)Type() are used to change the type of a slot, as a
+   * result of an operation that might change the value. These operations
+   * preserve the typeSrcs of the slot, so the new type may be derived from the
+   * old type.
+   */
 private: // local tracking helpers
   void setLocalValue(uint32_t id, SSATmp* value);
   void refineLocalValues(SSATmp* oldVal, SSATmp* newVal);
@@ -426,6 +455,7 @@ private: // local tracking helpers
   void refineLocalType(uint32_t id, Type type, TypeSource typeSrc);
   void setLocalPredictedType(uint32_t id, Type type);
   void setLocalType(uint32_t id, Type type);
+  void widenLocalType(uint32_t id, Type type);
   void setBoxedLocalPrediction(uint32_t id, Type type);
   void updateLocalRefPredictions(SSATmp*, SSATmp*);
   void setLocalTypeSource(uint32_t id, TypeSource typeSrc);
@@ -434,11 +464,13 @@ private: // local tracking helpers
 private: // stack tracking helpers
   void setStackValue(IRSPOffset, SSATmp*);
   void setStackType(IRSPOffset, Type);
+  void widenStackType(IRSPOffset, Type);
   void refineStackValues(SSATmp* oldval, SSATmp* newVal);
   void refineStackType(IRSPOffset, Type, TypeSource typeSrc);
   void clearStackForCall();
   void setBoxedStkPrediction(IRSPOffset, Type type);
   void spillFrameStack(IRSPOffset, FPInvOffset, const IRInstruction*);
+  void clearStack();
 
 private:
   Status m_status{Status::None};

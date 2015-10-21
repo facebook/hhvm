@@ -857,6 +857,15 @@ constexpr int32_t kMaxConcatN = 4;
                                        MFINAL,          ONE(CV),    NF) \
   O(QueryMStr,       FOUR(IVA, OA(QueryMOp), OA(PropElemOp), SA),       \
                                        MFINAL,          ONE(CV),    NF) \
+  O(SetML,           THREE(IVA, OA(PropElemOp), LA),                    \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMC,           TWO(IVA, OA(PropElemOp)),                          \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMInt,         THREE(IVA, OA(PropElemOp), I64A),                  \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMStr,         THREE(IVA, OA(PropElemOp), SA),                    \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMNewElem,     ONE(IVA),         C_MFINAL,        ONE(CV),    NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
 enum class Op : uint16_t {
@@ -1278,6 +1287,11 @@ inline bool isMemberFinalOp(Op op) {
     case OpQueryMC:
     case OpQueryMInt:
     case OpQueryMStr:
+    case OpSetML:
+    case OpSetMC:
+    case OpSetMInt:
+    case OpSetMStr:
+    case OpSetMNewElem:
       return true;
 
     default:

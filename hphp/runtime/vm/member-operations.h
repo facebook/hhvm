@@ -396,7 +396,7 @@ inline TypedValue* ElemDEmptyish(TypedValue* base, key_type<keyType> key) {
  */
 inline TypedValue* ElemDScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteUninit(&tvRef);
+  tvWriteNull(&tvRef);
   return &tvRef;
 }
 
@@ -512,7 +512,7 @@ inline TypedValue* ElemUArray(TypedValue& tvRef,
     return ElemUArrayImpl<keyType>(baseArr, key);
   }
 
-  tvWriteUninit(&tvRef);
+  tvWriteNull(&tvRef);
   return &tvRef;
 }
 
@@ -579,7 +579,7 @@ inline TypedValue* NewElemEmptyish(TypedValue* base) {
  */
 inline TypedValue* NewElemInvalid(TypedValue& tvRef) {
   raise_warning("Cannot use a scalar value as an array");
-  tvWriteUninit(&tvRef);
+  tvWriteNull(&tvRef);
   return &tvRef;
 }
 
@@ -1022,6 +1022,8 @@ inline void SetNewElemString(TypedValue* base, Cell* value) {
  * SetNewElem when base is an Array
  */
 inline void SetNewElemArray(TypedValue* base, Cell* value) {
+  base = tvToCell(base);
+  assert(base->m_type == KindOfArray);
   ArrayData* a = base->m_data.parr;
   bool copy = (a->hasMultipleRefs())
     || (value->m_type == KindOfArray && value->m_data.parr == a);

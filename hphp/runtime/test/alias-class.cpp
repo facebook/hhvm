@@ -462,7 +462,7 @@ TEST(AliasClass, IterUnion) {
 TEST(AliasClass, Pointees) {
   IRUnit unit{test_context};
   auto const marker = BCMarker::Dummy();
-  auto ptr = unit.gen(LdMBase, marker)->dst();
+  auto ptr = unit.gen(LdMBase, marker, TPtrToGen)->dst();
   auto const acls = pointee(ptr);
   EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTV, acls);
 }

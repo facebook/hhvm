@@ -284,6 +284,10 @@ inline BCSPOffset offsetFromBCSP(const IRGS& env, FPInvOffset offsetFromFP) {
   return toBCSPOffset(offsetFromFP, curSPTop);
 }
 
+inline BCSPOffset offsetFromBCSP(const IRGS& env, IRSPOffset offsetFromIRSP) {
+  return offsetFromBCSP(env, env.irb->spOffset() - offsetFromIRSP);
+}
+
 inline SSATmp* pop(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
   auto const offset = offsetFromIRSP(env, BCSPOffset{0});
   auto const knownType = env.irb->stackType(offset, tc);
@@ -363,6 +367,10 @@ inline SSATmp* topR(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
   return assertType(top(env, i), TGen);
 }
 
+inline SSATmp* topA(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
+  return assertType(top(env, i), TCls);
+}
+
 //////////////////////////////////////////////////////////////////////
 // Frame
 
@@ -413,8 +421,15 @@ inline Type relaxToGuardable(Type ty) {
   assertx(ty <= TGen);
   ty = ty.unspecialize();
 
+  // ty is unspecialized and we don't support guarding on CountedArr or
+  // StaticArr, so widen any subtypes of Arr to Arr.
+  if (ty <= TArr) return TArr;
+
+  // We can guard on StaticStr but not CountedStr.
+  if (ty <= TCountedStr)     return TStr;
+
   if (ty <= TBoxedCell)      return TBoxedCell;
-  if (ty.isKnownDataType())       return ty;
+  if (ty.isKnownDataType())  return ty;
   if (ty <= TUncountedInit)  return TUncountedInit;
   if (ty <= TUncounted)      return TUncounted;
   if (ty <= TCell)           return TCell;

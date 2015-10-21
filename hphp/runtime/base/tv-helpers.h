@@ -56,12 +56,14 @@ struct Variant;
 #define TV_GENERIC_DISPATCH_SLOW(exp, func) \
   [](HPHP::TypedValue tv) {                                     \
     switch (tv.m_type) {                                        \
+      case HPHP::KindOfStaticString:                            \
       case HPHP::KindOfString: return tv.m_data.pstr->func();   \
       case HPHP::KindOfArray: return tv.m_data.parr->func();    \
       case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
       case HPHP::KindOfResource: return tv.m_data.pres->func(); \
       case HPHP::KindOfRef: return tv.m_data.pref->func();      \
-      default: assert(false);                                   \
+      default:                                                  \
+        assert_flog(false, "Bad KindOf: {}", (size_t)tv.m_type);\
     }                                                           \
   }(exp)
 

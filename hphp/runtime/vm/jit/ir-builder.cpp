@@ -477,6 +477,13 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
+  if (auto ptr = m_state.memberBasePtr()) return ptr;
+
+  inst->setTypeParam(inst->typeParam() & m_state.memberBasePtrType());
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
@@ -492,6 +499,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CoerceStk)
   X(CheckCtxThis)
   X(LdCtx)
+  X(LdMBase)
   default: break;
   }
 #undef X

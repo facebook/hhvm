@@ -358,6 +358,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_R_MMANY 0
 #define COUNT_V_MMANY 0
 #define COUNT_MFINAL 0
+#define COUNT_C_MFINAL 0
+#define COUNT_R_MFINAL 0
+#define COUNT_V_MFINAL 0
 #define COUNT_FMANY 0
 #define COUNT_CVMANY 0
 #define COUNT_CVUMANY 0
@@ -416,8 +419,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_R_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::R); \
   getEmitterVisitor().popEvalStackMMany()
-#define POP_MFINAL \
-  getEmitterVisitor().popEvalStackMMany()
+#define POP_MFINAL POP_MMANY
+#define POP_C_MFINAL POP_C_MMANY
+#define POP_R_MFINAL POP_R_MMANY
+#define POP_V_MFINAL POP_V_MMANY
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
 #define POP_CVMANY \
@@ -688,6 +693,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_V_MMANY
 #undef POP_R_MMANY
 #undef POP_MFINAL
+#undef POP_C_MFINAL
+#undef POP_R_MFINAL
+#undef POP_V_MFINAL
 #undef POP_CV
 #undef POP_VV
 #undef POP_HV
@@ -5020,7 +5028,7 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   return 0;
 }
 
-void EmitterVisitor::emitMOp(
+size_t EmitterVisitor::emitMOp(
   int iFirst,
   int& iLast,
   bool allowW,
@@ -5155,6 +5163,32 @@ void EmitterVisitor::emitMOp(
       default:
         always_assert(false && "Bad intermediate marker");
     }
+  }
+
+  size_t stackCount = 0;
+  for (int i = iFirst; i <= iLast; ++i) {
+    if (!StackSym::IsSymbolic(m_evalStack.get(i))) ++stackCount;
+  }
+  return stackCount;
+}
+
+static folly::Optional<PropElemOp> symToPropElem(
+  Emitter& e, char sym, bool allowW
+) {
+  switch (StackSym::GetMarker(sym)) {
+    case StackSym::P:
+      return PropElemOp::Prop;
+    case StackSym::E:
+      return PropElemOp::Elem;
+    case StackSym::Q:
+      return PropElemOp::PropQ;
+    case StackSym::W:
+      if (allowW) return folly::none;
+      throw EmitterVisitor::IncludeTimeFatalException(
+        e.getNode(), "Cannot use [] for reading"
+      );
+    default:
+      always_assert(false);
   }
 }
 
@@ -5398,47 +5432,25 @@ void EmitterVisitor::emitCGet(Emitter& e) {
     }
   } else {
     if (RuntimeOption::EvalEmitNewMInstrs) {
-      emitMOp(i, iLast, false, false, e, MOpFlags::Warn, MOpFlags::Warn);
-      size_t stackCount = 0;
-      for (size_t idx = i; idx <= iLast; ++idx) {
-        if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
-      }
+      auto const stackCount =
+        emitMOp(i, iLast, false, false, e, MOpFlags::Warn, MOpFlags::Warn);
 
-      auto sym = m_evalStack.get(iLast);
-      auto flavor = StackSym::GetSymFlavor(sym);
-      auto marker = StackSym::GetMarker(sym);
-      auto op = QueryMOp::CGet;
-
-      auto propElemOp = [&](PropElemOp pe) {
-        if (flavor == StackSym::L) {
-          e.QueryML(stackCount, op, pe, m_evalStack.getLoc(iLast));
-        } else if (flavor == StackSym::I) {
-          e.QueryMInt(stackCount, op, pe, m_evalStack.getInt(iLast));
-        } else if (flavor == StackSym::T) {
-          e.QueryMStr(stackCount, op, pe, m_evalStack.getName(iLast));
-        } else {
-          e.QueryMC(stackCount, op, pe);
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, false)) {
+        auto const op = QueryMOp::CGet;
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.QueryML(stackCount, op, *pe, m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.QueryMC(stackCount, op, *pe);
+          case StackSym::I:
+            return e.QueryMInt(stackCount, op, *pe, m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return e.QueryMStr(stackCount, op, *pe, m_evalStack.getName(iLast));
         }
-      };
-
-      switch (marker) {
-        case StackSym::P:
-          propElemOp(PropElemOp::Prop);
-          break;
-        case StackSym::E:
-          propElemOp(PropElemOp::Elem);
-          break;
-        case StackSym::Q:
-          propElemOp(PropElemOp::PropQ);
-          break;
-        case StackSym::W:
-          throw IncludeTimeFatalException(e.getNode(),
-                                          "Cannot use [] for reading");
-        default:
-          always_assert(false);
       }
 
-      return;
+      always_assert(false);
     }
 
     std::vector<uchar> vectorImm;
@@ -5924,6 +5936,30 @@ void EmitterVisitor::emitSet(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount =
+        emitMOp(i, iLast, true, true, e, MOpFlags::Define, MOpFlags::Define);
+
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, true)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.SetML(stackCount, *pe, m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.SetMC(stackCount, *pe);
+          case StackSym::I:
+            return e.SetMInt(stackCount, *pe, m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return e.SetMStr(stackCount, *pe, m_evalStack.getName(iLast));
+          default:
+            always_assert(false);
+        }
+      }
+
+      e.SetMNewElem(stackCount);
+      return;
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.SetM(vectorImm);

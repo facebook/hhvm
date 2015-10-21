@@ -837,16 +837,17 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
                                  Vreg sf, JmpFn doJcc) {
   // Note: if you add new supported type tests, you should update
   // negativeCheckType() to indicate whether it is precise or not.
-  always_assert(!(type <= TCls));
   always_assert(!type.hasConstVal());
+  always_assert_flog(
+    !type.subtypeOfAny(TCls, TCountedStr, TStaticArr, TCountedArr),
+    "Unsupported type in emitTypeTest: {}", type
+  );
   auto& v = vmain();
   ConditionCode cc;
   if (type <= TStaticStr) {
     emitCmpTVType(v, sf, KindOfStaticString, typeSrc);
     cc = CC_E;
   } else if (type <= TStr) {
-    always_assert(type != TCountedStr &&
-                  "We don't support guarding on CountedStr");
     emitTestTVType(v, sf, KindOfStringBit, typeSrc);
     cc = CC_NZ;
   } else if (type == TNull) {

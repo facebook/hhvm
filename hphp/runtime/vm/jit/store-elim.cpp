@@ -557,11 +557,9 @@ void visit(Local& env, IRInstruction& inst) {
         auto lbit = pure_store_bit(env, pl->src);
         if (!lbit || *lbit != *bit) return;
         /*
-         * The source of the store is a load from
-         * the same address, which is also in this
-         * block. If there's no interference, we
-         * can kill this store. We won't know until
-         * we see the load though.
+         * The source of the store is a load from the same address, which is
+         * also in this block. If there's no interference, we can kill this
+         * store. We won't know until we see the load though.
          */
         if (env.global.reStores.size() <= *bit) {
           env.global.reStores.resize(*bit + 1);

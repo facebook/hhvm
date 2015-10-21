@@ -16,6 +16,10 @@ function noinline($x) {
   }
 }
 
+function exn($e) {
+  echo get_class($e), ': ', $e->getMessage(), "\n";
+}
+
 function run_tests() {
   echo 3 << 64, "\n";
   echo 3 << id(64), "\n";
@@ -103,6 +107,28 @@ function run_tests() {
 
   echo (new stdclass) >> 64, "\n";
   echo (new stdclass) << 64, "\n";
+
+  echo "-\n";
+
+  try {echo 3 << -1, "\n";} catch (Exception $e) {exn($e);}
+  try {echo 3 << id(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo 3 << noinline(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo id(3) << -1, "\n";} catch (Exception $e) {exn($e);}
+  try {echo id(3) << id(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo id(3) << noinline(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo noinline(3) << -1, "\n";} catch (Exception $e) {exn($e);}
+  try {echo noinline(3) << id(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo noinline(3) << noinline(-1), "\n";} catch (Exception $e) {exn($e);}
+
+  try {echo 3 >> -1, "\n";} catch (Exception $e) {exn($e);}
+  try {echo 3 >> id(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo 3 >> noinline(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo id(3) >> -1, "\n";} catch (Exception $e) {exn($e);}
+  try {echo id(3) >> id(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo id(3) >> noinline(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo noinline(3) >> -1, "\n";} catch (Exception $e) {exn($e);}
+  try {echo noinline(3) >> id(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo noinline(3) >> noinline(-1), "\n";} catch (Exception $e) {exn($e);}
 }
 
 run_tests();

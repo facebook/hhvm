@@ -566,6 +566,12 @@ Cell cellShl(Cell c1, Cell c2) {
     if (UNLIKELY(shift >= 64)) {
       return make_int(0);
     }
+
+    if (UNLIKELY(shift < 0)) {
+      // TODO(https://github.com/facebook/hhvm/issues/6012)
+      // This should throw an ArithmeticError.
+      SystemLib::throwInvalidOperationExceptionObject(Strings::NEGATIVE_SHIFT);
+    }
   }
 
   return make_int(lhs << (shift & 63));
@@ -578,6 +584,12 @@ Cell cellShr(Cell c1, Cell c2) {
   if (RuntimeOption::PHP7_IntSemantics) {
     if (UNLIKELY(shift >= 64)) {
       return make_int(lhs >= 0 ? 0 : -1);
+    }
+
+    if (UNLIKELY(shift < 0)) {
+      // TODO(https://github.com/facebook/hhvm/issues/6012)
+      // This should throw an ArithmeticError.
+      SystemLib::throwInvalidOperationExceptionObject(Strings::NEGATIVE_SHIFT);
     }
   }
 

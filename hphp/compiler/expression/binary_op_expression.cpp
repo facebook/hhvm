@@ -436,6 +436,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
             result = v1.toInt64() << (shift & 63);
           } else if (shift >= 64) {
             result = 0;
+          } else if (shift < 0) {
+            // This raises an error, and so can't be folded.
+            return ExpressionPtr();
           } else {
             result = v1.toInt64() << (shift & 63);
           }
@@ -447,6 +450,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
             result = v1.toInt64() >> (shift & 63);
           } else if (shift >= 64) {
             result = v1.toInt64() >= 0 ? 0 : -1;
+          } else if (shift < 0) {
+            // This raises an error, and so can't be folded.
+            return ExpressionPtr();
           } else {
             result = v1.toInt64() >> (shift & 63);
           }

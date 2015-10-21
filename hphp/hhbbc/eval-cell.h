@@ -87,6 +87,8 @@ folly::Optional<Type> eval_cell(Pred p) {
      */
     auto const t = from_cell(c);
     return options.ConstantProp ? t : loosen_statics(t);
+  } catch (const Object&) {
+    return folly::none;
   } catch (const std::exception&) {
     return folly::none;
   } catch (...) {

@@ -32,6 +32,7 @@ const char* const CONSTANTS_CASE_SENSITIVE =
 const char* const MODULO_BY_ZERO = "Modulo by zero";
 const char* const DIVISION_BY_ZERO =
   "Division by zero";
+const char* const NEGATIVE_SHIFT = "Bit shift by negative number";
 const char* const UNDEFINED_CONSTANT =
   "Use of undefined constant %s - assumed '%s'";
 const char* const UNDEFINED_VARIABLE = "Undefined variable: %s";

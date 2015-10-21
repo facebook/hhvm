@@ -73,8 +73,27 @@
 -2
 -
 
-Notice: Object of class stdClass could not be converted to int in %s on line 104
+Notice: Object of class stdClass could not be converted to int in %s on line 108
 1
 
-Notice: Object of class stdClass could not be converted to int in %s on line 105
+Notice: Object of class stdClass could not be converted to int in %s on line 109
 1
+-
+-9223372036854775808
+-9223372036854775808
+-9223372036854775808
+-9223372036854775808
+-9223372036854775808
+-9223372036854775808
+-9223372036854775808
+-9223372036854775808
+-9223372036854775808
+0
+0
+0
+0
+0
+0
+0
+0
+0

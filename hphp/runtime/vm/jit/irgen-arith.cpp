@@ -1051,10 +1051,11 @@ void implShift(IRGS& env, Opcode op) {
   //   naive shift, i.e., either 0 or -1 depending on the shift and value. This
   //   is notably *not* the semantics of the x86 shift instructions, so we need
   //   to do some comparison logic here.
+  // - PHP7 defines negative shifts to throw an ArithmeticError.
   // - PHP5 semantics for such operations are machine-dependent.
   if (RuntimeOption::PHP7_IntSemantics &&
       !(shiftAmountInt->hasConstVal() &&
-        shiftAmountInt->intVal() < 64)) {
+        shiftAmountInt->intVal() < 64 && shiftAmountInt->intVal() >= 0)) {
     push(env, cond(
       env,
       [&] (Block* taken) {
@@ -1062,9 +1063,32 @@ void implShift(IRGS& env, Opcode op) {
         gen(env, JmpNZero, taken, checkShift);
       },
       [&] {
-        return gen(env, op, lhsInt, shiftAmountInt);
+        return cond(
+          env,
+          [&] (Block* taken) {
+            auto const checkShift =
+              gen(env, LtInt, shiftAmountInt, cns(env, 0));
+            gen(env, JmpNZero, taken, checkShift);
+          },
+          [&] {
+            return gen(env, op, lhsInt, shiftAmountInt);
+          },
+          [&] {
+            // Unlikely: shifting by a negative amount.
+            hint(env, Block::Hint::Unlikely);
+
+            // TODO(https://github.com/facebook/hhvm/issues/6012)
+            // This should throw an ArithmeticError.
+            gen(env, ThrowInvalidOperation,
+                cns(env, makeStaticString(Strings::NEGATIVE_SHIFT)));
+
+            // Dead-code, but needed to satisfy cond().
+            return cns(env, false);
+          }
+        );
       },
       [&] {
+        // Unlikely: shifting by >= 64.
         hint(env, Block::Hint::Unlikely);
 
         if (op != Shr) {

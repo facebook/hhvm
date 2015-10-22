@@ -29,7 +29,7 @@
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/runtime/ext/std/ext_std_misc.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 
 using namespace HPHP;
 

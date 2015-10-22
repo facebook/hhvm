@@ -91,7 +91,7 @@ String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
     }
 
     // disallow access with an absolute path
-    if (FileUtil::isAbsolutePath(canonicalized)) {
+    if (FileUtil::isAbsolutePath(canonicalized.slice())) {
       return empty_string();
     }
 
@@ -111,7 +111,7 @@ String File::TranslatePath(const String& filename) {
     // Otherwise it would be canonicalized to CWD, which is inconsistent with
     // PHP and most filesystem utilities.
     return filename;
-  } else if (!FileUtil::isAbsolutePath(filename)) {
+  } else if (!FileUtil::isAbsolutePath(filename.slice())) {
     String cwd = g_context->getCwd();
     return TranslatePathKeepRelative(cwd + "/" + filename);
   } else {

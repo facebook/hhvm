@@ -180,7 +180,7 @@ static int statSyscall(
     const String& path,
     struct stat* buf,
     bool useFileCache = false) {
-  bool isRelative = !FileUtil::isAbsolutePath(path);
+  bool isRelative = !FileUtil::isAbsolutePath(path.slice());
   int pathIndex = 0;
   Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
   if (!w) return -1;
@@ -1093,7 +1093,7 @@ static VFileType lookupVirtualFile(const String& filename) {
 
   String cwd;
   std::string root;
-  bool isRelative = !FileUtil::isAbsolutePath(filename);
+  bool isRelative = !FileUtil::isAbsolutePath(filename.slice());
   if (isRelative) {
     cwd = g_context->getCwd();
     root = RuntimeOption::SourceRoot;

@@ -19,10 +19,13 @@
 #ifndef incl_HPHP_FILE_UTIL_H_
 #define incl_HPHP_FILE_UTIL_H_
 
+#include "hphp/util/file.h"
+
 #include "hphp/runtime/base/type-string.h"
-#include <vector>
-#include <string>
+
 #include <set>
+#include <string>
+#include <vector>
 
 namespace HPHP { namespace FileUtil {
 
@@ -78,59 +81,6 @@ String canonicalize(const String& path);
 String canonicalize(const std::string& path);
 String canonicalize(const char* path, size_t len,
                     bool collapse_slashes = true);
-
-/**
-* Check if the given character is a directory separator
-* for the current platform.
-*/
-inline bool isDirSeparator(char c) {
-#ifdef _MSC_VER
-  return c == '/' || c == '\\';
-#else
-  return c == '/';
-#endif
-}
-
-/**
- * Check if the given path is an absolute path. This
- * does not guarantee that the path is canonicalized.
- */
-inline bool isAbsolutePath(const char* path) {
-#ifdef _MSC_VER
-  int len = strlen(path);
-  if (len < 2) {
-    return false;
-  }
-  // NOTE: Boost actually checks if the last character of the first
-  // path element is a colon, rather than if the first character is an
-  // alpha followed by a colon. This is fine for now, as I don't know
-  // of any other forms of paths that would allow.
-  return (isDirSeparator(path[0]) && isDirSeparator(path[1])) ||
-    (isalpha(path[0]) && path[1] == ':');
-#else
-  return path[0] == '/';
-#endif
-}
-
-inline bool isAbsolutePath(const String& path) {
-  return isAbsolutePath(path.data());
-}
-
-inline bool isAbsolutePath(const std::string& path) {
-  return isAbsolutePath((const char*)path.data());
-}
-
-/**
- * Get the preferred directory separator for the current
- * platform.
- */
-inline char getDirSeparator() {
-#ifdef _MSC_VER
-  return '\\';
-#else
-  return '/';
-#endif
-}
 
 /**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".

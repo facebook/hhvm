@@ -17,10 +17,13 @@
 #ifndef incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
 #define incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
 
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/hdf.h"
+#include <string>
 
 namespace HPHP {
+////////////////////////////////////////////////////////////////////////////////
+
+struct Hdf;
+struct IniSettingMap;
 
 /*
  * The enum type for describing various system health level.
@@ -40,7 +43,7 @@ enum class HealthLevel {
  * health monitor.
  */
 struct IHealthMonitorMetric {
-  virtual ~IHealthMonitorMetric() { } // make compiler happy
+  virtual ~IHealthMonitorMetric() {}
   virtual HealthLevel evaluate() = 0;
   virtual bool enabled() = 0;
   virtual void setConfig(const IniSettingMap&, const Hdf&,
@@ -52,10 +55,12 @@ struct IHealthMonitorMetric {
  * the system health monitor.
  */
 struct IHostHealthObserver {
-  virtual ~IHostHealthObserver() { } // make compiler happy
+  virtual ~IHostHealthObserver() {}
   virtual void notifyNewStatus(HealthLevel newStatus) = 0;
   virtual HealthLevel getStatus() = 0;
 };
 
+////////////////////////////////////////////////////////////////////////////////
 }
+
 #endif

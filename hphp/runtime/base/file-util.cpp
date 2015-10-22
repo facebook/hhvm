@@ -389,7 +389,7 @@ String FileUtil::relativePath(const std::string& fromDir,
   size_t maxlen = (fromDir.size() + toFile.size()) * 3;
 
   // Sanity checks
-  if (!isAbsolutePath(fromDir) || !isAbsolutePath(toFile) ||
+  if (!isAbsolutePath(fromDir) || !isAbsolutePath(toFile.slice()) ||
       !isDirSeparator(fromDir[fromDir.size() - 1])) {
     return empty_string();
   }

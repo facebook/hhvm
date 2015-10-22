@@ -21,10 +21,11 @@
 #include <string>
 #include <vector>
 
-#include "hphp/runtime/base/file-util.h"
 #include "hphp/util/cache/cache-manager.h"
+#include "hphp/util/file.h"
 
 namespace HPHP {
+////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Stores file contents in memory. Used by web server for faster static
@@ -82,6 +83,7 @@ class FileCache {
   std::unique_ptr<CacheManager> cache_manager_;
 };
 
-}   // namespace HPHP
+////////////////////////////////////////////////////////////////////////////////
+}
 
-#endif  // incl_HPHP_FILE_CACHE_H_
+#endif

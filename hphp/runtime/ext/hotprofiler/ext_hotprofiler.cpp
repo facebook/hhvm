@@ -613,8 +613,9 @@ class TraceWalker {
       if (!current->is_func_exit) {
         unsigned level = ++functionLevel[current->symbol];
         if (level >= m_recursion.size()) {
-          char *level_string = new char[8];
-          sprintf(level_string, "@%u", level);
+          constexpr size_t bufferSize = 12;
+          char *level_string = new char[bufferSize];
+          snprintf(level_string, bufferSize, "@%u", level);
           m_recursion.push_back(std::make_pair(level_string,
                                                strlen(level_string)));
         }

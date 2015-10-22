@@ -79,6 +79,12 @@ struct Repo::GlobalData {
    */
   bool PHP7_IntSemantics = false;
 
+  /*
+   * Indicates that generators should be autoprimed and not require an initial
+   * call to next() before calling other generator functions.
+   */
+  bool AutoprimeGenerators = true;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (HardTypeHints)
@@ -87,6 +93,7 @@ struct Repo::GlobalData {
       (DisallowDynamicVarEnvFuncs)
       (HardReturnTypeHints)
       (PHP7_IntSemantics)
+      (AutoprimeGenerators)
       ;
   }
 };

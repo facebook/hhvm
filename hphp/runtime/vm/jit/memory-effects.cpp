@@ -1108,6 +1108,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContArIncKey:
   case ContArUpdateIdx:
   case ContValid:
+  case ContStarted:
   case IncProfCounter:
   case IncStat:
   case IncStatGrouped:

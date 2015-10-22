@@ -19,17 +19,17 @@ next
 Breakpoint 1 reached at foo() on line 23 of %s/flow_gen_excep.php
   22 function foo($a) {
   23*  $gen1 = genFoo($a);
-  24   $gen1->next();
+  24   $gen1->rewind();
 
 next
 Break at foo() on line 24 of %s/flow_gen_excep.php
   23   $gen1 = genFoo($a);
-  24*  $gen1->next();
+  24*  $gen1->rewind();
   25   while ($gen1->valid()) {
 
 next
 Break at foo() on line 25 of %s/flow_gen_excep.php
-  24   $gen1->next();
+  24   $gen1->rewind();
   25*  while ($gen1->valid()) {
   26     $val = $gen1->current();
 
@@ -55,7 +55,7 @@ Break at foo() on line 29 of %s/flow_gen_excep.php
 next
 Caught Exception given to continuation 8 in genFoo()
 Break at foo() on line 25 of %s/flow_gen_excep.php
-  24   $gen1->next();
+  24   $gen1->rewind();
   25*  while ($gen1->valid()) {
   26     $val = $gen1->current();
 
@@ -97,7 +97,7 @@ Break at foo() on line 31 of %s/flow_gen_excep.php
 next
 Caught Exception given to continuation 4 in foo()
 Break at foo() on line 25 of %s/flow_gen_excep.php
-  24   $gen1->next();
+  24   $gen1->rewind();
   25*  while ($gen1->valid()) {
   26     $val = $gen1->current();
 

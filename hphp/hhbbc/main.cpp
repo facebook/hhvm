@@ -239,6 +239,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
+  gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
 
   gd.arrayTypeTable.repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);
@@ -286,16 +287,15 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoJournal         = "memory";
   RuntimeOption::RepoCommit          = false;
   RuntimeOption::EvalJit             = false;
-
-  register_process_init();
-  initialize_repo();
-  Repo::shutdown();
-
-  hphp_process_init();
-
   // We only need to set this flag so Repo::global will let us access
   // it.
   RuntimeOption::RepoAuthoritative = true;
+
+  register_process_init();
+  initialize_repo();
+
+  hphp_process_init();
+  Repo::shutdown();
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
   compile_repo();

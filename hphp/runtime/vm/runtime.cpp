@@ -168,10 +168,20 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
   return g_hphp_build_native_class_unit(builtinClasses, numBuiltinClasses);
 }
 
+std::string mangleSystemMd5(const std::string& fileMd5) {
+  // This resembles mangleUnitMd5(...), however, only settings that HHBBC is
+  // aware of may be used here or it will be unable to load systemlib!
+  std::string t = fileMd5 + '\0'
+    + (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
+    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    ;
+  return string_md5(t.c_str(), t.size());
+}
+
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname /* = nullptr */) {
-  auto md5string = string_md5(s, sz);
+  auto md5string = mangleSystemMd5(string_md5(s, sz));
   MD5 md5(md5string.c_str());
   Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
   if (u != nullptr) {
@@ -187,7 +197,9 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
     String systemName = String("/:") + String(fname);
-    MD5 md5;
+    MD5 md5 {
+      mangleSystemMd5(string_md5(s, sz)).c_str()
+    };
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
                              md5)) {

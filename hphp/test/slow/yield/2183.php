@@ -33,7 +33,7 @@ function gen() {
 function main() {
   $GLOBALS['cont'] = $c = gen();
   echo "iter 1\n";
-  $c->next();
+  $c->rewind();
 
   echo "iter 2\n";
   $c->send(new Evil);

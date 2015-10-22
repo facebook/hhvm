@@ -368,6 +368,7 @@ public:
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
   static bool AutoTypecheck;
+  static bool AutoprimeGenerators;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecateOldStyleCtors;

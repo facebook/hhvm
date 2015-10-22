@@ -38,7 +38,7 @@ struct APCArray {
   static APCHandle* MakeUncountedArray(ArrayData* array);
 
   static APCHandle::Pair MakeSharedEmptyArray();
-  static Variant MakeArray(const APCHandle* handle);
+  static Variant MakeLocalArray(const APCHandle* handle);
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {

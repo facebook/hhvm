@@ -50,18 +50,7 @@ struct APCObject {
   static APCHandle::Pair MakeAPCObject(APCHandle* obj, const Variant& value);
 
   // Return an instance of a PHP object from the given object handle
-  static Variant MakeObject(const APCHandle* handle);
-
-  /*
-   * Make a serialized version of an object.
-   *
-   * TODO(#7411437): this function should not be in this class.
-   */
-  static APCHandle::Pair MakeSerializedObj(String data) {
-    auto const pair = APCString::MakeSharedString(KindOfObject, data.get());
-    pair.handle->setSerializedObj();
-    return pair;
-  }
+  static Variant MakeLocalObject(const APCHandle* handle);
 
   static void Delete(APCHandle* handle);
 

@@ -146,7 +146,7 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
   return tmp;
 }
 
-Variant APCObject::MakeObject(const APCHandle* handle) {
+Variant APCObject::MakeLocalObject(const APCHandle* handle) {
   if (handle->isSerializedObj()) {
     auto const serObj = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serObj->data(), serObj->size());

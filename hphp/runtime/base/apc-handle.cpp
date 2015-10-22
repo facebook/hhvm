@@ -59,7 +59,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
-        return APCObject::MakeSerializedObj(apc_reserialize(String{s}));
+        return APCString::MakeSerializedObject(apc_reserialize(String{s}));
       }
       auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
       return {value->getHandle(), sizeof(APCTypedValue)};
@@ -69,7 +69,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
-        return APCObject::MakeSerializedObj(apc_reserialize(String{s}));
+        return APCString::MakeSerializedObject(apc_reserialize(String{s}));
       }
 
       auto const st = lookupStaticString(s);
@@ -84,7 +84,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
         auto value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
         return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
       }
-      return APCString::MakeSharedString(type, s);
+      return APCString::MakeSharedString(s);
     }
 
     case KindOfArray:
@@ -98,7 +98,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
                                    unserializeObj);
       }
       return unserializeObj ? APCObject::Construct(source.getObjectData()) :
-             APCObject::MakeSerializedObj(apc_serialize(source));
+             APCString::MakeSerializedObject(apc_serialize(source));
 
     case KindOfResource:
       // TODO Task #2661075: Here and elsewhere in the runtime, we convert
@@ -127,11 +127,11 @@ Variant APCHandle::toLocal() const {
     case KindOfStaticString:
       return Variant{APCTypedValue::fromHandle(this)->getStringData()};
     case KindOfString:
-      return APCString::MakeString(this);
+      return APCString::MakeLocalString(this);
     case KindOfArray:
-      return APCArray::MakeArray(this);
+      return APCArray::MakeLocalArray(this);
     case KindOfObject:
-      return APCObject::MakeObject(this);
+      return APCObject::MakeLocalObject(this);
     case KindOfResource:
     case KindOfRef:
     case KindOfClass:

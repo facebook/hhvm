@@ -23,6 +23,7 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/stacktrace-profiler.h"
 
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"

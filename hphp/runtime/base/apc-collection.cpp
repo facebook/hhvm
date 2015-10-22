@@ -78,7 +78,7 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
                                     APCHandleLevel level,
                                     bool unserializeObj) {
   auto bail = [&] {
-    return APCObject::MakeSerializedObj(
+    return APCString::MakeSerializedObject(
       apc_serialize(Variant(const_cast<ObjectData*>(obj)))
     );
   };

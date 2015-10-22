@@ -31,7 +31,8 @@ struct APCLocalArray;
 //////////////////////////////////////////////////////////////////////
 
 struct APCArray {
-  static APCHandle::Pair MakeSharedArray(ArrayData* data, bool inner,
+  static APCHandle::Pair MakeSharedArray(ArrayData* data,
+                                         APCHandleLevel level,
                                          bool unserializeObj);
 
   static APCHandle* MakeUncountedArray(ArrayData* array);

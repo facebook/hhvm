@@ -29,6 +29,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+enum class APCHandleLevel {
+  Outer,
+  Inner
+};
+
 /*
  * An APCHandle is the externally visible handle for in-memory APC values.  The
  * main role of the APCHandle is to hold the type information of the value,
@@ -90,7 +95,7 @@ struct APCHandle {
    */
   static Pair Create(const Variant& source,
                      bool serialized,
-                     bool inner,
+                     APCHandleLevel level,
                      bool unserializeObj);
 
   /*

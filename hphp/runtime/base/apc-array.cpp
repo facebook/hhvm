@@ -33,8 +33,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 APCHandle::Pair
-APCArray::MakeSharedArray(ArrayData* arr, bool inner, bool unserializeObj) {
-  if (!inner) {
+APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
+                          bool unserializeObj) {
+  if (level == APCHandleLevel::Outer) {
     // only need to call traverseData() on the toplevel array
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr);
@@ -74,11 +75,11 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, bool unserializeObj) {
 
   try {
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      auto key = APCHandle::Create(it.first(), false, true,
+      auto key = APCHandle::Create(it.first(), false, APCHandleLevel::Inner,
                                    unserializeObj);
       size += key.size;
-      auto val = APCHandle::Create(it.secondRef(), false, true,
-                                   unserializeObj);
+      auto val = APCHandle::Create(it.secondRef(), false,
+                                   APCHandleLevel::Inner, unserializeObj);
       size += val.size;
       ret->add(key.handle, val.handle);
     }
@@ -112,8 +113,8 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {
   try {
     size_t i = 0;
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      auto val = APCHandle::Create(it.secondRef(), false, true,
-                                   unserializeObj);
+      auto val = APCHandle::Create(it.secondRef(), false,
+                                   APCHandleLevel::Inner, unserializeObj);
       size += val.size;
       ret->vals()[i++] = val.handle;
     }

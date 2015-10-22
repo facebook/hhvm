@@ -27,7 +27,7 @@ struct Object;
 
 struct APCCollection {
   static APCHandle::Pair Make(const ObjectData*,
-                              bool inner,
+                              APCHandleLevel level,
                               bool unserializeObj);
   static void Delete(APCHandle*);
 

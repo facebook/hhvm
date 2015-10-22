@@ -73,7 +73,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
     assert(key.isString());
     const Variant& value = it.secondRef();
     if (!value.isNull()) {
-      auto val = APCHandle::Create(value, false, true, true);
+      auto val = APCHandle::Create(value, false, APCHandleLevel::Inner, true);
       prop->val = val.handle;
       size += val.size;
     } else {
@@ -141,7 +141,7 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
   if (features.isCircular || features.hasSerializable) {
     return {nullptr, 0};
   }
-  auto tmp = APCHandle::Create(value, false, true, true);
+  auto tmp = APCHandle::Create(value, false, APCHandleLevel::Inner, true);
   tmp.handle->setObjAttempted();
   return tmp;
 }

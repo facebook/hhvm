@@ -29,7 +29,7 @@ namespace HPHP {
 
 APCHandle::Pair APCHandle::Create(const Variant& source,
                                   bool serialized,
-                                  bool inner,
+                                  APCHandleLevel level,
                                   bool unserializeObj) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
@@ -79,7 +79,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       }
 
       assert(!s->isStatic()); // would've been handled above
-      if (!inner && apcExtension::UseUncounted) {
+      if (level == APCHandleLevel::Outer && apcExtension::UseUncounted) {
         auto st = StringData::MakeUncounted(s->slice());
         auto value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
         return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
@@ -88,13 +88,13 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     }
 
     case KindOfArray:
-      return APCArray::MakeSharedArray(source.getArrayData(), inner,
+      return APCArray::MakeSharedArray(source.getArrayData(), level,
                                        unserializeObj);
 
     case KindOfObject:
       if (source.getObjectData()->isCollection()) {
         return APCCollection::Make(source.getObjectData(),
-                                   inner,
+                                   level,
                                    unserializeObj);
       }
       return unserializeObj ? APCObject::Construct(source.getObjectData()) :

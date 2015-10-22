@@ -523,7 +523,7 @@ Variant &Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   Variant *ret = nullptr;
   auto arr = m_arr;
-  ArrayData *escalated = arr->lvalNew(ret, arr->hasMultipleRefs());
+  ArrayData *escalated = arr->lvalNew(ret, arr->cowCheck());
   if (escalated != arr) m_arr = Ptr::attach(escalated);
   assert(ret);
   return *ret;
@@ -533,7 +533,7 @@ Variant &Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   Variant *ret = nullptr;
   auto arr = m_arr;
-  ArrayData *escalated = arr->lvalNewRef(ret, arr->hasMultipleRefs());
+  ArrayData *escalated = arr->lvalNewRef(ret, arr->cowCheck());
   if (escalated != arr) m_arr = Ptr::attach(escalated);
   assert(ret);
   return *ret;
@@ -559,7 +559,7 @@ void Array::setImpl(const T &key, const Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::Create(key, v));
   } else {
-    ArrayData *escalated = m_arr->set(key, v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->set(key, v, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
@@ -571,7 +571,7 @@ void Array::setRefImpl(const T &key, Variant& v) {
     m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
   } else {
     escalate();
-    ArrayData *escalated = m_arr->setRef(key, v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->setRef(key, v, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
@@ -582,7 +582,7 @@ void Array::addImpl(const T &key, const Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::Create(key, v));
   } else {
-    ArrayData *escalated = m_arr->add(key, v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->add(key, v, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
@@ -688,7 +688,7 @@ const Variant& Array::append(const Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::Create(v));
   } else {
-    ArrayData *escalated = m_arr->append(v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->append(v, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
   return v;
@@ -698,7 +698,7 @@ const Variant& Array::appendRef(Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateRef(v));
   } else {
-    ArrayData *escalated = m_arr->appendRef(v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->appendRef(v, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
   return v;
@@ -706,7 +706,7 @@ const Variant& Array::appendRef(Variant& v) {
 
 const Variant& Array::appendWithRef(const Variant& v) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  ArrayData *escalated = m_arr->appendWithRef(v, (m_arr->hasMultipleRefs()));
+  ArrayData *escalated = m_arr->appendWithRef(v, m_arr->cowCheck());
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   return v;
 }
@@ -734,7 +734,7 @@ Variant Array::dequeue() {
 void Array::prepend(const Variant& v) {
   if (!m_arr) operator=(Create());
   assert(m_arr);
-  ArrayData *newarr = m_arr->prepend(v, (m_arr->hasMultipleRefs()));
+  ArrayData *newarr = m_arr->prepend(v, m_arr->cowCheck());
   if (newarr != m_arr) m_arr = Ptr::attach(newarr);
 }
 

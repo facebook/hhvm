@@ -126,6 +126,10 @@ inline void decRefCount(RefCount& count) {
   if (isRefCounted(count)) --count;
 }
 
+ALWAYS_INLINE bool decWillRelease(RefCount& count) {
+  return !hasMultipleRefs(count);
+}
+
 ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
   assert(check_refcount_nz(count));
   if (count == 1) return true;
@@ -164,6 +168,10 @@ inline void incRefCount(RefCount& count) {
   ++count;
 }
 
+ALWAYS_INLINE bool decWillRelease(RefCount& count) {
+  return !hasMultipleRefs(count);
+}
+
 inline void decRefCount(RefCount& count) {
   assert(check_refcount_ns_nz(count));
   --count;
@@ -200,6 +208,9 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
     assert(kindIsValid());                                              \
     return CountableManip::hasExactlyOneRef(m_hdr.count);               \
   }                                                                     \
+  bool cowCheck() const {                                               \
+    return CountableManip::hasMultipleRefs(m_hdr.count);                \
+  }                                                                     \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     assert(kindIsValid());                                              \
@@ -209,6 +220,10 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
     assert(!MemoryManager::sweeping());                                 \
     assert(kindIsValid());                                              \
     CountableManip::decRefCount(m_hdr.count);                           \
+  }                                                                     \
+  bool decWillRelease() const {                                         \
+    assert(kindIsValid());                                              \
+    return CountableManip::decWillRelease(m_hdr.count);                 \
   }                                                                     \
   ALWAYS_INLINE bool decReleaseCheck() {                                \
     assert(!MemoryManager::sweeping());                                 \
@@ -262,6 +277,10 @@ ALWAYS_INLINE bool decReleaseCheck(RefCount& count) {
     assert(!MemoryManager::sweeping());                                 \
     assert(kindIsValid());                                              \
     CountableManipNS::decRefCount(m_hdr.count);                         \
+  }                                                                     \
+  bool decWillRelease() const {                                         \
+    assert(kindIsValid());                                              \
+    return CountableManipNS::decWillRelease(m_hdr.count);               \
   }                                                                     \
   ALWAYS_INLINE bool decReleaseCheck() {                                \
     assert(!MemoryManager::sweeping());                                 \

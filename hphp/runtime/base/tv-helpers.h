@@ -126,7 +126,7 @@ bool tvDecRefWillRelease(TypedValue* tv);
  */
 inline bool tvDecRefWillCallHelper(TypedValue* tv) {
   return isRefcountedType(tv->m_type) &&
-    !TV_GENERIC_DISPATCH(*tv, hasMultipleRefs);
+         TV_GENERIC_DISPATCH(*tv, decWillRelease);
 }
 
 inline void tvDecRefStr(TypedValue* tv) {

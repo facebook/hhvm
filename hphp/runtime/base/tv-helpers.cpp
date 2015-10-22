@@ -101,7 +101,7 @@ bool tvDecRefWillRelease(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     return tv->m_data.pref->getRealCount() <= 1;
   }
-  return !TV_GENERIC_DISPATCH(*tv, hasMultipleRefs);
+  return TV_GENERIC_DISPATCH(*tv, decWillRelease);
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
@@ -474,7 +474,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(a->isStatic() || a->hasExactlyOneRef());
+  assert(!a->isRefCounted() || a->hasExactlyOneRef());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;

@@ -571,7 +571,7 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
   assertx(cellIsPlausible(value));
-  const bool copy = a->hasMultipleRefs();
+  const bool copy = a->cowCheck();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);

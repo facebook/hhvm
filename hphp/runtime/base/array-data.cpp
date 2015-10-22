@@ -533,7 +533,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *    Performs array addition, logically mutating the first array.
    *    It may return a new array if the array needed to grow, or if
-   *    it needed to COW because hasMultipleRefs was true.
+   *    it needed to COW because cowCheck() was true.
    */
   DISPATCH(PlusEq)
 
@@ -550,7 +550,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *   Remove the last element from the array and assign it to `value'.  This
    *   function may return a new array if it decided to COW due to
-   *   hasMultipleRefs().
+   *   cowCheck().
    */
   DISPATCH(Pop)
 
@@ -559,7 +559,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *   Remove the first element from the array and assign it to `value'.  This
    *   function may return a new array if it decided to COW due to
-   *   hasMultipleRefs().
+   *   cowCheck().
    */
   DISPATCH(Dequeue)
 

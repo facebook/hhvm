@@ -470,9 +470,9 @@ private:
 public:
   explicit ZArrVal(TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
-    ArrayData * ad = m_tv->m_data.parr;
-    if (ad->isStatic() || ad->hasMultipleRefs()) {
-      forceAsProxyArray ();
+    auto ad = m_tv->m_data.parr;
+    if (ad->cowCheck()) {
+      forceAsProxyArray();
     }
   }
   inline void forceAsProxyArray () {
@@ -480,16 +480,16 @@ public:
     if (ad->isEmptyArray()) {
       assert(!"can't forceAsProxyArray an empty array");
     } else {
-	  auto tmp = ad->copy();
-	  assert(tmp != ad);
-	  ad = tmp;
+      auto tmp = ad->copy();
+      assert(tmp != ad);
+      ad = tmp;
     }
 
     // copy() causes an array to be unproxied, so we normally need
     // to reproxy it
     if (!ad->isProxyArray()) {
       ad = ProxyArray::Make(ad);
-	  assert(ad->hasExactlyOneRef());
+      assert(ad->hasExactlyOneRef());
     }
     m_tv->m_data.parr->decRefCount();
     m_tv->m_data.parr = ad;

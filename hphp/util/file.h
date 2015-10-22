@@ -64,7 +64,7 @@ inline bool isAbsolutePath(folly::StringPiece path) {
   return (isDirSeparator(path[0]) && isDirSeparator(path[1])) ||
     (isalpha(path[0]) && path[1] == ':');
 #else
-  return path[0] == '/';
+  return path.size() > 0 && path[0] == '/';
 #endif
 }
 

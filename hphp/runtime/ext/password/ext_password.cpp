@@ -19,22 +19,13 @@
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
-const StaticString s_PASSWORD_BCRYPT("PASSWORD_BCRYPT");
-const StaticString s_PASSWORD_DEFAULT("PASSWORD_DEFAULT");
-
-const int64_t k_PASSWORD_BCRYPT = 1;
-const int64_t k_PASSWORD_DEFAULT = k_PASSWORD_BCRYPT;
 
 class PasswordExtension final : public Extension {
  public:
   PasswordExtension() : Extension("password") {}
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_PASSWORD_BCRYPT.get(), k_PASSWORD_BCRYPT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PASSWORD_DEFAULT.get(), k_PASSWORD_DEFAULT
-    );
+    HHVM_RC_INT(PASSWORD_BCRYPT, 1);
+    HHVM_RC_INT(PASSWORD_DEFAULT, 1 /* PASSWORD_BCRYPT */);
 
     loadSystemlib();
   }

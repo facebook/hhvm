@@ -71,19 +71,16 @@ static void HHVM_METHOD(SpoofChecker, setChecks, int64_t checks) {
 //////////////////////////////////////////////////////////////////////////////
 
 void IntlExtension::initUSpoof() {
-
-#define SPOOFC(v) Native::registerClassConstant<KindOfInt64> \
-                    (s_SpoofChecker.get(), makeStaticString(#v), USPOOF_##v)
-
-  SPOOFC(SINGLE_SCRIPT_CONFUSABLE);
-  SPOOFC(MIXED_SCRIPT_CONFUSABLE);
-  SPOOFC(WHOLE_SCRIPT_CONFUSABLE);
-  SPOOFC(ANY_CASE);
-  SPOOFC(SINGLE_SCRIPT);
-  SPOOFC(INVISIBLE);
-  SPOOFC(CHAR_LIMIT);
-
-#undef SPOOFC
+  HHVM_RCC_INT(SpoofChecker, SINGLE_SCRIPT_CONFUSABLE,
+               USPOOF_SINGLE_SCRIPT_CONFUSABLE);
+  HHVM_RCC_INT(SpoofChecker, MIXED_SCRIPT_CONFUSABLE,
+               USPOOF_MIXED_SCRIPT_CONFUSABLE);
+  HHVM_RCC_INT(SpoofChecker, WHOLE_SCRIPT_CONFUSABLE,
+               USPOOF_WHOLE_SCRIPT_CONFUSABLE);
+  HHVM_RCC_INT(SpoofChecker, ANY_CASE, USPOOF_ANY_CASE);
+  HHVM_RCC_INT(SpoofChecker, SINGLE_SCRIPT, USPOOF_SINGLE_SCRIPT);
+  HHVM_RCC_INT(SpoofChecker, INVISIBLE, USPOOF_INVISIBLE);
+  HHVM_RCC_INT(SpoofChecker, CHAR_LIMIT, USPOOF_CHAR_LIMIT);
 
   HHVM_ME(SpoofChecker, isSuspicious);
   HHVM_ME(SpoofChecker, areConfusable);

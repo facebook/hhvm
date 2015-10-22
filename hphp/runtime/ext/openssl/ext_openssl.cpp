@@ -39,39 +39,6 @@ namespace HPHP {
 
 #define MIN_KEY_LENGTH          384
 
-#define OPENSSL_ALGO_SHA1       1
-#define OPENSSL_ALGO_MD5        2
-#define OPENSSL_ALGO_MD4        3
-#ifdef HAVE_OPENSSL_MD2_H
-#define OPENSSL_ALGO_MD2        4
-#endif
-#define OPENSSL_ALGO_DSS1       5
-#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
-#define OPENSSL_ALGO_SHA224     6
-#define OPENSSL_ALGO_SHA256     7
-#define OPENSSL_ALGO_SHA384     8
-#define OPENSSL_ALGO_SHA512     9
-#define OPENSSL_ALGO_RMD160     10
-#endif
-
-enum php_openssl_key_type {
-  OPENSSL_KEYTYPE_RSA,
-  OPENSSL_KEYTYPE_DSA,
-  OPENSSL_KEYTYPE_DH,
-  OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-#ifdef EVP_PKEY_EC
-  OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
-#endif
-};
-enum php_openssl_cipher_type {
-  PHP_OPENSSL_CIPHER_RC2_40,
-  PHP_OPENSSL_CIPHER_RC2_128,
-  PHP_OPENSSL_CIPHER_RC2_64,
-  PHP_OPENSSL_CIPHER_DES,
-  PHP_OPENSSL_CIPHER_3DES,
-  PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
-};
-
 // bitfields
 const int64_t k_OPENSSL_RAW_DATA = 1;
 const int64_t k_OPENSSL_ZERO_PADDING = 2;
@@ -79,44 +46,8 @@ const int64_t k_OPENSSL_NO_PADDING = 3;
 const int64_t k_OPENSSL_PKCS1_OAEP_PADDING = 4;
 
 // exported constants
-const int64_t k_OPENSSL_ALGO_SHA1 = 1;
-const int64_t k_OPENSSL_ALGO_MD5 = 2;
-const int64_t k_OPENSSL_ALGO_MD4 = 3;
-const int64_t k_OPENSSL_ALGO_MD2 = 4;
-const int64_t k_OPENSSL_ALGO_DSS1 = 5;
-const int64_t k_OPENSSL_ALGO_SHA224 = 6;
-const int64_t k_OPENSSL_ALGO_SHA256 = 7;
-const int64_t k_OPENSSL_ALGO_SHA384 = 8;
-const int64_t k_OPENSSL_ALGO_SHA512 = 9;
-const int64_t k_OPENSSL_ALGO_RMD160 = 10;
-
-const int64_t k_OPENSSL_CIPHER_RC2_40 = 0;
-const int64_t k_OPENSSL_CIPHER_RC2_128 = 1;
-const int64_t k_OPENSSL_CIPHER_RC2_64 = 2;
-const int64_t k_OPENSSL_CIPHER_DES = 3;
-const int64_t k_OPENSSL_CIPHER_3DES = 4;
-
-const int64_t k_OPENSSL_KEYTYPE_RSA = 0;
-const int64_t k_OPENSSL_KEYTYPE_DSA = 1;
-const int64_t k_OPENSSL_KEYTYPE_DH = 2;
-const int64_t k_OPENSSL_KEYTYPE_EC = 3;
-
 const int64_t k_OPENSSL_SSLV23_PADDING = 2;
 const int64_t k_OPENSSL_PKCS1_PADDING = 1;
-
-const int64_t k_OPENSSL_VERSION_NUMBER = OPENSSL_VERSION_NUMBER;
-const StaticString k_OPENSSL_VERSION_TEXT(OPENSSL_VERSION_TEXT);
-
-// PKCS
-const int64_t k_PKCS7_TEXT = 1;
-const int64_t k_PKCS7_NOCERTS = 2;
-const int64_t k_PKCS7_NOSIGS = 4;
-const int64_t k_PKCS7_NOCHAIN = 8;
-const int64_t k_PKCS7_NOINTERN = 16;
-const int64_t k_PKCS7_NOVERIFY = 32;
-const int64_t k_PKCS7_DETACHED = 64;
-const int64_t k_PKCS7_BINARY = 128;
-const int64_t k_PKCS7_NOATTR = 256;
 
 static char default_ssl_conf_filename[PATH_MAX];
 
@@ -1839,7 +1770,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   switch (EVP_PKEY_type(pkey->type)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    ktype = k_OPENSSL_KEYTYPE_RSA;
+    ktype = OPENSSL_KEYTYPE_RSA;
     assert(rsa);
     add_bignum_as_string(details, s_n, rsa->n);
     add_bignum_as_string(details, s_e, rsa->e);
@@ -1855,7 +1786,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_DSA2:
   case EVP_PKEY_DSA3:
   case EVP_PKEY_DSA4:
-    ktype = k_OPENSSL_KEYTYPE_DSA;
+    ktype = OPENSSL_KEYTYPE_DSA;
     assert(dsa);
     add_bignum_as_string(details, s_p, dsa->p);
     add_bignum_as_string(details, s_q, dsa->q);
@@ -1865,7 +1796,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     ret.set(s_dsa, details);
     break;
   case EVP_PKEY_DH:
-    ktype = k_OPENSSL_KEYTYPE_DH;
+    ktype = OPENSSL_KEYTYPE_DH;
     assert(dh);
     add_bignum_as_string(details, s_p, dh->p);
     add_bignum_as_string(details, s_g, dh->g);
@@ -1874,7 +1805,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     ret.set(s_dh, details);
     break;
 #ifdef EVP_PKEY_EC
-  case EVP_PKEY_EC:      ktype = k_OPENSSL_KEYTYPE_EC;    break;
+  case EVP_PKEY_EC:      ktype = OPENSSL_KEYTYPE_EC;    break;
 #endif
   }
   ret.set(s_type, ktype);
@@ -2897,51 +2828,50 @@ class opensslExtension final : public Extension {
  public:
   opensslExtension() : Extension("openssl") {}
   void moduleInit() override {
-#define SSLCNS(cns) Native::registerConstant<KindOfInt64> \
-                      (makeStaticString("OPENSSL_"#cns), k_OPENSSL_##cns)
-    SSLCNS(RAW_DATA);
-    SSLCNS(ZERO_PADDING);
-    SSLCNS(ALGO_RMD160);
-    SSLCNS(ALGO_SHA512);
-    SSLCNS(ALGO_SHA384);
-    SSLCNS(ALGO_SHA256);
-    SSLCNS(ALGO_SHA224);
-    SSLCNS(ALGO_DSS1);
-    SSLCNS(ALGO_MD2);
-    SSLCNS(ALGO_MD4);
-    SSLCNS(ALGO_MD5);
-    SSLCNS(ALGO_SHA1);
-    SSLCNS(CIPHER_3DES);
-    SSLCNS(CIPHER_DES);
-    SSLCNS(CIPHER_RC2_128);
-    SSLCNS(CIPHER_RC2_40);
-    SSLCNS(CIPHER_RC2_64);
-    SSLCNS(KEYTYPE_DH);
-    SSLCNS(KEYTYPE_DSA);
-    SSLCNS(KEYTYPE_EC);
-    SSLCNS(KEYTYPE_RSA);
-    SSLCNS(NO_PADDING);
-    SSLCNS(PKCS1_OAEP_PADDING);
-    SSLCNS(PKCS1_PADDING);
-    SSLCNS(SSLV23_PADDING);
-    SSLCNS(VERSION_NUMBER);
-#undef SSLCNS
-#define PKCSCNS(cns) Native::registerConstant<KindOfInt64> \
-                       (makeStaticString("PKCS7_" #cns), k_PKCS7_##cns)
-    PKCSCNS(BINARY);
-    PKCSCNS(DETACHED);
-    PKCSCNS(NOATTR);
-    PKCSCNS(NOCERTS);
-    PKCSCNS(NOCHAIN);
-    PKCSCNS(NOINTERN);
-    PKCSCNS(NOSIGS);
-    PKCSCNS(NOVERIFY);
-    PKCSCNS(TEXT);
-#undef PKCSCNS
+    HHVM_RC_INT(OPENSSL_RAW_DATA, k_OPENSSL_RAW_DATA);
+    HHVM_RC_INT(OPENSSL_ZERO_PADDING, k_OPENSSL_ZERO_PADDING);
+    HHVM_RC_INT(OPENSSL_NO_PADDING, k_OPENSSL_NO_PADDING);
+    HHVM_RC_INT(OPENSSL_PKCS1_OAEP_PADDING, k_OPENSSL_PKCS1_OAEP_PADDING);
+    HHVM_RC_INT(OPENSSL_SSLV23_PADDING, k_OPENSSL_SSLV23_PADDING);
+    HHVM_RC_INT(OPENSSL_PKCS1_PADDING, k_OPENSSL_PKCS1_PADDING);
 
-    Native::registerConstant<KindOfString>(
-      s_OPENSSL_VERSION_TEXT.get(), k_OPENSSL_VERSION_TEXT.get()
-    );
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA1);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_MD5);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_MD4);
+#ifdef HAVE_OPENSSL_MD2_H
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_MD2);
+#endif
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_DSS1);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA224);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA256);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA384);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_SHA512);
+    HHVM_RC_INT_SAME(OPENSSL_ALGO_RMD160);
+
+    HHVM_RC_INT(OPENSSL_CIPHER_RC2_40, PHP_OPENSSL_CIPHER_RC2_40);
+    HHVM_RC_INT(OPENSSL_CIPHER_RC2_128, PHP_OPENSSL_CIPHER_RC2_128);
+    HHVM_RC_INT(OPENSSL_CIPHER_RC2_64, PHP_OPENSSL_CIPHER_RC2_64);
+    HHVM_RC_INT(OPENSSL_CIPHER_DES, PHP_OPENSSL_CIPHER_DES);
+    HHVM_RC_INT(OPENSSL_CIPHER_3DES, PHP_OPENSSL_CIPHER_3DES);
+
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_RSA);
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DSA);
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DH);
+    HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_EC);
+
+    HHVM_RC_INT_SAME(OPENSSL_VERSION_NUMBER);
+
+    HHVM_RC_INT_SAME(PKCS7_TEXT);
+    HHVM_RC_INT_SAME(PKCS7_NOCERTS);
+    HHVM_RC_INT_SAME(PKCS7_NOSIGS);
+    HHVM_RC_INT_SAME(PKCS7_NOCHAIN);
+    HHVM_RC_INT_SAME(PKCS7_NOINTERN);
+    HHVM_RC_INT_SAME(PKCS7_NOVERIFY);
+    HHVM_RC_INT_SAME(PKCS7_DETACHED);
+    HHVM_RC_INT_SAME(PKCS7_BINARY);
+    HHVM_RC_INT_SAME(PKCS7_NOATTR);
+
+    HHVM_RC_STR_SAME(OPENSSL_VERSION_TEXT);
 
     HHVM_FE(openssl_csr_export_to_file);
     HHVM_FE(openssl_csr_export);

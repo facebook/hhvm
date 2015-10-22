@@ -691,30 +691,20 @@ void IntlExtension::initLocale() {
   HHVM_STATIC_ME(Locale, parseLocale);
   HHVM_STATIC_ME(Locale, setDefault);
 
-#define ULOC_CONST(nm,val) Native::registerClassConstant<KindOfStaticString>\
-                               (s_Locale.get(), s_##nm.get(), s_##val.get())
-
   Native::registerClassConstant<KindOfNull>(s_Locale.get(),
                                             s_DEFAULT_LOCALE.get());
-  ULOC_CONST(LANG_TAG,               LOC_LANG);
-  ULOC_CONST(EXTLANG_TAG,            LOC_EXTLANG);
-  ULOC_CONST(SCRIPT_TAG,             LOC_SCRIPT);
-  ULOC_CONST(REGION_TAG,             LOC_REGION);
-  ULOC_CONST(VARIANT_TAG,            LOC_VARIANT);
-  ULOC_CONST(GRANDFATHERED_LANG_TAG, GRANDFATHERED);
-  ULOC_CONST(PRIVATE_TAG,            LOC_PRIVATE);
+  HHVM_RCC_STR(Locale, LANG_TAG,               s_LOC_LANG);
+  HHVM_RCC_STR(Locale, EXTLANG_TAG,            s_LOC_EXTLANG);
+  HHVM_RCC_STR(Locale, SCRIPT_TAG,             s_LOC_SCRIPT);
+  HHVM_RCC_STR(Locale, REGION_TAG,             s_LOC_REGION);
+  HHVM_RCC_STR(Locale, VARIANT_TAG,            s_LOC_VARIANT);
+  HHVM_RCC_STR(Locale, GRANDFATHERED_LANG_TAG, s_GRANDFATHERED);
+  HHVM_RCC_STR(Locale, PRIVATE_TAG,            s_LOC_PRIVATE);
 
-#undef ULOC_CONST
-
-#define ULOC_LOCALE_CONST(cns) \
-  Native::registerConstant<KindOfInt64>\
-    (makeStaticString("ULOC_" #cns), ULOC_##cns); \
-  Native::registerClassConstant<KindOfInt64>\
-    (s_Locale.get(), makeStaticString(#cns), ULOC_##cns);
-
-  ULOC_LOCALE_CONST(ACTUAL_LOCALE);
-  ULOC_LOCALE_CONST(VALID_LOCALE);
-#undef ULOC_LOCALE_CONST
+  HHVM_RC_INT_SAME(ULOC_ACTUAL_LOCALE);
+  HHVM_RCC_INT(Locale, ACTUAL_LOCALE, ULOC_ACTUAL_LOCALE);
+  HHVM_RC_INT_SAME(ULOC_VALID_LOCALE);
+  HHVM_RCC_INT(Locale, VALID_LOCALE, ULOC_VALID_LOCALE);
 
   loadSystemlib("icu_locale");
 }

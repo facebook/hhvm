@@ -328,8 +328,6 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_UREGEX_OFFSET_CAPTURE("UREGEX_OFFSET_CAPTURE");
-
 void IntlExtension::initICU() {
   // We need this initialization to be done late
   // so that ICU's dynamic initializers have had
@@ -341,16 +339,12 @@ void IntlExtension::initICU() {
   HHVM_FE(icu_transliterate);
   HHVM_FE(icu_tokenize);
 
-#define UREGEX_CONST(v) Native::registerConstant<KindOfInt64> \
-                          (makeStaticString("UREGEX_" #v), UREGEX_##v);
-  UREGEX_CONST(CASE_INSENSITIVE);
-  UREGEX_CONST(COMMENTS);
-  UREGEX_CONST(DOTALL);
-  UREGEX_CONST(MULTILINE);
-  UREGEX_CONST(UWORD);
-#undef UREGEX_CONST
-  Native::registerConstant<KindOfInt64>(s_UREGEX_OFFSET_CAPTURE.get(),
-                                        k_UREGEX_OFFSET_CAPTURE);
+  HHVM_RC_INT_SAME(UREGEX_CASE_INSENSITIVE);
+  HHVM_RC_INT_SAME(UREGEX_COMMENTS);
+  HHVM_RC_INT_SAME(UREGEX_DOTALL);
+  HHVM_RC_INT_SAME(UREGEX_MULTILINE);
+  HHVM_RC_INT_SAME(UREGEX_UWORD);
+  HHVM_RC_INT(UREGEX_OFFSET_CAPTURE, k_UREGEX_OFFSET_CAPTURE);
 
   loadSystemlib("icu");
 }

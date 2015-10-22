@@ -52,8 +52,6 @@ IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
 
 const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
-const double k_INF = std::numeric_limits<double>::infinity();
-const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 static String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted more than 25kb of code.
@@ -140,7 +138,6 @@ void StandardExtension::threadInitMisc() {
 
 static void bindTokenConstants();
 static int get_user_token_id(int internal_id);
-const StaticString s_T_PAAMAYIM_NEKUDOTAYIM("T_PAAMAYIM_NEKUDOTAYIM");
 
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
@@ -164,10 +161,7 @@ void StandardExtension::initMisc() {
     HHVM_FE(hphp_to_string);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
-    Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
-    Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
-    Native::registerConstant<KindOfInt64>(
-        makeStaticString("PHP_MAXPATHLEN"), MAXPATHLEN);
+    HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
     Native::registerConstant<KindOfBoolean>(makeStaticString("PHP_DEBUG"),
       #if DEBUG
         true
@@ -176,8 +170,7 @@ void StandardExtension::initMisc() {
       #endif
      );
     bindTokenConstants();
-    Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
-                                          get_user_token_id(T_DOUBLE_COLON));
+    HHVM_RC_INT(T_PAAMAYIM_NEKUDOTAYIM, get_user_token_id(T_DOUBLE_COLON));
 
     loadSystemlib("std_misc");
   }
@@ -835,8 +828,7 @@ Variant HHVM_FUNCTION(SystemLib_min2, const Variant& value1,
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 #define YYTOKEN_MAP static void bindTokenConstants()
-#define YYTOKEN(num, name) Native::registerConstant<KindOfInt64> \
-  (makeStaticString(#name), get_user_token_id(num));
+#define YYTOKEN(num, name) HHVM_RC_INT(name, get_user_token_id(num));
 
 #include "hphp/parser/hphp.tab.hpp" // nolint
 

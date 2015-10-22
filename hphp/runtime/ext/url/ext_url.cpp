@@ -63,9 +63,9 @@ Variant HHVM_FUNCTION(base64_encode, const String& data) {
 
 Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {
   Variant c = HHVM_FN(curl_init)();
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HEADER, 1);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL, url);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_HEADER, 1);
   Variant res = HHVM_FN(curl_exec)(c.toResource());
   if (same(res, false)) {
     return false;
@@ -311,51 +311,20 @@ String HHVM_FUNCTION(urlencode, const String& str) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_PHP_URL_SCHEME("PHP_URL_SCHEME");
-const StaticString s_PHP_URL_HOST("PHP_URL_HOST");
-const StaticString s_PHP_URL_PORT("PHP_URL_PORT");
-const StaticString s_PHP_URL_USER("PHP_URL_USER");
-const StaticString s_PHP_URL_PASS("PHP_URL_PASS");
-const StaticString s_PHP_URL_PATH("PHP_URL_PATH");
-const StaticString s_PHP_URL_QUERY("PHP_URL_QUERY");
-const StaticString s_PHP_URL_FRAGMENT("PHP_URL_FRAGMENT");
-const StaticString s_PHP_QUERY_RFC1738("PHP_QUERY_RFC1738");
-const StaticString s_PHP_QUERY_RFC3986("PHP_QUERY_RFC3986");
-
 class StandardURLExtension final : public Extension {
  public:
   StandardURLExtension() : Extension("url") {}
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_SCHEME.get(), k_PHP_URL_SCHEME
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_HOST.get(), k_PHP_URL_HOST
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_PORT.get(), k_PHP_URL_PORT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_USER.get(), k_PHP_URL_USER
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_PASS.get(), k_PHP_URL_PASS
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_PATH.get(), k_PHP_URL_PATH
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_QUERY.get(), k_PHP_URL_QUERY
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_URL_FRAGMENT.get(), k_PHP_URL_FRAGMENT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_QUERY_RFC1738.get(), k_PHP_QUERY_RFC1738
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_QUERY_RFC3986.get(), k_PHP_QUERY_RFC3986
-    );
+    HHVM_RC_INT(PHP_URL_SCHEME, k_PHP_URL_SCHEME);
+    HHVM_RC_INT(PHP_URL_HOST, k_PHP_URL_HOST);
+    HHVM_RC_INT(PHP_URL_PORT, k_PHP_URL_PORT);
+    HHVM_RC_INT(PHP_URL_USER, k_PHP_URL_USER);
+    HHVM_RC_INT(PHP_URL_PASS, k_PHP_URL_PASS);
+    HHVM_RC_INT(PHP_URL_PATH, k_PHP_URL_PATH);
+    HHVM_RC_INT(PHP_URL_QUERY, k_PHP_URL_QUERY);
+    HHVM_RC_INT(PHP_URL_FRAGMENT, k_PHP_URL_FRAGMENT);
+    HHVM_RC_INT(PHP_QUERY_RFC1738, k_PHP_QUERY_RFC1738);
+    HHVM_RC_INT(PHP_QUERY_RFC3986, k_PHP_QUERY_RFC3986);
     HHVM_FE(base64_decode);
     HHVM_FE(base64_encode);
     HHVM_FE(get_headers);

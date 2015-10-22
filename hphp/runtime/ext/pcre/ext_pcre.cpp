@@ -257,8 +257,6 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_PCRE_VERSION("PCRE_VERSION");
-
 extern IMPLEMENT_THREAD_LOCAL(PCREglobals, tl_pcre_globals);
 
 class PcreExtension final : public Extension {
@@ -266,31 +264,24 @@ public:
   PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {
-    Native::registerConstant<KindOfString>(
-      s_PCRE_VERSION.get(), makeStaticString(pcre_version())
-    );
+    HHVM_RC_STR(PCRE_VERSION, pcre_version());
 
-#define PCRECNS(c) Native::registerConstant<KindOfInt64> \
-                    (makeStaticString("PREG_" #c), PHP_PCRE_##c);
-    PCRECNS(NO_ERROR);
-    PCRECNS(INTERNAL_ERROR);
-    PCRECNS(BACKTRACK_LIMIT_ERROR);
-    PCRECNS(RECURSION_LIMIT_ERROR);
-    PCRECNS(BAD_UTF8_ERROR);
-    PCRECNS(BAD_UTF8_OFFSET_ERROR);
-#undef PCRECNS
-#define PREGCNS(c) Native::registerConstant<KindOfInt64> \
-                    (makeStaticString("PREG_" #c), PREG_##c);
-    PREGCNS(PATTERN_ORDER);
-    PREGCNS(SET_ORDER);
-    PREGCNS(OFFSET_CAPTURE);
+    HHVM_RC_INT(PREG_NO_ERROR, PHP_PCRE_NO_ERROR);
+    HHVM_RC_INT(PREG_INTERNAL_ERROR, PHP_PCRE_INTERNAL_ERROR);
+    HHVM_RC_INT(PREG_BACKTRACK_LIMIT_ERROR, PHP_PCRE_BACKTRACK_LIMIT_ERROR);
+    HHVM_RC_INT(PREG_RECURSION_LIMIT_ERROR, PHP_PCRE_RECURSION_LIMIT_ERROR);
+    HHVM_RC_INT(PREG_BAD_UTF8_ERROR, PHP_PCRE_BAD_UTF8_ERROR);
+    HHVM_RC_INT(PREG_BAD_UTF8_OFFSET_ERROR, PHP_PCRE_BAD_UTF8_OFFSET_ERROR);
 
-    PREGCNS(SPLIT_NO_EMPTY);
-    PREGCNS(SPLIT_DELIM_CAPTURE);
-    PREGCNS(SPLIT_OFFSET_CAPTURE);
+    HHVM_RC_INT_SAME(PREG_PATTERN_ORDER);
+    HHVM_RC_INT_SAME(PREG_SET_ORDER);
+    HHVM_RC_INT_SAME(PREG_OFFSET_CAPTURE);
 
-    PREGCNS(GREP_INVERT);
-#undef PREGCNS
+    HHVM_RC_INT_SAME(PREG_SPLIT_NO_EMPTY);
+    HHVM_RC_INT_SAME(PREG_SPLIT_DELIM_CAPTURE);
+    HHVM_RC_INT_SAME(PREG_SPLIT_OFFSET_CAPTURE);
+
+    HHVM_RC_INT_SAME(PREG_GREP_INVERT);
 
     HHVM_FE(preg_filter);
     HHVM_FE(preg_grep);

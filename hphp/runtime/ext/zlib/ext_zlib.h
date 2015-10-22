@@ -71,7 +71,7 @@ Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
 bool HHVM_FUNCTION(gzclose, const Resource& zp);
 Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length = 0);
 Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
-                              int64_t whence = k_SEEK_SET);
+                              int64_t whence = SEEK_SET);
 Variant HHVM_FUNCTION(gztell, const Resource& zp);
 bool HHVM_FUNCTION(gzeof, const Resource& zp);
 bool HHVM_FUNCTION(gzrewind, const Resource& zp);

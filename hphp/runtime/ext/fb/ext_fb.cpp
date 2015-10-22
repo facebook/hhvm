@@ -1158,17 +1158,7 @@ void const_load() {
   // legacy entry point, no longer used.
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_FBUNS_NONSTRING_VALUE("FB_UNSERIALIZE_NONSTRING_VALUE"),
-  s_FBUNS_UNEXPECTED_END("FB_UNSERIALIZE_UNEXPECTED_END"),
-  s_FBUNS_UNRECOGNIZED_OBJECT_TYPE("FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE"),
-  s_FBUNS_UNEXPECTED_ARRAY_KEY_TYPE("FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE"),
-  s_HHVM_FACEBOOK("HHVM_FACEBOOK");
-
-#define FBUNS(cns) Native::registerConstant<KindOfInt64> \
-  (s_FBUNS_##cns.get(), FB_UNSERIALIZE_##cns)
+///////////////////////////////////////////////////////////////////////////////
 
 class FBExtension : public Extension {
  public:
@@ -1176,11 +1166,12 @@ class FBExtension : public Extension {
 
   void moduleInit() override {
     Native::registerConstant<KindOfBoolean>
-      (s_HHVM_FACEBOOK.get(), HHVM_FACEBOOK);
-    FBUNS(NONSTRING_VALUE);
-    FBUNS(UNEXPECTED_END);
-    FBUNS(UNRECOGNIZED_OBJECT_TYPE);
-    FBUNS(UNEXPECTED_ARRAY_KEY_TYPE);
+      (makeStaticString("HHVM_FACEBOOK"), HHVM_FACEBOOK);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_NONSTRING_VALUE);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_NONSTRING_VALUE);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);

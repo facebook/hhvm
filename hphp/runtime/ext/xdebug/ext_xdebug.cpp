@@ -727,15 +727,6 @@ static void HHVM_FUNCTION(_xdebug_check_trigger_vars) {
 ///////////////////////////////////////////////////////////////////////////////
 // Module implementation
 
-// XDebug constants
-const StaticString
-  s_XDEBUG_CC_UNUSED("XDEBUG_CC_UNUSED"),
-  s_XDEBUG_CC_DEAD_CODE("XDEBUG_CC_DEAD_CODE"),
-  s_XDEBUG_TRACE_APPEND("XDEBUG_TRACE_APPEND"),
-  s_XDEBUG_TRACE_COMPUTERIZED("XDEBUG_TRACE_COMPUTERIZED"),
-  s_XDEBUG_TRACE_HTML("XDEBUG_TRACE_HTML"),
-  s_XDEBUG_TRACE_NAKED_FILENAME("XDEBUG_TRACE_NAKED_FILENAME");
-
 // Helper for requestInit that returns the initial value for the given config
 // option.
 template <typename T>
@@ -866,24 +857,12 @@ void XDebugExtension::moduleInit() {
     return;
   }
 
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_CC_UNUSED.get(), k_XDEBUG_CC_UNUSED
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_CC_DEAD_CODE.get(), k_XDEBUG_CC_DEAD_CODE
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_APPEND.get(), k_XDEBUG_TRACE_APPEND
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_COMPUTERIZED.get(), k_XDEBUG_TRACE_COMPUTERIZED
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_HTML.get(), k_XDEBUG_TRACE_HTML
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_XDEBUG_TRACE_NAKED_FILENAME.get(), k_XDEBUG_TRACE_NAKED_FILENAME
-  );
+  HHVM_RC_INT(XDEBUG_CC_UNUSED, k_XDEBUG_CC_UNUSED);
+  HHVM_RC_INT(XDEBUG_CC_DEAD_CODE, k_XDEBUG_CC_DEAD_CODE);
+  HHVM_RC_INT(XDEBUG_TRACE_APPEND, k_XDEBUG_TRACE_APPEND);
+  HHVM_RC_INT(XDEBUG_TRACE_COMPUTERIZED, k_XDEBUG_TRACE_COMPUTERIZED);
+  HHVM_RC_INT(XDEBUG_TRACE_HTML, k_XDEBUG_TRACE_HTML);
+  HHVM_RC_INT(XDEBUG_TRACE_NAKED_FILENAME, k_XDEBUG_TRACE_NAKED_FILENAME);
   HHVM_FE(xdebug_break);
   HHVM_FE(xdebug_call_class);
   HHVM_FE(xdebug_call_file);

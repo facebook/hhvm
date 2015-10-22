@@ -29,18 +29,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTime
 
-extern const StaticString q_DateTime$$ATOM;
-extern const StaticString q_DateTime$$COOKIE;
-extern const StaticString q_DateTime$$ISO8601;
-extern const StaticString q_DateTime$$RFC822;
-extern const StaticString q_DateTime$$RFC850;
-extern const StaticString q_DateTime$$RFC1036;
-extern const StaticString q_DateTime$$RFC1123;
-extern const StaticString q_DateTime$$RFC2822;
-extern const StaticString q_DateTime$$RFC3339;
-extern const StaticString q_DateTime$$RSS;
-extern const StaticString q_DateTime$$W3C;
-
 class DateTimeData {
 public:
   DateTimeData() {}
@@ -118,21 +106,6 @@ Array HHVM_METHOD(DateTime, __debuginfo);
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
-extern const int64_t q_DateTimeZone$$AFRICA;
-extern const int64_t q_DateTimeZone$$AMERICA;
-extern const int64_t q_DateTimeZone$$ANTARCTICA;
-extern const int64_t q_DateTimeZone$$ARCTIC;
-extern const int64_t q_DateTimeZone$$ASIA;
-extern const int64_t q_DateTimeZone$$ATLANTIC;
-extern const int64_t q_DateTimeZone$$AUSTRALIA;
-extern const int64_t q_DateTimeZone$$EUROPE;
-extern const int64_t q_DateTimeZone$$INDIAN;
-extern const int64_t q_DateTimeZone$$PACIFIC;
-extern const int64_t q_DateTimeZone$$UTC;
-extern const int64_t q_DateTimeZone$$ALL;
-extern const int64_t q_DateTimeZone$$ALL_WITH_BC;
-extern const int64_t q_DateTimeZone$$PER_COUNTRY;
-
 class DateTimeZoneData {
 public:
   DateTimeZoneData() {}
@@ -152,6 +125,21 @@ public:
   req::ptr<TimeZone> m_tz;
   static Class* s_class;
   static const StaticString s_className;
+
+  static const int64_t AFRICA = 1;
+  static const int64_t AMERICA = 2;
+  static const int64_t ANTARCTICA = 4;
+  static const int64_t ARCTIC = 8;
+  static const int64_t ASIA = 16;
+  static const int64_t ATLANTIC = 32;
+  static const int64_t AUSTRALIA = 64;
+  static const int64_t EUROPE = 128;
+  static const int64_t INDIAN = 256;
+  static const int64_t PACIFIC = 512;
+  static const int64_t UTC = 1024;
+  static const int64_t ALL = 2047;
+  static const int64_t ALL_WITH_BC = 4095;
+  static const int64_t PER_COUNTRY = 4096;
 };
 
 void HHVM_METHOD(DateTimeZone, __construct,

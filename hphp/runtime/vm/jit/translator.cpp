@@ -1317,6 +1317,9 @@ void translateInstr(
 
   irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(irgs, Stats::Instr_TC, 1);
+  if (Stats::enableInstrCount()) {
+    irgen::emitIncStat(irgs, Stats::opToTranslStat(ni.op()), 1);
+  }
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
     irgen::gen(irgs, CountBytecode);

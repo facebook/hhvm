@@ -136,18 +136,9 @@ inline void inc(StatCounter stat, int n = 1) {
 static_assert(static_cast<uint64_t>(OpLowInvalid) == 0,
               "stats.h assumes OpLowInvalid == 0");
 
-inline StatCounter opcodeToStatCounter(Op opc) {
-  return StatCounter(Instr_InterpBBLowInvalid +
-                     STATS_PER_OPCODE * uint8_t(opc));
-}
-
-inline void incOp(Op opc) {
-  inc(opcodeToStatCounter(opc));
-}
-
-inline StatCounter opcodeToTranslStatCounter(Op opc) {
+inline StatCounter opToTranslStat(Op opc) {
   return StatCounter(Instr_TranslLowInvalid +
-                     STATS_PER_OPCODE * uint8_t(opc));
+                     STATS_PER_OPCODE * size_t(opc));
 }
 
 extern void init();

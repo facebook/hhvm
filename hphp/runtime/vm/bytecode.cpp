@@ -7852,7 +7852,10 @@ OPTBLD_INLINE static TCA iopRetWrapper(TCA(*fn)(PC& pc), PC& pc) {
   interp_set_regs(fp, sp, pcOff);                                       \
   SKTRACE(5, SrcKey(liveFunc(), vmpc(), liveResumed()), "%40s %p %p\n", \
           "interpOne" #opcode " before (fp,sp)", vmfp(), vmsp());       \
-  Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
+  if (Stats::enableInstrCount()) {                                      \
+    Stats::inc(Stats::Instr_Transl##opcode, -1);                        \
+    Stats::inc(Stats::Instr_InterpOne##opcode);                         \
+  }                                                                     \
   if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
     static const StringData* cat = makeStaticString("interpOne");       \
     static const StringData* name = makeStaticString(#opcode);          \
@@ -7967,11 +7970,13 @@ TCA dispatchImpl() {
   }
 #define OPCODE_MAIN_BODY(name, imm, push, pop, flags)         \
   {                                                           \
+    if (breakOnCtlFlow && Stats::enableInstrCount()) {        \
+      Stats::inc(Stats::Instr_InterpBB##name);                \
+    }                                                         \
     retAddr = iopRetWrapper(iop##name, pc);                   \
     vmpc() = pc;                                              \
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \
-      Stats::incOp(Op::name);                                 \
     }                                                         \
     if (UNLIKELY(!pc)) {                                      \
       op = Op::name;                                          \

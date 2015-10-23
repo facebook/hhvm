@@ -3,4 +3,6 @@ Invalid index type for this array (Typing[4110])
 File "typing_fail_string1.php", line 14, characters 6-10:
 This is a string
 File "typing_fail_string1.php", line 14, characters 6-10:
-It is incompatible with an int because this is used as an index
+It is incompatible with an int
+File "typing_fail_string1.php", line 13, characters 8-13:
+This can only be indexed with integers

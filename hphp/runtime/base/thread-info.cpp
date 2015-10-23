@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/ext/process/ext_process.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -212,6 +213,7 @@ size_t check_request_surprise() {
     }
   }
   if (do_GC) {
+    VMRegAnchor _;
     MM().collect("surprise");
   }
   if (do_signaled) {

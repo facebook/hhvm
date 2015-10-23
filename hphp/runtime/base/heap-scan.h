@@ -269,6 +269,7 @@ template<class F> void scanRoots(F& mark) {
   TI().scan(mark);
   // C++ stack
   mark.where("cpp-stack");
+  asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");
   auto sp = stack_top_ptr();
   mark(sp, s_stackLimit + s_stackSize - uintptr_t(sp));
   // C++ threadlocal data, but don't scan MemoryManager

@@ -187,6 +187,7 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
       auto size = hdr->hdr_.kind == HeaderKind::Hole ||
                   hdr->hdr_.kind == HeaderKind::Free ? hdr->free_.size() :
                   MemoryManager::smallSizeClass(hdr->size());
+      assert(size % 16 == 0);
       hdr = (Header*)((char*)hdr + size);
       if (hdr >= slab_end) {
         assert(hdr == slab_end && "hdr > slab_end indicates corruption");

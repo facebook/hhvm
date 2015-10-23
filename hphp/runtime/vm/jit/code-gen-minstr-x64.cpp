@@ -310,6 +310,27 @@ void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
 void CodeGenerator::cgElemArray(IRInstruction* i)  { cgElemArrayImpl(i); }
 void CodeGenerator::cgElemArrayW(IRInstruction* i) { cgElemArrayImpl(i); }
 
+void CodeGenerator::cgElemArrayD(IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  auto const keyInfo = checkStrictlyInteger(key->type());
+  BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type);
+
+  auto args = argGroup(inst).ssa(0);
+  if (keyInfo.converted) {
+    args.imm(keyInfo.convertedInt);
+  } else {
+    args.ssa(1);
+  }
+
+  cgCallHelper(
+    vmain(),
+    CallSpec::direct(opFunc),
+    callDest(inst),
+    SyncOptions::Sync,
+    args
+  );
+}
+
 void CodeGenerator::cgArrayGet(IRInstruction* inst) {
   auto const key         = inst->src(1);
   auto const keyInfo     = checkStrictlyInteger(key->type());

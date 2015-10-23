@@ -1065,6 +1065,17 @@ void emitElem(MTS& env) {
     return;
   }
 
+  if (env.base.type <= TPtrToArr &&
+      define &&
+      !unset &&
+      key->type().subtypeOfAny(TInt,TStr)) {
+    setBase(
+      env,
+      gen(env, ElemArrayD, env.base.value, key)
+    );
+    return;
+  }
+
   assertx(!(define && unset));
   if (unset) {
     auto const uninit = ptrToUninit(env);
@@ -2447,12 +2458,15 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
   auto const baseType = base ? base->type() : basePtr->type().deref();
 
-  if (base && base->isA(TArr) && !unset && !define &&
-      (key->isA(TInt) || key->isA(TStr))) {
+  if (base && base->isA(TArr) && !unset &&
+      key->type().subtypeOfAny(TInt, TStr)) {
+    assertx(!define || !warn);
+    env.irb->constrainValue(base, DataTypeSpecific);
+    if (define) return gen(env, ElemArrayD, basePtr, key);
     return gen(env, warn ? ElemArrayW : ElemArray, base, key);
   }
 
-  assert(!(define && unset));
+  assertx(!define || !unset);
   if (unset) {
     env.irb->constrainValue(base, DataTypeSpecific);
     if (baseType <= TStr) {

@@ -441,7 +441,23 @@ inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   return ret ? ret : elemArrayNotFound<warn>(key);
 }
 
-#define ELEM_ARRAY_HELPER_TABLE(m)                                  \
+#define ELEM_ARRAY_D_HELPER_TABLE(m) \
+  /* name                keyType */  \
+  m(elemArraySD,    KeyType::Str)    \
+  m(elemArrayID,    KeyType::Int)    \
+
+#define X(nm, keyType)                                                 \
+inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
+  auto cbase = tvToCell(base);                                         \
+  assertx(isArrayType(cbase->m_type));                                 \
+  auto constexpr warn  = false;                                        \
+  auto constexpr reffy = false;                                        \
+  return ElemDArray<warn, reffy, keyType>(cbase, key);                 \
+}
+ELEM_ARRAY_D_HELPER_TABLE(X)
+#undef X
+
+#define ELEM_ARRAY_HELPER_TABLE(m)                      \
   /* name               keyType  checkForInt   warn */  \
   m(elemArrayS,    KeyType::Str,       false,  false)   \
   m(elemArraySi,   KeyType::Str,        true,  false)   \

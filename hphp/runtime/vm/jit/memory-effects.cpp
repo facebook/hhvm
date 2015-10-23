@@ -794,6 +794,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetNewElemArray:
   case SetNewElem:
   case UnsetElem:
+  case ElemArrayD:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
     assertx(inst.src(0)->type() <= TPtrToGen);
@@ -812,6 +813,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetWithRefElem:
   case SetWithRefNewElem:
   case VGetElem:
+
     assertx(inst.src(0)->isA(TPtrToGen));
     return minstr_with_tvref(inst);
 

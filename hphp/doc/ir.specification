@@ -2271,12 +2271,18 @@ fields of that struct for holding intermediate values.
   Get intermediate element with key S1 from base S0. The base will not be
   modified.
 
-| ElemArray, D(PtrToMembGen), S(Arr) S(Int,Str), Er
+| ElemArray,  D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
 | ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-  Similar to ElemX, but the base S0 is an array and the key S1 is an
-  int/str.  The ElemArrayW version is for Warn member instrs.
+| ElemArrayD, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
+
+  Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
+  The ElemArrayW version is for Warn member instrs, and the ElemArrayD version
+  is for Define member instrs.
+
+  ElemArrayD takes a PtrToGen for its base operand, but it expects it to be a
+  PtrToArr or PtrToBoxedArr.
 
 | ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 

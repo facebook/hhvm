@@ -1433,6 +1433,7 @@ void miQuery(ISS& env, int32_t nDiscard, QueryMOp op, PropElemOp propElem,
     case PropElemOp::PropQ:
       switch (op) {
         case QueryMOp::CGet:
+        case QueryMOp::CGetQuiet:
           return miFinalCGetProp(env, nDiscard, key);
         case QueryMOp::Isset:
         case QueryMOp::Empty:
@@ -1441,6 +1442,7 @@ void miQuery(ISS& env, int32_t nDiscard, QueryMOp op, PropElemOp propElem,
     case PropElemOp::Elem:
       switch (op) {
         case QueryMOp::CGet:
+        case QueryMOp::CGetQuiet:
           return miFinalCGetElem(env, nDiscard, key);
         case QueryMOp::Isset:
         case QueryMOp::Empty:

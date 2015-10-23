@@ -1686,7 +1686,12 @@ void emitCGetProp(MTS& env) {
   auto const nullsafe = (env.immVecM[env.mInd] == MQT);
   auto const key = getKey(env);
 
-  env.result = gen(env, nullsafe ? CGetPropQ : CGetProp, env.base.value, key);
+  if (nullsafe) {
+    env.result = gen(env, CGetPropQ, env.base.value, key);
+  } else {
+    env.result =
+      gen(env, CGetProp, MInstrAttrData{MIA_warn}, env.base.value, key);
+  }
 }
 
 void emitVGetProp(MTS& env) {
@@ -1796,7 +1801,8 @@ void emitUnsetProp(MTS& env) {
   gen(env, UnsetProp, env.base.value, key);
 }
 
-SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
+SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
+                     MOpFlags flags, SimpleOp simpleOp) {
   switch (simpleOp) {
     case SimpleOp::Array:
       return emitArrayGet(env, base, key);
@@ -1817,13 +1823,15 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
     case SimpleOp::Map:
       return gen(env, MapGet, base, key);
     case SimpleOp::None:
-      return gen(env, CGetElem, base, key);
+      return gen(env, CGetElem, MInstrAttrData{mOpFlagsToAttr(flags)},
+                 base, key);
   }
   always_assert(false);
 }
 
 void emitCGetElem(MTS& env) {
-  env.result = emitCGetElem(env, env.base.value, getKey(env), env.simpleOp);
+  env.result = emitCGetElem(env, env.base.value, getKey(env),
+                            MOpFlags::Warn, env.simpleOp);
 }
 
 void emitVGetElem(MTS& env) {
@@ -2518,15 +2526,17 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
   gen(env, FinishMemberOp);
 }
 
-SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key, bool nullsafe) {
+SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
+                     MOpFlags flags, bool nullsafe) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
+  auto const mia = mOpFlagsToAttr(flags);
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MIA_none, propInfo)) {
     auto propAddr = emitPropSpecialized(
       env, base, base->type(), key,
-      nullsafe, MIA_warn, propInfo
+      nullsafe, mia, propInfo
     );
 
     if (!RuntimeOption::RepoAuthoritative) {
@@ -2546,7 +2556,11 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key, bool nullsafe) {
     return result;
   }
 
-  return gen(env, nullsafe ? CGetPropQ : CGetProp, base, key);
+  // No warning takes precedence over nullsafe
+  if (!nullsafe || !(mia & MIA_warn)) {
+    return gen(env, CGetProp, MInstrAttrData{mia}, base, key);
+  }
+  return gen(env, CGetPropQ, base, key);
 }
 
 void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
@@ -2556,7 +2570,8 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
   auto objBase = base && base->isA(TObj) ? base : basePtr;
   auto simpleOp = SimpleOp::None;
 
-  if (base && propElem == PropElemOp::Elem && query != QueryMOp::Empty) {
+  if (base && propElem == PropElemOp::Elem &&
+      query != QueryMOp::Empty && query != QueryMOp::CGetQuiet) {
     simpleOp = simpleCollectionOp(base->type(), key->type(), true);
 
     if (auto tc = simpleOpConstraint(simpleOp)) {
@@ -2567,16 +2582,19 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
   auto result = [&] {
     switch (query) {
       case QueryMOp::CGet:
+      case QueryMOp::CGetQuiet: {
+        auto const flags = getMOpFlags(query);
         switch (propElem) {
           case PropElemOp::Prop:
-            return cGetPropImpl(env, objBase, key, false);
           case PropElemOp::PropQ:
-            return cGetPropImpl(env, objBase, key, true);
+            return cGetPropImpl(env, objBase, key, flags,
+                                propElem == PropElemOp::PropQ);
           case PropElemOp::Elem:
             auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
-            return emitCGetElem(env, realBase, key, simpleOp);
+            return emitCGetElem(env, realBase, key, flags, simpleOp);
         }
         always_assert(false);
+      }
       case QueryMOp::Isset:
       case QueryMOp::Empty:
         not_implemented();

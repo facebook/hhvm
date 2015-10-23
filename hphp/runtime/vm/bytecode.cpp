@@ -5058,6 +5058,7 @@ static OPTBLD_INLINE void queryMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
   TypedValue result;
   switch (op) {
     case QueryMOp::CGet:
+    case QueryMOp::CGetQuiet:
       if (mstate.base->m_type == KindOfRef) {
         mstate.base = mstate.base->m_data.pref->tv();
       }

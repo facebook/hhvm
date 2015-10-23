@@ -542,6 +542,7 @@ inline MInstrAttr mOpFlagsToAttr(MOpFlags f) {
 
 #define QUERY_M_OPS                               \
   OP(CGet)                                        \
+  OP(CGetQuiet)                                   \
   OP(Isset)                                       \
   OP(Empty)
 

@@ -428,6 +428,8 @@ OTHER_UNPARSEABLE_FILES = [
     'variadic_args1.php',
     'constraints/tapply_is_newtype.php',
     'array_get_newtype.php',
+    'references/call_time_reference1.php',
+    'references/call_time_reference3.php',
 ]
 
 UNPARSEABLE_OUTPUT = set([

@@ -229,8 +229,12 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
   vwrap(cb, [] (Vout& v) { v << ret{}; });
 
   // This stub is hot, so make sure to keep it small.
+  // Alas, we have more work to do in this under Windows,
+  // so we can't be this small :(
+#ifndef _WIN32
   always_assert(Stats::enabled() ||
                 (cb.frontier() - release <= 4 * x64::cache_line_size()));
+#endif
 
   return release;
 }

@@ -558,6 +558,7 @@ TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
 const StaticString s_idx("hh\\idx");
 
 TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
+  EagerVMRegAnchor _;
   static auto func = Unit::loadFunc(s_idx.get());
   assertx(func != nullptr);
   TypedValue args[] = {

@@ -1233,7 +1233,7 @@ X(ContStartedCheck,             IsAsyncData);
 X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
-
+X(GenericIdx,                   IRSPOffsetData);
 
 #undef X
 

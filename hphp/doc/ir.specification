@@ -1723,7 +1723,7 @@ To string conversions:
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned.
 
-| GenericIdx, D(Cell), S(Cell) S(Cell) S(Cell), PRc|Er
+| GenericIdx, D(Cell), S(Cell) S(Cell) S(Cell) S(StkPtr), PRc|Er
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned. If S0 does not support array or indexed access S2 is

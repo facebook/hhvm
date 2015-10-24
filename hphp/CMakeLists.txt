@@ -28,8 +28,8 @@ endif()
 
 include(HPHPSetup)
 include(FollySetup)
-HHVM_EXTENSION_BUILD_DEFINE_STRING(HHVM_EXTENSIONS_ENABLED_DEFINE_STRING)
-configure_file(hphp-config.h.in "${CMAKE_CURRENT_BINARY_DIR}/hphp-config.h")
+include(HHVMGenerateConfig)
+HHVM_GENERATE_CONFIG("${CMAKE_CURRENT_BINARY_DIR}/hphp-config.h")
 
 if (ENABLE_COTIRE)
   include(cotire)

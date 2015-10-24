@@ -397,23 +397,6 @@ function (HHVM_EXTENSION_BUILD_SOURCE_LISTS)
   set(IDL_DEFINES ${IDL_DEFINES} PARENT_SCOPE)
 endfunction()
 
-# This builds a string to define the macros for all enabled extensions.
-function(HHVM_EXTENSION_BUILD_DEFINE_STRING destVarName)
-  set(builtString "/* Extensions */")
-  set(i 0)
-  while (i LESS HHVM_EXTENSION_COUNT)
-    string(TOUPPER ${HHVM_EXTENSION_${i}_NAME} upperExtName)
-    if (${HHVM_EXTENSION_${i}_ENABLED_STATE} EQUAL 1)
-      set(builtString "${builtString}\n#define ENABLE_EXTENSION_${upperExtName} 1")
-    else()
-      set(builtString "${builtString}\n/* #undef ENABLE_EXTENSION_${upperExtName} */")
-    endif()
-    math(EXPR i "${i} + 1")
-  endwhile()
-
-  set(${destVarName} "${builtString}" PARENT_SCOPE)
-endfunction()
-
 # Sort out all the files into their appropriate variable, as well as transform the paths
 # to their fully-resolved forms.
 function (HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES rootDir)

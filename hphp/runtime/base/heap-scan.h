@@ -101,7 +101,6 @@ template<class F> void scanHeader(const Header* h, F& mark) {
 }
 
 template<class F> void ObjectData::scan(F& mark) const {
-  auto props = propVec();
   if (getAttribute(HasNativeData)) {
     // [NativeNode][NativeData][ObjectData][props]
     Native::nativeDataScan(this, mark);
@@ -113,12 +112,16 @@ template<class F> void ObjectData::scan(F& mark) const {
     mark(frame, uintptr_t(this) - uintptr_t(frame));
   }
 
+  auto props = propVec();
   if (getAttribute(IsCppBuiltin)) {
     // [ObjectData][C++ fields][props]
     // TODO t6169228 virtual call for exact marking
     mark(this + 1, uintptr_t(props) - uintptr_t(this + 1));
+    if (m_hdr.kind == HeaderKind::AwaitAllWH) {
+      auto wh = static_cast<const c_AwaitAllWaitHandle*>(this);
+      wh->scanChildren(mark);
+    }
   }
-  mark(m_cls);
   for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {
     mark(props[i]);
   }

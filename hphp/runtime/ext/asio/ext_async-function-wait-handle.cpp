@@ -113,7 +113,7 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
   setContextIdx(child->getContextIdx());
   m_children[0].setChild(child);
-  incRefCount();
+  incRefCount(); // account for child->this back-reference
 }
 
 void c_AsyncFunctionWaitHandle::resume() {

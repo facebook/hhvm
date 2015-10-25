@@ -30,7 +30,7 @@ extern "C" {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class MimePart : public ResourceData {
+struct MimePart : public ResourceData {
 public:
   enum Decode {
     DecodeNone      = 0,  /* include headers but no section */
@@ -62,7 +62,7 @@ public:
   int filter(int c);
 
 private:
-  class MimeHeader {
+  struct MimeHeader {
   public:
     MimeHeader();
     explicit MimeHeader(const char *value);

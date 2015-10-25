@@ -23,20 +23,20 @@
 
 namespace HPHP {
 
-class LitstrRepoProxy : public RepoProxy {
+struct LitstrRepoProxy : public RepoProxy {
 public:
   explicit LitstrRepoProxy(Repo& repo);
   ~LitstrRepoProxy() {}
   void createSchema(int repoId, RepoTxn& txn);
   void load();
 
-  class InsertLitstrStmt : public RepoProxy::Stmt {
+  struct InsertLitstrStmt : public RepoProxy::Stmt {
   public:
     InsertLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, Id litstrId, const StringData* litstr);
   };
 
-  class GetLitstrsStmt : public RepoProxy::Stmt {
+  struct GetLitstrsStmt : public RepoProxy::Stmt {
   public:
     GetLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     bool get();

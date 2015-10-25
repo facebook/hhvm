@@ -45,8 +45,8 @@ DECLARE_BOOST_TYPES(FunctionScope);
  *   try {...} catch (T obj) {...}
  *   extract(name_value_pair)
  */
-class VariableTable : public SymbolTable {
-  friend class AssignmentExpression;
+struct VariableTable : public SymbolTable {
+  friend struct AssignmentExpression;
 public:
   enum Attribute {
     ContainsDynamicVariable = 1,

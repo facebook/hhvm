@@ -23,8 +23,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class String;
+struct Array;
+struct String;
 
 /**
  * Using an integer to represent time: the value of time in seconds since 0
@@ -32,7 +32,7 @@ class String;
  * without including leap seconds. Therefore, this integer is by definition
  * non timezone specific and thus not shifted by DST.
  */
-class TimeStamp {
+struct TimeStamp {
 public:
   static int64_t Current();
   static double CurrentSecond();

@@ -32,7 +32,7 @@ struct BootTimer::Impl {
   void dumpMarks();
   int64_t computeDeltaFromLast();
 
-  friend class BootTimer;
+  friend struct BootTimer;
 
 private:
   // Must hold when updating m_last

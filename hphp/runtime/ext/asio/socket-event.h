@@ -14,7 +14,7 @@ namespace HPHP {
 typedef folly::EventHandler AsioEventHandler;
 typedef folly::AsyncTimeout AsioTimeoutHandler;
 
-class AsioEventBase : public folly::EventBase {
+struct AsioEventBase : public folly::EventBase {
  public:
   AsioEventBase();
   ~AsioEventBase();

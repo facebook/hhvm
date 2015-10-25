@@ -39,7 +39,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ImapStream : public SweepableResourceData {
+struct ImapStream : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(ImapStream);
 

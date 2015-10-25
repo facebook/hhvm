@@ -27,14 +27,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassInfoHook;
+struct ClassInfoHook;
 
 /**
  * Though called "ClassInfo", we consider global scope as a virtual "class".
  * Therefore, this is the place we store meta information of both global
  * functions and class methods and properties.
  */
-class ClassInfo {
+struct ClassInfo {
 public:
   enum Attribute {                      //  class   prop   func  method param
     ParamCoerceModeNull    = (1 <<  0), //                  x      x
@@ -83,7 +83,7 @@ public:
     NoFCallBuiltin         = (1u << 31),//                  x      x
   };
 
-  class ConstantInfo {
+  struct ConstantInfo {
   public:
     ConstantInfo();
 
@@ -99,7 +99,7 @@ public:
     std::string svalue; // serialized, only used by eval
   };
 
-  class UserAttributeInfo {
+  struct UserAttributeInfo {
   public:
     UserAttributeInfo();
 
@@ -145,7 +145,7 @@ public:
     MaybeDataType returnType;
   };
 
-  class PropertyInfo {
+  struct PropertyInfo {
   public:
     PropertyInfo() : docComment(nullptr) {}
     Attribute attribute;
@@ -378,7 +378,7 @@ private:
 /**
  * Stores info about a class that appears once in the codebase.
  */
-class ClassInfoUnique : public ClassInfo {
+struct ClassInfoUnique : public ClassInfo {
 public:
 
   /**

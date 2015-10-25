@@ -38,7 +38,7 @@ static zip* _zip_open(const String& filename, int _flags, int* zep) {
   return zip_open(to_full_path(filename).c_str(), _flags, zep);
 }
 
-class ZipStream : public File {
+struct ZipStream : public File {
  public:
   DECLARE_RESOURCE_ALLOCATION(ZipStream);
 
@@ -96,7 +96,7 @@ void ZipStream::sweep() {
   File::sweep();
 }
 
-class ZipStreamWrapper : public Stream::Wrapper {
+struct ZipStreamWrapper : public Stream::Wrapper {
  public:
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,
@@ -126,7 +126,7 @@ class ZipStreamWrapper : public Stream::Wrapper {
   }
 };
 
-class ZipEntry : public SweepableResourceData {
+struct ZipEntry : public SweepableResourceData {
  public:
   DECLARE_RESOURCE_ALLOCATION(ZipEntry);
 
@@ -214,7 +214,7 @@ class ZipEntry : public SweepableResourceData {
 };
 IMPLEMENT_RESOURCE_ALLOCATION(ZipEntry);
 
-class ZipDirectory: public SweepableResourceData {
+struct ZipDirectory: public SweepableResourceData {
  public:
   DECLARE_RESOURCE_ALLOCATION(ZipDirectory);
 

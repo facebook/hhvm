@@ -55,7 +55,7 @@ private:
   static void skipField(const char*& fmt);
 };
 
-class FieldGenerator {
+struct FieldGenerator {
 public:
   FieldGenerator(Transport* t, const VirtualHost* vh,
                  AccessLog::ThreadData* tdata)

@@ -29,8 +29,8 @@
 #include <folly/IPAddress.h>
 
 namespace HPHP {
-class ProxygenServer;
-class ProxygenTransport;
+struct ProxygenServer;
+struct ProxygenTransport;
 
 ////////////////////////////////////////////////////////////////////////////////
 /** Message passed from dispatch thread to I/O thread
@@ -38,7 +38,7 @@ class ProxygenTransport;
  * These messages hold a reference to the transport so it doesn't get deleted
  * out from under them in transit.
  */
-class ResponseMessage {
+struct ResponseMessage {
   public:
   enum class Type {
     HEADERS,
@@ -83,7 +83,7 @@ class ResponseMessage {
   bool m_eom{false};
 };
 
-class PushTxnHandler;
+struct PushTxnHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -94,7 +94,7 @@ class PushTxnHandler;
  * Note that one transport object is created for each request.  The transport
  * accessed by the I/O thread and dispatch thread, but it should be OK, right?
  */
-class ProxygenTransport : public Transport,
+struct ProxygenTransport : public Transport,
   public proxygen::HTTPTransactionHandler,
   public std::enable_shared_from_this<ProxygenTransport>,
   public folly::AsyncTimeout,

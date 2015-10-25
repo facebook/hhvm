@@ -68,7 +68,7 @@ static class HashExtension final : public Extension {
 static HashEngineMap HashEngines;
 using HashEnginePtr = std::shared_ptr<HashEngine>;
 
-class HashEngineMapInitializer {
+struct HashEngineMapInitializer {
 public:
   HashEngineMapInitializer() {
     HashEngines["md2"]        = HashEnginePtr(new hash_md2());

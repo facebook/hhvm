@@ -27,10 +27,10 @@
 
 namespace HPHP {
 
-class CacheSaver;
-class MmapFile;
+struct CacheSaver;
+struct MmapFile;
 
-class CacheData : private boost::noncopyable {
+struct CacheData : private boost::noncopyable {
  public:
   CacheData();
   ~CacheData();

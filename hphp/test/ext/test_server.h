@@ -24,7 +24,7 @@
 /**
  * Testing HTTP server.
  */
-class TestServer : public TestCodeRun {
+struct TestServer : public TestCodeRun {
 public:
   TestServer() = delete;
   explicit TestServer(const std::string serverType);
@@ -96,7 +96,7 @@ protected:
   const std::string m_serverType;
 };
 
-class TestLibEventServer : public TestServer {
+struct TestLibEventServer : public TestServer {
   public:
   TestLibEventServer() : TestServer("proxygen") {}
 };

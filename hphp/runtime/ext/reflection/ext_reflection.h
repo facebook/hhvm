@@ -41,7 +41,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
                                              const String& prop, const Variant& value,
                                              bool force);
 
-class Reflection {
+struct Reflection {
  public:
   static HPHP::Class* s_ReflectionExceptionClass;
   static Object AllocReflectionExceptionObject(const Variant& message);
@@ -51,7 +51,7 @@ class Reflection {
 /* A ReflectionFuncHandle is a NativeData object wrapping a Func*
  * for the purposes of ReflectionFunction and ReflectionMethod. */
 extern const StaticString s_ReflectionFuncHandle;
-class ReflectionFuncHandle {
+struct ReflectionFuncHandle {
  public:
   ReflectionFuncHandle(): m_func(nullptr) {}
   explicit ReflectionFuncHandle(const Func* func): m_func(func) {};
@@ -84,7 +84,7 @@ class ReflectionFuncHandle {
 /* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
  * purposes of ReflectionClass. */
 extern const StaticString s_ReflectionClassHandle;
-class ReflectionClassHandle {
+struct ReflectionClassHandle {
  public:
   ReflectionClassHandle(): m_cls(nullptr) {}
   explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {};
@@ -169,7 +169,7 @@ struct ReflectionConstHandle {
 /* A ReflectionPropHandle is a NativeData object wrapping a Prop*
  * for the purposes of ReflectionProperty. */
 extern const StaticString s_ReflectionPropHandle;
-class ReflectionPropHandle {
+struct ReflectionPropHandle {
  public:
   ReflectionPropHandle(): m_prop(nullptr) {}
   explicit ReflectionPropHandle(const Class::Prop* prop): m_prop(prop) {};
@@ -205,7 +205,7 @@ class ReflectionPropHandle {
 /* A ReflectionSPropHandle is a NativeData object wrapping a SProp*
  * for the purposes of static ReflectionProperty. */
 extern const StaticString s_ReflectionSPropHandle;
-class ReflectionSPropHandle {
+struct ReflectionSPropHandle {
  public:
   ReflectionSPropHandle(): m_sprop(nullptr) {}
   explicit ReflectionSPropHandle(const Class::SProp* sprop): m_sprop(sprop) {};

@@ -1011,7 +1011,7 @@ static inline std::string GetDocName(AnalysisResultPtr ar,
   return c ? c->getDocName() : "UnknownClass";
 }
 
-class GetDocNameFunctor {
+struct GetDocNameFunctor {
 public:
   GetDocNameFunctor(AnalysisResultPtr ar, BlockScopeRawPtr scope) :
     m_ar(ar), m_scope(scope) {}

@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestExtCurl : public TestCppExt {
+struct TestExtCurl : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 

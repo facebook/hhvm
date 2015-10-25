@@ -36,7 +36,7 @@ DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(VariableTable);
 DECLARE_BOOST_TYPES(ConstantTable);
 
-class BuiltinSymbols {
+struct BuiltinSymbols {
 public:
   static bool Loaded;
   static AnalysisResultPtr s_systemAr;

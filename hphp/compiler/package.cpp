@@ -193,7 +193,7 @@ std::shared_ptr<FileCache> Package::getFileCache() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ParserWorker :
+struct ParserWorker :
     public JobQueueWorker<std::pair<const char *,bool>, Package*, true, true> {
 public:
   bool m_ret;

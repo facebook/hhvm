@@ -27,7 +27,7 @@ namespace HPHP {
  * Java-like base class for synchronization between object methods within the
  * same class. Check pool.h for a typical example.
  */
-class Synchronizable {
+struct Synchronizable {
  public:
   Synchronizable();
   virtual ~Synchronizable();

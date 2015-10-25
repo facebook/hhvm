@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_whirlpool : public HashEngine {
+struct hash_whirlpool : public HashEngine {
 public:
   hash_whirlpool();
 

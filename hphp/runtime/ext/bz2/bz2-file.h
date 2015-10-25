@@ -27,7 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // BZ2File class
 
-class BZ2File : public File {
+struct BZ2File : public File {
 public:
   DECLARE_RESOURCE_ALLOCATION(BZ2File);
 

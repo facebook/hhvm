@@ -81,7 +81,7 @@ namespace HPHP {
  */
 
 template<class T, class SerDe>
-class IsNontrivialSerializable {
+struct IsNontrivialSerializable {
   template<class U, void (U::*)(SerDe&)> struct Checker;
   template<class U> static char test(Checker<U,&U::template serde<SerDe> >*);
   template<class>   static long test(...);

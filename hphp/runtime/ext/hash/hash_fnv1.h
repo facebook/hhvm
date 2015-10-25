@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_fnv132 : public HashEngine {
+struct hash_fnv132 : public HashEngine {
 public:
   explicit hash_fnv132(bool a);
 
@@ -36,7 +36,7 @@ private:
   bool m_a;
 };
 
-class hash_fnv164 : public HashEngine {
+struct hash_fnv164 : public HashEngine {
 public:
   explicit hash_fnv164(bool a);
 

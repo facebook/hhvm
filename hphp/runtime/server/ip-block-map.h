@@ -27,7 +27,7 @@ namespace HPHP {
 // configuration, then is used to test candidate addresses to see if they
 // fall into one of the forbidden networks for a particular request type.
 
-class IpBlockMap {
+struct IpBlockMap {
 public:
   // Reads a textual IPv4 or IPv6 address, possibly including a bit count,
   // and turns it into an IPv6 address and a number of significant bits.
@@ -47,7 +47,7 @@ public:
   // node has a flag to indicate whether matching addresses are allowed or
   // disallowed. The value at the deepest trie node that matches a prefix of
   // the candidate address is the value for that address's network.
-  class BinaryPrefixTrie {
+  struct BinaryPrefixTrie {
   public:
     explicit BinaryPrefixTrie(bool allow);
 

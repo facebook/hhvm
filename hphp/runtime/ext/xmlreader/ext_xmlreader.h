@@ -60,7 +60,7 @@ extern const int64_t q_XMLReader$$SUBST_ENTITIES;
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLReader
 
-class XMLReader {
+struct XMLReader {
 public:
   XMLReader();
   ~XMLReader();

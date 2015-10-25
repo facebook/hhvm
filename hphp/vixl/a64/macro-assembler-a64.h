@@ -45,7 +45,7 @@
 
 namespace vixl {
 
-class MacroAssembler : public Assembler {
+struct MacroAssembler : public Assembler {
  public:
   explicit MacroAssembler(HPHP::CodeBlock& cb)
       : Assembler(cb),
@@ -1143,7 +1143,7 @@ class MacroAssembler : public Assembler {
 // instructions. This scope prevents the MacroAssembler from being called and
 // literal pools from being emitted. It also asserts the number of instructions
 // emitted is what you specified when creating the scope.
-class InstructionAccurateScope {
+struct InstructionAccurateScope {
  public:
   explicit InstructionAccurateScope(MacroAssembler* masm)
       : masm_(masm) {

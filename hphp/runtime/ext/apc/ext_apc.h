@@ -128,7 +128,7 @@ void apc_load_impl_compressed(
   int *thrift_lens, const char *thrifts,
   int *other_lens, const char *others);
 
-class apc_rfc1867_data {
+struct apc_rfc1867_data {
 public:
   std::string tracking_key;
   int64_t content_length;

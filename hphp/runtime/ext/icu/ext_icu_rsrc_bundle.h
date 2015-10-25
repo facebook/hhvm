@@ -11,7 +11,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_ResourceBundle;
 
-class ResourceBundle : public IntlError {
+struct ResourceBundle : public IntlError {
 public:
   ResourceBundle() {}
   ResourceBundle(const ResourceBundle&) = delete;

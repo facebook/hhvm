@@ -176,7 +176,7 @@ static int64_t* get_cpu_frequency_from_file(const char *file, int ncpus)
 ///////////////////////////////////////////////////////////////////////////////
 // Machine information that we collect just once.
 
-class MachineInfo {
+struct MachineInfo {
 public:
   /**
    * Bind the current process to a specified CPU. This function is to ensure
@@ -486,7 +486,7 @@ void Profiler::endFrame(const TypedValue *retval,
 
 class HierarchicalProfiler final : public Profiler {
 private:
-  class CountMap {
+  struct CountMap {
   public:
     CountMap() : count(0), wall_time(0), cpu(0), memory(0), peak_memory(0) {}
 
@@ -497,7 +497,7 @@ private:
     int64_t peak_memory;
   };
 
-  class HierarchicalProfilerFrame : public Frame {
+  struct HierarchicalProfilerFrame : public Frame {
   public:
     virtual ~HierarchicalProfilerFrame() {
     }
@@ -584,7 +584,7 @@ private:
 // Walks a log of function enter and exit events captured by
 // TraceProfiler and generates statistics for each function executed.
 template <class TraceIterator, class Stats>
-class TraceWalker {
+struct TraceWalker {
  public:
   struct Frame {
     TraceIterator trace; // Pointer to the log entry which pushed this frame
@@ -758,7 +758,7 @@ class TraceWalker {
 // then processes that into per-function statistics. A single-frame
 // stack trace is used to aggregate stats for each function when
 // called from different call sites.
-class TraceProfiler : public Profiler {
+struct TraceProfiler : public Profiler {
  public:
   explicit TraceProfiler(int flags)
     : Profiler(true)
@@ -987,7 +987,7 @@ class TraceProfiler : public Profiler {
 
   // Final stats, per-function per-callsite, with a count of how many
   // times the function was called from that callsite.
-  class CountedTraceData : public TraceData {
+  struct CountedTraceData : public TraceData {
   public:
     int64_t count;
     CountedTraceData() : count(0)  { clear(); }
@@ -1006,7 +1006,7 @@ pthread_mutex_t TraceProfiler::s_inUse = PTHREAD_MUTEX_INITIALIZER;
 /**
  * Sampling based profiler.
  */
-class SampleProfiler : public Profiler {
+struct SampleProfiler : public Profiler {
 private:
   typedef std::pair<int64_t, int64_t> Timestamp;
   typedef req::vector<std::pair<Timestamp, std::string>> SampleVec;
@@ -1138,7 +1138,7 @@ private:
 // others. In particular, it should provide the results via the return
 // value from writeStats, not print to stderr :) Task 3396401 tracks this.
 
-class MemoProfiler : public Profiler {
+struct MemoProfiler : public Profiler {
  public:
   explicit MemoProfiler(int flags) : Profiler(true) {}
 

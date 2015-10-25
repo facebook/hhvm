@@ -459,7 +459,7 @@ static void pcntl_signal_handler(int signo) {
   }
 }
 
-class SignalHandlersStaticInitializer {
+struct SignalHandlersStaticInitializer {
 public:
   SignalHandlersStaticInitializer() {
     signal(SIGALRM, pcntl_signal_handler);
@@ -772,7 +772,7 @@ String HHVM_FUNCTION(system,
 ///////////////////////////////////////////////////////////////////////////////
 // proc
 
-class ChildProcess : public SweepableResourceData {
+struct ChildProcess : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(ChildProcess)
 
@@ -822,7 +822,7 @@ void ChildProcess::sweep() {
 
 const StaticString s_w("w");
 
-class DescriptorItem {
+struct DescriptorItem {
 public:
   DescriptorItem() :
     index(-1), parentend(-1), childend(-1), mode(-1), mode_flags(-1) {

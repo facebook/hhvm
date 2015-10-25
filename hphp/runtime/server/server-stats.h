@@ -36,7 +36,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ServerStats {
+struct ServerStats {
 public:
 
   enum class ThreadMode {
@@ -159,7 +159,7 @@ private:
                          int64_t usWallTime = -1);
   Array getThreadIOStatuses();
 
-  class IOStatus {
+  struct IOStatus {
   public:
     IOStatus() : count(0), wall_time(0) {}
 
@@ -169,7 +169,7 @@ private:
   // keys: "url==>name" and "name==>address"
   typedef hphp_string_map<IOStatus> IOStatusMap;
 
-  class ThreadStatus {
+  struct ThreadStatus {
   public:
     ThreadStatus();
 
@@ -211,7 +211,7 @@ private:
 /**
  * Taking server stats at different time point of execution.
  */
-class ServerStatsHelper {
+struct ServerStatsHelper {
 public:
   enum {
     TRACK_MEMORY = 0x00000001,
@@ -236,7 +236,7 @@ private:
 /**
  * Recording I/O status in a scoped manner.
  */
-class IOStatusHelper {
+struct IOStatusHelper {
 public:
   explicit IOStatusHelper(const char *name, const char *address = nullptr,
                           int port = 0);

@@ -39,7 +39,7 @@ static const StaticString
   s_mode("mode"),
   s_opendir("opendir");
 
-static class PharStreamWrapper : public Stream::Wrapper {
+static struct PharStreamWrapper : public Stream::Wrapper {
  public:
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,

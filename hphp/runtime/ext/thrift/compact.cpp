@@ -178,7 +178,7 @@ struct CompactRequestData final : RequestEventHandler {
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 
-class CompactWriter {
+struct CompactWriter {
   public:
     explicit CompactWriter(PHPOutputTransport *transport) :
       transport(transport),
@@ -501,7 +501,7 @@ class CompactWriter {
     }
 };
 
-class CompactReader {
+struct CompactReader {
   public:
     explicit CompactReader(const Object& _transportobj) :
       transport(_transportobj),

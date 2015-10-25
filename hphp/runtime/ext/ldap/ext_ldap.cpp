@@ -100,7 +100,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class LdapRequestData {
+struct LdapRequestData {
 public:
   LdapRequestData() : m_num_links(0), m_max_links(-1) {
   }
@@ -111,7 +111,7 @@ public:
 static IMPLEMENT_THREAD_LOCAL(LdapRequestData, s_ldap_data);
 #define LDAPG(name) s_ldap_data->m_ ## name
 
-class LdapLink : public SweepableResourceData {
+struct LdapLink : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
@@ -173,7 +173,7 @@ void LdapLink::closeImpl() {
   }
 }
 
-class LdapResult : public SweepableResourceData {
+struct LdapResult : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(LdapResult)
 
@@ -199,7 +199,7 @@ public:
 };
 IMPLEMENT_RESOURCE_ALLOCATION(LdapResult)
 
-class LdapResultEntry : public SweepableResourceData {
+struct LdapResultEntry : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(LdapResultEntry)
 

@@ -27,7 +27,7 @@ namespace HPHP {
 /**
  * memory based files.
  */
-class MemFile : public File {
+struct MemFile : public File {
 public:
   DECLARE_RESOURCE_ALLOCATION(MemFile);
 

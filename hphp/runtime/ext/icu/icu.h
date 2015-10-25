@@ -32,7 +32,7 @@ namespace Intl {
 
 /* Common error handling logic used by all Intl classes
  */
-class IntlError {
+struct IntlError {
  public:
   void setError(UErrorCode code, const char *format = nullptr, ...);
   void clearError(bool clearGlobalError = true);

@@ -94,7 +94,7 @@ struct FBSerializeBase {
 };
 
 template <class V>
-class FBSerializer : private FBSerializeBase {
+struct FBSerializer : private FBSerializeBase {
  public:
   template <typename Variant>
   static size_t serializedSize(const Variant& thing);
@@ -132,7 +132,7 @@ class FBSerializer : private FBSerializeBase {
 };
 
 template <class V>
-class FBUnserializer : private FBSerializeBase {
+struct FBUnserializer : private FBSerializeBase {
  public:
   static typename V::VariantType unserialize(folly::StringPiece serialized);
 

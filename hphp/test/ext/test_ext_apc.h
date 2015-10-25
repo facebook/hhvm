@@ -21,7 +21,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestExtApc : public TestCppExt {
+struct TestExtApc : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
   bool test_apc_reserialize();

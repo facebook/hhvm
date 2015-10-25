@@ -27,11 +27,11 @@
 struct stat;
 
 namespace HPHP {
-class StreamContext;
+struct StreamContext;
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Wrapper : boost::noncopyable {
+struct Wrapper : boost::noncopyable {
  public:
   Wrapper() : m_isLocal(true) { }
   void registerAs(const std::string &scheme);

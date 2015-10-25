@@ -45,7 +45,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 // compress.zlib:// stream wrapper
 
-static class ZlibStreamWrapper : public Stream::Wrapper {
+static struct ZlibStreamWrapper : public Stream::Wrapper {
  public:
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,
@@ -570,7 +570,7 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
 
 const StaticString s___SystemLib_ChunkedInflator("__SystemLib_ChunkedInflator");
 
-class __SystemLib_ChunkedInflator {
+struct __SystemLib_ChunkedInflator {
  public:
   __SystemLib_ChunkedInflator(): m_eof(false) {
     m_zstream.zalloc = (alloc_func) Z_NULL;

@@ -22,10 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Symbol;
+struct Symbol;
 DECLARE_BOOST_TYPES(SimpleVariable);
 
-class SimpleVariable : public Expression {
+struct SimpleVariable : public Expression {
 public:
   SimpleVariable(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                  const std::string &name,

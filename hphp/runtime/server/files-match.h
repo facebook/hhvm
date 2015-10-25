@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class FilesMatch {
+struct FilesMatch {
 public:
   explicit FilesMatch(const IniSetting::Map& ini, const Hdf& vh);
 

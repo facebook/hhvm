@@ -25,7 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(EchoStatement);
 
-class EchoStatement : public Statement {
+struct EchoStatement : public Statement {
 public:
   EchoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 

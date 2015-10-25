@@ -173,7 +173,7 @@ int DebuggerClient::pollSignal() {
 /**
  * Initialization and shutdown.
  */
-class ReadlineApp {
+struct ReadlineApp {
 public:
   ReadlineApp() {
     TRACE(2, "ReadlineApp::ReadlineApp\n");
@@ -203,7 +203,7 @@ public:
 /**
  * Displaying a spinning wait icon.
  */
-class ReadlineWaitCursor {
+struct ReadlineWaitCursor {
 public:
   ReadlineWaitCursor()
       : m_thread(this, &ReadlineWaitCursor::animate), m_waiting(true) {

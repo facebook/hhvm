@@ -27,7 +27,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassVariable);
 DECLARE_BOOST_TYPES(SimpleVariable);
 
-class ClassVariable : public Statement, public IParseHandler {
+struct ClassVariable : public Statement, public IParseHandler {
 public:
   ClassVariable(STATEMENT_CONSTRUCTOR_PARAMETERS,
                 ModifierExpressionPtr modifiers,

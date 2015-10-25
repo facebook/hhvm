@@ -302,7 +302,7 @@ private:
 /*
  * Initializer for a vector-shaped array.
  */
-class PackedArrayInit {
+struct PackedArrayInit {
 public:
   explicit PackedArrayInit(size_t n)
     : m_vec(MixedArray::MakeReserve(n))

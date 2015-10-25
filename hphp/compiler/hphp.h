@@ -24,8 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassScope;
-class FunctionScope;
+struct ClassScope;
+struct FunctionScope;
 
 // ClassScope and FunctionScope are compared case-insensitively.
 

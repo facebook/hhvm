@@ -25,7 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(TryStatement);
 
-class TryStatement : public Statement {
+struct TryStatement : public Statement {
 public:
 
   TryStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,

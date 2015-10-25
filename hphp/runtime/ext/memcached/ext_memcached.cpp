@@ -216,7 +216,7 @@ static __thread MEMCACHEDGlobals* s_memcached_globals;
 #define MEMCACHEDG(name) s_memcached_globals->name
 
 namespace {
-class MemcachedResultWrapper {
+struct MemcachedResultWrapper {
 public:
   memcached_result_st value;
   explicit MemcachedResultWrapper(memcached_st *memcached) {
@@ -241,9 +241,9 @@ static memcached_return_t memcached_dump_callback(const memcached_st*,
 
 const StaticString s_MemcachedData("MemcachedData");
 
-class MemcachedData {
+struct MemcachedData {
  public:
-  class Impl {
+  struct Impl {
    public:
     Impl() :
       compression(true),

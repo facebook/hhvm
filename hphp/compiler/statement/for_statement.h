@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ForStatement);
 
-class ForStatement : public LoopStatement {
+struct ForStatement : public LoopStatement {
 public:
   ForStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                ExpressionPtr exp1, ExpressionPtr exp2, ExpressionPtr exp3,

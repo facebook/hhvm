@@ -7,7 +7,7 @@ struct privateParent {
   HPHP::Variant var;
 };
 
-class privateX : public HPHP::ResourceData, public privateParent {
+struct privateX : public HPHP::ResourceData, public privateParent {
   void method() const { }
   char* x;
 };

@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Capability {
+struct Capability {
 public:
   /**
    * This sets the  effective user ID of the current process, leaving

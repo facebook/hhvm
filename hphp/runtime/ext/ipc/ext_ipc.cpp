@@ -121,7 +121,7 @@ int64_t HHVM_FUNCTION(ftok,
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
-class MessageQueue : public ResourceData {
+struct MessageQueue : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MessageQueue)
 
@@ -576,7 +576,7 @@ typedef struct {
   long total;
 } sysvshm_chunk_head;
 
-class sysvshm_shm {
+struct sysvshm_shm {
 public:
   key_t key;               /* Key set by user */
   long id;                 /* Returned by shmget. */
@@ -587,7 +587,7 @@ public:
   }
 };
 
-class shm_set : public std::set<sysvshm_shm*> {
+struct shm_set : public std::set<sysvshm_shm*> {
 public:
   ~shm_set() {
     for (auto iter = begin(); iter != end(); ++iter) {

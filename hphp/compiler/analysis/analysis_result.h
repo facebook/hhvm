@@ -47,7 +47,7 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
 
-class AnalysisResult : public BlockScope, public FunctionContainer {
+struct AnalysisResult : public BlockScope, public FunctionContainer {
 public:
   /**
    * There are multiple passes over our syntax trees. This lists all of them.
@@ -82,7 +82,7 @@ public:
     GlobalSymbolTypeCount
   };
 
-  class Locker {
+  struct Locker {
   public:
     explicit Locker(const AnalysisResult *ar) :
         m_ar(const_cast<AnalysisResult*>(ar)),

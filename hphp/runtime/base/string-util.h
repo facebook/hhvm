@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 struct Variant;
 
 extern const StaticString k_HPHP_TRIM_CHARLIST;
@@ -35,7 +35,7 @@ extern const StaticString k_HPHP_TRIM_CHARLIST;
  * Utility string functions. These are mostly wrappers around zend/ string
  * functions, but in a safe and convenient form.
  */
-class StringUtil {
+struct StringUtil {
 public:
   enum class PadType {
     Left = 0,

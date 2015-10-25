@@ -54,7 +54,7 @@ static __thread MEMCACHEGlobals* s_memcache_globals;
 
 const StaticString s_MemcacheData("MemcacheData");
 
-class MemcacheData {
+struct MemcacheData {
  public:
   memcached_st m_memcache;
   int m_compress_threshold;

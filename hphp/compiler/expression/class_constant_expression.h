@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ClassConstantExpression);
 
-class ClassConstantExpression : public Expression, public StaticClassName {
+struct ClassConstantExpression : public Expression, public StaticClassName {
 public:
   ClassConstantExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                           ExpressionPtr classExp,

@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StaticContentCache {
+struct StaticContentCache {
 public:
   static StaticContentCache TheCache;
   static std::shared_ptr<FileCache> TheFileCache;

@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(JoinClause);
 
-class JoinClause : public Expression {
+struct JoinClause : public Expression {
 public:
   JoinClause(EXPRESSION_CONSTRUCTOR_PARAMETERS,
       const std::string &var, ExpressionPtr coll, ExpressionPtr left,

@@ -123,7 +123,7 @@ const StaticString
   s_SETPROFILE_FLAGS_FRAME_PTRS("SETPROFILE_FLAGS_FRAME_PTRS"),
   s_SETPROFILE_FLAGS_CTORS("SETPROFILE_FLAGS_CTORS");
 
-class XHProfExtension : public Extension {
+struct XHProfExtension : public Extension {
  public:
   XHProfExtension(): Extension("xhprof", "0.9.4") {}
 

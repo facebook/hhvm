@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_adler32 : public HashEngine {
+struct hash_adler32 : public HashEngine {
 public:
   explicit hash_adler32(bool invert = false);
 

@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StaticClassName : public IParseHandler {
+struct StaticClassName : public IParseHandler {
 public:
   explicit StaticClassName(ExpressionPtr classExp);
 

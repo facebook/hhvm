@@ -18,7 +18,7 @@
 
 namespace HPHP {
 
-class ProxygenServerFactory : public ServerFactory {
+struct ProxygenServerFactory : public ServerFactory {
 public:
   ProxygenServerFactory() {}
 

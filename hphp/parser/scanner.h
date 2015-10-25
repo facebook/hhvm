@@ -39,7 +39,7 @@ namespace HPHP {
 
 typedef int TokenID;
 
-class ScannerToken {
+struct ScannerToken {
 public:
   ScannerToken() : m_num(0), m_check(false), m_id(-1) {}
   void reset() { m_num = 0; m_text.clear(); m_id = -1; }
@@ -194,7 +194,7 @@ struct TokenListener {
   virtual ~TokenListener() {}
 };
 
-class Scanner {
+struct Scanner {
 public:
   enum Type {
     AllowShortTags       = 0x01, // allow <?

@@ -288,7 +288,7 @@ private:
 
 private:
   template<typename Key, typename T, typename HashCompare>
-  class APCMap : public tbb::concurrent_hash_map<Key,T,HashCompare> {
+  struct APCMap : public tbb::concurrent_hash_map<Key,T,HashCompare> {
   public:
     void dumpRandomAPCEntry(std::ostream& out);
   };

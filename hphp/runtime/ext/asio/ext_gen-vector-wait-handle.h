@@ -33,7 +33,7 @@ namespace HPHP {
  * preserves order of the original vector. If one of the wait handles failed,
  * the exception is propagated by failure.
  */
-class c_Vector;
+struct c_Vector;
 class c_GenVectorWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenVectorWaitHandle)

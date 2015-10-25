@@ -39,7 +39,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class MySQLUtil {
+struct MySQLUtil {
 public:
   enum TimeoutType {
     ConnectTimeout,
@@ -272,7 +272,7 @@ struct MySQLRequestData final : RequestEventHandler {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MySQLFieldInfo {
+struct MySQLFieldInfo {
 public:
   String name;
   String org_name;
@@ -290,7 +290,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MySQLResult : public SweepableResourceData {
+struct MySQLResult : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(MySQLResult);
 

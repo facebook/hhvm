@@ -27,7 +27,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ListAssignment);
 
-class ListAssignment : public Expression {
+struct ListAssignment : public Expression {
 public:
   enum RHSKind {
     Regular,

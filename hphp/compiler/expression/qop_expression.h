@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(QOpExpression);
 
-class QOpExpression : public Expression {
+struct QOpExpression : public Expression {
 public:
   QOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                 ExpressionPtr condition, ExpressionPtr expYes,

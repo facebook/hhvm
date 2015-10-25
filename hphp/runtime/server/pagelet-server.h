@@ -30,10 +30,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class PageletTransport;
-class PageletServerTaskEvent;
+struct PageletTransport;
+struct PageletServerTaskEvent;
 
-class PageletServer {
+struct PageletServer {
 public:
   static bool Enabled();
   static void Restart();
@@ -79,7 +79,7 @@ public:
   static int GetQueuedJobs();
 };
 
-class PageletTransport : public Transport, public Synchronizable {
+struct PageletTransport : public Transport, public Synchronizable {
 public:
   PageletTransport(
     const String& url, const Array& headers, const String& postData,

@@ -31,7 +31,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MCrypt : public SweepableResourceData {
+struct MCrypt : public SweepableResourceData {
 public:
   explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {}
 
@@ -70,7 +70,7 @@ typedef enum {
   RAND
 } iv_source;
 
-class mcrypt_data {
+struct mcrypt_data {
 public:
   std::string algorithms_dir;
   std::string modes_dir;

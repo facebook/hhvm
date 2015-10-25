@@ -41,7 +41,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <bool enableAssertions>
-class BaseMutex {
+struct BaseMutex {
 private:
 #ifdef DEBUG
   static const int kMagic = 0xba5eba11;
@@ -185,7 +185,7 @@ protected:
  * Standard recursive mutex, which can be used for condition variables.
  * This mutex does not support enabling assertions
  */
-class Mutex : public BaseMutex<false> {
+struct Mutex : public BaseMutex<false> {
 public:
   explicit Mutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<false>(recursive, rank) {}
@@ -198,7 +198,7 @@ public:
  * Simple recursive mutex, which does not expose the underlying raw
  * pthread_mutex_t. This allows this mutex to support enabling assertions
  */
-class SimpleMutex : public BaseMutex<true> {
+struct SimpleMutex : public BaseMutex<true> {
 public:
   explicit SimpleMutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<true>(recursive, rank) {}
@@ -209,7 +209,7 @@ public:
 /**
  * Read-write lock wrapper.
  */
-class ReadWriteMutex {
+struct ReadWriteMutex {
 #ifdef DEBUG
 /*
  * We have a track record of self-deadlocking on these, and our pthread
@@ -306,10 +306,10 @@ private:
  * A ranked wrapper around tbb::concurrent_hash_map.
  */
 template<typename K, typename V, typename H=K, Rank R=RankUnranked>
-class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
+struct RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
   typedef tbb::concurrent_hash_map<K, V, H> RawCHM;
  public:
-  class accessor : public RawCHM::accessor {
+  struct accessor : public RawCHM::accessor {
     bool freed;
    public:
     accessor() : freed(false) { pushRank(R); }
@@ -320,7 +320,7 @@ class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
       freed = true;
     }
   };
-  class const_accessor : public RawCHM::const_accessor {
+  struct const_accessor : public RawCHM::const_accessor {
     bool freed;
    public:
     const_accessor() : freed(false) { pushRank(R); }

@@ -48,7 +48,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // DNS
 
-class ResolverInit {
+struct ResolverInit {
 public:
   ResolverInit() : m_res(nullptr) {
     m_res = (struct __res_state *)calloc(1, sizeof(*m_res));

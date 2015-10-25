@@ -29,7 +29,7 @@ namespace HPHP {
 /**
  * A common base class for ClientSideSelectRewriter and ServerSideSelectRewriter
  */
-class SelectRewriter {
+struct SelectRewriter {
 public:
   void rewriteQuery(QueryExpressionPtr ep);
 
@@ -82,7 +82,7 @@ private:
  * of the selected database columns, into the stream of PHP values specified
  * by the original select clause.
  */
-class ClientSideSelectRewriter : public SelectRewriter {
+struct ClientSideSelectRewriter : public SelectRewriter {
 public:
 
   /**
@@ -104,7 +104,7 @@ public:
  * to the query provider, which then does not have to deal with any
  * expressions that need to be evaluated in the context of the query expression.
  */
-class ServerSideSelectRewriter : public SelectRewriter {
+struct ServerSideSelectRewriter : public SelectRewriter {
 public:
   ServerSideSelectRewriter() {
     m_serverSide = true;

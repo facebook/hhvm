@@ -6,7 +6,7 @@
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-class CollectionsExtension : public Extension {
+struct CollectionsExtension : public Extension {
  public:
   CollectionsExtension(): Extension("collections") {}
 

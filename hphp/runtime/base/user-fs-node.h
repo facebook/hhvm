@@ -22,12 +22,12 @@
 
 namespace HPHP {
 
-class Array;
+struct Array;
 struct Func;
 struct Class;
-class StreamContext;
+struct StreamContext;
 
-class UserFSNode {
+struct UserFSNode {
 public:
   explicit UserFSNode(Class* cls,
                       const req::ptr<StreamContext>& context = nullptr);

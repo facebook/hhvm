@@ -663,7 +663,7 @@ bool ExecutionContext::errorNeedsLogging(int errnum) {
   return RuntimeOption::NoSilencer || (level & errnum) != 0;
 }
 
-class ErrorStateHelper {
+struct ErrorStateHelper {
 public:
   ErrorStateHelper(ExecutionContext *context,
                    ExecutionContext::ErrorState state) {

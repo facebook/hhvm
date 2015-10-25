@@ -26,7 +26,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(StaticStatement);
 
-class StaticStatement : public Statement {
+struct StaticStatement : public Statement {
 public:
   StaticStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 

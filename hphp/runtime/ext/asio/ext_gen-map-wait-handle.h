@@ -33,7 +33,7 @@ namespace HPHP {
  * preserves the keys of the original map. If one of the wait handles failed,
  * the exception is propagated by failure.
  */
-class c_Map;
+struct c_Map;
 class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)

@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(StatementList);
 
-class StatementList : public Statement {
+struct StatementList : public Statement {
 public:
   explicit StatementList(STATEMENT_CONSTRUCTOR_PARAMETERS);
   StatementListPtr shallowClone();

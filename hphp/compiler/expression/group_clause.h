@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(GroupClause);
 
-class GroupClause : public Expression {
+struct GroupClause : public Expression {
 public:
   GroupClause(EXPRESSION_CONSTRUCTOR_PARAMETERS,
     ExpressionPtr coll, ExpressionPtr key);

@@ -25,7 +25,7 @@
 namespace HPHP {
 const StaticString s_finfo("finfo");
 
-class FileinfoResource : public SweepableResourceData {
+struct FileinfoResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(FileinfoResource)
   CLASSNAME_IS("file_info")

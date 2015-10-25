@@ -27,11 +27,11 @@
 
 namespace HPHP {
 
-class SourceRootInfo;
-class RequestURI;
+struct SourceRootInfo;
+struct RequestURI;
 
 namespace ServiceData {
-class ExportedTimeSeries;
+struct ExportedTimeSeries;
 }
 
 /*
@@ -42,7 +42,7 @@ void setProxyOriginPercentage(const std::string& origin, int percentage);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class HttpRequestHandler : public RequestHandler {
+struct HttpRequestHandler : public RequestHandler {
 public:
   static AccessLog &GetAccessLog() { return s_accessLog; }
 

@@ -34,7 +34,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helper class
 
-class CPipe {
+struct CPipe {
 public:
   CPipe()  { m_fds[0] = m_fds[1] = 0;}
   ~CPipe() { close();}
@@ -62,7 +62,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Process {
+struct Process {
 public:
   // Cached process statics
   static std::string HostName;

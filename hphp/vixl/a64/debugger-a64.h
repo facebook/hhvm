@@ -101,11 +101,11 @@ enum DebugParameters {
 };
 
 // Forward declarations.
-class DebugCommand;
-class Token;
-class FormatToken;
+struct DebugCommand;
+struct Token;
+struct FormatToken;
 
-class Debugger : public Simulator {
+struct Debugger : public Simulator {
  public:
   explicit Debugger(Decoder* decoder, std::ostream& stream);
 

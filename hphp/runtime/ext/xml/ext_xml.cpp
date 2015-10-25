@@ -69,7 +69,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XmlParser : public SweepableResourceData {
+struct XmlParser : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(XmlParser)
   XmlParser() {}

@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ModifierExpression);
 
-class ModifierExpression : public Expression {
+struct ModifierExpression : public Expression {
 public:
   explicit ModifierExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS);
 

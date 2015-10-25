@@ -21,7 +21,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestParserStmt : public TestParser {
+struct TestParserStmt : public TestParser {
  public:
   virtual bool RunTests(const std::string &which);
 

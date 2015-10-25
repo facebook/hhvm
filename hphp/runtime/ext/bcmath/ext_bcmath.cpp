@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmath_data {
+struct bcmath_data {
 public:
   bcmath_data() {
     // we can't really call bc_init_numbers() that calls into this constructor

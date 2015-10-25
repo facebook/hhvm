@@ -37,7 +37,7 @@ namespace HPHP {
 // without calling res_init(), any call to getaddrinfo() may leak memory:
 //  http://sources.redhat.com/ml/libc-hacker/2004-02/msg00049.html
 
-class ResolverLibInitializer {
+struct ResolverLibInitializer {
 public:
   ResolverLibInitializer() {
     res_init();

@@ -29,7 +29,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(TraitPrecStatement);
 
-class TraitPrecStatement : public Statement {
+struct TraitPrecStatement : public Statement {
 public:
   TraitPrecStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                      ScalarExpressionPtr className,

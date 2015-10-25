@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(NewObjectExpression);
 
-class NewObjectExpression : public FunctionCall {
+struct NewObjectExpression : public FunctionCall {
 public:
   NewObjectExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       ExpressionPtr variable, ExpressionListPtr params);

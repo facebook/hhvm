@@ -51,7 +51,7 @@ namespace HPHP {
   O(REQUEST_METHOD,  RAW_STRING, getExtendedMethod) \
 /**/
 
-class FastCGISession;
+struct FastCGISession;
 
 /*
  * FastCGITransport is used to communicate between a PHP (VM) thread running a

@@ -45,11 +45,11 @@ struct BuiltinObjExtents {
   ptrdiff_t odOffsetBytes;
 };
 
-class PreClassEmitter {
+struct PreClassEmitter {
  public:
   typedef std::vector<FuncEmitter*> MethodVec;
 
-  class Prop {
+  struct Prop {
    public:
     Prop()
       : m_name(nullptr)
@@ -98,7 +98,7 @@ class PreClassEmitter {
     RepoAuthType m_repoAuthType;
   };
 
-  class Const {
+  struct Const {
    public:
     Const()
       : m_name(nullptr)
@@ -274,9 +274,9 @@ class PreClassEmitter {
   ConstMap::Builder m_constMap;
 };
 
-class PreClassRepoProxy : public RepoProxy {
-  friend class PreClass;
-  friend class PreClassEmitter;
+struct PreClassRepoProxy : public RepoProxy {
+  friend struct PreClass;
+  friend struct PreClassEmitter;
  public:
   explicit PreClassRepoProxy(Repo& repo);
   ~PreClassRepoProxy();

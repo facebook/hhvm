@@ -29,7 +29,7 @@ namespace HPHP {
 
 #define L64(x) (x ## ULL)
 
-class HashEngine {
+struct HashEngine {
 public:
   HashEngine(int digest_size_, int block_size_, int context_size_)
     : digest_size(digest_size_), block_size(block_size_),

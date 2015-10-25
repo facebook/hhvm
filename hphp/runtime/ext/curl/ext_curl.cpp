@@ -100,7 +100,7 @@ void throwException(ExceptionType& ex) {
  * This is a helper class used to wrap Curl handles that are pooled.
  * Operations on this class are _NOT_ thread safe!
  */
-class PooledCurlHandle {
+struct PooledCurlHandle {
 public:
   explicit PooledCurlHandle(int connRecycleAfter)
   : m_handle(nullptr), m_numUsages(0), m_connRecycleAfter(connRecycleAfter) { }
@@ -146,7 +146,7 @@ private:
  * hold connections open and cache SSL session ids over their lifetimes.
  * All operations on this class are thread safe.
  */
-class CurlHandlePool {
+struct CurlHandlePool {
 public:
   static std::map<std::string, CurlHandlePool*> namedPools;
 
@@ -208,11 +208,11 @@ std::map<std::string, CurlHandlePool*> CurlHandlePool::namedPools;
 ///////////////////////////////////////////////////////////////////////////////
 // helper data structure
 
-class CurlResource : public SweepableResourceData {
+struct CurlResource : public SweepableResourceData {
 private:
   DECLARE_RESOURCE_ALLOCATION(CurlResource)
 
-  class WriteHandler {
+  struct WriteHandler {
   public:
     WriteHandler() : method(0), type(0) {}
 
@@ -224,7 +224,7 @@ private:
     int                type;
   };
 
-  class ReadHandler {
+  struct ReadHandler {
   public:
     ReadHandler() : method(0) {}
 
@@ -233,7 +233,7 @@ private:
     req::ptr<File>     fp;
   };
 
-  class ToFree {
+  struct ToFree {
   public:
     std::vector<char*>          str;
     std::vector<curl_httppost*> post;
@@ -1433,7 +1433,7 @@ void HHVM_FUNCTION(curl_reset, const Resource& ch) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CurlMultiResource : public SweepableResourceData {
+struct CurlMultiResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
 
@@ -1638,9 +1638,9 @@ Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
   return ret;
 }
 
-class CurlMultiAwait;
+struct CurlMultiAwait;
 
-class CurlEventHandler : public AsioEventHandler {
+struct CurlEventHandler : public AsioEventHandler {
  public:
   CurlEventHandler(AsioEventBase* base, int fd, CurlMultiAwait* cma):
     AsioEventHandler(base, fd), m_curlMultiAwait(cma), m_fd(fd) {}
@@ -1651,7 +1651,7 @@ class CurlEventHandler : public AsioEventHandler {
   int m_fd;
 };
 
-class CurlTimeoutHandler : public AsioTimeoutHandler {
+struct CurlTimeoutHandler : public AsioTimeoutHandler {
  public:
   CurlTimeoutHandler(AsioEventBase* base, CurlMultiAwait* cma):
     AsioTimeoutHandler(base), m_curlMultiAwait(cma) {}
@@ -1661,7 +1661,7 @@ class CurlTimeoutHandler : public AsioTimeoutHandler {
   CurlMultiAwait* m_curlMultiAwait;
 };
 
-class CurlMultiAwait : public AsioExternalThreadEvent {
+struct CurlMultiAwait : public AsioExternalThreadEvent {
  public:
   CurlMultiAwait(req::ptr<CurlMultiResource> multi, double timeout) {
     if ((addLowHandles(multi) + addHighHandles(multi)) == 0) {

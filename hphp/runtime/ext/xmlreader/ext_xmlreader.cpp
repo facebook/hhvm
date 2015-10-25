@@ -572,7 +572,7 @@ struct XMLPropertyAccessor {
   int return_type;
 };
 
-class XMLPropertyAccessorMap :
+struct XMLPropertyAccessorMap :
       private hphp_const_char_map<XMLPropertyAccessor*> {
 public:
   explicit XMLPropertyAccessorMap(XMLPropertyAccessor* props,

@@ -24,7 +24,7 @@ namespace HPHP {
 
 using std::string;
 
-class TestCacheManager : public testing::Test {
+struct TestCacheManager : public testing::Test {
  protected:
   bool makeTempFile(const string& contents, string* fn) {
     char fn_tmpl[] = "/tmp/hhvm_unit_test.XXXXXX";

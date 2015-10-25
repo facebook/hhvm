@@ -310,7 +310,7 @@ struct PageletWorker
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PageletTask : public SweepableResourceData {
+struct PageletTask : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(PageletTask)
 

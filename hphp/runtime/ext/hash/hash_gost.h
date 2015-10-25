@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_gost : public HashEngine {
+struct hash_gost : public HashEngine {
 public:
   hash_gost();
 

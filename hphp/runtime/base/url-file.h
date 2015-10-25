@@ -27,7 +27,7 @@ namespace HPHP {
 /**
  * url based files.
  */
-class UrlFile : public MemFile {
+struct UrlFile : public MemFile {
 public:
   DECLARE_RESOURCE_ALLOCATION(UrlFile);
 

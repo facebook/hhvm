@@ -2348,7 +2348,7 @@ private:
 IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
-class ArraySortTmp {
+struct ArraySortTmp {
  public:
   explicit ArraySortTmp(Array& arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr.get()->escalateForSort(sf);

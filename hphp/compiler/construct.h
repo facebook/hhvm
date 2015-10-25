@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Variant;
+struct Variant;
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(IParseHandler);
 DECLARE_BOOST_TYPES(AnalysisResult);
@@ -36,9 +36,9 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-class AstWalkerStateVec;
+struct AstWalkerStateVec;
 
-class IParseHandler {
+struct IParseHandler {
   /**
    * To avoid iteration of parse tree, we move any work that can be done
    * in parse phase into this function, so to speed up static analysis.
@@ -147,7 +147,7 @@ public:
 /**
  * Base class of Expression and Statement.
  */
-class Construct : public std::enable_shared_from_this<Construct>,
+struct Construct : public std::enable_shared_from_this<Construct>,
                   public JSON::CodeError::ISerializable {
 public:
   virtual ~Construct() {}
@@ -348,7 +348,7 @@ protected:
   mutable int m_effectsTag;
 };
 
-class LocalEffectsContainer {
+struct LocalEffectsContainer {
 public:
   int getLocalEffects() const { return m_localEffects; }
   virtual void effectsCallback() = 0;

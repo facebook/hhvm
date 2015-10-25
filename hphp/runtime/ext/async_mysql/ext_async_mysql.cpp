@@ -93,7 +93,7 @@ static std::shared_ptr<am::AsyncMysqlClient> getDefaultClient() {
 ///////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClientStats
 
-class AsyncMysqlClientStats {
+struct AsyncMysqlClientStats {
  public:
   AsyncMysqlClientStats& operator=(const AsyncMysqlClientStats& other) {
     m_values = other.m_values;

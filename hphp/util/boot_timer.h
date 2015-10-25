@@ -71,7 +71,7 @@ private:
   static void add(const std::string& name,
     const std::chrono::nanoseconds value);
 
-  class Impl;
+  struct Impl;
 
   static bool s_started;
   static std::chrono::steady_clock::time_point s_start;

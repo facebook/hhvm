@@ -464,7 +464,7 @@ inline const TypedValue& zval_follow_ref(const zval &z) {
  * certain uses Z_ARRVAL so that we can make a copy of the array when
  * appropriate so that PHP5 extensions work correctly.
  */
-class ZArrVal {
+struct ZArrVal {
 private:
   TypedValue* m_tv;
 public:

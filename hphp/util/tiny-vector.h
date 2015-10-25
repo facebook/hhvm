@@ -198,7 +198,7 @@ struct TinyVector<T,InternalSize,MinHeapCapacity>::const_iterator
   {}
 
 private:
-  friend class boost::iterator_core_access;
+  friend struct boost::iterator_core_access;
 
   void increment() {
     ++m_idx;

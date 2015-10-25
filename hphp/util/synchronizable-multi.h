@@ -34,7 +34,7 @@ namespace HPHP {
  * variable for an altered scheduling that potentially wakes up a thread with
  * better thread caching.
  */
-class SynchronizableMulti {
+struct SynchronizableMulti {
 public:
   explicit SynchronizableMulti(int size);
   virtual ~SynchronizableMulti();

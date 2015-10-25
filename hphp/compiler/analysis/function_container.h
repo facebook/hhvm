@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeGenerator;
+struct CodeGenerator;
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(ClassScope);
@@ -32,7 +32,7 @@ DECLARE_BOOST_TYPES(FunctionContainer);
 /**
  * Base class of both FileScope and ClassScope that can contain functions.
  */
-class FunctionContainer {
+struct FunctionContainer {
 public:
   FunctionContainer();
 

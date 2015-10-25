@@ -37,7 +37,7 @@
 #endif
 
 #define DECLARE_BOOST_TYPES(classname)                                  \
-  class classname;                                                      \
+  struct classname;                                                      \
                                                                         \
   using classname ## Ptr      = std::shared_ptr<classname>;             \
   using classname ## RawPtr   = hphp_raw_ptr<classname>;                \

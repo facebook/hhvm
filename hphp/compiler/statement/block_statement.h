@@ -25,7 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(BlockStatement);
 
-class BlockStatement : public Statement {
+struct BlockStatement : public Statement {
 public:
   BlockStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts);
 

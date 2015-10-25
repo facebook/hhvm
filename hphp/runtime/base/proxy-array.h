@@ -203,7 +203,7 @@ private:
   static void reseatable(const ArrayData* oldArr, ArrayData* newArr);
 
   static ArrayData* innerArr(const ArrayData* ad);
-  friend class c_AwaitAllWaitHandle;
+  friend struct c_AwaitAllWaitHandle;
 
 public:
   template<class F> void scan(F& mark) const {

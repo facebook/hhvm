@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 struct Variant;
 
 /**
@@ -52,7 +52,7 @@ using CookieList = std::vector<std::pair<std::string, std::string>>;
  * Note that one transport object is created for each request, and
  * one transport is ONLY accessed from one single thread.
  */
-class Transport : public IDebuggable {
+struct Transport : public IDebuggable {
 public:
   enum class Method {
     Unknown,

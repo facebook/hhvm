@@ -359,7 +359,7 @@ static InitFiniNode init(
   InitFiniNode::When::RequestInit
 );
 
-class JsonParserCleaner {
+struct JsonParserCleaner {
 public:
   explicit JsonParserCleaner(json_parser *json) : m_json(json) {}
   ~JsonParserCleaner() {

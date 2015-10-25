@@ -26,7 +26,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(Ordering);
 
-class Ordering : public Expression {
+struct Ordering : public Expression {
 
 public:
   Ordering(EXPRESSION_CONSTRUCTOR_PARAMETERS,

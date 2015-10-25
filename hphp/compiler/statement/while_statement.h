@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(WhileStatement);
 
-class WhileStatement : public LoopStatement {
+struct WhileStatement : public LoopStatement {
 public:
   WhileStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                  ExpressionPtr condition, StatementPtr stmt);

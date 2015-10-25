@@ -56,7 +56,7 @@ static inline bool useCounters() {
 #endif
 }
 
-class HardwareCounterImpl {
+struct HardwareCounterImpl {
 public:
   HardwareCounterImpl(int type, unsigned long config,
                       const char* desc = nullptr)
@@ -176,20 +176,20 @@ private:
   }
 };
 
-class InstructionCounter : public HardwareCounterImpl {
+struct InstructionCounter : public HardwareCounterImpl {
 public:
   InstructionCounter() :
     HardwareCounterImpl(PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS) {}
 };
 
-class LoadCounter : public HardwareCounterImpl {
+struct LoadCounter : public HardwareCounterImpl {
 public:
   LoadCounter() :
     HardwareCounterImpl(PERF_TYPE_HW_CACHE,
         (PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_READ) << 8))) {}
 };
 
-class StoreCounter : public HardwareCounterImpl {
+struct StoreCounter : public HardwareCounterImpl {
 public:
   StoreCounter() :
     HardwareCounterImpl(PERF_TYPE_HW_CACHE,

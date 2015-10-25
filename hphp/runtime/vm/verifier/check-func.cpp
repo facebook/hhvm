@@ -389,7 +389,7 @@ Offset decodeOffset(PC* ppc) {
 /**
  * Range over the members of an immediate member vector.
  */
-class ImmVecRange {
+struct ImmVecRange {
  public:
   explicit ImmVecRange(PC instr)
     : v(getImmVector(instr))

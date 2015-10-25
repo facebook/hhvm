@@ -32,7 +32,7 @@
  * calling library functions, therefore we can easily run it under valgrind
  * and other tools to detect any coding problems.
  */
-class TestCppBase : public TestBase {
+struct TestCppBase : public TestBase {
  public:
   TestCppBase();
 

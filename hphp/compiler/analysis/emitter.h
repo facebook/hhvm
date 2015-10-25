@@ -56,20 +56,20 @@ DECLARE_BOOST_TYPES(FunctionCall);
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(SwitchStatement);
 DECLARE_BOOST_TYPES(ForEachStatement);
-class StaticClassName;
-class HhbcExtFuncInfo;
-class HhbcExtClassInfo;
+struct StaticClassName;
+struct HhbcExtFuncInfo;
+struct HhbcExtClassInfo;
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Forward declarations.
-class Label;
-class EmitterVisitor;
+struct Label;
+struct EmitterVisitor;
 
 using OptLocation = folly::Optional<Location::Range>;
 
-class Emitter {
+struct Emitter {
 public:
   Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
       : m_node(node), m_ue(ue), m_ev(ev) {}
@@ -272,7 +272,7 @@ public:
   void popFDesc();
 };
 
-class Label {
+struct Label {
 public:
   Label() : m_off(InvalidAbsoluteOffset) {}
   explicit Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
@@ -298,13 +298,13 @@ private:
   SymbolicStack m_evalStack;
 };
 
-class Thunklet {
+struct Thunklet {
 public:
   virtual ~Thunklet();
   virtual void emit(Emitter& e) = 0;
 };
 
-class Funclet {
+struct Funclet {
 public:
   explicit Funclet(Thunklet* body)
     : m_body(body) {
@@ -349,7 +349,7 @@ DECLARE_BOOST_TYPES(Region);
  * implementation. The levels are used to keep track of the information
  * such as the control targets that can be taken inside a block.
  */
-class Region {
+struct Region {
 public:
   enum Kind {
     // Top-level (global) context.
@@ -429,9 +429,9 @@ public:
   RegionPtr m_parent;
 };
 
-class EmitterVisitor {
-  friend class UnsetUnnamedLocalThunklet;
-  friend class FuncFinisher;
+struct EmitterVisitor {
+  friend struct UnsetUnnamedLocalThunklet;
+  friend struct FuncFinisher;
 public:
   typedef std::vector<int> IndexChain;
   typedef std::pair<ExpressionPtr, IndexChain> IndexPair;
@@ -522,7 +522,7 @@ private:
   typedef std::vector<NonScalarPair> NonScalarVec;
   typedef std::pair<Id, int> StrCase;
 
-  class PostponedMeth {
+  struct PostponedMeth {
   public:
     PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
                   ClosureUseVarVec* useVars)
@@ -533,7 +533,7 @@ private:
     ClosureUseVarVec* m_closureUseVars;
   };
 
-  class PostponedCtor {
+  struct PostponedCtor {
   public:
     PostponedCtor(InterfaceStatementPtr is, FuncEmitter* fe)
       : m_is(is), m_fe(fe) {}
@@ -541,7 +541,7 @@ private:
     FuncEmitter* m_fe;
   };
 
-  class PostponedNonScalars {
+  struct PostponedNonScalars {
   public:
     PostponedNonScalars(InterfaceStatementPtr is, FuncEmitter* fe,
                         NonScalarVec* v)
@@ -554,7 +554,7 @@ private:
     NonScalarVec* m_vec;
   };
 
-  class PostponedClosureCtor {
+  struct PostponedClosureCtor {
   public:
     PostponedClosureCtor(ClosureUseVarVec& v, ClosureExpressionPtr e,
                          FuncEmitter* fe)
@@ -564,7 +564,7 @@ private:
     FuncEmitter* m_fe;
   };
 
-  class CatchRegion {
+  struct CatchRegion {
   public:
     CatchRegion(Offset start, Offset end) : m_start(start),
       m_end(end) {}
@@ -580,7 +580,7 @@ private:
     std::vector<std::pair<StringData*, Label*> > m_catchLabels;
   };
 
-  class FaultRegion {
+  struct FaultRegion {
   public:
     FaultRegion(Offset start,
                 Offset end,
@@ -600,7 +600,7 @@ private:
     IterKind m_iterKind;
   };
 
-  class FPIRegion {
+  struct FPIRegion {
     public:
       FPIRegion(Offset start, Offset end, Offset fpOff)
         : m_start(start), m_end(end), m_fpOff(fpOff) {}

@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseGenerator
 
-class BaseGenerator {
+struct BaseGenerator {
 public:
   enum class State : uint8_t {
     Created = 0,  // generator was created but never iterated

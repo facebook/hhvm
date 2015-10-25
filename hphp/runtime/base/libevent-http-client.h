@@ -39,7 +39,7 @@ using LibEventHttpClientPtr = std::shared_ptr<LibEventHttpClient>;
  * doesn't. But this class allows keep-alive connections to be pooled for
  * repetitively HTTP requests.
  */
-class LibEventHttpClient {
+struct LibEventHttpClient {
 public:
   /**
    * Specify an address:port to be cached. Set to 0 to clear it.

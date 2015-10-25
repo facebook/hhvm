@@ -27,7 +27,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(QueryOrderby);
 
-class QueryOrderby : public Expression {
+struct QueryOrderby : public Expression {
 public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
@@ -40,7 +40,7 @@ protected:
 
 DECLARE_BOOST_TYPES(QueryExpression);
 
-class QueryExpression : public QueryOrderby {
+struct QueryExpression : public QueryOrderby {
 public:
   QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                   ExpressionPtr head, ExpressionPtr body);
@@ -77,7 +77,7 @@ private:
 
 DECLARE_BOOST_TYPES(OrderbyClause);
 
-class OrderbyClause : public QueryOrderby {
+struct OrderbyClause : public QueryOrderby {
 public:
   OrderbyClause(EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr orderings)
   : QueryOrderby(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(OrderbyClause)) {

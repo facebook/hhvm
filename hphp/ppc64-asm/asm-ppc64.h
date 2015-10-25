@@ -72,7 +72,7 @@ enum class BranchConditions {
 
 #undef BRANCHES
 
-class BranchParams {
+struct BranchParams {
   public:
     /* BO and BI parameter mapping related to BranchConditions */
     enum class BO {
@@ -363,9 +363,9 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-class Label;
+struct Label;
 
-class Assembler {
+struct Assembler {
 public:
 
   friend struct Label;
@@ -2234,7 +2234,7 @@ private:
 // Branches
 //////////////////////////////////////////////////////////////////////
 
-class Label : private boost::noncopyable {
+struct Label : private boost::noncopyable {
 public:
   Label() : m_a(nullptr) , m_address(nullptr) {}
   Label(CodeAddress predefined) : m_a(nullptr) , m_address(predefined) {}
@@ -2406,7 +2406,7 @@ inline void Assembler::branchAuto(CodeAddress c,
   branchAuto(c, BranchParams::convertCC(cc), lr);
 }
 
-class Decoder {
+struct Decoder {
 public:
   explicit Decoder(uint32_t* ip)
   : ip_(*ip),

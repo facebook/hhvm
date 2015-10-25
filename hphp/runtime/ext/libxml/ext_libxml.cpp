@@ -47,7 +47,7 @@ TRACE_SET_MOD(libxml);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class xmlErrorVec : public folly::fbvector<xmlError> {
+struct xmlErrorVec : public folly::fbvector<xmlError> {
 public:
   ~xmlErrorVec() {
     clearErrors();

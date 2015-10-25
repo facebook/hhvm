@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class c_ExternalThreadEventWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
 
 /* This is not an optimal solution
  * This value is in principle a constexp, but the integer-to-pointer cast would

@@ -29,11 +29,11 @@
 namespace HPHP {
 
 // Forward declaration.
-class BlobDecoder;
-class BlobEncoder;
+struct BlobDecoder;
+struct BlobEncoder;
 struct StringData;
 struct TypedValue;
-class Repo;
+struct Repo;
 
 enum RepoId {
   RepoIdInvalid = -1,
@@ -64,7 +64,7 @@ struct RepoExc : std::exception {
   std::string m_msg;
 };
 
-class RepoStmt {
+struct RepoStmt {
  public:
   explicit RepoStmt(Repo& repo);
   ~RepoStmt();
@@ -86,7 +86,7 @@ class RepoStmt {
 
 // Under most circumstances RepoTxnQuery should be used instead of RepoQuery;
 // queries outside of transactions are fraught with peril.
-class RepoQuery {
+struct RepoQuery {
  public:
   explicit RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
@@ -155,7 +155,7 @@ class RepoQuery {
  * Semantics: the guard object will rollback the transaction unless
  * you tell it not to.  Call .commit() when you want things to stay.
  */
-class RepoTxn : boost::noncopyable {
+struct RepoTxn : boost::noncopyable {
  public:
   explicit RepoTxn(Repo& repo);
   ~RepoTxn();
@@ -174,7 +174,7 @@ class RepoTxn : boost::noncopyable {
   bool error() const { return m_error; }
 
  private:
-  friend class RepoTxnQuery;
+  friend struct RepoTxnQuery;
   void step(RepoQuery& query);
   void exec(RepoQuery& query);
   void rollback(); // nothrow
@@ -184,7 +184,7 @@ class RepoTxn : boost::noncopyable {
   bool m_error;
 };
 
-class RepoTxnQuery : public RepoQuery {
+struct RepoTxnQuery : public RepoQuery {
  public:
   RepoTxnQuery(RepoTxn& txn, RepoStmt& stmt)
     : RepoQuery(stmt), m_txn(txn) {
@@ -197,13 +197,13 @@ class RepoTxnQuery : public RepoQuery {
   RepoTxn& m_txn;
 };
 
-class RepoProxy {
+struct RepoProxy {
  public:
   explicit RepoProxy(Repo& repo) : m_repo(repo) {}
   ~RepoProxy() {}
 
  protected:
-  class Stmt : public RepoStmt {
+  struct Stmt : public RepoStmt {
    public:
     Stmt(Repo& repo, int repoId) : RepoStmt(repo), m_repoId(repoId) {}
    protected:

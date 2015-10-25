@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(DynamicVariable);
 
-class DynamicVariable : public Expression {
+struct DynamicVariable : public Expression {
 public:
   DynamicVariable(EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 

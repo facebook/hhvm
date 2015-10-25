@@ -30,7 +30,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeGenerator;
+struct CodeGenerator;
 
 struct Array;
 
@@ -106,7 +106,7 @@ DECLARE_BOOST_TYPES(TypeAnnotation);
  * constants. If so, it is a double colon delimited string in the form
  * of "clsName::cnsName".
  */
-class TypeAnnotation {
+struct TypeAnnotation {
 public:
   TypeAnnotation(const std::string &name, TypeAnnotationPtr typeArgs);
 

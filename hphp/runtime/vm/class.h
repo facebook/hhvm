@@ -1087,7 +1087,7 @@ private:
                                      const StringData* methName);
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
   using TMIData = TraitMethodImportData<TraitMethod,
                                         TMIOps,

@@ -10,7 +10,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_Transliterator;
 
-class Transliterator : public IntlError {
+struct Transliterator : public IntlError {
 public:
   Transliterator() {}
   Transliterator(const Transliterator&) = delete;

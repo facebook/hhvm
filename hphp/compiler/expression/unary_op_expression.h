@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(UnaryOpExpression);
 
 struct Variant;
 
-class UnaryOpExpression : public Expression,
+struct UnaryOpExpression : public Expression,
                           public LocalEffectsContainer {
 private:
   void ctorInit();

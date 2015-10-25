@@ -38,13 +38,13 @@ DEFINE_int32(time_padding_low, 0,
 DEFINE_int32(time_padding_percent, 0,
              "percent of time request is selected for padding");
 
-class Tickable {
+struct Tickable {
  public:
   virtual ~Tickable() {}
   virtual void tick() = 0;
 };
 
-class TickingClock {
+struct TickingClock {
  public:
   TickingClock() : m_ticks(0) {
   }
@@ -76,7 +76,7 @@ class TickingClock {
   std::vector<Tickable*> m_tickables;
 };
 
-class TickRequest {
+struct TickRequest {
  public:
   enum class State {
     IN_QUEUE,
@@ -154,7 +154,7 @@ class TickRequest {
 };
 typedef std::shared_ptr<TickRequest> TickRequestPtr;
 
-class TickRequestFactory {
+struct TickRequestFactory {
  public:
   explicit TickRequestFactory(TickingClock* clock) : m_clock(clock) {}
 
@@ -212,7 +212,7 @@ class TickRequestFactory {
   TickingClock* m_clock;
 };
 
-class TickWorker : public JobQueueWorker<TickRequestPtr, TickingClock*, true,
+struct TickWorker : public JobQueueWorker<TickRequestPtr, TickingClock*, true,
                                          true>,
                    public Tickable {
  public:
@@ -257,7 +257,7 @@ class TickWorker : public JobQueueWorker<TickRequestPtr, TickingClock*, true,
   TickRequestPtr m_job;
 };
 
-class JobQueueStatsCollector : public Tickable {
+struct JobQueueStatsCollector : public Tickable {
  public:
   explicit JobQueueStatsCollector(JobQueueDispatcher<TickWorker>* dispatcher)
       : m_dispatcher(dispatcher),
@@ -275,7 +275,7 @@ class JobQueueStatsCollector : public Tickable {
   int m_maxQueued;
 };
 
-class JobQueueTest : public testing::Test {
+struct JobQueueTest : public testing::Test {
  protected:
 
   virtual void SetUp() {

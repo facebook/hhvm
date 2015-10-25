@@ -1201,14 +1201,14 @@ private:
 
 Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
 
-class RefResultValue {
+struct RefResultValue {
 public:
   const Variant& get() const { return m_var; }
 private:
   Variant m_var;
 };
 
-class VRefParamValue {
+struct VRefParamValue {
 public:
   template <class T> /* implicit */ VRefParamValue(const T &v) : m_var(v) {}
 
@@ -1275,7 +1275,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR
 
-class VarNR : private TypedValueAux {
+struct VarNR : private TypedValueAux {
 public:
   // Use to hold variant that do not need ref-counting
   explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}

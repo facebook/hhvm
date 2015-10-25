@@ -1,10 +1,10 @@
 #ifndef incl_X_H
 #define incl_X_H
 namespace HPHP {
-class ResourceData { };
-class ObjectData { };
-class Variant { };
-class Object { };
+struct ResourceData { };
+struct ObjectData { };
+struct Variant { };
+struct Object { };
 }
 
 namespace std {
@@ -15,12 +15,12 @@ namespace req {
 template <typename T> struct vector { T* data; };
 }
 
-class foobar : HPHP::ResourceData {
+struct foobar : HPHP::ResourceData {
   int scanme;
 };
 
 // empty class, should use parent's scan
-class foobar2 : public foobar { };
+struct foobar2 : public foobar { };
 
 struct bad_class {
   foobar ff;
@@ -38,9 +38,9 @@ struct bad_template_use : public HPHP::ResourceData {
   std::vector<foobar> vec;
 };
 
-class X;
+struct X;
 /** HHVM_NEEDS_SCAN */
-class X : public HPHP::ResourceData { int v; char* s; public: X* x; };
+struct X : public HPHP::ResourceData { int v; char* s; public: X* x; };
 
 typedef union { int i; double d; } U;
 
@@ -56,7 +56,7 @@ struct Z : public X {
 }
 
 /** no mark fn */
-class W { };
+struct W { };
 
 /** HHVM_NEEDS_SCAN but won't get one */
 union Q { };
@@ -71,7 +71,7 @@ struct voidstargc {
 };
 
 namespace ns {
-class privateX;
+struct privateX;
 }
 
 struct opaqueRef {
@@ -83,7 +83,7 @@ struct badcontainer : public HPHP::ResourceData {
 };
 
 template <typename T>
-class hide_template {
+struct hide_template {
   T* x;
 };
 

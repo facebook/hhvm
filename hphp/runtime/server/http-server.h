@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class HttpServer : public Synchronizable, public TakeoverListener,
+struct HttpServer : public Synchronizable, public TakeoverListener,
                    public Server::ServerEventListener {
 public:
   static std::shared_ptr<HttpServer> Server;

@@ -28,7 +28,7 @@ extern "C" {
 
 namespace HPHP {
 
-class Disasm : private boost::noncopyable {
+struct Disasm : private boost::noncopyable {
  public:
   struct Options {
     Options()

@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_salsa : public HashEngine {
+struct hash_salsa : public HashEngine {
 public:
   hash_salsa(bool salsa10);
 

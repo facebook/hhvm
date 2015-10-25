@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(GotoStatement);
 
-class GotoStatement : public Statement {
+struct GotoStatement : public Statement {
 public:
   GotoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label);
 

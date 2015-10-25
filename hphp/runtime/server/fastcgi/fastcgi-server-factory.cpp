@@ -18,7 +18,7 @@
 
 namespace HPHP {
 
-class FastCGIServerFactory : public ServerFactory {
+struct FastCGIServerFactory : public ServerFactory {
 public:
   FastCGIServerFactory() {}
 

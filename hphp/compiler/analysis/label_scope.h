@@ -27,9 +27,9 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(Statement);
 
-class LabelScope {
+struct LabelScope {
 public:
-  class LabelInfo {
+  struct LabelInfo {
   public:
     LabelInfo(StatementPtr s, const std::string& name)
       : m_stmt(s), m_name(name) {}

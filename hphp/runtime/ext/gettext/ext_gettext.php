@@ -24,7 +24,7 @@ function dcgettext(string $domain,
 /* This function allows you to override the current domain for a single plural
  * message lookup.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function dcngettext(string $domain,
                     string $msgid1,
                     string $msgid2,

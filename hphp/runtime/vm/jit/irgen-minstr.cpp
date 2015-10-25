@@ -551,17 +551,11 @@ SSATmp* getKey(MTS& env) {
   return key;
 }
 
-SSATmp* getUnconstrainedValue(MTS& env) {
+SSATmp* getValue(MTS& env) {
   // If an instruction takes an rhs, it's always input 0.
   assertx(env.mii.valCount() == 1);
   const int kValIdx = 0;
   return getInput(env, kValIdx, DataTypeGeneric);
-}
-
-SSATmp* getValue(MTS& env) {
-  auto const val = getUnconstrainedValue(env);
-  env.irb.constrainValue(val, DataTypeSpecific);
-  return val;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1735,6 +1729,7 @@ void emitSetProp(MTS& env) {
     }
     auto const oldVal  = gen(env, LdMem, cellTy, cellPtr);
 
+    env.irb.constrainValue(value, DataTypeCountness);
     gen(env, IncRef, value);
     gen(env, StMem, cellPtr, value);
     gen(env, DecRef, oldVal);
@@ -1928,6 +1923,7 @@ void emitSetElem(MTS& env) {
     } else if (t == TCountedStr) {
       // Base is a string. Stack result is a new string so we're responsible for
       // decreffing value.
+      env.irb.constrainValue(value, DataTypeCountness);
       env.result = result;
       gen(env, DecRef, value);
     } else {
@@ -1943,7 +1939,7 @@ void emitSetElem(MTS& env) {
 
 void emitSetWithRefElem(MTS& env) {
   auto const key = getUnconstrainedKey(env);
-  auto const val = getUnconstrainedValue(env);
+  auto const val = getValue(env);
   gen(env, SetWithRefElem, env.base.value, key, val, tvRefPtr(env));
   env.result = nullptr;
 }
@@ -2645,7 +2641,7 @@ Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
 }
 
 SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
-  auto const value = topC(env);
+  auto const value = topC(env, BCSPOffset{0}, DataTypeGeneric);
   auto base = env.irb->fs().memberBaseValue();
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
 
@@ -2670,6 +2666,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
       propPtr = gen(env, UnboxPtr, propPtr);
     }
 
+    env.irb->constrainValue(value, DataTypeCountness);
     auto const oldVal = gen(env, LdMem, propTy, propPtr);
     gen(env, IncRef, value);
     gen(env, StMem, propPtr, value);
@@ -2757,7 +2754,7 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
 }
 
 SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
-  auto value = topC(env);
+  auto value = topC(env, BCSPOffset{0}, DataTypeGeneric);
   auto const base = env.irb->fs().memberBaseValue();
   auto const simpleOp =
     base ? simpleCollectionOp(base->type(), key->type(), false)
@@ -2801,6 +2798,7 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
       } else if (t == TCountedStr) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
+        env.irb->constrainValue(value, DataTypeCountness);
         gen(env, DecRef, value);
         value = result;
       } else {

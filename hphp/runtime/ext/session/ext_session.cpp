@@ -1866,7 +1866,7 @@ const StaticString s_PHP_SESSION_DISABLED("PHP_SESSION_DISABLED");
 const StaticString s_PHP_SESSION_NONE("PHP_SESSION_NONE");
 const StaticString s_PHP_SESSION_ACTIVE("PHP_SESSION_ACTIVE");
 
-static class SessionExtension final : public Extension {
+static struct SessionExtension final : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {

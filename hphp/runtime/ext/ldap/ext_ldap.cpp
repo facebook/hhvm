@@ -41,7 +41,7 @@ const StaticString
   s_LDAP_ESCAPE_FILTER("LDAP_ESCAPE_FILTER"),
   s_LDAP_ESCAPE_DN("LDAP_ESCAPE_DN");
 
-static class LdapExtension final : public Extension {
+static struct LdapExtension final : public Extension {
 public:
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

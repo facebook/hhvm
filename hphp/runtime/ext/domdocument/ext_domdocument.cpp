@@ -5806,7 +5806,7 @@ Variant HHVM_FUNCTION(dom_import_simplexml,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DOMDocumentExtension final : public Extension {
+struct DOMDocumentExtension final : public Extension {
 public:
   DOMDocumentExtension() : Extension("domdocument") {}
   void moduleInit() override {

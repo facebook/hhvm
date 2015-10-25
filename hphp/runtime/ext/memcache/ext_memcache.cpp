@@ -744,7 +744,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
 const StaticString s_MEMCACHE_HAVE_SESSION("MEMCACHE_HAVE_SESSION");
 
-class MemcacheExtension final : public Extension {
+struct MemcacheExtension final : public Extension {
   public:
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {

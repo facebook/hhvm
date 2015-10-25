@@ -36,7 +36,7 @@ static const StaticString s_PAGELET_NOT_READY("PAGELET_NOT_READY");
 static const StaticString s_PAGELET_READY("PAGELET_READY");
 static const StaticString s_PAGELET_DONE("PAGELET_DONE");
 
-static class ServerExtension final : public Extension {
+static struct ServerExtension final : public Extension {
 public:
   ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

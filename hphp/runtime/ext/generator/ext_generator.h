@@ -142,7 +142,7 @@ static_assert(offsetof(BaseGenerator, m_resumable) == 0,
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Generator
-class Generator final : public BaseGenerator {
+struct Generator final : public BaseGenerator {
 public:
   explicit Generator();
   ~Generator();

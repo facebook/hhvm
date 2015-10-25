@@ -29,7 +29,7 @@ struct Array;
 /**
  * Utility array functions.
  */
-class ArrayUtil final {
+struct ArrayUtil final {
 public:
   /////////////////////////////////////////////////////////////////////////////
   // Compositions.

@@ -271,7 +271,7 @@ struct AsyncMysqlQueryResult : public AsyncMysqlResult {
 ///////////////////////////////////////////////////////////////////////////////
 // Async events
 
-class AsyncMysqlConnectEvent final : public AsioExternalThreadEvent {
+struct AsyncMysqlConnectEvent final : public AsioExternalThreadEvent {
  public:
   explicit AsyncMysqlConnectEvent(std::shared_ptr<am::ConnectOperation> op) {
     m_op = op;
@@ -291,7 +291,7 @@ class AsyncMysqlConnectEvent final : public AsioExternalThreadEvent {
   db::ClientPerfStats m_clientStats;
 };
 
-class AsyncMysqlQueryEvent final : public AsioExternalThreadEvent {
+struct AsyncMysqlQueryEvent final : public AsioExternalThreadEvent {
  public:
   AsyncMysqlQueryEvent(ObjectData* conn,
                        std::shared_ptr<am::QueryOperation> op)
@@ -313,7 +313,7 @@ class AsyncMysqlQueryEvent final : public AsioExternalThreadEvent {
   db::ClientPerfStats m_clientStats;
 };
 
-class AsyncMysqlMultiQueryEvent final : public AsioExternalThreadEvent {
+struct AsyncMysqlMultiQueryEvent final : public AsioExternalThreadEvent {
  public:
   AsyncMysqlMultiQueryEvent(ObjectData* conn,
                             std::shared_ptr<am::MultiQueryOperation> op)

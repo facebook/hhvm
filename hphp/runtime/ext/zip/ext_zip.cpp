@@ -1365,7 +1365,7 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class zipExtension final : public Extension {
+struct zipExtension final : public Extension {
  public:
   zipExtension() : Extension("zip", "1.12.4-dev") {}
   void moduleInit() override {

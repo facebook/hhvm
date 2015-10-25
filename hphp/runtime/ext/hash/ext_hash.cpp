@@ -45,7 +45,7 @@
 
 namespace HPHP {
 
-static class HashExtension final : public Extension {
+static struct HashExtension final : public Extension {
  public:
   HashExtension() : Extension("hash", "1.0") { }
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {

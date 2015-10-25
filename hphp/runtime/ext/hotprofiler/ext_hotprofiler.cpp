@@ -484,7 +484,7 @@ void Profiler::endFrame(const TypedValue *retval,
 ///////////////////////////////////////////////////////////////////////////////
 // HierarchicalProfiler
 
-class HierarchicalProfiler final : public Profiler {
+struct HierarchicalProfiler final : public Profiler {
 private:
   struct CountMap {
   public:

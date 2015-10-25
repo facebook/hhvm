@@ -6,7 +6,7 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-class StandardExtension final : public Extension {
+struct StandardExtension final : public Extension {
  public:
   StandardExtension() : Extension("standard") {}
 

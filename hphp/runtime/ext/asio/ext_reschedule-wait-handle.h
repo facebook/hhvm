@@ -36,7 +36,7 @@ constexpr int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
  *
  * RescheduleWaitHandle is guaranteed to never finish immediately.
  */
-class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
+struct c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(RescheduleWaitHandle)
 

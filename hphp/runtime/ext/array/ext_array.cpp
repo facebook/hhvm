@@ -2763,7 +2763,7 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
   Native::registerConstant<KindOfInt64>(makeStaticString("ARRAY_" #option),    \
                                        (value));
 
-class ArrayExtension final : public Extension {
+struct ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
   void moduleInit() override {

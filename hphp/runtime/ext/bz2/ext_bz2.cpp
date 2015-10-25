@@ -241,7 +241,7 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bz2Extension final : public Extension {
+struct bz2Extension final : public Extension {
  public:
   bz2Extension() : Extension("bz2") {}
 

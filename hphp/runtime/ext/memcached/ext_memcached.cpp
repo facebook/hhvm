@@ -1353,7 +1353,7 @@ const StaticString s_SERIALIZER_IGBINARY("SERIALIZER_IGBINARY");
 const StaticString s_SERIALIZER_JSON("SERIALIZER_JSON");
 const StaticString s_SERIALIZER_PHP("SERIALIZER_PHP");
 
-class MemcachedExtension final : public Extension {
+struct MemcachedExtension final : public Extension {
  public:
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
   void threadInit() override {

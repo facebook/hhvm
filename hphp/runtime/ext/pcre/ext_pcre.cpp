@@ -261,7 +261,7 @@ const StaticString s_PCRE_VERSION("PCRE_VERSION");
 
 extern IMPLEMENT_THREAD_LOCAL(PCREglobals, tl_pcre_globals);
 
-class PcreExtension final : public Extension {
+struct PcreExtension final : public Extension {
 public:
   PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
 

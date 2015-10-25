@@ -66,7 +66,7 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 #define REGISTER_SAME_CONSTANT(name) \
   Native::registerConstant<KindOfInt64>(makeStaticString(#name), k_ ##name)    \
 
-static class StreamExtension final : public Extension {
+static struct StreamExtension final : public Extension {
 public:
   StreamExtension() : Extension("stream") {}
   void moduleInit() override {

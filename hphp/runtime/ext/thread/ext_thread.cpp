@@ -22,7 +22,7 @@
 
 namespace HPHP {
 
-static class ThreadExtension final : public Extension {
+static struct ThreadExtension final : public Extension {
 public:
   ThreadExtension() : Extension("thread", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

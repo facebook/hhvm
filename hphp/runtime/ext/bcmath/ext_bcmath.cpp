@@ -242,7 +242,7 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmathExtension final : public Extension {
+struct bcmathExtension final : public Extension {
  public:
   bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

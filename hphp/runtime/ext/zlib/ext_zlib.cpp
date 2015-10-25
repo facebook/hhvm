@@ -648,7 +648,7 @@ String HHVM_METHOD(__SystemLib_ChunkedInflator,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ZlibExtension final : public Extension {
+struct ZlibExtension final : public Extension {
  public:
   ZlibExtension() : Extension("zlib", "2.0") {}
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {

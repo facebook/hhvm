@@ -2429,7 +2429,7 @@ const StaticString s_CURLPROTO_ALL("CURLPROTO_ALL");
 static int s_poolSize, s_reuseLimit, s_getTimeout;
 static std::string s_namedPools;
 
-class CurlExtension final : public Extension {
+struct CurlExtension final : public Extension {
  public:
   CurlExtension() : Extension("curl") {}
   void moduleInit() override {

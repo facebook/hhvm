@@ -28,7 +28,7 @@ TRACE_SET_MOD(debugger);
 
 using namespace Eval;
 
-class DebuggerExtension final : public Extension {
+struct DebuggerExtension final : public Extension {
  public:
   DebuggerExtension() : Extension("debugger", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

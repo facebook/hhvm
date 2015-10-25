@@ -1748,7 +1748,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ReflectionExtension final : public Extension {
+struct ReflectionExtension final : public Extension {
  public:
   ReflectionExtension() : Extension("reflection", "$Id$") { }
   void moduleInit() override {

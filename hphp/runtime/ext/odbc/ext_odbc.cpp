@@ -873,7 +873,7 @@ bool HHVM_FUNCTION(odbc_rollback, const Resource& link)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static class ODBCExtension final : public Extension {
+static struct ODBCExtension final : public Extension {
  public:
   ODBCExtension() : Extension("odbc") { }
   void moduleInit() override {

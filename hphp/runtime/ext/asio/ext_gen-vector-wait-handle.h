@@ -34,7 +34,7 @@ namespace HPHP {
  * the exception is propagated by failure.
  */
 struct c_Vector;
-class c_GenVectorWaitHandle final : public c_WaitableWaitHandle {
+struct c_GenVectorWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenVectorWaitHandle)
 

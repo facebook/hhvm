@@ -179,7 +179,7 @@ DEFINE_CONSTANT(SIGSTKFLT, SIGSTKFLT);
 #define REGISTER_CONSTANT(name) \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)
 
-static class ProcessExtension final : public Extension {
+static struct ProcessExtension final : public Extension {
 public:
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -625,7 +625,7 @@ int64_t HHVM_FUNCTION(pcntl_wtermsig,
 
 namespace {
 
-class ShellExecContext final {
+struct ShellExecContext final {
 public:
   ShellExecContext() {
     m_sig_handler = signal(SIGCHLD, SIG_DFL);

@@ -37,7 +37,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassicWriter final : public LogWriter {
+struct ClassicWriter final : public LogWriter {
 public:
   ClassicWriter(const AccessLogFileData& alfd, LogChannel chan)
     : LogWriter(chan)

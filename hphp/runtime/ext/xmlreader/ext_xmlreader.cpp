@@ -722,7 +722,7 @@ Variant HHVM_METHOD(XMLReader, expand,
                                              makeStaticString(#name),          \
                                              q_XMLReader$$##name)              \
 
-static class XMLReaderExtension final : public Extension {
+static struct XMLReaderExtension final : public Extension {
 public:
   XMLReaderExtension() : Extension("xmlreader", "0.1") {}
   void moduleInit() override {

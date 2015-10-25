@@ -34,7 +34,7 @@ namespace HPHP {
  */
 struct AsyncGenerator;
 
-class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
+struct c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncGeneratorWaitHandle)
 

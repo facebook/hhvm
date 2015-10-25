@@ -154,7 +154,7 @@ private:
   PageletServerTaskEvent *m_event;
 };
 
-class PageletServerTaskEvent final : public AsioExternalThreadEvent {
+struct PageletServerTaskEvent final : public AsioExternalThreadEvent {
 public:
 
   ~PageletServerTaskEvent() {

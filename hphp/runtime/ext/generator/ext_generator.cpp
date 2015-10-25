@@ -149,7 +149,7 @@ String HHVM_METHOD(Generator, getCalledClass) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class GeneratorExtension final : public Extension {
+struct GeneratorExtension final : public Extension {
 public:
   GeneratorExtension() : Extension("generator") {}
 

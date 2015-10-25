@@ -770,7 +770,7 @@ const StaticString s_MCRYPT_TWOFISH("MCRYPT_TWOFISH");
 const StaticString s_MCRYPT_WAKE("MCRYPT_WAKE");
 const StaticString s_MCRYPT_XTEA("MCRYPT_XTEA");
 
-class McryptExtension final : public Extension {
+struct McryptExtension final : public Extension {
  public:
   McryptExtension() : Extension("mcrypt") {}
   void moduleInit() override {

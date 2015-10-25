@@ -29,7 +29,7 @@ namespace HPHP {
 /**
  * A wait handle that sleeps until a give time passes.
  */
-class c_SleepWaitHandle final : public c_WaitableWaitHandle {
+struct c_SleepWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(SleepWaitHandle);
 

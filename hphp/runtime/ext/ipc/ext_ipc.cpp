@@ -55,7 +55,7 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-static class SysvmsgExtension final : public Extension {
+static struct SysvmsgExtension final : public Extension {
 public:
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -72,7 +72,7 @@ public:
   }
 } s_sysvmsg_extension;
 
-static class SysvsemExtension final : public Extension {
+static struct SysvsemExtension final : public Extension {
 public:
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -85,7 +85,7 @@ public:
   }
 } s_sysvsem_extension;
 
-static class SysvshmExtension final : public Extension {
+static struct SysvshmExtension final : public Extension {
 public:
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

@@ -1575,7 +1575,7 @@ const StaticString s_IMAP_OPENTIMEOUT("IMAP_OPENTIMEOUT");
 const StaticString s_IMAP_READTIMEOUT("IMAP_READTIMEOUT");
 const StaticString s_IMAP_WRITETIMEOUT("IMAP_WRITETIMEOUT");
 
-static class imapExtension final : public Extension {
+static struct imapExtension final : public Extension {
 public:
   imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
 

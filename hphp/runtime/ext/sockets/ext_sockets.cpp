@@ -1588,7 +1588,7 @@ const StaticString
   s_SOL_TCP("SOL_TCP"),
   s_SOL_UDP("SOL_UDP");
 
-class SocketsExtension final : public Extension {
+struct SocketsExtension final : public Extension {
  public:
   SocketsExtension() : Extension("sockets", NO_EXTENSION_VERSION_YET) {}
 

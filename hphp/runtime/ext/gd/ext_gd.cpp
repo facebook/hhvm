@@ -8386,7 +8386,7 @@ Variant HHVM_FUNCTION(exif_imagetype, const String& filename) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ExifExtension final : public Extension {
+struct ExifExtension final : public Extension {
  public:
   ExifExtension() : Extension("exif", NO_EXTENSION_VERSION_YET) {}
 
@@ -8415,7 +8415,7 @@ const StaticString
 #endif
   s_GD_BUNDLED("GD_BUNDLED");
 
-class GdExtension final : public Extension {
+struct GdExtension final : public Extension {
  public:
   GdExtension() : Extension("gd", NO_EXTENSION_VERSION_YET) {}
 

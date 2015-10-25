@@ -16,7 +16,7 @@ U_NAMESPACE_BEGIN
  * MessageFormat.  It is never instantiated; it exists only for C++
  * access management.
  */
-class MessageFormatAdapter {
+struct MessageFormatAdapter {
 public:
     MessageFormatAdapter() = delete;
 

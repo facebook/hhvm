@@ -868,7 +868,7 @@ String HHVM_FUNCTION(str_repeat,
 
 Variant sscanfImpl(const String& str,
                    const String& format,
-                   const std::vector<Variant*>& args) {
+                   const req::vector<Variant*>& args) {
   Variant ret;
   int result;
   result = string_sscanf(str.c_str(), format.c_str(), args.size(), ret);
@@ -896,11 +896,11 @@ TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
   }
   String format{getArg<KindOfString>(ar, 1)};
 
-  std::vector<Variant*> args;
+  req::vector<Variant*> args;
+  if (ar->numArgs() > 2) args.reserve(ar->numArgs() - 2);
   for (int i = 2; i < ar->numArgs(); ++i) {
     args.push_back(getArg<KindOfRef>(ar, i));
   }
-
   return arReturn(ar, sscanfImpl(str, format, args));
 }
 

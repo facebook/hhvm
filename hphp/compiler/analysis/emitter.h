@@ -679,7 +679,8 @@ public:
    * final operation.
    */
   size_t emitMOp(int iFirst, int& iLast, bool allowW, bool rhsVal,
-                 Emitter& e, MOpFlags baseFlags, MOpFlags dimFlags);
+                 Emitter& e, MOpFlags flags);
+  void emitQueryMOp(int iFirst, int iLast, Emitter& e, QueryMOp op);
 
   enum class PassByRefKind {
     AllowCell,

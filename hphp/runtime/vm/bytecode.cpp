@@ -4978,10 +4978,8 @@ static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
-static OPTBLD_INLINE void dimImpl(PC& pc, TypedValue key) {
-  auto op = decode_oa<PropElemOp>(pc);
-  auto flags = decode_oa<MOpFlags>(pc);
-
+static OPTBLD_INLINE void dimDispatch(PropElemOp op, MOpFlags flags,
+                                      TypedValue key) {
   switch (op) {
     case PropElemOp::Prop:
       propDispatch(flags, key);
@@ -4993,6 +4991,13 @@ static OPTBLD_INLINE void dimImpl(PC& pc, TypedValue key) {
       elemDispatch(flags, key);
       break;
   }
+}
+
+static OPTBLD_INLINE void dimImpl(PC& pc, TypedValue key) {
+  auto op = decode_oa<PropElemOp>(pc);
+  auto flags = decode_oa<MOpFlags>(pc);
+
+  dimDispatch(op, flags, key);
 }
 
 OPTBLD_INLINE void iopDimL(IOP_ARGS) {
@@ -5038,36 +5043,36 @@ static OPTBLD_INLINE void mFinal(MInstrState& mstate,
 static OPTBLD_INLINE void queryMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
   auto nDiscard = decode_iva(pc);
   auto op = decode_oa<QueryMOp>(pc);
-  auto flags = getMOpFlags(op);
   auto propElem = decode_oa<PropElemOp>(pc);
   auto key = decode_key(pc);
-
-  switch (propElem) {
-    case PropElemOp::Prop:
-      propDispatch(flags, key);
-      break;
-    case PropElemOp::PropQ:
-      propQDispatch(flags, key);
-      break;
-    case PropElemOp::Elem:
-      elemDispatch(flags, key);
-      break;
-  }
 
   auto& mstate = vmMInstrState();
   TypedValue result;
   switch (op) {
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
-      if (mstate.base->m_type == KindOfRef) {
-        mstate.base = mstate.base->m_data.pref->tv();
-      }
-      tvDup(*mstate.base, result);
+      dimDispatch(propElem, getQueryMOpFlags(op), key);
+      tvDup(*tvToCell(mstate.base), result);
       break;
 
     case QueryMOp::Isset:
     case QueryMOp::Empty:
-      not_implemented();
+      result.m_type = KindOfBoolean;
+      switch (propElem) {
+        case PropElemOp::Prop:
+        case PropElemOp::PropQ: {
+          auto const ctx = arGetContextClass(vmfp());
+          result.m_data.num = op == QueryMOp::Empty
+            ? IssetEmptyProp<true>(ctx, mstate.base, key)
+            : IssetEmptyProp<false>(ctx, mstate.base, key);
+          break;
+        }
+        case PropElemOp::Elem:
+          result.m_data.num = op == QueryMOp::Empty
+            ? IssetEmptyElem<true>(mstate.base, key)
+            : IssetEmptyElem<false>(mstate.base, key);
+          break;
+      }
       break;
   }
 

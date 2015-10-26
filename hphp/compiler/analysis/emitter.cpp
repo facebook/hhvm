@@ -5034,12 +5034,14 @@ size_t EmitterVisitor::emitMOp(
   bool allowW,
   bool rhsVal,
   Emitter& e,
-  MOpFlags baseFlags,
-  MOpFlags dimFlags
+  MOpFlags flags
 ) {
   auto stackIdx = [&](int i) {
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
+
+  auto const baseFlags =
+    MOpFlags(uint8_t(flags) & uint8_t(MOpFlags::WarnDefine));
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
@@ -5128,13 +5130,13 @@ size_t EmitterVisitor::emitMOp(
 
     auto doDim = [&](PropElemOp op) {
       if (flavor == StackSym::L) {
-        e.DimL(m_evalStack.getLoc(i), op, dimFlags);
+        e.DimL(m_evalStack.getLoc(i), op, flags);
       } else if (flavor == StackSym::I) {
-        e.DimInt(m_evalStack.getInt(i), op, dimFlags);
+        e.DimInt(m_evalStack.getInt(i), op, flags);
       } else if (flavor == StackSym::T) {
-        e.DimStr(m_evalStack.getName(i), op, dimFlags);
+        e.DimStr(m_evalStack.getName(i), op, flags);
       } else {
-        e.DimC(stackIdx(i), op, dimFlags);
+        e.DimC(stackIdx(i), op, flags);
       }
     };
 
@@ -5153,7 +5155,7 @@ size_t EmitterVisitor::emitMOp(
         break;
       case StackSym::W:
         if (allowW) {
-          e.DimNewElem(dimFlags);
+          e.DimNewElem(flags);
         } else {
           throw IncludeTimeFatalException(e.getNode(),
                                           "Cannot use [] for reading");
@@ -5402,6 +5404,28 @@ void EmitterVisitor::emitAGet(Emitter& e) {
   }
 }
 
+void EmitterVisitor::emitQueryMOp(int iFirst, int iLast, Emitter& e,
+                                  QueryMOp op) {
+  auto const flags = getQueryMOpFlags(op);
+  auto const stackCount = emitMOp(iFirst, iLast, false, false, e, flags);
+
+  auto const sym = m_evalStack.get(iLast);
+  if (auto const pe = symToPropElem(e, sym, false)) {
+    switch (StackSym::GetSymFlavor(sym)) {
+      case StackSym::L:
+        return e.QueryML(stackCount, op, *pe, m_evalStack.getLoc(iLast));
+      case StackSym::C:
+        return e.QueryMC(stackCount, op, *pe);
+      case StackSym::I:
+        return e.QueryMInt(stackCount, op, *pe, m_evalStack.getInt(iLast));
+      case StackSym::T:
+        return e.QueryMStr(stackCount, op, *pe, m_evalStack.getName(iLast));
+    }
+  }
+
+  always_assert(false);
+}
+
 void EmitterVisitor::emitCGet(Emitter& e) {
   if (checkIfStackEmpty("CGet*")) return;
   LocationGuard loc(e, m_tempLoc);
@@ -5432,25 +5456,7 @@ void EmitterVisitor::emitCGet(Emitter& e) {
     }
   } else {
     if (RuntimeOption::EvalEmitNewMInstrs) {
-      auto const stackCount =
-        emitMOp(i, iLast, false, false, e, MOpFlags::Warn, MOpFlags::Warn);
-
-      auto const sym = m_evalStack.get(iLast);
-      if (auto const pe = symToPropElem(e, sym, false)) {
-        auto const op = QueryMOp::CGet;
-        switch (StackSym::GetSymFlavor(sym)) {
-          case StackSym::L:
-            return e.QueryML(stackCount, op, *pe, m_evalStack.getLoc(iLast));
-          case StackSym::C:
-            return e.QueryMC(stackCount, op, *pe);
-          case StackSym::I:
-            return e.QueryMInt(stackCount, op, *pe, m_evalStack.getInt(iLast));
-          case StackSym::T:
-            return e.QueryMStr(stackCount, op, *pe, m_evalStack.getName(iLast));
-        }
-      }
-
-      always_assert(false);
+      return emitQueryMOp(i, iLast, e, QueryMOp::CGet);
     }
 
     std::vector<uchar> vectorImm;
@@ -5816,6 +5822,10 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      return emitQueryMOp(i, iLast, e, QueryMOp::Isset);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.IssetM(vectorImm);
@@ -5864,6 +5874,10 @@ void EmitterVisitor::emitEmpty(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      return emitQueryMOp(i, iLast, e, QueryMOp::Empty);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.EmptyM(vectorImm);
@@ -5938,7 +5952,7 @@ void EmitterVisitor::emitSet(Emitter& e) {
   } else {
     if (RuntimeOption::EvalEmitNewMInstrs) {
       auto const stackCount =
-        emitMOp(i, iLast, true, true, e, MOpFlags::Define, MOpFlags::Define);
+        emitMOp(i, iLast, true, true, e, MOpFlags::Define);
 
       auto const sym = m_evalStack.get(iLast);
       if (auto const pe = symToPropElem(e, sym, true)) {

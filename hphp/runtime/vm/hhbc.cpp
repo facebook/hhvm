@@ -1506,15 +1506,5 @@ const MInstrInfo& getMInstrInfo(Op op) {
   }
 }
 
-MOpFlags getMOpFlags(QueryMOp op) {
-  switch (op) {
-    case QueryMOp::CGet:  return MOpFlags::Warn;
-    case QueryMOp::CGetQuiet:
-    case QueryMOp::Isset:
-    case QueryMOp::Empty: return MOpFlags::None;
-  }
-  always_assert(false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

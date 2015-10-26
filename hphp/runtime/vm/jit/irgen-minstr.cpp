@@ -1533,46 +1533,37 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key) {
   return result;
 }
 
-void emitPackedArrayIsset(MTS& env) {
-  assertx(env.base.type.arrSpec().kind() == ArrayData::kPackedKind);
-  auto const key = getKey(env);
+SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
+  assertx(base->type().arrSpec().kind() == ArrayData::kPackedKind);
 
-  auto const type = packedArrayElemType(env.base.value, key);
-  if (type <= TNull) {             // not set, or null
-    env.result = cns(env, false);
-    return;
-  }
+  auto const type = packedArrayElemType(base, key);
+  if (type <= TNull) return cns(env, false);
 
   if (key->hasConstVal()) {
     auto const idx = key->intVal();
-    switch (packedArrayBoundsStaticCheck(env.base.type, idx)) {
-    case PackedBounds::In:
-      {
-        if (!type.maybe(TNull)) {
-          env.result = cns(env, true);
-          return;
-        }
-        auto const elemAddr = gen(env, LdPackedArrayElemAddr,
-                                  type.ptr(Ptr::Arr), env.base.value, key);
-        env.result = gen(env, IsNTypeMem, TNull, elemAddr);
-      }
-      return;
+    switch (packedArrayBoundsStaticCheck(base->type(), idx)) {
+    case PackedBounds::In: {
+      if (!type.maybe(TNull)) return cns(env, true);
+
+      auto const elemAddr = gen(env, LdPackedArrayElemAddr,
+                                type.ptr(Ptr::Arr), base, key);
+      return gen(env, IsNTypeMem, TNull, elemAddr);
+    }
     case PackedBounds::Out:
-      env.result = cns(env, false);
-      return;
+      return cns(env, false);
     case PackedBounds::Unknown:
       break;
     }
   }
 
-  env.result = cond(
+  return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayBounds, taken, env.base.value, key);
+      gen(env, CheckPackedArrayBounds, taken, base, key);
     },
     [&] { // Next:
       auto const elemAddr = gen(env, LdPackedArrayElemAddr,
-                                type.ptr(Ptr::Arr), env.base.value, key);
+                                type.ptr(Ptr::Arr), base, key);
       return gen(env, IsNTypeMem, TNull, elemAddr);
     },
     [&] { // Taken:
@@ -1836,33 +1827,32 @@ void emitVGetElem(MTS& env) {
   env.result = gen(env, VGetElem, env.base.value, key, tvRefPtr(env));
 }
 
-void emitIssetElem(MTS& env) {
-  switch (env.simpleOp) {
+SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
+  switch (simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::StructArray:
   case SimpleOp::ProfiledPackedArray:
   case SimpleOp::ProfiledStructArray:
-    env.result = gen(env, ArrayIsset, env.base.value, getKey(env));
-    break;
+    return gen(env, ArrayIsset, base, key);
   case SimpleOp::PackedArray:
-    emitPackedArrayIsset(env);
-    break;
+    return emitPackedArrayIsset(env, base, key);
   case SimpleOp::String:
-    env.result = gen(env, StringIsset, env.base.value, getKey(env));
-    break;
+    return gen(env, StringIsset, base, key);
   case SimpleOp::Vector:
-    env.result = gen(env, VectorIsset, env.base.value, getKey(env));
-    break;
+    return gen(env, VectorIsset, base, key);
   case SimpleOp::Pair:
-    env.result = gen(env, PairIsset, env.base.value, getKey(env));
-    break;
+    return gen(env, PairIsset, base, key);
   case SimpleOp::Map:
-    env.result = gen(env, MapIsset, env.base.value, getKey(env));
-    break;
+    return gen(env, MapIsset, base, key);
   case SimpleOp::None:
-    env.result = gen(env, IssetElem, env.base.value, getKey(env));
-    break;
+    return gen(env, IssetElem, base, key);
   }
+
+  always_assert(false);
+}
+
+void emitIssetElem(MTS& env) {
+  env.result = emitIssetElem(env, env.base.value, getKey(env), env.simpleOp);
 }
 
 void emitEmptyElem(MTS& env) {
@@ -2583,7 +2573,7 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
     switch (query) {
       case QueryMOp::CGet:
       case QueryMOp::CGetQuiet: {
-        auto const flags = getMOpFlags(query);
+        auto const flags = getQueryMOpFlags(query);
         switch (propElem) {
           case PropElemOp::Prop:
           case PropElemOp::PropQ:
@@ -2595,10 +2585,27 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
         }
         always_assert(false);
       }
+
       case QueryMOp::Isset:
+        switch (propElem) {
+          case PropElemOp::Prop:
+          case PropElemOp::PropQ:
+            return gen(env, IssetProp, basePtr, key);
+          case PropElemOp::Elem:
+            auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
+            return emitIssetElem(env, realBase, key, simpleOp);
+        }
+
       case QueryMOp::Empty:
-        not_implemented();
+        switch (propElem) {
+          case PropElemOp::Prop:
+          case PropElemOp::PropQ:
+            return gen(env, EmptyProp, basePtr, key);
+          case PropElemOp::Elem:
+            return gen(env, EmptyElem, basePtr, key);
+        }
     }
+
     always_assert(false);
   }();
 

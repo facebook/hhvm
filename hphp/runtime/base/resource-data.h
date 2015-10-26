@@ -68,7 +68,7 @@ make(Args&&... args);
 struct ResourceHdr {
   static void resetMaxId();
 
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
   bool kindIsValid() const { return m_hdr.kind == HeaderKind::Resource; }
   void release() noexcept;
 
@@ -158,7 +158,6 @@ struct ResourceData : private boost::noncopyable {
 
 inline void ResourceHdr::release() noexcept {
   assert(kindIsValid());
-  assert(!hasMultipleRefs());
   delete data();
 }
 

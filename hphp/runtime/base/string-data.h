@@ -195,7 +195,7 @@ struct StringData {
   /*
    * Reference-counting related.
    */
-  IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
 
   bool kindIsValid() const { return m_hdr.kind == HeaderKind::String; }
 
@@ -482,7 +482,7 @@ private:
   // We have the next fields blocked into qword-size unions so
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
-  HeaderWord<CapCode> m_hdr;
+  HeaderWord<CapCode,Counted::Maybe> m_hdr;
   union {
     struct {
       uint32_t m_len;

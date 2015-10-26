@@ -46,12 +46,10 @@ struct Variant;
  *
  * This assumes isRefcountedType() is true.
  */
-#define TV_GENERIC_DISPATCH_FAST(exp, func)                             \
-  HPHP::CountableManip::func(                                           \
-    *reinterpret_cast<HPHP::RefCount*>(                                 \
-      (exp).m_data.num + HPHP::FAST_REFCOUNT_OFFSET                     \
-    )                                                                   \
-  )
+#define TV_GENERIC_DISPATCH_FAST(exp, func)                     \
+  reinterpret_cast<HPHP::HeaderWord<uint16_t,true>*>(           \
+      (exp).m_data.num + HPHP::HeaderOffset                     \
+  )->func()
 
 #define TV_GENERIC_DISPATCH_SLOW(exp, func) \
   [](HPHP::TypedValue tv) {                                     \

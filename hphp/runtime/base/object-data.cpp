@@ -111,7 +111,7 @@ NEVER_INLINE bool ObjectData::destructImpl() {
   // when count == 1. This difference only matters for objects that
   // resurrect themselves in their destructors, so make sure count is
   // consistent here.
-  assert(!hasMultipleRefs());
+  assert(m_hdr.count == 0 || m_hdr.count == 1);
   m_hdr.count = 0;
 
   // We raise the refcount around the call to __destruct(). This is to
@@ -151,7 +151,6 @@ static void freeDynPropArray(ObjectData* inst) {
 NEVER_INLINE
 void ObjectData::releaseNoObjDestructCheck() noexcept {
   assert(kindIsValid());
-  assert(!hasMultipleRefs());
 
   auto const attrs = getAttributes();
 
@@ -200,7 +199,6 @@ static void tail_call_remove_live_bc_obj(ObjectData* obj) {
 
 void ObjectData::release() noexcept {
   assert(kindIsValid());
-  assert(!hasMultipleRefs());
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
     return tail_call_remove_live_bc_obj(this);
   }

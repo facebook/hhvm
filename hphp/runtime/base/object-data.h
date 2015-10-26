@@ -115,7 +115,7 @@ struct ObjectData {
                       NoInit) noexcept;
 
  public:
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
   bool kindIsValid() const { return isObjectKind(headerKind()); }
 
   template<class F> void scan(F&) const;

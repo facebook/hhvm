@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

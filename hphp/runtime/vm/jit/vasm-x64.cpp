@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"

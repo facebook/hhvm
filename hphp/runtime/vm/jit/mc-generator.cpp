@@ -1227,7 +1227,7 @@ MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
   }
 
   tl_regState = VMRegState::DIRTY;
-  backEnd().enterTCHelper(start, stashedAR);
+  enterTCImpl(start, stashedAR);
   tl_regState = VMRegState::CLEAN;
   assertx(isValidVMStackAddress(vmsp()));
 
@@ -2087,8 +2087,7 @@ void MCGenerator::traceCodeGen(IRGS& irgs) {
 }
 
 MCGenerator::MCGenerator()
-  : m_backEnd(newBackEnd())
-  , m_numTrans(0)
+  : m_numTrans(0)
   , m_catchTraceMap(128)
   , m_useLLVM(false)
 {

@@ -14,47 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_BACK_END_H
-#define incl_HPHP_JIT_BACK_END_H
+#ifndef incl_HPHP_JIT_UNIQUE_STUBS_ARM_H_
+#define incl_HPHP_JIT_UNIQUE_STUBS_ARM_H_
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/stack-offsets.h"
-
-#include "hphp/util/data-block.h"
 
 namespace HPHP {
 
 struct ActRec;
-struct SrcKey;
+
+namespace jit { namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace jit {
-
-struct AsmInfo;
-struct IRUnit;
-struct PhysReg;
+void enterTCImpl(TCA start, ActRec* stashedAR);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct BackEnd {
-  virtual ~BackEnd();
-
-  virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
-
-  virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
-  virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
-                           TCA begin, TCA end) = 0;
-
-protected:
-  BackEnd() {}
-};
-
-std::unique_ptr<BackEnd> newBackEnd();
-
-///////////////////////////////////////////////////////////////////////////////
-
-}}
+}}}
 
 #endif

@@ -16,8 +16,13 @@
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
 
 namespace HPHP { namespace jit {
 
@@ -31,15 +36,37 @@ int PhysReg::getNumSIMD() {
   return abi().simd().size();
 }
 
+std::string show(PhysReg r) {
+  switch (arch()) {
+    case Arch::X64:
+      return r.type() == PhysReg::GP   ? reg::regname(Reg64(r)) :
+             r.type() == PhysReg::SIMD ? reg::regname(RegXMM(r)) :
+          /* r.type() == PhysReg::SF)  ? */ reg::regname(RegSF(r));
+
+    case Arch::ARM:
+      if (r.isSF()) return "SF";
+
+      return folly::to<std::string>(
+        r.isGP() ? (vixl::Register(r).size() == vixl::kXRegSize ? 'x' : 'w')
+                 : (vixl::FPRegister(r).size() == vixl::kSRegSize ? 's' : 'd'),
+        ((vixl::CPURegister)r).code()
+      );
+
+    case Arch::PPC64:
+      not_implemented();
+  }
+  not_reached();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string show(RegSet regs) {
-  auto& backEnd = mcg->backEnd();
   std::ostringstream out;
   auto sep = "";
 
   out << '{';
   regs.forEach([&](PhysReg r) {
-    out << sep;
-    backEnd.streamPhysReg(out, r);
+    out << sep << show(r);
     sep = ", ";
   });
   out << '}';

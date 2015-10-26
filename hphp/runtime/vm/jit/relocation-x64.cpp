@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"

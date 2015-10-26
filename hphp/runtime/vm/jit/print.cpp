@@ -21,9 +21,11 @@
 #include <algorithm>
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-util.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/asm-info.h"
@@ -34,10 +36,15 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
+#include "hphp/vixl/a64/disasm-a64.h"
+
 namespace HPHP { namespace jit {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 namespace {
+
+///////////////////////////////////////////////////////////////////////////////
 
 // Helper for pretty-printing punctuation.
 std::string punc(const char* str) {
@@ -108,13 +115,13 @@ struct InstAreaRange {
   TcaRange m_instRange;
 };
 
-} // namespace
+///////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////
+}
 
-/*
- * IRInstruction
- */
+///////////////////////////////////////////////////////////////////////////////
+// IRInstruction.
+
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* constraints) {
   os << color(ANSI_COLOR_CYAN)
@@ -209,7 +216,8 @@ void print(const IRInstruction* inst) {
   std::cerr << std::endl;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// SSATmp.
 
 void print(std::ostream& os, const SSATmp* tmp) {
   if (tmp->inst()->is(DefConst)) {
@@ -231,16 +239,39 @@ void print(const SSATmp* tmp) {
   std::cerr << std::endl;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Block.
 
-/*
- * Block
- */
 static constexpr auto kIndent = 4;
 
 void disasmRange(std::ostream& os, TCA begin, TCA end) {
-  mcg->backEnd().disasmRange(os, kIndent, dumpIREnabled(kExtraLevel),
-                             begin, end);
+  assertx(begin <= end);
+  bool const dumpIR = dumpIREnabled(kExtraLevel);
+
+  switch (arch()) {
+    case Arch::X64: {
+      Disasm disasm(Disasm::Options().indent(kIndent + 4)
+                    .printEncoding(dumpIR)
+                    .color(color(ANSI_COLOR_BROWN)));
+      disasm.disasm(os, begin, end);
+      return;
+    }
+
+    case Arch::ARM: {
+      vixl::Decoder dec;
+      vixl::PrintDisassembler disasm(os, kIndent + 4, dumpIR,
+                                     color(ANSI_COLOR_BROWN));
+      dec.AppendVisitor(&disasm);
+      for (; begin < end; begin += vixl::kInstructionSize) {
+        dec.Decode(vixl::Instruction::Cast(begin));
+      }
+      return;
+    }
+
+    case Arch::PPC64:
+      not_implemented();
+  }
+  not_reached();
 }
 
 template <typename T>
@@ -467,7 +498,8 @@ std::string Block::toString() const {
   return out.str();
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Unit.
 
 void printOpcodeStats(std::ostream& os, const BlockList& blocks) {
   uint32_t counts[kNumOpcodes];
@@ -486,9 +518,6 @@ void printOpcodeStats(std::ostream& os, const BlockList& blocks) {
   os << '\n';
 }
 
-/*
- * Unit
- */
 void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
            const GuardConstraints* guards) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
@@ -613,5 +642,7 @@ void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
     }
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}

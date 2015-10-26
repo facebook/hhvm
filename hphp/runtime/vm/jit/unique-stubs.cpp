@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -694,6 +695,12 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
   }
   v << copy{v.cns(sk.pc()), rarg(0)};
   v << jmpi{mcg->tx().uniqueStubs.interpHelper, arg_regs(1)};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void enterTCImpl(TCA start, ActRec* stashedAR) {
+  ARCH_SWITCH_CALL(enterTCImpl, start, stashedAR);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

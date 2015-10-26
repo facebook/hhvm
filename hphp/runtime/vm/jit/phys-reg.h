@@ -24,10 +24,11 @@
 #include <folly/Optional.h>
 
 namespace HPHP { namespace jit {
+
 struct Vreg;
 struct Vout;
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * PhysReg represents a physical machine register.
@@ -228,12 +229,15 @@ inline Reg64 r64(PhysReg r) { return Reg64(r); }
 
 constexpr PhysReg InvalidReg;
 
+std::string show(PhysReg r);
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * A set of registers.
  *
- * This type is guaranteed to be a standard layout class with a
- * trivial destructor.  (This makes it usable in classes that are
- * arena-allocated.)
+ * This type is guaranteed to be a standard layout class with a trivial
+ * destructor.  (This makes it usable in classes that are arena-allocated.)
  *
  * Zero-initializing this class is guaranteed to produce an empty set.
  */
@@ -403,7 +407,7 @@ std::string show(RegSet regs);
 static_assert(std::is_trivially_destructible<RegSet>::value,
               "RegSet must have a trivial destructor");
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

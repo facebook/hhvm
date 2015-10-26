@@ -31,13 +31,17 @@
 
 namespace HPHP {
 
+namespace {
 template<class F>
 struct PtrFilter: F {
   template <class... Args> explicit PtrFilter(Args&&... args)
     : F(std::forward<Args>(args)...)
-  {}
+  {
+    rds_ = folly::Range<const char*>((char*)rds::header(),
+                                   RuntimeOption::EvalJitTargetCacheSize);
+  }
 
-  // classes containing exact pointers
+  // classes containing counted pointers
   void operator()(const String& p) { (*this)(p.get()); }
   void operator()(const Array& p) { (*this)(p.get()); }
   void operator()(const ArrayNoDtor& p) { (*this)(p.arr()); }
@@ -63,15 +67,16 @@ struct PtrFilter: F {
   void operator()(const TypedValue& tv) {
     switch (tv.m_type) {
       case KindOfString: // never null, sometimes counted
-        if (counted(tv.m_data.pstr)) next()(tv.m_data.pstr);
+        if (tv.m_data.pstr->isRefCounted()) F::counted(tv.m_data.pstr);
         break;
       case KindOfArray: // never null, sometimes counted
-        if (counted(tv.m_data.parr)) next()(tv.m_data.parr);
+        if (tv.m_data.parr->isRefCounted()) F::counted(tv.m_data.parr);
         break;
       case KindOfRef: // sometimes points into rds
-        return next()(tv.m_data.pref);
-      case KindOfObject:    return next()(tv.m_data.pobj);
-      case KindOfResource:  return next()(tv.m_data.pres);
+        if (!inRds(tv.m_data.pref)) F::counted(tv.m_data.pref);
+        break;
+      case KindOfObject:    return F::counted(tv.m_data.pobj);
+      case KindOfResource:  return F::counted(tv.m_data.pres);
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
@@ -87,12 +92,22 @@ struct PtrFilter: F {
   void operator()(const ActRec&) {}
   void operator()(const Stack&) {}
 
-  void operator()(const StringData* p) { if (p && counted(p)) next()(p); }
-  void operator()(const ArrayData* p) { if (p && counted(p)) next()(p); }
-  void operator()(const ObjectData* p) { if (p) next()(p); }
-  void operator()(const ResourceData* p) { if (p) next()(p->hdr()); }
-  void operator()(const ResourceHdr* p) { if (p) next()(p); }
-  void operator()(const RefData* p) { if (p) next()(p); }
+  void operator()(const StringData* p) {
+    if (p && p->isRefCounted()) F::counted(p);
+  }
+  void operator()(const ArrayData* p) {
+    if (p && p->isRefCounted()) F::counted(p);
+  }
+  void operator()(const ObjectData* p) { if (p) F::counted(p); }
+  void operator()(const ResourceData* p) { if (p) F::counted(p->hdr()); }
+  void operator()(const ResourceHdr* p) { if (p) F::counted(p); }
+  void operator()(const RefData* p) { if (p && !inRds(p)) F::counted(p); }
+
+  void implicit(const ObjectData* p) { if (p) F::implicit(p); }
+  void implicit(const ResourceHdr* p) { if (p) F::implicit(p); }
+  void implicit(const Array& p) {
+    if (!p.isNull() && p.get()->isRefCounted()) F::implicit(p.get());
+  }
 
   // collections of scannable fields
   template<class T> void operator()(const req::vector<T>& c) {
@@ -100,6 +115,9 @@ struct PtrFilter: F {
   }
   template<class T> void operator()(const req::set<T>& c) {
     for (auto& e : c) (*this)(e);
+  }
+  template<class T> void implicit(const req::set<T>& c) {
+    for (auto& e : c) implicit(e);
   }
   template<class T,class U> void operator()(const std::pair<T,U>& p) {
     (*this)(p.first);
@@ -130,30 +148,20 @@ struct PtrFilter: F {
     const uintptr_t M{7}; // word size - 1
     auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
     auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
-    for (; s < e; s++) next().ambig(*s);
+    for (; s < e; s++) F::ambig(*s);
   }
 
-private:
-  F& next() { return *this; }
-  template<class T> static bool counted(T* p) {
-    return p->isRefCounted();
+ private:
+  bool inRds(const void* vp) {
+    auto p = reinterpret_cast<const char*>(vp);
+    return p >= rds_.begin() && p < rds_.end();
   }
+
+ private:
+  folly::Range<const char*> rds_; // full mmap'd rds section.
 };
 
-namespace {
-
-using PtrMap = std::unordered_map<const Header*,int>;
-
-void addNode(HeapGraph& g, const Header* h) {
-  g.nodes.push_back(HeapGraph::Node{h, -1, -1});
-}
-
-void idNodes(HeapGraph& g, PtrMap& ids) {
-  for (int i = 0; i < g.nodes.size(); ++i) {
-    const Header* h = g.nodes[i].h;
-    ids[h] = i;
-  }
-}
+using NodeMap = std::unordered_map<const Header*,int>;
 
 void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
   auto& from_node = g.nodes[from];
@@ -173,52 +181,62 @@ void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind kind, const char* seat) {
   g.roots.push_back(e);
 }
 
-// if p points to a valid Header, return it; otherwise return null
-const Header* filter(PtrMap& ids, const void* p) {
-  auto h = static_cast<const Header*>(p);
-  auto it = ids.find(h);
-  return it != end(ids) ? h : nullptr;
-}
-
 struct ObjMarker {
-  HeapGraph& g_;
-  PtrMap& ids_;
-  int from_;
-  explicit ObjMarker(HeapGraph& g, PtrMap& ids, const Header* h)
-    : g_(g), ids_(ids), from_(ids_[h]) {
+  explicit ObjMarker(HeapGraph& g, NodeMap& ids, PtrMap& blocks,
+                     const Header* h)
+    : g_(g), ids_(ids), blocks_(blocks), from_(ids_[h]) {
     assert(h);
   }
-  void operator()(const void* p) {
-    auto h = filter(ids_, p);
-    assert(h && haveCount(h->kind()));
-    addPtr(g_, from_, ids_[h], HeapGraph::Exact);
-  }
+  void counted(const void* p) { mark(p, HeapGraph::Counted); }
+  void implicit(const void* p) { mark(p, HeapGraph::Implicit); }
   void ambig(const void* p) {
-    if (auto h = filter(ids_, p)) {
+    if (auto h = blocks_.header(p)) {
       addPtr(g_, from_, ids_[h], HeapGraph::Ambiguous);
     }
   }
   void where(const char*) {}
+
+ private:
+  void mark(const void* p, HeapGraph::PtrKind kind) {
+    assert(blocks_.header(p));
+    auto h = blocks_.header(p);
+    addPtr(g_, from_, ids_[h], kind);
+  }
+
+ private:
+  HeapGraph& g_;
+  NodeMap& ids_;
+  PtrMap& blocks_;
+  int from_;
 };
 
 struct RootMarker {
-  HeapGraph& g_;
-  PtrMap& ids_;
-  const char* seat_{nullptr};
-  explicit RootMarker(HeapGraph& g, PtrMap& ids): g_(g), ids_(ids) {}
-  void operator()(const void* p) {
-    auto h = filter(ids_, p);
-    assert(h && haveCount(h->kind()));
-    addRoot(g_, ids_[h], HeapGraph::Exact, seat_);
-  }
+  explicit RootMarker(HeapGraph& g, NodeMap& ids, PtrMap& blocks)
+    : g_(g), ids_(ids), blocks_(blocks)
+  {}
+  void counted(const void* p) { mark(p, HeapGraph::Counted); }
+  void implicit(const void* p) { mark(p, HeapGraph::Implicit); }
   void ambig(const void* p) {
-    if (auto h = filter(ids_, p)) {
+    if (auto h = blocks_.header(p)) {
       addRoot(g_, ids_[h], HeapGraph::Ambiguous, seat_);
     }
   }
   void where(const char* seat) {
     seat_ = seat;
   }
+
+ private:
+  void mark(const void* p, HeapGraph::PtrKind kind) {
+    assert(blocks_.header(p));
+    auto h = blocks_.header(p);
+    addRoot(g_, ids_[h], kind, seat_);
+  }
+
+ private:
+  HeapGraph& g_;
+  NodeMap& ids_;
+  PtrMap& blocks_;
+  const char* seat_{nullptr};
 };
 
 } // anon namespace
@@ -240,43 +258,32 @@ std::vector<int> makeParentTree(const HeapGraph& g) {
 // add edges for every known root pointer and every known obj->obj ptr.
 HeapGraph makeHeapGraph() {
   HeapGraph g;
-  PtrMap ids;
+  NodeMap ids;
+  PtrMap blocks;
 
-  // parse the heap once to create nodes.
+  // parse the heap once to create nodes. Create one node for
+  // every parsed block, including NativeData and ResumableFrame blocks.
   MM().forEachHeader([&](Header* h) {
-    addNode(g, h);
-    // NativeData and ResumableFrame headers wrap around an inner ObjectData,
-    // which we also want to track.
-    if (h->kind() == HeaderKind::NativeData) {
-      addNode(g, (Header*)h->nativeObj());
-    } else if (h->kind() == HeaderKind::ResumableFrame) {
-      addNode(g, (Header*)h->resumableObj());
-    }
+    g.nodes.push_back(HeapGraph::Node{h, -1, -1});
+    blocks.insert(h); // adds interval [h, h+h->size[
   });
+  blocks.prepare();
 
   // Give ids to all the nodes
   ids.reserve(g.nodes.size());
-  idNodes(g, ids);
+  for (int i = 0; i < g.nodes.size(); ++i) {
+    ids[g.nodes[i].h] = i;
+  }
 
   // find roots
-  PtrFilter<RootMarker> rmark(g, ids);
+  PtrFilter<RootMarker> rmark(g, ids, blocks);
   scanRoots(rmark);
 
   // find heap->heap pointers
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
     auto h = g.nodes[i].h;
-    PtrFilter<ObjMarker> omark(g, ids, h);
+    PtrFilter<ObjMarker> omark(g, ids, blocks, h);
     scanHeader(h, omark);
-  }
-
-  if (!g_context.isNull()) {
-    // add a fake heap ptr from each obj with dyn props to its prop array
-    for (const auto& e : g_context->dynPropTable) {
-      auto obj = filter(ids, e.first); // ObjectData*
-      auto props = filter(ids, e.second.arr().get()); // ArrayData*
-      assert(obj && props);
-      addPtr(g, ids[obj], ids[props], HeapGraph::DynProps);
-    }
   }
   return g;
 }

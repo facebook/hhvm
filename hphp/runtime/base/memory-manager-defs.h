@@ -237,7 +237,7 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
 // iterate just the ObjectDatas, including the kinds with prefixes.
 // (NativeData and ResumableFrame).
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
-  if (debug) checkHeap();
+  if (debug) checkHeap("MM::forEachObject");
   std::vector<ObjectData*> ptrs;
   forEachHeader([&](Header* h) {
     switch (h->kind()) {

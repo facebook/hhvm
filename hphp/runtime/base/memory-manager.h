@@ -814,6 +814,8 @@ struct MemoryManager {
    * MemoryManager may not be set up (i.e. between requests).
    */
   static bool sweeping();
+  static bool exiting();
+  static void setExiting();
 
   /*
    * During session shutdown, before resetAllocator(), this phase runs through
@@ -906,6 +908,11 @@ struct MemoryManager {
   void collect(const char* phase);
   void quarantine(); // turn free objects into holes
 
+  /*
+   * Run an integrity check on the heap
+   */
+  void checkHeap(const char* phase);
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -982,7 +989,6 @@ private:
   void logAllocation(void*, size_t);
   void logDeallocation(void*);
 
-  void checkHeap();
   void initHole(void* ptr, uint32_t size);
   void initHole();
   void initFree();
@@ -1041,8 +1047,8 @@ private:
 private:
   TRACE_SET_MOD(mm);
 
-  void* m_front;
-  void* m_limit;
+  void* m_front{nullptr};
+  void* m_limit{nullptr};
   std::array<FreeList,kNumSmallSizes> m_freelists;
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
@@ -1059,7 +1065,8 @@ private:
   mutable RootMap<ObjectData>* m_objectRoots{nullptr};
   mutable std::vector<ExtendedException*> m_exceptionRoots;
 
-  bool m_sweeping;
+  bool m_exiting{false};
+  bool m_sweeping{false};
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;

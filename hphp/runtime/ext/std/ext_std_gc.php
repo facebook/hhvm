@@ -19,3 +19,8 @@ function gc_disable(): void;
  */
 <<__Native>>
 function gc_collect_cycles(): int;
+
+/* Check heap integrity
+ */
+<<__Native>>
+function gc_check_heap(): void;

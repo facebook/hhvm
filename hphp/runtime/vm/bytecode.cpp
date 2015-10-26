@@ -335,15 +335,10 @@ VarEnv::VarEnv()
   , m_global(true)
 {
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
-  auto globals = new (MM().objMalloc(sizeof(GlobalsArray)))
-    GlobalsArray(&m_nvTable);
-  assert(globals->hasExactlyOneRef());
-
-  auto globalArray = make_tv<KindOfArray>(globals->asArrayData());
-  m_nvTable.set(s_GLOBALS.get(), &globalArray);
-
-  assert(globals->hasMultipleRefs());
-  globals->decRefCount();
+  auto globals_var = Variant::attach(
+    new (MM().objMalloc(sizeof(GlobalsArray))) GlobalsArray(&m_nvTable)
+  );
+  m_nvTable.set(s_GLOBALS.get(), globals_var.asTypedValue());
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
@@ -382,8 +377,11 @@ VarEnv::~VarEnv() {
      * not supposed to run destructors for objects that are live at
      * the end of a request.
      */
+    m_nvTable.unset(s_GLOBALS.get());
     m_nvTable.leak();
   }
+  // at this point, m_nvTable is destructed, and GlobalsArray
+  // has a dangling pointer to it.
 }
 
 void VarEnv::deallocate(ActRec* fp) {

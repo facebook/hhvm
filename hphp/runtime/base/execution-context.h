@@ -504,7 +504,7 @@ public:
     mark(m_sandboxId);
     //mark(m_vhost); // VirtualHost* not allocated in php request heap
     //mark(debuggerSettings);
-    mark(m_liveBCObjs);
+    mark.implicit(m_liveBCObjs); // exact ptrs, but not refcounted.
     mark(m_apcMemSize);
     //mark(m_apcHandles);
     //mark(dynPropTable); // don't root objects with dyn props
@@ -573,7 +573,7 @@ private:
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;
-  req::set<ObjectData*> m_liveBCObjs;
+  req::set<ObjectData*> m_liveBCObjs; // objects with destructors
 private:
   size_t m_apcMemSize{0};
   std::vector<APCHandle*> m_apcHandles; // gets moved to treadmill

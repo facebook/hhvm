@@ -242,12 +242,12 @@ std::string getRDSLocalConnectionName(
 
 std::string getEdgeKindName(HeapGraph::PtrKind kind) {
   switch (kind) {
-    case HeapGraph::Exact:
-      return "Ptr:Exact";
+    case HeapGraph::Counted:
+      return "Ptr:Counted";
+    case HeapGraph::Implicit:
+      return "Ptr:Implicit";
     case HeapGraph::Ambiguous:
-      return  "Ptr:Ambiguous";
-    case HeapGraph::DynProps:
-      return "Ptr:DynamicProperty";
+      return "Ptr:Ambiguous";
   }
   not_reached();
 }

@@ -39,6 +39,7 @@ size_t GlobalsArray::Vsize(const ArrayData* ad) {
   // We need to iterate to find out the actual size, since kNamedLocalDataType
   // elements in the array may have been set to KindOfUninit.
   auto a = asGlobals(ad);
+  if (a->m_tab->leaked()) return 0;
   size_t count = 0;
   auto iter_limit = IterEnd(a);
   for (auto iter = IterBegin(a);

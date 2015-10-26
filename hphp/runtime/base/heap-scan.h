@@ -126,9 +126,9 @@ template<class F> void ObjectData::scan(F& mark) const {
     mark(props[i]);
   }
   if (getAttribute(HasDynPropArr)) {
-    // nb: dynamic property arrays are pointed to by ExecutionContext,
-    // which is marked as a root.
-    mark(g_context->dynPropTable[this].arr());
+    // nb: dynamic property arrays are in ExecutionContext::dynPropTable,
+    // which is not marked as a root. Mark the arry when scanning the object.
+    mark.implicit(g_context->dynPropTable[this].arr());
   }
 }
 
@@ -217,14 +217,14 @@ void MemoryManager::scanSweepLists(F& mark) const {
     if (auto h = static_cast<Header*>(s->owner())) {
       assert(h->kind() == HeaderKind::Resource || isObjectKind(h->kind()));
       if (isObjectKind(h->kind())) {
-        mark(&h->obj_);
+        mark.implicit(&h->obj_);
       } else {
-        mark(&h->res_);
+        mark.implicit(&h->res_);
       }
     }
   }
   for (auto node: m_natives) {
-    mark(Native::obj(node));
+    mark.implicit(Native::obj(node));
   }
 }
 
@@ -269,7 +269,9 @@ template<class F> void scanRoots(F& mark) {
   }
   // ThreadInfo
   mark.where("ThreadInfo");
-  TI().scan(mark);
+  if (!ThreadInfo::s_threadInfo.isNull()) {
+    TI().scan(mark);
+  }
   // C++ stack
   mark.where("cpp-stack");
   asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");
@@ -312,6 +314,62 @@ template <typename T, typename F>
 void scan(const req::ptr<T>& ptr, F& mark) {
   ptr->scan(mark);
 }
+
+// information about heap objects, indexed by valid object starts.
+struct PtrMap {
+  void insert(const Header* h) {
+    assert(!sorted_);
+    regions_.emplace_back(h, h->size());
+  }
+  const Header* header(const void* p) const {
+    assert(sorted_);
+    // Find the first region which begins beyond p.
+    auto it =
+      std::upper_bound(
+        regions_.begin(),
+        regions_.end(),
+        p,
+        [](const void* p,
+           const std::pair<const Header*, std::size_t>& region) {
+          return p < region.first;
+        }
+      );
+    // If its the first region, p is before any region, so there's no
+    // header. Otherwise, backup to the previous region.
+    if (it == regions_.begin()) return nullptr;
+    --it;
+    // p can only potentially point within this previous region, so check that.
+    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ?
+      it->first : nullptr;
+  }
+  bool isHeader(const void* p) const {
+    auto h = header(p);
+    return h && h == p;
+  }
+
+  void prepare() {
+    assert(!sorted_);
+    std::sort(regions_.begin(), regions_.end());
+    assert(sanityCheck());
+    sorted_ = true;
+  }
+private:
+  bool sanityCheck() const {
+    // Verify that all the regions are in increasing and non-overlapping order.
+    void* last = nullptr;
+    for (const auto& region : regions_) {
+      if (!last || last <= region.first) {
+        last = (void*)(uintptr_t(region.first) + region.second);
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  std::vector<std::pair<const Header*, std::size_t>> regions_;
+  bool sorted_ = false;
+};
 
 }
 #endif

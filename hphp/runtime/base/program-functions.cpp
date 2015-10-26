@@ -2170,6 +2170,7 @@ void hphp_context_exit(bool shutdown /* = true */) {
   }
 
   // Clean up a bunch of request state. No user code after this point.
+  MemoryManager::setExiting();
   auto const context = g_context.getNoCheck();
   context->requestExit();
   context->obProtect(false);

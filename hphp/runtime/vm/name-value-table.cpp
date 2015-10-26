@@ -78,8 +78,7 @@ NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
 }
 
 NameValueTable::~NameValueTable() {
-  if (!m_table) return;
-
+  if (leaked()) return;
   for (Elm* elm = &m_table[m_tabMask]; elm != &m_table[-1]; --elm) {
     if (elm->m_name) {
       decRefStr(const_cast<StringData*>(elm->m_name));
@@ -146,6 +145,7 @@ void NameValueTable::leak() {
   m_tabMask = 0;
   req::free(m_table);
   m_table = nullptr;
+  assert(leaked());
 }
 
 TypedValue* NameValueTable::set(const StringData* name, const TypedValue* val) {

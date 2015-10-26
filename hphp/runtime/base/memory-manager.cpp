@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/alloc.h"
@@ -41,6 +42,8 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 
 namespace HPHP {
+
+const unsigned kInvalidSweepIndex = 0xffffffff;
 
 TRACE_SET_MOD(mm);
 
@@ -185,10 +188,7 @@ void MemoryManager::OnThreadExit(MemoryManager* mm) {
   mm->~MemoryManager();
 }
 
-MemoryManager::MemoryManager()
-    : m_front(nullptr)
-    , m_limit(nullptr)
-    , m_sweeping(false) {
+MemoryManager::MemoryManager() {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
@@ -242,7 +242,7 @@ void MemoryManager::deleteRootMaps() {
 void MemoryManager::resetRuntimeOptions() {
   if (debug) {
     deleteRootMaps();
-    checkHeap();
+    checkHeap("resetRuntimeOptions");
     // check that every allocation in heap has been freed before reset
     iterate([&](Header* h) {
       assert(h->kind() == HeaderKind::Free);
@@ -465,11 +465,12 @@ template void MemoryManager::refreshStatsImpl<true>(MemoryUsageStats& stats);
 template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 
 void MemoryManager::sweep() {
+  // running a gc-cycle at end of request exposes bugs, but otherwise is
+  // somewhat pointless since we're about to free the heap en-masse.
+  if (debug) collect("before MM::sweep");
+
   assert(!sweeping());
-  if (debug) checkHeap();
-  collect("MM::sweep");
   m_sweeping = true;
-  SCOPE_EXIT { m_sweeping = false; };
   DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
 
   // iterate until both sweep lists are empty. Entries can be added or
@@ -499,7 +500,6 @@ void MemoryManager::sweep() {
          num_sweepables,
          num_natives,
          napcs);
-  if (debug) checkHeap();
 
   // decref apc arrays referenced by this request.  This must happen here
   // (instead of in resetAllocator), because the sweep routine may use
@@ -508,11 +508,14 @@ void MemoryManager::sweep() {
     auto a = m_apc_arrays.back();
     m_apc_arrays.pop_back();
     a->sweep();
+    if (debug) a->m_sweep_index = kInvalidSweepIndex;
   }
+
+  if (debug) checkHeap("after MM::sweep");
 }
 
 void MemoryManager::resetAllocator() {
-  assert(m_natives.empty() && m_sweepables.empty());
+  assert(m_natives.empty() && m_sweepables.empty() && m_sweeping);
   // decref apc strings referenced by this request
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
 
@@ -526,7 +529,8 @@ void MemoryManager::resetAllocator() {
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
   m_needInitFree = false;
-
+  m_sweeping = false;
+  m_exiting = false;
   resetStatsImpl(true);
   FTRACE(1, "reset: strings {}\n", nstrings);
 }
@@ -640,7 +644,7 @@ const char* header_names[] = {
   "GlobalsArray", "ProxyArray", "String", "Resource", "Ref",
   "Object", "ResumableObj", "AwaitAllWH",
   "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
-  "Resumable", "Native", "SmallMalloc", "BigMalloc", "BigObj",
+  "ResumableFrame", "NativeData", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
@@ -681,7 +685,7 @@ void MemoryManager::quarantine() {
 }
 
 // test iterating objects in slabs
-void MemoryManager::checkHeap() {
+void MemoryManager::checkHeap(const char* phase) {
   size_t bytes=0;
   std::vector<Header*> hdrs;
   std::unordered_set<FreeNode*> free_blocks;
@@ -691,7 +695,6 @@ void MemoryManager::checkHeap() {
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
   forEachHeader([&](Header* h) {
     hdrs.push_back(&*h);
-    TRACE(2, "checkHeap: hdr %p\n", hdrs[hdrs.size()-1]);
     bytes += h->size();
     counts[(int)h->kind()]++;
     switch (h->kind()) {
@@ -699,7 +702,9 @@ void MemoryManager::checkHeap() {
         free_blocks.insert(&h->free_);
         break;
       case HeaderKind::Apc:
-        apc_arrays.insert(&h->apc_);
+        if (h->apc_.m_sweep_index != kInvalidSweepIndex) {
+          apc_arrays.insert(&h->apc_);
+        }
         break;
       case HeaderKind::String:
         if (h->str_.isProxy()) apc_strings.insert(&h->str_);
@@ -744,6 +749,7 @@ void MemoryManager::checkHeap() {
   assert(free_blocks.empty());
 
   // check the apc array list
+  assert(apc_arrays.size() == m_apc_arrays.size());
   for (auto a : m_apc_arrays) {
     assert(apc_arrays.find(a) != apc_arrays.end());
     apc_arrays.erase(a);
@@ -760,11 +766,13 @@ void MemoryManager::checkHeap() {
   }
   assert(apc_strings.empty());
 
-  TRACE(1, "checkHeap: %lu objects %lu bytes\n", hdrs.size(), bytes);
-  TRACE(1, "checkHeap-types: ");
-  for (unsigned i = 0; i < NumHeaderKinds; ++i) {
-    TRACE(1, "%s %lu%s", header_names[i], counts[i],
-          (i + 1 < NumHeaderKinds ? " " : "\n"));
+  // heap check is done. If we are not exiting, check pointers using HeapGraph
+  if (Trace::moduleEnabled(Trace::heapreport)) {
+    auto g = makeHeapGraph();
+    if (!exiting()) checkPointers(g, phase);
+    if (Trace::moduleEnabled(Trace::heapreport, 2)) {
+      printHeapReport(g, phase);
+    }
   }
 }
 
@@ -777,7 +785,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
     refreshStats();
   }
   storeTail(m_front, (char*)m_limit - (char*)m_front);
-  if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap();
+  if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap("MM::newSlab");
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
   m_stats.borrow(slab.size);

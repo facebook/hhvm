@@ -417,6 +417,14 @@ inline bool MemoryManager::sweeping() {
   return !TlsWrapper::isNull() && MM().m_sweeping;
 }
 
+inline bool MemoryManager::exiting() {
+  return !TlsWrapper::isNull() && MM().m_exiting;
+}
+
+inline void MemoryManager::setExiting() {
+  if (!TlsWrapper::isNull()) MM().m_exiting = true;
+}
+
 inline StringDataNode& MemoryManager::getStringList() {
   return m_strings;
 }

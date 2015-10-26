@@ -55,7 +55,7 @@ void ThreadLocalManager::PushTop(void* nodePtr, size_t nodeSize) {
   }
   node.m_next = list->head;
   node.m_size = nodeSize;
-  list->head = node.m_next;
+  list->head = &node;
 }
 
 ThreadLocalManager& ThreadLocalManager::GetManager() {

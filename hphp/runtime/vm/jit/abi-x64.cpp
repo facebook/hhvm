@@ -40,7 +40,7 @@ const RegSet kGPCallerSaved =
   reg::r8  | reg::r9  | reg::r10 | reg::r11;
 
 const RegSet kGPCalleeSaved =
-  reg::rbx | reg::r13 | reg::r14 | reg::r15;
+  reg::rbx | reg::r12 | reg::r13 | reg::r14 | reg::r15;
 #endif
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;

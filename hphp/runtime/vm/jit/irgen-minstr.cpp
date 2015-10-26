@@ -1272,7 +1272,9 @@ void emitRatchetRefs(MTS& env) {
 
       // Adjust base pointer.
       assertx(env.base.type <= TPtrToGen);
-      return misRef2Addr;
+
+      // See the comment in ratchetRefs().
+      return misLea(env, offsetof(MInstrState, tvRef2));
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
       return env.base.value;
@@ -2365,8 +2367,10 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
       // Reset tvRef.
       gen(env, StMem, tvRef, cns(env, TUninit));
 
-      // Adjust base pointer.
-      return tvRef2;
+      // Adjust base pointer.  Don't use 'tvRef2' here so that we don't reuse
+      // the temp.  This will let us elide uses of the register for 'tvRef2',
+      // until the Jmp we're going to emit here.
+      return tvRef2Ptr(env);
     }
   );
 }
@@ -2636,6 +2640,11 @@ Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
     auto const val = gen(env, LdUnwinderValue, TCell);
     push(env, val);
   }
+
+  // The minstr is done here, so we want to drop a FinishMemberOp to kill off
+  // stores to MIState.
+  gen(env, FinishMemberOp);
+
   gen(env, Jmp, makeExit(env, nextBcOff(env)));
   return block;
 }

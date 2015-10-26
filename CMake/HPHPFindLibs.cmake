@@ -70,12 +70,8 @@ if (ENABLE_ASYNC_MYSQL)
     ${TP_DIR}/webscalesqlclient/src/include/
   )
   set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-  # Unlike the .so, the static library intentionally does not link against
-  # yassl, despite building it :/
   set(MYSQL_CLIENT_LIBS
     ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
-    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
-    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
   )
 else()
   find_package(MySQL REQUIRED)

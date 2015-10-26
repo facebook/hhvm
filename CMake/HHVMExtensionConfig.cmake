@@ -874,12 +874,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     # third-party/ instead
     if (ENABLE_ASYNC_MYSQL)
       set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-      # Unlike the .so, the static library intentionally does not link against
-      # yassl, despite building it :/
       set(MYSQL_CLIENT_LIBS
         ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
-        ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
-        ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
       )
 
       if (${addPaths})

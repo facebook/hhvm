@@ -40,6 +40,7 @@ const StaticString
   s_args("args"),
   s_frame_ptr("frame_ptr"),
   s_parent_frame_ptr("parent_frame_ptr"),
+  s_this_ptr("this_ptr"),
   s_enter("enter"),
   s_exit("exit"),
   s_exception("exception"),
@@ -123,6 +124,23 @@ ActRec* getParentFrame(const ActRec* ar) {
   return ret;
 }
 
+void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
+  if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) == 0) {
+    return;
+  }
+
+  if (isEnter) {
+    auto this_ptr = ar->hasThis() ? intptr_t(ar->getThis()) : 0;
+    frameinfo.set(s_this_ptr, Variant(this_ptr));
+  }
+
+  frameinfo.set(s_frame_ptr, Variant(intptr_t(ar)));
+  ActRec* parent_ar = getParentFrame(ar);
+  if (parent_ar != nullptr) {
+    frameinfo.set(s_parent_frame_ptr, Variant(intptr_t(parent_ar)));
+  }
+}
+
 void runUserProfilerOnFunctionEnter(const ActRec* ar) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileEnters) == 0) {
     return;
@@ -137,13 +155,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
 
   Array frameinfo;
   frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
-  if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) != 0) {
-    frameinfo.set(s_frame_ptr, Variant(intptr_t(ar)));
-    ActRec* parent_ar = getParentFrame(ar);
-    if (parent_ar != nullptr) {
-      frameinfo.set(s_parent_frame_ptr, Variant(intptr_t(parent_ar)));
-    }
-  }
+  addFramePointers(ar, frameinfo, true);
   params.append(frameinfo);
 
   vm_call_user_func(g_context->m_setprofileCallback, params);
@@ -168,13 +180,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   } else if (exception) {
     frameinfo.set(s_exception, Variant{exception});
   }
-  if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) != 0) {
-    frameinfo.set(s_frame_ptr, Variant(intptr_t(ar)));
-    ActRec* parent_ar = getParentFrame(ar);
-    if (parent_ar != nullptr) {
-      frameinfo.set(s_parent_frame_ptr, Variant(intptr_t(parent_ar)));
-    }
-  }
+  addFramePointers(ar, frameinfo, false);
   params.append(frameinfo);
 
   vm_call_user_func(g_context->m_setprofileCallback, params);

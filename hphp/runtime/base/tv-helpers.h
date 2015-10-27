@@ -47,7 +47,7 @@ struct Variant;
  * This assumes isRefcountedType() is true.
  */
 #define TV_GENERIC_DISPATCH_FAST(exp, func)                     \
-  reinterpret_cast<HPHP::HeaderWord<uint16_t,true>*>(           \
+  reinterpret_cast<HPHP::HeaderWord<uint16_t,HPHP::Counted::Maybe>*>(\
       (exp).m_data.num + HPHP::HeaderOffset                     \
   )->func()
 

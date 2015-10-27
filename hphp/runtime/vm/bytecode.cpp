@@ -2701,7 +2701,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
                                        int frame) {
   assert(retval);
   // The code has "<?php" prepended already
-  Unit* unit = compile_string(code->data(), code->size());
+  auto unit = compile_string(code->data(), code->size());
   if (unit == nullptr) {
     raise_error("Syntax error");
     tvWriteNull(retval);
@@ -2719,11 +2719,13 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
   assert(retval);
   always_assert(!RuntimeOption::RepoAuthoritative);
 
-  bool failed = true;
-  ActRec *fp = vmfp();
+  VMRegAnchor _;
+
+  auto failed = true;
+  auto fp = vmfp();
   if (fp) {
     for (; frame > 0; --frame) {
-      ActRec* prevFp = getPrevVMState(fp);
+      auto prevFp = getPrevVMState(fp);
       if (!prevFp) {
         // To be safe in case we failed to get prevFp. This would mean we've
         // been asked to eval in a frame which is beyond the top of the stack.

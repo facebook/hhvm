@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/system/constants.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 
 #include <map>
 #include <memory>

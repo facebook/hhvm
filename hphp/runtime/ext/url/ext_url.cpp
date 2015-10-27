@@ -322,7 +322,7 @@ const StaticString s_PHP_URL_FRAGMENT("PHP_URL_FRAGMENT");
 const StaticString s_PHP_QUERY_RFC1738("PHP_QUERY_RFC1738");
 const StaticString s_PHP_QUERY_RFC3986("PHP_QUERY_RFC3986");
 
-class StandardURLExtension final : public Extension {
+struct StandardURLExtension final : public Extension {
  public:
   StandardURLExtension() : Extension("url") {}
   void moduleInit() override {

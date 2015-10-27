@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Variant;
+struct Variant;
 
 struct Directory : SweepableResourceData {
   virtual void close() = 0;

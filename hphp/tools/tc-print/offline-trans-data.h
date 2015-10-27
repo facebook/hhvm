@@ -32,7 +32,7 @@
 
 namespace HPHP { namespace jit {
 
-class OfflineX86Code;
+struct OfflineX86Code;
 
 typedef char MD5Str[33];
 
@@ -47,7 +47,7 @@ struct TransAddrRange {
   }
 };
 
-class OfflineTransData {
+struct OfflineTransData {
 public:
   explicit OfflineTransData(const std::string& dumpDir)
     : dumpDir(dumpDir) {

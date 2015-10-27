@@ -118,7 +118,7 @@ void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
   }
 }
 
-static class HHExtension final : public Extension {
+static struct HHExtension final : public Extension {
  public:
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -131,7 +131,7 @@ static class HHExtension final : public Extension {
   }
 } s_hh_extension;
 
-static class XHPExtension final : public Extension {
+static struct XHPExtension final : public Extension {
  public:
   XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET) { }
   bool moduleEnabled() const override { return RuntimeOption::EnableXHP; }

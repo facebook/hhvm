@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ContinueStatement);
 
-class ContinueStatement : public BreakStatement {
+struct ContinueStatement : public BreakStatement {
 public:
   ContinueStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, uint64_t depth);
   StatementPtr clone() override;

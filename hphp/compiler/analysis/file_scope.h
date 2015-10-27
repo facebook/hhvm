@@ -47,7 +47,7 @@ DECLARE_BOOST_TYPES(StatementList);
  * AnalysisResult objects to grab statements, functions and classes from
  * FileScope objects to form execution paths.
  */
-class FileScope : public BlockScope,
+struct FileScope : public BlockScope,
                   public FunctionContainer,
                   public JSON::DocTarget::ISerializable {
 public:

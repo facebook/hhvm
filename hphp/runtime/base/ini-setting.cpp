@@ -676,7 +676,7 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
 }
 
 
-class IniCallbackData {
+struct IniCallbackData {
 public:
   IniCallbackData() {
     extension = nullptr;

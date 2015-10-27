@@ -27,7 +27,7 @@
 
 namespace HPHP {
 
-class MmapFile : private boost::noncopyable {
+struct MmapFile : private boost::noncopyable {
  public:
   explicit MmapFile(const std::string& path);
   ~MmapFile();

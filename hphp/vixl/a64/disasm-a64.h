@@ -34,7 +34,7 @@
 
 namespace vixl {
 
-class Disassembler: public DecoderVisitor {
+struct Disassembler: public DecoderVisitor {
  public:
   Disassembler();
   Disassembler(char* text_buffer, int buffer_size);
@@ -93,7 +93,7 @@ class Disassembler: public DecoderVisitor {
 };
 
 
-class PrintDisassembler: public Disassembler {
+struct PrintDisassembler: public Disassembler {
  public:
   explicit PrintDisassembler(std::ostream& stream,
                              int indent = 0,

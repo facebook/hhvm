@@ -28,7 +28,7 @@
 /**
  * Testing CPP extension library coding.
  */
-class TestCppExt : public TestCppBase {
+struct TestCppExt : public TestCppBase {
 public:
   TestCppExt();
 };

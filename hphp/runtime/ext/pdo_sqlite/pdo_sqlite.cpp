@@ -30,7 +30,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, 1.0.1);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOSqliteStatement : public PDOStatement {
+struct PDOSqliteStatement : public PDOStatement {
 public:
   DECLARE_RESOURCE_ALLOCATION(PDOSqliteStatement);
   PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt);

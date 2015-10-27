@@ -85,7 +85,7 @@ private:
   bool m_silent{false};
   MemoryManager::ExceptionRootKey m_key;
 
-  friend class MemoryManager;
+  friend struct MemoryManager;
 };
 
 struct FatalErrorException : ExtendedException {
@@ -138,7 +138,7 @@ struct RequestMemoryExceededException : ResourceExceededException {
 
 //////////////////////////////////////////////////////////////////////
 
-class ExitException : public ExtendedException {
+struct ExitException : public ExtendedException {
 public:
   static std::atomic<int> ExitCode; // XXX should not be static
 
@@ -148,7 +148,7 @@ public:
   EXCEPTION_COMMON_IMPL(ExitException);
 };
 
-class PhpFileDoesNotExistException : public ExtendedException {
+struct PhpFileDoesNotExistException : public ExtendedException {
 public:
   explicit PhpFileDoesNotExistException(const char *file)
     : ExtendedException("File could not be loaded: %s", file) {}

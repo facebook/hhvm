@@ -45,12 +45,12 @@ constexpr int kRegListSizeInBits = sizeof(RegList) * 8;
 
 // Some CPURegister methods can return Register and FPRegister types, so we
 // need to declare them in advance.
-class Register;
-class FPRegister;
-class MemOperand;
+struct Register;
+struct FPRegister;
+struct MemOperand;
 
 
-class CPURegister {
+struct CPURegister {
  public:
   enum RegisterType {
     // The kInvalid value is used to detect uninitialized static instances,
@@ -158,7 +158,7 @@ class CPURegister {
 };
 
 
-class Register : public CPURegister {
+struct Register : public CPURegister {
  public:
   constexpr explicit Register() : CPURegister() {}
   constexpr explicit Register(const CPURegister& other)
@@ -187,7 +187,7 @@ class Register : public CPURegister {
 };
 
 
-class FPRegister : public CPURegister {
+struct FPRegister : public CPURegister {
  public:
   constexpr FPRegister() : CPURegister() {}
   constexpr explicit FPRegister(const CPURegister& other)
@@ -271,7 +271,7 @@ bool AreSameSizeAndType(const CPURegister& reg1,
 
 
 // Lists of registers.
-class CPURegList {
+struct CPURegList {
  public:
   inline explicit CPURegList(CPURegister reg1,
                              CPURegister reg2 = NoCPUReg,
@@ -419,7 +419,7 @@ extern const CPURegList kCallerSavedFP;
 
 
 // Operand.
-class Operand {
+struct Operand {
  public:
   // #<immediate>
   // where <immediate> is int64_t.
@@ -484,7 +484,7 @@ class Operand {
 
 
 // MemOperand represents the addressing mode of a load or store instruction.
-class MemOperand {
+struct MemOperand {
  public:
   explicit MemOperand(Register base,
                       ptrdiff_t offset = 0,
@@ -524,7 +524,7 @@ class MemOperand {
 };
 
 
-class Label {
+struct Label {
  public:
   Label() : is_bound_(false), link_(nullptr), target_(nullptr) {}
   ~Label() {
@@ -554,7 +554,7 @@ class Label {
   // The label location.
   HPHP::CodeAddress target_;
 
-  friend class Assembler;
+  friend struct Assembler;
 };
 
 
@@ -573,7 +573,7 @@ enum LiteralPoolEmitOption {
 
 
 // Literal pool entry.
-class Literal {
+struct Literal {
  public:
   Literal(HPHP::CodeAddress pc, uint64_t imm, unsigned size)
       : pc_(pc), value_(imm), size_(size) {}
@@ -583,12 +583,12 @@ class Literal {
   int64_t value_;
   unsigned size_;
 
-  friend class Assembler;
+  friend struct Assembler;
 };
 
 
 // Assembler.
-class Assembler {
+struct Assembler {
  public:
   explicit Assembler(HPHP::CodeBlock& cb);
 
@@ -1762,14 +1762,14 @@ class Assembler {
   HPHP::CodeAddress next_literal_pool_check_;
   unsigned literal_pool_monitor_;
 
-  friend class BlockLiteralPoolScope;
+  friend struct BlockLiteralPoolScope;
 
 #ifdef DEBUG
   bool finalized_;
 #endif
 };
 
-class BlockLiteralPoolScope {
+struct BlockLiteralPoolScope {
  public:
   explicit BlockLiteralPoolScope(Assembler* assm) : assm_(assm) {
     assm_->BlockLiteralPool();

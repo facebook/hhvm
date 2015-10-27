@@ -34,7 +34,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
-class ImagickExtension final : public Extension {
+struct ImagickExtension final : public Extension {
  public:
   ImagickExtension();
   void moduleInit() override;
@@ -55,7 +55,7 @@ class ImagickExtension final : public Extension {
 //////////////////////////////////////////////////////////////////////////////
 // PHP Exceptions and Classes
 #define IMAGICK_DEFINE_CLASS(CLS) \
-  class CLS { \
+  struct CLS { \
    public: \
     static Object allocObject() { \
       if (cls == nullptr) { \
@@ -116,7 +116,7 @@ void imagickThrow(const char* fmt, ...) {
 //////////////////////////////////////////////////////////////////////////////
 // WandResource
 template<typename Wand>
-class WandResource : public SweepableResourceData {
+struct WandResource : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
  public:

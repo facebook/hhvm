@@ -50,7 +50,7 @@ struct StringData;
  * runtime Units.
  */
 struct UnitEmitter {
-  friend class UnitRepoProxy;
+  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
@@ -442,8 +442,8 @@ private:
  * Proxy for converting in-repo unit representations into UnitEmitters.
  */
 struct UnitRepoProxy : public RepoProxy {
-  friend class Unit;
-  friend class UnitEmitter;
+  friend struct Unit;
+  friend struct UnitEmitter;
 
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();

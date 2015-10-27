@@ -40,7 +40,7 @@ static req::ptr<T> safe_cast(const Resource& res) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ODBCContext {
+struct ODBCContext {
 public:
   // extract an error from a handle
   static void extract_error(const SQLSMALLINT type, const SQLHANDLE hdl);
@@ -99,7 +99,7 @@ SQLCHAR* ODBCContext::get_last_error_msg()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ODBCColumn : public SweepableResourceData {
+struct ODBCColumn : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(ODBCColumn);
 
@@ -202,7 +202,7 @@ SQLLEN ODBCColumn::total_column_size() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ODBCParam : public SweepableResourceData {
+struct ODBCParam : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(ODBCParam);
 
@@ -231,7 +231,7 @@ ODBCParam::ODBCParam(const SQLHSTMT hdl_stmt, const int i_col)
 ///////////////////////////////////////////////////////////////////////////////
 
 // created per-query
-class ODBCCursor : public SweepableResourceData {
+struct ODBCCursor : public SweepableResourceData {
 public:
   CLASSNAME_IS("odbc cursor")
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -565,7 +565,7 @@ int64_t ODBCCursor::num_rows() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ODBCLink : public SweepableResourceData {
+struct ODBCLink : public SweepableResourceData {
 public:
   CLASSNAME_IS("odbc link")
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -873,7 +873,7 @@ bool HHVM_FUNCTION(odbc_rollback, const Resource& link)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static class ODBCExtension final : public Extension {
+static struct ODBCExtension final : public Extension {
  public:
   ODBCExtension() : Extension("odbc") { }
   void moduleInit() override {

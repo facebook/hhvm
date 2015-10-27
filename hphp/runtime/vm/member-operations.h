@@ -34,7 +34,7 @@ namespace HPHP {
 
 const StaticString s_storage("storage");
 
-class InvalidSetMException : public std::runtime_error {
+struct InvalidSetMException : public std::runtime_error {
  public:
   InvalidSetMException()
     : std::runtime_error("Empty InvalidSetMException")

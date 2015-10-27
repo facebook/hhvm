@@ -30,7 +30,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(SwitchStatement);
 
-class SwitchStatement : public Statement {
+struct SwitchStatement : public Statement {
 public:
   SwitchStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                   ExpressionPtr exp, StatementListPtr cases);

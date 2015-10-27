@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
-class HostEnt {
+struct HostEnt {
 public:
   HostEnt() : tmphstbuf(nullptr) {}
   ~HostEnt() { if (tmphstbuf) free(tmphstbuf);}
@@ -50,7 +50,7 @@ public:
 //   ssl, 192.168.1.0, 80
 // ssl://[2a03:2880::1]:443
 //   ssl, 2a03:2880::1, 443
-class HostURL {
+struct HostURL {
 public:
   explicit HostURL(const std::string &hosturl, int port = 0);
 

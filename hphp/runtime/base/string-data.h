@@ -34,9 +34,9 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class APCString;
-class Array;
-class String;
+struct APCString;
+struct Array;
+struct String;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ enum CopyStringMode { CopyString };
  *   Proxy  |        |          |    X
  */
 struct StringData {
-  friend class APCString;
+  friend struct APCString;
   friend StringData* allocFlatSmallImpl(size_t len);
   friend StringData* allocFlatSlowImpl(size_t len);
 

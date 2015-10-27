@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(UserAttribute);
 
-class UserAttribute : public Expression {
+struct UserAttribute : public Expression {
 public:
   UserAttribute(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                 const std::string& name,

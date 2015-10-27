@@ -266,7 +266,7 @@ static bool HHVM_FUNCTION(readline_write_history,
   }
 }
 
-static class ReadlineExtension final : public Extension {
+static struct ReadlineExtension final : public Extension {
   public:
     ReadlineExtension() : Extension("readline") {}
     void moduleInit() override {

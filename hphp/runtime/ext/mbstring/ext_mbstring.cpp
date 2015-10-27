@@ -4382,7 +4382,7 @@ bool HHVM_FUNCTION(mb_send_mail,
   return ret;
 }
 
-static class mbstringExtension final : public Extension {
+static struct mbstringExtension final : public Extension {
   public:
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
 

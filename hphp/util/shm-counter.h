@@ -29,7 +29,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ShmCounter {
+struct ShmCounter {
 public:
   ShmCounter() {}
   explicit ShmCounter(const char *n) : count(0) {
@@ -41,7 +41,7 @@ public:
   char name[64];
   long long count;
 };
-class ShmCounters {
+struct ShmCounters {
 public:
   SHM_COUNTER_DEF(dummy_def1)
   SHM_COUNTER_DEF(dummy_def2)

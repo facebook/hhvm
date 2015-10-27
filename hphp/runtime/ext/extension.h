@@ -55,7 +55,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Extension : public IDebuggable {
+struct Extension : public IDebuggable {
 public:
   static bool IsSystemlibPath(const std::string& path);
 

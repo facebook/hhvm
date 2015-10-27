@@ -17,7 +17,7 @@
 #ifndef HPHP_EXT_FILTER_FILTER_PRIVATE_H
 #define HPHP_EXT_FILTER_FILTER_PRIVATE_H
 
-class String;
+struct String;
 struct Variant;
 
 #define PHP_INPUT_FILTER_PARAM_DECL const String& value, long flags, \

@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/indexed-string-map.h"
 
 namespace folly {
-template <class T> class Optional;
+template <class T> struct Optional;
 }
 
 namespace HPHP {

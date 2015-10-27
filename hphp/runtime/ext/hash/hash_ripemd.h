@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_ripemd128 : public HashEngine {
+struct hash_ripemd128 : public HashEngine {
 public:
   hash_ripemd128();
 
@@ -33,7 +33,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_ripemd160 : public HashEngine {
+struct hash_ripemd160 : public HashEngine {
 public:
   hash_ripemd160();
 
@@ -43,7 +43,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_ripemd256 : public HashEngine {
+struct hash_ripemd256 : public HashEngine {
 public:
   hash_ripemd256();
 
@@ -53,7 +53,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_ripemd320 : public HashEngine {
+struct hash_ripemd320 : public HashEngine {
 public:
   hash_ripemd320();
 

@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_crc32 : public HashEngine {
+struct hash_crc32 : public HashEngine {
 public:
   hash_crc32(bool b);
 

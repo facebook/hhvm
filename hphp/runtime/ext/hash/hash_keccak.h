@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_keccak : public HashEngine {
+struct hash_keccak : public HashEngine {
  public:
   hash_keccak(uint32_t capacity, uint32_t digestlen);
 

@@ -30,7 +30,7 @@ namespace HPHP {
  * debugging HTTP requests that cause problems that are hard to debug on live
  * servers.
  */
-class ReplayTransport : public Transport {
+struct ReplayTransport : public Transport {
 public:
   ReplayTransport() : m_ini(IniSetting::Map::object), m_code(0) {}
 

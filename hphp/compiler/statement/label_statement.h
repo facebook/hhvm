@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(LabelStatement);
 
-class LabelStatement : public Statement {
+struct LabelStatement : public Statement {
 public:
   LabelStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label);
 

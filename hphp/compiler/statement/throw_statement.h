@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ThrowStatement);
 
-class ThrowStatement : public Statement {
+struct ThrowStatement : public Statement {
 public:
   ThrowStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 

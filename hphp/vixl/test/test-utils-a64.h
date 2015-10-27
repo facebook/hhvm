@@ -36,7 +36,7 @@ namespace vixl {
 
 // RegisterDump: Object allowing integer, floating point and flags registers
 // to be saved to itself for future reference.
-class RegisterDump {
+struct RegisterDump {
  public:
   RegisterDump() : completed_(false) {
     assert(sizeof(dump_.d_[0]) == kDRegSizeInBytes);

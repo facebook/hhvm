@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class HttpClient {
+struct HttpClient {
 public:
   explicit HttpClient(int timeout = 5 /* seconds */, int maxRedirect = 1,
                       bool use11 = true, bool decompress = false);

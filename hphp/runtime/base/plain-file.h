@@ -27,7 +27,7 @@ namespace HPHP {
 /**
  * A file system file that's nothing but ordinary. A simple FILE* wrapper.
  */
-class PlainFile : public File {
+struct PlainFile : public File {
 public:
   DECLARE_RESOURCE_ALLOCATION(PlainFile);
 

@@ -79,7 +79,7 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class enumExtension final : public Extension {
+struct enumExtension final : public Extension {
  public:
   enumExtension() : Extension("enum", "1.0.0-dev") {}
   void moduleInit() override {

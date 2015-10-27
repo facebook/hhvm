@@ -81,7 +81,7 @@ static String wordwrap(const String& str, int width /* = 75 */,
   return vm_call_user_func("wordwrap", args);
 }
 
-class DebuggerExtension final : public Extension {
+struct DebuggerExtension final : public Extension {
  public:
   DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET) {}
 } s_debugger_extension;
@@ -173,7 +173,7 @@ int DebuggerClient::pollSignal() {
 /**
  * Initialization and shutdown.
  */
-class ReadlineApp {
+struct ReadlineApp {
 public:
   ReadlineApp() {
     TRACE(2, "ReadlineApp::ReadlineApp\n");
@@ -203,7 +203,7 @@ public:
 /**
  * Displaying a spinning wait icon.
  */
-class ReadlineWaitCursor {
+struct ReadlineWaitCursor {
 public:
   ReadlineWaitCursor()
       : m_thread(this, &ReadlineWaitCursor::animate), m_waiting(true) {

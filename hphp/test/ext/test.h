@@ -25,7 +25,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Test {
+struct Test {
 public:
   static std::string s_suite;
   static int s_total;

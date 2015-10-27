@@ -116,7 +116,7 @@ struct FPIEnt {
  *
  */
 struct Func {
-  friend class FuncEmitter;
+  friend struct FuncEmitter;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.

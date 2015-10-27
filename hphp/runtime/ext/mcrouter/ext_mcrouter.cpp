@@ -76,7 +76,7 @@ static Object mcr_getOptionException(
 
 /////////////////////////////////////////////////////////////////////////////
 
-class MCRouter {
+struct MCRouter {
  public:
   MCRouter() {}
   MCRouter& operator=(const MCRouter& str) = delete;
@@ -148,7 +148,7 @@ class MCRouter {
   }
 };
 
-class MCRouterResult : public AsioExternalThreadEvent {
+struct MCRouterResult : public AsioExternalThreadEvent {
  public:
   MCRouterResult(MCRouter* router, mcr::mcrouter_msg_t& msg) {
     m_result.m_type = KindOfNull;
@@ -369,7 +369,7 @@ static String HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class MCRouterExtension : public Extension {
+struct MCRouterExtension : public Extension {
  public:
   MCRouterExtension(): Extension("mcrouter", "1.0.0") {}
 

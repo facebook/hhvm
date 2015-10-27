@@ -324,7 +324,7 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
 
 } // namespace
 
-class xenonExtension final : public Extension {
+struct xenonExtension final : public Extension {
  public:
   xenonExtension() : Extension("xenon", "1.0") { }
 

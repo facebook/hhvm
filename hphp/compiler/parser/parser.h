@@ -64,7 +64,7 @@ enum class ThisContextError {
 ///////////////////////////////////////////////////////////////////////////////
 // scanner
 
-class Token : public ScannerToken {
+struct Token : public ScannerToken {
 public:
   ExpressionPtr exp;
   StatementPtr stmt;
@@ -113,7 +113,7 @@ public:
 
 DECLARE_BOOST_TYPES(Parser);
 
-class Parser : public ParserBase {
+struct Parser : public ParserBase {
 public:
   static StatementListPtr ParseString(const String& input, AnalysisResultPtr ar,
                                       const char *fileName = nullptr,
@@ -480,7 +480,7 @@ private:
    * We use it instead a regular map because it lazily imports a bunch of
    * names into the current namespace when appropriate.
    */
-  class AliasTable {
+  struct AliasTable {
   public:
     struct AliasEntry {
       std::string alias;

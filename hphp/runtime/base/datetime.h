@@ -33,7 +33,7 @@ namespace HPHP {
  * Encapsulating all date/time manipulations, conversions, input and output
  * into this one single class.
  */
-class DateTime final : public SweepableResourceData {
+struct DateTime final : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(DateTime);
 

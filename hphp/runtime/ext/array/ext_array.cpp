@@ -2348,7 +2348,7 @@ private:
 IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
-class ArraySortTmp {
+struct ArraySortTmp {
  public:
   explicit ArraySortTmp(Array& arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr.get()->escalateForSort(sf);
@@ -2763,7 +2763,7 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
   Native::registerConstant<KindOfInt64>(makeStaticString("ARRAY_" #option),    \
                                        (value));
 
-class ArrayExtension final : public Extension {
+struct ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
   void moduleInit() override {

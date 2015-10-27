@@ -70,7 +70,7 @@ constexpr unsigned kHostCallCountOffset = 1 * kInstructionSize;
 // The proper way to initialize a simulated system register (such as NZCV) is as
 // follows:
 //  SimSystemRegister nzcv = SimSystemRegister::DefaultValueFor(NZCV);
-class SimSystemRegister {
+struct SimSystemRegister {
  public:
   // The default constructor represents a register which has no writable bits.
   // It is not possible to set its value to anything other than 0.
@@ -119,7 +119,7 @@ class SimSystemRegister {
   uint32_t write_ignore_mask_;
 };
 
-class Simulator : public DecoderVisitor {
+struct Simulator : public DecoderVisitor {
  public:
   explicit Simulator(Decoder* decoder, std::ostream& stream);
   ~Simulator();

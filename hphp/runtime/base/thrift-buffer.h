@@ -24,8 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class Object;
+struct Array;
+struct Object;
 struct Variant;
 
 /**
@@ -34,7 +34,7 @@ struct Variant;
  *
  *   thrift --gen hphp my_service.thrift
  */
-class ThriftBuffer {
+struct ThriftBuffer {
 public:
   enum TType {
     T_STOP   = 0,

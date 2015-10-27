@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_haval : public HashEngine {
+struct hash_haval : public HashEngine {
 public:
   hash_haval(int type, int digest);
 

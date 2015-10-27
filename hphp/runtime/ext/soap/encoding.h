@@ -189,7 +189,7 @@ struct soapMapping {
 
 struct sdlType;
 
-class encodeType {
+struct encodeType {
 public:
   encodeType() : type(0), sdl_type(NULL) {}
 

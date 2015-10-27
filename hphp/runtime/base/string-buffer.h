@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class File;
+struct File;
 
 struct StringBufferLimitException : FatalErrorException {
   StringBufferLimitException(int size, const String& partialResult)

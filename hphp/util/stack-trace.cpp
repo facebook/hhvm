@@ -220,7 +220,7 @@ std::string StackTrace::hexEncode(int minLevel /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // crash log
 
-class StackTraceLog {
+struct StackTraceLog {
 public:
   hphp_string_map<std::string> data;
 

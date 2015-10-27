@@ -1170,7 +1170,7 @@ const StaticString
 #define FBUNS(cns) Native::registerConstant<KindOfInt64> \
   (s_FBUNS_##cns.get(), FB_UNSERIALIZE_##cns)
 
-class FBExtension : public Extension {
+struct FBExtension : public Extension {
  public:
   FBExtension(): Extension("fb", "1.0.0") {}
 

@@ -34,7 +34,7 @@ namespace HPHP {
 IMPLEMENT_RESOURCE_ALLOCATION(TimeZone)
 ///////////////////////////////////////////////////////////////////////////////
 
-class GuessedTimeZone {
+struct GuessedTimeZone {
 public:
   std::string m_tzid;
   std::string m_warning;
@@ -79,7 +79,7 @@ static GuessedTimeZone s_guessed_timezone;
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-class TimeZoneData {
+struct TimeZoneData {
 public:
   TimeZoneData() : Database(nullptr) {}
 

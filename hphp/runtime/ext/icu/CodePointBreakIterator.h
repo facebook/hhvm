@@ -12,7 +12,7 @@
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 
-class CodePointBreakIterator : public icu::BreakIterator {
+struct CodePointBreakIterator : public icu::BreakIterator {
  public:
   static UClassID getStaticClassID();
   UClassID getDynamicClassID(void) const override;

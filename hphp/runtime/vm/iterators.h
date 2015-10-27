@@ -45,7 +45,7 @@ struct class_iterator : boost::iterator_facade<class_iterator,
   }
 
 private:
-  friend class boost::iterator_core_access;
+  friend struct boost::iterator_core_access;
 
   /////////////////////////////////////////////////////////////////////////////
   // boost::iterator_facade methods.

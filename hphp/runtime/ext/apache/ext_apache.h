@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-class ApacheExtension final : public Extension {
+struct ApacheExtension final : public Extension {
  public:
   ApacheExtension();
   virtual ~ApacheExtension();

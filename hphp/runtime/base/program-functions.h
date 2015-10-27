@@ -77,7 +77,7 @@ std::string get_right_option_name(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ExecutionContext;
+struct ExecutionContext;
 
 void hphp_process_init();
 void hphp_session_init();

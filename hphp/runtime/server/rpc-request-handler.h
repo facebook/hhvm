@@ -23,12 +23,12 @@
 
 namespace HPHP {
 
-class SourceRootInfo;
-class RequestURI;
-class Transport;
+struct SourceRootInfo;
+struct RequestURI;
+struct Transport;
 ///////////////////////////////////////////////////////////////////////////////
 
-class RPCRequestHandler : public RequestHandler {
+struct RPCRequestHandler : public RequestHandler {
 public:
   static AccessLog &GetAccessLog() { return s_accessLog; }
 

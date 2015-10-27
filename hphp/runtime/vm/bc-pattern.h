@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-class Func;
+struct Func;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -43,11 +43,11 @@ class Func;
  * To use this class, instantiate a BCPattern with a list of opcodes and
  * metacharacters, then matchAnchored() on a PC.
  */
-class BCPattern {
+struct BCPattern {
 public:
   ////////////////////////////////////////////////////////////////////
 
-  class Atom;
+  struct Atom;
 
   typedef std::vector<Atom> Expr;
   typedef std::vector<PC> CaptureVec;
@@ -57,7 +57,7 @@ public:
    *
    * For JmpZ and JmpNZ, also supports pattern matching on the taken branch.
    */
-  class Atom {
+  struct Atom {
   public:
     /* implicit */ Atom(Op op)
       : m_op(op)
@@ -129,7 +129,7 @@ public:
   /**
    * Result of a pattern match.
    */
-  class Result {
+  struct Result {
   public:
     bool found() const  { return m_start; }
 
@@ -154,7 +154,7 @@ public:
     PC m_end{0};
     CaptureVec m_captures;
 
-    friend class BCPattern;
+    friend struct BCPattern;
   };
 
   ////////////////////////////////////////////////////////////////////

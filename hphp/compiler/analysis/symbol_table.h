@@ -30,9 +30,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class BlockScope;
-class CodeGenerator;
-class Variant;
+struct BlockScope;
+struct CodeGenerator;
+struct Variant;
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
@@ -46,11 +46,11 @@ DECLARE_BOOST_TYPES(BlockScope);
 typedef std::set<std::string> SymbolSet;
 typedef std::map<std::string, std::set<std::string> > Type2SymbolSetMap;
 
-class Symbol;
+struct Symbol;
 typedef hphp_string_map<Symbol*> StringToSymbolMap;
 typedef std::vector<Symbol*>     SymbolVec;
 
-class Symbol {
+struct Symbol {
 public:
   Symbol() : m_hash(0), m_parameter(-1) { m_flags_val = 0; }
 
@@ -230,7 +230,7 @@ private:
   ConstructPtr        m_initVal;
 };
 
-class SymParamWrapper : public JSON::DocTarget::ISerializable {
+struct SymParamWrapper : public JSON::DocTarget::ISerializable {
 public:
   explicit SymParamWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
@@ -242,7 +242,7 @@ private:
   const Symbol *m_sym;
 };
 
-class SymClassVarWrapper : public JSON::DocTarget::ISerializable {
+struct SymClassVarWrapper : public JSON::DocTarget::ISerializable {
 public:
   explicit SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
@@ -257,7 +257,7 @@ private:
 /**
  * Base class of VariableTable and ConstantTable.
  */
-class SymbolTable : public std::enable_shared_from_this<SymbolTable>,
+struct SymbolTable : public std::enable_shared_from_this<SymbolTable>,
                     public JSON::CodeError::ISerializable {
 public:
   BlockScope *getScopePtr() const { return &m_blockScope; }

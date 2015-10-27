@@ -145,7 +145,7 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
 
-static class FilterExtension final : public Extension {
+static struct FilterExtension final : public Extension {
 public:
   FilterExtension() : Extension("filter", "0.11.0") {}
 

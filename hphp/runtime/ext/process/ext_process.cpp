@@ -179,7 +179,7 @@ DEFINE_CONSTANT(SIGSTKFLT, SIGSTKFLT);
 #define REGISTER_CONSTANT(name) \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)
 
-static class ProcessExtension final : public Extension {
+static struct ProcessExtension final : public Extension {
 public:
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -459,7 +459,7 @@ static void pcntl_signal_handler(int signo) {
   }
 }
 
-class SignalHandlersStaticInitializer {
+struct SignalHandlersStaticInitializer {
 public:
   SignalHandlersStaticInitializer() {
     signal(SIGALRM, pcntl_signal_handler);
@@ -625,7 +625,7 @@ int64_t HHVM_FUNCTION(pcntl_wtermsig,
 
 namespace {
 
-class ShellExecContext final {
+struct ShellExecContext final {
 public:
   ShellExecContext() {
     m_sig_handler = signal(SIGCHLD, SIG_DFL);
@@ -772,7 +772,7 @@ String HHVM_FUNCTION(system,
 ///////////////////////////////////////////////////////////////////////////////
 // proc
 
-class ChildProcess : public SweepableResourceData {
+struct ChildProcess : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(ChildProcess)
 
@@ -822,7 +822,7 @@ void ChildProcess::sweep() {
 
 const StaticString s_w("w");
 
-class DescriptorItem {
+struct DescriptorItem {
 public:
   DescriptorItem() :
     index(-1), parentend(-1), childend(-1), mode(-1), mode_flags(-1) {

@@ -94,13 +94,13 @@ namespace HPHP {
  */
 namespace ServiceData {
 
-class ExportedCounter;
-class ExportedHistogram;
-class ExportedTimeSeries;
+struct ExportedCounter;
+struct ExportedHistogram;
+struct ExportedTimeSeries;
 
 namespace detail {
 template <class ClassWithPrivateDestructor>
-class FriendDeleter;
+struct FriendDeleter;
 };
 
 enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
@@ -176,7 +176,7 @@ void exportAll(std::map<std::string, int64_t>& statsMap);
 folly::Optional<int64_t> exportCounterByKey(std::string& key);
 
 // Interface for a flat counter. All methods are thread safe.
-class ExportedCounter {
+struct ExportedCounter {
  public:
   ExportedCounter() : m_value(0) {}
   void increment() { m_value.fetch_add(1, std::memory_order_relaxed); }
@@ -190,14 +190,14 @@ class ExportedCounter {
   int64_t getValue() const { return m_value.load(std::memory_order_relaxed); }
 
  private:
-  friend class detail::FriendDeleter<ExportedCounter>;
+  friend struct detail::FriendDeleter<ExportedCounter>;
   ~ExportedCounter() {}
 
   std::atomic_int_fast64_t m_value;
 };
 
 // Interface for timeseries data. All methods are thread safe.
-class ExportedTimeSeries {
+struct ExportedTimeSeries {
  public:
   ExportedTimeSeries(int numBuckets,
                      const std::vector<std::chrono::seconds>& durations,
@@ -213,7 +213,7 @@ class ExportedTimeSeries {
                  std::map<std::string, int64_t>& statsMap);
 
  private:
-  friend class detail::FriendDeleter<ExportedTimeSeries>;
+  friend struct detail::FriendDeleter<ExportedTimeSeries>;
   ~ExportedTimeSeries() {}
 
   folly::Synchronized<folly::MultiLevelTimeSeries<int64_t>,
@@ -222,7 +222,7 @@ class ExportedTimeSeries {
 };
 
 // Interface for histogram data. All methods are thread safe.
-class ExportedHistogram {
+struct ExportedHistogram {
  public:
   ExportedHistogram(int64_t bucketSize, int64_t min, int64_t max,
                     const std::vector<double>& exportPercentiles);
@@ -232,7 +232,7 @@ class ExportedHistogram {
                  std::map<std::string, int64_t>& statsMap);
 
  private:
-  friend class detail::FriendDeleter<ExportedHistogram>;
+  friend struct detail::FriendDeleter<ExportedHistogram>;
   ~ExportedHistogram() {}
 
   folly::Synchronized<folly::Histogram<int64_t>, folly::RWSpinLock> m_histogram;

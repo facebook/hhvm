@@ -35,7 +35,7 @@ typedef std::shared_ptr<timelib_rel_time> DateIntervalPtr;
 /**
  * Handles all date interal related functions.
  */
-class DateInterval : public SweepableResourceData {
+struct DateInterval : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(DateInterval);
   static const StaticString& classnameof() {
@@ -79,7 +79,7 @@ public:
   req::ptr<DateInterval> cloneDateInterval() const;
 
 protected:
-  friend class DateTime;
+  friend struct DateTime;
 
   timelib_rel_time *get() const { return m_di.get(); }
 

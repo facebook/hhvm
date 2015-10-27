@@ -30,14 +30,14 @@ extern "C" {
 
 namespace HPHP {
 
-class Array;
+struct Array;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Handles all timezone related functions.
  */
-class TimeZone : public SweepableResourceData {
+struct TimeZone : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(TimeZone);
 
@@ -117,9 +117,9 @@ public:
   req::ptr<TimeZone> cloneTimeZone() const;
 
 protected:
-  friend class DateTime;
-  friend class TimeStamp;
-  friend class DateInterval;
+  friend struct DateTime;
+  friend struct TimeStamp;
+  friend struct DateInterval;
 
   /**
    * Returns raw pointer. For internal use only.

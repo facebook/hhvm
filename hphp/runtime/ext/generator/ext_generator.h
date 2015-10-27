@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseGenerator
 
-class BaseGenerator {
+struct BaseGenerator {
 public:
   enum class State : uint8_t {
     Created = 0,  // generator was created but never iterated
@@ -142,7 +142,7 @@ static_assert(offsetof(BaseGenerator, m_resumable) == 0,
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Generator
-class Generator final : public BaseGenerator {
+struct Generator final : public BaseGenerator {
 public:
   explicit Generator();
   ~Generator();

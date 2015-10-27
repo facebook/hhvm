@@ -43,7 +43,7 @@ DECLARE_BOOST_TYPES(LoopStatement);
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(ExpressionList);
 
-class CodeGenerator {
+struct CodeGenerator {
 public:
   enum Output {
     InvalidOutput,

@@ -23,7 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestUtil : public TestBase {
+struct TestUtil : public TestBase {
  public:
   TestUtil();
 

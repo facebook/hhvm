@@ -26,7 +26,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlIterator;
 
-class IntlIterator : public IntlError {
+struct IntlIterator : public IntlError {
 public:
   IntlIterator() {}
   IntlIterator(const IntlIterator&) = delete;
@@ -108,7 +108,7 @@ private:
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 // Proxy StringEnumeration for consistent behavior
-class BugStringCharEnumeration : public icu::StringEnumeration
+struct BugStringCharEnumeration : public icu::StringEnumeration
 {
 public:
   explicit BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}

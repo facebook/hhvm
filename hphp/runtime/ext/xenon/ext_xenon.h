@@ -61,7 +61,7 @@
 */
 
 namespace HPHP {
-class Xenon final {
+struct Xenon final {
   public:
 
     enum SampleType {

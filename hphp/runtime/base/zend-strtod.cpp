@@ -369,7 +369,7 @@ typedef struct Bigint Bigint;
 
 void destroy_freelist(Bigint** freelist);
 
-class BigintData {
+struct BigintData {
 public:
   BigintData() : p5s(nullptr) {
     freelist = (Bigint **)calloc(Kmax + 1, sizeof(Bigint *));

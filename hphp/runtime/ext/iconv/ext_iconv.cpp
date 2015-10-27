@@ -1997,7 +1997,7 @@ const StaticString
   s_iconv_impl(iconv_impl()),
   s_iconv_version(iconv_version());
 
-class iconvExtension final : public Extension {
+struct iconvExtension final : public Extension {
 public:
   iconvExtension() : Extension("iconv") {}
 

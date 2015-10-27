@@ -25,7 +25,7 @@
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
-class Wrapper;
+struct Wrapper;
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper);
 bool disableWrapper(const String& scheme);

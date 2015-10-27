@@ -28,7 +28,7 @@
 
 namespace HPHP {
 
-class ServerNameIndication {
+struct ServerNameIndication {
 public:
 
   /**

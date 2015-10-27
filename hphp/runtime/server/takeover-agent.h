@@ -32,7 +32,7 @@ namespace HPHP {
  * A callback to be informed when a server is shutting down because its socket
  * has been taken over by a new process.
  */
-class TakeoverListener {
+struct TakeoverListener {
 public:
   virtual ~TakeoverListener();
   virtual void takeoverShutdown() = 0;
@@ -43,14 +43,14 @@ public:
  * Agent with the ability to take over an accept socket
  * from another process, and give its accept socket up.
  */
-class TakeoverAgent {
+struct TakeoverAgent {
 public:
   enum class RequestType {
     LISTEN_SOCKET,
     TERMINATE,
    };
 
-  class Callback {
+  struct Callback {
    public:
     virtual ~Callback() {}
     // Called by the TakeoverAgent when it receives a request for takeover

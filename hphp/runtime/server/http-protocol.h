@@ -22,12 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class RequestURI;
-class SourceRootInfo;
-class StringBuffer;
-class Variant;
-class VirtualHost;
+struct Array;
+struct RequestURI;
+struct SourceRootInfo;
+struct StringBuffer;
+struct Variant;
+struct VirtualHost;
 
 struct HttpProtocol {
   static const VirtualHost *GetVirtualHost(Transport *transport);

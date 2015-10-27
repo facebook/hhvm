@@ -27,7 +27,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(TraitAliasStatement);
 
-class TraitAliasStatement : public Statement {
+struct TraitAliasStatement : public Statement {
 public:
   TraitAliasStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                       ScalarExpressionPtr traitName,

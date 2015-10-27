@@ -25,7 +25,7 @@ const StaticString s_PASSWORD_DEFAULT("PASSWORD_DEFAULT");
 const int64_t k_PASSWORD_BCRYPT = 1;
 const int64_t k_PASSWORD_DEFAULT = k_PASSWORD_BCRYPT;
 
-class PasswordExtension final : public Extension {
+struct PasswordExtension final : public Extension {
  public:
   PasswordExtension() : Extension("password") {}
   void moduleInit() override {

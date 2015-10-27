@@ -33,7 +33,7 @@ namespace HPHP { namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(ErrorInfo);
-class ErrorInfo : public JSON::CodeError::ISerializable {
+struct ErrorInfo : public JSON::CodeError::ISerializable {
 public:
   ErrorType m_error;
   ConstructPtr m_construct1;
@@ -48,7 +48,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeErrors : public JSON::CodeError::ISerializable {
+struct CodeErrors : public JSON::CodeError::ISerializable {
 public:
   CodeErrors();
   void clear();

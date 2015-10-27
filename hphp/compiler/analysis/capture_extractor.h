@@ -38,7 +38,7 @@ namespace HPHP {
  *  before the query is evaluated and are passed as arguments to the query
  *  processor.
  */
-class CaptureExtractor {
+struct CaptureExtractor {
 public:
 
   ExpressionPtr rewrite(ExpressionPtr ep);

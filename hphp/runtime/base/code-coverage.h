@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 
 struct CodeCoverage {
   void Record(const char* filename, int line0, int line1);

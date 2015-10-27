@@ -34,13 +34,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class AccessLogFileData;
+struct AccessLogFileData;
 struct VirtualHost;
 struct IpBlockMap;
 struct SatelliteServerInfo;
 struct FilesMatch;
 struct Hdf;
-class IniSettingMap;
+struct IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
@@ -48,7 +48,7 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
  * Configurable options set from command line or configurable file at startup
  * time.
  */
-class RuntimeOption {
+struct RuntimeOption {
 public:
   static void Load(
     IniSettingMap &ini, Hdf& config,

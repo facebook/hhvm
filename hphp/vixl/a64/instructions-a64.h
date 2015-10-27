@@ -143,7 +143,7 @@ enum Reg31Mode {
 
 // Instructions. ---------------------------------------------------------------
 
-class Instruction {
+struct Instruction {
  public:
   inline Instr InstructionBits() const {
     return *(reinterpret_cast<const Instr*>(this));

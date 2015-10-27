@@ -31,7 +31,7 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-class c_ConditionWaitHandle final : public c_WaitableWaitHandle {
+struct c_ConditionWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(ConditionWaitHandle)
 

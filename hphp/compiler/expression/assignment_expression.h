@@ -25,7 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(AssignmentExpression);
 struct TypedValue;
 
-class AssignmentExpression : public Expression, public IParseHandler {
+struct AssignmentExpression : public Expression, public IParseHandler {
 public:
   AssignmentExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                        ExpressionPtr variable, ExpressionPtr value,

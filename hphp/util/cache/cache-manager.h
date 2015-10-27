@@ -40,8 +40,8 @@
 
 namespace HPHP {
 
-class CacheData;
-class MmapFile;
+struct CacheData;
+struct MmapFile;
 
 enum class VFileType : uint8_t {
   NotFound = 0,
@@ -49,7 +49,7 @@ enum class VFileType : uint8_t {
   Directory
 };
 
-class CacheManager : private boost::noncopyable {
+struct CacheManager : private boost::noncopyable {
  public:
   CacheManager();
   ~CacheManager();

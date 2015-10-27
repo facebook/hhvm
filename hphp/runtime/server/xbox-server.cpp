@@ -108,7 +108,7 @@ static IMPLEMENT_THREAD_LOCAL(std::shared_ptr<XboxServerInfo>,
   s_xbox_server_info);
 static IMPLEMENT_THREAD_LOCAL(std::string, s_xbox_prev_req_init_doc);
 
-class XboxRequestHandler: public RPCRequestHandler {
+struct XboxRequestHandler: public RPCRequestHandler {
 public:
   XboxRequestHandler() : RPCRequestHandler(
     (*s_xbox_server_info)->getTimeoutSeconds().count(), Info) {}
@@ -331,7 +331,7 @@ bool XboxServer::PostMessage(const String& message,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxTask : public SweepableResourceData {
+struct XboxTask : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(XboxTask)
 

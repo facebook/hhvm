@@ -25,7 +25,7 @@
 namespace HPHP {
 const StaticString s_finfo("finfo");
 
-class FileinfoResource : public SweepableResourceData {
+struct FileinfoResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(FileinfoResource)
   CLASSNAME_IS("file_info")
@@ -250,7 +250,7 @@ const StaticString s_FILEINFO_CONTINUE("FILEINFO_CONTINUE");
 const StaticString s_FILEINFO_PRESERVE_ATIME("FILEINFO_PRESERVE_ATIME");
 const StaticString s_FILEINFO_RAW("FILEINFO_RAW");
 
-class fileinfoExtension final : public Extension {
+struct fileinfoExtension final : public Extension {
  public:
   fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
   void moduleInit() override {

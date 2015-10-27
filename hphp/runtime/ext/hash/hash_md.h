@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_md5 : public HashEngine {
+struct hash_md5 : public HashEngine {
 public:
   hash_md5();
 
@@ -33,7 +33,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_md4 : public HashEngine {
+struct hash_md4 : public HashEngine {
 public:
   hash_md4();
 
@@ -43,7 +43,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_md2 : public HashEngine {
+struct hash_md2 : public HashEngine {
 public:
   hash_md2();
 

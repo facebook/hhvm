@@ -32,7 +32,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestCurlRequestHandler : public RequestHandler {
+struct TestCurlRequestHandler : public RequestHandler {
 public:
   explicit TestCurlRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler

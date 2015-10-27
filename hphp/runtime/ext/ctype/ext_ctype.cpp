@@ -100,7 +100,7 @@ bool HHVM_FUNCTION(ctype_xdigit, const Variant& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CtypeExtension final : public Extension {
+struct CtypeExtension final : public Extension {
  public:
   CtypeExtension() : Extension("ctype") {}
   void moduleInit() override {

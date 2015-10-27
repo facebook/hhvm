@@ -97,7 +97,7 @@ namespace HPHP {
 #define twist(m,u,v) \
   (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
-class RandData {
+struct RandData {
 public:
   RandData()
     : seeded(false), left(0), next(nullptr),

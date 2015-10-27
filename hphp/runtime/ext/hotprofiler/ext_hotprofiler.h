@@ -72,7 +72,7 @@ namespace HPHP {
  * in case they need additional information,
  * and then override allocateFrame().
  */
-class Frame {
+struct Frame {
 public:
   Frame          *m_parent;        // pointer to parent frame
   const char     *m_name;          // function name

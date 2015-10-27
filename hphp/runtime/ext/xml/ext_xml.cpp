@@ -34,7 +34,7 @@
 
 namespace HPHP {
 
-static class XMLExtension final : public Extension {
+static struct XMLExtension final : public Extension {
 public:
   XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -69,7 +69,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XmlParser : public SweepableResourceData {
+struct XmlParser : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(XmlParser)
   XmlParser() {}

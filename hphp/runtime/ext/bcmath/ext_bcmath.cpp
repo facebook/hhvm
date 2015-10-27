@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmath_data {
+struct bcmath_data {
 public:
   bcmath_data() {
     // we can't really call bc_init_numbers() that calls into this constructor
@@ -242,7 +242,7 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmathExtension final : public Extension {
+struct bcmathExtension final : public Extension {
  public:
   bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

@@ -30,7 +30,7 @@ namespace HPHP {
 /**
  * Timing execution of block of codes.
  */
-class Timer {
+struct Timer {
 public:
   enum Type {
     WallTime,
@@ -65,7 +65,7 @@ private:
   int64_t measure() const;
 };
 
-class SlowTimer {
+struct SlowTimer {
 public:
   SlowTimer(int64_t msThreshold, const char *location, const char *info);
   ~SlowTimer();

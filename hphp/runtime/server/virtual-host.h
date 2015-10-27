@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class VirtualHost {
+struct VirtualHost {
 public:
   static VirtualHost &GetDefault();
 

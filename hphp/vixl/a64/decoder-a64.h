@@ -85,7 +85,7 @@ namespace vixl {
 
 // The Visitor interface. Disassembler and simulator (and other tools)
 // must provide implementations for all of these functions.
-class DecoderVisitor {
+struct DecoderVisitor {
  public:
   #define DECLARE(A) virtual void Visit##A(Instruction* instr) = 0;
   VISITOR_LIST(DECLARE)
@@ -97,11 +97,11 @@ class DecoderVisitor {
   // Visitors are registered in a list.
   std::list<DecoderVisitor*> visitors_;
 
-  friend class Decoder;
+  friend struct Decoder;
 };
 
 
-class Decoder: public DecoderVisitor {
+struct Decoder: public DecoderVisitor {
  public:
   Decoder() {}
 

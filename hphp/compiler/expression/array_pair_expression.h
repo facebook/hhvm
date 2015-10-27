@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ArrayPairExpression);
 
-class ArrayPairExpression : public Expression {
+struct ArrayPairExpression : public Expression {
 public:
   ArrayPairExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       ExpressionPtr name, ExpressionPtr value, bool ref,

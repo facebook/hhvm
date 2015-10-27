@@ -548,13 +548,13 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
 #endif
 }
 
-class ApcLoadJob {
+struct ApcLoadJob {
 public:
   ApcLoadJob(void *handle, int index) : m_handle(handle), m_index(index) {}
   void *m_handle; int m_index;
 };
 
-class ApcLoadWorker {
+struct ApcLoadWorker {
 public:
   void onThreadEnter() {}
   void doJob(std::shared_ptr<ApcLoadJob> job) {

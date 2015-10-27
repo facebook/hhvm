@@ -44,7 +44,7 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(ParameterExpression);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-class CodeGenerator;
+struct CodeGenerator;
 
 typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
                                         AnalysisResultConstPtr ar,
@@ -60,7 +60,7 @@ typedef std::vector< ParameterExpressionPtrIdxPair >
  * A FunctionScope corresponds to a function declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-class FunctionScope : public BlockScope,
+struct FunctionScope : public BlockScope,
                       public JSON::CodeError::ISerializable,
                       public JSON::DocTarget::ISerializable {
 public:
@@ -314,7 +314,7 @@ public:
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);
 
-  class FunctionInfo {
+  struct FunctionInfo {
   public:
     explicit FunctionInfo(int rva = -1)
       : m_maybeStatic(false)

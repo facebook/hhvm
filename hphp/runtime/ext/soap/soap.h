@@ -162,7 +162,7 @@ struct soapClass {
   int persistance;
 };
 
-class soapHeader : public ResourceData {
+struct soapHeader : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader);
 
@@ -181,7 +181,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapException : public ExtendedException {
+struct SoapException : public ExtendedException {
 public:
   SoapException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);

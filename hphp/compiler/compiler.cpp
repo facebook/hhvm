@@ -107,7 +107,7 @@ struct CompilerOptions {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class AsyncFileCacheSaver : public AsyncFunc<AsyncFileCacheSaver> {
+struct AsyncFileCacheSaver : public AsyncFunc<AsyncFileCacheSaver> {
 public:
   AsyncFileCacheSaver(Package *package, const char *name)
       : AsyncFunc<AsyncFileCacheSaver>(this, &AsyncFileCacheSaver::saveCache),

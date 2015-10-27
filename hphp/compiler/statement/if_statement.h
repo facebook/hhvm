@@ -25,7 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(IfStatement);
 
-class IfStatement : public Statement {
+struct IfStatement : public Statement {
 public:
   IfStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts);
 

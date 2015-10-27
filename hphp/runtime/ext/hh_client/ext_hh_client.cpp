@@ -19,7 +19,7 @@
 
 namespace HPHP {
 
-static class HHClientExtension final : Extension {
+static struct HHClientExtension final : Extension {
  public:
   HHClientExtension(): Extension("hh_client", NO_EXTENSION_VERSION_YET) { }
 

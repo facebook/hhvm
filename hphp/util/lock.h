@@ -27,7 +27,7 @@ namespace HPHP {
 /**
  * Lock instrumentation for mutex stats.
  */
-class LockProfiler {
+struct LockProfiler {
 public:
   typedef void (*PFUNC_PROFILE)(const std::string &stack, int64_t elapsed_us);
   static PFUNC_PROFILE s_pfunc_profile;
@@ -45,7 +45,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename MutexT>
-class BaseConditionalLock {
+struct BaseConditionalLock {
 public:
   BaseConditionalLock(MutexT &mutex, bool condition, bool profile = true)
     : m_profiler(profile), m_mutex(mutex), m_acquired(false) {
@@ -65,7 +65,7 @@ private:
   bool         m_acquired;
 };
 
-class ConditionalLock : public BaseConditionalLock<Mutex> {
+struct ConditionalLock : public BaseConditionalLock<Mutex> {
 public:
   ConditionalLock(Mutex &mutex,
                   bool condition, bool profile = true)
@@ -90,7 +90,7 @@ public:
  *   // inside lock
  * } // unlock here
  */
-class Lock : public ConditionalLock {
+struct Lock : public ConditionalLock {
 public:
   explicit Lock(Mutex &mutex, bool profile = true)
     : ConditionalLock(mutex, true, profile) {}
@@ -100,7 +100,7 @@ public:
     : ConditionalLock(obj, true, profile) {}
 };
 
-class ScopedUnlock {
+struct ScopedUnlock {
 public:
   explicit ScopedUnlock(Mutex &mutex) : m_mutex(mutex) {
     m_mutex.unlock();
@@ -120,7 +120,7 @@ private:
   Mutex &m_mutex;
 };
 
-class SimpleConditionalLock : public BaseConditionalLock<SimpleMutex> {
+struct SimpleConditionalLock : public BaseConditionalLock<SimpleMutex> {
 public:
   SimpleConditionalLock(SimpleMutex &mutex,
                         bool condition, bool profile = true)
@@ -132,7 +132,7 @@ public:
   }
 };
 
-class SimpleLock : public SimpleConditionalLock {
+struct SimpleLock : public SimpleConditionalLock {
 public:
   explicit SimpleLock(SimpleMutex &mutex, bool profile = true)
     : SimpleConditionalLock(mutex, true, profile) {}

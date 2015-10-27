@@ -31,7 +31,7 @@
 
 namespace vixl {
 
-class CPU {
+struct CPU {
  public:
   // Initialise CPU support.
   static void SetUp();

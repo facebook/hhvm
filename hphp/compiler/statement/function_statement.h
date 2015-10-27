@@ -28,7 +28,7 @@ DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FunctionStatement);
 
-class FunctionStatement : public MethodStatement {
+struct FunctionStatement : public MethodStatement {
 public:
   FunctionStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                     ModifierExpressionPtr modifiers, bool ref,

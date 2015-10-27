@@ -42,7 +42,7 @@ extern const int64_t k_SQLITE3_OPEN_CREATE;
 ///////////////////////////////////////////////////////////////////////////////
 // class SQLite3
 
-class SQLite3 {
+struct SQLite3 {
 public:
   SQLite3();
   ~SQLite3();
@@ -111,7 +111,7 @@ bool HHVM_METHOD(SQLite3, openblob,
 ///////////////////////////////////////////////////////////////////////////////
 // class SQLite3Stmt
 
-class SQLite3Stmt {
+struct SQLite3Stmt {
 public:
   SQLite3Stmt();
   ~SQLite3Stmt();
@@ -151,7 +151,7 @@ Variant HHVM_METHOD(SQLite3Stmt, execute);
 ///////////////////////////////////////////////////////////////////////////////
 // class SQLite3Result
 
-class SQLite3Result {
+struct SQLite3Result {
 public:
   SQLite3Result();
   void validate() const;

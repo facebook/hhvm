@@ -51,7 +51,7 @@ enum CounterType {
 };
 
 
-class Counter {
+struct Counter {
  public:
   explicit Counter(const char* name, CounterType type = Gauge);
   ~Counter() { }
@@ -72,7 +72,7 @@ class Counter {
 };
 
 
-class Instrument: public DecoderVisitor {
+struct Instrument: public DecoderVisitor {
  public:
   explicit Instrument(const char* datafile = nullptr,
     uint64_t sample_period = kDefaultInstrumentationSamplingPeriod);

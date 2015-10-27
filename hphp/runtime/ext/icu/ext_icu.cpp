@@ -131,7 +131,7 @@ static Variant HHVM_FUNCTION(icu_match, const String& pattern,
 // Need to have a valid installation of the transliteration data in /lib64.
 // Initialization will be taken care of by ext_array which also uses icu.
 
-class TransliteratorWrapper {
+struct TransliteratorWrapper {
 public:
   void initialize() {
     UnicodeString basicID("Any-Latin ; NFKD; [:nonspacing mark:] Remove");
@@ -222,19 +222,19 @@ std::string icuStringToUTF8(const UnicodeString& ustr) {
 
 
 // Regex matchers for spaces and numbers.
-class SpaceMatcher : public ICUMatcher {
+struct SpaceMatcher : public ICUMatcher {
 public:
   SpaceMatcher() { set("^\\s+$"); }
 };
 
-class NumMatcher : public ICUMatcher {
+struct NumMatcher : public ICUMatcher {
 public:
   NumMatcher() { set("\\d"); }
 };
 
 
 // Transliterator to convert UnicodeStrings to lower case.
-class LowerCaseTransliterator : public ICUTransliterator {
+struct LowerCaseTransliterator : public ICUTransliterator {
 public:
   LowerCaseTransliterator() { set("Upper; Lower;"); }
 };

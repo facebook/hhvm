@@ -31,7 +31,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MCrypt : public SweepableResourceData {
+struct MCrypt : public SweepableResourceData {
 public:
   explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {}
 
@@ -70,7 +70,7 @@ typedef enum {
   RAND
 } iv_source;
 
-class mcrypt_data {
+struct mcrypt_data {
 public:
   std::string algorithms_dir;
   std::string modes_dir;
@@ -770,7 +770,7 @@ const StaticString s_MCRYPT_TWOFISH("MCRYPT_TWOFISH");
 const StaticString s_MCRYPT_WAKE("MCRYPT_WAKE");
 const StaticString s_MCRYPT_XTEA("MCRYPT_XTEA");
 
-class McryptExtension final : public Extension {
+struct McryptExtension final : public Extension {
  public:
   McryptExtension() : Extension("mcrypt") {}
   void moduleInit() override {

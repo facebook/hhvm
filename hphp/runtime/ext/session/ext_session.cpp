@@ -71,7 +71,7 @@ static bool mod_is_open();
 ///////////////////////////////////////////////////////////////////////////////
 // global data
 
-class SessionSerializer;
+struct SessionSerializer;
 struct Session {
   enum Status {
     Disabled,
@@ -489,19 +489,19 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
 //////////////////////////////////////////////////////////////////////////////
 // SystemlibSessionModule implementations
 
-static class RedisSessionModule : public SystemlibSessionModule {
+static struct RedisSessionModule : public SystemlibSessionModule {
  public:
   RedisSessionModule() :
     SystemlibSessionModule("redis", "RedisSessionModule") { }
 } s_redis_session_module;
 
-static class MemcacheSessionModule : public SystemlibSessionModule {
+static struct MemcacheSessionModule : public SystemlibSessionModule {
  public:
   MemcacheSessionModule() :
     SystemlibSessionModule("memcache", "MemcacheSessionModule") { }
 } s_memcache_session_module;
 
-static class MemcachedSessionModule : public SystemlibSessionModule {
+static struct MemcachedSessionModule : public SystemlibSessionModule {
  public:
   MemcachedSessionModule() :
     SystemlibSessionModule("memcached", "MemcachedSessionModule") { }
@@ -510,7 +510,7 @@ static class MemcachedSessionModule : public SystemlibSessionModule {
 //////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
-class FileSessionData {
+struct FileSessionData {
 public:
   FileSessionData() : m_fd(-1), m_dirdepth(0), m_st_size(0), m_filemode(0600) {
   }
@@ -846,7 +846,7 @@ private:
 };
 IMPLEMENT_THREAD_LOCAL(FileSessionData, s_file_session_data);
 
-class FileSessionModule : public SessionModule {
+struct FileSessionModule : public SessionModule {
 public:
   FileSessionModule() : SessionModule("files") {
   }
@@ -874,7 +874,7 @@ static FileSessionModule s_file_session_module;
 ///////////////////////////////////////////////////////////////////////////////
 // UserSessionModule
 
-class UserSessionModule : public SessionModule {
+struct UserSessionModule : public SessionModule {
  public:
   UserSessionModule() : SessionModule("user") {}
 
@@ -949,7 +949,7 @@ static UserSessionModule s_user_session_module;
 ///////////////////////////////////////////////////////////////////////////////
 // session serializers
 
-class SessionSerializer {
+struct SessionSerializer {
 public:
   explicit SessionSerializer(const char *name) : m_name(name) {
     RegisteredSerializers.push_back(this);
@@ -982,7 +982,7 @@ std::vector<SessionSerializer*> SessionSerializer::RegisteredSerializers;
 #define PS_BIN_UNDEF (1<<(PS_BIN_NR_OF_BITS-1))
 #define PS_BIN_MAX (PS_BIN_UNDEF-1)
 
-class BinarySessionSerializer : public SessionSerializer {
+struct BinarySessionSerializer : public SessionSerializer {
 public:
   BinarySessionSerializer() : SessionSerializer("php_binary") {}
 
@@ -1038,7 +1038,7 @@ static BinarySessionSerializer s_binary_session_serializer;
 #define PS_DELIMITER '|'
 #define PS_UNDEF_MARKER '!'
 
-class PhpSessionSerializer : public SessionSerializer {
+struct PhpSessionSerializer : public SessionSerializer {
 public:
   PhpSessionSerializer() : SessionSerializer("php") {}
 
@@ -1100,7 +1100,7 @@ public:
 };
 static PhpSessionSerializer s_php_session_serializer;
 
-class PhpSerializeSessionSerializer : public SessionSerializer {
+struct PhpSerializeSessionSerializer : public SessionSerializer {
 public:
   PhpSerializeSessionSerializer() : SessionSerializer("php_serialize") {}
 
@@ -1125,7 +1125,7 @@ public:
 };
 static PhpSerializeSessionSerializer s_php_serialize_session_serializer;
 
-class WddxSessionSerializer : public SessionSerializer {
+struct WddxSessionSerializer : public SessionSerializer {
 public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
@@ -1866,7 +1866,7 @@ const StaticString s_PHP_SESSION_DISABLED("PHP_SESSION_DISABLED");
 const StaticString s_PHP_SESSION_NONE("PHP_SESSION_NONE");
 const StaticString s_PHP_SESSION_ACTIVE("PHP_SESSION_ACTIVE");
 
-static class SessionExtension final : public Extension {
+static struct SessionExtension final : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {

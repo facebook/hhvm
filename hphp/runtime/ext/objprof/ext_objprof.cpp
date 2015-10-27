@@ -951,7 +951,7 @@ Array HHVM_FUNCTION(thread_memory_stats, void) {
 
 }
 
-class objprofExtension final : public Extension {
+struct objprofExtension final : public Extension {
 public:
   objprofExtension() : Extension("objprof", "1.0") { }
 

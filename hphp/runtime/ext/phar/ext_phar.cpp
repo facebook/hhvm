@@ -39,7 +39,7 @@ static const StaticString
   s_mode("mode"),
   s_opendir("opendir");
 
-static class PharStreamWrapper : public Stream::Wrapper {
+static struct PharStreamWrapper : public Stream::Wrapper {
  public:
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,
@@ -127,7 +127,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
 } s_phar_stream_wrapper;
 
-class pharExtension final : public Extension {
+struct pharExtension final : public Extension {
  public:
   pharExtension() : Extension("phar") {}
   void moduleInit() override {

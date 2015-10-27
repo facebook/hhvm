@@ -53,7 +53,7 @@ struct TCRegionRec {
   uint32_t len;
 };
 
-class OfflineX86Code {
+struct OfflineX86Code {
 
 public:
 

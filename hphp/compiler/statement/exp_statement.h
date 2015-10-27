@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ExpStatement);
 
-class ExpStatement : public Statement, public IParseHandler {
+struct ExpStatement : public Statement, public IParseHandler {
 public:
   ExpStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 

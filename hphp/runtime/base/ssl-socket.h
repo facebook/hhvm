@@ -106,7 +106,7 @@ struct SSLSocketData : SocketData {
   virtual bool closeImpl();
   ~SSLSocketData();
 private:
-  friend class SSLSocket;
+  friend struct SSLSocket;
   bool m_ssl_active{false};
   bool m_client{false};
   bool m_enable_on_connect{false};
@@ -120,7 +120,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // helper class
 
-class Certificate : public SweepableResourceData {
+struct Certificate : public SweepableResourceData {
 public:
   X509 *m_cert;
   explicit Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}

@@ -41,7 +41,7 @@ extern const StaticString q_DateTime$$RFC3339;
 extern const StaticString q_DateTime$$RSS;
 extern const StaticString q_DateTime$$W3C;
 
-class DateTimeData {
+struct DateTimeData {
 public:
   DateTimeData() {}
   DateTimeData(const DateTimeData&) = delete;
@@ -133,7 +133,7 @@ extern const int64_t q_DateTimeZone$$ALL;
 extern const int64_t q_DateTimeZone$$ALL_WITH_BC;
 extern const int64_t q_DateTimeZone$$PER_COUNTRY;
 
-class DateTimeZoneData {
+struct DateTimeZoneData {
 public:
   DateTimeZoneData() {}
   DateTimeZoneData(const DateTimeZoneData&) = delete;
@@ -171,7 +171,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
 
-class DateIntervalData {
+struct DateIntervalData {
 public:
   DateIntervalData() {}
   DateIntervalData(const DateIntervalData&) = delete;

@@ -36,7 +36,7 @@
 namespace HPHP {
 
 
-class AsioExtension final : public Extension {
+struct AsioExtension final : public Extension {
 public:
   AsioExtension() : Extension("asio", "0.1") {}
 

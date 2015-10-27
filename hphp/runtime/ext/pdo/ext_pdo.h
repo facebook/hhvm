@@ -197,7 +197,7 @@ const StaticString s_ERR_NONE("ERR_NONE");
 ///////////////////////////////////////////////////////////////////////////////
 // class PDO
 
-class PDOData {
+struct PDOData {
  public:
   public: sp_PDOResource m_dbh;
 };
@@ -205,7 +205,7 @@ class PDOData {
 ///////////////////////////////////////////////////////////////////////////////
 // class PDOStatement
 
-class PDOStatementData {
+struct PDOStatementData {
  public:
   public: PDOStatementData();
   public: ~PDOStatementData();

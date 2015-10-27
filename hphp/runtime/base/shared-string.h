@@ -29,7 +29,7 @@ namespace HPHP {
 /**
  * Interned immutable strings sharable across threads.
  */
-class SharedStringData {
+struct SharedStringData {
 public:
   explicit SharedStringData(const std::string &data);
   void incAtomicCount() const {
@@ -47,7 +47,7 @@ protected:
   static InternMap s_intern;
 };
 
-class SharedString : public AtomicSharedPtr<SharedStringData> {
+struct SharedString : public AtomicSharedPtr<SharedStringData> {
 public:
   SharedString() {}
   /* implicit */ SharedString(SharedStringData *px)
@@ -81,7 +81,7 @@ struct shared_string_hash {
 };
 
 template<typename T>
-class hphp_shared_string_map :
+struct hphp_shared_string_map :
     public hphp_hash_map<SharedString, T, shared_string_hash,
                          shared_string_eq> {
 };

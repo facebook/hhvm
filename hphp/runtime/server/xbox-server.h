@@ -27,12 +27,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 struct XboxServerInfo;
-class RPCRequestHandler;
-class XboxTransport;
+struct RPCRequestHandler;
+struct XboxTransport;
 
-class XboxServer {
+struct XboxServer {
 public:
   /**
    * Start or restart xbox server.
@@ -69,7 +69,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxServerInfo : public SatelliteServerInfo {
+struct XboxServerInfo : public SatelliteServerInfo {
 public:
   XboxServerInfo() : SatelliteServerInfo(IniSetting::Map::object, Hdf()) {
     m_type = SatelliteServer::Type::KindOfXboxServer;
@@ -92,7 +92,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxTransport : public Transport, public Synchronizable {
+struct XboxTransport : public Transport, public Synchronizable {
 public:
   explicit XboxTransport(const String& message, const String& reqInitDoc = "");
 

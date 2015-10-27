@@ -85,7 +85,7 @@
 
 namespace HPHP {
 
-class CacheSaver : private boost::noncopyable {
+struct CacheSaver : private boost::noncopyable {
  public:
   struct DirEntry {
     uint64_t id;

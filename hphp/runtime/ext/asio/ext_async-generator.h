@@ -25,14 +25,14 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-class c_AsyncGeneratorWaitHandle;
-class c_StaticWaitHandle;
-class c_WaitableWaitHandle;
+struct c_AsyncGeneratorWaitHandle;
+struct c_StaticWaitHandle;
+struct c_WaitableWaitHandle;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator
 
-class AsyncGenerator final : public BaseGenerator {
+struct AsyncGenerator final : public BaseGenerator {
 public:
    AsyncGenerator() : m_waitHandle(nullptr) {}
   ~AsyncGenerator();

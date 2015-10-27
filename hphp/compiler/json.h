@@ -33,10 +33,10 @@ struct AnalysisResult;
 namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename T> class _OutputStream;
-template <typename T> class _MapStream;
-template <typename T> class _ListStream;
-template <typename T> class _ISerializable;
+template <typename T> struct _OutputStream;
+template <typename T> struct _MapStream;
+template <typename T> struct _ListStream;
+template <typename T> struct _ISerializable;
 
 #define DEFINE_JSON_OUTPUT_TYPE(type) \
   struct type { \
@@ -52,7 +52,7 @@ DEFINE_JSON_OUTPUT_TYPE(DocTarget);
 std::string Escape(const char *s);
 
 template <typename T>
-class _ISerializable {
+struct _ISerializable {
 public:
   virtual ~_ISerializable() {}
 
@@ -62,7 +62,7 @@ public:
   virtual void serialize(_OutputStream<T> &out) const = 0;
 };
 
-class Name {
+struct Name {
 public:
   explicit Name(const char *name) {
     assert(name && *name);
@@ -82,7 +82,7 @@ private:
 enum class Null {};
 
 template <typename Type>
-class _OutputStream {
+struct _OutputStream {
 public:
   _OutputStream(std::ostream &out,
                 std::shared_ptr<AnalysisResult> ar) : m_out(out), m_ar(ar) {}
@@ -198,7 +198,7 @@ private:
 };
 
 template <typename Type>
-class _MapStream {
+struct _MapStream {
 public:
   explicit _MapStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}
@@ -239,7 +239,7 @@ private:
 };
 
 template <typename Type>
-class _ListStream {
+struct _ListStream {
 public:
   explicit _ListStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}

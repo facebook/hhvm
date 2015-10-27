@@ -24,7 +24,7 @@
 /**
  * Testing PHP -> C++ -> execution.
  */
-class TestCodeRun : public TestBase {
+struct TestCodeRun : public TestBase {
  public:
   TestCodeRun();
 

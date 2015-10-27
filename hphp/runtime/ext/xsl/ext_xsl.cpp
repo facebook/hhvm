@@ -714,7 +714,7 @@ const StaticString s_xslt_version("LIBXSLT_VERSION");
 const StaticString s_xslt_dotted_version("LIBXSLT_DOTTED_VERSION");
 const StaticString s_xslt_dotted_version_value(LIBXSLT_DOTTED_VERSION);
 
-class XSLExtension final : public Extension {
+struct XSLExtension final : public Extension {
   public:
     XSLExtension() : Extension("xsl", "0.1") {};
 

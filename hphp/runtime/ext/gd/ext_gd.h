@@ -34,7 +34,7 @@ struct gfxinfo {
   unsigned int channels;
 };
 
-class Image : public SweepableResourceData {
+struct Image : public SweepableResourceData {
 public:
   Image() : m_gdImage(nullptr) {}
   explicit Image(gdImagePtr gdImage) : m_gdImage(gdImage) {}

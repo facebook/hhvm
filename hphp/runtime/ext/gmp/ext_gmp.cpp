@@ -1423,7 +1423,7 @@ void GMPData::setGMPMpz(const mpz_t data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
-class GMPExtension final : public Extension {
+struct GMPExtension final : public Extension {
 public:
   GMPExtension() : Extension("gmp", "2.0.0-hhvm") { };
   void moduleInit() override {

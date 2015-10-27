@@ -33,7 +33,7 @@ struct ActRec;
  * execution of PHP code that can be resumed once the result of awaited
  * WaitHandle becomes available.
  */
-class c_ResumableWaitHandle : public c_WaitableWaitHandle {
+struct c_ResumableWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(ResumableWaitHandle)
 

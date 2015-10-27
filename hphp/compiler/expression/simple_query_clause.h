@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(SimpleQueryClause);
 
-class SimpleQueryClause : public Expression {
+struct SimpleQueryClause : public Expression {
 public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
@@ -42,7 +42,7 @@ protected:
 
 DECLARE_BOOST_TYPES(FromClause);
 
-class FromClause : public SimpleQueryClause {
+struct FromClause : public SimpleQueryClause {
 public:
   FromClause(EXPRESSION_CONSTRUCTOR_PARAMETERS,
              const std::string &identifier, ExpressionPtr collection)
@@ -63,7 +63,7 @@ public:
 
 DECLARE_BOOST_TYPES(LetClause);
 
-class LetClause : public SimpleQueryClause {
+struct LetClause : public SimpleQueryClause {
 public:
   LetClause(EXPRESSION_CONSTRUCTOR_PARAMETERS,
             const std::string &identifier, ExpressionPtr expression)
@@ -84,7 +84,7 @@ public:
 
 DECLARE_BOOST_TYPES(WhereClause);
 
-class WhereClause : public SimpleQueryClause {
+struct WhereClause : public SimpleQueryClause {
 public:
   WhereClause(EXPRESSION_CONSTRUCTOR_PARAMETERS,
               ExpressionPtr condition)
@@ -105,7 +105,7 @@ public:
 
 DECLARE_BOOST_TYPES(SelectClause);
 
-class SelectClause : public SimpleQueryClause {
+struct SelectClause : public SimpleQueryClause {
 public:
   SelectClause(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                ExpressionPtr expression)
@@ -126,7 +126,7 @@ public:
 
 DECLARE_BOOST_TYPES(IntoClause);
 
-class IntoClause : public SimpleQueryClause {
+struct IntoClause : public SimpleQueryClause {
 public:
   IntoClause(EXPRESSION_CONSTRUCTOR_PARAMETERS,
              const std::string &identifier, ExpressionPtr query)

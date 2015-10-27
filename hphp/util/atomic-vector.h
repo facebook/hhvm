@@ -44,7 +44,7 @@ namespace HPHP {
  */
 
 template<typename Value>
-class AtomicVector {
+struct AtomicVector {
  public:
   AtomicVector(size_t size, const Value& def);
   ~AtomicVector();

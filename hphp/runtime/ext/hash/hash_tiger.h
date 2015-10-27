@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_tiger : public HashEngine {
+struct hash_tiger : public HashEngine {
 public:
   hash_tiger(bool tiger3, int digest, bool invert = false);
 

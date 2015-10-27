@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_sha1 : public HashEngine {
+struct hash_sha1 : public HashEngine {
 public:
   hash_sha1();
 
@@ -33,7 +33,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_sha256 : public HashEngine {
+struct hash_sha256 : public HashEngine {
 public:
   explicit hash_sha256(int size = 32);
 
@@ -46,7 +46,7 @@ public:
 /* sha224 is just sha256 with a different initial vector
  * and a truncated output.
  */
-class hash_sha224 : public hash_sha256 {
+struct hash_sha224 : public hash_sha256 {
 public:
   hash_sha224() : hash_sha256(28) {}
 
@@ -54,7 +54,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_sha384 : public HashEngine {
+struct hash_sha384 : public HashEngine {
 public:
   hash_sha384();
 
@@ -64,7 +64,7 @@ public:
   virtual void hash_final(unsigned char *digest, void *context);
 };
 
-class hash_sha512 : public HashEngine {
+struct hash_sha512 : public HashEngine {
 public:
   hash_sha512();
 

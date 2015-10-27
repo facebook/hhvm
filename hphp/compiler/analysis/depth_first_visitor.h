@@ -35,7 +35,7 @@ inline int GetPhaseInterestMask() {
 
 template <typename When,
           template <typename> class T>
-class DepthFirstVisitor {
+struct DepthFirstVisitor {
 public:
   DepthFirstVisitor(T<When> d) : m_data(d) {
     setup();

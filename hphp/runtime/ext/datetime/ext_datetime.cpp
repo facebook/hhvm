@@ -859,7 +859,7 @@ Variant date_sunrise_sunset(int64_t numArgs,
     DateTimeZoneData::s_className.get(), s_DateTimeZone$$##name.get(),         \
     q_DateTimeZone$$##name)                                                    \
 
-static class DateTimeExtension final : public Extension {
+static struct DateTimeExtension final : public Extension {
 public:
   DateTimeExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
 

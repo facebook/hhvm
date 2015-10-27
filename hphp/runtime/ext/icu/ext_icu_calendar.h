@@ -27,7 +27,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlCalendar;
 
-class IntlCalendar : public IntlError {
+struct IntlCalendar : public IntlError {
  public:
   IntlCalendar() {}
   IntlCalendar(const IntlCalendar&) = delete;

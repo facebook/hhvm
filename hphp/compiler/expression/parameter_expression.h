@@ -30,7 +30,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ParameterExpression);
 DECLARE_BOOST_TYPES(TypeAnnotation);
 
-class ParameterExpression : public Expression {
+struct ParameterExpression : public Expression {
 public:
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       TypeAnnotationPtr type,

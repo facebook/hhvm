@@ -34,9 +34,9 @@ namespace HPHP {
 /**
  * Taking a stacktrace at current execution location.
  */
-class StackTraceBase {
+struct StackTraceBase {
 public:
-  class Frame {
+  struct Frame {
   public:
     explicit Frame(void *_bt) : bt(_bt), lineno(0), offset(0) {}
 
@@ -75,9 +75,9 @@ protected:
 
 };
 
-class StackTrace : public StackTraceBase {
+struct StackTrace : public StackTraceBase {
 public:
-  class Frame : public StackTraceBase::Frame {
+  struct Frame : public StackTraceBase::Frame {
   public:
     explicit Frame(void *_bt) : StackTraceBase::Frame(_bt) {}
     std::string filename;
@@ -144,7 +144,7 @@ private:
 };
 
 // Do not use heap here, so this will still work if called during a heap error
-class StackTraceNoHeap : public StackTraceBase {
+struct StackTraceNoHeap : public StackTraceBase {
 public:
   /**
    * Constructor, and this will save current stack trace if trace is true.
@@ -164,7 +164,7 @@ public:
   static void AddExtraLogging(const char *name, const std::string &value);
   static void ClearAllExtraLogging();
 
-  class ExtraLoggingClearer {
+  struct ExtraLoggingClearer {
   public:
     ExtraLoggingClearer() {}
     ~ExtraLoggingClearer() { StackTraceNoHeap::ClearAllExtraLogging();}

@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-class Shape {
+struct Shape {
 public:
   static Shape* emptyShape();
   static Shape* create(StringData** properties, uint32_t numProperties);

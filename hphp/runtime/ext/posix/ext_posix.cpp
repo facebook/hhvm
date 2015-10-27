@@ -74,7 +74,7 @@ DEFINE_POSIX_CONSTANT(R_OK);
 #define REGISTER_POSIX_CONSTANT(name)                                          \
   Native::registerConstant<KindOfInt64>(s_POSIX_##name.get(), k_POSIX_##name)  \
 
-static class POSIXExtension final : public Extension {
+static struct POSIXExtension final : public Extension {
 public:
   POSIXExtension() : Extension("posix", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-class WddxPacket: public ResourceData {
+struct WddxPacket: public ResourceData {
  public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(WddxPacket);
 

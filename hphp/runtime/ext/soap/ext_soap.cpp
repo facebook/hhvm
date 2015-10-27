@@ -61,7 +61,7 @@ Class* cls::getClass() {                                                       \
 
 using std::string;
 
-class SoapScope {
+struct SoapScope {
 public:
   SoapScope() {
     USE_SOAP_GLOBAL;
@@ -88,7 +88,7 @@ private:
   int m_old_soap_version;
 };
 
-class SoapServerScope : public SoapScope {
+struct SoapServerScope : public SoapScope {
 public:
   explicit SoapServerScope(ObjectData *server) {
     USE_SOAP_GLOBAL;
@@ -97,7 +97,7 @@ public:
   }
 };
 
-class SoapClientScope : public SoapScope {
+struct SoapClientScope : public SoapScope {
 public:
   explicit SoapClientScope(ObjectData *client) {
     USE_SOAP_GLOBAL;
@@ -106,7 +106,7 @@ public:
   }
 };
 
-class SoapServiceScope {
+struct SoapServiceScope {
 public:
   explicit SoapServiceScope(SoapServer *server) {
     save();
@@ -3062,7 +3062,7 @@ void HHVM_METHOD(SoapHeader, __construct,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SoapExtension final : public Extension {
+static struct SoapExtension final : public Extension {
 public:
   SoapExtension() : Extension("soap", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {

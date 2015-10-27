@@ -34,7 +34,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeGenerator;
+struct CodeGenerator;
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(VariableTable);
@@ -65,7 +65,7 @@ typedef std::vector< std::pair< BlockScopeRawPtr, int* > >
 /**
  * Base class of ClassScope and FunctionScope.
  */
-class BlockScope : private boost::noncopyable,
+struct BlockScope : private boost::noncopyable,
                    public std::enable_shared_from_this<BlockScope> {
 public:
   enum KindOf {

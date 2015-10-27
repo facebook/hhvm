@@ -98,8 +98,8 @@ public:
     }
 
   private:
-    friend class TreadHashMap;
-    friend class boost::iterator_core_access;
+    friend struct TreadHashMap;
+    friend struct boost::iterator_core_access;
 
     void increment() {
       ++m_offset;

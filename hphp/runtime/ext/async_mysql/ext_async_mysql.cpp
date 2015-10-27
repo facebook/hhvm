@@ -93,7 +93,7 @@ static std::shared_ptr<am::AsyncMysqlClient> getDefaultClient() {
 ///////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClientStats
 
-class AsyncMysqlClientStats {
+struct AsyncMysqlClientStats {
  public:
   AsyncMysqlClientStats& operator=(const AsyncMysqlClientStats& other) {
     m_values = other.m_values;
@@ -1427,7 +1427,7 @@ void HHVM_METHOD(AsyncMysqlRowIterator, rewind) {
 static const int64_t DISABLE_COPY_AND_SWEEP = Native::NDIFlags::NO_COPY |
   Native::NDIFlags::NO_SWEEP;
 
-static class AsyncMysqlExtension final : public Extension {
+static struct AsyncMysqlExtension final : public Extension {
 public:
   AsyncMysqlExtension() : Extension("async_mysql") {}
   void moduleInit() override {

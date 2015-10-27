@@ -1814,7 +1814,7 @@ static bool HHVM_METHOD(SimpleXMLIterator, hasChildren) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SimpleXMLExtension : public Extension {
+static struct SimpleXMLExtension : public Extension {
  public:
   SimpleXMLExtension(): Extension("simplexml", "1.0") {}
 

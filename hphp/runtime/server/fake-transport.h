@@ -25,7 +25,7 @@ namespace HPHP {
  * Fake Transport to be passed to the access log when a real transport is not
  * available
  */
-class FakeTransport : public Transport {
+struct FakeTransport : public Transport {
 public:
   std::string m_url;
   std::string m_remoteHost;

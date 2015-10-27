@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(LoopStatement);
 
-class LoopStatement : public Statement {
+struct LoopStatement : public Statement {
 protected:
   explicit LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
 };

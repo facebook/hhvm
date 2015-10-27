@@ -36,7 +36,7 @@ namespace HPHP { namespace jit {
  * addresses, suitable for being incremented from the TC.
  */
 template<typename T>
-class ProfCounters {
+struct ProfCounters {
  public:
   explicit ProfCounters(T initVal)
       : m_initVal(initVal)
@@ -71,7 +71,7 @@ typedef std::vector<TCA> PrologueCallersVec;
  * of callers for each prologue, so that we can smash them appropriately when
  * regenerating prologues.
  */
-class PrologueCallersRec : private boost::noncopyable {
+struct PrologueCallersRec : private boost::noncopyable {
  public:
   const PrologueCallersVec& mainCallers()  const;
   const PrologueCallersVec& guardCallers() const;
@@ -120,7 +120,7 @@ struct PrologueID {
 /**
  * A simple wrapper for a map from profiling prologues to TransIDs.
  */
-class PrologueToTransMap {
+struct PrologueToTransMap {
  public:
   void    add(FuncId funcId, int numArgs, TransID transId);
   TransID get(FuncId funcId, int numArgs) const;
@@ -132,7 +132,7 @@ class PrologueToTransMap {
 /**
  * A profiling record kept for each translation in JitPGO mode.
  */
-class ProfTransRec {
+struct ProfTransRec {
  public:
   ProfTransRec(TransID id, TransKind kind, Offset lastBcOff, SrcKey sk,
                RegionDescPtr region);
@@ -172,7 +172,7 @@ using FuncIdSet = hphp_hash_set<FuncId>;
 /**
  * ProfData encapsulates the profiling data kept by the JIT.
  */
-class ProfData {
+struct ProfData {
 public:
   ProfData();
 

@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace jit {
 
-class SSATmp;
+struct SSATmp;
 struct IRInstruction;
 
 namespace NativeCalls { struct CallInfo; }

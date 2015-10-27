@@ -31,7 +31,7 @@ int64_t HHVM_FUNCTION(_soap_active_version);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapServer {
+struct SoapServer {
 public:
   SoapServer();
 
@@ -55,7 +55,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapClient {
+struct SoapClient {
 public:
   SoapClient();
 
@@ -103,7 +103,7 @@ extern const StaticString
   s_enc_type, s_enc_value, s_enc_stype,
   s_enc_ns, s_enc_name, s_enc_namens;
 
-class SoapVar {
+struct SoapVar {
 public:
   static Class* getClass();
 
@@ -160,7 +160,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapParam {
+struct SoapParam {
 public:
   static Class* getClass();
 
@@ -173,7 +173,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapHeader {
+struct SoapHeader {
 public:
   static Class* getClass();
 

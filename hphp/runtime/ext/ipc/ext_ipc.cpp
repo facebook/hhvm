@@ -55,7 +55,7 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-static class SysvmsgExtension final : public Extension {
+static struct SysvmsgExtension final : public Extension {
 public:
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -72,7 +72,7 @@ public:
   }
 } s_sysvmsg_extension;
 
-static class SysvsemExtension final : public Extension {
+static struct SysvsemExtension final : public Extension {
 public:
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -85,7 +85,7 @@ public:
   }
 } s_sysvsem_extension;
 
-static class SysvshmExtension final : public Extension {
+static struct SysvshmExtension final : public Extension {
 public:
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -121,7 +121,7 @@ int64_t HHVM_FUNCTION(ftok,
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
-class MessageQueue : public ResourceData {
+struct MessageQueue : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MessageQueue)
 
@@ -576,7 +576,7 @@ typedef struct {
   long total;
 } sysvshm_chunk_head;
 
-class sysvshm_shm {
+struct sysvshm_shm {
 public:
   key_t key;               /* Key set by user */
   long id;                 /* Returned by shmget. */
@@ -587,7 +587,7 @@ public:
   }
 };
 
-class shm_set : public std::set<sysvshm_shm*> {
+struct shm_set : public std::set<sysvshm_shm*> {
 public:
   ~shm_set() {
     for (auto iter = begin(); iter != end(); ++iter) {

@@ -245,7 +245,7 @@ const StaticString
   s_JSON_ERROR_INF_OR_NAN("JSON_ERROR_INF_OR_NAN"),
   s_JSON_ERROR_UNSUPPORTED_TYPE("JSON_ERROR_UNSUPPORTED_TYPE");
 
-class JsonExtension final : public Extension {
+struct JsonExtension final : public Extension {
  public:
   JsonExtension() : Extension("json", "1.2.1") {}
   void moduleInit() override {

@@ -10,7 +10,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlDatePatternGenerator;
 
-class IntlDatePatternGenerator : public IntlError {
+struct IntlDatePatternGenerator : public IntlError {
  public:
   IntlDatePatternGenerator() {}
   IntlDatePatternGenerator(const IntlDatePatternGenerator&) = delete;

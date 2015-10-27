@@ -18,8 +18,8 @@
 
 namespace HPHP {
 
-class Array;
-class VMParserFrame;
+struct Array;
+struct VMParserFrame;
 
 struct BacktraceArgs {
 

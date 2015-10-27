@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(IfBranchStatement);
 
-class IfBranchStatement : public Statement {
+struct IfBranchStatement : public Statement {
 public:
   IfBranchStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                     ExpressionPtr condition, StatementPtr stmt);

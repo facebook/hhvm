@@ -30,9 +30,9 @@ const int64_t k_STREAM_FILTER_ALL   = k_STREAM_FILTER_READ |
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class File;
+struct File;
 
-class BucketBrigade : public ResourceData {
+struct BucketBrigade : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(BucketBrigade);
   CLASSNAME_IS("bucket brigade");
@@ -54,7 +54,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamFilter : public ResourceData {
+struct StreamFilter : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamFilter);
   CLASSNAME_IS("stream filter");

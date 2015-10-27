@@ -30,9 +30,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TypedValue;
-class BaseVector;
-class BaseMap;
-class BaseSet;
+struct BaseVector;
+struct BaseMap;
+struct BaseSet;
 struct Iter;
 struct MixedArray;
 

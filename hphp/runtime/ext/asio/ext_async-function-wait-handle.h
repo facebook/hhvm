@@ -33,11 +33,11 @@ namespace HPHP {
  * execution. A dependency on another wait handle is set up by awaiting such
  * wait handle, giving control of the execution back to the asio framework.
  */
-class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
+struct c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 
-  class Node final {
+  struct Node final {
    public:
     static constexpr ptrdiff_t childOff() {
       return offsetof(Node, m_child);

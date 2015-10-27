@@ -29,7 +29,7 @@
 using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestBase {
+struct TestBase {
  public:
   TestBase();
   virtual ~TestBase() {}
@@ -87,7 +87,7 @@ class TestBase {
 };
 
 template <bool value>
-class WithOption {
+struct WithOption {
 public:
   explicit WithOption(bool& option) :
     m_option(&option), m_save(option) {

@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class GlobStreamWrapper : public Stream::Wrapper {
+struct GlobStreamWrapper : public Stream::Wrapper {
  public:
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,

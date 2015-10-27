@@ -398,74 +398,6 @@
             "value": 32768
         },
         {
-            "name": "DOMSTRING_SIZE_ERR",
-            "value": 2
-        },
-        {
-            "name": "DOM_HIERARCHY_REQUEST_ERR",
-            "value": 3
-        },
-        {
-            "name": "DOM_INDEX_SIZE_ERR",
-            "value": 1
-        },
-        {
-            "name": "DOM_INUSE_ATTRIBUTE_ERR",
-            "value": 10
-        },
-        {
-            "name": "DOM_INVALID_ACCESS_ERR",
-            "value": 15
-        },
-        {
-            "name": "DOM_INVALID_CHARACTER_ERR",
-            "value": 5
-        },
-        {
-            "name": "DOM_INVALID_MODIFICATION_ERR",
-            "value": 13
-        },
-        {
-            "name": "DOM_INVALID_STATE_ERR",
-            "value": 11
-        },
-        {
-            "name": "DOM_NAMESPACE_ERR",
-            "value": 14
-        },
-        {
-            "name": "DOM_NOT_FOUND_ERR",
-            "value": 8
-        },
-        {
-            "name": "DOM_NOT_SUPPORTED_ERR",
-            "value": 9
-        },
-        {
-            "name": "DOM_NO_DATA_ALLOWED_ERR",
-            "value": 6
-        },
-        {
-            "name": "DOM_NO_MODIFICATION_ALLOWED_ERR",
-            "value": 7
-        },
-        {
-            "name": "DOM_PHP_ERR",
-            "value": 0
-        },
-        {
-            "name": "DOM_SYNTAX_ERR",
-            "value": 12
-        },
-        {
-            "name": "DOM_VALIDATION_ERR",
-            "value": 16
-        },
-        {
-            "name": "DOM_WRONG_DOCUMENT_ERR",
-            "value": 4
-        },
-        {
             "name": "D_FMT",
             "value": 131113
         },
@@ -1070,94 +1002,6 @@
             "value": 1
         },
         {
-            "name": "SOAP_1_1",
-            "value": 1
-        },
-        {
-            "name": "SOAP_1_2",
-            "value": 2
-        },
-        {
-            "name": "SOAP_ACTOR_NEXT",
-            "value": 1
-        },
-        {
-            "name": "SOAP_ACTOR_NONE",
-            "value": 2
-        },
-        {
-            "name": "SOAP_ACTOR_UNLIMATERECEIVER",
-            "value": 3
-        },
-        {
-            "name": "SOAP_AUTHENTICATION_BASIC",
-            "value": 0
-        },
-        {
-            "name": "SOAP_AUTHENTICATION_DIGEST",
-            "value": 1
-        },
-        {
-            "name": "SOAP_COMPRESSION_ACCEPT",
-            "value": 32
-        },
-        {
-            "name": "SOAP_COMPRESSION_DEFLATE",
-            "value": 16
-        },
-        {
-            "name": "SOAP_COMPRESSION_GZIP",
-            "value": 0
-        },
-        {
-            "name": "SOAP_DOCUMENT",
-            "value": 2
-        },
-        {
-            "name": "SOAP_ENCODED",
-            "value": 1
-        },
-        {
-            "name": "SOAP_ENC_ARRAY",
-            "value": 300
-        },
-        {
-            "name": "SOAP_ENC_OBJECT",
-            "value": 301
-        },
-        {
-            "name": "SOAP_FUNCTIONS_ALL",
-            "value": 999
-        },
-        {
-            "name": "SOAP_LITERAL",
-            "value": 2
-        },
-        {
-            "name": "SOAP_PERSISTENCE_REQUEST",
-            "value": 2
-        },
-        {
-            "name": "SOAP_PERSISTENCE_SESSION",
-            "value": 1
-        },
-        {
-            "name": "SOAP_RPC",
-            "value": 1
-        },
-        {
-            "name": "SOAP_SINGLE_ELEMENT_ARRAYS",
-            "value": 1
-        },
-        {
-            "name": "SOAP_USE_XSI_ARRAY_TYPE",
-            "value": 4
-        },
-        {
-            "name": "SOAP_WAIT_ONE_WAY_CALLS",
-            "value": 2
-        },
-        {
             "name": "SORTARRIVAL",
             "value": 1
         },
@@ -1351,34 +1195,6 @@
         },
         {
             "name": "WUNTRACED",
-            "value": 2
-        },
-        {
-            "name": "X509_PURPOSE_ANY",
-            "value": 7
-        },
-        {
-            "name": "X509_PURPOSE_CRL_SIGN",
-            "value": 6
-        },
-        {
-            "name": "X509_PURPOSE_NS_SSL_SERVER",
-            "value": 3
-        },
-        {
-            "name": "X509_PURPOSE_SMIME_ENCRYPT",
-            "value": 5
-        },
-        {
-            "name": "X509_PURPOSE_SMIME_SIGN",
-            "value": 4
-        },
-        {
-            "name": "X509_PURPOSE_SSL_CLIENT",
-            "value": 1
-        },
-        {
-            "name": "X509_PURPOSE_SSL_SERVER",
             "value": 2
         },
         {

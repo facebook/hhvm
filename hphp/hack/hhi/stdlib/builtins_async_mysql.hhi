@@ -71,7 +71,7 @@ class AsyncMysqlClient {
       string $user,
       string $password,
       int $timeout_micros = -1,
-      ?MySSLContextProvider ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
+      ?MySSLContextProvider $ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
   static public function adoptConnection($connection) { }
 }
 

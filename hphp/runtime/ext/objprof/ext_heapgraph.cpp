@@ -214,32 +214,6 @@ std::string getObjectConnectionName(
   return "";
 }
 
-std::string getRDSLocalConnectionName(
-  const void* target
-) {
-  for (auto cls = all_classes().begin(); cls != all_classes().end(); ++cls) {
-    if (cls->needsInitSProps()) {
-      continue;
-    }
-    auto staticProps = cls->staticProperties();
-    const size_t nSProps = cls->numStaticProperties();
-    for (Slot i = 0; i < nSProps; ++i) {
-      auto prop = staticProps[i];
-      TypedValue* tv = cls->getSPropData(i);
-      if (tv == nullptr) {
-        continue;
-      }
-      if ((void*)tv->m_data.pobj == target) {
-        return
-          "ClassProperty:" +
-          cls->name()->toCppString() + ":" +
-          StrNR(prop.name).data();
-      }
-    }
-  }
-  return "";
-}
-
 std::string getEdgeKindName(HeapGraph::PtrKind kind) {
   switch (kind) {
     case HeapGraph::Counted:
@@ -318,17 +292,11 @@ std::string getNodesConnectionName(
         break;
     }
   } else if (from == -1 && to != -1) {
-    auto th = g.nodes[to].h;
-    const void* target_ptr = &th->obj_;
     auto seat = g.ptrs[ptr].seat;
     std::string conn_name;
 
     if (seat != nullptr) {
-      if (strcmp(seat, "rds-local") == 0) {
-        conn_name = getRDSLocalConnectionName(target_ptr);
-      } else {
-        conn_name = std::string(seat);
-      }
+      conn_name = std::string(seat);
     }
 
     if (!conn_name.empty()) {

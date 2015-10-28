@@ -251,7 +251,7 @@ void ThreadLocalManager::scan(F& mark) const {
   if (!list) return;
   for (auto p = list->head; p != nullptr;) {
     auto node = static_cast<ThreadLocalNode<void>*>(p);
-    mark(node->m_p, node->m_size);
+    if (node->m_p) mark(node->m_p, node->m_size);
     p = node->m_next;
   }
 }
@@ -278,6 +278,7 @@ template<class F> void scanRoots(F& mark) {
   auto sp = stack_top_ptr();
   mark(sp, s_stackLimit + s_stackSize - uintptr_t(sp));
   // C++ threadlocal data, but don't scan MemoryManager
+  mark.where("cpp-tdata");
   auto tdata = getCppTdata(); // tdata = { ptr, size }
   if (tdata.second > 0) {
     auto tm = (char*)tdata.first;
@@ -288,6 +289,9 @@ template<class F> void scanRoots(F& mark) {
     mark(tm, mm - tm);
     mark(mm_end, tm_end - mm_end);
   }
+  // ThreadLocal nodes
+  mark.where("ThreadLocalManager");
+  ThreadLocalManager::GetManager().scan(mark);
   // Extension thread locals
   mark.where("extensions");
   ExtMarker<F> xm(mark);

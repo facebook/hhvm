@@ -380,10 +380,6 @@ private:
       , mayCallSetFrameMetadata(false)
     {}
 
-    void checkFinalAssertions() {
-      assert(!isGenerator || !hasNonEmptyReturn);
-    }
-
     // Function contains a call to func_num_args, func_get_args or func_get_arg.
     bool hasCallToGetArgs;
 

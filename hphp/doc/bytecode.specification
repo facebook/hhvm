@@ -4330,6 +4330,11 @@ ContCurrent    []  ->  [C]
   Get generator value. $this must be a Generator object. Pushes the most
   recently yielded value from the generator onto the stack.
 
+ContGetReturn    [] -> [C]
+
+  Get generator's return value. $this must be a Generator object. Pushes the
+  return value of the generator onto the stack.
+
 15. Async functions
 -------------------
 

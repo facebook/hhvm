@@ -3161,7 +3161,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     char retSym = StackSym::C;
     if (visit(r->getRetExp())) {
-      if (r->getRetExp()->getContext() & Expression::RefValue) {
+      if (r->getRetExp()->getContext() & Expression::RefValue &&
+          // Generators don't support returning by references
+          !m_curFunc->isGenerator) {
         emitConvertToVar(e);
         retSym = StackSym::V;
       } else {
@@ -9520,6 +9522,7 @@ enum GeneratorMethod {
   METH_CURRENT,
   METH_KEY,
   METH_REWIND,
+  METH_GETRETURN,
 };
 
 typedef hphp_hash_map<const StringData*, GeneratorMethod,
@@ -9535,6 +9538,7 @@ StaticString s_current("current");
 StaticString s_key("key");
 StaticString s_throw("throw");
 StaticString s_rewind("rewind");
+StaticString s_getReturn("getReturn");
 
 StaticString genCls("Generator");
 StaticString asyncGenCls("HH\\AsyncGenerator");
@@ -9552,7 +9556,8 @@ ContMethMapT s_genMethods = {
     {s_current, GeneratorMethod::METH_CURRENT},
     {s_key, GeneratorMethod::METH_KEY},
     {s_throw, GeneratorMethod::METH_RAISE},
-    {s_rewind, GeneratorMethod::METH_REWIND}
+    {s_rewind, GeneratorMethod::METH_REWIND},
+    {s_getReturn, GeneratorMethod::METH_GETRETURN}
   };
 }
 
@@ -9645,6 +9650,11 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
     }
     case METH_REWIND: {
       ue.emitOp(OpNull);
+      ue.emitOp(OpRetC);
+      break;
+    }
+    case METH_GETRETURN: {
+      ue.emitOp(OpContGetReturn);
       ue.emitOp(OpRetC);
       break;
     }

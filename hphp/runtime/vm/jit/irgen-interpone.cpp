@@ -516,6 +516,7 @@ void emitDefCns(IRGS& env, const StringData*) { INTERP }
 void emitDefCls(IRGS& env, int32_t)           { INTERP }
 void emitDefFunc(IRGS& env, int32_t)          { INTERP }
 void emitCatch(IRGS& env)                     { INTERP }
+void emitContGetReturn(IRGS& env)             { INTERP }
 void emitHighInvalid(IRGS& env)               { std::abort(); }
 
 //////////////////////////////////////////////////////////////////////

@@ -414,6 +414,8 @@ static const struct {
   { OpContStarted, {None,             Stack1,       OutBoolean      }},
   { OpContKey,     {None,             Stack1,       OutUnknown      }},
   { OpContCurrent, {None,             Stack1,       OutUnknown      }},
+  { OpContGetReturn,
+                   {None,             Stack1,       OutUnknown      }},
 
   /*** 15. Async functions instructions ***/
 
@@ -908,6 +910,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::ContKey:
   case Op::ContValid:
   case Op::ContStarted:
+  case Op::ContGetReturn:
   case Op::CreateCl:
   case Op::DefCns:
   case Op::DefFunc:

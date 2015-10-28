@@ -29,6 +29,9 @@ final class Generator implements HH\KeyedIterator {
   <<__Native("OpCodeImpl")>>
   function raise(mixed $v): mixed;
 
+  <<__Native("OpCodeImpl")>>
+  function getReturn(): mixed;
+
   <<__Native>>
   function getOrigFuncName(): string;
 

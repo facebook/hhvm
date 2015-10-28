@@ -409,10 +409,26 @@ void emitContCurrent(IRGS& env) {
   if (!RuntimeOption::AutoprimeGenerators) {
     gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
   }
-  auto const offset = cns(env,
-    offsetof(Generator, m_value) - Generator::objectOff());
-  auto const value = gen(env, LdContField, TCell, cont, offset);
-  pushIncRef(env, value);
+  // We reuse the same storage for the return value as the yield (`m_value`),
+  // so doing a blind read will cause `current` to return the wrong value on a
+  // finished generator. We should return NULL instead
+  ifThenElse(
+    env,
+    [&] (Block *taken) {
+      auto const done = gen(env, ContValid, IsAsyncData(false), cont);
+      gen(env, JmpZero, taken, done);
+    },
+    [&] {
+      auto const offset = cns(env,
+        offsetof(Generator, m_value) - Generator::objectOff());
+      auto const value = gen(env, LdContField, TCell, cont, offset);
+      pushIncRef(env, value);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      emitNull(env);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

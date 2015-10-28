@@ -14,10 +14,8 @@
    about these missing files.
 *)
 
-begin program "h2tp"
-
-  requires += [ "hh-format" ]
-
+begin library "h2tp-common"
+  requires += [ "hh-parsing" "hh-find" ]
   files = [
     "Prepend_require.ml"
     "common/fun.ml"
@@ -27,6 +25,22 @@ begin program "h2tp"
     "common/converter_options.ml"
     "common/sys_ext.ml"
     "common/parser_hack_ext.ml"
+  ]
+end
+
+begin library "h2tp-unparser"
+  requires += [ "h2tp-common" "hh-format" ]
+  files = [
+    "unparser/unparsed.ml"
+    "unparser/unparser.ml"
+  ]
+end
+
+begin program "h2tp"
+
+  requires += [ "h2tp-unparser" ]
+
+  files = [
     "mapper/map_ast.ml"
     "mapper/Deleted_constructs.ml"
     "mapper/constructor_arg_promotion.ml"
@@ -42,8 +56,6 @@ begin program "h2tp"
     "mapper/unsupported_constructs.ml"
     "mapper/value_collections.ml"
     "mapper/yield_break.ml"
-    "unparser/unparsed.ml"
-    "unparser/unparser.ml"
     "engine.ml"
     "h2tp.ml"
   ]

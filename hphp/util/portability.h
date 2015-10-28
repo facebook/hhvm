@@ -120,6 +120,7 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////
+// DECLARE_FRAME_POINTER
 
 #if defined(__x86_64__)
 
@@ -157,6 +158,29 @@
 
 # error What are the stack and frame pointers called on your architecture?
 
+#endif
+
+//////////////////////////////////////////////////////////////////////
+// CALLEE_SAVED_BARRIER
+
+#if defined(__CYGWIN__) || defined(__MINGW__)
+  #define CALLEE_SAVED_BARRIER()\
+    asm volatile("" : : : "rbx", "rsi", "rdi", "r12", "r13", "r14", "r15");
+#elif defined(_MSC_VER)
+  // Unfortunately, we have no way to tell MSVC to do this, so we'll
+  // probably have to use a pair of assembly stubs to manage this.
+  #define CALLEE_SAVED_BARRIER() always_assert(false);
+#elif defined (__powerpc64__)
+  // PPC64 port under development
+  #define CALLEE_SAVED_BARRIER()\
+      not_implemented();
+#elif defined (__AARCH64EL__)
+  #define CALLEE_SAVED_BARRIER()\
+    asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25",\
+                 "x26", "x27", "x28")
+#else
+  #define CALLEE_SAVED_BARRIER()\
+    asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");
 #endif
 
 //////////////////////////////////////////////////////////////////////

@@ -52,10 +52,6 @@ namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define CALLEE_SAVED_BARRIER() \
-  asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
-               "x26", "x27", "x28")
-
 /*
  * A partial equivalent of enterTCHelper, used to set up the ARM simulator.
  */

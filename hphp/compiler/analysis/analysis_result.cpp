@@ -332,7 +332,7 @@ bool AnalysisResult::declareConst(FileScopePtr fs, const std::string &name) {
 
 static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
   if (auto d = b1->getStmt()->getRange().compare(b2->getStmt()->getRange())) {
-    return d;
+    return d < 0;
   }
   return b1->getContainingFile()->getName() <
     b2->getContainingFile()->getName();

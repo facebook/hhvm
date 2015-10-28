@@ -10,7 +10,7 @@ import sys
 import tempfile
 
 from hh_paths import hh_server, hh_client
-from utils import touch, write_files, test_env
+from utils import write_files
 
 class CommonSaveStateTests(object):
 
@@ -23,8 +23,14 @@ class CommonSaveStateTests(object):
         init_dir = tempfile.mkdtemp()
         cls.repo_dir = tempfile.mkdtemp()
         cls.config_path = os.path.join(cls.repo_dir, '.hhconfig')
-        cls.saved_state_dir = tempfile.mkdtemp()
+        cls.tmp_dir = tempfile.mkdtemp()
+        cls.hh_tmp_dir = tempfile.mkdtemp()
         cls.saved_state_name = 'foo'
+        cls.test_env = dict(os.environ, **{
+            'HH_TEST_MODE': '1',
+            'HH_TMPDIR': cls.hh_tmp_dir,
+            'PATH': '%s:/bin:/usr/bin' % cls.tmp_dir,
+            })
 
         with open(os.path.join(init_dir, '.hhconfig'), 'w') as f:
             f.write(r"""
@@ -75,11 +81,12 @@ assume_php = false""")
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.repo_dir)
-        shutil.rmtree(cls.saved_state_dir)
+        shutil.rmtree(cls.tmp_dir)
+        shutil.rmtree(cls.hh_tmp_dir)
 
     @classmethod
     def saved_state_path(cls):
-        return os.path.join(cls.saved_state_dir, cls.saved_state_name)
+        return os.path.join(cls.tmp_dir, cls.saved_state_name)
 
     def write_load_config(self, *changed_files):
         raise NotImplementedError()
@@ -91,19 +98,46 @@ assume_php = false""")
         return subprocess.Popen(
                 cmd,
                 stderr=subprocess.PIPE,
-                env=test_env)
+                env=cls.test_env)
+
+    @classmethod
+    def get_server_logs(cls):
+        log_file = cls.proc_call([
+            hh_client, '--logname', cls.repo_dir]).strip()
+        with open(log_file) as f:
+            return f.read()
 
     def setUp(self):
         write_files(self.files, self.repo_dir)
 
     def tearDown(self):
-        subprocess.call([
+        self.proc_call([
             hh_client,
             'stop',
             self.repo_dir
-        ], env=test_env)
+        ])
         for p in glob.glob(os.path.join(self.repo_dir, '*')):
             os.remove(p)
+
+    @classmethod
+    def proc_call(cls, args, env=None, stdin=None):
+        """
+        Invoke a subprocess, return stdout, send stderr to our stderr (for
+        debugging)
+        """
+        env = {} if env is None else env
+        print(" ".join(args), file=sys.stderr)
+        proc = subprocess.Popen(
+                args,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=dict(cls.test_env, **env),
+                universal_newlines=True)
+        (stdout_data, stderr_data) = proc.communicate(stdin)
+        sys.stderr.write(stderr_data)
+        sys.stderr.flush()
+        return stdout_data
 
     def check_cmd(self, expected_output, stdin=None, options=None):
         raise NotImplementedError()

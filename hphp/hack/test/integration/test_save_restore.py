@@ -9,17 +9,17 @@ import sys
 import unittest
 
 from hh_paths import hh_server, hh_client
-from utils import touch, proc_call, ensure_output_contains, test_env
+from utils import ensure_output_contains
 
 class TestSaveRestore(common_tests.CommonSaveStateTests, unittest.TestCase):
 
     @classmethod
     def save_command(cls, init_dir):
-        subprocess.call([
+        cls.proc_call([
             hh_server,
             '--check', init_dir,
-            '--save', os.path.join(cls.saved_state_dir, 'foo'),
-        ], env=test_env)
+            '--save', os.path.join(cls.tmp_dir, 'foo'),
+        ])
 
     def write_load_config(self, *changed_files):
         """
@@ -49,7 +49,7 @@ load_script = %s
 
     def check_cmd(self, expected_output, stdin=None, options=[]):
         root = self.repo_dir + os.path.sep
-        output = proc_call([
+        output = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -71,7 +71,7 @@ load_script = %s
         """
         Make sure we are invoking the server_options_cmd with the right flags
         """
-        args_file = os.path.join(self.saved_state_dir, 'cmd_args')
+        args_file = os.path.join(self.tmp_dir, 'cmd_args')
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
             f.write(r"""
 #! /bin/sh
@@ -89,7 +89,7 @@ load_script = %s
 
         self.check_cmd(['No errors!'])
 
-        version = proc_call([
+        version = self.proc_call([
             hh_server,
             '--version'
         ])

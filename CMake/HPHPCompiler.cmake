@@ -74,7 +74,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   endif()
 
   if(GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
-    set(GNUCC_OPT "${GNUCC_OPT} -D_GLIBCXX_USE_CXX11_ABI=0 -Wno-bool-compare -DFOLLY_HAVE_MALLOC_H")
+    set(GNUCC_OPT "${GNUCC_OPT} -Wno-bool-compare -DFOLLY_HAVE_MALLOC_H")
   endif()
 
   # Enabled GCC/LLVM stack-smashing protection

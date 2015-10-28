@@ -239,9 +239,10 @@ static void object_instance_property_export_xml_node(xdebug_xml_node& parent,
   auto const info = demangle_prop(key.toString());
   auto const& prop_name = info.prop_name;
 
-  auto const make_full_name = [parentName] (const char* name) -> const char* {
+  auto const make_full_name = [&] (const char* name) -> const char* {
     if (parentName == nullptr) return nullptr;
-    return xdebug_sprintf("%s->%s", parentName, name);
+    auto const format_str = obj->isCollection() ? "%s[%s]" : "%s->%s";
+    return xdebug_sprintf(format_str, parentName, name);
   };
 
   if (obj->isCollection() || key.isInteger()) {

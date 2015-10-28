@@ -330,51 +330,51 @@ struct Assembler {
 
   friend struct Label;
 
-   explicit Assembler(HPHP::CodeBlock& cb) : codeBlock(cb) {}
-   ~Assembler(){}
+  explicit Assembler(HPHP::CodeBlock& cb) : codeBlock(cb) {}
+  ~Assembler(){}
 
-   HPHP::CodeBlock& code() const { return codeBlock; }
+  HPHP::CodeBlock& code() const { return codeBlock; }
 
-   CodeAddress base() const {
-     return codeBlock.base();
-   }
+  CodeAddress base() const {
+    return codeBlock.base();
+  }
 
-   CodeAddress frontier() const {
-     return codeBlock.frontier();
-   }
+  CodeAddress frontier() const {
+    return codeBlock.frontier();
+  }
 
-   void setFrontier(CodeAddress newFrontier) {
-     codeBlock.setFrontier(newFrontier);
-   }
+  void setFrontier(CodeAddress newFrontier) {
+    codeBlock.setFrontier(newFrontier);
+  }
 
-   size_t capacity() const {
-     return codeBlock.capacity();
-   }
+  size_t capacity() const {
+    return codeBlock.capacity();
+  }
 
-   size_t used() const {
-     return codeBlock.used();
-   }
+  size_t used() const {
+    return codeBlock.used();
+  }
 
-   size_t available() const {
-     return codeBlock.available();
-   }
+  size_t available() const {
+    return codeBlock.available();
+  }
 
-   bool contains(CodeAddress addr) const {
-     return codeBlock.contains(addr);
-   }
+  bool contains(CodeAddress addr) const {
+    return codeBlock.contains(addr);
+  }
 
-   bool empty() const {
-     return codeBlock.empty();
-   }
+  bool empty() const {
+    return codeBlock.empty();
+  }
 
-   void clear() {
-     codeBlock.clear();
-   }
+  void clear() {
+    codeBlock.clear();
+  }
 
-   bool canEmit(size_t nBytes) const {
-     assert(capacity() >= used());
-     return nBytes < (capacity() - used());
-   }
+  bool canEmit(size_t nBytes) const {
+    assert(capacity() >= used());
+    return nBytes < (capacity() - used());
+  }
 
   enum class SpecialReg {
     XER      = 1,

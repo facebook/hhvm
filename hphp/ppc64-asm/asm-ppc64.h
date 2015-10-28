@@ -324,10 +324,9 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-class Label;
+struct Label;
 
-class Assembler {
-public:
+struct Assembler {
 
   friend struct Label;
 
@@ -2195,8 +2194,7 @@ private:
 // Branches
 //////////////////////////////////////////////////////////////////////
 
-class Label : private boost::noncopyable {
-public:
+struct Label : private boost::noncopyable {
   Label() : m_a(nullptr) , m_address(nullptr) {}
   Label(CodeAddress predefined) : m_a(nullptr) , m_address(predefined) {}
 

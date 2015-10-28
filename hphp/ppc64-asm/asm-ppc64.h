@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef INCLUDE_ASM_PPC64_H_
-#define INCLUDE_ASM_PPC64_H_
+#ifndef incl_ASM_PPC64_H_
+#define incl_ASM_PPC64_H_
 
 #include <cstdint>
 #include <cassert>

@@ -2227,10 +2227,9 @@ function main($argv) {
   // If we have no serial tests, we can use the maximum number of allowed
   // threads for the test running. If we have some, we save one thread for
   // the serial bucket.
-  $parallel_threads = $options['threads'];
-  if (count($serial_tests) > 0) {
-    $parallel_threads--;
-  }
+  $parallel_threads = count($serial_tests) > 0
+                    ? $options['threads'] - 1
+                    : $options['threads'];
 
   foreach ($tests as $test) {
     if (!in_array($test, $serial_tests)) {
@@ -2241,7 +2240,21 @@ function main($argv) {
 
   if (count($serial_tests) > 0) {
     // The last bucket is serial.
-    $i = $options['threads'] - 1;
+    // If the number of parallel tests didn't equal the actual number of
+    // parallel threads because the number of serial tests reduced it enough,
+    // then our next bucket is just $i; otherwise it is final available
+    // thread. For example, we have 13 total tests which initially gave us
+    // 13 parallel threads, but then we find out 3 are serial, so the parallel
+    // tests would only fill 9 parallel buckets (< 12). The next one would be
+    // 10 for the 3 serial. Now if we have 40 total tests which gave us 32
+    // parallel threads and 4 serial tests, then all of possible parallel
+    // buckets (31) would be filled regardless; so the serial bucket is what
+    // would have been the last parallel thread (32).
+    // $i got bumped to the next bucket at the end of the parallel test loop
+    // above, so no $i++ here.
+    $i = count($tests) - count($serial_tests) < $parallel_threads
+       ? $i // we didn't fill all the parallel buckets, so use next one in line
+       : $options['threads'] - 1; // all parallel filled; last thread; 0 indexed
     foreach ($serial_tests as $test) {
         $test_buckets[$i][] = $test;
     }

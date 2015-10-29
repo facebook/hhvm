@@ -132,16 +132,14 @@ bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Simplifier rules are not allowed to add new uses to SSATmps that aren't
- * known to be available.  All the sources to the original instruction must
- * be available, and non-reference counted values reachable through the
- * source chain are also always available.  Anything else requires more
- * complicated analysis than belongs in the simplifier right now.
- */
 DEBUG_ONLY bool validate(const State& env,
                          SSATmp* newDst,
                          const IRInstruction* origInst) {
+  // simplify() rules are not allowed to add new uses to SSATmps that aren't
+  // known to be available.  All the sources to the original instruction must
+  // be available, and non-reference counted values reachable through the
+  // source chain are also always available.  Anything else requires more
+  // complicated analysis than belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
@@ -199,7 +197,7 @@ DEBUG_ONLY bool validate(const State& env,
 
     always_assert_flog(
       available,
-      "Simplifier produced a new destination that wasn't known to be "
+      "simplify() produced a new destination that wasn't known to be "
       "available:\n"
       "  original inst: {}\n"
       "  new dst:       {}\n",
@@ -228,7 +226,7 @@ DEBUG_ONLY bool validate(const State& env,
   );
 
   assert_last(
-    origInst->hasDst() == (bool)newDst,
+    origInst->hasDst() == (newDst != nullptr),
     "HasDest mismatch between input and output"
   );
 

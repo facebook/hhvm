@@ -563,7 +563,7 @@ void Repo::initCentral() {
     long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize != -1) {
       auto buf = new char[bufsize];
-      SCOPE_EXIT { delete buf; };
+      SCOPE_EXIT { delete[] buf; };
       if (!getpwuid_r(getuid(), &pwbuf, buf, size_t(bufsize), &pwbufp)
           && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
         std::string centralPath = pwbufp->pw_dir;

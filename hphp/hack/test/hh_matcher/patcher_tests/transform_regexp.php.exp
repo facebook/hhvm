@@ -1,0 +1,14 @@
+
+<?hh //strict
+
+class Foo {
+  public function bar(): void {
+    $__ANY = "Good bye anon";
+    $__ANY = "Good bye anon";
+    $__ANY = "Good bye anon";
+    $baz = "Hi Dan";
+    return;
+  }
+}
+
+

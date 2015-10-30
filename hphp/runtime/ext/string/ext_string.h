@@ -32,14 +32,39 @@ namespace HPHP {
 // transformations and manipulations
 
 extern const HPHP::StaticString k_HPHP_TRIM_CHARLIST;
-extern const int64_t k_STR_PAD_RIGHT;
-extern const int64_t k_ENT_COMPAT;
-extern const int64_t k_ENT_NOQUOTES;
-extern const int64_t k_ENT_QUOTES;
-extern const int64_t k_ENT_IGNORE;
-extern const int64_t k_ENT_SUBSTITUTE;
-extern const int64_t k_ENT_FB_UTF8;
-extern const int64_t k_ENT_FB_UTF8_ONLY;
+
+constexpr int64_t k_ENT_HTML_QUOTE_NONE = 0;
+constexpr int64_t k_ENT_HTML_QUOTE_SINGLE = 1;
+constexpr int64_t k_ENT_HTML_QUOTE_DOUBLE = 2;
+constexpr int64_t k_ENT_HTML_IGNORE_ERRORS = 4;
+constexpr int64_t k_ENT_HTML_SUBSTITUTE_ERRORS = 8;
+constexpr int64_t k_ENT_HTML_DOC_TYPE_MASK = (16|32);
+constexpr int64_t k_ENT_HTML_DOC_HTML401 = 0;
+constexpr int64_t k_ENT_HTML_DOC_XML1 = 16;
+constexpr int64_t k_ENT_HTML_DOC_XHTML = 32;
+constexpr int64_t k_ENT_HTML_DOC_HTML5 = (16|32);
+constexpr int64_t k_ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS = 128;
+constexpr int64_t k_ENT_FB_UTF8 = 32768;
+constexpr int64_t k_ENT_FB_UTF8_ONLY = 65536;
+
+constexpr int64_t k_ENT_COMPAT = k_ENT_HTML_QUOTE_DOUBLE;
+constexpr int64_t k_ENT_QUOTES = (k_ENT_HTML_QUOTE_DOUBLE |
+                                  k_ENT_HTML_QUOTE_SINGLE);
+constexpr int64_t k_ENT_NOQUOTES = k_ENT_HTML_QUOTE_NONE;
+constexpr int64_t k_ENT_IGNORE = k_ENT_HTML_IGNORE_ERRORS;
+constexpr int64_t k_ENT_SUBSTITUTE = k_ENT_HTML_SUBSTITUTE_ERRORS;
+constexpr int64_t k_ENT_HTML401 = k_ENT_HTML_DOC_HTML401;
+constexpr int64_t k_ENT_XML1 = k_ENT_HTML_DOC_XML1;
+constexpr int64_t k_ENT_XHTML = k_ENT_HTML_DOC_XHTML;
+constexpr int64_t k_ENT_HTML5 = k_ENT_HTML_DOC_HTML5;
+constexpr int64_t k_DISALLOWED = k_ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS;
+
+constexpr int64_t k_HTML_SPECIALCHARS = 0;
+constexpr int64_t k_HTML_ENTITIES = 1;
+
+constexpr int64_t k_STR_PAD_LEFT  = 0;
+constexpr int64_t k_STR_PAD_RIGHT = 1;
+constexpr int64_t k_STR_PAD_BOTH  = 2;
 
 String HHVM_FUNCTION(addcslashes,
                      const String& str,

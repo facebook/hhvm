@@ -45,13 +45,9 @@ namespace HPHP {
 
 static Mutex s_mutex;
 
-const int64_t k_ENT_COMPAT = 2;
-const int64_t k_ENT_NOQUOTES = 0;
-const int64_t k_ENT_QUOTES = 3;
-const int64_t k_ENT_IGNORE = 4;
-const int64_t k_ENT_SUBSTITUTE = 8;
-const int64_t k_ENT_FB_UTF8 = 32768;
-const int64_t k_ENT_FB_UTF8_ONLY = 65536;
+const StaticString
+  s_HPHP_TRIM_CHARLIST("HPHP_TRIM_CHARLIST"),
+  k_HPHP_TRIM_CHARLIST("\n\r\t\x0b\x00 ", 6);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2287,13 +2283,11 @@ Array HHVM_FUNCTION(get_html_translation_table,
   }
   auto doctype = determine_doctype(flags);
 
-  const int HTML_SPECIALCHARS = 0;
-  const int HTML_ENTITIES = 1;
-  bool all = (table == HTML_ENTITIES);
+  bool all = (table == k_HTML_ENTITIES);
 
   Array ret;
   switch (table) {
-  case HTML_ENTITIES: {
+  case k_HTML_ENTITIES: {
     if (charset == cs_utf_8) {
       auto entity_map = get_doctype_entity_table(doctype);
       for (const auto& item : *entity_map) {
@@ -2330,7 +2324,7 @@ Array HHVM_FUNCTION(get_html_translation_table,
     }
     /* fall thru */
   }
-  case HTML_SPECIALCHARS:
+  case k_HTML_SPECIALCHARS:
     const auto& basic_table = get_basic_table(all, doctype);
     for (int j = 0; basic_table[j].charcode != 0; j++) {
       const auto& item = basic_table[j];
@@ -2361,13 +2355,6 @@ String HHVM_FUNCTION(hebrevc,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-const StaticString s_ENT_COMPAT("ENT_COMPAT");
-const StaticString s_ENT_NOQUOTES("ENT_NOQUOTES");
-const StaticString s_ENT_QUOTES("ENT_QUOTES");
-const StaticString s_ENT_IGNORE("ENT_IGNORE");
-const StaticString s_ENT_SUBSTITUTE("ENT_SUBSTITUTE");
-const StaticString s_ENT_FB_UTF8("ENT_FB_UTF8");
-const StaticString s_ENT_FB_UTF8_ONLY("ENT_FB_UTF8_ONLY");
 
 class StringExtension final : public Extension {
 public:
@@ -2463,27 +2450,79 @@ public:
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
 
-    Native::registerConstant<KindOfInt64>(
-      s_ENT_COMPAT.get(), k_ENT_COMPAT
+#define kCNS(cns) Native::registerConstant<KindOfInt64> \
+  (makeStaticString(#cns), k_##cns)
+    kCNS(ENT_COMPAT);
+    kCNS(ENT_NOQUOTES);
+    kCNS(ENT_QUOTES);
+    kCNS(ENT_IGNORE);
+    kCNS(ENT_SUBSTITUTE);
+    kCNS(ENT_HTML401);
+    kCNS(ENT_XML1);
+    kCNS(ENT_XHTML);
+    kCNS(ENT_HTML5);
+    kCNS(ENT_FB_UTF8);
+    kCNS(ENT_FB_UTF8_ONLY);
+
+    kCNS(HTML_SPECIALCHARS);
+    kCNS(HTML_ENTITIES);
+
+    kCNS(STR_PAD_LEFT);
+    kCNS(STR_PAD_RIGHT);
+    kCNS(STR_PAD_BOTH);
+#undef kCNS
+
+    Native::registerConstant<KindOfString>(
+      s_HPHP_TRIM_CHARLIST.get(),
+      k_HPHP_TRIM_CHARLIST.get()
     );
-    Native::registerConstant<KindOfInt64>(
-      s_ENT_NOQUOTES.get(), k_ENT_NOQUOTES
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_ENT_QUOTES.get(), k_ENT_QUOTES
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_ENT_IGNORE.get(), k_ENT_IGNORE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_ENT_SUBSTITUTE.get(), k_ENT_SUBSTITUTE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_ENT_FB_UTF8.get(), k_ENT_FB_UTF8
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_ENT_FB_UTF8_ONLY.get(), k_ENT_FB_UTF8_ONLY
-    );
+
+#ifdef ABDAY_1
+    HHVM_RC_INT_SAME(ABDAY_1);
+    HHVM_RC_INT_SAME(ABDAY_2);
+    HHVM_RC_INT_SAME(ABDAY_3);
+    HHVM_RC_INT_SAME(ABDAY_4);
+    HHVM_RC_INT_SAME(ABDAY_5);
+    HHVM_RC_INT_SAME(ABDAY_6);
+    HHVM_RC_INT_SAME(ABDAY_7);
+#endif
+#ifdef DAY_1
+    HHVM_RC_INT_SAME(DAY_1);
+    HHVM_RC_INT_SAME(DAY_2);
+    HHVM_RC_INT_SAME(DAY_3);
+    HHVM_RC_INT_SAME(DAY_4);
+    HHVM_RC_INT_SAME(DAY_5);
+    HHVM_RC_INT_SAME(DAY_6);
+    HHVM_RC_INT_SAME(DAY_7);
+#endif
+#ifdef ABMON_1
+    HHVM_RC_INT_SAME(ABMON_1);
+    HHVM_RC_INT_SAME(ABMON_2);
+    HHVM_RC_INT_SAME(ABMON_3);
+    HHVM_RC_INT_SAME(ABMON_4);
+    HHVM_RC_INT_SAME(ABMON_5);
+    HHVM_RC_INT_SAME(ABMON_6);
+    HHVM_RC_INT_SAME(ABMON_7);
+    HHVM_RC_INT_SAME(ABMON_8);
+    HHVM_RC_INT_SAME(ABMON_9);
+    HHVM_RC_INT_SAME(ABMON_10);
+    HHVM_RC_INT_SAME(ABMON_11);
+    HHVM_RC_INT_SAME(ABMON_12);
+#endif
+#ifdef MON_1
+    HHVM_RC_INT_SAME(MON_1);
+    HHVM_RC_INT_SAME(MON_2);
+    HHVM_RC_INT_SAME(MON_3);
+    HHVM_RC_INT_SAME(MON_4);
+    HHVM_RC_INT_SAME(MON_5);
+    HHVM_RC_INT_SAME(MON_6);
+    HHVM_RC_INT_SAME(MON_7);
+    HHVM_RC_INT_SAME(MON_8);
+    HHVM_RC_INT_SAME(MON_9);
+    HHVM_RC_INT_SAME(MON_10);
+    HHVM_RC_INT_SAME(MON_11);
+    HHVM_RC_INT_SAME(MON_12);
+#endif
 
     loadSystemlib();
   }

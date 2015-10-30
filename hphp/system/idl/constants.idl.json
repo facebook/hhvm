@@ -342,62 +342,6 @@
             "value": ""
         },
         {
-            "name": "DNS_A",
-            "value": 1
-        },
-        {
-            "name": "DNS_A6",
-            "value": 16777216
-        },
-        {
-            "name": "DNS_AAAA",
-            "value": 134217728
-        },
-        {
-            "name": "DNS_ALL",
-            "value": 251713587
-        },
-        {
-            "name": "DNS_ANY",
-            "value": 268435456
-        },
-        {
-            "name": "DNS_CNAME",
-            "value": 16
-        },
-        {
-            "name": "DNS_HINFO",
-            "value": 4096
-        },
-        {
-            "name": "DNS_MX",
-            "value": 16384
-        },
-        {
-            "name": "DNS_NAPTR",
-            "value": 67108864
-        },
-        {
-            "name": "DNS_NS",
-            "value": 2
-        },
-        {
-            "name": "DNS_PTR",
-            "value": 2048
-        },
-        {
-            "name": "DNS_SOA",
-            "value": 32
-        },
-        {
-            "name": "DNS_SRV",
-            "value": 33554432
-        },
-        {
-            "name": "DNS_TXT",
-            "value": 32768
-        },
-        {
             "name": "D_FMT",
             "value": 131113
         },
@@ -444,10 +388,6 @@
         {
             "name": "ERA_T_FMT",
             "value": 131121
-        },
-        {
-            "name": "EXIF_USE_MBSTRING",
-            "value": 0
         },
         {
             "name": "FALSE",
@@ -528,86 +468,6 @@
         {
             "name": "HTML_SPECIALCHARS",
             "value": 0
-        },
-        {
-            "name": "IMAGETYPE_BMP",
-            "value": 6
-        },
-        {
-            "name": "IMAGETYPE_COUNT",
-            "value": 18
-        },
-        {
-            "name": "IMAGETYPE_GIF",
-            "value": 1
-        },
-        {
-            "name": "IMAGETYPE_IFF",
-            "value": 14
-        },
-        {
-            "name": "IMAGETYPE_JB2",
-            "value": 12
-        },
-        {
-            "name": "IMAGETYPE_JP2",
-            "value": 10
-        },
-        {
-            "name": "IMAGETYPE_JPC",
-            "value": 9
-        },
-        {
-            "name": "IMAGETYPE_JPEG",
-            "value": 2
-        },
-        {
-            "name": "IMAGETYPE_JPEG2000",
-            "value": 9
-        },
-        {
-            "name": "IMAGETYPE_JPX",
-            "value": 11
-        },
-        {
-            "name": "IMAGETYPE_PNG",
-            "value": 3
-        },
-        {
-            "name": "IMAGETYPE_PSD",
-            "value": 5
-        },
-        {
-            "name": "IMAGETYPE_SWC",
-            "value": 13
-        },
-        {
-            "name": "IMAGETYPE_SWF",
-            "value": 4
-        },
-        {
-            "name": "IMAGETYPE_TIFF_II",
-            "value": 7
-        },
-        {
-            "name": "IMAGETYPE_TIFF_MM",
-            "value": 8
-        },
-        {
-            "name": "IMAGETYPE_UNKNOWN",
-            "value": 0
-        },
-        {
-            "name": "IMAGETYPE_WBMP",
-            "value": 15
-        },
-        {
-            "name": "IMAGETYPE_XBM",
-            "value": 16
-        },
-        {
-            "name": "IMAGETYPE_ICO",
-            "value": 17
         },
         {
             "name": "INI_ALL",
@@ -692,78 +552,6 @@
         {
             "name": "LC_TIME",
             "value": 2
-        },
-        {
-            "name": "LDAP_DEREF_ALWAYS",
-            "value": 3
-        },
-        {
-            "name": "LDAP_DEREF_FINDING",
-            "value": 2
-        },
-        {
-            "name": "LDAP_DEREF_NEVER",
-            "value": 0
-        },
-        {
-            "name": "LDAP_DEREF_SEARCHING",
-            "value": 1
-        },
-        {
-            "name": "LDAP_OPT_CLIENT_CONTROLS",
-            "value": 19
-        },
-        {
-            "name": "LDAP_OPT_DEBUG_LEVEL",
-            "value": 20481
-        },
-        {
-            "name": "LDAP_OPT_DEREF",
-            "value": 2
-        },
-        {
-            "name": "LDAP_OPT_ERROR_NUMBER",
-            "value": 49
-        },
-        {
-            "name": "LDAP_OPT_ERROR_STRING",
-            "value": 50
-        },
-        {
-            "name": "LDAP_OPT_HOST_NAME",
-            "value": 48
-        },
-        {
-            "name": "LDAP_OPT_MATCHED_DN",
-            "value": 51
-        },
-        {
-            "name": "LDAP_OPT_NETWORK_TIMEOUT",
-            "value": 20485
-        },
-        {
-            "name": "LDAP_OPT_PROTOCOL_VERSION",
-            "value": 17
-        },
-        {
-            "name": "LDAP_OPT_REFERRALS",
-            "value": 8
-        },
-        {
-            "name": "LDAP_OPT_RESTART",
-            "value": 9
-        },
-        {
-            "name": "LDAP_OPT_SERVER_CONTROLS",
-            "value": 18
-        },
-        {
-            "name": "LDAP_OPT_SIZELIMIT",
-            "value": 3
-        },
-        {
-            "name": "LDAP_OPT_TIMELIMIT",
-            "value": 4
         },
         {
             "name": "ENT_HTML401",

@@ -34,30 +34,6 @@ namespace HPHP {
 #define PHP_SQLITE3_NUM    (1<<1)
 #define PHP_SQLITE3_BOTH   (PHP_SQLITE3_ASSOC|PHP_SQLITE3_NUM)
 
-const int64_t k_SQLITE3_ASSOC = PHP_SQLITE3_ASSOC;
-const int64_t k_SQLITE3_NUM = PHP_SQLITE3_NUM;
-const int64_t k_SQLITE3_BOTH = PHP_SQLITE3_BOTH;
-const int64_t k_SQLITE3_INTEGER = SQLITE_INTEGER;
-const int64_t k_SQLITE3_FLOAT = SQLITE_FLOAT;
-const int64_t k_SQLITE3_TEXT = SQLITE3_TEXT;
-const int64_t k_SQLITE3_BLOB = SQLITE_BLOB;
-const int64_t k_SQLITE3_NULL = SQLITE_NULL;
-const int64_t k_SQLITE3_OPEN_READONLY = SQLITE_OPEN_READONLY;
-const int64_t k_SQLITE3_OPEN_READWRITE = SQLITE_OPEN_READWRITE;
-const int64_t k_SQLITE3_OPEN_CREATE = SQLITE_OPEN_CREATE;
-
-const StaticString s_SQLITE3_ASSOC("SQLITE3_ASSOC");
-const StaticString s_SQLITE3_NUM("SQLITE3_NUM");
-const StaticString s_SQLITE3_BOTH("SQLITE3_BOTH");
-const StaticString s_SQLITE3_INTEGER("SQLITE3_INTEGER");
-const StaticString s_SQLITE3_FLOAT("SQLITE3_FLOAT");
-const StaticString s_SQLITE3_TEXT("SQLITE3_TEXT");
-const StaticString s_SQLITE3_BLOB("SQLITE3_BLOB");
-const StaticString s_SQLITE3_NULL("SQLITE3_NULL");
-const StaticString s_SQLITE3_OPEN_READONLY("SQLITE3_OPEN_READONLY");
-const StaticString s_SQLITE3_OPEN_READWRITE("SQLITE3_OPEN_READWRITE");
-const StaticString s_SQLITE3_OPEN_CREATE("SQLITE3_OPEN_CREATE");
-
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class *cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
@@ -784,24 +760,22 @@ bool HHVM_METHOD(SQLite3Result, finalize) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define REGISTER_CONSTANT(name)                                                \
-  Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
-
 static class SQLite3Extension final : public Extension {
 public:
   SQLite3Extension() : Extension("sqlite3", "0.7-dev") {}
   void moduleInit() override {
-    REGISTER_CONSTANT(SQLITE3_ASSOC);
-    REGISTER_CONSTANT(SQLITE3_NUM);
-    REGISTER_CONSTANT(SQLITE3_BOTH);
-    REGISTER_CONSTANT(SQLITE3_INTEGER);
-    REGISTER_CONSTANT(SQLITE3_FLOAT);
-    REGISTER_CONSTANT(SQLITE3_TEXT);
-    REGISTER_CONSTANT(SQLITE3_BLOB);
-    REGISTER_CONSTANT(SQLITE3_NULL);
-    REGISTER_CONSTANT(SQLITE3_OPEN_READONLY);
-    REGISTER_CONSTANT(SQLITE3_OPEN_READWRITE);
-    REGISTER_CONSTANT(SQLITE3_OPEN_CREATE);
+    HHVM_RC_INT(SQLITE3_ASSOC, PHP_SQLITE3_ASSOC);
+    HHVM_RC_INT(SQLITE3_NUM, PHP_SQLITE3_NUM);
+    HHVM_RC_INT(SQLITE3_BOTH, PHP_SQLITE3_BOTH);
+
+    HHVM_RC_INT(SQLITE3_INTEGER, SQLITE_INTEGER);
+    HHVM_RC_INT(SQLITE3_FLOAT, SQLITE_FLOAT);
+    HHVM_RC_INT_SAME(SQLITE3_TEXT);
+    HHVM_RC_INT(SQLITE3_BLOB, SQLITE_BLOB);
+    HHVM_RC_INT(SQLITE3_NULL, SQLITE_NULL);
+    HHVM_RC_INT(SQLITE3_OPEN_READONLY, SQLITE_OPEN_READONLY);
+    HHVM_RC_INT(SQLITE3_OPEN_READWRITE, SQLITE_OPEN_READWRITE);
+    HHVM_RC_INT(SQLITE3_OPEN_CREATE, SQLITE_OPEN_CREATE);
 
     HHVM_ME(SQLite3, __construct);
     HHVM_ME(SQLite3, open);

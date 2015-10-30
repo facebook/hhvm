@@ -48,10 +48,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64_t k_PHP_ROUND_HALF_UP;
-extern const int64_t k_PHP_ROUND_HALF_DOWN;
-extern const int64_t k_PHP_ROUND_HALF_EVEN;
-extern const int64_t k_PHP_ROUND_HALF_ODD;
+extern const double k_INF;
+extern const double k_NAN;
 
 Variant HHVM_FUNCTION(min, const Variant& value, const Array& args);
 Variant HHVM_FUNCTION(max, const Variant& value, const Array& args);

@@ -26,17 +26,17 @@
 namespace HPHP {
 
 static int check_id_allowed(const String& id, long bf) {
-  if (bf & q_DateTimeZone$$AFRICA && id.find("Africa/") == 0) return 1;
-  if (bf & q_DateTimeZone$$AMERICA && id.find("America/") == 0) return 1;
-  if (bf & q_DateTimeZone$$ANTARCTICA && id.find("Antarctica/") == 0) return 1;
-  if (bf & q_DateTimeZone$$ARCTIC && id.find("Arctic/") == 0) return 1;
-  if (bf & q_DateTimeZone$$ASIA && id.find("Asia/") == 0) return 1;
-  if (bf & q_DateTimeZone$$ATLANTIC && id.find("Atlantic/") == 0) return 1;
-  if (bf & q_DateTimeZone$$AUSTRALIA && id.find("Australia/") == 0) return 1;
-  if (bf & q_DateTimeZone$$EUROPE && id.find("Europe/") == 0) return 1;
-  if (bf & q_DateTimeZone$$INDIAN && id.find("Indian/") == 0) return 1;
-  if (bf & q_DateTimeZone$$PACIFIC && id.find("Pacific/") == 0) return 1;
-  if (bf & q_DateTimeZone$$UTC && id.find("UTC") == 0) return 1;
+  if (bf & DateTimeZoneData::AFRICA && id.find("Africa/") == 0) return 1;
+  if (bf & DateTimeZoneData::AMERICA && id.find("America/") == 0) return 1;
+  if (bf & DateTimeZoneData::ANTARCTICA && id.find("Antarctica/") == 0) return 1;
+  if (bf & DateTimeZoneData::ARCTIC && id.find("Arctic/") == 0) return 1;
+  if (bf & DateTimeZoneData::ASIA && id.find("Asia/") == 0) return 1;
+  if (bf & DateTimeZoneData::ATLANTIC && id.find("Atlantic/") == 0) return 1;
+  if (bf & DateTimeZoneData::AUSTRALIA && id.find("Australia/") == 0) return 1;
+  if (bf & DateTimeZoneData::EUROPE && id.find("Europe/") == 0) return 1;
+  if (bf & DateTimeZoneData::INDIAN && id.find("Indian/") == 0) return 1;
+  if (bf & DateTimeZoneData::PACIFIC && id.find("Pacific/") == 0) return 1;
+  if (bf & DateTimeZoneData::UTC && id.find("UTC") == 0) return 1;
   return 0;
 }
 
@@ -77,25 +77,6 @@ IMPLEMENT_THREAD_LOCAL(DateGlobals, s_date_globals);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constants
-
-#define DEFINE_TIME_ZONE_CONSTANT(name, value)                                 \
-  const int64_t q_DateTimeZone$$##name(value);                                 \
-  const StaticString s_DateTimeZone$$##name(#name)                             \
-
-DEFINE_TIME_ZONE_CONSTANT(AFRICA, 1);
-DEFINE_TIME_ZONE_CONSTANT(AMERICA, 2);
-DEFINE_TIME_ZONE_CONSTANT(ANTARCTICA, 4);
-DEFINE_TIME_ZONE_CONSTANT(ARCTIC, 8);
-DEFINE_TIME_ZONE_CONSTANT(ASIA, 16);
-DEFINE_TIME_ZONE_CONSTANT(ATLANTIC, 32);
-DEFINE_TIME_ZONE_CONSTANT(AUSTRALIA, 64);
-DEFINE_TIME_ZONE_CONSTANT(EUROPE, 128);
-DEFINE_TIME_ZONE_CONSTANT(INDIAN, 256);
-DEFINE_TIME_ZONE_CONSTANT(PACIFIC, 512);
-DEFINE_TIME_ZONE_CONSTANT(UTC, 1024);
-DEFINE_TIME_ZONE_CONSTANT(ALL, 2047);
-DEFINE_TIME_ZONE_CONSTANT(ALL_WITH_BC, 4095);
-DEFINE_TIME_ZONE_CONSTANT(PER_COUNTRY, 4096);
 
 const StaticString s_data("data");
 const StaticString s_getTimestamp("getTimestamp");
@@ -401,7 +382,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
                            const String& country) {
   // This is the same check that PHP5 performs, no validation needed.
   // See ext/date/php_date.c lines 4496-4499
-  if (what == q_DateTimeZone$$PER_COUNTRY && country.length() != 2) {
+  if (what == DateTimeZoneData::PER_COUNTRY && country.length() != 2) {
     raise_notice("A two-letter ISO 3166-1 compatible country code is expected");
     return false;
   }
@@ -418,8 +399,8 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
     // There is no known better way to extract this information out.
     const char* infoString = (const char*)&tzdb->data[table[i].pos];
     String countryCode = String(&infoString[5], 2, CopyString);
-    if ((what == q_DateTimeZone$$PER_COUNTRY && equal(country, countryCode))
-        || what == q_DateTimeZone$$ALL_WITH_BC
+    if ((what == DateTimeZoneData::PER_COUNTRY && equal(country, countryCode))
+        || what == DateTimeZoneData::ALL_WITH_BC
         || (check_id_allowed(table[i].id, what)
             && tzdb->data[table[i].pos + 4] == '\1')) {
 
@@ -854,11 +835,7 @@ Variant date_sunrise_sunset(int64_t numArgs,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define REGISTER_TIME_ZONE_CONSTANT(name)                                      \
-  Native::registerClassConstant<KindOfInt64>(                                  \
-    DateTimeZoneData::s_className.get(), s_DateTimeZone$$##name.get(),         \
-    q_DateTimeZone$$##name)                                                    \
-
+static const StaticString s_DateTimeZone("DateTimeZone");
 static class DateTimeExtension final : public Extension {
 public:
   DateTimeExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
@@ -887,20 +864,20 @@ public:
     Native::registerNativeDataInfo<DateTimeData>(
       DateTimeData::s_className.get(), Native::NDIFlags::NO_SWEEP);
 
-    REGISTER_TIME_ZONE_CONSTANT(AFRICA);
-    REGISTER_TIME_ZONE_CONSTANT(AMERICA);
-    REGISTER_TIME_ZONE_CONSTANT(ANTARCTICA);
-    REGISTER_TIME_ZONE_CONSTANT(ARCTIC);
-    REGISTER_TIME_ZONE_CONSTANT(ASIA);
-    REGISTER_TIME_ZONE_CONSTANT(ATLANTIC);
-    REGISTER_TIME_ZONE_CONSTANT(AUSTRALIA);
-    REGISTER_TIME_ZONE_CONSTANT(EUROPE);
-    REGISTER_TIME_ZONE_CONSTANT(INDIAN);
-    REGISTER_TIME_ZONE_CONSTANT(PACIFIC);
-    REGISTER_TIME_ZONE_CONSTANT(UTC);
-    REGISTER_TIME_ZONE_CONSTANT(ALL);
-    REGISTER_TIME_ZONE_CONSTANT(ALL_WITH_BC);
-    REGISTER_TIME_ZONE_CONSTANT(PER_COUNTRY);
+    HHVM_RCC_INT(DateTimeZone, AFRICA, DateTimeZoneData::AFRICA);
+    HHVM_RCC_INT(DateTimeZone, AMERICA, DateTimeZoneData::AMERICA);
+    HHVM_RCC_INT(DateTimeZone, ANTARCTICA, DateTimeZoneData::ANTARCTICA);
+    HHVM_RCC_INT(DateTimeZone, ARCTIC, DateTimeZoneData::ARCTIC);
+    HHVM_RCC_INT(DateTimeZone, ASIA, DateTimeZoneData::ASIA);
+    HHVM_RCC_INT(DateTimeZone, ATLANTIC, DateTimeZoneData::ATLANTIC);
+    HHVM_RCC_INT(DateTimeZone, AUSTRALIA, DateTimeZoneData::AUSTRALIA);
+    HHVM_RCC_INT(DateTimeZone, EUROPE, DateTimeZoneData::EUROPE);
+    HHVM_RCC_INT(DateTimeZone, INDIAN, DateTimeZoneData::INDIAN);
+    HHVM_RCC_INT(DateTimeZone, PACIFIC, DateTimeZoneData::PACIFIC);
+    HHVM_RCC_INT(DateTimeZone, UTC, DateTimeZoneData::UTC);
+    HHVM_RCC_INT(DateTimeZone, ALL, DateTimeZoneData::ALL);
+    HHVM_RCC_INT(DateTimeZone, ALL_WITH_BC, DateTimeZoneData::ALL_WITH_BC);
+    HHVM_RCC_INT(DateTimeZone, PER_COUNTRY, DateTimeZoneData::PER_COUNTRY);
 
     HHVM_ME(DateTimeZone, __construct);
     HHVM_ME(DateTimeZone, getLocation);
@@ -949,14 +926,10 @@ public:
     HHVM_FE(timezone_name_from_abbr);
     HHVM_FE(timezone_version_get);
 
-#define SUNFUNCS_CNS(name, type) \
-    Native::registerConstant<KindOfInt64> \
-      (makeStaticString("SUNFUNCS_RET_" #name), \
-      (int64_t)DateTime::SunInfoFormat::Return##type);
-    SUNFUNCS_CNS(DOUBLE, Double);
-    SUNFUNCS_CNS(STRING, String);
-    SUNFUNCS_CNS(TIMESTAMP, TimeStamp);
-#undef SUNFUNCS_CNS
+    HHVM_RC_INT(SUNFUNCS_RET_DOUBLE, DateTime::SunInfoFormat::ReturnDouble);
+    HHVM_RC_INT(SUNFUNCS_RET_STRING, DateTime::SunInfoFormat::ReturnString);
+    HHVM_RC_INT(SUNFUNCS_RET_TIMESTAMP,
+                DateTime::SunInfoFormat::ReturnTimeStamp);
 
     loadSystemlib("datetime");
   }

@@ -26,28 +26,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64_t k_UCOL_DEFAULT;
-extern const int64_t k_UCOL_PRIMARY;
-extern const int64_t k_UCOL_SECONDARY;
-extern const int64_t k_UCOL_TERTIARY;
-extern const int64_t k_UCOL_DEFAULT_STRENGTH;
-extern const int64_t k_UCOL_QUATERNARY;
-extern const int64_t k_UCOL_IDENTICAL;
-extern const int64_t k_UCOL_OFF;
-extern const int64_t k_UCOL_ON;
-extern const int64_t k_UCOL_SHIFTED;
-extern const int64_t k_UCOL_NON_IGNORABLE;
-extern const int64_t k_UCOL_LOWER_FIRST;
-extern const int64_t k_UCOL_UPPER_FIRST;
-extern const int64_t k_UCOL_FRENCH_COLLATION;
-extern const int64_t k_UCOL_ALTERNATE_HANDLING;
-extern const int64_t k_UCOL_CASE_FIRST;
-extern const int64_t k_UCOL_CASE_LEVEL;
-extern const int64_t k_UCOL_NORMALIZATION_MODE;
-extern const int64_t k_UCOL_STRENGTH;
-extern const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE;
-extern const int64_t k_UCOL_NUMERIC_COLLATION;
-
 Variant HHVM_FUNCTION(array_chunk,
                       const Variant& input,
                       int size,

@@ -1622,7 +1622,7 @@ static Variant HHVM_FUNCTION(iconv_mime_encode,
         prev_in_left = ini_in_left = in_left;
         ini_in_p = in_p;
 
-        for (out_size = char_cnt; out_size > 0;) {
+        for (out_size = (char_cnt - 2) / 3; out_size > 0;) {
           size_t prev_out_left ATTRIBUTE_UNUSED;
 
           nbytes_required = 0;

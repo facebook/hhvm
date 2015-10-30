@@ -2472,6 +2472,16 @@ public:
     kCNS(STR_PAD_BOTH);
 #undef kCNS
 
+    HHVM_RC_INT_SAME(LC_CTYPE);
+    HHVM_RC_INT_SAME(LC_NUMERIC);
+    HHVM_RC_INT_SAME(LC_TIME);
+    HHVM_RC_INT_SAME(LC_COLLATE);
+    HHVM_RC_INT_SAME(LC_MONETARY);
+    HHVM_RC_INT_SAME(LC_ALL);
+#ifdef LC_MESSAGES
+    HHVM_RC_INT_SAME(LC_MESSAGES);
+#endif
+
     Native::registerConstant<KindOfString>(
       s_HPHP_TRIM_CHARLIST.get(),
       k_HPHP_TRIM_CHARLIST.get()

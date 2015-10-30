@@ -74,38 +74,6 @@
             "value": 1
         },
         {
-            "name": "CREDITS_ALL",
-            "value": 4294967295
-        },
-        {
-            "name": "CREDITS_DOCS",
-            "value": 16
-        },
-        {
-            "name": "CREDITS_FULLPAGE",
-            "value": 32
-        },
-        {
-            "name": "CREDITS_GENERAL",
-            "value": 2
-        },
-        {
-            "name": "CREDITS_GROUP",
-            "value": 1
-        },
-        {
-            "name": "CREDITS_MODULES",
-            "value": 8
-        },
-        {
-            "name": "CREDITS_QA",
-            "value": 64
-        },
-        {
-            "name": "CREDITS_SAPI",
-            "value": 4
-        },
-        {
             "name": "CRNCYSTR",
             "value": 262159
         },
@@ -236,62 +204,6 @@
         {
             "name": "INTL_MAX_LOCALE_LEN",
             "value": 80
-        },
-        {
-            "name": "LATT_HASCHILDREN",
-            "value": 32
-        },
-        {
-            "name": "LATT_HASNOCHILDREN",
-            "value": 64
-        },
-        {
-            "name": "LATT_MARKED",
-            "value": 4
-        },
-        {
-            "name": "LATT_NOINFERIORS",
-            "value": 1
-        },
-        {
-            "name": "LATT_NOSELECT",
-            "value": 2
-        },
-        {
-            "name": "LATT_REFERRAL",
-            "value": 16
-        },
-        {
-            "name": "LATT_UNMARKED",
-            "value": 8
-        },
-        {
-            "name": "LC_ALL",
-            "value": 6
-        },
-        {
-            "name": "LC_COLLATE",
-            "value": 3
-        },
-        {
-            "name": "LC_CTYPE",
-            "value": 0
-        },
-        {
-            "name": "LC_MESSAGES",
-            "value": 5
-        },
-        {
-            "name": "LC_MONETARY",
-            "value": 4
-        },
-        {
-            "name": "LC_NUMERIC",
-            "value": 1
-        },
-        {
-            "name": "LC_TIME",
-            "value": 2
         },
         {
             "name": "MB_CASE_LOWER",
@@ -454,38 +366,6 @@
             "value": 4
         },
         {
-            "name": "SORT_ASC",
-            "value": 4
-        },
-        {
-            "name": "SORT_DESC",
-            "value": 3
-        },
-        {
-            "name": "SORT_FLAG_CASE",
-            "value": 8
-        },
-        {
-            "name": "SORT_LOCALE_STRING",
-            "value": 5
-        },
-        {
-            "name": "SORT_NATURAL",
-            "value": 6
-        },
-        {
-            "name": "SORT_NUMERIC",
-            "value": 1
-        },
-        {
-            "name": "SORT_REGULAR",
-            "value": 0
-        },
-        {
-            "name": "SORT_STRING",
-            "value": 2
-        },
-        {
             "name": "SO_FREE",
             "value": 8
         },
@@ -552,38 +432,6 @@
         {
             "name": "UNKNOWN_TYPE",
             "value": 999998
-        },
-        {
-            "name": "UPLOAD_ERR_CANT_WRITE",
-            "value": 7
-        },
-        {
-            "name": "UPLOAD_ERR_EXTENSION",
-            "value": 8
-        },
-        {
-            "name": "UPLOAD_ERR_FORM_SIZE",
-            "value": 2
-        },
-        {
-            "name": "UPLOAD_ERR_INI_SIZE",
-            "value": 1
-        },
-        {
-            "name": "UPLOAD_ERR_NO_FILE",
-            "value": 4
-        },
-        {
-            "name": "UPLOAD_ERR_NO_TMP_DIR",
-            "value": 6
-        },
-        {
-            "name": "UPLOAD_ERR_OK",
-            "value": 0
-        },
-        {
-            "name": "UPLOAD_ERR_PARTIAL",
-            "value": 3
         },
         {
             "name": "WNOHANG",

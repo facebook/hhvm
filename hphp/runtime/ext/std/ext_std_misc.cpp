@@ -190,6 +190,24 @@ void StandardExtension::initMisc() {
     Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
                                           get_user_token_id(T_DOUBLE_COLON));
 
+    HHVM_RC_INT(UPLOAD_ERR_OK,         0);
+    HHVM_RC_INT(UPLOAD_ERR_INI_SIZE,   1);
+    HHVM_RC_INT(UPLOAD_ERR_FORM_SIZE,  2);
+    HHVM_RC_INT(UPLOAD_ERR_PARTIAL,    3);
+    HHVM_RC_INT(UPLOAD_ERR_NO_FILE,    4);
+    HHVM_RC_INT(UPLOAD_ERR_NO_TMP_DIR, 6);
+    HHVM_RC_INT(UPLOAD_ERR_CANT_WRITE, 7);
+    HHVM_RC_INT(UPLOAD_ERR_EXTENSION,  8);
+
+    HHVM_RC_INT(CREDITS_GROUP,    1 << 0);
+    HHVM_RC_INT(CREDITS_GENERAL,  1 << 1);
+    HHVM_RC_INT(CREDITS_SAPI,     1 << 2);
+    HHVM_RC_INT(CREDITS_MODULES,  1 << 3);
+    HHVM_RC_INT(CREDITS_DOCS,     1 << 4);
+    HHVM_RC_INT(CREDITS_FULLPAGE, 1 << 5);
+    HHVM_RC_INT(CREDITS_QA,       1 << 6);
+    HHVM_RC_INT(CREDITS_ALL, 0xFFFFFFFF);
+
     HHVM_RC_STR(PHP_BINARY, current_executable_path());
     HHVM_RC_STR(PHP_BINDIR, current_executable_directory());
     HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString().toCppString());

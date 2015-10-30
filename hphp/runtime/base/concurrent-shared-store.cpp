@@ -278,8 +278,8 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
 
     VariableUnserializer vu(sAddr, sval->getSerializedSize(), sType);
     Variant v = vu.unserialize();
-    auto const pair = APCHandle::Create(v, sval->isSerializedObj(), false,
-      false);
+    auto const pair = APCHandle::Create(v, sval->isSerializedObj(),
+      APCHandleLevel::Outer, false);
     sval->data = pair.handle;
     sval->dataSize = pair.size;
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
@@ -381,7 +381,8 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   }
 
   auto const ret = oldHandle->toLocal().toInt64() + step;
-  auto const pair = APCHandle::Create(Variant(ret), false, false, false);
+  auto const pair = APCHandle::Create(Variant(ret), false,
+    APCHandleLevel::Outer, false);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.expire == 0, false);
@@ -416,7 +417,8 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
     return false;
   }
 
-  auto const pair = APCHandle::Create(Variant(val), false, false, false);
+  auto const pair = APCHandle::Create(Variant(val), false,
+    APCHandleLevel::Outer, false);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.expire == 0, false);
@@ -485,7 +487,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            bool overwrite,
                                            bool limit_ttl) {
   StoreValue *sval;
-  auto svar = APCHandle::Create(value, false, false, false);
+  auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
   auto keyLen = key.size();
   ReadLock l(m_lock);
   char* const kcp = strdup(key.data());
@@ -617,7 +619,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
       return false;
     }
   }
-  auto pair = APCHandle::Create(v, serialized, false, false);
+  auto pair = APCHandle::Create(v, serialized, APCHandleLevel::Outer, false);
   item.value = pair.handle;
   item.sSize = pair.size;
   return true;
@@ -637,7 +639,7 @@ bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
       return false;
     }
   }
-  auto pair = APCHandle::Create(v, false, false, false);
+  auto pair = APCHandle::Create(v, false, APCHandleLevel::Outer, false);
   item.value = pair.handle;
   item.sSize = pair.size;
   return true;
@@ -665,7 +667,8 @@ void ConcurrentTableSharedStore::primeDone() {
       free(copy);
       return;
     }
-    auto const pair = APCHandle::Create(Variant(1), false, false, false);
+    auto const pair = APCHandle::Create(Variant(1), false,
+      APCHandleLevel::Outer, false);
     acc->second.set(pair.handle, 0);
     acc->second.dataSize = pair.size;
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);

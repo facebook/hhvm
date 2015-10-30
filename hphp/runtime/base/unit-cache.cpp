@@ -232,7 +232,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     makeStaticString(
       // XXX: it seems weird we have to do this even though we already ran
       // resolveVmInclude.
-      (requestedPath->data()[0] == '/'
+      (FileUtil::isAbsolutePath(requestedPath->toCppString())
        ?  String{requestedPath}
         : String(SourceRootInfo::GetCurrentSourceRoot()) + StrNR(requestedPath)
       ).get()
@@ -366,7 +366,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);
-  if (file[0] != '/') {
+  if (!FileUtil::isAbsolutePath(file.toCppString())) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
       context->path = translatedPath;
       return true;
@@ -382,8 +382,9 @@ bool findFileWrapper(const String& file, void* ctx) {
   std::string server_root(SourceRootInfo::GetCurrentSourceRoot());
   if (server_root.empty()) {
     server_root = std::string(g_context->getCwd().data());
-    if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
-      server_root += "/";
+    if (server_root.empty() ||
+        FileUtil::isDirSeparator(server_root[server_root.size() - 1])) {
+      server_root += FileUtil::getDirSeparator();
     }
   }
   String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
@@ -433,6 +434,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + RuntimeOption::EvalUseExternalEmitter + '\0'
     + (RuntimeOption::EvalExternalEmitterFallback ? '1' : '0')
     + (RuntimeOption::EvalExternalEmitterAllowPartial ? '1' : '0')
+    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
     + mangleUnitPHP7Options();
   return string_md5(t.c_str(), t.size());
 }

@@ -19,10 +19,13 @@
 #ifndef incl_HPHP_FILE_UTIL_H_
 #define incl_HPHP_FILE_UTIL_H_
 
+#include "hphp/util/file.h"
+
 #include "hphp/runtime/base/type-string.h"
-#include <vector>
-#include <string>
+
 #include <set>
+#include <string>
+#include <vector>
 
 namespace HPHP { namespace FileUtil {
 

@@ -60,7 +60,6 @@ function echo_flush() {
 
 $hg_for_closure = null;
 $id_of_rootclass = null;
-$id_of_memoize_edge = null;
 function showTestClasses($args) {
   global $hg_for_closure;
   global $id_of_rootclass;
@@ -88,14 +87,12 @@ function showTestClasses($args) {
 
 function showTestEdges($args) {
   global $hg_for_closure;
-  global $id_of_memoize_edge;
   $testedges = array(
     'ArrayKey:MemoizedSingleton' => 1,
     'Property:somestring' => 1,
     'Property:child' => 1,
     'Property:closure' => 1,
     'Property:children' => 1,
-    'ClassProperty:RootClass:getinstance$memoize_cache' => 1,
   );
   $name = $args['name'];
   if (idx($testedges, $name)) {
@@ -105,10 +102,6 @@ function showTestEdges($args) {
     if ($same_name != $name) {
       echo"heapgraph_edge broken: $name != $same_name\n";
     }
-  }
-
-  if ($name == 'ClassProperty:RootClass:getinstance$memoize_cache') {
-    $id_of_memoize_edge = $args['index'];
   }
 }
 
@@ -195,11 +188,5 @@ echo_flush();
 echo "\nDoing DFS from root class on nodes (skipping root):\n";
 heapgraph_dfs_nodes(
   $hg, array($id_of_rootclass), array($id_of_rootclass), 'showClass'
-);
-echo_flush();
-
-echo "\nDoing DFS from memoize cache edge on edges and nodes:\n";
-heapgraph_dfs_edges(
-  $hg, array($id_of_memoize_edge), array(), 'showEdgeAndClass'
 );
 echo_flush();

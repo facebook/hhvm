@@ -603,11 +603,17 @@ void regionizeFunc(const Func*  func,
                    RegionVec&   regions);
 
 /*
- * Optimize the guards of `region'.
+ * Optimize the guards of `region' based on profiling data.
  *
  * The `region' must have its retranslation blocks already chained.
  */
-void optimizeGuards(RegionDesc& region, const ProfData& profData);
+void optimizeProfiledGuards(RegionDesc& region, const ProfData& profData);
+
+/*
+ * Optimize the guards of `region', optionally in `simple' mode (where
+ * guards are only relaxed if they can be relaxed all the way to TGen).
+ */
+void optimizeGuards(RegionDesc& region, bool simple);
 
 /*
  * Returns the PGO region selector to be used for the given `func'.

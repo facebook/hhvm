@@ -142,15 +142,8 @@ void cgDivDbl(IRLS& env, const IRInstruction* inst) {
   auto const d = dstLoc(env, inst, 0).reg();
   auto const dividend = srcLoc(env, inst, 0).reg();
   auto const divisor  = srcLoc(env, inst, 1).reg();
-  auto const exit = inst->taken();
   auto& v = vmain(env);
 
-  // Divide by zero check.
-  auto const sf = v.makeReg();
-  v << ucomisd{v.cns(0), divisor, sf};
-  unlikelyIfThen(v, vcold(env), CC_NP, sf, [&] (Vout& v) {
-    fwdJcc(v, env, CC_E, sf, exit);
-  });
   v << divsd{divisor, dividend, d};
 }
 

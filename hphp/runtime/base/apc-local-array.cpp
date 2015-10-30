@@ -34,7 +34,7 @@ namespace HPHP {
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   assert(ad->isApcArray());
-  assert(ad->getCount() != 0);
+  assert(ad->checkCount());
   DEBUG_ONLY auto const shared = static_cast<const APCLocalArray*>(ad);
   if (auto ptr = shared->m_localCache) {
     auto const cap = shared->m_arr->capacity();

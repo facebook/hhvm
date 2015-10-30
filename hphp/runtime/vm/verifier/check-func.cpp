@@ -762,6 +762,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define V_MMANY { },
   #define R_MMANY { },
   #define MFINAL { },
+  #define C_MFINAL { },
+  #define R_MFINAL { },
+  #define V_MFINAL { },
   #define IDX_A { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
@@ -771,6 +774,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef R_MMANY
   #undef MMANY
   #undef MFINAL
+  #undef C_MFINAL
+  #undef R_MFINAL
+  #undef V_MFINAL
   #undef FMANY
   #undef CVMANY
   #undef CVUMANY
@@ -809,6 +815,15 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CRV;
     }
     return m_tmp_sig;
+  case Op::SetML:
+  case Op::SetMC:
+  case Op::SetMInt:
+  case Op::SetMStr:
+  case Op::SetMNewElem:
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = i == n - 1 ? CV : CRV;
+    }
+    return m_tmp_sig;
   case Op::FCall:       // ONE(IVA),     FMANY,   ONE(RV)
   case Op::FCallD:      // THREE(IVA,SA,SA), FMANY,   ONE(RV)
   case Op::FCallUnpack: // ONE(IVA), FMANY, ONE(RV)
@@ -841,8 +856,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     if (pops == 1) {
       m_tmp_sig[0] = AV;
     } else {
-      m_tmp_sig[0] = CV;
-      m_tmp_sig[1] = AV;
+      m_tmp_sig[0] = AV;
+      m_tmp_sig[1] = CV;
     }
     return m_tmp_sig;
   }

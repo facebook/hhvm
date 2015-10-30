@@ -332,7 +332,7 @@ bool AnalysisResult::declareConst(FileScopePtr fs, const std::string &name) {
 
 static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
   if (auto d = b1->getStmt()->getRange().compare(b2->getStmt()->getRange())) {
-    return d;
+    return d < 0;
   }
   return b1->getContainingFile()->getName() <
     b2->getContainingFile()->getName();
@@ -997,8 +997,9 @@ std::string AnalysisResult::prepareFile(const char *root,
                                         bool chop,
                                         bool stripPath /* = true */) {
   std::string fullPath = root;
-  if (!fullPath.empty() && fullPath[fullPath.size() - 1] != '/') {
-    fullPath += "/";
+  if (!fullPath.empty() &&
+    !FileUtil::isDirSeparator(fullPath[fullPath.size() - 1])) {
+    fullPath += FileUtil::getDirSeparator();
   }
 
   auto file = fileName;
@@ -1015,7 +1016,7 @@ std::string AnalysisResult::prepareFile(const char *root,
     fullPath += file;
   }
   for (size_t pos = strlen(root); pos < fullPath.size(); pos++) {
-    if (fullPath[pos] == '/') {
+    if (FileUtil::isDirSeparator(fullPath[pos])) {
       mkdir(fullPath.substr(0, pos).c_str(), 0777);
     }
   }

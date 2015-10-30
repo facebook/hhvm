@@ -22,8 +22,10 @@
 #include <vector>
 
 #include "hphp/util/cache/cache-manager.h"
+#include "hphp/util/file.h"
 
 namespace HPHP {
+////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Stores file contents in memory. Used by web server for faster static
@@ -63,7 +65,7 @@ class FileCache {
 
   // Check if path is file, directory, unknown, or not in cache
   VFileType getFileType(const char* name) const {
-    if (name && *name == '/') {
+    if (name && FileUtil::isAbsolutePath(name)) {
       return cache_manager_->getFileType(GetRelativePath(name).c_str());
     }
     return cache_manager_->getFileType(name);
@@ -71,7 +73,7 @@ class FileCache {
 
   // Read list of files in directory
   std::vector<std::string> readDirectory(const char* name) const {
-    if (name && *name == '/') {
+    if (name && FileUtil::isAbsolutePath(name)) {
       return cache_manager_->readDirectory(GetRelativePath(name).c_str());
     }
     return cache_manager_->readDirectory(name);
@@ -81,6 +83,7 @@ class FileCache {
   std::unique_ptr<CacheManager> cache_manager_;
 };
 
-}   // namespace HPHP
+////////////////////////////////////////////////////////////////////////////////
+}
 
-#endif  // incl_HPHP_FILE_CACHE_H_
+#endif

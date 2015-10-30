@@ -46,7 +46,6 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -439,7 +438,6 @@ CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(RaiseArrayKeyNotice)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
-CALL_OPCODE(GenericIdx)
 CALL_OPCODE(MapIdx)
 CALL_OPCODE(LdClsPropAddrOrNull)
 CALL_OPCODE(LdClsPropAddrOrRaise)
@@ -636,6 +634,17 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgGenericIdx(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const sp = srcLoc(inst, 3).reg();
+  auto const spOff = inst->extra<GenericIdx>()->offset.offset;
+  auto const sync_sp = v.makeReg();
+  v << lea{sp[cellsToBytes(spOff)], sync_sp};
+  emitEagerSyncPoint(v, inst->marker().sk().pc(),
+                     rvmtl(), rvmfp(), sync_sp);
+  cgCallNative (v, inst);
+}
 
 void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   using namespace NativeCalls;
@@ -837,16 +846,17 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
                                  Vreg sf, JmpFn doJcc) {
   // Note: if you add new supported type tests, you should update
   // negativeCheckType() to indicate whether it is precise or not.
-  always_assert(!(type <= TCls));
   always_assert(!type.hasConstVal());
+  always_assert_flog(
+    !type.subtypeOfAny(TCls, TCountedStr, TStaticArr, TCountedArr),
+    "Unsupported type in emitTypeTest: {}", type
+  );
   auto& v = vmain();
   ConditionCode cc;
   if (type <= TStaticStr) {
     emitCmpTVType(v, sf, KindOfStaticString, typeSrc);
     cc = CC_E;
   } else if (type <= TStr) {
-    always_assert(type != TCountedStr &&
-                  "We don't support guarding on CountedStr");
     emitTestTVType(v, sf, KindOfStringBit, typeSrc);
     cc = CC_NZ;
   } else if (type == TNull) {
@@ -1195,7 +1205,15 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
     }, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
       return cond(v, CC_P, sf, v.makeReg(), [&](Vout& v) {
-        return dst1;
+        // PF = 1 -> unordered, i.e., we are doing an int cast of NaN. PHP5
+        // didn't formally define this, but observationally returns the
+        // truncated value (i.e., what dst1 currently holds). PHP7 formally
+        // defines this case to return 0.
+        if (RuntimeOption::PHP7_IntSemantics) {
+          return v.cns(0);
+        } else {
+          return dst1;
+        }
       }, [&](Vout& v) {
         auto const sf = v.makeReg();
         v << ucomisd{v.cns(maxULongAsDouble), srcReg, sf};
@@ -4445,6 +4463,18 @@ void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testbim{int8_t(0xffu), contReg[stateOff], sf};
   v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
+}
+
+void CodeGenerator::cgContStarted(IRInstruction* inst) {
+  auto contReg  = srcLoc(inst, 0).reg();
+  auto dstReg   = dstLoc(inst, 0).reg();
+  auto stateOff = BaseGenerator::stateOff() - genOffset(false /* isAsync */);
+  auto& v       = vmain();
+
+  // Return 1 if generator state is not in the Created state.
+  auto const sf = v.makeReg();
+  v << cmpbim{int8_t(BaseGenerator::State::Created), contReg[stateOff], sf};
+  v << setcc{CC_NE, sf, dstReg};
 }
 
 void CodeGenerator::cgContValid(IRInstruction* inst) {

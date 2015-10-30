@@ -24,6 +24,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+constexpr int64_t k_PHP_INT_MIN = std::numeric_limits<int64_t>::lowest();
+constexpr int64_t k_PHP_INT_MAX = std::numeric_limits<int64_t>::max();
+extern const StaticString k_PHP_VERSION;
+
 int64_t HHVM_FUNCTION(connection_aborted);
 int64_t HHVM_FUNCTION(connection_status);
 int64_t HHVM_FUNCTION(connection_timeout);

@@ -17,11 +17,9 @@
 
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
@@ -36,28 +34,36 @@ constexpr int kJmpLen = 5;
 using WideJmpSet = hphp_hash_set<void*>;
 struct JmpOutOfRange : std::exception {};
 
-template <typename T>
-void fixupStateVector(StateVector<T, TcaRange>& sv, RelocationInfo& rel) {
-  for (auto& ii : sv) {
-    if (!ii.empty()) {
-      /*
-       * We have to be careful with before/after here.
-       * If we relocate two consecutive regions of memory,
-       * but relocate them to two different destinations, then
-       * the end address of the first region is also the start
-       * address of the second region; so adjustedAddressBefore(end)
-       * gives us the relocated address of the end of the first
-       * region, while adjustedAddressAfter(end) gives us the
-       * relocated address of the start of the second region.
-       */
-      auto s = rel.adjustedAddressAfter(ii.begin());
-      auto e = rel.adjustedAddressBefore(ii.end());
-      if (e || s) {
-        if (!s) s = ii.begin();
-        if (!e) e = ii.end();
-        ii = TcaRange(s, e);
-      }
-    }
+TcaRange fixupRange(const RelocationInfo& rel, const TcaRange& rng) {
+  /*
+   * We have to be careful with before/after here.
+   * If we relocate two consecutive regions of memory,
+   * but relocate them to two different destinations, then
+   * the end address of the first region is also the start
+   * address of the second region; so adjustedAddressBefore(end)
+   * gives us the relocated address of the end of the first
+   * region, while adjustedAddressAfter(end) gives us the
+   * relocated address of the start of the second region.
+   */
+  auto s = rel.adjustedAddressAfter(rng.begin());
+  auto e = rel.adjustedAddressBefore(rng.end());
+  if (s && e) {
+    return TcaRange(s, e);
+  }
+  if (s && !e) {
+    return TcaRange(s, s + rng.size());
+  }
+  if (!s && e) {
+    return TcaRange(e - rng.size(), e);
+  }
+  return rng;
+}
+
+void fixupRanges(AsmInfo* asmInfo, AreaIndex area, RelocationInfo& rel) {
+  asmInfo->clearBlockRangesForArea(area);
+  for (auto& ii : asmInfo->instRangesForArea(area)) {
+    ii.second = fixupRange(rel, ii.second);
+    asmInfo->updateForBlock(area, ii.first, ii.second);
   }
 }
 
@@ -428,12 +434,11 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
 
   if (asmInfo) {
-    fixupStateVector(asmInfo->asmInstRanges, rel);
-    fixupStateVector(asmInfo->asmBlockRanges, rel);
-    fixupStateVector(asmInfo->coldInstRanges, rel);
-    fixupStateVector(asmInfo->coldBlockRanges, rel);
-    fixupStateVector(asmInfo->frozenInstRanges, rel);
-    fixupStateVector(asmInfo->frozenBlockRanges, rel);
+    assert(asmInfo->validate());
+    fixupRanges(asmInfo, AreaIndex::Main, rel);
+    fixupRanges(asmInfo, AreaIndex::Cold, rel);
+    fixupRanges(asmInfo, AreaIndex::Frozen, rel);
+    assert(asmInfo->validate());
   }
 }
 

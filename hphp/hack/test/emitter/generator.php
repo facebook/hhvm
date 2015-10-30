@@ -47,7 +47,6 @@ function test(): void {
   }
 
   $k = yield_val();
-  $k->next();
   while ($k->valid()) {
     $i = $k->current();
     echo $i, "\n";

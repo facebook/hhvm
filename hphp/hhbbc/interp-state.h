@@ -208,8 +208,8 @@ struct State {
   std::vector<ActRec> fpiStack;
 
   /*
-   * The current base. Updated as we move through bytecodes representing the
-   * operation.
+   * The current member base. Updated as we move through bytecodes representing
+   * the operation.
    */
   Base base;
 
@@ -217,7 +217,7 @@ struct State {
    * Chains of member operations on array elements will all affect the type of
    * something further back in the member instruction.  Currently this is just
    * used for locals.  This vector tracks the base,key type pair that was used
-   * at each stage.  See resolveArrayChain.
+   * at each stage.  See irgen-minstr.cpp:resolveArrayChain().
    */
   std::vector<std::pair<Type,Type>> arrayChain;
 };

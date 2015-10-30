@@ -29,6 +29,7 @@ class Memcached {
   const DISTRIBUTION_MODULA = 0;
   const DISTRIBUTION_CONSISTENT = 0;
   const OPT_LIBKETAMA_COMPATIBLE = 0;
+  const OPT_LIBKETAMA_HASH = 0;
   const OPT_BUFFER_WRITES = 0;
   const OPT_BINARY_PROTOCOL = 0;
   const OPT_NO_BLOCK = 0;

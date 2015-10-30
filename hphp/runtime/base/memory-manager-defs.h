@@ -187,6 +187,7 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
       auto size = hdr->hdr_.kind == HeaderKind::Hole ||
                   hdr->hdr_.kind == HeaderKind::Free ? hdr->free_.size() :
                   MemoryManager::smallSizeClass(hdr->size());
+      assert(size % 16 == 0);
       hdr = (Header*)((char*)hdr + size);
       if (hdr >= slab_end) {
         assert(hdr == slab_end && "hdr > slab_end indicates corruption");
@@ -236,7 +237,7 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
 // iterate just the ObjectDatas, including the kinds with prefixes.
 // (NativeData and ResumableFrame).
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
-  if (debug) checkHeap();
+  if (debug) checkHeap("MM::forEachObject");
   std::vector<ObjectData*> ptrs;
   forEachHeader([&](Header* h) {
     switch (h->kind()) {

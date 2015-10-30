@@ -10,7 +10,7 @@ ENTERS
 enter some_function args
 
 FRAME PTRS
-enter some_function args,frame_ptr,parent_frame_ptr
+enter some_function args,this_ptr,frame_ptr,parent_frame_ptr
 exit some_function return,frame_ptr,parent_frame_ptr
 
 IMPLICIT CTORS

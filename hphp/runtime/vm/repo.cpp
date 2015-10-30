@@ -177,6 +177,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     // in an inconsistent and ad-hoc manner. But I don't understand their uses
     // and interactions well enough to feel comfortable fixing now.
     RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
+    RuntimeOption::AutoprimeGenerators = s_globalData.AutoprimeGenerators;
 
     return;
   }
@@ -562,7 +563,7 @@ void Repo::initCentral() {
     long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize != -1) {
       auto buf = new char[bufsize];
-      SCOPE_EXIT { delete buf; };
+      SCOPE_EXIT { delete[] buf; };
       if (!getpwuid_r(getuid(), &pwbuf, buf, size_t(bufsize), &pwbufp)
           && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
         std::string centralPath = pwbufp->pw_dir;

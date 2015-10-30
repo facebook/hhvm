@@ -213,6 +213,7 @@ public:
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;
+  using ArrayData::decWillRelease;
   using ArrayData::incRefCount;
 
   /*

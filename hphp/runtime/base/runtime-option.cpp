@@ -29,6 +29,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/util/code-cache.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
@@ -87,6 +88,7 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
+bool RuntimeOption::AutoprimeGenerators = true;
 
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
@@ -434,16 +436,8 @@ static inline std::string pgoRegionSelectorDefault() {
 #endif
 }
 
-static inline bool hhirConstrictGuardsDefault() {
-#ifdef HHVM_CONSTRICT_GUARDS_BY_DEFAULT
-  return true;
-#else
-  return false;
-#endif
-}
-
 static inline bool hhirRelaxGuardsDefault() {
-  return !RuntimeOption::EvalHHIRConstrictGuards;
+  return false;
 }
 
 static inline bool evalJitDefault() {
@@ -512,7 +506,6 @@ const uint64_t kEvalVMStackElmsDefault =
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
 static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
-static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
 static const uint64_t kJitRelocationSizeDefault = 1 << 20;
 
 static const bool kJitTimerDefault =
@@ -523,9 +516,6 @@ static const bool kJitTimerDefault =
 #endif
 ;
 
-inline size_t maxUsageDef() {
-  return RuntimeOption::EvalJitASize;
-}
 using std::string;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
@@ -1020,6 +1010,7 @@ void RuntimeOption::Load(
     Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative", false);
     Config::Bind(RepoPreload, ini, config, "Repo.Preload", false);
   }
+
   {
     // Eval
     Config::Bind(EnableHipHopSyntax, ini, config, "Eval.EnableHipHopSyntax");
@@ -1116,6 +1107,37 @@ void RuntimeOption::Load(
     }
   }
   {
+    // CodeCache
+    Config::Bind(CodeCache::AHotSize, ini, config, "Eval.JitAHotSize",
+                 ahotDefault());
+    Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize", 60 << 20);
+
+    if (RuntimeOption::EvalJitPGO) {
+      Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize",
+                   64 << 20);
+    } else {
+      CodeCache::AProfSize = 0;
+    }
+    Config::Bind(CodeCache::AColdSize, ini, config, "Eval.JitAColdSize",
+                 24 << 20);
+    Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",
+                 40 << 20);
+    Config::Bind(CodeCache::GlobalDataSize, ini, config,
+                 "Eval.JitGlobalDataSize", CodeCache::ASize >> 2);
+    Config::Bind(CodeCache::AMaxUsage, ini, config, "Eval.JitAMaxUsage",
+                 CodeCache::ASize);
+
+    Config::Bind(CodeCache::MapTCHuge, ini, config, "Eval.MapTCHuge",
+                 hugePagesSoundNice());
+
+    Config::Bind(CodeCache::TCNumHugeHotMB, ini, config,
+                 "Eval.TCNumHugeHotMB", 16);
+    Config::Bind(CodeCache::TCNumHugeColdMB, ini, config,
+                 "Eval.TCNumHugeColdMB", 4);
+
+    Config::Bind(CodeCache::AutoTCShift, ini, config, "Eval.JitAutoTCShift", 1);
+  }
+  {
     // Hack Language
     Config::Bind(IntsOverflowToInts, ini, config,
                  "Hack.Lang.IntsOverflowToInts", EnableHipHopSyntax);
@@ -1148,6 +1170,13 @@ void RuntimeOption::Load(
     // some reason.
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
                  LookForTypechecker);
+
+    // The default behavior in PHP is to auto-prime generators. For now we leave
+    // this disabled in HipHop syntax mode to deal with incompatibilities in
+    // existing code-bases.
+    Config::Bind(AutoprimeGenerators, ini, config,
+                 "Hack.Lang.AutoprimeGenerators",
+                 true);
   }
   {
     // Options for PHP7 features which break BC. (Features which do not break
@@ -1306,8 +1335,9 @@ void RuntimeOption::Load(
     Config::Bind(TLSClientCipherSpec, ini, config,
                  "Server.TLSClientCipherSpec");
 
-    string srcRoot = FileUtil::normalizeDir(
-      Config::GetString(ini, config, "Server.SourceRoot"));
+    // SourceRoot has been default to: Process::GetCurrentDirectory() + '/'
+    Config::Bind(SourceRoot, ini, config, "Server.SourceRoot", SourceRoot);
+    string srcRoot = FileUtil::normalizeDir(SourceRoot);
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 

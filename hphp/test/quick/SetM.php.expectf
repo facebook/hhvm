@@ -9,10 +9,10 @@ array(1) {
   }
 }
 
-Warning: Cannot use a scalar value as an array in %s on line 7
+Warning: Cannot use a scalar value as an array in %s on line 13
 int(4)
 
-Warning: Cannot use a scalar value as an array in %s on line 11
+Warning: Cannot use a scalar value as an array in %s on line 17
 array(1) {
   [0]=>
   bool(true)
@@ -22,10 +22,10 @@ array(1) {
   string(1) "x"
 }
 
-Warning: Illegal string offset: -1 in %s on line 19
+Warning: Illegal string offset: -1 in %s on line 25
 string(7) "abc e g"
 int(1)
 int(1)
 
-Warning: Cannot use a scalar value as an array in %s on line 26
+Warning: Cannot use a scalar value as an array in %s on line 5
 NULL

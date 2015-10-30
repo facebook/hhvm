@@ -170,7 +170,12 @@ struct Div {
   Cell operator()(int64_t t, int64_t u) const {
     if (UNLIKELY(u == 0)) {
       raise_warning(Strings::DIVISION_BY_ZERO);
-      return make_tv<KindOfBoolean>(false);
+      if (RuntimeOption::PHP7_IntSemantics) {
+        // PHP7 uses the IEEE definition (+/- INF and NAN).
+        return make_dbl(t / 0.0);
+      } else {
+        return make_tv<KindOfBoolean>(false);
+      }
     }
 
     // Avoid SIGFPE when dividing the miniumum respresentable integer
@@ -190,7 +195,12 @@ struct Div {
   >::type operator()(T t, U u) const {
     if (UNLIKELY(u == 0)) {
       raise_warning(Strings::DIVISION_BY_ZERO);
-      return make_tv<KindOfBoolean>(false);
+      if (RuntimeOption::PHP7_IntSemantics) {
+        // PHP7 uses the IEEE definition (+/- INF and NAN).
+        return make_dbl(t / u);
+      } else {
+        return make_tv<KindOfBoolean>(false);
+      }
     }
     return make_dbl(t / u);
   }
@@ -559,11 +569,41 @@ Cell cellBitXor(Cell c1, Cell c2) {
 }
 
 Cell cellShl(Cell c1, Cell c2) {
-  return make_int(cellToInt(c1) << cellToInt(c2));
+  int64_t lhs = cellToInt(c1);
+  int64_t shift = cellToInt(c2);
+
+  if (RuntimeOption::PHP7_IntSemantics) {
+    if (UNLIKELY(shift >= 64)) {
+      return make_int(0);
+    }
+
+    if (UNLIKELY(shift < 0)) {
+      // TODO(https://github.com/facebook/hhvm/issues/6012)
+      // This should throw an ArithmeticError.
+      SystemLib::throwInvalidOperationExceptionObject(Strings::NEGATIVE_SHIFT);
+    }
+  }
+
+  return make_int(lhs << (shift & 63));
 }
 
 Cell cellShr(Cell c1, Cell c2) {
-  return make_int(cellToInt(c1) >> cellToInt(c2));
+  int64_t lhs = cellToInt(c1);
+  int64_t shift = cellToInt(c2);
+
+  if (RuntimeOption::PHP7_IntSemantics) {
+    if (UNLIKELY(shift >= 64)) {
+      return make_int(lhs >= 0 ? 0 : -1);
+    }
+
+    if (UNLIKELY(shift < 0)) {
+      // TODO(https://github.com/facebook/hhvm/issues/6012)
+      // This should throw an ArithmeticError.
+      SystemLib::throwInvalidOperationExceptionObject(Strings::NEGATIVE_SHIFT);
+    }
+  }
+
+  return make_int(lhs >> (shift & 63));
 }
 
 void cellAddEq(Cell& c1, Cell c2) {
@@ -633,7 +673,7 @@ void cellBitNot(Cell& cell) {
       break;
 
     case KindOfString:
-      if (cell.m_data.pstr->hasMultipleRefs()) {
+      if (cell.m_data.pstr->cowCheck()) {
     case KindOfStaticString:
         auto const newSd = StringData::Make(
           cell.m_data.pstr->slice(),

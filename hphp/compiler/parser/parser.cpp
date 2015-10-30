@@ -1089,8 +1089,6 @@ void Parser::checkFunctionContext(const std::string& funcName,
                                   FunctionContext& funcContext,
                                   ModifierExpressionPtr modifiers,
                                   int returnsRef) {
-  funcContext.checkFinalAssertions();
-
   // let async modifier be mandatory
   if (funcContext.isAsync && !modifiers->isAsync()) {
     invalidAwait();
@@ -1808,10 +1806,6 @@ void Parser::setHasNonEmptyReturn(ConstructPtr blame) {
   }
 
   FunctionContext& fc = m_funcContexts.back();
-  if (fc.isGenerator) {
-    Compiler::Error(Compiler::InvalidYield, blame);
-    PARSE_ERROR("Generators cannot return values using \"return\"");
-  }
 
   fc.hasNonEmptyReturn = true;
 }
@@ -1861,18 +1855,13 @@ void Parser::setIsGenerator() {
     PARSE_ERROR("Yield can only be used inside a function");
   }
 
-  FunctionContext& fc = m_funcContexts.back();
-  if (fc.hasNonEmptyReturn) {
-    invalidYield();
-    PARSE_ERROR("Generators cannot return values using \"return\"");
-  }
   if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                 "magic methods");
   }
 
-  fc.isGenerator = true;
+  m_funcContexts.back().isGenerator = true;
 }
 
 void Parser::onYield(Token &out, Token *expr) {

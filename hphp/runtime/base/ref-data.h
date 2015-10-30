@@ -90,7 +90,6 @@ struct RefData {
    */
   void release() noexcept {
     assert(kindIsValid());
-    assert(!hasMultipleRefs());
     if (UNLIKELY(m_hdr.aux.cow)) {
       m_hdr.count = 1;
       m_hdr.aux.cow = m_hdr.aux.z = 0;
@@ -104,7 +103,7 @@ struct RefData {
     MM().freeSmallSize(const_cast<RefData*>(this), sizeof(RefData));
   }
 
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
   bool kindIsValid() const { return m_hdr.kind == HeaderKind::Ref; }
 
   /*

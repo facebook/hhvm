@@ -1205,6 +1205,8 @@ X(PropDX,                       MInstrAttrData);
 X(ElemX,                        MInstrAttrData);
 X(ElemDX,                       MInstrAttrData);
 X(ElemUX,                       MInstrAttrData);
+X(CGetProp,                     MInstrAttrData);
+X(CGetElem,                     MInstrAttrData);
 X(SetOpProp,                    SetOpData);
 X(IncDecProp,                   IncDecData);
 X(SetOpElem,                    SetOpData);
@@ -1231,7 +1233,7 @@ X(ContStartedCheck,             IsAsyncData);
 X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
-
+X(GenericIdx,                   IRSPOffsetData);
 
 #undef X
 

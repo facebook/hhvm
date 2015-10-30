@@ -84,7 +84,7 @@ protected:
   ~ArrayData();
 
 public:
-  IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC
+  IMPLEMENT_COUNTABLE_METHODS
 
   bool kindIsValid() const { return isArrayKind(m_hdr.kind); }
 
@@ -447,7 +447,7 @@ protected:
     };
     uint64_t m_sizeAndPos; // careful, m_pos is signed
   };
-  HeaderWord<CapCode> m_hdr;
+  HeaderWord<CapCode,Counted::Maybe> m_hdr;
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");

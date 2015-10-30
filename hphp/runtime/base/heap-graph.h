@@ -25,9 +25,9 @@ struct Header;
 
 struct HeapGraph {
   enum PtrKind {
-    Exact, // any exactly-marked pointer
-    Ambiguous, // any ambiguous pointer to a valid object
-    DynProps // fake obj->array ptr from ExecutionContext::dynPropsArray
+    Counted, // exactly-marked, ref-counted, pointer
+    Implicit, // exactly-marked but not counted
+    Ambiguous, // any ambiguous pointer into a valid object
   };
   struct Node {
     const Header* h;
@@ -84,6 +84,9 @@ void printHeapReport(const HeapGraph&, const char* phase);
 // Given a node, you can walk the parents towards roots to find out
 // why the node is reachable. parent[k] == -1 for unreachable nodes.
 std::vector<int> makeParentTree(const HeapGraph&);
+
+// integrity check pointers and refcounts
+bool checkPointers(const HeapGraph& g, const char* phase);
 
 }
 

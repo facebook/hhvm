@@ -46,12 +46,22 @@ inline bool haveCount(HeaderKind k) {
  */
 using RefCount = int32_t;
 
+enum class Counted {
+  Maybe, // objects can be static or uncounted, and support cow
+  Always // objects must be in request-heap with positive refcounts
+};
+
 /*
  * Common header for all heap-allocated objects. Layout is carefully
  * designed to allow overlapping with the second word of a TypedValue,
  * or to follow a C++ defined vptr.
+ *
+ * T can be any simple 16-bit type. CNT is Maybe for copy-on-write
+ * objects that support being allocated outside the request heap with
+ * a count field containing StaticValue or UncountedValue
  */
-template<class T = uint16_t> struct HeaderWord {
+template<class T = uint16_t, Counted CNT = Counted::Always>
+struct HeaderWord {
   union {
     struct {
       union {
@@ -83,9 +93,20 @@ template<class T = uint16_t> struct HeaderWord {
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
-  void init(const HeaderWord<T>& h, RefCount count) {
+  void init(const HeaderWord<T,CNT>& h, RefCount count) {
     q = h.lo32 | uint64_t(count) << 32;
   }
+
+  bool checkCount() const;
+  bool isRefCounted() const;
+  bool hasMultipleRefs() const;
+  bool hasExactlyOneRef() const;
+  bool isStatic() const;
+  bool isUncounted() const;
+  void incRefCount() const;
+  void decRefCount() const;
+  bool decWillRelease() const;
+  bool decReleaseCheck();
 };
 
 constexpr auto HeaderOffset = sizeof(void*);

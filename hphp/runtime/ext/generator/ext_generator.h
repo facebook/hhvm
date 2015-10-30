@@ -173,14 +173,15 @@ public:
 
   void yield(Offset resumeOffset, const Cell* key, Cell value);
   void copyVars(const ActRec *fp);
-  void ret() { done(); }
-  void fail() { done(); }
+  void ret(TypedValue tv) { done(tv); }
+  void fail() { done(make_tv<KindOfUninit>()); }
+  bool successfullyFinishedExecuting();
   ObjectData* toObject() {
     return Native::object<Generator>(this);
   }
 
 private:
-  void done();
+  void done(TypedValue tv);
 
 public:
   int64_t m_index;

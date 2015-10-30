@@ -246,11 +246,21 @@ bool Scanner::nextIfToken(TokenStore::iterator& pos, int tok) {
 }
 
 bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
-  for (;;) {
+  for (int parsed = 0;; parsed++) {
     if (pos->t == '+' || pos->t == '-') {
       nextLookahead(pos);
     }
-    if (!tryParseNSType(pos)) return false;
+    auto cpPos = pos;
+    if (!tryParseNSType(cpPos)) {
+      if (parsed > 0) {
+        pos = cpPos;
+        return true;
+      } else {
+        return false;
+      }
+    }
+    pos = cpPos;
+
     if (pos->t == T_AS || pos->t == T_SUPER) {
       nextLookahead(pos);
       if (!tryParseNSType(pos)) {
@@ -379,12 +389,21 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
 }
 
 bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
-  for (;;) {
+  for (int parsed = 0;;parsed++) {
     if (pos->t == T_ELLIPSIS) {
       nextLookahead(pos);
       return true;
     }
-    if (!tryParseNSType(pos)) return false;
+    auto cpPos = pos;
+    if (!tryParseNSType(cpPos)) {
+      if (parsed > 0) {
+        pos = cpPos;
+        return true;
+      } else {
+        return false;
+      }
+    }
+    pos = cpPos;
     if (pos->t != ',') return true;
     nextLookahead(pos);
   }

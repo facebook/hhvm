@@ -30,14 +30,28 @@ namespace HPHP {
  * via APCTypedValue.
  */
 struct APCString {
-  static APCHandle::Pair MakeSharedString(DataType type, StringData* s);
+
+  static APCHandle::Pair MakeSharedString(StringData* str) {
+    return MakeSharedString(KindOfString, str);
+  }
+  static APCHandle::Pair MakeSerializedArray(StringData* str) {
+    auto pair = MakeSharedString(KindOfArray, str);
+    pair.handle->setSerializedArray();
+    return pair;
+  }
+  static APCHandle::Pair MakeSerializedObject(const String& str) {
+    auto pair = MakeSharedString(KindOfObject, str.get());
+    pair.handle->setSerializedObj();
+    return pair;
+  }
+
   static void Delete(APCString* s) {
     s->~APCString();
     std::free(s);
   }
 
   // Return the PHP string from the APC one
-  static Variant MakeString(const APCHandle* handle) {
+  static Variant MakeLocalString(const APCHandle* handle) {
     assert(handle->type() == KindOfString);
     if (handle->isUncounted()) {
       return Variant{APCTypedValue::fromHandle(handle)->getStringData()};
@@ -80,6 +94,7 @@ struct APCString {
   }
 
 private:
+  static APCHandle::Pair MakeSharedString(DataType type, StringData* s);
   explicit APCString(DataType type) : m_handle(type) {}
   ~APCString() {}
   APCString(const APCString&) = delete;

@@ -54,7 +54,7 @@ IRMetadataUpdater::IRMetadataUpdater(const Venv& env, AsmInfo* asm_info)
 
 void IRMetadataUpdater::register_inst(const Vinstr& inst) {
   // Update HHIR mappings for AsmInfo.
-  if (m_asm_info && m_origin != inst.origin) {
+  if (m_asm_info) {
     auto& snippets = block_info();
     auto const frontier = m_env.cb->frontier();
 

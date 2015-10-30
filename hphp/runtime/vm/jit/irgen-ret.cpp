@@ -130,13 +130,14 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
 }
 
 void generatorReturn(IRGS& env, SSATmp* retval) {
-  // Clear generator's key and value.
+  // Clear generator's key.
   auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
   gen(env, StContArKey, fp(env), cns(env, TInitNull));
   gen(env, DecRef, oldKey);
 
+  // Populate the generator's value with retval to support `getReturn`
   auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
-  gen(env, StContArValue, fp(env), cns(env, TInitNull));
+  gen(env, StContArValue, fp(env), retval);
   gen(env, DecRef, oldValue);
 
   gen(env,

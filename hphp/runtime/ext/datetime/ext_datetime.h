@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timezone.h"
 #include "hphp/runtime/base/dateinterval.h"
-#include "hphp/system/constants.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

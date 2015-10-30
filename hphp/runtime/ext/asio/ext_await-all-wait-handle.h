@@ -60,6 +60,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
   template<typename T> void forEachChild(T fn);
+  template<class F> void scanChildren(F&) const;
 
   size_t heapSize() const { return heapSize(m_cap); }
   static size_t heapSize(unsigned count) {

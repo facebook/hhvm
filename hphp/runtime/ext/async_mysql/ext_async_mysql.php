@@ -57,7 +57,8 @@ final class AsyncMysqlClient {
                                  string $dbname,
                                  string $user,
                                  string $password,
-                                 int $timeout_micros = -1
+                                 int $timeout_micros = -1,
+                                 ?MySSLContextProvider $ssl_context = null,
                                 ): ExternalThreadEventWaitHandle;
 
   /**
@@ -264,6 +265,22 @@ final class AsyncMysqlConnection {
    */
   <<__HipHopSpecific, __Native>>
   function connectResult(): ?AsyncMysqlConnectResult;
+}
+
+/**
+ * This class holds the SSL Context Provider that Squangle Client will use to
+ * establish a SSL connection. The data isn't accessible by PHP, the data
+ * will just be passed around.
+ */
+<<__NativeData("MySSLContextProvider")>>
+class MySSLContextProvider {
+  private function __contruct(): void {
+    throw new InvalidOperationException(
+      __CLASS__ . " objects cannot be directly created");
+  }
+
+  <<__HipHopSpecific, __Native>>
+  public function isValid(): bool;
 }
 
 /**

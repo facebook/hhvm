@@ -52,19 +52,19 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfString:
         assertPtr(cell.m_data.pstr);
-        assert(check_refcount(cell.m_data.pstr->getCount()));
+        assert(cell.m_data.pstr->checkCount());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
-        assert(check_refcount(cell.m_data.parr->getCount()));
+        assert(cell.m_data.parr->checkCount());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
-        assert(check_refcount_ns(cell.m_data.pobj->getCount()));
+        assert(cell.m_data.pobj->checkCount());
         return;
       case KindOfResource:
         assertPtr(cell.m_data.pres);
-        assert(check_refcount_ns(cell.m_data.pres->getCount()));
+        assert(cell.m_data.pres->checkCount());
         return;
       case KindOfRef:
         assert(!"KindOfRef found in a Cell");
@@ -83,7 +83,7 @@ bool tvIsPlausible(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     assert(tv.m_data.pref);
     assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
-    assert(check_refcount(tv.m_data.pref->getRealCount()));
+    assert(tv.m_data.pref->checkCount());
     tv = *tv.m_data.pref->tv();
   }
   return cellIsPlausible(tv);
@@ -101,7 +101,7 @@ bool tvDecRefWillRelease(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     return tv->m_data.pref->getRealCount() <= 1;
   }
-  return !TV_GENERIC_DISPATCH(*tv, hasMultipleRefs);
+  return TV_GENERIC_DISPATCH(*tv, decWillRelease);
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
@@ -474,7 +474,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(a->isStatic() || a->hasExactlyOneRef());
+  assert(!a->isRefCounted() || a->hasExactlyOneRef());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;

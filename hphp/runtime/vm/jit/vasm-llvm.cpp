@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/align-x64.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/llvm-locrecs.h"
@@ -1503,6 +1502,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
 #define SUPPORTED_OPS \
 O(addli) \
 O(addlm) \
+O(addlim) \
 O(addq) \
 O(addqi) \
 O(addqim) \
@@ -1587,6 +1587,7 @@ O(neg) \
 O(nop) \
 O(not) \
 O(notb) \
+O(orbim) \
 O(orwim) \
 O(orq) \
 O(orqi) \
@@ -1807,6 +1808,13 @@ void LLVMEmitter::emit(const addli& inst) {
 void LLVMEmitter::emit(const addlm& inst) {
   auto ptr = emitPtr(inst.m, 32);
   auto result = m_irb.CreateAdd(value(inst.s0), m_irb.CreateLoad(ptr));
+  defineFlagTmp(inst.sf, result);
+  m_irb.CreateStore(result, ptr);
+}
+
+void LLVMEmitter::emit(const addlim& inst) {
+  auto ptr = emitPtr(inst.m, 32);
+  auto result = m_irb.CreateAdd(cns(inst.s0.l()), m_irb.CreateLoad(ptr));
   defineFlagTmp(inst.sf, result);
   m_irb.CreateStore(result, ptr);
 }
@@ -2736,6 +2744,13 @@ void LLVMEmitter::emit(const not& inst) {
 
 void LLVMEmitter::emit(const notb& inst) {
   defineValue(inst.d, m_irb.CreateXor(value(inst.s), cns(int8_t{-1})));
+}
+
+void LLVMEmitter::emit(const orbim& inst) {
+  auto ptr = emitPtr(inst.m, 8);
+  auto value = m_irb.CreateOr(cns(inst.s0.b()), m_irb.CreateLoad(ptr));
+  defineFlagTmp(inst.sf, value);
+  m_irb.CreateStore(value, ptr);
 }
 
 void LLVMEmitter::emit(const orwim& inst) {

@@ -55,7 +55,7 @@ template<typename T>
 inline void
 emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d) {
   // We don't know for sure what's live.
-  PhysRegSaver(v, abi().gpUnreserved - abi().calleeSaved, true /* aligned */);
+  PhysRegSaver(v, abi().gpUnreserved - abi().calleeSaved);
 
   v << vcall{
     CallSpec::direct(pthread_getspecific),

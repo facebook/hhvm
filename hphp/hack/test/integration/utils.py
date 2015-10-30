@@ -8,8 +8,6 @@ import signal
 import subprocess
 import sys
 
-test_env = dict(os.environ, **{'HH_TEST_MODE': '1'})
-
 def touch(fn):
     with open(fn, 'a'):
         os.utime(fn, None)
@@ -24,25 +22,6 @@ def write_files(files, dir_path):
         path = os.path.join(dir_path, fn)
         with open(path, 'w') as f:
             f.write(content)
-
-def proc_call(args, env=None, stdin=None):
-    """
-    Invoke a subprocess, return stdout, send stderr to our stderr (for
-    debugging)
-    """
-    env = {} if env is None else env
-    print(" ".join(args), file=sys.stderr)
-    proc = subprocess.Popen(
-            args,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=dict(test_env, **env),
-            universal_newlines=True)
-    (stdout_data, stderr_data) = proc.communicate(stdin)
-    sys.stderr.write(stderr_data)
-    sys.stderr.flush()
-    return stdout_data
 
 def ensure_output_contains(f, s, timeout=20):
     """

@@ -180,7 +180,7 @@ static int statSyscall(
     const String& path,
     struct stat* buf,
     bool useFileCache = false) {
-  bool isRelative = path.charAt(0) != '/';
+  bool isRelative = !FileUtil::isAbsolutePath(path.slice());
   int pathIndex = 0;
   Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
   if (!w) return -1;
@@ -411,7 +411,7 @@ Variant HHVM_FUNCTION(fgetss,
 
 Variant fscanfImpl(const Resource& handle,
                    const String& format,
-                   const std::vector<Variant*>& args) {
+                   const req::vector<Variant*>& args) {
   CHECK_HANDLE(handle, f);
   String line = f->readLine();
   if (line.length() == 0) {
@@ -429,8 +429,8 @@ TypedValue* HHVM_FN(fscanf)(ActRec* ar) {
   if (ar->numArgs() < 2) {
     return arReturn(ar, false);
   }
-
-  std::vector<Variant*> args;
+  req::vector<Variant*> args;
+  args.reserve(ar->numArgs() - 2);
   for (int i = 2; i < ar->numArgs(); ++i) {
     args.push_back(getArg<KindOfRef>(ar, i));
   }
@@ -1093,11 +1093,13 @@ static VFileType lookupVirtualFile(const String& filename) {
 
   String cwd;
   std::string root;
-  bool isRelative = (filename.charAt(0) != '/');
+  bool isRelative = !FileUtil::isAbsolutePath(filename.slice());
   if (isRelative) {
     cwd = g_context->getCwd();
     root = RuntimeOption::SourceRoot;
-    if (cwd.empty() || cwd[cwd.size() - 1] != '/') root.pop_back();
+    if (cwd.empty() || FileUtil::isDirSeparator(cwd[cwd.size() - 1])) {
+      root.pop_back();
+    }
   }
 
   if (!isRelative || !root.compare(cwd.data())) {
@@ -1666,7 +1668,7 @@ String HHVM_FUNCTION(basename,
   const char *comp, *cend;
   comp = cend = c;
   for (int cnt = path.size(); cnt > 0; --cnt, ++c) {
-    if (*c == '/') {
+    if (FileUtil::isDirSeparator(*c)) {
       if (state == 1) {
         state = 0;
         cend = c;

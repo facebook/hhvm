@@ -29,12 +29,11 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/virtual-host.h"
-
-#include "hphp/system/constants.h"
 
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/util/logger.h"
@@ -92,7 +91,7 @@ String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
     }
 
     // disallow access with an absolute path
-    if (canonicalized.charAt(0) == '/') {
+    if (FileUtil::isAbsolutePath(canonicalized.slice())) {
       return empty_string();
     }
 
@@ -112,7 +111,7 @@ String File::TranslatePath(const String& filename) {
     // Otherwise it would be canonicalized to CWD, which is inconsistent with
     // PHP and most filesystem utilities.
     return filename;
-  } else if (filename.charAt(0) != '/') {
+  } else if (!FileUtil::isAbsolutePath(filename.slice())) {
     String cwd = g_context->getCwd();
     return TranslatePathKeepRelative(cwd + "/" + filename);
   } else {

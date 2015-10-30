@@ -195,7 +195,10 @@ interpOutputLocals(IRGS& env,
                    bool& smashesAllLocals,
                    folly::Optional<Type> pushedType) {
   using namespace jit::InstrFlags;
-  if (!(getInstrInfo(inst.op()).out & Local)) return {};
+  auto const& info = getInstrInfo(inst.op());
+  // Anything with Local in its output or a member base input can modify a
+  // local.
+  if (!(info.out & Local) && !(info.in & MBase)) return {};
 
   jit::vector<InterpOneData::LocalType> locals;
   auto setLocType = [&](uint32_t id, Type t) {
@@ -214,6 +217,8 @@ interpOutputLocals(IRGS& env,
            testTy.maybe(TBoxedCell) ? TGen :
            useTy;
   };
+
+  auto const mDefine = static_cast<unsigned char>(MOpFlags::Define);
 
   switch (inst.op()) {
     case OpSetN:
@@ -277,6 +282,24 @@ interpOutputLocals(IRGS& env,
     case OpUnsetL:
     case OpPushL:
       setImmLocType(0, TUninit);
+      break;
+
+    // New minstrs are handled extremely conservatively for now.
+    case OpDimL:
+    case OpDimC:
+    case OpDimInt:
+    case OpDimStr:
+      if (inst.imm[2].u_OA & mDefine) smashesAllLocals = true;
+      break;
+    case OpDimNewElem:
+      if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
+      break;
+    case OpSetML:
+    case OpSetMC:
+    case OpSetMInt:
+    case OpSetMStr:
+    case OpSetMNewElem:
+      smashesAllLocals = true;
       break;
 
     case OpSetM:
@@ -372,7 +395,9 @@ interpOutputLocals(IRGS& env,
       break;
 
     default:
-      not_reached();
+      always_assert_flog(
+        false, "Unknown local-modifying op {}", opcodeToName(inst.op())
+      );
   }
 
   return locals;
@@ -491,6 +516,7 @@ void emitDefCns(IRGS& env, const StringData*) { INTERP }
 void emitDefCls(IRGS& env, int32_t)           { INTERP }
 void emitDefFunc(IRGS& env, int32_t)          { INTERP }
 void emitCatch(IRGS& env)                     { INTERP }
+void emitContGetReturn(IRGS& env)             { INTERP }
 void emitHighInvalid(IRGS& env)               { std::abort(); }
 
 //////////////////////////////////////////////////////////////////////

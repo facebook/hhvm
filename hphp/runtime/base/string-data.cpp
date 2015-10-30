@@ -23,6 +23,7 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/stacktrace-profiler.h"
 
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -355,7 +356,7 @@ StringData* StringData::Make(const StringData* s1, const StringData* s2) {
   auto const next = memcpy8(data, s1->m_data, s1->m_len);
   *memcpy8(next, s2->m_data, s2->m_len) = 0;
 
-  assert(sd->getCount() == 1);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -689,7 +690,7 @@ StringData* StringData::escalate(size_t cap) {
 void StringData::dump() const {
   auto s = slice();
 
-  printf("StringData(%d) (%s%s%s%d): [", getCount(),
+  printf("StringData(%d) (%s%s%s%d): [", m_hdr.count,
          isProxy() ? "proxy " : "",
          isStatic() ? "static " : "",
          isUncounted() ? "uncounted " : "",

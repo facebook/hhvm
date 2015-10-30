@@ -83,10 +83,6 @@ struct EnvConstants {
   Variant stgv_Variant[1];
 };
 extern EnvConstants* get_env_constants();
-extern String k_PHP_BINARY;
-extern String k_PHP_BINDIR;
-extern String k_PHP_OS;
-extern String k_PHP_SAPI;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

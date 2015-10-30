@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplify.h"
@@ -70,7 +71,7 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   , m_curMarker(initMarker)
   , m_state(initMarker)
   , m_curBlock(m_unit.entry())
-  , m_constrainGuards(shouldHHIRRelaxGuards())
+  , m_constrainGuards(mcg->tx().mode() != TransKind::Optimize)
 {
   m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {
@@ -476,6 +477,13 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
+  if (auto ptr = m_state.memberBasePtr()) return ptr;
+
+  inst->setTypeParam(inst->typeParam() & m_state.memberBasePtrType());
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
@@ -491,6 +499,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CoerceStk)
   X(CheckCtxThis)
   X(LdCtx)
+  X(LdMBase)
   default: break;
   }
 #undef X

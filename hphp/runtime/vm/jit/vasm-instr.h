@@ -123,6 +123,7 @@ struct Vunit;
   /* x64 instructions */\
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(addlm, Inone, U(s0) U(m), D(sf)) \
+  O(addlim, I(s0), U(m), D(sf)) \
   O(addq, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(addqim, I(s0), U(m), D(sf)) \
@@ -194,6 +195,7 @@ struct Vunit;
   O(nop, Inone, Un, Dn)\
   O(not, Inone, UH(s,d), DH(d,s))\
   O(notb, Inone, UH(s,d), DH(d,s))\
+  O(orbim, I(s0), U(m), D(sf))\
   O(orwim, I(s0), U(m), D(sf))\
   O(orq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -756,6 +758,7 @@ struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
 
 struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct addlm { Vreg32 s0; Vptr m; VregSF sf; };
+struct addlim { Immed s0; Vptr m; VregSF sf; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; };
 struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct addqim { Immed s0; Vptr m; VregSF sf; };
@@ -847,6 +850,7 @@ struct neg { Vreg64 s, d; VregSF sf; };
 struct nop {};
 struct not { Vreg64 s, d; };
 struct notb { Vreg8 s, d; };
+struct orbim { Immed s0; Vptr m; VregSF sf; };
 struct orwim { Immed s0; Vptr m; VregSF sf; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };

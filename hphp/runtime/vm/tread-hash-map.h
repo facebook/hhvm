@@ -209,7 +209,11 @@ private:
     auto newTable = allocTable(old->capac * 2);
     for (auto i = 0; i < old->capac; ++i) {
       value_type* ent = old->entries + i;
+#ifdef MSVC_NO_NONVOID_ATOMIC_IF
+      if (ent->first.load()) {
+#else
       if (ent->first) {
+#endif
         insertImpl(newTable, ent->first, ent->second);
       }
     }

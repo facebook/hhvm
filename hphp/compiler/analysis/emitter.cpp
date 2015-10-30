@@ -358,6 +358,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_R_MMANY 0
 #define COUNT_V_MMANY 0
 #define COUNT_MFINAL 0
+#define COUNT_C_MFINAL 0
+#define COUNT_R_MFINAL 0
+#define COUNT_V_MFINAL 0
 #define COUNT_FMANY 0
 #define COUNT_CVMANY 0
 #define COUNT_CVUMANY 0
@@ -416,8 +419,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_R_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::R); \
   getEmitterVisitor().popEvalStackMMany()
-#define POP_MFINAL \
-  getEmitterVisitor().popEvalStackMMany()
+#define POP_MFINAL POP_MMANY
+#define POP_C_MFINAL POP_C_MMANY
+#define POP_R_MFINAL POP_R_MMANY
+#define POP_V_MFINAL POP_V_MMANY
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
 #define POP_CVMANY \
@@ -688,6 +693,9 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_V_MMANY
 #undef POP_R_MMANY
 #undef POP_MFINAL
+#undef POP_C_MFINAL
+#undef POP_R_MFINAL
+#undef POP_V_MFINAL
 #undef POP_CV
 #undef POP_VV
 #undef POP_HV
@@ -3153,7 +3161,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     char retSym = StackSym::C;
     if (visit(r->getRetExp())) {
-      if (r->getRetExp()->getContext() & Expression::RefValue) {
+      if (r->getRetExp()->getContext() & Expression::RefValue &&
+          // Generators don't support returning by references
+          !m_curFunc->isGenerator) {
         emitConvertToVar(e);
         retSym = StackSym::V;
       } else {
@@ -5020,18 +5030,20 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   return 0;
 }
 
-void EmitterVisitor::emitMOp(
+size_t EmitterVisitor::emitMOp(
   int iFirst,
   int& iLast,
   bool allowW,
   bool rhsVal,
   Emitter& e,
-  MOpFlags baseFlags,
-  MOpFlags dimFlags
+  MOpFlags flags
 ) {
   auto stackIdx = [&](int i) {
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
+
+  auto const baseFlags =
+    MOpFlags(uint8_t(flags) & uint8_t(MOpFlags::WarnDefine));
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
@@ -5120,13 +5132,13 @@ void EmitterVisitor::emitMOp(
 
     auto doDim = [&](PropElemOp op) {
       if (flavor == StackSym::L) {
-        e.DimL(m_evalStack.getLoc(i), op, dimFlags);
+        e.DimL(m_evalStack.getLoc(i), op, flags);
       } else if (flavor == StackSym::I) {
-        e.DimInt(m_evalStack.getInt(i), op, dimFlags);
+        e.DimInt(m_evalStack.getInt(i), op, flags);
       } else if (flavor == StackSym::T) {
-        e.DimStr(m_evalStack.getName(i), op, dimFlags);
+        e.DimStr(m_evalStack.getName(i), op, flags);
       } else {
-        e.DimC(stackIdx(i), op, dimFlags);
+        e.DimC(stackIdx(i), op, flags);
       }
     };
 
@@ -5145,7 +5157,7 @@ void EmitterVisitor::emitMOp(
         break;
       case StackSym::W:
         if (allowW) {
-          e.DimNewElem(dimFlags);
+          e.DimNewElem(flags);
         } else {
           throw IncludeTimeFatalException(e.getNode(),
                                           "Cannot use [] for reading");
@@ -5155,6 +5167,32 @@ void EmitterVisitor::emitMOp(
       default:
         always_assert(false && "Bad intermediate marker");
     }
+  }
+
+  size_t stackCount = 0;
+  for (int i = iFirst; i <= iLast; ++i) {
+    if (!StackSym::IsSymbolic(m_evalStack.get(i))) ++stackCount;
+  }
+  return stackCount;
+}
+
+static folly::Optional<PropElemOp> symToPropElem(
+  Emitter& e, char sym, bool allowW
+) {
+  switch (StackSym::GetMarker(sym)) {
+    case StackSym::P:
+      return PropElemOp::Prop;
+    case StackSym::E:
+      return PropElemOp::Elem;
+    case StackSym::Q:
+      return PropElemOp::PropQ;
+    case StackSym::W:
+      if (allowW) return folly::none;
+      throw EmitterVisitor::IncludeTimeFatalException(
+        e.getNode(), "Cannot use [] for reading"
+      );
+    default:
+      always_assert(false);
   }
 }
 
@@ -5368,6 +5406,28 @@ void EmitterVisitor::emitAGet(Emitter& e) {
   }
 }
 
+void EmitterVisitor::emitQueryMOp(int iFirst, int iLast, Emitter& e,
+                                  QueryMOp op) {
+  auto const flags = getQueryMOpFlags(op);
+  auto const stackCount = emitMOp(iFirst, iLast, false, false, e, flags);
+
+  auto const sym = m_evalStack.get(iLast);
+  if (auto const pe = symToPropElem(e, sym, false)) {
+    switch (StackSym::GetSymFlavor(sym)) {
+      case StackSym::L:
+        return e.QueryML(stackCount, op, *pe, m_evalStack.getLoc(iLast));
+      case StackSym::C:
+        return e.QueryMC(stackCount, op, *pe);
+      case StackSym::I:
+        return e.QueryMInt(stackCount, op, *pe, m_evalStack.getInt(iLast));
+      case StackSym::T:
+        return e.QueryMStr(stackCount, op, *pe, m_evalStack.getName(iLast));
+    }
+  }
+
+  always_assert(false);
+}
+
 void EmitterVisitor::emitCGet(Emitter& e) {
   if (checkIfStackEmpty("CGet*")) return;
   LocationGuard loc(e, m_tempLoc);
@@ -5398,47 +5458,7 @@ void EmitterVisitor::emitCGet(Emitter& e) {
     }
   } else {
     if (RuntimeOption::EvalEmitNewMInstrs) {
-      emitMOp(i, iLast, false, false, e, MOpFlags::Warn, MOpFlags::Warn);
-      size_t stackCount = 0;
-      for (size_t idx = i; idx <= iLast; ++idx) {
-        if (!StackSym::IsSymbolic(m_evalStack.get(idx))) ++stackCount;
-      }
-
-      auto sym = m_evalStack.get(iLast);
-      auto flavor = StackSym::GetSymFlavor(sym);
-      auto marker = StackSym::GetMarker(sym);
-      auto op = QueryMOp::CGet;
-
-      auto propElemOp = [&](PropElemOp pe) {
-        if (flavor == StackSym::L) {
-          e.QueryML(stackCount, op, pe, m_evalStack.getLoc(iLast));
-        } else if (flavor == StackSym::I) {
-          e.QueryMInt(stackCount, op, pe, m_evalStack.getInt(iLast));
-        } else if (flavor == StackSym::T) {
-          e.QueryMStr(stackCount, op, pe, m_evalStack.getName(iLast));
-        } else {
-          e.QueryMC(stackCount, op, pe);
-        }
-      };
-
-      switch (marker) {
-        case StackSym::P:
-          propElemOp(PropElemOp::Prop);
-          break;
-        case StackSym::E:
-          propElemOp(PropElemOp::Elem);
-          break;
-        case StackSym::Q:
-          propElemOp(PropElemOp::PropQ);
-          break;
-        case StackSym::W:
-          throw IncludeTimeFatalException(e.getNode(),
-                                          "Cannot use [] for reading");
-        default:
-          always_assert(false);
-      }
-
-      return;
+      return emitQueryMOp(i, iLast, e, QueryMOp::CGet);
     }
 
     std::vector<uchar> vectorImm;
@@ -5804,6 +5824,10 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      return emitQueryMOp(i, iLast, e, QueryMOp::Isset);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.IssetM(vectorImm);
@@ -5852,6 +5876,10 @@ void EmitterVisitor::emitEmpty(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      return emitQueryMOp(i, iLast, e, QueryMOp::Empty);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.EmptyM(vectorImm);
@@ -5924,6 +5952,30 @@ void EmitterVisitor::emitSet(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount =
+        emitMOp(i, iLast, true, true, e, MOpFlags::Define);
+
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, true)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.SetML(stackCount, *pe, m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.SetMC(stackCount, *pe);
+          case StackSym::I:
+            return e.SetMInt(stackCount, *pe, m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return e.SetMStr(stackCount, *pe, m_evalStack.getName(iLast));
+          default:
+            always_assert(false);
+        }
+      }
+
+      e.SetMNewElem(stackCount);
+      return;
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.SetM(vectorImm);
@@ -6567,7 +6619,10 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrHot;
   }
 
-  if (Option::WholeProgram) {
+  if (!SystemLib::s_inited) {
+    // we're building systemlib. everything is unique
+    attrs = attrs | AttrBuiltin | AttrUnique | AttrPersistent;
+  } else if (Option::WholeProgram) {
     if (!funcScope->isRedeclaring()) {
       attrs = attrs | AttrUnique;
       if (top &&
@@ -6583,9 +6638,6 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
       assert((attrs & AttrPersistent) || meth->getClassScope());
       attrs = attrs | AttrBuiltin;
     }
-  } else if (!SystemLib::s_inited) {
-    // we're building systemlib. everything is unique
-    attrs = attrs | AttrBuiltin | AttrUnique | AttrPersistent;
   }
 
   // For closures, the MethodStatement didn't have real attributes; enforce
@@ -9469,6 +9521,8 @@ enum GeneratorMethod {
   METH_VALID,
   METH_CURRENT,
   METH_KEY,
+  METH_REWIND,
+  METH_GETRETURN,
 };
 
 typedef hphp_hash_map<const StringData*, GeneratorMethod,
@@ -9483,6 +9537,8 @@ StaticString s_valid("valid");
 StaticString s_current("current");
 StaticString s_key("key");
 StaticString s_throw("throw");
+StaticString s_rewind("rewind");
+StaticString s_getReturn("getReturn");
 
 StaticString genCls("Generator");
 StaticString asyncGenCls("HH\\AsyncGenerator");
@@ -9499,15 +9555,48 @@ ContMethMapT s_genMethods = {
     {s_valid, GeneratorMethod::METH_VALID},
     {s_current, GeneratorMethod::METH_CURRENT},
     {s_key, GeneratorMethod::METH_KEY},
-    {s_throw, GeneratorMethod::METH_RAISE}
+    {s_throw, GeneratorMethod::METH_RAISE},
+    {s_rewind, GeneratorMethod::METH_REWIND},
+    {s_getReturn, GeneratorMethod::METH_GETRETURN}
   };
 }
 
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
-                                   GeneratorMethod m) {
+                                   GeneratorMethod m,
+                                   bool isAsync) {
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
+
+  if (!isAsync && RuntimeOption::AutoprimeGenerators) {
+    // Create a dummy Emitter, so it's possible to emit jump instructions
+    EmitterVisitor ev(ue);
+    Emitter e(ConstructPtr(), ue, ev);
+    Location::Range loc;
+    if (ue.bcPos() > 0) loc.line0 = -1;
+    e.setTempLocation(loc);
+
+    // Check if the generator has started yet
+    Label started;
+    e.ContStarted();
+    e.JmpNZ(started);
+
+    // If it hasn't started, perform one "next" operation before
+    // the actual operation (auto-priming)
+    e.ContCheck(false);
+    e.Null();
+    e.ContEnter();
+    e.PopC();
+    started.set(e);
+  }
+
+  if (!RuntimeOption::AutoprimeGenerators && m == METH_REWIND) {
+    // In non-autopriming mode the rewind function will always call next, when
+    // autopriming is enabled, rewind matches PHP behavior and will only advance
+    // the generator when it has not yet been started.
+    m = METH_NEXT;
+  }
+
   switch (m) {
     case METH_SEND:
     case METH_RAISE:
@@ -9559,7 +9648,16 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
       ue.emitOp(OpRetC);
       break;
     }
-
+    case METH_REWIND: {
+      ue.emitOp(OpNull);
+      ue.emitOp(OpRetC);
+      break;
+    }
+    case METH_GETRETURN: {
+      ue.emitOp(OpContGetReturn);
+      ue.emitOp(OpRetC);
+      break;
+    }
     default:
       not_reached();
   }
@@ -9578,10 +9676,10 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
 
   if (genCls.same(s_class) &&
       (cmeth = folly::get_ptr(s_genMethods, s_func))) {
-    return emitGeneratorMethod(m_ue, fe, *cmeth);
+    return emitGeneratorMethod(m_ue, fe, *cmeth, false);
   } else if (asyncGenCls.same(s_class) &&
       (cmeth = folly::get_ptr(s_asyncGenMethods, s_func))) {
-    return emitGeneratorMethod(m_ue, fe, *cmeth);
+    return emitGeneratorMethod(m_ue, fe, *cmeth, true);
   }
 
   throw IncludeTimeFatalException(meth,
@@ -9912,6 +10010,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HardReturnTypeHints      = Option::HardReturnTypeHints;
   gd.UsedHHBBC                = Option::UseHHBBC;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
+  gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
   gd.HardPrivatePropInference = true;
 
   if (arrTable) gd.arrayTypeTable.repopulate(*arrTable);

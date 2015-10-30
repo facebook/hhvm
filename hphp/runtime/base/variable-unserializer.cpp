@@ -147,6 +147,27 @@ static void throwInvalidHashKey(const ObjectData* obj) {
                   header_names[(int)obj->headerKind()]);
 }
 
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwColRKey() {
+  throw Exception("Referring to collection keys using the 'r' encoding "
+                    "is not supported");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwColRefValue() {
+  throw Exception("Collection values cannot be taken by reference");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwColRefKey() {
+  throw Exception("Collection keys cannot be taken by reference");
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnexpectedEOB() {
+  throw Exception("Unexpected end of buffer during unserialization");
+}
+
 const StaticString
   s_unserialize("unserialize"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
@@ -236,31 +257,22 @@ void VariableUnserializer::add(Variant* v, UnserializeMode mode) {
 Variant* VariableUnserializer::getByVal(int id) {
   if (id <= 0 || id > (int)m_refs.size()) return nullptr;
   Variant* ret = m_refs[id-1].var();
-  if (!ret) {
-    throw Exception("Referring to collection keys using the 'r' encoding "
-                    "is not supported");
-  }
+  if (!ret) throwColRKey();
   return ret;
 }
 
 Variant* VariableUnserializer::getByRef(int id) {
   if (id <= 0 || id > (int)m_refs.size()) return nullptr;
   if (!m_refs[id-1].canBeReferenced()) {
-    // If the low bit is set, that means the value cannot
-    // be taken by reference
-    throw Exception("Collection values cannot be taken by reference");
+    throwColRefValue();
   }
   Variant* ret = m_refs[id-1].var();
-  if (!ret) {
-    throw Exception("Collection keys cannot be taken by reference");
-  }
+  if (!ret) throwColRefKey();
   return ret;
 }
 
 void VariableUnserializer::check() const {
-  if (m_buf >= m_end) {
-    throw Exception("Unexpected end of buffer during unserialization");
-  }
+  if (m_buf >= m_end) throwUnexpectedEOB();
 }
 
 void VariableUnserializer::set(const char* buf, const char* end) {

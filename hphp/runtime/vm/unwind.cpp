@@ -72,10 +72,10 @@ std::string describeFault(const Fault& f) {
 void discardStackTemps(const ActRec* const fp,
                        Stack& stack,
                        Offset const bcOffset) {
-  ITRACE(2, "discardStackTemps with fp {} sp {} pc {}\n",
+  ITRACE(2, "discardStackTemps with fp {} sp {} pc {} op {}\n",
          implicit_cast<const void*>(fp),
          implicit_cast<void*>(stack.top()),
-         bcOffset);
+         bcOffset, opcodeToName(fp->func()->unit()->getOp(bcOffset)));
 
   visitStackElems(
     fp, stack.top(), bcOffset,
@@ -99,6 +99,23 @@ void discardStackTemps(const ActRec* const fp,
 
   ITRACE(2, "discardStackTemps ends with sp = {}\n",
          implicit_cast<void*>(stack.top()));
+}
+
+void discardMemberTVRefs(PC pc) {
+  auto const throwOp = peek_op(pc);
+
+  /*
+   * If the opcode that threw was a member instruction, we have to decref tvRef
+   * and tvRef2. AssertRAT* instructions can appear while these values are live
+   * but they will never throw.
+   */
+  if (UNLIKELY(isMemberDimOp(throwOp) || isMemberFinalOp(throwOp))) {
+    auto& mstate = vmMInstrState();
+    tvRefcountedDecRef(mstate.tvRef);
+    tvWriteUninit(&mstate.tvRef);
+    tvRefcountedDecRef(mstate.tvRef2);
+    tvWriteUninit(&mstate.tvRef2);
+  }
 }
 
 UnwindAction checkHandlers(const EHEnt* eh,
@@ -385,13 +402,15 @@ void unwindPhp() {
     ITRACE(1, "leaving unwinder for fault: {}\n", describeFault(fault));
   };
 
+  discardMemberTVRefs(pc);
+
   do {
     bool discard = false;
     if (fault.m_raiseOffset == kInvalidOffset) {
       /*
        * This block executes whenever we want to treat the fault as if
        * it was freshly thrown. Freshly thrown faults either were never
-       * previosly seen by the unwinder OR were propagated from the
+       * previously seen by the unwinder OR were propagated from the
        * previous frame. In such a case, we fill in the fields with
        * the information from the current frame.
        */
@@ -517,6 +536,8 @@ void unwindCpp(Exception* exception) {
     ITRACE(1, "leaving unwinder for C++ exception: {}\n",
            implicit_cast<void*>(exception));
   };
+
+  discardMemberTVRefs(pc);
 
   do {
     auto const offset = fp->func()->unit()->offsetOf(pc);

@@ -23,14 +23,38 @@
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+inline void APCHandle::reference() const {
+  if (!isUncounted()) {
+    atomicIncRef();
+  }
+}
+
+inline void APCHandle::unreference() const {
+  if (!isUncounted()) {
+    atomicDecRef();
+  }
+}
 
 inline void APCHandle::unreferenceRoot(size_t size) {
   if (!isUncounted()) {
-    realDecRef();
+    atomicDecRef();
   } else {
     g_context->enqueueAPCHandle(this, size);
   }
+}
+
+inline void APCHandle::atomicIncRef() const {
+  assert(isRefcountedType(m_type));
+  ++m_count;
+}
+
+inline void APCHandle::atomicDecRef() const {
+  assert(m_count.load() > 0);
+  if (m_count > 1) {
+    assert(isRefcountedType(m_type));
+    if (--m_count) return;
+  }
+  const_cast<APCHandle*>(this)->deleteShared();
 }
 
 //////////////////////////////////////////////////////////////////////

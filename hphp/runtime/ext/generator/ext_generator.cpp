@@ -114,11 +114,25 @@ void Generator::yield(Offset resumeOffset,
   setState(State::Started);
 }
 
-void Generator::done() {
+void Generator::done(TypedValue tv) {
   assert(getState() == State::Running);
   cellSetNull(m_key);
-  cellSetNull(m_value);
+  cellSet(*tvToCell(&tv), m_value);
   setState(State::Done);
+}
+
+bool Generator::successfullyFinishedExecuting() {
+  // `getReturn` needs to know whether a generator finished successfully or
+  // whether an exception occurred during its execution. For every other use
+  // case a failed generator was identical to one that finished executing, but
+  // `getReturn` wants to throw an exception if the generator threw an
+  // exception. Since we use the same variable to store the yield result and
+  // the return value, and since we dont have a separate state to represent a
+  // failed generator, we use an unintialized value to flag that the generator
+  // failed (rather than NULL, which we use for a successful generator without
+  // a return value).
+  return getState() == State::Done &&
+         m_value.m_type != KindOfUninit;
 }
 
 const StaticString s__closure_("{closure}");

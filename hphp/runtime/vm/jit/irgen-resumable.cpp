@@ -385,10 +385,18 @@ void emitContValid(IRGS& env) {
     IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
 }
 
+void emitContStarted(IRGS& env) {
+  assert(curClass(env));
+  auto const cont = ldThis(env);
+  push(env, gen(env, ContStarted, cont));
+}
+
 void emitContKey(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
+  if (!RuntimeOption::AutoprimeGenerators) {
+    gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
+  }
   auto const offset = cns(env,
     offsetof(Generator, m_key) - Generator::objectOff());
   auto const value = gen(env, LdContField, TCell, cont, offset);
@@ -398,11 +406,29 @@ void emitContKey(IRGS& env) {
 void emitContCurrent(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
-  auto const offset = cns(env,
-    offsetof(Generator, m_value) - Generator::objectOff());
-  auto const value = gen(env, LdContField, TCell, cont, offset);
-  pushIncRef(env, value);
+  if (!RuntimeOption::AutoprimeGenerators) {
+    gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
+  }
+  // We reuse the same storage for the return value as the yield (`m_value`),
+  // so doing a blind read will cause `current` to return the wrong value on a
+  // finished generator. We should return NULL instead
+  ifThenElse(
+    env,
+    [&] (Block *taken) {
+      auto const done = gen(env, ContValid, IsAsyncData(false), cont);
+      gen(env, JmpZero, taken, done);
+    },
+    [&] {
+      auto const offset = cns(env,
+        offsetof(Generator, m_value) - Generator::objectOff());
+      auto const value = gen(env, LdContField, TCell, cont, offset);
+      pushIncRef(env, value);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      emitNull(env);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

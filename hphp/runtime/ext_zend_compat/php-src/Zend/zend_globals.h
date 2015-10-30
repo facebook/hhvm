@@ -202,7 +202,7 @@ struct _zend_executor_globals {
 
   zval *This;
 
-  long precision;
+  int64_t precision;
 
   int ticks_count;
 

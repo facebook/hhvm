@@ -1041,26 +1041,86 @@ void emitXor(IRGS& env) {
   gen(env, DecRef, btr);
 }
 
-void emitShl(IRGS& env) {
+void implShift(IRGS& env, Opcode op) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
   auto const lhsInt         = gen(env, ConvCellToInt, lhs);
   auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
 
-  push(env, gen(env, Shl, lhsInt, shiftAmountInt));
+  // - PHP7 defines shifts of width >= 64 to return the value you get from a
+  //   naive shift, i.e., either 0 or -1 depending on the shift and value. This
+  //   is notably *not* the semantics of the x86 shift instructions, so we need
+  //   to do some comparison logic here.
+  // - PHP7 defines negative shifts to throw an ArithmeticError.
+  // - PHP5 semantics for such operations are machine-dependent.
+  if (RuntimeOption::PHP7_IntSemantics &&
+      !(shiftAmountInt->hasConstVal() &&
+        shiftAmountInt->intVal() < 64 && shiftAmountInt->intVal() >= 0)) {
+    push(env, cond(
+      env,
+      [&] (Block* taken) {
+        auto const checkShift = gen(env, GteInt, shiftAmountInt, cns(env, 64));
+        gen(env, JmpNZero, taken, checkShift);
+      },
+      [&] {
+        return cond(
+          env,
+          [&] (Block* taken) {
+            auto const checkShift =
+              gen(env, LtInt, shiftAmountInt, cns(env, 0));
+            gen(env, JmpNZero, taken, checkShift);
+          },
+          [&] {
+            return gen(env, op, lhsInt, shiftAmountInt);
+          },
+          [&] {
+            // Unlikely: shifting by a negative amount.
+            hint(env, Block::Hint::Unlikely);
+
+            // TODO(https://github.com/facebook/hhvm/issues/6012)
+            // This should throw an ArithmeticError.
+            gen(env, ThrowInvalidOperation,
+                cns(env, makeStaticString(Strings::NEGATIVE_SHIFT)));
+
+            // Dead-code, but needed to satisfy cond().
+            return cns(env, false);
+          }
+        );
+      },
+      [&] {
+        // Unlikely: shifting by >= 64.
+        hint(env, Block::Hint::Unlikely);
+
+        if (op != Shr) {
+          return cns(env, 0);
+        }
+
+        if (lhsInt->hasConstVal()) {
+          int64_t lhsConst = lhsInt->intVal();
+          if (lhsConst >= 0) {
+            return cns(env, 0);
+          } else {
+            return cns(env, -1);
+          }
+        }
+
+        return gen(env, op, lhsInt, cns(env, 63));
+      }
+    ));
+  } else {
+    push(env, gen(env, op, lhsInt, shiftAmountInt));
+  }
+
   gen(env, DecRef, lhs);
   gen(env, DecRef, shiftAmount);
 }
 
-void emitShr(IRGS& env) {
-  auto const shiftAmount    = popC(env);
-  auto const lhs            = popC(env);
-  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
-  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
+void emitShl(IRGS& env) {
+  implShift(env, Shl);
+}
 
-  push(env, gen(env, Shr, lhsInt, shiftAmountInt));
-  gen(env, DecRef, lhs);
-  gen(env, DecRef, shiftAmount);
+void emitShr(IRGS& env) {
+  implShift(env, Shr);
 }
 
 void emitPow(IRGS& env) {
@@ -1124,7 +1184,7 @@ void emitDiv(IRGS& env) {
         divisorVal = divisor->boolVal();
       }
 
-      if (divisorVal == 0) {
+      if (divisorVal == 0 && !RuntimeOption::PHP7_IntSemantics) {
         popC(env);
         popC(env);
         gen(env, RaiseWarning,
@@ -1143,7 +1203,11 @@ void emitDiv(IRGS& env) {
         }
         popC(env);
         popC(env);
-        if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
+        if (!divisorVal) {
+          gen(env, RaiseWarning,
+              cns(env, makeStaticString(Strings::DIVISION_BY_ZERO)));
+          push(env, cns(env, dividendVal / 0.0));
+        } else if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
           push(env, cns(env, (double)dividendVal / divisorVal));
         } else {
           push(env, cns(env, dividendVal / divisorVal));
@@ -1169,24 +1233,31 @@ void emitDiv(IRGS& env) {
   divisor  = make_double(popC(env));
   dividend = make_double(popC(env));
 
-  SSATmp* divVal = nullptr;  // edge-defined value
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      divVal = gen(env, DivDbl, taken, dividend, divisor);
-    },
-    [&] {
-      // Make progress by raising a warning and pushing false before
-      // side-exiting to the next instruction.
-      hint(env, Block::Hint::Unlikely);
-      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
-      gen(env, RaiseWarning, msg);
-      push(env, cns(env, false));
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
-    }
-  );
+  if (!divisor->hasConstVal() || divisor->dblVal() == 0.0) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const checkZero = gen(env, EqDbl, divisor, cns(env, 0.0));
+        gen(env, JmpNZero, taken, checkZero);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+        gen(env, RaiseWarning, msg);
 
-  push(env, divVal);
+        // PHP5 results in false; we side exit since the type of the result
+        // has now dramatically changed. PHP7 falls through to the IEEE
+        // division semantics below (and doesn't side exit since the type is
+        // still a double).
+        if (!RuntimeOption::PHP7_IntSemantics) {
+          push(env, cns(env, false));
+          gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        }
+      }
+    );
+  }
+
+  push(env, gen(env, DivDbl, dividend, divisor));
 }
 
 void emitMod(IRGS& env) {

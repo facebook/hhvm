@@ -673,8 +673,15 @@ public:
   void buildVectorImm(std::vector<unsigned char>& vectorImm,
                       int iFirst, int iLast, bool allowW,
                       Emitter& e);
-  void emitMOp(int iFirst, int& iLast, bool allowW, bool rhsVal,
-               Emitter& e, MOpFlags baseFlags, MOpFlags dimFlags);
+  /*
+   * Emit bytecodes for the base and intermediate dims, returning the number of
+   * eval stack slots containing member keys that should be consumed by the
+   * final operation.
+   */
+  size_t emitMOp(int iFirst, int& iLast, bool allowW, bool rhsVal,
+                 Emitter& e, MOpFlags flags);
+  void emitQueryMOp(int iFirst, int iLast, Emitter& e, QueryMOp op);
+
   enum class PassByRefKind {
     AllowCell,
     WarnOnCell,

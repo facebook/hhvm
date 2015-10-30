@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
@@ -126,6 +125,7 @@ struct Vgen {
   void emit(andqi i) { binary(i); a->andq(i.s0, i.d); }
   void emit(addli i) { binary(i); a->addl(i.s0, i.d); }
   void emit(const addlm& i) { a->addl(i.s0, i.m); }
+  void emit(const addlim& i);
   void emit(addq i) { commuteSF(i); a->addq(i.s0, i.d); }
   void emit(addqi i) { binary(i); a->addq(i.s0, i.d); }
   void emit(const addqim& i);
@@ -188,6 +188,7 @@ struct Vgen {
   void emit(const nop& i) { a->nop(); }
   void emit(not i) { unary(i); a->not(i.d); }
   void emit(notb i) { unary(i); a->notb(i.d); }
+  void emit(const orbim& i) { a->orb(i.s0, i.m); }
   void emit(const orwim& i) { a->orw(i.s0, i.m); }
   void emit(orq i) { commuteSF(i); a->orq(i.s0, i.d); }
   void emit(orqi i) { binary(i); a->orq(i.s0, i.d); }
@@ -569,6 +570,10 @@ void Vgen::emit(const unwind& i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const addlim& i) {
+  prefix(*a, i.m).addl(i.s0, i.m.mr());
+}
 
 void Vgen::emit(const addqim& i) {
   prefix(*a, i.m).addq(i.s0, i.m.mr());

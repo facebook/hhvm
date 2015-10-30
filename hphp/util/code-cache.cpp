@@ -16,7 +16,6 @@
 
 #include "hphp/util/code-cache.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
@@ -33,6 +32,19 @@ const void* __hot_end = nullptr;
 // This value should be enough bytes to emit the "main" part of a minimal
 // translation, which consists of a move and a jump.
 static const int kMinTranslationBytes = 16;
+
+/* Initialized by RuntimeOption. */
+uint64_t CodeCache::AHotSize = 0;
+uint64_t CodeCache::ASize = 0;
+uint64_t CodeCache::AProfSize = 0;
+uint64_t CodeCache::AColdSize = 0;
+uint64_t CodeCache::AFrozenSize = 0;
+uint64_t CodeCache::GlobalDataSize = 0;
+uint64_t CodeCache::AMaxUsage = 0;
+bool CodeCache::MapTCHuge = false;
+uint32_t CodeCache::AutoTCShift = 0;
+uint32_t CodeCache::TCNumHugeHotMB = 0;
+uint32_t CodeCache::TCNumHugeColdMB = 0;
 
 CodeCache::Selector::Selector(const Args& args)
   : m_cache(args.m_cache)
@@ -63,14 +75,13 @@ CodeCache::CodeCache()
   auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
   auto rd = [=] (size_t sz) { return sz & ~(kRoundUp - 1); };
 
-  const size_t kAHotSize    = ru(RuntimeOption::EvalJitAHotSize);
-  const size_t kASize       = ru(RuntimeOption::EvalJitASize);
-  const size_t kAProfSize   = ru(RuntimeOption::EvalJitPGO ?
-                                 RuntimeOption::EvalJitAProfSize : 0);
-  const size_t kAColdSize  = ru(RuntimeOption::EvalJitAColdSize);
-  const size_t kAFrozenSize = ru(RuntimeOption::EvalJitAFrozenSize);
+  auto const kAHotSize    = ru(CodeCache::AHotSize);
+  auto const kASize       = ru(CodeCache::ASize);
+  auto const kAProfSize   = ru(CodeCache::AProfSize);
+  auto const kAColdSize   = ru(CodeCache::AColdSize);
+  auto const kAFrozenSize = ru(CodeCache::AFrozenSize);
 
-  const size_t kGDataSize  = ru(RuntimeOption::EvalJitGlobalDataSize);
+  auto const kGDataSize   = ru(CodeCache::GlobalDataSize);
   m_totalSize = kAHotSize + kASize + kAColdSize + kAProfSize +
                 kAFrozenSize + kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
@@ -92,7 +103,7 @@ CodeCache::CodeCache()
   }
 
   auto enhugen = [&](void* base, int numMB) {
-    if (RuntimeOption::EvalMapTCHuge) {
+    if (CodeCache::MapTCHuge) {
       assert((uintptr_t(base) & (kRoundUp - 1)) == 0);
       hintHuge(base, numMB << 20);
     }
@@ -111,13 +122,13 @@ CodeCache::CodeCache()
   // Adjust the start of TC relative to hot runtime code. What really matters
   // is a number of 2MB pages in-between. We appear to benefit from odd numbers.
   auto const shiftTC = [&]() -> size_t {
-    if (!RuntimeOption::EvalJitAutoTCShift) return 0;
+    if (!CodeCache::AutoTCShift || __hot_start == nullptr) return 0;
     // Make sure the offset from hot text is either odd or even number
     // of huge pages.
     const auto hugePagesDelta = (ru(reinterpret_cast<size_t>(base)) -
                                  rd(reinterpret_cast<size_t>(__hot_start))) /
                                 kRoundUp;
-    return ((hugePagesDelta & 1) == (RuntimeOption::EvalJitAutoTCShift & 1))
+    return ((hugePagesDelta & 1) == (CodeCache::AutoTCShift & 1))
       ? 0
       : kRoundUp;
   };
@@ -132,7 +143,7 @@ CodeCache::CodeCache()
   }
   if (base == (uint8_t*)-1) {
     allocationSize = m_totalSize + kRoundUp - 1;
-    if (RuntimeOption::EvalJitAutoTCShift) {
+    if (CodeCache::AutoTCShift) {
       allocationSize += kRoundUp;
     }
     base = (uint8_t*)low_malloc(allocationSize);
@@ -165,7 +176,7 @@ CodeCache::CodeCache()
   TRACE(1, "init a @%p\n", base);
 
   m_main.init(base, kASize, "main");
-  enhugen(base, RuntimeOption::EvalTCNumHugeHotMB);
+  enhugen(base, CodeCache::TCNumHugeHotMB);
   base += kASize;
 
   TRACE(1, "init aprof @%p\n", base);
@@ -174,7 +185,7 @@ CodeCache::CodeCache()
 
   TRACE(1, "init acold @%p\n", base);
   m_cold.init(base, kAColdSize, "cold");
-  enhugen(base, RuntimeOption::EvalTCNumHugeColdMB);
+  enhugen(base, CodeCache::TCNumHugeColdMB);
   base += kAColdSize;
 
   TRACE(1, "init afrozen @%p\n", base);

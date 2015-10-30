@@ -35,7 +35,7 @@ namespace HPHP {
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->isPacked());
-  assert(arr->getCount() != 0);
+  assert(arr->checkCount());
   assert(arr->m_size <= arr->cap());
   assert(arr->m_pos >= 0 && arr->m_pos <= arr->m_size);
   static_assert(ArrayData::kPackedKind == 0, "");
@@ -799,7 +799,7 @@ static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
 ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   assert(checkInvariants(adIn));
 
-  auto const ad = adIn->hasMultipleRefs() ? Copy(adIn) : adIn;
+  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
 
   if (UNLIKELY(ad->m_size == 0)) {
     assert(ad->m_pos == 0);
@@ -824,7 +824,7 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
 ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   assert(checkInvariants(adIn));
 
-  auto const ad = adIn->hasMultipleRefs() ? Copy(adIn) : adIn;
+  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   if (UNLIKELY(strong_iterators_exist())) {
@@ -852,8 +852,8 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn,
                                 bool copy) {
   assert(checkInvariants(adIn));
 
-  auto const ad = adIn->hasMultipleRefs() ? CopyAndResizeIfNeeded(adIn)
-                                          : ResizeIfNeeded(adIn);
+  auto const ad = adIn->cowCheck() ? CopyAndResizeIfNeeded(adIn)
+                                   : ResizeIfNeeded(adIn);
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
   if (UNLIKELY(strong_iterators_exist())) {

@@ -20,7 +20,9 @@
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
@@ -41,11 +43,22 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(ustubs);
+
+extern "C" void enterTCHelper(Cell* vm_sp,
+                              ActRec* vm_fp,
+                              TCA start,
+                              ActRec* firstAR,
+                              void* targetCacheBase,
+                              ActRec* stashedAR);
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -152,7 +165,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, PhysReg tv, PhysReg type,
 
       // Note that the stack is aligned since we called to this helper from an
       // stack-unaligned stub.
-      PhysRegSaver prs{v, live, true /* aligned */};
+      PhysRegSaver prs{v, live};
 
       // The refcount is exactly 1; release the value.
       v << callm{lookupDestructor(v, type)};
@@ -318,6 +331,18 @@ TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
     // We need to do a syncForLLVMCatch(), but vmfp is already in rdx.
     v << jmpr{reg::rax};
   });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void enterTCImpl(TCA start, ActRec* stashedAR) {
+  // We have to force C++ to spill anything that might be in a callee-saved
+  // register (aside from %rbp), since enterTCHelper does not save them.
+  CALLEE_SAVED_BARRIER();
+  auto& regs = vmRegsUnsafe();
+  jit::enterTCHelper(regs.stack.top(), regs.fp, start,
+                     vmFirstAR(), rds::tl_base, stashedAR);
+  CALLEE_SAVED_BARRIER();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

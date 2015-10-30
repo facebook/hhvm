@@ -25,19 +25,16 @@ ParentWithClosureTarget
 RootClass
 
 Traversing edges for first capture:
-ArrayKey:MemoizedSingleton
-ClassProperty:RootClass:getinstance$memoize_cache
 Property:child
 Property:children
 Property:closure
 Property:somestring
 
 Traversing roots for first capture:
-ClassProperty:RootClass:getinstance$memoize_cache
 
 Getting in edges of root class:
-ClassProperty:RootClass:getinstance$memoize_cache
 onsome-stack
+rds-local
 
 Getting out edges of root class:
 Property:children
@@ -51,11 +48,3 @@ RootClass
 String
 
 Doing DFS from root class on nodes (skipping root):
-
-Doing DFS from memoize cache edge on edges and nodes:
-ArrayKey:MemoizedSingleton-->ChildWithClosureMember
-ClassProperty:RootClass:getinstance$memoize_cache-->Closure$ParentWithClosureTarget::createClosure;%d
-MixedArray
-ParentWithClosureTarget
-Property:child-->Property:children-->Property:closure-->Property:somestring-->RootClass
-String

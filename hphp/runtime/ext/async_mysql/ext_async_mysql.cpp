@@ -134,6 +134,38 @@ double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// MySSLContextProvider
+MySSLContextProvider::MySSLContextProvider(
+    std::shared_ptr<am::SSLOptionsProviderBase> provider)
+    : m_provider(std::move(provider)) {}
+
+Object MySSLContextProvider::newInstance(
+    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+  Object obj{getClass()};
+  Native::data<MySSLContextProvider>(obj)
+      ->setSSLProvider(std::move(ssl_provider));
+  return obj;
+}
+
+std::shared_ptr<am::SSLOptionsProviderBase>&
+MySSLContextProvider::getSSLProvider() {
+  return m_provider;
+}
+void MySSLContextProvider::setSSLProvider(
+    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+  m_provider = std::move(ssl_provider);
+}
+
+bool HHVM_METHOD(MySSLContextProvider, isValid) {
+  auto* data = Native::data<MySSLContextProvider>(this_);
+  return data->m_provider != nullptr;
+}
+
+Class* MySSLContextProvider::s_class = nullptr;
+const StaticString MySSLContextProvider::s_className("MySSLContextProvider");
+IMPLEMENT_GET_CLASS(MySSLContextProvider)
+
+//////////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClient
 void HHVM_STATIC_METHOD(AsyncMysqlClient,
                         setPoolsConnectionLimit,
@@ -141,18 +173,27 @@ void HHVM_STATIC_METHOD(AsyncMysqlClient,
   getDefaultClient()->setPoolsConnectionLimit(limit);
 }
 
-Object HHVM_STATIC_METHOD(AsyncMysqlClient, connect,
+Object HHVM_STATIC_METHOD(AsyncMysqlClient,
+                          connect,
                           const String& host,
                           int port,
                           const String& dbname,
                           const String& user,
                           const String& password,
-                          int64_t timeout_micros /* = -1 */) {
-  auto op = getDefaultClient()->beginConnection(static_cast<std::string>(host),
-                                         port,
-                                         static_cast<std::string>(dbname),
-                                         static_cast<std::string>(user),
-                                         static_cast<std::string>(password));
+                          int64_t timeout_micros /* = -1 */,
+                          const Variant& sslContextProvider /* = null */) {
+  am::ConnectionKey key(static_cast<std::string>(host),
+                        port,
+                        static_cast<std::string>(dbname),
+                        static_cast<std::string>(user),
+                        static_cast<std::string>(password));
+  auto op = getDefaultClient()->beginConnection(key);
+  if (!sslContextProvider.isNull()) {
+    auto* mysslContextProvider =
+        Native::data<MySSLContextProvider>(sslContextProvider.toObject());
+    op->setSSLOptionsProviderBase(mysslContextProvider->getSSLProvider().get());
+  }
+
   if (timeout_micros < 0) {
     timeout_micros = mysqlExtension::ConnectTimeout * 1000;
   }
@@ -1442,6 +1483,10 @@ public:
     HHVM_ME(AsyncMysqlClientStats, callbackDelayMicrosAvg);
     Native::registerNativeDataInfo<AsyncMysqlClientStats>(
         AsyncMysqlClientStats::s_className.get());
+
+    Native::registerNativeDataInfo<MySSLContextProvider>(
+        MySSLContextProvider::s_className.get());
+    HHVM_ME(MySSLContextProvider, isValid);
 
     HHVM_ME(AsyncMysqlConnection, query);
     HHVM_ME(AsyncMysqlConnection, queryf);

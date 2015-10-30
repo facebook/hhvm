@@ -354,7 +354,7 @@ exceptions depending on how coercion is implemented.
 
 | MulDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
-| DivDbl, D(Dbl), S(Dbl) S(Dbl), B
+| DivDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
 | Floor, D(Dbl), S(Dbl), NF
 
@@ -383,10 +383,9 @@ exceptions depending on how coercion is implemented.
 
   AbsDbl computes the absolute value of a double-precision value.
 
-  DivDbl will branch to block B when S1 is zero (signed or unsigned). When the
-  result of the division is a real valued number DivDbl conforms to IEEE 754.
-  In particular should the result of a division be zero the sign will follow
-  normal sign rules for division.
+  DivDbl conforms to IEEE 754. In particular, division by zero returns +/- INF
+  or NAN depending on the dividend; and should the result of a division be zero
+  the sign will follow the normal sign rules for division.
 
   Note that Shr is an arithmetic right shift: The MSB is sign-extended.
 
@@ -1724,7 +1723,7 @@ To string conversions:
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned.
 
-| GenericIdx, D(Cell), S(Cell) S(Cell) S(Cell), PRc|Er
+| GenericIdx, D(Cell), S(Cell) S(Cell) S(Cell) S(StkPtr), PRc|Er
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned. If S0 does not support array or indexed access S2 is
@@ -1867,6 +1866,11 @@ To string conversions:
 | ContValid, D(Bool), S(Obj), NF
 
   Return true if a generator is not done, false otherwise.
+
+| ContStarted, D(Bool), S(Obj), NF
+
+  Return true if a generator has been run at least once, i.e. is not in the
+  Created state, false otherwise.
 
 | ContArIncKey, ND, S(FramePtr), NF
 
@@ -2140,13 +2144,15 @@ To string conversions:
   Load an MInstrState address. Returns a pointer to offset S0 within the
   current MInstrState.
 
-| LdMBase, D(PtrToGen), NA, NF
+| LdMBase, DParam, NA, NF
 
   Load the current value of the member base register.
 
 | StMBase, ND, S(PtrToGen), NF
 
-  Store a new value to the member base register.
+  Store a new value to the member base register. It is illegal for any
+  instruction other than StMBase or InterpOne (when interpreting a member
+  instruction) to modify the member base register.
 
 | FinishMemberOp, ND, NA, NF
 
@@ -2265,12 +2271,18 @@ fields of that struct for holding intermediate values.
   Get intermediate element with key S1 from base S0. The base will not be
   modified.
 
-| ElemArray, D(PtrToMembGen), S(Arr) S(Int,Str), Er
+| ElemArray,  D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
 | ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-  Similar to ElemX, but the base S0 is an array and the key S1 is an
-  int/str.  The ElemArrayW version is for Warn member instrs.
+| ElemArrayD, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
+
+  Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
+  The ElemArrayW version is for Warn member instrs, and the ElemArrayD version
+  is for Define member instrs.
+
+  ElemArrayD takes a PtrToGen for its base operand, but it expects it to be a
+  PtrToArr or PtrToBoxedArr.
 
 | ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 
@@ -2315,9 +2327,9 @@ fields of that struct for holding intermediate values.
 
 | ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedCell), CRc|Er
 
-  Like ArraySet, but for binding operations on the array. The parameter in S3
-  must point to a RefData with an array type when this instruction is executed,
-  and it must be the same array that is in S0.
+  Like ArraySet, but for binding operations on the array. S3 must point to a
+  RefData with an array type when this instruction is executed, and it must be
+  the same array that is in S0.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), Er
 

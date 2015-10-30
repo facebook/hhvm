@@ -29,6 +29,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+enum class APCHandleLevel {
+  Outer, // directly referenced by the apc store
+  Inner // referenced by some other Inner or Outer handle
+};
+
 /*
  * An APCHandle is the externally visible handle for in-memory APC values.  The
  * main role of the APCHandle is to hold the type information of the value,
@@ -90,7 +95,7 @@ struct APCHandle {
    */
   static Pair Create(const Variant& source,
                      bool serialized,
-                     bool inner,
+                     APCHandleLevel level,
                      bool unserializeObj);
 
   /*
@@ -114,16 +119,8 @@ struct APCHandle {
    * other threads---it is an exception to the thread-safety rule documented
    * above the class.
    */
-  void reference() const {
-    if (!isUncounted()) {
-      realIncRef();
-    }
-  }
-  void unreference() const {
-    if (!isUncounted()) {
-      realDecRef();
-    }
-  }
+  void reference() const;
+  void unreference() const;
   void unreferenceRoot(size_t size);
 
   /*
@@ -195,20 +192,8 @@ private:
   constexpr static uint8_t FAPCCollection   = 1 << 4;
 
 private:
-  void realIncRef() const {
-    assert(isRefcountedType(m_type));
-    ++m_count;
-  }
-
-  void realDecRef() const {
-    assert(m_count.load() > 0);
-    if (m_count > 1) {
-      assert(isRefcountedType(m_type));
-      if (--m_count) return;
-    }
-    const_cast<APCHandle*>(this)->deleteShared();
-  }
-
+  void atomicIncRef() const;
+  void atomicDecRef() const;
   void deleteShared();
 
 private:

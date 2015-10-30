@@ -28,10 +28,6 @@
 
 namespace HPHP { namespace jit {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
 AliasClass pointee(const SSATmp* ptr) {
   auto const type = ptr->type();
   always_assert(type <= TPtrToGen);
@@ -79,16 +75,34 @@ AliasClass pointee(const SSATmp* ptr) {
       return AMIStateTV;
     }
 
-    if (typeNR <= TPtrToArrGen) {
-      if (sinst->is(LdPackedArrayElemAddr)) {
-        if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
-          return AliasClass {
-            AElemI { sinst->src(0), sinst->src(1)->intVal() }
-          };
-        }
+    auto elem = [&] () -> AliasClass {
+      auto base = sinst->src(0);
+      auto key  = sinst->src(1);
+
+      always_assert(base->isA(TArr));
+
+      if (key->isA(TInt)) {
+        if (key->hasConstVal()) return AElemI { base, key->intVal() };
         return AElemIAny;
       }
+      if (key->hasConstVal(TStr)) {
+        int64_t n;
+        if (key->strVal()->isStrictlyInteger(n)) return AElemI { base, n };
+        return AElemS { base, key->strVal() };
+      }
       return AElemAny;
+    };
+
+    if (typeNR <= TPtrToArrGen) {
+      if (sinst->is(LdPackedArrayElemAddr)) return elem();
+      return AElemAny;
+    }
+
+    // The result of ElemArray{,W} is either the address of an array element, or
+    // &init_null_variant().
+    if (typeNR <= TPtrToMembGen) {
+      if (sinst->is(ElemArray, ElemArrayW)) return elem();
+      return folly::none;
     }
 
     return folly::none;
@@ -110,6 +124,10 @@ AliasClass pointee(const SSATmp* ptr) {
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
   return ret;
 }
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
 
 AliasClass all_pointees(folly::Range<SSATmp**> srcs) {
   auto ret = AliasClass{AEmpty};
@@ -454,18 +472,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * removing that set.
    */
   case DefInlineFP:
-    return may_load_store(
+    return may_load_store_kill(
       AFrameAny | inline_fp_frame(&inst),
       /*
-       * Note that although DefInlineFP is going to store some things into the
-       * memory for the new frame (m_soff, etc), it's as part of converting it
-       * from a pre-live frame to a live frame.  We don't need to report those
-       * effects on memory because they are logically to a 'different location
-       * class' (i.e. an activation record for the callee) than the AStack
-       * locations that represented the pre-live ActRec, even though they are at
-       * the same physical addresses in memory.
+       * This prevents stack slots from the caller from being sunk into the
+       * callee. Note that some of these stack slots overlap with the frame
+       * locals of the callee-- those slots are inacessible in the inlined
+       * call as frame and stack locations may not alias.
        */
-      AEmpty
+      stack_below(inst.dst(), 0),
+      /*
+       * While not required for correctness adding these slots to the kill set
+       * will hopefully avoid some extra stores.
+       */
+      stack_below(inst.dst(), 0)
     );
 
   case InlineReturn:
@@ -774,6 +794,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetNewElemArray:
   case SetNewElem:
   case UnsetElem:
+  case ElemArrayD:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
     assertx(inst.src(0)->type() <= TPtrToGen);
@@ -792,6 +813,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetWithRefElem:
   case SetWithRefNewElem:
   case VGetElem:
+
     assertx(inst.src(0)->isA(TPtrToGen));
     return minstr_with_tvref(inst);
 
@@ -1088,6 +1110,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContArIncKey:
   case ContArUpdateIdx:
   case ContValid:
+  case ContStarted:
   case IncProfCounter:
   case IncStat:
   case IncStatGrouped:

@@ -39,11 +39,12 @@ TRACE_SET_MOD(vasm_copy);
 
 using RpoID = uint32_t;
 
-constexpr auto kNumPhysRegs = 1;
+constexpr auto kNumPhysRegs = 2;
 
 folly::Optional<int32_t> phys_reg_index(Vreg reg) {
   assert(reg.isPhys());
   if (reg == rvmfp()) return 0;
+  if (reg == rvmtl()) return 1;
   return folly::none;
 }
 

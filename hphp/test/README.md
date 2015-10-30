@@ -71,6 +71,8 @@ must have one and only one of `.php.typechecker.expect` or
 `.php.typechecker.expectf`, and you must have a `.php.hhconfig` file as well;
 and the rest are optional.
 
+NOTE: If you are using a `.php.type-errors` file, then all the files suffixes listed in the paragraph above will include `type-errors` (e.g., `.php.type-errors.hhvm.expectf`).
+
 NOTE: You can have both a `.php.[hhvm].expect[f]` and a 
 `.php.typechecker.expect[f]`.
 

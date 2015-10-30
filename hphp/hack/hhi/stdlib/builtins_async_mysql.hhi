@@ -64,13 +64,26 @@ function mysql_async_status($link_identifier);
 class AsyncMysqlClient {
   public function __construct() { }
   static public function setPoolsConnectionLimit(int $limit) { }
-  static public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1): Awaitable<AsyncMysqlConnection> { }
+  static public function connect(
+      string $host,
+      int $port,
+      string $dbname,
+      string $user,
+      string $password,
+      int $timeout_micros = -1,
+      ?MySSLContextProvider $ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
   static public function adoptConnection($connection) { }
 }
+
 class AsyncMysqlConnectionPool {
   public function __construct(array $options) { }
   public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = "") { }
   public function getPoolStats(): array { }
+}
+
+class MySSLContextProvider {
+  private function __contruct(): void { }
+  public function isValid(): bool { }
 }
 
 class AsyncMysqlClientStats {

@@ -44,6 +44,15 @@
 namespace HPHP {
 
 static Mutex s_mutex;
+
+const int64_t k_ENT_COMPAT = 2;
+const int64_t k_ENT_NOQUOTES = 0;
+const int64_t k_ENT_QUOTES = 3;
+const int64_t k_ENT_IGNORE = 4;
+const int64_t k_ENT_SUBSTITUTE = 8;
+const int64_t k_ENT_FB_UTF8 = 32768;
+const int64_t k_ENT_FB_UTF8_ONLY = 65536;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class Op> ALWAYS_INLINE
@@ -859,7 +868,7 @@ String HHVM_FUNCTION(str_repeat,
 
 Variant sscanfImpl(const String& str,
                    const String& format,
-                   const std::vector<Variant*>& args) {
+                   const req::vector<Variant*>& args) {
   Variant ret;
   int result;
   result = string_sscanf(str.c_str(), format.c_str(), args.size(), ret);
@@ -887,11 +896,11 @@ TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
   }
   String format{getArg<KindOfString>(ar, 1)};
 
-  std::vector<Variant*> args;
+  req::vector<Variant*> args;
+  if (ar->numArgs() > 2) args.reserve(ar->numArgs() - 2);
   for (int i = 2; i < ar->numArgs(); ++i) {
     args.push_back(getArg<KindOfRef>(ar, i));
   }
-
   return arReturn(ar, sscanfImpl(str, format, args));
 }
 
@@ -1735,12 +1744,13 @@ String HHVM_FUNCTION(sha1,
 #define HASH_TAB_MASK ((uint16_t)(HASH_TAB_SIZE - 1))
 
 struct PatAndRepl {
-  const String  pat;
-  const String  repl;
+  const std::string pat;
+  const std::string repl;
 
   uint16_t hash(int start, int len) const;
 
-  PatAndRepl(const String& pat, const String& repl) : pat(pat), repl(repl) { }
+  PatAndRepl(const String& pat, const String& repl)
+  : pat(pat.data(), pat.size()), repl(repl.data(), repl.size()) { }
 };
 
 using ShiftTab   = std::array<size_t, SHIFT_TAB_SIZE>;
@@ -1766,7 +1776,7 @@ public:
   : m(minLen), B(MIN(m,2)), Bp(MIN(m,2)),
     valid(initPatterns(arr)) { }
 
-  Variant translate(String source);
+  Variant translate(String source) const;
 };
 
 static inline uint16_t strtr_hash(const char *str, int len) {
@@ -1828,6 +1838,8 @@ bool WuManberReplacement::initPatterns(const Array& arr) {
     patterns.emplace_back(pattern, iter.second().toString());
   }
 
+  initTables();
+
   return true;
 }
 
@@ -1884,7 +1896,7 @@ void WuManberReplacement::initTables() {
   }
 }
 
-Variant WuManberReplacement::translate(String source) {
+Variant WuManberReplacement::translate(String source) const {
   size_t  pos      = 0,
           nextwpos = 0,
           lastpos  = source.size() - m;
@@ -1893,8 +1905,9 @@ Variant WuManberReplacement::translate(String source) {
     return false;
   }
 
-  if (prefix.size() == 0) {
-    initTables();
+  // all patterns are longer than the source
+  if (m > source.size()) {
+    return source;
   }
 
   StringBuffer  result(source.size());
@@ -1916,7 +1929,7 @@ Variant WuManberReplacement::translate(String source) {
           continue;
         }
 
-        PatAndRepl *pnr = &patterns[i];
+        const PatAndRepl *pnr = &patterns[i];
         if (pnr->pat.size() > source.size() - pos ||
             memcmp(pnr->pat.data(), source.data() + pos,
                    pnr->pat.size()) != 0) {
@@ -2009,7 +2022,7 @@ Variant strtr_fast(const String& str, const Array& arr,
 
 static constexpr int kBitsPerQword = CHAR_BIT * sizeof(uint64_t);
 
-using WuManberPtr   = std::shared_ptr<WuManberReplacement>;
+using WuManberPtr   = std::shared_ptr<const WuManberReplacement>;
 using WuManberCache = ConcurrentLRUCache<int64_t, WuManberPtr>;
 static WuManberCache wuManberCache(10);
 
@@ -2052,7 +2065,7 @@ Variant HHVM_FUNCTION(strtr,
   }
 
   if (arr.size() < 1000) {
-    WuManberReplacement replacer(arr, minlen);
+    const WuManberReplacement replacer(arr, minlen);
     return replacer.translate(str);
   }
 
@@ -2348,6 +2361,13 @@ String HHVM_FUNCTION(hebrevc,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+const StaticString s_ENT_COMPAT("ENT_COMPAT");
+const StaticString s_ENT_NOQUOTES("ENT_NOQUOTES");
+const StaticString s_ENT_QUOTES("ENT_QUOTES");
+const StaticString s_ENT_IGNORE("ENT_IGNORE");
+const StaticString s_ENT_SUBSTITUTE("ENT_SUBSTITUTE");
+const StaticString s_ENT_FB_UTF8("ENT_FB_UTF8");
+const StaticString s_ENT_FB_UTF8_ONLY("ENT_FB_UTF8_ONLY");
 
 class StringExtension final : public Extension {
 public:
@@ -2442,6 +2462,28 @@ public:
     HHVM_FE(similar_text);
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
+
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_COMPAT.get(), k_ENT_COMPAT
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_NOQUOTES.get(), k_ENT_NOQUOTES
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_QUOTES.get(), k_ENT_QUOTES
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_IGNORE.get(), k_ENT_IGNORE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_SUBSTITUTE.get(), k_ENT_SUBSTITUTE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_FB_UTF8.get(), k_ENT_FB_UTF8
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_ENT_FB_UTF8_ONLY.get(), k_ENT_FB_UTF8_ONLY
+    );
 
     loadSystemlib();
   }

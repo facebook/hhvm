@@ -14,6 +14,8 @@
 (*****************************************************************************)
 open ServerEnv
 
+module SLC = ServerLocalConfig
+
 let make_genv options config local_config =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
@@ -28,18 +30,23 @@ let make_genv options config local_config =
     else
       Some (Worker.make nbr_procs gc_control) in
   let watchman =
-    if check_mode || not local_config.ServerLocalConfig.use_watchman
+    if check_mode || not local_config.SLC.use_watchman
     then None
+    else if Sys.file_exists (Watchman.crash_marker_path root)
+    then (Hh_logger.log "Watchman failed recently, falling back to dfind"; None)
     else
       try
-        Some (Watchman.init root)
-      with e -> Hh_logger.exc e; None
+        let watchman =
+          Watchman.init local_config.SLC.watchman_init_timeout root in
+        Hh_logger.log "Using watchman";
+        Some watchman
+      with e -> Hh_logger.exc ~prefix:"Watchman init: " e; None
   in
   let indexer, notifier, wait_until_ready =
     match watchman with
     | Some watchman ->
-      let files = Watchman.get_all_files watchman in
       let indexer filter =
+        let files = Watchman.get_all_files watchman in
         Bucket.make ~max_size:1000 (List.filter filter files) in
       let notifier () = Watchman.get_changes watchman in
       HackEventLogger.set_use_watchman ();

@@ -542,6 +542,7 @@ inline MInstrAttr mOpFlagsToAttr(MOpFlags f) {
 
 #define QUERY_M_OPS                               \
   OP(CGet)                                        \
+  OP(CGetQuiet)                                   \
   OP(Isset)                                       \
   OP(Empty)
 
@@ -812,8 +813,10 @@ constexpr int32_t kMaxConcatN = 4;
   O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    CF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
+  O(ContStarted,     NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
+  O(ContGetReturn,   NA,               NOV,             ONE(CV),    NF) \
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    CF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
@@ -856,6 +859,15 @@ constexpr int32_t kMaxConcatN = 4;
                                        MFINAL,          ONE(CV),    NF) \
   O(QueryMStr,       FOUR(IVA, OA(QueryMOp), OA(PropElemOp), SA),       \
                                        MFINAL,          ONE(CV),    NF) \
+  O(SetML,           THREE(IVA, OA(PropElemOp), LA),                    \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMC,           TWO(IVA, OA(PropElemOp)),                          \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMInt,         THREE(IVA, OA(PropElemOp), I64A),                  \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMStr,         THREE(IVA, OA(PropElemOp), SA),                    \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetMNewElem,     ONE(IVA),         C_MFINAL,        ONE(CV),    NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
 enum class Op : uint16_t {
@@ -891,7 +903,15 @@ constexpr bool isValidOpcode(Op op) {
 
 const MInstrInfo& getMInstrInfo(Op op);
 
-MOpFlags getMOpFlags(QueryMOp op);
+inline MOpFlags getQueryMOpFlags(QueryMOp op) {
+  switch (op) {
+    case QueryMOp::CGet:  return MOpFlags::Warn;
+    case QueryMOp::CGetQuiet:
+    case QueryMOp::Isset:
+    case QueryMOp::Empty: return MOpFlags::None;
+  }
+  always_assert(false);
+}
 
 enum AcoldOp {
   OpAcoldStart = Op_count-1,
@@ -1277,6 +1297,11 @@ inline bool isMemberFinalOp(Op op) {
     case OpQueryMC:
     case OpQueryMInt:
     case OpQueryMStr:
+    case OpSetML:
+    case OpSetMC:
+    case OpSetMInt:
+    case OpSetMStr:
+    case OpSetMNewElem:
       return true;
 
     default:

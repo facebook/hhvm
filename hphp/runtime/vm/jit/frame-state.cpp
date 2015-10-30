@@ -138,8 +138,15 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     changed = true;
   }
 
-  if (dst.mbase != src.mbase) {
-    dst.mbase = nullptr;
+  if (dst.mbase.ptr != src.mbase.ptr) {
+    dst.mbase.ptr = nullptr;
+    changed = true;
+  }
+  if (merge_util(dst.mbase.ptrType, dst.mbase.ptrType | src.mbase.ptrType)) {
+    changed = true;
+  }
+  if (dst.mbase.value != src.mbase.value) {
+    dst.mbase.value = nullptr;
     changed = true;
   }
 
@@ -466,6 +473,13 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().spOffset = inst->extra<DefSP>()->offset;
     break;
 
+  case StMem:
+    // If we ever start using StMem to store to pointers that might be
+    // stack/locals, we have to update tracked state here.
+    always_assert(!inst->src(0)->type().maybe(TPtrToFrameGen));
+    always_assert(!inst->src(0)->type().maybe(TPtrToStkGen));
+    break;
+
   case LdStk:
     {
       auto const offset = inst->extra<LdStk>()->offset;
@@ -655,7 +669,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
     if (isMemberBaseOp(extra.opcode) || isMemberDimOp(extra.opcode) ||
         isMemberFinalOp(extra.opcode)) {
-      cur().mbase = nullptr;
+      cur().mbase.reset();
     }
     break;
   }
@@ -691,49 +705,95 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case StMBase:
+    cur().mbase.ptr = inst->src(0);
+    cur().mbase.ptrType = inst->src(0)->type();
+    cur().mbase.value = nullptr;
+    break;
+
   case FinishMemberOp:
-    cur().mbase = nullptr;
+    cur().mbase.reset();
     break;
 
   default:
     if (MInstrEffects::supported(inst)) {
-      auto const base = inst->src(minstrBaseIdx(inst->op()));
-
-      // We require that minstrs that could affect stack/local locations take
-      // the stack address as an direct source. This restriction may be relaxed
-      // in the future (t7580150).
-      if (base->inst()->is(LdStkAddr)) {
-        auto const offset = base->inst()->extra<LdStkAddr>()->offset;
-        auto const prevTy = stackType(offset);
-        MInstrEffects effects(inst->op(), prevTy.ptr(Ptr::Stk));
-
-        if (effects.baseTypeChanged || effects.baseValChanged) {
-          auto const ty = effects.baseType.derefIfPtr();
-          setStackType(
-            offset,
-            ty <= TBoxedCell ? TBoxedInitCell : ty
-          );
-        }
-      } else if (base->inst()->is(LdLocAddr)) {
-        auto const locId = base->inst()->extra<LdLocAddr>()->locId;
-        auto const baseType = localType(locId);
-
-        MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
-        if (effects.baseTypeChanged || effects.baseValChanged) {
-          auto const ty = effects.baseType.derefIfPtr();
-          if (ty <= TBoxedCell) {
-            setLocalType(locId, TBoxedInitCell);
-            setBoxedLocalPrediction(locId, ty);
-          } else {
-            setLocalType(locId, ty);
-          }
-        }
-      }
+      updateMInstr(inst);
     }
     break;
   }
 
   return changed;
+}
+
+void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
+  // We don't update tracked local types for pseudomains, but we do care about
+  // stack types.
+  auto const isPM = cur().curFunc->isPseudoMain();
+  auto const base = inst->src(minstrBaseIdx(inst->op()));
+
+  if (base->inst()->is(LdStkAddr)) {
+    auto const offset = base->inst()->extra<LdStkAddr>()->offset;
+    auto const prevTy = stackType(offset);
+    MInstrEffects effects(inst->op(), prevTy.ptr(Ptr::Stk));
+
+    if (effects.baseTypeChanged || effects.baseValChanged) {
+      auto const ty = effects.baseType.derefIfPtr();
+      setStackType(
+        offset,
+        ty <= TBoxedCell ? TBoxedInitCell : ty
+      );
+    }
+  } else if (base->inst()->is(LdLocAddr)) {
+    if (isPM) return;
+    auto const locId = base->inst()->extra<LdLocAddr>()->locId;
+    auto const baseType = localType(locId);
+
+    MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
+    if (effects.baseTypeChanged || effects.baseValChanged) {
+      auto const ty = effects.baseType.derefIfPtr();
+      if (ty <= TBoxedCell) {
+        setLocalType(locId, TBoxedInitCell);
+        setBoxedLocalPrediction(locId, ty);
+      } else {
+        setLocalType(locId, ty);
+      }
+    }
+  } else {
+    Trace::Indent indent;
+    // If we don't know exactly where the base is, we have to be conservative
+    // and apply the operation to all locals/stack slots that could be
+    // affected.
+    if (base->type().maybe(TPtrToFrameGen) && !isPM) {
+      for (size_t i = 0, n = cur().locals.size(); i < n; ++i) {
+        auto const oldType = localType(i);
+        if (TGen <= oldType) {
+          // Drop the value and don't bother with precise effects.
+          setLocalType(i, oldType);
+          continue;
+        }
+        if (oldType <= TBoxedCell) continue;
+        MInstrEffects e(inst->op(), oldType);
+        if (!e.baseValChanged && !e.baseTypeChanged) continue;
+        widenLocalType(i, oldType | e.baseType);
+      }
+    }
+    if (base->type().maybe(TPtrToStkGen)) {
+      auto begin = cur().spOffset.offset;
+      auto end = cur().spOffset.offset - int32_t(cur().stack.size());
+      for (auto i = begin; i > end; --i) {
+        auto const irSP = IRSPOffset{i};
+        auto const oldType = stackType(irSP);
+        if (TStkElem <= oldType) {
+          // Drop the value and don't bother with precise effects.
+          setStackType(irSP, oldType);
+          continue;
+        }
+        if (oldType <= TBoxedCell) continue;
+        MInstrEffects e(inst->op(), oldType);
+        if (!e.baseValChanged && !e.baseTypeChanged) continue;
+        widenStackType(irSP, oldType | e.baseType);
+      }
+    }
+  }
 }
 
 /*
@@ -1020,7 +1080,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().locals.resize(target->numLocals());
   cur().stack.clear();
   cur().stack.resize(std::max(cur().syncedSpLevel.offset,
-                                    cur().spOffset.offset));
+                              cur().spOffset.offset));
 }
 
 void FrameStateMgr::trackInlineReturn() {
@@ -1049,16 +1109,12 @@ void FrameStateMgr::clearForUnprocessedPred() {
   FTRACE(1, "clearForUnprocessedPred\n");
 
   // Forget any information about stack values in memory.
-  for (auto& state : m_stack) {
-    for (auto& stk : state.stack) {
-      stk = StackState{};
-    }
-  }
+  clearStack();
 
   // These values must go toward their conservative state.
   cur().thisAvailable    = false;
   cur().frameMaySpanCall = true;
-  cur().mbase            = nullptr;
+  cur().mbase.reset();
 
   cur().fpiStack.clear();
   clearLocals();
@@ -1144,11 +1200,19 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
 }
 
 void FrameStateMgr::setMemberBaseValue(SSATmp* value) {
-  cur().mbase = value;
+  cur().mbase.value = value;
+}
+
+SSATmp* FrameStateMgr::memberBasePtr() const {
+  return cur().mbase.ptr;
+}
+
+Type FrameStateMgr::memberBasePtrType() const {
+  return cur().mbase.ptrType;
 }
 
 SSATmp* FrameStateMgr::memberBaseValue() const {
-  return cur().mbase;
+  return cur().mbase.value;
 }
 
 SSATmp* FrameStateMgr::localValue(uint32_t id) const {
@@ -1218,12 +1282,22 @@ void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {
 
 void FrameStateMgr::setStackType(IRSPOffset offset, Type type) {
   auto& stk = stackState(offset);
-  FTRACE(2, "stk[{}] :: {}\n", offset.offset, type.toString());
+  ITRACE(2, "stk[{}] :: {} -> {}\n", offset.offset, stk.type, type);
   stk.value         = nullptr;
   stk.type          = type;
   stk.maybeChanged  = true;
   stk.predictedType = type;
   stk.typeSrcs.clear();
+  cur().stackModified = true;
+}
+
+void FrameStateMgr::widenStackType(IRSPOffset offset, Type type) {
+  auto& stk = stackState(offset);
+  ITRACE(2, "stk[{}] :: {} -> {}\n", offset.offset, stk.type, type);
+  stk.value         = nullptr;
+  stk.type          = type;
+  stk.maybeChanged  = true;
+  stk.predictedType = type;
   cur().stackModified = true;
 }
 
@@ -1261,6 +1335,12 @@ void FrameStateMgr::spillFrameStack(IRSPOffset offset, FPInvOffset retOffset,
   cur().syncedSpLevel += kNumActRecCells;
   cur().fpiStack.push_front(FPIInfo { cur().spValue, retOffset, ctx, opc, func,
                                       false /* interp */, false /* spans */ });
+}
+
+void FrameStateMgr::clearStack() {
+  for (auto& state : m_stack) {
+    for (auto& stk : state.stack) stk = StackState{};
+  }
 }
 
 void FrameStateMgr::refineStackType(IRSPOffset offset,
@@ -1386,11 +1466,21 @@ void FrameStateMgr::refineStackPredictedType(IRSPOffset offset, Type type) {
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
+  ITRACE(2, "loc[{}] :: {} -> {}\n", id, cur().locals[id].type, type);
   cur().locals[id].value         = nullptr;
   cur().locals[id].type          = type;
   cur().locals[id].maybeChanged  = true;
   cur().locals[id].predictedType = type;
   cur().locals[id].typeSrcs.clear();
+}
+
+void FrameStateMgr::widenLocalType(uint32_t id, Type type) {
+  always_assert(id < cur().locals.size());
+  ITRACE(2, "loc[{}] :: {} -> {}\n", id, cur().locals[id].type, type);
+  cur().locals[id].value         = nullptr;
+  cur().locals[id].type          = type;
+  cur().locals[id].maybeChanged  = true;
+  cur().locals[id].predictedType = type;
 }
 
 void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {

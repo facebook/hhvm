@@ -455,6 +455,9 @@ int instrNumPops(PC pc) {
 #define V_MMANY -2
 #define R_MMANY -2
 #define MFINAL -3
+#define C_MFINAL -5
+#define R_MFINAL C_MFINAL
+#define V_MFINAL C_MFINAL
 #define FMANY -3
 #define CVMANY -3
 #define CVUMANY -3
@@ -473,6 +476,9 @@ int instrNumPops(PC pc) {
 #undef V_MMANY
 #undef R_MMANY
 #undef MFINAL
+#undef C_MFINAL
+#undef R_MFINAL
+#undef V_MFINAL
 #undef FMANY
 #undef CVMANY
 #undef CVUMANY
@@ -488,9 +494,11 @@ int instrNumPops(PC pc) {
   // BaseSC and BaseSL remove an A that may be on the top of the stack or one
   // element below the top, depending on the second immediate.
   if (n == -4) return getImm(pc, 1).u_IVA + 1;
-  // FCall, NewPackedArray, and final member operations specify how many values
-  // are popped in their first immediate
+  // FCall, NewPackedArray, and some final member operations specify how many
+  // values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
+  // Other final member operations pop their first immediate + 1
+  if (n == -5) return getImm(pc, 0).u_IVA + 1;
   // For instructions with vector immediates, we have to scan the
   // contents of the vector immediate to determine how many values
   // are popped
@@ -557,6 +565,7 @@ FlavorDesc minstrFlavor(PC op, uint32_t i, FlavorDesc top) {
 
   // First, check for location codes that have a non-Cell stack input.
   auto const location = getMLocation(op);
+  auto const numStack = getImmVector(op).numStackValues();
   switch (location.lcode) {
     // No stack input for the location.
     case LL: case LH: case LGL: case LNL: break;
@@ -569,16 +578,16 @@ FlavorDesc minstrFlavor(PC op, uint32_t i, FlavorDesc top) {
       if (i == 0) return AV;
       break;
 
-    // RV on top.
+    // RV on the bottom.
     case LR:
-      if (i == 0) return RV;
+      if (i == numStack - 1) return RV;
       break;
 
     case InvalidLocationCode:
       always_assert(false);
   }
 
-  if (i < getImmVector(op).numStackValues()) return CV;
+  if (i < numStack) return CV;
   always_assert(0 && "Invalid stack index");
 }
 
@@ -609,6 +618,9 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define V_MMANY return minstrFlavor(op, idx, VV);
 #define R_MMANY return minstrFlavor(op, idx, RV);
 #define MFINAL return manyFlavor(op, idx, CRV);
+#define C_MFINAL return idx == 0 ? CV : CRV;
+#define R_MFINAL return idx == 0 ? RV : CRV;
+#define V_MFINAL return idx == 0 ? VV : CRV;
 #define FMANY return manyFlavor(op, idx, FV);
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
@@ -630,6 +642,9 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef V_MMANY
 #undef R_MMANY
 #undef MFINAL
+#undef C_MFINAL
+#undef R_MFINAL
+#undef V_MFINAL
 #undef FMANY
 #undef CVMANY
 #undef CVUMANY
@@ -904,7 +919,9 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
   it += sizeof(Offset);                                             \
 } while (false)
 
-#define READV() out << " " << decodeVariableSizeImm((const uint8_t**)&it);
+#define READV() out << " " << decodeVariableSizeImm(&it);
+
+#define READLA() out << " L:" << decodeVariableSizeImm(&it);
 
 #define READIVA() do {                      \
   out << " ";                               \
@@ -1031,7 +1048,7 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
 #define H_ILA READIVEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
-#define H_LA READV()
+#define H_LA READLA()
 #define H_IA READV()
 #define H_DA READ(double)
 #define H_BA READOFF()
@@ -1065,6 +1082,8 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
 OPCODES
 #undef O
 #undef READ
+#undef READV
+#undef READLA
 #undef ONE
 #undef TWO
 #undef THREE
@@ -1485,15 +1504,6 @@ const MInstrInfo& getMInstrInfo(Op op) {
 #undef MII
   default: not_reached();
   }
-}
-
-MOpFlags getMOpFlags(QueryMOp op) {
-  switch (op) {
-    case QueryMOp::CGet:  return MOpFlags::Warn;
-    case QueryMOp::Isset:
-    case QueryMOp::Empty: return MOpFlags::None;
-  }
-  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

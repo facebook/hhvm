@@ -368,6 +368,7 @@ public:
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
   static bool AutoTypecheck;
+  static bool AutoprimeGenerators;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecateOldStyleCtors;
@@ -431,14 +432,6 @@ public:
   F(string,   JitLLVMAttrs,            "")                              \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
-  F(uint64_t, JitAHotSize,             ahotDefault())                   \
-  F(uint64_t, JitASize,                60 << 20)                        \
-  F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
-  F(uint64_t, JitAProfSize,            64 << 20)                        \
-  F(uint64_t, JitAColdSize,            24 << 20)                        \
-  F(uint64_t, JitAFrozenSize,          40 << 20)                        \
-  F(uint32_t, JitAutoTCShift,          1)                               \
-  F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(bool, RecordSubprocessTimes,       false)                           \
@@ -553,7 +546,6 @@ public:
   F(uint32_t, JitPGORelaxPercent,      100)                             \
   F(bool,     JitLoops,                true)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
-  F(bool, HHIRConstrictGuards,         hhirConstrictGuardsDefault())    \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
@@ -564,12 +556,9 @@ public:
   F(uint32_t, DumpIR,                  0)                               \
   F(bool, DumpRegion,                  false)                           \
   F(bool, DumpAst,                     false)                           \
-  F(bool, MapTCHuge,                   hugePagesSoundNice())            \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
-  F(uint32_t, TCNumHugeHotMB,          16)                              \
-  F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, CheckHeapOnAlloc,            false)                           \
   F(bool, EnableGC,                    false)                           \

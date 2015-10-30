@@ -396,7 +396,7 @@ inline TypedValue* ElemDEmptyish(TypedValue* base, key_type<keyType> key) {
  */
 inline TypedValue* ElemDScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteUninit(&tvRef);
+  tvWriteNull(&tvRef);
   return &tvRef;
 }
 
@@ -512,7 +512,7 @@ inline TypedValue* ElemUArray(TypedValue& tvRef,
     return ElemUArrayImpl<keyType>(baseArr, key);
   }
 
-  tvWriteUninit(&tvRef);
+  tvWriteNull(&tvRef);
   return &tvRef;
 }
 
@@ -579,7 +579,7 @@ inline TypedValue* NewElemEmptyish(TypedValue* base) {
  */
 inline TypedValue* NewElemInvalid(TypedValue& tvRef) {
   raise_warning("Cannot use a scalar value as an array");
-  tvWriteUninit(&tvRef);
+  tvWriteNull(&tvRef);
   return &tvRef;
 }
 
@@ -769,7 +769,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
   }
 
   // Create and save the result.
-  if (x >= 0 && x < baseLen && !base->m_data.pstr->hasMultipleRefs()) {
+  if (x >= 0 && x < baseLen && !base->m_data.pstr->cowCheck()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
     auto const oldp = base->m_data.pstr;
@@ -913,8 +913,8 @@ template <bool setResult, KeyType keyType>
 inline void SetElemArray(TypedValue* base, key_type<keyType> key,
                          Cell* value) {
   ArrayData* a = base->m_data.parr;
-  bool copy = (a->hasMultipleRefs())
-    || (value->m_type == KindOfArray && value->m_data.parr == a);
+  bool copy = a->cowCheck() ||
+              (value->m_type == KindOfArray && value->m_data.parr == a);
 
   auto* newData = SetElemArrayPre<setResult>(a, key, value, copy);
 
@@ -1022,9 +1022,11 @@ inline void SetNewElemString(TypedValue* base, Cell* value) {
  * SetNewElem when base is an Array
  */
 inline void SetNewElemArray(TypedValue* base, Cell* value) {
+  base = tvToCell(base);
+  assert(base->m_type == KindOfArray);
   ArrayData* a = base->m_data.parr;
-  bool copy = (a->hasMultipleRefs())
-    || (value->m_type == KindOfArray && value->m_data.parr == a);
+  bool copy = a->cowCheck() ||
+              (value->m_type == KindOfArray && value->m_data.parr == a);
   ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
   if (a2 != a) {
     auto old = base->m_data.parr;
@@ -1480,7 +1482,7 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
 template <KeyType keyType>
 inline void UnsetElemArray(TypedValue* base, key_type<keyType> key) {
   ArrayData* a = base->m_data.parr;
-  bool copy = a->hasMultipleRefs();
+  bool copy = a->cowCheck();
   ArrayData* a2 = UnsetElemArrayPre(a, key, copy);
 
   if (a2 != a) {

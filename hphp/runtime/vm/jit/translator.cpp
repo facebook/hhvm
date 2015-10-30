@@ -411,8 +411,11 @@ static const struct {
   { OpYieldK,      {StackTop2,        Stack1,       OutUnknown      }},
   { OpContCheck,   {None,             None,         OutNone         }},
   { OpContValid,   {None,             Stack1,       OutBoolean      }},
+  { OpContStarted, {None,             Stack1,       OutBoolean      }},
   { OpContKey,     {None,             Stack1,       OutUnknown      }},
   { OpContCurrent, {None,             Stack1,       OutUnknown      }},
+  { OpContGetReturn,
+                   {None,             Stack1,       OutUnknown      }},
 
   /*** 15. Async functions instructions ***/
 
@@ -436,10 +439,20 @@ static const struct {
   { OpDimInt,      {MBase,            MBase,        OutNone         }},
   { OpDimStr,      {MBase,            MBase,        OutNone         }},
   { OpDimNewElem,  {MBase,            MBase,        OutNone         }},
-  { OpQueryML,     {Local|MBase,      Stack1,       OutUnknown      }},
-  { OpQueryMC,     {Stack1|MBase,     Stack1,       OutUnknown      }},
-  { OpQueryMInt,   {MBase,            Stack1,       OutUnknown      }},
-  { OpQueryMStr,   {MBase,            Stack1,       OutUnknown      }},
+  { OpQueryML,     {BStackN|Local|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpQueryMC,     {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpQueryMInt,   {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpQueryMStr,   {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpSetML,       {Stack1|BStackN|Local|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetMC,       {Stack1|BStackN|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetMInt,     {Stack1|BStackN|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetMStr,     {Stack1|BStackN|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetMNewElem, {Stack1|MBase,     Stack1,       OutUnknown      }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;
@@ -506,6 +519,10 @@ int64_t getStackPopped(PC pc) {
     case Op::ConcatN:
     case Op::FCallBuiltin:
     case Op::CreateCl:     return getImm(pc, 0).u_IVA;
+
+    case Op::SetML:   case Op::SetMC:
+    case Op::SetMInt: case Op::SetMStr: case Op::SetMNewElem:
+      return getImm(pc, 0).u_IVA + 1;
 
     case Op::NewStructArray: return getImmVector(pc).size();
 
@@ -736,6 +753,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
         loc = ni.imm[1].u_IVA;
         break;
       case OpQueryML:
+      case OpSetML:
         loc = ni.imm[3].u_IVA;
         break;
 
@@ -891,6 +909,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::ContCurrent:
   case Op::ContKey:
   case Op::ContValid:
+  case Op::ContStarted:
+  case Op::ContGetReturn:
   case Op::CreateCl:
   case Op::DefCns:
   case Op::DefFunc:
@@ -987,6 +1007,11 @@ bool dontGuardAnyInputs(Op op) {
   case Op::QueryMC:
   case Op::QueryMInt:
   case Op::QueryMStr:
+  case Op::SetML:
+  case Op::SetMC:
+  case Op::SetMInt:
+  case Op::SetMStr:
+  case Op::SetMNewElem:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
@@ -1129,8 +1154,7 @@ Translator::Translator()
   , m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
   , m_mode(TransKind::Invalid)
   , m_profData(nullptr)
-  , m_useAHot(RuntimeOption::RepoAuthoritative &&
-              RuntimeOption::EvalJitAHotSize > 0)
+  , m_useAHot(RuntimeOption::RepoAuthoritative && CodeCache::AHotSize > 0)
 {
   initInstrInfo();
   if (RuntimeOption::EvalJitPGO) {
@@ -1261,202 +1285,6 @@ Type flavorToType(FlavorDesc f) {
   not_reached();
 }
 
-TypeConstraint constraintForInput(
-  IRGS& irgs,
-  const NormalizedInstruction& ni,
-  int32_t opndIdx,
-  Type predictedType
-) {
-  auto opc = ni.op();
-  switch (opc) {
-    case OpSetS:
-    case OpSetG:
-    case OpSetL: {
-      // stack value
-      if (opndIdx == 0) {
-        return DataTypeCountness;
-      }
-      if (opc == OpSetL) {
-        // old local value is dec-refed
-        assert(opndIdx == 1);
-        return DataTypeCountness;
-      }
-      return DataTypeSpecific;
-    }
-
-    case OpUnsetL: {
-      return DataTypeCountness;
-    }
-
-    case OpCGetL:
-    case OpVGetL:
-    case OpFPassL: {
-      return DataTypeCountnessInit;
-    }
-
-    case OpCGetL2: {
-      // Stack input isn't touched, Local input is CountnessInit.
-      return opndIdx == 0 ? DataTypeGeneric : DataTypeCountnessInit;
-    }
-
-    case OpCUGetL: {
-      return DataTypeCountness;
-    }
-
-    case OpPushL:
-    case OpContEnter:
-    case OpContRaise: {
-      return DataTypeGeneric;
-    }
-
-    case OpRetC:
-    case OpRetV: {
-      return DataTypeCountness;
-    }
-
-    case OpFCallArray: {
-      return DataTypeGeneric;
-    }
-
-    case OpPopC:
-    case OpPopV:
-    case OpPopR: {
-      return DataTypeCountness;
-    }
-
-    case OpYield:
-    case OpYieldK: {
-      // The stack input is teleported to the continuation's m_value field
-      return DataTypeGeneric;
-    }
-
-    case OpAddElemC: {
-      // The stack input is teleported to the array
-      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
-    }
-
-    case OpIdx: {
-      // Default value is Generic, key is Specific, and base is more
-      // complicated.
-      if (opndIdx == 0) return DataTypeGeneric;
-      if (opndIdx == 1) return DataTypeSpecific;
-
-      auto baseType = irgen::predictedTypeFromLocation(irgs, ni.inputs[2]);
-      auto keyType = irgen::predictedTypeFromLocation(irgs, ni.inputs[1]);
-      return irgen::idxBaseConstraint(baseType, keyType);
-    }
-
-    case OpArrayIdx: {
-      // The default value (w/ opndIdx 0) is simply passed to a helper,
-      // which takes care of dec-refing it if needed
-      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
-    }
-
-    case OpNewPackedArray: {
-      return DataTypeGeneric;
-    }
-
-    case OpIterInit:
-    case OpIterInitK:
-    case OpMIterInit:
-    case OpMIterInitK:
-    case OpWIterInit:
-    case OpWIterInitK: {
-      // We care about the type of the stack input but not the locals.
-      return opndIdx == 0 ? DataTypeSpecific : DataTypeGeneric;
-    }
-
-    case OpIterNext:
-    case OpIterNextK:
-    case OpMIterNext:
-    case OpMIterNextK:
-    case OpWIterNext:
-    case OpWIterNextK: {
-      // Don't care about local input types; all we do is pass their address to
-      // helpers.
-      return DataTypeGeneric;
-    }
-
-    default: {
-      break;
-    }
-  }
-
-  if (hasMVector(opc) && opndIdx == getMInstrInfo(ni.mInstrOp()).valCount()) {
-    return irgen::mInstrBaseConstraint(irgs, predictedType);
-  }
-
-  return DataTypeSpecific;
-}
-
-void emitInputChecks(
-  IRGS& irgs,
-  const NormalizedInstruction& ni,
-  bool checkOuterTypeOnly
-) {
-  FTRACE(4, "\n{}: {}\n", ni.offset(), opcodeToName(ni.op()));
-  if (isAlwaysNop(ni.op())) return;
-
-  for (auto i = 0; i < ni.inputs.size(); ++i) {
-    FTRACE(4, "Input {}: ", i);
-    auto loc = ni.inputs[i];
-    if (!loc.isLocal() && !loc.isStack()) {
-      FTRACE(4, "!isLocal && !isStack, skipping\n");
-      continue;
-    }
-    auto const predictedType = irgen::predictedTypeFromLocation(irgs, loc);
-    FTRACE(4, "predicted {}\n", predictedType);
-
-    if (!(predictedType <= TGen) && !(predictedType <= TCls)) {
-      FTRACE(4, "predictedType ({}) !<= TGen|TCls, skipping\n", predictedType);
-      continue;
-    }
-
-    assertx(predictedType != TBottom);
-
-    auto typeToCheck = predictedType <= TCls
-      ? predictedType
-      : relaxType(predictedType,
-                  constraintForInput(irgs, ni, i, predictedType).category);
-
-    // Make sure typeToCheck is checkable.
-    if (!(typeToCheck <= TCell || typeToCheck <= TBoxedInitCell)) {
-      FTRACE(4, "typeToCheck isn't checkable, skipping\n");
-      continue;
-    }
-
-    if (typeToCheck == TCountedStr) {
-      FTRACE(4, "typeToCheck is CountedStr, widening to Str\n");
-      typeToCheck = TStr;
-    } else if (typeToCheck <= TStaticArr) {
-      FTRACE(4, "typeToCheck is StaticArr, widening to Arr\n");
-      typeToCheck = TArr;
-    } else if (typeToCheck.clsSpec() &&
-        !(typeToCheck.clsSpec().cls()->attrs() & AttrNoOverride)) {
-      FTRACE(4, "class specialization could be overridden, widening to Obj\n");
-      typeToCheck = TObj;
-    } else if (typeToCheck.arrSpec() && typeToCheck.arrSpec().type()) {
-      FTRACE(4, "array specialization is RAT, widening to Arr\n");
-      typeToCheck = TArr;
-    }
-
-    if (loc.isLocal()) {
-      FTRACE(4, "Checking local {} for type {}\n", loc.offset, typeToCheck);
-      irgen::checkTypeLocal(irgs, loc.offset, typeToCheck, ni.source.offset(),
-        checkOuterTypeOnly);
-    } else {
-      FTRACE(4, "Checking stack offset {} for type {}\n",
-          loc.bcRelOffset.offset, typeToCheck);
-      irgen::checkTypeStack(irgs, loc.bcRelOffset, typeToCheck,
-        ni.source.offset(), checkOuterTypeOnly);
-    }
-  }
-  // Calling checkTypeStack with a Type t such that t <= BoxedCell causes us to
-  // spill the stack, so we need to sync the stack with an exception stack
-  // boundary here.
-  irgs.irb->exceptionStackBoundary();
-}
-
 }
 
 void translateInstr(
@@ -1487,16 +1315,14 @@ void translateInstr(
     irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
   }
 
-  if (RuntimeOption::EvalHHIRConstrictGuards) {
-    emitInputChecks(irgs, ni, checkOuterTypeOnly);
-    if (firstInst) irgen::gen(irgs, EndGuards);
-  }
-
   FTRACE(1, "\nTranslating {}: {} with state:\n{}\n",
          ni.offset(), ni, show(irgs));
 
   irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(irgs, Stats::Instr_TC, 1);
+  if (Stats::enableInstrCount()) {
+    irgen::emitIncStat(irgs, Stats::opToTranslStat(ni.op()), 1);
+  }
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
     irgen::gen(irgs, CountBytecode);

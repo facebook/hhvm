@@ -415,6 +415,7 @@ bool canDCE(IRInstruction* inst) {
   case ContPreNext:
   case ContStartedCheck:
   case ContValid:
+  case ContStarted:
   case ContArIncKey:
   case ContArIncIdx:
   case ContArUpdateIdx:
@@ -472,6 +473,7 @@ bool canDCE(IRInstruction* inst) {
   case IssetProp:
   case ElemX:
   case ElemArray:
+  case ElemArrayD:
   case ElemArrayW:
   case ElemDX:
   case ElemUX:

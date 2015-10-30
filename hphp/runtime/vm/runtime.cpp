@@ -67,10 +67,9 @@ void print_boolean(bool val) {
  * and decref its first argument
  */
 StringData* concat_ss(StringData* v1, StringData* v2) {
-  if (v1->hasMultipleRefs()) {
+  if (v1->cowCheck()) {
     StringData* ret = StringData::Make(v1, v2);
-    // Because v1->getCount() is greater than 1, we know we will never
-    // have to release the string here
+    // Because v1 was shared, we know this won't release the string.
     v1->decRefCount();
     return ret;
   }
@@ -101,11 +100,10 @@ StringData* concat_is(int64_t v1, StringData* v2) {
 StringData* concat_si(StringData* v1, int64_t v2) {
   char intbuf[21];
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
-  if (v1->hasMultipleRefs()) {
+  if (v1->cowCheck()) {
     auto const s1 = v1->slice();
     auto const ret = StringData::Make(s1, s2);
-    // Because v1->getCount() is greater than 1, we know we will never
-    // have to release the string here
+    // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
@@ -119,11 +117,10 @@ StringData* concat_si(StringData* v1, int64_t v2) {
 }
 
 StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
-  if (v1->hasMultipleRefs()) {
+  if (v1->cowCheck()) {
     StringData* ret = StringData::Make(
       v1->slice(), v2->slice(), v3->slice());
-    // Because v1->getCount() is greater than 1, we know we will never
-    // have to release the string here
+    // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
@@ -139,11 +136,10 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
 
 StringData* concat_s4(StringData* v1, StringData* v2,
                       StringData* v3, StringData* v4) {
-  if (v1->hasMultipleRefs()) {
+  if (v1->cowCheck()) {
     StringData* ret = StringData::Make(
         v1->slice(), v2->slice(), v3->slice(), v4->slice());
-    // Because v1->getCount() is greater than 1, we know we will never
-    // have to release the string here
+    // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
@@ -172,10 +168,20 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
   return g_hphp_build_native_class_unit(builtinClasses, numBuiltinClasses);
 }
 
+std::string mangleSystemMd5(const std::string& fileMd5) {
+  // This resembles mangleUnitMd5(...), however, only settings that HHBBC is
+  // aware of may be used here or it will be unable to load systemlib!
+  std::string t = fileMd5 + '\0'
+    + (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
+    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    ;
+  return string_md5(t.c_str(), t.size());
+}
+
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname /* = nullptr */) {
-  auto md5string = string_md5(s, sz);
+  auto md5string = mangleSystemMd5(string_md5(s, sz));
   MD5 md5(md5string.c_str());
   Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
   if (u != nullptr) {
@@ -191,7 +197,9 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
                                const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
     String systemName = String("/:") + String(fname);
-    MD5 md5;
+    MD5 md5 {
+      mangleSystemMd5(string_md5(s, sz)).c_str()
+    };
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
                              md5)) {

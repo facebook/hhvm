@@ -54,7 +54,6 @@
 #endif
 
 #ifdef TSRM_WIN32
-#include "readdir.h"
 #include <sys/utime.h>
 /* mode_t isn't defined on Windows */
 typedef unsigned short mode_t;
@@ -118,13 +117,7 @@ typedef unsigned short mode_t;
 #define CWD_EXPORTS
 #endif
 
-#ifdef TSRM_WIN32
-#  ifdef CWD_EXPORTS
-#    define CWD_API __declspec(dllexport)
-#  else
-#    define CWD_API __declspec(dllimport)
-#  endif
-#elif defined(__GNUC__) && __GNUC__ >= 4
+#if defined(__GNUC__) && __GNUC__ >= 4
 #  define CWD_API __attribute__ ((__visibility__("default")))
 #else
 #  define CWD_API

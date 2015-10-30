@@ -427,7 +427,7 @@ class BaseVector : public ExtCollectionObjectData {
    */
   bool canMutateBuffer() const {
     assert(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
-    return m_capacity == 0 || !arrayData()->hasMultipleRefs();
+    return m_capacity == 0 || !arrayData()->cowCheck();
   }
 
   /**
@@ -437,7 +437,7 @@ class BaseVector : public ExtCollectionObjectData {
    * this Vector's buffer if needed.
    */
   void mutate() {
-    if (arrayData()->hasMultipleRefs()) {
+    if (arrayData()->cowCheck()) {
       // mutateImpl() does two things for us. First it drops the the
       // immutable collection held by m_immCopy (if m_immCopy is not
       // null). Second, it takes care of copying the buffer if needed.
@@ -893,8 +893,8 @@ struct HashCollection : ExtCollectionObjectData {
    * modify this HashCollection's buffer.
    */
   bool canMutateBuffer() const {
-    assert(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
-    return !arrayData()->hasMultipleRefs();
+    assert(IMPLIES(!arrayData()->cowCheck(), m_immCopy.isNull()));
+    return !arrayData()->cowCheck();
   }
 
   static constexpr ptrdiff_t arrOffset() {
@@ -1178,7 +1178,7 @@ struct HashCollection : ExtCollectionObjectData {
    */
   void mutate() {
     assert(IMPLIES(!m_immCopy.isNull(), arrayData()->hasMultipleRefs()));
-    if (arrayData()->hasMultipleRefs()) {
+    if (arrayData()->cowCheck()) {
       // mutateImpl() does two things for us. First it drops the the
       // immutable collection held by m_immCopy (if m_immCopy is not
       // null). Second, it takes care of copying the buffer if needed.

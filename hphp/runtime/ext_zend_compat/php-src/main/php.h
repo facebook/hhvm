@@ -45,13 +45,7 @@
 #define PHP_DEBUG ZEND_DEBUG
 
 #ifdef PHP_WIN32
-#  include "tsrm_win32.h"
-#  include "win95nt.h"
-#  ifdef PHP_EXPORTS
-#    define PHPAPI __declspec(dllexport)
-#  else
-#    define PHPAPI __declspec(dllimport)
-#  endif
+#  define PHPAPI
 #  define PHP_DIR_SEPARATOR '\\'
 #  define PHP_EOL "\r\n"
 #else

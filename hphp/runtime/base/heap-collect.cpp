@@ -33,62 +33,6 @@ using HK = HeaderKind;
 
 namespace {
 
-// information about heap objects, indexed by valid object starts.
-struct PtrMap {
-  void insert(const Header* h) {
-    assert(!sorted_);
-    regions_.emplace_back(h, h->size());
-  }
-  const Header* header(const void* p) const {
-    assert(sorted_);
-    // Find the first region which begins beyond p.
-    auto it =
-      std::upper_bound(
-        regions_.begin(),
-        regions_.end(),
-        p,
-        [](const void* p,
-           const std::pair<const Header*, std::size_t>& region) {
-          return p < region.first;
-        }
-      );
-    // If its the first region, p is before any region, so there's no
-    // header. Otherwise, backup to the previous region.
-    if (it == regions_.begin()) return nullptr;
-    --it;
-    // p can only potentially point within this previous region, so check that.
-    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ?
-      it->first : nullptr;
-  }
-  bool isHeader(const void* p) const {
-    auto h = header(p);
-    return h && h == p;
-  }
-
-  void prepare() {
-    assert(!sorted_);
-    std::sort(regions_.begin(), regions_.end());
-    assert(sanityCheck());
-    sorted_ = true;
-  }
-private:
-  bool sanityCheck() const {
-    // Verify that all the regions are in increasing and non-overlapping order.
-    void* last = nullptr;
-    for (const auto& region : regions_) {
-      if (!last || last <= region.first) {
-        last = (void*)(uintptr_t(region.first) + region.second);
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  std::vector<std::pair<const Header*, std::size_t>> regions_;
-  bool sorted_ = false;
-};
-
 struct Counter {
   size_t count{0};
   size_t bytes{0};
@@ -135,6 +79,11 @@ struct Marker {
   void operator()(const AsioContext& p) { scanner().scan(p, *this); }
   void operator()(const VarEnv& venv) { (*this)(&venv); }
 
+  // treat implicit pointers the same as real pointers
+  void implicit(const ObjectData* p) { (*this)(p); }
+  void implicit(const ResourceHdr* p) { (*this)(p); }
+  void implicit(const Array& p) { (*this)(p); }
+
   template<class T> void operator()(const req::ptr<T>& p) {
     (*this)(p.get());
   }
@@ -143,6 +92,9 @@ struct Marker {
   }
   template<class T> void operator()(const req::set<T>& c) {
     for (auto& e : c) (*this)(e);
+  }
+  template<class T> void implicit(const req::set<T>& c) {
+    for (auto& e : c) implicit(e);
   }
   template<class T,class U> void operator()(const std::pair<T,U>& p) {
     (*this)(p.first);
@@ -184,7 +136,7 @@ struct Marker {
 
 private:
   template<class T> static bool counted(T* p) {
-    return p && p->getCount() >= 0;
+    return p && p->isRefCounted();
   }
   bool mark(const void*);
   bool inRds(const void* vp) {
@@ -648,9 +600,7 @@ void Marker::sweep() {
 
 void MemoryManager::collect(const char* phase) {
   if (!RuntimeOption::EvalEnableGC || empty()) return;
-  if (Trace::moduleEnabled(Trace::heapreport)) {
-    printHeapReport(makeHeapGraph(), phase);
-  }
+  if (debug) checkHeap(phase);
   Marker mkr;
   mkr.init();
   mkr.trace();

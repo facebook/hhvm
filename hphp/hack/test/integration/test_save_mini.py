@@ -4,20 +4,20 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import common_tests
 import os
+import stat
 import subprocess
 import unittest
 
 from hh_paths import hh_server, hh_client
-from utils import touch, proc_call, test_env
 
 class TestSaveMiniState(common_tests.CommonSaveStateTests, unittest.TestCase):
     @classmethod
     def save_command(cls, init_dir):
-        subprocess.call([
+        cls.proc_call([
             hh_server,
             '--check', init_dir,
             '--save-mini', cls.saved_state_path()
-        ], env=test_env)
+        ])
 
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
@@ -51,7 +51,7 @@ echo %s
     def check_cmd(self, expected_output, stdin=None, options=None):
         options = [] if options is None else options
         root = self.repo_dir + os.path.sep
-        output = proc_call([
+        output = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -60,7 +60,9 @@ echo %s
             ] + list(map(lambda x: x.format(root=root), options)),
             env={'HH_LOCALCONF_PATH': self.repo_dir},
             stdin=stdin)
-        log_file = proc_call([hh_client, '--logname', self.repo_dir]).strip()
+        log_file = self.proc_call([
+            hh_client, '--logname', self.repo_dir
+            ]).strip()
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Mini-state loading worker took', logs)
@@ -77,7 +79,7 @@ echo %s
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
 
-        output = proc_call([
+        output = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -88,7 +90,9 @@ echo %s
 
         self.assertEqual(output.strip(), 'No errors!')
 
-        log_file = proc_call([hh_client, '--logname', self.repo_dir]).strip()
+        log_file = self.proc_call([
+            hh_client, '--logname', self.repo_dir
+            ]).strip()
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Could not load mini state', logs)
@@ -110,8 +114,32 @@ load_mini_script = %s
         # this should start a new server
         self.check_cmd(['No errors!'])
         # check how the old one exited
-        log_file =\
-            proc_call([hh_client, '--logname', self.repo_dir]).strip() + '.old'
+        log_file = self.proc_call([
+            hh_client, '--logname', self.repo_dir]).strip() + '.old'
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('.hhconfig changed in an incompatible way', logs)
+
+    def test_watchman_timeout(self):
+        self.write_load_config()
+
+        with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
+            f.write(r"""
+use_watchman_2 = true
+watchman_init_timeout = 1
+""")
+
+        with open(os.path.join(self.tmp_dir, 'watchman'), 'w') as f:
+            f.write(r"""sleep 2""")
+            os.fchmod(f.fileno(), stat.S_IRWXU)
+
+        self.check_cmd(['No errors!'])
+        # Stop the server, ensuring that its logs get flushed
+        self.proc_call([hh_client, 'stop', self.repo_dir])
+        self.assertIn('Watchman.Timeout', self.get_server_logs())
+
+        self.check_cmd(['No errors!'])
+        # Stop the server, ensuring that its logs get flushed
+        self.proc_call([hh_client, 'stop', self.repo_dir])
+        self.assertIn('Watchman failed recently, falling back to dfind',
+                self.get_server_logs())

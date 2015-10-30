@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/server/static-content-cache.h"
-#include "hphp/system/constants.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"

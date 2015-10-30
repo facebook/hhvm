@@ -174,6 +174,7 @@ struct AsioSession final {
 
   template<class F> void scan(F& mark) const {
     for (auto cxt : m_contexts) cxt->scan(mark);
+    // TODO: #7930461 add list of externalThreadEvents that not in any context
     for (auto wh : m_sleepEvents) mark(wh);
     m_externalThreadEventQueue.scan(mark);
     mark(m_abruptInterruptException);

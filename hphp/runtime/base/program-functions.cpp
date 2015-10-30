@@ -50,7 +50,6 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
@@ -77,7 +76,6 @@
 #include "hphp/util/code-cache.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"
-#include "hphp/util/current-executable.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/hardware-counter.h"
 #ifndef _MSC_VER
@@ -202,11 +200,6 @@ const StaticString
   s_HOSTNAME("HOSTNAME"),
   s__SERVER("_SERVER"),
   s__ENV("_ENV");
-
-String k_PHP_BINARY;
-String k_PHP_BINDIR;
-String k_PHP_OS;
-String k_PHP_SAPI;
 
 static __thread bool s_sessionInitialized{false};
 
@@ -1926,12 +1919,6 @@ void hphp_process_init() {
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
   BootTimer::mark("xenon");
 
-  // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
-  k_PHP_BINARY = makeStaticString(current_executable_path());
-  k_PHP_BINDIR = makeStaticString(current_executable_directory());
-  k_PHP_OS = makeStaticString(HHVM_FN(php_uname)("s").toString());
-  k_PHP_SAPI = makeStaticString(RuntimeOption::ExecutionMode);
-
   ClassInfo::Load();
   BootTimer::mark("ClassInfo::Load");
 
@@ -2088,6 +2075,13 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   bool isServer = RuntimeOption::ServerExecutionMode();
   error = false;
 
+  // Make sure we have the right current working directory within the repo
+  // based on what server.source_root was set to (current process directory
+  // being the default)
+  if (RuntimeOption::RepoAuthoritative) {
+    context->setCwd(RuntimeOption::SourceRoot);
+  }
+
   String oldCwd;
   if (isServer) {
     oldCwd = context->getCwd();
@@ -2163,6 +2157,7 @@ void hphp_context_exit(bool shutdown /* = true */) {
   }
 
   // Clean up a bunch of request state. No user code after this point.
+  MemoryManager::setExiting();
   auto const context = g_context.getNoCheck();
   context->requestExit();
   context->obProtect(false);

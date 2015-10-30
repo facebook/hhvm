@@ -33,7 +33,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/alignment.h"
-#include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -165,7 +164,6 @@ public:
 
   DataBlock& globalData() { return code.data(); }
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
-  BackEnd& backEnd() { return *m_backEnd; }
 
   TcaTransIDMap& getJmpToTransIDMap() {
     return m_jmpToTransID;
@@ -379,7 +377,6 @@ private:
   void drawCFG(std::ofstream& out) const;
 
 private:
-  std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
 
   // maps jump addresses to the ID of translation containing them.

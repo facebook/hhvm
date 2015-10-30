@@ -35,11 +35,16 @@ static int64_t HHVM_FUNCTION(gc_collect_cycles) {
   return 0; // seriously, count cycles?
 }
 
+static void HHVM_FUNCTION(gc_check_heap) {
+  MM().checkHeap("gc_check_heap");
+}
+
 void StandardExtension::initGc() {
   HHVM_FE(gc_enabled);
   HHVM_FE(gc_enable);
   HHVM_FE(gc_disable);
   HHVM_FE(gc_collect_cycles);
+  HHVM_FE(gc_check_heap);
   loadSystemlib("std_gc");
 }
 

@@ -134,10 +134,10 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
   return *result;
 }
 
-template <KeyType keyType, bool isObj>
+template <KeyType keyType, bool isObj, bool warn>
 TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Prop<true, false, false, isObj, keyType>(
+  auto result = Prop<warn, false, false, isObj, keyType>(
     localTvRef,
     ctx,
     base,
@@ -146,16 +146,20 @@ TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   return cGetRefShuffle(localTvRef, result);
 }
 
-#define CGETPROP_HELPER_TABLE(m)          \
-  /* name         keyType       isObj */  \
-  m(cGetPropC,    KeyType::Any, false)    \
-  m(cGetPropCO,   KeyType::Any,  true)    \
-  m(cGetPropS,    KeyType::Str, false)    \
-  m(cGetPropSO,   KeyType::Str,  true)
+#define CGETPROP_HELPER_TABLE(m)                      \
+  /* name             keyType       isObj   attrs */  \
+  m(cGetPropCQuiet,  KeyType::Any, false,  None)      \
+  m(cGetPropCOQuiet, KeyType::Any,  true,  None)      \
+  m(cGetPropSQuiet,  KeyType::Str, false,  None)      \
+  m(cGetPropSOQuiet, KeyType::Str,  true,  None)      \
+  m(cGetPropC,       KeyType::Any, false,  Warn)      \
+  m(cGetPropCO,      KeyType::Any,  true,  Warn)      \
+  m(cGetPropS,       KeyType::Str, false,  Warn)      \
+  m(cGetPropSO,      KeyType::Str,  true,  Warn)
 
-#define X(nm, kt, isObj)                                               \
+#define X(nm, kt, isObj, attrs)                                        \
 inline TypedValue nm(Class* ctx, TypedValue* base, key_type<kt> key) { \
-  return cGetPropImpl<kt, isObj>(ctx, base, key);                      \
+  return cGetPropImpl<kt, isObj, (attrs) & MIA_warn>(ctx, base, key);  \
 }
 CGETPROP_HELPER_TABLE(X)
 #undef X
@@ -441,7 +445,23 @@ inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   return ret ? ret : elemArrayNotFound<warn>(key);
 }
 
-#define ELEM_ARRAY_HELPER_TABLE(m)                                  \
+#define ELEM_ARRAY_D_HELPER_TABLE(m) \
+  /* name                keyType */  \
+  m(elemArraySD,    KeyType::Str)    \
+  m(elemArrayID,    KeyType::Int)    \
+
+#define X(nm, keyType)                                                 \
+inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
+  auto cbase = tvToCell(base);                                         \
+  assertx(isArrayType(cbase->m_type));                                 \
+  auto constexpr warn  = false;                                        \
+  auto constexpr reffy = false;                                        \
+  return ElemDArray<warn, reffy, keyType>(cbase, key);                 \
+}
+ELEM_ARRAY_D_HELPER_TABLE(X)
+#undef X
+
+#define ELEM_ARRAY_HELPER_TABLE(m)                      \
   /* name               keyType  checkForInt   warn */  \
   m(elemArrayS,    KeyType::Str,       false,  false)   \
   m(elemArraySi,   KeyType::Str,        true,  false)   \
@@ -485,22 +505,25 @@ ARRAYGET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType>
+template <KeyType keyType, bool warn>
 TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Elem<true, keyType>(localTvRef, base, key);
+  auto result = Elem<warn, keyType>(localTvRef, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
-#define CGETELEM_HELPER_TABLE(m)                \
-  /* name       key  */                         \
-  m(cGetElemC,  KeyType::Any)                   \
-  m(cGetElemI,  KeyType::Int)                   \
-  m(cGetElemS,  KeyType::Str)
+#define CGETELEM_HELPER_TABLE(m)               \
+  /* name            key          attrs  */    \
+  m(cGetElemCQuiet, KeyType::Any, None)        \
+  m(cGetElemIQuiet, KeyType::Int, None)        \
+  m(cGetElemSQuiet, KeyType::Str, None)        \
+  m(cGetElemC,      KeyType::Any, Warn)        \
+  m(cGetElemI,      KeyType::Int, Warn)        \
+  m(cGetElemS,      KeyType::Str, Warn)
 
-#define X(nm, kt)                                                       \
+#define X(nm, kt, attrs)                                                \
 inline TypedValue nm(TypedValue* base, key_type<kt> key) {              \
-  return cGetElemImpl<kt>(base, key);                                   \
+  return cGetElemImpl<kt, (attrs) & MIA_warn>(base, key);               \
 }
 CGETELEM_HELPER_TABLE(X)
 #undef X
@@ -571,7 +594,7 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
   assertx(cellIsPlausible(value));
-  const bool copy = a->hasMultipleRefs();
+  const bool copy = a->cowCheck();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);

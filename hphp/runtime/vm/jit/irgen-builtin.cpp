@@ -1441,10 +1441,12 @@ void implMapIdx(IRGS& env) {
 }
 
 void implGenericIdx(IRGS& env) {
-  auto const def = popC(env);
-  auto const key = popC(env);
-  auto const arr = popC(env);
-  push(env, gen(env, GenericIdx, arr, key, def));
+  auto const stkptr = sp(env);
+  auto const spOff = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
+  auto const def = popC(env, DataTypeSpecific);
+  auto const key = popC(env, DataTypeSpecific);
+  auto const arr = popC(env, DataTypeSpecific);
+  push(env, gen(env, GenericIdx, spOff, arr, key, def, stkptr));
   gen(env, DecRef, arr);
   gen(env, DecRef, key);
   gen(env, DecRef, def);

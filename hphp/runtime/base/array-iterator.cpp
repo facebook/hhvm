@@ -841,7 +841,7 @@ ArrayData* MArrayIter::cowCheck() {
   if (hasRef()) {
     auto data = getData();
     if (!data) return nullptr;
-    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
+    if (data->cowCheck() && !data->noCopyOnWrite()) {
       data = data->copyWithStrongIterators();
       cellMove(make_tv<KindOfArray>(data), *getRef()->tv());
     }
@@ -850,7 +850,7 @@ ArrayData* MArrayIter::cowCheck() {
 
   assert(hasAd());
   auto const data = getAd();
-  if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
+  if (data->cowCheck() && !data->noCopyOnWrite()) {
     ArrayData* copied = data->copyWithStrongIterators();
     assert(data != copied);
     decRefArr(data);
@@ -1091,7 +1091,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
 
 static NEVER_INLINE
 int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
-  assert(arr->hasExactlyOneRef());
+  assert(arr->decWillRelease());
   assert(arr->isPacked());
   // Use non-specialized release call so ArrayTracer can track its destruction
   arr->release();
@@ -1103,7 +1103,7 @@ int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
 
 static NEVER_INLINE
 int64_t iter_next_free_struct(Iter* iter, ArrayData* arr) {
-  assert(arr->hasExactlyOneRef());
+  assert(arr->decWillRelease());
   assert(arr->isStruct());
   // Use non-specialized release call so ArrayTracer can track its destruction
   arr->release();
@@ -1116,7 +1116,7 @@ int64_t iter_next_free_struct(Iter* iter, ArrayData* arr) {
 static NEVER_INLINE
 int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
   assert(arr->isMixed());
-  assert(arr->hasExactlyOneRef());
+  assert(arr->decWillRelease());
   // Use non-specialized release call so ArrayTracer can track its destruction
   arr->release();
   if (debug) {
@@ -1127,7 +1127,7 @@ int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
 
 NEVER_INLINE
 static int64_t iter_next_free_apc(Iter* iter, APCLocalArray* arr) {
-  assert(arr->hasExactlyOneRef());
+  assert(arr->decWillRelease());
   APCLocalArray::Release(arr->asArrayData());
   if (debug) {
     iter->arr().setIterType(ArrayIter::TypeUndefined);
@@ -1170,7 +1170,7 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   if (UNLIKELY(ad->getSize() == 0)) {
-    if (UNLIKELY(ad->hasExactlyOneRef())) {
+    if (UNLIKELY(ad->decWillRelease())) {
       if (ad->isPacked()) return iter_next_free_packed(dest, ad);
       if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
       if (ad->isStruct()) return iter_next_free_struct(dest, ad);
@@ -1228,7 +1228,7 @@ int64_t new_iter_array_key(Iter*       dest,
                            TypedValue* valOut,
                            TypedValue* keyOut) {
   if (UNLIKELY(ad->getSize() == 0)) {
-    if (UNLIKELY(ad->hasExactlyOneRef())) {
+    if (UNLIKELY(ad->decWillRelease())) {
       if (ad->isPacked()) return iter_next_free_packed(dest, ad);
       if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
       if (ad->isStruct()) return iter_next_free_struct(dest, ad);
@@ -1515,7 +1515,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   auto const arr = APCLocalArray::asApcArray(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
   if (UNLIKELY(pos == ad->getSize())) {
-    if (UNLIKELY(arr->hasExactlyOneRef())) {
+    if (UNLIKELY(arr->decWillRelease())) {
       return iter_next_free_apc(iter, arr);
     }
     arr->decRefCount();
@@ -1569,7 +1569,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     if (LIKELY(isPacked)) {
       ssize_t pos = arrIter->getPos() + 1;
       if (size_t(pos) >= size_t(ad->getSize())) {
-        if (UNLIKELY(ad->hasExactlyOneRef())) {
+        if (UNLIKELY(ad->decWillRelease())) {
           return iter_next_free_packed(iter, ad);
         }
         ad->decRefCount();
@@ -1596,7 +1596,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     if (isStruct) {
       ssize_t pos = arrIter->getPos() + 1;
       if (size_t(pos) >= size_t(ad->getSize())) {
-        if (UNLIKELY(ad->hasExactlyOneRef())) {
+        if (UNLIKELY(ad->decWillRelease())) {
           return iter_next_free_struct(iter, ad);
         }
         ad->decRefCount();
@@ -1627,7 +1627,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     do {
       ++pos;
       if (size_t(pos) >= size_t(mixed->iterLimit())) {
-        if (UNLIKELY(mixed->hasExactlyOneRef())) {
+        if (UNLIKELY(mixed->decWillRelease())) {
           return iter_next_free_mixed(iter, mixed->asArrayData());
         }
         mixed->decRefCount();
@@ -1769,7 +1769,7 @@ int64_t iter_next_mixed_impl(Iter* it,
 
   do {
     if (size_t(++pos) >= size_t(arr->iterLimit())) {
-      if (UNLIKELY(arr->hasExactlyOneRef())) {
+      if (UNLIKELY(arr->decWillRelease())) {
         return iter_next_free_mixed(it, arr->asArrayData());
       }
       arr->decRefCount();
@@ -1782,13 +1782,13 @@ int64_t iter_next_mixed_impl(Iter* it,
 
 
   if (isRefcountedType(valOut->m_type)) {
-    if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
+    if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
     TV_GENERIC_DISPATCH(*valOut, decRefCount);
   }
   if (HasKey && isRefcountedType(keyOut->m_type)) {
-    if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
+    if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
     TV_GENERIC_DISPATCH(*keyOut, decRefCount);
@@ -1817,13 +1817,13 @@ int64_t iter_next_packed_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (isRefcountedType(valOut->m_type)) {
-      if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
+      if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
       TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
-      if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
+      if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
       TV_GENERIC_DISPATCH(*keyOut, decRefCount);
@@ -1838,7 +1838,7 @@ int64_t iter_next_packed_impl(Iter* it,
   }
 
   // Finished iterating---we need to free the array.
-  if (UNLIKELY(ad->hasExactlyOneRef())) {
+  if (UNLIKELY(ad->decWillRelease())) {
     return iter_next_free_packed(it, ad);
   }
   ad->decRefCount();
@@ -1861,13 +1861,13 @@ int64_t iter_next_struct_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (isRefcountedType(valOut->m_type)) {
-      if (UNLIKELY(!TV_GENERIC_DISPATCH(*valOut, hasMultipleRefs))) {
+      if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
       TV_GENERIC_DISPATCH(*valOut, decRefCount);
     }
     if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
-      if (UNLIKELY(!TV_GENERIC_DISPATCH(*keyOut, hasMultipleRefs))) {
+      if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
       TV_GENERIC_DISPATCH(*valOut, decRefCount);
@@ -1884,7 +1884,7 @@ int64_t iter_next_struct_impl(Iter* it,
   }
 
   // Finished iterating---we need to free the array.
-  if (UNLIKELY(ad->hasExactlyOneRef())) {
+  if (UNLIKELY(ad->decWillRelease())) {
     return iter_next_free_struct(it, ad);
   }
   ad->decRefCount();

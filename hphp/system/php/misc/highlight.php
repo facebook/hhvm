@@ -1,5 +1,9 @@
 <?php
 
+function show_source($filename, $return = false) {
+  return highlight_file($filename, $return);
+}
+
 function highlight_file($filename, $return = false) {
   $data = file_get_contents($filename);
   if ($data === false) {
@@ -86,6 +90,7 @@ function __HPHP_highlight_get_color($colors, $type) {
     case T_CONSTANT_ENCAPSED_STRING:
       return $colors['string'];
 
+    case T_FILE:
     case T_STRING:
     case T_VARIABLE:
     case T_DNUMBER:

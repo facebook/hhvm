@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_UNIQUE_STUBS_X64_H_
 #define incl_HPHP_JIT_UNIQUE_STUBS_X64_H_
 
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -50,6 +51,8 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us);
 TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us);
 TCA emitCallToExit(CodeBlock& cb);
 TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us);
+
+void enterTCImpl(TCA start, ActRec* stashedAR);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -22,6 +22,7 @@
 
 #include <squangle/mysql_client/AsyncMysqlClient.h>
 #include <squangle/mysql_client/AsyncConnectionPool.h>
+#include <squangle/mysql_client/SSLOptionsProviderBase.h>
 #include <squangle/mysql_client/Row.h>
 
 #include <squangle/logger/DBEventCounter.h>
@@ -121,6 +122,32 @@ class AsyncMysqlConnection {
 
   static Class* s_class;
   static const StaticString s_className;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class MySSLContext
+
+class MySSLContextProvider {
+ public:
+  MySSLContextProvider() {}
+  explicit MySSLContextProvider(
+      std::shared_ptr<am::SSLOptionsProviderBase> provider);
+
+  MySSLContextProvider& operator=(const MySSLContextProvider& that_) {
+    m_provider = that_.m_provider;
+    return *this;
+  }
+
+  static Object newInstance(
+      std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider);
+  static Class* getClass();
+  std::shared_ptr<am::SSLOptionsProviderBase>& getSSLProvider();
+  void setSSLProvider(std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider);
+
+  static Class* s_class;
+  static const StaticString s_className;
+
+  std::shared_ptr<am::SSLOptionsProviderBase> m_provider;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

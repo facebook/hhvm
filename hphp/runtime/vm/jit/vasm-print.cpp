@@ -219,7 +219,7 @@ std::string show(Vreg r) {
   if (!r.isValid()) return "%?";
   std::ostringstream str;
   if (r.isPhys()) {
-    mcg->backEnd().streamPhysReg(str, r);
+    str << show(r.physReg());
   } else {
     str << "%" << size_t(r);
   }

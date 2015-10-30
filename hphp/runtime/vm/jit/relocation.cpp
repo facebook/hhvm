@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/align.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 

@@ -2590,7 +2590,7 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
         switch (propElem) {
           case PropElemOp::Prop:
           case PropElemOp::PropQ:
-            return gen(env, IssetProp, basePtr, key);
+            return gen(env, IssetProp, objBase, key);
           case PropElemOp::Elem:
             auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
             return emitIssetElem(env, realBase, key, simpleOp);
@@ -2600,7 +2600,7 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
         switch (propElem) {
           case PropElemOp::Prop:
           case PropElemOp::PropQ:
-            return gen(env, EmptyProp, basePtr, key);
+            return gen(env, EmptyProp, objBase, key);
           case PropElemOp::Elem:
             return gen(env, EmptyElem, basePtr, key);
         }
@@ -2688,7 +2688,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     gen(env, StMem, propPtr, value);
     gen(env, DecRef, oldVal);
   } else {
-    gen(env, SetProp, makeCatchSet(env), basePtr, key, value);
+    gen(env, SetProp, makeCatchSet(env), base, key, value);
   }
 
   return value;

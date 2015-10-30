@@ -503,17 +503,15 @@ inline TypedValue* ElemUArrayImpl<KeyType::Any>(Array& base, TypedValue key) {
  * ElemU when base is an Array
  */
 template <KeyType keyType>
-inline TypedValue* ElemUArray(TypedValue& tvRef,
-                              TypedValue* base,
-                              key_type<keyType> key) {
+inline TypedValue* ElemUArray(TypedValue* base, key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
-  bool defined = baseArr.exists(keyAsValue(key));
-  if (defined) {
+  if (baseArr.exists(keyAsValue(key))) {
     return ElemUArrayImpl<keyType>(baseArr, key);
   }
 
-  tvWriteNull(&tvRef);
-  return &tvRef;
+  // Unset{Elem,Prop} do nothing when the base is InitNull, so this sketchy but
+  // should be okay.
+  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
 }
 
 /**
@@ -553,7 +551,7 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
       return nullptr;
     case KindOfArray:
-      return ElemUArray<keyType>(tvRef, base, key);
+      return ElemUArray<keyType>(base, key);
     case KindOfObject:
       return ElemUObject<keyType>(tvRef, base, key);
     case KindOfRef:

@@ -98,10 +98,15 @@ AliasClass pointee(const SSATmp* ptr) {
       return AElemAny;
     }
 
-    // The result of ElemArray{,W} is either the address of an array element, or
-    // &init_null_variant().
+    // The result of ElemArray{,W,U} is either the address of an array element,
+    // or &init_null_variant().
     if (typeNR <= TPtrToMembGen) {
       if (sinst->is(ElemArray, ElemArrayW)) return elem();
+
+      // Takes a PtrToGen as its first operand, so we can't easily grab an array
+      // base.
+      if (sinst->is(ElemArrayU)) return AElemAny;
+
       return folly::none;
     }
 
@@ -795,6 +800,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetNewElem:
   case UnsetElem:
   case ElemArrayD:
+  case ElemArrayU:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
     assertx(inst.src(0)->type() <= TPtrToGen);

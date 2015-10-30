@@ -475,6 +475,7 @@ bool canDCE(IRInstruction* inst) {
   case ElemArray:
   case ElemArrayD:
   case ElemArrayW:
+  case ElemArrayU:
   case ElemDX:
   case ElemUX:
   case ArrayGet:

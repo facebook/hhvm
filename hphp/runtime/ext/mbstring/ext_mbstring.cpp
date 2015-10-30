@@ -1032,6 +1032,7 @@ Array HHVM_FUNCTION(mb_list_encodings) {
 
 Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
   const mbfl_encoding *encoding;
+  int i = 0;
   encoding = mbfl_name2encoding(name.data());
   if (!encoding) {
     raise_warning("mb_encoding_aliases(): Unknown encoding \"%s\"",
@@ -1039,11 +1040,11 @@ Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
     return false;
   }
 
-  Array ret = Array::Create();;
+  Array ret = Array::Create();
   if (encoding->aliases != nullptr) {
-    const char **alias;
-    for (alias = *encoding->aliases; *alias; ++alias) {
-      ret.append((char *)*alias);
+    while ((*encoding->aliases)[i] != nullptr) {
+      ret.append((*encoding->aliases)[i]);
+      i++;
     }
   }
   return ret;

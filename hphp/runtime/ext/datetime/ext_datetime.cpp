@@ -859,6 +859,19 @@ Variant date_sunrise_sunset(int64_t numArgs,
     DateTimeZoneData::s_className.get(), s_DateTimeZone$$##name.get(),         \
     q_DateTimeZone$$##name)                                                    \
 
+const StaticString
+  k_DATE_ATOM("Y-m-d\\TH:i:sP"),
+  k_DATE_COOKIE("l, d-M-y H:i:s T"),
+  k_DATE_ISO8601("Y-m-d\\TH:i:sO"),
+  k_DATE_RFC822("D, d M y H:i:s O"),
+  k_DATE_RFC850("l, d-M-y H:i:s T"),
+  k_DATE_RFC1036("D, d M y H:i:s O"),
+  k_DATE_RFC1123("D, d M Y H:i:s O"),
+  k_DATE_RFC2822("D, d M Y H:i:s O"),
+  k_DATE_RFC3339("Y-m-d\\TH:i:sP"),
+  k_DATE_RSS("D, d M Y H:i:s O"),
+  k_DATE_W3C("Y-m-d\\TH:i:sP");
+
 static class DateTimeExtension final : public Extension {
 public:
   DateTimeExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
@@ -886,6 +899,25 @@ public:
 
     Native::registerNativeDataInfo<DateTimeData>(
       DateTimeData::s_className.get(), Native::NDIFlags::NO_SWEEP);
+
+#define DATETIME_FORMAT(cns) \
+  Native::registerConstant<KindOfString> \
+    (makeStaticString("DATE_" #cns), k_DATE_ ## cns.get()); \
+  Native::registerClassConstant<KindOfString> \
+    (DateTimeData::s_className.get(), makeStaticString(#cns), \
+      k_DATE_ ## cns.get());
+    DATETIME_FORMAT(ATOM);
+    DATETIME_FORMAT(COOKIE);
+    DATETIME_FORMAT(ISO8601);
+    DATETIME_FORMAT(RFC822);
+    DATETIME_FORMAT(RFC850);
+    DATETIME_FORMAT(RFC1036);
+    DATETIME_FORMAT(RFC1123);
+    DATETIME_FORMAT(RFC2822);
+    DATETIME_FORMAT(RFC3339);
+    DATETIME_FORMAT(RSS);
+    DATETIME_FORMAT(W3C);
+#undef DATETIME_FORMAT
 
     REGISTER_TIME_ZONE_CONSTANT(AFRICA);
     REGISTER_TIME_ZONE_CONSTANT(AMERICA);

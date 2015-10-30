@@ -1570,11 +1570,6 @@ static Variant HHVM_FUNCTION(imap_utf8, const String& mime_encoded_text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_IMAP_CLOSETIMEOUT("IMAP_CLOSETIMEOUT");
-const StaticString s_IMAP_OPENTIMEOUT("IMAP_OPENTIMEOUT");
-const StaticString s_IMAP_READTIMEOUT("IMAP_READTIMEOUT");
-const StaticString s_IMAP_WRITETIMEOUT("IMAP_WRITETIMEOUT");
-
 static class imapExtension final : public Extension {
 public:
   imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
@@ -1622,19 +1617,24 @@ public:
     mail_parameters(NIL, SET_WRITETIMEOUT, timeout);
     mail_parameters(NIL, SET_CLOSETIMEOUT, timeout);
 
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_CLOSETIMEOUT.get(), 4
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_OPENTIMEOUT.get(), 1
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_READTIMEOUT.get(), 2
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_IMAP_WRITETIMEOUT.get(), 3
-    );
+    // FIXME: Use a consistent constant/enum
+    // rather than repeating hard-coded values
+    HHVM_RC_INT(IMAP_OPENTIMEOUT, 1);
+    HHVM_RC_INT(IMAP_READTIMEOUT, 2);
+    HHVM_RC_INT(IMAP_WRITETIMEOUT, 3);
+    HHVM_RC_INT(IMAP_CLOSETIMEOUT, 4);
 
+    HHVM_RC_INT_SAME(NIL);
+
+    HHVM_RC_INT_SAME(OP_DEBUG);
+    HHVM_RC_INT_SAME(OP_READONLY);
+    HHVM_RC_INT_SAME(OP_ANONYMOUS);
+    HHVM_RC_INT_SAME(OP_SHORTCACHE);
+    HHVM_RC_INT_SAME(OP_SILENT);
+    HHVM_RC_INT_SAME(OP_PROTOTYPE);
+    HHVM_RC_INT_SAME(OP_HALFOPEN);
+    HHVM_RC_INT_SAME(OP_EXPUNGE);
+    HHVM_RC_INT_SAME(OP_SECURE);
 
     HHVM_FE(imap_8bit);
     HHVM_FE(imap_alerts);

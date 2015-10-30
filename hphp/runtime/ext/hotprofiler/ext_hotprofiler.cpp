@@ -51,8 +51,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(hotprofiler, NO_VERSION_YET);
-
 using std::vector;
 using std::string;
 
@@ -1454,6 +1452,20 @@ void end_profiler_frame(Profiler *p,
                         const char *symbol) {
   p->endFrame(retval, symbol);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+static class HotProfilerExtension : public Extension {
+ public:
+  HotProfilerExtension(): Extension("hotprofiler", k_PHP_VERSION.data()) {}
+
+  void moduleInit() override {
+    HHVM_RC_INT_SAME(CLOCK_MONOTONIC);
+    HHVM_RC_INT_SAME(CLOCK_PROCESS_CPUTIME_ID);
+    HHVM_RC_INT_SAME(CLOCK_REALTIME);
+    HHVM_RC_INT_SAME(CLOCK_THREAD_CPUTIME_ID);
+  }
+} s_hot_profiler_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

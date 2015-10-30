@@ -38,22 +38,6 @@
             "value": 127
         },
         {
-            "name": "CLOCK_MONOTONIC",
-            "value": 1
-        },
-        {
-            "name": "CLOCK_PROCESS_CPUTIME_ID",
-            "value": 2
-        },
-        {
-            "name": "CLOCK_REALTIME",
-            "value": 0
-        },
-        {
-            "name": "CLOCK_THREAD_CPUTIME_ID",
-            "value": 3
-        },
-        {
             "name": "CL_EXPUNGE",
             "value": 32768
         },
@@ -144,50 +128,6 @@
         {
             "name": "CRYPT_STD_DES",
             "value": 1
-        },
-        {
-            "name": "DATE_ATOM",
-            "value": "Y-m-d\\TH:i:sP"
-        },
-        {
-            "name": "DATE_COOKIE",
-            "value": "l, d-M-y H:i:s T"
-        },
-        {
-            "name": "DATE_ISO8601",
-            "value": "Y-m-d\\TH:i:sO"
-        },
-        {
-            "name": "DATE_RFC1036",
-            "value": "D, d M y H:i:s O"
-        },
-        {
-            "name": "DATE_RFC1123",
-            "value": "D, d M Y H:i:s O"
-        },
-        {
-            "name": "DATE_RFC2822",
-            "value": "D, d M Y H:i:s O"
-        },
-        {
-            "name": "DATE_RFC3339",
-            "value": "Y-m-d\\TH:i:sP"
-        },
-        {
-            "name": "DATE_RFC822",
-            "value": "D, d M y H:i:s O"
-        },
-        {
-            "name": "DATE_RFC850",
-            "value": "l, d-M-y H:i:s T"
-        },
-        {
-            "name": "DATE_RSS",
-            "value": "D, d M Y H:i:s O"
-        },
-        {
-            "name": "DATE_W3C",
-            "value": "Y-m-d\\TH:i:sP"
         },
         {
             "name": "DEBUG_LOG_AGENT",
@@ -490,52 +430,12 @@
             "value": 2
         },
         {
-            "name": "NIL",
-            "value": 0
-        },
-        {
             "name": "NOEXPR",
             "value": 327681
         },
         {
             "name": "NULL",
             "value": null
-        },
-        {
-            "name": "OP_ANONYMOUS",
-            "value": 4
-        },
-        {
-            "name": "OP_DEBUG",
-            "value": 1
-        },
-        {
-            "name": "OP_EXPUNGE",
-            "value": 128
-        },
-        {
-            "name": "OP_HALFOPEN",
-            "value": 64
-        },
-        {
-            "name": "OP_PROTOTYPE",
-            "value": 32
-        },
-        {
-            "name": "OP_READONLY",
-            "value": 2
-        },
-        {
-            "name": "OP_SECURE",
-            "value": 256
-        },
-        {
-            "name": "OP_SHORTCACHE",
-            "value": 8
-        },
-        {
-            "name": "OP_SILENT",
-            "value": 16
         },
         {
             "name": "PATHINFO_BASENAME",

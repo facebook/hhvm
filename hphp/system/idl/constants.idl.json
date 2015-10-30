@@ -130,50 +130,6 @@
             "value": 1
         },
         {
-            "name": "DEBUG_LOG_AGENT",
-            "value": 8
-        },
-        {
-            "name": "DEBUG_LOG_ALL",
-            "value": 65535
-        },
-        {
-            "name": "DEBUG_LOG_COOKIE",
-            "value": 128
-        },
-        {
-            "name": "DEBUG_LOG_DEFAULT",
-            "value": 127
-        },
-        {
-            "name": "DEBUG_LOG_IP",
-            "value": 64
-        },
-        {
-            "name": "DEBUG_LOG_NONE",
-            "value": 0
-        },
-        {
-            "name": "DEBUG_LOG_POST",
-            "value": 16
-        },
-        {
-            "name": "DEBUG_LOG_REFERER",
-            "value": 4
-        },
-        {
-            "name": "DEBUG_LOG_TRACE",
-            "value": 1
-        },
-        {
-            "name": "DEBUG_LOG_URL",
-            "value": 2
-        },
-        {
-            "name": "DEBUG_LOG_USER",
-            "value": 32
-        },
-        {
             "name": "DEFAULT_INCLUDE_PATH",
             "value": ""
         },
@@ -247,46 +203,6 @@
         },
         {
             "name": "FT_UID",
-            "value": 1
-        },
-        {
-            "name": "GLOBAL_STATE_IGNORE",
-            "value": 0
-        },
-        {
-            "name": "GLOBAL_STATE_OVERWRITE",
-            "value": 1
-        },
-        {
-            "name": "GLOBAL_STATE_SKIP",
-            "value": 2
-        },
-        {
-            "name": "GLOBAL_SYMBOL_CLASS_STATIC",
-            "value": 2
-        },
-        {
-            "name": "GLOBAL_SYMBOL_DYNAMIC_CONSTANT",
-            "value": 3
-        },
-        {
-            "name": "GLOBAL_SYMBOL_FILE_INCLUDE",
-            "value": 4
-        },
-        {
-            "name": "GLOBAL_SYMBOL_GLOBAL_VARIABLE",
-            "value": 0
-        },
-        {
-            "name": "GLOBAL_SYMBOL_REDECLARED_CLASS",
-            "value": 6
-        },
-        {
-            "name": "GLOBAL_SYMBOL_REDECLARED_FUNCTION",
-            "value": 5
-        },
-        {
-            "name": "GLOBAL_SYMBOL_STATIC_VARIABLE",
             "value": 1
         },
         {

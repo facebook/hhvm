@@ -1217,10 +1217,10 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
             /* pass the entire chunk through the converter */
             err = _php_iconv_appendl(retval, encoded_word,
                                      (size_t)(p1 - encoded_word), cd_pl);
-            if (err != PHP_ICONV_ERR_SUCCESS) {
-              goto out;
-            }
             encoded_word = NULL;
+            if (err != PHP_ICONV_ERR_SUCCESS) {
+              break;
+            }
           } else {
             goto out;
           }
@@ -1622,7 +1622,7 @@ static Variant HHVM_FUNCTION(iconv_mime_encode,
         prev_in_left = ini_in_left = in_left;
         ini_in_p = in_p;
 
-        for (out_size = char_cnt; out_size > 0;) {
+        for (out_size = (char_cnt - 2) / 3; out_size > 0;) {
           size_t prev_out_left ATTRIBUTE_UNUSED;
 
           nbytes_required = 0;

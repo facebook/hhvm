@@ -13,6 +13,8 @@ function test(): void {
   $array = array(array('', 0), array('', 0));
 
   foreach ($array as $update) {
+    $index = 1;
+    $update[$index] = 0; // force conversion from tuple-like to vec-like
     list($name, $value) = $update;
     hh_show($name);
     hh_show($value);

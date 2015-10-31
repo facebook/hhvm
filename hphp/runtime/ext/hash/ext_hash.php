@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * hash() - http://php.net/function.hash
@@ -342,3 +342,35 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
 <<__Native>>
 function hash_equals(mixed $known, mixed $user): bool;
 
+/**
+ * furchash_hphp_ext
+ *
+ * @param string $key - The key to hash
+ * @param int $len    - Number of bytes to use from the hash
+ * @param int $npart  - The number of buckets
+ *
+ * @return int - A number in the range of 0-(nPart-1)
+ */
+<<__Native>>
+function furchash_hphp_ext(string $key, int $len, int $npart): int;
+
+/**
+ * furchash_hphp_ext_supported
+ *
+ * @return bool - True
+ */
+function furchash_hphp_ext_supported(): bool {
+  return true;
+}
+
+/**
+ * hphp_murmurhash
+ *
+ * @param string $key - The key to hash
+ * @param int $len    - Number of bytes to use from the key
+ * @param int $seed   - The seed to use for hashing
+ *
+ * @return - The Int64 hash of the first len input characters
+ */
+<<__Native>>
+function hphp_murmurhash(string $key, int $len, int $seed): int;

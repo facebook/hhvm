@@ -98,10 +98,6 @@
             "value": false
         },
         {
-            "name": "HASH_HMAC",
-            "value": 1
-        },
-        {
             "name": "INTL_MAX_LOCALE_LEN",
             "value": 80
         },

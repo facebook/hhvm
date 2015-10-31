@@ -48,7 +48,7 @@ namespace HPHP {
 static class HashExtension final : public Extension {
  public:
   HashExtension() : Extension("hash", "1.0") { }
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+  void moduleInit() override {
     HHVM_FE(hash);
     HHVM_FE(hash_algos);
     HHVM_FE(hash_file);
@@ -59,6 +59,10 @@ static class HashExtension final : public Extension {
     HHVM_FE(hash_equals);
     HHVM_FE(furchash_hphp_ext);
     HHVM_FE(hphp_murmurhash);
+
+    HHVM_RC_INT(HASH_HMAC, k_HASH_HMAC);
+
+    loadSystemlib();
   }
 } s_hash_extension;
 

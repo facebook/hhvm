@@ -38,10 +38,6 @@
             "value": 127
         },
         {
-            "name": "CL_EXPUNGE",
-            "value": 32768
-        },
-        {
             "name": "CODESET",
             "value": 14
         },
@@ -63,14 +59,6 @@
         },
         {
             "name": "COUNT_RECURSIVE",
-            "value": 1
-        },
-        {
-            "name": "CP_MOVE",
-            "value": 2
-        },
-        {
-            "name": "CP_UID",
             "value": 1
         },
         {
@@ -110,30 +98,6 @@
             "value": 131112
         },
         {
-            "name": "ENC7BIT",
-            "value": 0
-        },
-        {
-            "name": "ENC8BIT",
-            "value": 1
-        },
-        {
-            "name": "ENCBASE64",
-            "value": 3
-        },
-        {
-            "name": "ENCBINARY",
-            "value": 2
-        },
-        {
-            "name": "ENCOTHER",
-            "value": 5
-        },
-        {
-            "name": "ENCQUOTEDPRINTABLE",
-            "value": 4
-        },
-        {
             "name": "ERA",
             "value": 131116
         },
@@ -154,80 +118,12 @@
             "value": false
         },
         {
-            "name": "FT_INTERNAL",
-            "value": 8
-        },
-        {
-            "name": "FT_NOT",
-            "value": 4
-        },
-        {
-            "name": "FT_PEEK",
-            "value": 2
-        },
-        {
-            "name": "FT_PREFETCHTEXT",
-            "value": 32
-        },
-        {
-            "name": "FT_UID",
-            "value": 1
-        },
-        {
             "name": "HASH_HMAC",
-            "value": 1
-        },
-        {
-            "name": "INI_ALL",
-            "value": 7
-        },
-        {
-            "name": "INI_PERDIR",
-            "value": 2
-        },
-        {
-            "name": "INI_SCANNER_NORMAL",
-            "value": 0
-        },
-        {
-            "name": "INI_SCANNER_RAW",
-            "value": 1
-        },
-        {
-            "name": "INI_SYSTEM",
-            "value": 4
-        },
-        {
-            "name": "INI_USER",
             "value": 1
         },
         {
             "name": "INTL_MAX_LOCALE_LEN",
             "value": 80
-        },
-        {
-            "name": "MB_CASE_LOWER",
-            "value": 1
-        },
-        {
-            "name": "MB_CASE_TITLE",
-            "value": 2
-        },
-        {
-            "name": "MB_CASE_UPPER",
-            "value": 0
-        },
-        {
-            "name": "MB_OVERLOAD_MAIL",
-            "value": 1
-        },
-        {
-            "name": "MB_OVERLOAD_REGEX",
-            "value": 4
-        },
-        {
-            "name": "MB_OVERLOAD_STRING",
-            "value": 2
         },
         {
             "name": "MCC_ACCESSPOINT_DOWN",
@@ -302,132 +198,12 @@
             "value": 65536
         },
         {
-            "name": "SA_ALL",
-            "value": 31
-        },
-        {
-            "name": "SA_MESSAGES",
-            "value": 1
-        },
-        {
-            "name": "SA_RECENT",
-            "value": 2
-        },
-        {
-            "name": "SA_UIDNEXT",
-            "value": 8
-        },
-        {
-            "name": "SA_UIDVALIDITY",
-            "value": 16
-        },
-        {
-            "name": "SA_UNSEEN",
-            "value": 4
-        },
-        {
-            "name": "SE_FREE",
-            "value": 2
-        },
-        {
-            "name": "SE_NOPREFETCH",
-            "value": 4
-        },
-        {
-            "name": "SE_UID",
-            "value": 1
-        },
-        {
-            "name": "SORTARRIVAL",
-            "value": 1
-        },
-        {
-            "name": "SORTCC",
-            "value": 5
-        },
-        {
-            "name": "SORTDATE",
-            "value": 0
-        },
-        {
-            "name": "SORTFROM",
-            "value": 2
-        },
-        {
-            "name": "SORTSIZE",
-            "value": 6
-        },
-        {
-            "name": "SORTSUBJECT",
-            "value": 3
-        },
-        {
-            "name": "SORTTO",
-            "value": 4
-        },
-        {
-            "name": "SO_FREE",
-            "value": 8
-        },
-        {
-            "name": "SO_NOSERVER",
-            "value": 16
-        },
-        {
-            "name": "ST_SET",
-            "value": 4
-        },
-        {
-            "name": "ST_SILENT",
-            "value": 2
-        },
-        {
-            "name": "ST_UID",
-            "value": 1
-        },
-        {
             "name": "THOUSEP",
             "value": 65537
         },
         {
             "name": "TRUE",
             "value": true
-        },
-        {
-            "name": "TYPEAPPLICATION",
-            "value": 3
-        },
-        {
-            "name": "TYPEAUDIO",
-            "value": 4
-        },
-        {
-            "name": "TYPEIMAGE",
-            "value": 5
-        },
-        {
-            "name": "TYPEMESSAGE",
-            "value": 2
-        },
-        {
-            "name": "TYPEMODEL",
-            "value": 7
-        },
-        {
-            "name": "TYPEMULTIPART",
-            "value": 1
-        },
-        {
-            "name": "TYPEOTHER",
-            "value": 8
-        },
-        {
-            "name": "TYPETEXT",
-            "value": 0
-        },
-        {
-            "name": "TYPEVIDEO",
-            "value": 6
         },
         {
             "name": "UNKNOWN_TYPE",

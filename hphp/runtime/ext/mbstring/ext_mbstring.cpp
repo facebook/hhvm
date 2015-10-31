@@ -4395,6 +4395,15 @@ static class mbstringExtension final : public Extension {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "mbstring.substitute_character",
                      &MBSTRG(current_filter_illegal_mode));
+
+    HHVM_RC_INT(MB_OVERLOAD_MAIL, 1);
+    HHVM_RC_INT(MB_OVERLOAD_STRING, 2);
+    HHVM_RC_INT(MB_OVERLOAD_REGEX, 4);
+
+    HHVM_RC_INT(MB_CASE_UPPER, PHP_UNICODE_CASE_UPPER);
+    HHVM_RC_INT(MB_CASE_LOWER, PHP_UNICODE_CASE_LOWER);
+    HHVM_RC_INT(MB_CASE_TITLE, PHP_UNICODE_CASE_TITLE);
+
     HHVM_FE(mb_list_encodings);
     HHVM_FE(mb_list_encodings_alias_names);
     HHVM_FE(mb_list_mime_names);

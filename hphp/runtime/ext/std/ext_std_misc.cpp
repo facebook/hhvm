@@ -208,6 +208,13 @@ void StandardExtension::initMisc() {
     HHVM_RC_INT(CREDITS_QA,       1 << 6);
     HHVM_RC_INT(CREDITS_ALL, 0xFFFFFFFF);
 
+    HHVM_RC_INT(INI_SYSTEM, IniSetting::PHP_INI_SYSTEM);
+    HHVM_RC_INT(INI_PERDIR, IniSetting::PHP_INI_PERDIR);
+    HHVM_RC_INT(INI_USER,   IniSetting::PHP_INI_USER);
+    HHVM_RC_INT(INI_ALL,    IniSetting::PHP_INI_SYSTEM |
+                            IniSetting::PHP_INI_PERDIR |
+                            IniSetting::PHP_INI_USER);
+
     HHVM_RC_STR(PHP_BINARY, current_executable_path());
     HHVM_RC_STR(PHP_BINDIR, current_executable_directory());
     HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString().toCppString());

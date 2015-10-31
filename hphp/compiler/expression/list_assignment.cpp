@@ -77,7 +77,6 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   case Construct::KindOfIncludeExpression:
   case Construct::KindOfYieldExpression:
   case Construct::KindOfAwaitExpression:
-  case Construct::KindOfQueryExpression:
     return ListAssignment::Regular;
 
   case Construct::KindOfListAssignment:
@@ -120,15 +119,6 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   case Construct::KindOfParameterExpression:
   case Construct::KindOfModifierExpression:
   case Construct::KindOfUserAttribute:
-  case Construct::KindOfFromClause:
-  case Construct::KindOfLetClause:
-  case Construct::KindOfWhereClause:
-  case Construct::KindOfSelectClause:
-  case Construct::KindOfIntoClause:
-  case Construct::KindOfJoinClause:
-  case Construct::KindOfGroupClause:
-  case Construct::KindOfOrderbyClause:
-  case Construct::KindOfOrdering:
     always_assert(false);
 
   // non-arrays

@@ -551,19 +551,6 @@ static bool isValidClassConstantName(int tokid) {
   case T_XHP_CHILDREN:
   case T_XHP_REQUIRED:
   case T_ENUM:
-  case T_WHERE:
-  case T_JOIN:
-  case T_ON:
-  case T_IN:
-  case T_EQUALS:
-  case T_INTO:
-  case T_LET:
-  case T_ORDERBY:
-  case T_ASCENDING:
-  case T_DESCENDING:
-  case T_SELECT:
-  case T_GROUP:
-  case T_BY:
   case T_CALLABLE:
   case T_TRAIT:
   case T_EXTENDS:

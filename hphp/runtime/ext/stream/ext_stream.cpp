@@ -60,11 +60,7 @@ namespace HPHP {
 static
 req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
-#define REGISTER_CONSTANT(name, value)                                         \
-  Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
-
-#define REGISTER_SAME_CONSTANT(name) \
-  Native::registerConstant<KindOfInt64>(makeStaticString(#name), k_ ##name)    \
+#define REGISTER_SAME_CONSTANT(name) HHVM_RC_INT(name, k_ ## name);
 
 static class StreamExtension final : public Extension {
 public:
@@ -146,14 +142,14 @@ public:
     REGISTER_SAME_CONSTANT(STREAM_SOCK_STREAM);
     REGISTER_SAME_CONSTANT(STREAM_USE_PATH);
 
-    REGISTER_CONSTANT(STREAM_AWAIT_READ, FileEventHandler::READ);
-    REGISTER_CONSTANT(STREAM_AWAIT_WRITE, FileEventHandler::WRITE);
-    REGISTER_CONSTANT(STREAM_AWAIT_READ_WRITE, FileEventHandler::READ_WRITE);
+    HHVM_RC_INT(STREAM_AWAIT_READ, FileEventHandler::READ);
+    HHVM_RC_INT(STREAM_AWAIT_WRITE, FileEventHandler::WRITE);
+    HHVM_RC_INT(STREAM_AWAIT_READ_WRITE, FileEventHandler::READ_WRITE);
 
-    REGISTER_CONSTANT(STREAM_AWAIT_ERROR, FileAwait::ERROR);
-    REGISTER_CONSTANT(STREAM_AWAIT_TIMEOUT, FileAwait::TIMEOUT);
-    REGISTER_CONSTANT(STREAM_AWAIT_READY, FileAwait::READY);
-    REGISTER_CONSTANT(STREAM_AWAIT_CLOSED, FileAwait::CLOSED);
+    HHVM_RC_INT(STREAM_AWAIT_ERROR, FileAwait::ERROR);
+    HHVM_RC_INT(STREAM_AWAIT_TIMEOUT, FileAwait::TIMEOUT);
+    HHVM_RC_INT(STREAM_AWAIT_READY, FileAwait::READY);
+    HHVM_RC_INT(STREAM_AWAIT_CLOSED, FileAwait::CLOSED);
 
     REGISTER_SAME_CONSTANT(STREAM_URL_STAT_LINK);
     REGISTER_SAME_CONSTANT(STREAM_URL_STAT_QUIET);

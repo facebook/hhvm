@@ -55,15 +55,6 @@ namespace HPHP {
 const StaticString s_SLASH_TMP("/tmp");
 const StaticString s_ZEND_VERSION("2.4.99");
 
-const int64_t k_INFO_GENERAL       = (1<<0);
-const int64_t k_INFO_CREDITS       = (1<<0);
-const int64_t k_INFO_CONFIGURATION = (1<<0);
-const int64_t k_INFO_MODULES       = (1<<0);
-const int64_t k_INFO_ENVIRONMENT   = (1<<0);
-const int64_t k_INFO_VARIABLES     = (1<<0);
-const int64_t k_INFO_LICENSE       = (1<<0);
-const int64_t k_INFO_ALL           = 0x7FFFFFFF;
-
 const int64_t k_ASSERT_ACTIVE      = 1;
 const int64_t k_ASSERT_CALLBACK    = 2;
 const int64_t k_ASSERT_BAIL        = 3;
@@ -1267,27 +1258,21 @@ void StandardExtension::initOptions() {
   HHVM_FE(zend_version);
   HHVM_FE(version_compare);
 
-#define INFO(v) Native::registerConstant<KindOfInt64> \
-                  (makeStaticString("INFO_" #v), k_INFO_##v);
-  INFO(GENERAL);
-  INFO(CREDITS);
-  INFO(CONFIGURATION);
-  INFO(MODULES);
-  INFO(ENVIRONMENT);
-  INFO(VARIABLES);
-  INFO(LICENSE);
-  INFO(ALL);
-#undef INFO
+  HHVM_RC_INT(INFO_GENERAL, 1 << 0);
+  HHVM_RC_INT(INFO_CREDITS, 1 << 0);
+  HHVM_RC_INT(INFO_CONFIGURATION, 1 << 0);
+  HHVM_RC_INT(INFO_MODULES, 1 << 0);
+  HHVM_RC_INT(INFO_ENVIRONMENT, 1 << 0);
+  HHVM_RC_INT(INFO_VARIABLES, 1 << 0);
+  HHVM_RC_INT(INFO_LICENSE, 1 << 0);
+  HHVM_RC_INT(INFO_ALL, 0x7FFFFFFF);
 
-#define ASSERTCONST(v) Native::registerConstant<KindOfInt64> \
-                  (makeStaticString("ASSERT_" #v), k_ASSERT_##v);
-  ASSERTCONST(ACTIVE);
-  ASSERTCONST(CALLBACK);
-  ASSERTCONST(BAIL);
-  ASSERTCONST(WARNING);
-  ASSERTCONST(QUIET_EVAL);
-  ASSERTCONST(EXCEPTION);
-#undef ASSERTCONST
+  HHVM_RC_INT(ASSERT_ACTIVE, k_ASSERT_ACTIVE);
+  HHVM_RC_INT(ASSERT_CALLBACK, k_ASSERT_CALLBACK);
+  HHVM_RC_INT(ASSERT_BAIL, k_ASSERT_BAIL);
+  HHVM_RC_INT(ASSERT_WARNING, k_ASSERT_WARNING);
+  HHVM_RC_INT(ASSERT_QUIET_EVAL, k_ASSERT_QUIET_EVAL);
+  HHVM_RC_INT(ASSERT_EXCEPTION, k_ASSERT_EXCEPTION);
 
   loadSystemlib("std_options");
 }

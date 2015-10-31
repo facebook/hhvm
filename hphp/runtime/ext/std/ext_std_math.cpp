@@ -14,7 +14,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/std/ext_std_math.h"
 
 #include "hphp/runtime/base/comparisons.h"
@@ -26,11 +25,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-const int64_t k_PHP_ROUND_HALF_UP =   PHP_ROUND_HALF_UP;
-const int64_t k_PHP_ROUND_HALF_DOWN = PHP_ROUND_HALF_DOWN;
-const int64_t k_PHP_ROUND_HALF_EVEN = PHP_ROUND_HALF_EVEN;
-const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 
 const double k_M_PI       = 3.1415926535898;
 const double k_M_1_PI     = 0.31830988618379;
@@ -49,6 +43,9 @@ const double k_M_SQRT1_2  = 0.70710678118655;
 const double k_M_SQRT2    = 1.4142135623731;
 const double k_M_SQRT3    = 1.7320508075689;
 const double k_M_SQRTPI   = 1.7724538509055;
+
+const double k_INF = std::numeric_limits<double>::infinity();
+const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 Variant HHVM_FUNCTION(min,
                       const Variant& value,
@@ -509,17 +506,6 @@ Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_PHP_ROUND_HALF_UP("PHP_ROUND_HALF_UP");
-const StaticString s_PHP_ROUND_HALF_DOWN("PHP_ROUND_HALF_DOWN");
-const StaticString s_PHP_ROUND_HALF_EVEN("PHP_ROUND_HALF_EVEN");
-const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
-
-#define ICONST(nm)                                                             \
-  Native::registerConstant<KindOfInt64>(makeStaticString(#nm), k_##nm)         \
-
-#define DCONST(nm)                                                             \
-  Native::registerConstant<KindOfDouble>(makeStaticString("M_"#nm), k_M_##nm)  \
-
 void StandardExtension::requestInitMath() {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   if (s_state.state == RandomBuf::RequestInit) {
@@ -528,29 +514,35 @@ void StandardExtension::requestInitMath() {
 #endif
 }
 
-void StandardExtension::initMath() {
-  ICONST(PHP_ROUND_HALF_UP);
-  ICONST(PHP_ROUND_HALF_DOWN);
-  ICONST(PHP_ROUND_HALF_EVEN);
-  ICONST(PHP_ROUND_HALF_ODD);
+#define DCONST(nm)                                                       \
+  Native::registerConstant<KindOfDouble>(makeStaticString(#nm), k_##nm)  \
 
-  DCONST(PI);
-  DCONST(1_PI);
-  DCONST(2_PI);
-  DCONST(2_SQRTPI);
-  DCONST(E);
-  DCONST(EULER);
-  DCONST(LN10);
-  DCONST(LN2);
-  DCONST(LNPI);
-  DCONST(LOG10E);
-  DCONST(LOG2E);
-  DCONST(PI_2);
-  DCONST(PI_4);
-  DCONST(SQRT1_2);
-  DCONST(SQRT2);
-  DCONST(SQRT3);
-  DCONST(SQRTPI);
+void StandardExtension::initMath() {
+  HHVM_RC_INT_SAME(PHP_ROUND_HALF_UP);
+  HHVM_RC_INT_SAME(PHP_ROUND_HALF_DOWN);
+  HHVM_RC_INT_SAME(PHP_ROUND_HALF_EVEN);
+  HHVM_RC_INT_SAME(PHP_ROUND_HALF_ODD);
+
+  DCONST(M_PI);
+  DCONST(M_1_PI);
+  DCONST(M_2_PI);
+  DCONST(M_2_SQRTPI);
+  DCONST(M_E);
+  DCONST(M_EULER);
+  DCONST(M_LN10);
+  DCONST(M_LN2);
+  DCONST(M_LNPI);
+  DCONST(M_LOG10E);
+  DCONST(M_LOG2E);
+  DCONST(M_PI_2);
+  DCONST(M_PI_4);
+  DCONST(M_SQRT1_2);
+  DCONST(M_SQRT2);
+  DCONST(M_SQRT3);
+  DCONST(M_SQRTPI);
+
+  DCONST(NAN);
+  DCONST(INF);
 
   HHVM_FE(min);
   HHVM_FE(max);

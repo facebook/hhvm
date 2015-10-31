@@ -63,9 +63,9 @@ Variant HHVM_FUNCTION(base64_encode, const String& data) {
 
 Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {
   Variant c = HHVM_FN(curl_init)();
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
-  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HEADER, 1);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL, url);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
+  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_HEADER, 1);
   Variant res = HHVM_FN(curl_exec)(c.toResource());
   if (same(res, false)) {
     return false;

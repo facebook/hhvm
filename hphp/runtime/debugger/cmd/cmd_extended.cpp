@@ -182,14 +182,12 @@ const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
   return s_command_map;
 }
 
-#define ELSE_IF_CMD(name) \
-  } else if (cls == "Cmd" #name) { ret = std::make_shared<Cmd##name>()
-
 DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
   std::shared_ptr<CmdExtended> ret;
-  if (cls.empty()) {
-    ELSE_IF_CMD(Example);
-    ELSE_IF_CMD(Extension);
+  if (cls == "CmdExample") {
+    ret = std::make_shared<CmdExample>();
+  } else if (cls == "CmdExtension"); {
+    ret = std::make_shared<CmdExtension>();
   }
 
   if (ret) {

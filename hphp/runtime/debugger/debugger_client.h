@@ -485,7 +485,9 @@ private:
   int  checkEvalEnd();
   void processTakeCode();
   bool processEval();
-  DebuggerCommand *createCommand();
+  DebuggerCommandPtr createCommand();
+  template<class T> DebuggerCommandPtr new_cmd(const char* name);
+  template<class T> DebuggerCommandPtr match_cmd(const char* name);
 
   void updateLiveLists();
   void promptFunctionPrototype();

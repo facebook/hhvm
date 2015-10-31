@@ -177,7 +177,6 @@ const StaticString
 bool CmdList::listFunctionOrClass(DebuggerClient &client) {
   assert(client.argCount() == 1);
   auto cmdInfo = std::make_shared<CmdInfo>();
-  DebuggerCommandPtr deleter(cmdInfo);
   std::string subsymbol;
   cmdInfo->parseOneArg(client, subsymbol);
   auto cmd = client.xend<CmdInfo>(cmdInfo.get());

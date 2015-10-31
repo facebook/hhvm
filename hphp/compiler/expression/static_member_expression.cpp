@@ -153,24 +153,6 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void StaticMemberExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassPropertyExpression", 3);
-  StaticClassName::outputCodeModel(cg);
-  if (m_exp->is(Expression::KindOfScalarExpression)) {
-    cg.printPropertyHeader("propertyName");
-    auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
-    cg.printValue(var->getString());
-  } else {
-    cg.printPropertyHeader("propertyExpression");
-    m_exp->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void StaticMemberExpression::outputPHP(CodeGenerator &cg,

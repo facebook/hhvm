@@ -165,57 +165,6 @@ StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void IfStatement::outputCodeModel(CodeGenerator &cg) {
-  IfBranchStatementPtr elseBranch = nullptr;
-  auto count = m_stmts->getCount();
-  for (int i = 0; i < count; i++) {
-    auto branch = dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
-    assert(branch != nullptr); // this cast always succeeds, by construction.
-    auto condition = branch->getCondition();
-    if (condition == nullptr) {
-      elseBranch = branch;
-      count--;
-      break;
-    }
-    auto statements = branch->getStmt();
-    if (i > 0) {
-      // Not the first if in the if...else if...else if...else sequence
-      // so this is the false block of the preceding if
-      cg.printPropertyHeader("falseBlock");
-      cg.printObjectHeader("BlockStatement", 1);
-      cg.printPropertyHeader("statements");
-      cg.printf("V:9:\"HH\\Vector\":1:{");
-    }
-    cg.printObjectHeader("ConditionalStatement", 4);
-    cg.printPropertyHeader("condition");
-    condition->outputCodeModel(cg);
-    cg.printPropertyHeader("trueBlock");
-    cg.printAsBlock(statements);
-    cg.printPropertyHeader("sourceLocation");
-    cg.printLocation(this);
-    // false block will be supplied by next iteration, or code following loop
-  }
-  // supply the false block for the else
-  cg.printPropertyHeader("falseBlock");
-  if (elseBranch != nullptr) {
-    elseBranch->outputCodeModel(cg);
-  } else {
-    cg.printAsBlock(nullptr);
-  }
-
-  for (int i = 0; i < count-1; i++) {
-    cg.printObjectFooter(); //close the nested if
-    cg.printf("}"); //close the vector
-    cg.printObjectFooter(); //close falseBlock block
-  }
-
-  // Close the outermose ConditionalStatement
-  cg.printObjectFooter();
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void IfStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

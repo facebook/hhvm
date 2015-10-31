@@ -373,19 +373,6 @@ ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ExpressionList::outputCodeModel(CodeGenerator &cg) {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ExpressionPtr exp = m_exps[i];
-    if (exp) {
-      cg.printExpression(exp, exp->hasContext(RefParameter));
-    } else {
-      cg.printNull();
-    }
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

@@ -218,53 +218,6 @@ void TypeAnnotation::appendToTypeList(TypeAnnotationPtr typeList) {
   }
 }
 
-void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
-  TypeAnnotationPtr typeArgsElem = m_typeArgs;
-  auto numTypeArgs = this->numTypeArgs();
-  auto numProps = 1;
-  if (m_nullable) numProps++;
-  if (m_soft) numProps++;
-  if (m_function) {
-    numProps++;
-    // Since this is a function type, the first type argument is the return type
-    // and no typeArguments property will be serialized unless there are at
-    // least two type arguments.
-    if (numTypeArgs > 1) numProps++;
-  } else {
-    if (numTypeArgs > 0) numProps++;
-  }
-  cg.printObjectHeader("TypeExpression", numProps);
-  cg.printPropertyHeader("name");
-  cg.printValue(m_tuple ? "tuple" : m_name);
-  if (m_nullable) {
-    cg.printPropertyHeader("isNullable");
-    cg.printBool(true);
-  }
-  if (m_soft) {
-    cg.printPropertyHeader("isSoft");
-    cg.printBool(true);
-  }
-  if (m_function) {
-    cg.printPropertyHeader("returnType");
-    typeArgsElem->outputCodeModel(cg);
-    typeArgsElem = typeArgsElem->m_typeList;
-    // Since we've grabbed the first element of the list as the return
-    // type, make sure that the logic for serializing type arguments gets
-    // disabled unless there is at least one more type argument.
-    numTypeArgs--;
-  }
-  if (numTypeArgs > 0) {
-    cg.printPropertyHeader("typeArguments");
-    cg.printf("V:9:\"HH\\Vector\":%d:{", numTypeArgs);
-    while (typeArgsElem != nullptr) {
-      typeArgsElem->outputCodeModel(cg);
-      typeArgsElem = typeArgsElem->m_typeList;
-    }
-    cg.printf("}");
-  }
-  cg.printObjectFooter();
-}
-
 int TypeAnnotation::numTypeArgs() const {
   int n = 0;
   TypeAnnotationPtr typeEl = m_typeArgs;

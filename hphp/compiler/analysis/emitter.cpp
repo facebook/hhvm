@@ -4831,8 +4831,17 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     e.FPushObjMethodD(numArgs+1, executeQuery, ObjMethodOp::NullThrows);
     {
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-      e.String(query->getQueryString());
+
+      // Originally, the first argument to executeQuery was the
+      // serialized AST of the PHINQ expression (from CodeModel)
+      // Since CodeModel is gone, there's nothing to put here,
+      // but there's no evidence anyone could ever make use of this
+      // anyway.
+      //
+      // Inject a NULL placeholder here so that ordering doesn't change.
+      e.Null();
       emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+
       auto selectCallback = query->getSelectClosure();
       if (selectCallback != nullptr) {
         visit(selectCallback);

@@ -84,17 +84,6 @@ void GotoStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void GotoStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("GotoStatement", 2);
-  cg.printPropertyHeader("label");
-  cg.printValue(m_label);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

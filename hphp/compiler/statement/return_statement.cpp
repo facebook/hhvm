@@ -88,20 +88,6 @@ void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ReturnStatement::outputCodeModel(CodeGenerator &cg) {
-  auto nump = m_exp ? 2 : 1;
-  cg.printObjectHeader("ReturnStatement", nump);
-  if (m_exp) {
-    cg.printPropertyHeader("expression");
-    m_exp->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ReturnStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

@@ -95,17 +95,6 @@ void QueryExpression::doRewrites(AnalysisResultPtr ar,
   ServerSideSelectRewriter se;
   se.rewriteQuery(qe);
 
-  // Serialize the rewritten query expression so that it can be sent to
-  // the query provider as a string which it can unserialize and turn
-  // into a query (unless already cached).
-  std::ostringstream serialized;
-  CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel,
-                   &fileScope->getName());
-  cg.setAstClassPrefix("Code");
-  qe->outputCodeModel(cg);
-  std::string s(serialized.str().c_str(), serialized.str().length());
-  m_querystr = makeStaticString(s);
-
   // start again with the clone of the original query (not the one
   // that was rewritten for use by the query provider) and rewrite
   // it into a closure expression that is used by the query provider
@@ -233,22 +222,6 @@ void QueryOrderby::setNthKid(int n, ConstructPtr cp) {
   } else {
     (*m_expressions)[n] = dynamic_pointer_cast<Expression>(cp);
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void QueryOrderby::outputCodeModel(CodeGenerator &cg) {
-  if (this->getKindOf() == Expression::KindOfOrderbyClause) {
-    cg.printObjectHeader("OrderbyClause", 2);
-    cg.printPropertyHeader("orders");
-  } else {
-    cg.printObjectHeader("QueryExpression", 2);
-    cg.printPropertyHeader("clauses");
-  }
-  cg.printExpressionVector(m_originalExpressions);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -132,12 +132,6 @@ void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void FunctionStatement::outputCodeModel(CodeGenerator &cg) {
-  MethodStatement::outputCodeModel(cg);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void FunctionStatement::outputPHPHeader(CodeGenerator &cg,

@@ -89,17 +89,6 @@ void FinallyStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void FinallyStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("FinallyStatement", 2);
-  cg.printPropertyHeader("block");
-  cg.printAsEnclosedBlock(m_stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void FinallyStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

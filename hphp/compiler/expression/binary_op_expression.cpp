@@ -21,7 +21,6 @@
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
-#include "hphp/compiler/code_model_enums.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -575,81 +574,6 @@ BinaryOpExpression::foldRightAssoc(AnalysisResultConstPtr ar) {
     break;
   }
   return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
-  if (m_op == T_COLLECTION) {
-    cg.printObjectHeader("CollectionInitializerExpression", 3);
-    cg.printPropertyHeader("class");
-    cg.printTypeExpression(m_exp1);
-    cg.printPropertyHeader("arguments");
-    cg.printExpressionVector(static_pointer_cast<ExpressionList>(m_exp2));
-    cg.printPropertyHeader("sourceLocation");
-    cg.printLocation(this);
-    cg.printObjectFooter();
-    return;
-  }
-
-  cg.printObjectHeader("BinaryOpExpression", 4);
-  cg.printPropertyHeader("expression1");
-  m_exp1->outputCodeModel(cg);
-  cg.printPropertyHeader("expression2");
-  if (m_op == T_INSTANCEOF) {
-    cg.printTypeExpression(m_exp2);
-  } else {
-    m_exp2->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("operation");
-
-  int op = 0;
-  switch (m_op) {
-    case T_PLUS_EQUAL: op = PHP_PLUS_ASSIGN; break;
-    case T_MINUS_EQUAL: op = PHP_MINUS_ASSIGN; break;
-    case T_MUL_EQUAL: op = PHP_MULTIPLY_ASSIGN; break;
-    case T_DIV_EQUAL: op = PHP_DIVIDE_ASSIGN; break;
-    case T_CONCAT_EQUAL: op = PHP_CONCAT_ASSIGN; break;
-    case T_MOD_EQUAL:  op = PHP_MODULUS_ASSIGN;  break;
-    case T_AND_EQUAL: op = PHP_AND_ASSIGN; break;
-    case T_OR_EQUAL: op = PHP_OR_ASSIGN;  break;
-    case T_XOR_EQUAL: op = PHP_XOR_ASSIGN; break;
-    case T_SL_EQUAL: op = PHP_SHIFT_LEFT_ASSIGN; break;
-    case T_SR_EQUAL: op = PHP_SHIFT_RIGHT_ASSIGN; break;
-    case T_BOOLEAN_OR: op = PHP_BOOLEAN_OR;  break;
-    case T_BOOLEAN_AND: op = PHP_BOOLEAN_AND; break;
-    case T_LOGICAL_OR: op = PHP_LOGICAL_OR; break;
-    case T_LOGICAL_AND: op = PHP_LOGICAL_AND;  break;
-    case T_LOGICAL_XOR: op = PHP_LOGICAL_XOR; break;
-    case '|': op = PHP_OR; break;
-    case '&': op = PHP_AND;  break;
-    case '^': op = PHP_XOR; break;
-    case '.': op = PHP_CONCAT; break;
-    case '+': op = PHP_PLUS; break;
-    case '-': op = PHP_MINUS; break;
-    case '*': op = PHP_MULTIPLY; break;
-    case '/': op = PHP_DIVIDE; break;
-    case '%': op = PHP_MODULUS; break;
-    case T_SL: op = PHP_SHIFT_LEFT; break;
-    case T_SR: op = PHP_SHIFT_RIGHT; break;
-    case T_IS_IDENTICAL: op = PHP_IS_IDENTICAL; break;
-    case T_IS_NOT_IDENTICAL: op = PHP_IS_NOT_IDENTICAL; break;
-    case T_IS_EQUAL: op = PHP_IS_EQUAL; break;
-    case T_IS_NOT_EQUAL: op = PHP_IS_NOT_EQUAL; break;
-    case '<': op = PHP_IS_SMALLER; break;
-    case T_IS_SMALLER_OR_EQUAL: op = PHP_IS_SMALLER_OR_EQUAL; break;
-    case '>': op = PHP_IS_GREATER; break;
-    case T_IS_GREATER_OR_EQUAL: op = PHP_IS_GREATER_OR_EQUAL;  break;
-    case T_SPACESHIP: op = PHP_SPACESHIP; break;
-    case T_INSTANCEOF: op = PHP_INSTANCEOF;  break;
-    default:
-      assert(false);
-  }
-
-  cg.printValue(op);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -79,24 +79,6 @@ void IfBranchStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void IfBranchStatement::outputCodeModel(CodeGenerator &cg) {
-  if (m_condition == nullptr) {
-    cg.printAsBlock(m_stmt);
-    return;
-  }
-  auto numProps = 3;
-  cg.printObjectHeader("ConditionalStatement", numProps);
-  cg.printPropertyHeader("condition");
-  m_condition->outputCodeModel(cg);
-  cg.printPropertyHeader("trueBlock");
-  cg.printAsBlock(m_stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void IfBranchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

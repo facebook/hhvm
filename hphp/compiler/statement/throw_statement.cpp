@@ -70,17 +70,6 @@ void ThrowStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ThrowStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ThrowStatement", 2);
-  cg.printPropertyHeader("expression");
-  m_exp->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ThrowStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

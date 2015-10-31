@@ -90,21 +90,6 @@ void BlockStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void BlockStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("BlockStatement", m_stmts != nullptr ? 3 : 2);
-  if (m_stmts != nullptr) {
-    cg.printPropertyHeader("statements");
-    cg.printStatementVector(m_stmts);
-  }
-  cg.printPropertyHeader("isEnclosed");
-  cg.printBool(true);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void BlockStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

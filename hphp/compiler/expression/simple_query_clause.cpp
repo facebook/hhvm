@@ -71,50 +71,6 @@ void SimpleQueryClause::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void SimpleQueryClause::outputCodeModel(CodeGenerator &cg) {
-  switch (this->getKindOf()) {
-    case Expression::KindOfFromClause:
-      cg.printObjectHeader("FromClause", 3);
-      cg.printPropertyHeader("identifier");
-      cg.printValue(m_identifier);
-      cg.printPropertyHeader("collection");
-      break;
-    case Expression::KindOfLetClause:
-      cg.printObjectHeader("LetClause", 3);
-      cg.printPropertyHeader("identifier");
-      cg.printValue(m_identifier);
-      cg.printPropertyHeader("expression");
-      break;
-    case Expression::KindOfIntoClause:
-      cg.printObjectHeader("IntoClause", 3);
-      cg.printPropertyHeader("identifier");
-      cg.printValue(m_identifier);
-      cg.printPropertyHeader("clauses");
-      cg.printExpressionVector(m_expression);
-      cg.printPropertyHeader("sourceLocation");
-      cg.printLocation(this);
-      cg.printObjectFooter();
-      return;
-    case Expression::KindOfWhereClause:
-      cg.printObjectHeader("WhereClause", 2);
-      cg.printPropertyHeader("condition");
-      break;
-    case Expression::KindOfSelectClause:
-      cg.printObjectHeader("SelectClause", 2);
-      cg.printPropertyHeader("expression");
-      break;
-    default:
-      assert(false);
-      break;
-  }
-  m_expression->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void SimpleQueryClause::outputPHP(

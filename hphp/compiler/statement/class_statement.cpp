@@ -32,7 +32,6 @@
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
 #include "hphp/compiler/statement/class_require_statement.h"
-#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/option.h"
 #include <sstream>
 #include <algorithm>
@@ -230,70 +229,6 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ClassStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 4;
-  if (m_attrList != nullptr) numProps++;
-  if (m_type == T_ABSTRACT
-      || m_type == T_FINAL
-      || m_type == T_STATIC) numProps++;
-  if (!m_originalParent.empty()) numProps++;
-  if (m_base != nullptr) numProps++;
-  if (!m_docComment.empty()) numProps++;
-
-  cg.printObjectHeader("TypeStatement", numProps);
-  if (m_attrList != nullptr) {
-    cg.printPropertyHeader("attributes");
-    cg.printExpressionVector(m_attrList);
-  }
-  if (m_type == T_ABSTRACT) {
-    cg.printPropertyHeader("modifiers");
-    cg.printModifierVector("abstract");
-  } else if (m_type == T_FINAL) {
-    cg.printPropertyHeader("modifiers");
-    cg.printModifierVector("final");
-  } else if (m_type == T_STATIC) {
-    cg.printPropertyHeader("modifiers");
-    cg.printModifierVector("abstract final");
-  }
-  cg.printPropertyHeader("kind");
-  if (m_type == T_TRAIT) {
-    cg.printValue(PHP_TRAIT);
-  } else if (m_type == T_ENUM) {
-    cg.printValue(PHP_ENUM);
-  } else {
-    cg.printValue(PHP_CLASS);
-  }
-  cg.printPropertyHeader("name");
-  cg.printValue(m_originalName);
-  //TODO: type parameters (task 3262469)
-  if (!m_originalParent.empty()) {
-    cg.printPropertyHeader("baseClass");
-    cg.printTypeExpression(m_originalParent);
-  }
-  if (m_base != nullptr) {
-    cg.printPropertyHeader("interfaces");
-    cg.printTypeExpressionVector(m_base);
-  }
-  cg.printPropertyHeader("block");
-  auto stmt = m_stmt;
-  if (m_promotedParameterCount  > 0) {
-    stmt = m_stmt->shallowClone();
-    for (int i = 0; i < m_promotedParameterCount; i++) {
-      stmt->removeElement(stmt->getCount()-1);
-    }
-  }
-  cg.printAsEnclosedBlock(stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  if (!m_docComment.empty()) {
-    cg.printPropertyHeader("comments");
-    cg.printValue(m_docComment);
-  }
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

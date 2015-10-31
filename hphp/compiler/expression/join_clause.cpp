@@ -90,29 +90,6 @@ void JoinClause::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void JoinClause::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 5;
-  if (!m_group.empty()) numProps++;
-  cg.printObjectHeader("JoinClause", numProps);
-  cg.printPropertyHeader("identifier");
-  cg.printValue(m_var);
-  cg.printPropertyHeader("collection");
-  m_coll->outputCodeModel(cg);
-  cg.printPropertyHeader("left");
-  m_left->outputCodeModel(cg);
-  cg.printPropertyHeader("right");
-  m_right->outputCodeModel(cg);
-  if (!m_group.empty()) {
-    cg.printPropertyHeader("group");
-    cg.printValue(m_group);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void JoinClause::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

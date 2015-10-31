@@ -28,6 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Variant;
+DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(IParseHandler);
 DECLARE_BOOST_TYPES(AnalysisResult);
@@ -298,11 +299,6 @@ public:
 
   void dump(int spc, AnalysisResultConstPtr ar);
   void dumpNode(int spc, AnalysisResultConstPtr ar);
-
-  /**
-   * Generates a serialized Code Model corresponding to this AST.
-   */
-  virtual void outputCodeModel(CodeGenerator &cg) = 0;
 
   /**
    * Called when generating code.

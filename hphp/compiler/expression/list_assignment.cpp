@@ -250,22 +250,6 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ListAssignment::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_array != nullptr ? 3 : 2;
-  cg.printObjectHeader("ListAssignmentExpression", numProps);
-  cg.printPropertyHeader("variables");
-  cg.printExpressionVector(m_variables);
-  if (m_array != nullptr) {
-    cg.printPropertyHeader("expression");
-    m_array->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ListAssignment::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

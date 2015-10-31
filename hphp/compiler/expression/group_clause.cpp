@@ -79,19 +79,6 @@ void GroupClause::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void GroupClause::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("GroupClause", 3);
-  cg.printPropertyHeader("collection");
-  m_coll->outputCodeModel(cg);
-  cg.printPropertyHeader("key");
-  m_key->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void GroupClause::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

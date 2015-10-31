@@ -26,7 +26,6 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/parser/hphp.tab.hpp"
-#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -223,21 +222,6 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
     }
   }
   return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void AssignmentExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("BinaryOpExpression", 4);
-  cg.printPropertyHeader("expression1");
-  m_variable->outputCodeModel(cg);
-  cg.printPropertyHeader("expression2");
-  cg.printExpression(m_value, m_ref);
-  cg.printPropertyHeader("operation");
-  cg.printValue(PHP_ASSIGNMENT);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

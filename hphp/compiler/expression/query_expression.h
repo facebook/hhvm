@@ -51,7 +51,6 @@ public:
     QueryExpressionPtr exp(new QueryExpression(*this));
     Expression::deepCopy(exp);
     exp->m_expressions = Clone(m_expressions);
-    exp->m_querystr = m_querystr;
     return exp;
   }
 
@@ -60,7 +59,6 @@ public:
     assert(m_expressions->getCount() > 0);
     return static_pointer_cast<ExpressionList>((*m_expressions)[0]);
   }
-  StringData* getQueryString() const { return m_querystr; }
   ClosureExpressionPtr getSelectClosure() const {
     if (m_expressions->getCount() < 2) return nullptr;
     return static_pointer_cast<ClosureExpression>((*m_expressions)[1]);
@@ -72,7 +70,6 @@ private:
   ClosureExpressionPtr clientSideRewrite(AnalysisResultPtr ar,
                                          FileScopePtr fileScope);
 
-  StringData* m_querystr;
 };
 
 DECLARE_BOOST_TYPES(OrderbyClause);

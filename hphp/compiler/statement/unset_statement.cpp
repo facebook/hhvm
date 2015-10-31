@@ -86,17 +86,6 @@ StatementPtr UnsetStatement::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void UnsetStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("UnsetStatement", 2);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void UnsetStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

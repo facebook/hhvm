@@ -173,22 +173,6 @@ StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ClassConstant::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_typeConstraint.empty() ? 2 : 3;
-  cg.printObjectHeader("ConstantStatement", numProps);
-  if (!m_typeConstraint.empty()) {
-    cg.printPropertyHeader("typeAnnotation");
-    cg.printTypeExpression(m_typeConstraint);
-  }
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ClassConstant::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

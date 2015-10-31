@@ -80,19 +80,6 @@ void WhileStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void WhileStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("WhileStatement", 3);
-  cg.printPropertyHeader("condition");
-  m_condition->outputCodeModel(cg);
-  cg.printPropertyHeader("block");
-  cg.printAsBlock(m_stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void WhileStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

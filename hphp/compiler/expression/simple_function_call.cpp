@@ -1017,25 +1017,6 @@ int SimpleFunctionCall::getLocalEffects() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void SimpleFunctionCall::outputCodeModel(CodeGenerator &cg) {
-  if (m_class || hasStaticClass()) {
-    cg.printObjectHeader("ClassMethodCallExpression", 4);
-    StaticClassName::outputCodeModel(cg);
-    cg.printPropertyHeader("methodName");
-  } else {
-    cg.printObjectHeader("SimpleFunctionCallExpression", 3);
-    cg.printPropertyHeader("functionName");
-  }
-  cg.printValue(m_origName);
-  cg.printPropertyHeader("arguments");
-  cg.printExpressionVector(m_params);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

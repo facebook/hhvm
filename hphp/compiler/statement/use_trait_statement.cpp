@@ -108,19 +108,6 @@ void UseTraitStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void UseTraitStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("UseTraitStatement", 3);
-  cg.printPropertyHeader("typeExpressions");
-  cg.printTypeExpressionVector(m_exp);
-  cg.printPropertyHeader("block");
-  cg.printAsBlock(m_stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void UseTraitStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

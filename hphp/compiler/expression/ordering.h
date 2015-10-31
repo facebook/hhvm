@@ -36,6 +36,13 @@ public:
 
   ExpressionPtr getKey() const { return m_key; }
   int getDirection() { return m_direction; }
+
+  enum Order {
+    PHP_NOT_SPECIFIED = 1,
+    PHP_ASCENDING = 2,
+    PHP_DESCENDING = 3,
+  };
+
 private:
   ExpressionPtr m_key;
   int m_direction;

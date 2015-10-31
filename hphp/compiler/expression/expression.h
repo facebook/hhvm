@@ -36,7 +36,6 @@
 #define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
   void analyzeProgram(AnalysisResultPtr ar) override;                   \
   ExpressionPtr clone() override;                                       \
-  void outputCodeModel(CodeGenerator &cg) override;                     \
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
 #define DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS                            \
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;                            \

@@ -292,6 +292,23 @@ public:
     PREGCNS(GREP_INVERT);
 #undef PREGCNS
 
+#ifdef WNOHANG
+    HHVM_RC_INT_SAME(WNOHANG);
+#endif
+#ifdef WUNTRACED
+    HHVM_RC_INT_SAME(WUNTRACED);
+#endif
+
+#ifdef PRIO_PGRP
+    HHVM_RC_INT_SAME(PRIO_PGRP);
+#endif
+#ifdef PRIO_USER
+    HHVM_RC_INT_SAME(PRIO_USER);
+#endif
+#ifdef PRIO_PROCESS
+    HHVM_RC_INT_SAME(PRIO_PROCESS);
+#endif
+
     HHVM_FE(preg_filter);
     HHVM_FE(preg_grep);
     HHVM_FE(preg_match);

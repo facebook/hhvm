@@ -26,18 +26,6 @@
             "value": 200
         },
         {
-            "name": "CASE_LOWER",
-            "value": 0
-        },
-        {
-            "name": "CASE_UPPER",
-            "value": 1
-        },
-        {
-            "name": "CHAR_MAX",
-            "value": 127
-        },
-        {
             "name": "CODESET",
             "value": 14
         },
@@ -52,14 +40,6 @@
         {
             "name": "CONNECTION_TIMEOUT",
             "value": 2
-        },
-        {
-            "name": "COUNT_NORMAL",
-            "value": 0
-        },
-        {
-            "name": "COUNT_RECURSIVE",
-            "value": 1
         },
         {
             "name": "CRNCYSTR",
@@ -134,64 +114,12 @@
             "value": 1
         },
         {
-            "name": "MSG_EAGAIN",
-            "value": 11
-        },
-        {
-            "name": "MSG_ENOMSG",
-            "value": 42
-        },
-        {
-            "name": "MSG_EXCEPT",
-            "value": 4
-        },
-        {
-            "name": "MSG_IPC_NOWAIT",
-            "value": 1
-        },
-        {
-            "name": "MSG_NOERROR",
-            "value": 2
-        },
-        {
-            "name": "NOEXPR",
-            "value": 327681
-        },
-        {
             "name": "NULL",
             "value": null
         },
         {
-            "name": "PATHINFO_BASENAME",
-            "value": 2
-        },
-        {
-            "name": "PATHINFO_DIRNAME",
-            "value": 1
-        },
-        {
-            "name": "PATHINFO_EXTENSION",
-            "value": 4
-        },
-        {
-            "name": "PATHINFO_FILENAME",
-            "value": 8
-        },
-        {
             "name": "PM_STR",
             "value": 131111
-        },
-        {
-            "name": "PRIO_PGRP",
-            "value": 1
-        },
-        {
-            "name": "PRIO_PROCESS",
-            "value": 0
-        },
-        {
-            "name": "PRIO_USER",
-            "value": 2
         },
         {
             "name": "RADIXCHAR",
@@ -204,38 +132,6 @@
         {
             "name": "TRUE",
             "value": true
-        },
-        {
-            "name": "UNKNOWN_TYPE",
-            "value": 999998
-        },
-        {
-            "name": "WNOHANG",
-            "value": 1
-        },
-        {
-            "name": "WSDL_CACHE_BOTH",
-            "value": 3
-        },
-        {
-            "name": "WSDL_CACHE_DISK",
-            "value": 1
-        },
-        {
-            "name": "WSDL_CACHE_MEMORY",
-            "value": 2
-        },
-        {
-            "name": "WSDL_CACHE_NONE",
-            "value": 0
-        },
-        {
-            "name": "WUNTRACED",
-            "value": 2
-        },
-        {
-            "name": "YESEXPR",
-            "value": 327680
         },
         {
             "name": "ZEND_THREAD_SAFE",

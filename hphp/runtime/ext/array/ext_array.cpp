@@ -80,10 +80,16 @@ DEFINE_CONSTANT(UCOL_NUMERIC_COLLATION);
 
 #undef DEFINE_CONSTANT
 
+enum class CaseMode {
+  LOWER = 0,
+  UPPER = 1,
+};
+
 TypedValue HHVM_FUNCTION(array_change_key_case,
                          ArrayArg input,
                          int64_t case_ /* = 0 */) {
-  return tvReturn(ArrayUtil::ChangeKeyCase(ArrNR(input.get()), !case_));
+  return tvReturn(ArrayUtil::ChangeKeyCase(ArrNR(input.get()),
+                                           (CaseMode)case_ == CaseMode::LOWER));
 }
 
 Variant HHVM_FUNCTION(array_chunk,
@@ -1256,6 +1262,11 @@ bool HHVM_FUNCTION(shuffle,
   return true;
 }
 
+enum class CountMode {
+  NORMAL = 0,
+  RECURSIVE = 1,
+};
+
 int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode /* = 0 */) {
@@ -1273,7 +1284,7 @@ int64_t HHVM_FUNCTION(count,
       return 1;
 
     case KindOfArray:
-      if (mode) {
+      if ((CountMode)mode == CountMode::RECURSIVE) {
         const Array& arr_var = var.toCArrRef();
         return php_count_recursive(arr_var);
       }
@@ -2791,6 +2802,12 @@ public:
 
     REGISTER_CONSTANT_VALUE(FILTER_USE_BOTH, 1);
     REGISTER_CONSTANT_VALUE(FILTER_USE_KEY,  2);
+
+    HHVM_RC_INT(CASE_LOWER,      CaseMode::LOWER);
+    HHVM_RC_INT(CASE_UPPER,      CaseMode::UPPER);
+
+    HHVM_RC_INT(COUNT_NORMAL,    CountMode::NORMAL);
+    HHVM_RC_INT(COUNT_RECURSIVE, CountMode::RECURSIVE);
 
     HHVM_RC_INT_SAME(SORT_ASC);
     HHVM_RC_INT_SAME(SORT_DESC);

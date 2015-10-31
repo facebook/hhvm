@@ -2482,6 +2482,10 @@ public:
     HHVM_RC_INT_SAME(LC_MESSAGES);
 #endif
 
+    HHVM_RC_INT_SAME(YESEXPR);
+    HHVM_RC_INT_SAME(NOEXPR);
+    HHVM_RC_INT(CHAR_MAX, std::numeric_limits<char>::max());
+
     Native::registerConstant<KindOfString>(
       s_HPHP_TRIM_CHARLIST.get(),
       k_HPHP_TRIM_CHARLIST.get()

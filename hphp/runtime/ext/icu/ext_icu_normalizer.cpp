@@ -114,25 +114,19 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define CONST_NORM(v) \
-  Native::registerClassConstant<KindOfInt64> \
-    (s_Normalizer.get(), makeStaticString("FORM_" #v), UNORM_NF ## v); \
-  Native::registerClassConstant<KindOfInt64> \
-    (s_Normalizer.get(), makeStaticString("NF" #v), UNORM_NF ## v)
-
-const StaticString s_NONE("NONE");
-
 void IntlExtension::initNormalizer() {
   HHVM_STATIC_ME(Normalizer, isNormalized);
   HHVM_STATIC_ME(Normalizer, normalize);
 
-  Native::registerClassConstant<KindOfInt64>
-    (s_Normalizer.get(), s_NONE.get(), UNORM_NONE);
-
-  CONST_NORM(D);
-  CONST_NORM(KD);
-  CONST_NORM(C);
-  CONST_NORM(KC);
+  HHVM_RCC_INT(Normalizer, NONE, UNORM_NONE);
+  HHVM_RCC_INT(Normalizer, FORM_D, UNORM_NFD);
+  HHVM_RCC_INT(Normalizer, NFD, UNORM_NFD);
+  HHVM_RCC_INT(Normalizer, FORM_KD, UNORM_NFKD);
+  HHVM_RCC_INT(Normalizer, NFKD, UNORM_NFKD);
+  HHVM_RCC_INT(Normalizer, FORM_C, UNORM_NFC);
+  HHVM_RCC_INT(Normalizer, NFC, UNORM_NFC);
+  HHVM_RCC_INT(Normalizer, FORM_KC, UNORM_NFKC);
+  HHVM_RCC_INT(Normalizer, NFKC, UNORM_NFKC);
 
   loadSystemlib("icu_normalizer");
 }

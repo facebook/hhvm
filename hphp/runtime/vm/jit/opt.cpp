@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/vm/jit/check.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -65,25 +64,6 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
 
   assertx(checkEverything(unit));
 
-  auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
-
-  if (shouldHHIRRelaxGuards() && !hasLoop) {
-    Timer _t(Timer::optimize_relaxGuards);
-    const bool simple = kind == TransKind::Profile;
-    RelaxGuardsFlags flags = (RelaxGuardsFlags)
-      (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
-    auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
-    if (changed) {
-      printUnit(6, unit, "after guard relaxation");
-      mandatoryDCE(unit);  // relaxGuards can leave unreachable preds.
-    }
-
-    if (RuntimeOption::EvalHHIRSimplification) {
-      doPass(unit, simplifyPass, DCE::Minimal);
-      doPass(unit, cleanCfg, DCE::None);
-    }
-  }
-
   fullDCE(unit);
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
@@ -117,13 +97,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     doPass(unit, optimizeRefcounts2, DCE::Full);
   }
 
-  if (RuntimeOption::EvalHHIRLICM) {
-    if (kind != TransKind::Profile && hasLoop) {
-      // The clean pass is just to stress lack of pre_headers for now, since
-      // LICM is a disabled prototype pass.
-      doPass(unit, cleanCfg, DCE::None);
-      doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
-    }
+  if (RuntimeOption::EvalHHIRLICM && RuntimeOption::EvalJitLoops &&
+      cfgHasLoop(unit) && kind != TransKind::Profile) {
+    doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
   }
 
   doPass(unit, removeExitPlaceholders, DCE::Full);

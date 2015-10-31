@@ -546,7 +546,6 @@ public:
   F(uint32_t, JitPGORelaxPercent,      100)                             \
   F(bool,     JitLoops,                true)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
-  F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \

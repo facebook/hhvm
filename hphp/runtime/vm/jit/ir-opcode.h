@@ -181,9 +181,6 @@ namespace std {
   template<> struct hash<HPHP::jit::Opcode> {
     size_t operator()(HPHP::jit::Opcode op) const { return uint16_t(op); }
   };
-  template<> struct hash<HPHP::jit::Type> {
-    size_t operator()(HPHP::jit::Type t) const { return t.hash(); }
-  };
 }
 
 namespace folly {

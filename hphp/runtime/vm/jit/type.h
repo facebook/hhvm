@@ -793,9 +793,25 @@ Type ldRefReturn(Type typeParam);
  */
 Type negativeCheckType(Type typeParam, Type srcType);
 
+/*
+ * Returns the least specific supertype of `t' that maintains the properties
+ * required by `cat'.
+ */
+Type relaxType(Type t, DataTypeCategory cat);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace std {
+  template<> struct hash<HPHP::jit::Type> {
+    size_t operator()(HPHP::jit::Type t) const { return t.hash(); }
+  };
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 #define incl_HPHP_JIT_TYPE_INL_H_
 #include "hphp/runtime/vm/jit/type-inl.h"

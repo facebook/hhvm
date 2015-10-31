@@ -835,4 +835,38 @@ Type boxType(Type t) {
 
 //////////////////////////////////////////////////////////////////////
 
+static Type relaxCell(Type t, DataTypeCategory cat) {
+  assertx(t <= TCell);
+
+  switch (cat) {
+    case DataTypeGeneric:
+      return TGen;
+
+    case DataTypeCountness:
+      return !t.maybe(TCounted) ? TUncounted : t.unspecialize();
+
+    case DataTypeCountnessInit:
+      if (t <= TUninit) return TUninit;
+      return (!t.maybe(TCounted) && !t.maybe(TUninit))
+        ? TUncountedInit : t.unspecialize();
+
+    case DataTypeSpecific:
+      return t.unspecialize();
+
+    case DataTypeSpecialized:
+      assertx(t.isSpecialized());
+      return t;
+  }
+
+  not_reached();
+}
+
+Type relaxType(Type t, DataTypeCategory cat) {
+  always_assert_flog(t <= TGen && t != TBottom, "t = {}", t);
+  if (cat == DataTypeGeneric) return TGen;
+  auto const relaxed =
+    (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, cat);
+  return t <= TCell ? relaxed : relaxed | TBoxedInitCell;
+}
+
 }}

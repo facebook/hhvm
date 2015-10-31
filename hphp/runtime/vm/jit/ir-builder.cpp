@@ -26,7 +26,6 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -35,6 +34,7 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
 
 namespace HPHP { namespace jit {
 
@@ -64,6 +64,51 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 }
+
+
+//////////////////////////////////////////////////////////////////////
+
+/* For each possible dest type, determine if its type might relax. */
+#define ND             always_assert(false);
+#define D(t)           return false; // fixed type
+#define DofS(n)        return typeMightRelax(inst->src(n));
+#define DRefineS(n)    return true;  // typeParam may relax
+#define DParamMayRelax return true;  // typeParam may relax
+#define DParam         return false;
+#define DParamPtr(k)   return false;
+#define DUnboxPtr      return false;
+#define DBoxPtr        return false;
+#define DAllocObj      return false; // fixed type from ExtraData
+#define DArrPacked     return false; // fixed type
+#define DArrElem       assertx(inst->is(LdStructArrayElem, ArrayGet));    \
+                         return typeMightRelax(inst->src(0));
+#define DCol           return false; // fixed in bytecode
+#define DThis          return false; // fixed type from ctx class
+#define DCtx           return false;
+#define DMulti         return true;  // DefLabel; value could be anything
+#define DSetElem       return false; // fixed type
+#define DBuiltin       return false; // from immutable typeParam
+#define DSubtract(n,t) DofS(n)
+#define DCns           return false; // fixed type
+
+bool typeMightRelax(const SSATmp* tmp) {
+  if (tmp == nullptr) return true;
+
+  if (tmp->isA(TCls) || tmp->type() == TGen) return false;
+  if (canonical(tmp)->inst()->is(DefConst)) return false;
+
+  auto inst = tmp->inst();
+  // Do the rest based on the opcode's dest type
+  switch (inst->op()) {
+#   define O(name, dst, src, flags) case name: dst
+  IR_OPCODES
+#   undef O
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)

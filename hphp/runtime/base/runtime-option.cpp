@@ -436,10 +436,6 @@ static inline std::string pgoRegionSelectorDefault() {
 #endif
 }
 
-static inline bool hhirRelaxGuardsDefault() {
-  return false;
-}
-
 static inline bool evalJitDefault() {
 // Disable JIT for PPC64 - Port under development
 #if defined(__CYGWIN__) || defined(_MSC_VER) || defined(__powerpc64__)

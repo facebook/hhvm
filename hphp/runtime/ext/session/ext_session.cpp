@@ -124,9 +124,6 @@ struct Session {
   int64_t hash_bits_per_character{0};
 };
 
-const int64_t k_PHP_SESSION_DISABLED = Session::Disabled;
-const int64_t k_PHP_SESSION_NONE     = Session::None;
-const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
 struct SessionRequestData final : Session {
@@ -1862,23 +1859,13 @@ void ext_session_request_shutdown() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_PHP_SESSION_DISABLED("PHP_SESSION_DISABLED");
-const StaticString s_PHP_SESSION_NONE("PHP_SESSION_NONE");
-const StaticString s_PHP_SESSION_ACTIVE("PHP_SESSION_ACTIVE");
-
 static class SessionExtension final : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_SESSION_DISABLED.get(), k_PHP_SESSION_DISABLED
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_SESSION_NONE.get(), k_PHP_SESSION_NONE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PHP_SESSION_ACTIVE.get(), k_PHP_SESSION_ACTIVE
-    );
+    HHVM_RC_INT(PHP_SESSION_DISABLE, Session::Disabled);
+    HHVM_RC_INT(PHP_SESSION_NONE, Session::None);
+    HHVM_RC_INT(PHP_SESSION_ACTIVE, Session::Active);
 
     HHVM_FE(session_status);
     HHVM_FE(session_module_name);

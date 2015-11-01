@@ -44,6 +44,7 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/class_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
@@ -177,7 +178,6 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 
   newScope();
   m_staticVars.emplace_back();
-  m_inTrait = false;
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
@@ -279,6 +279,15 @@ void Parser::completeScope(BlockScopePtr inner) {
   if (m_scopes.size()) {
     m_scopes.back().push_back(inner);
   }
+}
+
+const std::string& Parser::clsName() const {
+  const static std::string empty = "";
+  return m_clsContexts.empty () ? empty : m_clsContexts.top().name;
+}
+
+bool Parser::inTrait() const {
+  return m_clsContexts.empty () ? false : m_clsContexts.top().type == T_TRAIT;
 }
 
 LabelScopePtr Parser::getLabelScope() const {
@@ -714,15 +723,15 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   ScalarExpressionPtr exp;
   switch (type) {
     case T_METHOD_C:
-      if (m_inTrait) {
+      if (inTrait()) {
         exp = NEW_EXP(ScalarExpression, type, scalar->text(),
-                      m_clsName + "::" + m_funcName);
+                      clsName() + "::" + m_funcName);
       } else {
         exp = NEW_EXP(ScalarExpression, type, scalar->text());
       }
       break;
     case T_CLASS_C:
-      if (m_inTrait) {
+      if (inTrait()) {
         // Inside traits we already did the magic for static::class so lets
         // reuse that
         out->exp = NEW_EXP(SimpleFunctionCall, "get_class", true,
@@ -741,7 +750,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
       break;
     case T_TRAIT_C:
       exp = NEW_EXP(ScalarExpression, type, scalar->text(),
-                    m_inTrait ? m_clsName : "");
+                    inTrait() ? clsName() : "");
       break;
     case T_NS_C:
       exp = NEW_EXP(ScalarExpression, type, m_namespace);
@@ -1022,7 +1031,7 @@ void Parser::onClassClass(Token &out, Token &cls, Token &name,
     PARSE_ERROR("::class can only be used on scalars");
   }
   if (cls->same("self") || cls->same("parent") || cls->same("static")) {
-    if (cls->same("self") && m_inTrait) {
+    if (cls->same("self") && inTrait()) {
       // Sooo... self:: works dynamically for everything in a trait except
       // for self::CLASS where it returns the trait name. Great...
       onScalar(out, T_TRAIT_C, cls);
@@ -1096,7 +1105,7 @@ void Parser::checkFunctionContext(const std::string& funcName,
                 funcName.c_str());
   }
 
-  if (modifiers->isAsync() && !canBeAsyncOrGenerator(funcName, m_clsName)) {
+  if (modifiers->isAsync() && !canBeAsyncOrGenerator(funcName, clsName())) {
     PARSE_ERROR("cannot declare constructors, destructors, and "
                     "magic methods such as '%s' as async",
                 funcName.c_str());
@@ -1151,7 +1160,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
 std::string Parser::getFunctionName(FunctionType type, Token* name) {
   switch (type) {
     case FunctionType::Closure:
-      return newClosureName(m_namespace, m_clsName, m_containingFuncName);
+      return newClosureName(m_namespace, clsName(), m_containingFuncName);
     case FunctionType::Function:
       assert(name);
       if (!m_lambdaMode) {
@@ -1397,13 +1406,19 @@ void Parser::onClassStart(int type, Token &name) {
 
   pushComment();
   newScope();
-  m_clsName = name.text();
-  m_inTrait = type == T_TRAIT;
+  m_clsContexts.push(ClassContext(type, name.text()));
 }
 
 void Parser::onClass(Token &out, int type, Token &name, Token &base,
                      Token &baseInterface, Token &stmt, Token *attr,
                      Token *enumBase) {
+  out->stmt = onClassHelper(type, name->text(), base, baseInterface, stmt, attr,
+      enumBase);
+}
+
+StatementPtr Parser::onClassHelper(int type, const std::string &name,
+                                   Token &base, Token &baseInterface,
+                                   Token &stmt, Token *attr, Token *enumBase) {
   StatementListPtr stmtList;
   if (stmt->stmt) {
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
@@ -1418,7 +1433,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
   }
 
   ClassStatementPtr cls = NEW_STMT
-    (ClassStatement, type, name->text(), base->text(),
+    (ClassStatement, type, name, base->text(),
      dynamic_pointer_cast<ExpressionList>(baseInterface->exp),
      popComment(), stmtList, attrList, enumBaseTy);
 
@@ -1450,17 +1465,43 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
     cls->getStmts()->addElement(var);
   }
 
-  out->stmt = cls;
+  StatementPtr result = cls;
   {
     cls->onParse(m_ar, m_file);
   }
   completeScope(cls->getClassScope());
   if (cls->ignored()) {
-    out->stmt = NEW_STMT0(StatementList);
+    result = NEW_STMT0(StatementList);
   }
-  m_clsName.clear();
-  m_inTrait = false;
-  registerAlias(name.text());
+  m_clsContexts.pop();
+  registerAlias(name);
+
+  return result;
+}
+
+void Parser::onClassExpressionStart() {
+  pushClass(false);
+  pushComment();
+  newScope();
+  auto name = newAnonClassName("class@anonymous", m_namespace, clsName(),
+      m_containingFuncName);
+  m_clsContexts.push(ClassContext(T_CLASS, name));
+}
+
+void Parser::onClassExpression(Token &out, Token& args, Token &base,
+                               Token &baseInterface, Token &stmt) {
+  auto name = clsName();
+  auto cls_stmt = dynamic_pointer_cast<ClassStatement>(
+    onClassHelper(T_CLASS, name, base, baseInterface, stmt,
+      nullptr, nullptr));
+  m_file->addAnonClass(cls_stmt);
+  auto cls = NEW_EXP(
+    ClassExpression,
+    cls_stmt,
+    dynamic_pointer_cast<ExpressionList>(args->exp)
+  );
+  out->exp = cls;
+  popClass();
 }
 
 void Parser::onEnum(Token &out, Token &name, Token &baseTy,
@@ -1850,7 +1891,7 @@ void Parser::setIsGenerator() {
     PARSE_ERROR("Yield can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
+  if (!canBeAsyncOrGenerator(m_funcName, clsName())) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                 "magic methods");
@@ -1889,7 +1930,7 @@ void Parser::setIsAsync() {
     PARSE_ERROR("'await' can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(m_funcName, m_clsName)) {
+  if (!canBeAsyncOrGenerator(m_funcName, clsName())) {
     invalidAwait();
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");

@@ -131,6 +131,7 @@ public:
   x(ConstantExpression,         Const) \
   x(EncapsListExpression,        None) \
   x(ClosureExpression,           None) \
+  x(ClassExpression,             None) \
   x(YieldExpression,             None) \
   x(AwaitExpression,             None) \
   x(UserAttribute,               None)

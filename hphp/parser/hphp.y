@@ -1184,6 +1184,12 @@ class_declaration_statement:
                                          _p->popTypeScope();}
 ;
 
+class_expression:
+    T_CLASS                            { _p->onClassExpressionStart(); }
+    ctor_arguments
+    extends_from implements_list '{'
+    class_statement_list '}'           { _p->onClassExpression($$, $3, $4, $5, $7); }
+
 trait_declaration_statement:
     T_TRAIT
     trait_decl_name                    { $2.setText(_p->nsClassDecl($2.text()));
@@ -1804,6 +1810,7 @@ expr_with_parens:
     '(' expr_with_parens ')'           { $$ = $2;}
   | T_NEW class_name_reference
     ctor_arguments                     { _p->onNewObject($$, $2, $3);}
+  | T_NEW class_expression             { $$ = $2;}
   | T_CLONE expr                       { UEXP($$,$2,T_CLONE,1);}
   | xhp_tag                            { $$ = $1;}
   | collection_literal                 { $$ = $1;}

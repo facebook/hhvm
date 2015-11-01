@@ -46,6 +46,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/class_constant_expression.h"
+#include "hphp/compiler/expression/class_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/dynamic_variable.h"
@@ -2602,6 +2603,10 @@ void EmitterVisitor::visit(FileScopePtr file) {
     enterRegion(region);
     SCOPE_EXIT { leaveRegion(region); };
 
+    for (auto cls : m_file->getAnonClasses()) {
+      emitClass(e, cls->getClassScope(), true);
+    }
+
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
       e.setTempLocation(s->getRange());
@@ -4759,6 +4764,19 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     auto body = static_pointer_cast<MethodStatement>(ce->getClosureFunction());
     postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
 
+    return true;
+  }
+  case Construct::KindOfClassExpression: {
+    auto ce = static_pointer_cast<ClassExpression>(node);
+    // The parser generated a unique name for the class, use that
+    std::string clsName = ce->getClass()->getOriginalName();
+    auto ssClsName = makeStaticString(clsName);
+    auto fpiStart = m_ue.bcPos();
+    auto params = ce->getParams();
+    int numParams = params ? params->getCount() : 0;
+    e.FPushCtorD(numParams, ssClsName);
+    emitCall(e, ce, ce->getParams(), fpiStart);
+    e.PopR();
     return true;
   }
   case Construct::KindOfYieldExpression: {

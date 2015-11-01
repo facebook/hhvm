@@ -30,6 +30,8 @@
 #include "hphp/compiler/hphp.h"
 #include "hphp/compiler/json.h"
 
+#include "hphp/compiler/statement/class_statement.h"
+
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/md5.h"
 
@@ -122,6 +124,8 @@ public:
   const StringToFunctionScopePtrVecMap *getRedecFunctions() {
     return m_redeclaredFunctions;
   }
+  void addAnonClass(ClassStatementPtr stmt);
+  const std::vector<ClassStatementPtr>& getAnonClasses() const;
 
   /**
    * For separate compilation
@@ -193,6 +197,7 @@ private:
   StatementListPtr m_tree;
   StringToFunctionScopePtrVecMap *m_redeclaredFunctions;
   StringToClassScopePtrVecMap m_classes;      // name => class
+  std::vector<ClassStatementPtr> m_anonClasses;
   FunctionScopeRawPtr m_pseudoMain;
 
   std::string m_pseudoMainName;

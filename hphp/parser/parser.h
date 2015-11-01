@@ -96,6 +96,11 @@ public:
       const std::string &namespaceName,
       const std::string &className,
       const std::string &funcName);
+  std::string newAnonClassName(
+      const std::string &prefix,
+      const std::string &namespaceName,
+      const std::string &className,
+      const std::string &funcName);
 
 public:
   ParserBase(Scanner &scanner, const char *fileName);
@@ -227,7 +232,7 @@ protected:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   hphp_string_imap<std::string> m_aliases;
-  hphp_string_imap<int> m_seenClosures;
+  hphp_string_imap<int> m_seenAnonClasses;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

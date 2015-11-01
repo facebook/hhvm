@@ -214,7 +214,7 @@ SSATmp* opt_dirname(IRGS& env, uint32_t numArgs) {
 
   // Return the directory portion of the path
   auto const path = top(env, BCSPOffset{0})->strVal()->toCppString();
-  return cns(env, makeStaticString(HHVM_FN(dirname(path))));
+  return cns(env, makeStaticString(HHVM_FN(dirname)(path)));
 }
 
 /*

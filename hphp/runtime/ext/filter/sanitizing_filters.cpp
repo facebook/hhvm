@@ -227,7 +227,7 @@ Variant php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL) {
   if (!(flags & k_FILTER_FLAG_NO_ENCODE_QUOTES)) {
     quotes = k_ENT_QUOTES;
   } else {
-    quotes = k_ENT_NOQUOTES;
+    quotes = k_ENT_HTML_QUOTE_NONE;
   }
   return HHVM_FN(htmlentities)(value, quotes);
 }

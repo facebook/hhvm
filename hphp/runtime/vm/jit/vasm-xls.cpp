@@ -112,6 +112,26 @@ constexpr int kInvalidSpillSlot = -1;
  * of the last range.  Allowing a use exactly at the end facilitates lifetime
  * splitting when the use at the position of an instruction clobbers registers
  * as a side effect, e.g. a call.
+ *
+ * The intuition for allowing uses at the end of an Interval is that, in truth,
+ * the picture at a given position looks like this:
+ *
+ *          | [s]
+ *          |
+ *    +-----|-------------+ copy{s, d}  <-+
+ *    |     v             |               |
+ *    + - - - - - - - - - +               +--- position n
+ *    |             |     |               |
+ *    +-------------|-----+             <-+
+ *                  |
+ *              [d] v
+ *
+ * We represent an instruction with a single position `n'.  All the use(s) and
+ * def(s) of that instruction are live at some point within it, but their
+ * lifetimes nonetheless do not overlap.  Since we don't represent instructions
+ * using two position numbers, instead, we allow uses on the open end side of
+ * Intervals, because they don't actually conflict with, e.g., a def of another
+ * Interval that starts at the same position.
  */
 struct Interval {
   explicit Interval(Vreg r) : parent(nullptr), vreg(r) {}
@@ -197,6 +217,8 @@ public:
   Vconst val;
 };
 
+const unsigned kMaxPos = UINT_MAX; // "infinity" use position
+
 /*
  * Bitset of Vreg numbers.
  */
@@ -207,13 +229,6 @@ template<class Fn> void forEach(const LiveSet& bits, Fn fn) {
     fn(Vreg(i));
   }
 }
-
-/*
- * A map from PhysReg number to position.
- */
-using PosVec = PhysReg::Map<unsigned>;
-
-//////////////////////////////////////////////////////////////////////////////
 
 /*
  * Sack of inputs and pre-computed data used by the main XLS algorithm.
@@ -257,89 +272,7 @@ public:
   jit::vector<LiveSet> livein;
 };
 
-/*
- * Extended Linear Scan register allocator over vasm virtual registers (Vregs).
- *
- * This encapsulates the intermediate data structures used during the algorithm
- * so we don't have to pass them around everywhere.
- */
-struct Vxls {
-  Vxls(Vunit& unit, const VxlsContext& ctx)
-    : unit(unit)
-    , ctx(ctx)
-    , m_abi(ctx.abi)
-    , m_sp(ctx.sp)
-    , m_tmp(ctx.tmp)
-    , blocks(ctx.blocks)
-    , block_ranges(ctx.block_ranges)
-    , spill_offsets(ctx.spill_offsets)
-    , livein(ctx.livein)
-  {}
-  ~Vxls();
-
-  // phases
-  void allocate();
-  void assignRegisters();
-  void allocateSpillSpace();
-
-  // utilities
-  void update(unsigned pos);
-  void allocate(Interval*);
-  void allocBlocked(Interval*);
-  void assignReg(Interval*, PhysReg);
-  unsigned constrain(Interval*, RegSet&);
-  LiveRange findBlockRange(unsigned pos);
-  void spill(Interval*);
-  void spillAfter(Interval* ivl, unsigned pos);
-  void spillOthers(Interval* current, PhysReg r);
-  void assignSpill(Interval* ivl);
-  PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
-  unsigned nearestSplitBefore(unsigned pos);
-
-public:
-  /*
-   * Comparison function for pending priority queue.
-   *
-   * std::priority_queue requires a less operation, but sorts the heap
-   * highest-first; we need the opposite (lowest-first), so use greater-than.
-   */
-  struct Compare {
-    bool operator()(const Interval* i1, const Interval* i2) {
-      return i1->start() > i2->start();
-    }
-  };
-
-public:
-  Vunit& unit;
-  const VxlsContext& ctx;
-
-  // Aliased VxlsContext members. XXX: Kill these.
-  const Abi& m_abi;
-  PhysReg m_sp;
-  PhysReg m_tmp;
-  const jit::vector<Vlabel>& blocks;
-  const jit::vector<LiveRange>& block_ranges;
-  const jit::vector<int>& spill_offsets;
-  const jit::vector<LiveSet>& livein;
-
-  // Parent intervals, null if unused.
-  jit::vector<Interval*> intervals;
-  // Intervals sorted by Interval start.
-  jit::priority_queue<Interval*,Compare> pending;
-  // Intervals that overlap.
-  jit::vector<Interval*> active, inactive;
-
-  // Number of intervals spilled.
-  unsigned num_spills{0};
-  // Number of spill slots used.
-  size_t used_spill_slots{0};
-  // Last position each spill slot was owned; kMaxPos means currently used.
-  jit::array<unsigned, kMaxSpillSlots> spill_slots{{0}};
-};
-
-const unsigned kMaxPos = UINT_MAX; // "infinity" use position
-
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Interval.
 
 unsigned Interval::findRange(unsigned pos) const {
@@ -397,8 +330,14 @@ Interval* Interval::childAt(unsigned pos) {
   return nullptr;
 }
 
-// Return the next intersection point between current and other, or kMaxPos
-// if they never intersect.
+/*
+ * Return the next intersection point between current and other, or kMaxPos if
+ * they never intersect.
+ *
+ * Note that if two intervals intersect, the first point of intersection will
+ * always be the start of one of the intervals, because SSA ensures that a def
+ * dominates all uses, and hence all live ranges as well.
+ */
 unsigned nextIntersect(const Interval* current, const Interval* other) {
   assertx(!current->fixed());
   if (!current->parent && !other->parent && !other->fixed()) {
@@ -483,7 +422,7 @@ Interval* Interval::split(unsigned pos, bool keep_uses) {
   return child;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Extended Linear Scan is based on Wimmer & Franz "Linear Scan Register
@@ -546,7 +485,8 @@ Interval* Interval::split(unsigned pos, bool keep_uses) {
 /*
  * Printing utilities.
  */
-void dumpIntervals(const jit::vector<Interval*>& intervals);
+void dumpIntervals(const jit::vector<Interval*>& intervals,
+                   unsigned num_spills);
 void printIntervals(const char* caption,
                     const Vunit& unit, const VxlsContext& ctx,
                     const jit::vector<Interval*>& intervals);
@@ -1069,17 +1009,100 @@ jit::vector<Interval*> buildIntervals(const Vunit& unit,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Register allocation.
 
-Vxls::~Vxls() {
-  for (auto ivl : intervals) {
-    for (Interval* next; ivl; ivl = next) {
-      next = ivl->next;
-      jit::destroy(ivl);
+/*
+ * A map from PhysReg number to position.
+ */
+using PosVec = PhysReg::Map<unsigned>;
+
+/*
+ * Find the PhysReg with the highest position in `posns'.
+ */
+PhysReg find_farthest(const PosVec& posns) {
+  unsigned max = 0;
+  PhysReg r1 = *posns.begin();
+  for (auto r : posns) {
+    if (posns[r] > max) {
+      r1 = r;
+      max = posns[r];
     }
   }
+  return r1;
 }
 
-void Vxls::assignRegisters() {
+/*
+ * Information about spills generated by register allocation.
+ *
+ * Used for the allocateSpillSpace() pass which inserts the instructions that
+ * create spill space on the stack.
+ */
+struct SpillInfo {
+  // Number of intervals spilled.
+  unsigned num_spills{0};
+  // Number of spill slots used.
+  size_t used_spill_slots{0};
+};
+
+/*
+ * Extended Linear Scan register allocator over vasm virtual registers (Vregs).
+ *
+ * This encapsulates the intermediate data structures used during the
+ * allocation phase of the algorithm so we don't have to pass them around
+ * everywhere.
+ */
+struct Vxls {
+  Vxls(const VxlsContext& ctx,
+       const jit::vector<Interval*>& intervals)
+    : ctx(ctx)
+    , intervals(intervals)
+  {}
+
+  SpillInfo go();
+
+private:
+  void assignSpill(Interval* ivl);
+  void spill(Interval*);
+  void assignReg(Interval*, PhysReg);
+
+  unsigned nearestSplitBefore(unsigned pos);
+  unsigned constrain(Interval*, RegSet&);
+  PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
+
+  void update(Interval*);
+  void allocate(Interval*);
+  void allocBlocked(Interval*);
+  void spillOthers(Interval* current, PhysReg r);
+
+private:
+  /*
+   * Comparison function for pending priority queue.
+   *
+   * std::priority_queue requires a less operation, but sorts the heap
+   * highest-first; we need the opposite (lowest-first), so use greater-than.
+   */
+  struct Compare {
+    bool operator()(const Interval* i1, const Interval* i2) {
+      return i1->start() > i2->start();
+    }
+  };
+
+private:
+  const VxlsContext& ctx;
+
+  // Parent intervals, null if unused.
+  const jit::vector<Interval*>& intervals;
+  // Intervals sorted by Interval start.
+  jit::priority_queue<Interval*,Compare> pending;
+  // Intervals that overlap.
+  jit::vector<Interval*> active, inactive;
+  // Last position each spill slot was owned; kMaxPos means currently used.
+  jit::array<unsigned, kMaxSpillSlots> spill_slots{{0}};
+  // Stats on spills.
+  SpillInfo spill_info;
+};
+
+SpillInfo Vxls::go() {
   for (auto ivl : intervals) {
     if (!ivl) continue;
     if (ivl->fixed()) {
@@ -1093,14 +1116,105 @@ void Vxls::assignRegisters() {
   while (!pending.empty()) {
     auto current = pending.top();
     pending.pop();
-    update(current->start());
+    update(current);
     allocate(current);
+  }
+  return spill_info;
+}
+
+/*
+ * Assign the next available spill slot to `ivl'.
+ */
+void Vxls::assignSpill(Interval* ivl) {
+  assertx(!ivl->fixed() && ivl->parent);
+
+  auto leader = ivl->parent;
+
+  if (leader->slot != kInvalidSpillSlot) {
+    ivl->slot = leader->slot;
+    return;
+  }
+  auto& used_spill_slots = spill_info.used_spill_slots;
+
+  auto const assign_slot = [&] (size_t slot) {
+    ivl->slot = leader->slot = slot;
+    ++spill_info.num_spills;
+
+    spill_slots[slot] = kMaxPos;
+    if (!ivl->wide) {
+      used_spill_slots = std::max(used_spill_slots, slot + 1);
+    } else {
+      used_spill_slots = std::max(used_spill_slots, slot + 2);
+      spill_slots[slot + 1] = kMaxPos;
+    }
+  };
+
+  // Assign spill slots.  We track the highest position at which a spill slot
+  // was owned, and only reassign it to a Vreg if its lifetime interval
+  // (including all splits) is strictly above that high water mark.
+  if (!ivl->wide) {
+    for (size_t slot = 0, n = spill_slots.size(); slot < n; ++slot) {
+      if (leader->start() >= spill_slots[slot]) {
+        return assign_slot(slot);
+      }
+    }
+  } else {
+    for (size_t slot = 0, n = spill_slots.size() - 1; slot < n; slot += 2) {
+      if (leader->start() >= spill_slots[slot] &&
+          leader->start() >= spill_slots[slot + 1]) {
+        return assign_slot(slot);
+      }
+    }
+  }
+
+  // Ran out of spill slots.
+  ONTRACE(kRegAllocLevel, dumpIntervals(intervals, spill_info.num_spills));
+  TRACE(1, "vxls-punt TooManySpills\n");
+  PUNT(LinearScan_TooManySpills);
+}
+
+/*
+ * Assign `r' to `ivl'.
+ */
+void Vxls::assignReg(Interval* ivl, PhysReg r) {
+  if (!ivl->fixed() && ivl->uses.empty()) {
+    ivl->reg = InvalidReg;
+    if (!ivl->constant) assignSpill(ivl);
+  } else {
+    ivl->reg = r;
+    active.push_back(ivl);
   }
 }
 
-// Update active and inactive lists based on pos
-void Vxls::update(unsigned pos) {
-  auto free_spill_slot = [this] (Interval* ivl) {
+/*
+ * Spill `ivl' from its start until its first register use.
+ *
+ * Spill `ivl' if there is no use; otherwise split the interval just before the
+ * use, and enqueue the second part.
+ */
+void Vxls::spill(Interval* ivl) {
+  unsigned first_use = ivl->firstUse();
+  if (first_use <= ivl->end()) {
+    auto split_pos = nearestSplitBefore(first_use);
+    if (split_pos <= ivl->start()) {
+      // This only can happen if we need more than the available registers
+      // at a single position.  It can happen in phijmp or callargs.
+      TRACE(1, "vxls-punt RegSpill\n");
+      PUNT(RegSpill); // cannot split before first_use
+    }
+    pending.push(ivl->split(split_pos));
+  }
+  ivl->reg = InvalidReg;
+  if (!ivl->constant) assignSpill(ivl);
+}
+
+/*
+ * Update the active and inactive lists for the start of `current'.
+ */
+void Vxls::update(Interval* current) {
+  auto const pos = current->start();
+
+  auto const free_spill_slot = [this] (Interval* ivl) {
     assertx(!ivl->next);
     auto slot = ivl->leader()->slot;
 
@@ -1114,60 +1228,67 @@ void Vxls::update(unsigned pos) {
     }
   };
 
-  // check for active intervals in that are expired or inactive
-  auto end = active.end();
-  for (auto i = active.begin(); i != end;) {
-    auto ivl = *i;
-    if (pos >= ivl->end()) {
-      *i = *--end;
-      if (!ivl->next) free_spill_slot(ivl);
-    } else if (!ivl->covers(pos)) {
-      *i = *--end;
-      inactive.push_back(ivl);
-    } else {
-      i++;
+  // Check for active/inactive intervals that have expired or which need their
+  // polarity flipped.
+  auto const update_list = [&] (jit::vector<Interval*>& target,
+                                jit::vector<Interval*>& other,
+                                bool is_active) {
+    auto end = target.end();
+    for (auto i = target.begin(); i != end;) {
+      auto ivl = *i;
+      if (pos >= ivl->end()) {
+        *i = *--end;
+        if (!ivl->next) free_spill_slot(ivl);
+      } else if (is_active ? !ivl->covers(pos) : ivl->covers(pos)) {
+        *i = *--end;
+        other.push_back(ivl);
+      } else {
+        i++;
+      }
     }
-  }
-  active.erase(end, active.end());
-
-  // check for intervals that are expired or active
-  end = inactive.end();
-  for (auto i = inactive.begin(); i != end;) {
-    auto ivl = *i;
-    if (pos >= ivl->end()) {
-      *i = *--end;
-      if (!ivl->next) free_spill_slot(ivl);
-    } else if (ivl->covers(pos)) {
-      *i = *--end;
-      active.push_back(ivl);
-    } else {
-      i++;
-    }
-  }
-  inactive.erase(end, inactive.end());
+    target.erase(end, target.end());
+  };
+  update_list(active, inactive, true);
+  update_list(inactive, active, false);
 }
 
-PhysReg find(const PosVec& posns) {
-  unsigned max = 0;
-  PhysReg r1 = *posns.begin();
-  for (auto r : posns) {
-    if (posns[r] > max) {
-      r1 = r;
-      max = posns[r];
-    }
-  }
-  return r1;
+/*
+ * Return the closest split position on or before `pos'.
+ *
+ * The result might be exactly on an edge, or in-between instruction positions.
+ */
+unsigned Vxls::nearestSplitBefore(unsigned pos) {
+  auto b = blockFor(ctx, pos);
+  auto range = ctx.block_ranges[b];
+  if (pos == range.start) return pos;
+  return (pos - 1) | 1;
 }
 
-// Constrain the allowable registers for ivl by inspecting uses, and
-// return the latest position for which that set is valid.
+/*
+ * Constrain the allowable registers for `ivl' by inspecting uses.
+ *
+ * Returns the latest position for which `allow' (which we populate) is valid.
+ * We use this return value to fill the `free_until' PosVec in allocate()
+ * below.  That data structure tracks the first position at which a register is
+ * /unavailable/, so it would appear that constrain()'s return value is
+ * off-by-one.
+ *
+ * In fact, it is not; we actually /need/ this position offsetting because of
+ * our leniency towards having uses at an Interval's end() position.  If we
+ * fail to constrain on an end-position use, we must still split and spill.
+ * (In contrast, if we intersect with another Interval on an end position use,
+ * it's okay because SSA tells us that the conflict must be the other
+ * Interval's def position, and a use and a def at the same position don't
+ * actually conflict; see the fun ASCII diagram that adorns the definition of
+ * Interval).
+ */
 unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
-  auto const any = m_abi.unreserved() - m_abi.sf; // Any but not flags.
-  allow = m_abi.unreserved();
+  auto const any = ctx.abi.unreserved() - ctx.abi.sf; // Any but not flags.
+  allow = ctx.abi.unreserved();
   for (auto& u : ivl->uses) {
-    auto need = u.kind == Constraint::Simd ? m_abi.simdUnreserved :
-                u.kind == Constraint::Gpr ? m_abi.gpUnreserved :
-                u.kind == Constraint::Sf ? m_abi.sf :
+    auto need = u.kind == Constraint::Simd ? ctx.abi.simdUnreserved :
+                u.kind == Constraint::Gpr ? ctx.abi.gpUnreserved :
+                u.kind == Constraint::Sf ? ctx.abi.sf :
                 any; // Any or CopySrc
     if ((allow & need).empty()) {
       // cannot satisfy constraints; must split before u.pos
@@ -1178,34 +1299,33 @@ unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
   return kMaxPos;
 }
 
-// return the closest split position on or before pos.
-// the result might be exactly on an edge, or inbetween normal positions.
-unsigned Vxls::nearestSplitBefore(unsigned pos) {
-  auto b = blockFor(ctx, pos);
-  auto range = block_ranges[b];
-  if (pos == range.start) return pos;
-  return (pos - 1) | 1;
-}
-
-// Return the first usable hint from all the uses in this interval.
-// Skip uses that don't have any hint, or have an unusable hint.
+/*
+ * Return the first hint from all the uses in this interval that is available
+ * for the lifetime of `current', else the hint which is available furthest
+ * into the future.
+ *
+ * Skips uses that don't have any hint, or have an unusable hint.
+ */
 PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
                        RegSet allow) {
   if (!RuntimeOption::EvalHHIREnablePreColoring &&
       !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
 
-  // search ivl for the register assigned to a sub-interval that ends at pos.
-  auto search = [&](Interval* ivl, unsigned pos) -> PhysReg {
-    for (; ivl; ivl = ivl->next) {
+  // Search `leader' for a child interval that ends at `pos' and return its
+  // assigned register.
+  auto const search = [&] (Interval* leader, unsigned pos) -> PhysReg {
+    for (auto ivl = leader; ivl; ivl = ivl->next) {
       if (pos == ivl->end() && ivl->reg != InvalidReg) return ivl->reg;
     }
     return InvalidReg;
   };
 
   auto ret = InvalidReg;
-  for (auto u : current->uses) {
+
+  for (auto const u : current->uses) {
     if (!u.hint.isValid()) continue;
     auto hint_ivl = intervals[u.hint];
+
     PhysReg hint;
     if (hint_ivl->fixed()) {
       hint = hint_ivl->reg;
@@ -1215,6 +1335,9 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
     }
     if (hint == InvalidReg) continue;
     if (!allow.contains(hint)) continue;
+
+    // Just use this hint if it's free far enough into the future; else try to
+    // find a hint that we can use for the longest.
     if (free_until[hint] >= current->end()) {
       return hint;
     }
@@ -1227,15 +1350,23 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
 }
 
 void Vxls::allocate(Interval* current) {
+  // Map from PhysReg until the first position at which it is /not/ available.
   PosVec free_until; // 0 by default
+
   RegSet allow;
-  unsigned conflict = constrain(current, allow);
+  auto const conflict = constrain(current, allow);
+
+  // Mark regs that fit our constraints as free up until the point of conflict,
+  // unless they're owned by active intervals---then mark them used.
   allow.forEach([&](PhysReg r) {
     free_until[r] = conflict;
   });
   for (auto ivl : active) {
     free_until[ivl->reg] = 0;
   }
+
+  // Mark each reg assigned to an inactive interval as only free until the
+  // first position at which `current' intersects that interval.
   for (auto ivl : inactive) {
     auto r = ivl->reg;
     if (free_until[r] == 0) continue;
@@ -1244,7 +1375,8 @@ void Vxls::allocate(Interval* current) {
   }
 
   if (current->ranges.size() > 1) {
-    auto blk_range = findBlockRange(current->start());
+    auto const b = blockFor(ctx, current->start());
+    auto const blk_range = ctx.block_ranges[b];
     if (blk_range.end > current->ranges[0].end) {
       // We're assigning a register to an interval with
       // multiple ranges, but the vreg isn't live out
@@ -1268,37 +1400,38 @@ void Vxls::allocate(Interval* current) {
     }
   }
 
-  // Try to get a hinted register
-  auto hint = findHint(current, free_until, allow);
+  // Try to get a hinted register.
+  auto const hint = findHint(current, free_until, allow);
   if (hint != InvalidReg && free_until[hint] >= current->end()) {
     return assignReg(current, hint);
   }
-  auto r = find(free_until);
-  auto pos = free_until[r];
+
+  // Use the register that's available until furthest in the future if it's
+  // free across all of `current'.
+  auto r = find_farthest(free_until);
+  auto const pos = free_until[r];
   if (pos >= current->end()) {
     return assignReg(current, r);
   }
+
   if (pos > current->start()) {
-    // r is free for the first part of current
-    auto prev_use = current->lastUseBefore(pos);
-    UNUSED auto min_split = std::max(prev_use, current->start() + 1);
-    auto max_split = pos;
-    assertx(min_split <= max_split);
-    auto split_pos = nearestSplitBefore(max_split);
+    // `r' is free for the first part of current.
+    auto const prev_use = current->lastUseBefore(pos);
+
+    DEBUG_ONLY auto min_split = std::max(prev_use, current->start() + 1);
+    assertx(min_split <= pos);
+
+    auto split_pos = nearestSplitBefore(pos);
     if (split_pos > current->start()) {
       if (prev_use && prev_use < split_pos) {
-        /*
-         * If there are uses in previous blocks, but no
-         * uses between the start of the block containing split_pos,
-         * and split_pos itself, we should split earlier; otherwise
-         * we'll need to insert moves/loads on the edge(s) into this
-         * block, which clearly can't be used since we're spilling
-         * before the first use.
-         * Might as well spill on a block boundary, as early as
-         * possible.
-         */
-        auto prev_range_ix = current->findRange(prev_use);
-        auto prev_range = &current->ranges[prev_range_ix];
+        // If there are uses in previous blocks, but no uses between the start
+        // of the block containing `split_pos' and `split_pos' itself, we
+        // should split earlier; otherwise we'll need to insert moves/loads on
+        // the edge(s) into this block, which clearly can't be used since we're
+        // spilling before the first use.  Might as well spill on a block
+        // boundary, as early as possible.
+        auto prev_range_idx = current->findRange(prev_use);
+        auto prev_range = &current->ranges[prev_range_idx];
         if (prev_range->start <= prev_use && prev_range->end < split_pos) {
           prev_range++;
         }
@@ -1306,7 +1439,12 @@ void Vxls::allocate(Interval* current) {
           split_pos = prev_range->start;
         }
       }
-      auto second = current->split(split_pos, true);
+
+      // Split and try the hinted reg again, else fall back to the one
+      // available furthest into the future.  We keep uses at the end of the
+      // first split because we know that `r' is free up to /and including/
+      // that position.
+      auto second = current->split(split_pos, true /* keep_uses */);
       pending.push(second);
       if (hint != InvalidReg && free_until[hint] >= current->end()) {
         r = hint;
@@ -1314,20 +1452,31 @@ void Vxls::allocate(Interval* current) {
       return assignReg(current, r);
     }
   }
-  // must spill current or another victim
+
+  // Must spill `current' or another victim.
   allocBlocked(current);
 }
 
-// When all registers are in use, find a good interval to split and spill,
-// which could be the current interval.  When an interval is split and the
-// second part is spilled, possibly split the second part again before the
-// next use-pos that requires a register, and enqueue the third part.
+/*
+ * When all registers are in use, find a good interval (possibly `current') to
+ * split and spill.
+ *
+ * When an interval is split and the second part is spilled, possibly split the
+ * second part again before the next use-pos that requires a register, and
+ * enqueue the third part.
+ */
 void Vxls::allocBlocked(Interval* current) {
-  PosVec used, blocked;
-  RegSet allow;
-  unsigned conflict = constrain(current, allow); // repeated from allocate
-  allow.forEach([&](PhysReg r) { used[r] = blocked[r] = conflict; });
   auto const cur_start = current->start();
+
+  RegSet allow;
+  auto const conflict = constrain(current, allow); // repeated from allocate
+
+  // Track the positions (a) at which each PhysReg is next used by any lifetime
+  // interval to which it's assigned (`used'), and (b) at which each PhysReg is
+  // next assigned to a value whose lifetime intersects `current' (`blocked').
+  PosVec used, blocked;
+  allow.forEach([&](PhysReg r) { used[r] = blocked[r] = conflict; });
+
   // compute next use of active registers, so we can pick the furthest one
   for (auto ivl : active) {
     if (ivl->fixed()) {
@@ -1337,12 +1486,15 @@ void Vxls::allocBlocked(Interval* current) {
       used[ivl->reg] = std::min(use_pos, used[ivl->reg]);
     }
   }
-  // compute next intersection/use of inactive regs to find whats free longest
+
+  // compute next intersection/use of inactive regs to find what's free longest
   for (auto ivl : inactive) {
-    auto r = ivl->reg;
+    auto const r = ivl->reg;
     if (blocked[r] == 0) continue;
+
     auto intersect_pos = nextIntersect(current, ivl);
     if (intersect_pos == kMaxPos) continue;
+
     if (ivl->fixed()) {
       blocked[r] = std::min(intersect_pos, blocked[r]);
       used[r] = std::min(blocked[r], used[r]);
@@ -1351,22 +1503,30 @@ void Vxls::allocBlocked(Interval* current) {
       used[r] = std::min(use_pos, used[r]);
     }
   }
-  // choose the best victim register(s) to spill
-  auto r = find(used);
-  auto used_pos = used[r];
-  if (used_pos < current->firstUse()) {
-    // all other intervals are used before current's first register-use
+
+  // Choose the best victim register(s) to spill---the one with the farthest
+  // first-use.
+  auto r = find_farthest(used);
+
+  // If all other registers are used by their owning intervals before the first
+  // register-use of `current', then we have to spill `current'.
+  if (used[r] < current->firstUse()) {
     return spill(current);
   }
-  auto block_pos = blocked[r];
+
+  auto const block_pos = blocked[r];
   if (block_pos < current->end()) {
+    // If /every/ usable register is assigned to a lifetime interval which
+    // intersects with `current', we have to split current before that point.
     auto prev_use = current->lastUseBefore(block_pos);
-    UNUSED auto min_split = std::max(prev_use, cur_start + 1);
+
+    DEBUG_ONLY auto min_split = std::max(prev_use, cur_start + 1);
     auto max_split = block_pos;
     assertx(cur_start < min_split && min_split <= max_split);
+
     auto split_pos = nearestSplitBefore(max_split);
     if (split_pos > current->start()) {
-      auto second = current->split(split_pos, true);
+      auto second = current->split(split_pos, true /* keep_uses */);
       pending.push(second);
     }
   }
@@ -1374,51 +1534,25 @@ void Vxls::allocBlocked(Interval* current) {
   assignReg(current, r);
 }
 
-// Assign r to this interval.
-void Vxls::assignReg(Interval* ivl, PhysReg r) {
-  if (!ivl->fixed() && ivl->uses.empty()) {
-    ivl->reg = InvalidReg;
-    if (!ivl->constant) {
-      assignSpill(ivl);
-    }
-  } else {
-    ivl->reg = r;
-    active.push_back(ivl);
-  }
-}
-
-// split ivl at pos and spill the second part.  If pos is too close
-// to ivl->start(), spill all of ivl.
-void Vxls::spillAfter(Interval* ivl, unsigned pos) {
-  auto split_pos = nearestSplitBefore(pos);
-  auto tail = split_pos <= ivl->start() ? ivl : ivl->split(split_pos);
-  spill(tail);
-}
-
-// Spill ivl from its start until its first register use.  If there
-// is no use, spill the entire interval.  Otherwise split the
-// interval just before the use, and enqueue the second part.
-void Vxls::spill(Interval* ivl) {
-  unsigned first_use = ivl->firstUse();
-  if (first_use <= ivl->end()) {
-    auto split_pos = nearestSplitBefore(first_use);
-    if (split_pos <= ivl->start()) {
-      // this only can happen if we need more than the available registers
-      // at a single position. It can happen in phijmp or callargs.
-      TRACE(1, "vxls-punt RegSpill\n");
-      PUNT(RegSpill); // cannot split before first_use
-    }
-    pending.push(ivl->split(split_pos));
-  }
-  ivl->reg = InvalidReg;
-  if (!ivl->constant) assignSpill(ivl);
-}
-
-// Split and spill other intervals that conflict with current for
-// register r, at current->start().  If necessary, split the victims
-// again before their first use position that requires a register.
+/*
+ * Split and spill other intervals that conflict with `current' for register r,
+ * at current->start().
+ *
+ * If necessary, split the victims again before their first use position that
+ * requires a register.
+ */
 void Vxls::spillOthers(Interval* current, PhysReg r) {
-  auto cur_start = current->start();
+  auto const cur_start = current->start();
+
+  // Split `ivl' at `cur_start' and spill the second part.  If `cur_start' is
+  // too close to ivl->start(), spill all of `ivl' instead.
+  auto const spill_after = [&] (Interval* ivl) {
+    auto const split_pos = nearestSplitBefore(cur_start);
+    auto const tail = split_pos <= ivl->start() ? ivl : ivl->split(split_pos);
+    spill(tail);
+  };
+
+  // Split and spill other active intervals after `cur_start'.
   auto end = active.end();
   for (auto i = active.begin(); i != end;) {
     auto other = *i;
@@ -1426,9 +1560,12 @@ void Vxls::spillOthers(Interval* current, PhysReg r) {
       i++; continue;
     }
     *i = *--end;
-    spillAfter(other, cur_start);
+    spill_after(other);
   }
   active.erase(end, active.end());
+
+  // Split and spill any inactive intervals after `cur_start' if they intersect
+  // with `current'.
   end = inactive.end();
   for (auto i = inactive.begin(); i != end;) {
     auto other = *i;
@@ -1440,54 +1577,14 @@ void Vxls::spillOthers(Interval* current, PhysReg r) {
       i++; continue;
     }
     *i = *--end;
-    spillAfter(other, cur_start);
+    spill_after(other);
   }
   inactive.erase(end, inactive.end());
 }
 
-// Assign the next available spill slot to interval
-void Vxls::assignSpill(Interval* ivl) {
-  assertx(!ivl->fixed() && ivl->parent);
-
-  auto leader = ivl->parent;
-
-  if (leader->slot != kInvalidSpillSlot) {
-    ivl->slot = leader->slot;
-    return;
-  }
-
-  auto assign_slot = [&] (size_t slot) {
-    ivl->slot = leader->slot = slot;
-    ++num_spills;
-
-    spill_slots[slot] = kMaxPos;
-    if (ivl->wide) {
-      used_spill_slots = std::max(used_spill_slots, slot + 2);
-      spill_slots[slot + 1] = kMaxPos;
-    } else {
-      used_spill_slots = std::max(used_spill_slots, slot + 1);
-    }
-  };
-
-  if (!ivl->wide) {
-    for (size_t slot = 0, n = spill_slots.size(); slot < n; ++slot) {
-      if (leader->start() >= spill_slots[slot]) {
-        return assign_slot(slot);
-      }
-    }
-  } else {
-    for (size_t slot = 0, n = spill_slots.size() - 1; slot < n; slot += 2) {
-      if (leader->start() >= spill_slots[slot] &&
-          leader->start() >= spill_slots[slot + 1]) {
-        return assign_slot(slot);
-      }
-    }
-  }
-
-  // Ran out of spill slots.
-  ONTRACE(kRegAllocLevel, dumpIntervals(intervals));
-  TRACE(1, "vxls-punt TooManySpills\n");
-  PUNT(LinearScan_TooManySpills);
+SpillInfo assignRegisters(const VxlsContext& ctx,
+                          const jit::vector<Interval*>& intervals) {
+  return Vxls(ctx, intervals).go();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1556,8 +1653,6 @@ void insertSpill(const VxlsContext& ctx,
 void resolveSplits(const VxlsContext& ctx,
                    const jit::vector<Interval*>& intervals,
                    ResolutionPlan& resolution) {
-  ONTRACE(kRegAllocLevel, dumpIntervals(intervals));
-
   for (auto i1 : intervals) {
     if (!i1) continue;
     if (i1->slot >= 0) insertSpill(ctx, resolution, i1);
@@ -1933,10 +2028,6 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
       }
     }
   }
-  ONTRACE(kRegAllocLevel,
-    dumpIntervals(intervals);
-    printIntervals("after inserting copies", unit, ctx, intervals);
-  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2048,21 +2139,7 @@ void peephole(Vunit& unit, const VxlsContext& ctx) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void Vxls::allocate() {
-  intervals = buildIntervals(unit, ctx);
-  assignRegisters();
-
-  auto const resolution = resolveLifetimes(unit, ctx, intervals);
-  renameOperands(unit, ctx, intervals);
-  insertCopies(unit, ctx, intervals, resolution);
-  peephole(unit, ctx);
-
-  allocateSpillSpace();
-  printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
-}
-
-///////////////////////////////////////////////////////////////////////////////
+// Spill space allocation.
 
 /*
  * SpillState is used by allocateSpillSpace() to decide where to allocate/free
@@ -2282,29 +2359,30 @@ std::uniform_int_distribution<int> s_stressDist(1,7);
  *       - != NoSpill out: Look for any fallbackcc/bindjcc instructions,
  *         deoptimizing as appropriate (see processSpillExits()).
  */
-void Vxls::allocateSpillSpace() {
-  if (RuntimeOption::EvalHHIRStressSpill && m_abi.canSpill) {
+void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
+                        SpillInfo& spi) {
+  if (RuntimeOption::EvalHHIRStressSpill && ctx.abi.canSpill) {
     auto extra = s_stressDist(s_stressRand);
     FTRACE(1, "StressSpill on; adding {} extra slots\n", extra);
-    used_spill_slots += extra;
+    spi.used_spill_slots += extra;
   }
-  if (used_spill_slots == 0) return;
+  if (spi.used_spill_slots == 0) return;
   Timer t(Timer::vasm_xls_spill);
-  always_assert(m_abi.canSpill);
+  always_assert(ctx.abi.canSpill);
 
   // Make sure we always allocate spill space in multiples of 16 bytes, to keep
   // alignment straightforward.
-  if (used_spill_slots % 2) used_spill_slots++;
-  FTRACE(1, "Allocating {} spill slots\n", used_spill_slots);
+  if (spi.used_spill_slots % 2) spi.used_spill_slots++;
+  FTRACE(1, "Allocating {} spill slots\n", spi.used_spill_slots);
 
-  auto const spillSize = safe_cast<int32_t>(slotOffset(used_spill_slots));
+  auto const spillSize = safe_cast<int32_t>(slotOffset(spi.used_spill_slots));
   // Pointer manipulation is traditionally done with lea, and it's safe to
   // insert even where flags might be live.
-  Vinstr alloc = lea{m_sp[-spillSize], m_sp};
-  Vinstr free  = lea{m_sp[spillSize], m_sp};
+  Vinstr alloc = lea{ctx.sp[-spillSize], ctx.sp};
+  Vinstr free  = lea{ctx.sp[spillSize], ctx.sp};
 
   jit::vector<uint32_t> rpoIds(unit.blocks.size());
-  for (uint32_t i = 0; i < blocks.size(); ++i) rpoIds[blocks[i]] = i;
+  for (uint32_t i = 0; i < ctx.blocks.size(); ++i) rpoIds[ctx.blocks[i]] = i;
 
   jit::vector<SpillStates> states(unit.blocks.size(), {Uninit, Uninit});
   states[unit.entry].in = NoSpill;
@@ -2315,13 +2393,13 @@ void Vxls::allocateSpillSpace() {
   // to successors, adding them to the worklist if their in-state
   // changes. Blocks may be visited multiple times if loops are present.
   while (!worklist.empty()) {
-    auto const label  = blocks[worklist.pop()];
+    auto const label  = ctx.blocks[worklist.pop()];
     auto const& block = unit.blocks[label];
     auto state = states[label].in;
 
     if (state < NeedSpill) {
       for (auto& inst : block.code) {
-        state = instrInState(unit, inst, state, m_sp);
+        state = instrInState(unit, inst, state, ctx.sp);
         if (state == NeedSpill) break;
       }
     }
@@ -2335,7 +2413,7 @@ void Vxls::allocateSpillSpace() {
   }
 
   // Do a single mutation pass over the blocks.
-  for (auto const label : blocks) {
+  for (auto const label : ctx.blocks) {
     auto state = states[label];
     auto& block = unit.blocks[label];
 
@@ -2345,7 +2423,7 @@ void Vxls::allocateSpillSpace() {
     if (state.in == NoSpill && state.out == NeedSpill) {
       auto state = NoSpill;
       for (auto it = block.code.begin(); it != block.code.end(); ++it) {
-        state = instrInState(unit, *it, state, m_sp);
+        state = instrInState(unit, *it, state, ctx.sp);
         if (state == NeedSpill) {
           FTRACE(3, "alloc spill before {}: {}\n", label, show(unit, *it));
           alloc.origin = it->origin;
@@ -2383,13 +2461,9 @@ void Vxls::allocateSpillSpace() {
     // Any block that ends with anything other than NoSpill needs to be walked
     // to look for places to free spill space.
     if (state.out != NoSpill) {
-      processSpillExits(unit, label, state.in, free, m_sp);
+      processSpillExits(unit, label, state.in, free, ctx.sp);
     }
   }
-}
-
-LiveRange Vxls::findBlockRange(unsigned pos) {
-  return block_ranges[blockFor(ctx, pos)];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2437,8 +2511,9 @@ std::string Interval::toString() {
   return out.str();
 }
 
-DEBUG_ONLY void dumpIntervals(const jit::vector<Interval*>& intervals) {
-  // XXX: Trace::traceRelease("Spills %u\n", num_spills);
+DEBUG_ONLY void dumpIntervals(const jit::vector<Interval*>& intervals,
+                              unsigned num_spills) {
+  Trace::traceRelease("Spills %u\n", num_spills);
   for (auto ivl : intervals) {
     if (!ivl || ivl->fixed()) continue;
     Trace::traceRelease("%%%-2lu %s\n", size_t(ivl->vreg),
@@ -2550,14 +2625,43 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   splitCriticalEdges(unit);
   assertx(check(unit));
 
+  // Analysis passes.
   VxlsContext ctx{abi};
   ctx.blocks = sortBlocks(unit);
   ctx.block_ranges = computePositions(unit, ctx.blocks);
   ctx.spill_offsets = analyzeSP(unit, ctx.blocks, ctx.sp);
   ctx.livein = computeLiveness(unit, ctx.abi, ctx.blocks);
 
-  Vxls a(unit, ctx);
-  a.allocate();
+  // Build lifetime intervals and perform register allocation.
+  auto intervals = buildIntervals(unit, ctx);
+  auto spill_info = assignRegisters(ctx, intervals);
+
+  ONTRACE(kRegAllocLevel, dumpIntervals(intervals, spill_info.num_spills));
+
+  // Insert lifetime-resolving copies, spills, and rematerializations, and
+  // replace the Vreg operands in the Vinstr stream with the assigned PhysRegs.
+  auto const resolution = resolveLifetimes(unit, ctx, intervals);
+  renameOperands(unit, ctx, intervals);
+  insertCopies(unit, ctx, intervals, resolution);
+
+  ONTRACE(kRegAllocLevel,
+    dumpIntervals(intervals, spill_info.num_spills);
+    printIntervals("after inserting copies", unit, ctx, intervals);
+  );
+
+  // Perform some cleanup, then insert instructions for creating spill space.
+  peephole(unit, ctx);
+  allocateSpillSpace(unit, ctx, spill_info);
+
+  printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
+
+  // Free the liveness intervals.
+  for (auto ivl : intervals) {
+    for (Interval* next; ivl; ivl = next) {
+      next = ivl->next;
+      jit::destroy(ivl);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

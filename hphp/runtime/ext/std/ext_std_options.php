@@ -223,6 +223,14 @@ function ini_restore(string $varname): void;
 function ini_set(string $varname,
                  mixed $newvalue): mixed;
 
+/* Sets the value of the given configuration option. The configuration option
+ * will keep this new value during the script's execution, and will be
+ * restored at the script's ending.
+ */
+<<__Native>>
+function ini_alter(string $varname,
+                   mixed $newvalue): mixed;
+
 /* Returns the peak of memory, in bytes, that's been allocated to your PHP
  * script.
  */

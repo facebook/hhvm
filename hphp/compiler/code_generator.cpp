@@ -23,6 +23,7 @@
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
@@ -421,7 +422,7 @@ void CodeGenerator::printValue(double v) {
   } else {
     char *buf;
     if (v == 0.0) v = 0.0; // so to avoid "-0" output
-    vspprintf(&buf, 0, "%.*H", 14, v);
+    vspprintf(&buf, 0, "%.*H", RuntimeOption::Precision, v);
     m_out->write(buf, strlen(buf));
     free(buf);
   }

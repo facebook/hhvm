@@ -48,7 +48,7 @@ REM execute the Hack testsuite
 @echo on
 
 set "python3=python.exe"
-set "max=2"
+set "max=8"
 "%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\autocomplete
 "%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\color
 "%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\colour

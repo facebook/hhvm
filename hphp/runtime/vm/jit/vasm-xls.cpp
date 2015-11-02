@@ -209,26 +209,6 @@ template<class Fn> void forEach(const LiveSet& bits, Fn fn) {
 }
 
 /*
- * A pair of source block number and successor index, used to identify an
- * out-edge.
- */
-using EdgeKey = std::pair<Vlabel,unsigned>;
-
-struct EdgeHasher {
-  size_t operator()(EdgeKey k) const {
-    return size_t(k.first) ^ k.second;
-  }
-};
-
-/*
- * Copies that are required at a given position or edge.
- *
- * The keys into the PhysReg::Map are the dests; the Interval*'s are the
- * sources (nullptr if no copy is needed).
- */
-using CopyPlan = PhysReg::Map<Interval*>;
-
-/*
  * A map from PhysReg number to position.
  */
 using PosVec = PhysReg::Map<unsigned>;
@@ -300,12 +280,6 @@ struct Vxls {
   // phases
   void allocate();
   void assignRegisters();
-  void resolveSplits();
-  void lowerCopies();
-  void resolveEdges();
-  void renameOperands();
-  void insertCopies();
-  void peephole();
   void allocateSpillSpace();
 
   // utilities
@@ -314,24 +288,13 @@ struct Vxls {
   void allocBlocked(Interval*);
   void assignReg(Interval*, PhysReg);
   unsigned constrain(Interval*, RegSet&);
-  void insertSpill(Interval*);
-  Vlabel findBlock(unsigned pos);
   LiveRange findBlockRange(unsigned pos);
   void spill(Interval*);
   void spillAfter(Interval* ivl, unsigned pos);
   void spillOthers(Interval* current, PhysReg r);
   void assignSpill(Interval* ivl);
-  void insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
-                      const CopyPlan&, MemoryRef slots, unsigned pos,
-                      const Interval* sf_ivl);
-  void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
-                      const CopyPlan&, MemoryRef slots, unsigned pos);
   PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
   unsigned nearestSplitBefore(unsigned pos);
-
-  // debugging
-  void print(const char* caption);
-  void dumpIntervals();
 
 public:
   /*
@@ -365,13 +328,6 @@ public:
   jit::priority_queue<Interval*,Compare> pending;
   // Intervals that overlap.
   jit::vector<Interval*> active, inactive;
-
-  // Where to insert copies.
-  jit::hash_map<unsigned,CopyPlan> copies;
-  // Where to insert spills.
-  jit::hash_map<unsigned,CopyPlan> spills;
-  // Copies on edges.
-  jit::hash_map<EdgeKey,CopyPlan,EdgeHasher> edge_copies;
 
   // Number of intervals spilled.
   unsigned num_spills{0};
@@ -587,9 +543,32 @@ Interval* Interval::split(unsigned pos, bool keep_uses) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Printing utilities.
+ */
+void dumpIntervals(const jit::vector<Interval*>& intervals);
 void printIntervals(const char* caption,
                     const Vunit& unit, const VxlsContext& ctx,
                     const jit::vector<Interval*>& intervals);
+
+/*
+ * The ID of the block enclosing `pos'.
+ */
+Vlabel blockFor(const VxlsContext& ctx, unsigned pos) {
+  for (unsigned lo = 0, hi = ctx.blocks.size(); lo < hi;) {
+    auto mid = (lo + hi) / 2;
+    auto r = ctx.block_ranges[ctx.blocks[mid]];
+    if (pos < r.start) {
+      hi = mid;
+    } else if (pos >= r.end) {
+      lo = mid + 1;
+    } else {
+      return ctx.blocks[mid];
+    }
+  }
+  always_assert(false);
+  return Vlabel{0xffffffff};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Pre-analysis passes.
@@ -1100,21 +1079,6 @@ Vxls::~Vxls() {
   }
 }
 
-void Vxls::allocate() {
-  intervals = buildIntervals(unit, ctx);
-  assignRegisters();
-  resolveSplits();
-  lowerCopies();
-  resolveEdges();
-  renameOperands();
-  insertCopies();
-  // clean up before allocating spill space, since it might create new
-  // blocks and modify the cfg.
-  peephole();
-  allocateSpillSpace();
-  printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
-}
-
 void Vxls::assignRegisters() {
   for (auto ivl : intervals) {
     if (!ivl) continue;
@@ -1217,7 +1181,7 @@ unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
 // return the closest split position on or before pos.
 // the result might be exactly on an edge, or inbetween normal positions.
 unsigned Vxls::nearestSplitBefore(unsigned pos) {
-  auto b = findBlock(pos);
+  auto b = blockFor(ctx, pos);
   auto range = block_ranges[b];
   if (pos == range.start) return pos;
   return (pos - 1) | 1;
@@ -1521,80 +1485,92 @@ void Vxls::assignSpill(Interval* ivl) {
   }
 
   // Ran out of spill slots.
-  ONTRACE(kRegAllocLevel, dumpIntervals());
+  ONTRACE(kRegAllocLevel, dumpIntervals(intervals));
   TRACE(1, "vxls-punt TooManySpills\n");
   PUNT(LinearScan_TooManySpills);
 }
 
-// Visitor class for renaming registers. Visit every virtual-register
-// typed operand, and rename it to its assigned physical register.
-struct Renamer {
-  Renamer(Vxls& xls, unsigned pos) : xls(xls), pos(pos) {}
-  template<class T> void imm(const T& r) {}
-  template<class R> void def(R& r) { rename(r); }
-  template<class D, class H> void defHint(D& dst, H) { rename(dst); }
-  void use(VcallArgsId) { always_assert(false && "vcall unsupported in vxls"); }
-  template<class R> void use(R& r) { rename(r); }
-  template<class S, class H> void useHint(S& src, H) { rename(src); }
-  template<class R> void across(R& r) { rename(r); }
-  void def(RegSet) {}
-  void use(Vptr& m) {
-    if (m.base.isValid()) rename(m.base);
-    if (m.index.isValid()) rename(m.index);
+///////////////////////////////////////////////////////////////////////////////
+// Lifetime continuity resolution.
+
+/*
+ * A pair of source block number and successor index, used to identify an
+ * out-edge.
+ */
+using EdgeKey = std::pair<Vlabel,unsigned>;
+
+struct EdgeHasher {
+  size_t operator()(EdgeKey k) const {
+    return size_t(k.first) ^ k.second;
   }
-  void use(RegSet r){}
-private:
-  void rename(Vreg8& r) { r = lookup(r, Constraint::Gpr); }
-  void rename(Vreg16& r) { r = lookup(r, Constraint::Gpr); }
-  void rename(Vreg32& r) { r = lookup(r, Constraint::Gpr); }
-  void rename(Vreg64& r) { r = lookup(r, Constraint::Gpr); }
-  void rename(VregDbl& r) { r = lookup(r, Constraint::Simd); }
-  void rename(Vreg128& r) { r = lookup(r, Constraint::Simd); }
-  void rename(VregSF& r) { r = RegSF{0}; }
-  void rename(Vreg& r) { r = lookup(r, Constraint::Any); }
-  void rename(Vtuple t) { /* phijmp/phijcc+phidef handled by resolveEdges */ }
-  PhysReg lookup(Vreg vreg, Constraint kind) {
-    auto ivl = xls.intervals[vreg];
-    if (!ivl || vreg.isPhys()) return vreg;
-    PhysReg reg = ivl->childAt(pos)->reg;
-    assertx((kind == Constraint::Gpr && reg.isGP()) ||
-           (kind == Constraint::Simd && reg.isSIMD()) ||
-           (kind == Constraint::Sf && reg.isSF()) ||
-           (kind == Constraint::Any && reg != InvalidReg));
-    return reg;
-  }
-private:
-  Vxls& xls;
-  unsigned pos;
 };
 
-void Vxls::renameOperands() {
-  for (auto b : blocks) {
-    auto pos = block_ranges[b].start;
-    for (auto& inst : unit.blocks[b].code) {
-      Renamer renamer(*this, pos);
-      visitOperands(inst, renamer);
-      pos += 2;
-    }
-  }
-  ONTRACE(kRegAllocLevel, print("after renaming operands"));
+/*
+ * Copies that are required at a given position or edge.
+ *
+ * The keys into the PhysReg::Map are the dests; the Interval*'s are the
+ * sources (nullptr if no copy is needed).
+ */
+using CopyPlan = PhysReg::Map<Interval*>;
+
+/*
+ * Copy and spill points for resolving split lifetime intervals.
+ *
+ * After register allocation, some lifetime intervals may have been split, and
+ * their Vregs assigned to different physical registers or spill locations.  We
+ * use this struct to track where we need to add moves to maintain continuity.
+ * (We also use it to resolve phis.)
+ */
+struct ResolutionPlan {
+  // Where to insert copies between instructions.
+  jit::hash_map<unsigned,CopyPlan> copies;
+  // Where to insert spills.
+  jit::hash_map<unsigned,CopyPlan> spills;
+  // Copies on edges (between blocks).
+  jit::hash_map<EdgeKey,CopyPlan,EdgeHasher> edge_copies;
+};
+
+/*
+ * Insert a spill after the def-position in `ivl'.
+ *
+ * There's only one such position, because of SSA.
+ */
+void insertSpill(const VxlsContext& ctx,
+                 ResolutionPlan& resolution, Interval* ivl) {
+  auto DEBUG_ONLY checkPos = [&](unsigned pos) {
+    assertx(pos % 2 == 1);
+    DEBUG_ONLY auto const b = blockFor(ctx, pos);
+    DEBUG_ONLY auto const& range = ctx.block_ranges[b];
+    assertx(pos - 1 >= range.start && pos + 1 < range.end);
+    return true;
+  };
+  auto pos = ivl->def_pos + 1;
+  assertx(checkPos(pos));
+  resolution.spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
 }
 
-// Insert spills and copies that connect sub-intervals that were split
-// between instructions.
-void Vxls::resolveSplits() {
-  ONTRACE(kRegAllocLevel, dumpIntervals());
+/*
+ * Insert spills and copies that connect sub-intervals that were split
+ * between instructions.
+ */
+void resolveSplits(const VxlsContext& ctx,
+                   const jit::vector<Interval*>& intervals,
+                   ResolutionPlan& resolution) {
+  ONTRACE(kRegAllocLevel, dumpIntervals(intervals));
+
   for (auto i1 : intervals) {
     if (!i1) continue;
-    auto slot = i1->slot;
-    if (slot >= 0) insertSpill(i1);
+    if (i1->slot >= 0) insertSpill(ctx, resolution, i1);
+
     for (auto i2 = i1->next; i2; i1 = i2, i2 = i2->next) {
-      auto pos = i2->start();
+      auto const pos = i2->start();
       if (i1->end() != pos) continue; // spans lifetime hole
       if (i2->reg == InvalidReg) continue; // no load necessary
       if (i2->reg == i1->reg) continue; // no copy necessary
-      auto b = findBlock(pos);
-      auto range = block_ranges[b];
+
+      auto const b = blockFor(ctx, pos);
+      auto const range = ctx.block_ranges[b];
+
       if (pos % 2 == 0) {
         // even position requiring a copy must be on edge
         assertx(range.start == pos);
@@ -1602,44 +1578,42 @@ void Vxls::resolveSplits() {
         // odd position
         assertx(pos > range.start); // implicit label position per block
         if (pos + 1 == range.end) continue; // copy belongs on successor edge
-        copies[pos][i2->reg] = i1;
+        resolution.copies[pos][i2->reg] = i1;
       }
     }
   }
 }
 
-// Insert a spill after the def-position in ivl. There's only one
-// such position, because of SSA.
-void Vxls::insertSpill(Interval* ivl) {
-  auto DEBUG_ONLY checkPos = [&](unsigned pos) {
-    assertx(pos % 2 == 1);
-    DEBUG_ONLY auto b = findBlock(pos);
-    DEBUG_ONLY auto range = block_ranges[b];
-    assertx(pos - 1 >= range.start && pos + 1 < range.end);
-    return true;
-  };
-  auto pos = ivl->def_pos + 1;
-  assertx(checkPos(pos));
-  spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
-}
-
-// Lower copyargs{} and copy{} into moveplans at the same position.
-void Vxls::lowerCopies() {
-  auto lower = [&](unsigned pos, Vreg s, Vreg d) {
+/*
+ * Lower copyargs{} and copy{} into moveplans at the same position.
+ */
+void lowerCopies(Vunit& unit, const VxlsContext& ctx,
+                 const jit::vector<Interval*>& intervals,
+                 ResolutionPlan& resolution) {
+  // Add a lifetime-resolving copy from `s' to `d'---without touching the
+  // instruction stream.
+  auto const lower = [&] (unsigned pos, Vreg s, Vreg d) {
     auto i1 = intervals[s];
-    if (!i1->fixed()) i1 = i1->childAt(pos);
     auto i2 = intervals[d];
+    assertx(i1 && i2);
+    assertx(i2 == i2->leader());
+    assertx(i2->fixed() || i2->def_pos == pos); // ssa
+
+    if (!i1->fixed()) i1 = i1->childAt(pos);
+
     if (i2->reg != i1->reg) {
-      assertx(!copies[pos][i2->reg]);
-      copies[pos][i2->reg] = i1;
+      assertx(!resolution.copies[pos][i2->reg]);
+      resolution.copies[pos][i2->reg] = i1;
     }
   };
-  for (auto b : blocks) {
-    auto pos = block_ranges[b].start;
+
+  for (auto b : ctx.blocks) {
+    auto pos = ctx.block_ranges[b].start;
+
     for (auto& inst : unit.blocks[b].code) {
       if (inst.op == Vinstr::copyargs) {
-        auto& uses = unit.tuples[inst.copyargs_.s];
-        auto& defs = unit.tuples[inst.copyargs_.d];
+        auto const& uses = unit.tuples[inst.copyargs_.s];
+        auto const& defs = unit.tuples[inst.copyargs_.d];
         for (unsigned i = 0, n = uses.size(); i < n; ++i) {
           lower(pos, uses[i], defs[i]);
         }
@@ -1660,154 +1634,408 @@ void Vxls::lowerCopies() {
 /*
  * Search for the phidef in block `b', then return its dest tuple.
  */
-static Vtuple findDefs(const Vunit& unit, Vlabel b) {
+Vtuple findPhiDefs(const Vunit& unit, Vlabel b) {
   assertx(!unit.blocks[b].code.empty() &&
-         unit.blocks[b].code.front().op == Vinstr::phidef);
+          unit.blocks[b].code.front().op == Vinstr::phidef);
   return unit.blocks[b].code.front().phidef_.defs;
 }
 
-void Vxls::resolveEdges() {
-  auto addPhiEdgeCopies =
-  [&](Vlabel block, Vlabel target, uint32_t targetIndex, const VregList& uses) {
-    auto p1 = block_ranges[block].end - 2;
-    auto& defs = unit.tuples[findDefs(unit, target)];
+/*
+ * Register copy resolutions for livein sets and phis.
+ */
+void resolveEdges(Vunit& unit, const VxlsContext& ctx,
+                  const jit::vector<Interval*>& intervals,
+                  ResolutionPlan& resolution) {
+  auto const addPhiEdgeCopies = [&] (Vlabel block, Vlabel target,
+                                     uint32_t targetIndex,
+                                     const VregList& uses) {
+    auto const p1 = ctx.block_ranges[block].end - 2;
+    auto const& defs = unit.tuples[findPhiDefs(unit, target)];
+
     for (unsigned i = 0, n = uses.size(); i < n; ++i) {
       auto i1 = intervals[uses[i]];
-      if (i1 && !i1->fixed()) i1 = i1->childAt(p1);
       auto i2 = intervals[defs[i]];
+      assertx(i1 && i2);
+      assertx(i2 == i2->leader());
+
+      if (!i1->fixed()) i1 = i1->childAt(p1);
+
       if (i2->reg != i1->reg) {
-        assertx((edge_copies[{block,targetIndex}][i2->reg] == nullptr));
-        edge_copies[{block,targetIndex}][i2->reg] = i1;
+        EdgeKey edge { block, targetIndex };
+        assertx((resolution.edge_copies[edge][i2->reg] == nullptr));
+        resolution.edge_copies[edge][i2->reg] = i1;
       }
     }
   };
-  for (auto b1 : blocks) {
+
+  for (auto b1 : ctx.blocks) {
+    auto const p1 = ctx.block_ranges[b1].end - 2;
     auto& block1 = unit.blocks[b1];
-    auto p1 = block_ranges[b1].end - 2;
-    auto succlist = succs(block1);
     auto& inst1 = block1.code.back();
+
+    // Add resolutions for phis.
     if (inst1.op == Vinstr::phijmp) {
-      auto& phijmp = inst1.phijmp_;
-      auto target = phijmp.target;
-      auto& uses = unit.tuples[phijmp.uses];
+      auto const& phijmp = inst1.phijmp_;
+      auto const target = phijmp.target;
+      auto const& uses = unit.tuples[phijmp.uses];
       addPhiEdgeCopies(b1, target, 0, uses);
       inst1 = jmp{target};
     } else if (inst1.op == Vinstr::phijcc) {
-      auto& phijcc = inst1.phijcc_;
-      auto& uses = unit.tuples[phijcc.uses];
-      auto& targets = phijcc.targets;
+      auto const& phijcc = inst1.phijcc_;
+      auto const& targets = phijcc.targets;
+      auto const& uses = unit.tuples[phijcc.uses];
       addPhiEdgeCopies(b1, targets[0], 0, uses);
       addPhiEdgeCopies(b1, targets[1], 1, uses);
       inst1 = jcc{phijcc.cc, phijcc.sf, {targets[0], targets[1]}};
     }
+
+    auto const succlist = succs(block1);
+
+    // Add resolutions for livein sets.
     for (unsigned i = 0, n = succlist.size(); i < n; i++) {
-      auto b2 = succlist[i];
-      auto p2 = block_ranges[b2].start;
-      forEach(livein[b2], [&](Vreg vr) {
+      auto const b2 = succlist[i];
+      auto const p2 = ctx.block_ranges[b2].start;
+
+      forEach(ctx.livein[b2], [&] (Vreg vr) {
         auto ivl = intervals[vr];
         if (ivl->fixed()) return;
         Interval* i1 = nullptr;
         Interval* i2 = nullptr;
+
         for (auto ivl = intervals[vr]; ivl && !(i1 && i2); ivl = ivl->next) {
           if (ivl->covers(p1)) i1 = ivl;
           if (ivl->covers(p2)) i2 = ivl;
         }
+
         // i2 can be unallocated if the tmp is a constant or is spilled.
         if (i2->reg != InvalidReg && i2->reg != i1->reg) {
-          assertx((edge_copies[{b1,i}][i2->reg] == nullptr));
-          edge_copies[{b1,i}][i2->reg] = i1;
+          assertx((resolution.edge_copies[{b1,i}][i2->reg] == nullptr));
+          resolution.edge_copies[{b1,i}][i2->reg] = i1;
         }
       });
     }
   }
 }
 
-// last phase: mutate the code by inserting copies. this destroyes
-// the position numbering, so we can't use interval positions after this.
-void Vxls::insertCopies() {
-  // sf_ivl is the physical SF register, computed from the union of VregSF
-  // registers by computeLiveness() and buildIntervals().
-  // Its safe to lower ldimm{0,r} to xor{r,r,r} when SF is not live.
-  auto sf_ivl = intervals[VregSF(RegSF{0})];
+/*
+ * Walk through the intervals list and account for all points where copies or
+ * spills need to be made.
+ */
+ResolutionPlan resolveLifetimes(Vunit& unit, const VxlsContext& ctx,
+                                const jit::vector<Interval*>& intervals) {
+  ResolutionPlan resolution;
 
-  // insert copies inside blocks
-  for (auto b : blocks) {
-    auto pos = block_ranges[b].start;
-    auto& block = unit.blocks[b];
-    auto& code = block.code;
-    auto offset = spill_offsets[b];
-    for (unsigned j = 0; j < code.size(); j++, pos += 2) {
-      MemoryRef slots = m_sp[offset];
-      offset -= spEffect(unit, code[j], m_sp);
-      auto s = spills.find(pos - 1);
-      if (s != spills.end()) {
-        insertSpillsAt(code, j, s->second, slots, pos - 1);
+  resolveSplits(ctx, intervals, resolution);
+  lowerCopies(unit, ctx, intervals, resolution);
+  resolveEdges(unit, ctx, intervals, resolution);
+
+  return resolution;
+}
+
+/*
+ * Insert stores for `spills' (with spill space starting at `slots') into
+ * `code' before code[j], corresponding to XLS logical position `pos'.
+ *
+ * Updates `j' to refer to the same instruction after the code insertions.
+ */
+void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
+                    const CopyPlan& spills, MemoryRef slots,
+                    unsigned pos) {
+  jit::vector<Vinstr> stores;
+  for (auto src : spills) {
+    auto ivl = spills[src];
+    if (!ivl) continue;
+
+    auto slot = ivl->leader()->slot;
+    assertx(slot >= 0 && src == ivl->reg);
+    MemoryRef ptr{slots.r + slotOffset(slot)};
+
+    if (!ivl->wide) {
+      always_assert_flog(!src.isSF(), "Tried to spill %flags");
+      stores.emplace_back(store{src, ptr});
+    } else {
+      assertx(src.isSIMD());
+      stores.emplace_back(storeups{src, ptr});
+    }
+  }
+  auto origin = code[j].origin;
+  code.insert(code.begin() + j, stores.size(), ud2{});
+  for (auto& inst : stores) {
+    code[j] = inst;
+    code[j].origin = origin;
+    code[j++].pos = pos;
+  }
+}
+
+/*
+ * Insert reg-reg moves, constant loads, or loads from spill space---with spill
+ * space starting at `slots'---for `copies' into `code' before code[j],
+ * corresponding to XLS logical position `pos'.
+ *
+ * Updates `j' to refer to the same instruction after the code insertions.
+ */
+void insertCopiesAt(const VxlsContext& ctx,
+                    jit::vector<Vinstr>& code, unsigned& j,
+                    const CopyPlan& copies, MemoryRef slots,
+                    unsigned pos, const Interval* sf_ivl) {
+  auto const sf_live = [&](unsigned pos) {
+    return sf_ivl && !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
+  };
+  MovePlan moves;
+  jit::vector<Vinstr> loads;
+
+  for (auto dst : copies) {
+    auto ivl = copies[dst];
+    if (!ivl) continue;
+
+    if (ivl->reg != InvalidReg) {
+      moves[dst] = ivl->reg;
+    } else if (ivl->constant) {
+      if (ivl->val.isUndef) continue;
+
+      auto const use_xor = ivl->val.val == 0 && dst.isGP() && !sf_live(pos);
+
+      switch (ivl->val.kind) {
+        case Vconst::Quad:
+        case Vconst::Double:
+          if (use_xor) {
+            Vreg32 d32 = dst; // assume 32-bit ops zero upper bits
+            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimmq{ivl->val.val, dst});
+          }
+          break;
+        case Vconst::Long:
+          if (use_xor) {
+            Vreg32 d32 = dst;
+            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst});
+          }
+          break;
+        case Vconst::Byte:
+          if (use_xor) {
+            Vreg8 d8 = dst;
+            loads.emplace_back(xorb{d8, d8, d8, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst});
+          }
+          break;
+        case Vconst::ThreadLocal:
+          loads.emplace_back(
+            load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
+          );
+          break;
       }
-      auto c = copies.find(pos - 1);
-      if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl);
-      }
-      c = copies.find(pos);
-      if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl);
+    } else {
+      assertx(ivl->spilled());
+      MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
+      if (!ivl->wide) {
+        loads.emplace_back(load{ptr, dst});
+      } else {
+        assertx(dst.isSIMD());
+        loads.emplace_back(loadups{ptr, dst});
       }
     }
   }
+  auto hows = doRegMoves(moves, ctx.tmp);
+
+  auto origin = code[j].origin;
+  auto count = hows.size() + loads.size();
+  code.insert(code.begin() + j, count, ud2{});
+
+  for (auto& how : hows) {
+    if (how.m_kind == MoveInfo::Kind::Xchg) {
+      code[j] = copy2{how.m_src, how.m_dst, how.m_dst, how.m_src};
+    } else {
+      code[j] = copy{how.m_src, how.m_dst};
+    }
+    code[j].origin = origin;
+    code[j++].pos = pos;
+  }
+  for (auto& inst : loads) {
+    code[j] = inst;
+    code[j].origin = origin;
+    code[j++].pos = pos;
+  }
+}
+
+/*
+ * Mutate the Vinstr stream by inserting copies.
+ *
+ * This destroys the position numbering, so we can't use interval positions
+ * after this.
+ */
+void insertCopies(Vunit& unit, const VxlsContext& ctx,
+                  const jit::vector<Interval*>& intervals,
+                  const ResolutionPlan& resolution) {
+  // sf_ivl is the physical SF register, computed from the union of VregSF
+  // registers by computeLiveness() and buildIntervals().  Its safe to lower
+  // ldimm{0,r} to xor{r,r,r} when SF is not live.
+  auto sf_ivl = intervals[VregSF(RegSF{0})];
+
+  // insert copies inside blocks
+  for (auto const b : ctx.blocks) {
+    auto& block = unit.blocks[b];
+    auto& code = block.code;
+    auto pos = ctx.block_ranges[b].start;
+    auto offset = ctx.spill_offsets[b];
+
+    for (unsigned j = 0; j < code.size(); j++, pos += 2) {
+      MemoryRef slots = ctx.sp[offset];
+
+      // We register spills to the position immediately after the def, so we
+      // insert it /before/ the following Vinstr.
+      auto s = resolution.spills.find(pos - 1);
+      if (s != resolution.spills.end()) {
+        insertSpillsAt(code, j, s->second, slots, pos - 1);
+      }
+
+      auto c = resolution.copies.find(pos - 1);
+      if (c != resolution.copies.end()) {
+        insertCopiesAt(ctx, code, j, c->second, slots, pos - 1, sf_ivl);
+      }
+      c = resolution.copies.find(pos);
+      if (c != resolution.copies.end()) {
+        insertCopiesAt(ctx, code, j, c->second, slots, pos, sf_ivl);
+      }
+      offset -= spEffect(unit, code[j], ctx.sp);
+    }
+  }
+
   // insert copies on edges
-  for (auto b : blocks) {
+  for (auto const b : ctx.blocks) {
     auto& block = unit.blocks[b];
     auto succlist = succs(block);
+
     if (succlist.size() == 1) {
       // copies will go at end of b
-      auto& code = block.code;
-      auto c = edge_copies.find({b, 0});
-      if (c != edge_copies.end()) {
+      auto const c = resolution.edge_copies.find({b, 0});
+      if (c != resolution.edge_copies.end()) {
+        auto& code = block.code;
         unsigned j = code.size() - 1;
-        auto slots = m_sp[spill_offsets[succlist[0]]];
-        insertCopiesAt(code, j, c->second, slots,
-                       block_ranges[b].end - 1, sf_ivl);
+        auto const slots = ctx.sp[ctx.spill_offsets[succlist[0]]];
+        insertCopiesAt(ctx, code, j, c->second, slots,
+                       ctx.block_ranges[b].end - 1, sf_ivl);
       }
     } else {
       // copies will go at start of successor
       for (int i = 0, n = succlist.size(); i < n; i++) {
         auto s = succlist[i];
-        auto c = edge_copies.find({b, i});
-        if (c != edge_copies.end()) {
-          auto slots = m_sp[spill_offsets[s]];
+        auto const c = resolution.edge_copies.find({b, i});
+        if (c != resolution.edge_copies.end()) {
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
-          insertCopiesAt(code, j, c->second, slots,
-                         block_ranges[s].start, sf_ivl);
+          auto const slots = ctx.sp[ctx.spill_offsets[s]];
+          insertCopiesAt(ctx, code, j, c->second, slots,
+                         ctx.block_ranges[s].start, sf_ivl);
         }
       }
     }
   }
   ONTRACE(kRegAllocLevel,
-    dumpIntervals();
-    print("after inserting copies");
+    dumpIntervals(intervals);
+    printIntervals("after inserting copies", unit, ctx, intervals);
   );
 }
 
-// Run a quick peephole pass to clean up after ourselves.
-// Remove nop-copies before allocating spill space, since it might create new
-// instructions that we lowered, and trivial copies.
-void Vxls::peephole() {
-  auto match_xchg = [](Vinstr& i, Vreg& r0, Vreg& r1) {
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Visitor class for renaming registers.
+ */
+struct Renamer {
+  Renamer(const jit::vector<Interval*>& intervals, unsigned pos)
+    : intervals(intervals)
+    , pos(pos)
+  {}
+
+  template<class T> void imm(const T& r) {}
+  template<class R> void def(R& r) { rename(r); }
+  template<class D, class H> void defHint(D& dst, H) { rename(dst); }
+  template<class R> void use(R& r) { rename(r); }
+  template<class S, class H> void useHint(S& src, H) { rename(src); }
+  template<class R> void across(R& r) { rename(r); }
+
+  void def(RegSet) {}
+  void use(RegSet r) {}
+  void use(Vptr& m) {
+    if (m.base.isValid()) rename(m.base);
+    if (m.index.isValid()) rename(m.index);
+  }
+  void use(VcallArgsId) { always_assert(false && "vcall unsupported in vxls"); }
+
+private:
+  void rename(Vreg8& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg16& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg32& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg64& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(VregDbl& r) { r = lookup(r, Constraint::Simd); }
+  void rename(Vreg128& r) { r = lookup(r, Constraint::Simd); }
+  void rename(VregSF& r) { r = RegSF{0}; }
+  void rename(Vreg& r) { r = lookup(r, Constraint::Any); }
+  void rename(Vtuple t) { /* phijmp/phijcc+phidef handled by resolveEdges */ }
+
+  PhysReg lookup(Vreg vreg, Constraint kind) {
+    auto ivl = intervals[vreg];
+    if (!ivl || vreg.isPhys()) return vreg;
+    PhysReg reg = ivl->childAt(pos)->reg;
+    assertx((kind == Constraint::Gpr && reg.isGP()) ||
+            (kind == Constraint::Simd && reg.isSIMD()) ||
+            (kind == Constraint::Sf && reg.isSF()) ||
+            (kind == Constraint::Any && reg != InvalidReg));
+    return reg;
+  }
+private:
+  const jit::vector<Interval*>& intervals;
+  unsigned pos;
+};
+
+/*
+ * Visit every virtual-register typed operand in `unit', and rename it to its
+ * assigned physical register.
+ */
+void renameOperands(Vunit& unit, const VxlsContext& ctx,
+                    const jit::vector<Interval*>& intervals) {
+  for (auto b : ctx.blocks) {
+    auto pos = ctx.block_ranges[b].start;
+    for (auto& inst : unit.blocks[b].code) {
+      Renamer renamer(intervals, pos);
+      visitOperands(inst, renamer);
+      pos += 2;
+    }
+  }
+  ONTRACE(
+    kRegAllocLevel,
+    printIntervals("after renaming operands", unit, ctx, intervals);
+  );
+}
+
+/*
+ * Peephole cleanup pass.
+ *
+ * Remove no-op copy sequences before allocating spill space, since doing so
+ * might modify the CFG.
+ */
+void peephole(Vunit& unit, const VxlsContext& ctx) {
+  // Whether a Vinstr is a register swap.
+  auto const match_xchg = [] (Vinstr& i, Vreg& r0, Vreg& r1) {
     if (i.op != Vinstr::copy2) return false;
     r0 = i.copy2_.s0;
     r1 = i.copy2_.s1;
     return r0 == i.copy2_.d1 && r1 == i.copy2_.d0;
   };
-  for (auto b : blocks) {
+
+  for (auto b : ctx.blocks) {
     auto& code = unit.blocks[b].code;
-    for (int i=0, n = code.size(); i+1 < n; i++) {
+    for (int i = 0, n = code.size(); i + 1 < n; i++) {
       Vreg r0, r1, r2, r3;
       if (match_xchg(code[i], r0, r1) &&
-          match_xchg(code[i+1], r2, r3) &&
+          match_xchg(code[i + 1], r2, r3) &&
           ((r0 == r2 && r1 == r3) || (r0 == r3 && r1 == r2))) {
         // matched xchg+xchg that cancel each other
         code[i] = nop{};
-        code[i+1] = nop{};
+        code[i + 1] = nop{};
         i++;
       }
     }
@@ -1818,6 +2046,23 @@ void Vxls::peephole() {
     code.erase(end, code.end());
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Vxls::allocate() {
+  intervals = buildIntervals(unit, ctx);
+  assignRegisters();
+
+  auto const resolution = resolveLifetimes(unit, ctx, intervals);
+  renameOperands(unit, ctx, intervals);
+  insertCopies(unit, ctx, intervals, resolution);
+  peephole(unit, ctx);
+
+  allocateSpillSpace();
+  printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * SpillState is used by allocateSpillSpace() to decide where to allocate/free
@@ -2143,131 +2388,8 @@ void Vxls::allocateSpillSpace() {
   }
 }
 
-void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
-                          const CopyPlan& spills, MemoryRef slots,
-                          unsigned pos) {
-  jit::vector<Vinstr> stores;
-  for (auto src : spills) {
-    auto ivl = spills[src];
-    if (!ivl) continue;
-    auto slot = ivl->leader()->slot;
-    assertx(slot >= 0 && src == ivl->reg);
-    MemoryRef ptr{slots.r + slotOffset(slot)};
-    if (!ivl->wide) {
-      always_assert_flog(!src.isSF(), "Tried to spill %flags");
-      stores.emplace_back(store{src, ptr});
-    } else {
-      assertx(src.isSIMD());
-      stores.emplace_back(storeups{src, ptr});
-    }
-  }
-  auto origin = code[j].origin;
-  code.insert(code.begin() + j, stores.size(), ud2{});
-  for (auto& inst : stores) {
-    code[j] = inst;
-    code[j].origin = origin;
-    code[j++].pos = pos;
-  }
-}
-
-void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
-                          const CopyPlan& copies, MemoryRef slots,
-                          unsigned pos, const Interval* sf_ivl) {
-  auto sf_live = [&](unsigned pos) {
-    return sf_ivl && !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
-  };
-  MovePlan moves;
-  jit::vector<Vinstr> loads;
-  for (auto dst : copies) {
-    auto ivl = copies[dst];
-    if (!ivl) continue;
-    if (ivl->reg != InvalidReg) {
-      moves[dst] = ivl->reg;
-    } else if (ivl->constant) {
-      if (ivl->val.isUndef) continue;
-      auto const use_xor = ivl->val.val == 0 && dst.isGP() && !sf_live(pos);
-      switch (ivl->val.kind) {
-        case Vconst::Quad:
-        case Vconst::Double:
-          if (use_xor) {
-            Vreg32 d32 = dst; // assume 32-bit ops zero upper bits
-            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
-          } else {
-            loads.emplace_back(ldimmq{ivl->val.val, dst});
-          }
-          break;
-        case Vconst::Long:
-          if (use_xor) {
-            Vreg32 d32 = dst;
-            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
-          } else {
-            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst});
-          }
-          break;
-        case Vconst::Byte:
-          if (use_xor) {
-            Vreg8 d8 = dst;
-            loads.emplace_back(xorb{d8, d8, d8, RegSF{0}});
-          } else {
-            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst});
-          }
-          break;
-        case Vconst::ThreadLocal:
-          loads.emplace_back(
-            load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
-          );
-          break;
-      }
-    } else {
-      assertx(ivl->spilled());
-      MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
-      if (!ivl->wide) {
-        loads.emplace_back(load{ptr, dst});
-      } else {
-        assertx(dst.isSIMD());
-        loads.emplace_back(loadups{ptr, dst});
-      }
-    }
-  }
-  auto origin = code[j].origin;
-  auto hows = doRegMoves(moves, m_tmp);
-  auto count = hows.size() + loads.size();
-  code.insert(code.begin() + j, count, ud2{});
-  for (auto& how : hows) {
-    if (how.m_kind == MoveInfo::Kind::Xchg) {
-      code[j] = copy2{how.m_src, how.m_dst, how.m_dst, how.m_src};
-    } else {
-      code[j] = copy{how.m_src, how.m_dst};
-    }
-    code[j].origin = origin;
-    code[j++].pos = pos;
-  }
-  for (auto& inst : loads) {
-    code[j] = inst;
-    code[j].origin = origin;
-    code[j++].pos = pos;
-  }
-}
-
-// Return the [start,end) range for the block enclosing pos.
-Vlabel Vxls::findBlock(unsigned pos) {
-  for (unsigned lo = 0, hi = blocks.size(); lo < hi;) {
-    auto mid = (lo + hi) / 2;
-    auto r = block_ranges[blocks[mid]];
-    if (pos < r.start) {
-      hi = mid;
-    } else if (pos >= r.end) {
-      lo = mid + 1;
-    } else {
-      return blocks[mid];
-    }
-  }
-  always_assert(false);
-  return Vlabel{unit.blocks.size()};
-}
-
 LiveRange Vxls::findBlockRange(unsigned pos) {
-  return block_ranges[findBlock(pos)];
+  return block_ranges[blockFor(ctx, pos)];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2315,12 +2437,12 @@ std::string Interval::toString() {
   return out.str();
 }
 
-void Vxls::dumpIntervals() {
-  Trace::traceRelease("Spills %u\n", num_spills);
+DEBUG_ONLY void dumpIntervals(const jit::vector<Interval*>& intervals) {
+  // XXX: Trace::traceRelease("Spills %u\n", num_spills);
   for (auto ivl : intervals) {
     if (!ivl || ivl->fixed()) continue;
     Trace::traceRelease("%%%-2lu %s\n", size_t(ivl->vreg),
-                              ivl->toString().c_str());
+                        ivl->toString().c_str());
     for (ivl = ivl->next; ivl; ivl = ivl->next) {
       Trace::traceRelease("    %s\n", ivl->toString().c_str());
     }
@@ -2417,10 +2539,6 @@ DEBUG_ONLY void printIntervals(const char* caption,
     }
   }
   HPHP::Trace::traceRelease("%s\n", str.str().c_str());
-}
-
-void Vxls::print(const char* caption) {
-  printIntervals(caption, unit, ctx, intervals);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

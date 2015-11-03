@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/base/file-util.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -213,8 +213,14 @@ SSATmp* opt_dirname(IRGS& env, uint32_t numArgs) {
   }
 
   // Return the directory portion of the path
-  auto const path = top(env, BCSPOffset{0})->strVal()->toCppString();
-  return cns(env, makeStaticString(HHVM_FN(dirname)(path)));
+  auto path = top(env, BCSPOffset{0})->strVal();
+  auto psize = path->size();
+  // Make a mutable copy for dirname_helper to modify
+  char *buf = strndup(path->data(), psize);
+  int len = FileUtil::dirname_helper(buf, psize);
+  SSATmp *ret = cns(env, makeStaticString(buf, len));
+  free(buf);
+  return ret;
 }
 
 /*
@@ -415,8 +421,9 @@ bool optimizedFCallBuiltin(IRGS& env,
                            uint32_t numNonDefault) {
   auto const result = [&]() -> SSATmp* {
 
+    auto const fname = func->name();
 #define X(x) \
-    if (func->name()->isame(s_##x.get())) return opt_##x(env, numArgs);
+    if (fname->isame(s_##x.get())) return opt_##x(env, numArgs);
 
     X(get_called_class)
     X(get_class)

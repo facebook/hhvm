@@ -67,19 +67,15 @@ struct strintern_eq {
     auto const sd1 = to_sdata(k1);
     auto const len1 = sd1->size();
     auto const data1 = sd1->data();
-    const char* const* ptr2;
     if (UNLIKELY(k2 < 0)) {
       auto slice2 = to_sslice(k2);
       if (len1 != slice2->size()) return false;
-      ptr2 = reinterpret_cast<const char* const*>(slice2);
-      return !memcmp(data1, *ptr2, len1);
-    } else {
-      auto string2 = to_sdata(k2);
-      if (len1 != string2->size()) return false;
-      ptr2 = reinterpret_cast<const char* const*>(string2);
-      // only use wordsame on 8-byte aligned addresses
-      return wordsame(data1, *ptr2, len1);
+      return !memcmp(data1, slice2->begin(), len1);
     }
+    auto string2 = to_sdata(k2);
+    if (len1 != string2->size()) return false;
+    // only use wordsame on 8-byte aligned addresses
+    return wordsame(data1, string2->data(), len1);
   }
 };
 

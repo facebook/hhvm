@@ -58,11 +58,11 @@ const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 static String HHVM_FUNCTION(server_warmup_status) {
-  // Fail if we jitted more than 25kb of code.
+  // Fail if we jitted more than 5 KB of code.
   size_t begin, end;
   jit::mcg->codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
-  auto constexpr kMaxTCBytes = 25 << 10;
+  auto constexpr kMaxTCBytes = 5 << 10;
   if (diff > kMaxTCBytes) {
     return folly::format("Translation cache grew by {} bytes to {} bytes.",
                          diff, begin).str();

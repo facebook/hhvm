@@ -324,6 +324,9 @@ std::string Type::toString() const {
   }
 
   if (m_hasConstVal) {
+    if (*this <= TCls) {
+      return folly::sformat("Cls={}", m_clsVal->name()->data());
+    }
     return folly::format("{}<{}>",
                          dropConstVal().toString(), constValString()).str();
   }
@@ -332,10 +335,10 @@ std::string Type::toString() const {
   std::vector<std::string> parts;
   if (isSpecialized()) {
     if (auto clsSpec = this->clsSpec()) {
-      auto const base = Type(m_bits & kAnyObj, Ptr::Unk).toString();
+      auto const base = Type((m_bits & kAnyObj) | (m_bits & kCls), Ptr::Unk);
       auto const exact = clsSpec.exact() ? "=" : "<=";
       auto const name = clsSpec.cls()->name()->data();
-      auto const partStr = folly::to<std::string>(base, exact, name);
+      auto const partStr = folly::to<std::string>(base.toString(), exact, name);
 
       parts.push_back(partStr);
       t -= TAnyObj;
@@ -382,7 +385,7 @@ bool Type::checkValid() const {
   // Note: be careful, the TFoo objects aren't all constructed yet in this
   // function.
   if (m_extra) {
-    assertx((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
+    assertx((!(m_bits & kAnyObj) || !(m_bits & kAnyArr) || !(m_bits & kCls)) &&
            "Conflicting specialization");
   }
   // Never create such a thing like PtrToFooBottom.
@@ -467,7 +470,7 @@ Type Type::specialize(TypeSpec spec, bits_t killable /* = kTop */) const {
   // Remove the bits corresponding to any Bottom specializations---the
   // specializations intersected to zero, so the type component is impossible.
   if (spec.clsSpec() == ClassSpec::Bottom) {
-    bits &= ~(kAnyObj & killable);
+    bits &= ~((kCls | kAnyObj) & killable);
     cls_okay = false;
   }
   if (spec.arrSpec() == ArraySpec::Bottom) {
@@ -664,7 +667,7 @@ Type Type::operator-(Type rhs) const {
   // If these specializations would be subtracted out of lhs's specializations,
   // the finalization below will take care of re-eliminating it.
   if (rhs.arrSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyArr);
-  if (rhs.clsSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyObj);
+  if (rhs.clsSpec()) bits |= (lhs.m_bits & rhs.m_bits & (kAnyObj | kCls));
 
   // Stop looking at pointers, as it is already taken care of in `lhsPtr'.
   bits &= ~TPtrToGen.m_bits;

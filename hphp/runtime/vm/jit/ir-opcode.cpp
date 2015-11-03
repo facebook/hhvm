@@ -53,6 +53,7 @@ TRACE_SET_MOD(hhir);
 #define DParamMayRelax HasDest
 #define DParam         HasDest
 #define DParamPtr(k)   HasDest
+#define DLdObjCls      HasDest
 #define DUnboxPtr      HasDest
 #define DBoxPtr        HasDest
 #define DAllocObj      HasDest
@@ -110,6 +111,7 @@ OpInfo g_opInfo[] = {
 #undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
+#undef DLdObjCls
 #undef DUnboxPtr
 #undef DBoxPtr
 #undef DArrElem

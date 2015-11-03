@@ -291,6 +291,48 @@ TEST(Type, SpecializedObjects) {
   EXPECT_EQ(subA, subA - exactA);  // conservative
 }
 
+TEST(Type, SpecializedClass) {
+  auto const A = SystemLib::s_IteratorClass;
+  auto const B = SystemLib::s_TraversableClass;
+
+  EXPECT_TRUE(A->classof(B));
+
+  auto const cls = TCls;
+  auto const exactA = Type::ExactCls(A);
+  auto const exactB = Type::ExactCls(B);
+  auto const subA = Type::SubCls(A);
+  auto const subB = Type::SubCls(B);
+
+  EXPECT_EQ(exactA.clsSpec().exactCls(), A);
+  EXPECT_EQ(subA.clsSpec().cls(), A);
+  EXPECT_EQ(subA.clsSpec().exactCls(), nullptr);
+
+  EXPECT_LE(exactA, exactA);
+  EXPECT_LE(subA, subA);
+
+  EXPECT_LT(exactA, cls);
+  EXPECT_LT(subA, cls);
+
+  EXPECT_LE(TBottom, exactA);
+  EXPECT_LE(TBottom, subA);
+
+  EXPECT_LT(exactA, subA);
+
+  EXPECT_LT(exactA, subB);
+  EXPECT_LT(subA, subB);
+
+  EXPECT_FALSE(exactA <= exactB);
+  EXPECT_FALSE(subA <= exactB);
+
+  EXPECT_EQ(exactA & subA, exactA);
+  EXPECT_EQ(subA & exactA, exactA);
+  EXPECT_EQ(exactB & subB, exactB);
+  EXPECT_EQ(subB & exactB, exactB);
+
+  EXPECT_EQ(cls, cls - subA);  // conservative
+  EXPECT_EQ(subA, subA - exactA);  // conservative
+}
+
 TEST(Type, Const) {
   auto five = Type::cns(5);
   EXPECT_LT(five, TInt);

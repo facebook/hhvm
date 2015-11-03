@@ -352,6 +352,13 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DParam          return inst->typeParam();
 #define DParamPtr(k)    assertx(inst->typeParam() <= TGen.ptr(Ptr::k)); \
                         return inst->typeParam();
+#define DLdObjCls {                                                \
+  if (auto spec = inst->src(0)->type().clsSpec()) {                \
+    auto const cls = spec.cls();                                   \
+    return spec.exact() ? Type::ExactCls(cls) : Type::SubCls(cls); \
+  }                                                                \
+  return TCls;                                                     \
+}
 #define DUnboxPtr       return unboxPtr(inst->src(0)->type());
 #define DBoxPtr         return boxPtr(inst->src(0)->type());
 #define DAllocObj       return allocObjReturn(inst);
@@ -383,6 +390,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
+#undef DLdObjCls
 #undef DUnboxPtr
 #undef DBoxPtr
 #undef DAllocObj

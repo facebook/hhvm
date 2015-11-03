@@ -975,7 +975,7 @@ To string conversions:
 
   Look up the cached-class RDS handle for a given class name.
 
-| DerefClsRDSHandle, D(Cls), S(RDSHandle), NF
+| DerefClsRDSHandle, D(Cls|Nullptr), S(RDSHandle), NF
 
   Dereference an RDS handle that points to a cached class slot.
 
@@ -1129,7 +1129,7 @@ To string conversions:
   respectively. These instructions mutate a partially created ActRec pointed to
   by S1 + `offset' (in cells).
 
-| LdObjClass, D(Cls), S(Obj), NF
+| LdObjClass, DLdObjCls, S(Obj), NF
 
   Load the class out of the object in S0 and put it in D.
 

@@ -79,7 +79,7 @@ void printLabel(std::ostream& os, const Block* block) {
     os << "<Catch>";
   } else {
     switch (block->hint()) {
-      case Block::Hint::Unused:        os << "<Unused>"; break;
+      case Block::Hint::Unused:      os << "<Unused>"; break;
       case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
       case Block::Hint::Likely:      os << "<Likely>"; break;
       default:

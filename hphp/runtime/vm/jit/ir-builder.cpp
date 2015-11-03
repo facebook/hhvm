@@ -73,6 +73,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 #define D(t)           return false; // fixed type
 #define DofS(n)        return typeMightRelax(inst->src(n));
 #define DRefineS(n)    return true;  // typeParam may relax
+#define DLdObjCls      return typeMightRelax(inst->src(0));
 #define DParamMayRelax return true;  // typeParam may relax
 #define DParam         return false;
 #define DParamPtr(k)   return false;

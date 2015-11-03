@@ -587,6 +587,9 @@ public:
   static Type SubObj(const Class* cls);
   static Type ExactObj(const Class* cls);
 
+  static Type ExactCls(const Class* cls);
+  static Type SubCls(const Class* cls);
+
   /*
    * Return a copy of this Type with the specialization dropped.
    *
@@ -752,7 +755,7 @@ private:
   };
 };
 
-typedef folly::Optional<Type> OptType;
+using OptType = folly::Optional<Type>;
 
 /*
  * jit::Type must be small enough for efficient pass-by-value.

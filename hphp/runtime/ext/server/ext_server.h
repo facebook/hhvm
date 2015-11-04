@@ -25,10 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64_t k_PAGELET_NOT_READY;
-extern const int64_t k_PAGELET_READY;
-extern const int64_t k_PAGELET_DONE;
-
 enum PageletStatusType {
   PAGELET_NOT_READY,
   PAGELET_READY,

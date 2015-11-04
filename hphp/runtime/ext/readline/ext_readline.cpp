@@ -271,13 +271,9 @@ static class ReadlineExtension final : public Extension {
     ReadlineExtension() : Extension("readline") {}
     void moduleInit() override {
 #ifdef USE_EDITLINE
-      Native::registerConstant<KindOfStaticString>(
-          makeStaticString("READLINE_LIB"), makeStaticString("libedit")
-      );
+      HHVM_RC_STR(READLINE_LIB, "libedit");
 #else
-      Native::registerConstant<KindOfStaticString>(
-          makeStaticString("READLINE_LIB"), makeStaticString("readline")
-      );
+      HHVM_RC_STR(READLINE_LIB, "readline");
 #endif
       HHVM_FE(readline);
       HHVM_FE(readline_add_history);

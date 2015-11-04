@@ -114,6 +114,9 @@ int main(int argc, const char* argv[]) {
         << "fg_" << name << ", (void*)(&"
         << func.getPrefixedCppName() << ") }";
   }
+  if (!funcs.size()) {
+    cpp << "  { }";
+  }
   cpp << "\n};\n\n";
 
   for (auto const& klass : classes) {

@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/filter/ext_filter.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
@@ -75,7 +74,7 @@ static int php_filter_parse_int(const char *str, unsigned int str_len,
   }
 
   if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
-   || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) &&
+   || (sizeof(long) == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) &&
        *str > '2')) {
     /* overflow */
     return -1;
@@ -356,7 +355,7 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
     return (double)lval;
   } else if (isDoubleType(dt)) {
     if ((!dval && p.size() > 1 && strpbrk(p.data(), "123456789")) ||
-         !zend_finite(dval)) {
+         !finite(dval)) {
       goto error;
     }
     return dval;

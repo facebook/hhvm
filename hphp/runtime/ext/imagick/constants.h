@@ -117,14 +117,6 @@ extern const StaticString
   s_ImagickPixel,
   s_ImagickPixelIterator;
 
-template<typename T>
-ALWAYS_INLINE
-bool registerImagickConstants(const StaticString& name, T value) {
-  return Native::registerClassConstant<KindOfInt64>(s_Imagick.get(),
-                                                    name.get(),
-                                                    (int64_t)value);
-}
-
 void loadImagickConstants();
 
 //////////////////////////////////////////////////////////////////////////////

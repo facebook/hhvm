@@ -2196,7 +2196,8 @@ private:
 
 struct Label : private boost::noncopyable {
   Label() : m_a(nullptr) , m_address(nullptr) {}
-  Label(CodeAddress predefined) : m_a(nullptr) , m_address(predefined) {}
+  /* implicit */ Label(CodeAddress predefined) : m_a(nullptr) ,
+                                                 m_address(predefined) {}
 
   ~Label() {
     if (!m_toPatch.empty()) {

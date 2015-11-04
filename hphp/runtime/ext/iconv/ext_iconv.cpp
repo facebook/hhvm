@@ -1989,31 +1989,15 @@ const char* iconv_version() { return "2.5"; }
 #endif
 #endif
 
-const StaticString
-  s_ICONV_IMPL("ICONV_IMPL"),
-  s_ICONV_MIME_DECODE_CONTINUE_ON_ERROR("ICONV_MIME_DECODE_CONTINUE_ON_ERROR"),
-  s_ICONV_MIME_DECODE_STRICT("ICONV_MIME_DECODE_STRICT"),
-  s_ICONV_VERSION("ICONV_VERSION"),
-  s_iconv_impl(iconv_impl()),
-  s_iconv_version(iconv_version());
-
 class iconvExtension final : public Extension {
 public:
   iconvExtension() : Extension("iconv") {}
 
   void moduleInit() override {
-    Native::registerConstant<KindOfStaticString>(
-        s_ICONV_IMPL.get(), s_iconv_impl.get()
-    );
-    Native::registerConstant<KindOfInt64>(
-        s_ICONV_MIME_DECODE_CONTINUE_ON_ERROR.get(), 2
-    );
-    Native::registerConstant<KindOfInt64>(
-        s_ICONV_MIME_DECODE_STRICT.get(), 1
-    );
-    Native::registerConstant<KindOfStaticString>(
-        s_ICONV_VERSION.get(), s_iconv_version.get()
-    );
+    HHVM_RC_STR(ICONV_IMPL, iconv_impl());
+    HHVM_RC_INT(ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 2);
+    HHVM_RC_INT(ICONV_MIME_DECODE_STRICT, 1);
+    HHVM_RC_STR(ICONV_VERSION, iconv_version());
 
     HHVM_FE(iconv_get_encoding);
     HHVM_FE(iconv_mime_decode_headers);

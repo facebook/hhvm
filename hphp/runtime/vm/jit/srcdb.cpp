@@ -171,8 +171,8 @@ void SrcRec::newTranslation(TransLoc loc,
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, loc.mainStart());
 
   m_translations.push_back(loc);
-  if (!m_topTranslation.load(std::memory_order_acquire)) {
-    m_topTranslation.store(loc.mainStart(), std::memory_order_release);
+  if (!m_topTranslation.get()) {
+    m_topTranslation = loc.mainStart();
     patchIncomingBranches(loc.mainStart());
   }
 
@@ -204,8 +204,8 @@ void SrcRec::relocate(RelocationInfo& rel) {
     m_anchorTranslation = adjusted;
   }
 
-  if (auto adjusted = rel.adjustedAddressAfter(m_topTranslation.load())) {
-    m_topTranslation.store(adjusted);
+  if (auto adjusted = rel.adjustedAddressAfter(m_topTranslation.get())) {
+    m_topTranslation = adjusted;
   }
 
   for (auto &t : m_translations) {
@@ -243,14 +243,14 @@ void SrcRec::addDebuggerGuard(TCA dbgGuard, TCA dbgBranchGuardSrc) {
   // Set m_dbgBranchGuardSrc after patching, so we don't try to patch
   // the debug guard.
   m_dbgBranchGuardSrc = dbgBranchGuardSrc;
-  m_topTranslation.store(dbgGuard, std::memory_order_release);
+  m_topTranslation = dbgGuard;
 }
 
 void SrcRec::patchIncomingBranches(TCA newStart) {
   if (hasDebuggerGuard()) {
     // We have a debugger guard, so all jumps to us funnel through
     // this.  Just smash m_dbgBranchGuardSrc.
-    TRACE(1, "smashing m_dbgBranchGuardSrc @%p\n", m_dbgBranchGuardSrc);
+    TRACE(1, "smashing m_dbgBranchGuardSrc @%p\n", m_dbgBranchGuardSrc.get());
     smashJmp(m_dbgBranchGuardSrc, newStart);
     return;
   }
@@ -279,7 +279,7 @@ void SrcRec::replaceOldTranslations() {
   // which is a REQ_RETRANSLATE.
   auto translations = std::move(m_translations);
   m_tailFallbackJumps.clear();
-  m_topTranslation.store(nullptr, std::memory_order_release);
+  m_topTranslation = nullptr;
 
   /*
    * It may seem a little weird that we're about to point every

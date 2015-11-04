@@ -33,6 +33,11 @@ namespace HPHP { namespace jit {
 typedef unsigned char* TCA; // "Translation cache address."
 typedef const unsigned char* CTCA;
 
+using LowTCA = LowPtr<uint8_t>;
+using AtomicLowTCA = AtomicLowPtr<uint8_t,
+                                  std::memory_order_acquire,
+                                  std::memory_order_release>;
+
 struct ctca_identity_hash {
   size_t operator()(CTCA val) const {
     // Experiments show that this is a sufficient "hash function" on

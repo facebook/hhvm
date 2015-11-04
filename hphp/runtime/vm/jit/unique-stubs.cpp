@@ -166,6 +166,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb) {
     v << cmpl{argc, nparams, sf};
 
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+    auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
 
     // If we passed more args than declared, we might need to dispatch to the
     // "too many arguments" prologue.
@@ -181,13 +182,15 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb) {
 
         // Too many gosh-darned arguments passed.  Go to the (nparams + 1)-th
         // prologue, which is always the "too many args" entry point.
-        v << load{func[nparams * 8 + (pTabOff + int32_t(sizeof(TCA)))], dest};
+        emitLdLowPtr(v, func[nparams * ptrSize + (pTabOff + ptrSize)],
+                     dest, sizeof(LowPtr<uint8_t>));
         v << jmpr{dest};
       });
     });
 
     auto const dest = v.makeReg();
-    v << load{func[argc * 8 + pTabOff], dest};
+    emitLdLowPtr(v, func[argc * ptrSize + pTabOff],
+                 dest, sizeof(LowPtr<uint8_t>));
     v << jmpr{dest};
   });
 }
@@ -429,7 +432,7 @@ TCA emitFCallArrayHelper(CodeBlock& cb) {
     auto const body = v.makeReg();
 
     v << load{rvmfp()[AROFF(m_func)], callee};
-    v << load{callee[Func::funcBodyOff()], body};
+    emitLdLowPtr(v, callee[Func::funcBodyOff()], body, sizeof(LowPtr<uint8_t>));
 
     // We jmp directly to the func body---this keeps the return stack buffer
     // balanced between the call to this stub and the ret from the callee.

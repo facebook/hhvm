@@ -43,7 +43,7 @@ void checkHHConfig(const Unit* unit) {
   const std::string &s = unit->filepath()->toCppString();
   boost::filesystem::path p(s);
 
-  while (p != "/") {
+  while (p != "/" && p != "") {
     p.remove_filename();
     p /= ".hhconfig";
 
@@ -54,7 +54,7 @@ void checkHHConfig(const Unit* unit) {
     p.remove_filename();
   }
 
-  if (p == "/") {
+  if (p == "/" || p == "") {
     raise_error(
       "%s appears to be a Hack file, but you do not appear to be running "
       "the Hack typechecker. See the documentation at %s for information on "

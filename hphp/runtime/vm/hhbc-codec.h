@@ -136,7 +136,7 @@ int32_t decodeVariableSizeImm(PC* immPtr) {
   return (int32_t)(small >> 1);
 }
 
-inline int32_t decode_iva(PC& pc) {
+ALWAYS_INLINE int32_t decode_iva(PC& pc) {
   return decodeVariableSizeImm(&pc);
 }
 

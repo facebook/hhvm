@@ -1030,6 +1030,26 @@ Array HHVM_FUNCTION(mb_list_encodings) {
   return ret;
 }
 
+Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
+  const mbfl_encoding *encoding;
+  int i = 0;
+  encoding = mbfl_name2encoding(name.data());
+  if (!encoding) {
+    raise_warning("mb_encoding_aliases(): Unknown encoding \"%s\"",
+                  name.data());
+    return false;
+  }
+
+  Array ret = Array::Create();
+  if (encoding->aliases != nullptr) {
+    while ((*encoding->aliases)[i] != nullptr) {
+      ret.append((*encoding->aliases)[i]);
+      i++;
+    }
+  }
+  return ret;
+}
+
 Variant HHVM_FUNCTION(mb_list_encodings_alias_names,
                       const Variant& opt_name) {
   const String name = convertArg(opt_name);
@@ -4418,6 +4438,7 @@ static class mbstringExtension final : public Extension {
     HHVM_FE(mb_detect_order);
     HHVM_FE(mb_encode_mimeheader);
     HHVM_FE(mb_encode_numericentity);
+    HHVM_FE(mb_encoding_aliases);
     HHVM_FE(mb_ereg_match);
     HHVM_FE(mb_ereg_replace);
     HHVM_FE(mb_ereg_search_getpos);

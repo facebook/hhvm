@@ -15,7 +15,7 @@ function test(int $i, int $j, int $k): void {
   $v[$i][0] = 'aaa'; // we don't know anything about $i and $j, so
   // $v[$j][0] can be both string and int
   hh_show($v[$j]);
-  take_string($v[$j]['aaa']); // should be an error
+  take_string($v[$j][0]); // should be an error
 
 }
 

@@ -1,0 +1,6 @@
+File "akempty_promotion_15.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+File "akempty_promotion_15.php", line 3, characters 25-29:
+This is an array (used like a vector)
+File "akempty_promotion_15.php", line 6, characters 5-17:
+It is incompatible with an array (used like a hashtable) because it is used as map here

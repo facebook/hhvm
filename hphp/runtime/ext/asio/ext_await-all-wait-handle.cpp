@@ -111,8 +111,10 @@ retry:
     case ArrayData::kPackedKind:
       return FromPackedArray(ad);
 
-    case ArrayData::kMixedKind:
     case ArrayData::kStructKind:
+      return FromStructArray(StructArray::asStructArray(ad));
+
+    case ArrayData::kMixedKind:
       return FromMixedArray(MixedArray::asMixed(ad));
 
     case ArrayData::kProxyKind:
@@ -162,7 +164,31 @@ Object c_AwaitAllWaitHandle::ti_fromvector(const Variant& dependencies) {
 }
 
 Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
-  auto const start = reinterpret_cast<const TypedValue*>(dependencies + 1);
+  auto const start = packedData(dependencies);
+  auto const stop  = start + dependencies->getSize();
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  int32_t cnt = 0;
+
+  for (auto iter = start; iter < stop; ++iter) {
+    prepareChild(tvToCell(iter), ctx_idx, cnt);
+  }
+
+  if (!cnt) return Object{returnEmpty()};
+
+  auto result = Alloc(cnt);
+  auto next = &result->m_children[cnt];
+
+  for (auto iter = start; iter < stop; ++iter) {
+    addChild(tvToCell(iter), next);
+  }
+
+  assert(next == &result->m_children[0]);
+  result->initialize(ctx_idx);
+  return Object{std::move(result)};
+}
+
+Object c_AwaitAllWaitHandle::FromStructArray(const StructArray* dependencies) {
+  auto const start = dependencies->data();
   auto const stop = start + dependencies->getSize();
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   int32_t cnt = 0;

@@ -69,6 +69,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 
  private:
   static Object FromPackedArray(const ArrayData* dependencies);
+  static Object FromStructArray(const StructArray* dependencies);
   static Object FromMixedArray(const MixedArray* dependencies);
   static Object FromMap(const BaseMap* dependencies);
   static Object FromVector(const BaseVector* dependencies);

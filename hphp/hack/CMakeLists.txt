@@ -1,4 +1,9 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
+
 find_package(OCaml)
+find_package(LZ4)
+find_package(LibElf)
+find_package(Memfd)
 
 if (OCAMLC_FOUND)
   # This is totally the wrong way to do this, but I am tired of fighting with
@@ -12,6 +17,14 @@ if (OCAMLC_FOUND)
   endforeach()
   if(ELF_GETSHDRSTRNDX)
     list(APPEND extra_cc_flags -DHAVE_ELF_GETSHDRSTRNDX)
+  endif()
+
+  if(HAVE_MEMFD_CREATE)
+    list(APPEND extra_cc_flags -DHAVE_MEMFD_CREATE)
+  endif()
+
+  if(HAVE_DECL___NR_MEMFD_CREATE)
+    list(APPEND extra_cc_flags -DHAVE_DECL___NR_MEMFD_CREATE)
   endif()
 
   list(APPEND extra_cc_flags -DOSS_SMALL_HH_TABLE_POWS)

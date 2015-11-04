@@ -537,12 +537,14 @@ Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,
                       const String& delimiter /* = "," */,
-                      const String& enclosure /* = "\"" */) {
+                      const String& enclosure /* = "\"" */,
+                      const String& escape /* = "\\" */) {
   FCSV_CHECK_ARG(delimiter);
   FCSV_CHECK_ARG(enclosure);
+  FCSV_CHECK_ARG(escape);
 
   CHECK_HANDLE_RET_NULL(handle, f);
-  return f->writeCSV(fields, delimiter_char, enclosure_char);
+  return f->writeCSV(fields, delimiter_char, enclosure_char, escape_char);
 }
 
 Variant HHVM_FUNCTION(fgetcsv,

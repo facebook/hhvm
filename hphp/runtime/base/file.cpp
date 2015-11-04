@@ -756,10 +756,10 @@ const String& File::o_getResourceName() const {
 // csv functions
 
 int64_t File::writeCSV(const Array& fields, char delimiter_char /* = ',' */,
-                     char enclosure_char /* = '"' */) {
+                     char enclosure_char /* = '"' */,
+                     char escape_char /* = '\' */) {
   int line = 0;
   int count = fields.size();
-  const char escape_char = '\\';
   StringBuffer csvline(1024);
 
   for (ArrayIter iter(fields); iter; ++iter) {

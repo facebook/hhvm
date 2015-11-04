@@ -144,7 +144,8 @@ Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,
                       const String& delimiter = ",",
-                      const String& enclosure = "\"");
+                      const String& enclosure = "\"",
+                      const String& escape = "\\");
 Variant HHVM_FUNCTION(fgetcsv,
                       const Resource& handle,
                       int64_t length = 0,

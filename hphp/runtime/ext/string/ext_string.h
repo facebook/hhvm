@@ -47,17 +47,8 @@ constexpr int64_t k_ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS = 128;
 constexpr int64_t k_ENT_FB_UTF8 = 32768;
 constexpr int64_t k_ENT_FB_UTF8_ONLY = 65536;
 
-constexpr int64_t k_ENT_COMPAT = k_ENT_HTML_QUOTE_DOUBLE;
-constexpr int64_t k_ENT_QUOTES = (k_ENT_HTML_QUOTE_DOUBLE |
-                                  k_ENT_HTML_QUOTE_SINGLE);
-constexpr int64_t k_ENT_NOQUOTES = k_ENT_HTML_QUOTE_NONE;
-constexpr int64_t k_ENT_IGNORE = k_ENT_HTML_IGNORE_ERRORS;
-constexpr int64_t k_ENT_SUBSTITUTE = k_ENT_HTML_SUBSTITUTE_ERRORS;
-constexpr int64_t k_ENT_HTML401 = k_ENT_HTML_DOC_HTML401;
-constexpr int64_t k_ENT_XML1 = k_ENT_HTML_DOC_XML1;
-constexpr int64_t k_ENT_XHTML = k_ENT_HTML_DOC_XHTML;
-constexpr int64_t k_ENT_HTML5 = k_ENT_HTML_DOC_HTML5;
-constexpr int64_t k_DISALLOWED = k_ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS;
+constexpr int64_t k_ENT_QUOTES = k_ENT_HTML_QUOTE_DOUBLE |
+                                 k_ENT_HTML_QUOTE_SINGLE;
 
 constexpr int64_t k_HTML_SPECIALCHARS = 0;
 constexpr int64_t k_HTML_ENTITIES = 1;
@@ -162,24 +153,24 @@ String HHVM_FUNCTION(str_repeat,
 
 String HHVM_FUNCTION(html_entity_decode,
                      const String& str,
-                     int quote_style = k_ENT_COMPAT,
+                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                      const String& charset = "UTF-8");
 String HHVM_FUNCTION(htmlentities,
                      const String& str,
-                     int quote_style = k_ENT_COMPAT,
+                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                      const String& charset = "UTF-8",
                      bool double_encode = true);
 String HHVM_FUNCTION(htmlspecialchars_decode,
                      const String& str,
-                     int quote_style = k_ENT_COMPAT);
+                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE);
 String HHVM_FUNCTION(htmlspecialchars,
                      const String& str,
-                     int quote_style = k_ENT_COMPAT,
+                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                      const String& charset = "UTF-8",
                      bool double_encode = true);
 String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& str,
-                     int quote_style = k_ENT_COMPAT,
+                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                      const String& charset = "ISO-8859-1",
                      const Variant& extra = empty_array_ref);
 String HHVM_FUNCTION(quoted_printable_encode,
@@ -213,7 +204,7 @@ String HHVM_FUNCTION(convert_cyr_string,
                      const String& to);
 Array HHVM_FUNCTION(get_html_translation_table,
                     int table = 0,
-                    int quote_style = k_ENT_COMPAT,
+                    int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
                     const String& encoding = "UTF-8");
 String HHVM_FUNCTION(hebrev,
                      const String& hebrew_text,

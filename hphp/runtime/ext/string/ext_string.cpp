@@ -1621,7 +1621,7 @@ Variant HHVM_FUNCTION(metaphone,
 
 String HHVM_FUNCTION(html_entity_decode,
                      const String& str,
-                     int flags /* = k_ENT_COMPAT */,
+                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "UTF-8" */) {
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
@@ -1631,7 +1631,7 @@ String HHVM_FUNCTION(html_entity_decode,
 
 String HHVM_FUNCTION(htmlentities,
                      const String& str,
-                     int flags /* = k_ENT_COMPAT */,
+                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "UTF-8" */,
                      bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
@@ -1643,14 +1643,14 @@ String HHVM_FUNCTION(htmlentities,
 
 String HHVM_FUNCTION(htmlspecialchars_decode,
                      const String& str,
-                     int flags /* = k_ENT_COMPAT */) {
+                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */) {
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 "UTF-8", false);
 }
 
 String HHVM_FUNCTION(htmlspecialchars,
                      const String& str,
-                     int flags /* = k_ENT_COMPAT */,
+                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "UTF-8" */,
                      bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
@@ -1662,7 +1662,7 @@ String HHVM_FUNCTION(htmlspecialchars,
 
 String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& str,
-                     int flags /* = k_ENT_COMPAT */,
+                     int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "ISO-8859-1" */,
                      const Variant& extra /* = empty_array_ref */) {
   if (!extra.isNull() && !extra.isArray()) {
@@ -2270,7 +2270,7 @@ String encode_as_utf8(int code_point) {
 
 Array HHVM_FUNCTION(get_html_translation_table,
                     int table /* = 0 */,
-                    int flags /* = k_ENT_COMPAT */,
+                    int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                     const String& encoding /* = "UTF-8" */) {
   using namespace entity_charset_enum;
   auto charset = determine_charset(encoding.data());
@@ -2450,27 +2450,24 @@ public:
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
 
-#define kCNS(cns) Native::registerConstant<KindOfInt64> \
-  (makeStaticString(#cns), k_##cns)
-    kCNS(ENT_COMPAT);
-    kCNS(ENT_NOQUOTES);
-    kCNS(ENT_QUOTES);
-    kCNS(ENT_IGNORE);
-    kCNS(ENT_SUBSTITUTE);
-    kCNS(ENT_HTML401);
-    kCNS(ENT_XML1);
-    kCNS(ENT_XHTML);
-    kCNS(ENT_HTML5);
-    kCNS(ENT_FB_UTF8);
-    kCNS(ENT_FB_UTF8_ONLY);
+    HHVM_RC_INT(ENT_COMPAT, k_ENT_HTML_QUOTE_DOUBLE);
+    HHVM_RC_INT(ENT_NOQUOTES, k_ENT_HTML_QUOTE_NONE);
+    HHVM_RC_INT(ENT_QUOTES, k_ENT_QUOTES);
+    HHVM_RC_INT(ENT_IGNORE, k_ENT_HTML_IGNORE_ERRORS);
+    HHVM_RC_INT(ENT_SUBSTITUTE, k_ENT_HTML_SUBSTITUTE_ERRORS);
+    HHVM_RC_INT(ENT_HTML401, k_ENT_HTML_DOC_HTML401);
+    HHVM_RC_INT(ENT_XML1, k_ENT_HTML_DOC_XML1);
+    HHVM_RC_INT(ENT_XHTML, k_ENT_HTML_DOC_XHTML);
+    HHVM_RC_INT(ENT_HTML5, k_ENT_HTML_DOC_HTML5);
+    HHVM_RC_INT(ENT_FB_UTF8, k_ENT_FB_UTF8);
+    HHVM_RC_INT(ENT_FB_UTF8_ONLY, k_ENT_FB_UTF8_ONLY);
 
-    kCNS(HTML_SPECIALCHARS);
-    kCNS(HTML_ENTITIES);
+    HHVM_RC_INT(HTML_SPECIALCHARS, k_HTML_SPECIALCHARS);
+    HHVM_RC_INT(HTML_ENTITIES, k_HTML_ENTITIES);
 
-    kCNS(STR_PAD_LEFT);
-    kCNS(STR_PAD_RIGHT);
-    kCNS(STR_PAD_BOTH);
-#undef kCNS
+    HHVM_RC_INT(STR_PAD_LEFT, k_STR_PAD_LEFT);
+    HHVM_RC_INT(STR_PAD_RIGHT, k_STR_PAD_RIGHT);
+    HHVM_RC_INT(STR_PAD_BOTH, k_STR_PAD_BOTH);
 
     HHVM_RC_INT_SAME(LC_CTYPE);
     HHVM_RC_INT_SAME(LC_NUMERIC);
@@ -2482,14 +2479,15 @@ public:
     HHVM_RC_INT_SAME(LC_MESSAGES);
 #endif
 
+#ifdef YESEXPR
     HHVM_RC_INT_SAME(YESEXPR);
+#endif
+#ifdef NOEXPR
     HHVM_RC_INT_SAME(NOEXPR);
+#endif
     HHVM_RC_INT(CHAR_MAX, std::numeric_limits<char>::max());
 
-    Native::registerConstant<KindOfString>(
-      s_HPHP_TRIM_CHARLIST.get(),
-      k_HPHP_TRIM_CHARLIST.get()
-    );
+    HHVM_RC_STR(HPHP_TRIM_CHARLIST, k_HPHP_TRIM_CHARLIST);
 
 #ifdef ABDAY_1
     HHVM_RC_INT_SAME(ABDAY_1);

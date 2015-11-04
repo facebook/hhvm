@@ -321,15 +321,11 @@ static String HHVM_METHOD(IntlDatePatternGenerator, getErrorMessage) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define UDATPG_CONST_FIELD(nm)Native::registerClassConstant<KindOfInt64>( \
-                               s_IntlDatePatternGenerator.get(), \
-                               makeStaticString(#nm "_PATTERN_FIELD"), \
-                               UDATPG_ ## nm ## _FIELD);
+#define UDATPG_CONST_FIELD(nm) \
+HHVM_RCC_INT(IntlDatePatternGenerator, nm##_PATTERN_FIELD, UDATPG_##nm##_FIELD);
 
-#define UDATPG_CONST(nm)Native::registerClassConstant<KindOfInt64>( \
-                         s_IntlDatePatternGenerator.get(), \
-                         makeStaticString("PATTERN_" #nm), \
-                         UDATPG_ ## nm);
+#define UDATPG_CONST(nm) \
+  HHVM_RCC_INT(IntlDatePatternGenerator, PATTERN_##nm, UDATPG_##nm);
 
 void IntlExtension::initDatePatternGenerator() {
   // UDateTimePatternField

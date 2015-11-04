@@ -26,20 +26,6 @@
 #include "hphp/runtime/ext/extension.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-extern const int64_t k_SQLITE3_ASSOC;
-extern const int64_t k_SQLITE3_NUM;
-extern const int64_t k_SQLITE3_BOTH;
-extern const int64_t k_SQLITE3_INTEGER;
-extern const int64_t k_SQLITE3_FLOAT;
-extern const int64_t k_SQLITE3_TEXT;
-extern const int64_t k_SQLITE3_BLOB;
-extern const int64_t k_SQLITE3_NULL;
-extern const int64_t k_SQLITE3_OPEN_READONLY;
-extern const int64_t k_SQLITE3_OPEN_READWRITE;
-extern const int64_t k_SQLITE3_OPEN_CREATE;
-
-///////////////////////////////////////////////////////////////////////////////
 // class SQLite3
 
 class SQLite3 {

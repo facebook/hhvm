@@ -57,14 +57,6 @@ const StaticString s_GMP_s("s");
 const StaticString s_GMP_t("t");
 const StaticString s_GMP_g("g");
 
-// Global defines Strings
-const StaticString s_GMP_MAX_BASE("GMP_MAX_BASE");
-const StaticString s_GMP_ROUND_ZERO("GMP_ROUND_ZERO");
-const StaticString s_GMP_ROUND_PLUSINF("GMP_ROUND_PLUSINF");
-const StaticString s_GMP_ROUND_MINUSINF("GMP_ROUND_MINUSINF");
-const StaticString s_GMP_VERSION("GMP_VERSION");
-const StaticString k_GMP_VERSION(gmp_version);
-
 // Error strings
 const char* const cs_GMP_INVALID_TYPE =
   "%s(): Unable to convert variable to GMP - wrong type";

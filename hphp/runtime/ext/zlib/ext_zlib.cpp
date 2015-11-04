@@ -655,15 +655,12 @@ class ZlibExtension final : public Extension {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }
   void moduleInit() override {
-#define X(cns) \
-    Native::registerConstant<KindOfInt64>(makeStaticString(#cns), k_##cns);
-    X(ZLIB_ENCODING_RAW);
-    X(ZLIB_ENCODING_GZIP);
-    X(ZLIB_ENCODING_DEFLATE);
-    X(ZLIB_ENCODING_ANY);
-    X(FORCE_GZIP);
-    X(FORCE_DEFLATE);
-#undef X
+    HHVM_RC_INT(ZLIB_ENCODING_RAW, k_ZLIB_ENCODING_RAW);
+    HHVM_RC_INT(ZLIB_ENCODING_GZIP, k_ZLIB_ENCODING_GZIP);
+    HHVM_RC_INT(ZLIB_ENCODING_DEFLATE, k_ZLIB_ENCODING_DEFLATE);
+    HHVM_RC_INT(ZLIB_ENCODING_ANY, k_ZLIB_ENCODING_ANY);
+    HHVM_RC_INT(FORCE_GZIP, k_FORCE_GZIP);
+    HHVM_RC_INT(FORCE_DEFLATE, k_FORCE_DEFLATE);
 
     HHVM_FE(zlib_encode);
     HHVM_FE(gzdeflate);

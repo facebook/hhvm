@@ -22,6 +22,11 @@ if (EXISTS "${HPHP_HOME}/deps/")
   set(ENABLE_EXTENSION_MYSQLI OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_PDO_MYSQL OFF CACHE BOOL "")
 
+  # We need to link against the static library version of boost targetting the static
+  # runtime, so set the vars required by default.
+  set(Boost_USE_STATIC_LIBS ON CACHE BOOL "")
+  set(Boost_USE_STATIC_RUNTIME ON CACHE BOOL "")
+
   # And now the actual libs. Please keep them alphabetical, and keep the lib
   # values with any system libs first, then the debug version, and finally the
   # release version. Also, when setting the variables, set the include directory

@@ -119,18 +119,18 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
     std::string err;
     for (int i = 0; i < 50; i++) {
       Variant c = HHVM_FN(curl_init)();
-      HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, server);
-      HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+      HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL, server);
+      HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
       if (postdata) {
-        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_POSTFIELDS, postdata);
-        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_POST, true);
+        HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_POSTFIELDS, postdata);
+        HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_POST, true);
       }
       if (header) {
-        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HTTPHEADER,
+        HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_HTTPHEADER,
                       make_packed_array(header));
       }
       if (responseHeader) {
-        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HEADER, 1);
+        HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_HEADER, 1);
       }
 
       Variant res = HHVM_FN(curl_exec)(c.toResource());
@@ -204,10 +204,10 @@ void TestServer::StopServer() {
     String url = "http://";
     url += HHVM_FN(php_uname)("n").toString();
     url += ":" + folly::to<std::string>(s_admin_port) + "/stop";
-    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
-    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
-    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_TIMEOUT, 1);
-    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_CONNECTTIMEOUT, 1);
+    HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL, url);
+    HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
+    HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_TIMEOUT, 1);
+    HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_CONNECTTIMEOUT, 1);
     Variant res = HHVM_FN(curl_exec)(c.toResource());
     if (!same(res, false)) {
       return;

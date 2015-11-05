@@ -635,6 +635,9 @@ norepo_tests = (
 
     # Tests use banned reflection features
     '/ext/reflection/tests/bug30146.php',
+
+    # Closure::bind.
+    '/Zend/tests/anon/013.php',
 )
 
 # Random other files that zend wants

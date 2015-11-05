@@ -58,7 +58,7 @@ def record_failures(failures, out_ext):
     for failure in failures:
         outfile = failure.fname + out_ext
         with open(outfile, 'wb') as f:
-            f.write(failure.output)
+            f.write(bytes(failure.output, 'UTF-8'))
 
 def dump_failures(failures):
     for f in failures:

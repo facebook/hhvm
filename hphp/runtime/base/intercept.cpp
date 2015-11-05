@@ -100,8 +100,10 @@ bool register_intercept(const String& name, const Variant& callback,
   if (!callback.toBoolean()) {
     if (name.empty()) {
       s_intercept_data->m_global_handler.unset();
-      handlers.clear();
+      StringIMap<Variant> empty;
+      handlers.swap(empty);
     } else {
+      auto tmp = handlers[name];
       handlers.erase(name);
     }
     return true;
@@ -113,7 +115,8 @@ bool register_intercept(const String& name, const Variant& callback,
 
   if (name.empty()) {
     s_intercept_data->m_global_handler = handler;
-    handlers.clear();
+    StringIMap<Variant> empty;
+    handlers.swap(empty);
   } else {
     handlers[name] = handler;
   }

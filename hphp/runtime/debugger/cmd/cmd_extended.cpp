@@ -186,7 +186,7 @@ DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
   std::shared_ptr<CmdExtended> ret;
   if (cls == "CmdExample") {
     ret = std::make_shared<CmdExample>();
-  } else if (cls == "CmdExtension"); {
+  } else if (cls == "CmdExtension") {
     ret = std::make_shared<CmdExtension>();
   }
 

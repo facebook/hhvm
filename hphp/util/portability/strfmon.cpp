@@ -28,7 +28,11 @@
 #include <stdarg.h>
 #include <errno.h>
 
-static ssize_t vstrfmon_l(char *s, size_t n, locale_t loc, const char *fmt, va_list ap) {
+static ssize_t vstrfmon_l(char *s,
+                          size_t n,
+                          locale_t loc,
+                          const char *fmt,
+                          va_list ap) {
   size_t l;
   double x;
   int fill, nogrp, negpar, nosym, left, intl;
@@ -97,7 +101,11 @@ static ssize_t vstrfmon_l(char *s, size_t n, locale_t loc, const char *fmt, va_l
   return s - s0;
 }
 
-ssize_t strfmon_l(char *__restrict s, size_t n, locale_t loc, const char *__restrict fmt, ...) {
+extern "C" ssize_t strfmon_l(char* __restrict s,
+                             size_t n,
+                             locale_t loc,
+                             const char* __restrict fmt,
+                             ...) {
   va_list ap;
   ssize_t ret;
 
@@ -109,7 +117,10 @@ ssize_t strfmon_l(char *__restrict s, size_t n, locale_t loc, const char *__rest
 }
 
 
-ssize_t strfmon(char *__restrict s, size_t n, const char *__restrict fmt, ...) {
+extern "C" ssize_t strfmon(char* __restrict s,
+                           size_t n,
+                           const char* __restrict fmt,
+                           ...) {
   va_list ap;
   ssize_t ret;
 

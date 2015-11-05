@@ -12,3 +12,233 @@ begin library "ROOTPROJECT"
   files = []
 end
 
+begin library "hh-hhi"
+  requires = [ "hh-globals" "hh-utils" "hh-find" "bigarray" ]
+  files = [
+    "src/hhi/hhi_elf.c"
+    "src/hhi/hhi_win32res_stubs.c"
+    "src/hhi/hhi_win32res.ml"
+    "src/hhi/hhi.ml"
+  ]
+  if (os_type = "Win32") then {
+    (* Embed resources *)
+    hhi_source = "./hhi.rc"
+    hhi_target = "%{hh-hhi_FULL_DST_DIR}%/hhi_res.o"
+    cclib = [ hhi_target ]
+    build_rules = [
+      hhi_target (
+        sources = [ hhi_source ]
+        commands = [
+          { "windres"
+            "--preprocessor=x86_64-w64-mingw32-gcc.exe"
+            "--preprocessor-arg=-E"
+            "--preprocessor-arg=-xc-header"
+            hhi_source hhi_target }
+        ]
+        build_target = true
+      )
+    ]
+  } else if (system = "macosx" && os_type = "Unix") then {
+    cclib = [
+      "-sectcreate" "-__text" "hhi"
+      "%{ROOTPROJECT_FULL_SRC_DIR}%/bin/hhi.tar.gz"
+      "-framework" "CoreServices"
+      "-framework" "CoreFoundation"
+    ]
+  }
+
+end
+
+begin library "hh-server-base"
+  requires = [ "hh-third-party" "hh-utils" "hh-typing"  "hh-search"
+                "hh-stubs" "hh-stubs-ai"  "hh-socket" "hh-dfind" "hh-hhi" ]
+  files = [
+    "src/server/serverFiles.ml"
+    "src/server/serverConfig.ml"
+    "src/server/serverArgs.ml"
+    "src/server/serverEnv.ml"
+    "src/server/serverUtils.ml"
+    "src/server/argumentInfoService.ml"
+    "src/server/autocompleteService.ml"
+    "src/server/fileOutline.ml"
+    "src/server/serverIdeUtils.ml"
+    "src/server/findRefsService.ml"
+    "src/server/identifySymbolService.ml"
+    "src/server/inferAtPosService.ml"
+    "src/server/methodJumps.ml"
+    "src/server/serverArgumentInfo.ml"
+    "src/server/serverAutoComplete.ml"
+    "src/server/serverBuild.ml"
+    "src/server/serverCheckpoint.ml"
+    "src/server/serverColorFile.ml"
+    "src/server/serverCoverageMetric.ml"
+    "src/server/serverError.ml"
+    "src/server/serverFindRefs.ml"
+    "src/server/serverIdentifyFunction.ml"
+    "src/server/serverInferType.ml"
+    "src/server/serverLocalConfig.ml"
+    "src/server/serverLint.ml"
+    "src/server/serverMonitor.ml"
+    "src/server/serverRefactor.ml"
+    "src/server/serverSearch.ml"
+    "src/server/symbolUtils.ml"
+    "src/server/symbolFunCallService.ml"
+    "src/server/symbolTypeService.ml"
+    "src/server/symbolInfoService.ml"
+    "src/server/serverIdle.ml"
+    "src/server/serverRpc.ml"
+    "src/server/serverCheckUtils.ml"
+    "src/server/serverTypeCheck.ml"
+    "src/server/serverCommand.ml"
+    "src/server/serverConvert.ml"
+    "src/server/serverStamp.ml"
+  ]
+end
+
+begin library "hh-server"
+  requires = [
+    "hh-third-party" "hh-utils" "hh-typing"
+    "hh-search"  "hh-stubs"  "hh-stubs-ai"
+    "hh-socket"  "hh-dfind" "hh-watchman" "hh-server-base"
+  ]
+  files = [
+    "src/server/serverEnvBuild.ml"
+    "src/server/serverInit.ml"
+    "src/server/serverMain.ml"
+  ]
+end
+
+begin library "hh-client"
+  requires = [
+    "hh-deps"  "hh-heap"  "hh-parsing"
+    "hh-globals"  "hh-search"  "hh-stubs"
+    "hh-socket"  "hh-server-base"
+  ]
+  files = [
+    "src/client/clientConnectSimple.ml"
+    "src/client/clientStop.ml"
+    "src/client/clientStart.ml"
+    "src/client/clientConnect.ml"
+    "src/client/clientLogCommand.ml"
+    "src/client/clientBuild.ml"
+    "src/client/clientEnv.ml"
+    "src/client/clientCommand.ml"
+    "src/client/clientArgs.ml"
+    "src/client/clientArgumentInfo.ml"
+    "src/client/clientAutocomplete.ml"
+    "src/client/clientCheckStatus.ml"
+    "src/client/colorFile.ml"
+    "src/client/clientColorFile.ml"
+    "src/client/clientCoverageMetric.ml"
+    "src/client/clientFindRefs.ml"
+    "src/client/clientLint.ml"
+    "src/client/clientMethodJumps.ml"
+    "src/client/clientOutline.ml"
+    "src/client/clientRefactor.ml"
+    "src/client/clientSearch.ml"
+    "src/client/clientAiInfo.ml"
+    "src/client/clientSymbolInfo.ml"
+    "src/client/clientTypeAtPos.ml"
+    "src/client/clientCheck.ml"
+    "src/client/clientRestart.ml"
+  ]
+end
+
+begin program "hh_client"
+  requires = [ "hh-client" ]
+  files = [ "src/hh_client.ml" ]
+end
+
+begin program "hh_server"
+  requires = [ "hh-server" ]
+  files = [ "src/hh_server.ml" ]
+end
+
+begin library "hh-emitter"
+  requires = [ "hh-naming" "hh-typing" ]
+
+  files = [
+    "src/emitter/emitter_core.ml"
+    "src/emitter/emitter_consts.ml"
+    "src/emitter/emitter_xhp.ml"
+    "src/emitter/emitter_expr.ml"
+    "src/emitter/emitter_lit.ml"
+    "src/emitter/emitter_stmt.ml"
+    "src/emitter/emitter_types.ml"
+    "src/emitter/emitter.ml"
+  ]
+end
+
+begin library "hh-format"
+  requires = [ "hh-typing-base" ]
+  files = [
+    "src/stubs/formatEventLogger.ml"
+    "src/format/format_hack.ml"
+    "src/format/format_diff.ml"
+    "src/format/format_mode.ml"
+  ]
+end
+
+begin program "hh_format"
+  requires = [ "hh-format" "hh-client" ]
+  files = [ "src/hh_format.ml" ]
+end
+
+begin program "hh_single_type_check"
+  requires = [ "hh-client"  "hh-emitter" ]
+  files = [
+    "src/hh_single_type_check.ml"
+  ]
+end
+
+begin library "hh-match"
+  requires = [ "hh-parsing" "hh-typing-base" "h2tp-unparser"]
+  files = [
+    "src/hh_matcher/astConstructor.ml"
+    "src/hh_matcher/ast_code_extent.ml"
+    "src/hh_matcher/hh_match_utils.ml"
+    "src/hh_matcher/hh_match_test_utils.ml"
+    "src/hh_matcher/patcher.ml"
+    "src/hh_matcher/matcher.ml"
+  ]
+end
+
+begin program "hh_match"
+  requires = [ "hh-match" "hh-client" ]
+  files = [ "src/hh_match.ml" ]
+end
+
+begin program "code_extent_tests"
+  requires = [ "hh-match" "hh-hhi" ]
+  files = [
+    "src/hh_matcher/test/code_extent_tests.ml"
+  ]
+end
+
+begin program "matcher_test"
+  requires = [ "hh-match" "hh-hhi" ]
+  files = [
+    "src/hh_matcher/test/matcher_test.ml"
+  ]
+end
+
+begin program "patcher_module_test"
+  requires = [ "hh-match" "hh-hhi" ]
+  files = [
+    "src/hh_matcher/test/patcher_module_test.ml"
+  ]
+end
+
+begin program "patcher_api_test"
+  requires = [ "hh-match" "hh-hhi" ]
+  files = [
+    "src/hh_matcher/test/patcher_api_test.ml"
+  ]
+end
+
+begin program "patcher_test"
+  requires = [ "hh-match" "hh-hhi" ]
+  files = [
+    "src/hh_matcher/test/patcher_test.ml"
+  ]
+end

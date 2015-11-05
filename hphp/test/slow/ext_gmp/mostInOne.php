@@ -61,8 +61,6 @@ echo gmp_strval($div1) . "\n";
 // gmp_divexact
 $div1 = gmp_divexact("10", "2");
 echo gmp_strval($div1) . "\n";
-$div2 = gmp_divexact("10", "3"); // bogus result
-echo gmp_strval($div2) . "\n";
 
 // gmp_fact
 $fact1 = gmp_fact(5); // 5 * 4 * 3 * 2 * 1

@@ -1966,8 +1966,9 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   Otherwise this instruction pushes a new entry on the FPI stack, initializing
   it with the number of parameters being passed (given by %1) and a reference
   to the FPI structure for the function named x. With FPushFuncD the litstr in
-  %2 must not start with a '\' character. Function names should be normalized
-  with respect to namespace and never start with a '\'.
+  %2 must not start with a '\' character, or be of the form "Class::Method".
+  Function names should be normalized with respect to namespace and never start
+  with a '\'.
 
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
@@ -1976,7 +1977,13 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   by %1) and a reference to the FPI structure for the __invoke method from
   object x.
 
-  If x is not a string or object, this instruction throws a fatal error.
+  if x is an array, this instruction will check that the first array element is
+  either the name of a class, or an instance of one, and that the second array
+  element is the name of a method.  If no such class exists, or no such method
+  on that class exists, then this instruction throws a fatal error.  Otherwise
+  this instruction does the same FPI manipulation mentioned above.
+
+  If x is not a string, object, or array, this instruction throws a fatal error.
 
 FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
 

@@ -1345,7 +1345,8 @@ void in(ISS& env, const bc::FPushFunc& op) {
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfStaticString) {
     auto const name = normalizeNS(v1->m_data.pstr);
-    if (isNSNormalized(name)) {
+    // FPushFuncD doesn't support class-method pair strings yet.
+    if (isNSNormalized(name) && notClassMethodPair(name)) {
       return reduce(env, bc::PopC {},
                          bc::FPushFuncD { op.arg1, name });
     }

@@ -190,6 +190,8 @@ const int64_t q_Memcached$$RES_SERVER_MARKED_DEAD
           = MEMCACHED_SERVER_MARKED_DEAD;
 const int64_t q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
           = MEMCACHED_SERVER_TEMPORARILY_DISABLED;
+const int64_t q_Memcached$$OPT_HASH_WITH_PREFIX_KEY
+          = MEMCACHED_BEHAVIOR_HASH_WITH_PREFIX_KEY;
 
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
@@ -1309,6 +1311,7 @@ const StaticString s_OPT_LIBKETAMA_HASH("OPT_LIBKETAMA_HASH");
 const StaticString s_OPT_NO_BLOCK("OPT_NO_BLOCK");
 const StaticString s_OPT_POLL_TIMEOUT("OPT_POLL_TIMEOUT");
 const StaticString s_OPT_PREFIX_KEY("OPT_PREFIX_KEY");
+const StaticString s_OPT_HASH_WITH_PREFIX_KEY("OPT_HASH_WITH_PREFIX_KEY");
 const StaticString s_OPT_RECV_TIMEOUT("OPT_RECV_TIMEOUT");
 #if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
 const StaticString s_OPT_REMOVE_FAILED_SERVERS("OPT_REMOVE_FAILED_SERVERS");
@@ -1504,6 +1507,10 @@ class MemcachedExtension final : public Extension {
     );
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_OPT_PREFIX_KEY.get(), q_Memcached$$OPT_PREFIX_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_HASH_WITH_PREFIX_KEY.get(),
+      q_Memcached$$OPT_HASH_WITH_PREFIX_KEY
     );
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_OPT_RECV_TIMEOUT.get(), q_Memcached$$OPT_RECV_TIMEOUT

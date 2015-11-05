@@ -45,7 +45,7 @@ extern "C" void globfree(glob_t*);
 #define GLOB_NOCHECK  0x10
 #define GLOB_APPEND   0x20
 #define GLOB_NOESCAPE 0x40
-#define	GLOB_PERIOD   0x80
+#define GLOB_PERIOD   0x80
 
 #define GLOB_NOSPACE 1
 #define GLOB_ABORTED 2

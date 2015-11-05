@@ -394,7 +394,7 @@ int64_t extract_impl(VRefParam vref_array,
   auto& arr = tvAsCVarRef(arr_tv).asCArrRef();
   if (UNLIKELY(reference)) {
     auto extr_refs = [&](Array& arr) {
-      {
+      if (arr.size() > 0) {
         // force arr to escalate (if necessary) by getting an
         // lvalue to the first element.
         ArrayData* ad = arr.get();

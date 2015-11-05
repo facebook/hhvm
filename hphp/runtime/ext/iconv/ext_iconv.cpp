@@ -1217,10 +1217,10 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
             /* pass the entire chunk through the converter */
             err = _php_iconv_appendl(retval, encoded_word,
                                      (size_t)(p1 - encoded_word), cd_pl);
-            if (err != PHP_ICONV_ERR_SUCCESS) {
-              goto out;
-            }
             encoded_word = NULL;
+            if (err != PHP_ICONV_ERR_SUCCESS) {
+              break;
+            }
           } else {
             goto out;
           }

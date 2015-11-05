@@ -151,7 +151,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Returns an iterator that points to the beginning of this Set.
    */
-  public function getIterator(): SetIterator<Tv>;
+  public function getIterator(): KeyedIterator<mixed, Tv>;
 
   /**
    * Returns a Set containing the values from the specified array.
@@ -175,6 +175,11 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function items(): Iterable<Tv>;
 }
 
+/**
+ * @internal
+ *
+ * Methods and functions should take and return the KeyedIterator interface.
+ */
 class SetIterator<+Tv> implements KeyedIterator<mixed, Tv> {
   public function __construct();
   public function current(): Tv;

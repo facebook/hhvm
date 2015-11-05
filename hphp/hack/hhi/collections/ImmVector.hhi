@@ -91,7 +91,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
   /**
    * Returns an iterator that points to the beginning of this ImmVector.
    */
-  public function getIterator(): VectorIterator<Tv>;
+  public function getIterator(): KeyedIterator<int, Tv>;
 
   /**
    * Returns the index of the first element that matches the search value.

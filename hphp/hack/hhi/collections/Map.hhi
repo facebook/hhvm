@@ -654,6 +654,11 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function items(): Iterable<Pair<Tk, Tv>>;
 }
 
+/**
+ * @internal
+ *
+ * Methods and functions should take and return the KeyedIterator interface.
+ */
 class MapIterator<Tk, +Tv> implements KeyedIterator<Tk, Tv> {
   public function __construct();
   public function current(): Tv;

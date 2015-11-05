@@ -131,6 +131,11 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
   public function __toString(): string;
 }
 
+/**
+ * @internal
+ *
+ * Methods and functions should take and return the KeyedIterator interface.
+ */
 class PairIterator implements KeyedIterator<int, mixed> {
   public function __construct();
   public function rewind(): void;

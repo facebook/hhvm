@@ -692,6 +692,11 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function items(): Iterable<Tv>;
 }
 
+/**
+ * @internal
+ *
+ * Methods and functions should take and return the KeyedIterator interface.
+ */
 class VectorIterator<+Tv> implements KeyedIterator<int, Tv> {
   public function __construct();
   public function rewind(): void;

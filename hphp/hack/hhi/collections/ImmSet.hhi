@@ -56,7 +56,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
   /**
    * Returns an iterator that points to the beginning of this ImmSet.
    */
-  public function getIterator(): SetIterator<Tv>;
+  public function getIterator(): KeyedIterator<mixed, Tv>;
 
   public static function fromItems(?Traversable<Tv> $items): ImmSet<Tv>;
 

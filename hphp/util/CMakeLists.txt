@@ -7,9 +7,8 @@ auto_sources(files "*.S" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND ASM_SOURCES ${files})
 
 set(HEADER_SOURCES)
-auto_sources(files "*.h" "RECURSE")
+auto_sources(files "*.h" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND HEADER_SOURCES ${files})
-HHVM_PUBLIC_HEADERS(util ${files})
 
 # Disable Channeled JSON until we're sure it's going to stick
 # sgolemon(2014-02-19)
@@ -21,9 +20,19 @@ if (NOT MSVC)
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/fnmatch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/strptime.cpp
   )
+  list(REMOVE_ITEM HEADER_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/fnmatch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/portability/strptime.h
+  )
 endif()
+
+HHVM_PUBLIC_HEADERS(util ${HEADER_SOURCES})
 
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"

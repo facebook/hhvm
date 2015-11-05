@@ -10,7 +10,7 @@ function test() {
   $a; // $a is a <string, int> array - checked
 
   $b = array();
-  $b[] = 4; // still AKempty, partially checked
+  $b[] = 4; // still AKempty, checked
   $b; // array<int> - checked
 
   $c = array();

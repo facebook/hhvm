@@ -190,12 +190,8 @@ static std::vector<bitmask*> *node_to_cpu_mask;
 static bool use_numa = false;
 static bool threads_bind_local = false;
 
-extern "C" void numa_init();
-
 static void initNuma() {
-  // numa_init is called automatically, but is probably called after
-  // JEMallocInitializer(). its idempotent, so call it here.
-  numa_init();
+
   if (numa_available() < 0) return;
 
   // set interleave for early code. we'll then force interleave

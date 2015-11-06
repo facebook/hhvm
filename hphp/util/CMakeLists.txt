@@ -25,17 +25,6 @@ add_custom_command(
   COMMENT "Generating Repo Schema ID and Compiler ID"
   VERBATIM)
 
-## Disabling numa support (for now) since distro
-## libnuma packages don't always have numa_init available
-## Find a better way to make sure numa initialization
-## happens on time. -sgolemon (2013-10-16)
-
-#find_package(LibNuma)
-#if (LIBNUMA_INCLUDE_DIRS)
-#  add_definitions("-DHAVE_NUMA=1")
-#  include_directories(${LIBNUMA_INCLUDE_DIRS})
-#endif()
-
 if(MSVC)
   list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/afdt-util.cpp")
   list(REMOVE_ITEM HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/afdt-util.h")
@@ -52,9 +41,6 @@ if (ENABLE_COTIRE)
   cotire(hphp_util)
 endif()
 
-#if (LIBNUMA_LIBRARIES)
-#  target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
-#endif()
 if (ENABLE_ASYNC_MYSQL)
   add_dependencies(hphp_util webscalesqlclient)
 endif ()

@@ -1460,10 +1460,18 @@ static class HotProfilerExtension : public Extension {
   HotProfilerExtension(): Extension("hotprofiler", k_PHP_VERSION.data()) {}
 
   void moduleInit() override {
-    HHVM_RC_INT_SAME(CLOCK_MONOTONIC);
-    HHVM_RC_INT_SAME(CLOCK_PROCESS_CPUTIME_ID);
+#ifdef CLOCK_REALTIME
     HHVM_RC_INT_SAME(CLOCK_REALTIME);
+#endif
+#ifdef CLOCK_MONOTONIC
+    HHVM_RC_INT_SAME(CLOCK_MONOTONIC);
+#endif
+#ifdef CLOCK_PROCESS_CPUTIME_ID
+    HHVM_RC_INT_SAME(CLOCK_PROCESS_CPUTIME_ID);
+#endif
+#ifdef CLOCK_THREAD_CPUTIME_ID
     HHVM_RC_INT_SAME(CLOCK_THREAD_CPUTIME_ID);
+#endif
   }
 } s_hot_profiler_extension;
 

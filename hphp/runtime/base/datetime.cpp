@@ -887,6 +887,7 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
   // needed if any date part is missing
   timelib_fill_holes(t, m_time.get(), TIMELIB_NO_CLONE);
   timelib_update_ts(t, m_tz->get());
+  timelib_update_from_sse(t);
 
   int error2;
   m_timestamp = timelib_date_to_int(t, &error2);

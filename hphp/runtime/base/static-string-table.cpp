@@ -66,17 +66,16 @@ struct strintern_eq {
     assert(k2 >= 0 || k2 < kAhmMagicThreshold);
     auto const sd1 = to_sdata(k1);
     auto const len1 = sd1->size();
-    const char* const* ptr2;
+    auto const data1 = sd1->data();
     if (UNLIKELY(k2 < 0)) {
       auto slice2 = to_sslice(k2);
       if (len1 != slice2->size()) return false;
-      ptr2 = reinterpret_cast<const char* const*>(slice2);
-    } else {
-      auto string2 = to_sdata(k2);
-      if (len1 != string2->size()) return false;
-      ptr2 = reinterpret_cast<const char* const*>(string2);
+      return !memcmp(data1, slice2->begin(), len1);
     }
-    return wordsame(sd1->data(), *ptr2, len1);
+    auto string2 = to_sdata(k2);
+    if (len1 != string2->size()) return false;
+    // only use wordsame on 8-byte aligned addresses
+    return wordsame(data1, string2->data(), len1);
   }
 };
 

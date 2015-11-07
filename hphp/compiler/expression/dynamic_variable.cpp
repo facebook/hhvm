@@ -19,7 +19,6 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/code_model_enums.h"
 
 using namespace HPHP;
 
@@ -73,19 +72,6 @@ void DynamicVariable::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void DynamicVariable::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("UnaryOpExpression", 3);
-  cg.printPropertyHeader("expression");
-  m_exp->outputCodeModel(cg);
-  cg.printPropertyHeader("operation");
-  cg.printValue(PHP_DYNAMIC_VARIABLE_OP) ;
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

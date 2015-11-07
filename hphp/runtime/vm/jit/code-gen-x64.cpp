@@ -1098,9 +1098,7 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
     return dst;
   };
 
-  if (test->hasConstVal(TCls)) {
-    // Don't need to do the null check when the class is const.
-    assertx(test->clsVal() != nullptr);
+  if (test->isA(TCls)) {
     call_classof(destReg);
     return;
   }
@@ -1120,13 +1118,15 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
  * Class entry.
  */
 void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
-  auto const rdst          = dstLoc(inst, 0).reg();
-  auto const rObjClass     = srcLoc(inst, 0).reg();
-  auto const rTestClass    = srcLoc(inst, 1).reg();
-  auto const testClass     = inst->src(1)->clsVal();
+  auto const rdst       = dstLoc(inst, 0).reg();
+  auto const rObjClass  = srcLoc(inst, 0).reg();
+  auto const rTestClass = srcLoc(inst, 1).reg();
+  auto const testClass  = inst->src(1)->type().clsSpec().exactCls();
   auto& v = vmain();
 
-  // check whether rObjClass points to a strict subclass of rTestClass,
+  assertx(testClass != nullptr);
+
+  // Check whether rObjClass points to a strict subclass of rTestClass,
   // set dst with the bool true/false result, and return dst.
   auto check_strict_subclass = [&](Vreg dst) {
     // Check the length of the class vectors. If the candidate's is at

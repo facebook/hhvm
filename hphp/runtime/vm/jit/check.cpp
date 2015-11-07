@@ -501,6 +501,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DParamMayRelax requireTypeParam();
 #define DParam         requireTypeParam();
 #define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
+#define DLdObjCls
 #define DUnboxPtr
 #define DBoxPtr
 #define DAllocObj
@@ -539,6 +540,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
+#undef DLdObjCls
 #undef DUnboxPtr
 #undef DBoxPtr
 #undef DAllocObj

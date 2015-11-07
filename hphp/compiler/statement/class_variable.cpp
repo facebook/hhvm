@@ -272,24 +272,6 @@ StatementPtr ClassVariable::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ClassVariable::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_typeConstraint.empty() ? 3 : 4;
-  cg.printObjectHeader("ClassVariableStatement", numProps);
-  cg.printPropertyHeader("modifiers");
-  m_modifiers->outputCodeModel(cg);
-  if (!m_typeConstraint.empty()) {
-    cg.printPropertyHeader("typeAnnotation");
-    cg.printTypeExpression(m_typeConstraint);
-  }
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_declaration);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ClassVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

@@ -113,23 +113,6 @@ ClassScopePtr StaticClassName::resolveClass() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StaticClassName::outputCodeModel(CodeGenerator &cg) {
-  if (isStatic() || !m_origClassName.empty()) {
-    cg.printPropertyHeader("class");
-  } else {
-    cg.printPropertyHeader("classExpression");
-  }
-  if (isStatic()) {
-    cg.printTypeExpression("static");
-  } else if (!m_origClassName.empty()) {
-    cg.printTypeExpression(m_origClassName);
-  } else {
-    m_class->outputCodeModel(cg);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void StaticClassName::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_class) {
     m_class->outputPHP(cg, ar);

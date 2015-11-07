@@ -18,32 +18,6 @@ module TUtils       = Typing_utils
 module Type         = Typing_ops
 
 (*****************************************************************************)
-(* Adds a new field to all the shapes found in a given type.
- * The function leaves all the other types (non-shapes) unchanged.
- *)
-(*****************************************************************************)
-
-let rec grow_shape pos field_name env shape =
-  let _, shape = Env.expand_type env shape in
-  match shape with
-  | _, Tshape (fields_known, fields) ->
-      let env, tv = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
-      let fields = ShapeMap.add field_name tv fields in
-      let result = Reason.Rwitness pos, Tshape (fields_known, fields) in
-      env, result
-  | _, Tarraykind (AKshape fdm) ->
-      let env, tk = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
-      let env, tv = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
-      let fdm =
-        ShapeMap.add field_name (tk, tv) fdm in
-      env, (Reason.Rwitness pos, Tarraykind (AKshape fdm))
-  | _, Tunresolved tyl ->
-      let env, tyl = lfold (grow_shape pos field_name) env tyl in
-      let result = Reason.Rwitness pos, Tunresolved tyl in
-      env, result
-  | x ->
-      env, x
-(*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.
  * The function leaves all the other types (non-shapes) unchanged.
  *)
@@ -90,6 +64,7 @@ let idx env fty shape_ty field default =
        * Shapes::idx definition as reason*)
       env, (fst fty, Toption res)
     | Some (default_pos, default_ty) ->
+      let env, default_ty = Typing_utils.unresolved env default_ty in
       Type.sub_type default_pos Reason.URparam env default_ty res, res
 
 let remove_key p env shape_ty field  =

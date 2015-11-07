@@ -31,7 +31,8 @@ def run_test_program(files, program, expect_ext, get_flags):
             print('Executing', ' '.join(cmd))
         try:
             output = subprocess.check_output(
-                    cmd, stderr=subprocess.STDOUT, cwd=test_dir)
+                    cmd, stderr=subprocess.STDOUT, cwd=test_dir,
+                    universal_newlines=True)
         except subprocess.CalledProcessError as e:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
@@ -46,7 +47,7 @@ def run_test_program(files, program, expect_ext, get_flags):
 
 def check_result(fname, expect_exp, out):
     try:
-        with open(fname + expect_exp, 'rb') as fexp:
+        with open(fname + expect_exp, 'rt') as fexp:
             exp = fexp.read()
     except FileNotFoundError:
         exp = ''
@@ -57,7 +58,7 @@ def record_failures(failures, out_ext):
     for failure in failures:
         outfile = failure.fname + out_ext
         with open(outfile, 'wb') as f:
-            f.write(failure.output)
+            f.write(bytes(failure.output, 'UTF-8'))
 
 def dump_failures(failures):
     for f in failures:

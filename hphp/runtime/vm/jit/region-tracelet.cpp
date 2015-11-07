@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include "hphp/runtime/vm/jit/annotation.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -533,9 +532,7 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
 }
 
 /*
- * Records any type/reffiness predictions we depend on in the region. Guards
- * for locals and stack cells that are not used will be eliminated by the call
- * to relaxGuards.
+ * Records any type/reffiness predictions we depend on in the region.
  */
 void RegionFormer::recordDependencies() {
   // Record the incrementally constructed reffiness predictions.
@@ -549,16 +546,6 @@ void RegionFormer::recordDependencies() {
   // Relax guards and record the ones that survived.
   auto& firstBlock = *m_region->blocks().front();
   auto& unit = m_irgs.unit;
-  auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
-  bool changed = false;
-  if (doRelax) {
-    Timer _t(Timer::selectTracelet_relaxGuards);
-    // The IR is going to be discarded immediately, so skip reflowing
-    // the types in relaxGuards to save JIT time.
-    RelaxGuardsFlags flags = m_profiling ? RelaxSimple : RelaxNormal;
-    changed = relaxGuards(unit, *m_irgs.irb->guards(), flags);
-  }
-
   auto guardMap = std::map<RegionDesc::Location,Type>{};
   ITRACE(2, "Visiting guards\n");
   auto hintMap = std::map<RegionDesc::Location,Type>{};
@@ -609,11 +596,6 @@ void RegionFormer::recordDependencies() {
                                                        catMap[kv.first] };
     ITRACE(1, "selectTracelet adding guard {}\n", show(preCond));
     firstBlock.addPreCondition(preCond);
-  }
-
-  if (changed) {
-    printUnit(3, unit, " after guard relaxation ", nullptr,
-              m_irgs.irb->guards());
   }
 }
 

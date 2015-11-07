@@ -166,6 +166,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb) {
     v << cmpl{argc, nparams, sf};
 
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+    auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
 
     // If we passed more args than declared, we might need to dispatch to the
     // "too many arguments" prologue.
@@ -181,13 +182,15 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb) {
 
         // Too many gosh-darned arguments passed.  Go to the (nparams + 1)-th
         // prologue, which is always the "too many args" entry point.
-        v << load{func[nparams * 8 + (pTabOff + int32_t(sizeof(TCA)))], dest};
+        emitLdLowPtr(v, func[nparams * ptrSize + (pTabOff + ptrSize)],
+                     dest, sizeof(LowPtr<uint8_t>));
         v << jmpr{dest};
       });
     });
 
     auto const dest = v.makeReg();
-    v << load{func[argc * 8 + pTabOff], dest};
+    emitLdLowPtr(v, func[argc * ptrSize + pTabOff],
+                 dest, sizeof(LowPtr<uint8_t>));
     v << jmpr{dest};
   });
 }
@@ -211,9 +214,21 @@ TCA emitFCallHelperThunk(CodeBlock& cb) {
 
     unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
       // A nullptr dest means the callee was intercepted and should be skipped.
-      // Just return to the caller after syncing VM regs.
+      // Make a copy of the current rvmfp(), which belongs to the callee,
+      // before syncing VM regs.
+      auto const callee_fp = v.makeReg();
+      v << copy{rvmfp(), callee_fp};
       loadVMRegs(v);
-      v << phpret{rvmfp(), rvmfp(), php_return_regs(), true};
+
+      // Do a PHP return to the caller---i.e., relative to the callee's frame.
+      // Note that if intercept skips the callee, it tears down its frame but
+      // guarantees that m_savedRip remains valid, so this is safe (and is the
+      // only way to get the return address).
+      //
+      // TODO(#8908075): We've been fishing the m_savedRip out of the callee's
+      // logically-trashed frame for a while now, but we really ought to
+      // respect that the frame is freed and not touch it.
+      v << phpret{callee_fp, rvmfp(), php_return_regs(), true};
     });
 
     // Jump to the func prologue.
@@ -417,7 +432,7 @@ TCA emitFCallArrayHelper(CodeBlock& cb) {
     auto const body = v.makeReg();
 
     v << load{rvmfp()[AROFF(m_func)], callee};
-    v << load{callee[Func::funcBodyOff()], body};
+    emitLdLowPtr(v, callee[Func::funcBodyOff()], body, sizeof(LowPtr<uint8_t>));
 
     // We jmp directly to the func body---this keeps the return stack buffer
     // balanced between the call to this stub and the ret from the callee.

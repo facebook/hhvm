@@ -25,7 +25,6 @@
 
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/runtime/base/type-structure.h"
-#include "hphp/compiler/code_generator.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -212,11 +211,6 @@ public:
    * annotation could represent more than one type.
    */
   MaybeDataType dataType() const;
-
-  /*
-   *  Serializes the type annotation using the given CodeGenerator.
-   */
-  void outputCodeModel(CodeGenerator& cg);
 
   int numTypeArgs() const;
   TypeAnnotationPtr getTypeArg(int n) const;

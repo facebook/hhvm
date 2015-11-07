@@ -45,7 +45,9 @@ const int64_t k_XSL_SECPREF_WRITE_FILE        = 4;
 const int64_t k_XSL_SECPREF_CREATE_DIRECTORY  = 8;
 const int64_t k_XSL_SECPREF_READ_NETWORK      = 16;
 const int64_t k_XSL_SECPREF_WRITE_NETWORK     = 32;
-const int64_t k_XSL_SECPREF_DEFAULT           = 44;
+const int64_t k_XSL_SECPREF_DEFAULT = k_XSL_SECPREF_WRITE_FILE |
+                                      k_XSL_SECPREF_CREATE_DIRECTORY |
+                                      k_XSL_SECPREF_WRITE_NETWORK;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -701,19 +703,6 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 
-const StaticString s_XSL_SECPREF_NONE("XSL_SECPREF_NONE");
-const StaticString s_XSL_SECPREF_READ_FILE("XSL_SECPREF_READ_FILE");
-const StaticString s_XSL_SECPREF_WRITE_FILE("XSL_SECPREF_WRITE_FILE");
-const StaticString
-  s_XSL_SECPREF_CREATE_DIRECTORY("XSL_SECPREF_CREATE_DIRECTORY");
-const StaticString s_XSL_SECPREF_READ_NETWORK("XSL_SECPREF_READ_NETWORK");
-const StaticString s_XSL_SECPREF_WRITE_NETWORK("XSL_SECPREF_WRITE_NETWORK");
-const StaticString s_XSL_SECPREF_DEFAULT("XSL_SECPREF_DEFAULT");
-
-const StaticString s_xslt_version("LIBXSLT_VERSION");
-const StaticString s_xslt_dotted_version("LIBXSLT_DOTTED_VERSION");
-const StaticString s_xslt_dotted_version_value(LIBXSLT_DOTTED_VERSION);
-
 class XSLExtension final : public Extension {
   public:
     XSLExtension() : Extension("xsl", "0.1") {};
@@ -721,34 +710,16 @@ class XSLExtension final : public Extension {
     void moduleInit() override {
       xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
       exsltRegisterAll();
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_NONE.get(), k_XSL_SECPREF_NONE
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_READ_FILE.get(), k_XSL_SECPREF_READ_FILE
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_WRITE_FILE.get(), k_XSL_SECPREF_WRITE_FILE
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_CREATE_DIRECTORY.get(), k_XSL_SECPREF_CREATE_DIRECTORY
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_READ_NETWORK.get(), k_XSL_SECPREF_READ_NETWORK
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_WRITE_NETWORK.get(), k_XSL_SECPREF_WRITE_NETWORK
-      );
-      Native::registerConstant<KindOfInt64>(
-        s_XSL_SECPREF_DEFAULT.get(), k_XSL_SECPREF_DEFAULT
-      );
+      HHVM_RC_INT(XSL_SECPREF_NONE, k_XSL_SECPREF_NONE);
+      HHVM_RC_INT(XSL_SECPREF_READ_FILE, k_XSL_SECPREF_READ_FILE);
+      HHVM_RC_INT(XSL_SECPREF_WRITE_FILE, k_XSL_SECPREF_WRITE_FILE);
+      HHVM_RC_INT(XSL_SECPREF_CREATE_DIRECTORY, k_XSL_SECPREF_CREATE_DIRECTORY);
+      HHVM_RC_INT(XSL_SECPREF_READ_NETWORK, k_XSL_SECPREF_READ_NETWORK);
+      HHVM_RC_INT(XSL_SECPREF_WRITE_NETWORK, k_XSL_SECPREF_WRITE_NETWORK);
+      HHVM_RC_INT(XSL_SECPREF_DEFAULT, k_XSL_SECPREF_DEFAULT);
 
-      Native::registerConstant<KindOfInt64>(
-        s_xslt_version.get(), LIBXSLT_VERSION
-      );
-      Native::registerConstant<KindOfString>(
-        s_xslt_dotted_version.get(), s_xslt_dotted_version_value.get()
-      );
+      HHVM_RC_INT_SAME(LIBXSLT_VERSION);
+      HHVM_RC_STR_SAME(LIBXSLT_DOTTED_VERSION);
 
       HHVM_ME(XSLTProcessor, getParameter);
       HHVM_ME(XSLTProcessor, getSecurityPrefs);

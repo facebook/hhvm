@@ -45,45 +45,18 @@ namespace HPHP {
 #define SORT_DESC               3
 #define SORT_ASC                4
 
-#define DEFINE_CONSTANT(name)                                                  \
-  const int64_t k_##name = name;                                               \
-  const StaticString s_##name(#name)                                           \
-
 const StaticString s_count("count");
 
-DEFINE_CONSTANT(UCOL_DEFAULT);
-
-DEFINE_CONSTANT(UCOL_PRIMARY);
-DEFINE_CONSTANT(UCOL_SECONDARY);
-DEFINE_CONSTANT(UCOL_TERTIARY);
-DEFINE_CONSTANT(UCOL_DEFAULT_STRENGTH);
-DEFINE_CONSTANT(UCOL_QUATERNARY);
-DEFINE_CONSTANT(UCOL_IDENTICAL);
-
-DEFINE_CONSTANT(UCOL_OFF);
-DEFINE_CONSTANT(UCOL_ON);
-
-DEFINE_CONSTANT(UCOL_SHIFTED);
-DEFINE_CONSTANT(UCOL_NON_IGNORABLE);
-
-DEFINE_CONSTANT(UCOL_LOWER_FIRST);
-DEFINE_CONSTANT(UCOL_UPPER_FIRST);
-
-DEFINE_CONSTANT(UCOL_FRENCH_COLLATION);
-DEFINE_CONSTANT(UCOL_ALTERNATE_HANDLING);
-DEFINE_CONSTANT(UCOL_CASE_FIRST);
-DEFINE_CONSTANT(UCOL_CASE_LEVEL);
-DEFINE_CONSTANT(UCOL_NORMALIZATION_MODE);
-DEFINE_CONSTANT(UCOL_STRENGTH);
-DEFINE_CONSTANT(UCOL_HIRAGANA_QUATERNARY_MODE);
-DEFINE_CONSTANT(UCOL_NUMERIC_COLLATION);
-
-#undef DEFINE_CONSTANT
+enum class CaseMode {
+  LOWER = 0,
+  UPPER = 1,
+};
 
 TypedValue HHVM_FUNCTION(array_change_key_case,
                          ArrayArg input,
                          int64_t case_ /* = 0 */) {
-  return tvReturn(ArrayUtil::ChangeKeyCase(ArrNR(input.get()), !case_));
+  return tvReturn(ArrayUtil::ChangeKeyCase(ArrNR(input.get()),
+                                           (CaseMode)case_ == CaseMode::LOWER));
 }
 
 Variant HHVM_FUNCTION(array_chunk,
@@ -1256,6 +1229,11 @@ bool HHVM_FUNCTION(shuffle,
   return true;
 }
 
+enum class CountMode {
+  NORMAL = 0,
+  RECURSIVE = 1,
+};
+
 int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode /* = 0 */) {
@@ -1273,7 +1251,7 @@ int64_t HHVM_FUNCTION(count,
       return 1;
 
     case KindOfArray:
-      if (mode) {
+      if ((CountMode)mode == CountMode::RECURSIVE) {
         const Array& arr_var = var.toCArrRef();
         return php_count_recursive(arr_var);
       }
@@ -2756,41 +2734,54 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define REGISTER_CONSTANT(name)                                                \
-  Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
-
-#define REGISTER_CONSTANT_VALUE(option, value)                                 \
-  Native::registerConstant<KindOfInt64>(makeStaticString("ARRAY_" #option),    \
-                                       (value));
-
 class ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
   void moduleInit() override {
-    REGISTER_CONSTANT(UCOL_DEFAULT);
-    REGISTER_CONSTANT(UCOL_PRIMARY);
-    REGISTER_CONSTANT(UCOL_SECONDARY);
-    REGISTER_CONSTANT(UCOL_TERTIARY);
-    REGISTER_CONSTANT(UCOL_DEFAULT_STRENGTH);
-    REGISTER_CONSTANT(UCOL_QUATERNARY);
-    REGISTER_CONSTANT(UCOL_IDENTICAL);
-    REGISTER_CONSTANT(UCOL_OFF);
-    REGISTER_CONSTANT(UCOL_ON);
-    REGISTER_CONSTANT(UCOL_SHIFTED);
-    REGISTER_CONSTANT(UCOL_NON_IGNORABLE);
-    REGISTER_CONSTANT(UCOL_LOWER_FIRST);
-    REGISTER_CONSTANT(UCOL_UPPER_FIRST);
-    REGISTER_CONSTANT(UCOL_FRENCH_COLLATION);
-    REGISTER_CONSTANT(UCOL_ALTERNATE_HANDLING);
-    REGISTER_CONSTANT(UCOL_CASE_FIRST);
-    REGISTER_CONSTANT(UCOL_CASE_LEVEL);
-    REGISTER_CONSTANT(UCOL_NORMALIZATION_MODE);
-    REGISTER_CONSTANT(UCOL_STRENGTH);
-    REGISTER_CONSTANT(UCOL_HIRAGANA_QUATERNARY_MODE);
-    REGISTER_CONSTANT(UCOL_NUMERIC_COLLATION);
+    HHVM_RC_INT_SAME(UCOL_DEFAULT);
 
-    REGISTER_CONSTANT_VALUE(FILTER_USE_BOTH, 1);
-    REGISTER_CONSTANT_VALUE(FILTER_USE_KEY,  2);
+    HHVM_RC_INT_SAME(UCOL_PRIMARY);
+    HHVM_RC_INT_SAME(UCOL_SECONDARY);
+    HHVM_RC_INT_SAME(UCOL_TERTIARY);
+    HHVM_RC_INT_SAME(UCOL_DEFAULT_STRENGTH);
+    HHVM_RC_INT_SAME(UCOL_QUATERNARY);
+    HHVM_RC_INT_SAME(UCOL_IDENTICAL);
+
+    HHVM_RC_INT_SAME(UCOL_OFF);
+    HHVM_RC_INT_SAME(UCOL_ON);
+
+    HHVM_RC_INT_SAME(UCOL_SHIFTED);
+    HHVM_RC_INT_SAME(UCOL_NON_IGNORABLE);
+
+    HHVM_RC_INT_SAME(UCOL_LOWER_FIRST);
+    HHVM_RC_INT_SAME(UCOL_UPPER_FIRST);
+
+    HHVM_RC_INT_SAME(UCOL_FRENCH_COLLATION);
+    HHVM_RC_INT_SAME(UCOL_ALTERNATE_HANDLING);
+    HHVM_RC_INT_SAME(UCOL_CASE_FIRST);
+    HHVM_RC_INT_SAME(UCOL_CASE_LEVEL);
+    HHVM_RC_INT_SAME(UCOL_NORMALIZATION_MODE);
+    HHVM_RC_INT_SAME(UCOL_STRENGTH);
+    HHVM_RC_INT_SAME(UCOL_HIRAGANA_QUATERNARY_MODE);
+    HHVM_RC_INT_SAME(UCOL_NUMERIC_COLLATION);
+
+    HHVM_RC_INT(ARRAY_FILTER_USE_BOTH, 1);
+    HHVM_RC_INT(ARRAY_FILTER_USE_KEY, 2);
+
+    HHVM_RC_INT(CASE_LOWER,      CaseMode::LOWER);
+    HHVM_RC_INT(CASE_UPPER,      CaseMode::UPPER);
+
+    HHVM_RC_INT(COUNT_NORMAL,    CountMode::NORMAL);
+    HHVM_RC_INT(COUNT_RECURSIVE, CountMode::RECURSIVE);
+
+    HHVM_RC_INT_SAME(SORT_ASC);
+    HHVM_RC_INT_SAME(SORT_DESC);
+    HHVM_RC_INT_SAME(SORT_FLAG_CASE);
+    HHVM_RC_INT_SAME(SORT_LOCALE_STRING);
+    HHVM_RC_INT_SAME(SORT_NATURAL);
+    HHVM_RC_INT_SAME(SORT_NUMERIC);
+    HHVM_RC_INT_SAME(SORT_REGULAR);
+    HHVM_RC_INT_SAME(SORT_STRING);
 
     HHVM_FE(array_change_key_case);
     HHVM_FE(array_chunk);
@@ -2877,7 +2868,5 @@ public:
     loadSystemlib();
   }
 } s_array_extension;
-
-#undef REGISTER_CONSTANT
 
 }

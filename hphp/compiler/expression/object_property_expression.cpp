@@ -179,23 +179,6 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ObjectPropertyExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ObjectPropertyExpression", 3);
-  cg.printPropertyHeader("object");
-  m_object->outputCodeModel(cg);
-  if (m_property->is(Expression::KindOfScalarExpression)) {
-    cg.printPropertyHeader("propertyName");
-  } else {
-    cg.printPropertyHeader("propertyExpression");
-  }
-  m_property->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ObjectPropertyExpression::outputPHP(CodeGenerator &cg,

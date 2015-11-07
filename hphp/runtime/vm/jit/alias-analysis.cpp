@@ -164,7 +164,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     auto const add_mis = [&] (AliasClass cls) {
       assertx(cls.isSingleLocation());
       if (cls <= *mis) {
-        if (auto const meta = find(cls)) {
+        if (auto meta = find(cls)) {
           ret |= ALocBits{meta->conflicts}.set(meta->index);
         } else {
           ret |= all_mistate;

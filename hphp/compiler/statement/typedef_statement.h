@@ -26,6 +26,7 @@
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
+DECLARE_BOOST_TYPES(ExpressionList);
 
 struct TypedefStatement : Statement, IParseHandler {
   explicit TypedefStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,

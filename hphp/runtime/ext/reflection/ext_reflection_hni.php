@@ -1369,6 +1369,10 @@ class ReflectionClass implements Reflector {
       (!$this->hasMethod('__clone') || $this->getMethod('__clone')->isPublic());
   }
 
+  public function isAnonymous(): bool {
+    return strpos($this->getName(), 'class@anonymous') === 0;
+  }
+
   /**
    * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getmethod.php )
    *

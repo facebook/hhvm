@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/code_model_enums.h"
 
 using namespace HPHP;
 
@@ -72,19 +71,6 @@ void AwaitExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void AwaitExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("UnaryOpExpression", 3);
-  cg.printPropertyHeader("expression");
-  m_exp->outputCodeModel(cg);
-  cg.printPropertyHeader("operation");
-  cg.printValue(PHP_AWAIT_OP);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

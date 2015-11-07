@@ -1,0 +1,8 @@
+File "keys.php", line 9, characters 26-27:
+Invalid argument (Typing[4110])
+File "keys.php", line 12, characters 43-48:
+This is a string
+File "keys.php", line 8, characters 8-12:
+It is incompatible with an int
+File "keys.php", line 8, characters 8-12:
+This can only be indexed with integers

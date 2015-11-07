@@ -80,19 +80,6 @@ void DoStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void DoStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("DoStatement", 3);
-  cg.printPropertyHeader("block");
-  cg.printAsBlock(m_stmt);
-  cg.printPropertyHeader("condition");
-  m_condition->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void DoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

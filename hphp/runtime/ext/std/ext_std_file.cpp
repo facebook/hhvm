@@ -537,12 +537,14 @@ Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,
                       const String& delimiter /* = "," */,
-                      const String& enclosure /* = "\"" */) {
+                      const String& enclosure /* = "\"" */,
+                      const String& escape /* = "\\" */) {
   FCSV_CHECK_ARG(delimiter);
   FCSV_CHECK_ARG(enclosure);
+  FCSV_CHECK_ARG(escape);
 
   CHECK_HANDLE_RET_NULL(handle, f);
-  return f->writeCSV(fields, delimiter_char, enclosure_char);
+  return f->writeCSV(fields, delimiter_char, enclosure_char, escape_char);
 }
 
 Variant HHVM_FUNCTION(fgetcsv,
@@ -2091,6 +2093,14 @@ void StandardExtension::initFile() {
   Native::registerConstant(s_STDIN.get(),  BuiltinFiles::GetSTDIN);
   Native::registerConstant(s_STDOUT.get(), BuiltinFiles::GetSTDOUT);
   Native::registerConstant(s_STDERR.get(), BuiltinFiles::GetSTDERR);
+
+  HHVM_RC_INT(INI_SCANNER_NORMAL, k_INI_SCANNER_NORMAL);
+  HHVM_RC_INT(INI_SCANNER_RAW,    k_INI_SCANNER_RAW);
+
+  HHVM_RC_INT(PATHINFO_BASENAME,  PHP_PATHINFO_BASENAME);
+  HHVM_RC_INT(PATHINFO_DIRNAME,   PHP_PATHINFO_DIRNAME);
+  HHVM_RC_INT(PATHINFO_EXTENSION, PHP_PATHINFO_EXTENSION);
+  HHVM_RC_INT(PATHINFO_FILENAME,  PHP_PATHINFO_FILENAME);
 
   HHVM_FE(fopen);
   HHVM_FE(popen);

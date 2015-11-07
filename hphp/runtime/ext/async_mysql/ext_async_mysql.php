@@ -16,12 +16,33 @@
 */
 
 /**
- * An asynchronous MySQL client
+ * An asynchronous MySQL client.
  *
+ * This class allows you to asynchronously connect to a MySQL client. You
+ * can directly connect to the MySQL client with the `connect()` method; in
+ * addition you can use this class in conjunction with
+ * `AsyncMysqlConnectionPool` pools by setting the limit of connections on
+ * any given pool, and using `AsyncMysqlConnectionPool::connect()`.
+ *
+ * There is some duplication with this class. If possible, you should directly
+ * construct connection pools via `new AsyncMysqlConnectionPool()` and then
+ * call `AsyncMysqlConnectionPool::connect()` to connect to the MySQL client
+ * using those pools. Here we optionally set pool limits and call `connect()`
+ * on this class. `AsyncMysqlConnectionPool` provides more flexibility with
+ * other available options, etc.
+ *
+ * In fact, there is discussion about deprecating `AsyncMysqlClient` all
+ * together to avoid having this choice. But, for now, you can use this class
+ * for asynchronous connection(s) to a MySQL database.
+ *
+ * @guide /hack/async/extensions
+ * @guide /hack/async/intro
  */
 final class AsyncMysqlClient {
 
   /**
+   * @internal
+   *
    * AsyncMysqlClient objects cannot be directly created.
    *
    */
@@ -31,25 +52,43 @@ final class AsyncMysqlClient {
   }
 
   /**
-   * Sets the limit of all pools using this client
+   * Sets the connection limit of all connection pools using this client.
    *
-   * @param int $limit - The limit for all pools
+   * Use this function to toggle the number of allowed async connections on the
+   * pools connecting to MySQL with this current client. For example, if you
+   * set the limit to 2, and you try a third connection on the same pool, an
+   * `AsyncMysqlConnectException` exception will be thrown.
+   *
+   * @param $limit - The limit for all pools.
    *
    */
   <<__HipHopSpecific, __Native>>
   public static function setPoolsConnectionLimit(int $limit): void;
 
   /**
-   * Begin an async connection to a MySQL instance
+   * Begin an async connection to a MySQL instance.
    *
-   * @param string $host - The hostname to connect to
-   * @param int $port - The port to connect to
-   * @param string $dbname - The initial database when connecting
-   * @param string $user - The user to connect as
-   * @param string $password - The password to connect with
-   * @param int $timeout_micros - Timeout, in microseconds, for the connect;
-   *   -1 for default, 0 for no timeout
+   * Use this to asynchronously connect to a MySQL instance.
    *
+   * Normally you would use this to make one asynchronous connection to the
+   * MySQL client.
+   *
+   * If you want to be able to pool up a bunch of connections, you would call
+   * `setPoolsConnectionLimit()`, create a default pool of connections with
+   * `AsyncMysqlConnectionPool()::__construct()`, which now
+   * has that limit set, and then call `AsyncMysqlConnectionPool()::connect()`.
+   *
+   * @param $host - The hostname to connect to.
+   * @param $port - The port to connect to.
+   * @param $dbname - The initial database to use when connecting.
+   * @param $user - The user to connect as.
+   * @param $password - The password to connect with.
+   * @param $timeout_micros - Timeout, in microseconds, for the connect; -1 for
+   *                          default, 0 for no timeout.
+   * @param $ssl_context - Optionally allow the connection to tunnel via SSL.
+   *
+   * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
+   * or `join` this result to obtain the actual connection.
    */
   <<__HipHopSpecific, __Native>>
   public static function connect(string $host,
@@ -59,13 +98,27 @@ final class AsyncMysqlClient {
                                  string $password,
                                  int $timeout_micros = -1,
                                  ?MySSLContextProvider $ssl_context = null,
-                                ): ExternalThreadEventWaitHandle;
+                                ): Awaitable<AsyncMysqlConnection>;
 
   /**
-   * Create a new async connection from a synchronous MySQL instance
+   * Create a new async connection from a synchronous MySQL instance.
    *
-   * @param mixed $connection - The synchronous MySQL connection.
+   * This is a synchronous function. You will block until the connection has
+   * been adopted to an `AsyncMysqlConnection`. Then you will be able to use
+   * the async `AsyncMysqlConnection` methods like `queryf()`, etc.
    *
+   * This is a tricky function to use and we are actually thinking of
+   * deprecating it. This function *requrires* a deprecated, MySQL resource.
+   * Once this resource is adpoted by a call to this function, it is no longer
+   * valid in the context on which it was being used.
+   *
+   * If you are using this function, you might consider just creating a
+   * connection pool via `AsyncMysqlConnectionPool` since you presumably have
+   * all the connection details anyway.
+   *
+   * @param $connection - The synchronous MySQL connection.
+   *
+   * @return - An `AsyncMysqlConnection` instance.
    */
   <<__HipHopSpecific, __Native>>
   public static function adoptConnection(mixed $connection

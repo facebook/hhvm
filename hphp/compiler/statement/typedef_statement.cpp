@@ -56,17 +56,6 @@ void TypedefStatement::setNthKid(int n, ConstructPtr cp) {
 
 void TypedefStatement::analyzeProgram(AnalysisResultPtr) {}
 
-void TypedefStatement::outputCodeModel(CodeGenerator& cg) {
-  cg.printObjectHeader("TypedefStatement", 3);
-  cg.printPropertyHeader("name");
-  cg.printValue(name);
-  cg.printPropertyHeader("typeAnnotation");
-  annot->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
 void TypedefStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
 }
 

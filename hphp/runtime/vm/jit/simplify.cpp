@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/punt.h"
@@ -132,16 +131,14 @@ bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Simplifier rules are not allowed to add new uses to SSATmps that aren't
- * known to be available.  All the sources to the original instruction must
- * be available, and non-reference counted values reachable through the
- * source chain are also always available.  Anything else requires more
- * complicated analysis than belongs in the simplifier right now.
- */
 DEBUG_ONLY bool validate(const State& env,
                          SSATmp* newDst,
                          const IRInstruction* origInst) {
+  // simplify() rules are not allowed to add new uses to SSATmps that aren't
+  // known to be available.  All the sources to the original instruction must
+  // be available, and non-reference counted values reachable through the
+  // source chain are also always available.  Anything else requires more
+  // complicated analysis than belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
@@ -199,7 +196,7 @@ DEBUG_ONLY bool validate(const State& env,
 
     always_assert_flog(
       available,
-      "Simplifier produced a new destination that wasn't known to be "
+      "simplify() produced a new destination that wasn't known to be "
       "available:\n"
       "  original inst: {}\n"
       "  new dst:       {}\n",
@@ -228,7 +225,7 @@ DEBUG_ONLY bool validate(const State& env,
   );
 
   assert_last(
-    origInst->hasDst() == (bool)newDst,
+    origInst->hasDst() == (newDst != nullptr),
     "HasDest mismatch between input and output"
   );
 
@@ -1402,28 +1399,70 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* instanceOfImpl(State& env, ClassSpec spec1, ClassSpec spec2) {
+  if (!spec1 || !spec2) return nullptr;
+
+  auto const cls1 = spec1.cls();
+  auto const cls2 = spec2.cls();
+
+  if (spec1.exact() && spec2.exact()) {
+    return cns(env, cls1->classof(cls2));
+  }
+
+  if (spec2.exact() && cls1->classof(cls2)) {
+    return cns(env, true);
+  }
+
+  return nullptr;
+}
+
 SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  if (src2->isA(TNullptr)) return cns(env, false);
+  auto const spec2 = src2->type().clsSpec();
 
-  if (!src1->hasConstVal() || !src2->hasConstVal()) return nullptr;
+  if (src2->isA(TNullptr)) {
+    return cns(env, false);
+  }
 
-  return cns(env, src1->clsVal()->classof(src2->clsVal()));
+  if (mightRelax(env, src1) || mightRelax(env, src2)) {
+    return nullptr;
+  }
+
+  if (auto const cls = spec2.exactCls()) {
+    if (isNormalClass(cls) && (cls->attrs() & AttrUnique)) {
+      return gen(env, ExtendsClass, src1, src2);
+    }
+    if (isInterface(cls) && (cls->attrs() & AttrUnique)) {
+      return gen(env, InstanceOfIface, src1, cns(env, cls->name()));
+    }
+  }
+
+  return instanceOfImpl(env, src1->type().clsSpec(), src2->type().clsSpec());
 }
 
-SSATmp* simplifyExtendsClass(State& env, const IRInstruction* i) {
-  return simplifyInstanceOf(env, i);
+SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  auto const spec2 = src2->type().clsSpec();
+
+  DEBUG_ONLY auto const cls2 = spec2.exactCls();
+  assertx(cls2 && isNormalClass(cls2));
+
+  return instanceOfImpl(env, src1->type().clsSpec(), spec2);
 }
 
 SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  if (!src1->hasConstVal() || !src2->hasConstVal()) return nullptr;
+  auto const cls2 = Unit::lookupClassOrUniqueClass(src2->strVal());
+  assertx(cls2 && isInterface(cls2));
+  auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 
-  return cns(env, src1->clsVal()->ifaceofDirect(src2->strVal()));
+  return instanceOfImpl(env, src1->type().clsSpec(), spec2);
 }
 
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {

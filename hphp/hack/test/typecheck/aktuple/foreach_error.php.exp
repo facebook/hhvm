@@ -1,0 +1,6 @@
+File "foreach_error.php", line 12, characters 14-15:
+Invalid argument (Typing[4110])
+File "foreach_error.php", line 16, characters 19-21:
+This is an int
+File "foreach_error.php", line 9, characters 17-20:
+It is incompatible with a float

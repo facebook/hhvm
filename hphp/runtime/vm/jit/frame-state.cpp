@@ -1339,7 +1339,9 @@ void FrameStateMgr::spillFrameStack(IRSPOffset offset, FPInvOffset retOffset,
 
 void FrameStateMgr::clearStack() {
   for (auto& state : m_stack) {
-    for (auto& stk : state.stack) stk = StackState{};
+    for (auto& stk : state.stack) {
+      stk = StackState{};
+    }
   }
 }
 

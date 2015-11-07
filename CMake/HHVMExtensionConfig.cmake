@@ -581,7 +581,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "editline" OR
     ${libraryName} STREQUAL "fastlz" OR
     ${libraryName} STREQUAL "folly" OR
-    ${libraryName} STREQUAL "iconv" OR
     ${libraryName} STREQUAL "lz4" OR
     ${libraryName} STREQUAL "mbfl" OR
     ${libraryName} STREQUAL "mcrouter" OR
@@ -743,14 +742,16 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
   elseif (${libraryName} STREQUAL "iconv")
     find_package(Libiconv ${requiredVersion})
-    if (NOT LIBICONV_INCLUDE_DIR OR NOT LIBICONV_LIBRARY)
+    if (NOT LIBICONV_INCLUDE_DIR)
       HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
       return()
     endif()
 
     if (${addPaths})
       include_directories(${LIBICONV_INCLUDE_DIR})
-      link_libraries(${LIBICONV_LIBRARY})
+      if (LIBICONV_LIBRARY)
+        link_libraries(${LIBICONV_LIBRARY})
+      endif()
       add_definitions("-DHAVE_ICONV")
       add_definitions("-DHAVE_LIBICONV")
       if (LIBICONV_CONST)

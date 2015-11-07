@@ -79,7 +79,7 @@ inline bool fls64(I64 input, I64 &out) {
     "cc"
   );
 #else
-  out = folly::findLastSet(input);
+  out = folly::findLastSet(input) - 1;
   retval = input != 0;
 #endif
   return retval;

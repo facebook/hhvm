@@ -715,21 +715,6 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_COMPILER_HALT_OFFSET
 %token T_ASYNC
 
-%right T_FROM
-%token T_WHERE
-%token T_JOIN
-%token T_IN
-%token T_ON
-%token T_EQUALS
-%token T_INTO
-%token T_LET
-%token T_ORDERBY
-%token T_ASCENDING
-%token T_DESCENDING
-%token T_SELECT
-%token T_GROUP
-%token T_BY
-
 %token T_LAMBDA_OP
 %token T_LAMBDA_CP
 %token T_UNRESOLVED_OP
@@ -783,19 +768,6 @@ ident_no_semireserved:
   | T_XHP_CHILDREN                     { $$ = $1;}
   | T_XHP_REQUIRED                     { $$ = $1;}
   | T_ENUM                             { $$ = $1;}
-  | T_WHERE                            { $$ = $1;}
-  | T_JOIN                             { $$ = $1;}
-  | T_ON                               { $$ = $1;}
-  | T_IN                               { $$ = $1;}
-  | T_EQUALS                           { $$ = $1;}
-  | T_INTO                             { $$ = $1;}
-  | T_LET                              { $$ = $1;}
-  | T_ORDERBY                          { $$ = $1;}
-  | T_ASCENDING                        { $$ = $1;}
-  | T_DESCENDING                       { $$ = $1;}
-  | T_SELECT                           { $$ = $1;}
-  | T_GROUP                            { $$ = $1;}
-  | T_BY                               { $$ = $1;}
 ;
 
 ident_for_class_const:
@@ -1056,8 +1028,6 @@ statement:
   | await_assign_expr ';'              { _p->onExpStatement($$, $1);}
   | T_RETURN await_expr ';'            { _p->onReturn($$, &$2); }
   | await_list_assign_expr ';'         { _p->onExpStatement($$, $1);}
-  | query_assign_expr ';'              { _p->onExpStatement($$, $1);}
-  | T_RETURN query_expr ';'            { _p->onReturn($$, &$2); }
   | ident_no_semireserved ':'          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
                                                       _p->getRange(),
@@ -1213,6 +1183,12 @@ class_declaration_statement:
                                          _p->popClass();
                                          _p->popTypeScope();}
 ;
+
+class_expression:
+    T_CLASS                            { _p->onClassExpressionStart(); }
+    ctor_arguments
+    extends_from implements_list '{'
+    class_statement_list '}'           { _p->onClassExpression($$, $3, $4, $5, $7); }
 
 trait_declaration_statement:
     T_TRAIT
@@ -1834,6 +1810,7 @@ expr_with_parens:
     '(' expr_with_parens ')'           { $$ = $2;}
   | T_NEW class_name_reference
     ctor_arguments                     { _p->onNewObject($$, $2, $3);}
+  | T_NEW class_expression             { $$ = $2;}
   | T_CLONE expr                       { UEXP($$,$2,T_CLONE,1);}
   | xhp_tag                            { $$ = $1;}
   | collection_literal                 { $$ = $1;}
@@ -2007,22 +1984,7 @@ closure_expression:
 ;
 
 lambda_expression:
-    T_VARIABLE                         { _p->pushFuncLocation();
-                                         Token t;
-                                         _p->onNewLabelScope(true);
-                                         _p->onClosureStart(t);
-                                         _p->pushLabelInfo();
-                                         Token u;
-                                         _p->onParam($1,NULL,u,$1,0,
-                                                     NULL,NULL,NULL);}
-    lambda_body                        { Token v; Token w; Token x;
-                                         _p->finishStatement($3, $3); $3 = 1;
-                                         $$ = _p->onClosure(ClosureType::Short,
-                                                            nullptr,
-                                                            v,$1,w,$3,x);
-                                         _p->popLabelInfo();
-                                         _p->onCompleteLabelScope(true);}
-  | T_ASYNC
+    T_ASYNC
     T_VARIABLE                         { _p->pushFuncLocation();
                                          Token t;
                                          _p->onNewLabelScope(true);
@@ -2038,21 +2000,6 @@ lambda_expression:
                                          $$ = _p->onClosure(ClosureType::Short,
                                                             &$1,
                                                             v,$2,w,$4,x);
-                                         _p->popLabelInfo();
-                                         _p->onCompleteLabelScope(true);}
-  | T_LAMBDA_OP                        { _p->pushFuncLocation();
-                                         Token t;
-                                         _p->onNewLabelScope(true);
-                                         _p->onClosureStart(t);
-                                         _p->pushLabelInfo();}
-    parameter_list
-    T_LAMBDA_CP
-    hh_opt_return_type
-    lambda_body                        { Token u; Token v;
-                                         _p->finishStatement($6, $6); $6 = 1;
-                                         $$ = _p->onClosure(ClosureType::Short,
-                                                            nullptr,
-                                                            u,$3,v,$6,$5);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
   | T_ASYNC
@@ -2091,6 +2038,36 @@ lambda_expression:
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);
                                          _p->onCall($$,1,$$,y,NULL);}
+  | T_VARIABLE                         { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();
+                                         Token u;
+                                         _p->onParam($1,NULL,u,$1,0,
+                                                     NULL,NULL,NULL);}
+    lambda_body                        { Token v; Token w; Token x;
+                                         _p->finishStatement($3, $3); $3 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            nullptr,
+                                                            v,$1,w,$3,x);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+  | T_LAMBDA_OP                        { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();}
+    parameter_list
+    T_LAMBDA_CP
+    hh_opt_return_type
+    lambda_body                        { Token u; Token v;
+                                         _p->finishStatement($6, $6); $6 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            nullptr,
+                                                            u,$3,v,$6,$5);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
 ;
 
 lambda_body:
@@ -2175,102 +2152,6 @@ dim_expr_base:
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
                                          T_CONSTANT_ENCAPSED_STRING, $1); }
   | '(' expr_no_variable ')'           { $$ = $2;}
-;
-
-query_expr:
-    query_head query_body            { _p->onQuery($$, $1, $2); }
-;
-
-query_assign_expr:
-    variable '=' query_expr          { _p->onAssign($$, $1, $3, 0, true);}
-;
-
-query_head:
-  T_FROM T_VARIABLE T_IN expr        { _p->onFromClause($$, $2, $4); }
-;
-
-query_body:
-    query_body_clauses select_or_group_clause
-                                     { _p->onQueryBody($$, &$1, $2, NULL); }
-  | query_body_clauses select_or_group_clause query_continuation
-                                     { _p->onQueryBody($$, &$1, $2, &$3); }
-  | select_or_group_clause
-                                     { _p->onQueryBody($$, NULL, $1, NULL); }
-  | select_or_group_clause query_continuation
-                                     { _p->onQueryBody($$, NULL, $1, &$2); }
-;
-
-query_body_clauses:
-    query_body_clause                { _p->onQueryBodyClause($$, NULL, $1); }
-  | query_body_clauses query_body_clause
-                                     { _p->onQueryBodyClause($$, &$1, $2); }
-;
-
-query_body_clause:
-    from_clause                      { $$ = $1;}
-  | let_clause                       { $$ = $1;}
-  | where_clause                     { $$ = $1;}
-  | join_clause                      { $$ = $1;}
-  | join_into_clause                 { $$ = $1;}
-  | orderby_clause                   { $$ = $1;}
-;
-
-from_clause:
-    T_FROM T_VARIABLE T_IN expr      { _p->onFromClause($$, $2, $4); }
-;
-
-let_clause:
-    T_LET T_VARIABLE '=' expr        { _p->onLetClause($$, $2, $4); }
-;
-
-where_clause:
-    T_WHERE expr                     { _p->onWhereClause($$, $2); }
-;
-
-join_clause:
-    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr
-                                     { _p->onJoinClause($$, $2, $4, $6, $8); }
-;
-
-join_into_clause:
-    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr T_INTO T_VARIABLE
-                              { _p->onJoinIntoClause($$, $2, $4, $6, $8, $10); }
-;
-
-orderby_clause:
-    T_ORDERBY orderings              { _p->onOrderbyClause($$, $2); }
-;
-
-orderings:
-    ordering                         { _p->onOrdering($$, NULL, $1); }
-  | orderings ',' ordering           { _p->onOrdering($$, &$1, $3); }
-;
-
-ordering:
-    expr                             { _p->onOrderingExpr($$, $1, NULL); }
-  | expr ordering_direction          { _p->onOrderingExpr($$, $1, &$2); }
-;
-
-ordering_direction:
-    T_ASCENDING                      { $$ = $1;}
-  | T_DESCENDING                     { $$ = $1;}
-;
-
-select_or_group_clause:
-    select_clause                    { $$ = $1;}
-  | group_clause                     { $$ = $1;}
-;
-
-select_clause:
-    T_SELECT expr                    { _p->onSelectClause($$, $2); }
-;
-
-group_clause:
-    T_GROUP expr T_BY expr           { _p->onGroupClause($$, $2, $4); }
-;
-
-query_continuation:
-    T_INTO T_VARIABLE query_body     { _p->onIntoClause($$, $2, $3); }
 ;
 
 lexical_var_list:

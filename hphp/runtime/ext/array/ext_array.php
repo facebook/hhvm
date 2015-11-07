@@ -12,7 +12,7 @@
  *
  */
 <<__Native, __IsFoldable>>
-function array_change_key_case(array $input, int $case_ = 0): mixed;
+function array_change_key_case(array $input, int $case_ = CASE_LOWER): mixed;
 
 /**
  * Chunks an array into size large chunks. The last chunk may contain less
@@ -630,7 +630,7 @@ function shuffle(mixed &$array): bool;
  *
  */
 <<__Native, __IsFoldable>>
-function count(mixed $var, int $mode = 0): int;
+function count(mixed $var, int $mode = COUNT_NORMAL): int;
 
 /**
  * @param mixed $var
@@ -640,7 +640,7 @@ function count(mixed $var, int $mode = 0): int;
  *
  */
 <<__Native, __IsFoldable>>
-function sizeof(mixed $var, int $mode = 0): int;
+function sizeof(mixed $var, int $mode = COUNT_NORMAL): int;
 
 /**
  * Return the current key and value pair from an array and advance the array

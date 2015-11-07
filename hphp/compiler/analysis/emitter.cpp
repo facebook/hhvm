@@ -46,6 +46,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/class_constant_expression.h"
+#include "hphp/compiler/expression/class_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/dynamic_variable.h"
@@ -65,7 +66,6 @@
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
-#include "hphp/compiler/expression/query_expression.h"
 #include "hphp/compiler/statement/block_statement.h"
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/statement/case_statement.h"
@@ -2603,6 +2603,10 @@ void EmitterVisitor::visit(FileScopePtr file) {
     enterRegion(region);
     SCOPE_EXIT { leaveRegion(region); };
 
+    for (auto cls : m_file->getAnonClasses()) {
+      emitClass(e, cls->getClassScope(), true);
+    }
+
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
       e.setTempLocation(s->getRange());
@@ -4762,6 +4766,19 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     return true;
   }
+  case Construct::KindOfClassExpression: {
+    auto ce = static_pointer_cast<ClassExpression>(node);
+    // The parser generated a unique name for the class, use that
+    std::string clsName = ce->getClass()->getOriginalName();
+    auto ssClsName = makeStaticString(clsName);
+    auto fpiStart = m_ue.bcPos();
+    auto params = ce->getParams();
+    int numParams = params ? params->getCount() : 0;
+    e.FPushCtorD(numParams, ssClsName);
+    emitCall(e, ce, ce->getParams(), fpiStart);
+    e.PopR();
+    return true;
+  }
   case Construct::KindOfYieldExpression: {
     auto y = static_pointer_cast<YieldExpression>(node);
 
@@ -4820,47 +4837,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     resume.set(e);
     return true;
   }
-  case Construct::KindOfQueryExpression: {
-    auto query = static_pointer_cast<QueryExpression>(node);
-    auto args = *query->getQueryArguments();
-    auto numArgs = args.getCount();
-    visit(args[0]);
-    emitConvertToCell(e);
-    auto fpiStart = m_ue.bcPos();
-    StringData* executeQuery = makeStaticString("executeQuery");
-    e.FPushObjMethodD(numArgs+1, executeQuery, ObjMethodOp::NullThrows);
-    {
-      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-      e.String(query->getQueryString());
-      emitFPass(e, 0, PassByRefKind::ErrorOnCell);
-      auto selectCallback = query->getSelectClosure();
-      if (selectCallback != nullptr) {
-        visit(selectCallback);
-        emitConvertToCell(e);
-      } else {
-        e.Null();
-      }
-      emitFPass(e, 1, PassByRefKind::ErrorOnCell);
-      for (int i = 1; i < numArgs; i++) {
-        visit(args[i]);
-        emitConvertToCell(e);
-        emitFPass(e, i+1, PassByRefKind::ErrorOnCell);
-      }
-    }
-    e.FCall(numArgs+1);
-    e.UnboxR();
-    return true;
-  }
-  case Construct::KindOfExpression:
-  case Construct::KindOfFromClause:
-  case Construct::KindOfLetClause:
-  case Construct::KindOfWhereClause:
-  case Construct::KindOfSelectClause:
-  case Construct::KindOfIntoClause:
-  case Construct::KindOfJoinClause:
-  case Construct::KindOfGroupClause:
-  case Construct::KindOfOrderbyClause:
-  case Construct::KindOfOrdering: {
+  case Construct::KindOfExpression: {
     not_reached();
   }
   }

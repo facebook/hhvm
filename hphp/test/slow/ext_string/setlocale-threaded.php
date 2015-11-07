@@ -62,7 +62,7 @@ function send_to_pagelet($relative_file_path, $locale) {
   $rc = 0;
   $result = pagelet_server_task_result($task, $headers, $rc, 2000);
   if ($rc != 200) {
-    echo "Failed to finish pagelet task\n";
+    echo "Failed to finish pagelet task, status = $rc\n";
     die();
   }
 

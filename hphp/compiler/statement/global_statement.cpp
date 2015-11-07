@@ -99,17 +99,6 @@ StatementPtr GlobalStatement::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void GlobalStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("GlobalStatement", 2);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void GlobalStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

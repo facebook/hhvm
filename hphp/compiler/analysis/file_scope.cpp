@@ -37,6 +37,7 @@
 #include "hphp/compiler/parser/parser.h"
 
 #include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 
@@ -182,6 +183,13 @@ ClassScopePtr FileScope::getClass(const char *name) {
   return iter->second.back();
 }
 
+void FileScope::addAnonClass(ClassStatementPtr stmt) {
+  m_anonClasses.push_back(stmt);
+}
+
+const std::vector<ClassStatementPtr>& FileScope::getAnonClasses() const {
+  return m_anonClasses;
+}
 
 int FileScope::getFunctionCount() const {
   int total = FunctionContainer::getFunctionCount();

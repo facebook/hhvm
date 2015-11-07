@@ -72,25 +72,6 @@ ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void DynamicFunctionCall::outputCodeModel(CodeGenerator &cg) {
-  if (m_class || hasStaticClass()) {
-    cg.printObjectHeader("ClassMethodCallExpression", 4);
-    StaticClassName::outputCodeModel(cg);
-    cg.printPropertyHeader("methodExpression");
-  } else {
-    cg.printObjectHeader("SimpleFunctionCallExpression", 3);
-    cg.printPropertyHeader("functionExpression");
-  }
-  m_nameExp->outputCodeModel(cg);
-  cg.printPropertyHeader("arguments");
-  cg.printExpressionVector(m_params);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(m_nameExp);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_class || hasStaticClass()) {

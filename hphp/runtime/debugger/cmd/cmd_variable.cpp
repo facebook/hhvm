@@ -57,7 +57,7 @@ void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
       m_variables.reset();
       if (error != DebuggerWireHelpers::HitLimit || m_version == 0) {
         // Unexpected error. Log it.
-        m_wireError = sdata;
+        m_wireError = sdata.toCppString();
       }
     }
   }

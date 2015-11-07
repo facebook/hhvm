@@ -18,6 +18,7 @@
 #define incl_HPHP_COMPILER_PARSER_H_
 
 #include <functional>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -219,6 +220,9 @@ public:
   void onClass(Token &out, int type, Token &name, Token &base,
                Token &baseInterface, Token &stmt, Token *attr,
                Token *enumTy);
+  void onClassExpressionStart();
+  void onClassExpression(Token &out, Token &args, Token &base,
+                         Token &baseInterface, Token &stmt);
   void onInterface(Token &out, Token &name, Token &base, Token &stmt,
                    Token *attr);
   void onEnum(Token &out, Token &name, Token &baseTy,
@@ -303,24 +307,6 @@ public:
     const Token& value);
   void onShape(Token& out, const Token& shapeMemberList);
 
-  // for language integrated query expressions
-  void onQuery(Token &out, Token &head, Token &body);
-  void onQueryBody(Token &out, Token *clauses, Token &select, Token *cont);
-  void onQueryBodyClause(Token &out, Token *clauses, Token &clause);
-  void onFromClause(Token &out, Token &var, Token &coll);
-  void onLetClause(Token &out, Token &var, Token &expr);
-  void onWhereClause(Token &out, Token &expr);
-  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
-    Token &right);
-  void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
-    Token &right, Token &group);
-  void onOrderbyClause(Token &out, Token &orderings);
-  void onOrdering(Token &out, Token *orderings, Token &ordering);
-  void onOrderingExpr(Token &out, Token &expr, Token *direction);
-  void onSelectClause(Token &out, Token &expr);
-  void onGroupClause(Token &out, Token &coll, Token &key);
-  void onIntoClause(Token &out, Token &var, Token &query);
-
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();
@@ -402,6 +388,14 @@ private:
     Closure,
   };
 
+  struct ClassContext {
+    ClassContext(int type, std::string name)
+      : type(type), name(name) {}
+
+    int type;
+    std::string name;
+  };
+
   AnalysisResultPtr m_ar;
   FileScopePtr m_file;
   std::vector<std::string> m_comments; // for docComment stack
@@ -409,10 +403,9 @@ private:
   std::vector<std::vector<LabelScopePtr>> m_labelScopes;
   std::vector<FunctionContext> m_funcContexts;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
-  std::string m_clsName; // for T_CLASS_C inside a closure
+  std::stack<ClassContext> m_clsContexts;
   std::string m_funcName;
   std::string m_containingFuncName;
-  bool m_inTrait;
 
   // parser output
   StatementListPtr m_tree;
@@ -428,6 +421,9 @@ private:
 
   void newScope();
   void completeScope(BlockScopePtr inner);
+
+  const std::string& clsName() const;
+  bool inTrait() const;
 
   void setHasNonEmptyReturn(ConstructPtr blame);
 
@@ -452,6 +448,9 @@ private:
                         Token *modifiers, Token &ret,
                         Token &ref, Token *name, Token &params,
                         Token &stmt, Token *attr, bool reloc);
+  StatementPtr onClassHelper(int type, const std::string &name, Token &base,
+                 Token &baseInterface, Token &stmt, Token *attr,
+                 Token *enumTy);
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

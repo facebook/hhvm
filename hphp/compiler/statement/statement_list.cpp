@@ -227,14 +227,6 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void StatementList::outputCodeModel(CodeGenerator &cg) {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    m_stmts[i]->outputCodeModel(cg);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void StatementList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

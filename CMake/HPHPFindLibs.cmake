@@ -53,14 +53,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# iconv checks
-find_package(Libiconv REQUIRED)
-include_directories(${LIBICONV_INCLUDE_DIR})
-if (LIBICONV_CONST)
-  message(STATUS "Using const for input to iconv() call")
-  add_definitions("-DICONV_CONST=const")
-endif()
-
 # mysql checks - if we're using async mysql, we use webscalesqlclient from
 # third-party/ instead
 if (ENABLE_ASYNC_MYSQL)
@@ -471,10 +463,6 @@ macro(hphp_link target)
 
   if (LIBINOTIFY_LIBRARY)
     target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})
-  endif()
-
-  if (LIBICONV_LIBRARY)
-    target_link_libraries(${target} ${LIBICONV_LIBRARY})
   endif()
 
   if (LINUX)

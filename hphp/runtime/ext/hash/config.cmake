@@ -39,4 +39,6 @@ HHVM_DEFINE_EXTENSION("hash"
     php_hash_snefru_tables.h
     php_hash_tiger_tables.h
     php_hash_whirlpool_tables.h
+  SYSTEMLIB
+    ext_hash.php
 )

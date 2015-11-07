@@ -110,21 +110,6 @@ void CatchStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void CatchStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("CatchStatement", 4);
-  cg.printPropertyHeader("class");
-  cg.printTypeExpression(m_origClassName);
-  cg.printPropertyHeader("variableName");
-  cg.printValue(m_variable->getName());
-  cg.printPropertyHeader("block");
-  cg.printAsEnclosedBlock(m_stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

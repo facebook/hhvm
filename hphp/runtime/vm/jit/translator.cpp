@@ -51,7 +51,6 @@
 #include "hphp/runtime/vm/bc-pattern.h"
 
 #include "hphp/runtime/vm/jit/annotation.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"

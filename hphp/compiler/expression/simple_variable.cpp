@@ -154,17 +154,6 @@ bool SimpleVariable::checkUnused() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void SimpleVariable::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("SimpleVariableExpression", 2);
-  cg.printPropertyHeader("variableName");
-  cg.printValue(m_name);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void SimpleVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

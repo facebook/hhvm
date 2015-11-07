@@ -121,17 +121,6 @@ StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void StaticStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("StaticStatement", 2);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void StaticStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

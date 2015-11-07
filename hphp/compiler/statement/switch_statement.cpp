@@ -138,24 +138,6 @@ void SwitchStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void SwitchStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 2;
-  if (m_cases != nullptr) numProps++;
-
-  cg.printObjectHeader("SwitchStatement", numProps);
-  cg.printPropertyHeader("expression");
-  m_exp->outputCodeModel(cg);
-  if (m_cases != nullptr) {
-    cg.printPropertyHeader("caseStatements");
-    cg.printStatementVector(m_cases);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void SwitchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

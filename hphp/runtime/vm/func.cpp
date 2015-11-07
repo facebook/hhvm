@@ -103,7 +103,8 @@ void* Func::allocFuncMem(int numParams) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numExtraPrologues = std::max(maxNumPrologues - kNumFixedPrologues, 0);
 
-  size_t funcSize = sizeof(Func) + numExtraPrologues * sizeof(unsigned char*);
+  auto const funcSize =
+    sizeof(Func) + numExtraPrologues * sizeof(m_prologueTable[0]);
 
   return low_malloc(funcSize);
 }
@@ -153,7 +154,7 @@ void Func::smashPrologues() const {
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
-  mcg->smashPrologueGuards((jit::TCA*)m_prologueTable,
+  mcg->smashPrologueGuards((AtomicLowPtr<uint8_t>*)m_prologueTable,
                            numPrologues, this);
 }
 

@@ -456,22 +456,15 @@ static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, const Variant& zone) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define UDAT_CONST(nm) Native::registerClassConstant<KindOfInt64>( \
-                       s_IntlDateFormatter.get(), \
-                       makeStaticString(#nm), UDAT_##nm);
-#define UCAL_CONST(nm) Native::registerClassConstant<KindOfInt64>( \
-                       s_IntlDateFormatter.get(), \
-                       makeStaticString(#nm), UCAL_##nm);
-
 void IntlExtension::initDateFormatter() {
-  UDAT_CONST(FULL);
-  UDAT_CONST(LONG);
-  UDAT_CONST(MEDIUM);
-  UDAT_CONST(SHORT);
-  UDAT_CONST(NONE);
+  HHVM_RCC_INT(IntlDateFormatter, FULL, UDAT_FULL);
+  HHVM_RCC_INT(IntlDateFormatter, LONG, UDAT_LONG);
+  HHVM_RCC_INT(IntlDateFormatter, MEDIUM, UDAT_MEDIUM);
+  HHVM_RCC_INT(IntlDateFormatter, SHORT, UDAT_SHORT);
+  HHVM_RCC_INT(IntlDateFormatter, NONE, UDAT_NONE);
 
-  UCAL_CONST(GREGORIAN);
-  UCAL_CONST(TRADITIONAL);
+  HHVM_RCC_INT(IntlDateFormatter, GREGORIAN, UCAL_GREGORIAN);
+  HHVM_RCC_INT(IntlDateFormatter, TRADITIONAL, UCAL_TRADITIONAL);
 
   HHVM_ME(IntlDateFormatter, __construct);
   HHVM_ME(IntlDateFormatter, format);

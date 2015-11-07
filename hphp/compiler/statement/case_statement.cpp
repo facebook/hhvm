@@ -105,23 +105,6 @@ void CaseStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void CaseStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 2;
-  if (m_condition != nullptr) numProps++;
-  cg.printObjectHeader("CaseStatement", numProps);
-  if (m_condition != nullptr) {
-    cg.printPropertyHeader("condition");
-    m_condition->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("block");
-  cg.printAsBlock(m_stmt);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void CaseStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

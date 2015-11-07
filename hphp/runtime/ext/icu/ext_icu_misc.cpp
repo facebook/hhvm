@@ -164,10 +164,6 @@ static Variant HHVM_FUNCTION(idn_to_utf8, const String& domain,
 
 /////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_INTL_IDNA_VARIANT_2003("INTL_IDNA_VARIANT_2003"),
-  s_INTL_IDNA_VARIANT_UTS46("INTL_IDNA_VARIANT_UTS46");
-
 void IntlExtension::initMisc() {
   HHVM_FE(intl_get_error_code);
   HHVM_FE(intl_get_error_message);
@@ -177,10 +173,8 @@ void IntlExtension::initMisc() {
   HHVM_FE(idn_to_ascii);
   HHVM_FE(idn_to_utf8);
 
-  Native::registerConstant<KindOfInt64>(s_INTL_IDNA_VARIANT_2003.get(),
-                                          INTL_IDNA_VARIANT_2003);
-  Native::registerConstant<KindOfInt64>(s_INTL_IDNA_VARIANT_UTS46.get(),
-                                          INTL_IDNA_VARIANT_UTS46);
+  HHVM_RC_INT_SAME(INTL_IDNA_VARIANT_2003);
+  HHVM_RC_INT_SAME(INTL_IDNA_VARIANT_UTS46);
 
 #define UHHVM_RC_INT_SAME(cns) HHVM_RC_INT(cns, U ## cns)
   UHHVM_RC_INT_SAME(IDNA_DEFAULT);

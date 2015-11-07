@@ -657,6 +657,15 @@ SimpleOp computeSimpleCollectionOp(
   return SimpleOp::None;
 }
 
+/*
+ * Punt if the given base type isn't known to be boxed or unboxed.
+ */
+void checkGenBase(Type baseType) {
+  if (baseType.maybe(TCell) && baseType.maybe(TBoxedCell)) {
+    PUNT(MInstr-GenBase);
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 // Base ops
 
@@ -668,10 +677,7 @@ void emitBaseLCR(MTS& env) {
   auto base = getInput(env, env.iInd, DataTypeGeneric);
   auto baseType = base->type();
 
-  if (!(baseType <= TCell ||
-        baseType <= TBoxedCell)) {
-    PUNT(MInstr-GenBase);
-  }
+  checkGenBase(baseType);
 
   // Check for Uninit and warn if needed.
   if (baseL.isLocal() && (mia & MIA_warn) && baseType <= TUninit) {
@@ -1042,13 +1048,16 @@ void emitElem(MTS& env) {
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate);
   auto const key = getKey(env);
 
-  // Fast path for the common/easy case
-  const bool warn = mia & MIA_warn;
-  const bool unset = mia & MIA_unset;
-  const bool define = mia & MIA_define;
-  if (env.base.type <= TPtrToArr &&
-      !unset && !define &&
-      (key->isA(TInt) || key->isA(TStr))) {
+  auto const warn   = mia & MIA_warn;
+  auto const unset  = mia & MIA_unset;
+  auto const define = mia & MIA_define;
+
+  assertx(!define || !unset);
+  assertx(!define || !warn);
+
+  // Fast path for the common/easy case.
+  if (env.base.type <= TPtrToArr && !unset && !define &&
+      key->type().subtypeOfAny(TInt, TStr)) {
     setBase(
       env,
       gen(env,
@@ -1059,18 +1068,15 @@ void emitElem(MTS& env) {
     return;
   }
 
-  if (env.base.type <= TPtrToArr &&
-      define &&
-      !unset &&
-      key->type().subtypeOfAny(TInt,TStr)) {
+  if (env.base.type <= TPtrToArr && (define || unset) &&
+      key->type().subtypeOfAny(TInt, TStr)) {
     setBase(
       env,
-      gen(env, ElemArrayD, env.base.value, key)
+      gen(env, unset ? ElemArrayU : ElemArrayD, env.base.value, key)
     );
     return;
   }
 
-  assertx(!(define && unset));
   if (unset) {
     auto const uninit = ptrToUninit(env);
     auto const baseType = env.base.type.strip();
@@ -2226,15 +2232,6 @@ TypeConstraint mInstrBaseConstraint(const IRGS& env, Type predictedType) {
 namespace {
 
 /*
- * Punt if the given base type isn't known to be boxed or unboxed.
- */
-void checkGenBase(Type baseType) {
-  if (baseType.maybe(TCell) && baseType.maybe(TBoxedCell)) {
-    PUNT(MInstr-GenBase);
-  }
-}
-
-/*
  * Determine which simple collection op to use for the given base and key
  * types.
  */
@@ -2456,15 +2453,17 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
   auto const baseType = base ? base->type() : basePtr->type().deref();
 
-  if (base && base->isA(TArr) && !unset &&
-      key->type().subtypeOfAny(TInt, TStr)) {
-    assertx(!define || !warn);
+  assertx(!define || !unset);
+  assertx(!define || !warn);
+
+  if (base && base->isA(TArr) && key->type().subtypeOfAny(TInt, TStr)) {
     env.irb->constrainValue(base, DataTypeSpecific);
-    if (define) return gen(env, ElemArrayD, basePtr, key);
+    if (define || unset) {
+      return gen(env, unset ? ElemArrayU : ElemArrayD, basePtr, key);
+    }
     return gen(env, warn ? ElemArrayW : ElemArray, base, key);
   }
 
-  assertx(!define || !unset);
   if (unset) {
     env.irb->constrainValue(base, DataTypeSpecific);
     if (baseType <= TStr) {
@@ -2590,7 +2589,7 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
         switch (propElem) {
           case PropElemOp::Prop:
           case PropElemOp::PropQ:
-            return gen(env, IssetProp, basePtr, key);
+            return gen(env, IssetProp, objBase, key);
           case PropElemOp::Elem:
             auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
             return emitIssetElem(env, realBase, key, simpleOp);
@@ -2600,7 +2599,7 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
         switch (propElem) {
           case PropElemOp::Prop:
           case PropElemOp::PropQ:
-            return gen(env, EmptyProp, basePtr, key);
+            return gen(env, EmptyProp, objBase, key);
           case PropElemOp::Elem:
             return gen(env, EmptyElem, basePtr, key);
         }
@@ -2688,7 +2687,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     gen(env, StMem, propPtr, value);
     gen(env, DecRef, oldVal);
   } else {
-    gen(env, SetProp, makeCatchSet(env), basePtr, key, value);
+    gen(env, SetProp, makeCatchSet(env), base, key, value);
   }
 
   return value;

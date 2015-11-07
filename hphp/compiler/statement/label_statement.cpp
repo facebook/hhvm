@@ -65,17 +65,6 @@ void LabelStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void LabelStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("LabelStatement", 2);
-  cg.printPropertyHeader("label");
-  cg.printValue(m_label);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void LabelStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

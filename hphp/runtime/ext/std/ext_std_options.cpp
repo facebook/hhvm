@@ -1205,6 +1205,7 @@ void StandardExtension::initOptions() {
   HHVM_FE(clock_gettime);
   HHVM_FE(cpu_get_count);
   HHVM_FE(cpu_get_model);
+  HHVM_FALIAS(ini_alter, ini_set);
   HHVM_FE(ini_get);
   HHVM_FE(ini_get_all);
   HHVM_FE(ini_restore);

@@ -64,10 +64,11 @@ private:
   Array  m_info;
   std::shared_ptr<DebuggerClient::LiveLists> m_acLiveLists;
 
-  static String GetParams(const Array& params, bool varg, bool detailed = false);
+  static String GetParams(const Array& params, bool varg, bool detailed=false);
   static String GetParam(const Array& params, int index);
   static String GetModifier(const Array& info, const String&);
-  static String GetTypeProfilingInfo(const Array& profilingArray, const Array& params);
+  static String GetTypeProfilingInfo(const Array& profilingArray,
+                                     const Array& params);
 
   static bool TryConstant(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol);
@@ -77,7 +78,8 @@ private:
                         const Array& info, std::string subsymbol);
 
   static void PrintDocComments(StringBuffer &sb, const Array& info);
-  static void PrintInfo(DebuggerClient &client, StringBuffer &sb, const Array& info,
+  static void PrintInfo(DebuggerClient &client, StringBuffer &sb,
+                        const Array& info,
                         const std::string &subsymbol);
   static void PrintHeader(DebuggerClient &client, StringBuffer &sb,
                           const Array& info);

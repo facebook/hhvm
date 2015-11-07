@@ -1,0 +1,8 @@
+array[[1]intersect(Tstring)]
+[2]intersect(array[[3]intersect(Tint, Tstring)])
+File "local_vs_nested.php", line 18, characters 15-23:
+Invalid argument (Typing[4110])
+File "local_vs_nested.php", line 22, characters 22-27:
+This is a string
+File "local_vs_nested.php", line 14, characters 22-22:
+It is incompatible with an int

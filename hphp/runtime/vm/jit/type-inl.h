@@ -380,6 +380,15 @@ inline Type Type::ExactObj(const Class* cls) {
   return Type(TObj, ClassSpec(cls, ClassSpec::ExactTag{}));
 }
 
+inline Type Type::SubCls(const Class* cls) {
+  if (cls->attrs() & AttrNoOverride) return ExactCls(cls);
+  return Type(TCls, ClassSpec(cls, ClassSpec::SubTag{}));
+}
+
+inline Type Type::ExactCls(const Class* cls) {
+  return Type::cns(cls);
+}
+
 inline Type Type::unspecialize() const {
   return Type(m_bits, ptrKind());
 }
@@ -398,7 +407,7 @@ inline bool Type::supports(SpecKind kind) const {
     case SpecKind::Array:
       return m_bits & kAnyArr;
     case SpecKind::Class:
-      return m_bits & kAnyObj;
+      return (m_bits & kAnyObj) || (m_bits & kCls);
   }
   not_reached();
 }

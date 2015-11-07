@@ -17,7 +17,6 @@
 #include "hphp/compiler/statement/class_require_statement.h"
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/code_model_enums.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -79,23 +78,6 @@ int ClassRequireStatement::getKidCount() const {
 
 void ClassRequireStatement::setNthKid(int n, ConstructPtr cp) {
   always_assert(false);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ClassRequireStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassRequiresStatement", 3);
-  cg.printPropertyHeader("name");
-  cg.printValue(m_required);
-  cg.printPropertyHeader("kind");
-  if (m_extends) {
-    cg.printValue(PHP_EXTENDS);
-  } else {
-    cg.printValue(PHP_IMPLEMENTS);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

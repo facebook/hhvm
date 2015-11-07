@@ -528,11 +528,14 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     argTypes.push_back(type);
   }
 
+  if (RuntimeOption::EvalInlineRegionMode == "both") {
+    auto region = selectCalleeTracelet(callee, numArgs, argTypes, maxBCInstrs);
+    if (region) return region;
+  }
+
   if (RuntimeOption::EvalInlineRegionMode != "tracelet" &&
       RuntimeOption::EvalJitPGO && !mcg->tx().profData()->freed()) {
-    auto region = selectCalleeCFG(callee, numArgs, argTypes, maxBCInstrs);
-    if (region) return region;
-    if (RuntimeOption::EvalInlineRegionMode != "both") return nullptr;
+    return selectCalleeCFG(callee, numArgs, argTypes, maxBCInstrs);
   }
 
   return selectCalleeTracelet(callee, numArgs, argTypes, maxBCInstrs);

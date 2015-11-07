@@ -60,6 +60,7 @@ using namespace HPHP;
   Isset or empty expression
   Exit expression
   Instanceof expression
+  Anonymous class expression
 */
 static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   switch (rhs->getKindOf()) {
@@ -77,7 +78,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   case Construct::KindOfIncludeExpression:
   case Construct::KindOfYieldExpression:
   case Construct::KindOfAwaitExpression:
-  case Construct::KindOfQueryExpression:
+  case Construct::KindOfClassExpression:
     return ListAssignment::Regular;
 
   case Construct::KindOfListAssignment:
@@ -120,15 +121,6 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   case Construct::KindOfParameterExpression:
   case Construct::KindOfModifierExpression:
   case Construct::KindOfUserAttribute:
-  case Construct::KindOfFromClause:
-  case Construct::KindOfLetClause:
-  case Construct::KindOfWhereClause:
-  case Construct::KindOfSelectClause:
-  case Construct::KindOfIntoClause:
-  case Construct::KindOfJoinClause:
-  case Construct::KindOfGroupClause:
-  case Construct::KindOfOrderbyClause:
-  case Construct::KindOfOrdering:
     always_assert(false);
 
   // non-arrays
@@ -247,22 +239,6 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ListAssignment::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_array != nullptr ? 3 : 2;
-  cg.printObjectHeader("ListAssignmentExpression", numProps);
-  cg.printPropertyHeader("variables");
-  cg.printExpressionVector(m_variables);
-  if (m_array != nullptr) {
-    cg.printPropertyHeader("expression");
-    m_array->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

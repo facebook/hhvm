@@ -149,7 +149,7 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
 struct SrcRec {
   SrcRec()
     : m_topTranslation(nullptr)
-    , m_anchorTranslation(0)
+    , m_anchorTranslation(nullptr)
     , m_dbgBranchGuardSrc(nullptr)
     , m_guard(0)
   {}
@@ -163,7 +163,7 @@ struct SrcRec {
    * lease.
    */
   TCA getTopTranslation() const {
-    return m_topTranslation.load(std::memory_order_acquire);
+    return m_topTranslation.get();
   }
 
   /*
@@ -242,7 +242,7 @@ private:
   // This either points to the most recent translation in the
   // translations vector, or if hasDebuggerGuard() it points to the
   // debug guard.
-  std::atomic<TCA> m_topTranslation;
+  AtomicLowTCA m_topTranslation;
 
   /*
    * The following members are all protected by the translator write
@@ -252,14 +252,14 @@ private:
   // We chain new translations onto the end of the list, so we need to
   // track all the fallback jumps from the "tail" translation so we
   // can rewrire them to new ones.
-  TCA m_anchorTranslation;
+  LowTCA m_anchorTranslation;
   GrowableVector<IncomingBranch> m_tailFallbackJumps;
 
   GrowableVector<TransLoc> m_translations;
   GrowableVector<IncomingBranch> m_incomingBranches;
   MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
-  TCA m_dbgBranchGuardSrc;
+  LowTCA m_dbgBranchGuardSrc;
   std::atomic<uint32_t> m_guard;
 };
 

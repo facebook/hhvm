@@ -240,47 +240,19 @@ static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_FILEINFO_NONE("FILEINFO_NONE");
-const StaticString s_FILEINFO_SYMLINK("FILEINFO_SYMLINK");
-const StaticString s_FILEINFO_MIME("FILEINFO_MIME");
-const StaticString s_FILEINFO_MIME_TYPE("FILEINFO_MIME_TYPE");
-const StaticString s_FILEINFO_MIME_ENCODING("FILEINFO_MIME_ENCODING");
-const StaticString s_FILEINFO_DEVICES("FILEINFO_DEVICES");
-const StaticString s_FILEINFO_CONTINUE("FILEINFO_CONTINUE");
-const StaticString s_FILEINFO_PRESERVE_ATIME("FILEINFO_PRESERVE_ATIME");
-const StaticString s_FILEINFO_RAW("FILEINFO_RAW");
-
 class fileinfoExtension final : public Extension {
  public:
   fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_NONE.get(), MAGIC_NONE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_SYMLINK.get(), MAGIC_SYMLINK
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_MIME.get(), MAGIC_MIME
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_MIME_TYPE.get(), MAGIC_MIME_TYPE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_MIME_ENCODING.get(),MAGIC_MIME_ENCODING
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_DEVICES.get(), MAGIC_DEVICES
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_CONTINUE.get(), MAGIC_CONTINUE
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_PRESERVE_ATIME.get(), MAGIC_PRESERVE_ATIME
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FILEINFO_RAW.get(), MAGIC_RAW
-    );
+    HHVM_RC_INT(FILEINFO_NONE, MAGIC_NONE);
+    HHVM_RC_INT(FILEINFO_SYMLINK, MAGIC_SYMLINK);
+    HHVM_RC_INT(FILEINFO_MIME, MAGIC_MIME);
+    HHVM_RC_INT(FILEINFO_MIME_TYPE, MAGIC_MIME_TYPE);
+    HHVM_RC_INT(FILEINFO_MIME_ENCODING,MAGIC_MIME_ENCODING);
+    HHVM_RC_INT(FILEINFO_DEVICES, MAGIC_DEVICES);
+    HHVM_RC_INT(FILEINFO_CONTINUE, MAGIC_CONTINUE);
+    HHVM_RC_INT(FILEINFO_PRESERVE_ATIME, MAGIC_PRESERVE_ATIME);
+    HHVM_RC_INT(FILEINFO_RAW, MAGIC_RAW);
     HHVM_FE(finfo_open);
     HHVM_FE(finfo_buffer);
     HHVM_FE(finfo_file);

@@ -296,22 +296,6 @@ bool ClosureExpression::hasStaticLocalsImpl(ConstructPtr root) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ClosureExpression::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_vars != nullptr && m_vars->getCount() > 0 ? 3 : 2;
-  cg.printObjectHeader("ClosureExpression", numProps);
-  cg.printPropertyHeader("ffunction");
-  m_func->outputCodeModel(cg);
-  if (m_vars != nullptr && m_vars->getCount() > 0) {
-    cg.printPropertyHeader("capturedVariables");
-    cg.printExpressionVector(m_vars);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ClosureExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

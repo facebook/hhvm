@@ -461,6 +461,20 @@ inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X
 
+#define ELEM_ARRAY_U_HELPER_TABLE(m) \
+  /* name        keyType */          \
+  m(elemArraySU, KeyType::Str)       \
+  m(elemArrayIU, KeyType::Int)       \
+
+#define X(nm, keyType)                                                 \
+inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
+  auto cbase = tvToCell(base);                                         \
+  assertx(isArrayType(cbase->m_type));                                 \
+  return ElemUArray<keyType>(cbase, key);                              \
+}
+ELEM_ARRAY_U_HELPER_TABLE(X)
+#undef X
+
 #define ELEM_ARRAY_HELPER_TABLE(m)                      \
   /* name               keyType  checkForInt   warn */  \
   m(elemArrayS,    KeyType::Str,       false,  false)   \

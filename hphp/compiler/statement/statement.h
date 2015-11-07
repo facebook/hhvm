@@ -33,7 +33,6 @@
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
   void analyzeProgram(AnalysisResultPtr ar) override;                   \
   StatementPtr clone() override;                                        \
-  void outputCodeModel(CodeGenerator &cg) override;                     \
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
 #define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;                             \

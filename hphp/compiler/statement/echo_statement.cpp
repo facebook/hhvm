@@ -73,17 +73,6 @@ void EchoStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void EchoStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("EchoStatement", 2);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void EchoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

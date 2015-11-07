@@ -42,6 +42,13 @@ inline bool needsNSNormalization(const StringData* name) {
 }
 
 /*
+ * Returns true if the string is not of the form "Class::Method".
+ */
+inline bool notClassMethodPair(const StringData* name) {
+  return strstr(name->data(), "::") == nullptr;
+}
+
+/*
  * Normalizes a given class or function name removing the leading '\'.
  * Leaves the name unchanged if more than one '\' is leading.
  * So '\name' becomes 'name' but '\\name' stays '\\name'.

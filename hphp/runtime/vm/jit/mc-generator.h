@@ -178,7 +178,8 @@ public:
    */
   TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
                       bool forRegeneratePrologue = false);
-  void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
+  void smashPrologueGuards(AtomicLowPtr<uint8_t>* prologues,
+                           int numPrologues, const Func* func);
 
   TCA getFuncBody(Func* func);
 

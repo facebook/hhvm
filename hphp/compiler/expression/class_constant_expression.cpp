@@ -157,18 +157,6 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassConstantExpression", 3);
-  StaticClassName::outputCodeModel(cg);
-  cg.printPropertyHeader("constantName");
-  cg.printValue(m_varName);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ClassConstantExpression::outputPHP(CodeGenerator &cg,

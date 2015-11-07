@@ -284,19 +284,19 @@ inline StringData* decode_litstr(PC& pc) {
   return vmfp()->m_func->unit()->lookupLitstrId(id);
 }
 
-inline int32_t decode_la(PC& pc) {
+ALWAYS_INLINE int32_t decode_la(PC& pc) {
   return decode_iva(pc);
 }
 
-inline int32_t decode_ia(PC& pc) {
+ALWAYS_INLINE int32_t decode_ia(PC& pc) {
   return decode_iva(pc);
 }
 
-inline Offset decode_ba(PC& pc) {
+ALWAYS_INLINE Offset decode_ba(PC& pc) {
   return decode<Offset>(pc);
 }
 
-inline Offset peek_ba(PC& pc) {
+ALWAYS_INLINE Offset peek_ba(PC& pc) {
   return peek<Offset>(pc);
 }
 

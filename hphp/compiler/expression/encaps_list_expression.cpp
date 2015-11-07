@@ -104,20 +104,6 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void EncapsListExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("EncapsListExpression", 3);
-  cg.printPropertyHeader("delimiter");
-  std::string tstr(1, m_type);
-  cg.printValue(tstr);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exps);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void EncapsListExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

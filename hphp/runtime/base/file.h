@@ -251,7 +251,7 @@ struct File : SweepableResourceData {
    * Write one line of csv record.
    */
   int64_t writeCSV(const Array& fields, char delimiter = ',',
-                   char enclosure = '"');
+                   char enclosure = '"', char escape_char = '\\');
 
   /**
    * Read one line of csv record.

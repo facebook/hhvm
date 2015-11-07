@@ -1221,7 +1221,7 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  unsigned char* volatile m_funcBody;
+  AtomicLowPtr<uint8_t> m_funcBody;
   mutable rds::Link<Func*> m_cachedFunc{rds::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
   LowStringPtr m_fullName;
@@ -1253,7 +1253,7 @@ private:
   AtomicAttr m_attrs;
   // This must be the last field declared in this structure, and the Func class
   // should not be inherited from.
-  unsigned char* volatile m_prologueTable[kNumFixedPrologues];
+  AtomicLowPtr<uint8_t> m_prologueTable[kNumFixedPrologues];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

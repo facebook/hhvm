@@ -70,9 +70,8 @@ const int64_t k_SEEK_SET = SEEK_SET;
 const int64_t k_SEEK_CUR = SEEK_CUR;
 const int64_t k_SEEK_END = SEEK_END;
 
-// This can probably be removed when we register this constant via HNI
-// in the appropriate extension or global constants file
-extern const int64_t k_INI_SCANNER_NORMAL;
+constexpr int64_t k_INI_SCANNER_NORMAL = 0;
+constexpr int64_t k_INI_SCANNER_RAW = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // file handle based file operations
@@ -145,7 +144,8 @@ Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,
                       const String& delimiter = ",",
-                      const String& enclosure = "\"");
+                      const String& enclosure = "\"",
+                      const String& escape = "\\");
 Variant HHVM_FUNCTION(fgetcsv,
                       const Resource& handle,
                       int64_t length = 0,

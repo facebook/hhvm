@@ -24,6 +24,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
+constexpr int64_t k_MSG_IPC_NOWAIT = 1;
+constexpr int64_t k_MSG_NOERROR    = 2;
+constexpr int64_t k_MSG_EXCEPT     = 4;
+
 int64_t HHVM_FUNCTION(ftok,
                       const String& pathname,
                       const String& proj);

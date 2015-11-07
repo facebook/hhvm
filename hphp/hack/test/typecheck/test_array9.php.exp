@@ -1,1 +1,4 @@
-No errors
+File "test_array9.php", line 16, characters 16-30:
+You are trying to access the member unknownFunction but this is not an object, it is an int (Typing[4062])
+File "test_array9.php", line 15, characters 25-25:
+Check this out

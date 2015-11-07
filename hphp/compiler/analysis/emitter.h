@@ -21,6 +21,7 @@
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
 #include "hphp/compiler/statement/class_require_statement.h"
+#include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"

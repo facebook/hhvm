@@ -975,7 +975,7 @@ To string conversions:
 
   Look up the cached-class RDS handle for a given class name.
 
-| DerefClsRDSHandle, D(Cls), S(RDSHandle), NF
+| DerefClsRDSHandle, D(Cls|Nullptr), S(RDSHandle), NF
 
   Dereference an RDS handle that points to a cached class slot.
 
@@ -1129,7 +1129,7 @@ To string conversions:
   respectively. These instructions mutate a partially created ActRec pointed to
   by S1 + `offset' (in cells).
 
-| LdObjClass, D(Cls), S(Obj), NF
+| LdObjClass, DLdObjCls, S(Obj), NF
 
   Load the class out of the object in S0 and put it in D.
 
@@ -2275,11 +2275,13 @@ fields of that struct for holding intermediate values.
 
 | ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-| ElemArrayD, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
+| ElemArrayD, D(PtrToArrGen), S(PtrToGen) S(Int,Str), MElem|Er
+
+| ElemArrayU, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
 
   Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
-  The ElemArrayW version is for Warn member instrs, and the ElemArrayD version
-  is for Define member instrs.
+  ElemArrayW is for Warn member instrs, ElemArrayD is for Define member instrs,
+  and ElemArrayU is for Unset.
 
   ElemArrayD takes a PtrToGen for its base operand, but it expects it to be a
   PtrToArr or PtrToBoxedArr.

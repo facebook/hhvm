@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+constexpr int64_t k_HASH_HMAC = 1;
+
 Variant HHVM_FUNCTION(hash, const String& algo, const String& data,
                             bool raw_output = false);
 Array HHVM_FUNCTION(hash_algos);

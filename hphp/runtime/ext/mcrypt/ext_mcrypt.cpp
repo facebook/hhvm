@@ -728,175 +728,51 @@ bool HHVM_FUNCTION(mcrypt_generic_end, const Resource& td) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_MCRYPT_3DES("MCRYPT_3DES");
-const StaticString s_MCRYPT_ARCFOUR("MCRYPT_ARCFOUR");
-const StaticString s_MCRYPT_ARCFOUR_IV("MCRYPT_ARCFOUR_IV");
-const StaticString s_MCRYPT_BLOWFISH("MCRYPT_BLOWFISH");
-const StaticString s_MCRYPT_BLOWFISH_COMPAT("MCRYPT_BLOWFISH_COMPAT");
-const StaticString s_MCRYPT_CAST_128("MCRYPT_CAST_128");
-const StaticString s_MCRYPT_CAST_256("MCRYPT_CAST_256");
-const StaticString s_MCRYPT_CRYPT("MCRYPT_CRYPT");
-const StaticString s_MCRYPT_DECRYPT("MCRYPT_DECRYPT");
-const StaticString s_MCRYPT_DES("MCRYPT_DES");
-const StaticString s_MCRYPT_DEV_RANDOM("MCRYPT_DEV_RANDOM");
-const StaticString s_MCRYPT_DEV_URANDOM("MCRYPT_DEV_URANDOM");
-const StaticString s_MCRYPT_ENCRYPT("MCRYPT_ENCRYPT");
-const StaticString s_MCRYPT_ENIGNA("MCRYPT_ENIGNA");
-const StaticString s_MCRYPT_GOST("MCRYPT_GOST");
-const StaticString s_MCRYPT_IDEA("MCRYPT_IDEA");
-const StaticString s_MCRYPT_LOKI97("MCRYPT_LOKI97");
-const StaticString s_MCRYPT_MARS("MCRYPT_MARS");
-const StaticString s_MCRYPT_MODE_CBC("MCRYPT_MODE_CBC");
-const StaticString s_MCRYPT_MODE_CFB("MCRYPT_MODE_CFB");
-const StaticString s_MCRYPT_MODE_ECB("MCRYPT_MODE_ECB");
-const StaticString s_MCRYPT_MODE_NOFB("MCRYPT_MODE_NOFB");
-const StaticString s_MCRYPT_MODE_OFB("MCRYPT_MODE_OFB");
-const StaticString s_MCRYPT_MODE_STREAM("MCRYPT_MODE_STREAM");
-const StaticString s_MCRYPT_PANAMA("MCRYPT_PANAMA");
-const StaticString s_MCRYPT_RAND("MCRYPT_RAND");
-const StaticString s_MCRYPT_RC2("MCRYPT_RC2");
-const StaticString s_MCRYPT_RC6("MCRYPT_RC6");
-const StaticString s_MCRYPT_RIJNDAEL_128("MCRYPT_RIJNDAEL_128");
-const StaticString s_MCRYPT_RIJNDAEL_192("MCRYPT_RIJNDAEL_192");
-const StaticString s_MCRYPT_RIJNDAEL_256("MCRYPT_RIJNDAEL_256");
-const StaticString s_MCRYPT_SAFER128("MCRYPT_SAFER128");
-const StaticString s_MCRYPT_SAFER64("MCRYPT_SAFER64");
-const StaticString s_MCRYPT_SAFERPLUS("MCRYPT_SAFERPLUS");
-const StaticString s_MCRYPT_SERPENT("MCRYPT_SERPENT");
-const StaticString s_MCRYPT_SKIPJACK("MCRYPT_SKIPJACK");
-const StaticString s_MCRYPT_THREEWAY("MCRYPT_THREEWAY");
-const StaticString s_MCRYPT_TRIPLEDES("MCRYPT_TRIPLEDES");
-const StaticString s_MCRYPT_TWOFISH("MCRYPT_TWOFISH");
-const StaticString s_MCRYPT_WAKE("MCRYPT_WAKE");
-const StaticString s_MCRYPT_XTEA("MCRYPT_XTEA");
-
 class McryptExtension final : public Extension {
  public:
   McryptExtension() : Extension("mcrypt") {}
   void moduleInit() override {
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_3DES.get(), StaticString("tripledes").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_ARCFOUR.get(), StaticString("arcfour").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_ARCFOUR_IV.get(), StaticString("arcfour-iv").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_BLOWFISH.get(), StaticString("blowfish").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_BLOWFISH_COMPAT.get(), StaticString("blowfish-compat").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_CAST_128.get(), StaticString("cast-128").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_CAST_256.get(), StaticString("cast-256").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_CRYPT.get(), StaticString("crypt").get()
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_MCRYPT_DECRYPT.get(), 1
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_DES.get(), StaticString("des").get()
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_MCRYPT_DEV_RANDOM.get(), RANDOM
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_MCRYPT_DEV_URANDOM.get(), URANDOM
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_MCRYPT_ENCRYPT.get(), 0
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_ENIGNA.get(), StaticString("crypt").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_GOST.get(), StaticString("gost").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_IDEA.get(), StaticString("idea").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_LOKI97.get(), StaticString("loki97").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_MARS.get(), StaticString("mars").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_MODE_CBC.get(), StaticString("cbc").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_MODE_CFB.get(), StaticString("cfb").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_MODE_ECB.get(), StaticString("ecb").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_MODE_NOFB.get(), StaticString("nofb").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_MODE_OFB.get(), StaticString("ofb").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_MODE_STREAM.get(), StaticString("stream").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_PANAMA.get(), StaticString("panama").get()
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_MCRYPT_RAND.get(), RAND
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_RC2.get(), StaticString("rc2").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_RC6.get(), StaticString("rc6").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_RIJNDAEL_128.get(), StaticString("rijndael-128").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_RIJNDAEL_192.get(), StaticString("rijndael-192").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_RIJNDAEL_256.get(), StaticString("rijndael-256").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_SAFER128.get(), StaticString("safer-sk128").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_SAFER64.get(), StaticString("safer-sk64").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_SAFERPLUS.get(), StaticString("saferplus").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_SERPENT.get(), StaticString("serpent").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_SKIPJACK.get(), StaticString("skipjack").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_THREEWAY.get(), StaticString("threeway").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_TRIPLEDES.get(), StaticString("tripledes").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_TWOFISH.get(), StaticString("twofish").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_WAKE.get(), StaticString("wake").get()
-    );
-    Native::registerConstant<KindOfStaticString>(
-      s_MCRYPT_XTEA.get(), StaticString("xtea").get()
-    );
+    HHVM_RC_STR(MCRYPT_3DES, "tripledes");
+    HHVM_RC_STR(MCRYPT_ARCFOUR, "arcfour");
+    HHVM_RC_STR(MCRYPT_ARCFOUR_IV, "arcfour-iv");
+    HHVM_RC_STR(MCRYPT_BLOWFISH, "blowfish");
+    HHVM_RC_STR(MCRYPT_BLOWFISH_COMPAT, "blowfish-compat");
+    HHVM_RC_STR(MCRYPT_CAST_128, "cast-128");
+    HHVM_RC_STR(MCRYPT_CAST_256, "cast-256");
+    HHVM_RC_STR(MCRYPT_CRYPT, "crypt");
+    HHVM_RC_INT(MCRYPT_DECRYPT, 1);
+    HHVM_RC_STR(MCRYPT_DES, "des");
+    HHVM_RC_INT(MCRYPT_DEV_RANDOM, RANDOM);
+    HHVM_RC_INT(MCRYPT_DEV_URANDOM, URANDOM);
+    HHVM_RC_INT(MCRYPT_ENCRYPT, 0);
+    HHVM_RC_STR(MCRYPT_ENIGNA, "crypt");
+    HHVM_RC_STR(MCRYPT_GOST, "gost");
+    HHVM_RC_STR(MCRYPT_IDEA, "idea");
+    HHVM_RC_STR(MCRYPT_LOKI97, "loki97");
+    HHVM_RC_STR(MCRYPT_MARS, "mars");
+    HHVM_RC_STR(MCRYPT_MODE_CBC, "cbc");
+    HHVM_RC_STR(MCRYPT_MODE_CFB, "cfb");
+    HHVM_RC_STR(MCRYPT_MODE_ECB, "ecb");
+    HHVM_RC_STR(MCRYPT_MODE_NOFB, "nofb");
+    HHVM_RC_STR(MCRYPT_MODE_OFB, "ofb");
+    HHVM_RC_STR(MCRYPT_MODE_STREAM, "stream");
+    HHVM_RC_STR(MCRYPT_PANAMA, "panama");
+    HHVM_RC_INT(MCRYPT_RAND, RAND);
+    HHVM_RC_STR(MCRYPT_RC2, "rc2");
+    HHVM_RC_STR(MCRYPT_RC6, "rc6");
+    HHVM_RC_STR(MCRYPT_RIJNDAEL_128, "rijndael-128");
+    HHVM_RC_STR(MCRYPT_RIJNDAEL_192, "rijndael-192");
+    HHVM_RC_STR(MCRYPT_RIJNDAEL_256, "rijndael-256");
+    HHVM_RC_STR(MCRYPT_SAFER128, "safer-sk128");
+    HHVM_RC_STR(MCRYPT_SAFER64, "safer-sk64");
+    HHVM_RC_STR(MCRYPT_SAFERPLUS, "saferplus");
+    HHVM_RC_STR(MCRYPT_SERPENT, "serpent");
+    HHVM_RC_STR(MCRYPT_SKIPJACK, "skipjack");
+    HHVM_RC_STR(MCRYPT_THREEWAY, "threeway");
+    HHVM_RC_STR(MCRYPT_TRIPLEDES, "tripledes");
+    HHVM_RC_STR(MCRYPT_TWOFISH, "twofish");
+    HHVM_RC_STR(MCRYPT_WAKE, "wake");
+    HHVM_RC_STR(MCRYPT_XTEA, "xtea");
 
     HHVM_FE(mcrypt_module_open);
     HHVM_FE(mcrypt_module_close);

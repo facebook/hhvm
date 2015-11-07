@@ -23,6 +23,8 @@
 
 namespace HPHP {
 
+Array HHVM_FUNCTION(apache_request_headers);
+
 class ApacheExtension final : public Extension {
  public:
   ApacheExtension();

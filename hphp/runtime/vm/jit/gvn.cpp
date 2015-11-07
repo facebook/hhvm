@@ -316,8 +316,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case IsWaitHandle:
   case IsCol:
   case ClsNeq:
-  case LdStkAddr:
-  case LdLocAddr:
   case LdRDSAddr:
   case LdCtx:
   case LdCctx:

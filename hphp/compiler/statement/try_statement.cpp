@@ -121,28 +121,6 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void TryStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 2;
-  if (m_catches->getCount() > 0) numProps++;
-  if (m_finallyStmt != nullptr) numProps++;
-  cg.printObjectHeader("TryStatement", numProps);
-  cg.printPropertyHeader("block");
-  cg.printAsEnclosedBlock(m_tryStmt);
-  if (m_catches->getCount() > 0)  {
-    cg.printPropertyHeader("catchStatements");
-    cg.printStatementVector(m_catches);
-  }
-  if (m_finallyStmt != nullptr) {
-    cg.printPropertyHeader("finallyStatement");
-    m_finallyStmt->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void TryStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

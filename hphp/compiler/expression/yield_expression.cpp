@@ -84,21 +84,6 @@ void YieldExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void YieldExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("YieldExpression", m_keyExp != nullptr ? 3 : 2);
-  if (m_keyExp != nullptr) {
-    cg.printPropertyHeader("key");
-    m_keyExp->outputCodeModel(cg);
-  }
-  cg.printPropertyHeader("value");
-  m_valExp->outputCodeModel(cg);
-  cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this);
-  cg.printObjectFooter();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void YieldExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

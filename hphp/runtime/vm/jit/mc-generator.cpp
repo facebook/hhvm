@@ -667,9 +667,8 @@ TCA MCGenerator::getFuncBody(Func* func) {
   return tca;
 }
 
-void
-MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
-                                 const Func* func) {
+void MCGenerator::smashPrologueGuards(AtomicLowPtr<uint8_t>* prologues,
+                                      int numPrologues, const Func* func) {
   for (int i = 0; i < numPrologues; i++) {
     auto const guard = funcGuardFromPrologue(prologues[i], func);
     if (funcGuardMatches(guard, func)) {

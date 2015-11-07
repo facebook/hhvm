@@ -494,6 +494,24 @@ void StandardExtension::initNetwork() {
   HHVM_FE(fsockopen);
   HHVM_FE(pfsockopen);
 
+#define PHP_DNS_RC_INT(cns) Native::registerConstant<KindOfInt64> \
+  (makeStaticString("DNS_" #cns), PHP_DNS_ ## cns);
+  PHP_DNS_RC_INT(A);
+  PHP_DNS_RC_INT(A6);
+  PHP_DNS_RC_INT(AAAA);
+  PHP_DNS_RC_INT(ALL);
+  PHP_DNS_RC_INT(ANY);
+  PHP_DNS_RC_INT(CNAME);
+  PHP_DNS_RC_INT(HINFO);
+  PHP_DNS_RC_INT(MX);
+  PHP_DNS_RC_INT(NAPTR);
+  PHP_DNS_RC_INT(NS);
+  PHP_DNS_RC_INT(PTR);
+  PHP_DNS_RC_INT(SOA);
+  PHP_DNS_RC_INT(SRV);
+  PHP_DNS_RC_INT(TXT);
+#undef PHP_DNS_RC_INT
+
   HHVM_RC_INT_SAME(LOG_EMERG);
   HHVM_RC_INT_SAME(LOG_ALERT);
   HHVM_RC_INT_SAME(LOG_CRIT);

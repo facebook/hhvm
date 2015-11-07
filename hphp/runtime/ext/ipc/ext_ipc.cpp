@@ -59,6 +59,12 @@ static class SysvmsgExtension final : public Extension {
 public:
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
+    HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
+    HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
+    HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
+    HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
+    HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
+
     HHVM_FE(ftok);
     HHVM_FE(msg_get_queue);
     HHVM_FE(msg_queue_exists);

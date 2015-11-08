@@ -287,7 +287,7 @@ static String intl_convert_str_utf8_to_utf16(const String& utf8_str,
                              utf8_str.data(), utf8_str.length(),
                              status);
   if (U_FAILURE(*status)) {
-    return (const char *)(L"");
+    return empty_string();
   }
   return String((char*)ustr, UBYTES(ustr_len), AttachString);
 }

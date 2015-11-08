@@ -209,7 +209,7 @@ void SourceRootInfo::handleError(Transport *t) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array SourceRootInfo::setServerVariables(Array server) const {
-  if (!sandboxOn()) return std::move(server);
+  if (!sandboxOn()) return server;
   for (auto it = RuntimeOption::SandboxServerVariables.begin();
        it != RuntimeOption::SandboxServerVariables.end();
        ++it) {
@@ -221,7 +221,7 @@ Array SourceRootInfo::setServerVariables(Array server) const {
     server += m_serverVars;
   }
 
-  return std::move(server);
+  return server;
 }
 
 Eval::DSandboxInfo SourceRootInfo::getSandboxInfo() const {

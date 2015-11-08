@@ -3083,7 +3083,7 @@ Variant HHVM_METHOD(DOMText, splitText,
   Object ret{getDOMTextClass()};
   auto text_data = Native::data<DOMNode>(ret);
   text_data->setNode(nnode);
-  text_data->setDoc(std::move(data->doc()));
+  text_data->setDoc(data->doc());
   return ret;
 }
 

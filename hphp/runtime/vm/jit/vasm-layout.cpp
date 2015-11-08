@@ -390,7 +390,7 @@ void Clusterizer::sortClusters() {
   }
 
   DFSSortClusters dfsSort(std::move(clusterGraph), m_unit);
-  m_clusterOrder = std::move(dfsSort.sort(m_blockCluster[m_unit.entry]));
+  m_clusterOrder = dfsSort.sort(m_blockCluster[m_unit.entry]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

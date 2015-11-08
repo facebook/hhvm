@@ -59,7 +59,7 @@ class ResponseMessage {
       m_eom(eom) {
     if (size > 0 && (m_type == Type::BODY || m_type == Type::HEADERS)) {
         // sad panda copy.  TODO (t4362832): change sendImpl to take IOBuf
-        m_chunk = std::move(folly::IOBuf::copyBuffer(data, size));
+        m_chunk = folly::IOBuf::copyBuffer(data, size);
       }
     };
 

@@ -638,7 +638,7 @@ void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
       HPHP::Trace::traceRelease("%s\n", str.str().c_str());
     }
     if (RuntimeOption::EvalDumpIR >= level) {
-      mcg->annotations().emplace_back(caption, std::move(str.str()));
+      mcg->annotations().emplace_back(caption, str.str());
     }
   }
 }

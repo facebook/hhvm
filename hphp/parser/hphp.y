@@ -890,27 +890,22 @@ namespace_name:
   | namespace_name T_NS_SEPARATOR
     ident_no_semireserved                              { $$ = $1 + $2 + $3; $$ = $1.num() | 2;}
 ;
-namespace_string_base:
+namespace_string:
     namespace_name                     { $$ = $1; $$ = $$.num() | 1;}
   | T_NAMESPACE T_NS_SEPARATOR
     namespace_name                     { $$.set($3.num() | 2, _p->nsDecl($3.text()));}
   | T_NS_SEPARATOR namespace_name      { $$ = $2; $$ = $$.num() | 2;}
 ;
-namespace_string:
-    namespace_string_base              { if ($1.num() & 1) {
-                                           $1.setText(_p->resolve($1.text(),0));
-                                         }
-                                         $$ = $1;}
-;
+
 namespace_string_typeargs:
-    namespace_string_base
+    namespace_string
     hh_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),0));
                                          }
                                          $$ = $1;}
 ;
 class_namespace_string_typeargs:
-    namespace_string_base
+    namespace_string
     hh_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),1));
                                          }

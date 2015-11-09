@@ -706,6 +706,8 @@ void Parser::onConstantValue(Token &out, Token &constant) {
   const auto& alias = m_cnstAliasTable.find(constant.text());
   if (alias != m_cnstAliasTable.end()) {
     constant.setText(alias->second);
+  } else if (constant.num() & 1) {
+    constant.setText(resolve(constant.text(), 0));
   }
 
   ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text(),

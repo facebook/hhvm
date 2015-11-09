@@ -14,42 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_EMIT_H_
-#define incl_HPHP_JIT_VASM_EMIT_H_
+#ifndef incl_HPHP_JIT_FUNC_GUARD_PPC64_H
+#define incl_HPHP_JIT_FUNC_GUARD_PPC64_H
 
-namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
+#include "hphp/runtime/vm/jit/types.h"
 
-struct Abi;
-struct AsmInfo;
-struct Vtext;
-struct Vunit;
+#include "hphp/util/data-block.h"
 
-///////////////////////////////////////////////////////////////////////////////
+namespace HPHP {
 
-/*
- * Optimize, lower for x64, register allocator, and perform more optimizations
- * on `unit'.
- */
-void optimizeX64(Vunit& unit, const Abi&);
+struct Func;
 
-/*
- * Emit code for the given unit using the given code areas. The unit should
- * have already been through optimizeX64().
- */
-void emitX64(const Vunit&, Vtext&, AsmInfo*);
-
-/*
- * Optimize, register allocate, and emit ARM code for the given unit.
- */
-void finishARM(Vunit&, Vtext&, const Abi&, AsmInfo*);
-
-/*
- * Optimize, register allocate, and emit PPC64 code for the given unit.
- */
-void finishPPC64(Vunit&, Vtext&, const Abi&, AsmInfo*);
+namespace jit { namespace ppc64 {
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+
+/*
+ * Mirrors the API of func-guard.h.
+ */
+
+void emitFuncGuard(const Func* func, CodeBlock& cb);
+TCA funcGuardFromPrologue(TCA prologue, const Func* func);
+bool funcGuardMatches(TCA guard, const Func* func);
+void clobberFuncGuard(TCA guard, const Func* func);
+
+///////////////////////////////////////////////////////////////////////////////
+
+}}}
 
 #endif

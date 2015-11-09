@@ -1356,7 +1356,7 @@ void emitNativeImpl(IRGS& env) {
             callee->numParams(),
             fail,
             [&] (uint32_t i, const Type) {
-              return gen(env, LdLocAddr, TPtrToFrameGen, LocalId(i), fp(env));
+              return gen(env, LdLocAddr, LocalId(i), fp(env));
             }
           );
           auto const catcher = CatchMaker {

@@ -700,7 +700,7 @@ inline SSATmp* pushStLoc(IRGS& env,
 
 inline SSATmp* ldLocAddr(IRGS& env, uint32_t locId) {
   env.irb->constrainLocal(locId, DataTypeSpecific, "LdLocAddr");
-  return gen(env, LdLocAddr, TPtrToFrameGen, LocalId(locId), fp(env));
+  return gen(env, LdLocAddr, LocalId(locId), fp(env));
 }
 
 inline SSATmp* ldStkAddr(IRGS& env, BCSPOffset relOffset) {
@@ -709,7 +709,6 @@ inline SSATmp* ldStkAddr(IRGS& env, BCSPOffset relOffset) {
   return gen(
     env,
     LdStkAddr,
-    TPtrToStkGen,
     IRSPOffsetData { offset },
     sp(env)
   );

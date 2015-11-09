@@ -137,6 +137,18 @@ bool splitCriticalEdges(Vunit& unit) {
   return changed;
 }
 
+Vreg make_const(Vunit& unit, Type type) {
+  if (type.subtypeOfAny(TUninit, TInitNull)) {
+    // Return undefined value.
+    return unit.makeConst(Vconst::Quad);
+  }
+  if (type <= TNullptr) return unit.makeConst(0);
+
+  assertx(type.hasConstVal());
+  if (type <= TBool) return unit.makeConst(type.boolVal());
+  if (type <= TDbl) return unit.makeConst(type.dblVal());
+  return unit.makeConst(type.rawVal());
+}
 
 //////////////////////////////////////////////////////////////////////
 

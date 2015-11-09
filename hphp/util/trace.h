@@ -129,8 +129,9 @@ namespace Trace {
       TM(hhir_refineTmps) \
       TM(hhir_gvn)      \
       TM(hhir_refcount) \
-      TM(layout)        \
       TM(hhir_licm)     \
+      TM(hhir_phi)      \
+      TM(layout)        \
       TM(llvm)          \
       TM(llvm_count)    \
       TM(inlining)      \

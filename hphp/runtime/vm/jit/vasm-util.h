@@ -16,6 +16,9 @@
 #ifndef incl_HPHP_VASM_UTIL_H_
 #define incl_HPHP_VASM_UTIL_H_
 
+#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+
 #include <algorithm>
 
 namespace HPHP { namespace jit {
@@ -35,6 +38,11 @@ bool is_trivial_nop(const Vinstr&);
  * Splits any critical edges in `unit'.  Returns true iff the unit was modified.
  */
 bool splitCriticalEdges(Vunit& unit);
+
+/*
+ * Return a Vreg holding the constant value represented by the given Type.
+ */
+Vreg make_const(Vunit&, Type);
 
 /*
  * Move all the elements of `in' into `out', replacing `count' elements of

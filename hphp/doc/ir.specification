@@ -837,12 +837,12 @@ To string conversions:
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdStkAddr<T,offset>, DParamPtr(Stk), S(StkPtr), NF
+| LdStkAddr<T,offset>, D(PtrToStkGen), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells). T must be a subtype of PtrToStkGen.
 
-| LdLocAddr<T,localId>, DParamPtr(Frame), S(FramePtr), NF
+| LdLocAddr<T,localId>, D(PtrToFrameGen), S(FramePtr), NF
 
   Loads the address of the local slot localId from the frame S0 into D. T must
   be a subtype of PtrToFrameGen.

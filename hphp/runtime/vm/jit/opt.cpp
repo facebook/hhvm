@@ -93,6 +93,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     doPass(unit, optimizeStores, DCE::Full);
   }
 
+  doPass(unit, optimizePhis, DCE::Full);
+
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
     doPass(unit, optimizeRefcounts2, DCE::Full);
   }

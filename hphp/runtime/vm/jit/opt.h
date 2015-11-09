@@ -40,6 +40,7 @@ void optimizeLoads(IRUnit&);
 void optimizeStores(IRUnit&);
 void optimizeLoopInvariantCode(IRUnit&);
 void cleanCfg(IRUnit&);
+void optimizePhis(IRUnit&);
 
 /*
  * For debugging, we can run this pass, which inserts various sanity checking

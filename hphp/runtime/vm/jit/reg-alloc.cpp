@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-util.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -187,17 +188,7 @@ void assignRegs(IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
       continue;
     }
     if (tmp->inst()->is(DefConst)) {
-      auto const type = tmp->type();
-      Vreg c;
-      if (type.subtypeOfAny(TNull, TNullptr)) {
-        c = vunit.makeConst(0);
-      } else if (type <= TBool) {
-        c = vunit.makeConst(tmp->boolVal());
-      } else if (type <= TDbl) {
-        c = vunit.makeConst(tmp->dblVal());
-      } else {
-        c = vunit.makeConst(tmp->rawVal());
-      }
+      auto const c = make_const(vunit, tmp->type());
       state.locs[tmp] = Vloc{c};
       FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
     } else {

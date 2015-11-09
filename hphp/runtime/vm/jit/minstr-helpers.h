@@ -73,29 +73,39 @@ inline TypedValue* baseGWD(TypedValue key) {
 
 //////////////////////////////////////////////////////////////////////
 
-template <MInstrAttr attrs, bool isObj>
+template <MInstrAttr attrs, KeyType kt, bool isObj>
 TypedValue* propImpl(Class* ctx, TypedValue* base,
-                     TypedValue key, TypedValue& tvRef) {
-  return Prop<WDU(attrs), isObj>(tvRef, ctx, base, key);
+                     key_type<kt> key, TypedValue& tvRef) {
+  return Prop<WDU(attrs), isObj, kt>(tvRef, ctx, base, key);
 }
 
-#define PROP_HELPER_TABLE(m)                        \
-  /* name     attrs        isObj */                 \
-  m(propC,    None,        false)                   \
-  m(propCD,   Define,      false)                   \
-  m(propCDO,  Define,       true)                   \
-  m(propCO,   None,         true)                   \
-  m(propCU,   Unset,       false)                   \
-  m(propCUO,  Unset,        true)                   \
-  m(propCW,   Warn,        false)                   \
-  m(propCWD,  WarnDefine,  false)                   \
-  m(propCWDO, WarnDefine,   true)                   \
-  m(propCWO,  Warn,         true)
+#define PROP_HELPER_TABLE(m)                      \
+  /* name      attrs       keyType       isObj */ \
+  m(propC,     None,       KeyType::Any, false)   \
+  m(propCS,    None,       KeyType::Str, false)   \
+  m(propCD,    Define,     KeyType::Any, false)   \
+  m(propCDS,   Define,     KeyType::Str, false)   \
+  m(propCDO,   Define,     KeyType::Any, true)    \
+  m(propCDOS,  Define,     KeyType::Str, true)    \
+  m(propCO,    None,       KeyType::Any, true)    \
+  m(propCOS,   None,       KeyType::Str, true)    \
+  m(propCU,    Unset,      KeyType::Any, false)   \
+  m(propCUS,   Unset,      KeyType::Str, false)   \
+  m(propCUO,   Unset,      KeyType::Any, true)    \
+  m(propCUOS,  Unset,      KeyType::Str, true)    \
+  m(propCW,    Warn,       KeyType::Any, false)   \
+  m(propCWS,   Warn,       KeyType::Str, false)   \
+  m(propCWD,   WarnDefine, KeyType::Any, false)   \
+  m(propCWDS,  WarnDefine, KeyType::Str, false)   \
+  m(propCWDO,  WarnDefine, KeyType::Any, true)    \
+  m(propCWDOS, WarnDefine, KeyType::Str, true)    \
+  m(propCWO,   Warn,       KeyType::Any, true)    \
+  m(propCWOS,  Warn,       KeyType::Str, true)    \
 
-#define X(nm, ...)                                                      \
-inline TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,     \
-                      TypedValue& tvRef) {                              \
-  return propImpl<__VA_ARGS__>(ctx, base, key, tvRef);                  \
+#define X(nm, attrs, kt, isObj)                                       \
+inline TypedValue* nm(Class* ctx, TypedValue* base, key_type<kt> key, \
+                      TypedValue& tvRef) {                            \
+  return propImpl<attrs, kt, isObj>(ctx, base, key, tvRef);           \
 }
 PROP_HELPER_TABLE(X)
 #undef X
@@ -239,21 +249,21 @@ BINDPROP_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <bool isObj>
-void setPropImpl(Class* ctx, TypedValue* base,
-                 TypedValue key, Cell val) {
-  HPHP::SetProp<false, isObj>(ctx, base, key, &val);
+template <KeyType kt, bool isObj>
+void setPropImpl(Class* ctx, TypedValue* base, key_type<kt> key, Cell val) {
+  HPHP::SetProp<false, isObj, kt>(ctx, base, key, &val);
 }
 
-#define SETPROP_HELPER_TABLE(m)             \
-  /* name        isObj */                   \
-  m(setPropC,    false)                     \
-  m(setPropCO,    true)
+#define SETPROP_HELPER_TABLE(m)                 \
+  /* name        keyType       isObj */         \
+  m(setPropC,    KeyType::Any, false)           \
+  m(setPropCS,   KeyType::Str, false)           \
+  m(setPropCO,   KeyType::Any, true)            \
+  m(setPropCOS,  KeyType::Str, true)            \
 
-#define X(nm, ...)                                                      \
-inline void nm(Class* ctx, TypedValue* base, TypedValue key,            \
-               Cell val) {                                              \
-  setPropImpl<__VA_ARGS__>(ctx, base, key, val);                        \
+#define X(nm, kt, isObj)                                                   \
+inline void nm(Class* ctx, TypedValue* base, key_type<kt> key, Cell val) { \
+  setPropImpl<kt, isObj>(ctx, base, key, val);                             \
 }
 SETPROP_HELPER_TABLE(X)
 #undef X
@@ -295,10 +305,10 @@ TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
   m(setOpPropC,    false)                       \
   m(setOpPropCO,    true)
 
-#define X(nm, ...)                                                     \
-inline TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,     \
-              Cell val, TypedValue& tvRef, SetOpOp op) {                \
-  return setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, tvRef, op);     \
+#define X(nm, ...)                                                      \
+inline TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,      \
+                     Cell val, TypedValue& tvRef, SetOpOp op) {         \
+  return setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, tvRef, op);    \
 }
 SETOPPROP_HELPER_TABLE(X)
 #undef X
@@ -337,22 +347,26 @@ INCDECPROP_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <bool useEmpty, bool isObj>
-bool issetEmptyPropImpl(Class* ctx, TypedValue* base, TypedValue key) {
-  return HPHP::IssetEmptyProp<useEmpty, isObj>(ctx, base, key);
+template <KeyType kt, bool useEmpty, bool isObj>
+bool issetEmptyPropImpl(Class* ctx, TypedValue* base, key_type<kt> key) {
+  return HPHP::IssetEmptyProp<useEmpty, isObj, kt>(ctx, base, key);
 }
 
-#define ISSET_EMPTY_PROP_HELPER_TABLE(m)        \
-  /* name         useEmpty isObj */             \
-  m(issetPropC,   false,   false)               \
-  m(issetPropCE,   true,   false)               \
-  m(issetPropCEO,  true,    true)               \
-  m(issetPropCO,  false,    true)
+#define ISSET_EMPTY_PROP_HELPER_TABLE(m)                          \
+  /* name          keyType       useEmpty isObj */                \
+  m(issetPropC,    KeyType::Any, false,   false)                  \
+  m(issetPropCS,   KeyType::Str, false,   false)                  \
+  m(issetPropCE,   KeyType::Any, true,    false)                  \
+  m(issetPropCES,  KeyType::Str, true,    false)                  \
+  m(issetPropCEO,  KeyType::Any, true,    true)                   \
+  m(issetPropCEOS, KeyType::Str, true,    true)                   \
+  m(issetPropCO,   KeyType::Any, false,   true)                   \
+  m(issetPropCOS,  KeyType::Str, false,   true)                   \
 
-#define X(nm, ...)                                                      \
-/* This returns int64_t to ensure all 64 bits of rax are valid */       \
-inline uint64_t nm(Class* ctx, TypedValue* base, TypedValue key) {      \
-  return issetEmptyPropImpl<__VA_ARGS__>(ctx, base, key);               \
+#define X(nm, kt, useEmpty, isObj)                                      \
+/* This returns uint64_t to ensure all 64 bits of rax are valid. */     \
+inline uint64_t nm(Class* ctx, TypedValue* base, key_type<kt> key) {    \
+  return issetEmptyPropImpl<kt, useEmpty, isObj>(ctx, base, key);       \
 }
 ISSET_EMPTY_PROP_HELPER_TABLE(X)
 #undef X

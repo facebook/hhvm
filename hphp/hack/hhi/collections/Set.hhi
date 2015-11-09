@@ -16,32 +16,32 @@
  */
 
 /**
- * Set is an ordered set-style collection. HHVM provides a native
+ * `Set` is an ordered set-style collection. HHVM provides a native
  * implementation for this class. The PHP class definition below is not
  * actually used at run time; it is simply provided for the typechecker and
  * for developer reference.
  *
- * Like all objects in PHP, Sets have reference-like semantics. When a caller
- * passes a Set to a callee, the callee can modify the Set and the caller will
- * see the changes. Sets do not have "copy-on-write" semantics.
+ * Like all objects in PHP, `Set`s have reference-like semantics. When a caller
+ * passes a `Set` to a callee, the callee can modify the `Set` and the caller
+ * will see the changes. `Set`s do not have "copy-on-write" semantics.
  *
- * Sets preserve insertion order of the elements. When iterating over a Set,
- * the elements appear in the order they were inserted. Also, Sets do not
- * automagically convert integer-like strings (ex. "123") into integers.
+ * `Set`s preserve insertion order of the elements. When iterating over a
+ * `Set`, the elements appear in the order they were inserted. Also, `Set`s do
+ * not automagically convert integer-like strings (ex. "123") into integers.
  *
- * Sets only support integer values and string values. If a value of a
+ * `Set`s only support `int` values and `string` values. If a value of a
  * different type is used, an exception will be thrown.
  *
- * In general, Sets do not support "$c[$k]" style syntax. Adding an element
- * using "$c[] = .." syntax is supported.
+ * In general, Sets do not support `$c[$k]` style syntax. Adding an element
+ * using `$c[] = ..` syntax is supported.
  *
- * Set do not support iteration while elements are being added or removed.
- * When an element is added or removed, all iterators that point to the Set
+ * `Set` do not support iteration while elements are being added or removed.
+ * When an element is added or removed, all iterators that point to the `Set`
  * shall be considered invalid.
  *
- * Sets do not support taking elements by reference. If binding assignment (=&)
- * is used when adding a new element to a Set (ex. "$c[] =& ..."), or if a Set
- * is used with foreach by reference, an exception will be thrown.
+ * `Set`s do not support taking elements by reference. If binding assignment
+ * (`=&`) is used when adding a new element to a `Set` (ex. `$c[] =& ...`), or
+ * if a `Set` is used with `foreach` by reference, an exception will be thrown.
  *
  * @guide /hack/collections/intro
  * @guide /hack/collections/classes
@@ -49,156 +49,157 @@
 
 final class Set<Tv> implements MutableSet<Tv> {
   /**
-   * Creates a Set from the given Traversable, or an empty Set
-   * if "null" is passed.
+   * Creates a `Set` from the given `Traversable`, or an empty `Set` if `null`
+   * is passed.
    *
-   * @param $it - any traversable object from which to create
-   *              the Set (e.g., array). If null, then an empty
-   *              Set is created.
+   * @param $it - any `Traversable` object from which to create the `Set`
+   *              (e.g., `array`). If `null`, then an empty `Set` is created.
    */
   public function __construct(?Traversable<Tv> $it);
 
   /**
-   * Returns an array containing the values from the current Set.
+   * Returns an `array` containing the values from the current `Set`.
    *
-   * For the returned array, each key is the same as its associated value.
+   * For the returned `array`, each key is the same as its associated value.
    *
-   * @return - an array containing the values from the current Set, where each
-   *           key of the array are the same as each value.
+   * @return - an `array` containing the values from the current `Set`, where
+   *           each key of the `array` are the same as each value.
    */
   public function toArray(): array;
 
   /**
-   * Returns an array containing the values from the current Set.
+   * Returns an `array` containing the values from the current `Set`.
    *
-   * Sets don't have keys. So this method just returns the values.
+   * `Set`s don't have keys. So this method just returns the values.
    *
-   * This method is interchangeable with toValuesArray().
+   * This method is interchangeable with `toValuesArray()`.
    *
-   * @return - an integer-indexed array containing the values from the current
-   *           Set.
+   * @return - an integer-indexed `array` containing the values from the
+   *           current `Set`.
    */
   public function toKeysArray(): array<Tv>;
 
   /**
-   * Returns an array containing the values from the current Set.
+   * Returns an `array` containing the values from the current `Set`.
    *
-   * This method is interchangeable with toKeysArray().
+   * This method is interchangeable with `toKeysArray()`.
    *
-   * @return - an integer-indexed array containing the values from the current
-   *           Set.
+   * @return - an integer-indexed `array` containing the values from the
+   *           current `Set`.
    */
   public function toValuesArray(): array<Tv>;
 
   /**
-   * Returns a Vector of the current Set values.
+   * Returns a `Vector` of the current `Set` values.
    *
-   * @return - a Vector (integer-indexed) that contains the values of the
-   *           current Set.
+   * @return - a `Vector` (integer-indexed) that contains the values of the
+   *           current `Set`.
    */
   public function toVector(): Vector<Tv>;
 
   /**
-   * Returns an immutable Vector (ImmVector) with the values of the current Set.
+   * Returns an immutable vector (`ImmVector`) with the values of the current
+   * `Set`.
    *
-   * @return - an ImmVector (integer-indexed) with the values of the current
-   *           Set.
+   * @return - an `ImmVector` (integer-indexed) with the values of the current
+   *           `Set`.
    */
   public function toImmVector(): ImmVector<Tv>;
 
   /**
-   * Returns a Map based on the values of the current Set.
+   * Returns a `Map` based on the values of the current `Set`.
    *
-   * Each key of the Map will be the same as its value.
+   * Each key of the `Map` will be the same as its value.
    *
-   * @return - a Map that that contains the values of the current Set, with
-   *           each key of the Map being the same as its value.
+   * @return - a `Map` that that contains the values of the current `Set`, with
+   *           each key of the `Map` being the same as its value.
    */
   public function toMap(): Map<mixed, Tv>;
 
   /**
-   * Returns an immutable Map (ImmMap) based on the values of the current Set.
+   * Returns an immutable map (`ImmMap`) based on the values of the current
+   * `Set`.
    *
-   * Each key of the Map will be the same as its value.
+   * Each key of the `Map` will be the same as its value.
    *
-   * @return - an ImmMap that that contains the values of the current Set, with
-   *           each key of the Map being the same as its value.
+   * @return - an `ImmMap` that that contains the values of the current `Set`,
+   *           with each key of the Map being the same as its value.
    */
   public function toImmMap(): ImmMap<mixed, Tv>;
 
   /**
-   * Returns a deep copy of the current Set.
+   * Returns a deep copy of the current `Set`.
    *
-   * @return - a Set that is a deep copy of the current Set.
+   * @return - a `Set` that is a deep copy of the current `Set`.
    */
   public function toSet(): Set<Tv>;
 
   /**
-   * Returns an immutable, deep copy (ImmSet) of the current Set.
+   * Returns an immutable (`ImmSet`), deep copy of the current `Set`.
    *
-   * This method is interchangeable with immutable().
+   * This method is interchangeable with `immutable()`.
    *
-   * @return - an ImmSet that is a deep copy of the current Set.
+   * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
   public function toImmSet(): ImmSet<Tv>;
 
   /**
-   * Returns an immutable, deep copy (ImmSet) of the current Set.
+   * Returns an immutable (`ImmSet`), deep copy of the current `Set`.
    *
-   * This method is interchangeable with toImmSet().
+   * This method is interchangeable with `toImmSet()`.
    *
-   * @return - an ImmSet that is a deep copy of the current Set.
+   * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
   public function immutable(): ImmSet<Tv>;
 
   /**
    * Returns a lazy, access elements only when needed view of the current
-   * Set.
+   * `Set`.
    *
-   * Normally, memory is allocated for all of the elements of the Set. With
+   * Normally, memory is allocated for all of the elements of the `Set`. With
    * a lazy view, memory is allocated for an element only when needed or used
-   * in a calculation like in map() or filter().
+   * in a calculation like in `map()` or `filter()`.
    *
-   * @return - an KeyedIterable representing the lazy view into the current
-   *           Set, where the keys are the same as the values.
+   * @return - an `KeyedIterable` representing the lazy view into the current
+   *           `Set`, where the keys are the same as the values.
    *
    * @guide /hack/collections/examples
    */
   public function lazy(): KeyedIterable<mixed, Tv>;
 
   /**
-   * Returns a Vector containing the values of the current Set.
+   * Returns a `Vector` containing the values of the current `Set`.
    *
-   * This method is interchangeable with toVector() and keys().
+   * This method is interchangeable with `toVector()` and `keys()`.
    *
-   * @return - a Vector (integer-indexed) containing the values of the current
-   *           Set.
+   * @return - a `Vector` (integer-indexed) containing the values of the
+   *           current `Set`.
    */
   public function values(): Vector<Tv>;
 
   /**
-   * Returns a Vector containing the values of the current Set.
+   * Returns a `Vector` containing the values of the current `Set`.
    *
-   * Sets don't have keys, so this will return the values.
+   * `Set`s don't have keys, so this will return the values.
    *
-   * This method is interchangeable with toVector() and values().
+   * This method is interchangeable with `toVector()` and `values()`.
    *
-   * @return - a Vector (integer-indexed) containing the values of the current
-   *           Set.
+   * @return - a `Vector` (integer-indexed) containing the values of the
+   *           current `Set`.
    */
   public function keys(): Vector<mixed>;
 
   /**
-   * Returns a Set containing the values after an operation has been applied
-   * to each value in the current Set.
+   * Returns a `Set` containing the values after an operation has been applied
+   * to each value in the current `Set`.
    *
-   * Every value in the current Set is affected by a call to map(), unlike
-   * filter() where only values that meet a certain criteria are affected.
+   * Every value in the current `Set` is affected by a call to `map()`, unlike
+   * `filter()` where only values that meet a certain criteria are affected.
    *
-   * @param $callback - The $callback containing the operation to apply to the
-   *                    current Set values.
+   * @param $callback - The callback containing the operation to apply to the
+   *                    current `Set` values.
    *
-   * @return - a Set containing the values after a user-specified operation
+   * @return - a `Set` containing the values after a user-specified operation
    *           is applied.
    *
    * @guide /hack/collections/examples
@@ -206,35 +207,35 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function map<Tu>((function(Tv): Tu) $callback): Set<Tu>;
 
   /**
-   * Returns a Set containing the values after an operation has been applied
-   * to each "key" and value in the current Set.
+   * Returns a `Set` containing the values after an operation has been applied
+   * to each "key" and value in the current `Set`.
    *
-   * Since Sets don't have keys, the callback uses the values as the keys
+   * Since `Set`s don't have keys, the callback uses the values as the keys
    * as well.
    *
-   * Every value in the current Set is affected by a call to mapWithKey(),
-   * unlike filterWithKey() where only values that meet a certain criteria are
+   * Every value in the current `Set` is affected by a call to `mapWithKey()`,
+   * unlike `filterWithKey()` where only values that meet a certain criteria are
    * affected.
    *
-   * @param $callback - The $callback containing the operation to apply to the
-   *                    current Set keys and values.
+   * @param $callback - The callback containing the operation to apply to the
+   *                    current `Set` keys and values.
    *
-   * @return - a Set containing the values after a user-specified operation
-   *           on the current Set's values is applied.
+   * @return - a `Set` containing the values after a user-specified operation
+   *           on the current `Set`'s values is applied.
    */
   public function mapWithKey<Tu>((function(mixed, Tv): Tu) $callback): Set<Tu>;
 
   /**
-   * Returns a Set containing the values of the current Set that meet
+   * Returns a `Set` containing the values of the current `Set` that meet
    * a supplied condition applied to each value.
    *
    * Only values that meet a certain criteria are affected by a call to
-   * filter(), while all values are affected by a call to map().
+   * `filter()`, while all values are affected by a call to `map()`.
    *
-   * @param $callback - The $callback containing the condition to apply to the
-   *                    current Set values.
+   * @param $callback - The callback containing the condition to apply to the
+   *                    current `Set` values.
    *
-   * @return - a Set containing the values after a user-specified condition
+   * @return - a `Set` containing the values after a user-specified condition
    *           is applied.
    *
    * @guide /hack/collections/examples
@@ -242,284 +243,291 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function filter((function(Tv): bool) $callback): Set<Tv>;
 
   /**
-   * Returns a Set containing the values of the current Set that meet
+   * Returns a `Set` containing the values of the current `Set` that meet
    * a supplied condition applied to its "keys" and values.
    *
-   * Since Sets don't have keys, the callback uses the values as the keys
+   * Since `Set`s don't have keys, the callback uses the values as the keys
    * as well.
    *
    * Only values that meet a certain criteria are affected by a call to
-   * filterWithKey(), while all values are affected by a call to mapWithKey().
+   * `filterWithKey()`, while all values are affected by a call to
+   * `mapWithKey()`.
    *
-   * @param $callback - The $callback containing the condition to apply to the
-   *                    current Set keys and values.
+   * @param $callback - The callback containing the condition to apply to the
+   *                    current `Set` keys and values.
    *
-   * @return - a Set containing the values after a user-specified condition
-   *           is applied to the values of the current Set.
+   * @return - a `Set` containing the values after a user-specified condition
+   *           is applied to the values of the current `Set`.
    *
    */
   public function filterWithKey((function(mixed, Tv): bool) $callback): Set<Tv>;
 
   /**
-   * Alters the current Set so that it only contains the values that meet a
+   * Alters the current `Set` so that it only contains the values that meet a
    * supplied condition on each value.
    *
-   * This method is like filter(), but mutates the current Set too in addition
-   * to returning a shallow copy of the current Set.
+   * This method is like `filter()`, but mutates the current `Set` too in
+   * addition to returning a shallow copy of the current `Set`.
    *
-   * Future changes made to the current Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the current `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
-   * @param $callback - The $callback containing the condition to apply to the
-   *                    current Set values.
+   * @param $callback - The callback containing the condition to apply to the
+   *                    current `Set` values.
    *
-   * @return - a shallow copy of the current Set containing the values after a
-   *           user-specified condition is applied.
+   * @return - a shallow copy of the current `Set` containing the values after
+   *           a user-specified condition is applied.
    */
   public function retain((function(Tv): bool) $callback): Set<Tv>;
 
   /**
-   * Alters the current Set so that it only contains the values that meet a
+   * Alters the current `Set` so that it only contains the values that meet a
    * supplied condition on its "keys" and values.
    *
-   * Sets don't have keys, so the Set values are used as the key in the
+   * `Set`s don't have keys, so the `Set` values are used as the key in the
    * callback.
    *
-   * This method is like filterWithKey(), but mutates the current Set too in
-   * addition to returning a shallow copy of the current Set.
+   * This method is like `filterWithKey()`, but mutates the current `Set` too
+   * in addition to returning a shallow copy of the current `Set`.
    *
-   * Future changes made to the current Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the current `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
-   * @param $callback - The $callback containing the condition to apply to the
-   *                    current Set values.
+   * @param $callback - The callback containing the condition to apply to the
+   *                    current `Set` values.
    *
-   * @return - a shallow copy of the current Set containing the values after a
-   *           user-specified condition is applied.
+   * @return - a shallow copy of the current `Set` containing the values after
+   *           a user-specified condition is applied.
    */
   public function retainWithKey((function(mixed, Tv): bool) $callback): Set<Tv>;
 
   /**
-   *  Throws an exception unless the current Set or the Traversable is empty.
+   *  Throws an exception unless the current `Set` or the `Traversable` is
+   *  empty.
    *
-   *  Since Sets only support integers or strings as values, we cannot have
-   *  a Pair as a Set value. So in order to avoid an InvalidArgumentException,
-   *  either the current Set or the Traversable must be empty so that we
-   *  actually return an empty Set.
+   *  Since `Set`s only support integers or strings as values, we cannot have
+   *  a `Pair` as a `Set` value. So in order to avoid an
+   *  `InvalidArgumentException`, either the current `Set` or the `Traversable`
+   *  must be empty so that we actually return an empty `Set`.
    *
-   *  @param $traversable - The traversable to use to combine with the elements
-   *                        of the current Set.
+   *  @param $traversable - The `Traversable` to use to combine with the
+   *                        elements of the current `Set`.
    *
-   *  @return - The Set that combines the values of the current Set with the
-   *            provided Traversable; one of these must be empty or an exception
-   *            is thrown.
+   *  @return - The `Set` that combines the values of the current `Set` with
+   *            the provided `Traversable`; one of these must be empty or an
+   *            exception is thrown.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
 
   /**
-   * Returns a Set containing the first n values of the current Set.
+   * Returns a `Set` containing the first `n` values of the current `Set`.
    *
-   * The returned Set will always be a proper subset of the current Set.
+   * The returned `Set` will always be a proper subset of the current `Set`.
    *
-   * n is 1-based. So the first element is 1, the second 2, etc.
+   * `n` is 1-based. So the first element is 1, the second 2, etc.
    *
-   * @param $n - The last element that will be included in the Set.
+   * @param $n - The last element that will be included in the `Set`.
    *
-   * @return - A Set that is a proper subset of the current Set up to n
+   * @return - A `Set` that is a proper subset of the current `Set` up to `n`
    *           elements.
    */
   public function take(int $n): Set<Tv>;
 
   /**
-   * Returns a Set containing the values of the current Set up to but not
-   * including the first value that produces false when passed to the specified
-   * callback.
+   * Returns a `Set` containing the values of the current `Set` up to but not
+   * including the first value that produces `false` when passed to the
+   * specified callback.
    *
-   * The returned Set will always be a proper subset of the current Set.
+   * The returned `Set` will always be a proper subset of the current `Set`.
    *
    * @param $fn - The callback that is used to determine the stopping condition.
    *
-   * @return - A Set that is a proper subset of the current Set up until the
-   *           callback returns false.
+   * @return - A `Set` that is a proper subset of the current `Set` up until
+   *           the callback returns `false`.
    */
   public function takeWhile((function(Tv): bool) $fn): Set<Tv>;
 
   /**
-   * Returns a Set containing the values after the n-th element of the current
-   * Set.
+   * Returns a `Set` containing the values after the `n`-th element of the
+   * current `Set`.
    *
-   * The returned Set will always be a proper subset of the current Set.
+   * The returned `Set` will always be a proper subset of the current `Set`.
    *
-   * n is 1-based. So the first element is 1, the second 2, etc.
+   * `n` is 1-based. So the first element is 1, the second 2, etc.
    *
-   * @param $n - The last element to be skipped; the $n+1 element will be the
-   *             first one in the returned Set.
+   * @param $n - The last element to be skipped; the `$n+1` element will be
+   *             the first one in the returned `Set`.
    *
-   * @return - A Set that is a proper subset of the current Set containing
-   *           values after the specified n-th element.
+   * @return - A `Set` that is a proper subset of the current `Set` containing
+   *           values after the specified `n`-th element.
    */
   public function skip(int $n): Set<Tv>;
 
   /**
-   * Returns a Set containing the values of the current Set starting after and
-   * including the first value that produces true when passed to the specified
-   * callback.
+   * Returns a `Set` containing the values of the current `Set` starting after
+   * and including the first value that produces `true` when passed to the
+   * specified callback.
    *
-   * The returned Set will always be a proper subset of the current Set.
+   * The returned `Set` will always be a proper subset of the current `Set`.
    *
    * @param $fn - The callback used to determine the starting element for the
-   *              Set.
+   *              `Set`.
    *
-   * @return - A Set that is a proper subset of the current Set starting after
-   *           the callback returns true.
+   * @return - A `Set` that is a proper subset of the current `Set` starting
+   *           after the callback returns `true`.
    */
   public function skipWhile((function(Tv): bool) $fn): Set<Tv>;
 
   /**
-   * Returns a subset of the current Set starting from a given key up to, but
+   * Returns a subset of the current `Set` starting from a given key up to, but
    * not including, the element at the provided length from the starting key.
    *
-   * $start is 0-based. $len is 1-based. So slice(0, 2) would return the
+   * `$start` is 0-based. `$len` is 1-based. So `slice(0, 2)` would return the
    * elements at key 0 and 1.
    *
-   * The returned Set will always be a proper subset of the current Set.
+   * The returned `Set` will always be a proper subset of the current `Set`.
    *
-   * @param $start - The starting value in the current Set for the returned Set.
-   * @param $len - The length of the returned Set.
+   * @param $start - The starting value in the current `Set` for the returned
+   *                 `Set`.
+   * @param $len - The length of the returned `Set`.
    *
-   * @return - A Set that is a proper subset of the current Set starting at
-   *           $start up to but not including the element $start + $len.
+   * @return - A `Set` that is a proper subset of the current `Set` starting at
+   *           `$start` up to but not including the element `$start + $len`.
    */
   public function slice(int $start, int $len): Set<Tv>;
 
   /**
-   * Returns a Vector that is the concatenation of the values of the current
-   * Set and the values of the provided Traversable.
+   * Returns a `Vector` that is the concatenation of the values of the current
+   * `Set` and the values of the provided `Traversable`.
    *
-   * The values of the provided Traversable is concatenated to the end of the
-   * current Set to produce the returned Vector.
+   * The values of the provided `Traversable` is concatenated to the end of the
+   * current `Set` to produce the returned `Vector`.
    *
-   * @param $traversable - The Traversable to concatenate to the current Set.
+   * @param $traversable - The `Traversable` to concatenate to the current
+   *                       `Set`.
    *
-   * @return - The concatenated Vector.
+   * @return - The concatenated `Vector`.
    *
    * @guide /hack/generics/constraints
    */
   public function concat<Tu super Tv>(Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
-   * Returns the first value in the current Set.
+   * Returns the first value in the current `Set`.
    *
-   * @return - The first value in the current Set, or null if the Set is empty.
+   * @return - The first value in the current `Set`, or `null` if the `Set` is
+   *           empty.
    */
   public function firstValue(): ?Tv;
 
   /**
-   * Returns the first "key" in the current Set.
+   * Returns the first "key" in the current `Set`.
    *
-   * Since Sets do not have keys, it returns the first value.
+   * Since `Set`s do not have keys, it returns the first value.
    *
-   * This method is interchangeable with firstValue().
+   * This method is interchangeable with `firstValue()`.
    *
-   * @return - The first value in the current Set, or null if the Set is empty.
+   * @return - The first value in the current `Set`, or `null` if the `Set` is
+   *           empty.
    */
   public function firstKey(): mixed;
 
   /**
-   * Returns the last value in the current Set.
+   * Returns the last value in the current `Set`.
    *
-   * @return - The last value in the current Set, or null if the current Set is
-   *           empty.
+   * @return - The last value in the current `Set`, or `null` if the current
+   *           `Set` is empty.
    */
   public function lastValue(): ?Tv;
 
   /**
-   * Returns the last "key" in the current Set.
+   * Returns the last "key" in the current `Set`.
    *
-   * Since Sets do not have keys, it returns the last value.
+   * Since `Set`s do not have keys, it returns the last value.
    *
-   * This method is interchangeable with lastValue().
+   * This method is interchangeable with `lastValue()`.
    *
-   * @return - The last value in the current Set, or null if the current Set is
-   *           empty.
+   * @return - The last value in the current `Set`, or `null` if the current
+   *           `Set` is empty.
    */
   public function lastKey(): mixed;
 
   /**
-   * Checks if the current Set is empty.
+   * Checks if the current `Set` is empty.
    *
-   * @return - true if the current Set is empty; false otherwise.
+   * @return - `true` if the current `Set` is empty; `false` otherwise.
    */
   public function isEmpty(): bool;
 
   /**
-   * Provides the number of elements in the current Set.
+   * Provides the number of elements in the current `Set`.
    *
-   * @return - The number of elements in the current Set.
+   * @return - The number of elements in the current `Set`.
    */
   public function count(): int;
 
   /**
-   * Remove all the elements from the current Set.
+   * Remove all the elements from the current `Set`.
    *
-   * Future changes made to the current Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the current `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
-   * @return - A shallow, empty copy of the current Set. The current Set is
+   * @return - A shallow, empty copy of the current `Set`. The current `Set` is
    *           also empty.
    */
   public function clear(): Set<Tv>;
 
   /**
-   * Determines if the specified values is in the current Set.
+   * Determines if the specified value is in the current `Set`.
    *
-   * @param $v - The value to ch
-   * @return - true if the specified value is present in the current Set; false
-   *           otherwise.
+   * @param $v - The value to check.
+   * @return - `true` if the specified value is present in the current `Set`;
+   *           `false` otherwise.
    */
   public function contains<Tu super Tv>(Tu $v): bool;
 
   /**
-   * Add the value to the current Set.
+   * Add the value to the current `Set`.
    *
-   * "$set->add($v)" is semantically equivalent to "$set[] = $v" (except that
-   * add() returns the Set).
+   * `$set->add($v)` is semantically equivalent to `$set[] = $v` (except that
+   * `add()` returns the `Set`).
    *
-   * Future changes made to the current Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the current `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
-   * @param $v - The value to add to the current Set
+   * @param $v - The value to add to the current `Set`
    *
-   * @return - A shallow copy of the current Set with the added the value set.
-   *           The current Set is also updated.
+   * @return - A shallow copy of the current `Set` with the added the value
+   *           set. The current `Set` is also updated.
    */
   public function add(Tv $v): Set<Tv>;
 
   /**
-   * For every element in the provided traversable, add the value into the
-   * current Set.
+   * For every element in the provided `Traversable`, add the value into the
+   * current `Set`.
    *
-   * Future changes made to the original Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the original `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
-   * @param $k - The traversable with the new values to add. If null is
+   * @param $k - The `Traversable` with the new values to add. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current Set with the added the values set.
-   *           The current Set is also updated.
+   * @return - A shallow copy of the current `Set` with the added the values
+   *           set. The current `Set` is also updated.
    */
   public function addAll(?Traversable<Tv> $it): Set<Tv>;
 
   /**
-   * Adds the keys of the specified container to the current Set as new values.
+   * Adds the keys of the specified container to the current `Set` as new
+   * values.
    *
-   * Future changes made to the current Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the current `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
    * @param $container - The container with the new keys to add.
    *
-   * @return - A shallow copy of the current Set with the new keys added; the
-   *           current Set is also updated.
+   * @return - A shallow copy of the current `Set` with the new keys added; the
+   *           current `Set` is also updated.
    */
   public function addAllKeysOf<Tv2>(
     ?KeyedContainer<Tv,Tv2> $container,
@@ -528,111 +536,112 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Reserves enough memory to accommodate a given number of elements.
    *
-   * Reserves enough memory for 'sz' elements. If 'sz' is less than or
-   * equal to the current capacity of this Set, this method does nothing.
+   * Reserves enough memory for `sz` elements. If `sz` is less than or equal
+   * to the current capacity of this `Set`, this method does nothing.
    *
-   * @param $sz - The pre-determined size you want for the current Set.
+   * @param $sz - The pre-determined size you want for the current `Set`.
    */
   public function reserve(int $sz): void;
 
   /**
-   * Removes the specified value from the current Set.
+   * Removes the specified value from the current `Set`.
    *
-   * Future changes made to the current Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the current `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
    * @param $v - The value to remove.
    *
-   * @return - A shallow copy of the current Set with the value removed; the
-   *           current Set is also updated.
+   * @return - A shallow copy of the current `Set` with the value removed; the
+   *           current `Set` is also updated.
    */
   public function remove(Tv $v): Set<Tv>;
 
   /**
-   * Removes the values in the current Set that are also in the Traversable.
+   * Removes the values in the current `Set` that are also in the `Traversable`.
    *
-   * If a value in the Traversable doesn't exist in the current Set, that value
-   * in the Traversable is ignored.
+   * If a value in the `Traversable` doesn't exist in the current `Set`, that
+   * value in the `Traversable` is ignored.
    *
-   * Future changes made to the current Set ARE reflected in the
-   * returned Set, and vice-versa.
+   * Future changes made to the current `Set` ARE reflected in the returned
+   * `Set`, and vice-versa.
    *
-   * @param $other - The Traversable containing values that will be removed
-   *                 from the Set.
+   * @param $other - The `Traversable` containing values that will be removed
+   *                 from the `Set`.
    *
-   * @return - A shallow copy of the current Set with the values removed; the
-   *           current Set is also updated.
+   * @return - A shallow copy of the current `Set` with the values removed; the
+   *           current `Set` is also updated.
    */
   public function removeAll(Traversable<Tv> $other): Set<Tv>;
 
   /**
-   * Returns an iterator that points to beginning of the current Set.
+   * Returns an iterator that points to beginning of the current `Set`.
    *
-   * @return - A KeyedIterator that allows you to traverse the current Set.
+   * @return - A `KeyedIterator` that allows you to traverse the current `Set`.
    */
   public function getIterator(): KeyedIterator<mixed, Tv>;
 
   /**
-   * Returns a Set containing the values from the specified array.
+   * Returns a `Set` containing the values from the specified `array`.
    *
-   * This function is deprecated. Use `new Set($arr)` instead.
+   * This function is deprecated. Use `new Set ($arr)` instead.
    *
-   * @param $arr - The array to convert to a Set.
+   * @param $arr - The `array` to convert to a `Set`.
    *
-   * @return - A Set with the values from this array.
+   * @return - A `Set` with the values from the provided `array`.
    */
-  <<__Deprecated('Use `new Set()` instead.')>>
+  <<__Deprecated('Use `new Set($arr)` instead.')>>
   public static function fromArray<T>(array<T, Tv> $arr): Set<Tv>;
 
   /**
-   * Returns a Set containing all the values from the specified array(s).
+   * Returns a `Set` containing all the values from the specified `array`(s).
    *
-   * @param ... - The arrays to convert to a Set.
+   * @param ... - The `array`s to convert to a `Set`.
    *
-   * @return - A Set with the values from the passed arrays..
+   * @return - A `Set` with the values from the passed `array`(s).
    */
   public static function fromArrays(...): Set<Tv>;
 
   /**
-   * Creates a Set from the given Traversable, or an empty Set
-   * if "null" is passed.
+   * Creates a `Set` from the given `Traversable`, or an empty `Set` if `null`
+   * is passed.
    *
-   * This is the static method version of the Set __construct() constructor.
+   * This is the static method version of the `Set::__construct()` constructor.
    *
-   * @param $items - any traversable object from which to create a Set
-   *                 (e.g., array). If null, then an empty Set is created.
+   * @param $items - any `Traversable` object from which to create a `Set`
+   *                 (e.g., `array`). If `null`, then an empty `Set` is created.
    *
-   * @return A Set with the values from the Traversable; or an empty Set
-   *         if the Traversable is null.
+   * @return - A `Set` with the values from the `Traversable`; or an empty `Set`
+   *           if the `Traversable` is `null`.
    */
   public static function fromItems<Tv2>(?Traversable<Tv2> $items): Set<Tv2>;
 
   /**
-   * Creates a Set from the keys of the specified container.
+   * Creates a `Set` from the keys of the specified container.
    *
-   * The keys of the container will be the values of the Set.
+   * The keys of the container will be the values of the `Set`.
    *
-   * @param $container - The container with the keys used to create the Set.
+   * @param $container - The container with the keys used to create the `Set`.
    *
-   * @return - A Set built from the keys of the specified container.
+   * @return - A `Set` built from the keys of the specified container.
    */
   public static function fromKeysOf<Tk, Tv2>(
     ?KeyedContainer<Tk,Tv2> $container,
   ): Set<Tk>;
 
   /**
-   * Returns the string version of the current Set, which is "Set".
+   * Returns the `string` version of the current `Set`, which is `"Set"`.
    *
-   * @return - The string "Set".
+   * @return - The `string` `"Set"`.
    */
   public function __toString(): string;
 
   /**
-   * Returns an Iterable view of the current Set.
+   * Returns an `Iterable` view of the current `Set`.
    *
-   * The Iterable returned is one that produces the values from the current Set.
+   * The `Iterable` returned is one that produces the values from the current
+   * `Set`.
    *
-   * @return - The Iterable view of the current Set.
+   * @return - The `Iterable` view of the current `Set`.
    */
   public function items(): Iterable<Tv>;
 }

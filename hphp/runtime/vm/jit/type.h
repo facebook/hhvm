@@ -802,6 +802,12 @@ Type negativeCheckType(Type typeParam, Type srcType);
  */
 Type relaxType(Type t, DataTypeCategory cat);
 
+/*
+ * Returns the smallest supertype of ty that we can reasonably guard on. Used
+ * for checking inner ref cells and locals in pesudomains.
+ */
+Type relaxToGuardable(Type ty);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

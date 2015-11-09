@@ -787,17 +787,15 @@ Type typeFromRAT(RepoAuthType ty) {
 //////////////////////////////////////////////////////////////////////
 
 Type ldRefReturn(Type typeParam) {
-  assertx(typeParam <= TCell);
   // Guarding on specialized types and uncommon unions like {Int|Bool} is
   // expensive enough that we only want to do it in situations where we've
   // manually confirmed the benefit.
-  auto const type = typeParam.unspecialize();
+  typeParam = relaxToGuardable(typeParam);
+  always_assert(typeParam <= TCell);
 
-  if (type.isKnownDataType())      return type;
-  if (type <= TUncountedInit) return TUncountedInit;
-  if (type <= TUncounted)     return TUncounted;
-  always_assert(type <= TCell);
-  return TInitCell;
+  // Refs can never contain Uninit, so this lets us return UncountedInit rather
+  // than Uncounted, and InitCell rather than Cell.
+  return typeParam - TUninit;
 }
 
 Type negativeCheckType(Type srcType, Type typeParam) {
@@ -870,6 +868,26 @@ Type relaxType(Type t, DataTypeCategory cat) {
   auto const relaxed =
     (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, cat);
   return t <= TCell ? relaxed : relaxed | TBoxedInitCell;
+}
+
+Type relaxToGuardable(Type ty) {
+  assertx(ty <= TGen);
+  ty = ty.unspecialize();
+
+  // ty is unspecialized and we don't support guarding on CountedArr or
+  // StaticArr, so widen any subtypes of Arr to Arr.
+  if (ty <= TArr) return TArr;
+
+  // We can guard on StaticStr but not CountedStr.
+  if (ty <= TCountedStr)     return TStr;
+
+  if (ty <= TBoxedCell)      return TBoxedCell;
+  if (ty.isKnownDataType())  return ty;
+  if (ty <= TUncountedInit)  return TUncountedInit;
+  if (ty <= TUncounted)      return TUncounted;
+  if (ty <= TCell)           return TCell;
+  if (ty <= TGen)            return TGen;
+  not_reached();
 }
 
 }}

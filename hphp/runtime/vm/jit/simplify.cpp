@@ -677,23 +677,45 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
-  auto src1 = inst->src(0);
-  auto src2 = inst->src(1);
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
 
   if (!src2->hasConstVal()) return nullptr;
 
-  // not supporting integers (#2570625)
-  double src2Val = src2->dblVal();
+  auto src2Val = src2->dblVal();
 
-  // X / 0 -> bool(false)
   if (src2Val == 0.0) {
-    // Ideally we'd generate a RaiseWarning and return false here, but we need
-    // a catch trace for that and we can't make a catch trace here.
+    // The branch emitted during irgen will deal with this
     return nullptr;
   }
 
   // statically compute X / Y
   return src1->hasConstVal() ? cns(env, src1->dblVal() / src2Val) : nullptr;
+}
+
+SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
+  auto const dividend = inst->src(0);
+  auto const divisor  = inst->src(1);
+
+  if (!divisor->hasConstVal()) return nullptr;
+
+  auto const divisorVal = divisor->intVal();
+
+  if (divisorVal == 0) {
+    // The branch emitted during irgen will deal with this
+    return nullptr;
+  }
+
+  if (!dividend->hasConstVal()) return nullptr;
+
+  auto const dividendVal = dividend->intVal();
+
+  if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
+    // This should be unreachable
+    return nullptr;
+  }
+
+  return cns(env, dividendVal / divisorVal);
 }
 
 SSATmp* simplifyAndInt(State& env, const IRInstruction* inst) {
@@ -2382,6 +2404,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(DecRefNZ)
   X(DefLabel)
   X(DivDbl)
+  X(DivInt)
   X(ExtendsClass)
   X(Floor)
   X(GetCtxFwdCall)

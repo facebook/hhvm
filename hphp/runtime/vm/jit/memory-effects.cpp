@@ -1009,6 +1009,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GteDbl:
   case LtDbl:
   case DivDbl:
+  case DivInt:
   case MulDbl:
   case MulInt:
   case MulIntO:

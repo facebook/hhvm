@@ -228,6 +228,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case SubDbl:
   case MulDbl:
   case DivDbl:
+  case DivInt:
   case Mod:
   case Sqrt:
   case OrInt:

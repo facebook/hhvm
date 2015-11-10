@@ -765,6 +765,15 @@ void lower(Vunit& unit, srem& inst, Vlabel b, size_t i) {
   });
 }
 
+void lower(Vunit& unit, divint& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << copy{inst.s0, rax};
+    v << cqo{};                      // sign-extend rax => rdx:rax
+    v << idiv{inst.s1, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
+    v << copy{rax, inst.d};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void lower(Vunit& unit, movtqb& inst, Vlabel b, size_t i) {

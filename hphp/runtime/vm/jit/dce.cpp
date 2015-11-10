@@ -261,6 +261,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckNonNull:
   case CheckStaticLocInit:
   case DivDbl:
+  case DivInt:
   case AddIntO:
   case SubIntO:
   case MulIntO:

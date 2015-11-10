@@ -356,6 +356,8 @@ exceptions depending on how coercion is implemented.
 
 | DivDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
+| DivInt, D(Int), S(Int) S(Int), NF
+
 | Floor, D(Dbl), S(Dbl), NF
 
 | Ceil, D(Dbl), S(Dbl), NF
@@ -386,6 +388,9 @@ exceptions depending on how coercion is implemented.
   DivDbl conforms to IEEE 754. In particular, division by zero returns +/- INF
   or NAN depending on the dividend; and should the result of a division be zero
   the sign will follow the normal sign rules for division.
+
+  DivInt will perform integer division of S1 by S0. S0 should not be zero and
+  must divide S1.
 
   Note that Shr is an arithmetic right shift: The MSB is sign-extended.
 

@@ -1168,96 +1168,93 @@ void emitDiv(IRGS& env) {
     return;
   }
 
-  auto divisor  = topC(env, BCSPOffset{0});
-  auto dividend = topC(env, BCSPOffset{1});
+  auto toDbl = [&] (SSATmp* x) {
+    return
+      x->isA(TInt)  ? gen(env, ConvIntToDbl, x) :
+      x->isA(TBool) ? gen(env, ConvBoolToDbl, x) :
+      x;
+  };
 
-  // we can't codegen this but we may be able to special case it away
-  if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
-    // TODO(#2570625): support integer-integer division, move this to
-    // simplifier:
-    if (divisor->hasConstVal()) {
-      int64_t divisorVal;
-      if (divisor->isA(TInt)) {
-        divisorVal = divisor->intVal();
-      } else {
-        assertx(divisor->isA(TBool));
-        divisorVal = divisor->boolVal();
-      }
+  auto toInt = [&] (SSATmp* x) {
+    return x->isA(TBool) ? gen(env, ConvBoolToInt, x) : x;
+  };
 
-      if (divisorVal == 0 && !RuntimeOption::PHP7_IntSemantics) {
-        popC(env);
-        popC(env);
-        gen(env, RaiseWarning,
-            cns(env, makeStaticString(Strings::DIVISION_BY_ZERO)));
+  auto const divisor  = popC(env);
+  auto const dividend = popC(env);
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const checkZero =
+        divisor->isA(TInt) ? gen(env, EqInt,  divisor, cns(env, 0)) :
+        divisor->isA(TDbl) ? gen(env, EqDbl,  divisor, cns(env, 0.0)) :
+                             gen(env, EqBool, divisor, cns(env, false));
+      gen(env, JmpNZero, taken, checkZero);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+      gen(env, RaiseWarning, msg);
+
+      // PHP5 results in false; we side exit since the type of the result
+      // has now dramatically changed. PHP7 falls through to the IEEE
+      // division semantics below (and doesn't side exit since the type is
+      // still a double).
+      if (!RuntimeOption::PHP7_IntSemantics) {
         push(env, cns(env, false));
-        return;
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      } else if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
+        // We don't need to side exit here, but it's cleaner, and we assume
+        // that division by zero is unikely
+        push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
       }
-
-      if (dividend->hasConstVal()) {
-        int64_t dividendVal;
-        if (dividend->isA(TInt)) {
-          dividendVal = dividend->intVal();
-        } else {
-          assertx(dividend->isA(TBool));
-          dividendVal = dividend->boolVal();
-        }
-        popC(env);
-        popC(env);
-        if (!divisorVal) {
-          gen(env, RaiseWarning,
-              cns(env, makeStaticString(Strings::DIVISION_BY_ZERO)));
-          push(env, cns(env, dividendVal / 0.0));
-        } else if (dividendVal == LLONG_MIN || dividendVal % divisorVal) {
-          push(env, cns(env, (double)dividendVal / divisorVal));
-        } else {
-          push(env, cns(env, dividendVal / divisorVal));
-        }
-        return;
-      }
-      /* fall through */
     }
-    interpOne(env, TUncountedInit, 2);
+  );
+
+  if (divisor->isA(TDbl) || dividend->isA(TDbl)) {
+    push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
     return;
   }
 
-  auto make_double = [&] (SSATmp* src) {
-    if (src->isA(TInt)) {
-      return gen(env, ConvIntToDbl, src);
-    } else if (src->isA(TBool)) {
-      return gen(env, ConvBoolToDbl, src);
-    }
-    assertx(src->isA(TDbl));
-    return src;
-  };
-
-  divisor  = make_double(popC(env));
-  dividend = make_double(popC(env));
-
-  if (!divisor->hasConstVal() || divisor->dblVal() == 0.0) {
+  if (divisor->isA(TInt) && dividend->isA(TInt)) {
     ifThen(
       env,
       [&] (Block* taken) {
-        auto const checkZero = gen(env, EqDbl, divisor, cns(env, 0.0));
-        gen(env, JmpNZero, taken, checkZero);
+        auto const badDividend = gen(env, EqInt, dividend, cns(env, LLONG_MIN));
+        gen(env, JmpNZero, taken, badDividend);
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
-        gen(env, RaiseWarning, msg);
+        ifThen(
+          env,
+          [&] (Block* taken) {
+            auto const badDivisor = gen(env, EqInt, divisor, cns(env, -1));
+            gen(env, JmpNZero, taken, badDivisor);
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
 
-        // PHP5 results in false; we side exit since the type of the result
-        // has now dramatically changed. PHP7 falls through to the IEEE
-        // division semantics below (and doesn't side exit since the type is
-        // still a double).
-        if (!RuntimeOption::PHP7_IntSemantics) {
-          push(env, cns(env, false));
-          gen(env, Jmp, makeExit(env, nextBcOff(env)));
-        }
+            // Avoid SIGFPE when dividing the miniumum respresentable integer
+            // by -1.
+            push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
+            gen(env, Jmp, makeExit(env, nextBcOff(env)));
+          }
+        );
       }
     );
   }
 
-  push(env, gen(env, DivDbl, dividend, divisor));
+  auto const result = cond(
+    env,
+    [&] (Block* taken) {
+      auto const mod = gen(env, Mod, toInt(dividend), toInt(divisor));
+      gen(env, JmpNZero, taken, mod);
+    },
+    [&] { return gen(env, DivInt, toInt(dividend), toInt(divisor)); },
+    [&] { return gen(env, DivDbl, toDbl(dividend), toDbl(divisor)); }
+  );
+  push(env, result);
 }
 
 void emitMod(IRGS& env) {

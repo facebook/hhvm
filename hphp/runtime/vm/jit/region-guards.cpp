@@ -335,7 +335,7 @@ void sortBlockData(BlockDataVec& blockData) {
   std::sort(blockData.begin(), blockData.end(),
             [&](const BlockData& bd1, const BlockData& bd2) {
               if (bd1.deleted != bd2.deleted) return bd1.deleted < bd2.deleted;
-              return bd1.weight >= bd2.weight;
+              return bd1.weight > bd2.weight;
             });
 }
 

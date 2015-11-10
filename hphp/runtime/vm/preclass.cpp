@@ -154,6 +154,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
     staticStreamer(&m_val, ss);
     out << ss.str();
   }
+  out << " (RAT = " << show(m_repoAuthType) << ")";
   out << std::endl;
 }
 

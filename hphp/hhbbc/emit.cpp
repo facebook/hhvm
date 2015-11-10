@@ -49,6 +49,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_empty("");
+const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -892,6 +893,13 @@ void emit_class(EmitUnitState& state,
     emit_finish_func(*m, *fe, info);
   }
 
+  std::vector<Type> useVars;
+  if (is_closure(cls)) {
+    auto f = find_method(&cls, s_invoke.get());
+    useVars = state.index.lookup_closure_use_vars(f);
+  }
+  auto uvIt = useVars.begin();
+
   auto const privateProps   = state.index.lookup_private_props(&cls);
   auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
@@ -905,14 +913,12 @@ void emit_class(EmitUnitState& state,
     };
 
     auto const privPropTy = [&] (const PropState& ps) -> Type {
-      /*
-       * Skip closures, because the types of their used vars can be
-       * communicated via assert opcodes right now.  At the time of this
-       * writing there was nothing to gain by including RAT's for the
-       * properties, since closure properties are only used internally by the
-       * runtime, not directly via opcodes like CGetM.
-       */
-      if (is_closure(cls)) return Type{};
+      if (is_closure(cls)) {
+        // For closures use variables will be the first properties of the
+        // closure object, in declaration order
+        if (uvIt != useVars.end()) return *uvIt++;
+        return Type{};
+      }
 
       auto it = ps.find(prop.name);
       if (it == end(ps)) return Type{};
@@ -936,6 +942,7 @@ void emit_class(EmitUnitState& state,
       makeRat(propTy)
     );
   }
+  assert(uvIt == useVars.end());
 
   for (auto& cconst : cls.constants) {
     if (!cconst.val.hasValue()) {

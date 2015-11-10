@@ -326,10 +326,10 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
       return Variant{source.getStringData()};
 
     case KindOfString: {
-      auto const st = lookupStaticString(source.getStringData());
-      if (st != nullptr) return Variant{st};
-      return
-        Variant{StringData::MakeUncounted(source.getStringData()->slice())};
+      auto src = source.getStringData();
+      if (src->isStatic()) return Variant{src};
+      if (auto s = lookupStaticString(src)) return Variant{s};
+      return Variant{StringData::MakeUncounted(src->slice())};
     }
 
     case KindOfArray: {

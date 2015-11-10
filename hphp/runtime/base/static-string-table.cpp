@@ -188,11 +188,7 @@ StringData* makeStaticString(folly::StringPiece slice) {
 }
 
 StringData* lookupStaticString(const StringData *str) {
-  if (UNLIKELY(!s_stringDataMap)) return nullptr;
-  if (str->isStatic()) {
-    assert(checkStaticStr(str));
-    return const_cast<StringData*>(str);
-  }
+  assert(s_stringDataMap && !str->isStatic());
   auto const it = s_stringDataMap->find(make_intern_key(str));
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));

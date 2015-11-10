@@ -9074,9 +9074,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  bool allowPacked = !ct ||
-    ct == CollectionType::Vector ||
-    ct == CollectionType::ImmVector;
+  auto const allowPacked = !ct || isVectorCollection(*ct);
 
   int nElms;
   if (allowPacked && isPackedInit(el, &nElms)) {
@@ -9089,10 +9087,11 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  // If `RuntimeOption::EvalDisableStructArray`, MakeStructArray actually makes
-  // a mixed array, which can be used to initialize Map/Set.
-  bool allowStruct = !ct ||
-    (RuntimeOption::EvalDisableStructArray && !allowPacked);
+  // Don't emit struct arrays for a collection initializers.  HashCollection
+  // can't handle that yet.  Also ignore RuntimeOption::DisableStructArray here.
+  // The VM can handle the NewStructArray bytecode when struct arrays are
+  // disabled.
+  auto const allowStruct = !ct;
   std::vector<std::string> keys;
   if (allowStruct && isStructInit(el, keys)) {
     for (int i = 0, n = keys.size(); i < n; i++) {
@@ -9105,7 +9104,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   }
 
   auto capacityHint = MixedArray::SmallSize;
-  int capacity = el->getCount();
+  auto const capacity = el->getCount();
   if (capacity > 0) capacityHint = capacity;
   if (allowPacked && isPackedInit(el, &nElms, false /* ignore size */)) {
     e.NewArray(capacityHint);

@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
+#include "hphp/runtime/base/file-util.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -40,6 +41,7 @@ const StaticString
   s_is_a("is_a"),
   s_count("count"),
   s_ini_get("ini_get"),
+  s_dirname("dirname"),
   s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
@@ -197,6 +199,28 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
   // ini_get() is now enhanced to return more than strings.
   // Get out of here if we are something else like an array.
   return nullptr;
+}
+
+SSATmp* opt_dirname(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  // Only generate the optimized version if the argument passed in is a
+  // static string with a constant literal value so we can get the string value
+  // at JIT time.
+  auto const argType = topType(env, BCSPOffset{0});
+  if (!(argType.hasConstVal(TStaticStr))) {
+    return nullptr;
+  }
+
+  // Return the directory portion of the path
+  auto path = top(env, BCSPOffset{0})->strVal();
+  auto psize = path->size();
+  // Make a mutable copy for dirname_helper to modify
+  char *buf = strndup(path->data(), psize);
+  int len = FileUtil::dirname_helper(buf, psize);
+  SSATmp *ret = cns(env, makeStaticString(buf, len));
+  free(buf);
+  return ret;
 }
 
 /*
@@ -397,8 +421,9 @@ bool optimizedFCallBuiltin(IRGS& env,
                            uint32_t numNonDefault) {
   auto const result = [&]() -> SSATmp* {
 
+    auto const fname = func->name();
 #define X(x) \
-    if (func->name()->isame(s_##x.get())) return opt_##x(env, numArgs);
+    if (fname->isame(s_##x.get())) return opt_##x(env, numArgs);
 
     X(get_called_class)
     X(get_class)
@@ -416,6 +441,7 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(func_num_args)
     X(max2)
     X(min2)
+    X(dirname)
 
 #undef X
 

@@ -70,8 +70,8 @@ class mysqli {
   }
 
   public function __clone(): void {
-    throw new Exception(
-      'Trying to clone an uncloneable object of class mysqli'
+    hphp_throw_fatal_error(
+      'Trying to clone an uncloneable object of class mysqli_result'
     );
   }
 
@@ -871,8 +871,8 @@ class mysqli_driver {
   }
 
   public function __clone(): void {
-    throw new Exception(
-      'Trying to clone an uncloneable object of class mysqli_driver'
+    hphp_throw_fatal_error(
+      'Trying to clone an uncloneable object of class mysqli_result'
     );
   }
 }
@@ -912,7 +912,7 @@ class mysqli_result {
   }
 
   public function __clone(): void {
-    throw new Exception(
+    hphp_throw_fatal_error(
       'Trying to clone an uncloneable object of class mysqli_result'
     );
   }
@@ -1189,8 +1189,8 @@ class mysqli_stmt {
   }
 
   public function __clone(): void {
-    throw new Exception(
-      'Trying to clone an uncloneable object of class mysqli_stmt'
+    hphp_throw_fatal_error(
+      'Trying to clone an uncloneable object of class mysqli_result'
     );
   }
 
@@ -1412,15 +1412,19 @@ class mysqli_stmt {
   public function store_result(): mixed {
     // First we need to set the MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH attribute in
     // some cases.
-    $result = $this->result_metadata();
-    $fields = $result->fetch_fields();
-    foreach ($fields as $field) {
-      if ($field->type == MYSQLI_TYPE_BLOB ||
-          $field->type == MYSQLI_TYPE_MEDIUM_BLOB ||
-          $field->type == MYSQLI_TYPE_LONG_BLOB ||
-          $field->type == MYSQLI_TYPE_GEOMETRY) {
-        $this->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
-        break;
+    if ($this->__link->field_count > 0) {
+      $result = $this->result_metadata();
+      if (!is_bool($result)) {
+        $fields = $result->fetch_fields();
+        foreach ($fields as $field) {
+          if ($field->type == MYSQLI_TYPE_BLOB ||
+              $field->type == MYSQLI_TYPE_MEDIUM_BLOB ||
+              $field->type == MYSQLI_TYPE_LONG_BLOB ||
+              $field->type == MYSQLI_TYPE_GEOMETRY) {
+            $this->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
+            break;
+          }
+        }
       }
     }
 

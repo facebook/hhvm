@@ -227,7 +227,7 @@ function(HHVM_GENERATE_CONFIG_COMPILES_DEFINE_STRING destVarName)
   HHVM_GENERATE_CONFIG_SYMBOL_EXISTS(builtString MAJOR_IN_MKDEV "#include <mkdev.h>" "major")
   HHVM_GENERATE_CONFIG_SYMBOL_EXISTS(builtString MAJOR_IN_SYSMACROS "#include <sysmacros.h>" "major")
   HHVM_GENERATE_CONFIG_CHECK_COMPILES(builtString HAVE_VISIBILITY "
-  __attribute__ ((__visibility__("hidden"))) void someMethod(void);
+  __attribute__ ((__visibility__(\"hidden\"))) void someMethod(void);
   int main(void) {
     return 0;
   }")

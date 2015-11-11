@@ -517,8 +517,9 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
       if (!collapse_slashes) {
         path[pathlen++] = '/';
       }
-    } else if (seglen == 1 && addpath[0] == '.') {
-      /* ./ */
+    } else if (seglen == 1 && addpath[0] == '.'
+               && (pathlen > 0 || (*next && *(next+1)))) {
+      /* ./ (safe to drop iff there is something before or after it) */
     } else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') {
       /* backpath (../) */
       if (pathlen == 1 && path[0] == '/') {

@@ -263,10 +263,6 @@ bool RequestInjectionData::setAllowedDirectories(const std::string& value) {
         File::TranslatePathKeepRelative(path).empty()) {
       return false;
     }
-
-    if (path == ".") {
-      path = g_context->getCwd().toCppString();
-    }
   }
   m_safeFileAccess = !boom.empty();
   std::string dirs;

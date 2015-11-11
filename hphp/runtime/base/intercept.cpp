@@ -104,7 +104,11 @@ bool register_intercept(const String& name, const Variant& callback,
       handlers.swap(empty);
     } else {
       auto tmp = handlers[name];
-      handlers.erase(name);
+      auto it = handlers.find(name);
+      if (it != handlers.end()) {
+        auto tmp = it->second;
+        handlers.erase(it);
+      }
     }
     return true;
   }

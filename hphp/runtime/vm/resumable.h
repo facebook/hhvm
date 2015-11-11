@@ -162,6 +162,7 @@ struct alignas(16) Resumable {
     m_resumeOffset = resumeOffset;
   }
 
+private:
   // ActRec of the resumed frame.
   ActRec m_actRec;
 

@@ -216,12 +216,15 @@ static const struct {
   { OpCGetL2,      {Stack1|DontGuardStack1|
                     Local,            StackIns1,    OutCInputL      }},
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL      }},
+  { OpCGetQuietL,  {Local,            Stack1,       OutCInputL      }},
   // In OpCUGetL we rely on OutCInputL returning TCell (which covers Uninit
   // values) instead of TInitCell.
   { OpCUGetL,      {Local,            Stack1,       OutCInputL      }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL      }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown      }},
+  { OpCGetQuietN,  {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown      }},
+  { OpCGetQuietG,  {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetS,       {StackTop2,        Stack1,       OutUnknown      }},
   { OpCGetM,       {MVector,          Stack1,       OutUnknown      }},
   { OpVGetL,       {Local,            Stack1|Local, OutVInputL      }},
@@ -883,7 +886,9 @@ bool dontGuardAnyInputs(Op op) {
   case Op::BindS:
   case Op::BitNot:
   case Op::CGetG:
+  case Op::CGetQuietG:
   case Op::CGetL:
+  case Op::CGetQuietL:
   case Op::CGetL2:
   case Op::CGetS:
   case Op::CUGetL:
@@ -1030,6 +1035,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Throw:
   case Op::CGetL3:
   case Op::CGetN:
+  case Op::CGetQuietN:
   case Op::VGetN:
   case Op::IssetN:
   case Op::EmptyN:

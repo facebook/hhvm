@@ -583,6 +583,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %right T_AWAIT T_YIELD
 %left '?' ':'
+%right T_COALESCE
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
 %left '|'
@@ -693,6 +694,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 %token T_TRAIT
 %token T_ELLIPSIS "..."
+%token T_COALESCE "??"
 %token T_INSTEADOF
 %token T_TRAIT_C
 
@@ -1922,6 +1924,7 @@ expr_no_variable:
   | '(' expr_no_variable ')'           { $$ = $2;}
   | expr '?' expr ':' expr             { _p->onQOp($$, $1, &$3, $5);}
   | expr '?' ':' expr                  { _p->onQOp($$, $1,   0, $4);}
+  | expr T_COALESCE expr               { _p->onNullCoalesce($$, $1, $3);}
   | internal_functions                 { $$ = $1;}
   | T_INT_CAST expr                    { UEXP($$,$2,T_INT_CAST,1);}
   | T_DOUBLE_CAST expr                 { UEXP($$,$2,T_DOUBLE_CAST,1);}

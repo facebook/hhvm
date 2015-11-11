@@ -737,6 +737,12 @@ void in(ISS& env, const bc::CGetL& op) {
   push(env, locAsCell(env, op.loc1));
 }
 
+void in(ISS& env, const bc::CGetQuietL& op) {
+  nothrow(env);
+  constprop(env);
+  push(env, locAsCell(env, op.loc1));
+}
+
 void in(ISS& env, const bc::CUGetL& op) {
   auto const ty = locRaw(env, op.loc1);
   if (ty.subtypeOf(TUninit)) {
@@ -785,7 +791,12 @@ void in(ISS& env, const bc::CGetN&) {
   push(env, TInitCell);
 }
 
+void in(ISS& env, const bc::CGetQuietN&) {
+  in(env, *static_cast<const bc::CGetQuietN*>(nullptr));
+}
+
 void in(ISS& env, const bc::CGetG&) { popC(env); push(env, TInitCell); }
+void in(ISS& env, const bc::CGetQuietG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::CGetS&) {
   auto const tcls  = popA(env);

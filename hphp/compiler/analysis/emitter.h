@@ -696,6 +696,7 @@ public:
   void emitCGetL3(Emitter& e);
   void emitPushL(Emitter& e);
   void emitCGet(Emitter& e);
+  void emitCGetQuiet(Emitter& e);
   bool emitVGet(Emitter& e, bool skipCells = false);
   void emitIsset(Emitter& e);
   void emitIsType(Emitter& e, IsTypeOp op);

@@ -59,6 +59,7 @@
 #include "hphp/compiler/expression/object_method_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/expression/null_coalesce_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/simple_function_call.h"
@@ -4505,6 +4506,23 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     return true;
   }
 
+  case Construct::KindOfNullCoalesceExpression: {
+    auto q = static_pointer_cast<NullCoalesceExpression>(node);
+
+    Label done;
+    visit(q->getFirst());
+    emitCGetQuiet(e);
+    e.Dup();
+    e.JmpNZ(done);
+    e.PopC();
+    visit(q->getSecond());
+    emitConvertToCell(e);
+    done.set(e);
+    m_evalStack.cleanTopMeta();
+
+    return true;
+  }
+
   case Construct::KindOfScalarExpression: {
     auto ex = static_pointer_cast<Expression>(node);
     Variant v;
@@ -5441,6 +5459,40 @@ void EmitterVisitor::emitCGet(Emitter& e) {
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.CGetM(vectorImm);
+  }
+}
+
+void EmitterVisitor::emitCGetQuiet(Emitter& e) {
+  if (checkIfStackEmpty("CGetQuiet*")) return;
+  LocationGuard loc(e, m_tempLoc);
+  m_tempLoc.clear();
+
+  emitClsIfSPropBase(e);
+  int iLast = m_evalStack.size()-1;
+  int i = scanStackForLocation(iLast);
+  int sz = iLast - i;
+  assert(sz >= 0);
+  char sym = m_evalStack.get(i);
+  if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
+    switch (sym) {
+      case StackSym::L:  e.CGetQuietL(m_evalStack.getLoc(i));  break;
+      case StackSym::C:  /* nop */   break;
+      case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
+      case StackSym::CN: e.CGetQuietN();  break;
+      case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
+      case StackSym::CG: e.CGetQuietG();  break;
+      case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
+      case StackSym::CS: e.CGetS();  break;
+      case StackSym::V:  e.Unbox();  break;
+      case StackSym::R:  e.UnboxR(); break;
+      default: {
+        unexpectedStackSym(sym, "emitCGetQuiet");
+        break;
+      }
+    }
+
+  } else {
+    emitQueryMOp(i, iLast, e, QueryMOp::CGetQuiet);
   }
 }
 

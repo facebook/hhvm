@@ -199,6 +199,7 @@ public:
   void onUnaryOpExp(Token &out, Token &operand, int op, bool front);
   void onBinaryOpExp(Token &out, Token &operand1, Token &operand2, int op);
   void onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo);
+  void onNullCoalesce(Token &out, Token &expFirst, Token &expSecond);
   void onArray(Token &out, Token &pairs, int op = T_ARRAY);
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);

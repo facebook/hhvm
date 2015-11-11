@@ -4619,15 +4619,16 @@ static inline void cgetl_inner_body(TypedValue* fr, TypedValue* to) {
   cellDup(*tvToCell(fr), *to);
 }
 
-static inline void cgetl_body(ActRec* fp,
+OPTBLD_INLINE void cgetl_body(ActRec* fp,
                               TypedValue* fr,
                               TypedValue* to,
-                              Id pind) {
+                              Id pind,
+                              bool warn) {
   if (fr->m_type == KindOfUninit) {
     // `to' is uninitialized here, so we need to tvWriteNull before
     // possibly causing stack unwinding.
     tvWriteNull(to);
-    raise_undefined_local(fp, pind);
+    if (warn) raise_undefined_local(fp, pind);
   } else {
     cgetl_inner_body(fr, to);
   }
@@ -4637,7 +4638,14 @@ OPTBLD_INLINE void iopCGetL(IOP_ARGS) {
   auto local = decode_la(pc);
   Cell* to = vmStack().allocC();
   TypedValue* fr = frame_local(vmfp(), local);
-  cgetl_body(vmfp(), fr, to, local);
+  cgetl_body(vmfp(), fr, to, local, true);
+}
+
+OPTBLD_INLINE void iopCGetQuietL(IOP_ARGS) {
+  auto local = decode_la(pc);
+  Cell* to = vmStack().allocC();
+  TypedValue* fr = frame_local(vmfp(), local);
+  cgetl_body(vmfp(), fr, to, local, false);
 }
 
 OPTBLD_INLINE void iopCUGetL(IOP_ARGS) {
@@ -4654,7 +4662,7 @@ OPTBLD_INLINE void iopCGetL2(IOP_ARGS) {
   memcpy(newTop, oldTop, sizeof *newTop);
   Cell* to = oldTop;
   TypedValue* fr = frame_local(vmfp(), local);
-  cgetl_body(vmfp(), fr, to, local);
+  cgetl_body(vmfp(), fr, to, local, true);
 }
 
 OPTBLD_INLINE void iopCGetL3(IOP_ARGS) {
@@ -4665,7 +4673,7 @@ OPTBLD_INLINE void iopCGetL3(IOP_ARGS) {
   memmove(newTop, oldTop, sizeof *oldTop * 2);
   Cell* to = oldSubTop;
   TypedValue* fr = frame_local(vmfp(), local);
-  cgetl_body(vmfp(), fr, to, local);
+  cgetl_body(vmfp(), fr, to, local, true);
 }
 
 OPTBLD_INLINE void iopPushL(IOP_ARGS) {
@@ -4679,14 +4687,14 @@ OPTBLD_INLINE void iopPushL(IOP_ARGS) {
   locVal->m_type = KindOfUninit;
 }
 
-OPTBLD_INLINE void iopCGetN(IOP_ARGS) {
+OPTBLD_INLINE void cgetn_body(bool warn) {
   StringData* name;
   TypedValue* to = vmStack().topTV();
   TypedValue* fr = nullptr;
   lookup_var(vmfp(), name, to, fr);
   SCOPE_EXIT { decRefStr(name); };
   if (fr == nullptr || fr->m_type == KindOfUninit) {
-    raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
+    if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvRefcountedDecRef(to);
     tvWriteNull(to);
   } else {
@@ -4695,20 +4703,23 @@ OPTBLD_INLINE void iopCGetN(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void iopCGetG(IOP_ARGS) {
+OPTBLD_INLINE void iopCGetN(IOP_ARGS) { cgetn_body(true); }
+OPTBLD_INLINE void iopCGetQuietN(IOP_ARGS) { cgetn_body(false); }
+
+OPTBLD_INLINE void cgetg_body(bool warn) {
   StringData* name;
   TypedValue* to = vmStack().topTV();
   TypedValue* fr = nullptr;
   lookup_gbl(vmfp(), name, to, fr);
   SCOPE_EXIT { decRefStr(name); };
   if (fr == nullptr) {
-    if (MoreWarnings) {
+    if (warn && MoreWarnings) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
     tvRefcountedDecRef(to);
     tvWriteNull(to);
   } else if (fr->m_type == KindOfUninit) {
-    raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
+    if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     tvRefcountedDecRef(to);
     tvWriteNull(to);
   } else {
@@ -4716,6 +4727,9 @@ OPTBLD_INLINE void iopCGetG(IOP_ARGS) {
     cgetl_inner_body(fr, to);
   }
 }
+
+OPTBLD_INLINE void iopCGetG(IOP_ARGS) { cgetg_body(true); }
+OPTBLD_INLINE void iopCGetQuietG(IOP_ARGS) { cgetg_body(false); }
 
 struct SpropState {
   explicit SpropState(Stack&);
@@ -6504,7 +6518,7 @@ OPTBLD_INLINE void iopFPassL(IOP_ARGS) {
   TypedValue* fr = frame_local(vmfp(), local);
   TypedValue* to = vmStack().allocTV();
   if (!ar->m_func->byRef(paramId)) {
-    cgetl_body(vmfp(), fr, to, local);
+    cgetl_body(vmfp(), fr, to, local, true);
   } else {
     vgetl_body(fr, to);
   }

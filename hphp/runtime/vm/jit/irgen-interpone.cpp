@@ -488,6 +488,7 @@ void emitFatal(IRGS& env, FatalOp)            { INTERP }
 void emitUnwind(IRGS& env)                    { INTERP }
 void emitThrow(IRGS& env)                     { INTERP }
 void emitCGetN(IRGS& env)                     { INTERP }
+void emitCGetQuietN(IRGS& env)                { INTERP }
 void emitVGetN(IRGS& env)                     { INTERP }
 void emitIssetN(IRGS& env)                    { INTERP }
 void emitEmptyN(IRGS& env)                    { INTERP }

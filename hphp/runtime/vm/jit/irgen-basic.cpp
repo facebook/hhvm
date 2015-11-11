@@ -89,6 +89,19 @@ void emitCGetL(IRGS& env, int32_t id) {
   pushIncRef(env, loc);
 }
 
+void emitCGetQuietL(IRGS& env, int32_t id) {
+  auto const ldrefExit = makeExit(env);
+  auto const ldPMExit = makePseudoMainExit(env);
+  auto const loc = ldLocInner(
+    env,
+    id,
+    ldrefExit,
+    ldPMExit,
+    DataTypeCountnessInit
+  );
+  pushIncRef(env, loc);
+}
+
 void emitCUGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);

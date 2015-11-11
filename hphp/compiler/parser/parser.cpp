@@ -37,6 +37,7 @@
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/expression/null_coalesce_expression.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/class_constant_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
@@ -938,6 +939,10 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
 void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
   out->exp = NEW_EXP(QOpExpression, exprCond->exp,
                      expYes ? expYes->exp : ExpressionPtr(), expNo->exp);
+}
+
+void Parser::onNullCoalesce(Token &out, Token &expFirst, Token &expSecond) {
+  out->exp = NEW_EXP(NullCoalesceExpression, expFirst->exp, expSecond->exp);
 }
 
 void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/server/admin-request-handler.h"
 
-#include "hphp/hphp-config.h"
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/datetime.h"

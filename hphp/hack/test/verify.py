@@ -62,8 +62,8 @@ def record_failures(failures, out_ext):
 
 def dump_failures(failures):
     for f in failures:
-        expected = f.expected.decode('utf-8')
-        actual = f.output.decode('utf-8')
+        expected = f.expected
+        actual = f.output
         diff = difflib.ndiff(
             expected.splitlines(1),
             actual.splitlines(1))

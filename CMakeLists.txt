@@ -52,11 +52,27 @@ ENDIF()
 
 INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 INCLUDE(CheckFunctionExists)
+INCLUDE(Options)
+INCLUDE(HHVMExtensionConfig)
 
 SET(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 
+# Before we do anything else, we'll configure the extensions,
+# so that the defines take effect globally.
+# Exclude a couple of directories that don't use the config mechanism.
+file(GLOB subdirs ${CMAKE_CURRENT_SOURCE_DIR}/hphp/runtime/ext/*)
+foreach (dir ${subdirs})
+  if (IS_DIRECTORY ${dir})
+    if (EXISTS "${dir}/config.cmake")
+      set(HRE_CURRENT_EXT_PATH "${dir}")
+      include("${dir}/config.cmake")
+    endif()
+  endif()
+endforeach()
+HHVM_EXTENSION_RESOLVE_DEPENDENCIES()
+ 
 ADD_SUBDIRECTORY(third-party)
 ADD_SUBDIRECTORY(hphp)
 

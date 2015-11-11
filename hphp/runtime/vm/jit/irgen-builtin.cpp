@@ -39,6 +39,7 @@ namespace {
 
 const StaticString
   s_is_a("is_a"),
+  s_is_subclass_of("is_subclass_of"),
   s_count("count"),
   s_ini_get("ini_get"),
   s_dirname("dirname"),
@@ -74,38 +75,53 @@ bool type_converts_to_number(Type ty) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* opt_is_a(IRGS& env, uint32_t numArgs) {
+SSATmp* is_a_impl(IRGS& env, uint32_t numArgs, bool subclassOnly) {
   if (numArgs != 3) return nullptr;
 
-  // The last param of is_a has a default argument of false, which makes it
-  // behave the same as instanceof (which doesn't allow a string as the tested
-  // object). Don't do the conversion if we're not sure this arg is false.
-  auto const allowStringType = topType(env, BCSPOffset{0});
-  if (!allowStringType.hasConstVal(TBool) || allowStringType.boolVal()) {
+  auto const allowString = topC(env, BCSPOffset{0});
+  auto const classname   = topC(env, BCSPOffset{1});
+  auto const obj         = topC(env, BCSPOffset{2});
+
+  if (!obj->isA(TObj) ||
+      !classname->hasConstVal(TStr) ||
+      !allowString->isA(TBool)) {
     return nullptr;
   }
 
-  // Unlike InstanceOfD, is_a doesn't support interfaces like Stringish, so e.g.
-  // "is_a('x', 'Stringish')" is false even though "'x' instanceof Stringish" is
-  // true. So if the first arg is not an object, the return is always false.
-  auto const objType = topType(env, BCSPOffset{2});
-  if (!objType.maybe(TObj)) {
-    return cns(env, false);
-  }
+  auto const objCls = gen(env, LdObjClass, obj);
 
-  if (objType <= TObj) {
-    auto const classnameType = topType(env, BCSPOffset{1});
-    if (classnameType.hasConstVal(TStaticStr)) {
-      return implInstanceOfD(
-        env,
-        topC(env, BCSPOffset{2}),
-        top(env, BCSPOffset{1})->strVal()
-      );
+  SSATmp* testCls = nullptr;
+  if (auto const cls = Unit::lookupClassOrUniqueClass(classname->strVal())) {
+    if (classIsUniqueOrCtxParent(env, cls)) testCls = cns(env, cls);
+  }
+  if (testCls == nullptr) return nullptr;
+
+  // is_a() finishes here.
+  if (!subclassOnly) return gen(env, InstanceOf, objCls, testCls);
+
+  // is_subclass_of() needs to check that the LHS doesn't have the same class as
+  // as the RHS.
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const eq = gen(env, EqCls, objCls, testCls);
+      gen(env, JmpNZero, taken, eq);
+    },
+    [&] {
+      return gen(env, InstanceOf, objCls, testCls);
+    },
+    [&] {
+      return cns(env, false);
     }
-  }
+  );
+}
 
-  // The LHS is a strict superset of Obj; bail.
-  return nullptr;
+SSATmp* opt_is_a(IRGS& env, uint32_t numArgs) {
+  return is_a_impl(env, numArgs, false /* subclassOnly */);
+}
+
+SSATmp* opt_is_subclass_of(IRGS& env, uint32_t numArgs) {
+  return is_a_impl(env, numArgs, true /* subclassOnly */);
 }
 
 SSATmp* opt_count(IRGS& env, uint32_t numArgs) {
@@ -431,6 +447,7 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(ini_get)
     X(count)
     X(is_a)
+    X(is_subclass_of)
     X(sqrt)
     X(strlen)
     X(max2)
@@ -1245,7 +1262,8 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   auto checkClass = [&] (SSATmp* obj) {
     auto cls = gen(env, LdObjClass, obj);
     auto testCls = SystemLib::s___PHP_Incomplete_ClassClass;
-    return gen(env, ClsNeq, ClsNeqData { testCls }, cls);
+    auto eq = gen(env, EqCls, cls, cns(env, testCls));
+    return gen(env, XorBool, eq, cns(env, true));
   };
 
   return cond(

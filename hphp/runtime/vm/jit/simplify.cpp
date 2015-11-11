@@ -1295,6 +1295,15 @@ X(NeqRes, Res)
 
 #undef X
 
+SSATmp* simplifyEqCls(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, left->clsVal() == right->clsVal());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCmpBool(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
@@ -2497,6 +2506,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(EqRes)
   X(NeqRes)
   X(CmpRes)
+  X(EqCls)
   X(ArrayGet)
   X(OrdStr)
   X(LdLoc)

@@ -987,6 +987,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefSP:
   case EndGuards:
   case EqBool:
+  case EqCls:
   case EqDbl:
   case EqInt:
   case GteBool:
@@ -1037,7 +1038,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefLabel:
   case CheckInit:
   case Nop:
-  case ClsNeq:
   case Mod:
   case Conjure:
   case Halt:

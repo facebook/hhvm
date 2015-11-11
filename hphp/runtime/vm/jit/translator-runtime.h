@@ -220,6 +220,9 @@ rds::Handle lookupClsRDSHandle(const StringData* name);
  */
 void registerLiveObj(ObjectData* obj);
 
+/* Check if a method of the given name exists on the class. */
+bool methodExistsHelper(Class*, StringData*);
+
 /*
  * Throw a VMSwitchMode exception.
  */

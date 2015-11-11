@@ -1238,6 +1238,11 @@ void throwSwitchMode() {
   throw VMSwitchMode();
 }
 
+bool methodExistsHelper(Class* cls, StringData* meth) {
+  assertx(isNormalClass(cls) && !isAbstract(cls));
+  return cls->lookupMethod(meth) != nullptr;
+}
+
 namespace MInstrHelpers {
 
 StringData* stringGetI(StringData* base, uint64_t x) {

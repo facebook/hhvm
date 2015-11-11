@@ -40,6 +40,7 @@ namespace {
 const StaticString
   s_is_a("is_a"),
   s_is_subclass_of("is_subclass_of"),
+  s_method_exists("method_exists"),
   s_count("count"),
   s_ini_get("ini_get"),
   s_dirname("dirname"),
@@ -122,6 +123,18 @@ SSATmp* opt_is_a(IRGS& env, uint32_t numArgs) {
 
 SSATmp* opt_is_subclass_of(IRGS& env, uint32_t numArgs) {
   return is_a_impl(env, numArgs, true /* subclassOnly */);
+}
+
+SSATmp* opt_method_exists(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 2) return nullptr;
+
+  auto const meth = topC(env, BCSPOffset{0});
+  auto const obj  = topC(env, BCSPOffset{1});
+
+  if (!obj->isA(TObj) || !meth->isA(TStr)) return nullptr;
+
+  auto const cls = gen(env, LdObjClass, obj);
+  return gen(env, MethodExists, cls, meth);
 }
 
 SSATmp* opt_count(IRGS& env, uint32_t numArgs) {
@@ -448,6 +461,7 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(count)
     X(is_a)
     X(is_subclass_of)
+    X(method_exists)
     X(sqrt)
     X(strlen)
     X(max2)

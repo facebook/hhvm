@@ -1075,6 +1075,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StARNumArgsAndFlags:
   case LdARInvName:
   case StARInvName:
+  case MethodExists:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

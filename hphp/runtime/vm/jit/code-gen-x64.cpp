@@ -442,6 +442,8 @@ CALL_OPCODE(LdClsPropAddrOrNull)
 CALL_OPCODE(LdClsPropAddrOrRaise)
 CALL_OPCODE(LdGblAddrDef)
 
+CALL_OPCODE(MethodExists)
+
 // Vector instruction helpers
 CALL_OPCODE(StringGet)
 CALL_OPCODE(BindElem)

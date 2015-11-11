@@ -1512,6 +1512,21 @@ SSATmp* simplifyIsScalarType(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  auto const clsSpec = src1->type().clsSpec();
+
+  if (clsSpec.cls() != nullptr && src2->hasConstVal(TStr)) {
+    // If we don't have an exact type, then we can't say for sure the class
+    // doesn't have the method.
+    auto const result = clsSpec.cls()->lookupMethod(src2->strVal()) != nullptr;
+    return (clsSpec.exact() || result) ? cns(env, result) : nullptr;
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyConcatStrStr(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -2431,6 +2446,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdClsCtx)
   X(LdClsName)
   X(LdStrLen)
+  X(MethodExists)
   X(CheckCtxThis)
   X(CastCtxThis)
   X(LdObjClass)

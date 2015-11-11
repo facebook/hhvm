@@ -227,6 +227,7 @@ bool canDCE(IRInstruction* inst) {
   case LdARInvName:
   case PackMagicArgs:
   case LdMBase:
+  case MethodExists:
     assertx(!inst->isControlFlow());
     return true;
 

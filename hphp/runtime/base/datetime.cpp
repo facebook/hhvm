@@ -445,17 +445,17 @@ bool DateTime::modify(const String& diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              &error, TimeZone::GetDatabase(),
                                              TimeZone::GetTimeZoneInfoRaw);
+  SCOPE_EXIT { timelib_time_dtor(tmp_time); };
+
   if (error && error->error_count > 0) {
     raise_warning("DateTime::modify(): Failed to parse time string (%s)"
                   " at position %d (%c): %s",
       diff.c_str(), error->error_messages[0].position,
       error->error_messages[0].character, error->error_messages[0].message
     );
-    timelib_time_dtor(tmp_time);
     return false;
   }
   internalModify(tmp_time);
-  timelib_time_dtor(tmp_time);
   return true;
 }
 

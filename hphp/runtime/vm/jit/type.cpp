@@ -278,19 +278,7 @@ DataType Type::toDataType() const {
   if (*this <= TBool)        return KindOfBoolean;
   if (*this <= TInt)         return KindOfInt64;
   if (*this <= TDbl)         return KindOfDouble;
-  if (*this <= TStaticStr) {
-    /*
-     * TODO(#6272363): we'd love to return KindOfStaticString here, but we
-     * can't because of APC's uncounted strings.  Right now they are subtypes
-     * of TStaticStr, because they aren't TCountedStr (because they
-     * need static bit checks in IncRef and the like), and there are no other
-     * subtypes of TStr that they can be part of.
-     *
-     * KindOfStaticString, however, implies m_data.pstr->isStatic(), which is
-     * false for these strings.
-     */
-    return KindOfString;
-  }
+  if (*this <= TStaticStr)   return KindOfStaticString;
   if (*this <= TStr)         return KindOfString;
   if (*this <= TArr)         return KindOfArray;
   if (*this <= TObj)         return KindOfObject;

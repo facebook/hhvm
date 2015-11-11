@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/program-functions.h"
 
+#include "hphp/hphp-config.h"
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"

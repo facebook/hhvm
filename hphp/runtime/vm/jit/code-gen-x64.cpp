@@ -330,7 +330,6 @@ CALL_OPCODE(ConvObjToArr);
 CALL_OPCODE(ConvStrToArr);
 CALL_OPCODE(ConvCellToArr);
 
-CALL_OPCODE(ConvStrToBool);
 CALL_OPCODE(ConvCellToBool);
 
 CALL_OPCODE(ConvArrToDbl);
@@ -1358,6 +1357,33 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
       return v.cns(true);
     }
   );
+}
+
+void CodeGenerator::cgConvStrToBool(IRInstruction* inst) {
+  auto const dst = dstLoc(inst, 0).reg();
+  auto const src = srcLoc(inst, 0).reg();
+  auto& v = vmain();
+
+  auto const sf = v.makeReg();
+
+  v << cmplim{1, src[StringData::sizeOff()], sf};
+  unlikelyCond(v, vcold(), CC_E, sf, dst, [&] (Vout& v) {
+    // Unlikely case is we end up having to check whether the first byte of the
+    // string is equal to '0'.
+    auto const dst = v.makeReg();
+    auto const sd  = v.makeReg();
+    auto const sf  = v.makeReg();
+    v << load{src[StringData::dataOff()], sd};
+    v << cmpbim{'0', sd[0], sf};
+    v << setcc{CC_NE, sf, dst};
+    return dst;
+  }, [&] (Vout& v) {
+    // Common case is we have an empty string or a string with size bigger than
+    // one.
+    auto const dst = v.makeReg();
+    v << setcc{CC_G, sf, dst};
+    return dst;
+  });
 }
 
 void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {

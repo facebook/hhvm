@@ -130,8 +130,6 @@ static CallMap s_callMap {
     {ConvCellToArr,      convCellToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConvStrToBool,      &StringData::toBoolean, DSSA, SNone,
-                           {{SSA, 0}}},
     {ConvCellToBool,     cellToBool, DSSA, SNone,
                            {{TV, 0}}},
 

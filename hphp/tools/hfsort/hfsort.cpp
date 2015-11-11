@@ -169,10 +169,10 @@ void print(const std::vector<Cluster*>& clusters, bool useWildcards) {
         int space = 0;
         for (const auto& mangledName : cg.funcs[fid].mangledNames) {
           if (useWildcards) {
-            fprintf(outfile, "%.*s*.text.%s\n",
+            fprintf(outfile, "%.*s.text.%s\n",
                     space, " ", getNameWithoutSuffix(mangledName).c_str());
           } else {
-            fprintf(outfile, "%.*s*.text.%s\n",
+            fprintf(outfile, "%.*s.text.%s\n",
                     space, " ", mangledName.c_str());
           }
 

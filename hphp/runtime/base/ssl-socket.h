@@ -113,6 +113,7 @@ private:
   bool m_state_set{false};
   bool m_is_blocked{true};
   SSL *m_handle{nullptr};
+  SSL_CTX *m_ctx{nullptr};
   SSLSocket::CryptoMethod m_method{(SSLSocket::CryptoMethod)-1};
   double m_connect_timeout{0};
 };

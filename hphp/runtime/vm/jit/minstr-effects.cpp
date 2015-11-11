@@ -105,7 +105,7 @@ MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   // Note: MInstrEffects wants to manipulate pointer types in some situations
   // for historical reasons.  We'll eventually change that.
   bool const is_ptr = origBase <= TPtrToGen;
-  auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Unk;
+  auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Bottom;
   baseType = origBase.derefIfPtr();
 
   baseTypeChanged = baseValChanged = false;

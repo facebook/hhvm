@@ -102,7 +102,7 @@ private:
    * Mask of specializations that a given ArraySpec represents.
    */
   enum SortOf : uint8_t {
-    IsTop     = 0, // top
+    IsTop     = 0,
     IsBottom  = 1 << 0,
     HasKind   = 1 << 1,
     HasType   = 1 << 2,

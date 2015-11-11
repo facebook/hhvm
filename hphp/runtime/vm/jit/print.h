@@ -85,7 +85,7 @@ constexpr int kExtraExtraLevel = 7;
 void printUnit(int level, const IRUnit&, const char* caption,
                AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);
 
-inline std::ostream& operator<<(std::ostream& os, Type t) {
+inline std::ostream& operator<<(std::ostream& os, const Type& t) {
   return os << t.toString();
 }
 inline std::ostream& operator<<(std::ostream& os, TypeConstraint tc) {

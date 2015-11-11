@@ -1338,7 +1338,7 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key) {
           key->isA(TInt));
 
   auto doLdElem = [&] {
-    auto const type = packedArrayElemType(base, key).ptr(Ptr::Arr);
+    auto const type = packedArrayElemType(base, key).ptr(Ptr::Elem);
     auto addr = gen(env, LdPackedArrayElemAddr, type, base, key);
     auto res = gen(env, LdMem, type.deref(), addr);
     auto unboxed = unbox(env, res, nullptr);
@@ -1552,7 +1552,7 @@ SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
       if (!type.maybe(TNull)) return cns(env, true);
 
       auto const elemAddr = gen(env, LdPackedArrayElemAddr,
-                                type.ptr(Ptr::Arr), base, key);
+                                type.ptr(Ptr::Elem), base, key);
       return gen(env, IsNTypeMem, TNull, elemAddr);
     }
     case PackedBounds::Out:
@@ -1569,7 +1569,7 @@ SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
     },
     [&] { // Next:
       auto const elemAddr = gen(env, LdPackedArrayElemAddr,
-                                type.ptr(Ptr::Arr), base, key);
+                                type.ptr(Ptr::Elem), base, key);
       return gen(env, IsNTypeMem, TNull, elemAddr);
     },
     [&] { // Taken:

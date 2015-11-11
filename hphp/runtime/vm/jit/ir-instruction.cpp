@@ -209,7 +209,7 @@ Type unboxPtr(Type t) {
 Type boxPtr(Type t) {
   auto const rawBoxed = t.deref().unbox().box();
   auto const noNull = rawBoxed - TBoxedUninit;
-  return noNull.ptr(remove_ref(t.ptrKind()));
+  return noNull.ptr(t.ptrKind() - Ptr::Ref);
 }
 
 Type allocObjReturn(const IRInstruction* inst) {

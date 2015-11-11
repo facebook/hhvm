@@ -93,7 +93,7 @@ AliasClass pointee(const SSATmp* ptr) {
       return AElemAny;
     };
 
-    if (typeNR <= TPtrToArrGen) {
+    if (typeNR <= TPtrToElemGen) {
       if (sinst->is(LdPackedArrayElemAddr)) return elem();
       return AElemAny;
     }
@@ -123,7 +123,7 @@ AliasClass pointee(const SSATmp* ptr) {
   if (typeNR.maybe(TPtrToStkGen))     ret = ret | AStackAny;
   if (typeNR.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
   if (typeNR.maybe(TPtrToPropGen))    ret = ret | APropAny;
-  if (typeNR.maybe(TPtrToArrGen))     ret = ret | AElemAny;
+  if (typeNR.maybe(TPtrToElemGen))    ret = ret | AElemAny;
   if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateTV;
   if (typeNR.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;

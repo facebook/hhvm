@@ -1384,9 +1384,9 @@ To string conversions:
     bool                Bool              source, destination
     int64_t             Int               source, destination
     double              Dbl               source, destination
-    const String&       PtrToString       source
-    const Array&        PtrToArray        source
-    const Object&       PtrToObject       source
+    const String&       PtrToStr          source
+    const Array&        PtrToArr          source
+    const Object&       PtrToObj          source
     const Variant&      PtrToGen          source
     Variant&            PtrToGen          source (ref param)
     String              {Str|InitNull}    destination
@@ -2280,7 +2280,7 @@ fields of that struct for holding intermediate values.
 
 | ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-| ElemArrayD, D(PtrToArrGen), S(PtrToGen) S(Int,Str), MElem|Er
+| ElemArrayD, D(PtrToElemGen), S(PtrToGen) S(Int,Str), MElem|Er
 
 | ElemArrayU, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
 
@@ -2458,7 +2458,7 @@ fields of that struct for holding intermediate values.
   Checks that the index in S1 is within the bounds of the packed array in S0.
   Branches to B if the index is out of bounds.
 
-| LdPackedArrayElemAddr<T>, DParamPtr(Arr), AK(Packed) S(Int), NF
+| LdPackedArrayElemAddr<T>, DParamPtr(Elem), AK(Packed) S(Int), NF
 
   Load the address of the element at index S1 of the packed array in S0.
 

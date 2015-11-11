@@ -219,7 +219,7 @@ static Variant impl_assert(const Variant& assertion,
     auto const str = !assertion.isString()
       ? " failed"
       : concat3(" \"",  assertion.toString(), "\" failed");
-    raise_warning("%s%s", name.data(),  str.data());
+    raise_warning("assert(): %s%s", name.data(),  str.data());
   }
   if (s_option_data->assertBail) {
     throw ExitException(1);

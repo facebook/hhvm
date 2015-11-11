@@ -229,7 +229,6 @@ SSLSocket::SSLSocket(int sockfd, int type, const req::ptr<StreamContext>& ctx,
 SSLSocket::~SSLSocket() { }
 
 void SSLSocket::sweep() {
-  SSLSocket::closeImpl();
   File::sweep();
   m_data = nullptr;
 }

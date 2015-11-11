@@ -54,9 +54,7 @@ void for_each_strong_iterator(Fn fn) {
   fn(tl_miter_table.ents[4]);
   fn(tl_miter_table.ents[5]);
   fn(tl_miter_table.ents[6]);
-#ifndef MSVC_NO_CONSTEXPR_ARRAY_MEMBER_SIZE
-  static_assert(tl_miter_table.ents.size() == 7, "");
-#endif
+  static_assert(tl_miter_table.ents_size == 7, "");
   if (UNLIKELY(!tl_miter_table.extras.empty())) {
     for_each_strong_iterator_slow(fn);
   }

@@ -208,30 +208,17 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#if defined(_MSC_VER) && _MSC_FULL_VER <= 190023026 // 2015 RTM or below
-// This is a terrible hack that I wish wasn't needed :(
-// It is due to MSVC 2015's initial release not allowing
-// you to do an offsetof within a constexpr member function.
-// It's allowed at the global scope, but that still requires
-// the fields to be public.
-// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1414341
-// This should be fixed in Update 1, whenever that gets released.
-# define MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF 1
-
-// MSVC2015's initial release has an issue with getting
-// function pointers to templated functions if the expected
-// result type isn't auto.
-// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1464651
+#if defined(_MSC_VER) && _MSC_FULL_VER <= 190023419 // 2015 Update 1 RC or below
+// MSVC2015 has an issue with getting function pointers to templated functions
+// if the expected result type isn't auto. Unfortunately, when I made the
+// initial bug report, I oversimplified the use-case, and, while the case I
+// reported was indeed fixed in Update 1 RC, none of our actual uses of it were
+// fixed.
+// This is being tracked at MS as #163251.
 # define MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD 1
-// 2015 RTM doesn't let you use constexpr constructors for types with unions that
-// contain members that have bitfields.
-// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1571281
-# define MSVC_NO_UNION_BITFIELD_CONSTEXPR_CONSTRUCTOR 1
 // 2015 RTM doesn't like it when you try to add via a double duration.
+// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1839243
 # define MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD 1
-// 2015 RTM doesn't like letting you get the size of tl_miter_table.ents, even
-// though it's a constexpr member in a context that is viably constexpr.
-# define MSVC_NO_CONSTEXPR_ARRAY_MEMBER_SIZE 1
 #endif
 
 #endif

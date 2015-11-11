@@ -932,14 +932,10 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-#define OFF(f) static constexpr ptrdiff_t f##Off();
-#else
 #define OFF(f)                          \
   static constexpr ptrdiff_t f##Off() { \
     return offsetof(Class, m_##f);      \
   }
-#endif
   OFF(classVec)
   OFF(classVecLen)
   OFF(instanceBits)
@@ -1200,13 +1196,7 @@ private:
   mutable rds::Link<Array> m_nonScalarConstantCache{rds::kInvalidHandle};
 
   LowPtr<Func> m_toString;
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-public:
-#endif
   LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-private:
-#endif
 
   ConstMap m_constants;
 
@@ -1237,13 +1227,7 @@ private:
   PropInitVec m_declPropInit;
   FixedVector<const Func*> m_pinitVec;
   SPropMap m_staticProperties;
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-public:
-#endif
   PreClassPtr m_preClass;
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-private:
-#endif
   InterfaceMap m_interfaces;
 
   /*
@@ -1251,13 +1235,7 @@ private:
    * to a commonly used class name, determined during the profiling warmup
    * requests.
    */
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-public:
-#endif
   InstanceBits::BitSet m_instanceBits;
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-private:
-#endif
   MethodMap m_methods;
 
   /*
@@ -1273,16 +1251,10 @@ private:
   mutable rds::Link<TypedValue>* m_sPropCache{nullptr};
   mutable rds::Link<bool> m_sPropCacheInit{rds::kInvalidHandle};
 
-  veclen_t m_funcVecLen;
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-public:
-#endif
   veclen_t m_classVecLen;
+  veclen_t m_funcVecLen;
   veclen_t m_vtableVecLen{0};
   LowPtr<VtableVecSlot> m_vtableVec{nullptr};
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-private:
-#endif
 
   /*
    * Each ObjectData is created with enough trailing space to directly store
@@ -1298,13 +1270,7 @@ private:
 
   MaybeDataType m_enumBaseTy;
   uint16_t m_ODAttrs;
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-public:
-#endif
   mutable rds::Link<PropInitVec*> m_propDataCache{rds::kInvalidHandle};
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-private:
-#endif
 
   /*
    * Whether the Class requires initialization, because it has either
@@ -1320,32 +1286,12 @@ private:
    */
   unsigned m_attrCopy : 28;
 
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-public:
-#endif
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including
    * this Class as the last element.
    */
   LowPtr<Class> m_classVec[1]; // Dynamically sized; must come last.
 };
-
-#ifdef MSVC_NO_CONSTEXPR_MEMBER_OFFSETOF
-#define OFF(f)                          \
-  static constexpr ptrdiff_t Class_##f##Off = offsetof(Class, m_##f); \
-  constexpr ptrdiff_t Class::f##Off() { \
-    return Class_##f##Off;      \
-  }
-OFF(classVec)
-OFF(classVecLen)
-OFF(instanceBits)
-OFF(invoke)
-OFF(preClass)
-OFF(propDataCache)
-OFF(vtableVecLen)
-OFF(vtableVec)
-#undef OFF
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

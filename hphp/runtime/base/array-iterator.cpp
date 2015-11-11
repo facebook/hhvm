@@ -596,9 +596,7 @@ X(3);
 X(4);
 X(5);
 X(6);
-#ifndef MSVC_NO_CONSTEXPR_ARRAY_MEMBER_SIZE
-  static_assert(tl_miter_table.ents.size() == 7, "");
-#endif
+  static_assert(tl_miter_table.ents_size == 7, "");
 #undef X
   return find_empty_strong_iter_slower();
 }
@@ -660,9 +658,7 @@ void free_strong_iterator_impl(Cond cond) {
   rm(tl_miter_table.ents[4]);
   rm(tl_miter_table.ents[5]);
   rm(tl_miter_table.ents[6]);
-#ifndef MSVC_NO_CONSTEXPR_ARRAY_MEMBER_SIZE
-  static_assert(tl_miter_table.ents.size() == 7, "");
-#endif
+  static_assert(tl_miter_table.ents_size == 7, "");
 
   if (UNLIKELY(pvalid != nullptr)) {
     std::swap(*pvalid, tl_miter_table.ents[0]);

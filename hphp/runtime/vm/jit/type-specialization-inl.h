@@ -127,11 +127,8 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
-constexpr inline ArraySpec::ArraySpec() :
-#ifdef MSVC_NO_UNION_BITFIELD_CONSTEXPR_CONSTRUCTOR
-    m_bits(),
-#endif
-    m_sort(IsTop)
+constexpr inline ArraySpec::ArraySpec()
+  : m_sort(IsTop)
   , m_kind(ArrayData::ArrayKind{})
   , m_ptr(0)
 {}
@@ -201,11 +198,8 @@ inline ArraySpec::SortOf operator&(ArraySpec::SortOf l, ArraySpec::SortOf r) {
 ///////////////////////////////////////////////////////////////////////////////
 // ClassSpec.
 
-constexpr inline ClassSpec::ClassSpec() :
-#ifdef MSVC_NO_UNION_BITFIELD_CONSTEXPR_CONSTRUCTOR
-    m_bits(),
-#endif
-    m_sort(IsTop)
+constexpr inline ClassSpec::ClassSpec()
+  : m_sort(IsTop)
   , m_ptr(0)
 {}
 

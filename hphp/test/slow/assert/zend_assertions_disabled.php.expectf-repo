@@ -7,6 +7,5 @@ Warning: zend.assertions may be completely enabled or disabled only in php.ini i
 bool(true)
 string(2) "-1"
 in construct
-in toString
 
 Fatal error: assert should not be called dynamically in %s on line 31

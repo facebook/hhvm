@@ -31,7 +31,10 @@
 #include <vector>
 
 #ifdef __APPLE__
-#include <dispatch/dispatch.h>
+# include <dispatch/dispatch.h>
+#elif defined(_MSC_VER)
+# include <agents.h>
+# include <ppltasks.h>
 #endif
 
 namespace HPHP {
@@ -66,7 +69,7 @@ private:
   dispatch_source_t m_timerSource;
   dispatch_group_t m_timerGroup;
 #elif defined(_MSC_VER)
-  // Dummy implmeentation only.
+  concurrency::task_completion_event<void>* m_tce;
 #else
   clockid_t m_clockType;
   timer_t m_timer_id;      // id of our timer

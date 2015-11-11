@@ -1,0 +1,12 @@
+
+Warning: zend.assertions may be completely enabled or disabled only in php.ini in %s on line 17
+bool(true)
+-
+
+Warning: zend.assertions may be completely enabled or disabled only in php.ini in %s on line 23
+bool(true)
+string(2) "-1"
+in construct
+in toString
+
+Warning: assert(): toString failed in %s on line 31

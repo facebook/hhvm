@@ -139,9 +139,11 @@ namespace Compiler {
 TRACE_SET_MOD(emitter);
 
 const StaticString
+  s_ini_get("ini_get"),
+  s_is_deprecated("deprecated function"),
   s_trigger_error("trigger_error"),
   s_trigger_sampled_error("trigger_sampled_error"),
-  s_is_deprecated("deprecated function");
+  s_zend_assertions("zend.assertions");
 
 using uchar = unsigned char;
 
@@ -4136,6 +4138,40 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           return true;
         }
       }
+    } else if (call->isCallToFunction("assert")) {
+      // Special-case some logic around emitting assert(), or jumping around
+      // it. This all applies only for direct calls to assert() -- dynamic
+      // calls don't get this special logic, and don't in PHP7 either.
+
+      if (!RuntimeOption::AssertEmitted) {
+        e.True();
+        return true;
+      }
+
+      // We need to emit an ini_get around all asserts to check if the
+      // zend.assertions option is enabled -- you can switch between 0 and 1
+      // at runtime, and having it set to 0 disables the assert from running,
+      // including side effects of function arguments, so we need to jump
+      // around it if so. (The -1 value of zend.assertions corresponds to
+      // AssertEmitted being set to 0 above, and is not changeable at
+      // runtime.)
+      Label disabled, after;
+      e.String(s_zend_assertions.get());
+      e.FCallBuiltin(1, 1, s_ini_get.get());
+      e.UnboxRNop();
+      e.Int(0);
+      e.Gt();
+      e.JmpZ(disabled);
+
+      emitFuncCall(e, call, "__SystemLib\\assert", call->getParams());
+      emitConvertToCell(e);
+      e.Jmp(after);
+
+      disabled.set(e);
+      e.True();
+
+      after.set(e);
+      return true;
     } else if (emitSystemLibVarEnvFunc(e, call)) {
       return true;
     } else if (call->isCallToFunction("array_slice") &&
@@ -7792,9 +7828,6 @@ bool EmitterVisitor::emitSystemLibVarEnvFunc(Emitter& e,
   if (call->isCallToFunction("extract")) {
     emitFuncCall(e, call,
                  "__SystemLib\\extract", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("assert")) {
-    emitFuncCall(e, call, "__SystemLib\\assert", call->getParams());
     return true;
   } else if (call->isCallToFunction("parse_str")) {
     emitFuncCall(e, call, "__SystemLib\\parse_str", call->getParams());

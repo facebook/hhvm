@@ -476,6 +476,27 @@ void RequestInjectionData::threadInit() {
                    "zlib.output_compression", &m_gzipCompression);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
+
+  // Assertions
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "zend.assertions", "1",
+    IniSetting::SetAndGet<int64_t>(
+      [this](const int64_t& value) {
+        if ((value >= 0) != RuntimeOption::AssertEmitted) {
+          // Setting the option to < 0 changes a RuntimeOption which affects
+          // bytecode emission, so you can't move between < 0 and >= 0 at
+          // runtime. (This is also a restriction in PHP7 for similar reasons.)
+          raise_warning("zend.assertions may be completely enabled or "
+            "disabled only in php.ini");
+          return false;
+        }
+        m_zendAssertions = value;
+        return true;
+      },
+      [this]() {
+        return m_zendAssertions;
+      }
+    ));
 }
 
 std::string RequestInjectionData::getDefaultIncludePath() {

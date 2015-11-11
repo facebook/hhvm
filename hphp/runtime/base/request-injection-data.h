@@ -318,6 +318,7 @@ private:
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
   int64_t m_maxMemoryNumeric;
+  int64_t m_zendAssertions;
 
   /*
    * Keep track of the open_basedir_separator that may be used so we can

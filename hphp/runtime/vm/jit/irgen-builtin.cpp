@@ -197,6 +197,12 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
 
   // We can only optimize settings that are system wide since user level
   // settings can be overridden during the execution of a request.
+  //
+  // TODO: the above is true for settings whose value we burn directly into the
+  // TC, but for non-system settings, we can optimize them as a load from the
+  // known static address or thread-local address of where the setting lives.
+  // This might be worth doing specifically for the zend.assertions setting,
+  // for which the emitter emits an ini_get around every call to assert().
   auto const settingName = top(env,
                                BCSPOffset{0})->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;

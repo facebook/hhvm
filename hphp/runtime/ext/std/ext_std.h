@@ -32,7 +32,10 @@ class StandardExtension final : public Extension {
     threadInitMisc();
   }
 
-  void requestInit() override;
+  void requestInit() override {
+    requestInitMath();
+    requestInitOptions();
+  }
  private:
   void initStandard();
   void initErrorFunc();
@@ -51,6 +54,9 @@ class StandardExtension final : public Extension {
   void initMath();
 
   void threadInitMisc();
+
+  void requestInitMath();
+  void requestInitOptions();
 };
 
 /////////////////////////////////////////////////////////////////////////////

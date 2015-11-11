@@ -112,8 +112,6 @@ int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::WarnTooManyArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;
-bool RuntimeOption::AssertActive = false;
-bool RuntimeOption::AssertWarning = false;
 int64_t RuntimeOption::NoticeFrequency = 1;
 int64_t RuntimeOption::WarningFrequency = 1;
 int RuntimeOption::RaiseDebuggingFrequency = 1;
@@ -900,8 +898,6 @@ void RuntimeOption::Load(
                  "ErrorHandling.WarnTooManyArguments");
     Config::Bind(EnableHipHopErrors, ini, config,
                  "ErrorHandling.EnableHipHopErrors", true);
-    Config::Bind(AssertActive, ini, config, "ErrorHandling.AssertActive");
-    Config::Bind(AssertWarning, ini, config, "ErrorHandling.AssertWarning");
     Config::Bind(NoticeFrequency, ini, config, "ErrorHandling.NoticeFrequency",
                  1);
     Config::Bind(WarningFrequency, ini, config,

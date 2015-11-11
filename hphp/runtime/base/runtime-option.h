@@ -97,8 +97,6 @@ public:
   static bool NoInfiniteRecursionDetection;
   static bool WarnTooManyArguments;
   static bool EnableHipHopErrors;
-  static bool AssertActive;
-  static bool AssertWarning;
   static int64_t NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int64_t WarningFrequency;
   static int RaiseDebuggingFrequency;

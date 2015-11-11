@@ -74,8 +74,8 @@ const int64_t k_ASSERT_QUIET_EVAL  = 5;
 
 struct OptionData final : RequestEventHandler {
   void requestInit() override {
-    assertActive = RuntimeOption::AssertActive ? 1 : 0;
-    assertWarning = RuntimeOption::AssertWarning ? 1 : 0;
+    assertActive = 0;
+    assertWarning = 0;
     assertBail = 0;
     assertQuietEval = false;
   }
@@ -98,6 +98,15 @@ struct OptionData final : RequestEventHandler {
 IMPLEMENT_STATIC_REQUEST_LOCAL(OptionData, s_option_data);
 
 /////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::requestInitOptions() {
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "assert.active", "0", &s_option_data->assertActive);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "assert.warning", "0", &s_option_data->assertWarning);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "assert.bail", "0", &s_option_data->assertBail);
+}
 
 static Variant HHVM_FUNCTION(assert_options,
                              int64_t what, const Variant& value /*=null */) {

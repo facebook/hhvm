@@ -1888,7 +1888,9 @@ void insertCopiesAt(const VxlsContext& ctx,
     } else if (ivl->constant) {
       if (ivl->val.isUndef) continue;
 
-      auto const use_xor = ivl->val.val == 0 && dst.isGP() && !sf_live(pos);
+      // Other archs can zero a register without mutating status flags
+      auto const use_xor = arch() == Arch::X64 &&
+                           ivl->val.val == 0 && dst.isGP() && !sf_live(pos);
 
       switch (ivl->val.kind) {
         case Vconst::Quad:

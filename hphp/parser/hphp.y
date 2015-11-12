@@ -761,6 +761,18 @@ top_statement:
   | T_USE T_CONST
     use_declarations ';'               { _p->onUse($3, &Parser::useConst);
                                          _p->nns(); $$.reset();}
+  | T_USE group_use_prefix
+    '{' mixed_use_declarations '}' ';' { _p->onGroupUse($2.text(), $4,
+                                           nullptr);
+                                         _p->nns(); $$.reset();}
+  | T_USE T_FUNCTION group_use_prefix
+    '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
+                                           &Parser::useFunction);
+                                         _p->nns(); $$.reset();}
+  | T_USE T_CONST group_use_prefix
+    '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
+                                           &Parser::useConst);
+                                         _p->nns(); $$.reset();}
   | constant_declaration ';'           { _p->nns();
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;
@@ -848,6 +860,12 @@ ident:
   | T_CLASS
 ;
 
+group_use_prefix:
+    namespace_name T_NS_SEPARATOR      { $$ = $1;}
+  | T_NS_SEPARATOR
+    namespace_name T_NS_SEPARATOR      { $$ = $2;}
+;
+
 use_declarations:
     use_declarations ','
     use_declaration                    { _p->addStatement($$,$1,$3);}
@@ -862,6 +880,22 @@ use_declaration:
     T_AS ident_no_semireserved      { _p->onUseDeclaration($$, $1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
     T_AS ident_no_semireserved      { _p->onUseDeclaration($$, $2.text(),$4.text());}
+;
+
+mixed_use_declarations:
+    mixed_use_declarations ','
+    mixed_use_declaration              { _p->addStatement($$,$1,$3);}
+  | mixed_use_declaration              { $$.reset();
+                                         _p->addStatement($$,$$,$1);}
+;
+
+mixed_use_declaration:
+    use_declaration                    { _p->onMixedUseDeclaration($$, $1,
+                                           &Parser::useClass);}
+  | T_FUNCTION use_declaration         { _p->onMixedUseDeclaration($$, $2,
+                                           &Parser::useFunction);}
+  | T_CONST use_declaration            { _p->onMixedUseDeclaration($$, $2,
+                                           &Parser::useConst);}
 ;
 
 namespace_name:

@@ -316,12 +316,39 @@ public:
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
 
-  void onUseDeclaration(Token& out, const std::string &ns,
-                                    const std::string &as);
-
   typedef void (Parser::*UseDeclarationConsumer)
     (const std::string&, const std::string&);
+
+  void onUseDeclaration(Token& out, const std::string &ns,
+                                    const std::string &as);
+  void onMixedUseDeclaration(Token &out,
+                             Token &use, UseDeclarationConsumer f);
+
+  /*
+   * The consumer parameter here vs the mixed_consumer in the
+   * UseDeclarationStatementFragment is annoying. The gist is that the following
+   * are both valid:
+   *
+   *   use function Foo\{Bar, Baz};
+   *   use Foo\{function Bar, function Baz};
+   *
+   * This means that we need to track the type of the use with each individual
+   * element in the latter "mixed" case, but also need to be able to specify it
+   * for the whole clause in the former case. Thankfully, you can't mix the two,
+   * so we can have some assertions around this.
+   *
+   * In the former case, the mixed_consumer member will always be nullptr, and
+   * the consumer parameter to these two following functions must be specified.
+   * In the latter case, the mixed_consumer member will always be specified, and
+   * the consumer parameter to these two following function must be nullptr.
+   *
+   * This means exactly one will be non-null, and we can assert that the other
+   * is null.
+   */
   void onUse(const Token &tok, UseDeclarationConsumer f);
+  void onGroupUse(const std::string &prefix, const Token &tok,
+                  UseDeclarationConsumer f);
+
   void useClass(const std::string &fn, const std::string &as);
   void useFunction(const std::string &fn, const std::string &as);
   void useConst(const std::string &cnst, const std::string &as);

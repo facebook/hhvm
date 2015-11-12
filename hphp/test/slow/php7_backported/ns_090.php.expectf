@@ -1,0 +1,11 @@
+Foo\Bar\Baz\A::__construct
+Foo\Bar\Baz\B::__construct
+Foo\Bar\Baz\C::__construct
+Foo\Bar\Baz\D::__construct
+Fiz\Biz\Buz\C::__construct
+Foo\Bar\Baz\foo
+Foo\Bar\Baz\bar
+Fiz\Biz\Buz\bar
+int(0)
+int(1)
+int(100)

@@ -2522,7 +2522,18 @@ void Parser::onUseDeclaration(Token& out, const std::string &ns,
   out.stmt = NEW_STMT(UseDeclarationStatementFragment, ns, as);
 }
 
+void Parser::onMixedUseDeclaration(Token &out,
+                                   Token &use, UseDeclarationConsumer f) {
+  assert(f);
+  assert(use.stmt->is(Construct::KindOfUseDeclarationStatementFragment));
+  auto frag =
+    static_pointer_cast<UseDeclarationStatementFragment>(use.stmt);
+  frag->mixed_consumer = f;
+  out.stmt = frag;
+}
+
 void Parser::onUse(const Token &tok, UseDeclarationConsumer f) {
+  assert(f);
   assert(tok.stmt->is(Construct::KindOfStatementList));
   auto const stmts = static_pointer_cast<StatementList>(tok.stmt);
   for (int i = 0; i < stmts->getCount(); i++) {
@@ -2530,7 +2541,32 @@ void Parser::onUse(const Token &tok, UseDeclarationConsumer f) {
       Construct::KindOfUseDeclarationStatementFragment));
     auto const frag = static_pointer_cast<UseDeclarationStatementFragment>(
       stmts->getNthKid(i));
+    assert(!frag->mixed_consumer);
     (this->*f)(frag->ns, frag->as);
+  }
+}
+
+void Parser::onGroupUse(const std::string &prefix, const Token &tok,
+                        UseDeclarationConsumer f) {
+  assert(tok.stmt->is(Construct::KindOfStatementList));
+  auto const stmts = static_pointer_cast<StatementList>(tok.stmt);
+  for (int i = 0; i < stmts->getCount(); i++) {
+    assert(stmts->getNthKid(i)->is(
+      Construct::KindOfUseDeclarationStatementFragment));
+    auto const frag = static_pointer_cast<UseDeclarationStatementFragment>(
+      stmts->getNthKid(i));
+
+    auto const ns = prefix + "\\" + frag->ns;
+    UseDeclarationConsumer consumer;
+    if (f) {
+      assert(!frag->mixed_consumer);
+      consumer = f;
+    } else {
+      assert(frag->mixed_consumer);
+      consumer = frag->mixed_consumer;
+    }
+
+    (this->*consumer)(ns, frag->as);
   }
 }
 

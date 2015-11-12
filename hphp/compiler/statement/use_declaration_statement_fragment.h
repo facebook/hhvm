@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_USE_DECLARATION_STATEMENT_FRAGMENT_H_
 #define incl_HPHP_USE_DECLARATION_STATEMENT_FRAGMENT_H_
 
+#include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
@@ -32,12 +33,13 @@ DECLARE_BOOST_TYPES(UseDeclarationStatementFragment);
 struct UseDeclarationStatementFragment : public Statement {
   std::string ns;
   std::string as;
+  Compiler::Parser::UseDeclarationConsumer mixed_consumer;
 
   UseDeclarationStatementFragment(STATEMENT_CONSTRUCTOR_PARAMETERS,
                                   std::string ns, std::string as)
     : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(
           UseDeclarationStatementFragment)),
-      ns(ns), as(as) {
+      ns(ns), as(as), mixed_consumer(nullptr) {
   }
 
   void analyzeProgram(AnalysisResultPtr ar) override {

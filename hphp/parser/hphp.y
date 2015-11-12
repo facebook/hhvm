@@ -753,11 +753,14 @@ top_statement:
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $5;}
   | T_NAMESPACE '{'                    { _p->onNamespaceStart("");}
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $4;}
-  | T_USE use_declarations ';'         { _p->nns(); $$.reset();}
+  | T_USE use_declarations ';'         { _p->onUse($2, &Parser::useClass);
+                                         _p->nns(); $$.reset();}
   | T_USE T_FUNCTION
-    use_fn_declarations ';'            { _p->nns(); $$.reset();}
+    use_declarations ';'               { _p->onUse($3, &Parser::useFunction);
+                                         _p->nns(); $$.reset();}
   | T_USE T_CONST
-    use_const_declarations ';'         { _p->nns(); $$.reset();}
+    use_declarations ';'               { _p->onUse($3, &Parser::useConst);
+                                         _p->nns(); $$.reset();}
   | constant_declaration ';'           { _p->nns();
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;
@@ -847,44 +850,18 @@ ident:
 
 use_declarations:
     use_declarations ','
-    use_declaration                    { }
-  | use_declaration                    { }
-;
-
-use_fn_declarations:
-    use_fn_declarations ','
-    use_fn_declaration                 { }
-  | use_fn_declaration                 { }
-;
-
-use_const_declarations:
-    use_const_declarations ','
-    use_const_declaration              { }
-  | use_const_declaration              { }
+    use_declaration                    { _p->addStatement($$,$1,$3);}
+  | use_declaration                    { $$.reset();
+                                         _p->addStatement($$,$$,$1);}
 ;
 
 use_declaration:
-    namespace_name                     { _p->onUse($1.text(),"");}
-  | T_NS_SEPARATOR namespace_name      { _p->onUse($2.text(),"");}
-  | namespace_name T_AS ident_no_semireserved          { _p->onUse($1.text(),$3.text());}
+    namespace_name                  { _p->onUseDeclaration($$, $1.text(),"");}
+  | T_NS_SEPARATOR namespace_name   { _p->onUseDeclaration($$, $2.text(),"");}
+  | namespace_name
+    T_AS ident_no_semireserved      { _p->onUseDeclaration($$, $1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
-    T_AS ident_no_semireserved                         { _p->onUse($2.text(),$4.text());}
-;
-
-use_fn_declaration:
-    namespace_name                     { _p->onUseFunction($1.text(),"");}
-  | T_NS_SEPARATOR namespace_name      { _p->onUseFunction($2.text(),"");}
-  | namespace_name T_AS ident_no_semireserved          { _p->onUseFunction($1.text(),$3.text());}
-  | T_NS_SEPARATOR namespace_name
-    T_AS ident_no_semireserved                         { _p->onUseFunction($2.text(),$4.text());}
-;
-
-use_const_declaration:
-    namespace_name                     { _p->onUseConst($1.text(),"");}
-  | T_NS_SEPARATOR namespace_name      { _p->onUseConst($2.text(),"");}
-  | namespace_name T_AS ident_no_semireserved          { _p->onUseConst($1.text(),$3.text());}
-  | T_NS_SEPARATOR namespace_name
-    T_AS ident_no_semireserved                         { _p->onUseConst($2.text(),$4.text());}
+    T_AS ident_no_semireserved      { _p->onUseDeclaration($$, $2.text(),$4.text());}
 ;
 
 namespace_name:

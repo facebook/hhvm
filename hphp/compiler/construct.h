@@ -103,7 +103,8 @@ public:
   x(ClassRequireStatement)  \
   x(TraitPrecStatement)     \
   x(TraitAliasStatement)    \
-  x(TypedefStatement)
+  x(TypedefStatement)       \
+  x(UseDeclarationStatementFragment)
 
 #define DECLARE_EXPRESSION_TYPES(x)     \
   x(Expression,                  None) \

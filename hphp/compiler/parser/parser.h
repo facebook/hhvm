@@ -316,9 +316,15 @@ public:
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
 
-  void onUse(const std::string &ns, const std::string &as);
-  void onUseFunction(const std::string &fn, const std::string &as);
-  void onUseConst(const std::string &cnst, const std::string &as);
+  void onUseDeclaration(Token& out, const std::string &ns,
+                                    const std::string &as);
+
+  typedef void (Parser::*UseDeclarationConsumer)
+    (const std::string&, const std::string&);
+  void onUse(const Token &tok, UseDeclarationConsumer f);
+  void useClass(const std::string &fn, const std::string &as);
+  void useFunction(const std::string &fn, const std::string &as);
+  void useConst(const std::string &cnst, const std::string &as);
 
   /*
    * Get the current label scope. A new label scope is demarcated by

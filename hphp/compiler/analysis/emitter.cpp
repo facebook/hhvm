@@ -4893,6 +4893,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     resume.set(e);
     return true;
   }
+  case Construct::KindOfUseDeclarationStatementFragment:
   case Construct::KindOfExpression: {
     not_reached();
   }

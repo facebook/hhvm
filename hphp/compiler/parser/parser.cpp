@@ -85,6 +85,7 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
+#include "hphp/compiler/statement/use_declaration_statement_fragment.h"
 
 #include "hphp/compiler/analysis/function_scope.h"
 
@@ -2516,7 +2517,24 @@ void Parser::onNamespaceEnd() {
   }
 }
 
-void Parser::onUse(const std::string &ns, const std::string &as) {
+void Parser::onUseDeclaration(Token& out, const std::string &ns,
+                                          const std::string &as) {
+  out.stmt = NEW_STMT(UseDeclarationStatementFragment, ns, as);
+}
+
+void Parser::onUse(const Token &tok, UseDeclarationConsumer f) {
+  assert(tok.stmt->is(Construct::KindOfStatementList));
+  auto const stmts = static_pointer_cast<StatementList>(tok.stmt);
+  for (int i = 0; i < stmts->getCount(); i++) {
+    assert(stmts->getNthKid(i)->is(
+      Construct::KindOfUseDeclarationStatementFragment));
+    auto const frag = static_pointer_cast<UseDeclarationStatementFragment>(
+      stmts->getNthKid(i));
+    (this->*f)(frag->ns, frag->as);
+  }
+}
+
+void Parser::useClass(const std::string &ns, const std::string &as) {
   if (ns == "strict") {
     if (m_scanner.isHHSyntaxEnabled()) {
       error("To use strict hack, place // strict after the open tag. "
@@ -2561,7 +2579,7 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   m_nsAliasTable.set(key, ns, AliasType::USE, line1());
 }
 
-void Parser::onUseFunction(const std::string &fn, const std::string &as) {
+void Parser::useFunction(const std::string &fn, const std::string &as) {
   auto const key = fully_qualified_name_as_alias_key(fn, as);
 
   if (m_fnTable.count(key) || m_fnAliasTable.count(key)) {
@@ -2573,7 +2591,7 @@ void Parser::onUseFunction(const std::string &fn, const std::string &as) {
   m_fnAliasTable[key] = fn;
 }
 
-void Parser::onUseConst(const std::string &cnst, const std::string &as) {
+void Parser::useConst(const std::string &cnst, const std::string &as) {
   auto const key = fully_qualified_name_as_alias_key(cnst, as);
 
   if (m_cnstTable.count(key) || m_cnstAliasTable.count(key)) {

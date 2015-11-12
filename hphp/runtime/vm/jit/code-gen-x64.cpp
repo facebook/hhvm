@@ -2184,6 +2184,7 @@ float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
 void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                                const OptDecRefProfile& profile,
                                bool unlikelyDestroy) {
+  auto const llvm = mcg->useLLVM();
   auto const ty   = inst->src(0)->type();
   auto const base = srcLoc(inst, 0).reg(0);
 
@@ -2194,17 +2195,12 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
       v << incwm{rvmtl()[profile->handle() + offsetof(DecRefProfile, destroy)],
                  v.makeReg()};
     }
-
-    cgCallHelper(
-      v,
-      ty.isKnownDataType()
-        ? mcg->getDtorCall(ty.toDataType())
-        : CallSpec::destruct(srcLoc(inst, 0).reg(1)),
-      kVoidDest,
-      SyncOptions::Sync,
-      argGroup(inst)
-        .reg(base)
-    );
+    // LLVM backend doesn't support CallSpec::Array
+    auto dtor = ty <= TArr && !llvm ? CallSpec::array(&g_array_funcs.release) :
+                ty.isKnownDataType() ? mcg->getDtorCall(ty.toDataType()) :
+                CallSpec::destruct(srcLoc(inst, 0).reg(1));
+    cgCallHelper(v, dtor, kVoidDest, SyncOptions::Sync,
+                 argGroup(inst).reg(base));
   };
 
   emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl

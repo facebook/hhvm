@@ -30,6 +30,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/abi-cxx.h"
 
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -2184,6 +2185,9 @@ float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
 void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                                const OptDecRefProfile& profile,
                                bool unlikelyDestroy) {
+  static const auto TPackedArr = Type::Array(ArrayData::kPackedKind);
+  static const auto TMixedArr = Type::Array(ArrayData::kMixedKind);
+  static const auto TApcArr = Type::Array(ArrayData::kApcKind);
   auto const llvm = mcg->useLLVM();
   auto const ty   = inst->src(0)->type();
   auto const base = srcLoc(inst, 0).reg(0);
@@ -2196,7 +2200,10 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                  v.makeReg()};
     }
     // LLVM backend doesn't support CallSpec::Array
-    auto dtor = ty <= TArr && !llvm ? CallSpec::array(&g_array_funcs.release) :
+    auto dtor = ty <= TPackedArr ? CallSpec::direct(PackedArray::Release) :
+                ty <= TMixedArr ? CallSpec::direct(MixedArray::Release) :
+                ty <= TApcArr ? CallSpec::direct(APCLocalArray::Release) :
+                ty <= TArr && !llvm ? CallSpec::array(&g_array_funcs.release) :
                 ty.isKnownDataType() ? mcg->getDtorCall(ty.toDataType()) :
                 CallSpec::destruct(srcLoc(inst, 0).reg(1));
     cgCallHelper(v, dtor, kVoidDest, SyncOptions::Sync,

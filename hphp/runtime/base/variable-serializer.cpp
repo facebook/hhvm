@@ -30,7 +30,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

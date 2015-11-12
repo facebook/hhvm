@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/native-data.h"
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/string/ext_string.h"

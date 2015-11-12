@@ -76,7 +76,7 @@
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"

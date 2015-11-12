@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"

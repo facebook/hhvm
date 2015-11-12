@@ -22,11 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void c_StaticWaitHandle::t___construct() {
-  // gen-ext-hhvm requires at least one declared method in the class to work
-  not_reached();
-}
-
 /**
  * Create succeeded StaticWaitHandle object.
  *

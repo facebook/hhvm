@@ -195,22 +195,22 @@ static Array createAsyncStacktrace() {
   auto currentWaitHandle = HHVM_FN(asio_get_running)();
   if (currentWaitHandle.isNull()) return trace;
   Array depStack =
-    objToWaitableWaitHandle(currentWaitHandle)->t_getdependencystack();
+    objToWaitableWaitHandle(currentWaitHandle)->getDependencyStack();
   for (ArrayIter iter(depStack); iter; ++iter) {
     if (iter.secondRef().isNull()) {
       trace.append(Array(staticEmptyArray()));
     } else {
       auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
-      auto parents = wh->t_getparents();
+      auto parents = wh->getParents();
       Array ancestors;
       for (ArrayIter piter(parents); piter; ++piter) {
         // Note: the parent list contains no nulls.
         auto parent = objToWaitableWaitHandle(piter.secondRef().toObject());
-        ancestors.append(parent->t_getname());
+        ancestors.append(parent->getName());
       }
       Array frameData;
-      frameData.set(s_function, wh->t_getname(), true);
-      frameData.set(s_id, wh->t_getid(), true);
+      frameData.set(s_function, wh->getName(), true);
+      frameData.set(s_id, wh->getId(), true);
       frameData.set(s_ancestors, ancestors, true);
       // Async function wait handles may have a source location to add.
       if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction) {

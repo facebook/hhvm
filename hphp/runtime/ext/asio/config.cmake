@@ -59,8 +59,6 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
   SYSTEMLIB
     ext_asio.php
     ext_async-generator.php
-  IDL
-    ../../../system/idl/asio.idl.json
   DEPENDS
     libFolly
 )

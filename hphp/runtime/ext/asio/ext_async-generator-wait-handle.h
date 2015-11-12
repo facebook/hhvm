@@ -36,14 +36,13 @@ class AsyncGenerator;
 
 class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(AsyncGeneratorWaitHandle)
+  WAITHANDLE_CLASSOF(AsyncGeneratorWaitHandle);
+  WAITHANDLE_DTOR(AsyncGeneratorWaitHandle);
 
   explicit c_AsyncGeneratorWaitHandle(Class* cls =
       c_AsyncGeneratorWaitHandle::classof())
     : c_ResumableWaitHandle(cls) {}
   ~c_AsyncGeneratorWaitHandle();
-
-  void t___construct();
 
  public:
   static constexpr ptrdiff_t blockableOff() {

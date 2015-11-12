@@ -65,6 +65,7 @@ template<class F> void scanHeader(const Header* h, F& mark) {
     case HeaderKind::Globals:
       return h->globals_.scan(mark);
     case HeaderKind::Object:
+    case HeaderKind::WaitHandle:
     case HeaderKind::ResumableObj:
     case HeaderKind::AwaitAllWH:
     case HeaderKind::Vector:

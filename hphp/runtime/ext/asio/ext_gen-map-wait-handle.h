@@ -36,14 +36,12 @@ namespace HPHP {
 class c_Map;
 class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)
+  WAITHANDLE_CLASSOF(GenMapWaitHandle);
+  WAITHANDLE_DTOR(GenMapWaitHandle);
 
   explicit c_GenMapWaitHandle(Class* cls = c_GenMapWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_GenMapWaitHandle() {}
-
-  static void ti_setoncreatecallback(const Variant& callback);
-  static Object ti_create(const Variant& dependencies);
 
  public:
   static constexpr ptrdiff_t blockableOff() {
@@ -66,9 +64,16 @@ class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
   ssize_t m_iterPos;
   AsioBlockable m_blockable;
 
+  friend Object HHVM_STATIC_METHOD(GenMapWaitHandle, create,
+                                   const Object& deps);
  public:
   static const int8_t STATE_BLOCKED = 2;
 };
+
+void HHVM_STATIC_METHOD(GenMapWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+Object HHVM_STATIC_METHOD(GenMapWaitHandle, create,
+                          const Object& deps);
 
 inline c_GenMapWaitHandle* c_WaitHandle::asGenMap() {
   assert(getKind() == Kind::GenMap);

@@ -326,6 +326,7 @@ Marker::operator()(const void* start, size_t len) {
         enqueue(h);
         break;
       case HK::Object:
+      case HK::WaitHandle:
       case HK::AwaitAllWH:
       case HK::Vector:
       case HK::Map:
@@ -397,6 +398,7 @@ void Marker::init() {
         total_ += h->size();
         break;
       case HK::Object:
+      case HK::WaitHandle:
       case HK::Vector:
       case HK::Map:
       case HK::Set:
@@ -478,6 +480,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       // ordinary counted objects
       break;
     case HK::Object:
+    case HK::WaitHandle:
     case HK::Vector:
     case HK::Map:
     case HK::Set:
@@ -541,6 +544,7 @@ void Marker::sweep() {
       case HK::Resource:
       case HK::Ref:
       case HK::Object:
+      case HK::WaitHandle:
       case HK::AwaitAllWH:
       case HK::Vector:
       case HK::Map:

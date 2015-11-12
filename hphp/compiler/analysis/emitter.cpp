@@ -143,7 +143,9 @@ const StaticString
   s_is_deprecated("deprecated function"),
   s_trigger_error("trigger_error"),
   s_trigger_sampled_error("trigger_sampled_error"),
-  s_zend_assertions("zend.assertions");
+  s_zend_assertions("zend.assertions"),
+  s_HH_WaitHandle("HH\\WaitHandle"),
+  s_result("result");
 
 using uchar = unsigned char;
 
@@ -9726,6 +9728,17 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
   return 1;  // Above cases push at most one stack cell.
 }
 
+// HH\WaitHandle::result()
+static int32_t emitWaitHandleResult(UnitEmitter& ue,
+                                    FuncEmitter* fe) {
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
+  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
+  ue.emitOp(OpThis);
+  ue.emitOp(OpWHResult);
+  ue.emitOp(OpRetC);
+  return 1;
+}
+
 // Emit byte codes to implement methods. Return the maximum stack cell count.
 int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
                                              const char* funcName,
@@ -9741,29 +9754,13 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
   } else if (asyncGenCls.same(s_class) &&
       (cmeth = folly::get_ptr(s_asyncGenMethods, s_func))) {
     return emitGeneratorMethod(m_ue, fe, *cmeth, true);
+  } else if (s_HH_WaitHandle.same(s_class) &&
+             s_result.same(s_func)) {
+    return emitWaitHandleResult(m_ue, fe);
   }
 
   throw IncludeTimeFatalException(meth,
     "OpCodeImpl attribute is not applicable to %s", funcName);
-}
-
-static int32_t emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
-                      AttrFinal);
-  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
-  ue.emitOp(OpThis);
-  ue.emitOp(OpRetC);
-  return 1;  // we use one stack slot
-}
-
-static int32_t emitWaitHandleResultMethod(UnitEmitter& ue, FuncEmitter* fe) {
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
-                      AttrFinal);
-  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
-  ue.emitOp(OpThis);
-  ue.emitOp(OpWHResult);
-  ue.emitOp(OpRetC);
-  return 1;  // we use one stack slot
 }
 
 StaticString s_construct("__construct");
@@ -9852,37 +9849,28 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
-      static const StringData* waitHandleCls =
-        makeStaticString("hh\\waithandle");
-      static const StringData* gwhMeth = makeStaticString("getwaithandle");
-      static const StringData* resultMeth = makeStaticString("result");
       StringData* methName = makeStaticString(methodInfo->m_name);
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
       auto stackPad = int32_t{0};
-      if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
-        stackPad = emitGetWaitHandleMethod(*ue, fe);
-      } else if (e.name->isame(waitHandleCls) && methName->isame(resultMeth)) {
-        stackPad = emitWaitHandleResultMethod(*ue, fe);
-      } else {
-        if (e.name->isame(s_construct.get())) {
-          hasCtor = true;
-        }
-
-        // Build the function
-        BuiltinFunction bcf = (BuiltinFunction)methodInfo->m_pGenericMethod;
-        auto nativeFunc = methodInfo->m_nativeFunc;
-        const ClassInfo::MethodInfo* mi =
-          e.ci->getMethodInfo(std::string(methodInfo->m_name));
-        Offset base = ue->bcPos();
-        fe->setBuiltinFunc(mi,
-          bcf,
-          reinterpret_cast<BuiltinFunction>(nativeFunc),
-          base
-        );
-        ue->emitOp(OpNativeImpl);
+      if (e.name->isame(s_construct.get())) {
+        hasCtor = true;
       }
+
+      // Build the function
+      BuiltinFunction bcf = (BuiltinFunction)methodInfo->m_pGenericMethod;
+      auto nativeFunc = methodInfo->m_nativeFunc;
+      const ClassInfo::MethodInfo* mi =
+        e.ci->getMethodInfo(std::string(methodInfo->m_name));
+      Offset base = ue->bcPos();
+      fe->setBuiltinFunc(mi,
+        bcf,
+        reinterpret_cast<BuiltinFunction>(nativeFunc),
+        base
+      );
+      ue->emitOp(OpNativeImpl);
+
       Offset past = ue->bcPos();
       assert(!fe->numIterators());
       fe->maxStackCells = fe->numLocals() + stackPad;

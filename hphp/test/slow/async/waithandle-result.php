@@ -1,7 +1,7 @@
 <?hh
 
 async function blockme(int $n): Awaitable<int> {
-  await RescheduleWaitHandle::create(0, 0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   return $n;
 }
 

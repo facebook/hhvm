@@ -25,11 +25,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class RescheduleWaitHandle
 
-constexpr int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT =
-  AsioContext::QUEUE_DEFAULT;
-constexpr int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
-  AsioContext::QUEUE_NO_PENDING_IO;
-
 /**
  * A wait handle that is enqueued into a given priority queue and once desired
  * execution priority is eligible for execution, it succeeds with a null result.
@@ -38,14 +33,13 @@ constexpr int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
  */
 class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(RescheduleWaitHandle)
+  WAITHANDLE_CLASSOF(RescheduleWaitHandle);
+  WAITHANDLE_DTOR(RescheduleWaitHandle);
 
   explicit c_RescheduleWaitHandle(Class* cls =
       c_RescheduleWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_RescheduleWaitHandle() {}
-
-  static Object ti_create(int64_t queue, int64_t priority);
 
  public:
   void run();
@@ -57,12 +51,18 @@ class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
   void setState(uint8_t state) { setKindState(Kind::Reschedule, state); }
   void initialize(uint32_t queue, int64_t priority);
 
+  friend Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
+                                   int64_t queue, int64_t priority);
+
   uint32_t m_queue;
   int64_t m_priority;
 
  public:
   static const int8_t STATE_SCHEDULED = 2;
 };
+
+Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
+                          int64_t queue, int64_t priority);
 
 inline c_RescheduleWaitHandle* c_WaitHandle::asReschedule() {
   assert(getKind() == Kind::Reschedule);

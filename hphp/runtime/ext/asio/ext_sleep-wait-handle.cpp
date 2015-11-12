@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
@@ -30,15 +31,17 @@ namespace {
   StaticString s_sleep("<sleep>");
 }
 
-void c_SleepWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(SleepWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnSleepCreate(callback);
 }
 
-void c_SleepWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(SleepWaitHandle, setOnSuccessCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnSleepSuccess(callback);
 }
 
-Object c_SleepWaitHandle::ti_create(int64_t usecs) {
+Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs) {
   if (UNLIKELY(usecs < 0)) {
     SystemLib::throwInvalidArgumentExceptionObject(
         "Expected usecs to be a non-negative integer");
@@ -117,6 +120,17 @@ void c_SleepWaitHandle::registerToContext() {
 void c_SleepWaitHandle::unregisterFromContext() {
   AsioContext *ctx = getContext();
   ctx->unregisterFrom(ctx->getSleepEvents(), m_ctxVecIndex);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initSleepWaitHandle() {
+#define SWH_SME(meth) \
+  HHVM_STATIC_MALIAS(HH\\SleepWaitHandle, meth, SleepWaitHandle, meth)
+  SWH_SME(create);
+  SWH_SME(setOnCreateCallback);
+  SWH_SME(setOnSuccessCallback);
+#undef SWH_SWE
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,6 +25,20 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class WaitHandle
 
+void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitEnterCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitExitCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
+                        const Variant& callback);
+void HHVM_METHOD(WaitHandle, import);
+Variant HHVM_METHOD(WaitHandle, join);
+bool HHVM_METHOD(WaitHandle, isFinished);
+bool HHVM_METHOD(WaitHandle, isSucceeded);
+bool HHVM_METHOD(WaitHandle, isFailed);
+int64_t HHVM_METHOD(WaitHandle, getId);
+String HHVM_METHOD(WaitHandle, getName);
+
 /**
  * A wait handle is an object that describes operation that is potentially
  * asynchronous. A WaitHandle class is a base class of all such objects. There
@@ -64,10 +78,35 @@ class c_ConditionWaitHandle;
 class c_RescheduleWaitHandle;
 class c_SleepWaitHandle;
 class c_ExternalThreadEventWaitHandle;
-class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
-                                               ObjectData::NoDestructor> {
+
+#define WAITHANDLE_CLASSOF(cn) \
+  static Class* classof() { \
+    static Class* cls = Unit::lookupClass(makeStaticString("HH\\" #cn)); \
+    return cls; \
+  }
+
+#define WAITHANDLE_DTOR(cn) \
+  static void instanceDtor(ObjectData* obj, const Class*) { \
+    auto wh = wait_handle<c_##cn>(obj); \
+    wh->~c_##cn(); \
+    MM().objFree(obj, sizeof(c_##cn)); \
+  }
+
+template<class T>
+T* wait_handle(const ObjectData* obj) {
+  assert(obj->instanceof(T::classof()));
+  assert(obj->getAttribute(ObjectData::IsWaitHandle));
+  return static_cast<T*>(const_cast<ObjectData*>(obj));
+}
+
+class c_WaitHandle : public ObjectData {
  public:
-  DECLARE_CLASS_NO_SWEEP(WaitHandle)
+  WAITHANDLE_CLASSOF(WaitHandle);
+  WAITHANDLE_DTOR(WaitHandle);
+
+  int64_t getId() const {
+    return ((intptr_t)this) / sizeof(void*);
+  }
 
   enum class Kind : uint8_t {
     Static,
@@ -84,23 +123,13 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
   };
 
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
-                        HeaderKind kind = HeaderKind::Object) noexcept
-    : ExtObjectDataFlags(cls, kind, NoInit{}) {}
+                        HeaderKind kind = HeaderKind::WaitHandle) noexcept
+    : ObjectData(cls,
+                 ObjectData::IsWaitHandle|ObjectData::NoDestructor|
+                   ObjectData::InstanceDtor,
+                 kind,
+                 NoInit{}) {}
   ~c_WaitHandle() {}
-
-  void t___construct();
-  static void ti_setoniowaitentercallback(const Variant& callback);
-  static void ti_setoniowaitexitcallback(const Variant& callback);
-  static void ti_setonjoincallback(const Variant& callback);
-  Object t_getwaithandle();
-  void t_import();
-  Variant t_join();
-  Variant t_result();
-  bool t_isfinished();
-  bool t_issucceeded();
-  bool t_isfailed();
-  int64_t t_getid();
-  String t_getname();
 
  public:
   static constexpr ptrdiff_t stateOff() {

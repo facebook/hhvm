@@ -1,7 +1,7 @@
 <?hh
 
 async function bar($options) {
-  await RescheduleWaitHandle::create(0, 0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   var_dump(debug_backtrace($options));
 }
 

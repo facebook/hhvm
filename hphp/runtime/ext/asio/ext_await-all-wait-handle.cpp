@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
@@ -38,13 +39,6 @@ req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto handle = new (mem) c_AwaitAllWaitHandle(cnt);
   assert(handle->hasExactlyOneRef());
   return req::ptr<c_AwaitAllWaitHandle>::attach(handle);
-}
-
-void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
-  auto const waitHandle = static_cast<c_AwaitAllWaitHandle*>(od);
-  auto bytes = waitHandle->heapSize();
-  waitHandle->~c_AwaitAllWaitHandle();
-  MM().objFree(waitHandle, bytes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,11 +91,13 @@ namespace {
   }
 }
 
-void c_AwaitAllWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnAwaitAllCreate(callback);
 }
 
-Object c_AwaitAllWaitHandle::ti_fromarray(const Array& dependencies) {
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
+                          const Array& dependencies) {
   auto ad = dependencies.get();
   assert(ad);
   if (!ad->size()) return Object{returnEmpty()};
@@ -109,13 +105,14 @@ Object c_AwaitAllWaitHandle::ti_fromarray(const Array& dependencies) {
 retry:
   switch (ad->kind()) {
     case ArrayData::kPackedKind:
-      return FromPackedArray(ad);
+      return c_AwaitAllWaitHandle::FromPackedArray(ad);
 
     case ArrayData::kStructKind:
-      return FromStructArray(StructArray::asStructArray(ad));
+      return c_AwaitAllWaitHandle::FromStructArray(
+               StructArray::asStructArray(ad));
 
     case ArrayData::kMixedKind:
-      return FromMixedArray(MixedArray::asMixed(ad));
+      return c_AwaitAllWaitHandle::FromMixedArray(MixedArray::asMixed(ad));
 
     case ArrayData::kProxyKind:
       ad = ProxyArray::innerArr(ad);
@@ -138,26 +135,28 @@ retry:
   not_reached();
 }
 
-Object c_AwaitAllWaitHandle::ti_frommap(const Variant& dependencies) {
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
+                          const Variant& dependencies) {
   if (LIKELY(dependencies.isObject())) {
     auto obj = dependencies.getObjectData();
     if (LIKELY(obj->isCollection() && isMapCollection(obj->collectionType()))) {
       assertx(collections::isType(obj->getVMClass(), CollectionType::Map,
                                                      CollectionType::ImmMap));
-      return FromMap(static_cast<BaseMap*>(obj));
+      return c_AwaitAllWaitHandle::FromMap(static_cast<BaseMap*>(obj));
     }
   }
   failMap();
 }
 
-Object c_AwaitAllWaitHandle::ti_fromvector(const Variant& dependencies) {
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
+                          const Variant& dependencies) {
   if (LIKELY(dependencies.isObject())) {
     auto obj = dependencies.getObjectData();
     if (LIKELY(obj->isCollection() &&
                isVectorCollection(obj->collectionType()))) {
       assertx(collections::isType(obj->getVMClass(), CollectionType::Vector,
                                                   CollectionType::ImmVector));
-      return FromVector(static_cast<BaseVector*>(obj));
+      return c_AwaitAllWaitHandle::FromVector(static_cast<BaseVector*>(obj));
     }
   }
   failVector();
@@ -366,6 +365,18 @@ c_WaitableWaitHandle* c_AwaitAllWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   assert(m_cur >= 0);
   return m_children[m_cur];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initAwaitAllWaitHandle() {
+#define AAWH_SME(meth) \
+  HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, meth, AwaitAllWaitHandle, meth)
+  AAWH_SME(fromArray);
+  AAWH_SME(fromMap);
+  AAWH_SME(fromVector);
+  AAWH_SME(setOnCreateCallback);
+#undef AAWH_SME
 }
 
 ///////////////////////////////////////////////////////////////////////////////

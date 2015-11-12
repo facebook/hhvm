@@ -1894,24 +1894,21 @@ void insertCopiesAt(const VxlsContext& ctx,
         case Vconst::Quad:
         case Vconst::Double:
           if (use_xor) {
-            Vreg32 d32 = dst; // assume 32-bit ops zero upper bits
-            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+            loads.emplace_back(zeroq{Vreg64(dst), RegSF{0}});
           } else {
             loads.emplace_back(ldimmq{ivl->val.val, dst});
           }
           break;
         case Vconst::Long:
           if (use_xor) {
-            Vreg32 d32 = dst;
-            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+            loads.emplace_back(zerol{Vreg32(dst), RegSF{0}});
           } else {
             loads.emplace_back(ldimml{int32_t(ivl->val.val), dst});
           }
           break;
         case Vconst::Byte:
           if (use_xor) {
-            Vreg8 d8 = dst;
-            loads.emplace_back(xorb{d8, d8, d8, RegSF{0}});
+            loads.emplace_back(zerob{Vreg8(dst), RegSF{0}});
           } else {
             loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst});
           }
@@ -1965,8 +1962,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
                   const jit::vector<Interval*>& intervals,
                   const ResolutionPlan& resolution) {
   // sf_ivl is the physical SF register, computed from the union of VregSF
-  // registers by computeLiveness() and buildIntervals().  Its safe to lower
-  // ldimm{0,r} to xor{r,r,r} when SF is not live.
+  // registers by computeLiveness() and buildIntervals().
   auto sf_ivl = intervals[VregSF(RegSF{0})];
 
   // insert copies inside blocks

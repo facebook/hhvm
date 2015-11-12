@@ -114,6 +114,15 @@ struct Vgen {
   void emit(const ldimml& i);
   void emit(const ldimmb& i);
   void emit(const ldimmqs& i) { not_implemented(); }
+  void emit(const zerob& i) {
+    Vreg64 d(static_cast<size_t>(i.d));
+    emit(xorq{d, d, d, i.sf});
+  }
+  void emit(const zerol& i) {
+    Vreg64 d(static_cast<size_t>(i.d));
+    emit(xorq{d, d, d, i.sf});
+  }
+  void emit(const zeroq& i) { emit(xorq{i.d, i.d, i.d, i.sf}); }
   void emit(const load& i);
   void emit(const store& i);
 

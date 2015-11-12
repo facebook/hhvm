@@ -62,7 +62,11 @@ BlockIdToIRBlockMap createBlockMap(IRGS& irgs, const RegionDesc& region) {
     // NB: This maps the region entry block to a new IR block, even though
     // we've already constructed an IR entry block. We'll make the IR entry
     // block jump to this block.
-    auto const iBlock = irb.unit().defBlock();
+    auto transCount = hasTransID(id)
+      ? mcg->tx().profData()->transCounter(getTransID(id))
+      : 1;
+    uint64_t profCount = transCount * irgs.profFactor;
+    auto const iBlock = irb.unit().defBlock(profCount);
 
     ret[id] = iBlock;
     FTRACE(1,
@@ -549,9 +553,15 @@ TranslateResult irGenRegion(IRGS& irgs,
                             TranslateRetryContext& retry,
                             TransFlags trflags,
                             InliningDecider& inl,
-                            int32_t& budgetBCInstrs) {
+                            int32_t& budgetBCInstrs,
+                            double profFactor) {
   const Timer translateRegionTimer(Timer::translateRegion);
-  FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
+  double prevProfFactor = irgs.profFactor;
+  irgs.profFactor = profFactor;
+  SCOPE_EXIT { irgs.profFactor = prevProfFactor; };
+
+  FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
+         show(mcg->tx().mode()), profFactor, show(region));
 
   if (RuntimeOption::EvalDumpRegion) {
     mcg->annotations().emplace_back("RegionDesc", show(region));
@@ -725,7 +735,7 @@ TranslateResult irGenRegion(IRGS& irgs,
                show(irgs));
 
         auto returnSk = inst.nextSk();
-        auto returnBlock = irb.unit().defBlock();
+        auto returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
         auto returnFuncOff = returnSk.offset() - block->func()->base();
 
         if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee, returnFuncOff,
@@ -737,8 +747,19 @@ TranslateResult irGenRegion(IRGS& irgs,
           irb.resetOffsetMapping();
           irb.resetGuardFailBlock();
 
+          // Calculate the profFactor for the callee as the weight of
+          // the caller block over the weight of the entry block of
+          // the callee region.
+          double calleeProfFactor = irgen::curProfCount(irgs);
+          auto const calleeEntryBID = calleeRegion->entry()->id();
+          if (hasTransID(calleeEntryBID)) {
+            auto const calleeTID = getTransID(calleeEntryBID);
+            calleeProfFactor = calleeProfFactor /
+                               mcg->tx().profData()->transCounter(calleeTID);
+          }
+
           auto result = irGenRegion(irgs, *calleeRegion, retry, trflags, inl,
-                                    budgetBCInstrs);
+                                    budgetBCInstrs, calleeProfFactor);
           assertx(budgetBCInstrs >= 0);
 
           inl.registerEndInlining(callee);
@@ -883,9 +904,17 @@ TranslateResult translateRegion(IRGS& irgs,
   InliningDecider inl(region.entry()->func());
   if (mcg->tx().mode() == TransKind::Profile) inl.disable();
 
+  // Set the profCount of the IRUnit's entry block, which is created a priori.
+  if (mcg->tx().mode() == TransKind::Optimize) {
+    auto entryBID = region.entry()->id();
+    assertx(hasTransID(entryBID));
+    auto entryTID = getTransID(entryBID);
+    auto entryProfCount = mcg->tx().profData()->transCounter(entryTID);
+    irgs.unit.entry()->setProfCount(entryProfCount);
+  }
   int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
   auto irGenResult = irGenRegion(irgs, region, retry, trflags, inl,
-                                 budgetBCInstrs);
+                                 budgetBCInstrs, 1);
   assertx(budgetBCInstrs >= 0);
   FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
   if (irGenResult != TranslateResult::Success) return irGenResult;

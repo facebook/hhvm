@@ -67,14 +67,18 @@ struct Block : boost::noncopyable {
 
   enum class Hint { Neither, Likely, Unlikely, Unused };
 
-  explicit Block(unsigned id)
+  explicit Block(unsigned id, uint64_t profCount)
     : m_id(id)
     , m_hint(Hint::Neither)
+    , m_profCount(profCount)
   {}
 
   unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }
   void        setHint(Hint hint)   { m_hint = hint; }
+  uint64_t    profCount() const    { return m_profCount; }
+
+  void setProfCount(uint64_t count) { m_profCount = count; }
 
   // Returns true if this block has no successors.
   bool isExit() const { return !empty() && !taken() && !next(); }
@@ -187,6 +191,8 @@ struct Block : boost::noncopyable {
   const unsigned m_id;      // unit-assigned unique id of this block
   EdgeList m_preds;         // Edges that point to this block
   Hint m_hint;              // execution frequency hint
+  uint64_t m_profCount;     // execution profile count of the region block
+                            // containing this IR block.
 };
 
 using BlockList = jit::vector<Block*>;

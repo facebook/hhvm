@@ -218,7 +218,7 @@ Block* cloneCFG(IRUnit& unit,
   while (!toClone.empty()) {
     auto origBlock = toClone.front();
     toClone.pop();
-    auto copyBlock = unit.defBlock(origBlock->hint());
+    auto copyBlock = unit.defBlock(origBlock->profCount(), origBlock->hint());
     blockRenames[origBlock] = copyBlock;
     FTRACE(5, "cloneCFG: copying B{} to B{}\n",
            origBlock->id(), copyBlock->id());
@@ -478,7 +478,8 @@ Block* insertLoopPreExit(IRUnit& unit,
 
   // Split oldPreHeader before the Jmp, and append an
   // ExitPlaceholder{ fallthru=newPreHeader, taken=preExit }.
-  auto newPreHeader = unit.defBlock(oldPreHeader->hint());
+  auto newPreHeader = unit.defBlock(oldPreHeader->profCount(),
+                                    oldPreHeader->hint());
   assertx(oldPreHeader->back().is(Jmp));
   auto const jmp = &(oldPreHeader->back());
   oldPreHeader->erase(jmp);
@@ -528,7 +529,7 @@ void insertLoopPreHeader(IRUnit& unit,
     );
   }
 
-  auto const preHeader = unit.defBlock();
+  auto const preHeader = unit.defBlock(loop.numInvocations);
   auto const marker = header->front().marker();
 
   // If the header starts with a DefLabel, the arguments from all the incoming

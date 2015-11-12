@@ -648,7 +648,7 @@ void hoist_check_instruction(LoopEnv& env,
   // instruction.
   assert(preh->back().is(Jmp));
   auto const jmp       = &preh->back();
-  auto const new_preh  = env.global.unit.defBlock();
+  auto const new_preh  = env.global.unit.defBlock(linfo(env).numInvocations);
   preh->erase(jmp);
   new_preh->prepend(jmp);
   new_check->setNext(new_preh);

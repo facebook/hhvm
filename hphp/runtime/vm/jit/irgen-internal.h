@@ -85,6 +85,10 @@ inline FPInvOffset invSPOff(const IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Control-flow helpers.
 
+inline Block* defBlock(IRGS& env, Block::Hint hint = Block::Hint::Neither) {
+  return env.unit.defBlock(curProfCount(env), hint);
+}
+
 inline void hint(IRGS& env, Block::Hint h) {
   env.irb->curBlock()->setHint(h);
 }
@@ -125,8 +129,8 @@ template<> struct BranchImpl<SSATmp*> {
  */
 template<class Branch, class Next, class Taken>
 SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
-  auto const taken_block = env.unit.defBlock();
-  auto const done_block = env.unit.defBlock();
+  auto const taken_block = defBlock(env);
+  auto const done_block  = defBlock(env);
 
   using T = decltype(branch(taken_block));
   auto const v1 = BranchImpl<T>::go(branch, taken_block, next);
@@ -162,8 +166,8 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
-  auto const taken_block = env.unit.defBlock();
-  auto const done_block = env.unit.defBlock();
+  auto const taken_block = defBlock(env);
+  auto const done_block  = defBlock(env);
   branch(taken_block);
   next();
   // patch the last block added by the Next lambda to jump to
@@ -194,8 +198,8 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
  */
 template<class Branch, class Taken>
 void ifThen(IRGS& env, Branch branch, Taken taken) {
-  auto const taken_block = env.unit.defBlock();
-  auto const done_block = env.unit.defBlock();
+  auto const taken_block = defBlock(env);
+  auto const done_block  = defBlock(env);
   branch(taken_block);
   auto const cur = env.irb->curBlock();
   if (cur->empty() || !cur->back().isBlockEnd()) {
@@ -224,7 +228,7 @@ void ifThen(IRGS& env, Branch branch, Taken taken) {
  */
 template<class Branch, class Next>
 void ifElse(IRGS& env, Branch branch, Next next) {
-  auto const done_block = env.unit.defBlock();
+  auto const done_block = defBlock(env);
   branch(done_block);
   next();
   // patch the last block added by the Next lambda to jump to

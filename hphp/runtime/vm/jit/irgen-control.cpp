@@ -44,7 +44,7 @@ Block* getBlock(IRGS& env, Offset offset) {
   // to the region, so we just create an exit block.
   if (!env.irb->hasBlock(sk)) return makeExit(env, offset);
 
-  return env.irb->makeBlock(sk);
+  return env.irb->makeBlock(sk, curProfCount(env));
 }
 
 //////////////////////////////////////////////////////////////////////

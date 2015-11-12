@@ -31,7 +31,8 @@ TRACE_SET_MOD(hhir);
 
 IRUnit::IRUnit(TransContext context)
   : m_context(context)
-  , m_entry(defBlock())
+  , m_entry(defBlock()) // For Optimize translations, the entry block's
+                        // profCount is adjusted later in translateRegion.
 {}
 
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
@@ -72,9 +73,10 @@ void IRUnit::expandJmp(IRInstruction* jmp, SSATmp* value) {
   jmp->setSrcs(i, newSrcs);
 }
 
-Block* IRUnit::defBlock(Block::Hint hint) {
+Block* IRUnit::defBlock(uint64_t profCount /* =1 */,
+                        Block::Hint hint   /* =Neither */ ) {
   FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId);
-  auto const block = new (m_arena) Block(m_nextBlockId++);
+  auto const block = new (m_arena) Block(m_nextBlockId++, profCount);
   block->setHint(hint);
   return block;
 }

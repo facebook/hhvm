@@ -96,7 +96,9 @@ BlockIDs numberBlocks(const IRUnit& unit, const BlockList& input) {
 
 Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   auto& branch = from->back();
-  Block* middle = unit.defBlock();
+  // Guesstimate the weight of the new block.
+  auto profCount = std::min(from->profCount(), to->profCount()) / 2;
+  Block* middle = unit.defBlock(profCount);
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
          from->id(), to->id(), middle->id());
   if (branch.taken() == to) {

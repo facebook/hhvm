@@ -114,6 +114,12 @@ struct IRGS {
   bool lastBcInst{false};
 
   /*
+   * Profile-weight factor, to be multiplied by the region blocks'
+   * profile-translation counters in PGO mode.
+   */
+  double profFactor{1};
+
+  /*
    * The function to use to create catch blocks when instructions that can
    * throw are created with no catch block.  The default (when this function is
    * null) is to spill the stack and then leave.  We allow a non-default

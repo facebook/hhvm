@@ -2113,7 +2113,7 @@ void handleStrTestResult(MTS& env) {
 }
 
 Block* makeMISCatch(MTS& env) {
-  auto const exit = env.unit.defBlock(Block::Hint::Unused);
+  auto const exit = defBlock(env.irgs, Block::Hint::Unused);
   BlockPusher bp(env.irb, makeMarker(env, bcOff(env)), exit);
   gen(env, BeginCatch);
   cleanTvRefs(env);
@@ -2123,7 +2123,7 @@ Block* makeMISCatch(MTS& env) {
 }
 
 Block* makeCatchSet(MTS& env) {
-  env.failedSetBlock = env.unit.defBlock(Block::Hint::Unused);
+  env.failedSetBlock = defBlock(env.irgs, Block::Hint::Unused);
 
   const bool isSetWithRef = env.op == Op::SetWithRefLM ||
                             env.op == Op::SetWithRefRM;
@@ -2612,7 +2612,7 @@ void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
 }
 
 Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
-  auto block = env.unit.defBlock(Block::Hint::Unused);
+  auto block = defBlock(env, Block::Hint::Unused);
 
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), block);
   gen(env, BeginCatch);

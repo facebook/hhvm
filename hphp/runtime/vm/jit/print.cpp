@@ -366,7 +366,15 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
 
   os << '\n' << std::string(kIndent - 3, ' ');
   printLabel(os, block);
-  os << punc(":");
+  os << punc(":") << " [profCount=" << block->profCount() << "]";
+
+  switch (block->hint()) {
+    case Block::Hint::Unused:   os << "<Unused>";   break;
+    case Block::Hint::Unlikely: os << "<Unlikely>"; break;
+    case Block::Hint::Likely:   os << "<Likely>";   break;
+    default: break;
+  }
+
   auto& preds = block->preds();
   if (!preds.empty()) {
     os << " (preds";

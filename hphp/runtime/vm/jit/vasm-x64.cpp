@@ -241,7 +241,7 @@ struct Vgen {
   void emit(xorb i) { commuteSF(i); a->xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a->xorb(i.s0, i.d); }
   void emit(xorl i) { commuteSF(i); a->xorl(i.s0, i.d); }
-  void emit(xorq i) { commuteSF(i); a->xorq(i.s0, i.d); }
+  void emit(xorq i);
   void emit(xorqi i) { binary(i); a->xorq(i.s0, i.d); }
 
 private:
@@ -692,6 +692,15 @@ void Vgen::emit(const testqim& i) {
   } else {
     emit(testlim{i.s0, i.s1, i.sf});
   }
+}
+
+void Vgen::emit(xorq i) {
+  if (i.s0 == i.s1) {
+    // 32-bit xor{s, s, d} zeroes the upper bits of `d'.
+    return emit(xorl{r32(i.s0), r32(i.s1), r32(i.d), i.sf});
+  }
+  commuteSF(i);
+  a->xorq(i.s0, i.d);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

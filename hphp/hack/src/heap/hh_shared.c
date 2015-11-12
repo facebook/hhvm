@@ -848,7 +848,13 @@ value hh_mem(value key) {
     // The data is currently in the process of being written, wait until it
     // actually is ready to be used before returning.
     while (hashtbl[slot].addr == (char*)1) {
+#if defined(__x86_64__)
       asm volatile("pause" : : : "memory");
+#elif defined(__aarch64__)
+      asm volatile("yield" : : : "memory");
+#else
+#warning Consider porting this spin loop to your architecture.
+#endif
     }
     return Val_bool(1);
   }

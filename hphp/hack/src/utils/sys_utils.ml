@@ -353,3 +353,11 @@ let terminate_process pid =
     if not (win_terminate_process pid) then
       raise Unix.(Unix_error(ESRCH, "kill", ""))
 
+let lstat path =
+  (* WTF, on Windows `lstat` fails if a directory path ends with an
+     '/' (or a '\', whatever) *)
+  Unix.lstat @@
+  if Sys.win32 && Utils.str_ends_with path Filename.dir_sep then
+    String.sub path 0 (String.length path - 1)
+  else
+    path

@@ -115,6 +115,15 @@ TEST(Type, ToString) {
   EXPECT_EQ("PtrTo{Int|StaticStr}|{Int|StaticStr}",
             (TInt | TPtrToStaticStr).toString());
   EXPECT_EQ("{Obj<=Iterator|Int}", (TInt | sub).toString());
+
+  EXPECT_EQ("Cls<=Iterator",
+            Type::SubCls(SystemLib::s_IteratorClass).toString());
+  EXPECT_EQ("Cls=Iterator",
+            Type::ExactCls(SystemLib::s_IteratorClass).toString());
+
+  EXPECT_EQ("{Func|ABC}", (TABC | TFunc).toString());
+
+  EXPECT_EQ("InitNull", TInitNull.constValString());
 }
 
 TEST(Type, Boxes) {

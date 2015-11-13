@@ -46,7 +46,12 @@ namespace HPHP { namespace jit {
 TRACE_SET_MOD(hhir);
 
 std::string Type::constValString() const {
-  assertx(hasConstVal() || subtypeOfAny(TUninit, TInitNull, TNullptr));
+  if (*this <= TBottom)   return "Bottom";
+  if (*this <= TUninit)   return "Uninit";
+  if (*this <= TInitNull) return "InitNull";
+  if (*this <= TNullptr)  return "Nullptr";
+
+  assertx(hasConstVal());
 
   if (*this <= TBool) {
     return m_boolVal ? "true" : "false";
@@ -104,11 +109,9 @@ std::string Type::constValString() const {
   if (*this <= TRDSHandle) {
     return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   }
-  if (subtypeOfAny(TNull, TNullptr) || *this <= TPtrToGen) {
-    return toString();
-  }
 
-  not_reached();
+  always_assert_flog(false, "Bad type in constValString(): {:#16x}:{:#16x}",
+                     m_raw, m_extra);
 }
 
 static std::string show(Ptr ptr) {
@@ -160,8 +163,8 @@ std::string Type::toString() const {
     if (*this <= TCls) {
       return folly::sformat("Cls={}", m_clsVal->name()->data());
     }
-    return folly::format("{}<{}>",
-                         dropConstVal().toString(), constValString()).str();
+    return folly::sformat("{}<{}>",
+                          dropConstVal().toString(), constValString());
   }
 
   auto t = *this;
@@ -177,12 +180,12 @@ std::string Type::toString() const {
     return ret;
   }
 
-  assertx(t.ptrKind() == Ptr::NotPtr);
+  assertx(t.ptrKind() <= Ptr::NotPtr);
 
   std::vector<std::string> parts;
   if (isSpecialized()) {
     if (auto clsSpec = t.clsSpec()) {
-      auto const base = Type(m_bits & kClsSpecBits, Ptr::NotPtr);
+      auto const base = Type(m_bits & kClsSpecBits, t.ptrKind());
       auto const exact = clsSpec.exact() ? "=" : "<=";
       auto const name = clsSpec.cls()->name()->data();
       auto const partStr = folly::to<std::string>(base.toString(), exact, name);
@@ -190,7 +193,7 @@ std::string Type::toString() const {
       parts.push_back(partStr);
       t -= TAnyObj;
     } else if (auto arrSpec = t.arrSpec()) {
-      auto str = Type(m_bits & kArrSpecBits, Ptr::NotPtr).toString();
+      auto str = Type(m_bits & kArrSpecBits, t.ptrKind()).toString();
       if (auto const kind = arrSpec.kind()) {
         str += "=";
         str += ArrayData::kindToString(*kind);

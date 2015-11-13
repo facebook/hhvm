@@ -866,11 +866,16 @@ group_use_prefix:
     namespace_name T_NS_SEPARATOR      { $$ = $2;}
 ;
 
-use_declarations:
-    use_declarations ','
+non_empty_use_declarations:
+    non_empty_use_declarations ','
     use_declaration                    { _p->addStatement($$,$1,$3);}
   | use_declaration                    { $$.reset();
                                          _p->addStatement($$,$$,$1);}
+;
+
+use_declarations:
+    non_empty_use_declarations
+    hh_possible_comma                  { $$ = $1;}
 ;
 
 use_declaration:
@@ -882,11 +887,16 @@ use_declaration:
     T_AS ident_no_semireserved      { _p->onUseDeclaration($$, $2.text(),$4.text());}
 ;
 
-mixed_use_declarations:
-    mixed_use_declarations ','
+non_empty_mixed_use_declarations:
+    non_empty_mixed_use_declarations ','
     mixed_use_declaration              { _p->addStatement($$,$1,$3);}
   | mixed_use_declaration              { $$.reset();
                                          _p->addStatement($$,$$,$1);}
+;
+
+mixed_use_declarations:
+    non_empty_mixed_use_declarations
+    hh_possible_comma                  { $$ = $1;}
 ;
 
 mixed_use_declaration:

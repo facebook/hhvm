@@ -508,6 +508,7 @@ public:
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
+  F(uint32_t, HHIRInliningMaxBindJmps, 0)                               \
   F(uint32_t, HHIRInliningMaxReturns,  3)                               \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \

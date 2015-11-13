@@ -351,13 +351,8 @@ bool InliningDecider::shouldInline(const Func* callee,
   // inlined calls for a given caller---just the cost of each nested stack.)
   const int maxCost = RuntimeOption::EvalHHIRInliningMaxCost - m_cost;
 
-  // We only inline callee regions that have exactly one return.
-  //
-  // NOTE: Currently, the tracelet selector uses the first Ret in the child's
-  // region to determine when to stop inlining.  However, the safety of this
-  // behavior should not be considered guaranteed by InliningDecider; the
-  // "right" way to decide when inlining ends is to inline all of `region'.
   int numRets = 0;
+  int numExits = 0;
 
   // Iterate through the region, checking its suitability for inlining.
   for (auto const& block : region.blocks()) {
@@ -407,6 +402,12 @@ bool InliningDecider::shouldInline(const Func* callee,
       // Refuse if the cost exceeds our thresholds.
       if (cost > maxCost) {
         return refuse("too expensive");
+      }
+    }
+
+    if (region.isExit(block->id())) {
+      if (++numExits > RuntimeOption::EvalHHIRInliningMaxBindJmps + numRets) {
+        return refuse("region has too many non return exits");
       }
     }
   }

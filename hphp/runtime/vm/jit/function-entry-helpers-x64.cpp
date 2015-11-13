@@ -51,12 +51,14 @@ TCA fcallHelper(ActRec* ar) {
   assert_native_stack_aligned();
 
   assertx(!ar->resumed());
-  auto const tca = mcg->getFuncPrologue(
-    const_cast<Func*>(ar->m_func),
-    ar->numArgs(),
-    ar
-  );
-  if (tca) return tca;
+  if (LIKELY(!RuntimeOption::EvalFailJitPrologs)) {
+    auto const tca = mcg->getFuncPrologue(
+      const_cast<Func*>(ar->m_func),
+      ar->numArgs(),
+      ar
+    );
+    if (tca) return tca;
+  }
 
   // Check for stack overflow in the same place func prologues make their
   // StackCheck::Early check (see irgen-func-prologue.cpp).  This handler also

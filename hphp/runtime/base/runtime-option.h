@@ -447,6 +447,7 @@ public:
   F(bool, EmitSwitch,                  true)                            \
   F(bool, EmitNewMInstrs,              newMInstrsDefault())             \
   F(bool, LogThreadCreateBacktraces,   false)                           \
+  F(bool, FailJitPrologs,              false)                           \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
      1 - Raises E_WARNING if a return type hint fails.

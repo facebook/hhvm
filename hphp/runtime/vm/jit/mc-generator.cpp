@@ -1361,7 +1361,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
     TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
   }
 
-  if (start) {
+  if (start && !RuntimeOption::EvalFailJitPrologs) {
     LeaseHolder writer(Translator::WriteLease());
     if (writer) {
       // Someone else may have changed the func prologue while we waited for

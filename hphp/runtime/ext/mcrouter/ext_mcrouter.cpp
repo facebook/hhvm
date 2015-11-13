@@ -158,6 +158,10 @@ class MCRouterResult : public AsioExternalThreadEvent {
     router->send(msg);
   }
 
+  /* Unserialize happens in the request thread where we can allocate smart pointers
+   * Use this opportunity to marshal the saved data from persistent data structures
+   * into per-request data.
+   */
   void unserialize(Cell& c) override {
     if (!m_exception.empty()) {
       throw mcr_getException(m_exception, m_op, m_replyCode, m_key);
@@ -180,6 +184,15 @@ class MCRouterResult : public AsioExternalThreadEvent {
     cellDup(m_result, c);
   }
 
+  /* Callback invoked by libmcrouter (by way of McRouter::onReply())
+   * We're in the worker thread here, so we can't do any request
+   * allocations or the memory manager will get confused.
+   * We also can't store `msg' directly on the object as it'll be
+   * freed after the result() method returns.
+   *
+   * Marshal the data we actually care about into fields on this
+   * object, then remarshal them into smart_ptr structures during unserialize()
+   */
   void result(const mcr::mcrouter_msg_t* msg) {
     if (msg->reply.isError()) {
       setResultException(msg);
@@ -360,7 +373,7 @@ template<mc_op_t op>
 static Object mcr_void(ObjectData* this_) {
   mcr::mcrouter_msg_t msg;
   msg.req = mc_msg_new(0);
-  msg.req->op = mc_op_version;
+  msg.req->op = op;
   return Native::data<MCRouter>(this_)->issue(msg);
 }
 

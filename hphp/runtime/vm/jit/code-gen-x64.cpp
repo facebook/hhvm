@@ -2128,11 +2128,12 @@ float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
   // Without profiling data, we assume destroy is unlikely.
   if (kind != TransKind::Profile && kind != TransKind::Optimize) return 0.0;
 
+  auto const locId = inst->extra<DecRef>()->locId;
   auto const profileKey =
     makeStaticString(folly::to<std::string>("DecRefProfile-",
                                             opcodeName(inst->op()),
-                                            '-',
-                                            type.toString()));
+                                            '-', type.toString(),
+                                            '-', locId));
   profile.emplace(m_state.unit.context(), inst->marker(), profileKey);
 
   auto& v = vmain();

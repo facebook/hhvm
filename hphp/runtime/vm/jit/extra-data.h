@@ -996,6 +996,14 @@ struct SetOpData : IRExtraData {
   SetOpOp op;
 };
 
+struct DecRefData : IRExtraData {
+  explicit DecRefData(int locId = -1) : locId(locId) {}
+  std::string show() const {
+    return locId != -1 ? folly::to<std::string>("Loc", locId) : "-";
+  }
+  int locId; // If a known local, this has its id; -1 otherwise.
+};
+
 struct IncDecData : IRExtraData {
   explicit IncDecData(IncDecOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
@@ -1217,6 +1225,7 @@ X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(GenericIdx,                   IRSPOffsetData);
+X(DecRef,                       DecRefData);
 
 #undef X
 

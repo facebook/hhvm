@@ -314,10 +314,14 @@ inline void discard(IRGS& env, uint32_t n) {
   env.irb->fs().decSyncedSpLevel(n);
 }
 
+inline void decRef(IRGS& env, SSATmp* tmp, int locId=-1) {
+  gen(env, DecRef, DecRefData(locId), tmp);
+}
+
 inline void popDecRef(IRGS& env,
                       TypeConstraint tc = DataTypeCountness) {
   auto const val = pop(env, tc);
-  gen(env, DecRef, val);
+  decRef(env, val);
 }
 
 inline SSATmp* push(IRGS& env, SSATmp* tmp) {
@@ -601,7 +605,7 @@ inline SSATmp* stLocImpl(IRGS& env,
   auto unboxed_case = [&] {
     stLocRaw(env, id, fp(env), newVal);
     if (incRefNew) gen(env, IncRef, newVal);
-    if (decRefOld) gen(env, DecRef, oldLoc);
+    if (decRefOld) decRef(env, oldLoc);
     return newVal;
   };
 
@@ -619,7 +623,7 @@ inline SSATmp* stLocImpl(IRGS& env,
     gen(env, StRef, box, newVal);
     if (incRefNew) gen(env, IncRef, newVal);
     if (decRefOld) {
-      gen(env, DecRef, innerCell);
+      decRef(env, innerCell);
       env.irb->constrainValue(box, DataTypeCountness);
     }
     return newVal;
@@ -699,7 +703,7 @@ inline void decRefLocalsInline(IRGS& env) {
   assertx(!curFunc(env)->isPseudoMain());
   for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
     auto const loc = ldLoc(env, id, nullptr, DataTypeGeneric);
-    gen(env, DecRef, loc);
+    decRef(env, loc, id);
   }
 }
 
@@ -713,7 +717,7 @@ inline void decRefThis(IRGS& env) {
     },
     [&] {  // Next: it's a this
       auto const this_ = gen(env, CastCtxThis, ctx);
-      gen(env, DecRef, this_);
+      decRef(env, this_);
     },
     [&] {  // Taken: static context, or psuedomain w/o a $this
       // No op.

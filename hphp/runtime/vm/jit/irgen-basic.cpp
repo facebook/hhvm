@@ -59,7 +59,7 @@ void emitAGetC(IRGS& env) {
   if (name->type().subtypeOfAny(TObj, TStr)) {
     popC(env);
     implAGet(env, name);
-    gen(env, DecRef, name);
+    decRef(env, name);
   } else {
     interpOne(env, TCls, 1);
   }
@@ -190,7 +190,7 @@ void emitBoxR(IRGS& env) {
 void emitUnsetL(IRGS& env, int32_t id) {
   auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountness);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
-  gen(env, DecRef, prev);
+  decRef(env, prev);
 }
 
 void emitBindL(IRGS& env, int32_t id) {
@@ -207,7 +207,7 @@ void emitBindL(IRGS& env, int32_t id) {
   pushIncRef(env, newValue);
   auto const oldValue = ldLoc(env, id, ldPMExit, DataTypeSpecific);
   stLocRaw(env, id, fp(env), newValue);
-  gen(env, DecRef, oldValue);
+  decRef(env, oldValue);
 }
 
 void emitSetL(IRGS& env, int32_t id) {
@@ -233,7 +233,7 @@ void emitInitThisLoc(IRGS& env, int32_t id) {
   auto const this_     = gen(env, CastCtxThis, ctx);
   gen(env, IncRef, this_);
   stLocRaw(env, id, fp(env), this_);
-  gen(env, DecRef, oldLoc);
+  decRef(env, oldLoc);
 }
 
 void emitPrint(IRGS& env) {
@@ -268,7 +268,7 @@ void emitUnbox(IRGS& env) {
   auto const srcBox = popV(env);
   auto const unboxed = unbox(env, srcBox, exit);
   pushIncRef(env, unboxed);
-  gen(env, DecRef, srcBox);
+  decRef(env, srcBox);
 }
 
 void emitThis(IRGS& env) {
@@ -301,7 +301,7 @@ void emitClone(IRGS& env) {
   if (!topC(env)->isA(TObj)) PUNT(Clone-NonObj);
   auto const obj        = popC(env);
   push(env, gen(env, Clone, obj));
-  gen(env, DecRef, obj);
+  decRef(env, obj);
 }
 
 void emitLateBoundCls(IRGS& env) {
@@ -359,19 +359,19 @@ void emitCastArray(IRGS& env) {
 void emitCastBool(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToBool, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitCastDouble(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToDbl, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitCastInt(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToInt, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitCastObject(IRGS& env) {
@@ -382,7 +382,7 @@ void emitCastObject(IRGS& env) {
 void emitCastString(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToStr, src));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitIncStat(IRGS& env, int32_t counter, int32_t value) {

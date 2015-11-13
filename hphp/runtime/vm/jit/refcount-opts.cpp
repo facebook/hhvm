@@ -1211,6 +1211,7 @@ void weaken_decrefs(Env& env) {
         if (id != -1 && will_be_used.test(id)) {
           FTRACE(2, "    ** weakening {} to DecRefNZ\n", inst);
           inst.setOpcode(DecRefNZ);
+          inst.clearExtra();
         }
       }
 
@@ -1240,6 +1241,7 @@ void remove_helper(IRInstruction* inst) {
   case DecRef:
   case DecRefNZ:
     inst->setOpcode(DbgAssertRefCount);
+    inst->clearExtra();
     break;
   default:
     always_assert_flog(
@@ -3225,7 +3227,9 @@ Node* rule_decnz(Env& env, Node* node) {
     to_dec(node)->inst->is(DecRef);
   if (!applies) return node;
   FTRACE(2, "    ** decnz:  {}\n", *to_dec(node)->inst);
-  to_dec(node)->inst->setOpcode(DecRefNZ);
+  auto inst = to_dec(node)->inst;
+  inst->setOpcode(DecRefNZ);
+  inst->clearExtra();
   return node->next;
 }
 

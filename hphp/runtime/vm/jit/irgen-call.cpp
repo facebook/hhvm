@@ -201,7 +201,7 @@ void fpushObjMethodExactFunc(
   emitIncStat(env, Stats::ObjMethod_known, 1);
   if (func->isStatic() && !func->isClosureBody()) {
     assertx(baseClass);
-    gen(env, DecRef, obj);
+    decRef(env, obj);
     objOrCls = cns(env, baseClass);
   }
   fpushActRec(
@@ -299,7 +299,7 @@ void fpushObjMethodInterfaceFunc(
                   cls);
   SSATmp* objOrCls = obj;
   if (ifaceFunc->attrs() & AttrStatic) {
-    gen(env, DecRef, obj);
+    decRef(env, obj);
     objOrCls = cls;
   }
   fpushActRec(env, func, objOrCls, numParams, /* invName */nullptr);
@@ -358,7 +358,7 @@ void fpushObjMethodNonExactFunc(
   );
   SSATmp* objOrCls = obj;
   if (func->attrs() & AttrStatic && !func->isClosureBody()) {
-    gen(env, DecRef, obj);
+    decRef(env, obj);
     objOrCls = clsTmp;
   }
   fpushActRec(env,
@@ -483,7 +483,7 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
 
   gen(env, LdArrFuncCtx, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     arr, sp(env), thisAR);
-  gen(env, DecRef, arr);
+  decRef(env, arr);
 }
 
 // FPushCuf when the callee is not known at compile time.
@@ -521,7 +521,7 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
                                                : LdStrFPushCuf;
   gen(env, opcode, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     callable, sp(env), fp(env));
-  gen(env, DecRef, callable);
+  decRef(env, callable);
 }
 
 SSATmp* clsMethodCtx(IRGS& env, const Func* callee, const Class* cls) {
@@ -642,7 +642,7 @@ void implUnboxR(IRGS& env) {
     push(env, unboxed);
   } else {
     pushIncRef(env, unboxed);
-    gen(env, DecRef, srcBox);
+    decRef(env, srcBox);
   }
 }
 
@@ -923,7 +923,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   gen(env, LookupClsMethod,
     IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     clsVal, methVal, sp(env), fp(env));
-  gen(env, DecRef, methVal);
+  decRef(env, methVal);
 }
 
 void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
@@ -1054,7 +1054,7 @@ void emitFPassV(IRGS& env, int32_t argNum) {
 
   auto const tmp = popV(env);
   pushIncRef(env, gen(env, LdRef, TInitCell, tmp));
-  gen(env, DecRef, tmp);
+  decRef(env, tmp);
 }
 
 void emitFPassCE(IRGS& env, int32_t argNum) {

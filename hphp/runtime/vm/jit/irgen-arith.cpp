@@ -377,7 +377,7 @@ SSATmp* emitObjStrCmp(IRGS& env, Op op, SSATmp* obj, SSATmp* str) {
       // object into a string, and then do a string comparison.
       auto const converted = gen(env, ConvObjToStr, obj);
       auto const result = gen(env, toStrCmpOpcode(op), converted, str);
-      gen(env, DecRef, converted);
+      decRef(env, converted);
       return result;
     }
   );
@@ -811,8 +811,8 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TRes) implResCmp(env, op, left, right);
   else always_assert(false);
 
-  gen(env, DecRef, left);
-  gen(env, DecRef, right);
+  decRef(env, left);
+  decRef(env, right);
 }
 
 void implAdd(IRGS& env, Op op) {
@@ -846,7 +846,7 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
     preDecRef(str);
     // Note that the ConcatFoo opcode consumed the reference on its first
     // argument, so we only need to decref the second one.
-    gen(env, DecRef, c1);
+    decRef(env, c1);
     return;
   }
 
@@ -866,9 +866,9 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
   auto const s1 = t1 <= TStr ? c1 : gen(env, ConvCellToStr, c1);
   auto const r  = gen(env, ConcatStrStr, s2, s1);  // consumes s2 reference
   preDecRef(r);
-  gen(env, DecRef, s1);
-  if (s2 != c2) gen(env, DecRef, c2);
-  if (s1 != c1) gen(env, DecRef, c1);
+  decRef(env, s1);
+  if (s2 != c2) decRef(env, c2);
+  if (s1 != c1) decRef(env, c1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -896,8 +896,8 @@ void emitConcatN(IRGS& env, int32_t n) {
 
   if (n == 3) {
     push(env, gen(env, ConcatStr3, t3, t2, t1));
-    gen(env, DecRef, t2);
-    gen(env, DecRef, t1);
+    decRef(env, t2);
+    decRef(env, t1);
     return;
   }
 
@@ -906,9 +906,9 @@ void emitConcatN(IRGS& env, int32_t n) {
   if (!(t4->type() <= TStr)) PUNT(ConcatN);
 
   push(env, gen(env, ConcatStr4, t4, t3, t2, t1));
-  gen(env, DecRef, t3);
-  gen(env, DecRef, t2);
-  gen(env, DecRef, t1);
+  decRef(env, t3);
+  decRef(env, t2);
+  decRef(env, t1);
 }
 
 void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
@@ -1037,8 +1037,8 @@ void emitXor(IRGS& env) {
   auto const tr = gen(env, ConvCellToBool, btr);
   auto const tl = gen(env, ConvCellToBool, btl);
   push(env, gen(env, XorBool, tl, tr));
-  gen(env, DecRef, btl);
-  gen(env, DecRef, btr);
+  decRef(env, btl);
+  decRef(env, btr);
 }
 
 void implShift(IRGS& env, Opcode op) {
@@ -1111,8 +1111,8 @@ void implShift(IRGS& env, Opcode op) {
     push(env, gen(env, op, lhsInt, shiftAmountInt));
   }
 
-  gen(env, DecRef, lhs);
-  gen(env, DecRef, shiftAmount);
+  decRef(env, lhs);
+  decRef(env, shiftAmount);
 }
 
 void emitShl(IRGS& env) {
@@ -1151,7 +1151,7 @@ void emitBitNot(IRGS& env) {
 void emitNot(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, XorBool, gen(env, ConvCellToBool, src), cns(env, true)));
-  gen(env, DecRef, src);
+  decRef(env, src);
 }
 
 void emitDiv(IRGS& env) {
@@ -1282,8 +1282,8 @@ void emitMod(IRGS& env) {
         // warning and push false.
         auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
         gen(env, RaiseWarning, msg);
-        gen(env, DecRef, btr);
-        gen(env, DecRef, btl);
+        decRef(env, btr);
+        decRef(env, btl);
         push(env, cns(env, false));
         gen(env, Jmp, makeExit(env, nextBcOff(env)));
       }
@@ -1293,8 +1293,8 @@ void emitMod(IRGS& env) {
   // DecRefs on the main line must happen after the potentially-throwing exit
   // above: if we throw during the RaiseWarning, those values must still be on
   // the stack.
-  gen(env, DecRef, btr);
-  gen(env, DecRef, btl);
+  decRef(env, btr);
+  decRef(env, btl);
 
   // Check for -1.  The Mod IR instruction has undefined behavior for -1, but
   // php semantics are to return zero.

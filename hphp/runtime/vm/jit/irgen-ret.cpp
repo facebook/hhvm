@@ -109,7 +109,7 @@ void emitAsyncRetSlow(IRGS& env, SSATmp* retVal) {
   // Must load this before FreeActRec, which adjusts fp(env).
   auto const resumableObj = gen(env, LdResumableArObj, fp(env));
   gen(env, FreeActRec, fp(env));
-  gen(env, DecRef, resumableObj);
+  decRef(env, resumableObj);
 
   auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
   gen(
@@ -182,12 +182,12 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   // Clear generator's key.
   auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
   gen(env, StContArKey, fp(env), cns(env, TInitNull));
-  gen(env, DecRef, oldKey);
+  decRef(env, oldKey);
 
   // Populate the generator's value with retval to support `getReturn`
   auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
   gen(env, StContArValue, fp(env), retval);
-  gen(env, DecRef, oldValue);
+  decRef(env, oldValue);
 
   gen(env,
       StContArState,

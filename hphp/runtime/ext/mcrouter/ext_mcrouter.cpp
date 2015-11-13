@@ -22,8 +22,10 @@ const StaticString
   s_MCRouterException("MCRouterException"),
   s_MCRouterOptionException("MCRouterOptionException"),
   s_option("option"),
+  s_error("error"),
   s_value("value"),
-  s_error("error");
+  s_cas("cas"),
+  s_flags("flags");
 
 static Class* c_MCRouterException = nullptr;
 static Object mcr_getException(const std::string& message,
@@ -165,6 +167,15 @@ class MCRouterResult : public AsioExternalThreadEvent {
       m_result.m_data.pstr = StringData::Make(
         m_stringResult.c_str(), m_stringResult.size(), CopyString);
       m_stringResult.clear();
+    } else if ((m_result.m_type == KindOfArray) && !m_result.m_data.parr) {
+      // Deferred string value and cas, see below
+      Array ret = Array::Create();
+      ret.set(s_value,
+        String(m_stringResult.c_str(), m_stringResult.size(), CopyString));
+      ret.set(s_cas, (int64_t)m_cas);
+      ret.set(s_flags, (int64_t)m_flags);
+      m_result.m_data.parr = ret.detach();
+      m_stringResult.clear();
     }
     cellDup(m_result, c);
   }
@@ -175,6 +186,7 @@ class MCRouterResult : public AsioExternalThreadEvent {
     } else {
       switch (msg->req->op) {
         case mc_op_add:
+        case mc_op_cas:
         case mc_op_set:
         case mc_op_replace:
         case mc_op_prepend:
@@ -209,6 +221,10 @@ class MCRouterResult : public AsioExternalThreadEvent {
           m_result.m_data.num = msg->reply.delta();
           break;
 
+        case mc_op_gets:
+          m_cas = msg->reply.cas();
+          m_flags = msg->reply.flags();
+          /* fallthrough */
         case mc_op_get:
           if (msg->reply.isMiss()) {
             setResultException(msg);
@@ -216,7 +232,8 @@ class MCRouterResult : public AsioExternalThreadEvent {
           }
           /* fallthrough */
         case mc_op_version:
-          m_result.m_type = KindOfString;
+          m_result.m_type =
+            (msg->req->op == mc_op_gets) ? KindOfArray : KindOfString;
           m_result.m_data.pstr = nullptr;
           // We're in the wrong thread for making a StringData
           // so stash it in a std::string until we get to unserialize
@@ -251,8 +268,10 @@ class MCRouterResult : public AsioExternalThreadEvent {
 
   Cell m_result;
 
-  // Deferred string result
+  // Deferred string result and metadata
   std::string m_stringResult;
+  uint64_t m_cas{0};
+  uint64_t m_flags{0};
 
   // Deferred exception data
   mc_op_t m_op;
@@ -345,6 +364,20 @@ static Object mcr_void(ObjectData* this_) {
   return Native::data<MCRouter>(this_)->issue(msg);
 }
 
+static Object HHVM_METHOD(MCRouter, cas,
+                          int64_t cas,
+                          const String& key,
+                          const String& val,
+                          int64_t expiration /*=0*/) {
+  mcr::mcrouter_msg_t msg;
+  msg.req = mc_msg_new_with_key_and_value_full(key.c_str(), key.size(),
+                                               val.c_str(), val.size());
+  msg.req->op = mc_op_cas;
+  msg.req->cas = cas;
+  msg.req->exptime = expiration;
+  return Native::data<MCRouter>(this_)->issue(msg);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 static String HHVM_STATIC_METHOD(MCRouter, getOpName, int64_t op) {
@@ -376,7 +409,8 @@ class MCRouterExtension : public Extension {
   void moduleInit() override {
     HHVM_ME(MCRouter, __construct);
 
-    HHVM_NAMED_ME(MCRouter, get, mcr_str<mc_op_get>);
+    HHVM_NAMED_ME(MCRouter, get,  mcr_str<mc_op_get>);
+    HHVM_NAMED_ME(MCRouter, gets, mcr_str<mc_op_gets>);
 
     HHVM_NAMED_ME(MCRouter, add, mcr_set<mc_op_add>);
     HHVM_NAMED_ME(MCRouter, set, mcr_set<mc_op_set>);
@@ -391,6 +425,8 @@ class MCRouterExtension : public Extension {
     HHVM_NAMED_ME(MCRouter, flushAll, mcr_int<mc_op_flushall>);
 
     HHVM_NAMED_ME(MCRouter, version, mcr_void<mc_op_version>);
+
+    HHVM_ME(MCRouter, cas);
 
     Native::registerNativeDataInfo<MCRouter>(s_MCRouter.get());
 

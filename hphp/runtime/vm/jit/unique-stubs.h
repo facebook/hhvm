@@ -203,6 +203,17 @@ struct UniqueStubs {
   TCA retInlHelper;
 
   /*
+   * Async function return stub: first check whether the parent can be resumed
+   * directly (single parent in the same asio context, which is the fast &
+   * common path).  If not, follow the slow path, which unblock parents and
+   * return to the scheduler.
+   *
+   * @reached: jmp from TC
+   * @context: func body
+   */
+  TCA asyncRetCtrl;
+
+  /*
    * Return from a function when the ActRec was called from jitted code but
    * had its m_savedRip smashed by the debugger.
    *
@@ -349,7 +360,6 @@ struct UniqueStubs {
    * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
    */
   TCA throwSwitchMode;
-
 
   /////////////////////////////////////////////////////////////////////////////
 

@@ -4669,7 +4669,7 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
   auto parentArReg = srcLoc(inst, 0).reg();
   auto childReg = srcLoc(inst, 1).reg();
   auto& v = vmain();
-  const int8_t blocked = c_WaitHandle::toKindState(
+  const int8_t afblocked = c_WaitHandle::toKindState(
     c_WaitHandle::Kind::AsyncFunction,
     c_AsyncFunctionWaitHandle::STATE_BLOCKED
   );
@@ -4689,7 +4689,7 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
                                  - c_AsyncFunctionWaitHandle::arOff();
 
   // parent->setState(STATE_BLOCKED);
-  v << storebi{blocked, parentArReg[stateToArOff]};
+  v << storebi{afblocked, parentArReg[stateToArOff]};
 
   // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::AFWH;
   auto firstParent = v.makeReg();
@@ -4704,6 +4704,57 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
 
   // parent->m_child = child;
   v << store{childReg, parentArReg[childToArOff]};
+}
+
+// Packing the TV type and data into two registers.
+void emitPackTVRegs(Vout& v, Vloc loc, const SSATmp* src,
+                    Vreg rData, Vreg rType) {
+  auto const type = src->type();
+  auto const typeShort = v.makeReg();
+
+  assertx(!loc.isFullSIMD());
+  if (type.needsReg()) {
+    assertx(loc.hasReg(1));
+    v << copy{loc.reg(1), typeShort};
+  } else {
+    v << copy{v.cns(type.toDataType()), typeShort};
+  }
+  // We are passing the packed registers to asyncRetCtrl unique stub, which
+  // expects both rType and rData to be i64 regs.
+  v << movzbq{typeShort, rType};
+
+  // Ignore the values of null type
+  if (!(src->isA(TNull))) {
+    if (src->hasConstVal()) {
+      // Skip potential zero-extend if we know the value.
+      v << copy{v.cns(src->rawVal()), rData};
+    } else {
+      assertx(loc.hasReg(0));
+      auto const extended = zeroExtendIfBool(v, src, loc.reg(0));
+      v << copy{extended, rData};
+    }
+  }
+}
+
+void CodeGenerator::cgAsyncRetFast(IRInstruction* inst) {
+  auto const retValLoc = srcLoc(inst, 2);
+  auto const retValSrc = inst->src(2);
+  auto& v = vmain();
+
+  // Here we sync stack assuming the return value will be pushed onto stack by
+  // the stub, i.e. the fast path case.  If slow path is taken, SP will be
+  // adjusted accordingly.
+  adjustSPForReturn(m_state, inst);
+
+  // The asyncRetCtrl stub takes 2 arguments: data and type of the return value.
+  emitPackTVRegs(v, retValLoc, retValSrc, rarg(0), rarg(1));
+
+  RegSet asyncStubRegs(vm_regs_with_sp() | rarg(1));
+  if (!(retValSrc->isA(TNull))) {
+      asyncStubRegs |= rarg(0);
+  }
+  auto const stub = mcg->tx().uniqueStubs.asyncRetCtrl;
+  v << jmpi{stub, asyncStubRegs};
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {

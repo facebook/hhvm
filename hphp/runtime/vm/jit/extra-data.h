@@ -1149,6 +1149,7 @@ X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncRetCtrl,                 RetCtrlData);
+X(AsyncRetFast,                 RetCtrlData);
 X(LdArrFuncCtx,                 IRSPOffsetData);
 X(LdArrFPushCuf,                IRSPOffsetData);
 X(LdStrFPushCuf,                IRSPOffsetData);

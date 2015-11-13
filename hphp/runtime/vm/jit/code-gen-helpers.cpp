@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/abi-cxx.h"
 #include "hphp/util/immed.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/ringbuffer.h"
@@ -151,6 +152,34 @@ Vreg emitDecRef(Vout& v, Vreg base) {
   assertSFNonNegative(v, sf);
 
   return sf;
+}
+
+void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
+  // ifRefCountType
+  ifThen(v, CC_G, sf, [&] (Vout& v) {
+    auto const sf2 = v.makeReg();
+    // ifNonStatic
+    v << cmplim{0, data[FAST_REFCOUNT_OFFSET], sf2};
+    ifThen(v, CC_GE, sf2, [&] (Vout& v) { emitIncRef(v, data); });
+  });
+}
+
+void emitDecRefObj(Vout& v, Vreg obj) {
+  auto const shouldRelease = v.makeReg();
+  v << cmplim{1, obj[FAST_REFCOUNT_OFFSET], shouldRelease};
+  ifThenElse(
+    v, CC_E, shouldRelease,
+    [&] (Vout& v) {
+      // Put fn inside vcall{} triggers a compiler internal error (gcc 4.4.7)
+      auto const fn = CallSpec::method(&ObjectData::release);
+      v << vcall{fn, v.makeVcallArgs({{obj}}), v.makeTuple({})};
+    },
+    [&] (Vout& v) {
+      emitDecRef(v, obj);
+    }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

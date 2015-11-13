@@ -265,14 +265,6 @@ if (GOOGLE_CPU_PROFILER_ENABLED)
   add_definitions(-DGOOGLE_CPU_PROFILER=1)
 endif()
 
-#libnuma 
-find_package(LibNuma)
-if (LIBNUMA_INCLUDE_DIRS)
-  add_definitions("-DHAVE_NUMA=1")
-  set(LIBNUMA_ENABLED 1)
-  include_directories(${LIBNUMA_INCLUDE_DIRS})  
-endif()
-
 # tbb libs
 find_package(TBB REQUIRED)
 if (${TBB_INTERFACE_VERSION} LESS 5005)
@@ -441,11 +433,7 @@ macro(hphp_link target)
     target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
   endif()
 
-  # This will ensure that the _init_ in libnuma is always called first before 
-  # jemalloc _init_ when the program loads. 
-  if (JEMALLOC_ENABLED AND LIBNUMA_ENABLED)
-    target_link_libraries(${target} ${JEMALLOC_LIB} ${LIBNUMA_LIBRARIES}) 
-  elseif(JEMALLOC_ENABLED AND NOT LIBNUMA_ENABLED)   
+  if (JEMALLOC_ENABLED)
     target_link_libraries(${target} ${JEMALLOC_LIB})
   endif()
 

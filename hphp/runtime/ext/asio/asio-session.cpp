@@ -49,7 +49,7 @@ namespace {
   Object checkCallback(const Variant& callback, char* name) {
     if (!callback.isNull() &&
         (!callback.isObject() ||
-         !callback.getObjectData()->instanceof(c_Closure::classof()))) {
+         !callback.getObjectData()->instanceof(Closure::classof()))) {
       auto msg = folly::format(
         "Unable to set {}: callback not a closure",
         name

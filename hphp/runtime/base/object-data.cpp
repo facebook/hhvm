@@ -29,11 +29,11 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -520,7 +520,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
     return convert_to_array(this, SystemLib::s_ArrayObjectClass);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
     return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
-  } else if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  } else if (UNLIKELY(instanceof(Closure::classof()))) {
     return Array::Create(Object(const_cast<ObjectData*>(this)));
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
@@ -758,8 +758,6 @@ ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
     if (isCollection()) {
       return collections::clone(this);
-    } else if (instanceof(c_Closure::classof())) {
-      return c_Closure::Clone(this);
     }
     always_assert(false);
   }
@@ -785,7 +783,7 @@ bool ObjectData::equal(const ObjectData& other) const {
     other.o_getArray(ar2);
     return ar1->equal(ar2.get(), false);
   }
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(Closure::classof()))) {
     // First comparison already proves they are different
     return false;
   }
@@ -802,7 +800,7 @@ bool ObjectData::less(const ObjectData& other) const {
     return DateTimeData::getTimestamp(this) <
       DateTimeData::getTimestamp(&other);
   }
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(Closure::classof()))) {
     // First comparison already proves they are different
     return false;
   }
@@ -820,7 +818,7 @@ bool ObjectData::more(const ObjectData& other) const {
     return DateTimeData::getTimestamp(this) >
       DateTimeData::getTimestamp(&other);
   }
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(Closure::classof()))) {
     // First comparison already proves they are different
     return false;
   }
@@ -840,7 +838,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     return (t1 < t2) ? -1 : ((t1 > t2) ? 1 : 0);
   }
   // Return 1 for different classes to match PHP7 behavior.
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(Closure::classof()))) {
     // First comparison already proves they are different
     return 1;
   }

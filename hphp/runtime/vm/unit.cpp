@@ -77,6 +77,7 @@
 
 #include "hphp/runtime/server/source-root-info.h"
 
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/system/systemlib.h"
@@ -1795,7 +1796,7 @@ void AllCachedClasses::skip() {
   while (!empty()) {
     cls = m_next->second.clsList();
     if (cls && cls->getCached() &&
-        (cls->parent() != SystemLib::s_ClosureClass)) break;
+        (cls->parent() != Closure::classof())) break;
     ++m_next;
   }
 }

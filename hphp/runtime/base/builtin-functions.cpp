@@ -155,7 +155,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     ObjectData *d = tv_func->m_data.pobj;
     const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name) {
-      if (d->instanceof(c_Closure::classof())) {
+      if (d->instanceof(Closure::classof())) {
         // Hack to stop the mangled name from showing up
         *name->var() = s_Closure__invoke;
       } else {

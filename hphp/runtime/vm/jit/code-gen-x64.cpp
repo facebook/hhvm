@@ -2428,17 +2428,17 @@ void CodeGenerator::cgStClosureArg(IRInstruction* inst) {
 void CodeGenerator::cgLdClosureCtx(IRInstruction* inst) {
   auto const obj = srcLoc(inst, 0).reg();
   auto const ctx = dstLoc(inst, 0).reg();
-  vmain() << load{obj[c_Closure::ctxOffset()], ctx};
+  vmain() << load{obj[Closure::ctxOffset()], ctx};
 }
 
 void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
   auto const obj = srcLoc(inst, 0).reg();
   auto& v = vmain();
   if (inst->src(1)->isA(TNullptr)) {
-    v << storeqi{0, obj[c_Closure::ctxOffset()]};
+    v << storeqi{0, obj[Closure::ctxOffset()]};
   } else {
     auto const ctx = srcLoc(inst, 1).reg();
-    v << store{ctx, obj[c_Closure::ctxOffset()]};
+    v << store{ctx, obj[Closure::ctxOffset()]};
   }
 }
 

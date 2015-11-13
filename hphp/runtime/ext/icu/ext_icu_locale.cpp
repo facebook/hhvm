@@ -706,6 +706,8 @@ void IntlExtension::initLocale() {
   HHVM_RC_INT_SAME(ULOC_VALID_LOCALE);
   HHVM_RCC_INT(Locale, VALID_LOCALE, ULOC_VALID_LOCALE);
 
+  HHVM_RC_INT(INTL_MAX_LOCALE_LEN, 80);
+
   loadSystemlib("icu_locale");
 }
 

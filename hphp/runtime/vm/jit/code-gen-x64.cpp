@@ -2406,9 +2406,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   auto flags = ActRec::Flags::None;
-  if (extra->fromFPushCtor) {
-    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::FromFPushCtor);
-  }
   if (magicName) {
     flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
   }

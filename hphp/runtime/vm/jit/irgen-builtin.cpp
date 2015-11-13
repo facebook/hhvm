@@ -638,7 +638,7 @@ ParamPrep prepare_params(IRGS& env,
  * non-refcounted after conversions, and we can't DecRef things twice.
  */
 struct CatchMaker {
-  enum class Kind { NotInlining, InliningNonCtor, InliningCtor };
+  enum class Kind { NotInlining, Inlining };
 
   explicit CatchMaker(IRGS& env,
                       Kind kind,
@@ -658,8 +658,7 @@ struct CatchMaker {
   bool inlining() const {
     switch (m_kind) {
     case Kind::NotInlining:      return false;
-    case Kind::InliningNonCtor:  return true;
-    case Kind::InliningCtor:     return true;
+    case Kind::Inlining:         return true;
     }
     not_reached();
   }
@@ -733,8 +732,7 @@ private:
                   cns(env, m_callee),
                   m_params.thiz ? m_params.thiz : cns(env, TNullptr),
                   m_params.size(),
-                  nullptr,
-                  m_kind == Kind::InliningCtor);
+                  nullptr);
     }
     /*
      * We're potentially spilling to a different depth than the unwinder
@@ -1211,9 +1209,6 @@ void nativeImplInlined(IRGS& env) {
   auto const callee = curFunc(env);
   assertx(callee->nativeFuncPtr());
 
-  auto const wasInliningConstructor =
-    fp(env)->inst()->extra<DefInlineFP>()->fromFPushCtor;
-
   auto const numArgs = callee->numParams();
   auto const paramThis = [&] () -> SSATmp* {
     if (!callee->isMethod()) return nullptr;
@@ -1250,8 +1245,7 @@ void nativeImplInlined(IRGS& env) {
 
   auto const catcher = CatchMaker {
     env,
-    wasInliningConstructor ? CatchMaker::Kind::InliningCtor
-                           : CatchMaker::Kind::InliningNonCtor,
+    CatchMaker::Kind::Inlining,
     callee,
     &params
   };

@@ -489,7 +489,7 @@ static void populateLiveContext(RegionContext& ctx) {
   int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
-    [&](const ActRec* ar) {
+    [&](const ActRec* ar, Offset) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
       auto const objOrCls =

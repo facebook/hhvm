@@ -900,7 +900,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   std::vector<std::string> stackElems;
   visitStackElems(
     fp, ftop, offset,
-    [&](const ActRec* ar) {
+    [&](const ActRec* ar, Offset) {
       stackElems.push_back(
         folly::format("{{func:{}}}", ar->m_func->fullName()->data()).str()
       );
@@ -6291,7 +6291,6 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
-  ar->setFromFPushCtor();
   ar->trashVarEnv();
 }
 
@@ -6319,7 +6318,6 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
-  ar->setFromFPushCtor();
   ar->trashVarEnv();
 }
 

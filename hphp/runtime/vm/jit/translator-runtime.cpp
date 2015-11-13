@@ -832,7 +832,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
 
   visitStackElems(
     fp, sp, bcOff,
-    [](const ActRec* ar) {
+    [](const ActRec* ar, Offset) {
       ar->func()->validate();
     },
     [](const TypedValue* tv) {

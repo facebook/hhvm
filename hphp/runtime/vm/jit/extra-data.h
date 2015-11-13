@@ -525,12 +525,10 @@ struct ActRecInfo : IRExtraData {
   IRSPOffset spOffset;
   const StringData* invName;  // may be nullptr
   int32_t numArgs;
-  bool fromFPushCtor;
 
   std::string show() const {
     return folly::to<std::string>(spOffset.offset, ',',
                                   numArgs,
-                                  fromFPushCtor ? ",ctor" : "",
                                   invName ? " M" : "");
   }
 };
@@ -564,7 +562,6 @@ struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       target->fullName()->data(), "(),",
-      fromFPushCtor ? "ctor," : "",
       retBCOff, ',',
       retSPOff.offset, ',',
       spOffset.offset
@@ -572,7 +569,6 @@ struct DefInlineFPData : IRExtraData {
   }
 
   const Func* target;
-  bool fromFPushCtor;
   SSATmp* ctx;       // Ctx, Cls or Nullptr.
   Offset retBCOff;
   FPInvOffset retSPOff;

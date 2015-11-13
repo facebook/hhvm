@@ -110,7 +110,6 @@ bool beginInlining(IRGS& env,
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
-  data.fromFPushCtor = isFPushCtor(info.fpushOpc);
   data.ctx           = ctx;
   data.retSPOff      = prevSPOff;
   data.spOffset      = offsetFromIRSP(env, BCSPOffset{0});

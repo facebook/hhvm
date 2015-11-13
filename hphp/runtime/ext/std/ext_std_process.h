@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_STD_PROCESS_H_
 
 #include "hphp/runtime/ext/std/ext_std.h"
-#include <wait.h>
+#include <signal.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

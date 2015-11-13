@@ -3314,7 +3314,7 @@ void rcgraph_opts(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void optimizeRefcounts2(IRUnit& unit) {
+void optimizeRefcounts(IRUnit& unit) {
   Timer timer(Timer::optimize_refcountOpts);
   splitCriticalEdges(unit);
 

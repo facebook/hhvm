@@ -1,10 +1,8 @@
-array(3) {
+array(2) {
   [0]=>
-  string(4) "/tmp"
+  string(9) "/baz/quux"
   [1]=>
-  string(13) "/var/releases"
-  [2]=>
-  string(8) "/var/www"
+  string(8) "/foo/bar"
 }
 array(2) {
   [1]=>

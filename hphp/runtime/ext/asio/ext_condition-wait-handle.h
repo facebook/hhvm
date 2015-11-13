@@ -33,16 +33,12 @@ namespace HPHP {
  */
 class c_ConditionWaitHandle final : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(ConditionWaitHandle)
+  WAITHANDLE_CLASSOF(ConditionWaitHandle);
+  WAITHANDLE_DTOR(ConditionWaitHandle);
 
   explicit c_ConditionWaitHandle(Class* cls = c_ConditionWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_ConditionWaitHandle() {}
-
-  static void ti_setoncreatecallback(const Variant& callback);
-  static Object ti_create(const Variant& child);
-  void t_succeed(const Variant& result);
-  void t_fail(const Variant& exception);
 
  public:
   static constexpr ptrdiff_t blockableOff() {
@@ -59,10 +55,23 @@ class c_ConditionWaitHandle final : public c_WaitableWaitHandle {
   void setState(uint8_t state) { setKindState(Kind::Condition, state); }
   void initialize(c_WaitableWaitHandle* child);
 
+  friend Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
+                                   const Variant& child);
+  friend void HHVM_METHOD(ConditionWaitHandle, succeed,
+                          const Variant& result);
+  friend void HHVM_METHOD(ConditionWaitHandle, fail,
+                          const Object& ex);
  private:
   c_WaitableWaitHandle* m_child;
   AsioBlockable m_blockable;
 };
+
+void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
+                          const Variant& child);
+void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result);
+void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception);
 
 inline c_ConditionWaitHandle* c_WaitHandle::asCondition() {
   assert(getKind() == Kind::Condition);

@@ -986,19 +986,6 @@ struct IndexData : IRExtraData {
   std::string show() const { return folly::format("{}", index).str(); }
 };
 
-struct ClsNeqData : IRExtraData {
-  explicit ClsNeqData(Class* testClass) : testClass(testClass) {}
-
-  std::string show() const {
-    return testClass->name()->data();
-  }
-
-  bool equals(ClsNeqData o) const { return testClass == o.testClass; }
-  size_t hash() const { return std::hash<Class*>()(testClass); }
-
-  Class* testClass; // class we're checking equality with
-};
-
 struct MInstrAttrData : IRExtraData {
   explicit MInstrAttrData(MInstrAttr mia) : mia(mia) {}
 
@@ -1198,7 +1185,6 @@ X(ProfilePackedArray,           RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
 X(ProfileObjClass,              RDSHandleData);
 X(LdRDSAddr,                    RDSHandleData);
-X(ClsNeq,                       ClsNeqData);
 X(BaseG,                        MInstrAttrData);
 X(PropX,                        MInstrAttrData);
 X(PropDX,                       MInstrAttrData);

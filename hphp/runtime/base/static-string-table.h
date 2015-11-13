@@ -72,13 +72,9 @@ StringData* makeStaticString(char c);
 
 /*
  * Attempt to look up a static string for `str' if it exists, without
- * inserting it if not.
+ * inserting it if not. Requires the input string to be known non-static.
  *
  * Returns: a string that isStatic(), or nullptr if there was none.
- *
- * TODO(#2880477): can this have a precondition that str is not
- * static?  Also can't it assume the static string map is already
- * allocated...
  */
 StringData* lookupStaticString(const StringData* str);
 

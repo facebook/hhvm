@@ -38,7 +38,7 @@ function assert_options(int $what,
  * literal values such as 1 or "two" will not be passed via this argument)
  */
 <<__Native>>
-function assert(mixed $assertion, ?string $message = null): mixed;
+function assert(mixed $assertion, mixed $message = null): mixed;
 
 /* Loads the PHP extension given by the parameter library.  Use
  * extension_loaded() to test whether a given extension is already available
@@ -441,7 +441,7 @@ function zend_version(): string;
 
 namespace __SystemLib {
   <<__Native>>
-  function assert(mixed $assertion, ?string $message = null): ?bool;
+  function assert(mixed $assertion, mixed $message = null): ?bool;
 
   function phpinfo_tr($l, $d) {
     echo "<tr><td class=\"l\">$l</td><td class=\"r\">$d</td></tr>";

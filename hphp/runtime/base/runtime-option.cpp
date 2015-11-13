@@ -112,8 +112,7 @@ int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::WarnTooManyArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;
-bool RuntimeOption::AssertActive = false;
-bool RuntimeOption::AssertWarning = false;
+bool RuntimeOption::AssertEmitted = true;
 int64_t RuntimeOption::NoticeFrequency = 1;
 int64_t RuntimeOption::WarningFrequency = 1;
 int RuntimeOption::RaiseDebuggingFrequency = 1;
@@ -501,7 +500,7 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
-static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 5000;
+static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
 static const uint64_t kJitRelocationSizeDefault = 1 << 20;
 
 static const bool kJitTimerDefault =
@@ -900,8 +899,6 @@ void RuntimeOption::Load(
                  "ErrorHandling.WarnTooManyArguments");
     Config::Bind(EnableHipHopErrors, ini, config,
                  "ErrorHandling.EnableHipHopErrors", true);
-    Config::Bind(AssertActive, ini, config, "ErrorHandling.AssertActive");
-    Config::Bind(AssertWarning, ini, config, "ErrorHandling.AssertWarning");
     Config::Bind(NoticeFrequency, ini, config, "ErrorHandling.NoticeFrequency",
                  1);
     Config::Bind(WarningFrequency, ini, config,
@@ -1710,10 +1707,35 @@ void RuntimeOption::Load(
     Config::Bind(XenonPeriodSeconds, ini, config, "Xenon.Period", 0.0);
     Config::Bind(XenonForceAlwaysOn, ini, config, "Xenon.ForceAlwaysOn", false);
   }
+  {
+    // We directly read zend.assertions here, so that we can get its INI value
+    // in order to know how we should emit bytecode. We don't actually Bind the
+    // option here though, since its runtime value can be changed and is per
+    // request. (We prevent its value from changing at runtime between values
+    // that would affect byecode emission.)
+    Variant v;
+    bool b = IniSetting::GetSystem("zend.assertions", v);
+    if (b) RuntimeOption::AssertEmitted = v.toInt64() >= 0;
+  }
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
   refineStaticStringTableSize();
+
+
+  // **************************************************************************
+  //                                  DANGER
+  //
+  // Do not bind any PHP_INI_ALL or PHP_INI_USER settings here! These settings
+  // are process-wide, while those need to be thread-local since they are
+  // per-request. They should go into RequestInjectionData. Getting this wrong
+  // will cause subtle breakage -- in particular, it probably will not show up
+  // in CLI mode, since everything there tends to be single theaded.
+  //
+  // Per-dir INI settings are bound here, but that seems really questionable
+  // since they can change per request too. TODO(#7757602) this should be
+  // investigated.
+  // **************************************************************************
 
   // Enables the hotfixing of a bug that occurred with D1797805 where
   // per request user settings (like upload_max_filesize) were not able to be

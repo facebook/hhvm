@@ -113,6 +113,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     return ListAssignment::Null;
   }
   case Construct::KindOfQOpExpression:
+  case Construct::KindOfNullCoalesceExpression:
     return ListAssignment::Checked;
 
   // invalid context

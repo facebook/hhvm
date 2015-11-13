@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
@@ -31,21 +32,18 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setoncreatecallback(
-  const Variant& callback
-) {
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventCreate(callback);
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setonsuccesscallback(
-  const Variant& callback
-) {
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventSuccess(callback);
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setonfailcallback(
-  const Variant& callback
-) {
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnExternalThreadEventFail(callback);
 }
 
@@ -197,6 +195,18 @@ void c_ExternalThreadEventWaitHandle::registerToContext() {
 void c_ExternalThreadEventWaitHandle::unregisterFromContext() {
   AsioContext *ctx = getContext();
   ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_ctxVecIndex);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initExternalThreadEventWaitHandle() {
+#define ETEWH_SME(meth) \
+  HHVM_STATIC_MALIAS(HH\\ExternalThreadEventWaitHandle, meth, \
+                     ExternalThreadEventWaitHandle, meth)
+  ETEWH_SME(setOnCreateCallback);
+  ETEWH_SME(setOnSuccessCallback);
+  ETEWH_SME(setOnFailCallback);
+#undef ETEWH_SME
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -31,14 +31,12 @@ namespace HPHP {
  */
 class c_SleepWaitHandle final : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(SleepWaitHandle);
+  WAITHANDLE_CLASSOF(SleepWaitHandle);
+  WAITHANDLE_DTOR(SleepWaitHandle);
 
   explicit c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_SleepWaitHandle() {}
-  static void ti_setoncreatecallback(const Variant& callback);
-  static void ti_setonsuccesscallback(const Variant& callback);
-  static Object ti_create(int64_t usecs);
 
  public:
   void process();
@@ -53,10 +51,17 @@ class c_SleepWaitHandle final : public c_WaitableWaitHandle {
   void initialize(int64_t usecs);
 
   AsioSession::TimePoint m_waketime;
+  friend Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
 
  public:
   static const int8_t STATE_WAITING = 2;
 };
+
+void HHVM_STATIC_METHOD(SleepWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(SleepWaitHandle, setOnSuccessCallback,
+                        const Variant& callback);
+Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
 
 inline c_SleepWaitHandle* c_WaitHandle::asSleep() {
   assert(getKind() == Kind::Sleep);

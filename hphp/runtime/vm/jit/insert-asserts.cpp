@@ -74,7 +74,6 @@ void insertStkAssert(IRUnit& unit,
   auto const addr = unit.gen(
     LdStkAddr,
     where->marker(),
-    TPtrToStkGen,
     IRSPOffsetData { off },
     sp
   );

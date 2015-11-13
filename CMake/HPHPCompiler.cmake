@@ -162,28 +162,38 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   set(MSVC_RELEASE_EXE_LINKER_OPTIONS)
 
   # Some addional configuration options.
-  set(MSVC_FAVORED_ARCHITECTURE "blend" CACHE STRING "One of 'blend', 'AMD64', 'INTEL64', or 'ATOM'. This tells the compiler to generate code optimized to run best on the specified architecture.")
-  set(MSVC_ENABLE_LTCG OFF CACHE BOOL "If enabled, use Link Time Code Generation for Release builds.")
-  set(MSVC_ENABLE_STATIC_ANALYSIS OFF CACHE BOOL "If enabled, do more complex static analysis and generate warnings appropriately.")
-  set(MSVC_NO_ASSERT_IN_DEBUG OFF CACHE BOOL "If enabled, don't do asserts in debug mode. The reduces the size of hphp_runtime_static by ~300mb.")
-  set(MSVC_ENABLE_PCH ON CACHE BOOL "If enabled, use precompiled headers to speed up the build.")
+  set(MSVC_ENABLE_ALL_WARNINGS ON CACHE BOOL "If enabled, pass /Wall to the compiler.")
   set(MSVC_ENABLE_DEBUG_INLINING ON CACHE BOOL "If enabled, enable inlining in the debug configuration. This allows /Zc:inline to be far more effective, resulting in hphp_runtime_static being ~450mb smaller.")
+  set(MSVC_ENABLE_LTCG OFF CACHE BOOL "If enabled, use Link Time Code Generation for Release builds.")
+  set(MSVC_ENABLE_PARALLEL_BUILD ON CACHE BOOL "If enabled, build multiple source files in parallel.")
+  set(MSVC_ENABLE_PCH ON CACHE BOOL "If enabled, use precompiled headers to speed up the build.")
+  set(MSVC_ENABLE_STATIC_ANALYSIS OFF CACHE BOOL "If enabled, do more complex static analysis and generate warnings appropriately.")
+  set(MSVC_FAVORED_ARCHITECTURE "blend" CACHE STRING "One of 'blend', 'AMD64', 'INTEL64', or 'ATOM'. This tells the compiler to generate code optimized to run best on the specified architecture.")
+  set(MSVC_NO_ASSERT_IN_DEBUG OFF CACHE BOOL "If enabled, don't do asserts in debug mode. The reduces the size of hphp_runtime_static by ~300mb.")
 
   # The general options passed:
   list(APPEND MSVC_GENERAL_OPTIONS
     "bigobj" # Support objects with > 65k sections. Needed for folly due to templates.
     "fp:precise" # Precise floating point model used in every other build, use it here as well.
     "EHa" # Enable both SEH and C++ Exceptions.
-    "MP" # Enable multi-processor compilation.
     "Oy-" # Disable elimination of stack frames.
-    "Wall" # Enable all warnings.
     "Zc:inline" # Have the compiler eliminate unreferenced COMDAT functions and data before emitting the object file. This produces significantly less input to the linker, resulting in MUCH faster linking.
     "Zo" # Enable enhanced optimized debugging. Produces slightly larger pdb files, but the resulting optimized code is much much easier to debug.
   )
 
+  # Enable all warnings if requested.
+  if (MSVC_ENABLE_ALL_WARNINGS)
+    list(APPEND MSVC_GENERAL_OPTIONS "Wall")
+  endif()
+
   # Enable static analysis if requested.
   if (MSVC_ENABLE_STATIC_ANALYSIS)
     list(APPEND MSVC_GENERAL_OPTIONS "analyze")
+  endif()
+
+  # Enable multi-processor compilation if requested.
+  if (MSVC_ENABLE_PARALLEL_BUILD)
+    list(APPEND MSVC_GENERAL_OPTIONS "MP")
   endif()
 
   # Enable AVX2 codegen if available and requested.
@@ -208,62 +218,69 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     "4800" # Values being forced to bool, this happens many places, and is a "performance warning".
   )
 
-  # These warnings are disabled because we've
-  # enabled all warnings. If all warnings are
-  # not enabled, then these don't need to be
-  # disabled.
-  list(APPEND MSVC_DISABLED_WARNINGS
-    "4100" # Unreferenced formal parameter.
-    "4127" # Conditional expression is constant.
-    "4131" # Old style declarator used. This is triggered by ext_bc's backend code.
-    "4189" # Local variable is initialized but not referenced.
-    "4191" # Unsafe type cast.
-    "4200" # Non-standard extension, zero sized array.
-    "4201" # Non-standard extension used: nameless struct/union.
-    "4232" # Non-standard extension used: 'pCurrent': address of dllimport.
-    "4245" # Implicit change from signed/unsigned when initializing.
-    "4255" # Implicitly converting fucntion prototype from `()` to `(void)`.
-    "4265" # Class has virtual functions, but destructor is not virtual.
-    "4287" # Unsigned/negative constant mismatch.
-    "4296" # '<' Expression is always false.
-    "4315" # 'this' pointer for member may not be aligned to 8 bytes as expected by the constructor.
-    "4324" # Structure was padded due to alignment specifier.
-    "4355" # 'this' used in base member initializer list.
-    "4365" # Signed/unsigned mismatch.
-    "4371" # Layout of class may have changed due to fixes in packing.
-    "4388" # Signed/unsigned mismatch on relative comparison operator.
-    "4389" # Signed/unsigned mismatch on equality comparison operator.
-    "4435" # Object layout under /vd2 will change due to virtual base.
-    "4456" # Declaration of local hides previous definition of local by the same name.
-    "4457" # Declaration of local hides function parameter.
-    "4458" # Declaration of parameter hides class member.
-    "4459" # Declaration of parameter hides global declaration.
-    "4514" # Unreferenced inline function has been removed. (caused by /Zc:inline)
-    "4548" # Expression before comma has no effect. I wouldn't disable this normally, but malloc.h triggers this warning.
-    "4555" # Expression has no effect; expected expression with side-effect. This is triggered by boost/variant.hpp.
-    "4574" # ifdef'd macro was defined to 0.
-    "4582" # Constructor is not implicitly called.
-    "4583" # Destructor is not implicitly called.
-    "4608" # Member has already been initialized by another union member initializer.
-    "4619" # Invalid warning number used in #pragma warning.
-    "4623" # Default constructor was implicitly defined as deleted.
-    "4625" # Copy constructor was implicitly defined as deleted.
-    "4626" # Assignment operator was implicitly defined as deleted.
-    "4647" # __is_pod() has a different value in pervious versions of MSVC.
-    "4668" # Macro was not defined, replacing with 0.
-    "4701" # Potentially uninitialized local variable used.
-    "4702" # Unreachable code.
-    "4706" # Assignment within conditional expression.
-    "4710" # Function was not inlined.
-    "4711" # Function was selected for automated inlining. This produces tens of thousands of warnings in release mode if you leave it enabled, which will completely break Visual Studio, so don't enable it.
-    "4714" # Function marked as __forceinline not inlined.
-    "4774" # Format string expected in argument is not a string literal.
-    "4820" # Padding added after data member.
-    "4917" # A GUID can only be associated with a class. This is triggered by some standard windows headers.
-    "4946" # reinterpret_cast used between related types.
-    "5026" # Move constructor was implicitly defined as deleted.
-    "5027" # Move assignment operator was implicitly defined as deleted.
-  )
+  if (MSVC_ENABLE_ALL_WARNINGS)
+    # These warnings are disabled because we've
+    # enabled all warnings. If all warnings are
+    # not enabled, then these don't need to be
+    # disabled.
+    list(APPEND MSVC_DISABLED_WARNINGS
+      "4061" # Enum value not handled by a case in a switch on an enum. This isn't very helpful because it is produced even if a default statement is present.
+      "4100" # Unreferenced formal parameter.
+      "4127" # Conditional expression is constant.
+      "4131" # Old style declarator used. This is triggered by ext_bc's backend code.
+      "4189" # Local variable is initialized but not referenced.
+      "4191" # Unsafe type cast.
+      "4200" # Non-standard extension, zero sized array.
+      "4201" # Non-standard extension used: nameless struct/union.
+      "4232" # Non-standard extension used: 'pCurrent': address of dllimport.
+      "4245" # Implicit change from signed/unsigned when initializing.
+      "4255" # Implicitly converting fucntion prototype from `()` to `(void)`.
+      "4265" # Class has virtual functions, but destructor is not virtual.
+      "4287" # Unsigned/negative constant mismatch.
+      "4296" # '<' Expression is always false.
+      "4315" # 'this' pointer for member may not be aligned to 8 bytes as expected by the constructor.
+      "4324" # Structure was padded due to alignment specifier.
+      "4355" # 'this' used in base member initializer list.
+      "4365" # Signed/unsigned mismatch.
+      "4371" # Layout of class may have changed due to fixes in packing.
+      "4388" # Signed/unsigned mismatch on relative comparison operator.
+      "4389" # Signed/unsigned mismatch on equality comparison operator.
+      "4435" # Object layout under /vd2 will change due to virtual base.
+      "4456" # Declaration of local hides previous definition of local by the same name.
+      "4457" # Declaration of local hides function parameter.
+      "4458" # Declaration of parameter hides class member.
+      "4459" # Declaration of parameter hides global declaration.
+      "4464" # Relative include path contains "..". This is triggered by the TBB headers.
+      "4505" # Unreferenced local function has been removed. This is mostly the result of things not being needed under MSVC.
+      "4514" # Unreferenced inline function has been removed. (caused by /Zc:inline)
+      "4548" # Expression before comma has no effect. I wouldn't disable this normally, but malloc.h triggers this warning.
+      "4555" # Expression has no effect; expected expression with side-effect. This is triggered by boost/variant.hpp.
+      "4574" # ifdef'd macro was defined to 0.
+      "4582" # Constructor is not implicitly called.
+      "4583" # Destructor is not implicitly called.
+      "4608" # Member has already been initialized by another union member initializer.
+      "4619" # Invalid warning number used in #pragma warning.
+      "4623" # Default constructor was implicitly defined as deleted.
+      "4625" # Copy constructor was implicitly defined as deleted.
+      "4626" # Assignment operator was implicitly defined as deleted.
+      "4647" # __is_pod() has a different value in pervious versions of MSVC.
+      "4668" # Macro was not defined, replacing with 0.
+      "4701" # Potentially uninitialized local variable used.
+      "4702" # Unreachable code.
+      "4706" # Assignment within conditional expression.
+      "4709" # Comma operator within array index expression. This currently just produces false-positives.
+      "4710" # Function was not inlined.
+      "4711" # Function was selected for automated inlining. This produces tens of thousands of warnings in release mode if you leave it enabled, which will completely break Visual Studio, so don't enable it.
+      "4714" # Function marked as __forceinline not inlined.
+      "4774" # Format string expected in argument is not a string literal.
+      "4820" # Padding added after data member.
+      "4917" # A GUID can only be associated with a class. This is triggered by some standard windows headers.
+      "4946" # reinterpret_cast used between related types.
+      "5026" # Move constructor was implicitly defined as deleted.
+      "5027" # Move assignment operator was implicitly defined as deleted.
+      "5031" # #pragma warning(pop): likely mismatch, popping warning state pushed in different file. This is needed because of how boost does things.
+    )
+  endif()
 
   if (MSVC_ENABLE_STATIC_ANALYSIS)
     # Warnings disabled for /analyze

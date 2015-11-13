@@ -248,6 +248,7 @@ std::string getNodesConnectionName(
 
       // Obvious cases that do not need pointer type
       case HeaderKind::AwaitAllWH:
+      case HeaderKind::WaitHandle:
       case HeaderKind::ResumableObj:
       case HeaderKind::Pair:
       case HeaderKind::ResumableFrame:

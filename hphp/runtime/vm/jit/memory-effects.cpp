@@ -93,7 +93,7 @@ AliasClass pointee(const SSATmp* ptr) {
       return AElemAny;
     };
 
-    if (typeNR <= TPtrToArrGen) {
+    if (typeNR <= TPtrToElemGen) {
       if (sinst->is(LdPackedArrayElemAddr)) return elem();
       return AElemAny;
     }
@@ -123,7 +123,7 @@ AliasClass pointee(const SSATmp* ptr) {
   if (typeNR.maybe(TPtrToStkGen))     ret = ret | AStackAny;
   if (typeNR.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
   if (typeNR.maybe(TPtrToPropGen))    ret = ret | APropAny;
-  if (typeNR.maybe(TPtrToArrGen))     ret = ret | AElemAny;
+  if (typeNR.maybe(TPtrToElemGen))    ret = ret | AElemAny;
   if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateTV;
   if (typeNR.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
@@ -987,6 +987,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefSP:
   case EndGuards:
   case EqBool:
+  case EqCls:
   case EqDbl:
   case EqInt:
   case GteBool:
@@ -1009,6 +1010,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GteDbl:
   case LtDbl:
   case DivDbl:
+  case DivInt:
   case MulDbl:
   case MulInt:
   case MulIntO:
@@ -1036,7 +1038,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefLabel:
   case CheckInit:
   case Nop:
-  case ClsNeq:
   case Mod:
   case Conjure:
   case Halt:
@@ -1074,6 +1075,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StARNumArgsAndFlags:
   case LdARInvName:
   case StARInvName:
+  case MethodExists:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

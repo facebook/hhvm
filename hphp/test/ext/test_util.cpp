@@ -102,10 +102,14 @@ bool TestUtil::TestSharedString() {
 bool TestUtil::TestCanonicalize() {
   VERIFY(FileUtil::canonicalize(String("foo")) == String("foo"));
   VERIFY(FileUtil::canonicalize(String("/foo")) == String("/foo"));
-  VERIFY(FileUtil::canonicalize(String("./foo")) == String("foo"));
   VERIFY(FileUtil::canonicalize(String("foo/bar")) == String("foo/bar"));
   VERIFY(FileUtil::canonicalize(String("foo/////bar")) == String("foo/bar"));
   VERIFY(FileUtil::canonicalize(String("foo/bar/")) == String("foo/bar/"));
+  VERIFY(FileUtil::canonicalize(String("./foo")) == String("foo"));
+  VERIFY(FileUtil::canonicalize(String(".")) == String("."));
+  VERIFY(FileUtil::canonicalize(String("./")) == String("./"));
+  VERIFY(FileUtil::canonicalize(String("././")) == String("./"));
+  VERIFY(FileUtil::canonicalize(String("foo/./")) == String("foo/"));
   VERIFY(FileUtil::canonicalize(String("foo/../bar")) == String("bar"));
   VERIFY(FileUtil::canonicalize(String("./foo/../bar")) == String("bar"));
   VERIFY(FileUtil::canonicalize(String(".////foo/xyz////..////../bar"))

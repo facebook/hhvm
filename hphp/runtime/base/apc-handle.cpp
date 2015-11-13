@@ -31,6 +31,18 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
                                   bool serialized,
                                   APCHandleLevel level,
                                   bool unserializeObj) {
+
+  auto createStaticStr = [&](StringData* s) {
+    assert(s->isStatic());
+    if (serialized) {
+      // It is priming, and there might not be the right class definitions
+      // for unserialization.
+      return APCString::MakeSerializedObject(apc_reserialize(String{s}));
+    }
+    auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
+    return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
+  };
+
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
     case KindOfUninit: {
@@ -54,31 +66,21 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       auto value = new APCTypedValue(source.getDouble());
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
-    case KindOfStaticString: {
-      StringData* s = source.getStringData();
-      if (serialized) {
-        // It is priming, and there might not be the right class definitions
-        // for unserialization.
-        return APCString::MakeSerializedObject(apc_reserialize(String{s}));
-      }
-      auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
-      return {value->getHandle(), sizeof(APCTypedValue)};
-    }
     case KindOfString: {
       StringData* s = source.getStringData();
+      if (s->isStatic()) {
+        return createStaticStr(s);
+      }
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
         return APCString::MakeSerializedObject(apc_reserialize(String{s}));
       }
-
       auto const st = lookupStaticString(s);
       if (st) {
         auto value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
-
-      assert(!s->isStatic()); // would've been handled above
       if (level == APCHandleLevel::Outer && apcExtension::UseUncounted) {
         auto st = StringData::MakeUncounted(s->slice());
         auto value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
@@ -86,6 +88,8 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       }
       return APCString::MakeSharedString(s);
     }
+    case KindOfStaticString:
+      return createStaticStr(source.getStringData());
 
     case KindOfArray:
       return APCArray::MakeSharedArray(source.getArrayData(), level,

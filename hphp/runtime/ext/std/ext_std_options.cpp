@@ -69,13 +69,15 @@ const int64_t k_ASSERT_CALLBACK    = 2;
 const int64_t k_ASSERT_BAIL        = 3;
 const int64_t k_ASSERT_WARNING     = 4;
 const int64_t k_ASSERT_QUIET_EVAL  = 5;
+const int64_t k_ASSERT_EXCEPTION   = 6;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct OptionData final : RequestEventHandler {
   void requestInit() override {
-    assertActive = RuntimeOption::AssertActive ? 1 : 0;
-    assertWarning = RuntimeOption::AssertWarning ? 1 : 0;
+    assertActive = 0;
+    assertException = 0;
+    assertWarning = 0;
     assertBail = 0;
     assertQuietEval = false;
   }
@@ -89,6 +91,7 @@ struct OptionData final : RequestEventHandler {
   }
 
   int assertActive;
+  int assertException;
   int assertWarning;
   int assertBail;
   bool assertQuietEval;
@@ -98,6 +101,17 @@ struct OptionData final : RequestEventHandler {
 IMPLEMENT_STATIC_REQUEST_LOCAL(OptionData, s_option_data);
 
 /////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::requestInitOptions() {
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "assert.active", "0", &s_option_data->assertActive);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "assert.exception", "0", &s_option_data->assertException);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "assert.warning", "0", &s_option_data->assertWarning);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    "assert.bail", "0", &s_option_data->assertBail);
+}
 
 static Variant HHVM_FUNCTION(assert_options,
                              int64_t what, const Variant& value /*=null */) {
@@ -124,6 +138,11 @@ static Variant HHVM_FUNCTION(assert_options,
   if (what == k_ASSERT_QUIET_EVAL) {
     bool oldValue = s_option_data->assertQuietEval;
     if (!value.isNull()) s_option_data->assertQuietEval = value.toBoolean();
+    return Variant(oldValue);
+  }
+  if (what == k_ASSERT_EXCEPTION) {
+    int oldValue = s_option_data->assertException;
+    if (!value.isNull()) s_option_data->assertException = value.toBoolean();
     return Variant(oldValue);
   }
   throw_invalid_argument("assert option %ld is not supported", (long)what);
@@ -205,12 +224,24 @@ static Variant impl_assert(const Variant& assertion,
     ai.append(assertion.isString() ? assertion : empty_string_variant_ref);
     HHVM_FN(call_user_func)(s_option_data->assertCallback, ai.toArray());
   }
-  String name(message.isNull() ? "Assertion" : message.toString());
+  if (s_option_data->assertException) {
+    if (message.isObject()) {
+      Object exn = message.toObject();
+      // TODO(https://github.com/facebook/hhvm/issues/6012)
+      // This should be checking for AssertionError.
+      if (exn.instanceof(SystemLib::s_ExceptionClass)) {
+        throw exn;
+      }
+    }
+
+    SystemLib::throwExceptionObject(message.toString());
+  }
   if (s_option_data->assertWarning) {
+    String name(message.isNull() ? "Assertion" : message.toString());
     auto const str = !assertion.isString()
       ? " failed"
       : concat3(" \"",  assertion.toString(), "\" failed");
-    raise_warning("%s%s", name.data(),  str.data());
+    raise_warning("assert(): %s%s", name.data(),  str.data());
   }
   if (s_option_data->assertBail) {
     throw ExitException(1);
@@ -1245,6 +1276,7 @@ void StandardExtension::initOptions() {
   ASSERTCONST(BAIL);
   ASSERTCONST(WARNING);
   ASSERTCONST(QUIET_EVAL);
+  ASSERTCONST(EXCEPTION);
 #undef ASSERTCONST
 
   loadSystemlib("std_options");

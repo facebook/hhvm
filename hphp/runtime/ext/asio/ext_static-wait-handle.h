@@ -32,7 +32,8 @@ namespace HPHP {
  */
 class c_StaticWaitHandle final : public c_WaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
+  WAITHANDLE_CLASSOF(StaticWaitHandle);
+  WAITHANDLE_DTOR(StaticWaitHandle);
 
   explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
     : c_WaitHandle(cls) {}
@@ -40,8 +41,6 @@ class c_StaticWaitHandle final : public c_WaitHandle {
     assert(isFinished());
     tvRefcountedDecRef(&m_resultOrException);
   }
-
-  void t___construct();
 
  public:
   static c_StaticWaitHandle* CreateSucceeded(Cell result); // nothrow

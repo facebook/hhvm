@@ -86,7 +86,7 @@ Block* implMakeExit(IRGS& env, TransFlags trflags, Offset targetBcOff,
     PUNT(MakeExitAtBranchToItself);
   }
 
-  auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
+  auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
   exitRequest(env, trflags, SrcKey{curSrcKey(env), targetBcOff});
   return exit;
@@ -109,7 +109,7 @@ Block* makeGuardExit(IRGS& env, TransFlags flags) {
 }
 
 Block* makeExitSlow(IRGS& env) {
-  auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
+  auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
   interpOne(env, *env.currentNormalizedInstruction);
   // If it changes the PC, InterpOneCF will get us to the new location.
@@ -128,7 +128,7 @@ Block* makePseudoMainExit(IRGS& env) {
 Block* makeExitOpt(IRGS& env, TransID transId) {
   assertx(!isInlining(env));
   auto const targetBcOff = bcOff(env);
-  auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
+  auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
   auto const data = ReqRetranslateOptData {
     transId,

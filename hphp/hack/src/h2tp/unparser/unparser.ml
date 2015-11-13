@@ -176,13 +176,18 @@ let rec u_program v = u_of_list_spc u_def v
         let strProgram = u_program program
         in StrWords [Str "namespace"; u_id id; StrBraces strProgram]
     | NamespaceUse uses ->
-        let u_use ((p1, ns), (p2, name)) =
+        let u_use (kind, (p1, ns), (p2, name)) =
           let ns_end = List.last_exn (R.split (R.regexp "\\\\") ns) in
           let qualifier = if ns_end <> name
                           then [Str "as"; u_id (p2, name)]
                           else [] in
-          StrWords (u_id (p1, ns) :: qualifier) in
-        StrStatement [Str "use"; (u_of_list_comma u_use uses)]
+          let id_and_qualifier = u_id (p1, ns) :: qualifier in
+          let kind_id_and_qualifier = match kind with
+            | NSClass -> id_and_qualifier
+            | NSFun -> Str "function" :: id_and_qualifier
+            | NSConst -> Str "const" :: id_and_qualifier in
+          StrStatement (Str "use" :: kind_id_and_qualifier) in
+        u_of_list_spc u_use uses
   and
     u_typedef {
                 t_id = (pos, _) as v_t_id;

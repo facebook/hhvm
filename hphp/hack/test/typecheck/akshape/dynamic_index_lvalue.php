@@ -11,10 +11,7 @@ function test(string $key): void {
   $a['k2'] = 'aaa';
   $a[$key] = 4;
   hh_show($a);
-  // Note: if we ever plug the "heterogeneus array access returns Tany" hole
-  // this needs to be updated to "take_string($a['k2'])" and start reporting an
-  // error for this test to still test what it intends to.
-  take_string($a['k1']);
+  take_string($a['k2']);
 }
 
 function take_string(string $_): void {}

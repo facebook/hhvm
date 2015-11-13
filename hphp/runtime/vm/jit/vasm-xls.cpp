@@ -510,6 +510,23 @@ Vlabel blockFor(const VxlsContext& ctx, unsigned pos) {
   return Vlabel{0xffffffff};
 }
 
+/*
+ * Insert `src' into `dst' before dst[j], corresponding to XLS logical
+ * position `pos'.
+ *
+ * Updates `j' to refer to the same instruction after the code insertions.
+ */
+void insertCodeAt(jit::vector<Vinstr>& dst, unsigned& j,
+                  const jit::vector<Vinstr>& src, unsigned pos) {
+  auto const origin = dst[j].origin;
+  dst.insert(dst.begin() + j, src.size(), ud2{});
+  for (auto const& inst : src) {
+    dst[j] = inst;
+    dst[j].origin = origin;
+    dst[j++].pos = pos;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Pre-analysis passes.
 
@@ -1619,13 +1636,42 @@ using CopyPlan = PhysReg::Map<Interval*>;
  * (We also use it to resolve phis.)
  */
 struct ResolutionPlan {
-  // Where to insert copies between instructions.
-  jit::hash_map<unsigned,CopyPlan> copies;
   // Where to insert spills.
   jit::hash_map<unsigned,CopyPlan> spills;
-  // Copies on edges (between blocks).
+  // Where to insert reg-reg moves, or spill and constant loads, between
+  // instructions (or in place of copy{} and friends).
+  jit::hash_map<unsigned,CopyPlan> copies;
+
+  // Copies and loads on edges (between blocks).
   jit::hash_map<EdgeKey,CopyPlan,EdgeHasher> edge_copies;
 };
+
+template<class CopyPlanT>
+using void_req = typename std::enable_if<
+  std::is_same<CopyPlanT, CopyPlan>::value ||
+  std::is_same<CopyPlanT, const CopyPlan>::value
+>::type;
+
+/*
+ * Iterators for reg-reg copies and for {const,spill}-reg loads.
+ */
+template<class CopyPlanT, class F>
+void_req<CopyPlanT> for_each_copy(CopyPlanT& plan, F f) {
+  for (auto dst : plan) {
+    auto& ivl = plan[dst];
+    if (!ivl || ivl->reg == InvalidReg) continue;
+    f(dst, ivl);
+  }
+}
+template<class CopyPlanT, class F>
+void_req<CopyPlanT> for_each_load(CopyPlanT& plan, F f) {
+  for (auto dst : plan) {
+    auto& ivl = plan[dst];
+    if (!ivl || ivl->reg != InvalidReg) continue;
+    assertx(ivl->constant || ivl->spilled());
+    f(dst, ivl);
+  }
+}
 
 /*
  * Insert a spill after the def-position in `ivl'.
@@ -1673,6 +1719,8 @@ void resolveSplits(const VxlsContext& ctx,
         // odd position
         assertx(pos > range.start); // implicit label position per block
         if (pos + 1 == range.end) continue; // copy belongs on successor edge
+
+        assertx(!resolution.copies[pos][i2->reg]);
         resolution.copies[pos][i2->reg] = i1;
       }
     }
@@ -1837,6 +1885,7 @@ void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
                     const CopyPlan& spills, MemoryRef slots,
                     unsigned pos) {
   jit::vector<Vinstr> stores;
+
   for (auto src : spills) {
     auto ivl = spills[src];
     if (!ivl) continue;
@@ -1853,77 +1902,84 @@ void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
       stores.emplace_back(storeups{src, ptr});
     }
   }
-  auto origin = code[j].origin;
-  code.insert(code.begin() + j, stores.size(), ud2{});
-  for (auto& inst : stores) {
-    code[j] = inst;
-    code[j].origin = origin;
-    code[j++].pos = pos;
-  }
+  insertCodeAt(code, j, stores, pos);
 }
 
 /*
- * Insert reg-reg moves, constant loads, or loads from spill space---with spill
- * space starting at `slots'---for `copies' into `code' before code[j],
- * corresponding to XLS logical position `pos'.
+ * Insert reg-reg moves for `copies' into `code' before code[j], corresponding
+ * to XLS logical position `pos'.
  *
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertCopiesAt(const VxlsContext& ctx,
                     jit::vector<Vinstr>& code, unsigned& j,
-                    const CopyPlan& copies, MemoryRef slots,
-                    unsigned pos, const Interval* sf_ivl) {
-  auto const sf_live = [&](unsigned pos) {
-    return sf_ivl && !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
-  };
+                    const CopyPlan& plan, unsigned pos) {
   MovePlan moves;
+  jit::vector<Vinstr> copies;
+
+  for_each_copy(plan, [&] (PhysReg dst, const Interval* ivl) {
+    moves[dst] = ivl->reg;
+  });
+  auto const hows = doRegMoves(moves, ctx.tmp);
+
+  for (auto const& how : hows) {
+    if (how.m_kind == MoveInfo::Kind::Xchg) {
+      copies.emplace_back(copy2{how.m_src, how.m_dst, how.m_dst, how.m_src});
+    } else {
+      copies.emplace_back(copy{how.m_src, how.m_dst});
+    }
+  }
+  insertCodeAt(code, j, copies, pos);
+}
+
+/*
+ * Get the appropriate Vinstr for a constant load of a particular constraint.
+ */
+template<class VregT, class ldimm_op, class xor_op, class int_t>
+Vinstr ldcns(const Interval* ivl, PhysReg dst, bool sf_live) {
+  auto const use_xor = (ivl->val.val == 0 && dst.isGP() && !sf_live);
+  if (use_xor) {
+    VregT d = dst;
+    return xor_op{d, d, d, RegSF{0}};
+  } else {
+    return ldimm_op{int_t(ivl->val.val), dst};
+  }
+}
+
+/*
+ * Insert constant loads or loads from spill space---with spill space starting
+ * at `slots'---for `loads' into `code' before code[j], corresponding to XLS
+ * logical position `pos'.
+ *
+ * Updates `j' to refer to the same instruction after the code insertions.
+ */
+void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
+                   const CopyPlan& plan, MemoryRef slots,
+                   unsigned pos, const Interval* sf_ivl) {
   jit::vector<Vinstr> loads;
 
-  for (auto dst : copies) {
-    auto ivl = copies[dst];
-    if (!ivl) continue;
+  auto const sf_live = sf_ivl &&
+                       !sf_ivl->ranges.empty() &&
+                       sf_ivl->covers(pos);
 
-    if (ivl->reg != InvalidReg) {
-      moves[dst] = ivl->reg;
-    } else if (ivl->constant) {
-      if (ivl->val.isUndef) continue;
-
-      auto const use_xor = ivl->val.val == 0 && dst.isGP() && !sf_live(pos);
-
-      switch (ivl->val.kind) {
-        case Vconst::Quad:
-        case Vconst::Double:
-          if (use_xor) {
-            Vreg32 d32 = dst; // assume 32-bit ops zero upper bits
-            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
-          } else {
-            loads.emplace_back(ldimmq{ivl->val.val, dst});
-          }
-          break;
-        case Vconst::Long:
-          if (use_xor) {
-            Vreg32 d32 = dst;
-            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
-          } else {
-            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst});
-          }
-          break;
-        case Vconst::Byte:
-          if (use_xor) {
-            Vreg8 d8 = dst;
-            loads.emplace_back(xorb{d8, d8, d8, RegSF{0}});
-          } else {
-            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst});
-          }
-          break;
-        case Vconst::ThreadLocal:
-          loads.emplace_back(
-            load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
-          );
-          break;
-      }
-    } else {
-      assertx(ivl->spilled());
+  for_each_load(plan, [&] (PhysReg dst, const Interval* ivl) {
+    if (ivl->constant) {
+      if (ivl->val.isUndef) return;
+      loads.push_back([&]() -> Vinstr {
+        switch (ivl->val.kind) {
+          case Vconst::Quad:
+          case Vconst::Double:
+            return ldcns<Vreg64, ldimmq, xorq, uint64_t>(ivl, dst, sf_live);
+          case Vconst::Long:
+            return ldcns<Vreg32, ldimml, xorl, int32_t>(ivl, dst, sf_live);
+          case Vconst::Byte:
+            return ldcns<Vreg8, ldimmb, xorb, uint8_t>(ivl, dst, sf_live);
+          case Vconst::ThreadLocal:
+            return load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst};
+        }
+        not_reached();
+      }());
+    } else if (ivl->spilled()) {
       MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
       if (!ivl->wide) {
         loads.emplace_back(load{ptr, dst});
@@ -1932,27 +1988,8 @@ void insertCopiesAt(const VxlsContext& ctx,
         loads.emplace_back(loadups{ptr, dst});
       }
     }
-  }
-  auto hows = doRegMoves(moves, ctx.tmp);
-
-  auto origin = code[j].origin;
-  auto count = hows.size() + loads.size();
-  code.insert(code.begin() + j, count, ud2{});
-
-  for (auto& how : hows) {
-    if (how.m_kind == MoveInfo::Kind::Xchg) {
-      code[j] = copy2{how.m_src, how.m_dst, how.m_dst, how.m_src};
-    } else {
-      code[j] = copy{how.m_src, how.m_dst};
-    }
-    code[j].origin = origin;
-    code[j++].pos = pos;
-  }
-  for (auto& inst : loads) {
-    code[j] = inst;
-    code[j].origin = origin;
-    code[j++].pos = pos;
-  }
+  });
+  insertCodeAt(code, j, loads, pos);
 }
 
 /*
@@ -1979,21 +2016,26 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
     for (unsigned j = 0; j < code.size(); j++, pos += 2) {
       MemoryRef slots = ctx.sp[offset];
 
-      // We register spills to the position immediately after the def, so we
-      // insert it /before/ the following Vinstr.
+      // Spills, reg-reg moves, and loads of constant values or spill space all
+      // occur between instruction.  Insert them in order.
       auto s = resolution.spills.find(pos - 1);
       if (s != resolution.spills.end()) {
         insertSpillsAt(code, j, s->second, slots, pos - 1);
       }
-
       auto c = resolution.copies.find(pos - 1);
       if (c != resolution.copies.end()) {
-        insertCopiesAt(ctx, code, j, c->second, slots, pos - 1, sf_ivl);
+        insertCopiesAt(ctx, code, j, c->second, pos - 1);
+        insertLoadsAt(code, j, c->second, slots, pos - 1, sf_ivl);
       }
+
+      // Insert copies and loads at instructions.
       c = resolution.copies.find(pos);
       if (c != resolution.copies.end()) {
-        insertCopiesAt(ctx, code, j, c->second, slots, pos, sf_ivl);
+        insertCopiesAt(ctx, code, j, c->second, pos);
+        insertLoadsAt(code, j, c->second, slots, pos, sf_ivl);
       }
+      assertx(resolution.spills.count(pos) == 0);
+
       offset -= spEffect(unit, code[j], ctx.sp);
     }
   }
@@ -2009,9 +2051,13 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
       if (c != resolution.edge_copies.end()) {
         auto& code = block.code;
         unsigned j = code.size() - 1;
+        auto const pos = ctx.block_ranges[b].end - 1;
         auto const slots = ctx.sp[ctx.spill_offsets[succlist[0]]];
-        insertCopiesAt(ctx, code, j, c->second, slots,
-                       ctx.block_ranges[b].end - 1, sf_ivl);
+
+        // We interleave copies and loads in `edge_copies', so here and below
+        // we process them separately (and pass `true' to avoid asserting).
+        insertCopiesAt(ctx, code, j, c->second, pos);
+        insertLoadsAt(code, j, c->second, slots, pos, sf_ivl);
       }
     } else {
       // copies will go at start of successor
@@ -2021,9 +2067,11 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         if (c != resolution.edge_copies.end()) {
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
+          auto const pos = ctx.block_ranges[s].start;
           auto const slots = ctx.sp[ctx.spill_offsets[s]];
-          insertCopiesAt(ctx, code, j, c->second, slots,
-                         ctx.block_ranges[s].start, sf_ivl);
+
+          insertCopiesAt(ctx, code, j, c->second, pos);
+          insertLoadsAt(code, j, c->second, slots, pos, sf_ivl);
         }
       }
     }

@@ -583,6 +583,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %right T_AWAIT T_YIELD
 %left '?' ':'
+%right T_COALESCE
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
 %left '|'
@@ -693,6 +694,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 %token T_TRAIT
 %token T_ELLIPSIS "..."
+%token T_COALESCE "??"
 %token T_INSTEADOF
 %token T_TRAIT_C
 
@@ -751,11 +753,26 @@ top_statement:
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $5;}
   | T_NAMESPACE '{'                    { _p->onNamespaceStart("");}
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $4;}
-  | T_USE use_declarations ';'         { _p->nns(); $$.reset();}
+  | T_USE use_declarations ';'         { _p->onUse($2, &Parser::useClass);
+                                         _p->nns(); $$.reset();}
   | T_USE T_FUNCTION
-    use_fn_declarations ';'            { _p->nns(); $$.reset();}
+    use_declarations ';'               { _p->onUse($3, &Parser::useFunction);
+                                         _p->nns(); $$.reset();}
   | T_USE T_CONST
-    use_const_declarations ';'         { _p->nns(); $$.reset();}
+    use_declarations ';'               { _p->onUse($3, &Parser::useConst);
+                                         _p->nns(); $$.reset();}
+  | T_USE group_use_prefix
+    '{' mixed_use_declarations '}' ';' { _p->onGroupUse($2.text(), $4,
+                                           nullptr);
+                                         _p->nns(); $$.reset();}
+  | T_USE T_FUNCTION group_use_prefix
+    '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
+                                           &Parser::useFunction);
+                                         _p->nns(); $$.reset();}
+  | T_USE T_CONST group_use_prefix
+    '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
+                                           &Parser::useConst);
+                                         _p->nns(); $$.reset();}
   | constant_declaration ';'           { _p->nns();
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;
@@ -843,46 +860,42 @@ ident:
   | T_CLASS
 ;
 
+group_use_prefix:
+    namespace_name T_NS_SEPARATOR      { $$ = $1;}
+  | T_NS_SEPARATOR
+    namespace_name T_NS_SEPARATOR      { $$ = $2;}
+;
+
 use_declarations:
     use_declarations ','
-    use_declaration                    { }
-  | use_declaration                    { }
-;
-
-use_fn_declarations:
-    use_fn_declarations ','
-    use_fn_declaration                 { }
-  | use_fn_declaration                 { }
-;
-
-use_const_declarations:
-    use_const_declarations ','
-    use_const_declaration              { }
-  | use_const_declaration              { }
+    use_declaration                    { _p->addStatement($$,$1,$3);}
+  | use_declaration                    { $$.reset();
+                                         _p->addStatement($$,$$,$1);}
 ;
 
 use_declaration:
-    namespace_name                     { _p->onUse($1.text(),"");}
-  | T_NS_SEPARATOR namespace_name      { _p->onUse($2.text(),"");}
-  | namespace_name T_AS ident_no_semireserved          { _p->onUse($1.text(),$3.text());}
+    namespace_name                  { _p->onUseDeclaration($$, $1.text(),"");}
+  | T_NS_SEPARATOR namespace_name   { _p->onUseDeclaration($$, $2.text(),"");}
+  | namespace_name
+    T_AS ident_no_semireserved      { _p->onUseDeclaration($$, $1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
-    T_AS ident_no_semireserved                         { _p->onUse($2.text(),$4.text());}
+    T_AS ident_no_semireserved      { _p->onUseDeclaration($$, $2.text(),$4.text());}
 ;
 
-use_fn_declaration:
-    namespace_name                     { _p->onUseFunction($1.text(),"");}
-  | T_NS_SEPARATOR namespace_name      { _p->onUseFunction($2.text(),"");}
-  | namespace_name T_AS ident_no_semireserved          { _p->onUseFunction($1.text(),$3.text());}
-  | T_NS_SEPARATOR namespace_name
-    T_AS ident_no_semireserved                         { _p->onUseFunction($2.text(),$4.text());}
+mixed_use_declarations:
+    mixed_use_declarations ','
+    mixed_use_declaration              { _p->addStatement($$,$1,$3);}
+  | mixed_use_declaration              { $$.reset();
+                                         _p->addStatement($$,$$,$1);}
 ;
 
-use_const_declaration:
-    namespace_name                     { _p->onUseConst($1.text(),"");}
-  | T_NS_SEPARATOR namespace_name      { _p->onUseConst($2.text(),"");}
-  | namespace_name T_AS ident_no_semireserved          { _p->onUseConst($1.text(),$3.text());}
-  | T_NS_SEPARATOR namespace_name
-    T_AS ident_no_semireserved                         { _p->onUseConst($2.text(),$4.text());}
+mixed_use_declaration:
+    use_declaration                    { _p->onMixedUseDeclaration($$, $1,
+                                           &Parser::useClass);}
+  | T_FUNCTION use_declaration         { _p->onMixedUseDeclaration($$, $2,
+                                           &Parser::useFunction);}
+  | T_CONST use_declaration            { _p->onMixedUseDeclaration($$, $2,
+                                           &Parser::useConst);}
 ;
 
 namespace_name:
@@ -890,27 +903,22 @@ namespace_name:
   | namespace_name T_NS_SEPARATOR
     ident_no_semireserved                              { $$ = $1 + $2 + $3; $$ = $1.num() | 2;}
 ;
-namespace_string_base:
+namespace_string:
     namespace_name                     { $$ = $1; $$ = $$.num() | 1;}
   | T_NAMESPACE T_NS_SEPARATOR
     namespace_name                     { $$.set($3.num() | 2, _p->nsDecl($3.text()));}
   | T_NS_SEPARATOR namespace_name      { $$ = $2; $$ = $$.num() | 2;}
 ;
-namespace_string:
-    namespace_string_base              { if ($1.num() & 1) {
-                                           $1.setText(_p->resolve($1.text(),0));
-                                         }
-                                         $$ = $1;}
-;
+
 namespace_string_typeargs:
-    namespace_string_base
+    namespace_string
     hh_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),0));
                                          }
                                          $$ = $1;}
 ;
 class_namespace_string_typeargs:
-    namespace_string_base
+    namespace_string
     hh_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),1));
                                          }
@@ -1927,6 +1935,7 @@ expr_no_variable:
   | '(' expr_no_variable ')'           { $$ = $2;}
   | expr '?' expr ':' expr             { _p->onQOp($$, $1, &$3, $5);}
   | expr '?' ':' expr                  { _p->onQOp($$, $1,   0, $4);}
+  | expr T_COALESCE expr               { _p->onNullCoalesce($$, $1, $3);}
   | internal_functions                 { $$ = $1;}
   | T_INT_CAST expr                    { UEXP($$,$2,T_INT_CAST,1);}
   | T_DOUBLE_CAST expr                 { UEXP($$,$2,T_DOUBLE_CAST,1);}

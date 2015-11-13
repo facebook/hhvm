@@ -222,6 +222,27 @@ void emitCGetG(IRGS& env) {
   );
 }
 
+void emitCGetQuietG(IRGS& env) {
+  auto const name = topC(env);
+  if (!name->isA(TStr)) PUNT(CGetQuietG-NonStrName);
+
+  auto ret = cond(
+    env,
+    [&] (Block* taken) { return gen(env, LdGblAddr, taken, name); },
+    [&] (SSATmp* ptr) {
+      auto tmp = gen(env, LdMem, TCell, gen(env, UnboxPtr, ptr));
+      gen(env, IncRef, tmp);
+      return tmp;
+    },
+    // Taken: LdGblAddr branched here because no global variable exists with
+    // that name.
+    [&] { return cns(env, TInitNull); }
+  );
+
+  destroyName(env, name);
+  push(env, ret);
+}
+
 void emitVGetG(IRGS& env) {
   auto const name = topC(env);
   if (!name->isA(TStr)) PUNT(VGetG-NonStrName);

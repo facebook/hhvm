@@ -36,14 +36,12 @@ namespace HPHP {
 class c_Vector;
 class c_GenVectorWaitHandle final : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(GenVectorWaitHandle)
+  WAITHANDLE_CLASSOF(GenVectorWaitHandle);
+  WAITHANDLE_DTOR(GenVectorWaitHandle);
 
   explicit c_GenVectorWaitHandle(Class* cls = c_GenVectorWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_GenVectorWaitHandle() {}
-
-  static void ti_setoncreatecallback(const Variant& callback);
-  static Object ti_create(const Variant& dependencies);
 
  public:
   static constexpr ptrdiff_t blockableOff() {
@@ -66,9 +64,16 @@ class c_GenVectorWaitHandle final : public c_WaitableWaitHandle {
   int64_t m_iterPos;
   AsioBlockable m_blockable;
 
+  friend Object HHVM_STATIC_METHOD(GenVectorWaitHandle, create,
+                                   const Object& deps);
  public:
   static const int8_t STATE_BLOCKED = 2;
 };
+
+void HHVM_STATIC_METHOD(GenVectorWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+Object HHVM_STATIC_METHOD(GenVectorWaitHandle, create,
+                          const Object& deps);
 
 inline c_GenVectorWaitHandle* c_WaitHandle::asGenVector() {
   assert(getKind() == Kind::GenVector);

@@ -32,17 +32,14 @@ namespace HPHP {
  */
 class AsioExternalThreadEvent;
 struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
-  DECLARE_CLASS_NO_SWEEP(ExternalThreadEventWaitHandle)
+  WAITHANDLE_CLASSOF(ExternalThreadEventWaitHandle);
+  WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);
   void sweep();
 
   explicit c_ExternalThreadEventWaitHandle(Class* cls =
       c_ExternalThreadEventWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_ExternalThreadEventWaitHandle() {}
-
-  static void ti_setoncreatecallback(const Variant& callback);
-  static void ti_setonsuccesscallback(const Variant& callback);
-  static void ti_setonfailcallback(const Variant& callback);
 
  public:
   static req::ptr<c_ExternalThreadEventWaitHandle>
@@ -81,6 +78,13 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
 
   friend struct SweepableMember<c_ExternalThreadEventWaitHandle>;
 };
+
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
+                        const Variant& callback);
 
 inline c_ExternalThreadEventWaitHandle* c_WaitHandle::asExternalThreadEvent() {
   assert(getKind() == Kind::ExternalThreadEvent);

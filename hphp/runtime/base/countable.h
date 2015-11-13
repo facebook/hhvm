@@ -38,43 +38,43 @@ constexpr int32_t UncountedValue = -128;
 constexpr int32_t StaticValue = -127; // implies UncountedValue
 constexpr int32_t RefCountMaxRealistic = (1 << 30) - 1;
 
-template<class T, Counted CNT>
+template<class T, Counted CNT> ALWAYS_INLINE
 bool HeaderWord<T,CNT>::checkCount() const {
   return count >= 1 ||
          (CNT == Counted::Maybe &&
           (count == UncountedValue || count == StaticValue));
 }
 
-template<class T, Counted CNT>
+template<class T, Counted CNT> ALWAYS_INLINE
 bool HeaderWord<T,CNT>::isRefCounted() const {
   return CNT == Counted::Always || count >= 0;
 }
 
-template<class T, Counted CNT>
+template<class T, Counted CNT> ALWAYS_INLINE
 bool HeaderWord<T,CNT>::hasMultipleRefs() const {
   assert(checkCount());
   return uint32_t(count) > 1; // treat Static/Uncounted as large positive counts
 }
 
-template<class T, Counted CNT>
+template<class T, Counted CNT> ALWAYS_INLINE
 bool HeaderWord<T,CNT>::hasExactlyOneRef() const {
   assert(checkCount());
   return count == 1;
 }
 
-template<class T, Counted CNT>
+template<class T, Counted CNT> ALWAYS_INLINE
 void HeaderWord<T,CNT>::incRefCount() const {
   assert(checkCount() || count == 0 /* due to static init order */);
   if (isRefCounted()) ++count;
 }
 
-template<class T, Counted CNT>
+template<class T, Counted CNT> ALWAYS_INLINE
 void HeaderWord<T,CNT>::decRefCount() const {
   assert(checkCount());
   if (isRefCounted()) --count;
 }
 
-template<class T, Counted CNT>
+template<class T, Counted CNT> ALWAYS_INLINE
 bool HeaderWord<T,CNT>::decWillRelease() const {
   return !hasMultipleRefs();
 }

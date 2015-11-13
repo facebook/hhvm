@@ -1,0 +1,11 @@
+string(14) "Foo\Bar\ClassA"
+string(14) "Foo\Bar\ClassB"
+string(14) "Foo\Bar\ClassC"
+string(12) "Foo\Bar\fn_a"
+string(12) "Foo\Bar\fn_b"
+string(12) "Foo\Bar\fn_c"
+int(1)
+int(2)
+int(3)
+
+Done

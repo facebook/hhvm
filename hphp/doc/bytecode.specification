@@ -1536,6 +1536,13 @@ CGetL <local variable id>    []  ->  [C]
   as a cell. If the local variable is not defined, this instruction raises a
   warning and pushes null onto the stack.
 
+CGetQuietL <local variable id>    []  ->  [C]
+
+  Get local as cell. If the local variable given by %1 is defined, this
+  instruction gets the value of the local variable and pushes it onto the stack
+  as a cell. If the local variable is not defined, this instruction pushes null
+  onto the stack.
+
 CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
 
   Get local as cell. If the local variable given by %1 is defined, this
@@ -1577,6 +1584,15 @@ CGetN    [C]  ->  [C]
   If there is no local variable defined named x, this instruction pushes null
   onto the stack and raises a warning.
 
+CGetQuietN    [C]  ->  [C]
+
+  Get local as cell. This instruction first computes x = (string)$1. Next, this
+  instruction reads the local variable named x pushes its value onto the stack
+  as a cell.
+
+  If there is no local variable defined named x, this instruction pushes null
+  onto the stack.
+
 CGetG    [C]  ->  [C]
 
   Get global as cell. This instruction first computes x = (string)$1. Next,
@@ -1585,6 +1601,15 @@ CGetG    [C]  ->  [C]
 
   If there is not a global variable defined named x, this instruction pushes
   null onto the stack and raises a warning.
+
+CGetQuietG    [C]  ->  [C]
+
+  Get global as cell. This instruction first computes x = (string)$1. Next,
+  this instruction reads the global variable named x pushes its value onto the
+  stack as a cell.
+
+  If there is not a global variable defined named x, this instruction pushes
+  null onto the stack.
 
 CGetS    [C A]  ->  [C]
 

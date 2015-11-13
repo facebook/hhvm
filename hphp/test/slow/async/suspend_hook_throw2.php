@@ -21,9 +21,9 @@ async function foo($resched) {
 
 async function thing() {
   echo "thing1\n";
-  await RescheduleWaitHandle::create(0,0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
   echo "thing2\n";
-  await RescheduleWaitHandle::create(0,0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
   echo "thing3\n";
 }
 $y = thing();

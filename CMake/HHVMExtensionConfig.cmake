@@ -540,7 +540,7 @@ function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDepende
 
   if (NOT ${isOptional})
     if (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 4 AND (NOT ${ARGC} EQUAL 3 OR NOT "${ARGV2}" STREQUAL "ON"))
-      message(FATAL_ERROR "The ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension '${ARGC}' '${ARGV2}' is an extension you probably want, but resolving the dependency '${failedDependency}' failed!")
+      message(FATAL_ERROR "The ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension is an extension you probably want, but resolving the dependency '${failedDependency}' failed!")
     elseif (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 3)
       message(FATAL_ERROR "The ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension was forcefully enabled, but resolving the dependency '${failedDependency}' failed!")
     elseif (${HHVM_EXTENSION_${extensionID}_ENABLED_STATE} EQUAL 1)

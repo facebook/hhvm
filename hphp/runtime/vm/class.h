@@ -51,6 +51,7 @@ struct ClassInfo;
 struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
+class c_WaitHandle;
 
 namespace Native {
 struct NativeDataInfo;
@@ -1189,6 +1190,9 @@ public:
 
 private:
   default_ptr<ExtraData> m_extra;
+  template<class T> friend typename
+    std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
+  finish_class();
 
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;

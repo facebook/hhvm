@@ -97,12 +97,24 @@ TEST(Type, ToString) {
   EXPECT_EQ("Int", TInt.toString());
   EXPECT_EQ("Cell", TCell.toString());
   EXPECT_EQ("BoxedDbl", TBoxedDbl.toString());
+  EXPECT_EQ("Boxed{Int|Dbl}", (TBoxedInt | TBoxedDbl).toString());
 
   auto const sub = Type::SubObj(SystemLib::s_IteratorClass);
   auto const exact = Type::ExactObj(SystemLib::s_IteratorClass);
 
   EXPECT_EQ("Obj<=Iterator", sub.toString());
   EXPECT_EQ("Obj=Iterator", exact.toString());
+  EXPECT_EQ("PtrToStr", TPtrToStr.toString());
+
+  EXPECT_EQ("PtrTo{Prop|MIS|Misc}Gen",
+            (TPtrToMembGen - TPtrToElemGen).toString());
+  EXPECT_EQ("PtrToMembGen", TPtrToMembGen.toString());
+  EXPECT_EQ("PtrTo{ClsInit|ClsCns|Frame|Stk|Gbl|Prop|Elem|SProp|MIS|Misc}Gen",
+            (TPtrToGen - TPtrToRefGen).toString());
+
+  EXPECT_EQ("PtrTo{Int|StaticStr}|{Int|StaticStr}",
+            (TInt | TPtrToStaticStr).toString());
+  EXPECT_EQ("{Obj<=Iterator|Int}", (TInt | sub).toString());
 }
 
 TEST(Type, Boxes) {
@@ -125,10 +137,30 @@ TEST(Type, Ptr) {
   EXPECT_TRUE(TPtrToBoxedCell <= TPtrToGen);
   EXPECT_TRUE(TPtrToInt <= TPtrToCell);
 
-  EXPECT_EQ(TPtrToInt, TInt.ptr(Ptr::Unk));
-  EXPECT_EQ(TPtrToCell, TCell.ptr(Ptr::Unk));
+  EXPECT_EQ(TPtrToInt, TInt.ptr(Ptr::Ptr));
+  EXPECT_EQ(TPtrToCell, TCell.ptr(Ptr::Ptr));
   EXPECT_EQ(TInt, TPtrToInt.deref());
   EXPECT_EQ(TBoxedCell, TPtrToBoxedCell.deref());
+
+  EXPECT_EQ(TPtrToInt, TPtrToInt - TInt);
+  EXPECT_EQ(TInt, (TPtrToInt | TInt) - TPtrToInt);
+  EXPECT_EQ(TPtrToUncountedInit, TPtrToUncounted - TPtrToUninit);
+
+  auto const t = TPtrToInt | TPtrToStr | TInt | TStr;
+  EXPECT_EQ(t, t - TPtrToInt);
+  EXPECT_EQ(t, t - TInt);
+  EXPECT_EQ(TPtrToInt | TPtrToStr, t - (TInt | TStr));
+  EXPECT_EQ(TInt | TStr, t - (TPtrToInt | TPtrToStr));
+  EXPECT_EQ(TPtrToFrameGen, TPtrToRFrameGen - TPtrToRefGen);
+
+  EXPECT_EQ(TBottom, TPtrToInt & TInt);
+  auto const a1 = Type::Array(ArrayData::kPackedKind).ptr(Ptr::Frame);
+  auto const a2 = Type::Array(ArrayData::kMixedKind).ptr(Ptr::Frame);
+  EXPECT_EQ(TBottom, a1 & a2);
+  EXPECT_EQ(a1, a1 - a2);
+  EXPECT_EQ(TFunc, (TFunc | a1) - a1);
+
+  EXPECT_EQ(TBottom, TBottom.deref());
 }
 
 TEST(Type, Subtypes) {
@@ -189,9 +221,9 @@ TEST(Type, RelaxType) {
   auto tc = TypeConstraint{DataTypeSpecialized};
   tc.setDesiredClass(SystemLib::s_IteratorClass);
   tc.category = DataTypeSpecialized;
-  auto type = Type::SubObj(SystemLib::s_IteratorClass);
-  EXPECT_EQ("Obj<=Iterator", type.toString());
-  EXPECT_EQ(type, relaxType(type, tc.category));
+  auto subIter = Type::SubObj(SystemLib::s_IteratorClass);
+  EXPECT_EQ("Obj<=Iterator", subIter.toString());
+  EXPECT_EQ(subIter, relaxType(subIter, tc.category));
 
   EXPECT_EQ(TBoxedInitCell,
             relaxType(TBoxedInitCell, DataTypeCountnessInit));
@@ -244,8 +276,26 @@ TEST(Type, Specialized) {
 
   // Checking specialization dropping.
   EXPECT_EQ(TArr | TBoxedInitCell, packed | TBoxedInitCell);
-  auto specializedObj = Type::SubObj(SystemLib::s_IteratorClass);
-  EXPECT_EQ(TArr | TObj, packed | specializedObj);
+  auto subIter = Type::SubObj(SystemLib::s_IteratorClass);
+  EXPECT_EQ(TArr | TObj, packed | subIter);
+
+  auto const packedOrInt = spacked | TInt;
+  EXPECT_EQ(TInt, packedOrInt - TArr);
+  EXPECT_EQ(TInt, packedOrInt - spacked);
+  EXPECT_EQ(spacked, packedOrInt - TInt);
+  EXPECT_EQ(TPtrToArr,
+            TPtrToArr - Type::Array(ArrayData::kPackedKind).ptr(Ptr::Ptr));
+
+  auto const iterOrStr = subIter | TStr;
+  EXPECT_EQ(TStr, iterOrStr - TObj);
+  EXPECT_EQ(TStr, iterOrStr - subIter);
+  EXPECT_EQ(subIter, iterOrStr - TStr);
+  EXPECT_EQ(TPtrToObj, TPtrToObj - subIter.ptr(Ptr::Ptr));
+
+  auto const subCls = Type::SubCls(SystemLib::s_IteratorClass);
+  EXPECT_EQ(TCls, TCls - subCls);
+  EXPECT_EQ(subCls, (subCls | TPtrToInt) - TPtrToInt);
+  EXPECT_EQ(TPtrToInt, (subCls | TPtrToInt) - subCls);
 }
 
 TEST(Type, SpecializedObjects) {
@@ -289,6 +339,8 @@ TEST(Type, SpecializedObjects) {
 
   EXPECT_EQ(TObj, TObj - subA);  // conservative
   EXPECT_EQ(subA, subA - exactA);  // conservative
+
+  EXPECT_LT(subA | TCctx, TCtx);
 }
 
 TEST(Type, SpecializedClass) {
@@ -335,6 +387,7 @@ TEST(Type, SpecializedClass) {
 
 TEST(Type, Const) {
   auto five = Type::cns(5);
+  auto fiveArr = five | TArr;
   EXPECT_LT(five, TInt);
   EXPECT_NE(five, TInt);
   EXPECT_TRUE(five.hasConstVal());
@@ -353,6 +406,9 @@ TEST(Type, Const) {
   EXPECT_EQ(five, five - TArr);
   EXPECT_EQ(five, five - Type::cns(1));
   EXPECT_EQ(TInt, TInt - five); // conservative
+  EXPECT_EQ(TInt, fiveArr - TArr);
+  EXPECT_EQ(fiveArr, fiveArr - five);
+  EXPECT_EQ(TArr, fiveArr - TInt);
   EXPECT_EQ(TBottom, five - TInt);
   EXPECT_EQ(TBottom, five - five);
   EXPECT_EQ(TPtrToGen,
@@ -418,8 +474,8 @@ TEST(Type, PtrKinds) {
   auto const frameGen    = TGen.ptr(Ptr::Frame);
   auto const frameUninit = TUninit.ptr(Ptr::Frame);
   auto const frameBool   = TBool.ptr(Ptr::Frame);
-  auto const unknownBool = TBool.ptr(Ptr::Unk);
-  auto const unknownGen  = TGen.ptr(Ptr::Unk);
+  auto const unknownBool = TBool.ptr(Ptr::Ptr);
+  auto const unknownGen  = TGen.ptr(Ptr::Ptr);
   auto const stackObj    = TObj.ptr(Ptr::Stk);
   auto const stackBool    = TBool.ptr(Ptr::Stk);
 
@@ -449,8 +505,6 @@ TEST(Type, PtrKinds) {
   EXPECT_EQ(TBottom, frameBool & stackBool);
   EXPECT_EQ(frameBool, frameBool & unknownBool);
 
-  EXPECT_EQ(TPtrToCell, TPtrToPropCell|TPtrToFrameCell);
-
   EXPECT_EQ(Ptr::Prop,
             (TPtrToPropCell|TNullptr).ptrKind());
   EXPECT_EQ(Ptr::RProp,
@@ -461,9 +515,9 @@ TEST(Type, PtrKinds) {
   auto const frameGenOrCell = frameGen | TCell;
   auto const frameOrRefGenOrCell = frameGenOrCell | TGen.ptr(Ptr::Ref);
   auto const stackOrRefArrOrInt = TArr.ptr(Ptr::RStk) | TInt;
-  EXPECT_EQ(frameGenOrCell & stackOrRefArrOrInt, TInt);
-  EXPECT_EQ(frameOrRefGenOrCell & stackOrRefArrOrInt,
-            TArr.ptr(Ptr::Ref) | TInt);
+  EXPECT_EQ(TInt | TArr, frameGenOrCell & stackOrRefArrOrInt);
+  EXPECT_EQ(TArr.ptr(Ptr::Ref) | TInt,
+            frameOrRefGenOrCell & stackOrRefArrOrInt);
 }
 
 TEST(Type, PtrRefs) {
@@ -473,7 +527,6 @@ TEST(Type, PtrRefs) {
   EXPECT_EQ(TBottom, TPtrToRPropCell & TPtrToFrameBool);
   EXPECT_FALSE(TPtrToRPropCell.maybe(TPtrToFrameBool));
 
-  EXPECT_EQ(TPtrToGen, TPtrToGen - TPtrToRefGen);
   EXPECT_EQ(TPtrToPropCell, TPtrToPropGen - TPtrToBoxedCell);
   EXPECT_EQ(TPtrToPropInt, TPtrToRPropInt - TPtrToRefCell);
   EXPECT_EQ(TPtrToPropInt, TPtrToRPropInt - TPtrToRStkCell);

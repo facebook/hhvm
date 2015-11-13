@@ -45,11 +45,6 @@ c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
   decRefObj(m_child);
 }
 
-void c_AsyncGeneratorWaitHandle::t___construct() {
-  // gen-ext-hhvm requires at least one declared method in the class to work
-  not_reached();
-}
-
 c_AsyncGeneratorWaitHandle*
 c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
                                    c_WaitableWaitHandle* child) {

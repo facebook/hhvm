@@ -24,7 +24,7 @@ enum class HeaderKind : uint8_t {
   Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
-  Object, ResumableObj, AwaitAllWH,
+  Object, WaitHandle, ResumableObj, AwaitAllWH,
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
   ResumableFrame, // ResumableNode followed by Frame, Resumable, ObjectData
   NativeData, // a NativeData header preceding an HNI ObjectData

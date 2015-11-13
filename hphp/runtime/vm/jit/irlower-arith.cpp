@@ -147,6 +147,15 @@ void cgDivDbl(IRLS& env, const IRInstruction* inst) {
   v << divsd{divisor, dividend, d};
 }
 
+void cgDivInt(IRLS& env, const IRInstruction* inst) {
+  auto const d = dstLoc(env, inst, 0).reg();
+  auto const dividend = srcLoc(env, inst, 0).reg();
+  auto const divisor  = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  v << divint{dividend, divisor, d};
+}
+
 void cgMod(IRLS& env, const IRInstruction* inst) {
   auto const d = dstLoc(env, inst, 0).reg();
   auto const dividend = srcLoc(env, inst, 0).reg();

@@ -70,13 +70,13 @@ static ServerPtr runServer() {
         ServerOptions("127.0.0.1", s_server_port, 4));
       server->setRequestHandlerFactory<TestCurlRequestHandler>(0);
       server->start();
-      return std::move(server);
+      return server;
 
     } catch (const FailedToListenException& e) {
       if (s_server_port == PORT_MAX) throw;
     }
   }
-  return std::move(ServerPtr());
+  return ServerPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ bool TestExtCurl::RunTests(const std::string &which) {
                          " return strlen($s2);"
                          "}");
 
-  ServerPtr server = std::move(runServer());
+  ServerPtr server = runServer();
 
   RUN_TEST(test_curl_init);
   RUN_TEST(test_curl_copy_handle);

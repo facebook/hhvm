@@ -56,6 +56,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Ref:
       break;
     case HeaderKind::Object:
+    case HeaderKind::WaitHandle:
     case HeaderKind::ResumableObj:
     case HeaderKind::AwaitAllWH:
       out << ":" << h->obj_.classname_cstr();

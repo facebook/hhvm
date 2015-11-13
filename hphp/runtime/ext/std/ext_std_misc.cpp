@@ -58,11 +58,11 @@ const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 static String HHVM_FUNCTION(server_warmup_status) {
-  // Fail if we jitted more than 5 KB of code.
+  // Fail if we jitted more than 25kb of code.
   size_t begin, end;
   jit::mcg->codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
-  auto constexpr kMaxTCBytes = 5 << 10;
+  auto constexpr kMaxTCBytes = 25 << 10;
   if (diff > kMaxTCBytes) {
     return folly::format("Translation cache grew by {} bytes to {} bytes.",
                          diff, begin).str();
@@ -692,7 +692,8 @@ const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 434;
 const int UserTokenId_T_HASHBANG = 435;
 const int UserTokenId_T_SUPER = 436;
 const int UserTokenId_T_SPACESHIP = 437;
-const int MaxUserTokenId = 438; // Marker, not a real user token ID
+const int UserTokenId_T_COALESCE = 438;
+const int MaxUserTokenId = 439; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

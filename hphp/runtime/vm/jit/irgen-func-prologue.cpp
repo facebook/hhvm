@@ -114,26 +114,27 @@ SSATmp* juggle_closure_ctx(IRGS& env) {
  */
 void init_use_vars(IRGS& env, SSATmp* closure) {
   auto const func = env.context.func;
+  auto const cls = func->implCls();
   auto const nparams = func->numParams();
 
   assertx(func->isClosureBody());
 
   // Closure object properties are the use vars followed by the static locals
   // (which are per-instance).
-  auto const nuse = func->implCls()->numDeclProperties() -
-                    func->numStaticLocals();
+  auto const nuse = cls->numDeclProperties() - func->numStaticLocals();
 
-  int use_var_off = sizeof(ObjectData) + func->implCls()->builtinODTailSize();
+  int use_var_off = sizeof(ObjectData) + cls->builtinODTailSize();
 
   for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
+    auto const ty = typeFromRAT(cls->declPropRepoAuthType(i));
     auto const addr = gen(
       env,
       LdPropAddr,
       PropOffset { use_var_off },
-      TPtrToPropGen,
+      ty.ptr(Ptr::Prop),
       closure
     );
-    auto const prop = gen(env, LdMem, TGen, addr);
+    auto const prop = gen(env, LdMem, ty, addr);
     gen(env, StLoc, LocalId{nparams + 1 + i}, fp(env), prop);
     gen(env, IncRef, prop);
   }

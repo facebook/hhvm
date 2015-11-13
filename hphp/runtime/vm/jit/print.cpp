@@ -366,7 +366,15 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
 
   os << '\n' << std::string(kIndent - 3, ' ');
   printLabel(os, block);
-  os << punc(":");
+  os << punc(":") << " [profCount=" << block->profCount() << "]";
+
+  switch (block->hint()) {
+    case Block::Hint::Unused:   os << "<Unused>";   break;
+    case Block::Hint::Unlikely: os << "<Unlikely>"; break;
+    case Block::Hint::Likely:   os << "<Likely>";   break;
+    default: break;
+  }
+
   auto& preds = block->preds();
   if (!preds.empty()) {
     os << " (preds";
@@ -638,7 +646,7 @@ void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
       HPHP::Trace::traceRelease("%s\n", str.str().c_str());
     }
     if (RuntimeOption::EvalDumpIR >= level) {
-      mcg->annotations().emplace_back(caption, std::move(str.str()));
+      mcg->annotations().emplace_back(caption, str.str());
     }
   }
 }

@@ -276,8 +276,6 @@ void emitMIterFree(IRGS& env, int32_t iterId) {
 void emitIterBreak(IRGS& env,
                    const ImmVector& iv,
                    Offset relOffset) {
-  always_assert(env.currentNormalizedInstruction->endsRegion);
-
   for (int iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
     IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
     Id       iterId   = iv.vec32()[iterIndex + 1];
@@ -288,8 +286,7 @@ void emitIterBreak(IRGS& env,
     }
   }
 
-  // Would need to change this if we support not ending regions on this:
-  gen(env, Jmp, makeExit(env, bcOff(env) + relOffset));
+  jmpImpl(env, bcOff(env) + relOffset);
 }
 
 void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {

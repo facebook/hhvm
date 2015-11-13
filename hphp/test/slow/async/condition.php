@@ -6,20 +6,20 @@ async function noblock() {
 
 async function block() {
   echo "block enter\n";
-  await RescheduleWaitHandle::create(0, 0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
 }
 
 async function block_then_succeed(&$condition) {
   echo "block enter\n";
-  await RescheduleWaitHandle::create(0, 0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
   $condition->succeed(42);
 }
 
 async function block_then_fail(&$condition) {
   echo "block enter\n";
-  await RescheduleWaitHandle::create(0, 0);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
   $condition->fail(new Exception('horrible failure'));
 }
@@ -72,7 +72,7 @@ async function run_one(string $name) {
   } catch (Exception $e) {
     echo "failed: {$e->getMessage()}\n";
   }
-  await RescheduleWaitHandle::create(0, 1);
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 1);
   echo "\n";
 }
 

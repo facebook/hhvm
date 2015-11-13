@@ -173,7 +173,7 @@ public:
   /*
    * Create a new block corresponding to bytecode control flow.
    */
-  Block* makeBlock(SrcKey sk);
+  Block* makeBlock(SrcKey sk, uint64_t profCount);
 
   /*
    * Clear the map from bytecode offsets to Blocks.

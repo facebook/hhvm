@@ -32,13 +32,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
-  auto wh = static_cast<c_AsyncFunctionWaitHandle*>(od);
-  Resumable::Destroy(wh->resumable()->size(), wh);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   if (LIKELY(isFinished())) {
     return;
@@ -47,11 +40,6 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   assert(!isRunning());
   frame_free_locals_inl_no_hook<false>(actRec(), actRec()->func()->numLocals());
   decRefObj(m_children[0].getChild());
-}
-
-void c_AsyncFunctionWaitHandle::t___construct() {
-  // gen-ext-hhvm requires at least one declared method in the class to work
-  not_reached();
 }
 
 namespace {

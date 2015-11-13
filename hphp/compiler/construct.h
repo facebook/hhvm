@@ -103,7 +103,8 @@ public:
   x(ClassRequireStatement)  \
   x(TraitPrecStatement)     \
   x(TraitAliasStatement)    \
-  x(TypedefStatement)
+  x(TypedefStatement)       \
+  x(UseDeclarationStatementFragment)
 
 #define DECLARE_EXPRESSION_TYPES(x)     \
   x(Expression,                  None) \
@@ -124,6 +125,7 @@ public:
   x(IncludeExpression,           Call) \
   x(BinaryOpExpression,        Update) \
   x(QOpExpression,               None) \
+  x(NullCoalesceExpression,      None) \
   x(ArrayPairExpression,         None) \
   x(ClassConstantExpression,    Const) \
   x(ParameterExpression,         None) \

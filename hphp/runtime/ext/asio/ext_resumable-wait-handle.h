@@ -35,16 +35,13 @@ struct ActRec;
  */
 class c_ResumableWaitHandle : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(ResumableWaitHandle)
+  WAITHANDLE_CLASSOF(ResumableWaitHandle);
+  WAITHANDLE_DTOR(ResumableWaitHandle);
 
   explicit c_ResumableWaitHandle(Class* cls = c_ResumableWaitHandle::classof(),
-                                 HeaderKind kind = HeaderKind::Object) noexcept
-    : c_WaitableWaitHandle(cls, kind) {}
+                                 HeaderKind kind = HeaderKind::WaitHandle)
+  noexcept : c_WaitableWaitHandle(cls, kind) {}
   ~c_ResumableWaitHandle() {}
-  static void ti_setoncreatecallback(const Variant& callback);
-  static void ti_setonawaitcallback(const Variant& callback);
-  static void ti_setonsuccesscallback(const Variant& callback);
-  static void ti_setonfailcallback(const Variant& callback);
 
  public:
   static c_ResumableWaitHandle* getRunning(ActRec* fp);
@@ -60,6 +57,15 @@ inline c_ResumableWaitHandle* c_WaitHandle::asResumable() {
   assert(getKind() == Kind::AsyncFunction || getKind() == Kind::AsyncGenerator);
   return static_cast<c_ResumableWaitHandle*>(this);
 }
+
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnAwaitCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnSuccessCallback,
+                        const Variant& callback);
+void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnFailCallback,
+                        const Variant& callback);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

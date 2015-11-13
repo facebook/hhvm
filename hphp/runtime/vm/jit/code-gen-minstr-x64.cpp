@@ -47,8 +47,11 @@ void CodeGenerator::cgBaseG(IRInstruction* inst) {
 
 void CodeGenerator::cgPropImpl(IRInstruction* inst) {
   using namespace MInstrHelpers;
-  auto const mia = inst->extra<MInstrAttrData>()->mia;
-  BUILD_OPTAB(PROP_HELPER_TABLE, mia, inst->src(0)->isA(TObj));
+  auto const mia  = inst->extra<MInstrAttrData>()->mia;
+  auto const base = inst->src(0);
+  auto const key  = inst->src(1);
+  auto const keyType = getKeyTypeNoInt(key);
+  BUILD_OPTAB(PROP_HELPER_TABLE, mia, keyType, base->isA(TObj));
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
@@ -57,7 +60,7 @@ void CodeGenerator::cgPropImpl(IRInstruction* inst) {
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .typedValue(1)
+      .memberKeyS(1)
       .ssa(2)
   );
 }
@@ -179,7 +182,9 @@ void CodeGenerator::cgBindProp(IRInstruction* inst) {
 
 void CodeGenerator::cgSetProp(IRInstruction* inst) {
   auto const base = inst->src(0);
-  BUILD_OPTAB(SETPROP_HELPER_TABLE, base->isA(TObj));
+  auto const key = inst->src(1);
+  auto const keyType = getKeyTypeNoInt(key);
+  BUILD_OPTAB(SETPROP_HELPER_TABLE, keyType, base->isA(TObj));
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
@@ -188,7 +193,7 @@ void CodeGenerator::cgSetProp(IRInstruction* inst) {
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .typedValue(1)
+      .memberKeyS(1)
       .typedValue(2)
   );
 }
@@ -245,9 +250,11 @@ void CodeGenerator::cgIncDecProp(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIssetEmptyPropImpl(IRInstruction* inst) {
-  bool const isEmpty = inst->op() == EmptyProp;
+  auto const isEmpty = inst->op() == EmptyProp;
   auto const base = inst->src(0);
-  BUILD_OPTAB(ISSET_EMPTY_PROP_HELPER_TABLE, isEmpty, base->isA(TObj));
+  auto const key = inst->src(1);
+  auto const keyType = getKeyTypeNoInt(key);
+  BUILD_OPTAB(ISSET_EMPTY_PROP_HELPER_TABLE, keyType, isEmpty, base->isA(TObj));
   cgCallHelper(
     vmain(),
     CallSpec::direct(opFunc),
@@ -256,7 +263,7 @@ void CodeGenerator::cgIssetEmptyPropImpl(IRInstruction* inst) {
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .typedValue(1)
+      .memberKeyS(1)
   );
 }
 

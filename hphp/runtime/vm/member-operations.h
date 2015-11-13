@@ -1804,27 +1804,27 @@ inline TypedValue* Prop(TypedValue& tvRef,
   return instance->prop(&tvRef, ctx, keySD);
 }
 
-template <bool useEmpty>
+template <bool useEmpty, KeyType kt>
 inline bool IssetEmptyPropObj(Class* ctx, ObjectData* instance,
-                              TypedValue key) {
+                              key_type<kt> key) {
   auto keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
+  SCOPE_EXIT { releaseKey<kt>(keySD); };
 
   return useEmpty ?
     instance->propEmpty(ctx, keySD) :
     instance->propIsset(ctx, keySD);
 }
 
-template <bool useEmpty, bool isObj = false>
-bool IssetEmptyProp(Class* ctx, TypedValue* base, TypedValue key) {
+template <bool useEmpty, bool isObj = false, KeyType kt = KeyType::Any>
+bool IssetEmptyProp(Class* ctx, TypedValue* base, key_type<kt> key) {
   if (isObj) {
     auto obj = reinterpret_cast<ObjectData*>(base);
-    return IssetEmptyPropObj<useEmpty>(ctx, obj, key);
+    return IssetEmptyPropObj<useEmpty, kt>(ctx, obj, key);
   }
 
   base = tvToCell(base);
   if (LIKELY(base->m_type == KindOfObject)) {
-    return IssetEmptyPropObj<useEmpty>(ctx, instanceFromTv(base), key);
+    return IssetEmptyPropObj<useEmpty, kt>(ctx, instanceFromTv(base), key);
   }
   return useEmpty;
 }

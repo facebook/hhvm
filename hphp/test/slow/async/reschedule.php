@@ -5,7 +5,10 @@ async function re($e) {
   $priority = (int)pow(2, $e);
   $r = async $diff ==> {
     try {
-      await RescheduleWaitHandle::create(0, $priority + $diff);
+      await RescheduleWaitHandle::create(
+        RescheduleWaitHandle::QUEUE_DEFAULT,
+        $priority + $diff,
+      );
     } catch (Exception $ex) {
       echo "exception\t$priority\t$diff\t".$ex->getMessage()."\n";
     }
@@ -25,9 +28,15 @@ AwaitAllWaitHandle::fromArray(array_map(
   [ 1, 30, 31, 32, 33, 48, 62, 63 ],
 ))->join();
 
-RescheduleWaitHandle::create(0, PHP_INT_MAX)->join();
+RescheduleWaitHandle::create(
+  RescheduleWaitHandle::QUEUE_DEFAULT,
+  PHP_INT_MAX,
+)->join();
 try {
-  RescheduleWaitHandle::create(0, PHP_INT_MAX + 1)->join();
+  RescheduleWaitHandle::create(
+    RescheduleWaitHandle::QUEUE_DEFAULT,
+    PHP_INT_MAX + 1,
+  )->join();
 } catch (Exception $ex) {
   echo "caught expected exception\n";
 }

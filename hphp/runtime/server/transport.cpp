@@ -809,7 +809,7 @@ StringHolder Transport::prepareResponse(const void *data, int size,
   }
   if (compressed || !isCompressionEnabled() ||
       m_compressionDecision == CompressionDecision::ShouldNot) {
-    return std::move(response);
+    return response;
   }
 
   // There isn't that much need to gzip response, when it can fit into one
@@ -849,7 +849,7 @@ StringHolder Transport::prepareResponse(const void *data, int size,
     }
   }
 
-  return std::move(response);
+  return response;
 }
 
 bool Transport::setHeaderCallback(const Variant& callback) {

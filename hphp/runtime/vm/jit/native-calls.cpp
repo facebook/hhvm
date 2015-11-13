@@ -130,8 +130,6 @@ static CallMap s_callMap {
     {ConvCellToArr,      convCellToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConvStrToBool,      &StringData::toBoolean, DSSA, SNone,
-                           {{SSA, 0}}},
     {ConvCellToBool,     cellToBool, DSSA, SNone,
                            {{TV, 0}}},
 
@@ -430,8 +428,11 @@ static CallMap s_callMap {
     {ZeroErrorLevel, &zero_error_level, DSSA, SNone, {}},
     {RestoreErrorLevel, &restore_error_level, DNone, SNone, {{SSA, 0}}},
 
-    // count($mixed)
+    /* count($mixed) */
     {Count, &countHelper, DSSA, SSync, {{TV, 0}}},
+
+    /* method_exists($obj, $meth) */
+    {MethodExists, methodExistsHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
 
     {GetMemoKey, getMemoKeyHelper, DTV, SSync, {{TV, 0}}},
 };

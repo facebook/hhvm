@@ -399,7 +399,7 @@ void performHoisting(
     IRInstruction* oldCheck,
     Type type
   ) {
-    auto newBlock = unit.defBlock();
+    auto newBlock = unit.defBlock(exitingInst->block()->profCount());
     auto newCheck = unit.gen(
       oldCheck->op(),
       exitingInst->marker(),

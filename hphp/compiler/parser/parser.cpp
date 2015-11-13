@@ -37,6 +37,7 @@
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/expression/null_coalesce_expression.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/class_constant_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
@@ -84,6 +85,7 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
+#include "hphp/compiler/statement/use_declaration_statement_fragment.h"
 
 #include "hphp/compiler/analysis/function_scope.h"
 
@@ -706,6 +708,8 @@ void Parser::onConstantValue(Token &out, Token &constant) {
   const auto& alias = m_cnstAliasTable.find(constant.text());
   if (alias != m_cnstAliasTable.end()) {
     constant.setText(alias->second);
+  } else if (constant.num() & 1) {
+    constant.setText(resolve(constant.text(), 0));
   }
 
   ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text(),
@@ -936,6 +940,10 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
 void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
   out->exp = NEW_EXP(QOpExpression, exprCond->exp,
                      expYes ? expYes->exp : ExpressionPtr(), expNo->exp);
+}
+
+void Parser::onNullCoalesce(Token &out, Token &expFirst, Token &expSecond) {
+  out->exp = NEW_EXP(NullCoalesceExpression, expFirst->exp, expSecond->exp);
 }
 
 void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
@@ -2509,7 +2517,60 @@ void Parser::onNamespaceEnd() {
   }
 }
 
-void Parser::onUse(const std::string &ns, const std::string &as) {
+void Parser::onUseDeclaration(Token& out, const std::string &ns,
+                                          const std::string &as) {
+  out.stmt = NEW_STMT(UseDeclarationStatementFragment, ns, as);
+}
+
+void Parser::onMixedUseDeclaration(Token &out,
+                                   Token &use, UseDeclarationConsumer f) {
+  assert(f);
+  assert(use.stmt->is(Construct::KindOfUseDeclarationStatementFragment));
+  auto frag =
+    static_pointer_cast<UseDeclarationStatementFragment>(use.stmt);
+  frag->mixed_consumer = f;
+  out.stmt = frag;
+}
+
+void Parser::onUse(const Token &tok, UseDeclarationConsumer f) {
+  assert(f);
+  assert(tok.stmt->is(Construct::KindOfStatementList));
+  auto const stmts = static_pointer_cast<StatementList>(tok.stmt);
+  for (int i = 0; i < stmts->getCount(); i++) {
+    assert(stmts->getNthKid(i)->is(
+      Construct::KindOfUseDeclarationStatementFragment));
+    auto const frag = static_pointer_cast<UseDeclarationStatementFragment>(
+      stmts->getNthKid(i));
+    assert(!frag->mixed_consumer);
+    (this->*f)(frag->ns, frag->as);
+  }
+}
+
+void Parser::onGroupUse(const std::string &prefix, const Token &tok,
+                        UseDeclarationConsumer f) {
+  assert(tok.stmt->is(Construct::KindOfStatementList));
+  auto const stmts = static_pointer_cast<StatementList>(tok.stmt);
+  for (int i = 0; i < stmts->getCount(); i++) {
+    assert(stmts->getNthKid(i)->is(
+      Construct::KindOfUseDeclarationStatementFragment));
+    auto const frag = static_pointer_cast<UseDeclarationStatementFragment>(
+      stmts->getNthKid(i));
+
+    auto const ns = prefix + "\\" + frag->ns;
+    UseDeclarationConsumer consumer;
+    if (f) {
+      assert(!frag->mixed_consumer);
+      consumer = f;
+    } else {
+      assert(frag->mixed_consumer);
+      consumer = frag->mixed_consumer;
+    }
+
+    (this->*consumer)(ns, frag->as);
+  }
+}
+
+void Parser::useClass(const std::string &ns, const std::string &as) {
   if (ns == "strict") {
     if (m_scanner.isHHSyntaxEnabled()) {
       error("To use strict hack, place // strict after the open tag. "
@@ -2554,7 +2615,7 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   m_nsAliasTable.set(key, ns, AliasType::USE, line1());
 }
 
-void Parser::onUseFunction(const std::string &fn, const std::string &as) {
+void Parser::useFunction(const std::string &fn, const std::string &as) {
   auto const key = fully_qualified_name_as_alias_key(fn, as);
 
   if (m_fnTable.count(key) || m_fnAliasTable.count(key)) {
@@ -2566,7 +2627,7 @@ void Parser::onUseFunction(const std::string &fn, const std::string &as) {
   m_fnAliasTable[key] = fn;
 }
 
-void Parser::onUseConst(const std::string &cnst, const std::string &as) {
+void Parser::useConst(const std::string &cnst, const std::string &as) {
   auto const key = fully_qualified_name_as_alias_key(cnst, as);
 
   if (m_cnstTable.count(key) || m_cnstAliasTable.count(key)) {

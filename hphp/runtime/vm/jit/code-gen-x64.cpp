@@ -30,6 +30,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/abi-cxx.h"
 
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -330,7 +331,6 @@ CALL_OPCODE(ConvObjToArr);
 CALL_OPCODE(ConvStrToArr);
 CALL_OPCODE(ConvCellToArr);
 
-CALL_OPCODE(ConvStrToBool);
 CALL_OPCODE(ConvCellToBool);
 
 CALL_OPCODE(ConvArrToDbl);
@@ -443,6 +443,8 @@ CALL_OPCODE(LdClsPropAddrOrNull)
 CALL_OPCODE(LdClsPropAddrOrRaise)
 CALL_OPCODE(LdGblAddrDef)
 
+CALL_OPCODE(MethodExists)
+
 // Vector instruction helpers
 CALL_OPCODE(StringGet)
 CALL_OPCODE(BindElem)
@@ -486,6 +488,7 @@ DELEGATE_OPCODE(AddDbl)
 DELEGATE_OPCODE(SubDbl)
 DELEGATE_OPCODE(MulDbl)
 DELEGATE_OPCODE(DivDbl)
+DELEGATE_OPCODE(DivInt)
 DELEGATE_OPCODE(Mod)
 DELEGATE_OPCODE(Floor)
 DELEGATE_OPCODE(Ceil)
@@ -1173,14 +1176,15 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   });
 }
 
-void CodeGenerator::cgClsNeq(IRInstruction* inst) {
-  auto const rdst      = dstLoc(inst, 0).reg();
-  const Vreg rObjClass = srcLoc(inst, 0).reg();
+void CodeGenerator::cgEqCls(IRInstruction* inst) {
+  auto const dst  = dstLoc(inst, 0).reg();
+  auto const src1 = srcLoc(inst, 0).reg();
+  auto const src2 = srcLoc(inst, 1).reg();
+
   auto& v = vmain();
-  auto testClass       = v.cns(inst->extra<ClsNeqData>()->testClass);
   auto const sf = v.makeReg();
-  emitCmpClass(v, sf, testClass, rObjClass);
-  v << setcc{CC_NE, sf, rdst};
+  emitCmpClass(v, sf, src2, src1);
+  v << setcc{CC_E, sf, dst};
 }
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
@@ -1357,6 +1361,33 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
       return v.cns(true);
     }
   );
+}
+
+void CodeGenerator::cgConvStrToBool(IRInstruction* inst) {
+  auto const dst = dstLoc(inst, 0).reg();
+  auto const src = srcLoc(inst, 0).reg();
+  auto& v = vmain();
+
+  auto const sf = v.makeReg();
+
+  v << cmplim{1, src[StringData::sizeOff()], sf};
+  unlikelyCond(v, vcold(), CC_E, sf, dst, [&] (Vout& v) {
+    // Unlikely case is we end up having to check whether the first byte of the
+    // string is equal to '0'.
+    auto const dst = v.makeReg();
+    auto const sd  = v.makeReg();
+    auto const sf  = v.makeReg();
+    v << load{src[StringData::dataOff()], sd};
+    v << cmpbim{'0', sd[0], sf};
+    v << setcc{CC_NE, sf, dst};
+    return dst;
+  }, [&] (Vout& v) {
+    // Common case is we have an empty string or a string with size bigger than
+    // one.
+    auto const dst = v.makeReg();
+    v << setcc{CC_G, sf, dst};
+    return dst;
+  });
 }
 
 void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
@@ -2154,6 +2185,10 @@ float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
 void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                                const OptDecRefProfile& profile,
                                bool unlikelyDestroy) {
+  static const auto TPackedArr = Type::Array(ArrayData::kPackedKind);
+  static const auto TMixedArr = Type::Array(ArrayData::kMixedKind);
+  static const auto TApcArr = Type::Array(ArrayData::kApcKind);
+  auto const llvm = mcg->useLLVM();
   auto const ty   = inst->src(0)->type();
   auto const base = srcLoc(inst, 0).reg(0);
 
@@ -2164,17 +2199,15 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
       v << incwm{rvmtl()[profile->handle() + offsetof(DecRefProfile, destroy)],
                  v.makeReg()};
     }
-
-    cgCallHelper(
-      v,
-      ty.isKnownDataType()
-        ? mcg->getDtorCall(ty.toDataType())
-        : CallSpec::destruct(srcLoc(inst, 0).reg(1)),
-      kVoidDest,
-      SyncOptions::Sync,
-      argGroup(inst)
-        .reg(base)
-    );
+    // LLVM backend doesn't support CallSpec::Array
+    auto dtor = ty <= TPackedArr ? CallSpec::direct(PackedArray::Release) :
+                ty <= TMixedArr ? CallSpec::direct(MixedArray::Release) :
+                ty <= TApcArr ? CallSpec::direct(APCLocalArray::Release) :
+                ty <= TArr && !llvm ? CallSpec::array(&g_array_funcs.release) :
+                ty.isKnownDataType() ? mcg->getDtorCall(ty.toDataType()) :
+                CallSpec::destruct(srcLoc(inst, 0).reg(1));
+    cgCallHelper(v, dtor, kVoidDest, SyncOptions::Sync,
+                 argGroup(inst).reg(base));
   };
 
   emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl

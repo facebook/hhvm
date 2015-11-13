@@ -17,6 +17,7 @@
 
 #include <hphp/runtime/ext/asio/ext_gen-map-wait-handle.h>
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include <hphp/runtime/ext/collections/ext_collections-idl.h>
 #include <hphp/runtime/ext/closure/ext_closure.h>
 #include <hphp/runtime/ext/asio/asio-blockable.h>
@@ -41,19 +42,19 @@ namespace {
   }
 }
 
-void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(GenMapWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnGenMapCreate(callback);
 }
 
-Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
-  ObjectData* obj;
-  if (UNLIKELY(!dependencies.isObject() ||
-      !(obj = dependencies.getObjectData())->isCollection() ||
-      obj->collectionType() != CollectionType::Map)) {
+Object HHVM_STATIC_METHOD(GenMapWaitHandle, create,
+                          const Object& map) {
+  ObjectData* obj = map.get();
+  if (!obj->isCollection() ||
+      (obj->collectionType() != CollectionType::Map)) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Map");
   }
-  assertx(obj->collectionType() == CollectionType::Map);
   auto deps = req::ptr<c_Map>::attach(c_Map::Clone(obj));
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (ssize_t iter_pos = deps->iter_begin();
@@ -100,7 +101,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
 
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenMapCreate())) {
-        session->onGenMapCreate(my_wh.get(), dependencies);
+        session->onGenMapCreate(my_wh.get(), map);
       }
 
       return Object(std::move(my_wh));
@@ -188,6 +189,15 @@ c_WaitableWaitHandle* c_GenMapWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return static_cast<c_WaitableWaitHandle*>(
       m_deps->iter_value(m_iterPos)->m_data.pobj);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initGenMapWaitHandle() {
+  HHVM_STATIC_MALIAS(HH\\GenMapWaitHandle, create,
+                     GenMapWaitHandle, create);
+  HHVM_STATIC_MALIAS(HH\\GenMapWaitHandle, setOnCreateCallback,
+                     GenMapWaitHandle, setOnCreateCallback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

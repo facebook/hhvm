@@ -193,7 +193,8 @@ struct IRUnit {
   /*
    * Add a block to the IRUnit's arena.
    */
-  Block* defBlock(Block::Hint hint = Block::Hint::Neither);
+  Block* defBlock(uint64_t profCount = 1,
+                  Block::Hint hint = Block::Hint::Neither);
 
   /*
    * Add a DefConst instruction to the const table.

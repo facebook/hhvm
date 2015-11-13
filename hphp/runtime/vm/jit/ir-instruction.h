@@ -229,6 +229,7 @@ struct IRInstruction {
    */
   void setSrc(uint32_t i, SSATmp* newSrc);
   void setSrcs(uint32_t numSrcs, SSATmp** newSrcs);
+  void deleteSrc(uint32_t i);
 
   /*
    * Set the dsts, either as a single dst, or as `numDsts' dsts (if the
@@ -236,6 +237,7 @@ struct IRInstruction {
    */
   void setDst(SSATmp* newDst);
   void setDsts(uint32_t numDsts, SSATmp** newDsts);
+  void deleteDst(uint32_t i);
 
 
   /////////////////////////////////////////////////////////////////////////////

@@ -87,9 +87,8 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
  * This keeps track of the weights of blocks and arcs in a Vunit.
  */
 struct Scale {
-  Scale(const Vunit& unit, const ProfData& prof)
+  explicit Scale(const Vunit& unit)
       : m_unit(unit)
-      , m_prof(prof)
       , m_blocks(sortBlocks(unit))
       , m_preds(computePreds(unit)) {
     computeWeights();
@@ -104,12 +103,11 @@ struct Scale {
   void    computeBlockWeights();
   void    computeArcWeights();
   TransID findProfTransID(Vlabel blk) const;
-  int64_t findProfWeight(Vlabel blk)  const;
+  int64_t findProfCount(Vlabel blk)   const;
 
   static uint64_t arcId(Vlabel src, Vlabel dst) { return (src << 32) + dst; }
 
   const Vunit&                     m_unit;
-  const ProfData&                  m_prof;
   const jit::vector<Vlabel>        m_blocks;
   const PredVector                 m_preds;
   jit::vector<int64_t>             m_blkWgts;
@@ -134,10 +132,13 @@ TransID Scale::findProfTransID(Vlabel blk) const {
   return kInvalidTransID;
 }
 
-int64_t Scale::findProfWeight(Vlabel blk) const {
-  auto profTransID = findProfTransID(blk);
-  return profTransID == kInvalidTransID ? 0
-                                        : m_prof.transCounter(profTransID);
+int64_t Scale::findProfCount(Vlabel blk) const {
+  for (auto& i : m_unit.blocks[blk].code) {
+    if (i.origin) {
+      return i.origin->block()->profCount();
+    }
+  }
+  return 1;
 }
 
 void Scale::computeBlockWeights() {
@@ -157,7 +158,7 @@ void Scale::computeBlockWeights() {
   for (auto b : m_blocks) {
     auto a = unsigned(m_unit.blocks[b].area);
     assertx(a < 3);
-    m_blkWgts[b] = findProfWeight(b) / areaWeightFactors[a];
+    m_blkWgts[b] = findProfCount(b) / areaWeightFactors[a];
   }
 }
 
@@ -189,17 +190,17 @@ void Scale::computeWeights() {
 std::string Scale::toString() const {
   std::ostringstream out;
   out << "digraph {\n";
-  int64_t maxWgt = 0;
+  int64_t maxWgt = 1;
   for (auto b : m_blocks) {
     maxWgt = std::max(maxWgt, weight(b));
   }
   for (auto b : m_blocks) {
     unsigned coldness = 255 - (255 * weight(b) / maxWgt);
     out << folly::format(
-      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\","
+      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\","
       "shape=box,style=filled,fillcolor=\"#ff{:02x}{:02x}\"]\n",
       b, b, weight(b), findProfTransID(b), unsigned(m_unit.blocks[b].area),
-      coldness, coldness);
+      findProfCount(b), coldness, coldness);
     for (auto s : succs(m_unit.blocks[b])) {
       out << folly::format("{} -> {} [label={}];\n", b, s, weight(b, s));
     }
@@ -390,14 +391,14 @@ void Clusterizer::sortClusters() {
   }
 
   DFSSortClusters dfsSort(std::move(clusterGraph), m_unit);
-  m_clusterOrder = std::move(dfsSort.sort(m_blockCluster[m_unit.entry]));
+  m_clusterOrder = dfsSort.sort(m_blockCluster[m_unit.entry]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 jit::vector<Vlabel> pgoLayout(const Vunit& unit) {
   // compute block & arc weights
-  Scale scale(unit, *(mcg->tx().profData()));
+  Scale scale(unit);
   FTRACE(1, "profileGuidedLayout: Weighted CFG:\n{}\n", scale.toString());
 
   // cluster the blocks based on weights and sort the clusters

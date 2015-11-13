@@ -180,6 +180,12 @@ inline void IRInstruction::setSrcs(uint32_t numSrcs, SSATmp** newSrcs) {
   m_srcs = newSrcs;
 }
 
+inline void IRInstruction::deleteSrc(uint32_t i) {
+  always_assert(i < numSrcs());
+  std::copy(m_srcs + i + 1, m_srcs + m_numSrcs, m_srcs + i);
+  --m_numSrcs;
+}
+
 inline void IRInstruction::setDst(SSATmp* newDst) {
   assertx(hasDst());
   m_dest = newDst;
@@ -190,6 +196,13 @@ inline void IRInstruction::setDsts(uint32_t numDsts, SSATmp** newDsts) {
   assertx(naryDst());
   m_numDsts = numDsts;
   m_dsts = newDsts;
+}
+
+inline void IRInstruction::deleteDst(uint32_t i) {
+  always_assert(i < numDsts());
+  assertx(naryDst());
+  std::copy(m_dsts + i + 1, m_dsts + m_numDsts, m_dsts + i);
+  --m_numDsts;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

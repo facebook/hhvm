@@ -1,0 +1,13 @@
+in construct
+in toString
+
+Warning: assert(): toString failed in %s on line 18
+NULL
+-
+bool(true)
+
+Warning: zend.assertions may be completely enabled or disabled only in php.ini in %s on line 27
+string(1) "0"
+in construct
+
+Fatal error: assert should not be called dynamically in %s on line 31

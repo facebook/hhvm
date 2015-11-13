@@ -323,6 +323,16 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
   return label->dst(label->numDsts() - 1);
 }
 
+SSATmp* deletePhiDest(IRInstruction* label, unsigned i) {
+  assertx(label->is(DefLabel));
+  auto dest = label->dst(i);
+  label->block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp* src) {
+    jmp->deleteSrc(i);
+  });
+  label->deleteDst(i);
+  return dest;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

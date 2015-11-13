@@ -156,7 +156,8 @@ TEST(AliasClass, AliasIdSet) {
 TEST(AliasClass, Basic) {
   IRUnit unit{test_context};
   auto const specialized = specialized_classes(unit);
-  auto const joined = boost::join(generic_classes(), specialized);
+  auto const generic = generic_classes();
+  auto const joined = boost::join(generic, specialized);
 
   for (auto cls : joined) {
     // Everything is a subclass of AUnknown and intersects AUnknown.

@@ -36,16 +36,12 @@ class AsioContext;
 
 class c_WaitableWaitHandle : public c_WaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(WaitableWaitHandle)
+  WAITHANDLE_CLASSOF(WaitableWaitHandle);
+  WAITHANDLE_DTOR(WaitableWaitHandle);
 
   explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof(),
-                                HeaderKind kind = HeaderKind::Object) noexcept;
+                           HeaderKind kind = HeaderKind::WaitHandle) noexcept;
   ~c_WaitableWaitHandle();
-
-  int t_getcontextidx();
-  Object t_getcreator();
-  Array t_getparents();
-  Array t_getdependencystack();
 
  public:
   static constexpr ptrdiff_t parentChainOff() {
@@ -59,6 +55,14 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   AsioBlockableChain& getParentChain();
   void join();
   String getName();
+  Array getParents() {
+    // no parent data available if finished
+    if (isFinished()) {
+      return empty_array();
+    }
+    return getParentChain().toArray();
+  }
+  Array getDependencyStack();
 
  protected:
   c_WaitableWaitHandle* getChild();
@@ -69,6 +73,11 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   NEVER_INLINE ATTRIBUTE_NORETURN
   void throwCycleException(c_WaitableWaitHandle* child) const;
 };
+
+int64_t HHVM_METHOD(WaitableWaitHandle, getContextIdx);
+Object HHVM_METHOD(WaitableWaitHandle, getCreator);
+Array HHVM_METHOD(WaitableWaitHandle, getParents);
+Array HHVM_METHOD(WaitableWaitHandle, getDependencyStack);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

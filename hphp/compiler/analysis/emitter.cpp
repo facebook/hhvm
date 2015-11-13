@@ -59,6 +59,7 @@
 #include "hphp/compiler/expression/object_method_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/qop_expression.h"
+#include "hphp/compiler/expression/null_coalesce_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/simple_function_call.h"
@@ -138,9 +139,13 @@ namespace Compiler {
 TRACE_SET_MOD(emitter);
 
 const StaticString
+  s_ini_get("ini_get"),
+  s_is_deprecated("deprecated function"),
   s_trigger_error("trigger_error"),
   s_trigger_sampled_error("trigger_sampled_error"),
-  s_is_deprecated("deprecated function");
+  s_zend_assertions("zend.assertions"),
+  s_HH_WaitHandle("HH\\WaitHandle"),
+  s_result("result");
 
 using uchar = unsigned char;
 
@@ -4135,6 +4140,40 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           return true;
         }
       }
+    } else if (call->isCallToFunction("assert")) {
+      // Special-case some logic around emitting assert(), or jumping around
+      // it. This all applies only for direct calls to assert() -- dynamic
+      // calls don't get this special logic, and don't in PHP7 either.
+
+      if (!RuntimeOption::AssertEmitted) {
+        e.True();
+        return true;
+      }
+
+      // We need to emit an ini_get around all asserts to check if the
+      // zend.assertions option is enabled -- you can switch between 0 and 1
+      // at runtime, and having it set to 0 disables the assert from running,
+      // including side effects of function arguments, so we need to jump
+      // around it if so. (The -1 value of zend.assertions corresponds to
+      // AssertEmitted being set to 0 above, and is not changeable at
+      // runtime.)
+      Label disabled, after;
+      e.String(s_zend_assertions.get());
+      e.FCallBuiltin(1, 1, s_ini_get.get());
+      e.UnboxRNop();
+      e.Int(0);
+      e.Gt();
+      e.JmpZ(disabled);
+
+      emitFuncCall(e, call, "__SystemLib\\assert", call->getParams());
+      emitConvertToCell(e);
+      e.Jmp(after);
+
+      disabled.set(e);
+      e.True();
+
+      after.set(e);
+      return true;
     } else if (emitSystemLibVarEnvFunc(e, call)) {
       return true;
     } else if (call->isCallToFunction("array_slice") &&
@@ -4505,6 +4544,23 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     return true;
   }
 
+  case Construct::KindOfNullCoalesceExpression: {
+    auto q = static_pointer_cast<NullCoalesceExpression>(node);
+
+    Label done;
+    visit(q->getFirst());
+    emitCGetQuiet(e);
+    e.Dup();
+    e.JmpNZ(done);
+    e.PopC();
+    visit(q->getSecond());
+    emitConvertToCell(e);
+    done.set(e);
+    m_evalStack.cleanTopMeta();
+
+    return true;
+  }
+
   case Construct::KindOfScalarExpression: {
     auto ex = static_pointer_cast<Expression>(node);
     Variant v;
@@ -4837,6 +4893,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     resume.set(e);
     return true;
   }
+  case Construct::KindOfUseDeclarationStatementFragment:
   case Construct::KindOfExpression: {
     not_reached();
   }
@@ -5441,6 +5498,40 @@ void EmitterVisitor::emitCGet(Emitter& e) {
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.CGetM(vectorImm);
+  }
+}
+
+void EmitterVisitor::emitCGetQuiet(Emitter& e) {
+  if (checkIfStackEmpty("CGetQuiet*")) return;
+  LocationGuard loc(e, m_tempLoc);
+  m_tempLoc.clear();
+
+  emitClsIfSPropBase(e);
+  int iLast = m_evalStack.size()-1;
+  int i = scanStackForLocation(iLast);
+  int sz = iLast - i;
+  assert(sz >= 0);
+  char sym = m_evalStack.get(i);
+  if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
+    switch (sym) {
+      case StackSym::L:  e.CGetQuietL(m_evalStack.getLoc(i));  break;
+      case StackSym::C:  /* nop */   break;
+      case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
+      case StackSym::CN: e.CGetQuietN();  break;
+      case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
+      case StackSym::CG: e.CGetQuietG();  break;
+      case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
+      case StackSym::CS: e.CGetS();  break;
+      case StackSym::V:  e.Unbox();  break;
+      case StackSym::R:  e.UnboxR(); break;
+      default: {
+        unexpectedStackSym(sym, "emitCGetQuiet");
+        break;
+      }
+    }
+
+  } else {
+    emitQueryMOp(i, iLast, e, QueryMOp::CGetQuiet);
   }
 }
 
@@ -7741,9 +7832,6 @@ bool EmitterVisitor::emitSystemLibVarEnvFunc(Emitter& e,
     emitFuncCall(e, call,
                  "__SystemLib\\extract", call->getParams());
     return true;
-  } else if (call->isCallToFunction("assert")) {
-    emitFuncCall(e, call, "__SystemLib\\assert", call->getParams());
-    return true;
   } else if (call->isCallToFunction("parse_str")) {
     emitFuncCall(e, call, "__SystemLib\\parse_str", call->getParams());
     return true;
@@ -9074,9 +9162,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  bool allowPacked = !ct ||
-    ct == CollectionType::Vector ||
-    ct == CollectionType::ImmVector;
+  auto const allowPacked = !ct || isVectorCollection(*ct);
 
   int nElms;
   if (allowPacked && isPackedInit(el, &nElms)) {
@@ -9089,10 +9175,11 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  // If `RuntimeOption::EvalDisableStructArray`, MakeStructArray actually makes
-  // a mixed array, which can be used to initialize Map/Set.
-  bool allowStruct = !ct ||
-    (RuntimeOption::EvalDisableStructArray && !allowPacked);
+  // Don't emit struct arrays for a collection initializers.  HashCollection
+  // can't handle that yet.  Also ignore RuntimeOption::DisableStructArray here.
+  // The VM can handle the NewStructArray bytecode when struct arrays are
+  // disabled.
+  auto const allowStruct = !ct;
   std::vector<std::string> keys;
   if (allowStruct && isStructInit(el, keys)) {
     for (int i = 0, n = keys.size(); i < n; i++) {
@@ -9105,7 +9192,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
   }
 
   auto capacityHint = MixedArray::SmallSize;
-  int capacity = el->getCount();
+  auto const capacity = el->getCount();
   if (capacity > 0) capacityHint = capacity;
   if (allowPacked && isPackedInit(el, &nElms, false /* ignore size */)) {
     e.NewArray(capacityHint);
@@ -9642,6 +9729,17 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
   return 1;  // Above cases push at most one stack cell.
 }
 
+// HH\WaitHandle::result()
+static int32_t emitWaitHandleResult(UnitEmitter& ue,
+                                    FuncEmitter* fe) {
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
+  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
+  ue.emitOp(OpThis);
+  ue.emitOp(OpWHResult);
+  ue.emitOp(OpRetC);
+  return 1;
+}
+
 // Emit byte codes to implement methods. Return the maximum stack cell count.
 int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
                                              const char* funcName,
@@ -9657,29 +9755,13 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
   } else if (asyncGenCls.same(s_class) &&
       (cmeth = folly::get_ptr(s_asyncGenMethods, s_func))) {
     return emitGeneratorMethod(m_ue, fe, *cmeth, true);
+  } else if (s_HH_WaitHandle.same(s_class) &&
+             s_result.same(s_func)) {
+    return emitWaitHandleResult(m_ue, fe);
   }
 
   throw IncludeTimeFatalException(meth,
     "OpCodeImpl attribute is not applicable to %s", funcName);
-}
-
-static int32_t emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
-                      AttrFinal);
-  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
-  ue.emitOp(OpThis);
-  ue.emitOp(OpRetC);
-  return 1;  // we use one stack slot
-}
-
-static int32_t emitWaitHandleResultMethod(UnitEmitter& ue, FuncEmitter* fe) {
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
-                      AttrFinal);
-  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
-  ue.emitOp(OpThis);
-  ue.emitOp(OpWHResult);
-  ue.emitOp(OpRetC);
-  return 1;  // we use one stack slot
 }
 
 StaticString s_construct("__construct");
@@ -9768,37 +9850,28 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
-      static const StringData* waitHandleCls =
-        makeStaticString("hh\\waithandle");
-      static const StringData* gwhMeth = makeStaticString("getwaithandle");
-      static const StringData* resultMeth = makeStaticString("result");
       StringData* methName = makeStaticString(methodInfo->m_name);
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
       auto stackPad = int32_t{0};
-      if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
-        stackPad = emitGetWaitHandleMethod(*ue, fe);
-      } else if (e.name->isame(waitHandleCls) && methName->isame(resultMeth)) {
-        stackPad = emitWaitHandleResultMethod(*ue, fe);
-      } else {
-        if (e.name->isame(s_construct.get())) {
-          hasCtor = true;
-        }
-
-        // Build the function
-        BuiltinFunction bcf = (BuiltinFunction)methodInfo->m_pGenericMethod;
-        auto nativeFunc = methodInfo->m_nativeFunc;
-        const ClassInfo::MethodInfo* mi =
-          e.ci->getMethodInfo(std::string(methodInfo->m_name));
-        Offset base = ue->bcPos();
-        fe->setBuiltinFunc(mi,
-          bcf,
-          reinterpret_cast<BuiltinFunction>(nativeFunc),
-          base
-        );
-        ue->emitOp(OpNativeImpl);
+      if (e.name->isame(s_construct.get())) {
+        hasCtor = true;
       }
+
+      // Build the function
+      BuiltinFunction bcf = (BuiltinFunction)methodInfo->m_pGenericMethod;
+      auto nativeFunc = methodInfo->m_nativeFunc;
+      const ClassInfo::MethodInfo* mi =
+        e.ci->getMethodInfo(std::string(methodInfo->m_name));
+      Offset base = ue->bcPos();
+      fe->setBuiltinFunc(mi,
+        bcf,
+        reinterpret_cast<BuiltinFunction>(nativeFunc),
+        base
+      );
+      ue->emitOp(OpNativeImpl);
+
       Offset past = ue->bcPos();
       assert(!fe->numIterators());
       fe->maxStackCells = fe->numLocals() + stackPad;

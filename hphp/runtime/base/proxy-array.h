@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP {
 
@@ -203,8 +204,8 @@ private:
   static void reseatable(const ArrayData* oldArr, ArrayData* newArr);
 
   static ArrayData* innerArr(const ArrayData* ad);
-  friend class c_AwaitAllWaitHandle;
-
+  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
+                                   const Array& dependencies);
 public:
   template<class F> void scan(F& mark) const {
     mark(m_ref);

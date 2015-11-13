@@ -33,14 +33,12 @@ namespace HPHP {
  */
 class c_GenArrayWaitHandle final : public c_WaitableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(GenArrayWaitHandle)
+  WAITHANDLE_CLASSOF(GenArrayWaitHandle);
+  WAITHANDLE_DTOR(GenArrayWaitHandle);
 
   explicit c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::classof())
     : c_WaitableWaitHandle(cls) {}
   ~c_GenArrayWaitHandle() {}
-
-  static void ti_setoncreatecallback(const Variant& callback);
-  static Object ti_create(const Array& dependencies);
 
  public:
   static constexpr ptrdiff_t blockableOff() {
@@ -64,9 +62,16 @@ class c_GenArrayWaitHandle final : public c_WaitableWaitHandle {
   ssize_t m_iterPos;
   AsioBlockable m_blockable;
 
+  friend Object HHVM_STATIC_METHOD(GenArrayWaitHandle, create,
+                                   const Array& dependencies);
  public:
   static const int8_t STATE_BLOCKED = 2;
 };
+
+void HHVM_STATIC_METHOD(GenArrayWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+Object HHVM_STATIC_METHOD(GenArrayWaitHandle, create,
+                          const Array& dependencies);
 
 inline c_GenArrayWaitHandle* c_WaitHandle::asGenArray() {
   assert(getKind() == Kind::GenArray);

@@ -713,7 +713,7 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
     WriteLock l(m_lock);
     for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
       entries.push_back(
-          std::move(makeEntryInfo(iter->first, &iter->second, curr_time)));
+          makeEntryInfo(iter->first, &iter->second, curr_time));
     }
   }
   std::sort(entries.begin(), entries.end(),

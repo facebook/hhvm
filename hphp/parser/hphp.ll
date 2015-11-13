@@ -288,6 +288,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"interface"            { RETTOKEN(T_INTERFACE);}
 <ST_IN_SCRIPTING>"trait"                { RETTOKEN(T_TRAIT);}
 <ST_IN_SCRIPTING>"..."                  { RETTOKEN(T_ELLIPSIS);}
+<ST_IN_SCRIPTING>"??"                   { RETTOKEN(T_COALESCE); }
 <ST_IN_SCRIPTING>"insteadof"            { RETTOKEN(T_INSTEADOF);}
 <ST_IN_SCRIPTING>"extends"              { RETTOKEN(T_EXTENDS);}
 <ST_IN_SCRIPTING>"implements"           { RETTOKEN(T_IMPLEMENTS);}

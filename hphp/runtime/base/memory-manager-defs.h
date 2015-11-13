@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 
 namespace HPHP {
@@ -137,6 +138,9 @@ inline size_t Header::size() const {
     case HeaderKind::ImmSet:
       // [ObjectData][subclass][props]
       return obj_.heapSize();
+    case HeaderKind::WaitHandle:
+      // [ObjectData][subclass]
+      return asio_object_size(&obj_);
     case HeaderKind::AwaitAllWH:
       // [ObjectData][children...]
       return awaitall_.heapSize();
@@ -242,6 +246,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   forEachHeader([&](Header* h) {
     switch (h->kind()) {
       case HeaderKind::Object:
+      case HeaderKind::WaitHandle:
       case HeaderKind::ResumableObj:
       case HeaderKind::AwaitAllWH:
       case HeaderKind::Vector:

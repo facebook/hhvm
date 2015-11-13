@@ -128,6 +128,8 @@ void incTransCounter(IRGS&);
 void incProfCounter(IRGS&, TransID);
 void checkCold(IRGS&, TransID);
 
+uint64_t curProfCount(const IRGS& env);
+
 /*
  * If ringbuffer tracing is enabled, generate a ringbuffer entry associated
  * with a SrcKey or string.

@@ -22,7 +22,7 @@ VERIFY(count((array)$ret) != 0);
 $bynam = posix_getgrnam($ret['name']);
 VS($ret, $bynam);
 
-$ret = posix_getgrnam("root");
+$ret = posix_getgrnam("wheel");
 VERIFY($ret != false);
 VERIFY(count((array)$ret) != 0);
 
@@ -58,10 +58,6 @@ VERIFY(posix_getsid(posix_getpid()));
 $tmpfifo = tempnam('/tmp', 'vmmkfifotest');
 unlink($tmpfifo);
 VERIFY(posix_mkfifo($tmpfifo, 0));
-
-$tmpnod = tempnam('/tmp', 'vmmknodtest');
-unlink($tmpnod);
-VERIFY(posix_mknod($tmpnod, 0));
 
 VERIFY(posix_setpgid(0, 0));
 VERIFY(posix_setsid());

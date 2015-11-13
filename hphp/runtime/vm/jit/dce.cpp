@@ -129,6 +129,7 @@ bool canDCE(IRInstruction* inst) {
   case EqRes:
   case NeqRes:
   case CmpRes:
+  case EqCls:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -147,7 +148,6 @@ bool canDCE(IRInstruction* inst) {
   case IsScalarType:
   case IsWaitHandle:
   case IsCol:
-  case ClsNeq:
   case UnboxPtr:
   case BoxPtr:
   case LdStk:
@@ -227,6 +227,7 @@ bool canDCE(IRInstruction* inst) {
   case LdARInvName:
   case PackMagicArgs:
   case LdMBase:
+  case MethodExists:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -261,6 +262,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckNonNull:
   case CheckStaticLocInit:
   case DivDbl:
+  case DivInt:
   case AddIntO:
   case SubIntO:
   case MulIntO:

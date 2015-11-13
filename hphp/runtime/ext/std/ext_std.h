@@ -26,13 +26,17 @@ class StandardExtension final : public Extension {
     initFile();
     initIntrinsics();
     initMath();
+    initProcess();
   }
 
   void threadInit() override {
     threadInitMisc();
   }
 
-  void requestInit() override;
+  void requestInit() override {
+    requestInitMath();
+    requestInitOptions();
+  }
  private:
   void initStandard();
   void initErrorFunc();
@@ -49,8 +53,12 @@ class StandardExtension final : public Extension {
   void initFile();
   void initIntrinsics();
   void initMath();
+  void initProcess();
 
   void threadInitMisc();
+
+  void requestInitMath();
+  void requestInitOptions();
 };
 
 /////////////////////////////////////////////////////////////////////////////

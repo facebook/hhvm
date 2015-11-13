@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
@@ -43,7 +44,8 @@ namespace {
   }
 }
 
-void c_GenArrayWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(GenArrayWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnGenArrayCreate(callback);
 }
 
@@ -53,7 +55,8 @@ static void fail() {
     "Expected dependencies to be an array of WaitHandle instances");
 }
 
-Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
+Object HHVM_STATIC_METHOD(GenArrayWaitHandle, create,
+                          const Array& inputDependencies) {
   auto depCopy = inputDependencies.copy();
   if (UNLIKELY(depCopy->kind() > ArrayData::kEmptyKind)) {
     // The only array kind that can return a non-k{Packed,Mixed,Empty}Kind
@@ -216,6 +219,15 @@ c_WaitableWaitHandle* c_GenArrayWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return static_cast<c_WaitableWaitHandle*>(
     m_deps->getValueRef(m_iterPos).asTypedValue()->m_data.pobj);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initGenArrayWaitHandle() {
+  HHVM_STATIC_MALIAS(HH\\GenArrayWaitHandle, create,
+                     GenArrayWaitHandle, create);
+  HHVM_STATIC_MALIAS(HH\\GenArrayWaitHandle, setOnCreateCallback,
+                     GenArrayWaitHandle, setOnCreateCallback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

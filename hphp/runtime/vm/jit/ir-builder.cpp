@@ -189,7 +189,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
       // First make the inst's next block, so we can save state to it in
       // finishBlock.
-      m_curBlock = m_unit.defBlock();
+      m_curBlock = m_unit.defBlock(prev.block()->profCount());
       if (!prev.isTerminal()) {
         // New block is reachable from old block so link it.
         prev.setNext(m_curBlock);
@@ -956,10 +956,10 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   return true;
 }
 
-Block* IRBuilder::makeBlock(SrcKey sk) {
+Block* IRBuilder::makeBlock(SrcKey sk, uint64_t profCount) {
   auto it = m_skToBlockMap.find(sk);
   if (it == m_skToBlockMap.end()) {
-    auto const block = m_unit.defBlock();
+    auto const block = m_unit.defBlock(profCount);
     m_skToBlockMap.emplace(sk, block);
     return block;
   }

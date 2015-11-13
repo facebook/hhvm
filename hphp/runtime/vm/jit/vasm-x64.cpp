@@ -241,7 +241,7 @@ struct Vgen {
   void emit(xorb i) { commuteSF(i); a->xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a->xorb(i.s0, i.d); }
   void emit(xorl i) { commuteSF(i); a->xorl(i.s0, i.d); }
-  void emit(xorq i) { commuteSF(i); a->xorq(i.s0, i.d); }
+  void emit(xorq i);
   void emit(xorqi i) { binary(i); a->xorq(i.s0, i.d); }
 
 private:
@@ -694,6 +694,15 @@ void Vgen::emit(const testqim& i) {
   }
 }
 
+void Vgen::emit(xorq i) {
+  if (i.s0 == i.s1) {
+    // 32-bit xor{s, s, d} zeroes the upper bits of `d'.
+    return emit(xorl{r32(i.s0), r32(i.s1), r32(i.d), i.sf});
+  }
+  commuteSF(i);
+  a->xorq(i.s0, i.d);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename Lower>
@@ -762,6 +771,15 @@ void lower(Vunit& unit, srem& inst, Vlabel b, size_t i) {
     v << cqo{};                      // sign-extend rax => rdx:rax
     v << idiv{inst.s1, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
     v << copy{rdx, inst.d};
+  });
+}
+
+void lower(Vunit& unit, divint& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << copy{inst.s0, rax};
+    v << cqo{};                      // sign-extend rax => rdx:rax
+    v << idiv{inst.s1, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
+    v << copy{rax, inst.d};
   });
 }
 

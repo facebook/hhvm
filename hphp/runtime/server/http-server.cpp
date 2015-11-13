@@ -97,7 +97,7 @@ HttpServer::HttpServer()
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
-  m_pageServer = std::move(serverFactory->createServer(options));
+  m_pageServer = serverFactory->createServer(options);
   m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);
 
@@ -122,14 +122,14 @@ HttpServer::HttpServer()
   ServerOptions admin_options
     (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
      RuntimeOption::AdminThreadCount);
-  m_adminServer = std::move(serverFactory->createServer(admin_options));
+  m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
 
   for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
        i++) {
     auto info = RuntimeOption::SatelliteServerInfos[i];
-    auto satellite(std::move(SatelliteServer::Create(info)));
+    auto satellite(SatelliteServer::Create(info));
     if (satellite) {
       if (info->getType() == SatelliteServer::Type::KindOfDanglingPageServer) {
         m_danglings.push_back(std::move(satellite));

@@ -19,38 +19,55 @@
 #define incl_HPHP_EXT_ASIO_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
-#include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 namespace HPHP {
-
 
 class AsioExtension final : public Extension {
 public:
   AsioExtension() : Extension("asio", "0.1") {}
 
   void moduleInit() override {
-    initAsyncGenerator();
     initFunctions();
+
+    initWaitHandle();
+    initWaitableWaitHandle();
+    initResumableWaitHandle();
+    initAsyncGenerator();
+    initAwaitAllWaitHandle();
+    initGenArrayWaitHandle();
+    initGenMapWaitHandle();
+    initGenVectorWaitHandle();
+    initConditionWaitHandle();
+    initSleepWaitHandle();
+    initRescheduleWaitHandle();
+    initExternalThreadEventWaitHandle();
+
+    loadSystemlib();
+
+    finishClasses();
   }
 
 private:
-  void initAsyncGenerator();
   void initFunctions();
+
+  void initWaitHandle();
+  void initWaitableWaitHandle();
+  void initResumableWaitHandle();
+  void initAsyncGenerator();
+  void initAwaitAllWaitHandle();
+  void initGenArrayWaitHandle();
+  void initGenMapWaitHandle();
+  void initGenVectorWaitHandle();
+  void initConditionWaitHandle();
+  void initSleepWaitHandle();
+  void initRescheduleWaitHandle();
+  void initExternalThreadEventWaitHandle();
+
+  void finishClasses();
 };
 
 Object HHVM_FUNCTION(asio_get_running);
+size_t asio_object_size(const ObjectData* obj);
 
 }
 

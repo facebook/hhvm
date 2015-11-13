@@ -449,14 +449,20 @@ struct Variant : private TypedValue {
 
   ALWAYS_INLINE String& asStrRef() {
     assert(isStringType(m_type) && m_data.pstr);
+    // The caller is likely going to modify the string, so we have to eagerly
+    // promote KindOfStaticString -> KindOfString.
+    m_type = KindOfString;
     return *reinterpret_cast<String*>(&m_data.pstr);
   }
 
   ALWAYS_INLINE String& toStrRef() {
     assert(is(KindOfString) || is(KindOfStaticString));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    return *reinterpret_cast<String*>(LIKELY(isStringType(m_type)) ?
-        &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
+    // The caller is likely going to modify the string, so we have to eagerly
+    // promote KindOfStaticString -> KindOfString.
+    auto tv = LIKELY(isStringType(m_type)) ? this : m_data.pref->tv();
+    tv->m_type = KindOfString;
+    return *reinterpret_cast<String*>(&tv->m_data.pstr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////

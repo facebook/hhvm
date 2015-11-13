@@ -117,6 +117,13 @@ void refineTmps(IRUnit&, const BlockList&, const IdomVector&);
  */
 SSATmp* insertPhi(IRUnit&, Block* blk, const jit::vector<SSATmp*>& inputs);
 
+/*
+ * Remove the i'th dest from `label' and all incoming Jmps, returning its
+ * SSATmp*. May leave the DefLabel with 0 dests, in which case the instruction
+ * may be deleted by the caller.
+ */
+SSATmp* deletePhiDest(IRInstruction* label, unsigned i);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

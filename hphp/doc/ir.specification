@@ -356,6 +356,8 @@ exceptions depending on how coercion is implemented.
 
 | DivDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
+| DivInt, D(Int), S(Int) S(Int), NF
+
 | Floor, D(Dbl), S(Dbl), NF
 
 | Ceil, D(Dbl), S(Dbl), NF
@@ -386,6 +388,9 @@ exceptions depending on how coercion is implemented.
   DivDbl conforms to IEEE 754. In particular, division by zero returns +/- INF
   or NAN depending on the dividend; and should the result of a division be zero
   the sign will follow the normal sign rules for division.
+
+  DivInt will perform integer division of S1 by S0. S0 should not be zero and
+  must divide S1.
 
   Note that Shr is an arithmetic right shift: The MSB is sign-extended.
 
@@ -654,6 +659,10 @@ To string conversions:
   Perform comparison of resources using PHP semantics. Resource comparisons
   never re-enter or throw.
 
+| EqCls,                       D(Bool), S(Cls) S(Cls),                    NF
+
+  Checks if two Class values are equal.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait
@@ -793,10 +802,6 @@ To string conversions:
   instruction with the same number of sources. Ordinary branch instructions may
   not pass values to a DefLabel.
 
-| ClsNeq<class>, D(Bool), S(Cls), NF
-
-    Compare S0 to the class `class', returning true if it is not the same.
-
 
 6. Reference manipulation
 
@@ -837,12 +842,12 @@ To string conversions:
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdStkAddr<T,offset>, DParamPtr(Stk), S(StkPtr), NF
+| LdStkAddr<T,offset>, D(PtrToStkGen), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells). T must be a subtype of PtrToStkGen.
 
-| LdLocAddr<T,localId>, DParamPtr(Frame), S(FramePtr), NF
+| LdLocAddr<T,localId>, D(PtrToFrameGen), S(FramePtr), NF
 
   Loads the address of the local slot localId from the frame S0 into D. T must
   be a subtype of PtrToFrameGen.
@@ -1379,9 +1384,9 @@ To string conversions:
     bool                Bool              source, destination
     int64_t             Int               source, destination
     double              Dbl               source, destination
-    const String&       PtrToString       source
-    const Array&        PtrToArray        source
-    const Object&       PtrToObject       source
+    const String&       PtrToStr          source
+    const Array&        PtrToArr          source
+    const Object&       PtrToObj          source
     const Variant&      PtrToGen          source
     Variant&            PtrToGen          source (ref param)
     String              {Str|InitNull}    destination
@@ -1733,6 +1738,11 @@ To string conversions:
 
   Checks if S0, which must be an HH\Map or an HH\ImmMap, contains the key S1,
   and returns the result if found. Otherwise S2 is returned.
+
+| MethodExists, D(Bool), S(Cls) S(Str), NF
+
+  Checks if the method named S1 exists on class S0.  S0 must be a normal class
+  that is not abstract.
 
 | LdBindAddr<SrcKey,spOff>, D(TCA), NA, NF
 
@@ -2275,7 +2285,7 @@ fields of that struct for holding intermediate values.
 
 | ElemArrayW, D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
-| ElemArrayD, D(PtrToArrGen), S(PtrToGen) S(Int,Str), MElem|Er
+| ElemArrayD, D(PtrToElemGen), S(PtrToGen) S(Int,Str), MElem|Er
 
 | ElemArrayU, D(PtrToMembGen), S(PtrToGen) S(Int,Str), MElem|Er
 
@@ -2453,7 +2463,7 @@ fields of that struct for holding intermediate values.
   Checks that the index in S1 is within the bounds of the packed array in S0.
   Branches to B if the index is out of bounds.
 
-| LdPackedArrayElemAddr<T>, DParamPtr(Arr), AK(Packed) S(Int), NF
+| LdPackedArrayElemAddr<T>, DParamPtr(Elem), AK(Packed) S(Int), NF
 
   Load the address of the element at index S1 of the packed array in S0.
 

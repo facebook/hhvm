@@ -44,6 +44,7 @@
 #include "hphp/util/alloc.h"
 
 namespace HPHP {
+size_t asio_object_size(const ObjectData*);
 
 namespace {
 
@@ -567,7 +568,13 @@ std::pair<int, double> getObjSize(
     obj->getClassName().data(),
     obj
   );
-  int size = getClassSize(cls);
+  int size;
+  if (UNLIKELY(obj->getAttribute(ObjectData::IsWaitHandle))) {
+    size = asio_object_size(obj);
+  } else {
+    size = getClassSize(cls);
+  }
+
   double sized = size;
   if (stack) stack->push_back(
     std::string("Object:" + cls->name()->toCppString())

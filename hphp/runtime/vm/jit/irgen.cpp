@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -29,7 +31,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 Block* create_catch_block(IRGS& env) {
-  auto const catchBlock = env.irb->unit().defBlock(Block::Hint::Unused);
+  auto const catchBlock = defBlock(env, Block::Hint::Unused);
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
   auto const& exnState = env.irb->exceptionStackState();
@@ -52,6 +54,12 @@ void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+uint64_t curProfCount(const IRGS& env) {
+  auto tid = env.profTransID;
+  return env.profFactor *
+         (tid != kInvalidTransID ? mcg->tx().profData()->transCounter(tid) : 1);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -864,8 +864,6 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 
 bool breaksRegion(SrcKey sk) {
   switch (sk.op()) {
-    case Op::MIterNext:
-    case Op::MIterNextK:
     case Op::SSwitch:
     case Op::CreateCont:
     case Op::Yield:
@@ -874,10 +872,6 @@ bool breaksRegion(SrcKey sk) {
     case Op::RetV:
     case Op::Exit:
     case Op::Fatal:
-    case Op::MIterInit:
-    case Op::MIterInitK:
-    case Op::IterBreak:
-    case Op::DecodeCufIter:
     case Op::Throw:
     case Op::Unwind:
     case Op::Eval:

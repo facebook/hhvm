@@ -523,7 +523,7 @@ const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
 #define DCONST(nm)                                                             \
   Native::registerConstant<KindOfDouble>(makeStaticString("M_"#nm), k_M_##nm)  \
 
-void StandardExtension::requestInit() {
+void StandardExtension::requestInitMath() {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   if (s_state.state == RandomBuf::RequestInit) {
     s_state.state = RandomBuf::ThreadInit;

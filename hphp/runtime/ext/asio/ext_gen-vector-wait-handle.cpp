@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
@@ -42,19 +43,19 @@ namespace {
   }
 }
 
-void c_GenVectorWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void HHVM_STATIC_METHOD(GenVectorWaitHandle, setOnCreateCallback,
+                        const Variant& callback) {
   AsioSession::Get()->setOnGenVectorCreate(callback);
 }
 
-Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
-  ObjectData* obj;
-  if (UNLIKELY(!dependencies.isObject() ||
-      !(obj = dependencies.getObjectData())->isCollection() ||
-      obj->collectionType() != CollectionType::Vector)) {
+Object HHVM_STATIC_METHOD(GenVectorWaitHandle, create,
+                          const Object& vec) {
+  ObjectData* obj = vec.get();
+  if (!obj->isCollection() ||
+      (obj->collectionType() != CollectionType::Vector)) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Vector");
   }
-  assertx(collections::isType(obj->getVMClass(), CollectionType::Vector));
   auto deps = req::ptr<c_Vector>::attach(c_Vector::Clone(obj));
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
@@ -95,7 +96,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       my_wh->initialize(exception, deps.get(), iter_pos, ctx_idx, child_wh);
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenVectorCreate())) {
-        session->onGenVectorCreate(my_wh.get(), dependencies);
+        session->onGenVectorCreate(my_wh.get(), vec);
       }
       return Object(std::move(my_wh));
     }
@@ -178,6 +179,15 @@ String c_GenVectorWaitHandle::getName() {
 c_WaitableWaitHandle* c_GenVectorWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return static_cast<c_WaitableWaitHandle*>(m_deps->at(m_iterPos)->m_data.pobj);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AsioExtension::initGenVectorWaitHandle() {
+  HHVM_STATIC_MALIAS(HH\\GenVectorWaitHandle, create,
+                     GenVectorWaitHandle, create);
+  HHVM_STATIC_MALIAS(HH\\GenVectorWaitHandle, setOnCreateCallback,
+                     GenVectorWaitHandle, setOnCreateCallback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

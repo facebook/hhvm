@@ -335,10 +335,8 @@ const void *ProxygenTransport::getMorePostData(int &size) {
   if (oldLength >= RuntimeOption::RequestBodyReadLimit &&
       m_bodyData.chainLength() < RuntimeOption::RequestBodyReadLimit) {
     VLOG(4) << "resuming ingress";
-    m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::RESUME_INGRESS)));
-
+    m_server->putResponseMessage(ResponseMessage(
+        shared_from_this(), ResponseMessage::Type::RESUME_INGRESS));
   }
   VLOG(4) << "returning POST body chunk size=" << size;
   return data;
@@ -443,8 +441,7 @@ void ProxygenTransport::onError(const HTTPException& err) noexcept {
 }
 
 void ProxygenTransport::finish(shared_ptr<ProxygenTransport> &&transport) {
-  m_server->putResponseMessage(
-    std::move(ResponseMessage(std::move(transport))));
+  m_server->putResponseMessage(ResponseMessage(std::move(transport)));
 }
 
 HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
@@ -562,15 +559,15 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
     m_response.setIsChunked(chunked);
     m_response.dumpMessage(4);
     m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::HEADERS, 0,
-                                chunked, data, size, eom)));
+      ResponseMessage(shared_from_this(),
+                      ResponseMessage::Type::HEADERS, 0,
+                      chunked, data, size, eom));
     m_sendStarted = true;
   } else {
     m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::BODY, 0,
-                                chunked, data, size, eom)));
+      ResponseMessage(shared_from_this(),
+                      ResponseMessage::Type::BODY, 0,
+                      chunked, data, size, eom));
   }
 
   if (eom) {
@@ -592,8 +589,7 @@ void ProxygenTransport::onSendEndImpl() {
   if (!m_sendEnded) {
     VLOG(4) << "onSendEndImpl called";
     m_server->putResponseMessage(
-      std::move(ResponseMessage(shared_from_this(),
-                                ResponseMessage::Type::EOM)));
+        ResponseMessage(shared_from_this(), ResponseMessage::Type::EOM));
     m_sendEnded = true;
   }
 }
@@ -645,9 +641,9 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   }
 
   m_server->putResponseMessage(
-    std::move(ResponseMessage(shared_from_this(),
-                              ResponseMessage::Type::HEADERS,
-                              pushId, false, data, size, eom)));
+    ResponseMessage(shared_from_this(),
+                    ResponseMessage::Type::HEADERS,
+                    pushId, false, data, size, eom));
 
 
   return pushId;
@@ -659,8 +655,8 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
     return;
   }
   m_server->putResponseMessage(
-    std::move(ResponseMessage(shared_from_this(), ResponseMessage::Type::BODY,
-                              id, false, data, size, eom)));
+    ResponseMessage(shared_from_this(), ResponseMessage::Type::BODY,
+                    id, false, data, size, eom));
 }
 
 void ProxygenTransport::timeoutExpired() noexcept {

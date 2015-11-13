@@ -32,7 +32,13 @@ namespace HPHP {
  * with null once all given wait handles are finished (succeeded or failed).
  */
 struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
-  DECLARE_CLASS_NO_SWEEP(AwaitAllWaitHandle)
+  WAITHANDLE_CLASSOF(AwaitAllWaitHandle);
+  static void instanceDtor(ObjectData* obj, const Class*) {
+    auto wh = wait_handle<c_AwaitAllWaitHandle>(obj);
+    auto const sz = wh->heapSize();
+    wh->~c_AwaitAllWaitHandle();
+    MM().objFree(obj, sz);
+  }
 
   explicit c_AwaitAllWaitHandle(Class* cls = c_AwaitAllWaitHandle::classof())
     : c_AwaitAllWaitHandle(0, cls)
@@ -45,11 +51,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     , m_cur(cap - 1)
   {}
   ~c_AwaitAllWaitHandle() {}
-
-  static void ti_setoncreatecallback(const Variant& callback);
-  static Object ti_fromarray(const Array& dependencies);
-  static Object ti_frommap(const Variant& dependencies);
-  static Object ti_fromvector(const Variant& dependencies);
 
  public:
   static constexpr ptrdiff_t blockableOff() {
@@ -79,6 +80,12 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   void markAsFailed(const Object& exception);
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
 
+  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
+                                   const Array& dependencies);
+  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
+                          const Variant& dependencies);
+  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
+                          const Variant& dependencies);
  private:
   uint32_t const m_cap; // how many children we have room for.
   int32_t m_cur; // index of last child
@@ -88,6 +95,15 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
  public:
   static const int8_t STATE_BLOCKED = 2;
 };
+
+void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
+                        const Variant& callback);
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
+                          const Array& dependencies);
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
+                          const Variant& dependencies);
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
+                          const Variant& dependencies);
 
 inline c_AwaitAllWaitHandle* c_WaitHandle::asAwaitAll() {
   assert(getKind() == Kind::AwaitAll);

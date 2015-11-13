@@ -35,7 +35,11 @@ namespace HPHP {
  */
 class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
+  WAITHANDLE_CLASSOF(AsyncFunctionWaitHandle);
+  static void instanceDtor(ObjectData* obj, const Class*) {
+    auto wh = wait_handle<c_AsyncFunctionWaitHandle>(obj);
+    Resumable::Destroy(wh->resumable()->size(), wh);
+  }
 
   class Node final {
    public:
@@ -61,7 +65,6 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
       c_AsyncFunctionWaitHandle::classof()) noexcept
     : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj) {}
   ~c_AsyncFunctionWaitHandle();
-  void t___construct();
 
  public:
   static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }

@@ -284,7 +284,7 @@ c_AsyncFunctionWaitHandle *getWaitHandleAtAsyncStackPosition(int position) {
   }
 
   Array depStack =
-    objToWaitableWaitHandle(top)->t_getdependencystack();
+    objToWaitableWaitHandle(top)->getDependencyStack();
 
   return objToContinuationWaitHandle(depStack[position].toObject());
 }

@@ -6,7 +6,10 @@ async function genEager(...$args) {
 }
 
 function block() { // simulates blocking I/O
-  return RescheduleWaitHandle::create(1,1);
+  return RescheduleWaitHandle::create(
+    RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
+    1,
+  );
 };
 
 function generator(...$args) {

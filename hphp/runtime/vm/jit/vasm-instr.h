@@ -115,6 +115,7 @@ struct Vunit;
   O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(srem, Inone, U(s0) U(s1), D(d))\
+  O(divint, Inone, U(s0) U(s1), D(d))\
   /* arm instructions */\
   O(brk, I(code), Un, Dn)\
   O(cbcc, I(cc), U(s), Dn)\
@@ -727,6 +728,11 @@ struct shl { Vreg64 s0, s1, d; VregSF sf; };
  * Modulus of two integers.
  */
 struct srem { Vreg s0, s1, d; };
+
+/*
+ * Integer division.
+ */
+struct divint { Vreg s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARM.

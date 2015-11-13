@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/ext/ext.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"

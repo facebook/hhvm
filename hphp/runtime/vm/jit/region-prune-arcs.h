@@ -16,9 +16,12 @@
 #ifndef incl_HPHP_REGION_PRUNE_ARCS_H_
 #define incl_HPHP_REGION_PRUNE_ARCS_H_
 
+#include <vector>
+
 namespace HPHP { namespace jit {
 
 struct RegionDesc;
+struct Type;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -27,7 +30,7 @@ struct RegionDesc;
  * that lead to blocks that will immediately fail guards.  Also, remove blocks
  * that are completely unreachable after these arcs are removed.
  */
-void region_prune_arcs(RegionDesc&);
+void region_prune_arcs(RegionDesc& region, std::vector<Type>* input = nullptr);
 
 //////////////////////////////////////////////////////////////////////
 

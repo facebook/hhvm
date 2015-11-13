@@ -504,8 +504,14 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
   TransCFG cfg(callee->getFuncId(), profData, mcg->tx().getSrcDB(),
                mcg->getJmpToTransIDMap(), true /* inlining */);
 
-  return selectHotCFG(dvID, profData, cfg, maxBCInstrs, selectedTIDs,
-                      nullptr /* selectedVec */, true /* inlining */);
+  HotTransContext ctx;
+  ctx.tid = dvID;
+  ctx.cfg = &cfg;
+  ctx.profData = profData;
+  ctx.maxBCInstrs = maxBCInstrs;
+  ctx.inlining = true;
+  ctx.inputTypes = &argTypes;
+  return selectHotCFG(ctx, selectedTIDs, nullptr /* selectedVec */);
 }
 }
 

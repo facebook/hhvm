@@ -59,10 +59,11 @@ std::string DEBUG_ONLY show(const State& state) {
   return ret;
 }
 
-State entry_state(const RegionDesc& region) {
+State entry_state(const RegionDesc& region, std::vector<Type>* input) {
   auto const numLocals = region.start().func()->numLocals();
   auto ret = State{};
   ret.initialized = true;
+  if (input) ret.locals = *input;
   ret.locals.resize(numLocals, TGen);
   return ret;
 }
@@ -153,7 +154,7 @@ void apply_transfer_function(State& dst, const PostConditions& postConds) {
 
 }
 
-void region_prune_arcs(RegionDesc& region) {
+void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
   FTRACE(4, "region_prune_arcs\n");
 
   region.sortBlocks();
@@ -171,7 +172,7 @@ void region_prune_arcs(RegionDesc& region) {
     blockToRPO[binfo.blockID] = rpoID;
   }
   workQ.push(0);
-  blockInfos[0].in = entry_state(region);
+  blockInfos[0].in = entry_state(region, input);
 
   FTRACE(4, "Iterating:\n");
   do {

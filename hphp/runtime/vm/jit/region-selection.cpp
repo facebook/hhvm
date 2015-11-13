@@ -803,11 +803,14 @@ RegionDescPtr selectHotRegion(TransID transId,
   TransIDSet selectedTIDs;
   assertx(regionMode() != RegionMode::Method);
   RegionDescPtr region;
+  HotTransContext ctx;
+  ctx.cfg = &cfg;
+  ctx.profData = profData;
+  ctx.tid = transId;
+  ctx.maxBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
   switch (pgoRegionMode(func)) {
     case PGORegionMode::Hottrace:
-      region = selectHotTrace(transId, profData, cfg,
-                              RuntimeOption::EvalJitMaxRegionInstrs,
-                              selectedTIDs);
+      region = selectHotTrace(ctx, selectedTIDs);
       break;
 
     case PGORegionMode::Hotblock:
@@ -816,9 +819,7 @@ RegionDescPtr selectHotRegion(TransID transId,
 
     case PGORegionMode::WholeCFG:
     case PGORegionMode::HotCFG:
-      region = selectHotCFG(transId, profData, cfg,
-                            RuntimeOption::EvalJitMaxRegionInstrs,
-                            selectedTIDs);
+      region = selectHotCFG(ctx, selectedTIDs);
       break;
   }
   assertx(region);

@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
-#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"

@@ -79,9 +79,11 @@ void discardStackTemps(const ActRec* const fp,
 
   visitStackElems(
     fp, stack.top(), bcOffset,
-    [&] (ActRec* ar) {
+    [&] (ActRec* ar, Offset pushOff) {
       assert(ar == reinterpret_cast<ActRec*>(stack.top()));
-      if (ar->isFromFPushCtor()) {
+      // ar is a pre-live ActRec in fp's scope, and pushOff
+      // is the offset of the corresponding FPush* opcode.
+      if (isFPushCtor(fp->func()->unit()->getOp(pushOff))) {
         assert(ar->hasThis());
         ar->getThis()->setNoDestruct();
       }
@@ -199,8 +201,22 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   // or user profiler, most likely). More importantly, fp->m_this may have
   // already been destructed and/or overwritten due to sharing space with
   // fp->m_r.
-  if (fp->isFromFPushCtor() && fp->hasThis() && curOp != OpRetC) {
-    fp->getThis()->setNoDestruct();
+  if (curOp != OpRetC &&
+      fp->hasThis() &&
+      fp->getThis()->getVMClass()->getCtor() == func &&
+      fp->getThis()->getVMClass()->getDtor()) {
+    /*
+     * Looks like an FPushCtor call, but it could still have been called
+     * directly. Check the fpi region to be sure.
+     */
+    Offset prevPc;
+    auto outer = g_context->getPrevVMState(fp, &prevPc);
+    if (outer) {
+      auto fe = outer->func()->findPrecedingFPI(prevPc);
+      if (fe && isFPushCtor(outer->func()->unit()->getOp(fe->m_fpushOff))) {
+        fp->getThis()->setNoDestruct();
+      }
+    }
   }
 
   auto const decRefLocals = [&] {

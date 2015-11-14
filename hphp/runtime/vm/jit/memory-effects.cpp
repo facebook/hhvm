@@ -422,14 +422,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AStackAny | AFrameAny | AMIStateAny
     };
 
+  case AsyncRetFast:
   case AsyncRetCtrl:
-    if (inst.extra<AsyncRetCtrl>()->suspendingResumed) {
+    if (inst.extra<RetCtrlData>()->suspendingResumed) {
       return UnknownEffects {};
     }
     return ReturnEffects {
       *stack_below(
         inst.src(0),
-        inst.extra<AsyncRetCtrl>()->spOffset.offset - 1
+        inst.extra<RetCtrlData>()->spOffset.offset - 1
       ).precise_union(AMIStateAny)
     };
 

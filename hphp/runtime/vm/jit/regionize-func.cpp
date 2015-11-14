@@ -319,18 +319,19 @@ void regionizeFunc(const Func* func,
       TransIDSet selectedSet;
       TransIDVec selectedVec;
       RegionDescPtr region;
+      HotTransContext ctx;
+      ctx.cfg = &cfg;
+      ctx.profData = profData;
+      ctx.tid = newHead;
+      ctx.maxBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
       switch (regionMode) {
         case PGORegionMode::Hottrace:
-          region = selectHotTrace(newHead, profData, cfg,
-                                  RuntimeOption::EvalJitMaxRegionInstrs,
-                                  selectedSet, &selectedVec);
+          region = selectHotTrace(ctx, selectedSet, &selectedVec);
           break;
 
         case PGORegionMode::WholeCFG:
         case PGORegionMode::HotCFG:
-          region = selectHotCFG(newHead, profData, cfg,
-                                RuntimeOption::EvalJitMaxRegionInstrs,
-                                selectedSet, &selectedVec);
+          region = selectHotCFG(ctx, selectedSet, &selectedVec);
           break;
 
         case PGORegionMode::Hotblock:

@@ -68,7 +68,6 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -490,7 +489,7 @@ static void populateLiveContext(RegionContext& ctx) {
   int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
-    [&](const ActRec* ar) {
+    [&](const ActRec* ar, Offset) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
       auto const objOrCls =
@@ -1362,7 +1361,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
     TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
   }
 
-  if (start) {
+  if (start && !RuntimeOption::EvalFailJitPrologs) {
     LeaseHolder writer(Translator::WriteLease());
     if (writer) {
       // Someone else may have changed the func prologue while we waited for

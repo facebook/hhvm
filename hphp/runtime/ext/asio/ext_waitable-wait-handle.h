@@ -44,6 +44,9 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   ~c_WaitableWaitHandle();
 
  public:
+  static constexpr ptrdiff_t contextIdxOff() {
+    return offsetof(c_WaitableWaitHandle, m_contextIdx);
+  }
   static constexpr ptrdiff_t parentChainOff() {
     return offsetof(c_WaitableWaitHandle, m_parentChain);
   }

@@ -155,7 +155,7 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
   auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
   gen(env, StContArValue, fp(env),
     popC(env, DataTypeGeneric)); // teleporting value
-  gen(env, DecRef, oldValue);
+  decRef(env, oldValue);
 
   // Set state from Running to Started.
   gen(env, StContArState,
@@ -181,7 +181,7 @@ void emitWHResult(IRGS& env) {
   gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
   auto const res = gen(env, LdWHResult, TInitCell, child);
   gen(env, IncRef, res);
-  gen(env, DecRef, child);
+  decRef(env, child);
   push(env, res);
 }
 
@@ -243,7 +243,7 @@ void emitAwait(IRGS& env, int32_t numIters) {
     [&] { // Taken: retrieve the result from the wait handle
       auto const res = gen(env, LdWHResult, knownTy, child);
       gen(env, IncRef, res);
-      gen(env, DecRef, child);
+      decRef(env, child);
       push(env, res);
     }
   );
@@ -335,7 +335,7 @@ void emitYield(IRGS& env) {
     auto const newIdx = gen(env, ContArIncIdx, fp(env));
     auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
     gen(env, StContArKey, fp(env), newIdx);
-    gen(env, DecRef, oldKey);
+    decRef(env, oldKey);
   } else {
     // we're guaranteed that the key is an int
     gen(env, ContArIncKey, fp(env));
@@ -356,7 +356,7 @@ void emitYieldK(IRGS& env) {
   auto const newKey = popC(env);
   auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
   gen(env, StContArKey, fp(env), newKey);
-  gen(env, DecRef, oldKey);
+  decRef(env, oldKey);
 
   auto const keyType = newKey->type();
   if (keyType <= TInt) {
@@ -434,4 +434,3 @@ void emitContCurrent(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

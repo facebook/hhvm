@@ -72,11 +72,21 @@ module J = struct
     JSON_Array (JSON_String name :: args)
 end
 
-let with_crash_record root f =
+let with_crash_record_exn root source f =
   try f ()
   with e ->
     close_out @@ open_out @@ crash_marker_path root;
+    Hh_logger.exc ~prefix:("Watchman " ^ source ^ ": ") e;
     raise e
+
+let with_crash_record root source f =
+  try
+    with_crash_record_exn root source f
+  with _ ->
+    Exit_status.(exit Watchman_failed)
+
+let with_crash_record_opt root source f =
+  Option.try_with (fun () -> with_crash_record_exn root source f)
 
 let assert_no_error obj =
   try
@@ -93,12 +103,11 @@ let assert_no_error obj =
 let clock root = J.strlist ["clock"; root]
 
 let base_query
-    ?(extra_kv=[]) ?(extra_expressions=[]) ?(sync_timeout=300_000) env =
+    ?(extra_kv=[]) ?(extra_expressions=[]) env =
   let open Hh_json in
   JSON_Array begin
     [JSON_String "query"; JSON_String env.watch_root] @ [
       JSON_Object (extra_kv @ [
-        "sync_timeout", Hh_json.int_ sync_timeout;
         "fields", J.strlist ["name"];
         "relative_root", JSON_String env.relative_path;
         "expression", J.pred "allof" @@ (extra_expressions @ [
@@ -173,12 +182,12 @@ let extract_file_names env json =
   files
 
 let get_all_files env =
-  with_crash_record env.root @@ fun () ->
+  with_crash_record env.root "get_all_files" @@ fun () ->
   let response = exec env.sockname (query env) in
   extract_file_names env response
 
 let get_changes env =
-  with_crash_record env.root @@ fun () ->
+  with_crash_record env.root "get_changes" @@ fun () ->
   let response = exec env.sockname (since env) in
   env.clockspec <- J.get_string_val "clock" response;
   set_of_list @@ extract_file_names env response
@@ -191,7 +200,7 @@ let get_sockname timeout =
   J.get_string_val "sockname" json
 
 let init timeout root =
-  with_crash_record root @@ fun () ->
+  with_crash_record_opt root "init" @@ fun () ->
   let root_s = Path.to_string root in
   let sockname = get_sockname timeout in
   ignore @@ exec sockname (capability_check ["relative_root"]);

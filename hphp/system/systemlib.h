@@ -49,7 +49,6 @@ namespace HPHP { namespace SystemLib {
   x(DOMException)                               \
   x(PDOException)                               \
   x(SoapFault)                                  \
-  x(Closure)                                    \
   x(Serializable)                               \
   x(ArrayAccess)                                \
   x(ArrayObject)                                \

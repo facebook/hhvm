@@ -96,7 +96,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   doPass(unit, optimizePhis, DCE::Full);
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
-    doPass(unit, optimizeRefcounts2, DCE::Full);
+    doPass(unit, optimizeRefcounts, DCE::Full);
   }
 
   if (RuntimeOption::EvalHHIRLICM && RuntimeOption::EvalJitLoops &&

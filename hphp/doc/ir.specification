@@ -1519,7 +1519,7 @@ To string conversions:
 
   If the Ctx in S0 is a $this pointer, IncRef it.
 
-| DecRef, ND, S(Gen), CRc
+| DecRef<locId>, ND, S(Gen), CRc
 
   Decrease the reference count of S0 by one, and call a destructor for types
   that require it if it goes to zero.
@@ -1529,6 +1529,9 @@ To string conversions:
   inner types of a BoxedCell except when doing LdRef. For any S0 that is a
   strict subtype of BoxedCell, the DecRef must just decref it as if it were a
   BoxedCell.
+
+  The locId is just a hint to the runtime indicating which local variable is
+  being DecRef'd, if any.
 
 | DecRefNZ, ND, S(Gen), CRc
 
@@ -1958,6 +1961,13 @@ To string conversions:
 
   Establish dependency between parent AsyncFunctionWaitHandle object, whose
   ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
+
+| AsyncRetFast<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(Cell), T
+
+  Packs retVal (S2) into registers, sync stack (S0) and calls the asyncRetCtrl
+  unique stub. The stub unblocks parents of the async function (represented by
+  the frame pointer S1) and determines if it's possible to resume parent
+  directly (fast path).
 
 | ABCUnblock, ND, S(ABC), NF
 

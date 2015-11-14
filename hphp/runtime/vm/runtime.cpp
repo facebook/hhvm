@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -216,7 +216,7 @@ void assertTv(const TypedValue* tv) {
 }
 
 int init_closure(ActRec* ar, TypedValue* sp) {
-  c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
+  Closure* closure = Native::data<Closure>(ar->getThis());
 
   // Swap in the $this or late bound class or null if it is ony from a plain
   // function or pseudomain
@@ -234,7 +234,7 @@ int init_closure(ActRec* ar, TypedValue* sp) {
   // and now it is a local, so they cancel out
   TypedValue* firstLocal = --sp;
   firstLocal->m_type = KindOfObject;
-  firstLocal->m_data.pobj = closure;
+  firstLocal->m_data.pobj = Native::object<Closure>(closure);
 
   // Copy in all the use vars
   TypedValue* prop = closure->getUseVars();

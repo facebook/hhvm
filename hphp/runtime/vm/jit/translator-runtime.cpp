@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -47,14 +47,14 @@ const StaticString s_staticPrefix("86static_");
 RefData* lookupStaticFromClosure(ObjectData* closure,
                                  StringData* name,
                                  bool& inited) {
-  assertx(closure->instanceof(c_Closure::classof()));
+  assertx(closure->instanceof(Closure::classof()));
   auto str = String::attach(
     StringData::Make(s_staticPrefix.slice(), name->slice())
   );
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assertx(slot != kInvalidSlot);
-  auto const val = static_cast<c_Closure*>(closure)->getStaticVar(slot);
+  auto const val = Native::data<Closure>(closure)->getStaticVar(slot);
 
   if (val->m_type == KindOfUninit) {
     inited = false;
@@ -832,7 +832,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
 
   visitStackElems(
     fp, sp, bcOff,
-    [](const ActRec* ar) {
+    [](const ActRec* ar, Offset) {
       ar->func()->validate();
     },
     [](const TypedValue* tv) {

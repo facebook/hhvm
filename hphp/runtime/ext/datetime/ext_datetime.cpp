@@ -190,10 +190,12 @@ Variant HHVM_METHOD(DateTime, getTimezone) {
   return false;
 }
 
-Object HHVM_METHOD(DateTime, modify,
+Variant HHVM_METHOD(DateTime, modify,
                    const String& modify) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  data->m_dt->modify(modify);
+  if (!data->m_dt->modify(modify)) {
+    return false;
+  }
   return Object(this_);
 }
 

@@ -2754,17 +2754,8 @@ void simplifyPass(IRUnit& unit) {
 //////////////////////////////////////////////////////////////////////
 
 void copyProp(IRInstruction* inst) {
-  for (uint32_t i = 0; i < inst->numSrcs(); i++) {
-    auto tmp     = inst->src(i);
-    auto srcInst = tmp->inst();
-
-    if (srcInst->is(Mov)) {
-      inst->setSrc(i, srcInst->src(0));
-    }
-
-    // We're assuming that all of our src instructions have already been
-    // copyPropped.
-    assertx(!inst->src(i)->inst()->is(Mov));
+  for (auto& src : inst->srcs()) {
+    while (src->inst()->is(Mov)) src = src->inst()->src(0);
   }
 }
 

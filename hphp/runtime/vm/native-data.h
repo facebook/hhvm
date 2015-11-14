@@ -81,6 +81,11 @@ ObjectData* object(T *data) {
   return reinterpret_cast<ObjectData*>(data + 1);
 }
 
+template<class T>
+const ObjectData* object(const T* data) {
+  return reinterpret_cast<const ObjectData*>(data + 1);
+}
+
 void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,

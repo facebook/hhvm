@@ -2536,6 +2536,15 @@ public:
     HHVM_RC_INT_SAME(MON_12);
 #endif
 
+    // These are ostensibly bools,
+    // but for historical reasons are expressed as ints
+    HHVM_RC_INT(CRYPT_BLOWFISH, 1);
+    HHVM_RC_INT(CRYPT_EXT_DES, 0);
+    HHVM_RC_INT(CRYPT_MD5, 1);
+    HHVM_RC_INT(CRYPT_STD_DES, 1);
+
+    HHVM_RC_INT(CRYPT_SALT_LENGTH, 12);
+
     loadSystemlib();
   }
 } s_string_extension;

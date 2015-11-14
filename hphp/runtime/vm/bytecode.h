@@ -307,8 +307,8 @@ struct ActRec {
 
     // Mutually exclusive execution mode states in these 2 bits.
     InResumed     = (1u << 30),
-    FromFPushCtor = (1u << 31),
-    MagicDispatch = InResumed|FromFPushCtor,
+    SpareFlag     = (1u << 31),
+    MagicDispatch = InResumed|SpareFlag,
   };
 
   static constexpr int kNumArgsBits       = 29;
@@ -325,8 +325,8 @@ struct ActRec {
   bool resumed() const {
     return (flags() & kExecutionModeMask) == InResumed;
   }
-  bool isFromFPushCtor() const {
-    return (flags() & kExecutionModeMask) == FromFPushCtor;
+  bool isSpareFlag() const {
+    return (flags() & kExecutionModeMask) == SpareFlag;
   }
   bool magicDispatch() const {
     return (flags() & kExecutionModeMask) == MagicDispatch;
@@ -353,9 +353,9 @@ struct ActRec {
     assert(flags() == Flags::None);
     m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
   }
-  void setFromFPushCtor() {
+  void setSpareFlag() {
     assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), FromFPushCtor);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), SpareFlag);
   }
 
   void setMagicDispatch(StringData* invName) {
@@ -1106,7 +1106,7 @@ visitStackElems(const ActRec* const fp,
       while (cursor < reinterpret_cast<TypedValue*>(ar)) {
         tvFun(cursor++);
       }
-      arFun(ar);
+      arFun(ar, fe->m_fpushOff);
 
       cursor += kNumActRecCells;
       if (fe->m_parentIndex == -1) break;

@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/logger.h"
@@ -155,7 +155,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     ObjectData *d = tv_func->m_data.pobj;
     const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name) {
-      if (d->instanceof(c_Closure::classof())) {
+      if (d->instanceof(Closure::classof())) {
         // Hack to stop the mangled name from showing up
         *name->var() = s_Closure__invoke;
       } else {

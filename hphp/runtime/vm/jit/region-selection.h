@@ -558,13 +558,19 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
                              bool profiling,
                              bool inlining = false);
 
+struct HotTransContext {
+  TransID tid;
+  TransCFG* cfg;
+  const ProfData* profData;
+  int32_t maxBCInstrs;
+  bool inlining{false};
+  std::vector<Type>* inputTypes{nullptr};
+};
+
 /*
  * Select the hottest trace beginning with triggerId.
  */
-RegionDescPtr selectHotTrace(TransID triggerId,
-                             const ProfData* profData,
-                             TransCFG& cfg,
-                             int32_t maxBCInstrs,
+RegionDescPtr selectHotTrace(HotTransContext& ctx,
                              TransIDSet& selectedSet,
                              TransIDVec* selectedVec = nullptr);
 
@@ -573,13 +579,9 @@ RegionDescPtr selectHotTrace(TransID triggerId,
  * the TransCFG as possible (in "wholecfg" mode), but that can be
  * pruned to eliminate cold/unlikely code as well (in "hotcfg" mode).
  */
-RegionDescPtr selectHotCFG(TransID headId,
-                           const ProfData* profData,
-                           const TransCFG& cfg,
-                           int32_t maxBCInstrs,
+RegionDescPtr selectHotCFG(HotTransContext& ctx,
                            TransIDSet& selectedSet,
-                           TransIDVec* selectedVec = nullptr,
-                           bool inlining = false);
+                           TransIDVec* selectedVec = nullptr);
 
 /*
  * Checks whether the type predictions at the beginning of block

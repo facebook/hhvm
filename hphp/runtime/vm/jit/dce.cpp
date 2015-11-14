@@ -430,6 +430,7 @@ bool canDCE(IRInstruction* inst) {
   case StAsyncArResume:
   case StAsyncArResult:
   case AFWHBlockOn:
+  case AsyncRetFast:
   case ABCUnblock:
   case IncStat:
   case IncTransCounter:

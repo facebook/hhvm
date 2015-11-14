@@ -79,7 +79,7 @@ Array HHVM_STATIC_METHOD(DateTime, getLastErrors);
 int64_t HHVM_METHOD(DateTime, getOffset);
 int64_t HHVM_METHOD(DateTime, gettimestamp);
 Variant HHVM_METHOD(DateTime, getTimezone);
-Object HHVM_METHOD(DateTime, modify,
+Variant HHVM_METHOD(DateTime, modify,
                    const String& modify);
 Object HHVM_METHOD(DateTime, setDate,
                    int64_t year,

@@ -203,7 +203,7 @@ let recheck genv old_env updates =
   let config_in_updates =
     Relative_path.Set.mem ServerConfig.filename updates in
   if config_in_updates then begin
-    let new_config = ServerConfig.(load filename) in
+    let new_config = ServerConfig.(load filename genv.options) in
     if not (ServerConfig.is_compatible genv.config new_config) then begin
       Hh_logger.log
         "%s changed in an incompatible way; please restart %s.\n"
@@ -390,11 +390,11 @@ let program_init genv =
           env, "mini_load"
     else
       match ServerConfig.load_script genv.config with
-      | None ->
+      | Some load_script when not (ServerArgs.no_load genv.options) ->
+          run_load_script genv load_script
+      | _ ->
           let env = ServerInit.init genv in
           env, "fresh"
-      | Some load_script ->
-          run_load_script genv load_script
   in
   HackEventLogger.init_end init_type;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
@@ -437,7 +437,7 @@ let daemon_main options =
     Hh_logger.log "Error: another server is already running?\n";
     Exit_status.(exit Server_already_exists);
   end;
-  let config = ServerConfig.(load filename) in
+  let config = ServerConfig.(load filename options) in
   let {ServerLocalConfig.cpu_priority; io_priority; _} as local_config =
     ServerLocalConfig.load () in
   if Sys_utils.is_test_mode ()

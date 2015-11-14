@@ -1268,7 +1268,7 @@ void emitRatchetRefs(MTS& env) {
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd(env) > 0) {
         auto const val = gen(env, LdMem, TGen, misRef2Addr);
-        gen(env, DecRef, val);
+        decRef(env, val);
       }
       // Copy tvRef to tvRef2.
       auto const tvRef = gen(env, LdMem, TGen, misRefAddr);
@@ -1647,7 +1647,7 @@ void emitVectorSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* value) {
   auto const idx = gen(env, Shl, key, cns(env, 4));
   auto const oldVal = gen(env, LdElem, vecBase, idx);
   gen(env, StElem, vecBase, idx, value);
-  gen(env, DecRef, oldVal);
+  decRef(env, oldVal);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1731,7 +1731,7 @@ void emitSetProp(MTS& env) {
     env.irb.constrainValue(value, DataTypeCountness);
     gen(env, IncRef, value);
     gen(env, StMem, cellPtr, value);
-    gen(env, DecRef, oldVal);
+    decRef(env, oldVal);
     env.result = value;
     return;
   }
@@ -1923,7 +1923,7 @@ void emitSetElem(MTS& env) {
       // decreffing value.
       env.irb.constrainValue(value, DataTypeCountness);
       env.result = result;
-      gen(env, DecRef, value);
+      decRef(env, value);
     } else {
       assertx(t == (TCountedStr | TNullptr));
       // Base might be a string. Assume the result is value, then inform
@@ -2065,7 +2065,7 @@ void cleanTvRefs(MTS& env) {
   for (unsigned i = 0; i < std::min(env.numLogicalRatchets, 2U); ++i) {
     auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
     auto const val  = gen(env, LdMem, TGen, addr);
-    gen(env, DecRef, val);
+    decRef(env, val);
   }
 }
 
@@ -2084,7 +2084,7 @@ uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
     auto const tc = why == DecRefStyle::FromMain ? DataTypeSpecific
                                                  : DataTypeGeneric;
     auto const input = top(env, i, tc);
-    gen(env, DecRef, input);
+    decRef(env, input);
   }
   return stackCnt;
 }
@@ -2102,7 +2102,7 @@ void handleStrTestResult(MTS& env) {
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const str = gen(env, AssertNonNull, env.strTestResult);
-      gen(env, DecRef, env.result);
+      decRef(env, env.result);
       auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromMain);
       discard(env, stackCnt);
       cleanTvRefs(env);
@@ -2153,7 +2153,7 @@ Block* makeCatchSet(MTS& env) {
   // stack inputs, and decref the ratchet storage after the stack inputs.
   if (!isSetWithRef) {
     auto const val = top(env, BCSPOffset{0}, DataTypeGeneric);
-    gen(env, DecRef, val);
+    decRef(env, val);
   }
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);
   discard(env, stackCnt);
@@ -2318,7 +2318,7 @@ void initTvRefs(IRGS& env) {
  */
 void cleanTvRefs(IRGS& env) {
   for (auto ptr : {tvRefPtr(env), tvRef2Ptr(env)}) {
-    gen(env, DecRef, gen(env, LdMem, TGen, ptr));
+    decRef(env, gen(env, LdMem, TGen, ptr));
   }
 }
 
@@ -2346,7 +2346,7 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
       auto tvRef2 = tvRef2Ptr(env);
       // Clean up tvRef2 before overwriting it.
       auto const oldRef2 = gen(env, LdMem, TGen, tvRef2);
-      gen(env, DecRef, oldRef2);
+      decRef(env, oldRef2);
 
       // Copy tvRef to tvRef2.
       auto const tvRefVal = gen(env, LdMem, TGen, tvRef);
@@ -2685,7 +2685,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     auto const oldVal = gen(env, LdMem, propTy, propPtr);
     gen(env, IncRef, value);
     gen(env, StMem, propPtr, value);
-    gen(env, DecRef, oldVal);
+    decRef(env, oldVal);
   } else {
     gen(env, SetProp, makeCatchSet(env), base, key, value);
   }
@@ -2814,7 +2814,7 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
         env.irb->constrainValue(value, DataTypeCountness);
-        gen(env, DecRef, value);
+        decRef(env, value);
         value = result;
       } else {
         assertx(t == (TCountedStr | TNullptr));

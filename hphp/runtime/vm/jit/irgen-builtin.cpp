@@ -491,7 +491,7 @@ bool optimizedFCallBuiltin(IRGS& env,
   for (int i = 0; i < numArgs; i++) {
     auto const arg = popR(env);
     if (i >= numArgs - numNonDefault) {
-      gen(env, DecRef, arg);
+      decRef(env, arg);
     }
   }
 
@@ -638,7 +638,7 @@ ParamPrep prepare_params(IRGS& env,
  * non-refcounted after conversions, and we can't DecRef things twice.
  */
 struct CatchMaker {
-  enum class Kind { NotInlining, InliningNonCtor, InliningCtor };
+  enum class Kind { NotInlining, Inlining };
 
   explicit CatchMaker(IRGS& env,
                       Kind kind,
@@ -658,8 +658,7 @@ struct CatchMaker {
   bool inlining() const {
     switch (m_kind) {
     case Kind::NotInlining:      return false;
-    case Kind::InliningNonCtor:  return true;
-    case Kind::InliningCtor:     return true;
+    case Kind::Inlining:         return true;
     }
     not_reached();
   }
@@ -711,7 +710,7 @@ struct CatchMaker {
       hint(env, Block::Hint::Unlikely);
       decRefForSideExit();
       if (m_params.thiz && m_params.thiz->type() <= TObj) {
-        gen(env, DecRef, m_params.thiz);
+        decRef(env, m_params.thiz);
       }
 
       auto const val = gen(env, LdUnwinderValue, TCell);
@@ -733,8 +732,7 @@ private:
                   cns(env, m_callee),
                   m_params.thiz ? m_params.thiz : cns(env, TNullptr),
                   m_params.size(),
-                  nullptr,
-                  m_kind == Kind::InliningCtor);
+                  nullptr);
     }
     /*
      * We're potentially spilling to a different depth than the unwinder
@@ -770,7 +768,7 @@ private:
       if (pi.passByAddr) {
         popDecRef(env);
       } else {
-        gen(env, DecRef, pi.value);
+        decRef(env, pi.value);
       }
     }
   }
@@ -792,9 +790,9 @@ private:
       if (m_params[i].passByAddr) {
         --stackIdx;
         auto const val = top(env, BCSPOffset{stackIdx}, DataTypeGeneric);
-        gen(env, DecRef, val);
+        decRef(env, val);
       } else {
-        gen(env, DecRef, m_params[i].value);
+        decRef(env, m_params[i].value);
       }
     }
     discard(env, m_params.numByAddr);
@@ -856,7 +854,7 @@ SSATmp* coerce_value(IRGS& env,
   }();
 
   if (result) {
-    gen(env, DecRef, oldVal);
+    decRef(env, oldVal);
     return result;
   }
 
@@ -1187,7 +1185,7 @@ SSATmp* builtinCall(IRGS& env,
 
   if (!params.forNativeImpl) {
     if (params.thiz && params.thiz->type() <= TObj) {
-      gen(env, DecRef, params.thiz);
+      decRef(env, params.thiz);
     }
     catchMaker.decRefByPopping();
   }
@@ -1210,9 +1208,6 @@ SSATmp* builtinCall(IRGS& env,
 void nativeImplInlined(IRGS& env) {
   auto const callee = curFunc(env);
   assertx(callee->nativeFuncPtr());
-
-  auto const wasInliningConstructor =
-    fp(env)->inst()->extra<DefInlineFP>()->fromFPushCtor;
 
   auto const numArgs = callee->numParams();
   auto const paramThis = [&] () -> SSATmp* {
@@ -1250,8 +1245,7 @@ void nativeImplInlined(IRGS& env) {
 
   auto const catcher = CatchMaker {
     env,
-    wasInliningConstructor ? CatchMaker::Kind::InliningCtor
-                           : CatchMaker::Kind::InliningNonCtor,
+    CatchMaker::Kind::Inlining,
     callee,
     &params
   };
@@ -1469,8 +1463,8 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
 
     // if the key is null it will not be found so just return the default
     push(env, def);
-    gen(env, DecRef, stack_base);
-    gen(env, DecRef, key);
+    decRef(env, stack_base);
+    decRef(env, key);
     return;
   }
   if (!(keyType <= TInt || keyType <= TStr)) {
@@ -1488,9 +1482,9 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
     : stack_base;
   auto const value = gen(env, ArrayIdx, use_base, key, def);
   push(env, value);
-  gen(env, DecRef, stack_base);
-  gen(env, DecRef, key);
-  gen(env, DecRef, def);
+  decRef(env, stack_base);
+  decRef(env, key);
+  decRef(env, def);
 }
 
 void implMapIdx(IRGS& env) {
@@ -1499,9 +1493,9 @@ void implMapIdx(IRGS& env) {
   auto const map = popC(env);
   auto const val = gen(env, MapIdx, map, key, def);
   push(env, val);
-  gen(env, DecRef, map);
-  gen(env, DecRef, key);
-  gen(env, DecRef, def);
+  decRef(env, map);
+  decRef(env, key);
+  decRef(env, def);
 }
 
 void implGenericIdx(IRGS& env) {
@@ -1511,9 +1505,9 @@ void implGenericIdx(IRGS& env) {
   auto const key = popC(env, DataTypeSpecific);
   auto const arr = popC(env, DataTypeSpecific);
   push(env, gen(env, GenericIdx, spOff, arr, key, def, stkptr));
-  gen(env, DecRef, arr);
-  gen(env, DecRef, key);
-  gen(env, DecRef, def);
+  decRef(env, arr);
+  decRef(env, key);
+  decRef(env, def);
 }
 
 TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
@@ -1620,7 +1614,7 @@ void emitAKExists(IRGS& env) {
   if (key->isA(TInitNull)) {
     if (arr->isA(TObj)) {
       push(env, cns(env, false));
-      gen(env, DecRef, arr);
+      decRef(env, arr);
       return;
     }
 
@@ -1632,8 +1626,8 @@ void emitAKExists(IRGS& env) {
   auto const val =
     gen(env, arr->isA(TArr) ? AKExistsArr : AKExistsObj, arr, key);
   push(env, val);
-  gen(env, DecRef, arr);
-  gen(env, DecRef, key);
+  decRef(env, arr);
+  decRef(env, key);
 }
 
 void emitGetMemoKey(IRGS& env) {
@@ -1645,14 +1639,14 @@ void emitGetMemoKey(IRGS& env) {
   if (inTy <= TNull) {
     auto input = popC(env);
     push(env, cns(env, s_empty.get()));
-    gen(env, DecRef, input);
+    decRef(env, input);
     return;
   }
 
   auto const obj = popC(env);
   auto const key = gen(env, GetMemoKey, obj);
   push(env, key);
-  gen(env, DecRef, obj);
+  decRef(env, obj);
 }
 
 void emitSilence(IRGS& env, Id localId, SilenceOp subop) {

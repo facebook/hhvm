@@ -53,7 +53,7 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
 
   auto const res = genFunc(src, pred);
   auto const out = popV(env);
-  gen(env, DecRef, out);
+  decRef(env, out);
   implCondJmp(env, bcOff(env) + relOffset, true, res);
 }
 
@@ -301,10 +301,10 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
       src,
       fp(env)
     );
-    gen(env, DecRef, src);
+    decRef(env, src);
     implCondJmp(env, bcOff(env) + relOffset, true, res);
   } else {
-    gen(env, DecRef, src);
+    decRef(env, src);
     jmpImpl(env, bcOff(env) + relOffset);
   }
 }

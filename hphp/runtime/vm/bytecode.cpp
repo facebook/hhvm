@@ -76,7 +76,7 @@
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
@@ -900,7 +900,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   std::vector<std::string> stackElems;
   visitStackElems(
     fp, ftop, offset,
-    [&](const ActRec* ar) {
+    [&](const ActRec* ar, Offset) {
       stackElems.push_back(
         folly::format("{{func:{}}}", ar->m_func->fullName()->data()).str()
       );
@@ -6291,7 +6291,6 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
-  ar->setFromFPushCtor();
   ar->trashVarEnv();
 }
 
@@ -6319,7 +6318,6 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
-  ar->setFromFPushCtor();
   ar->trashVarEnv();
 }
 
@@ -7328,10 +7326,10 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   auto const cls = Unit::loadClass(clsName)->rescope(
     const_cast<Class*>(vmfp()->m_func->cls())
   );
-  auto const cl = static_cast<c_Closure*>(newInstance(cls));
-  cl->init(numArgs, vmfp(), vmStack().top());
+  auto obj = newInstance(cls);
+  Native::data<Closure>(obj)->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);
-  vmStack().pushObjectNoRc(cl);
+  vmStack().pushObjectNoRc(obj);
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {

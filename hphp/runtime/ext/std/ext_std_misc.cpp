@@ -57,6 +57,10 @@ const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
+const int64_t k_CONNECTION_NORMAL = 0;
+const int64_t k_CONNECTION_ABORTED = 1;
+const int64_t k_CONNECTION_TIMEOUT = 2;
+
 static String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted more than 25kb of code.
   size_t begin, end;
@@ -175,6 +179,19 @@ void StandardExtension::initMisc() {
     HHVM_FE(hphp_to_string);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
+
+    Native::registerConstant<KindOfBoolean>(makeStaticString("TRUE"), true);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("true"), true);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("FALSE"), false);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("false"), false);
+    Native::registerConstant<KindOfNull>(makeStaticString("NULL"));
+    Native::registerConstant<KindOfNull>(makeStaticString("null"));
+
+    Native::registerConstant<KindOfBoolean>(
+      makeStaticString("ZEND_THREAD_SAFE"),
+      true
+    );
+
     Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
     Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
     Native::registerConstant<KindOfInt64>(
@@ -231,6 +248,10 @@ void StandardExtension::initMisc() {
     HHVM_RC_STR_SAME(PHP_VERSION);
     HHVM_RC_INT_SAME(PHP_VERSION_ID);
 
+    HHVM_RC_INT(CONNECTION_NORMAL,  k_CONNECTION_NORMAL);
+    HHVM_RC_INT(CONNECTION_ABORTED, k_CONNECTION_ABORTED);
+    HHVM_RC_INT(CONNECTION_TIMEOUT, k_CONNECTION_TIMEOUT);
+
     // FIXME: These values are hardcoded from their previous IDL values
     // Grab their correct values from the system as appropriate
     HHVM_RC_STR(PHP_EOL, "\n");
@@ -245,6 +266,24 @@ void StandardExtension::initMisc() {
     HHVM_RC_STR(PHP_SYSCONFDIR, "");
     HHVM_RC_STR(PEAR_EXTENSION_DIR, "");
     HHVM_RC_STR(PEAR_INSTALL_DIR, "");
+    HHVM_RC_STR(DEFAULT_INCLUDE_PATH, "");
+
+    // I'm honestly not sure where these constants came from
+    // I've brought them for ward from their IDL definitions
+    // with their previous hard-coded values.
+    HHVM_RC_INT(CODESET,         14);
+    HHVM_RC_INT(RADIXCHAR,    65536);
+    HHVM_RC_INT(THOUSEP,      65537);
+    HHVM_RC_INT(ALT_DIGITS,  131119);
+    HHVM_RC_INT(AM_STR,      131110);
+    HHVM_RC_INT(PM_STR,      131111);
+    HHVM_RC_INT(D_T_FMT,     131112);
+    HHVM_RC_INT(D_FMT,       131113);
+    HHVM_RC_INT(ERA,         131116);
+    HHVM_RC_INT(ERA_D_FMT,   131118);
+    HHVM_RC_INT(ERA_D_T_FMT, 131120);
+    HHVM_RC_INT(ERA_T_FMT,   131121);
+    HHVM_RC_INT(CRNCYSTR,    262159);
 
     loadSystemlib("std_misc");
   }
@@ -260,6 +299,7 @@ int64_t HHVM_FUNCTION(connection_aborted) {
 }
 
 int64_t HHVM_FUNCTION(connection_status) {
+  // FIXME: WAT?
   return k_CONNECTION_NORMAL;
 }
 

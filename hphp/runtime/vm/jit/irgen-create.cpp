@@ -322,7 +322,7 @@ void emitMapAddElemC(IRGS& env) {
   auto const key = popC(env);
   auto const coll = popC(env);
   push(env, gen(env, MapAddElemC, coll, key, val));
-  gen(env, DecRef, key);
+  decRef(env, key);
 }
 
 void emitColAddNewElemC(IRGS& env) {
@@ -366,7 +366,7 @@ void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
   gen(env, IncRef, box);
   auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
   stLocRaw(env, locId, fp(env), box);
-  gen(env, DecRef, oldValue);
+  decRef(env, oldValue);
   // We don't need to decref value---it's a bytecode invariant that
   // our Cell was not ref-counted.
 }
@@ -406,7 +406,7 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
   gen(env, IncRef, box);
   auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeGeneric);
   stLocRaw(env, locId, fp(env), box);
-  gen(env, DecRef, oldValue);
+  decRef(env, oldValue);
   push(env, res);
 }
 

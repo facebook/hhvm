@@ -274,23 +274,20 @@ private:
 
 }
 
-RegionDescPtr selectHotCFG(TransID head,
-                           const ProfData* profData,
-                           const TransCFG& cfg,
-                           int32_t maxBCInstrs,
+RegionDescPtr selectHotCFG(HotTransContext& ctx,
                            TransIDSet& selectedSet,
-                           TransIDVec* selectedVec /* = nullptr */,
-                           bool inlining /* = false */) {
-  ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", maxBCInstrs);
+                           TransIDVec* selectedVec /* = nullptr */) {
+  ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", ctx.maxBCInstrs);
   auto const region =
-    DFS(profData, cfg, selectedSet, selectedVec, maxBCInstrs, inlining)
-      .formRegion(head);
+    DFS(ctx.profData, *ctx.cfg, selectedSet, selectedVec, ctx.maxBCInstrs,
+        ctx.inlining)
+      .formRegion(ctx.tid);
 
   if (region->empty()) return nullptr;
 
   ITRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
          show(*region));
-  region_prune_arcs(*region);
+  region_prune_arcs(*region, ctx.inputTypes);
   ITRACE(3, "selectHotCFG: before chainRetransBlocks:\n{}\n",
          show(*region));
   region->chainRetransBlocks();
@@ -299,7 +296,7 @@ RegionDescPtr selectHotCFG(TransID head,
   if (RuntimeOption::EvalRegionRelaxGuards) {
     ITRACE(3, "selectHotCFG: before optimizeProfiledGuards:\n{}\n",
            show(*region));
-    optimizeProfiledGuards(*region, *profData);
+    optimizeProfiledGuards(*region, *ctx.profData);
   }
   ITRACE(1, "selectHotCFG: final version after optimizeProfiledGuards:\n{}\n",
          show(*region));

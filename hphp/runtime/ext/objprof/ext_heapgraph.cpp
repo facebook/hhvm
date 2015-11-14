@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/iterators.h"
@@ -143,7 +144,7 @@ bool supportsToArray(ObjectData* obj) {
     return true;
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
     return true;
-  } else if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
+  } else if (UNLIKELY(obj->instanceof(Closure::classof()))) {
     return true;
   } else if (UNLIKELY(obj->instanceof(DateTimeData::getClass()))) {
     return true;

@@ -29,7 +29,7 @@ void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src) {
   auto const prevValue = gen(env, LdMem, ptr->type().deref(), ptr);
   pushIncRef(env, src);
   gen(env, StMem, ptr, src);
-  gen(env, DecRef, prevValue);
+  decRef(env, prevValue);
 }
 
 void destroyName(IRGS& env, SSATmp* name) {

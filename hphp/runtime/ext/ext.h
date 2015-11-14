@@ -24,14 +24,9 @@
 // Super temporary
 #ifndef USE_CMAKE
 #include "hphp/facebook/extensions/phpmc/ext_phpmc.h"
-#define ENABLE_EXTENSION_CLOSURE
 #define ENABLE_EXTENSION_COLLECTIONS
-#define ENABLE_EXTENSION_SIMPLEXML
 #endif
 
-#ifdef ENABLE_EXTENSION_CLOSURE
-#include "hphp/runtime/ext/closure/ext_closure.h"
-#endif
 #ifdef ENABLE_EXTENSION_COLLECTIONS
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #endif

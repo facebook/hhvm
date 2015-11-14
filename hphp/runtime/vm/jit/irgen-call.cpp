@@ -127,8 +127,7 @@ void fpushObjMethodUnknown(IRGS& env,
               cns(env, TNullptr),  // Will be set by LdObjMethod
               obj,
               numParams,
-              nullptr,
-              false);
+              nullptr);
   auto const objCls = gen(env, LdObjClass, obj);
 
   // This is special.  We need to move the stackpointer in case LdObjMethod
@@ -202,7 +201,7 @@ void fpushObjMethodExactFunc(
   emitIncStat(env, Stats::ObjMethod_known, 1);
   if (func->isStatic() && !func->isClosureBody()) {
     assertx(baseClass);
-    gen(env, DecRef, obj);
+    decRef(env, obj);
     objOrCls = cns(env, baseClass);
   }
   fpushActRec(
@@ -210,8 +209,7 @@ void fpushObjMethodExactFunc(
     cns(env, func),
     objOrCls,
     numParams,
-    methodName,
-    /* fromFPushCtor */false
+    methodName
   );
 }
 
@@ -301,11 +299,10 @@ void fpushObjMethodInterfaceFunc(
                   cls);
   SSATmp* objOrCls = obj;
   if (ifaceFunc->attrs() & AttrStatic) {
-    gen(env, DecRef, obj);
+    decRef(env, obj);
     objOrCls = cls;
   }
-  fpushActRec(env, func, objOrCls, numParams,
-              /* invName */nullptr, false);
+  fpushActRec(env, func, objOrCls, numParams, /* invName */nullptr);
   return;
 }
 
@@ -361,15 +358,14 @@ void fpushObjMethodNonExactFunc(
   );
   SSATmp* objOrCls = obj;
   if (func->attrs() & AttrStatic && !func->isClosureBody()) {
-    gen(env, DecRef, obj);
+    decRef(env, obj);
     objOrCls = clsTmp;
   }
   fpushActRec(env,
     funcTmp,
     objOrCls,
     numParams,
-    /* invName */nullptr,
-    /* fromFPushCtor */false
+    /* invName */nullptr
   );
 }
 
@@ -464,7 +460,7 @@ void fpushFuncObj(IRGS& env, int32_t numParams) {
   auto const obj      = popC(env);
   auto const cls      = gen(env, LdObjClass, obj);
   auto const func     = gen(env, LdObjInvoke, slowExit, cls);
-  fpushActRec(env, func, obj, numParams, nullptr, false);
+  fpushActRec(env, func, obj, numParams, nullptr);
 }
 
 void fpushFuncArr(IRGS& env, int32_t numParams) {
@@ -476,8 +472,7 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
     cns(env, TNullptr),
     cns(env, TNullptr),
     numParams,
-    nullptr,
-    false
+    nullptr
   );
 
   // This is special. We need to move the stackpointer incase LdArrFuncCtx
@@ -488,7 +483,7 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
 
   gen(env, LdArrFuncCtx, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     arr, sp(env), thisAR);
-  gen(env, DecRef, arr);
+  decRef(env, arr);
 }
 
 // FPushCuf when the callee is not known at compile time.
@@ -509,8 +504,7 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
     cns(env, TNullptr),
     cns(env, TNullptr),
     numParams,
-    nullptr,
-    false
+    nullptr
   );
 
   /*
@@ -527,7 +521,7 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
                                                : LdStrFPushCuf;
   gen(env, opcode, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     callable, sp(env), fp(env));
-  gen(env, DecRef, callable);
+  decRef(env, callable);
 }
 
 SSATmp* clsMethodCtx(IRGS& env, const Func* callee, const Class* cls) {
@@ -611,7 +605,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
     push(env, safeFlag);
   }
 
-  fpushActRec(env, func, ctx, numArgs, invName, false);
+  fpushActRec(env, func, ctx, numArgs, invName);
 }
 
 void fpushFuncCommon(IRGS& env,
@@ -624,8 +618,7 @@ void fpushFuncCommon(IRGS& env,
                   cns(env, func),
                   cns(env, TNullptr),
                   numParams,
-                  nullptr,
-                  false);
+                  nullptr);
       return;
     }
   }
@@ -637,8 +630,7 @@ void fpushFuncCommon(IRGS& env,
               ssaFunc,
               cns(env, TNullptr),
               numParams,
-              nullptr,
-              false);
+              nullptr);
 }
 
 void implUnboxR(IRGS& env) {
@@ -650,7 +642,7 @@ void implUnboxR(IRGS& env) {
     push(env, unboxed);
   } else {
     pushIncRef(env, unboxed);
-    gen(env, DecRef, srcBox);
+    decRef(env, srcBox);
   }
 }
 
@@ -664,13 +656,11 @@ void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
                  int32_t numArgs,
-                 const StringData* invName,
-                 bool fromFPushCtor) {
+                 const StringData* invName) {
   ActRecInfo info;
   info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
   info.numArgs = numArgs;
   info.invName = invName;
-  info.fromFPushCtor = fromFPushCtor;
   gen(
     env,
     SpillFrame,
@@ -712,7 +702,7 @@ void emitFPushCtor(IRGS& env, int32_t numParams) {
   auto const func = gen(env, LdClsCtor, cls);
   auto const obj  = gen(env, AllocObj, cls);
   pushIncRef(env, obj);
-  fpushActRec(env, func, obj, numParams, nullptr, true /* fromFPushCtor */);
+  fpushActRec(env, func, obj, numParams, nullptr);
 }
 
 void emitFPushCtorD(IRGS& env,
@@ -745,7 +735,7 @@ void emitFPushCtorD(IRGS& env,
   auto const obj = fastAlloc ? allocObjFast(env, cls)
                              : gen(env, AllocObj, ssaCls);
   pushIncRef(env, obj);
-  fpushActRec(env, ssaFunc, obj, numParams, nullptr, true /* FromFPushCtor */);
+  fpushActRec(env, ssaFunc, obj, numParams, nullptr);
 }
 
 void emitFPushFuncD(IRGS& env, int32_t nargs, const StringData* name) {
@@ -772,8 +762,7 @@ void emitFPushFunc(IRGS& env, int32_t numParams) {
               gen(env, LdFunc, funcName),
               cns(env, TNullptr),
               numParams,
-              nullptr,
-              false);
+              nullptr);
 }
 
 void emitFPushObjMethodD(IRGS& env,
@@ -798,8 +787,7 @@ void emitFPushObjMethodD(IRGS& env,
       cns(env, SystemLib::s_nullFunc),
       cns(env, TNullptr),
       numParams,
-      nullptr,
-      false);
+      nullptr);
     return;
   }
 
@@ -841,8 +829,7 @@ void emitFPushClsMethodD(IRGS& env,
                 cns(env, func),
                 objOrCls,
                 numParams,
-                func && magicCall ? methodName : nullptr,
-                false);
+                func && magicCall ? methodName : nullptr);
     return;
   }
 
@@ -873,8 +860,7 @@ void emitFPushClsMethodD(IRGS& env,
               func,
               clsCtx,
               numParams,
-              nullptr,
-              false);
+              nullptr);
 }
 
 void emitFPushClsMethod(IRGS& env, int32_t numParams) {
@@ -915,7 +901,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
         auto funcTmp = clsVal->hasConstVal()
           ? cns(env, func)
           : gen(env, LdClsMethod, clsVal, cns(env, -(func->methodSlot() + 1)));
-        fpushActRec(env, funcTmp, clsVal, numParams, nullptr, false);
+        fpushActRec(env, funcTmp, clsVal, numParams, nullptr);
         return;
       }
     }
@@ -925,8 +911,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
               cns(env, TNullptr),
               cns(env, TNullptr),
               numParams,
-              nullptr,
-              false);
+              nullptr);
 
   /*
    * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec on the
@@ -938,7 +923,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   gen(env, LookupClsMethod,
     IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     clsVal, methVal, sp(env), fp(env));
-  gen(env, DecRef, methVal);
+  decRef(env, methVal);
 }
 
 void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
@@ -969,7 +954,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
     auto const funcTmp = cns(env, vmfunc);
     auto const newCtxTmp = gen(env, GetCtxFwdCall, curCtxTmp, funcTmp);
     fpushActRec(env, funcTmp, newCtxTmp, numParams,
-      magicCall ? methName : nullptr, false);
+      magicCall ? methName : nullptr);
     return;
   }
 
@@ -1001,8 +986,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
               funcTmp,
               ctx,
               numParams,
-              magicCall ? methName : nullptr,
-              false);
+              magicCall ? methName : nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1070,7 +1054,7 @@ void emitFPassV(IRGS& env, int32_t argNum) {
 
   auto const tmp = popV(env);
   pushIncRef(env, gen(env, LdRef, TInitCell, tmp));
-  gen(env, DecRef, tmp);
+  decRef(env, tmp);
 }
 
 void emitFPassCE(IRGS& env, int32_t argNum) {

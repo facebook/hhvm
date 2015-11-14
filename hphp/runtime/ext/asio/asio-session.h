@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
-#include "hphp/runtime/ext/closure/ext_closure.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

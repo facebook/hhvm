@@ -82,6 +82,12 @@
 #define UNUSED             __attribute__((__unused__))
 #endif
 
+#if defined(__GNUC__) 
+#define ATTRIBUTE_WEAK __attribute__((weak))
+#elif defined(__clang__)
+#define ATTRIBUTE_WEAK __attribute__((weak_import))
+#endif
+
 #ifdef DEBUG
 # define DEBUG_ONLY /* nop */
 #else

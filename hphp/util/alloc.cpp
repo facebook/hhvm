@@ -190,14 +190,8 @@ static std::vector<bitmask*> *node_to_cpu_mask;
 static bool use_numa = false;
 static bool threads_bind_local = false;
 
-#if defined(__GNUC__) && !defined(__APPLE__)
-#define WEAK_ATTR __attribute__((weak))
-#else
-#define WEAK_ATTR
-#endif
-
 extern "C" {
-WEAK_ATTR extern void numa_init(void);
+ATTRIBUTE_WEAK extern void numa_init(void);
 }
 static void initNuma() {
   

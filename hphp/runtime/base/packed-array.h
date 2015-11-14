@@ -39,17 +39,9 @@ struct MixedArray;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Packed arrays are a specialized array layout for vector-like data.
- * That is, php arrays with zero-based contiguous integer keys, and
- * values of mixed types.
- *
- * Currently the layout of this array kind is set up to match
- * MixedArray, with some of the fields uninitialized.  I.e., packed
- * arrays allocate space for a hashtable that they don't use, in order
- * to make the code path that transitions from packed to mixed
- * cheaper.  (This is a transitional thing---we'd like to further
- * specialize the layout.)  See MixedArray::checkInvariants for
- * details.
+ * Packed arrays are a specialized array layout for vector-like data.  That is,
+ * php arrays with zero-based contiguous integer keys, and values of mixed
+ * types.  The TypedValue's are placed right after the array header.
  */
 struct PackedArray {
   static constexpr uint32_t MaxSize = 0xFFFFFFFFul;

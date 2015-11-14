@@ -4551,6 +4551,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     visit(q->getFirst());
     emitCGetQuiet(e);
     e.Dup();
+    emitIsset(e);
     e.JmpNZ(done);
     e.PopC();
     visit(q->getSecond());

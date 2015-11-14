@@ -901,31 +901,22 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
 }
 
 // helper for getClosureScopeClass
-static Variant HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
-                           const Object& closure) {
-  if (!closure->instanceof(Closure::classof())) {
-    SystemLib::throwExceptionObject(String(
-      "Expected closure instance"
-    ));
+static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
+                          const Object& closure) {
+  auto clos = unsafe_cast<c_Closure>(closure);
+  if (clos->getScope()) {
+    return String(const_cast<StringData*>(clos->getScope()->name()));
   }
-  if (auto scope = Native::data<Closure>(closure.get())->getScope()) {
-    return String(const_cast<StringData*>(scope->name()));
-  }
-  return null_variant;
+  return String();
 }
 
-static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
-                           const Object& closure) {
-  if (!closure->instanceof(Closure::classof())) {
-    SystemLib::throwExceptionObject(String(
-      "Expected closure instance"
-    ));
-  }
-  auto clos = Native::data<Closure>(closure.get());
+static Object HHVM_METHOD(ReflectionFunction, getClosureThisObject,
+                          const Object& closure) {
+  auto clos = unsafe_cast<c_Closure>(closure);
   if (clos->hasThis()) {
     return Object{clos->getThis()};
   }
-  return null_variant;
+  return Object{};
 }
 
 // helper for getStaticVariables

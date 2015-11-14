@@ -216,7 +216,7 @@ void assertTv(const TypedValue* tv) {
 }
 
 int init_closure(ActRec* ar, TypedValue* sp) {
-  Closure* closure = Native::data<Closure>(ar->getThis());
+  c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
 
   // Swap in the $this or late bound class or null if it is ony from a plain
   // function or pseudomain
@@ -234,7 +234,7 @@ int init_closure(ActRec* ar, TypedValue* sp) {
   // and now it is a local, so they cancel out
   TypedValue* firstLocal = --sp;
   firstLocal->m_type = KindOfObject;
-  firstLocal->m_data.pobj = Native::object<Closure>(closure);
+  firstLocal->m_data.pobj = closure;
 
   // Copy in all the use vars
   TypedValue* prop = closure->getUseVars();

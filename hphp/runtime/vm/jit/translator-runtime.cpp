@@ -47,14 +47,14 @@ const StaticString s_staticPrefix("86static_");
 RefData* lookupStaticFromClosure(ObjectData* closure,
                                  StringData* name,
                                  bool& inited) {
-  assertx(closure->instanceof(Closure::classof()));
+  assertx(closure->instanceof(c_Closure::classof()));
   auto str = String::attach(
     StringData::Make(s_staticPrefix.slice(), name->slice())
   );
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assertx(slot != kInvalidSlot);
-  auto const val = Native::data<Closure>(closure)->getStaticVar(slot);
+  auto const val = static_cast<c_Closure*>(closure)->getStaticVar(slot);
 
   if (val->m_type == KindOfUninit) {
     inited = false;

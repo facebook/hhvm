@@ -268,7 +268,7 @@ public:
   void setISODate(int year, int week, int day = 1);
   void setTime(int hour, int minute, int second = 0);
   void setTimezone(req::ptr<TimeZone> tz);
-  void modify(const String& diff); // PHP's date_modify() function, muy powerful
+  bool modify(const String& diff); // PHP's date_modify() function, muy powerful
   void add(const req::ptr<DateInterval>& interval);
   void sub(const req::ptr<DateInterval>& interval);
 

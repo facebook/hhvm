@@ -113,7 +113,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function modify(string $modify): DateTime;
+  function modify(string $modify): mixed;
 
   /**
    * Resets the current date of the DateTime object to a different date.

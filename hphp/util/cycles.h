@@ -39,6 +39,12 @@ inline uint64_t cpuCycles() {
   uint64_t tb;
   asm volatile("mfspr %0, 268" : "=r" (tb));
   return tb;
+#elif __aarch64__
+  // TODO(CDE): Best approach for AArch64 is to use the perf library as
+  //            the setup must be done by a priviledged user, i.e. in the
+  //            kernel. For now, just return zero effectively breaking
+  //            profiling.
+  return 0;
 #elif _MSC_VER
   return (uint64_t)__rdtsc();
 #else

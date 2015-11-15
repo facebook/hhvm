@@ -436,8 +436,9 @@ static inline std::string pgoRegionSelectorDefault() {
 }
 
 static inline bool evalJitDefault() {
-// Disable JIT for PPC64 - Port under development
-#if defined(__CYGWIN__) || defined(_MSC_VER) || defined(__powerpc64__)
+// Disable JIT for PPC64 and AArch64- Port under development
+#if defined(__CYGWIN__) || defined(_MSC_VER) || \
+    defined(__powerpc64__) || defined(__aarch64__)
   return false;
 #else
   return true;

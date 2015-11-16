@@ -482,6 +482,41 @@ class ReflectionParameter implements Reflector {
     return $this->getTypeText() === 'callable';
   }
 
+  /**
+   * ( excerpt from
+   * http://docs.hhvm.com/manual/en/reflectionparameter.hastype.php )
+   *
+   * Checks if the parameter has a type associated with it.
+   *
+   * @return     bool   TRUE if a type is specified, FALSE otherwise.
+   */
+  public function hasType(): bool {
+    return $this->info['type_hint'] !== '';
+  }
+
+  /**
+   * ( excerpt from
+   * http://docs.hhvm.com/manual/en/reflectionparameter.gettype.php )
+   *
+   * Gets the associated type of a parameter.
+   *
+   * @return     ?ReflectionType   Returns a ReflectionType object if a
+   *                               parameter type is specified, NULL otherwise.
+   */
+  public function getType(): ?ReflectionType {
+    if ($this->hasType()) {
+      return new ReflectionType(
+        $this,
+        array(
+          'name' => $this->info['type_hint'],
+          'nullable' => $this->info['type_hint_nullable'],
+          'builtin' => $this->info['type_hint_builtin'],
+        )
+      );
+    }
+    return null;
+  }
+
   private static function collectAttributes(&$attrs, $class, $function_name,
                                             $index) {
     if ($class->hasMethod($function_name)) {
@@ -1069,6 +1104,83 @@ class ReflectionExtension implements Reflector {
   public function info() {
     return $this->info['info'];
   }
+}
+
+/**
+ * ( excerpt from http://docs.hhvm.com/manual/en/class.reflectiontype.php )
+ *
+ * The ReflectionType class reports information about a function's parameters
+ * or return type.
+ *
+ */
+class ReflectionType {
+  private $type_hint_info;
+  public function __construct(?Reflector $param_or_ret = null,
+                              array $type_hint_info = array()) {
+    // PHP7 actually allows you to call this constructor from user code
+    // successfully, even though it is really meant to only be called from
+    // ReflectionParameter::getType() and
+    // ReflectionFunctionAbstract::getReturnType(). And if you do call it from
+    // user code, it will construct successfully, but you will fail on the
+    // *first* method call to the instantiated object.
+    // Let's assume that is not going to be an issue in the real world, and
+    // make it a simple check and throw instead. If we really need that
+    // functionality, we can do something like this instead:
+    // https://phabricator.fb.com/P20754288
+    if (!($param_or_ret instanceof ReflectionParameter ||
+          $param_or_ret instanceof ReflectionFunctionAbstract)) {
+      $msg = 'ReflectionType::__construct(): Internal error: Failed to '
+           . 'retrieve the reflection object';
+      trigger_error($msg, E_ERROR);
+    }
+    $this->type_hint_info = $type_hint_info;
+  }
+
+  /**
+   * ( excerpt from http://php.net/manual/en/reflectiontype.allowsnull.php )
+   *
+   * Checks if null is allowed
+   *
+   * @return - true if null is allowed for the parameter or return type; false
+   *           otherwise.
+   *
+   */
+  public function allowsNull(): bool {
+    return idx($this->type_hint_info, 'nullable', false);
+  }
+
+  /**
+   * ( excerpt from http://php.net/manual/en/reflectiontype.isbuiltin.php )
+   *
+   * Checks if the type is a builtin in type (e.g., int)
+   *
+   * @return - true if the type is a builtin type; false otherwise.
+   *
+   */
+  public function isBuiltin(): bool {
+    return idx($this->type_hint_info, 'builtin', false);
+  }
+
+  /**
+   * ( excerpt from http://php.net/manual/en/reflectiontype.tostring.php )
+   *
+   * Gets the parameter type name
+   *
+   * @return - a string representing the type name, if it exists; otherwise,
+   *           the empty string.
+   *
+   */
+  public function __toString(): string {
+    return idx($this->type_hint_info, 'name', '');
+  }
+
+  // Prevent cloning
+  final public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ReflectionType'
+    );
+  }
+
 }
 
 namespace HH {

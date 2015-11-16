@@ -103,10 +103,12 @@ const StaticString
   s_varg("varg"),
   s___invoke("__invoke"),
   s_return_type("return_type"),
-  s_type_hint("type_hint"),
   s_accessible("accessible"),
   s_reflectionexception("ReflectionException"),
-  s_reflectionextension("ReflectionExtension");
+  s_reflectionextension("ReflectionExtension"),
+  s_type_hint("type_hint"),
+  s_type_hint_builtin("type_hint_builtin"),
+  s_type_hint_nullable("type_hint_nullable");
 
 Class* get_cls(const Variant& class_or_object) {
   Class* cls = nullptr;
@@ -678,6 +680,18 @@ static Array get_function_param_info(const Func* func) {
     const StringData* typeHint = fpi.userType ?
       fpi.userType : staticEmptyString();
     param.set(s_type_hint, VarNR(typeHint));
+    // callable typehint considered builtin; stdclass typehint is not
+    if (
+      fpi.typeConstraint.isCallable() ||
+      (fpi.typeConstraint.underlyingDataType() &&
+       fpi.typeConstraint.underlyingDataType() != KindOfClass &&
+       fpi.typeConstraint.underlyingDataType() != KindOfObject
+      )
+    ) {
+      param.set(s_type_hint_builtin, true_varNR);
+    } else {
+      param.set(s_type_hint_builtin, false_varNR);
+    }
     param.set(s_function, VarNR(func->name()));
     if (func->preClass()) {
       param.set(
@@ -688,6 +702,9 @@ static Array get_function_param_info(const Func* func) {
     }
     if (!nonExtendedConstraint || fpi.typeConstraint.isNullable()) {
       param.set(s_nullable, true_varNR);
+      param.set(s_type_hint_nullable, true_varNR);
+    } else {
+      param.set(s_type_hint_nullable, false_varNR);
     }
 
     if (fpi.phpCode) {
@@ -767,6 +784,37 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getReturnTypeHint) {
     return String(ret);
   }
   return String();
+}
+
+static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
+  Array retTypeInfo = Array::Create();
+  auto name = HHVM_MN(ReflectionFunctionAbstract, getReturnTypeHint)(this_);
+  if (name && !name.empty()) {
+    auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+    auto retType = func->returnTypeConstraint();
+    if (retType.isNullable()) {
+      retTypeInfo.set(s_type_hint_nullable, true_varNR);
+    } else {
+      retTypeInfo.set(s_type_hint_nullable, false_varNR);
+    }
+    if (
+      retType.isCallable() || // callable type hint is considered builtin
+      (retType.underlyingDataType() &&
+       retType.underlyingDataType() != KindOfClass && // stdclass is not
+       retType.underlyingDataType() != KindOfObject
+      )
+    ) {
+      retTypeInfo.set(s_type_hint_builtin, true_varNR);
+    } else {
+      retTypeInfo.set(s_type_hint_builtin, false_varNR);
+    }
+  } else {
+    name = staticEmptyString();
+    retTypeInfo.set(s_type_hint_nullable, false_varNR);
+    retTypeInfo.set(s_type_hint_builtin, false_varNR);
+  }
+  retTypeInfo.set(s_type_hint, name);
+  return retTypeInfo;
 }
 
 ALWAYS_INLINE
@@ -1780,6 +1828,7 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionFunctionAbstract, getNumberOfParameters);
     HHVM_ME(ReflectionFunctionAbstract, getParamInfo);
     HHVM_ME(ReflectionFunctionAbstract, getAttributes);
+    HHVM_ME(ReflectionFunctionAbstract, getRetTypeInfo);
 
     HHVM_ME(ReflectionMethod, __init);
     HHVM_ME(ReflectionMethod, isFinal);

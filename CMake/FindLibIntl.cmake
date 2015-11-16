@@ -91,26 +91,25 @@
 #=============================================================================
 
 # Find include directory
-find_path(Intl_INCLUDE_DIR
+find_path(LIBINTL_INCLUDE_DIR
           NAMES "libintl.h"
           DOC "libintl include directory")
-mark_as_advanced(Intl_INCLUDE_DIR)
+mark_as_advanced(LIBINTL_INCLUDE_DIR)
 
 # Find all Intl libraries
-find_library(Intl_LIBRARY "intl"
+find_library(LIBINTL_LIBRARY "intl"
   DOC "libintl libraries (if not in the C library)")
-mark_as_advanced(Intl_LIBRARY)
+mark_as_advanced(LIBINTL_LIBRARY)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Intl
-                                  FOUND_VAR Intl_FOUND
-                                  REQUIRED_VARS Intl_INCLUDE_DIR
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBINTL
+                                  REQUIRED_VARS LIBINTL_INCLUDE_DIR
                                   FAIL_MESSAGE "Failed to find Gettext libintl")
 
-if(Intl_FOUND)
-  set(Intl_INCLUDE_DIRS "${Intl_INCLUDE_DIR}")
-  if(Intl_LIBRARY)
-    set(Intl_LIBRARIES "${Intl_LIBRARY}")
+if(LIBINTL_FOUND)
+  set(LIBINTL_INCLUDE_DIRS "${LIBINTL_INCLUDE_DIR}")
+  if(LIBINTL_LIBRARY)
+    set(LIBINTL_LIBRARIES "${LIBINTL_LIBRARY}")
   else()
-    unset(Intl_LIBRARIES)
+    unset(LIBINTL_LIBRARIES)
   endif()
 endif()

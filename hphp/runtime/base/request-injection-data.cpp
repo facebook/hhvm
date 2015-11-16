@@ -40,6 +40,10 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+void RequestTimer::onTimeout() {
+  m_reqInjectionData->onTimeout(this);
+}
+
 #if defined(__APPLE__)
 
 RequestTimer::RequestTimer(RequestInjectionData* data)
@@ -115,11 +119,6 @@ void RequestTimer::setTimeout(int seconds) {
   dispatch_resume(m_timerSource);
 }
 
-
-void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
-}
-
 int RequestTimer::getRemainingTime() const {
   // Unfortunately, not a good way to detect this. The best we can say is if the
   // timer exists and fired and cancelled itself, we can clip to 0, otherwise
@@ -138,18 +137,43 @@ int RequestTimer::getRemainingTime() const {
 RequestTimer::RequestTimer(RequestInjectionData* data)
     : m_reqInjectionData(data)
     , m_timeoutSeconds(0)
+    , m_tce(nullptr)
 {}
 
 RequestTimer::~RequestTimer() {
+  if (m_tce) {
+    m_tce->set();
+    m_tce = nullptr;
+  }
 }
 
 void RequestTimer::setTimeout(int seconds) {
   m_timeoutSeconds = seconds > 0 ? seconds : 0;
-}
 
+  if (m_tce) {
+    m_tce->set();
+    m_tce = nullptr;
+  }
 
-void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
+  if (m_timeoutSeconds) {
+    auto call = new concurrency::call<int>([this](int) {
+      this->onTimeout();
+      m_tce->set();
+      m_tce = nullptr;
+    });
+
+    auto timer = new concurrency::timer<int>(m_timeoutSeconds * 1000,
+                                             0, call, false);
+
+    concurrency::task<void> event_set(*m_tce);
+    event_set.then([call, timer]() {
+      timer->pause();
+      delete call;
+      delete timer;
+    });
+
+    timer->start();
+  }
 }
 
 int RequestTimer::getRemainingTime() const {
@@ -222,10 +246,6 @@ void RequestTimer::setTimeout(int seconds) {
   } else {
     m_timerActive.store(false, std::memory_order_relaxed);
   }
-}
-
-void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
 }
 
 int RequestTimer::getRemainingTime() const {

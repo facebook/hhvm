@@ -58,12 +58,12 @@ namespace HPHP {
 #define ALIGN_RIGHT 1
 #define ADJ_WIDTH 1
 #define ADJ_PRECISION 2
-#define NUM_BUF_SIZE 500
+#define NUM_BUF_SIZE 2048
 #define NDIG 320
 #define FLOAT_DIGITS 6
 #define FLOAT_PRECISION 6
 #define MAX_FLOAT_DIGITS 38
-#define MAX_FLOAT_PRECISION 40
+#define MAX_FLOAT_PRECISION 53
 #define EXPONENT_LENGTH 10
 
 static char hexchars[] = "0123456789abcdef";
@@ -76,7 +76,8 @@ typedef enum {
   LM_LONG_LONG,
   LM_SIZE_T,
   LM_LONG,
-  LM_LONG_DOUBLE
+  LM_LONG_DOUBLE,
+  LM_PHP_INT_T
 } length_modifier_e;
 
 typedef enum {
@@ -1108,10 +1109,6 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
 
         /*
          * Check if a precision was specified
-         *
-         * XXX: an unreasonable amount of precision may be specified
-         * resulting in overflow of num_buf. Currently we
-         * ignore this possibility.
          */
         if (*fmt == '.') {
           adjust_precision = YES;
@@ -1125,6 +1122,10 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
               precision = 0;
           } else
             precision = 0;
+
+          if (precision > FORMAT_CONV_MAX_PRECISION) {
+            precision = FORMAT_CONV_MAX_PRECISION;
+          }
         } else
           adjust_precision = NO;
       } else
@@ -1187,6 +1188,16 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
           modifier = LM_SIZE_T;
 #endif
           break;
+        case 'p': {
+            char __next = *(fmt+1);
+            if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
+              fmt++;
+              modifier = LM_PHP_INT_T;
+            } else {
+              modifier = LM_STD;
+            }
+          }
+          break;
         case 'h':
           fmt++;
           if (*fmt == 'h') {
@@ -1238,6 +1249,9 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
               i_num = (wide_int) va_arg(ap, ptrdiff_t);
               break;
 #endif
+            case LM_PHP_INT_T:
+              i_num = (wide_int) va_arg(ap, u_wide_int);
+              break;
           }
           /*
            * The rest also applies to other integer formats, so fall
@@ -1280,6 +1294,9 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
                 i_num = (wide_int) va_arg(ap, ptrdiff_t);
                 break;
 #endif
+              case LM_PHP_INT_T:
+                i_num = (wide_int) va_arg(ap, wide_int);
+                break;
             }
           }
           s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -1325,6 +1342,9 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
               ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
               break;
 #endif
+            case LM_PHP_INT_T:
+              ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+              break;
           }
           s = ap_php_conv_p2(ui_num, 3, *fmt,
                 &num_buf[NUM_BUF_SIZE], &s_len);
@@ -1365,6 +1385,9 @@ static int xbuf_format_converter(char **outbuf, const char *fmt, va_list ap)
               ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
               break;
 #endif
+            case LM_PHP_INT_T:
+              ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+              break;
           }
           s = ap_php_conv_p2(ui_num, 4, *fmt,
                 &num_buf[NUM_BUF_SIZE], &s_len);

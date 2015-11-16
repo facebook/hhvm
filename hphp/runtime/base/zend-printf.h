@@ -21,6 +21,8 @@
 #include <sys/types.h>
 #include <stdarg.h>
 
+#define FORMAT_CONV_MAX_PRECISION 500
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

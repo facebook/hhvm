@@ -11,7 +11,7 @@ $fb = new FooBar();
 
 $r1 = 0;
 $st = microtime(true);
-for ($i = 0; $i < 100000; $i++) {
+for ($i = 0; $i < 1000; $i++) {
   $x = $a->bindTo($fb, "FooBar");
   $r1 += $x(4);
 }
@@ -21,7 +21,7 @@ var_dump($end - $st);
 
 $r2 = 0;
 $st = microtime(true);
-for ($i = 0; $i < 100000; $i++) {
+for ($i = 0; $i < 1000; $i++) {
   $r2 += $a->call($fb, 4);
 }
 $end = microtime(true);

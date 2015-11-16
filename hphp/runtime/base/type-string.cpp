@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -127,7 +128,7 @@ String::String(int64_t n) : m_str(buildString(n)) { }
 
 void formatPhpDblStr(char **pbuf, double n) {
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
-  vspprintf(pbuf, 0, "%.*G", 14, n);
+  vspprintf(pbuf, 0, "%.*G", RuntimeOption::Precision, n);
 }
 
 StringData* buildStringData(double n) {

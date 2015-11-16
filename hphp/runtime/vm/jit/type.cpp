@@ -109,6 +109,9 @@ std::string Type::constValString() const {
   if (*this <= TRDSHandle) {
     return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   }
+  if (*this <= TPtrToGen) {
+    return folly::sformat("TV: {}", m_ptrVal);
+  }
 
   always_assert_flog(false, "Bad type in constValString(): {:#16x}:{:#16x}",
                      m_raw, m_extra);

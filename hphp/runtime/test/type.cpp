@@ -124,6 +124,10 @@ TEST(Type, ToString) {
   EXPECT_EQ("{Func|ABC}", (TABC | TFunc).toString());
 
   EXPECT_EQ("InitNull", TInitNull.constValString());
+
+  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMembInitNull);
+  EXPECT_EQ("PtrToMembInitNull<TV: 0xba5eba11>", ptrCns.toString());
+  EXPECT_EQ("TV: 0xba5eba11", ptrCns.constValString());
 }
 
 TEST(Type, Boxes) {

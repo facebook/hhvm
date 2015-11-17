@@ -241,6 +241,7 @@ const int CURL_TIMECOND_IFUNMODSINCE = 0;
 const int CURL_TIMECOND_LASTMOD = 0;
 
 function curl_init($url = null);
+function curl_multi_strerror($errornum);
 function curl_copy_handle($ch);
 function curl_version($uversion = CURLVERSION_NOW);
 function curl_setopt($ch, $option, $value);

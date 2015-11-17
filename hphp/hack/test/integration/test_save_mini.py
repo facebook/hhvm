@@ -6,6 +6,7 @@ import common_tests
 import os
 import stat
 import subprocess
+import time
 import unittest
 
 from hh_paths import hh_server, hh_client
@@ -110,6 +111,10 @@ echo %s
 assume_php = true
 load_mini_script = %s
 """ % os.path.join(self.repo_dir, 'server_options.sh'))
+
+        # Server may take some time to kill itself.
+        # TODO: Speed up monitor's reaction time to the typechecker dying.
+        time.sleep(2)
 
         # this should start a new server
         self.check_cmd(['No errors!'])

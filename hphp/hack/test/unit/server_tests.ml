@@ -15,7 +15,7 @@ let test_dmesg_parser () =
     "[3034339.262439] Out of memory: Kill process 2758734 (hh_server) \
     score 253 or sacrifice child";
   ] in
-  ServerMonitor.find_oom_in_dmesg_output 2758734 input
+  ServerProcessTools.find_oom_in_dmesg_output 2758734 input
 
 
 let tests = [

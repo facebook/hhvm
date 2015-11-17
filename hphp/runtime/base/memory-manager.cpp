@@ -778,8 +778,8 @@ void MemoryManager::checkHeap(const char* phase) {
   assert(apc_strings.empty());
 
   // heap check is done. If we are not exiting, check pointers using HeapGraph
+  auto g = makeHeapGraph(); // several useful assertions, even w/out heapreport
   if (Trace::moduleEnabled(Trace::heapreport)) {
-    auto g = makeHeapGraph();
     if (!exiting()) checkPointers(g, phase);
     if (Trace::moduleEnabled(Trace::heapreport, 2)) {
       printHeapReport(g, phase);
@@ -796,7 +796,9 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
     refreshStats();
   }
   storeTail(m_front, (char*)m_limit - (char*)m_front);
-  if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap("MM::newSlab");
+  if (debug && RuntimeOption::EvalCheckHeapOnAlloc && !g_context.isNull()) {
+    setSurpriseFlag(PendingGCFlag); // defer heap check until safepoint
+  }
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
   m_stats.borrow(slab.size);

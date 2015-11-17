@@ -177,17 +177,8 @@ inline DEBUG_ONLY HeaderKind kind(const void* p) {
 void Marker::operator()(const ObjectData* p) {
   if (!p) return;
   assert(isObjectKind(p->headerKind()));
-  if (p->getAttribute(ObjectData::HasNativeData)) {
-    // HNI style native object; mark the NativeNode header, queue the object.
-    // [NativeNode][NativeData][ObjectData][props] is one allocation.
-    // For generators -
-    // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
-    auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
-    assert(h->hdr.kind == HK::NativeData);
-    if (mark(h)) {
-      enqueue(p);
-    }
-  } else if (p->headerKind() == HK::ResumableObj) {
+  auto kind = p->headerKind();
+  if (kind == HK::ResumableObj) {
     // Resumable object, prefixed by a ResumableNode header, which is what
     // we need to mark.
     // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
@@ -198,6 +189,18 @@ void Marker::operator()(const ObjectData* p) {
     assert(node->hdr.kind == HK::ResumableFrame);
     if (mark(node)) {
       // mark the ResumableFrame prefix, but enqueue the ObjectData* to scan
+      enqueue(p);
+    }
+    assert(!p->getVMClass()->getNativeDataInfo());
+  } else if (kind != HeaderKind::WaitHandle &&
+             p->getAttribute(ObjectData::HasNativeData)) {
+    // HNI style native object; mark the NativeNode header, queue the object.
+    // [NativeNode][NativeData][ObjectData][props] is one allocation.
+    // For generators -
+    // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
+    auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
+    assert(h->hdr.kind == HK::NativeData);
+    if (mark(h)) {
       enqueue(p);
     }
   } else {
@@ -327,8 +330,6 @@ Marker::operator()(const void* start, size_t len) {
         enqueue(h);
         break;
       case HK::Object:
-      case HK::WaitHandle:
-      case HK::AwaitAllWH:
       case HK::Vector:
       case HK::Map:
       case HK::Set:
@@ -338,7 +339,13 @@ Marker::operator()(const void* start, size_t len) {
       case HK::ImmSet:
         // Object kinds. None of these should have native-data, because if they
         // do, the mapped header should be for the NativeData prefix.
-        assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
+        assert(!h->obj_.getAttribute(ObjectData::HasNativeData) ||
+               h->kind() == HeaderKind::WaitHandle);
+        enqueue(h);
+        break;
+      case HK::WaitHandle:
+      case HK::AwaitAllWH:
+        // HNI objects w/o NativeData prefix
         enqueue(h);
         break;
       case HK::ResumableFrame:
@@ -399,7 +406,6 @@ void Marker::init() {
         total_ += h->size();
         break;
       case HK::Object:
-      case HK::WaitHandle:
       case HK::Vector:
       case HK::Map:
       case HK::Set:
@@ -407,7 +413,6 @@ void Marker::init() {
       case HK::ImmVector:
       case HK::ImmMap:
       case HK::ImmSet:
-      case HK::AwaitAllWH:
         // count==0 can be witnessed, see above
         total_ += h->size();
         if (!h->obj_.getAttribute(ObjectData::HasNativeData)) {
@@ -417,6 +422,13 @@ void Marker::init() {
           // because they should be prefixed by a NativeData allocation.
           assert(false && "object with native-data from forEachHeader()");
         }
+        break;
+      case HK::AwaitAllWH:
+      case HK::WaitHandle:
+        // like Object with HasNativeData, but with cpp data off the end
+        // instead of the NativeData prefix.
+        total_ += h->size();
+        ptrs_.insert(h);
         break;
       case HK::ResumableFrame: {
         // Pointers to either the frame or the object will be mapped to the
@@ -491,7 +503,9 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
     case HK::ImmSet:
     case HK::AwaitAllWH:
       // objects; should not have native-data
-      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
+      assert(!h->obj_.getAttribute(ObjectData::HasNativeData) ||
+             h->kind() == HeaderKind::WaitHandle ||
+             h->kind() == HeaderKind::AwaitAllWH);
       break;
     case HK::ResumableFrame:
     case HK::NativeData:

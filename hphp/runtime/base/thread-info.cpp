@@ -228,7 +228,11 @@ size_t check_request_surprise() {
   }
   if (do_GC) {
     VMRegAnchor _;
-    MM().collect("surprise");
+    if (RuntimeOption::EvalEnableGC) {
+      MM().collect("surprise");
+    } else {
+      MM().checkHeap("surprise");
+    }
   }
   if (do_signaled) {
     HHVM_FN(pcntl_signal_dispatch)();

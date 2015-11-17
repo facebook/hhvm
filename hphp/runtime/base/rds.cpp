@@ -413,12 +413,12 @@ Array& s_constants() {
 
 size_t allocBit() {
   Guard g(s_allocMutex);
-  if (!s_bits_to_go) {
-    static const int kNumBytes = 512;
+  if (s_bits_to_go == 0) {
+    static const int kNumBytes = 8;
     static const int kNumBytesMask = kNumBytes - 1;
     s_next_bit = s_normal_frontier * CHAR_BIT;
-    // allocate at least kNumBytes bytes, and make sure we end
-    // on a 64 byte aligned boundary.
+    // allocate at least kNumBytes bytes, and make sure we end on a kNumBytes
+    // aligned boundary.
     int bytes = ((~s_normal_frontier + 1) & kNumBytesMask) + kNumBytes;
     s_bits_to_go = bytes * CHAR_BIT;
     s_normal_frontier += bytes;

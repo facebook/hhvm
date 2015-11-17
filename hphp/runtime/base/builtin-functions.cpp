@@ -120,7 +120,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     return ret;
   }
 
-  if (tv_func->m_type == KindOfArray) {
+  if (isArrayType(tv_func->m_type)) {
     const Array& arr = Array(tv_func->m_data.parr);
     const Variant& clsname = arr.rvalAtRef(int64_t(0));
     const Variant& mthname = arr.rvalAtRef(int64_t(1));

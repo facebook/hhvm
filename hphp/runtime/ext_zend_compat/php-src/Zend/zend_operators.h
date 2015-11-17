@@ -493,6 +493,7 @@ public:
     }
     m_tv->m_data.parr->decRefCount();
     m_tv->m_data.parr = ad;
+    m_tv->m_type = KindOfArray;
   }
   /* implicit */ operator HashTable*() {
     cowCheck();
@@ -513,6 +514,7 @@ public:
   }
   ZArrVal& operator=(HashTable* a) {
     m_tv->m_data.parr = a;
+	m_tv->m_type = KindOfArray;
     return *this;
   }
 private:

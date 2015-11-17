@@ -386,6 +386,7 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfDouble:        return isHHType ? "float" : "double";
     case KindOfStaticString:
     case KindOfString:        return "string";
+    case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfObject:        return tv->m_data.pobj->getClassName().c_str();
     case KindOfResource:

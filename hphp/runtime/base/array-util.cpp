@@ -476,7 +476,7 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
   while (miter->advance()) {
     k = miter->key();
     v.assignRef(miter->val());
-    if (recursive && v.is(KindOfArray)) {
+    if (recursive && v.isArray()) {
       assert(seen);
       ArrayData *arr = v.getArrayData();
 

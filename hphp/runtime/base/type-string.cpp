@@ -566,6 +566,7 @@ StaticString getDataTypeString(DataType t) {
     case KindOfDouble:     return s_double;
     case KindOfStaticString:
     case KindOfString:     return s_string;
+    case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;

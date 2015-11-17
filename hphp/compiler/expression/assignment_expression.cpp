@@ -167,7 +167,7 @@ bool AssignmentExpression::isSimpleGlobalAssign(StringData **name,
   auto ae = static_pointer_cast<ArrayElementExpression>(m_variable);
   if (!ae->isSuperGlobal() || ae->isDynamicGlobal()) return false;
   Variant v;
-  if (!m_value->getScalarValue(v) || v.is(KindOfArray)) return false;
+  if (!m_value->getScalarValue(v) || v.isArray()) return false;
   if (name) {
     *name = makeStaticString(ae->getGlobalName());
   }

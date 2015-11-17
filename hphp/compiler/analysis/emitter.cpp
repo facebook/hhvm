@@ -4585,6 +4585,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
+      case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -5735,6 +5736,7 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
           switch (*t) {
             case KindOfStaticString:
             case KindOfString:
+            case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
             case KindOfResource:
@@ -5778,6 +5780,8 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
       e.String(nValue);
       return;
     }
+
+    case KindOfPersistentArray:
     case KindOfArray:
       e.Array(v.getArrayData());
       return;
@@ -7419,7 +7423,7 @@ void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
   TypedValue tvProp;
   if (useSharedProp ||
       (meth->getParams() && meth->getParams()->getCount() > 0)) {
-    tvProp = make_tv<KindOfArray>(staticEmptyArray());
+    tvProp = make_tv<KindOfPersistentArray>(staticEmptyArray());
   } else {
     tvWriteNull(&tvProp);
   }
@@ -9079,7 +9083,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
     m_staticArrays.push_back(Array::attach(MixedArray::MakeReserve(0)));
     m_staticColType.push_back(ct);
     visit(el);
-    tvVal = make_tv<KindOfArray>(
+    tvVal = make_tv<KindOfPersistentArray>(
       ArrayData::GetScalarArray(m_staticArrays.back().get())
     );
     m_staticArrays.pop_back();

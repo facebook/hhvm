@@ -93,11 +93,14 @@ APCHandle* APCArray::MakeUncountedArray(ArrayData* array) {
   assert(apcExtension::UseUncounted);
   APCTypedValue* value;
   if (array->isPacked()) {
-    value = new APCTypedValue(MixedArray::MakeUncountedPacked(array));
+    value = new APCTypedValue(APCTypedValue::UncountedArr{},
+                              MixedArray::MakeUncountedPacked(array));
   } else if (array->isStruct()) {
-    value = new APCTypedValue(StructArray::MakeUncounted(array));
+    value = new APCTypedValue(APCTypedValue::UncountedArr{},
+                              StructArray::MakeUncounted(array));
   } else {
-    value = new APCTypedValue(MixedArray::MakeUncounted(array));
+    value = new APCTypedValue(APCTypedValue::UncountedArr{},
+                              MixedArray::MakeUncounted(array));
   }
   return value->getHandle();
 }
@@ -127,7 +130,8 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {
 
 Variant APCArray::MakeLocalArray(const APCHandle* handle) {
   if (handle->isUncounted()) {
-    return Variant{APCTypedValue::fromHandle(handle)->getArrayData()};
+    return Variant{APCTypedValue::fromHandle(handle)->getArrayData(),
+                   Variant::PersistentArrInit{}};
   } else if (handle->isSerializedArray()) {
     auto const serArr = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serArr->data(), serArr->size());

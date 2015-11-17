@@ -282,7 +282,7 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
   DataType type = tv.m_type;
-  if (type == KindOfArray || type == KindOfObject || type == KindOfResource) {
+  if (isArrayType(type) || type == KindOfObject || type == KindOfResource) {
     coerceCellFail(KindOfBoolean, type, argNum, func);
     not_reached();
   }
@@ -316,6 +316,7 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -355,6 +356,7 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -383,6 +385,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
                               /* fallthrough */
     case KindOfStaticString:
                               return tv.m_data.pstr;
+    case KindOfPersistentArray:
     case KindOfArray:         raise_notice("Array to string conversion");
                               return array_string.get();
     case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
@@ -652,6 +655,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfBoolean:
       case KindOfStaticString:
       case KindOfString:
+      case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:

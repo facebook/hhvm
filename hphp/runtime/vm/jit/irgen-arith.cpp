@@ -798,8 +798,7 @@ void implCmp(IRGS& env, Op op) {
   // constants. Otherwise, switch on the type of the left operand to emit the
   // right kind of comparison.
   if ((op == Op::Same || op == Op::NSame) &&
-      leftTy.toDataType() != rightTy.toDataType() &&
-      !(leftTy <= TStr && rightTy <= TStr)) {
+      !equivDataTypes(leftTy.toDataType(), rightTy.toDataType())) {
     push(env, emitConstCmp(env, op, false, true));
   } else if (leftTy <= TNull) implNullCmp(env, op, left, right);
   else if (leftTy <= TBool) implBoolCmp(env, op, left, right);

@@ -721,6 +721,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfDouble:
   case KindOfStaticString:
   case KindOfString:
+  case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:
   case KindOfResource:
@@ -761,6 +762,7 @@ static std::string toStringElm(const TypedValue* tv) {
            << "\"" << (truncated ? "..." : "");
       }
       continue;
+    case KindOfPersistentArray:
     case KindOfArray:
       assert(tv->m_data.parr->checkCount());
       os << tv->m_data.parr;
@@ -1704,7 +1706,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
     stack.pushArrayNoRc(argArray.detach());
   } else {
     if (nregular == 0
-        && args.m_type == KindOfArray
+        && isArrayType(args.m_type)
         && args.m_data.parr->isVectorData()) {
       assert(stack.top() == (void*) ar);
       stack.pushStringNoRc(invName);
@@ -1868,7 +1870,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     assert(hasVarParam);
     if (nparams == 0
         && nextra_regular == 0
-        && args.m_type == KindOfArray
+        && isArrayType(args.m_type)
         && args.m_data.parr->isVectorData()) {
       stack.pushArray(args.m_data.parr);
     } else {
@@ -3603,7 +3605,7 @@ OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
   ArrayData* arr;
   TypedValue* fr = frame_local(vmfp(), local);
 
-  if (LIKELY(fr->m_type == KindOfArray)) {
+  if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
   } else {
     capacity = (capacity ? capacity : MixedArray::SmallSize);
@@ -3652,7 +3654,7 @@ OPTBLD_INLINE void iopAddElemC(IOP_ARGS) {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (c3->m_type != KindOfArray) {
+  if (!isArrayType(c3->m_type)) {
     raise_error("AddElemC: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
@@ -3668,7 +3670,7 @@ OPTBLD_INLINE void iopAddElemV(IOP_ARGS) {
   Ref* r1 = vmStack().topV();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (c3->m_type != KindOfArray) {
+  if (!isArrayType(c3->m_type)) {
     raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
@@ -3683,7 +3685,7 @@ OPTBLD_INLINE void iopAddElemV(IOP_ARGS) {
 OPTBLD_INLINE void iopAddNewElemC(IOP_ARGS) {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
-  if (c2->m_type != KindOfArray) {
+  if (!isArrayType(c2->m_type)) {
     raise_error("AddNewElemC: $2 must be an array");
   }
   cellAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
@@ -3693,7 +3695,7 @@ OPTBLD_INLINE void iopAddNewElemC(IOP_ARGS) {
 OPTBLD_INLINE void iopAddNewElemV(IOP_ARGS) {
   Ref* r1 = vmStack().topV();
   Cell* c2 = vmStack().indC(1);
-  if (c2->m_type != KindOfArray) {
+  if (!isArrayType(c2->m_type)) {
     raise_error("AddNewElemV: $2 must be an array");
   }
   cellAsVariant(*c2).asArrRef().appendRef(tvAsVariant(r1));
@@ -4057,6 +4059,7 @@ OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
       cls = Unit::lookupClass(ne);
       return cls && interface_supports_string(cls->name());
 
+    case KindOfPersistentArray:
     case KindOfArray:
       cls = Unit::lookupClass(ne);
       return cls && interface_supports_array(cls->name());
@@ -4314,6 +4317,7 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
             case KindOfBoolean:
             case KindOfStaticString:
             case KindOfString:
+            case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
             case KindOfResource:
@@ -4326,8 +4330,9 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
         }
 
         case KindOfArray:
-          match = SwitchMatch::DEFAULT;
           tvDecRef(val);
+        case KindOfPersistentArray:
+          match = SwitchMatch::DEFAULT;
           return;
 
         case KindOfObject:
@@ -5986,8 +5991,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
     return;
   }
 
-  if ((c1->m_type == KindOfArray) ||
-      isStringType(c1->m_type)) {
+  if (isArrayType(c1->m_type) || isStringType(c1->m_type)) {
     // support:
     //   array($instance, 'method')
     //   array('Class', 'method'),
@@ -6009,7 +6013,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
       /* warn */ false
     );
     if (func == nullptr) {
-      if (origCell.m_type == KindOfArray) {
+      if (isArrayType(origCell.m_type)) {
         raise_error("Invalid callable (array)");
       } else {
         assert(isStringType(origCell.m_type));
@@ -6034,8 +6038,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
     }
     if (origCell.m_type == KindOfArray) {
       decRefArr(origCell.m_data.parr);
-    } else {
-      assert(isStringType(origCell.m_type));
+    } else if (origCell.m_type == KindOfString) {
       decRefStr(origCell.m_data.pstr);
     }
     return;
@@ -6641,7 +6644,7 @@ OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
     if (func->hasVariadicCaptureParam()) {
       assertx(numArgs > 0);
-      assertx(args[1-numArgs].m_type == KindOfArray);
+      assertx(isArrayType(args[1-numArgs].m_type));
     }
     Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
   } else {
@@ -6689,7 +6692,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
         Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
-        c1->m_type = KindOfArray;
+        c1->m_type = KindOfPersistentArray;
         c1->m_data.parr = staticEmptyArray();
         tvRefcountedDecRef(&tmp);
         break;
@@ -6838,7 +6841,7 @@ OPTBLD_INLINE void iopWIterInitK(IOP_ARGS) {
 inline bool initIteratorM(Iter* it, Offset offset, Ref* r1,
                           TypedValue *val, TypedValue *key) {
   TypedValue* rtv = r1->m_data.pref->tv();
-  if (rtv->m_type == KindOfArray) {
+  if (isArrayType(rtv->m_type)) {
     return new_miter_array_key(it, r1->m_data.pref, val, key);
   }
   if (rtv->m_type == KindOfObject)  {

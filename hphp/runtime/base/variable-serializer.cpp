@@ -1308,6 +1308,7 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
                         tv->m_data.pstr->size(), isArrayKey, noQuotes);
       return;
 
+    case KindOfPersistentArray:
     case KindOfArray:
       assert(!isArrayKey);
       serializeArray(tv->m_data.parr, serializer, skipNestCheck);
@@ -1575,7 +1576,7 @@ static void serializeObjectImpl(const ObjectData* obj,
     assert(!obj->isCollection());
     if (ret.isArray()) {
       Array wanted = Array::Create();
-      assert(ret.getRawType() == KindOfArray); // can't be KindOfRef
+      assert(isArrayType(ret.getRawType())); // can't be KindOfRef
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
         String memberName = iter.second().toString();

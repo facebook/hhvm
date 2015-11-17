@@ -154,6 +154,7 @@ static bool variantToGMPData(const char* const fnCaller,
 
   case KindOfUninit:
   case KindOfNull:
+  case KindOfPersistentArray:
   case KindOfArray:
   case KindOfRef:
   case KindOfClass:

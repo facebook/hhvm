@@ -47,6 +47,7 @@ static const char *argTypeName(DataType dt) {
     case KindOfDouble:        return "double";
     case KindOfStaticString:
     case KindOfString:        return "string";
+    case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfObject:        return "object";
     case KindOfResource:      return "resource";
@@ -202,8 +203,7 @@ bool parseArgs(ActRec *ar, const char *format, ...) {
       }
 
       case 'A': // KindOfArray || KindOfObject
-        if ((tv->m_type != KindOfArray) &&
-            (tv->m_type != KindOfObject)) {
+        if (!isArrayType(tv->m_type) && tv->m_type != KindOfObject) {
           throw_invalid_argument("Expected array or object, got %s",
                                  argTypeName(tv->m_type));
           return false;

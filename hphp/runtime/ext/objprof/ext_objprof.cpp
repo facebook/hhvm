@@ -175,7 +175,7 @@ std::pair<int, double> sizeOfArray(
       const TypedValue* val;
       std::pair<int, double> key_size_pair;
       switch (key.m_type) {
-        case HPHP::KindOfString: {
+        case KindOfString: {
           StringData* str = key.m_data.pstr;
           val = MixedArray::NvGetStr(props, str);
           if (stack) {
@@ -191,7 +191,7 @@ std::pair<int, double> sizeOfArray(
           str->decRefCount();
           break;
         }
-        case HPHP::KindOfInt64: {
+        case KindOfInt64: {
           int64_t num = key.m_data.num;
           val = MixedArray::NvGetInt(props, num);
           if (stack) {
@@ -264,7 +264,7 @@ void stringsOfArray(
       // Measure val
       const TypedValue* val;
       switch (key.m_type) {
-        case HPHP::KindOfString: {
+        case KindOfString: {
           StringData* str = key.m_data.pstr;
           val = MixedArray::NvGetStr(props, str);
           auto key_str = str->toCppString();
@@ -273,7 +273,7 @@ void stringsOfArray(
           path->push_back(std::string("[\"" + key_str + "\"]"));
           break;
         }
-        case HPHP::KindOfInt64: {
+        case KindOfInt64: {
           int64_t num = key.m_data.num;
           val = MixedArray::NvGetInt(props, num);
           auto key_str = std::to_string(num);
@@ -333,15 +333,16 @@ std::pair<int, double> tvGetSize(
   double sized = size;
 
   switch (tv->m_type) {
-    case HPHP::KindOfUninit:
-    case HPHP::KindOfNull:
-    case HPHP::KindOfBoolean:
-    case HPHP::KindOfInt64:
-    case HPHP::KindOfDouble: {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfClass: {
       // Counted as part sizeof(TypedValue)
       break;
     }
-    case HPHP::KindOfObject: {
+    case KindOfObject: {
       if (stack && paths) {
         ObjectData* obj = tv->m_data.pobj;
         // notice we might have multiple OBJ->path->OBJ for same path
@@ -368,7 +369,8 @@ std::pair<int, double> tvGetSize(
       // This is a shallow size function, not a recursive one
       break;
     }
-    case HPHP::KindOfArray: {
+    case KindOfPersistentArray:
+    case KindOfArray: {
       ArrayData* arr = tv->m_data.parr;
       if (arr->isRefCounted()) {
         auto arr_ref_count = tvGetCount(tv) + ref_adjust;
@@ -395,7 +397,7 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    case HPHP::KindOfResource: {
+    case KindOfResource: {
       auto res_ref_count = tvGetCount(tv) + ref_adjust;
       auto resource = tv->m_data.pres;
       auto resource_size = resource->heapSize();
@@ -405,7 +407,7 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    case HPHP::KindOfRef: {
+    case KindOfRef: {
       RefData* ref = tv->m_data.pref;
       size += sizeof(*ref);
       sized += sizeof(*ref);
@@ -427,8 +429,8 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    case HPHP::KindOfStaticString:
-    case HPHP::KindOfString: {
+    case KindOfStaticString:
+    case KindOfString: {
       StringData* str = tv->m_data.pstr;
       size += str->size();
       if (str->isRefCounted()) {
@@ -448,9 +450,6 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    default:
-      // Not interesting
-      break;
   }
 
   return std::make_pair(size, sized);

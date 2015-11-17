@@ -77,6 +77,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
              op(0, val);
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
 
@@ -121,6 +122,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
              op(0, val);
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
 
@@ -168,6 +170,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
     case KindOfString:
       return op(cell.m_data.pstr, val);
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
 
@@ -215,6 +218,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
     case KindOfString:
       return op(false, true);
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return op(cell.m_data.parr, ad);
 
@@ -266,6 +270,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
       return op(false, true);
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
         return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
 
@@ -306,6 +311,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
       return op(str->toDouble(), rd->o_toDouble());
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
 
@@ -343,6 +349,7 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfDouble:       return cellRelOp(op, c1, c2.m_data.dbl);
   case KindOfStaticString:
   case KindOfString:       return cellRelOp(op, c1, c2.m_data.pstr);
+  case KindOfPersistentArray:
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
   case KindOfResource:     return cellRelOp(op, c1, c2.m_data.pres);
@@ -547,8 +554,9 @@ bool cellSame(Cell c1, Cell c2) {
       if (!isStringType(c2.m_type)) return false;
       return c1.m_data.pstr->same(c2.m_data.pstr);
 
+    case KindOfPersistentArray:
     case KindOfArray:
-      if (c2.m_type != KindOfArray) return false;
+      if (!isArrayType(c2.m_type)) return false;
       return c1.m_data.parr->equal(c2.m_data.parr, true);
 
     case KindOfObject:
@@ -740,7 +748,7 @@ bool cellLessOrEqual(Cell c1, Cell c2) {
   assert(cellIsPlausible(c1));
   assert(cellIsPlausible(c2));
 
-  if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
+  if ((isArrayType(c1.m_type) && isArrayType(c2.m_type)) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
       (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
     return cellLess(c1, c2) || cellEqual(c1, c2);
@@ -759,7 +767,7 @@ bool cellGreaterOrEqual(Cell c1, Cell c2) {
   assert(cellIsPlausible(c1));
   assert(cellIsPlausible(c2));
 
-  if ((c1.m_type == KindOfArray && c2.m_type == KindOfArray) ||
+  if ((isArrayType(c1.m_type) && isArrayType(c2.m_type)) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
       (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
     return cellGreater(c1, c2) || cellEqual(c1, c2);

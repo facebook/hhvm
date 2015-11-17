@@ -60,6 +60,7 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfStaticString:
       return stringToNumeric(cell.m_data.pstr);
 
+    case KindOfPersistentArray:
     case KindOfArray:
       throw_bad_array_operand();
 
@@ -99,7 +100,7 @@ again:
     }
   }
 
-  if (c1.m_type == KindOfArray && c2.m_type == KindOfArray) {
+  if (isArrayType(c1.m_type) && isArrayType(c2.m_type)) {
     return make_tv<KindOfArray>(o(c1.m_data.parr, c2.m_data.parr));
   }
 
@@ -112,7 +113,7 @@ again:
 // returns the overflowed value.
 template<class Op, class Check, class Over>
 Cell cellArithO(Op o, Check ck, Over ov, Cell c1, Cell c2) {
-  if (c1.m_type == KindOfArray && c2.m_type == KindOfArray) {
+  if (isArrayType(c1.m_type) && isArrayType(c2.m_type)) {
     return cellArith(o, c1, c2);
   }
 
@@ -244,11 +245,12 @@ again:
     }
   }
 
-  if (c1.m_type == KindOfArray && c2.m_type == KindOfArray) {
+  if (isArrayType(c1.m_type) && isArrayType(c2.m_type)) {
     auto const ad1    = c1.m_data.parr;
     auto const newArr = op(ad1, c2.m_data.parr);
     if (newArr != ad1) {
       c1.m_data.parr = newArr;
+      c1.m_type = KindOfArray;
       decRefArr(ad1);
     }
     return;
@@ -409,6 +411,7 @@ void cellIncDecOp(Op op, Cell& cell) {
       return;
 
     case KindOfBoolean:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -703,6 +706,7 @@ void cellBitNot(Cell& cell) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

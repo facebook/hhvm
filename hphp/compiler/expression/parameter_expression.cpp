@@ -232,6 +232,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                   (m_hhType && interface_supports_string(hint)));
         return;
 
+      case KindOfPersistentArray:
       case KindOfArray:
         compat = (!strcasecmp(hint, "array") ||
                   (m_hhType && interface_supports_array(hint)));

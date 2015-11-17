@@ -124,7 +124,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       }
       Variant spec = HHVM_FN(hphp_get_static_property)(structType, s_TSPEC,
                                                                    false);
-      if (!spec.is(KindOfArray)) {
+      if (!spec.isArray()) {
         char errbuf[128];
         snprintf(errbuf, 128, "spec for %s is wrong type: %s\n",
                  structType.data(), ret->getClassName().c_str());

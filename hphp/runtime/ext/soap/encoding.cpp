@@ -1464,7 +1464,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
              details.sdl_type->kind == XSD_TYPEKIND_RESTRICTION ||
              details.sdl_type->kind == XSD_TYPEKIND_EXTENSION) &&
             (details.sdl_type->encode == NULL ||
-             (details.sdl_type->encode->details.type != KindOfArray &&
+             (!isArrayType((DataType)details.sdl_type->encode->details.type) &&
               details.sdl_type->encode->details.type != SOAP_ENC_ARRAY))) {
           ret = to_zval_object_ex(&sdlType->encode->details, data, ce);
         } else {
@@ -3003,7 +3003,7 @@ Variant sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data) {
   case XSD_TYPEKIND_RESTRICTION:
   case XSD_TYPEKIND_EXTENSION:
     if (type->encode &&
-        (type->encode->details.type == KindOfArray ||
+        (isArrayType((DataType)type->encode->details.type) ||
          type->encode->details.type == SOAP_ENC_ARRAY)) {
       return to_zval_array(enc, data);
     }
@@ -3069,7 +3069,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, const Variant& data, int sty
   case XSD_TYPEKIND_RESTRICTION:
   case XSD_TYPEKIND_EXTENSION:
     if (type->encode &&
-        (type->encode->details.type == KindOfArray ||
+        (isArrayType((DataType)type->encode->details.type) ||
          type->encode->details.type == SOAP_ENC_ARRAY)) {
       return to_xml_array(enc, data, style, parent);
     } else {

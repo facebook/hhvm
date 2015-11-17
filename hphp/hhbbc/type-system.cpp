@@ -1606,17 +1606,18 @@ Type from_cell(Cell cell) {
     always_assert(cell.m_data.pstr->isStatic());
     return sval(cell.m_data.pstr);
 
+  case KindOfPersistentArray:
   case KindOfArray:
     always_assert(cell.m_data.parr->isStatic());
     return aval(cell.m_data.parr);
 
+  case KindOfClass:
   case KindOfRef:
   case KindOfObject:
   case KindOfResource:
-  default:
     break;
   }
-  always_assert(0 && "reference counted type in from_cell");
+  always_assert(0 && "reference counted/class type in from_cell");
 }
 
 Type from_DataType(DataType dt) {
@@ -1628,11 +1629,12 @@ Type from_DataType(DataType dt) {
   case KindOfDouble:   return TDbl;
   case KindOfStaticString:
   case KindOfString:   return TStr;
+  case KindOfPersistentArray:
   case KindOfArray:    return TArr;
   case KindOfRef:      return TRef;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
-  default:
+  case KindOfClass:
     break;
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");

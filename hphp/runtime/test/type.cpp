@@ -65,11 +65,15 @@ TEST(Type, Null) {
 
 TEST(Type, KnownDataType) {
   auto trueTypes = {
-    TInt, TBoxedCell, TStaticStr,
-    TStr, // TODO(#3390819): this should return false...
+    TInt,
+    TBoxedCell,
+    TStaticStr,
+    TCountedStr,
+    TStr,
     TObj,
     TDbl,
     TArr,
+    TPersistentArr,
     TStaticArr,
     TCountedArr,
     TRes,

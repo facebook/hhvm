@@ -534,7 +534,7 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   auto it = userAttributes.find(s_native.get());
   assert(it != userAttributes.end());
   const TypedValue userAttr = it->second;
-  assert(userAttr.m_type == KindOfArray);
+  assert(isArrayType(userAttr.m_type));
   for (ArrayIter it(userAttr.m_data.parr); it; ++it) {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {

@@ -82,6 +82,7 @@ Variant SSATmp::variantVal() const {
     case KindOfStaticString:
     case KindOfString:
       return Variant(const_cast<StringData*>(strVal()));
+    case KindOfPersistentArray:
     case KindOfArray:
       return Variant{const_cast<ArrayData*>(arrVal())};
     case KindOfObject:

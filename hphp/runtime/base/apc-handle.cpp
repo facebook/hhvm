@@ -91,9 +91,17 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
     case KindOfStaticString:
       return createStaticStr(source.getStringData());
 
-    case KindOfArray:
+    case KindOfPersistentArray:
+    case KindOfArray: {
+      auto ad = source.getArrayData();
+      if (ad->isStatic()) {
+        auto value = new APCTypedValue(APCTypedValue::StaticArr{}, ad);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+
       return APCArray::MakeSharedArray(source.getArrayData(), level,
                                        unserializeObj);
+    }
 
     case KindOfObject:
       if (source.getObjectData()->isCollection()) {
@@ -132,6 +140,9 @@ Variant APCHandle::toLocal() const {
       return Variant{APCTypedValue::fromHandle(this)->getStringData()};
     case KindOfString:
       return APCString::MakeLocalString(this);
+    case KindOfPersistentArray:
+      return Variant{APCTypedValue::fromHandle(this)->getArrayData(),
+                     Variant::PersistentArrInit{}};
     case KindOfArray:
       return APCArray::MakeLocalArray(this);
     case KindOfObject:
@@ -154,6 +165,7 @@ void APCHandle::deleteShared() {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:
+    case KindOfPersistentArray:
       delete APCTypedValue::fromHandle(this);
       return;
 

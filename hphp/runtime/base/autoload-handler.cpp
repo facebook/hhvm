@@ -237,7 +237,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   const String& name = normalizeNS(clsName);
   const Variant& type_map = m_map.get()->get(kind);
   auto const typeMapCell = type_map.asCell();
-  if (typeMapCell->m_type != KindOfArray) return Failure;
+  if (!isArrayType(typeMapCell->m_type)) return Failure;
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
   const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
   bool ok = false;

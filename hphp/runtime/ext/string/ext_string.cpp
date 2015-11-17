@@ -609,12 +609,12 @@ static
 Variant str_replace(const Variant& search, const Variant& replace, const String& subject,
                     int &count, bool caseSensitive) {
   count = 0;
-  if (search.is(KindOfArray)) {
+  if (search.isArray()) {
     String ret = subject;
     int c = 0;
 
     Array searchArr = search.toArray();
-    if (replace.is(KindOfArray)) {
+    if (replace.isArray()) {
       Array replArr = replace.toArray();
       ArrayIter replIter(replArr);
       for (ArrayIter iter(searchArr); iter; ++iter) {
@@ -641,7 +641,7 @@ Variant str_replace(const Variant& search, const Variant& replace, const String&
     return ret;
   }
 
-  if (replace.is(KindOfArray)) {
+  if (replace.isArray()) {
     raise_notice("Array to string conversion");
   }
   return string_replace(subject, search.toString(), replace.toString(), count,
@@ -651,12 +651,12 @@ Variant str_replace(const Variant& search, const Variant& replace, const String&
 static Variant str_replace(const Variant& search, const Variant& replace, const Variant& subject,
                            int &count, bool caseSensitive) {
   count = 0;
-  if (subject.is(KindOfArray)) {
+  if (subject.isArray()) {
     Array arr = subject.toArray();
     Array ret = Array::Create();
     int c;
     for (ArrayIter iter(arr); iter; ++iter) {
-      if (iter.second().is(KindOfArray) || iter.second().is(KindOfObject)) {
+      if (iter.second().isArray() || iter.second().is(KindOfObject)) {
         ret.set(iter.first(), iter.second());
         continue;
       }
@@ -708,15 +708,15 @@ Variant HHVM_FUNCTION(substr_replace,
                       const Variant& replacement,
                       const Variant& start,
                       const Variant& length /* = 0x7FFFFFFF */) {
-  if (!str.is(KindOfArray)) {
+  if (!str.isArray()) {
     String repl;
-    if (replacement.is(KindOfArray)) {
+    if (replacement.isArray()) {
       repl = replacement.asCArrRef()[0].toString();
     } else {
       repl = replacement.toString();
     }
-    if (start.is(KindOfArray)) {
-      if (!length.is(KindOfArray)) {
+    if (start.isArray()) {
+      if (!length.isArray()) {
         throw_invalid_argument("start and length should be of same type - "
                                "numerical or array");
         return str;
@@ -753,7 +753,7 @@ Variant HHVM_FUNCTION(substr_replace,
   ArrayIter startIter(startArr);
   ArrayIter lengthIter(lengthArr);
 
-  if (replacement.is(KindOfArray)) {
+  if (replacement.isArray()) {
     Array replArr = replacement.toArray();
     ArrayIter replIter(replArr);
     for (ArrayIter iter(strArr); iter; ++iter) {
@@ -1392,6 +1392,7 @@ Variant HHVM_FUNCTION(strlen,
     case KindOfString:
       return Variant(cell->m_data.pstr->size());
 
+    case KindOfPersistentArray:
     case KindOfArray:
       raise_warning("strlen() expects parameter 1 to be string, "
                     "array given");
@@ -2034,7 +2035,7 @@ Variant HHVM_FUNCTION(strtr,
     return StringUtil::Translate(str, from.toString(), to.toString());
   }
 
-  if (!from.is(KindOfArray)) {
+  if (!from.isArray()) {
     throw_invalid_argument("2nd argument: (not array)");
     return false;
   }
@@ -2091,7 +2092,7 @@ Variant HHVM_FUNCTION(setlocale,
                       const Variant& locale,
                       const Array& _argv /* = null_array */) {
   Array argv = _argv;
-  if (locale.is(KindOfArray)) {
+  if (locale.isArray()) {
     if (!argv.empty()) throw_invalid_argument("locale: not string)");
     argv = locale; // ignore _argv
   }
@@ -2099,7 +2100,7 @@ Variant HHVM_FUNCTION(setlocale,
   for (int i = -1; i < argv.size(); i++) {
     String slocale;
     if (i == -1) {
-      if (locale.is(KindOfArray)) continue;
+      if (locale.isArray()) continue;
       slocale = locale.toString();
     } else {
       slocale = argv[i].toString();

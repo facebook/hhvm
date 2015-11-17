@@ -93,17 +93,18 @@ Variant::Variant(const Variant& v) noexcept {
  * ResourceHdr, and RefData classes.
  */
 
-static_assert(typeToDestrIdx(KindOfString) == 1, "String destruct index");
-static_assert(typeToDestrIdx(KindOfArray)  == 2,  "Array destruct index");
-static_assert(typeToDestrIdx(KindOfObject) == 3, "Object destruct index");
-static_assert(typeToDestrIdx(KindOfResource) == 4,
+static_assert(typeToDestrIdx(KindOfString) == 2, "String destruct index");
+static_assert(typeToDestrIdx(KindOfArray)  == 3,  "Array destruct index");
+static_assert(typeToDestrIdx(KindOfObject) == 4, "Object destruct index");
+static_assert(typeToDestrIdx(KindOfResource) == 5,
               "Resource destruct index");
-static_assert(typeToDestrIdx(KindOfRef)    == 5,    "Ref destruct index");
+static_assert(typeToDestrIdx(KindOfRef)    == 6,    "Ref destruct index");
 
-static_assert(kDestrTableSize == 6,
+static_assert(kDestrTableSize == 7,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
+  nullptr,
   nullptr,
   (RawDestructor)getMethodPtr(&StringData::release),
   (RawDestructor)getMethodPtr(&ArrayData::release),
@@ -243,6 +244,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -273,6 +275,7 @@ bool Variant::isScalar() const noexcept {
   switch (getType()) {
     case KindOfUninit:
     case KindOfNull:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -315,6 +318,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfDouble:        return m_data.dbl != 0;
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toBoolean();
+    case KindOfPersistentArray:
     case KindOfArray:         return !m_data.parr->empty();
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
@@ -334,6 +338,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfDouble:        return HPHP::toInt64(m_data.dbl);
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toInt64(base);
+    case KindOfPersistentArray:
     case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
@@ -352,6 +357,7 @@ double Variant::toDoubleHelper() const {
     case KindOfDouble:        return m_data.dbl;
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toDouble();
+    case KindOfPersistentArray:
     case KindOfArray:         return (double)toInt64();
     case KindOfObject:        return m_data.pobj->toDouble();
     case KindOfResource:      return m_data.pres->data()->o_toDouble();
@@ -382,6 +388,7 @@ String Variant::toStringHelper() const {
       assert(false); // Should be done in caller
       return String{m_data.pstr};
 
+    case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
       return array_string;
@@ -410,6 +417,7 @@ Array Variant::toArrayHelper() const {
     case KindOfDouble:        return Array::Create(*this);
     case KindOfStaticString:
     case KindOfString:        return Array::Create(Variant{m_data.pstr});
+    case KindOfPersistentArray:
     case KindOfArray:         return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
@@ -436,6 +444,8 @@ Object Variant::toObjectHelper() const {
       return obj;
     }
 
+
+    case KindOfPersistentArray:
     case KindOfArray:
       return ObjectData::FromArray(m_data.parr);
 
@@ -460,6 +470,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfDouble:
     case KindOfStaticString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
       return Resource(req::make<DummyResource>());
@@ -500,6 +511,7 @@ VarNR Variant::toKey() const {
 
     case KindOfStaticString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
       throw_bad_type_exception("Invalid type used as key");
@@ -522,7 +534,12 @@ Variant& lvalBlackHole() {
 
 void Variant::setEvalScalar() {
   switch (m_type) {
-    DT_UNCOUNTED_CASE:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
       return;
 
     case KindOfString: {
@@ -537,13 +554,15 @@ void Variant::setEvalScalar() {
       return;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray: {
-      ArrayData *parr = m_data.parr;
+      auto parr = m_data.parr;
       if (!parr->isStatic()) {
-        ArrayData *ad = ArrayData::GetScalarArray(parr);
-        decRefArr(parr);
+        auto ad = ArrayData::GetScalarArray(parr);
+        assert(ad->isStatic());
         m_data.parr = ad;
-        assert(m_data.parr->isStatic());
+        m_type = KindOfPersistentArray;
+        decRefArr(parr);
       }
       return;
     }

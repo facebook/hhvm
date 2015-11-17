@@ -157,6 +157,7 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfNull:
     case KindOfStaticString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -378,7 +379,7 @@ static Variant HHVM_METHOD(Memcache, get, const Variant& key,
     return false;
   }
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     std::vector<const char *> real_keys;
     std::vector<size_t> key_len;
     Array keyArr = key.toArray();

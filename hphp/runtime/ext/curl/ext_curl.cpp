@@ -662,7 +662,7 @@ public:
       break;
     case CURLOPT_POSTFIELDS:
       m_emptyPost = false;
-      if (value.is(KindOfArray) || value.is(KindOfObject)) {
+      if (value.isArray() || value.is(KindOfObject)) {
         Array arr = value.toArray();
         curl_httppost *first = nullptr;
         curl_httppost *last  = nullptr;
@@ -784,7 +784,7 @@ public:
     case CURLOPT_HTTP200ALIASES:
     case CURLOPT_POSTQUOTE:
     case CURLOPT_RESOLVE:
-      if (value.is(KindOfArray) || value.is(KindOfObject)) {
+      if (value.isArray() || value.is(KindOfObject)) {
         Array arr = value.toArray();
         curl_slist *slist = nullptr;
         for (ArrayIter iter(arr); iter; ++iter) {

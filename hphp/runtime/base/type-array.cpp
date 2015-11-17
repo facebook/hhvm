@@ -84,7 +84,7 @@ Array &Array::operator=(const Variant& var) {
 
 // Move assign
 Array& Array::operator=(Variant&& v) {
-  if (v.asTypedValue()->m_type == KindOfArray) {
+  if (isArrayType(v.asTypedValue()->m_type)) {
     m_arr = req::ptr<ArrayData>::attach(v.asTypedValue()->m_data.parr);
     v.asTypedValue()->m_type = KindOfNull;
   } else {
@@ -112,7 +112,7 @@ static void throw_bad_array_merge() {
 }
 
 Array &Array::operator+=(const Variant& var) {
-  if (var.getType() != KindOfArray) {
+  if (!var.isArray()) {
     throw_bad_array_merge();
   }
   return operator+=(var.getArrayData());
@@ -372,7 +372,7 @@ bool Array::less(const Variant& v2) const {
   if (m_arr == nullptr || v2.isNull()) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
-  if (v2.getType() == KindOfArray) {
+  if (isArrayType(v2.getType())) {
     return m_arr->compare(v2.toArray().get()) < 0;
   }
   return HPHP::more(v2, *this);
@@ -400,7 +400,7 @@ bool Array::more(const Variant& v2) const {
   if (m_arr == nullptr || v2.isNull()) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
-  if (v2.getType() == KindOfArray) {
+  if (isArrayType(v2.getType())) {
     return v2.toArray().get()->compare(get()) < 0;
   }
   return HPHP::less(v2, *this);
@@ -498,6 +498,7 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
       }
       return m_arr->get(key.asCStrRef(), flags & AccessFlags::Error);
 
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
       throw_bad_type_exception("Invalid type used as key");

@@ -2810,7 +2810,7 @@ Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
     return TInitNull;
   }
 
-  Type t = arr->isA(TStaticArr) ? TInitCell : TGen;
+  Type t = arr->isA(TPersistentArr) ? TInitCell : TGen;
 
   auto const at = arr->type().arrSpec().type();
   if (!at) return t;

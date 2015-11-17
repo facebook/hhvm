@@ -851,7 +851,7 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
   // negativeCheckType() to indicate whether it is precise or not.
   always_assert(!type.hasConstVal());
   always_assert_flog(
-    !type.subtypeOfAny(TCls, TCountedStr, TStaticArr, TCountedArr),
+    !type.subtypeOfAny(TCls, TCountedStr, TPersistentArr),
     "Unsupported type in emitTypeTest: {}", type
   );
   auto& v = vmain();
@@ -861,6 +861,9 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     cc = CC_E;
   } else if (type <= TStr) {
     emitTestTVType(v, sf, KindOfStringBit, typeSrc);
+    cc = CC_NZ;
+  } else if (type <= TArr) {
+    emitTestTVType(v, sf, KindOfArrayBit, typeSrc);
     cc = CC_NZ;
   } else if (type == TNull) {
     emitCmpTVType(v, sf, KindOfNull, typeSrc);

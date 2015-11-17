@@ -234,6 +234,7 @@ void callFunc(const Func* func, void *ctx,
 
     case KindOfStaticString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -301,8 +302,8 @@ bool coerceFCallArgs(TypedValue* args,
 
     // Skip tvCoerceParamTo*() call if we're already the right type
     if (args[-i].m_type == targetType ||
-        (isStringType(args[-i].m_type) &&
-         isStringType(targetType))) {
+        (isStringType(args[-i].m_type) && isStringType(targetType)) ||
+        (isArrayType(args[-i].m_type) && isArrayType(targetType))) {
       continue;
     }
 
@@ -330,6 +331,7 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfUninit:
       case KindOfNull:
       case KindOfStaticString:
+      case KindOfPersistentArray:
       case KindOfRef:
       case KindOfClass:
         not_reached();
@@ -510,6 +512,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfObject:       return ty == T::Object   || ty == T::ObjectArg;
     case KindOfStaticString:
     case KindOfString:       return ty == T::String   || ty == T::StringArg;
+    case KindOfPersistentArray:
     case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:

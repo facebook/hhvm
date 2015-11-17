@@ -488,7 +488,7 @@ struct MArrayIter {
 private:
   ArrayData* getData() const {
     assert(hasRef());
-    return m_ref->tv()->m_type == KindOfArray
+    return isArrayType(m_ref->tv()->m_type)
       ? m_ref->tv()->m_data.parr
       : nullptr;
   }

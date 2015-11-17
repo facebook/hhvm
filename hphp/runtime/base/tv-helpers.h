@@ -56,6 +56,7 @@ struct Variant;
     switch (tv.m_type) {                                        \
       case HPHP::KindOfStaticString:                            \
       case HPHP::KindOfString: return tv.m_data.pstr->func();   \
+      case HPHP::KindOfPersistentArray:                             \
       case HPHP::KindOfArray: return tv.m_data.parr->func();    \
       case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
       case HPHP::KindOfResource: return tv.m_data.pres->func(); \

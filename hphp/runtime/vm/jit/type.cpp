@@ -262,6 +262,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfDouble        : return kDbl;
     case KindOfStaticString  : return kStaticStr;
     case KindOfString        : return kStr;
+    case KindOfPersistentArray   : return kPersistentArr;
     case KindOfArray         : return kArr;
     case KindOfResource      : return kRes;
     case KindOfObject        : return kObj;
@@ -286,6 +287,7 @@ DataType Type::toDataType() const {
   if (*this <= TDbl)         return KindOfDouble;
   if (*this <= TStaticStr)   return KindOfStaticString;
   if (*this <= TStr)         return KindOfString;
+  if (*this <= TPersistentArr)   return KindOfPersistentArray;
   if (*this <= TArr)         return KindOfArray;
   if (*this <= TObj)         return KindOfObject;
   if (*this <= TRes)         return KindOfResource;
@@ -531,7 +533,7 @@ Type typeFromTV(const TypedValue* tv) {
     return Type::ExactObj(cls);
   }
 
-  if (tv->m_type == KindOfArray) {
+  if (isArrayType(tv->m_type)) {
     auto const ar = tv->m_data.parr;
     if (ar->kind() == ArrayData::kStructKind) {
       return Type::Array(StructArray::asStructArray(ar)->shape());
@@ -546,6 +548,7 @@ Type typeFromTV(const TypedValue* tv) {
   if (outer == KindOfRef) {
     inner = tv->m_data.pref->tv()->m_type;
     if (inner == KindOfStaticString) inner = KindOfString;
+    else if (inner == KindOfPersistentArray) inner = KindOfArray;
   }
   return Type(outer, inner);
 }

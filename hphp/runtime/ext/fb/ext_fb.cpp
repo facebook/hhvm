@@ -425,6 +425,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
       fb_compact_serialize_string(sb, var.toString());
       return 0;
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = var.toArray();
       int64_t index_limit;

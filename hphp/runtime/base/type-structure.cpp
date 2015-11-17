@@ -577,7 +577,7 @@ Array resolveTS(const Array& arr,
             cnsName.data());
         }
         auto tv = cls->clsCnsGet(cnsName.get(), /* includeTypeCns = */ true);
-        assert(tv.m_type == KindOfArray);
+        assert(isArrayType(tv.m_type));
         typeCnsVal = Array(tv.m_data.parr);
         if (i == sz - 1) break;
 
@@ -638,7 +638,7 @@ String TypeStructure::toString(const Array& arr) {
 Array TypeStructure::resolve(const Class::Const& typeCns,
                              const Class* typeCnsCls) {
   assert(typeCns.isType());
-  assert(typeCns.val.m_type == KindOfArray);
+  assert(isArrayType(typeCns.val.m_type));
   assert(typeCns.name);
   assert(typeCnsCls);
 

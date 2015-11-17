@@ -1480,7 +1480,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
 static Variant php_replace_in_subject(const Variant& regex, const Variant& replace,
                                       String subject, int limit, bool callable,
                                       int* replace_count) {
-  if (!regex.is(KindOfArray)) {
+  if (!regex.isArray()) {
     Variant ret = php_pcre_replace(regex.toString(), subject, replace,
                                    callable, limit, replace_count);
 
@@ -1492,7 +1492,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
     return ret;
   }
 
-  if (callable || !replace.is(KindOfArray)) {
+  if (callable || !replace.isArray()) {
     Array arr = regex.toArray();
     for (ArrayIter iterRegex(arr); iterRegex; ++iterRegex) {
       String regex_entry = iterRegex.second().toString();
@@ -1547,7 +1547,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
                           bool is_callable, bool is_filter) {
   assert(!(is_callable && is_filter));
   if (!is_callable &&
-      replacement.is(KindOfArray) && !pattern.is(KindOfArray)) {
+      replacement.isArray() && !pattern.isArray()) {
     raise_warning("Parameter mismatch, pattern is a string while "
                     "replacement is an array");
     return false;

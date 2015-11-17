@@ -162,7 +162,7 @@ public:
    */
   static req::ptr<Key> Get(const Variant& var, bool public_key,
                            const char *passphrase = nullptr) {
-    if (var.is(KindOfArray)) {
+    if (var.isArray()) {
       Array arr = var.toArray();
       if (!arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
         raise_warning("key array must be of the form "
@@ -1165,7 +1165,7 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
 static STACK_OF(X509) *php_array_to_X509_sk(const Variant& certs) {
   STACK_OF(X509) *pcerts = sk_X509_new_null();
   Array arrCerts;
-  if (certs.is(KindOfArray)) {
+  if (certs.isArray()) {
     arrCerts = certs.toArray();
   } else {
     arrCerts.append(certs);

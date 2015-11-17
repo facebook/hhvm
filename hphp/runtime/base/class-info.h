@@ -293,6 +293,7 @@ public:
       case KindOfUninit:
       case KindOfNull:
       case KindOfStaticString:
+      case KindOfPersistentArray:
       case KindOfRef:
       case KindOfClass:
         break;

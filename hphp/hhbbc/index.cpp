@@ -2065,8 +2065,9 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
+        case KindOfStaticString:
         case KindOfString:       return TStr;
-        case KindOfStaticString: return TStr;
+        case KindOfPersistentArray:
         case KindOfArray:        return TArr;
         case KindOfResource:     return TRes;
         case KindOfObject:
@@ -2142,8 +2143,9 @@ Type Index::satisfies_constraint_helper(Context ctx,
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
+        case KindOfStaticString:
         case KindOfString:       return TStr;
-        case KindOfStaticString: return TStr;
+        case KindOfPersistentArray:
         case KindOfArray:        return TArr;
         case KindOfResource:     return TRes;
         case KindOfObject:

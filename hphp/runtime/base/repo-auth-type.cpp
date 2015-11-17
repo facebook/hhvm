@@ -37,7 +37,7 @@ static_assert(sizeof(RepoAuthType) == sizeof(CompactTaggedPtr<void>), "");
 namespace {
 
 bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
-  assert(tv.m_type == KindOfArray);
+  assert(isArrayType(tv.m_type));
   auto const ad = tv.m_data.parr;
   using A = RepoAuthType::Array;
 
@@ -244,7 +244,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::SArr:
-    if (tv.m_type != KindOfArray || !tv.m_data.parr->isStatic()) {
+    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isStatic()) {
       return false;
     }
     if (auto const arr = ty.array()) {
@@ -256,7 +256,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::Arr:
-    if (tv.m_type != KindOfArray) return false;
+    if (!isArrayType(tv.m_type)) return false;
     if (auto const arr = ty.array()) {
       if (!tvMatchesArrayType(tv, arr)) return false;
     }

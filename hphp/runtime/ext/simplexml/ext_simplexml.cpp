@@ -898,7 +898,7 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type) {
     sxe_get_prop_hash(sxe, true, properties, true);
     return properties.size() != 0;
   }
-  if (type == KindOfArray) {
+  if (isArrayType((DataType)type)) {
     Array properties = Array::Create();
     sxe_get_prop_hash(sxe, true, properties);
     return properties;

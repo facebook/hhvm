@@ -246,8 +246,8 @@ Type arrElemReturn(const IRInstruction* inst) {
     resultType &= TInit;
   }
 
-  // Elements of a static array are uncounted
-  if (inst->src(0)->isA(TStaticArr)) {
+  // Elements of a noncounted array are uncounted
+  if (inst->src(0)->isA(TPersistentArr)) {
     resultType &= TUncountedInit;
   }
 

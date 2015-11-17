@@ -27,6 +27,7 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_double(name + "=KindOfDouble")
   , m_static_string(name + "=KindOfStaticString")
   , m_string(name + "=KindOfString")
+  , m_static_array(name + "=KindOfPersistentArray")
   , m_array(name + "=KindOfArray")
   , m_object(name + "=KindOfObject")
   , m_resource(name + "=KindOfResource")
@@ -42,6 +43,7 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfDouble:        m_double.count(); break;
     case KindOfStaticString:  m_static_string.count(); break;
     case KindOfString:        m_string.count(); break;
+    case KindOfPersistentArray:   m_static_array.count(); break;
     case KindOfArray:         m_array.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
@@ -60,6 +62,7 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_double.hits() +
                m_static_string.hits() +
                m_string.hits() +
+               m_static_array.hits() +
                m_array.hits() +
                m_object.hits() +
                m_resource.hits() +
@@ -72,6 +75,7 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfDouble=%.1f%% "
                   "KindOfStaticString=%.1f%% "
                   "KindOfString=%.1f%% "
+                  "KindOfPersistentArray=%.1f%% "
                   "KindOfArray=%.1f%% "
                   "KindOfObject=%.1f%% "
                   "KindOfResource=%.1f%% "
@@ -84,6 +88,7 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_double.hits() / total,
           100.0 * m_static_string.hits() / total,
           100.0 * m_string.hits() / total,
+          100.0 * m_static_array.hits() / total,
           100.0 * m_array.hits() / total,
           100.0 * m_object.hits() / total,
           100.0 * m_resource.hits() / total,

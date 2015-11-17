@@ -36,7 +36,8 @@ inline bool cellToBool(Cell cell) {
     case KindOfDouble:        return cell.m_data.dbl != 0;
     case KindOfStaticString:
     case KindOfString:        return cell.m_data.pstr->toBoolean();
-    case KindOfArray:         return !!cell.m_data.parr->size();
+    case KindOfPersistentArray:
+    case KindOfArray:         return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
     case KindOfRef:
@@ -56,6 +57,7 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfDouble:        return toInt64(cell.m_data.dbl);
     case KindOfStaticString:
     case KindOfString:        return cell.m_data.pstr->toInt64(10);
+    case KindOfPersistentArray:
     case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return cell.m_data.pobj->toInt64();
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();

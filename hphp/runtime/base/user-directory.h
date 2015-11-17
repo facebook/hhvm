@@ -36,10 +36,10 @@ public:
   void rewind() override;
 
 private:
-  const Func* m_DirOpen;
-  const Func* m_DirClose;
-  const Func* m_DirRead;
-  const Func* m_DirRewind;
+  LowPtr<const Func> m_DirOpen;
+  LowPtr<const Func> m_DirClose;
+  LowPtr<const Func> m_DirRead;
+  LowPtr<const Func> m_DirRewind;
 };
 
 }

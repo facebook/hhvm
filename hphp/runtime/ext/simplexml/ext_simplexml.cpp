@@ -825,7 +825,9 @@ static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
       rv.append(sxe_xmlNodeListGetString(node->doc, node->children, 1));
       node = nullptr;
     } else if (sxe->iter.type != SXE_ITER_CHILD) {
-      if (!node->children || !node->parent || node->children->next ||
+      if (sxe->iter.type == SXE_ITER_NONE || !node->children ||
+          !node->parent ||
+          node->children->next ||
           node->children->children ||
           node->parent->children == node->parent->last) {
         node = node->children;

@@ -1,6 +1,0 @@
-3961a1204b86c121ee19c04ca9b668fe8555bb60
-
-test/zend/bad/ext/mysqli/tests/mysqli_last_insert_id.php
-
-!!!!!!!!!! Fix this
-test/zend/good/ext/mysqli/tests/mysqli_insert_id_variation.php

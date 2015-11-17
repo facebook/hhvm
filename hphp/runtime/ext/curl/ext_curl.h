@@ -55,6 +55,9 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue = null_object);
 Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
+bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
+                      int option,
+                      const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

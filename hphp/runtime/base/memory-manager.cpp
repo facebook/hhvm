@@ -337,6 +337,10 @@ void MemoryManager::refreshStatsHelperExceeded() {
   }
 }
 
+void MemoryManager::setMemThresholdCallback(size_t threshold) {
+  m_memThresholdCallbackPeakUsage = threshold;
+}
+
 #ifdef USE_JEMALLOC
 void MemoryManager::refreshStatsHelperStop() {
   HttpServer::Server->stop();
@@ -425,7 +429,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "After stats sync:\n");
     FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
       stats.usage, stats.totalAlloc);
-}
+  }
 #endif
   assert(stats.maxBytes > 0);
   if (live && stats.usage > stats.maxBytes && m_couldOOM) {
@@ -449,6 +453,12 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       refreshStatsHelperStop();
     }
 #endif
+    if (live &&
+        stats.usage > m_memThresholdCallbackPeakUsage &&
+        stats.peakUsage <= m_memThresholdCallbackPeakUsage) {
+      setSurpriseFlag(MemThresholdFlag);
+    }
+
     stats.peakUsage = stats.usage;
   }
   if (live && m_statsIntervalActive) {
@@ -1151,6 +1161,7 @@ void MemoryManager::requestShutdown() {
 #endif
 
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
+  MM().m_memThresholdCallbackPeakUsage = SIZE_MAX;
   profctx = ReqProfContext{};
 }
 

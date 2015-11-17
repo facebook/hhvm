@@ -956,6 +956,19 @@ Array HHVM_FUNCTION(thread_memory_stats, void) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void HHVM_FUNCTION(set_mem_threshold_callback,
+  int64_t threshold,
+  const Variant& callback
+) {
+  // In a similar way to fb_setprofile storing in m_setprofileCallback
+  g_context->m_memThresholdCallback = callback;
+
+  // Notify MM that surprise flag should be set upon reaching the threshold
+  MM().setMemThresholdCallback(threshold);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 class objprofExtension final : public Extension {
@@ -968,6 +981,7 @@ public:
     HHVM_FALIAS(HH\\objprof_get_paths, objprof_get_paths);
     HHVM_FALIAS(HH\\thread_memory_stats, thread_memory_stats);
     HHVM_FALIAS(HH\\thread_mark_stack, thread_mark_stack);
+    HHVM_FALIAS(HH\\set_mem_threshold_callback, set_mem_threshold_callback);
     loadSystemlib();
   }
 } s_objprof_extension;

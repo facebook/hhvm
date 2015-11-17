@@ -521,6 +521,7 @@ public:
     mark(m_lastErrorPath);
     mark(m_lastErrorLine);
     mark(m_setprofileCallback);
+    mark(m_memThresholdCallback);
     mark(m_executingSetprofileCallback);
     //mark(m_activeSims);
   }
@@ -599,6 +600,7 @@ private:
   int m_lastErrorLine;
 public:
   Variant m_setprofileCallback;
+  Variant m_memThresholdCallback;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::vector<vixl::Simulator*> m_activeSims;

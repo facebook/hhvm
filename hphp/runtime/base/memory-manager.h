@@ -847,6 +847,13 @@ struct MemoryManager {
   static bool triggerProfiling(const std::string& filename);
 
   /*
+   * Installs a PHP callback for the specified peak memory watermarks
+   * Each request may have 1 memory callback for 1 specific threshold
+   * at a given time
+   */
+  void setMemThresholdCallback(size_t threshold);
+
+  /*
    * Do per-request initialization.
    *
    * Attempt to consume the profiling trigger, and copy it to m_profctx if we
@@ -1074,6 +1081,9 @@ private:
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;
+
+  // Peak memory threshold callback (installed via setMemThresholdCallback)
+  size_t m_memThresholdCallbackPeakUsage{SIZE_MAX};
 
   static void* TlsInitSetup;
 

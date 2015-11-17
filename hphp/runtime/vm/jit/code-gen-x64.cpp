@@ -2161,6 +2161,35 @@ float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
   return 0.0;
 }
 
+static CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
+  // LLVM backend doesn't support CallSpec::Array
+  auto const llvm = mcg->useLLVM();
+
+  static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
+  static auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
+  static auto const TApcArr = Type::Array(ArrayData::kApcKind);
+
+  if (ty <= TPackedArr) return CallSpec::direct(PackedArray::Release);
+  if (ty <= TMixedArr) return CallSpec::direct(MixedArray::Release);
+  if (ty <= TApcArr) return CallSpec::direct(APCLocalArray::Release);
+  if (ty <= TArr && !llvm) return  CallSpec::array(&g_array_funcs.release);
+
+  if (ty <= TObj && ty.clsSpec().cls()) {
+    auto cls = ty.clsSpec().cls();
+
+    // These conditions must match what causes us to call cls->instanceDtor()
+    // in ObjectData::release().
+    if ((cls->attrs() & AttrNoOverride) &&
+        !cls->getDtor() && cls->instanceDtor()) {
+      args.immPtr(cls);
+      return CallSpec::direct(cls->instanceDtor().get());
+    }
+  }
+
+  return ty.isKnownDataType() ? mcg->getDtorCall(ty.toDataType())
+                              : CallSpec::destruct(loc.reg(1));
+}
+
 /*
  * We've tried a variety of tweaks to this and found the current state of
  * things optimal, at least when measurements of the following factors were
@@ -2189,10 +2218,6 @@ float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
 void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                                const OptDecRefProfile& profile,
                                bool unlikelyDestroy) {
-  static const auto TPackedArr = Type::Array(ArrayData::kPackedKind);
-  static const auto TMixedArr = Type::Array(ArrayData::kMixedKind);
-  static const auto TApcArr = Type::Array(ArrayData::kApcKind);
-  auto const llvm = mcg->useLLVM();
   auto const ty   = inst->src(0)->type();
   auto const base = srcLoc(inst, 0).reg(0);
 
@@ -2203,15 +2228,9 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
       v << incwm{rvmtl()[profile->handle() + offsetof(DecRefProfile, destroy)],
                  v.makeReg()};
     }
-    // LLVM backend doesn't support CallSpec::Array
-    auto dtor = ty <= TPackedArr ? CallSpec::direct(PackedArray::Release) :
-                ty <= TMixedArr ? CallSpec::direct(MixedArray::Release) :
-                ty <= TApcArr ? CallSpec::direct(APCLocalArray::Release) :
-                ty <= TArr && !llvm ? CallSpec::array(&g_array_funcs.release) :
-                ty.isKnownDataType() ? mcg->getDtorCall(ty.toDataType()) :
-                CallSpec::destruct(srcLoc(inst, 0).reg(1));
-    cgCallHelper(v, dtor, kVoidDest, SyncOptions::Sync,
-                 argGroup(inst).reg(base));
+    auto args = argGroup(inst).reg(base);
+    auto const dtor = makeDtorCall(ty, srcLoc(inst, 0), args);
+    cgCallHelper(v, dtor, kVoidDest, SyncOptions::Sync, args);
   };
 
   emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl

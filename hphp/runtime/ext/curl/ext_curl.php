@@ -255,6 +255,18 @@ function curl_multi_await(resource $mh,
                           float $timeout = 1.0): Awaitable<int>;
 
 /**
+ * Wait for activity on any curl_multi connection
+ *
+ * @param resource $mh -
+ * @param int $option - One of the CURLMOPT_* constants.
+ * @param int $option - The value to be set on option.
+ *
+ * @return Returns TRUE on success or FALSE on failure.
+ */
+<<__Native>>
+function curl_multi_setopt(resource $mh, int $option, mixed $value) : bool;
+
+/**
  * Set multiple options for a cURL transfer
  *
  * @param resource $ch -

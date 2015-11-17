@@ -9536,18 +9536,6 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   ue->addTrivialPseudoMain();
 
   Attr attrs = AttrBuiltin | AttrUnique | AttrPersistent;
-  /*
-    Special function used by FPushCuf* when its argument
-    is not callable.
-  */
-  StringData* name = makeStaticString("86null");
-  FuncEmitter* fe = ue->newFuncEmitter(name);
-  fe->init(0, 0, ue->bcPos(), attrs, true, staticEmptyString());
-  ue->emitOp(OpNull);
-  ue->emitOp(OpRetC);
-  fe->maxStackCells = 1;
-  fe->finish(ue->bcPos(), false);
-  ue->recordFunction(fe);
 
   for (ssize_t i = 0; i < numBuiltinFuncs; ++i) {
     const HhbcExtFuncInfo* info = &builtinFuncs[i];

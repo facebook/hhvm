@@ -125,24 +125,30 @@ void ProcessInit() {
     SystemLib::s_hhas_unit->merge();
   }
 
-  SystemLib::s_nativeFuncUnit = build_native_func_unit(hhbc_ext_funcs,
-                                                       hhbc_ext_funcs_count);
-  SystemLib::s_nativeFuncUnit->merge();
+  if (hhbc_ext_funcs_count) {
+    SystemLib::s_nativeFuncUnit = build_native_func_unit(hhbc_ext_funcs,
+                                                         hhbc_ext_funcs_count);
+    SystemLib::s_nativeFuncUnit->merge();
+  }
+
   SystemLib::s_nullFunc =
-    Unit::lookupFunc(makeStaticString("86null"));
+    Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
 
   // We call a special bytecode emitter function to build the native
   // unit which will contain all of our cppext functions and classes.
   // Each function and method will have a bytecode body that will thunk
   // to the native implementation.
-  Unit* nativeClassUnit = build_native_class_unit(hhbc_ext_classes,
-                                                  hhbc_ext_class_count);
-  SystemLib::s_nativeClassUnit = nativeClassUnit;
+  if (hhbc_ext_class_count) {
+    SystemLib::s_nativeClassUnit =
+      build_native_class_unit(hhbc_ext_classes, hhbc_ext_class_count);
+  }
 
   LitstrTable::get().setReading();
 
   // Load the nativelib unit to build the Class objects
-  SystemLib::s_nativeClassUnit->merge();
+  if (SystemLib::s_nativeClassUnit) {
+    SystemLib::s_nativeClassUnit->merge();
+  }
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \

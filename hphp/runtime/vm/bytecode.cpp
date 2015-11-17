@@ -8193,8 +8193,6 @@ static void threadLogger(const char* header, const char* msg,
 
 void ExecutionContext::requestInit() {
   assert(SystemLib::s_unit);
-  assert(SystemLib::s_nativeFuncUnit);
-  assert(SystemLib::s_nativeClassUnit);
 
   EnvConstants::requestInit(req::make_raw<EnvConstants>());
   VarEnv::createGlobal();
@@ -8222,14 +8220,16 @@ void ExecutionContext::requestInit() {
     SystemLib::s_unit->merge();
     SystemLib::mergePersistentUnits();
     if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
-    SystemLib::s_nativeFuncUnit->merge();
-    SystemLib::s_nativeClassUnit->merge();
+    if (SystemLib::s_nativeFuncUnit) SystemLib::s_nativeFuncUnit->merge();
+    if (SystemLib::s_nativeClassUnit) SystemLib::s_nativeClassUnit->merge();
   } else {
     // System units are merge only, and everything is persistent.
     assert(SystemLib::s_unit->isEmpty());
     assert(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
-    assert(SystemLib::s_nativeFuncUnit->isEmpty());
-    assert(SystemLib::s_nativeClassUnit->isEmpty());
+    assert(!SystemLib::s_nativeFuncUnit ||
+           SystemLib::s_nativeFuncUnit->isEmpty());
+    assert(!SystemLib::s_nativeClassUnit ||
+           SystemLib::s_nativeClassUnit->isEmpty());
   }
 
   profileRequestStart();

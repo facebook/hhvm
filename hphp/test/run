@@ -705,6 +705,12 @@ function hhvm_cmd($options, $test, $test_run = null) {
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
   }
 
+  // Command line arguments
+  $cli_args = find_test_ext($test, 'cli_args');
+  if ($cli_args !== null) {
+    $cmd .= " " . file_get_contents($cli_args);
+  }
+
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
   if ($in !== null) {

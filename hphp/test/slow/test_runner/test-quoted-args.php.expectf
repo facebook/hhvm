@@ -1,0 +1,12 @@
+array(5) {
+  [0]=>
+  string(%d) "%stest-quoted-args.php"
+  [1]=>
+  string(1) "3"
+  [2]=>
+  string(9) "hello you"
+  [3]=>
+  string(28) "We don't have much chocolate"
+  [4]=>
+  string(25) "She said, "Let's go home""
+}

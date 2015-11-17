@@ -54,6 +54,7 @@ These are the allowed extensions:
 * `.php.in` - When you run the test, the input will be obtained from here.
 * `.php.out` - When you run the test, the output will be stored here.
 * `.php.opts` - Runtime options to pass to hhvm.
+* `.php.cli_args` - Command line arguments to the test file (e.g., `$argv` options).
 * `.php.serial` - The test will always be put in the serial bucket to be run sequentially with other serial tests so as to avoid any timing problems or collisions.
 * `.php.hphp_opts` - Options passed to hphp when generating a bytecode repo.
 * `.php.diff or hhas.diff` - The diff for .expect tests.

@@ -1657,6 +1657,19 @@ const StaticString
   s_mime("mime"),
   s_linespacing("linespacing");
 
+
+gdImagePtr get_valid_image_resource(const Resource& image, const char* func_name) {
+  auto img_res = dyn_cast_or_null<Image>(image);
+  if (!img_res || !img_res->get()) {
+    raise_warning(
+      "%s(): supplied resource is not a valid Image resource",
+      func_name + 2
+    );
+    return nullptr;
+  }
+  return img_res->get();
+}
+
 Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
   int itype = 0;
   struct gfxinfo *result = nullptr;
@@ -1861,7 +1874,7 @@ static bool _php_image_output_ctx(const Resource& image,
                                   int quality, int basefilter,
                                   int image_type, char *tn,
                                   void (*func_p)()) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   req::ptr<File> file;
   FILE *fp = nullptr;
@@ -2196,7 +2209,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 static bool _php_image_output(const Resource& image, const String& filename,
                               int quality, int type, int image_type, char *tn,
                               void (*func_p)()) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   req::ptr<File> file;
   FILE *fp;
@@ -2634,7 +2647,7 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y,
  */
 static bool php_imagechar(const Resource& image, int size, int x, int y,
                           const String& c, int color, int mode) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   int ch = 0;
   gdFontPtr font;
@@ -2673,7 +2686,7 @@ static bool php_imagechar(const Resource& image, int size, int x, int y,
 static bool php_imagepolygon(const Resource& image,
                              const Array& points, int num_points,
                              int color, int filled) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdPointPtr pts;
   int nelem, i;
@@ -2876,7 +2889,7 @@ static Variant php_imagettftext_common(int mode, int extended,
     fontname = arg7;
     str = arg8;
     extrainfo = arg9;
-    im = cast<Image>(image)->get();
+    gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
     if (!im) return false;
   }
 
@@ -3146,7 +3159,7 @@ Variant HHVM_FUNCTION(imageloadfont, const String& file) {
 }
 
 bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   int *stylearr;
   int index;
@@ -3169,10 +3182,10 @@ const StaticString
   s_height("height");
 
 Variant HHVM_FUNCTION(imagecrop, const Resource& image, const Array& rect) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
+  if (!im) return false;
   gdImagePtr imcropped = nullptr;
   gdRect gdrect;
-  if (!im) return false;
   if (rect.exists(s_x)) {
     gdrect.x = rect[s_x].toInt64();
   } else {
@@ -3211,9 +3224,9 @@ Variant HHVM_FUNCTION(imagecropauto,
                       int64_t mode /* = -1 */,
                       double threshold /* = 0.5f */,
                       int64_t color /* = -1 */) {
-  gdImagePtr im = cast<Image>(image)->get();
-  gdImagePtr imcropped = nullptr;
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
+  gdImagePtr imcropped = nullptr;
   switch (mode) {
     case -1:
       mode = GD_CROP_DEFAULT;
@@ -3261,14 +3274,14 @@ Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
 }
 
 bool f_imageistruecolor(const Resource& image) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return im->trueColor;
 }
 
 Variant HHVM_FUNCTION(imagetruecolortopalette, const Resource& image,
     bool dither, int64_t ncolors) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
 
   if (ncolors <= 0) {
@@ -3281,9 +3294,9 @@ Variant HHVM_FUNCTION(imagetruecolortopalette, const Resource& image,
 
 Variant HHVM_FUNCTION(imagecolormatch, const Resource& image1,
                                        const Resource& image2) {
-  gdImagePtr im1 = cast<Image>(image1)->get();
+  gdImagePtr im1 = get_valid_image_resource(image1, __FUNCTION__);
   if (!im1) return false;
-  gdImagePtr im2 = cast<Image>(image2)->get();
+  gdImagePtr im2 = get_valid_image_resource(image2, __FUNCTION__);
   if (!im2) return false;
   int result;
 
@@ -3308,7 +3321,7 @@ Variant HHVM_FUNCTION(imagecolormatch, const Resource& image1,
 
 bool HHVM_FUNCTION(imagesetthickness,
     const Resource& image, int64_t thickness) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageSetThickness(im, thickness);
   return true;
@@ -3316,7 +3329,7 @@ bool HHVM_FUNCTION(imagesetthickness,
 
 bool HHVM_FUNCTION(imagefilledellipse, const Resource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageFilledEllipse(im, cx, cy, width, height, color);
   return true;
@@ -3325,7 +3338,7 @@ bool HHVM_FUNCTION(imagefilledellipse, const Resource& image,
 bool HHVM_FUNCTION(imagefilledarc, const Resource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height,
     int64_t start, int64_t end, int64_t color, int64_t style) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   if (end < 0) end %= 360;
   if (start < 0) start %= 360;
@@ -3337,7 +3350,7 @@ Variant HHVM_FUNCTION(imageaffine,
                       const Resource& image,
                       const Array& affine /* = Array() */,
                       const Array& clip /* = Array() */) {
-  gdImagePtr src = cast<Image>(image)->get();
+  gdImagePtr src = get_valid_image_resource(image, __FUNCTION__);
   if (!src) return false;
   gdImagePtr dst = nullptr;
   gdRect rect;
@@ -3525,21 +3538,21 @@ Variant HHVM_FUNCTION(imageaffinematrixget,
 
 bool HHVM_FUNCTION(imagealphablending, const Resource& image,
                                        bool blendmode) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageAlphaBlending(im, blendmode);
   return true;
 }
 
 bool HHVM_FUNCTION(imagesavealpha, const Resource& image, bool saveflag) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageSaveAlpha(im, saveflag);
   return true;
 }
 
 bool HHVM_FUNCTION(imagelayereffect, const Resource& image, int64_t effect) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageAlphaBlending(im, effect);
   return true;
@@ -3548,7 +3561,7 @@ bool HHVM_FUNCTION(imagelayereffect, const Resource& image, int64_t effect) {
 Variant HHVM_FUNCTION(imagecolorallocatealpha,
     const Resource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   int ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
   if (ct < 0) {
@@ -3559,7 +3572,7 @@ Variant HHVM_FUNCTION(imagecolorallocatealpha,
 
 Variant HHVM_FUNCTION(imagecolorresolvealpha, const Resource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageColorResolveAlpha(im, red, green, blue, alpha);
 }
@@ -3567,14 +3580,14 @@ Variant HHVM_FUNCTION(imagecolorresolvealpha, const Resource& image,
 Variant HHVM_FUNCTION(imagecolorclosestalpha,
     const Resource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageColorClosestAlpha(im, red, green, blue, alpha);
 }
 
 Variant HHVM_FUNCTION(imagecolorexactalpha, const Resource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageColorExactAlpha(im, red, green, blue, alpha);
 }
@@ -3583,9 +3596,9 @@ bool HHVM_FUNCTION(imagecopyresampled,
     const Resource& dst_im, const Resource& src_im,
     int64_t dst_x, int64_t dst_y, int64_t src_x, int64_t src_y,
     int64_t dst_w, int64_t dst_h, int64_t src_w, int64_t src_h) {
-  gdImagePtr im_src = cast<Image>(src_im)->get();
+  gdImagePtr im_src = get_valid_image_resource(src_im, __FUNCTION__);
   if (!im_src) return false;
-  gdImagePtr im_dst = cast<Image>(dst_im)->get();
+  gdImagePtr im_dst = get_valid_image_resource(dst_im, __FUNCTION__);
   if (!im_dst) return false;
   gdImageCopyResampled(im_dst, im_src, dst_x, dst_y, src_x, src_y,
                        dst_w, dst_h, src_w, src_h);
@@ -3595,7 +3608,7 @@ bool HHVM_FUNCTION(imagecopyresampled,
 Variant HHVM_FUNCTION(imagerotate, const Resource& source_image,
     double angle, int64_t bgd_color,
     int64_t ignore_transparent /* = 0 */) {
-  gdImagePtr im_src = cast<Image>(source_image)->get();
+  gdImagePtr im_src = get_valid_image_resource(source_image, __FUNCTION__);
   if (!im_src) return false;
   gdImagePtr im_dst = gdImageRotate(im_src, angle, bgd_color,
                                     ignore_transparent);
@@ -3605,9 +3618,9 @@ Variant HHVM_FUNCTION(imagerotate, const Resource& source_image,
 
 #if HAVE_GD_IMAGESETTILE
 bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
-  gdImagePtr til = cast<Image>(tile)->get();
+  gdImagePtr til = get_valid_image_resource(tile, __FUNCTION__);
   if (!til) return false;
   gdImageSetTile(im, til);
   return true;
@@ -3616,9 +3629,9 @@ bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
 
 bool HHVM_FUNCTION(imagesetbrush,
     const Resource& image, const Resource& brush) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
-  gdImagePtr tile = cast<Image>(brush)->get();
+  gdImagePtr tile = get_valid_image_resource(brush, __FUNCTION__);
   if (!tile) return false;
   gdImageSetBrush(im, tile);
   return true;
@@ -3626,7 +3639,7 @@ bool HHVM_FUNCTION(imagesetbrush,
 
 bool HHVM_FUNCTION(imagesetinterpolation,
     const Resource& image, int64_t method /*=GD_BILINEAR_FIXED*/) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   if (method == -1) method = GD_BILINEAR_FIXED;
   return gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method);
@@ -3956,7 +3969,7 @@ bool HHVM_FUNCTION(imagedestroy, const Resource& image) {
 Variant HHVM_FUNCTION(imagecolorallocate,
     const Resource& image,
     int64_t red, int64_t green, int64_t blue) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   int ct = gdImageColorAllocate(im, red, green, blue);
   if (ct < 0) {
@@ -3968,7 +3981,8 @@ Variant HHVM_FUNCTION(imagecolorallocate,
 Variant HHVM_FUNCTION(imagepalettecopy,
     const Resource& dst,
     const Resource& src) {
-  gdImagePtr dstim = cast<Image>(dst)->get();
+  gdImagePtr dstim = cast<Image>(dst)->get()
+  ;
   gdImagePtr srcim = cast<Image>(src)->get();
   if (!dstim || !srcim)
     return false;
@@ -3978,7 +3992,7 @@ Variant HHVM_FUNCTION(imagepalettecopy,
 
 Variant HHVM_FUNCTION(imagecolorat,
     const Resource& image, int64_t x, int64_t y) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
 #if HAVE_LIBGD20
   if (gdImageTrueColor(im)) {
@@ -4007,21 +4021,21 @@ Variant HHVM_FUNCTION(imagecolorat,
 
 Variant HHVM_FUNCTION(imagecolorclosest,
     const Resource& image, int64_t red, int64_t green, int64_t blue) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageColorClosest(im, red, green, blue);
 }
 
 Variant HHVM_FUNCTION(imagecolorclosesthwb, const Resource& image,
     int64_t red, int64_t green, int64_t blue) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageColorClosestHWB(im, red, green, blue);
 }
 
 bool HHVM_FUNCTION(imagecolordeallocate, const Resource& image,
                                          int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
 #if HAVE_LIBGD20
   /* We can return right away for a truecolor image as deallocating colours
@@ -4040,21 +4054,21 @@ bool HHVM_FUNCTION(imagecolordeallocate, const Resource& image,
 
 Variant HHVM_FUNCTION(imagecolorresolve, const Resource& image,
     int64_t red, int64_t green, int64_t blue) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageColorResolve(im, red, green, blue);
 }
 
 Variant HHVM_FUNCTION(imagecolorexact, const Resource& image,
     int64_t red, int64_t green, int64_t blue) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageColorExact(im, red, green, blue);
 }
 
 Variant HHVM_FUNCTION(imagecolorset, const Resource& image,
     int64_t index, int64_t red, int64_t green, int64_t blue) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   if (index >= 0 && index < gdImageColorsTotal(im)) {
     im->red[index] = red;
@@ -4074,7 +4088,7 @@ const StaticString
 
 Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
                                            int64_t index) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
 #if HAVE_LIBGD20
   if ((index >= 0 && gdImageTrueColor(im)) ||
@@ -4102,7 +4116,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
 
 bool HHVM_FUNCTION(imagegammacorrect, const Resource& image,
     double inputgamma, double outputgamma) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
 #if HAVE_LIBGD20
   if (gdImageTrueColor(im))   {
@@ -4137,7 +4151,7 @@ bool HHVM_FUNCTION(imagegammacorrect, const Resource& image,
 
 bool HHVM_FUNCTION(imagesetpixel, const Resource& image,
     int64_t x, int64_t y, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageSetPixel(im, x, y, color);
   return true;
@@ -4145,7 +4159,7 @@ bool HHVM_FUNCTION(imagesetpixel, const Resource& image,
 
 bool HHVM_FUNCTION(imageline, const Resource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   color = SetupAntiAliasedColor(im, color);
   gdImageLine(im, x1, y1, x2, y2, color);
@@ -4155,7 +4169,7 @@ bool HHVM_FUNCTION(imageline, const Resource& image,
 bool HHVM_FUNCTION(imagedashedline,
     const Resource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageDashedLine(im, x1, y1, x2, y2, color);
   return true;
@@ -4163,7 +4177,7 @@ bool HHVM_FUNCTION(imagedashedline,
 
 bool HHVM_FUNCTION(imagerectangle, const Resource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageRectangle(im, x1, y1, x2, y2, color);
   return true;
@@ -4171,7 +4185,7 @@ bool HHVM_FUNCTION(imagerectangle, const Resource& image,
 
 bool HHVM_FUNCTION(imagefilledrectangle, const Resource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageFilledRectangle(im, x1, y1, x2, y2, color);
   return true;
@@ -4180,7 +4194,7 @@ bool HHVM_FUNCTION(imagefilledrectangle, const Resource& image,
 bool HHVM_FUNCTION(imagearc, const Resource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height,
     int64_t start, int64_t end, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   if (end < 0) end %= 360;
   if (start < 0) start %= 360;
@@ -4191,7 +4205,7 @@ bool HHVM_FUNCTION(imagearc, const Resource& image,
 
 bool HHVM_FUNCTION(imageellipse, const Resource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   color = SetupAntiAliasedColor(im, color);
   gdImageArc(im, cx, cy, width, height, 0, 360, color);
@@ -4200,7 +4214,7 @@ bool HHVM_FUNCTION(imageellipse, const Resource& image,
 
 bool HHVM_FUNCTION(imagefilltoborder, const Resource& image,
     int64_t x, int64_t y, int64_t border, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageFillToBorder(im, x, y, border, color);
   return true;
@@ -4208,21 +4222,21 @@ bool HHVM_FUNCTION(imagefilltoborder, const Resource& image,
 
 bool HHVM_FUNCTION(imagefill, const Resource& image,
     int64_t x, int64_t y, int64_t color) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   gdImageFill(im, x, y, color);
   return true;
 }
 
 Variant HHVM_FUNCTION(imagecolorstotal, const Resource& image) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return (gdImageColorsTotal(im));
 }
 
 Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
                                              int64_t color /* = -1 */) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   if (color != -1) {
     // has color argument
@@ -4233,7 +4247,7 @@ Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
 
 Variant HHVM_FUNCTION(imageinterlace, const Resource& image,
     int64_t interlace /* = 0 */) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   if (interlace != 0) {
     // has interlace argument
@@ -4345,13 +4359,13 @@ bool HHVM_FUNCTION(imagecopyresized, const Resource& dst_im,
 }
 
 Variant HHVM_FUNCTION(imagesx, const Resource& image) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageSX(im);
 }
 
 Variant HHVM_FUNCTION(imagesy, const Resource& image) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   return gdImageSY(im);
 }
@@ -4422,13 +4436,8 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
     int64_t filtertype,
     const Variant& arg1 /*=0*/, const Variant& arg2 /*=0*/,
     const Variant& arg3 /*=0*/, const Variant& arg4 /*=0*/) {
-  auto im = dyn_cast_or_null<Image>(res);
-  if (!im || !im->get()) {
-    raise_warning(
-      "imagefilter(): supplied resource is not a valid Image resource"
-    );
-    return false;
-  }
+  gdImagePtr im = get_valid_image_resource(res, __FUNCTION__);
+  if (!im) return false;
 
 /* Exists purely to mirror PHP5's invalid arg logic for this function */
 #define IMFILT_TYPECHK(n) \
@@ -4460,14 +4469,14 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
   };
   auto const num_filters = sizeof(filters) / sizeof(image_filter);
   if (filtertype >= 0 && filtertype < num_filters) {
-    return filters[filtertype](im->get(), arg1.toInt64(), arg2.toInt64(),
+    return filters[filtertype](im, arg1.toInt64(), arg2.toInt64(),
                                           arg3.toInt64(), arg4.toInt64());
   }
   return false;
 }
 
 bool HHVM_FUNCTION(imageflip, const Resource& image, int64_t mode /* = -1 */) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   if (mode == -1) mode = GD_FLIP_HORINZONTAL;
 
@@ -4602,7 +4611,7 @@ bool HHVM_FUNCTION(imageconvolution, const Resource& image,
 }
 
 bool HHVM_FUNCTION(imageantialias, const Resource& image, bool on) {
-  gdImagePtr im = cast<Image>(image)->get();
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
   SetAntiAliased(im, on);
   return true;
@@ -4610,9 +4619,9 @@ bool HHVM_FUNCTION(imageantialias, const Resource& image, bool on) {
 
 Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
   int64_t newheight /* =-1 */, int64_t method /*=GD_BILINEAR_FIXED*/) {
-  gdImagePtr im = cast<Image>(image)->get();
-  gdImagePtr imscaled = nullptr;
+  gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
   if (!im) return false;
+  gdImagePtr imscaled = nullptr;
   if (method == -1) method = GD_BILINEAR_FIXED;
 
   if (newheight < 0) {

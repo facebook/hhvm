@@ -356,7 +356,7 @@ static void *fontFetch (char **error, void *key)
 	int font_found = 0;
 	unsigned short platform, encoding;
 	char *fontsearchpath, *fontlist;
-	char fullname[MAXPATHLEN], cur_dir[MAXPATHLEN];
+	char fullname[PATH_MAX], cur_dir[PATH_MAX];
 	char *name, *path=NULL, *dir;
 	char *strtok_ptr;
 	FT_Error err;
@@ -395,7 +395,6 @@ static void *fontFetch (char **error, void *key)
 		for (dir = gd_strtok_r (path, PATHSEPARATOR, &strtok_ptr_path); dir;
 		     dir = gd_strtok_r (0, PATHSEPARATOR, &strtok_ptr_path)) {
 			if (!strcmp(dir, ".")) {
-				TSRMLS_FETCH();
 				dir = getcwd(cur_dir, MAXPATHLEN);
 				if (!dir) {
 					continue;

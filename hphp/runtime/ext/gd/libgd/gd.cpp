@@ -5,7 +5,6 @@
 #include <cstdlib>
 
 #include "gdhelpers.h"
-#include "php.h"
 
 #include "hphp/runtime/base/memory-manager.h"
 
@@ -76,21 +75,28 @@ void php_gd_error_ex(int type, const char *format, ...)
 {
 	va_list args;
 
-	TSRMLS_FETCH();
-
 	va_start(args, format);
-	php_verror(NULL, "", type, format, args TSRMLS_CC);
-	va_end(args);
+  std::string msg;
+  HPHP::string_vsnprintf(msg, format, args);
+  va_end(args);
+
+  if (type == E_ERROR) {
+    HPHP::raise_error(msg);
+  } else if (type == E_WARNING) {
+    HPHP::raise_warning(msg);
+  } else if (type == E_NOTICE) {
+    HPHP::raise_notice(msg);
+  }
 }
 
 void php_gd_error(const char *format, ...)
 {
 	va_list args;
 
-	TSRMLS_FETCH();
-
 	va_start(args, format);
-	php_verror(NULL, "", E_WARNING, format, args TSRMLS_CC);
+  std::string msg;
+  HPHP::string_vsnprintf(msg, format, args);
+  HPHP::raise_warning(msg);
 	va_end(args);
 }
 
@@ -1944,7 +1950,7 @@ skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 		} while (x<=x2);
 	}
 
-	efree(stack);
+	gdFree(stack);
 
 done:
 	im->alphaBlendingFlag = alphablending_bak;
@@ -1968,9 +1974,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 
 	nc =  gdImageTileGet(im,x,y);
 
-	pts = (char **) ecalloc(im->sy + 1, sizeof(char *));
+	pts = (char **) gdCalloc(im->sy + 1, sizeof(char *));
 	for (i = 0; i < im->sy + 1; i++) {
-		pts[i] = (char *) ecalloc(im->sx + 1, sizeof(char));
+		pts[i] = (char *) gdCalloc(im->sx + 1, sizeof(char));
 	}
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
@@ -2016,11 +2022,11 @@ skip:		for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
 	}
 
 	for(i = 0; i < im->sy + 1; i++) {
-		efree(pts[i]);
+    gdFree(pts[i]);
 	}
 
-	efree(pts);
-	efree(stack);
+  gdFree(pts);
+  gdFree(stack);
 }
 
 

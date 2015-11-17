@@ -62,9 +62,6 @@ if (EXISTS "${HPHP_HOME}/deps/")
   set(ICU_LIBRARY "debug;${libRoot}/sicuucd.lib;optimized;${libRoot}/sicuuc.lib" CACHE FILEPATH "")
   set(ICU_STATIC ON CACHE BOOL "")
 
-  set(Intl_INCLUDE_DIR "${incRoot}" CACHE PATH "")
-  set(Intl_LIBRARY "debug;${libRoot}/libintlMTd.lib;optimized;${libRoot}/libintlMT.lib" CACHE FILEPATH "")
-
   set(LIBEVENT_INCLUDE_DIR "${incRoot}" CACHE PATH "")
   set(LIBEVENT_LIB "general;Ws2_32.lib;debug;${libRoot}/eventMTd.lib;debug;${libRoot}/event_coreMTd.lib;debug;${libRoot}/event_extraMTd.lib;optimized;${libRoot}/eventMT.lib;optimized;${libRoot}/event_coreMT.lib;optimized;${libRoot}/event_extraMT.lib" CACHE FILEPATH "")
 
@@ -75,6 +72,9 @@ if (EXISTS "${HPHP_HOME}/deps/")
   set(LIBICONV_INCLUDE_DIR "${incRoot}" CACHE PATH "")
   set(LIBICONV_LIBRARY "debug;${libRoot}/iconvMTd.lib;optimized;${libRoot}/iconvMT.lib" CACHE FILEPATH "")
   set(LIBICONV_CONST ON CACHE BOOL "")
+
+  set(LIBINTL_INCLUDE_DIR "${incRoot}" CACHE PATH "")
+  set(LIBINTL_LIBRARY "debug;${libRoot}/libintlMTd.lib;optimized;${libRoot}/libintlMT.lib" CACHE FILEPATH "")
 
   set(LIBJPEG_INCLUDE_DIRS "${incRoot}" CACHE PATH "")
   set(LIBJPEG_LIBRARIES "debug;${libRoot}/libjpegMTd.lib;optimized;${libRoot}/libjpegMT.lib" CACHE FILEPATH "")

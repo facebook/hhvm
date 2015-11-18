@@ -126,7 +126,12 @@ struct InliningDecider {
    * must be called immediately to correctly reset the internal inlining costs.
    */
   bool shouldInline(const Func* callee, const RegionDesc& region,
-                    bool& needsMerge);
+                    uint32_t maxTotalCost);
+
+  /*
+   * Update our context to account for the beginning of an inlined call.
+   */
+  void accountForInlining(const Func* callee, const RegionDesc& region);
 
   /*
    * Update internal state for when an inlining event ends.
@@ -165,6 +170,7 @@ private:
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const IRGS& irgs,
+                                 InliningDecider& inl,
                                  int32_t maxBCInstrs);
 
 ///////////////////////////////////////////////////////////////////////////////

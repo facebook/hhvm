@@ -511,6 +511,7 @@ public:
   F(uint32_t, HHIRInliningMaxBindJmps, 0)                               \
   F(uint32_t, HHIRInliningMaxReturns,  3)                               \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
+  F(uint32_t, HHIRPGOInliningMaxCost,  6)                               \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \

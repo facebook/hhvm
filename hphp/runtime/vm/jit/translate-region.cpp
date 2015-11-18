@@ -491,6 +491,14 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
   not_reached();
 }
 
+uint32_t countRets(const RegionDesc& region) {
+  uint32_t count = 0;
+  for (auto const& block : region.blocks()) {
+    if (isReturnish(block->last().op())) count++;
+  }
+  return count;
+}
+
 /*
  * If `psk' is not an FCall{,D} with inlinable `callee', return nullptr.
  *
@@ -537,15 +545,15 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, maxBCInstrs);
+  auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, inl,
+                                         maxBCInstrs);
   if (!calleeRegion || calleeRegion->instrSize() > maxBCInstrs) {
     return nullptr;
   }
 
-  // Return the callee region if it's inlinable and update `inl'.
-  return inl.shouldInline(callee, *calleeRegion, needsMerge)
-    ? calleeRegion
-    : nullptr;
+  inl.accountForInlining(callee, *calleeRegion);
+  needsMerge = countRets(*calleeRegion) > 1;
+  return calleeRegion;
 }
 
 TranslateResult irGenRegion(IRGS& irgs,

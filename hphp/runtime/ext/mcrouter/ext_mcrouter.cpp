@@ -109,8 +109,7 @@ class MCRouter {
     m_client = router->createClient(
       {onReply,onCancel,nullptr},
       this,
-      0,
-      false);
+      0);
 
     if (!m_client) {
       throw mcr_getException("Unable to initilize MCRouterClient instance");

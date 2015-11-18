@@ -177,8 +177,6 @@ inline bool ObjectData::getAttribute(Attribute attr) const {
   return m_hdr.aux & attr;
 }
 
-inline uint16_t ObjectData::getAttributes() const { return m_hdr.aux; }
-
 inline void ObjectData::setAttribute(Attribute attr) {
   m_hdr.aux |= attr;
 }
@@ -193,6 +191,10 @@ inline void ObjectData::setNoDestruct() {
 
 inline void ObjectData::clearNoDestruct() {
   m_hdr.aux &= ~NoDestructor;
+}
+
+inline bool ObjectData::hasInstanceDtor() const {
+  return m_hdr.aux & (IsCppBuiltin | HasNativeData);
 }
 
 inline int ObjectData::getId() const {

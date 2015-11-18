@@ -125,8 +125,8 @@ class c_WaitHandle : public ObjectData {
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
                         HeaderKind kind = HeaderKind::WaitHandle) noexcept
     : ObjectData(cls,
-                 ObjectData::IsWaitHandle|ObjectData::NoDestructor|
-                   ObjectData::InstanceDtor,
+                 ObjectData::IsWaitHandle | ObjectData::NoDestructor |
+                 ObjectData::IsCppBuiltin | ObjectData::HasNativeData,
                  kind,
                  NoInit{}) {}
   ~c_WaitHandle() {}

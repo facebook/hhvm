@@ -548,7 +548,7 @@ bool supportsToArray(ObjectData* obj) {
   } else if (UNLIKELY(obj->instanceof(DateTimeData::getClass()))) {
     return true;
   } else {
-    if (LIKELY(!obj->getAttribute(ObjectData::InstanceDtor))) {
+    if (LIKELY(!obj->hasInstanceDtor())) {
       return true;
     }
 

@@ -152,15 +152,15 @@ NEVER_INLINE
 void ObjectData::releaseNoObjDestructCheck() noexcept {
   assert(kindIsValid());
 
-  auto const attrs = getAttributes();
-
-  if (UNLIKELY(!(attrs & Attribute::NoDestructor))) {
+  if (UNLIKELY(!getAttribute(NoDestructor))) {
     if (UNLIKELY(!destructImpl())) return;
   }
 
   auto const cls = getVMClass();
 
-  if (UNLIKELY(attrs & InstanceDtor))  return cls->instanceDtor()(this, cls);
+  if (UNLIKELY(hasInstanceDtor())) {
+    return cls->instanceDtor()(this, cls);
+  }
 
   assert(!cls->preClass()->builtinObjSize());
   assert(!cls->preClass()->builtinODOffset());
@@ -177,7 +177,7 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
 
   // Deliberately reload `attrs' to check for dynamic properties.  This made
   // gcc generate better code at the time it was done (saving a spill).
-  if (UNLIKELY(getAttributes() & HasDynPropArr)) freeDynPropArray(this);
+  if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
 
   auto& pmax = os_max_id;
   if (o_id && o_id == pmax) --pmax;

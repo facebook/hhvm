@@ -81,8 +81,7 @@ struct ObjectData {
                             // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     HasNativePropHandler    // class has native magic props handler
-                  = 0x8000,
-    InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
+                  = 0x8000
   };
 
   enum {
@@ -179,9 +178,8 @@ struct ObjectData {
   HeaderKind headerKind() const;
 
   bool getAttribute(Attribute) const;
-  uint16_t getAttributes() const;
   void setAttribute(Attribute);
-
+  bool hasInstanceDtor() const;
   bool noDestruct() const;
   void setNoDestruct();
   void clearNoDestruct();

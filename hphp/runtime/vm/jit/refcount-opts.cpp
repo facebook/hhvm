@@ -3314,6 +3314,95 @@ void rcgraph_opts(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * sink_incs() is a simple pass that sinks IncRefs of values that may
+ * be uncount past some safe instructions.  These are instructions
+ * that cannot observe the reference count and so we can sink IncRefs
+ * across them regardless of their lower bounds.  The goal is to sink
+ * IncRefs past Check* and Assert* instructions that may provide
+ * further type information to enable more specialized IncRefs (or
+ * even completely eliminate them).
+ */
+
+bool can_sink_inc_through(const IRInstruction& inst) {
+  switch (inst.op()) {
+    // these refine the type
+    case AssertType:
+    case AssertLoc:
+    case AssertStk:  return true;
+
+    // these commonly occur along with type guards
+    case LdLoc:
+    case LdStk:
+    case InlineReturn:
+    case InlineReturnNoFrame:
+    case Nop:
+                     return true;
+
+    // this avoids iterating to find new
+    // opportunities after moving other IncRefs
+    case IncRef:     return true;
+
+    default:         return false;
+  }
+}
+
+void sink_incs(Env& env) {
+  FTRACE(2, "sink_incs ---------------------------------\n");
+  jit::vector<IRInstruction*> incs;
+
+  // Find all IncRefs in the unit.
+  for (auto& blk : env.rpoBlocks) {
+    for (auto& inst : *blk) {
+      if (inst.is(IncRef)) {
+        incs.push_back(&inst);
+      }
+    }
+  }
+
+  // Process each of the IncRefs, including new ones that are created
+  // along the way.
+  while (!incs.empty()) {
+    auto inc = incs.back();
+    incs.pop_back();
+
+    auto block  = inc->block();
+    auto marker = inc->marker();
+    auto tmp    = inc->src(0);
+    if (!tmp->type().maybe(TUncounted)) continue;
+
+    auto iter = block->iteratorTo(inc);
+    auto iterOrigSucc = ++iter;
+    while (can_sink_inc_through(*iter)) {
+      iter++;
+    }
+
+    auto const& succ = *iter;
+    if (succ.is(CheckType, CheckLoc, CheckStk)) {
+      // try to sink past Check* instructions
+      if (!can_sink(env, inc, block)) continue;
+
+      auto const new_taken = env.unit.gen(IncRef, marker, tmp);
+      auto const new_next  = env.unit.gen(IncRef, marker, tmp);
+      block->taken()->prepend(new_taken);
+      block->next()->prepend(new_next);
+      incs.push_back(new_taken);
+      incs.push_back(new_next);
+      FTRACE(2, "    ** sink_incs: {} -> {}, {}\n",
+             *inc, *new_taken, *new_next);
+      remove_helper(inc);
+
+    } else if (iter != iterOrigSucc) {
+      // insert the inc right before succ if we advanced any instruction
+      auto const new_inc = env.unit.gen(IncRef, marker, tmp);
+      block->insert(iter, new_inc);
+      FTRACE(2, "    ** sink_incs: {} -> {}, {}\n", *inc, *new_inc);
+      remove_helper(inc);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3332,6 +3421,7 @@ void optimizeRefcounts(IRUnit& unit) {
   weaken_decrefs(env);
   rcgraph_opts(env);
   remove_trivial_incdecs(env);
+  sink_incs(env);
 
   // We may have pushed IncRefs past CheckTypes, which could allow us to
   // specialize them.

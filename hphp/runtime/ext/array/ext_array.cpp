@@ -1613,7 +1613,7 @@ TypedValue HHVM_FUNCTION(range,
         return tvReturn(ArrayUtil::Range(d1, d2, dstep));
       }
 
-      int64_t lstep = (int64_t) dstep;
+      int64_t lstep = toInt64(dstep);
       if (type1 == KindOfInt64 || type2 == KindOfInt64) {
         if (type1 != KindOfInt64) n1 = slow.toInt64();
         if (type2 != KindOfInt64) n2 = shigh.toInt64();
@@ -1629,7 +1629,7 @@ TypedValue HHVM_FUNCTION(range,
     return tvReturn(ArrayUtil::Range(low.toDouble(), high.toDouble(), dstep));
   }
 
-  int64_t lstep = (int64_t) dstep;
+  int64_t lstep = toInt64(dstep);
   return tvReturn(ArrayUtil::Range(low.toDouble(), high.toDouble(), lstep));
 }
 ///////////////////////////////////////////////////////////////////////////////

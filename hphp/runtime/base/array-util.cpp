@@ -215,7 +215,7 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
     }
     rangeCheckAlloc((low - high) / step);
     for (; low >= high; low -= step) {
-      ret.append((int64_t)low);
+      ret.append(toInt64(low));
     }
   } else if (high > low) { // Positive steps
     if (high - low < step || step <= 0) {
@@ -224,10 +224,10 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
     }
     rangeCheckAlloc((high - low) / step);
     for (; low <= high; low += step) {
-      ret.append((int64_t)low);
+      ret.append(toInt64(low));
     }
   } else {
-    ret.append((int64_t)low);
+    ret.append(toInt64(low));
   }
   return ret;
 }

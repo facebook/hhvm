@@ -2889,7 +2889,7 @@ static Variant php_imagettftext_common(int mode, int extended,
     fontname = arg7;
     str = arg8;
     extrainfo = arg9;
-    gdImagePtr im = get_valid_image_resource(image, __FUNCTION__);
+    im = get_valid_image_resource(image, __FUNCTION__);
     if (!im) return false;
   }
 

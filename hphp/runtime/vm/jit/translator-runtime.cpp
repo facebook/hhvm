@@ -1029,7 +1029,7 @@ const Func* lookupFallbackFunc(const StringData* name,
   return func;
 }
 
-Class* lookupKnownClass(Class** cache, const StringData* clsName) {
+Class* lookupKnownClass(LowPtr<Class>* cache, const StringData* clsName) {
   Class* cls = *cache;
   assertx(!cls); // the caller should already have checked
 

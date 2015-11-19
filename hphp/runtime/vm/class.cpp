@@ -324,7 +324,7 @@ void Class::destroy() {
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
-  m_cachedClass = rds::Link<Class*>(rds::kInvalidHandle);
+  m_cachedClass = rds::Link<LowPtr<Class>>(rds::kInvalidHandle);
 
   /*
    * Regardless of refCount, this Class is now unusable.  Remove it
@@ -673,6 +673,8 @@ void Class::initSProps() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Property storage.
 
+static rds::Link<bool> s_persistentTrue{rds::kInvalidHandle};
+
 void Class::initSPropHandles() const {
   if (m_sPropCacheInit.bound()) return;
 
@@ -728,11 +730,14 @@ void Class::initSPropHandles() const {
   if (allPersistentHandles) {
     // We must make sure the value stored at the handle is correct before
     // setting m_sPropCacheInit in case another thread tries to read it at just
-    // the wrong time.
-    rds::Link<bool> tmp{rds::kInvalidHandle};
-    tmp.bind(rds::Mode::Persistent);
-    *tmp = true;
-    m_sPropCacheInit = tmp;
+    // the wrong time. And rather than giving each Class its own persistent
+    // handle that always points to an immutable 'true', share one between all
+    // of them.
+    if (!s_persistentTrue.bound()) {
+      s_persistentTrue.bind(rds::Mode::Persistent);
+      *s_persistentTrue = true;
+    }
+    m_sPropCacheInit = s_persistentTrue;
   } else {
     m_sPropCacheInit.bind();
   }

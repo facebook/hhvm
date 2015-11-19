@@ -192,7 +192,7 @@ const Func* loadClassCtor(Class* cls);
 const Func* lookupUnknownFunc(const StringData*);
 const Func* lookupFallbackFunc(const StringData*, const StringData*);
 
-Class* lookupKnownClass(Class** cache, const StringData* clsName);
+Class* lookupKnownClass(LowPtr<Class>* cache, const StringData* clsName);
 
 TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const NamedEntity* ne,

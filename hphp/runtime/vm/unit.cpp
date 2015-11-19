@@ -1350,7 +1350,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
       do {
         Func* func = *it;
         assert(func->top());
-        getDataRef<Func*>(tcbase, func->funcHandle()) = func;
+        getDataRef<LowPtr<Func>>(tcbase, func->funcHandle()) = func;
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
@@ -1391,12 +1391,13 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
               rds::isPersistentHandle(parent->classHandle())) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
           }
-          if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->classHandle()))) {
+          if (UNLIKELY(!getDataRef<LowPtr<Class>>(tcbase,
+                                                  parent->classHandle()))) {
             redoHoistable = true;
             continue;
           }
         }
-        getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
+        getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
         if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
@@ -1474,7 +1475,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
             raise_error("unknown class %s", other->name()->data());
           }
           assert(avail == Class::Avail::True);
-          getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
+          getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);

@@ -180,7 +180,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->setFullName(numParams);
 
   if (f != this) {
-    f->m_cachedFunc = rds::Link<Func*>{rds::kInvalidHandle};
+    f->m_cachedFunc = rds::Link<LowPtr<Func>>{rds::kInvalidHandle};
     f->m_maybeIntercepted = -1;
     f->m_isPreFunc = false;
   }

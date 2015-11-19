@@ -1468,11 +1468,10 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   });
 }
 
-Vreg CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst) {
-  auto const name = inst->extra<LdFuncCachedData>()->name;
+Vreg CodeGenerator::cgLdFuncCachedCommon(const StringData* name, Vreg dst) {
   auto const ch   = NamedEntity::get(name)->getFuncHandle();
   auto& v = vmain();
-  v << load{rvmtl()[ch], dst};
+  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Func>));
   auto const sf = v.makeReg();
   v << testq{dst, dst, sf};
   return sf;
@@ -1481,7 +1480,8 @@ Vreg CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst) {
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   auto& v = vmain();
   auto dst1 = v.makeReg();
-  auto const sf = cgLdFuncCachedCommon(inst, dst1);
+  auto const sf =
+    cgLdFuncCachedCommon(inst->extra<LdFuncCachedData>()->name, dst1);
   unlikelyCond(v, vcold(), CC_Z, sf, dstLoc(inst, 0).reg(), [&] (Vout& v) {
     auto dst2 = v.makeReg();
     const Func* (*const func)(const StringData*) = lookupUnknownFunc;
@@ -1499,20 +1499,17 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  cgLdFuncCachedCommon(inst, dstLoc(inst, 0).reg());
+  cgLdFuncCachedCommon(inst->extra<LdFuncCachedData>()->name,
+                       dstLoc(inst, 0).reg());
 }
 
 void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
   auto const dstReg    = dstLoc(inst, 0).reg();
   auto const extra     = inst->extra<LdFuncCachedU>();
-  auto const hFunc     = NamedEntity::get(extra->name)->getFuncHandle();
-  auto& v = vmain();
 
-  // Check the first function handle, otherwise try to autoload.
-  auto dst1 = v.makeReg();
-  v << load{rvmtl()[hFunc], dst1};
-  auto const sf = v.makeReg();
-  v << testq{dst1, dst1, sf};
+  auto& v = vmain();
+  auto const dst1 = v.makeReg();
+  auto const sf = cgLdFuncCachedCommon(extra->name, dst1);
 
   unlikelyCond(v, vcold(), CC_Z, sf, dstReg, [&] (Vout& v) {
     // If we get here, things are going to be slow anyway, so do all the
@@ -3834,7 +3831,8 @@ void CodeGenerator::cgLdClsMethodCacheCommon(IRInstruction* inst, Offset off) {
   auto const methodName = extra.methodName;
   auto const ch = StaticMethodCache::alloc(clsName, methodName,
                                      getContextName(getClass(inst->marker())));
-  vmain() << load{rvmtl()[ch + off], dstReg};
+  static_assert(sizeof(LowPtr<const Class>) == sizeof(LowPtr<const Func>), "");
+  emitLdLowPtr(vmain(), rvmtl()[ch + off], dstReg, sizeof(LowPtr<const Class>));
 }
 
 void CodeGenerator::cgLdClsMethodCacheFunc(IRInstruction* inst) {
@@ -3903,7 +3901,7 @@ void CodeGenerator::cgLdClsMethodFCacheFunc(IRInstruction* inst) {
   auto const ch = StaticMethodFCache::alloc(
     clsName, methodName, getContextName(getClass(inst->marker()))
   );
-  vmain() << load{rvmtl()[ch], dstReg};
+  emitLdLowPtr(vmain(), rvmtl()[ch], dstReg, sizeof(LowPtr<const Func>));
 }
 
 void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
@@ -4001,7 +3999,7 @@ rds::Handle CodeGenerator::cgLdClsCachedCommon(Vout& v, IRInstruction* inst,
                                                Vreg dst, Vreg sf) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
-  v << load{rvmtl()[ch], dst};
+  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Class>));
   v << testq{dst, dst, sf};
   return ch;
 }
@@ -4013,8 +4011,7 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   auto ch = cgLdClsCachedCommon(v, inst, dst1, sf);
   unlikelyCond(v, vcold(), CC_E, sf, dstLoc(inst, 0).reg(), [&] (Vout& v) {
     auto dst2 = v.makeReg();
-    Class* (*const func)(Class**, const StringData*) = jit::lookupKnownClass;
-    cgCallHelper(v, CallSpec::direct(func), callDest(dst2),
+    cgCallHelper(v, CallSpec::direct(jit::lookupKnownClass), callDest(dst2),
                  SyncOptions::Sync,
                  argGroup(inst).addr(rvmtl(), safe_cast<int32_t>(ch))
                            .ssa(0));
@@ -4035,7 +4032,7 @@ void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
   auto const ch   = srcLoc(inst, 0).reg();
   const Vreg rds = rvmtl();
   auto& v = vmain();
-  v << load{rds[ch], dreg};
+  emitLdLowPtr(v, rds[ch], dreg, sizeof(LowPtr<Class>));
 }
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {

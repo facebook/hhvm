@@ -189,8 +189,8 @@ struct NamedEntity {
   // Data members.
 
 public:
-  mutable rds::Link<Class*> m_cachedClass;
-  mutable rds::Link<Func*> m_cachedFunc;
+  mutable rds::Link<LowPtr<Class>> m_cachedClass;
+  mutable rds::Link<LowPtr<Func>> m_cachedFunc;
   mutable rds::Link<TypeAliasReq> m_cachedTypeAlias;
 
 private:

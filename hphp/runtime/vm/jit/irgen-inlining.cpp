@@ -95,7 +95,7 @@ bool beginInlining(IRGS& env,
     return gen(env, LdStk, TCtx, IRSPOffsetData{ctxOff}, sp(env));
   }();
 
-  if (debug) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
     IRSPOffset arOff = offsetFromIRSP(env, BCSPOffset{0});
     auto arFunc = gen(env, LdARFuncPtr, IRSPOffsetData{arOff}, sp(env));
     gen(env, DbgAssertFunc, arFunc, cns(env, target));

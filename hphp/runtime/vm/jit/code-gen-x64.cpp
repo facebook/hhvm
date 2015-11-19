@@ -1906,7 +1906,7 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInlineReturnNoFrame(IRInstruction* inst) {
-  if (debug) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
     auto const offset = cellsToBytes(
       inst->extra<InlineReturnNoFrame>()->frameOffset.offset);
     for (auto i = 0; i < kNumActRecCells; ++i) {

@@ -1468,7 +1468,7 @@ public:
     switch (option) {
 #if LIBCURL_VERSION_NUM >= 0x071000 /* 7.16.0 */
       case CURLMOPT_PIPELINING:
-#endif
+
 #if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
       case CURLMOPT_MAXCONNECTS:
 #endif
@@ -1476,7 +1476,7 @@ public:
                                   (CURLMoption)option,
                                   value.toInt64());
         break;
-
+#endif
       default:
         raise_warning("curl_multi_setopt():"
                       "Invalid curl multi configuration option");

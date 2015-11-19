@@ -974,13 +974,11 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (RuntimeOption::EvalEnableNuma) {
 #ifdef USE_JEMALLOC
-    uint64_t epoch = 1;
     unsigned narenas;
-    size_t sz = sizeof(narenas);
     size_t mib[3];
     size_t miblen = 3;
-    if (mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch)) == 0 &&
-        mallctl("arenas.narenas", &narenas, &sz, nullptr, 0) == 0 &&
+    if (mallctlWrite("epoch", 1, true) == 0 &&
+        mallctlRead("arenas.narenas", &narenas, true) == 0 &&
         mallctlnametomib("arena.0.purge", mib, &miblen) == 0) {
       mib[1] = size_t(narenas);
       mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);

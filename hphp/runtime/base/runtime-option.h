@@ -513,7 +513,7 @@ public:
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
   F(uint32_t, HHIRPGOInliningMaxCost,  6)                               \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
-  F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
+  F(uint32_t, HHIRInliningMaxReturnDecRefs, 6)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \
   F(std::string, InlineRegionMode,     "both")                          \

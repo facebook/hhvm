@@ -44,6 +44,8 @@ const StaticString
   s_count("count"),
   s_ini_get("ini_get"),
   s_dirname("dirname"),
+  s_86metadata("86metadata"),
+  s_set_frame_metadata("hh\\set_frame_metadata"),
   s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
@@ -448,6 +450,20 @@ SSATmp* opt_abs(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
+SSATmp* opt_set_frame_metadata(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+  auto func = curFunc(env);
+  if (func->isPseudoMain() || (func->attrs() & AttrMayUseVV)) return nullptr;
+  auto const local = func->lookupVarId(s_86metadata.get());
+  if (local == kInvalidId) return nullptr;
+  auto oldVal = ldLoc(env, local, nullptr, DataTypeCountness);
+  auto newVal = topC(env);
+  stLocRaw(env, local, fp(env), newVal);
+  decRef(env, oldVal);
+  gen(env, IncRef, newVal);
+  return cns(env, TInitNull);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool optimizedFCallBuiltin(IRGS& env,
@@ -479,6 +495,7 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(max2)
     X(min2)
     X(dirname)
+    X(set_frame_metadata)
 
 #undef X
 

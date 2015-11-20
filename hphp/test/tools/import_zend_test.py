@@ -642,6 +642,7 @@ norepo_tests = (
 
 # Random other files that zend wants
 other_files = (
+    '/ext/bz2/tests/003.txt.bz2',
     '/ext/bz2/tests/004_1.txt.bz2',
     '/ext/bz2/tests/004_2.txt.bz2',
     '/ext/calendar/tests/skipif.inc',

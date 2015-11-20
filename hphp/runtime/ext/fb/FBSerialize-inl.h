@@ -323,7 +323,7 @@ FBUnserializer<V>::FBUnserializer(folly::StringPiece serialized) :
 
 template <class V>
 inline void FBUnserializer<V>::need(size_t n) const {
-  if (UNLIKELY(n > end_ - p_)) {
+  if (UNLIKELY(p_ + n > end_)) {
     throw UnserializeError("Unexpected end");
   }
 }

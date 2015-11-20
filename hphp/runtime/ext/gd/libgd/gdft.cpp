@@ -395,7 +395,7 @@ static void *fontFetch (char **error, void *key)
 		for (dir = gd_strtok_r (path, PATHSEPARATOR, &strtok_ptr_path); dir;
 		     dir = gd_strtok_r (0, PATHSEPARATOR, &strtok_ptr_path)) {
 			if (!strcmp(dir, ".")) {
-				dir = getcwd(cur_dir, MAXPATHLEN);
+				dir = getcwd(cur_dir, PATH_MAX);
 				if (!dir) {
 					continue;
 				}

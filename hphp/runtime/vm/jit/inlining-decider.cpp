@@ -285,6 +285,23 @@ bool isInliningVVSafe(Op op) {
 }
 
 /*
+ * Opcodes that don't contribute to the inlining cost (i.e. produce no codegen).
+ */
+bool isFreeOp(Op op) {
+  switch (op) {
+  case Op::AssertRATL:
+  case Op::AssertRATStk:
+  case Op::BoxRNop:
+  case Op::Nop:
+  case Op::RGetCNop:
+  case Op::UnboxRNop:
+    return true;
+  default:
+    return false;
+  }
+}
+
+/*
  * Compute estimated cost of inlining `region'.
  */
 int computeCost(const RegionDesc& region) {
@@ -295,8 +312,7 @@ int computeCost(const RegionDesc& region) {
     for (auto i = 0, n = block->length(); i < n; ++i, sk.advance()) {
       auto op = sk.op();
 
-      // Assert opcodes don't contribute to the inlining cost.
-      if (op == Op::AssertRATL || op == Op::AssertRATStk) continue;
+      if (isFreeOp(op)) continue;
 
       cost += 1;
 

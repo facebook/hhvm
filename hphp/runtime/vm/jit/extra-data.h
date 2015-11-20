@@ -314,7 +314,14 @@ struct IRSPOffsetData : IRExtraData {
  */
 struct RelOffsetData : IRExtraData {
   explicit RelOffsetData(BCSPOffset bcSpOffset, IRSPOffset irSpOffset)
-    : bcSpOffset(bcSpOffset)
+    : hasBcSpOffset(true)
+    , bcSpOffset(bcSpOffset)
+    , irSpOffset(irSpOffset)
+  {}
+
+  explicit RelOffsetData(IRSPOffset irSpOffset)
+    : hasBcSpOffset(false)
+    , bcSpOffset(BCSPOffset{-1})
     , irSpOffset(irSpOffset)
   {}
 
@@ -323,7 +330,7 @@ struct RelOffsetData : IRExtraData {
   }
   size_t hash() const {
     return hash_int64_pair(
-      std::hash<int32_t>()(bcSpOffset.offset),
+      std::hash<int32_t>()(hasBcSpOffset ? bcSpOffset.offset : -1),
       std::hash<int32_t>()(irSpOffset.offset)
     );
   }
@@ -335,6 +342,13 @@ struct RelOffsetData : IRExtraData {
     );
   }
 
+  /*
+   * Note: In certain situations we replace instructions that operate on locals
+   * with stack relative instructions for inlined calls. The bcSpOffset field
+   * is only used when visiting guards at the time of this writing, and inlined
+   * callee stack cells will never be in the guards for a translation.
+   */
+  bool hasBcSpOffset;
   BCSPOffset bcSpOffset;
   IRSPOffset irSpOffset;
 };

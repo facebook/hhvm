@@ -188,6 +188,13 @@ struct IRUnit {
    */
   SSATmp* mainFP() const;
 
+  /*
+   * Return the main StkPtr for the unit.  This is the result of the DefSP
+   * instruction on the entry block. (note that tere should be no other stack
+   * pointers in the unit).
+   */
+  SSATmp* mainSP() const;
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*

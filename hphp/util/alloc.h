@@ -23,9 +23,7 @@
 
 #include <folly/Portability.h>
 
-#include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/logger.h"
 
 #ifdef FOLLY_SANITIZE_ADDRESS
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
@@ -260,52 +258,7 @@ void numa_bind_to(void* start, size_t size, int node);
 
 #ifdef USE_JEMALLOC
 
-/*
- * mallctl wrappers.
- */
-
-/*
- * Call mallctl, reading/writing values of type <T> if out/in are non-null,
- * respectively.  Assert/log on error, depending on errOk.
- */
-template <typename T>
-int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
-#ifdef USE_JEMALLOC
-  assert(mallctl != nullptr);
-  size_t outLen = sizeof(T);
-  int err = mallctl(cmd,
-                    out, out ? &outLen : nullptr,
-                    in, in ? sizeof(T) : 0);
-#else
-  int err = ENOENT;
-#endif
-  if (err != 0) {
-    std::string errStr =
-      folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
-    Logger::Warning(errStr);
-    always_assert(errOk || err == 0);
-  }
-  return err;
-}
-
-template <typename T>
-int mallctlReadWrite(const char *cmd, T* out, T in, bool errOk=false) {
-  return mallctlHelper(cmd, out, &in, errOk);
-}
-
-template <typename T>
-int mallctlRead(const char* cmd, T* out, bool errOk=false) {
-  return mallctlHelper(cmd, out, static_cast<T*>(nullptr), errOk);
-}
-
-template <typename T>
-int mallctlWrite(const char* cmd, T in, bool errOk=false) {
-  return mallctlHelper(cmd, static_cast<T*>(nullptr), &in, errOk);
-}
-
-int mallctlCall(const char* cmd, bool errOk=false);
-
-/*
+/**
  * jemalloc pprof utility functions.
  */
 int jemalloc_pprof_enable();

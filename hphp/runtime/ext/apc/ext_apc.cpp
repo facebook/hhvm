@@ -604,20 +604,25 @@ void apc_load(int thread) {
 #ifdef USE_JEMALLOC
     size_t allocated_before = 0;
     size_t allocated_after = 0;
+    size_t sz = sizeof(size_t);
     if (mallctl) {
-      mallctlWrite("epoch", 1);
-      mallctlRead("stats.allocated", &allocated_before);
+      uint64_t epoch = 1;
+      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+      mallctl("stats.allocated", &allocated_before, &sz, nullptr, 0);
       // Ignore the first result because it may be inaccurate due to internal
       // allocation.
-      mallctlWrite("epoch", 1);
-      mallctlRead("stats.allocated", &allocated_before);
+      epoch = 1;
+      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+      mallctl("stats.allocated", &allocated_before, &sz, nullptr, 0);
     }
 #endif
     apc_load_func(handle, "_hphp_const_load_all")();
 #ifdef USE_JEMALLOC
     if (mallctl) {
-      mallctlWrite("epoch", 1);
-      mallctlRead("stats.allocated", &allocated_after);
+      uint64_t epoch = 1;
+      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+      sz = sizeof(size_t);
+      mallctl("stats.allocated", &allocated_after, &sz, nullptr, 0);
       s_const_map_size = allocated_after - allocated_before;
     }
 #endif

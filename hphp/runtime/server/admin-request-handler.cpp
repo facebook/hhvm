@@ -537,7 +537,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       assert(mallctlnametomib && mallctlbymib);
       if (cmd == "free-mem") {
         // Purge all dirty unused pages.
-        int err = mallctlWrite("epoch", 1, true);
+        uint64_t epoch = 1;
+        int err = mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"epoch\", ...)" << endl;
@@ -546,7 +547,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         }
 
         unsigned narenas;
-        err = mallctlRead("arenas.narenas", &narenas, true);
+        size_t sz = sizeof(narenas);
+        err = mallctl("arenas.narenas", &narenas, &sz, nullptr, 0);
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
@@ -580,14 +582,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
+        uint64_t epoch = 1;
         uint32_t error = 0;
-        if (mallctlWrite("epoch", 1, true) != 0) {
+        if (mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch)) != 0) {
           error = 1;
         }
 
         auto call_mallctl = [&](const char* statName) {
           size_t value = 0;
-          if (mallctlRead(statName, &value, true) != 0) {
+          size_t sz = sizeof(value);
+          if (mallctl(statName, &value, &sz, nullptr, 0) != 0){
             error = 1;
           }
           return value;

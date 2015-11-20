@@ -221,7 +221,7 @@ static CallMap s_callMap {
                            {{extra(&ClassData::cls)}}},
     {RegisterLiveObj,    registerLiveObj, DNone, SNone, {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
-                           {{SSA, 0}}},
+                           {{SSA, 0}, {SSA, 1}}},
     {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SSync, {{SSA, 0}}},

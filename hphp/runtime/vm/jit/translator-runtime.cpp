@@ -994,13 +994,13 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
   }
 }
 
-const Func* loadClassCtor(Class* cls) {
+const Func* loadClassCtor(Class* cls, ActRec* fp) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    VMRegAnchor _;
-    UNUSED LookupResult res =
-      g_context->lookupCtorMethod(f, cls, true /*raise*/);
-    assertx(res == LookupResult::MethodFoundWithThis);
+    auto const ctx = arGetContextClass(fp);
+    UNUSED auto func =
+      g_context->lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, true);
+    assertx(func == f);
   }
   return f;
 }

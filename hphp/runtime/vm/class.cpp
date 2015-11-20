@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -37,6 +38,7 @@
 #include "hphp/util/logger.h"
 
 #include <folly/Bits.h>
+#include <folly/Optional.h>
 
 #include <algorithm>
 #include <iostream>
@@ -588,6 +590,8 @@ void Class::initProps() const {
   // the new propVec.
   auto propVec = PropInitVec::allocWithReqAllocator(m_declPropInit);
 
+  VMRegAnchor _;
+
   initPropHandle();
   *m_propDataCache = propVec;
 
@@ -634,6 +638,12 @@ bool Class::needsInitSProps() const {
 void Class::initSProps() const {
   assert(needsInitSProps() || m_sPropCacheInit.isPersistent());
 
+  const bool hasNonscalarInit = !m_sinitVec.empty();
+  folly::Optional<VMRegAnchor> _;
+  if (hasNonscalarInit) {
+    _.emplace();
+  }
+
   // Initialize static props for parent.
   Class* parent = this->parent();
   if (parent && parent->needsInitSProps()) {
@@ -652,8 +662,6 @@ void Class::initSProps() const {
       *m_sPropCache[slot] = sProp.val;
     }
   }
-
-  const bool hasNonscalarInit = !m_sinitVec.empty();
 
   // If there are non-scalar initializers (i.e. 86sinit methods), run them now.
   // They will override the KindOfUninit values set by scalar initialization.

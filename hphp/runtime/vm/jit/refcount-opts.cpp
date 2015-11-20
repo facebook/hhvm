@@ -2968,6 +2968,10 @@ bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
   assertx(inst->is(IncRef));
   if (!block->taken() || !block->next()) return false;
   if (inst->src(0)->inst()->is(DefConst)) return true;
+  // We've split critical edges, so `next' and 'taken' blocks can't
+  // have other predecessors.
+  assertx(block->taken()->numPreds() == 1);
+  assertx(block->next()->numPreds() == 1);
   auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
   return dominates(defBlock, block->taken(), env.idoms) &&
          dominates(defBlock, block->next(), env.idoms);
@@ -3336,12 +3340,7 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     case LdStk:
     case InlineReturn:
     case InlineReturnNoFrame:
-    case Nop:
-                     return true;
-
-    // this avoids iterating to find new
-    // opportunities after moving other IncRefs
-    case IncRef:     return true;
+    case Nop:        return true;
 
     default:         return false;
   }

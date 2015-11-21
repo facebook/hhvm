@@ -423,7 +423,7 @@ static inline uint64_t pgoThresholdDefault() {
 #ifdef HHVM_WHOLE_CFG
   return 100;
 #else
-  return debug ? 2 : 100;
+  return debug ? 2 : 5000;
 #endif
 }
 

@@ -2592,7 +2592,7 @@ bool canSimplifyAssertType(const IRInstruction* inst,
     if (!srcMightRelax) return true;
 
     if (srcType < newType) {
-      // This can happen because of limitations in how Toperator& handles
+      // This can happen because of limitations in how Type::operator& handles
       // specialized types: sometimes it returns a Type that's wider than it
       // needs to be.  It shouldn't affect correctness but it can cause us to
       // miss out on some perf.

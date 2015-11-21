@@ -312,6 +312,18 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
   }
 }
 
+size_t countStaticStringConstants() {
+  if (!s_stringDataMap) return 0;
+  size_t count = 0;
+  for (auto it = s_stringDataMap->begin();
+       it != s_stringDataMap->end(); ++it) {
+    if (it->second.bound()) {
+      ++count;
+    }
+  }
+  return count;
+}
+
 void refineStaticStringTableSize() {
   if (RuntimeOption::EvalInitialStaticStringTableSize ==
       kDefaultInitialStaticStringTableSize) {

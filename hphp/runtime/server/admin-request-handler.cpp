@@ -214,6 +214,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
+        "/static-strings-rds: ... that correspond to defined constants\n"
         "/dump-static-strings: dump static strings to /tmp/static_strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-apc-info:   show basic APC stats\n"
@@ -395,6 +396,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "static-strings", 14) == 0 &&
         handleStaticStringsRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "static-strings-rds", 18) == 0 &&
+        handleStaticStringsRdsRequest(cmd, transport)) {
       break;
     }
     if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
@@ -1042,6 +1047,14 @@ bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
                                                      Transport* transport) {
   std::ostringstream result;
   result << makeStaticStringCount();
+  transport->sendString(result.str());
+  return true;
+}
+
+bool AdminRequestHandler::handleStaticStringsRdsRequest(const std::string& cmd,
+                                                        Transport* transport) {
+  std::ostringstream result;
+  result << countStaticStringConstants();
   transport->sendString(result.str());
   return true;
 }

@@ -108,6 +108,12 @@ std::vector<StringData*> lookupDefinedStaticStrings();
 Array lookupDefinedConstants(bool categorize = false);
 
 /*
+ * Return the number of static strings that correspond to defined
+ * constants.
+ */
+size_t countStaticStringConstants();
+
+/*
  * The static string table is generally initially created before main
  * by global constructors (StaticString objects).  After we've parsed
  * options, we may find out a different size was requested for the

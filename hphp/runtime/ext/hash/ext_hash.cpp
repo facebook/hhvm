@@ -35,6 +35,7 @@
 #include "hphp/runtime/ext/hash/hash_furc.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/ext/hash/hash_keccak.h"
+#include "hphp/runtime/ext/hash/hash_joaat.h"
 #include "hphp/system/constants.h"
 
 #if defined(HPHP_OSS)
@@ -103,6 +104,7 @@ public:
 
     HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
     HashEngines["gost"]       = HashEnginePtr(new hash_gost());
+    HashEngines["joaat"]      = HashEnginePtr(new hash_joaat());
 #ifdef FACEBOOK
     HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
 #endif

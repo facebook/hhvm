@@ -106,6 +106,17 @@ size_t getMemSize(const APCArray* arr) {
 }
 
 size_t getMemSize(const APCObject* obj) {
+  if (obj->getHandle()->isPersistentObj()) {
+    auto size = sizeof(APCObject) +
+                sizeof(APCHandle*) * obj->m_propCount;
+    auto prop = obj->persistentProps();
+    auto const propEnd = prop + obj->m_propCount;
+    for (; prop != propEnd; ++prop) {
+      if (*prop) size += getMemSize(*prop);
+    }
+    return size;
+  }
+
   auto size = sizeof(APCObject) +
               sizeof(APCObject::Prop) * obj->m_propCount;
   auto prop = obj->props();

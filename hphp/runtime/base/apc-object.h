@@ -40,6 +40,8 @@ struct ObjectData;
  * MakeObject and Delete take care of isolating callers from that detail.
  */
 struct APCObject {
+  using ClassOrName = Either<const Class*,const StringData*>;
+
   /*
    * Create an APCObject from an ObjectData*; returns its APCHandle.
    */
@@ -65,6 +67,7 @@ struct APCObject {
   }
 
   APCHandle* getHandle() { return &m_handle; }
+  const APCHandle* getHandle() const { return &m_handle; }
 
 private:
   struct Prop {
@@ -74,23 +77,33 @@ private:
   };
 
 private:
-  explicit APCObject(ObjectData*, uint32_t propCount);
+  explicit APCObject(ClassOrName cls, uint32_t propCount);
   ~APCObject();
   APCObject(const APCObject&) = delete;
   APCObject& operator=(const APCObject&) = delete;
 
 private:
+  static APCHandle::Pair ConstructSlow(ObjectData* data, ClassOrName name);
+
   friend size_t getMemSize(const APCObject*);
   Object createObject() const;
+  Object createObjectSlow() const;
 
   Prop* props() { return reinterpret_cast<Prop*>(this + 1); }
   const Prop* props() const {
     return const_cast<APCObject*>(this)->props();
   }
 
+  APCHandle** persistentProps() {
+    return reinterpret_cast<APCHandle**>(this + 1);
+  }
+  const APCHandle* const * persistentProps() const {
+    return const_cast<APCObject*>(this)->persistentProps();
+  }
+
 private:
   APCHandle m_handle;
-  Either<const Class*,const StringData*> m_cls;
+  ClassOrName m_cls;
   uint32_t m_propCount;
 };
 

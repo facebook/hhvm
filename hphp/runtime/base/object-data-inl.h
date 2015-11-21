@@ -99,19 +99,33 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   assert(obj->hasExactlyOneRef());
   if (UNLIKELY(cls->callsCustomInstanceInit())) {
     /*
-      This must happen after the constructor finishes,
-      because it can leak references to obj AND it can
-      throw exceptions. If we have this in the ObjectData
-      constructor, and it throws, obj will be partially
-      destroyed (ie ~ObjectData will be called, resetting
-      the vtable pointer) leaving dangling references
-      to the object (eg in backtraces).
-    */
+     * This must happen after the constructor finishes, because it can leak
+     * references to obj AND it can throw exceptions. If we have this in the
+     * ObjectData constructor, and it throws, obj will be partially destroyed
+     * (ie ~ObjectData will be called, resetting the vtable pointer) leaving
+     * dangling references to the object (eg in backtraces).
+     */
     obj->callCustomInstanceInit();
   }
 
   // callCustomInstanceInit may have inc-refd.
   assert(obj->checkCount());
+  return obj;
+}
+
+inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
+  if (cls->needInitialization()) cls->initialize();
+
+  assert(!cls->instanceCtor() && !cls->callsCustomInstanceInit() &&
+         !(cls->attrs() &
+           (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
+
+  size_t nProps = cls->numDeclProperties();
+  size_t size = sizeForNProps(nProps);
+  auto& mm = MM();
+  auto const obj = new (mm.objMalloc(size)) ObjectData(cls, NoInit{});
+  obj->m_hdr.aux |= cls->getODAttrs();
+  assert(obj->hasExactlyOneRef());
   return obj;
 }
 
@@ -225,6 +239,22 @@ inline double ObjectData::toDouble() const {
 
 inline const Func* ObjectData::methodNamed(const StringData* sd) const {
   return getVMClass()->lookupMethod(sd);
+}
+
+inline TypedValue* ObjectData::propVec() {
+  auto const ret = reinterpret_cast<uintptr_t>(this + 1);
+  if (UNLIKELY(getAttribute(IsCppBuiltin))) {
+    return reinterpret_cast<TypedValue*>(ret + m_cls->builtinODTailSize());
+  }
+  return reinterpret_cast<TypedValue*>(ret);
+}
+
+inline const TypedValue* ObjectData::propVec() const {
+  return const_cast<ObjectData*>(this)->propVec();
+}
+
+inline bool ObjectData::hasDynProps() const {
+  return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
 }
 
 inline size_t ObjectData::sizeForNProps(Slot nProps) {

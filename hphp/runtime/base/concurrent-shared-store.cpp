@@ -667,8 +667,8 @@ void ConcurrentTableSharedStore::primeDone() {
       free(copy);
       return;
     }
-    auto const pair = APCHandle::Create(Variant(1), false,
-      APCHandleLevel::Outer, false);
+    auto const pair =
+      APCHandle::Create(Variant(1), false, APCHandleLevel::Outer, false);
     acc->second.set(pair.handle, 0);
     acc->second.dataSize = pair.size;
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);

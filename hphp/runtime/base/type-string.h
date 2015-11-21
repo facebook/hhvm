@@ -260,12 +260,14 @@ public:
     return m_str ? m_str->isZero() : false;
   }
 
-  /**
-   * Take a sub-string from start with specified length. Note, read
-   * http://www.php.net/substr about meanings of negative start or length.
+  /*
+   * Create a sub-string from start with specified length.
+   *
+   * If the start is outside the bounds of the string, or the length is
+   * negative, the empty string is returned.  The range [start, start+length]
+   * gets clamped to [start, size()].
    */
-  String substr(int start, int length = 0x7FFFFFFF,
-                bool nullable = false) const;
+  String substr(int start, int length = StringData::MaxSize) const;
 
   /**
    * Find a character or a substring and return its position. "pos" has to be

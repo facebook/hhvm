@@ -803,13 +803,61 @@ Variant HHVM_FUNCTION(substr_replace,
   return ret;
 }
 
+/*
+ * Calculates and adjusts "start" and "length" according to string's length.
+ * This function determines how those two parameters are interpreted in
+ * f_substr.
+ */
+static bool string_substr_check(int len, int& f, int& l) {
+  assertx(len >= 0);
+
+  if (l < 0 && -l > len) {
+    return false;
+  }
+  if (f >= len) {
+    return false;
+  }
+
+  if (l > len) {
+    l = len;
+  }
+
+  if (f < 0 && -f > len) {
+    f = 0;
+    if (len == 0) {
+      return false;
+    }
+  }
+
+  if (l < 0 && l + len < f) {
+    return false;
+  }
+
+  // If "from" position is negative, count start position from the end.
+  if (f < 0) {
+    f += len;
+  }
+  assertx(f >= 0);
+
+  // If "length" position is negative, set it to the length needed to stop that
+  // many chars from the end of the string.
+  if (l < 0) {
+    l += len - f;
+    if (l < 0) {
+      l = 0;
+    }
+  }
+  assertx(l >= 0);
+
+  return true;
+}
+
 Variant HHVM_FUNCTION(substr,
                       const String& str,
                       int start,
                       int length /* = 0x7FFFFFFF */) {
-  String ret = str.substr(start, length, true);
-  if (ret.isNull()) return false;
-  return ret;
+  if (!string_substr_check(str.size(), start, length)) return false;
+  return str.substr(start, length);
 }
 
 String HHVM_FUNCTION(str_pad,

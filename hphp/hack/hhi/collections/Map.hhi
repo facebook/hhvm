@@ -35,8 +35,12 @@
  *
  * `Map`s support `$m[$k]` style syntax for getting and setting values by key.
  * `Map`s also support `isset($m[$k])` and `empty($m[$k])` syntax, and they
- * provide similar semantics as arrays. Adding an element using `$m[] = ..`
- * syntax is not supported.
+ * provide similar semantics as arrays. Adding an element with square bracket
+ * syntax `[]` is supported either by providing a key between the brackets or
+ * a `Pair` on the right-hand side. e.g.,
+ * `$m[$k] = $v` is supported
+ * `$m[] = Pair {$k, $v}` is supported
+ * `$m[] = $v` is not supported.
  *
  * `Map`s do not support iterating while new keys are being added or elements
  * are being removed. When a new key is added or an element is removed, all

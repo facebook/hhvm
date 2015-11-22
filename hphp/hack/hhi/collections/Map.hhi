@@ -526,8 +526,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * If you want to overwrite a value, use `set()`.
    *
-   * `$map->add($p)` is semantically equivalent to `$map[$k] = $v` (except that
-   * `add()` returns the `Map`).
+   * `$map->add($p)` is semantically equivalent to both `$map[$k] = $v` and
+   * `$map[] = Pair {$k, $v}` (except that `add()` returns the `Map`).
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.

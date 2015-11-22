@@ -260,6 +260,7 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
     memcpy(buf + bytes_read, self->cursor, extra_byte_read);
     bytes_to_read -= extra_byte_read;
     bytes_read += extra_byte_read;
+    self->cursor += extra_byte_read;
   }
   return bytes_read;
 }

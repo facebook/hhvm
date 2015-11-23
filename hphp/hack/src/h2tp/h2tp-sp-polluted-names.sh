@@ -9,7 +9,7 @@ die () { warn "$ME_: $*"; exit 1; }
 # The sole argument must be the name of a directory in which
 # an h2tp binary resides.
 case $# in 1);; *) die "missing dir name argument";; esac
-path_dir=$1
+path_dir=$(dirname $1)
 test -d "$path_dir" || die "not a directory: $path_dir"
 test -x "$path_dir/h2tp" || die "no h2tp binary in $path_dir"
 PATH="$path_dir:$PATH"

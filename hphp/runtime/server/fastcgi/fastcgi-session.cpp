@@ -170,7 +170,7 @@ bool KVParser::parseKeyValueContent(Cursor& cursor,
 FastCGISession::FastCGISession(
   folly::EventBase* evBase,
   JobQueueDispatcher<FastCGIWorker>& dispatcher,
-  folly::AsyncSocket::UniquePtr sock,
+  folly::AsyncTransportWrapper::UniquePtr sock,
   const folly::SocketAddress& localAddr,
   const folly::SocketAddress& peerAddr)
   : m_eventBase(evBase)

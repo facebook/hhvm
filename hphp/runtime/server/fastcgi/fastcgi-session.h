@@ -177,13 +177,13 @@ private:
  */
 struct FastCGISession
   : public  wangle::ManagedConnection
-  , private folly::AsyncSocket::ReadCallback
-  , private folly::AsyncSocket::WriteCallback
+  , private folly::AsyncTransportWrapper::ReadCallback
+  , private folly::AsyncTransportWrapper::WriteCallback
 {
   FastCGISession(
     folly::EventBase* evBase,
     JobQueueDispatcher<FastCGIWorker>& dispatcher,
-    folly::AsyncSocket::UniquePtr sock,
+    folly::AsyncTransportWrapper::UniquePtr sock,
     const folly::SocketAddress& localAddr,
     const folly::SocketAddress& peerAddr);
 
@@ -347,7 +347,7 @@ private:
 
   folly::SocketAddress m_localAddr;     // app server address
   folly::SocketAddress m_peerAddr;      // webserver address
-  folly::AsyncSocket::UniquePtr m_sock; // async socket
+  folly::AsyncTransportWrapper::UniquePtr m_sock; // async socket
 
   //////////////////////////////////////////////////////////////////////////////
   // State data- flags, buffers, and event counters

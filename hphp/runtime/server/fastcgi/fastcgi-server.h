@@ -49,7 +49,7 @@ struct FastCGIAcceptor : public wangle::Acceptor {
   virtual ~FastCGIAcceptor() {}
 
   bool canAccept(const folly::SocketAddress& address) override;
-  void onNewConnection(folly::AsyncSocket::UniquePtr sock,
+  void onNewConnection(folly::AsyncTransportWrapper::UniquePtr sock,
                        const folly::SocketAddress* peerAddress,
                        const std::string& nextProtocolName,
                        SecureTransportType secureProtocolType,

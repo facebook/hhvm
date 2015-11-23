@@ -66,16 +66,14 @@ class PushTxnHandler : public proxygen::HTTPPushTransactionHandler {
 
  public:
   PushTxnHandler(uint64_t pushId,
-                 const std::shared_ptr<ProxygenTransport>& transport,
-                 uint8_t priority)
+                 const std::shared_ptr<ProxygenTransport>& transport)
       : m_pushId(pushId),
         m_transport(transport) {}
 
   proxygen::HTTPTransaction *getOrCreateTransaction(
     proxygen::HTTPTransaction *clientTxn, bool newPushOk) {
     if (!m_pushTxn && newPushOk) {
-      m_pushTxn = clientTxn->newPushedTransaction(
-        this, proxygen::http2::DefaultPriority);
+      m_pushTxn = clientTxn->newPushedTransaction(this);
     }
     return m_pushTxn;
   }
@@ -610,12 +608,12 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   }
 
   int64_t pushId = m_nextPushId++;
-  PushTxnHandler *handler = new PushTxnHandler(pushId, shared_from_this(),
-                                               priority);
+  PushTxnHandler *handler = new PushTxnHandler(pushId, shared_from_this());
   HTTPMessage& pushMsg = handler->getPushMessage();
   pushMsg.setURL(path);
   pushMsg.setIsChunked(true); // implicitly chunked
   pushMsg.setSecure(true); // should we allow setting scheme?
+  pushMsg.setPriority(priority);
 
   for (ArrayIter iter(headers); iter; ++iter) {
     Variant key = iter.first();

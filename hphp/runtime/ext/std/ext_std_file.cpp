@@ -365,9 +365,9 @@ Variant HHVM_FUNCTION(fread,
                       int64_t length) {
   CHECK_HANDLE(handle, f);
   if (length < 1) {
-    // raise_warning(
-    //   "fread(): Length parameter must be greater than 0"
-    // );
+    raise_warning(
+      "fread(): Length parameter must be greater than 0"
+    );
     return false;
   }
   return f->read(length);

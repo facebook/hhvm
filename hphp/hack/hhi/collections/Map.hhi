@@ -628,7 +628,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public static function fromArray(array<Tk, Tv> $arr): Map<Tk, Tv>;
 
   /**
-   * Creates a `Map` from the given `Traversable`, or an empty `Vector` if
+   * Creates a `Map` from the given `Traversable`, or an empty `Map` if
    * `null` is passed.
    *
    * This is the static method version of the `Map::__construct()` constructor.

@@ -440,6 +440,8 @@ Variable* Variable::create(Vreg r) {
 
 void Variable::destroy(Variable* var) {
   var->~Variable();
+  auto ivl = reinterpret_cast<Interval*>(var + 1);
+  ivl->~Interval();
   free(var);
 }
 

@@ -132,10 +132,8 @@ size_t asio_object_size(const ObjectData* od) {
     X(AsyncGenerator)
 #undef X
     case c_WaitHandle::Kind::AwaitAll:
-      assert(false); // Handled by its own HeaderKind
       return obj->asAwaitAll()->heapSize();
     case c_WaitHandle::Kind::AsyncFunction:
-      assert(false); // Handled by its own HeaderKind
       return obj->asAsyncFunction()->resumable()->size();
   }
   always_assert(false);

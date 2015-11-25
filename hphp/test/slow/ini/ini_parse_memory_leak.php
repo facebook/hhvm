@@ -35,4 +35,5 @@ function leak_test($output)
 }
 
 leak_test(false);
+leak_test(false);
 leak_test(true);

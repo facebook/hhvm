@@ -642,6 +642,7 @@ norepo_tests = (
 
 # Random other files that zend wants
 other_files = (
+    '/ext/bz2/tests/003.txt.bz2',
     '/ext/bz2/tests/004_1.txt.bz2',
     '/ext/bz2/tests/004_2.txt.bz2',
     '/ext/calendar/tests/skipif.inc',
@@ -762,6 +763,8 @@ other_files = (
     '/ext/gettext/tests/locale/en/LC_MESSAGES/messages.po',
     '/ext/gettext/tests/locale/fi/LC_MESSAGES/messages.mo',
     '/ext/gettext/tests/locale/fi/LC_MESSAGES/messages.po',
+    '/ext/iconv/tests/iconv_stream_filter.txt',
+    '/ext/iconv/tests/Quotes.UTF-8',
     '/ext/iconv/tests/skipif.inc',
     '/ext/imap/tests/skipif.inc',
     '/ext/interbase/tests/skipif.inc',
@@ -878,6 +881,7 @@ other_files = (
     '/ext/standard/tests/file/test2.csv',
     '/ext/standard/tests/file/test3.csv',
     '/ext/standard/tests/file/test.csv',
+    '/ext/standard/tests/filters/filter_errors.inc',
     '/ext/standard/tests/general_functions/004.data',
     '/ext/standard/tests/general_functions/bug49692.ini',
     '/ext/standard/tests/general_functions/bug52138.data',

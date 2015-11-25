@@ -193,7 +193,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#if FACEBOOK
+#if FACEBOOK && !defined(HAVE_LIBBFD)
 // Linking in libbfd is a gigantic PITA. If you want this yourself in a non-FB
 // build, feel free to define HAVE_LIBBFD and specify the right options to link
 // in libbfd.a in the extra C++ options.

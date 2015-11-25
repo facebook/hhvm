@@ -367,6 +367,14 @@ if (LINUX OR APPLE)
   FIND_LIBRARY (RESOLV_LIB resolv)
 endif()
 
+FIND_LIBRARY (BFD_LIB libbfd.a)
+FIND_LIBRARY (LIBIBERTY_LIB iberty)
+
+if (BFD_LIB AND LIBIBERTY_LIB)
+  message(STATUS "Found libiberty: ${LIBIBERTY_LIB}")
+  add_definitions("-DHAVE_LIBBFD=1")
+endif()
+
 if (FREEBSD)
   FIND_LIBRARY (EXECINFO_LIB execinfo)
   if (NOT EXECINFO_LIB)
@@ -481,6 +489,11 @@ macro(hphp_link target)
     if (PAM_LIBRARY)
       target_link_libraries(${target} ${PAM_LIBRARY})
     endif()
+  endif()
+
+  if (BFD_LIB AND LIBIBERTY_LIB)
+    target_link_libraries(${target} ${BFD_LIB})
+    target_link_libraries(${target} ${LIBIBERTY_LIB})
   endif()
 
   if (LIBPTHREAD_LIBRARIES)

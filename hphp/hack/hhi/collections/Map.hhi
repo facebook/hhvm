@@ -616,7 +616,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function getIterator(): KeyedIterator<Tk, Tv>;
 
   /**
-   * Returns a `Map` containing the key/valur pairs from the specified `array`.
+   * Returns a `Map` containing the key/value pairs from the specified `array`.
    *
    * This function is deprecated. Use `new `Map`($arr)` instead.
    *

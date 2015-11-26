@@ -16,13 +16,13 @@
 
 #include "hphp/util/cache/mmap-file.h"
 
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include <cstdint>
 #include <string>
 
+#include <folly/CPortability.h>
 #include <folly/Format.h>
 #include "hphp/util/logger.h"
 

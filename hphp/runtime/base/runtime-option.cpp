@@ -24,9 +24,7 @@
 #include <set>
 #include <vector>
 
-#include <sys/time.h>
-#include <sys/resource.h>
-
+#include <folly/CPortability.h>
 #include <folly/String.h>
 
 #include "hphp/util/code-cache.h"

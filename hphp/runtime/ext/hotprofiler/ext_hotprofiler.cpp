@@ -34,8 +34,6 @@
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
-#include <sys/time.h>
-#include <sys/resource.h>
 #include <iostream>
 #include <fstream>
 #include <zlib.h>
@@ -44,6 +42,8 @@
 #include <new>
 #include <utility>
 #include <vector>
+
+#include <folly/CPortability.h>
 
 // Append the delimiter
 #define HP_STACK_DELIM        "==>"

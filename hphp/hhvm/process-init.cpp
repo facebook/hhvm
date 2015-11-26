@@ -31,9 +31,9 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 
+#include <folly/CPortability.h>
 #include <folly/Singleton.h>
 
-#include <libgen.h> // For dirname(3).
 #include <string>
 
 namespace HPHP {

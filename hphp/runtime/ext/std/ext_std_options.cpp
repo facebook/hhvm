@@ -18,13 +18,14 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/resource.h>
+#ifndef _MSC_VER
 #include <sys/utsname.h>
 #include <pwd.h>
+#endif
 #include <algorithm>
 #include <vector>
 
+#include <folly/CPortability.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 

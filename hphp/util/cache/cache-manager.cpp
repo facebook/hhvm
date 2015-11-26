@@ -17,7 +17,6 @@
 #include "hphp/util/cache/cache-manager.h"
 
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -28,6 +27,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <folly/CPortability.h>
 
 #include "hphp/util/cache/cache-data.h"
 #include "hphp/util/cache/cache-saver.h"

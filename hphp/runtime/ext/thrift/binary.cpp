@@ -27,8 +27,8 @@
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>
-#include <netinet/in.h>
-#include <unistd.h>
+#include <folly/FilePortability.h>
+#include <folly/SocketPortability.h>
 #include <stdexcept>
 
 namespace HPHP { namespace thrift {

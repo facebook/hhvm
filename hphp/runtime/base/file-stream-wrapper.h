@@ -19,11 +19,12 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
+
+#include <folly/FilePortability.h>
 #include <folly/String.h>
 
 #define ERROR_RAISE_WARNING(exp)        \

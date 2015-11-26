@@ -17,22 +17,15 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <sys/un.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/uio.h>
-#include <poll.h>
 
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 #include <folly/String.h>
 #include <folly/SocketAddress.h>
+#include <folly/SocketPortability.h>
 
 #include "hphp/util/network.h"
 #include "hphp/runtime/base/array-init.h"
@@ -348,7 +341,7 @@ static req::ptr<Socket> create_new_socket(
   }
 
   auto sock = req::make<Socket>(
-    socket(domain, type, 0),
+    fsp::socket(domain, type, 0),
     domain,
     hosturl.getHost().c_str(),
     hosturl.getPort()
@@ -440,7 +433,7 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
     struct sockaddr *sa_ptr;
     size_t sa_size;
 
-    fd = socket(domain, type, 0);
+    fd = fsp::socket(domain, type, 0);
     sock = req::make<Socket>(
       fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
 
@@ -475,7 +468,7 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
 
     for (struct addrinfo *ai = aiHead; ai != nullptr; ai = ai->ai_next) {
       domain = ai->ai_family;
-      fd = socket(domain, ai->ai_socktype, ai->ai_protocol);
+      fd = fsp::socket(domain, ai->ai_socktype, ai->ai_protocol);
       if (fd == -1) {
         continue;
       }
@@ -522,7 +515,7 @@ Variant HHVM_FUNCTION(socket_create,
                       int type,
                       int protocol) {
   check_socket_parameters(domain, type);
-  int socketId = socket(domain, type, protocol);
+  int socketId = fsp::socket(domain, type, protocol);
   if (socketId == -1) {
     SOCKET_ERROR(req::make<Socket>(),
                  "Unable to create socket",
@@ -547,7 +540,7 @@ Variant HHVM_FUNCTION(socket_create_listen,
   la.sin_port = htons((unsigned short)port);
 
   auto sock = req::make<Socket>(
-    socket(PF_INET, SOCK_STREAM, 0), PF_INET, "0.0.0.0", port);
+    fsp::socket(PF_INET, SOCK_STREAM, 0), PF_INET, "0.0.0.0", port);
 
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create listening socket", errno);

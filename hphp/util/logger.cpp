@@ -15,7 +15,7 @@
 */
 #include "hphp/util/logger.h"
 
-#include <syslog.h>
+#include <folly/CPortability.h>
 
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"

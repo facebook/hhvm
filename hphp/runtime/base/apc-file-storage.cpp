@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/apc-file-storage.h"
 
-#include <sys/mman.h>
+#include <folly/CPortability.h>
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"

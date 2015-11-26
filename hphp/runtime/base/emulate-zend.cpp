@@ -20,12 +20,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <vector>
 #include <string>
 #include <iostream>
 #include <sstream>
+
+#include <folly/FilePortability.h>
 
 namespace HPHP {
 

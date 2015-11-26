@@ -21,7 +21,6 @@
 #include <atomic>
 #include <vector>
 
-#include <sys/mman.h>
 #if !defined(__CYGWIN__) && !defined(_MSC_VER)
 #include <execinfo.h>
 #endif
@@ -29,6 +28,7 @@
 #include <folly/sorted_vector_types.h>
 #include <folly/String.h>
 #include <folly/Hash.h>
+#include <folly/CPortability.h>
 #include <folly/Bits.h>
 
 #include "hphp/util/maphuge.h"

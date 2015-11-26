@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sys/time.h>
+#include <folly/CPortability.h>
 #include <openssl/rand.h>
 
 #include "hphp/runtime/base/zend-math.h"

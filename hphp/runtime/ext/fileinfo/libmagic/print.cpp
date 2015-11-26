@@ -40,15 +40,9 @@ FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 #include <time.h>
-
-#ifdef PHP_WIN32
-# define asctime_r php_asctime_r
-# define ctime_r php_ctime_r
-#endif
 
 #define SZOF(a)  (sizeof(a) / sizeof(a[0]))
 

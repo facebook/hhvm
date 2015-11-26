@@ -29,11 +29,10 @@
 #include "hphp/util/network.h"
 
 #include <fcntl.h>
-#include <poll.h>
-#include <thread>
-#include <netinet/tcp.h>
 #include <sys/types.h>
-#include <sys/socket.h>
+#include <thread>
+
+#include <folly/SocketPortability.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -172,7 +171,7 @@ int XDebugServer::createSocket(const char* hostname, int port) {
   lookupHostname(hostname, address.sin_addr);
 
   // Create the socket
-  auto const sockfd = socket(address.sin_family, SOCK_STREAM, 0);
+  auto const sockfd = fsp::socket(address.sin_family, SOCK_STREAM, 0);
   if (sockfd < 0) {
     log("create_debugger_socket(\"%s\", %d) socket: %s\n",
         hostname, port, folly::errnoStr(errno).c_str());

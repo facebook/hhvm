@@ -1391,7 +1391,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 
 	sa = (struct sockaddr *) &ftp->localaddr;
 	/* bind/listen */
-	if ((fd = socket(sa->sa_family, SOCK_STREAM, 0)) == SOCK_ERR) {
+	if ((fd = fsp::socket(sa->sa_family, SOCK_STREAM, 0)) == SOCK_ERR) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "socket() failed: %s (%d)", strerror(errno), errno);
 		goto bail;
 	}

@@ -19,7 +19,8 @@
 
 #include "hphp/runtime/base/file.h"
 #include <sys/types.h>
-#include <sys/socket.h>
+
+#include <folly/SocketPortability.h>
 
 #ifdef SOCKET_ERROR
 # undef SOCKET_ERROR

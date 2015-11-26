@@ -15,7 +15,8 @@
 */
 #include "hphp/runtime/base/timestamp.h"
 
-#include <sys/time.h>
+#include <folly/CPortability.h>
+
 extern "C" {
 #include <timelib.h>
 }

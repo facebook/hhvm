@@ -18,12 +18,12 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <cstdint>
 #include <random>
 #include <string>
 
+#include <folly/FilePortability.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include "hphp/util/cache/cache-saver.h"

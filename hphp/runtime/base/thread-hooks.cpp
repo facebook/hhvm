@@ -20,7 +20,8 @@
 #include <execinfo.h>
 #include <dlfcn.h>
 #endif
-#include <unistd.h>
+
+#include <folly/FilePortability.h>
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/assertions.h"

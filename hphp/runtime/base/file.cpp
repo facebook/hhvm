@@ -39,10 +39,10 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 
+#include <folly/FilePortability.h>
 #include <folly/String.h>
 
 #include <algorithm>
-#include <sys/file.h>
 
 namespace HPHP {
 

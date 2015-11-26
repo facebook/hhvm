@@ -34,16 +34,9 @@ FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
 #include "magic.h" // @nolint
 
 #include <stdlib.h>
-#ifdef PHP_WIN32
-#include "win32/unistd.h" // @nolint
-#else
-#include <unistd.h>
-#endif
+#include <folly/CPortability.h>
+#include <folly/FilePortability.h>
 #include <string.h>
-
-#ifdef PHP_WIN32
-#include <shlwapi.h>
-#endif
 
 #include <limits.h>  /* for PIPE_BUF */
 
@@ -55,10 +48,6 @@ FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
 # elif defined(HAVE_UTIME_H)
 #  include <utime.h>
 # endif
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>  /* for read() */
 #endif
 
 #ifndef PIPE_BUF

@@ -57,6 +57,7 @@
 #endif
 
 #include <sys/types.h>
+#include <folly/CPortability.h>
 #ifdef PHP_WIN32
 #include "win32/param.h"
 #else

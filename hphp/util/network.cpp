@@ -15,15 +15,13 @@
 */
 #include "hphp/util/network.h"
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #ifndef _MSC_VER
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include <sys/utsname.h>
 #endif
 
+#include <folly/SocketPortability.h>
 #include <folly/String.h>
 #include <folly/IPAddress.h>
 
@@ -147,7 +145,7 @@ static std::string normalizeIPv6Address(const std::string& address) {
   }
 
   char ipPresentation[INET6_ADDRSTRLEN];
-  if (inet_ntop(AF_INET6, &addr, ipPresentation, INET6_ADDRSTRLEN) == nullptr) {
+  if (::inet_ntop(AF_INET6, &addr, ipPresentation, INET6_ADDRSTRLEN) == nullptr) {
     return std::string();
   }
 

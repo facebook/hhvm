@@ -343,3 +343,13 @@ let nbr_procs = nproc ()
 
 external set_priorities : cpu_priority:int -> io_priority:int -> unit =
   "hh_set_priorities"
+
+external win_terminate_process: int -> bool = "win_terminate_process"
+
+let terminate_process pid =
+  try Unix.kill pid Sys.sigkill
+  with exn when Sys.win32 ->
+    (* Can be removed once support for ocaml-4.01 is dropped *)
+    if not (win_terminate_process pid) then
+      raise Unix.(Unix_error(ESRCH, "kill", ""))
+

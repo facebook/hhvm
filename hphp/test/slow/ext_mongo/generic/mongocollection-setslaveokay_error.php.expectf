@@ -1,4 +1,0 @@
-%s: Function MongoCollection::setSlaveOkay() is deprecated in %s on line %d
-
-Warning: %s
-NULL

@@ -47,7 +47,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
-#ifndef PHP_WIN32
+#ifndef _MSC_VER
 #include <sys/ioctl.h>
 #endif
 #ifdef HAVE_SYS_WAIT_H

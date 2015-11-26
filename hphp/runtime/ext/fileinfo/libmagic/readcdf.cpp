@@ -214,7 +214,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                                         if (cdf_timestamp_to_timespec(&ts, tp) == -1) {
                       return -1;
                     }
-                                        c = cdf_ctime(&ts.tv_sec, tbuf);
+                                        time_t tmp = ts.tv_sec;
+                                        c = cdf_ctime(&tmp, tbuf);
                                         if ((ec = strchr(c, '\n')) != nullptr)
                                                 *ec = '\0';
 

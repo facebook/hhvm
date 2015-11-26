@@ -32,6 +32,7 @@ if (OCAMLC_FOUND)
     list(APPEND extra_cc_flags -DHAVE_DECL___NR_MEMFD_CREATE)
   endif()
 
+  list(APPEND extra_cc_flags -Iutils)
   list(APPEND extra_cc_flags -DOSS_SMALL_HH_TABLE_POWS)
   list(APPEND extra_cc_flags -pthread)
 

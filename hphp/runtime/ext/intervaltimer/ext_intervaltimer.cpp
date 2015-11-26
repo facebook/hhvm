@@ -139,7 +139,11 @@ void IntervalTimer::run() {
   do {
     std::unique_lock<std::mutex> lock(m_mutex);
     auto status = m_cv.wait_for(lock,
+#ifdef MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD
+                                std::chrono::duration<__int64>((__int64)waitTime),
+#else
                                 std::chrono::duration<double>(waitTime),
+#endif
                                 [this]{ return m_done; });
     if (status) break;
     {

@@ -2009,34 +2009,38 @@ void emitBindNewElem(MTS& env) {
 void emitFinalMOp(MTS& env) {
   using MemFun = void (*)(MTS&);
 
+  // MSVC needs these to be outside of
+  // the case labels.
+  static const MemFun elemOps[] = {
+#define MII(instr, ...) &emit##instr##Elem,
+    MINSTRS
+#undef MII
+  };
+  
+  static const MemFun propOps[] = {
+#define MII(instr, ...) &emit##instr##Prop,
+    MINSTRS
+#undef MII
+  };
+  
+  static const MemFun newOps[] = {
+#define MII(instr, attrs, bS, iS, vC, fN) &emit##fN,
+    MINSTRS
+#undef MII
+  };
+  
   switch (env.immVecM[env.mInd]) {
   case MEC: case MEL: case MET: case MEI:
-    static constexpr MemFun elemOps[] = {
-#   define MII(instr, ...) &emit##instr##Elem,
-    MINSTRS
-#   undef MII
-    };
     elemOps[env.mii.instr()](env);
     break;
 
   case MQT:
   case MPC: case MPL: case MPT:
-    static constexpr MemFun propOps[] = {
-#   define MII(instr, ...) &emit##instr##Prop,
-    MINSTRS
-#   undef MII
-    };
     propOps[env.mii.instr()](env);
     break;
 
   case MW:
     assertx(env.mii.getAttr(MW) & MIA_final);
-    static constexpr MemFun newOps[] = {
-#   define MII(instr, attrs, bS, iS, vC, fN) \
-      &emit##fN,
-    MINSTRS
-#   undef MII
-    };
     newOps[env.mii.instr()](env);
     break;
 

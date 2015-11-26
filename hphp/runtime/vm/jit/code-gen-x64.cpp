@@ -4855,8 +4855,19 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     } else if (isWInit) {
       args.imm(0);
     }
-    TCA helperAddr = isWInit ? (TCA)new_iter_array_key<true> :
-      isInitK ? (TCA)new_iter_array_key<false> : (TCA)new_iter_array;
+    // MSVC gets confused if we try to directly assign
+    // the template overload, so use a temporary and
+    // let the optimizer sort it out.
+    TCA helperAddr;
+    if (isWInit) {
+      auto tmp = new_iter_array_key<true>;
+      helperAddr = (TCA)tmp;
+    } else if (isInitK) {
+      auto tmp = new_iter_array_key<false>;
+      helperAddr = (TCA)tmp;
+    } else {
+      helperAddr = (TCA)new_iter_array;
+    }
     cgCallHelper(
       vmain(),
       CallSpec::direct(reinterpret_cast<void (*)()>(helperAddr)),

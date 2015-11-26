@@ -208,4 +208,17 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#if defined(_MSC_VER) && _MSC_FULL_VER <= 190023419 // 2015 Update 1 RC or below
+// MSVC2015 has an issue with getting function pointers to templated functions
+// if the expected result type isn't auto. Unfortunately, when I made the
+// initial bug report, I oversimplified the use-case, and, while the case I
+// reported was indeed fixed in Update 1 RC, none of our actual uses of it were
+// fixed.
+// This is being tracked at MS as #163251.
+# define MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD 1
+// 2015 RTM doesn't like it when you try to add via a double duration.
+// Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1839243
+# define MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD 1
+#endif
+
 #endif

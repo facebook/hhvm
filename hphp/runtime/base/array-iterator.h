@@ -578,7 +578,8 @@ struct MIterTable {
     }
   }
 
-  std::array<Ent,7> ents;
+  static constexpr int ents_size = 7;
+  std::array<Ent, ents_size> ents;
   // Slow path: we expect this `extras' list to rarely be allocated.
   TlsPodBag<Ent,req::Allocator<Ent>> extras;
 };

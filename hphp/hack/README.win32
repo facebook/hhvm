@@ -29,6 +29,7 @@ NOTE: lz4 is not required to build Hack. If you want to use it, and lz4 is not
       `ccopt` variable correctly in the `00_config.ocp` file. For instance:
 
     ccopt = [ "-I/PATH/TO/LZ4/DIRECTORY" ]
+    cclib = [ "-L/PATH/TO/LZ4/DIRECTORY" ]
 
 Then, execute the `make.bat` script:
 

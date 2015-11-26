@@ -224,6 +224,15 @@ function curl_multi_info_read(resource $mh,
 function curl_multi_init(): resource;
 
 /**
+ * Returns a text error message describing the given CURLM error code.
+ *
+ * @return string - Returns error string for valid error code,
+ *   NULL otherwise.
+ */
+<<__Native>>
+function curl_multi_strerror(int $errornum): mixed;
+
+/**
  * Remove a multi handle from a set of cURL handles
  *
  * @param resource $mh -

@@ -383,6 +383,9 @@ bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_UVS = false;
 
+int64_t RuntimeOption::Precision = 14;
+int64_t RuntimeOption::SerializePrecision = 17;
+
 int RuntimeOption::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
@@ -1801,6 +1804,12 @@ void RuntimeOption::Load(
                    IniSetting::SetAndGet<std::string>(
                      [](const std::string& value) { return false; },
                      []() { return "1"; }));
+
+  // Precision
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "precision", &RuntimeOption::Precision);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "serialize_precision", &RuntimeOption::SerializePrecision);
 
   // HPHP specific
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,

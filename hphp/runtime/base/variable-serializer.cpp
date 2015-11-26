@@ -269,8 +269,8 @@ void VariableSerializer::write(int64_t v) {
 }
 
 void VariableSerializer::write(double v) {
-  auto const precision = 14;
-  auto const serde_precision = 17;
+  auto const precision = RuntimeOption::Precision;
+  auto const serde_precision = RuntimeOption::SerializePrecision;
 
   switch (m_type) {
   case Type::JSON:

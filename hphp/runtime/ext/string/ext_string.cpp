@@ -428,10 +428,17 @@ String HHVM_FUNCTION(lcfirst,
 }
 
 String HHVM_FUNCTION(ucwords,
-                     const String& str) {
+                     const String& str,
+                     const String& delimiters /* = " \t\r\n\f\v"*/) {
+  if (str.empty()) {
+    return str;
+  }
+  String strcopy(str, CopyString);
+  char* string = strcopy.mutableData();
+  *string = toupper(*string);
   char last = ' ';
-  return stringForEachFast(str, [&] (char c) {
-    char ret = isspace(last) ? toupper(c) : c;
+  return stringForEach<true>(strcopy.size(), strcopy, [&] (char c) {
+    char ret = delimiters.find(last) >= 0 ? toupper(c) : c;
     last = c;
     return ret;
   });

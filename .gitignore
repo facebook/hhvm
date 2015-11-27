@@ -4,6 +4,7 @@
 .DS_Store
 hphp.log
 /build
+/deps
 
 /hphp/test/test
 /hphp/test/test_fast.inc

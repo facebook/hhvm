@@ -967,7 +967,7 @@ TypedValue* Stack::frameStackBase(const ActRec* fp) {
 
 TypedValue* Stack::resumableStackBase(const ActRec* fp) {
   assert(fp->resumed());
-  auto const sfp = fp->sfp();
+  auto sfp = fp->sfp();
   if (sfp) {
     // The non-reentrant case occurs when a non-async or async generator is
     // resumed via ContEnter or ContRaise opcode. These opcodes leave a single
@@ -975,6 +975,14 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
     // find the caller's FP, compensate for its locals and iterators, and then
     // we've found the base of the generator's stack.
     assert(fp->func()->isGenerator());
+
+    // Since resumables are stored on the heap, we need to go back in the
+    // callstack a bit to find the base of the stack. Unfortunately, due to
+    // generator delegation, this can be pretty far back...
+    while (sfp->func()->isGenerator()) {
+      sfp = sfp->sfp();
+    }
+
     return (TypedValue*)sfp - sfp->func()->numSlotsInFrame();
   } else {
     // The reentrant case occurs when asio scheduler resumes an async function

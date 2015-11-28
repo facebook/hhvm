@@ -208,6 +208,14 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef _MSC_VER
+# include "hphp/util/portability/fnmatch.h"
+# include "hphp/util/portability/glob.h"
+# include "hphp/util/portability/rand_r.h"
+# include "hphp/util/portability/strfmon.h"
+# include "hphp/util/portability/strptime.h"
+#endif
+
 #if defined(_MSC_VER) && _MSC_FULL_VER <= 190023419 // 2015 Update 1 RC or below
 // MSVC2015 has an issue with getting function pointers to templated functions
 // if the expected result type isn't auto. Unfortunately, when I made the

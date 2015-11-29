@@ -295,7 +295,7 @@ final class AsyncMysqlConnection {
    *  - `%Q`   raw SQL query. The typechecker intentionally does not recognize
    *           this, however, you can use it in combination with // UNSAFE
    *           if absolutely required. Use this at your own risk as it could
-   *           open you up for SQL injuection.
+   *           open you up for SQL injection.
    *
    * With the exception of `%Q`, any strings provided will be properly
    * escaped.

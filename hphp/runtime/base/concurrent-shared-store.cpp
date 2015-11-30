@@ -796,7 +796,7 @@ void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream& out,
 
 std::vector<EntryInfo>
 ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
-  ReadLock l(m_lock);
+  WriteLock l(m_lock);
   if (m_vars.empty()) {
     Logger::Warning("No APC entries sampled (empty store)");
     return std::vector<EntryInfo>();

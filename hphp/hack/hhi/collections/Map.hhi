@@ -448,11 +448,11 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * If the key is not present, an exception is thrown. If you want to add a
    * value even if a key is not present, use `add()`.
    *
-   * `$map->set($k,$v)` is semantically equivalent to `$map[$k] = $v` (except
-   * that `set()` returns the current `Map`).
+   * Assuming the key is present, `$map->set($k,$v)` is semantically equivalent
+   * to `$map[$k] = $v` (except that `set()` returns the current `Map`).
    *
-   * Future changes made to the current `Map` ARE reflected in the returned,
-   * and vice-versa.
+   * Future changes made to the current `Map` ARE reflected in the returned
+   * `Map`, and vice-versa.
    *
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.

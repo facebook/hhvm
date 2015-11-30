@@ -108,16 +108,15 @@ template<class F> void ObjectData::scan(F& mark) const {
     auto frame = reinterpret_cast<const TypedValue*>(r) -
                  r->actRec()->func()->numSlotsInFrame();
     mark(frame, uintptr_t(this) - uintptr_t(frame));
-    assert(!getVMClass()->getNativeDataInfo());
   } else if (m_hdr.kind == HeaderKind::WaitHandle) {
     // scan C++ properties after [ObjectData] header
     mark(this + 1, asio_object_size(this) - sizeof(*this));
-    assert(!getVMClass()->getNativeDataInfo());
   } else if (m_hdr.kind == HeaderKind::AwaitAllWH) {
     auto wh = static_cast<const c_AwaitAllWaitHandle*>(this);
     wh->scanChildren(mark);
-    assert(!getVMClass()->getNativeDataInfo());
-  } else if (getAttribute(HasNativeData)) {
+  }
+
+  if (getAttribute(HasNativeData)) {
     // [NativeNode][NativeData][ObjectData][props]
     Native::nativeDataScan(this, mark);
   }

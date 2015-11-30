@@ -756,6 +756,17 @@ void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
   }
 }
 
+static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
+  out << "key inmem size ttl type\n";
+  for (auto entry : entries) {
+    out << entry.key << " "
+        << static_cast<int32_t>(entry.inMem) << " "
+        << entry.size << " "
+        << entry.ttl << " "
+        << static_cast<int32_t>(entry.type) << '\n';
+  }
+}
+
 void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
   Logger::Info("dumping apc");
 
@@ -771,16 +782,7 @@ void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
     break;
 
   case DumpMode::KeyAndMeta:
-    {
-      out << "key inmem size ttl type\n";
-      for (auto& entry : getEntriesInfo()) {
-        out << entry.key << " "
-            << static_cast<int32_t>(entry.inMem) << " "
-            << entry.size << " "
-            << entry.ttl << " "
-            << static_cast<int32_t>(entry.type) << '\n';
-      }
-    }
+    dumpEntriesInfo(getEntriesInfo(), out);
     break;
   }
 
@@ -789,50 +791,48 @@ void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
 
 void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream& out,
                                                 uint32_t count) {
-  out << "key inmem size ttl type\n";
-  for (; count > 0; count--) {
-    m_vars.dumpRandomAPCEntry(out);
+  dumpEntriesInfo(sampleEntriesInfo(count), out);
+}
+
+std::vector<EntryInfo>
+ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
+  ReadLock l(m_lock);
+  if (m_vars.empty()) {
+    Logger::Warning("No APC entries sampled (empty store)");
+    return std::vector<EntryInfo>();
   }
+  std::vector<EntryInfo> samples;
+  for (; count > 0; count--) {
+    if (!m_vars.getRandomAPCEntry(samples)) {
+      Logger::Warning("No APC entries sampled (incompatible TBB library)");
+      return std::vector<EntryInfo>();
+    }
+  }
+  return samples;
 }
 
 template<typename Key, typename T, typename HashCompare>
-void ConcurrentTableSharedStore
+bool ConcurrentTableSharedStore
       ::APCMap<Key,T,HashCompare>
-      ::dumpRandomAPCEntry(std::ostream &out) {
-#if TBB_VERSION_MAJOR == 4 && TBB_VERSION_MINOR == 0
-  while (this->my_size > 0) {
-    int64_t curr_time = time(nullptr);
-    auto randIndex = rand() % this->my_size;
-    auto mahBucket = this->segment_index_of(randIndex);
-    auto segmentIndex = randIndex - this->segment_base(mahBucket);
-    auto bucketPtr = this->my_table[mahBucket];
-    {
-      bucketPtr->mutex.lock();
-      SCOPE_EXIT{ bucketPtr->mutex.unlock(); };
-      auto nodePtr = (bucketPtr + segmentIndex)->node_list;
-      if (nodePtr != nullptr &&
-          nodePtr != tbb::interface5::internal::rehash_req &&
-          nodePtr != tbb::interface5::internal::empty_rehashed) {
-        uintptr_t apcPairPtr =
-         (reinterpret_cast<uintptr_t>(nodePtr) +
-          sizeof(tbb::interface5::internal::hash_map_node_base));
-        auto apcPair =
-          (reinterpret_cast<std::pair<const char *, StoreValue>*>
-                    (apcPairPtr));
-        auto entry = makeEntryInfo(apcPair->first, &apcPair->second, curr_time);
-        out << entry.key << " "
-            << static_cast<int32_t>(entry.inMem) << " "
-            << entry.size << " "
-            << entry.ttl << " "
-            << static_cast<int32_t>(entry.type) << '\n';
-        return;
-      }
+      ::getRandomAPCEntry(std::vector<EntryInfo>& entries) {
+  assert(!this->empty());
+#if TBB_VERSION_MAJOR >= 4
+  auto current = this->range();
+  for (auto rnd = rand(); rnd > 0 && current.is_divisible(); rnd >>= 1) {
+    // Split the range 'current' into two halves: 'current' and 'otherHalf'.
+    decltype(current) otherHalf(current, tbb::split());
+    // Randomly choose which half to keep.
+    if (rnd & 1) {
+      current = otherHalf;
     }
   }
+  auto apcPair = *current.begin();
+  int64_t curr_time = time(nullptr);
+  entries.push_back(makeEntryInfo(apcPair.first, &apcPair.second, curr_time));
+  return true;
 #else
-  out << "Incompatible TBB library\n";
+  return false;
 #endif
-  return;
 }
 
 //////////////////////////////////////////////////////////////////////

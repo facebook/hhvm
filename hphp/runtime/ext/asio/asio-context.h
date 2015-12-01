@@ -32,6 +32,7 @@ class c_ResumableWaitHandle;
 class c_RescheduleWaitHandle;
 class c_SleepWaitHandle;
 class c_ExternalThreadEventWaitHandle;
+class c_AsyncFunctionWaitHandle;
 
 typedef uint8_t context_idx_t;
 
@@ -46,6 +47,10 @@ struct AsioContext final {
 
   void schedule(c_ResumableWaitHandle* wait_handle) {
     m_runnableQueue.push_back(wait_handle);
+  }
+  void scheduleFast(c_AsyncFunctionWaitHandle* wait_handle) {
+    // assert(wait_handle->isFastResumable());
+    m_fastRunnableQueue.push_back(wait_handle);
   }
   void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
                 int64_t priority);
@@ -72,6 +77,7 @@ struct AsioContext final {
     // m_savedFP is a pointer to a frame on the stack that represents
     // a WaitHandle::join() call; it's guaranteed to be on the stack
     mark(m_runnableQueue);
+    mark(m_fastRunnableQueue);
     for (auto& p : m_priorityQueueDefault) {
       for (auto wh : p.second) mark(wh);
     }
@@ -94,6 +100,9 @@ private:
 
   // stack of ResumableWaitHandles ready for immediate execution
   req::vector<c_ResumableWaitHandle*> m_runnableQueue;
+
+  // stack of AsyncFunctionWaitHandles ready for immediate execution
+  req::vector<c_AsyncFunctionWaitHandle*> m_fastRunnableQueue;
 
   // queue of RescheduleWaitHandles scheduled in default mode
   reschedule_priority_queue_t m_priorityQueueDefault;

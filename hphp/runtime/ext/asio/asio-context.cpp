@@ -89,6 +89,7 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
 
   exitContextVector(ctx_idx, m_runnableQueue);
+  exitContextVector(ctx_idx, m_fastRunnableQueue);
 
   for (auto& it : m_priorityQueueDefault) {
     exitContextQueue<true>(ctx_idx, it.second);
@@ -130,6 +131,13 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     if (!m_runnableQueue.empty()) {
       auto current = m_runnableQueue.back();
       m_runnableQueue.pop_back();
+      current->resume();
+      continue;
+    }
+
+    if (!m_fastRunnableQueue.empty()) {
+      auto current = m_fastRunnableQueue.back();
+      m_fastRunnableQueue.pop_back();
       current->resume();
       continue;
     }

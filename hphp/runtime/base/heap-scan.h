@@ -41,6 +41,7 @@
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
 #ifdef ENABLE_ZEND_COMPAT
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"

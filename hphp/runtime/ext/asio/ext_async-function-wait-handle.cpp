@@ -138,7 +138,11 @@ void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 void c_AsyncFunctionWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (isInContext()) {
-    getContext()->schedule(this);
+    if (isFastResumable()) {
+      getContext()->scheduleFast(this);
+    } else {
+      getContext()->schedule(this);
+    }
   } else {
     decRefObj(this);
   }
@@ -296,11 +300,14 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
 
       // Reschedule if still in a context.
       if (isInContext()) {
-        getContext()->schedule(this);
+        if (isFastResumable()) {
+          getContext()->scheduleFast(this);
+        } else {
+          getContext()->schedule(this);
+        }
       } else {
         decRefObj(this);
       }
-
       break;
 
     default:

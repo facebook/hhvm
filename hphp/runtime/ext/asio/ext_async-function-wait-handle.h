@@ -112,6 +112,12 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
     return resumable()->actRec();
   }
 
+  bool isFastResumable() const {
+    assert(getState() == STATE_SCHEDULED);
+    return (resumable()->resumeAddr() &&
+            m_children[0].getChild()->isSucceeded());
+  }
+
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }
   void initialize(c_WaitableWaitHandle* child);

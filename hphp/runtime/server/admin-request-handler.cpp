@@ -132,9 +132,19 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
 extern unsigned low_arena;
 #endif
 
+void WarnIfNotOK(Transport* transport) {
+  auto code = static_cast<Transport::StatusCode>(transport->getResponseCode());
+  if (code != Transport::StatusCode::OK) {
+    Logger::Warning("Non-OK response from admin server: %d %s",
+                    static_cast<int>(code),
+                    transport->getResponseInfo().c_str());
+  }
+}
+
 void AdminRequestHandler::logToAccessLog(Transport* transport) {
   GetAccessLog().onNewRequest();
   GetAccessLog().log(transport, nullptr);
+  WarnIfNotOK(transport);
 }
 
 void AdminRequestHandler::setupRequest(Transport* transport) {
@@ -145,6 +155,7 @@ void AdminRequestHandler::setupRequest(Transport* transport) {
 void AdminRequestHandler::teardownRequest(Transport* transport) noexcept {
   SCOPE_EXIT { hphp_memory_cleanup(); };
   GetAccessLog().log(transport, nullptr);
+  WarnIfNotOK(transport);
 }
 
 void AdminRequestHandler::handleRequest(Transport *transport) {

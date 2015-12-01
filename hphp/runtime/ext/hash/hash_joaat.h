@@ -27,10 +27,10 @@ class hash_joaat : public HashEngine {
 public:
   explicit hash_joaat();
 
-  virtual void hash_init(void *context);
+  virtual void hash_init(void *context) override;
   virtual void hash_update(void *context, const unsigned char *buf,
-                           unsigned int count);
-  virtual void hash_final(unsigned char *digest, void *context);
+                           unsigned int count) override;
+  virtual void hash_final(unsigned char *digest, void *context) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

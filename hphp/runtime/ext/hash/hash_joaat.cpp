@@ -20,9 +20,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
-  unsigned int state;
-} PHP_JOAAT_CTX;
+namespace {
+  struct phpJoaatCtx {
+    unsigned int state;
+  };
+
+  using PHP_JOAAT_CTX = phpJoaatCtx;
+} // anon namespace
+
 
 hash_joaat::hash_joaat() :
   HashEngine(4, 4, sizeof(PHP_JOAAT_CTX)) {

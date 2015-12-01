@@ -872,17 +872,6 @@ private:
   Unit::PreClassRange cr;
 };
 
-class AllCachedClasses {
-  NamedEntity::Map::iterator m_next, m_end;
-  void skip();
-
-public:
-  AllCachedClasses();
-  bool empty() const;
-  Class* front();
-  Class* popFront();
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

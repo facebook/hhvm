@@ -40,7 +40,7 @@
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/iterators.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/util/alloc.h"
 
 namespace HPHP {
@@ -818,9 +818,9 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
       assert(stack.size() == 0);
   });
 
-  for (auto cls = all_classes().begin(); cls != all_classes().end(); ++cls) {
+  NamedEntity::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
-      continue;
+      return;
     }
     auto const staticProps = cls->staticProperties();
     auto const nSProps = cls->numStaticProperties();
@@ -846,7 +846,7 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
       );
 
       if (tv->m_data.num == 0) {
-          continue;
+        continue;
       }
 
       stack.push_back(refname);
@@ -867,7 +867,7 @@ Array HHVM_FUNCTION(objprof_get_paths, void) {
       }
       assert(stack.size() == 0);
     }
-  }
+  });
 
   // Create response
   ArrayInit objs(histogram.size(), ArrayInit::Map{});

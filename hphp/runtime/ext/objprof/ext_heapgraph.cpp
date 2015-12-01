@@ -43,7 +43,6 @@
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/iterators.h"
 #include "hphp/util/alloc.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"

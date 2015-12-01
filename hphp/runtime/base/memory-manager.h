@@ -380,6 +380,13 @@ alignas(64) constexpr uint32_t kSmallIndex2Size[] = {
 #undef SMALL_SIZE
 };
 
+alignas(64) constexpr unsigned kNContigTab[] = {
+#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+  ncontig,
+  SMALL_SIZES
+#undef SMALL_SIZE
+};
+
 constexpr uint32_t kMaxSmallSizeLookup = 4096;
 
 constexpr unsigned kLgSlabSize = 21;
@@ -409,9 +416,6 @@ static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
 static_assert(kMaxSmallSize < kSlabSize, "fix kNumSmallSizes or kLgSlabSize");
 static_assert(kNumSmallSizes <= sizeof(kSmallSize2Index),
               "Extend SMALL_SIZES table");
-
-constexpr unsigned kSmallPreallocCountLimit = 8;
-constexpr uint32_t kSmallPreallocBytesLimit = uint32_t{1} << 9;
 
 /*
  * Constants for the various debug junk-filling of different types of
@@ -969,11 +973,11 @@ private:
   MemoryManager& operator=(const MemoryManager&) = delete;
 
 private:
-  void* slabAlloc(uint32_t bytes, unsigned index);
-  void* newSlab(uint32_t nbytes);
   void storeTail(void* tail, uint32_t tailBytes);
   void splitTail(void* tail, uint32_t tailBytes, unsigned nSplit,
                  uint32_t splitUsable, unsigned splitInd);
+  void* slabAlloc(uint32_t bytes, unsigned index);
+  void* newSlab(uint32_t nbytes);
   void* mallocSmallSizeSlow(uint32_t bytes, unsigned index);
   void  updateBigStats();
   void* mallocBig(size_t nbytes);

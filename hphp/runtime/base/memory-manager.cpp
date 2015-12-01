@@ -788,6 +788,53 @@ void MemoryManager::checkHeap(const char* phase) {
 }
 
 /*
+ * Store slab tail bytes (if any) in freelists.
+ */
+inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
+  void* rem = tail;
+  for (uint32_t remBytes = tailBytes; remBytes > 0;) {
+    uint32_t fragBytes = remBytes;
+    assert(fragBytes >= kSmallSizeAlign);
+    assert((fragBytes & kSmallSizeAlignMask) == 0);
+    unsigned fragInd = smallSize2Index(fragBytes + 1) - 1;
+    uint32_t fragUsable = smallIndex2Size(fragInd);
+    void* frag = (void*)(uintptr_t(rem) + remBytes - fragUsable);
+    FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
+              "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
+              (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
+              frag, (void*)uintptr_t(fragBytes), (void*)uintptr_t(fragUsable),
+              fragInd);
+    m_freelists[fragInd].push(frag, fragUsable);
+    remBytes -= fragUsable;
+  }
+}
+
+/*
+ * Create nSplit contiguous regions and store them in the appropriate freelist.
+ */
+inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
+                                     unsigned nSplit, uint32_t splitUsable,
+                                     unsigned splitInd) {
+  assert(tailBytes >= kSmallSizeAlign);
+  assert((tailBytes & kSmallSizeAlignMask) == 0);
+  assert((splitUsable & kSmallSizeAlignMask) == 0);
+  assert(nSplit * splitUsable <= tailBytes);
+  for (uint32_t i = nSplit; i--;) {
+    void* split = (void*)(uintptr_t(tail) + i * splitUsable);
+    FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
+              "split={}, splitUsable={}, splitInd={}\n", tail,
+              (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
+              split, splitUsable, splitInd);
+    m_freelists[splitInd].push(split, splitUsable);
+  }
+  void* rem = (void*)(uintptr_t(tail) + nSplit * splitUsable);
+  assert(tailBytes >= nSplit * splitUsable);
+  uint32_t remBytes = tailBytes - nSplit * splitUsable;
+  assert(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
+  storeTail(rem, remBytes);
+}
+
+/*
  * Get a new slab, then allocate nbytes from it and install it in our
  * slab list.  Return the newly allocated nbytes-sized block.
  */
@@ -841,85 +888,25 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
     }
   }
   // Preallocate more of the same in order to amortize entry into this method.
-  unsigned nPrealloc;
-  if (nbytes * kSmallPreallocCountLimit <= kSmallPreallocBytesLimit) {
-    nPrealloc = kSmallPreallocCountLimit;
-  } else {
-    nPrealloc = kSmallPreallocBytesLimit / nbytes;
+  unsigned nSplit = kNContigTab[index] - 1;
+  uintptr_t avail = uintptr_t(m_limit) - uintptr_t(m_front);
+  if (UNLIKELY(nSplit * nbytes > avail)) {
+    nSplit = avail / nbytes; // Expensive division.
   }
-  {
-    void* front = (void*)(uintptr_t(m_front) + nPrealloc*nbytes);
-    if (uintptr_t(front) > uintptr_t(m_limit)) {
-      nPrealloc = ((uintptr_t)m_limit - uintptr_t(m_front)) / nbytes;
-      front = (void*)(uintptr_t(m_front) + nPrealloc*nbytes);
-    }
-    m_front = front;
-  }
-  for (void* p = (void*)(uintptr_t(m_front) - nbytes); p != ptr;
-       p = (void*)(uintptr_t(p) - nbytes)) {
-    m_freelists[index].push(p, nbytes);
+  if (nSplit > 0) {
+    void* tail = m_front;
+    uint32_t tailBytes = nSplit * nbytes;
+    m_front = (void*)(uintptr_t(m_front) + tailBytes);
+    splitTail(tail, tailBytes, nSplit, nbytes, index);
   }
   FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", bytes,
             index, ptr, m_front, m_limit);
   return ptr;
 }
 
-/*
- * Store slab tail bytes (if any) in freelists.
- */
-inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
-  void* rem = tail;
-  for (uint32_t remBytes = tailBytes; remBytes > 0;) {
-    uint32_t fragBytes = remBytes;
-    assert(fragBytes >= kSmallSizeAlign);
-    assert((fragBytes & kSmallSizeAlignMask) == 0);
-    unsigned fragInd = smallSize2Index(fragBytes + 1) - 1;
-    uint32_t fragUsable = smallIndex2Size(fragInd);
-    void* frag = (void*)(uintptr_t(rem) + remBytes - fragUsable);
-    FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
-              "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
-              (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
-              frag, (void*)uintptr_t(fragBytes), (void*)uintptr_t(fragUsable),
-              fragInd);
-    m_freelists[fragInd].push(frag, fragUsable);
-    remBytes -= fragUsable;
-  }
-}
-
-/*
- * Create nSplit contiguous regions and store them in the appropriate freelist.
- */
-inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
-                                     unsigned nSplit, uint32_t splitUsable,
-                                     unsigned splitInd) {
-  assert(tailBytes >= kSmallSizeAlign);
-  assert((tailBytes & kSmallSizeAlignMask) == 0);
-  assert((splitUsable & kSmallSizeAlignMask) == 0);
-  assert(nSplit * splitUsable <= tailBytes);
-  for (uint32_t i = nSplit; i--;) {
-    void* split = (void*)(uintptr_t(tail) + i * splitUsable);
-    FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
-              "split={}, splitUsable={}, splitInd={}\n", tail,
-              (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
-              split, splitUsable, splitInd);
-    m_freelists[splitInd].push(split, splitUsable);
-  }
-  void* rem = (void*)(uintptr_t(tail) + nSplit * splitUsable);
-  assert(tailBytes >= nSplit * splitUsable);
-  uint32_t remBytes = tailBytes - nSplit * splitUsable;
-  assert(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
-  storeTail(rem, remBytes);
-}
-
 void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, unsigned index) {
   size_t nbytes = smallIndex2Size(index);
-  static constexpr unsigned nContigTab[] = {
-#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
-    ncontig,
-  SMALL_SIZES
-#undef SMALL_SIZE
-  };
-  unsigned nContig = nContigTab[index];
+  unsigned nContig = kNContigTab[index];
   size_t contigMin = nContig * nbytes;
   unsigned contigInd = smallSize2Index(contigMin);
   for (unsigned i = contigInd; i < kNumSmallSizes; ++i) {

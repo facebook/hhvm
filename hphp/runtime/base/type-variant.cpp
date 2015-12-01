@@ -119,25 +119,6 @@ void tweak_variant_dtors() {
     (RawDestructor)getMethodPtr(&ObjectData::releaseNoObjDestructCheck);
 }
 
-Variant::~Variant() noexcept {
-  tvRefcountedDecRef(asTypedValue());
-  if (debug) {
-    memset(this, kTVTrashFill2, sizeof(*this));
-  }
-}
-
-void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
-  assert(type == KindOfString || type == KindOfArray ||
-         type == KindOfObject || type == KindOfResource ||
-         type == KindOfRef);
-  TypedValue tmp;
-  tmp.m_type = type;
-  tmp.m_data.num = datum;
-  if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
-    g_destructors[typeToDestrIdx(type)]((void*)datum);
-  }
-}
-
 Variant &Variant::assign(const Variant& v) noexcept {
   AssignValHelper(this, &v);
   return *this;

@@ -108,9 +108,8 @@ ALWAYS_INLINE bool isUncounted(const TypedValue& tv) {
   return uncounted;
 }
 
-// Assumes 'data' is live
-// Assumes 'isRefcountedType(type)'
-void tvDecRefHelper(DataType type, uint64_t datum) noexcept;
+typedef void(*RawDestructor)(void*);
+extern RawDestructor g_destructors[kDestrTableSize];
 
 /*
  * Returns true if decreffing the specified TypedValue will free heap-allocated
@@ -158,6 +157,20 @@ ALWAYS_INLINE void tvDecRefRefInternal(RefData* r) {
 ALWAYS_INLINE void tvDecRefRef(TypedValue* tv) {
   assert(tv->m_type == KindOfRef);
   tvDecRefRefInternal(tv->m_data.pref);
+}
+
+// Assumes 'data' is live
+// Assumes 'isRefcountedType(type)'
+ALWAYS_INLINE void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
+  assert(type == KindOfString || type == KindOfArray ||
+         type == KindOfObject || type == KindOfResource ||
+         type == KindOfRef);
+  TypedValue tmp;
+  tmp.m_type = type;
+  tmp.m_data.num = datum;
+  if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
+    g_destructors[typeToDestrIdx(type)]((void*)datum);
+  }
 }
 
 // Assumes 'tv' is live
@@ -700,9 +713,6 @@ X(Object)
 X(NullableObject)
 X(Resource)
 #undef X
-
-typedef void(*RawDestructor)(void*);
-extern RawDestructor g_destructors[kDestrTableSize];
 
 ALWAYS_INLINE void tvCastInPlace(TypedValue *tv, DataType DType) {
 #define X(kind) \

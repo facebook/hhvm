@@ -335,8 +335,13 @@ struct Variant : private TypedValue {
     return *this;
   }
 
-  // D462768 showed no gain from inlining, even just into mixed-array.o
-  ~Variant() noexcept;
+  ALWAYS_INLINE ~Variant() noexcept {
+    tvRefcountedDecRef(asTypedValue());
+    if (debug) {
+      memset(this, kTVTrashFill2, sizeof(*this));
+    }
+  }
+
 
   //////////////////////////////////////////////////////////////////////
 

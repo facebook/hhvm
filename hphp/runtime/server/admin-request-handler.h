@@ -47,8 +47,6 @@ private:
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
   bool handleStaticStringsRequest(const std::string &cmd,
                                   Transport *transport);
-  bool handleStaticStringsRdsRequest(const std::string &cmd,
-                                     Transport *transport);
   bool handleDumpStaticStrings(const std::string &cmd, Transport *transport,
                                const std::string &filename);
   bool handleVMRequest      (const std::string &cmd, Transport *transport);

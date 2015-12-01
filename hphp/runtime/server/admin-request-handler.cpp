@@ -409,10 +409,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleStaticStringsRequest(cmd, transport)) {
       break;
     }
-    if (strncmp(cmd.c_str(), "static-strings-rds", 18) == 0 &&
-        handleStaticStringsRdsRequest(cmd, transport)) {
-      break;
-    }
     if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
       auto filename = transport->getParam("file");
       if (filename == "") filename = "/tmp/static_strings";
@@ -1056,18 +1052,18 @@ bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
 
 bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
                                                      Transport* transport) {
-  std::ostringstream result;
-  result << makeStaticStringCount();
-  transport->sendString(result.str());
-  return true;
-}
-
-bool AdminRequestHandler::handleStaticStringsRdsRequest(const std::string& cmd,
-                                                        Transport* transport) {
-  std::ostringstream result;
-  result << countStaticStringConstants();
-  transport->sendString(result.str());
-  return true;
+  if (cmd == "static-strings") {
+    std::ostringstream result;
+    result << makeStaticStringCount();
+    transport->sendString(result.str());
+    return true;
+  } else if (cmd == "static-strings-rds") {
+    std::ostringstream result;
+    result << countStaticStringConstants();
+    transport->sendString(result.str());
+    return true;
+  }
+  return false;
 }
 
 bool AdminRequestHandler::handleDumpStaticStrings(const std::string& cmd,

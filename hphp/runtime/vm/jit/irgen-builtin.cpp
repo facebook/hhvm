@@ -160,6 +160,14 @@ SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
     return gen(env, OrdStr, arg);
   }
 
+  // In strict mode type mismatches won't be coerced (for legacy reasons in HH
+  // files builtins are always weak).
+  if (curFunc(env)->unit()->useStrictTypes() &&
+      !curFunc(env)->unit()->isHHFile() &&
+      !RuntimeOption::EnableHipHopSyntax) {
+    return nullptr;
+  }
+
   // intercept constant, non-string ord() here instead of OrdStr simplify stage.
   // OrdStr depends on a string as input for its vasm implementation.
   if (arg->hasConstVal(TBool)) {

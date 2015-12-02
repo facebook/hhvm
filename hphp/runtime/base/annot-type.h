@@ -115,7 +115,9 @@ enum class AnnotAction { Pass, Fail, ObjectCheck, CallableCheck };
  * annotation at run time.  NOTE that if the annotation is "array" and the
  * value is a collection object, this function will return Fail but the
  * runtime might possibly cast the collection to an array and allow normal
- * execution to continue (see TypeConstraint::verifyFail() for details).
+ * execution to continue (see TypeConstraint::verifyFail() for details). In
+ * addition in Weak mode verifyFail may coerce certain types allowing
+ * execution to continue.
  *
  * CallableCheck: `at' is "callable" and a value with DataType `dt' might
  * be compatible with the annotation, but the caller needs to consult

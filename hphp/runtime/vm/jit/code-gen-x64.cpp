@@ -2350,6 +2350,13 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
       emitIncRef(v, ctx3);
     });
   }
+
+  auto callerFunc = inst->marker().func();
+  auto unit = callerFunc->unit();
+  auto weakTypesFlag = !callerFunc->isBuiltin() && !unit->useStrictTypes()
+      ? ActRec::Flags::UseWeakTypes
+      : ActRec::Flags::None;
+
   auto name = v.makeReg();
   v << load{fpReg[itOff + CufIter::nameOff()], name};
   auto const sf = v.makeReg();
@@ -2362,13 +2369,17 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
     v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
     auto const encoded = ActRec::encodeNumArgsAndFlags(
       safe_cast<int32_t>(nArgs),
-      ActRec::Flags::MagicDispatch
+      static_cast<ActRec::Flags>(ActRec::Flags::MagicDispatch | weakTypesFlag)
     );
     v << storeli{static_cast<int32_t>(encoded),
                  spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
   }, [&](Vout& v) {
+    auto const encoded = ActRec::encodeNumArgsAndFlags(
+      safe_cast<int32_t>(nArgs),
+      weakTypesFlag
+    );
     v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
-    v << storeli{safe_cast<int32_t>(nArgs),
+    v << storeli{safe_cast<int32_t>(encoded),
                  spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
   });
 }
@@ -2425,7 +2436,11 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     v << store{srcLoc(inst, 1).reg(0), spReg[spOffset + int(AROFF(m_func))]};
   }
 
-  auto flags = ActRec::Flags::None;
+  auto callerFunc = inst->marker().func();
+  auto unit = callerFunc->unit();
+  auto flags = !callerFunc->isBuiltin() && !unit->useStrictTypes()
+      ? ActRec::Flags::UseWeakTypes
+      : ActRec::Flags::None;
   if (magicName) {
     flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
   }

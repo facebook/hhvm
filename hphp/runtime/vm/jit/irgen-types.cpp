@@ -152,13 +152,19 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     return;
   }
 
+  auto retFail = [&] {
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+    gen(env, VerifyRetFail, ldStkAddr(env, BCSPOffset{0}));
+  };
+
   auto result = annotCompat(valType.toDataType(), tc.type(), tc.typeName());
   switch (result) {
     case AnnotAction::Pass:
       return;
     case AnnotAction::Fail:
       if (isReturnType) {
-        gen(env, VerifyRetFail, val);
+        retFail();
       } else {
         gen(env, VerifyParamFail, cns(env, id));
       }
@@ -227,7 +233,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       // The hint was self or parent and there's no corresponding
       // class for the current func. This typehint will always fail.
       if (isReturnType) {
-        gen(env, VerifyRetFail, val);
+        retFail();
       } else {
         gen(env, VerifyParamFail, cns(env, id));
       }
@@ -251,7 +257,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       },
       [&] { // taken: the param type does not match
         hint(env, Block::Hint::Unlikely);
-        if (isReturnType) gen(env, VerifyRetFail, val);
+        if (isReturnType) retFail();
         else              gen(env, VerifyParamFail, cns(env, id));
       }
     );

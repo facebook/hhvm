@@ -377,9 +377,7 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 
 void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
   auto const func = env.context.func;
-
-  // TODO(#8060661): Why don't we need to mask out the flags?
-  auto const num_args = gen(env, LdARNumArgsAndFlags, fp(env));
+  auto const num_args = gen(env, LdARNumParams, fp(env));
 
   for (auto const& dv : dvs) {
     ifThen(

@@ -7774,19 +7774,6 @@ OPTBLD_INLINE void iopInitProp(IOP_ARGS) {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopStrlen(IOP_ARGS) {
-  TypedValue* subj = vmStack().topTV();
-  if (LIKELY(isStringType(subj->m_type))) {
-    int64_t ans = subj->m_data.pstr->size();
-    tvRefcountedDecRef(subj);
-    subj->m_type = KindOfInt64;
-    subj->m_data.num = ans;
-  } else {
-    Variant ans = HHVM_FN(strlen)(tvAsVariant(subj));
-    tvAsVariant(subj) = ans;
-  }
-}
-
 OPTBLD_INLINE void iopIncStat(IOP_ARGS) {
   auto counter = decode_iva(pc);
   auto value = decode_iva(pc);

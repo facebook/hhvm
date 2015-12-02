@@ -818,7 +818,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
       try {
         g_context->setThrowAllErrors(true);
         Variant v = invoke(m_funcScope->getScopeName().c_str(),
-                           arr, -1, true, true);
+                           arr, -1, true, true,
+                           !getFileScope()->useStrictTypes());
         g_context->setThrowAllErrors(false);
         return makeScalarExpression(ar, v);
       } catch (...) {

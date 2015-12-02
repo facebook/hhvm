@@ -430,7 +430,8 @@ public:
                   Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
-                  InvokeFlags flags = InvokeNormal);
+                  InvokeFlags flags = InvokeNormal,
+                  bool useWeakTypes = false);
 
   void invokeFunc(TypedValue* retval,
                   const CallCtx& ctx,
@@ -442,7 +443,8 @@ public:
                      void* thisOrCls,
                      StringData* invName,
                      int argc,
-                     const TypedValue* argv);
+                     const TypedValue* argv,
+                     bool useWeakTypes = false);
 
   void invokeFuncFew(TypedValue* retval,
                      const Func* f,

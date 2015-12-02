@@ -202,7 +202,8 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
   [&] {
     switch (defaultType) {
       case KindOfUninit:
-        compat = m_hhType;
+        // PHP 7 allows user defined constants as parameter default values
+        compat = m_hhType || RuntimeOption::PHP7_ScalarTypes;
         return;
       case KindOfNull:
         compat = true;
@@ -216,6 +217,9 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
         compat = (!strcasecmp(hint, "HH\\int") ||
                   !strcasecmp(hint, "HH\\num") ||
                   !strcasecmp(hint, "HH\\arraykey") ||
+                  // PHP 7 allows widening conversions
+                  (RuntimeOption::PHP7_ScalarTypes &&
+                   !strcasecmp(hint, "HH\\float")) ||
                   (m_hhType && interface_supports_int(hint)));
         return;
 

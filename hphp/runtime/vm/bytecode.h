@@ -262,7 +262,7 @@ struct ActRec {
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
-      // Bits 0-28 are the number of function args.  Bits 29-31 are values from
+      // Bits 0-27 are the number of function args.  Bits 28-31 are values from
       // the Flags enum.
       uint32_t m_numArgsAndFlags;
     };
@@ -300,6 +300,10 @@ struct ActRec {
   enum Flags : uint32_t {
     None          = 0,
 
+    // In non-HH files the caller can specify whether param type-checking should
+    // be strict or weak.
+    UseWeakTypes = (1u << 28),
+
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
     // down (locals freed).
@@ -311,16 +315,17 @@ struct ActRec {
     MagicDispatch = InResumed|SpareFlag,
   };
 
-  static constexpr int kNumArgsBits       = 29;
+  static constexpr int kNumArgsBits       = 28;
   static constexpr int kNumArgsMask       = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask         = ~kNumArgsMask;
-  static constexpr int kExecutionModeMask = ~LocalsDecRefd;
+  static constexpr int kExecutionModeMask = ~(LocalsDecRefd | UseWeakTypes);
 
   int32_t numArgs() const { return m_numArgsAndFlags & kNumArgsMask; }
   Flags flags() const {
     return static_cast<Flags>(m_numArgsAndFlags & kFlagsMask);
   }
 
+  bool useWeakTypes() const { return flags() & UseWeakTypes; }
   bool localsDecRefd() const { return flags() & LocalsDecRefd; }
   bool resumed() const {
     return (flags() & kExecutionModeMask) == InResumed;
@@ -346,21 +351,22 @@ struct ActRec {
     m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, flags());
   }
 
+  void setUseWeakTypes() {
+    m_numArgsAndFlags |= UseWeakTypes;
+  }
   void setLocalsDecRefd() {
-    m_numArgsAndFlags = m_numArgsAndFlags | LocalsDecRefd;
+    m_numArgsAndFlags |= LocalsDecRefd;
   }
   void setResumed() {
-    assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
+    m_numArgsAndFlags |= InResumed;
   }
   void setSpareFlag() {
-    assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), SpareFlag);
+    m_numArgsAndFlags |= SpareFlag;
   }
 
   void setMagicDispatch(StringData* invName) {
-    assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), MagicDispatch);
+    assertx(!resumed());
+    m_numArgsAndFlags |= MagicDispatch;
     m_invName = invName;
   }
 

@@ -994,6 +994,34 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
   }
 }
 
+// In PHP7 the caller specifies if parameter type-checking is strict in the
+// callee. NB: HH files ignore this preference and always use strict checking,
+// except in systemlib. Calls originating in systemlib are always strict.
+namespace {
+bool callUsesStrictTypes() {
+  if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
+    return true;
+  }
+  if (!vmfp()) {
+    return true;
+  }
+  auto func = vmfp()->func();
+  auto unit = func->unit();
+  return func->isBuiltin() || unit->useStrictTypes();
+}
+
+bool builtinCallUsesStrictTypes(const Unit* caller) {
+  if (!RuntimeOption::PHP7_ScalarTypes || RuntimeOption::EnableHipHopSyntax) {
+    return false;
+  }
+  return caller->useStrictTypes() && !caller->isHHFile();
+}
+
+void setTypesFlag(ActRec* ar) {
+  if (!callUsesStrictTypes()) ar->setUseWeakTypes();
+}
+}
+
 //=============================================================================
 // ExecutionContext.
 
@@ -1806,7 +1834,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       // prepareFuncEntry.  Since the stack state is going to be considered
       // "trimmed" over there, we need to null the extraArgs/varEnv field if
       // the function could read it.
-      ar->initNumArgs(nargs);
+      ar->setNumArgs(nargs);
       ar->trashVarEnv();
       if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
         ar->setVarEnv(nullptr);
@@ -1829,7 +1857,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
 
     // the extra args are not used in the function; no reason to add them
     // to the stack
-    ar->initNumArgs(f->numParams());
+    ar->setNumArgs(f->numParams());
     return true;
   }
 
@@ -1872,7 +1900,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       assert(ad->hasExactlyOneRef());
       stack.pushArrayNoRc(ad);
     }
-    ar->initNumArgs(nargs);
+    ar->setNumArgs(nargs);
     ar->setExtraArgs(extraArgs);
   } else {
     assert(hasVarParam);
@@ -1905,7 +1933,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       assert(ad->hasExactlyOneRef());
       stack.pushArrayNoRc(ad);
     }
-    ar->initNumArgs(f->numParams());
+    ar->setNumArgs(f->numParams());
   }
   return true;
 }
@@ -2127,7 +2155,8 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
                                   Class* cls /* = NULL */,
                                   VarEnv* varEnv /* = NULL */,
                                   StringData* invName /* = NULL */,
-                                  InvokeFlags flags /* = InvokeNormal */) {
+                                  InvokeFlags flags /* = InvokeNormal */,
+                                  bool useWeakTypes /* = false */) {
   assert(retptr);
   assert(f);
   // If f is a regular function, this_ and cls must be NULL
@@ -2225,6 +2254,11 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
       return;
     }
   }
+  if (useWeakTypes) {
+    ar->setUseWeakTypes();
+  } else {
+    setTypesFlag(ar);
+  }
 
   TypedValue retval;
   {
@@ -2260,7 +2294,8 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
                                      void* thisOrCls,
                                      StringData* invName,
                                      int argc,
-                                     const TypedValue* argv) {
+                                     const TypedValue* argv,
+                                     bool useWeakTypes /* = false */) {
   assert(retptr);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
@@ -2305,6 +2340,11 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
     ar->setMagicDispatch(invName);
   } else {
     ar->trashVarEnv();
+  }
+  if (useWeakTypes) {
+    ar->setUseWeakTypes();
+  } else {
+    setTypesFlag(ar);
   }
 
 #ifdef HPHP_TRACE
@@ -5969,6 +6009,7 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
   ar->m_func = func;
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  setTypesFlag(ar);
   return ar;
 }
 
@@ -6118,6 +6159,7 @@ void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
     ar->trashVarEnv();
     decRefStr(name);
   }
+  setTypesFlag(ar);
 }
 
 void fPushNullObjMethod(int numArgs) {
@@ -6230,6 +6272,7 @@ void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
     ar->trashVarEnv();
     decRefStr(const_cast<StringData*>(name));
   }
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void iopFPushClsMethod(IOP_ARGS) {
@@ -6303,6 +6346,7 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
@@ -6330,6 +6374,7 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void iopDecodeCufIter(IOP_ARGS) {
@@ -6390,6 +6435,7 @@ OPTBLD_INLINE void iopFPushCufIter(IOP_ARGS) {
   } else {
     ar->trashVarEnv();
   }
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
@@ -6433,6 +6479,7 @@ OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
   } else {
     ar->trashVarEnv();
   }
+  setTypesFlag(ar);
   tvRefcountedDecRef(&func);
 }
 
@@ -6641,6 +6688,8 @@ OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
   auto numNonDefault = decode_iva(pc);
   auto id = decode<Id>(pc);
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
+  auto unit = vmfp()->func()->unit();
+  auto strict = builtinCallUsesStrictTypes(unit);
   Func* func = Unit::lookupFunc(ne);
   if (func == nullptr) {
     raise_error("Call to undefined function %s()",
@@ -6649,7 +6698,7 @@ OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
-  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
+  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func, strict)) {
     if (func->hasVariadicCaptureParam()) {
       assertx(numArgs > 0);
       assertx(isArrayType(args[1-numArgs].m_type));
@@ -7260,8 +7309,11 @@ OPTBLD_INLINE void iopVerifyParamType(IOP_ARGS) {
   assert(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
+  bool useStrictTypes =
+    func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
+    !vmfp()->useWeakTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyParam(frame_local(vmfp(), paramId), func, paramId);
+    tc.verifyParam(frame_local(vmfp(), paramId), func, paramId, useStrictTypes);
   }
 }
 
@@ -7272,8 +7324,9 @@ OPTBLD_INLINE void implVerifyRetType(PC& pc) {
 
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
+  bool useStrictTypes = func->unit()->useStrictTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyReturn(vmStack().topTV(), func);
+    tc.verifyReturn(vmStack().topTV(), func, useStrictTypes);
   }
 }
 

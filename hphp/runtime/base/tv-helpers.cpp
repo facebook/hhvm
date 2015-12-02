@@ -21,6 +21,9 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -594,6 +597,10 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
     case KindOfDouble:
     case KindOfStaticString:
     case KindOfString:
+      // In PHP 7 mode handling of null types is stricter
+      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
+        return false;
+      }
       tvCastToBooleanInPlace(tv);
       return true;
 
@@ -613,23 +620,32 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
 bool tvCanBeCoercedToNumber(TypedValue* tv) {
   switch (tv->m_type) {
     case KindOfUninit:
-    case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
       return true;
+
+    case KindOfNull:
+      // In PHP 7 mode handling of null types is stricter
+      return !RuntimeOption::PHP7_ScalarTypes;
 
     case KindOfStaticString:
     case KindOfString: {
       // Simplified version of is_numeric_string
       // which also allows for non-numeric garbage
       // Because PHP
-      auto p = tv->m_data.pstr->data();
+      auto str = tv->m_data.pstr;
+      auto p = str->data();
       auto l = tv->m_data.pstr->size();
       while (l && isspace(*p)) { ++p; --l; }
       if (l && (*p == '+' || *p == '-')) { ++p; --l; }
       if (l && *p == '.') { ++p; --l; }
-      return l && isdigit(*p);
+      bool okay = l && isdigit(*p);
+      // In PHP7 garbage at the end of a numeric string will trigger a notice
+      if (RuntimeOption::PHP7_ScalarTypes && okay && !str->isNumeric()) {
+        raise_notice("A non well formed numeric value encountered");
+      }
+      return okay;
     }
 
     case KindOfPersistentArray:
@@ -650,6 +666,13 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
   if (!tvCanBeCoercedToNumber(tv)) {
     return false;
+  }
+  // In PHP 7 mode doubles only convert to integers when the conversion is non-
+  // narrowing
+  if (RuntimeOption::PHP7_ScalarTypes && tv->m_type == KindOfDouble) {
+    if (tv->m_data.dbl < std::numeric_limits<int64_t>::min()) return false;
+    if (tv->m_data.dbl > std::numeric_limits<int64_t>::max()) return false;
+    if (isnan(tv->m_data.dbl)) return false;
   }
   tvCastToInt64InPlace(tv);
   return true;
@@ -677,6 +700,10 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
     case KindOfDouble:
     case KindOfStaticString:
     case KindOfString:
+      // In PHP 7 mode handling of null types is stricter
+      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
+        return false;
+      }
       tvCastToStringInPlace(tv);
       return true;
 
@@ -762,6 +789,17 @@ bool tvCoerceParamToResourceInPlace(TypedValue* tv) {
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
                                     const Func* callee,           \
                                     unsigned int arg_num) {       \
+  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {                \
+    VMRegAnchor _;                                                \
+    auto strict = liveFunc() == callee                            \
+      ? !liveFrame()->useWeakTypes()                              \
+      : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();  \
+    if (strict) {                                                 \
+      auto const& tc = callee->params()[arg_num - 1].typeConstraint;\
+      tc.verifyParam(tv, callee, arg_num - 1, true);              \
+      return;                                                     \
+    }                                                             \
+  }                                                               \
   if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
     return;                                                       \
   }                                                               \

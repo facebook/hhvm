@@ -526,6 +526,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
+  u->m_useStrictTypes = m_useStrictTypes;
   {
     const std::string& dirname = FileUtil::safe_dirname(m_filepath->data(),
                                                         m_filepath->size());
@@ -710,6 +711,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_mergeOnly)
     (m_isHHFile)
     (m_typeAliases)
+    (m_useStrictTypes)
     ;
 }
 

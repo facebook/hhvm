@@ -381,6 +381,7 @@ bool RuntimeOption::PHP7_DeprecateOldStyleCtors = false;
 bool RuntimeOption::PHP7_IntSemantics = false;
 bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
+bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_UVS = false;
 
 int RuntimeOption::GetScannerType() {
@@ -1193,6 +1194,8 @@ void RuntimeOption::Load(
     Config::Bind(PHP7_LTR_assign, ini, config, "PHP7.LTRAssign",
                  s_PHP7_master);
     Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics",
+                 s_PHP7_master);
+    Config::Bind(PHP7_ScalarTypes, ini, config, "PHP7.ScalarTypes",
                  s_PHP7_master);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
   }

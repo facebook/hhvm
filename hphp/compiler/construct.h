@@ -104,7 +104,8 @@ public:
   x(TraitPrecStatement)     \
   x(TraitAliasStatement)    \
   x(TypedefStatement)       \
-  x(UseDeclarationStatementFragment)
+  x(UseDeclarationStatementFragment) \
+  x(DeclareStatement)
 
 #define DECLARE_EXPRESSION_TYPES(x)     \
   x(Expression,                  None) \

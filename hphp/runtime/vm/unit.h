@@ -770,6 +770,14 @@ public:
    */
   bool isHHFile() const;
 
+  /*
+   * Should calls from this unit use strict types? (This is always true for HH
+   * units).
+   *
+   * With strict types enabled only lossless int->float conversions are allowed
+   */
+  bool useStrictTypes() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -808,6 +816,7 @@ private:
   bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;
+  bool m_useStrictTypes : 1;
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;

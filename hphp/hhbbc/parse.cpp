@@ -945,6 +945,8 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
   ret->md5      = ue.md5();
   ret->filename = ue.m_filepath;
   ret->preloadPriority = ue.m_preloadPriority;
+  ret->isHHFile = ue.m_isHHFile;
+  ret->useStrictTypes = ue.m_useStrictTypes;
 
   ParseUnitState puState;
   if (ue.hasSourceLocInfo()) {

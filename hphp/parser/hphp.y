@@ -754,25 +754,25 @@ top_statement:
   | T_NAMESPACE '{'                    { _p->onNamespaceStart("");}
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $4;}
   | T_USE use_declarations ';'         { _p->onUse($2, &Parser::useClass);
-                                         _p->nns(); $$.reset();}
+                                         _p->nns(T_USE); $$.reset();}
   | T_USE T_FUNCTION
     use_declarations ';'               { _p->onUse($3, &Parser::useFunction);
-                                         _p->nns(); $$.reset();}
+                                         _p->nns(T_USE); $$.reset();}
   | T_USE T_CONST
     use_declarations ';'               { _p->onUse($3, &Parser::useConst);
-                                         _p->nns(); $$.reset();}
+                                         _p->nns(T_USE); $$.reset();}
   | T_USE group_use_prefix
     '{' mixed_use_declarations '}' ';' { _p->onGroupUse($2.text(), $4,
                                            nullptr);
-                                         _p->nns(); $$.reset();}
+                                         _p->nns(T_USE); $$.reset();}
   | T_USE T_FUNCTION group_use_prefix
     '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
                                            &Parser::useFunction);
-                                         _p->nns(); $$.reset();}
+                                         _p->nns(T_USE); $$.reset();}
   | T_USE T_CONST group_use_prefix
     '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
                                            &Parser::useConst);
-                                         _p->nns(); $$.reset();}
+                                         _p->nns(T_USE); $$.reset();}
   | constant_declaration ';'           { _p->nns();
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;
@@ -1020,7 +1020,9 @@ statement:
                                          _p->onForEach($$,$3,$6,$7,$10, true);
                                          _p->onCompleteLabelScope(false);}
   | T_DECLARE '(' declare_list ')'
-    declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
+    declare_statement                  { _p->onDeclare($3, $5);
+                                         $$ = $3;
+                                         $$ = T_DECLARE;}
   | T_TRY
     try_statement_list
     T_CATCH '('
@@ -1098,7 +1100,7 @@ function_declaration_statement:
                                          _p->onFunctionStart($3);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
-    hh_opt_return_type
+    opt_return_type
     function_body                      { _p->onFunction($$,nullptr,$8,$2,$3,$6,$9,nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();
@@ -1111,7 +1113,7 @@ function_declaration_statement:
                                          _p->onFunctionStart($4);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
-    hh_opt_return_type
+    opt_return_type
     function_body                      { _p->onFunction($$,&$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();
@@ -1124,7 +1126,7 @@ function_declaration_statement:
                                          _p->onFunctionStart($5);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
-    hh_opt_return_type
+    opt_return_type
     function_body                      { _p->onFunction($$,&$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();
@@ -1301,15 +1303,16 @@ while_statement:
     T_ENDWHILE ';'                     { $$ = $2;}
 ;
 declare_statement:
-    statement                          { $$ = $1;}
+    statement                          { _p->onBlock($$, $1);}
   | ':' inner_statement_list
-    T_ENDDECLARE ';'                   { $$ = $2;}
+    T_ENDDECLARE ';'                   { _p->onBlock($$, $2);}
 ;
 
 declare_list:
-    ident_no_semireserved '=' static_expr
+    ident_no_semireserved '=' static_expr {_p->onDeclareList($$, $1, $3);}
   | declare_list ','
-    ident_no_semireserved '=' static_expr
+    ident_no_semireserved '=' static_expr {_p->onDeclareList($1, $3, $5);
+                                           $$ = $1;}
 ;
 
 switch_case_list:
@@ -1580,7 +1583,7 @@ class_statement:
                                          _p->onMethodStart($4, $1);
                                          _p->pushLabelInfo();}
     method_parameter_list ')'
-    hh_opt_return_type
+    opt_return_type
     method_body
                                        { _p->onMethod($$,$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
@@ -1594,7 +1597,7 @@ class_statement:
                                          _p->onMethodStart($5, $2);
                                          _p->pushLabelInfo();}
     method_parameter_list ')'
-    hh_opt_return_type
+    opt_return_type
     method_body
                                        { _p->onMethod($$,$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
@@ -1979,7 +1982,7 @@ closure_expression:
                                          _p->onClosureStart(t);
                                          _p->pushLabelInfo(); }
     parameter_list ')'
-    hh_opt_return_type lambda_use_vars
+    opt_return_type lambda_use_vars
     '{' inner_statement_list '}'       { _p->finishStatement($10, $10); $10 = 1;
                                          $$ = _p->onClosure(ClosureType::Long,
                                                             nullptr,
@@ -1993,7 +1996,7 @@ closure_expression:
                                          _p->onClosureStart(t);
                                          _p->pushLabelInfo(); }
     parameter_list ')'
-    hh_opt_return_type lambda_use_vars
+    opt_return_type lambda_use_vars
     '{' inner_statement_list '}'       { _p->finishStatement($11, $11); $11 = 1;
                                          $$ = _p->onClosure(ClosureType::Long,
                                                             &$1,
@@ -2029,7 +2032,7 @@ lambda_expression:
                                          _p->pushLabelInfo();}
     parameter_list
     T_LAMBDA_CP
-    hh_opt_return_type
+    opt_return_type
     lambda_body                        { Token u; Token v;
                                          $1 = T_ASYNC;
                                          _p->onMemberModifier($1, nullptr, $1);
@@ -2079,7 +2082,7 @@ lambda_expression:
                                          _p->pushLabelInfo();}
     parameter_list
     T_LAMBDA_CP
-    hh_opt_return_type
+    opt_return_type
     lambda_body                        { Token u; Token v;
                                          _p->finishStatement($6, $6); $6 = 1;
                                          $$ = _p->onClosure(ClosureType::Short,
@@ -3149,9 +3152,9 @@ hh_func_type_list:
   |                                    { $$.reset(); }
 ;
 
-hh_opt_return_type:
+opt_return_type:
                                        { $$.reset(); }
-  | ':' hh_type                        { only_in_hh_syntax(_p); $$ = $2; }
+  | ':' hh_type                        { $$ = $2; }
 ;
 
 hh_constraint:

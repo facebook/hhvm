@@ -50,7 +50,7 @@ namespace HPHP {
 FileScope::FileScope(const std::string &fileName, int fileSize, const MD5 &md5)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
     m_size(fileSize), m_md5(md5), m_system(false),
-    m_isHHFile(false), m_preloadPriority(0),
+    m_isHHFile(false), m_useStrictTypes(false), m_preloadPriority(0),
     m_fileName(fileName), m_redeclaredFunctions(0) {
   pushAttribute(); // for global scope
 }
@@ -80,6 +80,10 @@ void FileScope::setSystem() {
 
 void FileScope::setHHFile() {
   m_isHHFile = true;
+}
+
+void FileScope::setUseStrictTypes() {
+  m_useStrictTypes = true;
 }
 
 FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,

@@ -331,5 +331,9 @@ inline bool Unit::isHHFile() const {
   return m_isHHFile;
 }
 
+inline bool Unit::useStrictTypes() const {
+  return m_useStrictTypes;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

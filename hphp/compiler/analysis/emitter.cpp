@@ -101,6 +101,7 @@
 #include "hphp/compiler/statement/declare_statement.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/hhbbc/hhbbc.h"
+#include "hphp/hhbbc/parallel.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/util/safe-cast.h"
@@ -4925,7 +4926,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     assert(m_evalStack.size() == 1);
 
-    e.Await(m_pendingIters.size());
+    e.Await();
 
     resume.set(e);
     return true;
@@ -5029,7 +5030,7 @@ bool EmitterVisitor::emitInlineGenva(
   e.FCall(1);
   e.UnboxR();
 
-  e.Await(m_pendingIters.size());
+  e.Await();
   // result of AwaitAllWaitHandle does not matter
   emitPop(e);
 
@@ -8867,7 +8868,7 @@ void EmitterVisitor::emitForeachAwaitAs(Emitter& e,
   emitVirtualLocal(iterTempLocal);
   emitCGet(e);
   emitConstMethodCallNoParams(e, "next");
-  e.Await(m_pendingIters.size());
+  e.Await();
   auto const resultTempLocal = emitSetUnnamedL(e);
 
   // Did we finish yet?

@@ -66,7 +66,7 @@ void suspendHookR(IRGS& env, SSATmp* frame, SSATmp* objOrNullptr) {
   );
 }
 
-void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
+void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(!resumed(env));
   assertx(child->type() <= TObj);
@@ -121,7 +121,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   auto const data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StAsyncArResume, ResumeOffset { resumeOffset }, fp(env),
-    resumeAddr);
+      resumeAddr);
 
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
@@ -185,7 +185,7 @@ void emitWHResult(IRGS& env) {
   push(env, res);
 }
 
-void emitAwait(IRGS& env, int32_t numIters) {
+void emitAwait(IRGS& env) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
 
@@ -237,7 +237,7 @@ void emitAwait(IRGS& env, int32_t numIters) {
       if (resumed(env)) {
         implAwaitR(env, child, resumeOffset);
       } else {
-        implAwaitE(env, child, resumeOffset, numIters);
+        implAwaitE(env, child, resumeOffset);
       }
     },
     [&] { // Taken: retrieve the result from the wait handle

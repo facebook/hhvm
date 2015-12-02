@@ -7583,7 +7583,7 @@ OPTBLD_INLINE void iopContGetReturn(IOP_ARGS) {
   cellDup(cont->m_value, *vmStack().allocC());
 }
 
-OPTBLD_INLINE void asyncSuspendE(PC& pc, int32_t iters) {
+OPTBLD_INLINE void asyncSuspendE(PC& pc) {
   assert(!vmfp()->resumed());
   assert(vmfp()->func()->isAsyncFunction());
   const auto func = vmfp()->m_func;
@@ -7672,7 +7672,6 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 }
 
 OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
-  auto iters = decode_iva(pc);
   auto const awaitable = vmStack().topC();
   auto wh = c_WaitHandle::fromCell(awaitable);
   if (UNLIKELY(wh == nullptr)) {
@@ -7710,7 +7709,7 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
     asyncSuspendR(pc);
   } else {
     // suspend eager execution
-    asyncSuspendE(pc, iters);
+    asyncSuspendE(pc);
   }
 
   return jitReturnPost(jitReturn);

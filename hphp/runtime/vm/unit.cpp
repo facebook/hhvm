@@ -701,7 +701,21 @@ Class* Unit::defClass(const PreClass* preClass,
   }
 }
 
+namespace {
+bool isPHP7ReservedType(const StringData* alias) {
+  return
+    !strcmp("int",    alias->data()) ||
+    !strcmp("bool",   alias->data()) ||
+    !strcmp("float",  alias->data()) ||
+    !strcmp("string", alias->data());
+}
+}
+
 bool Unit::aliasClass(Class* original, const StringData* alias) {
+  if (RuntimeOption::PHP7_ScalarTypes && isPHP7ReservedType(alias)) {
+    raise_error("Fatal error: Cannot use '%s' as class name as it is reserved",
+                alias->data());
+  }
   auto const aliasNe = NamedEntity::get(alias);
   aliasNe->m_cachedClass.bind();
 

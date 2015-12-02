@@ -983,6 +983,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
   ue->m_preloadPriority = unit.preloadPriority;
+  ue->m_isHHFile = unit.isHHFile;
+  ue->m_useStrictTypes = unit.useStrictTypes;
 
   EmitUnitState state { index };
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);

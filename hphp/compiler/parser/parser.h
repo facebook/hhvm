@@ -353,6 +353,9 @@ public:
   void useFunction(const std::string &fn, const std::string &as);
   void useConst(const std::string &cnst, const std::string &as);
 
+  void onDeclare(Token& out, Token& block);
+  void onDeclareList(Token& out, Token& ident, Token& value);
+
   /*
    * Get the current label scope. A new label scope is demarcated by
    * one of the following: a loop, a switch statement, a finally block,
@@ -504,16 +507,22 @@ private:
     InsideNamespace,
   };
 
+public:
   /*
    * An AliasTable maps aliases to names.
    * We use it instead a regular map because it lazily imports a bunch of
    * names into the current namespace when appropriate.
    */
-  class AliasTable {
-  public:
-    struct AliasEntry {
-      std::string alias;
+  struct AliasTable {
+    enum class AliasFlags {
+      None = 0,
+      HH = 0x1,
+      PHP7_ScalarTypes = 0x2,
+    };
+
+    struct AutoAlias {
       std::string name;
+      AliasFlags flags;
     };
 
     enum class AliasType {
@@ -523,8 +532,14 @@ private:
       DEF
     };
 
-    AliasTable(const hphp_string_imap<std::string>& autoAliases,
-               std::function<bool ()> autoOracle);
+    using AutoAliasMap = std::unordered_map<
+      std::string,
+      AutoAlias,
+      string_hashi,
+      string_eqstri>;
+
+    AliasTable(const AutoAliasMap& aliases,
+               std::function<AliasFlags ()> autoOracle);
 
     std::string getName(const std::string& alias, int line_no);
     std::string getNameRaw(const std::string& alias);
@@ -545,14 +560,19 @@ private:
     };
 
     hphp_string_imap<NameEntry> m_aliases;
-    const hphp_string_imap<std::string>& m_autoAliases;
+    const AutoAliasMap& m_autoAliases;
     // Returns true if stuff should be auto-imported.
-    std::function<bool ()> m_autoOracle;
+    std::function<AliasFlags ()> m_autoOracle;
     void setFalseOracle();
+    const AutoAliasMap& getAutoAliases();
   };
 
+  using AutoAlias = AliasTable::AutoAlias;
   using AliasType = AliasTable::AliasType;
+  using AliasFlags = AliasTable::AliasFlags;
+  using AutoAliasMap = AliasTable::AutoAliasMap;
 
+private:
   NamespaceState m_nsState;
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
@@ -568,10 +588,19 @@ private:
   hphp_string_map<std::string> m_cnstAliasTable;
 
   void registerAlias(std::string name);
-  bool isAutoAliasOn();
-  const hphp_string_imap<std::string>& getAutoAliasedClasses();
-  hphp_string_imap<std::string> getAutoAliasedClassesHelper();
+  AliasFlags getAliasFlags();
+  const AutoAliasMap& getAutoAliasedClasses();
 };
+
+inline Parser::AliasFlags operator|(const Parser::AliasFlags& lhs,
+                                    const Parser::AliasFlags& rhs) {
+  return (Parser::AliasFlags)((unsigned)lhs | (unsigned)rhs);
+}
+
+inline unsigned operator&(const Parser::AliasFlags& lhs,
+                          const Parser::AliasFlags& rhs) {
+  return (unsigned)lhs & (unsigned)rhs;
+}
 
 template<typename... Args>
 inline void HPHP_PARSER_ERROR(const char* fmt,

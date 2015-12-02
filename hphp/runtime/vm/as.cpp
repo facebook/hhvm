@@ -2417,6 +2417,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   auto ue = folly::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
+  ue->m_useStrictTypes = true;
 
   try {
     std::istringstream instr(std::string(code, codeLen));

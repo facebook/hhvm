@@ -1,14 +1,6 @@
 {
     "preamble": "",
     "consts": [
-        {
-            "name": "MCC_ACCESSPOINT_DOWN",
-            "value": 2
-        },
-        {
-            "name": "MCC_ACCESSPOINT_UP",
-            "value": 1
-        }
     ],
     "funcs": [
     ],

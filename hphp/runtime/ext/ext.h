@@ -23,7 +23,6 @@
 
 // Super temporary
 #ifndef USE_CMAKE
-#include "hphp/facebook/extensions/phpmc/ext_phpmc.h"
 #define ENABLE_EXTENSION_COLLECTIONS
 #endif
 

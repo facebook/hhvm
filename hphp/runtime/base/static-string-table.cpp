@@ -14,12 +14,11 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/static-string-table.h"
-
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/debug.h"
-
 #include "hphp/runtime/server/memory-stats.h"
+#include "hphp/util/low-ptr.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -29,48 +28,49 @@ namespace HPHP {
 
 namespace {
 
-// Pointer to StringData, or pointer to folly::StringPiece.
-using StrInternKey = intptr_t;
+// the string key will one of these values:
+//  * a valid LowPtr<StringData>, or
+//  * zero, meaning use the slice in t_needle, or
+//  * -1, -2, or -3 AHM magic values.
+// Note that only the magic values have 1s in the low 3 bits
+// since StringData's are at least 8-aligned.
 
-DEBUG_ONLY constexpr intptr_t kAhmMagicThreshold = -3;
+using StrInternKey = LowStringPtr::storage_type;
 
-StrInternKey make_intern_key(const StringData* sd) {
-  auto const ret = reinterpret_cast<StrInternKey>(sd);
-  assert(ret > 0);
-  return ret;
-}
+constexpr StrInternKey kSearchKey = 0;
 
-StrInternKey make_intern_key(const folly::StringPiece* sl) {
-  auto const ret = -reinterpret_cast<StrInternKey>(sl);
-  assert(ret < 0 && ret < kAhmMagicThreshold);
-  return ret;
+static __thread folly::StringPiece t_needle; // the real search string
+
+// Return true if k is one of AHM's magic values. valid pointers and
+// kSearchKey are 8-aligned, so test the low 3 bits.
+bool isMagicKey(StrInternKey k) {
+  return (k & 7) != 0;
 }
 
 const StringData* to_sdata(StrInternKey key) {
-  assert(key > 0);
+  assert(key != kSearchKey && !isMagicKey(key));
+  static_assert(std::is_unsigned<StrInternKey>(), "cast must zero-extend");
   return reinterpret_cast<const StringData*>(key);
 }
 
-const folly::StringPiece* to_sslice(StrInternKey key) {
-  assert(key < 0 && key < kAhmMagicThreshold);
-  return reinterpret_cast<const folly::StringPiece*>(-key);
+folly::StringPiece to_sslice(StrInternKey key) {
+  assert(key == kSearchKey);
+  return t_needle;
 }
 
 struct strintern_eq {
   bool operator()(StrInternKey k1, StrInternKey k2) const {
-    if (k1 < 0) {
-      // AHM only gives lookup keys on the rhs of the equal operator
-      assert(k1 >= kAhmMagicThreshold);
-      return false;
-    }
-    assert(k2 >= 0 || k2 < kAhmMagicThreshold);
+    if (isMagicKey(k1)) return false; // magic values
+    // AHM only gives lookup keys on the rhs of the equal operator
+    assert(k1 != kSearchKey);
+    assert(!isMagicKey(k2)); // no magic values on rhs
     auto const sd1 = to_sdata(k1);
     auto const len1 = sd1->size();
     auto const data1 = sd1->data();
-    if (UNLIKELY(k2 < 0)) {
+    if (k2 == kSearchKey) {
       auto slice2 = to_sslice(k2);
-      if (len1 != slice2->size()) return false;
-      return !memcmp(data1, slice2->begin(), len1);
+      if (len1 != slice2.size()) return false;
+      return !memcmp(data1, slice2.begin(), len1);
     }
     auto string2 = to_sdata(k2);
     if (len1 != string2->size()) return false;
@@ -81,11 +81,11 @@ struct strintern_eq {
 
 struct strintern_hash {
   size_t operator()(StrInternKey k) const {
-    assert(k > 0 || k < kAhmMagicThreshold);
-    if (LIKELY(k > 0)) {
+    assert(!isMagicKey(k)); // no magic values get here
+    if (k != kSearchKey) {
       return to_sdata(k)->hash();
     }
-    auto const slice = *to_sslice(k);
+    auto slice = to_sslice(k);
     return hash_string(slice.data(), slice.size());
   }
 };
@@ -99,10 +99,21 @@ typedef folly::AtomicHashMap<
 > StringDataMap;
 StringDataMap* s_stringDataMap;
 
+StringDataMap::iterator find_key(const StringData* s) {
+  t_needle = s->slice();
+  return s_stringDataMap->find(kSearchKey);
+}
+
+StringDataMap::iterator find_key(folly::StringPiece s) {
+  t_needle = s;
+  return s_stringDataMap->find(kSearchKey);
+}
+
 // If a string is static it better be the one in the table.
 DEBUG_ONLY bool checkStaticStr(const StringData* s) {
   assert(s->isStatic());
-  auto DEBUG_ONLY const it = s_stringDataMap->find(make_intern_key(s));
+  assert(s_stringDataMap);
+  auto DEBUG_ONLY const it = find_key(s);
   assert(it != s_stringDataMap->end());
   assert(to_sdata(it->first) == s);
   return true;
@@ -121,8 +132,9 @@ StringData** precompute_chars() {
 StringData** precomputed_chars = precompute_chars();
 
 StringData* insertStaticString(StringData* sd) {
+  assert(sd->isStatic());
   auto pair = s_stringDataMap->insert(
-    make_intern_key(sd),
+    safe_cast<StrInternKey>(reinterpret_cast<uintptr_t>(sd)),
     rds::Link<TypedValue>(rds::kInvalidHandle)
   );
 
@@ -162,14 +174,14 @@ size_t makeStaticStringCount() {
 }
 
 StringData* makeStaticString(const StringData* str) {
-  if (UNLIKELY(!s_stringDataMap)) {
-    create_string_data_map();
-  }
   if (str->isStatic()) {
     assert(checkStaticStr(str));
     return const_cast<StringData*>(str);
   }
-  auto const it = s_stringDataMap->find(make_intern_key(str));
+  if (UNLIKELY(!s_stringDataMap)) {
+    create_string_data_map();
+  }
+  auto const it = find_key(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
@@ -180,7 +192,7 @@ StringData* makeStaticString(folly::StringPiece slice) {
   if (UNLIKELY(!s_stringDataMap)) {
     create_string_data_map();
   }
-  auto const it = s_stringDataMap->find(make_intern_key(&slice));
+  auto const it = find_key(slice);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
@@ -189,7 +201,7 @@ StringData* makeStaticString(folly::StringPiece slice) {
 
 StringData* lookupStaticString(const StringData *str) {
   assert(s_stringDataMap && !str->isStatic());
-  auto const it = s_stringDataMap->find(make_intern_key(str));
+  auto const it = find_key(str);
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
@@ -222,7 +234,7 @@ StringData* makeStaticString(char c) {
 
 rds::Handle lookupCnsHandle(const StringData* cnsName) {
   assert(s_stringDataMap);
-  auto const it = s_stringDataMap->find(make_intern_key(cnsName));
+  auto const it = find_key(cnsName);
   if (it != s_stringDataMap->end()) {
     return it->second.handle();
   }
@@ -238,7 +250,7 @@ rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
     // the request local rds::s_constants instead.
     return 0;
   }
-  auto const it = s_stringDataMap->find(make_intern_key(cnsName));
+  auto const it = find_key(cnsName);
   assert(it != s_stringDataMap->end());
   if (!it->second.bound()) {
     it->second.bind<kTVSimdAlign>(persistent ? rds::Mode::Persistent

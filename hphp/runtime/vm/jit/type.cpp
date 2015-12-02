@@ -580,7 +580,7 @@ Type typeFromRAT(RepoAuthType ty) {
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;
-    case T::InitGen:        return TInit;
+    case T::InitGen:        return TInitGen;
     case T::Gen:            return TGen;
 
     // TODO(#4205897): option specialized array types

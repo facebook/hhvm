@@ -129,6 +129,10 @@ TEST(Type, ToString) {
 
   EXPECT_EQ("InitNull", TInitNull.constValString());
 
+  EXPECT_EQ("InitGen", TInitGen.toString());
+  EXPECT_EQ("PtrToInitGen", TInitGen.ptr(Ptr::Ptr).toString());
+  EXPECT_EQ("PtrToFrameInitGen", TPtrToFrameInitGen.toString());
+
   auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMembInitNull);
   EXPECT_EQ("PtrToMembInitNull<TV: 0xba5eba11>", ptrCns.toString());
   EXPECT_EQ("TV: 0xba5eba11", ptrCns.constValString());

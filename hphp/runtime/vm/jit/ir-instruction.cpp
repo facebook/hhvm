@@ -243,7 +243,7 @@ Type arrElemReturn(const IRInstruction* inst) {
 
   auto resultType = inst->hasTypeParam() ? inst->typeParam() : TGen;
   if (inst->is(ArrayGet)) {
-    resultType &= TInit;
+    resultType &= TInitGen;
   }
 
   // Elements of a noncounted array are uncounted

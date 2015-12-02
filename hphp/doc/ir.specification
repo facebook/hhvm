@@ -1616,7 +1616,7 @@ To string conversions:
 
   Verify a return type hint.
 
-| VerifyRetFail, ND, S(Gen), Er
+| VerifyRetFail, ND, S(PtrToGen), Er
 
   Failure to verify a return type hint.
 

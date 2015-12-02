@@ -129,7 +129,7 @@ void VerifyRetTypeSlow(const Class* cls,
                        const HPHP::TypeConstraint* expected,
                        const TypedValue value);
 void VerifyRetTypeCallable(TypedValue value);
-void VerifyRetTypeFail(const TypedValue value);
+void VerifyRetTypeFail(TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 

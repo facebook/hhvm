@@ -785,21 +785,42 @@ bool tvCoerceParamToResourceInPlace(TypedValue* tv) {
   return tv->m_type == KindOfResource;
 }
 
+namespace {
+/*
+ * Sometimes calls to builtin functions are inlined so that the call itself can
+ * occur via CallBuiltin rather than NativeImpl. In these instances it's
+ * possible that no ActRec was pushed for the builtin call, in which case the
+ * liveFunc() will be the caller rather than the callee.
+ *
+ * If no ActRec was pushed for the builtin function inspect the caller to
+ * determine if the call used strict types.
+ */
+bool useStrictTypes(const Func* callee) {
+  return liveFunc() == callee
+    ? !liveFrame()->useWeakTypes()
+    : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
+}
+}
+
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
+  if (LIKELY(!RuntimeOption::PHP7_ScalarTypes ||
+             RuntimeOption::EnableHipHopSyntax)) {
+    return;
+  }
+
+  VMRegAnchor _;
+  if (!useStrictTypes(func)) return;
+
+  auto const& tc = func->params()[argNum - 1].typeConstraint;
+  tc.verifyParam(&tv, func, argNum - 1, true);
+}
+
+
 #define XX(kind, expkind)                                         \
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
                                     const Func* callee,           \
                                     unsigned int arg_num) {       \
-  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {                \
-    VMRegAnchor _;                                                \
-    auto strict = liveFunc() == callee                            \
-      ? !liveFrame()->useWeakTypes()                              \
-      : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();  \
-    if (strict) {                                                 \
-      auto const& tc = callee->params()[arg_num - 1].typeConstraint;\
-      tc.verifyParam(tv, callee, arg_num - 1, true);              \
-      return;                                                     \
-    }                                                             \
-  }                                                               \
+  tvCoerceIfStrict(*tv, arg_num, callee);                         \
   if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
     return;                                                       \
   }                                                               \

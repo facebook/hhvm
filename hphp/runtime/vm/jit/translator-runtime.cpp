@@ -281,6 +281,8 @@ inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
+  tvCoerceIfStrict(tv, argNum, func);
+
   DataType type = tv.m_type;
   if (isArrayType(type) || type == KindOfObject || type == KindOfResource) {
     coerceCellFail(KindOfBoolean, type, argNum, func);
@@ -293,6 +295,12 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
 int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
   DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
 
+  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
+    auto tv = make_tv<KindOfString>(sd);
+
+    // In strict mode this will always fail, in weak mode it will be a noop
+    tvCoerceIfStrict(tv, argNum, func);
+  }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfDouble, KindOfString, argNum, func);
     not_reached();
@@ -303,6 +311,8 @@ int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
 
 int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
+
+  tvCoerceIfStrict(tv, argNum, func);
 
   switch (tv.m_type) {
     case KindOfNull:
@@ -333,6 +343,12 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
   DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
 
+  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
+    auto tv = make_tv<KindOfString>(sd);
+
+    // In strict mode this will always fail, in weak mode it will be a noop
+    tvCoerceIfStrict(tv, argNum, func);
+  }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfInt64, KindOfString, argNum, func);
     not_reached();
@@ -343,6 +359,8 @@ int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
 
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
+
+  tvCoerceIfStrict(tv, argNum, func);
 
   switch (tv.m_type) {
     case KindOfNull:
@@ -452,32 +470,40 @@ void VerifyParamTypeFail(int paramNum) {
   const Func* func = ar->m_func;
   auto const& tc = func->params()[paramNum].typeConstraint;
   TypedValue* tv = frame_local(ar, paramNum);
+  auto unit = func->unit();
+  bool useStrictTypes =
+    unit->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
+    !ar->useWeakTypes();
   assertx(!tc.check(tv, func));
-  tc.verifyParamFail(func, tv, paramNum);
+  tc.verifyParamFail(func, tv, paramNum, useStrictTypes);
 }
 
 void VerifyRetTypeSlow(const Class* cls,
                        const Class* constraint,
                        const HPHP::TypeConstraint* expected,
-                       const TypedValue tv) {
+                       TypedValue tv) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyRetTypeFail(tv);
+    VerifyRetTypeFail(&tv);
   }
 }
 
 void VerifyRetTypeCallable(TypedValue value) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyRetTypeFail(value);
+    VerifyRetTypeFail(&value);
   }
 }
 
-void VerifyRetTypeFail(TypedValue tv) {
+void VerifyRetTypeFail(TypedValue* tv) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
   const HPHP::TypeConstraint& tc = func->returnTypeConstraint();
-  assertx(!tc.check(&tv, func));
-  tc.verifyReturnFail(func, &tv);
+  auto unit = func->unit();
+  bool useStrictTypes =
+    RuntimeOption::EnableHipHopSyntax || func->isBuiltin() ||
+    unit->useStrictTypes();
+  assertx(!tc.check(tv, func));
+  tc.verifyReturnFail(func, tv, useStrictTypes);
 }
 
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {

@@ -132,9 +132,9 @@ const char* getContextName(const Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Then>
-void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
-  if (!ty.maybe(TStatic)) {
-    then(v);
+void ifNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
+  if (!ty.maybe(TPersistent)) {
+    then(v); // non-persistent check below will always succeed
     return;
   }
 
@@ -157,9 +157,9 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
 }
 
 template<class Then>
-void ifRefCountedNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
+void ifRefCountedNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
   ifRefCountedType(v, v, ty, loc, [&] (Vout& v) {
-    ifNonStatic(v, ty, loc, then);
+    ifNonPersistent(v, ty, loc, then);
   });
 }
 
@@ -2020,7 +2020,7 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  // This is redundant with a check in ifRefCountedNonStatic, but we check
+  // This is redundant with a check in ifRefCountedNonPersistent, but we check
   // earlier to avoid emitting profiling code in this case.
   auto const ty = inst->src(0)->type();
   if (!ty.maybe(TCounted)) return;
@@ -2054,7 +2054,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
       v << incwm{rvmtl()[*profHandle + offsetof(IncRefProfile, tryinc)],
                  v.makeReg()};
     }
-    ifNonStatic(v, ty, loc, [&](Vout& v) {
+    ifNonPersistent(v, ty, loc, [&](Vout& v) {
       emitIncRef(v, loc.reg());
     });
   });
@@ -2238,7 +2238,7 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                v.makeReg()};
   }
 
-  if (!ty.maybe(TStatic)) {
+  if (!ty.maybe(TPersistent)) {
     auto const sf = emitDecRef(v, base);
     ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
@@ -2312,7 +2312,7 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   emitIncStat(vmain(), Stats::TC_DecRef_NZ);
   emitDecRefTypeStat(vmain(), inst);
   auto const ty = inst->src(0)->type();
-  ifRefCountedNonStatic(
+  ifRefCountedNonPersistent(
     vmain(), ty, srcLoc(inst, 0),
     [&] (Vout& v) {
       auto const base = srcLoc(inst, 0).reg();
@@ -3606,7 +3606,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
    * situations with strings and arrays that are neither constantly-foldable
    * nor in the emitTypeTest code path.
    *
-   * We currently actually check their static bit here.  Note (importantly)
+   * We currently actually check their persistent bit here. Note (importantly)
    * that this is why toDataType can't return KindOfStaticString for
    * TStaticStr---this code will let an apc string through.  Also note
    * that CheckType<Uncounted> t1:{Null|Str} doesn't get this treatment
@@ -3617,7 +3617,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       typeParam <= TUncounted &&
       srcType.subtypeOfAny(TStr, TArr) &&
       srcType.maybe(typeParam)) {
-    assertx(srcType.maybe(TStatic));
+    assertx(srcType.maybe(TPersistent));
     v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
     doJcc(CC_L, sf);
     doMov();

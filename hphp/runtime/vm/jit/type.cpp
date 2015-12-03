@@ -637,7 +637,7 @@ Type negativeCheckType(Type srcType, Type typeParam) {
   // They may reject some Statics in some situations, where we only guard using
   // the type tag and not by loading the count field.
   auto tmp = srcType - typeParam;
-  if (typeParam.maybe(TStatic)) {
+  if (typeParam.maybe(TPersistent)) {
     if (tmp.maybe(TCountedStr)) tmp |= TStr;
     if (tmp.maybe(TCountedArr)) tmp |= TArr;
   }

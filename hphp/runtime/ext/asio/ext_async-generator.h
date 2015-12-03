@@ -63,12 +63,12 @@ public:
   }
 
   bool isEagerlyExecuted() const {
-    assert(getState() == State::Running);
+    assert(isRunning());
     return m_waitHandle == nullptr;
   }
 
   c_AsyncGeneratorWaitHandle* getWaitHandle() const {
-    assert(getState() == State::Running);
+    assert(isRunning());
     return m_waitHandle;
   }
 

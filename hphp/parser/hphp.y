@@ -582,6 +582,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %right T_PRINT
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %right T_AWAIT T_YIELD
+%right T_YIELD_FROM
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
@@ -837,6 +838,7 @@ ident_for_class_const:
   | T_CONTINUE
   | T_SWITCH
   | T_YIELD
+  | T_YIELD_FROM
   | T_FUNCTION
   | T_IF
   | T_ENDSWITCH
@@ -1044,6 +1046,9 @@ statement:
   | yield_expr ';'                     { _p->onExpStatement($$, $1);}
   | yield_assign_expr ';'              { _p->onExpStatement($$, $1);}
   | yield_list_assign_expr ';'         { _p->onExpStatement($$, $1);}
+  | yield_from_expr ';'                { _p->onExpStatement($$, $1);}
+  | yield_from_assign_expr ';'         { _p->onExpStatement($$, $1);}
+  | T_RETURN yield_from_expr ';'       { _p->onReturn($$, &$2);}
   | await_expr ';'                     { _p->onExpStatement($$, $1);}
   | await_assign_expr ';'              { _p->onExpStatement($$, $1);}
   | T_RETURN await_expr ';'            { _p->onReturn($$, &$2); }
@@ -1866,6 +1871,14 @@ yield_list_assign_expr:
     '=' yield_expr                     { _p->onListAssignment($$, $3, &$6, true);}
 ;
 
+yield_from_expr:
+    T_YIELD_FROM expr                  { _p->onYieldFrom($$,&$2);}
+;
+
+yield_from_assign_expr:
+    variable '=' yield_from_expr       { _p->onAssign($$, $1, $3, 0, true);}
+;
+
 await_expr:
     T_AWAIT expr                       { _p->onAwait($$, $2); }
 ;
@@ -2261,6 +2274,7 @@ xhp_bareword:
   | T_CONST                            { $$ = $1;}
   | T_RETURN                           { $$ = $1;}
   | T_YIELD                            { $$ = $1;}
+  | T_YIELD_FROM                       { $$ = $1;}
   | T_AWAIT                            { $$ = $1;}
   | T_TRY                              { $$ = $1;}
   | T_CATCH                            { $$ = $1;}

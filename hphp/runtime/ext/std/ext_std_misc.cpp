@@ -733,7 +733,8 @@ const int UserTokenId_T_HASHBANG = 435;
 const int UserTokenId_T_SUPER = 436;
 const int UserTokenId_T_SPACESHIP = 437;
 const int UserTokenId_T_COALESCE = 438;
-const int MaxUserTokenId = 439; // Marker, not a real user token ID
+const int UserTokenId_T_YIELD_FROM = 439;
+const int MaxUserTokenId = 440; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

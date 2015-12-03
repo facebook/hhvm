@@ -136,6 +136,7 @@ public:
   x(ClosureExpression,           None) \
   x(ClassExpression,             None) \
   x(YieldExpression,             None) \
+  x(YieldFromExpression,         None) \
   x(AwaitExpression,             None) \
   x(UserAttribute,               None)
 

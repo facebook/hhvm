@@ -4272,7 +4272,7 @@ Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
 }
 
 Variant HHVM_FUNCTION(imageinterlace, int64_t argc, const Resource& image,
-    int64_t interlace /* = nullptr */) {
+    int64_t interlace /* = 0 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   if (argc > 1) {

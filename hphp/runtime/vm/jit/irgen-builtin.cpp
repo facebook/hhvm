@@ -374,8 +374,15 @@ SSATmp* opt_strlen(IRGS& env, uint32_t numArgs) {
     return gen(env, LdStrLen, val);
   }
 
-  if (ty.subtypeOfAny(TNull, TBool, TInt, TDbl)) {
-    return gen(env, LdStrLen, gen(env, ConvCellToStr, val));
+  if (ty.subtypeOfAny(TNull, TBool)) {
+    return gen(env, ConvCellToInt, val);
+  }
+
+  if (ty.subtypeOfAny(TInt, TDbl)) {
+    auto str = gen(env, ConvCellToStr, val);
+    auto len = gen(env, LdStrLen, str);
+    decRef(env, str);
+    return len;
   }
 
   return nullptr;

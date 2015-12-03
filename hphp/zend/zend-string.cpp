@@ -268,25 +268,13 @@ char *string_crypt(const char *key, const char *salt) {
 
   } else {
     // System crypt() function
-#ifdef HAVE_CRYPT_R
-# if defined(CRYPT_R_STRUCT_CRYPT_DATA)
-    struct crypt_data buffer;
-    memset(&buffer, 0, sizeof(buffer));
-# elif defined(CRYPT_R_CRYPTD)
-    CRYPTD buffer;
-# else
-#  error "Data struct used by crypt_r() is unknown. Please report."
-# endif
-    char *crypt_res = crypt_r(key, salt, &buffer);
-#elif defined(PHP_CRYPT_R_MSVC)
+#ifdef PHP_CRYPT_R_MSVC
     return php_crypt_r_msvc(key, salt);
 #else
     static Mutex mutex;
     Lock lock(mutex);
     char *crypt_res = crypt(key,salt);
-#endif
 
-#ifndef PHP_CRYPT_R_MSVC
     if (crypt_res) {
       return strdup(crypt_res);
     }

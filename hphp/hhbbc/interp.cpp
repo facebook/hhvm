@@ -2121,6 +2121,20 @@ void in(ISS& env, const bc::YieldK&) {
   push(env, TInitCell);
 }
 
+void in(ISS& env, const bc::ContAssignDelegate&) {
+  popC(env);
+}
+
+void in(ISS& env, const bc::ContEnterDelegate&) {
+  popC(env);
+}
+
+void in(ISS& env, const bc::YieldFromDelegate&) {
+  push(env, TInitCell);
+}
+
+void in(ISS& env, const bc::ContUnsetDelegate&) {}
+
 void in(ISS& env, const bc::ContCheck&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContStarted&) { push(env, TBool); }

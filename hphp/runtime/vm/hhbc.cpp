@@ -1304,6 +1304,8 @@ bool instrIsNonCallControlFlow(Op opcode) {
     case OpYieldK:
     case OpContEnter:
     case OpContRaise:
+    case OpContEnterDelegate:
+    case OpYieldFromDelegate:
     case OpFCallBuiltin:
     case OpIncl:
     case OpInclOnce:

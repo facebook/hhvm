@@ -7451,16 +7451,8 @@ OPTBLD_INLINE TCA iopCreateCont(IOP_ARGS) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void contEnterImpl(PC& pc) {
-
-  // The stack must have one cell! Or else resumableStackBase() won't work!
-  assert(vmStack().top() + 1 ==
-         (TypedValue*)vmfp() - vmfp()->m_func->numSlotsInFrame());
-
-  // Do linkage of the generator's AR.
-  assert(vmfp()->hasThis());
-  auto const gen = this_base_generator(vmfp());
-  assert(gen->getState() == BaseGenerator::State::Running);
+OPTBLD_INLINE void moveProgramCounterIntoGenerator(PC &pc, BaseGenerator* gen) {
+  assert(gen->isRunning());
   ActRec* genAR = gen->actRec();
   genAR->setReturn(vmfp(), pc, genAR->func()->isAsync() ?
     mcg->tx().uniqueStubs.asyncGenRetHelper :
@@ -7471,16 +7463,60 @@ OPTBLD_INLINE void contEnterImpl(PC& pc) {
   assert(genAR->func()->contains(gen->resumable()->resumeOffset()));
   pc = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
   vmpc() = pc;
+}
+
+OPTBLD_INLINE bool tvIsGenerator(TypedValue tv) {
+  return tv.m_type == KindOfObject &&
+         tv.m_data.pobj->instanceof(Generator::getClass());
+}
+
+template<bool recursive>
+OPTBLD_INLINE void contEnterImpl(PC& pc) {
+
+  // The stack must have one cell! Or else resumableStackBase() won't work!
+  assert(vmStack().top() + 1 ==
+         (TypedValue*)vmfp() - vmfp()->m_func->numSlotsInFrame());
+
+  // Do linkage of the generator's AR.
+  assert(vmfp()->hasThis());
+  // `recursive` determines whether we enter just the top generator or whether
+  // we drop down to the lowest running delegate generator. This is useful for
+  // ContRaise, which should throw from the context of the lowest generator.
+  if(!recursive || vmfp()->getThis()->getVMClass() != Generator::getClass()) {
+    moveProgramCounterIntoGenerator(pc, this_base_generator(vmfp()));
+  } else {
+    // TODO(https://github.com/facebook/hhvm/issues/6040)
+    // Implement throwing from delegate generators.
+    assert(vmfp()->getThis()->getVMClass() == Generator::getClass());
+    auto gen = this_generator(vmfp());
+    if (gen->m_delegate.m_type != KindOfNull) {
+      SystemLib::throwExceptionObject("Throwing from a delegate generator is "
+          "not currently supported in HHVM");
+    }
+    moveProgramCounterIntoGenerator(pc, gen);
+  }
+
   EventHook::FunctionResumeYield(vmfp());
 }
 
 OPTBLD_INLINE void iopContEnter(IOP_ARGS) {
-  contEnterImpl(pc);
+  contEnterImpl<false>(pc);
 }
 
 OPTBLD_INLINE void iopContRaise(IOP_ARGS) {
-  contEnterImpl(pc);
+  contEnterImpl<true>(pc);
   iopThrow(pc);
+}
+
+OPTBLD_INLINE void moveProgramCounterToCaller(PC& pc) {
+  auto fp = vmfp();
+  // Grab caller info from ActRec.
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
+
+  // Return control to the next()/send()/raise() caller.
+  vmfp() = sfp;
+  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
@@ -7515,13 +7551,7 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
     }
   }
 
-  // Grab caller info from ActRec.
-  ActRec* sfp = fp->sfp();
-  Offset soff = fp->m_soff;
-
-  // Return control to the next()/send()/raise() caller.
-  vmfp() = sfp;
-  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
+  moveProgramCounterToCaller(pc);
 
   return jitReturnPost(jitReturn);
 }
@@ -7539,6 +7569,192 @@ OPTBLD_INLINE TCA iopYieldK(IOP_ARGS) {
   return yield(pc, &key, value);
 }
 
+OPTBLD_INLINE bool typeIsValidGeneratorDelegate(DataType type) {
+  return type == KindOfArray           ||
+         type == KindOfPersistentArray ||
+         type == KindOfObject;
+}
+
+OPTBLD_INLINE void iopContAssignDelegate(IOP_ARGS) {
+  auto param = *vmStack().topC();
+  vmStack().discard();
+
+  auto itId = decode_ia(pc);
+
+  auto gen = frame_generator(vmfp());
+  auto iter = frame_iter(vmfp(), itId);
+
+  if (UNLIKELY(!typeIsValidGeneratorDelegate(param.m_type))) {
+    tvRefcountedDecRef(param);
+    // TODO(https://github.com/facebook/hhvm/issues/6012)
+    // This should throw an Error.
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Can use \"yield from\" only with arrays and Traversables"
+    );
+  }
+
+  // We don't use the iterator if we have a delegate generator (as iterators
+  // mess with the internal state of the generator), so short circuit and dont
+  // init our iterator in that case. Otherwise, if we init our iterator and it
+  // returns false then we know that we have an empty iterator (like `[]`) in
+  // which case just set our delegate to Null so that ContEnterDelegate and
+  // YieldFromDelegate know something is up.
+  if (tvIsGenerator(param) || iter->init(&param)) {
+    cellSet(param, gen->m_delegate);
+  } else {
+    cellSetNull(gen->m_delegate);
+  }
+  // When using a subgenerator we don't actually read the values of the m_key
+  // and m_value of our frame generator (the delegating generator). The
+  // generator itself is still holding a reference to them though, so null
+  // out the key/value to free the memory.
+  cellSetNull(gen->m_key);
+  cellSetNull(gen->m_value);
+}
+
+OPTBLD_INLINE void iopContEnterDelegate(IOP_ARGS) {
+  // Make sure we have a delegate
+  auto gen = frame_generator(vmfp());
+
+  // Ignore the VM Stack, we want to pass that down from ContEnter
+
+  // ContEnterDelegate doesn't do anything for iterators.
+  if (!tvIsGenerator(gen->m_delegate)) {
+    return;
+  }
+
+  auto delegate = Generator::fromObject(gen->m_delegate.m_data.pobj);
+
+  if (delegate->getState() == BaseGenerator::State::Done) {
+    // If our generator finished earlier (or if there was nothing to do) just
+    // continue on and let YieldFromDelegate handle cleaning up.
+    return;
+  }
+
+  // A pretty odd if statement, but consider the following situation.
+  // Generators A and B both do `yield from` on a shared delegate generator,
+  // C. When A is first used we autoprime it, and therefore also autoprime C as
+  // well. Then we also autoprime B when it gets used, which advances C past
+  // some perfectly valid data.
+  // Basically this check is to make sure that we autoprime delegate generators
+  // when needed, and not if they're shared.
+  if (gen->getState() == BaseGenerator::State::Priming &&
+      delegate->getState() != BaseGenerator::State::Created) {
+    return;
+  }
+
+  // We're about to resume executing our generator, so make sure we're in the
+  // right state.
+  delegate->preNext(false);
+
+  moveProgramCounterIntoGenerator(pc, delegate);
+  EventHook::FunctionResumeYield(vmfp());
+}
+
+OPTBLD_INLINE TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
+  auto fp = vmfp();
+
+  assert(tvIsGenerator(gen->m_delegate));
+  auto delegate = Generator::fromObject(gen->m_delegate.m_data.pobj);
+
+  if (delegate->getState() == BaseGenerator::State::Done) {
+    // If the generator is done, just copy the return value onto the stack.
+    cellDup(delegate->m_value, *vmStack().topTV());
+    return nullptr;
+  }
+
+  auto jitReturn = jitReturnPre(fp);
+
+  EventHook::FunctionSuspendR(fp, nullptr);
+  // We don't actually want to "yield" anything here. The implementation of
+  // key/current are smart enough to dive into our delegate generator, so
+  // really what we want to do is clean up all of the generator metadata
+  // (state, ressume address, etc) and continue on.
+  assert(gen->isRunning());
+  gen->resumable()->setResumeAddr(nullptr, resumeOffset);
+  gen->setState(BaseGenerator::State::Started);
+
+  moveProgramCounterToCaller(pc);
+
+  return jitReturnPost(jitReturn);
+}
+
+OPTBLD_INLINE TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
+  auto fp = vmfp();
+
+  // For the most part this should never happen, the emitter assigns our
+  // delegate to a non-null value in ContAssignDelegate. The one exception to
+  // this is if we are given an empty iterator, in which case
+  // ContAssignDelegate will remove our delegate and just send us to
+  // YieldFromDelegate to return our null.
+  if (UNLIKELY(gen->m_delegate.m_type == KindOfNull)) {
+    tvWriteNull(vmStack().topTV());
+    return nullptr;
+  }
+
+  // Otherwise, if iteration is finished we just return null.
+  auto arr = it->arr();
+  if (arr.end()) {
+    // Push our null return value onto the stack
+    tvWriteNull(vmStack().topTV());
+    return nullptr;
+  }
+
+  auto jitReturn = jitReturnPre(fp);
+
+  EventHook::FunctionSuspendR(fp, nullptr);
+  auto key = *(arr.first().asTypedValue());
+  auto value = *(arr.second().asTypedValue());
+  gen->yield(resumeOffset, &key, value);
+
+  moveProgramCounterToCaller(pc);
+
+  it->next();
+
+  return jitReturnPost(jitReturn);
+}
+
+OPTBLD_INLINE TCA iopYieldFromDelegate(IOP_ARGS) {
+  auto gen = frame_generator(vmfp());
+
+  auto func = vmfp()->func();
+  PC origPc = pc - encoded_op_size(Op::YieldFromDelegate);
+
+  auto itId = decode_ia(pc);
+  Iter* it = frame_iter(vmfp(), itId);
+
+  auto offset = decode_ba(pc);
+  auto resumePc = origPc + offset;
+  auto resumeOffset = func->unit()->offsetOf(resumePc);
+
+  if (tvIsGenerator(gen->m_delegate)) {
+    return yieldFromGenerator(pc, gen, resumeOffset);
+  } else {
+    return yieldFromIterator(pc, gen, it, resumeOffset);
+  }
+}
+
+OPTBLD_INLINE void iopContUnsetDelegate(IOP_ARGS) {
+  auto itId = decode_ia(pc);
+  auto shouldFreeIter = (bool)decode_iva(pc);
+
+  auto gen = frame_generator(vmfp());
+
+  // The `shouldFreeIter` immediate determines whether we need to call free
+  // on our iterator or not. Normally if we finish executing our yield from
+  // successfully then the implementation of `next` will automatically do it
+  // for us when there aren't any elements left, but if an exception is thrown
+  // then we need to do it manually. We don't use the iterator when the
+  // delegate is a generator though, so even if the param tells us to free it
+  // we should just ignore it.
+  if (UNLIKELY(shouldFreeIter && !tvIsGenerator(gen->m_delegate))) {
+    auto iter = frame_iter(vmfp(), itId);
+    iter->free();
+  }
+
+  cellSetNull(gen->m_delegate);
+}
+
 OPTBLD_INLINE void iopContCheck(IOP_ARGS) {
   auto checkStarted = decode_iva(pc);
   this_base_generator(vmfp())->preNext(checkStarted);
@@ -7554,15 +7770,29 @@ OPTBLD_INLINE void iopContStarted(IOP_ARGS) {
     this_generator(vmfp())->getState() != BaseGenerator::State::Created);
 }
 
+OPTBLD_INLINE Generator *currentlyDelegatedGenerator(Generator *gen) {
+  while(tvIsGenerator(gen->m_delegate)) {
+    gen = Generator::fromObject(gen->m_delegate.m_data.pobj);
+  }
+  return gen;
+}
+
 OPTBLD_INLINE void iopContKey(IOP_ARGS) {
   Generator* cont = this_generator(vmfp());
   if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+
+  // If we are currently delegating to a generator, return its key instead
+  cont = currentlyDelegatedGenerator(cont);
+
   cellDup(cont->m_key, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopContCurrent(IOP_ARGS) {
   Generator* cont = this_generator(vmfp());
   if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+
+  // If we are currently delegating to a generator, return its value instead
+  cont = currentlyDelegatedGenerator(cont);
 
   if(cont->getState() == BaseGenerator::State::Done) {
     vmStack().pushNull();
@@ -8066,6 +8296,7 @@ TCA dispatchImpl() {
       assert(op == OpRetC || op == OpRetV ||                  \
              op == OpAwait || op == OpCreateCont ||           \
              op == OpYield || op == OpYieldK ||               \
+             op == OpYieldFromDelegate ||                     \
              op == OpNativeImpl);                             \
       vmfp() = nullptr;                                       \
       /* We returned from the top VM frame in this nesting level. This means

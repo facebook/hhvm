@@ -814,6 +814,14 @@ constexpr int32_t kMaxConcatN = 4;
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(Yield,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    CF) \
+  O(ContAssignDelegate,                                                 \
+                     ONE(IA),          ONE(CV),         NOV,        NF) \
+  O(ContEnterDelegate,                                                  \
+                     NA,               ONE(CV),         NOV,        CF) \
+  O(YieldFromDelegate,                                                  \
+                     TWO(IA, BA),      NOV,             ONE(CV),    CF) \
+  O(ContUnsetDelegate,                                                  \
+                     TWO(IA, IVA),     NOV,             NOV,        NF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContStarted,     NA,               NOV,             ONE(CV),    NF) \

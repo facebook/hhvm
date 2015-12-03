@@ -36,8 +36,9 @@ public:
   enum class State : uint8_t {
     Created = 0,  // generator was created but never iterated
     Started = 1,  // generator was iterated but not currently running
-    Running = 2,  // generator is currently being iterated
-    Done    = 3   // generator has finished its execution
+    Priming = 2,  // generator is advancing to the first yield
+    Running = 3,  // generator is currently being iterated
+    Done    = 4   // generator has finished its execution
   };
 
   static constexpr ptrdiff_t resumableOff() {
@@ -106,6 +107,10 @@ public:
     m_state = state;
   }
 
+  bool isRunning() const {
+    return getState() == State::Priming || getState() == State::Running;
+  }
+
   void startedCheck() {
     if (getState() == State::Created) {
       throw_exception(
@@ -118,18 +123,26 @@ public:
     if (checkStarted) {
       startedCheck();
     }
-    if (getState() == State::Running) {
-      throw_exception(
-        SystemLib::AllocExceptionObject("Generator is already running")
-      );
+    switch (getState()) {
+      case State::Created:
+        setState(State::Priming);
+        break;
+      case State::Started:
+        setState(State::Running);
+        break;
+      // For our purposes priming is basically running.
+      case State::Priming:
+      case State::Running:
+        throw_exception(
+          SystemLib::AllocExceptionObject("Generator is already running")
+        );
+        break;
+      case State::Done:
+        throw_exception(
+          SystemLib::AllocExceptionObject("Generator is already finished")
+        );
+        break;
     }
-    if (getState() == State::Done) {
-      throw_exception(
-        SystemLib::AllocExceptionObject("Generator is already finished")
-      );
-    }
-    assert(getState() == State::Created || getState() == State::Started);
-    setState(State::Running);
   }
 
   Resumable m_resumable;
@@ -187,6 +200,7 @@ public:
   int64_t m_index;
   Cell m_key;
   Cell m_value;
+  TypedValue m_delegate;
 
   static Class* s_class;
   static const StaticString s_className;

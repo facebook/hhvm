@@ -1303,6 +1303,25 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
       auto ar = info.args[0].ar;
       auto caller = info.args[1].ar;
       assertx(caller == vmfp());
+      // If caller is a resumable (aka a generator) then whats likely happened
+      // here is that we're resuming a yield from. That expression happens to
+      // cause an assumption that we made earlier to be violated (that `ar` is
+      // on the stack), so if we detect this situation we need to fix up the
+      // value of `ar`.
+      if (UNLIKELY(caller->resumed() &&
+                   caller->func()->isNonAsyncGenerator())) {
+        auto gen = frame_generator(caller);
+        if (gen->m_delegate.m_type == KindOfObject) {
+          auto delegate = gen->m_delegate.m_data.pobj;
+          // We only checked that our delegate is an object, but we can't get
+          // into this situation if the object itself isn't a Generator
+          assert(delegate->getVMClass() == Generator::getClass());
+          // Ok so we're in a `yield from` situation, we know our ar is garbage.
+          // The ar that we're looking for is the ar of the delegate generator,
+          // so grab that here.
+          ar = Generator::fromObject(delegate)->actRec();
+        }
+      }
       Unit* destUnit = caller->func()->unit();
       // Set PC so logging code in getTranslation doesn't get confused.
       vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);

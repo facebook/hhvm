@@ -836,6 +836,8 @@ public:
   void emitContinue(Emitter& e, int depth, StatementPtr s);
   void emitGoto(Emitter& e, StringData* name, StatementPtr s);
 
+  void emitYieldFrom(Emitter& e, ExpressionPtr exp);
+
   // Helper methods for emitting IterFree instructions
   void emitIterFree(Emitter& e, IterVec& iters);
   void emitIterFreeForReturn(Emitter& e);

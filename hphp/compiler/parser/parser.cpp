@@ -47,6 +47,7 @@
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/class_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/yield_from_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
 
@@ -1925,6 +1926,11 @@ void Parser::onYield(Token &out, Token *expr) {
   // yield; == yield null;
   auto expPtr = expr ? expr->exp : NEW_EXP(ConstantExpression, "null", false);
   out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expPtr);
+}
+
+void Parser::onYieldFrom(Token &out, Token *expr) {
+  setIsGenerator();
+  out->exp = NEW_EXP(YieldFromExpression, expr->exp);
 }
 
 void Parser::onYieldPair(Token &out, Token *key, Token *val) {

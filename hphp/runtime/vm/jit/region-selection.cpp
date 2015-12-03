@@ -869,6 +869,7 @@ bool breaksRegion(SrcKey sk) {
     case Op::CreateCont:
     case Op::Yield:
     case Op::YieldK:
+    case Op::YieldFromDelegate:
     case Op::RetC:
     case Op::RetV:
     case Op::Exit:

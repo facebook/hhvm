@@ -3768,6 +3768,9 @@ Variant HHVM_FUNCTION(imagecreatefromgif, const String& filename) {
                            PHP_GDIMG_TYPE_GIF, "GIF",
                            (gdImagePtr(*)())gdImageCreateFromGif,
                            (gdImagePtr(*)())gdImageCreateFromGifCtx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 #endif
@@ -3779,6 +3782,9 @@ Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename) {
                            PHP_GDIMG_TYPE_JPG, "JPEG",
                            (gdImagePtr(*)())gdImageCreateFromJpeg,
                            (gdImagePtr(*)())gdImageCreateFromJpegCtx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 #endif
@@ -3790,6 +3796,9 @@ Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
                            PHP_GDIMG_TYPE_PNG, "PNG",
                            (gdImagePtr(*)())gdImageCreateFromPng,
                            (gdImagePtr(*)())gdImageCreateFromPngCtx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 #endif
@@ -3801,6 +3810,9 @@ Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename) {
                            PHP_GDIMG_TYPE_WEBP, "WEBP",
                            (gdImagePtr(*)())gdImageCreateFromWebp,
                            (gdImagePtr(*)())gdImageCreateFromWebpCtx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 #endif
@@ -3812,6 +3824,9 @@ Variant HHVM_FUNCTION(imagecreatefromxbm, const String& filename) {
                            PHP_GDIMG_TYPE_XBM, "XBM",
                            (gdImagePtr(*)())gdImageCreateFromXbm,
                            (gdImagePtr(*)())nullptr);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 #endif
@@ -3823,6 +3838,9 @@ Variant HHVM_FUNCTION(imagecreatefromxpm, const String& filename) {
                            PHP_GDIMG_TYPE_XPM, "XPM",
                            (gdImagePtr(*)())gdImageCreateFromXpm,
                            (gdImagePtr(*)())nullptr);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 #endif
@@ -3834,6 +3852,9 @@ Variant HHVM_FUNCTION(imagecreatefromwbmp, const String& filename) {
                            PHP_GDIMG_TYPE_WBM, "WBMP",
                            (gdImagePtr(*)())gdImageCreateFromWBMP,
                            (gdImagePtr(*)())gdImageCreateFromWBMPCtx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 #endif
@@ -3844,6 +3865,9 @@ Variant HHVM_FUNCTION(imagecreatefromgd, const String& filename) {
                            PHP_GDIMG_TYPE_GD, "GD",
                            (gdImagePtr(*)())gdImageCreateFromGd,
                            (gdImagePtr(*)())gdImageCreateFromGdCtx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 
@@ -3853,6 +3877,9 @@ Variant HHVM_FUNCTION(imagecreatefromgd2, const String& filename) {
                            PHP_GDIMG_TYPE_GD2, "GD2",
                            (gdImagePtr(*)())gdImageCreateFromGd2,
                            (gdImagePtr(*)())gdImageCreateFromGd2Ctx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 
@@ -3864,6 +3891,9 @@ Variant HHVM_FUNCTION(imagecreatefromgd2part,
                            PHP_GDIMG_TYPE_GD2PART, "GD2",
                            (gdImagePtr(*)())gdImageCreateFromGd2Part,
                            (gdImagePtr(*)())gdImageCreateFromGd2PartCtx);
+  if (im == nullptr) {
+    return false;
+  }
   return Variant(req::make<Image>(im));
 }
 
@@ -4241,11 +4271,11 @@ Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
   return gdImageGetTransparent(im);
 }
 
-Variant HHVM_FUNCTION(imageinterlace, const Resource& image,
-    int64_t interlace /* = 0 */) {
+Variant HHVM_FUNCTION(imageinterlace, int64_t argc, const Resource& image,
+    int64_t interlace /* = nullptr */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
-  if (interlace != 0) {
+  if (argc > 1) {
     // has interlace argument
     gdImageInterlace(im, interlace);
   }

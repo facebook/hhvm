@@ -75,7 +75,7 @@ typedef enum {
 const int DWARF_CODE_ALIGN = 1;
 const int DWARF_DATA_ALIGN = 8;
 
-#ifdef LIBDWARF_CONST_NAME
+#if (defined(FACEBOOK) || defined(LIBDWARF_CONST_NAME))
 #define LIBDWARF_CALLBACK_NAME_TYPE const char*
 #else
 #define LIBDWARF_CALLBACK_NAME_TYPE char*

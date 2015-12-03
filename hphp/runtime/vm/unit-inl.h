@@ -250,6 +250,18 @@ inline Func* Unit::firstHoistable() const {
   return *m_mergeInfo->funcHoistableBegin();
 }
 
+template<class Fn> void Unit::forEachFunc(Fn fn) const {
+  for (auto& func : funcs()) {
+    fn(func);
+  }
+  for (auto& c : preclasses()) {
+    auto methods = FuncRange{c->methods(), c->methods() + c->numMethods()};
+    for (auto& method : methods) {
+      fn(method);
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases
 inline Unit::TypeAliasRange Unit::typeAliases() const {

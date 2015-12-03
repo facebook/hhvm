@@ -482,6 +482,10 @@ public:
    */
   void renameFunc(const StringData* oldName, const StringData* newName);
 
+  /*
+   * Visit all functions and methods in this unit.
+   */
+  template<class Fn> void forEachFunc(Fn fn) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Func lookup.                                                      [static]
@@ -833,52 +837,6 @@ private:
   FixedVector<const ArrayData*> m_arrays;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// TODO(#4717225): Rewrite these in iterators.h.
-
-struct AllFuncs {
-  explicit AllFuncs(const Unit* unit)
-    : fr(unit->funcs())
-    , mr(0, 0)
-    , cr(unit->preclasses())
-  {
-    if (fr.empty()) skip();
-  }
-
-  bool empty() const {
-    return fr.empty() && mr.empty() && cr.empty();
-  }
-
-  const Func* front() const {
-    assert(!empty());
-    if (!fr.empty()) return fr.front();
-    assert(!mr.empty());
-    return mr.front();
-  }
-
-  const Func* popFront() {
-    auto f = !fr.empty() ? fr.popFront() :
-             !mr.empty() ? mr.popFront() : 0;
-    assert(f);
-    if (fr.empty() && mr.empty()) skip();
-    return f;
-  }
-
-private:
-  void skip() {
-    assert(fr.empty());
-    while (!cr.empty() && mr.empty()) {
-      auto c = cr.popFront();
-      mr = Unit::FuncRange(c->methods(),
-                           c->methods() + c->numMethods());
-    }
-  }
-
-  Unit::FuncRange fr;
-  Unit::FuncRange mr;
-  Unit::PreClassRange cr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

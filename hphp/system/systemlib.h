@@ -83,6 +83,9 @@ extern Class* s_ ## cls ## Class;
 extern Class* s_ThrowableClass;
 extern Class* s_BaseExceptionClass;
 extern Class* s_ErrorClass;
+extern Class* s_ArithmeticErrorClass;
+extern Class* s_AssertionErrorClass;
+extern Class* s_DivisionByZeroErrorClass;
 extern Class* s_ParseErrorClass;
 extern Class* s_TypeErrorClass;
 
@@ -90,8 +93,10 @@ Object AllocStdClassObject();
 Object AllocPinitSentinel();
 Object AllocExceptionObject(const Variant& message);
 Object AllocErrorObject(const Variant& message);
-Object AllocTypeErrorObject(const Variant& message);
+Object AllocArithmeticErrorObject(const Variant& message);
+Object AllocDivisionByZeroErrorObject(const Variant& message);
 Object AllocParseErrorObject(const Variant& message);
+Object AllocTypeErrorObject(const Variant& message);
 Object AllocBadMethodCallExceptionObject(const Variant& message);
 Object AllocInvalidArgumentExceptionObject(const Variant& message);
 Object AllocRuntimeExceptionObject(const Variant& message);
@@ -114,8 +119,10 @@ Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
 
 ATTRIBUTE_NORETURN void throwExceptionObject(const Variant& message);
 ATTRIBUTE_NORETURN void throwErrorObject(const Variant& message);
-ATTRIBUTE_NORETURN void throwTypeErrorObject(const Variant& message);
+ATTRIBUTE_NORETURN void throwArithmeticErrorObject(const Variant& message);
+ATTRIBUTE_NORETURN void throwDivisionByZeroErrorObject(const Variant& message);
 ATTRIBUTE_NORETURN void throwParseErrorObject(const Variant& message);
+ATTRIBUTE_NORETURN void throwTypeErrorObject(const Variant& message);
 ATTRIBUTE_NORETURN
 void throwBadMethodCallExceptionObject(const Variant& message);
 ATTRIBUTE_NORETURN

@@ -458,6 +458,8 @@ CALL_OPCODE(BindNewElem)
 CALL_OPCODE(VectorIsset)
 CALL_OPCODE(PairIsset)
 CALL_OPCODE(ThrowOutOfBounds)
+CALL_OPCODE(ThrowArithmeticError)
+CALL_OPCODE(ThrowDivisionByZeroError)
 
 CALL_OPCODE(InstanceOfIface)
 CALL_OPCODE(InterfaceSupportsArr)

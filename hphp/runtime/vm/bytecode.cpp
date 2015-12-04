@@ -7609,9 +7609,7 @@ OPTBLD_INLINE void iopContAssignDelegate(IOP_ARGS) {
 
   if (UNLIKELY(!typeIsValidGeneratorDelegate(param.m_type))) {
     tvRefcountedDecRef(param);
-    // TODO(https://github.com/facebook/hhvm/issues/6012)
-    // This should throw an Error.
-    SystemLib::throwInvalidArgumentExceptionObject(
+    SystemLib::throwErrorObject(
       "Can use \"yield from\" only with arrays and Traversables"
     );
   }

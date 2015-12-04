@@ -537,6 +537,8 @@ bool canDCE(IRInstruction* inst) {
   case ExitPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidOperation:
+  case ThrowArithmeticError:
+  case ThrowDivisionByZeroError:
   case MapIdx:
   case StMBase:
   case FinishMemberOp:

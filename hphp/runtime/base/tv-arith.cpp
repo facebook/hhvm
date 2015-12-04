@@ -537,9 +537,7 @@ Cell cellMod(Cell c1, Cell c2) {
   auto const i2 = cellToInt(c2);
   if (UNLIKELY(i2 == 0)) {
     if (RuntimeOption::PHP7_IntSemantics) {
-      // TODO(https://github.com/facebook/hhvm/issues/6012)
-      // This should throw a DivisionByZeroError.
-      SystemLib::throwInvalidOperationExceptionObject(Strings::MODULO_BY_ZERO);
+      SystemLib::throwDivisionByZeroErrorObject(Strings::MODULO_BY_ZERO);
     } else {
       raise_warning(Strings::DIVISION_BY_ZERO);
       return make_tv<KindOfBoolean>(false);
@@ -581,9 +579,7 @@ Cell cellShl(Cell c1, Cell c2) {
     }
 
     if (UNLIKELY(shift < 0)) {
-      // TODO(https://github.com/facebook/hhvm/issues/6012)
-      // This should throw an ArithmeticError.
-      SystemLib::throwInvalidOperationExceptionObject(Strings::NEGATIVE_SHIFT);
+      SystemLib::throwArithmeticErrorObject(Strings::NEGATIVE_SHIFT);
     }
   }
 
@@ -600,9 +596,7 @@ Cell cellShr(Cell c1, Cell c2) {
     }
 
     if (UNLIKELY(shift < 0)) {
-      // TODO(https://github.com/facebook/hhvm/issues/6012)
-      // This should throw an ArithmeticError.
-      SystemLib::throwInvalidOperationExceptionObject(Strings::NEGATIVE_SHIFT);
+      SystemLib::throwArithmeticErrorObject(Strings::NEGATIVE_SHIFT);
     }
   }
 

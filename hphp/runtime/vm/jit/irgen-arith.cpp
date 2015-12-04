@@ -1076,9 +1076,7 @@ void implShift(IRGS& env, Opcode op) {
             // Unlikely: shifting by a negative amount.
             hint(env, Block::Hint::Unlikely);
 
-            // TODO(https://github.com/facebook/hhvm/issues/6012)
-            // This should throw an ArithmeticError.
-            gen(env, ThrowInvalidOperation,
+            gen(env, ThrowArithmeticError,
                 cns(env, makeStaticString(Strings::NEGATIVE_SHIFT)));
 
             // Dead-code, but needed to satisfy cond().
@@ -1272,10 +1270,8 @@ void emitMod(IRGS& env) {
       hint(env, Block::Hint::Unlikely);
 
       if (RuntimeOption::PHP7_IntSemantics) {
-        // TODO(https://github.com/facebook/hhvm/issues/6012)
-        // This should throw a DivisionByZeroError.
         auto const msg = cns(env, makeStaticString(Strings::MODULO_BY_ZERO));
-        gen(env, ThrowInvalidOperation, msg);
+        gen(env, ThrowDivisionByZeroError, msg);
       } else {
         // Make progress before side-exiting to the next instruction: raise a
         // warning and push false.

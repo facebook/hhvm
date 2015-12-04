@@ -35,8 +35,12 @@
  *
  * `Map`s support `$m[$k]` style syntax for getting and setting values by key.
  * `Map`s also support `isset($m[$k])` and `empty($m[$k])` syntax, and they
- * provide similar semantics as arrays. Adding an element using `$m[] = ..`
- * syntax is not supported.
+ * provide similar semantics as arrays. Adding an element with square bracket
+ * syntax `[]` is supported either by providing a key between the brackets or
+ * a `Pair` on the right-hand side. e.g.,
+ * `$m[$k] = $v` is supported
+ * `$m[] = Pair {$k, $v}` is supported
+ * `$m[] = $v` is not supported.
  *
  * `Map`s do not support iterating while new keys are being added or elements
  * are being removed. When a new key is added or an element is removed, all
@@ -444,11 +448,11 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * If the key is not present, an exception is thrown. If you want to add a
    * value even if a key is not present, use `add()`.
    *
-   * `$map->set($k,$v)` is semantically equivalent to `$map[$k] = $v` (except
-   * that `set()` returns the current `Map`).
+   * Assuming the key is present, `$map->set($k,$v)` is semantically equivalent
+   * to `$map[$k] = $v` (except that `set()` returns the current `Map`).
    *
-   * Future changes made to the current `Map` ARE reflected in the returned,
-   * and vice-versa.
+   * Future changes made to the current `Map` ARE reflected in the returned
+   * `Map`, and vice-versa.
    *
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.
@@ -522,8 +526,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * If you want to overwrite a value, use `set()`.
    *
-   * `$map->add($p)` is semantically equivalent to `$map[$k] = $v` (except that
-   * `add()` returns the `Map`).
+   * `$map->add($p)` is semantically equivalent to both `$map[$k] = $v` and
+   * `$map[] = Pair {$k, $v}` (except that `add()` returns the `Map`).
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
@@ -612,7 +616,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function getIterator(): KeyedIterator<Tk, Tv>;
 
   /**
-   * Returns a `Map` containing the key/valur pairs from the specified `array`.
+   * Returns a `Map` containing the key/value pairs from the specified `array`.
    *
    * This function is deprecated. Use `new `Map`($arr)` instead.
    *
@@ -624,7 +628,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public static function fromArray(array<Tk, Tv> $arr): Map<Tk, Tv>;
 
   /**
-   * Creates a `Map` from the given `Traversable`, or an empty `Vector` if
+   * Creates a `Map` from the given `Traversable`, or an empty `Map` if
    * `null` is passed.
    *
    * This is the static method version of the `Map::__construct()` constructor.

@@ -44,6 +44,8 @@ const StaticString
   s_count("count"),
   s_ini_get("ini_get"),
   s_dirname("dirname"),
+  s_86metadata("86metadata"),
+  s_set_frame_metadata("hh\\set_frame_metadata"),
   s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
@@ -156,6 +158,14 @@ SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
   auto const arg_type = arg->type();
   if (arg_type <= TStr) {
     return gen(env, OrdStr, arg);
+  }
+
+  // In strict mode type mismatches won't be coerced (for legacy reasons in HH
+  // files builtins are always weak).
+  if (curFunc(env)->unit()->useStrictTypes() &&
+      !curFunc(env)->unit()->isHHFile() &&
+      !RuntimeOption::EnableHipHopSyntax) {
+    return nullptr;
   }
 
   // intercept constant, non-string ord() here instead of OrdStr simplify stage.
@@ -364,8 +374,15 @@ SSATmp* opt_strlen(IRGS& env, uint32_t numArgs) {
     return gen(env, LdStrLen, val);
   }
 
-  if (ty.subtypeOfAny(TNull, TBool, TInt, TDbl)) {
-    return gen(env, LdStrLen, gen(env, ConvCellToStr, val));
+  if (ty.subtypeOfAny(TNull, TBool)) {
+    return gen(env, ConvCellToInt, val);
+  }
+
+  if (ty.subtypeOfAny(TInt, TDbl)) {
+    auto str = gen(env, ConvCellToStr, val);
+    auto len = gen(env, LdStrLen, str);
+    decRef(env, str);
+    return len;
   }
 
   return nullptr;
@@ -448,6 +465,20 @@ SSATmp* opt_abs(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
+SSATmp* opt_set_frame_metadata(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+  auto func = curFunc(env);
+  if (func->isPseudoMain() || (func->attrs() & AttrMayUseVV)) return nullptr;
+  auto const local = func->lookupVarId(s_86metadata.get());
+  if (local == kInvalidId) return nullptr;
+  auto oldVal = ldLoc(env, local, nullptr, DataTypeCountness);
+  auto newVal = topC(env);
+  stLocRaw(env, local, fp(env), newVal);
+  decRef(env, oldVal);
+  gen(env, IncRef, newVal);
+  return cns(env, TInitNull);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool optimizedFCallBuiltin(IRGS& env,
@@ -479,6 +510,7 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(max2)
     X(min2)
     X(dirname)
+    X(set_frame_metadata)
 
 #undef X
 

@@ -1,0 +1,98 @@
+object(X)#1 (1) {
+  ["foo":"X":private]=>
+  string(3) "bar"
+}
+Adding 1 and 2
+object(WithStuff)#2 (7) {
+  ["arr":"WithStuff":private]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  ["vec":"WithStuff":private]=>
+  object(HH\Vector)#3 (3) {
+    [0]=>
+    string(3) "str"
+    [1]=>
+    float(12.3)
+    [2]=>
+    int(123)
+  }
+  ["pub"]=>
+  string(12) "lollerskates"
+  ["prot":protected]=>
+  string(5) "blorp"
+  ["arr":"ParentClass":private]=>
+  array(1) {
+    [0]=>
+    string(5) "hello"
+  }
+  ["str":"ParentClass":private]=>
+  string(4) "blep"
+  ["dynProp"]=>
+  int(3)
+}
+object(WithStuff)#4 (7) {
+  ["arr":"WithStuff":private]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  ["vec":"WithStuff":private]=>
+  object(HH\Vector)#6 (3) {
+    [0]=>
+    string(3) "str"
+    [1]=>
+    float(12.3)
+    [2]=>
+    int(123)
+  }
+  ["pub"]=>
+  string(12) "lollerskates"
+  ["prot":protected]=>
+  string(5) "blorp"
+  ["arr":"ParentClass":private]=>
+  array(1) {
+    [0]=>
+    string(5) "hello"
+  }
+  ["str":"ParentClass":private]=>
+  string(4) "blep"
+  ["dynProp"]=>
+  int(3)
+}
+Adding 1 and 2
+object(WithStuff)#%d (7) {
+  ["arr":"WithStuff":private]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  ["vec":"WithStuff":private]=>
+  object(HH\Vector)#%d (3) {
+    [0]=>
+    string(3) "str"
+    [1]=>
+    float(12.3)
+    [2]=>
+    int(123)
+  }
+  ["pub"]=>
+  string(12) "lollerskates"
+  ["prot":protected]=>
+  string(5) "blorp"
+  ["arr":"ParentClass":private]=>
+  array(1) {
+    [0]=>
+    string(5) "hello"
+  }
+  ["str":"ParentClass":private]=>
+  string(4) "blep"
+  ["dynProp"]=>
+  int(3)
+}
+Adding 1 and 2
+object(X)#1 (1) {
+  ["foo":"X":private]=>
+  string(3) "bar"
+}

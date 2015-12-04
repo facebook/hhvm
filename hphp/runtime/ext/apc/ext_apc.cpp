@@ -226,7 +226,7 @@ Variant HHVM_FUNCTION(apc_store,
                       int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return Variant(false);
 
-  if (key_or_array.is(KindOfArray)) {
+  if (key_or_array.isArray()) {
     Array valuesArr = key_or_array.toArray();
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
@@ -269,7 +269,7 @@ Variant HHVM_FUNCTION(apc_add,
                       int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
-  if (key_or_array.is(KindOfArray)) {
+  if (key_or_array.isArray()) {
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
@@ -304,7 +304,7 @@ Variant HHVM_FUNCTION(apc_fetch,
 
   Variant v;
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     bool tmp = false;
     Array keys = key.toArray();
     ArrayInit init(keys.size(), ArrayInit::Map{});
@@ -337,7 +337,7 @@ Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key) {
   if (!apcExtension::Enable) return false;
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     Array keys = key.toArray();
     PackedArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
@@ -414,7 +414,7 @@ Variant HHVM_FUNCTION(apc_exists,
                       const Variant& key) {
   if (!apcExtension::Enable) return false;
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     Array keys = key.toArray();
     PackedArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
@@ -1288,7 +1288,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
           rfc1867ApcData->update_freq) {
         Variant v;
         if (apc_store().get(rfc1867ApcData->tracking_key, v)) {
-          if (v.is(KindOfArray)) {
+          if (v.isArray()) {
             ArrayInit track(6, ArrayInit::Map{});
             track.set(s_total, rfc1867ApcData->content_length);
             track.set(s_current, rfc1867ApcData->bytes_processed);

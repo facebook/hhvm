@@ -227,9 +227,7 @@ static Variant impl_assert(const Variant& assertion,
   if (s_option_data->assertException) {
     if (message.isObject()) {
       Object exn = message.toObject();
-      // TODO(https://github.com/facebook/hhvm/issues/6012)
-      // This should be checking for AssertionError.
-      if (exn.instanceof(SystemLib::s_ExceptionClass)) {
+      if (exn.instanceof(SystemLib::s_AssertionErrorClass)) {
         throw exn;
       }
     }

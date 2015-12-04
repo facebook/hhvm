@@ -17,14 +17,13 @@
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
-#include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Closure::~Closure() {
+c_Closure::~c_Closure() {
   if (auto t = getThis()) {
     decRefObj(t);
   }
@@ -32,25 +31,46 @@ Closure::~Closure() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_Closure("Closure"),
+void c_Closure::t___construct() {
+  raise_error("Can't create a Closure directly");
+}
+
+Variant c_Closure::t___get(Variant member) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return init_null();
+}
+
+Variant c_Closure::t___set(Variant member, Variant value) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return init_null();
+}
+
+bool c_Closure::t___isset(Variant name) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return false;
+}
+
+Variant c_Closure::t___unset(Variant name) {
+  raise_recoverable_error("Closure object cannot have properties");
+  return init_null();
+}
+
+static StaticString
   s_this("this"),
   s_varprefix("$"),
   s_parameter("parameter"),
   s_required("<required>"),
   s_optional("<optional>");
 
-static Array HHVM_METHOD(Closure, __debugInfo) {
-  auto closure = Native::data<Closure>(this_);
-
+Array c_Closure::t___debuginfo() {
   Array ret = Array::Create();
 
   // Serialize 'use' parameters.
-  if (auto propValues = this_->propVec()) {
+  if (auto propValues = propVec()) {
     Array use;
 
-    auto propsInfo = this_->getVMClass()->declProperties();
-    for (size_t i = 0; i < this_->getVMClass()->numDeclProperties(); ++i) {
+    auto propsInfo = getVMClass()->declProperties();
+    for (size_t i = 0; i < getVMClass()->numDeclProperties(); ++i) {
       auto value = &propValues[i];
       use.setWithRef(Variant(StrNR(propsInfo[i].name)), tvAsCVarRef(value));
     }
@@ -60,7 +80,7 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
     }
   }
 
-  auto const func = closure->getInvokeFunc();
+  auto const func = getInvokeFunc();
 
   // Serialize function parameters.
   if (func->numParams()) {
@@ -83,8 +103,8 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
   }
 
   // Serialize 'this' object.
-  if (closure->hasThis()) {
-    ret.set(s_this, Object(closure->getThis()));
+  if (hasThis()) {
+    ret.set(s_this, Object(getThis()));
   }
 
   return ret;
@@ -94,9 +114,8 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
 
 const StaticString s_uuinvoke("__invoke");
 
-void Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
-  auto obj = Native::object<Closure>(this);
-  auto const invokeFunc = obj->getVMClass()->lookupMethod(s_uuinvoke.get());
+void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
+  auto const invokeFunc = getVMClass()->lookupMethod(s_uuinvoke.get());
 
   m_ctx = ar->m_this;
   if (ar->hasThis()) {
@@ -112,10 +131,10 @@ void Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
    * Copy the use vars to instance variables, and initialize any
    * instance properties that are for static locals to KindOfUninit.
    */
-  auto const numDeclProperties = obj->getVMClass()->numDeclProperties();
+  auto const numDeclProperties = getVMClass()->numDeclProperties();
   assert(numDeclProperties - numArgs == getInvokeFunc()->numStaticLocals());
   TypedValue* beforeCurUseVar = sp + numArgs;
-  TypedValue* curProperty = obj->propVec();
+  TypedValue* curProperty = propVec();
   int i = 0;
   assert(numArgs <= numDeclProperties);
   for (; i < numArgs; i++) {
@@ -127,20 +146,47 @@ void Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   }
 }
 
-Closure& Closure::operator=(const Closure &src) {
-  m_ctx = src.m_ctx;
-  return *this;
+c_Closure* c_Closure::Clone(ObjectData* obj) {
+  auto thiz = static_cast<c_Closure*>(obj);
+  auto closure = static_cast<c_Closure*>(obj->cloneImpl());
+  closure->m_ctx = thiz->m_ctx;
+  return closure;
 }
 
-static Variant HHVM_METHOD(Closure, bindto,
-                           const Variant& newthis, const Variant& scope) {
+Object c_Closure::ti_bind(const Variant& closure, const Variant& newthis,
+                           const Variant& scope) {
+  if (!closure.isObject()) {
+    raise_warning("Closure::bind() expects parameter 1 to be an object");
+    return Object{};
+  }
+
+  Object closureObject = closure.toObject();
+  if (!closureObject.is<c_Closure>()) {
+    raise_warning("Closure::bind() expects parameter 1 to be closure");
+    return Object{};
+  }
+
+  if (!newthis.isObject() && !newthis.isNull()) {
+    raise_warning("Closure::bind() expects parameter 2 to be object or NULL");
+    return Object{};
+  }
+
+  if (!scope.isObject() && !scope.isString() && !scope.isNull()) {
+    raise_warning("Closure::bindto expects parameter 3 to be string or object");
+    return Object{};
+  }
+
+  return unsafe_cast<c_Closure>(closureObject)->t_bindto(newthis, scope);
+}
+
+Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {
   if (RuntimeOption::RepoAuthoritative &&
       RuntimeOption::EvalAllowScopeBinding) {
     raise_warning("Closure binding is not supported in RepoAuthoritative mode");
-    return null_variant;
+    return Object{};
   }
 
-  auto const cls = this_->getVMClass();
+  auto const cls = getVMClass();
   auto const invoke = cls->getCachedInvoke();
 
   ObjectData* od = nullptr;
@@ -152,7 +198,7 @@ static Variant HHVM_METHOD(Closure, bindto,
     }
   } else if (!newthis.isNull()) {
     raise_warning("Closure::bindto() expects parameter 1 to be object");
-    return null_variant;
+    return Object{};
   }
 
   auto const curscope = invoke->cls();
@@ -167,7 +213,7 @@ static Variant HHVM_METHOD(Closure, bindto,
       newscope = Unit::loadClass(className);
       if (!newscope) {
         raise_warning("Class '%s' not found", className->data());
-        return null_variant;
+        return Object{};
       }
     }
   } else if (scope.isNull()) {
@@ -175,13 +221,13 @@ static Variant HHVM_METHOD(Closure, bindto,
   } else {
     raise_warning("Closure::bindto() expects parameter 2 "
                   "to be string or object");
-    return null_variant;
+    return Object{};
   }
 
   if (od && !newscope) {
     // Bound closures should be scoped.  If no scope is specified, scope it to
     // the Closure class.
-    newscope = static_cast<Class*>(Closure::classof());
+    newscope = static_cast<Class*>(c_Closure::classof());
   }
 
   bool thisNotOfCtx = od && !od->getVMClass()->classof(newscope);
@@ -189,18 +235,17 @@ static Variant HHVM_METHOD(Closure, bindto,
   if (!RuntimeOption::EvalAllowScopeBinding) {
     if (newscope != curscope) {
       raise_warning("Re-binding closure scopes is disabled");
-      return null_variant;
+      return Object{};
     }
 
     if (thisNotOfCtx) {
       raise_warning("Binding to objects not subclassed from closure "
                     "context is disabled");
-      return null_variant;
+      return Object{};
     }
   }
 
-  auto cloneObj = this_->clone();
-  auto clone = Native::data<Closure>(cloneObj);
+  c_Closure* clone = Clone(this);
   clone->setClass(nullptr);
 
   Attr curattrs = invoke->attrs();
@@ -228,21 +273,20 @@ static Variant HHVM_METHOD(Closure, bindto,
     assert(newattrs != AttrNone);
 
     auto newcls = cls->rescope(newscope, newattrs);
-    cloneObj->setVMClass(newcls);
+    clone->setVMClass(newcls);
   }
 
-  return Object{cloneObj};
+  return Object(clone);
 }
 
-static Variant HHVM_METHOD(Closure, call,
-                           const Variant& newthis,
-                           const Array& params) {
+Variant c_Closure::t_call(int64_t param_count, const Variant& newthis,
+                          const Array& params) {
   if (newthis.isNull() || !newthis.isObject()) {
     raise_warning(
       "Closure::call() expects parameter 1 to be object, %s given",
       getDataTypeString(newthis.getType()).c_str()
     );
-    return null_variant;
+    return init_null();
   }
 
   // So, with bind/bindTo, if we are trying to bind an instance to a static
@@ -250,17 +294,17 @@ static Variant HHVM_METHOD(Closure, call,
   // we are supposed to just return null (according to the PHP 7 implementation)
   // Here is that speciality check, then. Do it here so we don't have to go
   // through the rigormorale of binding if this is the case.
-  if (this_->getVMClass()->getCachedInvoke()->isStatic()) {
+  if (getVMClass()->getCachedInvoke()->isStatic()) {
     raise_warning("Cannot bind an instance to a static closure");
-    return null_variant;
+    return init_null();
   }
 
-  auto bound = HHVM_MN(Closure, bindto)(this_, newthis, newthis);
+  auto bound = this->t_bindto(newthis, newthis);
   // If something went wrong in the binding (warning, for example), then
   // we can get an empty object back. And an empty object is null by
   // default. Return null if that is the case.
   if (bound.isNull()) {
-    return null_variant;
+    return init_null();
   }
 
   Variant ret;
@@ -268,23 +312,10 @@ static Variant HHVM_METHOD(Closure, call,
   // whole decode function process to get a Func*. But we know this
   // is a closure, and we can get a Func* via getInvokeFunc(), so just
   // bypass all that decode process to save time.
-  g_context->invokeFunc((TypedValue*)&ret,
-                        Native::data<Closure>(this_)->getInvokeFunc(),
-                        params, bound.toObject().get(),
-                        nullptr, nullptr, nullptr,
+  g_context->invokeFunc((TypedValue*)&ret, this->getInvokeFunc(), params,
+                        bound.get(), nullptr, nullptr, nullptr,
                         ExecutionContext::InvokeCuf);
   return ret;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-void StandardExtension::initClosure() {
-  HHVM_ME(Closure, __debugInfo);
-  HHVM_ME(Closure, bindto);
-  HHVM_ME(Closure, call);
-
-  Native::registerNativeDataInfo<Closure>(s_Closure.get());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

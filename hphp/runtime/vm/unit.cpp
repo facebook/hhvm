@@ -66,6 +66,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/repo.h"
@@ -77,7 +78,6 @@
 
 #include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/system/systemlib.h"
@@ -701,7 +701,21 @@ Class* Unit::defClass(const PreClass* preClass,
   }
 }
 
+namespace {
+bool isPHP7ReservedType(const StringData* alias) {
+  return
+    !strcmp("int",    alias->data()) ||
+    !strcmp("bool",   alias->data()) ||
+    !strcmp("float",  alias->data()) ||
+    !strcmp("string", alias->data());
+}
+}
+
 bool Unit::aliasClass(Class* original, const StringData* alias) {
+  if (RuntimeOption::PHP7_ScalarTypes && isPHP7ReservedType(alias)) {
+    raise_error("Fatal error: Cannot use '%s' as class name as it is reserved",
+                alias->data());
+  }
   auto const aliasNe = NamedEntity::get(alias);
   aliasNe->m_cachedClass.bind();
 
@@ -1351,7 +1365,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
       do {
         Func* func = *it;
         assert(func->top());
-        getDataRef<Func*>(tcbase, func->funcHandle()) = func;
+        getDataRef<LowPtr<Func>>(tcbase, func->funcHandle()) = func;
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
@@ -1392,12 +1406,13 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
               rds::isPersistentHandle(parent->classHandle())) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
           }
-          if (UNLIKELY(!getDataRef<Class*>(tcbase, parent->classHandle()))) {
+          if (UNLIKELY(!getDataRef<LowPtr<Class>>(tcbase,
+                                                  parent->classHandle()))) {
             redoHoistable = true;
             continue;
           }
         }
-        getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
+        getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
         if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
@@ -1475,7 +1490,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
             raise_error("unknown class %s", other->name()->data());
           }
           assert(avail == Class::Avail::True);
-          getDataRef<Class*>(tcbase, cls->classHandle()) = cls;
+          getDataRef<LowPtr<Class>>(tcbase, cls->classHandle()) = cls;
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
@@ -1614,7 +1629,6 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
   } while (true);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Info arrays.
 
@@ -1622,18 +1636,15 @@ namespace {
 
 Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   Array a = Array::Create();
-  if (NamedEntity::table()) {
-    for (AllCachedClasses ac; !ac.empty();) {
-      Class* c = ac.popFront();
-      if ((c->attrs() & attrs) ? !inverse : inverse) {
-        if (c->isBuiltin()) {
-          a.prepend(VarNR(c->name()));
-        } else {
-          a.append(VarNR(c->name()));
-        }
+  NamedEntity::foreach_cached_class([&](Class* c) {
+    if ((c->attrs() & attrs) ? !inverse : inverse) {
+      if (c->isBuiltin()) {
+        a.prepend(VarNR(c->name()));
+      } else {
+        a.append(VarNR(c->name()));
       }
     }
-  }
+  });
   return a;
 }
 
@@ -1642,16 +1653,10 @@ Array getFunctions() {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
   Array a = Array::Create();
-  if (NamedEntity::table()) {
-    for (auto it = NamedEntity::table()->begin();
-         it != NamedEntity::table()->end(); ++it) {
-      Func* func_ = it->second.getCachedFunc();
-      if (!func_ || (system ^ func_->isBuiltin()) || func_->isGenerated()) {
-        continue;
-      }
-      a.append(VarNR(HHVM_FN(strtolower)(func_->nameStr())));
-    }
-  }
+  NamedEntity::foreach_cached_func([&](Func* func) {
+    if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
+    a.append(VarNR(HHVM_FN(strtolower)(func->nameStr())));
+  });
   return a;
 }
 
@@ -1788,45 +1793,4 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
   auto kind_char = *pc;
   return kind_char == static_cast<uint8_t>(FatalOp::Parse);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-void AllCachedClasses::skip() {
-  Class* cls;
-  while (!empty()) {
-    cls = m_next->second.clsList();
-    if (cls && cls->getCached() &&
-        (cls->parent() != Closure::classof())) break;
-    ++m_next;
-  }
-}
-
-AllCachedClasses::AllCachedClasses()
-    : m_next(NamedEntity::table()->begin())
-    , m_end(NamedEntity::table()->end())
-{
-  skip();
-}
-
-bool AllCachedClasses::empty() const {
-  return m_next == m_end;
-}
-
-Class* AllCachedClasses::front() {
-  assert(!empty());
-  Class* c = m_next->second.clsList();
-  assert(c);
-  c = c->getCached();
-  assert(c);
-  return c;
-}
-
-Class* AllCachedClasses::popFront() {
-  Class* c = front();
-  ++m_next;
-  skip();
-  return c;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

@@ -714,6 +714,29 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().mbase.reset();
     break;
 
+  case VerifyRetFail:
+    if (!func()->unit()->useStrictTypes()) {
+      // In PHP 7 mode scalar types can sometimes coerce; we do this during the
+      // VerifyRetFail call -- we never allow this in HH files.
+      auto const offset = toIRSPOffset(
+        BCSPOffset{0},
+        inst->marker().spOff(),
+        spOffset()
+      );
+      setStackType(offset, TGen);
+    }
+    break;
+
+  case VerifyParamFail:
+    if (!func()->unit()->isHHFile() && !RuntimeOption::EnableHipHopSyntax &&
+        RuntimeOption::PHP7_ScalarTypes) {
+      // In PHP 7 mode scalar types can sometimes coerce; we do this during the
+      // VerifyParamFail call -- we never allow this in HH files.
+      auto id = inst->src(0)->intVal();
+      setLocalType(id, TGen);
+    }
+    break;
+
   default:
     if (MInstrEffects::supported(inst)) {
       updateMInstr(inst);

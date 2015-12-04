@@ -37,7 +37,6 @@ IMPLEMENT_RESOURCE_ALLOCATION(TimeZone)
 class GuessedTimeZone {
 public:
   std::string m_tzid;
-  std::string m_warning;
 
   GuessedTimeZone() {
     time_t the_time = time(0);
@@ -55,23 +54,6 @@ public:
       tzid = "UTC";
     }
     m_tzid = tzid;
-
-#define DATE_TZ_ERRMSG \
-  "It is not safe to rely on the system's timezone settings. Please use " \
-  "the date.timezone setting, the TZ environment variable or the " \
-  "date_default_timezone_set() function. In case you used any of those " \
-  "methods and you are still getting this warning, you most likely " \
-  "misspelled the timezone identifier. "
-
-    string_printf(m_warning, DATE_TZ_ERRMSG
-                  "We selected '%s' for '%s/%.1f/%s' instead", tzid,
-#ifdef _MSC_VER
-                  "Unknown", 0,
-#else
-                  ta ? ta->tm_zone : "Unknown",
-                  ta ? (float) (ta->tm_gmtoff / 3600) : 0,
-#endif
-                  ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
   }
 };
 static GuessedTimeZone s_guessed_timezone;
@@ -168,8 +150,6 @@ String TimeZone::CurrentName() {
     return String(env, CopyString);
   }
 
-  /* Try to guess timezone from system information */
-  raise_strict_warning(s_guessed_timezone.m_warning);
   return String(s_guessed_timezone.m_tzid);
 }
 

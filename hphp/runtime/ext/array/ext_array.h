@@ -281,7 +281,7 @@ inline int64_t countHelper(TypedValue tv) {
 
 #define getCheckedArrayRet(input, fail)                           \
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
-  if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
+  if (UNLIKELY(!isArrayType(cell_##input->m_type))) {             \
     throw_expected_array_exception();                             \
     return fail;                                                  \
   }                                                               \
@@ -290,7 +290,7 @@ inline int64_t countHelper(TypedValue tv) {
 
 #define getCheckedArrayColumnRet(input, fail)                     \
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
-  if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
+  if (UNLIKELY(!isArrayType(cell_##input->m_type))) {             \
     if (cell_##input->m_type == KindOfString ||                   \
         cell_##input->m_type == KindOfStaticString) {             \
       throw_bad_type_exception("array_column() expects parameter" \

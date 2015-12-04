@@ -654,6 +654,7 @@ Variant HHVM_FUNCTION(file_put_contents,
       break;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = data.toArray();
       for (ArrayIter iter(arr); iter; ++iter) {

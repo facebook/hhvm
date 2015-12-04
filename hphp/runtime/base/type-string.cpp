@@ -151,23 +151,19 @@ String::String(Variant&& src) : String(src.toString()) { }
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
-String String::substr(int start, int length /* = 0x7FFFFFFF */,
-                      bool nullable /* = false */) const {
-  auto r = slice();
-  // string_substr_check() will update start & length to a legal range.
-  if (string_substr_check(r.size(), start, length)) {
-    if (start == 0 && length >= r.size()) {
-      return *this;
-    }
-
-    // No length check covers 'start == r.size()' due to string_substr_check
-    if (length == 0) {
-      return empty_string();
-    }
-
-    return String(r.data() + start, length, CopyString);
+String String::substr(int start, int length /* = StringData::MaxSize */) const {
+  if (start < 0 || start > size() || length < 0) {
+    return empty_string();
   }
-  return nullable ? String() : empty_string();
+
+  auto const max_len = size() - start;
+  if (length > max_len) {
+    length = max_len;
+  }
+
+  if (UNLIKELY(length == size())) return *this;
+  if (length == 0) return empty_string();
+  return String(data() + start, length, CopyString);
 }
 
 int String::find(char ch, int pos /* = 0 */,
@@ -566,6 +562,7 @@ StaticString getDataTypeString(DataType t) {
     case KindOfDouble:     return s_double;
     case KindOfStaticString:
     case KindOfString:     return s_string;
+    case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;

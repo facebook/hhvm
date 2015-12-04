@@ -16,6 +16,10 @@ let path_of_root root extension =
   let root_part = Path.slash_escaped_string_of_path root in
   Filename.concat GlobalConfig.tmp_dir (spf "%s.%s" root_part extension)
 
+let is_of_root root fn =
+  let root_part = Path.slash_escaped_string_of_path root in
+  str_starts_with fn (Filename.concat GlobalConfig.tmp_dir root_part)
+
 (* Creates a symlink at <dir>/<linkname.ext> to
  * <dir>/<pluralized ext>/<linkname>-<timestamp>.<ext> *)
 let make_link_of_timestamped linkname =
@@ -35,10 +39,15 @@ let make_link_of_timestamped linkname =
   Sys_utils.symlink filename linkname;
   filename
 
-let init_file root = path_of_root root "init"
+(**
+ * Lock on this file will be held after the server has finished initializing.
+ * *)
+let init_complete_file root = path_of_root root "init_complete"
 let lock_file root = path_of_root root "lock"
 let log_link root = path_of_root root "log"
 let pids_file root = path_of_root root "pids"
 let socket_file root = path_of_root root "sock"
 let dfind_log root = path_of_root root "dfind"
 let load_log root = path_of_root root "load"
+
+let server_monitor_log_link root = path_of_root root "monitor_log"

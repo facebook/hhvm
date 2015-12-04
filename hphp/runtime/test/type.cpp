@@ -65,11 +65,15 @@ TEST(Type, Null) {
 
 TEST(Type, KnownDataType) {
   auto trueTypes = {
-    TInt, TBoxedCell, TStaticStr,
-    TStr, // TODO(#3390819): this should return false...
+    TInt,
+    TBoxedCell,
+    TStaticStr,
+    TCountedStr,
+    TStr,
     TObj,
     TDbl,
     TArr,
+    TPersistentArr,
     TStaticArr,
     TCountedArr,
     TRes,
@@ -124,6 +128,14 @@ TEST(Type, ToString) {
   EXPECT_EQ("{Func|ABC}", (TABC | TFunc).toString());
 
   EXPECT_EQ("InitNull", TInitNull.constValString());
+
+  EXPECT_EQ("InitGen", TInitGen.toString());
+  EXPECT_EQ("PtrToInitGen", TInitGen.ptr(Ptr::Ptr).toString());
+  EXPECT_EQ("PtrToFrameInitGen", TPtrToFrameInitGen.toString());
+
+  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMembInitNull);
+  EXPECT_EQ("PtrToMembInitNull<TV: 0xba5eba11>", ptrCns.toString());
+  EXPECT_EQ("TV: 0xba5eba11", ptrCns.constValString());
 }
 
 TEST(Type, Boxes) {

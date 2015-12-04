@@ -998,7 +998,7 @@ struct Func {
 
   void setAttrs(Attr attrs);
   void setBaseCls(Class* baseCls);
-  void setFuncHandle(rds::Link<Func*> l);
+  void setFuncHandle(rds::Link<LowPtr<Func>> l);
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
 
@@ -1222,7 +1222,7 @@ private:
   int m_magic;
 #endif
   AtomicLowPtr<uint8_t> m_funcBody;
-  mutable rds::Link<Func*> m_cachedFunc{rds::kInvalidHandle};
+  mutable rds::Link<LowPtr<Func>> m_cachedFunc{rds::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
   LowStringPtr m_fullName;
   LowStringPtr m_name;

@@ -81,11 +81,6 @@ ObjectData* object(T *data) {
   return reinterpret_cast<ObjectData*>(data + 1);
 }
 
-template<class T>
-const ObjectData* object(const T* data) {
-  return reinterpret_cast<const ObjectData*>(data + 1);
-}
-
 void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,
@@ -193,19 +188,20 @@ typename std::enable_if<
   void
 >::type registerNativeDataInfo(const StringData* name,
                                int64_t flags = 0) {
+  auto ndic = &nativeDataInfoCopy<T>;
+  auto ndisw = &nativeDataInfoSweep<T>;
+  auto ndisl = &nativeDataInfoSleep<T>;
+  auto ndiw = &nativeDataInfoWakeup<T>;
+  auto ndis = &nativeDataInfoScan<T>;
+
   registerNativeDataInfo(name, sizeof(T),
-                         &nativeDataInfoInit<T>,
-                         (flags & NDIFlags::NO_COPY)
-                           ? nullptr : &nativeDataInfoCopy<T>,
-                         &nativeDataInfoDestroy<T>,
-                         (flags & NDIFlags::NO_SWEEP)
-                           ? nullptr : &nativeDataInfoSweep<T>,
-                         hasSleep<T, Variant() const>::value
-                           ? &nativeDataInfoSleep<T> : nullptr,
-                         hasWakeup<T, void(const Variant&, ObjectData*)>::value
-                           ? &nativeDataInfoWakeup<T> : nullptr,
-                         hasScan<T, void(IMarker&)>::value
-                           ? &nativeDataInfoScan<T> : nullptr);
+    &nativeDataInfoInit<T>,
+    (flags & NDIFlags::NO_COPY) ? nullptr : ndic,
+    &nativeDataInfoDestroy<T>,
+    (flags & NDIFlags::NO_SWEEP) ? nullptr : ndisw,
+    hasSleep<T, Variant() const>::value ? ndisl : nullptr,
+    hasWakeup<T, void(const Variant&, ObjectData*)>::value ? ndiw : nullptr,
+    hasScan<T, void(IMarker&)>::value ? ndis : nullptr);
 }
 
 // Return the ObjectData payload allocated after this NativeNode header

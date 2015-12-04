@@ -212,11 +212,13 @@ bool operator>(Ptr, Ptr) = delete;
  */
 #define IRT_PHP_UNIONS(c)                                               \
   c(Null,          kUninit|kInitNull)                                   \
-  c(Str,           kStaticStr|kUncountedStr|kCountedStr)                \
-  c(Arr,           kStaticArr|kUncountedArr|kCountedArr)                \
+  c(PersistentStr, kStaticStr|kUncountedStr)                            \
+  c(Str,           kPersistentStr|kCountedStr)                          \
+  c(PersistentArr, kStaticArr|kUncountedArr)                            \
+  c(Arr,           kPersistentArr|kCountedArr)                          \
   c(NullableObj,   kObj|kInitNull|kUninit)                              \
-  c(Static,        kStaticStr|kUncountedStr|kStaticArr|kUncountedArr)   \
-  c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStatic)                   \
+  c(Persistent,    kPersistentStr|kPersistentArr)                       \
+  c(UncountedInit, kInitNull|kBool|kInt|kDbl|kPersistent)               \
   c(Uncounted,     kUninit|kUncountedInit)                              \
   c(InitCell,      kUncountedInit|kStr|kArr|kObj|kRes)                  \
   c(Cell,          kUninit|kInitCell)
@@ -252,12 +254,12 @@ bool operator>(Ptr, Ptr) = delete;
   IRT(Counted,               kCountedStr|kCountedArr|kObj|kRes|kBoxedCell) \
   IRTP(PtrToCounted, Ptr,    kCounted)                                  \
   IRT(Gen,                   kCell|kBoxedCell)                          \
-  IRT(Init,                  kGen & ~kUninit)                           \
+  IRT(InitGen,               kGen & ~kUninit)                           \
   IRT(StkElem,               kGen|kCls)                                 \
   IRTP(PtrToGen,     Ptr,    kGen)                                      \
-  IRTP(PtrToInit,    Ptr,    kInit)                                     \
+  IRTP(PtrToInitGen, Ptr,    kInitGen)                                  \
   PTR_TYPES(IRTP_FROM_PTR, PTR_R, Gen)                                  \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_R, Init)
+  PTR_TYPES(IRTP_FROM_PTR, PTR_R, InitGen)
 
 /*
  * All types that represent a non-union type.

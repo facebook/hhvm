@@ -849,7 +849,7 @@ public:
    * only a single name-to-class mapping will exist per request.
    */
   rds::Handle classHandle() const;
-  void setClassHandle(rds::Link<Class*> link) const;
+  void setClassHandle(rds::Link<LowPtr<Class>> link) const;
 
   /*
    * Get and set the RDS-cached class with this class's name.
@@ -1206,7 +1206,7 @@ private:
 
   ClassPtr m_parent;
   int32_t m_declPropNumAccessible;
-  mutable rds::Link<Class*> m_cachedClass{rds::kInvalidHandle};
+  mutable rds::Link<LowPtr<Class>> m_cachedClass{rds::kInvalidHandle};
 
   /*
    * Whether this is a subclass of Closure whose m_invoke->m_cls has been set

@@ -132,10 +132,8 @@ size_t asio_object_size(const ObjectData* od) {
     X(AsyncGenerator)
 #undef X
     case c_WaitHandle::Kind::AwaitAll:
-      assert(false); // Handled by its own HeaderKind
       return obj->asAwaitAll()->heapSize();
     case c_WaitHandle::Kind::AsyncFunction:
-      assert(false); // Handled by its own HeaderKind
       return obj->asAsyncFunction()->resumable()->size();
   }
   always_assert(false);
@@ -185,7 +183,6 @@ finish_class() {
   assert(!cls->m_extra->m_nativeDataInfo);
   assert(!cls->m_extra->m_instanceCtor);
   assert(!cls->m_extra->m_instanceDtor);
-  // Having an InstanceDtor means we must be IsCppBuiltin
   // Being IsCppBuiltin means we must have an InstanceCtor
   // Use the default newInstance which will fail as expected
   // on the private final constructor (asserted above)

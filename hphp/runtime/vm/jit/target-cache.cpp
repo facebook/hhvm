@@ -510,7 +510,12 @@ void handlePrimeCacheInit(Entry* mce,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+  auto hsp = handleSlowPath<fatal>;
+  smashCall(callAddr, reinterpret_cast<TCA>(hsp));
+#else
   smashCall(callAddr, reinterpret_cast<TCA>(handleSlowPath<fatal>));
+#endif
 }
 
 template

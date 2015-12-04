@@ -132,14 +132,14 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
   strncpy(dir, fullpath.data(), sizeof(dir));
 
   for (p = dir + 1; *p; p++) {
-    if (*p == '/') {
+    if (FileUtil::isDirSeparator(*p)) {
       *p = '\0';
       if (::access(dir, F_OK) < 0) {
         if (::mkdir(dir, mode) < 0) {
           return -1;
         }
       }
-      *p = '/';
+      *p = FileUtil::getDirSeparator();
     }
   }
 

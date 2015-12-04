@@ -1414,6 +1414,17 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   assertx(IMPLIES(type <= TStr, type == TStr));
   assertx(IMPLIES(type <= TArr, type == TArr));
 
+  // Specially handle checking if an uninit var's type is null. The Type class
+  // doesn't fully correctly handle the fact that the earlier stages of the
+  // compiler consider null to be either initalized or uninitalized, so we need
+  // to do this check first. Right here is really the only place in the backend
+  // it seems to matter, especially since manipulating an uninit is kind of
+  // weird; as of this writing, "$uninitalized_variable ?? 42" is the only
+  // place it really comes up.
+  if (srcType <= TUninit && type <= TNull) {
+    return cns(env, trueSense);
+  }
+
   // The types are disjoint; the result must be false.
   if (!srcType.maybe(type)) {
     return cns(env, !trueSense);
@@ -2581,7 +2592,7 @@ bool canSimplifyAssertType(const IRInstruction* inst,
     if (!srcMightRelax) return true;
 
     if (srcType < newType) {
-      // This can happen because of limitations in how Toperator& handles
+      // This can happen because of limitations in how Type::operator& handles
       // specialized types: sometimes it returns a Type that's wider than it
       // needs to be.  It shouldn't affect correctness but it can cause us to
       // miss out on some perf.
@@ -2799,7 +2810,7 @@ Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
     return TInitNull;
   }
 
-  Type t = arr->isA(TStaticArr) ? TInitCell : TGen;
+  Type t = arr->isA(TPersistentArr) ? TInitCell : TGen;
 
   auto const at = arr->type().arrSpec().type();
   if (!at) return t;

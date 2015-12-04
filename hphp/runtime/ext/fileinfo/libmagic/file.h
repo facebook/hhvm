@@ -36,15 +36,10 @@
 #include "compat.h"
 #include "config.h"
 
-#ifdef PHP_WIN32
-  #ifdef _WIN64
-    #define SIZE_T_FORMAT "I64"
-  #else
-    #define SIZE_T_FORMAT ""
-  #endif
+#define SIZE_T_FORMAT "z"
+#ifdef _MSC_VER
   #define INT64_T_FORMAT "I64"
 #else
-  #define SIZE_T_FORMAT "z"
   #define INT64_T_FORMAT "ll"
 #endif
 
@@ -57,9 +52,7 @@
 #endif
 
 #include <sys/types.h>
-#ifdef PHP_WIN32
-#include "win32/param.h"
-#else
+#ifndef _MSC_VER
 #include <sys/param.h>
 #endif
 /* Do this here and now, because struct stat gets re-defined on solaris */
@@ -72,7 +65,7 @@
 #define MAGIC "/etc/magic"
 #endif
 
-#if defined(__EMX__) || defined(PHP_WIN32)
+#if defined(__EMX__) || defined(_MSC_VER)
 #define PATHSEP  ';'
 #else
 #define PATHSEP  ':'

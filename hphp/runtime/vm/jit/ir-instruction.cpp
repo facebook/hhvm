@@ -243,11 +243,11 @@ Type arrElemReturn(const IRInstruction* inst) {
 
   auto resultType = inst->hasTypeParam() ? inst->typeParam() : TGen;
   if (inst->is(ArrayGet)) {
-    resultType &= TInit;
+    resultType &= TInitGen;
   }
 
-  // Elements of a static array are uncounted
-  if (inst->src(0)->isA(TStaticArr)) {
+  // Elements of a noncounted array are uncounted
+  if (inst->src(0)->isA(TPersistentArr)) {
     resultType &= TUncountedInit;
   }
 

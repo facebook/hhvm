@@ -1258,21 +1258,22 @@ void remove_helper(IRInstruction* inst) {
  * Walk through each block, and remove nearby IncRef/DecRef[NZ] pairs that
  * operate on the same must-alias-set, if there are obviously no instructions
  * in between them that could read the reference count of that object.
+ *
+ * Then run the same pass, but backwards, which removes nearby DecRef[NZ]/IncRef
+ * likewise.
  */
 void remove_trivial_incdecs(Env& env) {
   FTRACE(2, "remove_trivial_incdecs ---------------------------------\n");
   auto incs = jit::vector<IRInstruction*>{};
   for (auto& blk : env.rpoBlocks) {
-    incs.clear();
-
-    for (auto& inst : *blk) {
+    auto process = [&] (IRInstruction& inst) {
       if (inst.is(IncRef)) {
         incs.push_back(&inst);
-        continue;
+        return;
       }
 
       if (inst.is(DecRef, DecRefNZ)) {
-        if (incs.empty()) continue;
+        if (incs.empty()) return;
         auto const setID = env.asetMap[inst.src(0)];
         auto const to_rm = [&] () -> IRInstruction* {
           for (auto it = begin(incs); it != end(incs); ++it) {
@@ -1287,14 +1288,13 @@ void remove_trivial_incdecs(Env& env) {
           incs.clear();
           return nullptr;
         }();
-        if (to_rm == nullptr) continue;
+        if (to_rm == nullptr) return;
 
         FTRACE(3, "    ** trivial pair: {}, {}\n", *to_rm, inst);
         remove_helper(to_rm);
         remove_helper(&inst);
-        continue;
+        return;
       }
-
 
       auto const effects = memory_effects(inst);
       match<void>(
@@ -1313,6 +1313,15 @@ void remove_trivial_incdecs(Env& env) {
         [&] (ExitEffects)       { incs.clear(); },
         [&] (UnknownEffects)    { incs.clear(); }
       );
+    };
+
+    incs.clear();
+    for (auto& inst : *blk) {
+      process(inst);
+    }
+    incs.clear();
+    for (auto iter = blk->rbegin(); iter != blk->rend(); ++iter) {
+      process(*iter);
     }
   }
 }
@@ -2968,6 +2977,10 @@ bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
   assertx(inst->is(IncRef));
   if (!block->taken() || !block->next()) return false;
   if (inst->src(0)->inst()->is(DefConst)) return true;
+  // We've split critical edges, so `next' and 'taken' blocks can't
+  // have other predecessors.
+  assertx(block->taken()->numPreds() == 1);
+  assertx(block->next()->numPreds() == 1);
   auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
   return dominates(defBlock, block->taken(), env.idoms) &&
          dominates(defBlock, block->next(), env.idoms);
@@ -3314,6 +3327,90 @@ void rcgraph_opts(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * sink_incs() is a simple pass that sinks IncRefs of values that may
+ * be uncount past some safe instructions.  These are instructions
+ * that cannot observe the reference count and so we can sink IncRefs
+ * across them regardless of their lower bounds.  The goal is to sink
+ * IncRefs past Check* and Assert* instructions that may provide
+ * further type information to enable more specialized IncRefs (or
+ * even completely eliminate them).
+ */
+
+bool can_sink_inc_through(const IRInstruction& inst) {
+  switch (inst.op()) {
+    // these refine the type
+    case AssertType:
+    case AssertLoc:
+    case AssertStk:  return true;
+
+    // these commonly occur along with type guards
+    case LdLoc:
+    case LdStk:
+    case InlineReturn:
+    case InlineReturnNoFrame:
+    case Nop:        return true;
+
+    default:         return false;
+  }
+}
+
+void sink_incs(Env& env) {
+  FTRACE(2, "sink_incs ---------------------------------\n");
+  jit::vector<IRInstruction*> incs;
+
+  // Find all IncRefs in the unit.
+  for (auto& blk : env.rpoBlocks) {
+    for (auto& inst : *blk) {
+      if (inst.is(IncRef)) {
+        incs.push_back(&inst);
+      }
+    }
+  }
+
+  // Process each of the IncRefs, including new ones that are created
+  // along the way.
+  while (!incs.empty()) {
+    auto inc = incs.back();
+    incs.pop_back();
+
+    auto block  = inc->block();
+    auto marker = inc->marker();
+    auto tmp    = inc->src(0);
+    if (!tmp->type().maybe(TUncounted)) continue;
+
+    auto iter = block->iteratorTo(inc);
+    auto iterOrigSucc = ++iter;
+    while (can_sink_inc_through(*iter)) {
+      iter++;
+    }
+
+    auto const& succ = *iter;
+    if (succ.is(CheckType, CheckLoc, CheckStk)) {
+      // try to sink past Check* instructions
+      if (!can_sink(env, inc, block)) continue;
+
+      auto const new_taken = env.unit.gen(IncRef, marker, tmp);
+      auto const new_next  = env.unit.gen(IncRef, marker, tmp);
+      block->taken()->prepend(new_taken);
+      block->next()->prepend(new_next);
+      incs.push_back(new_taken);
+      incs.push_back(new_next);
+      FTRACE(2, "    ** sink_incs: {} -> {}, {}\n",
+             *inc, *new_taken, *new_next);
+      remove_helper(inc);
+
+    } else if (iter != iterOrigSucc) {
+      // insert the inc right before succ if we advanced any instruction
+      auto const new_inc = env.unit.gen(IncRef, marker, tmp);
+      block->insert(iter, new_inc);
+      FTRACE(2, "    ** sink_incs: {} -> {}, {}\n", *inc, *new_inc);
+      remove_helper(inc);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3332,6 +3429,7 @@ void optimizeRefcounts(IRUnit& unit) {
   weaken_decrefs(env);
   rcgraph_opts(env);
   remove_trivial_incdecs(env);
+  sink_incs(env);
 
   // We may have pushed IncRefs past CheckTypes, which could allow us to
   // specialize them.

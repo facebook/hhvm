@@ -177,17 +177,8 @@ inline DEBUG_ONLY HeaderKind kind(const void* p) {
 void Marker::operator()(const ObjectData* p) {
   if (!p) return;
   assert(isObjectKind(p->headerKind()));
-  if (p->getAttribute(ObjectData::HasNativeData)) {
-    // HNI style native object; mark the NativeNode header, queue the object.
-    // [NativeNode][NativeData][ObjectData][props] is one allocation.
-    // For generators -
-    // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
-    auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
-    assert(h->hdr.kind == HK::NativeData);
-    if (mark(h)) {
-      enqueue(p);
-    }
-  } else if (p->headerKind() == HK::ResumableObj) {
+  auto kind = p->headerKind();
+  if (kind == HK::ResumableObj) {
     // Resumable object, prefixed by a ResumableNode header, which is what
     // we need to mark.
     // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
@@ -198,6 +189,18 @@ void Marker::operator()(const ObjectData* p) {
     assert(node->hdr.kind == HK::ResumableFrame);
     if (mark(node)) {
       // mark the ResumableFrame prefix, but enqueue the ObjectData* to scan
+      enqueue(p);
+    }
+    assert(!p->getVMClass()->getNativeDataInfo());
+  } else if (p->getAttribute(ObjectData::HasNativeData)) {
+    // HNI style native object; mark the NativeNode header, queue the object.
+    // [NativeNode][NativeData][ObjectData][props] is one allocation.
+    // For generators -
+    // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
+    assert(p->getVMClass()->getNativeDataInfo() != nullptr);
+    auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
+    assert(h->hdr.kind == HK::NativeData);
+    if (mark(h)) {
       enqueue(p);
     }
   } else {
@@ -291,6 +294,7 @@ void Marker::operator()(const TypedValue& tv) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:
+    case KindOfPersistentArray:
     case KindOfClass: // only in eval stack
       return;
   }
@@ -326,8 +330,6 @@ Marker::operator()(const void* start, size_t len) {
         enqueue(h);
         break;
       case HK::Object:
-      case HK::WaitHandle:
-      case HK::AwaitAllWH:
       case HK::Vector:
       case HK::Map:
       case HK::Set:
@@ -335,6 +337,8 @@ Marker::operator()(const void* start, size_t len) {
       case HK::ImmVector:
       case HK::ImmMap:
       case HK::ImmSet:
+      case HK::WaitHandle:
+      case HK::AwaitAllWH:
         // Object kinds. None of these should have native-data, because if they
         // do, the mapped header should be for the NativeData prefix.
         assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
@@ -398,7 +402,6 @@ void Marker::init() {
         total_ += h->size();
         break;
       case HK::Object:
-      case HK::WaitHandle:
       case HK::Vector:
       case HK::Map:
       case HK::Set:
@@ -407,15 +410,11 @@ void Marker::init() {
       case HK::ImmMap:
       case HK::ImmSet:
       case HK::AwaitAllWH:
-        // count==0 can be witnessed, see above
+      case HK::WaitHandle:
+        assert(!h->obj_.getAttribute(ObjectData::HasNativeData) &&
+               "object with NativeData from forEachHeader");
         total_ += h->size();
-        if (!h->obj_.getAttribute(ObjectData::HasNativeData)) {
-          ptrs_.insert(h);
-        } else {
-          // Objects with native-data shouldn't be encountered on their own
-          // because they should be prefixed by a NativeData allocation.
-          assert(false && "object with native-data from forEachHeader()");
-        }
+        ptrs_.insert(h);
         break;
       case HK::ResumableFrame: {
         // Pointers to either the frame or the object will be mapped to the
@@ -480,7 +479,6 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       // ordinary counted objects
       break;
     case HK::Object:
-    case HK::WaitHandle:
     case HK::Vector:
     case HK::Map:
     case HK::Set:
@@ -488,6 +486,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
     case HK::ImmVector:
     case HK::ImmMap:
     case HK::ImmSet:
+    case HK::WaitHandle:
     case HK::AwaitAllWH:
       // objects; should not have native-data
       assert(!h->obj_.getAttribute(ObjectData::HasNativeData));

@@ -42,6 +42,7 @@ String HHVM_FUNCTION(curl_strerror, int code);
 Variant HHVM_FUNCTION(curl_close, const Resource& ch);
 void HHVM_FUNCTION(curl_reset, const Resource& ch);
 Resource HHVM_FUNCTION(curl_multi_init);
+Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code);
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch);
 Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch);
 Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running);
@@ -55,6 +56,9 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue = null_object);
 Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
+bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
+                              int option,
+                              const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -12,6 +12,11 @@ if (OCAMLC_FOUND)
   unset(extra_include_paths)
   unset(extra_lib_paths)
   unset(extra_cc_flags)
+
+  # Allows '#include "hphp/path/to/library/"' paths to start from hphp
+  # project directory  which is consistent with fbmake's include paths.
+  list(APPEND extra_include_paths ${HPHP_HOME})
+
   foreach(lib ${LIBELF_INCLUDE_DIRS})
     list(APPEND extra_include_paths ${lib})
   endforeach()

@@ -57,6 +57,15 @@ Func* s_nullFunc = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
+Class* s_ThrowableClass;
+Class* s_BaseExceptionClass;
+Class* s_ErrorClass;
+Class* s_ArithmeticErrorClass;
+Class* s_AssertionErrorClass;
+Class* s_DivisionByZeroErrorClass;
+Class* s_ParseErrorClass;
+Class* s_TypeErrorClass;
+
 Object AllocStdClassObject() {
   return Object{s_stdclassClass};
 }
@@ -67,6 +76,27 @@ Object AllocPinitSentinel() {
 
 Object AllocExceptionObject(const Variant& message) {
   return createAndConstruct(s_ExceptionClass, make_packed_array(message));
+}
+
+Object AllocErrorObject(const Variant& message) {
+  return createAndConstruct(s_ErrorClass, make_packed_array(message));
+}
+
+Object AllocArithmeticErrorObject(const Variant& message) {
+  return createAndConstruct(s_ArithmeticErrorClass, make_packed_array(message));
+}
+
+Object AllocDivisionByZeroErrorObject(const Variant& message) {
+  return createAndConstruct(s_DivisionByZeroErrorClass,
+                            make_packed_array(message));
+}
+
+Object AllocParseErrorObject(const Variant& message) {
+  return createAndConstruct(s_ParseErrorClass, make_packed_array(message));
+}
+
+Object AllocTypeErrorObject(const Variant& message) {
+  return createAndConstruct(s_TypeErrorClass, make_packed_array(message));
 }
 
 Object AllocBadMethodCallExceptionObject(const Variant& message) {
@@ -135,6 +165,26 @@ Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
 
 void throwExceptionObject(const Variant& message) {
   throw AllocExceptionObject(message);
+}
+
+void throwErrorObject(const Variant& message) {
+  throw AllocErrorObject(message);
+}
+
+void throwArithmeticErrorObject(const Variant& message) {
+  throw AllocArithmeticErrorObject(message);
+}
+
+void throwDivisionByZeroErrorObject(const Variant& message) {
+  throw AllocDivisionByZeroErrorObject(message);
+}
+
+void throwParseErrorObject(const Variant& message) {
+  throw AllocParseErrorObject(message);
+}
+
+void throwTypeErrorObject(const Variant& message) {
+  throw AllocTypeErrorObject(message);
 }
 
 void throwBadMethodCallExceptionObject(const Variant& message) {

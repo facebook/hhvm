@@ -243,6 +243,12 @@ struct ConcurrentTableSharedStore {
   void dumpRandomKeys(std::ostream& out, uint32_t count);
 
   /*
+   * Return 'count' randomly chosen entries, possibly with duplicates. If the
+   * store is empty or this operation is not supported, returns an empty vector.
+   */
+  std::vector<EntryInfo> sampleEntriesInfo(uint32_t count);
+
+  /*
    * Debugging.  Access information about all the entries in this table.
    *
    * This is extremely expensive and not recommended for use outside of
@@ -290,7 +296,9 @@ private:
   template<typename Key, typename T, typename HashCompare>
   class APCMap : public tbb::concurrent_hash_map<Key,T,HashCompare> {
   public:
-    void dumpRandomAPCEntry(std::ostream& out);
+    // Append a random entry to 'entries'. The map must be non-empty and not
+    // concurrently accessed. Returns false if this operation is not supported.
+    bool getRandomAPCEntry(std::vector<EntryInfo>& entries);
   };
 
   using Map = APCMap<const char*,StoreValue,CharHashCompare>;

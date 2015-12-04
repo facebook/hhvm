@@ -488,7 +488,7 @@ struct MArrayIter {
 private:
   ArrayData* getData() const {
     assert(hasRef());
-    return m_ref->tv()->m_type == KindOfArray
+    return isArrayType(m_ref->tv()->m_type)
       ? m_ref->tv()->m_data.parr
       : nullptr;
   }
@@ -578,7 +578,8 @@ struct MIterTable {
     }
   }
 
-  std::array<Ent,7> ents;
+  static constexpr int ents_size = 7;
+  std::array<Ent, ents_size> ents;
   // Slow path: we expect this `extras' list to rarely be allocated.
   TlsPodBag<Ent,req::Allocator<Ent>> extras;
 };

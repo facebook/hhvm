@@ -1,8 +1,0 @@
-object(X)#1 (1) {
-  ["foo":"X":private]=>
-  string(3) "bar"
-}
-object(X)#1 (1) {
-  ["foo":"X":private]=>
-  string(3) "bar"
-}

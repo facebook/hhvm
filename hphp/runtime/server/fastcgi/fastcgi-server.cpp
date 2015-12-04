@@ -28,7 +28,7 @@ bool FastCGIAcceptor::canAccept(const folly::SocketAddress& address) {
 }
 
 void FastCGIAcceptor::onNewConnection(
-  folly::AsyncSocket::UniquePtr sock,
+  folly::AsyncTransportWrapper::UniquePtr sock,
   const folly::SocketAddress* peerAddress,
   const std::string& nextProtocolName,
   SecureTransportType secureProtocolType,

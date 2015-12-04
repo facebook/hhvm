@@ -26,17 +26,19 @@
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 
+#include "hphp/system/systemlib.h"
 #include "hphp/parser/parser.h"
 
 #include "hphp/util/debug.h"
 #include "hphp/util/logger.h"
 
 #include <folly/Bits.h>
+#include <folly/Optional.h>
 
 #include <algorithm>
 #include <iostream>
@@ -238,7 +240,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 }
 
 Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
-  assert(parent() == Closure::classof());
+  assert(parent() == SystemLib::s_ClosureClass);
   assert(m_invoke);
 
   bool const is_dynamic = (attrs != AttrNone);
@@ -324,7 +326,7 @@ void Class::destroy() {
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
-  m_cachedClass = rds::Link<Class*>(rds::kInvalidHandle);
+  m_cachedClass = rds::Link<LowPtr<Class>>(rds::kInvalidHandle);
 
   /*
    * Regardless of refCount, this Class is now unusable.  Remove it
@@ -588,6 +590,8 @@ void Class::initProps() const {
   // the new propVec.
   auto propVec = PropInitVec::allocWithReqAllocator(m_declPropInit);
 
+  VMRegAnchor _;
+
   initPropHandle();
   *m_propDataCache = propVec;
 
@@ -634,6 +638,12 @@ bool Class::needsInitSProps() const {
 void Class::initSProps() const {
   assert(needsInitSProps() || m_sPropCacheInit.isPersistent());
 
+  const bool hasNonscalarInit = !m_sinitVec.empty();
+  folly::Optional<VMRegAnchor> _;
+  if (hasNonscalarInit) {
+    _.emplace();
+  }
+
   // Initialize static props for parent.
   Class* parent = this->parent();
   if (parent && parent->needsInitSProps()) {
@@ -653,8 +663,6 @@ void Class::initSProps() const {
     }
   }
 
-  const bool hasNonscalarInit = !m_sinitVec.empty();
-
   // If there are non-scalar initializers (i.e. 86sinit methods), run them now.
   // They will override the KindOfUninit values set by scalar initialization.
   if (hasNonscalarInit) {
@@ -672,6 +680,8 @@ void Class::initSProps() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Property storage.
+
+static rds::Link<bool> s_persistentTrue{rds::kInvalidHandle};
 
 void Class::initSPropHandles() const {
   if (m_sPropCacheInit.bound()) return;
@@ -728,11 +738,14 @@ void Class::initSPropHandles() const {
   if (allPersistentHandles) {
     // We must make sure the value stored at the handle is correct before
     // setting m_sPropCacheInit in case another thread tries to read it at just
-    // the wrong time.
-    rds::Link<bool> tmp{rds::kInvalidHandle};
-    tmp.bind(rds::Mode::Persistent);
-    *tmp = true;
-    m_sPropCacheInit = tmp;
+    // the wrong time. And rather than giving each Class its own persistent
+    // handle that always points to an immutable 'true', share one between all
+    // of them.
+    if (!s_persistentTrue.bound()) {
+      s_persistentTrue.bind(rds::Mode::Persistent);
+      *s_persistentTrue = true;
+    }
+    m_sPropCacheInit = s_persistentTrue;
   } else {
     m_sPropCacheInit.bind();
   }
@@ -2091,6 +2104,7 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
       return same(tvAsVariant(&tv1), tvAsVariant(&tv2));
 
     case KindOfUninit:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

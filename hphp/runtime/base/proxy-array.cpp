@@ -82,7 +82,9 @@ void ProxyArray::Release(ArrayData*ad) {
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {
   if (innerArr(oldArr) != newArr) {
     auto old = innerArr(oldArr);
-    asProxyArray(oldArr)->m_ref->tv()->m_data.parr = newArr;
+    auto tv = asProxyArray(oldArr)->m_ref->tv();
+    tv->m_data.parr = newArr;
+    tv->m_type = KindOfArray;
     decRefArr(old);
   }
 }
@@ -433,7 +435,7 @@ void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {
 void ProxyArray::proxyInit(uint32_t nSize,
     DtorFunc pDestructor, bool persistent) {
   if (persistent) {
-    throw FatalErrorException("zend_hash_init: \"persistent\" is \
+    raise_fatal_error("zend_hash_init: \"persistent\" is \
                               unimplemented");
   }
   if (nSize) {

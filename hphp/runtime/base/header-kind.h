@@ -104,6 +104,7 @@ struct HeaderWord {
   bool isStatic() const;
   bool isUncounted() const;
   void incRefCount() const;
+  void rawIncRefCount() const;
   void decRefCount() const;
   bool decWillRelease() const;
   bool decReleaseCheck();

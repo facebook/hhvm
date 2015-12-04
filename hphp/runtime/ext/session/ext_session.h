@@ -117,11 +117,10 @@ private:
   LowPtr<Class> m_cls;
   static LowPtr<Class> s_SHIClass;
   DECLARE_STATIC_REQUEST_LOCAL(SystemlibSessionInstance, s_obj);
-
-  const Func *m_ctor;
-  const Func *m_open, *m_close;
-  const Func *m_read, *m_write;
-  const Func *m_destroy, *m_gc;
+  const Func* m_ctor;
+  LowPtr<const Func> m_open, m_close;
+  LowPtr<const Func> m_read, m_write;
+  LowPtr<const Func> m_destroy, m_gc;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

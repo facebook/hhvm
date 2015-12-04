@@ -171,6 +171,13 @@ struct APCHandle {
   void setSerializedArray() { m_flags |= FSerializedArray; }
   void setAPCCollection() { m_flags |= FAPCCollection; }
 
+  bool isPersistentObj() const { return m_flags & FPersistentObj; }
+  bool hasWakeup() const { return (m_flags & FObjNoWakeup) == 0; }
+  bool isFastObjInit() const { return m_flags & FFastObjInit; }
+  void setPersistentObj() { m_flags |= FPersistentObj; }
+  void setNoWakeup() { m_flags |= FObjNoWakeup; }
+  void setFastObjInit() { m_flags |= FFastObjInit; }
+
   /*
    * If true, this APCHandle is not using reference counting.
    */
@@ -190,6 +197,9 @@ private:
   constexpr static uint8_t FPacked          = 1 << 2;
   constexpr static uint8_t FUncounted       = 1 << 3;
   constexpr static uint8_t FAPCCollection   = 1 << 4;
+  constexpr static uint8_t FPersistentObj   = 1 << 5;
+  constexpr static uint8_t FObjNoWakeup     = 1 << 6;
+  constexpr static uint8_t FFastObjInit     = 1 << 7;
 
 private:
   void atomicIncRef() const;

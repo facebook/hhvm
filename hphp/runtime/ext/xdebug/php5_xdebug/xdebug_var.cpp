@@ -895,6 +895,7 @@ void xdebug_var_export_fancy(
     sb.printf(" <i>(length=%d)</i>", str.size());
     break;
   }
+  case KindOfPersistentArray:
   case KindOfArray: {
     auto const& arr = v.toCArrRef();
 
@@ -1030,11 +1031,13 @@ void xdebug_var_export_fancy(
     }
     break;
   }
-  default:
+  case KindOfClass:
+  case KindOfResource:
+  case KindOfRef:
     not_reached();
   }
 
-  if (v.getType() != KindOfArray && v.getType() != KindOfObject) {
+  if (!isArrayType(v.getType()) && v.getType() != KindOfObject) {
     sb.append('\n');
   }
 }

@@ -1,0 +1,4 @@
+Fatal error: Uncaught exception 'Exception' with message 'Throwing from a delegate generator is not currently supported in HHVM' in %s:17
+Stack trace:
+#0 %s(17): Generator->throw()
+#1 {main}

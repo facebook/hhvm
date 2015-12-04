@@ -165,6 +165,9 @@ public:
   void setHHFile();
   bool isHHFile() const { return m_isHHFile; }
 
+  void setUseStrictTypes();
+  bool useStrictTypes() const { return m_useStrictTypes; }
+
   void setPreloadPriority(int p) { m_preloadPriority = p; }
   int preloadPriority() const { return m_preloadPriority; }
 
@@ -190,6 +193,7 @@ private:
   MD5 m_md5;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
+  unsigned m_useStrictTypes : 1;
   int m_preloadPriority;
 
   std::vector<int> m_attributes;

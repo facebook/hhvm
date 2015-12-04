@@ -416,6 +416,7 @@ const std::string mangleUnitPHP7Options() {
       (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
     + (RuntimeOption::PHP7_LTR_assign ? '1' : '0')
     + (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0')
+    + (RuntimeOption::PHP7_ScalarTypes ? '1' : '0')
     + (RuntimeOption::PHP7_UVS ? '1' : '0');
   return s;
 }

@@ -41,6 +41,7 @@
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
 #ifdef ENABLE_ZEND_COMPAT
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
@@ -102,15 +103,23 @@ template<class F> void scanHeader(const Header* h, F& mark) {
 }
 
 template<class F> void ObjectData::scan(F& mark) const {
-  if (getAttribute(HasNativeData)) {
-    // [NativeNode][NativeData][ObjectData][props]
-    Native::nativeDataScan(this, mark);
-  } else if (m_hdr.kind == HeaderKind::ResumableObj) {
+  if (m_hdr.kind == HeaderKind::ResumableObj) {
     // scan the frame locals, iterators, and Resumable
     auto r = Resumable::FromObj(this);
     auto frame = reinterpret_cast<const TypedValue*>(r) -
                  r->actRec()->func()->numSlotsInFrame();
     mark(frame, uintptr_t(this) - uintptr_t(frame));
+  } else if (m_hdr.kind == HeaderKind::WaitHandle) {
+    // scan C++ properties after [ObjectData] header
+    mark(this + 1, asio_object_size(this) - sizeof(*this));
+  } else if (m_hdr.kind == HeaderKind::AwaitAllWH) {
+    auto wh = static_cast<const c_AwaitAllWaitHandle*>(this);
+    wh->scanChildren(mark);
+  }
+
+  if (getAttribute(HasNativeData)) {
+    // [NativeNode][NativeData][ObjectData][props]
+    Native::nativeDataScan(this, mark);
   }
 
   auto props = propVec();
@@ -118,17 +127,13 @@ template<class F> void ObjectData::scan(F& mark) const {
     // [ObjectData][C++ fields][props]
     // TODO t6169228 virtual call for exact marking
     mark(this + 1, uintptr_t(props) - uintptr_t(this + 1));
-    if (m_hdr.kind == HeaderKind::AwaitAllWH) {
-      auto wh = static_cast<const c_AwaitAllWaitHandle*>(this);
-      wh->scanChildren(mark);
-    }
   }
   for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {
     mark(props[i]);
   }
   if (getAttribute(HasDynPropArr)) {
     // nb: dynamic property arrays are in ExecutionContext::dynPropTable,
-    // which is not marked as a root. Mark the arry when scanning the object.
+    // which is not marked as a root. Mark the array when scanning the object.
     mark.implicit(g_context->dynPropTable[this].arr());
   }
 }

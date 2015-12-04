@@ -721,6 +721,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfDouble:
   case KindOfStaticString:
   case KindOfString:
+  case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:
   case KindOfResource:
@@ -761,6 +762,7 @@ static std::string toStringElm(const TypedValue* tv) {
            << "\"" << (truncated ? "..." : "");
       }
       continue;
+    case KindOfPersistentArray:
     case KindOfArray:
       assert(tv->m_data.parr->checkCount());
       os << tv->m_data.parr;
@@ -965,7 +967,7 @@ TypedValue* Stack::frameStackBase(const ActRec* fp) {
 
 TypedValue* Stack::resumableStackBase(const ActRec* fp) {
   assert(fp->resumed());
-  auto const sfp = fp->sfp();
+  auto sfp = fp->sfp();
   if (sfp) {
     // The non-reentrant case occurs when a non-async or async generator is
     // resumed via ContEnter or ContRaise opcode. These opcodes leave a single
@@ -973,6 +975,14 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
     // find the caller's FP, compensate for its locals and iterators, and then
     // we've found the base of the generator's stack.
     assert(fp->func()->isGenerator());
+
+    // Since resumables are stored on the heap, we need to go back in the
+    // callstack a bit to find the base of the stack. Unfortunately, due to
+    // generator delegation, this can be pretty far back...
+    while (sfp->func()->isGenerator()) {
+      sfp = sfp->sfp();
+    }
+
     return (TypedValue*)sfp - sfp->func()->numSlotsInFrame();
   } else {
     // The reentrant case occurs when asio scheduler resumes an async function
@@ -982,6 +992,34 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
     assert(fp->func()->isAsync());
     return g_context.getNoCheck()->m_nestedVMs.back().sp;
   }
+}
+
+// In PHP7 the caller specifies if parameter type-checking is strict in the
+// callee. NB: HH files ignore this preference and always use strict checking,
+// except in systemlib. Calls originating in systemlib are always strict.
+namespace {
+bool callUsesStrictTypes() {
+  if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
+    return true;
+  }
+  if (!vmfp()) {
+    return true;
+  }
+  auto func = vmfp()->func();
+  auto unit = func->unit();
+  return func->isBuiltin() || unit->useStrictTypes();
+}
+
+bool builtinCallUsesStrictTypes(const Unit* caller) {
+  if (!RuntimeOption::PHP7_ScalarTypes || RuntimeOption::EnableHipHopSyntax) {
+    return false;
+  }
+  return caller->useStrictTypes() && !caller->isHHFile();
+}
+
+void setTypesFlag(ActRec* ar) {
+  if (!callUsesStrictTypes()) ar->setUseWeakTypes();
+}
 }
 
 //=============================================================================
@@ -1704,7 +1742,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
     stack.pushArrayNoRc(argArray.detach());
   } else {
     if (nregular == 0
-        && args.m_type == KindOfArray
+        && isArrayType(args.m_type)
         && args.m_data.parr->isVectorData()) {
       assert(stack.top() == (void*) ar);
       stack.pushStringNoRc(invName);
@@ -1796,7 +1834,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       // prepareFuncEntry.  Since the stack state is going to be considered
       // "trimmed" over there, we need to null the extraArgs/varEnv field if
       // the function could read it.
-      ar->initNumArgs(nargs);
+      ar->setNumArgs(nargs);
       ar->trashVarEnv();
       if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
         ar->setVarEnv(nullptr);
@@ -1819,7 +1857,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
 
     // the extra args are not used in the function; no reason to add them
     // to the stack
-    ar->initNumArgs(f->numParams());
+    ar->setNumArgs(f->numParams());
     return true;
   }
 
@@ -1862,13 +1900,13 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       assert(ad->hasExactlyOneRef());
       stack.pushArrayNoRc(ad);
     }
-    ar->initNumArgs(nargs);
+    ar->setNumArgs(nargs);
     ar->setExtraArgs(extraArgs);
   } else {
     assert(hasVarParam);
     if (nparams == 0
         && nextra_regular == 0
-        && args.m_type == KindOfArray
+        && isArrayType(args.m_type)
         && args.m_data.parr->isVectorData()) {
       stack.pushArray(args.m_data.parr);
     } else {
@@ -1895,7 +1933,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       assert(ad->hasExactlyOneRef());
       stack.pushArrayNoRc(ad);
     }
-    ar->initNumArgs(f->numParams());
+    ar->setNumArgs(f->numParams());
   }
   return true;
 }
@@ -2117,7 +2155,8 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
                                   Class* cls /* = NULL */,
                                   VarEnv* varEnv /* = NULL */,
                                   StringData* invName /* = NULL */,
-                                  InvokeFlags flags /* = InvokeNormal */) {
+                                  InvokeFlags flags /* = InvokeNormal */,
+                                  bool useWeakTypes /* = false */) {
   assert(retptr);
   assert(f);
   // If f is a regular function, this_ and cls must be NULL
@@ -2215,6 +2254,11 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
       return;
     }
   }
+  if (useWeakTypes) {
+    ar->setUseWeakTypes();
+  } else {
+    setTypesFlag(ar);
+  }
 
   TypedValue retval;
   {
@@ -2250,7 +2294,8 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
                                      void* thisOrCls,
                                      StringData* invName,
                                      int argc,
-                                     const TypedValue* argv) {
+                                     const TypedValue* argv,
+                                     bool useWeakTypes /* = false */) {
   assert(retptr);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
@@ -2295,6 +2340,11 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
     ar->setMagicDispatch(invName);
   } else {
     ar->trashVarEnv();
+  }
+  if (useWeakTypes) {
+    ar->setUseWeakTypes();
+  } else {
+    setTypesFlag(ar);
   }
 
 #ifdef HPHP_TRACE
@@ -2378,7 +2428,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
                                             ObjectData* freeObj,
                                             ObjectData* exception) {
   assert(exception);
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+  assert(exception->instanceof(SystemLib::s_ThrowableClass));
   assert(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
@@ -3603,7 +3653,7 @@ OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
   ArrayData* arr;
   TypedValue* fr = frame_local(vmfp(), local);
 
-  if (LIKELY(fr->m_type == KindOfArray)) {
+  if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
   } else {
     capacity = (capacity ? capacity : MixedArray::SmallSize);
@@ -3652,7 +3702,7 @@ OPTBLD_INLINE void iopAddElemC(IOP_ARGS) {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (c3->m_type != KindOfArray) {
+  if (!isArrayType(c3->m_type)) {
     raise_error("AddElemC: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
@@ -3668,7 +3718,7 @@ OPTBLD_INLINE void iopAddElemV(IOP_ARGS) {
   Ref* r1 = vmStack().topV();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (c3->m_type != KindOfArray) {
+  if (!isArrayType(c3->m_type)) {
     raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
@@ -3683,7 +3733,7 @@ OPTBLD_INLINE void iopAddElemV(IOP_ARGS) {
 OPTBLD_INLINE void iopAddNewElemC(IOP_ARGS) {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
-  if (c2->m_type != KindOfArray) {
+  if (!isArrayType(c2->m_type)) {
     raise_error("AddNewElemC: $2 must be an array");
   }
   cellAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
@@ -3693,7 +3743,7 @@ OPTBLD_INLINE void iopAddNewElemC(IOP_ARGS) {
 OPTBLD_INLINE void iopAddNewElemV(IOP_ARGS) {
   Ref* r1 = vmStack().topV();
   Cell* c2 = vmStack().indC(1);
-  if (c2->m_type != KindOfArray) {
+  if (!isArrayType(c2->m_type)) {
     raise_error("AddNewElemV: $2 must be an array");
   }
   cellAsVariant(*c2).asArrRef().appendRef(tvAsVariant(r1));
@@ -4057,6 +4107,7 @@ OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
       cls = Unit::lookupClass(ne);
       return cls && interface_supports_string(cls->name());
 
+    case KindOfPersistentArray:
     case KindOfArray:
       cls = Unit::lookupClass(ne);
       return cls && interface_supports_array(cls->name());
@@ -4314,6 +4365,7 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
             case KindOfBoolean:
             case KindOfStaticString:
             case KindOfString:
+            case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
             case KindOfResource:
@@ -4326,8 +4378,9 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
         }
 
         case KindOfArray:
-          match = SwitchMatch::DEFAULT;
           tvDecRef(val);
+        case KindOfPersistentArray:
+          match = SwitchMatch::DEFAULT;
           return;
 
         case KindOfObject:
@@ -4508,9 +4561,11 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   // in that case if necessary.
   frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retval);
 
-  // If in an eagerly executed async function, wrap the return value
-  // into succeeded StaticWaitHandle.
-  if (UNLIKELY(!vmfp()->resumed() && vmfp()->func()->isAsyncFunction())) {
+  // If in an eagerly executed async function, not called by
+  // FCallAwait, wrap the return value into succeeded
+  // StaticWaitHandle.
+  if (UNLIKELY(vmfp()->mayNeedStaticWaitHandle() &&
+               vmfp()->func()->isAsyncFunction())) {
     auto const& retvalCell = *tvAssertCell(&retval);
     // Heads up that we're assuming CreateSucceeded can't throw, or we won't
     // decref the return value.  (It can't right now.)
@@ -4532,6 +4587,9 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     vmStack().ret();
     *vmStack().topTV() = retval;
     assert(vmStack().topTV() == &vmfp()->m_r);
+    // In case we were called by a jitted FCallAwait, let it know
+    // that we finished eagerly.
+    vmStack().topTV()->m_aux.u_fcallAwaitFlag = 0;
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
@@ -4585,9 +4643,8 @@ OPTBLD_INLINE void iopUnwind(IOP_ARGS) {
 OPTBLD_INLINE void iopThrow(IOP_ARGS) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject ||
-      !c1->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
-    raise_error("Exceptions must be valid objects derived from the "
-                "Exception base class");
+      !c1->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
+    raise_error("Exceptions must implement the Throwable interface.");
   }
 
   Object obj(c1->m_data.pobj);
@@ -5956,6 +6013,7 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
   ar->m_func = func;
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  setTypesFlag(ar);
   return ar;
 }
 
@@ -5986,8 +6044,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
     return;
   }
 
-  if ((c1->m_type == KindOfArray) ||
-      isStringType(c1->m_type)) {
+  if (isArrayType(c1->m_type) || isStringType(c1->m_type)) {
     // support:
     //   array($instance, 'method')
     //   array('Class', 'method'),
@@ -6009,7 +6066,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
       /* warn */ false
     );
     if (func == nullptr) {
-      if (origCell.m_type == KindOfArray) {
+      if (isArrayType(origCell.m_type)) {
         raise_error("Invalid callable (array)");
       } else {
         assert(isStringType(origCell.m_type));
@@ -6034,8 +6091,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
     }
     if (origCell.m_type == KindOfArray) {
       decRefArr(origCell.m_data.parr);
-    } else {
-      assert(isStringType(origCell.m_type));
+    } else if (origCell.m_type == KindOfString) {
       decRefStr(origCell.m_data.pstr);
     }
     return;
@@ -6107,6 +6163,7 @@ void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
     ar->trashVarEnv();
     decRefStr(name);
   }
+  setTypesFlag(ar);
 }
 
 void fPushNullObjMethod(int numArgs) {
@@ -6127,7 +6184,7 @@ static void throw_call_non_object(const char* methodName,
   if (RuntimeOption::ThrowExceptionOnBadMethodCall) {
     SystemLib::throwBadMethodCallExceptionObject(String(msg));
   }
-  throw FatalErrorException(msg.c_str());
+  raise_fatal_error(msg.c_str());
 }
 
 OPTBLD_INLINE void iopFPushObjMethod(IOP_ARGS) {
@@ -6219,6 +6276,7 @@ void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
     ar->trashVarEnv();
     decRefStr(const_cast<StringData*>(name));
   }
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void iopFPushClsMethod(IOP_ARGS) {
@@ -6292,6 +6350,7 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
@@ -6319,6 +6378,7 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void iopDecodeCufIter(IOP_ARGS) {
@@ -6379,6 +6439,7 @@ OPTBLD_INLINE void iopFPushCufIter(IOP_ARGS) {
   } else {
     ar->trashVarEnv();
   }
+  setTypesFlag(ar);
 }
 
 OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
@@ -6422,6 +6483,7 @@ OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
   } else {
     ar->trashVarEnv();
   }
+  setTypesFlag(ar);
   tvRefcountedDecRef(&func);
 }
 
@@ -6611,7 +6673,8 @@ OPTBLD_INLINE void iopFCall(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
-  auto const ar = arFromInstr(vmStack().top(), pc- encoded_op_size(Op::FCallD));
+  auto const ar = arFromInstr(vmStack().top(),
+                              pc - encoded_op_size(Op::FCallD));
   UNUSED auto numArgs = decode_iva(pc);
   UNUSED auto clsName = decode_litstr(pc);
   UNUSED auto funcName = decode_litstr(pc);
@@ -6625,11 +6688,31 @@ OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
   doFCall(ar, pc);
 }
 
+OPTBLD_INLINE void iopFCallAwait(IOP_ARGS) {
+  auto const ar = arFromInstr(vmStack().top(),
+                              pc - encoded_op_size(Op::FCallAwait));
+  UNUSED auto numArgs = decode_iva(pc);
+  UNUSED auto clsName = decode_litstr(pc);
+  UNUSED auto funcName = decode_litstr(pc);
+
+  if (!RuntimeOption::EvalJitEnableRenameFunction &&
+      !(ar->m_func->attrs() & AttrInterceptable)) {
+    assert(ar->m_func->name()->isame(funcName));
+  }
+  assert(numArgs == ar->numArgs());
+  checkStack(vmStack(), ar->m_func, 0);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
+  ar->setFCallAwait();
+  doFCall(ar, pc);
+}
+
 OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
   auto numArgs = decode_iva(pc);
   auto numNonDefault = decode_iva(pc);
   auto id = decode<Id>(pc);
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
+  auto unit = vmfp()->func()->unit();
+  auto strict = builtinCallUsesStrictTypes(unit);
   Func* func = Unit::lookupFunc(ne);
   if (func == nullptr) {
     raise_error("Call to undefined function %s()",
@@ -6638,10 +6721,10 @@ OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
-  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
+  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func, strict)) {
     if (func->hasVariadicCaptureParam()) {
       assertx(numArgs > 0);
-      assertx(args[1-numArgs].m_type == KindOfArray);
+      assertx(isArrayType(args[1-numArgs].m_type));
     }
     Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
   } else {
@@ -6689,7 +6772,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
         Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
-        c1->m_type = KindOfArray;
+        c1->m_type = KindOfPersistentArray;
         c1->m_data.parr = staticEmptyArray();
         tvRefcountedDecRef(&tmp);
         break;
@@ -6838,7 +6921,7 @@ OPTBLD_INLINE void iopWIterInitK(IOP_ARGS) {
 inline bool initIteratorM(Iter* it, Offset offset, Ref* r1,
                           TypedValue *val, TypedValue *key) {
   TypedValue* rtv = r1->m_data.pref->tv();
-  if (rtv->m_type == KindOfArray) {
+  if (isArrayType(rtv->m_type)) {
     return new_miter_array_key(it, r1->m_data.pref, val, key);
   }
   if (rtv->m_type == KindOfObject)  {
@@ -7249,8 +7332,11 @@ OPTBLD_INLINE void iopVerifyParamType(IOP_ARGS) {
   assert(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
+  bool useStrictTypes =
+    func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
+    !vmfp()->useWeakTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyParam(frame_local(vmfp(), paramId), func, paramId);
+    tc.verifyParam(frame_local(vmfp(), paramId), func, paramId, useStrictTypes);
   }
 }
 
@@ -7261,8 +7347,9 @@ OPTBLD_INLINE void implVerifyRetType(PC& pc) {
 
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
+  bool useStrictTypes = func->unit()->useStrictTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyReturn(vmStack().topTV(), func);
+    tc.verifyReturn(vmStack().topTV(), func, useStrictTypes);
   }
 }
 
@@ -7326,10 +7413,10 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   auto const cls = Unit::loadClass(clsName)->rescope(
     const_cast<Class*>(vmfp()->m_func->cls())
   );
-  auto obj = newInstance(cls);
-  Native::data<Closure>(obj)->init(numArgs, vmfp(), vmStack().top());
+  auto const cl = static_cast<c_Closure*>(newInstance(cls));
+  cl->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);
-  vmStack().pushObjectNoRc(obj);
+  vmStack().pushObjectNoRc(cl);
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {
@@ -7387,16 +7474,8 @@ OPTBLD_INLINE TCA iopCreateCont(IOP_ARGS) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void contEnterImpl(PC& pc) {
-
-  // The stack must have one cell! Or else resumableStackBase() won't work!
-  assert(vmStack().top() + 1 ==
-         (TypedValue*)vmfp() - vmfp()->m_func->numSlotsInFrame());
-
-  // Do linkage of the generator's AR.
-  assert(vmfp()->hasThis());
-  auto const gen = this_base_generator(vmfp());
-  assert(gen->getState() == BaseGenerator::State::Running);
+OPTBLD_INLINE void moveProgramCounterIntoGenerator(PC &pc, BaseGenerator* gen) {
+  assert(gen->isRunning());
   ActRec* genAR = gen->actRec();
   genAR->setReturn(vmfp(), pc, genAR->func()->isAsync() ?
     mcg->tx().uniqueStubs.asyncGenRetHelper :
@@ -7407,16 +7486,60 @@ OPTBLD_INLINE void contEnterImpl(PC& pc) {
   assert(genAR->func()->contains(gen->resumable()->resumeOffset()));
   pc = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
   vmpc() = pc;
+}
+
+OPTBLD_INLINE bool tvIsGenerator(TypedValue tv) {
+  return tv.m_type == KindOfObject &&
+         tv.m_data.pobj->instanceof(Generator::getClass());
+}
+
+template<bool recursive>
+OPTBLD_INLINE void contEnterImpl(PC& pc) {
+
+  // The stack must have one cell! Or else resumableStackBase() won't work!
+  assert(vmStack().top() + 1 ==
+         (TypedValue*)vmfp() - vmfp()->m_func->numSlotsInFrame());
+
+  // Do linkage of the generator's AR.
+  assert(vmfp()->hasThis());
+  // `recursive` determines whether we enter just the top generator or whether
+  // we drop down to the lowest running delegate generator. This is useful for
+  // ContRaise, which should throw from the context of the lowest generator.
+  if(!recursive || vmfp()->getThis()->getVMClass() != Generator::getClass()) {
+    moveProgramCounterIntoGenerator(pc, this_base_generator(vmfp()));
+  } else {
+    // TODO(https://github.com/facebook/hhvm/issues/6040)
+    // Implement throwing from delegate generators.
+    assert(vmfp()->getThis()->getVMClass() == Generator::getClass());
+    auto gen = this_generator(vmfp());
+    if (gen->m_delegate.m_type != KindOfNull) {
+      SystemLib::throwExceptionObject("Throwing from a delegate generator is "
+          "not currently supported in HHVM");
+    }
+    moveProgramCounterIntoGenerator(pc, gen);
+  }
+
   EventHook::FunctionResumeYield(vmfp());
 }
 
 OPTBLD_INLINE void iopContEnter(IOP_ARGS) {
-  contEnterImpl(pc);
+  contEnterImpl<false>(pc);
 }
 
 OPTBLD_INLINE void iopContRaise(IOP_ARGS) {
-  contEnterImpl(pc);
+  contEnterImpl<true>(pc);
   iopThrow(pc);
+}
+
+OPTBLD_INLINE void moveProgramCounterToCaller(PC& pc) {
+  auto fp = vmfp();
+  // Grab caller info from ActRec.
+  ActRec* sfp = fp->sfp();
+  Offset soff = fp->m_soff;
+
+  // Return control to the next()/send()/raise() caller.
+  vmfp() = sfp;
+  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
@@ -7451,13 +7574,7 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
     }
   }
 
-  // Grab caller info from ActRec.
-  ActRec* sfp = fp->sfp();
-  Offset soff = fp->m_soff;
-
-  // Return control to the next()/send()/raise() caller.
-  vmfp() = sfp;
-  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
+  moveProgramCounterToCaller(pc);
 
   return jitReturnPost(jitReturn);
 }
@@ -7475,6 +7592,190 @@ OPTBLD_INLINE TCA iopYieldK(IOP_ARGS) {
   return yield(pc, &key, value);
 }
 
+OPTBLD_INLINE bool typeIsValidGeneratorDelegate(DataType type) {
+  return type == KindOfArray           ||
+         type == KindOfPersistentArray ||
+         type == KindOfObject;
+}
+
+OPTBLD_INLINE void iopContAssignDelegate(IOP_ARGS) {
+  auto param = *vmStack().topC();
+  vmStack().discard();
+
+  auto itId = decode_ia(pc);
+
+  auto gen = frame_generator(vmfp());
+  auto iter = frame_iter(vmfp(), itId);
+
+  if (UNLIKELY(!typeIsValidGeneratorDelegate(param.m_type))) {
+    tvRefcountedDecRef(param);
+    SystemLib::throwErrorObject(
+      "Can use \"yield from\" only with arrays and Traversables"
+    );
+  }
+
+  // We don't use the iterator if we have a delegate generator (as iterators
+  // mess with the internal state of the generator), so short circuit and dont
+  // init our iterator in that case. Otherwise, if we init our iterator and it
+  // returns false then we know that we have an empty iterator (like `[]`) in
+  // which case just set our delegate to Null so that ContEnterDelegate and
+  // YieldFromDelegate know something is up.
+  if (tvIsGenerator(param) || iter->init(&param)) {
+    cellSet(param, gen->m_delegate);
+  } else {
+    cellSetNull(gen->m_delegate);
+  }
+  // When using a subgenerator we don't actually read the values of the m_key
+  // and m_value of our frame generator (the delegating generator). The
+  // generator itself is still holding a reference to them though, so null
+  // out the key/value to free the memory.
+  cellSetNull(gen->m_key);
+  cellSetNull(gen->m_value);
+}
+
+OPTBLD_INLINE void iopContEnterDelegate(IOP_ARGS) {
+  // Make sure we have a delegate
+  auto gen = frame_generator(vmfp());
+
+  // Ignore the VM Stack, we want to pass that down from ContEnter
+
+  // ContEnterDelegate doesn't do anything for iterators.
+  if (!tvIsGenerator(gen->m_delegate)) {
+    return;
+  }
+
+  auto delegate = Generator::fromObject(gen->m_delegate.m_data.pobj);
+
+  if (delegate->getState() == BaseGenerator::State::Done) {
+    // If our generator finished earlier (or if there was nothing to do) just
+    // continue on and let YieldFromDelegate handle cleaning up.
+    return;
+  }
+
+  // A pretty odd if statement, but consider the following situation.
+  // Generators A and B both do `yield from` on a shared delegate generator,
+  // C. When A is first used we autoprime it, and therefore also autoprime C as
+  // well. Then we also autoprime B when it gets used, which advances C past
+  // some perfectly valid data.
+  // Basically this check is to make sure that we autoprime delegate generators
+  // when needed, and not if they're shared.
+  if (gen->getState() == BaseGenerator::State::Priming &&
+      delegate->getState() != BaseGenerator::State::Created) {
+    return;
+  }
+
+  // We're about to resume executing our generator, so make sure we're in the
+  // right state.
+  delegate->preNext(false);
+
+  moveProgramCounterIntoGenerator(pc, delegate);
+  EventHook::FunctionResumeYield(vmfp());
+}
+
+OPTBLD_INLINE TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
+  auto fp = vmfp();
+
+  assert(tvIsGenerator(gen->m_delegate));
+  auto delegate = Generator::fromObject(gen->m_delegate.m_data.pobj);
+
+  if (delegate->getState() == BaseGenerator::State::Done) {
+    // If the generator is done, just copy the return value onto the stack.
+    cellDup(delegate->m_value, *vmStack().topTV());
+    return nullptr;
+  }
+
+  auto jitReturn = jitReturnPre(fp);
+
+  EventHook::FunctionSuspendR(fp, nullptr);
+  // We don't actually want to "yield" anything here. The implementation of
+  // key/current are smart enough to dive into our delegate generator, so
+  // really what we want to do is clean up all of the generator metadata
+  // (state, ressume address, etc) and continue on.
+  assert(gen->isRunning());
+  gen->resumable()->setResumeAddr(nullptr, resumeOffset);
+  gen->setState(BaseGenerator::State::Started);
+
+  moveProgramCounterToCaller(pc);
+
+  return jitReturnPost(jitReturn);
+}
+
+OPTBLD_INLINE TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
+  auto fp = vmfp();
+
+  // For the most part this should never happen, the emitter assigns our
+  // delegate to a non-null value in ContAssignDelegate. The one exception to
+  // this is if we are given an empty iterator, in which case
+  // ContAssignDelegate will remove our delegate and just send us to
+  // YieldFromDelegate to return our null.
+  if (UNLIKELY(gen->m_delegate.m_type == KindOfNull)) {
+    tvWriteNull(vmStack().topTV());
+    return nullptr;
+  }
+
+  // Otherwise, if iteration is finished we just return null.
+  auto arr = it->arr();
+  if (arr.end()) {
+    // Push our null return value onto the stack
+    tvWriteNull(vmStack().topTV());
+    return nullptr;
+  }
+
+  auto jitReturn = jitReturnPre(fp);
+
+  EventHook::FunctionSuspendR(fp, nullptr);
+  auto key = *(arr.first().asTypedValue());
+  auto value = *(arr.second().asTypedValue());
+  gen->yield(resumeOffset, &key, value);
+
+  moveProgramCounterToCaller(pc);
+
+  it->next();
+
+  return jitReturnPost(jitReturn);
+}
+
+OPTBLD_INLINE TCA iopYieldFromDelegate(IOP_ARGS) {
+  auto gen = frame_generator(vmfp());
+
+  auto func = vmfp()->func();
+  PC origPc = pc - encoded_op_size(Op::YieldFromDelegate);
+
+  auto itId = decode_ia(pc);
+  Iter* it = frame_iter(vmfp(), itId);
+
+  auto offset = decode_ba(pc);
+  auto resumePc = origPc + offset;
+  auto resumeOffset = func->unit()->offsetOf(resumePc);
+
+  if (tvIsGenerator(gen->m_delegate)) {
+    return yieldFromGenerator(pc, gen, resumeOffset);
+  } else {
+    return yieldFromIterator(pc, gen, it, resumeOffset);
+  }
+}
+
+OPTBLD_INLINE void iopContUnsetDelegate(IOP_ARGS) {
+  auto itId = decode_ia(pc);
+  auto shouldFreeIter = (bool)decode_iva(pc);
+
+  auto gen = frame_generator(vmfp());
+
+  // The `shouldFreeIter` immediate determines whether we need to call free
+  // on our iterator or not. Normally if we finish executing our yield from
+  // successfully then the implementation of `next` will automatically do it
+  // for us when there aren't any elements left, but if an exception is thrown
+  // then we need to do it manually. We don't use the iterator when the
+  // delegate is a generator though, so even if the param tells us to free it
+  // we should just ignore it.
+  if (UNLIKELY(shouldFreeIter && !tvIsGenerator(gen->m_delegate))) {
+    auto iter = frame_iter(vmfp(), itId);
+    iter->free();
+  }
+
+  cellSetNull(gen->m_delegate);
+}
+
 OPTBLD_INLINE void iopContCheck(IOP_ARGS) {
   auto checkStarted = decode_iva(pc);
   this_base_generator(vmfp())->preNext(checkStarted);
@@ -7490,15 +7791,29 @@ OPTBLD_INLINE void iopContStarted(IOP_ARGS) {
     this_generator(vmfp())->getState() != BaseGenerator::State::Created);
 }
 
+OPTBLD_INLINE Generator *currentlyDelegatedGenerator(Generator *gen) {
+  while(tvIsGenerator(gen->m_delegate)) {
+    gen = Generator::fromObject(gen->m_delegate.m_data.pobj);
+  }
+  return gen;
+}
+
 OPTBLD_INLINE void iopContKey(IOP_ARGS) {
   Generator* cont = this_generator(vmfp());
   if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+
+  // If we are currently delegating to a generator, return its key instead
+  cont = currentlyDelegatedGenerator(cont);
+
   cellDup(cont->m_key, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopContCurrent(IOP_ARGS) {
   Generator* cont = this_generator(vmfp());
   if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+
+  // If we are currently delegating to a generator, return its value instead
+  cont = currentlyDelegatedGenerator(cont);
 
   if(cont->getState() == BaseGenerator::State::Done) {
     vmStack().pushNull();
@@ -7519,7 +7834,7 @@ OPTBLD_INLINE void iopContGetReturn(IOP_ARGS) {
   cellDup(cont->m_value, *vmStack().allocC());
 }
 
-OPTBLD_INLINE void asyncSuspendE(PC& pc, int32_t iters) {
+OPTBLD_INLINE void asyncSuspendE(PC& pc) {
   assert(!vmfp()->resumed());
   assert(vmfp()->func()->isAsyncFunction());
   const auto func = vmfp()->m_func;
@@ -7554,10 +7869,13 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc, int32_t iters) {
   vmStack().ret();
   tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
   assert(vmStack().topTV() == &vmfp()->m_r);
-
+  // In case we were called by a jitted FCallAwait, let it know
+  // that we suspended.
+  vmStack().topTV()->m_aux.u_fcallAwaitFlag = 1;
   // Return control to the caller.
   vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+  pc = LIKELY(vmfp() != nullptr) ?
+    vmfp()->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE void asyncSuspendR(PC& pc) {
@@ -7608,7 +7926,6 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 }
 
 OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
-  auto iters = decode_iva(pc);
   auto const awaitable = vmStack().topC();
   auto wh = c_WaitHandle::fromCell(awaitable);
   if (UNLIKELY(wh == nullptr)) {
@@ -7639,17 +7956,42 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
     throw Object(wh->getException());
   }
 
-  auto const jitReturn = jitReturnPre(vmfp());
+  return suspendStack(pc);
+}
 
-  if (vmfp()->resumed()) {
-    // suspend resumed execution
-    asyncSuspendR(pc);
-  } else {
+TCA suspendStack(PC &pc) {
+  while (true) {
+    auto const jitReturn = []() {
+      // FixMe: what to do here?
+      try {
+        return jitReturnPre(vmfp());
+      } catch (...) {
+        // We're halfway through a bytecode
+        always_assert(false);
+      }
+    }();
+
+    if (vmfp()->resumed()) {
+      // suspend resumed execution
+      asyncSuspendR(pc);
+      return jitReturnPost(jitReturn);
+    }
+
+    auto const suspendOuter = vmfp()->isFCallAwait();
+    assertx(jitReturn.sfp || !suspendOuter);
+
     // suspend eager execution
-    asyncSuspendE(pc, iters);
-  }
+    asyncSuspendE(pc);
 
-  return jitReturnPost(jitReturn);
+    auto retIp = jitReturnPost(jitReturn);
+    if (!suspendOuter) return retIp;
+    if (retIp) {
+      auto const& us = mcg->tx().uniqueStubs;
+      if (retIp == us.resumeHelper) retIp = us.fcallAwaitSuspendHelper;
+      return retIp;
+    }
+    vmpc() = pc;
+  }
 }
 
 OPTBLD_INLINE void iopWHResult(IOP_ARGS) {
@@ -7709,19 +8051,6 @@ OPTBLD_INLINE void iopInitProp(IOP_ARGS) {
 
   cellDup(*fr, *tvToCell(tv));
   vmStack().popC();
-}
-
-OPTBLD_INLINE void iopStrlen(IOP_ARGS) {
-  TypedValue* subj = vmStack().topTV();
-  if (LIKELY(isStringType(subj->m_type))) {
-    int64_t ans = subj->m_data.pstr->size();
-    tvRefcountedDecRef(subj);
-    subj->m_type = KindOfInt64;
-    subj->m_data.num = ans;
-  } else {
-    Variant ans = HHVM_FN(strlen)(tvAsVariant(subj));
-    tvAsVariant(subj) = ans;
-  }
 }
 
 OPTBLD_INLINE void iopIncStat(IOP_ARGS) {
@@ -8016,6 +8345,7 @@ TCA dispatchImpl() {
       assert(op == OpRetC || op == OpRetV ||                  \
              op == OpAwait || op == OpCreateCont ||           \
              op == OpYield || op == OpYieldK ||               \
+             op == OpYieldFromDelegate ||                     \
              op == OpNativeImpl);                             \
       vmfp() = nullptr;                                       \
       /* We returned from the top VM frame in this nesting level. This means
@@ -8190,8 +8520,6 @@ static void threadLogger(const char* header, const char* msg,
 
 void ExecutionContext::requestInit() {
   assert(SystemLib::s_unit);
-  assert(SystemLib::s_nativeFuncUnit);
-  assert(SystemLib::s_nativeClassUnit);
 
   EnvConstants::requestInit(req::make_raw<EnvConstants>());
   VarEnv::createGlobal();
@@ -8219,14 +8547,16 @@ void ExecutionContext::requestInit() {
     SystemLib::s_unit->merge();
     SystemLib::mergePersistentUnits();
     if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
-    SystemLib::s_nativeFuncUnit->merge();
-    SystemLib::s_nativeClassUnit->merge();
+    if (SystemLib::s_nativeFuncUnit) SystemLib::s_nativeFuncUnit->merge();
+    if (SystemLib::s_nativeClassUnit) SystemLib::s_nativeClassUnit->merge();
   } else {
     // System units are merge only, and everything is persistent.
     assert(SystemLib::s_unit->isEmpty());
     assert(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
-    assert(SystemLib::s_nativeFuncUnit->isEmpty());
-    assert(SystemLib::s_nativeClassUnit->isEmpty());
+    assert(!SystemLib::s_nativeFuncUnit ||
+           SystemLib::s_nativeFuncUnit->isEmpty());
+    assert(!SystemLib::s_nativeClassUnit ||
+           SystemLib::s_nativeClassUnit->isEmpty());
   }
 
   profileRequestStart();

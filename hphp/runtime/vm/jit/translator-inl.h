@@ -136,6 +136,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::CreateCont:
     case Op::Yield:
     case Op::YieldK:
+    case Op::YieldFromDelegate:
     case Op::Await:
     case Op::RetC:
     case Op::RetV:
@@ -167,6 +168,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::FCallUnpack:
     case Op::ContEnter:
     case Op::ContRaise:
+    case Op::ContEnterDelegate:
     case Op::Incl:
     case Op::InclOnce:
     case Op::Req:

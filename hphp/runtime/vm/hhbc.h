@@ -757,6 +757,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
   O(FPassM,          TWO(IVA,MA),      MMANY,           ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
+  O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
@@ -814,6 +815,14 @@ constexpr int32_t kMaxConcatN = 4;
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(Yield,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    CF) \
+  O(ContAssignDelegate,                                                 \
+                     ONE(IA),          ONE(CV),         NOV,        NF) \
+  O(ContEnterDelegate,                                                  \
+                     NA,               ONE(CV),         NOV,        CF) \
+  O(YieldFromDelegate,                                                  \
+                     TWO(IA, BA),      NOV,             ONE(CV),    CF) \
+  O(ContUnsetDelegate,                                                  \
+                     TWO(IA, IVA),     NOV,             NOV,        NF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContStarted,     NA,               NOV,             ONE(CV),    NF) \
@@ -821,7 +830,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContGetReturn,   NA,               NOV,             ONE(CV),    NF) \
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
-  O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    CF) \
+  O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
@@ -1218,6 +1227,7 @@ inline bool isFCallStar(Op opcode) {
   switch (opcode) {
     case Op::FCall:
     case Op::FCallD:
+    case Op::FCallAwait:
     case Op::FCallArray:
     case Op::FCallUnpack:
       return true;

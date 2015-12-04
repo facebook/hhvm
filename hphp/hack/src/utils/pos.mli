@@ -59,14 +59,14 @@ val compare : 'a pos -> 'a pos -> int
 
 (* XXX deprecated: do not use! Talk to @jezng if you are not hack_sgrep and
  * you feel a need to use this. *)
-val pos_start : 'a pos -> Lexing.position
-val pos_end : 'a pos -> Lexing.position
+val pos_start : 'a pos -> File_pos.t
+val pos_end : 'a pos -> File_pos.t
 
 val destruct_range : 'a pos -> (int * int * int * int)
 
 (* XXX deprecated: should only be used by Flow *)
-val make_from_lexing_pos :
-  pos_file:Relative_path.t -> pos_start:Lexing.position ->
-    pos_end:Lexing.position -> t
+val make_from_file_pos :
+  pos_file:Relative_path.t -> pos_start:File_pos.t ->
+    pos_end:File_pos.t -> t
 
 module Map : MapSig with type key = t

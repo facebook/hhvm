@@ -312,6 +312,7 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
     case KindOfStaticString:
     case KindOfString:
       return ElemString<warn, keyType>(tvRef, base, key);
+    case KindOfPersistentArray:
     case KindOfArray:
       return ElemArray<warn, keyType>(base->m_data.parr, key);
     case KindOfObject:
@@ -331,7 +332,7 @@ template <bool warn, KeyType keyType = KeyType::Any>
 inline const TypedValue* Elem(TypedValue& tvRef,
                               TypedValue* base,
                               key_type<keyType> key) {
-  if (LIKELY(base->m_type == KindOfArray)) {
+  if (LIKELY(isArrayType(base->m_type))) {
     return ElemArray<warn, keyType>(base->m_data.parr, key);
   }
   return ElemSlow<warn, keyType>(tvRef, base, key);
@@ -475,6 +476,7 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfStaticString:
     case KindOfString:
       return ElemDString<warn, keyType>(base, key);
+    case KindOfPersistentArray:
     case KindOfArray:
       return ElemDArray<warn, reffy, keyType>(base, key);
     case KindOfObject:
@@ -550,6 +552,7 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfString:
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
       return nullptr;
+    case KindOfPersistentArray:
     case KindOfArray:
       return ElemUArray<keyType>(base, key);
     case KindOfObject:
@@ -646,6 +649,7 @@ inline TypedValue* NewElem(TypedValue& tvRef,
     case KindOfStaticString:
     case KindOfString:
       return NewElemString(tvRef, base);
+    case KindOfPersistentArray:
     case KindOfArray:
       return NewElemArray<reffy>(base);
     case KindOfObject:
@@ -835,8 +839,9 @@ arrayRefShuffle(ArrayData* oldData, ArrayData* newData, TypedValue* base) {
   }
 
   if (setRef) {
-    if (base->m_type == KindOfArray && base->m_data.parr == oldData) {
+    if (isArrayType(base->m_type) && base->m_data.parr == oldData) {
       base->m_data.parr = newData;
+      base->m_type = KindOfArray;
     } else {
       // The base was in a reference that was overwritten by the set operation,
       // so we don't want to store the new ArrayData to it. oldData has already
@@ -888,7 +893,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
   if (key.m_type == KindOfInt64) {
     return SetElemArrayPre<setResult>(a, key.m_data.num, value, copy);
   }
-  if (key.m_type != KindOfArray && key.m_type != KindOfObject) {
+  if (!isArrayType(key.m_type) && key.m_type != KindOfObject) {
     return SetElemArrayPre<setResult>(a, tvAsCVarRef(&key).toInt64(),
                                       value, copy);
   }
@@ -912,7 +917,7 @@ inline void SetElemArray(TypedValue* base, key_type<keyType> key,
                          Cell* value) {
   ArrayData* a = base->m_data.parr;
   bool copy = a->cowCheck() ||
-              (value->m_type == KindOfArray && value->m_data.parr == a);
+              (isArrayType(value->m_type) && value->m_data.parr == a);
 
   auto* newData = SetElemArrayPre<setResult>(a, key, value, copy);
 
@@ -944,6 +949,7 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
     case KindOfStaticString:
     case KindOfString:
       return SetElemString<setResult, keyType>(base, key, value);
+    case KindOfPersistentArray:
     case KindOfArray:
       SetElemArray<setResult, keyType>(base, key, value);
       return nullptr;
@@ -963,7 +969,7 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
 template <bool setResult, KeyType keyType = KeyType::Any>
 inline StringData* SetElem(TypedValue* base, key_type<keyType> key,
                            Cell* value) {
-  if (LIKELY(base->m_type == KindOfArray)) {
+  if (LIKELY(isArrayType(base->m_type))) {
     SetElemArray<setResult, keyType>(base, key, value);
     return nullptr;
   }
@@ -1021,14 +1027,15 @@ inline void SetNewElemString(TypedValue* base, Cell* value) {
  */
 inline void SetNewElemArray(TypedValue* base, Cell* value) {
   base = tvToCell(base);
-  assert(base->m_type == KindOfArray);
+  assert(isArrayType(base->m_type));
   ArrayData* a = base->m_data.parr;
   bool copy = a->cowCheck() ||
-              (value->m_type == KindOfArray && value->m_data.parr == a);
+              (isArrayType(value->m_type) && value->m_data.parr == a);
   ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
   if (a2 != a) {
     auto old = base->m_data.parr;
     base->m_data.parr = a2;
+    base->m_type = KindOfArray;
     old->decRefAndRelease();
   }
 }
@@ -1063,6 +1070,7 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     case KindOfStaticString:
     case KindOfString:
       return SetNewElemString(base, value);
+    case KindOfPersistentArray:
     case KindOfArray:
       return SetNewElemArray(base, value);
     case KindOfObject:
@@ -1133,6 +1141,7 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
       }
       return SetOpElemEmptyish(op, base, key, rhs);
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result;
       result = ElemDArray<MoreWarnings,
@@ -1204,6 +1213,7 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
       }
       return SetOpNewElemEmptyish(op, base, rhs);
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result;
       result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
@@ -1343,6 +1353,7 @@ inline void IncDecElem(
       }
       return IncDecElemEmptyish(op, base, key, dest);
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       auto result =
         ElemDArray<MoreWarnings, /* reffy */ false, KeyType::Any>(base, key);
@@ -1415,6 +1426,7 @@ inline void IncDecNewElem(
       }
       return IncDecNewElemEmptyish(op, base, dest);
 
+    case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
       assert(result->m_type == KindOfNull);
@@ -1486,6 +1498,7 @@ inline void UnsetElemArray(TypedValue* base, key_type<keyType> key) {
   if (a2 != a) {
     auto old = base->m_data.parr;
     base->m_data.parr = a2;
+    base->m_type = KindOfArray;
     old->decRefAndRelease();
  }
 }
@@ -1511,6 +1524,7 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
       raise_error(Strings::CANT_UNSET_STRING);
       return;
 
+    case KindOfPersistentArray:
     case KindOfArray:
       UnsetElemArray<keyType>(base, key);
       return;
@@ -1537,9 +1551,8 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
  */
 template <KeyType keyType = KeyType::Any>
 inline void UnsetElem(TypedValue* base, key_type<keyType> key) {
-  if (LIKELY(base->m_type == KindOfArray)) {
-    UnsetElemArray<keyType>(base, key);
-    return;
+  if (LIKELY(isArrayType(base->m_type))) {
+    return UnsetElemArray<keyType>(base, key);
   }
   return UnsetElemSlow<keyType>(base, key);
 }
@@ -1586,7 +1599,7 @@ bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
       }
       int64_t n;
       badKey = !is_strictly_integer(str, len, n);
-    } else if (tv.m_type == KindOfArray || tv.m_type == KindOfObject ||
+    } else if (isArrayType(tv.m_type) || tv.m_type == KindOfObject ||
                tv.m_type == KindOfResource) {
       badKey = true;
     }
@@ -1641,6 +1654,7 @@ NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
     case KindOfString:
       return IssetEmptyElemString<useEmpty, keyType>(base, key);
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return IssetEmptyElemArray<useEmpty, keyType>(base, key);
 
@@ -1659,7 +1673,7 @@ NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
  */
 template <bool useEmpty, KeyType keyType = KeyType::Any>
 bool IssetEmptyElem(TypedValue* base, key_type<keyType> key) {
-  if (LIKELY(base->m_type == KindOfArray)) {
+  if (LIKELY(isArrayType(base->m_type))) {
     return IssetEmptyElemArray<useEmpty, keyType>(base, key);
   }
   return IssetEmptyElemSlow<useEmpty, keyType>(base, key);
@@ -1721,8 +1735,8 @@ TypedValue* propPre(TypedValue& tvRef, TypedValue* base) {
       }
       return propPreStdclass<warn, define>(tvRef, base);
 
+    case KindOfPersistentArray:
     case KindOfArray:
-
       return propPreNull<warn>(tvRef);
 
     case KindOfObject:
@@ -1751,6 +1765,7 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
     case KindOfResource:
     case KindOfStaticString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
       tvWriteNull(&tvRef);
       raise_notice("Cannot access property on non-object");
@@ -1885,6 +1900,7 @@ inline void SetProp(Class* ctx, TypedValue* base, key_type<keyType> key,
 
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
       return SetPropNull<setResult>(val);
@@ -1963,6 +1979,7 @@ inline TypedValue* SetOpProp(TypedValue& tvRef,
 
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
       return SetOpPropNull(tvRef);
@@ -2044,6 +2061,7 @@ inline void IncDecProp(
 
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
       return IncDecPropNull(dest);

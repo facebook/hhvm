@@ -15,9 +15,12 @@
 */
 #include "hphp/runtime/base/exceptions.h"
 
+#include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/imarker.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -159,5 +162,23 @@ void throw_not_supported(const char* feature, const char* reason) {
   throw ExtendedException("%s is not supported: %s", feature, reason);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+ATTRIBUTE_NORETURN
+void raise_fatal_error(const char* msg,
+                       const Array& bt /* = null_array */,
+                       bool recoverable /* = false */,
+                       bool silent /* = false */,
+                       bool throws /* = true */) {
+  if (RuntimeOption::PHP7_EngineExceptions && throws) {
+    VMRegAnchor _;
+    SystemLib::throwErrorObject(Variant(msg));
+  }
+  auto ex = bt.isNull() && !recoverable
+    ? FatalErrorException(msg)
+    : FatalErrorException(msg, bt, recoverable);
+  ex.setSilent(silent);
+  throw ex;
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

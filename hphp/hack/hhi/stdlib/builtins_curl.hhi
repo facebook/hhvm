@@ -252,6 +252,7 @@ function curl_error($ch);
 function curl_strerror($code);
 function curl_close($ch);
 function curl_multi_init();
+function curl_multi_strerror($errornum);
 function curl_multi_add_handle($mh, $ch);
 function curl_multi_remove_handle($mh, $ch);
 function curl_multi_exec($mh, &$still_running);

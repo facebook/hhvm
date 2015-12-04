@@ -47,6 +47,7 @@
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/class_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/yield_from_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
 
@@ -86,6 +87,7 @@
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
 #include "hphp/compiler/statement/use_declaration_statement_fragment.h"
+#include "hphp/compiler/statement/declare_statement.h"
 
 #include "hphp/compiler/analysis/function_scope.h"
 
@@ -99,6 +101,7 @@
 
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/annot-type.h"
+#include "hphp/system/systemlib.h"
 
 #define NEW_EXP0(cls)                                           \
   std::make_shared<cls>(BlockScopePtr(),                        \
@@ -172,7 +175,8 @@ Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false), m_nsState(SeenNothing),
-      m_nsAliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
+      m_nsAliasTable(getAutoAliasedClasses(),
+                     [&] { return getAliasFlags(); }) {
   auto const md5str = mangleUnitMd5(scanner.getMd5());
   MD5 md5 = MD5(md5str.c_str());
 
@@ -202,6 +206,12 @@ bool Parser::parse() {
     }
     if (scanner().isHHFile()) {
       m_file->setHHFile();
+      m_file->setUseStrictTypes();
+    }
+    // Default to strict types in force_hh mode and when not using PHP 7 scalar
+    // types.
+    if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
+      m_file->setUseStrictTypes();
     }
     return true;
   } catch (const ParseTimeFatalException& e) {
@@ -533,7 +543,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
       }
       // Auto import a few functions from the HH namespace
       // TODO(#4245628): merge those into m_fnAliasTable
-      if (isAutoAliasOn() &&
+      if (getAliasFlags() & AliasFlags::HH &&
           (stripped == "fun" ||
            stripped == "meth_caller" ||
            stripped == "class_meth" ||
@@ -1356,21 +1366,23 @@ void Parser::checkClassDeclName(const std::string& name) {
   bool isHHNamespace = (strcasecmp(m_namespace.c_str(), "HH") == 0);
   auto const* at = nameToAnnotType(
     [&]() -> const std::string& {
-      if (isHHNamespace ||
-          (m_namespace.empty() && m_scanner.isHHSyntaxEnabled())) {
-        auto const& autoAliases = getAutoAliasedClasses();
+      if (isHHNamespace || (m_namespace.empty() &&
+                            getAliasFlags() != AliasFlags::None)) {
         // For the HH namespace, it's important to apply the Hack auto-
         // alias rules so that we catch cases involving synonyms such
         // as "class Boolean {..}".
-        auto it = autoAliases.find(
+        auto it = getAutoAliasedClasses().find(
           // "self" and "parent" are treated specially when namespace
           // resolution is performed, so when we're in the HH namespace
           // we can't just assume the name starts with "HH\", we need
           // to actually check.
           (isHHNamespace && boost::starts_with(name, "HH\\"))
             ? name.substr(3) : name);
-        if (it != autoAliases.end()) {
-          return it->second;
+        auto const flags = isHHNamespace
+          ? getAliasFlags() | AliasFlags::HH
+          : getAliasFlags();
+        if (it != getAutoAliasedClasses().end() && it->second.flags & flags) {
+          return it->second.name;
         }
       }
       return name;
@@ -1388,7 +1400,8 @@ void Parser::checkClassDeclName(const std::string& name) {
       case AnnotType::Mixed:
       case AnnotType::Number:
       case AnnotType::ArrayKey:
-        if (!m_scanner.isHHSyntaxEnabled() && !isHHNamespace) {
+        if (!RuntimeOption::PHP7_ScalarTypes &&
+            !m_scanner.isHHSyntaxEnabled() && !isHHNamespace) {
           // If HH syntax is not enabled and we're not in the HH namespace,
           // allow Hack-specific reserved names such "string" to be used
           break;
@@ -1915,6 +1928,11 @@ void Parser::onYield(Token &out, Token *expr) {
   out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expPtr);
 }
 
+void Parser::onYieldFrom(Token &out, Token *expr) {
+  setIsGenerator();
+  out->exp = NEW_EXP(YieldFromExpression, expr->exp);
+}
+
 void Parser::onYieldPair(Token &out, Token *key, Token *val) {
   setIsGenerator();
   out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
@@ -2227,6 +2245,22 @@ void Parser::onTypedef(Token& out, const Token& name, const Token& type,
 
 void Parser::onTypeAnnotation(Token& out, const Token& name,
                                           const Token& typeArgs) {
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    auto text = name.text();
+    auto const pos = text.rfind(NAMESPACE_SEP);
+    if (pos != std::string::npos && text.substr(0, pos + 1) != "HH\\" &&
+        text.substr(0, pos + 1) != "\\HH\\") {
+      auto const key = text.substr(pos + 1);
+      auto& table = getAutoAliasedClasses();
+      auto it = table.find(key);
+      if (it != table.end() &&
+          it->second.flags & AliasFlags::PHP7_ScalarTypes) {
+        error("Cannot use '%s' as class name as it is reserved: %s",
+              key.c_str(), getMessage(false,true).c_str());
+        return;
+      }
+    }
+  }
   out.set(name.num(), name.text());
   out.typeAnnotation = std::make_shared<TypeAnnotation>(
     name.text(), typeArgs.typeAnnotation);
@@ -2297,16 +2331,27 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
 
 //////////////////// AliasTable /////////////////////
 
-Parser::AliasTable::AliasTable(const hphp_string_imap<std::string>& autoAliases,
-                               std::function<bool ()> autoOracle)
-  : m_autoAliases(autoAliases), m_autoOracle(autoOracle) {
+Parser::AliasTable::AliasTable(
+  const Parser::AutoAliasMap& aliases,
+  std::function<Parser::AliasFlags ()> autoOracle)
+  : m_autoAliases(aliases)
+  , m_autoOracle(autoOracle) {
   if (!m_autoOracle) {
     setFalseOracle();
   }
 }
 
+const Parser::AutoAliasMap&
+Parser::AliasTable::getAutoAliases() {
+  static AutoAliasMap emptyAliases;
+
+  return m_autoOracle() != AliasFlags::None
+    ? m_autoAliases
+    : emptyAliases;
+}
+
 void Parser::AliasTable::setFalseOracle() {
-  m_autoOracle = [] () { return false; };
+  m_autoOracle = [] () { return AliasFlags::None; };
 }
 
 std::string Parser::AliasTable::getName(const std::string& alias, int line_no) {
@@ -2314,10 +2359,11 @@ std::string Parser::AliasTable::getName(const std::string& alias, int line_no) {
   if (it != m_aliases.end()) {
     return it->second.name;
   }
-  auto autoIt = m_autoAliases.find(alias);
-  if (autoIt != m_autoAliases.end()) {
-    set(alias, autoIt->second, AliasType::AUTO_USE, line_no);
-    return autoIt->second;
+  auto autoIt = getAutoAliases().find(alias);
+  if (autoIt != getAutoAliases().end() &&
+      autoIt->second.flags & m_autoOracle()) {
+    set(alias, autoIt->second.name, AliasType::AUTO_USE, line_no);
+    return autoIt->second.name;
   }
   return "";
 }
@@ -2347,7 +2393,9 @@ bool Parser::AliasTable::isAliased(const std::string& alias) {
   if (t == AliasType::USE || t == AliasType::AUTO_USE) {
     return true;
   }
-  return m_autoOracle() && m_autoAliases.find(alias) != m_autoAliases.end();
+  auto autoIt = getAutoAliases().find(alias);
+  return
+    autoIt != getAutoAliases().end() && autoIt->second.flags & m_autoOracle();
 }
 
 void Parser::AliasTable::set(const std::string& alias,
@@ -2370,10 +2418,24 @@ void Parser::AliasTable::clear() {
 /*
  * We auto-alias classes only on HH mode.
  */
-bool Parser::isAutoAliasOn() {
-  return m_scanner.isHHSyntaxEnabled();
+Parser::AliasFlags Parser::getAliasFlags() {
+  auto flags = AliasFlags::None;
+  if (m_scanner.isHHSyntaxEnabled()) {
+    flags = AliasFlags::HH;
+  }
+
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    flags = flags | AliasFlags::PHP7_ScalarTypes;
+  }
+
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    flags = flags | AliasFlags::PHP7_EngineExceptions;
+  }
+
+  return flags;
 }
 
+namespace {
 /**
  * This is the authoritative map that drives Hack's auto-importation
  * mechanism for core types and classes defined in the HH namespace.
@@ -2385,84 +2447,106 @@ bool Parser::isAutoAliasOn() {
  * Note that this map serves a different purpose than the AnnotType
  * map in "runtime/base/annot-type.cpp".
  */
-hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
-  hphp_string_imap<std::string> autoAliases;
-  typedef AliasTable::AliasEntry AliasEntry;
-  std::vector<AliasEntry> aliases {
-    AliasEntry{"AsyncIterator", "HH\\AsyncIterator"},
-    AliasEntry{"AsyncKeyedIterator", "HH\\AsyncKeyedIterator"},
-    AliasEntry{"Traversable", "HH\\Traversable"},
-    AliasEntry{"Container", "HH\\Container"},
-    AliasEntry{"KeyedTraversable", "HH\\KeyedTraversable"},
-    AliasEntry{"KeyedContainer", "HH\\KeyedContainer"},
-    AliasEntry{"Iterator", "HH\\Iterator"},
-    AliasEntry{"KeyedIterator", "HH\\KeyedIterator"},
-    AliasEntry{"Iterable", "HH\\Iterable"},
-    AliasEntry{"KeyedIterable", "HH\\KeyedIterable"},
-    AliasEntry{"Collection", "HH\\Collection"},
-    AliasEntry{"Vector", "HH\\Vector"},
-    AliasEntry{"Map", "HH\\Map"},
-    AliasEntry{"Set", "HH\\Set"},
-    AliasEntry{"Pair", "HH\\Pair"},
-    AliasEntry{"ImmVector", "HH\\ImmVector"},
-    AliasEntry{"ImmMap", "HH\\ImmMap"},
-    AliasEntry{"ImmSet", "HH\\ImmSet"},
-    AliasEntry{"InvariantException", "HH\\InvariantException"},
-    AliasEntry{"IMemoizeParam", "HH\\IMemoizeParam"},
-    AliasEntry{"Shapes", "HH\\Shapes"},
-    AliasEntry{"TypeStructureKind", "HH\\TypeStructureKind"},
-    AliasEntry{"TypeStructure", "HH\\TypeStructure"},
+Parser::AutoAliasMap getAutoAliasedClassesHelper() {
+  using AutoAlias  = Parser::AliasTable::AutoAlias;
+  using AliasFlags = Parser::AliasTable::AliasFlags;
+#define ALIAS(alias, name, flags) {alias, AutoAlias{name, flags}}
+#define HH_TYPE(name, flags) \
+  ALIAS(#name, "HH\\" #name, AliasFlags::HH | flags)
+#define HH_ONLY_TYPE(name) HH_TYPE(name, AliasFlags::None)
+#define HH_ALIAS(alias, name) \
+  ALIAS(#alias, "HH\\" #name, AliasFlags::HH)
+#define SCALAR_TYPE(name) HH_TYPE(name, AliasFlags::PHP7_ScalarTypes)
+#define PHP7_TYPE(name, option) \
+  ALIAS(#name, "__SystemLib\\" #name, AliasFlags::option)
+  Parser::AutoAliasMap aliases {
+    HH_ONLY_TYPE(AsyncIterator),
+    HH_ONLY_TYPE(AsyncKeyedIterator),
+    HH_ONLY_TYPE(Traversable),
+    HH_ONLY_TYPE(Container),
+    HH_ONLY_TYPE(KeyedTraversable),
+    HH_ONLY_TYPE(KeyedContainer),
+    HH_ONLY_TYPE(Iterator),
+    HH_ONLY_TYPE(KeyedIterator),
+    HH_ONLY_TYPE(Iterable),
+    HH_ONLY_TYPE(KeyedIterable),
+    HH_ONLY_TYPE(Collection),
+    HH_ONLY_TYPE(Vector),
+    HH_ONLY_TYPE(Map),
+    HH_ONLY_TYPE(Set),
+    HH_ONLY_TYPE(Pair),
+    HH_ONLY_TYPE(ImmVector),
+    HH_ONLY_TYPE(ImmMap),
+    HH_ONLY_TYPE(ImmSet),
+    HH_ONLY_TYPE(InvariantException),
+    HH_ONLY_TYPE(IMemoizeParam),
+    HH_ONLY_TYPE(Shapes),
+    HH_ONLY_TYPE(TypeStructureKind),
+    HH_ONLY_TYPE(TypeStructure),
 
-    AliasEntry{"Awaitable", "HH\\Awaitable"},
-    AliasEntry{"AsyncGenerator", "HH\\AsyncGenerator"},
-    AliasEntry{"WaitHandle", "HH\\WaitHandle"},
+    HH_ONLY_TYPE(Awaitable),
+    HH_ONLY_TYPE(AsyncGenerator),
+    HH_ONLY_TYPE(WaitHandle),
     // Keep in sync with order in hphp/runtime/ext/asio/wait-handle.h
-    AliasEntry{"StaticWaitHandle", "HH\\StaticWaitHandle"},
-    AliasEntry{"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
-    AliasEntry{"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
-    AliasEntry{"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
-    AliasEntry{"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},
-    AliasEntry{"AwaitAllWaitHandle", "HH\\AwaitAllWaitHandle"},
-    AliasEntry{"GenArrayWaitHandle", "HH\\GenArrayWaitHandle"},
-    AliasEntry{"GenMapWaitHandle", "HH\\GenMapWaitHandle"},
-    AliasEntry{"GenVectorWaitHandle", "HH\\GenVectorWaitHandle"},
-    AliasEntry{"ConditionWaitHandle", "HH\\ConditionWaitHandle"},
-    AliasEntry{"RescheduleWaitHandle", "HH\\RescheduleWaitHandle"},
-    AliasEntry{"SleepWaitHandle", "HH\\SleepWaitHandle"},
-    AliasEntry{
-      "ExternalThreadEventWaitHandle",
-      "HH\\ExternalThreadEventWaitHandle"
-    },
+    HH_ONLY_TYPE(StaticWaitHandle),
+    HH_ONLY_TYPE(WaitableWaitHandle),
+    HH_ONLY_TYPE(ResumableWaitHandle),
+    HH_ONLY_TYPE(AsyncFunctionWaitHandle),
+    HH_ONLY_TYPE(AsyncGeneratorWaitHandle),
+    HH_ONLY_TYPE(AwaitAllWaitHandle),
+    HH_ONLY_TYPE(GenArrayWaitHandle),
+    HH_ONLY_TYPE(GenMapWaitHandle),
+    HH_ONLY_TYPE(GenVectorWaitHandle),
+    HH_ONLY_TYPE(ConditionWaitHandle),
+    HH_ONLY_TYPE(RescheduleWaitHandle),
+    HH_ONLY_TYPE(SleepWaitHandle),
+    HH_ONLY_TYPE(ExternalThreadEventWaitHandle),
 
-    AliasEntry{"bool", "HH\\bool"},
-    AliasEntry{"int", "HH\\int"},
-    AliasEntry{"float", "HH\\float"},
-    AliasEntry{"num", "HH\\num"},
-    AliasEntry{"arraykey", "HH\\arraykey"},
-    AliasEntry{"string", "HH\\string"},
-    AliasEntry{"resource", "HH\\resource"},
-    AliasEntry{"mixed", "HH\\mixed"},
-    AliasEntry{"noreturn", "HH\\noreturn"},
-    AliasEntry{"void", "HH\\void"},
-    AliasEntry{"this", "HH\\this"},
-    AliasEntry{"classname", "HH\\string"}, // for ::class
-    AliasEntry{"typename", "HH\\string"}, // for ::class
+    // Types supported by PHP 7 scalar type RFC
+    SCALAR_TYPE(bool),
+    SCALAR_TYPE(int),
+    SCALAR_TYPE(float),
+    SCALAR_TYPE(string),
+
+    // Hack-only primatives
+    HH_ONLY_TYPE(num),
+    HH_ONLY_TYPE(arraykey),
+    HH_ONLY_TYPE(resource),
+    HH_ONLY_TYPE(mixed),
+    HH_ONLY_TYPE(noreturn),
+    HH_ONLY_TYPE(void),
+    HH_ONLY_TYPE(this),
+    HH_ALIAS(classname, string),
+    HH_ALIAS(typename, string),
 
     // Support a handful of synonyms for backwards compat with code written
     // against older versions of HipHop, and to be consistent with PHP5 casting
     // syntax (for example, PHP5 supports both "(bool)$x" and "(boolean)$x")
-    AliasEntry{"boolean", "HH\\bool"},
-    AliasEntry{"integer", "HH\\int"},
-    AliasEntry{"double", "HH\\float"},
-    AliasEntry{"real", "HH\\float"},
+    HH_ALIAS(boolean, bool),
+    HH_ALIAS(integer, int),
+    HH_ALIAS(double, float),
+    HH_ALIAS(real, float),
+
+    // Engine exception classes
+    PHP7_TYPE(Throwable, PHP7_EngineExceptions),
+    PHP7_TYPE(Error, PHP7_EngineExceptions),
+    PHP7_TYPE(ArithmeticError, PHP7_EngineExceptions),
+    PHP7_TYPE(AssertionError, PHP7_EngineExceptions),
+    PHP7_TYPE(DivisionByZeroError, PHP7_EngineExceptions),
+    PHP7_TYPE(ParseError, PHP7_EngineExceptions),
+    PHP7_TYPE(TypeError, PHP7_EngineExceptions),
   };
-  for (auto entry : aliases) {
-    autoAliases[entry.alias] = entry.name;
-  }
-  return autoAliases;
+#undef PHP7_TYPE
+#undef HH_ALIAS
+#undef SCALAR_TYPE
+#undef HH_ONLY_TYPE
+#undef HH_TYPE
+#undef ALIAS
+  return aliases;
+}
 }
 
-const hphp_string_imap<std::string>& Parser::getAutoAliasedClasses() {
+const Parser::AutoAliasMap& Parser::getAutoAliasedClasses() {
   static auto autoAliases = getAutoAliasedClassesHelper();
   return autoAliases;
 }
@@ -2474,8 +2558,9 @@ void Parser::nns(int token, const std::string& text) {
     return;
   }
 
-  if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
-      token != ';' && token != T_HASHBANG) {
+  if (m_nsState == SeenNothing && (SystemLib::s_inited || !text.empty()) &&
+      token != T_DECLARE && token != T_USE && token != ';' &&
+      token != T_HASHBANG) {
     m_nsState = SeenNonNamespaceStatement;
   }
 }
@@ -2612,6 +2697,17 @@ void Parser::useClass(const std::string &ns, const std::string &as) {
     }
   }
 
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    auto& table = getAutoAliasedClasses();
+    auto it = table.find(key);
+    if (it != table.end() && it->second.flags & AliasFlags::PHP7_ScalarTypes) {
+      error("Cannot use %s as %s because '%s' is a special class name: %s",
+            key.c_str(), key.c_str(), as.c_str(),
+            getMessage(false,true).c_str());
+      return;
+    }
+  }
+
   m_nsAliasTable.set(key, ns, AliasType::USE, line1());
 }
 
@@ -2637,6 +2733,42 @@ void Parser::useConst(const std::string &cnst, const std::string &as) {
   }
 
   m_cnstAliasTable[key] = cnst;
+}
+
+void Parser::onDeclare(Token& out, Token& block) {
+  if (!out->stmt) {
+    out->stmt = NEW_STMT0(DeclareStatement);
+  }
+
+  auto st = static_pointer_cast<DeclareStatement>(out->stmt);
+  st->setBlock(static_pointer_cast<BlockStatement>(block->stmt));
+}
+
+void Parser::onDeclareList(Token& out, Token& ident, Token& exp) {
+  if (ident->text() == "strict_types") {
+    if (m_nsState != SeenNothing) {
+      error("strict_types declaration must be the very first statement in the "
+            "script: %s", getMessage(false,true).c_str());
+      return;
+    }
+    Variant val;
+    if (!exp->exp->getScalarValue(val) || !val.isInteger() ||
+        (val.toInt64Val() != 0 && val.toInt64Val() != 1)) {
+      error("strict_types declaration must have 0 or 1 as its value: %s",
+            getMessage(false,true).c_str());
+      return;
+    }
+    if (val.toInt64Val() == 1) {
+      m_file->setUseStrictTypes();
+    }
+  }
+
+  if (!out->stmt) {
+    out->stmt = NEW_STMT0(DeclareStatement);
+  }
+
+  auto st = static_pointer_cast<DeclareStatement>(out->stmt);
+  st->addDeclare(ident->text(), exp->exp);
 }
 
 std::string Parser::nsClassDecl(const std::string &name) {
@@ -2721,6 +2853,15 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 void Parser::registerAlias(std::string name) {
   auto const pos = name.rfind(NAMESPACE_SEP);
   auto const key = (pos != std::string::npos) ? name.substr(pos + 1) : name;
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    auto& table = getAutoAliasedClasses();
+    auto it = table.find(key);
+    if (it != table.end() && it->second.flags & AliasFlags::PHP7_ScalarTypes) {
+      error("Cannot use '%s' as class name as it is reserved: %s",
+            key.c_str(), getMessage(false,true).c_str());
+      return;
+    }
+  }
   if (m_nsAliasTable.getType(key) != AliasType::USE &&
       m_nsAliasTable.getType(key) != AliasType::AUTO_USE) {
     m_nsAliasTable.set(key, name, AliasType::DEF, line1());

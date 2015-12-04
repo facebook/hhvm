@@ -206,7 +206,7 @@ void DecodedInstruction::determineOperandsMap0(uint8_t* ip) {
       if ((m_opcode & 0x0c) == 0) {
         m_offSz = m_flags.addrSzOvr ? sz::dword : sz::qword;
       } else if ((m_opcode & 0x0e) == 8) {
-        m_immSz = m_opcode & 1 ? sz::byte :
+        m_immSz = !(m_opcode & 1) ? sz::byte :
           m_flags.opndSzOvr ? sz::word : sz::dword;
       }
       break;

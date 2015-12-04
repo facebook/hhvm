@@ -45,4 +45,6 @@ function thread_memory_stats(): array<string, int>;
 <<__Native>>
 function thread_mark_stack(): void;
 
+<<__Native>>
+function set_mem_threshold_callback(int $threshold, mixed $callback): void;
 }

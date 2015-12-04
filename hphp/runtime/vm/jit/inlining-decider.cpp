@@ -284,33 +284,81 @@ bool isInliningVVSafe(Op op) {
   return false;
 }
 
+/*
+ * Opcodes that don't contribute to the inlining cost (i.e. produce no codegen).
+ */
+bool isFreeOp(Op op) {
+  switch (op) {
+  case Op::AssertRATL:
+  case Op::AssertRATStk:
+  case Op::BoxRNop:
+  case Op::Nop:
+  case Op::RGetCNop:
+  case Op::UnboxRNop:
+    return true;
+  default:
+    return false;
+  }
+}
+
+/*
+ * Compute estimated cost of inlining `region'.
+ */
+int computeCost(const RegionDesc& region) {
+  int cost = 0;
+  for (auto const& block : region.blocks()) {
+    auto sk = block->start();
+
+    for (auto i = 0, n = block->length(); i < n; ++i, sk.advance()) {
+      auto op = sk.op();
+
+      if (isFreeOp(op)) continue;
+
+      cost += 1;
+
+      // Add the size of immediate vectors to the cost.
+      auto const pc = sk.pc();
+      if (hasMVector(op)) {
+        cost += getMVector(pc).size();
+      } else if (hasImmVector(op)) {
+        cost += getImmVector(pc).size();
+      }
+    }
+  }
+  return cost;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+/*
+ * Update context for start of inlining.
+ */
+void InliningDecider::accountForInlining(const Func* callee,
+                                         const RegionDesc& region) {
+  int cost = computeCost(region);
+  m_costStack.push_back(cost);
+  m_cost       += cost;
+  m_callDepth  += 1;
+  m_stackDepth += callee->maxStackCells();
 }
 
 bool InliningDecider::shouldInline(const Func* callee,
                                    const RegionDesc& region,
-                                   bool& needsMerge) {
+                                   uint32_t maxTotalCost) {
   auto sk = region.empty() ? SrcKey() : region.start();
   assertx(callee);
   assertx(sk.func() == callee);
 
-  int cost = 0;
-
   // Tracing return lambdas.
   auto refuse = [&] (const char* why) {
+    FTRACE(1, "shouldInline: rejecting callee region: {}", show(region));
     return traceRefusal(m_topFunc, callee, why);
   };
 
   auto accept = [&, this] (const char* kind) {
     FTRACE(1, "InliningDecider: inlining {}() <- {}()\t<reason: {}>\n",
            m_topFunc->fullName()->data(), callee->fullName()->data(), kind);
-
-    // Update our context.
-    m_costStack.push_back(cost);
-    m_cost += cost;
-    m_callDepth += 1;
-    m_stackDepth += callee->maxStackCells();
-
     return true;
   };
 
@@ -346,11 +394,6 @@ bool InliningDecider::shouldInline(const Func* callee,
   // which we know won't actually require these features.
   const bool needsCheckVVSafe = callee->attrs() & AttrMayUseVV;
 
-  // We measure the cost of inlining each callstack and stop when it exceeds a
-  // certain threshold.  (Note that we do not measure the total cost of all the
-  // inlined calls for a given caller---just the cost of each nested stack.)
-  const int maxCost = RuntimeOption::EvalHHIRInliningMaxCost - m_cost;
-
   int numRets = 0;
   int numExits = 0;
 
@@ -385,24 +428,6 @@ bool InliningDecider::shouldInline(const Func* callee,
       if (op == Op::FCallArray) {
         return refuse("can't inline FCallArray");
       }
-
-      // Assert opcodes don't contribute to the inlining cost.
-      if (op == Op::AssertRATL || op == Op::AssertRATStk) continue;
-
-      cost += 1;
-
-      // Add the size of immediate vectors to the cost.
-      auto const pc = sk.pc();
-      if (hasMVector(op)) {
-        cost += getMVector(pc).size();
-      } else if (hasImmVector(op)) {
-        cost += getImmVector(pc).size();
-      }
-
-      // Refuse if the cost exceeds our thresholds.
-      if (cost > maxCost) {
-        return refuse("too expensive");
-      }
     }
 
     if (region.isExit(block->id())) {
@@ -412,10 +437,19 @@ bool InliningDecider::shouldInline(const Func* callee,
     }
   }
 
+  // Refuse if the cost exceeds our thresholds.
+  // We measure the cost of inlining each callstack and stop when it exceeds a
+  // certain threshold.  (Note that we do not measure the total cost of all the
+  // inlined calls for a given caller---just the cost of each nested stack.)
+  const int maxCost = maxTotalCost - m_cost;
+  const int cost = computeCost(region);
+  if (cost > maxCost) {
+    return refuse("too expensive");
+  }
+
   if (numRets == 0) {
     return refuse("region has no returns");
   }
-  needsMerge = numRets > 1;
   return accept("small region with single return");
 }
 
@@ -519,6 +553,7 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const IRGS& irgs,
+                                 InliningDecider& inl,
                                  int32_t maxBCInstrs) {
   auto const op = sk.pc();
   auto const numArgs = getImm(op, 0).u_IVA;
@@ -535,17 +570,21 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     argTypes.push_back(type);
   }
 
-  if (RuntimeOption::EvalInlineRegionMode == "both") {
+  const auto mode = RuntimeOption::EvalInlineRegionMode;
+  if (mode == "tracelet" || mode == "both") {
     auto region = selectCalleeTracelet(callee, numArgs, argTypes, maxBCInstrs);
-    if (region) return region;
+    auto const maxCost = RuntimeOption::EvalHHIRInliningMaxCost;
+    if (region && inl.shouldInline(callee, *region, maxCost)) return region;
+    if (mode == "tracelet") return nullptr;
   }
 
-  if (RuntimeOption::EvalInlineRegionMode != "tracelet" &&
-      RuntimeOption::EvalJitPGO && !mcg->tx().profData()->freed()) {
-    return selectCalleeCFG(callee, numArgs, argTypes, maxBCInstrs);
+  if (RuntimeOption::EvalJitPGO && !mcg->tx().profData()->freed()) {
+    auto region = selectCalleeCFG(callee, numArgs, argTypes, maxBCInstrs);
+    auto const maxCost = RuntimeOption::EvalHHIRPGOInliningMaxCost;
+    if (region && inl.shouldInline(callee, *region, maxCost)) return region;
   }
 
-  return selectCalleeTracelet(callee, numArgs, argTypes, maxBCInstrs);
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

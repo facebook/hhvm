@@ -105,6 +105,11 @@ private:
   bool m_recoverable{false};
 };
 
+ATTRIBUTE_NORETURN
+void raise_fatal_error(const char* msg, const Array& bt = null_array,
+                       bool recoverable = false, bool silent = false,
+                       bool throws = true);
+
 //////////////////////////////////////////////////////////////////////
 
 struct ResourceExceededException : FatalErrorException {

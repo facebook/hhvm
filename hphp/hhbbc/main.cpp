@@ -239,6 +239,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
+  gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
 
   gd.arrayTypeTable.repopulate(*arrTable);

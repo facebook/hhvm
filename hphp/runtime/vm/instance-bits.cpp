@@ -27,7 +27,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/iterators.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -153,10 +153,9 @@ void init() {
   // into their class lists, but in practice most Classes will already be
   // created by now and this process takes at most 10ms.
   WriteLock l(InstanceBits::lock);
-  for (auto it = all_classes().begin();
-       it != all_classes().end(); ++it) {
-    it->setInstanceBitsAndParents();
-  }
+  NamedEntity::foreach_class([&](Class* cls) {
+    cls->setInstanceBitsAndParents();
+  });
 
   initFlag.store(true, std::memory_order_release);
 }

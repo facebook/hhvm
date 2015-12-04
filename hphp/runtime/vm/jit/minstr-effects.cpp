@@ -78,8 +78,8 @@ void getBaseType(Opcode rawOp, bool predict,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
     baseValChanged = true;
-    if (baseType.maybe(TStaticArr)) baseType |= TCountedArr;
-    if (baseType.maybe(TStaticStr)) baseType |= TCountedStr;
+    if (baseType.maybe(TArr)) baseType |= TCountedArr;
+    if (baseType.maybe(TStr)) baseType |= TCountedStr;
   }
 }
 

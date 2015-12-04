@@ -51,7 +51,14 @@ struct APCTypedValue {
     m_data.str = data;
   }
 
-  explicit APCTypedValue(ArrayData* data) : m_handle(KindOfArray) {
+  enum class StaticArr {};
+  APCTypedValue(StaticArr, ArrayData* data) : m_handle(KindOfPersistentArray) {
+    assert(data->isStatic());
+    m_data.arr = data;
+  }
+
+  enum class UncountedArr {};
+  APCTypedValue(UncountedArr, ArrayData* data) : m_handle(KindOfArray) {
     assert(data->isUncounted());
     m_handle.setUncounted();
     m_data.arr = data;
@@ -96,7 +103,8 @@ struct APCTypedValue {
   }
 
   ArrayData* getArrayData() const {
-    assert(m_handle.isUncounted() && m_handle.type() == KindOfArray);
+    assert(m_handle.type() == KindOfPersistentArray ||
+           (m_handle.isUncounted() && m_handle.type() == KindOfArray));
     return m_data.arr;
   }
 

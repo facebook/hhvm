@@ -33,7 +33,9 @@ bool SSLSocketData::closeImpl() {
   }
   if (m_handle) {
     SSL_free(m_handle);
+    SSL_CTX_free(m_ctx);
     m_handle = nullptr;
+    m_ctx = nullptr;
   }
   return SocketData::closeImpl();
 }
@@ -535,6 +537,8 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     SSL_CTX_free(ctx);
     return false;
   }
+
+  m_data->m_ctx = ctx;
 
   if (!SSL_set_fd(m_data->m_handle, getFd())) {
     handleError(0, true);

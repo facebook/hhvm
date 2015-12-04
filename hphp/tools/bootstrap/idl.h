@@ -32,24 +32,21 @@ using folly::fbvector;
  * not have a cyclical dependency from tools/bootstrap into runtime/.  This code
  * is on the way out, as we are actively converting IDL extensions to HNI, so
  * this grossness shouldn't last for long.
- *
- * In theory we don't even need to match datatype.h, the enum here is only used
- * for parsing out type names from IDL files and giving them IDs, but copying it
- * was faster.
  */
 enum DataType : int8_t {
-  KindOfClass         = -13,
+  KindOfClass         = -8,
   KindOfUninit        = 0x00,
-  KindOfNull          = 0x08,
+  KindOfNull          = 0x01,
   KindOfBoolean       = 0x09,
-  KindOfInt64         = 0x0a,
-  KindOfDouble        = 0x0b,
-  KindOfStaticString  = 0x0c,
-  KindOfString        = 0x14,
-  KindOfArray         = 0x20,
-  KindOfObject        = 0x30,
-  KindOfResource      = 0x40,
-  KindOfRef           = 0x50,
+  KindOfInt64         = 0x11,
+  KindOfDouble        = 0x19,
+  KindOfStaticString  = 0x1b,
+  KindOfPersistentArray   = 0x1d,
+  KindOfString        = 0x22,
+  KindOfArray         = 0x34,
+  KindOfObject        = 0x40,
+  KindOfResource      = 0x50,
+  KindOfRef           = 0x60,
 };
 constexpr DataType kInvalidDataType      = static_cast<DataType>(-1);
 constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-2);

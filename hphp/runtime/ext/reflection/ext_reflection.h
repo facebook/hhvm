@@ -78,7 +78,7 @@ class ReflectionFuncHandle {
   }
 
  private:
-  const Func* m_func{nullptr};
+  LowPtr<const Func> m_func{nullptr};
 };
 
 /* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
@@ -123,7 +123,7 @@ class ReflectionClassHandle {
   void wakeup(const Variant& content, ObjectData* obj);
 
  private:
-  const Class* m_cls{nullptr};
+  LowPtr<const Class> m_cls{nullptr};
 };
 
 /* A ReflectionConstHandle is a NativeData object wrapping a Const*
@@ -163,7 +163,7 @@ struct ReflectionConstHandle {
 
  private:
   const Class::Const* m_const;
-  const Class* m_cls;
+  LowPtr<const Class> m_cls;
 };
 
 /* A ReflectionPropHandle is a NativeData object wrapping a Prop*

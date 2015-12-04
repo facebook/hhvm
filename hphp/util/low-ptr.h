@@ -41,6 +41,8 @@ namespace detail {
  */
 template <class T, class S>
 struct LowPtrImpl {
+  using storage_type = typename S::storage_type;
+
   /*
    * Constructors.
    */

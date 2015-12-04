@@ -531,6 +531,8 @@ using TypeAlias = ::HPHP::TypeAlias;
 struct Unit {
   MD5 md5;
   SString filename;
+  bool isHHFile{false};
+  bool useStrictTypes{false};
   int preloadPriority{0};
   std::unique_ptr<Func> pseudomain;
   std::vector<std::unique_ptr<Func>> funcs;

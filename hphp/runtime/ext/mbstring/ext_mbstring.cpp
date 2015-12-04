@@ -890,7 +890,7 @@ static bool php_mb_parse_encoding(const Variant& encoding,
                                   mbfl_encoding ***return_list,
                                   int *return_size, bool persistent) {
   bool ret;
-  if (encoding.is(KindOfArray)) {
+  if (encoding.isArray()) {
     ret = php_mb_parse_encoding_array(encoding.toArray(),
                                       return_list, return_size,
                                       persistent ? 1 : 0);
@@ -1239,7 +1239,7 @@ Variant HHVM_FUNCTION(mb_convert_encoding,
                       const String& to_encoding,
                       const Variant& from_encoding /* = null_variant */) {
   String encoding = from_encoding.toString();
-  if (from_encoding.is(KindOfArray)) {
+  if (from_encoding.isArray()) {
     StringBuffer _from_encodings;
     Array encs = from_encoding.toArray();
     for (ArrayIter iter(encs); iter; ++iter) {
@@ -1326,7 +1326,7 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 static bool php_mbfl_encoding_detect(const Variant& var,
                                      mbfl_encoding_detector *identd,
                                      mbfl_string *string) {
-  if (var.is(KindOfArray) || var.is(KindOfObject)) {
+  if (var.isArray() || var.is(KindOfObject)) {
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
       if (php_mbfl_encoding_detect(iter.second(), identd, string)) {
@@ -1348,7 +1348,7 @@ static Variant php_mbfl_convert(const Variant& var,
                                 mbfl_buffer_converter *convd,
                                 mbfl_string *string,
                                 mbfl_string *result) {
-  if (var.is(KindOfArray)) {
+  if (var.isArray()) {
     Array ret = empty_array();
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
@@ -1525,7 +1525,7 @@ static Variant php_mb_numericentity_exec(const String& str,
 
   /* conversion map */
   int *iconvmap = nullptr;
-  if (convmap.is(KindOfArray)) {
+  if (convmap.isArray()) {
     Array convs = convmap.toArray();
     mapsize = convs.size();
     if (mapsize > 0) {

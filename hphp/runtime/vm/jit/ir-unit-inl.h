@@ -275,6 +275,13 @@ inline SSATmp* IRUnit::mainFP() const {
   return entry()->begin()->dst();
 }
 
+inline SSATmp* IRUnit::mainSP() const {
+  assertx(!entry()->empty() && entry()->begin()->is(DefFP));
+  auto it = ++entry()->begin();
+  assertx(it != entry()->end() && it->is(DefSP));
+  return it->dst();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> SSATmp* IRUnit::cns(T val) {

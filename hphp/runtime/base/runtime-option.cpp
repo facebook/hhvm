@@ -378,9 +378,11 @@ bool RuntimeOption::AutoTypecheck = true;
 // and store a pointer to it.)
 static bool s_PHP7_master = false;
 bool RuntimeOption::PHP7_DeprecateOldStyleCtors = false;
+bool RuntimeOption::PHP7_EngineExceptions = false;
 bool RuntimeOption::PHP7_IntSemantics = false;
 bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
+bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_UVS = false;
 
 int RuntimeOption::GetScannerType() {
@@ -423,7 +425,7 @@ static inline uint64_t pgoThresholdDefault() {
 #ifdef HHVM_WHOLE_CFG
   return 100;
 #else
-  return debug ? 2 : 100;
+  return debug ? 2 : 5000;
 #endif
 }
 
@@ -1188,11 +1190,15 @@ void RuntimeOption::Load(
     Config::Bind(s_PHP7_master, ini, config, "PHP7.all", false);
     Config::Bind(PHP7_DeprecateOldStyleCtors, ini, config,
                  "PHP7.DeprecateOldStyleCtors", s_PHP7_master);
+    Config::Bind(PHP7_EngineExceptions, ini, config, "PHP7.EngineExceptions",
+                 s_PHP7_master);
     Config::Bind(PHP7_IntSemantics, ini, config, "PHP7.IntSemantics",
                  s_PHP7_master);
     Config::Bind(PHP7_LTR_assign, ini, config, "PHP7.LTRAssign",
                  s_PHP7_master);
     Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics",
+                 s_PHP7_master);
+    Config::Bind(PHP7_ScalarTypes, ini, config, "PHP7.ScalarTypes",
                  s_PHP7_master);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
   }

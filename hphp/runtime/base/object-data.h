@@ -81,8 +81,7 @@ struct ObjectData {
                             // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     HasNativePropHandler    // class has native magic props handler
-                  = 0x8000,
-    InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
+                  = 0x8000
   };
 
   enum {
@@ -124,11 +123,20 @@ struct ObjectData {
 
  public:
 
-  // Call newInstance() to instantiate a PHP object. The initial ref-count will
-  // be greater than zero. Since this gives you a raw pointer, it is your
-  // responsibility to manage the ref-count yourself. Whenever possible, prefer
-  // using the Object class instead, which takes care of this for you.
+  /*
+   * Call newInstance() to instantiate a PHP object. The initial ref-count will
+   * be greater than zero. Since this gives you a raw pointer, it is your
+   * responsibility to manage the ref-count yourself. Whenever possible, prefer
+   * using the Object class instead, which takes care of this for you.
+   */
   static ObjectData* newInstance(Class*);
+
+  /*
+   * Instantiate a new object without initializing its declared properties. The
+   * given Class must be a concrete, regular Class, without an instanceCtor or
+   * customInit.
+   */
+  static ObjectData* newInstanceNoPropInit(Class*);
 
   /*
    * Given a Class that is assumed to be a concrete, regular (not a trait or
@@ -179,9 +187,8 @@ struct ObjectData {
   HeaderKind headerKind() const;
 
   bool getAttribute(Attribute) const;
-  uint16_t getAttributes() const;
   void setAttribute(Attribute);
-
+  bool hasInstanceDtor() const;
   bool noDestruct() const;
   void setNoDestruct();
   void clearNoDestruct();
@@ -291,6 +298,13 @@ struct ObjectData {
    * Post: getAttribute(HasDynPropArr)
    */
   Array& reserveProperties(int nProp = 2);
+
+  /*
+   * Use the given array for this object's dynamic properties. HasDynPropArry
+   * must not already be set. Returns a reference to the Array in its final
+   * location.
+   */
+  Array& setDynPropArray(const Array&);
 
   // accessors for the declared properties area
   TypedValue* propVec();

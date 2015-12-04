@@ -14,6 +14,10 @@ type 'a in_channel
 type 'a out_channel
 type ('in_, 'out) channel_pair = 'in_ in_channel * 'out out_channel
 
+type log_mode =
+| Log_file
+| Parent_streams
+
 val to_channel :
   'a out_channel -> ?flags:Marshal.extern_flags list -> ?flush:bool ->
   'a -> unit
@@ -67,7 +71,11 @@ val devnull : unit -> ('a, 'b) handle
 (* Spawn a new instance of the current process, and execute the
    alternate entry point. *)
 val spawn :
-  ?reason:string -> ?log_file:string ->
+  ?reason:string -> ?log_file:string -> ?channel_mode:[ `pipe | `socket ] ->
+  (** in `log_file mode, both stdout and stderr go to the
+   * log file (or null). In `parent_streams mode, they go to
+   * the same stdout and stderr as the parent process. *)
+  ?log_mode:log_mode ->
   ('param, 'input, 'output) entry -> 'param -> ('output, 'input) handle
 
 (* Close the typed channels associated to a 'spawned' child. *)

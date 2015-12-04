@@ -94,8 +94,7 @@ void printGml(const Unit* unit) {
   fprintf(file, "graph [\n"
                 "  hierarchic 1\n"
                 "  directed 1\n");
-  for (AllFuncs i(unit); !i.empty(); ) {
-    const Func* func = i.popFront();
+  unit->forEachFunc([&](const Func* func) {
     Arena scratch;
     GraphBuilder builder(scratch, func);
     const Graph* g = builder.build();
@@ -142,7 +141,7 @@ void printGml(const Unit* unit) {
       }
     }
     nextid += g->block_count + 1;
-  }
+  });
   fprintf(file, "]\n");
   fclose(file);
 }

@@ -504,7 +504,7 @@ function locale_get_script(string $locale): mixed {
 function locale_lookup(array $langtag,
                        string $locale,
                        bool $canonicalize = false,
-                       string $default): string {
+                       string $default = ""): string {
   return Locale::lookup($langtag, $locale, $canonicalize, $default);
 }
 

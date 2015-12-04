@@ -69,6 +69,12 @@ void HeaderWord<T,CNT>::incRefCount() const {
 }
 
 template<class T, Counted CNT> ALWAYS_INLINE
+void HeaderWord<T,CNT>::rawIncRefCount() const {
+  assert(isRefCounted());
+  ++count;
+}
+
+template<class T, Counted CNT> ALWAYS_INLINE
 void HeaderWord<T,CNT>::decRefCount() const {
   assert(checkCount());
   if (isRefCounted()) --count;
@@ -128,6 +134,11 @@ bool HeaderWord<T,CNT>::isUncounted() const {
     assert(!MemoryManager::sweeping());                                 \
     assert(kindIsValid());                                              \
     m_hdr.incRefCount();                                                \
+  }                                                                     \
+  void rawIncRefCount() const {                                         \
+    assert(!MemoryManager::sweeping());                                 \
+    assert(kindIsValid());                                              \
+    m_hdr.rawIncRefCount();                                             \
   }                                                                     \
   void decRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \

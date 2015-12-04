@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include <stack>
 #include <utility>
@@ -1044,6 +1045,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
                       const String& obj_typename) {
+  EagerVMRegAnchor _;
   CompactReader reader(transportobj);
   return reader.read(obj_typename);
 }
@@ -1051,6 +1053,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename) {
+  EagerVMRegAnchor _;
   CompactReader reader(transportobj);
   Object ret = create_object(obj_typename, Array());
   Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename,

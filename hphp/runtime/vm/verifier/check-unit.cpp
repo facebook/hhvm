@@ -136,14 +136,13 @@ bool UnitChecker::checkBytecode() {
   bool ok = true;
   typedef std::map<Offset, const Func*> FuncMap; // ordered!
   FuncMap funcs;
-  for (AllFuncs i(m_unit); !i.empty();) {
-    const Func* f = i.popFront();
+  m_unit->forEachFunc([&](const Func* f) {
     if (f->past() <= f->base()) {
       if (!f->isAbstract() || f->past() < f->base()) {
         error("func size <= 0 [%d:%d] in unit %s\n",
              f->base(), f->past(), m_unit->md5().toString().c_str());
         ok = false;
-        continue;
+        return; // continue
       }
     }
     if (f->base() < 0 || f->past() > m_unit->bclen()) {
@@ -151,16 +150,16 @@ bool UnitChecker::checkBytecode() {
              f->base(), f->past(), m_unit->md5().toString().c_str(),
              0, m_unit->bclen());
       ok = false;
-      continue;
+      return; // continue
     }
     if (funcs.find(f->base()) != funcs.end()) {
       error("duplicate function-base at %d in unit %s\n",
              f->base(), m_unit->md5().toString().c_str());
       ok = false;
-      continue;
+      return; // continue
     }
     funcs.insert(FuncMap::value_type(f->base(), f));
-  }
+  });
   // iterate funcs in offset order, checking for holes and overlap
   if (funcs.empty()) {
     error("unit %s must have at least one func\n",
@@ -194,26 +193,26 @@ bool UnitChecker::checkBytecode() {
 }
 
 bool UnitChecker::checkFuncs() {
-  const Func* pseudo = 0;
+  const Func* pseudo = nullptr;
   bool multi = false;
-
   bool ok = true;
-  for (AllFuncs i(m_unit); !i.empty();) {
-    if (i.front()->isPseudoMain()) {
+
+  m_unit->forEachFunc([&](const Func* func) {
+    if (func->isPseudoMain()) {
       if (pseudo) {
         multi = true;
         error("%s", "unit should have exactly one pseudo-main\n");
         ok = false;
       }
-      pseudo = i.front();
+      pseudo = func;
     }
 
-    if (i.front()->attrs() & AttrNative) {
-      ok &= checkNativeFunc(i.front(), m_verbose);
+    if (func->attrs() & AttrNative) {
+      ok &= checkNativeFunc(func, m_verbose);
     }
 
-    ok &= checkFunc(i.popFront(), m_verbose);
-  }
+    ok &= checkFunc(func, m_verbose);
+  });
 
   if (!multi && m_unit->getMain() != pseudo) {
     error("%s", "funcs and unit disagree on what is the pseudo-main\n");

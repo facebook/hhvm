@@ -374,6 +374,8 @@ public:
   static bool PHP7_IntSemantics;
   static bool PHP7_LTR_assign;
   static bool PHP7_NoHexNumerics;
+  static bool PHP7_ScalarTypes;
+  static bool PHP7_EngineExceptions;
   static bool PHP7_UVS;
 
   static int64_t HeapSizeMB;
@@ -511,8 +513,9 @@ public:
   F(uint32_t, HHIRInliningMaxBindJmps, 0)                               \
   F(uint32_t, HHIRInliningMaxReturns,  3)                               \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
+  F(uint32_t, HHIRPGOInliningMaxCost,  6)                               \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
-  F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
+  F(uint32_t, HHIRInliningMaxReturnDecRefs, 6)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \
   F(std::string, InlineRegionMode,     "both")                          \

@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>
@@ -124,7 +125,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       }
       Variant spec = HHVM_FN(hphp_get_static_property)(structType, s_TSPEC,
                                                                    false);
-      if (!spec.is(KindOfArray)) {
+      if (!spec.isArray()) {
         char errbuf[128];
         snprintf(errbuf, 128, "spec for %s is wrong type: %s\n",
                  structType.data(), ret->getClassName().c_str());
@@ -584,6 +585,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const Object& transportobj,
                      const String& obj_typename,
                      bool strict_read) {
+  EagerVMRegAnchor _;
   PHPInputTransport transport(transportobj);
   int8_t messageType = 0;
   int32_t sz = transport.readI32();
@@ -635,6 +637,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
 Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       const Object& transportobj,
                       const String& obj_typename) {
+  EagerVMRegAnchor _;
   PHPInputTransport transport(transportobj);
 
   Object ret_val = createObject(obj_typename);

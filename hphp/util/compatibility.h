@@ -30,7 +30,7 @@ namespace HPHP {
 
 template <typename T>
 std::shared_ptr<T> getSingleton() {
-  return folly::Singleton<T>::get_weak().lock();
+  return folly::Singleton<T>::try_get();
 }
 
 #define PHP_DIR_SEPARATOR '/'

@@ -824,10 +824,11 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
     }
     return m_tmp_sig;
-  case Op::FCall:       // ONE(IVA),     FMANY,   ONE(RV)
-  case Op::FCallD:      // THREE(IVA,SA,SA), FMANY,   ONE(RV)
-  case Op::FCallUnpack: // ONE(IVA), FMANY, ONE(RV)
-  case Op::FCallArray:  // NA,           ONE(FV), ONE(RV)
+  case Op::FCall:       // ONE(IVA),            FMANY,   ONE(RV)
+  case Op::FCallD:      // THREE(IVA,SA,SA),    FMANY,   ONE(RV)
+  case Op::FCallAwait:  // THREE(IVA,SA,SA),    FMANY,   ONE(CV)
+  case Op::FCallUnpack: // ONE(IVA),            FMANY,   ONE(RV)
+  case Op::FCallArray:  // NA,                  ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }

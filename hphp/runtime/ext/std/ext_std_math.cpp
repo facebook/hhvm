@@ -303,6 +303,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
       return dt;
     }
 
+    case KindOfPersistentArray:
     case KindOfArray:
       // Not reachable since HHVM_FN(pow) deals with these base cases first.
     case KindOfRef:
@@ -497,14 +498,10 @@ double HHVM_FUNCTION(lcg_value) { return math_combined_lcg();}
 
 Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
   if (divisor == 0) {
-    // TODO(https://github.com/facebook/hhvm/issues/6012)
-    // This should throw a DivisionByZeroError.
-    SystemLib::throwInvalidOperationExceptionObject(Strings::DIVISION_BY_ZERO);
+    SystemLib::throwDivisionByZeroErrorObject(Strings::DIVISION_BY_ZERO);
   } else if (divisor == -1 &&
              numerator == std::numeric_limits<int64_t>::min()) {
-    // TODO(https://github.com/facebook/hhvm/issues/6012)
-    // This should throw an ArithmeticError.
-    SystemLib::throwInvalidOperationExceptionObject(
+    SystemLib::throwArithmeticErrorObject(
       "Division of PHP_INT_MIN by -1 is not an integer");
   }
   return numerator/divisor;

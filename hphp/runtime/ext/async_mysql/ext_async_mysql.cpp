@@ -495,7 +495,7 @@ Object HHVM_METHOD(AsyncMysqlConnection, queryf,
     } else if (arg.isString()) {
       list.push_back(static_cast<std::string>(arg.toString()));
     } else if (arg.isNull()) {
-      list.push_back(am::QueryArgument());
+      list.push_back(nullptr);
     } else {
       return false;
     }

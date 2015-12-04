@@ -52,7 +52,7 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
-const StaticString s_Exception("Exception");
+const StaticString s_Throwable("__SystemLib\\Throwable");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
@@ -715,7 +715,7 @@ void in(ISS& env, const bc::Throw& op)   { popC(env); }
 
 void in(ISS& env, const bc::Catch&) {
   nothrow(env);
-  return push(env, subObj(env.index.builtin_class(s_Exception.get())));
+  return push(env, subObj(env.index.builtin_class(s_Throwable.get())));
 }
 
 void in(ISS& env, const bc::NativeImpl&) {
@@ -1713,6 +1713,11 @@ void in(ISS& env, const bc::FCallD& op) {
   push(env, TInitGen);
 }
 
+void in(ISS& env, const bc::FCallAwait& op) {
+  in(env, bc::FCallD { op.arg1, op.str2, op.str3 });
+  in(env, bc::Await { });
+}
+
 void fcallArrayImpl(ISS& env) {
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);
@@ -2120,6 +2125,20 @@ void in(ISS& env, const bc::YieldK&) {
   popC(env);
   push(env, TInitCell);
 }
+
+void in(ISS& env, const bc::ContAssignDelegate&) {
+  popC(env);
+}
+
+void in(ISS& env, const bc::ContEnterDelegate&) {
+  popC(env);
+}
+
+void in(ISS& env, const bc::YieldFromDelegate&) {
+  push(env, TInitCell);
+}
+
+void in(ISS& env, const bc::ContUnsetDelegate&) {}
 
 void in(ISS& env, const bc::ContCheck&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }

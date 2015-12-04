@@ -29,8 +29,8 @@
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -630,7 +630,7 @@ void VariableSerializer::write(const Object& v) {
     preventOverflow(v, [&v, this]() {
       if (v->isCollection()) {
         serializeCollection(v.get(), this);
-      } else if (v->instanceof(Closure::classof())) {
+      } else if (v->instanceof(SystemLib::s_ClosureClass)) {
         // We serialize closures as "{}" in JSON mode to be compatible
         // with PHP. And issue a warning in HipHop syntax.
         if (RuntimeOption::EnableHipHopSyntax) {
@@ -1308,6 +1308,7 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
                         tv->m_data.pstr->size(), isArrayKey, noQuotes);
       return;
 
+    case KindOfPersistentArray:
     case KindOfArray:
       assert(!isArrayKey);
       serializeArray(tv->m_data.parr, serializer, skipNestCheck);
@@ -1488,7 +1489,7 @@ inline Array getSerializeProps(const ObjectData* obj,
 
     // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
-    if (UNLIKELY(obj->instanceof(Closure::classof()))) {
+    if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
       auto ret = Array::Create();
       obj->o_getArray(ret);
       return ret;
@@ -1575,7 +1576,7 @@ static void serializeObjectImpl(const ObjectData* obj,
     assert(!obj->isCollection());
     if (ret.isArray()) {
       Array wanted = Array::Create();
-      assert(ret.getRawType() == KindOfArray); // can't be KindOfRef
+      assert(isArrayType(ret.getRawType())); // can't be KindOfRef
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
         String memberName = iter.second().toString();
@@ -1651,7 +1652,7 @@ static void serializeObjectImpl(const ObjectData* obj,
     if (obj->isCollection()) {
       serializeCollection(const_cast<ObjectData*>(obj), serializer);
     } else if (type == VariableSerializer::Type::VarExport &&
-               obj->instanceof(Closure::classof())) {
+               obj->instanceof(c_Closure::classof())) {
       serializer->write(obj->getClassName());
     } else {
       auto className = obj->getClassName();
@@ -1669,7 +1670,7 @@ static void serializeObjectImpl(const ObjectData* obj,
       }
       if (type == VariableSerializer::Type::DebuggerDump) {
         // Expect to display as their stringified classname.
-        if (obj->instanceof(Closure::classof())) {
+        if (obj->instanceof(SystemLib::s_ClosureClass)) {
           serializer->write(obj->getVMClass()->nameStr());
           return;
         }

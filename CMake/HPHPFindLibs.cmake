@@ -375,10 +375,6 @@ if (FREEBSD)
 endif()
 
 if (APPLE)
-  find_library(LIBINTL_LIBRARIES NAMES intl libintl)
-  if (LIBINTL_INCLUDE_DIR)
-    include_directories(${LIBINTL_INCLUDE_DIR})
-  endif()
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
 
   # This is required by Homebrew's libc. See

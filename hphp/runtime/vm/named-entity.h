@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/util/portability.h"
+#include "hphp/util/low-ptr.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -31,7 +32,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Class;
 class Func;
 class String;
 
@@ -172,28 +172,32 @@ struct NamedEntity {
                           String* normalizedStr = nullptr) FLATTEN;
 
   /*
-   * The global NamedEntity table.
-   *
-   * TODO(#4717225) Get rid of this.
+   * Visitors that traverse the named entity table
    */
-  static Map* table();
+  template<class Fn> static void foreach_class(Fn fn);
+  template<class Fn> static void foreach_cached_class(Fn fn);
+  template<class Fn> static void foreach_cached_func(Fn fn);
 
   /*
    * Size of the global NamedEntity table.
    */
   static size_t tableSize();
 
+private:
+  template<class Fn> static void foreach_name(Fn);
+  static Map* table();
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
-  mutable rds::Link<Class*> m_cachedClass;
-  mutable rds::Link<Func*> m_cachedFunc;
+  mutable rds::Link<LowPtr<Class>> m_cachedClass;
+  mutable rds::Link<LowPtr<Func>> m_cachedFunc;
   mutable rds::Link<TypeAliasReq> m_cachedTypeAlias;
 
 private:
-  std::atomic<Class*> m_clsList{nullptr};
+  AtomicLowPtr<Class, std::memory_order_acquire,
+               std::memory_order_release> m_clsList{nullptr};
 };
 
 /*
@@ -201,11 +205,10 @@ private:
  */
 using NamedEntityPair = std::pair<const StringData*, const NamedEntity*>;
 
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #define incl_HPHP_VM_NAMED_ENTITY_INL_H_
 #include "hphp/runtime/vm/named-entity-inl.h"
 #undef incl_HPHP_VM_NAMED_ENTITY_INL_H_
 
-#endif // incl_HPHP_VM_NAMED_ENTITY_INL_H_
+#endif

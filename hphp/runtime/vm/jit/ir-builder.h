@@ -244,7 +244,6 @@ public:
                        CloneFlag doClone,
                        Block* srcBlock);
 
-
 private:
   struct BlockState {
     Block* block;

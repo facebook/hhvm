@@ -530,8 +530,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // out, except as a side effect of raising a warning.
   case VerifyRetCallable:
   case VerifyRetCls:
-  case VerifyRetFail:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+  // In PHP 7 VerifyRetFail can coerce the return type in weak files-- even in
+  // a strict file we may still coerce int to float. This is not true of HH
+  // files.
+  case VerifyRetFail: {
+    auto func = inst.marker().func();
+    auto mayCoerce =
+      RuntimeOption::PHP7_ScalarTypes &&
+      !RuntimeOption::EnableHipHopSyntax &&
+      !func->unit()->isHHFile();
+    auto stores = mayCoerce ? AHeapAny | AStackAny : AHeapAny;
+    return may_raise(inst, may_load_store(AHeapAny | AStackAny, stores));
+  }
 
   case CallArray:
     return CallEffects {
@@ -1074,6 +1085,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckARMagicFlag:
   case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
+  case LdTVAux:
+  case StTVAux:
   case LdARInvName:
   case StARInvName:
   case MethodExists:
@@ -1380,6 +1393,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToDbl:
   case ThrowOutOfBounds:
   case ThrowInvalidOperation:
+  case ThrowArithmeticError:
+  case ThrowDivisionByZeroError:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals

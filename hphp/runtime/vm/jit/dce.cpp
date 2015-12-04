@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <array>
+#include "hphp/runtime/vm/jit/dce.h"
 
+#include <array>
 #include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"
@@ -530,10 +531,14 @@ bool canDCE(IRInstruction* inst) {
   case CheckARMagicFlag:
   case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
+  case LdTVAux:
+  case StTVAux:
   case StARInvName:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidOperation:
+  case ThrowArithmeticError:
+  case ThrowDivisionByZeroError:
   case MapIdx:
   case StMBase:
   case FinishMemberOp:
@@ -691,8 +696,13 @@ bool findWeakActRecUses(const BlockList& blocks,
     if (state[inst].isDead()) return;
 
     switch (inst->op()) {
-    // We don't need to generate stores to a frame if it can be eliminated.
+    // these can be made stack relative
     case StLoc:
+    case LdLoc:
+    case CheckLoc:
+    case AssertLoc:
+    case LdLocAddr:
+    case HintLocInner:
       incWeak(inst, inst->src(0));
       break;
 
@@ -717,37 +727,7 @@ bool findWeakActRecUses(const BlockList& blocks,
 
           // Ensure that the frame is still dead for the purposes of
           // memory-effects
-          auto const spInst = frameInst->src(0)->inst();
-          InlineReturnNoFrameData data {
-            // +-------------------+
-            // |                   |
-            // | Outer Frame       |
-            // |                   |  <-- FP    --- ---
-            // +-------------------+             |   |
-            // |                   |             |   |  B: DefSP.offset
-            // | ...               |             |   |     (FPInvOffset, >= 0)
-            // +-------------------+             |   |
-            // |                   |  <-- SP     |  ---
-            // +-------------------+           C |   |
-            // |                   |             |   |
-            // | ...               |             |   |  A: DefInlineFP.spOffset
-            // +-------------------+             |   |     (IRSPRelOffset, <= 0)
-            // |                   |            ---  |
-            // | Callee Frame      |                 |
-            // |                   |                ---
-            // +-------------------+
-            //
-            // What we're trying to compute is C, a FPRelOffset (<0) from the
-            // Outer FP to the top cell in the Callee Frame. From the picture,
-            // we have |C| = |A| + |B| - 2. To get the negative result, A
-            // already has the correct sign, but we need to negate B and the
-            // minus 2 becomes +2, so: C = A - B + 2.
-            FPRelOffset {
-              frameInst->extra<DefInlineFP>()->spOffset.offset -
-              spInst->extra<DefSP>()->offset.offset + 2
-            }
-          };
-          unit.replace(inst, InlineReturnNoFrame, data);
+          convertToInlineReturnNoFrame(unit, *inst);
         }
       }
       break;
@@ -760,6 +740,20 @@ bool findWeakActRecUses(const BlockList& blocks,
   });
 
   return killedFrames;
+}
+
+/*
+ * Convert a localId in a callee frame into an SP relative offset in the caller
+ * frame.
+ */
+IRSPOffset locToStkOff(IRInstruction& inst) {
+  assertx(inst.is(LdLoc, StLoc, LdLocAddr, AssertLoc, CheckLoc, HintLocInner));
+
+  auto locId = inst.extra<LocalId>()->locId;
+  auto fpInst = inst.src(0)->inst();
+  assertx(fpInst->is(DefInlineFP));
+
+  return fpInst->extra<DefInlineFP>()->spOffset - locId - 1;
 }
 
 /*
@@ -812,9 +806,13 @@ void performActRecFixups(const BlockList& blocks,
         break;
 
       case StLoc:
+      case LdLoc:
+      case LdLocAddr:
+      case AssertLoc:
+      case CheckLoc:
+      case HintLocInner:
         if (state[inst.src(0)->inst()].isDead()) {
-          ITRACE(3, "marking {} as dead\n", inst);
-          state[inst].setDead();
+          convertToStackInst(unit, inst);
         }
         break;
 
@@ -870,6 +868,90 @@ void optimizeActRecs(const BlockList& blocks,
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
+
+void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
+  assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner));
+  assertx(inst.src(0)->inst()->is(DefInlineFP));
+  switch (inst.op()) {
+    case StLoc: {
+      IRSPOffsetData data {locToStkOff(inst)};
+      unit.replace(&inst, StStk, data, unit.mainSP(), inst.src(1));
+      return;
+    }
+    case LdLoc: {
+      auto ty = inst.typeParam();
+      IRSPOffsetData data {locToStkOff(inst)};
+      unit.replace(&inst, LdStk, data, ty, unit.mainSP());
+      return;
+    }
+    case LdLocAddr: {
+      auto ty = inst.typeParam().deref().ptr(Ptr::Stk);
+      IRSPOffsetData data {locToStkOff(inst)};
+      unit.replace(&inst, LdStkAddr, data, ty, unit.mainSP());
+      return;
+    }
+    case AssertLoc: {
+      auto ty = inst.typeParam();
+      IRSPOffsetData data {locToStkOff(inst)};
+      unit.replace(&inst, AssertStk, data, ty, unit.mainSP());
+      return;
+    }
+    case CheckLoc: {
+      auto ty = inst.typeParam();
+      // NOTE: RelOffsetData takes an optional BCSPOffset but it only gets
+      // read inside of region-tracelet when we walk guards-- if we're
+      // killing an inlined frame its locals won't be part of the guards
+      RelOffsetData data {locToStkOff(inst)};
+      unit.replace(&inst, CheckStk, data, ty, unit.mainSP());
+      return;
+    }
+    case HintLocInner: {
+      auto ty = inst.typeParam();
+      // NOTE: same as above
+      RelOffsetData data {locToStkOff(inst)};
+      unit.replace(&inst, HintStkInner, data, ty, unit.mainSP());
+      return;
+    }
+    default: break;
+  }
+  not_reached();
+}
+
+void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
+  assertx(inst.is(InlineReturn));
+  auto const frameInst = inst.src(0)->inst();
+  auto const spInst = frameInst->src(0)->inst();
+  InlineReturnNoFrameData data {
+    // +-------------------+
+    // |                   |
+    // | Outer Frame       |
+    // |                   |  <-- FP    --- ---
+    // +-------------------+             |   |
+    // |                   |             |   |  B: DefSP.offset
+    // | ...               |             |   |     (FPInvOffset, >= 0)
+    // +-------------------+             |   |
+    // |                   |  <-- SP     |  ---
+    // +-------------------+           C |   |
+    // |                   |             |   |
+    // | ...               |             |   |  A: DefInlineFP.spOffset
+    // +-------------------+             |   |     (IRSPRelOffset, <= 0)
+    // |                   |            ---  |
+    // | Callee Frame      |                 |
+    // |                   |                ---
+    // +-------------------+
+    //
+    // What we're trying to compute is C, a FPRelOffset (<0) from the
+    // Outer FP to the top cell in the Callee Frame. From the picture,
+    // we have |C| = |A| + |B| - 2. To get the negative result, A
+    // already has the correct sign, but we need to negate B and the
+    // minus 2 becomes +2, so: C = A - B + 2.
+    FPRelOffset {
+      frameInst->extra<DefInlineFP>()->spOffset.offset -
+        spInst->extra<DefSP>()->offset.offset + 2
+    }
+  };
+  unit.replace(&inst, InlineReturnNoFrame, data);
+}
 
 void mandatoryDCE(IRUnit& unit) {
   if (removeUnreachable(unit)) {

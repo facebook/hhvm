@@ -10,12 +10,6 @@ class StandardExtension final : public Extension {
  public:
   StandardExtension() : Extension("standard") {}
 
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
-    // Closure must be hoisted before anything which extends from it.
-    // So we place it in the global systemlib and bind its dependencies early.
-    initClosure();
-  }
-
   void moduleInit() override {
     initStandard();
     initErrorFunc();
@@ -47,7 +41,6 @@ class StandardExtension final : public Extension {
   void initStandard();
   void initErrorFunc();
   void initClassobj();
-  void initClosure();
   void initNetwork();
   void initOptions();
   void initGc();

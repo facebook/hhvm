@@ -81,7 +81,7 @@ struct TypeAlias {
 
     TypedValue tv;
     sd(tv);
-    assert(tv.m_type == KindOfArray);
+    assert(isArrayType(tv.m_type));
     typeStructure = tv.m_data.parr;
   }
 

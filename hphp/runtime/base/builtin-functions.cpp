@@ -120,7 +120,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     return ret;
   }
 
-  if (tv_func->m_type == KindOfArray) {
+  if (isArrayType(tv_func->m_type)) {
     const Array& arr = Array(tv_func->m_data.parr);
     const Variant& clsname = arr.rvalAtRef(int64_t(0));
     const Variant& mthname = arr.rvalAtRef(int64_t(1));
@@ -155,7 +155,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     ObjectData *d = tv_func->m_data.pobj;
     const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
     if (name) {
-      if (d->instanceof(Closure::classof())) {
+      if (d->instanceof(c_Closure::classof())) {
         // Hack to stop the mangled name from showing up
         *name->var() = s_Closure__invoke;
       } else {
@@ -460,11 +460,13 @@ static Variant invoke_failed(const char *func,
 
 static Variant invoke(const String& function, const Variant& params,
                       strhash_t hash, bool tryInterp,
-                      bool fatal) {
+                      bool fatal, bool useWeakTypes = false) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     Variant ret;
-    g_context->invokeFunc(ret.asTypedValue(), func, params);
+    g_context->invokeFunc(ret.asTypedValue(), func, params, nullptr, nullptr,
+                          nullptr, nullptr, ExecutionContext::InvokeNormal,
+                          useWeakTypes);
     if (UNLIKELY(ret.getRawType()) == KindOfRef) {
       tvUnbox(ret.asTypedValue());
     }
@@ -476,9 +478,10 @@ static Variant invoke(const String& function, const Variant& params,
 // Declared in externals.h.  If you're considering calling this
 // function for some new code, please reconsider.
 Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
-               bool tryInterp /* = true */, bool fatal /* = true */) {
+               bool tryInterp /* = true */, bool fatal /* = true */,
+               bool useWeakTypes /* = false */) {
   String funcName(function, CopyString);
-  return invoke(funcName, params, hash, tryInterp, fatal);
+  return invoke(funcName, params, hash, tryInterp, fatal, useWeakTypes);
 }
 
 Variant invoke_static_method(const String& s, const String& method,
@@ -509,7 +512,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
     msg += cls;
     msg += "::";
     msg += meth;
-    throw FatalErrorException(msg.c_str());
+    raise_fatal_error(msg.c_str());
   } else {
     raise_warning("call_user_func to non-existent method %s::%s", cls, meth);
     return false;
@@ -554,6 +557,14 @@ void throw_collection_property_exception() {
 
 void throw_invalid_operation_exception(StringData* str) {
   SystemLib::throwInvalidOperationExceptionObject(Variant{str});
+}
+
+void throw_arithmetic_error(StringData* str) {
+  SystemLib::throwArithmeticErrorObject(Variant{str});
+}
+
+void throw_division_by_zero_error(StringData *str) {
+  SystemLib::throwDivisionByZeroErrorObject(Variant{str});
 }
 
 void throw_collection_compare_exception() {
@@ -974,7 +985,7 @@ static Variant include_impl(const String& file, bool once,
     if (required) {
       String ms = "Required file that does not exist: ";
       ms += file;
-      throw FatalErrorException(ms.data());
+      raise_fatal_error(ms.data());
     }
     return false;
   }
@@ -999,9 +1010,8 @@ bool function_exists(const String& function_name) {
 // debugger and code coverage instrumentation
 
 void throw_exception(const Object& e) {
-  if (!e.instanceof(SystemLib::s_ExceptionClass)) {
-    raise_error("Exceptions must be valid objects derived from the "
-                "Exception base class");
+  if (!e.instanceof(SystemLib::s_ThrowableClass)) {
+    raise_error("Exceptions must implement the Throwable interface.");
   }
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(e.get()));
   throw e;

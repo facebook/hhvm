@@ -135,7 +135,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
                              const String& num_prefix, const String& key_prefix,
                              const String& key_suffix, const String& arg_sep,
                              bool encode_plus = true) {
-  void *id = varr.is(KindOfArray) ?
+  void *id = varr.isArray() ?
     (void*)varr.getArrayData() : (void*)varr.getObjectData();
   if (!seen_arrs.insert(id).second) {
     return; // recursive
@@ -161,7 +161,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
     String key = iter.first();
     bool numeric = key.isNumeric();
 
-    if (data.is(KindOfArray) || data.is(KindOfObject)) {
+    if (data.isArray() || data.is(KindOfObject)) {
       String encoded;
       if (numeric) {
         encoded = key;
@@ -208,7 +208,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const String& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */,
                            int enc_type /* = k_PHP_QUERY_RFC1738 */) {
-  if (!formdata.is(KindOfArray) && !formdata.is(KindOfObject)) {
+  if (!formdata.isArray() && !formdata.is(KindOfObject)) {
     throw_invalid_argument("formdata: (need Array or Object)");
     return false;
   }

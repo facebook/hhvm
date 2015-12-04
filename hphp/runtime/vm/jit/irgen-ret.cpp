@@ -95,6 +95,9 @@ void freeLocalsAndThis(IRGS& env) {
 
 void normalReturn(IRGS& env, SSATmp* retval) {
   gen(env, StRetVal, fp(env), retval);
+  if (curFunc(env)->isAsyncFunction() && !resumed(env)) {
+    gen(env, StTVAux, fp(env), cns(env, 0));
+  }
   auto const data = RetCtrlData { offsetToReturnSlot(env), false };
   gen(env, RetCtrl, data, sp(env), fp(env));
 }
@@ -155,8 +158,23 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
     retSurpriseCheck(env, retVal);
 
     // Return from an eagerly-executed async function: wrap the return value in
-    // a StaticWaitHandle object and return that normally.
-    auto const wrapped = gen(env, CreateSSWH, retVal);
+    // a StaticWaitHandle object and return that normally, unless we were called
+    // via FCallAwait
+    auto const wrapped = cond(
+      env,
+      [&] (Block* taken) {
+        auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
+        auto test = gen(env, AndInt,
+                        flags,
+                        cns(env, ActRec::Flags::IsFCallAwait));
+        gen(env, JmpNZero, taken, test);
+      },
+      [&] {
+        return gen(env, CreateSSWH, retVal);
+      },
+      [&] {
+        return retVal;
+      });
     normalReturn(env, wrapped);
     return;
   }

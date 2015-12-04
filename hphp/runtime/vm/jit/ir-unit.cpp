@@ -29,11 +29,14 @@ TRACE_SET_MOD(hhir);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IRUnit::IRUnit(TransContext context)
-  : m_context(context)
-  , m_entry(defBlock()) // For Optimize translations, the entry block's
-                        // profCount is adjusted later in translateRegion.
-{}
+IRUnit::IRUnit(TransContext context) : m_context(context)
+{
+  // Setup m_entry after property initialization, since it depends on
+  // the value of m_defHint.
+  // For Optimize translations, the entry block's profCount is
+  // adjusted later in translateRegion.
+  m_entry = defBlock();
+}
 
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
@@ -77,6 +80,9 @@ Block* IRUnit::defBlock(uint64_t profCount /* =1 */,
                         Block::Hint hint   /* =Neither */ ) {
   FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId);
   auto const block = new (m_arena) Block(m_nextBlockId++, profCount);
+  if (hint == Block::Hint::Neither) {
+    hint = m_defHint;
+  }
   block->setHint(hint);
   return block;
 }
@@ -114,6 +120,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case RaiseError:
     case ThrowOutOfBounds:
     case ThrowInvalidOperation:
+    case ThrowArithmeticError:
+    case ThrowDivisionByZeroError:
       return instSk == sk;
 
     // The RetCtrl is generally ending a bytecode instruction, with the

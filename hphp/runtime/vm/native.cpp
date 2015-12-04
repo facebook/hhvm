@@ -234,6 +234,7 @@ void callFunc(const Func* func, void *ctx,
 
     case KindOfStaticString:
     case KindOfString:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -279,7 +280,7 @@ void callFunc(const Func* func, void *ctx,
 
 bool coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
-                     const Func* func) {
+                     const Func* func, bool useStrictTypes) {
   assert(numArgs == func->numParams());
 
   bool paramCoerceMode = func->isParamCoerceMode();
@@ -301,13 +302,17 @@ bool coerceFCallArgs(TypedValue* args,
 
     // Skip tvCoerceParamTo*() call if we're already the right type
     if (args[-i].m_type == targetType ||
-        (isStringType(args[-i].m_type) &&
-         isStringType(targetType))) {
+        (isStringType(args[-i].m_type) && isStringType(targetType)) ||
+        (isArrayType(args[-i].m_type) && isArrayType(targetType))) {
       continue;
     }
 
     // No coercion or cast for Variants.
     if (!targetType) continue;
+    if (RuntimeOption::PHP7_ScalarTypes && useStrictTypes) {
+      tc.verifyParam(&args[-i], func, i, true);
+      return true;
+    }
 
     switch (*targetType) {
       CASE(Boolean)
@@ -330,6 +335,7 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfUninit:
       case KindOfNull:
       case KindOfStaticString:
+      case KindOfPersistentArray:
       case KindOfRef:
       case KindOfClass:
         not_reached();
@@ -392,13 +398,14 @@ TypedValue* functionWrapper(ActRec* ar) {
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
+  auto strict = !ar->useWeakTypes();
   TypedValue* args = ((TypedValue*)ar) - 1;
   TypedValue rv;
   rv.m_type = KindOfNull;
 
   if (((numNonDefault == numArgs) ||
        (nativeWrapperCheckArgs(ar))) &&
-      (coerceFCallArgs(args, numArgs, numNonDefault, func))) {
+      (coerceFCallArgs(args, numArgs, numNonDefault, func, strict))) {
     callFunc<usesDoubles>(func, nullptr, args, numNonDefault, rv);
   } else if (func->attrs() & AttrParamCoerceModeFalse) {
     rv.m_type = KindOfBoolean;
@@ -418,13 +425,14 @@ TypedValue* methodWrapper(ActRec* ar) {
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
   bool isStatic = func->isStatic();
+  auto strict = !ar->useWeakTypes();
   TypedValue* args = ((TypedValue*)ar) - 1;
   TypedValue rv;
   rv.m_type = KindOfNull;
 
   if (((numNonDefault == numArgs) ||
        (nativeWrapperCheckArgs(ar))) &&
-      (coerceFCallArgs(args, numArgs, numNonDefault, func))) {
+      (coerceFCallArgs(args, numArgs, numNonDefault, func, strict))) {
     // Prepend a context arg for methods
     // KindOfClass when it's being called statically Foo::bar()
     // KindOfObject when it's being called on an instance $foo->bar()
@@ -510,6 +518,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfObject:       return ty == T::Object   || ty == T::ObjectArg;
     case KindOfStaticString:
     case KindOfString:       return ty == T::String   || ty == T::StringArg;
+    case KindOfPersistentArray:
     case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:

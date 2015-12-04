@@ -47,14 +47,14 @@ const StaticString s_staticPrefix("86static_");
 RefData* lookupStaticFromClosure(ObjectData* closure,
                                  StringData* name,
                                  bool& inited) {
-  assertx(closure->instanceof(Closure::classof()));
+  assertx(closure->instanceof(c_Closure::classof()));
   auto str = String::attach(
     StringData::Make(s_staticPrefix.slice(), name->slice())
   );
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assertx(slot != kInvalidSlot);
-  auto const val = Native::data<Closure>(closure)->getStaticVar(slot);
+  auto const val = static_cast<c_Closure*>(closure)->getStaticVar(slot);
 
   if (val->m_type == KindOfUninit) {
     inited = false;
@@ -281,8 +281,10 @@ inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
+  tvCoerceIfStrict(tv, argNum, func);
+
   DataType type = tv.m_type;
-  if (type == KindOfArray || type == KindOfObject || type == KindOfResource) {
+  if (isArrayType(type) || type == KindOfObject || type == KindOfResource) {
     coerceCellFail(KindOfBoolean, type, argNum, func);
     not_reached();
   }
@@ -293,6 +295,12 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
 int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
   DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
 
+  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
+    auto tv = make_tv<KindOfString>(sd);
+
+    // In strict mode this will always fail, in weak mode it will be a noop
+    tvCoerceIfStrict(tv, argNum, func);
+  }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfDouble, KindOfString, argNum, func);
     not_reached();
@@ -303,6 +311,8 @@ int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
 
 int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
+
+  tvCoerceIfStrict(tv, argNum, func);
 
   switch (tv.m_type) {
     case KindOfNull:
@@ -316,6 +326,7 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -332,6 +343,12 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
   DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
 
+  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
+    auto tv = make_tv<KindOfString>(sd);
+
+    // In strict mode this will always fail, in weak mode it will be a noop
+    tvCoerceIfStrict(tv, argNum, func);
+  }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfInt64, KindOfString, argNum, func);
     not_reached();
@@ -342,6 +359,8 @@ int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
 
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
+
+  tvCoerceIfStrict(tv, argNum, func);
 
   switch (tv.m_type) {
     case KindOfNull:
@@ -355,6 +374,7 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -383,6 +403,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
                               /* fallthrough */
     case KindOfStaticString:
                               return tv.m_data.pstr;
+    case KindOfPersistentArray:
     case KindOfArray:         raise_notice("Array to string conversion");
                               return array_string.get();
     case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
@@ -449,32 +470,40 @@ void VerifyParamTypeFail(int paramNum) {
   const Func* func = ar->m_func;
   auto const& tc = func->params()[paramNum].typeConstraint;
   TypedValue* tv = frame_local(ar, paramNum);
+  auto unit = func->unit();
+  bool useStrictTypes =
+    unit->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
+    !ar->useWeakTypes();
   assertx(!tc.check(tv, func));
-  tc.verifyParamFail(func, tv, paramNum);
+  tc.verifyParamFail(func, tv, paramNum, useStrictTypes);
 }
 
 void VerifyRetTypeSlow(const Class* cls,
                        const Class* constraint,
                        const HPHP::TypeConstraint* expected,
-                       const TypedValue tv) {
+                       TypedValue tv) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyRetTypeFail(tv);
+    VerifyRetTypeFail(&tv);
   }
 }
 
 void VerifyRetTypeCallable(TypedValue value) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyRetTypeFail(value);
+    VerifyRetTypeFail(&value);
   }
 }
 
-void VerifyRetTypeFail(TypedValue tv) {
+void VerifyRetTypeFail(TypedValue* tv) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
   const HPHP::TypeConstraint& tc = func->returnTypeConstraint();
-  assertx(!tc.check(&tv, func));
-  tc.verifyReturnFail(func, &tv);
+  auto unit = func->unit();
+  bool useStrictTypes =
+    RuntimeOption::EnableHipHopSyntax || func->isBuiltin() ||
+    unit->useStrictTypes();
+  assertx(!tc.check(tv, func));
+  tc.verifyReturnFail(func, tv, useStrictTypes);
 }
 
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
@@ -652,6 +681,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfBoolean:
       case KindOfStaticString:
       case KindOfString:
+      case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -990,13 +1020,13 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
   }
 }
 
-const Func* loadClassCtor(Class* cls) {
+const Func* loadClassCtor(Class* cls, ActRec* fp) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    VMRegAnchor _;
-    UNUSED LookupResult res =
-      g_context->lookupCtorMethod(f, cls, true /*raise*/);
-    assertx(res == LookupResult::MethodFoundWithThis);
+    auto const ctx = arGetContextClass(fp);
+    UNUSED auto func =
+      g_context->lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, true);
+    assertx(func == f);
   }
   return f;
 }
@@ -1025,7 +1055,7 @@ const Func* lookupFallbackFunc(const StringData* name,
   return func;
 }
 
-Class* lookupKnownClass(Class** cache, const StringData* clsName) {
+Class* lookupKnownClass(LowPtr<Class>* cache, const StringData* clsName) {
   Class* cls = *cache;
   assertx(!cls); // the caller should already have checked
 

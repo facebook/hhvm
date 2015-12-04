@@ -39,6 +39,8 @@ namespace HPHP { namespace jit {
 struct Block : boost::noncopyable {
   typedef InstructionList::iterator iterator;
   typedef InstructionList::const_iterator const_iterator;
+  typedef InstructionList::reverse_iterator reverse_iterator;
+  typedef InstructionList::const_reverse_iterator const_reverse_iterator;
   typedef InstructionList::reference reference;
   typedef InstructionList::const_reference const_reference;
 
@@ -165,6 +167,10 @@ struct Block : boost::noncopyable {
   iterator         end()         { return m_instrs.end(); }
   const_iterator   begin() const { return m_instrs.begin(); }
   const_iterator   end()   const { return m_instrs.end(); }
+  reverse_iterator rbegin()       { return m_instrs.rbegin(); }
+  reverse_iterator rend()         { return m_instrs.rend(); }
+  const_reverse_iterator rbegin() const { return m_instrs.rbegin(); }
+  const_reverse_iterator rend()   const { return m_instrs.rend(); }
   iterator         erase(iterator pos);
   iterator         erase(IRInstruction* inst);
   iterator insert(iterator pos, IRInstruction* inst);

@@ -104,7 +104,8 @@ public:
   x(TraitPrecStatement)     \
   x(TraitAliasStatement)    \
   x(TypedefStatement)       \
-  x(UseDeclarationStatementFragment)
+  x(UseDeclarationStatementFragment) \
+  x(DeclareStatement)
 
 #define DECLARE_EXPRESSION_TYPES(x)     \
   x(Expression,                  None) \
@@ -135,6 +136,7 @@ public:
   x(ClosureExpression,           None) \
   x(ClassExpression,             None) \
   x(YieldExpression,             None) \
+  x(YieldFromExpression,         None) \
   x(AwaitExpression,             None) \
   x(UserAttribute,               None)
 

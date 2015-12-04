@@ -59,7 +59,7 @@ inline bool is_bool(const Variant& v)   { return v.is(KindOfBoolean);}
 inline bool is_int(const Variant& v)    { return v.isInteger();}
 inline bool is_double(const Variant& v) { return v.is(KindOfDouble);}
 inline bool is_string(const Variant& v) { return v.isString();}
-inline bool is_array(const Variant& v)  { return v.is(KindOfArray);}
+inline bool is_array(const Variant& v)  { return v.isArray();}
 
 inline bool is_object(const Variant& var) {
   if (!var.is(KindOfObject)) {
@@ -120,6 +120,8 @@ bool is_constructor_name(const char* func);
 void throw_instance_method_fatal(const char *name);
 
 ATTRIBUTE_NORETURN void throw_invalid_operation_exception(StringData*);
+ATTRIBUTE_NORETURN void throw_arithmetic_error(StringData*);
+ATTRIBUTE_NORETURN void throw_division_by_zero_error(StringData*);
 ATTRIBUTE_NORETURN void throw_iterator_not_valid();
 ATTRIBUTE_NORETURN void throw_collection_modified();
 ATTRIBUTE_NORETURN void throw_collection_property_exception();

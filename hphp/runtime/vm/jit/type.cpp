@@ -109,6 +109,9 @@ std::string Type::constValString() const {
   if (*this <= TRDSHandle) {
     return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   }
+  if (*this <= TPtrToGen) {
+    return folly::sformat("TV: {}", m_ptrVal);
+  }
 
   always_assert_flog(false, "Bad type in constValString(): {:#16x}:{:#16x}",
                      m_raw, m_extra);
@@ -259,6 +262,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfDouble        : return kDbl;
     case KindOfStaticString  : return kStaticStr;
     case KindOfString        : return kStr;
+    case KindOfPersistentArray   : return kPersistentArr;
     case KindOfArray         : return kArr;
     case KindOfResource      : return kRes;
     case KindOfObject        : return kObj;
@@ -283,6 +287,7 @@ DataType Type::toDataType() const {
   if (*this <= TDbl)         return KindOfDouble;
   if (*this <= TStaticStr)   return KindOfStaticString;
   if (*this <= TStr)         return KindOfString;
+  if (*this <= TPersistentArr)   return KindOfPersistentArray;
   if (*this <= TArr)         return KindOfArray;
   if (*this <= TObj)         return KindOfObject;
   if (*this <= TRes)         return KindOfResource;
@@ -528,7 +533,7 @@ Type typeFromTV(const TypedValue* tv) {
     return Type::ExactObj(cls);
   }
 
-  if (tv->m_type == KindOfArray) {
+  if (isArrayType(tv->m_type)) {
     auto const ar = tv->m_data.parr;
     if (ar->kind() == ArrayData::kStructKind) {
       return Type::Array(StructArray::asStructArray(ar)->shape());
@@ -543,6 +548,7 @@ Type typeFromTV(const TypedValue* tv) {
   if (outer == KindOfRef) {
     inner = tv->m_data.pref->tv()->m_type;
     if (inner == KindOfStaticString) inner = KindOfString;
+    else if (inner == KindOfPersistentArray) inner = KindOfArray;
   }
   return Type(outer, inner);
 }
@@ -574,7 +580,7 @@ Type typeFromRAT(RepoAuthType ty) {
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;
-    case T::InitGen:        return TInit;
+    case T::InitGen:        return TInitGen;
     case T::Gen:            return TGen;
 
     // TODO(#4205897): option specialized array types
@@ -631,7 +637,7 @@ Type negativeCheckType(Type srcType, Type typeParam) {
   // They may reject some Statics in some situations, where we only guard using
   // the type tag and not by loading the count field.
   auto tmp = srcType - typeParam;
-  if (typeParam.maybe(TStatic)) {
+  if (typeParam.maybe(TPersistent)) {
     if (tmp.maybe(TCountedStr)) tmp |= TStr;
     if (tmp.maybe(TCountedArr)) tmp |= TArr;
   }

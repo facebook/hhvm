@@ -346,7 +346,7 @@ inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
-inline void Class::setClassHandle(rds::Link<Class*> link) const {
+inline void Class::setClassHandle(rds::Link<LowPtr<Class>> link) const {
   assert(!m_cachedClass.bound());
   m_cachedClass = link;
 }

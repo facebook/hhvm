@@ -33,7 +33,7 @@ namespace {
 
   void putException(Object& exception_field, ObjectData* new_exception) {
     assert(new_exception);
-    assert(new_exception->instanceof(SystemLib::s_ExceptionClass));
+    assert(new_exception->instanceof(SystemLib::s_ThrowableClass));
 
     if (exception_field.isNull()) {
       exception_field.reset(new_exception);

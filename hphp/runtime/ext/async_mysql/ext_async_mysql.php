@@ -295,7 +295,7 @@ final class AsyncMysqlConnection {
    *  - `%Q`   raw SQL query. The typechecker intentionally does not recognize
    *           this, however, you can use it in combination with // UNSAFE
    *           if absolutely required. Use this at your own risk as it could
-   *           open you up for SQL injuection.
+   *           open you up for SQL injection.
    *
    * With the exception of `%Q`, any strings provided will be properly
    * escaped.
@@ -940,7 +940,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
   function mapRows(): Vector<Map>;
 
   /**
-   * Returns the actual rows reeturned by the successful query, each row
+   * Returns the actual rows returned by the successful query, each row
    * including the values for each column.
    *
    * All values come back as `string`s. If you want typed values, use
@@ -973,7 +973,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
   function mapRowsTyped(): Vector;
 
   /**
-   * Returns the actual rows reeturned by the successful query, each row
+   * Returns the actual rows returned by the successful query, each row
    * including the typed values for each column.
    *
    * The rows are returned as a `Vector` of `Vector` objects which hold the

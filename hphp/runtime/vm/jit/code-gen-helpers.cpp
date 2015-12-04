@@ -232,12 +232,6 @@ Vptr lookupDestructor(Vout& v, Vreg type) {
     "Destructor function table is expected to be in the data "
     "segment, with addresses less than 2^31"
   );
-  static_assert((KindOfString   >> kShiftDataTypeToDestrIndex == 1) &&
-                (KindOfArray    >> kShiftDataTypeToDestrIndex == 2) &&
-                (KindOfObject   >> kShiftDataTypeToDestrIndex == 3) &&
-                (KindOfResource >> kShiftDataTypeToDestrIndex == 4) &&
-                (KindOfRef      >> kShiftDataTypeToDestrIndex == 5),
-                "lookup of destructors depends on KindOf* values");
   auto index = v.makeReg();
   v << shrli{kShiftDataTypeToDestrIndex, type, index, v.makeReg()};
   return baseless(index * 8 + safe_cast<int>(table));

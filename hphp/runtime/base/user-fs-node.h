@@ -42,7 +42,7 @@ protected:
   const Func* lookupMethod(const StringData* name);
 
 protected:
-  const Func* m_Call;
+  LowPtr<const Func> m_Call;
   LowPtr<Class> m_cls;
   Object m_obj;
 };

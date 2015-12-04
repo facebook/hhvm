@@ -71,7 +71,7 @@ const String& ResourceData::o_getClassName() const {
 }
 
 const String& ResourceData::o_getClassNameHook() const {
-  throw FatalErrorException("Resource did not provide a name");
+  raise_fatal_error("Resource did not provide a name");
 }
 
 const String& ResourceData::o_getResourceName() const {

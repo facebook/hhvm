@@ -190,6 +190,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfDouble:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

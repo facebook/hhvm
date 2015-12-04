@@ -80,8 +80,8 @@ struct ClassCache {
 //////////////////////////////////////////////////////////////////////
 
 struct StaticMethodCache {
-  const Func* m_func;
-  const Class* m_cls;
+  LowPtr<const Func> m_func;
+  LowPtr<const Class> m_cls;
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
@@ -92,7 +92,7 @@ struct StaticMethodCache {
 };
 
 struct StaticMethodFCache {
-  const Func* m_func;
+  LowPtr<const Func> m_func;
   int m_static;
 
   static rds::Handle alloc(const StringData* cls,

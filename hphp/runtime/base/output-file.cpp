@@ -29,7 +29,7 @@ const StaticString s_output("Output");
 
 OutputFile::OutputFile(const String& filename): File(true, s_php, s_output) {
   if (filename != s_php_output) {
-    throw FatalErrorException("not a php://output file ");
+    raise_fatal_error("not a php://output file ");
   }
   setIsLocal(true);
 }
@@ -44,7 +44,7 @@ void OutputFile::sweep() {
 }
 
 bool OutputFile::open(const String& filename, const String& mode) {
-  throw FatalErrorException("cannot open a php://output file ");
+  raise_fatal_error("cannot open a php://output file ");
 }
 
 bool OutputFile::close() {

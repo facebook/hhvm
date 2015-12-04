@@ -84,6 +84,14 @@ using StrIntCmpFnInt = int64_t (*)(const StringData*, int64_t);
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+static auto Generator_Create_false = &Generator::Create<false>;
+static auto c_AsyncFunctionWaitHandle_Create_true =
+  &c_AsyncFunctionWaitHandle::Create<true>;
+static auto c_AsyncFunctionWaitHandle_Create_false =
+  &c_AsyncFunctionWaitHandle::Create<false>;
+#endif
+
 /*
  * The table passed to s_callMap's constructor describes helpers calls
  * used by translated code. Each row consists of the following values:
@@ -221,7 +229,7 @@ static CallMap s_callMap {
                            {{extra(&ClassData::cls)}}},
     {RegisterLiveObj,    registerLiveObj, DNone, SNone, {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
-                           {{SSA, 0}}},
+                           {{SSA, 0}, {SSA, 1}}},
     {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SSync, {{SSA, 0}}},
@@ -234,7 +242,7 @@ static CallMap s_callMap {
     {VerifyRetCls,       VerifyRetTypeSlow, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {TV, 3}}},
     {VerifyRetCallable,  VerifyRetTypeCallable, DNone, SSync, {{TV, 0}}},
-    {VerifyRetFail,      VerifyRetTypeFail, DNone, SSync, {{TV, 0}}},
+    {VerifyRetFail,      VerifyRetTypeFail, DNone, SSync, {{SSA, 0}}},
     {RaiseUninitLoc,     raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseError,         raise_error_sd, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
@@ -258,6 +266,10 @@ static CallMap s_callMap {
     {MapIdx,             mapIdx, DTV, SSync,
                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {ThrowInvalidOperation, throw_invalid_operation_exception,
+                          DNone, SSync, {{SSA, 0}}},
+    {ThrowArithmeticError, throw_arithmetic_error,
+                          DNone, SSync, {{SSA, 0}}},
+    {ThrowDivisionByZeroError, throw_division_by_zero_error,
                           DNone, SSync, {{SSA, 0}}},
     {HasToString,        &ObjectData::hasToString, DSSA, SSync,
                           {{SSA, 0}}},
@@ -359,14 +371,26 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Generator support helpers */
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+    {CreateCont,         Generator_Create_false, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
+#else
     {CreateCont,         &Generator::Create<false>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
+#endif
 
     /* Async function support helpers */
+#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
+    {CreateAFWH,         c_AsyncFunctionWaitHandle_Create_true, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+    {CreateAFWHNoVV,     c_AsyncFunctionWaitHandle_Create_false, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+#else
     {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create<true>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {CreateAFWHNoVV,     &c_AsyncFunctionWaitHandle::Create<false>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+#endif
     {CreateSSWH,         &c_StaticWaitHandle::CreateSucceeded, DSSA, SNone,
                            {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,

@@ -26,8 +26,7 @@ inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
   , m_cachedFunc(ne.m_cachedFunc)
   , m_cachedTypeAlias(ne.m_cachedTypeAlias)
 {
-  m_clsList.store(ne.m_clsList.load(std::memory_order_acquire),
-                  std::memory_order_release);
+  m_clsList = ne.m_clsList;
 }
 
 inline rds::Handle NamedEntity::getFuncHandle() const {
@@ -41,7 +40,7 @@ inline rds::Handle NamedEntity::getClassHandle() const {
 }
 
 inline Class* NamedEntity::clsList() const {
-  return m_clsList.load(std::memory_order_acquire);
+  return m_clsList;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

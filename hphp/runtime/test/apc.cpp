@@ -99,6 +99,7 @@ std::unique_ptr<Store> new_primed_store() {
 
 const StaticString s_key("key");
 const StaticString s_key2("key2");
+const StaticString s_foo("foo");
 const StaticString s_value1("value1");
 const StaticString s_value2("value2");
 
@@ -211,6 +212,34 @@ TEST(APC, BasicPrimeStuff) {
   EXPECT_EQ(store->cas("obj_2", 4, 5), false);
   EXPECT_EQ(store->cas("int_4", 4, 5), true);
   EXPECT_EQ(store->cas("int_5", 4, 5), false);
+}
+
+TEST(APC, SampleEntries) {
+  auto store = new_store();
+  // Empty store gives an empty sample.
+  auto entries = store->sampleEntriesInfo(10);
+  EXPECT_EQ(entries.size(), 0);
+  // Single-element store results in repetition.
+  store->set(s_foo, s_value1, 1500);
+  for (uint32_t count = 0; count <= 10; ++count) {
+    entries = store->sampleEntriesInfo(count);
+    EXPECT_EQ(entries.size(), count);
+    for (const auto& entry : entries) {
+      EXPECT_STREQ(entry.key.c_str(), "foo");
+    }
+  }
+  // More entries.
+  store->set(s_key, s_value1, 1500);
+  store->set(s_key2, s_value2, 1500);
+  for (uint32_t count = 0; count <= 10; ++count) {
+    entries = store->sampleEntriesInfo(count);
+    EXPECT_EQ(entries.size(), count);
+    for (const auto& entry : entries) {
+      EXPECT_TRUE(entry.key == std::string("foo") ||
+                  entry.key == std::string("key") ||
+                  entry.key == std::string("key2"));
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

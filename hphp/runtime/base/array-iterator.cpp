@@ -213,7 +213,7 @@ void ArrayIter::objInit(ObjectData* obj) {
 
 void ArrayIter::cellInit(const Cell c) {
   assert(cellIsPlausible(c));
-  if (LIKELY(c.m_type == KindOfArray)) {
+  if (LIKELY(isArrayType(c.m_type))) {
     arrInit(c.m_data.parr);
   } else if (LIKELY(c.m_type == KindOfObject)) {
     objInit<true>(c.m_data.pobj);
@@ -415,7 +415,7 @@ Variant ArrayIter::second() {
 
 const Variant& ArrayIter::secondRef() {
   if (!hasArrayData()) {
-    throw FatalErrorException("taking reference on iterator objects");
+    raise_fatal_error("taking reference on iterator objects");
   }
   assert(hasArrayData());
   const ArrayData* ad = getArrayData();
@@ -596,7 +596,7 @@ X(3);
 X(4);
 X(5);
 X(6);
-  static_assert(tl_miter_table.ents.size() == 7, "");
+  static_assert(tl_miter_table.ents_size == 7, "");
 #undef X
   return find_empty_strong_iter_slower();
 }
@@ -658,7 +658,7 @@ void free_strong_iterator_impl(Cond cond) {
   rm(tl_miter_table.ents[4]);
   rm(tl_miter_table.ents[5]);
   rm(tl_miter_table.ents[6]);
-  static_assert(tl_miter_table.ents.size() == 7, "");
+  static_assert(tl_miter_table.ents_size == 7, "");
 
   if (UNLIKELY(pvalid != nullptr)) {
     std::swap(*pvalid, tl_miter_table.ents[0]);
@@ -886,7 +886,7 @@ CufIter::~CufIter() {
 bool Iter::init(TypedValue* c1) {
   assert(c1->m_type != KindOfRef);
   bool hasElems = true;
-  if (c1->m_type == KindOfArray) {
+  if (isArrayType(c1->m_type)) {
     if (!c1->m_data.parr->empty()) {
       (void) new (&arr()) ArrayIter(c1->m_data.parr);
       arr().setIterType(ArrayIter::TypeArray);

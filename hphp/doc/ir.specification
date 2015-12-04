@@ -938,10 +938,10 @@ To string conversions:
   Loads into D the class representing the current context. Extracts the class
   from the S0, which is a context class.
 
-| LdClsCtor, D(Func), S(Cls), Er
+| LdClsCtor, D(Func), S(Cls) S(FramePtr), Er
 
   Loads into D the constructor of class S0. If the constructor cannot be called
-  from the current context, raise an error.
+  from the context in S1, raise an error.
 
 | DefConst<T>, DParam, NA, NF
 
@@ -1616,7 +1616,7 @@ To string conversions:
 
   Verify a return type hint.
 
-| VerifyRetFail, ND, S(Gen), Er
+| VerifyRetFail, ND, S(PtrToGen), Er
 
   Failure to verify a return type hint.
 
@@ -2451,6 +2451,14 @@ fields of that struct for holding intermediate values.
 
   Throws an InvalidOperationException with a message indicating S0.
 
+| ThrowArithmeticError, ND, S(Str), Er|T
+
+  Throws an ArithmeticError with a message indicating S0.
+
+| ThrowDivisionByZeroError, ND, S(Str), Er|T
+
+  Throws a DivisionByZeroError with a message indicating S0.
+
 | ProfilePackedArray, ND, S(Arr), NF
 
   Profile type of array S0 (i.e. whether it is packed or ).
@@ -2600,6 +2608,14 @@ fields of that struct for holding intermediate values.
   Call MixedArray::MakePacked() with the value of numArgs() on the ActRec
   pointed to by the frame pointer S0 as the first argument, and the pointer to
   the first parameter in the frame as the second argument.
+
+| LdTVAux, D(Int), S(PtrToStkGen), NF
+
+  Load the value of m_aux from the Cell pointed to by S0
+
+| StTVAux, ND, S(FramePtr) S(Int), CRc
+
+  Store S1 to m_aux field of the m_ret field of the frame pointed to by S0.
 
 /* Local Variables: */
 /* fill-column: 79 */

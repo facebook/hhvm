@@ -49,6 +49,9 @@ enum SurpriseFlag : size_t {
   /* Set if a GC should be run at the next safe point. */
   PendingGCFlag        = 1ull << 60,
 
+  /* Set when memory threshold exceeds a PHP specified limit */
+  MemThresholdFlag     = 1ull << 61,
+
   /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to

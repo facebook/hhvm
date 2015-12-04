@@ -266,6 +266,14 @@ struct UniqueStubs {
   TCA resumeHelper;
 
   /*
+   * Finish suspending a stack of FCallAwaits.
+   * See comments for handleFCallAwaitSuspend.
+   *
+   * Expects that all VM registers are synced.
+   */
+  TCA fcallAwaitSuspendHelper;
+
+  /*
    * Like resumeHelper, but specifically for an interpreted FCall.
    *
    * @reached:  jmp from fcallHelperThunk

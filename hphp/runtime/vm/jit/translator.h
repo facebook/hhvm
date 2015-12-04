@@ -598,9 +598,8 @@ const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
  */
 inline bool isReqPtrRef(MaybeDataType t) {
-  return t == KindOfString || t == KindOfStaticString ||
-         t == KindOfArray || t == KindOfObject ||
-         t == KindOfResource;
+  return isStringType(t) || isArrayType(t) ||
+         t == KindOfObject || t == KindOfResource;
 }
 
 /*

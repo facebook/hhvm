@@ -337,6 +337,10 @@ void MemoryManager::refreshStatsHelperExceeded() {
   }
 }
 
+void MemoryManager::setMemThresholdCallback(size_t threshold) {
+  m_memThresholdCallbackPeakUsage = threshold;
+}
+
 #ifdef USE_JEMALLOC
 void MemoryManager::refreshStatsHelperStop() {
   HttpServer::Server->stop();
@@ -425,7 +429,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "After stats sync:\n");
     FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
       stats.usage, stats.totalAlloc);
-}
+  }
 #endif
   assert(stats.maxBytes > 0);
   if (live && stats.usage > stats.maxBytes && m_couldOOM) {
@@ -449,6 +453,12 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       refreshStatsHelperStop();
     }
 #endif
+    if (live &&
+        stats.usage > m_memThresholdCallbackPeakUsage &&
+        stats.peakUsage <= m_memThresholdCallbackPeakUsage) {
+      setSurpriseFlag(MemThresholdFlag);
+    }
+
     stats.peakUsage = stats.usage;
   }
   if (live && m_statsIntervalActive) {
@@ -778,81 +788,6 @@ void MemoryManager::checkHeap(const char* phase) {
 }
 
 /*
- * Get a new slab, then allocate nbytes from it and install it in our
- * slab list.  Return the newly allocated nbytes-sized block.
- */
-NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
-  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
-    refreshStats();
-  }
-  storeTail(m_front, (char*)m_limit - (char*)m_front);
-  if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap("MM::newSlab");
-  auto slab = m_heap.allocSlab(kSlabSize);
-  assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
-  m_stats.borrow(slab.size);
-  m_stats.alloc += slab.size;
-  if (m_stats.alloc > m_stats.peakAlloc) {
-    m_stats.peakAlloc = m_stats.alloc;
-  }
-  m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
-  m_limit = (void*)(uintptr_t(slab.ptr) + slab.size);
-  FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab.ptr, m_limit);
-  return slab.ptr;
-}
-
-/*
- * Allocate `bytes' from the current slab, aligned to kSmallSizeAlign.
- */
-inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
-  FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", bytes, index,
-            m_front, m_limit);
-  uint32_t nbytes = smallIndex2Size(index);
-
-  assert(bytes <= nbytes);
-  assert(nbytes <= kSlabSize);
-  assert((nbytes & kSmallSizeAlignMask) == 0);
-  assert((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
-
-  if (UNLIKELY(m_bypassSlabAlloc)) {
-    // Stats correction; mallocBigSize() pulls stats from jemalloc.
-    m_stats.usage -= bytes;
-    return mallocBigSize<false>(nbytes).ptr;
-  }
-
-  void* ptr = m_front;
-  {
-    void* next = (void*)(uintptr_t(ptr) + nbytes);
-    if (uintptr_t(next) <= uintptr_t(m_limit)) {
-      m_front = next;
-    } else {
-      ptr = newSlab(nbytes);
-    }
-  }
-  // Preallocate more of the same in order to amortize entry into this method.
-  unsigned nPrealloc;
-  if (nbytes * kSmallPreallocCountLimit <= kSmallPreallocBytesLimit) {
-    nPrealloc = kSmallPreallocCountLimit;
-  } else {
-    nPrealloc = kSmallPreallocBytesLimit / nbytes;
-  }
-  {
-    void* front = (void*)(uintptr_t(m_front) + nPrealloc*nbytes);
-    if (uintptr_t(front) > uintptr_t(m_limit)) {
-      nPrealloc = ((uintptr_t)m_limit - uintptr_t(m_front)) / nbytes;
-      front = (void*)(uintptr_t(m_front) + nPrealloc*nbytes);
-    }
-    m_front = front;
-  }
-  for (void* p = (void*)(uintptr_t(m_front) - nbytes); p != ptr;
-       p = (void*)(uintptr_t(p) - nbytes)) {
-    m_freelists[index].push(p, nbytes);
-  }
-  FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", bytes,
-            index, ptr, m_front, m_limit);
-  return ptr;
-}
-
-/*
  * Store slab tail bytes (if any) in freelists.
  */
 inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
@@ -899,15 +834,79 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
   storeTail(rem, remBytes);
 }
 
+/*
+ * Get a new slab, then allocate nbytes from it and install it in our
+ * slab list.  Return the newly allocated nbytes-sized block.
+ */
+NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
+  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+    refreshStats();
+  }
+  storeTail(m_front, (char*)m_limit - (char*)m_front);
+  if (debug && RuntimeOption::EvalCheckHeapOnAlloc && !g_context.isNull()) {
+    setSurpriseFlag(PendingGCFlag); // defer heap check until safepoint
+  }
+  auto slab = m_heap.allocSlab(kSlabSize);
+  assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
+  m_stats.borrow(slab.size);
+  m_stats.alloc += slab.size;
+  if (m_stats.alloc > m_stats.peakAlloc) {
+    m_stats.peakAlloc = m_stats.alloc;
+  }
+  m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
+  m_limit = (void*)(uintptr_t(slab.ptr) + slab.size);
+  FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab.ptr, m_limit);
+  return slab.ptr;
+}
+
+/*
+ * Allocate `bytes' from the current slab, aligned to kSmallSizeAlign.
+ */
+inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
+  FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", bytes, index,
+            m_front, m_limit);
+  uint32_t nbytes = smallIndex2Size(index);
+
+  assert(bytes <= nbytes);
+  assert(nbytes <= kSlabSize);
+  assert((nbytes & kSmallSizeAlignMask) == 0);
+  assert((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
+
+  if (UNLIKELY(m_bypassSlabAlloc)) {
+    // Stats correction; mallocBigSize() pulls stats from jemalloc.
+    m_stats.usage -= bytes;
+    return mallocBigSize<false>(nbytes).ptr;
+  }
+
+  void* ptr = m_front;
+  {
+    void* next = (void*)(uintptr_t(ptr) + nbytes);
+    if (uintptr_t(next) <= uintptr_t(m_limit)) {
+      m_front = next;
+    } else {
+      ptr = newSlab(nbytes);
+    }
+  }
+  // Preallocate more of the same in order to amortize entry into this method.
+  unsigned nSplit = kNContigTab[index] - 1;
+  uintptr_t avail = uintptr_t(m_limit) - uintptr_t(m_front);
+  if (UNLIKELY(nSplit * nbytes > avail)) {
+    nSplit = avail / nbytes; // Expensive division.
+  }
+  if (nSplit > 0) {
+    void* tail = m_front;
+    uint32_t tailBytes = nSplit * nbytes;
+    m_front = (void*)(uintptr_t(m_front) + tailBytes);
+    splitTail(tail, tailBytes, nSplit, nbytes, index);
+  }
+  FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", bytes,
+            index, ptr, m_front, m_limit);
+  return ptr;
+}
+
 void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, unsigned index) {
   size_t nbytes = smallIndex2Size(index);
-  static constexpr unsigned nContigTab[] = {
-#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
-    ncontig,
-  SMALL_SIZES
-#undef SMALL_SIZE
-  };
-  unsigned nContig = nContigTab[index];
+  unsigned nContig = kNContigTab[index];
   size_t contigMin = nContig * nbytes;
   unsigned contigInd = smallSize2Index(contigMin);
   for (unsigned i = contigInd; i < kNumSmallSizes; ++i) {
@@ -1151,6 +1150,7 @@ void MemoryManager::requestShutdown() {
 #endif
 
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
+  MM().m_memThresholdCallbackPeakUsage = SIZE_MAX;
   profctx = ReqProfContext{};
 }
 
@@ -1451,7 +1451,7 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
         "Heap address space exhausted\nbase:{}\nend:{}\nused{}",
         m_base, m_end, m_used);
     // Throw exception when t4840214 is fixed
-    // throw FatalErrorException("Request heap out of memory");
+    // raise_fatal_error("Request heap out of memory");
   } else if (UNLIKELY(m_used > m_OOMMarker)) {
     setSurpriseFlag(MemExceededFlag);
   }

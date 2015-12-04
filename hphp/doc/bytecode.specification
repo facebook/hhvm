@@ -1273,14 +1273,6 @@ Sqrt   [C]    ->  [C:Null|Dbl]
   If $1 is a negative number, this instruction pushes a floating-point value
   representing NAN onto the stack.
 
-Strlen  [C] -> [C:Null|Int]
-
-  String length. If $1 is a string push the length of the string on the stack.
-  If $1 is an object with a __toString method, call this method and push the
-  length of the resulting string on the stack. If $1 is an array or resource,
-  raise a warning and push null on the stack. Otherwise convert $1 to a string
-  and push the length of that string on the stack.
-
 Xor    [C C]  ->  [C:Bool]
 
   Logical xor (xor). Pushes ((bool)$2 xor (bool)$1) onto the stack.
@@ -2214,6 +2206,17 @@ FCallArray    [F]  ->  [R]
 
   When the callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
+
+FCallAwait <num params> <class name> <func name> [F..F] -> [R]
+
+  FPI call direct to a known async function. Equivalent to the sequence
+
+    FCallD
+    UnboxRNop
+    Await
+
+  but may enable the runtime to avoid creating a StaticWaitHandle in the event
+  that the called function returns eagerly.
 
 FCallUnpack <num params> [F..F] -> [R]
 
@@ -4367,6 +4370,81 @@ ContGetReturn    [] -> [C]
   Get generator's return value. $this must be a Generator object. Pushes the
   return value of the generator onto the stack.
 
+14.1 Generator Delegation
+-------------------------
+
+The following bytecodes are used to implement the Generator Delegation feature
+of PHP7. Generator Delegation (which is exposed to programmers as `yield from`)
+allows generators to yield results from other generators (referred to as their
+"delegates") as if they were the ones yielding the value. For a full
+explanation of the feature, see https://wiki.php.net/rfc/generator-delegation.
+
+The important part of this feature is how it interacts with different inputs.
+The `yield from` pseudo-expression takes two different types of inputs, and
+interacts with them very differently. The first is other generators. When
+When the delegate is a generator we resume execution of the subgenerator and
+return to the caller of the delegating generator (the one containing
+`yield from`) when we encounter a yield. All of the features of generators
+(`send`, `throw`, etc) are piped through to the delegate, and the result of the
+`yield from` expression is the return value of the subgenerator.
+
+The second valid type of input to `yield from` is an object conforming to the
+Traversable interface. When the delegate of a generator is a Traversable the
+`send()` method does nothing more than continue execution of the delegating
+generator. The `throw()` method will throw from the context of the delegating
+generator, and the result of the `yield from` expression will always be NULL.
+At a high level, you can think of `yield from <traversable>` as being
+equivalent to `foreach(<traversable> as $val) { yield $val; }`.
+
+While the bytecodes implementing Generator Delegation have their own API and
+well defined contracts, they generally expect to be used in the following
+pattern:
+
+```
+ContAssignDelegate <expr>
+ContEnterDelegate
+YieldFromDelegate
+ContUnsetDelegate
+```
+
+ContAssignDelegate [C] -> []
+
+  This instruction may only appear in bodies of non-async generators. Stores $1
+  in the generator as it's delegate, for use later by the ContEnterDelegate
+  and YieldFromDelegate bytecodes. Throws an exception if $1 is not either a
+  Traversable or another Generator.
+
+ContEnterDelegate [C] -> []
+
+  This instruction may only appear in bodies of non-async generators, and the
+  delegate property of the current generator must be non-null. If the delegate
+  is a Generator, control flow is transfered to the saved resume offset of the
+  delegate. $1 describes the value given to either ContEnter or ContRaise when
+  execution of the current generator was resumed, and said value is then passed
+  to the delegate generator for use there.
+
+YieldFromDelegate [] -> [C]
+
+  This instruction may only appear in bodies of non-async generators, and the
+  delegate property of the current generator must be non-null. If the delegate
+  is a Traversable the current key/value pair is stored in the generator as
+  the result of the current iteration and the iterator is advanced. When the
+  delegate is a Generator, the ContCurrent and ContKey opcodes handle
+  returning the result from the deepest active generator. When iteration has
+  finished, this opcode continues executing the next instruction, otherwise it
+  sets the resume offset to the offset specified by its immediate and returns
+  control to the caller.
+
+ContUnsetDelegate <free iterator> [] -> []
+
+  This instruction may only appear in bodies of non-async generators. Removes
+  the currently assigned delegate of the generator. If <free iterator> is true
+  and the delegate is not another generator then this opcode is responsible for
+  freeing the internal iterator used by this group of opcodes. If false then it
+  is expected that the iterator is freed elsewhere. When the delegate is
+  another generator then it assumes that the iterator was never initialized
+  in the first place.
+
 15. Async functions
 -------------------
 
@@ -4377,7 +4455,7 @@ WHResult [C:Obj] -> [C]
   this instruction throws the exception stored in the WaitHandle. If $1 is not
   finished, throws an Exception.
 
-Await  <number of iterators>   [C]  ->  [C]
+Await    [C]  ->  [C]
 
   This instruction may only appear in bodies of async functions. Awaits
   a WaitHandle provided by $1, suspending the execution if the WaitHandle
@@ -4392,11 +4470,11 @@ Await  <number of iterators>   [C]  ->  [C]
   execution needs to be suspended:
 
   If the async function is executed eagerly, creates an AsyncFunctionWaitHandle
-  object, moves all local variables and first %1 iterators from the current
-  frame into the object, sets resume offset at the next opcode, marks the
+  object, moves all local variables and iterators from the current frame into
+  the object, sets resume offset at the next opcode, marks the
   AsyncFunctionWaitHandle as blocked on the WaitHandle provided by $1 and
-  suspends execution by transferring control flow back to the caller,
-  returning the AsyncFunctionWaitHandle object.
+  suspends execution by transferring control flow back to the caller, returning
+  the AsyncFunctionWaitHandle object.
 
   If the async function is executed in resumed mode, sets resume offset at
   the next opcode, marks the AsyncFunctionWaitHandle as blocked on the

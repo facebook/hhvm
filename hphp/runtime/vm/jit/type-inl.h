@@ -243,12 +243,13 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
-      case KindOfStaticString:
         return Type(tv.m_type);
 
+      case KindOfStaticString:
       case KindOfString:
         return type_detail::for_const(tv.m_data.pstr);
 
+      case KindOfPersistentArray:
       case KindOfArray:
         return type_detail::for_const(tv.m_data.parr);
 

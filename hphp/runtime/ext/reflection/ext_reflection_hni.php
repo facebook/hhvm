@@ -214,12 +214,54 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native>>
   public function returnsReference(): bool;
 
+  <<__Native>>
+  private function getRetTypeInfo(): array;
+
   <<__Native, __HipHopSpecific>>
   private function getReturnTypeHint(): string;
 
   <<__HipHopSpecific>>
   public function getReturnTypeText() {
     return $this->getReturnTypeHint() ?: false;
+  }
+
+  /**
+   * ( excerpt from
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.hasreturntype.php
+   * )
+   *
+   * Checks if the function has a specified return type.
+   *
+   * @return - true if the function has a specified return type; false
+   *           otherwise.
+   */
+  public function hasReturnType(): bool {
+    return (bool) $this->getReturnTypeText();
+  }
+
+  /**
+   * ( excerpt from
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getReturnType.php
+   * )
+   *
+   * Gets the specified return type of a function
+   *
+   * @return - a ReflectionType object if a return type is specified; null
+   *           otherwise.
+   */
+  public function getReturnType(): ?ReflectionType {
+    if ($this->hasReturnType()) {
+      $retTypeInfo = $this->getRetTypeInfo();
+      return new ReflectionType(
+        $this,
+        array(
+          'name' => $retTypeInfo['type_hint'],
+          'nullable' => $retTypeInfo['type_hint_nullable'],
+          'builtin' => $retTypeInfo['type_hint_builtin'],
+        )
+      );
+    }
+    return null;
   }
 
   /**
@@ -297,6 +339,10 @@ abstract class ReflectionFunctionAbstract implements Reflector {
         $param = new ReflectionParameter(null, null);
         $param->info = $info;
         $param->name = $info['name'];
+        $param->paramTypeInfo = array();
+        $param->paramTypeInfo['name'] = $info['type_hint'];
+        $param->paramTypeInfo['nullable'] = $info['type_hint_nullable'];
+        $param->paramTypeInfo['builtin'] = $info['type_hint_builtin'];
         $ret[] = $param;
       }
       $this->params = $ret;
@@ -607,7 +653,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureScopeClassname(object $closure): ?string;
+  private function getClosureScopeClassname(object $closure): string;
 
   public function getClosureScopeClass(): ?ReflectionClass {
     if ($this->closure &&
@@ -618,7 +664,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureThisObject(object $closure): ?object;
+  private function getClosureThisObject(object $closure): object;
 
   /**
    * Returns this pointer bound to closure.

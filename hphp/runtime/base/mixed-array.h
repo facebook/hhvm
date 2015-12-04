@@ -56,20 +56,17 @@ public:
   struct ValIter;
 
   struct Elm {
-    /* The key is either a string pointer or an int value, and the _count
-     * field in data is used to discriminate the key type. _count = 0 means
-     * int, nonzero values contain 32 bits of a string's hashcode.
-     * It is critical that when we return &data to clients, that they not
-     * read or write the _count field! */
     union {
       int64_t ikey;
       StringData* skey;
     };
     // We store values here, but also some information local to this array:
-    // data.m_aux.u_hash contains either a negative number (for an int key) or a
-    // string hashcode (31-bit and thus non-negative); the high bit is the
+    // data.m_aux.u_hash contains either a negative number (for an int key) or
+    // a string hashcode (31-bit and thus non-negative); the high bit is the
     // int/string key descriminator. data.m_type == kInvalidDataType if this is
-    // an empty slot in the array (e.g. after a key is deleted).
+    // an empty slot in the array (e.g. after a key is deleted).  It is
+    // critical that when we return &data to clients, that they not read or
+    // write the m_aux field!
     TypedValueAux data;
 
     bool hasStrKey() const {
@@ -321,10 +318,6 @@ public:
   }
 
   // Element index, with special values < 0 used for hash tables.
-  // NOTE: Unfortunately, g++ on x64 tends to generate worse machine code for
-  // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
-  // chosen to use ssize_t in some places where ideally we *should* have used
-  // int32_t.
   static constexpr int32_t Empty      = -1;
   static constexpr int32_t Tombstone  = -2;
 

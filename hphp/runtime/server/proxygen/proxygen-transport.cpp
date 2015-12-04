@@ -24,6 +24,7 @@
 #include <boost/algorithm/string.hpp>
 #include <memory>
 #include <set>
+#include <proxygen/lib/http/codec/experimental/HTTP2Framer.h>
 
 using proxygen::HTTPException;
 using proxygen::HTTPHeaders;
@@ -65,16 +66,14 @@ class PushTxnHandler : public proxygen::HTTPPushTransactionHandler {
 
  public:
   PushTxnHandler(uint64_t pushId,
-                 const std::shared_ptr<ProxygenTransport>& transport,
-                 uint8_t priority)
+                 const std::shared_ptr<ProxygenTransport>& transport)
       : m_pushId(pushId),
-        m_transport(transport),
-        m_priority(priority) {}
+        m_transport(transport) {}
 
   proxygen::HTTPTransaction *getOrCreateTransaction(
     proxygen::HTTPTransaction *clientTxn, bool newPushOk) {
     if (!m_pushTxn && newPushOk) {
-      m_pushTxn = clientTxn->newPushedTransaction(this, m_priority);
+      m_pushTxn = clientTxn->newPushedTransaction(this);
     }
     return m_pushTxn;
   }
@@ -115,7 +114,6 @@ class PushTxnHandler : public proxygen::HTTPPushTransactionHandler {
   std::shared_ptr<ProxygenTransport> m_transport;
   proxygen::HTTPTransaction *m_pushTxn{nullptr};
   proxygen::HTTPMessage m_pushMessage;
-  uint8_t m_priority;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -610,12 +608,12 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   }
 
   int64_t pushId = m_nextPushId++;
-  PushTxnHandler *handler = new PushTxnHandler(pushId, shared_from_this(),
-                                               priority);
+  PushTxnHandler *handler = new PushTxnHandler(pushId, shared_from_this());
   HTTPMessage& pushMsg = handler->getPushMessage();
   pushMsg.setURL(path);
   pushMsg.setIsChunked(true); // implicitly chunked
   pushMsg.setSecure(true); // should we allow setting scheme?
+  pushMsg.setPriority(priority);
 
   for (ArrayIter iter(headers); iter; ++iter) {
     Variant key = iter.first();

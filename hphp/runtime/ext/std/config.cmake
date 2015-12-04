@@ -50,6 +50,8 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
     ext_std_process.php
     ext_std_string.php
     ext_std_variable.php
+  IDL
+    ../../../system/idl/closure.idl.json
   DEPENDS
     libBoost
     libFolly

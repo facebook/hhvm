@@ -88,7 +88,8 @@ String HHVM_FUNCTION(ucfirst,
 String HHVM_FUNCTION(lcfirst,
                      const String& str);
 String HHVM_FUNCTION(ucwords,
-                     const String& str);
+                     const String& str,
+                     const String& delimiters = " \t\r\n\f\v");
 String HHVM_FUNCTION(strip_tags,
                      const String& str,
                      const Variant& allowable_tags = "");

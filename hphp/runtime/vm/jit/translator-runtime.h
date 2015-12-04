@@ -129,7 +129,7 @@ void VerifyRetTypeSlow(const Class* cls,
                        const HPHP::TypeConstraint* expected,
                        const TypedValue value);
 void VerifyRetTypeCallable(TypedValue value);
-void VerifyRetTypeFail(const TypedValue value);
+void VerifyRetTypeFail(TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 
@@ -188,11 +188,11 @@ void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
-const Func* loadClassCtor(Class* cls);
+const Func* loadClassCtor(Class* cls, ActRec* fp);
 const Func* lookupUnknownFunc(const StringData*);
 const Func* lookupFallbackFunc(const StringData*, const StringData*);
 
-Class* lookupKnownClass(Class** cache, const StringData* clsName);
+Class* lookupKnownClass(LowPtr<Class>* cache, const StringData* clsName);
 
 TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const NamedEntity* ne,

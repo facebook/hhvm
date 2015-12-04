@@ -177,6 +177,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     // in an inconsistent and ad-hoc manner. But I don't understand their uses
     // and interactions well enough to feel comfortable fixing now.
     RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
+    RuntimeOption::PHP7_ScalarTypes  = s_globalData.PHP7_ScalarTypes;
     RuntimeOption::AutoprimeGenerators = s_globalData.AutoprimeGenerators;
 
     return;

@@ -33,6 +33,7 @@ Generator::Generator()
   : m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())
+  , m_delegate(make_tv<KindOfNull>())
 {
 }
 
@@ -44,6 +45,7 @@ Generator::~Generator() {
   assert(getState() != State::Running);
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
+  tvRefcountedDecRef(m_delegate);
 
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
@@ -66,6 +68,7 @@ Generator& Generator::operator=(const Generator& other) {
   m_index = other.m_index;
   cellSet(other.m_key, m_key);
   cellSet(other.m_value, m_value);
+  cellSet(other.m_delegate, m_delegate);
   return *this;
 }
 
@@ -95,7 +98,7 @@ void Generator::copyVars(const ActRec* srcFp) {
 
 void Generator::yield(Offset resumeOffset,
                       const Cell* key, const Cell value) {
-  assert(getState() == State::Running);
+  assert(isRunning());
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
   if (key) {
@@ -115,7 +118,7 @@ void Generator::yield(Offset resumeOffset,
 }
 
 void Generator::done(TypedValue tv) {
-  assert(getState() == State::Running);
+  assert(isRunning());
   cellSetNull(m_key);
   cellSet(*tvToCell(&tv), m_value);
   setState(State::Done);

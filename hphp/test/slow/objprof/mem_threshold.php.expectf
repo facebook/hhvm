@@ -1,0 +1,3 @@
+Start mem: %d
+Threshold crossed, current peak: %d
+Threshold crossed again, peak: %d

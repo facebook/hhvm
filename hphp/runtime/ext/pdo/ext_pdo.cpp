@@ -2591,6 +2591,7 @@ safe:
                 // fallthru
               case KindOfStaticString:
               case KindOfString:
+              case KindOfPersistentArray:
               case KindOfArray:
               case KindOfObject:
               case KindOfResource:

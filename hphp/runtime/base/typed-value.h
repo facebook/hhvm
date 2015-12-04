@@ -61,10 +61,11 @@ struct ConstModifiers {
 };
 
 union AuxUnion {
-  int32_t u_hash;        // key type and hash for MixedArray and [Stable]Map
-  VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
-  bool u_deepInit;       // used by Class::initPropsImpl for deep init
-  int32_t u_rdsHandle;   // used by unit.cpp to squirrel away rds handles TODO type
+  uint32_t u_fcallAwaitFlag;// true if we're suspending an FCallAwait
+  int32_t u_hash;           // key type and hash for MixedArray
+  VarNrFlag u_varNrFlag;    // magic number for asserts in VarNR
+  bool u_deepInit;          // used by Class::initPropsImpl for deep init
+  int32_t u_rdsHandle;      // used by unit.cpp to squirrel away rds handles TODO type
   ConstModifiers u_constModifiers; // used by Class::Const
 };
 
@@ -169,6 +170,7 @@ X(KindOfBoolean,      bool);
 X(KindOfInt64,        int64_t);
 X(KindOfDouble,       double);
 X(KindOfArray,        ArrayData*);
+X(KindOfPersistentArray,  const ArrayData*);
 X(KindOfObject,       ObjectData*);
 X(KindOfResource,     ResourceHdr*);
 X(KindOfRef,          RefData*);
@@ -256,7 +258,8 @@ typename std::enable_if<
   typename DataTypeCPPType<DType>::type
 >::type unpack_tv(TypedValue *tv) {
   assert((DType == tv->m_type) ||
-         (isStringType(DType) && isStringType(tv->m_type)));
+         (isStringType(DType) && isStringType(tv->m_type)) ||
+         (isArrayType(DType) && isArrayType(tv->m_type)));
   return reinterpret_cast<typename DataTypeCPPType<DType>::type>
            (tv->m_data.pstr);
 }

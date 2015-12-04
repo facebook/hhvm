@@ -788,6 +788,7 @@ void staticArrayStreamer(ArrayData* ad, std::ostream& out) {
                                       val.getStringData()->size())
                 << "\"";
             return;
+          case KindOfPersistentArray:
           case KindOfArray:
             staticArrayStreamer(val.getArrayData(), out);
             return;
@@ -822,6 +823,7 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
     case KindOfString:
       out << "\"" << tv->m_data.pstr->data() << "\"";
       return;
+    case KindOfPersistentArray:
     case KindOfArray:
       staticArrayStreamer(tv->m_data.parr, out);
       return;
@@ -1302,6 +1304,8 @@ bool instrIsNonCallControlFlow(Op opcode) {
     case OpYieldK:
     case OpContEnter:
     case OpContRaise:
+    case OpContEnterDelegate:
+    case OpYieldFromDelegate:
     case OpFCallBuiltin:
     case OpIncl:
     case OpInclOnce:

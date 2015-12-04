@@ -262,7 +262,7 @@ struct ActRec {
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
-      // Bits 0-28 are the number of function args.  Bits 29-31 are values from
+      // Bits 0-27 are the number of function args.  Bits 28-31 are values from
       // the Flags enum.
       uint32_t m_numArgsAndFlags;
     };
@@ -300,6 +300,10 @@ struct ActRec {
   enum Flags : uint32_t {
     None          = 0,
 
+    // In non-HH files the caller can specify whether param type-checking should
+    // be strict or weak.
+    UseWeakTypes = (1u << 28),
+
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
     // down (locals freed).
@@ -307,34 +311,38 @@ struct ActRec {
 
     // Mutually exclusive execution mode states in these 2 bits.
     InResumed     = (1u << 30),
-    SpareFlag     = (1u << 31),
-    MagicDispatch = InResumed|SpareFlag,
+    IsFCallAwait  = (1u << 31),
+    MagicDispatch = InResumed|IsFCallAwait,
   };
 
-  static constexpr int kNumArgsBits       = 29;
+  static constexpr int kNumArgsBits       = 28;
   static constexpr int kNumArgsMask       = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask         = ~kNumArgsMask;
-  static constexpr int kExecutionModeMask = ~LocalsDecRefd;
+  static constexpr int kExecutionModeMask = ~(LocalsDecRefd | UseWeakTypes);
 
   int32_t numArgs() const { return m_numArgsAndFlags & kNumArgsMask; }
   Flags flags() const {
     return static_cast<Flags>(m_numArgsAndFlags & kFlagsMask);
   }
 
+  bool useWeakTypes() const { return flags() & UseWeakTypes; }
   bool localsDecRefd() const { return flags() & LocalsDecRefd; }
   bool resumed() const {
     return (flags() & kExecutionModeMask) == InResumed;
   }
-  bool isSpareFlag() const {
-    return (flags() & kExecutionModeMask) == SpareFlag;
+  bool isFCallAwait() const {
+    return (flags() & kExecutionModeMask) == IsFCallAwait;
+  }
+  bool mayNeedStaticWaitHandle() const {
+    return !(m_numArgsAndFlags & (InResumed|IsFCallAwait));
   }
   bool magicDispatch() const {
     return (flags() & kExecutionModeMask) == MagicDispatch;
   }
 
   static uint32_t encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
-    assert((numArgs & ~kNumArgsMask) == 0);
-    assert((uint32_t{flags} & ~kFlagsMask) == 0);
+    assert((numArgs & kFlagsMask) == 0);
+    assert((uint32_t{flags} & kNumArgsMask) == 0);
     return numArgs | flags;
   }
 
@@ -346,21 +354,24 @@ struct ActRec {
     m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, flags());
   }
 
+  void setUseWeakTypes() {
+    m_numArgsAndFlags |= UseWeakTypes;
+  }
   void setLocalsDecRefd() {
-    m_numArgsAndFlags = m_numArgsAndFlags | LocalsDecRefd;
+    m_numArgsAndFlags |= LocalsDecRefd;
   }
   void setResumed() {
-    assert(flags() == Flags::None);
+    assert((flags() & ~IsFCallAwait) == Flags::None);
     m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
   }
-  void setSpareFlag() {
+  void setFCallAwait() {
     assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), SpareFlag);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), IsFCallAwait);
   }
 
   void setMagicDispatch(StringData* invName) {
-    assert(flags() == Flags::None);
-    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), MagicDispatch);
+    assertx(!resumed());
+    m_numArgsAndFlags |= MagicDispatch;
     m_invName = invName;
   }
 
@@ -866,8 +877,7 @@ public:
   void pushStringNoRc(StringData* s) {
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.pstr = s;
-    m_top->m_type = KindOfString;
+    *m_top = make_tv<KindOfString>(s);
   }
 
   ALWAYS_INLINE
@@ -875,8 +885,7 @@ public:
     assert(s->isStatic()); // No need to call s->incRefCount().
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.pstr = s;
-    m_top->m_type = KindOfStaticString;
+    *m_top = make_tv<KindOfStaticString>(s);
   }
 
   // This should only be called directly when the caller has
@@ -885,8 +894,7 @@ public:
   void pushArrayNoRc(ArrayData* a) {
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.parr = a;
-    m_top->m_type = KindOfArray;
+    *m_top = make_tv<KindOfArray>(a);
   }
 
   ALWAYS_INLINE
@@ -899,7 +907,9 @@ public:
   ALWAYS_INLINE
   void pushStaticArray(ArrayData* a) {
     assert(a->isStatic()); // No need to call a->incRefCount().
-    pushArrayNoRc(a);
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfPersistentArray>(a);
   }
 
   // This should only be called directly when the caller has
@@ -908,8 +918,7 @@ public:
   void pushObjectNoRc(ObjectData* o) {
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.pobj = o;
-    m_top->m_type = KindOfObject;
+    *m_top = make_tv<KindOfObject>(o);
   }
 
   ALWAYS_INLINE
@@ -1130,6 +1139,7 @@ bool doFCall(ActRec* ar, PC& pc);
 jit::TCA dispatchBB();
 void pushLocalsAndIterators(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
+jit::TCA suspendStack(PC& pc);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -56,6 +56,7 @@ struct Variant;
     switch (tv.m_type) {                                        \
       case HPHP::KindOfStaticString:                            \
       case HPHP::KindOfString: return tv.m_data.pstr->func();   \
+      case HPHP::KindOfPersistentArray:                             \
       case HPHP::KindOfArray: return tv.m_data.parr->func();    \
       case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
       case HPHP::KindOfResource: return tv.m_data.pres->func(); \
@@ -107,9 +108,8 @@ ALWAYS_INLINE bool isUncounted(const TypedValue& tv) {
   return uncounted;
 }
 
-// Assumes 'data' is live
-// Assumes 'isRefcountedType(type)'
-void tvDecRefHelper(DataType type, uint64_t datum) noexcept;
+typedef void(*RawDestructor)(void*);
+extern RawDestructor g_destructors[kDestrTableSize];
 
 /*
  * Returns true if decreffing the specified TypedValue will free heap-allocated
@@ -157,6 +157,20 @@ ALWAYS_INLINE void tvDecRefRefInternal(RefData* r) {
 ALWAYS_INLINE void tvDecRefRef(TypedValue* tv) {
   assert(tv->m_type == KindOfRef);
   tvDecRefRefInternal(tv->m_data.pref);
+}
+
+// Assumes 'data' is live
+// Assumes 'isRefcountedType(type)'
+ALWAYS_INLINE void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
+  assert(type == KindOfString || type == KindOfArray ||
+         type == KindOfObject || type == KindOfResource ||
+         type == KindOfRef);
+  TypedValue tmp;
+  tmp.m_type = type;
+  tmp.m_data.num = datum;
+  if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
+    g_destructors[typeToDestrIdx(type)]((void*)datum);
+  }
 }
 
 // Assumes 'tv' is live
@@ -684,6 +698,16 @@ double tvCastToDouble(TypedValue* tv);
 StringData* tvCastToString(const TypedValue* tv);
 bool tvCanBeCoercedToNumber(TypedValue* tv);
 
+/*
+ * If the current function (func, a builtin) was called in a strict context then
+ * verify that tv is the correct type for argNum or attempt to convert it to
+ * the correct type, fataling on failure.
+ *
+ * If PHP7_ScalarType is false or EnableHipHopSyntax is true, this call does
+ * nothing.
+ */
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
+
 #define X(kind) \
 void tvCastTo##kind##InPlace(TypedValue* tv); \
 bool tvCoerceParamTo##kind##InPlace(TypedValue* tv); \
@@ -699,9 +723,6 @@ X(Object)
 X(NullableObject)
 X(Resource)
 #undef X
-
-typedef void(*RawDestructor)(void*);
-extern RawDestructor g_destructors[kDestrTableSize];
 
 ALWAYS_INLINE void tvCastInPlace(TypedValue *tv, DataType DType) {
 #define X(kind) \

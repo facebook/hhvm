@@ -73,13 +73,13 @@ private:
 
 template<class T, class TagType = uint32_t>
 struct CompactTaggedPtr {
-  using Opaque = std::pair<T*,uint32_t>;
+  using Opaque = std::pair<T*,TagType>;
 
   CompactTaggedPtr() { set(TagType{}, 0); }
 
   // for save and restore
-  explicit CompactTaggedPtr(Opaque v) : m_ptr(v.first), m_size(v.second) {}
-  Opaque getOpaque() const { return std::make_pair(m_ptr, m_size); }
+  explicit CompactTaggedPtr(Opaque v) : m_ptr(v.first), m_tag(v.second) {}
+  Opaque getOpaque() const { return std::make_pair(m_ptr, m_tag); }
 
   void set(TagType ttag, T* ptr) {
     auto const tag = static_cast<uint32_t>(ttag);

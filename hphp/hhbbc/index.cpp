@@ -2065,8 +2065,9 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
+        case KindOfStaticString:
         case KindOfString:       return TStr;
-        case KindOfStaticString: return TStr;
+        case KindOfPersistentArray:
         case KindOfArray:        return TArr;
         case KindOfResource:     return TRes;
         case KindOfObject:
@@ -2142,8 +2143,9 @@ Type Index::satisfies_constraint_helper(Context ctx,
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
+        case KindOfStaticString:
         case KindOfString:       return TStr;
-        case KindOfStaticString: return TStr;
+        case KindOfPersistentArray:
         case KindOfArray:        return TArr;
         case KindOfResource:     return TRes;
         case KindOfObject:
@@ -2185,6 +2187,25 @@ Type Index::satisfies_constraint_helper(Context ctx,
   }
 
   return TBottom;
+}
+
+bool Index::is_async_func(res::Func rfunc) const {
+  return match<bool>(
+    rfunc.val,
+    [&] (res::Func::FuncName s)        { return false; },
+    [&] (res::Func::MethodName s)      { return false; },
+    [&] (borrowed_ptr<FuncInfo> finfo) {
+      return finfo->func->isAsync && !finfo->func->isGenerator;
+    },
+    [&] (borrowed_ptr<FuncFamily> fam) {
+      for (auto const& finfo : fam->possibleFuncs) {
+        if (!finfo->func->isAsync || finfo->func->isGenerator) {
+          return false;
+        }
+      }
+      return true;
+    }
+  );
 }
 
 Type Index::lookup_class_constant(Context ctx,

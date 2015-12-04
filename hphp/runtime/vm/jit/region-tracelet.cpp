@@ -517,7 +517,13 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
         case HintStkInner:
         case CheckStk:
         {
+          /*
+           * BCSPOffset is optional but should --always-- be set for CheckStk
+           * instructions that appear within the guards for a translation.
+           */
           auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
+          assertx(inst.extra<RelOffsetData>()->hasBcSpOffset);
+
           auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
           func(&inst,
                L::Stack{offsetFromFp},

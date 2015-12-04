@@ -452,7 +452,7 @@ static void create_miter_for_walk(folly::Optional<MArrayIter>& miter,
   bool isIterable;
   Object iterable = odata->iterableObject(isIterable);
   if (isIterable) {
-    throw FatalErrorException("An iterator cannot be used with "
+    raise_fatal_error("An iterator cannot be used with "
                               "foreach by reference");
   }
   Array properties = iterable->o_toIterArray(null_string,
@@ -476,7 +476,7 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
   while (miter->advance()) {
     k = miter->key();
     v.assignRef(miter->val());
-    if (recursive && v.is(KindOfArray)) {
+    if (recursive && v.isArray()) {
       assert(seen);
       ArrayData *arr = v.getArrayData();
 

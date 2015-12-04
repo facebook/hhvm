@@ -138,7 +138,11 @@ void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 void c_AsyncFunctionWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (isInContext()) {
-    getContext()->schedule(this);
+    if (isFastResumable()) {
+      getContext()->scheduleFast(this);
+    } else {
+      getContext()->schedule(this);
+    }
   } else {
     decRefObj(this);
   }
@@ -174,7 +178,7 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   assert(isRunning());
   assert(exception);
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+  assert(exception->instanceof(SystemLib::s_ThrowableClass));
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFail())) {
@@ -249,7 +253,7 @@ String c_AsyncFunctionWaitHandle::getName() {
     }
 
     default:
-      throw FatalErrorException(
+      raise_fatal_error(
           "Invariant violation: encountered unexpected state");
   }
 }
@@ -296,11 +300,14 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
 
       // Reschedule if still in a context.
       if (isInContext()) {
-        getContext()->schedule(this);
+        if (isFastResumable()) {
+          getContext()->scheduleFast(this);
+        } else {
+          getContext()->schedule(this);
+        }
       } else {
         decRefObj(this);
       }
-
       break;
 
     default:

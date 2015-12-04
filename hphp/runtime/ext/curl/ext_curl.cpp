@@ -662,7 +662,7 @@ public:
       break;
     case CURLOPT_POSTFIELDS:
       m_emptyPost = false;
-      if (value.is(KindOfArray) || value.is(KindOfObject)) {
+      if (value.isArray() || value.is(KindOfObject)) {
         Array arr = value.toArray();
         curl_httppost *first = nullptr;
         curl_httppost *last  = nullptr;
@@ -784,7 +784,7 @@ public:
     case CURLOPT_HTTP200ALIASES:
     case CURLOPT_POSTQUOTE:
     case CURLOPT_RESOLVE:
-      if (value.is(KindOfArray) || value.is(KindOfObject)) {
+      if (value.isArray() || value.is(KindOfObject)) {
         Array arr = value.toArray();
         curl_slist *slist = nullptr;
         for (ArrayIter iter(arr); iter; ++iter) {
@@ -1456,6 +1456,41 @@ public:
     }
   }
 
+  bool setOption(int option, const Variant& value) {
+#if LIBCURL_VERSION_NUM <= 0x070f04 /* 7.15.4 */
+    return false;
+#endif
+    if (m_multi == nullptr) {
+      return false;
+    }
+
+    CURLMcode error = CURLM_OK;
+    switch (option) {
+#if LIBCURL_VERSION_NUM >= 0x071000 /* 7.16.0 */
+      case CURLMOPT_PIPELINING:
+
+#if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
+      case CURLMOPT_MAXCONNECTS:
+#endif
+        error = curl_multi_setopt(m_multi,
+                                  (CURLMoption)option,
+                                  value.toInt64());
+        break;
+#endif
+      default:
+        raise_warning("curl_multi_setopt():"
+                      "Invalid curl multi configuration option");
+        error = CURLM_UNKNOWN_OPTION;
+        break;
+    }
+
+    if (error != CURLM_OK) {
+        return false;
+    } else {
+        return true;
+    }
+  }
+
   bool isInvalid() const override {
     return !m_multi;
   }
@@ -1557,6 +1592,15 @@ Resource HHVM_FUNCTION(curl_multi_init) {
   return Resource(req::make<CurlMultiResource>());
 }
 
+Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
+  const char *str = curl_multi_strerror((CURLMcode)code);
+  if (str) {
+    return str;
+  } else {
+    return init_null();
+  }
+}
+
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);
@@ -1581,6 +1625,13 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_runni
   still_running.assignIfRef(running);
   return result;
 }
+
+bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
+                   int option, const Variant& value) {
+  CHECK_MULTI_RESOURCE_THROW(curlm);
+  return curlm->setOption(option, value);
+}
+
 
 /* Fallback implementation of curl_multi_select()
  *
@@ -1885,6 +1936,14 @@ class CurlExtension final : public Extension {
     HHVM_RC_INT_SAME(CURLOPT_CONNECTTIMEOUT_MS);
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x071000 /* Available since 7.16.0 */
+    HHVM_RC_INT_SAME(CURLMOPT_PIPELINING);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x071003 /* Available since 7.16.3 */
+    HHVM_RC_INT_SAME(CURLMOPT_MAXCONNECTS);
+#endif
+
     HHVM_RC_INT_SAME(CURLAUTH_ANY);
     HHVM_RC_INT_SAME(CURLAUTH_ANYSAFE);
     HHVM_RC_INT_SAME(CURLAUTH_BASIC);
@@ -2165,12 +2224,14 @@ class CurlExtension final : public Extension {
     HHVM_FE(curl_close);
     HHVM_FE(curl_reset);
     HHVM_FE(curl_multi_init);
+    HHVM_FE(curl_multi_strerror);
     HHVM_FE(curl_multi_add_handle);
     HHVM_FE(curl_multi_remove_handle);
     HHVM_FE(curl_multi_exec);
     HHVM_FE(curl_multi_select);
     HHVM_FE(curl_multi_await);
     HHVM_FE(curl_multi_getcontent);
+    HHVM_FE(curl_multi_setopt);
     HHVM_FE(fb_curl_multi_fdset);
     HHVM_FE(curl_multi_info_read);
     HHVM_FE(curl_multi_close);

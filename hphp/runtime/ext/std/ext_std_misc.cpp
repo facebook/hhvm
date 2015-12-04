@@ -313,13 +313,13 @@ static Class* getClassByName(const char* name, int len) {
   if (len == 4 && !memcmp(name, "self", 4)) {
     cls = g_context->getContextClass();
     if (!cls) {
-      throw FatalErrorException("Cannot access self:: "
+      raise_fatal_error("Cannot access self:: "
                                 "when no class scope is active");
     }
   } else if (len == 6 && !memcmp(name, "parent", 6)) {
     cls = g_context->getParentContextClass();
     if (!cls) {
-      throw FatalErrorException("Cannot access parent");
+      raise_fatal_error("Cannot access parent");
     }
   } else if (len == 6 && !memcmp(name, "static", 6)) {
     CallerFrame cf;
@@ -332,7 +332,7 @@ static Class* getClassByName(const char* name, int len) {
       }
     }
     if (!cls) {
-      throw FatalErrorException("Cannot access static:: "
+      raise_fatal_error("Cannot access static:: "
                                 "when no class scope is active");
     }
   } else {
@@ -733,7 +733,8 @@ const int UserTokenId_T_HASHBANG = 435;
 const int UserTokenId_T_SUPER = 436;
 const int UserTokenId_T_SPACESHIP = 437;
 const int UserTokenId_T_COALESCE = 438;
-const int MaxUserTokenId = 439; // Marker, not a real user token ID
+const int UserTokenId_T_YIELD_FROM = 439;
+const int MaxUserTokenId = 440; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

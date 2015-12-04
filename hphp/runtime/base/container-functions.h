@@ -25,7 +25,7 @@ namespace HPHP {
 
 inline bool isContainer(const Cell c) {
   assert(cellIsPlausible(c));
-  return c.m_type == KindOfArray ||
+  return isArrayType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
 
@@ -35,7 +35,7 @@ inline bool isContainer(const Variant& v) {
 
 inline bool isContainerOrNull(const Cell c) {
   assert(cellIsPlausible(c));
-  return isNullType(c.m_type) || c.m_type == KindOfArray ||
+  return isNullType(c.m_type) || isArrayType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
 
@@ -45,7 +45,7 @@ inline bool isContainerOrNull(const Variant& v) {
 
 inline bool isMutableContainer(const Cell c) {
   assert(cellIsPlausible(c));
-  return c.m_type == KindOfArray ||
+  return isArrayType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
 }
 
@@ -55,7 +55,7 @@ inline bool isMutableContainer(const Variant& v) {
 
 inline size_t getContainerSize(const Cell c) {
   assert(isContainer(c));
-  if (c.m_type == KindOfArray) {
+  if (isArrayType(c.m_type)) {
     return c.m_data.parr->size();
   }
   assert(c.m_type == KindOfObject && c.m_data.pobj->isCollection());
@@ -68,7 +68,7 @@ inline size_t getContainerSize(const Variant& v) {
 
 inline bool isPackedContainer(const Cell c) {
   assert(isContainer(c));
-  if (c.m_type == KindOfArray) {
+  if (isArrayType(c.m_type)) {
     return c.m_data.parr->isPacked();
   }
 

@@ -41,6 +41,7 @@ struct VariantController {
       case KindOfBoolean:    return HPHP::serialize::Type::BOOL;
       case KindOfDouble:     return HPHP::serialize::Type::DOUBLE;
       case KindOfInt64:      return HPHP::serialize::Type::INT64;
+      case KindOfPersistentArray:
       case KindOfArray:      return HPHP::serialize::Type::MAP;
       case KindOfStaticString:
       case KindOfString:     return HPHP::serialize::Type::STRING;

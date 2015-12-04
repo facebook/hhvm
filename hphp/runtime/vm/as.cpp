@@ -1340,7 +1340,8 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     /* Stack depth should be 1 after resume from suspend. */           \
     if (thisOpcode == OpCreateCont || thisOpcode == OpAwait ||         \
-        thisOpcode == OpYield || thisOpcode == OpYieldK) {             \
+        thisOpcode == OpYield || thisOpcode == OpYieldK ||             \
+        thisOpcode == OpYieldFromDelegate) {                           \
       as.enforceStackDepth(1);                                         \
     }                                                                  \
                                                                        \
@@ -1947,9 +1948,11 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
     tvAsVariant(&tvInit) = parse_php_serialized(as);
     if (isStringType(tvInit.m_type)) {
       tvInit.m_data.pstr = makeStaticString(tvInit.m_data.pstr);
+      tvInit.m_type = KindOfStaticString;
       as.ue->mergeLitstr(tvInit.m_data.pstr);
     } else if (isArrayType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
+      tvInit.m_type = KindOfPersistentArray;
       as.ue->mergeArray(tvInit.m_data.parr);
     } else if (tvInit.m_type == KindOfObject) {
       as.error("property initializer can't be an object");
@@ -2415,6 +2418,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   auto ue = folly::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
+  ue->m_useStrictTypes = true;
 
   try {
     std::istringstream instr(std::string(code, codeLen));

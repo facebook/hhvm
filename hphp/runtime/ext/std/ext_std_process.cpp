@@ -474,7 +474,7 @@ static bool pre_proc_open(const Array& descriptorspec,
     if (descitem.isResource()) {
       auto file = cast<File>(descitem);
       if (!item.readFile(file)) break;
-    } else if (!descitem.is(KindOfArray)) {
+    } else if (!descitem.isArray()) {
       raise_warning("Descriptor must be either an array or a File-Handle");
       break;
     } else {

@@ -122,7 +122,7 @@ private:
   void cgIterInitCommon(IRInstruction* inst);
   void cgMIterNextCommon(IRInstruction* inst);
   void cgMIterInitCommon(IRInstruction* inst);
-  Vreg cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst);
+  Vreg cgLdFuncCachedCommon(const StringData* name, Vreg dst);
   void cgLookupCnsCommon(IRInstruction* inst);
   rds::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
                                   Vreg sf);

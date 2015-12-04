@@ -733,9 +733,9 @@ void ExecutionContext::handleError(const std::string& msg,
     DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, msg));
     bool isRecoverable =
       errnum == static_cast<int>(ErrorMode::RECOVERABLE_ERROR);
-    auto exn = FatalErrorException(msg, ee.getBacktrace(), isRecoverable);
-    exn.setSilent(!errorNeedsLogging(errnum));
-    throw exn;
+    raise_fatal_error(msg.c_str(), ee.getBacktrace(), isRecoverable,
+                      !errorNeedsLogging(errnum) /* silent */);
+    not_reached();
   }
   if (!handled) {
     VMRegAnchor _;
@@ -876,7 +876,7 @@ bool ExecutionContext::onUnhandledException(Object e) {
     Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
 
-  if (e.instanceof(SystemLib::s_ExceptionClass)) {
+  if (e.instanceof(SystemLib::s_ThrowableClass)) {
     // user thrown exception
     if (!m_userExceptionHandlers.empty()) {
       if (!same(vm_call_user_func

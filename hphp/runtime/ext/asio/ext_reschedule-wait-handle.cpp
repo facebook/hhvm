@@ -95,7 +95,7 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   if (UNLIKELY(getState() != STATE_SCHEDULED)) {
-    throw FatalErrorException(
+    raise_fatal_error(
       "Invariant violation: encountered unexpected state");
   }
 

@@ -329,7 +329,9 @@ const StaticString s_previous("previous");
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   while (true) {
     auto const lookup = top->getProp(
-      SystemLib::s_ExceptionClass,
+      top->instanceof(SystemLib::s_ExceptionClass)
+        ? SystemLib::s_ExceptionClass
+        : SystemLib::s_ErrorClass,
       s_previous.get()
     );
     auto const top_tv = lookup.prop;
@@ -337,7 +339,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
 
     assert(top_tv->m_type != KindOfUninit && lookup.accessible);
     if (top_tv->m_type != KindOfObject ||
-        !top_tv->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
+        !top_tv->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
       // Since we are overwriting, decref.
       tvRefcountedDecRef(top_tv);
       // Objects held in m_faults are not refcounted, therefore we need to

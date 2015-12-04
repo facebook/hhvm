@@ -21,17 +21,17 @@
 
 PHPAPI HashTable *php_stream_xport_get_hash(void)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_get_hash");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_get_hash");
 }
 
 PHPAPI int php_stream_xport_register(char *protocol, php_stream_transport_factory factory TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_register");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_register");
 }
 
 PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_unregister");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_unregister");
 }
 
 PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int options,
@@ -42,7 +42,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
     int *error_code
     STREAMS_DC TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: _php_stream_xport_create");
+  HPHP::raise_fatal_error("unimplemented: _php_stream_xport_create");
 }
 
 /* Bind the stream to a local address */
@@ -51,7 +51,7 @@ PHPAPI int php_stream_xport_bind(php_stream *stream,
     char **error_text
     TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_bind");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_bind");
 }
 
 /* Connect to a remote address */
@@ -63,13 +63,13 @@ PHPAPI int php_stream_xport_connect(php_stream *stream,
     int *error_code
     TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_connect");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_connect");
 }
 
 /* Prepare to listen */
 PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error_text TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_listen");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_listen");
 }
 
 /* Get the next client and their address (as a string) */
@@ -80,7 +80,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
     char **error_text
     TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_accept");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_accept");
 }
 
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
@@ -88,17 +88,17 @@ PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
     void **addr, socklen_t *addrlen
     TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_get_name");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_get_name");
 }
 
 PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_crypto_setup");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_crypto_setup");
 }
 
 PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_crypto_enable");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_crypto_enable");
 }
 
 /* Similar to recv() system call; read data from the stream, optionally
@@ -107,7 +107,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
     long flags, void **addr, socklen_t *addrlen, char **textaddr, int *textaddrlen
     TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_recvfrom");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_recvfrom");
 }
 
 /* Similar to send() system call; send data to the stream, optionally
@@ -115,12 +115,12 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
     long flags, void *addr, socklen_t addrlen TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_sendto");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_sendto");
 }
 
 /* Similar to shutdown() system call; shut down part of a full-duplex
  * connection */
 PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_xport_shutdown");
+  HPHP::raise_fatal_error("unimplemented: php_stream_xport_shutdown");
 }

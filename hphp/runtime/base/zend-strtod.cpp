@@ -394,7 +394,7 @@ static Bigint * Balloc(int k)
   Bigint *rv;
 
   if (k > Kmax) {
-    throw FatalErrorException("Balloc() allocation exceeds list boundary");
+    raise_fatal_error("Balloc() allocation exceeds list boundary");
   }
 
   Bigint **&freelist = s_bigint_data->freelist;
@@ -404,7 +404,7 @@ static Bigint * Balloc(int k)
     x = 1 << k;
     rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(Long));
     if (!rv) {
-      throw FatalErrorException("Balloc() failed to allocate memory");
+      raise_fatal_error("Balloc() failed to allocate memory");
     }
     rv->k = k;
     rv->maxwds = x;

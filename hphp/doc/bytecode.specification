@@ -2207,6 +2207,17 @@ FCallArray    [F]  ->  [R]
   When the callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
 
+FCallAwait <num params> <class name> <func name> [F..F] -> [R]
+
+  FPI call direct to a known async function. Equivalent to the sequence
+
+    FCallD
+    UnboxRNop
+    Await
+
+  but may enable the runtime to avoid creating a StaticWaitHandle in the event
+  that the called function returns eagerly.
+
 FCallUnpack <num params> [F..F] -> [R]
 
   FPI call with params and array. This instruction gets the bytecode address of

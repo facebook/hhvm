@@ -1325,6 +1325,15 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
       Unit* destUnit = caller->func()->unit();
       // Set PC so logging code in getTranslation doesn't get confused.
       vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
+      if (ar->isFCallAwait()) {
+        // If there was an interped FCallAwait, and we return via the
+        // jit, we need to deal with the suspend case here.
+        assert(ar->m_r.m_aux.u_fcallAwaitFlag < 2);
+        if (ar->m_r.m_aux.u_fcallAwaitFlag) {
+          start = m_tx.uniqueStubs.fcallAwaitSuspendHelper;
+          break;
+        }
+      }
       sk = SrcKey{caller->func(), vmpc(), caller->resumed()};
       start = getTranslation(TranslArgs{sk, true});
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
@@ -1431,6 +1440,16 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
   }
 
   return start;
+}
+
+TCA MCGenerator::handleFCallAwaitSuspend() {
+  assert_native_stack_aligned();
+  FTRACE(1, "handleFCallAwaitSuspend\n");
+
+  tl_regState = VMRegState::CLEAN;
+  auto start = suspendStack(vmpc());
+  tl_regState = VMRegState::DIRTY;
+  return start ? start : tx().uniqueStubs.resumeHelper;
 }
 
 TCA MCGenerator::handleResume(bool interpFirst) {

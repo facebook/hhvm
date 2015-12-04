@@ -591,6 +591,12 @@ struct Index {
    */
   void refine_public_statics(const PublicSPropIndexer&);
 
+  /*
+   * Return true if the resolved function is an async
+   * function.
+   */
+  bool is_async_func(res::Func rfunc) const;
+
 private:
   Index(const Index&) = delete;
   Index& operator=(Index&&) = delete;

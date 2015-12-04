@@ -990,10 +990,12 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 //////////////////////////////////////////////////////////////////////
 
 void remove_unreachable_blocks(const Index& index, const FuncAnalysis& ainfo) {
-  boost::dynamic_bitset<> reachable(ainfo.ctx.func->nextBlockId);
+  auto reachable = [&](php::Block& b) {
+    return ainfo.bdata[b.id].stateIn.initialized;
+  };
+
   for (auto& blk : ainfo.rpoBlocks) {
-    reachable[blk->id] = ainfo.bdata[blk->id].stateIn.initialized;
-    if (reachable[blk->id]) continue;
+    if (reachable(*blk)) continue;
     auto const srcLoc = blk->hhbcs.front().srcLoc;
     blk->hhbcs = {
       bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
@@ -1007,8 +1009,8 @@ void remove_unreachable_blocks(const Index& index, const FuncAnalysis& ainfo) {
   for (auto& blk : ainfo.rpoBlocks) {
     auto reachableTargets = false;
     forEachTakenEdge(blk->hhbcs.back(), [&] (php::Block& target) {
-      if (reachable[target.id]) reachableTargets = true;
-    });
+        if (reachable(target)) reachableTargets = true;
+      });
     if (reachableTargets) continue;
     switch (blk->hhbcs.back().op) {
     case Op::JmpNZ:
@@ -1019,6 +1021,88 @@ void remove_unreachable_blocks(const Index& index, const FuncAnalysis& ainfo) {
       break;
     }
   }
+}
+
+bool merge_blocks(const FuncAnalysis& ainfo) {
+  auto& func = *ainfo.ctx.func;
+  FTRACE(2, "merge_blocks: {}\n", func.name);
+
+  boost::dynamic_bitset<> hasPred(func.nextBlockId);
+  boost::dynamic_bitset<> multiplePreds(func.nextBlockId);
+  boost::dynamic_bitset<> multipleSuccs(func.nextBlockId);
+  boost::dynamic_bitset<> removed(func.nextBlockId);
+  auto reachable = [&](php::Block& b) {
+    auto const& state = ainfo.bdata[b.id].stateIn;
+    return state.initialized && !state.unreachable;
+  };
+  // find all the blocks with multiple preds; they can't be merged
+  // into their predecessors
+  for (auto& blk : func.blocks) {
+    int numSucc = 0;
+    if (!reachable(*blk)) multiplePreds[blk->id] = true;
+    forEachSuccessor(*blk, [&](php::Block& succ) {
+        if (hasPred[succ.id]) {
+          multiplePreds[succ.id] = true;
+        } else {
+          hasPred[succ.id] = true;
+        }
+        numSucc++;
+      });
+    if (numSucc > 1) multipleSuccs[blk->id] = true;
+  }
+  multiplePreds[func.mainEntry->id] = true;
+  for (auto& blk: func.dvEntries) {
+    if (blk) {
+      multiplePreds[blk->id] = true;
+    }
+  }
+
+  bool removedAny = false;
+  for (auto& blk : func.blocks) {
+    while (auto nxt = blk->fallthrough) {
+      if (multipleSuccs[blk->id] ||
+          multiplePreds[nxt->id] ||
+          blk->exnNode != nxt->exnNode ||
+          blk->section != nxt->section) {
+        break;
+      }
+
+      FTRACE(1, "merging: {} into {}\n", (void*)nxt, (void*)blk.get());
+      multipleSuccs[blk->id] = multipleSuccs[nxt->id];
+      blk->fallthrough = nxt->fallthrough;
+      blk->fallthroughNS = nxt->fallthroughNS;
+      if (nxt->factoredExits.size()) {
+        if (blk->factoredExits.size()) {
+          std::set<borrowed_ptr<php::Block>> exitSet;
+          std::copy(begin(blk->factoredExits), end(blk->factoredExits),
+                    std::inserter(exitSet, begin(exitSet)));
+          std::copy(nxt->factoredExits.begin(), nxt->factoredExits.end(),
+                    std::inserter(exitSet, begin(exitSet)));
+          blk->factoredExits.clear();
+          std::copy(begin(exitSet), end(exitSet),
+                    std::back_inserter(blk->factoredExits));
+        } else {
+          blk->factoredExits = std::move(nxt->factoredExits);
+        }
+      }
+      std::copy(nxt->hhbcs.begin(), nxt->hhbcs.end(),
+                std::back_inserter(blk->hhbcs));
+      nxt->fallthrough = nullptr;
+      removed[nxt->id] = removedAny = true;
+    }
+  }
+
+  if (!removedAny) return false;
+
+  func.blocks.erase(std::remove_if(func.blocks.begin(), func.blocks.end(),
+                                   [&](std::unique_ptr<php::Block>& blk) {
+                                     return removed[blk->id];
+                                   }), func.blocks.end());
+  func.nextBlockId = 0;
+  for (auto& blk : func.blocks) {
+    blk->id = func.nextBlockId++;
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

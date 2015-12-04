@@ -1713,6 +1713,11 @@ void in(ISS& env, const bc::FCallD& op) {
   push(env, TInitGen);
 }
 
+void in(ISS& env, const bc::FCallAwait& op) {
+  in(env, bc::FCallD { op.arg1, op.str2, op.str3 });
+  in(env, bc::Await { });
+}
+
 void fcallArrayImpl(ISS& env) {
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);

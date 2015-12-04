@@ -651,12 +651,14 @@ struct CallData : IRExtraData {
                     uint32_t numParams,
                     Offset after,
                     const Func* callee,
-                    bool destroy)
+                    bool destroy,
+                    bool fcallAwait)
     : spOffset(spOffset)
     , numParams(numParams)
     , after(after)
     , callee(callee)
     , destroyLocals(destroy)
+    , fcallAwait(fcallAwait)
   {}
 
   std::string show() const {
@@ -665,7 +667,8 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
-      destroyLocals ? ",destroyLocals" : ""
+      destroyLocals ? ",destroyLocals" : "",
+      fcallAwait ? ",fcallAwait" : ""
     );
   }
 
@@ -674,6 +677,7 @@ struct CallData : IRExtraData {
   Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
+  bool fcallAwait;
 };
 
 struct RetCtrlData : IRExtraData {

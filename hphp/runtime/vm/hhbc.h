@@ -757,6 +757,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
   O(FPassM,          TWO(IVA,MA),      MMANY,           ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
+  O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
@@ -1226,6 +1227,7 @@ inline bool isFCallStar(Op opcode) {
   switch (opcode) {
     case Op::FCall:
     case Op::FCallD:
+    case Op::FCallAwait:
     case Op::FCallArray:
     case Op::FCallUnpack:
       return true;

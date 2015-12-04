@@ -1701,6 +1701,9 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
 void CodeGenerator::cgStRetVal(IRInstruction* inst) {
   auto  const rFp = srcLoc(inst, 0).reg();
   emitStoreTV(vmain(), rFp[AROFF(m_r)], srcLoc(inst, 1), inst->src(1));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    vmain() << storeli{0xbadbaad, rFp[AROFF(m_r.m_aux.u_fcallAwaitFlag)]};
+  }
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
@@ -2635,12 +2638,16 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   // instruction pointers.
   constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
 
-  auto const ar = argc * sizeof(TypedValue);
-  v << store{rFP, rSP[cellsToBytes(extra->spOffset.offset) +
-    ar + AROFF(m_sfp)]};
-  v << storeli{safe_cast<int32_t>(extra->after),
-               rSP[cellsToBytes(extra->spOffset.offset) + ar + AROFF(m_soff)]};
+  auto const arOff =
+    cellsToBytes(extra->spOffset.offset) + argc * sizeof(TypedValue);
 
+  v << store{rFP, rSP[arOff + AROFF(m_sfp)]};
+  v << storeli{safe_cast<int32_t>(extra->after), rSP[arOff + AROFF(m_soff)]};
+  if (extra->fcallAwait) {
+    auto imm = static_cast<int32_t>(
+      ActRec::encodeNumArgsAndFlags(argc, ActRec::Flags::IsFCallAwait));
+    v << storeli{imm, rSP[arOff + AROFF(m_numArgsAndFlags)]};
+  }
   // The sync_sp temporary will be eliminated by vasm-copy.
   auto const sync_sp = v.makeReg();
   v << lea{rSP[cellsToBytes(extra->spOffset.offset)], sync_sp};
@@ -5496,16 +5503,22 @@ void CodeGenerator::cgCheckARMagicFlag(IRInstruction* inst) {
   auto const fp = srcLoc(inst, 0).reg();
 
   auto& v = vmain();
-  auto const arflags = v.makeReg();
-  auto const tmp = v.makeReg();
   auto const sf = v.makeReg();
 
   auto const mask = static_cast<int32_t>(ActRec::Flags::MagicDispatch);
 
-  v << loadl{fp[AROFF(m_numArgsAndFlags)], arflags};
-  v << andli{mask, arflags, tmp, v.makeReg()};
-  v << cmpli{mask, tmp, sf};
-  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
+  if (mask & (mask - 1)) {
+    auto const tmp = v.makeReg();
+    auto const arflags = v.makeReg();
+    // need to test multiple bits
+    v << loadl{fp[AROFF(m_numArgsAndFlags)], arflags};
+    v << andli{mask, arflags, tmp, v.makeReg()};
+    v << cmpli{mask, tmp, sf};
+    v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
+  } else {
+    v << testlim{mask, fp[AROFF(m_numArgsAndFlags)], sf};
+    v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
+  }
 }
 
 void CodeGenerator::cgLdARNumArgsAndFlags(IRInstruction* inst) {
@@ -5517,7 +5530,33 @@ void CodeGenerator::cgLdARNumArgsAndFlags(IRInstruction* inst) {
 void CodeGenerator::cgStARNumArgsAndFlags(IRInstruction* inst) {
   auto const fp = srcLoc(inst, 0).reg();
   auto const val = srcLoc(inst, 1).reg();
-  vmain() << storel{val, fp[AROFF(m_numArgsAndFlags)]};
+  auto &v = vmain();
+  auto const tmp = v.makeReg();
+  v << movtql{val, tmp};
+  v << storel{tmp, fp[AROFF(m_numArgsAndFlags)]};
+}
+
+void CodeGenerator::cgLdTVAux(IRInstruction* inst) {
+  auto tv = srcLoc(inst, 0).reg();
+  auto dst = dstLoc(inst, 0).reg();
+  auto &v = vmain();
+  v << loadzlq{tv[TVOFF(m_aux)], dst};
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    auto const sf = v.makeReg();
+    v << testqi{-2, dst, sf};
+    ifThen(v, CC_NZ, sf, [](Vout& v) {
+      v << ud2{};
+    });
+  }
+}
+
+void CodeGenerator::cgStTVAux(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const val = srcLoc(inst, 1).reg();
+  auto &v = vmain();
+  auto const tmp = v.makeReg();
+  v << movtql{val, tmp};
+  v << storel{tmp, fp[AROFF(m_r.m_aux.u_fcallAwaitFlag)]};
 }
 
 void CodeGenerator::cgLdARInvName(IRInstruction* inst) {

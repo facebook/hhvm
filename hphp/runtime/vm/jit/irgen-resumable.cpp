@@ -99,6 +99,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
   // store the return value and return control to the caller.
   gen(env, StRetVal, fp(env), waitHandle);
+  gen(env, StTVAux, fp(env), cns(env, 1));
   auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
   gen(env, RetCtrl, ret_data, sp(env), fp(env));
 }
@@ -245,6 +246,46 @@ void emitAwait(IRGS& env) {
       gen(env, IncRef, res);
       decRef(env, child);
       push(env, res);
+    }
+  );
+}
+
+void emitFCallAwait(IRGS& env,
+                    int32_t numParams,
+                    const StringData*,
+                    const StringData*) {
+  auto const resumeOffset = nextBcOff(env);
+  emitFCall(env, numParams);
+  assertTypeStack(env, BCSPOffset{0}, TCell);
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto addr = gen(env, LdStkAddr,
+                      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+                      sp(env));
+      auto aux = gen(env, LdTVAux, addr);
+      gen(env, JmpNZero, taken, aux);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+      assertTypeStack(env, BCSPOffset{0}, TObj);
+      // If an event hook throws we need the current bytecode to be
+      // after the FCallAwait, otherwise the unwinder will expect
+      // to find a PreLive ActRec on the stack.
+      env.irb->setCurMarker(makeMarker(env, resumeOffset));
+      auto const child = popC(env);
+      if (resumed(env)) {
+        // We've popped a stack element, so inform the unwinder
+        // of the current stack depth.
+        env.irb->setCurMarker(makeMarker(env, resumeOffset));
+        env.irb->exceptionStackBoundary();
+        implAwaitR(env, child, resumeOffset);
+      } else {
+        // implAwaitE pushes a null before calling the event hook,
+        // so we don't want to update the marker here.
+        implAwaitE(env, child, resumeOffset);
+      }
     }
   );
 }

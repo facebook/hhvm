@@ -659,8 +659,9 @@ void fpushActRec(IRGS& env,
                  const StringData* invName) {
   ActRecInfo info;
   info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
-  info.numArgs = numArgs;
   info.invName = invName;
+  info.numArgs = numArgs;
+
   gen(
     env,
     SpillFrame,
@@ -1098,6 +1099,8 @@ void emitFCall(IRGS& env, int32_t numParams) {
     curFunc(env)
   );
 
+  auto op = curFunc(env)->unit()->getOp(bcOff(env));
+
   gen(
     env,
     Call,
@@ -1106,7 +1109,8 @@ void emitFCall(IRGS& env, int32_t numParams) {
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
-      destroyLocals
+      destroyLocals,
+      op == Op::FCallAwait
     },
     sp(env),
     fp(env)

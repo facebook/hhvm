@@ -411,7 +411,7 @@ void first_pass(const Index& index,
   CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
 
-  auto peephole = make_peephole(newBCs);
+  auto peephole = make_peephole(newBCs, index, ctx);
   std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
 
   for (auto& op : blk->hhbcs) {
@@ -560,30 +560,38 @@ void visit_blocks(const char* what,
 //////////////////////////////////////////////////////////////////////
 
 void do_optimize(const Index& index, FuncAnalysis ainfo) {
-  FTRACE(2, "{:-^70}\n", "Optimize Func");
+  FTRACE(2, "{:-^70} {}\n", "Optimize Func", ainfo.ctx.func->name);
 
-  visit_blocks_mutable("first pass", index, ainfo, first_pass);
+  bool again;
+  do {
+    again = false;
+    visit_blocks_mutable("first pass", index, ainfo, first_pass);
 
-  /*
-   * Note: it's useful to do dead block removal before DCE, so it can remove
-   * code relating to the branch to the dead block.
-   */
-  remove_unreachable_blocks(index, ainfo);
-
-  if (options.LocalDCE) {
-    visit_blocks("local DCE", index, ainfo, local_dce);
-  }
-  if (options.GlobalDCE) {
-    global_dce(index, ainfo);
-    assert(check(*ainfo.ctx.func));
     /*
-     * Global DCE can change types of locals across blocks.  See dce.cpp for an
-     * explanation.
-     *
-     * We need to perform a final type analysis before we do anything else.
+     * Note: it's useful to do dead block removal before DCE, so it can remove
+     * code relating to the branch to the dead block.
      */
-    ainfo = analyze_func(index, ainfo.ctx);
-  }
+    remove_unreachable_blocks(index, ainfo);
+
+    if (options.LocalDCE) {
+      visit_blocks("local DCE", index, ainfo, local_dce);
+    }
+    if (options.GlobalDCE) {
+      global_dce(index, ainfo);
+      again = merge_blocks(ainfo);
+      assert(check(*ainfo.ctx.func));
+      /*
+       * Global DCE can change types of locals across blocks.  See
+       * dce.cpp for an explanation.
+       *
+       * We need to perform a final type analysis before we do
+       * anything else.
+       */
+      ainfo = analyze_func(index, ainfo.ctx);
+    }
+
+    // If we merged blocks, there could be new optimization opportunities
+  } while (again);
 
   if (options.InsertAssertions) {
     visit_blocks("insert assertions", index, ainfo, insert_assertions);

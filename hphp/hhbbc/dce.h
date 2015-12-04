@@ -55,6 +55,12 @@ void global_dce(const Index&, const FuncAnalysis&);
  */
 void remove_unreachable_blocks(const Index&, const FuncAnalysis&);
 
+/*
+ * Merge single-succ block goes to single pred block into one
+ * where possible.
+ */
+bool merge_blocks(const FuncAnalysis&);
+
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_unreachable("static analysis error: supposedly "

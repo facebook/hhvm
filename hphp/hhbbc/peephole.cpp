@@ -20,12 +20,62 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
+
+void BasicPeephole::push_back(const Bytecode& next) {
+  FTRACE(1, "BasicPeephole::push_back {}\n", show(next));
+  if (next.op == Op::Nop) return;
+  if (m_next.size()) {
+    auto& cur = m_next.back();
+
+    if ((cur.op == Op::RGetCNop && next.op == Op::UnboxRNop) ||
+        (next.op == Op::PopC && (cur.op == Op::Dup ||
+                                 cur.op == Op::Null ||
+                                 cur.op == Op::False ||
+                                 cur.op == Op::True ||
+                                 cur.op == Op::Int ||
+                                 cur.op == Op::Double ||
+                                 cur.op == Op::String))) {
+      m_next.pop_back();
+      return;
+    }
+
+    if (!m_ctx.func->isGenerator &&
+        m_next.size() > 1 &&
+        cur.op == Op::UnboxRNop &&
+        next.op == Op::Await) {
+      auto& prev = (&cur)[-1];
+      if (prev.op == Op::FCallD) {
+        auto& call = prev.FCallD;
+        auto async = [&]() {
+          if (call.str2->empty()) {
+            return m_index.is_async_func(
+              m_index.resolve_func(m_ctx, call.str3));
+          }
+          auto cls = m_index.resolve_class(m_ctx, call.str2);
+          assert(cls);
+          auto func = m_index.resolve_method(m_ctx, subCls(*cls),
+                                             call.str3);
+          return m_index.is_async_func(func);
+        }();
+        if (async) {
+          prev = bc::FCallAwait {
+            call.arg1, call.str2, call.str3
+          };
+          m_next.pop_back();
+          return;
+        }
+      }
+    }
+  }
+  m_next.push_back(next);
+}
 
 void ConcatPeephole::finalize() {
   while (!m_working.empty()) {
@@ -37,6 +87,7 @@ void ConcatPeephole::finalize() {
 void ConcatPeephole::append(const Bytecode& op,
                             const State& state,
                             const std::vector<Op>& srcStack) {
+  FTRACE(1, "ConcatPeephole::append {}\n", show(op));
   assert(state.stack.size() == srcStack.size());
   int nstack = state.stack.size();
 

@@ -4561,9 +4561,11 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   // in that case if necessary.
   frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retval);
 
-  // If in an eagerly executed async function, wrap the return value
-  // into succeeded StaticWaitHandle.
-  if (UNLIKELY(!vmfp()->resumed() && vmfp()->func()->isAsyncFunction())) {
+  // If in an eagerly executed async function, not called by
+  // FCallAwait, wrap the return value into succeeded
+  // StaticWaitHandle.
+  if (UNLIKELY(vmfp()->mayNeedStaticWaitHandle() &&
+               vmfp()->func()->isAsyncFunction())) {
     auto const& retvalCell = *tvAssertCell(&retval);
     // Heads up that we're assuming CreateSucceeded can't throw, or we won't
     // decref the return value.  (It can't right now.)
@@ -4585,6 +4587,9 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     vmStack().ret();
     *vmStack().topTV() = retval;
     assert(vmStack().topTV() == &vmfp()->m_r);
+    // In case we were called by a jitted FCallAwait, let it know
+    // that we finished eagerly.
+    vmStack().topTV()->m_aux.u_fcallAwaitFlag = 0;
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assert(!sfp);
@@ -6668,7 +6673,8 @@ OPTBLD_INLINE void iopFCall(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
-  auto const ar = arFromInstr(vmStack().top(), pc- encoded_op_size(Op::FCallD));
+  auto const ar = arFromInstr(vmStack().top(),
+                              pc - encoded_op_size(Op::FCallD));
   UNUSED auto numArgs = decode_iva(pc);
   UNUSED auto clsName = decode_litstr(pc);
   UNUSED auto funcName = decode_litstr(pc);
@@ -6679,6 +6685,24 @@ OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
+  doFCall(ar, pc);
+}
+
+OPTBLD_INLINE void iopFCallAwait(IOP_ARGS) {
+  auto const ar = arFromInstr(vmStack().top(),
+                              pc - encoded_op_size(Op::FCallAwait));
+  UNUSED auto numArgs = decode_iva(pc);
+  UNUSED auto clsName = decode_litstr(pc);
+  UNUSED auto funcName = decode_litstr(pc);
+
+  if (!RuntimeOption::EvalJitEnableRenameFunction &&
+      !(ar->m_func->attrs() & AttrInterceptable)) {
+    assert(ar->m_func->name()->isame(funcName));
+  }
+  assert(numArgs == ar->numArgs());
+  checkStack(vmStack(), ar->m_func, 0);
+  ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
+  ar->setFCallAwait();
   doFCall(ar, pc);
 }
 
@@ -7847,10 +7871,13 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
   vmStack().ret();
   tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
   assert(vmStack().topTV() == &vmfp()->m_r);
-
+  // In case we were called by a jitted FCallAwait, let it know
+  // that we suspended.
+  vmStack().topTV()->m_aux.u_fcallAwaitFlag = 1;
   // Return control to the caller.
   vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+  pc = LIKELY(vmfp() != nullptr) ?
+    vmfp()->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE void asyncSuspendR(PC& pc) {
@@ -7931,17 +7958,42 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
     throw Object(wh->getException());
   }
 
-  auto const jitReturn = jitReturnPre(vmfp());
+  return suspendStack(pc);
+}
 
-  if (vmfp()->resumed()) {
-    // suspend resumed execution
-    asyncSuspendR(pc);
-  } else {
+TCA suspendStack(PC &pc) {
+  while (true) {
+    auto const jitReturn = []() {
+      // FixMe: what to do here?
+      try {
+        return jitReturnPre(vmfp());
+      } catch (...) {
+        // We're halfway through a bytecode
+        always_assert(false);
+      }
+    }();
+
+    if (vmfp()->resumed()) {
+      // suspend resumed execution
+      asyncSuspendR(pc);
+      return jitReturnPost(jitReturn);
+    }
+
+    auto const suspendOuter = vmfp()->isFCallAwait();
+    assertx(jitReturn.sfp || !suspendOuter);
+
     // suspend eager execution
     asyncSuspendE(pc);
-  }
 
-  return jitReturnPost(jitReturn);
+    auto retIp = jitReturnPost(jitReturn);
+    if (!suspendOuter) return retIp;
+    if (retIp) {
+      auto const& us = mcg->tx().uniqueStubs;
+      if (retIp == us.resumeHelper) retIp = us.fcallAwaitSuspendHelper;
+      return retIp;
+    }
+    vmpc() = pc;
+  }
 }
 
 OPTBLD_INLINE void iopWHResult(IOP_ARGS) {

@@ -197,6 +197,19 @@ struct IRUnit {
 
   /////////////////////////////////////////////////////////////////////////////
 
+  struct Hinter {
+    Hinter(IRUnit& unit, Block::Hint defHint) :
+        m_unit(unit), m_saved(unit.m_defHint) {
+      m_unit.m_defHint = defHint;
+    }
+    ~Hinter() {
+      m_unit.m_defHint = m_saved;
+    }
+   private:
+    IRUnit& m_unit;
+    Block::Hint m_saved;
+  };
+
   /*
    * Add a block to the IRUnit's arena.
    */
@@ -247,6 +260,8 @@ private:
 
   // Map from SSATmp ids to SSATmp*.
   jit::vector<SSATmp*> m_ssaTmps;
+
+  Block::Hint m_defHint = Block::Hint::Neither;
 };
 
 //////////////////////////////////////////////////////////////////////

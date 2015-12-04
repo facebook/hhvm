@@ -325,6 +325,7 @@ static const struct {
    */
   { OpFCall,       {FStack,           Stack1,       OutUnknown      }},
   { OpFCallD,      {FStack,           Stack1,       OutUnknown      }},
+  { OpFCallAwait,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallUnpack, {FStack,           Stack1,       OutUnknown      }},
   { OpFCallArray,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
@@ -521,6 +522,7 @@ int64_t getStackPopped(PC pc) {
   switch (op) {
     case Op::FCall:        return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallD:       return getImm(pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCallAwait:   return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
     case Op::QueryML:   case Op::QueryMC:
@@ -829,6 +831,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::FCallArray:
   case Op::FCall:
   case Op::FCallD:
+  case Op::FCallAwait:
   case Op::ClsCnsD:
   case Op::FPassCW:
   case Op::FPassCE:

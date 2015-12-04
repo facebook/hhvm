@@ -311,8 +311,8 @@ struct ActRec {
 
     // Mutually exclusive execution mode states in these 2 bits.
     InResumed     = (1u << 30),
-    SpareFlag     = (1u << 31),
-    MagicDispatch = InResumed|SpareFlag,
+    IsFCallAwait  = (1u << 31),
+    MagicDispatch = InResumed|IsFCallAwait,
   };
 
   static constexpr int kNumArgsBits       = 28;
@@ -330,16 +330,19 @@ struct ActRec {
   bool resumed() const {
     return (flags() & kExecutionModeMask) == InResumed;
   }
-  bool isSpareFlag() const {
-    return (flags() & kExecutionModeMask) == SpareFlag;
+  bool isFCallAwait() const {
+    return (flags() & kExecutionModeMask) == IsFCallAwait;
+  }
+  bool mayNeedStaticWaitHandle() const {
+    return !(m_numArgsAndFlags & (InResumed|IsFCallAwait));
   }
   bool magicDispatch() const {
     return (flags() & kExecutionModeMask) == MagicDispatch;
   }
 
   static uint32_t encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
-    assert((numArgs & ~kNumArgsMask) == 0);
-    assert((uint32_t{flags} & ~kFlagsMask) == 0);
+    assert((numArgs & kFlagsMask) == 0);
+    assert((uint32_t{flags} & kNumArgsMask) == 0);
     return numArgs | flags;
   }
 
@@ -358,10 +361,12 @@ struct ActRec {
     m_numArgsAndFlags |= LocalsDecRefd;
   }
   void setResumed() {
-    m_numArgsAndFlags |= InResumed;
+    assert((flags() & ~IsFCallAwait) == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
   }
-  void setSpareFlag() {
-    m_numArgsAndFlags |= SpareFlag;
+  void setFCallAwait() {
+    assert(flags() == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), IsFCallAwait);
   }
 
   void setMagicDispatch(StringData* invName) {
@@ -1134,6 +1139,7 @@ bool doFCall(ActRec* ar, PC& pc);
 jit::TCA dispatchBB();
 void pushLocalsAndIterators(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
+jit::TCA suspendStack(PC& pc);
 
 ///////////////////////////////////////////////////////////////////////////////
 

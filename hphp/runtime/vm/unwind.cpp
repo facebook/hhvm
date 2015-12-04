@@ -255,7 +255,9 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   if (LIKELY(!fp->resumed())) {
     decRefLocals();
-    if (UNLIKELY(func->isAsyncFunction()) && phpException) {
+    if (UNLIKELY(func->isAsyncFunction()) &&
+        phpException &&
+        !fp->isFCallAwait()) {
       // If in an eagerly executed async function, wrap the user exception
       // into a failed StaticWaitHandle and return it to the caller.
       auto const waitHandle = c_StaticWaitHandle::CreateFailed(phpException);

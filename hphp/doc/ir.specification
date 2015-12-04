@@ -2601,6 +2601,14 @@ fields of that struct for holding intermediate values.
   pointed to by the frame pointer S0 as the first argument, and the pointer to
   the first parameter in the frame as the second argument.
 
+| LdTVAux, D(Int), S(PtrToStkGen), NF
+
+  Load the value of m_aux from the Cell pointed to by S0
+
+| StTVAux, ND, S(FramePtr) S(Int), CRc
+
+  Store S1 to m_aux field of the m_ret field of the frame pointed to by S0.
+
 /* Local Variables: */
 /* fill-column: 79 */
 /* End: */

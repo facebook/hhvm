@@ -80,9 +80,18 @@ extern Class* s_ ## cls ## Class;
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
 
+extern Class* s_ThrowableClass;
+extern Class* s_BaseExceptionClass;
+extern Class* s_ErrorClass;
+extern Class* s_ParseErrorClass;
+extern Class* s_TypeErrorClass;
+
 Object AllocStdClassObject();
 Object AllocPinitSentinel();
 Object AllocExceptionObject(const Variant& message);
+Object AllocErrorObject(const Variant& message);
+Object AllocTypeErrorObject(const Variant& message);
+Object AllocParseErrorObject(const Variant& message);
 Object AllocBadMethodCallExceptionObject(const Variant& message);
 Object AllocInvalidArgumentExceptionObject(const Variant& message);
 Object AllocRuntimeExceptionObject(const Variant& message);
@@ -104,6 +113,9 @@ Object AllocLazyIterableViewObject(const Variant& iterable);
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
 
 ATTRIBUTE_NORETURN void throwExceptionObject(const Variant& message);
+ATTRIBUTE_NORETURN void throwErrorObject(const Variant& message);
+ATTRIBUTE_NORETURN void throwTypeErrorObject(const Variant& message);
+ATTRIBUTE_NORETURN void throwParseErrorObject(const Variant& message);
 ATTRIBUTE_NORETURN
 void throwBadMethodCallExceptionObject(const Variant& message);
 ATTRIBUTE_NORETURN

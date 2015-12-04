@@ -70,7 +70,7 @@ bool MemFile::open(const String& filename, const String& mode) {
       assert(RuntimeOption::EnableOnDemandUncompress);
       data = gzdecode(data, len);
       if (data == nullptr) {
-        throw FatalErrorException("cannot unzip compressed data");
+        raise_fatal_error("cannot unzip compressed data");
       }
       m_data = data;
       m_malloced = true;
@@ -173,12 +173,12 @@ bool MemFile::rewind() {
 }
 
 int64_t MemFile::writeImpl(const char *buffer, int64_t length) {
-  throw FatalErrorException((std::string("cannot write a mem stream: ") +
+  raise_fatal_error((std::string("cannot write a mem stream: ") +
                              getName()).c_str());
 }
 
 bool MemFile::flush() {
-  throw FatalErrorException((std::string("cannot flush a mem stream: ") +
+  raise_fatal_error((std::string("cannot flush a mem stream: ") +
                              getName()).c_str());
 }
 
@@ -200,7 +200,7 @@ void MemFile::unzip() {
   int len = m_len;
   char *data = gzdecode(m_data, len);
   if (data == nullptr) {
-    throw FatalErrorException((std::string("cannot unzip mem stream: ") +
+    raise_fatal_error((std::string("cannot unzip mem stream: ") +
                                getName()).c_str());
   }
   m_data = data;

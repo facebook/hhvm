@@ -2428,6 +2428,10 @@ Parser::AliasFlags Parser::getAliasFlags() {
     flags = flags | AliasFlags::PHP7_ScalarTypes;
   }
 
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    flags = flags | AliasFlags::PHP7_EngineExceptions;
+  }
+
   return flags;
 }
 
@@ -2453,6 +2457,8 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
 #define HH_ALIAS(alias, name) \
   ALIAS(#alias, "HH\\" #name, AliasFlags::HH)
 #define SCALAR_TYPE(name) HH_TYPE(name, AliasFlags::PHP7_ScalarTypes)
+#define PHP7_TYPE(name, option) \
+  ALIAS(#name, "__SystemLib\\" #name, AliasFlags::option)
   Parser::AutoAliasMap aliases {
     HH_ONLY_TYPE(AsyncIterator),
     HH_ONLY_TYPE(AsyncKeyedIterator),
@@ -2520,7 +2526,14 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ALIAS(integer, int),
     HH_ALIAS(double, float),
     HH_ALIAS(real, float),
+
+    // Engine exception classes
+    PHP7_TYPE(Throwable, PHP7_EngineExceptions),
+    PHP7_TYPE(Error, PHP7_EngineExceptions),
+    PHP7_TYPE(ParseError, PHP7_EngineExceptions),
+    PHP7_TYPE(TypeError, PHP7_EngineExceptions),
   };
+#undef PHP7_TYPE
 #undef HH_ALIAS
 #undef SCALAR_TYPE
 #undef HH_ONLY_TYPE

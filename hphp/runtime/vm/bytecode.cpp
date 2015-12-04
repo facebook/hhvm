@@ -2428,7 +2428,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
                                             ObjectData* freeObj,
                                             ObjectData* exception) {
   assert(exception);
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+  assert(exception->instanceof(SystemLib::s_ThrowableClass));
   assert(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
@@ -4638,9 +4638,8 @@ OPTBLD_INLINE void iopUnwind(IOP_ARGS) {
 OPTBLD_INLINE void iopThrow(IOP_ARGS) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject ||
-      !c1->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
-    raise_error("Exceptions must be valid objects derived from the "
-                "Exception base class");
+      !c1->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
+    raise_error("Exceptions must implement the Throwable interface.");
   }
 
   Object obj(c1->m_data.pobj);
@@ -6180,7 +6179,7 @@ static void throw_call_non_object(const char* methodName,
   if (RuntimeOption::ThrowExceptionOnBadMethodCall) {
     SystemLib::throwBadMethodCallExceptionObject(String(msg));
   }
-  throw FatalErrorException(msg.c_str());
+  raise_fatal_error(msg.c_str());
 }
 
 OPTBLD_INLINE void iopFPushObjMethod(IOP_ARGS) {

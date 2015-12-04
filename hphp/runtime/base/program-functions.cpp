@@ -1610,7 +1610,7 @@ static int execute_program_impl(int argc, char** argv) {
         Array bt = createBacktrace(BacktraceArgs()
                                    .withSelf()
                                    .setParserFrame(&parserFrame));
-        throw FatalErrorException(msg->data(), bt);
+        raise_fatal_error(msg->data(), bt);
       }
     } catch (FileOpenException &e) {
       Logger::Error("%s", e.getMessage().c_str());

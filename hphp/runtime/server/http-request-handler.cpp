@@ -326,7 +326,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       if (!original && compressed) {
         data = gzdecode(data, len);
         if (data == nullptr) {
-          throw FatalErrorException("cannot unzip compressed data");
+          raise_fatal_error("cannot unzip compressed data");
         }
         decompressed_data = const_cast<char*>(data);
         compressed = false;

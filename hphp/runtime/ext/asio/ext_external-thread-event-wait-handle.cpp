@@ -134,7 +134,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   try {
     m_event->unserialize(result);
   } catch (const Object& exception) {
-    assert(exception->instanceof(SystemLib::s_ExceptionClass));
+    assert(exception->instanceof(SystemLib::s_ThrowableClass));
     auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);

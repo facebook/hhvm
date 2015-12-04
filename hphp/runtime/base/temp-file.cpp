@@ -54,7 +54,7 @@ void TempFile::sweep() {
 }
 
 bool TempFile::open(const String& filename, const String& mode) {
-  throw FatalErrorException((std::string("cannot open a temp file ") +
+  raise_fatal_error((std::string("cannot open a temp file ") +
                              getName()).c_str());
 }
 

@@ -1451,7 +1451,7 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
         "Heap address space exhausted\nbase:{}\nend:{}\nused{}",
         m_base, m_end, m_used);
     // Throw exception when t4840214 is fixed
-    // throw FatalErrorException("Request heap out of memory");
+    // raise_fatal_error("Request heap out of memory");
   } else if (UNLIKELY(m_used > m_OOMMarker)) {
     setSurpriseFlag(MemExceededFlag);
   }

@@ -365,11 +365,11 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
       buf_size = buf_size << 1;
       buf = (char*)realloc(buf, buf_size);
       if (!buf) {
-        throw FatalErrorException(0,
-                                  "The structure buffer has been exceeded "
-                                  "(%d).  Please try decreasing the nesting "
-                                  "depth of messages and report this to the "
-                                  "developers.", buf_size);
+        raise_fatal_error(
+          folly::sformat("The structure buffer has been exceeded "
+                          "({}).  Please try decreasing the nesting "
+                          "depth of messages and report this to the "
+                          "developers.", buf_size).c_str());
       }
     }
     sprintf(&buf[i], "%s%c", intbuf, id->next ? '.' : '\0');

@@ -415,7 +415,7 @@ Variant ArrayIter::second() {
 
 const Variant& ArrayIter::secondRef() {
   if (!hasArrayData()) {
-    throw FatalErrorException("taking reference on iterator objects");
+    raise_fatal_error("taking reference on iterator objects");
   }
   assert(hasArrayData());
   const ArrayData* ad = getArrayData();

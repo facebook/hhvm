@@ -178,7 +178,7 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   assert(isRunning());
   assert(exception);
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+  assert(exception->instanceof(SystemLib::s_ThrowableClass));
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFail())) {
@@ -253,7 +253,7 @@ String c_AsyncFunctionWaitHandle::getName() {
     }
 
     default:
-      throw FatalErrorException(
+      raise_fatal_error(
           "Invariant violation: encountered unexpected state");
   }
 }

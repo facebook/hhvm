@@ -208,7 +208,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // But we can't, the cycles are detected and avoided at blockOn() time.
     // So, looks like it's not cycle, but the word I started typing first.
     assert(false);
-    throw FatalErrorException(
+    raise_fatal_error(
       "Invariant violation: queues are empty, but wait handle did not finish");
   }
 }

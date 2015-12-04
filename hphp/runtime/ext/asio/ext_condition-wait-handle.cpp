@@ -89,9 +89,9 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
 }
 
 void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
-  if (!exception->instanceof(SystemLib::s_ExceptionClass)) {
+  if (!exception->instanceof(SystemLib::s_ThrowableClass)) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected exception to be an instance of Exception");
+      "Expected exception to be an instance of Throwable");
   }
   auto obj = wait_handle<c_ConditionWaitHandle>(this_);
 

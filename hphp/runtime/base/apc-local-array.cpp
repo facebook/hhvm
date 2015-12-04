@@ -220,7 +220,7 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
 }
 
 ArrayData* APCLocalArray::CopyWithStrongIterators(const ArrayData*) {
-  throw FatalErrorException(
+  raise_fatal_error(
     "Unimplemented ArrayData::copyWithStrongIterators");
 }
 

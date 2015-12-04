@@ -1,4 +1,4 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Can use "yield from" only with arrays and Traversables' in %s:4
+Fatal error: Uncaught Error: Can use "yield from" only with arrays and Traversables in %s:4
 Stack trace:
 #0 (): gen()
 #1 %s(10): Generator->rewind()

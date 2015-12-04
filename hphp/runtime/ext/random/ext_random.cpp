@@ -33,14 +33,12 @@ static bool getRandomBytes(void *bytes, size_t length) {
 
 String HHVM_FUNCTION(random_bytes, int64_t length) {
   if (length < 1) {
-    // TODO(https://github.com/facebook/hhvm/issues/6012)
-    // Make this throw PHP 7 `Error` when it's implemented
-    SystemLib::throwExceptionObject("Length must be greater than 0");
+    SystemLib::throwErrorObject("Length must be greater than 0");
   }
 
   String ret(length, ReserveString);
   if (!getRandomBytes(ret.mutableData(), ret.capacity())) {
-    SystemLib::throwExceptionObject("Could not gather sufficient random data");
+    SystemLib::throwErrorObject("Could not gather sufficient random data");
   }
 
   return ret.setSize(length);
@@ -48,9 +46,7 @@ String HHVM_FUNCTION(random_bytes, int64_t length) {
 
 int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
   if (min > max) {
-    // TODO(https://github.com/facebook/hhvm/issues/6012)
-    // Make this throw PHP 7 `Error` when it's implemented
-    SystemLib::throwExceptionObject(
+    SystemLib::throwErrorObject(
       "Minimum value must be less than or equal to the maximum value");
   }
 
@@ -61,7 +57,7 @@ int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
   uint64_t umax = max - min;
   uint64_t result;
   if (!getRandomBytes(&result, sizeof(result))) {
-    SystemLib::throwExceptionObject("Could not gather sufficient random data");
+    SystemLib::throwErrorObject("Could not gather sufficient random data");
   }
 
   // Special case where no modulus is required
@@ -81,7 +77,7 @@ int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
     // Discard numbers over the limit to avoid modulo bias
     while (result > limit) {
       if (!getRandomBytes(&result, sizeof(result))) {
-        SystemLib::throwExceptionObject(
+        SystemLib::throwErrorObject(
           "Could not gather sufficient random data");
       }
     }

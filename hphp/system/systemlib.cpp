@@ -60,8 +60,11 @@ SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 Class* s_ThrowableClass;
 Class* s_BaseExceptionClass;
 Class* s_ErrorClass;
-Class* s_TypeErrorClass;
+Class* s_ArithmeticErrorClass;
+Class* s_AssertionErrorClass;
+Class* s_DivisionByZeroErrorClass;
 Class* s_ParseErrorClass;
+Class* s_TypeErrorClass;
 
 Object AllocStdClassObject() {
   return Object{s_stdclassClass};
@@ -77,6 +80,15 @@ Object AllocExceptionObject(const Variant& message) {
 
 Object AllocErrorObject(const Variant& message) {
   return createAndConstruct(s_ErrorClass, make_packed_array(message));
+}
+
+Object AllocArithmeticErrorObject(const Variant& message) {
+  return createAndConstruct(s_ArithmeticErrorClass, make_packed_array(message));
+}
+
+Object AllocDivisionByZeroErrorObject(const Variant& message) {
+  return createAndConstruct(s_DivisionByZeroErrorClass,
+                            make_packed_array(message));
 }
 
 Object AllocParseErrorObject(const Variant& message) {
@@ -157,6 +169,14 @@ void throwExceptionObject(const Variant& message) {
 
 void throwErrorObject(const Variant& message) {
   throw AllocErrorObject(message);
+}
+
+void throwArithmeticErrorObject(const Variant& message) {
+  throw AllocArithmeticErrorObject(message);
+}
+
+void throwDivisionByZeroErrorObject(const Variant& message) {
+  throw AllocDivisionByZeroErrorObject(message);
 }
 
 void throwParseErrorObject(const Variant& message) {

@@ -259,6 +259,10 @@ static CallMap s_callMap {
                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {ThrowInvalidOperation, throw_invalid_operation_exception,
                           DNone, SSync, {{SSA, 0}}},
+    {ThrowArithmeticError, throw_arithmetic_error,
+                          DNone, SSync, {{SSA, 0}}},
+    {ThrowDivisionByZeroError, throw_division_by_zero_error,
+                          DNone, SSync, {{SSA, 0}}},
     {HasToString,        &ObjectData::hasToString, DSSA, SSync,
                           {{SSA, 0}}},
 

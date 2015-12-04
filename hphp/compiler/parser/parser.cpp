@@ -2530,6 +2530,9 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     // Engine exception classes
     PHP7_TYPE(Throwable, PHP7_EngineExceptions),
     PHP7_TYPE(Error, PHP7_EngineExceptions),
+    PHP7_TYPE(ArithmeticError, PHP7_EngineExceptions),
+    PHP7_TYPE(AssertionError, PHP7_EngineExceptions),
+    PHP7_TYPE(DivisionByZeroError, PHP7_EngineExceptions),
     PHP7_TYPE(ParseError, PHP7_EngineExceptions),
     PHP7_TYPE(TypeError, PHP7_EngineExceptions),
   };

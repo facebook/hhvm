@@ -8,18 +8,18 @@ var_dump(intdiv(-PHP_INT_MAX - 1, -PHP_INT_MAX - 1));
 
 try {
   var_dump(intdiv(-PHP_INT_MAX - 1, -1));
-} catch (Exception $e) {
+} catch (Throwable $e) {
   var_dump($e->getMessage());
 }
 
 try {
   var_dump(intdiv(PHP_INT_MIN, -1));
-} catch (Exception $e) {
+} catch (Throwable $e) {
   var_dump($e->getMessage());
 }
 
 try {
   var_dump(intdiv(1, 0));
-} catch (Exception $e) {
+} catch (Throwable $e) {
   var_dump($e->getMessage());
 }

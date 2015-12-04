@@ -1277,10 +1277,13 @@ bool HHVM_METHOD(Memcached, ispristine) {
   return data->m_impl->is_pristine;
 }
 
-#ifdef HAVE_MEMCACHED_TOUCH
 bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
                                       const String& key,
                                       int expiration /*= 0*/) {
+
+#ifndef HAVE_MEMCACHED_TOUCH
+  throw_not_supported(__func__, "Not Implemented in libmemcached versions below 1.0.2");
+#endif
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
@@ -1306,7 +1309,6 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   return true;
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1444,9 +1446,7 @@ class MemcachedExtension final : public Extension {
     HHVM_ME(Memcached, getresultmessage);
     HHVM_ME(Memcached, ispersistent);
     HHVM_ME(Memcached, ispristine);
-#ifdef HAVE_MEMCACHED_TOUCH
     HHVM_ME(Memcached, touchbykey);
-#endif
 
     Native::registerNativeDataInfo<MemcachedData>(s_MemcachedData.get());
 

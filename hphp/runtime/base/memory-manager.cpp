@@ -1109,26 +1109,20 @@ void MemoryManager::requestInit() {
   delete trigger;
 
 #ifdef USE_JEMALLOC
-  bool active = true;
-  size_t boolsz = sizeof(bool);
-
   // Reset jemalloc stats.
-  if (mallctl("prof.reset", nullptr, nullptr, nullptr, 0)) {
+  if (mallctlCall("prof.reset", true) != 0) {
     return;
   }
 
   // Enable jemalloc thread-local heap dumps.
-  if (mallctl("prof.active",
-              &profctx.prof_active, &boolsz,
-              &active, sizeof(bool))) {
+  if (mallctlReadWrite("prof.active", &profctx.prof_active, true, true)
+      != 0) {
     profctx = ReqProfContext{};
     return;
   }
-  if (mallctl("thread.prof.active",
-              &profctx.thread_prof_active, &boolsz,
-              &active, sizeof(bool))) {
-    mallctl("prof.active", nullptr, nullptr,
-            &profctx.prof_active, sizeof(bool));
+  if (mallctlReadWrite("thread.prof.active", &profctx.thread_prof_active,
+                       true, true) != 0) {
+    mallctlWrite("prof.active", profctx.prof_active);
     profctx = ReqProfContext{};
     return;
   }
@@ -1143,10 +1137,8 @@ void MemoryManager::requestShutdown() {
 #ifdef USE_JEMALLOC
   jemalloc_pprof_dump(profctx.filename, true);
 
-  mallctl("thread.prof.active", nullptr, nullptr,
-          &profctx.thread_prof_active, sizeof(bool));
-  mallctl("prof.active", nullptr, nullptr,
-          &profctx.prof_active, sizeof(bool));
+  mallctlWrite("thread.prof.active", profctx.thread_prof_active);
+  mallctlWrite("prof.active", profctx.prof_active);
 #endif
 
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;

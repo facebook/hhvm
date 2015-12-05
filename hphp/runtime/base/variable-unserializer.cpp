@@ -31,10 +31,11 @@
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
 
-static void unserializeVariant(Variant&, VariableUnserializer *unserializer,
+static void unserializeVariant(Variant&, VariableUnserializer* unserializer,
                                UnserializeMode mode = UnserializeMode::Value);
 static Array unserializeArray(VariableUnserializer*);
 static String unserializeString(VariableUnserializer*, char delimiter0 = '"',
@@ -108,6 +109,13 @@ static void throwUnexpectedType(const String& key, const ObjectData* obj,
     tname(type.asTypedValue()->m_type)
   ).str();
   throw Exception(msg);
+}
+
+NEVER_INLINE ATTRIBUTE_NORETURN
+static void throwUnexpectedType(const StringData* key, const ObjectData* obj,
+                                const Variant& type) {
+  String str(key->data(), key->size(), CopyString);
+  throwUnexpectedType(str, obj, type);
 }
 
 NEVER_INLINE ATTRIBUTE_NORETURN
@@ -396,8 +404,49 @@ void VariableUnserializer::putInOverwrittenList(const Variant& v) {
   m_overwrittenList.append(v);
 }
 
+bool VariableUnserializer::matchString(folly::StringPiece str) {
+  const char* p = m_buf;
+  const auto ss = str.size();
+  if (ss >= 100) return false;
+  int digs = ss >= 10 ? 2 : 1;
+  int total = 2 + digs + 2 + ss + 2;
+  if (p + total > m_end) return false;
+  if (*p++ != 's') return false;
+  if (*p++ != ':') return false;
+  if (digs == 2) {
+    if (*p++ != '0' + ss/10) return false;
+    if (*p++ != '0' + ss%10) return false;
+  } else {
+    if (*p++ != '0' + ss) return false;
+  }
+  if (*p++ != ':') return false;
+  if (*p++ != '\"') return false;
+  if (memcmp(p, str.data(), ss)) return false;
+  p += ss;
+  if (*p++ != '\"') return false;
+  if (*p++ != ';') return false;
+  assert(m_buf + total == p);
+  m_buf = p;
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
+
+// remainingProps should include the current property being unserialized.
+static void unserializePropertyValue(Variant& v, VariableUnserializer* uns,
+                                     int remainingProps) {
+  assert(remainingProps > 0);
+  unserializeVariant(v, uns);
+  if (--remainingProps > 0) {
+    auto lastChar = uns->peekBack();
+    if (lastChar != ';' && lastChar != '}') {
+      throwUnterminatedProperty();
+    }
+  }
+}
+
+// nProp should include the current property being unserialized.
 NEVER_INLINE
 static void unserializeProp(VariableUnserializer* uns,
                             ObjectData* obj,
@@ -425,7 +474,7 @@ static void unserializeProp(VariableUnserializer* uns,
     uns->putInOverwrittenList(*t);
   }
 
-  unserializeVariant(*t, uns);
+  unserializePropertyValue(*t, uns, nProp);
   if (!RuntimeOption::RepoAuthoritative) return;
   if (!Repo::get().global().HardPrivatePropInference) return;
 
@@ -445,6 +494,57 @@ static void unserializeProp(VariableUnserializer* uns,
     return;
   }
   throwUnexpectedType(key, obj, *t);
+}
+
+
+NEVER_INLINE
+static void unserializeRemainingProps(VariableUnserializer* uns,
+                                      Object& obj,
+                                      int remainingProps,
+                                      Variant& serializedNativeData,
+                                      bool& hasSerializedNativeData) {
+  while (remainingProps > 0) {
+    /*
+      use the number of properties remaining as an estimate for
+      the total number of dynamic properties when we see the
+      first dynamic prop.  see getVariantPtr
+    */
+    Variant v;
+    unserializeVariant(v, uns, UnserializeMode::Key);
+    String key = v.toString();
+    int ksize = key.size();
+    const char *kdata = key.data();
+    int subLen = 0;
+    if (key == s_serializedNativeDataKey) {
+      unserializePropertyValue(serializedNativeData,
+                               uns, remainingProps--);
+      hasSerializedNativeData = true;
+    } else if (kdata[0] == '\0') {
+      if (UNLIKELY(!ksize)) {
+        raise_error("Cannot access empty property");
+      }
+      // private or protected
+      subLen = strlen(kdata + 1) + 2;
+      if (UNLIKELY(subLen >= ksize)) {
+        if (subLen == ksize) {
+          raise_error("Cannot access empty property");
+        } else {
+          throwMangledPrivateProperty();
+        }
+      }
+      String k(kdata + subLen, ksize - subLen, CopyString);
+      Class* ctx = (Class*)-1;
+      if (kdata[1] != '*') {
+        ctx = Unit::lookupClass(
+          String(kdata + 1, subLen - 2, CopyString).get());
+      }
+      unserializeProp(uns, obj.get(), k, ctx, key,
+                      remainingProps--);
+    } else {
+      unserializeProp(uns, obj.get(), key, nullptr, key,
+                      remainingProps--);
+    }
+  }
 }
 
 /*
@@ -492,7 +592,7 @@ static Class* tryAlternateCollectionClass(const StringData* clsName) {
 }
 
 NEVER_INLINE static
-void unserializeVariant(Variant& self, VariableUnserializer *uns,
+void unserializeVariant(Variant& self, VariableUnserializer* uns,
                         UnserializeMode mode /* = UnserializeMode::Value */) {
 
   // NOTE: If you make changes to how serialization and unserialization work,
@@ -624,7 +724,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       String clsName = unserializeString(uns);
 
       uns->expectChar(':');
-      int64_t size = uns->readInt();
+      const int64_t size = uns->readInt();
       uns->expectChar(':');
       uns->expectChar('{');
 
@@ -695,53 +795,62 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
 
           Variant serializedNativeData = init_null();
           bool hasSerializedNativeData = false;
+          bool checkRepoAuthType =
+            RuntimeOption::RepoAuthoritative &&
+            Repo::get().global().HardPrivatePropInference;
+          Class* objCls = obj->getVMClass();
+          auto remainingProps = size;
+          // Try fast case.
+          if (size >= objCls->numDeclProperties()) {
+            bool mismatch = false;
+            auto objProps = obj->propVec();
 
-          /*
-            Count backwards so that i is the number of properties
-            remaining (to be used as an estimate for the total number
-            of dynamic properties when we see the first dynamic prop).
-            see getVariantPtr
-          */
-          for (int64_t i = size; i--; ) {
-            Variant v;
-            unserializeVariant(v, uns, UnserializeMode::Key);
-            String key = v.toString();
-            int ksize = key.size();
-            const char *kdata = key.data();
-            int subLen = 0;
-            if (key == s_serializedNativeDataKey) {
-              unserializeVariant(serializedNativeData, uns);
-              hasSerializedNativeData = true;
-            } else if (kdata[0] == '\0') {
-              if (UNLIKELY(!ksize)) {
-                raise_error("Cannot access empty property");
+            for (auto prop : objCls->declProperties()) {
+              if (!uns->matchString(prop.mangledName->slice())) {
+                mismatch = true;
+                break;
               }
-              // private or protected
-              subLen = strlen(kdata + 1) + 2;
-              if (UNLIKELY(subLen >= ksize)) {
-                if (subLen == ksize) {
-                  raise_error("Cannot access empty property");
+              // don't need to worry about overwritten list, because
+              // this is definitely the first time we're setting this
+              // property.
+              TypedValue* tv = objProps++;
+              Variant& t = tvAsVariant(tv);
+              unserializePropertyValue(t, uns, remainingProps--);
+
+              if (UNLIKELY(checkRepoAuthType &&
+                           !tvMatchesRepoAuthType(*tv, prop.repoAuthType))) {
+                throwUnexpectedType(prop.name, obj.get(), t);
+              }
+            }
+            // If everything matched, all remaining properties are dynamic.
+            if (!mismatch && remainingProps > 0) {
+              auto& arr = obj->reserveProperties(remainingProps);
+              while (remainingProps > 0) {
+                Variant v;
+                unserializeVariant(v, uns, UnserializeMode::Key);
+                String key = v.toString();
+                if (key == s_serializedNativeDataKey) {
+                  unserializePropertyValue(serializedNativeData,
+                                           uns, remainingProps--);
+                  hasSerializedNativeData = true;
                 } else {
-                  throwMangledPrivateProperty();
+                  auto t = &arr.lvalAt(key, AccessFlags::Key);
+                  if (UNLIKELY(isRefcountedType(t->getRawType()))) {
+                    uns->putInOverwrittenList(*t);
+                  }
+                  unserializePropertyValue(*t, uns, remainingProps--);
                 }
               }
-              String k(kdata + subLen, ksize - subLen, CopyString);
-              Class* ctx = (Class*)-1;
-              if (kdata[1] != '*') {
-                ctx = Unit::lookupClass(
-                  String(kdata + 1, subLen - 2, CopyString).get());
-              }
-              unserializeProp(uns, obj.get(), k, ctx, key, i + 1);
-            } else {
-              unserializeProp(uns, obj.get(), key, nullptr, key, i + 1);
             }
-
-            if (i > 0) {
-              auto lastChar = uns->peekBack();
-              if ((lastChar != ';') && (lastChar != '}')) {
-                throwUnterminatedProperty();
-              }
-            }
+          }
+          if (remainingProps > 0) {
+            INC_TPC(unser_prop_slow);
+            unserializeRemainingProps(uns, obj, remainingProps,
+                                      serializedNativeData,
+                                      hasSerializedNativeData);
+            remainingProps = 0;
+          } else {
+            INC_TPC(unser_prop_fast);
           }
 
           // nativeDataWakeup is called last to ensure that all properties are
@@ -848,7 +957,7 @@ Array unserializeArray(VariableUnserializer* uns) {
     assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
-    Variant &value = arr.lvalAt(key, AccessFlags::Key);
+    Variant& value = arr.lvalAt(key, AccessFlags::Key);
     if (UNLIKELY(isRefcountedType(value.getRawType()))) {
       uns->putInOverwrittenList(value);
     }
@@ -867,7 +976,7 @@ Array unserializeArray(VariableUnserializer* uns) {
 }
 
 static
-String unserializeString(VariableUnserializer *uns, char delimiter0 /* = '"' */,
+String unserializeString(VariableUnserializer* uns, char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
   int64_t size = uns->readInt();
   if (size >= RuntimeOption::MaxSerializedStringSize) {
@@ -992,7 +1101,7 @@ void unserializePair(ObjectData* obj, VariableUnserializer* uns,
   unserializeVariant(tvAsVariant(&elms[1]), uns, UnserializeMode::ColValue);
 }
 
-void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
+void reserialize(VariableUnserializer* uns, StringBuffer& buf) {
   char type = uns->readChar();
   char sep = uns->readChar();
 

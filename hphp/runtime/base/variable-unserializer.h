@@ -76,6 +76,12 @@ struct VariableUnserializer {
   void expectChar(char expected);
 
   /*
+   * Attempt to consume a serialized string with content matching str.
+   * Return false and rewind stream on non-standard format or content mismatch.
+   */
+  bool matchString(folly::StringPiece str);
+
+  /*
    * Accessors.
    */
   Type type() const;
@@ -142,7 +148,7 @@ private:
   const Array& m_options; // e.g. classes allowed to be unserialized
 };
 
-void reserialize(VariableUnserializer *uns, StringBuffer &buf);
+void reserialize(VariableUnserializer* uns, StringBuffer& buf);
 
 }
 

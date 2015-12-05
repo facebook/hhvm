@@ -503,7 +503,6 @@ void emitBindN(IRGS& env)                     { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
 void emitFPassN(IRGS& env, int32_t)           { INTERP }
-void emitFCallUnpack(IRGS& env, int32_t)      { INTERP }
 void emitCufSafeArray(IRGS& env)              { INTERP }
 void emitCufSafeReturn(IRGS& env)             { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }

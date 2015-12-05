@@ -1347,15 +1347,17 @@ To string conversions:
   dead. InlineFrameStart is the caller FP-relative offset of the start of the
   callee frame. Everything below InlineFrameStart is dead.
 
-| CallArray<spOffset,returnOff,after,destroyLocals>, ND,
-|                                                    S(StkPtr) S(FramePtr),
-|                                                    Er
+| CallArray<spOffset,numParams,callOff,after,destroyLocals>,
+|                       ND,
+|                       S(StkPtr) S(FramePtr),
+|                       Er
 
-  Invoke function corresponding to the current FPI with array args. S0+spOffset
-  points to the stack resulting after the ActRec for the function and the array
-  of its arguments is pushed. CallArray pops the array off the stack, pushes
-  the elements of the array as arguments, and invokes the function in the
-  ActRec.
+  Invoke function corresponding to the current FPI with numParams arguments,
+  the last of which is an array of the remaining args. Used for FCallArray (in
+  which case numParams == 1), and FCallUnpack. S0+spOffset points to the stack
+  resulting after the ActRec for the function and numParams arguments have been
+  pushed. CallArray pops the array off the stack, pushes the elements of the
+  array as arguments, and invokes the function in the ActRec.
 
 | Call<offset,numParams,returnOff,funcd,destroyLocals>, ND,
 |                                                       S(StkPtr) S(FramePtr),

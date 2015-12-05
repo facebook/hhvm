@@ -2613,14 +2613,19 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   auto const extra  = inst->extra<CallArray>();
   auto const pc     = v.cns(extra->pc);
   auto const after  = v.cns(extra->after);
-  auto const target = mcg->tx().uniqueStubs.fcallArrayHelper;
+  auto const target = extra->numParams == 0 ?
+    mcg->tx().uniqueStubs.fcallArrayHelper :
+    mcg->tx().uniqueStubs.fcallUnpackHelper;
   auto const rSP    = srcLoc(inst, 0 /* sp */).reg();
   auto const syncSP = v.makeReg();
   v << lea{rSP[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};
 
   auto done = v.makeBlock();
-  v << vcallarray{target, fcall_array_regs(), v.makeTuple({pc, after}),
+  auto args = extra->numParams == 0 ?
+    v.makeTuple({pc, after}) :
+    v.makeTuple({pc, after, v.cns(extra->numParams)});
+  v << vcallarray{target, fcall_array_regs(), args,
                   {done, m_state.labels[inst->taken()]}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;

@@ -601,10 +601,12 @@ struct InlineReturnNoFrameData : IRExtraData {
 
 struct CallArrayData : IRExtraData {
   explicit CallArrayData(IRSPOffset spOffset,
+                         int32_t numParams,
                          Offset pcOffset,
                          Offset after,
                          bool destroyLocals)
     : spOffset(spOffset)
+    , numParams(numParams)
     , pc(pcOffset)
     , after(after)
     , destroyLocals(destroyLocals)
@@ -616,6 +618,7 @@ struct CallArrayData : IRExtraData {
   }
 
   IRSPOffset spOffset;    // offset from StkPtr to bottom of call's ActRec+args
+  int32_t numParams;
   Offset pc;     // XXX why isn't this available in the marker?
   Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   bool destroyLocals;

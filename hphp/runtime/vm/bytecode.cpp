@@ -1904,10 +1904,9 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     ar->setExtraArgs(extraArgs);
   } else {
     assert(hasVarParam);
-    if (nparams == 0
-        && nextra_regular == 0
-        && isArrayType(args.m_type)
-        && args.m_data.parr->isVectorData()) {
+    if (nparams == nregular &&
+        isArrayType(args.m_type) &&
+        args.m_data.parr->isVectorData()) {
       stack.pushArray(args.m_data.parr);
     } else {
       PackedArrayInit ai(extra);
@@ -6811,11 +6810,16 @@ static bool doFCallArray(PC& pc, int numStackValues,
   return true;
 }
 
-bool doFCallArrayTC(PC pc) {
+bool doFCallArrayTC(PC pc, int32_t numArgs) {
   assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto const ret = doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
+  auto onInvalid = CallArrOnInvalidContainer::WarnAndContinue;
+  if (!numArgs) {
+    numArgs = 1;
+    onInvalid = CallArrOnInvalidContainer::CastToArray;
+  }
+  auto const ret = doFCallArray(pc, numArgs, onInvalid);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }

@@ -1077,6 +1077,18 @@ void emitFPassCW(IRGS& env, int32_t argNum) {
 void emitFCallArray(IRGS& env) {
   auto const data = CallArrayData {
     offsetFromIRSP(env, BCSPOffset{0}),
+    0,
+    bcOff(env),
+    nextBcOff(env),
+    callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
+  };
+  gen(env, CallArray, data, sp(env), fp(env));
+}
+
+void emitFCallUnpack(IRGS& env, int32_t numParams) {
+  auto const data = CallArrayData {
+    offsetFromIRSP(env, BCSPOffset{0}),
+    numParams,
     bcOff(env),
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))

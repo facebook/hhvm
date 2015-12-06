@@ -1282,8 +1282,10 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
                                       int expiration /*= 0*/) {
 
 #ifndef HAVE_MEMCACHED_TOUCH
-  throw_not_supported(__func__, "Not Implemented in libmemcached versions below 1.0.2");
-#endif
+  throw_not_supported(__func__, "Not Implemented in libmemcached versions below"
+                                " 1.0.2");
+  return false;
+#else
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
@@ -1292,7 +1294,7 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
   }
 
 #if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX < 0x01000016
-  if (memcached_behavior_get(data->m_impl->memcached,
+  if (memcached_behavior_get(&data->m_impl->memcached,
                              MEMCACHED_BEHAVIOR_BINARY_PROTOCOL)) {
     raise_warning("using touch command with binary protocol is not "
                   "recommended with libmemcached versions below 1.0.16");
@@ -1308,6 +1310,7 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
   if (!data->handleError(status)) return false;
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   return true;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

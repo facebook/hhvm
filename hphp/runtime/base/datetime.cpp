@@ -487,6 +487,7 @@ void DateTime::internalModifyRelative(timelib_rel_time *rel,
   m_time->relative.have_special_relative = rel->have_special_relative;
   m_time->relative.have_weekday_relative = rel->have_weekday_relative;
   m_time->relative.weekday_behavior = rel->weekday_behavior;
+  m_time->relative.first_last_day_of = rel->first_last_day_of;
 #endif
   m_time->sse_uptodate = 0;
   update();

@@ -339,14 +339,16 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case KindOfStaticString:
       gen(bc::String { v->m_data.pstr });
       break;
-    case KindOfArray:
+    case KindOfPersistentArray:
       gen(bc::Array { v->m_data.parr });
       break;
 
     case KindOfRef:
     case KindOfResource:
     case KindOfString:
-    default:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfClass:
       always_assert(0 && "invalid constant in propagate_constants");
     }
 

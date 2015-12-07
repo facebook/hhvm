@@ -92,6 +92,7 @@ begin library "hh-server-base"
     "src/server/serverCommand.ml"
     "src/server/serverConvert.ml"
     "src/server/serverStamp.ml"
+    "src/server/serverWorker.ml"
   ]
 end
 

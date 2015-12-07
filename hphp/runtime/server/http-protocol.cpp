@@ -106,6 +106,7 @@ const StaticString
   s_CONTENT_LENGTH("CONTENT_LENGTH"),
   s_PHP_AUTH_USER("PHP_AUTH_USER"),
   s_PHP_AUTH_PW("PHP_AUTH_PW"),
+  s_PHP_AUTH_DIGEST("PHP_AUTH_DIGEST"),
   s_REQUEST_URI("REQUEST_URI"),
   s_SCRIPT_URL("SCRIPT_URL"),
   s_SCRIPT_URI("SCRIPT_URI"),
@@ -620,6 +621,8 @@ static void CopyAuthInfo(Array& server, Transport *transport) {
         server.set(s_PHP_AUTH_USER, decodedAuth.substr(0, colonPos));
         server.set(s_PHP_AUTH_PW, decodedAuth.substr(colonPos + 1));
       }
+    } else if (strncmp(authorization.c_str(), "Digest ", 7) == 0) {
+      server.set(s_PHP_AUTH_DIGEST, String(authorization.c_str() + 7));
     }
   }
 }

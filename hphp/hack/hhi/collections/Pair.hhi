@@ -43,7 +43,7 @@
  * You may notice that many methods affecting the instace of `Pair` return an
  * `ImmVector` -- `Pair`s are essentially backed by 2-element `ImmVector`s.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 

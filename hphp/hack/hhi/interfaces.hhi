@@ -28,7 +28,7 @@
  * implement `Iterable` instead of `Traversable` since `Traversable` is more
  * of a bridge for PHP `array`s to work well with Hack collections.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface Traversable<+Tv> {}
@@ -48,7 +48,7 @@ interface Traversable<+Tv> {}
  * `KeyedTraversable` is more of a bridge for PHP `array`s to work well with
  * Hack collections.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
@@ -62,7 +62,7 @@ interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
  *
  * In addition to Hack collections, PHP `array`s are `Container`s.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface Container<+Tv> extends Traversable<Tv> {}
@@ -77,7 +77,7 @@ interface Container<+Tv> extends Traversable<Tv> {}
  *
  * In addition to Hack collections, PHP `array`s are `KeyedContainer`s.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
@@ -95,7 +95,7 @@ interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk, T
  *
  * In addition to Hack collections, PHP `array`s are `Indexish`.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  * @guide /hack/collections/read-write
  */
@@ -108,7 +108,7 @@ interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}
  * If a class implements `Iterator`, then it provides the infrastructure to be
  * iterated over using a `foreach` loop.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  *
  * @link http://php.net/manual/en/class.iterator.php
@@ -157,7 +157,7 @@ interface Iterator<+Tv> extends Traversable<Tv> {
  * }
  * ```
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/guidelines
  */
 interface AsyncIterator<+Tv> {
@@ -191,7 +191,7 @@ interface AsyncIterator<+Tv> {
  * }
  * ```
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/guidelines
  */
 interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {
@@ -217,7 +217,7 @@ interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {
  * If a class implements `KeyedIterator`, then it provides the infrastructure
  * to be iterated over using a `foreach` loop.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface KeyedIterator<+Tk, +Tv> extends KeyedTraversable<Tk,Tv>, Iterator<Tv> {
@@ -236,7 +236,7 @@ interface KeyedIterator<+Tk, +Tv> extends KeyedTraversable<Tk,Tv>, Iterator<Tv> 
  * Normally, this interface won't be used in type annotations; rather `Iterable`
  * or `Traversable` will be the better interface.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  *
  * @link http://php.net/manual/en/class.iteratoraggregate.php
@@ -256,7 +256,7 @@ interface IteratorAggregate<+Tv> extends Traversable<Tv> {
  *
  * `Iterable` does not include `array`s.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface Iterable<+Tv> extends IteratorAggregate<Tv> {
@@ -514,7 +514,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
  *
  * `KeyedIterable` does not include `array`s.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {
@@ -862,7 +862,7 @@ interface Stringish {
   * Classes that implement IMemoizeParam may be used as parameters on
   * <<__Memoize>> functions
   *
- * @guide /hack/attributes/intro
+ * @guide /hack/attributes/introduction
  * @guide /hack/attributes/special
   */
 interface IMemoizeParam {

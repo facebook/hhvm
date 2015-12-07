@@ -51,7 +51,7 @@
  * passed by reference, of if a `Map` is used with `foreach` by reference, an
  * exception will be thrown.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 

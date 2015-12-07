@@ -36,7 +36,7 @@
  * for asynchronous connection(s) to a MySQL database.
  *
  * @guide /hack/async/extensions
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  */
 final class AsyncMysqlClient {
 
@@ -139,7 +139,7 @@ final class AsyncMysqlClient {
  * you nearly the flexibility. In fact, there is discussion about deprecating
  * the `AsyncMysqlClient` class all together.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlConnectionPool")>>
@@ -239,7 +239,7 @@ class AsyncMysqlConnectionPool {
  * actual do real work with the MySQL database, with the primary work being
  * querying the database itself.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlConnection")>>
@@ -466,7 +466,7 @@ final class AsyncMysqlConnection {
  *
  * The SSL context data isn't accessible by PHP; it is for internal use only.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("MySSLContextProvider")>>
@@ -507,7 +507,7 @@ class MySSLContextProvider {
  * these type of statistics by calling its `clientStats()` method and a method
  * on this class.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlClientStats")>>
@@ -560,7 +560,7 @@ class AsyncMysqlClientStats {
  * that concrete classes must implement, which are timing information methods
  * regarding a query, connection or a resulting error.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlResult")>>
@@ -617,7 +617,7 @@ abstract class AsyncMysqlResult {
  * This class is instantiated through a call from the connection object
  * via `AsyncMysqlConnection::connectResult()`.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlConnectResult")>>
@@ -677,7 +677,7 @@ final class AsyncMysqlConnectResult extends AsyncMysqlResult {
  * This class is instantiated when an `AsyncMysqlException` is thrown and
  * `AsyncMysqlException::getResult()` is called.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlErrorResult")>>
@@ -779,7 +779,7 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
  * This class is instantiated when an `AsyncMysqlQueryException` is thrown and
  * `AsyncMysqlQueryException::getResult()` is called.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlQueryErrorResult")>>
@@ -825,7 +825,7 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
  * `AsyncMysqlConnection::query()`, `AsyncMysqlConection::queryf()` and
  * `AsyncMysqlConnection::multiQuery()`
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlQueryResult")>>
@@ -1022,7 +1022,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
  * You can get an instance of `AsyncMysqlRowBlock` via the
  * `AsyncMysqlQueryResult::rowBlocks()` call.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowBlock")>>
@@ -1188,7 +1188,7 @@ final class AsyncMysqlRowBlock implements IteratorAggregate, Countable {
  * You can iterate over all the rows of an `AsyncMysqlRowBlock` one by one until
  * the iterator is not valid any longer.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowBlockIterator")>>
@@ -1251,7 +1251,7 @@ final class AsyncMysqlRowBlockIterator implements HH\KeyedIterator {
  * returned as a result from a query. The row has values associated with
  * each column.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRow")>>
@@ -1360,7 +1360,7 @@ final class AsyncMysqlRow implements MysqlRow {
  * You can iterate over all the fields (columns) of an `AsyncMysqlBlock` one by
  * one until the iterator is not valid any longer.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowIterator")>>

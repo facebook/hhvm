@@ -38,7 +38,7 @@
  * $s = ImmSet {1, 2};
  * ```
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 

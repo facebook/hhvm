@@ -3,7 +3,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import common_tests
+import json
 import os
+import shlex
 import stat
 import subprocess
 import time
@@ -37,13 +39,13 @@ load_mini_script = %s
 
     def write_load_config(self, *changed_files):
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            f.write(r"""
-#! /bin/sh
-echo %s
-""" % self.saved_state_path())
+            f.write("#! /bin/sh\n")
             os.fchmod(f.fileno(), 0o700)
-            for fn in changed_files:
-                f.write("echo %s\n" % fn)
+            f.write("echo %s\n" % shlex.quote(json.dumps({
+                'state': self.saved_state_path(),
+                'deptable': self.saved_state_path() + '.deptable',
+                'changes': changed_files,
+                })))
             os.fchmod(f.fileno(), 0o700)
 
         self.write_local_conf()
@@ -72,9 +74,13 @@ echo %s
             output.splitlines())
 
     def test_no_state_found(self):
+        error_msg = 'No such rev'
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            # exit without printing anything
-            f.write(r"#! /bin/sh")
+            f.write("#! /bin/sh\n")
+            os.fchmod(f.fileno(), 0o700)
+            f.write("echo %s\n" % shlex.quote(json.dumps({
+                'error': error_msg,
+                })))
             os.fchmod(f.fileno(), 0o700)
 
         self.write_local_conf()
@@ -97,6 +103,7 @@ echo %s
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Could not load mini state', logs)
+            self.assertIn(error_msg, logs)
 
     def test_hhconfig_change(self):
         """

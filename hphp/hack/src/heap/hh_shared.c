@@ -208,8 +208,12 @@ static size_t heap_size;
 
 /* Fix the location of our shared memory so we can save and restore the
  * hashtable easily */
+#ifdef _WIN32
+/* We have to set differently our shared memory location on Windows. */
+#define SHARED_MEM_INIT ((char *) 0x48047e00000ll)
+#else
 #define SHARED_MEM_INIT ((char *)0x500000000000ll)
-
+#endif
 /* As a sanity check when loading from a file */
 static uint64_t MAGIC_CONSTANT = 0xfacefacefaceb000ll;
 

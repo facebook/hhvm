@@ -962,7 +962,7 @@ private:
     bool flag{false};
     bool prof_active{false};
     bool thread_prof_active{false};
-    std::string filename;
+    std::string filename{};
   };
 
   /////////////////////////////////////////////////////////////////////////////

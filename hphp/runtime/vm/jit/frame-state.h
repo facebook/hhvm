@@ -95,7 +95,7 @@ struct SlotState {
    * is unavailable, we won't hold onto it in the value field, but we'll keep
    * it around in typeSrcs for guard relaxation.
    */
-  TypeSourceSet typeSrcs;
+  TypeSourceSet typeSrcs{};
 
   /*
    * Whether or not the local or stack element may have changed since

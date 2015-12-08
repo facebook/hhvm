@@ -331,6 +331,11 @@ flaky_tests = (
     # Socket based test that are possibly port clowny
     # Github commit: 6ae44fc92acb63e7fa31b5fd4fcd4cf939c3ef54
     '/ext/sockets/tests/socket_getsockname.php',
+
+    # Rely on system service configuration being a particular way.
+    '/ext/standard/tests/general_functions/getservbyname_variation9.php',
+    '/ext/standard/tests/general_functions/getservbyname_variation10.php',
+    '/ext/standard/tests/general_functions/getservbyport_variation1.php',
 )
 
 # Tests that work but not in repo mode

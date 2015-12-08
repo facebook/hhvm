@@ -150,6 +150,8 @@ class PreClassEmitter {
                   PreClass::Hoistable hoistable);
   ~PreClassEmitter();
 
+
+  void setClosurePreClass();
   void init(int line1, int line2, Offset offset, Attr attrs,
             const StringData* parent, const StringData* docComment);
 

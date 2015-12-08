@@ -7417,10 +7417,10 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   auto const cls = Unit::loadClass(clsName)->rescope(
     const_cast<Class*>(vmfp()->m_func->cls())
   );
-  auto const cl = static_cast<c_Closure*>(newInstance(cls));
-  cl->init(numArgs, vmfp(), vmStack().top());
+  auto obj = newInstance(cls);
+  c_Closure::fromObject(obj)->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);
-  vmStack().pushObjectNoRc(cl);
+  vmStack().pushObjectNoRc(obj);
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {

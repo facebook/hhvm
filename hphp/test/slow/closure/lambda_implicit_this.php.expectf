@@ -3,7 +3,7 @@ direct:
 in C::bar: get_called_class(): D, get_class($this): D
 
 in parent function
-object(D)#1 (0) {
+object(D)#%d (0) {
 }
 
 nestedCapture:
@@ -11,7 +11,7 @@ nestedCapture:
 in C::bar: get_called_class(): D, get_class($this): D
 
 in parent function
-object(D)#1 (0) {
+object(D)#%d (0) {
 }
 
 nestedNoCapture:
@@ -19,7 +19,7 @@ nestedNoCapture:
 in C::bar: get_called_class(): D, get_class($this): D
 
 in parent function
-object(D)#1 (0) {
+object(D)#%d (0) {
 }
 
 Notice: Undefined variable: this in %s/test/slow/closure/lambda_implicit_this.php on line 20
@@ -27,9 +27,9 @@ in D::bar
 
 reflectionInfo:
 
-object(D)#1 (0) {
+object(D)#%d (0) {
 }
-object(D)#1 (0) {
+object(D)#%d (0) {
 }
 NULL
 

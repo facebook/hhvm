@@ -29,8 +29,8 @@
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -630,7 +630,7 @@ void VariableSerializer::write(const Object& v) {
     preventOverflow(v, [&v, this]() {
       if (v->isCollection()) {
         serializeCollection(v.get(), this);
-      } else if (v->instanceof(SystemLib::s_ClosureClass)) {
+      } else if (v->instanceof(c_Closure::classof())) {
         // We serialize closures as "{}" in JSON mode to be compatible
         // with PHP. And issue a warning in HipHop syntax.
         if (RuntimeOption::EnableHipHopSyntax) {
@@ -1489,7 +1489,7 @@ inline Array getSerializeProps(const ObjectData* obj,
 
     // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
-    if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
+    if (UNLIKELY(obj->instanceof(c_Closure::classof()))) {
       auto ret = Array::Create();
       obj->o_getArray(ret);
       return ret;
@@ -1670,7 +1670,7 @@ static void serializeObjectImpl(const ObjectData* obj,
       }
       if (type == VariableSerializer::Type::DebuggerDump) {
         // Expect to display as their stringified classname.
-        if (obj->instanceof(SystemLib::s_ClosureClass)) {
+        if (obj->instanceof(c_Closure::classof())) {
           serializer->write(obj->getVMClass()->nameStr());
           return;
         }

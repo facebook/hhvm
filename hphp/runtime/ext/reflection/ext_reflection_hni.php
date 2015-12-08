@@ -653,7 +653,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureScopeClassname(object $closure): string;
+  private function getClosureScopeClassname(object $closure): ?string;
 
   public function getClosureScopeClass(): ?ReflectionClass {
     if ($this->closure &&
@@ -664,7 +664,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureThisObject(object $closure): object;
+  private function getClosureThisObject(object $closure): ?object;
 
   /**
    * Returns this pointer bound to closure.

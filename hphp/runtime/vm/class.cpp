@@ -30,8 +30,8 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
-#include "hphp/system/systemlib.h"
 #include "hphp/parser/parser.h"
 
 #include "hphp/util/debug.h"
@@ -240,7 +240,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 }
 
 Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
-  assert(parent() == SystemLib::s_ClosureClass);
+  assert(parent() == c_Closure::classof());
   assert(m_invoke);
 
   bool const is_dynamic = (attrs != AttrNone);

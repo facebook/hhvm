@@ -20,17 +20,30 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct c_Closure : ExtObjectDataFlags<ObjectData::HasClone> {
+class StandardExtension;
 
-  DECLARE_CLASS_NO_SWEEP(Closure)
+extern const StaticString s_Closure;
 
-  c_Closure(Class* cls = c_Closure::classof());
-  ~c_Closure();
+struct c_Closure : ObjectData {
+
+  static Class* classof() { assertx(cls_Closure); return cls_Closure; }
+  static c_Closure* fromObject(ObjectData* obj) {
+    assertx(obj->instanceof(classof()));
+    return reinterpret_cast<c_Closure*>(obj);
+  }
+
+  /* closureInstanceCtor() skips this constructor call in debug mode.
+   * Update that method if this assumption changes.
+   */
+  explicit c_Closure(Class* cls = classof()): ObjectData(cls) {
+    // m_ctx must be initialized by init() or the TC.
+    if (debug) setThis(reinterpret_cast<ObjectData*>(-uintptr_t(1)));
+  }
 
   /*
    * Initialization function used by the interpreter.  The JIT inlines these
@@ -40,139 +53,103 @@ struct c_Closure : ExtObjectDataFlags<ObjectData::HasClone> {
    */
   void init(int numArgs, ActRec* ar, TypedValue* sp);
 
-  /*
-   * Glub.
-   */
-  static c_Closure* Clone(ObjectData* obj);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // ObjectData overrides.
-
-  void t___construct(); // must not be called for Closures
-
-  // Closure object can't have properties.
-  Variant t___get(Variant member);
-  Variant t___set(Variant member, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
-
-  Array t___debuginfo();
-
   /////////////////////////////////////////////////////////////////////////////
 
   /*
    * The closure's underlying function.
    */
-  const Func* getInvokeFunc() const;
+  const Func* getInvokeFunc() const { return getVMClass()->getCachedInvoke(); }
 
   /*
    * The Class scope the closure was defined in.
    */
-  Class* getScope();
+  Class* getScope() { return getInvokeFunc()->cls(); }
 
   /*
    * Use and static local variables.
+   *
+   * Returns obj->propVec()
+   * but with runtime generalized checks replaced with assertions
    */
-  TypedValue* getUseVars();
-  TypedValue* getStaticVar(Slot s);
-  int32_t getNumUseVars() const;
+  TypedValue* getUseVars() {
+    assertx(getVMClass()->builtinODTailSize() == sizeof(void*));
+
+    auto ret = reinterpret_cast<TypedValue*>(this + 1);
+    // Sanity check in dbg mode to make sure ObjectData's shape hasn't changed
+    assertx(ret == propVec());
+
+    return ret;
+  }
+  TypedValue* getStaticVar(Slot s) {
+    assertx(getVMClass()->numDeclProperties() > s);
+    return getUseVars() + s;
+  }
+  int32_t getNumUseVars() const {
+    return getVMClass()->numDeclProperties() -
+           getInvokeFunc()->numStaticLocals();
+  }
 
   /*
    * The bound context of the Closure---either a $this or a late bound class,
    * just like in the ActRec.
    */
-  void* getThisOrClass() const;
+  void* getThisOrClass() const { return m_ctx; }
 
-  ObjectData* getThis() const;
-  void setThis(ObjectData* od);
-  bool hasThis() const;
+  ObjectData* getThis() const {
+    if (UNLIKELY(ctxIsClass())) {
+      return nullptr;
+    } else {
+      return reinterpret_cast<ObjectData*>(m_ctx);
+    }
+  }
+  void setThis(ObjectData* od) { m_ctx = od; }
+  bool hasThis() const { return m_ctx && !ctxIsClass(); }
 
-  Class* getClass() const;
-  void setClass(Class* cls);
-  bool hasClass() const;
+  Class* getClass() const {
+    if (LIKELY(ctxIsClass())) {
+      return reinterpret_cast<Class*>(
+        reinterpret_cast<uintptr_t>(m_ctx) & ~kClassBit
+      );
+    } else {
+      return nullptr;
+    }
+  }
+  void setClass(Class* cls) {
+    m_ctx = reinterpret_cast<void*>(
+      reinterpret_cast<uintptr_t>(cls) | kClassBit
+    );
+  }
+  bool hasClass() const { return m_ctx && ctxIsClass(); }
+
+  ObjectData* clone();
 
   /////////////////////////////////////////////////////////////////////////////
 
   /*
    * Offsets for the JIT.
    */
-  static constexpr size_t ctxOffset() { return offsetof(c_Closure, m_ctx); }
-
-  /*
-   * PHP API.
-   */
-  static Object ti_bind(const Variant& closure, const Variant& newthis,
-                        const Variant& scope);
-  Object t_bindto(const Variant& newthis, const Variant& scope);
-  // param_count and params for varargs that can come with parameters to the
-  // closure function
-  Variant t_call(int64_t param_count, const Variant& newthis,
-                 const Array& params = null_array);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Data members.
+  static constexpr ssize_t ctxOffset() {
+    // c_Closure must be precisely one pointer larger than ObjectData
+    // so that we use up precisely one slotted declared property slot
+    static_assert(sizeof(c_Closure) == sizeof(void*) + sizeof(ObjectData),
+                  "c_Closure size mismatch");
+    return offsetof(c_Closure, m_ctx);
+  }
 
 private:
+  friend class Class;
+  friend class StandardExtension;
+
+  static Class* cls_Closure;
+  static void setAllocators(Class* cls);
+
+  static constexpr uintptr_t kClassBit = 0x1;
+  bool ctxIsClass() const {
+    return reinterpret_cast<uintptr_t>(m_ctx) & kClassBit;
+  }
+
   void* m_ctx;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-inline c_Closure::c_Closure(Class* cls)
-  : ExtObjectDataFlags(cls)
-{
-  // m_ctx must be initialized by init() or the TC.
-  if (debug) m_ctx = reinterpret_cast<ObjectData*>(-uintptr_t(1));
-}
-
-inline const Func* c_Closure::getInvokeFunc() const {
-  return getVMClass()->getCachedInvoke();
-}
-
-inline Class* c_Closure::getScope() {
-  return getInvokeFunc()->cls();
-}
-
-inline TypedValue* c_Closure::getUseVars() {
-  return propVec();
-}
-
-inline TypedValue* c_Closure::getStaticVar(Slot s) {
-  return propVec() + s;
-}
-
-inline int32_t c_Closure::getNumUseVars() const {
-  return getVMClass()->numDeclProperties() -
-         getInvokeFunc()->numStaticLocals();
-}
-
-inline void* c_Closure::getThisOrClass() const {
-  return m_ctx;
-}
-
-inline ObjectData* c_Closure::getThis() const {
-  return ActRec::decodeThis(m_ctx);
-}
-
-inline void c_Closure::setThis(ObjectData* od) {
-  m_ctx = ActRec::encodeThis(od);
-}
-
-inline bool c_Closure::hasThis() const {
-  return getThis() != nullptr;
-}
-
-inline Class* c_Closure::getClass() const {
-  return ActRec::decodeClass(m_ctx);
-}
-
-inline void c_Closure::setClass(Class* cls) {
-  m_ctx = ActRec::encodeClass(cls);
-}
-
-inline bool c_Closure::hasClass() const {
-  return getClass() != nullptr;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

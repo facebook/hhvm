@@ -54,7 +54,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assertx(slot != kInvalidSlot);
-  auto const val = static_cast<c_Closure*>(closure)->getStaticVar(slot);
+  auto const val = c_Closure::fromObject(closure)->getStaticVar(slot);
 
   if (val->m_type == KindOfUninit) {
     inited = false;

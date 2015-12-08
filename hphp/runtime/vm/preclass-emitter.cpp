@@ -53,6 +53,8 @@ PreClassEmitter::Prop::~Prop() {
 //=============================================================================
 // PreClassEmitter.
 
+extern const StaticString s_Closure;
+
 PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
                                  Id id,
                                  const StringData* n,
@@ -60,8 +62,11 @@ PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
   : m_ue(ue)
   , m_name(n)
   , m_id(id)
-  , m_hoistable(hoistable)
-{}
+  , m_hoistable(hoistable) {
+  if (n->isame(s_Closure.get())) {
+    setClosurePreClass();
+  }
+}
 
 void PreClassEmitter::init(int line1, int line2, Offset offset, Attr attrs,
                            const StringData* parent,

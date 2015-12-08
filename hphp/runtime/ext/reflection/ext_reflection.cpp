@@ -948,23 +948,30 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
   return true;
 }
 
+const StaticString s_ExpectedClosureInstance("Expected closure instance");
+
 // helper for getClosureScopeClass
-static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
-                          const Object& closure) {
-  auto clos = unsafe_cast<c_Closure>(closure);
-  if (clos->getScope()) {
-    return String(const_cast<StringData*>(clos->getScope()->name()));
+static Variant HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
+                           const Object& closure) {
+  if (!closure->instanceof(c_Closure::classof())) {
+    SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
   }
-  return String();
+  if (auto scope = c_Closure::fromObject(closure.get())->getScope()) {
+    return String(const_cast<StringData*>(scope->name()));
+  }
+  return init_null_variant;
 }
 
-static Object HHVM_METHOD(ReflectionFunction, getClosureThisObject,
-                          const Object& closure) {
-  auto clos = unsafe_cast<c_Closure>(closure);
+static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
+                           const Object& closure) {
+  if (!closure->instanceof(c_Closure::classof())) {
+    SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
+  }
+  auto clos = c_Closure::fromObject(closure.get());
   if (clos->hasThis()) {
     return Object{clos->getThis()};
   }
-  return Object{};
+  return init_null_variant;
 }
 
 // helper for getStaticVariables

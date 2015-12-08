@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/system/systemlib.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 namespace HPHP {
 
@@ -49,7 +49,7 @@ void NamedEntity::foreach_cached_class(Fn fn) {
   foreach_name([&](NamedEntity& name) {
     if (auto cls = name.clsList()) {
       if (auto cached = cls->getCached()) {
-        if (cls->parent() != SystemLib::s_ClosureClass) {
+        if (cls->parent() != c_Closure::classof()) {
           fn(cached);
         }
       }

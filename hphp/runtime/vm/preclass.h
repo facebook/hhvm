@@ -446,7 +446,7 @@ public:
 
 private:
   Unit* m_unit;
-  NamedEntity* m_namedEntity;
+  LowPtr<NamedEntity> m_namedEntity;
   int m_line1;
   int m_line2;
   Offset m_offset;

@@ -260,7 +260,7 @@ private:
   Type m_type;
   Flags m_flags;
   LowStringPtr m_typeName;
-  const NamedEntity* m_namedEntity;
+  LowPtr<const NamedEntity> m_namedEntity;
 };
 
 //////////////////////////////////////////////////////////////////////

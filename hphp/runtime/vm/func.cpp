@@ -265,7 +265,7 @@ void Func::setFullName(int numParams) {
     // `methodSlot', which refers to its slot in its `baseCls' (which still
     // points to a subclass of Closure).
     if (!isMethod()) {
-      m_namedEntity = NamedEntity::get(m_name);
+      setNamedEntity(NamedEntity::get(m_name));
     }
   }
   if (RuntimeOption::EvalPerfDataMap) {

@@ -315,6 +315,61 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force);
 
 #endif // USE_JEMALLOC
 
+template <class T>
+struct LowAllocator {
+  typedef T              value_type;
+  typedef T*             pointer;
+  typedef const T*       const_pointer;
+  typedef T&             reference;
+  typedef const T&       const_reference;
+  typedef std::size_t    size_type;
+  typedef std::ptrdiff_t difference_type;
+
+  template <class U>
+  struct rebind { using other = LowAllocator<U>; };
+
+  pointer address(reference value) {
+    return &value;
+  }
+  const_pointer address(const_reference value) const {
+    return &value;
+  }
+
+  LowAllocator() noexcept {}
+  template<class U> LowAllocator(const LowAllocator<U>&) noexcept {}
+  ~LowAllocator() noexcept {}
+
+  size_type max_size() const {
+    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  }
+
+  pointer allocate(size_type num, const void* = 0) {
+    pointer ret = (pointer)low_malloc(num * sizeof(T));
+    return ret;
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  void deallocate(pointer p, size_type num) {
+    low_free((void*)p);
+  }
+
+  template<class U> bool operator==(const LowAllocator<U>&) const {
+    return true;
+  }
+
+  template<class U> bool operator!=(const LowAllocator<U>&) const {
+    return false;
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

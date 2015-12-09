@@ -33,27 +33,31 @@
  *
  */
 
-/*
- * This has been modified to be used exclusively by MSVC
- * for HHVM. It has also been reformatted for HHVM's coding
- * standards.
- */
-
-#include <string.h>
+#ifdef _MSC_VER
 #include <Windows.h>
 #include <wincrypt.h>
+#endif
 
+#include <string.h>
 #include <signal.h>
+
 #include "php-crypt_r.h"
 #include "crypt-freesec.h"
+#include "zend-md5.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/mutex.h"
 
 namespace HPHP {
 
 void _crypt_extended_init_r() {
-  LONG volatile initialized = 0;
+  static Mutex m;
+  static volatile bool initialized = 0;
+
+  Lock l(m);
 
   if (!initialized) {
-    InterlockedIncrement(&initialized);
+    initialized = 1;
     _crypt_extended_init();
   }
 }
@@ -73,6 +77,7 @@ to64(char *s, int v, int n) {
   }
 }
 
+#ifdef _MSC_VER
 char* php_md5_crypt_r(const char *pw, const char *salt, char *out) {
   HCRYPTPROV hCryptProv;
   HCRYPTHASH ctx, ctx1;
@@ -260,5 +265,117 @@ _destroyProv:
 
   return out;
 }
+
+#else
+
+/*
+ * MD5 password encryption.
+ */
+char* php_md5_crypt_r(const char *pw, const char *salt, char *out)
+{
+  static __thread char passwd[MD5_HASH_MAX_LEN], *p;
+  const char *sp, *ep;
+  unsigned char final[16];
+  unsigned int i, sl, pwl;
+  PHP_MD5_CTX ctx, ctx1;
+  uint32_t l;
+  int pl;
+
+  pwl = strlen(pw);
+
+  /* Refine the salt first */
+  sp = salt;
+
+  /* If it starts with the magic string, then skip that */
+  if (strncmp(sp, MD5_MAGIC, MD5_MAGIC_LEN) == 0)
+    sp += MD5_MAGIC_LEN;
+
+  /* It stops at the first '$', max 8 chars */
+  for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++)
+    continue;
+
+  /* get the length of the true salt */
+  sl = ep - sp;
+
+  PHP_MD5Init(&ctx);
+
+  /* The password first, since that is what is most unknown */
+  PHP_MD5Update(&ctx, (const unsigned char *)pw, pwl);
+
+  /* Then our magic string */
+  PHP_MD5Update(&ctx, (const unsigned char *)MD5_MAGIC, MD5_MAGIC_LEN);
+
+  /* Then the raw salt */
+  PHP_MD5Update(&ctx, (const unsigned char *)sp, sl);
+
+  /* Then just as many characters of the MD5(pw,salt,pw) */
+  PHP_MD5Init(&ctx1);
+  PHP_MD5Update(&ctx1, (const unsigned char *)pw, pwl);
+  PHP_MD5Update(&ctx1, (const unsigned char *)sp, sl);
+  PHP_MD5Update(&ctx1, (const unsigned char *)pw, pwl);
+  PHP_MD5Final(final, &ctx1);
+
+  for (pl = pwl; pl > 0; pl -= 16)
+    PHP_MD5Update(&ctx, final, (unsigned int)(pl > 16 ? 16 : pl));
+
+  /* Don't leave anything around in vm they could use. */
+  memset(final, 0, sizeof(final));
+
+  /* Then something really weird... */
+  for (i = pwl; i != 0; i >>= 1)
+    if ((i & 1) != 0)
+        PHP_MD5Update(&ctx, final, 1);
+    else
+        PHP_MD5Update(&ctx, (const unsigned char *)pw, 1);
+
+  /* Now make the output string */
+  memcpy(passwd, MD5_MAGIC, MD5_MAGIC_LEN);
+  strlcpy(passwd + MD5_MAGIC_LEN, sp, sl + 1);
+  strcat(passwd, "$");
+
+  PHP_MD5Final(final, &ctx);
+
+  /*
+   * And now, just to make sure things don't run too fast. On a 60 MHz
+   * Pentium this takes 34 msec, so you would need 30 seconds to build
+   * a 1000 entry dictionary...
+   */
+  for (i = 0; i < 1000; i++) {
+    PHP_MD5Init(&ctx1);
+
+    if ((i & 1) != 0)
+      PHP_MD5Update(&ctx1, (const unsigned char *)pw, pwl);
+    else
+      PHP_MD5Update(&ctx1, final, 16);
+
+    if ((i % 3) != 0)
+      PHP_MD5Update(&ctx1, (const unsigned char *)sp, sl);
+
+    if ((i % 7) != 0)
+      PHP_MD5Update(&ctx1, (const unsigned char *)pw, pwl);
+
+    if ((i & 1) != 0)
+      PHP_MD5Update(&ctx1, final, 16);
+    else
+      PHP_MD5Update(&ctx1, (const unsigned char *)pw, pwl);
+
+    PHP_MD5Final(final, &ctx1);
+  }
+
+  p = passwd + sl + MD5_MAGIC_LEN + 1;
+
+  l = (final[ 0]<<16) | (final[ 6]<<8) | final[12]; to64(p,l,4); p += 4;
+  l = (final[ 1]<<16) | (final[ 7]<<8) | final[13]; to64(p,l,4); p += 4;
+  l = (final[ 2]<<16) | (final[ 8]<<8) | final[14]; to64(p,l,4); p += 4;
+  l = (final[ 3]<<16) | (final[ 9]<<8) | final[15]; to64(p,l,4); p += 4;
+  l = (final[ 4]<<16) | (final[10]<<8) | final[ 5]; to64(p,l,4); p += 4;
+  l =          final[11]    ; to64(p,l,2); p += 2;
+  *p = '\0';
+
+  /* Don't leave anything around in vm they could use. */
+  SECURE_ZERO(final, sizeof(final));
+  return (passwd);
+}
+#endif
 
 }

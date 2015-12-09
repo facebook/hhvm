@@ -2,9 +2,7 @@
    Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.  */
 /* Windows VC++ port by Pierre Joye <pierre@php.net> */
 
-
-#define __alignof__ __alignof
-#define alloca _alloca
+#include "php-crypt_r.h"
 
 #include <errno.h>
 #include <limits.h>
@@ -12,7 +10,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _MSC_VER
+#define __alignof__ __alignof
+#define alloca _alloca
+
 #include <Windows.h>
+#endif
 
 namespace HPHP {
 
@@ -370,7 +374,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
   if (strncmp(salt, sha512_rounds_prefix, sizeof(sha512_rounds_prefix) - 1) == 0) {
     const char *num = salt + sizeof(sha512_rounds_prefix) - 1;
     char *endp;
-    size_t srounds = _strtoui64(num, &endp, 10);
+    unsigned long long srounds = STRTOUL(num, &endp, 10);
 
     if (*endp == '$') {
       salt = endp + 1;
@@ -519,7 +523,11 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
   buflen -= sizeof(sha512_salt_prefix) - 1;
 
   if (rounds_custom) {
-    int n = _snprintf(cp, MAX(0, buflen), "%s%I64u$", sha512_rounds_prefix, rounds);
+#ifdef PHP_WIN32
+    int n = _snprintf(cp, MAX(0, buflen), "%s" ZEND_ULONG_FMT "$", sha512_rounds_prefix, rounds);
+#else
+    int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha512_rounds_prefix, rounds);
+#endif
     cp += n;
     buflen -= n;
   }
@@ -580,16 +588,16 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
    inside the SHA512 implementation as well.  */
   sha512_init_ctx(&ctx);
   sha512_finish_ctx(&ctx, alt_result);
-  RtlSecureZeroMemory(temp_result, sizeof(temp_result));
-  RtlSecureZeroMemory(p_bytes, key_len);
-  RtlSecureZeroMemory(s_bytes, salt_len);
-  RtlSecureZeroMemory(&ctx, sizeof(ctx));
-  RtlSecureZeroMemory(&alt_ctx, sizeof(alt_ctx));
+  SECURE_ZERO(temp_result, sizeof(temp_result));
+  SECURE_ZERO(p_bytes, key_len);
+  SECURE_ZERO(s_bytes, salt_len);
+  SECURE_ZERO(&ctx, sizeof(ctx));
+  SECURE_ZERO(&alt_ctx, sizeof(alt_ctx));
   if (copied_key != NULL) {
-    RtlSecureZeroMemory(copied_key, key_len);
+    SECURE_ZERO(copied_key, key_len);
   }
   if (copied_salt != NULL) {
-    RtlSecureZeroMemory(copied_salt, salt_len);
+    SECURE_ZERO(copied_salt, salt_len);
   }
 
   return buffer;

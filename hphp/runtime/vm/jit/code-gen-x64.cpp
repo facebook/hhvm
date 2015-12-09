@@ -1703,7 +1703,8 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
 void CodeGenerator::cgStRetVal(IRInstruction* inst) {
   auto  const rFp = srcLoc(inst, 0).reg();
   emitStoreTV(vmain(), rFp[AROFF(m_r)], srcLoc(inst, 1), inst->src(1));
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts &&
+      inst->extra<StRetValData>()->wide) {
     vmain() << storeli{0xbadbaad, rFp[AROFF(m_r.m_aux.u_fcallAwaitFlag)]};
   }
 }
@@ -5544,16 +5545,20 @@ void CodeGenerator::cgStARNumArgsAndFlags(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdTVAux(IRInstruction* inst) {
+  auto const extra = inst->extra<LdTVAux>();
   auto tv = srcLoc(inst, 0).reg();
   auto dst = dstLoc(inst, 0).reg();
   auto &v = vmain();
   v << loadzlq{tv[TVOFF(m_aux)], dst};
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const sf = v.makeReg();
-    v << testqi{-2, dst, sf};
-    ifThen(v, CC_NZ, sf, [](Vout& v) {
-      v << ud2{};
-    });
+    auto mask = -extra->valid - 1;
+    if (mask) {
+      auto const sf = v.makeReg();
+      v << testqi{mask, dst, sf};
+      ifThen(v, CC_NZ, sf, [](Vout& v) {
+          v << ud2{};
+        });
+    }
   }
 }
 

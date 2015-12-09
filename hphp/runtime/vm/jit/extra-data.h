@@ -473,6 +473,26 @@ struct FPushCufData : IRExtraData {
   uint32_t iterId;
 };
 
+struct LdTVAuxData : IRExtraData {
+  explicit LdTVAuxData(int32_t v = -1) : valid(v) {}
+
+  std::string show() const {
+    return folly::sformat("{:x}", valid);
+  }
+
+  int32_t valid;
+};
+
+struct StRetValData : IRExtraData {
+  explicit StRetValData(bool w) : wide(w) {}
+
+  std::string show() const {
+    return wide ? "wide" : "narrow";
+  }
+
+  bool wide;
+};
+
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& target,
                           FPInvOffset invSPOff,
@@ -1247,6 +1267,8 @@ X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(GenericIdx,                   IRSPOffsetData);
 X(DecRef,                       DecRefData);
+X(LdTVAux,                      LdTVAuxData);
+X(StRetVal,                     StRetValData);
 
 #undef X
 

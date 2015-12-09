@@ -96,6 +96,8 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // have StMem in here since it sometimes stores to RefDatas.
   switch (inst.op()) {
   case StRetVal:
+    if (!inst.extra<StRetValData>()->wide) return false;
+    // fall through
   case StLoc:
     return srcIdx == 1;
 

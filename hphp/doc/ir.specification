@@ -1410,10 +1410,11 @@ To string conversions:
   resumable rather than performing an async function return.  Returns by
   leaving the TC to enterTCHelper.
 
-| StRetVal, ND, S(FramePtr) S(Gen), CRc
+| StRetVal<wide>, ND, S(FramePtr) S(Gen), CRc
 
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
+  If wide is true, can clobber the aux field of the return value slot.
 
 | ReleaseVVAndSkip, ND, S(FramePtr), B
 
@@ -2611,9 +2612,10 @@ fields of that struct for holding intermediate values.
   pointed to by the frame pointer S0 as the first argument, and the pointer to
   the first parameter in the frame as the second argument.
 
-| LdTVAux, D(Int), S(PtrToStkGen), NF
+| LdTVAux<ValidBits>, D(Int), S(PtrToStkGen), NF
 
-  Load the value of m_aux from the Cell pointed to by S0
+  Load the value of m_aux from the Cell pointed to by S0. ValidBits is a mask
+  specifying which bits are allowed to be set. The runtime may ignore it.
 
 | StTVAux, ND, S(FramePtr) S(Int), CRc
 

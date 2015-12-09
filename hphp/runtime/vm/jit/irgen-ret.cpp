@@ -94,10 +94,9 @@ void freeLocalsAndThis(IRGS& env) {
 }
 
 void normalReturn(IRGS& env, SSATmp* retval) {
-  gen(env, StRetVal, fp(env), retval);
-  if (curFunc(env)->isAsyncFunction() && !resumed(env)) {
-    gen(env, StTVAux, fp(env), cns(env, 0));
-  }
+  gen(env, StRetVal,
+      StRetValData { !curFunc(env)->isAsyncFunction() || resumed(env) },
+      fp(env), retval);
   auto const data = RetCtrlData { offsetToReturnSlot(env), false };
   gen(env, RetCtrl, data, sp(env), fp(env));
 }
@@ -170,9 +169,13 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
         gen(env, JmpNZero, taken, test);
       },
       [&] {
+        if (RuntimeOption::EvalHHIRGenerateAsserts) {
+          gen(env, StTVAux, fp(env), cns(env, 0xbad));
+        }
         return gen(env, CreateSSWH, retVal);
       },
       [&] {
+        gen(env, StTVAux, fp(env), cns(env, 0));
         return retVal;
       });
     normalReturn(env, wrapped);

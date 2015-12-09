@@ -179,6 +179,34 @@ struct ImmFolder {
     int val;
     if (match_byte(in.s, val)) {
       out = copy{in.s, in.d};
+      if (in.d.isVirt()) {
+        valid.set(in.d);
+        vals[in.d] = val;
+      }
+    }
+  }
+  void fold(movtql& in, Vinstr& out) {
+    int val;
+    if (match_int(in.s, val)) {
+      out = copy{in.s, in.d};
+      if (in.d.isVirt()) {
+        valid.set(in.d);
+        vals[in.d] = val;
+      }
+    }
+  }
+  void fold(movtqb& in, Vinstr& out) {
+    int val;
+    if (match_byte(in.s, val)) {
+      out = copy{in.s, in.d};
+      if (in.d.isVirt()) {
+        valid.set(in.d);
+        vals[in.d] = val;
+      }
+    }
+  }
+  void fold(copy& in, Vinstr& out) {
+    if (in.d.isVirt() && valid.test(in.s)) {
       valid.set(in.d);
       vals[in.d] = vals[in.s];
     }

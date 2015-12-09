@@ -20,6 +20,11 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/lock.h"
+#include "hphp/zend/crypt-blowfish.h"
+
+#ifdef _MSC_VER
+#include "hphp/zend/php-crypt_r.h"
+#endif
 
 namespace HPHP {
 
@@ -157,7 +162,6 @@ int string_crc32(const char *p, int len) {
 
 #ifdef _MSC_VER
 #define PHP_CRYPT_R_MSVC 1
-#include "hphp/zend/php-crypt_r.h"
 
 char* php_crypt_r_msvc(const char* key, const char* salt) {
   if (salt[0] == '$' && salt[1] == '1' && salt[2] == '$') {
@@ -229,7 +233,6 @@ char* php_crypt_r_msvc(const char* key, const char* salt) {
 # include <crypt.h>
 #endif
 #endif
-#include "hphp/zend/crypt-blowfish.h"
 
 static unsigned char itoa64[] =
   "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

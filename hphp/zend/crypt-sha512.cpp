@@ -14,6 +14,8 @@
 #include <string.h>
 #include <Windows.h>
 
+namespace HPHP {
+
 // Defined in crypt-sha256.c
 extern void * __php_mempcpy(void * dst, const void * src, size_t len);
 extern char * __php_stpncpy(char *dst, const char *src, size_t len);
@@ -104,7 +106,7 @@ static const uint64_t K[80] = {
    It is assumed that LEN % 128 == 0.  */
 static void
 sha512_process_block(const void *buffer, size_t len, struct sha512_ctx *ctx) {
-  const uint64_t *words = buffer;
+  const uint64_t *words = (const uint64_t*)buffer;
   size_t nwords = len / sizeof(uint64_t);
   uint64_t a = ctx->H[0];
   uint64_t b = ctx->H[1];
@@ -329,7 +331,7 @@ static const char sha512_rounds_prefix[] = "rounds=";
 #define ROUNDS_MAX 999999999
 
 /* Table with characters for base64 transformation.  */
-static const char b64t[64] =
+static const char b64t[] =
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 
@@ -383,12 +385,12 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
   if ((key - (char *) 0) % __alignof__ (uint64_t) != 0) {
     char *tmp = (char *) alloca (key_len + __alignof__ (uint64_t));
     key = copied_key =
-    memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), key, key_len);
+    (char*)memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), key, key_len);
   }
 
   if ((salt - (char *) 0) % __alignof__ (uint64_t) != 0) {
     char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint64_t));
-    salt = copied_salt = memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), salt, salt_len);
+    salt = copied_salt = (char*)memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), salt, salt_len);
     copied_salt[salt_len] = 0;
   }
 
@@ -452,9 +454,9 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
   sha512_finish_ctx(&alt_ctx, temp_result);
 
   /* Create byte sequence P.  */
-  cp = p_bytes = alloca(key_len);
+  cp = p_bytes = (char*)alloca(key_len);
   for (cnt = key_len; cnt >= 64; cnt -= 64) {
-    cp = __php_mempcpy((void *) cp, (const void *)temp_result, 64);
+    cp = (char*)__php_mempcpy((void *) cp, (const void *)temp_result, 64);
   }
 
   memcpy(cp, temp_result, cnt);
@@ -471,9 +473,9 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
   sha512_finish_ctx(&alt_ctx, temp_result);
 
   /* Create byte sequence S.  */
-  cp = s_bytes = alloca(salt_len);
+  cp = s_bytes = (char*)alloca(salt_len);
   for (cnt = salt_len; cnt >= 64; cnt -= 64) {
-    cp = __php_mempcpy(cp, temp_result, 64);
+    cp = (char*)__php_mempcpy(cp, temp_result, 64);
   }
   memcpy(cp, temp_result, cnt);
 
@@ -619,4 +621,6 @@ php_sha512_crypt(const char *key, const char *salt) {
   }
 
   return php_sha512_crypt_r (key, salt, buffer, buflen);
+}
+
 }

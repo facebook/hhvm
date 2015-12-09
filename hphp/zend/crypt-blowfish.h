@@ -18,9 +18,6 @@
 #ifndef incl_CRYPT_BLOWFISH_H
 #define incl_CRYPT_BLOWFISH_H
 
-#ifdef __cplusplus
-extern "C"
-#endif
 char *php_crypt_blowfish_rn(const char *key, const char *setting,
                             char *output, int size);
 

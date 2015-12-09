@@ -20,28 +20,23 @@
 #ifndef _CRYPT_WIHN32_H_
 #define _CRYPT_WIHN32_H_
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include "crypt-blowfish.h"
 #include "crypt-freesec.h"
+
+#define MD5_HASH_MAX_LEN 120
+#define PHP_MAX_SALT_LEN 123
+
+namespace HPHP {
 
 void php_init_crypt_r();
 void php_shutdown_crypt_r();
 
 extern void _crypt_extended_init_r(void);
 
-#define MD5_HASH_MAX_LEN 120
-#define PHP_MAX_SALT_LEN 123
-
-#include "crypt-blowfish.h"
-
 extern char * php_md5_crypt_r(const char *pw, const char *salt, char *out);
 extern char * php_sha512_crypt_r (const char *key, const char *salt, char *buffer, int buflen);
 extern char * php_sha256_crypt_r (const char *key, const char *salt, char *buffer, int buflen);
 
-#ifdef __cplusplus
 }
-#endif
 
 #endif /* _CRYPT_WIHN32_H_ */

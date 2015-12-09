@@ -47,6 +47,8 @@
 #include "php-crypt_r.h"
 #include "crypt-freesec.h"
 
+namespace HPHP {
+
 void _crypt_extended_init_r() {
   LONG volatile initialized = 0;
 
@@ -257,4 +259,6 @@ _destroyProv:
   }
 
   return out;
+}
+
 }

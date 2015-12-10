@@ -781,7 +781,7 @@ function hh_server_cmd($options, $test) {
   // files associated with the test to a temporary directory, rename the
   // basename($test_file).hhconfig file to just .hhconfig and set the command
   // appropriately.
-  $temp_dir = uniqid('/tmp/hh-test-runner-');
+  $temp_dir = '/tmp/hh-test-runner-'.bin2hex(random_bytes(16));
   mkdir($temp_dir);
   foreach (glob($test . '*') as $test_file) {
     copy($test_file, $temp_dir . '/' . basename($test_file));

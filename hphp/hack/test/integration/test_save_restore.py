@@ -21,6 +21,13 @@ class TestSaveRestore(common_tests.CommonSaveStateTests, unittest.TestCase):
             '--save', os.path.join(cls.tmp_dir, 'foo'),
         ])
 
+    def write_local_conf(self):
+        with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+            f.write(r"""
+# some comment
+use_mini_state = false
+""")
+
     def write_load_config(self, *changed_files):
         """
         repo_dir: Repository to run hh_server on
@@ -47,6 +54,8 @@ assume_php = false
 load_script = %s
 """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
+        self.write_local_conf()
+
     def check_cmd(self, expected_output, stdin=None, options=[]):
         root = self.repo_dir + os.path.sep
         output = self.proc_call([
@@ -56,6 +65,7 @@ load_script = %s
             '20',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
+            env={'HH_LOCALCONF_PATH': self.repo_dir},
             stdin=stdin)
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),

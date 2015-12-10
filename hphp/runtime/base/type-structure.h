@@ -64,10 +64,13 @@ bool KindOfClass(Kind kind);
 
 String toString(const Array& arr);
 
-Array resolve(const Class::Const& typeCns, const Class* typeCnsCls);
+Array resolve(const Class::Const& typeCns,
+              const Class* typeCnsCls,
+              bool& persistent);
 
 Array resolve(const String& aliasName,
               const Array& arr,
+              bool& persistent,
               const Array& generics = Array());
 
 }

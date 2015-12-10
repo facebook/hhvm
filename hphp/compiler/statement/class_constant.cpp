@@ -40,8 +40,6 @@ ClassConstant::ClassConstant
   // for now only store TypeAnnotation info for type constants
   if (typeconst && typeAnnot) {
     m_typeStructure = Array(typeAnnot->getScalarArrayRep());
-  } else {
-    m_typeStructure = Array::Create();
   }
 }
 

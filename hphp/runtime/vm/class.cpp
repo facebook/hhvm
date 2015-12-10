@@ -920,47 +920,87 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
 
 Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   Slot clsCnsInd;
-  auto clsCns = cnsNameToTV(clsCnsName, clsCnsInd, includeTypeCns);
-  if (!clsCns) return make_tv<KindOfUninit>();
-  if (clsCns->m_type != KindOfUninit && !m_constants[clsCnsInd].isType()) {
-    return *clsCns;
+  auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, includeTypeCns);
+  if (!cnsVal) return make_tv<KindOfUninit>();
+
+  auto& cns = m_constants[clsCnsInd];
+  ArrayData* typeCns = nullptr;
+
+  if (cnsVal->m_type != KindOfUninit) {
+    if (cns.isType()) {
+      // Type constants with the low bit set are already resolved and can be
+      // returned after masking out that bit.
+      assert(cnsVal->m_type == KindOfPersistentArray);
+      typeCns = cnsVal->m_data.parr;
+      auto const rawData = reinterpret_cast<intptr_t>(typeCns);
+      if (rawData & 0x1) {
+        return make_tv<KindOfPersistentArray>(
+          reinterpret_cast<ArrayData*>(rawData ^ 0x1));
+      }
+    } else {
+      return *cnsVal;
+    }
   }
 
-  // This constant has a non-scalar initializer, meaning it will be
-  // potentially different in different requests, which we store
-  // separately in an array living off in RDS.
+  // This constant has a non-scalar initializer, meaning it will be potentially
+  // different in different requests, which we store separately in an array
+  // living off in RDS.
   m_nonScalarConstantCache.bind();
   auto& clsCnsData = *m_nonScalarConstantCache;
 
-  if (clsCnsData.get() == nullptr) {
-    clsCnsData = Array::attach(MixedArray::MakeReserve(m_constants.size()));
-  } else {
-    auto cCns = clsCnsData->nvGet(clsCnsName);
-    if (cCns) return *cCns;
+  if (clsCnsData.get() != nullptr) {
+    if (auto cCns = clsCnsData->nvGet(clsCnsName)) return *cCns;
   }
 
-  // resolve type constant
-  if (m_constants[clsCnsInd].isType()) {
-    Array resTS;
+  auto makeCache = [&] {
+    if (clsCnsData.get() == nullptr) {
+      clsCnsData = Array::attach(MixedArray::MakeReserve(m_constants.size()));
+    }
+  };
+
+  // Resolve type constant, if needed.
+  if (cns.isType()) {
+    Array resolvedTS;
+    bool persistent = true;
     try {
-      resTS = TypeStructure::resolve(m_constants[clsCnsInd], this);
-    } catch (Exception &e) {
+      // We must give TypeStructure::resolve() the same ArrayData* we tested up
+      // above, to avoid reading an already-resolved (by another thread)
+      // ArrayData* from cns. Since resolve() takes a Class::Const and no other
+      // fields of the Const can change, just copy cns and give the copy our
+      // local version of the ArrayData*.
+      auto cnsCopy = cns;
+      cnsCopy.val.m_data.parr = typeCns;
+
+      resolvedTS = TypeStructure::resolve(cnsCopy, this, persistent);
+    } catch (const Exception& e) {
       raise_error(e.getMessage());
     }
-    auto tv = make_tv<KindOfArray>(resTS.get());
-    tv.m_aux = clsCns->m_aux;
-    assert(tvIsPlausible(tv));
+
+    auto const ad = ArrayData::GetScalarArray(resolvedTS.get());
+    if (persistent) {
+      auto const rawData = reinterpret_cast<intptr_t>(ad);
+      assert((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");
+      auto taggedData = reinterpret_cast<ArrayData*>(rawData | 0x1);
+
+      // Multiple threads might create and store the resolved type structure
+      // here, but that's fine since they'll all store the same thing thanks to
+      // GetScalarArray(). We could avoid a little duplicated work during
+      // warmup with more complexity but it's not worth it.
+      const_cast<TypedValueAux&>(cns.val).m_data.parr = taggedData;
+      return make_tv<KindOfPersistentArray>(ad);
+    }
+
+    auto tv = make_tv<KindOfPersistentArray>(ad);
+    makeCache();
     clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&tv), true /* isKey */);
     return tv;
   }
 
   // The class constant has not been initialized yet; do so.
   static auto const sd86cinit = makeStaticString("86cinit");
-  auto const meth86cinit =
-    m_constants[clsCnsInd].cls->lookupMethod(sd86cinit);
+  auto const meth86cinit = cns.cls->lookupMethod(sd86cinit);
   TypedValue args[1] = {
-    make_tv<KindOfStaticString>(
-      const_cast<StringData*>(m_constants[clsCnsInd].name.get()))
+    make_tv<KindOfStaticString>(const_cast<StringData*>(cns.name.get()))
   };
 
   Cell ret;
@@ -973,6 +1013,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     args
   );
 
+  makeCache();
   clsCnsData.set(StrNR(clsCnsName), cellAsCVarRef(ret), true /* isKey */);
   return ret;
 }
@@ -990,8 +1031,8 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   if (!includeTypeCns && m_constants[clsCnsInd].isType()) {
     return nullptr;
   }
-  auto const ret = const_cast<TypedValueAux*>(&m_constants[clsCnsInd].val);
-  assert(tvIsPlausible(*ret));
+  auto const ret = &m_constants[clsCnsInd].val;
+  assert(m_constants[clsCnsInd].isType() || tvIsPlausible(*ret));
   return ret;
 }
 

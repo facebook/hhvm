@@ -847,10 +847,9 @@ To string conversions:
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells). T must be a subtype of PtrToStkGen.
 
-| LdLocAddr<T,localId>, D(PtrToFrameGen), S(FramePtr), NF
+| LdLocAddr<localId>, D(PtrToFrameGen), S(FramePtr), NF
 
-  Loads the address of the local slot localId from the frame S0 into D. T must
-  be a subtype of PtrToFrameGen.
+  Loads the address of the local slot localId from the frame S0 into D.
 
 | LdRDSAddr<T,RDSHandle>, DParam, NA, NF
 

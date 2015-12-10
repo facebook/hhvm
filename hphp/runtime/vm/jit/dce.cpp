@@ -885,9 +885,8 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
       return;
     }
     case LdLocAddr: {
-      auto ty = inst.typeParam().deref().ptr(Ptr::Stk);
       IRSPOffsetData data {locToStkOff(inst)};
-      unit.replace(&inst, LdStkAddr, data, ty, unit.mainSP());
+      unit.replace(&inst, LdStkAddr, data, unit.mainSP());
       return;
     }
     case AssertLoc: {

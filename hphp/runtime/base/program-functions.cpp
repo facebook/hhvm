@@ -1515,8 +1515,10 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);
     std::vector<std::string> badnodes;
     config.lint(badnodes);
-    for (unsigned int i = 0; i < badnodes.size(); i++) {
-      Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
+    for (const auto& badnode : badnodes) {
+      const auto msg = "Possible bad config node: " + badnode;
+      fprintf(stderr, "%s\n", msg.c_str());
+      messages.push_back(msg);
     }
   }
   std::vector<int> inherited_fds;

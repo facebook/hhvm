@@ -77,7 +77,7 @@ public:
 };
 static GuessedTimeZone s_guessed_timezone;
 static Mutex s_tzdb_mutex;
-static const timelib_tzdb * s_tzdb_cache { nullptr };
+static const timelib_tzdb* s_tzdb_cache { nullptr };
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -115,12 +115,12 @@ void timezone_init() {
   s_tzvCache = TimeZoneValidityCache::create(kMaxTimeZoneCache).release();
 }
 
-const timelib_tzdb * timezone_get_builtin_tzdb() {
-    if (s_tzdb_cache != nullptr) return s_tzdb_cache;
+const timelib_tzdb* timezone_get_builtin_tzdb() {
+  if (s_tzdb_cache != nullptr) return s_tzdb_cache;
 
-    Lock tzdbLock(s_tzdb_mutex);
-    if (s_tzdb_cache == nullptr) s_tzdb_cache = timelib_builtin_db();
-    return s_tzdb_cache;
+  Lock tzdbLock(s_tzdb_mutex);
+  if (s_tzdb_cache == nullptr) s_tzdb_cache = timelib_builtin_db();
+  return s_tzdb_cache;
 }
 
 const timelib_tzdb *TimeZone::GetDatabase() {

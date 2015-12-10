@@ -77,7 +77,7 @@ public:
 };
 static GuessedTimeZone s_guessed_timezone;
 static Mutex s_tzdb_mutex;
-static const timelib_tzdb* s_tzdb_cache { nullptr };
+static std::atomic<const timelib_tzdb*> s_tzdb_cache { nullptr };
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics

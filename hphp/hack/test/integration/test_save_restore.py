@@ -58,7 +58,7 @@ load_script = %s
 
     def check_cmd(self, expected_output, stdin=None, options=[]):
         root = self.repo_dir + os.path.sep
-        output = self.proc_call([
+        (output, err) = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -70,6 +70,7 @@ load_script = %s
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
+        return err
 
     def test_server_output(self):
         self.write_load_config()
@@ -99,7 +100,7 @@ load_script = %s
 
         self.check_cmd(['No errors!'])
 
-        version = self.proc_call([
+        (version, _) = self.proc_call([
             hh_server,
             '--version'
         ])

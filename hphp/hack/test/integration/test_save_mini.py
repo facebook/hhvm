@@ -54,7 +54,7 @@ load_mini_script = %s
     def check_cmd(self, expected_output, stdin=None, options=None):
         options = [] if options is None else options
         root = self.repo_dir + os.path.sep
-        output = self.proc_call([
+        (output, err) = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -65,13 +65,14 @@ load_mini_script = %s
             stdin=stdin)
         log_file = self.proc_call([
             hh_client, '--logname', self.repo_dir
-            ]).strip()
+            ])[0].strip()
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Mini-state loading worker took', logs)
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
+        return err
 
     def test_no_state_found(self):
         error_msg = 'No such rev'
@@ -86,7 +87,7 @@ load_mini_script = %s
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
 
-        output = self.proc_call([
+        (output, _) = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -99,7 +100,7 @@ load_mini_script = %s
 
         log_file = self.proc_call([
             hh_client, '--logname', self.repo_dir
-            ]).strip()
+            ])[0].strip()
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Could not load mini state', logs)
@@ -120,14 +121,13 @@ load_mini_script = %s
 """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
         # Server may take some time to kill itself.
-        # TODO: Speed up monitor's reaction time to the typechecker dying.
         time.sleep(2)
 
         # this should start a new server
         self.check_cmd(['No errors!'])
         # check how the old one exited
         log_file = self.proc_call([
-            hh_client, '--logname', self.repo_dir]).strip() + '.old'
+            hh_client, '--logname', self.repo_dir])[0].strip() + '.old'
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('.hhconfig changed in an incompatible way', logs)

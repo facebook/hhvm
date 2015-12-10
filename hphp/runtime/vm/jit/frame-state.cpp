@@ -613,9 +613,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
-
-    auto& iInfo = getInstrInfo(extra.opcode);
-    if (iInfo.type == jit::InstrFlags::OutFDesc) {
+    if (isFPush(extra.opcode)) {
       cur().fpiStack.push_front(FPIInfo { cur().spValue,
                                           cur().spOffset,
                                           nullptr,

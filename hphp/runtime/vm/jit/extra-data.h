@@ -661,18 +661,21 @@ struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPOffset spOffset,
                            const Func* callee,
                            int32_t numNonDefault,
-                           bool destroyLocals)
+                           bool destroyLocals,
+                           bool needsFrame)
     : spOffset(spOffset)
     , callee{callee}
     , numNonDefault{numNonDefault}
     , destroyLocals{destroyLocals}
+    , needsCallerFrame{needsFrame}
   {}
 
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',',
       callee->fullName()->data(),
-      destroyLocals ? ",destroyLocals" : ""
+      destroyLocals ? ",destroyLocals" : "",
+      needsCallerFrame ? ",needsCallerFrame" : ""
     );
   }
 
@@ -680,6 +683,7 @@ struct CallBuiltinData : IRExtraData {
   const Func* callee;
   int32_t numNonDefault;
   bool destroyLocals;
+  bool needsCallerFrame;
 };
 
 struct CallData : IRExtraData {
@@ -688,12 +692,14 @@ struct CallData : IRExtraData {
                     Offset after,
                     const Func* callee,
                     bool destroy,
+                    bool needsFrame,
                     bool fcallAwait)
     : spOffset(spOffset)
     , numParams(numParams)
     , after(after)
     , callee(callee)
     , destroyLocals(destroy)
+    , needsCallerFrame(needsFrame)
     , fcallAwait(fcallAwait)
   {}
 
@@ -704,6 +710,7 @@ struct CallData : IRExtraData {
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
       destroyLocals ? ",destroyLocals" : "",
+      needsCallerFrame ? ",needsCallerFrame" : "",
       fcallAwait ? ",fcallAwait" : ""
     );
   }
@@ -713,6 +720,7 @@ struct CallData : IRExtraData {
   Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
+  bool needsCallerFrame;
   bool fcallAwait;
 };
 

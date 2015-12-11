@@ -30,9 +30,9 @@ function getimagesizefromstring(string $filename,
 
 /* Returns the extension for the given IMAGETYPE_XXX constant.
  */
-<<__Native>>
+<<__ParamCoerceModeFalse, __Native>>
 function image_type_to_extension(int $imagetype,
-                                 bool $include_dot = true): string;
+                                 bool $include_dot = true): mixed;
 
 /* The image_type_to_mime_type() function will determine the Mime-Type for an
  * IMAGETYPE constant.

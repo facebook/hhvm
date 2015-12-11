@@ -1611,9 +1611,8 @@ String HHVM_FUNCTION(image_type_to_mime_type, int64_t imagetype) {
   }
 }
 
-String HHVM_FUNCTION(image_type_to_extension,
+Variant HHVM_FUNCTION(image_type_to_extension,
                      int64_t imagetype, bool include_dot /*=true */) {
-  String ret;
   switch (imagetype) {
   case IMAGE_FILETYPE_GIF:
     return include_dot ? String(".gif") : String("gif");
@@ -1647,7 +1646,7 @@ String HHVM_FUNCTION(image_type_to_extension,
   case IMAGE_FILETYPE_ICO:
     return include_dot ? String(".ico") : String("ico");
   default:
-    return ret;
+    return false;
   }
 }
 

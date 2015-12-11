@@ -55,7 +55,7 @@ private:
 Array HHVM_FUNCTION(gd_info);
 Variant HHVM_FUNCTION(getimagesize,
   const String& filename, VRefParam imageinfo = uninit_null());
-String HHVM_FUNCTION(image_type_to_extension,
+Variant HHVM_FUNCTION(image_type_to_extension,
   int64_t imagetype, bool include_dot = true);
 String HHVM_FUNCTION(image_type_to_mime_type, int64_t imagetype);
 #ifdef HAVE_GD_WBMP

@@ -309,6 +309,7 @@ NOOP_OPCODE(HintLocInner)
 NOOP_OPCODE(HintStkInner)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(FinishMemberOp)
+NOOP_OPCODE(BeginInlining)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -2455,6 +2456,18 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     flags
   ));
   v << storeli{encoded, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
+}
+
+void CodeGenerator::cgSyncReturnBC(IRInstruction* inst) {
+  auto const extra = inst->extra<SyncReturnBC>();
+  auto const spOffset = cellsToBytes(extra->spOffset.offset);
+  auto const bcOffset = extra->bcOffset;
+  auto const spReg = srcLoc(inst, 0).reg();
+  auto const fpReg = srcLoc(inst, 1).reg();
+
+  auto& v = vmain();
+  v << storeli{safe_cast<int32_t>(bcOffset), spReg[spOffset + AROFF(m_soff)]};
+  v << store{fpReg, spReg[spOffset + AROFF(m_sfp)]};
 }
 
 void CodeGenerator::cgStClosureArg(IRInstruction* inst) {

@@ -619,6 +619,19 @@ struct InlineReturnNoFrameData : IRExtraData {
   FPRelOffset frameOffset;
 };
 
+struct SyncReturnBCData : IRExtraData {
+  SyncReturnBCData(Offset bcOff, IRSPOffset spOff)
+    : bcOffset(bcOff)
+    , spOffset(spOff)
+  {}
+  std::string show() const {
+    return folly::to<std::string>(bcOffset, ",", spOffset.offset);
+  }
+
+  Offset bcOffset;
+  IRSPOffset spOffset;
+};
+
 struct CallArrayData : IRExtraData {
   explicit CallArrayData(IRSPOffset spOffset,
                          int32_t numParams,
@@ -1187,6 +1200,8 @@ X(DefSP,                        FPInvOffsetData);
 X(LdStk,                        IRSPOffsetData);
 X(LdStkAddr,                    IRSPOffsetData);
 X(DefInlineFP,                  DefInlineFPData);
+X(BeginInlining,                IRSPOffsetData);
+X(SyncReturnBC,                 SyncReturnBCData);
 X(InlineReturnNoFrame,          InlineReturnNoFrameData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);

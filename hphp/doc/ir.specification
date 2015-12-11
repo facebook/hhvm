@@ -1316,6 +1316,12 @@ To string conversions:
   Load the saved frame pointer from the activation record pointed to by S0 into
   D.
 
+| BeginInlining<offset>, ND, S(StkPtr), NF
+
+  Marks the start of an inlined function whose stack resides offset cells below
+  the SP. It has no effect other than to hint to optimization passes that at the
+  start of the inlined function its stack is dead.
+
 | DefInlineFP<func,retBCOff,retSPOff>, D(FramePtr),
 |                                      S(StkPtr) S(FramePtr),
 |                                      NF
@@ -1357,6 +1363,11 @@ To string conversions:
   resulting after the ActRec for the function and numParams arguments have been
   pushed. CallArray pops the array off the stack, pushes the elements of the
   array as arguments, and invokes the function in the ActRec.
+
+| SyncReturnBC<spOffset,bcOffset>, ND, S(StkPtr) S(FramePtr), NF
+
+  Stores bcOffset into the frame at spOffset from S0 as the return bytecode
+  address and the frame S1 as the return frame.
 
 | Call<offset,numParams,returnOff,funcd,destroyLocals>, ND,
 |                                                       S(StkPtr) S(FramePtr),

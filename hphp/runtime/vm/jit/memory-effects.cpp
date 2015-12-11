@@ -470,6 +470,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * effectively converted AStack locations into a frame until the
    * InlineReturn).
    *
+   * Note: We may push the publishing of the inline frame below the start of
+   * the inline function so that we can avoid spilling the inline frame in the
+   * common case. Because of this we cannot add the stack positions within the
+   * inline function to the kill set here as they may be live having been stored
+   * on the main trace.
+   *
    * TODO(#3634984): Additionally, DefInlineFP is marking may-load on all the
    * locals of the outer frame.  This is probably not necessary anymore, but we
    * added it originally because a store sinking prototype needed to know it
@@ -478,21 +484,52 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * removing that set.
    */
   case DefInlineFP:
+    return may_load_store(
+      /*
+       * We need to mark DefInlineFP as both loading and storing the entire
+       * stack below its frame because it may have been pushed. If DefInlineFP
+       * is not pushed these cells were marked as both stored and killed by
+       * BeginInlining so now actual stores should be aliased.
+       *
+       * Importantly, if we do sink DefInlineFP stack cells from above may
+       * alias locals within DefInlineFP, this confuses alias analysis, these
+       * stores must not be sunk past DefInlineFP where they could clobber a
+       * local.
+       */
+      AFrameAny | inline_fp_frame(&inst) | stack_below(inst.dst(), 0),
+      AFrameAny | stack_below(inst.dst(), 0)
+    );
+
+  /*
+   * BeginInlining is similar to DefInlineFP, however, it must always be the
+   * first instruction in the inlined call and has no effect serving only as
+   * a marker to memory effects that the stack cells within the inlined call
+   * are now dead.
+   *
+   * Unlike DefInlineFP it does not load the SpillFrame, which we hope to push
+   * off the main trace or elide entirely.
+   */
+  case BeginInlining: {
+    /*
+     * SP relative offset of the first non-frame cell within the inlined call.
+     */
+    auto inlineStackOff = inst.extra<BeginInlining>()->offset.offset;
     return may_load_store_kill(
-      AFrameAny | inline_fp_frame(&inst),
+      AEmpty,
       /*
        * This prevents stack slots from the caller from being sunk into the
        * callee. Note that some of these stack slots overlap with the frame
        * locals of the callee-- those slots are inacessible in the inlined
        * call as frame and stack locations may not alias.
        */
-      stack_below(inst.dst(), 0),
+      stack_below(inst.src(0), inlineStackOff),
       /*
        * While not required for correctness adding these slots to the kill set
        * will hopefully avoid some extra stores.
        */
-      stack_below(inst.dst(), 0)
+      stack_below(inst.src(0), inlineStackOff)
     );
+  }
 
   case InlineReturn:
     return ReturnEffects { stack_below(inst.src(0), 2) | AMIStateAny };
@@ -504,6 +541,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         std::numeric_limits<int32_t>::max()
       }) | AMIStateAny
     };
+
+  case SyncReturnBC: {
+    auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;
+    auto const arStack = AStack {
+      inst.src(0),
+      // Same as spillframe
+      spOffset.offset + int32_t{kNumActRecCells} - 1,
+      int32_t{kNumActRecCells}
+    };
+    // This instruction doesn't actually load but SpillFrame cannot be pushed
+    // past it
+    return may_load_store(arStack, arStack);
+  }
 
   case InterpOne:
     return interp_one_effects(inst);

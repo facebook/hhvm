@@ -543,6 +543,8 @@ bool canDCE(IRInstruction* inst) {
   case StMBase:
   case FinishMemberOp:
   case InlineReturnNoFrame:
+  case BeginInlining:
+  case SyncReturnBC:
     return false;
   }
   not_reached();

@@ -887,6 +887,7 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
     case LdLocAddr: {
       IRSPOffsetData data {locToStkOff(inst)};
       unit.replace(&inst, LdStkAddr, data, unit.mainSP());
+      retypeDests(&inst, &unit);
       return;
     }
     case AssertLoc: {
@@ -901,7 +902,9 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
       // read inside of region-tracelet when we walk guards-- if we're
       // killing an inlined frame its locals won't be part of the guards
       RelOffsetData data {locToStkOff(inst)};
-      unit.replace(&inst, CheckStk, data, ty, unit.mainSP());
+      auto next = inst.next();
+      unit.replace(&inst, CheckStk, data, ty, inst.taken(), unit.mainSP());
+      inst.setNext(next);
       return;
     }
     case HintLocInner: {

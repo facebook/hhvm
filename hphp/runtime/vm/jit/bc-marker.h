@@ -56,6 +56,7 @@ struct BCMarker {
     , m_spOff(sp)
     , m_profTransID{tid}
     , m_fp{fp}
+    , m_fixupSk(sk)
   {
     assertx(valid());
   }
@@ -81,13 +82,29 @@ struct BCMarker {
   FPInvOffset spOff()       const { assertx(valid());   return m_spOff;        }
   TransID     profTransID() const { assertx(valid());   return m_profTransID;  }
   SSATmp*     fp()          const { assertx(valid());   return m_fp;           }
+  SrcKey      fixupSk()     const { assertx(valid());   return m_fixupSk;      }
 
-  // Return a copy of this marker with an updated sp or fp.
+  const Func* fixupFunc() const {
+    assertx(valid());
+    return m_fixupSk.func();
+  }
+
+  Offset fixupBcOff() const {
+    assertx(valid());
+    return m_fixupSk.offset();
+  }
+
+  // Return a copy of this marker with an updated sp, fp, or sk.
   BCMarker adjustSP(FPInvOffset sp) const {
     return BCMarker { m_sk, sp, m_profTransID, m_fp };
   }
   BCMarker adjustFP(SSATmp* fp) const {
     return BCMarker { m_sk, m_spOff, m_profTransID, fp };
+  }
+  BCMarker adjustFixupSK(SrcKey sk) const {
+    auto ret = *this;
+    ret.m_fixupSk = sk;
+    return ret;
   }
 
 private:
@@ -95,6 +112,12 @@ private:
   FPInvOffset m_spOff{0};
   TransID m_profTransID{kInvalidTransID};
   SSATmp* m_fp{nullptr};
+
+  // Normally the fixup SrcKey is the same as the SrcKey for the marker,
+  // however, when inlining has dropped an inner frame the fixup SrcKey will
+  // be inside the parent frame so that its offset is relative to the live
+  // ActRec
+  SrcKey m_fixupSk;
 };
 
 //////////////////////////////////////////////////////////////////////

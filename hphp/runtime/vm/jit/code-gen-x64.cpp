@@ -646,7 +646,7 @@ void CodeGenerator::cgGenericIdx(IRInstruction* inst) {
   auto const spOff = inst->extra<GenericIdx>()->offset.offset;
   auto const sync_sp = v.makeReg();
   v << lea{sp[cellsToBytes(spOff)], sync_sp};
-  emitEagerSyncPoint(v, inst->marker().sk().pc(),
+  emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
                      rvmtl(), rvmfp(), sync_sp);
   cgCallNative (v, inst);
 }
@@ -1983,7 +1983,7 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   auto& v = vmain();
   auto const sync_sp = v.makeReg();
   v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff)], sync_sp};
-  emitEagerSyncPoint(v, inst->marker().sk().pc(),
+  emitEagerSyncPoint(v, inst->marker().fixupSk().pc(),
                      rvmtl(), srcLoc(inst, 0).reg(), sync_sp);
 }
 
@@ -2847,11 +2847,11 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     offsetof(MInstrState, tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(callee)) {
-    auto const rSP       = srcLoc(inst, 1).reg();
-    auto const spOffset  = cellsToBytes(
+    auto const rSP = srcLoc(inst, 1).reg();
+    auto const spOffset = cellsToBytes(
       inst->extra<CallBuiltin>()->spOffset.offset);
-    auto const& marker   = inst->marker();
-    auto const pc        = getUnit(marker)->entry() + marker.bcOff();
+    auto const& marker = inst->marker();
+    auto const pc = marker.fixupSk().unit()->entry() + marker.fixupBcOff();
     auto const synced_sp = v.makeReg();
     v << lea{rSP[spOffset], synced_sp};
     emitEagerSyncPoint(
@@ -3461,7 +3461,7 @@ Fixup CodeGenerator::makeFixup(const BCMarker& marker, SyncOptions sync) {
     break;
   }
 
-  Offset pcOff = marker.bcOff() - marker.func()->base();
+  Offset pcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
   return Fixup{pcOff, stackOff.offset};
 }
 

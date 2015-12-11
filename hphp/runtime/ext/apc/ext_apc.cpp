@@ -85,7 +85,20 @@ extern void const_load();
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 
+static void* keep_alive;
+
 void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
+  if (!keep_alive && ini.isString()) {
+    // this is a hack to preserve some dynamic entry points
+    switch (ini.toString().size()) {
+      case 0: keep_alive = (void*)const_load; break;
+      case 1: keep_alive = (void*)const_load_impl; break;
+      case 2: keep_alive = (void*)const_load_impl_compressed; break;
+      case 3: keep_alive = (void*)apc_load_impl; break;
+      case 4: keep_alive = (void*)apc_load_impl_compressed; break;
+    }
+  }
+
   Config::Bind(Enable, ini, config, "Server.APC.EnableApc", true);
   Config::Bind(EnableConstLoad, ini, config, "Server.APC.EnableConstLoad",
                false);
@@ -541,43 +554,14 @@ public:
 
 static size_t s_const_map_size = 0;
 
-EXTERNALLY_VISIBLE
 void apc_load(int thread) {
 #ifndef _MSC_VER
   static void *handle = nullptr;
   if (handle ||
       apcExtension::PrimeLibrary.empty() ||
       !apcExtension::Enable) {
-    static uint64_t keep_entry_points_around_under_lto;
-    if (++keep_entry_points_around_under_lto ==
-        std::numeric_limits<uint64_t>::max()) {
-      // this had better never happen...
-
-      // Fill out a cache_info to prevent g++ from optimizing out
-      // the calls to const_load_impl*
-      cache_info info;
-      info.a_name = "dummy";
-      info.use_const = true;
-
-      const_load_impl(&info, (const char**)const_load,
-                      nullptr, nullptr, nullptr, nullptr,
-                      nullptr, nullptr, nullptr);
-      const_load_impl_compressed(&info,
-                                 nullptr, nullptr, nullptr,
-                                 nullptr, nullptr, nullptr,
-                                 nullptr, nullptr, nullptr, nullptr,
-                                 nullptr, nullptr, nullptr, nullptr);
-      apc_load_impl(&info, nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr);
-      apc_load_impl_compressed(&info,
-                               nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr, nullptr);
-    }
     return;
   }
-
   BootTimer::Block timer("loading APC data");
   handle = dlopen(apcExtension::PrimeLibrary.c_str(), RTLD_LAZY);
   if (!handle) {

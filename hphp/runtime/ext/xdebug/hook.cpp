@@ -26,9 +26,12 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-namespace HPHP {
+#include "hphp/util/match.h"
 
-// These don't need to be exposed, but make dealing the breakpoints less verbose
+namespace HPHP {
+////////////////////////////////////////////////////////////////////////////////
+
+// These don't need to be exposed, but make dealing the breakpoints less verbose.
 #define BREAKPOINT_MAP (s_xdebug_breakpoints->m_breakMap)
 #define FUNC_ENTRY (s_xdebug_breakpoints->m_funcEntryMap)
 #define FUNC_EXIT (s_xdebug_breakpoints->m_funcExitMap)
@@ -37,10 +40,8 @@ namespace HPHP {
 #define UNMATCHED (s_xdebug_breakpoints->m_unmatched)
 
 using BreakType = XDebugBreakpoint::Type;
-using BreakInfo = XDebugHook::BreakInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Helpers
 
 // Helper that adds the given function breakpoint corresponding to the given
 // function and id as a breakpoint. If a duplicate breakpoint already exists,
@@ -301,31 +302,28 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 // Debug Hook Handling
 
 // Helper that grabs the breakpoint ids for the given breakpoint type using the
-// given breakpoint info. Pushes the ids onto the passed vector.
-template<BreakType type>
+// given breakpoint info.  Pushes the ids onto the passed vector.
 static void get_breakpoint_ids(const BreakInfo& bi, std::vector<int>& ids) {
-  switch (type) {
-    case BreakType::CALL:
-      ids.push_back(FUNC_ENTRY.at(bi.func->getFuncId()));
-      return;
-    case BreakType::RETURN:
-      ids.push_back(FUNC_EXIT.at(bi.func->getFuncId()));
-      return;
-    case BreakType::LINE: {
-      // Look for the breakpoint's unit
-      auto unit_iter = LINE_MAP.find(bi.unit->filepath()->toCppString());
+  match<void>(
+    bi,
+    [&] (FuncBreak fb) {
+      auto& map = fb.entry ? FUNC_ENTRY : FUNC_EXIT;
+      ids.push_back(map.at(fb.func->getFuncId()));
+    },
+    [&] (LineBreak lb) {
+      // Look for the breakpoint's unit.
+      auto unit_iter = LINE_MAP.find(lb.unit->filepath()->toCppString());
       if (unit_iter == LINE_MAP.end()) {
         return;
       }
 
-      // Add all the ids for this line
-      auto range = unit_iter->second.equal_range(bi.line);
+      // Add all the ids for this line.
+      auto range = unit_iter->second.equal_range(lb.line);
       for (auto iter = range.first; iter != range.second; ++iter) {
         ids.push_back(iter->second);
       }
-      return;
-    }
-    case BreakType::EXCEPTION: {
+    },
+    [&] (ExnBreak eb) {
       // Check for the wildcard exception breakpoint
       auto iter = EXCEPTION_MAP.find("*");
       if (iter != EXCEPTION_MAP.end()) {
@@ -334,18 +332,16 @@ static void get_breakpoint_ids(const BreakInfo& bi, std::vector<int>& ids) {
       }
 
       // Check if breakpoint's exception is registered.
-      iter = EXCEPTION_MAP.find(bi.name->toCppString());
+      iter = EXCEPTION_MAP.find(eb.name->toCppString());
       if (iter != EXCEPTION_MAP.end()) {
         ids.push_back(iter->second);
       }
-      return;
     }
-  }
+  );
 }
 
 // Helper that checks if the given breakpoint has been "hit". That is, if
 // all hit conditions have been met
-template<BreakType type>
 static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
   if (!bp.enabled) {
     return false;
@@ -354,7 +350,7 @@ static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
   // Check the condition on line breakpoints. We disable then enable the
   // breakpoints before/after the evaluation in order to prevent
   // a breakpoint from being hit within this check
-  if (type == BreakType::LINE && bp.conditionUnit != nullptr) {
+  if (bp.type == BreakType::LINE && bp.conditionUnit != nullptr) {
     auto const prev_disabled = g_context->m_dbgNoBreak;
     g_context->m_dbgNoBreak = true;
 
@@ -386,13 +382,9 @@ static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
   }
 }
 
-// Returns the message from the given breakpoint info
-template<BreakType type>
-static const Variant get_breakpoint_message(const BreakInfo& bi) {
-  // In php5 xdebug, only messages have a string. But this could be extended to
-  // be more useful.
-  return type == BreakType::EXCEPTION ?
-    Variant(bi.message->data()) : init_null();
+static Variant get_breakpoint_message(const BreakInfo& bi) {
+  if (auto eb = boost::get<ExnBreak>(&bi)) return VarNR(eb->message);
+  return init_null();
 }
 
 DebuggerHook* XDebugHook::GetInstance() {
@@ -400,7 +392,6 @@ DebuggerHook* XDebugHook::GetInstance() {
   return instance;
 }
 
-template<BreakType type>
 void XDebugHook::onBreak(const BreakInfo& bi) {
   // Have to have a server to break.
   if (XDEBUG_GLOBAL(Server) == nullptr) {
@@ -409,24 +400,24 @@ void XDebugHook::onBreak(const BreakInfo& bi) {
 
   // Grab the breakpoints matching the passed info
   std::vector<int> ids;
-  get_breakpoint_ids<type>(bi, ids);
+  get_breakpoint_ids(bi, ids);
 
-  // Iterate. Note that we only tell the server to break once.
+  // Iterate.  Note that we only tell the server to break once.
   bool have_broken = false;
   for (auto const id : ids) {
-    // Look up the breakpoint, ensure it's hittable
+    // Look up the breakpoint, ensure it's hittable.
     auto& bp = BREAKPOINT_MAP.at(id);
-    if (!is_breakpoint_hit<type>(bp)) {
+    if (!is_breakpoint_hit(bp)) {
       continue;
     }
 
-    // We only break once per location
+    // We only break once per location.
     auto const temporary = bp.temporary; // breakpoint could be deleted
     if (!have_broken) {
       have_broken = true;
 
-      // Grab the breakpoint message and do the break
-      const Variant msg = get_breakpoint_message<type>(bi);
+      // Grab the breakpoint message and do the break.
+      auto const msg = get_breakpoint_message(bi);
       if (!XDEBUG_GLOBAL(Server)->breakpoint(bp, msg)) {
         // Kill the server if there's an error.
         XDebugServer::detach();
@@ -434,14 +425,14 @@ void XDebugHook::onBreak(const BreakInfo& bi) {
       }
     }
 
-    // Remove the breakpoint if it was temporary
+    // Remove the breakpoint if it was temporary.
     if (temporary) {
       XDEBUG_REMOVE_BREAKPOINT(id);
     }
   }
 }
 
-// Exception::getMessage method name
+// Exception::getMessage method name.
 const StaticString s_GET_MESSAGE("getMessage");
 
 void XDebugHook::onOpcode(PC pc) {
@@ -458,7 +449,7 @@ void XDebugHook::onOpcode(PC pc) {
 
   server->log("Request thread received break command");
 
-  VMRegAnchor _;
+  VMRegAnchor anchor;
 
   auto const unit = vmfp()->func()->unit();
   auto const line = unit->getLineNumber(unit->offsetOf(pc));

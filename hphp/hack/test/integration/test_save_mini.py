@@ -137,7 +137,7 @@ load_mini_script = %s
 
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
             f.write(r"""
-use_watchman_2 = true
+use_watchman = true
 watchman_init_timeout = 1
 """)
 

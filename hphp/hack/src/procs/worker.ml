@@ -124,7 +124,7 @@ and 'a slave = {
    'Deamon.register_entry_point' *)
 type builder =
     Builder of
-      (Gc.control -> SharedMem.handle -> unit -> (void, request) Daemon.handle)
+      (Gc.control -> SharedMem.handle -> int -> unit -> (void, request) Daemon.handle)
 
 let slave_main ic oc =
   let send_result res = Marshal.to_channel oc res []; flush oc in
@@ -190,14 +190,14 @@ let unix_worker_main restore state (ic, oc) =
     assert false
   with End_of_file -> exit 0
 
-let cpt = ref 0
+let entry_cpt = ref 0
 let register_entry_point ~save ~restore =
-  incr cpt;
+  incr entry_cpt;
   let restore (st, gc_control, heap_handle) =
     restore st;
     SharedMem.connect heap_handle;
     Gc.set gc_control in
-  let name = Printf.sprintf "slave_%d" !cpt in
+  let name = Printf.sprintf "slave_%d" !entry_cpt in
   let entry =
     Daemon.register_entry_point
       name
@@ -207,15 +207,22 @@ let register_entry_point ~save ~restore =
          win32_worker_main restore) in
   let builder gc_control heap_handle =
     let saved_state = save () in
-    fun () ->
-      Unix.clear_close_on_exec heap_handle.SharedMem.h_fd;
-      let handle =
-        Daemon.spawn
-          (* ~log_file:name *)
-          ~reason:"worker" entry
-          (saved_state, gc_control, heap_handle) in
-      Unix.set_close_on_exec heap_handle.SharedMem.h_fd;
-      handle in
+    fun worker_id ->
+      (* On Windows, the slave is `spawned` at each request, but we
+         want to clear the log file only once. Hence, partial
+         application in [make_one]. *)
+      let log_file = Printf.sprintf "slave_%d.log" worker_id in
+      Sys_utils.unlink_no_fail log_file;
+      fun () ->
+        Unix.clear_close_on_exec heap_handle.SharedMem.h_fd;
+        let handle =
+          Daemon.spawn
+            ~log_file
+            ~log_mode:Daemon.Log_append
+            ~reason:"worker" entry
+            (saved_state, gc_control, heap_handle) in
+        Unix.set_close_on_exec heap_handle.SharedMem.h_fd;
+        handle in
   Builder builder
 
 
@@ -233,6 +240,9 @@ let make_one =
     let id = !cpt in
     if id >= max_workers then failwith "Too many workers";
     incr cpt;
+    (* Partial application: remove log file on Windows
+       (see register_entry_point). *)
+    let spawn = spawn id in
     let prespawned = if not use_prespawned then None else Some (spawn ()) in
     let worker = { id; busy = false; killed = false; prespawned; spawn } in
     workers := worker :: !workers;

@@ -24,6 +24,7 @@ let () = Lazy.force Handle.init
 
 type log_mode =
 | Log_file
+| Log_append
 | Parent_streams
 
 let to_channel :
@@ -224,7 +225,7 @@ let spawn
     Unix.openfile null_path [Unix.O_RDONLY; Unix.O_CREAT] 0o777 in
   let out_fd, err_fd =
     match log_mode with
-    | Log_file ->
+    | Log_file | Log_append ->
       let out_path =
         Option.value_map log_file
           ~default:null_path
@@ -232,8 +233,23 @@ let spawn
               Sys_utils.mkdir_no_fail (Filename.dirname fn);
               fn)  in
       let out_fd =
-        Unix.openfile out_path [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC]
-        0o666 in
+        match log_mode with
+        | Log_file ->
+          Unix.openfile out_path [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC]
+            0o666
+        | Log_append ->
+          (* Used for slave's on Windows, where `O_APPEND` is ignored.
+             See [Worker.register_entry_point]. *)
+          if Sys.file_exists out_path then begin
+            let fd = Unix.openfile out_path [Unix.O_WRONLY] 0o666 in
+            ignore (Unix.lseek fd 0 Unix.SEEK_END) ;
+            fd
+          end else begin
+            Unix.openfile out_path [Unix.O_WRONLY; Unix.O_CREAT]
+              0o666
+          end
+        | Parent_streams -> assert false
+      in
       out_fd, out_fd
     | Parent_streams ->
       Unix.stdout, Unix.stderr

@@ -16,6 +16,7 @@ type ('in_, 'out) channel_pair = 'in_ in_channel * 'out out_channel
 
 type log_mode =
 | Log_file
+| Log_append
 | Parent_streams
 
 val to_channel :

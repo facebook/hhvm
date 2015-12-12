@@ -615,6 +615,18 @@ template<> struct FormatValue<HPHP::String> {
  private:
   const HPHP::String& m_val;
 };
+
+template<> struct FormatValue<HPHP::StaticString> {
+  explicit FormatValue(const HPHP::StaticString& str) : m_val(str) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    FormatValue<HPHP::StringData*>(m_val.get()).format(arg, cb);
+  }
+
+ private:
+  const HPHP::StaticString& m_val;
+};
 }
 
 #endif

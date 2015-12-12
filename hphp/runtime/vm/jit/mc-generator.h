@@ -445,7 +445,10 @@ bool shouldPGOFunc(const Func& func);
   TPC(enter_tc) \
   TPC(service_req) \
   TPC(unser_prop_slow) \
-  TPC(unser_prop_fast)
+  TPC(unser_prop_fast) \
+  TPC(thrift_read_slow) \
+  TPC(thrift_write_slow) \
+  TPC(thrift_spec_slow)
 
 #define TPC(n) tpc_ ## n,
 enum TransPerfCounter {

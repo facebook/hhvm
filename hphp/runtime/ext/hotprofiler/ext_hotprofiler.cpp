@@ -1457,7 +1457,7 @@ void end_profiler_frame(Profiler *p,
 
 static class HotProfilerExtension : public Extension {
  public:
-  HotProfilerExtension(): Extension("hotprofiler", k_PHP_VERSION.data()) {}
+  HotProfilerExtension(): Extension("hotprofiler", get_PHP_VERSION().data()) {}
 
   void moduleInit() override {
 #ifdef CLOCK_REALTIME

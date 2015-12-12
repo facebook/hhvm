@@ -968,7 +968,7 @@ static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {
   Extension *ext;
 
   if (extension.empty()) {
-    return k_PHP_VERSION;
+    return get_PHP_VERSION();
   }
 
   if ((ext = ExtensionRegistry::get(extension)) != nullptr &&

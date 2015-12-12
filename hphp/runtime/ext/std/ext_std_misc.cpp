@@ -148,14 +148,24 @@ static void bindTokenConstants();
 static int get_user_token_id(int internal_id);
 const StaticString s_T_PAAMAYIM_NEKUDOTAYIM("T_PAAMAYIM_NEKUDOTAYIM");
 
-#define PHP_MAJOR_VERSION 5
-#define PHP_MINOR_VERSION 6
+#define PHP_MAJOR_VERSION_5 5
+#define PHP_MINOR_VERSION_5 6
+#define PHP_VERSION_5 "5.6.99-hhvm"
+#define PHP_VERSION_ID_5 50699
+
+#define PHP_MAJOR_VERSION_7 7
+#define PHP_MINOR_VERSION_7 0
+#define PHP_VERSION_7 "7.0.99-hhvm"
+#define PHP_VERSION_ID_7 70099
+
 #define PHP_RELEASE_VERSION 99
 #define PHP_EXTRA_VERSION "hhvm"
-#define PHP_VERSION "5.6.99-hhvm"
-#define PHP_VERSION_ID 50699
 
-const StaticString k_PHP_VERSION(PHP_VERSION);
+StaticString get_PHP_VERSION() {
+  static StaticString v5(PHP_VERSION_5);
+  static StaticString v7(PHP_VERSION_7);
+  return RuntimeOption::PHP7_ReportVersion ? v7 : v5;
+}
 
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
@@ -241,12 +251,20 @@ void StandardExtension::initMisc() {
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);
     HHVM_RC_INT(PHP_INT_MAX, k_PHP_INT_MAX);
 
-    HHVM_RC_INT_SAME(PHP_MAJOR_VERSION);
-    HHVM_RC_INT_SAME(PHP_MINOR_VERSION);
+    if (RuntimeOption::PHP7_ReportVersion) {
+      HHVM_RC_INT(PHP_MAJOR_VERSION, PHP_MAJOR_VERSION_7);
+      HHVM_RC_INT(PHP_MINOR_VERSION, PHP_MINOR_VERSION_7);
+      HHVM_RC_STR(PHP_VERSION, PHP_VERSION_7);
+      HHVM_RC_INT(PHP_VERSION_ID, PHP_VERSION_ID_7);
+    } else {
+      HHVM_RC_INT(PHP_MAJOR_VERSION, PHP_MAJOR_VERSION_5);
+      HHVM_RC_INT(PHP_MINOR_VERSION, PHP_MINOR_VERSION_5);
+      HHVM_RC_STR(PHP_VERSION, PHP_VERSION_5);
+      HHVM_RC_INT(PHP_VERSION_ID, PHP_VERSION_ID_5);
+    }
+
     HHVM_RC_INT_SAME(PHP_RELEASE_VERSION);
     HHVM_RC_STR_SAME(PHP_EXTRA_VERSION);
-    HHVM_RC_STR_SAME(PHP_VERSION);
-    HHVM_RC_INT_SAME(PHP_VERSION_ID);
 
     HHVM_RC_INT(CONNECTION_NORMAL,  k_CONNECTION_NORMAL);
     HHVM_RC_INT(CONNECTION_ABORTED, k_CONNECTION_ABORTED);

@@ -302,8 +302,8 @@ bool StackTrace::PerfMap::translate(const void* addr, Frame* f) const {
     const_cast<StackTrace::PerfMap*>(this)->rebuild();
   }
 
-  // Use a key with non-zero span, because otherwise a key right at a range
-  // boundary will be considered within the range (bad) rather than just past it
+  // Use a key with non-zero span, because otherwise a key right at the base of
+  // a range will be treated as before the range (bad) rather than within it
   // (good).
   PerfMap::Range key{uintptr_t(addr), uintptr_t(addr)+1};
   auto const& it = m_map.find(key);

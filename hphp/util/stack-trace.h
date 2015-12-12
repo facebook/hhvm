@@ -94,7 +94,7 @@ public:
       uintptr_t past;
       struct Cmp {
         bool operator() (const Range& a, const Range& b) const {
-          return a.past < b.base;
+          return a.past <= b.base;
         }
       };
     };

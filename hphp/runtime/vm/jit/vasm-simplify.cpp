@@ -71,6 +71,29 @@ struct Simplifier {
     }
   }
 
+  bool match_and_test(const Vblock& block,
+                      size_t& iIdx,
+                      Vinstr& andq,
+                      Vreg& sf) {
+    if (!match_instr(block, iIdx, Vinstr::andq)) return false;
+
+    auto const& code = block.code;
+    auto const& inst = code[iIdx].andq_;
+    auto const dst = inst.d;
+    if (uses[dst] == 2 && uses[inst.sf] == 0 &&
+        match_instr(block, iIdx + 1, Vinstr::testq)) {
+      auto const& testq = code[iIdx + 1].testq_;
+      if (testq.s0 == dst && testq.s1 == dst) {
+        andq = inst;
+        sf = testq.sf;
+        ++iIdx;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   // If there is an adjacent setcc/xorbi pair where the xor is being used
   // to invert the result of the setcc, just invert the setcc condition and
   // omit the xor.
@@ -83,7 +106,7 @@ struct Simplifier {
       auto const& inst = code[iIdx].setcc_;
       auto const dst = inst.d;
       // Make sure setcc result is only used by xor.
-      if (uses[inst.d] == 1 && match_instr(block, iIdx + 1, Vinstr::xorbi)) {
+      if (uses[dst] == 1 && match_instr(block, iIdx + 1, Vinstr::xorbi)) {
         auto const& xor = code[iIdx + 1].xorbi_;
         if (xor.s0.b() == 1 && xor.s1 == dst && uses[xor.sf] == 0) {
           sinst = code[iIdx++];  // setcc instruction being modified.
@@ -117,13 +140,13 @@ struct Simplifier {
   size_t simplify(Vout& v, const Vblock& block, size_t iIdx) {
     Vinstr inst;
     Vreg dst;
-    if (match_setcc_xorbi(block, iIdx, inst, dst)) {
+    if (match_and_test(block, iIdx, inst, dst)) {
+      v << testq{inst.andq_.s0, inst.andq_.s1, dst};
+    } else if (match_setcc_xorbi(block, iIdx, inst, dst)) {
       // Rewrite setcc/xorbi pair as setcc with inverted condition.
       v << setcc{ccNegate(inst.setcc_.cc), inst.setcc_.sf, dst};
-    }
-
-    // Convert simple copyargs to a list of copies.
-    if (match_copyargs_no_overlap(block, iIdx)) {
+    } else if (match_copyargs_no_overlap(block, iIdx)) {
+      // Convert simple copyargs to a list of copies.
       auto const& inst = block.code[iIdx].copyargs_;
       auto const& dsts = unit.tuples[inst.d];
       auto const& srcs = unit.tuples[inst.s];

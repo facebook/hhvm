@@ -163,9 +163,9 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
       env,
       [&] (Block* taken) {
         auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
-        auto test = gen(env, AndInt,
-                        flags,
-                        cns(env, ActRec::Flags::IsFCallAwait));
+        auto test = gen(
+          env, AndInt, flags,
+          cns(env, static_cast<int32_t>(ActRec::Flags::IsFCallAwait)));
         gen(env, JmpNZero, taken, test);
       },
       [&] {

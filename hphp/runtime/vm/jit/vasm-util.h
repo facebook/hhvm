@@ -55,13 +55,18 @@ template<typename V>
 void vector_splice(V& out, size_t idx, size_t count, V& in) {
   auto out_size = out.size();
 
-  // Start by making room in out for the new elements.
-  out.resize(out.size() + in.size() - count);
+  if (in.size() > count) {
+    // Start by making room in out for the new elements.
+    out.resize(out.size() + in.size() - count);
 
-  // Move everything after the to-be-overwritten elements to the new end.
-  std::move_backward(out.begin() + idx + count, out.begin() + out_size,
-                     out.end());
-
+    // Move everything after the to-be-overwritten elements to the new end.
+    std::move_backward(out.begin() + idx + count, out.begin() + out_size,
+                       out.end());
+  } else if (in.size() < count) {
+    std::move(out.begin() + idx + count, out.end(),
+              out.begin() + idx + in.size());
+    out.resize(out.size() + in.size() - count);
+  }
   // Move the new elements in.
   std::move(in.begin(), in.end(), out.begin() + idx);
   in.clear();

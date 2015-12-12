@@ -176,6 +176,18 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   }
   auto varEnv = curFP->getVarEnv();
 
+  if (curFP != vmfp()) {
+    // If we aren't using FCallBuiltin, the stack frame of the call to assert
+    // will be in middle of the code we are about to eval and our caller, whose
+    // varEnv we want to use. The invokeFunc below will get very confused if
+    // this is the case, since it will be using a varEnv that belongs to the
+    // wrong function on the stack. So, we rebind it here, to match what
+    // invokeFunc will expect.
+    assert(!vmfp()->hasVarEnv());
+    vmfp()->setVarEnv(varEnv);
+    varEnv->enterFP(curFP, vmfp());
+  }
+
   auto const func = unit->getMain();
   TypedValue retVal;
   g_context->invokeFunc(

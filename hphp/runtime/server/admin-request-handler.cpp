@@ -1177,7 +1177,7 @@ bool AdminRequestHandler::handleRandomApcRequest(const std::string &cmd,
   if (count != "") {
     try {
       keyCount = folly::to<int64_t>(count);
-    } catch (const std::invalid_argument& ia) {
+    } catch (...) {
       // set keyCount to 1 if an invalid string is passed
       keyCount = 1;
     }

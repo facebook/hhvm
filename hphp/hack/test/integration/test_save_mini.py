@@ -43,6 +43,7 @@ load_mini_script = %s
             os.fchmod(f.fileno(), 0o700)
             f.write("echo %s\n" % shlex.quote(json.dumps({
                 'state': self.saved_state_path(),
+                'is_cached': True,
                 'deptable': self.saved_state_path() + '.deptable',
                 'changes': changed_files,
                 })))

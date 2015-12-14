@@ -52,6 +52,7 @@
 #include "hphp/util/timer.h"
 
 #include <folly/Conv.h>
+#include <folly/Random.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -227,6 +228,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/static-strings:  get number of static strings\n"
         "/static-strings-rds: ... that correspond to defined constants\n"
         "/dump-static-strings: dump static strings to /tmp/static_strings\n"
+        "/random-static-strings: return randomly selected static strings\n"
+        "    count         number of strings to return, default 1\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-apc-info:   show basic APC stats\n"
         "/dump-apc-meta:   dump meta information for all objects in APC to\n"
@@ -412,8 +415,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
       auto filename = transport->getParam("file");
       if (filename == "") filename = "/tmp/static_strings";
-      handleDumpStaticStrings(cmd, transport, filename);
+      handleDumpStaticStringsRequest(cmd, filename);
       transport->sendString("OK\n");
+      break;
+    }
+    if (strncmp(cmd.c_str(), "random-static-strings", 21) == 0) {
+      handleRandomStaticStringsRequest(cmd, transport);
       break;
     }
     if (strncmp(cmd.c_str(), "vm-", 3) == 0 &&
@@ -1062,17 +1069,50 @@ bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
   return false;
 }
 
-bool AdminRequestHandler::handleDumpStaticStrings(const std::string& cmd,
-                                                  Transport* transporti,
-                                                  const std::string &filename) {
+std::string formatStaticString(StringData* str) {
+  return folly::sformat(
+      "----\n{} bytes\n{}\n", str->size(), str->toCppString());
+}
+
+bool AdminRequestHandler::handleDumpStaticStringsRequest(
+  const std::string& cmd,
+  const std::string& filename
+) {
   std::vector<StringData*> list = lookupDefinedStaticStrings();
   std::ofstream out(filename.c_str());
   SCOPE_EXIT { out.close(); };
   for (auto item : list) {
-    out << "----\n";
-    out << item->size() << " bytes\n";
-    out << item->toCppString() << "\n";
+    out << formatStaticString(item);
   }
+  return true;
+}
+
+bool AdminRequestHandler::handleRandomStaticStringsRequest(
+  const std::string& cmd,
+  Transport* transport
+) {
+  size_t count = 1;
+  auto countParam = transport->getParam("count");
+  if (countParam != "") {
+    try {
+      count = folly::to<size_t>(countParam);
+    } catch (...) {
+      // do the default on invalid input
+    }
+  }
+  std::string output;
+  std::vector<StringData*> list = lookupDefinedStaticStrings();
+  if (count < list.size()) {
+    for (size_t i = 0; i < count; i++) {
+      size_t j = folly::Random::rand64(i, list.size());
+      std::swap(list[i], list[j]);
+    }
+    list.resize(count);
+  }
+  for (auto item : list) {
+    output += formatStaticString(item);
+  }
+  transport->sendString(output);
   return true;
 }
 

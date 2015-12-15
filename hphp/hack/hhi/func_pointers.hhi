@@ -43,25 +43,21 @@ function inst_meth($inst, string $meth_name); // becomes:
 //   : (function(<params of Tobj::method>): <the return type of Tobj::method>)
 
 /**
- * A way to have a variable type checked as a more specific type than it is
- * currently declared. A source transformation in the runtime modifies code
- * that looks like:
- *
- *   invariant(<condition>, 'sprintf format: %s %d', 'string', ...);
- *
- * ... is transformed to be:
- *
- *   if (!(<condition>)) { // an Exception is thrown
- *     invariant_violation('sprintf format: %s', 'string', ...);
- *   }
- *   // <condition> is known to be true in the code below
- *
- * See http://docs.hhvm.com/manual/en/hack.otherrulesandfeatures.invariant.php
- * for more information.
+ * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
  */
 function invariant(
   $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
   \HH\FormatString<PlainSprintf> $f, ...$f_args
-): void;
+): void; // becomes:
+// if (!(<condition>)) { // an Exception is thrown
+//   invariant_violation('sprintf format: %s', 'string', ...);
+// }
+// <condition> is known to be true in the code below
 
-function invariant_callback_register((function(string, ...): void) $callback): void {}
+/**
+ * See
+ * http://docs.hhvm.com/hack/reference/function/HH.invariant_callback_register/
+ */
+function invariant_callback_register(
+  (function(string, ...): void) $callback
+): void {}

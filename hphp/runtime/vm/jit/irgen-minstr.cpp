@@ -2186,6 +2186,8 @@ void emitMPost(MTS& env) {
             env.op == Op::SetWithRefLM ||
             env.op == Op::SetWithRefRM);
   }
+
+  gen(env, FinishMemberOp);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -61,10 +61,6 @@ inline void checkVMRegState() {
   assert(tl_regState == VMRegState::CLEAN);
 }
 
-inline bool vmRegStateIsDirty() {
-  return tl_regState == VMRegState::DIRTY;
-}
-
 inline VMRegs& vmRegsUnsafe() {
   return rds::header()->vmRegs;
 }
@@ -122,7 +118,9 @@ inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
   vmpc() = ar->unit()->at(pcOff);
 }
 
-/**
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * This class is used as a scoped guard around code that is called from the JIT
  * which needs the VM to be in a consistent state. JIT helpers use it to guard
  * calls into HHVM's runtime. It is used like this:
@@ -140,25 +138,28 @@ inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
  * constructed.
  */
 struct VMRegAnchor : private boost::noncopyable {
-  VMRegState m_old;
-
   VMRegAnchor();
+  /*
+   * Some C++ entry points have an ActRec prepared from after a call
+   * instruction.  Instantiating a VMRegAnchor with an ActRec argument syncs us
+   * to right after the call instruction.
+   */
   explicit VMRegAnchor(ActRec* ar);
 
   ~VMRegAnchor() {
     tl_regState = m_old;
   }
+
+  VMRegState m_old;
 };
 
-/**
+/*
  * This class is used as an invocation guard equivalent to VMRegAnchor, except
  * the sync is assumed to have already been done. This was part of a
  * project aimed at improving performance by doing the fixup in advance, i.e.
  * eagerly -- the benefits turned out to be marginal or negative in most cases.
  */
 struct EagerVMRegAnchor {
-  VMRegState m_old;
-
   EagerVMRegAnchor() {
     if (debug) {
       auto& regs = vmRegsUnsafe();
@@ -177,7 +178,13 @@ struct EagerVMRegAnchor {
   ~EagerVMRegAnchor() {
     tl_regState = m_old;
   }
+
+  VMRegState m_old;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
 
 inline ActRec* regAnchorFP(Offset* pc = nullptr) {
   // In builtins, m_fp points to the caller's frame if called through
@@ -203,26 +210,31 @@ inline ActRec* regAnchorFPForArgs() {
   return cur;
 }
 
-struct EagerCallerFrame : public EagerVMRegAnchor {
-  ActRec* operator()() {
-    return regAnchorFP();
-  }
-  ActRec* actRecForArgs() { return regAnchorFPForArgs(); }
-};
+}
 
-
-// VM helper to retrieve the frame pointer from the TC. This is
-// a common need for extensions.
+/*
+ * VM helper to retrieve the frame pointer from the TC.  This is a common need
+ * for extensions.
+ */
 struct CallerFrame : public VMRegAnchor {
   template<class... Args>
   ActRec* operator()(Args&&... args) {
-    return regAnchorFP(std::forward<Args>(args)...);
+    return detail::regAnchorFP(std::forward<Args>(args)...);
   }
-  ActRec* actRecForArgs() { return regAnchorFPForArgs(); }
+  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(); }
+};
+
+struct EagerCallerFrame : public EagerVMRegAnchor {
+  ActRec* operator()() {
+    return detail::regAnchorFP();
+  }
+  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(); }
 };
 
 #define SYNC_VM_REGS_SCOPED() \
   HPHP::VMRegAnchor _anchorUnused
+
+///////////////////////////////////////////////////////////////////////////////
 
 }
 

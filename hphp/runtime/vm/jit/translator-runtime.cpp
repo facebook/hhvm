@@ -709,15 +709,6 @@ TCA sswitchHelperFast(const StringData* val,
   return dest ? *dest : *def;
 }
 
-// TODO(#2031980): clear these out
-void tv_release_generic(TypedValue* tv) {
-  assertx(vmRegStateIsDirty());
-  assertx(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
-         tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
-         tv->m_type == KindOfRef);
-  g_destructors[typeToDestrIdx(tv->m_type)](tv->m_data.pref);
-}
-
 Cell lookupCnsHelper(const TypedValue* tv,
                      StringData* nm,
                      bool error) {
@@ -1101,7 +1092,7 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
 
 /*
  * The standard VMRegAnchor treatment won't work for some cases called
- * during function preludes.
+ * during function prologues.
  *
  * The fp sync machinery is fundamentally based on the notion that
  * instruction pointers in the TC are uniquely associated with source
@@ -1144,8 +1135,7 @@ static void sync_regstate_to_caller(ActRec* preLive) {
 NEVER_INLINE
 static void trimExtraArgsMayReenter(ActRec* ar,
                                     TypedValue* tvArgs,
-                                    TypedValue* limit
-                                   ) {
+                                    TypedValue* limit) {
   sync_regstate_to_caller(ar);
   do {
     tvRefcountedDecRef(tvArgs); // may reenter for __destruct

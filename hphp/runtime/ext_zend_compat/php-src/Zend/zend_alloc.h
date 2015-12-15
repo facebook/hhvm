@@ -215,7 +215,7 @@ END_EXTERN_C()
 #ifdef HHVM
 #define ALLOC_HASHTABLE(ht)                               \
   (ht) = [&]{ auto ret = HPHP::ProxyArray::Make(          \
-      HPHP::MixedArray::MakeReserve(0));                   \
+      HPHP::MixedArray::MakeReserveMixed(0));             \
       return ret; }()
 #else
 #define ALLOC_HASHTABLE(ht)  \

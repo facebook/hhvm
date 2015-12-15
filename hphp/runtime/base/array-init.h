@@ -305,7 +305,7 @@ private:
 class PackedArrayInit {
 public:
   explicit PackedArrayInit(size_t n)
-    : m_vec(MixedArray::MakeReserve(n))
+    : m_vec(PackedArray::MakeReserve(n))
 #ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
@@ -324,7 +324,7 @@ public:
     if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
       check_request_surprise_unlikely();
     }
-    m_vec = MixedArray::MakeReserve(n);
+    m_vec = PackedArray::MakeReserve(n);
 #ifndef NDEBUG
     m_addCount = 0;
     m_expectedCount = n;

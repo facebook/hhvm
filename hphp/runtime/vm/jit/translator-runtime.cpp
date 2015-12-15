@@ -1190,20 +1190,18 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
   assertx(f->hasVariadicCaptureParam());
   assertx(!(f->attrs() & AttrMayUseVV));
 
-  {
-    auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
-    // write into the last (variadic) param
-    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-    tv->m_type = KindOfArray;
-    tv->m_data.parr = varArgsArray.detach();
-    assertx(tv->m_data.parr->hasExactlyOneRef());
+  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
+  // write into the last (variadic) param
+  auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+  tv->m_type = KindOfArray;
+  tv->m_data.parr = varArgsArray.detach();
+  assertx(tv->m_data.parr->hasExactlyOneRef());
 
-    // no incref is needed, since extra values are being transferred
-    // from the stack to the last local
-    assertx(f->numParams() == (numArgs - numExtra + 1));
-    assertx(f->numParams() == (numParams + 1));
-    ar->setNumArgs(numParams + 1);
-  }
+  // no incref is needed, since extra values are being transferred
+  // from the stack to the last local
+  assertx(f->numParams() == (numArgs - numExtra + 1));
+  assertx(f->numParams() == (numParams + 1));
+  ar->setNumArgs(numParams + 1);
 }
 
 void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
@@ -1211,21 +1209,19 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
   assertx(f->hasVariadicCaptureParam());
   assertx(f->attrs() & AttrMayUseVV);
 
-  {
-    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
+  ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
 
-    auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
-    auto tvIncr = tvArgs; uint32_t i = 0;
-    // an incref is needed to compensate for discarding from the stack
-    for (; i < numExtra; ++i, ++tvIncr) { tvRefcountedIncRef(tvIncr); }
-    // write into the last (variadic) param
-    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-    tv->m_type = KindOfArray;
-    tv->m_data.parr = varArgsArray.detach();
-    assertx(tv->m_data.parr->hasExactlyOneRef());
-    // Before, for each arg: refcount = n + 1 (stack)
-    // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
-  }
+  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
+  auto tvIncr = tvArgs; uint32_t i = 0;
+  // an incref is needed to compensate for discarding from the stack
+  for (; i < numExtra; ++i, ++tvIncr) { tvRefcountedIncRef(tvIncr); }
+  // write into the last (variadic) param
+  auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+  tv->m_type = KindOfArray;
+  tv->m_data.parr = varArgsArray.detach();
+  assertx(tv->m_data.parr->hasExactlyOneRef());
+  // Before, for each arg: refcount = n + 1 (stack)
+  // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
 }
 
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE

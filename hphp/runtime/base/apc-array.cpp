@@ -94,7 +94,7 @@ APCHandle* APCArray::MakeUncountedArray(ArrayData* array) {
   APCTypedValue* value;
   if (array->isPacked()) {
     value = new APCTypedValue(APCTypedValue::UncountedArr{},
-                              MixedArray::MakeUncountedPacked(array));
+                              PackedArray::MakeUncounted(array));
   } else if (array->isStruct()) {
     value = new APCTypedValue(APCTypedValue::UncountedArr{},
                               StructArray::MakeUncounted(array));

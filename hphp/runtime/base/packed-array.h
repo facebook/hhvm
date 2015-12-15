@@ -45,7 +45,10 @@ struct MixedArray;
  */
 struct PackedArray {
   static constexpr uint32_t MaxSize = 0xFFFFFFFFul;
+  static constexpr uint32_t SmallSize = 3;
+
   static void Release(ArrayData*);
+  static void ReleaseUncounted(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
@@ -123,6 +126,22 @@ struct PackedArray {
 
   static size_t heapSize(const ArrayData*);
   template<class Marker> static void scan(const ArrayData*, Marker&);
+
+  static ArrayData* MakeReserve(uint32_t capacity);
+  static ArrayData* MakeReserveSlow(uint32_t capacity);
+
+  /*
+   * Allocate a PackedArray containing `size' values, in the reverse order of
+   * the `values' array.
+   *
+   * This function takes ownership of the TypedValues in `values'.
+   */
+  static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
+  static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
+  static ArrayData* MakeUninitialized(uint32_t size);
+
+  static ArrayData* MakeUncounted(ArrayData* array);
+  static ArrayData* MakeUncountedHelper(ArrayData* array);
 
 private:
   static ArrayData* Grow(ArrayData*);

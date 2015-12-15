@@ -39,7 +39,6 @@ namespace HPHP {
 template <typename AccessorT>
 SortFlavor MixedArray::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
-  assert(!isPacked());
   if (!checkTypes && m_size == m_used) {
     // No need to loop over the elements, we're done
     return GenericSort;

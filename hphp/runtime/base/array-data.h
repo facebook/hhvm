@@ -543,8 +543,7 @@ struct ArrayFunctions {
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
 };
 
-extern ArrayFunctions g_array_funcs;
-extern const ArrayFunctions g_array_funcs_unmodified;
+extern const ArrayFunctions g_array_funcs;
 
 ALWAYS_INLINE
 void decRefArr(ArrayData* arr) {

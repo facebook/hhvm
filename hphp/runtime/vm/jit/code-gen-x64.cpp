@@ -5615,7 +5615,7 @@ void CodeGenerator::cgPackMagicArgs(IRInstruction* inst) {
 
   cgCallHelper(
     v,
-    CallSpec::direct(MixedArray::MakePacked),
+    CallSpec::direct(PackedArray::MakePacked),
     callDest(inst),
     SyncOptions::Sync,
     argGroup(inst)

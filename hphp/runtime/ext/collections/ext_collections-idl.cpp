@@ -570,7 +570,7 @@ Variant BaseVector::popFront() {
 void BaseVector::reserveImpl(uint32_t newCap) {
   auto* oldBuf = data();
   auto* oldAd = arrayData();
-  m_arr = MixedArray::MakeReserve(newCap);
+  m_arr = PackedArray::MakeReserve(newCap);
   m_capacity = arrayData()->cap();
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
@@ -605,7 +605,7 @@ BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
   : ExtCollectionObjectData(cls, kind)
   , m_size(0)
   , m_versionAndCap(cap)
-  , m_arr(cap == 0 ? staticEmptyArray() : MixedArray::MakeReserve(cap))
+  , m_arr(cap == 0 ? staticEmptyArray() : PackedArray::MakeReserve(cap))
 {}
 
 /**

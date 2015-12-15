@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -51,7 +52,7 @@ void APCTypedValue::deleteUncounted() {
     m_data.str->destructUncounted();
   } else if (type == KindOfArray) {
     if (m_data.arr->isPacked()) {
-      MixedArray::ReleaseUncountedPacked(m_data.arr);
+      PackedArray::ReleaseUncounted(m_data.arr);
     } else if (m_data.arr->isStruct()) {
       StructArray::ReleaseUncounted(m_data.arr);
     } else {
@@ -64,4 +65,3 @@ void APCTypedValue::deleteUncounted() {
 //////////////////////////////////////////////////////////////////////
 
 }
-

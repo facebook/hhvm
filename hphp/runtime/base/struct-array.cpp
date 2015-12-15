@@ -100,6 +100,7 @@ ArrayData* StructArray::MakeUncounted(ArrayData* array) {
   auto const srcData = structArray->data();
   auto const stop    = srcData + size;
   auto targetData    = result->data();
+
   for (auto ptr = srcData; ptr != stop; ++ptr, ++targetData) {
     auto srcVariant = MixedArray::CreateVarForUncountedArray(tvAsCVarRef(ptr));
     tvCopy(*srcVariant.asTypedValue(),
@@ -136,7 +137,7 @@ void StructArray::ReleaseUncounted(ArrayData* ad) {
   auto const data = structArray->data();
   auto const stop = data + structArray->size();
   for (auto ptr = data; ptr != stop; ++ptr) {
-    MixedArray::ReleaseUncountedTypedValue(*ptr);
+    ReleaseUncountedTv(*ptr);
   }
 
   // We better not have strong iterators associated with uncounted
@@ -212,11 +213,9 @@ ArrayData* StructArray::SetStr(
                   : ResizeIfNeeded(structArray, newShape);
     offset = result->shape()->offsetFor(staticKey);
     assert(offset != PropertyTable::kInvalidOffset);
-    TypedValue* dst = &result->data()[offset];
-    // TODO(#3888164): we should restructure things so we don't have to
-    // check KindOfUninit here.
-    if (UNLIKELY(v.m_type == KindOfUninit)) v = make_tv<KindOfNull>();
-    cellDup(v, *dst);
+    // TODO(#3888164): we should restructure things so we don't have
+    // to check KindOfUninit here.
+    initVal(result->data()[offset], v);
     return result;
   }
 
@@ -225,9 +224,9 @@ ArrayData* StructArray::SetStr(
   }
 
   assert(offset != PropertyTable::kInvalidOffset);
-  TypedValue* dst = &result->data()[offset];
-  if (UNLIKELY(v.m_type == KindOfUninit)) v = make_tv<KindOfNull>();
-  cellSet(v, *tvToCell(dst));
+  // TODO(#3888164): we should restructure things so we don't have to
+  // check KindOfUninit here.
+  setVal(result->data()[offset], v);
   return result;
 }
 

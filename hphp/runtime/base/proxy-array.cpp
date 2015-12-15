@@ -439,7 +439,7 @@ void ProxyArray::proxyInit(uint32_t nSize,
                               unimplemented");
   }
   if (nSize) {
-    reseatable(this, MixedArray::MakeReserve(nSize));
+    reseatable(this, PackedArray::MakeReserve(nSize));
   }
   m_destructor = pDestructor;
 }

@@ -954,7 +954,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
 
   auto makeCache = [&] {
     if (clsCnsData.get() == nullptr) {
-      clsCnsData = Array::attach(MixedArray::MakeReserve(m_constants.size()));
+      clsCnsData = Array::attach(PackedArray::MakeReserve(m_constants.size()));
     }
   };
 

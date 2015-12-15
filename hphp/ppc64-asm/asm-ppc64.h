@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef INCLUDE_ASM_PPC64_H_
-#define INCLUDE_ASM_PPC64_H_
+#ifndef incl_ASM_PPC64_H_
+#define incl_ASM_PPC64_H_
 
 #include <cstdint>
 #include <cassert>
@@ -258,6 +258,9 @@ namespace reg {
   constexpr Reg64 r30(30);
   constexpr Reg64 r31(31);
 
+  // RegXMM is used for both FP and SIMD registers. Registers from 0 to 15 are
+  // reserved to FP and register from 16 to 29 are reserved to SIMD.
+  // Ignoring the vector registers 30, 31 due to kMaxRegs == 64
   constexpr RegXMM f0(0);   // volatile scratch register
   /* volatile, argument passing floating point registers */
   constexpr RegXMM f1(1);
@@ -276,43 +279,8 @@ namespace reg {
   /* nonvolatile, local variables */
   constexpr RegXMM f14(14);
   constexpr RegXMM f15(15);
-  constexpr RegXMM f16(16);
-  constexpr RegXMM f17(17);
-  constexpr RegXMM f18(18);
-  constexpr RegXMM f19(19);
-  constexpr RegXMM f20(20);
-  constexpr RegXMM f21(21);
-  constexpr RegXMM f22(22);
-  constexpr RegXMM f23(23);
-  constexpr RegXMM f24(24);
-  constexpr RegXMM f25(25);
-  constexpr RegXMM f26(26);
-  constexpr RegXMM f27(27);
-  constexpr RegXMM f28(28);
-  constexpr RegXMM f29(29);
-  // Ignoring the floating pointer registers 30, 31 due to kMaxRegs == 64
-  // constexpr Reg64 f30(30);
-  // constexpr Reg64 f31(31);
 
   /* volatile, local variables */
-  constexpr RegXMM v0(0);
-  constexpr RegXMM v1(1);
-  /* volatile, argument passing vector registers */
-  constexpr RegXMM v2(2);
-  constexpr RegXMM v3(3);
-  constexpr RegXMM v4(4);
-  constexpr RegXMM v5(5);
-  constexpr RegXMM v6(6);
-  constexpr RegXMM v7(7);
-  constexpr RegXMM v8(8);
-  constexpr RegXMM v9(9);
-  constexpr RegXMM v10(10);
-  constexpr RegXMM v11(11);
-  constexpr RegXMM v12(12);
-  constexpr RegXMM v13(13);
-  /* volatile, local variables */
-  constexpr RegXMM v14(14);
-  constexpr RegXMM v15(15);
   constexpr RegXMM v16(16);
   constexpr RegXMM v17(17);
   constexpr RegXMM v18(18);
@@ -328,9 +296,6 @@ namespace reg {
   constexpr RegXMM v27(27);
   constexpr RegXMM v28(28);
   constexpr RegXMM v29(29);
-  // Ignoring the vector registers 30, 31 due to kMaxRegs == 64
-  // constexpr RegXMM v30(30);
-  // constexpr RegXMM v30(31);
 
 #define RNAME(x) if (r == x) return "%"#x
 
@@ -347,15 +312,11 @@ namespace reg {
   inline const char* regname(RegXMM r) {
     RNAME(f0);  RNAME(f1);  RNAME(f2);  RNAME(f3);  RNAME(f4);  RNAME(f5);
     RNAME(f6);  RNAME(f7);  RNAME(f8);  RNAME(f9);  RNAME(f10); RNAME(f11);
-    RNAME(f12); RNAME(f13); RNAME(f14); RNAME(f15); RNAME(f16); RNAME(f17);
-    RNAME(f18); RNAME(f19); RNAME(f20); RNAME(f21); RNAME(f22); RNAME(f23);
-    RNAME(f24); RNAME(f25); RNAME(f26); RNAME(f27); RNAME(f28); RNAME(f29);
+    RNAME(f12); RNAME(f13); RNAME(f14); RNAME(f15);
 
-    RNAME(v0);  RNAME(v1);  RNAME(v2);  RNAME(v3);  RNAME(v4);  RNAME(v5);
-    RNAME(v6);  RNAME(v7);  RNAME(v8);  RNAME(v9);  RNAME(v10); RNAME(v11);
-    RNAME(v12); RNAME(v13); RNAME(v14); RNAME(v15); RNAME(v16); RNAME(v17);
-    RNAME(v18); RNAME(v19); RNAME(v20); RNAME(v21); RNAME(v22); RNAME(v23);
-    RNAME(v24); RNAME(v25); RNAME(v26); RNAME(v27); RNAME(v28); RNAME(v29);
+    RNAME(v16); RNAME(v17); RNAME(v18); RNAME(v19); RNAME(v20); RNAME(v21);
+    RNAME(v22); RNAME(v23); RNAME(v24); RNAME(v25); RNAME(v26); RNAME(v27);
+    RNAME(v28); RNAME(v29);
     return nullptr;
   }
 #undef RNAME
@@ -363,58 +324,57 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-class Label;
+struct Label;
 
-class Assembler {
-public:
+struct Assembler {
 
   friend struct Label;
 
-   explicit Assembler(HPHP::CodeBlock& cb) : codeBlock(cb) {}
-   ~Assembler(){}
+  explicit Assembler(HPHP::CodeBlock& cb) : codeBlock(cb) {}
+  ~Assembler(){}
 
-   HPHP::CodeBlock& code() const { return codeBlock; }
+  HPHP::CodeBlock& code() const { return codeBlock; }
 
-   CodeAddress base() const {
-     return codeBlock.base();
-   }
+  CodeAddress base() const {
+    return codeBlock.base();
+  }
 
-   CodeAddress frontier() const {
-     return codeBlock.frontier();
-   }
+  CodeAddress frontier() const {
+    return codeBlock.frontier();
+  }
 
-   void setFrontier(CodeAddress newFrontier) {
-     codeBlock.setFrontier(newFrontier);
-   }
+  void setFrontier(CodeAddress newFrontier) {
+    codeBlock.setFrontier(newFrontier);
+  }
 
-   size_t capacity() const {
-     return codeBlock.capacity();
-   }
+  size_t capacity() const {
+    return codeBlock.capacity();
+  }
 
-   size_t used() const {
-     return codeBlock.used();
-   }
+  size_t used() const {
+    return codeBlock.used();
+  }
 
-   size_t available() const {
-     return codeBlock.available();
-   }
+  size_t available() const {
+    return codeBlock.available();
+  }
 
-   bool contains(CodeAddress addr) const {
-     return codeBlock.contains(addr);
-   }
+  bool contains(CodeAddress addr) const {
+    return codeBlock.contains(addr);
+  }
 
-   bool empty() const {
-     return codeBlock.empty();
-   }
+  bool empty() const {
+    return codeBlock.empty();
+  }
 
-   void clear() {
-     codeBlock.clear();
-   }
+  void clear() {
+    codeBlock.clear();
+  }
 
-   bool canEmit(size_t nBytes) const {
-     assert(capacity() >= used());
-     return nBytes < (capacity() - used());
-   }
+  bool canEmit(size_t nBytes) const {
+    assert(capacity() >= used());
+    return nBytes < (capacity() - used());
+  }
 
   enum class SpecialReg {
     XER      = 1,
@@ -2234,10 +2194,10 @@ private:
 // Branches
 //////////////////////////////////////////////////////////////////////
 
-class Label : private boost::noncopyable {
-public:
+struct Label : private boost::noncopyable {
   Label() : m_a(nullptr) , m_address(nullptr) {}
-  Label(CodeAddress predefined) : m_a(nullptr) , m_address(predefined) {}
+  /* implicit */ Label(CodeAddress predefined) : m_a(nullptr) ,
+                                                 m_address(predefined) {}
 
   ~Label() {
     if (!m_toPatch.empty()) {

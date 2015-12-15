@@ -857,6 +857,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CGetElem:
   case EmptyElem:
   case IssetElem:
+  case VGetElem:
   case SetElem:
   case SetNewElemArray:
   case SetNewElem:
@@ -880,8 +881,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpElem:
   case SetWithRefElem:
   case SetWithRefNewElem:
-  case VGetElem:
-
     assertx(inst.src(0)->isA(TPtrToGen));
     return minstr_with_tvref(inst);
 
@@ -895,6 +894,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CGetPropQ:
   case EmptyProp:
   case IssetProp:
+  case VGetProp:
   case UnsetProp:
   case IncDecProp:
   case SetProp:
@@ -908,7 +908,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PropQ:
   case BindProp:
   case SetOpProp:
-  case VGetProp:
     return minstr_with_tvref(inst);
 
   /*

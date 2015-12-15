@@ -159,7 +159,6 @@ void CodeGenerator::cgVGetProp(IRInstruction* inst) {
       .immPtr(getClass(inst->marker()))
       .ssa(0)
       .memberKeyS(1)
-      .ssa(2)
   );
 }
 
@@ -458,7 +457,6 @@ void CodeGenerator::cgVGetElem(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
-      .ssa(2)
   );
 }
 

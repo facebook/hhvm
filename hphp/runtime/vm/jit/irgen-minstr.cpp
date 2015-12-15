@@ -1696,7 +1696,7 @@ void emitVGetProp(MTS& env) {
       cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR))
     );
   }
-  env.result = gen(env, VGetProp, env.base.value, key, tvRefPtr(env));
+  env.result = gen(env, VGetProp, env.base.value, key);
 }
 
 void emitIssetProp(MTS& env) {
@@ -1830,7 +1830,7 @@ void emitCGetElem(MTS& env) {
 
 void emitVGetElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, VGetElem, env.base.value, key, tvRefPtr(env));
+  env.result = gen(env, VGetElem, env.base.value, key);
 }
 
 SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {

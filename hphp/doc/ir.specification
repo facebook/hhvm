@@ -2259,9 +2259,7 @@ fields of that struct for holding intermediate values.
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
-| VGetProp, D(BoxedInitCell),
-|           S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
-|           MProp|PRc|Er
+| VGetProp, D(BoxedInitCell), S(Obj,PtrToGen) S(Cell), MProp|PRc|Er
 
   Get property with key S1 from base S0 as a reference.
 
@@ -2347,7 +2345,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from S0.
 
-| VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|PRc|Er
+| VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell), MElem|PRc|Er
 
   Get element with key S1 from base S0 as a reference.
 

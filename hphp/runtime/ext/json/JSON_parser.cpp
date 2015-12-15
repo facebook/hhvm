@@ -45,6 +45,7 @@ SOFTWARE.
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/fast_strtoll_base10.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -468,7 +469,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
           z = copy_and_clear(buf);
         }
       } else {
-        z = int64_t(strtoll(buf.data(), nullptr, 10));
+        z = fast_strtoll_base10(buf.data());
       }
       return;
     }

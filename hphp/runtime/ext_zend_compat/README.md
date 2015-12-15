@@ -17,7 +17,7 @@ for i in runtime/ext_zend_compat/<ext_name>/*.c; do mv $i "$i"pp; done
 Then create a system library at `runtime/ext_zend_compat/ext_<ext_name>.php`
 This system library contains definitions for any functions and classes that have
 C implementations in your extension. Type hinting is required, using the Hack
-syntax documented at http://docs.hhvm.com/manual/en/hack.annotations.php .
+syntax documented at http://docs.hhvm.com/hack/overview/typing .
 You can follow the examples from non-Zend extensions in HHVM -- however, note
 that using types other than "mixed" is not as useful as it is in native HHVM
 extensions. All parameters will be converted to variants before they are passed

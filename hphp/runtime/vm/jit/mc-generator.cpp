@@ -544,6 +544,9 @@ MCGenerator::createTranslation(const TranslArgs& args) {
     }
   }
 
+  if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {
+    return nullptr;
+  }
   auto const srcRecSPOff = [&] () -> folly::Optional<FPInvOffset> {
     if (sk.resumed()) return folly::none;
     return liveSpOff();
@@ -1447,6 +1450,10 @@ TCA MCGenerator::handleFCallAwaitSuspend() {
   FTRACE(1, "handleFCallAwaitSuspend\n");
 
   tl_regState = VMRegState::CLEAN;
+
+  vmJitCalledFrame() = vmfp();
+  SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
+
   auto start = suspendStack(vmpc());
   tl_regState = VMRegState::DIRTY;
   return start ? start : tx().uniqueStubs.resumeHelper;

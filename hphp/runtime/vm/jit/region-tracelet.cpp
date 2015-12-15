@@ -298,6 +298,10 @@ RegionDescPtr RegionFormer::go() {
 bool RegionFormer::prepareInstruction() {
   m_inst.~NormalizedInstruction();
   new (&m_inst) NormalizedInstruction(m_sk, curUnit());
+  if (RuntimeOption::EvalFailJitPrologs &&
+      m_inst.op() == Op::FCallAwait) {
+    return false;
+  }
   auto const breaksBB =
     (m_profiling && instrBreaksProfileBB(&m_inst)) ||
     opcodeBreaksBB(m_inst.op());

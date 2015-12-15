@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -70,7 +71,6 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
-#include "hphp/util/disasm.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>
@@ -1408,9 +1408,8 @@ TCA UniqueStubs::add(const char* name, TCA start,
 
   ONTRACE(2,
           [&]{
-            Disasm dasm(Disasm::Options().indent(4));
             std::ostringstream os;
-            dasm.disasm(os, start, end);
+            disasmRange(os, start, end);
             FTRACE(2, "{}\n", os.str());
           }()
          );

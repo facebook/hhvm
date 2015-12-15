@@ -54,6 +54,7 @@ namespace {
 struct RegionFormer {
   RegionFormer(const RegionContext& ctx,
                InterpSet& interp,
+               SrcKey& breakAt,
                int32_t maxBCInstrs,
                bool profiling,
                bool inlining);
@@ -63,6 +64,7 @@ struct RegionFormer {
 private:
   const RegionContext& m_ctx;
   InterpSet& m_interp;
+  SrcKey& m_breakAt;
   SrcKey m_sk;
   const SrcKey m_startSk;
   NormalizedInstruction m_inst;
@@ -74,6 +76,7 @@ private:
   RefDeps m_refDeps;
   uint32_t m_numJmps;
   int32_t m_numBCInstrs;
+  SrcKey m_minstrStart;
   // This map memoizes reachability of IR blocks during tracelet
   // formation.  A block won't have it's reachability stored in this
   // map until it's been computed.
@@ -98,11 +101,13 @@ private:
 
 RegionFormer::RegionFormer(const RegionContext& ctx,
                            InterpSet& interp,
+                           SrcKey& breakAt,
                            int32_t maxBCInstrs,
                            bool profiling,
                            bool inlining)
   : m_ctx(ctx)
   , m_interp(interp)
+  , m_breakAt(breakAt)
   , m_sk(ctx.func, ctx.bcOffset, ctx.resumed)
   , m_startSk(m_sk)
   , m_region(std::make_shared<RegionDesc>())
@@ -175,7 +180,22 @@ RegionDescPtr RegionFormer::go() {
       break;
     }
 
+    if (!firstInst && m_sk == m_breakAt) {
+      FTRACE(1, "selectTracelet: breaking region at breakAt: {}\n", show(m_sk));
+      break;
+    }
+
     if (!prepareInstruction()) break;
+
+    // Until the rest of the pipeline can handle it without regressing, try to
+    // not break tracelets in the middle of new minstr sequences. Note that
+    // this is just an optimization; we can generate correct code regardless of
+    // how the minstrs are chopped up.
+    if (!firstInst && isMemberBaseOp(m_inst.op())) {
+      m_minstrStart = m_sk;
+    } else if (isMemberFinalOp(m_inst.op())) {
+      m_minstrStart = SrcKey{};
+    }
 
     m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
 
@@ -232,6 +252,12 @@ RegionDescPtr RegionFormer::go() {
     }
 
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
+  }
+
+  // Return an empty region to restart region formation at m_minstrStart.
+  if (m_minstrStart.valid()) {
+    m_breakAt = m_minstrStart;
+    m_region.reset();
   }
 
   if (m_region && !m_region->empty()) {
@@ -612,12 +638,13 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
                              bool profiling, bool inlining /* = false */) {
   Timer _t(Timer::selectTracelet);
   InterpSet interp;
+  SrcKey breakAt;
   RegionDescPtr region;
   uint32_t tries = 1;
 
   FTRACE(1, "selectTracelet: starting with maxBCInstrs = {}\n", maxBCInstrs);
 
-  while (!(region = RegionFormer(ctx, interp, maxBCInstrs, profiling,
+  while (!(region = RegionFormer(ctx, interp, breakAt, maxBCInstrs, profiling,
                                  inlining).go())) {
     ++tries;
   }

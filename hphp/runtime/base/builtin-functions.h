@@ -79,7 +79,7 @@ inline bool is_empty_string(const Variant& v) {
 
 /*
  * Semantics of is_callable defined here:
- * http://docs.hhvm.com/manual/en/function.is-callable.php
+ * http://php.net/manual/en/function.is-callable.php
  */
 bool is_callable(const Variant& v, bool syntax_only, RefData* name);
 /*

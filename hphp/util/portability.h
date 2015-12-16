@@ -83,9 +83,9 @@
 #endif
 
 #if defined(__GNUC__) 
-#define ATTRIBUTE_WEAK __attribute__((__weak__))
+#define HHVM_ATTRIBUTE_WEAK __attribute__((__weak__))
 #elif defined(__clang__)
-#define ATTRIBUTE_WEAK __attribute__((__weak_import__))
+#define HHVM_ATTRIBUTE_WEAK __attribute__((__weak_import__))
 #endif
 
 #ifdef DEBUG

@@ -188,7 +188,7 @@ static bool use_numa = false;
 static bool threads_bind_local = false;
 
 extern "C" {
-ATTRIBUTE_WEAK extern void numa_init(void);
+HHVM_ATTRIBUTE_WEAK extern void numa_init(void);
 }
 static void initNuma() {
   

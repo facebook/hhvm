@@ -683,8 +683,12 @@ void MemoryManager::initFree() {
   m_needInitFree = false;
 }
 
-// turn free blocks into holes, leave freelists empty.
-void MemoryManager::quarantine() {
+void MemoryManager::beginQuarantine() {
+  std::swap(m_freelists, m_quarantine);
+}
+
+// turn free blocks into holes, restore original freelists
+void MemoryManager::endQuarantine() {
   for (auto i = 0; i < kNumSmallSizes; i++) {
     auto size = smallIndex2Size(i);
     while (auto n = m_freelists[i].maybePop()) {
@@ -692,6 +696,7 @@ void MemoryManager::quarantine() {
       static_cast<FreeNode*>(n)->hdr.init(HeaderKind::Hole, size);
     }
   }
+  std::swap(m_freelists, m_quarantine);
 }
 
 // test iterating objects in slabs

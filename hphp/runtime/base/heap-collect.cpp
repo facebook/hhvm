@@ -564,6 +564,9 @@ void Marker::sweep() {
         ambig.count, ambig.bytes,
         freed.count, freed.bytes);
   // once we're done iterating the heap, it's safe to free unreachable objects.
+  if (debug && RuntimeOption::EvalEagerGCProbability > 0) {
+    mm.beginQuarantine();
+  }
   for (auto h : reaped) {
     if (h->kind() == HK::Apc) {
       // frees localCache, delists, decref apc-array, free array
@@ -581,8 +584,8 @@ void Marker::sweep() {
       mm.objFree(h, h->size());
     }
   }
-  if (RuntimeOption::EvalEagerGCProbability > 0) {
-    mm.quarantine();
+  if (debug && RuntimeOption::EvalEagerGCProbability > 0) {
+    mm.endQuarantine();
   }
 }
 }

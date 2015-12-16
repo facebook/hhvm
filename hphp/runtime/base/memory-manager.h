@@ -917,7 +917,13 @@ struct MemoryManager {
    * Run the experimental collector.
    */
   void collect(const char* phase);
-  void quarantine(); // turn free objects into holes
+
+  /*
+   * beginQuarantine() swaps out the normal freelists. endQuarantine()
+   * fills everything freed with holes, then restores the original freelists.
+   */
+  void beginQuarantine();
+  void endQuarantine();
 
   /*
    * Run an integrity check on the heap
@@ -1103,6 +1109,9 @@ private:
   static size_t s_cactiveLimitCeiling;
   bool m_enableStatsSync;
 #endif
+
+  // freelists to use when quarantine is active
+  std::array<FreeList,kNumSmallSizes> m_quarantine;
 };
 
 //////////////////////////////////////////////////////////////////////

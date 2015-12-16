@@ -666,6 +666,17 @@ void checkGenBase(Type baseType) {
   }
 }
 
+/*
+ * This is called in a few places to be consistent with old minstrs, and should
+ * be revisited once they're gone. It probably doesn't make sense to always
+ * guard on an object class when we have one.
+ */
+void specializeObjBase(IRGS& env, SSATmp* base) {
+  if (base && base->isA(TObj) && base->type().clsSpec().cls()) {
+    env.irb->constrainValue(base, TypeConstraint(base->type().clsSpec().cls()));
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 // Base ops
 
@@ -2439,6 +2450,8 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
     base = basePtr;
   }
 
+  specializeObjBase(env, base);
+
   auto const mia = mOpFlagsToAttr(flags);
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
@@ -2523,6 +2536,7 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
 
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpFlags flags, bool nullsafe) {
+  specializeObjBase(env, base);
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
   auto const mia = mOpFlagsToAttr(flags);
@@ -2671,6 +2685,8 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
   } else {
     base = basePtr;
   }
+
+  specializeObjBase(env, base);
 
   auto const mia = MIA_define;
   auto const propInfo =

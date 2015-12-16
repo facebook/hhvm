@@ -58,7 +58,7 @@ inline void cycleDelay(uint32_t numCycles) {
   auto start = cpuCycles();
   do {
     if (numCycles > 100) cpuRelax();
-  } while (cpuCycles() - start > numCycles);
+  } while (cpuCycles() - start < numCycles);
 }
 
 }

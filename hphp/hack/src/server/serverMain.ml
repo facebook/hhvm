@@ -200,7 +200,7 @@ let recheck genv old_env updates =
         (Relative_path.suffix ServerConfig.filename)
         GlobalConfig.program_name;
        (** TODO: Notify the server monitor directly about this. *)
-       exit 4
+       Exit_status.(exit Hhconfig_changed)
     end;
   end;
   let env, total_rechecked = Program.recheck genv old_env to_recheck in
@@ -383,7 +383,7 @@ let run_load_script genv cmd =
         HackEventLogger.load_failed msg;
         "load_error"
     in
-    let env = HackEventLogger.with_init_type init_type begin fun () ->
+    let env, _ = HackEventLogger.with_init_type init_type begin fun () ->
       ServerInit.init genv
     end in
     env, init_type
@@ -397,17 +397,17 @@ let program_init genv =
       ServerArgs.save_filename genv.options = None then
       match ServerConfig.load_mini_script genv.config with
       | None ->
-          let env = ServerInit.init genv in
+          let env, _ = ServerInit.init genv in
           env, "fresh"
       | Some load_mini_script ->
-          let env = ServerInit.init ~load_mini_script genv in
-          env, "mini_load"
+          let env, did_load = ServerInit.init ~load_mini_script genv in
+          env, if did_load then "mini_load" else "mini_load_fail"
     else
       match ServerConfig.load_script genv.config with
       | Some load_script when not (ServerArgs.no_load genv.options) ->
           run_load_script genv load_script
       | _ ->
-          let env = ServerInit.init genv in
+          let env, _ = ServerInit.init genv in
           env, "fresh"
   in
   HackEventLogger.init_end init_type;
@@ -432,23 +432,7 @@ let save _genv env (kind, fn) =
   | ServerArgs.Complete -> save_complete env fn
   | ServerArgs.Mini -> ServerInit.save_state env fn
 
-(* The main entry point of the daemon
- * the only trick to understand here, is that env.modified is the set
- * of files that changed, it is only set back to SSet.empty when the
- * type-checker succeeded. So to know if there is some work to be done,
- * we look if env.modified changed.
- *
- * The server monitor will pass client connections to this process
- * via in_fd.
- *)
-let daemon_main options in_fd out_fd =
-  (** If the client started the server, it opened an FD before forking,
-   * so it can be notified when the server is ready. The FD number was
-   * passed in program args. *)
-  let waiting_channel =
-    Option.map
-      (ServerArgs.waiting_client options)
-      ~f:Handle.to_out_channel in
+let setup_server options =
   let root = ServerArgs.root options in
   (* The OCaml default is 500, but we care about minimizing the memory
    * overhead *)
@@ -475,14 +459,39 @@ let daemon_main options in_fd out_fd =
   if not Sys.win32 then Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   PidLog.init (ServerFiles.pids_file root);
   PidLog.log ~reason:"main" (Unix.getpid());
-  let genv = ServerEnvBuild.make_genv options config local_config in
-  let is_check_mode = ServerArgs.check_mode genv.options in
-  if is_check_mode then
-    let env = program_init genv in
-    Option.iter (ServerArgs.save_filename genv.options) (save genv env);
-    Hh_logger.log "Running in check mode";
-    Program.run_once_and_exit genv env
-  else
-    let env = MainInit.go options waiting_channel
-      (fun () -> program_init genv) in
-    serve genv env in_fd out_fd
+  ServerEnvBuild.make_genv options config local_config
+
+let run_once options =
+  let genv = setup_server options in
+  if not (ServerArgs.check_mode genv.options) then
+    (Hh_logger.log "ServerMain run_once only supported in check mode.";
+    Exit_status.(exit Input_error));
+  let env = program_init genv in
+  Option.iter (ServerArgs.save_filename genv.options) (save genv env);
+  Hh_logger.log "Running in check mode";
+  Program.run_once_and_exit genv env
+
+(*
+ * The server monitor will pass client connections to this process
+ * via ic.
+ *)
+let daemon_main options (ic, oc) =
+  let genv = setup_server options in
+  if ServerArgs.check_mode genv.options then
+    (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
+    Exit_status.(exit Input_error));
+  let in_fd = Daemon.descr_of_in_channel ic in
+  let out_fd = Daemon.descr_of_out_channel oc in
+  (** If the client started the server, it opened an FD before forking,
+   * so it can be notified when the server is ready. The FD number was
+   * passed in program args. *)
+  let waiting_channel =
+    Option.map
+      (ServerArgs.waiting_client options)
+      ~f:Handle.to_out_channel in
+  let env = MainInit.go options waiting_channel
+    (fun () -> program_init genv) in
+  serve genv env in_fd out_fd
+
+let entry =
+  Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

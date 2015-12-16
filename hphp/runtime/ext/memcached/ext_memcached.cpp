@@ -54,6 +54,10 @@ namespace HPHP {
 #  define MEMCACHED_SERVER_TEMPORARILY_DISABLED (1024 << 2)
 #endif
 
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000002
+#  define HAVE_MEMCACHED_TOUCH 1
+#endif
+
 // Class options
 const int64_t q_Memcached$$OPT_COMPRESSION = -1001;
 const int64_t q_Memcached$$OPT_PREFIX_KEY  = -1002;
@@ -1273,6 +1277,42 @@ bool HHVM_METHOD(Memcached, ispristine) {
   return data->m_impl->is_pristine;
 }
 
+bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
+                                      const String& key,
+                                      int expiration /*= 0*/) {
+
+#ifndef HAVE_MEMCACHED_TOUCH
+  throw_not_supported(__func__, "Not Implemented in libmemcached versions below"
+                                " 1.0.2");
+  return false;
+#else
+  auto data = Native::data<MemcachedData>(this_);
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
+  if (key.empty()) {
+    data->m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
+    return false;
+  }
+
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX < 0x01000016
+  if (memcached_behavior_get(&data->m_impl->memcached,
+                             MEMCACHED_BEHAVIOR_BINARY_PROTOCOL)) {
+    raise_warning("using touch command with binary protocol is not "
+                  "recommended with libmemcached versions below 1.0.16");
+  }
+#endif
+
+  memcached_return_t status;
+  const String& myServerKey = server_key.empty() ? key : server_key;
+  status = memcached_touch_by_key(&data->m_impl->memcached,
+                        myServerKey.c_str(), myServerKey.length(),
+                        key.c_str(), key.length(), expiration);
+
+  if (!data->handleError(status)) return false;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
+  return true;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
@@ -1285,6 +1325,7 @@ const StaticString s_DISTRIBUTION_CONSISTENT_WEIGHTED("DISTRIBUTION_CONSISTENT_W
 #endif
 const StaticString s_DISTRIBUTION_MODULA("DISTRIBUTION_MODULA");
 const StaticString s_GET_PRESERVE_ORDER("GET_PRESERVE_ORDER");
+const StaticString s_GET_ERROR_RETURN_VALUE("GET_ERROR_RETURN_VALUE");
 const StaticString s_HASH_CRC("HASH_CRC");
 const StaticString s_HASH_DEFAULT("HASH_DEFAULT");
 const StaticString s_HASH_FNV1_32("HASH_FNV1_32");
@@ -1296,6 +1337,7 @@ const StaticString s_HASH_MD5("HASH_MD5");
 const StaticString s_HASH_MURMUR("HASH_MURMUR");
 const StaticString s_HAVE_IGBINARY("HAVE_IGBINARY");
 const StaticString s_HAVE_JSON("HAVE_JSON");
+const StaticString s_LIBMEMCACHED_VERSION_HEX("LIBMEMCACHED_VERSION_HEX");
 const StaticString s_OPT_BINARY_PROTOCOL("OPT_BINARY_PROTOCOL");
 const StaticString s_OPT_BUFFER_WRITES("OPT_BUFFER_WRITES");
 const StaticString s_OPT_CACHE_LOOKUPS("OPT_CACHE_LOOKUPS");
@@ -1407,6 +1449,7 @@ class MemcachedExtension final : public Extension {
     HHVM_ME(Memcached, getresultmessage);
     HHVM_ME(Memcached, ispersistent);
     HHVM_ME(Memcached, ispristine);
+    HHVM_ME(Memcached, touchbykey);
 
     Native::registerNativeDataInfo<MemcachedData>(s_MemcachedData.get());
 
@@ -1653,6 +1696,13 @@ class MemcachedExtension final : public Extension {
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_RES_SERVER_TEMPORARILY_DISABLED.get(),
       q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_LIBMEMCACHED_VERSION_HEX.get(),
+      LIBMEMCACHED_VERSION_HEX
+    );
+    Native::registerClassConstant<KindOfBoolean>(
+      s_Memcached.get(), s_GET_ERROR_RETURN_VALUE.get(), false
     );
 
 

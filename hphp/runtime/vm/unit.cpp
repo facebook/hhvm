@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -78,6 +79,7 @@
 
 #include "hphp/runtime/server/source-root-info.h"
 
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/system/systemlib.h"
@@ -844,7 +846,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
        * optimizing for.
        */
       rds::s_constants() =
-        Array::attach(MixedArray::MakeReserve(1));
+        Array::attach(PackedArray::MakeReserve(PackedArray::SmallSize));
     }
     auto const existed = !!rds::s_constants()->nvGet(cnsName);
     if (!existed) {

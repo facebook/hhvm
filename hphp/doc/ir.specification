@@ -847,10 +847,9 @@ To string conversions:
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells). T must be a subtype of PtrToStkGen.
 
-| LdLocAddr<T,localId>, D(PtrToFrameGen), S(FramePtr), NF
+| LdLocAddr<localId>, D(PtrToFrameGen), S(FramePtr), NF
 
-  Loads the address of the local slot localId from the frame S0 into D. T must
-  be a subtype of PtrToFrameGen.
+  Loads the address of the local slot localId from the frame S0 into D.
 
 | LdRDSAddr<T,RDSHandle>, DParam, NA, NF
 
@@ -1317,6 +1316,12 @@ To string conversions:
   Load the saved frame pointer from the activation record pointed to by S0 into
   D.
 
+| BeginInlining<offset>, ND, S(StkPtr), NF
+
+  Marks the start of an inlined function whose stack resides offset cells below
+  the SP. It has no effect other than to hint to optimization passes that at the
+  start of the inlined function its stack is dead.
+
 | DefInlineFP<func,retBCOff,retSPOff>, D(FramePtr),
 |                                      S(StkPtr) S(FramePtr),
 |                                      NF
@@ -1347,15 +1352,22 @@ To string conversions:
   dead. InlineFrameStart is the caller FP-relative offset of the start of the
   callee frame. Everything below InlineFrameStart is dead.
 
-| CallArray<spOffset,returnOff,after,destroyLocals>, ND,
-|                                                    S(StkPtr) S(FramePtr),
-|                                                    Er
+| CallArray<spOffset,numParams,callOff,after,destroyLocals>,
+|                       ND,
+|                       S(StkPtr) S(FramePtr),
+|                       Er
 
-  Invoke function corresponding to the current FPI with array args. S0+spOffset
-  points to the stack resulting after the ActRec for the function and the array
-  of its arguments is pushed. CallArray pops the array off the stack, pushes
-  the elements of the array as arguments, and invokes the function in the
-  ActRec.
+  Invoke function corresponding to the current FPI with numParams arguments,
+  the last of which is an array of the remaining args. Used for FCallArray (in
+  which case numParams == 1), and FCallUnpack. S0+spOffset points to the stack
+  resulting after the ActRec for the function and numParams arguments have been
+  pushed. CallArray pops the array off the stack, pushes the elements of the
+  array as arguments, and invokes the function in the ActRec.
+
+| SyncReturnBC<spOffset,bcOffset>, ND, S(StkPtr) S(FramePtr), NF
+
+  Stores bcOffset into the frame at spOffset from S0 as the return bytecode
+  address and the frame S1 as the return frame.
 
 | Call<offset,numParams,returnOff,funcd,destroyLocals>, ND,
 |                                                       S(StkPtr) S(FramePtr),
@@ -1408,10 +1420,11 @@ To string conversions:
   resumable rather than performing an async function return.  Returns by
   leaving the TC to enterTCHelper.
 
-| StRetVal, ND, S(FramePtr) S(Gen), CRc
+| StRetVal<wide>, ND, S(FramePtr) S(Gen), CRc
 
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
+  If wide is true, can clobber the aux field of the return value slot.
 
 | ReleaseVVAndSkip, ND, S(FramePtr), B
 
@@ -2246,9 +2259,7 @@ fields of that struct for holding intermediate values.
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
-| VGetProp, D(BoxedInitCell),
-|           S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
-|           MProp|PRc|Er
+| VGetProp, D(BoxedInitCell), S(Obj,PtrToGen) S(Cell), MProp|PRc|Er
 
   Get property with key S1 from base S0 as a reference.
 
@@ -2334,7 +2345,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from S0.
 
-| VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|PRc|Er
+| VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell), MElem|PRc|Er
 
   Get element with key S1 from base S0 as a reference.
 
@@ -2605,13 +2616,14 @@ fields of that struct for holding intermediate values.
 
 | PackMagicArgs, D(Arr), S(FramePtr), PRc
 
-  Call MixedArray::MakePacked() with the value of numArgs() on the ActRec
+  Call PackedArray::MakePacked() with the value of numArgs() on the ActRec
   pointed to by the frame pointer S0 as the first argument, and the pointer to
   the first parameter in the frame as the second argument.
 
-| LdTVAux, D(Int), S(PtrToStkGen), NF
+| LdTVAux<ValidBits>, D(Int), S(PtrToStkGen), NF
 
-  Load the value of m_aux from the Cell pointed to by S0
+  Load the value of m_aux from the Cell pointed to by S0. ValidBits is a mask
+  specifying which bits are allowed to be set. The runtime may ignore it.
 
 | StTVAux, ND, S(FramePtr) S(Int), CRc
 

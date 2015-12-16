@@ -166,8 +166,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 typedef FixedStringMap<TCA,true> SSwitchMap;
 TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
 
-void tv_release_generic(TypedValue* tv);
-
 void profileObjClassHelper(ClassProfile*, ObjectData*);
 
 Cell lookupCnsHelper(const TypedValue* tv,

@@ -5,7 +5,7 @@
  * such as count and its items are available. Every concrete class indirectly
  * implements this interface.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  *
  */
@@ -36,7 +36,7 @@ interface ConstCollection<+Te> extends Countable {
  * The interface implemented for a mutable collection type so that values can
  * be added to it.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  *
  */
@@ -78,7 +78,7 @@ interface OutputCollection<-Te> {
  * `OutputCollection` only. If your collection to be immutable, implement
  * `ConstCollection` only instead.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface Collection<Te> extends ConstCollection<Te>,
@@ -92,7 +92,7 @@ interface Collection<Te> extends ConstCollection<Te>,
 /**
  * The interface for all `Set`s to enable access its values.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstSetAccess<+Tm> {
@@ -108,7 +108,7 @@ interface ConstSetAccess<+Tm> {
  *
  * The interface for mutable `Set`s to enable removal of its values.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface SetAccess<Tm> extends ConstSetAccess<Tm> {
@@ -131,7 +131,7 @@ interface SetAccess<Tm> extends ConstSetAccess<Tm> {
 /**
  * The interface for all keyed collections to enable access its values.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstIndexAccess<Tk, +Tv> {
@@ -176,7 +176,7 @@ interface ConstIndexAccess<Tk, +Tv> {
  * The interface for mutable, keyed collections to enable setting and removing
  * keys.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
@@ -247,7 +247,7 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
  * defined in its parent interfaces. But you could theoretically use this
  * interface for parameter and return type annotations.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstMapAccess<Tk, +Tv> extends ConstSetAccess<Tk>,
@@ -261,7 +261,7 @@ interface ConstMapAccess<Tk, +Tv> extends ConstSetAccess<Tk>,
  * defined in its parent interfaces. But you could theoretically use this
  * interface for parameter and return type annotations.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
@@ -273,7 +273,7 @@ interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
  * Represents a read-only (immutable) sequence of values, indexed by integers
  * (i.e., a vector).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstVector<+Tv> extends ConstCollection<Tv>,
@@ -527,7 +527,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
  * Represents a write-enabled (mutable) sequence of values, indexed by integers
  * (i.e., a vector).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MutableVector<Tv> extends ConstVector<Tv>,
@@ -781,7 +781,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
 /**
  * Represents a read-only (immutable) sequence of key/value pairs, (i.e. a map).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
@@ -1031,7 +1031,7 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
  * Represents a write-enabled (mutable) sequence of key/value pairs
  * (i.e. a map).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
@@ -1285,7 +1285,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
  * Represents a read-only (immutable) set of values, with no keys
  * (i.e., a set).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstSet<+Tv> extends ConstCollection<Tv>,
@@ -1539,7 +1539,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
  * Represents a write-enabled (mutable) set of values, not indexed by keys
  * (i.e. a set).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MutableSet<Tv> extends ConstSet<Tv>,

@@ -682,6 +682,23 @@ ALWAYS_INLINE void tvUnboxIfNeeded(TypedValue* tv) {
   if (tv->m_type == KindOfRef) tvUnbox(tv);
 }
 
+// Used when adding an array element.
+ALWAYS_INLINE void initVal(TypedValue& tv, Cell v) {
+  cellDup(v, tv);
+  if (UNLIKELY(tv.m_type == KindOfUninit)) {
+    tv.m_type = KindOfNull;
+  }
+}
+
+// Used when changing an array element.
+ALWAYS_INLINE void setVal(TypedValue& tv, Cell src) {
+  auto const dst = tvToCell(&tv);
+  if (UNLIKELY(src.m_type == KindOfUninit)) {
+    src.m_type = KindOfNull;
+  }
+  cellSet(src, *dst);
+}
+
 /*
  * TypedValue conversions that update the tv in place (decrefing and
  * old value, if necessary).

@@ -113,6 +113,10 @@ Examples:
 
   # Run the Hack typechecker against the typechecker.expect[f] file in this test
   # $argv[0] --typechecker test/slow/test_runner_typechecker_mode/basic.php
+
+  # Use a specific typechecker binary
+  # $argv[0] --hhserver-binary-path ~/code/hhvm/hphp/hack/bin/hh_server --typechecker .
+
 EOT;
   return usage().$help;
 }
@@ -124,43 +128,56 @@ function error($message) {
 
 // If a user-supplied path is provided, let's make sure we have a valid
 // executable.
-function check_hhvm_executable($path) {
-  $path = realpath($path);
-  $msg = "Provided HHVM executable (" . $path . ") is not a file.\n"
-       . "If using HHVM_BIN, make sure that is set correctly.";
-  if (!is_file($path)) {
+function check_executable($path, $typechecker) {
+  $type = $typechecker ? "HH_SERVER" : "HHVM";
+  $rpath = realpath($path);
+  $msg = "Provided ".$type." executable (".$path.") is not a file.\n"
+       . "If using ".$type."_BIN, make sure that is set correctly.";
+  if (!is_file($rpath)) {
     error($msg);
   }
   $output = array();
-  exec($path . " --version", $output);
+  exec($rpath . " --help", $output);
   $str = implode($output);
-  $msg = "Provided file (" . $path . ") is not an HHVM executable.\n"
-       . "If using HHVM_BIN, make sure that is set correctly.";
-  if (strpos($str, "HipHop") === false && strpos($str, "HHVM") === false) {
+  $msg = "Provided file (".$rpath.") is not a/an ".$type." executable.\n"
+       . "If using ".$type."_BIN, make sure that is set correctly.";
+  if (strpos($str, "Usage") !== 0) {
     error($msg);
   }
 }
 
-function check_for_multiple_default_hhvm_binaries() {
+function check_for_multiple_default_binaries($typechecker) {
   $dir = hphp_home() . "/";
   if (getenv("FBMAKE_BIN_ROOT")) {
     $dir .= getenv("FBMAKE_BIN_ROOT");
   } else {
     $dir .= "_bin";
   }
+
+  $append_path = '/hphp/hhvm/hhvm';
+  $path_option = '--hhvm-binary_path';
+  if ($typechecker) {
+    $append_path = '/hphp/hack/src/hh_server';
+    $path_option = '--hhserver-binary-path';
+  }
+
   // For Facebook: We have two make systems fbmake and cmake, and we
   // can use both in the same code repo. If two binaries exist, we
   // want the onus to be on the user to specify a particular one because
   // before we chose the fbmake one by default and that can cause unexpected
   // results.
-  if (file_exists($dir.'/hphp/hhvm/hhvm') &&
-      file_exists(hphp_home().'/hphp/hhvm/hhvm')) {
+  if (file_exists($dir.$append_path) &&
+      file_exists(hphp_home().$append_path)) {
     $msg = "Two binaries exist in this repo. \n"
-         . " - " . $dir . "/hphp/hhvm/hhvm\n"
-         . " - " . hphp_home() . "/hphp/hhvm/hhvm\n"
+         . " - " . $dir . $append_path . "\n"
+         . " - " . hphp_home() . $append_path . "\n"
          . "Are you in fbcode? If so, remove a binary \n"
-         . "or use the --hhvm-binary-path option to the test runner. \n"
-         . "e.g., test/run -b hphp/hhvm/hhvm quick";
+         . "or use the " . $path_option . " option to the test runner. \n"
+         . "e.g., test/run " . $path_option . " /path/to/binary ";
+    if ($typechecker) {
+      $msg .= "--typechecker ";
+    }
+    $msg .= "slow\n";
     error($msg);
   }
 }
@@ -216,7 +233,12 @@ function bin_root() {
 }
 
 function hh_server_path() {
-  $file = hh_server_bin_root().'/hh_server';
+  $file = "";
+  if (getenv("HH_SERVER_BIN") !== false) {
+    $file = realpath(getenv("HH_SERVER_BIN"));
+  } else {
+    $file = hh_server_bin_root().'/hh_server';
+  }
   if (!is_file($file)) {
     error("$file doesn't exist. Did you forget to build first?");
   }
@@ -224,6 +246,9 @@ function hh_server_path() {
 }
 
 function hh_server_bin_root() {
+  if (getenv("HH_SERVER_BIN") !== false) {
+    return dirname(realpath(getenv("HH_SERVER_BIN")));
+  }
   $dir = hphp_home() . "/";
   if (getenv("FBMAKE_BIN_ROOT") !== false) {
     $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hack/src';
@@ -327,6 +352,7 @@ function get_options($argv) {
     'relocate:' => '',
     'hhvm-binary-path:' => 'b:',
     'typechecker' => '',
+    'hhserver-binary-path:' => '',
   );
   $options = array();
   $files = array();
@@ -755,7 +781,7 @@ function hh_server_cmd($options, $test) {
   // files associated with the test to a temporary directory, rename the
   // basename($test_file).hhconfig file to just .hhconfig and set the command
   // appropriately.
-  $temp_dir = uniqid('/tmp/hh-test-runner-');
+  $temp_dir = '/tmp/hh-test-runner-'.bin2hex(random_bytes(16));
   mkdir($temp_dir);
   foreach (glob($test . '*') as $test_file) {
     copy($test_file, $temp_dir . '/' . basename($test_file));
@@ -2010,6 +2036,10 @@ function print_failure($argv, $results, $options) {
     if ($option === "threads") {
       // e.g., For a small number of failed tests, we don't need max threads.
       $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
+    } else if ($option === "typechecker" || $option === "verbose") {
+      // The escapeshellarg($value) of these is 1, but there is no real value
+      // associated with these two options.
+      $rerun .= " --" . $option;
     } else {
       $rerun .= " --" . $option . ' ' . escapeshellarg($value);
     }
@@ -2168,23 +2198,58 @@ function main($argv) {
     error("Repo mode and typechecker mode are not compatible");
   }
 
+  if (isset($options['hhvm-binary-path']) &&
+      isset($options['typechecker'])) {
+    error("Did you mean to set the hh_server binary path instead?");
+  }
+
+  if (isset($options['hhserver-binary-path']) &&
+      !isset($options['typechecker'])) {
+    error("hh_server binary path set, but not --typechecker");
+  }
+
+  if (isset($options['hhvm-binary-path']) &&
+      isset($options['hhserver-binary-path'])) {
+    error("Need to choose one of the two binaries to run");
+  }
+
   $binary_path = "";
-  if (isset($options['typechecker'])) {
-    $binary_path = hh_server_path();
-  } else {
-    // Explicit path given by --hhvm-binary-path takes priority
-    // Then, if an HHVM_BIN env var exists, and the file it points to exists,
-    // that trumps any default hhvm executable path.
-    if (isset($options['hhvm-binary-path'])) {
-      $binary_path = realpath($options['hhvm-binary-path']);
-      check_hhvm_executable($binary_path);
-      putenv("HHVM_BIN=" . $binary_path);
-    } else if (getenv("HHVM_BIN") !== false) {
-      $binary_path = realpath(getenv("HHVM_BIN"));
-      check_hhvm_executable($binary_path);
+  $typechecker = false;
+  if (isset($options['hhvm-binary-path'])) {
+    check_executable($options['hhvm-binary-path'], false);
+    $binary_path = realpath($options['hhvm-binary-path']);
+    putenv("HHVM_BIN=" . $binary_path);
+  } else if (isset($options['hhserver-binary-path'])) {
+    check_executable($options['hhserver-binary-path'], true);
+    $binary_path = realpath($options['hhserver-binary-path']);
+    $typechecker = true;
+    putenv("HH_SERVER_BIN=" . $binary_path);
+  } else if (isset($options['typechecker'])) {
+    $typechecker = true;
+  }
+
+  // Explicit path given by --hhvm-binary-path or --hhserver-binary-path
+  // takes priority (see above)
+  // Then, if an HHVM_BIN or HH_SERVER env var exists, and the file it
+  // points to exists, that trumps any default hhvm / typechecker executable
+  // path.
+  if ($binary_path === "") {
+    if (!$typechecker) {
+      if (getenv("HHVM_BIN") !== false) {
+        $binary_path = realpath(getenv("HHVM_BIN"));
+        check_executable($binary_path, false);
+      } else {
+        check_for_multiple_default_binaries(false);
+        $binary_path = hhvm_path();
+      }
     } else {
-      check_for_multiple_default_hhvm_binaries();
-      $binary_path = hhvm_path();
+      if (getenv("HH_SERVER_BIN") !== false) {
+        $binary_path = realpath(getenv("HH_SERVER_BIN"));
+        check_executable($binary_path, true);
+      } else {
+        check_for_multiple_default_binaries(true);
+        $binary_path = hh_server_path();
+      }
     }
   }
 

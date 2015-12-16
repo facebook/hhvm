@@ -473,6 +473,26 @@ struct FPushCufData : IRExtraData {
   uint32_t iterId;
 };
 
+struct LdTVAuxData : IRExtraData {
+  explicit LdTVAuxData(int32_t v = -1) : valid(v) {}
+
+  std::string show() const {
+    return folly::sformat("{:x}", valid);
+  }
+
+  int32_t valid;
+};
+
+struct StRetValData : IRExtraData {
+  explicit StRetValData(bool w) : wide(w) {}
+
+  std::string show() const {
+    return wide ? "wide" : "narrow";
+  }
+
+  bool wide;
+};
+
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& target,
                           FPInvOffset invSPOff,
@@ -599,12 +619,27 @@ struct InlineReturnNoFrameData : IRExtraData {
   FPRelOffset frameOffset;
 };
 
+struct SyncReturnBCData : IRExtraData {
+  SyncReturnBCData(Offset bcOff, IRSPOffset spOff)
+    : bcOffset(bcOff)
+    , spOffset(spOff)
+  {}
+  std::string show() const {
+    return folly::to<std::string>(bcOffset, ",", spOffset.offset);
+  }
+
+  Offset bcOffset;
+  IRSPOffset spOffset;
+};
+
 struct CallArrayData : IRExtraData {
   explicit CallArrayData(IRSPOffset spOffset,
+                         int32_t numParams,
                          Offset pcOffset,
                          Offset after,
                          bool destroyLocals)
     : spOffset(spOffset)
+    , numParams(numParams)
     , pc(pcOffset)
     , after(after)
     , destroyLocals(destroyLocals)
@@ -616,6 +651,7 @@ struct CallArrayData : IRExtraData {
   }
 
   IRSPOffset spOffset;    // offset from StkPtr to bottom of call's ActRec+args
+  int32_t numParams;
   Offset pc;     // XXX why isn't this available in the marker?
   Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   bool destroyLocals;
@@ -625,18 +661,21 @@ struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPOffset spOffset,
                            const Func* callee,
                            int32_t numNonDefault,
-                           bool destroyLocals)
+                           bool destroyLocals,
+                           bool needsFrame)
     : spOffset(spOffset)
     , callee{callee}
     , numNonDefault{numNonDefault}
     , destroyLocals{destroyLocals}
+    , needsCallerFrame{needsFrame}
   {}
 
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',',
       callee->fullName()->data(),
-      destroyLocals ? ",destroyLocals" : ""
+      destroyLocals ? ",destroyLocals" : "",
+      needsCallerFrame ? ",needsCallerFrame" : ""
     );
   }
 
@@ -644,6 +683,7 @@ struct CallBuiltinData : IRExtraData {
   const Func* callee;
   int32_t numNonDefault;
   bool destroyLocals;
+  bool needsCallerFrame;
 };
 
 struct CallData : IRExtraData {
@@ -652,12 +692,14 @@ struct CallData : IRExtraData {
                     Offset after,
                     const Func* callee,
                     bool destroy,
+                    bool needsFrame,
                     bool fcallAwait)
     : spOffset(spOffset)
     , numParams(numParams)
     , after(after)
     , callee(callee)
     , destroyLocals(destroy)
+    , needsCallerFrame(needsFrame)
     , fcallAwait(fcallAwait)
   {}
 
@@ -668,6 +710,7 @@ struct CallData : IRExtraData {
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
       destroyLocals ? ",destroyLocals" : "",
+      needsCallerFrame ? ",needsCallerFrame" : "",
       fcallAwait ? ",fcallAwait" : ""
     );
   }
@@ -677,6 +720,7 @@ struct CallData : IRExtraData {
   Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
+  bool needsCallerFrame;
   bool fcallAwait;
 };
 
@@ -1164,6 +1208,8 @@ X(DefSP,                        FPInvOffsetData);
 X(LdStk,                        IRSPOffsetData);
 X(LdStkAddr,                    IRSPOffsetData);
 X(DefInlineFP,                  DefInlineFPData);
+X(BeginInlining,                IRSPOffsetData);
+X(SyncReturnBC,                 SyncReturnBCData);
 X(InlineReturnNoFrame,          InlineReturnNoFrameData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
@@ -1244,6 +1290,8 @@ X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(GenericIdx,                   IRSPOffsetData);
 X(DecRef,                       DecRefData);
+X(LdTVAux,                      LdTVAuxData);
+X(StRetVal,                     StRetValData);
 
 #undef X
 

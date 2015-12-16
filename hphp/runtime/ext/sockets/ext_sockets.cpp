@@ -1676,7 +1676,8 @@ class SocketsExtension final : public Extension {
 
     HHVM_RC_INT_SAME(IPV6_UNICAST_HOPS);
 
-#define REGISTER_LONG_CONSTANT(name, val, flags) HHVM_RC_INT(name, val);
+#define REGISTER_LONG_CONSTANT(name, val, flags) \
+    Native::registerConstant<KindOfInt64>(makeStaticString(name), val)
 #include "hphp/runtime/ext/sockets/unix_socket_constants.h"
 #undef REGISTER_LONG_CONSTANT
 

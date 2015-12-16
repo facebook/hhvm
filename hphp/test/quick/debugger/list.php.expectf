@@ -3,9 +3,9 @@ br SplMaxHeap::insert()
 Breakpoint 1 set upon entering SplMaxHeap::insert()
 run
 Breakpoint 1 reached at SplHeap::insert() on line %d of systemlib.php
- %d   public function insert($value) {
- %d*    $this->checkNotCorrupted();
- %d     $index = $this->lowestFreeIndex();
+%w%d   public function insert($value) {
+%w%d*    $this->checkNotCorrupted();
+%w%d     $index = $this->lowestFreeIndex();
 
 list myfunc
    5 function myfunc($a, $b) {

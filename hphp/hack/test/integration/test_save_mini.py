@@ -3,7 +3,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import common_tests
+import json
 import os
+import shlex
 import stat
 import subprocess
 import time
@@ -37,13 +39,14 @@ load_mini_script = %s
 
     def write_load_config(self, *changed_files):
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            f.write(r"""
-#! /bin/sh
-echo %s
-""" % self.saved_state_path())
+            f.write("#! /bin/sh\n")
             os.fchmod(f.fileno(), 0o700)
-            for fn in changed_files:
-                f.write("echo %s\n" % fn)
+            f.write("echo %s\n" % shlex.quote(json.dumps({
+                'state': self.saved_state_path(),
+                'is_cached': True,
+                'deptable': self.saved_state_path() + '.deptable',
+                'changes': changed_files,
+                })))
             os.fchmod(f.fileno(), 0o700)
 
         self.write_local_conf()
@@ -52,7 +55,7 @@ echo %s
     def check_cmd(self, expected_output, stdin=None, options=None):
         options = [] if options is None else options
         root = self.repo_dir + os.path.sep
-        output = self.proc_call([
+        (output, err) = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -63,24 +66,29 @@ echo %s
             stdin=stdin)
         log_file = self.proc_call([
             hh_client, '--logname', self.repo_dir
-            ]).strip()
+            ])[0].strip()
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Mini-state loading worker took', logs)
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
+        return err
 
     def test_no_state_found(self):
+        error_msg = 'No such rev'
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            # exit without printing anything
-            f.write(r"#! /bin/sh")
+            f.write("#! /bin/sh\n")
+            os.fchmod(f.fileno(), 0o700)
+            f.write("echo %s\n" % shlex.quote(json.dumps({
+                'error': error_msg,
+                })))
             os.fchmod(f.fileno(), 0o700)
 
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
 
-        output = self.proc_call([
+        (output, _) = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -93,10 +101,11 @@ echo %s
 
         log_file = self.proc_call([
             hh_client, '--logname', self.repo_dir
-            ]).strip()
+            ])[0].strip()
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('Could not load mini state', logs)
+            self.assertIn(error_msg, logs)
 
     def test_hhconfig_change(self):
         """
@@ -113,14 +122,13 @@ load_mini_script = %s
 """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
         # Server may take some time to kill itself.
-        # TODO: Speed up monitor's reaction time to the typechecker dying.
         time.sleep(2)
 
         # this should start a new server
         self.check_cmd(['No errors!'])
         # check how the old one exited
         log_file = self.proc_call([
-            hh_client, '--logname', self.repo_dir]).strip() + '.old'
+            hh_client, '--logname', self.repo_dir])[0].strip() + '.old'
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('.hhconfig changed in an incompatible way', logs)
@@ -130,7 +138,7 @@ load_mini_script = %s
 
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
             f.write(r"""
-use_watchman_2 = true
+use_watchman = true
 watchman_init_timeout = 1
 """)
 

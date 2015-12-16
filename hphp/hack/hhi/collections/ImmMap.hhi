@@ -37,7 +37,7 @@
  * $fm = ImmMap {'a' => 1, 'b' => 2};
  * ```
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 

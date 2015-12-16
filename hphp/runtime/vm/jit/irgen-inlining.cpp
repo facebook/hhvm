@@ -43,6 +43,7 @@ bool isInlining(const IRGS& env) {
  *   // FPI region:
  *     SpillFrame sp, ...
  *     // ... probably some StStks due to argument expressions
+ *             BeginInlining<offset> sp
  *     fp2   = DefInlineFP<func,retBC,retSP,off> sp
  *
  *         // ... callee body ...
@@ -106,6 +107,9 @@ bool beginInlining(IRGS& env,
                      "fpiFunc = {}  ;  target = {}",
                      fpiFunc ? fpiFunc->fullName()->data() : "null",
                      target  ? target->fullName()->data()  : "null");
+
+  auto inlineStack = offsetFromIRSP(env, BCSPOffset{0});
+  gen(env, BeginInlining, IRSPOffsetData{inlineStack}, sp(env));
 
   DefInlineFPData data;
   data.target        = target;

@@ -150,6 +150,9 @@ class PreClassEmitter {
                   PreClass::Hoistable hoistable);
   ~PreClassEmitter();
 
+
+
+  void setClosurePreClass();
   void init(int line1, int line2, Offset offset, Attr attrs,
             const StringData* parent, const StringData* docComment);
 
@@ -189,7 +192,7 @@ class PreClassEmitter {
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
                    const bool typeConst = false,
-                   const Array typeStructure = Array::Create());
+                   const Array& typeStructure = Array{});
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
                            const bool typeConst = false);

@@ -135,15 +135,6 @@ public:
                         int64_t nextIntKey);
 
   /*
-   * Allocate a new, empty, request-local array in packed mode, with
-   * enough space reserved for `capacity' members.
-   *
-   * The returned array is already incref'd.
-   */
-  static ArrayData* MakeReserve(uint32_t capacity);
-  static ArrayData* MakeReserveSlow(uint32_t capacity);
-
-  /*
    * Allocate a new, empty, request-local array in mixed mode, with
    * enough space reserved for `capacity' members.
    *
@@ -159,21 +150,6 @@ public:
    * The returned array is already incref'd.
    */
   static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
-
-  /*
-   * Allocate a packed MixedArray.  This is an array in packed
-   * mode, containing `size' values, in the reverse order of the
-   * `values' array.
-   *
-   * This function takes ownership of the TypedValues in `values'.
-   *
-   * The returned array is already incref'd.
-   *
-   * Pre: size > 0
-   */
-  static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
-  static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
-  static ArrayData* MakePackedUninitialized(uint32_t size);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -193,8 +169,6 @@ public:
    * when the array has a kPackedKind.
    */
   static ArrayData* MakeUncounted(ArrayData* array);
-  static ArrayData* MakeUncountedPacked(ArrayData* array);
-  static ArrayData* MakeUncountedPackedHelper(ArrayData* array);
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
@@ -240,8 +214,6 @@ private:
   using ArrayData::release;
 public:
   static Variant CreateVarForUncountedArray(const Variant& source);
-  static void ConvertTvToUncounted(TypedValue* source);
-  static void ReleaseUncountedTypedValue(TypedValue& tv);
 
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
@@ -289,7 +261,6 @@ public:
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
-  static void ReleaseUncountedPacked(ArrayData*);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Escalate(const ArrayData* ad) {
@@ -502,9 +473,7 @@ private:
 
   Elm& allocElm(int32_t* ei);
 
-  MixedArray* setVal(TypedValue& tv, Cell v);
   MixedArray* getLval(TypedValue& tv, Variant*& ret);
-  MixedArray* initVal(TypedValue& tv, Cell v);
   MixedArray* initRef(TypedValue& tv, Variant& v);
   MixedArray* initLval(TypedValue& tv, Variant*& ret);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);

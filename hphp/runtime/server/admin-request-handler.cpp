@@ -52,6 +52,7 @@
 #include "hphp/util/timer.h"
 
 #include <folly/Conv.h>
+#include <folly/Random.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -227,6 +228,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/static-strings:  get number of static strings\n"
         "/static-strings-rds: ... that correspond to defined constants\n"
         "/dump-static-strings: dump static strings to /tmp/static_strings\n"
+        "/random-static-strings: return randomly selected static strings\n"
+        "    count         number of strings to return, default 1\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-apc-info:   show basic APC stats\n"
         "/dump-apc-meta:   dump meta information for all objects in APC to\n"
@@ -412,8 +415,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
       auto filename = transport->getParam("file");
       if (filename == "") filename = "/tmp/static_strings";
-      handleDumpStaticStrings(cmd, transport, filename);
+      handleDumpStaticStringsRequest(cmd, filename);
       transport->sendString("OK\n");
+      break;
+    }
+    if (strncmp(cmd.c_str(), "random-static-strings", 21) == 0) {
+      handleRandomStaticStringsRequest(cmd, transport);
       break;
     }
     if (strncmp(cmd.c_str(), "vm-", 3) == 0 &&
@@ -549,8 +556,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       assert(mallctlnametomib && mallctlbymib);
       if (cmd == "free-mem") {
         // Purge all dirty unused pages.
-        uint64_t epoch = 1;
-        int err = mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+        int err = mallctlWrite<uint64_t>("epoch", 1, true);
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"epoch\", ...)" << endl;
@@ -559,8 +565,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         }
 
         unsigned narenas;
-        size_t sz = sizeof(narenas);
-        err = mallctl("arenas.narenas", &narenas, &sz, nullptr, 0);
+        err = mallctlRead("arenas.narenas", &narenas, true);
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
@@ -594,16 +599,14 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
-        uint64_t epoch = 1;
         uint32_t error = 0;
-        if (mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch)) != 0) {
+        if (mallctlWrite<uint64_t>("epoch", 1, true) != 0) {
           error = 1;
         }
 
         auto call_mallctl = [&](const char* statName) {
           size_t value = 0;
-          size_t sz = sizeof(value);
-          if (mallctl(statName, &value, &sz, nullptr, 0) != 0){
+          if (mallctlRead(statName, &value, true) != 0) {
             error = 1;
           }
           return value;
@@ -1066,17 +1069,50 @@ bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
   return false;
 }
 
-bool AdminRequestHandler::handleDumpStaticStrings(const std::string& cmd,
-                                                  Transport* transporti,
-                                                  const std::string &filename) {
+std::string formatStaticString(StringData* str) {
+  return folly::sformat(
+      "----\n{} bytes\n{}\n", str->size(), str->toCppString());
+}
+
+bool AdminRequestHandler::handleDumpStaticStringsRequest(
+  const std::string& cmd,
+  const std::string& filename
+) {
   std::vector<StringData*> list = lookupDefinedStaticStrings();
   std::ofstream out(filename.c_str());
   SCOPE_EXIT { out.close(); };
   for (auto item : list) {
-    out << "----\n";
-    out << item->size() << " bytes\n";
-    out << item->toCppString() << "\n";
+    out << formatStaticString(item);
   }
+  return true;
+}
+
+bool AdminRequestHandler::handleRandomStaticStringsRequest(
+  const std::string& cmd,
+  Transport* transport
+) {
+  size_t count = 1;
+  auto countParam = transport->getParam("count");
+  if (countParam != "") {
+    try {
+      count = folly::to<size_t>(countParam);
+    } catch (...) {
+      // do the default on invalid input
+    }
+  }
+  std::string output;
+  std::vector<StringData*> list = lookupDefinedStaticStrings();
+  if (count < list.size()) {
+    for (size_t i = 0; i < count; i++) {
+      size_t j = folly::Random::rand64(i, list.size());
+      std::swap(list[i], list[j]);
+    }
+    list.resize(count);
+  }
+  for (auto item : list) {
+    output += formatStaticString(item);
+  }
+  transport->sendString(output);
   return true;
 }
 
@@ -1181,7 +1217,7 @@ bool AdminRequestHandler::handleRandomApcRequest(const std::string &cmd,
   if (count != "") {
     try {
       keyCount = folly::to<int64_t>(count);
-    } catch (const std::invalid_argument& ia) {
+    } catch (...) {
       // set keyCount to 1 if an invalid string is passed
       keyCount = 1;
     }

@@ -249,6 +249,12 @@ struct UniqueStubs {
    */
   TCA fcallArrayHelper;
 
+  /*
+   * Similar to fcallArrayHelper, but takes an additional arg
+   * specifying the total number of args, including the array
+   * parameter (which must be the last one).
+   */
+  TCA fcallUnpackHelper;
 
   /////////////////////////////////////////////////////////////////////////////
   // Interpreter stubs.

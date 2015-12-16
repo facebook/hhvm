@@ -106,7 +106,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   if (!cls) return init_null();
   VMRegAnchor _;
 
-  auto retVal = Array::attach(MixedArray::MakeReserve(cls->numMethods()));
+  auto retVal = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
   Class::getMethodNames(
     cls,
     arGetContextClassFromBuiltin(vmfp()),
@@ -118,7 +118,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
 Array HHVM_FUNCTION(get_class_constants, const String& className) {
   auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
-    return Array::attach(MixedArray::MakeReserve(0));
+    return Array::attach(PackedArray::MakeReserve(0));
   }
 
   auto const numConstants = cls->numConstants();

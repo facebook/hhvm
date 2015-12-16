@@ -856,7 +856,7 @@ static const StaticString
 
 static class DateTimeExtension final : public Extension {
 public:
-  DateTimeExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
+  DateTimeExtension() : Extension("date", get_PHP_VERSION().c_str()) { }
 
   void moduleInit() override {
     HHVM_ME(DateTime, __construct);

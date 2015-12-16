@@ -16,7 +16,7 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ ArrayAppend -------
-object(HH\Map)#3 (4) {
+object(HH\Map)#4 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -26,7 +26,7 @@ object(HH\Map)#3 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap)#5 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -35,7 +35,7 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ add -------
-object(HH\Map)#3 (4) {
+object(HH\Map)#5 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -45,7 +45,7 @@ object(HH\Map)#3 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap)#6 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -54,7 +54,7 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ addAll -------
-object(HH\Map)#3 (4) {
+object(HH\Map)#6 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -64,7 +64,7 @@ object(HH\Map)#3 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap)#7 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -73,9 +73,9 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ clear -------
-object(HH\Map)#3 (0) {
+object(HH\Map)#7 (0) {
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap)#8 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -84,7 +84,7 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ set -------
-object(HH\Map)#3 (3) {
+object(HH\Map)#8 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -92,7 +92,7 @@ object(HH\Map)#3 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap)#9 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -101,7 +101,7 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ setAll -------
-object(HH\Map)#3 (3) {
+object(HH\Map)#9 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -109,7 +109,7 @@ object(HH\Map)#3 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap)#10 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -118,13 +118,13 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ removeKey -------
-object(HH\Map)#3 (2) {
+object(HH\Map)#10 (2) {
   [1]=>
   int(2)
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap)#11 (3) {
   [0]=>
   int(1)
   [1]=>

@@ -67,7 +67,7 @@ int(3)
 = differencebykey =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#20 (2) {
+object(HH\Pair)#22 (2) {
   [0]=>
   int(3)
   [1]=>
@@ -78,19 +78,19 @@ object(HH\Pair)#20 (2) {
 = map =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#22 (2) {
+object(HH\Pair)#27 (2) {
   [0]=>
   int(0)
   [1]=>
   int(2)
 }
-object(HH\Pair)#23 (2) {
+object(HH\Pair)#28 (2) {
   [0]=>
   int(1)
   [1]=>
   int(4)
 }
-object(HH\Pair)#24 (2) {
+object(HH\Pair)#29 (2) {
   [0]=>
   int(2)
   [1]=>
@@ -101,33 +101,33 @@ object(HH\Pair)#24 (2) {
 = mapwithkey =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#30 (2) {
+object(HH\Pair)#37 (2) {
   [0]=>
   int(0)
   [1]=>
-  object(HH\Pair)#26 (2) {
+  object(HH\Pair)#33 (2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
 }
-object(HH\Pair)#31 (2) {
+object(HH\Pair)#38 (2) {
   [0]=>
   int(1)
   [1]=>
-  object(HH\Pair)#27 (2) {
+  object(HH\Pair)#34 (2) {
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
 }
-object(HH\Pair)#32 (2) {
+object(HH\Pair)#39 (2) {
   [0]=>
   int(2)
   [1]=>
-  object(HH\Pair)#28 (2) {
+  object(HH\Pair)#35 (2) {
     [0]=>
     int(2)
     [1]=>
@@ -139,7 +139,7 @@ object(HH\Pair)#32 (2) {
 = filter =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#35 (2) {
+object(HH\Pair)#44 (2) {
   [0]=>
   int(0)
   [1]=>
@@ -150,13 +150,13 @@ object(HH\Pair)#35 (2) {
 = filterwithkey =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#37 (2) {
+object(HH\Pair)#49 (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#38 (2) {
+object(HH\Pair)#50 (2) {
   [0]=>
   int(2)
   [1]=>
@@ -167,19 +167,19 @@ object(HH\Pair)#38 (2) {
 = fromItems =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#45 (2) {
+object(HH\Pair)#59 (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\Pair)#46 (2) {
+object(HH\Pair)#60 (2) {
   [0]=>
   int(3)
   [1]=>
   int(4)
 }
-object(HH\Pair)#47 (2) {
+object(HH\Pair)#61 (2) {
   [0]=>
   int(5)
   [1]=>

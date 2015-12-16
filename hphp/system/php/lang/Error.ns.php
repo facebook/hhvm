@@ -3,7 +3,7 @@ namespace __SystemLib {
 class Error implements Throwable {
   use BaseException;
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/exception.construct.php )
+   * ( excerpt from http://php.net/manual/en/exception.construct.php )
    *
    * Constructs the Exception.
    *

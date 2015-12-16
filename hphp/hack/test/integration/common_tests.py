@@ -4,10 +4,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import glob
 import os
+import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 
 from hh_paths import hh_server, hh_client
 from utils import write_files
@@ -103,7 +106,7 @@ assume_php = false""")
     @classmethod
     def get_server_logs(cls):
         log_file = cls.proc_call([
-            hh_client, '--logname', cls.repo_dir]).strip()
+            hh_client, '--logname', cls.repo_dir])[0].strip()
         with open(log_file) as f:
             return f.read()
 
@@ -116,6 +119,11 @@ assume_php = false""")
             'stop',
             self.repo_dir
         ])
+
+        # Monitor polls every second, so can take up to 2 cycles to detect
+        # typechecker exit.
+        time.sleep(2)
+
         for p in glob.glob(os.path.join(self.repo_dir, '*')):
             os.remove(p)
 
@@ -137,8 +145,10 @@ assume_php = false""")
         (stdout_data, stderr_data) = proc.communicate(stdin)
         sys.stderr.write(stderr_data)
         sys.stderr.flush()
-        return stdout_data
+        return (stdout_data, stderr_data)
 
+    # Runs `hh_client check` asserting the stdout is equal the expected.
+    # Returns stderr.
     def check_cmd(self, expected_output, stdin=None, options=None):
         raise NotImplementedError()
 
@@ -301,3 +311,34 @@ assume_php = false""")
         self.check_cmd([
             '{root}foo_1.php',
             ], options=['--list-files'])
+
+    def test_abnormal_typechecker_exit_message(self):
+        """
+        Tests that the monitor outputs a useful message when its typechecker
+        exits abnormally.
+        """
+
+        self.write_load_config()
+        # Start a fresh server and monitor.
+        launch_logs = self.check_cmd(['No errors!'])
+        self.assertIn('Server launched with the following command', launch_logs)
+        self.assertIn('Logs will go to', launch_logs)
+        log_file_pattern = re.compile('Logs will go to (.*)')
+        monitor_log_match = log_file_pattern.search(launch_logs)
+        self.assertIsNotNone(monitor_log_match)
+        monitor_log_path = monitor_log_match.group(1)
+        self.assertIsNotNone(monitor_log_path)
+        with open(monitor_log_path) as f:
+            monitor_logs = f.read()
+            p = re.compile('Just started typechecker server with pid: ([0-9]+)')
+            m = p.search(monitor_logs)
+            self.assertIsNotNone(m)
+            pid = m.group(1)
+            self.assertIsNotNone(pid)
+            os.kill(int(pid), signal.SIGTERM)
+            # For some reason, waitpid in the monitor after the kill signal
+            # sent above doesn't preserve ordering - maybe because they're
+            # in separate processes? Give it some time.
+            time.sleep(0.1)
+            client_error = self.check_cmd([])
+            self.assertIn('Last typechecker killed by signal', client_error)

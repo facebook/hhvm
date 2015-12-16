@@ -2140,9 +2140,44 @@ Token Parser::onClosure(ClosureType type,
                         Token& params,
                         Token& cparams,
                         Token& stmts,
-                        Token& ret) {
+                        Token& ret1,
+                        Token* ret2 /* = nullptr */) {
   Token out;
   Token name;
+
+  // This is a bit ugly: when PHP7 picked up Hack-style return types, they
+  // inverted the syntax for a long-form closure with both a "use" clause and a
+  // return type. (Hack says the return type comes first, PHP7 says the "use"
+  // clause comes first.)
+  //
+  // This leaves us in the unenviable position of having to support both. Since
+  // they are both optional, it's really hard to express that there can be
+  // either ordering in the bison grammar. Instead, it's much easier to allow
+  // an optional return type both before and after an optional use clause. (The
+  // latter is only a shift/reduce conflict since, in the absence of a use
+  // clause, bison is unsure whether the return type is in the "first" or
+  // "second" slot.) Then, we can fix it up here -- pick the one that is
+  // nonempty, or generate a special parse error if they are both nonempty.
+  //
+  // This is slighly more annoying by the fact that many callsites to this
+  // function are *not* long-form closures, and so all of the above doesn't
+  // apply to them, hence ret2 being a pointer with a nullptr default, so they
+  // don't all have to explicitly opt out of this mess.
+  //
+  // If it makes you feel any better, the PHP contributor responsible for this
+  // has since said that he regrets his decision.
+  Token ret;
+  if (ret2) {
+    if (!ret1.num()) {
+      ret = *ret2;
+    } else if (!ret2->num()) {
+      ret = ret1;
+    } else {
+      PARSE_ERROR("Cannot have return types both before and after use clause");
+    }
+  } else {
+    ret = ret1;
+  }
 
   auto stmt = onFunctionHelper(
     FunctionType::Closure,

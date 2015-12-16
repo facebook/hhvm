@@ -23,6 +23,7 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/alloc.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -77,7 +78,8 @@ struct NamedEntity {
   typedef folly::AtomicHashMap<const StringData*,
                                NamedEntity,
                                string_data_hash,
-                               ahm_string_data_isame> Map;
+                               ahm_string_data_isame,
+                               LowAllocator<char>> Map;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.
@@ -203,7 +205,7 @@ private:
 /*
  * Litstr and NamedEntity pair.
  */
-using NamedEntityPair = std::pair<const StringData*, const NamedEntity*>;
+using NamedEntityPair = std::pair<LowStringPtr,LowPtr<const NamedEntity>>;
 
 }
 

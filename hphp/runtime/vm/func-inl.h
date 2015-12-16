@@ -133,7 +133,11 @@ inline StrNR Func::fullNameStr() const {
 
 inline const NamedEntity* Func::getNamedEntity() const {
   assert(!shared()->m_preClass);
-  return m_namedEntity;
+  return *reinterpret_cast<const LowPtr<const NamedEntity>*>(&m_namedEntity);
+}
+
+inline void Func::setNamedEntity(const NamedEntity* e) {
+  *reinterpret_cast<LowPtr<const NamedEntity>*>(&m_namedEntity) = e;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

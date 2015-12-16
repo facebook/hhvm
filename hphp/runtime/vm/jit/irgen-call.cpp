@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
+#include "hphp/runtime/vm/jit/func-effects.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -1077,6 +1078,18 @@ void emitFPassCW(IRGS& env, int32_t argNum) {
 void emitFCallArray(IRGS& env) {
   auto const data = CallArrayData {
     offsetFromIRSP(env, BCSPOffset{0}),
+    0,
+    bcOff(env),
+    nextBcOff(env),
+    callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
+  };
+  gen(env, CallArray, data, sp(env), fp(env));
+}
+
+void emitFCallUnpack(IRGS& env, int32_t numParams) {
+  auto const data = CallArrayData {
+    offsetFromIRSP(env, BCSPOffset{0}),
+    numParams,
     bcOff(env),
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
@@ -1094,10 +1107,19 @@ void emitFCallD(IRGS& env,
 void emitFCall(IRGS& env, int32_t numParams) {
   auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
   auto const callee = env.currentNormalizedInstruction->funcd;
-  auto const destroyLocals = callDestroysLocals(
-    *env.currentNormalizedInstruction,
-    curFunc(env)
-  );
+
+  auto const destroyLocals = callee
+    ? callee->isCPPBuiltin() && builtinFuncDestroysLocals(callee)
+    : callDestroysLocals(
+      *env.currentNormalizedInstruction,
+      curFunc(env)
+    );
+  auto const needsCallerFrame = callee
+    ? callee->isCPPBuiltin() && builtinFuncNeedsCallerFrame(callee)
+    : callNeedsCallerFrame(
+      *env.currentNormalizedInstruction,
+      curFunc(env)
+    );
 
   auto op = curFunc(env)->unit()->getOp(bcOff(env));
 
@@ -1110,6 +1132,7 @@ void emitFCall(IRGS& env, int32_t numParams) {
       returnBcOffset,
       callee,
       destroyLocals,
+      needsCallerFrame,
       op == Op::FCallAwait
     },
     sp(env),

@@ -367,10 +367,6 @@ Marker::operator()(const void* start, size_t len) {
 }
 
 // initially parse the heap to find valid objects and initialize metadata.
-// Certain objects can have count==0
-// * StringData owned by StringBuffer
-// * ArrayData owned by ArrayInit
-// * Object ctors allocating memory in ctor (while count still==0).
 void Marker::init() {
   rds_ = folly::Range<const char*>((char*)rds::header(),
                                    RuntimeOption::EvalJitTargetCacheSize);
@@ -385,19 +381,9 @@ void Marker::init() {
       case HK::Struct:
       case HK::Empty:
       case HK::String:
-        assert(h->hdr_.count > 0);
-        ptrs_.insert(h);
-        total_ += h->size();
-        break;
       case HK::Ref:
-        // EZC non-ref refdatas sometimes have count==0
-        assert(h->hdr_.count > 0 || !h->ref_.zIsRef());
-        ptrs_.insert(h);
-        total_ += h->size();
-        break;
       case HK::Resource:
-        // ZendNormalResourceData objects sometimes never incref'd
-        // TODO: t5969922, t6545412 might be a real bug.
+        assert(h->hdr_.count > 0);
         ptrs_.insert(h);
         total_ += h->size();
         break;

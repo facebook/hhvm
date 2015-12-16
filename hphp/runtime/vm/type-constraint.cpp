@@ -57,7 +57,7 @@ void TypeConstraint::init() {
         this, m_typeName->data());
   m_type = Type::Object;
   m_namedEntity = NamedEntity::get(m_typeName);
-  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
+  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity.get());
 }
 
 std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {

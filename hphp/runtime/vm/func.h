@@ -1153,7 +1153,7 @@ private:
   void appendParam(bool ref, const ParamInfo& info,
                    std::vector<ParamInfo>& pBuilder);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
-
+  void setNamedEntity(const NamedEntity*);
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal types.
@@ -1209,7 +1209,6 @@ public:
   static std::atomic<bool>     s_treadmill;
   static std::atomic<uint32_t> s_totalClonedClosures;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1233,8 +1232,8 @@ private:
   // The Class that provided this method implementation.
   AtomicLowPtr<Class> m_cls{nullptr};
   union {
-    const NamedEntity* m_namedEntity{nullptr};
-    Slot m_methodSlot;
+    Slot m_methodSlot{0};
+    LowPtr<const NamedEntity>::storage_type m_namedEntity;
   };
   // Atomically-accessed intercept flag.  -1, 0, or 1.
   // TODO(#1114385) intercept should work via invalidation.

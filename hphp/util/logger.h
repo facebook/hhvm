@@ -148,10 +148,9 @@ protected:
    * [machine:thread:datetime].
    */
   static std::string GetHeader();
+  static pid_t s_pid;
 private:
   static Logger *s_logger;
-  static pid_t s_pid;
-
   FILE* m_standardOut;
 };
 

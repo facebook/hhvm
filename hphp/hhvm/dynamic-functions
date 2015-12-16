@@ -1,0 +1,9 @@
+{
+  extern "C++" {
+    HPHP::apc_load_impl*;
+    HPHP::apc_load_impl_compressed*;
+    "HPHP::const_load()";
+    HPHP::const_load_impl*;
+    HPHP::const_load_impl_compressed*;
+  };
+};

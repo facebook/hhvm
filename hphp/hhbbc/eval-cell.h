@@ -66,7 +66,7 @@ folly::Optional<Type> eval_cell(Pred p) {
         {
           auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
           tvDecRef(&c);
-          c = make_tv<KindOfArray>(sarr);
+          c = make_tv<KindOfPersistentArray>(sarr);
         }
         break;
       default:

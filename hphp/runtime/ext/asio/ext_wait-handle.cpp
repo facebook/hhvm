@@ -34,6 +34,8 @@
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
+#include "hphp/system/systemlib.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -159,6 +161,13 @@ void AsioExtension::initWaitHandle() {
 #undef WH_ME
 }
 
+const StaticString
+  s_DoNotNewInstance("WaitHandles may not be directly instantiated");
+
+static ObjectData* asioInstanceCtor(Class*) {
+  SystemLib::throwExceptionObject(s_DoNotNewInstance);
+}
+
 // Asio's memory layout relies on the following invariants:
 //   * Inextensible: private final (do-nothing) constructor in base class
 //   * No declared properties
@@ -183,10 +192,7 @@ finish_class() {
   assert(!cls->m_extra->m_nativeDataInfo);
   assert(!cls->m_extra->m_instanceCtor);
   assert(!cls->m_extra->m_instanceDtor);
-  // Being IsCppBuiltin means we must have an InstanceCtor
-  // Use the default newInstance which will fail as expected
-  // on the private final constructor (asserted above)
-  cls->m_extra.raw()->m_instanceCtor = ObjectData::newInstance;
+  cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
 }
 

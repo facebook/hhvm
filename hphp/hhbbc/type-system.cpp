@@ -1532,7 +1532,7 @@ folly::Optional<Cell> tv(Type t) {
   case BTrue:        return make_tv<KindOfBoolean>(true);
   case BFalse:       return make_tv<KindOfBoolean>(false);
   case BCArrE:       /* fallthrough */
-  case BSArrE:       return make_tv<KindOfArray>(staticEmptyArray());
+  case BSArrE:       return make_tv<KindOfPersistentArray>(staticEmptyArray());
   default:
     if (is_opt(t)) {
       break;
@@ -1543,7 +1543,9 @@ folly::Optional<Cell> tv(Type t) {
     case DataTag::Str:    return make_tv<KindOfStaticString>(t.m_data.sval);
     case DataTag::ArrVal:
       if ((t.m_bits & BArrN) == t.m_bits) {
-        return make_tv<KindOfArray>(const_cast<ArrayData*>(t.m_data.aval));
+        return make_tv<KindOfPersistentArray>(
+          const_cast<ArrayData*>(t.m_data.aval)
+        );
       }
       break;
     case DataTag::ArrStruct:

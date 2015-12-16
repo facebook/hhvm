@@ -23,7 +23,9 @@
 
 #include <folly/Portability.h>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
+#include "hphp/util/logger.h"
 
 #ifdef FOLLY_SANITIZE_ADDRESS
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
@@ -258,7 +260,53 @@ void numa_bind_to(void* start, size_t size, int node);
 
 #ifdef USE_JEMALLOC
 
-/**
+/*
+ * mallctl wrappers.
+ */
+
+/*
+ * Call mallctl, reading/writing values of type <T> if out/in are non-null,
+ * respectively.  Assert/log on error, depending on errOk.
+ */
+template <typename T>
+int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
+#ifdef USE_JEMALLOC
+  assert(mallctl != nullptr);
+  size_t outLen = sizeof(T);
+  int err = mallctl(cmd,
+                    out, out ? &outLen : nullptr,
+                    in, in ? sizeof(T) : 0);
+  assert(err != 0 || outLen == sizeof(T));
+#else
+  int err = ENOENT;
+#endif
+  if (err != 0) {
+    std::string errStr =
+      folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
+    Logger::Warning(errStr);
+    always_assert(errOk || err == 0);
+  }
+  return err;
+}
+
+template <typename T>
+int mallctlReadWrite(const char *cmd, T* out, T in, bool errOk=false) {
+  return mallctlHelper(cmd, out, &in, errOk);
+}
+
+template <typename T>
+int mallctlRead(const char* cmd, T* out, bool errOk=false) {
+  return mallctlHelper(cmd, out, static_cast<T*>(nullptr), errOk);
+}
+
+template <typename T>
+int mallctlWrite(const char* cmd, T in, bool errOk=false) {
+  return mallctlHelper(cmd, static_cast<T*>(nullptr), &in, errOk);
+}
+
+int mallctlCall(const char* cmd, bool errOk=false);
+
+/*
  * jemalloc pprof utility functions.
  */
 int jemalloc_pprof_enable();
@@ -266,6 +314,61 @@ int jemalloc_pprof_disable();
 int jemalloc_pprof_dump(const std::string& prefix, bool force);
 
 #endif // USE_JEMALLOC
+
+template <class T>
+struct LowAllocator {
+  typedef T              value_type;
+  typedef T*             pointer;
+  typedef const T*       const_pointer;
+  typedef T&             reference;
+  typedef const T&       const_reference;
+  typedef std::size_t    size_type;
+  typedef std::ptrdiff_t difference_type;
+
+  template <class U>
+  struct rebind { using other = LowAllocator<U>; };
+
+  pointer address(reference value) {
+    return &value;
+  }
+  const_pointer address(const_reference value) const {
+    return &value;
+  }
+
+  LowAllocator() noexcept {}
+  template<class U> LowAllocator(const LowAllocator<U>&) noexcept {}
+  ~LowAllocator() noexcept {}
+
+  size_type max_size() const {
+    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  }
+
+  pointer allocate(size_type num, const void* = 0) {
+    pointer ret = (pointer)low_malloc(num * sizeof(T));
+    return ret;
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  void deallocate(pointer p, size_type num) {
+    low_free((void*)p);
+  }
+
+  template<class U> bool operator==(const LowAllocator<U>&) const {
+    return true;
+  }
+
+  template<class U> bool operator!=(const LowAllocator<U>&) const {
+    return false;
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

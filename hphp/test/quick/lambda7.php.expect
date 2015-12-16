@@ -41,7 +41,7 @@ array(1) {
   [0]=>
   string(3) "asd"
 }
-object(HH\Vector)#16 (2) {
+object(HH\Vector)#25 (2) {
   [0]=>
   int(2)
   [1]=>

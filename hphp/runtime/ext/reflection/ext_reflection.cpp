@@ -111,14 +111,11 @@ const StaticString
   s_type_hint_nullable("type_hint_nullable");
 
 Class* get_cls(const Variant& class_or_object) {
-  Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
-    ObjectData* obj = class_or_object.toCObjRef().get();
-    cls = obj->getVMClass();
-  } else {
-    cls = Unit::loadClass(class_or_object.toString().get());
+    return class_or_object.toCObjRef()->getVMClass();
   }
-  return cls;
+
+  return Unit::loadClass(class_or_object.toString().get());
 }
 
 const Func* get_method_func(const Class* cls, const String& meth_name) {
@@ -483,7 +480,8 @@ Array HHVM_FUNCTION(type_structure,
     assert(!typeStructure.empty());
     Array resolved;
     try {
-      resolved = TypeStructure::resolve(name, typeStructure);
+      bool persistent = true;
+      resolved = TypeStructure::resolve(name, typeStructure, persistent);
     } catch (Exception& e) {
       raise_error("resolving type alias %s failed. "
                   "Have you declared all classes in the type alias",
@@ -496,10 +494,7 @@ Array HHVM_FUNCTION(type_structure,
   auto const cls = get_cls(cls_or_obj);
 
   if (!cls) {
-    // an object must have an associated class
-    assert(!cls_or_obj.is(KindOfObject));
-    auto const cls_sd = cls_or_obj.toString().get();
-    raise_error("Non-existent class %s", cls_sd->data());
+    raise_error("Non-existent class %s", cls_or_obj.toString().get()->data());
   }
 
   auto const cls_sd = cls->name();
@@ -948,23 +943,30 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
   return true;
 }
 
+const StaticString s_ExpectedClosureInstance("Expected closure instance");
+
 // helper for getClosureScopeClass
-static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
-                          const Object& closure) {
-  auto clos = unsafe_cast<c_Closure>(closure);
-  if (clos->getScope()) {
-    return String(const_cast<StringData*>(clos->getScope()->name()));
+static Variant HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
+                           const Object& closure) {
+  if (!closure->instanceof(c_Closure::classof())) {
+    SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
   }
-  return String();
+  if (auto scope = c_Closure::fromObject(closure.get())->getScope()) {
+    return String(const_cast<StringData*>(scope->name()));
+  }
+  return init_null_variant;
 }
 
-static Object HHVM_METHOD(ReflectionFunction, getClosureThisObject,
-                          const Object& closure) {
-  auto clos = unsafe_cast<c_Closure>(closure);
+static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
+                           const Object& closure) {
+  if (!closure->instanceof(c_Closure::classof())) {
+    SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
+  }
+  auto clos = c_Closure::fromObject(closure.get());
   if (clos->hasThis()) {
     return Object{clos->getThis()};
   }
-  return Object{};
+  return init_null_variant;
 }
 
 // helper for getStaticVariables

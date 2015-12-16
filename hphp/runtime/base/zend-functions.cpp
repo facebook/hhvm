@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/util/fast_strtoll_base10.h"
 
 namespace HPHP {
 
@@ -190,7 +191,8 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
       }
     }
     if (lval) {
-      *lval = strtol(str, nullptr, base);
+      *lval = (base == 10 ? fast_strtoll_base10(str)
+                          : strtoll(str, nullptr, base));
     }
     return KindOfInt64;
   }

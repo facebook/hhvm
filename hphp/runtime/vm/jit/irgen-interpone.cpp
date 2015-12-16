@@ -135,8 +135,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutResource:    return TRes;
 
     case OutFDesc:       return folly::none;
-    case OutUnknown:     return TGen;
-
     case OutCns:         return TCell;
     case OutVUnknown:    return TBoxedInitCell;
 
@@ -150,6 +148,12 @@ folly::Optional<Type> interpOutputType(IRGS& env,
                                               topType(env, BCSPOffset{1}));
     case OutArithO:      return arithOpOverResult(topType(env, BCSPOffset{0}),
                                                   topType(env, BCSPOffset{1}));
+    case OutUnknown: {
+      if (isFPassStar(inst.op())) {
+        return inst.preppedByRef ? TBoxedInitCell : TCell;
+      }
+      return TGen;
+    }
     case OutBitOp:
       return bitOpResult(topType(env, BCSPOffset{0}),
                          inst.op() == HPHP::OpBitNot ?
@@ -503,7 +507,6 @@ void emitBindN(IRGS& env)                     { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
 void emitFPassN(IRGS& env, int32_t)           { INTERP }
-void emitFCallUnpack(IRGS& env, int32_t)      { INTERP }
 void emitCufSafeArray(IRGS& env)              { INTERP }
 void emitCufSafeReturn(IRGS& env)             { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }

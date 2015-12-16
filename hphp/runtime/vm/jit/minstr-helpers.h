@@ -192,22 +192,32 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
 
 //////////////////////////////////////////////////////////////////////
 
+inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
+                               TypedValue* result) {
+  if (LIKELY(result != &localTvRef)) {
+    if (result->m_type != KindOfRef) tvBox(result);
+    auto ref = result->m_data.pref;
+    ref->incRefCount();
+    return ref;
+  }
+
+  if (localTvRef.m_type != KindOfRef) {
+    // RefData::Make takes ownership of the reference that lives in localTvRef
+    // so no refcounting is necessary.
+    return RefData::Make(localTvRef);
+  }
+
+  return localTvRef.m_data.pref;
+}
+
 template <KeyType keyType, bool isObj>
-RefData* vGetPropImpl(Class* ctx, TypedValue* base,
-                      key_type<keyType> key, TypedValue& tvRef) {
+RefData* vGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
+  TypedValue localTvRef;
   auto result = Prop<false, true, false, isObj, keyType>(
-    tvRef,
-    ctx,
-    base,
-    key
+    localTvRef, ctx, base, key
   );
 
-  if (result->m_type != KindOfRef) {
-    tvBox(result);
-  }
-  auto ref = result->m_data.pref;
-  ref->incRefCount();
-  return ref;
+  return vGetRefShuffle(localTvRef, result);
 }
 
 #define VGETPROP_HELPER_TABLE(m)       \
@@ -218,9 +228,8 @@ RefData* vGetPropImpl(Class* ctx, TypedValue* base,
   m(vGetPropSO,  KeyType::Str,  true)
 
 #define X(nm, kt, isObj)                                              \
-inline RefData* nm(Class* ctx, TypedValue* base, key_type<kt> key,    \
-                   TypedValue& tvRef) {                               \
-  return vGetPropImpl<kt, isObj>(ctx, base, key, tvRef);              \
+inline RefData* nm(Class* ctx, TypedValue* base, key_type<kt> key) {  \
+  return vGetPropImpl<kt, isObj>(ctx, base, key);                     \
 }
 VGETPROP_HELPER_TABLE(X)
 #undef X
@@ -559,16 +568,11 @@ CGETELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template <KeyType keyType>
-RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key,
-                      TypedValue& tvRef) {
-  auto result = HPHP::ElemD<false, true, keyType>(tvRef, base, key);
+RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key) {
+  TypedValue localTvRef;
+  auto result = HPHP::ElemD<false, true, keyType>(localTvRef, base, key);
 
-  if (result->m_type != KindOfRef) {
-    tvBox(result);
-  }
-  auto ref = result->m_data.pref;
-  ref->incRefCount();
-  return ref;
+  return vGetRefShuffle(localTvRef, result);
 }
 
 #define VGETELEM_HELPER_TABLE(m)                \
@@ -578,8 +582,8 @@ RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key,
   m(vGetElemS,    KeyType::Str)
 
 #define X(nm, kt)                                                       \
-inline RefData* nm(TypedValue* base, key_type<kt> key, TypedValue& tvRef) { \
-  return vGetElemImpl<kt>(base, key,  tvRef);                             \
+  inline RefData* nm(TypedValue* base, key_type<kt> key) {              \
+    return vGetElemImpl<kt>(base, key);                                 \
 }
 VGETELEM_HELPER_TABLE(X)
 #undef X

@@ -33,10 +33,7 @@ VMRegAnchor::VMRegAnchor()
 VMRegAnchor::VMRegAnchor(ActRec* ar)
   : m_old(tl_regState)
 {
-  // Some C++ entry points have an ActRec prepared from after a call
-  // instruction. This syncs us to right after the call instruction.
   assert(tl_regState == VMRegState::DIRTY);
-  m_old = VMRegState::DIRTY;
   tl_regState = VMRegState::CLEAN;
 
   auto prevAr = g_context->getOuterVMFrame(ar);

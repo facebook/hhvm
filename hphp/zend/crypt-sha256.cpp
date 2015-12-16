@@ -2,17 +2,24 @@
    Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.  */
 /* Windows VC++ port by Pierre Joye <pierre@php.net> */
 
+#include "php-crypt_r.h"
+
 #include <errno.h>
 #include <limits.h>
-
-#define __alignof__ __alignof
-#define alloca _alloca
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _MSC_VER
+#define __alignof__ __alignof
+#define alloca _alloca
+
 #include <Windows.h>
+#endif
+
+namespace HPHP {
 
 char * __php_stpncpy(char *dst, const char *src, size_t len)
 {
@@ -75,7 +82,7 @@ static const uint32_t K[64] = {
 /* Process LEN bytes of BUFFER, accumulating context into CTX.
    It is assumed that LEN % 64 == 0.  */
 static void sha256_process_block (const void *buffer, size_t len, struct sha256_ctx *ctx) {
-  const uint32_t *words = buffer;
+  const uint32_t *words = (const uint32_t*)buffer;
   size_t nwords = len / sizeof (uint32_t);
   unsigned int t;
 
@@ -293,7 +300,7 @@ static const char sha256_rounds_prefix[] = "rounds=";
 #define ROUNDS_MAX 999999999
 
 /* Table with characters for base64 transformation.  */
-static const char b64t[64] =
+static const char b64t[] =
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
@@ -332,7 +339,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
   if (strncmp(salt, sha256_rounds_prefix, sizeof(sha256_rounds_prefix) - 1) == 0) {
     const char *num = salt + sizeof(sha256_rounds_prefix) - 1;
     char *endp;
-    size_t srounds = _strtoui64(num, &endp, 10);
+    unsigned long long srounds = STRTOUL(num, &endp, 10);
     if (*endp == '$') {
       salt = endp + 1;
       rounds = MAX(ROUNDS_MIN, MIN(srounds, ROUNDS_MAX));
@@ -345,13 +352,13 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 
   if ((key - (char *) 0) % __alignof__ (uint32_t) != 0) {
     char *tmp = (char *) alloca(key_len + __alignof__(uint32_t));
-    key = copied_key = memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__(uint32_t), key, key_len);
+    key = copied_key = (char*)memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__(uint32_t), key, key_len);
   }
 
   if ((salt - (char *) 0) % __alignof__(uint32_t) != 0) {
     char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint32_t));
     salt = copied_salt =
-    memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__ (uint32_t), salt, salt_len);
+    (char*)memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__ (uint32_t), salt, salt_len);
     copied_salt[salt_len] = 0;
   }
 
@@ -415,9 +422,9 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
   sha256_finish_ctx(&alt_ctx, temp_result);
 
   /* Create byte sequence P.  */
-  cp = p_bytes = alloca(key_len);
+  cp = p_bytes = (char*)alloca(key_len);
   for (cnt = key_len; cnt >= 32; cnt -= 32) {
-    cp = __php_mempcpy((void *)cp, (const void *)temp_result, 32);
+    cp = (char*)__php_mempcpy((void *)cp, (const void *)temp_result, 32);
   }
   memcpy(cp, temp_result, cnt);
 
@@ -433,9 +440,9 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
   sha256_finish_ctx(&alt_ctx, temp_result);
 
   /* Create byte sequence S.  */
-  cp = s_bytes = alloca(salt_len);
+  cp = s_bytes = (char*)alloca(salt_len);
   for (cnt = salt_len; cnt >= 32; cnt -= 32) {
-    cp = __php_mempcpy(cp, temp_result, 32);
+    cp = (char*)__php_mempcpy(cp, temp_result, 32);
   }
   memcpy(cp, temp_result, cnt);
 
@@ -531,17 +538,17 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
      inside the SHA256 implementation as well.  */
   sha256_init_ctx(&ctx);
   sha256_finish_ctx(&ctx, alt_result);
-  RtlSecureZeroMemory(temp_result, sizeof(temp_result));
-  RtlSecureZeroMemory(p_bytes, key_len);
-  RtlSecureZeroMemory(s_bytes, salt_len);
-  RtlSecureZeroMemory(&ctx, sizeof(ctx));
-  RtlSecureZeroMemory(&alt_ctx, sizeof(alt_ctx));
+  SECURE_ZERO(temp_result, sizeof(temp_result));
+  SECURE_ZERO(p_bytes, key_len);
+  SECURE_ZERO(s_bytes, salt_len);
+  SECURE_ZERO(&ctx, sizeof(ctx));
+  SECURE_ZERO(&alt_ctx, sizeof(alt_ctx));
 
   if (copied_key != NULL) {
-    RtlSecureZeroMemory(copied_key, key_len);
+    SECURE_ZERO(copied_key, key_len);
   }
   if (copied_salt != NULL) {
-    RtlSecureZeroMemory(copied_salt, salt_len);
+    SECURE_ZERO(copied_salt, salt_len);
   }
 
   return buffer;
@@ -573,4 +580,6 @@ char * php_sha256_crypt(const char *key, const char *salt)
   }
 
   return php_sha256_crypt_r(key, salt, buffer, buflen);
+}
+
 }

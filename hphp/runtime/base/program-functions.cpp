@@ -974,13 +974,11 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (RuntimeOption::EvalEnableNuma) {
 #ifdef USE_JEMALLOC
-    uint64_t epoch = 1;
     unsigned narenas;
-    size_t sz = sizeof(narenas);
     size_t mib[3];
     size_t miblen = 3;
-    if (mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch)) == 0 &&
-        mallctl("arenas.narenas", &narenas, &sz, nullptr, 0) == 0 &&
+    if (mallctlWrite<uint64_t>("epoch", 1, true) == 0 &&
+        mallctlRead("arenas.narenas", &narenas, true) == 0 &&
         mallctlnametomib("arena.0.purge", mib, &miblen) == 0) {
       mib[1] = size_t(narenas);
       mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
@@ -1517,8 +1515,10 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);
     std::vector<std::string> badnodes;
     config.lint(badnodes);
-    for (unsigned int i = 0; i < badnodes.size(); i++) {
-      Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
+    for (const auto& badnode : badnodes) {
+      const auto msg = "Possible bad config node: " + badnode;
+      fprintf(stderr, "%s\n", msg.c_str());
+      messages.push_back(msg);
     }
   }
   std::vector<int> inherited_fds;

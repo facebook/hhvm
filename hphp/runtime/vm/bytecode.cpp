@@ -1572,7 +1572,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
     ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numVarArgs));
     if (takesVariadicParam) {
       auto varArgsArray =
-        Array::attach(MixedArray::MakePacked(numVarArgs, tvArgs));
+        Array::attach(PackedArray::MakePacked(numVarArgs, tvArgs));
       // Incref the args (they're already referenced in extraArgs) but now
       // additionally referenced in varArgsArray ...
       auto tv = tvArgs; uint32_t i = 0;
@@ -1594,7 +1594,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
     assert(takesVariadicParam); // called only if extra args are used
     auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
     auto varArgsArray =
-      Array::attach(MixedArray::MakePacked(numVarArgs, tvArgs));
+      Array::attach(PackedArray::MakePacked(numVarArgs, tvArgs));
     // Discard the arguments from the stack; they were all moved into the
     // variadic args array so we don't need to decref the values.
     stack.ndiscard(numVarArgs);
@@ -1616,7 +1616,7 @@ static void shuffleMagicArgs(ActRec* ar) {
   // We need to make an array containing all the arguments passed by
   // the caller and put it where the second argument is.
   auto argArray = Array::attach(
-    nargs ? MixedArray::MakePacked(
+    nargs ? PackedArray::MakePacked(
               nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
           : staticEmptyArray()
   );
@@ -1723,7 +1723,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
     // the caller and put it where the second argument is.
     auto argArray = Array::attach(
       nregular
-      ? MixedArray::MakePacked(
+      ? PackedArray::MakePacked(
         nregular, reinterpret_cast<TypedValue*>(ar) - nregular)
       : staticEmptyArray()
     );
@@ -1904,10 +1904,9 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     ar->setExtraArgs(extraArgs);
   } else {
     assert(hasVarParam);
-    if (nparams == 0
-        && nextra_regular == 0
-        && isArrayType(args.m_type)
-        && args.m_data.parr->isVectorData()) {
+    if (nparams == nregular &&
+        isArrayType(args.m_type) &&
+        args.m_data.parr->isVectorData()) {
       stack.pushArray(args.m_data.parr);
     } else {
       PackedArrayInit ai(extra);
@@ -3633,7 +3632,7 @@ OPTBLD_INLINE void iopNewArray(IOP_ARGS) {
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyArray());
   } else {
-    vmStack().pushArrayNoRc(MixedArray::MakeReserve(capacity));
+    vmStack().pushArrayNoRc(PackedArray::MakeReserve(capacity));
   }
 }
 
@@ -3656,8 +3655,8 @@ OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
   if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
   } else {
-    capacity = (capacity ? capacity : MixedArray::SmallSize);
-    arr = MixedArray::MakeReserve(capacity);
+    capacity = (capacity ? capacity : PackedArray::SmallSize);
+    arr = PackedArray::MakeReserve(capacity);
   }
   vmStack().pushArrayNoRc(arr);
 }
@@ -3665,7 +3664,7 @@ OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
 OPTBLD_INLINE void iopNewPackedArray(IOP_ARGS) {
   auto n = decode_iva(pc);
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = MixedArray::MakePacked(n, vmStack().topC());
+  auto* a = PackedArray::MakePacked(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushArrayNoRc(a);
 }
@@ -6811,11 +6810,16 @@ static bool doFCallArray(PC& pc, int numStackValues,
   return true;
 }
 
-bool doFCallArrayTC(PC pc) {
+bool doFCallArrayTC(PC pc, int32_t numArgs) {
   assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto const ret = doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
+  auto onInvalid = CallArrOnInvalidContainer::WarnAndContinue;
+  if (!numArgs) {
+    numArgs = 1;
+    onInvalid = CallArrOnInvalidContainer::CastToArray;
+  }
+  auto const ret = doFCallArray(pc, numArgs, onInvalid);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }
@@ -7413,10 +7417,10 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   auto const cls = Unit::loadClass(clsName)->rescope(
     const_cast<Class*>(vmfp()->m_func->cls())
   );
-  auto const cl = static_cast<c_Closure*>(newInstance(cls));
-  cl->init(numArgs, vmfp(), vmStack().top());
+  auto obj = newInstance(cls);
+  c_Closure::fromObject(obj)->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);
-  vmStack().pushObjectNoRc(cl);
+  vmStack().pushObjectNoRc(obj);
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {

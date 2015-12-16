@@ -115,6 +115,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/struct-array.h"
@@ -9163,7 +9164,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
   tvVal.m_type = KindOfUninit;
   // static array initilization
   auto initArray = [&](ExpressionPtr el) {
-    m_staticArrays.push_back(Array::attach(MixedArray::MakeReserve(0)));
+    m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
     m_staticColType.push_back(ct);
     visit(el);
     tvVal = make_tv<KindOfPersistentArray>(

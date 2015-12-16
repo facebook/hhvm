@@ -58,10 +58,11 @@ void checkHHConfig(const Unit* unit) {
     raise_error(
       "%s appears to be a Hack file, but you do not appear to be running "
       "the Hack typechecker. See the documentation at %s for information on "
-      "getting it running. You can also set Hack.Lang.LookForTypechecker=0 "
+      "getting it running. You can also set "
+      "`-d hhvm.hack.lang.look_for_typechecker=0` "
       "to disable this check (not recommended).",
       s.c_str(),
-      "http://docs.hhvm.com/manual/en/install.hack.bootstrapping.php"
+      "http://docs.hhvm.com/hack/typechecker/setup"
     );
   } else {
     s_foundHHConfig = true;

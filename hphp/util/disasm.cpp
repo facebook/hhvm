@@ -65,7 +65,7 @@ Disasm::Disasm(const Disasm::Options& opts)
 #define MAX_INSTR_ASM_LEN 128
 
 static const xed_syntax_enum_t s_xed_syntax =
-  getenv("HHVM_ATT_DISAS") ? XED_SYNTAX_ATT : XED_SYNTAX_INTEL;
+  getenv("HHVM_INTEL_DISAS") ? XED_SYNTAX_INTEL : XED_SYNTAX_ATT;
 #endif // HAVE_LIBXED
 
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,

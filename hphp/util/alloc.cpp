@@ -60,10 +60,7 @@ static void numa_purge_arena();
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   if (mallctl) {
-    int err = mallctl("thread.tcache.flush", nullptr, nullptr, nullptr, 0);
-    if (UNLIKELY(err != 0)) {
-      Logger::Warning("mallctl thread.tcache.flush failed with error %d", err);
-    }
+    mallctlCall("thread.tcache.flush", true);
     numa_purge_arena();
   }
 #endif
@@ -254,9 +251,7 @@ static void numa_purge_arena() {
   // by request threads.
   if (!threads_bind_local) return;
   unsigned arena;
-  size_t sz = sizeof(arena);
-  int DEBUG_ONLY err = mallctl("thread.arena", &arena, &sz, nullptr, 0);
-  assert(err == 0);
+  mallctlRead("thread.arena", &arena);
   if (arena >= base_arena && arena < base_arena + numa_num_nodes) {
     // Threads may race through the following calls, but the last call made by
     // any idling thread will correctly restore lg_dirty_mult.
@@ -274,16 +269,14 @@ void enable_numa(bool local) {
     threads_bind_local = true;
 
     unsigned arenas;
-    size_t sz_arenas = sizeof(arenas);
-    if (mallctl("arenas.narenas", &arenas, &sz_arenas, nullptr, 0) != 0) {
+    if (mallctlRead("arenas.narenas", &arenas, true) != 0) {
       return;
     }
 
     base_arena = arenas;
     for (int i = 0; i < numa_num_nodes; i++) {
       int arena;
-      size_t sz = sizeof(arena);
-      if (mallctl("arenas.extend", &arena, &sz, nullptr, 0) != 0) {
+      if (mallctlRead("arenas.extend", &arena, true) != 0) {
         return;
       }
       if (arena != arenas) {
@@ -349,9 +342,7 @@ void set_numa_binding(int node) {
     numa_bitmask_free(nodes);
 
     int arena = base_arena + node;
-    int DEBUG_ONLY e = mallctl("thread.arena", nullptr, nullptr,
-                               &arena, sizeof(arena));
-    assert(!e);
+    mallctlWrite("thread.arena", arena);
   }
 
   char buf[32];
@@ -411,15 +402,12 @@ struct JEMallocInitializer {
     initNuma();
 
     // Create a special arena to be used for allocating objects in low memory.
-    size_t sz = sizeof(low_arena);
-    if (mallctl("arenas.extend", &low_arena, &sz, nullptr, 0) != 0) {
+    if (mallctlRead("arenas.extend", &low_arena, true) != 0) {
       // Error; bail out.
       return;
     }
-    const char *dss = "primary";
-    if (mallctl(folly::format("arena.{}.dss", low_arena).str().c_str(),
-                nullptr, nullptr,
-                (void *)&dss, sizeof(const char *)) != 0) {
+    if (mallctlWrite(folly::format("arena.{}.dss", low_arena).str().c_str(),
+                     "primary", true) != 0) {
       // Error; bail out.
       return;
     }
@@ -506,22 +494,24 @@ void low_malloc_skip_huge(void* start, void* end) {}
 
 #ifdef USE_JEMALLOC
 
+int mallctlCall(const char* cmd, bool errOk) {
+  // Use <unsigned> rather than <void> to avoid sizeof(void).
+  return mallctlHelper<unsigned>(cmd, nullptr, nullptr, errOk);
+}
+
 int jemalloc_pprof_enable() {
-  bool active = true;
-  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+  return mallctlWrite("prof.active", true, true);
 }
 
 int jemalloc_pprof_disable() {
-  bool active = false;
-  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+  return mallctlWrite("prof.active", false, true);
 }
 
 int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   if (!force) {
     bool active = false;
-    size_t activeSize = sizeof(active);
     // Check if profiling has been enabled before trying to dump.
-    int err = mallctl("opt.prof", &active, &activeSize, nullptr, 0);
+    int err = mallctlRead("opt.prof", &active, true);
     if (err || !active) {
       return 0; // nothing to do
     }
@@ -529,12 +519,11 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
   if (prefix != "") {
     const char *s = prefix.c_str();
-    return mallctl("prof.dump", nullptr, nullptr, (void *)&s, sizeof(char *));
+    return mallctlWrite("prof.dump", s, true);
   } else {
-    return mallctl("prof.dump", nullptr, nullptr, nullptr, 0);
+    return mallctlCall("prof.dump", true);
   }
 }
-
 #endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////

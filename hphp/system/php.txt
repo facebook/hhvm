@@ -2,6 +2,7 @@
 
 # Order matters here. Put parent classes in this list before child classes
 hphp/system/php/lang/stdClass.php
+hphp/system/php/lang/Closure.php
 hphp/system/php/lang/pinitSentinel.php
 hphp/system/php/lang/string.php
 hphp/system/php/lang/resource.php

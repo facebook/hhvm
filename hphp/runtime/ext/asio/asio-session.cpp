@@ -407,8 +407,9 @@ bool AsioSession::processSleepEvents() {
 }
 
 AsioSession::TimePoint AsioSession::sleepWakeTime() {
-  return m_sleepEvents.empty() ? getLatestWakeTime() :
-         m_sleepEvents.front()->getWakeTime();
+  auto const timeout = getLatestWakeTime();
+  return m_sleepEvents.empty() ? timeout :
+         min(timeout, m_sleepEvents.front()->getWakeTime());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

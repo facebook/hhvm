@@ -98,7 +98,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   discard(env, 1);
 
   // store the return value and return control to the caller.
-  gen(env, StRetVal, fp(env), waitHandle);
+  gen(env, StRetVal, StRetValData { true }, fp(env), waitHandle);
   gen(env, StTVAux, fp(env), cns(env, 1));
   auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
   gen(env, RetCtrl, ret_data, sp(env), fp(env));
@@ -263,7 +263,7 @@ void emitFCallAwait(IRGS& env,
       auto addr = gen(env, LdStkAddr,
                       IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
                       sp(env));
-      auto aux = gen(env, LdTVAux, addr);
+      auto aux = gen(env, LdTVAux, LdTVAuxData { 1 }, addr);
       gen(env, JmpNZero, taken, aux);
     },
     [&] {
@@ -323,7 +323,7 @@ void emitCreateCont(IRGS& env) {
 
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.
-  gen(env, StRetVal, fp(env), cont);
+  gen(env, StRetVal, StRetValData { true }, fp(env), cont);
   auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
   gen(env, RetCtrl, ret_data, sp(env), fp(env));
 }

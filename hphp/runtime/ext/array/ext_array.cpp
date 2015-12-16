@@ -345,7 +345,7 @@ Variant array_keys_helper(const Variant& input,
     }
     return ai.toVariant();
   } else {
-    Array ai = Array::attach(MixedArray::MakeReserve(0));
+    Array ai = Array::attach(PackedArray::MakeReserve(0));
     for (ArrayIter iter(cell_input); iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
           (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
@@ -912,7 +912,7 @@ Variant HHVM_FUNCTION(array_slice,
   } else {
     // Otherwise PackedArrayInit can't be used because non-numeric keys are
     // preserved even when preserve_keys is false
-    Array ret = Array::attach(MixedArray::MakeReserve(len));
+    Array ret = Array::attach(PackedArray::MakeReserve(len));
     for (; pos < (offset + len) && iter; ++pos, ++iter) {
       Variant key(iter.first());
       bool doAppend = !preserve_keys && key.isNumeric();
@@ -1188,7 +1188,7 @@ Array HHVM_FUNCTION(compact,
                     const Variant& varname,
                     const Array& args /* = null array */) {
   raise_disallowed_dynamic_call("compact should not be called dynamically");
-  Array ret = Array::attach(MixedArray::MakeReserve(args.size() + 1));
+  Array ret = Array::attach(PackedArray::MakeReserve(args.size() + 1));
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
     compact(v, ret, varname);
@@ -1201,7 +1201,7 @@ Array HHVM_FUNCTION(compact,
 Array HHVM_FUNCTION(__SystemLib_compact_sl,
                     const Variant& varname,
                     const Array& args /* = null array */) {
-  Array ret = Array::attach(MixedArray::MakeReserve(args.size() + 1));
+  Array ret = Array::attach(PackedArray::MakeReserve(args.size() + 1));
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
     compact(v, ret, varname);

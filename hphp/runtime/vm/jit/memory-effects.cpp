@@ -861,7 +861,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetElem:
   case SetNewElemArray:
   case SetNewElem:
+  case SetOpElem:
+  case SetWithRefElem:
+  case SetWithRefNewElem:
   case UnsetElem:
+  case BindElem:
+  case BindNewElem:
+  case IncDecElem:
   case ElemArrayD:
   case ElemArrayU:
     // Right now we generally can't limit any of these better than general
@@ -875,12 +881,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemX:
   case ElemDX:
   case ElemUX:
-  case BindElem:
-  case BindNewElem:
-  case IncDecElem:
-  case SetOpElem:
-  case SetWithRefElem:
-  case SetWithRefNewElem:
     assertx(inst.src(0)->isA(TPtrToGen));
     return minstr_with_tvref(inst);
 
@@ -898,6 +898,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case UnsetProp:
   case IncDecProp:
   case SetProp:
+  case SetOpProp:
+  case BindProp:
     return may_raise(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
@@ -906,8 +908,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PropX:
   case PropDX:
   case PropQ:
-  case BindProp:
-  case SetOpProp:
     return minstr_with_tvref(inst);
 
   /*

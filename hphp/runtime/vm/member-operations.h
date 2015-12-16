@@ -1322,7 +1322,6 @@ inline void IncDecElemScalar(TypedValue& dest) {
 }
 
 inline void IncDecElem(
-  TypedValue& tvRef,
   IncDecOp op,
   TypedValue* base,
   TypedValue key,
@@ -1362,14 +1361,19 @@ inline void IncDecElem(
 
     case KindOfObject: {
       TypedValue* result;
+      auto localTvRef = make_tv<KindOfUninit>();
+
       if (LIKELY(base->m_data.pobj->isCollection())) {
         result = collections::atRw(base->m_data.pobj, &key);
         assert(cellIsPlausible(*result));
       } else {
-        tvRef = objOffsetGet(instanceFromTv(base), key);
-        result = tvToCell(&tvRef);
+        localTvRef = objOffsetGet(instanceFromTv(base), key);
+        result = tvToCell(&localTvRef);
       }
-      return IncDecBody(op, result, &dest);
+
+      IncDecBody(op, result, &dest);
+      tvRefcountedDecRef(localTvRef);
+      return;
     }
 
     case KindOfRef:

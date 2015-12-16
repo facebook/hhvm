@@ -238,8 +238,17 @@ VGETPROP_HELPER_TABLE(X)
 
 template <bool isObj>
 void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
-                  RefData* val, TypedValue& tvRef) {
-  auto prop = Prop<false, true, false, isObj>(tvRef, ctx, base, key);
+                  RefData* val) {
+  TypedValue localTvRef;
+  auto prop = Prop<false, true, false, isObj>(localTvRef, ctx, base, key);
+
+  if (UNLIKELY(prop == &localTvRef)) {
+    // Skip binding a TypedValue that's about to be destroyed and just destroy
+    // it now.
+    tvRefcountedDecRef(localTvRef);
+    return;
+  }
+
   tvBindRef(val, prop);
 }
 
@@ -250,8 +259,8 @@ void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
 
 #define X(nm, ...)                                                      \
 inline void nm(Class* ctx, TypedValue* base, TypedValue key,            \
-               RefData* val, TypedValue& tvRef) {                       \
-  bindPropImpl<__VA_ARGS__>(ctx, base, key, val, tvRef);                \
+               RefData* val) {                                          \
+  bindPropImpl<__VA_ARGS__>(ctx, base, key, val);                       \
 }
 BINDPROP_HELPER_TABLE(X)
 #undef X
@@ -300,13 +309,11 @@ UNSETPROP_HELPER_TABLE(X)
 
 template <bool isObj>
 TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
-                         TypedValue key,
-                         Cell val, TypedValue& tvRef, SetOpOp op) {
-  auto result = HPHP::SetOpProp<isObj>(tvRef, ctx, op, base, key, &val);
+                         TypedValue key, Cell val, SetOpOp op) {
+  TypedValue localTvRef;
+  auto result = HPHP::SetOpProp<isObj>(localTvRef, ctx, op, base, key, &val);
 
-  Cell ret;
-  cellDup(*tvToCell(result), ret);
-  return ret;
+  return cGetRefShuffle(localTvRef, result);
 }
 
 #define SETOPPROP_HELPER_TABLE(m)               \
@@ -316,8 +323,8 @@ TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
 
 #define X(nm, ...)                                                      \
 inline TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,      \
-                     Cell val, TypedValue& tvRef, SetOpOp op) {         \
-  return setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, tvRef, op);    \
+                     Cell val, SetOpOp op) {                            \
+  return setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, op);           \
 }
 SETOPPROP_HELPER_TABLE(X)
 #undef X

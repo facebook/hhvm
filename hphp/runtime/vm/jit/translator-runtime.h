@@ -85,13 +85,8 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
 void setNewElem(TypedValue* base, Cell val);
 void setNewElemArray(TypedValue* base, Cell val);
-void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* boxValue(TypedValue tv);
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
-TypedValue setOpElem(TypedValue* base, TypedValue key,
-                     Cell val, MInstrState* mis, SetOpOp op);
-TypedValue incDecElem(TypedValue* base, TypedValue key,
-                      MInstrState* mis, IncDecOp op);
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */
@@ -227,12 +222,15 @@ bool methodExistsHelper(Class*, StringData*);
 ATTRIBUTE_NORETURN void throwSwitchMode();
 
 namespace MInstrHelpers {
+TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
-void bindElemC(TypedValue*, TypedValue, RefData*, MInstrState*);
-void setWithRefElemC(TypedValue*, TypedValue, TypedValue, MInstrState*);
-void setWithRefNewElem(TypedValue*, TypedValue, MInstrState*);
+void bindElemC(TypedValue*, TypedValue, RefData*);
+void setWithRefElemC(TypedValue*, TypedValue, TypedValue);
+void setWithRefNewElem(TypedValue*, TypedValue);
+TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
+void bindNewElem(TypedValue* base, RefData* val);
 }
 
 /*

@@ -5861,8 +5861,7 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
       case MEC:
       case MET:
       case MEI:
-        IncDecElem(*mstate.ref.asTypedValue(), op, mstate.base,
-                   *mstate.curMember, to);
+        IncDecElem(op, mstate.base, *mstate.curMember, to);
         break;
       case MPL:
       case MPC:

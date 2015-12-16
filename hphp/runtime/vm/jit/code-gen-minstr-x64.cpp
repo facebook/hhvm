@@ -175,7 +175,6 @@ void CodeGenerator::cgBindProp(IRInstruction* inst) {
       .ssa(0)
       .typedValue(1)
       .ssa(2)
-      .ssa(3)
   );
 }
 
@@ -226,7 +225,6 @@ void CodeGenerator::cgSetOpProp(IRInstruction* inst) {
       .ssa(0)
       .typedValue(1)
       .typedValue(2)
-      .ssa(3)
       .imm(static_cast<int32_t>(extra->op))
   );
 }

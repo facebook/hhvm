@@ -1438,7 +1438,6 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
         SCOPE_EXIT { tvRefcountedDecRef(get_result); };
         setopBody(tvToCell(&get_result), op, val);
         if (getAttribute(UseSet)) {
-          assert(tvRef.m_type == KindOfUninit);
           cellDup(*tvToCell(&get_result), tvRef);
           if (invokeSet(key, &tvRef)) {
             return &tvRef;

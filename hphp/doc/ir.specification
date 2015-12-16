@@ -2264,7 +2264,7 @@ fields of that struct for holding intermediate values.
   Get property with key S1 from base S0 as a reference.
 
 | BindProp, ND,
-|           S(Obj,PtrToGen) S(Cell) S(BoxedCell) S(PtrToMISGen),
+|           S(Obj,PtrToGen) S(Cell) S(BoxedCell),
 |           MProp|Er
 
   Bind property with key S1 in base S0 to the reference in S2.
@@ -2278,7 +2278,7 @@ fields of that struct for holding intermediate values.
   Unset an object property.
 
 | SetOpProp<op>, D(Cell),
-|                S(Obj,PtrToGen) S(Cell) S(Cell) S(PtrToMISGen),
+|                S(Obj,PtrToGen) S(Cell) S(Cell),
 |                MProp|PRc|Er
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.
@@ -2349,7 +2349,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0 as a reference.
 
-| BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell) S(PtrToMISGen), MElem|Er
+| BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell), MElem|Er
 
   Bind element with key S1 in base S0 to the reference S2.
 
@@ -2379,9 +2379,7 @@ fields of that struct for holding intermediate values.
   Furthermore, in the case of "invalid offsets", SetElem may throw an
   InvalidSetMException (see discussion above).
 
-| SetWithRefElem, ND,
-|                 S(PtrToGen) S(Gen) S(Gen) S(PtrToMISGen),
-|                 MElem|Er
+| SetWithRefElem, ND, S(PtrToGen) S(Gen) S(Gen), MElem|Er
 
   Set element with key S1 in S0 to S2.
 
@@ -2390,14 +2388,12 @@ fields of that struct for holding intermediate values.
   Unsets the element at key S1 in the base S0.
 
 | SetOpElem<op>, D(Cell),
-|                S(PtrToGen) S(Cell) S(Cell) S(PtrToMISGen),
+|                S(PtrToGen) S(Cell) S(Cell),
 |                MElem|PRc|Er
 
   Set op elem with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecElem, D(Cell),
-|             S(PtrToGen) S(Cell) S(PtrToMISGen),
-|             MElem|PRc|Er
+| IncDecElem, D(Cell), S(PtrToGen) S(Cell), MElem|PRc|Er
 
   Increment/decrement element with key S1 in base S0.
 
@@ -2409,15 +2405,11 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0, where S0 must be a pointer to an array.
 
-| SetWithRefNewElem, ND,
-|                    S(PtrToGen) S(PtrToGen) S(PtrToMISGen),
-|                    MElem|Er
+| SetWithRefNewElem, ND, S(PtrToGen) S(PtrToGen), MElem|Er
 
   AppendWithRef the value in S1 to S0.
 
-| BindNewElem, ND,
-|              S(PtrToGen) S(BoxedCell) S(PtrToMISGen),
-|              MElem|Er
+| BindNewElem, ND, S(PtrToGen) S(BoxedCell), MElem|Er
 
   Append the reference in S1 to S0.
 

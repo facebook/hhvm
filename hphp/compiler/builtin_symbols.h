@@ -20,8 +20,6 @@
 #include <set>
 #include <string>
 
-#include "hphp/util/string-bag.h"
-
 #include "hphp/compiler/hphp.h"
 
 #include "hphp/runtime/base/class-info.h"
@@ -63,7 +61,6 @@ public:
   static const char *const GlobalNames[];
   static int NumGlobalNames();
 private:
-  static StringBag s_strings;
   static const char *SystemClasses[];
 
   static hphp_string_set s_superGlobals;

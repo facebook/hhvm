@@ -47,7 +47,6 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 bool BuiltinSymbols::Loaded = false;
-StringBag BuiltinSymbols::s_strings;
 AnalysisResultPtr BuiltinSymbols::s_systemAr;
 
 const char *const BuiltinSymbols::GlobalNames[] = {

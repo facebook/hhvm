@@ -217,7 +217,7 @@ let register_entry_point ~save ~restore =
         Unix.clear_close_on_exec heap_handle.SharedMem.h_fd;
         let handle =
           Daemon.spawn
-            ~log_file
+            (* ~log_file *)
             ~log_mode:Daemon.Log_append
             ~reason:"worker" entry
             (saved_state, gc_control, heap_handle) in
@@ -273,7 +273,7 @@ let call w (type a) (type b) (f : a -> b) (x : a) : b handle =
   let result () : b =
     match Unix.waitpid [Unix.WNOHANG] slave_pid with
     | 0, _ | _, Unix.WEXITED 0 ->
-        let res : b = Timeout.input_value (Daemon.cast_in inc) in
+        let res : b = input_value (Daemon.cast_in inc) in
         if w.prespawned = None then Daemon.close h;
         res
     | _, Unix.WEXITED i when i = Exit_status.(to_int Out_of_shared_memory) ->

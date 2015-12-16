@@ -75,7 +75,7 @@ let setup_autokill_typechecker_on_exit typechecker =
 let start_hh_server options log_mode =
   let log_file =
     match log_mode with
-    | Daemon.Log_file ->
+    | Daemon.Log_file | Daemon.Log_append ->
       let log_link = ServerFiles.log_link (ServerArgs.root options) in
       (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
       let log_file = ServerFiles.make_link_of_timestamped log_link in

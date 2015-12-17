@@ -3404,7 +3404,7 @@ void sink_incs(Env& env) {
       // insert the inc right before succ if we advanced any instruction
       auto const new_inc = env.unit.gen(IncRef, marker, tmp);
       block->insert(iter, new_inc);
-      FTRACE(2, "    ** sink_incs: {} -> {}, {}\n", *inc, *new_inc);
+      FTRACE(2, "    ** sink_incs: {} -> {}\n", *inc, *new_inc);
       remove_helper(inc);
     }
   }

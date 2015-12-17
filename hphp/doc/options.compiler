@@ -207,7 +207,7 @@ a more precise partitioning.
 
 = GCCOptimization
 
-Default is disabled. This option allows to selectively decrease the compiler
+Default is disabled. This option allows one to selectively decrease the compiler
 optimization level for long functions. It is specified as:
 
   GCCOptimization {

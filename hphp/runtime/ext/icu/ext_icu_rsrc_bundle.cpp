@@ -18,7 +18,7 @@ static Variant extractValue(ResourceBundle* data,
                             const icu::ResourceBundle& bundle) {
 #define EXTRACT_ERR(type) \
   if (U_FAILURE(error)) { \
-    data->setError(error, "Failed to retreive " #type " value"); \
+    data->setError(error, "Failed to retrieve " #type " value"); \
     return init_null(); \
   }
 

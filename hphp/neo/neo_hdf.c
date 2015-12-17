@@ -1190,7 +1190,7 @@ static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
     if (*s == '\0' || k_l == 0)
     {
       _dealloc_hdf_attr(attr);
-      return nerr_raise(NERR_PARSE, "Misformed attribute specification: %s", *str);
+      return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
     }
     SKIPWS(s);
     if (*s == '=')
@@ -1245,7 +1245,7 @@ static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
 	{
 	  _dealloc_hdf_attr(attr);
 	  string_clear(&buf);
-	  return nerr_raise(NERR_PARSE, "Misformed attribute specification: %s", *str);
+	  return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
 	}
 	s++;
 	v = buf.buf;
@@ -1258,7 +1258,7 @@ static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
 	if (*s == '\0')
 	{
 	  _dealloc_hdf_attr(attr);
-	  return nerr_raise(NERR_PARSE, "Misformed attribute specification: %s", *str);
+	  return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
 	}
         v_l = s-v;
       }
@@ -1299,7 +1299,7 @@ static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
   if (*s == '\0')
   {
     _dealloc_hdf_attr(attr);
-    return nerr_raise(NERR_PARSE, "Misformed attribute specification: %s", *str);
+    return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
   }
   *str = s+1;
   return STATUS_OK;

@@ -30,9 +30,10 @@
 #include <type_traits>
 
 #include "hphp/util/alloc.h"
-#include "hphp/util/hdf.h"
 #include "hphp/util/async-job.h"
 #include "hphp/util/boot_timer.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/logger.h"
 
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/base/array-init.h"
@@ -105,7 +106,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ForceConstLoadToAPC, ini, config,
                "Server.APC.ForceConstLoadToAPC", true);
   Config::Bind(PrimeLibrary, ini, config, "Server.APC.PrimeLibrary");
-  Config::Bind(LoadThread, ini, config, "Server.APC.LoadThread", 2);
+  Config::Bind(LoadThread, ini, config, "Server.APC.LoadThread", 15);
   Config::Bind(CompletionKeys, ini, config, "Server.APC.CompletionKeys");
   std::string tblType = Config::GetString(ini, config, "Server.APC.TableType",
                                           "concurrent");
@@ -157,6 +158,14 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
 void apcExtension::moduleInit() {
   if (UseFileStorage) {
+    // We use 32 bits to represent offset into a chunk, so don't make it too
+    // large.
+    constexpr int64_t MaxChunkSize = 1LL << 31;
+    if (FileStorageChunkSize > MaxChunkSize) {
+      Logger::Warning("Server.APC.FileStorage.ChunkSize too large, "
+                      "resetting to %" PRId64, MaxChunkSize);
+      FileStorageChunkSize = MaxChunkSize;
+    }
     s_apc_file_storage.enable(FileStoragePrefix, FileStorageChunkSize);
   }
 
@@ -206,7 +215,7 @@ bool apcExtension::Enable = true;
 bool apcExtension::EnableConstLoad = false;
 bool apcExtension::ForceConstLoadToAPC = true;
 std::string apcExtension::PrimeLibrary;
-int apcExtension::LoadThread = 1;
+int apcExtension::LoadThread = 15;
 std::set<std::string> apcExtension::CompletionKeys;
 apcExtension::TableTypes apcExtension::TableType =
   TableTypes::ConcurrentTable;
@@ -521,14 +530,10 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
 #ifdef _MSC_VER
   throw Exception("apc_load_func is not currently supported under MSVC!");
 #else
-  Lock lock(dl_mutex);
-  dlerror(); // clear errors
   PFUNC_APC_LOAD p = (PFUNC_APC_LOAD)dlsym(handle, name);
-  const char *error = dlerror();
-  if (error || p == nullptr) {
-    throw Exception("Unable to find %s in %s: %s", name,
-                    apcExtension::PrimeLibrary.c_str(),
-                    error ? error : "(unknown error)");
+  if (p == nullptr) {
+    throw Exception("Unable to find %s in %s", name,
+                    apcExtension::PrimeLibrary.c_str());
   }
   return p;
 #endif

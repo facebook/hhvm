@@ -1662,9 +1662,8 @@ void RuntimeOption::Load(
   {
     // Sandbox
     Config::Bind(SandboxMode, ini, config, "Sandbox.SandboxMode");
-    SandboxPattern = format_pattern(Config::GetString(ini, config,
-                                                      "Sandbox.Pattern"),
-                                    true);
+    Config::Bind(SandboxPattern, ini, config, "Sandbox.Pattern");
+    SandboxPattern = format_pattern(SandboxPattern, true);
     Config::Bind(SandboxHome, ini, config, "Sandbox.Home");
     Config::Bind(SandboxFallback, ini, config, "Sandbox.Fallback");
     Config::Bind(SandboxConfFile, ini, config, "Sandbox.ConfFile");

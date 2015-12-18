@@ -106,9 +106,9 @@ ETCH_LABEL(enterTCHelper$prologue):
 /*
  * handleSRHelper
  *
- * Translated code will jump to this stub to perform all
- * service requests. It calls out to C++ to handle the request, then jumps
- * to the returned address (which may be the callToExit stub).
+ * Translated code will jump to this stub to perform all service requests. It
+ * calls out to C++ to handle the request, then jumps to the returned address
+ * (which may be the callToExit stub).
  *
  * The columns are registers of:
  * X64 ABI

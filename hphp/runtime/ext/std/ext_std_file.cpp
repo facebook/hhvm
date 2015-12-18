@@ -1833,6 +1833,7 @@ Variant HHVM_FUNCTION(tmpfile) {
   auto file = req::make<TempFile>(true);
   if (!file->valid()) {
     return false;
+  }
   return Variant(file);
 }
 

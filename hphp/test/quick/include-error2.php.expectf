@@ -1,0 +1,2 @@
+
+Fatal error: require(not-extisting-file.php): File not found in %s/test/quick/include-error2.php on line 2

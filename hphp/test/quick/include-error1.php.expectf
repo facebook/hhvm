@@ -1,0 +1,10 @@
+
+Warning: include(not-existing-file.php): File not found in %s/test/quick/include-error1.php on line 2
+
+Warning: include(not-extisting-file.php): File not found in %s/test/quick/include-error1.php on line 3
+
+Warning: include_once(not-extisting-file.php): File not found in %s/test/quick/include-error1.php on line 4
+
+Warning: include_once(not-extisting-file.php): File not found in %s/test/quick/include-error1.php on line 5
+
+Fatal error: require(not-extisting-file.php): File not found in %s/test/quick/include-error1.php on line 6

@@ -1925,9 +1925,7 @@ void Class::setProperties() {
       if (preProp->attrs() & AttrDeepInit) {
         m_hasDeepInitProps = true;
       }
-      switch (preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate)) {
-      case AttrPrivate: {
-        // Append a new private property.
+      auto addNewProp = [&] {
         Prop prop;
         prop.name                = preProp->name();
         prop.mangledName         = preProp->mangledName();
@@ -1945,6 +1943,11 @@ void Class::setProperties() {
         }
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(preProp->val());
+      };
+
+      switch (preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate)) {
+      case AttrPrivate: {
+        addNewProp();
         break;
       }
       case AttrProtected: {
@@ -1969,24 +1972,7 @@ void Class::setProperties() {
           copyDeepInitAttr(preProp, &prop);
           break;
         }
-        // Append a new protected property.
-        Prop prop;
-        prop.name                = preProp->name();
-        prop.mangledName         = preProp->mangledName();
-        prop.originalMangledName = preProp->mangledName();
-        prop.attrs               = preProp->attrs();
-        prop.typeConstraint      = preProp->typeConstraint();
-        // This is the first class to declare this property
-        prop.cls                 = this;
-        prop.docComment          = preProp->docComment();
-        prop.repoAuthType        = preProp->repoAuthType();
-        if (slot < traitIdx) {
-          prop.idx = slot;
-        } else {
-          prop.idx = slot + m_preClass->numProperties() + traitOffset;
-        }
-        curPropMap.add(preProp->name(), prop);
-        m_declPropInit.push_back(preProp->val());
+        addNewProp();
         break;
       }
       case AttrPublic: {
@@ -2017,24 +2003,7 @@ void Class::setProperties() {
           copyDeepInitAttr(preProp, &prop);
           break;
         }
-        // Append a new public property.
-        Prop prop;
-        prop.name                = preProp->name();
-        prop.mangledName         = preProp->mangledName();
-        prop.originalMangledName = preProp->mangledName();
-        prop.attrs               = preProp->attrs();
-        prop.typeConstraint      = preProp->typeConstraint();
-        // This is the first class to declare this property
-        prop.cls                 = this;
-        prop.docComment          = preProp->docComment();
-        prop.repoAuthType        = preProp->repoAuthType();
-        if (slot < traitIdx) {
-          prop.idx = slot;
-        } else {
-          prop.idx = slot + m_preClass->numProperties() + traitOffset;
-        }
-        curPropMap.add(preProp->name(), prop);
-        m_declPropInit.push_back(preProp->val());
+        addNewProp();
         break;
       }
       default: assert(false);

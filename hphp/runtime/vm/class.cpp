@@ -1944,8 +1944,7 @@ void Class::setProperties() {
           prop.idx = slot + m_preClass->numProperties() + traitOffset;
         }
         curPropMap.add(preProp->name(), prop);
-        m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
-                                 ->val());
+        m_declPropInit.push_back(preProp->val());
         break;
       }
       case AttrProtected: {
@@ -1963,7 +1962,7 @@ void Class::setProperties() {
           } else {
             prop.idx = slot + m_preClass->numProperties() + traitOffset;
           }
-          const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
+          const TypedValue& tv = preProp->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
@@ -1987,8 +1986,7 @@ void Class::setProperties() {
           prop.idx = slot + m_preClass->numProperties() + traitOffset;
         }
         curPropMap.add(preProp->name(), prop);
-        m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
-                                 ->val());
+        m_declPropInit.push_back(preProp->val());
         break;
       }
       case AttrPublic: {
@@ -2012,7 +2010,7 @@ void Class::setProperties() {
           } else {
             prop.idx = slot + m_preClass->numProperties() + traitOffset;
           }
-          auto const& tv = m_preClass->lookupProp(preProp->name())->val();
+          auto const& tv = preProp->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
@@ -2036,8 +2034,7 @@ void Class::setProperties() {
           prop.idx = slot + m_preClass->numProperties() + traitOffset;
         }
         curPropMap.add(preProp->name(), prop);
-        m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
-                                 ->val());
+        m_declPropInit.push_back(preProp->val());
         break;
       }
       default: assert(false);
@@ -2082,7 +2079,7 @@ void Class::setProperties() {
       sProp.typeConstraint = preProp->typeConstraint();
       sProp.docComment     = preProp->docComment();
       sProp.cls            = this;
-      sProp.val            = m_preClass->lookupProp(preProp->name())->val();
+      sProp.val            = preProp->val();
       sProp.repoAuthType   = preProp->repoAuthType();
       if (slot < traitIdx) {
         sProp.idx = slot;

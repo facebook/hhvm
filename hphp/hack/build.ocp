@@ -12,6 +12,8 @@ begin library "ROOTPROJECT"
   files = []
 end
 
+ccopt = "-I%{ROOTPROJECT_FULL_SRC_DIR}%/../.."
+
 begin library "hh-hhi"
   requires = [ "hh-globals" "hh-utils" "hh-find" "bigarray" ]
   files = [
@@ -54,8 +56,8 @@ begin library "hh-server-base"
                 "hh-stubs" "hh-stubs-ai"  "hh-socket" "hh-dfind" "hh-hhi" ]
   files = [
     "src/server/serverFiles.ml"
-    "src/server/serverConfig.ml"
     "src/server/serverArgs.ml"
+    "src/server/serverConfig.ml"
     "src/server/serverEnv.ml"
     "src/server/serverUtils.ml"
     "src/server/argumentInfoService.ml"
@@ -78,7 +80,7 @@ begin library "hh-server-base"
     "src/server/serverInferType.ml"
     "src/server/serverLocalConfig.ml"
     "src/server/serverLint.ml"
-    "src/server/serverMonitor.ml"
+    "src/server/serverProcessTools.ml"
     "src/server/serverRefactor.ml"
     "src/server/serverSearch.ml"
     "src/server/symbolUtils.ml"
@@ -100,11 +102,13 @@ begin library "hh-server"
     "hh-third-party" "hh-utils" "hh-typing"
     "hh-search"  "hh-stubs"  "hh-stubs-ai"
     "hh-socket"  "hh-dfind" "hh-watchman" "hh-server-base"
+    "libancillary"
   ]
   files = [
     "src/server/serverEnvBuild.ml"
     "src/server/serverInit.ml"
     "src/server/serverMain.ml"
+    "src/server/serverMonitor.ml"
   ]
 end
 

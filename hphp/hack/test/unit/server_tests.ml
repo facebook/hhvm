@@ -10,13 +10,24 @@
 
 open Core
 
+let test_process_data =
+  ServerProcess.{
+    pid = 2758734;
+    name = "hh_server";
+    start_t = 0.0;
+    in_fd = Unix.stdin;
+    out_fd = Unix.stdout;
+    log_file = "";
+    log_mode = Daemon.Parent_streams;
+    last_request_handoff = ref 0.0;
+  }
+
 let test_dmesg_parser () =
   let input = [
     "[3034339.262439] Out of memory: Kill process 2758734 (hh_server) \
     score 253 or sacrifice child";
   ] in
-  ServerProcessTools.find_oom_in_dmesg_output 2758734 input
-
+  ServerProcessTools.find_oom_in_dmesg_output test_process_data input
 
 let tests = [
   "test_dmesg_parser", test_dmesg_parser;

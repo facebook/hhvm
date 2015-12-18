@@ -341,4 +341,4 @@ assume_php = false""")
             # in separate processes? Give it some time.
             time.sleep(0.5)
             client_error = self.check_cmd([])
-            self.assertIn('Last typechecker killed by signal', client_error)
+            self.assertIn('Last server killed by signal', client_error)

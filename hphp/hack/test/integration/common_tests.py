@@ -339,6 +339,6 @@ assume_php = false""")
             # For some reason, waitpid in the monitor after the kill signal
             # sent above doesn't preserve ordering - maybe because they're
             # in separate processes? Give it some time.
-            time.sleep(0.1)
+            time.sleep(0.5)
             client_error = self.check_cmd([])
             self.assertIn('Last typechecker killed by signal', client_error)

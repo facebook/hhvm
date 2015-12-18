@@ -479,7 +479,7 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
         break;
       } // else fall through
     case ResponseMessage::Type::BODY:
-      if (message.m_chunk) {
+      if (message.m_chunk && m_method != Transport::Method::HEAD) {
         // TODO: experiment with disabling this chunked flag and letting
         // proxygen framework do the chunking
         if (message.m_chunked) {

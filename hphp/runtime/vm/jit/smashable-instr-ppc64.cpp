@@ -26,17 +26,6 @@ namespace HPHP { namespace jit { namespace ppc64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Concurrent modification and execution of instructions is safe if all
- * of the following hold:
- *
- *  1/  The modification is done with a single processor store.
- *  2/  Only one instruction in the original stream is modified.
- *  3/  The modified instruction does not cross a cacheline boundary.
- *
- * Cache alignment is required for mutable instructions to make sure mutations
- * don't "tear" on remote CPUs.
- */
 
 #define EMIT_BODY(cb, inst, Inst, ...)  \
   ([&] {                                \
@@ -55,22 +44,22 @@ TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d) {
 TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp) {
   align(cb, Alignment::SmashCmpq, AlignContext::Live);
 
-  // don't use cmpqim because of smashableCmpqImm implementation. A ldimml is
-  // mandatory
-  return vwrap(cb, [&] (Vout& v) {
-    Vreg op1 = v.makeReg(), op2 = v.makeReg();
-    v << ldimml{Immed(imm), op1};
-    v << loadl{r[disp], op2};
-    v << cmpq{op1, op2, VregSF(RegSF{0})};
-  });
+  auto const start = cb.frontier();
+  ppc64_asm::Assembler a { cb };
+
+  // don't use cmpqim because of smashableCmpqImm implementation. A "load 32bits
+  // immediate" is mandatory
+  a.li32(rfuncln(), imm);
+  a.lwz   (rAsm, r[disp]); // base + displacement
+  a.extsw(rAsm, rAsm);
+  a.cmpd(rfuncln(), rAsm);
+  return start;
 }
 
 TCA emitSmashableCall(CodeBlock& cb, TCA target) {
   align(cb, Alignment::SmashCmpq, AlignContext::Live);
 
-  return vwrap(cb, [&] (Vout& v) {
-    v << call{target};
-  });
+  return EMIT_BODY(cb, call, Call, rsp(), rfuncln(), rvmfp(), target);
 }
 
 TCA emitSmashableJmp(CodeBlock& cb, TCA target) {
@@ -104,7 +93,7 @@ emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc) {
 void smashMovq(TCA inst, uint64_t imm) {
   always_assert(is_aligned(inst, Alignment::SmashMovq));
 
-  HPHP::CodeBlock cb;
+  CodeBlock cb;
   // Initialize code block cb pointing to li64
   cb.init(inst, ppc64_asm::Assembler::kLi64InstrLen, "smashing Movq");
   CodeCursor cursor { cb, inst };
@@ -133,8 +122,7 @@ void smashCall(TCA inst, TCA target) {
   CodeCursor cursor { cb, inst };
   ppc64_asm::Assembler a { cb };
 
-  if (!isCall(inst))
-    always_assert(false && "smashCall has unexpected block");
+  if (!isCall(inst)) always_assert(false && "smashCall has unexpected block");
 
   a.setFrontier(inst + smashableCallSkip());
 
@@ -179,8 +167,7 @@ uint32_t smashableCmpqImm(TCA inst) {
 }
 
 TCA smashableCallTarget(TCA inst) {
-  if (!isCall(inst))
-    return nullptr;
+  if (!isCall(inst)) return nullptr;
 
   return reinterpret_cast<TCA>(
       ppc64_asm::Assembler::getLi64(inst + smashableCallSkip()));

@@ -50,7 +50,9 @@ ALWAYS_INLINE bool isPrologueStub(TCA addr) {
 void emitFuncGuard(const Func* func, CodeBlock& cb) {
   ppc64_asm::Assembler a { cb };
 
-  const auto tmp1 = ppc64_asm::reg::r3, tmp2 = ppc64_asm::reg::r4;
+  const auto tmp1 = ppc64_asm::reg::r3;
+  const auto tmp2 = ppc64_asm::reg::r4;
+
   assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp1));
   assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp2));
 

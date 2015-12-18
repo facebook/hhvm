@@ -39,6 +39,12 @@ using HPHP::jit::Immed;
 using HPHP::CodeAddress;
 using HPHP::jit::ConditionCode;
 
+/* Used to  define a minimal callstack on call/ret vasm */
+// Must be the same value of AROFF(_dummyB).
+constexpr int min_callstack_size       = 32;
+// Must be the same value of AROFF(m_savedRip).
+constexpr int lr_position_on_callstack = 16;
+
 #define BRANCHES(cr) \
   CR##cr##_LessThan,         \
   CR##cr##_LessThanEqual,    \
@@ -1893,6 +1899,17 @@ struct Assembler {
   // Auxiliary for loading a complete 64bits immediate into a register
   void li64 (const Reg64& rt, int64_t imm64);
 
+  // Create prologue when calling.
+  void prologue (const Reg64& rsp, const Reg64& rfuncln, const Reg64& rvmfp);
+
+  // Create epilogue when calling.
+  void epilogue (const Reg64& rsp, const Reg64& rfuncln);
+
+  void call (const Reg64& rsp,
+             const Reg64& rfuncln,
+             const Reg64& rvmfp,
+             CodeAddress target);
+
   // Retrieve the target defined by li64 instruction
   static int64_t getLi64(PPC64Instr* pinstr);
   static int64_t getLi64(CodeAddress pinstr) {
@@ -1945,11 +1962,11 @@ struct Assembler {
     // Check Label::branchAuto for details
     HPHP::CodeBlock cb2;
 
-#ifndef NDEBUG  // avoid "unused variable ‘bctr_addr’" warning on release build
-    // It has to skip the li64 and a mtctr instruction
+#ifndef NDEBUG  // avoid "unused variable 'bctr_addr'" warning on release build
+    // skips the li64 and a mtctr instruction
     CodeAddress bctr_addr = jmp + kLi64InstrLen + 1 * kBytesPerInstr;
-    // Opcode located at the 6 most significant bits
-    assert(((bctr_addr[3] >> 2) & 0x3F) == 19);  // XL-Form
+    // check for instruction opcode
+    assert(((bctr_addr[3] >> 2) & 0x3F) == 19);
 #endif
 
     // Initialize code block cb2 pointing to li64

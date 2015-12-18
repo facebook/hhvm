@@ -32,7 +32,7 @@ namespace HPHP { namespace jit { namespace ppc64 {
  * Mirrors the API of smashable-instr.h.
  */
 
-static constexpr uint8_t kStdIns = ppc64_asm::Assembler::kBytesPerInstr;
+constexpr uint8_t kStdIns = ppc64_asm::Assembler::kBytesPerInstr;
 
 // li64
 constexpr size_t smashableMovqLen() { return kStdIns * 5; }

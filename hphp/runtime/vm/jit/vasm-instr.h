@@ -74,6 +74,7 @@ struct Vunit;
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
   O(ldimmqs, I(s), Un, D(d))\
+  O(ldimmw, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) U(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -122,6 +123,7 @@ struct Vunit;
   O(hostcall, I(argc), U(args), Dn)\
   O(tbcc, I(cc) I(bit), U(s), Dn)\
   /* x64 instructions */\
+  O(addl, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(addlm, Inone, U(s0) U(m), D(sf)) \
   O(addlim, I(s0), U(m), D(sf)) \
@@ -162,12 +164,13 @@ struct Vunit;
   O(divsd, Inone, UA(s0) U(s1), D(d))\
   O(idiv, Inone, U(s), D(sf))\
   O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(incwm, Inone, U(m), D(sf))\
   O(incl, Inone, UH(s,d), DH(d,s) D(sf))\
   O(inclm, Inone, U(m), D(sf))\
   O(incq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(incqm, Inone, U(m), D(sf))\
   O(incqmlock, Inone, U(m), D(sf))\
+  O(incw, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(incwm, Inone, U(m), D(sf))\
   O(jcc, I(cc), U(sf), Dn)\
   O(jcci, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
@@ -251,26 +254,22 @@ struct Vunit;
   O(xorl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  /* ppc64 instructions */\
-  O(addl, Inone, U(s0) U(s1), D(d) D(sf)) \
+  /* PPC64 instructions */\
+  O(extsb, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(extsw, Inone, UH(s,d), DH(d,s) D(sf))\
   O(loadw, Inone, U(s), D(d))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
-  O(incw, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(ldimmw, I(s), Un, D(d))\
   O(xscvdpsxds, Inone, U(s), D(d))\
   O(mfcr, Inone, Un, D(d))\
   O(mflr, Inone, Un, D(d))\
   O(mfvsrd, Inone, U(s), D(d))\
+  O(movlk, Inone, UH(s,d), DH(d,s))\
   O(mtlr, Inone, U(s), Dn)\
   O(mtvsrd, Inone, U(s), D(d))\
   O(xscvsxddp, Inone, U(s), D(d))\
   O(xxlxor, Inone, U(s0) U(s1), D(d))\
   O(xxpermdi, Inone, U(s0) U(s1), D(d))\
-  /* PPC64 instructions */\
-  O(extsb, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(extsw, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(movlk, Inone, UH(s,d), DH(d,s))\
   /* */
 
 /*

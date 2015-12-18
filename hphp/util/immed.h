@@ -82,6 +82,8 @@ struct Immed {
 
   bool fits(int sz) const { return deltaFits(m_int, sz); }
 
+  Immed operator-() { return -this->m_int; }
+
 private:
   int32_t m_int;
 };

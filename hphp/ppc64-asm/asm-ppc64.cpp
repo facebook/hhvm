@@ -711,6 +711,35 @@ void Assembler::unimplemented(){
   EmitDForm(0, rn(0), rn(0), 0);
 }
 
+// Create prologue when calling
+void Assembler::prologue (const Reg64& rsp,
+                          const Reg64& rfuncln,
+                          const Reg64& rvmfp) {
+  mflr(rfuncln);
+  std(rfuncln, rsp[lr_position_on_callstack]);
+  // Carry the rvmfp to VM stack around on all vasm calls.
+  std(rvmfp, rsp[-min_callstack_size]);
+  addi(rsp, rsp, -min_callstack_size);
+}
+
+// Create epilogue when calling.
+void Assembler::epilogue (const Reg64& rsp, const Reg64& rfuncln) {
+  // pop caller's return address.
+  addi(rsp, rsp, min_callstack_size);
+  ld(rfuncln, rsp[lr_position_on_callstack]);
+  mtlr(rfuncln);
+}
+
+void Assembler::call (const Reg64& rsp,
+                      const Reg64& rfuncln,
+                      const Reg64& rvmfp,
+                      CodeAddress target) {
+
+  prologue(rsp, rfuncln, rvmfp);
+  branchAuto(target, BranchConditions::Always, LinkReg::Save);
+  epilogue(rsp, rfuncln);
+}
+
 void Assembler::li64 (const Reg64& rt, int64_t imm64) {
   // li64 always emits 5 instructions i.e. 20 bytes of instructions.
   // Assumes that 0 bytes will be missing in the end.

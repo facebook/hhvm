@@ -105,7 +105,11 @@ public:
    * Get command line with a process ID.
    */
   static std::string GetCommandLine(pid_t pid);
-  static bool CommandStartsWith(pid_t pid, const std::string &cmd);
+
+  /**
+   * Check if the current process is being run under GDB.  Will return false if
+   * we're unable to read /proc/{Process::GetProcessId()}/status.
+   */
   static bool IsUnderGDB();
 
   /**

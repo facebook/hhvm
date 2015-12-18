@@ -34,6 +34,8 @@
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
+#include <boost/filesystem.hpp>
+
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/text-color.h"
@@ -503,36 +505,33 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
 }
 
 std::string Process::GetCommandLine(pid_t pid) {
-  string name = "/proc/" + folly::to<string>(pid) + "/cmdline";
+  auto const name = folly::sformat("/proc/{}/cmdline", pid);
 
-  string cmdline;
-  FILE * f = fopen(name.c_str(), "r");
+  std::string cmdline;
+  auto const f = fopen(name.c_str(), "r");
   if (f) {
     readString(f, cmdline);
     fclose(f);
   }
 
-  string converted;
-  for (unsigned int i = 0; i < cmdline.size(); i++) {
-    char ch = cmdline[i];
+  std::string converted;
+  for (auto ch : cmdline) {
     converted += ch ? ch : ' ';
   }
   return converted;
 }
 
-bool Process::CommandStartsWith(pid_t pid, const std::string &cmd) {
-  if (!cmd.empty()) {
-    std::string cmdline = GetCommandLine(pid);
-    if (cmdline.length() >= cmd.length() &&
-        cmdline.substr(0, cmd.length()) == cmd) {
-      return true;
-    }
-  }
-  return false;
-}
-
 bool Process::IsUnderGDB() {
-  return CommandStartsWith(GetParentProcessId(), "gdb ");
+  auto const cmdStr = GetCommandLine(GetParentProcessId());
+  auto const cmdPiece = folly::StringPiece{cmdStr};
+
+  if (cmdPiece.empty()) return false;
+
+  auto const spaceIdx = std::min(cmdPiece.find(' '), cmdPiece.size() - 1);
+  auto const binaryPiece = cmdPiece.subpiece(0, spaceIdx + 1);
+
+  boost::filesystem::path binaryPath(binaryPiece.begin(), binaryPiece.end());
+  return binaryPath.filename() == "gdb ";
 }
 
 int64_t Process::GetProcessRSS(pid_t pid) {

@@ -1,0 +1,4 @@
+File "private_access.php", line 7, characters 9-9:
+Private members cannot be accessed dynamically. Did you mean to use 'self::'? (Typing[4112])
+File "private_access.php", line 4, characters 27-27:
+This member is private

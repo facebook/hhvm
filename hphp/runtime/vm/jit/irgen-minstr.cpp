@@ -113,20 +113,6 @@ struct MTS {
   unsigned iInd;
 
   /*
-   * Cached information about which stages of the minstr need ratchet
-   * operations. Filled in by computeRatchets().
-   */
-  unsigned numLogicalRatchets;
-  bool needFirstRatchet;
-  bool needFinalRatchet;
-
-  /*
-   * Old minstrs use this flag to determine whether they can elide all
-   * operations to MInstrState.
-   */
-  bool needMIS{true};
-
-  /*
    * The value of the base for the next member operation. Starts as the base
    * for the whole instruction and is updated as the translator makes
    * progress.
@@ -430,37 +416,6 @@ bool mightCallMagicPropMethod(MInstrAttr mia, PropInfo propInfo) {
   return !no_override_magic;
 }
 
-bool mInstrHasUnknownOffsets(IRGS& env) {
-  auto const& ni = *env.currentNormalizedInstruction;
-  auto const& mii = getMInstrInfo(ni.mInstrOp());
-  unsigned ii = mii.valCount();
-
-  // It's ok to use DataTypeGeneric here because our only caller will constrain
-  // the base properly if we return true and it uses that information.
-  auto const base = getInput(env, ii, DataTypeGeneric);
-  auto baseType = base->type().unbox();
-  if (!(baseType < (TObj | TInitNull)) || !baseType.clsSpec()) return true;
-  ++ii;
-
-  for (unsigned mi = 0; mi < ni.immVecM.size(); ++mi, ++ii) {
-    auto const mc = ni.immVecM[mi];
-    if (!mcodeIsProp(mc)) return true;
-
-    auto const keyType = provenTypeFromLocation(env, ni.inputs[ii]);
-    auto propInfo = getPropertyOffset(env,
-                                      curClass(env),
-                                      baseType.clsSpec().cls(),
-                                      keyType);
-    if (propInfo.offset == -1 ||
-        mightCallMagicPropMethod(mii.getAttr(mc), propInfo)) {
-      return true;
-    }
-    baseType = typeFromRAT(propInfo.repoAuthType);
-  }
-
-  return false;
-}
-
 // "Simple" bases are stack cells and locals, which imply that
 // env.ni.inputs[env.mii.valCount()] is the actual base value. Other base types
 // have things like Class references or global variable names in the first few
@@ -472,72 +427,6 @@ bool isSimpleBase(const IRGS& env) {
 
 bool isSingleMember(const IRGS& env) {
   return env.currentNormalizedInstruction->immVecM.size() == 1;
-}
-
-bool isOptimizableCollectionClass(const Class* klass) {
-  return collections::isType(klass, CollectionType::Vector,
-                                    CollectionType::Map,
-                                    CollectionType::Pair);
-}
-
-/*
- * Inspect the instruction we're about to translate and determine if it can be
- * executed without using an MInstrState struct.
- */
-void checkMIState(MTS& env) {
-  // We're definitely going to punt in emitBaseN, so we might not have guarded
-  // the base's type.
-  if (env.immVec.locationCode() == LNL || env.immVec.locationCode() == LNC) {
-    return;
-  }
-
-  Type baseType       = env.base.type.derefIfPtr();
-  auto const isCGetM  = env.op == Op::CGetM;
-  auto const isSetM   = env.op == Op::SetM;
-  auto const isIssetM = env.op == Op::IssetM;
-  auto const isUnsetM = env.op == Op::UnsetM;
-  auto const isSingle = env.immVecM.size() == 1;
-
-  // We don't need to bother with weird base types.
-  if (baseType.maybe(TCell) && baseType.maybe(TBoxedCell)) {
-    return;
-  }
-
-  if (baseType <= TBoxedCell) {
-    baseType = ldRefReturn(baseType.unbox());
-  }
-
-  // CGetM or SetM with no unknown property offsets.
-  auto const simpleProp = [&]() {
-    if (!isCGetM && !isSetM) return false;
-    if (mInstrHasUnknownOffsets(env)) return false;
-    auto const cls = baseType.clsSpec().cls();
-    if (cls == nullptr) return false;
-    return !constrainBase(env, TypeConstraint(cls).setWeak());
-  }();
-
-  // Final operations that don't use MIState.
-  auto const simpleFinal = isCGetM || isSetM || isIssetM || isUnsetM;
-
-  if (simpleProp || (isSingle && simpleFinal)) {
-    env.needMIS = false;
-
-    // Element access with one element in the vector.
-    auto const singleElem = isSingle && mcodeIsElem(env.immVecM[0]);
-
-    // CGetM or IssetM with one vector array element and a collection type.
-    auto const simpleCollection =
-      (isIssetM || isCGetM) &&
-      singleElem &&
-      baseType < TObj &&
-      isOptimizableCollectionClass(baseType.clsSpec().cls());
-
-    if (simpleCollection) {
-      constrainBase(env, TypeConstraint(baseType.clsSpec().cls()));
-    } else {
-      constrainBase(env, DataTypeSpecific);
-    }
-  }
 }
 
 void emitMTrace(MTS& env) {
@@ -813,8 +702,6 @@ void emitBaseH(MTS& env) {
 }
 
 void emitBaseN(MTS& env) {
-  // If this is ever implemented, the check at the beginning of
-  // checkMIState must be removed/adjusted as appropriate.
   PUNT(emitBaseN);
 }
 
@@ -1171,113 +1058,8 @@ void emitIntermediateOp(MTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool needFirstRatchet(MTS& env) {
-  if (!isSimpleBase(env)) return true;
-
-  auto const firstVal = getInput(env, env.mii.valCount(), DataTypeSpecific);
-  auto const firstTy = firstVal->type().unbox();
-  if (firstTy <= TArr) {
-    if (mcodeIsElem(env.immVecM[0])) return false;
-    return true;
-  }
-
-  // Using the specialized type here is safe because we only elide the first
-  // ratchet if the first member instruction is a property access, in which
-  // case we have constrained the specialized type of the base in emitBaseLCR
-  if (!(firstTy < TObj && firstTy.clsSpec())) return true;
-  auto const firstCls = firstTy.clsSpec().cls();
-
-  if (classMayHaveMagicPropMethods(firstCls)) {
-    // Note: we could also add a check here on whether the first property RAT
-    // contains Uninit---if not we can still return false.  See
-    // mightCallMagicPropMethod.
-    return true;
-  }
-
-  if (firstCls->hasNativePropHandler()) {
-    auto propInfo = getPropertyOffset(
-      env, curClass(env), firstCls,
-      provenTypeFromLocation(env, env.ni.inputs[env.mii.valCount() + 1])
-    );
-    // For native properties if the property is declared then we know don't
-    // call the native handler
-    if (propInfo.offset == -1) return true;
-  }
-
-  return !mcodeIsProp(env.immVecM[0]);
-}
-
-bool needFinalRatchet(const MTS& env) { return env.mii.finalGet(); }
-
-// Ratchet operations occur after each intermediate operation, except
-// possibly the first and last (see need{First,Final}Ratchet()).  No actual
-// ratchet occurs after the final operation, but this means that both tvRef
-// and tvRef2 can contain references just after the final operation.  Here we
-// pretend that a ratchet occurs after the final operation, i.e. a "logical"
-// ratchet.  The reason for counting logical ratchets as part of the total is
-// the following case, in which the logical count is 0:
-//
-//   (base is array)
-//   BaseL
-//   IssetElemL
-//     no logical ratchet
-//
-// Following are a few more examples to make the algorithm clear:
-//
-//   (base is array)      (base is object*)  (base is object*)
-//   BaseL                BaseL              BaseL
-//   ElemL                ElemL              CGetPropL
-//     no ratchet           ratchet            logical ratchet
-//   ElemL                PropL
-//     ratchet              ratchet
-//   ElemL                CGetElemL
-//     ratchet              logical ratchet
-//   IssetElemL
-//     logical ratchet
-//
-//   (base is array)        * If the base is a known (specialized) object type,
-//   BaseL                    we can also avoid the first rachet if we can
-//   ElemL                    prove it can't possibly invoke magic methods.
-//     no ratchet
-//   ElemL
-//     ratchet
-//   ElemL
-//     logical ratchet
-//   SetElemL
-//     no ratchet
-unsigned nLogicalRatchets(MTS& env) {
-  // If we've proven elsewhere that we don't need an MInstrState struct, we know
-  // this translation won't need any ratchets.
-  if (!env.needMIS) return 0;
-
-  unsigned ratchets = env.immVecM.size();
-  if (!env.needFirstRatchet) --ratchets;
-  if (!env.needFinalRatchet) --ratchets;
-  return ratchets;
-}
-
-int ratchetInd(MTS& env) {
-  return env.needFirstRatchet ? int(env.mInd) : int(env.mInd) - 1;
-}
-
-/*
- * Compute and store ratchet-related fields in env, because their values can
- * depending on state that will change during translation of the minstr.
- */
-void computeRatchets(MTS& env) {
-  env.needFirstRatchet = needFirstRatchet(env);
-  env.needFinalRatchet = needFinalRatchet(env);
-  env.numLogicalRatchets = nLogicalRatchets(env);
-}
-
 void emitRatchetRefs(MTS& env) {
-  if (ratchetInd(env) < 0 || ratchetInd(env) >= int(env.numLogicalRatchets)) {
-    return;
-  }
-
-  if (!env.irb.fs().needRatchet()) {
-    return;
-  }
+  if (!env.irb.fs().needRatchet()) return;
 
   auto const misRefAddr = misLea(env, offsetof(MInstrState, tvRef));
 
@@ -1289,10 +1071,9 @@ void emitRatchetRefs(MTS& env) {
     [&] { // Next: tvRef isn't Uninit. Ratchet the refs
       auto const misRef2Addr = misLea(env, offsetof(MInstrState, tvRef2));
       // Clean up tvRef2 before overwriting it.
-      if (ratchetInd(env) > 0) {
-        auto const val = gen(env, LdMem, TGen, misRef2Addr);
-        decRef(env, val);
-      }
+      auto const val = gen(env, LdMem, TGen, misRef2Addr);
+      decRef(env, val);
+
       // Copy tvRef to tvRef2.
       auto const tvRef = gen(env, LdMem, TGen, misRefAddr);
       gen(env, StMem, misRef2Addr, tvRef);
@@ -1320,21 +1101,15 @@ void emitMPre(MTS& env) {
   emitBaseOp(env);
   ++env.iInd;
 
-  checkMIState(env);
-  computeRatchets(env);
-  if (env.needMIS) {
-    auto const uninit = cns(env, TUninit);
-    if (env.numLogicalRatchets > 0) {
-      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef)), uninit);
-      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef2)), uninit);
-    }
+  auto const uninit = cns(env, TUninit);
+  gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef)), uninit);
+  gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef2)), uninit);
 
-    // If we're using an MInstrState, all the default-created catch blocks for
-    // exception paths from here out will need to clean up the tvRef{,2}
-    // storage, so install a custom catch creator.
-    auto const penv = &env;
-    env.irgs.catchCreator = [penv] { return makeMISCatch(*penv); };
-  }
+  // All the default-created catch blocks for exception paths from here out
+  // will need to clean up the tvRef{,2} storage, so install a custom catch
+  // creator.
+  auto const penv = &env;
+  env.irgs.catchCreator = [penv] { return makeMISCatch(*penv); };
 
   /*
    * Iterate over all but the last member, which is consumed by a final
@@ -2090,7 +1865,7 @@ void cleanTvRefs(MTS& env) {
     offsetof(MInstrState, tvRef),
     offsetof(MInstrState, tvRef2)
   };
-  for (unsigned i = 0; i < std::min(env.numLogicalRatchets, 2U); ++i) {
+  for (unsigned i = 0; i < 2; ++i) {
     auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
     auto const val  = gen(env, LdMem, TGen, addr);
     decRef(env, val);

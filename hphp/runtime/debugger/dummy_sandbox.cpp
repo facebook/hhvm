@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/debugger/dummy_sandbox.h"
 
-#include <boost/noncopyable.hpp>
-
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
@@ -57,7 +55,7 @@ bool DummySandbox::stop(int timeout) {
 
 namespace {
 
-struct CLISession : private boost::noncopyable {
+struct CLISession {
   CLISession() {
     TRACE(2, "CLISession::CLISession\n");
     char *argv[] = {"", nullptr};
@@ -69,6 +67,9 @@ struct CLISession : private boost::noncopyable {
     DebuggerHook::detach();
     execute_command_line_end(0, false, nullptr);
   }
+
+  CLISession(const CLISession&) = delete;
+  CLISession& operator=(const CLISession&) = delete;
 };
 
 }

@@ -87,7 +87,6 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
 #include <folly/Conv.h>
@@ -496,12 +495,15 @@ struct Label {
   std::map<std::string,std::vector<size_t>> ehCatches;
 };
 
-struct AsmState : private boost::noncopyable {
+struct AsmState {
   explicit AsmState(std::istream& in)
     : in(in)
   {
     currentStackDepth->setBase(*this, 0);
   }
+
+  AsmState(const AsmState&) = delete;
+  AsmState& operator=(const AsmState&) = delete;
 
   void error(const std::string& what) {
     throw Error(in.getLineNumber(), what);

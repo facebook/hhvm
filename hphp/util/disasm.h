@@ -24,11 +24,9 @@ extern "C" {
 
 #include <ostream>
 
-#include <boost/noncopyable.hpp>
-
 namespace HPHP {
 
-class Disasm : private boost::noncopyable {
+class Disasm {
  public:
   struct Options {
     Options()
@@ -81,6 +79,9 @@ class Disasm : private boost::noncopyable {
    * each line of disassembly. If printEncoding is true, the raw hex bytes of
    * the instructions will also be in the output. */
   explicit Disasm(const Options& opts = Options());
+
+  Disasm(const Disasm&) = delete;
+  Disasm& operator=(const Disasm&) = delete;
 
   /* Disassemble instructions. start should be the first byte of the region to
    * disassemble and end should be the first byte past the region to

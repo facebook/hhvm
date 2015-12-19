@@ -22,7 +22,6 @@
 #include "hphp/util/bits.h"
 #include "hphp/util/lock.h"
 
-#include <boost/noncopyable.hpp>
 #include <tbb/concurrent_hash_map.h>
 
 #include <list>
@@ -65,8 +64,7 @@ typedef std::vector< std::pair< BlockScopeRawPtr, int* > >
 /**
  * Base class of ClassScope and FunctionScope.
  */
-class BlockScope : private boost::noncopyable,
-                   public std::enable_shared_from_this<BlockScope> {
+class BlockScope : public std::enable_shared_from_this<BlockScope> {
 public:
   enum KindOf {
     ClassScope,
@@ -107,6 +105,7 @@ public:
 
   BlockScope(const BlockScope&) = delete;
   BlockScope& operator=(const BlockScope&) = delete;
+
   BlockScope(const std::string &name, const std::string &docComment,
              StatementPtr stmt, KindOf kind);
   virtual ~BlockScope() {}

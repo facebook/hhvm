@@ -79,7 +79,10 @@ void setopBody(Cell* lhs, SetOpOp op, Cell* rhs) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ExtraArgs : private boost::noncopyable {
+struct ExtraArgs {
+  ExtraArgs(const ExtraArgs&) = delete;
+  ExtraArgs& operator=(const ExtraArgs&) = delete;
+
   /*
    * Allocate an ExtraArgs structure, with arguments copied from the
    * evaluation stack.  This takes ownership of the args without

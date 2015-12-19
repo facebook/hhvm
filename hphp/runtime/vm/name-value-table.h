@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
 #define incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
 
-#include <boost/noncopyable.hpp>
-
 #include <folly/Bits.h>
 
 #include "hphp/runtime/base/typed-value.h"
@@ -43,7 +41,7 @@ struct StringData;
  * VarEnv in their normal location, but still make them accessible by name
  * through this table.
  */
-struct NameValueTable : private boost::noncopyable {
+struct NameValueTable {
   struct Iterator {
     explicit Iterator(const NameValueTable* tab);
     static Iterator getLast(const NameValueTable* tab);
@@ -97,6 +95,9 @@ struct NameValueTable : private boost::noncopyable {
   explicit NameValueTable(const NameValueTable& nvTable, ActRec* fp);
 
   ~NameValueTable();
+
+  NameValueTable(const NameValueTable&) = delete;
+  NameValueTable& operator=(const NameValueTable&) = delete;
 
   /**
    * Suspend locals into an in-resumable ActRec.

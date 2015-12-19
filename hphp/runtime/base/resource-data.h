@@ -18,7 +18,6 @@
 #define incl_HPHP_RESOURCE_DATA_H_
 
 #include <iostream>
-#include <boost/noncopyable.hpp>
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
@@ -105,8 +104,11 @@ private:
 /**
  * Base class of all PHP resources.
  */
-struct ResourceData : private boost::noncopyable {
+struct ResourceData {
   ResourceData();
+
+  ResourceData(const ResourceData&) = delete;
+  ResourceData& operator=(const ResourceData&) = delete;
 
   const ResourceHdr* hdr() const {
     auto h = reinterpret_cast<const ResourceHdr*>(this) - 1;

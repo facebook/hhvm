@@ -488,11 +488,14 @@ static pcre_jit_stack* alloc_jit_stack(void* data) {
 namespace {
 
 template<bool useSmartFree = false>
-struct FreeHelperImpl : private boost::noncopyable {
+struct FreeHelperImpl {
   explicit FreeHelperImpl(void* p) : p(p) {}
   ~FreeHelperImpl() {
     useSmartFree ? req::free(p) : free(p);
   }
+
+  FreeHelperImpl(const FreeHelperImpl&) = delete;
+  FreeHelperImpl& operator=(const FreeHelperImpl&) = delete;
 
 private:
   void* p;

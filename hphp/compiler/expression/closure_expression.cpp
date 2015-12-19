@@ -15,7 +15,6 @@
 */
 #include "hphp/compiler/expression/closure_expression.h"
 
-#include <boost/make_shared.hpp>
 #include <set>
 #include <folly/ScopeGuard.h>
 

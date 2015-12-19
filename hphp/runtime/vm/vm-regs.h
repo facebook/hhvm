@@ -137,7 +137,7 @@ inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
  * pointers. VMRegAnchor forces the stack traversal to be done when it is
  * constructed.
  */
-struct VMRegAnchor : private boost::noncopyable {
+struct VMRegAnchor {
   VMRegAnchor();
   /*
    * Some C++ entry points have an ActRec prepared from after a call
@@ -149,6 +149,9 @@ struct VMRegAnchor : private boost::noncopyable {
   ~VMRegAnchor() {
     tl_regState = m_old;
   }
+
+  VMRegAnchor(const VMRegAnchor&) = delete;
+  VMRegAnchor& operator=(const VMRegAnchor&) = delete;
 
   VMRegState m_old;
 };

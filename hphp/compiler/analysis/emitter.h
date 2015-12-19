@@ -610,8 +610,12 @@ private:
       Offset m_fpOff;
   };
 
-  struct SwitchState : private boost::noncopyable {
+  struct SwitchState {
     SwitchState() : nonZeroI(-1), defI(-1) {}
+
+    SwitchState(const SwitchState&) = delete;
+    SwitchState& operator=(const SwitchState&) = delete;
+
     std::map<int64_t, int> cases; // a map from int (or litstr id) to case index
     std::vector<StrCase> caseOrder; // for string switches, a list of the
                                     // <litstr id, case index> in the order

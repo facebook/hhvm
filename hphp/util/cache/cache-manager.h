@@ -36,8 +36,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/utility.hpp>
-
 namespace HPHP {
 
 class CacheData;
@@ -49,10 +47,13 @@ enum class VFileType : uint8_t {
   Directory
 };
 
-class CacheManager : private boost::noncopyable {
+class CacheManager {
  public:
   CacheManager();
   ~CacheManager();
+
+  CacheManager(const CacheManager&) = delete;
+  CacheManager& operator=(const CacheManager&) = delete;
 
   // Look up a named file to retrieve its contents.
   //

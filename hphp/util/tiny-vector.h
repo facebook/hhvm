@@ -18,7 +18,6 @@
 #define incl_HPHP_UTIL_TINYVECTOR_H_
 
 #include <stdlib.h>
-#include <boost/noncopyable.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
 #include <boost/type_traits/has_trivial_copy.hpp>
 #include <boost/type_traits/has_trivial_assign.hpp>
@@ -60,7 +59,7 @@ namespace HPHP {
  * accessible inline instead of moved to the heap.)
  */
 template<class T, size_t InternalSize = 1, size_t MinHeapCapacity = 0>
-struct TinyVector : private boost::noncopyable {
+struct TinyVector {
   struct const_iterator;
 
 #ifndef __INTEL_COMPILER
@@ -74,7 +73,11 @@ struct TinyVector : private boost::noncopyable {
   static_assert(InternalSize >= 1,
                 "TinyVector assumes that the internal size is at least 1");
 
+  TinyVector() {}
   ~TinyVector() { clear(); }
+
+  TinyVector(const TinyVector&) = delete;
+  TinyVector& operator=(const TinyVector&) = delete;
 
   size_t size() const { return m_data.size(); }
   bool empty() const { return !size(); }

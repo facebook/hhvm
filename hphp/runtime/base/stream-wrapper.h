@@ -18,22 +18,26 @@
 #define HPHP_STREAM_WRAPPER_H
 
 #include <string>
+
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/req-ptr.h"
-
-#include <boost/noncopyable.hpp>
 
 struct stat;
 
 namespace HPHP {
 class StreamContext;
+
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Wrapper : boost::noncopyable {
+class Wrapper {
  public:
   Wrapper() : m_isLocal(true) { }
+
+  Wrapper(const Wrapper&) = delete;
+  Wrapper& operator=(const Wrapper&) = delete;
+
   void registerAs(const std::string &scheme);
 
   virtual req::ptr<File> open(const String& filename,

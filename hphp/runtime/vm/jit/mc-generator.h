@@ -19,7 +19,6 @@
 #include <memory>
 #include <utility>
 #include <vector>
-#include <boost/noncopyable.hpp>
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/asm-x64.h"
@@ -136,7 +135,7 @@ struct TransRelocInfo;
  * the bytecode-to-asm translation process to translateRegion().
  *
  */
-struct MCGenerator : private boost::noncopyable {
+struct MCGenerator {
   /*
    * True iff the calling thread is the sole writer.
    */
@@ -150,6 +149,9 @@ struct MCGenerator : private boost::noncopyable {
 public:
   MCGenerator();
   ~MCGenerator();
+
+  MCGenerator(const MCGenerator&) = delete;
+  MCGenerator& operator=(const MCGenerator&) = delete;
 
   /*
    * Accessors.

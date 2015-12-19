@@ -26,7 +26,6 @@
 #include <fcntl.h>
 #include <sys/file.h>
 #include <unistd.h>
-#include <boost/noncopyable.hpp>
 #include <boost/format.hpp>
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>

@@ -23,17 +23,18 @@
 #include <cstdint>
 #include <string>
 
-#include <boost/utility.hpp>
-
 namespace HPHP {
 
 class CacheSaver;
 class MmapFile;
 
-class CacheData : private boost::noncopyable {
+class CacheData {
  public:
   CacheData();
   ~CacheData();
+
+  CacheData(const CacheData&) = delete;
+  CacheData& operator=(const CacheData&) = delete;
 
   // --- Creation functions: call at most one of these per instance.
 

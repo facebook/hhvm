@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_TRANSLATOR_INLINE_H_
 #define incl_HPHP_TRANSLATOR_INLINE_H_
 
-#include <boost/noncopyable.hpp>
-
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"

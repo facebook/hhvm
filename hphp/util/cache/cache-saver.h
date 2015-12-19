@@ -81,11 +81,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/utility.hpp>
-
 namespace HPHP {
 
-class CacheSaver : private boost::noncopyable {
+class CacheSaver {
  public:
   struct DirEntry {
     uint64_t id;
@@ -99,6 +97,9 @@ class CacheSaver : private boost::noncopyable {
 
   explicit CacheSaver(const std::string& path);
   ~CacheSaver();
+
+  CacheSaver(const CacheSaver&) = delete;
+  CacheSaver& operator=(const CacheSaver&) = delete;
 
   // Open file for writing and write initial magic number and directory size.
   //

@@ -455,13 +455,17 @@ private:
 struct GlobalsArray;
 typedef GlobalsArray GlobalVariables;
 
-struct CountableHelper : private boost::noncopyable {
+struct CountableHelper {
   explicit CountableHelper(ObjectData* object) : m_object(object) {
     object->incRefCount();
   }
   ~CountableHelper() {
     m_object->decRefCount();
   }
+
+  CountableHelper(const CountableHelper&) = delete;
+  CountableHelper& operator=(const CountableHelper&) = delete;
+
 private:
   ObjectData *m_object;
 };

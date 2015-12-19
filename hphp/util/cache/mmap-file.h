@@ -23,14 +23,15 @@
 #include <cstdint>
 #include <string>
 
-#include <boost/utility.hpp>
-
 namespace HPHP {
 
-class MmapFile : private boost::noncopyable {
+class MmapFile {
  public:
   explicit MmapFile(const std::string& path);
   ~MmapFile();
+
+  MmapFile(const MmapFile&) = delete;
+  MmapFile& operator=(const MmapFile&) = delete;
 
   // Class behavior is undefined until this returns true.
   // Read pointer is initialized to the beginning of the file.

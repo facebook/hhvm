@@ -17,9 +17,7 @@
 #ifndef incl_HPHP_SWEEPABLE_H_
 #define incl_HPHP_SWEEPABLE_H_
 
-#include <boost/noncopyable.hpp>
-
-#include "hphp/util/portability.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +29,9 @@ namespace HPHP {
  * method, allowing objects to clean up resources that are not othewise
  * owned by the current request, for example malloc'd-memory or file handles.
  */
-struct Sweepable: private boost::noncopyable {
+struct Sweepable {
+  Sweepable(const Sweepable&) = delete;
+  Sweepable& operator=(const Sweepable&) = delete;
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -89,7 +89,7 @@ private:
  * your warranty.
  */
 template<class T>
-struct SweepableMember: Sweepable {
+struct SweepableMember : Sweepable {
   void sweep() override {
     auto obj = reinterpret_cast<T*>(
       uintptr_t(this) - offsetof(T, m_sweepable)

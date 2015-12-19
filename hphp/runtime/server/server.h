@@ -24,8 +24,6 @@
 #include <memory>
 #include <string>
 
-#include <boost/noncopyable.hpp>
-
 #include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
@@ -330,9 +328,13 @@ public:
 /**
  * A ServerFactory knows how to create Server objects.
  */
-class ServerFactory : private boost::noncopyable {
+class ServerFactory {
 public:
+  ServerFactory() {}
   virtual ~ServerFactory() {}
+
+  ServerFactory(const ServerFactory&) = delete;
+  ServerFactory& operator=(const ServerFactory&) = delete;
 
   virtual ServerPtr createServer(const ServerOptions &options) = 0;
 
@@ -347,9 +349,12 @@ public:
  * This allows new server types to be plugged in dynamically, without having to
  * hard code the list of all possible server types.
  */
-class ServerFactoryRegistry : private boost::noncopyable {
+class ServerFactoryRegistry {
 public:
   ServerFactoryRegistry();
+
+  ServerFactoryRegistry(const ServerFactoryRegistry&) = delete;
+  ServerFactoryRegistry& operator=(const ServerFactoryRegistry&) = delete;
 
   static ServerFactoryRegistry *getInstance();
 

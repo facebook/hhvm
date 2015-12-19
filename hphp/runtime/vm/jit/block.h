@@ -36,7 +36,7 @@ namespace HPHP { namespace jit {
  * so usually you can use Block directly.  These methods also update
  * IRInstruction::m_block transparently.
  */
-struct Block : boost::noncopyable {
+struct Block {
   typedef InstructionList::iterator iterator;
   typedef InstructionList::const_iterator const_iterator;
   typedef InstructionList::reverse_iterator reverse_iterator;
@@ -74,6 +74,9 @@ struct Block : boost::noncopyable {
     , m_hint(Hint::Neither)
     , m_profCount(profCount)
   {}
+
+  Block(const Block&) = delete;
+  Block& operator=(const Block&) = delete;
 
   unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }

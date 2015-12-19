@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_UTIL_ASM_X64_H_
 #define incl_HPHP_UTIL_ASM_X64_H_
 
-#include <boost/noncopyable.hpp>
 #include <type_traits>
 
 #include "hphp/util/data-block.h"
@@ -712,7 +711,7 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class X64Assembler : private boost::noncopyable {
+class X64Assembler {
   friend struct Label;
 
   /*
@@ -726,6 +725,9 @@ class X64Assembler : private boost::noncopyable {
 
 public:
   explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
+
+  X64Assembler(const X64Assembler&) = delete;
+  X64Assembler& operator=(const X64Assembler&) = delete;
 
   CodeBlock& code() const { return codeBlock; }
 
@@ -2085,7 +2087,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-struct Label : private boost::noncopyable {
+struct Label {
   explicit Label()
     : m_a(nullptr)
     , m_address(nullptr)
@@ -2105,6 +2107,9 @@ struct Label : private boost::noncopyable {
       }
     }
   }
+
+  Label(const Label&) = delete;
+  Label& operator=(const Label&) = delete;
 
   void jmp(X64Assembler& a) {
     addJump(&a, Branch::Jmp);

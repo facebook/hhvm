@@ -15,7 +15,6 @@
 */
 #include "hphp/compiler/expression/class_expression.h"
 
-#include <boost/make_shared.hpp>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/compiler/statement/class_statement.h"

@@ -23,7 +23,6 @@
 #include "hphp/util/md5.h"
 #include "hphp/util/portability.h"
 
-#include <boost/noncopyable.hpp>
 #include <sqlite3.h>
 
 namespace HPHP {
@@ -155,10 +154,13 @@ class RepoQuery {
  * Semantics: the guard object will rollback the transaction unless
  * you tell it not to.  Call .commit() when you want things to stay.
  */
-class RepoTxn : boost::noncopyable {
+class RepoTxn {
  public:
   explicit RepoTxn(Repo& repo);
   ~RepoTxn();
+
+  RepoTxn(const RepoTxn&) = delete;
+  RepoTxn& operator=(const RepoTxn&) = delete;
 
   /*
    * All these routines may throw if there is an error accessing the

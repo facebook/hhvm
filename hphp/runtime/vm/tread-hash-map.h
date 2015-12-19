@@ -17,7 +17,6 @@
 #define incl_HPHP_VM_TREAD_HASH_MAP_H_
 
 #include <atomic>
-#include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <type_traits>
 #include <utility>
@@ -51,7 +50,7 @@ namespace Treadmill { void deferredFree(void*); }
  * Uses the treadmill to collect garbage.
  */
 template<class Key, class Val, class HashFunc>
-struct TreadHashMap : private boost::noncopyable {
+struct TreadHashMap {
   typedef std::pair<std::atomic<Key>,Val> value_type;
 
 private:
@@ -69,6 +68,9 @@ public:
   ~TreadHashMap() {
     free(m_table);
   }
+
+  TreadHashMap(const TreadHashMap&) = delete;
+  TreadHashMap& operator=(const TreadHashMap&) = delete;
 
   template<class IterVal>
   struct thm_iterator

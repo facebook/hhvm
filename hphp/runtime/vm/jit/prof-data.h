@@ -71,8 +71,12 @@ typedef std::vector<TCA> PrologueCallersVec;
  * of callers for each prologue, so that we can smash them appropriately when
  * regenerating prologues.
  */
-class PrologueCallersRec : private boost::noncopyable {
- public:
+struct PrologueCallersRec {
+  PrologueCallersRec() {}
+
+  PrologueCallersRec(const PrologueCallersRec&) = delete;
+  PrologueCallersRec& operator=(const PrologueCallersRec&) = delete;
+
   const PrologueCallersVec& mainCallers()  const;
   const PrologueCallersVec& guardCallers() const;
   void                      addMainCaller(TCA caller);

@@ -409,11 +409,10 @@ const std::string& RuntimeOption::GetServerPrimaryIPv6() {
 }
 
 static inline bool newMInstrsDefault() {
-#ifdef HHVM_NEW_MINSTRS
-  return true;
-#else
-  return getenv("HHVM_NEW_MINSTRS");
+#ifdef HHVM_OLD_MINSTRS
+  return false;
 #endif
+  return true;
 }
 
 static inline std::string regionSelectorDefault() {

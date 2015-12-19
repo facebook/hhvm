@@ -28,7 +28,12 @@
 
 namespace HPHP { namespace jit {
 
-AliasClass pointee(const SSATmp* ptr) {
+namespace {
+
+AliasClass pointee(
+  const SSATmp* ptr,
+  jit::flat_set<const IRInstruction*>* visited_labels
+) {
   auto const type = ptr->type();
   always_assert(type <= TPtrToGen);
   auto const maybeRef = type.maybe(TPtrToRefGen);
@@ -36,7 +41,34 @@ AliasClass pointee(const SSATmp* ptr) {
   auto const sinst = canonical(ptr)->inst();
 
   if (sinst->is(UnboxPtr)) {
-    return ARefAny | pointee(sinst->src(0));
+    return ARefAny | pointee(sinst->src(0), visited_labels);
+  }
+
+  // For phis, union all incoming values, taking care to not recurse infinitely
+  // in the presence of loops.
+  if (sinst->is(DefLabel)) {
+    if (visited_labels && visited_labels->count(sinst)) {
+      return AEmpty;
+    }
+
+    auto const dsts = sinst->dsts();
+    auto const dstIdx = std::find(dsts.begin(), dsts.end(), ptr) - dsts.begin();
+
+    folly::Optional<jit::flat_set<const IRInstruction*>> label_set;
+    if (visited_labels == nullptr) {
+      label_set.emplace();
+      visited_labels = &label_set.value();
+    }
+    visited_labels->insert(sinst);
+
+    auto ret = AEmpty;
+    sinst->block()->forEachSrc(
+      dstIdx,
+      [&] (const IRInstruction* jmp, const SSATmp* ptr) {
+        ret = ret | pointee(ptr, visited_labels);
+      }
+    );
+    return ret;
   }
 
   auto specific = [&] () -> folly::Optional<AliasClass> {
@@ -120,7 +152,7 @@ AliasClass pointee(const SSATmp* ptr) {
       // &init_null_variant().
       if (sinst->is(PropX, PropDX, PropQ)) {
         assertx(sinst->srcs().back()->isA(TPtrToMISGen));
-        return APropAny | pointee(sinst->srcs().back());
+        return APropAny | pointee(sinst->srcs().back(), visited_labels);
       }
 
       // Like the Prop* instructions, but for array elements. These could also
@@ -128,7 +160,7 @@ AliasClass pointee(const SSATmp* ptr) {
       // AliasClass yet.
       if (sinst->is(ElemX, ElemDX, ElemUX)) {
         assertx(sinst->srcs().back()->isA(TPtrToMISGen));
-        return AElemAny | pointee(sinst->srcs().back());
+        return AElemAny | pointee(sinst->srcs().back(), visited_labels);
       }
 
       return folly::none;
@@ -153,8 +185,6 @@ AliasClass pointee(const SSATmp* ptr) {
   if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
   return ret;
 }
-
-namespace {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1591,6 +1621,10 @@ MemEffects memory_effects(const IRInstruction& inst) {
   auto const ret = memory_effects_impl(inst);
   assertx(check_effects(inst, ret));
   return ret;
+}
+
+AliasClass pointee(const SSATmp* tmp) {
+  return pointee(tmp, nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////

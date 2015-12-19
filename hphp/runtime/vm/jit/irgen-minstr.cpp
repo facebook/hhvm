@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/collections.h"
 
+#include "hphp/runtime/vm/native-prop-handler.h"
+
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -249,6 +251,46 @@ PropInfo getPropertyOffset(IRGS& env,
   );
 }
 
+/*
+ * Returns true iff a Prop{X,DX,Q} operation with the given base and key will
+ * not write to its tvRef src, using the same set of conditions checked in
+ * ObjectData::propImpl(). This allows us to skip the very expensive ratchet
+ * operation after intermediate operations.
+ */
+bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
+  // Make sure it's an object of a known class.
+  if (!base->isA(TObj) || !base->type().clsSpec().cls()) return false;
+
+  auto cls = base->type().clsSpec().cls();
+  auto propType = TGen;
+  auto isDeclared = false;
+
+  // If the property name is known, try to look it up and get its RAT.
+  if (key->hasConstVal(TStr)) {
+    auto const keyStr = key->strVal();
+    auto const ctx = curClass(env);
+    auto const lookup = cls->getDeclPropIndex(ctx, keyStr);
+    if (lookup.prop != kInvalidSlot) {
+      isDeclared = true;
+      if (RuntimeOption::RepoAuthoritative) {
+        propType = typeFromRAT(cls->declPropRepoAuthType(lookup.prop));
+      }
+    }
+  }
+
+  // Magic getters/setters use tvRef if the property is unset.
+  if (classMayHaveMagicPropMethods(cls) && propType.maybe(TUninit)) {
+    return false;
+  }
+
+  // Native prop handlers never kick in for declared properties, even if
+  // they're unset.
+  if (!isDeclared && cls->hasNativePropHandler()) return false;
+
+  env.irb->constrainValue(base, TypeConstraint(cls));
+  return true;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool constrainBase(MTS& env, TypeConstraint tc) {
@@ -305,31 +347,37 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Returns a pointer to a particular field in the MInstrState structure.
- *
- * Must not be called if !env.needMIS.
+ * Returns a pointer to a specific value in MInstrState.
  */
-SSATmp* misLea(MTS& env, ptrdiff_t offset) {
-  assertx(env.needMIS);
-  env.irb.fs().setNeedRatchet(true);
-  auto const offvalue = cns(env, safe_cast<int32_t>(offset));
-  return gen(env, LdMIStateAddr, offvalue);
+SSATmp* misLea(IRGS& env, int32_t offset) {
+  env.irb->fs().setNeedRatchet(true);
+  return gen(env, LdMIStateAddr, cns(env, offset));
 }
 
-SSATmp* tvRefPtr(MTS& env) {
+SSATmp* tvRefPtr(IRGS& env) {
   return misLea(env, offsetof(MInstrState, tvRef));
+}
+
+SSATmp* propTvRefPtr(IRGS& env, SSATmp* base, const SSATmp* key) {
+  return prop_ignores_tvref(env, base, key)
+    ? cns(env, Type::cns(nullptr, TPtrToMISGen))
+    : tvRefPtr(env);
+}
+
+SSATmp* tvRef2Ptr(IRGS& env) {
+  return misLea(env, offsetof(MInstrState, tvRef2));
 }
 
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
-  return cns(env, Type::cns(&init_null_variant, TPtrToMembInitNull));
+  return cns(env, Type::cns(&init_null_variant, TPtrToOtherInitNull));
 }
 
 SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(env, Type::cns(&null_variant, TPtrToMembUninit));
+  return cns(env, Type::cns(&null_variant, TPtrToOtherUninit));
 }
 
 SSATmp* getInput(IRGS& env, unsigned i, TypeConstraint tc) {
@@ -989,7 +1037,8 @@ SSATmp* emitPropSpecialized(MTS& env, const MInstrAttr mia,
 void emitPropGeneric(MTS& env) {
   auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate_prop);
-  auto const nullsafe = (mCode == MQT);
+  auto const nullsafe = mCode == MQT;
+  auto const define = bool(mia & MIA_define);
 
   if ((mia & MIA_unset) && !env.base.type.strip().maybe(TObj)) {
     constrainBase(env, DataTypeSpecific);
@@ -997,50 +1046,27 @@ void emitPropGeneric(MTS& env) {
     return;
   }
 
-  auto const key = getKey(env);
-
-  if (mia & MIA_define) {
-    if (nullsafe) {
-      gen(
-        env,
-        RaiseError,
-        cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR))
-      );
-      setBase(env, ptrToInitNull(env));
-      return;
-    }
-    setBase(
+  if (define && nullsafe) {
+    gen(
       env,
-      gen(
-        env,
-        PropDX,
-        MInstrAttrData { mia },
-        env.base.value,
-        key,
-        tvRefPtr(env)
-      )
+      RaiseError,
+      cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR))
     );
-  } else {
-    setBase(
-      env,
-      nullsafe
-        ? gen(
-            env,
-            PropQ,
-            env.base.value,
-            key,
-            tvRefPtr(env)
-          )
-        : gen(
-            env,
-            PropX,
-            MInstrAttrData { mia },
-            env.base.value,
-            key,
-            tvRefPtr(env)
-          )
-    );
+    setBase(env, ptrToInitNull(env));
+    return;
   }
+
+  auto const base = env.base.value;
+  auto const key = getKey(env);
+  auto const tvRef = propTvRefPtr(env, base, key);
+
+  setBase(
+    env,
+    nullsafe
+      ? gen(env, PropQ, base, key, tvRef)
+      : gen(env, define ? PropDX : PropX, MInstrAttrData{mia},
+            base, key, tvRef)
+  );
 }
 
 void emitProp(MTS& env) {
@@ -1057,6 +1083,7 @@ void emitProp(MTS& env) {
 void emitElem(MTS& env) {
   auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate);
+  auto const base = env.base.value;
   auto const key = getKey(env);
 
   auto const warn   = mia & MIA_warn;
@@ -1067,24 +1094,13 @@ void emitElem(MTS& env) {
   assertx(!define || !warn);
 
   // Fast path for the common/easy case.
-  if (env.base.type <= TPtrToArr && !unset && !define &&
-      key->type().subtypeOfAny(TInt, TStr)) {
-    setBase(
-      env,
-      gen(env,
-          warn ? ElemArrayW : ElemArray,
-          gen(env, LdMem, TArr, env.base.value),
-          key)
-    );
-    return;
-  }
-
-  if (env.base.type <= TPtrToArr && (define || unset) &&
-      key->type().subtypeOfAny(TInt, TStr)) {
-    setBase(
-      env,
-      gen(env, unset ? ElemArrayU : ElemArrayD, env.base.value, key)
-    );
+  if (env.base.type <= TPtrToArr && key->type().subtypeOfAny(TInt, TStr)) {
+    if (define || unset) {
+      setBase(env, gen(env, unset ? ElemArrayU : ElemArrayD, base, key));
+    } else {
+      auto const arr = gen(env, LdMem, TArr, base);
+      setBase(env, gen(env, warn ? ElemArrayW : ElemArray, arr, key));
+    }
     return;
   }
 
@@ -1171,11 +1187,7 @@ bool needFirstRatchet(MTS& env) {
   if (!(firstTy < TObj && firstTy.clsSpec())) return true;
   auto const firstCls = firstTy.clsSpec().cls();
 
-  auto const no_overrides = AttrNoOverrideMagicGet|
-    AttrNoOverrideMagicSet|
-    AttrNoOverrideMagicIsset|
-    AttrNoOverrideMagicUnset;
-  if ((firstCls->attrs() & no_overrides) != no_overrides) {
+  if (classMayHaveMagicPropMethods(firstCls)) {
     // Note: we could also add a check here on whether the first property RAT
     // contains Uninit---if not we can still return false.  See
     // mightCallMagicPropMethod.
@@ -1334,6 +1346,9 @@ void emitMPre(MTS& env) {
    */
   for (env.mInd = 0; env.mInd < env.immVecM.size() - 1; ++env.mInd) {
     env.irb.exceptionStackBoundary();
+    // If emitIntermediateOp() does anything that need a ratchet, it will
+    // setNeedRatchet(true) for emitRatchetRefs().
+    env.irb.fs().setNeedRatchet(false);
     emitIntermediateOp(env);
     emitRatchetRefs(env);
   }
@@ -2120,6 +2135,7 @@ void handleStrTestResult(MTS& env) {
       discard(env, stackCnt);
       cleanTvRefs(env);
       push(env, str);
+      gen(env, FinishMemberOp);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
     }
   );
@@ -2175,6 +2191,7 @@ Block* makeCatchSet(MTS& env) {
     auto const val = gen(env, LdUnwinderValue, TCell);
     push(env, val);
   }
+  gen(env, FinishMemberOp);
   gen(env, Jmp, makeExit(env, nextBcOff(env)));
   return env.failedSetBlock;
 }
@@ -2305,22 +2322,6 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst) {
 }
 
 /*
- * Returns a pointer to a specific value in MInstrState.
- */
-SSATmp* misLea(IRGS& env, int32_t offset) {
-  env.irb->fs().setNeedRatchet(true);
-  return gen(env, LdMIStateAddr, cns(env, offset));
-}
-
-SSATmp* tvRefPtr(IRGS& env) {
-  return misLea(env, offsetof(MInstrState, tvRef));
-}
-
-SSATmp* tvRef2Ptr(IRGS& env) {
-  return misLea(env, offsetof(MInstrState, tvRef2));
-}
-
-/*
  * Store Uninit to tvRef and tvRef2.
  */
 void initTvRefs(IRGS& env) {
@@ -2416,20 +2417,18 @@ void simpleBaseImpl(IRGS& env, SSATmp* base, Type innerTy) {
 SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
                         bool nullsafe) {
   auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
-  if (flags & MOpFlags::Define) {
-    if (nullsafe) {
-      gen(env, RaiseError,
-          cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
-      return ptrToInitNull(env);
-    }
+  auto const define = bool(flags & MOpFlags::Define);
 
-    return gen(env, PropDX, miaData, base, key, tvRefPtr(env));
+  if (define && nullsafe) {
+    gen(env, RaiseError,
+        cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
+    return ptrToInitNull(env);
   }
 
-  if (nullsafe) {
-    return gen(env, PropQ, base, key, tvRefPtr(env));
-  }
-  return gen(env, PropX, miaData, base, key, tvRefPtr(env));
+  auto const tvRef = propTvRefPtr(env, base, key);
+  return nullsafe
+    ? gen(env, PropQ, base, key, tvRef)
+    : gen(env, define ? PropDX : PropX, miaData, base, key, tvRef);
 }
 
 SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
@@ -2732,6 +2731,7 @@ void handleStrTestResult(IRGS& env, SSATmp* strTestResult) {
       }
       cleanTvRefs(env);
       push(env, str);
+      gen(env, FinishMemberOp);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
     }
   );

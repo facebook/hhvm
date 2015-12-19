@@ -166,9 +166,8 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
       if (cls <= *mis) {
         if (auto meta = find(cls)) {
           ret |= ALocBits{meta->conflicts}.set(meta->index);
-        } else {
-          ret |= all_mistate;
         }
+        // The location is untracked.
       }
     };
 
@@ -402,19 +401,20 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const mis = acls.is_mis()) {
-      ret.all_mistate.set(meta.index);
-      return;
-    }
-
     if (auto const ref = acls.is_ref()) {
       meta.conflicts = ret.all_ref;
       meta.conflicts.reset(meta.index);
       return;
     }
 
+    if (auto const mis = acls.is_mis()) {
+      // We don't maintain an all_mistate set so there's nothing to do here but
+      // avoid hitting the assert below.
+      return;
+    }
+
     always_assert_flog(0, "AliasAnalysis assigned an AliasClass an id "
-      "but it didn't match a situation we undestood: {}\n", show(acls));
+      "but it didn't match a situation we understood: {}\n", show(acls));
   };
 
   ret.locations_inv.resize(ret.locations.size());

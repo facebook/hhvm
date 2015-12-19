@@ -110,11 +110,13 @@ TEST(Type, ToString) {
   EXPECT_EQ("Obj=Iterator", exact.toString());
   EXPECT_EQ("PtrToStr", TPtrToStr.toString());
 
-  EXPECT_EQ("PtrTo{Prop|MIS|Misc}Gen",
+  EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other}Gen",
             (TPtrToMembGen - TPtrToElemGen).toString());
   EXPECT_EQ("PtrToMembGen", TPtrToMembGen.toString());
-  EXPECT_EQ("PtrTo{ClsInit|ClsCns|Frame|Stk|Gbl|Prop|Elem|SProp|MIS|Misc}Gen",
-            (TPtrToGen - TPtrToRefGen).toString());
+  EXPECT_EQ(
+    "PtrTo{ClsInit|ClsCns|Frame|Stk|Gbl|Prop|Elem|SProp|MIS|MMisc|Other}Gen",
+    (TPtrToGen - TPtrToRefGen).toString()
+  );
 
   EXPECT_EQ("PtrTo{Int|StaticStr}|{Int|StaticStr}",
             (TInt | TPtrToStaticStr).toString());

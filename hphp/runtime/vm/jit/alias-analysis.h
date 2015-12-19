@@ -102,7 +102,6 @@ struct AliasAnalysis {
   ALocBits all_elemIs;
   ALocBits all_frame;
   ALocBits all_stack;
-  ALocBits all_mistate;
   ALocBits all_ref;
   ALocBits all_iterPos;
   ALocBits all_iterBase;

@@ -33,11 +33,14 @@ AliasClass pointee(const SSATmp* ptr) {
   always_assert(type <= TPtrToGen);
   auto const maybeRef = type.maybe(TPtrToRefGen);
   auto const typeNR = type - TPtrToRefGen;
+  auto const sinst = canonical(ptr)->inst();
+
+  if (sinst->is(UnboxPtr)) {
+    return ARefAny | pointee(sinst->src(0));
+  }
 
   auto specific = [&] () -> folly::Optional<AliasClass> {
     if (typeNR <= TBottom) return AEmpty;
-
-    auto const sinst = canonical(ptr)->inst();
 
     if (typeNR <= TPtrToFrameGen) {
       if (sinst->is(LdLocAddr)) {
@@ -71,6 +74,11 @@ AliasClass pointee(const SSATmp* ptr) {
     if (typeNR <= TPtrToMISGen) {
       if (sinst->is(LdMIStateAddr)) {
         return mis_from_offset(sinst->src(0)->intVal());
+      }
+      if (ptr->hasConstVal() && ptr->rawVal() == 0) {
+        // nullptr tvRef pointer, representing an instruction that doesn't use
+        // it.
+        return AEmpty;
       }
       return AMIStateTV;
     }
@@ -106,6 +114,22 @@ AliasClass pointee(const SSATmp* ptr) {
       // Takes a PtrToGen as its first operand, so we can't easily grab an array
       // base.
       if (sinst->is(ElemArrayU)) return AElemAny;
+
+      // These instructions can only get at tvRef when given it as a
+      // src. Otherwise they can only return pointers to properties or
+      // &init_null_variant().
+      if (sinst->is(PropX, PropDX, PropQ)) {
+        assertx(sinst->srcs().back()->isA(TPtrToMISGen));
+        return APropAny | pointee(sinst->srcs().back());
+      }
+
+      // Like the Prop* instructions, but for array elements. These could also
+      // return pointers to collection elements but those don't exist in
+      // AliasClass yet.
+      if (sinst->is(ElemX, ElemDX, ElemUX)) {
+        assertx(sinst->srcs().back()->isA(TPtrToMISGen));
+        return AElemAny | pointee(sinst->srcs().back());
+      }
 
       return folly::none;
     }
@@ -849,14 +873,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   /*
    * Various minstr opcodes that take a PtrToGen in src 0, which may or may not
-   * point to a frame local or the evaluation stack.  These instructions can
-   * all re-enter the VM and access arbitrary heap locations, and some of them
-   * take pointers to MinstrState locations, which they may both load and store
-   * from if present.
+   * point to a frame local or the evaluation stack. Some may read or write to
+   * that pointer while some only read. They can all re-enter the VM and access
+   * arbitrary heap locations.
    */
   case CGetElem:
   case EmptyElem:
   case IssetElem:
+  case CGetProp:
+  case CGetPropQ:
+  case EmptyProp:
+  case IssetProp:
+    return may_raise(inst, may_load_store(
+      AHeapAny | all_pointees(inst),
+      AHeapAny
+    ));
+
   case VGetElem:
   case SetElem:
   case SetNewElemArray:
@@ -870,41 +902,27 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IncDecElem:
   case ElemArrayD:
   case ElemArrayU:
-    // Right now we generally can't limit any of these better than general
-    // re-entry rules, since they can raise warnings and re-enter.
-    assertx(inst.src(0)->type() <= TPtrToGen);
-    return may_raise(inst, may_load_store(
-      AHeapAny | all_pointees(inst),
-      AHeapAny | all_pointees(inst)
-    ));
-
-  case ElemX:
-  case ElemDX:
-  case ElemUX:
-    assertx(inst.src(0)->isA(TPtrToGen));
-    return minstr_with_tvref(inst);
-
-  /*
-   * These minstr opcodes either take a PtrToGen or an Obj as the base.  The
-   * pointer may point at frame locals or the stack.  These instructions can
-   * all re-enter the VM and access arbitrary non-frame/stack locations, as
-   * well.
-   */
-  case CGetProp:
-  case CGetPropQ:
-  case EmptyProp:
-  case IssetProp:
   case VGetProp:
   case UnsetProp:
   case IncDecProp:
   case SetProp:
   case SetOpProp:
   case BindProp:
+    // Right now we generally can't limit any of these better than general
+    // re-entry rules, since they can raise warnings and re-enter.
     return may_raise(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     ));
 
+  /*
+   * Intermediate minstr operations. In addition to a base pointer like the
+   * operations agove, these may take a pointer to MInstrState::tvRef, which
+   * they may store to (but not read from).
+   */
+  case ElemX:
+  case ElemDX:
+  case ElemUX:
   case PropX:
   case PropDX:
   case PropQ:

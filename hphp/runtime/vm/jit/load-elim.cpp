@@ -245,21 +245,22 @@ void clear_everything(Local& env) {
   env.state.avail.reset();
 }
 
+TrackedLoc* find_tracked(State& state,
+                         folly::Optional<ALocMeta> meta) {
+  if (!meta) return nullptr;
+  return state.avail[meta->index] ? &state.tracked[meta->index]
+                                  : nullptr;
+}
+
 TrackedLoc* find_tracked(Local& env,
                          const IRInstruction& inst,
                          folly::Optional<ALocMeta> meta) {
-  if (!meta) return nullptr;
-  return env.state.avail[meta->index] ? &env.state.tracked[meta->index]
-                                      : nullptr;
+  return find_tracked(env.state, meta);
 }
 
 Flags load(Local& env,
            const IRInstruction& inst,
            AliasClass acls) {
-  // Bail out early when the instruction is in a catch block.  We don't want to
-  // increase lifetimes of values because of cold paths.
-  if (inst.block()->hint() == Block::Hint::Unused) return FNone{};
-
   acls = canonicalize(acls);
 
   auto const meta = env.global.ainfo.find(acls);
@@ -268,22 +269,16 @@ Flags load(Local& env,
 
   auto& tracked = env.state.tracked[meta->index];
 
-  if (env.state.avail[meta->index]) {
-    if (tracked.knownValue != nullptr) {
-      return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
-    }
-    /*
-     * We didn't have a value, but we had an available type.  This can happen
-     * at control flow joins right now (since we don't have support for
-     * inserting phis for available values).  Whatever the old type is is still
-     * valid, and whatever information the load instruction knows is also
-     * valid, so we can keep their intersection.
-     */
-    tracked.knownType &= inst.dst()->type();
-  } else {
+  // We can always trust the dst type of the load. Add its knowledge to
+  // knownType before doing anything else.
+  if (!env.state.avail[meta->index]) {
+    tracked.knownValue = nullptr;
     tracked.knownType = inst.dst()->type();
     env.state.avail.set(meta->index);
+  } else {
+    tracked.knownType &= inst.dst()->type();
   }
+
   if (tracked.knownType.hasConstVal() ||
       tracked.knownType.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
     tracked.knownValue = env.global.unit.cns(tracked.knownType);
@@ -295,6 +290,19 @@ Flags load(Local& env,
       tracked.knownType,
       kMaxTrackedALocs    // it's a constant, so it is nowhere
     };
+  }
+
+  if (tracked.knownValue != nullptr) {
+    // Don't use knownValue if it's from a different block and we're currently
+    // in a catch trace, to avoid extending lifetimes too much.
+    auto const block = tracked.knownValue.match(
+      [] (SSATmp* tmp) { return tmp->inst()->block(); },
+      [] (Block* blk)  { return blk; }
+    );
+    if (inst.block() != block && inst.block()->hint() == Block::Hint::Unused) {
+      return FNone{};
+    }
+    return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
   }
 
   tracked.knownValue = inst.dst();
@@ -468,15 +476,32 @@ void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
 //////////////////////////////////////////////////////////////////////
 
 Flags analyze_inst(Local& env, const IRInstruction& inst) {
-  if (inst.taken()) {
-    env.global.blockInfo[inst.block()].stateOutTaken = env.state;
-  }
-
   auto const effects = memory_effects(inst);
   FTRACE(3, "    {}\n"
             "      {}\n",
             inst.toString(),
             show(effects));
+
+  if (inst.taken()) {
+    auto& outState =
+      env.global.blockInfo[inst.block()].stateOutTaken = env.state;
+
+    // CheckInitMem's pointee is TUninit on the taken branch, so update
+    // outState.
+    if (inst.is(CheckInitMem)) {
+      auto const ge = boost::get<GeneralEffects>(effects);
+      auto const meta = env.global.ainfo.find(canonicalize(ge.loads));
+      if (auto const tloc = find_tracked(outState, meta)) {
+        tloc->knownType &= TUninit;
+      } else if (meta) {
+        auto tloc = &outState.tracked[meta->index];
+        tloc->knownValue = nullptr;
+        tloc->knownType = TUninit;
+        outState.avail.set(meta->index);
+      }
+    }
+  }
+
   auto flags = Flags{};
   match<void>(
     effects,

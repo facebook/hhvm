@@ -164,7 +164,7 @@ enum Attr {
   AttrParamCoerceModeNull  = (1 << 30), //       |          |    X    //
 };
 
-inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
+constexpr Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
 
 inline Attr& operator|=(Attr& a, const Attr& b) {
   return (a = Attr((int)a | (int)b));

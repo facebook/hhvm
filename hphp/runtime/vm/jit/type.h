@@ -68,10 +68,11 @@ namespace jit {
  * alias a PtrToRGblGen because both could be inside the same RefData.). Note
  * that PtrToRFooGen is just shorthand for PtrTo{Ref|Foo}Gen.
  *
- * Memb is a number of possible locations that result from the more generic
- * types of member operations: Prop, Elem, MIS, and Misc, which represents
- * something living in a collection instance, an object's dynamic property
- * array, the init_null_variant or null_variant, or the lvalBlackHole.
+ * Memb is a number of different locations that result from the more generic
+ * types of member operations: Prop, Elem, MIS, MMisc, and Other. MMisc
+ * contains something living in a collection instance or object's dynamic
+ * property array. Other contains init_null_variant, null_variant, or the
+ * lvalBlackHole.
  *
  * ClsInit is a pointer to class property initializer data.  These can never be
  * refs, so we don't have a RClsInit type.
@@ -135,12 +136,13 @@ namespace jit {
   r(f, Elem,  1U << 7, __VA_ARGS__)                      \
   r(f, SProp, 1U << 8, __VA_ARGS__)                      \
   r(f, MIS,   1U << 9, __VA_ARGS__)                      \
-  r(f, Misc,  1U << 10, __VA_ARGS__)                     \
-  /* NotPtr,  1U << 11, declared below */
+  r(f, MMisc, 1U << 10, __VA_ARGS__)                     \
+  r(f, Other, 1U << 11, __VA_ARGS__)                    \
+  /* NotPtr,  1U << 12, declared below */
 
 #define PTR_TYPES(f, r, ...)                             \
   PTR_PRIMITIVE(f, r, __VA_ARGS__)                       \
-  r(f, Memb, Prop | Elem | MIS | Misc, __VA_ARGS__)
+  r(f, Memb, Prop | Elem | MIS | MMisc | Other, __VA_ARGS__)
 
 enum class Ptr : uint16_t {
   /*
@@ -149,9 +151,9 @@ enum class Ptr : uint16_t {
    * with less ridiculous names: TGen and TPtrToGen, respectively.
    */
   Bottom = 0,
-  Top    = 0x0fffU, // Keep this in sync with the number of bits used in
+  Top    = 0x1fffU, // Keep this in sync with the number of bits used in
                     // PTR_PRIMITIVE, to keep pretty-printing cleaner.
-  NotPtr = 1U << 11,
+  NotPtr = 1U << 12,
   Ptr    = Top & ~NotPtr,
 
 #define PTRT(name, bits, ...) name = (bits),
@@ -237,7 +239,7 @@ bool operator>(Ptr, Ptr) = delete;
   IRT(ABC,         1ULL << 35) /* AsioBlockableChain */                 \
   IRT(RDSHandle,   1ULL << 36) /* rds::Handle */                        \
   IRT(Nullptr,     1ULL << 37)                                          \
-  /* bits 38-50 are padding, 51-62 are pointer kind, 63 is hasConstVal */
+  /* bits 38-49 are padding, 50-62 are pointer kind, 63 is hasConstVal */
 
 /*
  * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS
@@ -726,8 +728,8 @@ private:
       // Only 38 of the 51 bits are actively in use but we make sure these
       // three bit fields fill up all 64 bits to ensure they're all
       // initialized.
-      bits_t m_bits : 51;
-      bits_t m_ptrKind : 12;
+      bits_t m_bits : 50;
+      bits_t m_ptrKind : 13;
       bits_t m_hasConstVal : 1;
     };
     uint64_t m_raw;

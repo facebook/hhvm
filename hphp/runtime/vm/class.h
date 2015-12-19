@@ -1337,6 +1337,11 @@ bool isNormalClass(const Class* cls);
 bool classHasPersistentRDS(const Class* cls);
 
 /*
+ * Returns whether cls or any of its children may have magic property methods.
+ */
+bool classMayHaveMagicPropMethods(const Class* cls);
+
+/*
  * Return the class that "owns" f.  This will normally be f->cls(), but for
  * Funcs with static locals, f may have been cloned into a derived class.
  *

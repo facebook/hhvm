@@ -77,20 +77,13 @@ void CodeGenerator::cgPropQ(IRInstruction* inst) {
       .ssa(1)
       .ssa(2);
 
-  if (inst->src(0)->isA(TObj)) {
-    cgCallHelper(
-      vmain(),
-      CallSpec::direct(propCOQ),
-      callDest(inst),
-      SyncOptions::Sync,
-      args
-    );
-    return;
-  }
+  auto helper = inst->src(0)->isA(TObj)
+    ? CallSpec::direct(propCOQ)
+    : CallSpec::direct(propCQ);
 
   cgCallHelper(
     vmain(),
-    CallSpec::direct(propCQ),
+    helper,
     callDest(inst),
     SyncOptions::Sync,
     args

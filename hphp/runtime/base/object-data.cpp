@@ -1238,9 +1238,6 @@ TypedValue* ObjectData::propImpl(
       m_cls->preClass()->name()->data(),
       key->data()
     );
-
-    *tvRef = make_tv<KindOfUninit>();
-    return tvRef;
   }
 
   // First see if native getter is implemented.
@@ -1255,8 +1252,6 @@ TypedValue* ObjectData::propImpl(
 
   if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
-    *tvRef = make_tv<KindOfUninit>();
-    return tvRef;
   }
 
   if (warn) raiseUndefProp(key);

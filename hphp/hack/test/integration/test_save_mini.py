@@ -64,12 +64,8 @@ load_mini_script = %s
             ] + list(map(lambda x: x.format(root=root), options)),
             env={'HH_LOCALCONF_PATH': self.repo_dir},
             stdin=stdin)
-        log_file = self.proc_call([
-            hh_client, '--logname', self.repo_dir
-            ])[0].strip()
-        with open(log_file) as f:
-            logs = f.read()
-            self.assertIn('Mini-state loading worker took', logs)
+        logs = self.get_server_logs()
+        self.assertIn('Mini-state loading worker took', logs)
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
@@ -99,13 +95,9 @@ load_mini_script = %s
 
         self.assertEqual(output.strip(), 'No errors!')
 
-        log_file = self.proc_call([
-            hh_client, '--logname', self.repo_dir
-            ])[0].strip()
-        with open(log_file) as f:
-            logs = f.read()
-            self.assertIn('Could not load mini state', logs)
-            self.assertIn(error_msg, logs)
+        logs = self.get_server_logs()
+        self.assertIn('Could not load mini state', logs)
+        self.assertIn(error_msg, logs)
 
     def test_hhconfig_change(self):
         """
@@ -128,7 +120,8 @@ load_mini_script = %s
         self.check_cmd(['No errors!'])
         # check how the old one exited
         log_file = self.proc_call([
-            hh_client, '--logname', self.repo_dir])[0].strip() + '.old'
+            hh_client, '--logname', self.repo_dir]
+            )[0].strip() + '.old'
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('.hhconfig changed in an incompatible way', logs)

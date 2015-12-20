@@ -18,7 +18,6 @@ let test_process_data =
     in_fd = Unix.stdin;
     out_fd = Unix.stdout;
     log_file = "";
-    log_mode = Daemon.Parent_streams;
     last_request_handoff = ref 0.0;
   }
 

@@ -24,7 +24,7 @@ DeclareStatement::DeclareStatement(STATEMENT_CONSTRUCTOR_PARAMETERS)
 {}
 
 StatementPtr DeclareStatement::clone() {
-  return StatementPtr(new DeclareStatement(*this));
+  return std::make_shared<DeclareStatement>(*this);
 }
 
 //////////////////////////////////////////////////////////////////////

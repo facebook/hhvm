@@ -39,11 +39,12 @@
   ConstructPtr getNthKid(int n) const override;                         \
   int getKidCount() const override;                                     \
   void setNthKid(int n, ConstructPtr cp) override
+
 #define NULL_STATEMENT()                                    \
-  BlockStatementPtr(new BlockStatement(getScope(),          \
-                                       getLabelScope(),     \
-                                       getRange(),          \
-                                       StatementListPtr()))
+  std::make_shared<BlockStatement>(getScope(),              \
+                                   getLabelScope(),         \
+                                   getRange(),              \
+                                   StatementListPtr())
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

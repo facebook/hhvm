@@ -32,7 +32,7 @@ EncapsListExpression::EncapsListExpression
 }
 
 ExpressionPtr EncapsListExpression::clone() {
-  EncapsListExpressionPtr exp(new EncapsListExpression(*this));
+  auto exp = std::make_shared<EncapsListExpression>(*this);
   Expression::deepCopy(exp);
   exp->m_exps = Clone(m_exps);
   return exp;
@@ -87,15 +87,13 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
     int count = m_exps->getCount();
     // turn into cascaded concat
     if (count > 1) {
-      ExpressionPtr exp =
-        BinaryOpExpressionPtr(new BinaryOpExpression(
-                                getScope(), getRange(),
-                                (*m_exps)[0], (*m_exps)[1], '.'));
+      auto exp = std::make_shared<BinaryOpExpression>(
+        getScope(), getRange(), (*m_exps)[0], (*m_exps)[1], '.'
+      );
       for (int i = 2; i < count; i++) {
-        exp =
-          BinaryOpExpressionPtr(new BinaryOpExpression(
-                                  getScope(), getRange(),
-                                  exp, (*m_exps)[i], '.'));
+        exp = std::make_shared<BinaryOpExpression>(
+          getScope(), getRange(), exp, (*m_exps)[i], '.'
+        );
       }
       return exp;
     }

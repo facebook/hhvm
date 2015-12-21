@@ -673,7 +673,7 @@ int lintTarget(const CompilerOptions &po) {
     try {
       Scanner scanner(filename, Option::GetScannerType());
       Compiler::Parser parser(scanner, filename.c_str(),
-                              AnalysisResultPtr(new AnalysisResult()));
+                              std::make_shared<AnalysisResult>());
       if (!parser.parse()) {
         Logger::Error("Unable to parse file %s: %s", filename.c_str(),
                       parser.getMessage().c_str());

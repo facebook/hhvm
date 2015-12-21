@@ -45,8 +45,8 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
     m_forceRerun(false),
     m_rescheduleFlags(0), m_selfUser(0) {
   m_scopeName = name;
-  m_variables = VariableTablePtr(new VariableTable(*this));
-  m_constants = ConstantTablePtr(new ConstantTable(*this));
+  m_variables = std::make_shared<VariableTable>(*this);
+  m_constants = std::make_shared<ConstantTable>(*this);
 }
 
 void BlockScope::incLoopNestedLevel() {

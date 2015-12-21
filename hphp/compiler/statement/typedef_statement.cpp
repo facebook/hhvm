@@ -35,7 +35,7 @@ TypedefStatement::TypedefStatement(
 TypedefStatement::~TypedefStatement() {}
 
 StatementPtr TypedefStatement::clone() {
-  return StatementPtr(new TypedefStatement(*this));
+  return std::make_shared<TypedefStatement>(*this);
 }
 
 //////////////////////////////////////////////////////////////////////

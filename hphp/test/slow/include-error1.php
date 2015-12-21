@@ -1,6 +1,6 @@
 <?php
-include('not-existing-file.php');
-include 'not-extisting-file.php';
-include_once('not-extisting-file.php');
-include_once 'not-extisting-file.php';
-require('not-extisting-file.php');
+include('non-existing-file.php');
+include 'non-existing-file.php';
+include_once('non-existing-file.php');
+include_once 'non-existing-file.php';
+require('non-existing-file.php');

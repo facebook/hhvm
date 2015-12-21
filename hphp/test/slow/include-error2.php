@@ -1,2 +1,2 @@
 <?php
-require 'not-extisting-file.php';
+require 'non-existing-file.php';

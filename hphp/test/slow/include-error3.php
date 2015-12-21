@@ -1,2 +1,2 @@
 <?php
-require_once('not-extisting-file.php');
+require_once('non-existing-file.php');

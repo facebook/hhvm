@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
+#include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -42,17 +43,6 @@ const uint8_t VERSION_DOUBLE_BE = 2;
 const uint8_t PROTOCOL_ID = 0x82;
 const uint8_t TYPE_MASK = 0xe0;
 const uint8_t TYPE_SHIFT_AMOUNT = 5;
-
-enum TError {
-  ERR_UNKNOWN = 0,
-  ERR_INVALID_DATA = 1,
-  ERR_BAD_VERSION = 4
-};
-
-ATTRIBUTE_NORETURN static void thrift_error(const String& what, TError why);
-static void thrift_error(const String& what, TError why) {
-  throw create_object(s_TProtocolException, make_packed_array(what, why));
-}
 
 enum CState {
   STATE_CLEAR,
@@ -174,91 +164,6 @@ struct CompactRequestData final : RequestEventHandler {
   uint8_t version;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
-
-static Array get_tspec(const Class* cls) {
-  /*
-    passing in cls will short-circuit the accessibility checks,
-    but does mean we'll allow a private or protected s_TSPEC.
-    passing in nullptr would do the correct checks. Not sure it matters
-  */
-  auto lookup = cls->getSProp(cls, s_TSPEC.get());
-  if (!lookup.prop) {
-    thrift_error(
-      folly::sformat("Class {} does not have a property named {}",
-                     cls->name(), s_TSPEC),
-      ERR_INVALID_DATA);
-  }
-  Variant structSpec = tvAsVariant(lookup.prop);
-  if (!structSpec.isArray()) {
-    thrift_error("invalid type of spec", ERR_INVALID_DATA);
-  }
-  return structSpec.toArray();
-}
-
-struct FieldSpec {
-  int16_t fieldNum;
-  TType type;
-  StringData* name;  // TODO(9396341): Consider using LowStringPtr.
-  ArrayData* spec;
-};
-
-using StructSpec = FixedVector<FieldSpec>;
-using SpecCacheMap = folly::AtomicHashMap<const ArrayData*, StructSpec>;
-static SpecCacheMap s_specCacheMap(1000);
-
-// Provides safe access to specifications.
-class SpecHolder {
- public:
-  // The returned reference is valid at least while this SpecHolder is alive.
-  const StructSpec& getSpec(const Array& spec) {
-    auto it = s_specCacheMap.find(spec.get());
-    if (it != s_specCacheMap.end()) {
-      return it->second;
-    } else {
-      if (spec->isStatic()) {
-        // Static specs are kept by the cache.
-        auto result = s_specCacheMap.insert(spec.get(), compileSpec(spec));
-        // If someone else inserted the same key since our call to 'find', the
-        // temporary StructSpec instance above will be destructed, and the
-        // following will return the exisitng value from the cache:
-        return result.first->second;
-      } else {
-        // Temporary specs are kept by m_tempSpec.
-        StructSpec temp(compileSpec(spec));
-        m_tempSpec.swap(temp);
-        return m_tempSpec;
-      }
-    }
-  }
-
- private:
-  // Non-static spec, or empty if source spec is static.
-  StructSpec m_tempSpec;
-
-  static StructSpec compileSpec(const Array& spec) {
-    std::vector<FieldSpec> temp(spec.size());
-    ArrayIter specIt = spec.begin();
-    for (int i = 0; i < spec.size(); ++i, ++specIt) {
-      if (!specIt.first().isInteger()) {
-        thrift_error("Bad keytype in TSPEC (expected 'long')",
-                     ERR_INVALID_DATA);
-      }
-      auto& field = temp[i];
-      field.fieldNum = specIt.first().toInt16();
-      Array fieldSpec = specIt.second().toArray();
-      field.spec = fieldSpec.get();
-      field.type =
-        (TType)fieldSpec.rvalAt(s_type, AccessFlags::Error_Key).toInt64();
-      field.name =
-        fieldSpec.rvalAt(s_var, AccessFlags::Error_Key).toString().get();
-    }
-    if (temp.size() >> 16) {
-      thrift_error("Too many keys in TSPEC (expected < 2^16)",
-                   ERR_INVALID_DATA);
-    }
-    return StructSpec(temp);
-  }
-};
 
 class CompactWriter {
   public:

@@ -10,3 +10,5 @@
 
 val daemon_main: ServerArgs.options ->
   Unix.file_descr -> Unix.file_descr -> unit
+
+val run_once: ServerArgs.options -> 'a

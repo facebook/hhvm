@@ -35,23 +35,28 @@ inline Arch arch() {
 #endif
 }
 
+// MSVC's Preprocessor is completely idiotic, so we have to play by its
+// rules and forcefully expand the variadic args so they aren't all
+// interpreted as the first argument to func.
+#define MSVC_GLUE(x, y) x y
+
 /*
  * Macro for defining easy arch-dispatch wrappers.
  *
  * We need to specify the return type explicitly, or else we may drop refs.
  */
-#define ARCH_SWITCH_CALL(func, ...)     \
+#define ARCH_SWITCH_CALL(func, ...)                  \
   ([&]() -> boost::function_traits<decltype(x64::func)>::result_type {  \
-    switch (arch()) {                   \
-      case Arch::X64:                   \
-        return x64::func(__VA_ARGS__);  \
-      case Arch::ARM:                   \
-        return arm::func(__VA_ARGS__);  \
-      case Arch::PPC64:                 \
-        not_implemented();              \
-        break;                          \
-    }                                   \
-    not_reached();                      \
+    switch (arch()) {                                \
+      case Arch::X64:                                \
+        return x64::MSVC_GLUE(func, (__VA_ARGS__));  \
+      case Arch::ARM:                                \
+        return arm::MSVC_GLUE(func, (__VA_ARGS__));  \
+      case Arch::PPC64:                              \
+        not_implemented();                           \
+        break;                                       \
+    }                                                \
+    not_reached();                                   \
   }())
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -275,7 +275,9 @@ let monitor_daemon_main (options: ServerArgs.options) typechecker_entry =
   let www_root = (ServerArgs.root options) in
   ignore @@ Sys_utils.setsid ();
   let lock_file = ServerFiles.server_monitor_liveness_lock www_root in
-  if (Lock.grab lock_file) then
+  if ServerArgs.check_mode options then
+    ServerMain.run_once options
+  else if (Lock.grab lock_file) then
     Hh_logger.log "Starting monitor run loop"
   else
     (Hh_logger.log "Monitor daemon already running. Killing";

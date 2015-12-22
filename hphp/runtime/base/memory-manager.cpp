@@ -703,9 +703,7 @@ void MemoryManager::endQuarantine() {
 void MemoryManager::checkHeap(const char* phase) {
   size_t bytes=0;
   std::vector<Header*> hdrs;
-  std::unordered_set<FreeNode*> free_blocks;
-  std::unordered_set<APCLocalArray*> apc_arrays;
-  std::unordered_set<StringData*> apc_strings;
+  PtrMap free_blocks, apc_arrays, apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
   forEachHeader([&](Header* h) {
@@ -714,15 +712,15 @@ void MemoryManager::checkHeap(const char* phase) {
     counts[(int)h->kind()]++;
     switch (h->kind()) {
       case HeaderKind::Free:
-        free_blocks.insert(&h->free_);
+        free_blocks.insert(h);
         break;
       case HeaderKind::Apc:
         if (h->apc_.m_sweep_index != kInvalidSweepIndex) {
-          apc_arrays.insert(&h->apc_);
+          apc_arrays.insert(h);
         }
         break;
       case HeaderKind::String:
-        if (h->str_.isProxy()) apc_strings.insert(&h->str_);
+        if (h->str_.isProxy()) apc_strings.insert(h);
         break;
       case HeaderKind::Packed:
       case HeaderKind::Struct:
@@ -756,31 +754,34 @@ void MemoryManager::checkHeap(const char* phase) {
   });
 
   // check the free lists
+  free_blocks.prepare();
+  size_t num_free_blocks = 0;
   for (auto i = 0; i < kNumSmallSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      assert(free_blocks.find(n) != free_blocks.end());
-      free_blocks.erase(n);
+      assert(free_blocks.isHeader(n));
+      ++num_free_blocks;
     }
   }
-  assert(free_blocks.empty());
+  assert(num_free_blocks == free_blocks.size());
 
   // check the apc array list
   assert(apc_arrays.size() == m_apc_arrays.size());
-  for (auto a : m_apc_arrays) {
-    assert(apc_arrays.find(a) != apc_arrays.end());
-    apc_arrays.erase(a);
+  apc_arrays.prepare();
+  for (UNUSED auto a : m_apc_arrays) {
+    assert(apc_arrays.isHeader(a));
   }
-  assert(apc_arrays.empty());
 
   // check the apc string list
+  size_t num_apc_strings = 0;
+  apc_strings.prepare();
   for (StringDataNode *next, *n = m_strings.next; n != &m_strings; n = next) {
     next = n->next;
-    auto const s = StringData::node2str(n);
+    UNUSED auto const s = StringData::node2str(n);
     assert(s->isProxy());
-    assert(apc_strings.find(s) != apc_strings.end());
-    apc_strings.erase(s);
+    assert(apc_strings.isHeader(s));
+    ++num_apc_strings;
   }
-  assert(apc_strings.empty());
+  assert(num_apc_strings == apc_strings.size());
 
   // heap check is done. If we are not exiting, check pointers using HeapGraph
   if (Trace::moduleEnabled(Trace::heapreport)) {

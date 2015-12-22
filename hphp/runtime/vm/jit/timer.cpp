@@ -55,7 +55,7 @@ int64_t getCPUTimeNanos() {
 
 #ifdef RUSAGE_THREAD
   return HPHP::Timer::GetRusageMicros(HPHP::Timer::TotalCPU,
-                                      RUSAGE_THREAD) * 1000;
+                                      HPHP::Timer::Thread) * 1000;
 #else
   return -1;
 #endif

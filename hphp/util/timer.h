@@ -43,6 +43,13 @@ public:
     Stderr,
     Trace,
   };
+  enum Who {
+    Self = RUSAGE_SELF,
+    Children = RUSAGE_CHILDREN,
+#ifdef RUSAGE_THREAD
+    Thread = RUSAGE_THREAD,
+#endif
+  };
 
 public:
   explicit Timer(Type type, const char *name = nullptr, ReportType r = Log);
@@ -51,7 +58,7 @@ public:
   static void GetRealtimeTime(timespec &sp);
   static void GetMonotonicTime(timespec &sp);
   static int64_t GetCurrentTimeMicros();
-  static int64_t GetRusageMicros(Type t, int who);
+  static int64_t GetRusageMicros(Type t, Who who);
   const char *getName() const;
   int64_t getMicroSeconds() const;
   void report() const;

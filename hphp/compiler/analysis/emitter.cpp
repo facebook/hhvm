@@ -2657,7 +2657,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 break;
               }
               if (!RuntimeOption::PHP7_ScalarTypes) {
-                emitMakeUnitFatal(e, "strict_types can only be used when"
+                emitMakeUnitFatal(e, "strict_types can only be used when "
                                   "hhvm.php7.scalar_types = true");
                 break;
               }

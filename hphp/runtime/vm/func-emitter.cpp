@@ -40,7 +40,6 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,10 +236,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }
 
   std::vector<Func::ParamInfo> fParams;
-  bool usesDoubles = false;
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
-    if (pi.builtinType == KindOfDouble) usesDoubles = true;
     if (pi.isVariadic()) {
       pi.builtinType = KindOfArray;
     }
@@ -274,46 +271,38 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       f->isStatic()
     );
 
-    auto const nif = info.ptr;
-    if (nif) {
-      Attr dummy = AttrNone;
-      int nativeAttrs = parseNativeAttributes(dummy);
-      if (nativeAttrs & Native::AttrZendCompat) {
-        ex->m_nativeFuncPtr = nif;
-        ex->m_builtinFuncPtr = zend_wrap_func;
-      } else {
-        if (parseNativeAttributes(dummy) & Native::AttrActRec) {
-          ex->m_builtinFuncPtr = nif;
-          ex->m_nativeFuncPtr = nullptr;
-        } else {
-          ex->m_nativeFuncPtr = nif;
-          ex->m_builtinFuncPtr = Native::getWrapper(m_pce, usesDoubles);
+    Attr dummy = AttrNone;
+    auto nativeAttributes = parseNativeAttributes(dummy);
+    Native::getFunctionPointers(
+      info,
+      nativeAttributes,
+      ex->m_builtinFuncPtr,
+      ex->m_nativeFuncPtr
+    );
 
-          if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
-            ex->m_returnByValue = true;
-          }
-          int extra =
-            (attrs & AttrNumArgs ? 1 : 0) +
-            (isMethod() ? 1 : 0);
-          assert(info.sig.args.size() == params.size() + extra);
-          for (auto i = params.size(); i--; ) {
-            switch (info.sig.args[extra + i]) {
-              case Native::NativeSig::Type::ObjectArg:
-              case Native::NativeSig::Type::StringArg:
-              case Native::NativeSig::Type::ArrayArg:
-              case Native::NativeSig::Type::ResourceArg:
-              case Native::NativeSig::Type::OutputArg:
-              case Native::NativeSig::Type::MixedTV:
-                fParams[i].nativeArg = true;
-                break;
-              default:
-                break;
-            }
-          }
+    if (ex->m_nativeFuncPtr &&
+        !(nativeAttributes & Native::AttrZendCompat)) {
+      if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
+        ex->m_returnByValue = true;
+      }
+      int extra =
+        (attrs & AttrNumArgs ? 1 : 0) +
+        (isMethod() ? 1 : 0);
+      assert(info.sig.args.size() == params.size() + extra);
+      for (auto i = params.size(); i--; ) {
+        switch (info.sig.args[extra + i]) {
+          case Native::NativeSig::Type::ObjectArg:
+          case Native::NativeSig::Type::StringArg:
+          case Native::NativeSig::Type::ArrayArg:
+          case Native::NativeSig::Type::ResourceArg:
+          case Native::NativeSig::Type::OutputArg:
+          case Native::NativeSig::Type::MixedTV:
+            fParams[i].nativeArg = true;
+            break;
+          default:
+            break;
         }
       }
-    } else {
-      ex->m_builtinFuncPtr = Native::unimplementedWrapper;
     }
   }
 

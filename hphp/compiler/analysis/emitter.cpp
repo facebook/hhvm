@@ -130,7 +130,6 @@
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -7078,51 +7077,21 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     funcScope->setOptFunction(hphp_opt_fb_call_user_func);
   }
 
-  BuiltinFunction nif = info.ptr;
-  BuiltinFunction bif;
   int nativeAttrs = fe->parseNativeAttributes(attributes);
-  if (!nif) {
-    bif = Native::unimplementedWrapper;
-  } else {
-    if (nativeAttrs & Native::AttrZendCompat) {
-      bif = zend_wrap_func;
+  BuiltinFunction bif = nullptr, nif = nullptr;
+  Native::getFunctionPointers(info, nativeAttrs, bif, nif);
+  if (nif && !(nativeAttrs & Native::AttrZendCompat)) {
+    if (retType) {
+      fe->retTypeConstraint =
+        determine_type_constraint_from_annot(retType, true);
     } else {
-      if (retType) {
-        fe->retTypeConstraint = determine_type_constraint_from_annot(retType,
-                                                                     true);
-      } else {
-        fe->retTypeConstraint = TypeConstraint {
-          s_Void.get(),
-          TypeConstraint::ExtendedHint | TypeConstraint::HHType
-        };
-      }
-      if (nativeAttrs & Native::AttrActRec) {
-        // Call this native function with a raw ActRec*
-        // rather than pulling out args for normal func calling
-        bif = nif;
-        nif = nullptr;
-      } else {
-        bool usesDouble = false, variadic = funcScope->hasVariadicParam();
-        auto params = meth->getParams();
-        int numParams = params ? params->getCount() : 0;
-        // Ignore looking at the variadic capture param's type
-        // Since as far as the ABI is concerned, it's always array
-        if (variadic) numParams--;
-        assert(numParams >= 0);
-
-        // Does this method take doubles as arguments?
-        for (int i = 0; i < numParams; ++i) {
-          auto par = static_pointer_cast<ParameterExpression>((*params)[i]);
-          auto const typeAnnotation = par->annotation();
-          if (typeAnnotation && typeAnnotation->dataType() == KindOfDouble) {
-            usesDouble = true;
-            break;
-          }
-        }
-        bif = Native::getWrapper(pce, usesDouble);
-      }
+      fe->retTypeConstraint = TypeConstraint {
+        s_Void.get(),
+        TypeConstraint::ExtendedHint | TypeConstraint::HHType
+      };
     }
   }
+
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
 

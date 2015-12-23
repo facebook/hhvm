@@ -233,28 +233,6 @@ void callFunc(const Func* func, void* ctx,
  */
 const StringData* getInvokeName(ActRec* ar);
 
-/**
- * Returns a specialization of either functionWrapper or methodWrapper
- *
- * functionWrapper() Unpacks args and coerces types according
- * to Func typehints. Calls C++ function in the form:
- * ret f_foo(type arg1, type arg2, ...)
- * Marshalls return into TypedValue.
- *
- * methodWrapper() behaves the same as functionWrapper(),
- * but also prepends either an ObjectData* (instance) or Class* (static)
- * argument to the signature. i.e.:
- * ret c_class_ni_method(ObjectData* this_, type arg1, type arg2, ...)
- * ret c_class_ns_method(Class* self_, type arg1, type arg2, ...)
- */
-BuiltinFunction getWrapper(bool method, bool usesDoubles);
-
-/**
- * Fallback method bound to declared methods with no matching
- * internal implementation.
- */
-TypedValue* unimplementedWrapper(ActRec* ar);
-
 #define NATIVE_TYPES                                \
   /* kind       arg type              return type */  \
   X(Int32,      int32_t,              int32_t)        \
@@ -404,6 +382,35 @@ struct BuiltinFunctionInfo {
   NativeSig sig;
   BuiltinFunction ptr;
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Returns a specialization of either functionWrapper or methodWrapper
+ *
+ * functionWrapper() Unpacks args and coerces types according
+ * to Func typehints. Calls C++ function in the form:
+ * ret f_foo(type arg1, type arg2, ...)
+ * Marshalls return into TypedValue.
+ *
+ * methodWrapper() behaves the same as functionWrapper(),
+ * but also prepends either an ObjectData* (instance) or Class* (static)
+ * argument to the signature. i.e.:
+ * ret c_class_ni_method(ObjectData* this_, type arg1, type arg2, ...)
+ * ret c_class_ns_method(Class* self_, type arg1, type arg2, ...)
+ */
+void getFunctionPointers(const BuiltinFunctionInfo& info,
+                         int nativeAttrs,
+                         BuiltinFunction& bif,
+                         BuiltinFunction& nif);
+
+/**
+ * Fallback method bound to declared methods with no matching
+ * internal implementation.
+ */
+TypedValue* unimplementedWrapper(ActRec* ar);
+
+/////////////////////////////////////////////////////////////////////////////
 
 /**
  * Case insensitive map of "name" to function pointer

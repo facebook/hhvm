@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -465,18 +466,6 @@ TypedValue* methodWrapper(ActRec* ar) {
   return &ar->m_r;
 }
 
-BuiltinFunction getWrapper(bool method, bool usesDoubles) {
-  if (method) {
-    if ( usesDoubles) return methodWrapper<true>;
-    if (!usesDoubles) return methodWrapper<false>;
-  } else {
-    if ( usesDoubles) return functionWrapper<true>;
-    if (!usesDoubles) return functionWrapper<false>;
-  }
-  not_reached();
-  return nullptr;
-}
-
 TypedValue* unimplementedWrapper(ActRec* ar) {
   auto func = ar->m_func;
   auto cls = func->cls();
@@ -496,6 +485,52 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
     frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
   }
   return &ar->m_r;
+}
+
+void getFunctionPointers(const BuiltinFunctionInfo& info,
+                         int nativeAttrs,
+                         BuiltinFunction& bif,
+                         BuiltinFunction& nif) {
+  nif = info.ptr;
+  if (!nif) {
+    bif = unimplementedWrapper;
+    return;
+  }
+  if (nativeAttrs & AttrZendCompat) {
+    bif = zend_wrap_func;
+    return;
+  }
+  if (nativeAttrs & AttrActRec) {
+    bif = nif;
+    nif = nullptr;
+    return;
+  }
+
+  bool usesDoubles = false;
+  for (auto const argType : info.sig.args) {
+    if (argType == NativeSig::Type::Double) {
+      usesDoubles = true;
+      break;
+    }
+  }
+
+  bool isMethod = info.sig.args.size() &&
+      ((info.sig.args[0] == NativeSig::Type::This) ||
+       (info.sig.args[0] == NativeSig::Type::Class));
+
+  if (isMethod) {
+    if (usesDoubles) {
+      bif = methodWrapper<true>;
+    } else {
+      bif = methodWrapper<false>;
+    }
+  } else {
+    if (usesDoubles) {
+      bif = functionWrapper<true>;
+    } else {
+      bif = functionWrapper<false>;
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////

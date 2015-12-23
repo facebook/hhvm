@@ -8381,7 +8381,6 @@ Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
 Variant HHVM_FUNCTION(exif_imagetype, const String& filename) {
   auto stream = File::Open(filename, "rb");
   if (!stream) {
-    raise_warning("failed to open file: %s", filename.c_str());
     return false;
   }
   int itype = php_getimagetype(stream);

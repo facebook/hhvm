@@ -659,7 +659,15 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
   int64_t avail = bufferedLen();
   if (m_data->m_buffer == nullptr) {
     m_data->m_buffer = (char *)malloc(CHUNK_SIZE * 3);
+    m_data->m_bufferSize = CHUNK_SIZE * 3;
+  } else if (m_data->m_bufferSize < CHUNK_SIZE * 3) {
+    auto newbuf = malloc(CHUNK_SIZE * 3);
+    memcpy(newbuf, m_data->m_buffer, m_data->m_bufferSize);
+    free(m_data->m_buffer);
+    m_data->m_buffer = (char*) newbuf;
+    m_data->m_bufferSize = CHUNK_SIZE * 3;
   }
+
   if (avail < maxlen && !eof()) {
     assert(m_data->m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
     m_data->m_writepos +=

@@ -187,12 +187,18 @@ static std::vector<bitmask*> *node_to_cpu_mask;
 static bool use_numa = false;
 static bool threads_bind_local = false;
 
-extern "C" void numa_init();
-
+extern "C" {
+HHVM_ATTRIBUTE_WEAK extern void numa_init(void);
+}
 static void initNuma() {
-  // numa_init is called automatically, but is probably called after
-  // JEMallocInitializer(). its idempotent, so call it here.
-  numa_init();
+
+  // When linked dynamically numa_init() is called before JEMallocInitializer()
+  // numa_init is not exported by libnuma.so so it will be NULL
+  // however when linked statically numa_init() is not guaranteed to be called
+  // before JEMallocInitializer(),so call it here.
+  if(&numa_init) {
+    numa_init();
+  }
   if (numa_available() < 0) return;
 
   // set interleave for early code. we'll then force interleave

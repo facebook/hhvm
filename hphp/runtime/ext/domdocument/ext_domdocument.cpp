@@ -3615,6 +3615,17 @@ Variant HHVM_METHOD(DOMDocument, importNode,
       return false;
     }
   }
+  if ((retnodep->type == XML_ATTRIBUTE_NODE) && (nodep->ns != nullptr)) {
+    xmlNsPtr nsptr = nullptr;
+    xmlNodePtr root = xmlDocGetRootElement(docp);
+
+    nsptr = xmlSearchNsByHref (nodep->doc, root, nodep->ns->href);
+    if (nsptr == nullptr) {
+      int errorcode;
+      nsptr = dom_get_ns(root, (char *) nodep->ns->href, &errorcode, (char *) nodep->ns->prefix);
+    }
+    xmlSetNs(retnodep, nsptr);
+  }
   return create_node_object(retnodep, data->doc());
 }
 
@@ -4534,11 +4545,17 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
       if (nodep != nullptr && nodep->type != XML_ATTRIBUTE_DECL) {
         node_list_unlink(nodep->children);
       }
-      if (xmlStrEqual((xmlChar*)prefix, (xmlChar*)"xmlns") &&
-          xmlStrEqual((xmlChar*)namespaceuri.data(),
-                      (xmlChar*)DOM_XMLNS_NAMESPACE)) {
+      if ((xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") ||
+          (prefix == nullptr &&
+          xmlStrEqual((xmlChar *) localname, (xmlChar *)"xmlns"))) &&
+          xmlStrEqual((xmlChar *) namespaceuri.data(),
+                      (xmlChar *)DOM_XMLNS_NAMESPACE)) {
         is_xmlns = 1;
-        nsptr = dom_get_nsdecl(elemp, (xmlChar*)localname);
+        if (prefix == nullptr) {
+          nsptr = dom_get_nsdecl(elemp, nullptr);
+        } else {
+          nsptr = dom_get_nsdecl(elemp, (xmlChar *)localname);
+        }
       } else {
         nsptr = xmlSearchNsByHref(elemp->doc, elemp,
                                   (xmlChar*)namespaceuri.data());
@@ -4560,7 +4577,12 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
       }
       if (nsptr == nullptr) {
         if (prefix == nullptr) {
-          errorcode = NAMESPACE_ERR;
+          if (is_xmlns == 1) {
+            xmlNewNs(elemp, (xmlChar *)value.data(), nullptr);
+            xmlReconciliateNs(elemp->doc, elemp);
+          } else {
+            errorcode = NAMESPACE_ERR;
+          }
         } else {
           if (is_xmlns == 1) {
             xmlNewNs(elemp, (xmlChar*)value.data(), (xmlChar*)localname);

@@ -30,7 +30,27 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef void (*BootTimerCallback)(const std::map<std::string, int64_t>);
+struct TimeUsage {
+  TimeUsage() : m_wall{0}, m_cpu{0} {}
+  // Returns total usage for entire process.
+  static TimeUsage sinceEpoch();
+
+  void operator=(const TimeUsage& rhs);
+  TimeUsage operator-(const TimeUsage& rhs) const;
+  TimeUsage operator+(const TimeUsage& rhs) const;
+
+  using Unit = std::chrono::nanoseconds;
+  Unit wall() const { return m_wall; }
+  Unit cpu() const { return m_cpu; }
+  std::string toString() const;
+
+private:
+  TimeUsage(Unit wall, Unit cpu) : m_wall{wall}, m_cpu{cpu} {}
+  Unit m_wall;
+  Unit m_cpu;
+};
+
+typedef void (*BootTimerCallback)(const std::map<std::string, TimeUsage>);
 
 /**
  * Times execution of the different parts of HHVM startup and warmup.
@@ -64,17 +84,16 @@ struct BootTimer {
 
   private:
     std::string m_name;
-    std::chrono::steady_clock::time_point m_start;
+    TimeUsage m_start;
   };
 
 private:
-  static void add(const std::string& name,
-    const std::chrono::nanoseconds value);
+  static void add(const std::string& name, const TimeUsage value);
 
   class Impl;
 
   static bool s_started;
-  static std::chrono::steady_clock::time_point s_start;
+  static TimeUsage s_start;
   static std::unique_ptr<BootTimer::Impl> s_instance;
   static BootTimerCallback s_doneCallback;
 };

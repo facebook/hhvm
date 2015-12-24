@@ -34,6 +34,15 @@ enum class APCHandleLevel {
   Inner // referenced by some other Inner or Outer handle
 };
 
+// handle kind, instead of overloading DataType
+enum class APCKind: uint8_t {
+  Uninit, Null, Bool, Int, Double,
+  StaticString, UncountedString,
+  StaticArray, UncountedArray,
+  SharedString, SharedArray, SharedObject, SharedCollection,
+  SerializedArray, SerializedObject
+};
+
 /*
  * An APCHandle is the externally visible handle for in-memory APC values.  The
  * main role of the APCHandle is to hold the type information of the value,
@@ -66,18 +75,33 @@ enum class APCHandleLevel {
  * cases the APCTypedValue is returned directly instead of creating another
  * TypedValue.
  *
- * It's important to point out that APCHandle::type() is not enough to
- * determine the APCXXX class behind the APCHandle.  That is because both
- * APCObject and APCArray can have a serialized form that it is just a string
- * (see isSerializedArray and isSerializedObj).
+ * APCHandle::kind() determines the representation (APCString, APCObject,
+ * or APCTypedValue), and the DataType, for APCTypedValue.
+ *
+ *  APCKind           Representation  DataType
+ *  -------           --------------  --------
+ *  Uninit            APCTypedValue   KindOfUninit
+ *  Null              APCTypedValue   KindOfNull
+ *  Bool              APCTypedValue   KindOfBool
+ *  Int               APCTypedValue   KindOfInt64
+ *  Double            APCTypedValue   KindOfDouble
+ *  StaticString      APCTypedValue   KindOfStaticString
+ *  UncountedString   APCTypedValue   KindOfString
+ *  StaticArray       APCTypedValue   KindOfPersistentArray
+ *  UncountedArray    APCTypedValue   KindOfArray
+ *  SharedString      APCString       kInvalidDataType
+ *  SharedArray       APCArray        kInvalidDataType
+ *  SharedObject      APCObject       kInvalidDataType
+ *  SerializedArray   APCString       kInvalidDataType
+ *  SerializedObject  APCString       kInvalidDataType
+ *  Collection        APCObject       kInvalidDataType
  *
  * Thread safety:
  *
- *    const-qualified member functions on this class are safe for concurrent
- *    use by multiple threads, as long as no other thread may be calling any
- *    non-const member functions that are not documented as exceptions to this
- *    rule.
- *
+ * const-qualified member functions on this class are safe for concurrent
+ * use by multiple threads, as long as no other thread may be calling any
+ * non-const member functions that are not documented as exceptions to this
+ * rule.
  */
 struct APCHandle {
   struct Pair {
@@ -85,7 +109,20 @@ struct APCHandle {
     size_t size;
   };
 
-  explicit APCHandle(DataType type) : m_type(type) {}
+  explicit APCHandle(APCKind kind, DataType type = kInvalidDataType)
+    : m_type(type), m_kind(kind) {
+    if (kind == APCKind::UncountedString || kind == APCKind::UncountedArray) {
+      setUncounted();
+    } else if (kind == APCKind::SerializedArray) {
+      setSerializedArray();
+    } else if (kind == APCKind::SerializedObject) {
+      setSerializedObj();
+    } else if (kind == APCKind::SharedCollection) {
+      setAPCCollection();
+    }
+    assert(checkInvariants());
+  }
+
   APCHandle(const APCHandle&) = delete;
   APCHandle& operator=(APCHandle const&) = delete;
 
@@ -101,7 +138,7 @@ struct APCHandle {
   /*
    * Memory management API.
    *
-   * APC handles can be managed both by eager reference counting and via the
+   * APC handles can be managed both by atomic reference counting and via the
    * Treadmill.  Memory management operations on APC handles go through this
    * API to hide which scheme is being used from users of APCHandle.  The
    * active scheme can be different for different handles in the same process.
@@ -131,21 +168,20 @@ struct APCHandle {
   Variant toLocal() const;
 
   /*
-   * Return the PHP DataType represented by this APCHandle.
+   * Return the APCKind represented by this APCHandle.
    *
    * Note that this does not entirely determine the type of APC storage being
    * used---for example, objects and arrays can be represented as serialized
    * APCStrings, in which case type() will still KindOfObject or KindOfArray.
    * See isSerializedArray and isSerializedObj below.
    */
-  DataType type() const { return m_type; }
+  APCKind kind() const { return m_kind; }
 
   /*
-   * When we load KindOfObjects that are !isObj() (i.e. they are back by an
-   * APCString containing a serialized object), we may attempt to convert it to
-   * an APCObject representation.  If the conversion is not possible (for
-   * example, if there are internal references), we set this flag so that we
-   * don't try over and over.
+   * When we load serialized objects (in an APCString), we may attempt to
+   * convert it to an APCObject representation. If the conversion is not
+   * possible (for example, if there are internal references), we set this
+   * flag so that we don't try over and over.
    *
    * The non-const setObjAttempted function is safe for concurrent use with
    * multiple readers and writers on a live APCHandle---it is an exception to
@@ -159,10 +195,10 @@ struct APCHandle {
   }
 
   /*
-   * For KindOfObject and KindOfArray, reprectively, these flags distinguish
+   * For objects, collections, and arrays, these flags distinguish
    * between the APCObject and APCArray representations and serialized
-   * APCString representations.  And an APCCollection wraps an array that
-   * represents a php KindOfObject for a particular collection type.
+   * APCString representations. APCCollection wraps an array that
+   * represents a KindOfObject for a particular collection type.
    */
   bool isSerializedObj() const { return m_flags & FSerializedObj; }
   bool isSerializedArray() const { return m_flags & FSerializedArray; }
@@ -191,6 +227,9 @@ struct APCHandle {
   bool isPacked() const { return m_flags & FPacked; }
   void setPacked() { m_flags |= FPacked; }
 
+  bool checkInvariants() const;
+  bool isAtomicCounted() const;
+
 private:
   constexpr static uint8_t FSerializedArray = 1 << 0;
   constexpr static uint8_t FSerializedObj   = 1 << 1;
@@ -207,9 +246,10 @@ private:
   void deleteShared();
 
 private:
-  DataType m_type;
-  std::atomic<uint8_t> m_obj_attempted{false};
+  const DataType m_type;
+  const APCKind m_kind;
   uint8_t m_flags{0};
+  std::atomic<uint8_t> m_obj_attempted{false};
   mutable std::atomic<uint32_t> m_count{1};
 };
 

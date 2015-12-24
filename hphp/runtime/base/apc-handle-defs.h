@@ -43,15 +43,20 @@ inline void APCHandle::unreferenceRoot(size_t size) {
   }
 }
 
+inline bool APCHandle::isAtomicCounted() const {
+  return m_kind >= APCKind::SharedString &&
+         m_type == kInvalidDataType;
+}
+
 inline void APCHandle::atomicIncRef() const {
-  assert(isRefcountedType(m_type));
+  assert(isAtomicCounted());
   ++m_count;
 }
 
 inline void APCHandle::atomicDecRef() const {
   assert(m_count.load() > 0);
   if (m_count > 1) {
-    assert(isRefcountedType(m_type));
+    assert(isAtomicCounted());
     if (--m_count) return;
   }
   const_cast<APCHandle*>(this)->deleteShared();

@@ -38,16 +38,19 @@ struct APCArray {
   static APCHandle* MakeUncountedArray(ArrayData* array);
 
   static APCHandle::Pair MakeSharedEmptyArray();
-  static Variant MakeLocalArray(const APCHandle* handle);
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {
-    assert(offsetof(APCArray, m_handle) == 0);
+    assert(handle->checkInvariants());
+    assert(handle->kind() == APCKind::SharedArray);
+    static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<APCArray*>(handle);
   }
 
   static const APCArray* fromHandle(const APCHandle* handle) {
-    assert(offsetof(APCArray, m_handle) == 0);
+    assert(handle->checkInvariants());
+    assert(handle->kind() == APCKind::SharedArray);
+    static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
   }
 
@@ -111,10 +114,12 @@ private:
   };
 
 private:
-  explicit APCArray(size_t size) : m_handle(KindOfArray), m_size(size) {
+  explicit APCArray(size_t size)
+    : m_handle(APCKind::SharedArray, kInvalidDataType), m_size(size) {
     m_handle.setPacked();
   }
-  explicit APCArray(unsigned int cap) : m_handle(KindOfArray) {
+  explicit APCArray(unsigned int cap)
+    : m_handle(APCKind::SharedArray) {
     m.m_capacity_mask = cap - 1;
     m.m_num = 0;
   }

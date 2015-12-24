@@ -50,7 +50,7 @@ const StaticString s___wakeup("__wakeup");
 
 ALWAYS_INLINE
 APCObject::APCObject(ClassOrName cls, uint32_t propCount)
-  : m_handle(KindOfObject)
+  : m_handle(APCKind::SharedObject)
   , m_cls{cls}
   , m_propCount{propCount}
 {}
@@ -192,11 +192,6 @@ APCObject::~APCObject() {
 }
 
 void APCObject::Delete(APCHandle* handle) {
-  if (handle->isSerializedObj()) {
-    APCString::Delete(APCString::fromHandle(handle));
-    return;
-  }
-
   auto const obj = fromHandle(handle);
   obj->~APCObject();
   // No need to run Prop destructors.
@@ -222,14 +217,6 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
 }
 
 Variant APCObject::MakeLocalObject(const APCHandle* handle) {
-  if (handle->isSerializedObj()) {
-    auto const serObj = APCString::fromHandle(handle)->getStringData();
-    return apc_unserialize(serObj->data(), serObj->size());
-  }
-  if (handle->isAPCCollection()) {
-    return APCCollection::fromHandle(handle)->createObject();
-  }
-
   auto apcObj = APCObject::fromHandle(handle);
   if (handle->isPersistentObj()) return apcObj->createObject();
   return apcObj->createObjectSlow();
@@ -261,7 +248,9 @@ Object APCObject::createObject() const {
 
   if (UNLIKELY(numProps < m_propCount)) {
     auto dynProps = apcProp[numProps];
-    assert(isArrayType(dynProps->type()));
+    assert(dynProps->kind() == APCKind::StaticArray ||
+           dynProps->kind() == APCKind::UncountedArray ||
+           dynProps->kind() == APCKind::SharedArray);
     obj->setDynPropArray(dynProps->toLocal().asCArrRef());
   }
 

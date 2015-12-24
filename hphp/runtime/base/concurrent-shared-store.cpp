@@ -71,35 +71,30 @@ bool StoreValue::expired() const {
 //////////////////////////////////////////////////////////////////////
 
 EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
-  DataType type = handle->type();
-
-  switch (type) {
-    DT_UNCOUNTED_CASE:
+  switch (handle->kind()) {
+    case APCKind::Uninit:
+    case APCKind::Null:
+    case APCKind::Bool:
+    case APCKind::Int:
+    case APCKind::Double:
+    case APCKind::StaticString:
+    case APCKind::StaticArray:
       return EntryInfo::Type::Uncounted;
-
-    case KindOfString:
-      if (handle->isUncounted()) {
-        return EntryInfo::Type::UncountedString;
-      }
+    case APCKind::UncountedString:
+      return EntryInfo::Type::UncountedString;
+    case APCKind::SharedString:
       return EntryInfo::Type::APCString;
-    case KindOfArray:
-      if (handle->isUncounted()) {
-        return EntryInfo::Type::UncountedArray;
-      }
-      if (handle->isSerializedArray()) {
-        return EntryInfo::Type::SerializedArray;
-      }
+    case APCKind::UncountedArray:
+      return EntryInfo::Type::UncountedArray;
+    case APCKind::SerializedArray:
+      return EntryInfo::Type::SerializedArray;
+    case APCKind::SharedArray:
       return EntryInfo::Type::APCArray;
-    case KindOfObject:
-      if (handle->isSerializedObj()) {
-        return EntryInfo::Type::SerializedObject;
-      }
+    case APCKind::SerializedObject:
+      return EntryInfo::Type::SerializedObject;
+    case APCKind::SharedObject:
+    case APCKind::SharedCollection:
       return EntryInfo::Type::APCObject;
-
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      return EntryInfo::Type::Unknown;
   }
   not_reached();
 }
@@ -304,41 +299,43 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
     Map::const_accessor acc;
     if (!m_vars.find(acc, tag)) {
       return false;
+    }
+    sval = &acc->second;
+    if (sval->expired()) {
+      // Because it only has a read lock on the data, deletion from
+      // expiration has to happen after the lock is released
+      expired = true;
     } else {
-      sval = &acc->second;
-      if (sval->expired()) {
-        // Because it only has a read lock on the data, deletion from
-        // expiration has to happen after the lock is released
-        expired = true;
+      if (auto const handle = sval->data.left()) {
+        svar = handle;
       } else {
+        std::lock_guard<SmallLock> sval_lock(sval->lock);
+
         if (auto const handle = sval->data.left()) {
           svar = handle;
         } else {
-          std::lock_guard<SmallLock> sval_lock(sval->lock);
-
-          if (auto const handle = sval->data.left()) {
-            svar = handle;
-          } else {
-            /*
-             * Note that unserialize can run arbitrary php code via a __wakeup
-             * routine, which could try to access this same key, and we're
-             * holding various locks here.  This is only for promoting primed
-             * values to in-memory values, so it's basically not a real
-             * problem, but ... :)
-             */
-            svar = unserialize(keyStr, const_cast<StoreValue*>(sval));
-            if (!svar) return false;
-          }
+          /*
+           * Note that unserialize can run arbitrary php code via a __wakeup
+           * routine, which could try to access this same key, and we're
+           * holding various locks here.  This is only for promoting primed
+           * values to in-memory values, so it's basically not a real
+           * problem, but ... :)
+           */
+          svar = unserialize(keyStr, const_cast<StoreValue*>(sval));
+          if (!svar) return false;
         }
-
-        if (apcExtension::AllowObj && svar->type() == KindOfObject &&
-            !svar->objAttempted()) {
-          // Hold ref here for later promoting the object
-          svar->reference();
-          promoteObj = true;
-        }
-        value = svar->toLocal();
       }
+
+      if (apcExtension::AllowObj &&
+          (svar->kind() == APCKind::SerializedObject ||
+           svar->kind() == APCKind::SharedObject ||
+           svar->kind() == APCKind::SharedCollection) &&
+          !svar->objAttempted()) {
+        // Hold ref here for later promoting the object
+        svar->reference();
+        promoteObj = true;
+      }
+      value = svar->toLocal();
     }
   }
   if (expired) {
@@ -375,8 +372,8 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
    */
   auto const oldHandle = sval.data.left();
   if (oldHandle == nullptr) return 0;
-  if (oldHandle->type() != KindOfInt64 &&
-      oldHandle->type() != KindOfDouble) {
+  if (oldHandle->kind() != APCKind::Int &&
+      oldHandle->kind() != APCKind::Double) {
     return 0;
   }
 

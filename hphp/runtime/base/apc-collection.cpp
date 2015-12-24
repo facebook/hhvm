@@ -123,10 +123,8 @@ void APCCollection::Delete(APCHandle* h) {
 }
 
 APCCollection::APCCollection()
-  : m_handle(KindOfObject)
-{
-  m_handle.setAPCCollection();
-}
+  : m_handle(APCKind::SharedCollection)
+{}
 
 APCCollection::~APCCollection() {
   // Zero for size is correct, because when this APCCollection was unreferenced

@@ -18,6 +18,7 @@
 #define incl_HPHP_APC_TYPED_VALUE_H_
 
 #include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
 
 namespace HPHP {
 
@@ -26,54 +27,68 @@ namespace HPHP {
 struct APCTypedValue {
   // Int or bool
   enum class Bool {};
-  APCTypedValue(Bool, bool data) : m_handle(KindOfBoolean) {
+  APCTypedValue(Bool, bool data)
+    : m_handle(APCKind::Bool, KindOfBoolean) {
     m_data.num = data;
   }
 
-  explicit APCTypedValue(int64_t data) : m_handle(KindOfInt64) {
+  explicit APCTypedValue(int64_t data)
+    : m_handle(APCKind::Int, KindOfInt64) {
     m_data.num = data;
   }
 
-  explicit APCTypedValue(double data) : m_handle(KindOfDouble) {
+  explicit APCTypedValue(double data)
+    : m_handle(APCKind::Double, KindOfDouble) {
     m_data.dbl = data;
   }
 
   enum class StaticStr {};
-  APCTypedValue(StaticStr, StringData* data) : m_handle(KindOfStaticString) {
+  APCTypedValue(StaticStr, StringData* data)
+    : m_handle(APCKind::StaticString, KindOfStaticString) {
     assert(data->isStatic());
     m_data.str = data;
+    assert(checkInvariants());
   }
 
   enum class UncountedStr {};
-  APCTypedValue(UncountedStr, StringData* data) : m_handle(KindOfString) {
+  APCTypedValue(UncountedStr, StringData* data)
+    : m_handle(APCKind::UncountedString, KindOfString) {
     assert(data->isUncounted());
-    m_handle.setUncounted();
     m_data.str = data;
+    assert(checkInvariants());
   }
 
   enum class StaticArr {};
-  APCTypedValue(StaticArr, ArrayData* data) : m_handle(KindOfPersistentArray) {
+  APCTypedValue(StaticArr, ArrayData* data)
+    : m_handle(APCKind::StaticArray, KindOfPersistentArray) {
     assert(data->isStatic());
     m_data.arr = data;
+    assert(checkInvariants());
   }
 
   enum class UncountedArr {};
-  APCTypedValue(UncountedArr, ArrayData* data) : m_handle(KindOfArray) {
+  APCTypedValue(UncountedArr, ArrayData* data)
+    : m_handle(APCKind::UncountedArray, KindOfArray) {
     assert(data->isUncounted());
-    m_handle.setUncounted();
     m_data.arr = data;
+    assert(checkInvariants());
   }
 
-  explicit APCTypedValue(DataType type) : m_handle(type) {
+  explicit APCTypedValue(DataType type)
+    : m_handle(type == KindOfUninit ? APCKind::Uninit : APCKind::Null, type) {
     assert(isNullType(type)); // Uninit or Null
     m_data.num = 0;
   }
 
   static APCTypedValue* fromHandle(APCHandle* handle) {
+    assert(handle->checkInvariants() && !handle->isAtomicCounted());
+    static_assert(offsetof(APCTypedValue, m_handle) == sizeof(APCHandle), "");
     return reinterpret_cast<APCTypedValue*>(handle - 1);
   }
 
   static const APCTypedValue* fromHandle(const APCHandle* handle) {
+    assert(handle->checkInvariants() && !handle->isAtomicCounted());
+    static_assert(offsetof(APCTypedValue, m_handle) == sizeof(APCHandle), "");
     return reinterpret_cast<const APCTypedValue*>(handle - 1);
   }
 
@@ -82,29 +97,31 @@ struct APCTypedValue {
   }
 
   bool getBoolean() const {
-    assert(m_handle.type() == KindOfBoolean);
+    assert(checkInvariants() && m_handle.kind() == APCKind::Bool);
     return m_data.num != 0;
   }
 
   int64_t getInt64() const {
-    assert(m_handle.type() == KindOfInt64);
+    assert(checkInvariants() && m_handle.kind() == APCKind::Int);
     return m_data.num;
   }
 
   double getDouble() const {
-    assert(m_handle.type() == KindOfDouble);
+    assert(checkInvariants() && m_handle.kind() == APCKind::Double);
     return m_data.dbl;
   }
 
   StringData* getStringData() const {
-    assert(m_handle.type() == KindOfStaticString ||
-           (m_handle.isUncounted() && m_handle.type() == KindOfString));
+    assert(checkInvariants());
+    assert(m_handle.kind() == APCKind::StaticString ||
+           m_handle.kind() == APCKind::UncountedString);
     return m_data.str;
   }
 
   ArrayData* getArrayData() const {
-    assert(m_handle.type() == KindOfPersistentArray ||
-           (m_handle.isUncounted() && m_handle.type() == KindOfArray));
+    assert(checkInvariants());
+    assert(m_handle.kind() == APCKind::StaticArray ||
+           m_handle.kind() == APCKind::UncountedArray);
     return m_data.arr;
   }
 
@@ -118,6 +135,7 @@ struct APCTypedValue {
 private:
   APCTypedValue(const APCTypedValue&) = delete;
   APCTypedValue& operator=(const APCTypedValue&) = delete;
+  bool checkInvariants() const;
 
 private:
   union {

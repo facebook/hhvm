@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/apc-collection.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 
 namespace HPHP {
 
@@ -126,71 +128,139 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
 }
 
 Variant APCHandle::toLocal() const {
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:
+  switch (m_kind) {
+    case APCKind::Uninit:
+    case APCKind::Null:
       return init_null(); // shortcut.. no point to forward
-    case KindOfBoolean:
+    case APCKind::Bool:
       return APCTypedValue::fromHandle(this)->getBoolean();
-    case KindOfInt64:
+    case APCKind::Int:
       return APCTypedValue::fromHandle(this)->getInt64();
-    case KindOfDouble:
+    case APCKind::Double:
       return APCTypedValue::fromHandle(this)->getDouble();
-    case KindOfStaticString:
+    case APCKind::StaticString:
+      return Variant{APCTypedValue::fromHandle(this)->getStringData(),
+                     Variant::StaticStrInit{}};
+    case APCKind::UncountedString:
       return Variant{APCTypedValue::fromHandle(this)->getStringData()};
-    case KindOfString:
-      return APCString::MakeLocalString(this);
-    case KindOfPersistentArray:
+    case APCKind::SharedString:
+      return Variant::attach(
+        StringData::MakeProxy(APCString::fromHandle(this))
+      );
+    case APCKind::StaticArray:
+    case APCKind::UncountedArray:
       return Variant{APCTypedValue::fromHandle(this)->getArrayData(),
                      Variant::PersistentArrInit{}};
-    case KindOfArray:
-      return APCArray::MakeLocalArray(this);
-    case KindOfObject:
+    case APCKind::SerializedArray: {
+      auto const serArr = APCString::fromHandle(this)->getStringData();
+      return apc_unserialize(serArr->data(), serArr->size());
+    }
+    case APCKind::SharedArray:
+      return Variant::attach(
+        APCLocalArray::Make(APCArray::fromHandle(this))->asArrayData()
+      );
+    case APCKind::SerializedObject: {
+      auto const serObj = APCString::fromHandle(this)->getStringData();
+      return apc_unserialize(serObj->data(), serObj->size());
+    }
+    case APCKind::SharedCollection:
+      return APCCollection::fromHandle(this)->createObject();
+    case APCKind::SharedObject:
       return APCObject::MakeLocalObject(this);
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      break;
   }
   not_reached();
 }
 
 void APCHandle::deleteShared() {
-  assert(!isUncounted());
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
+  assert(checkInvariants());
+  switch (m_kind) {
+    case APCKind::Uninit:
+    case APCKind::Null:
+    case APCKind::Bool:
       return;
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfStaticString:
-    case KindOfPersistentArray:
+    case APCKind::Int:
+    case APCKind::Double:
+    case APCKind::StaticString:
+    case APCKind::StaticArray:
       delete APCTypedValue::fromHandle(this);
       return;
 
-    case KindOfString:
+    case APCKind::SharedString:
+    case APCKind::SerializedArray:
+    case APCKind::SerializedObject:
       APCString::Delete(APCString::fromHandle(this));
       return;
 
-    case KindOfArray:
+    case APCKind::SharedArray:
       APCArray::Delete(this);
       return;
 
-    case KindOfObject:
-      if (isAPCCollection()) {
-        APCCollection::Delete(this);
-        return;
-      }
+    case APCKind::SharedObject:
       APCObject::Delete(this);
       return;
 
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      break;
+    case APCKind::SharedCollection:
+      APCCollection::Delete(this);
+      return;
+
+    case APCKind::UncountedArray:
+    case APCKind::UncountedString:
+      assert(false);
+      return;
   }
   not_reached();
+}
+
+bool APCHandle::checkInvariants() const {
+  assert(isSerializedArray() == (m_kind == APCKind::SerializedArray));
+  assert(isSerializedObj() == (m_kind == APCKind::SerializedObject));
+  assert(isUncounted() == (m_kind == APCKind::UncountedString ||
+                           m_kind == APCKind::UncountedArray));
+  assert(isAPCCollection() == (m_kind == APCKind::SharedCollection));
+  assert(!isPersistentObj() || (m_kind == APCKind::SharedObject ||
+                                m_kind == APCKind::SharedCollection));
+  assert(hasWakeup() || m_kind == APCKind::SharedObject);
+  assert(!isFastObjInit() || m_kind == APCKind::SharedObject);
+  assert(!isPacked() || m_kind == APCKind::SharedArray);
+  switch (m_kind) {
+    case APCKind::Uninit:
+      assert(m_type == KindOfUninit);
+      return true;
+    case APCKind::Null:
+      assert(m_type == KindOfNull);
+      return true;
+    case APCKind::Bool:
+      assert(m_type == KindOfBoolean);
+      return true;
+    case APCKind::Int:
+      assert(m_type == KindOfInt64);
+      return true;
+    case APCKind::Double:
+      assert(m_type == KindOfDouble);
+      return true;
+    case APCKind::StaticString:
+      assert(m_type == KindOfStaticString);
+      return true;
+    case APCKind::UncountedString:
+      assert(m_type == KindOfString);
+      return true;
+    case APCKind::StaticArray:
+      assert(m_type == KindOfPersistentArray);
+      return true;
+    case APCKind::UncountedArray:
+      assert(m_type == KindOfArray);
+      return true;
+    case APCKind::SharedString:
+    case APCKind::SharedArray:
+    case APCKind::SharedObject:
+    case APCKind::SharedCollection:
+    case APCKind::SerializedArray:
+    case APCKind::SerializedObject:
+      assert(m_type == kInvalidDataType);
+      return true;
+  }
+  not_reached();
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -128,24 +127,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {
   return {ret->getHandle(), size};
 }
 
-Variant APCArray::MakeLocalArray(const APCHandle* handle) {
-  if (handle->isUncounted()) {
-    return Variant{APCTypedValue::fromHandle(handle)->getArrayData(),
-                   Variant::PersistentArrInit{}};
-  } else if (handle->isSerializedArray()) {
-    auto const serArr = APCString::fromHandle(handle)->getStringData();
-    return apc_unserialize(serArr->data(), serArr->size());
-  }
-  return Variant::attach(
-    APCLocalArray::Make(APCArray::fromHandle(handle))->asArrayData()
-  );
-}
-
 void APCArray::Delete(APCHandle* handle) {
-  if (handle->isSerializedArray()) {
-    APCString::Delete(APCString::fromHandle(handle));
-    return;
-  }
   auto const arr = APCArray::fromHandle(handle);
   arr->~APCArray();
   std::free(arr);
@@ -167,61 +149,59 @@ APCArray::~APCArray() {
 }
 
 void APCArray::add(APCHandle *key, APCHandle *val) {
-  int pos = m.m_num;
+  int hash_pos;
+  auto kind = key->kind();
+  if (kind == APCKind::Int) {
+    hash_pos = APCTypedValue::fromHandle(key)->getInt64();
+  } else if (kind == APCKind::StaticString ||
+             kind == APCKind::UncountedString) {
+    hash_pos = APCTypedValue::fromHandle(key)->getStringData()->hash();
+  } else {
+    assert(kind == APCKind::SharedString);
+    hash_pos = APCString::fromHandle(key)->getStringData()->hash();
+  }
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
+  int& hp = hash()[hash_pos & m.m_capacity_mask];
+  int pos = m.m_num++;
   Bucket* bucket = buckets() + pos;
   bucket->key = key;
   bucket->val = val;
-  m.m_num++;
-  int hash_pos;
-  if (!isRefcountedType(key->type())) {
-    auto const k = APCTypedValue::fromHandle(key);
-    hash_pos = (key->type() == KindOfInt64 ?
-        k->getInt64() : k->getStringData()->hash()) & m.m_capacity_mask;
-  } else {
-    assert(key->type() == KindOfString);
-    auto const k = APCString::fromHandle(key);
-    hash_pos = k->getStringData()->hash() & m.m_capacity_mask;
-  }
-
-  int& hp = hash()[hash_pos];
   bucket->next = hp;
   hp = pos;
 }
 
 ssize_t APCArray::indexOf(const StringData* key) const {
   strhash_t h = key->hash();
-  ssize_t bucket = hash()[h & m.m_capacity_mask];
   Bucket* b = buckets();
-  while (bucket != -1) {
-    if (!isRefcountedType(b[bucket].key->type())) {
+  for (ssize_t bucket = hash()[h & m.m_capacity_mask]; bucket != -1;
+       bucket = b[bucket].next) {
+    auto kind = b[bucket].key->kind();
+    if (kind == APCKind::StaticString || kind == APCKind::UncountedString) {
       auto const k = APCTypedValue::fromHandle(b[bucket].key);
-      if (b[bucket].key->type() != KindOfInt64 &&
-          key->same(k->getStringData())) {
+      if (key->same(k->getStringData())) {
         return bucket;
       }
-    } else {
-      assert(b[bucket].key->type() == KindOfString);
+    } else if (kind == APCKind::SharedString) {
       auto const k = APCString::fromHandle(b[bucket].key);
       if (key->same(k->getStringData())) {
         return bucket;
       }
     }
-    bucket = b[bucket].next;
   }
   return -1;
 }
 
 ssize_t APCArray::indexOf(int64_t key) const {
-  ssize_t bucket = hash()[key & m.m_capacity_mask];
   Bucket* b = buckets();
-  while (bucket != -1) {
-    if (b[bucket].key->type() == KindOfInt64 &&
-        key == APCTypedValue::fromHandle(b[bucket].key)->getInt64()) {
+  for (ssize_t bucket = hash()[key & m.m_capacity_mask]; bucket != -1;
+       bucket = b[bucket].next) {
+    auto key_handle = b[bucket].key;
+    auto kind = key_handle->kind();
+    if (kind == APCKind::Int &&
+        key == APCTypedValue::fromHandle(key_handle)->getInt64()) {
       return bucket;
     }
-    bucket = b[bucket].next;
   }
   return -1;
 }

@@ -81,8 +81,9 @@ struct APCDetailedStats {
   void removeAPCValue(APCHandle* handle, bool expired);
 
 private:
-  void addType(APCHandle* handle);
-  void removeType(APCHandle* handle);
+  void addType(const APCHandle* handle);
+  void removeType(const APCHandle* handle);
+  ServiceData::ExportedCounter* counterFor(const APCHandle*);
 
 private:
   /*

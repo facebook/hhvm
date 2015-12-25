@@ -502,14 +502,14 @@ int PDOMySqlConnection::handleError(const char *file, int line,
       einfo->errmsg = strdup(mysql_error(m_server));
     }
   } else { /* no error */
-    strcpy(*pdo_err, PDO_ERR_NONE);
+    setPDOErrorNone(*pdo_err);
     return false;
   }
 
   if (stmt && stmt->stmt()) {
-    strcpy(*pdo_err, mysql_stmt_sqlstate(stmt->stmt()));
+    setPDOError(*pdo_err, mysql_stmt_sqlstate(stmt->stmt()));
   } else {
-    strcpy(*pdo_err, mysql_sqlstate(m_server));
+    setPDOError(*pdo_err, mysql_sqlstate(m_server));
   }
 
   if (stmt && stmt->stmt()) {
@@ -552,7 +552,7 @@ bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
   }
 
   stmt->reset();
-  strcpy(error_code, s->error_code);
+  setPDOError(error_code, s->error_code);
   return false;
 }
 
@@ -1051,7 +1051,7 @@ bool PDOMySqlStatement::fetcher(PDOFetchOrientation ori, long offset) {
   }
 
   if (!m_result) {
-    strcpy(error_code, "HY000");
+    setPDOError(error_code, "HY000");
     return false;
   }
 
@@ -1127,7 +1127,7 @@ bool PDOMySqlStatement::getColumn(int colno, Variant &value) {
     ptr = (char*)m_bound_result[colno].buffer;
     if (m_out_length[colno] > m_bound_result[colno].buffer_length) {
       /* mysql lied about the column width */
-      strcpy(error_code, "01004"); /* truncated */
+      setPDOError(error_code, "01004"); /* truncated */
       m_out_length[colno] = m_bound_result[colno].buffer_length;
       len = m_out_length[colno];
       value = String(ptr, len, CopyString);
@@ -1151,7 +1151,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
     case PDO_PARAM_EVT_ALLOC:
       /* sanity check parameter number range */
       if (param->paramno < 0 || param->paramno >= m_num_params) {
-        strcpy(error_code, "HY093");
+        setPDOError(error_code, "HY093");
         return false;
       }
       m_params_given++;
@@ -1166,7 +1166,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
     case PDO_PARAM_EVT_EXEC_PRE:
       if ((int)m_params_given < m_num_params) {
         /* too few parameter bound */
-        strcpy(error_code, "HY093");
+        setPDOError(error_code, "HY093");
         return false;
       }
 

@@ -174,8 +174,24 @@ defined by SQL-92.
 */
 
 using PDOErrorType = char[6]; /* SQLSTATE */
-
 #define PDO_ERR_NONE  "00000"
+static_assert(sizeof(PDO_ERR_NONE) <= sizeof(PDOErrorType),
+              "PDO_ERR_NONE should actually fit into PDOErrorType");
+
+inline void setPDOErrorNone(PDOErrorType& err) {
+  memcpy(err, PDO_ERR_NONE, strlen(PDO_ERR_NONE) + 1);
+}
+inline void setPDOError(PDOErrorType& err, const char* val) {
+  auto const len = strlen(val);
+  if (len >= sizeof(PDOErrorType)) {
+    raise_notice("PDO Driver error too long, truncated");
+    memcpy(err, val, sizeof(PDOErrorType) - 1);
+    err[sizeof(PDOErrorType) - 1] = 0;
+  } else {
+    memcpy(err, val, len + 1);
+  }
+}
+
 
 enum PDOErrorMode {
   PDO_ERRMODE_SILENT,    /* just set error codes */

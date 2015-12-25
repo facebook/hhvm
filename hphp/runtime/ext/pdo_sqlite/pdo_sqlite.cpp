@@ -137,19 +137,19 @@ int PDOSqliteConnection::handleError(const char *file, int line,
     }
     m_einfo.errmsg = strdup((char*)sqlite3_errmsg(m_db));
   } else { /* no error */
-    strcpy(*pdo_err, PDO_ERR_NONE);
+    setPDOErrorNone(*pdo_err);
     return false;
   }
 
   switch (m_einfo.errcode) {
-  case SQLITE_NOTFOUND:    strcpy(*pdo_err, "42S02");  break;
-  case SQLITE_INTERRUPT:   strcpy(*pdo_err, "01002");  break;
-  case SQLITE_NOLFS:       strcpy(*pdo_err, "HYC00");  break;
-  case SQLITE_TOOBIG:      strcpy(*pdo_err, "22001");  break;
-  case SQLITE_CONSTRAINT:  strcpy(*pdo_err, "23000");  break;
+  case SQLITE_NOTFOUND:    setPDOError(*pdo_err, "42S02");  break;
+  case SQLITE_INTERRUPT:   setPDOError(*pdo_err, "01002");  break;
+  case SQLITE_NOLFS:       setPDOError(*pdo_err, "HYC00");  break;
+  case SQLITE_TOOBIG:      setPDOError(*pdo_err, "22001");  break;
+  case SQLITE_CONSTRAINT:  setPDOError(*pdo_err, "23000");  break;
   case SQLITE_ERROR:
   default:
-    strcpy(*pdo_err, "HY000");
+    setPDOError(*pdo_err, "HY000");
     break;
   }
 

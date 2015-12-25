@@ -507,7 +507,7 @@ void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
   if (stmt) {
     pdo_err = &stmt->error_code;
   }
-  strcpy(*pdo_err, sqlstate);
+  setPDOError(*pdo_err, sqlstate);
 
   const char *msg = s_err_hash.description(sqlstate);
   string err = "SQLSTATE["; err += sqlstate; err += "]: "; err += msg;
@@ -800,7 +800,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc,
   stmt->default_fetch_type = PDO_FETCH_BOTH;
 
   if (!pdo_stmt_verify_mode(stmt, mode, false)) {
-    strcpy(stmt->error_code, PDO_ERR_NONE);
+    setPDOErrorNone(stmt->error_code);
     return false;
   }
 
@@ -916,7 +916,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc,
    * last error message from the driver.
    *
    */
-  strcpy(stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(stmt->error_code);
   return retval;
 }
 
@@ -1082,7 +1082,7 @@ static Variant HHVM_METHOD(PDO, prepare, const String& statement,
   auto data = Native::data<PDOData>(this_);
 
   assert(data->m_dbh->conn()->driver);
-  strcpy(data->m_dbh->conn()->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
   String clsname;
@@ -1279,7 +1279,7 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
   }
 
   if (data->m_dbh->conn()->support(PDOConnection::MethodSetAttribute)) {
-    strcpy(data->m_dbh->conn()->error_code, PDO_ERR_NONE);
+    setPDOErrorNone(data->m_dbh->conn()->error_code);
     data->m_dbh->query_stmt = nullptr;
     if (data->m_dbh->conn()->setAttribute(attribute, value)) {
       return true;
@@ -1303,7 +1303,7 @@ static Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
   auto data = Native::data<PDOData>(this_);
 
   assert(data->m_dbh->conn()->driver);
-  strcpy(data->m_dbh->conn()->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
   /* handle generic PDO-level attributes */
@@ -1365,7 +1365,7 @@ static Variant HHVM_METHOD(PDO, exec, const String& query) {
   }
 
   assert(data->m_dbh->conn()->driver);
-  strcpy(data->m_dbh->conn()->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
   int64_t ret = data->m_dbh->conn()->doer(query);
@@ -1381,7 +1381,7 @@ static Variant HHVM_METHOD(PDO, lastinsertid,
   auto data = Native::data<PDOData>(this_);
 
   assert(data->m_dbh->conn()->driver);
-  strcpy(data->m_dbh->conn()->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
   if (!data->m_dbh->conn()->support(PDOConnection::MethodLastId)) {
@@ -1455,7 +1455,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
   auto data = Native::data<PDOData>(this_);
   SYNC_VM_REGS_SCOPED();
   assert(data->m_dbh->conn()->driver);
-  strcpy(data->m_dbh->conn()->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
   Object ret = pdo_stmt_instantiate(data->m_dbh,
@@ -1480,7 +1480,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
     stmt->dbh = data->m_dbh;
     stmt->lazy_object_ref.unset();
 
-    strcpy(stmt->error_code, PDO_ERR_NONE);
+    setPDOErrorNone(stmt->error_code);
 
     // when we add support for varargs here, we only need to set the stmt if
     // the argument count is > 1
@@ -1489,7 +1489,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
         pdo_stmt_set_fetch_mode(stmt, 0, _argv.rvalAt(0).toInt64Val(),
                                 HHVM_FN(array_splice)(_argv, 1).toArray())) {
       /* now execute the statement */
-      strcpy(stmt->error_code, PDO_ERR_NONE);
+      setPDOErrorNone(stmt->error_code);
       if (stmt->executer()) {
         int ok = 1;
         if (!stmt->executed) {
@@ -1520,7 +1520,7 @@ static Variant HHVM_METHOD(PDO, quote, const String& str,
   auto data = Native::data<PDOData>(this_);
 
   assert(data->m_dbh->conn()->driver);
-  strcpy(data->m_dbh->conn()->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_dbh->conn()->error_code);
   data->m_dbh->query_stmt = nullptr;
 
   if (!data->m_dbh->conn()->support(PDOConnection::MethodQuoter)) {
@@ -2564,7 +2564,7 @@ safe:
                                    param->param_type)) {
               /* bork */
               ret = -1;
-              strcpy(stmt->error_code, stmt->dbh->conn()->error_code);
+              setPDOError(stmt->error_code, stmt->dbh->conn()->error_code);
               goto clean_up;
             }
           } else {
@@ -2602,7 +2602,7 @@ safe:
                       param->param_type)) {
                   /* bork */
                   ret = -1;
-                  strcpy(stmt->error_code, stmt->dbh->conn()->error_code);
+                  setPDOError(stmt->error_code, stmt->dbh->conn()->error_code);
                   goto clean_up;
                 }
                 continue;
@@ -2735,7 +2735,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
     return init_null_variant;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
 
   if (!params.empty()) {
     data->m_stmt->bound_params.reset();
@@ -2820,7 +2820,7 @@ static Variant HHVM_METHOD(PDOStatement, fetch, int64_t how  = 0,
     return false;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
   if (!pdo_stmt_verify_mode(data->m_stmt, how, false)) {
     return false;
   }
@@ -2842,7 +2842,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
     return false;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
   if (!pdo_stmt_verify_mode(data->m_stmt, PDO_FETCH_CLASS, false)) {
     return false;
   }
@@ -2891,7 +2891,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
     return false;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
   if (!do_fetch_common(data->m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
     PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
@@ -2978,7 +2978,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
   Variant return_value;
   Variant data;
   if (!error)  {
-    strcpy(self->m_stmt->error_code, PDO_ERR_NONE);
+    setPDOErrorNone(self->m_stmt->error_code);
 
     if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
         (how == PDO_FETCH_USE_DEFAULT &&
@@ -3126,7 +3126,7 @@ static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
     return false;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
   if (data->m_stmt->setAttribute(attribute, value)) {
     return true;
   }
@@ -3150,7 +3150,7 @@ static Variant HHVM_METHOD(PDOStatement, getattribute, int64_t attribute) {
     return ret;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
   switch (data->m_stmt->getAttribute(attribute, ret)) {
   case -1:
     PDO_HANDLE_STMT_ERR(data->m_stmt);
@@ -3202,7 +3202,7 @@ static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
     return false;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
   Array ret;
   if (!data->m_stmt->getColumnMeta(column, ret)) {
     PDO_HANDLE_STMT_ERR(data->m_stmt);
@@ -3244,7 +3244,7 @@ static bool HHVM_METHOD(PDOStatement, nextrowset) {
     return false;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
 
   /* un-describe */
   if (!data->m_stmt->columns.empty()) {
@@ -3280,7 +3280,7 @@ static bool HHVM_METHOD(PDOStatement, closecursor) {
     return true;
   }
 
-  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  setPDOErrorNone(data->m_stmt->error_code);
   if (!data->m_stmt->cursorCloser()) {
     PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;

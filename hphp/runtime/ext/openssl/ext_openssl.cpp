@@ -1121,10 +1121,12 @@ Variant HHVM_FUNCTION(openssl_error_string) {
   return false;
 }
 
+
 bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
                                  const String& env_key,
                                  const Variant& priv_key_id,
-                                 const String& method /* = null_string */) {
+                                 const String& method, /* = null_string */
+                                 const String& iv /* = null_string */) {
   const EVP_CIPHER *cipher_type;
   if (method.empty()) {
     cipher_type = EVP_rc4();
@@ -1143,15 +1145,28 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
   }
   EVP_PKEY *pkey = okey->m_key;
 
+  const unsigned char *iv_buf = nullptr;
+  int iv_len = EVP_CIPHER_iv_length(cipher_type);
+  if (iv_len > 0) {
+    if (iv.empty()) {
+      raise_warning(
+        "Cipher algorithm requires an IV to be supplied as a sixth parameter");
+      return false;
+    }
+    if (iv.length() != iv_len) {
+      raise_warning("IV length is invalid");
+      return false;
+    }
+    iv_buf = reinterpret_cast<const unsigned char*>(iv.c_str());
+  }
+
   String s = String(sealed_data.size(), ReserveString);
   unsigned char *buf = (unsigned char *)s.mutableData();
 
   EVP_CIPHER_CTX ctx;
   int len1, len2;
   if (!EVP_OpenInit(&ctx, cipher_type, (unsigned char *)env_key.data(),
-                    env_key.size(), NULL, pkey) ||
-
-      EVP_CIPHER_CTX_iv_length(&ctx) > 0 ||
+                    env_key.size(), iv_buf, pkey) ||
       !EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)sealed_data.data(),
                       sealed_data.size()) ||
       !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
@@ -1993,7 +2008,8 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
 Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
                                     VRefParam env_keys,
                                     const Array& pub_key_ids,
-                                    const String& method /* = null_string */) {
+                                    const String& method /* = null_string */,
+                                    VRefParam iv /* = null_string */) {
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
     raise_warning("Fourth argument to openssl_seal() must be "
@@ -2008,6 +2024,24 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     cipher_type = EVP_get_cipherbyname(method.c_str());
     if (!cipher_type) {
       raise_warning("Unknown cipher algorithm");
+      return false;
+    }
+  }
+
+  int iv_len = EVP_CIPHER_iv_length(cipher_type);
+  unsigned char *iv_buf = nullptr;
+  String iv_s;
+  if (iv_len > 0) {
+    if (!iv.isRefData()) {
+      raise_warning(
+        "Cipher algorithm requires an IV to be supplied as a sixth parameter");
+    }
+
+    iv_s = String(iv_len, ReserveString);
+    iv_buf = (unsigned char*)iv_s.mutableData();
+
+    if (!RAND_bytes(iv_buf, iv_len)) {
+      raise_warning("Could not generate an IV.");
       return false;
     }
   }
@@ -2045,17 +2079,11 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     goto clean_exit;
   }
 
-  if (EVP_CIPHER_CTX_iv_length(&ctx) > 0) {
-    raise_warning("Cipher algorithm requires an IV");
-    ret = false;
-    goto clean_exit;
-  }
-
   int len1, len2;
 
   s = String(data.size() + EVP_CIPHER_CTX_block_size(&ctx), ReserveString);
   buf = (unsigned char *)s.mutableData();
-  if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, nullptr, pkeys, nkeys) ||
+  if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) ||
       !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data.data(),
                       data.size())) {
     ret = false;
@@ -2082,6 +2110,12 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   free(eks);
   free(eksl);
   free(pkeys);
+
+  if (iv_buf != nullptr) {
+    if (ret) {
+      iv.assignIfRef(iv_s.setSize(iv_len));
+    }
+  }
 
   if (ret) return len1 + len2;
   return false;

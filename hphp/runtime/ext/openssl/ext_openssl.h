@@ -93,7 +93,8 @@ Variant HHVM_FUNCTION(openssl_error_string);
 bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
                                  const String& env_key,
                                  const Variant& priv_key_id,
-                                 const String& method = null_string);
+                                 const String& method = null_string,
+                                 const String& iv = null_string);
 bool HHVM_FUNCTION(openssl_pkcs12_export_to_file, const Variant& x509,
                                                   const String& filename,
                                                   const Variant& priv_key,
@@ -171,7 +172,8 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
 Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
                                     VRefParam env_keys,
                                     const Array& pub_key_ids,
-                                    const String& method = null_string);
+                                    const String& method = null_string,
+                                    VRefParam iv = null_string);
 bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
                                  const Variant& priv_key_id,
                      const Variant& signature_alg = OPENSSL_ALGO_SHA1);

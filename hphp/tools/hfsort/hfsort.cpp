@@ -140,7 +140,18 @@ void readEdgcntData(FILE* file) {
   }
 }
 
-void print(const std::vector<Cluster*>& clusters) {
+std::string getNameWithoutSuffix(std::string str) {
+  int suffixStartPosition = str.find(".");
+  if (suffixStartPosition == -1) {
+    // if no suffix is found, just add the wildcard
+    return str + "*";
+  } else {
+    // replace sufix with wildcard
+    return str.substr(0, suffixStartPosition) + "*";
+  }
+}
+
+void print(const std::vector<Cluster*>& clusters, bool useWildcards) {
   FILE* outfile = fopen("hotfuncs.txt", "wt");
   if (!outfile) error("opening output file hotfuncs.txt");
   uint32_t totalSize = 0;
@@ -157,8 +168,14 @@ void print(const std::vector<Cluster*>& clusters) {
         hotfuncs++;
         int space = 0;
         for (const auto& mangledName : cg.funcs[fid].mangledNames) {
-          fprintf(outfile, "%.*s*.text.%s\n",
-                  space, " ", mangledName.c_str());
+          if (useWildcards) {
+            fprintf(outfile, "%.*s.text.%s\n",
+                    space, " ", getNameWithoutSuffix(mangledName).c_str());
+          } else {
+            fprintf(outfile, "%.*s.text.%s\n",
+                    space, " ", mangledName.c_str());
+          }
+
           space = 1;
         }
         HFTRACE(1, "start = %6u : %s\n", totalSize,
@@ -195,6 +212,7 @@ int main(int argc, char* argv[]) {
   char* symbFileName = nullptr;
   char* perfFileName = nullptr;
   char* edgcntFileName = nullptr;
+  bool useWildcards = false;
 
   FILE*  symbFile;
   gzFile perfFile;
@@ -207,14 +225,16 @@ int main(int argc, char* argv[]) {
   extern char* optarg;
   extern int optind;
   int c;
-
-  while ((c = getopt(argc, argv, "pe:")) != -1) {
+  while ((c = getopt(argc, argv, "pe:w")) != -1) {
     switch (c) {
       case 'p':
         algorithm = Algorithm::PettisHansen;
         break;
       case 'e':
         edgcntFileName = optarg;
+        break;
+      case 'w':
+        useWildcards = true;
         break;
       case '?':
         error("Unsupported command line argument");
@@ -223,9 +243,10 @@ int main(int argc, char* argv[]) {
 
   if ((optind + 2) != argc) {
     error(
-      "Usage: hfsort [-p] [-e <EDGCNT_FILE>] <SYMBOL_FILE> <PERF_DATA_FILE>\n"
+      "Usage: hfsort [-p] [-e <EDGCNT_FILE>] [-w] <SYMBOL_FILE> <PERF_DATA_FILE>\n"
       "   -p,               use pettis-hansen algorithm for code layout\n"
-      "   -e <EDGCNT_FILE>, use edge profile result to build the call graph"
+      "   -e <EDGCNT_FILE>, use edge profile result to build the call graph\n"
+      "   -w                use wildcards instead of suffixes in function names"
     );
   }
 
@@ -262,7 +283,7 @@ int main(int argc, char* argv[]) {
   }
 
   sort(clusters.begin(), clusters.end(), compareClustersDensity);
-  print(clusters);
+  print(clusters, useWildcards);
 
   fclose(symbFile);
   gzclose(perfFile);

@@ -345,19 +345,7 @@ public:
                               s_changedScopesMapThreadLocal);
 
 private:
-  template <typename Visitor>
-  void processScopesParallel(const char *id, void *opaque = nullptr);
-
-  template <typename Visitor>
-  void preWaitCallback(bool first,
-                       const BlockScopeRawPtrQueue &scopes,
-                       void *opaque);
-
-  template <typename Visitor>
-  bool postWaitCallback(bool first,
-                        bool again,
-                        const BlockScopeRawPtrQueue &scopes,
-                        void *opaque);
+  void processScopesParallel(const char* id, void* context = nullptr);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

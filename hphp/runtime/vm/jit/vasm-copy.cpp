@@ -237,7 +237,11 @@ void analyze_copy(Env& env, const copy& copy) {
 }
 
 void analyze_lea(Env& env, const lea& lea) {
-  if (!(lea.s.seg == Vptr::DS && lea.s.scale == 1 && lea.d.isVirt())) return;
+  if (!(lea.s.seg == Vptr::DS &&
+        lea.s.index == InvalidReg &&
+        lea.d.isVirt())) {
+    return;
+  }
   auto& dst = env.regs[lea.d];
   dst = RegInfo { lea.s.base, lea.s.disp };
   FTRACE(3, "      {} = {}\n", show(lea.d), show(dst));

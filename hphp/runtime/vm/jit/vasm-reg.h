@@ -239,7 +239,10 @@ struct Vptr {
     , index(i)
     , scale(s)
     , disp(d)
-  {}
+  {
+    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
+           "Invalid index register scaling (must be 1,2,4 or 8).");
+  }
 
   /* implicit */ Vptr(MemoryRef m, Segment s = DS)
     : base(m.r.base)

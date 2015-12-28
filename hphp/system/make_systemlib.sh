@@ -13,6 +13,10 @@ SYSTEMLIB=$INSTALL_DIR/systemlib.php
 # keeping.
 AT="@"
 
+if [ -f "${SYSTEMLIB}" ]; then
+  rm "${SYSTEMLIB}"
+fi
+
 echo "<?hh" > ${SYSTEMLIB}
 echo "// {$AT}generated" >> ${SYSTEMLIB}
 
@@ -60,3 +64,7 @@ for i in $@; do
     cat $i >> ${SYSTEMLIB}
   fi
 done
+
+HPHP_BUILD_DIR=$(echo "${INSTALL_DIR}" | sed 's|\(.*/hphp/\).*|\1|')
+
+cp "${SYSTEMLIB}" "${HPHP_BUILD_DIR}/system/systemlib.php}"

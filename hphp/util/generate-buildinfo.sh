@@ -43,7 +43,7 @@ else
     else
         scm=""
         root=$DIR/../../
-        find_files='find hphp \( -type f -o -type l \) \! -iregex ".*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)" | sort'
+        find_files='find hphp \( -type f -o -type l \) \! -iregex ".*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)" | LC_ALL=C sort'
     fi
 fi
 

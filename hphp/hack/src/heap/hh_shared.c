@@ -383,14 +383,8 @@ void memfd_init(char *shm_dir, size_t shared_mem_size) {
     char memname[255];
     snprintf(memname, sizeof(memname), "/fb_heap.%d", getpid());
     memfd = shm_open(memname, O_CREAT | O_RDWR, 0666);
-    if (memfd < 0) {
-        uerror("shm_open", Nothing);
-    }
 #elif defined(O_TMPFILE)
     memfd = open(shm_dir, O_TMPFILE|O_RDWR|O_CLOEXEC|O_EXCL, 0666);
-    if (memfd < 0) {
-        uerror("shm_open", Nothing);
-    }
 #endif
     if (memfd < 0) {
       char template[1024];

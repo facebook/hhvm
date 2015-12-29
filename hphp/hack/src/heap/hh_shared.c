@@ -388,7 +388,7 @@ void memfd_init(char *shm_dir, size_t shared_mem_size) {
 #endif
     if (memfd < 0) {
       char template[1024];
-      if (!sprintf(template,  "%s/fb_heap-XXXXXX", shm_dir)) {
+      if (!snprintf(template, sizeof(template), "%s/fb_heap-XXXXXX", shm_dir)) {
         uerror("sprintf", Nothing);
       };
       memfd = mkstemp(template);

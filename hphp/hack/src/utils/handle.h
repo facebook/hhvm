@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef _UTILS_HANDLE_H
+#define _UTILS_HANDLE_H  1
+
 #include <caml/mlvalues.h>
 #include <caml/unixsupport.h>
 
@@ -17,3 +20,6 @@
 #define Handle_val(fd) (Long_val(fd))
 #define Val_handle(fd) (Val_long(fd))
 #endif
+
+
+#end /* _UTILS_HANDLE_H */

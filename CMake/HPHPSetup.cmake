@@ -43,6 +43,7 @@ if (APPLE)
     list(APPEND HHVM_ANCHOR_SYMS -Xlinker -force_load -Xlinker ${lib})
   endforeach()
 elseif (IS_AARCH64)
+  set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 elseif(CYGWIN)

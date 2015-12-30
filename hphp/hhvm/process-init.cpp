@@ -67,8 +67,8 @@ void tweak_variant_dtors();
 void ProcessInit() {
   // Create the global mcg object
   jit::mcg = new jit::MCGenerator();
-  // Do not initialize JIT stubs for PPC64 - port under development
-#if !defined(__powerpc64__)
+  // Do not initialize JIT stubs for PPC64 or AARch64 - port under development
+#if !defined(__powerpc64__) || !defined(__aarch64__)
   jit::mcg->initUniqueStubs();
 #endif
 

@@ -667,8 +667,15 @@ struct OptVisitor {
     , m_dispatcher(nullptr)
   {}
 
-  OptVisitor(OptVisitor&&) noexcept = default;
-  OptVisitor& operator=(OptVisitor&&) = default;
+  OptVisitor(OptVisitor&& other) noexcept
+    : m_ar(other.m_ar)
+    , m_nscope(other.m_nscope)
+    , m_dispatcher(other.m_dispatcher)
+  {
+    other.m_dispatcher = nullptr;
+  }
+
+  OptVisitor& operator=(OptVisitor&&) = delete;
 
   OptVisitor(const OptVisitor&) = delete;
   OptVisitor& operator=(const OptVisitor&) = delete;

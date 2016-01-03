@@ -56,6 +56,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::UncountedArray: assert(m_data.arr->isUncounted()); break;
     case APCKind::SharedString:
     case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
     case APCKind::SerializedArray:

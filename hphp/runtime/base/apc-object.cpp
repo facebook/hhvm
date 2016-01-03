@@ -53,6 +53,9 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
   : m_handle(APCKind::SharedObject)
   , m_cls{cls}
   , m_propCount{propCount}
+  , m_persistent{0}
+  , m_no_wakeup{0}
+  , m_fast_init{0}
 {}
 
 APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
@@ -72,15 +75,14 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   auto const numApcProps = numRealProps + hasDynProps;
   auto size = sizeof(APCObject) + sizeof(APCHandle*) * numApcProps;
   auto const apcObj = new (std::malloc(size)) APCObject(clsOrName, numApcProps);
-  auto const handle = apcObj->getHandle();
-  handle->setPersistentObj();
+  apcObj->m_persistent = 1;
 
   // Set a few more flags for faster fetching: whether or not the object has a
   // wakeup method, and whether or not we can use a fast path that avoids
   // default-initializing properties before setting them to their APC values.
-  if (!cls->lookupMethod(s___wakeup.get())) handle->setNoWakeup();
+  if (!cls->lookupMethod(s___wakeup.get())) apcObj->m_no_wakeup = 1;
   if (!cls->instanceCtor() && !cls->callsCustomInstanceInit()) {
-    handle->setFastObjInit();
+    apcObj->m_fast_init = 1;
   }
 
   auto const apcPropVec = apcObj->persistentProps();
@@ -177,7 +179,7 @@ ALWAYS_INLINE
 APCObject::~APCObject() {
   auto const numProps = m_propCount;
 
-  if (getHandle()->isPersistentObj()) {
+  if (m_persistent) {
     auto props = persistentProps();
     for (unsigned i = 0; i < numProps; ++i) {
       if (props[i]) props[i]->unreference();
@@ -205,7 +207,7 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
     return {nullptr, 0};
   }
   obj->setObjAttempted();
-  ObjectData *o = value.getObjectData();
+  ObjectData* o = value.getObjectData();
   DataWalker walker(DataWalker::LookupFeature::DetectSerializable);
   DataWalker::DataFeature features = walker.traverseData(o);
   if (features.isCircular || features.hasSerializable) {
@@ -218,25 +220,24 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
 
 Variant APCObject::MakeLocalObject(const APCHandle* handle) {
   auto apcObj = APCObject::fromHandle(handle);
-  if (handle->isPersistentObj()) return apcObj->createObject();
-  return apcObj->createObjectSlow();
+  return apcObj->m_persistent ? apcObj->createObject()
+                              : apcObj->createObjectSlow();
 }
 
 Object APCObject::createObject() const {
   auto cls = m_cls.left();
   assert(cls != nullptr);
 
-  auto const fastInit = getHandle()->isFastObjInit();
   auto obj = Object::attach(
-    fastInit ? ObjectData::newInstanceNoPropInit(const_cast<Class*>(cls))
-             : ObjectData::newInstance(const_cast<Class*>(cls))
+    m_fast_init ? ObjectData::newInstanceNoPropInit(const_cast<Class*>(cls))
+                : ObjectData::newInstance(const_cast<Class*>(cls))
   );
 
   auto const numProps = cls->numDeclProperties();
   auto const objProp = obj->propVec();
   auto const apcProp = persistentProps();
 
-  if (fastInit) {
+  if (m_fast_init) {
     for (unsigned i = 0; i < numProps; ++i) {
       new (objProp + i) Variant(apcProp[i]->toLocal());
     }
@@ -254,7 +255,7 @@ Object APCObject::createObject() const {
     obj->setDynPropArray(dynProps->toLocal().asCArrRef());
   }
 
-  if (getHandle()->hasWakeup()) obj->invokeWakeup();
+  if (!m_no_wakeup) obj->invokeWakeup();
   return obj;
 }
 

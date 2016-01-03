@@ -156,6 +156,7 @@ Variant APCHandle::toLocal() const {
       return apc_unserialize(serArr->data(), serArr->size());
     }
     case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
       return Variant::attach(
         APCLocalArray::Make(APCArray::fromHandle(this))->asArrayData()
       );
@@ -191,6 +192,7 @@ void APCHandle::deleteShared() {
       APCString::Delete(APCString::fromHandle(this));
       return;
 
+    case APCKind::SharedPackedArray:
     case APCKind::SharedArray:
       APCArray::Delete(this);
       return;
@@ -212,16 +214,6 @@ void APCHandle::deleteShared() {
 }
 
 bool APCHandle::checkInvariants() const {
-  assert(isSerializedArray() == (m_kind == APCKind::SerializedArray));
-  assert(isSerializedObj() == (m_kind == APCKind::SerializedObject));
-  assert(isUncounted() == (m_kind == APCKind::UncountedString ||
-                           m_kind == APCKind::UncountedArray));
-  assert(isAPCCollection() == (m_kind == APCKind::SharedCollection));
-  assert(!isPersistentObj() || (m_kind == APCKind::SharedObject ||
-                                m_kind == APCKind::SharedCollection));
-  assert(hasWakeup() || m_kind == APCKind::SharedObject);
-  assert(!isFastObjInit() || m_kind == APCKind::SharedObject);
-  assert(!isPacked() || m_kind == APCKind::SharedArray);
   switch (m_kind) {
     case APCKind::Uninit:
       assert(m_type == KindOfUninit);
@@ -252,6 +244,7 @@ bool APCHandle::checkInvariants() const {
       return true;
     case APCKind::SharedString:
     case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
     case APCKind::SerializedArray:

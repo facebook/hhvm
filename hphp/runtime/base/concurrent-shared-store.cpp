@@ -89,6 +89,7 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::SerializedArray:
       return EntryInfo::Type::SerializedArray;
     case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
       return EntryInfo::Type::APCArray;
     case APCKind::SerializedObject:
       return EntryInfo::Type::SerializedObject;
@@ -247,7 +248,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   // have updated it already, check before updating.
   auto& sval = acc->second;
   auto const handle = sval.data.left();
-  if (handle == svar && handle->isSerializedObj()) {
+  if (handle == svar && handle->kind() == APCKind::SerializedObject) {
     sval.data = converted;
     APCStats::getAPCStats().updateAPCValue(
       converted, size, handle, sval.dataSize, sval.expire == 0, false);

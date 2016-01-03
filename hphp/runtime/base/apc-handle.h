@@ -39,7 +39,8 @@ enum class APCKind: uint8_t {
   Uninit, Null, Bool, Int, Double,
   StaticString, UncountedString,
   StaticArray, UncountedArray,
-  SharedString, SharedArray, SharedObject, SharedCollection,
+  SharedString, SharedArray, SharedPackedArray,
+  SharedObject, SharedCollection,
   SerializedArray, SerializedObject
 };
 
@@ -91,6 +92,7 @@ enum class APCKind: uint8_t {
  *  UncountedArray    APCTypedValue   KindOfArray
  *  SharedString      APCString       kInvalidDataType
  *  SharedArray       APCArray        kInvalidDataType
+ *  SharedPackedArray APCArray        kInvalidDataType
  *  SharedObject      APCObject       kInvalidDataType
  *  SerializedArray   APCString       kInvalidDataType
  *  SerializedObject  APCString       kInvalidDataType
@@ -111,15 +113,6 @@ struct APCHandle {
 
   explicit APCHandle(APCKind kind, DataType type = kInvalidDataType)
     : m_type(type), m_kind(kind) {
-    if (kind == APCKind::UncountedString || kind == APCKind::UncountedArray) {
-      setUncounted();
-    } else if (kind == APCKind::SerializedArray) {
-      setSerializedArray();
-    } else if (kind == APCKind::SerializedObject) {
-      setSerializedObj();
-    } else if (kind == APCKind::SharedCollection) {
-      setAPCCollection();
-    }
     assert(checkInvariants());
   }
 
@@ -169,11 +162,6 @@ struct APCHandle {
 
   /*
    * Return the APCKind represented by this APCHandle.
-   *
-   * Note that this does not entirely determine the type of APC storage being
-   * used---for example, objects and arrays can be represented as serialized
-   * APCStrings, in which case type() will still KindOfObject or KindOfArray.
-   * See isSerializedArray and isSerializedObj below.
    */
   APCKind kind() const { return m_kind; }
 
@@ -188,57 +176,29 @@ struct APCHandle {
    * the thread-safety rule documented above the class.
    */
   bool objAttempted() const {
+    assert(m_kind == APCKind::SerializedObject ||
+           m_kind == APCKind::SharedObject ||
+           m_kind == APCKind::SharedCollection);
     return m_obj_attempted.load(std::memory_order_relaxed);
   }
   void setObjAttempted() {
+    assert(m_kind == APCKind::SerializedObject ||
+           m_kind == APCKind::SharedObject ||
+           m_kind == APCKind::SharedCollection);
     m_obj_attempted.store(true, std::memory_order_relaxed);
   }
 
   /*
-   * For objects, collections, and arrays, these flags distinguish
-   * between the APCObject and APCArray representations and serialized
-   * APCString representations. APCCollection wraps an array that
-   * represents a KindOfObject for a particular collection type.
+   * If true, this APCHandle is an APCTypedValue holding an "uncounted"
+   * string or array; (not static or refcounted).
    */
-  bool isSerializedObj() const { return m_flags & FSerializedObj; }
-  bool isSerializedArray() const { return m_flags & FSerializedArray; }
-  bool isAPCCollection() const { return m_flags & FAPCCollection; }
-  void setSerializedObj() { m_flags |= FSerializedObj; }
-  void setSerializedArray() { m_flags |= FSerializedArray; }
-  void setAPCCollection() { m_flags |= FAPCCollection; }
-
-  bool isPersistentObj() const { return m_flags & FPersistentObj; }
-  bool hasWakeup() const { return (m_flags & FObjNoWakeup) == 0; }
-  bool isFastObjInit() const { return m_flags & FFastObjInit; }
-  void setPersistentObj() { m_flags |= FPersistentObj; }
-  void setNoWakeup() { m_flags |= FObjNoWakeup; }
-  void setFastObjInit() { m_flags |= FFastObjInit; }
-
-  /*
-   * If true, this APCHandle is not using reference counting.
-   */
-  bool isUncounted() const { return m_flags & FUncounted; }
-  void setUncounted() { m_flags |= FUncounted; }
-
-  /*
-   * If this APCHandle is using an APCArray representation, this flag
-   * discriminates between two different storage schemes inside APCArray.
-   */
-  bool isPacked() const { return m_flags & FPacked; }
-  void setPacked() { m_flags |= FPacked; }
+  bool isUncounted() const {
+    return m_kind == APCKind::UncountedString ||
+           m_kind == APCKind::UncountedArray;
+  }
 
   bool checkInvariants() const;
   bool isAtomicCounted() const;
-
-private:
-  constexpr static uint8_t FSerializedArray = 1 << 0;
-  constexpr static uint8_t FSerializedObj   = 1 << 1;
-  constexpr static uint8_t FPacked          = 1 << 2;
-  constexpr static uint8_t FUncounted       = 1 << 3;
-  constexpr static uint8_t FAPCCollection   = 1 << 4;
-  constexpr static uint8_t FPersistentObj   = 1 << 5;
-  constexpr static uint8_t FObjNoWakeup     = 1 << 6;
-  constexpr static uint8_t FFastObjInit     = 1 << 7;
 
 private:
   void atomicIncRef() const;
@@ -248,7 +208,6 @@ private:
 private:
   const DataType m_type;
   const APCKind m_kind;
-  uint8_t m_flags{0};
   std::atomic<uint8_t> m_obj_attempted{false};
   mutable std::atomic<uint32_t> m_count{1};
 };

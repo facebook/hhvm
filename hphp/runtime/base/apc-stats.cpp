@@ -77,6 +77,7 @@ size_t getMemSize(const APCHandle* handle) {
              getMemSize(APCTypedValue::fromHandle(handle)->getArrayData());
 
     case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
       return getMemSize(APCArray::fromHandle(handle));
 
     case APCKind::SerializedObject:
@@ -111,7 +112,7 @@ size_t getMemSize(const APCArray* arr) {
 }
 
 size_t getMemSize(const APCObject* obj) {
-  if (obj->getHandle()->isPersistentObj()) {
+  if (obj->isPersistent()) {
     auto size = sizeof(APCObject) +
                 sizeof(APCHandle*) * obj->m_propCount;
     auto prop = obj->persistentProps();
@@ -441,6 +442,7 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
       return m_serArray;
 
     case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
       return m_apcArray;
 
     case APCKind::SerializedObject:

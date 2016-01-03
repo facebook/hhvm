@@ -73,6 +73,8 @@ struct APCObject {
   APCHandle* getHandle() { return &m_handle; }
   const APCHandle* getHandle() const { return &m_handle; }
 
+  bool isPersistent() const { return m_persistent; }
+
 private:
   struct Prop {
     StringData* name;
@@ -109,6 +111,9 @@ private:
   APCHandle m_handle;
   ClassOrName m_cls;
   uint32_t m_propCount;
+  uint8_t m_persistent:1;
+  uint8_t m_no_wakeup:1;
+  uint8_t m_fast_init:1;
 };
 
 //////////////////////////////////////////////////////////////////////

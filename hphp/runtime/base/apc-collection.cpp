@@ -149,7 +149,7 @@ Object APCCollection::createObject() const {
     );
   }
 
-  if (UNLIKELY(m_arrayHandle->isSerializedArray())) {
+  if (UNLIKELY(m_arrayHandle->kind() == APCKind::SerializedArray)) {
     return createFromSerialized(m_colType, m_arrayHandle);
   }
 

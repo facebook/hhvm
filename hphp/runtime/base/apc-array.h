@@ -42,14 +42,16 @@ struct APCArray {
 
   static APCArray* fromHandle(APCHandle* handle) {
     assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedArray);
+    assert(handle->kind() == APCKind::SharedArray ||
+           handle->kind() == APCKind::SharedPackedArray);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<APCArray*>(handle);
   }
 
   static const APCArray* fromHandle(const APCHandle* handle) {
     assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedArray);
+    assert(handle->kind() == APCKind::SharedArray ||
+           handle->kind() == APCKind::SharedPackedArray);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
   }
@@ -102,7 +104,9 @@ struct APCArray {
     return indexOf(key);
   }
 
-  bool isPacked() const { return m_handle.isPacked(); }
+  bool isPacked() const {
+    return m_handle.kind() == APCKind::SharedPackedArray;
+  }
 
 private:
   struct Bucket {
@@ -115,11 +119,9 @@ private:
 
 private:
   explicit APCArray(size_t size)
-    : m_handle(APCKind::SharedArray, kInvalidDataType), m_size(size) {
-    m_handle.setPacked();
-  }
-  explicit APCArray(unsigned int cap)
-    : m_handle(APCKind::SharedArray) {
+    : m_handle(APCKind::SharedPackedArray, kInvalidDataType), m_size(size)
+  {}
+  explicit APCArray(unsigned int cap) : m_handle(APCKind::SharedArray) {
     m.m_capacity_mask = cap - 1;
     m.m_num = 0;
   }
@@ -134,8 +136,6 @@ private:
 
 private:
   friend size_t getMemSize(const APCArray*);
-
-  void setPacked() { m_handle.setPacked(); }
 
   void add(APCHandle* key, APCHandle* val);
   ssize_t indexOf(const StringData* key) const;

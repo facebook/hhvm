@@ -257,6 +257,9 @@ class JsonExtension final : public Extension {
 
     loadSystemlib();
   }
+
+  void requestInit() override { json_parser_init(); }
+
 } s_json_extension;
 
 }

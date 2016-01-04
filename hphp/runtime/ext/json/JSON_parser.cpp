@@ -355,11 +355,9 @@ const char *json_get_last_error_msg() {
 }
 
 // For each request, make sure we start with the default error code.
-// Inline the function to do that reset.
-static InitFiniNode init(
-  []{ s_json_parser->error_code = JSON_ERROR_NONE; },
-  InitFiniNode::When::RequestInit
-);
+void json_parser_init() {
+  s_json_parser->error_code = JSON_ERROR_NONE;
+}
 
 /**
  * Push a mode onto the stack. Return false if there is overflow.

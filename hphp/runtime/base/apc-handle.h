@@ -89,7 +89,7 @@ enum class APCKind: uint8_t {
  *  StaticString      APCTypedValue   KindOfStaticString
  *  UncountedString   APCTypedValue   KindOfString
  *  StaticArray       APCTypedValue   KindOfPersistentArray
- *  UncountedArray    APCTypedValue   KindOfArray
+ *  UncountedArray    APCTypedValue   KindOfPersistentArray
  *  SharedString      APCString       kInvalidDataType
  *  SharedArray       APCArray        kInvalidDataType
  *  SharedPackedArray APCArray        kInvalidDataType

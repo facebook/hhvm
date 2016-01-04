@@ -37,14 +37,15 @@ namespace {
 size_t getMemSize(const TypedValue* tv) {
   const auto& v = tvAsCVarRef(tv);
   auto type = v.getType();
-  if (!isRefcountedType(type)) {
-    return sizeof(Variant);
+  if (type == KindOfPersistentArray || type == KindOfArray) {
+    auto a = v.getArrayData();
+    return a->isStatic() ? sizeof(v) : getMemSize(a);
   }
   if (type == KindOfString) {
     return getMemSize(v.getStringData());
   }
-  if (type == KindOfArray) {
-    return getMemSize(v.getArrayData());
+  if (!isRefcountedType(type)) {
+    return sizeof(Variant);
   }
   assert(!"Unsupported Variant type for getMemSize()");
   return 0;

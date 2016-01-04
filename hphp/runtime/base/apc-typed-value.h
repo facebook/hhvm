@@ -68,7 +68,7 @@ struct APCTypedValue {
 
   enum class UncountedArr {};
   APCTypedValue(UncountedArr, ArrayData* data)
-    : m_handle(APCKind::UncountedArray, KindOfArray) {
+    : m_handle(APCKind::UncountedArray, KindOfPersistentArray) {
     assert(data->isUncounted());
     m_data.arr = data;
     assert(checkInvariants());

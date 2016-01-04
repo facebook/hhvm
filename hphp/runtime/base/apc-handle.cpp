@@ -237,10 +237,8 @@ bool APCHandle::checkInvariants() const {
       assert(m_type == KindOfString);
       return true;
     case APCKind::StaticArray:
-      assert(m_type == KindOfPersistentArray);
-      return true;
     case APCKind::UncountedArray:
-      assert(m_type == KindOfArray);
+      assert(m_type == KindOfPersistentArray);
       return true;
     case APCKind::SharedString:
     case APCKind::SharedArray:

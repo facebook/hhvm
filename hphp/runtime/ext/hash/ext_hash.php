@@ -33,7 +33,7 @@ function hash_algos(): array<string>;
  *
  * @param string $algo     - Name of selected hashing algorithm
  *                           (i.e. "md5", "sha256", "haval160,4", etc..)
- * @param string $filename - File who's contents are to be hashed.
+ * @param string $filename - File whose contents are to be hashed.
  * @param bool $raw_output - When set to TRUE, outputs raw binary data.
  *                           FALSE outputs lowercase hexits.
  *
@@ -272,6 +272,7 @@ function hash_copy(resource $context): mixed;
  *                  unless raw_output is set to TRUE in which case the raw
  *                  binary representation of the derived key is returned.
  */
+<<__IsFoldable>>
 function hash_pbkdf2(string $algo, string $password, string $salt,
                      int $iterations, int $length = 0,
                      bool $raw_output = false): mixed {
@@ -339,6 +340,9 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
  *
  * @return bool - Whether $known == $user
  */
+// While this function could be marked __IsFoldable, doing so would defeat
+// the purpose of having a comparison function which takes a fixed amount
+// of time.
 <<__Native>>
 function hash_equals(mixed $known, mixed $user): bool;
 
@@ -351,7 +355,7 @@ function hash_equals(mixed $known, mixed $user): bool;
  *
  * @return int - A number in the range of 0-(nPart-1)
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function furchash_hphp_ext(string $key, int $len, int $npart): int;
 
 /**
@@ -359,6 +363,7 @@ function furchash_hphp_ext(string $key, int $len, int $npart): int;
  *
  * @return bool - True
  */
+<<__IsFoldable>>
 function furchash_hphp_ext_supported(): bool {
   return true;
 }
@@ -372,5 +377,5 @@ function furchash_hphp_ext_supported(): bool {
  *
  * @return - The Int64 hash of the first len input characters
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function hphp_murmurhash(string $key, int $len, int $seed): int;

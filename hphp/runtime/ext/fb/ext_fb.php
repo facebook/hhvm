@@ -91,7 +91,7 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8ize(mixed &$input): bool;
 
 /* Count the number of UTF-8 code points in string or byte count if it's not
@@ -100,7 +100,7 @@ function fb_utf8ize(mixed &$input): bool;
  * @return int - Returns the count of code points if valid UTF-8 else byte
  * count.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_strlen_deprecated(string $input): int;
 
 /* Count the number of UTF-8 code points in string, substituting U+FFFD for
@@ -109,7 +109,7 @@ function fb_utf8_strlen_deprecated(string $input): int;
  * @return int - Returns the number of code points interpreting string as
  * UTF-8.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_strlen(string $input): int;
 
 /* Cuts a portion of str specified by the start and length parameters.
@@ -129,7 +129,7 @@ function fb_utf8_strlen(string $input): int;
  * length parameters.  If str is shorter than start characters long, the empty
  * string will be returned.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_substr(string $str,
                         int $start,
                         int $length = PHP_INT_MAX): string;

@@ -128,8 +128,9 @@ void raise_recoverable_error(const char *fmt, ...) {
 static int64_t g_notice_counter = 0;
 
 static bool notice_freq_check(ErrorMode mode) {
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      g_notice_counter++ % RuntimeOption::NoticeFrequency != 0) {
+  if ((RuntimeOption::NoticeFrequency <= 0 ||
+      g_notice_counter++ % RuntimeOption::NoticeFrequency != 0) &&
+      !g_context->getThrowAllErrors()){
     return false;
   }
   return g_context->errorNeedsHandling(

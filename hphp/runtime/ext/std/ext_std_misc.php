@@ -117,7 +117,7 @@ function ignore_user_abort(bool $setting = false): int;
  * byte X Back up one byte @ NUL-fill to absolute position
  * @return mixed - Returns a binary string containing data.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function pack(string $format, ...$args): mixed;
 
 /* @param int $seconds - Halt time in seconds.
@@ -179,7 +179,7 @@ function uniqid(string $prefix = "",
  * @return mixed - Returns an associative array containing unpacked elements
  * of binary string.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function unpack(string $format,
                 string $data): mixed;
 
@@ -218,7 +218,7 @@ function token_name(int $token): string;
  * @param mixed $v - The value being casted to a string.
  * @return string - The result of the string cast.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function hphp_to_string(mixed $v): string;
 
 }
@@ -230,7 +230,7 @@ namespace __SystemLib {
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native, __HipHopSpecific, __IsFoldable>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
 /* min2() returns the min of two operands (optimized FCallBuiltin for min).
@@ -238,7 +238,7 @@ function max2(mixed $arg1, mixed $arg2): mixed;
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native, __HipHopSpecific, __IsFoldable>>
 function min2(mixed $arg1, mixed $arg2): mixed;
 
 }

@@ -384,7 +384,7 @@ function http_response_code(int $response_code = 0): mixed;
  *
  * @return string - Returns a string representation of the address.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function inet_ntop(string $in_addr): mixed;
 
 /**
@@ -397,7 +397,7 @@ function inet_ntop(string $in_addr): mixed;
  *   example, an IPv4 address without dots or an IPv6 address without
  *   colons).
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function inet_pton(string $address): mixed;
 
 /**
@@ -409,7 +409,7 @@ function inet_pton(string $address): mixed;
  * @return int - Returns the IPv4 address or FALSE if ip_address is
  *   invalid.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function ip2long(string $ip_address): mixed;
 
 /**
@@ -420,7 +420,7 @@ function ip2long(string $ip_address): mixed;
  *
  * @return string - Returns the Internet IP address as a string.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function long2ip(string $proper_address): string;
 
 /**

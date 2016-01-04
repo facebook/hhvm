@@ -28,7 +28,7 @@ function bzclose(resource $bz): bool;
  * @return mixed - The compressed string, or an error number if an error
  *                 occurred.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function bzcompress(string $source, int $blocksize = 4,
                     int $workfactor = 0): mixed;
 
@@ -44,7 +44,7 @@ function bzcompress(string $source, int $blocksize = 4,
  * @return mixed - The decompressed string, or an error number if an error
  *                 occurred.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native, __ParamCoerceModeFalse, __IsFoldable>>
 function bzdecompress(string $source, int $small = 0): mixed;
 
 /**

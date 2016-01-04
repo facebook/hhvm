@@ -43,7 +43,7 @@ function array_chunk(mixed $input,
  * @return mixed - Returns the array column, or FALSE on failure
  *
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function array_column(mixed $arr,
                       mixed $val_key,
                       mixed $idx_key = null): mixed;

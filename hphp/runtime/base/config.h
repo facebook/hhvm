@@ -57,19 +57,21 @@ struct Config {
                              const bool prepend_hhvm = true);
 
   static void ParseConfigFile(const std::string &filename, IniSettingMap &ini,
-                              Hdf &hdf);
+                              Hdf &hdf, const bool is_system = true);
 
-  static void ParseIniFile(const std::string &filename);
+  static void ParseIniFile(const std::string &filename,
+                           const bool is_system = true);
   static void ParseIniFile(const std::string &filename, IniSettingMap &ini,
-                           const bool constants_only = false);
+                           const bool constants_only = false,
+                           const bool is_system = true);
 
   static void ParseHdfFile(const std::string &filename, Hdf &hdf);
 
   // Parse and process a .ini string (e.g., -d)
-  static void ParseIniString(const std::string iniStr, IniSettingMap &ini);
+  static void ParseIniString(const std::string &iniStr, IniSettingMap &ini);
 
   // Parse and process a .hdf string (e.g., -v)
-  static void ParseHdfString(const std::string hdfStr, Hdf &hdf);
+  static void ParseHdfString(const std::string &hdfStr, Hdf &hdf);
 
   /**
    * Prefer the Bind() over the GetFoo() as it makes ini_get() work too.
@@ -257,7 +259,8 @@ struct Config {
   private:
 
   static void SetParsedIni(IniSettingMap &ini, const std::string confStr,
-                           const std::string filename, bool extensions_only);
+                           const std::string &filename, bool constants_only,
+                           bool is_system);
 
   static void StringInsert(std::vector<std::string> &values,
                            const std::string &key,

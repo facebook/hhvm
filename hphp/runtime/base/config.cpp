@@ -88,19 +88,19 @@ std::string Config::IniName(const std::string& config,
   return out;
 }
 
-void Config::ParseIniString(const std::string iniStr, IniSettingMap &ini) {
-  Config::SetParsedIni(ini, iniStr, "", false);
+void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini) {
+  Config::SetParsedIni(ini, iniStr, "", false, true);
 }
 
-void Config::ParseHdfString(const std::string hdfStr, Hdf &hdf) {
+void Config::ParseHdfString(const std::string &hdfStr, Hdf &hdf) {
   hdf.fromString(hdfStr.c_str());
 }
 
 void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,
-                             Hdf &hdf) {
+                             Hdf &hdf, const bool is_system /* = true */) {
   // We don't allow a filename of just ".ini"
   if (boost::ends_with(filename, ".ini") && filename.length() > 4) {
-    Config::ParseIniFile(filename, ini);
+    Config::ParseIniFile(filename, ini, false, is_system);
   } else {
     // For now, assume anything else is an hdf file
     // TODO(#5151773): Have a non-invasive warning if HDF file does not end
@@ -109,19 +109,22 @@ void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,
   }
 }
 
-void Config::ParseIniFile(const std::string &filename) {
+void Config::ParseIniFile(const std::string &filename,
+                          const bool is_system /* = true */) {
   IniSettingMap ini = IniSettingMap();
-  Config::ParseIniFile(filename, ini, false);
+  Config::ParseIniFile(filename, ini, false, is_system);
 }
 
 void Config::ParseIniFile(const std::string &filename, IniSettingMap &ini,
-                          const bool constants_only /* = false */) {
+                          const bool constants_only /* = false */,
+                          const bool is_system /* = true */ ) {
     std::ifstream ifs(filename);
     std::string str((std::istreambuf_iterator<char>(ifs)),
                     std::istreambuf_iterator<char>());
     std::string with_includes;
     Config::ReplaceIncludesWithIni(filename, str, with_includes);
-    Config::SetParsedIni(ini, with_includes, filename, constants_only);
+    Config::SetParsedIni(ini, with_includes, filename, constants_only,
+                         is_system);
 }
 
 void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
@@ -175,7 +178,12 @@ void Config::ParseHdfFile(const std::string &filename, Hdf &hdf) {
 }
 
 void Config::SetParsedIni(IniSettingMap &ini, const std::string confStr,
-                          const std::string filename, bool constants_only) {
+                          const std::string &filename, bool constants_only,
+                          bool is_system) {
+  // if we are setting constants, we must be setting system settings
+  if (constants_only) {
+    assert(is_system);
+  }
   auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
   for (ArrayIter iter(parsed_ini.toArray()); iter; ++iter) {
     // most likely a string, but just make sure that we are dealing
@@ -185,7 +193,7 @@ void Config::SetParsedIni(IniSettingMap &ini, const std::string confStr,
     if (constants_only) {
       IniSetting::FillInConstant(iter.first().toString().toCppString(),
                                  iter.second());
-    } else {
+    } else if (is_system) {
       IniSetting::SetSystem(iter.first().toString().toCppString(),
                             iter.second());
     }

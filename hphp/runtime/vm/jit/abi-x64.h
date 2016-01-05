@@ -36,6 +36,7 @@ namespace x64 {
 
 const Abi& abi(CodeKind kind = CodeKind::Trace);
 
+/* VM registers must match etch-helpers.h definitions! */
 constexpr PhysReg rvmfp() { return reg::rbp; }
 constexpr PhysReg rvmsp() { return reg::rbx; }
 constexpr PhysReg rvmtl() { return reg::r12; }

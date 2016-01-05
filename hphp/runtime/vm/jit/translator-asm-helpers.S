@@ -33,7 +33,7 @@ ETCH_NAME(enterTCHelper):
   ETCH_GET_ARG5
   ETCH_GET_ARG6
 
-  push %rbp
+  push ETCH_VMFP
   CFI2(adjust_cfa_offset, 8) // cfa is now 8 bytes further from rsp than it was before
   CFI3C(offset, rbp, -16)    // Where to find previous value of rbp, relative to cfa
 
@@ -41,9 +41,9 @@ ETCH_NAME(enterTCHelper):
   mov %rsp, (ETCH_ARG4)
 
   // Set up special registers used for translated code.
-  mov ETCH_ARG1, %rbx          // rVmSp
-  mov ETCH_ARG5, %r12          // rVmTl
-  mov ETCH_ARG2, %rbp          // rVmFp
+  mov ETCH_ARG1, ETCH_VMSP
+  mov ETCH_ARG5, ETCH_VMTL
+  mov ETCH_ARG2, ETCH_VMFP
 
   sub $8, %rsp // align native stack
   CFI2(adjust_cfa_offset, 8)
@@ -63,7 +63,7 @@ ETCH_NAME(enterTCHelper):
   jz ETCH_LABEL(enterTCHelper$callTC)
   push ETCH_NAME_REL(enterTCExit)
   push 0x8(ETCH_ARG6)
-  mov ETCH_ARG6, %rbp
+  mov ETCH_ARG6, ETCH_VMFP
   call ETCH_LABEL(enterTCHelper$prologue)
 
   /*
@@ -85,13 +85,13 @@ ETCH_NAME(enterTCExit):
   /*
    * Eager vm-reg save. Must match values in rds-header.h
    */
-  mov %rbx, 0x10(%r12)
-  mov %rbp, 0x20(%r12)
+  mov ETCH_VMSP, 0x10(ETCH_VMTL)
+  mov ETCH_VMFP, 0x20(ETCH_VMTL)
   add $8, %rsp
   CFI2(adjust_cfa_offset, -8)
 
   // Epilogue
-  pop %rbp
+  pop ETCH_VMFP
   CFI2(restore, rbp)
   CFI2(adjust_cfa_offset, -8)
   ret
@@ -103,9 +103,22 @@ ETCH_LABEL(enterTCHelper$prologue):
   CFI(endproc)
   ETCH_SIZE(enterTCHelper)
 
-  // handleSRHelper: Translated code will jump to this stub to perform all
-  // service requests. It calls out to C++ to handle the request, then jumps
-  // to the returned address (which may be the callToExit stub).
+/*
+ * handleSRHelper
+ *
+ * Translated code will jump to this stub to perform all service requests. It
+ * calls out to C++ to handle the request, then jumps to the returned address
+ * (which may be the callToExit stub).
+ *
+ * The columns are registers of:
+ * X64 ABI
+ *   rdi:  ServiceRequest req (r_svcreq_req)
+ *   r10:  TCA stub (r_svcreq_stub)
+ *   rsi:  args[0]
+ *   rdx:  args[1]
+ *   rcx:  args[2]
+ *   r8 :  args[3]
+ */
   ETCH_ALIGN16
   ETCH_SECTION(handleSRHelper)
   .globl ETCH_NAME(handleSRHelper)
@@ -113,16 +126,16 @@ ETCH_NAME(handleSRHelper):
   CFI(startproc)
 
   // Sync vmsp & vmfp
-  mov %rbx, 0x10(%r12)
-  mov %rbp, 0x20(%r12)
+  mov ETCH_VMSP, 0x10(ETCH_VMTL)
+  mov ETCH_VMFP, 0x20(ETCH_VMTL)
 
-  // Push a ServiceReqInfo struct onto the stack and call handleServiceRequest.
-  push %r8
-  push %rcx
-  push %rdx
-  push %rsi
-  push %r10
-  push %rdi
+  // Push a ReqInfo struct onto the stack and call handleServiceRequest.
+  push ETCH_SVCREQ_ARG4
+  push ETCH_SVCREQ_ARG3
+  push ETCH_SVCREQ_ARG2
+  push ETCH_SVCREQ_ARG1
+  push ETCH_SVCREQ_STUB
+  push ETCH_SVCREQ_REQ
   CFI2(adjust_cfa_offset, 0x30)
 
   // call mcg->handleServiceRequest(%rsp)
@@ -130,16 +143,17 @@ ETCH_NAME(handleSRHelper):
   mov %rsp, ETCH_ARG2
   call MCGenerator_handleServiceRequest
 
-  // Pop the ServiceReqInfo off the stack.
+  // Pop the ReqInfo struct off the stack.
   add $0x30, %rsp
   CFI2(adjust_cfa_offset, -0x30)
 
   // rVmTl was preserved by the callee, but vmsp and vmfp might've changed if
   // we interpreted anything. Reload them.
-  mov 0x10(%r12), %rbx
-  mov 0x20(%r12), %rbp
+  mov 0x10(ETCH_VMTL), ETCH_VMSP
+  mov 0x20(ETCH_VMTL), ETCH_VMFP
 
-  jmp *%rax
+  jmp *ETCH_RET1
+
   CFI(endproc)
   ETCH_SIZE(handleSRHelper)
 

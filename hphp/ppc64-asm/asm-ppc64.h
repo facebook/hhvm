@@ -350,6 +350,8 @@ namespace reg {
   constexpr RegXMM v27(27);
   constexpr RegXMM v28(28);
   constexpr RegXMM v29(29);
+  constexpr RegXMM v30(30);
+  constexpr RegXMM v31(31);
 
 #define RNAME(x) if (r == x) return #x
 

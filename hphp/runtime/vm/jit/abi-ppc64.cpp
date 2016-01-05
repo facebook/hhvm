@@ -52,16 +52,14 @@ const RegSet kGPReserved = RegSet(reg::r12) | reg::r2 | rfuncln() | rvmtl() |
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
-const RegSet kXMMCallerSaved = reg::v0 | reg::v1 | reg::v2 | reg::v3 |
-  reg::v4 | reg::v5 | reg::v6 | reg::v7 | reg::v8 | reg::v9 | reg::v10 |
-  reg::v11 | reg::v12 | reg::v13 | reg::v14 | reg::v15 | reg::v16 | reg::v17 |
-  reg::v18 | reg::v19;
+const RegSet kXMMCallerSaved = reg::f1 | reg::f2 | reg::f3 | reg::f4 |
+    reg::f5 | reg::f6 | reg::f7 | reg::f8 | reg::f9 | reg::f10 | reg::f11 |
+    reg::f12 | reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19;
 
-const RegSet kXMMCalleeSaved = reg::v20 | reg::v21 | reg::v22 | reg::v23 |
-  reg::v24 | reg::v25 | reg::v26 | reg::v27 | reg::v28;
+const RegSet kXMMCalleeSaved = reg::f14 | reg::f15 | reg::v20 | reg::v21 |
+    reg::v22 | reg::v23 | reg::v24 | reg::v25 | reg::v26 | reg::v27 |
+    reg::v28 | reg::v30 | reg::v31;
  // v29 reserved for Vxls::m_tmp
- // Ignoring the v30, v31 due to PhysReg::kMaxRegs == 64
-
 
 const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
 const RegSet kXMMReserved = RegSet(reg::v29);
@@ -125,8 +123,8 @@ constexpr PhysReg gp_args[] = {
 };
 
 constexpr PhysReg simd_args[] = {
-  reg::v2, reg::v3, reg::v4, reg::v5, reg::v6, reg::v7, reg::v8, reg::v9,
-  reg::v10, reg::v11, reg::v12, reg::v13
+    reg::f1, reg::f2, reg::f3, reg::f4, reg::f5, reg::f6, reg::f7, reg::f8,
+    reg::f9, reg::f10, reg::f11, reg::f12, reg::f13
 };
 
 constexpr PhysReg svcreq_args[] = {
@@ -159,7 +157,7 @@ PhysReg rret(size_t i) {
 }
 PhysReg rret_simd(size_t i) {
   assertx(i == 0);
-  return reg::v2;
+  return reg::f1;
 }
 
 PhysReg rarg(size_t i) {

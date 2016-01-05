@@ -82,7 +82,7 @@ PhysReg r_svcreq_arg(size_t i);
  * Scratch registers.
  */
 constexpr Reg64 rAsm = ppc64_asm::reg::r11;
-constexpr RegXMM rFasm = ppc64_asm::reg::f29;
+constexpr RegXMM rFasm = ppc64_asm::reg::f15;
 
 ///////////////////////////////////////////////////////////////////////////////
 

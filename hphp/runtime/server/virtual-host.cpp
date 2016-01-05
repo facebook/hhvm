@@ -162,9 +162,12 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, const Hdf& vh) {
   m_runtimeOption.serializationSizeLimit = serializationSizeLimit;
 
   m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
-  if (!m_documentRoot.empty() &&
-      m_documentRoot[m_documentRoot.length() - 1] == '/') {
-    m_documentRoot = m_documentRoot.substr(0, m_documentRoot.length() - 1);
+  if (m_documentRoot.length() > 1 &&
+      m_documentRoot.back() == '/') {
+    m_documentRoot.pop_back();
+    // Make sure we've not converted "/" to "" (which is why we're checking
+    // length() > 1 instead of !empty() above)
+    assert(!m_documentRoot.empty());
   }
 }
 

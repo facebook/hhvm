@@ -806,7 +806,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     break;
   case Type::VarExport:
   case Type::PHPOutput:
-    if (m_indent > 0) {
+    if (m_indent > 0 && m_rsrcName.empty()) {
       m_buf->append('\n');
       indent();
     }
@@ -818,6 +818,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
         assert(m_objCode == 'V' || m_objCode == 'K');
         m_buf->append(" {\n");
       }
+    } else if (!m_rsrcName.empty()) {
+      m_buf->append("NULL");
     } else {
       m_buf->append("array (\n");
     }
@@ -1134,7 +1136,9 @@ void VariableSerializer::writeArrayFooter() {
     break;
   case Type::VarExport:
   case Type::PHPOutput:
-    indent();
+    if (m_rsrcName.empty()) {
+      indent();
+    }
     if (info.is_object && m_objCode) {
       if (m_objCode == 'O') {
         m_buf->append("))");
@@ -1142,7 +1146,7 @@ void VariableSerializer::writeArrayFooter() {
         assert(m_objCode == 'V' || m_objCode == 'K');
         m_buf->append("}");
       }
-    } else {
+    } else if (m_rsrcName.empty()) { // for rsrc, only write NULL in arrayHeader
       m_buf->append(')');
     }
     break;

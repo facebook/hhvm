@@ -330,8 +330,9 @@ assume_php = false""")
         self.assertIsNotNone(monitor_log_path)
         with open(monitor_log_path) as f:
             monitor_logs = f.read()
-            p = re.compile('Just started typechecker server with pid: ([0-9]+)')
-            m = p.search(monitor_logs)
+            m = re.search(
+                    'Just started typechecker server with pid: ([0-9]+)',
+                    monitor_logs)
             self.assertIsNotNone(m)
             pid = m.group(1)
             self.assertIsNotNone(pid)
@@ -340,5 +341,5 @@ assume_php = false""")
             # sent above doesn't preserve ordering - maybe because they're
             # in separate processes? Give it some time.
             time.sleep(1)
-            client_error = self.check_cmd([])
+            client_error = self.check_cmd(['No errors!'])
             self.assertIn('Last server killed by signal', client_error)

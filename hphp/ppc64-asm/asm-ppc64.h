@@ -31,13 +31,13 @@
 
 namespace ppc64_asm {
 
-using HPHP::jit::Reg64;
-using HPHP::jit::RegXMM;
-using HPHP::jit::RegSF;
-using HPHP::jit::MemoryRef;
-using HPHP::jit::Immed;
-using HPHP::CodeAddress;
-using HPHP::jit::ConditionCode;
+/* using override */ using HPHP::jit::Reg64;
+/* using override */ using HPHP::jit::RegXMM;
+/* using override */ using HPHP::jit::RegSF;
+/* using override */ using HPHP::jit::MemoryRef;
+/* using override */ using HPHP::jit::Immed;
+/* using override */ using HPHP::CodeAddress;
+/* using override */ using HPHP::jit::ConditionCode;
 
 /* Used to  define a minimal callstack on call/ret vasm */
 // Must be the same value of AROFF(_dummyB).

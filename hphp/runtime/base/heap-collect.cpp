@@ -293,7 +293,7 @@ void Marker::operator()(const TypedValue& tv) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfPersistentArray:
     case KindOfClass: // only in eval stack
       return;

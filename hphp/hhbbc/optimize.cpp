@@ -336,7 +336,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case KindOfDouble:
       gen(bc::Double { v->m_data.dbl });
       break;
-    case KindOfStaticString:
+    case KindOfPersistentString:
       gen(bc::String { v->m_data.pstr });
       break;
     case KindOfPersistentArray:

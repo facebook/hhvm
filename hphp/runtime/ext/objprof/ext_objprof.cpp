@@ -430,7 +430,7 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString: {
       StringData* str = tv->m_data.pstr;
       size += str->size();
@@ -487,7 +487,7 @@ void tvGetStrings(
       tvGetStrings((TypedValue*)cell, metrics, path, pointers);
       break;
     }
-    case HPHP::KindOfStaticString:
+    case HPHP::KindOfPersistentString:
     case HPHP::KindOfString: {
       StringData* str = tv->m_data.pstr;
 

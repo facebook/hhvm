@@ -1000,7 +1000,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   static auto const sd86cinit = makeStaticString("86cinit");
   auto const meth86cinit = cns.cls->lookupMethod(sd86cinit);
   TypedValue args[1] = {
-    make_tv<KindOfStaticString>(const_cast<StringData*>(cns.name.get()))
+    make_tv<KindOfPersistentString>(const_cast<StringData*>(cns.name.get()))
   };
 
   Cell ret;
@@ -2106,7 +2106,7 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return same(tvAsVariant(&tv1), tvAsVariant(&tv2));
 

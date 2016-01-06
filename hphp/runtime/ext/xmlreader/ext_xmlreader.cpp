@@ -639,7 +639,7 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfUninit:
     case KindOfNull:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

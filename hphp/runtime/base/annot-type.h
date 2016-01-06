@@ -184,7 +184,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfDouble:
         return interface_supports_double(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         return interface_supports_string(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;

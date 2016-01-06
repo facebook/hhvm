@@ -83,7 +83,7 @@ ScalarExpression::ScalarExpression
         m_type = T_DNUMBER;
         return;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         m_type = T_STRING;
         return;

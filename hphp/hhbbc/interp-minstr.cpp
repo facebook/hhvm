@@ -564,7 +564,7 @@ Type mcodeKey(MIS& env) {
 // Returns nullptr if it's an unknown key or not a string.
 SString mStringKey(Type key) {
   auto const v = tv(key);
-  return v && v->m_type == KindOfStaticString ? v->m_data.pstr : nullptr;
+  return v && v->m_type == KindOfPersistentString ? v->m_data.pstr : nullptr;
 }
 
 SString mcodeStringKey(MIS& env) {
@@ -607,7 +607,7 @@ Base miBaseLoc(ISS& env, borrowed_ptr<php::Local> locBase, bool isDefine) {
 Base miBaseSProp(ISS& env, Type cls, Type tprop) {
   auto const self = selfCls(env);
   auto const prop = tv(tprop);
-  auto const name = prop && prop->m_type == KindOfStaticString
+  auto const name = prop && prop->m_type == KindOfPersistentString
                       ? prop->m_data.pstr : nullptr;
   if (self && cls.subtypeOf(*self) && name) {
     if (auto const ty = selfPropAsCell(env, prop->m_data.pstr)) {

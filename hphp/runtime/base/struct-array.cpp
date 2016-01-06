@@ -169,7 +169,7 @@ void StructArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   const auto structArray = asStructArray(ad);
 
   auto str = const_cast<StringData*>(structArray->shape()->keyForOffset(pos));
-  out->m_type = KindOfStaticString;
+  out->m_type = KindOfPersistentString;
   out->m_data.pstr = str;
 }
 

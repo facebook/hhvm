@@ -79,7 +79,7 @@ Variant SSATmp::variantVal() const {
       return intVal();
     case KindOfDouble:
       return dblVal();
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return Variant(const_cast<StringData*>(strVal()));
     case KindOfPersistentArray:

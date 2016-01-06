@@ -45,7 +45,7 @@ struct TypedValue;
 union Value {
   int64_t       num;    // KindOfInt64, KindOfBool (must be zero-extended)
   double        dbl;    // KindOfDouble
-  StringData*   pstr;   // KindOfString, KindOfStaticString
+  StringData*   pstr;   // KindOfString, KindOfPersistentString
   ArrayData*    parr;   // KindOfArray
   ObjectData*   pobj;   // KindOfObject
   ResourceHdr*  pres;   // KindOfResource
@@ -175,7 +175,7 @@ X(KindOfObject,       ObjectData*);
 X(KindOfResource,     ResourceHdr*);
 X(KindOfRef,          RefData*);
 X(KindOfString,       StringData*);
-X(KindOfStaticString, const StringData*);
+X(KindOfPersistentString, const StringData*);
 
 #undef X
 

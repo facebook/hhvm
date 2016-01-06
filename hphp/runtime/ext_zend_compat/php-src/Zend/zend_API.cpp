@@ -1460,7 +1460,7 @@ ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce,
   Native::registerClassConstant(
       makeStaticString(ce->name, ce->name_length),
       makeStaticString(name, name_length),
-      make_tv<KindOfStaticString>(
+      make_tv<KindOfPersistentString>(
         makeStaticString(value, value_length)));
   return SUCCESS;
 }
@@ -1473,7 +1473,7 @@ ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce,
   Native::registerClassConstant(
       makeStaticString(ce->name, ce->name_length),
       makeStaticString(name, name_length),
-      make_tv<KindOfStaticString>(makeStaticString(value)));
+      make_tv<KindOfPersistentString>(makeStaticString(value)));
   return SUCCESS;
 }
 /* }}} */

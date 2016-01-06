@@ -297,7 +297,7 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
     case KindOfDouble:
       return convCellToDblHelper(tv);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
 
@@ -345,7 +345,7 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
     case KindOfDouble:
       return cellToInt(tv);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
 
@@ -377,7 +377,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
     case KindOfDouble:        return convDblToStrHelper(tv.m_data.num);
     case KindOfString:        tv.m_data.pstr->incRefCount();
                               /* fallthrough */
-    case KindOfStaticString:
+    case KindOfPersistentString:
                               return tv.m_data.pstr;
     case KindOfPersistentArray:
     case KindOfArray:         raise_notice("Array to string conversion");
@@ -655,7 +655,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
 
       case KindOfUninit:
       case KindOfBoolean:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
       case KindOfPersistentArray:
       case KindOfArray:
@@ -721,7 +721,7 @@ Cell lookupCnsHelper(const TypedValue* tv,
     raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
     Cell c1;
     c1.m_data.pstr = const_cast<StringData*>(nm);
-    c1.m_type = KindOfStaticString;
+    c1.m_type = KindOfPersistentString;
     return c1;
   }
   not_reached();
@@ -795,7 +795,7 @@ Cell lookupCnsUHelper(const TypedValue* tv,
       raise_notice(Strings::UNDEFINED_CONSTANT,
                    fallback->data(), fallback->data());
       c1.m_data.pstr = const_cast<StringData*>(fallback);
-      c1.m_type = KindOfStaticString;
+      c1.m_type = KindOfPersistentString;
       return c1;
     }
   }

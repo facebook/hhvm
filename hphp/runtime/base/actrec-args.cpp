@@ -45,7 +45,7 @@ static const char *argTypeName(DataType dt) {
     case KindOfBoolean:       return "boolean";
     case KindOfInt64:         return "integer";
     case KindOfDouble:        return "double";
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return "string";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";

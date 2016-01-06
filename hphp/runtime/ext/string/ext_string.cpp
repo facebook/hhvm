@@ -1443,7 +1443,7 @@ Variant HHVM_FUNCTION(strlen,
                       const Variant& vstr) {
   auto const cell = vstr.asCell();
   switch (cell->m_type) {
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return Variant(cell->m_data.pstr->size());
 

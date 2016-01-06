@@ -228,7 +228,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       sb.append(';');
       return sb.detach();
     }
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString: {
       StringData *str = value.getStringData();
       StringBuffer sb;

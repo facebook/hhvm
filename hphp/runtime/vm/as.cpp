@@ -1950,7 +1950,7 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
     tvAsVariant(&tvInit) = parse_php_serialized(as);
     if (isStringType(tvInit.m_type)) {
       tvInit.m_data.pstr = makeStaticString(tvInit.m_data.pstr);
-      tvInit.m_type = KindOfStaticString;
+      tvInit.m_type = KindOfPersistentString;
       as.ue->mergeLitstr(tvInit.m_data.pstr);
     } else if (isArrayType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);

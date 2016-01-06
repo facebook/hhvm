@@ -4624,7 +4624,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.Double(v.getDouble());
         return true;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString: {
         StringData* nValue = makeStaticString(v.getStringData());
         e.String(nValue);
@@ -5793,7 +5793,7 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
       if (t) {
         [&] {
           switch (*t) {
-            case KindOfStaticString:
+            case KindOfPersistentString:
             case KindOfString:
             case KindOfPersistentArray:
             case KindOfArray:
@@ -5833,7 +5833,7 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
       e.Double(v.toDouble());
       return;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString: {
       StringData *nValue = makeStaticString(v.getStringData());
       e.String(nValue);
@@ -6407,7 +6407,7 @@ MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
       DataType caseType;
       if (condition->getScalarValue(cval)) {
         caseType = cval.getType();
-        if (caseType == KindOfStaticString) caseType = KindOfString;
+        if (caseType == KindOfPersistentString) caseType = KindOfString;
         if ((caseType != KindOfInt64 && caseType != KindOfString) ||
             !IMPLIES(t != KindOfUninit, caseType == t)) {
           return folly::none;

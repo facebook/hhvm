@@ -860,7 +860,7 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
   auto& v = vmain();
   ConditionCode cc;
   if (type <= TStaticStr) {
-    emitCmpTVType(v, sf, KindOfStaticString, typeSrc);
+    emitCmpTVType(v, sf, KindOfPersistentString, typeSrc);
     cc = CC_E;
   } else if (type <= TStr) {
     emitTestTVType(v, sf, KindOfStringBit, typeSrc);
@@ -1018,12 +1018,14 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
   static_assert(KindOfNull < KindOfBoolean, "fix checks for IsScalar");
   static_assert(KindOfInt64 > KindOfBoolean, "fix checks for IsScalar");
   static_assert(KindOfDouble > KindOfBoolean, "fix checks for IsScalar");
-  static_assert(KindOfStaticString > KindOfBoolean, "fix checks for IsScalar");
+  static_assert(KindOfPersistentString > KindOfBoolean,
+                "fix checks for IsScalar");
   static_assert(KindOfString > KindOfBoolean, "fix checks for IsScalar");
 
   static_assert(KindOfInt64 < KindOfString, "fix checks for IsScalar");
   static_assert(KindOfDouble < KindOfString, "fix checks for IsScalar");
-  static_assert(KindOfStaticString < KindOfString, "fix checks for IsScalar");
+  static_assert(KindOfPersistentString < KindOfString,
+                "fix checks for IsScalar");
   static_assert(KindOfArray > KindOfString, "fix checks for IsScalar");
   static_assert(KindOfObject > KindOfString, "fix checks for IsScalar");
   static_assert(KindOfResource > KindOfString, "fix checks for IsScalar");
@@ -3635,7 +3637,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
    * nor in the emitTypeTest code path.
    *
    * We currently actually check their persistent bit here. Note (importantly)
-   * that this is why toDataType can't return KindOfStaticString for
+   * that this is why toDataType can't return KindOfPersistentString for
    * TStaticStr---this code will let an apc string through.  Also note
    * that CheckType<Uncounted> t1:{Null|Str} doesn't get this treatment
    * currently---in the emitTypeTest path above it will only check the type

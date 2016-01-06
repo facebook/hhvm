@@ -690,7 +690,7 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       assert(str.size() == 8);
       auto sdp = reinterpret_cast<StringData*const*>(&str[0]);
       assert((*sdp)->isStatic());
-      tvMove(make_tv<KindOfStaticString>(*sdp), *self.asTypedValue());
+      tvMove(make_tv<KindOfPersistentString>(*sdp), *self.asTypedValue());
     } else {
       throwUnknownType(type);
     }

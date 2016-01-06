@@ -229,7 +229,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                   (m_hhType && interface_supports_double(hint)));
         return;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         compat = (!strcasecmp(hint, "HH\\string") ||
                   !strcasecmp(hint, "HH\\arraykey") ||

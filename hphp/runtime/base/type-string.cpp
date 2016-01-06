@@ -560,7 +560,7 @@ StaticString getDataTypeString(DataType t) {
     case KindOfBoolean:    return s_boolean;
     case KindOfInt64:      return s_integer;
     case KindOfDouble:     return s_double;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:     return s_string;
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;

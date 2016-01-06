@@ -2065,7 +2065,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
-        case KindOfStaticString:
+        case KindOfPersistentString:
         case KindOfString:       return TStr;
         case KindOfPersistentArray:
         case KindOfArray:        return TArr;
@@ -2143,7 +2143,7 @@ Type Index::satisfies_constraint_helper(Context ctx,
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
-        case KindOfStaticString:
+        case KindOfPersistentString:
         case KindOfString:       return TStr;
         case KindOfPersistentArray:
         case KindOfArray:        return TArr;
@@ -2372,7 +2372,7 @@ Type Index::lookup_public_static(Type cls, Type name) const {
   }();
 
   auto const vname = tv(name);
-  if (!vname || (vname && vname->m_type != KindOfStaticString)) {
+  if (!vname || (vname && vname->m_type != KindOfPersistentString)) {
     return TInitGen;
   }
   auto const sname = vname->m_data.pstr;
@@ -2654,7 +2654,7 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
 
   auto const cinfo = *maybe_cinfo;
   bool const unknownName = !vname ||
-    (vname && vname->m_type != KindOfStaticString);
+    (vname && vname->m_type != KindOfPersistentString);
 
   if (!cinfo) {
     if (unknownName) {

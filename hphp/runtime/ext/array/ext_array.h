@@ -292,7 +292,7 @@ inline int64_t countHelper(TypedValue tv) {
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
   if (UNLIKELY(!isArrayType(cell_##input->m_type))) {             \
     if (cell_##input->m_type == KindOfString ||                   \
-        cell_##input->m_type == KindOfStaticString) {             \
+        cell_##input->m_type == KindOfPersistentString) {             \
       throw_bad_type_exception("array_column() expects parameter" \
                                " 1 to be array, string given");   \
     } else if (cell_##input->m_type == KindOfInt64) {             \

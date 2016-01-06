@@ -54,7 +54,7 @@ enum DataType : int8_t {
   KindOfBoolean         = 0x09,  //  00001001
   KindOfInt64           = 0x11,  //  00010001
   KindOfDouble          = 0x19,  //  00011001
-  KindOfStaticString    = 0x1b,  //  00011011
+  KindOfPersistentString = 0x1b, //  00011011
   KindOfPersistentArray = 0x1d,  //  00011101
   KindOfString          = 0x22,  //  00100010
   KindOfArray           = 0x34,  //  00110100
@@ -110,8 +110,8 @@ constexpr int8_t kMinDataType  = KindOfClass;
 constexpr int8_t kMaxDataType  = KindOfRef;
 
 /*
- * KindOfStringBit must be set in KindOfStaticString and KindOfString, and it
- * must be 0 in any other DataType.
+ * KindOfStringBit must be set in KindOfPersistentString and KindOfString,
+ * and it must be 0 in any other DataType.
  */
 constexpr int KindOfStringBit = 0x02;
 
@@ -123,7 +123,7 @@ constexpr int KindOfArrayBit = 0x04;
 
 /*
  * KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
- * StaticString, PersistentArray, and it must be 0 for any other DataType.
+ * PersistentString, PersistentArray, and it must be 0 for any other DataType.
  */
 constexpr int KindOfUncountedInitBit = 0x01;
 
@@ -166,7 +166,7 @@ DT_CATEGORIES(DT)
 // Static asserts.
 
 static_assert(KindOfString        & KindOfStringBit, "");
-static_assert(KindOfStaticString  & KindOfStringBit, "");
+static_assert(KindOfPersistentString  & KindOfStringBit, "");
 static_assert(!(KindOfUninit      & KindOfStringBit), "");
 static_assert(!(KindOfNull        & KindOfStringBit), "");
 static_assert(!(KindOfBoolean     & KindOfStringBit), "");
@@ -186,7 +186,7 @@ static_assert(!(KindOfNull         & KindOfArrayBit), "");
 static_assert(!(KindOfBoolean      & KindOfArrayBit), "");
 static_assert(!(KindOfInt64        & KindOfArrayBit), "");
 static_assert(!(KindOfDouble       & KindOfArrayBit), "");
-static_assert(!(KindOfStaticString & KindOfArrayBit), "");
+static_assert(!(KindOfPersistentString & KindOfArrayBit), "");
 static_assert(!(KindOfString       & KindOfArrayBit), "");
 static_assert(!(KindOfObject       & KindOfArrayBit), "");
 static_assert(!(KindOfResource     & KindOfArrayBit), "");
@@ -197,7 +197,7 @@ static_assert(KindOfNull         & KindOfUncountedInitBit, "");
 static_assert(KindOfBoolean      & KindOfUncountedInitBit, "");
 static_assert(KindOfInt64        & KindOfUncountedInitBit, "");
 static_assert(KindOfDouble       & KindOfUncountedInitBit, "");
-static_assert(KindOfStaticString & KindOfUncountedInitBit, "");
+static_assert(KindOfPersistentString & KindOfUncountedInitBit, "");
 static_assert(KindOfPersistentArray  & KindOfUncountedInitBit, "");
 static_assert(!(KindOfUninit     & KindOfUncountedInitBit), "");
 static_assert(!(KindOfString     & KindOfUncountedInitBit), "");
@@ -221,7 +221,7 @@ static_assert((kNotConstantValueTypeMask & KindOfPersistentArray) != 0  &&
               "Array, Object and Ref types");
 static_assert(!(kNotConstantValueTypeMask &
                 (KindOfNull|KindOfBoolean|KindOfInt64|KindOfDouble|
-                 KindOfStaticString|KindOfString)),
+                 KindOfPersistentString|KindOfString)),
               "DataType & kNotConstantValueTypeMask must be zero for "
               "null, bool, int, double and string types");
 
@@ -238,7 +238,7 @@ inline std::string tname(DataType t) {
     CS(Boolean)
     CS(Int64)
     CS(Double)
-    CS(StaticString)
+    CS(PersistentString)
     CS(PersistentArray)
     CS(String)
     CS(Array)
@@ -266,47 +266,6 @@ inline std::string typeCategoryName(DataTypeCategory c) {
 #undef CASE
   }
   not_reached();
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Indices.
-
-inline int getDataTypeIndex(DataType type) {
-  switch (type) {
-    case KindOfUninit       : return 0;
-    case KindOfNull         : return 1;
-    case KindOfBoolean      : return 2;
-    case KindOfInt64        : return 3;
-    case KindOfDouble       : return 4;
-    case KindOfStaticString : return 5;
-    case KindOfPersistentArray  : return 6;
-    case KindOfString       : return 7;
-    case KindOfArray        : return 8;
-    case KindOfObject       : return 9;
-    case KindOfResource     : return 10;
-    case KindOfRef          : return 11;
-    case KindOfClass        : break;  // Not a "real" DT.
-  }
-  not_reached();
-}
-
-inline DataType getDataTypeValue(unsigned index) {
-  switch (index) {
-    case 0:  return KindOfUninit;
-    case 1:  return KindOfNull;
-    case 2:  return KindOfBoolean;
-    case 3:  return KindOfInt64;
-    case 4:  return KindOfDouble;
-    case 5:  return KindOfStaticString;
-    case 6:  return KindOfPersistentArray;
-    case 7:  return KindOfString;
-    case 8:  return KindOfArray;
-    case 9:  return KindOfObject;
-    case 10: return KindOfResource;
-    case 11: return KindOfRef;
-    default: not_reached();
-  }
 }
 
 /*
@@ -416,7 +375,7 @@ constexpr bool equivDataTypes(DataType t1, DataType t2) {
   case KindOfBoolean:       \
   case KindOfInt64:         \
   case KindOfDouble:        \
-  case KindOfStaticString:  \
+  case KindOfPersistentString:  \
   case KindOfPersistentArray
 
 ///////////////////////////////////////////////////////////////////////////////

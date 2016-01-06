@@ -233,7 +233,7 @@ void callFunc(const Func* func, void *ctx,
         callFuncDoubleImpl(f, GP_args, GP_count, SIMD_args, SIMD_count);
       return;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
     case KindOfPersistentArray:
     case KindOfArray:
@@ -335,7 +335,7 @@ bool coerceFCallArgs(TypedValue* args,
 
       case KindOfUninit:
       case KindOfNull:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfPersistentArray:
       case KindOfRef:
       case KindOfClass:
@@ -551,7 +551,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfDouble:       return ty == T::Double;
     case KindOfBoolean:      return ty == T::Bool;
     case KindOfObject:       return ty == T::Object   || ty == T::ObjectArg;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:       return ty == T::String   || ty == T::StringArg;
     case KindOfPersistentArray:
     case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;

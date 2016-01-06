@@ -57,7 +57,7 @@ TypedNum numericConvHelper(Cell cell) {
       return make_int(cell.m_data.num);
 
     case KindOfString:
-    case KindOfStaticString:
+    case KindOfPersistentString:
       return stringToNumeric(cell.m_data.pstr);
 
     case KindOfPersistentArray:
@@ -405,7 +405,7 @@ void cellIncDecOp(Op op, Cell& cell) {
       op.dblCase(cell);
       return;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       stringIncDecOp(op, cell);
       return;
@@ -432,7 +432,7 @@ struct IncBase {
   void nullCase(Cell& cell) const { cellCopy(make_int(1), cell); }
 
   Cell emptyString() const {
-    return make_tv<KindOfStaticString>(s_1.get());
+    return make_tv<KindOfPersistentString>(s_1.get());
   }
 
   void nonNumericString(Cell& cell) const {
@@ -671,7 +671,7 @@ void cellBitNot(Cell& cell) {
 
     case KindOfString:
       if (cell.m_data.pstr->cowCheck()) {
-    case KindOfStaticString:
+    case KindOfPersistentString:
         auto const newSd = StringData::Make(
           cell.m_data.pstr->slice(),
           CopyString

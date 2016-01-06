@@ -296,7 +296,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfInt64:
       return ad->exists(cell->m_data.num);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString: {
       int64_t n = 0;
       StringData *sd = cell->m_data.pstr;
@@ -703,7 +703,7 @@ Variant HHVM_FUNCTION(array_product,
       case KindOfDouble:
         goto DOUBLE;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString: {
         int64_t ti;
         double td;
@@ -965,7 +965,7 @@ Variant HHVM_FUNCTION(array_sum,
       case KindOfDouble:
         goto DOUBLE;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString: {
         int64_t ti;
         double td;
@@ -1248,7 +1248,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
     case KindOfResource:
       return 1;

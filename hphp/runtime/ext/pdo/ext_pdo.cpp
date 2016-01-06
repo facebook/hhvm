@@ -2589,7 +2589,7 @@ safe:
               case KindOfBoolean:
                 param->parameter = param->parameter.toInt64();
                 // fallthru
-              case KindOfStaticString:
+              case KindOfPersistentString:
               case KindOfString:
               case KindOfPersistentArray:
               case KindOfArray:
@@ -3851,7 +3851,7 @@ public:
       q_PDO$$MYSQL_ATTR_IGNORE_SPACE
     );
 #endif
-    Native::registerClassConstant<KindOfStaticString>(
+    Native::registerClassConstant<KindOfPersistentString>(
       s_PDO.get(),
       s_ERR_NONE.get(),
       q_PDO$$ERR_NONE.get()

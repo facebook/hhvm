@@ -1540,7 +1540,7 @@ folly::Optional<Cell> tv(Type t) {
     switch (t.m_dataTag) {
     case DataTag::Int:    return make_tv<KindOfInt64>(t.m_data.ival);
     case DataTag::Dbl:    return make_tv<KindOfDouble>(t.m_data.dval);
-    case DataTag::Str:    return make_tv<KindOfStaticString>(t.m_data.sval);
+    case DataTag::Str:    return make_tv<KindOfPersistentString>(t.m_data.sval);
     case DataTag::ArrVal:
       if ((t.m_bits & BArrN) == t.m_bits) {
         return make_tv<KindOfPersistentArray>(
@@ -1603,7 +1603,7 @@ Type from_cell(Cell cell) {
   case KindOfInt64:    return ival(cell.m_data.num);
   case KindOfDouble:   return dval(cell.m_data.dbl);
 
-  case KindOfStaticString:
+  case KindOfPersistentString:
   case KindOfString:
     always_assert(cell.m_data.pstr->isStatic());
     return sval(cell.m_data.pstr);
@@ -1629,7 +1629,7 @@ Type from_DataType(DataType dt) {
   case KindOfBoolean:  return TBool;
   case KindOfInt64:    return TInt;
   case KindOfDouble:   return TDbl;
-  case KindOfStaticString:
+  case KindOfPersistentString:
   case KindOfString:   return TStr;
   case KindOfPersistentArray:
   case KindOfArray:    return TArr;

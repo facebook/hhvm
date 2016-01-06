@@ -430,7 +430,7 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
           return;
         case KindOfUninit:
         case KindOfDouble:
-        case KindOfStaticString:
+        case KindOfPersistentString:
         case KindOfPersistentArray:
         case KindOfArray:
         case KindOfObject:

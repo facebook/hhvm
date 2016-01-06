@@ -245,7 +245,7 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfDouble:
         return Type(tv.m_type);
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         return type_detail::for_const(tv.m_data.pstr);
 

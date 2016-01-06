@@ -711,7 +711,7 @@ DCls dcls_of(Type t);
 Type from_cell(Cell tv);
 
 /*
- * Create a Type from a DataType.  KindOfString and KindOfStaticString
+ * Create a Type from a DataType. KindOfString and KindOfPersistentString
  * are both treated as TStr.
  *
  * Pre: dt is one of the DataTypes that actually represent php values

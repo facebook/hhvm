@@ -292,7 +292,7 @@ public:
 
       case KindOfUninit:
       case KindOfNull:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfPersistentArray:
       case KindOfRef:
       case KindOfClass:

@@ -50,7 +50,7 @@ void TypeConstraint::init() {
   auto const mptr = nameToAnnotType(m_typeName);
   if (mptr) {
     m_type = *mptr;
-    assert(getAnnotDataType(m_type) != KindOfStaticString);
+    assert(getAnnotDataType(m_type) != KindOfPersistentString);
     return;
   }
   TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
@@ -384,7 +384,7 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfBoolean:       return "bool";
     case KindOfInt64:         return "int";
     case KindOfDouble:        return isHHType ? "float" : "double";
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return "string";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";

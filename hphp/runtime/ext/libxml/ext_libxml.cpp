@@ -625,7 +625,7 @@ class LibXMLExtension final : public Extension {
     }
 
     inline static void cnsStr(const StaticString & name, const char * value) {
-      Native::registerConstant<KindOfStaticString>(
+      Native::registerConstant<KindOfPersistentString>(
           name.get(), StaticString(value).get());
     }
 

@@ -1292,7 +1292,7 @@ int64_t new_iter_array_key(Iter*       dest,
     } else {
       cellDup(*tvToCell(structArray->data()), *valOut);
     }
-    keyOut->m_type = KindOfStaticString;
+    keyOut->m_type = KindOfPersistentString;
     keyOut->m_data.pstr = const_cast<StringData*>(
       structArray->shape()->keyForOffset(0));
     return 1;
@@ -1616,7 +1616,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       auto structArray = StructArray::asStructArray(ad);
       arrIter->setPos(pos);
       tvDupWithRef(structArray->data()[pos], *valOut);
-      keyOut->m_type = KindOfStaticString;
+      keyOut->m_type = KindOfPersistentString;
       keyOut->m_data.pstr = const_cast<StringData*>(
         structArray->shape()->keyForOffset(pos));
       return 1;
@@ -1878,7 +1878,7 @@ int64_t iter_next_struct_impl(Iter* it,
     if (HasKey) {
       keyOut->m_data.pstr = const_cast<StringData*>(
         structArray->shape()->keyForOffset(pos));
-      keyOut->m_type = KindOfStaticString;
+      keyOut->m_type = KindOfPersistentString;
     }
     return 1;
   }

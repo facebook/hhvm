@@ -1306,7 +1306,7 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
       serializer->write(tv->m_data.dbl);
       return;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       serializer->write(tv->m_data.pstr->data(),
                         tv->m_data.pstr->size(), isArrayKey, noQuotes);

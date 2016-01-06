@@ -182,7 +182,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfInt64:
       append(cell->m_data.num);
       break;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       append(cell->m_data.pstr);
       break;

@@ -90,7 +90,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       }
       return APCString::MakeSharedString(s);
     }
-    case KindOfStaticString:
+    case KindOfPersistentString:
       return createStaticStr(source.getStringData());
 
     case KindOfPersistentArray:
@@ -231,10 +231,8 @@ bool APCHandle::checkInvariants() const {
       assert(m_type == KindOfDouble);
       return true;
     case APCKind::StaticString:
-      assert(m_type == KindOfStaticString);
-      return true;
     case APCKind::UncountedString:
-      assert(m_type == KindOfString);
+      assert(m_type == KindOfPersistentString);
       return true;
     case APCKind::StaticArray:
     case APCKind::UncountedArray:

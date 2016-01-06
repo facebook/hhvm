@@ -29,11 +29,11 @@ void StandardExtension::initStandard() {
 
   // define('HPHP_VERSION', 'XX.YY.XX')
   // define('HHVM_VERSION', 'XX.YY.XX')
-  Native::registerConstant<KindOfStaticString>(
+  Native::registerConstant<KindOfPersistentString>(
     s_HHVM_VERSION.get(),
     s_HHVM_VERSION_string.get()
   );
-  Native::registerConstant<KindOfStaticString>(
+  Native::registerConstant<KindOfPersistentString>(
     s_HPHP_VERSION.get(),
     s_HHVM_VERSION_string.get()
   );
@@ -43,12 +43,12 @@ void StandardExtension::initStandard() {
     debug
   );
 
-  Native::registerConstant<KindOfStaticString>(
+  Native::registerConstant<KindOfPersistentString>(
     s_HHVM_COMPILER_ID.get(),
     s_HHVM_COMPILER_ID_string.get()
   );
 
-  Native::registerConstant<KindOfStaticString>(
+  Native::registerConstant<KindOfPersistentString>(
     s_HHVM_REPO_SCHEMA.get(),
     s_HHVM_REPO_SCHEMA_string.get()
   );

@@ -111,7 +111,7 @@ struct Variant : private TypedValue {
     m_data.pstr = s;
   }
   /* implicit */ Variant(const StaticString &v) noexcept {
-    m_type = KindOfStaticString;
+    m_type = KindOfPersistentString;
     StringData *s = v.get();
     assert(s);
     m_data.pstr = s;
@@ -191,7 +191,7 @@ struct Variant : private TypedValue {
     if (v) {
       assert(v->isStatic());
       m_data.pstr = const_cast<StringData*>(v);
-      m_type = KindOfStaticString;
+      m_type = KindOfPersistentString;
     } else {
       m_type = KindOfNull;
     }
@@ -264,7 +264,7 @@ struct Variant : private TypedValue {
     StringData *s = v.get();
     if (LIKELY(s != nullptr)) {
       m_data.pstr = s;
-      m_type = s->isStatic() ? KindOfStaticString : KindOfString;
+      m_type = s->isStatic() ? KindOfPersistentString : KindOfString;
       v.detach();
     } else {
       m_type = KindOfNull;
@@ -464,7 +464,7 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE String& asStrRef() {
     assert(isStringType(m_type) && m_data.pstr);
     // The caller is likely going to modify the string, so we have to eagerly
-    // promote KindOfStaticString -> KindOfString.
+    // promote KindOfPersistentString -> KindOfString.
     m_type = KindOfString;
     return *reinterpret_cast<String*>(&m_data.pstr);
   }
@@ -473,7 +473,7 @@ struct Variant : private TypedValue {
     assert(isString());
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
     // The caller is likely going to modify the string, so we have to eagerly
-    // promote KindOfStaticString -> KindOfString.
+    // promote KindOfPersistentString -> KindOfString.
     auto tv = LIKELY(isStringType(m_type)) ? this : m_data.pref->tv();
     tv->m_type = KindOfString;
     return *reinterpret_cast<String*>(&tv->m_data.pstr);
@@ -606,7 +606,7 @@ struct Variant : private TypedValue {
       case KindOfResource:
         return true;
       case KindOfDouble:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
       case KindOfPersistentArray:
       case KindOfArray:
@@ -1003,7 +1003,7 @@ struct Variant : private TypedValue {
    */
   Variant(StringData* var, Attach) noexcept {
     if (var) {
-      m_type = var->isStatic() ? KindOfStaticString : KindOfString;
+      m_type = var->isStatic() ? KindOfPersistentString : KindOfString;
       m_data.pstr = var;
     } else {
       m_type = KindOfNull;
@@ -1311,7 +1311,7 @@ public:
   explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {
-    init(KindOfStaticString);
+    init(KindOfPersistentString);
     StringData *s = v.get();
     assert(s);
     m_data.pstr = s;
@@ -1323,7 +1323,7 @@ public:
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
     assert(v && v->isStatic());
-    init(KindOfStaticString);
+    init(KindOfPersistentString);
     m_data.pstr = const_cast<StringData*>(v);
   }
   explicit VarNR(ArrayData *v);

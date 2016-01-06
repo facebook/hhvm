@@ -30,7 +30,8 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
   if (HPHP::isStringType(zvalue->tv()->m_type)) {
     zvalue->tv()->m_data.pstr =
       HPHP::StringData::Make(zvalue->tv()->m_data.pstr, HPHP::CopyString);
-    zvalue->tv()->m_type = HPHP::KindOfString; // not KindOfStaticString anymore
+    // m_type is not KindOfPersistentString anymore
+    zvalue->tv()->m_type = HPHP::KindOfString;
   } else if (HPHP::isArrayType(zvalue->tv()->m_type)) {
     HPHP::ArrayData * ad = zvalue->tv()->m_data.parr->copy();
     assert(ad != zvalue->tv()->m_data.parr);

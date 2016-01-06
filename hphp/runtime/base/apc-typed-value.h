@@ -44,7 +44,7 @@ struct APCTypedValue {
 
   enum class StaticStr {};
   APCTypedValue(StaticStr, StringData* data)
-    : m_handle(APCKind::StaticString, KindOfStaticString) {
+    : m_handle(APCKind::StaticString, KindOfPersistentString) {
     assert(data->isStatic());
     m_data.str = data;
     assert(checkInvariants());

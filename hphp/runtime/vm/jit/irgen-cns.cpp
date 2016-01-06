@@ -33,7 +33,7 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfBoolean:       return cns(env, !!tv->m_data.num);
     case KindOfInt64:         return cns(env, tv->m_data.num);
     case KindOfDouble:        return cns(env, tv->m_data.dbl);
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return cns(env, tv->m_data.pstr);
     case KindOfPersistentArray:
     case KindOfArray:         return cns(env, tv->m_data.parr);

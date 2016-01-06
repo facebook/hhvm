@@ -115,7 +115,7 @@ TEST(APC, Basic) {
   Variant got;
   EXPECT_EQ(store->get(s_key, got), true);
   EXPECT_TRUE(cellSame(*got.asCell(),
-    make_tv<KindOfStaticString>(s_value1.get())));
+    make_tv<KindOfPersistentString>(s_value1.get())));
   EXPECT_EQ(store->eraseKey(s_key), true);
   EXPECT_EQ(store->get(s_key, got), false);
 }
@@ -127,11 +127,11 @@ TEST(APC, SetOverwrite) {
   Variant got;
   EXPECT_EQ(store->get(s_key, got), true);
   EXPECT_TRUE(cellSame(*got.asCell(),
-              make_tv<KindOfStaticString>(s_value1.get())));
+              make_tv<KindOfPersistentString>(s_value1.get())));
   store->set(s_key, Variant(s_value2), 1500);
   EXPECT_EQ(store->get(s_key, got), true);
   EXPECT_TRUE(cellSame(*got.asCell(),
-              make_tv<KindOfStaticString>(s_value2.get())));
+              make_tv<KindOfPersistentString>(s_value2.get())));
 }
 
 TEST(APC, Clear) {

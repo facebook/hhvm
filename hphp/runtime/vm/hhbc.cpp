@@ -781,7 +781,7 @@ void staticArrayStreamer(ArrayData* ad, std::ostream& out) {
           case KindOfDouble:
             out << *val.getDoubleData();
             return;
-          case KindOfStaticString:
+          case KindOfPersistentString:
           case KindOfString:
             out << "\""
                 << escapeStringForCPP(val.getStringData()->data(),
@@ -819,7 +819,7 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
     case KindOfDouble:
       out << tv->m_data.dbl;
       return;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       out << "\"" << tv->m_data.pstr->data() << "\"";
       return;

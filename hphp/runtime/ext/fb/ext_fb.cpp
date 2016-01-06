@@ -420,7 +420,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
       return 0;
     }
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       fb_compact_serialize_string(sb, var.toString());
       return 0;
@@ -698,7 +698,7 @@ int fb_compact_unserialize_from_buffer(
         if (key.getType() == KindOfInt64) {
           arr.set(key.toInt64(), value);
         } else if (key.getType() == KindOfString ||
-                   key.getType() == KindOfStaticString) {
+                   key.getType() == KindOfPersistentString) {
           arr.set(key, value);
         } else {
           return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;

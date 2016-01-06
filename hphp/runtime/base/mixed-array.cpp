@@ -294,7 +294,7 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
       return source.getInt64();
     case KindOfDouble:
       return source.getDouble();
-    case KindOfStaticString:
+    case KindOfPersistentString:
       return Variant{source.getStringData()};
     case KindOfPersistentArray:
       return Variant{source.getArrayData()};

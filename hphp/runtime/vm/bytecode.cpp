@@ -719,7 +719,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfBoolean:
   case KindOfInt64:
   case KindOfDouble:
-  case KindOfStaticString:
+  case KindOfPersistentString:
   case KindOfString:
   case KindOfPersistentArray:
   case KindOfArray:
@@ -746,7 +746,7 @@ static std::string toStringElm(const TypedValue* tv) {
     case KindOfDouble:
       os << tv->m_data.dbl;
       continue;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       {
         int len = tv->m_data.pstr->size();
@@ -4100,7 +4100,7 @@ OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
       cls = Unit::lookupClass(ne);
       return cls && interface_supports_double(cls->name());
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       cls = Unit::lookupClass(ne);
       return cls && interface_supports_string(cls->name());
@@ -4345,7 +4345,7 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
           match = doubleCheck(val->m_data.dbl, intval);
           return;
 
-        case KindOfStaticString:
+        case KindOfPersistentString:
         case KindOfString: {
           double dval = 0.0;
           DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
@@ -4361,7 +4361,7 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
               break;
             case KindOfUninit:
             case KindOfBoolean:
-            case KindOfStaticString:
+            case KindOfPersistentString:
             case KindOfString:
             case KindOfPersistentArray:
             case KindOfArray:
@@ -5004,7 +5004,7 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
   switch (flags) {
     case MOpFlags::None:
     case MOpFlags::Warn:
-      assert(key.m_type == KindOfStaticString);
+      assert(key.m_type == KindOfPersistentString);
       result = nullSafeProp(mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
       break;
 
@@ -5081,7 +5081,7 @@ OPTBLD_INLINE void iopDimInt(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopDimStr(IOP_ARGS) {
-  dimImpl(pc, make_tv<KindOfStaticString>(decode_litstr(pc)));
+  dimImpl(pc, make_tv<KindOfPersistentString>(decode_litstr(pc)));
 }
 
 OPTBLD_INLINE void iopDimNewElem(IOP_ARGS) {
@@ -5156,7 +5156,7 @@ static inline TypedValue int_key(PC& pc) {
 }
 
 static inline TypedValue str_key(PC& pc) {
-  return make_tv<KindOfStaticString>(decode_litstr(pc));
+  return make_tv<KindOfPersistentString>(decode_litstr(pc));
 }
 
 OPTBLD_INLINE void iopQueryML(IOP_ARGS) {

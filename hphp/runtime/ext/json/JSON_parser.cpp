@@ -464,7 +464,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
 
     case KindOfUninit:
     case KindOfNull:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

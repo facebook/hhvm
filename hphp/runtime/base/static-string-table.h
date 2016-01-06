@@ -39,11 +39,14 @@ struct String;
  * We refer to these strings as "static strings"---they may be passed
  * around like request local strings, but have a bit set in their
  * reference count which indicates they should not actually be
- * incref'd or decref'd, and therefore are never freed.
+ * incref'd or decref'd, and therefore are never freed. Furthermore,
+ * any string marked static must be in the table and therefore can
+ * be compared by pointer.
  *
- * Note that when a static string is in a TypedValue, it may or may
- * not have KindOfStaticString.  (But no non-static strings will ever
- * have KindOfStaticString.)
+ * Note that when a static or uncounted string is in a TypedValue,
+ * it may or may not have KindOfPersistentString. (But no non-persistent
+ * strings will ever have KindOfPersistentString.) so-called "uncounted"
+ * strings are persistent (not ref counted) but not static.
  *
  * Because all constants defined in hhvm programs create a
  * process-lifetime string for the constant name, this module also

@@ -862,7 +862,7 @@ bool StringData::isNumeric() const {
       return true;
     case KindOfUninit:
     case KindOfBoolean:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
     case KindOfPersistentArray:
     case KindOfArray:
@@ -887,7 +887,7 @@ bool StringData::isInteger() const {
       return true;
     case KindOfUninit:
     case KindOfBoolean:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
     case KindOfPersistentArray:
     case KindOfArray:

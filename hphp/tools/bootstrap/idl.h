@@ -40,7 +40,7 @@ enum DataType : int8_t {
   KindOfBoolean       = 0x09,
   KindOfInt64         = 0x11,
   KindOfDouble        = 0x19,
-  KindOfStaticString  = 0x1b,
+  KindOfPersistentString  = 0x1b,
   KindOfPersistentArray   = 0x1d,
   KindOfString        = 0x22,
   KindOfArray         = 0x34,
@@ -109,7 +109,7 @@ static inline fbstring kindOfString(DataType t) {
     case KindOfBoolean:      return "Boolean";
     case KindOfInt64:        return "Int64";
     case KindOfDouble:       return "Double";
-    case KindOfStaticString: return "StaticString";
+    case KindOfPersistentString: return "StaticString";
     case KindOfString:       return "String";
     case KindOfArray:        return "Array";
     case KindOfObject:       return "Object";

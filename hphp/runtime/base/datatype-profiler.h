@@ -31,9 +31,9 @@ struct DataTypeProfiler {
 private:
   const std::string m_name;
   StackTraceProfiler m_uninit, m_null, m_boolean, m_int, m_double,
-                     m_static_string, m_string,
-                     m_persistent_array, m_array, m_object,
-                     m_resource, m_ref;
+                     m_persistent_string, m_string,
+                     m_persistent_array, m_array,
+                     m_object, m_resource, m_ref;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

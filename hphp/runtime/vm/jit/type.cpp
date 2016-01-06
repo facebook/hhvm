@@ -260,7 +260,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfBoolean       : return kBool;
     case KindOfInt64         : return kInt;
     case KindOfDouble        : return kDbl;
-    case KindOfStaticString  : return kStaticStr;
+    case KindOfPersistentString  : return kStaticStr;
     case KindOfString        : return kStr;
     case KindOfPersistentArray   : return kPersistentArr;
     case KindOfArray         : return kArr;
@@ -285,7 +285,7 @@ DataType Type::toDataType() const {
   if (*this <= TBool)        return KindOfBoolean;
   if (*this <= TInt)         return KindOfInt64;
   if (*this <= TDbl)         return KindOfDouble;
-  if (*this <= TStaticStr)   return KindOfStaticString;
+  if (*this <= TStaticStr)   return KindOfPersistentString;
   if (*this <= TStr)         return KindOfString;
   if (*this <= TPersistentArr)   return KindOfPersistentArray;
   if (*this <= TArr)         return KindOfArray;
@@ -544,10 +544,10 @@ Type typeFromTV(const TypedValue* tv) {
   auto outer = tv->m_type;
   auto inner = KindOfUninit;
 
-  if (outer == KindOfStaticString) outer = KindOfString;
+  if (outer == KindOfPersistentString) outer = KindOfString;
   if (outer == KindOfRef) {
     inner = tv->m_data.pref->tv()->m_type;
-    if (inner == KindOfStaticString) inner = KindOfString;
+    if (inner == KindOfPersistentString) inner = KindOfString;
     else if (inner == KindOfPersistentArray) inner = KindOfArray;
   }
   return Type(outer, inner);

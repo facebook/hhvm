@@ -132,7 +132,7 @@ static bool variantToGMPData(const char* const fnCaller,
   }
 
   case KindOfString:
-  case KindOfStaticString:
+  case KindOfPersistentString:
     if (!setMpzFromString(gmpData, data.toString(), base)) {
       raise_warning(cs_GMP_INVALID_STRING, fnCaller);
       return false;

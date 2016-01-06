@@ -888,7 +888,7 @@ public:
     assert(s->isStatic()); // No need to call s->incRefCount().
     assert(m_top != m_elms);
     m_top--;
-    *m_top = make_tv<KindOfStaticString>(s);
+    *m_top = make_tv<KindOfPersistentString>(s);
   }
 
   // This should only be called directly when the caller has

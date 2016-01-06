@@ -622,7 +622,7 @@ void xdebug_var_export_text_ansi(
       ANSI_COLOR_RESET
     );
     break;
-  case KindOfStaticString:
+  case KindOfPersistentString:
     /* fallthrough */
   case KindOfString: {
     auto const charlist = ansi ? s_ansi_esc : s_text_esc;
@@ -704,7 +704,7 @@ void xdebug_var_export_text_ansi(
             ANSI_COLOR_RESET
           );
           break;
-        case KindOfStaticString:
+        case KindOfPersistentString:
         case KindOfString: {
           auto const key_str = String{first.m_data.pstr};
           auto const esc_str = HHVM_FN(addcslashes)(
@@ -877,7 +877,7 @@ void xdebug_var_export_fancy(
       v.toDoubleVal()
     );
     break;
-  case KindOfStaticString:
+  case KindOfPersistentString:
     /* fallthrough */
   case KindOfString: {
     auto const& str = v.toCStrRef();
@@ -937,7 +937,7 @@ void xdebug_var_export_fancy(
       case KindOfInt64:
         sb.append(first.m_data.num);
         break;
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString: {
         auto const str = first.m_data.pstr;
         sb.append('\'');

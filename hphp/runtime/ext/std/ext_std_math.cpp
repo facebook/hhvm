@@ -293,7 +293,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
       dval = val.toDouble();
       return KindOfDouble;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString: {
       auto dt = val.toNumeric(ival, dval, true);
       if ((dt != KindOfInt64) && (dt != KindOfDouble)) {

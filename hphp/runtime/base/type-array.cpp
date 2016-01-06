@@ -487,7 +487,7 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
       return m_arr->get((int64_t)key.asTypedValue()->m_data.dbl,
                        flags & AccessFlags::Error);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       {
         int64_t n;

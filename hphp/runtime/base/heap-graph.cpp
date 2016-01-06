@@ -82,7 +82,7 @@ struct PtrFilter: F {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfPersistentArray:
       case KindOfClass: // only in eval stack
         return;

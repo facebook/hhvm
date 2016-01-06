@@ -155,7 +155,7 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
 
     case KindOfUninit:
     case KindOfNull:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
     case KindOfPersistentArray:
     case KindOfArray:

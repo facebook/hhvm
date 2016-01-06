@@ -486,7 +486,7 @@ Variant HHVM_FUNCTION(apc_cache_info,
   std::map<const StringData*, int64_t> stats;
   APCStats::getAPCStats().collectStats(stats);
   for (auto it = stats.begin(); it != stats.end(); it++) {
-    info.add(Variant(it->first, Variant::StaticStrInit{}), it->second);
+    info.add(Variant(it->first, Variant::PersistentStrInit{}), it->second);
   }
   if (!limited) {
     auto const entries = apc_store().getEntriesInfo();

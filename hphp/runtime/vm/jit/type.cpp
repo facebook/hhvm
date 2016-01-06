@@ -260,9 +260,9 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfBoolean       : return kBool;
     case KindOfInt64         : return kInt;
     case KindOfDouble        : return kDbl;
-    case KindOfPersistentString  : return kStaticStr;
+    case KindOfPersistentString : return kPersistentStr;
     case KindOfString        : return kStr;
-    case KindOfPersistentArray   : return kPersistentArr;
+    case KindOfPersistentArray : return kPersistentArr;
     case KindOfArray         : return kArr;
     case KindOfResource      : return kRes;
     case KindOfObject        : return kObj;
@@ -285,9 +285,9 @@ DataType Type::toDataType() const {
   if (*this <= TBool)        return KindOfBoolean;
   if (*this <= TInt)         return KindOfInt64;
   if (*this <= TDbl)         return KindOfDouble;
-  if (*this <= TStaticStr)   return KindOfPersistentString;
+  if (*this <= TPersistentStr) return KindOfPersistentString;
   if (*this <= TStr)         return KindOfString;
-  if (*this <= TPersistentArr)   return KindOfPersistentArray;
+  if (*this <= TPersistentArr) return KindOfPersistentArray;
   if (*this <= TArr)         return KindOfArray;
   if (*this <= TObj)         return KindOfObject;
   if (*this <= TRes)         return KindOfResource;

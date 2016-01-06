@@ -53,7 +53,7 @@ const VarNR INF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NEGINF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
 const Variant empty_string_variant_ref(staticEmptyString(),
-                                       Variant::StaticStrInit{});
+                                       Variant::PersistentStrInit{});
 
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
@@ -67,7 +67,7 @@ const StaticString
 Variant::Variant(StringData *v) noexcept {
   if (v) {
     m_data.pstr = v;
-    if (v->isStatic()) {
+    if (!v->isRefCounted()) {
       m_type = KindOfPersistentString;
     } else {
       m_type = KindOfString;
@@ -176,7 +176,7 @@ IMPLEMENT_SET(const StaticString&,
   }
 
 IMPLEMENT_PTR_SET(StringData, pstr,
-                  v->isStatic() ? KindOfPersistentString : KindOfString);
+                  v->isRefCounted() ? KindOfString : KindOfPersistentString);
 IMPLEMENT_PTR_SET(ArrayData, parr, KindOfArray)
 IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
 IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
@@ -198,7 +198,7 @@ IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
   }
 
 IMPLEMENT_STEAL(StringData, pstr,
-                v->isStatic() ? KindOfPersistentString : KindOfString)
+                v->isRefCounted() ? KindOfString : KindOfPersistentString)
 IMPLEMENT_STEAL(ArrayData, parr, KindOfArray)
 IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
 IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
@@ -397,7 +397,9 @@ Array Variant::toArrayHelper() const {
     case KindOfInt64:         return Array::Create(m_data.num);
     case KindOfDouble:        return Array::Create(*this);
     case KindOfPersistentString:
-    case KindOfString:        return Array::Create(Variant{m_data.pstr});
+      return Array::Create(Variant{m_data.pstr, PersistentStrInit{}});
+    case KindOfString:
+      return Array::Create(Variant{m_data.pstr});
     case KindOfPersistentArray:
     case KindOfArray:         return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray();
@@ -469,13 +471,10 @@ Resource Variant::toResourceHelper() const {
 }
 
 VarNR Variant::toKey() const {
-  if (m_type == KindOfString || m_type == KindOfPersistentString) {
+  if (isStringType(m_type)) {
     int64_t n;
-    if (m_data.pstr->isStrictlyInteger(n)) {
-      return VarNR(n);
-    } else {
-      return VarNR(m_data.pstr);
-    }
+    return m_data.pstr->isStrictlyInteger(n) ? VarNR(n) :
+                                               VarNR(m_data.pstr);
   }
   switch (m_type) {
     case KindOfUninit:
@@ -520,11 +519,11 @@ void Variant::setEvalScalar() {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfPersistentString:
       return;
 
+    case KindOfPersistentString:
     case KindOfString: {
-      StringData *pstr = m_data.pstr;
+      auto pstr = m_data.pstr;
       if (!pstr->isStatic()) {
         StringData *sd = makeStaticString(pstr);
         decRefStr(pstr);

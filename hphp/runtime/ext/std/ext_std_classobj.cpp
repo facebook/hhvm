@@ -228,7 +228,7 @@ Variant HHVM_FUNCTION(get_called_class) {
     }
     if (ar->hasClass()) {
       return Variant(ar->getClass()->preClass()->name(),
-        Variant::StaticStrInit{});
+        Variant::PersistentStrInit{});
     }
   }
 

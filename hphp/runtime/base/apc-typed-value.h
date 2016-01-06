@@ -52,7 +52,7 @@ struct APCTypedValue {
 
   enum class UncountedStr {};
   APCTypedValue(UncountedStr, StringData* data)
-    : m_handle(APCKind::UncountedString, KindOfString) {
+    : m_handle(APCKind::UncountedString, KindOfPersistentString) {
     assert(data->isUncounted());
     m_data.str = data;
     assert(checkInvariants());

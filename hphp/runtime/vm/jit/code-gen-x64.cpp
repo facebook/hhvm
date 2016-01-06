@@ -859,7 +859,7 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
   );
   auto& v = vmain();
   ConditionCode cc;
-  if (type <= TStaticStr) {
+  if (type <= TPersistentStr) {
     emitCmpTVType(v, sf, KindOfPersistentString, typeSrc);
     cc = CC_E;
   } else if (type <= TStr) {
@@ -3636,12 +3636,10 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
    * situations with strings and arrays that are neither constantly-foldable
    * nor in the emitTypeTest code path.
    *
-   * We currently actually check their persistent bit here. Note (importantly)
-   * that this is why toDataType can't return KindOfPersistentString for
-   * TStaticStr---this code will let an apc string through.  Also note
-   * that CheckType<Uncounted> t1:{Null|Str} doesn't get this treatment
-   * currently---in the emitTypeTest path above it will only check the type
-   * register.
+   * We currently actually check their persistent bit here, which will let
+   * both static and uncounted strings through. Also note that
+   * CheckType<Uncounted> t1:{Null|Str} doesn't get this treatment currently --
+   * the emitTypeTest path above will only check the type register.
    */
   if (!typeParam.isSpecialized() &&
       typeParam <= TUncounted &&

@@ -1477,7 +1477,7 @@ Array getDefinedVariables(const ActRec* fp) {
     if (ptv->m_type == KindOfUninit) {
       continue;
     }
-    Variant name(func->localVarName(id), Variant::StaticStrInit{});
+    Variant name(func->localVarName(id), Variant::PersistentStrInit{});
     ret.add(name, tvAsVariant(ptv));
   }
   return ret.toArray();

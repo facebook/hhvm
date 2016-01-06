@@ -111,10 +111,9 @@ struct Variant : private TypedValue {
     m_data.pstr = s;
   }
   /* implicit */ Variant(const StaticString &v) noexcept {
+    assert(v.get() && !v.get()->isRefCounted());
     m_type = KindOfPersistentString;
-    StringData *s = v.get();
-    assert(s);
-    m_data.pstr = s;
+    m_data.pstr = v.get();
   }
 
   Variant(const Variant& other, WithRefBind) {
@@ -185,16 +184,12 @@ struct Variant : private TypedValue {
     m_type = KindOfPersistentArray;
   }
 
-  // for static strings only
-  enum class StaticStrInit {};
-  explicit Variant(const StringData *v, StaticStrInit) noexcept {
-    if (v) {
-      assert(v->isStatic());
-      m_data.pstr = const_cast<StringData*>(v);
-      m_type = KindOfPersistentString;
-    } else {
-      m_type = KindOfNull;
-    }
+  // for persistent strings only
+  enum class PersistentStrInit {};
+  explicit Variant(const StringData *s, PersistentStrInit) noexcept {
+    assert(!s->isRefCounted());
+    m_data.pstr = const_cast<StringData*>(s);
+    m_type = KindOfPersistentString;
   }
 
   // These are prohibited, but declared just to prevent accidentally
@@ -264,7 +259,7 @@ struct Variant : private TypedValue {
     StringData *s = v.get();
     if (LIKELY(s != nullptr)) {
       m_data.pstr = s;
-      m_type = s->isStatic() ? KindOfPersistentString : KindOfString;
+      m_type = s->isRefCounted() ? KindOfString : KindOfPersistentString;
       v.detach();
     } else {
       m_type = KindOfNull;
@@ -1003,7 +998,7 @@ struct Variant : private TypedValue {
    */
   Variant(StringData* var, Attach) noexcept {
     if (var) {
-      m_type = var->isStatic() ? KindOfPersistentString : KindOfString;
+      m_type = var->isRefCounted() ? KindOfString : KindOfPersistentString;
       m_data.pstr = var;
     } else {
       m_type = KindOfNull;
@@ -1311,10 +1306,9 @@ public:
   explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {
+    assert(v.get() && !v.get()->isRefCounted());
     init(KindOfPersistentString);
-    StringData *s = v.get();
-    assert(s);
-    m_data.pstr = s;
+    m_data.pstr = v.get();
   }
 
   explicit VarNR(const String& v);
@@ -1322,7 +1316,7 @@ public:
   explicit VarNR(const Object& v);
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
-    assert(v && v->isStatic());
+    assert(v && !v->isRefCounted());
     init(KindOfPersistentString);
     m_data.pstr = const_cast<StringData*>(v);
   }
@@ -1464,7 +1458,7 @@ inline Array& forceToArray(Variant& var) {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Variant empty_string_variant() {
-  return Variant(staticEmptyString(), Variant::StaticStrInit{});
+  return Variant(staticEmptyString(), Variant::PersistentStrInit{});
 }
 
 template <typename T>

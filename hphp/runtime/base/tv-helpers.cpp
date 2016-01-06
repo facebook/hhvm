@@ -51,7 +51,7 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfPersistentString:
         assertPtr(cell.m_data.pstr);
-        assert(cell.m_data.pstr->isStatic());
+        assert(!cell.m_data.pstr->isRefCounted());
         return;
       case KindOfString:
         assertPtr(cell.m_data.pstr);
@@ -353,7 +353,8 @@ void tvCastToStringInPlace(TypedValue* tv) {
     tv->m_type = KindOfString;
     tv->m_data.pstr = s;
   };
-  auto staticString = [&](StringData* s) {
+  auto persistentString = [&](StringData* s) {
+    assert(!s->isRefCounted());
     tv->m_type = KindOfPersistentString;
     tv->m_data.pstr = s;
   };
@@ -361,10 +362,10 @@ void tvCastToStringInPlace(TypedValue* tv) {
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return staticString(staticEmptyString());
+      return persistentString(staticEmptyString());
 
     case KindOfBoolean:
-      return staticString(tv->m_data.num ? s_1.get() : staticEmptyString());
+      return persistentString(tv->m_data.num ? s_1.get() : staticEmptyString());
 
     case KindOfInt64:
       return string(buildStringData(tv->m_data.num));
@@ -380,7 +381,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
     case KindOfPersistentArray:
       raise_notice("Array to string conversion");
       if (tv->m_type == KindOfArray) tvDecRefArr(tv);
-      return staticString(array_string.get());
+      return persistentString(array_string.get());
 
     case KindOfObject:
       // For objects, we fall back on the Variant machinery

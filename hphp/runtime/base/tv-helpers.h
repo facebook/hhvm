@@ -54,9 +54,9 @@ struct Variant;
 #define TV_GENERIC_DISPATCH_SLOW(exp, func) \
   [](HPHP::TypedValue tv) {                                     \
     switch (tv.m_type) {                                        \
-      case HPHP::KindOfPersistentString:                            \
+      case HPHP::KindOfPersistentString:                        \
       case HPHP::KindOfString: return tv.m_data.pstr->func();   \
-      case HPHP::KindOfPersistentArray:                             \
+      case HPHP::KindOfPersistentArray:                         \
       case HPHP::KindOfArray: return tv.m_data.parr->func();    \
       case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
       case HPHP::KindOfResource: return tv.m_data.pres->func(); \

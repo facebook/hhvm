@@ -231,8 +231,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::SStr:
-    return tv.m_type == KindOfPersistentString ||
-           (tv.m_type == KindOfString && tv.m_data.pstr->isStatic());
+    return isStringType(tv.m_type) && tv.m_data.pstr->isStatic();
 
   case T::OptStr:
     if (initNull) return true;

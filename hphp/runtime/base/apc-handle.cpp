@@ -34,17 +34,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
                                   APCHandleLevel level,
                                   bool unserializeObj) {
 
-  auto createStaticStr = [&](StringData* s) {
-    assert(s->isStatic());
-    if (serialized) {
-      // It is priming, and there might not be the right class definitions
-      // for unserialization.
-      return APCString::MakeSerializedObject(apc_reserialize(String{s}));
-    }
-    auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
-    return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
-  };
-
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
     case KindOfUninit: {
@@ -68,15 +57,17 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       auto value = new APCTypedValue(source.getDouble());
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
+    case KindOfPersistentString:
     case KindOfString: {
       StringData* s = source.getStringData();
-      if (s->isStatic()) {
-        return createStaticStr(s);
-      }
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
         return APCString::MakeSerializedObject(apc_reserialize(String{s}));
+      }
+      if (s->isStatic()) {
+        auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
+        return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
       }
       auto const st = lookupStaticString(s);
       if (st) {
@@ -90,8 +81,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       }
       return APCString::MakeSharedString(s);
     }
-    case KindOfPersistentString:
-      return createStaticStr(source.getStringData());
 
     case KindOfPersistentArray:
     case KindOfArray: {
@@ -139,10 +128,9 @@ Variant APCHandle::toLocal() const {
     case APCKind::Double:
       return APCTypedValue::fromHandle(this)->getDouble();
     case APCKind::StaticString:
-      return Variant{APCTypedValue::fromHandle(this)->getStringData(),
-                     Variant::StaticStrInit{}};
     case APCKind::UncountedString:
-      return Variant{APCTypedValue::fromHandle(this)->getStringData()};
+      return Variant{APCTypedValue::fromHandle(this)->getStringData(),
+                     Variant::PersistentStrInit{}};
     case APCKind::SharedString:
       return Variant::attach(
         StringData::MakeProxy(APCString::fromHandle(this))

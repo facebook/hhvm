@@ -381,6 +381,29 @@ final class AsyncMysqlConnection {
   function serverInfo(): string;
 
   /**
+   * Returns whether or not the current connection reused the SSL session
+   * from another SSL connection. The session is set by MySSLContextProvider.
+   * Some cases, the server can deny the session that was set and the handshake
+   * will create a new one, in those cases this function will return `false`.
+   * If this connections isn't SSL, `false` will be returned as well.
+   *
+   * @return - `true` if this is a SSL connection and the SSL session was
+   *           reused; `false` otherwise.
+   */
+  <<__HipHopSpecific, __Native>>
+  function sslSessionReused(): bool;
+
+
+  /**
+   * Returns whether or not the current connection was established as SSL based
+   * on client flag exchanged during handshake.
+   *
+   * @return - `true` if this is a SSL connection; `false` otherwise
+   */
+  <<__HipHopSpecific, __Native>>
+  function isSSL(): bool;
+
+  /**
    * The number of errors, warnings, and notes returned during execution of
    * the previous SQL statement.
    *

@@ -612,6 +612,26 @@ String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
   return ret;
 }
 
+bool HHVM_METHOD(AsyncMysqlConnection, sslSessionReused) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+
+  bool ret = false;
+  if (data->m_conn && !data->m_closed) {
+    ret = data->m_conn->sslSessionReused();
+  }
+  return ret;
+}
+
+bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+
+  bool ret = false;
+  if (data->m_conn && !data->m_closed) {
+    ret = data->m_conn->isSSL();
+  }
+  return ret;
+}
+
 int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 

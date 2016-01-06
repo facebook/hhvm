@@ -101,6 +101,8 @@ class AsyncMysqlConnection {
   public function close(): void{ }
   public function releaseConnection() { }
   public function serverInfo() { }
+  public function sslSessionReused() { }
+  public function isSSL() { }
   public function warningCount() { }
   public function host(): string { }
   public function port(): int { }

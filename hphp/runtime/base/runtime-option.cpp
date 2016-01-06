@@ -536,6 +536,11 @@ bool RuntimeOption::RepoDebugInfo = true;
 // perf-sensitive.
 bool RuntimeOption::RepoPreload;
 
+bool RuntimeOption::HHProfEnabled = false;
+bool RuntimeOption::HHProfActive = false;
+bool RuntimeOption::HHProfAccum = false;
+bool RuntimeOption::HHProfRequest = false;
+
 bool RuntimeOption::SandboxMode = false;
 std::string RuntimeOption::SandboxPattern;
 std::string RuntimeOption::SandboxHome;
@@ -567,15 +572,6 @@ std::string RuntimeOption::MailForceExtraParameters;
 int64_t RuntimeOption::PregBacktraceLimit = 1000000;
 int64_t RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
-
-bool RuntimeOption::HHProfServerEnabled = false;
-int RuntimeOption::HHProfServerPort = 4327;
-int RuntimeOption::HHProfServerThreads = 2;
-int RuntimeOption::HHProfServerTimeoutSeconds = 30;
-bool RuntimeOption::HHProfServerProfileClientMode = true;
-bool RuntimeOption::HHProfServerAllocationProfile = false;
-int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
-int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
 bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
 
@@ -1024,6 +1020,13 @@ void RuntimeOption::Load(
     Config::Bind(RepoPreload, ini, config, "Repo.Preload", false);
   }
 
+  {
+    // HHProf
+    Config::Bind(HHProfEnabled, ini, config, "HHProf.Enabled", false);
+    Config::Bind(HHProfActive, ini, config, "HHProf.Active", false);
+    Config::Bind(HHProfAccum, ini, config, "HHProf.Accum", false);
+    Config::Bind(HHProfRequest, ini, config, "HHProf.Request", false);
+  }
   {
     // Eval
     Config::Bind(EnableHipHopSyntax, ini, config, "Eval.EnableHipHopSyntax");
@@ -1690,25 +1693,6 @@ void RuntimeOption::Load(
     Config::Bind(PregRecursionLimit, ini, config, "Preg.RecursionLimit",
                  100000);
     Config::Bind(EnablePregErrorLog, ini, config, "Preg.ErrorLog", true);
-  }
-  {
-    Config::Bind(HHProfServerEnabled, ini, config, "HHProfServer.Enabled",
-                 false);
-    Config::Bind(HHProfServerPort, ini, config, "HHProfServer.Port", 4327);
-    Config::Bind(HHProfServerThreads, ini, config, "HHProfServer.Threads", 2);
-    Config::Bind(HHProfServerTimeoutSeconds, ini, config,
-                 "HHProfServer.TimeoutSeconds", 30);
-    Config::Bind(HHProfServerProfileClientMode, ini, config,
-                 "HHProfServer.ProfileClientMode", true);
-    Config::Bind(HHProfServerAllocationProfile, ini, config,
-                 "HHProfServer.AllocationProfile", false);
-    {
-      // HHProfServer.Filter.*
-      Config::Bind(HHProfServerFilterMinAllocPerReq, ini, config,
-                   "HHProfServer.Filter.MinAllocPerReq", 2);
-      Config::Bind(HHProfServerFilterMinBytesPerReq, ini, config,
-                   "HHProfServer.Filter.MinBytesPerReq", 128);
-    }
   }
   {
     // SimpleXML

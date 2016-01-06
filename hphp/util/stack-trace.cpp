@@ -288,8 +288,8 @@ void StackTrace::PerfMap::rebuild() {
   SCOPE_EXIT { fclose(perfMap); };
   uintptr_t addr;
   uint32_t size;
-  char name[256];
-  while (fscanf(perfMap, "%lx %x %255s", &addr, &size, name) == 3) {
+  char name[1024];
+  while (fscanf(perfMap, "%lx %x %1023s", &addr, &size, name) == 3) {
     uintptr_t past = addr + size;
     PerfMap::Range range = {addr, past};
     m_map[range] = name;
@@ -310,7 +310,7 @@ bool StackTrace::PerfMap::translate(const void* addr, Frame* f) const {
   if (it == m_map.end()) {
     // Not found.
     f->filename = "?";
-    f->funcname = "TC?";
+    f->funcname = "TC?"; // Note HHProf::HandlePProfSymbol() dependency.
     return true;
   }
   // Found.

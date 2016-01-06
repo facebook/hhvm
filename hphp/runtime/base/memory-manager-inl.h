@@ -402,7 +402,8 @@ inline bool MemoryManager::contains(void *p) const {
 
 inline bool MemoryManager::checkContains(void* p) const {
   // Be conservative if the small-block allocator is disabled.
-  assert(RuntimeOption::DisableSmallAllocator || contains(p));
+  assert(RuntimeOption::DisableSmallAllocator || m_bypassSlabAlloc ||
+         contains(p));
   return true;
 }
 

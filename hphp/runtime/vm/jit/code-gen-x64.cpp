@@ -764,7 +764,7 @@ CodeGenerator::cgCallHelper(Vout& v, CallSpec call, const CallDest& dstInfo,
   }
 
   Fixup syncFixup;
-  if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::None) {
+  if (RuntimeOption::HHProfEnabled || sync != SyncOptions::None) {
     // If we are profiling the heap, we always need to sync because regs need
     // to be correct during allocations no matter what
     syncFixup = makeFixup(inst->marker(), sync);
@@ -3470,7 +3470,7 @@ Fixup CodeGenerator::makeFixup(const BCMarker& marker, SyncOptions sync) {
   case SyncOptions::None:
     // we can get here if we are memory profiling, since we override the
     // normal sync settings and sync anyway
-    always_assert(RuntimeOption::HHProfServerEnabled);
+    always_assert(RuntimeOption::HHProfEnabled);
     break;
   }
 

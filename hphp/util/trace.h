@@ -92,7 +92,7 @@ namespace Trace {
       TM(atomicvector)  \
       TM(bcinterp)      \
       TM(bisector)      \
-      TM(class_load)     \
+      TM(class_load)    \
       TM(datablock)     \
       TM(decreftype)    \
       TM(debugger)      \
@@ -103,7 +103,6 @@ namespace Trace {
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \
-      TM(heap)          \
       TM(heapreport)    \
       TM(hhas)          \
       TM(hhbbc)         \
@@ -114,6 +113,7 @@ namespace Trace {
       TM(hhbbc_time)    \
       TM(hhbbc_iface)   \
       TM(hhbc)          \
+      TM(hhprof)        \
       TM(vasm)          \
       TM(vasm_copy)     \
       TM(vasm_phi)      \

@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -286,16 +285,6 @@ void HttpServer::runOrExitProcess() {
     }
   }
 
-  if (RuntimeOption::HHProfServerEnabled) {
-    try {
-      HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
-    } catch (FailedToListenException &e) {
-      startupFailure("Unable to start profiling server");
-      not_reached();
-    }
-    Logger::Info("profiling server started");
-  }
-
   if (!Eval::Debugger::StartServer()) {
     startupFailure("Unable to start debugger server");
     not_reached();
@@ -357,9 +346,6 @@ void HttpServer::waitForServers() {
   }
   if (RuntimeOption::AdminServerPort) {
     m_adminServer->waitForEnd();
-  }
-  if (RuntimeOption::HHProfServerEnabled) {
-    HeapProfileServer::Server.reset();
   }
   // all other servers invoke waitForEnd on stop
 }

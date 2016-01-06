@@ -614,6 +614,12 @@ public:
   static bool RepoAuthoritative;
   static bool RepoPreload;
 
+  // pprof/hhprof options
+  static bool HHProfEnabled;
+  static bool HHProfActive;
+  static bool HHProfAccum;
+  static bool HHProfRequest;
+
   // Sandbox options
   static bool SandboxMode;
   static std::string SandboxPattern;
@@ -649,16 +655,6 @@ public:
   static int64_t PregBacktraceLimit;
   static int64_t PregRecursionLimit;
   static bool EnablePregErrorLog;
-
-  // pprof/hhprof server options
-  static bool HHProfServerEnabled;
-  static int HHProfServerPort;
-  static int HHProfServerThreads;
-  static int HHProfServerTimeoutSeconds;
-  static bool HHProfServerProfileClientMode;
-  static bool HHProfServerAllocationProfile;
-  static int HHProfServerFilterMinAllocPerReq;
-  static int HHProfServerFilterMinBytesPerReq;
 
   // SimpleXML options
   static bool SimpleXMLEmptyNamespaceMatchesAll;

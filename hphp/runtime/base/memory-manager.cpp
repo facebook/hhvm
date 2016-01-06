@@ -23,7 +23,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -1067,14 +1066,6 @@ Sweepable::Sweepable() {
 
 //////////////////////////////////////////////////////////////////////
 
-void MemoryManager::logAllocation(void* p, size_t bytes) {
-  MemoryProfile::logAllocation(p, bytes);
-}
-
-void MemoryManager::logDeallocation(void* p) {
-  MemoryProfile::logDeallocation(p);
-}
-
 void MemoryManager::resetCouldOOM(bool state) {
   clearSurpriseFlag(MemExceededFlag);
   m_couldOOM = state;
@@ -1150,6 +1141,15 @@ void MemoryManager::requestShutdown() {
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
   MM().m_memThresholdCallbackPeakUsage = SIZE_MAX;
   profctx = ReqProfContext{};
+}
+
+/* static */ void MemoryManager::setupProfiling() {
+  always_assert(MM().empty());
+  MM().m_bypassSlabAlloc = true;
+}
+
+/* static */ void MemoryManager::teardownProfiling() {
+  MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
 }
 
 void MemoryManager::eagerGCCheck() {

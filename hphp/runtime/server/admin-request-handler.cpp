@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
@@ -294,15 +295,39 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
               "                  the next request that runs\n"
               "    file          optional, filesystem path\n"
           );
+#ifdef ENABLE_HHPROF
+          usage.append(
+              "/hhprof/start:    start profiling\n"
+              "    requestType   \"all\" or \"next\"*\n"
+              "    url           profile next matching url for \"next\"\n"
+              "    lgSample      lg sample rate\n"
+              "    profileType   \"current\"* or \"cumulative\"\n"
+              "/hhprof/status:   configuration and current dump status\n"
+              "/hhprof/stop:     stop profiling\n"
+              "/pprof/cmdline:   program command line\n"
+              "/pprof/heap:      heap dump\n"
+              "/pprof/symbol:    symbol lookup\n"
+          );
+#endif // ENABLE_HHPROF
         }
-#endif
+#endif // USE_JEMALLOC
 
       transport->sendString(usage);
       break;
     }
 
     bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
-                          (cmd != "instance-id");
+                          (cmd != "instance-id")
+#if defined(ENABLE_HHPROF) && defined(USE_JEMALLOC)
+                          && (mallctl == nullptr || (
+                                 (cmd != "hhprof/start")
+                              && (cmd != "hhprof/status")
+                              && (cmd != "hhprof/stop")
+                              && (cmd != "pprof/cmdline")
+                              && (cmd != "pprof/heap")
+                              && (cmd != "pprof/symbol")))
+#endif
+                          ;
 
     if (needs_password && !RuntimeOption::AdminPasswords.empty()) {
       std::set<std::string>::const_iterator iter =
@@ -712,8 +737,34 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         }
         break;
       }
+#ifdef ENABLE_HHPROF
+      if (cmd == "hhprof/start") {
+        HHProf::HandleHHProfStart(transport);
+        break;
+      }
+      if (cmd == "hhprof/status") {
+        HHProf::HandleHHProfStatus(transport);
+        break;
+      }
+      if (cmd == "hhprof/stop") {
+        HHProf::HandleHHProfStop(transport);
+        break;
+      }
+      if (cmd == "pprof/cmdline") {
+        HHProf::HandlePProfCmdline(transport);
+        break;
+      }
+      if (cmd == "pprof/heap") {
+        HHProf::HandlePProfHeap(transport);
+        break;
+      }
+      if (cmd == "pprof/symbol") {
+        HHProf::HandlePProfSymbol(transport);
+        break;
+      }
+#endif // ENABLE_HHPROF
     }
-#endif
+#endif // USE_JEMALLOC
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);

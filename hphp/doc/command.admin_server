@@ -2,7 +2,7 @@
 
 When running a compiled program as an HTTP server, by default it runs an
 admin server on a specified port. One can send an HTTP request to this port
-to perform certain actions. To list all possible commands,
+to perform certain actions. To list all possible commands:
 
   GET http://localhost:8088
 
@@ -51,17 +51,19 @@ This is a list of available URLs:
 /pcre-cache-size: get pcre cache map size
 /dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache
 
-If program was compiled with GOOGLE_CPU_PROFILER, these commands will become available,
+If program was compiled with GOOGLE_CPU_PROFILER, these commands will become
+available:
 
 /prof-cpu-on:     turn on CPU profiler
 /prof-cpu-off:    turn off CPU profiler
 
-If program was compiled with GOOGLE_TCMALLOC, these commands will become available,
+If program was compiled with GOOGLE_TCMALLOC, these commands will become
+available:
 
 /free-mem:        ask tcmalloc to release memory to system
 /tcmalloc-stats:  get internal tcmalloc stats
 
-If program was compiled with USE_JEMALLOC, these commands will become available,
+If program was compiled with USE_JEMALLOC, these commands will become available:
 
 /free-mem:        ask jemalloc to release memory to system
 /jemalloc-stats:  get internal jemalloc stats
@@ -70,3 +72,17 @@ If program was compiled with USE_JEMALLOC, these commands will become available,
 /jemalloc-prof-deactivate: deactivate heap profiling
 /jemalloc-prof-dump: dump heap profile
     file          optional, filesystem path
+
+If program was compiled with USE_JEMALLOC and ENABLE_HHPROF, these commands will
+become available:
+
+/hhprof/start:    start profiling
+    requestType   "all" or "next"*
+    url           profile next matching url for "next"
+    lgSample      lg sample rate
+    profileType   "current"* or "cumulative"
+/hhprof/status:   configuration and current dump status
+/hhprof/stop:     stop profiling
+/pprof/cmdline:   program command line
+/pprof/heap:      heap dump
+/pprof/symbol:    symbol lookup

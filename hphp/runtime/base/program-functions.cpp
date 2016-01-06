@@ -25,11 +25,11 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -1902,6 +1902,8 @@ void hphp_process_init() {
 
   Process::InitProcessStatics();
   BootTimer::mark("Process::InitProcessStatics");
+
+  HHProf::Init();
 
   // initialize the tzinfo cache.
   timezone_init();

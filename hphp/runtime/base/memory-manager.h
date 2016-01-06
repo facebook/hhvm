@@ -872,6 +872,15 @@ struct MemoryManager {
    */
   static void requestShutdown();
 
+  /*
+   * Setup/teardown profiling for current request.  This causes all allocation
+   * requests to be passed through to the underlying memory allocator so that
+   * heap profiling can capture backtraces for individual allocations rather
+   * than slab allocations.
+   */
+  static void setupProfiling();
+  static void teardownProfiling();
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -1002,9 +1011,6 @@ private:
   void refreshStatsHelperStop();
 
   void resetStatsImpl(bool isInternalCall);
-
-  void logAllocation(void*, size_t);
-  void logDeallocation(void*);
 
   void initHole(void* ptr, uint32_t size);
   void initHole();

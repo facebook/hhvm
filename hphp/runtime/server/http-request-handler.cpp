@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -192,6 +193,7 @@ void HttpRequestHandler::logToAccessLog(Transport* transport) {
 
 void HttpRequestHandler::setupRequest(Transport* transport) {
   MemoryManager::requestInit();
+  HHProf::Request::Setup(transport);
 
   g_context.getCheck();
   GetAccessLog().onNewRequest();
@@ -220,6 +222,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   }
 
   MemoryManager::requestShutdown();
+  HHProf::Request::Teardown();
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {

@@ -49,8 +49,8 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
@@ -8563,7 +8563,7 @@ void ExecutionContext::requestInit() {
 
   profileRequestStart();
 
-  MemoryProfile::startProfiling();
+  HHProf::Request::StartProfiling();
 
 #ifdef DEBUG
   Class* cls = NamedEntity::get(s_stdclass.get())->clsList();
@@ -8581,7 +8581,7 @@ void ExecutionContext::requestInit() {
 
 void ExecutionContext::requestExit() {
   autoTypecheckRequestExit();
-  MemoryProfile::finishProfiling();
+  HHProf::Request::FinishProfiling();
 
   manageAPCHandle();
   syncGdbState();

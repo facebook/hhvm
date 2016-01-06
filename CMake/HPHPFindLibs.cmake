@@ -265,6 +265,11 @@ if (GOOGLE_CPU_PROFILER_ENABLED)
   add_definitions(-DGOOGLE_CPU_PROFILER=1)
 endif()
 
+# HHProf
+if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
+  add_definitions(-DENABLE_HHPROF=1)
+endif()
+
 # tbb libs
 find_package(TBB REQUIRED)
 if (${TBB_INTERFACE_VERSION} LESS 5005)

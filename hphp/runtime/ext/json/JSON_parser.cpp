@@ -615,6 +615,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       json->stack[i].key.reset();
       json->stack[i].val.unset();
     }
+    json->mark = -1;
   };
 
   json->mark = json->top = -1;
@@ -970,6 +971,15 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   return false;
 }
 
+void json_parser_scan(IMarker& mark) {
+  if (s_json_parser.isNull()) return;
+  auto json = s_json_parser.get();
+  if (json->mark < 0 || json->stack.empty()) return;
+  for (int i = 0; i <= json->mark; ++i) {
+    mark(json->stack[i].key);
+    mark(json->stack[i].val);
+  }
+}
 }
 
 #endif /* HAVE_JSONC */

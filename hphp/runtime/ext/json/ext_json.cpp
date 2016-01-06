@@ -258,7 +258,13 @@ class JsonExtension final : public Extension {
     loadSystemlib();
   }
 
-  void requestInit() override { json_parser_init(); }
+  void requestInit() override {
+    json_parser_init();
+  }
+
+  void vscan(IMarker& mark) const override {
+    json_parser_scan(mark);
+  }
 
 } s_json_extension;
 

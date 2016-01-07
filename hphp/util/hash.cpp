@@ -20,8 +20,12 @@ namespace HPHP {
 
 bool IsSSEHashSupported() {
 #ifdef USE_SSECRC
+#if defined FACEBOOK || defined __SSE4_2__
+  return true;
+#else
   static folly::CpuId cpuid;
   return cpuid.sse42();
+#endif
 #else
   return false;
 #endif

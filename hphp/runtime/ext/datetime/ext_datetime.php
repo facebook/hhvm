@@ -881,6 +881,7 @@ function timezone_open(string $timezone): DateTimeZone {
     return new DateTimeZone($timezone);
   }
   catch (Exception $e) {
+    trigger_error($e->getMessage(), E_WARNING);
     return false;
   }
 }

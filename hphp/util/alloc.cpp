@@ -492,8 +492,6 @@ void low_malloc_skip_huge(void* start, void* end) {}
 
 #endif // USE_JEMALLOC
 
-#ifdef USE_JEMALLOC
-
 int mallctlCall(const char* cmd, bool errOk) {
   // Use <unsigned> rather than <void> to avoid sizeof(void).
   return mallctlHelper<unsigned>(cmd, nullptr, nullptr, errOk);
@@ -524,7 +522,6 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
     return mallctlCall("prof.dump", true);
   }
 }
-#endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////
 }

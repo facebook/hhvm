@@ -76,7 +76,7 @@ Variant HHVM_FUNCTION(gztell, const Resource& zp);
 bool HHVM_FUNCTION(gzeof, const Resource& zp);
 bool HHVM_FUNCTION(gzrewind, const Resource& zp);
 Variant HHVM_FUNCTION(gzgetc, const Resource& zp);
-Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length = 1024);
+Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length = 0);
 Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length = 0,
                             const String& allowable_tags = null_string);
 Variant HHVM_FUNCTION(gzpassthru, const Resource& zp);

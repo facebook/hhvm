@@ -55,8 +55,10 @@ namespace HH {
  *  - [`inst_meth`](/hack/reference/function/HH.inst_meth/)
  *
  * @param $s Function to look up. Must be a constant string.
- * @return Callable, which will call `$s` when invoked, but has the proper Hack
+ * @return A callback which will call `$s` when invoked, but has the proper Hack
  *         function signature.
+ *
+ * @guide /hack/callables/special-functions
  */
 <<__IsFoldable>>
 function fun(string $s) /* interpreted by the type checker as
@@ -91,8 +93,12 @@ function fun(string $s) /* interpreted by the type checker as
  *  - [`class_meth`](/hack/reference/function/HH.class_meth/)
  *  - [`inst_meth`](/hack/reference/function/HH.inst_meth/)
  *
- * @param $class Must be constant string.
- * @param $method Must be constant string.
+ * @param $class The class of the method to call. Must be a constant string.
+ * @param $method The method of the class that will be called. Must be a
+ *        constant string.
+ * @return A callback which will call `$method` when invoked.
+ *
+ * @guide /hack/callables/special-functions
  */
 function meth_caller(string $class, string $method) {
   return new \__SystemLib\MethCallerHelper($class, $method);
@@ -118,8 +124,13 @@ function meth_caller(string $class, string $method) {
  *  - [`meth_caller`](/hack/reference/function/HH.meth_caller/)
  *  - [`inst_meth`](/hack/reference/function/HH.inst_meth/)
  *
- * @param $class Must be constant string.
- * @param $method Must be constant string.
+ * @param $class The class of the static method to call. Must be a constant
+*         string.
+ * @param $method The static method of the class that will be called. Must be a
+ *        constant string.
+ * @return A callback which will call `$method` when invoked.
+ *
+ * @guide /hack/callables/special-functions
  */
 <<__IsFoldable>>
 function class_meth(string $class, string $method)
@@ -149,8 +160,11 @@ function class_meth(string $class, string $method)
  *  - [`meth_caller`](/hack/reference/function/HH.meth_caller/)
  *  - [`class_meth`](/hack/reference/function/HH.class_meth/)
  *
- * @param $instance Any object.
- * @param $method Method to call on `$instance`. Must be constant string.
+ * @param $instance Any class object.
+ * @param $method Method to call on `$instance`. Must be a constant string.
+ * @return A callback which will call `$method` when invoked.
+ *
+ * @guide /hack/callables/special-functions
  */
 function inst_meth($instance, string $method)
   /* : (function(<hack figures this>): <and this>) */ {

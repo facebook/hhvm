@@ -1,4 +1,9 @@
 <?hh
+function _convert_throwable_to_error(Throwable $t, string $method, string $function) {
+  $message = str_replace($method . '():', $function . '():', $t->getMessage());
+  $message .= ' in ' . $t->getFile() . ' on line ' . $t->getLine();
+  return $message;
+}
 
 /**
  * Representation of date and time.
@@ -876,12 +881,12 @@ function timezone_name_get(DateTimeZone $timezone): string {
 }
 
 <<__ParamCoerceModeFalse>>
-function timezone_open(string $timezone): DateTimeZone {
+function timezone_open(string $timezone): mixed {
   try {
     return new DateTimeZone($timezone);
   }
   catch (Exception $e) {
-    trigger_error($e->getMessage(), E_WARNING);
+    trigger_error(_convert_throwable_to_error($e, 'DateTimeZone::__construct', __FUNCTION__), E_USER_WARNING);
     return false;
   }
 }

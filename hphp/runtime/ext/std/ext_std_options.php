@@ -340,7 +340,7 @@ function phpinfo(int $what = 0): bool {
   \__SystemLib\phpinfo_tr('uname', php_uname());
   echo '</table>';
 
-  \__SystemLib\phpinfo_table('INI', ini_get_all(null, false));
+  \__SystemLib\phpinfo_table('INI', ini_get_all('', false));
 
   if (function_exists('getallheaders')) {
     \__SystemLib\phpinfo_table('Headers', getallheaders());

@@ -444,6 +444,8 @@ struct PDOResource : SweepableResourceData {
 
   const sp_PDOConnection& conn() const { return m_conn; }
 
+  virtual void vscan(IMarker&) const override;
+
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 

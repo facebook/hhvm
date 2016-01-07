@@ -72,14 +72,17 @@ struct PDOSqliteConnection : PDOConnection {
   bool createFunction(const String& name,
                       const Variant& callback,
                       int argcount);
+
+  // called at request-end to clear request local callbacks from m_udfs
   void clearFunctions();
 
   int handleError(const char *file, int line, PDOStatement *stmt = nullptr);
 
-  /////////////////////////////////////////////////////////////////////////////
+  template<class F> void scan(F&) const;
 
 private:
   struct UDF : SQLite3::UserDefinedFunc {
+    // nb: UserDefinedFunc contains req-heap pointers
     std::string name;
   };
 
@@ -100,6 +103,7 @@ struct PDOSqliteResource : PDOResource {
   }
 
   void sweep() override;
+  void vscan(IMarker&) const override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

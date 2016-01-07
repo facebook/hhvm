@@ -76,6 +76,10 @@ req::ptr<PDOResource> PDODriver::createResource(const String& datasource,
   return rsrc;
 }
 
+void PDOResource::vscan(IMarker& mark) const {
+  mark(def_stmt_ctor_args);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // PDOConnection
 

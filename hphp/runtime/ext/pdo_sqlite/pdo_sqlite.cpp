@@ -311,6 +311,11 @@ void PDOSqliteConnection::clearFunctions() {
   m_udfs.clear();
 }
 
+template<class F>
+void PDOSqliteConnection::scan(F& mark) const {
+  for (auto udf : m_udfs) udf->scan(mark);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void PDOSqliteResource::sweep() {
@@ -321,6 +326,11 @@ void PDOSqliteResource::sweep() {
   }
   conn()->clearFunctions();
   PDOResource::sweep();
+}
+
+void PDOSqliteResource::vscan(IMarker& mark) const {
+  PDOResource::vscan(mark);
+  conn()->scan(mark);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

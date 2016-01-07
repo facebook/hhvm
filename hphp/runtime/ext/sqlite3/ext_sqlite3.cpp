@@ -430,7 +430,7 @@ bool HHVM_METHOD(SQLite3, createfunction,
     return false;
   }
 
-  auto udf = std::make_shared<SQLite3::UserDefinedFunc>();
+  auto udf = req::make_shared<SQLite3::UserDefinedFunc>();
   if (sqlite3_create_function(data->m_raw_db, name.data(), argcount,
                               SQLITE_UTF8, udf.get(), php_sqlite3_callback_func,
                               nullptr, nullptr) == SQLITE_OK) {
@@ -463,7 +463,7 @@ bool HHVM_METHOD(SQLite3, createaggregate,
     return false;
   }
 
-  auto udf = std::make_shared<SQLite3::UserDefinedFunc>();
+  auto udf = req::make_shared<SQLite3::UserDefinedFunc>();
   if (sqlite3_create_function(data->m_raw_db, name.data(), argcount,
                               SQLITE_UTF8, udf.get(), nullptr,
                               php_sqlite3_callback_step,
@@ -570,7 +570,7 @@ bool HHVM_METHOD(SQLite3Stmt, bindparam,
                  VRefParam parameter,
                  int64_t type /* = SQLITE3_TEXT */) {
   auto *data = Native::data<SQLite3Stmt>(this_);
-  auto param = std::make_shared<SQLite3Stmt::BoundParam>();
+  auto param = req::make_shared<SQLite3Stmt::BoundParam>();
   param->type = type;
   param->value.setWithRef(parameter);
 

@@ -152,6 +152,12 @@ assume_php = false""")
     def check_cmd(self, expected_output, stdin=None, options=None):
         raise NotImplementedError()
 
+    # hh should should work with 0 retries.
+    def test_responsiveness(self):
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        self.check_cmd(['No errors!'], options=['--retries', '0'])
+
     def test_modify_file(self):
         """
         Add an error to a file that previously had none.

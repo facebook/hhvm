@@ -2147,81 +2147,57 @@ static inline void enterVM(ActRec* ar, Action action) {
   enterVMCustomHandler(ar, [&] { exception_handler(action); });
 }
 
-void ExecutionContext::invokeFunc(TypedValue* retptr,
-                                  const Func* f,
-                                  const Variant& args_,
-                                  ObjectData* this_ /* = NULL */,
-                                  Class* cls /* = NULL */,
-                                  VarEnv* varEnv /* = NULL */,
-                                  StringData* invName /* = NULL */,
-                                  InvokeFlags flags /* = InvokeNormal */,
-                                  bool useWeakTypes /* = false */) {
+/*
+ * Shared implementation for invokeFunc{,Few}().
+ *
+ * The `doCheckStack' and `doInitArgs' callbacks should return truthy in order
+ * to short-circuit the rest of invokeFuncImpl() and return early, else they
+ * should return falsey.
+ *
+ * The `doInitArgs' and `doEnterVM' callbacks take an ActRec* argument
+ * corresponding to the reentry frame.
+ */
+template<class FStackCheck, class FInitArgs, class FEnterVM>
+ALWAYS_INLINE
+void ExecutionContext::invokeFuncImpl(TypedValue* retptr, const Func* f,
+                                      ObjectData* thiz, Class* cls,
+                                      uint32_t argc, StringData* invName,
+                                      bool useWeakTypes,
+                                      FStackCheck doStackCheck,
+                                      FInitArgs doInitArgs,
+                                      FEnterVM doEnterVM) {
   assert(retptr);
   assert(f);
-  // If f is a regular function, this_ and cls must be NULL
-  assert(f->preClass() || f->isPseudoMain() || (!this_ && !cls));
-  // If f is a method, either this_ or cls must be non-NULL
-  assert(!f->preClass() || (this_ || cls));
-  // If f is a static method, this_ must be NULL
-  assert(!(f->attrs() & AttrStatic && !f->isClosureBody()) ||
-         (!this_));
-  // invName should only be non-NULL if we are calling __call or
-  // __callStatic
-  assert(!invName || f->name()->isame(s___call.get()) ||
-         f->name()->isame(s___callStatic.get()));
-  const auto& args = *args_.asCell();
-  assert(isContainerOrNull(args));
-  // If we are inheriting a variable environment then args_ must be empty
-  assert(!varEnv || cellIsNull(&args) || !getContainerSize(args));
-
-  Cell* originalSP = vmRegsUnsafe().stack.top();
+  // If `f' is a regular function, `thiz' and `cls' must be null.
+  assert(IMPLIES(!f->preClass(), f->isPseudoMain() || (!thiz && !cls)));
+  // If `f' is a method, either `thiz' or `cls' must be non-null.
+  assert(IMPLIES(f->preClass(), thiz || cls));
+  // If `f' is a static method, thiz must be null.
+  assert(IMPLIES(f->isStatic(), f->isClosureBody() || !thiz));
+  // invName should only be non-null if we are calling __call or __callStatic.
+  assert(IMPLIES(invName, f->name()->isame(s___call.get()) ||
+                          f->name()->isame(s___callStatic.get())));
 
   VMRegAnchor _;
-  DEBUG_ONLY Cell* reentrySP = vmStack().top();
+  auto const reentrySP = vmStack().top();
 
-  if (this_ != nullptr) {
-    this_->incRefCount();
-  }
+  if (thiz != nullptr) thiz->incRefCount();
 
-  // We must do a stack overflow check for leaf functions on re-entry,
-  // because we won't have checked that the stack is deep enough for a
-  // leaf function /after/ re-entry, and the prologue for the leaf
-  // function will not make a check.
-  if (f->attrs() & AttrPhpLeafFn ||
-      !(f->numParams() + kNumActRecCells <= kStackCheckReenterPadding)) {
-    // Check both the native stack and VM stack for overflow.
-    checkStack(vmStack(), f,
-      kNumActRecCells /* numParams is included in f->maxStackCells */);
-  } else {
-    // invokeFunc() must always check the native stack for overflow no
-    // matter what.
-    checkNativeStack();
-  }
-
-  if (flags & InvokePseudoMain) {
-    assert(f->isPseudoMain());
-    assert(cellIsNull(&args) || !getContainerSize(args));
-    Unit* toMerge = f->unit();
-    toMerge->merge();
-    if (toMerge->isMergeOnly()) {
-      *retptr = *toMerge->getMainReturn();
-      return;
-    }
-  }
+  if (doStackCheck()) return;
 
   ActRec* ar = vmStack().allocA();
   ar->setReturnVMExit();
   ar->m_func = f;
-  if (this_) {
-    ar->setThis(this_);
+  if (thiz) {
+    ar->setThis(thiz);
   } else if (cls) {
     ar->setClass(cls);
   } else {
     ar->setThis(nullptr);
   }
-  auto numPassedArgs = cellIsNull(&args) ? 0 : getContainerSize(args);
-  ar->initNumArgs(numPassedArgs);
-  if (invName) {
+  ar->initNumArgs(argc);
+
+  if (UNLIKELY(invName != nullptr)) {
     ar->setMagicDispatch(invName);
   } else {
     ar->trashVarEnv();
@@ -2240,19 +2216,8 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
   }
 #endif
 
-  if (!varEnv) {
-    auto const& prepArgs = cellIsNull(&args)
-      ? make_tv<KindOfArray>(staticEmptyArray())
-      : args;
-    auto prepResult = prepareArrayArgs(
-      ar, prepArgs,
-      vmStack(), 0,
-      (bool) (flags & InvokeCuf), retptr);
-    if (UNLIKELY(!prepResult)) {
-      assert(KindOfNull == retptr->m_type);
-      return;
-    }
-  }
+  if (doInitArgs(ar)) return;
+
   if (useWeakTypes) {
     ar->setUseWeakTypes();
   } else {
@@ -2261,16 +2226,90 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
 
   TypedValue retval;
   {
-    pushVMState(originalSP);
+    pushVMState(reentrySP);
     SCOPE_EXIT {
       assert_flog(
         vmStack().top() == reentrySP,
-        "vmsp after reentry: {} doesn't match original vmsp: {}",
-        vmStack().top(), reentrySP
+        "vmsp() mismatch around reentry: before @ {}, after @ {}",
+        reentrySP, vmStack().top()
       );
       popVMState();
     };
 
+    doEnterVM(ar);
+
+    // `retptr' might point somewhere that is affected by {push,pop}VMState(),
+    // so don't write to it until after we pop the nested VM state.
+    tvCopy(*vmStack().topTV(), retval);
+    vmStack().discard();
+  }
+
+  tvCopy(retval, *retptr);
+}
+
+void ExecutionContext::invokeFunc(TypedValue* retptr,
+                                  const Func* f,
+                                  const Variant& args_,
+                                  ObjectData* thiz /* = NULL */,
+                                  Class* cls /* = NULL */,
+                                  VarEnv* varEnv /* = NULL */,
+                                  StringData* invName /* = NULL */,
+                                  InvokeFlags flags /* = InvokeNormal */,
+                                  bool useWeakTypes /* = false */) {
+  const auto& args = *args_.asCell();
+  assert(isContainerOrNull(args));
+
+  auto const argc = cellIsNull(&args) ? 0 : getContainerSize(args);
+  // If we are inheriting a variable environment, then `args' must be empty.
+  assert(IMPLIES(varEnv, argc == 0));
+
+  auto const doCheckStack = [&] {
+    // We must do a stack overflow check for leaf functions on re-entry,
+    // because we won't have checked that the stack is deep enough for a
+    // leaf function /after/ re-entry, and the prologue for the leaf
+    // function will not make a check.
+    if (f->attrs() & AttrPhpLeafFn ||
+        !(f->numParams() + kNumActRecCells <= kStackCheckReenterPadding)) {
+      // Check both the native stack and VM stack for overflow.
+      checkStack(vmStack(), f,
+        kNumActRecCells /* numParams is included in f->maxStackCells */);
+    } else {
+      // invokeFunc() must always check the native stack for overflow no
+      // matter what.
+      checkNativeStack();
+    }
+
+    // Handle includes of pseudomains.
+    if (flags & InvokePseudoMain) {
+      assert(f->isPseudoMain());
+      assert(cellIsNull(&args) || !getContainerSize(args));
+
+      auto toMerge = f->unit();
+      toMerge->merge();
+      if (toMerge->isMergeOnly()) {
+        *retptr = *toMerge->getMainReturn();
+        return true;
+      }
+    }
+    return false;
+  };
+
+  auto const doInitArgs = [&] (ActRec* ar) {
+    if (!varEnv) {
+      auto const& prepArgs = cellIsNull(&args)
+        ? make_tv<KindOfArray>(staticEmptyArray())
+        : args;
+      auto prepResult = prepareArrayArgs(ar, prepArgs, vmStack(), 0,
+                                         flags & InvokeCuf, retptr);
+      if (UNLIKELY(!prepResult)) {
+        assert(KindOfNull == retptr->m_type);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
       enterVMAtFunc(
         ar,
@@ -2278,14 +2317,10 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
         varEnv
       );
     });
+  };
 
-    // retptr might point somewhere that is affected by (push|pop)VMState, so
-    // don't write to it until after we pop the nested VM state.
-    tvCopy(*vmStack().topTV(), retval);
-    vmStack().discard();
-  }
-
-  tvCopy(retval, *retptr);
+  invokeFuncImpl(retptr, f, thiz, cls, argc, invName, useWeakTypes,
+                 doCheckStack, doInitArgs, doEnterVM);
 }
 
 void ExecutionContext::invokeFuncFew(TypedValue* retptr,
@@ -2295,99 +2330,39 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
                                      int argc,
                                      const TypedValue* argv,
                                      bool useWeakTypes /* = false */) {
-  assert(retptr);
-  assert(f);
-  // If this is a regular function, this_ and cls must be NULL
-  assert(f->preClass() || !thisOrCls);
-  // If this is a method, either this_ or cls must be non-NULL
-  assert(!f->preClass() || thisOrCls);
-  // If this is a static method, this_ must be NULL
-  assert(!(f->attrs() & AttrStatic && !f->isClosureBody()) ||
-         !ActRec::decodeThis(thisOrCls));
-  // invName should only be non-NULL if we are calling __call or
-  // __callStatic
-  assert(!invName || f->name()->isame(s___call.get()) ||
-         f->name()->isame(s___callStatic.get()));
-
-  Cell* originalSP = vmRegsUnsafe().stack.top();
-
-  VMRegAnchor _;
-  DEBUG_ONLY Cell* reentrySP = vmStack().top();
-
-  // See similar block of code above for why this is needed on
-  // AttrPhpLeafFn.
-  if (f->attrs() & AttrPhpLeafFn ||
-      !(argc + kNumActRecCells <= kStackCheckReenterPadding)) {
-    // Check both the native stack and VM stack for overflow
-    checkStack(vmStack(), f, argc + kNumActRecCells);
-  } else {
-    // invokeFuncFew() must always check the native stack for overflow
-    // no matter what
-    checkNativeStack();
-  }
-
-  if (ObjectData* thiz = ActRec::decodeThis(thisOrCls)) {
-    thiz->incRefCount();
-  }
-
-  ActRec* ar = vmStack().allocA();
-  ar->setReturnVMExit();
-  ar->m_func = f;
-  ar->m_this = (ObjectData*)thisOrCls;
-  ar->initNumArgs(argc);
-  if (UNLIKELY(invName != nullptr)) {
-    ar->setMagicDispatch(invName);
-  } else {
-    ar->trashVarEnv();
-  }
-  if (useWeakTypes) {
-    ar->setUseWeakTypes();
-  } else {
-    setTypesFlag(ar);
-  }
-
-#ifdef HPHP_TRACE
-  if (vmfp() == nullptr) {
-    TRACE(1, "Reentry: enter %s(%p) from top-level\n",
-          f->name()->data(), ar);
-  } else {
-    TRACE(1, "Reentry: enter %s(pc %p ar %p) from %s(%p)\n",
-          f->name()->data(), vmpc(), ar,
-          vmfp()->m_func ? vmfp()->m_func->name()->data()
-                         : "unknownBuiltin",
-          vmfp());
-  }
-#endif
-
-  for (ssize_t i = 0; i < argc; ++i) {
-    const TypedValue *from = &argv[i];
-    TypedValue *to = vmStack().allocTV();
-    if (LIKELY(from->m_type != KindOfRef || !f->byRef(i))) {
-      cellDup(*tvToCell(from), *to);
+  auto const doCheckStack = [&] {
+    // See comments in invokeFunc().
+    if (f->attrs() & AttrPhpLeafFn ||
+        !(argc + kNumActRecCells <= kStackCheckReenterPadding)) {
+      checkStack(vmStack(), f, argc + kNumActRecCells);
     } else {
-      refDup(*from, *to);
+      checkNativeStack();
     }
-  }
+    return false;
+  };
 
-  TypedValue retval;
-  {
-    pushVMState(originalSP);
-    SCOPE_EXIT {
-      assert(vmStack().top() == reentrySP);
-      popVMState();
-    };
+  auto const doInitArgs = [&] (ActRec* ar) {
+    for (ssize_t i = 0; i < argc; ++i) {
+      const TypedValue *from = &argv[i];
+      TypedValue *to = vmStack().allocTV();
+      if (LIKELY(from->m_type != KindOfRef || !f->byRef(i))) {
+        cellDup(*tvToCell(from), *to);
+      } else {
+        refDup(*from, *to);
+      }
+    }
+    return false;
+  };
 
-    enterVM(ar, [&] {
-      enterVMAtFunc(ar, StackArgsState::Untrimmed, nullptr);
-    });
+  auto const doEnterVM = [&] (ActRec* ar) {
+    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed, nullptr); });
+  };
 
-    // retptr might point somewhere that is affected by (push|pop)VMState, so
-    // don't write to it until after we pop the nested VM state.
-    tvCopy(*vmStack().topTV(), retval);
-    vmStack().discard();
-  }
-
-  tvCopy(retval, *retptr);
+  invokeFuncImpl(retptr, f,
+                 ActRec::decodeThis(thisOrCls),
+                 ActRec::decodeClass(thisOrCls),
+                 argc, invName, useWeakTypes,
+                 doCheckStack, doInitArgs, doEnterVM);
 }
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,

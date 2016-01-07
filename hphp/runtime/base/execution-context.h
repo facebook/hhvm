@@ -473,6 +473,15 @@ public:
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
+private:
+  template<class FStackCheck, class FInitArgs, class FEnterVM>
+  void invokeFuncImpl(TypedValue* retptr, const Func* f,
+                      ObjectData* thiz, Class* cls, uint32_t argc,
+                      StringData* invName, bool useWeakTypes,
+                      FStackCheck doStackCheck,
+                      FInitArgs doInitArgs,
+                      FEnterVM doEnterVM);
+
 public:
   template<class F> void scan(F& mark) {
     //mark(m_transport);

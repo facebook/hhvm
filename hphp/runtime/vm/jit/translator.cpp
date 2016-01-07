@@ -684,6 +684,60 @@ static void addMVectorInputs(NormalizedInstruction& ni,
                         "inputs, %d locals\n", stackCount, localCount);
 }
 
+size_t localImmIdx(Op op) {
+#define NA
+#define ONE(a) a(0)
+#define TWO(a, b) a(0) b(1)
+#define THREE(a, b, c) a(0) b(1) c(2)
+#define FOUR(a, b, c, d) a(0) b(1) c(2) d(3)
+// Iterator bytecodes have multiple local immediates but not the Local flag, so
+// they should never flow through this function.
+#define LA(n) assert(idx == 0xff); idx = n;
+#define MA(n)
+#define BLA(n)
+#define SLA(n)
+#define ILA(n)
+#define IVA(n)
+#define I64A(n)
+#define IA(n)
+#define DA(n)
+#define SA(n)
+#define AA(n)
+#define RATA(n)
+#define BA(n)
+#define OA(op) BA
+#define VSA(n)
+
+  size_t idx = 0xff;
+  switch (op) {
+#define O(name, imm, ...) case Op::name: imm break;
+    OPCODES
+#undef O
+  }
+  assert(idx != 0xff);
+  return idx;
+
+#undef ONE
+#undef TWO
+#undef THREE
+#undef FOUR
+#undef LA
+#undef MA
+#undef BLA
+#undef SLA
+#undef ILA
+#undef IVA
+#undef I64A
+#undef IA
+#undef DA
+#undef SA
+#undef AA
+#undef RATA
+#undef BA
+#undef OA
+#undef VSA
+}
+
 /*
  * getInputs --
  *   Returns locations for this instruction's inputs.
@@ -755,24 +809,9 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
   if (input & Local) {
     // (Almost) all instructions that take a Local have its index at
     // their first immediate.
-    int loc;
-    auto insertAt = inputs.end();
-    switch (ni.op()) {
-      case OpSetWithRefLM:
-        insertAt = inputs.begin();
-        // fallthrough
-      case OpFPassL:
-        loc = ni.imm[1].u_IVA;
-        break;
-      case OpQueryML:
-      case OpSetML:
-        loc = ni.imm[3].u_IVA;
-        break;
-
-      default:
-        loc = ni.imm[0].u_IVA;
-        break;
-    }
+    auto const insertAt =
+      ni.op() == OpSetWithRefLM ? inputs.begin() : inputs.end();
+    auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
     inputs.emplace(insertAt, Location(Location::Local, loc));
   }

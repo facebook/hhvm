@@ -421,6 +421,11 @@ public:
  */
 InputInfoVec getInputs(NormalizedInstruction&);
 
+/*
+ * Return the index of op's local immediate.
+ */
+size_t localImmIdx(Op op);
+
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////
 

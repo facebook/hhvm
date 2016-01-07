@@ -81,14 +81,7 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
 }
 
 uint32_t localInputId(const NormalizedInstruction& inst) {
-  switch (inst.op()) {
-    case OpSetWithRefLM:
-    case OpFPassL:
-      return inst.imm[1].u_LA;
-
-    default:
-      return inst.imm[0].u_LA;
-  }
+  return inst.imm[localImmIdx(inst.op())].u_LA;
 }
 
 folly::Optional<Type> interpOutputType(IRGS& env,

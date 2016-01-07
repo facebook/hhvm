@@ -553,12 +553,9 @@ Type mcodeKey(MIS& env) {
   case MEL:  return locAsCell(env, melem.immLoc);
   case MEI:  return ival(melem.immInt);
 
-  case MW:
-  case InvalidMemberCode:
-    always_assert(0);
-    break;
+  case MW:   break;
   }
-  not_reached();
+  always_assert(false);
 }
 
 // Returns nullptr if it's an unknown key or not a string.

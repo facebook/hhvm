@@ -3355,8 +3355,6 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
         result = nullptr;
       }
       break;
-    case InvalidMemberCode:
-      always_assert(false);
     }
     assert(result != nullptr);
     result = ratchetRefs(result, *mstate.ref.asTypedValue(),
@@ -5366,8 +5364,8 @@ OPTBLD_INLINE void isSetEmptyM(PC& pc) {
       break;
     }
     case MW:
-    case InvalidMemberCode:
       assert(false);
+      break;
   }
   auto tvRet = getHelperPost(mstate.ndiscard);
   *tvRet = make_tv<KindOfBoolean>(isSetEmptyResult);
@@ -5647,8 +5645,6 @@ OPTBLD_INLINE void iopSetM(IOP_ARGS) {
         break;
       }
       case MQT:
-        /* fallthrough */
-      case InvalidMemberCode:
         assert(false);
         break;
     }
@@ -5776,10 +5772,8 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
         break;
       }
       case MQT:
-        /* fallthrough */
-      case InvalidMemberCode:
         assert(false);
-        result = nullptr; // Silence compiler warning.
+        result = nullptr;
         break;
     }
 
@@ -5870,8 +5864,6 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
         break;
       }
       case MQT:
-        /* fallthrough */
-      case InvalidMemberCode:
         assert(false);
         break;
     }
@@ -5994,9 +5986,7 @@ OPTBLD_INLINE void iopUnsetM(IOP_ARGS) {
         break;
       }
       case MQT:
-        /* fallthrough */
       case MW:
-      case InvalidMemberCode:
         assert(false);
         break;
     }

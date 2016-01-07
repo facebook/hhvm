@@ -81,8 +81,6 @@ struct MElem {
     case MQT:  return immStr == o.immStr;
     case MEI:  return immInt == o.immInt;
     case MW:   return true;
-    case InvalidMemberCode:
-      break;
     }
     not_reached();
   }

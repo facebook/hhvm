@@ -1051,8 +1051,6 @@ void emitIntermediateOp(MTS& env) {
       assertx(env.mii.newElem());
       emitNewElem(env);
       break;
-    case InvalidMemberCode:
-      not_reached();
   }
 }
 
@@ -1842,9 +1840,6 @@ void emitFinalMOp(MTS& env) {
     assertx(env.mii.getAttr(MW) & MIA_final);
     newOps[env.mii.instr()](env);
     break;
-
-  case InvalidMemberCode:
-    not_reached();
   }
 }
 

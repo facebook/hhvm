@@ -920,8 +920,8 @@ ArrayData* read_litarray(AsmState& as) {
 }
 
 void read_immvector_immediate(AsmState& as, std::vector<unsigned char>& ret,
-                              MemberCode mcode = InvalidMemberCode) {
-  if (memberCodeImmIsLoc(mcode) || mcode == InvalidMemberCode) {
+                              folly::Optional<MemberCode> mcode = folly::none) {
+  if (!mcode || memberCodeImmIsLoc(*mcode)) {
     if (as.in.getc() != '$') {
       as.error("*L member code in vector immediate must be followed by "
                "a local variable name");
@@ -931,13 +931,13 @@ void read_immvector_immediate(AsmState& as, std::vector<unsigned char>& ret,
       as.error("couldn't read name for local variable in vector immediate");
     }
     encodeIvaToVector(ret, as.getLocalId("$" + name));
-  } else if (memberCodeImmIsString(mcode)) {
+  } else if (memberCodeImmIsString(*mcode)) {
     encodeToVector<int32_t>(ret, as.ue->mergeLitstr(read_litstr(as)));
-  } else if (memberCodeImmIsInt(mcode)) {
+  } else if (memberCodeImmIsInt(*mcode)) {
     encodeToVector<int64_t>(ret, read_opcode_arg<int64_t>(as));
   } else {
     as.error(std::string("don't understand immediate for member code ") +
-             memberCodeString(mcode));
+             memberCodeString(*mcode));
   }
 }
 
@@ -975,10 +975,11 @@ std::vector<unsigned char> read_immvector(AsmState& as, int& stackCount) {
     if (!as.in.readword(word)) {
       as.error("expected member code in immediate vector");
     }
-    MemberCode mcode = parseMemberCode(word.c_str());
-    if (mcode == InvalidMemberCode) {
+    auto optMcode = parseMemberCode(word.c_str());
+    if (!optMcode) {
       as.error("unrecognized member code `" + word + "'");
     }
+    auto mcode = *optMcode;
     ret.push_back(uint8_t(mcode));
     if (memberCodeHasImm(mcode)) {
       if (as.in.getc() != ':') {

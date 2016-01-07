@@ -268,7 +268,6 @@ int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode) {
     case MEC:
     case MPC:
     case MW:
-    case InvalidMemberCode:
       break;
   }
   not_reached();
@@ -879,17 +878,17 @@ static_assert(memberNamesCount == NumMemberCodes,
              "Member code missing for memberCodeString");
 
 const char* memberCodeString(MemberCode mcode) {
-  assert(mcode >= 0 && mcode < InvalidMemberCode);
+  assert(mcode >= 0 && mcode < NumMemberCodes);
   return memberNames[mcode];
 }
 
-MemberCode parseMemberCode(const char* s) {
+folly::Optional<MemberCode> parseMemberCode(const char* s) {
   for (auto i = 0; i < memberNamesCount; i++) {
     if (!strcmp(memberNames[i], s)) {
       return MemberCode(i);
     }
   }
-  return InvalidMemberCode;
+  return folly::none;
 }
 
 std::string instrToString(PC it, const Unit* u /* = NULL */) {

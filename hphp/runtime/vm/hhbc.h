@@ -212,13 +212,12 @@ enum MemberCode {
   // Element, using an int64 immediate
   MEI,
 
-  // New element operation.  (No real stack element.)
+  // New element operation: no key. If this is ever not the last MemberCode,
+  // NumMemberCodes must be adjusted.
   MW,
-
-  InvalidMemberCode,
 };
 
-constexpr int NumMemberCodes = InvalidMemberCode;
+constexpr size_t NumMemberCodes = MW + 1;
 
 enum MInstrAttr {
   MIA_none         = 0x00,
@@ -352,7 +351,7 @@ inline int mcodeStackVals(MemberCode mc) {
 const char* memberCodeString(MemberCode mc);
 
 // Same semantics as parseLocationCode, but for member codes.
-MemberCode parseMemberCode(const char*);
+folly::Optional<MemberCode> parseMemberCode(const char*);
 
 #define INCDEC_OPS    \
   INCDEC_OP(PreInc)   \

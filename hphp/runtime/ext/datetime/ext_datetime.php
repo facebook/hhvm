@@ -877,7 +877,12 @@ function timezone_name_get(DateTimeZone $timezone): string {
 
 <<__ParamCoerceModeFalse>>
 function timezone_open(string $timezone): DateTimeZone {
-  return new DateTimeZone($timezone);
+  try {
+    return new DateTimeZone($timezone);
+  }
+  catch (Exception $e) {
+    return false;
+  }
 }
 
 function timezone_transitions_get(DateTimeZone $timezone,

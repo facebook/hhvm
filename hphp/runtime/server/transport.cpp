@@ -812,10 +812,7 @@ StringHolder Transport::prepareResponse(const void *data, int size,
     return response;
   }
 
-  // There isn't that much need to gzip response, when it can fit into one
-  // Ethernet packet (1500 bytes), unless we are doing chunked encoding,
-  // where we don't really know if next chunk will benefit from compression.
-  if (m_chunkedEncoding || size > 1000 ||
+  if (m_chunkedEncoding ||
       m_compressionDecision == CompressionDecision::HasTo) {
     String compression;
     int compressionLevel = RuntimeOption::GzipCompressionLevel;

@@ -71,7 +71,7 @@ load_mini_script = %s
             stdin=stdin)
 
     def check_cmd(self, expected_output, stdin=None, options=None):
-        (output, err) = self.run_check(stdin, options)
+        (output, err, _) = self.run_check(stdin, options)
         logs = self.get_server_logs()
         self.assertIn('Successfully loaded mini-state', logs)
         root = self.repo_dir + os.path.sep
@@ -92,7 +92,7 @@ load_mini_script = %s
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
 
-        (output, _) = self.run_check()
+        (output, _, _) = self.run_check()
 
         self.assertEqual(output.strip(), 'No errors!')
 
@@ -117,7 +117,7 @@ load_mini_script = %s
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
 
-        (output, _) = self.run_check()
+        (output, _, _) = self.run_check()
 
         self.assertEqual(output.strip(), 'No errors!')
 

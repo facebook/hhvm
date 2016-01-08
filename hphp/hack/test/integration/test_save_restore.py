@@ -58,7 +58,7 @@ load_script = %s
 
     def check_cmd(self, expected_output, stdin=None, options=[]):
         root = self.repo_dir + os.path.sep
-        (output, err) = self.proc_call([
+        (output, err, _) = self.proc_call([
             hh_client,
             'check',
             '--retries',
@@ -100,7 +100,7 @@ load_script = %s
 
         self.check_cmd(['No errors!'])
 
-        (version, _) = self.proc_call([
+        (version, _, _) = self.proc_call([
             hh_server,
             '--version'
         ])

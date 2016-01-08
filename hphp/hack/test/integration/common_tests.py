@@ -105,6 +105,7 @@ assume_php = false""")
 
     @classmethod
     def get_server_logs(cls):
+        time.sleep(2)  # wait for logs to be written
         log_file = cls.proc_call([
             hh_client, '--logname', cls.repo_dir])[0].strip()
         with open(log_file) as f:
@@ -145,7 +146,8 @@ assume_php = false""")
         (stdout_data, stderr_data) = proc.communicate(stdin)
         sys.stderr.write(stderr_data)
         sys.stderr.flush()
-        return (stdout_data, stderr_data)
+        retcode = proc.wait()
+        return (stdout_data, stderr_data, retcode)
 
     # Runs `hh_client check` asserting the stdout is equal the expected.
     # Returns stderr.

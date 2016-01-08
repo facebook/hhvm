@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import glob
+import json
 import os
 import re
 import shutil
@@ -159,6 +160,22 @@ assume_php = false""")
         self.write_load_config()
         self.check_cmd(['No errors!'])
         self.check_cmd(['No errors!'], options=['--retries', '0'])
+
+    def test_json_errors(self):
+        """
+        If you ask for errors in JSON format, you will get them on standard
+        output. Changing this will break the tools that depend on it (like
+        editor plugins), and this test is here to remind you about it.
+        """
+        self.write_load_config()
+
+        stderr = self.check_cmd([], options=["--json"])
+        last_line = stderr.splitlines()[-1]
+        output = json.loads(last_line)
+
+        self.assertEqual(output["errors"], [])
+        self.assertEqual(output["passed"], True)
+        self.assertIn("version", output)
 
     def test_modify_file(self):
         """

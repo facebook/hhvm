@@ -456,10 +456,8 @@ int instrNumPops(PC pc) {
 #define MFINAL -3
 #define F_MFINAL -6
 #define C_MFINAL -5
-#define R_MFINAL C_MFINAL
 #define V_MFINAL C_MFINAL
 #define FMANY -3
-#define CVMANY -3
 #define CVUMANY -3
 #define CMANY -3
 #define SMANY -1
@@ -478,10 +476,8 @@ int instrNumPops(PC pc) {
 #undef MFINAL
 #undef F_MFINAL
 #undef C_MFINAL
-#undef R_MFINAL
 #undef V_MFINAL
 #undef FMANY
-#undef CVMANY
 #undef CVUMANY
 #undef CMANY
 #undef SMANY
@@ -624,10 +620,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define MFINAL return manyFlavor(op, idx, CRV);
 #define F_MFINAL MFINAL
 #define C_MFINAL return idx == 0 ? CV : CRV;
-#define R_MFINAL return idx == 0 ? RV : CRV;
 #define V_MFINAL return idx == 0 ? VV : CRV;
 #define FMANY return manyFlavor(op, idx, FV);
-#define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
@@ -649,10 +643,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef MFINAL
 #undef F_MFINAL
 #undef C_MFINAL
-#undef R_MFINAL
 #undef V_MFINAL
 #undef FMANY
-#undef CVMANY
 #undef CVUMANY
 #undef CMANY
 #undef SMANY

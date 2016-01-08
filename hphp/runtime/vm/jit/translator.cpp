@@ -494,6 +494,41 @@ static const struct {
   { OpSetMStr,     {Stack1|BStackN|MBase,
                                       Stack1,       OutUnknown      }},
   { OpSetMNewElem, {Stack1|MBase,     Stack1,       OutUnknown      }},
+  { OpIncDecML,    {BStackN|Local|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpIncDecMC,    {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpIncDecMInt,  {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpIncDecMStr,  {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpIncDecMNewElem,
+                   {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpSetOpML,     {Stack1|BStackN|Local|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetOpMC,     {Stack1|BStackN|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetOpMInt,   {Stack1|BStackN|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetOpMStr,   {Stack1|BStackN|MBase,
+                                      Stack1,       OutUnknown      }},
+  { OpSetOpMNewElem,
+                   {Stack1|MBase,     Stack1,       OutUnknown      }},
+  { OpBindML,      {Stack1|BStackN|Local|MBase,
+                                      Stack1,       OutSameAsInput  }},
+  { OpBindMC,      {Stack1|BStackN|MBase,
+                                      Stack1,       OutSameAsInput  }},
+  { OpBindMInt,    {Stack1|BStackN|MBase,
+                                      Stack1,       OutSameAsInput  }},
+  { OpBindMStr,    {Stack1|BStackN|MBase,
+                                      Stack1,       OutSameAsInput  }},
+  { OpBindMNewElem,{Stack1|MBase,     Stack1,       OutSameAsInput  }},
+  { OpUnsetML,     {BStackN|Local|MBase,
+                                      None,         OutNone         }},
+  { OpUnsetMC,     {BStackN|MBase,    None,         OutNone         }},
+  { OpUnsetMInt,   {BStackN|MBase,    None,         OutNone         }},
+  { OpUnsetMStr,   {BStackN|MBase,    None,         OutNone         }},
+  { OpSetWithRefLML,
+                   {MBase,            None,         OutNone         }},
+  { OpSetWithRefRML,
+                   {Stack1|MBase,     None,         OutNone         }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;
@@ -555,23 +590,33 @@ int64_t getStackPopped(PC pc) {
     case Op::FCallAwait:   return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
-    case Op::QueryML:   case Op::QueryMC:
-    case Op::QueryMInt: case Op::QueryMStr:
-    case Op::VGetML:    case Op::VGetMC:
-    case Op::VGetMInt:  case Op::VGetMStr:
+    case Op::QueryML:    case Op::QueryMC:
+    case Op::QueryMInt:  case Op::QueryMStr:
+    case Op::VGetML:     case Op::VGetMC:
+    case Op::VGetMInt:   case Op::VGetMStr:
     case Op::VGetMNewElem:
+    case Op::IncDecML:   case Op::IncDecMC:
+    case Op::IncDecMInt: case Op::IncDecMStr:
+    case Op::IncDecMNewElem:
+    case Op::UnsetML:    case Op::UnsetMC:
+    case Op::UnsetMInt:  case Op::UnsetMStr:
     case Op::NewPackedArray:
     case Op::ConcatN:
     case Op::FCallBuiltin:
-    case Op::CreateCl:     return getImm(pc, 0).u_IVA;
+    case Op::CreateCl:
+      return getImm(pc, 0).u_IVA;
 
     case Op::FPassML:   case Op::FPassMC:
     case Op::FPassMInt: case Op::FPassMStr: case Op::FPassMNewElem:
       // imm[0] is argument index
       return getImm(pc, 1).u_IVA;
 
-    case Op::SetML:   case Op::SetMC:
-    case Op::SetMInt: case Op::SetMStr: case Op::SetMNewElem:
+    case Op::SetML:     case Op::SetMC:
+    case Op::SetMInt:   case Op::SetMStr:   case Op::SetMNewElem:
+    case Op::SetOpML:   case Op::SetOpMC:
+    case Op::SetOpMInt: case Op::SetOpMStr: case Op::SetOpMNewElem:
+    case Op::BindML:    case Op::BindMC:
+    case Op::BindMInt:  case Op::BindMStr:  case Op::BindMNewElem:
       return getImm(pc, 0).u_IVA + 1;
 
     case Op::NewStructArray: return getImmVector(pc).size();
@@ -1124,6 +1169,27 @@ bool dontGuardAnyInputs(Op op) {
   case Op::SetMInt:
   case Op::SetMStr:
   case Op::SetMNewElem:
+  case Op::IncDecML:
+  case Op::IncDecMC:
+  case Op::IncDecMInt:
+  case Op::IncDecMStr:
+  case Op::IncDecMNewElem:
+  case Op::SetOpML:
+  case Op::SetOpMC:
+  case Op::SetOpMInt:
+  case Op::SetOpMStr:
+  case Op::SetOpMNewElem:
+  case Op::BindML:
+  case Op::BindMC:
+  case Op::BindMInt:
+  case Op::BindMStr:
+  case Op::BindMNewElem:
+  case Op::UnsetML:
+  case Op::UnsetMC:
+  case Op::UnsetMInt:
+  case Op::UnsetMStr:
+  case Op::SetWithRefLML:
+  case Op::SetWithRefRML:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.

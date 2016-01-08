@@ -5258,7 +5258,7 @@ OPTBLD_INLINE void iopVGetML(IOP_ARGS) {
 
 OPTBLD_INLINE void iopVGetMC(IOP_ARGS) {
   auto const nDiscard = decode_iva(pc);
-  vGetMImpl(pc, nDiscard, [](PC&) { return *vmStack().top(); });
+  vGetMImpl(pc, nDiscard, stack_key<0>);
 }
 
 OPTBLD_INLINE void iopVGetMInt(IOP_ARGS) {
@@ -5378,6 +5378,165 @@ OPTBLD_INLINE void iopSetMNewElem(IOP_ARGS) {
   auto const result = *topC;
   vmStack().discard();
   mFinal(mstate, nDiscard, result);
+}
+
+static OPTBLD_INLINE void incDecMImpl(PC& pc, KeyDecoder decode_key) {
+  auto const nDiscard = decode_iva(pc);
+  auto const propElem = decode_oa<PropElemOp>(pc);
+  auto const incDec = decode_oa<IncDecOp>(pc);
+  auto const key = decode_key(pc);
+
+  auto& mstate = vmMInstrState();
+  TypedValue result;
+  switch (propElem) {
+    case PropElemOp::Prop:
+      IncDecProp(arGetContextClass(vmfp()), incDec, mstate.base, key, result);
+      break;
+    case PropElemOp::Elem:
+      IncDecElem(incDec, mstate.base, key, result);
+      break;
+    case PropElemOp::PropQ:
+      always_assert(false);
+  }
+
+  mFinal(mstate, nDiscard, result);
+}
+
+OPTBLD_INLINE void iopIncDecML(IOP_ARGS)   { incDecMImpl(pc, local_key); }
+OPTBLD_INLINE void iopIncDecMC(IOP_ARGS)   { incDecMImpl(pc, stack_key<0>); }
+OPTBLD_INLINE void iopIncDecMInt(IOP_ARGS) { incDecMImpl(pc, int_key); }
+OPTBLD_INLINE void iopIncDecMStr(IOP_ARGS) { incDecMImpl(pc, str_key); }
+
+OPTBLD_INLINE void iopIncDecMNewElem(IOP_ARGS) {
+  auto const nDiscard = decode_iva(pc);
+  auto const incDec = decode_oa<IncDecOp>(pc);
+
+  auto& mstate = vmMInstrState();
+  TypedValue result;
+  IncDecNewElem(mstate.tvRef, incDec, mstate.base, result);
+  mFinal(mstate, nDiscard, result);
+}
+
+static OPTBLD_INLINE void setOpMImpl(PC& pc, KeyDecoder decode_key) {
+  auto const nDiscard = decode_iva(pc);
+  auto const propElem = decode_oa<PropElemOp>(pc);
+  auto const op = decode_oa<SetOpOp>(pc);
+  auto const key = decode_key(pc);
+  auto const rhs = vmStack().topC();
+
+  auto& mstate = vmMInstrState();
+  TypedValue* result;
+  switch (propElem) {
+    case PropElemOp::Prop:
+      result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), op,
+                         mstate.base, key, rhs);
+      break;
+    case PropElemOp::Elem:
+      result = SetOpElem(mstate.tvRef, op, mstate.base, key, rhs);
+      break;
+    case PropElemOp::PropQ:
+      always_assert(false);
+  }
+
+  vmStack().popC();
+  result = tvToCell(result);
+  tvRefcountedIncRef(result);
+  mFinal(mstate, nDiscard, *result);
+}
+
+OPTBLD_INLINE void iopSetOpML(IOP_ARGS)   { setOpMImpl(pc, local_key); }
+OPTBLD_INLINE void iopSetOpMC(IOP_ARGS)   { setOpMImpl(pc, stack_key<1>); }
+OPTBLD_INLINE void iopSetOpMInt(IOP_ARGS) { setOpMImpl(pc, int_key); }
+OPTBLD_INLINE void iopSetOpMStr(IOP_ARGS) { setOpMImpl(pc, str_key); }
+
+OPTBLD_INLINE void iopSetOpMNewElem(IOP_ARGS) {
+  auto const nDiscard = decode_iva(pc);
+  auto const op = decode_oa<SetOpOp>(pc);
+  auto const rhs = vmStack().topC();
+
+  auto& mstate = vmMInstrState();
+  auto result = SetOpNewElem(mstate.tvRef, op, mstate.base, rhs);
+  vmStack().popC();
+  result = tvToCell(result);
+  tvRefcountedIncRef(result);
+  mFinal(mstate, nDiscard, *result);
+}
+
+static OPTBLD_INLINE void bindMImpl(PC& pc, KeyDecoder decode_key) {
+  auto const nDiscard = decode_iva(pc);
+  auto const propElem = decode_oa<PropElemOp>(pc);
+  auto const key = decode_key(pc);
+
+  auto& mstate = vmMInstrState();
+  auto const rhs = *vmStack().topV();
+
+  dimDispatch(propElem, MOpFlags::DefineReffy, key);
+  tvBind(&rhs, mstate.base);
+
+  vmStack().discard();
+  mFinal(mstate, nDiscard, rhs);
+}
+
+OPTBLD_INLINE void iopBindML(IOP_ARGS)   { bindMImpl(pc, local_key); }
+OPTBLD_INLINE void iopBindMC(IOP_ARGS)   { bindMImpl(pc, stack_key<1>); }
+OPTBLD_INLINE void iopBindMInt(IOP_ARGS) { bindMImpl(pc, int_key); }
+OPTBLD_INLINE void iopBindMStr(IOP_ARGS) { bindMImpl(pc, str_key); }
+
+OPTBLD_INLINE void iopBindMNewElem(IOP_ARGS) {
+  auto const nDiscard = decode_iva(pc);
+
+  auto& mstate = vmMInstrState();
+  auto const rhs = *vmStack().topV();
+  mstate.base = NewElem<true>(mstate.tvRef, mstate.base);
+
+  tvBind(&rhs, mstate.base);
+  vmStack().discard();
+  mFinal(mstate, nDiscard, rhs);
+}
+
+static OPTBLD_INLINE void unsetMImpl(PC& pc, KeyDecoder decode_key) {
+  auto const nDiscard = decode_iva(pc);
+  auto const propElem = decode_oa<PropElemOp>(pc);
+  auto const key = decode_key(pc);
+
+  auto& mstate = vmMInstrState();
+  switch (propElem) {
+    case PropElemOp::Prop:
+      UnsetProp(arGetContextClass(vmfp()), mstate.base, key);
+      break;
+    case PropElemOp::Elem:
+      UnsetElem(mstate.base, key);
+      break;
+    case PropElemOp::PropQ:
+      always_assert(false);
+  }
+
+  mFinal(mstate, nDiscard, folly::none);
+}
+
+OPTBLD_INLINE void iopUnsetML(IOP_ARGS)   { unsetMImpl(pc, local_key); }
+OPTBLD_INLINE void iopUnsetMC(IOP_ARGS)   { unsetMImpl(pc, stack_key<0>); }
+OPTBLD_INLINE void iopUnsetMInt(IOP_ARGS) { unsetMImpl(pc, int_key); }
+OPTBLD_INLINE void iopUnsetMStr(IOP_ARGS) { unsetMImpl(pc, str_key); }
+
+static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
+  auto& mstate = vmMInstrState();
+  mstate.base = ElemD<false,true>(mstate.tvRef, mstate.base, key);
+  tvAsVariant(mstate.base).setWithRef(tvAsVariant(value));
+
+  mFinal(mstate, 0, folly::none);
+}
+
+OPTBLD_INLINE void iopSetWithRefLML(IOP_ARGS) {
+  auto const key = local_key(pc);
+  auto const valLoc = decode_la(pc);
+  setWithRefImpl(key, frame_local(vmfp(), valLoc));
+}
+
+OPTBLD_INLINE void iopSetWithRefRML(IOP_ARGS) {
+  auto const key = local_key(pc);
+  setWithRefImpl(key, vmStack().topTV());
+  vmStack().popTV();
 }
 
 static inline void vgetl_body(TypedValue* fr, TypedValue* to) {

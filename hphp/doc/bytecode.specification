@@ -3515,12 +3515,12 @@ FPassBaseGL <param id> <local id>       []  ->  []
   BaseG{C,L}{,W,D,WD} member operation, depending on the flags immediate or
   reffiness of the specified parameter.
 
-BaseSC <stack index> <stack index>    [A C?]  ->  [C?]
-BaseSL <local id>    <stack index>    [A C?]  ->  [C?]
+BaseSC <stack index> <stack index>    [A CV?]  ->  [CV?]
+BaseSL <local id>    <stack index>    [A CV?]  ->  [CV?]
 
   BaseS{C,L} member operation. %1 gives the location of the static property
   name, and %2 gives the index of the class input. The class is consumed from
-  the stack, leaving an optional cell above the class undisturbed.
+  the stack, leaving an optional cell or var above the class undisturbed.
 
 BaseL <local id> <member op flags>    []  ->  []
 
@@ -3609,9 +3609,57 @@ SetMStr <stack count> <prop/elem op> <litstr id>    [... C]  ->  [C]
   Set{Prop,Elem}{L,C,I,T} member operation, depending on the prop/elem op
   immediate.
 
-SetMNewElem <stack count>
+SetMNewElem <stack count>    [... C]  ->  [C]
 
   SetNewElem member operation.
+
+IncDecML   <stack count> <prop/elem op> <op> <local id>     [...]  ->  [C]
+IncDecMC   <stack count> <prop/elem op> <op>                [...]  ->  [C]
+IncDecMInt <stack count> <prop/elem op> <op> <int64>        [...]  ->  [C]
+IncDecMStr <stack count> <prop/elem op> <op> <litstr id>    [...]  ->  [C]
+
+  IncDec{Prop,Elem}{L,C,I,T} member operation.
+
+IncDecMNewElem <stack count> <op>    [...]  ->  [C]
+
+  IncDecNewElem member operation.
+
+SetOpML   <stack count> <prop/elem op> <op> <local id>     [... C]  ->  [C]
+SetOpMC   <stack count> <prop/elem op> <op>                [... C]  ->  [C]
+SetOpMInt <stack count> <prop/elem op> <op> <int64>        [... C]  ->  [C]
+SetOpMStr <stack count> <prop/elem op> <op> <litstr id>    [... C]  ->  [C]
+
+  SetOp{Prop,Elem}{L,C,I,T} member operation.
+
+SetOpMNewElem <stack count> <op>    [... C]  ->  [C]
+
+  SetOpNewElem member operation.
+
+BindML   <stack count> <prop/elem op> <local id>     [... V]  ->  [V]
+BindMC   <stack count> <prop/elem op>                [... V]  ->  [V]
+BindMInt <stack count> <prop/elem op> <int64>        [... V]  ->  [V]
+BindMStr <stack count> <prop/elem op> <litstr id>    [... V]  ->  [V]
+
+  Bind{Prop,Elem}{L,C,I,T} member operation.
+
+BindMNewElem <stack count>    [... V]  ->  [V]
+
+  BindNewElem member operation.
+
+UnsetML   <stack count> <prop/elem op> <local id>     [...]  ->  []
+UnsetMC   <stack count> <prop/elem op>                [...]  ->  []
+UnsetMInt <stack count> <prop/elem op> <int64>        [...]  ->  []
+UnsetMStr <stack count> <prop/elem op> <litstr id>    [...]  ->  []
+
+  Unset{Prop,Elem}{L,C,I,T} member operation.
+
+SetWithRefLML <local id> <local id>    []  ->  []
+
+  Set member %1, preserving reffiness of value in %2.
+
+SetWithRefRML <local id>    [R]  ->  []
+
+  Set member %1, preserving reffiness of stack input.
 
 10.2 Legacy member instructions
 -------------------------------

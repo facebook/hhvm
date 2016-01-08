@@ -466,8 +466,8 @@ public:
     m_evalStackIsUnknown = false;
   }
   bool evalStackIsUnknown() { return m_evalStackIsUnknown; }
-  void popEvalStack(char symFlavor, int arg = -1, int pos = -1);
-  void popSymbolicLocal(Op opcode, int arg = -1, int pos = -1);
+  void popEvalStack(char symFlavor);
+  void popSymbolicLocal(Op opcode);
   void popEvalStackMMany();
   void popEvalStackMany(int len, char symFlavor);
   void popEvalStackCVMany(int len);

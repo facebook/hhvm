@@ -314,7 +314,6 @@ namespace bc {
 #define POP_C_MFINAL uint32_t numPop() const { return arg1 + 1; } \
                      Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_R_MFINAL POP_C_MFINAL
 #define POP_V_MFINAL POP_C_MFINAL
 
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
@@ -333,11 +332,6 @@ namespace bc {
                     Flavor popFlavor(uint32_t i) const {      \
                       assert(i < numPop());                   \
                       return Flavor::F;                       \
-                    }
-
-#define POP_CVMANY  uint32_t numPop() const { return arg1; }  \
-                    Flavor popFlavor(uint32_t i) const {      \
-                      not_reached();                          \
                     }
 
 #define POP_CVUMANY uint32_t numPop() const { return arg1; }  \
@@ -415,12 +409,10 @@ OPCODES
 #undef POP_MFINAL
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL
-#undef POP_R_MFINAL
 #undef POP_V_MFINAL
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_FMANY
-#undef POP_CVMANY
 #undef POP_CVUMANY
 #undef POP_IDX_A
 

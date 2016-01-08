@@ -311,6 +311,27 @@ interpOutputLocals(IRGS& env,
     case OpSetMInt:
     case OpSetMStr:
     case OpSetMNewElem:
+    case OpIncDecML:
+    case OpIncDecMC:
+    case OpIncDecMInt:
+    case OpIncDecMStr:
+    case OpIncDecMNewElem:
+    case OpSetOpML:
+    case OpSetOpMC:
+    case OpSetOpMInt:
+    case OpSetOpMStr:
+    case OpSetOpMNewElem:
+    case OpBindML:
+    case OpBindMC:
+    case OpBindMInt:
+    case OpBindMStr:
+    case OpBindMNewElem:
+    case OpUnsetML:
+    case OpUnsetMC:
+    case OpUnsetMInt:
+    case OpUnsetMStr:
+    case OpSetWithRefLML:
+    case OpSetWithRefRML:
       smashesAllLocals = true;
       break;
 

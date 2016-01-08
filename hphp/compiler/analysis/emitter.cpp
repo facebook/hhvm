@@ -333,6 +333,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     {                                                                   \
       Trace::Indent indent;                                             \
       getEmitterVisitor().prepareEvalStack();                           \
+      char idxAPop UNUSED;                                              \
       POP_##pop;                                                        \
       const int nIn UNUSED = COUNT_##pop;                               \
       POP_LA_##imm;                                                     \
@@ -368,10 +369,8 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_MFINAL 0
 #define COUNT_F_MFINAL 0
 #define COUNT_C_MFINAL 0
-#define COUNT_R_MFINAL 0
 #define COUNT_V_MFINAL 0
 #define COUNT_FMANY 0
-#define COUNT_CVMANY 0
 #define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
 #define COUNT_SMANY 0
@@ -431,26 +430,25 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_MFINAL POP_MMANY
 #define POP_F_MFINAL POP_MMANY
 #define POP_C_MFINAL POP_C_MMANY
-#define POP_R_MFINAL POP_R_MMANY
 #define POP_V_MFINAL POP_V_MMANY
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
-#define POP_CVMANY \
+#define POP_CVUMANY \
   getEmitterVisitor().popEvalStackCVMany(a1)
-#define POP_CVUMANY POP_CVMANY
 #define POP_CMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 #define POP_SMANY \
   getEmitterVisitor().popEvalStackMany(a1.size(), StackSym::C)
 #define POP_IDX_A \
-  if (a2 == 1) getEmitterVisitor().popEvalStack(StackSym::C); \
+  idxAPop = getEmitterVisitor().getEvalStack().top();     \
+  if (a2 == 1) getEmitterVisitor().popEvalStackCVMany(1); \
   getEmitterVisitor().popEvalStack(StackSym::A)
 
-#define POP_CV(i) getEmitterVisitor().popEvalStack(StackSym::C, i, curPos)
-#define POP_VV(i) getEmitterVisitor().popEvalStack(StackSym::V, i, curPos)
-#define POP_AV(i) getEmitterVisitor().popEvalStack(StackSym::A, i, curPos)
-#define POP_RV(i) getEmitterVisitor().popEvalStack(StackSym::R, i, curPos)
-#define POP_FV(i) getEmitterVisitor().popEvalStack(StackSym::F, i, curPos)
+#define POP_CV(i) getEmitterVisitor().popEvalStack(StackSym::C)
+#define POP_VV(i) getEmitterVisitor().popEvalStack(StackSym::V)
+#define POP_AV(i) getEmitterVisitor().popEvalStack(StackSym::A)
+#define POP_RV(i) getEmitterVisitor().popEvalStack(StackSym::R)
+#define POP_FV(i) getEmitterVisitor().popEvalStack(StackSym::F)
 
 // Pop of virtual "locs" on the stack that turn into immediates.
 #define POP_LA_ONE(t) \
@@ -486,7 +484,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_LA_VSA(i)
 
 #define POP_LA_LA(i) \
-  getEmitterVisitor().popSymbolicLocal(opcode, i, curPos)
+  getEmitterVisitor().popSymbolicLocal(opcode)
 
 #define PUSH_NOV
 #define PUSH_ONE(t) \
@@ -523,7 +521,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().getEvalStack().insertAt(2, StackSym::C);
 
 #define PUSH_IDX_A \
-  if (a2 == 1) getEmitterVisitor().pushEvalStack(StackSym::C);
+  if (a2 == 1) getEmitterVisitor().pushEvalStack(idxAPop);
 
 #define IMPL_NA
 #define IMPL_ONE(t) \
@@ -705,7 +703,6 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_MFINAL
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL
-#undef POP_R_MFINAL
 #undef POP_V_MFINAL
 #undef POP_CV
 #undef POP_VV
@@ -715,7 +712,6 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_FV
 #undef POP_LREST
 #undef POP_FMANY
-#undef POP_CVMANY
 #undef POP_CVUMANY
 #undef POP_CMANY
 #undef POP_SMANY
@@ -2026,7 +2022,7 @@ void EmitterVisitor::unexpectedStackSym(char sym, const char* where) const {
                      m_ue.bcPos());
 }
 
-void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
+void EmitterVisitor::popEvalStack(char expected) {
   // Pop a value off of the evaluation stack, and verify that it
   // matches the specified symbolic flavor
   if (m_evalStack.size() == 0) {
@@ -2054,7 +2050,7 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
   }
 }
 
-void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
+void EmitterVisitor::popSymbolicLocal(Op op) {
   // A number of member instructions read locals without consuming an L from
   // the symbolic stack through the normal path.
   if (isMemberBaseOp(op) || isMemberDimOp(op) || isMemberFinalOp(op)) {
@@ -5495,6 +5491,12 @@ void EmitterVisitor::emitPop(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      emitQueryMOp(i, iLast, e, QueryMOp::CGet);
+      e.PopC();
+      return;
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.CGetM(vectorImm);
@@ -6144,6 +6146,28 @@ void EmitterVisitor::emitUnset(Emitter& e,
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Unset});
+
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, false)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.UnsetML(stackCount, *pe, m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.UnsetMC(stackCount, *pe);
+          case StackSym::I:
+            return e.UnsetMInt(stackCount, *pe, m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return e.UnsetMStr(stackCount, *pe, m_evalStack.getName(iLast));
+          default:
+            break;
+        }
+      }
+
+      always_assert(false);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, false, e);
     e.UnsetM(vectorImm);
@@ -6256,6 +6280,30 @@ void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount =
+        emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define}.rhs());
+
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, true)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.SetOpML(stackCount, *pe, op, m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.SetOpMC(stackCount, *pe, op);
+          case StackSym::I:
+            return e.SetOpMInt(stackCount, *pe, op, m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return
+              e.SetOpMStr(stackCount, *pe, op, m_evalStack.getName(iLast));
+          default:
+            always_assert(false);
+        }
+      }
+
+      return e.SetOpMNewElem(stackCount, op);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.SetOpM(op, vectorImm);
@@ -6285,6 +6333,29 @@ void EmitterVisitor::emitBind(Emitter& e) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount =
+        emitMOp(i, iLast, e, MInstrOpts{MOpFlags::DefineReffy}.rhs());
+
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, true)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.BindML(stackCount, *pe, m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.BindMC(stackCount, *pe);
+          case StackSym::I:
+            return e.BindMInt(stackCount, *pe, m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return e.BindMStr(stackCount, *pe, m_evalStack.getName(iLast));
+          default:
+            always_assert(false);
+        }
+      }
+
+      return e.BindMNewElem(stackCount);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.BindM(vectorImm);
@@ -6315,6 +6386,30 @@ void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount =
+        emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define});
+
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, true)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.IncDecML(stackCount, *pe, op, m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.IncDecMC(stackCount, *pe, op);
+          case StackSym::I:
+            return e.IncDecMInt(stackCount, *pe, op, m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return
+              e.IncDecMStr(stackCount, *pe, op, m_evalStack.getName(iLast));
+          default:
+            always_assert(false);
+        }
+      }
+
+      return e.IncDecMNewElem(stackCount, op);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.IncDecM(op, vectorImm);

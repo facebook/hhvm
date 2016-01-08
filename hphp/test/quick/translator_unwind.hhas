@@ -51,7 +51,8 @@ handler:
 
     This
     CGetL $id
-    SetM <C PT:"x">
+    BaseC 1
+    SetMStr 1 Prop "x"
     PopC
     Int 1
     RetC
@@ -60,7 +61,8 @@ handler:
   .method [public] __destruct() {
     String "dtor: "
     This
-    CGetM <C PT:"x">
+    BaseC 0
+    QueryMStr 1 CGet Prop "x"
     Concat
     String "\n"
     Concat

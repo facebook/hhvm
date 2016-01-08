@@ -42,7 +42,8 @@
     String "arr"
     Int 2
     AGetL $x
-    CGetM <SC EC>
+    BaseSC 2 0
+    QueryMC 2 CGet Elem
     FPassC 0
   FCall 1
   PopR
@@ -60,17 +61,20 @@
   SetL $arr
   PopC
 
-  CGetM <L:$arr ET:"foo">
+  BaseL $arr Warn
+  QueryMStr 0 CGet Elem "foo"
   String "\n"
   Concat
   Print
   PopC
 
   String "one"
-  SetM <L:$arr EI:1>
+  BaseL $arr Define
+  SetMInt 0 Elem 1
   PopC
 
-  CGetM <L:$arr EI:1>
+  BaseL $arr Warn
+  QueryMInt 0 CGet Elem 1
   String "\n"
   Concat
   Print
@@ -79,11 +83,13 @@
   String "baz"
   SetL $key
   PopC
-  UnsetM <L:$arr EL:$key>
+  BaseL $arr None
+  UnsetML 0 Elem $key
 
   # Test that it's unset
   CGetL $arr
-  IssetM <C EL:$key>
+  BaseC 0
+  QueryML 1 Isset Elem $key
   JmpZ unset_label
 
   String "This should be impossible...\n"

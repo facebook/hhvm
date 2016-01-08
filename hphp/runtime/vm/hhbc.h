@@ -917,6 +917,45 @@ constexpr int32_t kMaxConcatN = 4;
   O(SetMStr,         THREE(IVA, OA(PropElemOp), SA),                    \
                                        C_MFINAL,        ONE(CV),    NF) \
   O(SetMNewElem,     ONE(IVA),         C_MFINAL,        ONE(CV),    NF) \
+  O(IncDecML,        FOUR(IVA, OA(PropElemOp), OA(IncDecOp), LA),       \
+                                       MFINAL,          ONE(CV),    NF) \
+  O(IncDecMC,        THREE(IVA, OA(PropElemOp), OA(IncDecOp)),          \
+                                       MFINAL,          ONE(CV),    NF) \
+  O(IncDecMInt,      FOUR(IVA, OA(PropElemOp), OA(IncDecOp), I64A),     \
+                                       MFINAL,          ONE(CV),    NF) \
+  O(IncDecMStr,      FOUR(IVA, OA(PropElemOp), OA(IncDecOp), SA),       \
+                                       MFINAL,          ONE(CV),    NF) \
+  O(IncDecMNewElem,  TWO(IVA, OA(IncDecOp)),                            \
+                                       MFINAL,          ONE(CV),    NF) \
+  O(SetOpML,         FOUR(IVA, OA(PropElemOp), OA(SetOpOp), LA),        \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetOpMC,         THREE(IVA, OA(PropElemOp), OA(SetOpOp)),           \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetOpMInt,       FOUR(IVA, OA(PropElemOp), OA(SetOpOp), I64A),      \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetOpMStr,       FOUR(IVA, OA(PropElemOp), OA(SetOpOp), SA),        \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(SetOpMNewElem,   TWO(IVA, OA(SetOpOp)),                             \
+                                       C_MFINAL,        ONE(CV),    NF) \
+  O(BindML,          THREE(IVA, OA(PropElemOp), LA),                    \
+                                       V_MFINAL,        ONE(VV),    NF) \
+  O(BindMC,          TWO(IVA, OA(PropElemOp)),                          \
+                                       V_MFINAL,        ONE(VV),    NF) \
+  O(BindMInt,        THREE(IVA, OA(PropElemOp), I64A),                  \
+                                       V_MFINAL,        ONE(VV),    NF) \
+  O(BindMStr,        THREE(IVA, OA(PropElemOp), SA),                    \
+                                       V_MFINAL,        ONE(VV),    NF) \
+  O(BindMNewElem,    ONE(IVA),         V_MFINAL,        ONE(VV),    NF) \
+  O(UnsetML,         THREE(IVA, OA(PropElemOp), LA),                    \
+                                       MFINAL,          NOV,        NF) \
+  O(UnsetMC,         TWO(IVA, OA(PropElemOp)),                          \
+                                       MFINAL,          NOV,        NF) \
+  O(UnsetMInt,       THREE(IVA, OA(PropElemOp), I64A),                  \
+                                       MFINAL,          NOV,        NF) \
+  O(UnsetMStr,       THREE(IVA, OA(PropElemOp), SA),                    \
+                                       MFINAL,          NOV,        NF) \
+  O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
+  O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
 enum class Op : uint16_t {
@@ -1372,6 +1411,27 @@ inline bool isMemberFinalOp(Op op) {
     case OpSetMInt:
     case OpSetMStr:
     case OpSetMNewElem:
+    case OpIncDecML:
+    case OpIncDecMC:
+    case OpIncDecMInt:
+    case OpIncDecMStr:
+    case OpIncDecMNewElem:
+    case OpSetOpML:
+    case OpSetOpMC:
+    case OpSetOpMInt:
+    case OpSetOpMStr:
+    case OpSetOpMNewElem:
+    case OpBindML:
+    case OpBindMC:
+    case OpBindMInt:
+    case OpBindMStr:
+    case OpBindMNewElem:
+    case OpUnsetML:
+    case OpUnsetMC:
+    case OpUnsetMInt:
+    case OpUnsetMStr:
+    case OpSetWithRefLML:
+    case OpSetWithRefRML:
       return true;
 
     default:

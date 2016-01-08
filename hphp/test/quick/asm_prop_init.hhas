@@ -86,7 +86,8 @@
   PopC
 
   String "nonstat"
-  CGetM <L:$obj PC>
+  BaseL $obj Warn
+  QueryMC 1 CGet Prop
   String "\n"
   Concat
   Print

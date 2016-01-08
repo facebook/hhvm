@@ -1549,10 +1549,9 @@ void emitSetOpProp(MTS& env) {
     gen(env, SetOpProp, SetOpData { op }, env.base.value, key, value);
 }
 
-void emitIncDecProp(MTS& env) {
-  auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
-  auto const key = getKey(env);
-  auto const propInfo = getCurrentPropertyOffset(env);
+SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, base->type(), key->type());
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
@@ -1560,21 +1559,25 @@ void emitIncDecProp(MTS& env) {
       !mightCallMagicPropMethod(MIA_define, propInfo)) {
 
     // Special case for when the property is known to be an int.
-    if (env.base.type <= TObj &&
+    if (base->isA(TObj) &&
         propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
-      DEBUG_ONLY auto const propIntTy = TInt.ptr(Ptr::Prop);
-      setBase(env, emitPropSpecialized(env, MIA_define, propInfo));
-      assertx(env.base.value->type() <= propIntTy);
-      auto const prop = gen(env, LdMem, TInt, env.base.value);
+      base = emitPropSpecialized(env, base, base->type(), key, false,
+                                 MIA_define, propInfo);
+      auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
       assertx(result != nullptr);
-      gen(env, StMem, env.base.value, result);
-      env.result = isPre(op) ? result : prop;
-      return;
+      gen(env, StMem, base, result);
+      return isPre(op) ? result : prop;
     }
   }
 
-  env.result = gen(env, IncDecProp, IncDecData { op }, env.base.value, key);
+  return gen(env, IncDecProp, IncDecData{op}, base, key);
+}
+
+void emitIncDecProp(MTS& env) {
+  env.result =
+    emitIncDecProp(env, static_cast<IncDecOp>(env.ni.imm[0].u_OA),
+                   env.base.value, getKey(env));
 }
 
 void emitBindProp(MTS& env) {
@@ -1732,6 +1735,11 @@ void emitSetElem(MTS& env) {
     }
     break;
   }
+}
+
+void setWithRefImpl(IRGS& env, int32_t keyLoc, SSATmp* value) {
+  auto const key = ldLoc(env, keyLoc, nullptr, DataTypeGeneric);
+  gen(env, SetWithRefElem, gen(env, LdMBase, TPtrToGen), key, value);
 }
 
 void emitSetWithRefElem(MTS& env) {
@@ -2160,7 +2168,7 @@ void baseSImpl(IRGS& env, SSATmp* name, int32_t clsIdx) {
   gen(env, StMBase, spropPtr);
 
   if (clsIdx == 1) {
-    auto rhs = popC(env, DataTypeGeneric);
+    auto rhs = pop(env, DataTypeGeneric);
     popA(env);
     push(env, rhs);
   } else {
@@ -2650,6 +2658,80 @@ void setMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
   mFinalImpl(env, nDiscard, result);
 }
 
+void incDecMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                 IncDecOp incDec, SSATmp* key) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+
+  auto const result = [&] {
+    if (propElem == PropElemOp::Prop) {
+      return emitIncDecProp(env, incDec, baseObj, key);
+    }
+    if (propElem == PropElemOp::Elem) {
+      return gen(env, IncDecElem, IncDecData{incDec}, basePtr, key);
+    }
+    always_assert(false);
+  }();
+
+  mFinalImpl(env, nDiscard, result);
+}
+
+void setOpMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                SetOpOp op, SSATmp* key) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+  auto rhs = topC(env);
+
+  auto const result = [&] {
+    if (propElem == PropElemOp::Prop) {
+      return gen(env, SetOpProp, SetOpData{op}, baseObj, key, rhs);
+    }
+    if (propElem == PropElemOp::Elem) {
+      return gen(env, SetOpElem, SetOpData{op}, basePtr, key, rhs);
+    }
+    always_assert(false);
+  }();
+
+  popDecRef(env);
+  mFinalImpl(env, nDiscard, result);
+}
+
+void bindMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+  auto rhs = topV(env);
+
+  if (propElem == PropElemOp::Prop) {
+    gen(env, BindProp, baseObj, key, rhs);
+  } else if (propElem == PropElemOp::Elem) {
+    gen(env, BindElem, basePtr, key, rhs);
+  } else {
+    always_assert(false);
+  }
+
+  popV(env);
+  mFinalImpl(env, nDiscard, rhs);
+}
+
+void unsetMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+
+  if (propElem == PropElemOp::Prop) {
+    gen(env, UnsetProp, baseObj, key);
+  } else if (propElem == PropElemOp::Elem) {
+    gen(env, UnsetElem, basePtr, key);
+  } else {
+    always_assert(false);
+  }
+
+  mFinalImpl(env, nDiscard, nullptr);
+}
+
 MOpFlags fpassFlags(IRGS& env, int32_t idx) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     return MOpFlags::DefineReffy;
@@ -2924,6 +3006,119 @@ void emitSetMNewElem(IRGS& env, int32_t nDiscard) {
 
   popC(env, DataTypeGeneric);
   mFinalImpl(env, nDiscard, value);
+}
+
+void emitIncDecML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                  IncDecOp incDec, int32_t locId) {
+  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
+                        DataTypeSpecific);
+  incDecMImpl(env, nDiscard, propElem, incDec, key);
+}
+
+void emitIncDecMC(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                  IncDecOp incDec) {
+  incDecMImpl(env, nDiscard, propElem, incDec, topC(env));
+}
+
+void emitIncDecMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                    IncDecOp incDec, int64_t key) {
+  incDecMImpl(env, nDiscard, propElem, incDec, cns(env, key));
+}
+
+void emitIncDecMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                    IncDecOp incDec, const StringData* key) {
+  incDecMImpl(env, nDiscard, propElem, incDec, cns(env, key));
+}
+
+void emitIncDecMNewElem(IRGS& env, int32_t nDiscard, IncDecOp incDec) {
+  interpOne(env, *env.currentNormalizedInstruction);
+}
+
+void emitSetOpML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                  SetOpOp op, int32_t locId) {
+  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
+                        DataTypeSpecific);
+  setOpMImpl(env, nDiscard, propElem, op, key);
+}
+
+void emitSetOpMC(IRGS& env, int32_t nDiscard, PropElemOp propElem, SetOpOp op) {
+  setOpMImpl(env, nDiscard, propElem, op, topC(env, BCSPOffset{1}));
+}
+
+void emitSetOpMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                    SetOpOp op, int64_t key) {
+  setOpMImpl(env, nDiscard, propElem, op, cns(env, key));
+}
+
+void emitSetOpMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                    SetOpOp op, const StringData* key) {
+  setOpMImpl(env, nDiscard, propElem, op, cns(env, key));
+}
+
+void emitSetOpMNewElem(IRGS& env, int32_t nDiscard, SetOpOp op) {
+  interpOne(env, *env.currentNormalizedInstruction);
+}
+
+void emitBindML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                int32_t locId) {
+  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
+                        DataTypeSpecific);
+  bindMImpl(env, nDiscard, propElem, key);
+}
+
+void emitBindMC(IRGS& env, int32_t nDiscard, PropElemOp propElem) {
+  bindMImpl(env, nDiscard, propElem, topC(env, BCSPOffset{1}));
+}
+
+void emitBindMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                  int64_t key) {
+  bindMImpl(env, nDiscard, propElem, cns(env, key));
+}
+
+void emitBindMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                 const StringData* key) {
+  bindMImpl(env, nDiscard, propElem, cns(env, key));
+}
+
+void emitBindMNewElem(IRGS& env, int32_t nDiscard) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto rhs = topV(env);
+
+  gen(env, BindNewElem, basePtr, rhs);
+  popV(env);
+  mFinalImpl(env, nDiscard, rhs);
+}
+
+void emitUnsetML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                 int32_t locId) {
+  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
+                        DataTypeSpecific);
+  unsetMImpl(env, nDiscard, propElem, key);
+}
+
+void emitUnsetMC(IRGS& env, int32_t nDiscard, PropElemOp propElem) {
+  unsetMImpl(env, nDiscard, propElem, topC(env));
+}
+
+void emitUnsetMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                   int64_t key) {
+  unsetMImpl(env, nDiscard, propElem, cns(env, key));
+}
+
+void emitUnsetMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                 const StringData* key) {
+  unsetMImpl(env, nDiscard, propElem, cns(env, key));
+}
+
+void emitSetWithRefLML(IRGS& env, int32_t keyLoc, int32_t valLoc) {
+  setWithRefImpl(env, keyLoc, ldLoc(env, valLoc, nullptr, DataTypeGeneric));
+  mFinalImpl(env, 0, nullptr);
+}
+
+void emitSetWithRefRML(IRGS& env, int32_t keyLoc) {
+  setWithRefImpl(env, keyLoc, top(env, BCSPOffset{0}, DataTypeGeneric));
+  popDecRef(env);
+  mFinalImpl(env, 0, nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////

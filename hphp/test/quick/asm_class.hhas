@@ -97,7 +97,8 @@
     PopC
 
     This
-    CGetM <C PL:$name>
+    BaseC 0
+    QueryML 1 CGet Prop $name
     String "\n"
     Concat
     Print
@@ -110,14 +111,16 @@
 
   .method [public] print_defaulted {
     This
-    CGetM <C PT:"defaulted">
+    BaseC 0
+    QueryMStr 1 CGet Prop "defaulted"
     String "\n"
     Concat
     Print
     PopC
 
     This
-    CGetM <C PT:"badstring">
+    BaseC 0
+    QueryMStr 1 CGet Prop "badstring"
     String "bad string\"\"\"has triple quotes"
     Eq
     JmpZ broken
@@ -139,7 +142,8 @@
 
   String "funk"
   String "value of funk"
-  SetM <L:$obj PC>
+  BaseL $obj Define
+  SetMC 1 Prop
   PopC
 
   CGetL $obj

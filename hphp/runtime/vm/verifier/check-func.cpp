@@ -749,7 +749,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][4] = {
   #define NOV { },
   #define FMANY { },
-  #define CVMANY { },
   #define CVUMANY { },
   #define CMANY { },
   #define SMANY { },
@@ -764,7 +763,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define MFINAL { },
   #define F_MFINAL { },
   #define C_MFINAL { },
-  #define R_MFINAL { },
   #define V_MFINAL { },
   #define IDX_A { },
   #define O(name, imm, pop, push, flags) pop
@@ -777,10 +775,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef MFINAL
   #undef F_MFINAL
   #undef C_MFINAL
-  #undef R_MFINAL
   #undef V_MFINAL
   #undef FMANY
-  #undef CVMANY
   #undef CVUMANY
   #undef CMANY
   #undef SMANY
@@ -823,6 +819,15 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPassMInt:
   case Op::FPassMStr:
   case Op::FPassMNewElem:
+  case Op::IncDecML:
+  case Op::IncDecMC:
+  case Op::IncDecMInt:
+  case Op::IncDecMStr:
+  case Op::IncDecMNewElem:
+  case Op::UnsetML:
+  case Op::UnsetMC:
+  case Op::UnsetMInt:
+  case Op::UnsetMStr:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
@@ -832,8 +837,22 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::SetMInt:
   case Op::SetMStr:
   case Op::SetMNewElem:
+  case Op::SetOpML:
+  case Op::SetOpMC:
+  case Op::SetOpMInt:
+  case Op::SetOpMStr:
+  case Op::SetOpMNewElem:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
+    }
+    return m_tmp_sig;
+  case Op::BindML:
+  case Op::BindMC:
+  case Op::BindMInt:
+  case Op::BindMStr:
+  case Op::BindMNewElem:
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = i == n - 1 ? VV : CRV;
     }
     return m_tmp_sig;
   case Op::FCall:       // ONE(IVA),            FMANY,   ONE(RV)
@@ -870,7 +889,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[0] = AV;
     } else {
       m_tmp_sig[0] = AV;
-      m_tmp_sig[1] = CV;
+      m_tmp_sig[1] = CVV;
     }
     return m_tmp_sig;
   }
@@ -1053,7 +1072,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     FlavorDesc *outs = &cur->stk[cur->stklen];
     cur->stklen += pushes;
     if (op == Op::BaseSC || op == Op::BaseSL) {
-      if (pushes == 1) outs[0] = CV;
+      if (pushes == 1) outs[0] = outs[1];
     } else {
       for (int i = 0; i < pushes; ++i) {
         outs[i] = outputSigs[size_t(op)][i];

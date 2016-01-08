@@ -505,9 +505,12 @@ struct AsmState {
   AsmState(const AsmState&) = delete;
   AsmState& operator=(const AsmState&) = delete;
 
-  void error(const std::string& what) {
-    throw Error(in.getLineNumber(), what);
+  template<typename... Args>
+  void error(const std::string& fmt, Args&&... args) {
+    throw Error(in.getLineNumber(),
+                folly::sformat(fmt, std::forward<Args>(args)...));
   }
+
 
   void adjustStack(int delta) {
     if (currentStackDepth == nullptr) {
@@ -805,7 +808,8 @@ void StackDepth::addListener(AsmState& as, StackDepth* target) {
 
 void StackDepth::setBase(AsmState& as, int stackDepth) {
   if (baseValue && stackDepth != *baseValue) {
-    as.error("stack depth do not match");
+    as.error("stack depth {} does not match base value {}",
+             stackDepth, *baseValue);
   }
 
   baseValue = stackDepth;
@@ -1196,17 +1200,15 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define IMM_NA
 #define IMM_ONE(t) IMM_##t
-#define IMM_TWO(t1, t2) IMM_##t1; IMM_##t2
-#define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
-#define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
+#define IMM_TWO(t1, t2) IMM_ONE(t1); ++immIdx; IMM_##t2
+#define IMM_THREE(t1, t2, t3) IMM_TWO(t1, t2); ++immIdx; IMM_##t3
+#define IMM_FOUR(t1, t2, t3, t4) IMM_THREE(t1, t2, t3); ++immIdx; IMM_##t4
 
-// Some bytecodes need to know the the first or second iva imm for
-// (PUSH|POP)_*.
+// Some bytecodes need to know an iva imm for (PUSH|POP)_*.
 #define IMM_IVA do {                            \
-    int imm = read_opcode_arg<int64_t>(as);     \
+    int imm = read_opcode_arg<int32_t>(as);     \
     as.ue->emitIVA(imm);                        \
-    if (immIVA < 0) immIVA = imm;               \
-    else if (immIVA2 < 0) immIVA2 = imm;        \
+    immIVA[immIdx] = imm;                       \
   } while (0)
 
 #define IMM_VSA \
@@ -1284,7 +1286,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
 #define NUM_PUSH_INS_2(a) 1
-#define NUM_PUSH_IDX_A immIVA
+#define NUM_PUSH_IDX_A immIVA[1]
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
@@ -1293,22 +1295,19 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_C_MMANY (1 + vecImmStackValues)
 #define NUM_POP_V_MMANY NUM_POP_C_MMANY
 #define NUM_POP_R_MMANY NUM_POP_C_MMANY
-#define NUM_POP_MFINAL immIVA
-#define NUM_POP_F_MFINAL immIVA2
-#define NUM_POP_C_MFINAL (immIVA + 1)
-#define NUM_POP_R_MFINAL NUM_POP_C_MFINAL
+#define NUM_POP_MFINAL immIVA[0]
+#define NUM_POP_F_MFINAL immIVA[1]
+#define NUM_POP_C_MFINAL (immIVA[0] + 1)
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL
-#define NUM_POP_FMANY immIVA /* number of arguments */
-#define NUM_POP_CVMANY immIVA /* number of arguments */
-#define NUM_POP_CVUMANY immIVA /* number of arguments */
-#define NUM_POP_CMANY immIVA /* number of arguments */
+#define NUM_POP_FMANY immIVA[0] /* number of arguments */
+#define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
+#define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
-#define NUM_POP_IDX_A immIVA + 1
+#define NUM_POP_IDX_A (immIVA[1] + 1)
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED int64_t immIVA = -1;                                        \
-    UNUSED int64_t immIVA2 = -1;                                       \
+    UNUSED int32_t immIVA[4];                                          \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \
     std::vector<std::pair<std::string, Offset> > labelJumps;           \
@@ -1327,6 +1326,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     as.ue->emitOp(Op##name);                                           \
                                                                        \
+    UNUSED size_t immIdx = 0;                                          \
     IMM_##imm;                                                         \
                                                                        \
     int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;                  \
@@ -1394,10 +1394,8 @@ OPCODES
 #undef NUM_POP_MFINAL
 #undef NUM_POP_F_MFINAL
 #undef NUM_POP_C_MFINAL
-#undef NUM_POP_R_MFINAL
 #undef NUM_POP_V_MFINAL
 #undef NUM_POP_FMANY
-#undef NUM_POP_CVMANY
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY

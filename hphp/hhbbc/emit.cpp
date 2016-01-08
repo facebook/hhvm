@@ -361,12 +361,10 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_MFINAL     pop(data.arg1);
 #define POP_F_MFINAL   pop(data.arg2);
 #define POP_C_MFINAL   pop(1); pop(data.arg1);
-#define POP_R_MFINAL   POP_C_MFINAL
 #define POP_V_MFINAL   POP_C_MFINAL
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);
-#define POP_CVMANY     pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
 #define POP_IDX_A      pop(data.arg2 + 1);
 
@@ -432,7 +430,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_SMANY
 #undef POP_MMANY
 #undef POP_FMANY
-#undef POP_CVMANY
 #undef POP_CVUMANY
 #undef POP_C_MMANY
 #undef POP_R_MMANY
@@ -440,7 +437,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_MFINAL
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL
-#undef POP_R_MFINAL
 #undef POP_V_MFINAL
 #undef POP_IDX_A
 

@@ -1038,14 +1038,6 @@ void emitFPassR(IRGS& env, int32_t argNum) {
   implUnboxR(env);
 }
 
-void emitFPassM(IRGS& env, int32_t, int x) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    emitVGetM(env, x);
-  } else {
-    emitCGetM(env, x);
-  }
-}
-
 void emitUnboxR(IRGS& env) { implUnboxR(env); }
 
 void emitFPassV(IRGS& env, int32_t argNum) {

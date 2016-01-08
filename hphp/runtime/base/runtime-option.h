@@ -448,7 +448,6 @@ public:
   F(int, ExternalEmitterFallback,      0)                               \
   F(bool, ExternalEmitterAllowPartial, false)                           \
   F(bool, EmitSwitch,                  true)                            \
-  F(bool, EmitNewMInstrs,              newMInstrsDefault())             \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   /* CheckReturnTypeHints:

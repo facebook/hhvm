@@ -118,7 +118,6 @@ struct FuncChecker {
   void copyState(State* to, const State* from);
   void initState(State* s);
   const FlavorDesc* sig(PC pc);
-  const FlavorDesc* vectorSig(PC pc, FlavorDesc rhs_flavor);
   Offset offset(PC pc) const { return pc - unit()->entry(); }
   PC at(Offset off) const { return unit()->at(off); }
   int maxStack() const { return m_func->maxStackCells(); }
@@ -386,65 +385,6 @@ Offset decodeOffset(PC* ppc) {
   return offset;
 }
 
-/**
- * Range over the members of an immediate member vector.
- */
-class ImmVecRange {
- public:
-  explicit ImmVecRange(PC instr)
-    : v(getImmVector(instr))
-    , vecp(v.vec() + 1) // skip location code
-    , loc(v.locationCode())
-    , loc_local(numLocationCodeImms(loc) ? decodeVariableSizeImm(&vecp) : -1)
-  {
-  }
-
-  bool empty() const {
-    return vecp >= v.vec() + v.size();
-  }
-
-  PC end() const {
-    return v.vec() + v.size();
-  }
-
-  MemberCode frontMember() const {
-    assert(!empty());
-    return MemberCode(*vecp);
-  }
-
-  int frontLocal() const {
-    PC p = vecp + 1;
-    const MemberCode mc = frontMember();
-    return (mc == MEL || mc == MPL) ? decodeMemberCodeImm(&p, mc) : -1;
-  }
-
-  Id frontString() const {
-    PC p = vecp + 1;
-    const MemberCode mc = frontMember();
-    return (mc == MET || mc == MPT) ? Id(decodeMemberCodeImm(&p, mc)) : -1;
-  }
-
-  void popFront() {
-    assert(!empty());
-    vecp++;
-    const MemberCode mc = MemberCode(vecp[-1]);
-    if (memberCodeHasImm(mc)) {
-      decodeMemberCodeImm(&vecp, mc);
-    }
-  }
-
-  int size() const {
-    return v.size();
-  }
-
- private:
-  ImmVector v;
-  PC vecp;
- public:
-  const LocationCode loc;
-  const int loc_local;    // local variable id or -1
-};
-
 bool FuncChecker::checkLocal(PC pc, int k) {
   if (k < 0 || k >= numLocals()) {
     error("invalid local variable id %d at Offset %d\n",
@@ -456,56 +396,6 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 
 bool FuncChecker::checkString(PC pc, Id id) {
   return unit()->isLitstrId(id);
-}
-
-bool FuncChecker::checkImmMA(PC& pc, PC const instr) {
-  auto ok = true;
-
-  ImmVecRange vr(instr);
-  if (vr.size() < 2) {
-    // vector must at least have a LocationCode and 1+ MemberCodes
-    error("invalid vector size %d at %d\n",
-           vr.size(), offset(instr));
-    throw unknown_length{};
-  }
-
-  if (vr.loc < 0 || vr.loc >= NumLocationCodes) {
-    error("invalid location code %d in vector at %d\n",
-          (int)vr.loc, offset(instr));
-    ok = false;
-  }
-  if (vr.loc_local != -1) ok &= checkLocal(pc, vr.loc_local);
-  for (; !vr.empty(); vr.popFront()) {
-    MemberCode member = vr.frontMember();
-    if (member < 0 || member >= NumMemberCodes) {
-      error("invalid member code %d in vector at %d\n",
-            (int)member, offset(instr));
-      ok = false;
-    }
-    if (vr.frontLocal() != -1) {
-      ok &= checkLocal(pc, vr.frontLocal());
-    } else if (vr.frontString() != -1) {
-      ok &= checkString(pc, vr.frontString());
-    }
-    if (member == MQT) {
-      switch (peek_op(instr)) {
-        case Op::CGetM:
-        case Op::IssetM:
-        case Op::EmptyM:
-        case Op::VGetM:
-        case Op::FPassM:
-          break;
-        default:
-          error("Illegal QT member code at %d: %s\n",
-                offset(instr), instrToString(instr).c_str());
-          ok = false;
-          break;
-      }
-    }
-  }
-
-  pc = vr.end();
-  return ok;
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
@@ -711,40 +601,6 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
   return true;
 }
 
-/**
- * format of vector in memory:
- *   int32 size;
- *   int32 numstk;
- *   uint8 locationCode
- *   [IVA imm for location]
- *   [uint8 MemberCode; [IVA imm for member]]
- */
-const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
-  ImmVecRange vr(pc);
-  int n = 0;
-  if (vr.loc_local != -1 ||
-      vr.loc == LH ||
-      vr.loc == LGL ||
-      vr.loc == LNL ||
-      vr.loc == LSL) {
-    /* nothing on stack for loc */
-  } else if (vr.loc == LR) {
-    m_tmp_sig[n++] = RV;
-  } else {
-    m_tmp_sig[n++] = CV;
-  }
-  for (; !vr.empty(); vr.popFront()) {
-    MemberCode member = vr.frontMember();
-    if (member == MEC || member == MPC) {
-      m_tmp_sig[n++] = CV;
-    }
-  }
-  if (vr.loc == LSC || vr.loc == LSL) m_tmp_sig[n++] = AV; // extra classref
-  if (rhs_flavor != NOV) m_tmp_sig[n++] = rhs_flavor; // extra rhs value for Set
-  assert(n == instrNumPops(pc));
-  return m_tmp_sig;
-}
-
 const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][4] = {
   #define NOV { },
@@ -756,10 +612,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
   #define FOUR(a,b,c,d) { d, c, b, a },
-  #define MMANY { },
-  #define C_MMANY { },
-  #define V_MMANY { },
-  #define R_MMANY { },
   #define MFINAL { },
   #define F_MFINAL { },
   #define C_MFINAL { },
@@ -768,10 +620,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
-  #undef C_MMANY
-  #undef V_MMANY
-  #undef R_MMANY
-  #undef MMANY
   #undef MFINAL
   #undef F_MFINAL
   #undef C_MFINAL
@@ -788,23 +636,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef IDX_A
   };
   switch (peek_op(pc)) {
-  case Op::CGetM:     // ONE(LA),      MMANY, ONE(CV)
-  case Op::VGetM:     // ONE(LA),      MMANY, ONE(VV)
-  case Op::IssetM:    // ONE(LA),      MMANY, ONE(CV)
-  case Op::EmptyM:    // ONE(LA),      MMANY, ONE(CV)
-  case Op::UnsetM:    // ONE(LA),      MMANY, NOV
-  case Op::FPassM:    // TWO(IVA,LA),  MMANY, ONE(FV)
-  case Op::IncDecM:   // TWO(OA,LA),   MMANY, ONE(CV)
-    return vectorSig(pc, NOV);
-  case Op::BindM:     // ONE(LA),    V_MMANY, ONE(VV)
-    return vectorSig(pc, VV);
-  case Op::SetM:      // ONE(LA),    C_MMANY, ONE(CV)
-  case Op::SetOpM:    // TWO(OA,LA), C_MMANY, ONE(CV)
-    return vectorSig(pc, CV);
-  case Op::SetWithRefLM://TWO(MA, HA), MMANY, NOV
-    return vectorSig(pc, NOV);
-  case Op::SetWithRefRM://ONE(MA),   R_MMANY, NOV
-    return vectorSig(pc, RV);
   case Op::QueryML:
   case Op::QueryMC:
   case Op::QueryMInt:
@@ -1029,18 +860,10 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define FOUR(a,b,c,d) { a, b, c, d },
   #define INS_1(a) { a },
   #define INS_2(a) { a },
-  #define MMANY() { },
-  #define C_MMANY() { },
-  #define V_MMANY() { },
-  #define R_MMANY() { },
   #define IDX_A { },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
-  #undef C_MMANY
-  #undef V_MMANY
-  #undef R_MMANY
-  #undef MMANY
   #undef FMANY
   #undef CMANY
   #undef SMANY

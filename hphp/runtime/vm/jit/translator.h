@@ -496,7 +496,6 @@ enum Operands {
   FuncdRef        = 1 << 5,  // Input to FPass*
   FStack          = 1 << 6,  // output of FPushFuncD and friends
   Local           = 1 << 7,  // Writes to a local
-  MVector         = 1 << 8,  // Member-vector input
   Iter            = 1 << 9,  // Iterator in imm[0]
   AllLocals       = 1 << 10, // All locals (used by RetC)
   DontGuardStack1 = 1 << 11, // Dont force a guard on behalf of stack1 input

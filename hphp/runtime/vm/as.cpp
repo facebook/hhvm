@@ -841,7 +841,7 @@ void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {
 /*
  * Opcode arguments must be on the same line as the opcode itself,
  * although certain argument types may contain internal newlines (see,
- * for example, read_immvector, read_jmpvector, or string literals).
+ * for example, read_jmpvector or string literals).
  */
 template<class Target> Target read_opcode_arg(AsmState& as) {
   as.in.skipSpaceTab();
@@ -921,81 +921,6 @@ ArrayData* read_litarray(AsmState& as) {
     as.error("unknown array data literal name " + name);
   }
   return it->second;
-}
-
-void read_immvector_immediate(AsmState& as, std::vector<unsigned char>& ret,
-                              folly::Optional<MemberCode> mcode = folly::none) {
-  if (!mcode || memberCodeImmIsLoc(*mcode)) {
-    if (as.in.getc() != '$') {
-      as.error("*L member code in vector immediate must be followed by "
-               "a local variable name");
-    }
-    std::string name;
-    if (!as.in.readword(name)) {
-      as.error("couldn't read name for local variable in vector immediate");
-    }
-    encodeIvaToVector(ret, as.getLocalId("$" + name));
-  } else if (memberCodeImmIsString(*mcode)) {
-    encodeToVector<int32_t>(ret, as.ue->mergeLitstr(read_litstr(as)));
-  } else if (memberCodeImmIsInt(*mcode)) {
-    encodeToVector<int64_t>(ret, read_opcode_arg<int64_t>(as));
-  } else {
-    as.error(std::string("don't understand immediate for member code ") +
-             memberCodeString(*mcode));
-  }
-}
-
-std::vector<unsigned char> read_immvector(AsmState& as, int& stackCount) {
-  std::vector<unsigned char> ret;
-
-  as.in.skipSpaceTab();
-  as.in.expect('<');
-
-  std::string word;
-  if (!as.in.readword(word)) {
-    as.error("expected location code in immediate vector");
-  }
-
-  auto lcode = parseLocationCode(word.c_str());
-  if (lcode == InvalidLocationCode) {
-    as.error("expected location code, saw `" + word + "'");
-  }
-  ret.push_back(uint8_t(lcode));
-  if (word[word.size() - 1] == 'L') {
-    if (as.in.getc() != ':') {
-      as.error("expected `:' after location code `" + word + "'");
-    }
-  }
-  for (int i = 0; i < numLocationCodeImms(lcode); ++i) {
-    read_immvector_immediate(as, ret);
-  }
-  stackCount = numLocationCodeStackVals(lcode);
-
-  // Read all the member entries.
-  for (;;) {
-    as.in.skipWhitespace();
-    if (as.in.peek() == '>') { as.in.getc(); break; }
-
-    if (!as.in.readword(word)) {
-      as.error("expected member code in immediate vector");
-    }
-    auto optMcode = parseMemberCode(word.c_str());
-    if (!optMcode) {
-      as.error("unrecognized member code `" + word + "'");
-    }
-    auto mcode = *optMcode;
-    ret.push_back(uint8_t(mcode));
-    if (memberCodeHasImm(mcode)) {
-      if (as.in.getc() != ':') {
-        as.error("expected `:' after member code `" + word + "'");
-      }
-      read_immvector_immediate(as, ret, mcode);
-    } else if (mcode != MW) {
-      ++stackCount;
-    }
-  }
-
-  return ret;
 }
 
 RepoAuthType read_repo_auth_type(AsmState& as) {
@@ -1236,15 +1161,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
  * NUM_POP_*, so the member vector guy exposes a vecImmStackValues
  * integer.
  */
-#define IMM_MA                                                        \
-  int vecImmStackValues = 0;                                          \
-  auto vecImm = read_immvector(as, vecImmStackValues);                \
-  as.ue->emitInt32(vecImm.size());                                    \
-  as.ue->emitInt32(vecImmStackValues);                                \
-  for (auto const& imm : vecImm) {                                    \
-    as.ue->emitByte(imm);                                             \
-  }
-
 #define IMM_ILA do {                               \
   std::vector<uint32_t> vecImm = read_itervec(as); \
   as.ue->emitInt32(vecImm.size() / 2);             \
@@ -1291,10 +1207,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
 #define NUM_POP_THREE(a,b,c) 3
-#define NUM_POP_MMANY vecImmStackValues
-#define NUM_POP_C_MMANY (1 + vecImmStackValues)
-#define NUM_POP_V_MMANY NUM_POP_C_MMANY
-#define NUM_POP_R_MMANY NUM_POP_C_MMANY
 #define NUM_POP_MFINAL immIVA[0]
 #define NUM_POP_F_MFINAL immIVA[1]
 #define NUM_POP_C_MFINAL (immIVA[0] + 1)
@@ -1387,10 +1299,6 @@ OPCODES
 #undef NUM_POP_TWO
 #undef NUM_POP_THREE
 #undef NUM_POP_POS_N
-#undef NUM_POP_MMANY
-#undef NUM_POP_V_MMANY
-#undef NUM_POP_R_MMANY
-#undef NUM_POP_C_MMANY
 #undef NUM_POP_MFINAL
 #undef NUM_POP_F_MFINAL
 #undef NUM_POP_C_MFINAL

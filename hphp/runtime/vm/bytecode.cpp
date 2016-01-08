@@ -3109,381 +3109,6 @@ static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
   return result;
 }
 
-struct MemberState {
-  unsigned ndiscard;
-  MemberCode mcode{MEL};
-  TypedValue* base;
-  TypedValue tempBase;
-  TypedValue literal;
-  TypedValue result;
-  Variant ref;
-  Variant ref2;
-  TypedValue* curMember{nullptr};
-};
-
-enum class VectorLeaveCode {
-  ConsumeAll,
-  LeaveLast
-};
-
-template <bool setMember, bool warn, bool define, bool unset, bool reffy,
-          unsigned mdepth, // extra args on stack for set (e.g. rhs)
-          VectorLeaveCode mleave, bool saveResult>
-OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
-  // The caller must move pc to the vector immediate before calling
-  // {get, set}HelperPre.
-  const ImmVector immVec = ImmVector::createFromStream(pc);
-  const uint8_t* vec = immVec.vec();
-  assert(immVec.size() > 0);
-
-  // PC needs to be advanced before we do anything, otherwise if we
-  // raise a notice in the middle of this we could resume at the wrong
-  // instruction.
-  pc += immVec.size() + sizeof(int32_t) + sizeof(int32_t);
-
-  if (!setMember) {
-    assert(mdepth == 0);
-    assert(!define);
-    assert(!unset);
-  }
-
-  mstate.ndiscard = immVec.numStackValues();
-  auto depth = mdepth + mstate.ndiscard - 1;
-  auto const lcode = LocationCode(*vec++);
-
-  TypedValue* loc = nullptr;
-  auto const ctx = arGetContextClass(vmfp());
-
-  StringData* name;
-  TypedValue* fr = nullptr;
-  TypedValue* cref;
-  TypedValue* pname;
-
-  tvWriteUninit(&mstate.literal);
-  tvWriteUninit(mstate.ref.asTypedValue());
-  tvWriteUninit(mstate.ref2.asTypedValue());
-
-  switch (lcode) {
-  case LNL:
-    loc = frame_local_inner(vmfp(), decodeVariableSizeImm(&vec));
-    goto lcodeName;
-  case LNC:
-    loc = vmStack().indTV(depth--);
-    goto lcodeName;
-
-  lcodeName: {
-    if (define) {
-      lookupd_var(vmfp(), name, loc, fr);
-    } else {
-      lookup_var(vmfp(), name, loc, fr);
-    }
-    SCOPE_EXIT { decRefStr(name); };
-    if (fr == nullptr) {
-      if (warn) {
-        raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-      }
-      tvWriteNull(&mstate.tempBase);
-      loc = &mstate.tempBase;
-    } else {
-      loc = fr;
-    }
-    break;
-  }
-
-  case LGL:
-    loc = frame_local_inner(vmfp(), decodeVariableSizeImm(&vec));
-    goto lcodeGlobal;
-  case LGC:
-    loc = vmStack().indTV(depth--);
-    goto lcodeGlobal;
-
-  lcodeGlobal: {
-    if (define) {
-      lookupd_gbl(vmfp(), name, loc, fr);
-    } else {
-      lookup_gbl(vmfp(), name, loc, fr);
-    }
-    SCOPE_EXIT { decRefStr(name); };
-    if (fr == nullptr) {
-      if (warn) {
-        raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-      }
-      tvWriteNull(&mstate.tempBase);
-      loc = &mstate.tempBase;
-    } else {
-      loc = fr;
-    }
-    break;
-  }
-
-  case LSC:
-    cref = vmStack().indTV(mdepth);
-    pname = vmStack().indTV(depth--);
-    goto lcodeSprop;
-  case LSL:
-    cref = vmStack().indTV(mdepth);
-    pname = frame_local_inner(vmfp(), decodeVariableSizeImm(&vec));
-    goto lcodeSprop;
-
-  lcodeSprop: {
-    assert(cref->m_type == KindOfClass);
-    auto const class_ = cref->m_data.pcls;
-    auto const name = lookup_name(pname);
-    SCOPE_EXIT { decRefStr(name); };
-    auto const lookup = class_->getSProp(ctx, name);
-    loc = lookup.prop;
-    if (!lookup.prop || !lookup.accessible) {
-      raise_error("Invalid static property access: %s::%s",
-                  class_->name()->data(),
-                  name->data());
-    }
-    break;
-  }
-
-  case LL: {
-    int localInd = decodeVariableSizeImm(&vec);
-    loc = frame_local_inner(vmfp(), localInd);
-    if (warn) {
-      if (loc->m_type == KindOfUninit) {
-        raise_notice(Strings::UNDEFINED_VARIABLE,
-                     vmfp()->m_func->localVarName(localInd)->data());
-      }
-    }
-    break;
-  }
-  case LC:
-  case LR:
-    loc = vmStack().indTV(depth--);
-    break;
-  case LH:
-    assert(vmfp()->hasThis());
-    mstate.tempBase = make_tv<KindOfObject>(vmfp()->getThis());
-    loc = &mstate.tempBase;
-    break;
-
-  case InvalidLocationCode:
-    not_reached();
-  }
-
-  mstate.base = loc;
-
-  // Iterate through the members.
-  while (vec < pc) {
-    mstate.mcode = MemberCode(*vec++);
-    if (memberCodeHasImm(mstate.mcode)) {
-      auto const memberImm = decodeMemberCodeImm(&vec, mstate.mcode);
-      if (memberCodeImmIsString(mstate.mcode)) {
-        tvAsVariant(&mstate.literal) =
-          vmfp()->m_func->unit()->lookupLitstrId(memberImm);
-        assert(!isRefcountedType(mstate.literal.m_type));
-        mstate.curMember = &mstate.literal;
-      } else if (mstate.mcode == MEI) {
-        tvAsVariant(&mstate.literal) = memberImm;
-        mstate.curMember = &mstate.literal;
-      } else {
-        assert(memberCodeImmIsLoc(mstate.mcode));
-        mstate.curMember = frame_local_inner(vmfp(), memberImm);
-      }
-    } else {
-      mstate.curMember = (setMember && mstate.mcode == MW) ? nullptr
-                                             : vmStack().indTV(depth--);
-    }
-
-    if (mleave == VectorLeaveCode::LeaveLast) {
-      if (vec >= pc) {
-        assert(vec == pc);
-        break;
-      }
-    }
-
-    TypedValue* result;
-    switch (mstate.mcode) {
-    case MEL:
-    case MEC:
-    case MET:
-    case MEI:
-      if (unset) {
-        result = ElemU(
-          *mstate.ref.asTypedValue(),
-          mstate.base,
-          *mstate.curMember
-        );
-      } else if (define) {
-        result = ElemD<warn,reffy>(
-          *mstate.ref.asTypedValue(),
-          mstate.base,
-          *mstate.curMember
-        );
-      } else {
-        result =
-          // We're not really going to modify it in the non-D case, so
-          // this is safe.
-          const_cast<TypedValue*>(
-            Elem<warn>(*mstate.ref.asTypedValue(),
-                       mstate.base, *mstate.curMember)
-          );
-      }
-      break;
-    case MPL:
-    case MPC:
-    case MPT:
-      result = Prop<warn,define,unset>(
-        *mstate.ref.asTypedValue(), ctx, mstate.base, *mstate.curMember
-      );
-      break;
-    case MQT:
-      if (define) {
-        raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
-      }
-      result = nullSafeProp(
-        *mstate.ref.asTypedValue(), ctx, mstate.base,
-        mstate.curMember->m_data.pstr
-      );
-      break;
-    case MW:
-      if (setMember) {
-        assert(define);
-        result = NewElem<reffy>(*mstate.ref.asTypedValue(), mstate.base);
-      } else {
-        raise_error("Cannot use [] for reading");
-        result = nullptr;
-      }
-      break;
-    }
-    assert(result != nullptr);
-    result = ratchetRefs(result, *mstate.ref.asTypedValue(),
-                         *mstate.ref2.asTypedValue());
-    // Check whether an error occurred (i.e. no result was set).
-    if (!unset && setMember && result->m_type == KindOfUninit) {
-      return true;
-    }
-    mstate.base = result;
-  }
-
-  if (mleave == VectorLeaveCode::ConsumeAll) {
-    assert(vec == pc);
-    if (debug) {
-      if (lcode == LSC || lcode == LSL) {
-        assert(depth == int(mdepth));
-      } else {
-        assert(depth == int(mdepth) - 1);
-      }
-    }
-  }
-
-  if (saveResult) {
-    assert(!setMember);
-    // If requested, save a copy of the result.  Acquire a reference to the
-    // result via tvDup(); base points to the result but does not own a
-    // reference.
-    tvDup(*mstate.base, mstate.result);
-  }
-
-  return false;
-}
-
-// The following arguments are outputs:
-// pc:         bytecode instruction after the vector instruction
-// mstate
-//  ndiscard:  number of stack elements to discard
-//  base:      ultimate result of the vector-get
-//  tempBase:  TypedValue containing $this base, if used
-//  result:    temporary result storage
-//  ref:       temporary result storage
-//  ref2:      temporary result storage
-//  mcode:     output MemberCode for the last member if LeaveLast
-//  curMember: output last member value one if LeaveLast; but undefined
-//             if the last mcode == MW
-//
-// If saveResult is true, then upon completion of getHelperPre(), mstate.result
-// contains a reference to the result (a duplicate of what base refers to).
-// getHelperPost<true>(...)  then saves the result to its final location.
-template<bool warn,bool saveResult,VectorLeaveCode mleave>
-OPTBLD_INLINE void getHelperPre(PC& pc, MemberState& mstate) {
-  memberHelperPre<false,warn,false,false,false,0,mleave,saveResult>(
-    pc, mstate
-  );
-}
-
-OPTBLD_INLINE
-TypedValue* getHelperPost(unsigned ndiscard) {
-  // Clean up all ndiscard elements on the stack.  Actually discard
-  // only ndiscard - 1, and overwrite the last cell with the result,
-  // or if ndiscard is zero we actually need to allocate a cell.
-  for (unsigned depth = 0; depth < ndiscard; ++depth) {
-    TypedValue* tv = vmStack().indTV(depth);
-    tvRefcountedDecRef(tv);
-  }
-
-  TypedValue* tvRet;
-  if (!ndiscard) {
-    tvRet = vmStack().allocTV();
-  } else {
-    vmStack().ndiscard(ndiscard - 1);
-    tvRet = vmStack().topTV();
-  }
-  return tvRet;
-}
-
-OPTBLD_INLINE
-TypedValue* getHelper(PC& pc, MemberState& mstate) {
-  getHelperPre<true, true, VectorLeaveCode::ConsumeAll>(pc, mstate);
-  auto tvRet = getHelperPost(mstate.ndiscard);
-  // If tvRef wasn't just allocated, we've already decref'd it in
-  // the loop above. (XXX tvRef? or mstate.ref/result/tvRet)
-  tvCopy(mstate.result, *tvRet);
-  return tvRet;
-}
-
-// The following arguments are outputs:
-// pc:          bytecode instruction after the vector instruction
-// mstate
-//  ndiscard:   number of stack elements to discard
-//  base:       ultimate result of the vector-get
-//  tempBase:   TypedValue containing $this base, if used
-//  result:     temporary result storage
-//  ref:        temporary result storage
-//  ref2:       temporary result storage
-//  mcode:      output MemberCode for the last member if LeaveLast
-//  curMember:  output last member value one if LeaveLast; but undefined
-//              if the last mcode == MW
-template <bool warn, bool define, bool unset, bool reffy,
-          unsigned mdepth, // extra args on stack for set (e.g. rhs)
-          VectorLeaveCode mleave>
-OPTBLD_INLINE bool setHelperPre(PC& pc, MemberState& mstate) {
-  return memberHelperPre<true,warn,define,unset,reffy,mdepth,mleave,false>(
-    pc, mstate
-  );
-}
-
-template <unsigned mdepth>
-OPTBLD_INLINE void setHelperPost(unsigned ndiscard) {
-  // Clean up the stack.  Decref all the elements for the vector, but
-  // leave the first mdepth (they are not part of the vector data).
-  for (unsigned depth = mdepth; depth-mdepth < ndiscard; ++depth) {
-    TypedValue* tv = vmStack().indTV(depth);
-    tvRefcountedDecRef(tv);
-  }
-
-  // NOTE: currently the only instructions using this that have return
-  // values on the stack also have more inputs than the -vector, so
-  // mdepth > 0.  They also always return the original top value of
-  // the stack.
-  if (mdepth > 0) {
-    assert(mdepth == 1 &&
-           "We don't really support mdepth > 1 in setHelperPost");
-
-    if (ndiscard > 0) {
-      TypedValue* retSrc = vmStack().topTV();
-      TypedValue* dest = vmStack().indTV(ndiscard + mdepth - 1);
-      assert(dest != retSrc);
-      memcpy(dest, retSrc, sizeof *dest);
-    }
-  }
-
-  vmStack().ndiscard(ndiscard);
-}
-
 /*
  * One iop* function exists for every bytecode. They all take a single PC&
  * argument, which should be left pointing to the next bytecode to execute when
@@ -4824,14 +4449,6 @@ OPTBLD_INLINE void iopCGetS(IOP_ARGS) {
   getS<false>(pc);
 }
 
-OPTBLD_INLINE void iopCGetM(IOP_ARGS) {
-  MemberState mstate;
-  auto tvRet = getHelper(pc, mstate);
-  if (tvRet->m_type == KindOfRef) {
-    tvUnbox(tvRet);
-  }
-}
-
 static inline MInstrState& initMState() {
   auto& mstate = vmMInstrState();
   tvWriteUninit(&mstate.tvRef);
@@ -5579,23 +5196,6 @@ OPTBLD_INLINE void iopVGetS(IOP_ARGS) {
   getS<true>(pc);
 }
 
-OPTBLD_INLINE void iopVGetM(IOP_ARGS) {
-  MemberState mstate;
-  TypedValue* tv1 = vmStack().allocTV();
-  tvWriteUninit(tv1);
-  if (!setHelperPre<false, true, false, true, 1,
-      VectorLeaveCode::ConsumeAll>(pc, mstate)) {
-    if (mstate.base->m_type != KindOfRef) {
-      tvBox(mstate.base);
-    }
-    refDup(*mstate.base, *tv1);
-  } else {
-    tvWriteNull(tv1);
-    tvBox(tv1);
-  }
-  setHelperPost<1>(mstate.ndiscard);
-}
-
 OPTBLD_INLINE void iopIssetN(IOP_ARGS) {
   StringData* name;
   TypedValue* tv1 = vmStack().topTV();
@@ -5637,48 +5237,6 @@ OPTBLD_INLINE void iopIssetS(IOP_ARGS) {
   vmStack().popA();
   ss.output->m_data.num = e;
   ss.output->m_type = KindOfBoolean;
-}
-
-template <bool isEmpty>
-OPTBLD_INLINE void isSetEmptyM(PC& pc) {
-  MemberState mstate;
-  getHelperPre<false,false,VectorLeaveCode::LeaveLast>(pc, mstate);
-  // Process last member specially, in order to employ the IssetElem/IssetProp
-  // operations.
-  bool isSetEmptyResult = false;
-  switch (mstate.mcode) {
-    case MEL:
-    case MEC:
-    case MET:
-    case MEI: {
-      isSetEmptyResult = IssetEmptyElem<isEmpty>(
-        mstate.base,
-        *mstate.curMember
-      );
-      break;
-    }
-    case MPL:
-    case MPC:
-    case MPT:
-    case MQT: {
-      auto const ctx = arGetContextClass(vmfp());
-      isSetEmptyResult = IssetEmptyProp<isEmpty>(
-        ctx,
-        mstate.base,
-        *mstate.curMember
-      );
-      break;
-    }
-    case MW:
-      assert(false);
-      break;
-  }
-  auto tvRet = getHelperPost(mstate.ndiscard);
-  *tvRet = make_tv<KindOfBoolean>(isSetEmptyResult);
-}
-
-OPTBLD_INLINE void iopIssetM(IOP_ARGS) {
-  isSetEmptyM<false>(pc);
 }
 
 OPTBLD_INLINE void iopIssetL(IOP_ARGS) {
@@ -5822,10 +5380,6 @@ OPTBLD_INLINE void iopEmptyS(IOP_ARGS) {
   ss.output->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE void iopEmptyM(IOP_ARGS) {
-  isSetEmptyM<true>(pc);
-}
-
 OPTBLD_INLINE void iopAKExists(IOP_ARGS) {
   TypedValue* arr = vmStack().topTV();
   TypedValue* key = arr + 1;
@@ -5922,66 +5476,6 @@ OPTBLD_INLINE void iopSetS(IOP_ARGS) {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopSetM(IOP_ARGS) {
-  MemberState mstate;
-  if (!setHelperPre<false, true, false, false, 1,
-      VectorLeaveCode::LeaveLast>(pc, mstate)) {
-    Cell* c1 = vmStack().topC();
-    switch (mstate.mcode) {
-      case MW:
-        SetNewElem<true>(mstate.base, c1);
-        break;
-      case MEL:
-      case MEC:
-      case MET:
-      case MEI: {
-        StringData* result = SetElem<true>(mstate.base, *mstate.curMember, c1);
-        if (result) {
-          tvRefcountedDecRef(c1);
-          c1->m_type = KindOfString;
-          c1->m_data.pstr = result;
-        }
-        break;
-      }
-      case MPL:
-      case MPC:
-      case MPT: {
-        Class* ctx = arGetContextClass(vmfp());
-        SetProp<true>(ctx, mstate.base, *mstate.curMember, c1);
-        break;
-      }
-      case MQT:
-        assert(false);
-        break;
-    }
-  }
-  setHelperPost<1>(mstate.ndiscard);
-}
-
-OPTBLD_INLINE void iopSetWithRefLM(IOP_ARGS) {
-  MemberState mstate;
-  bool skip = setHelperPre<false, true, false, false, 0,
-                       VectorLeaveCode::ConsumeAll>(pc, mstate);
-  auto local = decode_la(pc);
-  if (!skip) {
-    TypedValue* from = frame_local(vmfp(), local);
-    tvAsVariant(mstate.base).setWithRef(tvAsVariant(from));
-  }
-  setHelperPost<0>(mstate.ndiscard);
-}
-
-OPTBLD_INLINE void iopSetWithRefRM(IOP_ARGS) {
-  MemberState mstate;
-  bool skip = setHelperPre<false, true, false, false, 1,
-                       VectorLeaveCode::ConsumeAll>(pc, mstate);
-  if (!skip) {
-    TypedValue* from = vmStack().top();
-    tvAsVariant(mstate.base).setWithRef(tvAsVariant(from));
-  }
-  setHelperPost<0>(mstate.ndiscard);
-  vmStack().popTV();
-}
-
 OPTBLD_INLINE void iopSetOpL(IOP_ARGS) {
   auto local = decode_la(pc);
   auto op = decode_oa<SetOpOp>(pc);
@@ -6049,46 +5543,6 @@ OPTBLD_INLINE void iopSetOpS(IOP_ARGS) {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
-  auto op = decode_oa<SetOpOp>(pc);
-  MemberState mstate;
-  if (!setHelperPre<MoreWarnings, true, false, false, 1,
-      VectorLeaveCode::LeaveLast>(pc, mstate)) {
-    TypedValue* result = nullptr;
-    Cell* rhs = vmStack().topC();
-
-    switch (mstate.mcode) {
-      case MW:
-        result = SetOpNewElem(*mstate.ref.asTypedValue(),
-                              op, mstate.base, rhs);
-        break;
-      case MEL:
-      case MEC:
-      case MET:
-      case MEI:
-        result = SetOpElem(*mstate.ref.asTypedValue(),
-                           op, mstate.base, *mstate.curMember, rhs);
-        break;
-      case MPL:
-      case MPC:
-      case MPT: {
-        Class *ctx = arGetContextClass(vmfp());
-        result = SetOpProp(*mstate.ref.asTypedValue(),
-                           ctx, op, mstate.base, *mstate.curMember, rhs);
-        break;
-      }
-      case MQT:
-        assert(false);
-        result = nullptr;
-        break;
-    }
-
-    tvRefcountedDecRef(rhs);
-    cellDup(*tvToCell(result), *rhs);
-  }
-  setHelperPost<1>(mstate.ndiscard);
-}
-
 OPTBLD_INLINE void iopIncDecL(IOP_ARGS) {
   auto local = decode_la(pc);
   auto op = decode_oa<IncDecOp>(pc);
@@ -6146,39 +5600,6 @@ OPTBLD_INLINE void iopIncDecS(IOP_ARGS) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
-  auto op = decode_oa<IncDecOp>(pc);
-  MemberState mstate;
-  TypedValue to = make_tv<KindOfUninit>();
-  if (!setHelperPre<MoreWarnings, true, false, false, 0,
-      VectorLeaveCode::LeaveLast>(pc, mstate)) {
-    switch (mstate.mcode) {
-      case MW:
-        IncDecNewElem(*mstate.ref.asTypedValue(), op, mstate.base, to);
-        break;
-      case MEL:
-      case MEC:
-      case MET:
-      case MEI:
-        IncDecElem(op, mstate.base, *mstate.curMember, to);
-        break;
-      case MPL:
-      case MPC:
-      case MPT: {
-        Class* ctx = arGetContextClass(vmfp());
-        IncDecProp(ctx, op, mstate.base, *mstate.curMember, to);
-        break;
-      }
-      case MQT:
-        assert(false);
-        break;
-    }
-  }
-  setHelperPost<0>(mstate.ndiscard);
-  Cell* c1 = vmStack().allocC();
-  memcpy(c1, &to, sizeof(TypedValue));
-}
-
 OPTBLD_INLINE void iopBindL(IOP_ARGS) {
   auto local = decode_la(pc);
   Ref* fr = vmStack().topV();
@@ -6233,17 +5654,6 @@ OPTBLD_INLINE void iopBindS(IOP_ARGS) {
   vmStack().ndiscard(2);
 }
 
-OPTBLD_INLINE void iopBindM(IOP_ARGS) {
-  MemberState mstate;
-  TypedValue* tv1 = vmStack().topTV();
-  if (!setHelperPre<false, true, false, true, 1,
-      VectorLeaveCode::ConsumeAll>(pc, mstate)) {
-    // Bind the element/property with the var on the top of the stack
-    tvBind(tv1, mstate.base);
-  }
-  setHelperPost<1>(mstate.ndiscard);
-}
-
 OPTBLD_INLINE void iopUnsetL(IOP_ARGS) {
   auto local = decode_la(pc);
   assert(local < vmfp()->m_func->numLocals());
@@ -6271,33 +5681,6 @@ OPTBLD_INLINE void iopUnsetG(IOP_ARGS) {
   assert(varEnv != nullptr);
   varEnv->unset(name);
   vmStack().popC();
-}
-
-OPTBLD_INLINE void iopUnsetM(IOP_ARGS) {
-  MemberState mstate;
-  if (!setHelperPre<false, false, true, false, 0,
-      VectorLeaveCode::LeaveLast>(pc, mstate)) {
-    switch (mstate.mcode) {
-      case MEL:
-      case MEC:
-      case MET:
-      case MEI:
-        UnsetElem(mstate.base, *mstate.curMember);
-        break;
-      case MPL:
-      case MPC:
-      case MPT: {
-        Class* ctx = arGetContextClass(vmfp());
-        UnsetProp(ctx, mstate.base, *mstate.curMember);
-        break;
-      }
-      case MQT:
-      case MW:
-        assert(false);
-        break;
-    }
-  }
-  setHelperPost<0>(mstate.ndiscard);
 }
 
 OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
@@ -6899,34 +6282,6 @@ OPTBLD_INLINE void iopFPassS(IOP_ARGS) {
     iopCGetS(origPc);
   } else {
     iopVGetS(origPc);
-  }
-}
-
-OPTBLD_INLINE void iopFPassM(IOP_ARGS) {
-  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassM));
-  auto paramId = decode_iva(pc);
-  assert(paramId < ar->numArgs());
-  if (!ar->m_func->byRef(paramId)) {
-    MemberState mstate;
-    auto tvRet = getHelper(pc, mstate);
-    if (tvRet->m_type == KindOfRef) {
-      tvUnbox(tvRet);
-    }
-  } else {
-    MemberState mstate;
-    TypedValue* tv1 = vmStack().allocTV();
-    tvWriteUninit(tv1);
-    if (!setHelperPre<false, true, false, true, 1,
-        VectorLeaveCode::ConsumeAll>(pc, mstate)) {
-      if (mstate.base->m_type != KindOfRef) {
-        tvBox(mstate.base);
-      }
-      refDup(*mstate.base, *tv1);
-    } else {
-      tvWriteNull(tv1);
-      tvBox(tv1);
-    }
-    setHelperPost<1>(mstate.ndiscard);
   }
 }
 

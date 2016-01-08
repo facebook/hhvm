@@ -30,19 +30,6 @@ std::vector<Bytecode> samples {
   bc::False {},
   bc::FPassC { 0 },
   bc::FPushFunc { 2 },
-  bc::CGetM {
-    MVector { LocationCode::LC,
-              nullptr,
-              { MElem { MemberCode::MPC } }
-            }
-  },
-  bc::CGetM {
-    MVector { LocationCode::LH,
-              nullptr,
-              { MElem { MemberCode::MPC },
-                MElem { MemberCode::MEC } }
-            }
-  },
 };
 
 TEST(Bytecode, EqualityComparable) {

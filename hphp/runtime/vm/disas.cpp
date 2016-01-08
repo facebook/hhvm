@@ -247,41 +247,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     return jmp_label(finfo, tgt);
   };
 
-  auto print_minstr = [&] {
-    auto const immVec = ImmVector::createFromStream(pc);
-    pc += immVec.size() + sizeof(int32_t) + sizeof(int32_t);
-    auto vec = immVec.vec();
-    auto const lcode = static_cast<LocationCode>(*vec++);
-
-    out.fmt(" <{}", locationCodeString(lcode));
-    if (numLocationCodeImms(lcode)) {
-      always_assert(numLocationCodeImms(lcode) == 1);
-      out.fmt(":{}", loc_name(finfo, decodeVariableSizeImm(&vec)));
-    }
-
-    while (vec < pc) {
-      auto const mcode = static_cast<MemberCode>(*vec++);
-      out.fmt(" {}", memberCodeString(mcode));
-      auto const imm = [&] { return decodeMemberCodeImm(&vec, mcode); };
-      switch (memberCodeImmType(mcode)) {
-      case MCodeImm::None:
-        break;
-      case MCodeImm::Local:
-        out.fmt(":{}", loc_name(finfo, imm()));
-        break;
-      case MCodeImm::String:
-        out.fmt(":{}", escaped(finfo.unit->lookupLitstrId(imm())));
-        break;
-      case MCodeImm::Int:
-        out.fmt(":{}", imm());
-        break;
-      }
-    }
-    assert(vec == pc);
-
-    out.fmt(">");
-  };
-
   auto print_switch = [&] {
     auto const vecLen = decode<int32_t>(pc);
     out.fmt(" <");
@@ -337,7 +302,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
-#define IMM_MA     print_minstr();
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
 #define IMM_ILA    print_itertab();
@@ -379,7 +343,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_THREE
 #undef IMM_FOUR
 
-#undef IMM_MA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA

@@ -90,27 +90,7 @@ struct MElem {
   }
 };
 
-struct MVector {
-  LocationCode lcode;
-  borrowed_ptr<php::Local> locBase;
-  std::vector<MElem> mcodes;
-
-  bool operator==(const MVector& o) const {
-    return lcode   == o.lcode &&
-           locBase == o.locBase &&
-           mcodes  == o.mcodes;
-  }
-
-  bool operator!=(const MVector& o) const {
-    return !(*this == o);
-  }
-};
-
 struct BCHashHelper {
-  static size_t hash(const MVector& vec) {
-    return vec.mcodes.size() | (static_cast<size_t>(vec.lcode) << 7);
-  }
-
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
   static size_t hash(SString s) { return s->hash(); }
 
@@ -140,14 +120,6 @@ struct BCHashHelper {
   >::type hash(const T& t) { return std::hash<T>()(t); }
 };
 
-inline uint32_t numVecPops(const MVector& mvec) {
-  uint32_t ret = numLocationCodeStackVals(mvec.lcode);
-  for (auto& mc : mvec.mcodes) {
-    ret += mcodeStackVals(mc.mcode);
-  }
-  return ret;
-}
-
 using IterTabEnt    = std::pair<IterKind,borrowed_ptr<php::Iter>>;
 using IterTab       = std::vector<IterTabEnt>;
 
@@ -162,7 +134,6 @@ using SSwitchTab    = std::vector<SSwitchTabEnt>;
 
 namespace bc {
 
-#define IMM_TY_MA       MVector
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
 #define IMM_TY_ILA      IterTab
@@ -178,7 +149,6 @@ namespace bc {
 #define IMM_TY_OA(type) type
 #define IMM_TY_VSA      std::vector<SString>
 
-#define IMM_NAME_MA(n)      mvec
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
 #define IMM_NAME_ILA(n)     iterTab
@@ -195,7 +165,6 @@ namespace bc {
 #define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
 #define IMM_NAME_VSA(n)     keys
 
-#define IMM_EXTRA_MA
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
 #define IMM_EXTRA_ILA
@@ -296,15 +265,6 @@ namespace bc {
                               not_reached();                        \
                             }
 
-#define POP_MMANY   uint32_t numPop() const { return 0 + numVecPops(mvec); } \
-                    Flavor popFlavor(uint32_t) const { not_reached(); }
-
-#define POP_C_MMANY uint32_t numPop() const { return 1 + numVecPops(mvec); } \
-                    Flavor popFlavor(uint32_t) const { not_reached(); }
-
-#define POP_R_MMANY POP_C_MMANY
-#define POP_V_MMANY POP_C_MMANY
-
 #define POP_MFINAL  uint32_t numPop() const { return arg1; } \
                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
@@ -402,10 +362,6 @@ OPCODES
 #undef POP_ONE
 #undef POP_TWO
 #undef POP_THREE
-#undef POP_MMANY
-#undef POP_C_MMANY
-#undef POP_R_MMANY
-#undef POP_V_MMANY
 #undef POP_MFINAL
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL
@@ -434,7 +390,6 @@ OPCODES
 
 // These are deliberately not undefined, so they can be used in other
 // places.
-// #undef IMM_NAME_MA
 // #undef IMM_NAME_BLA
 // #undef IMM_NAME_SLA
 // #undef IMM_NAME_ILA
@@ -450,7 +405,6 @@ OPCODES
 // #undef IMM_NAME_OA
 // #undef IMM_NAME_OA_IMPL
 
-#undef IMM_EXTRA_MA
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
 #undef IMM_EXTRA_ILA

@@ -318,9 +318,7 @@ int computeCost(const RegionDesc& region) {
 
       // Add the size of immediate vectors to the cost.
       auto const pc = sk.pc();
-      if (hasMVector(op)) {
-        cost += getMVector(pc).size();
-      } else if (hasImmVector(op)) {
+      if (hasImmVector(op)) {
         cost += getImmVector(pc).size();
       }
     }

@@ -198,42 +198,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(inst),
       show(inst.srcLoc));
 
-    auto count_stack_elems = [&] (const MVector& mvec) {
-      int32_t ret = numLocationCodeStackVals(mvec.lcode);
-      for (auto& m : mvec.mcodes) ret += mcodeStackVals(m.mcode);
-      return ret;
-    };
-
-    auto emit_mvec = [&] (const MVector& mvec) {
-      immVec.clear();
-
-      auto const lcodeImms = numLocationCodeImms(mvec.lcode);
-      immVec.push_back(mvec.lcode);
-      assert(lcodeImms == 0 || lcodeImms == 1);
-      if (lcodeImms) encodeIvaToVector(immVec, mvec.locBase->id);
-
-      for (auto& m : mvec.mcodes) {
-        immVec.push_back(m.mcode);
-        switch (memberCodeImmType(m.mcode)) {
-        case MCodeImm::None:
-          break;
-        case MCodeImm::Local:
-          encodeIvaToVector(immVec, m.immLoc->id);
-          break;
-        case MCodeImm::Int:
-          encodeToVector(immVec, int64_t{m.immInt});
-          break;
-        case MCodeImm::String:
-          encodeToVector(immVec, int32_t{ue.mergeLitstr(m.immStr)});
-          break;
-        }
-      }
-
-      ue.emitInt32(immVec.size());
-      ue.emitInt32(count_stack_elems(mvec));
-      for (size_t i = 0; i < immVec.size(); ++i) ue.emitByte(immVec[i]);
-    };
-
     auto emit_vsa = [&] (const std::vector<SString>& keys) {
       auto n = keys.size();
       ue.emitInt32(n);
@@ -326,7 +290,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       euState.defClsMap[id] = startOffset;
     };
 
-#define IMM_MA(n)      emit_mvec(data.mvec);
 #define IMM_BLA(n)     emit_switch(data.targets);
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_ILA(n)     emit_itertab(data.iterTab);
@@ -354,10 +317,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_TWO(x, y)         pop(2);
 #define POP_THREE(x, y, z)    pop(3);
 
-#define POP_MMANY      pop(count_stack_elems(data.mvec));
-#define POP_C_MMANY    pop(1); pop(count_stack_elems(data.mvec));
-#define POP_R_MMANY    POP_C_MMANY
-#define POP_V_MMANY    POP_C_MMANY
 #define POP_MFINAL     pop(data.arg1);
 #define POP_F_MFINAL   pop(data.arg2);
 #define POP_C_MFINAL   pop(1); pop(data.arg1);
@@ -428,12 +387,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
 #undef POP_CMANY
 #undef POP_SMANY
-#undef POP_MMANY
 #undef POP_FMANY
 #undef POP_CVUMANY
-#undef POP_C_MMANY
-#undef POP_R_MMANY
-#undef POP_V_MMANY
 #undef POP_MFINAL
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL

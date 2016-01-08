@@ -250,13 +250,6 @@ Type provenTypeFromLocal(const IRGS&, uint32_t locId);
 Type provenTypeFromStack(const IRGS&, BCSPOffset slot);
 
 /*
- * Assuming env is ready to translate a member instruction, analyze the type of
- * the base value and return an appropriately-specialized TypeConstraint if a
- * supported operation is detected.
- */
-TypeConstraint mInstrBaseConstraint(const IRGS& env, Type predicted);
-
-/*
  * Returns the TypeConstraint that should be used to constrain baseType for an
  * Idx bytecode.
  */
@@ -270,7 +263,6 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType);
  * The arguments to the functions are pre-unpacked bytecode immediates.
  */
 
-#define IMM_MA         int /* unused dummy placeholder */
 #define IMM_BLA        const ImmVector&
 #define IMM_SLA        const ImmVector&
 #define IMM_ILA        const ImmVector&

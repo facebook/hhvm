@@ -3476,9 +3476,6 @@ variable-length vector of subops, or a variable-length series of bytecodes,
 each representing a single operation. Work is underway to replace the member
 vector instructions with the smaller, simpler bytecodes.
 
-10.1 New member instructions
-----------------------------
-
 All bytecodes in this section produce and/or consume a value in the member base
 register (often referred to as MBR or just "member base"). The MBR is live
 starting after a Base* bytecode, modified by zero or more Dim* bytecodes, then
@@ -3491,10 +3488,9 @@ finally consumed by a final operation:
   Final Ops | live         | dead
 
 The bytecodes in this section also refer to member operations in section 9 to
-describe their semantics. Once the bytecodes in section 10.2 are eliminated,
-the documentation from section 9 can be folded into this section.
+describe their semantics.
 
-10.1a Base Operations
+10.1 Base Operations
 ---------------------
 
 BaseNC <stack index> <member op flags>    []  ->  []
@@ -3538,7 +3534,7 @@ BaseH    []  ->  []
 
   BaseH member operation.
 
-10.1b Intermediate operations
+10.2 Intermediate operations
 -----------------------------
 
 DimL   <local id>    <prop/elem op> <member op flags>    []  ->  []
@@ -3561,7 +3557,7 @@ FPassDimNewElem <param id>    []  ->  []
   Fatal error or NewElem operation, depending on the flags immediate or
   reffiness of the specified parameter.
 
-10.1c Final operations
+10.3 Final operations
 ----------------------
 
 All final operations take a <stack count> immediate as %0, which indicates the
@@ -3660,219 +3656,6 @@ SetWithRefLML <local id> <local id>    []  ->  []
 SetWithRefRML <local id>    [R]  ->  []
 
   Set member %1, preserving reffiness of stack input.
-
-10.2 Legacy member instructions
--------------------------------
-
-The member codes that represent immediate literal data (ET, EI, PT) are
-implemented using the corresponding EC or PC intermediate operation: they
-behave exactly as though that literal data had been pushed on the stack as a
-cell, then consumed by an ElemC* or PropC* operation.
-
-CGetM <loc-desc/M-vector>    [C..C]  ->  [C]
-
-  Get member as cell.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+----------
-    C          | BaseC      EC     | ElemCW       | CGetElemC
-    R          | BaseR      PC     | PropCW       | CGetPropC
-    L          | BaseLW     EL     | ElemLW       | CGetElemL
-    NC         | BaseNCW    PL     | PropLW       | CGetPropL
-    NL         | BaseNLW    W      | N/A          | N/A
-    GC         | BaseGCW
-    GL         | BaseGLW
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
-
-  Get member as ref.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+------------
-    C          | BaseC      EC     |  ElemCD      | VGetElemC
-    R          | BaseR      PC     |  PropCD      | VGetPropC
-    L          | BaseLD     EL     |  ElemLD      | VGetElemL
-    NC         | BaseNCD    PL     |  PropLD      | VGetPropL
-    NL         | BaseNLD    W      |  NewElem     | VGetNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-FPassM <param id> <loc-desc/M-vector>    [C..C]  ->  [F]
-
-  FPI pass parameter. This instruction behaves as CGetM if parameter %1 is pass
-  by value, or it behaves like VGetM if parameter %1 is pass by reference. Then
-  it passes the value produced to the callee.
-
-IssetM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
-
-  Isset member.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemC        | IssetElemC
-    R          | BaseR      PC     | PropC        | IssetPropC
-    L          | BaseL      EL     | ElemL        | IssetElemL
-    NC         | BaseNC     PL     | PropL        | IssetPropL
-    NL         | BaseNL     W      | N/A          | N/A
-    GC         | BaseGC
-    GL         | BaseGL
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-EmptyM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
-
-  Empty member.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemC        | EmptyElemC
-    R          | BaseR      PC     | PropC        | EmptyPropC
-    L          | BaseL      EL     | ElemL        | EmptyElemL
-    NC         | BaseNC     PL     | PropL        | EmptyPropL
-    NL         | BaseNL     W      | N/A          | N/A
-    GC         | BaseGC
-    GL         | BaseGL
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-SetM <loc-desc/M-vector>    [C..C C]  ->  [C]
-
-  Set member.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCD       | SetElemC
-    R          | BaseR      PC     | PropCD       | SetPropC
-    L          | BaseLD     EL     | ElemLD       | SetElemL
-    NC         | BaseNCD    PL     | PropLD       | SetPropL
-    NL         | BaseNLD    W      | NewElem      | SetNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-SetWithRefLM <loc-desc/M-vector> <local variable id> [C..C] -> []
-
-  Set member preserving the reffiness of the local.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
-    R          | BaseR      PC     | PropCD       | SetPropC
-    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
-    NC         | BaseNCD    PL     | PropLD       | SetPropL
-    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-SetWithRefRM <loc-desc/M-vector> [C..C R] -> []
-
-  Set member preserving the reffiness of the stack element.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCD       | SetWithRefElemC
-    R          | BaseR      PC     | PropCD       | SetPropC
-    L          | BaseLD     EL     | ElemLD       | SetWithRefElemL
-    NC         | BaseNCD    PL     | PropLD       | SetPropL
-    NL         | BaseNLD    W      | NewElem      | SetWithRefNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-SetOpM <op> <loc-desc/M-vector>    [C..C C]  ->  [C]
-
-  Set op member.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-------------
-    C          | BaseC      EC     | ElemCWD      | SetOpElemC
-    R          | BaseR      PC     | PropCWD      | SetOpPropC
-    L          | BaseLWD    EL     | ElemLWD      | SetOpElemL
-    NC         | BaseNCWD   PL     | PropLWD      | SetOpPropL
-    NL         | BaseNLWD   W      | NewElem      | SetOpNewElem
-    GC         | BaseGCWD
-    GL         | BaseGLWD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-IncDecM <op> <loc-desc/M-vector>    [C..C]  ->  [C]
-
-  Increment/decrement member.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+--------------
-    C          | BaseC      EC     | ElemCWD      | IncDecElemC
-    R          | BaseR      PC     | PropCWD      | IncDecPropC
-    L          | BaseLWD    EL     | ElemLWD      | IncDecElemL
-    NC         | BaseNCWD   PL     | PropLWD      | IncDecPropL
-    NL         | BaseNLWD   W      | NewElem      | IncDecNewElem
-    GC         | BaseGCWD
-    GL         | BaseGLWD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-BindM <loc-desc/M-vector>    [C..C V]  ->  [V]
-
-  Bind member.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+------------
-    C          | BaseC      EC     | ElemCD       | BindElemC
-    R          | BaseR      PC     | PropCD       | BindPropC
-    L          | BaseLD     EL     | ElemLD       | BindElemL
-    NC         | BaseNCD    PL     | PropLD       | BindPropL
-    NL         | BaseNLD    W      | NewElem      | BindNewElem
-    GC         | BaseGCD
-    GL         | BaseGLD
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
-UnsetM <loc-desc/M-vector>    [C..C]  ->  []
-
-  Unset member.
-
-    location     Base*      member   intermediate   final
-    descriptor   operation  code     operation      operation
-    -----------+----------  -------+--------------+-----------
-    C          | BaseC      EC     | ElemCU       | UnsetElemC
-    R          | BaseR      PC     | PropCU       | UnsetPropC
-    L          | BaseL      EL     | ElemLU       | UnsetElemL
-    NC         | BaseNC     PL     | PropLU       | UnsetPropL
-    NL         | BaseNL     W      | N/A          | N/A
-    GC         | BaseGC
-    GL         | BaseGL
-    SC         | BaseSC
-    SL         | BaseSL
-    H          | BaseH
-
 
 11. Iterator instructions
 -------------------------

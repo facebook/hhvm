@@ -169,10 +169,7 @@ int immSize(PC origPC, int idx) {
     if (idx >= 3) pc += immSize(origPC, 2);
     int prefixes, vecElemSz;
     auto itype = immType(op, idx);
-    if (itype == MA) {
-      prefixes = 2;
-      vecElemSz = sizeof(uint8_t);
-    } else if (itype == BLA) {
+    if (itype == BLA) {
       prefixes = 1;
       vecElemSz = sizeof(Offset);
     } else if (itype == ILA) {
@@ -196,8 +193,7 @@ int immSize(PC origPC, int idx) {
 
 bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return type == MA || type == BLA || type == SLA || type == ILA ||
-    type == VSA;
+  return type == BLA || type == SLA || type == ILA || type == VSA;
 }
 
 bool hasImmVector(Op opcode) {
@@ -251,28 +247,6 @@ T decodeImm(const unsigned char** immPtr) {
   return val;
 }
 
-int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode) {
-  switch (mcode) {
-    case MEL:
-    case MPL:
-      return decodeVariableSizeImm(immPtr);
-
-    case MET:
-    case MPT:
-    case MQT:
-      return decodeImm<int32_t>(immPtr);
-
-    case MEI:
-      return decodeImm<int64_t>(immPtr);
-
-    case MEC:
-    case MPC:
-    case MW:
-      break;
-  }
-  not_reached();
-}
-
 // TODO: merge with emitIVA in unit.h
 size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   if (LIKELY((n & 0x7f) == n)) {
@@ -282,12 +256,6 @@ size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   assert((n & 0x7fffffff) == n);
   *reinterpret_cast<uint32_t*>(buf) = (uint32_t(n) << 1) | 0x1;
   return 4;
-}
-
-void encodeIvaToVector(std::vector<unsigned char>& out, int32_t val) {
-  size_t currentLen = out.size();
-  out.resize(currentLen + 4);
-  out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
 }
 
 int instrLen(PC const origPC) {
@@ -303,7 +271,6 @@ int instrLen(PC const origPC) {
 Offset* instrJumpOffset(PC const origPC) {
   static const int8_t jumpMask[] = {
 #define IMM_NA 0
-#define IMM_MA 0
 #define IMM_IVA 0
 #define IMM_I64A 0
 #define IMM_DA 0
@@ -325,7 +292,6 @@ Offset* instrJumpOffset(PC const origPC) {
 #define O(name, imm, pop, push, flags) imm,
     OPCODES
 #undef IMM_NA
-#undef IMM_MA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_DA
@@ -449,10 +415,6 @@ int instrNumPops(PC pc) {
 #define TWO(...) 2
 #define THREE(...) 3
 #define FOUR(...) 4
-#define MMANY -1
-#define C_MMANY -2
-#define V_MMANY -2
-#define R_MMANY -2
 #define MFINAL -3
 #define F_MFINAL -6
 #define C_MFINAL -5
@@ -469,10 +431,6 @@ int instrNumPops(PC pc) {
 #undef TWO
 #undef THREE
 #undef FOUR
-#undef MMANY
-#undef C_MMANY
-#undef V_MMANY
-#undef R_MMANY
 #undef MFINAL
 #undef F_MFINAL
 #undef C_MFINAL
@@ -499,16 +457,12 @@ int instrNumPops(PC pc) {
   if (n == -6) return getImm(pc, 1).u_IVA;
   // Other final member operations pop their first immediate + 1
   if (n == -5) return getImm(pc, 0).u_IVA + 1;
-  // For instructions with vector immediates, we have to scan the
-  // contents of the vector immediate to determine how many values
-  // are popped
-  assert(n == -1 || n == -2);
+
+  // For instructions with vector immediates, we have to scan the contents of
+  // the vector immediate to determine how many values are popped
+  assert(n == -1);
   ImmVector iv = getImmVector(pc);
-  // Count the number of values on the stack accounted for by the
-  // ImmVector's location and members
   int k = iv.numStackValues();
-  // If this instruction also takes a RHS, count that too
-  if (n == -2) ++k;
   return k;
 }
 
@@ -557,40 +511,6 @@ FlavorDesc doFlavor(uint32_t i, FlavorDesc f, Args&&... args) {
   return i == 0 ? f : doFlavor(i - 1, std::forward<Args>(args)...);
 }
 
-FlavorDesc minstrFlavor(PC op, uint32_t i, FlavorDesc top) {
-  if (top != NOV) {
-    if (i == 0) return top;
-    --i;
-  }
-
-  // First, check for location codes that have a non-Cell stack input.
-  auto const location = getMLocation(op);
-  auto const numStack = getImmVector(op).numStackValues();
-  switch (location.lcode) {
-    // No stack input for the location.
-    case LL: case LH: case LGL: case LNL: break;
-
-    // CV on top. Handled below.
-    case LC: case LGC: case LNC: break;
-
-    // AV on top.
-    case LSL: case LSC:
-      if (i == 0) return AV;
-      break;
-
-    // RV on the bottom.
-    case LR:
-      if (i == numStack - 1) return RV;
-      break;
-
-    case InvalidLocationCode:
-      always_assert(false);
-  }
-
-  if (i < numStack) return CV;
-  always_assert(0 && "Invalid stack index");
-}
-
 FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   always_assert(i < uint32_t(instrNumPops(op)));
   return flavor;
@@ -607,16 +527,11 @@ FlavorDesc baseSFlavor(PC pc, uint32_t i) {
  * Returns the expected input flavor of stack slot idx.
  */
 FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
-  auto constexpr nov = NOV;
 #define NOV always_assert(0 && "Opcode has no stack inputs");
 #define ONE(f1) return doFlavor(idx, f1);
 #define TWO(f1, f2) return doFlavor(idx, f1, f2);
 #define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
-#define MMANY return minstrFlavor(op, idx, nov);
-#define C_MMANY return minstrFlavor(op, idx, CV);
-#define V_MMANY return minstrFlavor(op, idx, VV);
-#define R_MMANY return minstrFlavor(op, idx, RV);
 #define MFINAL return manyFlavor(op, idx, CRV);
 #define F_MFINAL MFINAL
 #define C_MFINAL return idx == 0 ? CV : CRV;
@@ -636,10 +551,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef TWO
 #undef THREE
 #undef FOUR
-#undef MMANY
-#undef C_MMANY
-#undef V_MMANY
-#undef R_MMANY
 #undef MFINAL
 #undef F_MFINAL
 #undef C_MFINAL
@@ -834,40 +745,6 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
   not_reached();
 }
 
-const char* const locationNames[] = { "L", "C", "H",
-                                      "GL", "GC",
-                                      "NL", "NC",
-                                      "SL", "SC",
-                                      "R" };
-const size_t locationNamesCount = sizeof(locationNames) /
-                                  sizeof(*locationNames);
-static_assert(locationNamesCount == NumLocationCodes,
-              "Location code missing for locationCodeString");
-
-const char* locationCodeString(LocationCode lcode) {
-  assert(lcode >= 0 && lcode < NumLocationCodes);
-  return locationNames[lcode];
-}
-
-LocationCode parseLocationCode(const char* s) {
-  if (!*s) return InvalidLocationCode;
-
-  switch (*s) {
-  case 'L':   return LL;
-  case 'C':   return LC;
-  case 'H':   return LH;
-  case 'R':   return LR;
-  default:
-    int incr = (s[1] == 'C');
-    switch (*s) {
-    case 'G': return LocationCode(LGL + incr);
-    case 'N': return LocationCode(LNL + incr);
-    case 'S': return LocationCode(LSL + incr);
-    }
-    return InvalidLocationCode;
-  }
-}
-
 const char* const memberNames[] =
   { "EC", "PC", "EL", "PL", "ET", "PT", "QT", "EI", "W"};
 const size_t memberNamesCount = sizeof(memberNames) /
@@ -942,46 +819,8 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
   out << " " << subopToName(immVal);            \
 } while (false)
 
-#define READVEC() do {                                                  \
-  int sz = *((int*)&*it);                                               \
-  it += sizeof(int) * 2;                                                \
-  const uint8_t* const start = (uint8_t*)it;                             \
-  out << " <";                                                          \
-  if (sz > 0) {                                                         \
-    int immVal = (int)*((unsigned char*)&*it);                          \
-    out << ((immVal >= 0 && size_t(immVal) < locationNamesCount) ?      \
-            locationCodeString(LocationCode(immVal)) : "?");            \
-    it += sizeof(unsigned char);                                        \
-    int numLocImms = numLocationCodeImms(LocationCode(immVal));         \
-    for (int i = 0; i < numLocImms; ++i) {                              \
-      out << ':' << decodeVariableSizeImm((const uint8_t**)&it);        \
-    }                                                                   \
-    while (reinterpret_cast<const uint8_t*>(it) - start < sz) {         \
-      immVal = (int)*((unsigned char*)&*it);                            \
-      out << " " << ((immVal >=0 && size_t(immVal) < memberNamesCount) ? \
-                     memberCodeString(MemberCode(immVal)) : "?");       \
-      it += sizeof(unsigned char);                                      \
-      if (memberCodeHasImm(MemberCode(immVal))) {                       \
-        int64_t imm = decodeMemberCodeImm((const uint8_t**)&it,         \
-                                          MemberCode(immVal));          \
-        out << ':';                                                     \
-        if (memberCodeImmIsString(MemberCode(immVal)) && u) {           \
-          const StringData* str = u->lookupLitstrId(imm);               \
-          int len = str->size();                                        \
-          String escaped = string_addslashes(str->data(), len);         \
-          out << '"' << escaped.data() << '"';                          \
-        } else {                                                        \
-          out << imm;                                                   \
-        }                                                               \
-      }                                                                 \
-    }                                                                   \
-    assert(reinterpret_cast<const uint8_t*>(it) - start == sz);         \
-  }                                                                     \
-  out << ">";                                                           \
-} while (false)
-
 #define READLITSTR(sep) do {                                      \
-  Id id = decode_raw<Id>(it);                                       \
+  Id id = decode_raw<Id>(it);                                     \
   if (id < 0) {                                                   \
     assert(op == OpSSwitch);                                      \
     out << sep << "-";                                            \
@@ -1042,7 +881,6 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
 #define FOUR(a, b, c, d) H_##a; H_##b; H_##c; H_##d;
 #define NA
-#define H_MA READVEC()
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
 #define H_ILA READIVEC()
@@ -1089,7 +927,6 @@ OPCODES
 #undef THREE
 #undef FOUR
 #undef NA
-#undef H_MA
 #undef H_BLA
 #undef H_SLA
 #undef H_ILA
@@ -1332,11 +1169,7 @@ ImmVector getImmVector(PC opcode) {
   int numImm = numImmediates(op);
   for (int k = 0; k < numImm; ++k) {
     ArgType t = immType(op, k);
-    if (t == MA) {
-      void* vp = getImmPtr(opcode, k);
-      return ImmVector::createFromStream(
-        static_cast<const uint8_t*>(vp));
-    } else if (t == BLA || t == SLA || t == ILA) {
+    if (t == BLA || t == SLA || t == ILA) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp));
@@ -1348,85 +1181,6 @@ ImmVector getImmVector(PC opcode) {
   }
 
   not_reached();
-}
-
-MInstrLocation getMLocation(PC opcode) {
-  auto immVec = getImmVector(opcode);
-  auto vec = immVec.vec();
-  auto const lcode = LocationCode(*vec++);
-  auto const imm = numLocationCodeImms(lcode) ? decodeVariableSizeImm(&vec)
-                                              : 0;
-  return {lcode, imm};
-}
-
-bool hasMVector(Op op) {
-  auto const num = numImmediates(op);
-  for (int i = 0; i < num; ++i) {
-    if (immType(op, i) == MA) return true;
-  }
-  return false;
-}
-
-std::vector<MVectorItem> getMVector(PC opcode) {
-  auto immVec = getImmVector(opcode);
-  std::vector<MVectorItem> result;
-  auto it = immVec.vec();
-  auto end = it + immVec.size();
-
-  // Skip the LocationCode and its immediate
-  auto const lcode = LocationCode(*it++);
-  if (numLocationCodeImms(lcode)) decodeVariableSizeImm(&it);
-
-  while (it < end) {
-    auto const mcode = MemberCode(*it++);
-    auto const imm = memberCodeHasImm(mcode) ? decodeMemberCodeImm(&it, mcode)
-                                             : 0;
-    result.push_back({mcode, imm});
-  }
-
-  return result;
-}
-
-const uint8_t* ImmVector::findLastMember() const {
-  assert(m_length > 0);
-
-  // Loop that does basically the same as numStackValues(), except
-  // stop at the last.
-  const uint8_t* vec = m_start;
-  const LocationCode locCode = LocationCode(*vec++);
-  const int numLocImms = numLocationCodeImms(locCode);
-  for (int i = 0; i < numLocImms; ++i) {
-    decodeVariableSizeImm(&vec);
-  }
-
-  for (;;) {
-    const uint8_t* ret = vec;
-    MemberCode code = MemberCode(*vec++);
-    if (memberCodeHasImm(code)) {
-      decodeMemberCodeImm(&vec, code);
-    }
-    if (vec - m_start == m_length) {
-      return ret;
-    }
-    assert(vec - m_start < m_length);
-  }
-
-  not_reached();
-}
-
-bool ImmVector::decodeLastMember(const Unit* u,
-                                 StringData*& sdOut,
-                                 MemberCode& membOut,
-                                 int64_t* strIdOut /*=NULL*/) const {
-  const uint8_t* vec = findLastMember();
-  membOut = MemberCode(*vec++);
-  if (memberCodeImmIsString(membOut)) {
-    int64_t strId = decodeMemberCodeImm(&vec, membOut);
-    if (strIdOut) *strIdOut = strId;
-    sdOut = u->lookupLitstrId(strId);
-    return true;
-  }
-  return false;
 }
 
 int instrFpToArDelta(const Func* func, PC opcode) {
@@ -1456,48 +1210,6 @@ std::string show(MInstrAttr mia) {
 #undef X
 
   return ret;
-}
-
-const MInstrInfo& getMInstrInfo(Op op) {
-  static const MInstrInfo mInstrInfo[] = {
-#define MII(instr, attrs, bS, iS, vC, fN)                               \
-    {MI_##instr##M,                                                     \
-     {MInstrAttr((attrs) & MIA_base), /* LL */                          \
-      MIA_none,                       /* LC */                          \
-      MIA_none,                       /* LH */                          \
-      MInstrAttr((attrs) & MIA_base), /* LGL */                         \
-      MInstrAttr((attrs) & MIA_base), /* LGC */                         \
-      MInstrAttr((attrs) & MIA_base), /* LNL */                         \
-      MInstrAttr((attrs) & MIA_base), /* LNC */                         \
-      MIA_none,                       /* LSL */                         \
-      MIA_none,                       /* LSC */                         \
-      MIA_none},                      /* LR */                          \
-     {MInstrAttr((attrs) & MIA_intermediate), /* MEC */                 \
-      MInstrAttr((attrs) & MIA_intermediate), /* MPC */                 \
-      MInstrAttr((attrs) & MIA_intermediate), /* MEL */                 \
-      MInstrAttr((attrs) & MIA_intermediate), /* MPL */                 \
-      MInstrAttr((attrs) & MIA_intermediate), /* MET */                 \
-      MInstrAttr((attrs) & MIA_intermediate), /* MPT */                 \
-      MInstrAttr((attrs) & MIA_intermediate), /* MQT */                 \
-      MInstrAttr((attrs) & MIA_intermediate), /* MEI */                 \
-      MInstrAttr((attrs) & MIA_final)},       /* MW */                  \
-     unsigned(vC), bool((attrs) & MIA_new), bool((attrs) & MIA_final_get), \
-     #instr},
-    MINSTRS
-#undef MII
-  };
-
-  switch (op) {
-#define MII(instr_, attrs, bS, iS, vC, fN) \
-  case Op##instr_##M: { \
-    const MInstrInfo& mii = mInstrInfo[MI_##instr_##M]; \
-    assert(mii.instr() == MI_##instr_##M); \
-    return mii; \
-  }
-  MINSTRS
-#undef MII
-  default: not_reached();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

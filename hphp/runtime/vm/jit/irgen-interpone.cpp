@@ -227,21 +227,6 @@ interpOutputLocals(IRGS& env,
       smashesAllLocals = true;
       break;
 
-    case OpFPassM:
-      switch (inst.immVec.locationCode()) {
-      case LL:
-      case LNL:
-      case LNC:
-        // FPassM may or may not affect local types, depending on whether it is
-        // passing to a parameter that is by reference.  If we're InterpOne'ing
-        // it, just assume it might be by reference and smash all the locals.
-        smashesAllLocals = true;
-        break;
-      default:
-        break;
-      }
-      break;
-
     case OpSetOpL:
     case OpIncDecL: {
       assertx(pushedType.hasValue());
@@ -333,59 +318,6 @@ interpOutputLocals(IRGS& env,
     case OpSetWithRefLML:
     case OpSetWithRefRML:
       smashesAllLocals = true;
-      break;
-
-    case OpSetM:
-    case OpSetOpM:
-    case OpBindM:
-    case OpVGetM:
-    case OpSetWithRefLM:
-    case OpSetWithRefRM:
-    case OpUnsetM:
-    case OpIncDecM:
-      switch (inst.immVec.locationCode()) {
-        case LL: {
-          auto const& mii = getMInstrInfo(inst.mInstrOp());
-          auto const& base = inst.inputs[mii.valCount()];
-          assertx(base.space == Location::Local);
-
-          // MInstrEffects expects to be used in the context of a normally
-          // translated instruction, not an interpOne. The two important
-          // differences are that the base is normally a PtrTo* and we need to
-          // supply an IR opcode representing the operation. SetWithRefElem is
-          // used instead of SetElem because SetElem makes a few assumptions
-          // about side exits that interpOne won't do.
-          auto const baseType = env.irb->localType(
-            base.offset, DataTypeSpecific
-          ).ptr(Ptr::Frame);
-          auto const isUnset = inst.op() == OpUnsetM;
-          auto const isProp = mcodeIsProp(inst.immVecM[0]);
-
-          if (isUnset && isProp) break;
-
-          // NullSafe (Q) props don't change the types of locals.
-          if (inst.immVecM[0] == MQT) break;
-
-          auto op = isProp ? SetProp : isUnset ? UnsetElem : SetWithRefElem;
-          MInstrEffects effects(op, baseType);
-          if (effects.baseValChanged) {
-            auto const ty = effects.baseType.deref();
-            assertx((ty <= TCell ||
-                    ty <= TBoxedCell) ||
-                    curFunc(env)->isPseudoMain());
-            setLocType(base.offset, handleBoxiness(ty, ty));
-          }
-          break;
-        }
-
-        case LNL:
-        case LNC:
-          smashesAllLocals = true;
-          break;
-
-        default:
-          break;
-      }
       break;
 
     case OpMIterInitK:

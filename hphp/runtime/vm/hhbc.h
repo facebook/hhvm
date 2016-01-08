@@ -41,15 +41,14 @@ struct Func;
  * otherwise, it's 4 bytes.  The immediate has to be logical-shifted to the
  * right by one to get rid of the flag bit.
  *
- * The types in this macro for MA, BLA, and SLA are meaningless since they are
- * never read out of ArgUnion (they use ImmVector and ImmVectorO).
+ * The types in this macro for BLA and SLA are meaningless since they are never
+ * read out of ArgUnion (they use ImmVector and ImmVectorO).
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
  */
 #define ARGTYPES                                                          \
   ARGTYPE(NA,     void*)         /* unused */                             \
-  ARGTYPEVEC(MA,  int32_t)       /* Member vector immediate */            \
   ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */   \
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */       \
   ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */        \
@@ -123,74 +122,6 @@ enum InstrFlags {
   CF_FF = (CF | FF)
 };
 
-enum LocationCode {
-  // Base is the object stored in a local, a cell, or $this
-  LL,
-  LC,
-  LH,
-
-  // Base is the global name referred to by a cell or a local.
-  LGL,
-  LGC,
-
-  // Base is the name of a local, given by a cell or the value of a
-  // local.
-  LNL,
-  LNC,
-
-  /*
-   * Base is a static property member of a class.  The S-vector takes
-   * two things to define a base.  The classref portion comes at the
-   * end of the M-vector, and the property name can be defined by
-   * either a cell or a local immediate.
-   */
-  LSL,
-  LSC,
-
-  // Base is a function return value.
-  LR,
-
-  InvalidLocationCode, // keep this last
-};
-constexpr int NumLocationCodes = InvalidLocationCode;
-
-inline int numLocationCodeImms(LocationCode lc) {
-  switch (lc) {
-  case LL: case LGL: case LNL: case LSL:
-    return 1;
-  case LC: case LH: case LGC: case LNC: case LSC: case LR:
-    return 0;
-  case InvalidLocationCode:
-    break;
-  }
-  not_reached();
-}
-
-inline int numLocationCodeStackVals(LocationCode lc) {
-  switch (lc) {
-  case LL: case LH: case LGL: case LNL:
-    return 0;
-  case LC: case LGC: case LNC: case LSL: case LR:
-    return 1;
-  case LSC:
-    return 2;
-  case InvalidLocationCode:
-    break;
-  }
-  not_reached();
-}
-
-// Returns string representation of `lc'.  (Pointer to internal static
-// data, does not need to be freed.)
-const char* locationCodeString(LocationCode lc);
-
-// Grok a LocationCode from a string---if the string doesn't represent
-// a location code, returns InvalidLocationCode.  This looks at at
-// most the first two bytes in `s'---the parse will not fail if there
-// is more junk after the first two bytes.
-LocationCode parseLocationCode(const char* s);
-
-
 /**
  * E - an element, $x['y']
  * P - a property, $x->y
@@ -244,78 +175,6 @@ enum MInstrAttr {
 };
 
 std::string show(MInstrAttr);
-
-// MII(instr,  * in *M
-//     attrs,  operation attributes
-//     bS,     base operation suffix
-//     iS,     intermediate operation suffix
-//     vC,     final value count (0 or 1)
-//     fN)     final new element operation name
-#define MINSTRS \
-  MII(CGet,   MIA_warn|MIA_final_get,            W,  W, 0, NotSuppNewElem) \
-  MII(VGet,   MIA_define|MIA_reffy|MIA_new|MIA_final_get,               \
-                                                 D,  D, 0, VGetNewElem) \
-  MII(Isset,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
-  MII(Empty,  MIA_final_get,                      ,   , 0, NotSuppNewElem) \
-  MII(Set,    MIA_define|MIA_new,                D,  D, 1, SetNewElem)  \
-  MII(SetOp,  MIA_more_warn|MIA_define|MIA_new|MIA_final_get,           \
-                                                WD, WD, 1, SetOpNewElem) \
-  MII(IncDec, MIA_more_warn|MIA_define|MIA_new|MIA_final_get,           \
-                                                WD, WD, 0, IncDecNewElem) \
-  MII(Bind,   MIA_define|MIA_reffy|MIA_new|MIA_final_get,               \
-                                                 D,  D, 1, BindNewElem) \
-  MII(Unset,  MIA_unset,                          ,  U, 0, NotSuppNewElem) \
-  MII(SetWithRefL,MIA_define|MIA_reffy|MIA_new|MIA_final_get,           \
-                                                 D,  D, 1, SetWithRefNewElem) \
-  MII(SetWithRefR,MIA_define|MIA_reffy|MIA_new|MIA_final_get,           \
-                                                 D,  D, 1, SetWithRefNewElem)
-
-enum MInstr {
-#define MII(instr, attrs, bS, iS, vC, fN) \
-  MI_##instr##M,
-  MINSTRS
-#undef MII
-};
-
-struct MInstrInfo {
-  MInstr     m_instr;
-  MInstrAttr m_baseOps[NumLocationCodes];
-  MInstrAttr m_intermediateOps[NumMemberCodes];
-  unsigned   m_valCount;
-  bool       m_newElem;
-  bool       m_finalGet;
-  const char* m_name;
-
-  MInstr instr() const {
-    return m_instr;
-  }
-
-  MInstrAttr getAttr(LocationCode lc) const {
-    assert(lc < NumLocationCodes);
-    return m_baseOps[lc];
-  }
-
-  MInstrAttr getAttr(MemberCode mc) const {
-    assert(mc < NumMemberCodes);
-    return m_intermediateOps[mc];
-  }
-
-  unsigned valCount() const {
-    return m_valCount;
-  }
-
-  bool newElem() const {
-    return m_newElem;
-  }
-
-  bool finalGet() const {
-    return m_finalGet;
-  }
-
-  const char* name() const {
-    return m_name;
-  }
-};
 
 inline bool memberCodeHasImm(MemberCode mc) {
   return mc == MEL || mc == MPL || mc == MET ||
@@ -673,12 +532,10 @@ constexpr int32_t kMaxConcatN = 4;
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetQuietG,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetS,           NA,               TWO(AV,CV),      ONE(CV),    NF) \
-  O(CGetM,           ONE(MA),          MMANY,           ONE(CV),    NF) \
   O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
   O(VGetN,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetS,           NA,               TWO(AV,CV),      ONE(VV),    NF) \
-  O(VGetM,           ONE(MA),          MMANY,           ONE(VV),    NF) \
   O(AGetC,           NA,               ONE(CV),         ONE(AV),    NF) \
   O(AGetL,           ONE(LA),          NOV,             ONE(AV),    NF) \
   O(GetMemoKey,      NA,               ONE(CV),         ONE(CV),    NF) \
@@ -687,12 +544,10 @@ constexpr int32_t kMaxConcatN = 4;
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
-  O(IssetM,          ONE(MA),          MMANY,           ONE(CV),    NF) \
   O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(EmptyN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
-  O(EmptyM,          ONE(MA),          MMANY,           ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(LA,                                            \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
@@ -702,32 +557,23 @@ constexpr int32_t kMaxConcatN = 4;
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetS,            NA,               THREE(CV,AV,CV), ONE(CV),    NF) \
-  O(SetM,            ONE(MA),          C_MMANY,         ONE(CV),    NF) \
-  O(SetWithRefLM,    TWO(MA,LA),       MMANY,           NOV,        NF) \
-  O(SetWithRefRM,    ONE(MA),          R_MMANY,         NOV,        NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
   O(SetOpN,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpS,          ONE(OA(SetOpOp)), THREE(CV,AV,CV), ONE(CV),    NF) \
-  O(SetOpM,          TWO(OA(SetOpOp),                                   \
-                       MA),            C_MMANY,         ONE(CV),    NF) \
   O(IncDecL,         TWO(LA,                                            \
                        OA(IncDecOp)),  NOV,             ONE(CV),    NF) \
   O(IncDecN,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         ONE(OA(IncDecOp)),TWO(AV,CV),      ONE(CV),    NF) \
-  O(IncDecM,         TWO(OA(IncDecOp),                                  \
-                       MA),            MMANY,           ONE(CV),    NF) \
   O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
   O(BindN,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindG,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindS,           NA,               THREE(VV,AV,CV), ONE(VV),    NF) \
-  O(BindM,           ONE(MA),          V_MMANY,         ONE(VV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
-  O(UnsetM,          ONE(MA),          MMANY,           NOV,        NF) \
   /* NOTE: isFPush below relies on the grouping of FPush* here */       \
   O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        NF) \
@@ -755,7 +601,6 @@ constexpr int32_t kMaxConcatN = 4;
   O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassG,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
-  O(FPassM,          TWO(IVA,MA),      MMANY,           ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
@@ -989,8 +834,6 @@ constexpr bool isValidOpcode(Op op) {
   return op > OpLowInvalid && op < OpHighInvalid;
 }
 
-const MInstrInfo& getMInstrInfo(Op op);
-
 inline MOpFlags getQueryMOpFlags(QueryMOp op) {
   switch (op) {
     case QueryMOp::CGet:  return MOpFlags::Warn;
@@ -1059,7 +902,6 @@ struct ImmVector {
 
   bool isValid() const { return m_start != 0; }
 
-  const uint8_t* vec() const { return m_start; }
   const int32_t* vec32() const {
     return reinterpret_cast<const int32_t*>(m_start);
   }
@@ -1071,8 +913,6 @@ struct ImmVector {
     return reinterpret_cast<const StrVecItem*>(m_start);
   }
 
-  LocationCode locationCode() const { return LocationCode(*vec()); }
-
   /*
    * Returns the length of the immediate vector in bytes (for M
    * vectors) or elements (for switch vectors)
@@ -1081,25 +921,9 @@ struct ImmVector {
 
   /*
    * Returns the number of elements on the execution stack that this vector
-   * will need to access.  Includes stack elements for both the base and
-   * members, but not the RHS of any set operations.
+   * will need to access.
    */
   int numStackValues() const { return m_numStack; }
-
-  /*
-   * Returns a pointer to the last member code in the vector.
-   *
-   * Requires: isValid() && size() >= 1
-   */
-  const uint8_t* findLastMember() const;
-
-  /*
-   * Decode the terminating string immediate, if any.
-   */
-  bool decodeLastMember(const Unit*, StringData*& sdOut,
-                        MemberCode& membOut,
-                        int64_t* strIdOut = nullptr) const;
-
 
 private:
   int32_t m_length;
@@ -1109,29 +933,6 @@ private:
 
 // Must be an opcode that actually has an ImmVector.
 ImmVector getImmVector(PC opcode);
-
-struct MInstrLocation {
-  LocationCode lcode;
-  int64_t imm;
-
-  bool hasImm() const {
-    auto count = numLocationCodeImms(lcode);
-    assert(count == 0 || count == 1);
-    return count;
-  }
-};
-MInstrLocation getMLocation(PC opcode);
-
-struct MVectorItem {
-  MemberCode mcode;
-  int64_t imm;
-
-  bool hasImm() const {
-    return memberCodeHasImm(mcode);
-  }
-};
-bool hasMVector(Op op);
-std::vector<MVectorItem> getMVector(PC opcode);
 
 // Some decoding helper functions.
 int numImmediates(Op opcode);
@@ -1153,21 +954,9 @@ ArgUnion getImm(PC opcode, int idx);
 // Don't use this with variable-sized immediates!
 ArgUnion* getImmPtr(PC opcode, int idx);
 
-int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode);
-
 // Encodes a variable sized immediate for `val' into `buf'.  Returns
 // the number of bytes used taken.  At most 4 bytes can be used.
 size_t encodeVariableSizeImm(int32_t val, unsigned char* buf);
-
-// Encodes a variable sized immediate to the end of vec.
-void encodeIvaToVector(std::vector<unsigned char>& vec, int32_t val);
-
-template<typename T>
-void encodeToVector(std::vector<unsigned char>& vec, T val) {
-  size_t currentLen = vec.size();
-  vec.resize(currentLen + sizeof(T));
-  memcpy(&vec[currentLen], &val, sizeof(T));
-}
 
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
@@ -1323,7 +1112,6 @@ inline bool isFPassStar(Op opcode) {
     case OpFPassN:
     case OpFPassG:
     case OpFPassS:
-    case OpFPassM:
       return true;
 
     default:

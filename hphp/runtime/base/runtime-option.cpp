@@ -408,13 +408,6 @@ const std::string& RuntimeOption::GetServerPrimaryIPv6() {
    return serverPrimaryIPv6;
 }
 
-static inline bool newMInstrsDefault() {
-#ifdef HHVM_OLD_MINSTRS
-  return false;
-#endif
-  return !getenv("HHVM_OLD_MINSTRS");
-}
-
 static inline std::string regionSelectorDefault() {
   return "tracelet";
 }

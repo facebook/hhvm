@@ -213,12 +213,10 @@ bool hasObviousStackOutput(Op op) {
   case Op::IssetN:
   case Op::IssetG:
   case Op::IssetS:
-  case Op::IssetM:
   case Op::EmptyL:
   case Op::EmptyN:
   case Op::EmptyG:
   case Op::EmptyS:
-  case Op::EmptyM:
   case Op::IsTypeC:
   case Op::IsTypeL:
   case Op::OODeclExists:

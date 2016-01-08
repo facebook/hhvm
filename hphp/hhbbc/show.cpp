@@ -273,33 +273,6 @@ std::string show(SrcLoc loc) {
 std::string show(const Bytecode& bc) {
   std::string ret;
 
-  auto append_mvec = [&] (const MVector& mvec) {
-    folly::toAppend(
-      "<",
-      locationCodeString(mvec.lcode),
-      &ret
-    );
-    if (mvec.locBase) {
-      ret += ":" + local_string(mvec.locBase);
-    }
-    for (auto& m : mvec.mcodes) {
-      folly::toAppend(" ", memberCodeString(m.mcode), &ret);
-      switch (memberCodeImmType(m.mcode)) {
-      case MCodeImm::None: break;
-      case MCodeImm::String:
-        ret += ":" + escaped_string(m.immStr);
-        break;
-      case MCodeImm::Int:
-        folly::toAppend(":", m.immInt, &ret);
-        break;
-      case MCodeImm::Local:
-        folly::toAppend(":$", local_string(m.immLoc), &ret);
-        break;
-      }
-    }
-    ret += ">";
-  };
-
   auto append_vsa = [&] (const std::vector<SString>& keys) {
     ret += "<";
     auto delim = "";
@@ -334,7 +307,6 @@ std::string show(const Bytecode& bc) {
     ret += ">";
   };
 
-#define IMM_MA(n)      ret += " "; append_mvec(data.mvec);
 #define IMM_BLA(n)     ret += " "; append_switch(data.targets);
 #define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
 #define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
@@ -371,7 +343,6 @@ std::string show(const Bytecode& bc) {
 
 #undef O
 
-#undef IMM_MA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA

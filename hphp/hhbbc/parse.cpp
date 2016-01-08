@@ -371,41 +371,6 @@ void populate_block(ParseUnitState& puState,
                     FindBlock findBlock) {
   auto const& ue = fe.ue();
 
-  auto decode_minstr = [&] {
-    auto const immVec = ImmVector::createFromStream(pc);
-    pc += immVec.size() + sizeof(int32_t) + sizeof(int32_t);
-
-    auto ret = MVector {};
-    auto vec = immVec.vec();
-
-    ret.lcode = static_cast<LocationCode>(*vec++);
-    if (numLocationCodeImms(ret.lcode)) {
-      assert(numLocationCodeImms(ret.lcode) == 1);
-      ret.locBase = borrow(func.locals[decodeVariableSizeImm(&vec)]);
-    }
-
-    while (vec < pc) {
-      auto elm = MElem {};
-      elm.mcode = static_cast<MemberCode>(*vec++);
-      switch (memberCodeImmType(elm.mcode)) {
-      case MCodeImm::None: break;
-      case MCodeImm::Local:
-        elm.immLoc = borrow(func.locals[decodeMemberCodeImm(&vec, elm.mcode)]);
-        break;
-      case MCodeImm::String:
-        elm.immStr = ue.lookupLitstr(decodeMemberCodeImm(&vec, elm.mcode));
-        break;
-      case MCodeImm::Int:
-        elm.immInt = decodeMemberCodeImm(&vec, elm.mcode);
-        break;
-      }
-      ret.mcodes.push_back(elm);
-    }
-    assert(vec == pc);
-
-    return ret;
-  };
-
   auto decode_stringvec = [&] {
     auto const vecLen = decode<int32_t>(pc);
     std::vector<SString> keys;
@@ -468,7 +433,6 @@ void populate_block(ParseUnitState& puState,
     puState.createClMap[b.CreateCl.str2].insert(&func);
   };
 
-#define IMM_MA(n)      auto mvec = decode_minstr();
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
 #define IMM_ILA(n)     auto iterTab = decode_itertab();
@@ -573,7 +537,6 @@ void populate_block(ParseUnitState& puState,
 
 #undef O
 
-#undef IMM_MA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA

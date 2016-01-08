@@ -74,19 +74,6 @@ Op NormalizedInstruction::op() const {
   return peek_op(pc());
 }
 
-Op NormalizedInstruction::mInstrOp() const {
-  auto const opcode = op();
-#define MII(instr, a, b, i, v, d) case Op##instr##M: return opcode;
-  switch (opcode) {
-    MINSTRS
-  case Op::FPassM:
-    return preppedByRef ? Op::VGetM : Op::CGetM;
-  default:
-    not_reached();
-  }
-#undef MII
-}
-
 PC NormalizedInstruction::pc() const {
   return unit()->at(source.offset());
 }

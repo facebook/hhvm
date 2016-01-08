@@ -292,32 +292,6 @@ bool in(StatsSS& env, const bc::IterInitK& op) {
   return false;
 }
 
-bool in(StatsSS& env, const bc::CGetM& op) {
-  auto const pops = op.numPop();
-  auto const ty = [&]() -> Type {
-    switch (op.mvec.lcode) {
-    case LL:
-      return env.state.locals[op.mvec.locBase->id];
-    case LC:
-    case LR:
-      return topT(env, pops - 1);
-    case LH:
-    case LGL:
-    case LGC:
-    case LNL:
-    case LNC:
-    case LSL:
-    case LSC:
-      return TTop;
-    case InvalidLocationCode:
-      break;
-    }
-    not_reached();
-  }();
-  add_type(env.stats.cgetmBase, ty);
-  return false;
-}
-
 bool in(StatsSS& env, const bc::FCallBuiltin& op) {
   ++env.stats.builtins.totalBuiltins;
 

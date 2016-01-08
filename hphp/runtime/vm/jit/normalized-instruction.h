@@ -48,9 +48,6 @@ struct NormalizedInstruction {
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
 
-  // The member codes for the M-vector.
-  std::vector<MemberCode> immVecM;
-
   bool endsRegion:1;
   bool preppedByRef:1;
   bool ignoreInnerType:1;
@@ -62,7 +59,6 @@ struct NormalizedInstruction {
   bool interp:1;
 
   Op op() const;
-  Op mInstrOp() const;
   PC pc() const;
   const Unit* unit() const;
   const Func* func() const;

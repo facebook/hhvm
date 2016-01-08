@@ -108,7 +108,6 @@ public:
   IMM_##typ1, IMM_##typ2, IMM_##typ3
 #define FOUR(typ1, typ2, typ3, typ4) \
   IMM_##typ1, IMM_##typ2, IMM_##typ3, IMM_##typ4
-#define IMM_MA std::vector<unsigned char>
 #define IMM_BLA std::vector<Label*>&
 #define IMM_SLA std::vector<StrOff>&
 #define IMM_ILA std::vector<IterPair>&
@@ -675,9 +674,6 @@ public:
 
   int scanStackForLocation(int iLast);
 
-  void buildVectorImm(std::vector<unsigned char>& vectorImm,
-                      int iFirst, int iLast, bool allowW,
-                      Emitter& e);
   /*
    * Emit bytecodes for the base and intermediate dims, returning the number of
    * eval stack slots containing member keys that should be consumed by the

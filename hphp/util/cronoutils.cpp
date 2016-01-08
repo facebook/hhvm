@@ -214,7 +214,7 @@ create_link(const char *pfilename,
 #ifndef _MSC_VER
     struct stat		stat_buf;
 
-    if (lstat(prevlinkname, &stat_buf) == 0)
+    if (prevlinkname && lstat(prevlinkname, &stat_buf) == 0)
     {
 	unlink(prevlinkname);
     }
@@ -230,13 +230,15 @@ create_link(const char *pfilename,
     if (linktype == S_IFLNK)
     {
 	if (symlink(pfilename, linkname) < 0) {
-          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+          fprintf(stderr, "Creating link from %s to %s failed",
+                  pfilename, linkname);
         }
     }
     else
     {
 	if (link(pfilename, linkname) < 0) {
-          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+          fprintf(stderr, "Creating link from %s to %s failed",
+                  pfilename, linkname);
         }
     }
 #else

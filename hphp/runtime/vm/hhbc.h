@@ -32,6 +32,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Unit;
+struct Func;
 
 /*
  * Variable-size immediates are implemented as follows: To determine which size
@@ -853,6 +854,16 @@ constexpr int32_t kMaxConcatN = 4;
   O(BaseC,           ONE(IVA),         NOV,             NOV,        NF) \
   O(BaseR,           ONE(IVA),         NOV,             NOV,        NF) \
   O(BaseH,           NA,               NOV,             NOV,        NF) \
+  O(FPassBaseNC,     TWO(IVA, IVA),                                     \
+                                       NOV,             NOV,        FF) \
+  O(FPassBaseNL,     TWO(IVA, LA),                                      \
+                                       NOV,             NOV,        FF) \
+  O(FPassBaseGC,     TWO(IVA, IVA),                                     \
+                                       NOV,             NOV,        FF) \
+  O(FPassBaseGL,     TWO(IVA, LA),                                      \
+                                       NOV,             NOV,        FF) \
+  O(FPassBaseL,      TWO(IVA, LA),                                      \
+                                       NOV,             NOV,        FF) \
   O(DimL,            THREE(LA, OA(PropElemOp), OA(MOpFlags)),           \
                                        NOV,             NOV,        NF) \
   O(DimC,            THREE(IVA, OA(PropElemOp), OA(MOpFlags)),          \
@@ -862,6 +873,15 @@ constexpr int32_t kMaxConcatN = 4;
   O(DimStr,          THREE(SA, OA(PropElemOp), OA(MOpFlags)),           \
                                        NOV,             NOV,        NF) \
   O(DimNewElem,      ONE(OA(MOpFlags)),NOV,             NOV,        NF) \
+  O(FPassDimL,       THREE(IVA, LA, OA(PropElemOp)),                    \
+                                       NOV,             NOV,        FF) \
+  O(FPassDimC,       THREE(IVA, IVA, OA(PropElemOp)),                   \
+                                       NOV,             NOV,        FF) \
+  O(FPassDimInt,     THREE(IVA, I64A, OA(PropElemOp)),                  \
+                                       NOV,             NOV,        FF) \
+  O(FPassDimStr,     THREE(IVA, SA, OA(PropElemOp)),                    \
+                                       NOV,             NOV,        FF) \
+  O(FPassDimNewElem, ONE(IVA),         NOV,             NOV,        FF) \
   O(QueryML,         FOUR(IVA, OA(QueryMOp), OA(PropElemOp), LA),       \
                                        MFINAL,          ONE(CV),    NF) \
   O(QueryMC,         THREE(IVA, OA(QueryMOp), OA(PropElemOp)),          \
@@ -879,6 +899,15 @@ constexpr int32_t kMaxConcatN = 4;
   O(VGetMStr,        THREE(IVA, OA(PropElemOp), SA),                    \
                                        MFINAL,          ONE(VV),    NF) \
   O(VGetMNewElem,    ONE(IVA),         MFINAL,          ONE(VV),    NF) \
+  O(FPassML,         FOUR(IVA, IVA, OA(PropElemOp), LA),                \
+                                       F_MFINAL,        ONE(FV),    FF) \
+  O(FPassMC,         THREE(IVA, IVA, OA(PropElemOp)),                   \
+                                       F_MFINAL,        ONE(FV),    FF) \
+  O(FPassMInt,       FOUR(IVA, IVA, OA(PropElemOp), I64A),              \
+                                       F_MFINAL,        ONE(FV),    FF) \
+  O(FPassMStr,       FOUR(IVA, IVA, OA(PropElemOp), SA),                \
+                                       F_MFINAL,        ONE(FV),    FF) \
+  O(FPassMNewElem,   TWO(IVA, IVA),    F_MFINAL,        ONE(FV),    FF) \
   O(SetML,           THREE(IVA, OA(PropElemOp), LA),                    \
                                        C_MFINAL,        ONE(CV),    NF) \
   O(SetMC,           TWO(IVA, OA(PropElemOp)),                          \
@@ -1285,9 +1314,14 @@ inline bool isMemberBaseOp(Op op) {
     case OpBaseNL:
     case OpBaseGC:
     case OpBaseGL:
+    case OpFPassBaseNC:
+    case OpFPassBaseNL:
+    case OpFPassBaseGC:
+    case OpFPassBaseGL:
     case OpBaseSC:
     case OpBaseSL:
     case OpBaseL:
+    case OpFPassBaseL:
     case OpBaseC:
     case OpBaseR:
     case OpBaseH:
@@ -1305,6 +1339,11 @@ inline bool isMemberDimOp(Op op) {
     case OpDimInt:
     case OpDimStr:
     case OpDimNewElem:
+    case OpFPassDimL:
+    case OpFPassDimC:
+    case OpFPassDimInt:
+    case OpFPassDimStr:
+    case OpFPassDimNewElem:
       return true;
 
     default:
@@ -1323,6 +1362,11 @@ inline bool isMemberFinalOp(Op op) {
     case OpVGetMInt:
     case OpVGetMStr:
     case OpVGetMNewElem:
+    case OpFPassML:
+    case OpFPassMC:
+    case OpFPassMInt:
+    case OpFPassMStr:
+    case OpFPassMNewElem:
     case OpSetML:
     case OpSetMC:
     case OpSetMInt:
@@ -1339,7 +1383,11 @@ int instrNumPops(PC opcode);
 int instrNumPushes(PC opcode);
 FlavorDesc instrInputFlavor(PC op, uint32_t idx);
 StackTransInfo instrStackTransInfo(PC opcode);
-int instrSpToArDelta(PC opcode);
+
+/*
+ * Delta from FP to top pre-live ActRec.
+ */
+int instrFpToArDelta(const Func* func, PC opcode);
 
 constexpr bool mcodeIsLiteral(MemberCode mcode) {
   return mcode == MET || mcode == MEI || mcode == MPT || mcode == MQT;

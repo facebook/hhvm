@@ -291,6 +291,16 @@ interpOutputLocals(IRGS& env,
     case OpDimNewElem:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
       break;
+    case OpFPassDimL:
+    case OpFPassDimC:
+    case OpFPassDimInt:
+    case OpFPassDimStr:
+    case OpFPassDimNewElem:
+    case OpFPassML:
+    case OpFPassMC:
+    case OpFPassMInt:
+    case OpFPassMStr:
+    case OpFPassMNewElem:
     case OpVGetML:
     case OpVGetMC:
     case OpVGetMInt:

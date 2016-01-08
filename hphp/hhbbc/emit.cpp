@@ -359,6 +359,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_R_MMANY    POP_C_MMANY
 #define POP_V_MMANY    POP_C_MMANY
 #define POP_MFINAL     pop(data.arg1);
+#define POP_F_MFINAL   pop(data.arg2);
 #define POP_C_MFINAL   pop(1); pop(data.arg1);
 #define POP_R_MFINAL   POP_C_MFINAL
 #define POP_V_MFINAL   POP_C_MFINAL
@@ -437,6 +438,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_R_MMANY
 #undef POP_V_MMANY
 #undef POP_MFINAL
+#undef POP_F_MFINAL
 #undef POP_C_MFINAL
 #undef POP_R_MFINAL
 #undef POP_V_MFINAL

@@ -1,0 +1,9 @@
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    NULL
+  }
+}
+
+Fatal error: Cannot use [] for reading in %s/test/slow/array/fpassm_mw2.php on line 11

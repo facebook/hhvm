@@ -439,9 +439,14 @@ static const struct {
   { OpBaseNL,      {Local,            MBase,        OutNone         }},
   { OpBaseGC,      {StackI,           MBase,        OutNone         }},
   { OpBaseGL,      {Local,            MBase,        OutNone         }},
+  { OpFPassBaseNC, {StackI|FuncdRef,  MBase,        OutNone         }},
+  { OpFPassBaseNL, {Local|FuncdRef,   MBase,        OutNone         }},
+  { OpFPassBaseGC, {StackI|FuncdRef,  MBase,        OutNone         }},
+  { OpFPassBaseGL, {Local|FuncdRef,   MBase,        OutNone         }},
   { OpBaseSC,      {StackI|IdxA,      MBase|IdxA,   OutUnknown      }},
   { OpBaseSL,      {Local|IdxA,       MBase|IdxA,   OutUnknown      }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
+  { OpFPassBaseL,  {Local|FuncdRef,   MBase,        OutNone         }},
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
   { OpBaseR,       {StackI,           MBase,        OutNone         }},
   { OpBaseH,       {None,             MBase,        OutNone         }},
@@ -450,6 +455,14 @@ static const struct {
   { OpDimInt,      {MBase,            MBase,        OutNone         }},
   { OpDimStr,      {MBase,            MBase,        OutNone         }},
   { OpDimNewElem,  {MBase,            MBase,        OutNone         }},
+  { OpFPassDimL,   {Local|MBase|FuncdRef,
+                                      MBase,        OutNone         }},
+  { OpFPassDimC,   {StackI|MBase|FuncdRef,
+                                      MBase,        OutNone         }},
+  { OpFPassDimInt, {MBase|FuncdRef,   MBase,        OutNone         }},
+  { OpFPassDimStr, {MBase|FuncdRef,   MBase,        OutNone         }},
+  { OpFPassDimNewElem,
+                   {MBase|FuncdRef,   MBase,        OutNone         }},
   { OpQueryML,     {BStackN|Local|MBase,
                                       Stack1,       OutUnknown      }},
   { OpQueryMC,     {BStackN|MBase,    Stack1,       OutUnknown      }},
@@ -461,6 +474,17 @@ static const struct {
   { OpVGetMInt,    {BStackN|MBase,    Stack1,       OutVUnknown     }},
   { OpVGetMStr,    {BStackN|MBase,    Stack1,       OutVUnknown     }},
   { OpVGetMNewElem,{BStackN|MBase,    Stack1,       OutVUnknown     }},
+  { OpFPassML,     {BStackN|Local|MBase|FuncdRef,
+                                      Stack1,       OutUnknown      }},
+  { OpFPassMC,     {BStackN|MBase|FuncdRef,
+                                      Stack1,       OutUnknown      }},
+  { OpFPassMInt,   {BStackN|MBase|FuncdRef,
+                                      Stack1,       OutUnknown      }},
+  { OpFPassMStr,   {BStackN|MBase|FuncdRef,
+                                      Stack1,       OutUnknown      }},
+  { OpFPassMNewElem,
+                   {BStackN|MBase|FuncdRef,
+                                      Stack1,       OutUnknown      }},
   { OpSetML,       {Stack1|BStackN|Local|MBase,
                                       Stack1,       OutUnknown      }},
   { OpSetMC,       {Stack1|BStackN|MBase,
@@ -540,6 +564,11 @@ int64_t getStackPopped(PC pc) {
     case Op::ConcatN:
     case Op::FCallBuiltin:
     case Op::CreateCl:     return getImm(pc, 0).u_IVA;
+
+    case Op::FPassML:   case Op::FPassMC:
+    case Op::FPassMInt: case Op::FPassMStr: case Op::FPassMNewElem:
+      // imm[0] is argument index
+      return getImm(pc, 1).u_IVA;
 
     case Op::SetML:   case Op::SetMC:
     case Op::SetMInt: case Op::SetMStr: case Op::SetMNewElem:
@@ -1055,9 +1084,14 @@ bool dontGuardAnyInputs(Op op) {
   case Op::BaseNL:
   case Op::BaseGC:
   case Op::BaseGL:
+  case Op::FPassBaseNC:
+  case Op::FPassBaseNL:
+  case Op::FPassBaseGC:
+  case Op::FPassBaseGL:
   case Op::BaseSC:
   case Op::BaseSL:
   case Op::BaseL:
+  case Op::FPassBaseL:
   case Op::BaseC:
   case Op::BaseR:
   case Op::BaseH:
@@ -1066,6 +1100,11 @@ bool dontGuardAnyInputs(Op op) {
   case Op::DimInt:
   case Op::DimStr:
   case Op::DimNewElem:
+  case Op::FPassDimL:
+  case Op::FPassDimC:
+  case Op::FPassDimInt:
+  case Op::FPassDimStr:
+  case Op::FPassDimNewElem:
   case Op::QueryML:
   case Op::QueryMC:
   case Op::QueryMInt:
@@ -1075,6 +1114,11 @@ bool dontGuardAnyInputs(Op op) {
   case Op::VGetMInt:
   case Op::VGetMStr:
   case Op::VGetMNewElem:
+  case Op::FPassML:
+  case Op::FPassMC:
+  case Op::FPassMInt:
+  case Op::FPassMStr:
+  case Op::FPassMNewElem:
   case Op::SetML:
   case Op::SetMC:
   case Op::SetMInt:

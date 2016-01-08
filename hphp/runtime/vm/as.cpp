@@ -1200,11 +1200,13 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
 #define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
 
-// Some bytecodes need to know the the first iva imm for (PUSH|POP)_*.
+// Some bytecodes need to know the the first or second iva imm for
+// (PUSH|POP)_*.
 #define IMM_IVA do {                            \
     int imm = read_opcode_arg<int64_t>(as);     \
     as.ue->emitIVA(imm);                        \
     if (immIVA < 0) immIVA = imm;               \
+    else if (immIVA2 < 0) immIVA2 = imm;        \
   } while (0)
 
 #define IMM_VSA \
@@ -1292,6 +1294,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_V_MMANY NUM_POP_C_MMANY
 #define NUM_POP_R_MMANY NUM_POP_C_MMANY
 #define NUM_POP_MFINAL immIVA
+#define NUM_POP_F_MFINAL immIVA2
 #define NUM_POP_C_MFINAL (immIVA + 1)
 #define NUM_POP_R_MFINAL NUM_POP_C_MFINAL
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL
@@ -1305,6 +1308,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
     UNUSED int64_t immIVA = -1;                                        \
+    UNUSED int64_t immIVA2 = -1;                                       \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \
     std::vector<std::pair<std::string, Offset> > labelJumps;           \
@@ -1388,6 +1392,7 @@ OPCODES
 #undef NUM_POP_R_MMANY
 #undef NUM_POP_C_MMANY
 #undef NUM_POP_MFINAL
+#undef NUM_POP_F_MFINAL
 #undef NUM_POP_C_MFINAL
 #undef NUM_POP_R_MFINAL
 #undef NUM_POP_V_MFINAL

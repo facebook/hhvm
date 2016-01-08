@@ -1048,7 +1048,7 @@ void emitIntermediateOp(MTS& env) {
       ++env.iInd;
       break;
     case MW:
-      assertx(env.mii.newElem());
+      if (!env.mii.newElem()) PUNT(NotSuppNewElem);
       emitNewElem(env);
       break;
   }
@@ -2650,6 +2650,13 @@ void setMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
   mFinalImpl(env, nDiscard, result);
 }
 
+MOpFlags fpassFlags(IRGS& env, int32_t idx) {
+  if (env.currentNormalizedInstruction->preppedByRef) {
+    return MOpFlags::DefineReffy;
+  }
+  return MOpFlags::Warn;
+}
+
 }
 
 void emitBaseNC(IRGS& env, int32_t idx, MOpFlags flags) {
@@ -2658,6 +2665,14 @@ void emitBaseNC(IRGS& env, int32_t idx, MOpFlags flags) {
 
 void emitBaseNL(IRGS& env, int32_t locId, MOpFlags flags) {
   interpOne(env, *env.currentNormalizedInstruction);
+}
+
+void emitFPassBaseNC(IRGS& env, int32_t arg, int32_t idx) {
+  emitBaseNC(env, idx, fpassFlags(env, arg));
+}
+
+void emitFPassBaseNL(IRGS& env, int32_t arg, int32_t locId) {
+  emitBaseNL(env, locId, fpassFlags(env, arg));
 }
 
 void emitBaseGC(IRGS& env, int32_t idx, MOpFlags flags) {
@@ -2671,6 +2686,14 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpFlags flags) {
   auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
                          DataTypeSpecific);
   baseGImpl(env, name, flags);
+}
+
+void emitFPassBaseGC(IRGS& env, int32_t arg, int32_t idx) {
+  emitBaseGC(env, idx, fpassFlags(env, arg));
+}
+
+void emitFPassBaseGL(IRGS& env, int32_t arg, int32_t locId) {
+  emitBaseGL(env, locId, fpassFlags(env, arg));
 }
 
 void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx) {
@@ -2701,6 +2724,10 @@ void emitBaseL(IRGS& env, int32_t locId, MOpFlags flags) {
   auto innerTy = base->isA(TBoxedCell) ? env.irb->predictedInnerType(locId)
                                        : TTop;
   simpleBaseImpl(env, base, innerTy);
+}
+
+void emitFPassBaseL(IRGS& env, int32_t arg, int32_t locId) {
+  emitBaseL(env, locId, fpassFlags(env, arg));
 }
 
 void emitBaseC(IRGS& env, int32_t idx) {
@@ -2754,6 +2781,27 @@ void emitDimNewElem(IRGS& env, MOpFlags flags) {
   interpOne(env, *env.currentNormalizedInstruction);
 }
 
+void emitFPassDimL(IRGS& env, int32_t arg, int32_t locId, PropElemOp propElem) {
+  emitDimL(env, locId, propElem, fpassFlags(env, arg));
+}
+
+void emitFPassDimC(IRGS& env, int32_t arg, int32_t idx, PropElemOp propElem) {
+  emitDimC(env, idx, propElem, fpassFlags(env, arg));
+}
+
+void emitFPassDimInt(IRGS& env, int32_t arg, int64_t key, PropElemOp propElem) {
+  emitDimInt(env, key, propElem, fpassFlags(env, arg));
+}
+
+void emitFPassDimStr(IRGS& env, int32_t arg, const StringData* key,
+                     PropElemOp propElem) {
+  emitDimStr(env, key, propElem, fpassFlags(env, arg));
+}
+
+void emitFPassDimNewElem(IRGS& env, int32_t arg) {
+  emitDimNewElem(env, fpassFlags(env, arg));
+}
+
 void emitQueryML(IRGS& env, int32_t nDiscard, QueryMOp query,
                  PropElemOp propElem, int32_t locId) {
   auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
@@ -2799,6 +2847,46 @@ void emitVGetMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
 
 void emitVGetMNewElem(IRGS& env, int32_t nDiscard) {
   SPUNT(__func__);
+}
+
+void emitFPassML(IRGS& env, int32_t arg, int32_t nDiscard, PropElemOp propElem,
+                 int32_t locId) {
+  if (fpassFlags(env, arg) == MOpFlags::Warn) {
+    return emitQueryML(env, nDiscard, QueryMOp::CGet, propElem, locId);
+  }
+  emitVGetML(env, nDiscard, propElem, locId);
+}
+
+void emitFPassMC(IRGS& env, int32_t arg, int32_t nDiscard,
+                 PropElemOp propElem) {
+  if (fpassFlags(env, arg) == MOpFlags::Warn) {
+    return emitQueryMC(env, nDiscard, QueryMOp::CGet, propElem);
+  }
+  emitVGetMC(env, nDiscard, propElem);
+}
+
+void emitFPassMInt(IRGS& env, int32_t arg, int32_t nDiscard,
+                   PropElemOp propElem, int64_t key) {
+  if (fpassFlags(env, arg) == MOpFlags::Warn) {
+    return emitQueryMInt(env, nDiscard, QueryMOp::CGet, propElem, key);
+  }
+  emitVGetMInt(env, nDiscard, propElem, key);
+}
+
+void emitFPassMStr(IRGS& env, int32_t arg, int32_t nDiscard,
+                   PropElemOp propElem, const StringData* key) {
+  if (fpassFlags(env, arg) == MOpFlags::Warn) {
+    return emitQueryMStr(env, nDiscard, QueryMOp::CGet, propElem, key);
+  }
+  emitVGetMStr(env, nDiscard, propElem, key);
+}
+
+void emitFPassMNewElem(IRGS& env, int32_t arg, int32_t nDiscard) {
+  if (fpassFlags(env, arg) == MOpFlags::Warn) {
+    // This will throw.
+    return interpOne(env, *env.currentNormalizedInstruction);
+  }
+  emitVGetMNewElem(env, nDiscard);
 }
 
 void emitSetML(IRGS& env, int32_t nDiscard, PropElemOp propElem,

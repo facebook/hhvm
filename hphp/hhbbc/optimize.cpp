@@ -437,6 +437,7 @@ void first_pass(const Index& index,
     } else if (op.op == Op::CGetL3) {
       srcStack.insert(srcStack.end() - 2, op.op);
     } else {
+      FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
       for (int i = 0; i < op.numPop(); i++) {
         srcStack.pop_back();
       }

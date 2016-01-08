@@ -1496,6 +1496,52 @@ void minstr(ISS& env, const MInstr& op) {
   miImpl(env, op, getMInstrInfo(MInstr::op), op.mvec);
 }
 
+template<typename A, typename B>
+void mergePaths(ISS& env, A a, B b) {
+  auto const start = env.state;
+  a();
+  auto const aState = env.state;
+  env.state = start;
+  b();
+  merge_into(env.state, aState);
+  assert(env.flags.wasPEI);
+  assert(!env.flags.canConstProp);
+}
+
+/*
+ * Helpers to set the MOpFlags immediate of a bytecode struct, regardless of
+ * its position. All users of these functions start with the flags set to Warn.
+ */
+template<typename BC>
+typename std::enable_if<std::is_same<decltype(BC::subop1), MOpFlags>{}>::type
+setMOpFlags(BC& op, MOpFlags flags) {
+  assert(op.subop1 == MOpFlags::Warn);
+  op.subop1 = flags;
+}
+
+template<typename BC>
+typename std::enable_if<std::is_same<decltype(BC::subop2), MOpFlags>{}>::type
+setMOpFlags(BC& op, MOpFlags flags) {
+  assert(op.subop2 == MOpFlags::Warn);
+  op.subop2 = flags;
+}
+
+template<typename BC>
+typename std::enable_if<std::is_same<decltype(BC::subop3), MOpFlags>{}>::type
+setMOpFlags(BC& op, MOpFlags flags) {
+  assert(op.subop3 == MOpFlags::Warn);
+  op.subop3 = flags;
+}
+
+folly::Optional<MOpFlags> fpassFlags(ISS& env, int32_t arg) {
+  switch (prepKind(env, arg)) {
+    case PrepKind::Unknown: return folly::none;
+    case PrepKind::Val:     return MOpFlags::Warn;
+    case PrepKind::Ref:     return MOpFlags::DefineReffy;
+  }
+  always_assert(false);
+}
+
 }
 
 namespace interp_step {
@@ -1512,7 +1558,31 @@ void in(ISS& env, const bc::IncDecM& op)      { minstr(env, op); }
 void in(ISS& env, const bc::UnsetM& op)       { minstr(env, op); }
 void in(ISS& env, const bc::BindM& op)        { minstr(env, op); }
 
+void in(ISS& env, const bc::FPassM& op) {
+  switch (prepKind(env, op.arg1)) {
+  case PrepKind::Unknown:
+    break;
+  case PrepKind::Val:
+    return reduce(env, bc::CGetM { op.mvec }, bc::FPassC { op.arg1 });
+  case PrepKind::Ref:
+    return reduce(env, bc::VGetM { op.mvec }, bc::FPassVNop { op.arg1 });
+  }
+
+  /*
+   * FPassM with an unknown PrepKind either has the effects of CGetM or the
+   * effects of VGetM, but we don't know which statically. These are
+   * complicated instructions, so the easiest way to handle this is to run both
+   * and then merge their output states.
+   */
+  mergePaths(
+    env,
+    [&] { in(env, bc::CGetM { op.mvec }); },
+    [&] { in(env, bc::VGetM { op.mvec}); }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
+// Base operations
 
 void in(ISS& env, const bc::BaseNC& op) {
   assert(env.state.arrayChain.empty());
@@ -1575,6 +1645,46 @@ void in(ISS& env, const bc::BaseH& op) {
   env.state.base = Base{ty ? *ty : TObj, BaseLoc::FrameThis};
 }
 
+template<typename BC>
+static void fpassImpl(ISS& env, int32_t arg, BC op) {
+  if (auto const flags = fpassFlags(env, arg)) {
+    setMOpFlags(op, *flags);
+    return reduce(env, op);
+  }
+
+  mergePaths(
+    env,
+    [&] { in(env, op); },
+    [&] {
+      setMOpFlags(op, MOpFlags::DefineReffy);
+      in(env, op);
+    }
+  );
+}
+
+void in(ISS& env, const bc::FPassBaseNC& op) {
+  fpassImpl(env, op.arg1, bc::BaseNC{op.arg2, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassBaseNL& op) {
+  fpassImpl(env, op.arg1, bc::BaseNL{op.loc2, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassBaseGC& op) {
+  fpassImpl(env, op.arg1, bc::BaseGC{op.arg2, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassBaseGL& op) {
+  fpassImpl(env, op.arg1, bc::BaseGL{op.loc2, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassBaseL& op) {
+  fpassImpl(env, op.arg1, bc::BaseL{op.loc2, MOpFlags::Warn});
+}
+
+//////////////////////////////////////////////////////////////////////
+// Intermediate operations
+
 void in(ISS& env, const bc::DimL& op) {
   miDim(env, op.subop2, op.subop3, locAsCell(env, op.loc1));
 }
@@ -1594,6 +1704,29 @@ void in(ISS& env, const bc::DimStr& op) {
 void in(ISS& env, const bc::DimNewElem& op) {
   miNewElem(env);
 }
+
+void in(ISS& env, const bc::FPassDimL& op) {
+  fpassImpl(env, op.arg1, bc::DimL{op.loc2, op.subop3, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassDimC& op) {
+  fpassImpl(env, op.arg1, bc::DimC{op.arg2, op.subop3, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassDimInt& op) {
+  fpassImpl(env, op.arg1, bc::DimInt{op.arg2, op.subop3, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassDimStr& op) {
+  fpassImpl(env, op.arg1, bc::DimStr{op.str2, op.subop3, MOpFlags::Warn});
+}
+
+void in(ISS& env, const bc::FPassDimNewElem& op) {
+  fpassImpl(env, op.arg1, bc::DimNewElem{MOpFlags::Warn});
+}
+
+//////////////////////////////////////////////////////////////////////
+// Final operations
 
 void in(ISS& env, const bc::QueryML& op) {
   miQuery(env, op.arg1, op.subop2, op.subop3, locAsCell(env, op.loc4));
@@ -1651,6 +1784,67 @@ void in(ISS& env, const bc::SetMStr& op) {
 void in(ISS& env, const bc::SetMNewElem& op) {
   miFinalSetNewElem(env, op.arg1);
   moveBase(env, folly::none);
+}
+
+template<typename In, typename COut, typename VOut>
+void fpassFinalImpl(ISS& env, In op, COut cOut, VOut vOut) {
+  if (auto const flags = fpassFlags(env, op.arg1)) {
+    if (flags == MOpFlags::Warn) {
+      return reduce(env, cOut, bc::FPassC{op.arg1});
+    }
+    return reduce(env, vOut, bc::FPassVNop{op.arg1});
+  }
+
+  mergePaths(
+    env,
+    [&] { in(env, cOut); },
+    [&] { in(env, vOut); }
+  );
+}
+
+void in(ISS& env, const bc::FPassML& op) {
+  fpassFinalImpl(env, op,
+                 bc::QueryML{op.arg2, QueryMOp::CGet, op.subop3, op.loc4},
+                 bc::VGetML{op.arg2, op.subop3, op.loc4});
+}
+
+void in(ISS& env, const bc::FPassMC& op) {
+  fpassFinalImpl(env, op,
+                 bc::QueryMC{op.arg2, QueryMOp::CGet, op.subop3},
+                 bc::VGetMC{op.arg2, op.subop3});
+}
+
+void in(ISS& env, const bc::FPassMInt& op) {
+  fpassFinalImpl(env, op,
+                 bc::QueryMInt{op.arg2, QueryMOp::CGet, op.subop3, op.arg4},
+                 bc::VGetMInt{op.arg2, op.subop3, op.arg4});
+}
+
+void in(ISS& env, const bc::FPassMStr& op) {
+  fpassFinalImpl(env, op,
+                 bc::QueryMStr{op.arg2, QueryMOp::CGet, op.subop3, op.str4},
+                 bc::VGetMStr{op.arg2, op.subop3, op.str4});
+}
+
+void in(ISS& env, const bc::FPassMNewElem& op) {
+  // QueryMNewElem doesn't exist since it would be an invalid operation, so we
+  // use this approximation of what it would do instead. Note that it always
+  // fatals but we still treat it as a PEI for simplicity.
+  auto queryMNewElem = [&] {
+      discard(env, op.arg2);
+      push(env, TInitCell);
+  };
+
+  if (auto const flags = fpassFlags(env, op.arg1)) {
+    if (flags == MOpFlags::Warn) return queryMNewElem();
+    return reduce(env, bc::VGetMNewElem{op.arg2}, bc::FPassVNop{op.arg1});
+  }
+
+  mergePaths(
+    env,
+    queryMNewElem,
+    [&] { in(env, bc::VGetMNewElem{op.arg2}); }
+  );
 }
 
 }

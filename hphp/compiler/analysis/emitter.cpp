@@ -366,6 +366,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_R_MMANY 0
 #define COUNT_V_MMANY 0
 #define COUNT_MFINAL 0
+#define COUNT_F_MFINAL 0
 #define COUNT_C_MFINAL 0
 #define COUNT_R_MFINAL 0
 #define COUNT_V_MFINAL 0
@@ -428,6 +429,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStack(StackSym::R); \
   getEmitterVisitor().popEvalStackMMany()
 #define POP_MFINAL POP_MMANY
+#define POP_F_MFINAL POP_MMANY
 #define POP_C_MFINAL POP_C_MMANY
 #define POP_R_MFINAL POP_R_MMANY
 #define POP_V_MFINAL POP_V_MMANY
@@ -701,6 +703,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_V_MMANY
 #undef POP_R_MMANY
 #undef POP_MFINAL
+#undef POP_F_MFINAL
 #undef POP_C_MFINAL
 #undef POP_R_MFINAL
 #undef POP_V_MFINAL
@@ -5128,17 +5131,16 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
 size_t EmitterVisitor::emitMOp(
   int iFirst,
   int& iLast,
-  bool allowW,
-  bool rhsVal,
   Emitter& e,
-  MOpFlags flags
+  MInstrOpts opts
 ) {
   auto stackIdx = [&](int i) {
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
 
   auto const baseFlags =
-    MOpFlags(uint8_t(flags) & uint8_t(MOpFlags::WarnDefine));
+    opts.fpass ? MOpFlags::None
+               : MOpFlags(uint8_t(opts.flags) & uint8_t(MOpFlags::WarnDefine));
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
@@ -5147,10 +5149,18 @@ size_t EmitterVisitor::emitMOp(
     case StackSym::N:
       switch (flavor) {
         case StackSym::C:
-          e.BaseNC(stackIdx(iFirst), baseFlags);
+          if (opts.fpass) {
+            e.FPassBaseNC(opts.paramId, stackIdx(iFirst));
+          } else {
+            e.BaseNC(stackIdx(iFirst), baseFlags);
+          }
           break;
         case StackSym::L:
-          e.BaseNL(m_evalStack.getLoc(iFirst), baseFlags);
+          if (opts.fpass) {
+            e.FPassBaseNL(opts.paramId, m_evalStack.getLoc(iFirst));
+          } else {
+            e.BaseNL(m_evalStack.getLoc(iFirst), baseFlags);
+          }
           break;
         default:
           always_assert(false);
@@ -5160,10 +5170,18 @@ size_t EmitterVisitor::emitMOp(
     case StackSym::G:
       switch (flavor) {
         case StackSym::C:
-          e.BaseGC(stackIdx(iFirst), baseFlags);
+          if (opts.fpass) {
+            e.FPassBaseGC(opts.paramId, stackIdx(iFirst));
+          } else {
+            e.BaseGC(stackIdx(iFirst), baseFlags);
+          }
           break;
         case StackSym::L:
-          e.BaseGL(m_evalStack.getLoc(iFirst), baseFlags);
+          if (opts.fpass) {
+            e.FPassBaseGL(opts.paramId, m_evalStack.getLoc(iFirst));
+          } else {
+            e.BaseGL(m_evalStack.getLoc(iFirst), baseFlags);
+          }
           break;
         default:
           always_assert(false);
@@ -5175,7 +5193,7 @@ size_t EmitterVisitor::emitMOp(
         unexpectedStackSym(sym, "S-vector base, class ref");
       }
 
-      auto const clsIdx = rhsVal ? 1 : 0;
+      auto const clsIdx = opts.rhsVal ? 1 : 0;
       switch (flavor) {
         case StackSym::C:
           e.BaseSC(stackIdx(iFirst), clsIdx);
@@ -5197,7 +5215,11 @@ size_t EmitterVisitor::emitMOp(
     case StackSym::None:
       switch (flavor) {
         case StackSym::L:
-          e.BaseL(m_evalStack.getLoc(iFirst), baseFlags);
+          if (opts.fpass) {
+            e.FPassBaseL(opts.paramId, m_evalStack.getLoc(iFirst));
+          } else {
+            e.BaseL(m_evalStack.getLoc(iFirst), baseFlags);
+          }
           break;
         case StackSym::C:
           e.BaseC(stackIdx(iFirst));
@@ -5227,13 +5249,29 @@ size_t EmitterVisitor::emitMOp(
 
     auto doDim = [&](PropElemOp op) {
       if (flavor == StackSym::L) {
-        e.DimL(m_evalStack.getLoc(i), op, flags);
+        if (opts.fpass) {
+          e.FPassDimL(opts.paramId, m_evalStack.getLoc(i), op);
+        } else {
+          e.DimL(m_evalStack.getLoc(i), op, opts.flags);
+        }
       } else if (flavor == StackSym::I) {
-        e.DimInt(m_evalStack.getInt(i), op, flags);
+        if (opts.fpass) {
+          e.FPassDimInt(opts.paramId, m_evalStack.getInt(i), op);
+        } else {
+          e.DimInt(m_evalStack.getInt(i), op, opts.flags);
+        }
       } else if (flavor == StackSym::T) {
-        e.DimStr(m_evalStack.getName(i), op, flags);
+        if (opts.fpass) {
+          e.FPassDimStr(opts.paramId, m_evalStack.getName(i), op);
+        } else {
+          e.DimStr(m_evalStack.getName(i), op, opts.flags);
+        }
       } else {
-        e.DimC(stackIdx(i), op, flags);
+        if (opts.fpass) {
+          e.FPassDimC(opts.paramId, stackIdx(i), op);
+        } else {
+          e.DimC(stackIdx(i), op, opts.flags);
+        }
       }
     };
 
@@ -5251,8 +5289,12 @@ size_t EmitterVisitor::emitMOp(
         doDim(PropElemOp::Elem);
         break;
       case StackSym::W:
-        if (allowW) {
-          e.DimNewElem(flags);
+        if (opts.allowW) {
+          if (opts.fpass) {
+            e.FPassDimNewElem(opts.paramId);
+          } else {
+            e.DimNewElem(opts.flags);
+          }
         } else {
           throw IncludeTimeFatalException(e.getNode(),
                                           "Cannot use [] for reading");
@@ -5504,7 +5546,7 @@ void EmitterVisitor::emitAGet(Emitter& e) {
 void EmitterVisitor::emitQueryMOp(int iFirst, int iLast, Emitter& e,
                                   QueryMOp op) {
   auto const flags = getQueryMOpFlags(op);
-  auto const stackCount = emitMOp(iFirst, iLast, false, false, e, flags);
+  auto const stackCount = emitMOp(iFirst, iLast, e, MInstrOpts{flags});
 
   auto const sym = m_evalStack.get(iLast);
   if (auto const pe = symToPropElem(e, sym, false)) {
@@ -5627,7 +5669,7 @@ bool EmitterVisitor::emitVGet(Emitter& e, bool skipCells) {
   } else {
     if (RuntimeOption::EvalEmitNewMInstrs) {
       auto const stackCount =
-        emitMOp(i, iLast, true, false, e, MOpFlags::DefineReffy);
+        emitMOp(i, iLast, e, MInstrOpts{MOpFlags::DefineReffy});
 
       auto const sym = m_evalStack.get(iLast);
       if (auto const pe = symToPropElem(e, sym, true)) {
@@ -5945,6 +5987,30 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{paramId});
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, true)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            return e.FPassML(paramId, stackCount, *pe,
+                             m_evalStack.getLoc(iLast));
+          case StackSym::C:
+            return e.FPassMC(paramId, stackCount, *pe);
+          case StackSym::I:
+            return e.FPassMInt(paramId, stackCount, *pe,
+                               m_evalStack.getInt(iLast));
+          case StackSym::T:
+            return e.FPassMStr(paramId, stackCount, *pe,
+                               m_evalStack.getName(iLast));
+          default:
+            always_assert(false);
+        }
+      }
+
+      return e.FPassMNewElem(paramId, stackCount);
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.FPassM(paramId, vectorImm);
@@ -6114,7 +6180,7 @@ void EmitterVisitor::emitSet(Emitter& e) {
   } else {
     if (RuntimeOption::EvalEmitNewMInstrs) {
       auto const stackCount =
-        emitMOp(i, iLast, true, true, e, MOpFlags::Define);
+        emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define}.rhs());
 
       auto const sym = m_evalStack.get(iLast);
       if (auto const pe = symToPropElem(e, sym, true)) {

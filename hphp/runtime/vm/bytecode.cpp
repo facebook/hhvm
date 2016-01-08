@@ -300,6 +300,25 @@ ALWAYS_INLINE Offset peek_ba(PC& pc) {
   return peek<Offset>(pc);
 }
 
+static inline ActRec* arFromInstr(PC pc) {
+  const ActRec* fp = vmfp();
+  auto const func = fp->m_func;
+  if (fp->resumed()) {
+    fp = reinterpret_cast<const ActRec*>(Stack::resumableStackBase(fp) +
+                                         func->numSlotsInFrame());
+  }
+
+  return arAtOffset(fp, -instrFpToArDelta(func, pc));
+}
+
+template<Op op>
+ALWAYS_INLINE MOpFlags decode_fpass_flags(PC& pc) {
+  auto const ar = arFromInstr(pc - encoded_op_size(op));
+  auto const paramId = decode_iva(pc);
+  assert(paramId < ar->numArgs());
+  return ar->m_func->byRef(paramId) ? MOpFlags::DefineReffy : MOpFlags::Warn;
+}
+
 //=============================================================================
 // Miscellaneous helpers.
 
@@ -4861,6 +4880,18 @@ OPTBLD_INLINE void iopBaseNL(IOP_ARGS) {
   baseNImpl(frame_local_inner(vmfp(), localId), flags);
 }
 
+OPTBLD_INLINE void iopFPassBaseNC(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassBaseNC>(pc);
+  auto const idx = decode_iva(pc);
+  baseNImpl(vmStack().indTV(idx), flags);
+}
+
+OPTBLD_INLINE void iopFPassBaseNL(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassBaseNL>(pc);
+  auto const localId = decode_la(pc);
+  baseNImpl(frame_local_inner(vmfp(), localId), flags);
+}
+
 static inline void baseGImpl(TypedValue* key, MOpFlags flags) {
   baseNGImpl(key, flags, lookupd_gbl, lookup_gbl);
 }
@@ -4874,6 +4905,18 @@ OPTBLD_INLINE void iopBaseGC(IOP_ARGS) {
 OPTBLD_INLINE void iopBaseGL(IOP_ARGS) {
   auto const localId = decode_la(pc);
   auto const flags = decode_oa<MOpFlags>(pc);
+  baseGImpl(frame_local_inner(vmfp(), localId), flags);
+}
+
+OPTBLD_INLINE void iopFPassBaseGC(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassBaseGC>(pc);
+  auto const idx = decode_iva(pc);
+  baseGImpl(vmStack().indTV(idx), flags);
+}
+
+OPTBLD_INLINE void iopFPassBaseGL(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassBaseGL>(pc);
+  auto const localId = decode_la(pc);
   baseGImpl(frame_local_inner(vmfp(), localId), flags);
 }
 
@@ -4914,9 +4957,7 @@ OPTBLD_INLINE void iopBaseSL(IOP_ARGS) {
   mstate.base = baseSImpl(clsIdx, frame_local_inner(vmfp(), keyLoc));
 }
 
-OPTBLD_INLINE void iopBaseL(IOP_ARGS) {
-  auto localId = decode_la(pc);
-  auto flags = decode_oa<MOpFlags>(pc);
+OPTBLD_INLINE void baseLImpl(int32_t localId, MOpFlags flags) {
   auto& mstate = initMState();
 
   auto local = frame_local_inner(vmfp(), localId);
@@ -4926,6 +4967,18 @@ OPTBLD_INLINE void iopBaseL(IOP_ARGS) {
   }
 
   mstate.base = local;
+}
+
+OPTBLD_INLINE void iopBaseL(IOP_ARGS) {
+  auto localId = decode_la(pc);
+  auto flags = decode_oa<MOpFlags>(pc);
+  baseLImpl(localId, flags);
+}
+
+OPTBLD_INLINE void iopFPassBaseL(IOP_ARGS) {
+  auto flags = decode_fpass_flags<Op::FPassBaseL>(pc);
+  auto localId = decode_la(pc);
+  baseLImpl(localId, flags);
 }
 
 OPTBLD_INLINE void iopBaseC(IOP_ARGS) {
@@ -4981,8 +5034,10 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
       result = nullSafeProp(mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
       break;
 
-    case MOpFlags::Define:
     case MOpFlags::DefineReffy:
+      raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
+
+    case MOpFlags::Define:
     case MOpFlags::Unset:
     case MOpFlags::WarnDefine:
       always_assert(false);
@@ -5034,40 +5089,75 @@ static OPTBLD_INLINE void dimDispatch(PropElemOp op, MOpFlags flags,
   }
 }
 
-static OPTBLD_INLINE void dimImpl(PC& pc, TypedValue key) {
+static OPTBLD_INLINE void dimImpl(
+  PC& pc, TypedValue key, folly::Optional<MOpFlags> flags = folly::none
+) {
   auto op = decode_oa<PropElemOp>(pc);
-  auto flags = decode_oa<MOpFlags>(pc);
+  if (!flags) flags = decode_oa<MOpFlags>(pc);
 
-  dimDispatch(op, flags, key);
+  dimDispatch(op, *flags, key);
 }
 
-OPTBLD_INLINE void iopDimL(IOP_ARGS) {
-  dimImpl(pc, *frame_local_inner(vmfp(), decode_la(pc)));
+
+static inline TypedValue local_key(PC& pc) {
+  return *frame_local_inner(vmfp(), decode_la(pc));
 }
 
-OPTBLD_INLINE void iopDimC(IOP_ARGS) {
-  dimImpl(pc, *vmStack().indC(decode_iva(pc)));
+template<int Idx>
+static inline TypedValue stack_key(PC& pc) {
+  return *vmStack().indTV(Idx == -1 ? decode_iva(pc) : Idx);
 }
 
-OPTBLD_INLINE void iopDimInt(IOP_ARGS) {
-  dimImpl(pc, make_tv<KindOfInt64>(decode<int64_t>(pc)));
+static inline TypedValue int_key(PC& pc) {
+  return make_tv<KindOfInt64>(decode<int64_t>(pc));
 }
 
-OPTBLD_INLINE void iopDimStr(IOP_ARGS) {
-  dimImpl(pc, make_tv<KindOfPersistentString>(decode_litstr(pc)));
+static inline TypedValue str_key(PC& pc) {
+  return make_tv<KindOfPersistentString>(decode_litstr(pc));
+}
+
+OPTBLD_INLINE void iopDimL(IOP_ARGS)   { dimImpl(pc, local_key(pc)); }
+OPTBLD_INLINE void iopDimC(IOP_ARGS)   { dimImpl(pc, stack_key<-1>(pc)); }
+OPTBLD_INLINE void iopDimInt(IOP_ARGS) { dimImpl(pc, int_key(pc)); }
+OPTBLD_INLINE void iopDimStr(IOP_ARGS) { dimImpl(pc, str_key(pc)); }
+
+OPTBLD_INLINE void dimNewElemImpl(MOpFlags flags) {
+  auto& mstate = vmMInstrState();
+  if (flags == MOpFlags::Warn) raise_error("Cannot use [] for reading");
+
+  auto result =
+    flags & MOpFlags::DefineReffy ? NewElem<true>(mstate.tvRef, mstate.base)
+                                  : NewElem<false>(mstate.tvRef, mstate.base);
+
+  mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
 OPTBLD_INLINE void iopDimNewElem(IOP_ARGS) {
-  auto& mstate = vmMInstrState();
-  auto const flags = decode_oa<MOpFlags>(pc);
-  auto result = [&] {
-    if (flags & MOpFlags::DefineReffy) {
-      return NewElem<true>(mstate.tvRef, mstate.base);
-    }
-    return NewElem<false>(mstate.tvRef, mstate.base);
-  }();
+  dimNewElemImpl(decode_oa<MOpFlags>(pc));
+}
 
-  mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
+OPTBLD_INLINE void iopFPassDimL(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassDimL>(pc);
+  dimImpl(pc, local_key(pc), flags);
+}
+
+OPTBLD_INLINE void iopFPassDimC(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassDimC>(pc);
+  dimImpl(pc, stack_key<-1>(pc), flags);
+}
+
+OPTBLD_INLINE void iopFPassDimInt(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassDimInt>(pc);
+  dimImpl(pc, int_key(pc), flags);
+}
+
+OPTBLD_INLINE void iopFPassDimStr(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassDimStr>(pc);
+  dimImpl(pc, str_key(pc), flags);
+}
+
+OPTBLD_INLINE void iopFPassDimNewElem(IOP_ARGS) {
+  dimNewElemImpl(decode_fpass_flags<Op::FPassDimNewElem>(pc));
 }
 
 static OPTBLD_INLINE void mFinal(MInstrState& mstate,
@@ -5081,9 +5171,11 @@ static OPTBLD_INLINE void mFinal(MInstrState& mstate,
   tvUnlikelyRefcountedDecRef(mstate.tvRef2);
 }
 
-static OPTBLD_INLINE void queryMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
-  auto nDiscard = decode_iva(pc);
-  auto op = decode_oa<QueryMOp>(pc);
+using KeyDecoder = TypedValue (*)(PC&);
+
+static OPTBLD_INLINE void queryMImpl(
+  PC& pc, int32_t nDiscard, QueryMOp op, KeyDecoder decode_key
+) {
   auto propElem = decode_oa<PropElemOp>(pc);
   auto key = decode_key(pc);
 
@@ -5120,36 +5212,33 @@ static OPTBLD_INLINE void queryMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
   mFinal(mstate, nDiscard, result);
 }
 
-static inline TypedValue local_key(PC& pc) {
-  return *frame_local_inner(vmfp(), decode_la(pc));
-}
-
-static inline TypedValue int_key(PC& pc) {
-  return make_tv<KindOfInt64>(decode<int64_t>(pc));
-}
-
-static inline TypedValue str_key(PC& pc) {
-  return make_tv<KindOfPersistentString>(decode_litstr(pc));
-}
-
 OPTBLD_INLINE void iopQueryML(IOP_ARGS) {
-  queryMImpl(pc, local_key);
+  auto const nDiscard = decode_iva(pc);
+  auto const op = decode_oa<QueryMOp>(pc);
+  queryMImpl(pc, nDiscard, op, local_key);
 }
 
 OPTBLD_INLINE void iopQueryMC(IOP_ARGS) {
-  queryMImpl(pc, [](PC&) { return *vmStack().topC(); });
+  auto const nDiscard = decode_iva(pc);
+  auto const op = decode_oa<QueryMOp>(pc);
+  queryMImpl(pc, nDiscard, op, stack_key<0>);
 }
 
 OPTBLD_INLINE void iopQueryMInt(IOP_ARGS) {
-  queryMImpl(pc, int_key);
+  auto const nDiscard = decode_iva(pc);
+  auto const op = decode_oa<QueryMOp>(pc);
+  queryMImpl(pc, nDiscard, op, int_key);
 }
 
 OPTBLD_INLINE void iopQueryMStr(IOP_ARGS) {
-  queryMImpl(pc, str_key);
+  auto const nDiscard = decode_iva(pc);
+  auto const op = decode_oa<QueryMOp>(pc);
+  queryMImpl(pc, nDiscard, op, str_key);
 }
 
-static OPTBLD_INLINE void vGetMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
-  auto const nDiscard = decode_iva(pc);
+static OPTBLD_INLINE void vGetMImpl(
+  PC& pc, int32_t nDiscard, KeyDecoder decode_key
+) {
   auto const propElem = decode_oa<PropElemOp>(pc);
   auto const key = decode_key(pc);
 
@@ -5163,22 +5252,26 @@ static OPTBLD_INLINE void vGetMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
 }
 
 OPTBLD_INLINE void iopVGetML(IOP_ARGS) {
-  vGetMImpl(pc, local_key);
+  auto const nDiscard = decode_iva(pc);
+  vGetMImpl(pc, nDiscard, local_key);
 }
 
 OPTBLD_INLINE void iopVGetMC(IOP_ARGS) {
-  vGetMImpl(pc, [](PC&) { return *vmStack().top(); });
+  auto const nDiscard = decode_iva(pc);
+  vGetMImpl(pc, nDiscard, [](PC&) { return *vmStack().top(); });
 }
 
 OPTBLD_INLINE void iopVGetMInt(IOP_ARGS) {
-  vGetMImpl(pc, int_key);
+  auto const nDiscard = decode_iva(pc);
+  vGetMImpl(pc, nDiscard, int_key);
 }
 
 OPTBLD_INLINE void iopVGetMStr(IOP_ARGS) {
-  vGetMImpl(pc, str_key);
+  auto const nDiscard = decode_iva(pc);
+  vGetMImpl(pc, nDiscard, str_key);
 }
 
-OPTBLD_INLINE void iopVGetMNewElem(IOP_ARGS) {
+static OPTBLD_INLINE void vGetMNewElemImpl(PC& pc) {
   auto const nDiscard = decode_iva(pc);
 
   auto& mstate = vmMInstrState();
@@ -5190,7 +5283,55 @@ OPTBLD_INLINE void iopVGetMNewElem(IOP_ARGS) {
   mFinal(mstate, nDiscard, result);
 }
 
-static OPTBLD_INLINE void setMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
+OPTBLD_INLINE void iopVGetMNewElem(IOP_ARGS) {
+  vGetMNewElemImpl(pc);
+}
+
+static OPTBLD_INLINE void fPassMImpl(
+  PC& pc, MOpFlags flags, int32_t nDiscard, KeyDecoder decode_key
+) {
+  if (flags == MOpFlags::Warn) {
+    return queryMImpl(pc, nDiscard, QueryMOp::CGet, decode_key);
+  }
+  assert(flags == MOpFlags::DefineReffy);
+  vGetMImpl(pc, nDiscard, decode_key);
+}
+
+OPTBLD_INLINE void iopFPassML(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassML>(pc);
+  auto const nDiscard = decode_iva(pc);
+  fPassMImpl(pc, flags, nDiscard, local_key);
+}
+
+OPTBLD_INLINE void iopFPassMC(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassMC>(pc);
+  auto const nDiscard = decode_iva(pc);
+  fPassMImpl(pc, flags, nDiscard, stack_key<0>);
+}
+
+OPTBLD_INLINE void iopFPassMInt(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassMInt>(pc);
+  auto const nDiscard = decode_iva(pc);
+  fPassMImpl(pc, flags, nDiscard, int_key);
+}
+
+OPTBLD_INLINE void iopFPassMStr(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassMStr>(pc);
+  auto const nDiscard = decode_iva(pc);
+  fPassMImpl(pc, flags, nDiscard, str_key);
+}
+
+OPTBLD_INLINE void iopFPassMNewElem(IOP_ARGS) {
+  auto const flags = decode_fpass_flags<Op::FPassMNewElem>(pc);
+
+  if (flags == MOpFlags::Warn) {
+    raise_error("Cannot use [] for reading");
+  }
+  assert(flags == MOpFlags::DefineReffy);
+  vGetMNewElemImpl(pc);
+}
+
+static OPTBLD_INLINE void setMImpl(PC& pc, KeyDecoder decode_key) {
   auto const nDiscard = decode_iva(pc);
   auto const propElem = decode_oa<PropElemOp>(pc);
   auto const key = decode_key(pc);
@@ -5222,21 +5363,10 @@ static OPTBLD_INLINE void setMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
   mFinal(mstate, nDiscard, result);
 }
 
-OPTBLD_INLINE void iopSetML(IOP_ARGS) {
-  setMImpl(pc, local_key);
-}
-
-OPTBLD_INLINE void iopSetMC(IOP_ARGS) {
-  setMImpl(pc, [](PC&) { return *vmStack().indC(1); });
-}
-
-OPTBLD_INLINE void iopSetMInt(IOP_ARGS) {
-  setMImpl(pc, int_key);
-}
-
-OPTBLD_INLINE void iopSetMStr(IOP_ARGS) {
-  setMImpl(pc, str_key);
-}
+OPTBLD_INLINE void iopSetML(IOP_ARGS)   { setMImpl(pc, local_key); }
+OPTBLD_INLINE void iopSetMC(IOP_ARGS)   { setMImpl(pc, stack_key<1>); }
+OPTBLD_INLINE void iopSetMInt(IOP_ARGS) { setMImpl(pc, int_key); }
+OPTBLD_INLINE void iopSetMStr(IOP_ARGS) { setMImpl(pc, str_key); }
 
 OPTBLD_INLINE void iopSetMNewElem(IOP_ARGS) {
   auto const nDiscard = decode_iva(pc);
@@ -6503,20 +6633,14 @@ OPTBLD_INLINE void iopFPushCufSafe(IOP_ARGS) {
   doFPushCuf(pc, false, true);
 }
 
-static inline ActRec* arFromInstr(TypedValue* sp, PC pc) {
-  return arFromSpOffset((ActRec*)sp, instrSpToArDelta(pc));
-}
-
 OPTBLD_INLINE void iopFPassC(IOP_ARGS) {
-  DEBUG_ONLY auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassC));
+  DEBUG_ONLY auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassC));
   UNUSED auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
 }
 
 OPTBLD_INLINE void iopFPassCW(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassCW));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassCW));
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   auto const func = ar->m_func;
@@ -6526,8 +6650,7 @@ OPTBLD_INLINE void iopFPassCW(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassCE(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassCE));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassCE));
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   auto const func = ar->m_func;
@@ -6537,8 +6660,7 @@ OPTBLD_INLINE void iopFPassCE(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassV(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassV));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassV));
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
@@ -6548,16 +6670,14 @@ OPTBLD_INLINE void iopFPassV(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassVNop(IOP_ARGS) {
-  DEBUG_ONLY auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassVNop));
+  DEBUG_ONLY auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassVNop));
   UNUSED auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   assert(ar->m_func->byRef(paramId));
 }
 
 OPTBLD_INLINE void iopFPassR(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassR));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassR));
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
@@ -6574,8 +6694,7 @@ OPTBLD_INLINE void iopFPassR(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassL(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassL));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassL));
   auto paramId = decode_iva(pc);
   auto local = decode_la(pc);
   assert(paramId < ar->numArgs());
@@ -6589,8 +6708,7 @@ OPTBLD_INLINE void iopFPassL(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassN(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassN));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassN));
   PC origPc = pc;
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
@@ -6602,8 +6720,7 @@ OPTBLD_INLINE void iopFPassN(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassG(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassG));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassG));
   PC origPc = pc;
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
@@ -6615,8 +6732,7 @@ OPTBLD_INLINE void iopFPassG(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassS(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassS));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassS));
   PC origPc = pc;
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
@@ -6628,8 +6744,7 @@ OPTBLD_INLINE void iopFPassS(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFPassM(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FPassM));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FPassM));
   auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
@@ -6668,7 +6783,7 @@ bool doFCall(ActRec* ar, PC& pc) {
 }
 
 OPTBLD_INLINE void iopFCall(IOP_ARGS) {
-  auto const ar = arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FCall));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCall));
   UNUSED auto numArgs = decode_iva(pc);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
@@ -6677,8 +6792,7 @@ OPTBLD_INLINE void iopFCall(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
-  auto const ar = arFromInstr(vmStack().top(),
-                              pc - encoded_op_size(Op::FCallD));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCallD));
   UNUSED auto numArgs = decode_iva(pc);
   UNUSED auto clsName = decode_litstr(pc);
   UNUSED auto funcName = decode_litstr(pc);
@@ -6693,8 +6807,7 @@ OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFCallAwait(IOP_ARGS) {
-  auto const ar = arFromInstr(vmStack().top(),
-                              pc - encoded_op_size(Op::FCallAwait));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCallAwait));
   UNUSED auto numArgs = decode_iva(pc);
   UNUSED auto clsName = decode_litstr(pc);
   UNUSED auto funcName = decode_litstr(pc);
@@ -6834,8 +6947,7 @@ OPTBLD_INLINE void iopFCallArray(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopFCallUnpack(IOP_ARGS) {
-  auto const ar =
-    arFromInstr(vmStack().top(), pc - encoded_op_size(Op::FCallUnpack));
+  auto const ar = arFromInstr(pc - encoded_op_size(Op::FCallUnpack));
   auto numArgs = decode_iva(pc);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);

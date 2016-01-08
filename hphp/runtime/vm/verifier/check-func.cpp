@@ -762,6 +762,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define V_MMANY { },
   #define R_MMANY { },
   #define MFINAL { },
+  #define F_MFINAL { },
   #define C_MFINAL { },
   #define R_MFINAL { },
   #define V_MFINAL { },
@@ -774,6 +775,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef R_MMANY
   #undef MMANY
   #undef MFINAL
+  #undef F_MFINAL
   #undef C_MFINAL
   #undef R_MFINAL
   #undef V_MFINAL
@@ -816,6 +818,11 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::VGetMInt:
   case Op::VGetMStr:
   case Op::VGetMNewElem:
+  case Op::FPassML:
+  case Op::FPassMC:
+  case Op::FPassMInt:
+  case Op::FPassMStr:
+  case Op::FPassMNewElem:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
@@ -944,11 +951,16 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
              param_id, fpi.next);
       ok = false;
     }
-    // we have already popped FPush's input, but not pushed the output,
-    // so this check doesn't count the F result of this FPush, but does
-    // count the previous FPush*s.
+    if (isMemberBaseOp(op) || isMemberDimOp(op)) {
+      // The argument isn't pushed until the final member operation. Skip the
+      // last two checks.
+      return ok;
+    }
+    // we have already popped FPass's input, but not pushed the output, so this
+    // check doesn't count the F result of this FPass, but does count the
+    // previous FPass*s.
     if (cur->stklen != fpi.stkmin + param_id) {
-      error("Stack depth incorrect after FPush; got %d expected %d\n",
+      error("Stack depth incorrect after FPass; got %d expected %d\n",
              cur->stklen, fpi.stkmin + param_id);
       ok = false;
     }

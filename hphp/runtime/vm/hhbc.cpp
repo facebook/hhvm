@@ -454,6 +454,7 @@ int instrNumPops(PC pc) {
 #define V_MMANY -2
 #define R_MMANY -2
 #define MFINAL -3
+#define F_MFINAL -6
 #define C_MFINAL -5
 #define R_MFINAL C_MFINAL
 #define V_MFINAL C_MFINAL
@@ -475,6 +476,7 @@ int instrNumPops(PC pc) {
 #undef V_MMANY
 #undef R_MMANY
 #undef MFINAL
+#undef F_MFINAL
 #undef C_MFINAL
 #undef R_MFINAL
 #undef V_MFINAL
@@ -486,7 +488,8 @@ int instrNumPops(PC pc) {
 #undef IDX_A
 #undef O
   };
-  int n = numberOfPops[size_t(peek_op(pc))];
+  auto const op = peek_op(pc);
+  int n = numberOfPops[size_t(op)];
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
@@ -496,6 +499,8 @@ int instrNumPops(PC pc) {
   // FCall, NewPackedArray, and some final member operations specify how many
   // values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
+  // FPassM final operations have paramId as imm 0 and stackCount as imm1
+  if (n == -6) return getImm(pc, 1).u_IVA;
   // Other final member operations pop their first immediate + 1
   if (n == -5) return getImm(pc, 0).u_IVA + 1;
   // For instructions with vector immediates, we have to scan the
@@ -617,6 +622,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define V_MMANY return minstrFlavor(op, idx, VV);
 #define R_MMANY return minstrFlavor(op, idx, RV);
 #define MFINAL return manyFlavor(op, idx, CRV);
+#define F_MFINAL MFINAL
 #define C_MFINAL return idx == 0 ? CV : CRV;
 #define R_MFINAL return idx == 0 ? RV : CRV;
 #define V_MFINAL return idx == 0 ? VV : CRV;
@@ -641,6 +647,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef V_MMANY
 #undef R_MMANY
 #undef MFINAL
+#undef F_MFINAL
 #undef C_MFINAL
 #undef R_MFINAL
 #undef V_MFINAL
@@ -1430,21 +1437,13 @@ bool ImmVector::decodeLastMember(const Unit* u,
   return false;
 }
 
-int instrSpToArDelta(PC opcode) {
-  // This function should only be called for instructions that read
-  // the current FPI
-  auto const op = peek_op(opcode);
-  assert(instrReadsCurrentFpi(op));
-  // The delta from sp to ar is equal to the number of values on the stack
-  // that will be consumed by this instruction (numPops) plus the number of
-  // parameters pushed onto the stack so far that are not being consumed by
-  // this instruction (numExtra). For the FPass* instructions, numExtra will
-  // be equal to the first immediate argument (param id). For the FCall
-  // instructions, numExtra will be 0 because all of the parameters on the
-  // stack are already accounted for by numPops.
-  int numPops = instrNumPops(opcode);
-  int numExtra = isFCallStar(op) ? 0 : getImm(opcode, 0).u_IVA;
-  return numPops + numExtra;
+int instrFpToArDelta(const Func* func, PC opcode) {
+  // This function should only be called for instructions that read the current
+  // FPI
+  assert(instrReadsCurrentFpi(peek_op(opcode)));
+  auto const fpi = func->findFPI(func->unit()->offsetOf(opcode));
+  assert(fpi != nullptr);
+  return fpi->m_fpOff;
 }
 
 std::string show(MInstrAttr mia) {

@@ -680,10 +680,8 @@ other FPI region. An FPI region may not contain backward jumps, nor may it
 contain forward jumps that jump past the end of the FPI region.
 
 Each function has an "FPI region table". Each row in the FPI region table
-consists of the starting offset of the FPI region (the bytecode offset
-immediately following the FPush* instruction), the ending offset of the FPI
-region (the bytecode offset of the FCall* instruction), and the number of
-parameters being passed.
+consists of offset of the FPush* instruction that begins the region, the FCall
+instruction that ends the region, and the number of parameters being passed.
 
 
 Flavor descriptors
@@ -3502,12 +3500,20 @@ the documentation from section 9 can be folded into this section.
 BaseNC <stack index> <member op flags>    []  ->  []
 BaseNL <local id>    <member op flags>    []  ->  []
 
-  BaseN{C,L}{,W,D,WD} member operation, depending on the flags immediate.
+FPassBaseNC <param id> <stack index>    []  ->  []
+FPassBaseNL <param id> <local id>       []  ->  []
+
+  BaseN{C,L}{,W,D,WD} member operation, depending on the flags immediate or
+  reffiness of the specified parameter.
 
 BaseGC <stack index> <member op flags>    []  ->  []
 BaseGL <local id>    <member op flags>    []  ->  []
 
-  BaseG{C,L}{,W,D,WD} member operation, depending on the flags immediate.
+FPassBaseGC <param id> <stack index>    []  ->  []
+FPassBaseGL <param id> <local id>       []  ->  []
+
+  BaseG{C,L}{,W,D,WD} member operation, depending on the flags immediate or
+  reffiness of the specified parameter.
 
 BaseSC <stack index> <stack index>    [A C?]  ->  [C?]
 BaseSL <local id>    <stack index>    [A C?]  ->  [C?]
@@ -3518,7 +3524,10 @@ BaseSL <local id>    <stack index>    [A C?]  ->  [C?]
 
 BaseL <local id> <member op flags>    []  ->  []
 
-  Base{L,LW,LD,LWD} member operation, depending on the flags immediate.
+FPassBaseL <param id> <local id>    []  ->  []
+
+  Base{L,LW,LD,LWD} member operation, depending on the flags immediate or
+  reffiness of the specified parameter.
 
 BaseC <stack index>    []  ->  []
 BaseR <stack index>    []  ->  []
@@ -3537,8 +3546,20 @@ DimC   <stack index> <prop/elem op> <member op flags>    []  ->  []
 DimInt <int64>       <prop/elem op> <member op flags>    []  ->  []
 DimStr <litstr id>   <prop/elem op> <member op flags>    []  ->  []
 
+FPassDimL   <param id> <local id>    <prop/elem op>    []  ->  []
+FPassDimC   <param id> <stack index> <prop/elem op>    []  ->  []
+FPassDimInt <param id> <int64>       <prop/elem op>    []  ->  []
+FPassDimStr <param id> <litstr id>   <prop/elem op>    []  ->  []
+
   {Prop,Elem}{L,C,I,T}{W,D,WD,U} member operation, depending on the prop/elem
-  op and flags immediates.
+  op and flags immediates or reffiness of the specified parameter.
+
+DimNewElem <member op flags>    []  ->  []
+
+FPassDimNewElem <param id>    []  ->  []
+
+  Fatal error or NewElem operation, depending on the flags immediate or
+  reffiness of the specified parameter.
 
 10.1c Final operations
 ----------------------
@@ -3566,6 +3587,19 @@ VGetMStr <stack count> <prop/elem op> <litstr id>    [...]  ->  [V]
 VGetMNewElem <stack count>
 
   VGetNewElem member operation.
+
+FPassML   <param id> <stack count> <prop/elem op> <local id>     [...]  ->  [V]
+FPassMC   <param id> <stack count> <prop/elem op>                [...]  ->  [V]
+FPassMInt <param id> <stack count> <prop/elem op> <int64>        [...]  ->  [V]
+FPassMStr <param id> <stack count> <prop/elem op> <litstr id>    [...]  ->  [V]
+
+  {CGet,VGet}{Prop,Elem}{L,C,I,T} member operation, depending on the reffiness
+  of the specified parameter and prop/elem op immediate.
+
+FPassMNewElem <param id> <stack count>
+
+  Fatal error or VGetNewElem member operation, depending on the reffiness of
+  the specified parameter.
 
 SetML   <stack count> <prop/elem op> <local id>     [... C]  ->  [C]
 SetMC   <stack count> <prop/elem op>                [... C]  ->  [C]

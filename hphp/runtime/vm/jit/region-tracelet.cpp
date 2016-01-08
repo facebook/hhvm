@@ -225,14 +225,15 @@ bool prepareInstruction(Env& env) {
 
   if (inputInfos.needsRefCheck) {
     // Reffiness guards are always at the beginning of the trace for now, so
-    // calculate the delta from the original sp to the ar.
+    // calculate the delta from the original sp to the ar. The FPI delta from
+    // instrFpToArDelta includes locals and iterators, so when we're in a
+    // resumed context we have to adjust for the fact that they're in a
+    // different place.
     auto argNum = env.inst.imm[0].u_IVA;
-    size_t entryArDelta = instrSpToArDelta(env.inst.pc()) -
-      (irgen::logicalStackDepth(env.irgs) - env.ctx.spOffset);
-    FTRACE(5, "entryArDelta info: {} {} {}\n",
-      instrSpToArDelta(env.inst.pc()),
-      irgen::logicalStackDepth(env.irgs).offset,
-      env.ctx.spOffset.offset);
+    auto entryArDelta = env.ctx.spOffset.offset -
+      instrFpToArDelta(curFunc(env), env.inst.pc());
+    if (env.sk.resumed()) entryArDelta += curFunc(env)->numSlotsInFrame();
+
     try {
       env.inst.preppedByRef =
         env.arStates.back().checkByRef(argNum, entryArDelta, &env.refDeps);

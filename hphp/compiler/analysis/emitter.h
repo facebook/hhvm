@@ -683,8 +683,33 @@ public:
    * eval stack slots containing member keys that should be consumed by the
    * final operation.
    */
-  size_t emitMOp(int iFirst, int& iLast, bool allowW, bool rhsVal,
-                 Emitter& e, MOpFlags flags);
+  struct MInstrOpts {
+    explicit MInstrOpts(MOpFlags flags)
+      : allowW{flags & MOpFlags::Define}
+      , flags{flags}
+    {}
+
+    explicit MInstrOpts(int32_t paramId)
+      : allowW{true}
+      , fpass{true}
+      , paramId{paramId}
+    {}
+
+    MInstrOpts& rhs() {
+      rhsVal = true;
+      return *this;
+    }
+
+    bool allowW{false};
+    bool rhsVal{false};
+    bool fpass{false};
+    union {
+      MOpFlags flags;
+      int32_t paramId;
+    };
+  };
+
+  size_t emitMOp(int iFirst, int& iLast, Emitter& e, MInstrOpts opts);
   void emitQueryMOp(int iFirst, int iLast, Emitter& e, QueryMOp op);
 
   enum class PassByRefKind {

@@ -1306,8 +1306,22 @@ void remove_trivial_incdecs(Env& env) {
         [&] (PureSpillFrame) {},
         [&] (IrrelevantEffects) {},
 
+        // Inlining related instructions can manipulate the frame but don't
+        // observe reference counts.
+        [&] (GeneralEffects) {
+          auto const is_inlining_inst = inst.is(
+            BeginInlining,
+            DefInlineFP,
+            InlineReturn,
+            InlineReturnNoFrame,
+            SyncReturnBC
+          );
+          if (!is_inlining_inst) {
+            incs.clear();
+          }
+        },
+
         // Everything else may.
-        [&] (GeneralEffects)    { incs.clear(); },
         [&] (CallEffects)       { incs.clear(); },
         [&] (ReturnEffects)     { incs.clear(); },
         [&] (ExitEffects)       { incs.clear(); },

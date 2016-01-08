@@ -491,20 +491,6 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (ReturnEffects l) {
-      if (inst.is(InlineReturn)) {
-        // Returning from an inlined function.  This adds nothing to gen, but
-        // kills frame and stack locations for the callee.
-        auto const fp = inst.src(0);
-        killSet(env, env.global.ainfo.per_frame_bits[fp]);
-        kill(env, l.kills);
-        return;
-      }
-
-      if (inst.is(InlineReturnNoFrame)) {
-        kill(env, l.kills);
-        return;
-      }
-
       // Return from the main function.  Locations other than the frame and
       // stack (e.g. object properties and whatnot) are always live on a
       // function return---so mark everything read before we start killing

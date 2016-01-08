@@ -585,16 +585,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
   }
 
-  case InlineReturn:
-    return ReturnEffects { stack_below(inst.src(0), 2) | AMIStateAny };
+  case InlineReturn: {
+    auto const callee = stack_below(inst.src(0), 2) | AMIStateAny | AFrameAny;
+    return may_load_store_kill(AEmpty, callee, callee);
+  }
 
-  case InlineReturnNoFrame:
-    return ReturnEffects {
-      AliasClass(AStack {
-        inst.extra<InlineReturnNoFrame>()->frameOffset.offset,
+  case InlineReturnNoFrame: {
+    auto const callee = AliasClass(AStack {
+      inst.extra<InlineReturnNoFrame>()->frameOffset.offset,
         std::numeric_limits<int32_t>::max()
-      }) | AMIStateAny
-    };
+    }) | AMIStateAny;
+    return may_load_store_kill(AEmpty, callee, callee);
+  }
 
   case SyncReturnBC: {
     auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;

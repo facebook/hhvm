@@ -886,10 +886,9 @@ void miFinalCGetProp(ISS& env, int32_t nDiscard, Type key) {
   push(env, TInitCell);
 }
 
-void miFinalVGetProp(MIS& env) {
-  auto const name = mcodeStringKey(env);
-  miPop(env);
-  auto const isNullsafe = env.mcode() == MQT;
+void miFinalVGetProp(ISS& env, int32_t nDiscard, Type key, bool isNullsafe) {
+  auto const name = mStringKey(key);
+  discard(env, nDiscard);
   handleInThisPropD(env, isNullsafe);
   handleInSelfPropD(env, isNullsafe);
   handleInPublicStaticPropD(env, isNullsafe);
@@ -1044,7 +1043,7 @@ void miFinalUnsetProp(MIS& env) {
 // This is a helper for final defining Elem operations that need to
 // handle array chains and frame effects, but don't yet do anything
 // better than supplying a single type.
-void pessimisticFinalElemD(MIS& env, Type key, Type ty) {
+void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
   if (mustBeInFrame(env.state.base) && env.state.base.type.subtypeOf(TArr)) {
     env.state.base.type = array_set(env.state.base.type, key, ty);
     return;
@@ -1066,9 +1065,8 @@ void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key) {
   push(env, ty);
 }
 
-void miFinalVGetElem(MIS& env) {
-  auto const key = mcodeKey(env);
-  miPop(env);
+void miFinalVGetElem(ISS& env, int32_t nDiscard, Type key) {
+  discard(env, nDiscard);
   handleInThisElemD(env);
   handleInSelfElemD(env);
   handleInPublicStaticElemD(env);
@@ -1204,10 +1202,10 @@ void miFinalUnsetElem(MIS& env) {
 //////////////////////////////////////////////////////////////////////
 // Final new elem ops
 
-// This is a helper for final defining Elem operations that need to
-// handle array chains and frame effects, but don't yet do anything
-// better than supplying a single type.
-void pessimisticFinalNewElem(MIS& env, Type ty) {
+// This is a helper for final defining Elem operations that need to handle
+// array chains and frame effects, but don't yet do anything better than
+// supplying a single type.
+void pessimisticFinalNewElem(ISS& env, Type ty) {
   if (mustBeInFrame(env.state.base) && env.state.base.type.subtypeOf(TArr)) {
     env.state.base.type = array_newelem(env.state.base.type, ty);
     return;
@@ -1219,8 +1217,8 @@ void pessimisticFinalNewElem(MIS& env, Type ty) {
   }
 }
 
-void miFinalVGetNewElem(MIS& env) {
-  miPop(env);
+void miFinalVGetNewElem(ISS& env, int32_t nDiscard) {
+  discard(env, nDiscard);
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
   handleInPublicStaticNewElem(env);
@@ -1326,9 +1324,14 @@ void miFinal(MIS& env, const bc::CGetM& op) {
 }
 
 void miFinal(MIS& env, const bc::VGetM& op) {
-  if (mcodeIsElem(env.mcode())) return miFinalVGetElem(env);
-  if (mcodeIsProp(env.mcode())) return miFinalVGetProp(env);
-  return miFinalVGetNewElem(env);
+  auto const nDiscard = numVecPops(env.mvec);
+  if (mcodeIsElem(env.mcode())) {
+    return miFinalVGetElem(env, nDiscard, mcodeKey(env));
+  }
+  if (mcodeIsProp(env.mcode())) {
+    return miFinalVGetProp(env, nDiscard, mcodeKey(env), env.mcode() == MQT);
+  }
+  return miFinalVGetNewElem(env, nDiscard);
 }
 
 void miFinal(MIS& env, const bc::SetM& op) {
@@ -1453,6 +1456,19 @@ void miQuery(ISS& env, int32_t nDiscard, QueryMOp op, PropElemOp propElem,
           return;
       }
   }
+}
+
+void miVGet(ISS& env, int32_t nDiscard, PropElemOp propElem, Type key) {
+  switch (propElem) {
+    case PropElemOp::Prop:
+    case PropElemOp::PropQ:
+      miFinalVGetProp(env, nDiscard, key, propElem == PropElemOp::PropQ);
+      break;
+    case PropElemOp::Elem:
+      miFinalVGetElem(env, nDiscard, key);
+      break;
+  }
+  moveBase(env, folly::none);
 }
 
 void miSet(ISS& env, int32_t nDiscard, PropElemOp propElem, Type key) {
@@ -1593,6 +1609,27 @@ void in(ISS& env, const bc::QueryMInt& op) {
 
 void in(ISS& env, const bc::QueryMStr& op) {
   miQuery(env, op.arg1, op.subop2, op.subop3, sval(op.str4));
+}
+
+void in(ISS& env, const bc::VGetML& op) {
+  miVGet(env, op.arg1, op.subop2, locAsCell(env, op.loc3));
+}
+
+void in(ISS& env, const bc::VGetMC& op) {
+  miVGet(env, op.arg1, op.subop2, topC(env));
+}
+
+void in(ISS& env, const bc::VGetMInt& op) {
+  miVGet(env, op.arg1, op.subop2, ival(op.arg3));
+}
+
+void in(ISS& env, const bc::VGetMStr& op) {
+  miVGet(env, op.arg1, op.subop2, sval(op.str3));
+}
+
+void in(ISS& env, const bc::VGetMNewElem& op) {
+  miFinalVGetNewElem(env, op.arg1);
+  moveBase(env, folly::none);
 }
 
 void in(ISS& env, const bc::SetML& op) {

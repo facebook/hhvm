@@ -455,6 +455,12 @@ static const struct {
   { OpQueryMC,     {BStackN|MBase,    Stack1,       OutUnknown      }},
   { OpQueryMInt,   {BStackN|MBase,    Stack1,       OutUnknown      }},
   { OpQueryMStr,   {BStackN|MBase,    Stack1,       OutUnknown      }},
+  { OpVGetML,      {BStackN|Local|MBase,
+                                      Stack1,       OutVUnknown     }},
+  { OpVGetMC,      {BStackN|MBase,    Stack1,       OutVUnknown     }},
+  { OpVGetMInt,    {BStackN|MBase,    Stack1,       OutVUnknown     }},
+  { OpVGetMStr,    {BStackN|MBase,    Stack1,       OutVUnknown     }},
+  { OpVGetMNewElem,{BStackN|MBase,    Stack1,       OutVUnknown     }},
   { OpSetML,       {Stack1|BStackN|Local|MBase,
                                       Stack1,       OutUnknown      }},
   { OpSetMC,       {Stack1|BStackN|MBase,
@@ -527,6 +533,9 @@ int64_t getStackPopped(PC pc) {
 
     case Op::QueryML:   case Op::QueryMC:
     case Op::QueryMInt: case Op::QueryMStr:
+    case Op::VGetML:    case Op::VGetMC:
+    case Op::VGetMInt:  case Op::VGetMStr:
+    case Op::VGetMNewElem:
     case Op::NewPackedArray:
     case Op::ConcatN:
     case Op::FCallBuiltin:
@@ -1061,6 +1070,11 @@ bool dontGuardAnyInputs(Op op) {
   case Op::QueryMC:
   case Op::QueryMInt:
   case Op::QueryMStr:
+  case Op::VGetML:
+  case Op::VGetMC:
+  case Op::VGetMInt:
+  case Op::VGetMStr:
+  case Op::VGetMNewElem:
   case Op::SetML:
   case Op::SetMC:
   case Op::SetMInt:

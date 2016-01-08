@@ -811,6 +811,11 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::QueryMC:
   case Op::QueryMInt:
   case Op::QueryMStr:
+  case Op::VGetML:
+  case Op::VGetMC:
+  case Op::VGetMInt:
+  case Op::VGetMStr:
+  case Op::VGetMNewElem:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }

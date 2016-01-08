@@ -315,9 +315,9 @@ ALWAYS_INLINE void cellDup(const Cell fr, Cell& to) {
 }
 
 /*
- * Duplicate a Ref from one location to another. Copies the m_data and
- * m_type fields and increments the reference count. Does not perform
- * as decRef on the value that was overwritten.
+ * Duplicate a Ref from one location to another. Copies the m_data and m_type
+ * fields and increments the reference count. Does not perform a decRef on the
+ * value that was overwritten.
  */
 ALWAYS_INLINE void refDup(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));

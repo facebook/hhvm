@@ -5625,6 +5625,34 @@ bool EmitterVisitor::emitVGet(Emitter& e, bool skipCells) {
       }
     }
   } else {
+    if (RuntimeOption::EvalEmitNewMInstrs) {
+      auto const stackCount =
+        emitMOp(i, iLast, true, false, e, MOpFlags::DefineReffy);
+
+      auto const sym = m_evalStack.get(iLast);
+      if (auto const pe = symToPropElem(e, sym, true)) {
+        switch (StackSym::GetSymFlavor(sym)) {
+          case StackSym::L:
+            e.VGetML(stackCount, *pe, m_evalStack.getLoc(iLast));
+            break;
+          case StackSym::C:
+            e.VGetMC(stackCount, *pe);
+            break;
+          case StackSym::I:
+            e.VGetMInt(stackCount, *pe, m_evalStack.getInt(iLast));
+            break;
+          case StackSym::T:
+            e.VGetMStr(stackCount, *pe, m_evalStack.getName(iLast));
+            break;
+          default:
+            always_assert(false);
+        }
+      } else {
+        e.VGetMNewElem(stackCount);
+      }
+      return false;
+    }
+
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.VGetM(vectorImm);
@@ -6104,8 +6132,7 @@ void EmitterVisitor::emitSet(Emitter& e) {
         }
       }
 
-      e.SetMNewElem(stackCount);
-      return;
+      return e.SetMNewElem(stackCount);
     }
 
     std::vector<uchar> vectorImm;

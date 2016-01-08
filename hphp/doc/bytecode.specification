@@ -3555,6 +3555,18 @@ QueryMStr <stack count> <query op> <prop/elem op> <litstr id>   [...]  ->  [C]
   {CGet,Isset,Empty}{Prop,Elem}{L,C,I,T} member operation, depending on the
   query op and prop/elem op immediates.
 
+VGetML   <stack count> <prop/elem op> <local id>     [...]  ->  [V]
+VGetMC   <stack count> <prop/elem op>                [...]  ->  [V]
+VGetMInt <stack count> <prop/elem op> <int64>        [...]  ->  [V]
+VGetMStr <stack count> <prop/elem op> <litstr id>    [...]  ->  [V]
+
+  {VGet}{Prop,Elem}{L,C,I,T} member operation, depending on the prop/elem op
+  immediate.
+
+VGetMNewElem <stack count>
+
+  VGetNewElem member operation.
+
 SetML   <stack count> <prop/elem op> <local id>     [... C]  ->  [C]
 SetMC   <stack count> <prop/elem op>                [... C]  ->  [C]
 SetMInt <stack count> <prop/elem op> <int64>        [... C]  ->  [C]

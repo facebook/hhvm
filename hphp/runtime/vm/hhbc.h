@@ -870,6 +870,15 @@ constexpr int32_t kMaxConcatN = 4;
                                        MFINAL,          ONE(CV),    NF) \
   O(QueryMStr,       FOUR(IVA, OA(QueryMOp), OA(PropElemOp), SA),       \
                                        MFINAL,          ONE(CV),    NF) \
+  O(VGetML,          THREE(IVA, OA(PropElemOp), LA),                    \
+                                       MFINAL,          ONE(VV),    NF) \
+  O(VGetMC,          TWO(IVA, OA(PropElemOp)),                          \
+                                       MFINAL,          ONE(VV),    NF) \
+  O(VGetMInt,        THREE(IVA, OA(PropElemOp), I64A),                  \
+                                       MFINAL,          ONE(VV),    NF) \
+  O(VGetMStr,        THREE(IVA, OA(PropElemOp), SA),                    \
+                                       MFINAL,          ONE(VV),    NF) \
+  O(VGetMNewElem,    ONE(IVA),         MFINAL,          ONE(VV),    NF) \
   O(SetML,           THREE(IVA, OA(PropElemOp), LA),                    \
                                        C_MFINAL,        ONE(CV),    NF) \
   O(SetMC,           TWO(IVA, OA(PropElemOp)),                          \
@@ -1309,6 +1318,11 @@ inline bool isMemberFinalOp(Op op) {
     case OpQueryMC:
     case OpQueryMInt:
     case OpQueryMStr:
+    case OpVGetML:
+    case OpVGetMC:
+    case OpVGetMInt:
+    case OpVGetMStr:
+    case OpVGetMNewElem:
     case OpSetML:
     case OpSetMC:
     case OpSetMInt:

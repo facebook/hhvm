@@ -291,6 +291,11 @@ interpOutputLocals(IRGS& env,
     case OpDimNewElem:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
       break;
+    case OpVGetML:
+    case OpVGetMC:
+    case OpVGetMInt:
+    case OpVGetMStr:
+    case OpVGetMNewElem:
     case OpSetML:
     case OpSetMC:
     case OpSetMInt:

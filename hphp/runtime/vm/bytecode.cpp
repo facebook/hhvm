@@ -5148,6 +5148,48 @@ OPTBLD_INLINE void iopQueryMStr(IOP_ARGS) {
   queryMImpl(pc, str_key);
 }
 
+static OPTBLD_INLINE void vGetMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
+  auto const nDiscard = decode_iva(pc);
+  auto const propElem = decode_oa<PropElemOp>(pc);
+  auto const key = decode_key(pc);
+
+  auto& mstate = vmMInstrState();
+  TypedValue result;
+  dimDispatch(propElem, MOpFlags::DefineReffy, key);
+  if (mstate.base->m_type != KindOfRef) tvBox(mstate.base);
+  refDup(*mstate.base, result);
+
+  mFinal(mstate, nDiscard, result);
+}
+
+OPTBLD_INLINE void iopVGetML(IOP_ARGS) {
+  vGetMImpl(pc, local_key);
+}
+
+OPTBLD_INLINE void iopVGetMC(IOP_ARGS) {
+  vGetMImpl(pc, [](PC&) { return *vmStack().top(); });
+}
+
+OPTBLD_INLINE void iopVGetMInt(IOP_ARGS) {
+  vGetMImpl(pc, int_key);
+}
+
+OPTBLD_INLINE void iopVGetMStr(IOP_ARGS) {
+  vGetMImpl(pc, str_key);
+}
+
+OPTBLD_INLINE void iopVGetMNewElem(IOP_ARGS) {
+  auto const nDiscard = decode_iva(pc);
+
+  auto& mstate = vmMInstrState();
+  TypedValue result;
+  mstate.base = NewElem<true>(mstate.tvRef, mstate.base);
+  if (mstate.base->m_type != KindOfRef) tvBox(mstate.base);
+  refDup(*mstate.base, result);
+
+  mFinal(mstate, nDiscard, result);
+}
+
 static OPTBLD_INLINE void setMImpl(PC& pc, TypedValue (*decode_key)(PC&)) {
   auto const nDiscard = decode_iva(pc);
   auto const propElem = decode_oa<PropElemOp>(pc);

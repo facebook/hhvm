@@ -2184,10 +2184,10 @@ void simpleBaseImpl(IRGS& env, SSATmp* base, Type innerTy) {
   env.irb->constrainValue(base, DataTypeSpecific);
 }
 
-SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
+SSATmp* propGenericImpl(IRGS& env, MInstrAttr mia, SSATmp* base, SSATmp* key,
                         bool nullsafe) {
-  auto const miaData = MInstrAttrData{mOpFlagsToAttr(flags)};
-  auto const define = bool(flags & MOpFlags::Define);
+  auto const miaData = MInstrAttrData{mia};
+  auto const define = bool(mia & MIA_define);
 
   if (define && nullsafe) {
     gen(env, RaiseError,
@@ -2219,12 +2219,12 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
 
   specializeObjBase(env, base);
 
-  auto const mia = mOpFlagsToAttr(flags);
+  auto const mia = MInstrAttr(mOpFlagsToAttr(flags) & MIA_intermediate_prop);
   auto const propInfo =
     getCurrentPropertyOffset(env, base, base->type(), key->type());
   if (propInfo.offset == -1 || (flags & MOpFlags::Unset) ||
       mightCallMagicPropMethod(mia, propInfo)) {
-    return propGenericImpl(env, flags, base, key, nullsafe);
+    return propGenericImpl(env, mia, base, key, nullsafe);
   }
 
   return emitPropSpecialized(env, base, base->type(), key,
@@ -2618,6 +2618,27 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
   return value;
 }
 
+void vGetMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+
+  auto const result = [&] {
+    switch (propElem) {
+      case PropElemOp::PropQ:
+        gen(env, RaiseError,
+            cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
+      case PropElemOp::Prop:
+        return gen(env, VGetProp, baseObj, key);
+      case PropElemOp::Elem:
+        return gen(env, VGetElem, basePtr, key);
+    }
+    always_assert(false);
+  }();
+
+  mFinalImpl(env, nDiscard, result);
+}
+
 void setMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
   auto const result = [&] {
     if (propElem == PropElemOp::Prop) return setPropImpl(env, key);
@@ -2753,6 +2774,31 @@ void emitQueryMInt(IRGS& env, int32_t nDiscard, QueryMOp query,
 void emitQueryMStr(IRGS& env, int32_t nDiscard, QueryMOp query,
                    PropElemOp propElem, const StringData* key) {
   queryMImpl(env, nDiscard, query, propElem, cns(env, key));
+}
+
+void emitVGetML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                int32_t locId) {
+  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
+                        DataTypeSpecific);
+  vGetMImpl(env, nDiscard, propElem, key);
+}
+
+void emitVGetMC(IRGS& env, int32_t nDiscard, PropElemOp propElem) {
+  vGetMImpl(env, nDiscard, propElem, topC(env));
+}
+
+void emitVGetMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                 int64_t key) {
+  vGetMImpl(env, nDiscard, propElem, cns(env, key));
+}
+
+void emitVGetMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
+                 const StringData* key) {
+  vGetMImpl(env, nDiscard, propElem, cns(env, key));
+}
+
+void emitVGetMNewElem(IRGS& env, int32_t nDiscard) {
+  SPUNT(__func__);
 }
 
 void emitSetML(IRGS& env, int32_t nDiscard, PropElemOp propElem,

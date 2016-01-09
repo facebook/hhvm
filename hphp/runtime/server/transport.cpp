@@ -812,7 +812,9 @@ StringHolder Transport::prepareResponse(const void *data, int size,
     return response;
   }
 
-  if (m_chunkedEncoding ||
+  // Gzip has 20 bytes header, so anything smaller than a few bytes probably
+  // wouldn't benefit much from compression
+  if (m_chunkedEncoding || size > 50 ||
       m_compressionDecision == CompressionDecision::HasTo) {
     String compression;
     int compressionLevel = RuntimeOption::GzipCompressionLevel;

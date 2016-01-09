@@ -386,6 +386,7 @@ OTHER_UNPARSEABLE_FILES = [
     'fc_enum_case_4.php',
     'hh_fixme3.php',
     'hh_fixme7.php',
+    'instanceof_newtype.php',
     'instanceof_static_with_reqs.php',
     'namespace_global_class1.php',
     'namespace_global_class2.php',

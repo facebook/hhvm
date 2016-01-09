@@ -169,9 +169,3 @@ watchman_init_timeout = 1
         # Stop the server, ensuring that its logs get flushed
         self.proc_call([hh_client, 'stop', self.repo_dir])
         self.assertIn('Watchman.Timeout', self.get_server_logs())
-
-        self.check_cmd(['No errors!'])
-        # Stop the server, ensuring that its logs get flushed
-        self.proc_call([hh_client, 'stop', self.repo_dir])
-        self.assertIn('Watchman failed recently, falling back to dfind',
-                self.get_server_logs())

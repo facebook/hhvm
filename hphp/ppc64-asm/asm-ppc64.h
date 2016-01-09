@@ -35,7 +35,7 @@ namespace ppc64_asm {
 /* using override */ using HPHP::jit::RegXMM;
 /* using override */ using HPHP::jit::RegSF;
 /* using override */ using HPHP::jit::MemoryRef;
-/* using override */ using HPHP::jit::Immed;
+/* using override */ using HPHP::jit::Immed64;
 /* using override */ using HPHP::CodeAddress;
 /* using override */ using HPHP::jit::ConditionCode;
 
@@ -517,9 +517,9 @@ struct Assembler {
   void addco(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
   void adde(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
   void addeo(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
-  void addi(const Reg64& rt, const Reg64& ra, Immed imm);
+  void addi(const Reg64& rt, const Reg64& ra, Immed64 imm);
   void addic(const Reg64& rt, const Reg64& ra, uint16_t imm, bool rc = 0);
-  void addis(const Reg64& rt, const Reg64& ra, Immed imm);
+  void addis(const Reg64& rt, const Reg64& ra, Immed64 imm);
   void addme(const Reg64& rt, const Reg64& ra, bool rc = 0);
   void addmeo(const Reg64& rt, const Reg64& ra, bool rc = 0);
   void addo(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
@@ -527,8 +527,8 @@ struct Assembler {
   void addzeo(const Reg64& rt, const Reg64& ra, bool rc = 0);
   void and(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void andc(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
-  void andi(const Reg64& ra, const Reg64& rs, Immed imm);
-  void andis(const Reg64& ra, const Reg64& rs, Immed imm);
+  void andi(const Reg64& ra, const Reg64& rs, Immed64 imm);
+  void andis(const Reg64& ra, const Reg64& rs, Immed64 imm);
   void b(int32_t offset);
   void ba(uint32_t target_addr);
   void bl(int32_t offset);
@@ -545,10 +545,10 @@ struct Assembler {
   void bctarl(uint8_t bo, uint8_t bi, uint16_t bh);
   void bpermd(const Reg64& ra, const Reg64& rs, const Reg64& rv);
   void cmp(uint16_t bf, bool l, const Reg64& ra, const Reg64& rb);
-  void cmpi(uint16_t bf, bool l, const Reg64& ra, Immed imm);
+  void cmpi(uint16_t bf, bool l, const Reg64& ra, Immed64 imm);
   void cmpb(const Reg64& rs, const Reg64& ra, const Reg64& rb);
   void cmpl(uint16_t bf, bool l, const Reg64& ra, const Reg64& rb);
-  void cmpli(uint16_t bf, bool l, const Reg64& ra, Immed imm);
+  void cmpli(uint16_t bf, bool l, const Reg64& ra, Immed64 imm);
   void cntlzd(const Reg64& ra, const Reg64& rs, bool rc = 0);
   void cntlzw(const Reg64& ra, const Reg64& rs, bool rc = 0);
   void crand(uint16_t bt, uint16_t ba, uint16_t bb);
@@ -642,8 +642,8 @@ struct Assembler {
   void nor(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void or(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void orc(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
-  void ori(const Reg64& ra, const Reg64& rs, Immed imm);
-  void oris(const Reg64& ra, const Reg64& rs, Immed imm);
+  void ori(const Reg64& ra, const Reg64& rs, Immed64 imm);
+  void oris(const Reg64& ra, const Reg64& rs, Immed64 imm);
   void popcntb(const Reg64& ra, const Reg64& rs);
   void popcntd(const Reg64& ra, const Reg64& rs);
   void popcntw(const Reg64& ra, const Reg64& rs);
@@ -720,8 +720,8 @@ struct Assembler {
   void tw(uint16_t to, const Reg64& ra, const Reg64& rb);
   void twi(uint16_t to, const Reg64& ra, uint16_t imm);
   void xor(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
-  void xori(const Reg64& ra, const Reg64& rs, Immed imm);
-  void xoris(const Reg64& ra, const Reg64& rs, Immed imm);
+  void xori(const Reg64& ra, const Reg64& rs, Immed64 imm);
+  void xoris(const Reg64& ra, const Reg64& rs, Immed64 imm);
   void xscvdpuxds(const RegXMM& xt, const RegXMM& xb) {
     //TODO(rcardoso): bx tx bits
     EmitXX2Form(60, rn(xt), 0, rn(xb), 328, 0, 0);
@@ -1753,14 +1753,14 @@ struct Assembler {
   void crclr()          { not_implemented(); }  //Extended crxor Bx,Bx,BX
   void crnot()          { not_implemented(); }  //Extended crnor Bx,By,By
   void crset()          { not_implemented(); }  //Extended creqv Bx,Bx,Bx
-  void li(const Reg64& rt, Immed imm) {
+  void li(const Reg64& rt, Immed64 imm) {
     addi(rt, Reg64(0), imm);
   }
   void la()             { not_implemented(); }  //Extended addi Rx,Ry,disp
-  void subi(const Reg64& rt, const Reg64& ra, Immed imm) {
+  void subi(const Reg64& rt, const Reg64& ra, Immed64 imm) {
     addi(rt, ra, -imm);
   }
-  void lis(const Reg64& rt, Immed imm) {
+  void lis(const Reg64& rt, Immed64 imm) {
     addis(rt, Reg64(0), imm);
   }
   void subis()          { not_implemented(); }  //Extended addis Rx,Ry,-value
@@ -1772,10 +1772,10 @@ struct Assembler {
   }
   void subic()          { not_implemented(); }  //Extended addic Rx,Ry,-value
   void subc()           { not_implemented(); }  //Extended subfc Rx,Rz,Ry
-  void cmpdi(const Reg64& ra, Immed imm) {
+  void cmpdi(const Reg64& ra, Immed64 imm) {
     cmpi(0, 1, ra, imm);
   }
-  void cmpwi(const Reg64& ra, Immed imm) {
+  void cmpwi(const Reg64& ra, Immed64 imm) {
     //Extended cmpi 3,0,Rx,value
     // TODO(CRField): if other CRs than 0 is used, please change this to 3
     cmpi(0, 0, ra, imm);
@@ -1788,10 +1788,10 @@ struct Assembler {
     // TODO(CRField): if other CRs than 0 is used, please change this to 3
     cmp(0, 0, ra, rb);
   }
-  void cmpldi(const Reg64& ra, Immed imm) {
+  void cmpldi(const Reg64& ra, Immed64 imm) {
     cmpli(0, 1, ra, imm);
   }
-  void cmplwi(const Reg64& ra, Immed imm) {
+  void cmplwi(const Reg64& ra, Immed64 imm) {
     //Extended cmpli 3,0,Rx,value
     // TODO(CRField): if other CRs than 0 is used, please change this to 3
     cmpli(0, 0, ra, imm);

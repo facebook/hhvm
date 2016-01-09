@@ -265,7 +265,7 @@ struct Vptr {
   Vreg64 index;     // optional
   uint8_t scale;    // 1,2,4,8
   Segment seg{DS};  // DS, FS or GS
-  int32_t disp;
+  intptr_t disp;    // big enough to fit a MemoryRef.disp type
 };
 
 Vptr operator+(Vptr lhs, int32_t d);

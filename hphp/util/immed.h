@@ -103,12 +103,18 @@ struct Immed64 {
     : m_long(reinterpret_cast<uintptr_t>(p))
   {}
 
+  /* implicit */ Immed64(const Immed p)
+    : m_long(p.q())
+  {}
+
   int64_t q() const { return m_long; }
   int32_t l() const { return safe_cast<int32_t>(m_long); }
   int16_t w() const { return safe_cast<int16_t>(m_long); }
   int8_t  b() const { return safe_cast<int8_t>(m_long); }
 
   bool fits(int sz) const { return deltaFits(m_long, sz); }
+
+  Immed64 operator-() { return -this->m_long; }
 
 private:
   int64_t m_long;

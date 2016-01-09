@@ -40,7 +40,7 @@ function test(): void {
   var_dump($a instanceof A);
   var_dump($a instanceof B);
   var_dump($a instanceof $a);
-  /* HH_FIXME[4125] */
+  /* HH_FIXME[4026] */
   var_dump($a instanceof $x);
   var_dump($b instanceof B);
   var_dump($b instanceof C);

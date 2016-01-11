@@ -1509,7 +1509,9 @@ static int execute_program_impl(int argc, char** argv) {
     s_config_files = po.config;
     // Start with .hdf and .ini files
     for (auto& filename : s_config_files) {
-      Config::ParseConfigFile(filename, ini, config);
+      if (boost::filesystem::exists(filename)) {
+        Config::ParseConfigFile(filename, ini, config);
+      }
     }
     // Now, take care of CLI options and then officially load and bind things
     RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);

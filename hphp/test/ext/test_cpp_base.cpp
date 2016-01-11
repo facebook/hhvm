@@ -483,34 +483,6 @@ bool TestCppBase::TestVirtualHost() {
   return Count(true);
 }
 
-bool TestCppBase::TestCollectionHdf() {
-  IniSetting::Map ini = IniSetting::Map::object;
-  Hdf hdf;
-  hdf.fromString(
-    "  Server {\n"
-    "    AllowedDirectories.* = /var/www\n"
-    "    AllowedDirectories.* = /usr/bin\n"
-    "    HighPriorityEndPoints.* = /end\n"
-    "    HighPriorityEndPoints.* = /point\n"
-    "    HighPriorityEndPoints.* = /power\n"
-    "  }\n"
-  );
-  RuntimeOption::AllowedDirectories.clear();
-
-  Config::Bind(RuntimeOption::AllowedDirectories, ini,
-               hdf, "Server.AllowedDirectories");
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
-  std::vector<std::string> ad =
-    Config::GetVector(ini, hdf, "Server.AllowedDirectories",
-                      RuntimeOption::AllowedDirectories);
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
-  VERIFY(ad.size() == 2);
-  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
-               hdf, "Server.HighPriorityEndPoints");
-  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
-  return Count(true);
-}
-
 bool TestCppBase::TestVirtualHostIni() {
   std::string inistr =
     "hhvm.server.allowed_directories[] = /var/www\n"
@@ -565,6 +537,7 @@ bool TestCppBase::TestVirtualHostIni() {
   // version of this test is run at the same time, we don't want to append
   // the same directories to it. We want to start fresh.
   RuntimeOption::AllowedDirectories.clear();
+
   Config::ParseIniString(inistr, ini);
   RuntimeOption::AllowedDirectories =
     Config::GetVector(ini, empty, "Server.AllowedDirectories");
@@ -633,18 +606,50 @@ bool TestCppBase::TestVirtualHostIni() {
   return Count(true);
 }
 
+bool TestCppBase::TestCollectionHdf() {
+  IniSetting::Map ini = IniSetting::Map::object;
+  Hdf hdf;
+  hdf.fromString(
+    "  Server {\n"
+    "    AllowedDirectories.* = /var/www\n"
+    "    AllowedDirectories.* = /usr/bin\n"
+    "    HighPriorityEndPoints.* = /end\n"
+    "    HighPriorityEndPoints.* = /point\n"
+    "    HighPriorityEndPoints.* = /power\n"
+    "  }\n"
+  );
+  RuntimeOption::AllowedDirectories.clear();
+
+  Config::Bind(RuntimeOption::AllowedDirectories, ini,
+               hdf, "Server.AllowedDirectories");
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  std::vector<std::string> ad =
+    Config::GetVector(ini, hdf, "Server.AllowedDirectories",
+                      RuntimeOption::AllowedDirectories);
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(ad.size() == 2);
+  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
+               hdf, "Server.HighPriorityEndPoints");
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
+  return Count(true);
+}
+
 bool TestCppBase::TestCollectionIni() {
   std::string inistr =
     "hhvm.server.allowed_directories[] = /var/www\n"
     "hhvm.server.allowed_directories[] = /usr/bin\n"
-    "hhvm.server.high_priority_endpoints[] = /end\n"
-    "hhvm.server.high_priority_endpoints[] = /point\n"
-    "hhvm.server.high_priority_endpoints[] = /power\n";
+    "hhvm.server.high_priority_end_points[] = /end\n"
+    "hhvm.server.high_priority_end_points[] = /point\n"
+    "hhvm.server.high_priority_end_points[] = /power\n"
+    "hhvm.server.high_priority_end_points[] = /word\n";
 
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf empty;
 
+  // Ensure we have no residuals left over from the HDF run.
   RuntimeOption::AllowedDirectories.clear();
+  RuntimeOption::ServerHighPriorityEndPoints.clear();
+
   Config::ParseIniString(inistr, ini);
   Config::Bind(RuntimeOption::AllowedDirectories, ini, empty,
                "Server.AllowedDirectories"); // Test converting name
@@ -659,6 +664,6 @@ bool TestCppBase::TestCollectionIni() {
   Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini, empty,
                "Server.HighPriorityEndPoints",
                 RuntimeOption::ServerHighPriorityEndPoints, false);
-  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 4);
   return Count(true);
 }

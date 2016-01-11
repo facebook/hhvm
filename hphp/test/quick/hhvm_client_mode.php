@@ -2,6 +2,6 @@
 
 $hhvm = PHP_BINARY;
 $file = '/../../a/b/test.php';
-$cmd = "$hhvm $file";
+$cmd = "$hhvm --no-config $file";
 $out = exec($cmd);
 echo $out;

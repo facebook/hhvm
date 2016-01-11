@@ -949,7 +949,7 @@ bool AdminRequestHandler::handleMemoryRequest(const std::string &cmd,
   }
   if (cmd == "memory.html" || cmd == "memory.htm") {
       MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::HTML);
-      transport->replaceHeader("Content-Type","application/html");
+      transport->replaceHeader("Content-Type","text/html");
       transport->sendString(out);
       return true;
   }

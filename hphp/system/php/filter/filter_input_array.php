@@ -33,7 +33,7 @@
    *                     the variable is not set and NULL if the filter
    *                     fails.
    */
-function filter_input_array($type, $definition, $add_empty = true) {
+function filter_input_array($type, $definition = null, $add_empty = true) {
   $var = null;
   switch ($type) {
     case INPUT_GET:

@@ -382,6 +382,8 @@ public:
 
 #undef DEF_ACCESSORS
 
+  const ConstMap& constantsMap() const { return m_constants; }
+
   /*
    * NativeData type declared in <<__NativeData("Type")>>.
    */

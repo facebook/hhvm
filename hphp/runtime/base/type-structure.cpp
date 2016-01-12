@@ -328,18 +328,23 @@ const Class* getClass(const String& clsName,
                       const Class::Const& typeCns,
                       const Class* typeCnsCls,
                       bool& persistent) {
+  auto checkPersistent = [&persistent](const Class* cls) {
+    persistent &= classHasPersistentRDS(cls);
+    return cls;
+  };
+
   // the original unresolved type structure came from a type constant
   // (instead of a type alias), and may have this/self/parent.
   if (typeCnsCls) {
     // HH\this: late static binding
     if (clsName.same(s_this)) {
-      return typeCnsCls;
+      return checkPersistent(typeCnsCls);
     }
 
     auto declCls = typeCns.cls;
     // self
     if (clsName.same(s_self)) {
-      return declCls;
+      return checkPersistent(declCls);
     }
     // parent
     if (clsName.same(s_parent)) {
@@ -350,7 +355,7 @@ const Class* getClass(const String& clsName,
           resolveContextMsg(typeCns, typeCnsCls).c_str(),
           declCls->name()->data());
       }
-      return parent;
+      return checkPersistent(parent);
     }
   }
 
@@ -376,9 +381,8 @@ const Class* getClass(const String& clsName,
       resolveContextMsg(typeCns, typeCnsCls).c_str(),
       name.data());
   }
-  persistent &= classHasPersistentRDS(cls);
 
-  return cls;
+  return checkPersistent(cls);
 }
 
 /* Given an unresolved T_shape TypeStructure, returns the __fields__

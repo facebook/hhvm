@@ -1804,6 +1804,20 @@ void Class::setConstants() {
     }
   }
 
+
+  // For type constants, we have to use the value from the PreClass of the
+  // declaring class, because the parent class or interface we got it from may
+  // have replaced it with a resolved value.
+  for (auto& pair : builder) {
+    auto& cns = builder[pair.second];
+    if (cns.isType()) {
+      auto& preConsts = cns.cls->preClass()->constantsMap();
+      auto const idx = preConsts.findIndex(cns.name.get());
+      assert(idx != -1);
+      cns.val = preConsts[idx].val();
+    }
+  }
+
   m_constants.create(builder);
 }
 

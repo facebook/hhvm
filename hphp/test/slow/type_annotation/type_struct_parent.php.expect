@@ -1,0 +1,18 @@
+array(2) {
+  ["kind"]=>
+  int(16)
+  ["classname"]=>
+  string(5) "IThis"
+}
+array(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "P"
+}
+array(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+}

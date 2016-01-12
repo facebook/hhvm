@@ -167,7 +167,7 @@ struct Vgen {
   void emit(const jmp& i);
   void emit(const jmpr& i) { a->jmp(i.target); }
   void emit(const jmpm& i) { a->jmp(i.target); }
-  void emit(const jmpi& i) { a->jmp(i.target); }
+  void emit(const jmpi& i);
   void emit(const lea& i);
   void emit(const leap& i) { a->lea(i.s, i.d); }
   void emit(const loadups& i) { a->movups(i.s, i.d); }
@@ -639,6 +639,16 @@ void Vgen::emit(const jmp& i) {
   if (next == i.target) return;
   jmps.push_back({a->frontier(), i.target});
   a->jmp(a->frontier());
+}
+
+void Vgen::emit(const jmpi& i) {
+  if (a->jmpDeltaFits(i.target)) {
+    a->jmp(i.target);
+  } else {
+    // can't do a near jmp - use rip-relative addressing
+    auto addr = mcg->allocLiteral((uint64_t)i.target);
+    a->jmp(rip[(intptr_t)addr]);
+  }
 }
 
 void Vgen::emit(const lea& i) {

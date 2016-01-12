@@ -79,6 +79,14 @@ rm "${TMP}"
 $SED -i "s#${TMP}#${INFILE}#g" "${OUTFILE5}"
 $SED -i "s#${TMP}#${INFILE}#g" "${OUTFILE7}"
 
+$SED -i \
+     -e 's@int Compiler[57]parse.*@@' \
+     -e 's@int Compiler[57]debug.*@@' \
+     -e "s@#ifndef YY_COMPILER[57]_.*@@g" \
+     -e "s@# define YY_COMPILER[57]_.*@@g" \
+     -e "s@#endif /\* !YY_COMPILER[57]_.*@@g" \
+     "${OUTHEADER5}" "${OUTHEADER7}"
+
 cmp "${OUTHEADER5}" "${OUTHEADER7}"
 if [ $? -ne 0 ] ; then
   echo "PHP5 and PHP7 headers differ, must be the same tokens"
@@ -92,8 +100,6 @@ cp "${OUTHEADER5}" "${OUTHEADER}"
 $SED -i -r \
      -e 's/(T_\w+)\s+=\s+([0-9]+)\s*,?/YYTOKEN(\2, \1)/g' \
      -e "s/\s+enum\s+yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num,\n#endif\n   YYTOKEN_MAP/" \
-     -e "s/#ifndef YY_COMPILER_.*//g" \
-     -e "s/# define YY_COMPILER_.*//g" \
     "${OUTHEADER}"
 
 # remove the include guard's #endif (-e doesn't work for this)
@@ -109,11 +115,6 @@ grep "^\s\+YYTOKEN(" "${OUTHEADER}" | head -n 1 | \
     $SED -r -e 's/\s+YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \1\n#endif/' >> "${OUTHEADER}"
 grep "^\s\+YYTOKEN(" "${OUTHEADER}" | tail -n 1 | \
     $SED -r -e 's/\s+YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \1\n#endif/' >> "${OUTHEADER}"
-
-# Why this is in the .hpp in bison 3 is anybody's guess...
-$SED -i \
-     -e 's@int Compilerparse.*@@' \
-     "${OUTHEADER}"
 
 # Renaming some stuff in the cpp file
 $SED -i \

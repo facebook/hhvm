@@ -1849,39 +1849,35 @@ static inline uint16_t strtr_hash(const char *str, int len) {
     return res;
 }
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-// OS X (and I think BSD?) have the context argument to this function first, but
-// glibc has it last.
-static int strtr_compare_hash_suffix(void *ctx_g,
-                                     const void *p_a, const void *p_b) {
-#else
-static int strtr_compare_hash_suffix(const void *p_a, const void *p_b,
-                                     void *ctx_g) {
-#endif
-  auto   *a    = (PatAndRepl *)p_a;
-  auto   *b    = (PatAndRepl *)p_b;
-  auto   *pair = (std::pair <size_t, int> *)ctx_g;
-  size_t m     = pair->first;
-  int    B     = pair->second;
+struct strtr_compare_hash_suffix {
 
-  uint16_t  hash_a = a->hash(m - B, B) & HASH_TAB_MASK,
-            hash_b = b->hash(m - B, B) & HASH_TAB_MASK;
+  strtr_compare_hash_suffix(size_t m, int B)
+  : m(m), B(B) { }
 
-  if (hash_a > hash_b) {
-    return 1;
+  bool operator() (const PatAndRepl &a, const PatAndRepl &b) {
+    uint16_t  hash_a = a.hash(m - B, B) & HASH_TAB_MASK,
+              hash_b = b.hash(m - B, B) & HASH_TAB_MASK;
+
+    if (hash_a > hash_b) {
+      return false;
+    }
+    if (hash_a < hash_b) {
+      return true;
+    }
+    // longer patterns must be sorted first
+    if (a.getPat().size() > b.getPat().size()) {
+      return true;
+    }
+    if (a.getPat().size() < b.getPat().size()) {
+      return false;
+    }
+    return false;
   }
-  if (hash_a < hash_b) {
-    return -1;
-  }
-  // longer patterns must be sorted first
-  if (a->getPat().size() > b->getPat().size()) {
-    return -1;
-  }
-  if (a->getPat().size() < b->getPat().size()) {
-    return 1;
-  }
-  return 0;
-}
+
+private:
+  size_t m;
+  int B;
+};
 
 uint16_t inline PatAndRepl::hash(int start, int len) const {
   assert(pat.size() >= start + len);
@@ -1910,20 +1906,8 @@ void WuManberReplacement::initTables() {
   shift.fill(max_shift);
   prefix.reserve(patterns.size());
 
-  std::pair <size_t, int> pair(m, B);
-#ifdef _MSC_VER
-  qsort_s(
-#else
-  qsort_r(
-#endif
-    &patterns[0], patterns.size(), sizeof(PatAndRepl),
-#ifdef __APPLE__
-    // OS X (and I think BSD?) have the last two arguments to qsort_r reversed
-    // from glibc.
-    &pair, strtr_compare_hash_suffix);
-#else
-    strtr_compare_hash_suffix, &pair);
-#endif
+  strtr_compare_hash_suffix comparator(m, B);
+  std::sort(patterns.begin(), patterns.end(), comparator);
 
   {
     uint16_t last_h = -1; // assumes not all bits are used

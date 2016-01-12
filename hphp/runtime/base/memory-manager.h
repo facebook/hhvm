@@ -47,7 +47,10 @@ struct APCLocalArray;
 struct MemoryManager;
 struct ObjectData;
 struct ResourceData;
-struct ExtendedException;
+
+namespace req {
+struct root_handle;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -905,16 +908,6 @@ struct MemoryManager {
   template <typename F> void scanRootMaps(F& m) const;
   template <typename F> void scanSweepLists(F& m) const;
 
-  // Opaque type used to allow for quick removal of exception roots. Should be
-  // embedded in ExtendedException.
-  struct ExceptionRootKey {
-    std::size_t m_index = 0;
-  };
-
-  // Add/remove exceptions as GC roots.
-  void addExceptionRoot(ExtendedException* exn);
-  void removeExceptionRoot(ExtendedException* exn);
-
   /*
    * Heap iterator methods.
    */
@@ -946,6 +939,7 @@ private:
   friend void* req::calloc(size_t count, size_t bytes);
   friend void* req::realloc(void* ptr, size_t nbytes);
   friend void  req::free(void* ptr);
+  friend struct req::root_handle; // access m_root_handles
 
   struct FreeList {
     void* maybePop();
@@ -986,6 +980,7 @@ private:
   MemoryManager();
   MemoryManager(const MemoryManager&) = delete;
   MemoryManager& operator=(const MemoryManager&) = delete;
+  ~MemoryManager();
 
 private:
   void storeTail(void* tail, uint32_t tailBytes);
@@ -1086,7 +1081,7 @@ private:
 
   mutable RootMap<ResourceData>* m_resourceRoots{nullptr};
   mutable RootMap<ObjectData>* m_objectRoots{nullptr};
-  mutable std::vector<ExtendedException*> m_exceptionRoots;
+  mutable std::vector<req::root_handle*> m_root_handles;
 
   bool m_exiting{false};
   bool m_sweeping{false};

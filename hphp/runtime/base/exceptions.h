@@ -26,6 +26,7 @@
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP {
 
@@ -57,7 +58,6 @@ struct ExtendedException : Exception {
     ATTRIBUTE_PRINTF(2,3);
   ExtendedException(const ExtendedException& other);
   ExtendedException(ExtendedException&& other) noexcept;
-  ~ExtendedException();
 
   ExtendedException& operator=(const ExtendedException& other);
   ExtendedException& operator=(ExtendedException&& other) noexcept;
@@ -72,8 +72,6 @@ struct ExtendedException : Exception {
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }
 
-  virtual void vscan(IMarker&) const;
-  template<class F> void scan(F& mark) const;
 protected:
   ExtendedException(const std::string& msg, ArrayData* backTrace);
 
@@ -81,11 +79,8 @@ private:
   void computeBacktrace(bool skipFrame = false);
 
 private:
-  Array m_btp;
+  req::root<Array> m_btp;
   bool m_silent{false};
-  MemoryManager::ExceptionRootKey m_key;
-
-  friend class MemoryManager;
 };
 
 struct FatalErrorException : ExtendedException {

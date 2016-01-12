@@ -325,13 +325,6 @@ void StringBuffer::growBy(int spaceRequired) {
 
 //////////////////////////////////////////////////////////////////////
 
-void StringBufferLimitException::vscan(IMarker& mark) const {
-  FatalErrorException::vscan(mark);
-  mark(m_result);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 CstrBuffer::CstrBuffer(int cap)
   : m_buffer((char*)safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
   assert(unsigned(cap) <= kMaxCap);

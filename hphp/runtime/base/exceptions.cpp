@@ -30,19 +30,16 @@ std::atomic<int> ExitException::ExitCode{0};  // XXX: this should not be static
 
 ExtendedException::ExtendedException() : Exception() {
   computeBacktrace();
-  MM().addExceptionRoot(this);
 }
 
 ExtendedException::ExtendedException(const std::string &msg) {
   m_msg = msg;
   computeBacktrace();
-  MM().addExceptionRoot(this);
 }
 
 ExtendedException::ExtendedException(SkipFrame, const std::string &msg) {
   m_msg = msg;
   computeBacktrace(true);
-  MM().addExceptionRoot(this);
 }
 
 ExtendedException::ExtendedException(const char *fmt, ...) {
@@ -51,7 +48,6 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   format(fmt, ap);
   va_end(ap);
   computeBacktrace();
-  MM().addExceptionRoot(this);
 }
 
 ExtendedException::ExtendedException(const std::string& msg,
@@ -59,7 +55,6 @@ ExtendedException::ExtendedException(const std::string& msg,
   : m_btp(backTrace)
 {
   m_msg = msg;
-  MM().addExceptionRoot(this);
 }
 
 /*
@@ -71,21 +66,13 @@ ExtendedException::ExtendedException(const ExtendedException& other)
   : Exception(other),
     m_btp(other.m_btp),
     m_silent(other.m_silent)
-{
-  MM().addExceptionRoot(this);
-}
+{}
 
 ExtendedException::ExtendedException(ExtendedException&& other) noexcept
   : Exception(std::move(other)),
     m_btp(std::move(other.m_btp)),
     m_silent(other.m_silent)
-{
-  MM().addExceptionRoot(this);
-}
-
-ExtendedException::~ExtendedException() {
-  MM().removeExceptionRoot(this);
-}
+{}
 
 ExtendedException&
 ExtendedException::operator=(const ExtendedException& other) {
@@ -105,10 +92,6 @@ ExtendedException::operator=(ExtendedException&& other) noexcept {
 
 Array ExtendedException::getBacktrace() const {
   return Array(m_btp.get());
-}
-
-void ExtendedException::vscan(IMarker& mark) const {
-  mark(m_btp);
 }
 
 const StaticString s_file("file"), s_line("line");

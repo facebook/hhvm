@@ -33,6 +33,12 @@ class Object {
   req::ptr<ObjectData> m_obj;
 
   using NoIncRef = req::ptr<ObjectData>::NoIncRef;
+
+public:
+  template<class F> void scan(F& mark) const {
+    mark(m_obj);
+  }
+
 public:
   Object() {}
 

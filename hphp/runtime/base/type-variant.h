@@ -920,6 +920,12 @@ struct Variant : private TypedValue {
    */
   Ref* asRef() { PromoteToRef(*this); return this; }
 
+  TypedValue detach() noexcept {
+    auto tv = *asTypedValue();
+    m_type = KindOfNull;
+    return tv;
+  }
+
  private:
   ResourceData* getResourceData() const {
     assert(is(KindOfResource));
@@ -1081,7 +1087,7 @@ struct Variant : private TypedValue {
   void set(String&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
-  void set(Resource&& v) noexcept { steal(detach<ResourceData>(std::move(v))); }
+  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
 
   template<typename T>
   void set(const req::ptr<T> &v) noexcept {
@@ -1203,6 +1209,10 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE
   void constructWithRefHelper(const Variant& v) {
     setWithRefHelper(v, false);
+  }
+
+  template<class F> void scan(F& mark) const {
+    mark(*asTypedValue());
   }
 
 private:

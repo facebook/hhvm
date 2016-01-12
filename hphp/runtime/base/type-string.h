@@ -74,6 +74,11 @@ protected:
   String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
 public:
+  template<class F> void scan(F& mark) const {
+    mark(m_str);
+  }
+
+public:
   typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
     IntegerStringDataMap;
   static const int MinPrecomputedInteger = SCHAR_MIN;

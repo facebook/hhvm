@@ -816,7 +816,6 @@ void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
   tc.verifyParam(&tv, func, argNum - 1, true);
 }
 
-
 #define XX(kind, expkind)                                         \
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
                                     const Func* callee,           \

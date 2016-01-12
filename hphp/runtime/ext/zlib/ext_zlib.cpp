@@ -343,7 +343,7 @@ bool HHVM_FUNCTION(gzrewind, const Resource& zp) {
 Variant HHVM_FUNCTION(gzgetc, const Resource& zp) {
   return HHVM_FN(fgetc)(zp);
 }
-Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length /* = 1024 */) {
+Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length /* = 0 */) {
   return HHVM_FN(fgets)(zp, length);
 }
 Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length /* = 0 */,

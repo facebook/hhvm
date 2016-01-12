@@ -148,7 +148,7 @@ function gzgetc(resource $zp): mixed;
  */
 <<__Native, __ParamCoerceModeFalse>>
 function gzgets(resource $zp,
-                int $length = 1024): mixed;
+                int $length = 0): mixed;
 
 /**
  * Get line from gz-file pointer and strip HTML tags

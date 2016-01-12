@@ -314,7 +314,7 @@ std::string resolveContextMsg(const Class::Const& typeCns,
 /* returns the unresolved TypeStructure; if aliasName is not an alias,
  * return nullptr. */
 Array getAlias(const String& aliasName) {
-  if (aliasName.same(s_this)) {
+  if (aliasName.same(s_this) || Unit::lookupClass(aliasName.get())) {
     return Array::Create();
   }
   auto typeAliasReq = Unit::loadTypeAlias(aliasName.get());

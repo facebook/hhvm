@@ -40,10 +40,15 @@ constexpr PhysReg rvmfp()      { return ppc64_asm::reg::r28; }
 constexpr PhysReg rvmsp()      { return ppc64_asm::reg::r29; }
 constexpr PhysReg rvmtl()      { return ppc64_asm::reg::r30; }
 constexpr PhysReg rsp()        { return ppc64_asm::reg::r1;  }
+
 // optional in function linkage/used in function prologues
 constexpr PhysReg rfuncln()    { return ppc64_asm::reg::r0;  }
-// thread pointer
+
+// thread pointer, used to access the thread local storage section.
+// See ABI for more info, page 112, Chapter 3.7.2 "TLS Runtime Handling"
+// https://members.openpowerfoundation.org/document/dl/576
 constexpr PhysReg rthreadptr() { return ppc64_asm::reg::r13; }
+
 // optional in function linkage/function entry address at global entry point
 constexpr PhysReg rfuncentry() { return ppc64_asm::reg::r12; }
 

@@ -242,7 +242,7 @@ function stream_wrapper_restore(string $protocol): bool;
 /**
  * Allows you to disable an already defined stream wrapper. Once the wrapper
  *   has been disabled you may override it with a user-defined wrapper using
- *   stream_wrapper_register() or reenable it later on with
+ *   stream_wrapper_register() or re-enable it later on with
  *   stream_wrapper_restore().
  *
  * @param string $protocol
@@ -517,7 +517,7 @@ function stream_socket_client(string $remote_socket,
  *   - STREAM_CRYPTO_SSLv23_SERVER
  *   - STREAM_CRYPTO_TLS_SERVER
  *
- *   When enabling crypto in HHVM, this parameter is requried as the
+ *   When enabling crypto in HHVM, this parameter is required as the
  *   session_stream parameter is not supported.
  *
  *   Under PHP, if omitted, the crypto_type context option on the stream's SSL

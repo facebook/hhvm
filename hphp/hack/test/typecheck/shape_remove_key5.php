@@ -1,7 +1,7 @@
 <?hh //strict
 
 /**
- * removeKey allows to unset any key, but it still must be statically
+ * removeKey allows unsetting any key, but it still must be statically
  * known
  */
 type s = shape(

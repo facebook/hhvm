@@ -4,7 +4,7 @@
 /**
  * ( excerpt from http://php.net/manual/en/class.arrayiterator.php )
  *
- * This iterator allows to unset and modify values and keys while
+ * This iterator allows unsetting and modifying values and keys while
  * iterating over Arrays and Objects.
  *
  * When you want to iterate over the same array multiple times you need to

@@ -372,7 +372,7 @@ function phpversion(string $extension = ""): mixed;
  * modify ANY environment variable!  The safe_mode_protected_env_vars
  * directive contains a comma-delimited list of environment variables, that
  * the end user won't be able to change using putenv(). These variables will
- * be protected even if safe_mode_allowed_env_vars is set to allow to change
+ * be protected even if safe_mode_allowed_env_vars is set to allow changing
  * them.
  */
 <<__Native>>

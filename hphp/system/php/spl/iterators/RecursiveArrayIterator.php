@@ -5,7 +5,7 @@
  * ( excerpt from http://php.net/manual/en/class.recursivearrayiterator.php
  * )
  *
- * This iterator allows to unset and modify values and keys while
+ * This iterator allows unsetting and modifying values and keys while
  * iterating over Arrays and Objects in the same way as the ArrayIterator.
  * Additionally it is possible to iterate over the current iterator entry.
  *

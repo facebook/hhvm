@@ -67,7 +67,7 @@ private:
   // Mapping of byte from char (8bit) to int32 for machine endian
   int64_t byte_map[1];
 
-  // Mappings of bytes from int (machine dependant) to int for machine endian
+  // Mappings of bytes from int (machine dependent) to int for machine endian
   int64_t int_map[sizeof(int)];
 
   // Mappings of bytes from shorts (16bit) for all endian environments

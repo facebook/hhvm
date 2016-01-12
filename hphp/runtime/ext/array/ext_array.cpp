@@ -994,7 +994,7 @@ Variant HHVM_FUNCTION(array_sum,
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    const Variant& entry(iter.secondRef());
+    const Variant& entry(iter.secondRefPlus());
     switch (entry.getType()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:

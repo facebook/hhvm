@@ -120,7 +120,7 @@ void Assembler::addis(const Reg64& rt, const Reg64& ra, Immed imm) {
   EmitDForm(15, rn(rt), rn(ra), imm.w());
 }
 
-void Assembler::and_(const Reg64& ra, const Reg64& rs, const Reg64& rb,
+void Assembler::and(const Reg64& ra, const Reg64& rs, const Reg64& rb,
                      bool rc) {
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 28, rc);
 }
@@ -431,7 +431,7 @@ void Assembler::nor(const Reg64& ra, const Reg64& rs, const Reg64& rb,
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 124, rc);
 }
 
-void Assembler::or_(const Reg64& ra, const Reg64& rs, const Reg64& rb,
+void Assembler::or(const Reg64& ra, const Reg64& rs, const Reg64& rb,
                     bool rc) {
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 444, rc);
 }
@@ -669,7 +669,7 @@ void Assembler::twi(uint16_t to, const Reg64& ra, uint16_t imm) {
   EmitDForm(3, rn(to), rn(ra), imm);
 }
 
-void Assembler::xor_(const Reg64& ra, const Reg64& rs, const Reg64& rb,
+void Assembler::xor(const Reg64& ra, const Reg64& rs, const Reg64& rb,
                      bool rc) {
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 316, rc);
 }
@@ -746,7 +746,7 @@ void Assembler::li64 (const Reg64& rt, int64_t imm64) {
   uint8_t missing = 0;
 
   // for assert purposes
-  CodeAddress li64StartPos = frontier();
+  DEBUG_ONLY CodeAddress li64StartPos = frontier();
 
   if (HPHP::jit::deltaFits(imm64, HPHP::sz::word)) {
     // immediate has only low 16 bits set, use simple load immediate
@@ -913,7 +913,7 @@ void Assembler::li32 (const Reg64& rt, int32_t imm32) {
 }
 
 void Assembler::li32un (const Reg64& rt, uint32_t imm32) {
-  xor_(rt, rt, rt);
+  xor(rt, rt, rt);
   if ((imm32 >> 16) == 0) {
     // immediate has only low 16 bits set, use simple load immediate
     ori(rt, rt, static_cast<int16_t>(imm32));

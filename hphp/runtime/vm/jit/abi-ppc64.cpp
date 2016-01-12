@@ -37,7 +37,7 @@ const RegSet kGPCallerSaved = reg::r3 | reg::r4 | reg::r5 | reg::r6 | reg::r7 |
 
 const RegSet kGPCalleeSaved = reg::r14 | reg::r15 | reg::r16 | reg::r17 |
   reg::r18 | reg::r19 | reg::r20 | reg::r21 | reg::r22 | reg::r23 | reg::r24 |
-  reg::r25 | reg::r26 |reg::r31;
+  reg::r25 | reg::r26 | reg::r31;
   // r1 is used as rsp
   // r27 is used as rone (value 1)
   // r28 is used as rvmfp
@@ -46,20 +46,20 @@ const RegSet kGPCalleeSaved = reg::r14 | reg::r15 | reg::r16 | reg::r17 |
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
-const RegSet kGPReserved = RegSet(reg::r12) | reg::r2 | rfuncln() | rvmtl() |
-  rvmfp() | rvmsp() | rAsm | rsp() | r_svcreq_stub() | rthreadptr() | rone();
+const RegSet kGPReserved = reg::r12 | reg::r2 | rfuncln() | rvmtl() | rvmfp() |
+  rvmsp() | rAsm | rsp() | r_svcreq_stub() | rthreadptr() | rone();
   // Reserve the r2 TOC register to avoid changing it
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kXMMCallerSaved = reg::f1 | reg::f2 | reg::f3 | reg::f4 |
-    reg::f5 | reg::f6 | reg::f7 | reg::f8 | reg::f9 | reg::f10 | reg::f11 |
-    reg::f12 | reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19;
+  reg::f5 | reg::f6 | reg::f7 | reg::f8 | reg::f9 | reg::f10 | reg::f11 |
+  reg::f12 | reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19;
 
 const RegSet kXMMCalleeSaved = reg::f14 | reg::f15 | reg::v20 | reg::v21 |
-    reg::v22 | reg::v23 | reg::v24 | reg::v25 | reg::v26 | reg::v27 |
-    reg::v28 | reg::v30 | reg::v31;
- // v29 reserved for Vxls::m_tmp
+  reg::v22 | reg::v23 | reg::v24 | reg::v25 | reg::v26 | reg::v27 | reg::v28 |
+  reg::v30 | reg::v31;
+  // v29 reserved for Vxls::m_tmp
 
 const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
 const RegSet kXMMReserved = RegSet(reg::v29);
@@ -123,8 +123,8 @@ constexpr PhysReg gp_args[] = {
 };
 
 constexpr PhysReg simd_args[] = {
-    reg::f1, reg::f2, reg::f3, reg::f4, reg::f5, reg::f6, reg::f7, reg::f8,
-    reg::f9, reg::f10, reg::f11, reg::f12, reg::f13
+  reg::f1, reg::f2, reg::f3, reg::f4, reg::f5, reg::f6, reg::f7, reg::f8,
+  reg::f9, reg::f10, reg::f11, reg::f12, reg::f13
 };
 
 constexpr PhysReg svcreq_args[] = {

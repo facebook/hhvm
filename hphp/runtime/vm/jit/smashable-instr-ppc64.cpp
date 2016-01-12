@@ -122,7 +122,8 @@ void smashCall(TCA inst, TCA target) {
   CodeCursor cursor { cb, inst };
   ppc64_asm::Assembler a { cb };
 
-  if (!isCall(inst)) always_assert(false && "smashCall has unexpected block");
+  if (!ppc64_asm::Assembler::isCall(inst))
+    always_assert(false && "smashCall has unexpected block");
 
   a.setFrontier(inst + smashableCallSkip());
 
@@ -167,7 +168,7 @@ uint32_t smashableCmpqImm(TCA inst) {
 }
 
 TCA smashableCallTarget(TCA inst) {
-  if (!isCall(inst)) return nullptr;
+  if (!ppc64_asm::Assembler::isCall(inst)) return nullptr;
 
   return reinterpret_cast<TCA>(
       ppc64_asm::Assembler::getLi64(inst + smashableCallSkip()));

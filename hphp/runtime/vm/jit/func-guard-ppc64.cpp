@@ -56,11 +56,11 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp1));
   assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp2));
 
-  a.  li64   (tmp1, uint64_t(func));
+  emitSmashableMovq(a.code(), uint64_t(func), tmp1);
   a.  ld     (tmp2, rvmfp()[AROFF(m_func)]);
   a.  cmpld  (tmp1, tmp2);
 
-  a.    branchAuto(mcg->tx().uniqueStubs.funcPrologueRedispatch,
+  a.  branchAuto(mcg->tx().uniqueStubs.funcPrologueRedispatch,
                   ppc64_asm::BranchConditions::NotEqual);
 
   DEBUG_ONLY auto guard = funcGuardFromPrologue(a.frontier(), func);
@@ -80,8 +80,7 @@ bool funcGuardMatches(TCA guard, const Func* func) {
 }
 
 void clobberFuncGuard(TCA guard, const Func* func) {
-  not_implemented();
-  return;
+  smashMovq(guard, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

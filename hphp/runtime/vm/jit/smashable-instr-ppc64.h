@@ -48,12 +48,6 @@ constexpr size_t smashableCallLen() { return kStdIns * 11; }
 // prologue of call function until the li64 takes place:
 // skips mflr, std, std, addi
 constexpr uint8_t smashableCallSkip() { return kStdIns * 4; }
-// checks if the @inst is pointing to a call
-inline bool isCall(TCA inst) {
-  // a call always begin with a mflr and it's rarely used
-  return ((((inst[3] >> 2) & 0x3F) == 31) &&                            // OPCD
-      ((((inst[1] & 0x3) << 7) | ((inst[0] >> 1) & 0xFF)) == 339));     // XO
-}
 
 // li64 + mtctr + bccrt
 constexpr size_t smashableJccLen()  { return kStdIns * 7; }

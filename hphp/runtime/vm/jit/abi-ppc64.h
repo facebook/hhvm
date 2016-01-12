@@ -80,6 +80,9 @@ PhysReg r_svcreq_arg(size_t i);
 
 /*
  * Scratch registers.
+ *
+ * rAsm: a general purpose temporary register
+ * rFasm: a floating point temporary register
  */
 constexpr Reg64 rAsm = ppc64_asm::reg::r11;
 constexpr RegXMM rFasm = ppc64_asm::reg::f15;

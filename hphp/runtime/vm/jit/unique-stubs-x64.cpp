@@ -168,7 +168,8 @@ static TCA emitDecRefHelper(CodeBlock& cb, PhysReg tv, PhysReg type,
       PhysRegSaver prs{v, live};
 
       // The refcount is exactly 1; release the value.
-      v << callm{lookupDestructor(v, type)};
+      // Avoid 'this' pointer overwriting by reserving it as an argument.
+      v << callm{lookupDestructor(v, type), arg_regs(1)};
 
       // Between where %rsp is now and the saved RIP of the call into the
       // freeLocalsHelpers stub, we have all the live regs we pushed, plus the

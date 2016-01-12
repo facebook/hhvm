@@ -200,8 +200,8 @@ trait BaseException {
         $res .= "\n\nNext ";
       }
       $cls = \get_class($ex);
-      if (\substr($cls, 0, strlen("__SystemLib\\")) === "__SystemLib\\") {
-        $cls = \substr($cls, strlen("__SystemLib\\"));
+      if (\substr($cls, 0, \strlen("__SystemLib\\")) === "__SystemLib\\") {
+        $cls = \substr($cls, \strlen("__SystemLib\\"));
       }
       $res .= $ex instanceof Error
         ? $cls . ": " . $ex->getMessage()

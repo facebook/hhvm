@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_LIST_H_
 
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
@@ -60,7 +61,7 @@ private:
   // If null, this is uninitialized. If false, there is no such range/file.
   // Otherwise, this contains an HPHP::String instance representing the
   // range of source text to be listed by this command.
-  Variant m_code;
+  req::root<Variant> m_code;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

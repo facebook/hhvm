@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/debuggable.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_base.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -43,7 +44,7 @@ private:
   // implementing IDebuggable
   void debuggerInfo(InfoVec&) override;
 
-  String m_out;
+  req::root<String> m_out;
   std::vector<DThreadInfoPtr> m_threads;
 
   void processList(DebuggerClient &client, bool output = true);

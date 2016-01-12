@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_WHERE_H_
 
 #include "hphp/runtime/debugger/debugger_command.h"
+#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,7 @@ protected:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
-  Array m_stacktrace;
+  req::root<Array> m_stacktrace;
   bool m_stackArgs{true};
 };
 

@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_
 
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
@@ -45,7 +46,7 @@ protected:
   void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  Array m_variables;
+  req::root<Array> m_variables;
   int m_frame;
 
   /* Serialization limit on a single variable value.  -1 means unlimited. */
@@ -54,8 +55,8 @@ private:
   /* Set true by onServer if it used g_context->m_globalVarEnv. */
   bool m_global;
 
-  String m_varName;
-  String m_filter;
+  req::root<String> m_varName;
+  req::root<String> m_filter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

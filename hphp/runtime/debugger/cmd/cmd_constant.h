@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_CONSTANT_H_
 
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
@@ -36,7 +37,7 @@ protected:
   void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  Array m_constants;
+  req::root<Array> m_constants;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

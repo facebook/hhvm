@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_GLOBAL_H_
 
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
@@ -38,7 +39,7 @@ protected:
   void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  Array m_globals;
+  req::root<Array> m_globals;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

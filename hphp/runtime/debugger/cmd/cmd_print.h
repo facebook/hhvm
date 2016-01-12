@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_PRINT_H_
 
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
@@ -45,8 +46,8 @@ protected:
   void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  Variant m_ret;
-  String m_output;
+  req::root<Variant> m_ret;
+  req::root<String> m_output;
   int m_frame;
   int m_printLevel;
   bool m_bypassAccessCheck{false};

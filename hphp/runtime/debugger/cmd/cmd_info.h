@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
 
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -60,8 +61,8 @@ private:
   };
 
   int8_t m_type;
-  String m_symbol;
-  Array  m_info;
+  req::root<String> m_symbol;
+  req::root<Array>  m_info;
   std::shared_ptr<DebuggerClient::LiveLists> m_acLiveLists;
 
   static String GetParams(const Array& params, bool varg, bool detailed=false);

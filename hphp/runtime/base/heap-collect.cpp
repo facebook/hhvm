@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/heap-graph.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
 
@@ -593,6 +594,7 @@ void Marker::sweep() {
 void MemoryManager::collect(const char* phase) {
   if (!RuntimeOption::EvalEnableGC || empty()) return;
   if (debug) checkHeap(phase);
+  VMRegAnchor _;
   Marker mkr;
   mkr.init();
   mkr.trace();

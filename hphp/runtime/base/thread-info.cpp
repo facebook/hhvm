@@ -227,7 +227,9 @@ size_t check_request_surprise() {
     }
   }
   if (do_GC) {
-    VMRegAnchor _;
+    if (StickyFlags & PendingGCFlag) {
+      clearSurpriseFlag(PendingGCFlag);
+    }
     if (RuntimeOption::EvalEnableGC) {
       MM().collect("surprise");
     } else {

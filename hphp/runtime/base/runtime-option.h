@@ -563,7 +563,6 @@ public:
   F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
   F(bool, RandomHotFuncs,              false)                           \
-  F(bool, CheckHeapOnAlloc,            false)                           \
   F(bool, EnableGC,                    false)                           \
   /*
     Run GC on every allocation/deallocation with probability 1/N (0 to

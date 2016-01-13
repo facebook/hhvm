@@ -459,10 +459,6 @@ template void MemoryManager::refreshStatsImpl<true>(MemoryUsageStats& stats);
 template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 
 void MemoryManager::sweep() {
-  // running a gc-cycle at end of request exposes bugs, but otherwise is
-  // somewhat pointless since we're about to free the heap en-masse.
-  if (debug) collect("before MM::sweep");
-
   assert(!sweeping());
   m_sweeping = true;
   DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
@@ -833,9 +829,6 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
     refreshStats();
   }
   storeTail(m_front, (char*)m_limit - (char*)m_front);
-  if (debug && RuntimeOption::EvalCheckHeapOnAlloc && !g_context.isNull()) {
-    setSurpriseFlag(PendingGCFlag); // defer heap check until safepoint
-  }
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
   m_stats.borrow(slab.size);

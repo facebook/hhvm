@@ -74,7 +74,7 @@ function timezone_location_get($timezone) { }
 function timezone_name_from_abbr($abbr, $gmtoffset = -1, $isdst = true) { }
 function timezone_name_get($object) { }
 function timezone_offset_get($object, $dt) { }
-function timezone_open($timezone) { }
+function timezone_open(string $timezone): mixed { }
 function timezone_transitions_get(DateTimeZone $object,
                                   int $timestamp_begin = PHP_INT_MIN,
                                   int $timestamp_end = PHP_INT_MAX) { }

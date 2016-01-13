@@ -1688,7 +1688,7 @@ O(unpcklpd)
       case Vinstr::fallthru:
       case Vinstr::ldimmw:
       case Vinstr::addl:
-      case Vinstr::incwm:
+      case Vinstr::incw:
       case Vinstr::extsb:
       case Vinstr::extsw:
       case Vinstr::loadw:

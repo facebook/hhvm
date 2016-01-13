@@ -1796,13 +1796,22 @@ String HHVM_FUNCTION(sha1,
 #define HASH_TAB_MASK ((uint16_t)(HASH_TAB_SIZE - 1))
 
 struct PatAndRepl {
-  const std::string pat;
-  const std::string repl;
-
   uint16_t hash(int start, int len) const;
+
+  const std::string getPat() const {
+    return pat;
+  }
+
+  const std::string getRepl() const {
+    return repl;
+  }
 
   PatAndRepl(const String& pat, const String& repl)
   : pat(pat.data(), pat.size()), repl(repl.data(), repl.size()) { }
+
+private:
+  std::string pat;
+  std::string repl;
 };
 
 using ShiftTab   = std::array<size_t, SHIFT_TAB_SIZE>;
@@ -1865,10 +1874,10 @@ static int strtr_compare_hash_suffix(const void *p_a, const void *p_b,
     return -1;
   }
   // longer patterns must be sorted first
-  if (a->pat.size() > b->pat.size()) {
+  if (a->getPat().size() > b->getPat().size()) {
     return -1;
   }
-  if (a->pat.size() < b->pat.size()) {
+  if (a->getPat().size() < b->getPat().size()) {
     return 1;
   }
   return 0;
@@ -1982,15 +1991,15 @@ Variant WuManberReplacement::translate(String source) const {
         }
 
         const PatAndRepl *pnr = &patterns[i];
-        if (pnr->pat.size() > source.size() - pos ||
-            memcmp(pnr->pat.data(), source.data() + pos,
-                   pnr->pat.size()) != 0) {
+        if (pnr->getPat().size() > source.size() - pos ||
+            memcmp(pnr->getPat().data(), source.data() + pos,
+                   pnr->getPat().size()) != 0) {
           continue;
         }
 
         result.append(source.data() + nextwpos, pos - nextwpos);
-        result.append(pnr->repl);
-        pos += pnr->pat.size();
+        result.append(pnr->getRepl());
+        pos += pnr->getPat().size();
         nextwpos = pos;
         goto end_outer_loop;
       }

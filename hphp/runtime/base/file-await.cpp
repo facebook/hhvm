@@ -33,7 +33,7 @@ FileAwait::FileAwait(int fd, uint16_t events, double timeout) {
   if (timeout_ms > 0) {
     m_timeout = std::make_shared<FileTimeoutHandler>(asio_event_base.get(),
                                                      this);
-    asio_event_base->runInEventBaseThread([this,timeout_ms] {
+    asio_event_base->runInEventBaseThreadAndWait([this,timeout_ms] {
       if (m_timeout) {
         m_timeout->scheduleTimeout(timeout_ms);
       }
@@ -55,7 +55,7 @@ FileAwait::~FileAwait() {
     m_timeout->m_fileAwait = nullptr;
 
     auto to = std::move(m_timeout);
-    getSingleton<AsioEventBase>()->runInEventBaseThread([to] {
+    getSingleton<AsioEventBase>()->runInEventBaseThreadAndWait([to] {
       to->cancelTimeout();
     });
   }

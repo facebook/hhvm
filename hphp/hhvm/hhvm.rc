@@ -28,7 +28,7 @@ BEGIN
       VALUE "FileDescription", "Hip Hop Virtual Machine\0"
       VALUE "FileVersion", STRVER4(HHVM_VERSION_MAJOR, HHVM_VERSION_MINOR, HHVM_VERSION_PATCH, HHVM_VERSION_PATCH)
       VALUE "InternalName", "hhvm\0"
-      VALUE "LegalCopyright", "Copyright ? 2010-2015 Facebook, Inc.\0"
+      VALUE "LegalCopyright", "Copyright © 2010-2015 Facebook, Inc.\0"
       VALUE "LegalTrademarks", "hhvm\0"
       VALUE "OriginalFilename", "hhvm.exe\0"
       VALUE "PrivateBuild", "\0"

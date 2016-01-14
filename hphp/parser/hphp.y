@@ -1676,7 +1676,7 @@ xhp_nullable_attribute_decl_type:
 xhp_attribute_decl_type:
     T_ARRAY                            { $$ = 4;}
   | T_ARRAY T_TYPELIST_LT hh_type
-    T_TYPELIST_GT                      { $$ = 4;}
+    possible_comma T_TYPELIST_GT       { $$ = 4;}
   | T_ARRAY T_TYPELIST_LT hh_type ','
     hh_type T_TYPELIST_GT              { $$ = 4;}
   | fully_qualified_class_name         { /* This case handles all types other
@@ -3176,12 +3176,17 @@ hh_constraint:
  |  T_SUPER hh_type
 
 hh_typevar_list:
-    hh_typevar_list ','
+    hh_non_empty_typevar_list
+    possible_comma                     { $$ = $1; }
+;
+
+hh_non_empty_typevar_list:
+    hh_non_empty_typevar_list ','
     hh_typevar_variance
     ident_no_semireserved              { _p->addTypeVar($4.text()); }
  |  hh_typevar_variance
     ident_no_semireserved              { _p->addTypeVar($2.text()); }
- |  hh_typevar_list ','
+ |  hh_non_empty_typevar_list ','
     hh_typevar_variance
     ident_no_semireserved
     hh_constraint                      { _p->addTypeVar($4.text()); }
@@ -3274,7 +3279,7 @@ hh_type:
                                          _p->onTypeAnnotation($$, $1, $3);
                                          _p->onTypeSpecialization($$, 'a'); }
   | T_ARRAY T_TYPELIST_LT hh_type
-    T_TYPELIST_GT                      { $1.setText("array");
+    possible_comma T_TYPELIST_GT       { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }
   | T_ARRAY T_TYPELIST_LT hh_type ','
     hh_type T_TYPELIST_GT              { _p->onTypeList($3, $5);

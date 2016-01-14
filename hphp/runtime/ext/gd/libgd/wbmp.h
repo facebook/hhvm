@@ -12,10 +12,6 @@
 #ifndef __WBMP_H
 #define __WBMP_H	1
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 extern "C" {
 #include "php_compat.h"
 }

@@ -19,6 +19,8 @@
 #define incl_HPHP_EXT_COLLECTION_H_
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -52,18 +54,6 @@ class PairIterator;
 class VectorIterator;
 class MapIterator;
 class SetIterator;
-}
-
-/*
- * All native collection class have their m_size field at the same
- * offset in the object.
- */
-constexpr ptrdiff_t FAST_COLLECTION_SIZE_OFFSET = use_lowptr ? 16 : 24;
-inline size_t getCollectionSize(const ObjectData* od) {
-  assert(od->isCollection());
-  return *reinterpret_cast<const uint32_t*>(
-    reinterpret_cast<const char*>(od) + FAST_COLLECTION_SIZE_OFFSET
-  );
 }
 
 /**
@@ -497,7 +487,7 @@ class BaseVector : public ExtCollectionObjectData {
     // For performance, all native collection classes have their m_size field
     // at the same offset.
     static_assert(
-      offsetof(BaseVector, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+      offsetof(BaseVector, m_size) == collections::FAST_SIZE_OFFSET, "");
   }
 
   // Friends
@@ -1377,7 +1367,7 @@ class BaseMap : public HashCollection {
     // For performance, all native collection classes have their m_size field
     // at the same offset.
     static_assert(offsetof(BaseMap, m_size)
-                  == FAST_COLLECTION_SIZE_OFFSET, "");
+                  == collections::FAST_SIZE_OFFSET, "");
   }
 
  protected:
@@ -1835,7 +1825,8 @@ class BaseSet : public HashCollection {
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
     // at the same offset.
-    static_assert(offsetof(BaseSet, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+    static_assert(offsetof(BaseSet, m_size) ==
+                  collections::FAST_SIZE_OFFSET, "");
   }
 };
 
@@ -1939,184 +1930,6 @@ class c_ImmSet : public BaseSet {
     : c_ImmSet(cls, cap) { }
 
   static c_ImmSet* Clone(ObjectData* obj);
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class Pair
-
-class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
-                                         ObjectData::UseGet|
-                                         ObjectData::UseSet|
-                                         ObjectData::UseIsset|
-                                         ObjectData::UseUnset|
-                                         ObjectData::HasClone|
-                                         ObjectData::NoDestructor> {
- public:
-  DECLARE_CLASS_NO_SWEEP(Pair)
-
- public:
-  enum class NoInit {};
-
-  explicit c_Pair(Class* cls = c_Pair::classof())
-    : ExtObjectDataFlags(cls, HeaderKind::Pair)
-    , m_size(2)
-  {
-    tvWriteNull(&elm0);
-    tvWriteNull(&elm1);
-  }
-  explicit c_Pair(NoInit, Class* cls = c_Pair::classof())
-    : ExtObjectDataFlags(cls, HeaderKind::Pair)
-    , m_size(0)
-  {}
-
-  void reserve(int64_t sz) { assertx(sz == 2); }
-  ~c_Pair();
-  void t___construct(int _argc, const Array& _argv = null_array);
-  bool t_isempty();
-  int64_t t_count();
-  Object t_items();
-  Object t_keys();
-  Object t_values();
-  Object t_lazy();
-  Variant t_at(const Variant& key);
-  Variant t_get(const Variant& key);
-  bool t_containskey(const Variant& key);
-  Array t_toarray();
-  Array t_tokeysarray();
-  Array t_tovaluesarray();
-  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
-  Object t_getiterator();
-  int64_t t_linearsearch(const Variant& search_value);
-  Object t_map(const Variant& callback);
-  Object t_mapwithkey(const Variant& callback);
-  Object t_filter(const Variant& callback);
-  Object t_filterwithkey(const Variant& callback);
-  Object t_zip(const Variant& iterable);
-  Object t_take(const Variant& n);
-  Object t_takewhile(const Variant& callback);
-  Object t_skip(const Variant& n);
-  Object t_skipwhile(const Variant& fn);
-  Object t_slice(const Variant& start, const Variant& len);
-  Object t_concat(const Variant& iterable);
-  Variant t_firstvalue();
-  Variant t_firstkey();
-  Variant t_lastvalue();
-  Variant t_lastkey();
-  DECLARE_COLLECTION_MAGIC_METHODS();
-  Object t_immutable();
-  String t___tostring();
-
-  ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
-
-  /**
-   * Most methods that operate on Pairs can safely assume that all Pairs have
-   * two elements that have been initialized. However, methods that deal with
-   * initializing and destructing Pairs needs to handle intermediate states
-   * where one or both of the elements is uninitialized.
-   */
-  bool isFullyConstructed() const {
-    return m_size == 2;
-  }
-
-  TypedValue* at(int64_t key) {
-    assert(isFullyConstructed());
-    if (UNLIKELY(uint64_t(key) >= uint64_t(2))) {
-      throwOOB(key);
-      return NULL;
-    }
-    return &getElms()[key];
-  }
-  TypedValue* get(int64_t key) {
-    assert(isFullyConstructed());
-    if (uint64_t(key) >= uint64_t(2)) {
-      return NULL;
-    }
-    return &getElms()[key];
-  }
-  void initAdd(const TypedValue* val) {
-    assert(!isFullyConstructed());
-    assert(val->m_type != KindOfRef);
-    cellDup(*val, getElms()[m_size]);
-    ++m_size;
-  }
-  void initAdd(const Variant& val) {
-    initAdd(val.asCell());
-  }
-  bool contains(int64_t key) const {
-    assert(isFullyConstructed());
-    return (uint64_t(key) < uint64_t(2));
-  }
-
-  Array toArrayImpl() const;
-
-  static c_Pair* Clone(ObjectData* obj);
-  static bool ToBool(const ObjectData* obj) {
-    assertx(obj->getVMClass() == c_Pair::classof());
-    assertx(static_cast<const c_Pair*>(obj)->isFullyConstructed());
-    return true;
-  }
-  static Array ToArray(const ObjectData* obj);
-  template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
-    auto pair = static_cast<c_Pair*>(obj);
-    assertx(pair->isFullyConstructed());
-    if (key->m_type == KindOfInt64) {
-      return throwOnMiss ? pair->at(key->m_data.num)
-                         : pair->get(key->m_data.num);
-    }
-    throwBadKeyType();
-    return nullptr;
-  }
-  static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, const TypedValue* key);
-  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
-
-  int64_t size() const {
-    assert(isFullyConstructed());
-    return 2;
-  }
-
-  TypedValue* initForUnserialize() {
-    m_size = 2;
-    elm0.m_type = KindOfNull;
-    elm1.m_type = KindOfNull;
-    return getElms();
-  }
-
-  static constexpr uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
-
- private:
-  ATTRIBUTE_NORETURN static void throwBadKeyType();
-
-#ifndef USE_LOWPTR
-  // Add 4 bytes here to keep m_size aligned the same way as in BaseVector and
-  // HashCollection.
-  UNUSED uint32_t dummy;
-#endif
-  uint32_t m_size;
-
-  TypedValue elm0;
-  TypedValue elm1;
-
-  TypedValue* getElms() { return &elm0; }
-  const TypedValue* getElms() const { return &elm0; }
-
-  int getVersion() const { return 0; }
-
-  friend void collections::deepCopy(TypedValue*);
-  friend class collections::PairIterator;
-  friend class c_Vector;
-  friend class BaseVector;
-  friend class BaseMap;
-  friend class ArrayIter;
-
-  static void compileTimeAssertions() {
-    // For performance, all native collection classes have their m_size field
-    // at the same offset.
-    static_assert(offsetof(c_Pair, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1265,7 +1265,7 @@ int64_t HHVM_FUNCTION(count,
       {
         Object obj = var.toObject();
         if (obj->isCollection()) {
-          return getCollectionSize(obj.get());
+          return collections::getSize(obj.get());
         }
         if (obj.instanceof(SystemLib::s_CountableClass)) {
           return obj->o_invoke_few_args(s_count, 0).toInt64();

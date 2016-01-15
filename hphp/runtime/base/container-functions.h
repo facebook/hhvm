@@ -59,7 +59,7 @@ inline size_t getContainerSize(const Cell c) {
     return c.m_data.parr->size();
   }
   assert(c.m_type == KindOfObject && c.m_data.pobj->isCollection());
-  return getCollectionSize(c.m_data.pobj);
+  return collections::getSize(c.m_data.pobj);
 }
 
 inline size_t getContainerSize(const Variant& v) {

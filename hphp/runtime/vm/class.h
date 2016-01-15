@@ -53,6 +53,10 @@ struct HhbcExtClassInfo;
 struct StringData;
 class c_WaitHandle;
 
+namespace collections {
+class CollectionsExtension;
+}
+
 namespace Native {
 struct NativeDataInfo;
 struct NativePropHandler;
@@ -1193,6 +1197,8 @@ private:
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
   finish_class();
+
+  friend class collections::CollectionsExtension;
 
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;

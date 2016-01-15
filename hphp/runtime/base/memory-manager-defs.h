@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 
 namespace HPHP {
 
@@ -50,6 +51,7 @@ struct Header {
     ProxyArray proxy_;
     GlobalsArray globals_;
     ObjectData obj_;
+    c_Pair pair_;
     ResourceHdr res_;
     RefData ref_;
     SmallNode small_;
@@ -129,6 +131,8 @@ inline size_t Header::size() const {
       return str_.heapSize();
     case HeaderKind::Object:
     case HeaderKind::ResumableObj:
+      // [ObjectData][subclass][props]
+      return obj_.heapSize();
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:
@@ -136,8 +140,8 @@ inline size_t Header::size() const {
     case HeaderKind::ImmVector:
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
-      // [ObjectData][subclass][props]
-      return obj_.heapSize();
+      // [ObjectData][subclass]
+      return collections::heapSize(kind());
     case HeaderKind::WaitHandle:
       // [ObjectData][subclass]
       return asio_object_size(&obj_);

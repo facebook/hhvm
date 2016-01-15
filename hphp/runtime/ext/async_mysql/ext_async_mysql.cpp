@@ -512,7 +512,7 @@ Object HHVM_METHOD(AsyncMysqlConnection, queryf,
       const Object& obj = arg.asCObjRef();
       if (obj->isCollection() && isVectorCollection(obj->collectionType())) {
         std::vector<am::QueryArgument> out;
-        out.reserve(getCollectionSize(obj.get()));
+        out.reserve(collections::getSize(obj.get()));
         for (ArrayIter listIter(arg); listIter; ++listIter) {
           const Variant& item = listIter.second();
           if (scalarPush(out, item)) {

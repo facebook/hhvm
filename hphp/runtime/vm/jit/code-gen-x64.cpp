@@ -1322,7 +1322,7 @@ void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
          ty.clsSpec().cls()->isCollectionClass());
   auto& v = vmain();
   auto const sf = v.makeReg();
-  v << cmplim{0, srcLoc(inst, 0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
+  v << cmplim{0, srcLoc(inst, 0).reg()[collections::FAST_SIZE_OFFSET], sf};
   v << setcc{CC_E, sf, dstLoc(inst, 0).reg()};
 }
 
@@ -1333,7 +1333,7 @@ void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
          ty.clsSpec().cls()->isCollectionClass());
   auto& v = vmain();
   auto const sf = v.makeReg();
-  v << cmplim{0, srcLoc(inst, 0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
+  v << cmplim{0, srcLoc(inst, 0).reg()[collections::FAST_SIZE_OFFSET], sf};
   v << setcc{CC_NE, sf, dstLoc(inst, 0).reg()};
 }
 
@@ -1353,7 +1353,7 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
         [&] (Vout& v) { // rsrc points to native collection
           auto dst2 = v.makeReg();
           auto const sf = v.makeReg();
-          v << cmplim{0, rsrc[FAST_COLLECTION_SIZE_OFFSET], sf};
+          v << cmplim{0, rsrc[collections::FAST_SIZE_OFFSET], sf};
           v << setcc{CC_NE, sf, dst2}; // true iff size not zero
           return dst2;
         }, [&] (Vout& v) { // rsrc is not a native collection
@@ -5325,7 +5325,7 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
   auto const baseReg = srcLoc(inst, 0).reg();
   auto const dstReg  = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  v << loadzlq{baseReg[FAST_COLLECTION_SIZE_OFFSET], dstReg};
+  v << loadzlq{baseReg[collections::FAST_SIZE_OFFSET], dstReg};
 }
 
 void CodeGenerator::cgLdStrLen(IRInstruction* inst) {

@@ -766,7 +766,8 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
         // Only unserialize CPP extension types which can actually
         // support it. Otherwise, we risk creating a CPP object
         // without having it initialized completely.
-        if (cls->instanceCtor() && !cls->isCppSerializable()) {
+        if (cls->instanceCtor() && !cls->isCppSerializable() &&
+            !cls->isCollectionClass()) {
           assert(obj.isNull());
           throw_null_pointer_exception();
         } else {

@@ -1405,7 +1405,7 @@ static void serializeArray(const Array& arr, VariableSerializer* serializer,
 
 static
 void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
-  int64_t sz = getCollectionSize(obj);
+  int64_t sz = collections::getSize(obj);
   auto type = obj->collectionType();
 
   if (isMapCollection(type)) {
@@ -1524,6 +1524,11 @@ static void serializeObjectImpl(const ObjectData* obj,
   Variant serializableNativeData = init_null();
   Variant ret;
   auto const type = serializer->getType();
+
+  if (obj->isCollection()) {
+    serializeCollection(const_cast<ObjectData*>(obj), serializer);
+    return;
+  }
 
   if (LIKELY(type == VariableSerializer::Type::Serialize ||
              type == VariableSerializer::Type::APCSerialize)) {
@@ -1653,10 +1658,8 @@ static void serializeObjectImpl(const ObjectData* obj,
       serializeVariant(uninit_null(), serializer);
     }
   } else {
-    if (obj->isCollection()) {
-      serializeCollection(const_cast<ObjectData*>(obj), serializer);
-    } else if (type == VariableSerializer::Type::VarExport &&
-               obj->instanceof(c_Closure::classof())) {
+    if (type == VariableSerializer::Type::VarExport &&
+        obj->instanceof(c_Closure::classof())) {
       serializer->write(obj->getClassName());
     } else {
       auto className = obj->getClassName();

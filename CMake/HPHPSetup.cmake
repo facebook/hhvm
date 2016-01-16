@@ -126,6 +126,15 @@ include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
+if (HHVM_VERSION_OVERRIDE)
+  parse_version("HHVM_VERSION_" ${HHVM_VERSION_OVERRIDE})
+  add_definitions("-DHHVM_VERSION_OVERRIDE")
+  add_definitions("-DHHVM_VERSION_MAJOR=${HHVM_VERSION_MAJOR}")
+  add_definitions("-DHHVM_VERSION_MINOR=${HHVM_VERSION_MINOR}")
+  add_definitions("-DHHVM_VERSION_PATCH=${HHVM_VERSION_PATCH}")
+  add_definitions("-DHHVM_VERSION_SUFFIX=\"${HHVM_VERSION_SUFFIX}\"")
+endif()
+
 # Weak linking on Linux, Windows, and OS X all work somewhat differently. The following test
 # works well on Linux and Windows, but fails for annoying reasons on OS X, and even works
 # differently on different releases of OS X, cf. http://glandium.org/blog/?p=2764. Getting

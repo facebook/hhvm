@@ -10,7 +10,7 @@
 
 open Core
 
-let test_process_data =
+let rec test_process_data =
   ServerProcess.{
     pid = 2758734;
     name = "hh_server";
@@ -19,6 +19,8 @@ let test_process_data =
     out_fd = Unix.stdout;
     log_file = "";
     last_request_handoff = ref 0.0;
+    starter = (fun () -> test_process_data);
+    retries = 0;
   }
 
 let test_dmesg_parser () =

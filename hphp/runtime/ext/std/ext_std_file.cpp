@@ -911,6 +911,9 @@ Variant HHVM_FUNCTION(fileinode,
 Variant HHVM_FUNCTION(filesize,
                       const String& filename) {
   CHECK_PATH(filename, 1);
+  if (filename.empty()) {
+    return false;
+  }
   if (StaticContentCache::TheFileCache) {
     int64_t size =
       StaticContentCache::TheFileCache->fileSize(filename.data(),

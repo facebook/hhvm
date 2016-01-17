@@ -98,7 +98,7 @@ function tempnam($dir, $prefix);
 function tmpfile();
 function fileperms($filename);
 function fileinode($filename);
-function filesize($filename);
+function filesize(string $filename);
 function fileowner($filename);
 function filegroup($filename);
 function fileatime($filename);

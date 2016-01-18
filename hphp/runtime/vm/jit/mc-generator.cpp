@@ -107,7 +107,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/unwind-vm.h"
 
 namespace HPHP { namespace jit {
 

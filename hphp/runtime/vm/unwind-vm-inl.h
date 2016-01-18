@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNWIND_INL_H_
-#error "unwind-inl.h should only be included by unwind.h"
+#ifndef incl_HPHP_VM_UNWIND_VM_INL_H_
+#error "unwind-vm-inl.h should only be included by unwind-vm.h"
 #endif
 
 namespace HPHP {

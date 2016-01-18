@@ -47,7 +47,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/FBSerialize.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
-#include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/unwind-vm.h"
 
 #include "hphp/parser/parser.h"
 

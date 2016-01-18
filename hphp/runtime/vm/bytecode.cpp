@@ -109,7 +109,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/unwind-vm.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

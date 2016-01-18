@@ -30,12 +30,12 @@
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/unwind.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/unwind-vm.h"
 
 namespace HPHP {
 

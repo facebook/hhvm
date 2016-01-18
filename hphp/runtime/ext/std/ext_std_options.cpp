@@ -75,9 +75,9 @@ const int64_t k_ASSERT_EXCEPTION   = 6;
 
 struct OptionData final : RequestEventHandler {
   void requestInit() override {
-    assertActive = 0;
+    assertActive = 1;
     assertException = 0;
-    assertWarning = 0;
+    assertWarning = 1;
     assertBail = 0;
     assertQuietEval = false;
   }
@@ -104,11 +104,11 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(OptionData, s_option_data);
 
 void StandardExtension::requestInitOptions() {
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-    "assert.active", "0", &s_option_data->assertActive);
+    "assert.active", "1", &s_option_data->assertActive);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
     "assert.exception", "0", &s_option_data->assertException);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-    "assert.warning", "0", &s_option_data->assertWarning);
+    "assert.warning", "1", &s_option_data->assertWarning);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
     "assert.bail", "0", &s_option_data->assertBail);
 }

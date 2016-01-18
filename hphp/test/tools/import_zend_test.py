@@ -634,6 +634,15 @@ norepo_tests = (
     '/tests/lang/bug22690.php',
     '/tests/lang/bug24926.php',
 
+    # These tests use assert with a string argument, which is also basically
+    # eval.
+    '/ext/dom/tests/DOMNode_insertBefore_error2.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error3.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error4.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error5.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error6.php',
+    '/tests/lang/bug23922.php',
+
     # This creates an interface with the same name as a builtin, which
     # hphpc doesn't correctly support AttrUnique flags on.
     '/Zend/tests/inter_06.php',

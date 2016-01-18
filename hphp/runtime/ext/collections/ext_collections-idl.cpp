@@ -2362,10 +2362,10 @@ BaseMap::php_takeWhile(const Variant& fn) {
     if (!b) continue;
     e = iter_elm(pos);
     if (e->hasIntKey()) {
-      map->setRaw(e->ikey, &e->data);
+      map->set(e->ikey, &e->data);
     } else {
       assert(e->hasStrKey());
-      map->setRaw(e->skey, &e->data);
+      map->set(e->skey, &e->data);
     }
   }
   return Object{std::move(map)};
@@ -2443,14 +2443,16 @@ BaseMap::php_skipWhile(const Variant& fn) {
     }
     if (!b) break;
   }
-  auto* eLimit = elmLimit();
-  auto* e = iter_elm(pos);
-  for (; e != eLimit; e = nextElm(e, eLimit)) {
-    if (e->hasIntKey()) {
-      map->setRaw(e->ikey, &e->data);
-    } else {
-      assert(e->hasStrKey());
-      map->setRaw(e->skey, &e->data);
+  if (iter_valid(pos)) {
+    auto* eLimit = elmLimit();
+    auto* e = iter_elm(pos);
+    for (; e != eLimit; e = nextElm(e, eLimit)) {
+      if (e->hasIntKey()) {
+        map->set(e->ikey, &e->data);
+      } else {
+        assert(e->hasStrKey());
+        map->set(e->skey, &e->data);
+      }
     }
   }
   return Object{std::move(map)};

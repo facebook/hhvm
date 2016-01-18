@@ -1,0 +1,51 @@
+skipWhile false
+string(3) "one"
+object(HH\Map)#%d (5) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  string(3) "two"
+  [2]=>
+  string(5) "three"
+  [3]=>
+  string(4) "four"
+  [4]=>
+  string(4) "five"
+}
+
+skipWhile true
+string(3) "one"
+string(3) "two"
+string(5) "three"
+string(4) "four"
+string(4) "five"
+object(HH\Map)#%d (0) {
+}
+
+takeWhile false
+string(3) "one"
+string(3) "two"
+string(5) "three"
+string(4) "four"
+string(4) "five"
+object(HH\Map)#%d (0) {
+}
+
+takeWhile true
+string(3) "one"
+string(3) "two"
+string(5) "three"
+string(4) "four"
+string(4) "five"
+object(HH\Map)#%d (5) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  string(3) "two"
+  [2]=>
+  string(5) "three"
+  [3]=>
+  string(4) "four"
+  [4]=>
+  string(4) "five"
+}

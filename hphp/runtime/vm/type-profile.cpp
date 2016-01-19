@@ -67,10 +67,7 @@ void setRelocateRequests(int32_t n) {
 }
 
 namespace {
-
-using FuncProfileCounters = tbb::concurrent_hash_map<FuncId,uint32_t>;
-FuncProfileCounters s_func_counters;
-
+AtomicVector<uint32_t> s_func_counters{kFuncCountHint, 0};
 }
 
 void profileWarmupStart() {
@@ -117,9 +114,9 @@ static void setHotFuncAttr() {
     Func::getFuncVec().foreach([&](const Func* f) {
       if (!f) return;
       auto const profCounter = [&]() -> uint32_t {
-        FuncProfileCounters::const_accessor acc;
-        if (s_func_counters.find(acc, f->getFuncId())) {
-          return acc->second;
+        auto const id = f->getFuncId();
+        if (id < s_func_counters.size()) {
+          return s_func_counters[id].load(std::memory_order_relaxed);
         }
         return 0;
       }();
@@ -142,18 +139,16 @@ static void setHotFuncAttr() {
   // that still thought they were profiling, so we need to clear it on the
   // treadmill.
   Treadmill::enqueue([&] {
-    FuncProfileCounters newMap(0);
-    swap(s_func_counters, newMap);
+    s_func_counters.~AtomicVector<uint32_t>();
+    new (&s_func_counters) AtomicVector<uint32_t>{0, 0};
   });
 
   synced = true;
 }
 
 void profileIncrementFuncCounter(const Func* f) {
-  FuncProfileCounters::accessor acc;
-  auto const value = FuncProfileCounters::value_type(f->getFuncId(), 0);
-  s_func_counters.insert(acc, value);
-  ++acc->second;
+  s_func_counters.ensureSize(f->getFuncId() + 1);
+  s_func_counters[f->getFuncId()].fetch_add(1, std::memory_order_relaxed);
 }
 
 int64_t requestCount() {

@@ -56,16 +56,10 @@ const StringData*     Func::s___callStatic = makeStaticString("__callStatic");
 std::atomic<bool>     Func::s_treadmill;
 
 /*
- * This size hint will create a ~6MB vector and is rarely hit in practice.
- * Note that this is just a hint and exceeding it won't affect correctness.
- */
-constexpr size_t kFuncVecSizeHint = 750000;
-
-/*
  * FuncId high water mark and FuncId -> Func* table.
  */
 static std::atomic<FuncId> s_nextFuncId(0);
-static AtomicVector<const Func*> s_funcVec(kFuncVecSizeHint, nullptr);
+static AtomicVector<const Func*> s_funcVec(kFuncCountHint, nullptr);
 
 const AtomicVector<const Func*>& Func::getFuncVec() {
   return s_funcVec;

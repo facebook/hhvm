@@ -18,6 +18,8 @@
 #define incl_HPHP_VARIABLE_SERIALIZER_H_
 
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -55,6 +57,7 @@ struct VariableSerializer {
     if (m_arrayIds) delete m_arrayIds;
   }
 
+  // Use UnlimitSerializationScope to suspend this temporarily.
   static __thread int64_t serializationSizeLimit;
 
   /**
@@ -157,6 +160,21 @@ private:
   // Otherwise, writeOverflow will be invoked instead.
   void preventOverflow(const Object& v, const std::function<void()>& func);
   void writePropertyKey(const String& prop);
+};
+
+// TODO: Move to util/folly?
+template<typename T> struct TmpAssign {
+  TmpAssign(T& v, const T tmp) : cur(v), save(cur) { cur = tmp; }
+  ~TmpAssign() { cur = save; }
+  T& cur;
+  const T save;
+};
+
+struct UnlimitSerializationScope {
+  static constexpr int32_t kTmpLimit = StringData::MaxSize;
+  TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit, kTmpLimit};
+  TmpAssign<int64_t> rs{RuntimeOption::SerializationSizeLimit, kTmpLimit};
+  TmpAssign<int32_t> rm{RuntimeOption::MaxSerializedStringSize, kTmpLimit};
 };
 
 extern const StaticString s_serializedNativeDataKey;

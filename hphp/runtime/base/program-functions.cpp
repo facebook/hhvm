@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/thread-safe-setlocale.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/debugger/debugger.h"
@@ -1958,10 +1959,10 @@ void hphp_process_init() {
 
   InitFiniNode::ProcessInit();
   BootTimer::mark("extra_process_init");
-  int64_t save = RuntimeOption::SerializationSizeLimit;
-  RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
-  apc_load(apcExtension::LoadThread);
-  RuntimeOption::SerializationSizeLimit = save;
+  {
+    UnlimitSerializationScope unlimit;
+    apc_load(apcExtension::LoadThread);
+  }
   BootTimer::mark("apc_load");
 
   rds::requestExit();

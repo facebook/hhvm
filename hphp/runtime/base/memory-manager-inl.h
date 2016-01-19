@@ -238,7 +238,7 @@ inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
   assert(index < kNumSmallSizes);
   assert(bytes <= kSmallIndex2Size[index]);
 
-  if (debug) eagerGCCheck();
+  if (debug) checkEagerGC();
 
   m_stats.usage += bytes;
 

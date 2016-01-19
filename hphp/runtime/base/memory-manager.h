@@ -1014,7 +1014,8 @@ private:
   void dropRootMaps();
   void deleteRootMaps();
 
-  void eagerGCCheck();
+  void checkEagerGC();
+  void resetEagerGC();
 
   template <typename T>
   typename std::enable_if<

@@ -623,7 +623,7 @@ inline void* MemoryManager::realloc(void* ptr, size_t nbytes) {
     return newmem;
   }
   // Ok, it's a big allocation.
-  if (debug) eagerGCCheck();
+  if (debug) checkEagerGC();
   auto block = m_heap.resizeBig(ptr, nbytes);
   refreshStats();
   return block.ptr;
@@ -942,7 +942,7 @@ MemBlock MemoryManager::mallocBigSize<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::mallocBigSize(size_t bytes) {
-  if (debug) eagerGCCheck();
+  if (debug) checkEagerGC();
 
   auto block = m_heap.allocBig(bytes, HeaderKind::BigObj);
   auto szOut = block.size;
@@ -964,7 +964,7 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes) {
 
 NEVER_INLINE
 void* MemoryManager::callocBig(size_t totalbytes) {
-  if (debug) eagerGCCheck();
+  if (debug) checkEagerGC();
   assert(totalbytes > 0);
   auto block = m_heap.callocBig(totalbytes);
   updateBigStats();
@@ -1128,14 +1128,6 @@ void MemoryManager::requestShutdown() {
 
 /* static */ void MemoryManager::teardownProfiling() {
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
-}
-
-void MemoryManager::eagerGCCheck() {
-  if (RuntimeOption::EvalEagerGCProbability > 0 &&
-      !g_context.isNull() &&
-      folly::Random::oneIn(RuntimeOption::EvalEagerGCProbability)) {
-    setSurpriseFlag(PendingGCFlag);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,6 +27,7 @@
 #include <iterator>
 #include <vector>
 #include <folly/Range.h>
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
 TRACE_SET_MOD(gc);
@@ -372,7 +373,9 @@ void Marker::init() {
   rds_ = folly::Range<const char*>((char*)rds::header(),
                                    RuntimeOption::EvalJitTargetCacheSize);
   MM().forEachHeader([&](Header* h) {
+    if (h->kind() == HeaderKind::Free) return;
     h->hdr_.mark = h->hdr_.cmark = false;
+    total_ += h->size();
     switch (h->kind()) {
       case HeaderKind::Apc:
       case HeaderKind::Globals:
@@ -384,9 +387,7 @@ void Marker::init() {
       case HeaderKind::String:
       case HeaderKind::Ref:
       case HeaderKind::Resource:
-        assert(h->hdr_.count > 0);
         ptrs_.insert(h);
-        total_ += h->size();
         break;
       case HeaderKind::Object:
       case HeaderKind::Vector:
@@ -400,13 +401,10 @@ void Marker::init() {
       case HeaderKind::WaitHandle:
         assert(!h->obj_.getAttribute(ObjectData::HasNativeData) &&
                "object with NativeData from forEachHeader");
-        total_ += h->size();
         ptrs_.insert(h);
         break;
       case HeaderKind::ResumableFrame: {
-        // Pointers to either the frame or the object will be mapped to the
-        // frame.
-        total_ += h->size();
+        // Pointers to either the frame or object will be mapped to the frame.
         ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->resumableObj());
         obj->hdr_.mark = obj->hdr_.cmark = false;
@@ -415,7 +413,6 @@ void Marker::init() {
       case HeaderKind::NativeData: {
         // Pointers to either the native data or the object will be mapped to
         // the native data.
-        total_ += h->size();
         ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->nativeObj());
         obj->hdr_.mark = obj->hdr_.cmark = false;
@@ -423,16 +420,15 @@ void Marker::init() {
       }
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
-        total_ += h->size();
         ptrs_.insert(h);
         break;
-      case HeaderKind::Free:
-        break;
       case HeaderKind::ResumableObj:
-        // These shouldn't be encountered on their own, they should always be
-        // prefixed by a ResumableFrame allocation.
+        // ResumableObj should not be encountered on their own, they should
+        // always be prefixed by a ResumableFrame allocation.
+      case HeaderKind::Free:
       case HeaderKind::Hole:
       case HeaderKind::BigObj:
+        // Hole and BigObj are skipped in ForEachHeader. Free is skipped above.
         assert(false && "skipped by forEachHeader()");
         break;
     }
@@ -559,15 +555,17 @@ void Marker::sweep() {
         break;
     }
   });
-  TRACE(1, "sweep tot %lu(%lu) mk %lu(%lu) amb %lu(%lu) free %lu(%lu)\n",
-        total_.count, total_.bytes,
-        marked.count, marked.bytes,
-        ambig.count, ambig.bytes,
-        freed.count, freed.bytes);
-  // once we're done iterating the heap, it's safe to free unreachable objects.
-  if (debug && RuntimeOption::EvalEagerGCProbability > 0) {
-    mm.beginQuarantine();
+  if (freed.count > 1) {
+    TRACE(1, "sweep tot %lu(%lu) mk %lu(%lu) amb %lu(%lu) free %lu(%lu)\n",
+          total_.count, total_.bytes,
+          marked.count, marked.bytes,
+          ambig.count, ambig.bytes,
+          freed.count, freed.bytes);
   }
+  // once we're done iterating the heap, it's safe to free unreachable objects.
+  const bool use_quarantine = debug && RuntimeOption::EvalEagerGC;
+  if (use_quarantine) mm.beginQuarantine();
+  SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
   for (auto h : reaped) {
     if (h->kind() == HeaderKind::Apc) {
       // frees localCache, delists, decref apc-array, free array
@@ -585,20 +583,67 @@ void Marker::sweep() {
       mm.objFree(h, h->size());
     }
   }
-  if (debug && RuntimeOption::EvalEagerGCProbability > 0) {
-    mm.endQuarantine();
-  }
-}
 }
 
-void MemoryManager::collect(const char* phase) {
-  if (!RuntimeOption::EvalEnableGC || empty()) return;
-  if (debug) checkHeap(phase);
+template<size_t NBITS> struct BloomFilter {
+  BloomFilter() : bits_{NBITS} {}
+  using T = const void*;
+  static size_t h1(size_t h) { return h % NBITS; }
+  static size_t h2(size_t h) { return (h / NBITS) % NBITS; }
+  void insert(T x) {
+    auto h = hash_int64(intptr_t(x));
+    bits_.set(h1(h)).set(h2(h));
+  }
+  bool test(T x) const {
+    auto h = hash_int64(intptr_t(x));
+    return bits_.test(h1(h)) & bits_.test(h2(h));
+  }
+  void clear() {
+    bits_.reset();
+    static_assert(NBITS < (1LL << 32), "");
+  }
+private:
+  boost::dynamic_bitset<> bits_;
+};
+
+thread_local bool t_eager_gc{false};
+thread_local BloomFilter<256*1024> t_surprise_filter;
+
+void collectImpl(const char* phase) {
   VMRegAnchor _;
+  if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
+    t_eager_gc = false;
+    auto pc = vmpc();
+    if (t_surprise_filter.test(pc)) return;
+    t_surprise_filter.insert(pc);
+    TRACE(2, "eager gc %s at %p\n", phase, pc);
+  } else {
+    TRACE(2, "normal gc %s at %p\n", phase, vmpc());
+  }
   Marker mkr;
   mkr.init();
   mkr.trace();
   mkr.sweep();
+}
+
+}
+
+void MemoryManager::resetEagerGC() {
+  if (RuntimeOption::EvalEagerGC && RuntimeOption::EvalFilterGCPoints) {
+    t_surprise_filter.clear();
+  }
+}
+
+void MemoryManager::checkEagerGC() {
+  if (RuntimeOption::EvalEagerGC && rds::header()) {
+    t_eager_gc = true;
+    setSurpriseFlag(PendingGCFlag);
+  }
+}
+
+void MemoryManager::collect(const char* phase) {
+  if (!RuntimeOption::EvalEnableGC || empty()) return;
+  collectImpl(phase);
 }
 
 }

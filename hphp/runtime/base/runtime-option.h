@@ -564,11 +564,10 @@ public:
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, EnableGC,                    false)                           \
-  /*
-    Run GC on every allocation/deallocation with probability 1/N (0 to
-    disable). Requires EnableGC=true with debug build.
-  */                                                                    \
-  F(uint32_t, EagerGCProbability,   0)                                  \
+  /* Run GC eagerly at each surprise point. */                          \
+  F(bool, EagerGC,                     false)                           \
+  /* only run eager-gc once at each surprise point (much faster) */     \
+  F(bool, FilterGCPoints,              true)                            \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \

@@ -14,42 +14,50 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_EMIT_H_
-#define incl_HPHP_JIT_VASM_EMIT_H_
+#ifndef incl_HPHP_JIT_ALIGN_PPC64_H_
+#define incl_HPHP_JIT_ALIGN_PPC64_H_
 
-namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/alignment.h"
 
-struct Abi;
-struct AsmInfo;
-struct Vtext;
-struct Vunit;
+#include "hphp/util/data-block.h"
 
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Optimize, lower for x64, register allocator, and perform more optimizations
- * on `unit'.
- */
-void optimizeX64(Vunit& unit, const Abi&);
-
-/*
- * Emit code for the given unit using the given code areas. The unit should
- * have already been through optimizeX64().
- */
-void emitX64(const Vunit&, Vtext&, AsmInfo*);
-
-/*
- * Optimize, register allocate, and emit ARM code for the given unit.
- */
-void finishARM(Vunit&, Vtext&, const Abi&, AsmInfo*);
-
-/*
- * Optimize, register allocate, and emit PPC64 code for the given unit.
- */
-void finishPPC64(Vunit&, Vtext&, const Abi&, AsmInfo*);
+namespace HPHP { namespace jit { namespace ppc64 {
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+
+/*
+ * Mirrors the API of align.h.
+ */
+
+bool is_aligned(TCA frontier, Alignment alignment);
+
+void align(CodeBlock& cb, Alignment alignment, AlignContext context,
+           bool fixups = true);
+
+constexpr size_t cache_line_size() { return 128; }
+
+/*
+ * All the Alignments can be expressed by stipulating that the code region
+ * given by
+ *
+ *    [frontier + offset, nbytes)
+ *
+ * fits into the nearest `align'-aligned and -sized line.
+ */
+struct AlignInfo {
+  size_t align;
+  size_t nbytes;
+  size_t offset;
+};
+
+/*
+ * Get the AlignInfo for `alignment'; used by relocation.
+ */
+const AlignInfo& alignment_info(Alignment alignment);
+
+///////////////////////////////////////////////////////////////////////////////
+
+}}}
 
 #endif

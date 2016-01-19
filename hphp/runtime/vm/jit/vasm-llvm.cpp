@@ -1686,6 +1686,24 @@ O(unpcklpd)
       case Vinstr::psllq:
       case Vinstr::psrlq:
       case Vinstr::fallthru:
+      case Vinstr::ldimmw:
+      case Vinstr::addl:
+      case Vinstr::incw:
+      case Vinstr::extsb:
+      case Vinstr::extsw:
+      case Vinstr::loadw:
+      case Vinstr::fcmpo:
+      case Vinstr::fcmpu:
+      case Vinstr::xscvdpsxds:
+      case Vinstr::mfcr:
+      case Vinstr::mflr:
+      case Vinstr::mfvsrd:
+      case Vinstr::movlk:
+      case Vinstr::mtlr:
+      case Vinstr::mtvsrd:
+      case Vinstr::xscvsxddp:
+      case Vinstr::xxlxor:
+      case Vinstr::xxpermdi:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));

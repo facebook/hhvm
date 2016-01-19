@@ -120,7 +120,7 @@ void Assembler::addis(const Reg64& rt, const Reg64& ra, Immed imm) {
   EmitDForm(15, rn(rt), rn(ra), imm.w());
 }
 
-void Assembler::and_(const Reg64& ra, const Reg64& rs, const Reg64& rb,
+void Assembler::and(const Reg64& ra, const Reg64& rs, const Reg64& rb,
                      bool rc) {
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 28, rc);
 }
@@ -140,24 +140,24 @@ void Assembler::andis(const Reg64& ra, const Reg64& rs, Immed imm) {
   EmitDForm(29, rn(rs), rn(ra), imm.w());
 }
 
-void Assembler::b(int32_t target_addr) {
-  EmitIForm(18, uint32_t(target_addr));
+void Assembler::b(int32_t offset) {
+  EmitIForm(18, uint32_t(offset));
 }
 
 void Assembler::ba(uint32_t target_addr) {
   EmitIForm(18, target_addr, 1, 0);
 }
 
-void Assembler::bl(int32_t target_addr) {
-  EmitIForm(18, uint32_t(target_addr), 0, 1);
+void Assembler::bl(int32_t offset) {
+  EmitIForm(18, uint32_t(offset), 0, 1);
 }
 
 void Assembler::bla(uint32_t target_addr) {
   EmitIForm(18, target_addr, 1, 1);
 }
 
-void Assembler::bc(uint8_t bo, uint8_t bi, int16_t target_addr) {
-  EmitBForm(16, bo, bi, uint32_t(target_addr), 0, 0);
+void Assembler::bc(uint8_t bo, uint8_t bi, int16_t offset) {
+  EmitBForm(16, bo, bi, uint32_t(offset), 0, 0);
 }
 
 void Assembler::bca(uint8_t bo, uint8_t bi, uint16_t target_addr) {
@@ -172,8 +172,8 @@ void Assembler::bcctrl(uint8_t bo, uint8_t bi, uint16_t bh) {
   EmitXLForm(19, bo, bi, (bh & 0x3), 528, 1);
 }
 
-void Assembler::bcl(uint8_t bo, uint8_t bi, int16_t target_addr) {
-  EmitBForm(16, bo, bi, target_addr, 0, 1);
+void Assembler::bcl(uint8_t bo, uint8_t bi, int16_t offset) {
+  EmitBForm(16, bo, bi, offset, 0, 1);
 }
 
 void Assembler::bcla(uint8_t bo, uint8_t bi, uint16_t target_addr) {
@@ -279,8 +279,8 @@ void Assembler::extsw(const Reg64& ra, const Reg64& rs, bool rc) {
 }
 
 void Assembler::isel(const Reg64& rt, const Reg64& ra, const Reg64& rb,
-                     uint16_t bc) {
-  EmitAForm(31, rn(rt), rn(ra), rn(rb), bc, 15);
+                     uint8_t bc) {
+  EmitAForm(31, rn(rt), rn(ra), rn(rb), rn(bc), 15);
 }
 
 void Assembler::lbz(const Reg64& rt, MemoryRef m) {
@@ -292,11 +292,11 @@ void Assembler::lbzu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::lbzux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 87);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 119);
 }
 
 void Assembler::lbzx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 119);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 87);
 }
 
 void Assembler::ld(const Reg64& rt, MemoryRef m) {
@@ -312,11 +312,11 @@ void Assembler::ldu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::ldux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 21);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 53);
 }
 
 void Assembler::ldx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 53);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 21);
 }
 
 void Assembler::lhbrx(const Reg64& rt, MemoryRef m) {
@@ -332,11 +332,11 @@ void Assembler::lhzu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::lhzux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 279);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 331);
 }
 
 void Assembler::lhzx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 331);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 279);
 }
 
 void Assembler::lha(const Reg64& rt, MemoryRef m) {
@@ -348,11 +348,11 @@ void Assembler::lhau(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::lhaux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 343);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 375);
 }
 
 void Assembler::lhax(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 375);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 343);
 }
 
 void Assembler::lmw(const Reg64& rt, MemoryRef m) {
@@ -382,11 +382,11 @@ void Assembler::lwzu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::lwzux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 23);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 55);
 }
 
 void Assembler::lwzx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 55);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 23);
 }
 
 void Assembler::lwa(const Reg64& rt, MemoryRef m) {
@@ -394,11 +394,11 @@ void Assembler::lwa(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::lwaux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 341);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 373);
 }
 
 void Assembler::lwax(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 373);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 341);
 }
 
 void Assembler::lwbrx(const Reg64& rt, MemoryRef m) {
@@ -431,7 +431,7 @@ void Assembler::nor(const Reg64& ra, const Reg64& rs, const Reg64& rb,
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 124, rc);
 }
 
-void Assembler::or_(const Reg64& ra, const Reg64& rs, const Reg64& rb,
+void Assembler::or(const Reg64& ra, const Reg64& rs, const Reg64& rb,
                     bool rc) {
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 444, rc);
 }
@@ -535,14 +535,17 @@ void Assembler::srad(const Reg64& ra, const Reg64& rs, const Reg64& rb,
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 794, rc);
 }
 
+void Assembler::sradi(const Reg64& ra, const Reg64& rs, uint8_t sh, bool rc) {
+  EmitXSForm(31, rn(rs), rn(ra), sh, 413, rc);
+}
+
 void Assembler::sraw(const Reg64& ra, const Reg64& rs, const Reg64& rb,
                      bool rc) {
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 792, rc);
 }
 
-void Assembler::srawi(const Reg64& ra, const Reg64& rs, const Reg64& rb,
-                      bool rc) {
-  EmitXForm(31, rn(rs), rn(ra), rn(rb), 824, rc);
+void Assembler::srawi(const Reg64& ra, const Reg64& rs, uint8_t sh, bool rc) {
+  EmitXForm(31, rn(rs), rn(ra), rn(sh), 824, rc);
 }
 
 void Assembler::srd(const Reg64& ra, const Reg64& rs, const Reg64& rb,
@@ -564,11 +567,11 @@ void Assembler::stbu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::stbux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 215);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 247);
 }
 
 void Assembler::stbx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 247);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 215);
 }
 
 void Assembler::sth(const Reg64& rt, MemoryRef m) {
@@ -580,11 +583,11 @@ void Assembler::sthu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::sthux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 407);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 439);
 }
 
 void Assembler::sthx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 439);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 407);
 }
 
 void Assembler::stw(const Reg64& rt, MemoryRef m) {
@@ -596,11 +599,11 @@ void Assembler::stwu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::stwux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 151);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 183);
 }
 
 void Assembler::stwx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 183);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 151);
 }
 
 void Assembler::std(const Reg64& rt, MemoryRef m) {
@@ -612,11 +615,11 @@ void Assembler::stdu(const Reg64& rt, MemoryRef m) {
 }
 
 void Assembler::stdux(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 149);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 181);
 }
 
 void Assembler::stdx(const Reg64& rt, MemoryRef m) {
-  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 181);
+  EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 149);
 }
 
 void Assembler::stq(const Reg64& rt, MemoryRef m) {
@@ -666,7 +669,7 @@ void Assembler::twi(uint16_t to, const Reg64& ra, uint16_t imm) {
   EmitDForm(3, rn(to), rn(ra), imm);
 }
 
-void Assembler::xor_(const Reg64& ra, const Reg64& rs, const Reg64& rb,
+void Assembler::xor(const Reg64& ra, const Reg64& rs, const Reg64& rb,
                      bool rc) {
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 316, rc);
 }
@@ -684,12 +687,22 @@ void Assembler::xoris(const Reg64& ra, const Reg64& rs, Immed imm) {
 /* Floating point operations */
 void Assembler::fadd(const RegXMM& frt, const RegXMM& fra, const RegXMM& frb,
                      bool rc) {
-  EmitAForm(63, rn(frt), rn(fra), rn(frb), 0, 21, rc);
+  EmitAForm(63, rn(frt), rn(fra), rn(frb), rn(0), 21, rc);
 }
 
 void Assembler::fsub(const RegXMM& frt, const RegXMM& fra, const RegXMM& frb,
                      bool rc) {
-  EmitAForm(63, rn(frt), rn(fra), rn(frb), 0, 20, rc);
+  EmitAForm(63, rn(frt), rn(fra), rn(frb), rn(0), 20, rc);
+}
+
+void Assembler::fmul(const RegXMM& frt, const RegXMM& fra, const RegXMM& frc,
+                     bool rc) {
+  EmitAForm(63, rn(frt), rn(fra), rn(0), rn(frc), 25, rc);
+}
+
+void Assembler::fdiv(const RegXMM& frt, const RegXMM& fra, const RegXMM& frb,
+                     bool rc) {
+  EmitAForm(63, rn(frt), rn(fra), rn(frb), rn(0), 18, rc);
 }
 
 
@@ -698,21 +711,65 @@ void Assembler::unimplemented(){
   EmitDForm(0, rn(0), rn(0), 0);
 }
 
-void Assembler::li64 (const Reg64& rt, uint64_t imm64) {
-  if ((imm64 >> 16) == 0) {
+// Create prologue when calling
+void Assembler::prologue (const Reg64& rsp,
+                          const Reg64& rfuncln,
+                          const Reg64& rvmfp) {
+  mflr(rfuncln);
+  std(rfuncln, rsp[lr_position_on_callstack]);
+  // Carry the rvmfp to VM stack around on all vasm calls.
+  std(rvmfp, rsp[-min_callstack_size]);
+  addi(rsp, rsp, -min_callstack_size);
+}
+
+// Create epilogue when calling.
+void Assembler::epilogue (const Reg64& rsp, const Reg64& rfuncln) {
+  // pop caller's return address.
+  addi(rsp, rsp, min_callstack_size);
+  ld(rfuncln, rsp[lr_position_on_callstack]);
+  mtlr(rfuncln);
+}
+
+void Assembler::call (const Reg64& rsp,
+                      const Reg64& rfuncln,
+                      const Reg64& rvmfp,
+                      CodeAddress target) {
+
+  prologue(rsp, rfuncln, rvmfp);
+  branchAuto(target, BranchConditions::Always, LinkReg::Save);
+  epilogue(rsp, rfuncln);
+}
+
+void Assembler::li64 (const Reg64& rt, int64_t imm64) {
+  // li64 always emits 5 instructions i.e. 20 bytes of instructions.
+  // Assumes that 0 bytes will be missing in the end.
+  uint8_t missing = 0;
+
+  // for assert purposes
+  DEBUG_ONLY CodeAddress li64StartPos = frontier();
+
+  if (HPHP::jit::deltaFits(imm64, HPHP::sz::word)) {
     // immediate has only low 16 bits set, use simple load immediate
     li(rt, static_cast<int16_t>(imm64));
-    if (imm64 & (1ULL << 15)) {
-      // clear extended sign
+    if (imm64 & (1ULL << 15) && !(imm64 & (1ULL << 16))) {
+      // clear extended sign that should not be set
+      // (32bits number. Sets the 16th bit but not the 17th, it's not negative!)
       clrldi(rt, rt, 48);
+      missing = kLi64InstrLen - 2 * kBytesPerInstr;
+    } else {
+      missing = kLi64InstrLen - 1 * kBytesPerInstr;
     }
-  } else if (imm64 >> 32 == 0) {
+  } else if (HPHP::jit::deltaFits(imm64, HPHP::sz::dword)) {
     // immediate has only low 32 bits set
     lis(rt, static_cast<int16_t>(imm64 >> 16));
     ori(rt, rt, static_cast<int16_t>(imm64 & UINT16_MAX));
-    if (imm64 & (1ULL << 31)) {
+    if (imm64 & (1ULL << 31) && !(imm64 & (1ULL << 32))) {
       // clear extended sign
+      // (64bits number. Sets the 32th bit but not the 33th, it's not negative!)
       clrldi(rt, rt, 32);
+      missing = kLi64InstrLen - 3 * kBytesPerInstr;
+    } else {
+      missing = kLi64InstrLen - 2 * kBytesPerInstr;
     }
   } else if (imm64 >> 48 == 0) {
     // immediate has only low 48 bits set
@@ -723,6 +780,8 @@ void Assembler::li64 (const Reg64& rt, uint64_t imm64) {
     if (imm64 & (1ULL << 47)) {
       // clear extended sign
       clrldi(rt, rt, 16);
+    } else {
+      missing = kLi64InstrLen - 4 * kBytesPerInstr;
     }
   } else {
     // load all 64 bits
@@ -732,15 +791,119 @@ void Assembler::li64 (const Reg64& rt, uint64_t imm64) {
     oris(rt, rt, static_cast<int16_t>((imm64 >> 16) & UINT16_MAX));
     ori(rt, rt, static_cast<int16_t>(imm64 & UINT16_MAX));
   }
+  emitNop(missing);
+
+  // guarantee our math with kLi64InstrLen is working
+  assert(kLi64InstrLen == frontier() - li64StartPos);
 }
 
-void Assembler::li32 (const Reg64& rt, uint32_t imm32) {
-  if ((imm32 >> 16) == 0) {
+int64_t Assembler::getLi64(PPC64Instr* pinstr) {
+  // @pinstr should be pointing to the beginning of the li64 block
+  //
+  // It's easier to know how many 16bits of data the immediate uses
+  // by counting how many nops there are inside of the code
+
+  uint8_t nops = [&]() {
+    // TODO(gut) use Decoder, but for now, do it hardcoded
+    auto isNop = [&](PPC64Instr instr) -> bool {
+      D_form_t d_formater {0, 0, 0, 24 }; // check Assembler::ori
+      return instr == d_formater.instruction;
+    };
+
+    uint8_t nNops = 0;
+    for (PPC64Instr* i = pinstr; i < pinstr + kLi64InstrLen/kBytesPerInstr;
+        i++) {
+      nNops += isNop(*i) ? 1 : 0;
+    }
+    return nNops;
+  }();
+
+  // TODO(gut) use Decoder, but for now, do it hardcoded
+  auto hasClearSignBit = [&](PPC64Instr* instr) -> bool {
+    bool op = (*instr >> 26) == 30;         // check opcode
+    bool xop = ((*instr >> 2) & 0x7) == 0;  // check extended opcode
+    return op && xop;
+  };
+
+  // TODO(gut) use Decoder, but for now, do it hardcoded
+  auto getImm = [&](PPC64Instr* instr) -> uint16_t {
+    return *instr & UINT16_MAX;
+  };
+
+  uint8_t immParts = 0;
+  switch (nops) {
+    case 4:
+      immParts = 1;                                   // 16bits, sign bit = 0
+      break;
+    case 3:
+      if (hasClearSignBit(pinstr + 1)) immParts = 1;  // 16bits, sign bit = 1
+      else immParts = 2;                              // 32bits, sign bit = 0
+      break;
+    case 2:
+      immParts = 2;                                   // 32bits, sign bit = 1
+      break;
+    case 1:
+      immParts = 3;                                   // 48bits, sign bit = 0
+      break;
+    case 0:
+      if (hasClearSignBit(pinstr + 4)) immParts = 3;  // 48bits, sign bit = 1
+      else immParts = 4;                              // 64bits, sign bit = 0
+      break;
+    default:
+      assert(false && "Unexpected number of nops in getLi64");
+      break;
+  }
+
+  // first getImm is suppose to get the sign
+  uint64_t imm64 = static_cast<uint64_t>(
+                        static_cast<int16_t>(getImm(pinstr)));
+  switch (immParts) {
+    case 1:
+      break;
+    case 2:
+      imm64 <<= 16;
+      imm64 |= getImm(pinstr + 1);
+      break;
+    case 3:
+      imm64 <<= 16;
+      imm64 |= getImm(pinstr + 1);
+      imm64 <<= 16;
+      imm64 |= getImm(pinstr + 3);  // jumps the sldi
+      break;
+    case 4:
+      imm64 <<= 16;
+      imm64 |= getImm(pinstr + 1);
+      imm64 <<= 16;
+      imm64 |= getImm(pinstr + 3);  // jumps the sldi
+      imm64 <<= 16;
+      imm64 |= getImm(pinstr + 4);
+      break;
+    default:
+      assert(false && "No immediate detected on getLi64");
+      break;
+  }
+
+  return static_cast<int64_t>(imm64);
+}
+
+Reg64 Assembler::getLi64Reg(PPC64Instr* instr) {
+  // First instruction is always either li or lis, both are D-form
+  D_form_t d_instr;
+  d_instr.instruction = *instr;
+  return Reg64(d_instr.RT);
+}
+
+void Assembler::li32 (const Reg64& rt, int32_t imm32) {
+
+  if (HPHP::jit::deltaFits(imm32, HPHP::sz::word)) {
     // immediate has only low 16 bits set, use simple load immediate
     li(rt, static_cast<int16_t>(imm32));
-    if (imm32 & (1ULL << 15)) {
-      // clear extended sign
+    if (imm32 & (1ULL << 15) && !(imm32 & (1ULL << 16))) {
+      // clear extended sign that should not be set
+      // (32bits number. Sets the 16th bit but not the 17th, it's not negative!)
       clrldi(rt, rt, 48);
+    } else {
+      emitNop(kBytesPerInstr); // emit nop for a balanced li32 with 2 instr
     }
   } else {
     // immediate has 32 bits set
@@ -750,10 +913,11 @@ void Assembler::li32 (const Reg64& rt, uint32_t imm32) {
 }
 
 void Assembler::li32un (const Reg64& rt, uint32_t imm32) {
-  xor_(rt, rt, rt);
+  xor(rt, rt, rt);
   if ((imm32 >> 16) == 0) {
     // immediate has only low 16 bits set, use simple load immediate
     ori(rt, rt, static_cast<int16_t>(imm32));
+    emitNop(kBytesPerInstr); // emit nop for a balanced li32un with 3 instr
   } else {
     // immediate has 32 bits set
     oris(rt, rt, static_cast<int16_t>(imm32 >> 16));
@@ -761,52 +925,26 @@ void Assembler::li32un (const Reg64& rt, uint32_t imm32) {
   }
 }
 
-std::string Decoder::toString(){
-    /*
-     * TODO(rcardoso):
-     * DRAFT:
-     *     Print Instruction
-     *     1- Read instruction name (done)
-     *     2- Get Operand masks
-     *     3- Convert operands to apropriated string and concat with name
-     *     5- Return formated string
-     * CAVEATS:
-     *   If instruction is kInvalid maybe it's data. What to do in this case?
-     */
-    if(decoded_instr_->form() == Form::kInvalid) {
-      return ".long " + ip_;
-    }
-    return decoded_instr_->mnemonic();
-}
+int32_t Assembler::getLi32(PPC64Instr* pinstr) {
+  // @pinstr should be pointing to the beginning of the li32 block
 
-void Decoder::decode(uint32_t* ip) {
-  /*
-   * TODO(rcardoso):
-   * The decoder table is in fact a hash table. We can have k decoder masks
-   * so we can need to test and retrieve the first who match. In worst case
-   * we have k*x where x is a number of access to decoder table
-   * and depends on number of  collisions in best case 1 (no collisions)
-   * or, in worst case, n (if all keys collide).
-   * And we have k*x + y where y is the number of alternate instructions
-   * (next pointer on DecoderInfo). It's '+' y because we retrieve the whole
-   * structure do a linear search if we need. So, in worst case y=n,
-   * then we have k*n + n => O(k*2n). But in pratice, this will not
-   * gonna happens because we have a limited number of execution modes and
-   * we cannot have a 'n' size collision so, we have O(k*c + c) = O(1) at most.
-   * This is not the best algorithm but this will work. Sorry for any math
-   * mistakes.
-   */
+  // TODO(gut) use Decoder, but for now, do it hardcoded
+  auto getImm = [&](PPC64Instr* instr) -> uint32_t {
+    return *instr & UINT16_MAX;
+  };
 
-  // To decode a instruction we extract the decoder fields
-  // masking the instruction and test if it 'hits' the decoder table.
-  for(int i = 0; i < kDecoderListSize; i++) {
-    uint32_t instr_image = *ip;
-    instr_image &= DecoderList[i];
+  // if first instruction is a li, it's using 16bits only
+  bool is_16b_only = [&](PPC64Instr instr) -> bool {
+    return (instr >> 26) == 14;        // check opcode
+  }(*pinstr);
 
-    decoded_instr_ = decoder_table_.GetInstruction(instr_image);
-    if(decoded_instr_->form() != Form::kInvalid)
-       break;
+  uint32_t imm32 = 0;
+  if (is_16b_only) {
+    imm32 |= static_cast<int16_t>(getImm(pinstr));
+  } else {
+    imm32 |= getImm(pinstr)     << 16;  // lis
+    imm32 |= getImm(pinstr + 1);        // ori
   }
+  return static_cast<int32_t>(imm32);
 }
-
 } // namespace ppc64_asm

@@ -28,15 +28,22 @@
 #include "hphp/ppc64-asm/isa-ppc64.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/immed.h"
-#include "hphp/util/safe-cast.h"
 
 namespace ppc64_asm {
 
-using HPHP::jit::Reg64;
-using HPHP::jit::RegXMM;
-using HPHP::jit::MemoryRef;
-using HPHP::jit::Immed;
-using HPHP::CodeAddress;
+/* using override */ using HPHP::jit::Reg64;
+/* using override */ using HPHP::jit::RegXMM;
+/* using override */ using HPHP::jit::RegSF;
+/* using override */ using HPHP::jit::MemoryRef;
+/* using override */ using HPHP::jit::Immed;
+/* using override */ using HPHP::CodeAddress;
+/* using override */ using HPHP::jit::ConditionCode;
+
+/* Used to  define a minimal callstack on call/ret vasm */
+// Must be the same value of AROFF(_dummyB).
+constexpr int min_callstack_size       = 32;
+// Must be the same value of AROFF(m_savedRip).
+constexpr int lr_position_on_callstack = 16;
 
 #define BRANCHES(cr) \
   CR##cr##_LessThan,         \
@@ -82,10 +89,10 @@ class BranchParams {
     };
 
 #define CR_CONDITIONS(cr) \
-      CR##cr##_LessThan          = 0x80000000ULL >> (32 - (0 + (cr * 4))), \
-      CR##cr##_GreaterThan       = 0x80000000ULL >> (32 - (1 + (cr * 4))), \
-      CR##cr##_Equal             = 0x80000000ULL >> (32 - (2 + (cr * 4))), \
-      CR##cr##_SummaryOverflow   = 0x80000000ULL >> (32 - (3 + (cr * 4)))
+      CR##cr##_LessThan          = (0 + (cr * 4)), \
+      CR##cr##_GreaterThan       = (1 + (cr * 4)), \
+      CR##cr##_Equal             = (2 + (cr * 4)), \
+      CR##cr##_SummaryOverflow   = (3 + (cr * 4))
 
     enum class BI {
       CR_CONDITIONS(0),
@@ -150,11 +157,11 @@ class BranchParams {
 
     BranchParams(BranchConditions bc) { defineBoBi(bc); }
 
-    BranchParams(HPHP::jit::ConditionCode cc) {
+    BranchParams(ConditionCode cc) {
       defineBoBi(convertCC(cc));
     }
 
-    static BranchConditions convertCC(HPHP::jit::ConditionCode cc) {
+    static BranchConditions convertCC(ConditionCode cc) {
       BranchConditions ret = BranchConditions::Always;
 
       switch (cc) {
@@ -203,7 +210,54 @@ class BranchParams {
       return ret;
     }
 
+    /*
+     * Get the BranchParams from an emitted conditional branch
+     */
+    BranchParams(PPC64Instr instr) {
+      // first, guarantee that is a conditional branch
+      if (((instr >> 26) == 16) || ((instr >> 26) == 19)) {
+        // bc, bclr, bcctr, bctar
+        m_bo = (BranchParams::BO)((instr >> 21) & 0x1F);
+        m_bi = (BranchParams::BI)((instr >> 16) & 0x1F);
+      } else {
+        assert(false && "Not a valid conditional branch instruction");
+        // also possible: defineBoBi(BranchConditions::Always);
+      }
+    }
+
     ~BranchParams() {}
+
+    /*
+     * Converts to ConditionCode upon casting to it
+     */
+    /* implicit */ operator ConditionCode() {
+      ConditionCode ret = HPHP::jit::CC_None;
+
+      switch (m_bi) {
+        case BI::CR0_LessThan:
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_B;  // CC_S, CC_L
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_AE; // CC_NL
+          break;
+        case BI::CR0_GreaterThan:
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_A;  // CC_NS, CC_G
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_BE; // CC_NG
+          break;
+        case BI::CR0_Equal:
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_E;
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_NE;
+          break;
+        case BI::CR0_SummaryOverflow:
+          if (m_bo == BO::CRSet)          ret = HPHP::jit::CC_O;
+          else if (m_bo == BO::CRNotSet)  ret = HPHP::jit::CC_NO;
+          break;
+        default:
+          assert(false && "Not a valid conditional branch parameter");
+          break;
+      }
+
+      return ret;
+    }
+
 
     uint8_t bo() { return (uint8_t)m_bo; }
     uint8_t bi() { return (uint8_t)m_bi; }
@@ -296,8 +350,10 @@ namespace reg {
   constexpr RegXMM v27(27);
   constexpr RegXMM v28(28);
   constexpr RegXMM v29(29);
+  constexpr RegXMM v30(30);
+  constexpr RegXMM v31(31);
 
-#define RNAME(x) if (r == x) return "%"#x
+#define RNAME(x) if (r == x) return #x
 
   inline const char* regname(Reg64 r) {
     RNAME(r0);  RNAME(r1);  RNAME(r2);  RNAME(r3);  RNAME(r4);  RNAME(r5);
@@ -319,6 +375,9 @@ namespace reg {
     RNAME(v28); RNAME(v29);
     return nullptr;
   }
+ inline const char* regname(RegSF) {
+    return "cr0";
+ }
 #undef RNAME
 }
 
@@ -409,6 +468,11 @@ struct Assembler {
     PPR32    = 898
   };
 
+  // How many bytes a PPC64 instruction length is
+  static const uint8_t kBytesPerInstr = sizeof(PPC64Instr);
+
+  // Total ammount of bytes that a li64 function emits
+  static const uint8_t kLi64InstrLen = 5 * kBytesPerInstr;
 
   // TODO(rcardoso): Must create a macro for these similar instructions.
   // This will make code more clean.
@@ -447,7 +511,6 @@ struct Assembler {
   // #undef LOAD_STORE_OP
   // #undef LOAD_STORE_OP_BYTE_REVERSED
 
-
   //PPC64 Instructions
   void add(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
   void addc(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
@@ -462,19 +525,19 @@ struct Assembler {
   void addo(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
   void addze(const Reg64& rt, const Reg64& ra, bool rc = 0);
   void addzeo(const Reg64& rt, const Reg64& ra, bool rc = 0);
-  void and_(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
+  void and(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void andc(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void andi(const Reg64& ra, const Reg64& rs, Immed imm);
   void andis(const Reg64& ra, const Reg64& rs, Immed imm);
-  void b(int32_t target_addr);
+  void b(int32_t offset);
   void ba(uint32_t target_addr);
-  void bl(int32_t target_addr);
+  void bl(int32_t offset);
   void bla(uint32_t target_addr);
-  void bc(uint8_t bo, uint8_t bi, int16_t target_addr);
+  void bc(uint8_t bo, uint8_t bi, int16_t offset);
   void bca(uint8_t bo, uint8_t bi, uint16_t target_addr);
   void bcctr(uint8_t bo, uint8_t bi, uint16_t bh);
   void bcctrl(uint8_t bo, uint8_t bi, uint16_t bh);
-  void bcl(uint8_t bo, uint8_t bi, int16_t target_addr);
+  void bcl(uint8_t bo, uint8_t bi, int16_t offset);
   void bcla(uint8_t bo, uint8_t bi, uint16_t target_addr);
   void bclr(uint8_t bo, uint8_t bi, uint16_t bh);
   void bclrl(uint8_t bo, uint8_t bi, uint16_t bh);
@@ -520,13 +583,17 @@ struct Assembler {
                                                                   bool rc = 0);
   void fsub(const RegXMM& frt, const RegXMM& fra, const RegXMM& frb,
                                                                   bool rc = 0);
+  void fmul(const RegXMM& frt, const RegXMM& fra, const RegXMM& frc,
+                                                                  bool rc = 0);
+  void fdiv(const RegXMM& frt, const RegXMM& fra, const RegXMM& frb,
+                                                                  bool rc = 0);
   void lfs(const RegXMM& frt, MemoryRef m) {
     EmitDForm(48, rn(frt), rn(m.r.base), m.r.disp);
   }
-  void lxvw4x(const RegXMM& xt, const Reg64& ra, const Reg64&rb) {
-    EmitXX1Form(31, rn(xt), rn(ra), rn(rb), 780, 0);
+  void lxvw4x(const RegXMM& Xt, const MemoryRef& m) {
+    EmitXX1Form(31, rn(Xt), rn(m.r.base), rn(m.r.index), 780, 0);
   }
-  void isel(const Reg64& rt, const Reg64& ra, const Reg64& rb, uint16_t bc);
+  void isel(const Reg64& rt, const Reg64& ra, const Reg64& rb, uint8_t bc);
   void lbz(const Reg64& rt, MemoryRef m);
   void lbzu(const Reg64& rt, MemoryRef m);
   void lbzux(const Reg64& rt, MemoryRef m);
@@ -573,7 +640,7 @@ struct Assembler {
   void neg(const Reg64& rt, const Reg64& ra, bool rc = 0);
   void nego(const Reg64& rt, const Reg64& ra, bool rc = 0);
   void nor(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
-  void or_(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
+  void or(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void orc(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void ori(const Reg64& ra, const Reg64& rs, Immed imm);
   void oris(const Reg64& ra, const Reg64& rs, Immed imm);
@@ -605,7 +672,7 @@ struct Assembler {
   void slw(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void srad(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void sraw(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
-  void srawi(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
+  void srawi(const Reg64& ra, const Reg64& rs, uint8_t sh, bool rc = 0);
   void srd(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void srw(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void stb(const Reg64& rs, MemoryRef m);
@@ -634,8 +701,8 @@ struct Assembler {
   void stmw(const Reg64& rs, MemoryRef m);
   void stswi(const Reg64& rs, MemoryRef m);
   void stswx(const Reg64& rs, MemoryRef m);
-  void stxvw4x(const RegXMM& xs, const Reg64& ra, const Reg64&rb) {
-    EmitXX1Form(31, rn(xs), rn(ra), rn(rb), 972, 0);
+  void stxvw4x(const RegXMM& xs, const MemoryRef& m) {
+    EmitXX1Form(31, rn(xs), rn(m.r.base), rn(m.r.index), 972, 0);
   }
   void subf(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
   void subfo(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
@@ -652,7 +719,7 @@ struct Assembler {
   void tdi(uint16_t to, const Reg64& ra, uint16_t imm);
   void tw(uint16_t to, const Reg64& ra, const Reg64& rb);
   void twi(uint16_t to, const Reg64& ra, uint16_t imm);
-  void xor_(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
+  void xor(const Reg64& ra, const Reg64& rs, const Reg64& rb, bool rc = 0);
   void xori(const Reg64& ra, const Reg64& rs, Immed imm);
   void xoris(const Reg64& ra, const Reg64& rs, Immed imm);
   void xscvdpuxds(const RegXMM& xt, const RegXMM& xb) {
@@ -697,7 +764,9 @@ struct Assembler {
   void dci()            { not_implemented(); }
   void dcmpo()          { not_implemented(); }
   void dcmpoq()         { not_implemented(); }
-  void dcmpu()          { not_implemented(); }
+  void dcmpu(const RegXMM& fra, const RegXMM& frb) {
+    EmitXForm(59, rn(0), rn(fra), rn(frb), 642);
+  }
   void dcmpuq()         { not_implemented(); }
   void dcread()         { not_implemented(); }
   void dctdp()          { not_implemented(); }
@@ -999,16 +1068,26 @@ struct Assembler {
   void evsubfw()        { not_implemented(); }
   void evsubifw()       { not_implemented(); }
   void evxor()          { not_implemented(); }
-  void fabs()           { not_implemented(); }
+  void fabs(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
+    EmitXForm(63, rn(frt), rn(0), rn(frb), 364, rc);
+  }
   void fadds()          { not_implemented(); }
   void fcfid()          { not_implemented(); }
-  void fcfids()         { not_implemented(); }
+  void fcfids(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
+    EmitXForm(59, rn(frt), rn(0), rn(frb), 846, rc);
+  }
   void fcfidu()         { not_implemented(); }
   void fcfidus()        { not_implemented(); }
-  void fcmpo()          { not_implemented(); }
-  void fcmpu()          { not_implemented(); }
+  void fcmpo(const RegSF& sf, const RegXMM& fra, const RegXMM& frb) {
+    EmitXForm(63, rn(int(sf) << 2), rn(fra), rn(frb), 32);
+  }
+  void fcmpu(const RegSF& sf, const RegXMM& fra, const RegXMM& frb) {
+    EmitXForm(63, rn(int(sf) << 2), rn(fra), rn(frb), 0);
+  }
   void fcpsgn()         { not_implemented(); }
-  void fctid()          { not_implemented(); }
+  void fctid(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
+    EmitXForm(63, rn(frt), rn(0), rn(frb), 814, rc);
+  }
   void fctidu()         { not_implemented(); }
   void fctiduz()        { not_implemented(); }
   void fctidz()         { not_implemented(); }
@@ -1020,7 +1099,9 @@ struct Assembler {
   void fdivs()          { not_implemented(); }
   void fmadd()          { not_implemented(); }
   void fmadds()         { not_implemented(); }
-  void fmr()            { not_implemented(); }
+  void fmr(const RegXMM& frt, const RegXMM& frb, bool rc = 0) {
+    EmitXForm(63, rn(frt), rn(0), rn(frb), 72, rc);
+  }
   void fmrgew()         { not_implemented(); }
   void fmrgow()         { not_implemented(); }
   void fmsub()          { not_implemented(); }
@@ -1066,14 +1147,18 @@ struct Assembler {
   void ldcix()          { not_implemented(); }
   void lddx()           { not_implemented(); }
   void ldepx()          { not_implemented(); }
-  void lfd()            { not_implemented(); }
+  void lfd(const RegXMM& frt, MemoryRef m) {
+    EmitDForm(50, rn(frt), rn(m.r.base), m.r.disp);
+  }
   void lfddx()          { not_implemented(); }
   void lfdepx()         { not_implemented(); }
   void lfdp()           { not_implemented(); }
   void lfdpx()          { not_implemented(); }
   void lfdu()           { not_implemented(); }
   void lfdux()          { not_implemented(); }
-  void lfdx()           { not_implemented(); }
+  void lfdx(const RegXMM& rt, MemoryRef m) {
+    EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 599);
+  }
   void lfiwax()         { not_implemented(); }
   void lfiwzx()         { not_implemented(); }
   void lfsu()           { not_implemented(); }
@@ -1132,7 +1217,9 @@ struct Assembler {
   void mcrfs()          { not_implemented(); }
   void mcrxr()          { not_implemented(); }
   void mfbhrbe()        { not_implemented(); }
-  void mfcr()           { not_implemented(); }
+  void mfcr(const Reg64& rt) {
+    EmitXFXForm(31, rn(rt), static_cast<SpecialReg>(0), 19);
+  }
   void mfdcr()          { not_implemented(); }
   void mfdcrux ()       { not_implemented(); }
   void mfdcrx()         { not_implemented(); }
@@ -1142,7 +1229,9 @@ struct Assembler {
   void mfsr()           { not_implemented(); }
   void mfsrin()         { not_implemented(); }
   void mftbmfvscr()     { not_implemented(); }
-  void mfvsrd()         { not_implemented(); }
+  void mfvsrd(const Reg64& ra, const RegXMM& xs) {
+   EmitXX1Form(31, rn(xs), rn(ra), rn(0) /* reserved */, 51, 0);
+  }
   void mfvsrwz()        { not_implemented(); }
   void msgclr()         { not_implemented(); }
   void msgclrp()        { not_implemented(); }
@@ -1159,7 +1248,9 @@ struct Assembler {
   void mtsr()           { not_implemented(); }
   void mtsrin()         { not_implemented(); }
   void mtvscr()         { not_implemented(); }
-  void mtvsrd()         { not_implemented(); }
+  void mtvsrd(const RegXMM& xt, const Reg64& ra) {
+   EmitXX1Form(31, rn(xt), rn(ra), rn(0) /* reserved */, 179, 0);
+  }
   void mtvsrwa()        { not_implemented(); }
   void mtvsrwz()        { not_implemented(); }
   void mulchw()         { not_implemented(); }
@@ -1197,7 +1288,7 @@ struct Assembler {
   void slbmfev()        { not_implemented(); }
   void slbmte()         { not_implemented(); }
   void sleep()          { not_implemented(); }
-  void sradi()          { not_implemented(); }
+  void sradi(const Reg64& ra, const Reg64& rs, uint8_t sh, bool rc = 0);
   void stbcix()         { not_implemented(); }
   void stbcx()          { not_implemented(); }
   void stbdx()          { not_implemented(); }
@@ -1216,7 +1307,7 @@ struct Assembler {
   void stfdu()          { not_implemented(); }
   void stfdux()         { not_implemented(); }
   void stfdx(const RegXMM& rt, MemoryRef m) {
-    EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 726);
+    EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 727);
   }
   void stfiwx()         { not_implemented(); }
   void stfsu()          { not_implemented(); }
@@ -1476,12 +1567,16 @@ struct Assembler {
   void xscpsgndp()      { not_implemented(); }
   void xscvdpsp()       { not_implemented(); }
   void xscvdpspn()      { not_implemented(); }
-  void xscvdpsxds()     { not_implemented(); }
+  void xscvdpsxds(const RegXMM& xt, const RegXMM& xb) {
+   EmitXX2Form(60, rn(xt), 0, rn(xb), 344, 0, 0);
+  }
   void xscvdpsxws()     { not_implemented(); }
   void xscvdpuxws()     { not_implemented(); }
   void xscvspdp()       { not_implemented(); }
   void xscvspdpn()      { not_implemented(); }
-  void xscvsxddp()      { not_implemented(); }
+  void xscvsxddp(const RegXMM& xt, const RegXMM& xb) {
+   EmitXX2Form(60, rn(xt), 0, rn(xb), 376, 0, 0);
+  }
   void xscvsxdsp()      { not_implemented(); }
   void xscvuxddp()      { not_implemented(); }
   void xscvuxdsp()      { not_implemented(); }
@@ -1509,7 +1604,9 @@ struct Assembler {
   void xsnmsubasp()     { not_implemented(); }
   void xsnmsubmdp()     { not_implemented(); }
   void xsnmsubmsp()     { not_implemented(); }
-  void xsrdpi()         { not_implemented(); }
+  void xsrdpi(const RegXMM& xt, const RegXMM& xb) {
+   EmitXX2Form(60, rn(xt), 0, rn(xb), 73, 0, 0);
+  }
   void xsrdpic()        { not_implemented(); }
   void xsrdpim()        { not_implemented(); }
   void xsrdpip()        { not_implemented(); }
@@ -1519,7 +1616,9 @@ struct Assembler {
   void xsrsp()          { not_implemented(); }
   void xsrsqrtedp()     { not_implemented(); }
   void xsrsqrtesp()     { not_implemented(); }
-  void xssqrtdp()       { not_implemented(); }
+  void xssqrtdp(const RegXMM& xt, const RegXMM& xb) {
+   EmitXX2Form(60, rn(xt), 0, rn(xb), 75, 0, 0);
+  }
   void xssqrtsp()       { not_implemented(); }
   void xssubdp()        { not_implemented(); }
   void xssubsp()        { not_implemented(); }
@@ -1543,8 +1642,12 @@ struct Assembler {
   void xvcvdpuxds()     { not_implemented(); }
   void xvcvdpuxws()     { not_implemented(); }
   void xvcvspdp()       { not_implemented(); }
-  void xvcvspsxds()     { not_implemented(); }
-  void xvcvspsxws()     { not_implemented(); }
+  void xvcvspsxds(const RegXMM& xt, const RegXMM& xb) {
+   EmitXX2Form(60, rn(xt), 0, rn(xb), 408, 0, 0);
+  }
+  void xvcvspsxws(const RegXMM& xt, const RegXMM& xb) {
+   EmitXX2Form(60, rn(xt), 0, rn(xb), 152, 0, 0);
+  }
   void xvcvspuxds()     { not_implemented(); }
   void xvcvspuxws()     { not_implemented(); }
   void xvcvsxddp()      { not_implemented(); }
@@ -1610,10 +1713,17 @@ struct Assembler {
   void xxlnor()         { not_implemented(); }
   void xxlor()          { not_implemented(); }
   void xxlorc()         { not_implemented(); }
-  void xxlxor()         { not_implemented(); }
+  void xxlxor(const RegXMM& xt, const RegXMM& xa, const RegXMM& xb) {
+   EmitXX3Form(60, rn(xt), rn(xa), rn(xb), 154, 0, 0, 0);
+  }
   void xxmrghw()        { not_implemented(); }
   void xxmrglw()        { not_implemented(); }
-  void xxpermdi()       { not_implemented(); }
+  void xxpermdi(const RegXMM& tx, const RegXMM& xa, const RegXMM& xb) {
+   EmitXX3Form(60, rn(tx), rn(xa), rn(xb),  10, 0, 0, 0);
+   // Note that I decided to hardcode DM bit as 0
+   // (xo field = 10), because it's sufficent for now.
+   // However, I might not be the case in the future
+  }
   void xxsel()          { not_implemented(); }
   void xxsldwi()        { not_implemented(); }
   void xxspltw()        { not_implemented(); }
@@ -1647,12 +1757,19 @@ struct Assembler {
     addi(rt, Reg64(0), imm);
   }
   void la()             { not_implemented(); }  //Extended addi Rx,Ry,disp
-  void subi()           { not_implemented(); }  //Extended addi Rx,Ry,-value
+  void subi(const Reg64& rt, const Reg64& ra, Immed imm) {
+    addi(rt, ra, -imm);
+  }
   void lis(const Reg64& rt, Immed imm) {
     addis(rt, Reg64(0), imm);
   }
   void subis()          { not_implemented(); }  //Extended addis Rx,Ry,-value
-  void sub()            { not_implemented(); }  //Extended subf Rx,Rz,Ry
+  void sub(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0) {
+    subf(rt, rb, ra, rc);
+  }
+  void subo(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0) {
+    subfo(rt, rb, ra, rc);
+  }
   void subic()          { not_implemented(); }  //Extended addic Rx,Ry,-value
   void subc()           { not_implemented(); }  //Extended subfc Rx,Rz,Ry
   void cmpdi(const Reg64& ra, Immed imm) {
@@ -1705,32 +1822,35 @@ struct Assembler {
   }
   void xnop()           { not_implemented(); }  //Extended
   void mr(const Reg64& rs, const Reg64& ra) {
-    or_(rs, ra, ra);
+    or(rs, ra, ra);
   }
-  void not_()           { not_implemented(); }  //Extended
-  void srwi(const Reg64& ra, const Reg64& rs, int8_t sh) {
-    rlwinm(ra, rs, 32-sh, sh, 31);
+  void not()            { not_implemented(); }  //Extended
+  void srwi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
+    rlwinm(ra, rs, 32-sh, sh, 31, rc);
   }
-  void slwi(const Reg64& ra, const Reg64& rs, int8_t sh) {
+  void slwi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
     /* non-existing mnemonic on ISA, but it's pratical to have it here */
-    rlwinm(ra, rs, sh, 0, 31-sh);
+    rlwinm(ra, rs, sh, 0, 31-sh, rc);
   }
   void clrwi()          { not_implemented(); }  //Extended
   void extwi()          { not_implemented(); }  //Extended
   void rotlw()          { not_implemented(); }  //Extended
   void inslwi()         { not_implemented(); }  //Extended
   void extrdi()         { not_implemented(); }  //Extended
-  void srdi(const Reg64& ra, const Reg64& rs, int8_t sh) {
-    rldicl(ra, rs, 64-sh, sh);
+  void srdi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
+    rldicl(ra, rs, 64-sh, sh, rc);
   }
-  void clrldi(const Reg64& ra, const Reg64& rs, int8_t sh) {
-    rldicl(ra, rs, 0, sh);
+  void clrldi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
+    rldicl(ra, rs, 0, sh, rc);
   }
   void extldi()         { not_implemented(); }  //Extended
-  void sldi(const Reg64& ra, const Reg64& rs, int8_t sh) {
-    rldicr(ra, rs, sh, 63-sh);
+  void sldi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
+    rldicr(ra, rs, sh, 63-sh, rc);
   }
   void clrrdi()         { not_implemented(); }  //Extended
+  void clrrwi(const Reg64& ra, const Reg64& rs, int8_t sh, bool rc = 0) {
+    rlwinm(ra, rs, 0, 0, 31-sh, rc);
+  }
   void clrlsldi()       { not_implemented(); }  //Extended
   void rotld()          { not_implemented(); }  //Extended
   void insrdi()         { not_implemented(); }  //Extended
@@ -1755,7 +1875,7 @@ struct Assembler {
   void bla(Label& l);
 
   void bc(Label& l, BranchConditions bc);
-  void bc(Label& l, HPHP::jit::ConditionCode cc);
+  void bc(Label& l, ConditionCode cc);
   void bca(Label& l, BranchConditions bc);
   void bcl(Label& l, BranchConditions bc);
   void bcla(Label& l, BranchConditions bc);
@@ -1769,23 +1889,68 @@ struct Assembler {
                   LinkReg lr = LinkReg::DoNotTouch);
 
   void branchAuto(CodeAddress c,
-                  HPHP::jit::ConditionCode cc,
+                  ConditionCode cc,
                   LinkReg lr = LinkReg::DoNotTouch);
 
   // ConditionCode variants
-  void bc(HPHP::jit::ConditionCode cc, int16_t address) {
+  void bc(ConditionCode cc, int16_t address) {
     BranchParams bp(cc);
     bc(bp.bo(), bp.bi(), address);
   }
 
   // Auxiliary for loading a complete 64bits immediate into a register
-  void li64 (const Reg64& rt, uint64_t imm64);
+  void li64 (const Reg64& rt, int64_t imm64);
+
+  // Create prologue when calling.
+  void prologue (const Reg64& rsp, const Reg64& rfuncln, const Reg64& rvmfp);
+
+  // Create epilogue when calling.
+  void epilogue (const Reg64& rsp, const Reg64& rfuncln);
+
+  void call (const Reg64& rsp,
+             const Reg64& rfuncln,
+             const Reg64& rvmfp,
+             CodeAddress target);
+
+  // checks if the @inst is pointing to a call
+  static inline bool isCall(HPHP::jit::TCA inst) {
+    // a call always begin with a mflr and it's rarely used elsewhere: good tag
+    return ((((inst[3] >> 2) & 0x3F) == 31) &&                          // OPCD
+      ((((inst[1] & 0x3) << 7) | ((inst[0] >> 1) & 0xFF)) == 339));     // XO
+  }
+
+  // Retrieve the target defined by li64 instruction
+  static int64_t getLi64(PPC64Instr* pinstr);
+  static int64_t getLi64(CodeAddress pinstr) {
+    return getLi64(reinterpret_cast<PPC64Instr*>(pinstr));
+  }
+
+  // Retrieve the register used by li64 instruction
+  static Reg64 getLi64Reg(PPC64Instr* instr);
+  static Reg64 getLi64Reg(CodeAddress instr) {
+    return getLi64Reg(reinterpret_cast<PPC64Instr*>(instr));
+  }
 
   // Auxiliary for loading a 32bits immediate into a register
-  void li32 (const Reg64& rt, uint32_t imm32);
+  void li32 (const Reg64& rt, int32_t imm32);
 
   // Auxiliary for loading a 32bits unsigned immediate into a register
   void li32un (const Reg64& rt, uint32_t imm32);
+
+  // Retrieve the target defined by li32 instruction
+  static int32_t getLi32(PPC64Instr* pinstr);
+  static int32_t getLi32(CodeAddress pinstr) {
+    return getLi32(reinterpret_cast<PPC64Instr*>(pinstr));
+  }
+
+  // Retrieve the register used by li32 instruction
+  static Reg64 getLi32Reg(PPC64Instr* instr) {
+    // it also starts with li or lis, so the same as getLi64
+    return getLi64Reg(instr);
+  }
+  static Reg64 getLi32Reg(CodeAddress instr) {
+    return getLi32Reg(reinterpret_cast<PPC64Instr*>(instr));
+  }
 
   //Can be used to generate or force a unimplemented opcode exception
   void unimplemented();
@@ -1799,29 +1964,29 @@ struct Assembler {
     int16_t* BD = (int16_t*)(jmp);    // target address location in instruction
 
     // Keep AA and LK values
-    *BD = HPHP::safe_cast<int16_t>(diff & 0xFFFC) | ((*BD) & 0x3);
+    *BD = static_cast<int16_t>(diff & 0xFFFC) | ((*BD) & 0x3);
   }
 
   static void patchBctr(CodeAddress jmp, CodeAddress dest) {
     // Check Label::branchAuto for details
+    HPHP::CodeBlock cb2;
 
-    // Opcode located at the 6 most significant bits
-    assert(((jmp[3] >> 2) & 0x3F) == 19);  // XL-Form
-    ssize_t diff = dest - jmp;
+#ifndef NDEBUG  // avoid "unused variable 'bctr_addr'" warning on release build
+    // skips the li64 and a mtctr instruction
+    CodeAddress bctr_addr = jmp + kLi64InstrLen + 1 * kBytesPerInstr;
+    // check for instruction opcode
+    assert(((bctr_addr[3] >> 2) & 0x3F) == 19);
+#endif
 
-    int16_t *imm = (int16_t*)(jmp);     // immediate field of addi
-    *imm = HPHP::safe_cast<int16_t>((diff & (ssize_t(UINT16_MAX) << 32)) >> 32);
-
-    imm += 2*4;                         // skip sldi instruction
-    *imm = HPHP::safe_cast<int16_t>((diff & (ssize_t(UINT16_MAX) << 16)) >> 16);
-
-    imm += 4;                           // next instruction
-    *imm = HPHP::safe_cast<int16_t>(diff & ssize_t(UINT16_MAX));
+    // Initialize code block cb2 pointing to li64
+    cb2.init(jmp, kLi64InstrLen, "patched bctr");
+    Assembler b{ cb2 };
+    b.li64(reg::r12, ssize_t(dest));
   }
 
-  void emitNop(int n) {
-    assert((n % 4 == 0) && "This arch supports only 4 bytes alignment");
-    for (; n > 0; n -= 4)
+  void emitNop(int nbytes) {
+    assert((nbytes % 4 == 0) && "This arch supports only 4 bytes alignment");
+    for (; nbytes > 0; nbytes -= 4)
       nop();
   }
 
@@ -1845,6 +2010,11 @@ protected:
                   const uint16_t xop,
                   const bool rc = 0) {
 
+    // GP Register cannot be greater than 31
+    assert(static_cast<uint32_t>(rb) < 32);
+    assert(static_cast<uint32_t>(ra) < 32);
+    assert(static_cast<uint32_t>(rt) < 32);
+
     XO_form_t xo_formater {
                             rc,
                             xop,
@@ -1862,6 +2032,10 @@ protected:
                  const RegNumber rt,
                  const RegNumber ra,
                  const int16_t imm) {
+
+    // GP Register cannot be greater than 31
+    assert(static_cast<uint32_t>(rt) < 32);
+    assert(static_cast<uint32_t>(ra) < 32);
 
     D_form_t d_formater {
                           static_cast<uint32_t>(imm),
@@ -1924,6 +2098,11 @@ protected:
                   const uint16_t xop,
                   const bool rc = 0){
 
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(rb) < 32);
+     assert(static_cast<uint32_t>(ra) < 32);
+     assert(static_cast<uint32_t>(rt) < 32);
+
       X_form_t x_formater {
                             rc,
                             xop,
@@ -1942,6 +2121,10 @@ protected:
                    const uint16_t imm,
                    const uint16_t xop) {
 
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(ra) < 32);
+     assert(static_cast<uint32_t>(rt) < 32);
+
       DS_form_t ds_formater {
                              xop,
                              static_cast<uint32_t>(imm) >> 2,
@@ -1957,6 +2140,9 @@ protected:
                    const RegNumber rtp,
                    const RegNumber ra,
                    uint16_t imm){
+
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(ra) < 32);
 
       DQ_form_t dq_formater {
                              0x0, //Reserved
@@ -1993,14 +2179,20 @@ protected:
                   const RegNumber rt,
                   const RegNumber ra,
                   const RegNumber rb,
-                  const uint16_t bc,
+                  const RegNumber bc,
                   const uint16_t xop,
                   const bool rc = 0) {
+
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(rt) < 32);
+     assert(static_cast<uint32_t>(ra) < 32);
+     assert(static_cast<uint32_t>(rb) < 32);
+     assert(static_cast<uint32_t>(bc) < 32);
 
       A_form_t a_formater {
                            rc,
                            xop,
-                           bc,
+                           static_cast<uint32_t>(bc),
                            static_cast<uint32_t>(rb),
                            static_cast<uint32_t>(ra),
                            static_cast<uint32_t>(rt),
@@ -2017,6 +2209,11 @@ protected:
                   const uint8_t mb,
                   const uint8_t me,
                   const bool rc = 0) {
+
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(rb) < 32);
+     assert(static_cast<uint32_t>(ra) < 32);
+     assert(static_cast<uint32_t>(rb) < 32);
 
       M_form_t m_formater {
                            rc,
@@ -2038,6 +2235,10 @@ protected:
                    const uint8_t mb,
                    const uint8_t xop,
                    const bool rc = 0) {
+
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(ra) < 32);
+     assert(static_cast<uint32_t>(rs) < 32);
 
       MD_form_t md_formater {
         rc,
@@ -2061,6 +2262,11 @@ protected:
                     const uint8_t xop,
                     const bool rc = 0) {
 
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(rb) < 32);
+     assert(static_cast<uint32_t>(ra) < 32);
+     assert(static_cast<uint32_t>(rs) < 32);
+
       MDS_form_t mds_formater {
                                rc,
                                xop,
@@ -2079,6 +2285,10 @@ protected:
                    const SpecialReg spr,
                    const uint16_t xo,
                    const uint8_t rsv = 0) {
+
+    // GP Register cannot be greater than 31
+    assert(static_cast<uint32_t>(rs) < 32);
+
     XFX_form_t xfx_formater {
       rsv,
       xo,
@@ -2087,6 +2297,7 @@ protected:
       static_cast<uint32_t>(rs),
       op
     };
+
     dword(xfx_formater.instruction);
   }
 
@@ -2136,7 +2347,13 @@ protected:
                    const RegNumber rb,
                    const uint16_t xo,
                    const bool tx) {
-    XX3_form_t xx1_formater {
+
+    // GP Register cannot be greater than 31
+    assert(static_cast<uint32_t>(s) < 32);
+    assert(static_cast<uint32_t>(ra) < 32);
+    assert(static_cast<uint32_t>(rb) < 32);
+
+    XX1_form_t xx1_formater {
       tx,
       xo,
       static_cast<uint32_t>(rb),
@@ -2144,15 +2361,58 @@ protected:
       static_cast<uint32_t>(s),
       op
     };
+
     dword(xx1_formater.instruction);
+  }
+
+  void EmitVXForm(const uint8_t op,
+                  const RegNumber rt,
+                  const RegNumber ra,
+                  const RegNumber rb,
+                  const uint16_t xo) {
+
+    assert(static_cast<uint32_t>(rt) < 32);
+    assert(static_cast<uint32_t>(ra) < 32);
+    assert(static_cast<uint32_t>(rb) < 32);
+
+    VX_form_t vx_formater {
+      xo,
+      static_cast<uint32_t>(rb),
+      static_cast<uint32_t>(ra),
+      static_cast<uint32_t>(rt),
+      op
+    };
+
+    dword(vx_formater.instruction);
   }
   //TODO(rcardoso): Unimplemented instruction formaters
   void EmitXFLForm()  { not_implemented(); }
   void EmitXX4Form()  { not_implemented(); }
-  void EmitXSForm()   { not_implemented(); }
+  void EmitXSForm(const uint8_t op,
+                  const RegNumber rt,
+                  const RegNumber ra,
+                  const uint8_t sh,
+                  const uint16_t xop,
+                  const bool rc = 0){
+
+     // GP Register cannot be greater than 31
+     assert(static_cast<uint32_t>(rt) < 32);
+     assert(static_cast<uint32_t>(ra) < 32);
+
+      XS_form_t xs_formater {
+                            rc,
+                            static_cast<uint32_t>(sh >> 5),
+                            xop,
+                            static_cast<uint32_t>(sh & 0x1F),
+                            static_cast<uint32_t>(ra),
+                            static_cast<uint32_t>(rt),
+                            op
+                          };
+
+      dword(xs_formater.instruction);
+   }
   void EmitVAForm()   { not_implemented(); }
   void EmitVCForm()   { not_implemented(); }
-  void EmitVXForm()   { not_implemented(); }
   void EmitZ23Form()  { not_implemented(); }
   void EmitEVXForm()  { not_implemented(); }
   void EmitEVSForm()  { not_implemented(); }
@@ -2182,6 +2442,9 @@ private:
     return RegNumber(int(r));
   }
   RegNumber rn(RegXMM r) {
+    return RegNumber(int(r));
+  }
+  RegNumber rn(RegSF r) {
     return RegNumber(int(r));
   }
   RegNumber rn(int n) {
@@ -2260,38 +2523,19 @@ struct Label {
   }
 
   void branchAuto(Assembler& a, BranchConditions bc, LinkReg lr) {
-    assert(m_address && "Cannot evaluate branch size without defined target");
-    auto delta = m_address - a.frontier();
-    if (HPHP::jit::deltaFits(delta, HPHP::sz::word)) {
-      // Branch by offset
-
-      // TODO(gut): Use a typedef or something to avoid copying code like below:
-      if (LinkReg::Save == lr)
-        a.bcl(*this, bc);
-      else
-        a.bc(*this, bc);
-    } else {
-      // use CTR to perform absolute branch
-      BranchParams bp(bc);
-
-      // TODO(gut): is this really the best way? If only there was a register
-      // that was already filled with the address...
-      const ssize_t address = ssize_t(m_address ? m_address : a.frontier());
-
-      // Use reserved function linkage register
-      a.li64(reg::r12, address);
-      // When branching to another context, r12 need to keep the target address
-      // to correctly set r2 (TOC reference).
-      a.mtctr(reg::r12);
-
-      addJump(&a, BranchType::bctr);  // marking THIS address for patchBctr
-
-      // TODO(gut): Use a typedef or something to avoid copying code like below:
-      if (LinkReg::Save == lr)
-        a.bcctrl(bp.bo(), bp.bi(), 0);
-      else
-        a.bcctr(bp.bo(), bp.bi(), 0);
-    }
+    // use CTR to perform absolute branch
+    BranchParams bp(bc);
+    const ssize_t address = ssize_t(m_address);
+    // Use reserved function linkage register
+    addJump(&a, BranchType::bctr);  // marking THIS address for patchBctr
+    a.li64(reg::r12, address);
+    // When branching to another context, r12 need to keep the target address
+    // to correctly set r2 (TOC reference).
+    a.mtctr(reg::r12);
+    if (LinkReg::Save == lr)
+      a.bcctrl(bp.bo(), bp.bi(), 0);
+    else
+      a.bcctr(bp.bo(), bp.bi(), 0);
   }
 
   void asm_label(Assembler& a) {
@@ -2339,7 +2583,7 @@ inline void Assembler::bla(Label& l) { bcla(l, BranchConditions::Always); }
 inline void Assembler::bc(Label& l, BranchConditions bc) {
   l.branchOffset(*this, bc, LinkReg::DoNotTouch);
 }
-inline void Assembler::bc(Label& l, HPHP::jit::ConditionCode cc) {
+inline void Assembler::bc(Label& l, ConditionCode cc) {
   l.branchOffset(*this, BranchParams::convertCC(cc), LinkReg::DoNotTouch);
 }
 inline void Assembler::bca(Label& l, BranchConditions bc) {
@@ -2364,30 +2608,10 @@ inline void Assembler::branchAuto(CodeAddress c,
   l.branchAuto(*this, bc, lr);
 }
 inline void Assembler::branchAuto(CodeAddress c,
-                                  HPHP::jit::ConditionCode cc,
+                                  ConditionCode cc,
                                   LinkReg lr) {
   branchAuto(c, BranchParams::convertCC(cc), lr);
 }
-
-class Decoder {
-public:
-  explicit Decoder(uint32_t* ip)
-  : ip_(*ip),
-  decoded_instr_(nullptr) { decode(ip); }
-
-  ~Decoder() {
-    delete decoded_instr_;
-    decoded_instr_ = nullptr;
-  }
-
-  std::string toString();
-private:
-  void decode(uint32_t* ip);
-
-  uint32_t ip_;
-  DecoderInfo* decoded_instr_;
-  DecoderTable decoder_table_;
-};
 
 } // namespace ppc64_asm
 

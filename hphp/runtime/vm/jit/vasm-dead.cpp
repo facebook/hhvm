@@ -36,6 +36,7 @@ typedef boost::dynamic_bitset<> LiveSet;
 bool effectful(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::absdbl:
+    case Vinstr::addl:
     case Vinstr::addli:
     case Vinstr::addq:
     case Vinstr::addqi:
@@ -72,11 +73,17 @@ bool effectful(Vinstr& inst) {
     case Vinstr::defvmsp:
     case Vinstr::divint:
     case Vinstr::divsd:
+    case Vinstr::extsb:
+    case Vinstr::extsw:
+    case Vinstr::fcmpo:
+    case Vinstr::fcmpu:
     case Vinstr::imul:
     case Vinstr::incl:
     case Vinstr::incq:
+    case Vinstr::incw:
     case Vinstr::ldimmq:
     case Vinstr::ldimml:
+    case Vinstr::ldimmw:
     case Vinstr::ldimmb:
     case Vinstr::ldimmqs:
     case Vinstr::lea:
@@ -87,12 +94,17 @@ bool effectful(Vinstr& inst) {
     case Vinstr::loadl:
     case Vinstr::loadqp:
     case Vinstr::loadsd:
+    case Vinstr::loadw:
     case Vinstr::loadtqb:
     case Vinstr::loadzbl:
     case Vinstr::loadzbq:
     case Vinstr::loadzlq:
+    case Vinstr::mfcr:
+    case Vinstr::mflr:
+    case Vinstr::mfvsrd:
     case Vinstr::movb:
     case Vinstr::movl:
+    case Vinstr::movlk:
     case Vinstr::movtqb:
     case Vinstr::movtql:
     case Vinstr::movzbl:
@@ -143,6 +155,10 @@ bool effectful(Vinstr& inst) {
     case Vinstr::xorl:
     case Vinstr::xorq:
     case Vinstr::xorqi:
+    case Vinstr::xscvdpsxds:
+    case Vinstr::xscvsxddp:
+    case Vinstr::xxlxor:
+    case Vinstr::xxpermdi:
       return false;
 
     case Vinstr::addlm:
@@ -187,6 +203,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::landingpad:
     case Vinstr::leavetc:
     case Vinstr::mcprep:
+    case Vinstr::mtlr:
+    case Vinstr::mtvsrd:
     case Vinstr::nothrow:
     case Vinstr::orbim:
     case Vinstr::orqim:

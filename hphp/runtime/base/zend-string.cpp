@@ -22,7 +22,9 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/overflow.h"
 #include <math.h>
+#ifndef _MSC_VER
 #include <monetary.h>
+#endif
 
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/base/exceptions.h"

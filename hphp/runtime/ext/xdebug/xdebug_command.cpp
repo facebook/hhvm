@@ -299,6 +299,7 @@ struct FeatureGetCmd : XDebugCommand {
     // Check against the defined features
     #define FEATURE(name, supported, val, free)                                \
       if (!match && m_feature == name) {                                       \
+        __pragma(warning(suppress: 4130))                                      \
         if (val != nullptr) {                                                  \
           xdebug_xml_add_text(&xml, val, free);                                \
         }                                                                      \

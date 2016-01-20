@@ -14,6 +14,8 @@ string(0) ""
 string(4) "1000"
 string(2) "15"
 string(14) "/tmp/apc_store"
+string(0) ""
+bool(false)
 bool(false)
 bool(false)
 bool(false)

@@ -68,6 +68,10 @@ std::string Config::IniName(const std::string& config,
     idx++;
   }
 
+  // The HHIRLICM runtime option is all capitals, so separation
+  // cannot be determined. Special case it.
+  boost::replace_first(out, "hhirlicm", "hhir_licm");
+  // The HHVM ini option becomes the standard PHP option.
   boost::replace_first(out,
                        "hhvm.server.upload.max_file_uploads",
                        "max_file_uploads");

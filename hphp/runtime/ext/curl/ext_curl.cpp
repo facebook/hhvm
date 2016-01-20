@@ -493,6 +493,12 @@ public:
       break;
     }
 #endif
+    case CURLOPT_SSL_VERIFYHOST:
+      if ((value.isBoolean() && value.toBoolean()) || (value.isInteger() && value.toInt64() == 1)) {
+        raise_notice("curl_setopt(): CURLOPT_SSL_VERIFYHOST set to true which disables common name validation (setting CURLOPT_SSL_VERIFYHOST to 2 enables common name validation)");
+      }
+      m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, value.toInt64());
+      break;
     case CURLOPT_INFILESIZE:
     case CURLOPT_VERBOSE:
     case CURLOPT_HEADER:
@@ -529,7 +535,6 @@ public:
 #if LIBCURL_VERSION_NUM >= 0x071002
     case CURLOPT_CONNECTTIMEOUT_MS:
 #endif
-    case CURLOPT_SSL_VERIFYHOST:
     case CURLOPT_SSL_VERIFYPEER:
       //case CURLOPT_DNS_USE_GLOBAL_CACHE: not thread-safe when set to true
     case CURLOPT_NOSIGNAL:
@@ -616,12 +621,28 @@ public:
 
         switch (option) {
           case CURLOPT_FILE:
-            m_write.fp = fp;
-            m_write.method = PHP_CURL_FILE;
+            {
+              auto fp_mode = fp->getMode();
+              if (fp_mode.find('r') != 0 || fp_mode.find('+') == 1) {
+                m_write.fp = fp;
+                m_write.method = PHP_CURL_FILE;
+              } else {
+                raise_warning("curl_setopt(): the provided file handle is not writable");
+                return false;
+              }
+            }
             break;
           case CURLOPT_WRITEHEADER:
-            m_write_header.fp = fp;
-            m_write_header.method = PHP_CURL_FILE;
+            {
+              auto fp_mode = fp->getMode();
+              if (fp_mode.find('r') != 0 || fp_mode.find('+') == 1) {
+                m_write_header.fp = fp;
+                m_write_header.method = PHP_CURL_FILE;
+              } else {
+                raise_warning("curl_setopt(): the provided file handle is not writable");
+                return false;
+              }
+            }
             break;
           case CURLOPT_INFILE:
             m_read.fp = fp;
@@ -2043,6 +2064,7 @@ class CurlExtension final : public Extension {
     HHVM_RC_INT_SAME(CURLINFO_REDIRECT_COUNT);
     HHVM_RC_INT_SAME(CURLINFO_REDIRECT_TIME);
     HHVM_RC_INT_SAME(CURLINFO_REQUEST_SIZE);
+    HHVM_RC_INT_SAME(CURLINFO_RESPONSE_CODE);
     HHVM_RC_INT_SAME(CURLINFO_SIZE_DOWNLOAD);
     HHVM_RC_INT_SAME(CURLINFO_SIZE_UPLOAD);
     HHVM_RC_INT_SAME(CURLINFO_SPEED_DOWNLOAD);

@@ -302,20 +302,20 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function retainWithKey((function(mixed, Tv): bool) $callback): Set<Tv>;
 
   /**
-   *  Throws an exception unless the current `Set` or the `Traversable` is
-   *  empty.
+   * Throws an exception unless the current `Set` or the `Traversable` is
+   * empty.
    *
-   *  Since `Set`s only support integers or strings as values, we cannot have
-   *  a `Pair` as a `Set` value. So in order to avoid an
-   *  `InvalidArgumentException`, either the current `Set` or the `Traversable`
-   *  must be empty so that we actually return an empty `Set`.
+   * Since `Set`s only support integers or strings as values, we cannot have
+   * a `Pair` as a `Set` value. So in order to avoid an
+   * `InvalidArgumentException`, either the current `Set` or the `Traversable`
+   * must be empty so that we actually return an empty `Set`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `Set`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `Set`.
    *
-   *  @return - The `Set` that combines the values of the current `Set` with
-   *            the provided `Traversable`; one of these must be empty or an
-   *            exception is thrown.
+   * @return - The `Set` that combines the values of the current `Set` with
+   *           the provided `Traversable`; one of these must be empty or an
+   *           exception is thrown.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
 

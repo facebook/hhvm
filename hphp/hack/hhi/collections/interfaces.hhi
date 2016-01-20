@@ -355,29 +355,28 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * `mapWithKey()`.
    *
    * @param $fn - The callback containing the condition to apply to the
-   *               `ConstVector` keys and values.
+   *              `ConstVector` keys and values.
    *
    * @return - a `ConstVector` containing the values after a user-specified
    *           condition is applied to the keys and values of the current
    *           `ConstVector`.
-   *
    */
   public function filterWithKey((function(int, Tv): bool) $fn):
     ConstVector<Tv>;
   /**
-   *  Returns a `ConstVector` where each element is a `Pair` that combines the
-   *  element of the current `ConstVector` and the provided `Traversable`.
+   * Returns a `ConstVector` where each element is a `Pair` that combines the
+   * element of the current `ConstVector` and the provided `Traversable`.
    *
-   *  If the number of elements of the `ConstVector` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of elements of the `ConstVector` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of this `ConstVector`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of this `ConstVector`.
    *
-   *  @return - The `ConstVector` that combines the values of the current
-   *            `ConstVector` with the provided `Traversable`.
+   * @return - The `ConstVector` that combines the values of the current
+   *           `ConstVector` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     ConstVector<Pair<Tv, Tu>>;
@@ -620,19 +619,19 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
   public function filterWithKey((function(int, Tv): bool) $fn):
     MutableVector<Tv>;
   /**
-   *  Returns a `MutableVector` where each element is a `Pair` that combines the
-   *  element of the current `MutableVector` and the provided `Traversable`.
+   * Returns a `MutableVector` where each element is a `Pair` that combines the
+   * element of the current `MutableVector` and the provided `Traversable`.
    *
-   *  If the number of elements of the `MutableVector` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of elements of the `MutableVector` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of this `MutableVector`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of this `MutableVector`.
    *
-   *  @return - The `MutableVector` that combines the values of the current
-   *            `MutableVector` with the provided `Traversable`.
+   * @return - The `MutableVector` that combines the values of the current
+   *           `MutableVector` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     MutableVector<Pair<Tv, Tu>>;
@@ -881,22 +880,22 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
   public function filterWithKey((function(Tk, Tv): bool) $fn):
     ConstMap<Tk, Tv>;
   /**
-   *  Returns a `ConstMap` where each value is a `Pair` that combines the value
-   *  of the current `ConstMap` and the provided `Traversable`.
+   * Returns a `ConstMap` where each value is a `Pair` that combines the value
+   * of the current `ConstMap` and the provided `Traversable`.
    *
-   *  If the number of values of the current `ConstMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `ConstMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  The keys associated with the current `ConstMap` remain unchanged in the
-   *  returned `ConstMap`.
+   * The keys associated with the current `ConstMap` remain unchanged in the
+   * returned `ConstMap`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `ConstMap`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `ConstMap`.
    *
-   *  @return - The `ConstMap` that combines the values of the current
-   *            `ConstMap` with the provided `Traversable`.
+   * @return - The `ConstMap` that combines the values of the current
+   *           `ConstMap` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     ConstMap<Tk, Pair<Tv, Tu>>;
@@ -1134,22 +1133,22 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
   public function filterWithKey((function(Tk, Tv): bool) $fn):
     MutableMap<Tk, Tv>;
   /**
-   *  Returns a `MutableMap` where each value is a `Pair` that combines the
-   *  value of the current `MutableMap` and the provided `Traversable`.
+   * Returns a `MutableMap` where each value is a `Pair` that combines the
+   * value of the current `MutableMap` and the provided `Traversable`.
    *
-   *  If the number of values of the current `MutableMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `MutableMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  The keys associated with the current `MutableMap` remain unchanged in the
-   *  returned `MutableMap`.
+   * The keys associated with the current `MutableMap` remain unchanged in the
+   * returned `MutableMap`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `MutableMap`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `MutableMap`.
    *
-   *  @return - The `MutableMap` that combines the values of the current
-   *            `MutableMap` with the provided `Traversable`.
+   * @return - The `MutableMap` that combines the values of the current
+   *           `MutableMap` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     MutableMap<Tk, Pair<Tv, Tu>>;
@@ -1382,23 +1381,23 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    */
   public function filterWithKey((function(mixed, Tv): bool) $fn): ConstSet<Tv>;
   /**
-   *  Returns a `ConstSet` where each value is a `Pair` that combines the value
-   *  of the current `ConstSet` and the provided `Traversable`.
+   * Returns a `ConstSet` where each value is a `Pair` that combines the value
+   * of the current `ConstSet` and the provided `Traversable`.
    *
-   *  If the number of values of the current `ConstMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `ConstMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  Note that some implementations of sets only support certain types of keys
-   *  (e.g., only `int` or `string` values allowed). In that case, this method
-   *  could thrown an exception since a `Pair` wouldn't be supported/
+   * Note that some implementations of sets only support certain types of keys
+   * (e.g., only `int` or `string` values allowed). In that case, this method
+   * could thrown an exception since a `Pair` wouldn't be supported/
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `ConstSet`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `ConstSet`.
    *
-   *  @return - The `ConstSet` that combines the values of the current
-   *            `ConstSet` with the provided `Traversable`.
+   * @return - The `ConstSet` that combines the values of the current
+   *           `ConstSet` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): ConstSet<Pair<Tv, Tu>>;
   /**
@@ -1638,23 +1637,23 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
   public function filterWithKey((function(mixed, Tv): bool) $fn):
     MutableSet<Tv>;
   /**
-   *  Returns a `MutableSet` where each value is a `Pair` that combines the
-   *  value of the current `MutableSet` and the provided `Traversable`.
+   * Returns a `MutableSet` where each value is a `Pair` that combines the
+   * value of the current `MutableSet` and the provided `Traversable`.
    *
-   *  If the number of values of the current `ConstMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `ConstMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  Note that some implementations of sets only support certain types of keys
-   *  (e.g., only `int` or `string` values allowed). In that case, this method
-   *  could thrown an exception since a `Pair` wouldn't be supported/
+   * Note that some implementations of sets only support certain types of keys
+   * (e.g., only `int` or `string` values allowed). In that case, this method
+   * could thrown an exception since a `Pair` wouldn't be supported/
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `MutableSet`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `MutableSet`.
    *
-   *  @return - The `MutableSet` that combines the values of the current
-   *            `MutableSet` with the provided `Traversable`.
+   * @return - The `MutableSet` that combines the values of the current
+   *           `MutableSet` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     MutableSet<Pair<Tv, Tu>>;

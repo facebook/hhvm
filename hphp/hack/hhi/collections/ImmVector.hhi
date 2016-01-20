@@ -382,19 +382,19 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
     ImmVector<Tv>;
 
   /**
-   *  Returns an `ImmVector` where each element is a `Pair` that combines the
-   *  element of the current `ImmVector` and the provided `Traversable`.
+   * Returns an `ImmVector` where each element is a `Pair` that combines the
+   * element of the current `ImmVector` and the provided `Traversable`.
    *
-   *  If the number of elements of the current `ImmVector` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of elements of the current `ImmVector` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `ImmVector`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `ImmVector`.
    *
-   *  @return - The `ImmVector` that combines the values of this `ImmVector`
-   *            with the provided `Traversable`.
+   * @return - The `ImmVector` that combines the values of this `ImmVector`
+   *           with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     ImmVector<Pair<Tv, Tu>>;

@@ -239,19 +239,19 @@ final class Vector<Tv> implements MutableVector<Tv> {
     Vector<Tv>;
 
   /**
-   *  Returns a `Vector` where each element is a `Pair` that combines the
-   *  element of the current `Vector` and the provided `Traversable`.
+   * Returns a `Vector` where each element is a `Pair` that combines the
+   * element of the current `Vector` and the provided `Traversable`.
    *
-   *  If the number of elements of the `Vector` are not equal to the number of
-   *  elements in the `Traversable`, then only the combined elements up to and
-   *  including the final element of the one with the least number of elements
-   *  is included.
+   * If the number of elements of the `Vector` are not equal to the number of
+   * elements in the `Traversable`, then only the combined elements up to and
+   * including the final element of the one with the least number of elements
+   * is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of this `Vector`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of this `Vector`.
    *
-   *  @return - The `Vector` that combines the values of the current `Vector`
-   *            with the provided `Traversable`.
+   * @return - The `Vector` that combines the values of the current `Vector`
+   *           with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): Vector<Pair<Tv, Tu>>;
 

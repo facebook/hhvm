@@ -253,22 +253,22 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
     ImmMap<Tk, Tv>;
 
   /**
-   *  Returns an `ImmMap` where each value is a `Pair` that combines the value
-   *  of the current `ImmMap` and the provided `Traversable`.
+   * Returns an `ImmMap` where each value is a `Pair` that combines the value
+   * of the current `ImmMap` and the provided `Traversable`.
    *
-   *  If the number of values of the current `ImmMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `ImmMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  The keys associated with the current `ImmMap` remain unchanged in the
-   *  returned `ImmMap`.
+   * The keys associated with the current `ImmMap` remain unchanged in the
+   * returned `ImmMap`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `ImmMap`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `ImmMap`.
    *
-   *  @return - The `ImmMap` that combines the values of the current `ImmMap`
-   *            with the provided `Traversable`.
+   * @return - The `ImmMap` that combines the values of the current `ImmMap`
+   *           with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     ImmMap<Tk, Pair<Tv, Tu>>;

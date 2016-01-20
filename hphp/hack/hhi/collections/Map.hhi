@@ -255,22 +255,22 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
     Map<Tk, Tv>;
 
   /**
-   *  Returns a `Map` where each value is a `Pair` that combines the value
-   *  of the current `Map` and the provided `Traversable`.
+   * Returns a `Map` where each value is a `Pair` that combines the value
+   * of the current `Map` and the provided `Traversable`.
    *
-   *  If the number of values of the current `Map` are not equal to the number
-   *  of elements in the `Traversable`, then only the combined elements up to
-   *  and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `Map` are not equal to the number
+   * of elements in the `Traversable`, then only the combined elements up to
+   * and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  The keys associated with the current `Map` remain unchanged in the
-   *  returned `Map`.
+   * The keys associated with the current `Map` remain unchanged in the
+   * returned `Map`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `Map`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `Map`.
    *
-   *  @return - The `Map` that combines the values of the current `Map` with
-   *            the provided `Traversable`.
+   * @return - The `Map` that combines the values of the current `Map` with
+   *           the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): Map<Tk, Pair<Tv, Tu>>;
 

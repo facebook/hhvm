@@ -28,6 +28,9 @@ exception Send_fd_failure of int
 
 let fd_to_int (x: Unix.file_descr) : int = Obj.magic x
 
+let to_channel oc =
+  Marshal_tools.to_fd_with_preamble (Unix.descr_of_out_channel oc)
+
 module Program = struct
   let name = "hh_server"
   (** Seconds since Unix epoch. *)
@@ -176,7 +179,7 @@ let rec hand_off_client_connection_with_retries typechecker retries client_fd =
 
 (** Does not return. *)
 let client_out_of_date_ client_channel =
-  msg_to_channel client_channel Build_id_mismatch;
+  to_channel client_channel Build_id_mismatch;
   HackEventLogger.out_of_date ()
 
 (** Kills typechecker, sends build ID mismatch message to client, and exits.
@@ -199,7 +202,7 @@ let client_out_of_date typechecker client_channel =
 (** Send (possibly empty) sequences of messages before handing off to
  * typechecker. *)
 let client_prehandoff typechecker fd =
-  msg_to_channel (Unix.out_channel_of_descr fd)
+  to_channel (Unix.out_channel_of_descr fd)
     Prehandoff_sentinel;
   hand_off_client_connection_with_retries typechecker 8 fd;
   HackEventLogger.client_connection_sent ();
@@ -220,7 +223,7 @@ let ack_and_handoff_client typechecker fd =
       (** TODO: Send this to client so it is visible. *)
       Hh_logger.log "Got request. Prior request %.1f seconds ago"
         since_last_request;
-      msg_to_channel channel ServerUtils.Connection_ok;
+      to_channel channel ServerUtils.Connection_ok;
       client_prehandoff typechecker fd
     )
   with

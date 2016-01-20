@@ -155,7 +155,8 @@ let rec wait_for_server_hello ic env retries start_time tail_env first_call =
       raise Server_hung_up
 
 let consume_prehandoff_messages ic =
-  let msg: ServerUtils.prehandoff_msg = Marshal.from_channel ic in
+  let msg: ServerUtils.prehandoff_msg = Marshal_tools.from_fd_with_preamble
+    (Unix.descr_of_in_channel ic) in
   match msg with
   | ServerUtils.Prehandoff_sentinel -> ()
   | ServerUtils.Prehandoff_aborting str ->

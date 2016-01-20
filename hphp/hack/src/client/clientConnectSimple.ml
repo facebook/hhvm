@@ -14,6 +14,9 @@ type error =
   | Server_busy
   | Build_id_mismatch
 
+let from_channel ic =
+  Marshal_tools.from_fd_with_preamble (Unix.descr_of_in_channel ic)
+
 let server_exists root = not (Lock.check
   (ServerFiles.server_monitor_liveness_lock root))
 
@@ -52,7 +55,7 @@ let establish_connection root =
 let get_cstate (ic, oc) =
   try
     send_build_id_ohai oc;
-    let cstate : ServerUtils.connection_state = Marshal.from_channel ic in
+    let cstate : ServerUtils.connection_state = from_channel ic in
     Result.Ok (ic, oc, cstate)
   with e ->
     Unix.shutdown_connection ic;

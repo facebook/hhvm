@@ -152,8 +152,8 @@ class c_Pair : public ObjectData {
 
   template<class F> friend void scanHeader(const Header*, F& mark);
   template<class F> void scan(F& mark) const {
-    mark(elm0);
-    mark(elm1);
+    if (m_size >= 1) mark(elm0);
+    if (m_size >= 2) mark(elm1);
   }
 
 #ifndef USE_LOWPTR

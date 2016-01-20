@@ -53,9 +53,6 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// rvmfp position on call stack.
-constexpr int rvmfp_position_on_callstack = 8;  // CR save area not in use
-
 /* Parameters for push/pop and keep stack aligned */
 constexpr int push_pop_position           = 8;
 

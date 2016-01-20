@@ -19,9 +19,11 @@
 #define incl_HPHP_EXT_CURL_H_
 
 #include "hphp/runtime/ext/extension.h"
+
 #include <curl/curl.h>
 
 #define CURLOPT_RETURNTRANSFER 19913
+#define CURLOPT_BINARYTRANSFER 19914
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

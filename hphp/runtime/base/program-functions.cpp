@@ -1511,6 +1511,11 @@ static int execute_program_impl(int argc, char** argv) {
     for (auto& filename : s_config_files) {
       if (boost::filesystem::exists(filename)) {
         Config::ParseConfigFile(filename, ini, config);
+      } else {
+        Logger::Warning(
+          "The configuration file %s does not exist",
+          filename.c_str()
+        );
       }
     }
     // Now, take care of CLI options and then officially load and bind things

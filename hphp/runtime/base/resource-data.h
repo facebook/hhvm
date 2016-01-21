@@ -248,14 +248,8 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *    }
  *
  */
-class SweepableResourceData : public ResourceData, public Sweepable {
+struct SweepableResourceData : ResourceData, Sweepable {
 protected:
-  void sweep() override {
-    // ResourceData objects are globally allocated by default (see
-    // operator delete in ResourceData), so sweeping will destroy the
-    // object and deallocate its seat as well.
-    delete this;
-  }
   void* owner() override {
     return static_cast<ResourceData*>(this)->hdr();
   }

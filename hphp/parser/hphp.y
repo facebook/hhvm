@@ -583,6 +583,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %right T_AWAIT T_YIELD
 %right T_YIELD_FROM
+%left T_PIPE
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
@@ -613,6 +614,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_STRING
 %token T_STRING_VARNAME
 %token T_VARIABLE
+%token T_PIPE_VAR
 %token T_NUM_STRING
 %token T_INLINE_HTML
 %token T_HASHBANG
@@ -1939,6 +1941,7 @@ expr_no_variable:
   | expr '/' expr                      { BEXP($$,$1,$3,'/');}
   | expr T_POW expr                    { BEXP($$,$1,$3,T_POW);}
   | expr '%' expr                      { BEXP($$,$1,$3,'%');}
+  | expr T_PIPE expr                   { BEXP($$,$1,$3,T_PIPE);}
   | expr T_SL expr                     { BEXP($$,$1,$3,T_SL);}
   | expr T_SR expr                     { BEXP($$,$1,$3,T_SR);}
   | '+' expr %prec T_INC               { UEXP($$,$2,'+',1);}
@@ -2900,6 +2903,7 @@ reference_variable:
 
 compound_variable:
     T_VARIABLE                         { _p->onSimpleVariable($$, $1);}
+  | T_PIPE_VAR                         { _p->onPipeVariable($$);}
   | '$' '{' expr '}'                   { _p->onDynamicVariable($$, $3, 0);}
   /* !PHP7_ONLY */
   | '$' compound_variable              { $1 = 1; _p->onIndirectRef($$, $1, $2);}

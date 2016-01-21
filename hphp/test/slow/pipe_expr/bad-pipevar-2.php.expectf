@@ -1,0 +1,2 @@
+
+Fatal error: Pipe variables must occur only in the RHS of pipe expressions in %s/bad-pipevar-2.php on line 5

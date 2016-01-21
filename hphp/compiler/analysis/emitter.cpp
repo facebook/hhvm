@@ -3813,6 +3813,16 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       return true;
     }
 
+    if (op == T_PIPE) {
+      Id pipeVar = emitVisitAndSetUnnamedL(e, b->getExp1());
+      allocPipeLocal(pipeVar);
+      visit(b->getExp2());
+      releasePipeLocal(pipeVar);
+      emitPushAndFreeUnnamedL(e, pipeVar, m_ue.bcPos());
+      e.PopC();
+      return true;
+    }
+
     visit(b->getExp1());
     emitConvertToCellOrLoc(e);
     visit(b->getExp2());
@@ -4574,6 +4584,16 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         break;
     }
     not_reached();
+  }
+
+  case Construct::KindOfPipeVariable: {
+    if (auto pipeVar = getPipeLocal()) {
+      emitVirtualLocal(*pipeVar);
+      return true;
+    }
+
+    throw IncludeTimeFatalException(
+      node, "Pipe variables must occur only in the RHS of pipe expressions");
   }
 
   case Construct::KindOfSimpleVariable: {

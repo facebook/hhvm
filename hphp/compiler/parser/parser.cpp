@@ -24,6 +24,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/dynamic_variable.h"
+#include "hphp/compiler/expression/pipe_variable.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/dynamic_function_call.h"
@@ -422,11 +423,18 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
   out->exp = NEW_EXP(SimpleVariable, var->text());
 }
 
+void Parser::onPipeVariable(Token &out) {
+  out->exp = NEW_EXP(PipeVariable);
+}
+
 void Parser::onDynamicVariable(Token &out, Token &expr, bool encap) {
   out->exp = getDynamicVariable(expr->exp, encap);
 }
 
 void Parser::onIndirectRef(Token &out, Token &refCount, Token &var) {
+  if (var->exp->is(Expression::KindOfPipeVariable)) {
+    PARSE_ERROR("Cannot take indirect reference to a pipe variable");
+  }
   out->exp = var->exp;
   for (int i = 0; i < refCount->num(); i++) {
     out->exp = createDynamicVariable(out->exp);

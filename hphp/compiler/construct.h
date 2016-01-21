@@ -113,6 +113,7 @@ public:
   x(AssignmentExpression,       Store) \
   x(SimpleVariable,              Load) \
   x(DynamicVariable,             Load) \
+  x(PipeVariable,                Load) \
   x(StaticMemberExpression,      Load) \
   x(ArrayElementExpression,      Load) \
   x(DynamicFunctionCall,         Call) \

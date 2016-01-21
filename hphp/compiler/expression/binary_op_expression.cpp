@@ -175,6 +175,12 @@ int BinaryOpExpression::getLocalEffects() const {
     }
     break;
   }
+  case T_PIPE:
+    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
+      effect = UnknownEffect;
+      m_canThrow = true;
+    }
+    break;
   default:
     break;
   }
@@ -622,6 +628,7 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_IS_GREATER_OR_EQUAL: cg_printf(" >= ");         break;
   case T_SPACESHIP:           cg_printf(" <=> ");        break;
   case T_INSTANCEOF:          cg_printf(" instanceof "); break;
+  case T_PIPE:                cg_printf(" |> ");         break;
   case T_COLLECTION: {
     auto el = static_pointer_cast<ExpressionList>(m_exp2);
     if (el->getCount() == 0) {

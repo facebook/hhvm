@@ -623,6 +623,16 @@ private:
     int defI;
   };
 
+  void allocPipeLocal(Id pipeVar) { m_pipeVars.emplace(pipeVar); }
+  void releasePipeLocal(Id pipeVar) {
+    assert(!m_pipeVars.empty() && m_pipeVars.top() == pipeVar);
+    m_pipeVars.pop();
+  }
+  folly::Optional<Id> getPipeLocal() {
+    if (m_pipeVars.empty()) return folly::none;
+    return m_pipeVars.top();
+  }
+
 private:
   static constexpr size_t kMinStringSwitchCases = 8;
 
@@ -667,6 +677,8 @@ private:
   // Unnamed local variables used by the "finally router" logic
   Id m_stateLocal;
   Id m_retLocal;
+  // stack of nested unnamed pipe variables
+  std::stack<Id> m_pipeVars;
 
 public:
   bool checkIfStackEmpty(const char* forInstruction) const;

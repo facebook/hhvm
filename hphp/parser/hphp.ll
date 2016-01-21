@@ -475,6 +475,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"XOR"                { RETTOKEN(T_LOGICAL_XOR);}
 <ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
 
+<ST_IN_SCRIPTING>"|>"                 { HH_ONLY_KEYWORD(T_PIPE); }
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
@@ -891,6 +892,16 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         _scanner->setHHFile();
         return T_OPEN_TAG;
 }
+
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$$"/[^a-zA-Z_\x7f-\xff${] {
+  if (_scanner->isXHPSyntaxEnabled()) {
+    RETTOKEN(T_PIPE_VAR);
+  }
+  unput('$');
+  return '$';
+}
+
+
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
         _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1, T_VARIABLE);

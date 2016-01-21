@@ -159,6 +159,7 @@ public:
   void onClassAbstractConstant(Token &out, Token *exprs, Token &var);
   void onClassTypeConstant(Token &out, Token &var, Token &value);
   void onSimpleVariable(Token &out, Token &var);
+  void onPipeVariable(Token &out);
   void onSynthesizedVariable(Token &out, Token &var) {
     onSimpleVariable(out, var);
   }

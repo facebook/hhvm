@@ -1,1 +1,1 @@
--vEval.EnableHipHopSyntax=1 -vStats.ProfilerTraceExpansion=42 -vResourceLimit.StringOffsetLimit=42 -vPidFile=/tmp/foo/bar
+-vEval.EnableHipHopSyntax=1 -vStats.ProfilerTraceExpansion=42 -vPidFile=/tmp/foo/bar

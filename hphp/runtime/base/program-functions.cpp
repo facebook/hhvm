@@ -1966,7 +1966,13 @@ void hphp_process_init() {
   BootTimer::mark("extra_process_init");
   {
     UnlimitSerializationScope unlimit;
-    apc_load(apcExtension::LoadThread);
+    // TODO(9755792): Add real execution mode for snapshot generation.
+    if (apcExtension::PrimeLibraryUpgradeDest != "") {
+      Timer timer(Timer::WallTime, "optimizeApcPrime");
+      apc_load(apcExtension::LoadThread);
+    } else {
+      apc_load(apcExtension::LoadThread);
+    }
     BootTimer::mark("apc_load");
   }
 

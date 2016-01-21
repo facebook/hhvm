@@ -995,6 +995,14 @@ void* realloc(void* ptr, size_t nbytes) {
   return MM().realloc(ptr, nbytes);
 }
 
+char* strndup(const char* str, size_t len) {
+  size_t n = std::min(len, strlen(str));
+  char* ret = reinterpret_cast<char*>(req::malloc(n + 1));
+  memcpy(ret, str, n);
+  ret[n] = 0;
+  return ret;
+}
+
 void free(void* ptr) {
   if (ptr) MM().free(ptr);
 }

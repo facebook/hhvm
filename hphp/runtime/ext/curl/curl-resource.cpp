@@ -37,7 +37,7 @@ namespace HPHP {
 
 CurlResource::ToFree::~ToFree() {
   for (unsigned int i = 0; i < str.size(); i++) {
-    free(str[i]);
+    req::free(str[i]);
   }
   for (unsigned int i = 0; i < post.size(); i++) {
     curl_formfree(post[i]);
@@ -60,7 +60,7 @@ CurlResource::CurlResource(const String& url,
 
   memset(m_error_str, 0, sizeof(m_error_str));
   m_error_no = CURLE_OK;
-  m_to_free = std::make_shared<ToFree>();
+  m_to_free = req::make_shared<ToFree>();
 
   m_write.method = PHP_CURL_STDOUT;
   m_write.type   = PHP_CURL_ASCII;
@@ -75,7 +75,7 @@ CurlResource::CurlResource(const String& url,
        the library... NOTE: before 7.17.0 strings were not copied. */
     curl_easy_setopt(m_cp, CURLOPT_URL, url.c_str());
 #else
-    char *urlcopy = strndup(url.data(), url.size());
+    char *urlcopy = req::strndup(url.data(), url.size());
     curl_easy_setopt(m_cp, CURLOPT_URL, urlcopy);
     m_to_free->str.push_back(urlcopy);
 #endif
@@ -134,7 +134,6 @@ void CurlResource::closeForSweep() {
     }
     m_cp = nullptr;
   }
-  m_to_free.reset();
 }
 
 void CurlResource::check_exception() {
@@ -427,7 +426,7 @@ bool CurlResource::setStringOption(long option, const String& value) {
      by the library... NOTE: before 7.17.0 strings were not copied. */
   m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, value.c_str());
 #else
-  char *copystr = strndup(value.data(), value.size());
+  char *copystr = req::strndup(value.data(), value.size());
   m_to_free->str.push_back(copystr);
   m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, copystr);
 #endif
@@ -448,7 +447,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
     m_error_no = curl_easy_setopt(m_cp, CURLOPT_COPYPOSTFIELDS,
                                 svalue.c_str());
 #else
-    char *post = strndup(svalue.data(), svalue.size());
+    char *post = req::strndup(svalue.data(), svalue.size());
     m_to_free->str.push_back(post);
 
     m_error_no = curl_easy_setopt(m_cp, CURLOPT_POSTFIELDS, post);

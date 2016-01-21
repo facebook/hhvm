@@ -57,7 +57,11 @@ struct CurlResource : SweepableResourceData {
   ~CurlResource() { close(); }
 
   void closeForSweep();
-  void close() { closeForSweep(); m_opts.clear(); }
+  void close() {
+    closeForSweep();
+    m_opts.clear();
+    m_to_free.reset();
+  }
   void reseat();
   void reset();
 

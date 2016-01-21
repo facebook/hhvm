@@ -33,7 +33,8 @@ class CommonSaveStateTests(object):
         cls.test_env = dict(os.environ, **{
             'HH_TEST_MODE': '1',
             'HH_TMPDIR': cls.hh_tmp_dir,
-            'PATH': '%s:/bin:/usr/bin' % cls.tmp_dir,
+            'PATH': '%s:/bin:/usr/bin:/usr/local/bin' % cls.tmp_dir,
+            'OCAMLRUNPARAM': 'b',
             })
 
         with open(os.path.join(init_dir, '.hhconfig'), 'w') as f:

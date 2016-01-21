@@ -19,17 +19,21 @@ def write_echo_json(f, obj):
 class TestSaveMiniState(common_tests.CommonSaveStateTests, unittest.TestCase):
     @classmethod
     def save_command(cls, init_dir):
-        cls.proc_call([
+        stdout, stderr, retcode = cls.proc_call([
             hh_server,
             '--check', init_dir,
             '--save-mini', cls.saved_state_path()
         ])
+        if retcode != 0:
+            raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
+                    (stdout, stderr))
 
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
             f.write(r"""
 # some comment
 use_mini_state = true
+use_watchman = true
 """)
 
     def write_hhconfig(self, script_name):
@@ -39,6 +43,12 @@ use_mini_state = true
 assume_php = false
 load_mini_script = %s
 """ % os.path.join(self.repo_dir, script_name))
+
+    def write_watchman_config(self):
+        with open(os.path.join(self.repo_dir, '.watchmanconfig'), 'w') as f:
+            f.write('{}')
+
+        os.mkdir(os.path.join(self.repo_dir, '.hg'))
 
     def write_load_config(self, *changed_files):
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
@@ -56,6 +66,7 @@ load_mini_script = %s
 
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
+        self.write_watchman_config()
 
     def run_check(self, stdin=None, options=None):
         options = [] if options is None else options
@@ -73,6 +84,7 @@ load_mini_script = %s
     def check_cmd(self, expected_output, stdin=None, options=None):
         (output, err, _) = self.run_check(stdin, options)
         logs = self.get_server_logs()
+        self.assertIn('Using watchman', logs)
         self.assertIn('Successfully loaded mini-state', logs)
         root = self.repo_dir + os.path.sep
         self.assertCountEqual(
@@ -91,6 +103,7 @@ load_mini_script = %s
 
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
+        self.write_watchman_config()
 
         (output, _, _) = self.run_check()
 
@@ -116,6 +129,7 @@ load_mini_script = %s
 
         self.write_local_conf()
         self.write_hhconfig('server_options.sh')
+        self.write_watchman_config()
 
         (output, _, _) = self.run_check()
 
@@ -157,7 +171,6 @@ load_mini_script = %s
 
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
             f.write(r"""
-use_watchman = true
 watchman_init_timeout = 1
 """)
 
@@ -165,7 +178,7 @@ watchman_init_timeout = 1
             f.write(r"""sleep 2""")
             os.fchmod(f.fileno(), stat.S_IRWXU)
 
-        self.check_cmd(['No errors!'])
+        self.run_check()
         # Stop the server, ensuring that its logs get flushed
         self.proc_call([hh_client, 'stop', self.repo_dir])
         self.assertIn('Watchman.Timeout', self.get_server_logs())

@@ -386,7 +386,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     stmt = 1;
   }
   {
-    Token params, ret, ref; ref = 1;
+    Token params, ret, ref; ref = 0;
     _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
@@ -436,7 +436,7 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
     stmt = 1;
   }
   {
-    Token params, ret, ref; ref = 1;
+    Token params, ret, ref; ref = 0;
     _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }
@@ -524,7 +524,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
     stmt = 1;
   }
   {
-    Token params, ret, ref; ref = 1;
+    Token params, ret, ref; ref = 0;
     _p->onMethod(out, modifiers, ret, ref, fname, params, stmt, nullptr, false);
   }
 }

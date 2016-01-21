@@ -99,6 +99,7 @@ namespace req {
 void* malloc(size_t nbytes);
 void* calloc(size_t count, size_t bytes);
 void* realloc(void* ptr, size_t nbytes);
+char* strndup(const char* str, size_t len);
 void  free(void* ptr);
 
 /*

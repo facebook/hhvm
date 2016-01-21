@@ -400,3 +400,50 @@ assume_php = false""")
             time.sleep(1)
             client_error = self.check_cmd(['No errors!'])
             self.assertIn('Last server killed by signal', client_error)
+
+    def test_duplicate_parent(self):
+        """
+        This checks that we handle duplicate parent classes, i.e. when Bar
+        extends Foo and there are two declarations of Foo. We want to make sure
+        that when the duplicate gets removed, we recover correctly by
+        redeclaring Bar with the remaining parent class.
+        """
+        with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
+            f.write("""
+            <?hh
+            class Foo { // also declared in foo_3.php in setUpClass
+                public static $x;
+            }
+            """)
+        with open(os.path.join(self.repo_dir, 'foo_5.php'), 'w') as f:
+            f.write("""
+            <?hh
+            class Bar extends Foo {}
+
+            function main(Bar $a) {
+                return $a::$y;
+            }
+            """)
+        self.write_load_config('foo_4.php', 'foo_5.php')
+        self.check_cmd([
+            '{root}foo_4.php:3:19,21: Name already bound: Foo (Naming[2012])',
+            '  {root}foo_3.php:7:15,17: Previous definition is here',
+            '{root}foo_5.php:6:28,29: Could not find class variable $y in type Bar (Typing[4090])',
+            '  {root}foo_5.php:3:19,21: Declaration of Bar is here',
+            ])
+
+        os.remove(os.path.join(self.repo_dir, 'foo_4.php'))
+        self.check_cmd([
+            '{root}foo_5.php:6:28,29: Could not find class variable $y in type Bar (Typing[4090])',
+            '  {root}foo_5.php:3:19,21: Declaration of Bar is here',
+            ])
+
+        with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
+            f.write("""
+            <?hh
+            class Foo {
+                public static $y;
+            }
+            """)
+        os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
+        self.check_cmd(['No errors!'])

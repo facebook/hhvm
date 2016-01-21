@@ -299,6 +299,12 @@ bool RuntimeOption::ClearInputOnSuccess = true;
 std::string RuntimeOption::ProfilerOutputDir = "/tmp";
 std::string RuntimeOption::CoreDumpEmail;
 bool RuntimeOption::CoreDumpReport = true;
+std::string RuntimeOption::CoreDumpReportDirectory =
+#if defined(HPHP_OSS)
+  "/tmp";
+#else
+  "/var/tmp/cores";
+#endif
 std::string RuntimeOption::StackTraceFilename;
 int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
 
@@ -1561,17 +1567,12 @@ void RuntimeOption::Load(
     if (CoreDumpReport) {
       install_crash_reporter();
     }
-
-    auto core_dump_report_dir =
-      Config::GetString(ini, config, "Debug.CoreDumpReportDirectory",
-#if defined(HPHP_OSS)
-  "/tmp"
-#else
-  "/var/tmp/cores"
-#endif
-      );
+    // Binding default dependenant on whether we are using an OSS build or
+    // not, and that is set at initialization time of CoreDumpReportDirectory.
+    Config::Bind(CoreDumpReportDirectory, ini, config,
+                 "Debug.CoreDumpReportDirectory", CoreDumpReportDirectory);
     std::ostringstream stack_trace_stream;
-    stack_trace_stream << core_dump_report_dir << "/stacktrace."
+    stack_trace_stream << CoreDumpReportDirectory << "/stacktrace."
                        << Process::GetProcessId() << ".log";
     StackTraceFilename = stack_trace_stream.str();
 

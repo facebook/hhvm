@@ -288,6 +288,7 @@ public:
   static std::string ProfilerOutputDir;
   static std::string CoreDumpEmail;
   static bool CoreDumpReport;
+  static std::string CoreDumpReportDirectory;
   static std::string StackTraceFilename;
   static int StackTraceTimeout;
 

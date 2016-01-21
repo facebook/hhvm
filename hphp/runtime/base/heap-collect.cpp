@@ -139,7 +139,7 @@ private:
   template<class T> static bool counted(T* p) {
     return p && p->isRefCounted();
   }
-  bool mark(const void*);
+  bool mark(const void*, uint8_t marks = MARK);
   bool inRds(const void* vp) {
     auto p = reinterpret_cast<const char*>(vp);
     return p >= rds_.begin() && p < rds_.end();
@@ -154,6 +154,7 @@ private:
   }
 
 private:
+  static constexpr uint8_t MARK{1}, CMARK{2};
   PtrMap ptrs_;
   std::vector<const Header*> work_;
   folly::Range<const char*> rds_; // full mmap'd rds section.
@@ -161,13 +162,13 @@ private:
 };
 
 // mark the object at p, return true if first time.
-bool Marker::mark(const void* p) {
+bool Marker::mark(const void* p, uint8_t marks) {
   assert(p && ptrs_.isHeader(p));
   auto h = static_cast<const Header*>(p);
   assert(h->kind() <= HeaderKind::BigMalloc &&
          h->kind() != HeaderKind::ResumableObj);
-  auto first = !h->hdr_.mark;
-  h->hdr_.mark = true;
+  auto first = !h->hdr_.marks;
+  h->hdr_.marks |= marks;
   return first;
 }
 
@@ -315,8 +316,7 @@ Marker::operator()(const void* start, size_t len) {
     if (!h) continue;
     // mark p if it's an interesting kind. since we have metadata for it,
     // it must have a valid header.
-    h->hdr_.cmark = true;
-    if (!mark(h)) continue; // skip if already marked.
+    if (!mark(h, CMARK)) continue; // skip if already marked.
     switch (h->kind()) {
       case HeaderKind::Apc:
       case HeaderKind::Globals:
@@ -374,7 +374,7 @@ void Marker::init() {
                                    RuntimeOption::EvalJitTargetCacheSize);
   MM().forEachHeader([&](Header* h) {
     if (h->kind() == HeaderKind::Free) return;
-    h->hdr_.mark = h->hdr_.cmark = false;
+    h->hdr_.marks = 0;
     total_ += h->size();
     switch (h->kind()) {
       case HeaderKind::Apc:
@@ -407,7 +407,7 @@ void Marker::init() {
         // Pointers to either the frame or object will be mapped to the frame.
         ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->resumableObj());
-        obj->hdr_.mark = obj->hdr_.cmark = false;
+        obj->hdr_.marks = 0;
         break;
       }
       case HeaderKind::NativeData: {
@@ -415,7 +415,7 @@ void Marker::init() {
         // the native data.
         ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->nativeObj());
-        obj->hdr_.mark = obj->hdr_.cmark = false;
+        obj->hdr_.marks = 0;
         break;
       }
       case HeaderKind::SmallMalloc:
@@ -447,7 +447,6 @@ void Marker::trace() {
 
 // check that headers have a "sensible" state during sweeping.
 DEBUG_ONLY bool check_sweep_header(const Header* h) {
-  assert(!h->hdr_.cmark || h->hdr_.mark); // cmark implies mark
   switch (h->kind()) {
     case HeaderKind::Packed:
     case HeaderKind::Struct:
@@ -484,7 +483,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       break;
     case HeaderKind::Free:
       // free memory; these should not be marked.
-      assert(!h->hdr_.mark);
+      assert(!h->hdr_.marks);
       break;
     case HeaderKind::ResumableObj:
     case HeaderKind::BigObj:
@@ -505,10 +504,10 @@ void Marker::sweep() {
   mm.iterate([&](Header* h) {
     assert(check_sweep_header(h));
     auto size = h->size(); // internal size
-    if (h->hdr_.mark) {
-      marked += size;
-      if (h->hdr_.cmark) ambig += size;
-      return; // continue foreach loop
+    if (h->hdr_.marks) {
+      if (h->hdr_.marks & MARK) marked += size;
+      else if (h->hdr_.marks & CMARK) ambig += size;
+      return; // continue iterate()
     }
     // when freeing objects below, do not run their destructors! we don't
     // want to execute cascading decrefs or anything. the normal release()

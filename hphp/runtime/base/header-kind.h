@@ -68,8 +68,7 @@ struct HeaderWord {
         struct {
           T aux;
           HeaderKind kind;
-          mutable uint8_t mark:1;
-          mutable uint8_t cmark:1;
+          mutable uint8_t marks;
         };
         uint32_t lo32;
       };

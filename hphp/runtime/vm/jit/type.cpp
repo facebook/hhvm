@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/text-util.cpp"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 #include <boost/algorithm/string/trim.hpp>

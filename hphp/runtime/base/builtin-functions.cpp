@@ -611,8 +611,14 @@ Object init_object(const String& s, const Array& params, ObjectData* o) {
   return Object{g_context->initObject(s.get(), params, o)};
 }
 
-Object create_object(const String& s, const Array& params, bool init /* = true */) {
+Object
+create_object(const String& s, const Array& params, bool init /* = true */) {
   return Object::attach(g_context->createObject(s.get(), params, init));
+}
+
+ATTRIBUTE_NORETURN
+void throw_object(const Object& e) {
+  throw e;
 }
 
 /*
@@ -1014,7 +1020,7 @@ void throw_exception(const Object& e) {
     raise_error("Exceptions must implement the Throwable interface.");
   }
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(e.get()));
-  throw e;
+  throw_object(e);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

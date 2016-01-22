@@ -137,6 +137,14 @@ Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
 Object init_object(const String& s, const Array &params, ObjectData* o);
 
+ATTRIBUTE_NORETURN
+void throw_object(const Object& e);
+
+ATTRIBUTE_NORETURN inline
+void throw_object(const String& s, const Array& params, bool init = true) {
+  throw_object(create_object(s, params, init));
+}
+
 /**
  * Argument count handling.
  *   - When level is 2, it's from constructors that turn these into fatals

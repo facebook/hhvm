@@ -824,6 +824,33 @@ std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
   if (!loadHelper(ue, name, md5)) return nullptr;
+
+#ifdef USE_JEMALLOC
+  if (RuntimeOption::TrackPerUnitMemory) {
+    size_t len = sizeof(uint64_t*);
+    uint64_t* alloc;
+    uint64_t* del;
+    mallctl("thread.allocatedp", static_cast<void*>(&alloc), &len, nullptr, 0);
+    mallctl("thread.deallocatedp", static_cast<void*>(&del), &len, nullptr, 0);
+    auto before = *alloc;
+    auto debefore = *del;
+    std::unique_ptr<Unit> result = ue.create();
+    auto after = *alloc;
+    auto deafter = *del;
+
+    auto path = folly::sformat("/tmp/units-{}.map", getpid());
+    auto change = (after - deafter) - (before - debefore);
+    auto str = folly::sformat("{} {}\n", name, change);
+    auto out = std::fopen(path.c_str(), "a");
+    if (out) {
+      std::fwrite(str.data(), str.size(), 1, out);
+      std::fclose(out);
+    }
+
+    return result;
+  }
+#endif
+
   return ue.create();
 }
 

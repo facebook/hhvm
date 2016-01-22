@@ -598,6 +598,7 @@ public:
   static bool HHProfActive;
   static bool HHProfAccum;
   static bool HHProfRequest;
+  static bool TrackPerUnitMemory;
 
   // Sandbox options
   static bool SandboxMode;

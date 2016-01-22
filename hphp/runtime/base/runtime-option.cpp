@@ -577,6 +577,7 @@ int RuntimeOption::Fb303ServerPoolThreads = 1;
 
 double RuntimeOption::XenonPeriodSeconds = 0.0;
 bool RuntimeOption::XenonForceAlwaysOn = false;
+bool RuntimeOption::TrackPerUnitMemory = false;
 
 std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
@@ -1609,6 +1610,8 @@ void RuntimeOption::Load(
                  "Stats.ProfilerTraceExpansion", 1.2);
     Config::Bind(ProfilerMaxTraceBuffer, ini, config,
                  "Stats.ProfilerMaxTraceBuffer", 0);
+    Config::Bind(TrackPerUnitMemory, ini, config,
+                 "Stats.TrackPerUnitMemory", false);
   }
   {
     Config::Bind(ServerVariables, ini, config, "ServerVariables");

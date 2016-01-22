@@ -1962,8 +1962,8 @@ void hphp_process_init() {
   {
     UnlimitSerializationScope unlimit;
     apc_load(apcExtension::LoadThread);
+    BootTimer::mark("apc_load");
   }
-  BootTimer::mark("apc_load");
 
   rds::requestExit();
   BootTimer::mark("rds::requestExit");
@@ -1972,6 +1972,13 @@ void hphp_process_init() {
   context->~ExecutionContext();
   new (context) ExecutionContext();
   BootTimer::mark("ExecutionContext");
+
+  // TODO(9755792): Add real execution mode for snapshot generation.
+  if (apcExtension::PrimeLibraryUpgradeDest != "") {
+    Logger::Info("APC PrimeLibrary upgrade mode completed; exiting.");
+    hphp_process_exit();
+    exit(0);
+  }
 }
 
 static void handle_exception(bool& ret, ExecutionContext* context,

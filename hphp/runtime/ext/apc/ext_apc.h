@@ -49,6 +49,7 @@ class apcExtension final : public Extension {
   static int PurgeRate;
   static bool AllowObj;
   static int TTLLimit;
+  static std::string PrimeLibraryUpgradeDest;
   static bool UseFileStorage;
   static int64_t FileStorageChunkSize;
   static std::string FileStoragePrefix;

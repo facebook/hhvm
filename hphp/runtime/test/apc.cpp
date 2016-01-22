@@ -47,7 +47,6 @@ std::vector<PrimePair> primable_n(Store& store,
   for (auto& pair : pairs) {
     auto key = folly::sformat("{}_{}", prefix, counter);
     pair.key = alloc_leaked_string(key.c_str());
-    pair.len = key.size();
 
     Variant v(create(counter));
     store.constructPrime(v, pair);

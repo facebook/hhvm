@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/native-prop-handler.h"
 
 #include <functional>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP {
 
@@ -684,6 +685,16 @@ static Array get_function_param_info(const Func* func) {
       )
     ) {
       param.set(s_type_hint_builtin, true_varNR);
+      // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
+      // the types to come back as PHP 7 style scalar types, not HH\ style
+      // scalar types.
+      if (!(func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax) &&
+          RuntimeOption::PHP7_ScalarTypes &&
+          boost::starts_with(typeHint->toCppString(), "HH\\")) {
+        String no_hh_type_hint(typeHint->toCppString());
+        no_hh_type_hint = no_hh_type_hint.substr(3);
+        param.set(s_type_hint, no_hh_type_hint);
+      }
     } else {
       param.set(s_type_hint_builtin, false_varNR);
     }
@@ -800,6 +811,14 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
       )
     ) {
       retTypeInfo.set(s_type_hint_builtin, true_varNR);
+      // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
+      // the types to come back as PHP 7 style scalar types, not HH\ style
+      // scalar types.
+      if (!(func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax) &&
+          RuntimeOption::PHP7_ScalarTypes &&
+          boost::starts_with(name.toCppString(), "HH\\")) {
+          name = name.substr(3);
+      }
     } else {
       retTypeInfo.set(s_type_hint_builtin, false_varNR);
     }

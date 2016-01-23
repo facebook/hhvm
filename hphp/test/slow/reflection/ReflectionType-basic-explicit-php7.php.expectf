@@ -1,0 +1,19 @@
+--Parameter--
+
+bool(true)
+bool(true)
+string(3) "int"
+bool(false)
+
+--Return--
+
+bool(true)
+bool(true)
+string(4) "bool"
+bool(false)
+
+--Call Constructor Directly--
+
+bool(false)
+
+Fatal error: ReflectionType::__construct(): Internal error: Failed to retrieve the reflection object in %sReflectionType-basic-explicit-php7.php on line %d

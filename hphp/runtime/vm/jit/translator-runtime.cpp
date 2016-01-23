@@ -35,7 +35,7 @@
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/unwind-vm.h"
+#include "hphp/runtime/vm/unwind.h"
 
 namespace HPHP {
 

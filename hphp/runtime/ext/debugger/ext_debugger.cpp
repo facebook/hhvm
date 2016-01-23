@@ -20,7 +20,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/unwind-vm.h"
+#include "hphp/runtime/vm/unwind.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

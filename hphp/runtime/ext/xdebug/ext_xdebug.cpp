@@ -32,7 +32,7 @@
 #include "hphp/runtime/ext/xdebug/hook.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
-#include "hphp/runtime/vm/unwind-vm.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"

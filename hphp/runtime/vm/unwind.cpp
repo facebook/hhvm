@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/unwind-vm.h"
+#include "hphp/runtime/vm/unwind.h"
 
 #include <boost/implicit_cast.hpp>
 

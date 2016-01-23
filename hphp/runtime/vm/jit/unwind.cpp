@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unwind-vm.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 

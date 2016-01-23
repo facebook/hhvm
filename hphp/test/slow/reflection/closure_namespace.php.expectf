@@ -9,3 +9,4 @@ string(%d) "Closure$Foo\Bar\C::func;%d"
 string(%d) "Closure$Foo\Bar\C::func;%d"
 int(2)
 string(3) "BAZ"
+NULL

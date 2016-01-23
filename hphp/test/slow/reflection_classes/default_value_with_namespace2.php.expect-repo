@@ -18,6 +18,7 @@ string(71) "array (
   ),
   2 => "foo",
 )"
+NULL
 call:
 array(3) {
   [0]=>

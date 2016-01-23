@@ -1,5 +1,6 @@
 reflection:
 int(42)
 string(18) "\A\I::SORT_NUMERIC"
+string(18) "\A\I::SORT_NUMERIC"
 call:
 int(42)

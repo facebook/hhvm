@@ -11,6 +11,7 @@ namespace {
   echo "reflection:\n";
   $rc = new ReflectionMethod('A\Bar', 'foo');
   var_dump($rc->getParameters()[0]->getDefaultValue());
+  var_dump($rc->getParameters()[0]->getDefaultValueText());
   var_dump($rc->getParameters()[0]->getDefaultValueConstantName());
   echo "call:\n";
   (new A\Bar())->foo();

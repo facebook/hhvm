@@ -11,6 +11,7 @@ function test($param) {
   $r = new ReflectionParameter('params', $param);
 
   var_dump($r->getDefaultValue());
+  var_dump($r->getDefaultValueText());
   var_dump($r->getDefaultValueConstantName());
 }
 

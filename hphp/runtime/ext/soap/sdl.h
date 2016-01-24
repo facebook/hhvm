@@ -339,7 +339,7 @@ struct sdlCtx {
   xmlNodeMap      portTypes;
   xmlNodeMap      bindings;
   xmlNodeMap      services;
-  
+
   ~sdlCtx();
 };
 
@@ -354,7 +354,7 @@ encodePtr get_encoder_ex(sdl *sdl, const std::string &nscat);
 sdlBindingPtr get_binding_from_type(sdl *sdl, int type);
 sdlBindingPtr get_binding_from_name(sdl *sdl, char *name, char *ns);
 
-sdlPtr load_wsdl(char *struri, HttpClient *http = NULL);
+sdlPtr load_wsdl(char *struri, HttpClient *http = nullptr);
 bool load_schema(sdlCtx *ctx, xmlNodePtr schema);
 void schema_pass2(sdlCtx *ctx);
 

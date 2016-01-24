@@ -211,7 +211,7 @@ bool load_schema(sdlCtx *ctx, xmlNodePtr schema) {
   xmlAttrPtr tns = get_attribute(schema->properties, "targetNamespace");
   if (!tns) {
     tns = xmlSetProp(schema, BAD_CAST("targetNamespace"), BAD_CAST(""));
-    xmlNewNs(schema, BAD_CAST(""), NULL);
+    xmlNewNs(schema, BAD_CAST(""), nullptr);
   }
 
   xmlNodePtr trav = schema->children;
@@ -230,7 +230,7 @@ bool load_schema(sdlCtx *ctx, xmlNodePtr schema) {
           uri = xmlBuildURI(location->children->content, base);
           xmlFree(base);
         }
-        schema_load_file(ctx, NULL, uri, tns, 0);
+        schema_load_file(ctx, nullptr, uri, tns, 0);
         xmlFree(uri);
       }
 
@@ -248,13 +248,13 @@ bool load_schema(sdlCtx *ctx, xmlNodePtr schema) {
           uri = xmlBuildURI(location->children->content, base);
           xmlFree(base);
         }
-        schema_load_file(ctx, NULL, uri, tns, 0);
+        schema_load_file(ctx, nullptr, uri, tns, 0);
         xmlFree(uri);
         /* TODO: <redefine> support */
       }
 
     } else if (node_is_equal(trav,"import")) {
-      xmlChar *uri = NULL;
+      xmlChar *uri = nullptr;
 
       xmlAttrPtr ns = get_attribute(trav->properties, "namespace");
       xmlAttrPtr location = get_attribute(trav->properties, "schemaLocation");
@@ -485,8 +485,8 @@ static bool schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType,
     start = str;
     while (start && *start != '\0') {
       end = strchr(start,' ');
-      if (end == NULL) {
-        next = NULL;
+      if (end == nullptr) {
+        next = nullptr;
       } else {
         *end = '\0';
         next = end+1;
@@ -591,7 +591,7 @@ static bool schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns,
                                              int simpleType) {
   checkBaseAttribute(sdl, restType, cur_type, !simpleType);
 
-  if (cur_type->restrictions == NULL) {
+  if (cur_type->restrictions == nullptr) {
     cur_type->restrictions = sdlRestrictionsPtr(new sdlRestrictions());
   }
 
@@ -640,9 +640,9 @@ static bool schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns,
   if (!simpleType) {
     while (trav) {
       if (node_is_equal(trav,"attribute")) {
-        schema_attribute(sdl, tns, trav, cur_type, NULL);
+        schema_attribute(sdl, tns, trav, cur_type, nullptr);
       } else if (node_is_equal(trav,"attributeGroup")) {
-        schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
+        schema_attributeGroup(sdl, tns, trav, cur_type, nullptr);
       } else if (node_is_equal(trav,"anyAttribute")) {
         /* TODO: <anyAttribute> support */
         trav = trav->next;
@@ -697,9 +697,9 @@ static bool schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns,
   }
   while (trav) {
     if (node_is_equal(trav,"attribute")) {
-      schema_attribute(sdl, tns, trav, cur_type, NULL);
+      schema_attribute(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"attributeGroup")) {
-      schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
+      schema_attributeGroup(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"anyAttribute")) {
       /* TODO: <anyAttribute> support */
       trav = trav->next;
@@ -732,7 +732,7 @@ static bool schema_restriction_var_int(xmlNodePtr val,
   }
 
   xmlAttrPtr value = get_attribute(val->properties, "value");
-  if (value == NULL) {
+  if (value == nullptr) {
     throw SoapException("Parsing Schema: missing restriction value");
   } else {
     valptr->value = atoi((char*)value->children->content);
@@ -755,7 +755,7 @@ static bool schema_restriction_var_char(xmlNodePtr val,
   }
 
   xmlAttrPtr value = get_attribute(val->properties, "value");
-  if (value == NULL) {
+  if (value == nullptr) {
     throw SoapException("Parsing Schema: missing restriction value");
   } else {
     valptr->value = (char*)value->children->content;
@@ -785,9 +785,9 @@ static bool schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns,
   }
   while (trav) {
     if (node_is_equal(trav,"attribute")) {
-      schema_attribute(sdl, tns, trav, cur_type, NULL);
+      schema_attribute(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"attributeGroup")) {
-      schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
+      schema_attributeGroup(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"anyAttribute")) {
       /* TODO: <anyAttribute> support */
       trav = trav->next;
@@ -841,9 +841,9 @@ static bool schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns,
   }
   while (trav) {
     if (node_is_equal(trav,"attribute")) {
-      schema_attribute(sdl, tns, trav, cur_type, NULL);
+      schema_attribute(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"attributeGroup")) {
-      schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
+      schema_attributeGroup(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"anyAttribute")) {
       /* TODO: <anyAttribute> support */
       trav = trav->next;
@@ -933,13 +933,13 @@ static bool schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all,
 static bool schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType,
                          sdlTypePtr cur_type, sdlContentModelPtr model) {
   xmlAttrPtr ns = get_attribute(groupType->properties, "targetNamespace");
-  if (ns == NULL) {
+  if (ns == nullptr) {
     ns = tns;
   }
 
-  xmlAttrPtr ref = NULL;
+  xmlAttrPtr ref = nullptr;
   xmlAttrPtr name = get_attribute(groupType->properties, "name");
-  if (name == NULL) {
+  if (name == nullptr) {
     name = ref = get_attribute(groupType->properties, "ref");
   }
 
@@ -968,7 +968,7 @@ static bool schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType,
       key += (char*)name->children->content;
     }
 
-    if (cur_type == NULL) {
+    if (cur_type == nullptr) {
       sdlTypePtr &newType = sdl->groups[key];
       if (newType) {
         throw SoapException("Parsing Schema: group '%s' already defined",
@@ -977,7 +977,7 @@ static bool schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType,
       cur_type = newType = sdlTypePtr(new sdlType());
     }
 
-    if (model == NULL) {
+    if (model == nullptr) {
       cur_type->model = newModel;
     } else {
       model->u_content.push_back(newModel);
@@ -1199,7 +1199,7 @@ static bool schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType,
                                sdlTypePtr cur_type) {
   xmlAttrPtr attrs = compType->properties;
   xmlAttrPtr ns = get_attribute(attrs, "targetNamespace");
-  if (ns == NULL) {
+  if (ns == nullptr) {
     ns = tns;
   }
 
@@ -1269,9 +1269,9 @@ static bool schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType,
       }
       while (trav) {
         if (node_is_equal(trav,"attribute")) {
-          schema_attribute(sdl, tns, trav, cur_type, NULL);
+          schema_attribute(sdl, tns, trav, cur_type, nullptr);
         } else if (node_is_equal(trav,"attributeGroup")) {
-          schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
+          schema_attributeGroup(sdl, tns, trav, cur_type, nullptr);
         } else if (node_is_equal(trav,"anyAttribute")) {
           /* TODO: <anyAttribute> support */
           trav = trav->next;
@@ -1315,13 +1315,13 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
                            sdlTypePtr cur_type, sdlContentModelPtr model) {
   xmlAttrPtr attrs = element->properties;
   xmlAttrPtr ns = get_attribute(attrs, "targetNamespace");
-  if (ns == NULL) {
+  if (ns == nullptr) {
     ns = tns;
   }
 
-  xmlAttrPtr ref = NULL;
+  xmlAttrPtr ref = nullptr;
   xmlAttrPtr name = get_attribute(attrs, "name");
-  if (name == NULL) {
+  if (name == nullptr) {
     name = ref = get_attribute(attrs, "ref");
   }
 
@@ -1345,7 +1345,7 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
       newType->namens = (char*)ns->children->content;
     }
 
-    if (cur_type == NULL) {
+    if (cur_type == nullptr) {
       string key = newType->namens;
       key += ':';
       key += newType->name;
@@ -1433,7 +1433,7 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
        if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
         xmlAttrPtr def = get_attribute(parent->properties,
                                        "elementFormDefault");
-        if (def == NULL ||
+        if (def == nullptr ||
             strncmp((char*)def->children->content, "qualified",
                     sizeof("qualified"))) {
           cur_type->form = XSD_FORM_UNQUALIFIED;
@@ -1444,7 +1444,7 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
       }
       parent = parent->parent;
     }
-    if (parent == NULL) {
+    if (parent == nullptr) {
       cur_type->form = XSD_FORM_UNQUALIFIED;
     }
   }
@@ -1527,10 +1527,10 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
 static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
                              sdlTypePtr cur_type, sdlCtx *ctx) {
   sdlAttributePtr newAttr;
-  xmlAttrPtr attr, ref = NULL, type = NULL;
+  xmlAttrPtr attr, ref = nullptr, type = nullptr;
 
   xmlAttrPtr name = get_attribute(attrType->properties, "name");
-  if (name == NULL) {
+  if (name == nullptr) {
     name = ref = get_attribute(attrType->properties, "ref");
   }
   if (name) {
@@ -1550,7 +1550,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
       newAttr->ref = key;
     } else {
       xmlAttrPtr ns = get_attribute(attrType->properties, "targetNamespace");
-      if (ns == NULL) {
+      if (ns == nullptr) {
         ns = tns;
       }
       if (ns) {
@@ -1562,7 +1562,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
     }
 
     sdlAttributeMap *addHash;
-    if (cur_type == NULL) {
+    if (cur_type == nullptr) {
       addHash = &ctx->attributes;
     } else {
       addHash = &cur_type->attributes;
@@ -1662,7 +1662,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
       if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
         xmlAttrPtr def = get_attribute(parent->properties,
                                        "attributeFormDefault");
-        if (def == NULL ||
+        if (def == nullptr ||
             strncmp((char*)def->children->content, "qualified",
                     sizeof("qualified"))) {
           newAttr->form = XSD_FORM_UNQUALIFIED;
@@ -1673,7 +1673,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
       }
       parent = parent->parent;
     }
-    if (parent == NULL) {
+    if (parent == nullptr) {
       newAttr->form = XSD_FORM_UNQUALIFIED;
     }
   }
@@ -1711,15 +1711,15 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
 static bool schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns,
                                   xmlNodePtr attrGroup, sdlTypePtr cur_type,
                                   sdlCtx *ctx) {
-  xmlAttrPtr ref = NULL;
+  xmlAttrPtr ref = nullptr;
   xmlAttrPtr name = get_attribute(attrGroup->properties, "name");
-  if (name == NULL) {
+  if (name == nullptr) {
     name = ref = get_attribute(attrGroup->properties, "ref");
   }
   if (name) {
     if (!cur_type) {
       xmlAttrPtr ns = get_attribute(attrGroup->properties, "targetNamespace");
-      if (ns == NULL) {
+      if (ns == nullptr) {
         ns = tns;
       }
       sdlTypePtr newType(new sdlType());
@@ -1771,13 +1771,13 @@ static bool schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns,
         throw SoapException("Parsing Schema: attributeGroup has both 'ref' "
                             "attribute and subattribute");
       }
-      schema_attribute(sdl, tns, trav, cur_type, NULL);
+      schema_attribute(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"attributeGroup")) {
       if (ref) {
         throw SoapException("Parsing Schema: attributeGroup has both 'ref' "
                             "attribute and subattribute");
       }
-      schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
+      schema_attributeGroup(sdl, tns, trav, cur_type, nullptr);
     } else if (node_is_equal(trav,"anyAttribute")) {
       if (ref) {
         throw SoapException("Parsing Schema: attributeGroup has both 'ref' "

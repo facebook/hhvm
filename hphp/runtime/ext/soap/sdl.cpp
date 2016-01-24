@@ -41,7 +41,7 @@ encodePtr get_encoder_from_prefix(sdl *sdl, xmlNodePtr node,
   encodePtr enc;
   if (nsptr) {
     enc = get_encoder(sdl, (char*)nsptr->href, cptype.c_str());
-    if (enc == NULL) {
+    if (enc == nullptr) {
       enc = get_encoder_ex(sdl, cptype);
     }
   } else {
@@ -91,7 +91,7 @@ encodePtr get_encoder(sdl *sdl, const char *ns, const char *type) {
     std::string enc_nscat = XSD_NAMESPACE;
     enc_nscat += ':';
     enc_nscat += type;
-    enc = get_encoder_ex(NULL, enc_nscat);
+    enc = get_encoder_ex(nullptr, enc_nscat);
     if (enc && sdl) {
       encodePtr new_enc(new encode());
       *new_enc = *enc;
@@ -238,13 +238,13 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
       if (tmp) {
         xmlChar *uri;
         xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-        if (base == NULL) {
+        if (base == nullptr) {
           uri = xmlBuildURI(tmp->children->content, trav->doc->URL);
         } else {
           uri = xmlBuildURI(tmp->children->content, base);
           xmlFree(base);
         }
-        load_wsdl_ex((char*)uri, ctx, true, NULL);
+        load_wsdl_ex((char*)uri, ctx, true, nullptr);
         xmlFree(uri);
       }
 
@@ -319,7 +319,7 @@ static std::shared_ptr<sdlSoapBindingFunctionHeader> wsdl_soap_binding_header
   }
 
   char *ctype = strrchr((char*)tmp->children->content,':');
-  if (ctype == NULL) {
+  if (ctype == nullptr) {
     ctype = (char*)tmp->children->content;
   } else {
     ++ctype;
@@ -337,7 +337,7 @@ static std::shared_ptr<sdlSoapBindingFunctionHeader> wsdl_soap_binding_header
   }
   xmlNodePtr part = get_node_with_attribute_ex
     (message->children, "part", WSDL_NAMESPACE, "name",
-     (char*)tmp->children->content, NULL);
+     (char*)tmp->children->content, nullptr);
   if (!part) {
     throw SoapException("Parsing WSDL: Missing part '%s' in <message>",
                         tmp->children->content);
@@ -513,7 +513,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node,
 static void wsdl_message(sdlCtx *ctx, sdlParamVec &parameters,
                          xmlChar* message_name) {
   char *ctype = strrchr((char*)message_name,':');
-  if (ctype == NULL) {
+  if (ctype == nullptr) {
     ctype = (char*)message_name;
   } else {
     ++ctype;
@@ -544,7 +544,7 @@ static void wsdl_message(sdlCtx *ctx, sdlParamVec &parameters,
     sdlParamPtr param(new sdlParam);
     param->order = 0;
     xmlAttrPtr name = get_attribute(part->properties, "name");
-    if (name == NULL) {
+    if (name == nullptr) {
       throw SoapException("Parsing WSDL: No name associated with <part> '%s'",
                           message->name);
     }
@@ -599,14 +599,14 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
 
       sdlBindingPtr tmpbinding(new sdlBinding());
       xmlAttrPtr bindingAttr = get_attribute(port->properties, "binding");
-      if (bindingAttr == NULL) {
+      if (bindingAttr == nullptr) {
         throw SoapException("Parsing WSDL: No binding associated with <port>");
       }
 
-      char *wsdl_soap_namespace = NULL;
+      char *wsdl_soap_namespace = nullptr;
 
         /* find address and figure out binding type */
-      xmlNodePtr address = NULL;
+      xmlNodePtr address = nullptr;
       xmlNodePtr trav2 = port->children;
       while (trav2) {
         if (node_is_equal(trav2,"address") && trav2->ns) {
@@ -661,7 +661,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
       tmpbinding->location = (char*)location->children->content;
 
       char *ctype = strrchr((char*)bindingAttr->children->content,':');
-      if (ctype == NULL) {
+      if (ctype == nullptr) {
         ctype = (char*)bindingAttr->children->content;
       } else {
         ++ctype;
@@ -702,21 +702,21 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
       }
 
       xmlAttrPtr name = get_attribute(binding->properties, "name");
-      if (name == NULL) {
+      if (name == nullptr) {
         throw SoapException("Parsing WSDL: Missing 'name' attribute "
                             "for <binding>");
       }
       tmpbinding->name = (char*)name->children->content;
 
       xmlAttrPtr type = get_attribute(binding->properties, "type");
-      if (type == NULL) {
+      if (type == nullptr) {
         throw SoapException("Parsing WSDL: Missing 'type' attribute "
                             "for <binding>");
       }
 
       xmlNodePtr portType, operation;
       ctype = strrchr((char*)type->children->content,':');
-      if (ctype == NULL) {
+      if (ctype == nullptr) {
         ctype = (char*)type->children->content;
       } else {
         ++ctype;
@@ -744,7 +744,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
 
         operation = trav2;
         xmlAttrPtr op_name = get_attribute(operation->properties, "name");
-        if (op_name == NULL) {
+        if (op_name == nullptr) {
           throw SoapException("Parsing WSDL: Missing 'name' attribute "
                               "for <operation>");
         }
@@ -767,8 +767,8 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
         xmlNodePtr portTypeOperation =
           get_node_with_attribute_ex(portType->children, "operation",
                                      WSDL_NAMESPACE, "name",
-                                     (char*)op_name->children->content, NULL);
-        if (portTypeOperation == NULL) {
+                                   (char*)op_name->children->content, nullptr);
+        if (portTypeOperation == nullptr) {
           throw SoapException("Parsing WSDL: Missing <portType>/<operation> "
                               "with name '%s'", op_name->children->content);
         }
@@ -814,7 +814,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                             WSDL_NAMESPACE);
         if (input) {
           xmlAttrPtr message = get_attribute(input->properties, "message");
-          if (message == NULL) {
+          if (message == nullptr) {
             throw SoapException("Parsing WSDL: Missing name for <input> "
                                 "of '%s'", op_name->children->content);
           }
@@ -846,7 +846,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                              WSDL_NAMESPACE);
         if (output) {
           xmlAttrPtr message = get_attribute(output->properties, "message");
-          if (message == NULL) {
+          if (message == nullptr) {
             throw SoapException("Parsing WSDL: Missing name for <output> "
                                 "of '%s'", op_name->children->content);
           }
@@ -857,7 +857,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
             xmlAttrPtr name = get_attribute(output->properties, "name");
             if (name) {
               function->responseName = estrdup(name->children->content);
-            } else if (input == NULL) {
+            } else if (input == nullptr) {
               function->responseName = estrdup(function->functionName);
             } else {
 */
@@ -888,12 +888,12 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
         while (fault) {
           if (node_is_equal_ex(fault, "fault", WSDL_NAMESPACE)) {
             xmlAttrPtr name = get_attribute(fault->properties, "name");
-            if (name == NULL) {
+            if (name == nullptr) {
               throw SoapException("Parsing WSDL: Missing name for <fault> "
                                   "of '%s'", op_name->children->content);
             }
             xmlAttrPtr message = get_attribute(fault->properties, "message");
-            if (message == NULL) {
+            if (message == nullptr) {
               throw SoapException("Parsing WSDL: Missing name for <output> "
                                   "of '%s'", op_name->children->content);
             }
@@ -911,7 +911,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
               xmlNodePtr soap_fault =
                 get_node_with_attribute_ex(operation->children, "fault",
                                            WSDL_NAMESPACE, "name",
-                                           (char*)f->name.c_str(), NULL);
+                                           (char*)f->name.c_str(), nullptr);
               if (soap_fault) {
                 xmlNodePtr trav = soap_fault->children;
                 while (trav) {

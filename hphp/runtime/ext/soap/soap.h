@@ -90,7 +90,7 @@ class SoapData final : public RequestEventHandler {
 public:
   SoapData();
 
-  sdl *get_sdl(const char *uri, long cache_wsdl, HttpClient *http = NULL);
+  sdl *get_sdl(const char *uri, long cache_wsdl, HttpClient *http = nullptr);
   encodeMap *register_typemap(encodeMapPtr typemap);
   void register_encoding(xmlCharEncodingHandlerPtr encoding);
 

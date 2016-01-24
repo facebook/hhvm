@@ -55,7 +55,7 @@ SoapData::SoapData() : m_cache(WSDL_CACHE_MEMORY), m_cache_ttl(86400) {
 }
 
 sdl *SoapData::get_sdl(const char *uri, long cache_wsdl,
-                       HttpClient *http /* = NULL */) {
+                       HttpClient *http /* = nullptr */) {
   sdlPtr sdl = get_sdl_impl(uri, cache_wsdl, http);
   if (sdl) {
     // holding it for the entire request life time, so soapserver and
@@ -63,7 +63,7 @@ sdl *SoapData::get_sdl(const char *uri, long cache_wsdl,
     m_sdls.insert(sdl);
     return sdl.get();
   }
-  return NULL;
+  return nullptr;
 }
 
 encodeMap *SoapData::register_typemap(encodeMapPtr typemap) {
@@ -73,7 +73,7 @@ encodeMap *SoapData::register_typemap(encodeMapPtr typemap) {
     m_typemaps.insert(typemap);
     return typemap.get();
   }
-  return NULL;
+  return nullptr;
 }
 
 void SoapData::register_encoding(xmlCharEncodingHandlerPtr encoding) {
@@ -113,14 +113,14 @@ sdlPtr SoapData::get_sdl_impl(const char *uri, long cache_wsdl,
 
 void SoapData::reset() {
   m_soap_version = SOAP_1_1;
-  m_sdl = NULL;
-  m_encoding = NULL;
+  m_sdl = nullptr;
+  m_encoding = nullptr;
   m_classmap.reset();
-  m_typemap = NULL;
+  m_typemap = nullptr;
   m_features = 0;
 
   m_use_soap_error_handler = false;
-  m_error_code = NULL;
+  m_error_code = nullptr;
   m_error_object.reset();
 
   m_cur_uniq_ns = 0;
@@ -130,8 +130,8 @@ void SoapData::reset() {
   m_sdls.clear();
   m_typemaps.clear();
 
-  for (auto itr = m_encodings.begin(); itr != m_encodings.end(); ++itr) {
-    xmlCharEncCloseFunc(*itr);
+  for (auto& handler : m_encodings) {
+    xmlCharEncCloseFunc(handler);
   }
   m_encodings.clear();
 }

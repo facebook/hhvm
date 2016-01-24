@@ -40,14 +40,14 @@ static bool is_blank(const xmlChar* str) {
 /* removes all empty text, comments and other insignoficant nodes */
 static void cleanup_xml_node(xmlNodePtr node) {
   xmlNodePtr trav;
-  xmlNodePtr del = NULL;
+  xmlNodePtr del = nullptr;
 
   trav = node->children;
-  while (trav != NULL) {
-    if (del != NULL) {
+  while (trav != nullptr) {
+    if (del != nullptr) {
       xmlUnlinkNode(del);
       xmlFreeNode(del);
-      del = NULL;
+      del = nullptr;
     }
     if (trav->type == XML_TEXT_NODE) {
       if (is_blank(trav->content)) {
@@ -56,12 +56,12 @@ static void cleanup_xml_node(xmlNodePtr node) {
     } else if ((trav->type != XML_ELEMENT_NODE) &&
                (trav->type != XML_CDATA_SECTION_NODE)) {
       del = trav;
-    } else if (trav->children != NULL) {
+    } else if (trav->children != nullptr) {
       cleanup_xml_node(trav);
     }
     trav = trav->next;
   }
-  if (del != NULL) {
+  if (del != nullptr) {
     xmlUnlinkNode(del);
     xmlFreeNode(del);
   }
@@ -102,12 +102,12 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
     }
     return ret;
   }
-  return NULL;
+  return nullptr;
 }
 
 xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size,
                               bool skip_clean /*= true */) {
-  xmlParserCtxtPtr ctxt = NULL;
+  xmlParserCtxtPtr ctxt = nullptr;
   xmlDocPtr ret;
 
 /*
@@ -118,25 +118,25 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size,
     ctxt->keepBlanks = 0;
     ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
     ctxt->sax->comment = soap_Comment;
-    ctxt->sax->warning = NULL;
-    ctxt->sax->error = NULL;
-    /*ctxt->sax->fatalError = NULL;*/
+    ctxt->sax->warning = nullptr;
+    ctxt->sax->error = nullptr;
+    /*ctxt->sax->fatalError = nullptr;*/
     auto old = HHVM_FN(libxml_disable_entity_loader)(true);
     xmlParseDocument(ctxt);
     HHVM_FN(libxml_disable_entity_loader)(old);
     if (ctxt->wellFormed) {
       ret = ctxt->myDoc;
-      if (ret->URL == NULL && ctxt->directory != NULL) {
+      if (ret->URL == nullptr && ctxt->directory != nullptr) {
         ret->URL = xmlCharStrdup(ctxt->directory);
       }
     } else {
-      ret = NULL;
+      ret = nullptr;
       xmlFreeDoc(ctxt->myDoc);
-      ctxt->myDoc = NULL;
+      ctxt->myDoc = nullptr;
     }
     xmlFreeParserCtxt(ctxt);
   } else {
-    ret = NULL;
+    ret = nullptr;
   }
 
 /*
@@ -155,7 +155,7 @@ xmlNsPtr attr_find_ns(xmlAttrPtr node) {
   } else if (node->parent->ns) {
     return node->parent->ns;
   } else {
-    return xmlSearchNs(node->doc, node->parent, NULL);
+    return xmlSearchNs(node->doc, node->parent, nullptr);
   }
 }
 
@@ -163,12 +163,12 @@ xmlNsPtr node_find_ns(xmlNodePtr node) {
   if (node->ns) {
     return node->ns;
   } else {
-    return xmlSearchNs(node->doc, node, NULL);
+    return xmlSearchNs(node->doc, node, nullptr);
   }
 }
 
 bool attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns) {
-  if (name == NULL || strcmp((char*)node->name, name) == 0) {
+  if (name == nullptr || strcmp((char*)node->name, name) == 0) {
     if (ns) {
       xmlNsPtr nsPtr = attr_find_ns(node);
       if (nsPtr) {
@@ -183,7 +183,7 @@ bool attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns) {
 }
 
 bool node_is_equal_ex(xmlNodePtr node, char *name, char *ns) {
-  if (name == NULL || strcmp((char*)node->name, name) == 0) {
+  if (name == nullptr || strcmp((char*)node->name, name) == 0) {
     if (ns) {
       xmlNsPtr nsPtr = node_find_ns(node);
       if (nsPtr) {
@@ -199,30 +199,30 @@ bool node_is_equal_ex(xmlNodePtr node, char *name, char *ns) {
 
 
 xmlAttrPtr get_attribute_ex(xmlAttrPtr node, char *name, char *ns) {
-  while (node!=NULL) {
+  while (node!=nullptr) {
     if (attr_is_equal_ex(node, name, ns)) {
       return node;
     }
     node = node->next;
   }
-  return NULL;
+  return nullptr;
 }
 
 xmlNodePtr get_node_ex(xmlNodePtr node, char *name, char *ns) {
-  while (node!=NULL) {
+  while (node!=nullptr) {
     if (node_is_equal_ex(node, name, ns)) {
       return node;
     }
     node = node->next;
   }
-  return NULL;
+  return nullptr;
 }
 
 xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, char *name, char *ns) {
-  while (node != NULL) {
+  while (node != nullptr) {
     if (node_is_equal_ex(node, name, ns)) {
       return node;
-    } else if (node->children != NULL) {
+    } else if (node->children != nullptr) {
       xmlNodePtr tmp = get_node_recurisve_ex(node->children, name, ns);
       if (tmp) {
         return tmp;
@@ -230,41 +230,41 @@ xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, char *name, char *ns) {
     }
     node = node->next;
   }
-  return NULL;
+  return nullptr;
 }
 
 xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name,
                                       char *name_ns, char *attribute,
                                       char *value, char *attr_ns) {
   xmlAttrPtr attr;
-  while (node != NULL) {
-    if (name != NULL) {
+  while (node != nullptr) {
+    if (name != nullptr) {
       node = get_node_ex(node, name, name_ns);
-      if (node==NULL) {
-        return NULL;
+      if (node==nullptr) {
+        return nullptr;
       }
     }
 
     attr = get_attribute_ex(node->properties, attribute, attr_ns);
-    if (attr != NULL && strcmp((char*)attr->children->content, value) == 0) {
+    if (attr != nullptr && strcmp((char*)attr->children->content, value) == 0) {
       return node;
     }
     node = node->next;
   }
-  return NULL;
+  return nullptr;
 }
 
 xmlNodePtr get_node_with_attribute_recursive_ex
 (xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value,
  char *attr_ns) {
-  while (node != NULL) {
+  while (node != nullptr) {
     if (node_is_equal_ex(node, name, name_ns)) {
       xmlAttrPtr attr = get_attribute_ex(node->properties, attribute, attr_ns);
-      if (attr != NULL && strcmp((char*)attr->children->content, value) == 0) {
+      if (attr != nullptr && !strcmp((char*)attr->children->content, value)) {
         return node;
       }
     }
-    if (node->children != NULL) {
+    if (node->children != nullptr) {
       xmlNodePtr tmp = get_node_with_attribute_recursive_ex
         (node->children, name, name_ns, attribute, value, attr_ns);
       if (tmp) {
@@ -273,7 +273,7 @@ xmlNodePtr get_node_with_attribute_recursive_ex
     }
     node = node->next;
   }
-  return NULL;
+  return nullptr;
 }
 
 void parse_namespace(const xmlChar *inval, std::string &value,

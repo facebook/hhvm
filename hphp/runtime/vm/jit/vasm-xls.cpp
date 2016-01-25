@@ -238,8 +238,10 @@ struct Variable {
   bool fixed() const { return vreg.isPhys(); }
 
   /*
-   * Return the subinterval which has a use at `pos', else nullptr.
+   * Return the subinterval which covers or has a use at `pos', else nullptr if
+   * no subinterval does.
    */
+  Interval* ivlAt(unsigned pos);
   Interval* ivlAtUse(unsigned pos);
 
 public:
@@ -257,9 +259,13 @@ public:
   // registers, and Vregs are SSA, a value's assigned slot never changes.
   int slot{kInvalidSpillSlot};
 
-  // Position of the variable's single def instruction; invalid for physical
-  // registers.
-  unsigned def_pos;
+  // Position of, and block containing, the variable's single def instruction;
+  // invalid for physical registers.
+  unsigned def_pos{kMaxPos};
+  Vlabel def_block;
+
+  // Copy of the Vreg's def instruction.
+  Vinstr def_inst;
 };
 
 /*
@@ -443,6 +449,14 @@ void Variable::destroy(Variable* var) {
   auto ivl = reinterpret_cast<Interval*>(var + 1);
   ivl->~Interval();
   free(var);
+}
+
+Interval* Variable::ivlAt(unsigned pos) {
+  for (auto ivl = this->ivl(); ivl; ivl = ivl->next) {
+    if (pos < ivl->start()) return nullptr;
+    if (ivl->covers(pos)) return ivl;
+  }
+  return nullptr;
 }
 
 Interval* Variable::ivlAtUse(unsigned pos) {
@@ -827,10 +841,12 @@ void addRange(Interval* ivl, LiveRange r) {
  */
 struct DefVisitor {
   DefVisitor(const Vunit& unit, jit::vector<Variable*>& variables,
-             LiveSet& live, unsigned pos)
-    : m_variables(variables)
-    , m_tuples(unit.tuples)
+             LiveSet& live, Vlabel b, const Vinstr& inst, unsigned pos)
+    : m_unit(unit)
+    , m_variables(variables)
     , m_live(live)
+    , m_block(b)
+    , m_inst(inst)
     , m_pos(pos)
   {}
 
@@ -841,11 +857,11 @@ struct DefVisitor {
   template<class R> void across(R) {}
 
   void def(Vtuple defs) {
-    for (auto r : m_tuples[defs]) def(r);
+    for (auto r : m_unit.tuples[defs]) def(r);
   }
   void defHint(Vtuple def_tuple, Vtuple hint_tuple) {
-    auto& defs = m_tuples[def_tuple];
-    auto& hints = m_tuples[hint_tuple];
+    auto& defs = m_unit.tuples[def_tuple];
+    auto& hints = m_unit.tuples[hint_tuple];
     for (int i = 0; i < defs.size(); i++) {
       def(defs[i], Constraint::Any, hints[i]);
     }
@@ -880,24 +896,28 @@ private:
       var->ivl()->uses.push_back(Use{kind, m_pos, hint});
       var->wide |= wide;
       var->def_pos = m_pos;
+      var->def_block = m_block;
+      var->def_inst = m_inst;
     }
   }
 
 private:
+  const Vunit& m_unit;
   jit::vector<Variable*>& m_variables;
-  const jit::vector<VregList>& m_tuples;
   LiveSet& m_live;
+  Vlabel m_block;
+  const Vinstr& m_inst;
   unsigned m_pos;
 };
 
 struct UseVisitor {
   UseVisitor(const Vunit& unit, jit::vector<Variable*>& variables,
              LiveSet& live, const Vinstr& inst, LiveRange range)
-    : m_variables(variables)
-    , m_tuples(unit.tuples)
+    : m_unit(unit)
+    , m_variables(variables)
     , m_live(live)
-    , m_range(range)
     , m_inst(inst)
+    , m_range(range)
   {}
 
   // Skip immediates and defs.
@@ -914,10 +934,10 @@ struct UseVisitor {
     use(r, constraint(r), m_range.end);
   }
   void use(RegSet regs) { regs.forEach([&](Vreg r) { use(r); }); }
-  void use(Vtuple uses) { for (auto r : m_tuples[uses]) use(r); }
+  void use(Vtuple uses) { for (auto r : m_unit.tuples[uses]) use(r); }
   void useHint(Vtuple src_tuple, Vtuple hint_tuple) {
-    auto& uses = m_tuples[src_tuple];
-    auto& hints = m_tuples[hint_tuple];
+    auto& uses = m_unit.tuples[src_tuple];
+    auto& hints = m_unit.tuples[hint_tuple];
     for (int i = 0, n = uses.size(); i < n; i++) {
       useHint(uses[i], hints[i]);
     }
@@ -963,11 +983,11 @@ private:
   }
 
 private:
+  const Vunit& m_unit;
   jit::vector<Variable*>& m_variables;
-  const jit::vector<VregList>& m_tuples;
   LiveSet& m_live;
-  const LiveRange m_range;
   const Vinstr& m_inst;
+  const LiveRange m_range;
 };
 
 /*
@@ -1004,7 +1024,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
       RegSet implicit_uses, implicit_across, implicit_defs;
       getEffects(ctx.abi, inst, implicit_uses, implicit_across, implicit_defs);
 
-      DefVisitor dv(unit, variables, live, pos);
+      DefVisitor dv(unit, variables, live, b, inst, pos);
       visitOperands(inst, dv);
       dv.def(implicit_defs);
 

@@ -1550,6 +1550,7 @@ static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
   return conn->createFunction(name, callback, argcount);
 #else
   raise_recoverable_error("PDO::sqliteCreateFunction not implemented");
+  return false;
 #endif
 }
 

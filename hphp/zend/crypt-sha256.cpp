@@ -6,16 +6,13 @@
 
 #include <errno.h>
 #include <limits.h>
-
+#include <memory.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _MSC_VER
-#define __alignof__ __alignof
-#define alloca _alloca
-
 #include <Windows.h>
 #endif
 
@@ -254,7 +251,7 @@ static void sha256_process_bytes(const void *buffer, size_t len, struct sha256_c
 
   /* Process available complete blocks.  */
   if (len >= 64) {
-# define UNALIGNED_P(p) (((uintptr_t) p) % __alignof__ (uint32_t) != 0)
+# define UNALIGNED_P(p) (((uintptr_t) p) % alignof (uint32_t) != 0)
     if (UNALIGNED_P (buffer))
       while (len > 64) {
         sha256_process_block(memcpy(ctx->buffer, buffer, 64), 64, ctx);
@@ -305,15 +302,8 @@ static const char b64t[] =
 
 char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
 {
-#if _MSC <= 1300
-# pragma pack(push, 16)
-  unsigned char alt_result[32];
-  unsigned char temp_result[32];
-# pragma pack(pop)
-#else
-  __declspec(align(32)) unsigned char alt_result[32];
-  __declspec(align(32)) unsigned char temp_result[32];
-#endif
+  alignas(32) unsigned char alt_result[32];
+  alignas(32) unsigned char temp_result[32];
 
   struct sha256_ctx ctx;
   struct sha256_ctx alt_ctx;
@@ -350,15 +340,15 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
   salt_len = MIN(strcspn(salt, "$"), SALT_LEN_MAX);
   key_len = strlen(key);
 
-  if ((key - (char *) 0) % __alignof__ (uint32_t) != 0) {
-    char *tmp = (char *) alloca(key_len + __alignof__(uint32_t));
-    key = copied_key = (char*)memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__(uint32_t), key, key_len);
+  if ((key - (char *) 0) % alignof (uint32_t) != 0) {
+    char *tmp = (char *) alloca(key_len + alignof(uint32_t));
+    key = copied_key = (char*)memcpy(tmp + alignof(uint32_t) - (tmp - (char *) 0) % alignof(uint32_t), key, key_len);
   }
 
-  if ((salt - (char *) 0) % __alignof__(uint32_t) != 0) {
-    char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint32_t));
+  if ((salt - (char *) 0) % alignof(uint32_t) != 0) {
+    char *tmp = (char *) alloca(salt_len + 1 + alignof(uint32_t));
     salt = copied_salt =
-    (char*)memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__ (uint32_t), salt, salt_len);
+    (char*)memcpy(tmp + alignof(uint32_t) - (tmp - (char *) 0) % alignof (uint32_t), salt, salt_len);
     copied_salt[salt_len] = 0;
   }
 
@@ -486,11 +476,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
   buflen -= sizeof(sha256_salt_prefix) - 1;
 
   if (rounds_custom) {
-#ifdef PHP_WIN32
-    int n = _snprintf(cp, MAX(0, buflen), "%s" ZEND_ULONG_FMT "$", sha256_rounds_prefix, rounds);
-#else
     int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha256_rounds_prefix, rounds);
-#endif
     cp += n;
     buflen -= n;
   }

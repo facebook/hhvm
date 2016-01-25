@@ -6,15 +6,13 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <memory.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _MSC_VER
-#define __alignof__ __alignof
-#define alloca _alloca
-
 #include <Windows.h>
 #endif
 
@@ -286,7 +284,7 @@ sha512_process_bytes(const void *buffer, size_t len, struct sha512_ctx *ctx) {
   /* Process available complete blocks.  */
   if (len >= 128) {
 #if !_STRING_ARCH_unaligned
-#define UNALIGNED_P(p) (((uintptr_t) p) % __alignof__ (uint64_t) != 0)
+#define UNALIGNED_P(p) (((uintptr_t) p) % alignof (uint64_t) != 0)
     if (UNALIGNED_P(buffer))
       while (len > 128) {
         sha512_process_block(memcpy(ctx->buffer, buffer, 128), 128, ctx);
@@ -341,15 +339,8 @@ static const char b64t[] =
 
 char *
 php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) {
-#if _MSC <= 1300
-# pragma pack(push, 16)
-  unsigned char alt_result[64];
-  unsigned char temp_result[64];
-# pragma pack(pop)
-#else
-  __declspec(align(64)) unsigned char alt_result[64];
-  __declspec(align(64)) unsigned char temp_result[64];
-#endif
+  alignas(64) unsigned char alt_result[64];
+  alignas(64) unsigned char temp_result[64];
   struct sha512_ctx ctx;
   struct sha512_ctx alt_ctx;
   size_t salt_len;
@@ -386,15 +377,15 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
   salt_len = MIN(strcspn(salt, "$"), SALT_LEN_MAX);
   key_len = strlen(key);
 
-  if ((key - (char *) 0) % __alignof__ (uint64_t) != 0) {
-    char *tmp = (char *) alloca (key_len + __alignof__ (uint64_t));
+  if ((key - (char *) 0) % alignof (uint64_t) != 0) {
+    char *tmp = (char *) alloca (key_len + alignof (uint64_t));
     key = copied_key =
-    (char*)memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), key, key_len);
+    (char*)memcpy(tmp + alignof(uint64_t) - (tmp - (char *) 0) % alignof(uint64_t), key, key_len);
   }
 
-  if ((salt - (char *) 0) % __alignof__ (uint64_t) != 0) {
-    char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint64_t));
-    salt = copied_salt = (char*)memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), salt, salt_len);
+  if ((salt - (char *) 0) % alignof (uint64_t) != 0) {
+    char *tmp = (char *) alloca(salt_len + 1 + alignof(uint64_t));
+    salt = copied_salt = (char*)memcpy(tmp + alignof(uint64_t) - (tmp - (char *) 0) % alignof(uint64_t), salt, salt_len);
     copied_salt[salt_len] = 0;
   }
 
@@ -523,11 +514,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
   buflen -= sizeof(sha512_salt_prefix) - 1;
 
   if (rounds_custom) {
-#ifdef PHP_WIN32
-    int n = _snprintf(cp, MAX(0, buflen), "%s" ZEND_ULONG_FMT "$", sha512_rounds_prefix, rounds);
-#else
     int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha512_rounds_prefix, rounds);
-#endif
     cp += n;
     buflen -= n;
   }

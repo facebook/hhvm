@@ -1090,18 +1090,36 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
 using PosVec = PhysReg::Map<unsigned>;
 
 /*
- * Find the PhysReg with the highest position in `posns'.
+ * Between `r1' and `r2', choose the one whose position in `pos_vec' is closest
+ * to but still after (or at) `pos'.
+ *
+ * If neither has a position after `pos', choose the higher one.
  */
-PhysReg find_farthest(const PosVec& posns) {
-  unsigned max = 0;
-  PhysReg r1 = *posns.begin();
-  for (auto r : posns) {
-    if (posns[r] > max) {
-      r1 = r;
-      max = posns[r];
+PhysReg choose_closest_after(unsigned pos, const PosVec& pos_vec,
+                             PhysReg r1, PhysReg r2) {
+  assertx(r1 != InvalidReg && r2 != InvalidReg);
+
+  if (pos_vec[r1] >= pos) {
+    if (pos <= pos_vec[r2] && pos_vec[r2] < pos_vec[r1]) {
+      return r2;
+    }
+  } else {
+    if (pos_vec[r2] > pos_vec[r1]) {
+      return r2;
     }
   }
   return r1;
+}
+
+/*
+ * Like choose_closest_after(), but iterates through `pos_vec'.
+ */
+PhysReg find_closest_after(unsigned pos, const PosVec& pos_vec) {
+  auto ret = *pos_vec.begin();
+  for (auto const r : pos_vec) {
+    ret = choose_closest_after(pos, pos_vec, ret, r);
+  }
+  return ret;
 }
 
 /*
@@ -1405,14 +1423,10 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
     if (hint == InvalidReg) continue;
     if (!allow.contains(hint)) continue;
 
-    // Just use this hint if it's free far enough into the future; else try to
-    // find a hint that we can use for the longest.
-    if (free_until[hint] >= current->end()) {
-      return hint;
-    }
-    if (ret == InvalidReg ||
-        free_until[ret] < free_until[hint]) {
+    if (ret == InvalidReg) {
       ret = hint;
+    } else {
+      ret = choose_closest_after(current->end(), free_until, ret, hint);
     }
   }
   return ret;
@@ -1520,9 +1534,10 @@ void Vxls::allocate(Interval* current) {
     return assignReg(current, hint);
   }
 
-  // Use the register that's available until furthest in the future if it's
-  // free across all of `current'.
-  auto r = find_farthest(free_until);
+  // Find the register whose availability most tightly covers the lifetime of
+  // `current' and use it.  If there is no such register, just find the one
+  // with the longest availability.
+  auto r = find_closest_after(current->end(), free_until);
   auto const pos = free_until[r];
   if (pos >= current->end()) {
     return assignReg(current, r);
@@ -1618,9 +1633,10 @@ void Vxls::allocBlocked(Interval* current) {
     }
   }
 
-  // Choose the best victim register(s) to spill---the one with the farthest
-  // first-use.
-  auto r = find_farthest(used);
+  // Choose the best victim register(s) to spill---the one with first-use
+  // after, but closest to, the lifetime of `current'; or the one with farthest
+  // first-use if no such register exists.
+  auto r = find_closest_after(current->end(), used);
 
   // If all other registers are used by their owning intervals before the first
   // register-use of `current', then we have to spill `current'.

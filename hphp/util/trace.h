@@ -94,55 +94,55 @@ namespace Trace {
       TM(bisector)      \
       TM(class_load)    \
       TM(datablock)     \
-      TM(decreftype)    \
       TM(debugger)      \
       TM(debuggerflow)  \
       TM(debuginfo)     \
+      TM(decreftype)    \
       TM(dispatchBB)    \
       TM(emitter)       \
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \
+      TM(heapgraph)     \
       TM(heapreport)    \
       TM(hhas)          \
       TM(hhbbc)         \
       TM(hhbbc_dce)     \
       TM(hhbbc_dump)    \
       TM(hhbbc_emit)    \
+      TM(hhbbc_iface)   \
       TM(hhbbc_index)   \
       TM(hhbbc_time)    \
-      TM(hhbbc_iface)   \
       TM(hhbc)          \
-      TM(hhprof)        \
-      TM(vasm)          \
-      TM(vasm_copy)     \
-      TM(vasm_phi)      \
       TM(hhir)          \
       TM(hhirTracelets) \
+      TM(hhir_alias)    \
       TM(hhir_cfg)      \
       TM(hhir_checkhoist) \
       TM(hhir_dce)      \
-      TM(hhir_store)    \
-      TM(hhir_alias)    \
-      TM(hhir_loop)     \
-      TM(hhir_load)     \
-      TM(hhir_refineTmps) \
       TM(hhir_gvn)      \
-      TM(hhir_refcount) \
       TM(hhir_licm)     \
+      TM(hhir_load)     \
+      TM(hhir_loop)     \
       TM(hhir_phi)      \
-      TM(layout)        \
-      TM(llvm)          \
-      TM(llvm_count)    \
+      TM(hhir_refcount) \
+      TM(hhir_refineTmps) \
+      TM(hhir_store)    \
+      TM(hhprof)        \
       TM(inlining)      \
       TM(instancebits)  \
       TM(intercept)     \
       TM(interpOne)     \
       TM(jittime)       \
+      TM(layout)        \
       TM(libxml)        \
+      TM(llvm)          \
+      TM(llvm_count)    \
       TM(mcg)           \
       TM(mcgstats)      \
       TM(minstr)        \
+      TM(mm)            \
+      TM(objprof)       \
       TM(pgo)           \
       TM(printir)       \
       TM(rat)           \
@@ -154,7 +154,6 @@ namespace Trace {
       TM(runtime)       \
       TM(servicereq)    \
       TM(simplify)      \
-      TM(mm)            \
       TM(stat)          \
       TM(statgroups)    \
       TM(stats)         \
@@ -167,10 +166,12 @@ namespace Trace {
       TM(typeProfile)   \
       TM(unwind)        \
       TM(ustubs)        \
+      TM(vasm)          \
+      TM(vasm_copy)     \
+      TM(vasm_phi)      \
       TM(xenon)         \
-      TM(objprof)       \
-      TM(heapgraph)     \
       TM(xls)           \
+      TM(xls_stats)     \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \
@@ -381,11 +382,12 @@ void dumpRingbuffer();
  * Implementation for when tracing is disabled.
  */
 
-#define ONTRACE(...)    do { } while (0)
-#define TRACE(...)      do { } while (0)
-#define FTRACE(...)     do { } while (0)
-#define TRACE_MOD(...)  do { } while (0)
-#define FTRACE_MOD(...) do { } while (0)
+#define ONTRACE(...)      do { } while (0)
+#define TRACE(...)        do { } while (0)
+#define FTRACE(...)       do { } while (0)
+#define ONTRACE_MOD(...)  do { } while (0)
+#define TRACE_MOD(...)    do { } while (0)
+#define FTRACE_MOD(...)   do { } while (0)
 #define TRACE_SET_MOD(name) \
   DEBUG_ONLY static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 

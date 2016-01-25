@@ -34,6 +34,7 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/util/trace.h"
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
@@ -2770,6 +2771,58 @@ DEBUG_ONLY void printVariables(const char* caption,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+struct XLSStats {
+  size_t instrs{0};
+  size_t moves{0};
+  size_t loads{0};
+  size_t spills{0};
+  size_t consts{0};
+  size_t total_copies{0};
+};
+
+DEBUG_ONLY void dumpStats(const Vunit& unit,
+                          const ResolutionPlan& resolution) {
+  XLSStats stats;
+
+  for (auto const& blk : unit.blocks) {
+    stats.instrs += blk.code.size();
+  }
+  for (auto const& kv : resolution.spills) {
+    auto const& spills = kv.second;
+    for (auto const r : spills) {
+      if (spills[r]) ++stats.spills;
+    }
+  }
+
+  auto const count_copies = [&] (const CopyPlan& plan) {
+    for_each_copy(plan, [&] (PhysReg, const Interval*) {
+      ++stats.moves;
+    });
+    for_each_load(plan, [&] (PhysReg, const Interval* ivl) {
+      ++(ivl->spilled() ? stats.loads : stats.consts);
+    });
+  };
+  for (auto const& kv : resolution.copies) count_copies(kv.second);
+  for (auto const& kv : resolution.edge_copies) count_copies(kv.second);
+
+  stats.total_copies = stats.moves + stats.loads + stats.spills;
+
+  FTRACE_MOD(
+    Trace::xls_stats, 1,
+    "XLS stats:\n"
+    "  instrs: {}\n"
+    "  moves:  {}\n"
+    "  loads:  {}\n"
+    "  spills: {}\n"
+    "  consts: {}\n"
+    "  total copies: {}\n",
+    stats.instrs, stats.moves, stats.loads, stats.spills,
+    stats.consts, stats.total_copies
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 void allocateRegisters(Vunit& unit, const Abi& abi) {
@@ -2807,6 +2860,7 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   allocateSpillSpace(unit, ctx, spill_info);
 
   printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
+  ONTRACE_MOD(Trace::xls_stats, 1, dumpStats(unit, resolution));
 
   // Free the variable metadata.
   for (auto var : variables) {

@@ -37,14 +37,8 @@ class IntlError {
   void setError(UErrorCode code, const char *format = nullptr, ...);
   void clearError(bool clearGlobalError = true);
 
-  Object getException(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    char buffer[1024];
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-    return SystemLib::AllocExceptionObject(buffer);
-  }
+  ATTRIBUTE_NORETURN
+  void throwException(const char *format, ...);
 
   UErrorCode getErrorCode() const { return m_errorCode; }
 

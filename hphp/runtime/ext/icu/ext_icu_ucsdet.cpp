@@ -9,8 +9,7 @@ const StaticString s_EncodingDetector("EncodingDetector");
 #define FETCH_DET(dest, src) \
   auto dest = EncodingDetector::Get(src); \
   if (!dest) { \
-    throw s_intl_error->getException( \
-                              "Call to invalid EncodingDetector Object"); \
+    s_intl_error->throwException("Call to invalid EncodingDetector Object"); \
   }
 
 static void HHVM_METHOD(EncodingDetector, setText, const String& text) {
@@ -29,8 +28,8 @@ static Object HHVM_METHOD(EncodingDetector, detect) {
   UErrorCode error = U_ZERO_ERROR;
   auto match = ucsdet_detect(data->detector(), &error);
   if (U_FAILURE(error)) {
-    throw data->getException("Could not detect encoding, error %d (%s)",
-                             error, u_errorName(error));
+    data->throwException("Could not detect encoding, error %d (%s)",
+                         error, u_errorName(error));
   }
   return EncodingMatch::newInstance(match);
 }
@@ -41,8 +40,8 @@ static Array HHVM_METHOD(EncodingDetector, detectAll) {
   int32_t count = 0;
   auto matches = ucsdet_detectAll(data->detector(), &count, &error);
   if (U_FAILURE(error)) {
-    throw data->getException("Could not detect all encodings, error %d (%s)",
-                             error, u_errorName(error));
+    data->throwException("Could not detect all encodings, error %d (%s)",
+                         error, u_errorName(error));
   }
   Array ret = Array::Create();
   for (int i = 0; i < count; ++i) {
@@ -74,8 +73,8 @@ static String HHVM_METHOD(EncodingMatch, getEncoding) {
   UErrorCode error = U_ZERO_ERROR;
   auto encoding = ucsdet_getName(data->match(), &error);
   if (U_FAILURE(error)) {
-    throw data->getException("Could not get encoding for match, error %d (%s)",
-                             error, u_errorName(error));
+    data->throwException("Could not get encoding for match, error %d (%s)",
+                         error, u_errorName(error));
   }
   return String(encoding, CopyString);
 }
@@ -85,8 +84,8 @@ static int64_t HHVM_METHOD(EncodingMatch, getConfidence) {
   UErrorCode error = U_ZERO_ERROR;
   auto confidence = ucsdet_getConfidence(data->match(), &error);
   if (U_FAILURE(error)) {
-    throw data->getException("Could not get confidence for match, error "
-                             "%d (%s)", error, u_errorName(error));
+    data->throwException("Could not get confidence for match, error "
+                         "%d (%s)", error, u_errorName(error));
   }
   return confidence;
 }
@@ -96,8 +95,8 @@ static String HHVM_METHOD(EncodingMatch, getLanguage) {
   UErrorCode error = U_ZERO_ERROR;
   auto language = ucsdet_getLanguage(data->match(), &error);
   if (U_FAILURE(error)) {
-    throw data->getException("Could not get language for match, error %d (%s)",
-                             error, u_errorName(error));
+    data->throwException("Could not get language for match, error %d (%s)",
+                         error, u_errorName(error));
   }
   return String(language, CopyString);
 }
@@ -121,14 +120,14 @@ static String HHVM_METHOD(EncodingMatch, getUTF8) {
   } while (error == U_BUFFER_OVERFLOW_ERROR);
 
   if (U_FAILURE(error)) {
-    throw data->getException("Could not get UTF-8 for match, error %d (%s)",
-                             error, u_errorName(error));
+    data->throwException("Could not get UTF-8 for match, error %d (%s)",
+                         error, u_errorName(error));
   }
 
   error = U_ZERO_ERROR;
   String ret(u8(ustr, error));
   if (U_FAILURE(error)) {
-    throw data->getException("Error converting buffer to UTF8 %d (%d)",
+    data->throwException("Error converting buffer to UTF8 %d (%d)",
                          error, u_errorName(error));
   }
   return ret;

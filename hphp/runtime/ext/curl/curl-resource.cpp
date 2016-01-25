@@ -141,7 +141,7 @@ void CurlResource::check_exception() {
   auto e = std::move(m_exception);
   assertx(!m_exception);
   if (isPhpException(e)) {
-    throw getPhpException(e);
+    throw_object(getPhpException(e));
   } else {
     getCppException(e)->throwException();
   }

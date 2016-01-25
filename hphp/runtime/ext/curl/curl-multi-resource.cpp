@@ -1,7 +1,7 @@
 #include "hphp/runtime/ext/curl/curl-multi-resource.h"
 #include "hphp/runtime/ext/curl/curl-resource.h"
-
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include <curl/easy.h>
 #include <curl/multi.h>
@@ -104,7 +104,7 @@ void CurlMultiResource::check_exceptions() {
     }
   }
   if (cppException) cppException->throwException();
-  if (!phpException.isNull()) throw phpException;
+  if (!phpException.isNull()) throw_object(phpException);
 }
 
 CURLM* CurlMultiResource::get() {

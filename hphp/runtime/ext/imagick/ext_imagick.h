@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/imagick/constants.h"
 #include "hphp/util/string-vsnprintf.h"
@@ -111,7 +112,7 @@ void imagickThrow(const char* fmt, ...) {
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  throw T::allocObject(msg);
+  throw_object(T::allocObject(msg));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -213,10 +214,9 @@ req::ptr<WandResource<Wand>> getWandResource(const StaticString& className,
                                              const std::string& msg) {
   auto ret = getWandResource<Wand>(className, obj);
   if (ret == nullptr || ret->getWand() == nullptr) {
-    throw T::allocObject(msg);
-  } else {
-    return ret;
+    throw_object(T::allocObject(msg));
   }
+  return ret;
 }
 
 ALWAYS_INLINE

@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/icu/icu.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -55,6 +56,16 @@ void IntlError::clearError(bool clearGlobalError /*= true */) {
     s_intl_error->m_errorCode = U_ZERO_ERROR;
     s_intl_error->m_errorMessage.clear();
   }
+}
+
+ATTRIBUTE_NORETURN
+void IntlError::throwException(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  char buffer[1024];
+  vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+  throw_object(SystemLib::AllocExceptionObject(buffer));
 }
 
 /////////////////////////////////////////////////////////////////////////////

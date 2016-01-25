@@ -46,7 +46,7 @@ void NumberFormatter::setNumberFormatter(const String& locale,
   if (U_FAILURE(error)) {
     s_intl_error->setError(error,
         "numfmt_create: error converting pattern to UTF-16");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 
   const String loc(localeOrDefault(locale));
@@ -59,7 +59,7 @@ void NumberFormatter::setNumberFormatter(const String& locale,
   if (U_FAILURE(error)) {
     s_intl_error->setError(error,
         "numfmt_create: number formatter creation failed");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 
@@ -67,14 +67,14 @@ void NumberFormatter::setNumberFormatter(const NumberFormatter *orig) {
   if (!orig || !orig->formatter()) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Cannot clone unconstructed NumberFormatter");
-    throw getException("%s", s_intl_error->getErrorMessage(false).c_str());
+    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   UErrorCode error = U_ZERO_ERROR;
   m_formatter = unum_clone(orig->formatter(), &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "numfmt_clone: "
                                   "number formatter clone failed");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 

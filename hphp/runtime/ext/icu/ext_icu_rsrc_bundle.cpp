@@ -7,7 +7,7 @@ namespace HPHP { namespace Intl {
 #define FETCH_RSRC(data, obj) \
   auto data = ResourceBundle::Get(obj); \
   if (!data) { \
-    throw s_intl_error->getException("Uninitialized Message Formatter"); \
+    s_intl_error->throwException("Uninitialized Message Formatter"); \
   }
 
 
@@ -78,7 +78,7 @@ static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "resourcebundle_ctor: "
                                   "Cannot load libICU resource bundle");
-    throw data->getException("%s", s_intl_error->getErrorMessage().c_str());
+    data->throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
   if (!fallback &&
       ((error == U_USING_FALLBACK_WARNING) ||
@@ -90,7 +90,7 @@ static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
       bundle ? bundle : "(default data)", loc.getName(),
       rsrc->getLocale(ULOC_ACTUAL_LOCALE, dummy).getName());
     delete rsrc;
-    throw data->getException("%s", s_intl_error->getErrorMessage().c_str());
+    data->throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
   data->setResource(rsrc);
 }

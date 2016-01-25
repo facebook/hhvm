@@ -62,13 +62,13 @@ class c_ExternalThreadEventWaitHandle;
  *       if (UNLIKELY(m_failed)) {
  *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
  *           "An error has occurred while scheduling the operation"));
- *         throw e;
+ *         throw_object(e);
  *       }
  *
  *       if (UNLIKELY(m_value > m_maxValue)) {
  *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
  *           "Invalid response returned by Foo backend"));
- *         throw e;
+ *         throw_object(e);
  *       }
  *
  *       cellDup(make_tv<KindOfInt64>(m_value), result);
@@ -88,7 +88,7 @@ class c_ExternalThreadEventWaitHandle;
  *   if (max_value < 0) {
  *     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
  *       "Expected max_value to be non-negative"));
- *     throw e;
+ *     throw_object(e);
  *   }
  *
  *   FooEvent* event = new FooEvent(max_value);
@@ -104,7 +104,7 @@ class c_ExternalThreadEventWaitHandle;
  *     event->abandon();
  *     Object e(SystemLib::AllocInvalidOperationExceptionObject(
  *       "Encountered unexpected exception"));
- *     throw e;
+ *     throw_object(e);
  *   }
  *   return event->getWaitHandle();
  * }

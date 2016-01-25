@@ -443,7 +443,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     }
   }
   if (!autoloadException.isNull()) {
-    throw autoloadException;
+    throw_object(autoloadException);
   }
   return true;
 }

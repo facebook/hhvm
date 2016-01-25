@@ -1042,7 +1042,7 @@ void throwAsyncMysqlException(const char* exception_type,
 
   Array params;
   params.append(std::move(error));
-  throw create_object(exception_type, params, true /* init */);
+  throw_object(exception_type, params, true /* init */);
 }
 
 void throwAsyncMysqlQueryException(const char* exception_type,
@@ -1058,7 +1058,7 @@ void throwAsyncMysqlQueryException(const char* exception_type,
 
   Array params;
   params.append(std::move(error));
-  throw create_object(exception_type, params, true /* init */);
+  throw_object(exception_type, params, true /* init */);
 }
 }
 

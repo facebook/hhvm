@@ -83,7 +83,7 @@ Variant HHVM_METHOD(WaitHandle, join) {
     return cellAsCVarRef(obj->getResult());
   } else {
     // failed? throw exception
-    throw Object{obj->getException()};
+    throw_object(Object{obj->getException()});
   }
 }
 

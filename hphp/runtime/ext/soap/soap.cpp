@@ -25,7 +25,7 @@ SoapData::SoapData() : m_cache(WSDL_CACHE_MEMORY), m_cache_ttl(86400) {
   for (int i = 0; s_defaultEncoding[i].type != END_KNOWN_TYPES; ++i) {
     encodeStatic &e = s_defaultEncoding[i];
 
-    encodePtr enc(new encode());
+    auto enc = std::make_shared<encode>();
     enc->details.type = e.type;
     enc->details.type_str = e.type_str;
     enc->details.ns = e.ns;

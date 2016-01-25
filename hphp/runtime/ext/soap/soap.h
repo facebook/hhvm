@@ -84,8 +84,8 @@ class SoapData final : public RequestEventHandler {
     sdlPtr sdl;
     time_t time;
   };
-  typedef hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>
-          sdlCache;
+  using sdlCache =
+        hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>;
 
 public:
   SoapData();

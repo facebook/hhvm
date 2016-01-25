@@ -93,7 +93,7 @@ encodePtr get_encoder(sdl *sdl, const char *ns, const char *type) {
     enc_nscat += type;
     enc = get_encoder_ex(nullptr, enc_nscat);
     if (enc && sdl) {
-      encodePtr new_enc(new encode());
+      auto new_enc = std::make_shared<encode>();
       *new_enc = *enc;
       sdl->encoders[nscat] = new_enc;
       enc = new_enc;
@@ -458,7 +458,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node,
           for (unsigned int i = 0; i < params.size(); i++) {
             sdlParamPtr param = params[i];
             if (param->paramName == parts) {
-              sdlParamPtr x_param(new sdlParam);
+              auto x_param = std::make_shared<sdlParam>();
               *x_param = *param;
               ht.push_back(x_param);
               found = true;
@@ -541,7 +541,7 @@ static void wsdl_message(sdlCtx *ctx, sdlParamVec &parameters,
                           trav->name);
     }
     part = trav;
-    sdlParamPtr param(new sdlParam);
+    auto param = std::make_shared<sdlParam>();
     param->order = 0;
     xmlAttrPtr name = get_attribute(part->properties, "name");
     if (name == nullptr) {
@@ -572,7 +572,7 @@ static void wsdl_message(sdlCtx *ctx, sdlParamVec &parameters,
 
 sdlPtr load_wsdl(char *struri, HttpClient *http) {
   sdlCtx ctx;
-  ctx.sdl = sdlPtr(new sdl());
+  ctx.sdl = std::make_shared<sdl>();
   ctx.sdl->source = struri;
 
   load_wsdl_ex(struri, &ctx, false, http);
@@ -597,7 +597,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
 
       port = trav;
 
-      sdlBindingPtr tmpbinding(new sdlBinding());
+      auto tmpbinding = std::make_shared<sdlBinding>();
       xmlAttrPtr bindingAttr = get_attribute(port->properties, "binding");
       if (bindingAttr == nullptr) {
         throw SoapException("Parsing WSDL: No binding associated with <port>");
@@ -676,7 +676,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
       if (tmpbinding->bindingType == BINDING_SOAP) {
         xmlAttrPtr tmp;
 
-        sdlSoapBindingPtr soapBinding(new sdlSoapBinding());
+        auto soapBinding = std::make_shared<sdlSoapBinding>();
         soapBinding->style = SOAP_DOCUMENT;
         xmlNodePtr soapBindingNode = get_node_ex(binding->children, "binding",
                                                  wsdl_soap_namespace);
@@ -780,8 +780,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
         function->functionName = (char*)op_name->children->content;
 
         if (tmpbinding->bindingType == BINDING_SOAP) {
-          sdlSoapBindingFunctionPtr soapFunctionBinding
-            (new sdlSoapBindingFunction());
+          auto soapFunctionBinding = std::make_shared<sdlSoapBindingFunction>();
           sdlSoapBindingPtr soapBinding = tmpbinding->bindingAttributes;
           soapFunctionBinding->style = soapBinding->style;
 
@@ -916,9 +915,8 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                 xmlNodePtr trav = soap_fault->children;
                 while (trav) {
                   if (node_is_equal_ex(trav, "fault", wsdl_soap_namespace)) {
-                    sdlSoapBindingFunctionFaultPtr binding =
-                      f->bindingAttributes = sdlSoapBindingFunctionFaultPtr
-                      (new sdlSoapBindingFunctionFault());
+                    auto binding = f->bindingAttributes =
+                         std::make_shared<sdlSoapBindingFunctionFault>();
                     xmlAttrPtr tmp = get_attribute(trav->properties, "use");
                     if (tmp && !strncmp((char*)tmp->children->content,
                                         "encoded", sizeof("encoded"))) {

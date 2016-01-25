@@ -92,7 +92,7 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type,
   if (iter != sdl->encoders.end()) {
     enc = iter->second;
   } else {
-    enc = encodePtr(new encode());
+    enc = std::make_shared<encode>();
   }
 
   enc->details.type = 0;
@@ -345,7 +345,7 @@ static bool schema_simpleType(sdlPtr sdl, xmlAttrPtr tns,
 
   xmlAttrPtr name = get_attribute(simpleType->properties, "name");
 
-  sdlTypePtr newType(new sdlType());
+  auto newType = std::make_shared<sdlType>();
   if (cur_type) {
     /* Anonymous type inside <element> or <restriction> */
     if (name) {
@@ -357,7 +357,7 @@ static bool schema_simpleType(sdlPtr sdl, xmlAttrPtr tns,
     }
     sdl->types.push_back(newType);
 
-    cur_type->encode = encodePtr(new encode());
+    cur_type->encode = std::make_shared<encode>();
     cur_type->encode->details.ns = newType->namens;
     cur_type->encode->details.type_str = newType->name;
     cur_type->encode->details.sdl_type = newType.get();
@@ -430,7 +430,7 @@ static bool schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType,
     parse_namespace(itemType->children->content, type, ns);
     xmlNsPtr nsptr = xmlSearchNs(listType->doc, listType, NS_STRING(ns));
     if (nsptr) {
-      sdlTypePtr newType(new sdlType());
+      auto newType = std::make_shared<sdlType>();
       newType->name = type;
       newType->namens = (char*)nsptr->href;
       newType->encode = get_create_encoder(sdl, newType, nsptr->href,
@@ -449,7 +449,7 @@ static bool schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType,
       throw SoapException("Parsing Schema: element has both 'itemType' "
                           "attribute and subtype");
     }
-    sdlTypePtr newType(new sdlType());
+    auto newType = std::make_shared<sdlType>();
     newType->name = "anonymous" + folly::to<string>(sdl->types.size());
     newType->namens = (char*)tns->children->content;
     cur_type->elements.push_back(newType);
@@ -495,7 +495,7 @@ static bool schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType,
       parse_namespace(BAD_CAST(start), type, ns);
       nsptr = xmlSearchNs(unionType->doc, unionType, NS_STRING(ns));
       if (nsptr) {
-        sdlTypePtr newType(new sdlType());
+        auto newType = std::make_shared<sdlType>();
         newType->name = type;
         newType->namens = (char*)nsptr->href;
         newType->encode = get_create_encoder(sdl, newType, nsptr->href,
@@ -514,7 +514,7 @@ static bool schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType,
   }
   while (trav) {
     if (node_is_equal(trav,"simpleType")) {
-      sdlTypePtr newType(new sdlType());
+      auto newType = std::make_shared<sdlType>();
       newType->name = "anonymous" + folly::to<string>(sdl->types.size());
       newType->namens = (char*)tns->children->content;
       cur_type->elements.push_back(newType);
@@ -592,7 +592,7 @@ static bool schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns,
   checkBaseAttribute(sdl, restType, cur_type, !simpleType);
 
   if (cur_type->restrictions == nullptr) {
-    cur_type->restrictions = sdlRestrictionsPtr(new sdlRestrictions());
+    cur_type->restrictions = std::make_shared<sdlRestrictions>();
   }
 
   xmlNodePtr trav = restType->children;
@@ -720,7 +720,7 @@ static bool schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns,
 
 static bool schema_restriction_var_int(xmlNodePtr val,
                                        sdlRestrictionIntPtr &valptr) {
-  valptr = sdlRestrictionIntPtr(new sdlRestrictionInt());
+  valptr = std::make_shared<sdlRestrictionInt>();
 
   xmlAttrPtr fixed = get_attribute(val->properties, "fixed");
   valptr->fixed = false;
@@ -743,7 +743,7 @@ static bool schema_restriction_var_int(xmlNodePtr val,
 
 static bool schema_restriction_var_char(xmlNodePtr val,
                                         sdlRestrictionCharPtr &valptr) {
-  valptr = sdlRestrictionCharPtr(new sdlRestrictionChar());
+  valptr = std::make_shared<sdlRestrictionChar>();
 
   xmlAttrPtr fixed = get_attribute(val->properties, "fixed");
   valptr->fixed = false;
@@ -893,7 +893,7 @@ void schema_min_max(xmlNodePtr node, sdlContentModelPtr model) {
 */
 static bool schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all,
                        sdlTypePtr cur_type, sdlContentModelPtr model) {
-  sdlContentModelPtr newModel(new sdlContentModel());
+  auto newModel = std::make_shared<sdlContentModel>();
   newModel->kind = XSD_CONTENT_ALL;
   if (model) {
     model->u_content.push_back(newModel);
@@ -956,11 +956,11 @@ static bool schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType,
       }
       key += type;
 
-      newModel = sdlContentModelPtr(new sdlContentModel());
+      newModel = std::make_shared<sdlContentModel>();
       newModel->kind = XSD_CONTENT_GROUP_REF;
       newModel->u_group_ref = key;
     } else {
-      newModel = sdlContentModelPtr(new sdlContentModel());
+      newModel = std::make_shared<sdlContentModel>();
       newModel->kind = XSD_CONTENT_SEQUENCE; /* will be redefined */
 
       key += (char*)ns->children->content;
@@ -974,7 +974,7 @@ static bool schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType,
         throw SoapException("Parsing Schema: group '%s' already defined",
                             key.c_str());
       }
-      cur_type = newType = sdlTypePtr(new sdlType());
+      cur_type = newType = std::make_shared<sdlType>();
     }
 
     if (model == nullptr) {
@@ -1042,7 +1042,7 @@ static bool schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType,
 */
 static bool schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType,
                           sdlTypePtr cur_type, sdlContentModelPtr model) {
-  sdlContentModelPtr newModel(new sdlContentModel());
+  auto newModel = std::make_shared<sdlContentModel>();
   newModel->kind = XSD_CONTENT_CHOICE;
   if (model) {
     model->u_content.push_back(newModel);
@@ -1087,7 +1087,7 @@ static bool schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType,
 */
 static bool schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType,
                             sdlTypePtr cur_type, sdlContentModelPtr model) {
-  sdlContentModelPtr newModel(new sdlContentModel());
+  auto newModel = std::make_shared<sdlContentModel>();
   newModel->kind = XSD_CONTENT_SEQUENCE;
   if (model) {
     model->u_content.push_back(newModel);
@@ -1135,7 +1135,7 @@ static bool schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType,
 static bool schema_any(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr anyType,
                        sdlTypePtr cur_type, sdlContentModelPtr model) {
   if (model) {
-    sdlContentModelPtr newModel(new sdlContentModel());
+    auto newModel = std::make_shared<sdlContentModel>();
     newModel->kind = XSD_CONTENT_ANY;
     schema_min_max(anyType, newModel);
     model->u_content.push_back(newModel);
@@ -1206,7 +1206,7 @@ static bool schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType,
   xmlAttrPtr name = get_attribute(attrs, "name");
   if (cur_type) {
     /* Anonymous type inside <element> */
-    sdlTypePtr newType(new sdlType());
+    auto newType = std::make_shared<sdlType>();
     newType->kind = XSD_TYPEKIND_COMPLEX;
     if (name) {
       newType->name = (char*)name->children->content;
@@ -1217,7 +1217,7 @@ static bool schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType,
     }
     sdl->types.push_back(newType);
 
-    cur_type->encode = encodePtr(new encode());
+    cur_type->encode = std::make_shared<encode>();
     cur_type->encode->details.ns = newType->namens;
     cur_type->encode->details.type_str = newType->name;
     cur_type->encode->details.sdl_type = newType.get();
@@ -1229,7 +1229,7 @@ static bool schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType,
     cur_type = newType;
 
   } else if (name) {
-    sdlTypePtr newType(new sdlType());
+    auto newType = std::make_shared<sdlType>();
     newType->kind = XSD_TYPEKIND_COMPLEX;
     newType->name = (char*)name->children->content;
     newType->namens = (char*)ns->children->content;
@@ -1326,7 +1326,7 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
   }
 
   if (name) {
-    sdlTypePtr newType(new sdlType());
+    auto newType = std::make_shared<sdlType>();
     if (ref) {
       string type, ns;
       parse_namespace(ref->children->content, type, ns);
@@ -1361,7 +1361,7 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
     }
 
     if (model) {
-      sdlContentModelPtr newModel(new sdlContentModel());
+      auto newModel = std::make_shared<sdlContentModel>();
       newModel->kind = XSD_CONTENT_ELEMENT;
       newModel->u_element = newType.get();
       schema_min_max(element, newModel);
@@ -1534,7 +1534,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
     name = ref = get_attribute(attrType->properties, "ref");
   }
   if (name) {
-    newAttr = sdlAttributePtr(new sdlAttribute());
+    newAttr = std::make_shared<sdlAttribute>();
 
     string key;
     if (ref) {
@@ -1692,7 +1692,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
         throw SoapException("Parsing Schema: attribute has both 'type' "
                             "attribute and subtype");
       }
-      sdlTypePtr dummy_type(new sdlType());
+      auto dummy_type = std::make_shared<sdlType>();
       dummy_type->name = string("anonymous") +
         folly::to<string>(sdl->types.size());
       dummy_type->namens = (char*)tns->children->content;
@@ -1722,7 +1722,7 @@ static bool schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns,
       if (ns == nullptr) {
         ns = tns;
       }
-      sdlTypePtr newType(new sdlType());
+      auto newType = std::make_shared<sdlType>();
       newType->name = (char*)name->children->content;
       newType->namens = (char*)ns->children->content;
 
@@ -1740,7 +1740,7 @@ static bool schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns,
       }
       cur_type = newType;
     } else if (ref) {
-      sdlAttributePtr newAttr(new sdlAttribute());
+      auto newAttr = std::make_shared<sdlAttribute>();
       string group_name, ns;
       parse_namespace(ref->children->content, group_name, ns);
       xmlNsPtr nsptr = xmlSearchNs(attrGroup->doc, attrGroup, NS_STRING(ns));
@@ -1866,7 +1866,7 @@ static bool schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr,
           }
         } else {
           schema_attribute_fixup(ctx, it->second);
-          sdlAttributePtr newAttr(new sdlAttribute());
+          auto newAttr = std::make_shared<sdlAttribute>();
           *newAttr = *it->second;
           copy_extra_attributes(newAttr, it->second);
           fixed[it->first] = newAttr;

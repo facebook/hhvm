@@ -387,7 +387,7 @@ struct Label;
 
 struct Assembler {
 
-  friend class Label;
+  friend struct Label;
 
   explicit Assembler(HPHP::CodeBlock& cb) : codeBlock(cb) {}
   ~Assembler(){}

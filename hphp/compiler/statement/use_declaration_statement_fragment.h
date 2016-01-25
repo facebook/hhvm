@@ -22,7 +22,7 @@
 
 namespace HPHP {
 
-DECLARE_BOOST_TYPES(UseDeclarationStatementFragment);
+DECLARE_BOOST_TYPES_STRUCT(UseDeclarationStatementFragment);
 
 /**
  * This is pretty nasty: it's not really a statement, it's morally more of an

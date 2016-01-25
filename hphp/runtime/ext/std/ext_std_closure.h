@@ -137,7 +137,7 @@ struct c_Closure : ObjectData {
   }
 
 private:
-  friend class Class;
+  friend struct Class;
   friend class StandardExtension;
 
   static Class* cls_Closure;

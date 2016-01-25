@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DeclareStatement);
+DECLARE_BOOST_TYPES_STRUCT(DeclareStatement);
 
 struct DeclareStatement : Statement {
   DeclareStatement(STATEMENT_CONSTRUCTOR_PARAMETERS);

@@ -37,8 +37,8 @@
 namespace HPHP { namespace jit {
 
 struct MCGenerator;
-struct ProfData;
-struct TransCFG;
+class ProfData;
+class TransCFG;
 
 //////////////////////////////////////////////////////////////////////
 

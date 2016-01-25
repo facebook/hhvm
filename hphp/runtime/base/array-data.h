@@ -32,10 +32,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct String;
+class String;
 struct TypedValue;
 struct MArrayIter;
-class VariableSerializer;
+struct VariableSerializer;
 
 struct ArrayData {
   // Runtime type tag of possible array types.  This is intentionally
@@ -433,7 +433,7 @@ protected:
   friend class BaseVector;
   friend class c_Vector;
   friend class c_ImmVector;
-  friend class HashCollection;
+  friend struct HashCollection;
   friend class BaseMap;
   friend class c_Map;
   friend class c_ImmMap;

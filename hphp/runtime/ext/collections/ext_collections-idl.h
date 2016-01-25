@@ -50,10 +50,10 @@ namespace HPHP {
 
 namespace collections{
 void deepCopy(TypedValue*);
-class PairIterator;
-class VectorIterator;
-class MapIterator;
-class SetIterator;
+struct PairIterator;
+struct VectorIterator;
+struct MapIterator;
+struct SetIterator;
 }
 
 /**
@@ -492,11 +492,11 @@ class BaseVector : public ExtCollectionObjectData {
 
   // Friends
 
-  friend class collections::VectorIterator;
+  friend struct collections::VectorIterator;
   friend class BaseMap;
   friend class BaseSet;
   friend class c_Pair;
-  friend class c_AwaitAllWaitHandle;
+  friend struct c_AwaitAllWaitHandle;
 
   friend void collections::deepCopy(TypedValue*);
 
@@ -585,7 +585,7 @@ class c_Vector : public BaseVector {
 
   friend class BaseMap;
   friend class c_Pair;
-  friend class ArrayIter;
+  friend struct ArrayIter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1355,12 +1355,12 @@ class BaseMap : public HashCollection {
  private:
   friend void collections::deepCopy(TypedValue*);
 
-  friend class collections::MapIterator;
+  friend struct collections::MapIterator;
   friend class c_Vector;
   friend class c_Map;
   friend class c_ImmMap;
-  friend class ArrayIter;
-  friend class c_AwaitAllWaitHandle;
+  friend struct ArrayIter;
+  friend struct c_AwaitAllWaitHandle;
   friend class c_GenMapWaitHandle;
 
   static void compileTimeAssertions() {
@@ -1816,11 +1816,11 @@ class BaseSet : public HashCollection {
 
  private:
 
-  friend class collections::SetIterator;
+  friend struct collections::SetIterator;
   friend class c_Vector;
   friend class c_Set;
   friend class c_Map;
-  friend class ArrayIter;
+  friend struct ArrayIter;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field

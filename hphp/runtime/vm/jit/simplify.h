@@ -27,7 +27,7 @@ namespace HPHP { namespace jit {
 
 struct IRInstruction;
 struct IRUnit;
-struct SSATmp;
+class SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 

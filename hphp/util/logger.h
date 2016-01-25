@@ -29,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class StackTrace;
-class Exception;
+struct Exception;
 
 class Logger {
 public:

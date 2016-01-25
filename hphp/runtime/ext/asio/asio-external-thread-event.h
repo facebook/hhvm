@@ -25,8 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class AsioSession;
-class c_ExternalThreadEventWaitHandle;
+struct AsioSession;
+struct c_ExternalThreadEventWaitHandle;
 
 /**
  * An asynchronous external thread event.

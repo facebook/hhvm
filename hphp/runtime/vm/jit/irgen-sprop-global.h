@@ -22,7 +22,7 @@ struct StringData;
 }
 namespace HPHP { namespace jit {
 struct IRGS;
-struct SSATmp;
+class SSATmp;
 struct Block;
 }}
 

@@ -26,7 +26,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class ArrayInit;
+struct ArrayInit;
 struct MemoryProfile;
 class Shape;
 struct StructArray;
@@ -328,14 +328,14 @@ private:
   friend struct EmptyArray;
   friend struct PackedArray;
   friend struct StructArray;
-  friend class HashCollection;
+  friend struct HashCollection;
   friend class BaseMap;
   friend class c_Map;
   friend class c_ImmMap;
   friend class BaseSet;
   friend class c_Set;
   friend class c_ImmSet;
-  friend class c_AwaitAllWaitHandle;
+  friend struct c_AwaitAllWaitHandle;
   enum class ClonePacked {};
   enum class CloneMixed {};
 

@@ -21,7 +21,7 @@
 namespace HPHP { struct StringData; }
 namespace HPHP { namespace jit {
 struct IRGS;
-struct SSATmp;
+class SSATmp;
 }}
 
 namespace HPHP { namespace jit { namespace irgen {

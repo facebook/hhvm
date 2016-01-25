@@ -25,7 +25,7 @@
 namespace HPHP { namespace jit {
 
 struct IRInstruction;
-struct SSATmp;
+class SSATmp;
 
 /*
  * The source of a local's type. Either the current value or a guard.

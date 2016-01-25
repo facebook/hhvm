@@ -41,7 +41,7 @@ namespace jit {
 
 struct Block;
 struct IRInstruction;
-struct SSATmp;
+class SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 

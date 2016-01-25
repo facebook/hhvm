@@ -25,7 +25,7 @@ namespace HPHP {
 class Array;
 struct Func;
 struct Class;
-class StreamContext;
+struct StreamContext;
 
 class UserFSNode {
 public:

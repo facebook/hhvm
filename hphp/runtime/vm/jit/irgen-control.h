@@ -21,7 +21,7 @@
 namespace HPHP { namespace jit {
 struct IRGS;
 struct Block;
-struct SSATmp;
+class SSATmp;
 }}
 
 namespace HPHP { namespace jit { namespace irgen {

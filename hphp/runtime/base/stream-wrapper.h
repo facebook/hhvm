@@ -26,7 +26,7 @@
 struct stat;
 
 namespace HPHP {
-class StreamContext;
+struct StreamContext;
 
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////

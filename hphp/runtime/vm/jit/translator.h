@@ -60,7 +60,7 @@ namespace jit {
 struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
-struct ProfData;
+class ProfData;
 struct IRGS;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;

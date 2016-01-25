@@ -35,7 +35,7 @@ namespace HPHP { namespace jit {
 struct Block;
 struct Edge;
 struct IRUnit;
-struct SSATmp;
+class SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 

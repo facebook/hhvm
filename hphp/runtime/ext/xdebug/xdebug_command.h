@@ -25,8 +25,8 @@
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Array;
-struct String;
+class Array;
+class String;
 struct XDebugServer;
 
 struct xdebug_xml_node;

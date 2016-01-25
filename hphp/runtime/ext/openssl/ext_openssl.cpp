@@ -486,7 +486,7 @@ static int64_t read_integer(const Array& args, const String& key, int64_t def) {
   return def;
 }
 
-static bool add_oid_section(struct php_x509_request *req) {
+static bool add_oid_section(class php_x509_request *req) {
   char *str = CONF_get_string(req->req_config, NULL, "oid_section");
   if (str == NULL) {
     return true;
@@ -539,7 +539,7 @@ const StaticString
   s_private_key_type("private_key_type"),
   s_encrypt_key("encrypt_key");
 
-static bool php_openssl_parse_config(struct php_x509_request *req,
+static bool php_openssl_parse_config(class php_x509_request *req,
                                      const Array& args,
                                      std::vector<String> &strings) {
   req->config_filename =
@@ -643,7 +643,7 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
   return true;
 }
 
-static void php_openssl_dispose_config(struct php_x509_request *req) {
+static void php_openssl_dispose_config(class php_x509_request *req) {
   if (req->global_config) {
     CONF_free(req->global_config);
     req->global_config = NULL;
@@ -780,7 +780,7 @@ static bool add_entries(X509_NAME *subj, const Array& items) {
   return true;
 }
 
-static bool php_openssl_make_REQ(struct php_x509_request *req, X509_REQ *csr,
+static bool php_openssl_make_REQ(class php_x509_request *req, X509_REQ *csr,
                                  const Array& dn, const Array& attribs) {
   char *dn_sect = CONF_get_string(req->req_config, req->section_name,
                                   "distinguished_name");
@@ -945,7 +945,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
                       const Variant& configargs /* = null_variant */,
                       const Variant& extraattribs /* = null_variant */) {
   Variant ret = false;
-  struct php_x509_request req;
+  class php_x509_request req;
   memset(&req, 0, sizeof(req));
 
   req::ptr<Key> okey;
@@ -1035,7 +1035,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   }
 
   req::ptr<Certificate> onewcert;
-  struct php_x509_request req;
+  class php_x509_request req;
   memset(&req, 0, sizeof(req));
   Variant ret = false;
   std::vector<String> strings;
@@ -1675,7 +1675,7 @@ static bool openssl_pkey_export_impl(const Variant& key, BIO *bio_out,
   }
   EVP_PKEY *pkey = okey->m_key;
 
-  struct php_x509_request req;
+  class php_x509_request req;
   memset(&req, 0, sizeof(req));
   std::vector<String> strings;
   bool ret = false;
@@ -1839,7 +1839,7 @@ Variant HHVM_FUNCTION(openssl_pkey_get_public, const Variant& certificate) {
 
 Resource HHVM_FUNCTION(openssl_pkey_new,
                        const Variant& configargs /* = null_variant */) {
-  struct php_x509_request req;
+  class php_x509_request req;
   memset(&req, 0, sizeof(req));
 
   Resource ret;

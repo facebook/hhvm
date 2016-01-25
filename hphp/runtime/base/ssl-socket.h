@@ -106,7 +106,7 @@ struct SSLSocketData : SocketData {
   virtual bool closeImpl();
   ~SSLSocketData();
 private:
-  friend class SSLSocket;
+  friend struct SSLSocket;
   bool m_ssl_active{false};
   bool m_client{false};
   bool m_enable_on_connect{false};

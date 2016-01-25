@@ -32,7 +32,7 @@ namespace HPHP {
 
 class BlockScope;
 class CodeGenerator;
-class Variant;
+struct Variant;
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);

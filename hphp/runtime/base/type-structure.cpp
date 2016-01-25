@@ -30,7 +30,7 @@
 
 namespace HPHP {
 
-struct String;
+class String;
 struct StaticString;
 
 namespace {

@@ -18,10 +18,10 @@
 #define incl_HPHP_FUNC_EFFECTS_H_
 
 namespace HPHP {
-class Func;
+struct Func;
 
 namespace jit {
-class NormalizedInstruction;
+struct NormalizedInstruction;
 
 /*
  * Could the CPP builtin function `callee` destroy the locals

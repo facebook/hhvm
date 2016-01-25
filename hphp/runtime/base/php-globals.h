@@ -23,7 +23,7 @@ namespace HPHP {
 struct StaticString;
 struct Variant;
 struct TypedValue;
-struct Array;
+class Array;
 
 //////////////////////////////////////////////////////////////////////
 

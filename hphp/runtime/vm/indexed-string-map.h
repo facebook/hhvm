@@ -40,7 +40,7 @@ template<class T,
          class Index,
          Index InvalidIndex = Index(-1)>
 struct IndexedStringMap {
-  struct Builder;
+  class Builder;
 
   explicit IndexedStringMap() {
     setSize(0);
@@ -241,7 +241,7 @@ public:
   }
 
 private:
-  friend class IndexedStringMap;
+  friend struct IndexedStringMap;
   std::vector<T> m_list;
   Map m_map;
 };

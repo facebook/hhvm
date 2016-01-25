@@ -25,8 +25,8 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FastCGIServer;
-class FastCGITransportTraits;
+struct FastCGIServer;
+struct FastCGITransportTraits;
 
 /*
  * FastCGIJob is used by FastCGIServer to enqueue jobs once a request has

@@ -42,12 +42,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Array;
+class Array;
 struct ArrayData;
 struct Class;
 struct Func;
 struct PreClass;
-struct String;
+class String;
 struct StringData;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,8 +189,8 @@ void stashLineTable(const Unit* unit, LineTable table);
  * required.
  */
 struct Unit {
-  friend class UnitEmitter;
-  friend class UnitRepoProxy;
+  friend struct UnitEmitter;
+  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.

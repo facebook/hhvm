@@ -33,8 +33,8 @@ namespace HPHP {
 
 class Array;
 class VarNR;
-class VariableSerializer;
-class VariableUnserializer;
+struct VariableSerializer;
+struct VariableUnserializer;
 
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };

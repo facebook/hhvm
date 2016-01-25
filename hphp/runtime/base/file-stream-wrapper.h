@@ -39,7 +39,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Directory;
+struct Directory;
 
 class FileStreamWrapper : public Stream::Wrapper {
  public:

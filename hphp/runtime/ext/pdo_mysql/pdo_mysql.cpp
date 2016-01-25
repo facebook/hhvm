@@ -36,7 +36,7 @@
 
 namespace HPHP {
 
-class PDOMySqlStatement;
+struct PDOMySqlStatement;
 
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_mysql, 1.0.2);
 

@@ -31,7 +31,7 @@
 namespace HPHP { namespace jit {
 
 struct NormalizedInstruction;
-struct SSATmp;
+class SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 

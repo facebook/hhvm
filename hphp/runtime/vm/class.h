@@ -47,7 +47,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Class;
-struct ClassInfo;
+class ClassInfo;
 struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
@@ -1092,7 +1092,7 @@ private:
                                      const StringData* methName);
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
   using TMIData = TraitMethodImportData<TraitMethod,
                                         TMIOps,

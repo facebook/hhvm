@@ -297,7 +297,7 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
   return false;
 }
 
-class StringData;
+struct StringData;
 ///////////////////////////////////////////////////////////////////////////////
 }
 

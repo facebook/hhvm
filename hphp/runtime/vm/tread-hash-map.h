@@ -100,7 +100,7 @@ public:
     }
 
   private:
-    friend class TreadHashMap;
+    friend struct TreadHashMap;
     friend class boost::iterator_core_access;
 
     void increment() {

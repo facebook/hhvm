@@ -43,6 +43,13 @@
   using classname ## RawPtr   = hphp_raw_ptr<classname>;                \
   using classname ## ConstPtr = std::shared_ptr<const classname>;       \
 
+#define DECLARE_BOOST_TYPES_STRUCT(classname)                           \
+  struct classname;                                                     \
+                                                                        \
+  using classname ## Ptr      = std::shared_ptr<classname>;             \
+  using classname ## RawPtr   = hphp_raw_ptr<classname>;                \
+  using classname ## ConstPtr = std::shared_ptr<const classname>;       \
+
 #define DECLARE_EXTENDED_BOOST_TYPES(classname)                     \
   DECLARE_BOOST_TYPES(classname)                                    \
   using StringTo ## classname ## PtrMap    = hphp_string_hash_map<  \

@@ -32,7 +32,7 @@ namespace HPHP {
 #define MULTIPART_EVENT_FILE_END  4
 #define MULTIPART_EVENT_END    5
 
-class Variant;
+struct Variant;
 
 typedef struct _multipart_event_start {
   size_t  content_length;

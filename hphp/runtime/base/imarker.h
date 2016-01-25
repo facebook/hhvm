@@ -34,10 +34,10 @@ template <class T> class Optional;
 
 namespace HPHP {
 namespace req { template<typename T> struct ptr; }
-struct Array;
+class Array;
 struct ArrayIter;
 struct MArrayIter;
-struct String;
+class String;
 struct Variant;
 struct ObjectData;
 struct ResourceData;
@@ -50,16 +50,16 @@ struct Class;
 struct TypedValue;
 struct NameValueTable;
 struct ActRec;
-struct Stack;
-struct VarEnv;
+class Stack;
+class VarEnv;
 struct RequestEventHandler;
 struct IMarker;
 struct AsioContext;
-struct Expression;
+class Expression;
 struct Unit;
 struct StreamContext;
-struct DateTime;
-struct Extension;
+class DateTime;
+class Extension;
 template <typename T, bool isLow> struct AtomicSharedPtrImpl;
 template <typename T> struct FixedVector;
 template <typename T> struct SweepableMember;
@@ -82,7 +82,7 @@ struct ALocMeta;
 struct Type;
 struct TypeConstraint;
 }
-namespace Compiler { struct Label; }
+namespace Compiler { class Label; }
 
 template <typename F, typename T>
 void scan(const T& v, F& mark) {

@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
-class ArrayData;
+struct ArrayData;
 class c_Pair;
 class c_Vector;
 class c_ImmVector;

@@ -29,7 +29,7 @@ namespace HPHP {
 
 class Hdf;
 
-class IniSettingMap;
+struct IniSettingMap;
 
 struct Option {
   /**

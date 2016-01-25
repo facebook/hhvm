@@ -138,6 +138,7 @@ alignas(8)
 __thread int64_t s_perfCounters[tpc_num_counters];
 
 static __thread size_t s_initialTCSize;
+static ServiceData::ExportedCounter* s_jitMaturityCounter;
 
 // The global MCGenerator object.
 MCGenerator* mcg;
@@ -2097,10 +2098,15 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   }
 
   // Report jit maturity based on the amount of code emitted.
-  auto percent = code.mainUsed() * 100 / CodeCache::AMaxUsage;
+  int32_t percent = code.mainUsed() * 100 / CodeCache::AMaxUsage;
   if (percent > 100) percent = 100;
-  ServiceData::createCounter("jit.maturity")->setValue(percent);
-
+  if (s_jitMaturityCounter &&
+      percent > s_jitMaturityCounter->getValue()) {
+    s_jitMaturityCounter->setValue(percent);
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Info("jit.maturity = %" PRId32, percent);
+    }
+  }
   return loc.mainStart();
 }
 
@@ -2155,6 +2161,8 @@ MCGenerator::MCGenerator()
     g_bytecodesVasm.bind();
     g_bytecodesLLVM.bind();
   }
+
+  s_jitMaturityCounter = ServiceData::createCounter("jit.maturity");
 }
 
 void MCGenerator::initUniqueStubs() {

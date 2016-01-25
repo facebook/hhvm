@@ -224,7 +224,7 @@
 # include "hphp/util/portability/strptime.h"
 #endif
 
-#if defined(_MSC_VER) && _MSC_FULL_VER <= 190023419 // 2015 Update 1 RC or below
+#if defined(_MSC_VER) && _MSC_FULL_VER <= 190023506 // 2015 Update 1 or below
 // MSVC2015 has an issue with getting function pointers to templated functions
 // if the expected result type isn't auto. Unfortunately, when I made the
 // initial bug report, I oversimplified the use-case, and, while the case I

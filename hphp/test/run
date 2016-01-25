@@ -2420,13 +2420,10 @@ function main($argv) {
       unset($servers['pids'][$pid]);
       $servers['pids'][$server['pid']] =& $server;
       unset($server);
-    } else {
-      if (!isset($children[$pid])) {
-        error("Unexpected child pid $pid from wait");
-      }
+    } elseif (isset($children[$pid])) {
       unset($children[$pid]);
       $return_value |= pcntl_wexitstatus($status);
-    }
+    } // Else, ignorable signal
   }
 
   Status::finished();

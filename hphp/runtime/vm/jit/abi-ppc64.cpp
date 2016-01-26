@@ -29,15 +29,16 @@ namespace {
 
 namespace reg = ppc64_asm::reg;
 
-const RegSet kGPCallerSaved = reg::r3 | reg::r4 | reg::r5 | reg::r6 | reg::r7 |
-  reg::r8 | reg::r9 | reg::r10;
+const RegSet kGPCallerSaved =
+  reg::r3 | reg::r4 | reg::r5 | reg::r6 |
+  reg::r7 | reg::r8 | reg::r9 | reg::r10;
   // r0 is used in function linkage as rfuncln
   // r11 is used as a scratch register (rAsm)
   // r12 is used in function linkage
 
-const RegSet kGPCalleeSaved = reg::r14 | reg::r15 | reg::r16 | reg::r17 |
-  reg::r18 | reg::r19 | reg::r20 | reg::r21 | reg::r22 | reg::r23 | reg::r24 |
-  reg::r25 | reg::r26 | reg::r31;
+const RegSet kGPCalleeSaved =
+  reg::r14 | reg::r15 | reg::r16 | reg::r17 | reg::r18 | reg::r19 | reg::r20 |
+  reg::r21 | reg::r22 | reg::r23 | reg::r24 | reg::r25 | reg::r26 | reg::r31;
   // r1 is used as rsp
   // r27 is used as rone (value 1)
   // r28 is used as rvmfp
@@ -46,19 +47,22 @@ const RegSet kGPCalleeSaved = reg::r14 | reg::r15 | reg::r16 | reg::r17 |
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
-const RegSet kGPReserved = reg::r12 | reg::r2 | rfuncln() | rvmtl() | rvmfp() |
-  rvmsp() | rAsm | rsp() | r_svcreq_stub() | rthreadptr() | rone();
+const RegSet kGPReserved =
+  reg::r2 | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm |
+  rfuncln() | rfuncentry() | rthreadptr() | rone() | r_svcreq_stub();
   // Reserve the r2 TOC register to avoid changing it
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
-const RegSet kXMMCallerSaved = reg::f1 | reg::f2 | reg::f3 | reg::f4 |
-  reg::f5 | reg::f6 | reg::f7 | reg::f8 | reg::f9 | reg::f10 | reg::f11 |
-  reg::f12 | reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19;
+const RegSet kXMMCallerSaved =
+  reg::f1  | reg::f2  | reg::f3  | reg::f4  | reg::f5  | reg::f6  |
+  reg::f7  | reg::f8  | reg::f9  | reg::f10 | reg::f11 | reg::f12 |
+  reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19;
 
-const RegSet kXMMCalleeSaved = reg::f14 | reg::f15 | reg::v20 | reg::v21 |
-  reg::v22 | reg::v23 | reg::v24 | reg::v25 | reg::v26 | reg::v27 | reg::v28 |
-  reg::v30 | reg::v31;
+const RegSet kXMMCalleeSaved =
+  reg::f14 | reg::f15 | reg::v20 | reg::v21 | reg::v22 |
+  reg::v23 | reg::v24 | reg::v25 | reg::v26 | reg::v27 |
+  reg::v28 | reg::v30 | reg::v31;
   // v29 reserved for Vxls::m_tmp
 
 const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
@@ -178,7 +182,7 @@ size_t num_arg_regs_simd() {
 
 
 PhysReg r_svcreq_sf() {
-  return abi().sf.findFirst();
+  return abi().sf.choose();
 }
 PhysReg r_svcreq_arg(size_t i) {
   return svcreq_args[i];

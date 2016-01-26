@@ -37,14 +37,14 @@ struct VscaledDisp;
  * XMM, or virtual register.
  */
 struct Vreg {
-  static const unsigned kNumGP{PhysReg::kSIMDOffset}; // 33
-  static const unsigned kNumXMM{30};
-  static const unsigned kNumSF{1};
-  static const unsigned G0{0};
-  static const unsigned X0{kNumGP};
-  static const unsigned S0{X0+kNumXMM};
-  static const unsigned V0{S0+kNumSF};
-  static const unsigned kInvalidReg{0xffffffffU};
+  static constexpr unsigned kNumGP = PhysReg::kNumGP;
+  static constexpr unsigned kNumXMM = PhysReg::kNumSIMD;
+  static constexpr unsigned kNumSF = PhysReg::kNumSF;
+  static constexpr unsigned G0 = PhysReg::kGPOffset;
+  static constexpr unsigned X0 = PhysReg::kSIMDOffset;
+  static constexpr unsigned S0 = PhysReg::kSFOffset;
+  static constexpr unsigned V0 = PhysReg::kMaxRegs;
+  static constexpr unsigned kInvalidReg = 0xffffffffU;
 
   /*
    * Constructors.

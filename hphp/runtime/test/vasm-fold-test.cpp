@@ -100,37 +100,37 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "addqi 0, %64 => %65, %67\n"
-    "copy %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "addqi 0, %128 => %129, %131\n"
+    "copy %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<addq>(0, 0u) // addq 0,r
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "addqi 0, %64 => %65, %67\n"
-    "copy %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "addqi 0, %128 => %129, %131\n"
+    "copy %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<addq>(1, 0u) // addq r,0
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "addqi 1, %64 => %65, %67\n"
-    "incq %64 => %66, %68\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "addqi 1, %128 => %129, %131\n"
+    "incq %128 => %130, %132\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<addq>(0, 1u) // addq 1,r
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "addqi 1, %64 => %65, %67\n"
-    "incq %64 => %66, %68\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "addqi 1, %128 => %129, %131\n"
+    "incq %128 => %130, %132\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<addq>(1, 1u) // addq r,1
   );
@@ -140,30 +140,30 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "subqi 0, %64 => %65, %67\n"
-    "copy %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "subqi 0, %128 => %129, %131\n"
+    "copy %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<subq>(0, 0u) // subq 0,r
   );
 
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "neg %64 => %65, %67\n"
-    "neg %64 => %66, %68\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "neg %128 => %129, %131\n"
+    "neg %128 => %130, %132\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<subq>(1, 0u) // subq r,0
   );
 
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "subqi 1, %64 => %65, %67\n"
-    "decq %64 => %66, %68\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "subqi 1, %128 => %129, %131\n"
+    "decq %128 => %130, %132\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<subq>(0, 1u) // subq 1,r
   );
@@ -173,37 +173,37 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorbi 0, %64 => %65, %67\n"
-    "copy %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorbi 0, %128 => %129, %131\n"
+    "copy %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorb>(0, 0u) // xorb 0,r
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorbi 0, %64 => %65, %67\n"
-    "copy %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorbi 0, %128 => %129, %131\n"
+    "copy %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorb>(1, 0u) // xorb r,0
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorbi -1, %64 => %65, %67\n"
-    "notb %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorbi -1, %128 => %129, %131\n"
+    "notb %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorb>(0, -1) // xorb -1,r
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorbi -1, %64 => %65, %67\n"
-    "notb %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorbi -1, %128 => %129, %131\n"
+    "notb %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorb>(1, -1) // xorb r,-1
   );
@@ -213,37 +213,37 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorqi 0, %64 => %65, %67\n"
-    "copy %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorqi 0, %128 => %129, %131\n"
+    "copy %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorq>(0, 0u) // xorq 0,r
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorqi 0, %64 => %65, %67\n"
-    "copy %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorqi 0, %128 => %129, %131\n"
+    "copy %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorq>(1, 0u) // xorq r,0
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorqi -1, %64 => %65, %67\n"
-    "not %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorqi -1, %128 => %129, %131\n"
+    "not %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorq>(0, -1) // xorq -1,r
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69(42l) => %64\n"
-    "xorqi -1, %64 => %65, %67\n"
-    "not %64 => %66\n"
-    "movl %67 => %71\n"
+    "movl %133(42l) => %128\n"
+    "xorqi -1, %128 => %129, %131\n"
+    "not %128 => %130\n"
+    "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorq>(1, -1) // xorq r,-1
   );

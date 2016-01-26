@@ -2075,7 +2075,7 @@ std::vector<llvm::Value*> LLVMEmitter::makePhysRegArgs(RegSet argRegs) {
     auto reg = kHHVMCCRegs[i];
     if (argRegs.contains(reg)) {
       ret.emplace_back(value(reg));
-      passed.add(reg);
+      passed |= reg;
       lastSet = i;
     } else {
       ret.emplace_back(m_int64Undef);

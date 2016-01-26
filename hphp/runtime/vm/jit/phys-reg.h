@@ -33,25 +33,36 @@ struct Vout;
 /*
  * PhysReg represents a physical machine register.
  *
- * To make it possible to use it with the assembler conveniently, it
- * can be implicitly converted to and from Reg64.  If you want to use
- * it as a 32 bit register call r32(physReg).
+ * To make it possible to use it with the assembler conveniently, it can be
+ * implicitly converted to and from Reg64.  To use a PhysReg `r' as a 32-bit
+ * register, call r32(r).
  */
 struct PhysReg {
- private:
-  static constexpr auto kMaxRegs = 64;
+private:
+  /*
+   * 48 GP regs + 64 SIMD regs + 1 SF reg + 15 empty == 128 regs.
+   *
+   * We can toggle these values, but they need sum to 128 so that RegSet can
+   * fit into two registers.
+   */
+  static constexpr auto kMaxRegs = 128;
+
   static constexpr auto kGPOffset = 0;
-  static constexpr auto kSIMDOffset = 33; // ARM has 33 GP registers.
-  static constexpr auto kSFOffset = 63;
+  static constexpr auto kNumGP = 48;
+
+  static constexpr auto kSIMDOffset = kNumGP;
+  static constexpr auto kNumSIMD = 64;
+
+  static constexpr auto kSFOffset = kNumGP + kNumSIMD;
   static constexpr auto kNumSF = 1;
 
- public:
+public:
   enum Type {
     GP,
     SIMD,
     SF,
   };
-  explicit constexpr PhysReg() : n(-1) {}
+  explicit constexpr PhysReg() : n(0xff) {}
   constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
   constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kSIMDOffset) {}
   constexpr /* implicit */ PhysReg(RegSF r) : n(int(r) + kSFOffset) {}
@@ -63,20 +74,20 @@ struct PhysReg {
     : n(r.code() + kSIMDOffset) {}
 
   /* implicit */ operator Reg64() const {
-    assertx(isGP() || n == -1);
+    assertx(isGP() || n == 0xff);
     return Reg64(n);
   }
   /* implicit */ operator RegXMM() const {
-    assertx(isSIMD() || n == -1);
+    assertx(isSIMD() || n == 0xff);
     return RegXMM(n - kSIMDOffset);
   }
   /* implicit */ operator RegSF() const {
-    assertx(isSF() || n == -1);
+    assertx(isSF() || n == 0xff);
     return RegSF(n - kSFOffset);
   }
 
   /* implicit */ operator vixl::CPURegister() const {
-    if (n == -1) {
+    if (n == 0xff) {
       return vixl::NoCPUReg;
     } else {
       if (isGP()) {
@@ -160,12 +171,12 @@ struct PhysReg {
     }
 
     T& operator[](const PhysReg& r) {
-      assertx(r.n != -1);
+      assertx(r.n != 0xff);
       return m_elms[r.n];
     }
 
     const T& operator[](const PhysReg& r) const {
-      assertx(r.n != -1);
+      assertx(r.n != 0xff);
       return m_elms[r.n];
     }
 
@@ -219,7 +230,7 @@ private:
   friend struct Vreg;
   explicit constexpr PhysReg(int n) : n(n) {}
 
-  int8_t n;
+  uint8_t n;
 };
 
 inline Reg8 rbyte(PhysReg r) { return Reg8(int(Reg64(r))); }
@@ -242,164 +253,166 @@ std::string show(PhysReg r);
  * Zero-initializing this class is guaranteed to produce an empty set.
  */
 struct RegSet {
-  RegSet() : m_bits(0) {}
-  explicit RegSet(PhysReg pr) : m_bits(uint64_t(1) << pr.n) {}
+  constexpr RegSet() : m_lo(0), m_hi(0) {}
 
-  // Union
-  RegSet operator|(const RegSet& rhs) const {
-    RegSet retval;
-    retval.m_bits = m_bits | rhs.m_bits;
-    return retval;
-  }
+  explicit RegSet(PhysReg r)
+    : m_lo(r.n >= 0  && r.n < 64  ? uint64_t{1} << r.n        : 0)
+    , m_hi(r.n >= 64 && r.n < 128 ? uint64_t{1} << (r.n - 64) : 0)
+  {}
 
-  RegSet& operator|=(const RegSet& rhs) {
-    m_bits |= rhs.m_bits;
-    return *this;
-  }
+private:
+  explicit RegSet(uint64_t lo, uint64_t hi) : m_lo(lo), m_hi(hi) {}
 
-  RegSet& operator|=(PhysReg r) {
-    return add(r);
-  }
+  /////////////////////////////////////////////////////////////////////////////
+  // Operators.
 
-  // Intersection
-  RegSet operator&(const RegSet& rhs) const {
-    RegSet retval;
-    retval.m_bits = m_bits & rhs.m_bits;
-    return retval;
-  }
-
-  RegSet& operator&=(const RegSet& rhs) {
-    m_bits &= rhs.m_bits;
-    return *this;
-  }
-
-  // Equality
+public:
+  /*
+   * Equality.
+   */
   bool operator==(const RegSet& rhs) const {
-    return m_bits == rhs.m_bits;
+    return m_lo == rhs.m_lo &&
+           m_hi == rhs.m_hi;
   }
-
   bool operator!=(const RegSet& rhs) const {
     return !(*this == rhs);
   }
 
-  // Difference
-  RegSet operator-(const RegSet& rhs) const {
-    RegSet retval;
-    retval.m_bits = m_bits & ~rhs.m_bits;
-    return retval;
+  /*
+   * Union.
+   */
+  RegSet& operator|=(const RegSet& rhs) {
+    m_lo |= rhs.m_lo;
+    m_hi |= rhs.m_hi;
+    return *this;
   }
-
-  RegSet& operator-=(const RegSet& rhs) {
-    *this = *this - rhs;
+  RegSet& operator|=(PhysReg r) {
+    *this |= RegSet(r);
     return *this;
   }
 
-  void clear() {
-    m_bits = 0;
+  RegSet operator|(const RegSet& rhs) const {
+    auto copy = *this;
+    return copy |= rhs;
   }
+  RegSet operator|(PhysReg r) const {
+    auto copy = *this;
+    return copy |= r;
+  }
+
+  /*
+   * Intersection.
+   */
+  RegSet& operator&=(const RegSet& rhs) {
+    m_lo &= rhs.m_lo;
+    m_hi &= rhs.m_hi;
+    return *this;
+  }
+  RegSet operator&(const RegSet& rhs) const {
+    auto copy = *this;
+    return copy &= rhs;
+  }
+
+  /*
+   * Difference.
+   */
+  RegSet& operator-=(const RegSet& rhs) {
+    m_lo &= ~rhs.m_lo;
+    m_hi &= ~rhs.m_hi;
+    return *this;
+  }
+  RegSet& operator-=(PhysReg r) {
+    *this -= RegSet(r);
+    return *this;
+  }
+
+  RegSet operator-(const RegSet& rhs) const {
+    auto copy = *this;
+    return copy -= rhs;
+  }
+  RegSet operator-(PhysReg r) const {
+    auto copy = *this;
+    return copy -= r;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  void clear() { m_lo = m_hi = 0; }
 
   int size() const {
-    return __builtin_popcountll(m_bits);
+    return __builtin_popcountll(m_lo) +
+           __builtin_popcountll(m_hi);
   }
+  bool empty() const { return m_lo == 0 && m_hi == 0; }
 
-  RegSet& add(PhysReg pr) {
-    if (pr != InvalidReg) {
-      *this |= RegSet(pr);
-    }
-    return *this;
-  }
-
-  RegSet& remove(PhysReg pr) {
-    if (pr != InvalidReg) {
-      m_bits = m_bits & ~(uint64_t(1) << pr.n);
-    }
-    return *this;
-  }
-
-  bool contains(PhysReg pr) const {
-    return bool(m_bits & (uint64_t(1) << pr.n));
-  }
-
-  bool empty() const {
-    return m_bits == 0;
+  bool contains(PhysReg r) const {
+    return !(*this & RegSet(r)).empty();
   }
 
   /*
-   * Can be used for iterating over present registers, in forward or
-   * backward order:
+   * Iterate through the registers in the set.
    *
-   *   while (regSet.findFirst(reg)) {
-   *     regSet.remove(reg);
-   *     foo(reg);
-   *   }
-   *
-   *   while (regSet.findLast(reg)) {
-   *     regSet.remove(reg);
-   *     foo(reg);
-   *   }
-   *
-   * Consider forEach if you don't want to mutate your register set.
+   * The only ordering guarantee is that forEachR() iterates in the reverse
+   * order that forEach() iterates in.
    */
-  bool findFirst(PhysReg& reg) {
-    uint64_t out;
-    bool retval = ffs64(m_bits, out);
-    reg = PhysReg(out);
-    assertx(!retval || (reg.n >= 0 && reg.n < 64));
-    return retval;
-  }
-
-  PhysReg findFirst() const {
-    uint64_t out;
-    if (ffs64(m_bits, out)) {
-      return PhysReg(out);
-    }
-    return InvalidReg;
-  }
-
-  bool findLast(PhysReg& reg) {
-    uint64_t out;
-    bool retval = fls64(m_bits, out);
-    reg = PhysReg(out);
-    assertx(!retval || (reg.n >= 0 && reg.n < 64));
-    return retval;
-  }
-
-  /*
-   * Do something for each register in the set, in either forward or
-   * reverse order.
-   */
-
   template<class Fun>
   void forEach(Fun f) const {
-    RegSet cpy = *this;
-    PhysReg r;
-    while (cpy.findFirst(r)) {
-      cpy.remove(r);
-      f(r);
-    }
+    uint64_t out;
+
+    auto const go = [&] (uint64_t& bits, off_t off) {
+      while (ffs64(bits, out)) {
+        assert(0 <= out && out < 64);
+        bits &= ~(uint64_t{1} << out);
+        f(PhysReg(out + off));
+      }
+    };
+
+    // Low to high.
+    auto copy = *this;
+    go(copy.m_lo, 0);
+    go(copy.m_hi, 64);
   }
 
   template<class Fun>
   void forEachR(Fun f) const {
-    RegSet cpy = *this;
-    PhysReg r;
-    while (cpy.findLast(r)) {
-      cpy.remove(r);
-      f(r);
-    }
+    uint64_t out;
+
+    auto const go = [&] (uint64_t& bits, off_t off) {
+      while (fls64(bits, out)) {
+        assert(0 <= out && out < 64);
+        bits &= ~(uint64_t{1} << out);
+        f(PhysReg(out + off));
+      }
+    };
+
+    // High to low.
+    auto copy = *this;
+    go(copy.m_hi, 64);
+    go(copy.m_lo, 0);
   }
 
+  /*
+   * Return a register in the set, or InvalidReg if the set is empty.
+   *
+   * As implemented, this just chooses the highest-numbered PhysReg, since it's
+   * only ever used to choose an SF register.
+   */
+  PhysReg choose() const {
+    uint64_t out;
+    if (fls64(m_hi, out)) return PhysReg(out + 64);
+    if (fls64(m_lo, out)) return PhysReg(out);
+    return InvalidReg;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
 private:
-  uint64_t m_bits;
-  static_assert(sizeof(decltype(m_bits)) * 8 >= PhysReg::kMaxRegs, "");
+  uint64_t m_lo;
+  uint64_t m_hi;
 };
 
 inline RegSet operator|(PhysReg r1, PhysReg r2) {
-  return RegSet(r1).add(r2);
-}
-
-inline RegSet operator|(RegSet regs, PhysReg r) {
-  return regs.add(r);
+  return RegSet(r1) | r2;
 }
 
 std::string show(RegSet regs);

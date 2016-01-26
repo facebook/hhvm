@@ -299,8 +299,8 @@ struct VxlsContext {
         not_implemented();
         break;
     }
-    this->abi.simdUnreserved.remove(tmp);
-    this->abi.simdReserved.add(tmp);
+    this->abi.simdUnreserved -= tmp;
+    this->abi.simdReserved |= tmp;
     assertx(!abi.gpUnreserved.contains(sp));
     assertx(!abi.gpUnreserved.contains(tmp));
   }

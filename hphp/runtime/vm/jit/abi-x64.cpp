@@ -44,7 +44,7 @@ const RegSet kGPCalleeSaved =
 #endif
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
-const RegSet kGPReserved = reg::rsp | x64::rvmfp() | x64::rvmtl();
+const RegSet kGPReserved = x64::rsp() | x64::rvmfp() | x64::rvmtl();
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kXMMCallerSaved =
@@ -70,7 +70,7 @@ const RegSet kSF = RegSet(RegSF{0});
  * Registers that can safely be used for scratch purposes in-between traces.
  */
 const RegSet kScratchCrossTraceRegs =
-  kXMMCallerSaved | (kGPUnreserved - detail::kVMRegs);
+  kXMMCallerSaved | (kGPUnreserved - x64::vm_regs_with_sp());
 
 /*
  * Helper code ABI registers.
@@ -188,7 +188,7 @@ RegSet arg_regs_simd(size_t n) {
 }
 
 PhysReg r_svcreq_sf() {
-  return abi().sf.findFirst();
+  return abi().sf.choose();
 }
 PhysReg r_svcreq_arg(size_t i) {
   return svcreq_args[i];

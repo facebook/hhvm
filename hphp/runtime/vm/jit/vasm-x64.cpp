@@ -750,6 +750,13 @@ void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = popm{inst.fp[AROFF(m_savedRip)]};
 }
 
+void lower(Vunit& unit, stubtophp& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << addqi{8, reg::rsp, reg::rsp, v.makeReg()};
+    v << popm{inst.fp[AROFF(m_savedRip)]};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void lower(Vunit& unit, absdbl& inst, Vlabel b, size_t i) {

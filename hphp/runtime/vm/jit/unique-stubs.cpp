@@ -625,10 +625,10 @@ TCA emitFCallArrayHelper(CodeBlock& cb, UniqueStubs& us) {
     });
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
 
-    // If true was returned, we're calling the callee, so manually undo the
+    // If true was returned, we're calling the callee, so undo the stublogue{}
+    // and convert to a phplogue{}.
     // stublogue{}, and simulate the work of a phplogue{}.
-    v << addqi{8, rsp(), rsp(), v.makeReg()};
-    v << popm{rvmfp()[AROFF(m_savedRip)]};
+    v << stubtophp{rvmfp()};
 
     auto const callee = v.makeReg();
     auto const body = v.makeReg();

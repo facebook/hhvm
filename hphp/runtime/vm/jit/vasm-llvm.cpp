@@ -1670,6 +1670,7 @@ O(unpcklpd)
       case Vinstr::tailcallstub:
       case Vinstr::callfaststub:
       case Vinstr::phplogue:
+      case Vinstr::stubtophp:
       case Vinstr::tailcallphp:
       case Vinstr::callarray:
       case Vinstr::nothrow:

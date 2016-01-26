@@ -71,10 +71,10 @@ struct Vunit;
   O(debugtrap, Inone, Un, Dn)\
   O(fallthru, Inone, Un, Dn)\
   O(ldimmb, I(s), Un, D(d))\
+  O(ldimmw, I(s), Un, D(d))\
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
   O(ldimmqs, I(s), Un, D(d))\
-  O(ldimmw, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) U(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -99,6 +99,7 @@ struct Vunit;
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
+  O(stubtophp, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
   O(tailcallphp, Inone, U(target) U(fp) U(args), Dn)\
@@ -182,6 +183,7 @@ struct Vunit;
   O(loadups, Inone, U(s), D(d))\
   O(loadtqb, Inone, U(s), D(d))\
   O(loadb, Inone, U(s), D(d))\
+  O(loadw, Inone, U(s), D(d))\
   O(loadl, Inone, U(s), D(d))\
   O(loadqp, I(s), Un, D(d))\
   O(loadsd, Inone, U(s), D(d))\
@@ -257,7 +259,6 @@ struct Vunit;
   /* PPC64 instructions */\
   O(extsb, Inone, UH(s,d), DH(d,s) D(sf))\
   O(extsw, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(loadw, Inone, U(s), D(d))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
   O(xscvdpsxds, Inone, U(s), D(d))\
@@ -462,6 +463,7 @@ struct fallthru {};
  * Load an immedate value without mutating status flags.
  */
 struct ldimmb { Immed s; Vreg d; };
+struct ldimmw { Immed s; Vreg16 d; };
 struct ldimml { Immed s; Vreg d; };
 struct ldimmq { Immed64 s; Vreg d; };
 struct ldimmqs { Immed64 s; Vreg d; };
@@ -529,17 +531,21 @@ struct ret { RegSet args; };
 /*
  * Stub function prologue.
  *
- * Set up the native stack as follows:
+ * Set up the stub call frame---which has the same layout as the native call
+ * frame (and hence is platform dependent), except not all components are
+ * required to be valid.
+ *
+ * On x64, for example, this leaves the native stack as follows:
  *
  *    +-----------------------+   <- native stack pointer, pre-call
  *    |     return address    |
  *    +-----------------------+
  *    | <junk> or saved rvmfp |
- *    +-----------------------+   <- native stack pointer, after prologue
+ *    +-----------------------+   <- native stack pointer, after stublogue{}
  *
- * This resembles the frame layout of some architectures, like x64---however,
- * the frame pointer is only optionally saved, when the stub (or any native
- * helpers it calls) requires it by setting `saveframe' to true.
+ * The return address is always required, but the frame pointer is only
+ * optionally saved, when `saveframe' is set because the stub (or some native
+ * helper that it calls) needs to use it.
  *
  * Stubs are not allowed to spill registers to the stack, so the native stack
  * pointer will only be adjusted if the stub code does so intentionally.
@@ -626,6 +632,14 @@ struct syncvmsp { Vreg s; };
  * register allocator spill space.
  */
 struct phplogue { Vreg fp; };
+
+/*
+ * Convert from a stublogue{} context to a phplogue{} context.
+ *
+ * This is only used by fcallArrayHelper, which needs to begin with a
+ * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
+ */
+struct stubtophp { Vreg fp; };
 
 /*
  * Load fp[m_sfp] into `d' and return to m_savedRip on `fp'.
@@ -781,6 +795,7 @@ struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
  * operations zero the upper bits of 64-bit registers.
  */
 
+struct addl  { Vreg32 s0, s1, d; VregSF sf; };
 struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct addlm { Vreg32 s0; Vptr m; VregSF sf; };
 struct addlim { Immed s0; Vptr m; VregSF sf; };
@@ -838,10 +853,11 @@ struct idiv { Vreg64 s; VregSF sf; };
 struct imul { Vreg64 s0, s1, d; VregSF sf; };
 struct incl { Vreg32 s, d; VregSF sf; };
 struct inclm { Vptr m; VregSF sf; };
+struct incw { Vreg16 s, d; VregSF sf; };
+struct incwm { Vptr m; VregSF sf; };
 struct incq { Vreg64 s, d; VregSF sf; };
 struct incqm { Vptr m; VregSF sf; };
 struct incqmlock { Vptr m; VregSF sf; };
-struct incwm { Vptr m; VregSF sf; };
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jcci { ConditionCode cc; VregSF sf; Vlabel target; TCA taken; };
 struct jmp { Vlabel target; };
@@ -853,6 +869,7 @@ struct leap { RIPRelativeRef s; Vreg64 d; };
 struct loadups { Vptr s; Vreg128 d; };
 struct loadtqb { Vptr s; Vreg8 d; };
 struct loadb { Vptr s; Vreg8 d; };
+struct loadw { Vptr s; Vreg16 d; };
 struct loadl { Vptr s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
 struct loadsd { Vptr s; VregDbl d; };
@@ -940,12 +957,8 @@ struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 /**
  * PPC64-specific instructions
  */
-struct addl  { Vreg32 s0, s1, d; VregSF sf; };
-struct loadw { Vptr s; Vreg16 d; };
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
-struct incw { Vreg16 s, d; VregSF sf; };
-struct ldimmw { Immed s; Vreg16 d; };
 struct xscvdpsxds { Vreg128 s, d; };
 struct mfcr { Vreg64 d; };
 struct mflr { Vreg64 d; };
@@ -962,8 +975,8 @@ struct xxpermdi { Vreg128 s0, s1, d; };
 struct extsb { Vreg64 s; Vreg64 d; VregSF sf; };
 struct extsw { Vreg64 s; Vreg64 d; VregSF sf; };
 
-
 ///////////////////////////////////////////////////////////////////////////////
+
 struct Vinstr {
 #define O(name, imms, uses, defs) name,
   enum Opcode : uint8_t { VASM_OPCODES };

@@ -57,6 +57,8 @@ namespace {
 
 size_t s_counter;
 
+DEBUG_ONLY constexpr auto kHintLevel = 5;
+
 /*
  * Vreg discriminator.
  */
@@ -78,9 +80,19 @@ template<class T> bool is_wide(const T&) { return false; }
  * A Use refers to the position where an interval is used or defined.
  */
 struct Use {
+  /*
+   * Constraint imposed on the Vreg at this use.
+   */
   Constraint kind;
+  /*
+   * Position of this use or def.
+   */
   unsigned pos;
-  Vreg hint; // if valid, try to use same physical register as hint.
+  /*
+   * If valid, try to assign the same physical register here as `hint' was
+   * assigned at `pos'.
+   */
+  Vreg hint;
 };
 
 /*
@@ -136,7 +148,7 @@ struct Variable;
 struct Interval {
   explicit Interval(Variable* var) : var(var) {}
 
-  std::string toString();
+  std::string toString() const;
 
   /*
    * Endpoints.  Intervals are [closed, open), just like LiveRanges.
@@ -531,11 +543,11 @@ Interval* Variable::ivlAtUse(unsigned pos) {
 /*
  * Printing utilities.
  */
-void dumpVariables(const jit::vector<Variable*>& variables,
-                   unsigned num_spills);
 void printVariables(const char* caption,
                     const Vunit& unit, const VxlsContext& ctx,
                     const jit::vector<Variable*>& variables);
+void dumpVariables(const jit::vector<Variable*>& variables,
+                   unsigned num_spills);
 
 /*
  * The ID of the block enclosing `pos'.
@@ -599,7 +611,8 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
       code.insert(code.begin(), nop{});
       code.front().origin = origin;
     }
-    auto start = pos;
+    auto const start = pos;
+
     for (auto& inst : unit.blocks[b].code) {
       inst.pos = pos;
       pos += 2;
@@ -1043,6 +1056,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
   for (auto& c : unit.constToReg) {
     if (auto var = variables[c.second]) {
       var->ivl()->ranges.back().start = 0;
+      var->def_pos = 0;
       var->constant = true;
       var->val = c.first;
     }
@@ -1082,7 +1096,6 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Register allocation.
 
 /*
  * A map from PhysReg number to position.
@@ -1097,7 +1110,8 @@ using PosVec = PhysReg::Map<unsigned>;
  */
 PhysReg choose_closest_after(unsigned pos, const PosVec& pos_vec,
                              PhysReg r1, PhysReg r2) {
-  assertx(r1 != InvalidReg && r2 != InvalidReg);
+  if (r1 == InvalidReg) return r2;
+  if (r2 == InvalidReg) return r1;
 
   if (pos_vec[r1] >= pos) {
     if (pos <= pos_vec[r2] && pos_vec[r2] < pos_vec[r1]) {
@@ -1121,6 +1135,79 @@ PhysReg find_closest_after(unsigned pos, const PosVec& pos_vec) {
   }
   return ret;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Hints.
+
+/*
+ * Try to return the physical register that would coalesce `ivl' with its
+ * hinted source.
+ */
+PhysReg tryCoalesce(const jit::vector<Variable*>& variables,
+                    const Interval* ivl) {
+  assertx(ivl == ivl->leader());
+  assertx(!ivl->uses.empty());
+
+  auto const& def = ivl->uses.front();
+  assertx(def.pos == ivl->var->def_pos);
+
+  if (!def.hint.isValid()) return InvalidReg;
+  auto const hint_var = variables[def.hint];
+
+  for (auto hvl = hint_var->ivl(); hvl; hvl = hvl->next) {
+    if (def.pos == hvl->end()) return hvl->reg;
+  }
+  return InvalidReg;
+}
+
+/*
+ * Choose an appropriate hint for the (sub-)interval `ivl'.
+ *
+ * The register allocator passes us constraints via `free_until' and `allow'.
+ * We use the `free_until' vector to choose a hint that most tightly covers the
+ * lifetime of `ivl'; we use `allow' to ensure that our hint satisfies
+ * constraints.
+ */
+PhysReg chooseHint(const jit::vector<Variable*>& variables,
+                   const Interval* ivl,
+                   const PosVec& free_until, RegSet allow) {
+  if (!RuntimeOption::EvalHHIREnablePreColoring &&
+      !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
+
+  auto hint = InvalidReg;
+
+  // If `ivl' contains its def, try a coalescing hint.
+  if (ivl == ivl->leader()) {
+    hint = tryCoalesce(variables, ivl);
+  }
+  // If we have one, return it.
+  if (hint != InvalidReg) {
+    if (allow.contains(hint)) {
+      FTRACE(kHintLevel, "hinting {} for %{} @ {}\n",
+             show(hint), size_t(ivl->var->vreg), ivl->start());
+      return hint;
+    }
+    FTRACE(kHintLevel, "  found mismatched hint for %{} @ {}\n",
+           size_t(ivl->var->vreg), ivl->uses.front().pos);
+  }
+
+  // Crawl through our uses and look for a physical hint.
+  for (auto const& u : ivl->uses) {
+    if (!u.hint.isValid() ||
+        !u.hint.isPhys() ||
+        !allow.contains(u.hint)) continue;
+    hint = choose_closest_after(ivl->end(), free_until, hint, u.hint);
+  }
+
+  if (hint != InvalidReg) {
+    FTRACE(kHintLevel, "physical hint {} for %{} @ {}\n",
+           show(hint), size_t(ivl->var->vreg), ivl->start());
+  }
+  return hint;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Register allocation.
 
 /*
  * Information about spills generated by register allocation.
@@ -1158,7 +1245,6 @@ private:
 
   unsigned nearestSplitBefore(unsigned pos);
   unsigned constrain(Interval*, RegSet&);
-  PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
 
   void update(Interval*);
   void allocate(Interval*);
@@ -1387,52 +1473,6 @@ unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
 }
 
 /*
- * Return the first hint from all the uses in this interval that is available
- * for the lifetime of `current', else the hint which is available furthest
- * into the future.
- *
- * Skips uses that don't have any hint, or have an unusable hint.
- */
-PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
-                       RegSet allow) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring &&
-      !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
-
-  // Search `var' for a subinterval that ends at `pos' and return its assigned
-  // register.
-  auto const find_end = [&] (Variable* var, unsigned pos) -> PhysReg {
-    for (auto ivl = var->ivl(); ivl; ivl = ivl->next) {
-      if (pos == ivl->end() && ivl->reg != InvalidReg) return ivl->reg;
-    }
-    return InvalidReg;
-  };
-
-  auto ret = InvalidReg;
-
-  for (auto const u : current->uses) {
-    if (!u.hint.isValid()) continue;
-    auto hint_var = variables[u.hint];
-
-    PhysReg hint;
-    if (hint_var->fixed()) {
-      hint = hint_var->ivl()->reg;
-    } else if (u.pos == current->var->def_pos) {
-      // this is a def, so u.hint is a src
-      hint = find_end(hint_var, u.pos);
-    }
-    if (hint == InvalidReg) continue;
-    if (!allow.contains(hint)) continue;
-
-    if (ret == InvalidReg) {
-      ret = hint;
-    } else {
-      ret = choose_closest_after(current->end(), free_until, ret, hint);
-    }
-  }
-  return ret;
-}
-
-/*
  * Return the next intersection point between `current' and `other', or kMaxPos
  * if they never intersect.
  *
@@ -1529,7 +1569,7 @@ void Vxls::allocate(Interval* current) {
   }
 
   // Try to get a hinted register.
-  auto const hint = findHint(current, free_until, allow);
+  auto const hint = chooseHint(variables, current, free_until, allow);
   if (hint != InvalidReg && free_until[hint] >= current->end()) {
     return assignReg(current, hint);
   }
@@ -2638,7 +2678,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
 ///////////////////////////////////////////////////////////////////////////////
 // Printing.
 
-std::string Interval::toString() {
+std::string Interval::toString() const {
   std::ostringstream out;
   auto delim = "";
   if (reg != InvalidReg) {
@@ -2653,13 +2693,13 @@ std::string Interval::toString() {
   }
   delim = "";
   out << " [";
-  for (auto& r : ranges) {
+  for (auto const& r : ranges) {
     out << delim << folly::format("{}-{}", r.start, r.end);
     delim = ",";
   }
   out << ") {";
   delim = "";
-  for (auto& u : uses) {
+  for (auto const& u : uses) {
     if (u.pos == var->def_pos) {
       if (u.hint.isValid()) {
         out << delim << "@" << u.pos << "=" << show(u.hint);

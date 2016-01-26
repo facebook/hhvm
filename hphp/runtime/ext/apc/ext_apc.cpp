@@ -606,7 +606,7 @@ void apc_load(int thread) {
     for (int i = 0; i < count; i++) {
       jobs.push_back(std::make_shared<ApcLoadJob>(handle, i));
     }
-    JobDispatcher<ApcLoadJob, ApcLoadWorker>(jobs, thread).run();
+    JobDispatcher<ApcLoadJob, ApcLoadWorker>(std::move(jobs), thread).run();
   }
 
   apc_store().primeDone();

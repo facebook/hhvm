@@ -34,7 +34,7 @@ class JobDispatcher;
 template<class TJob>
 class WorkerInfo {
  public:
-  enum { DoInit = true };
+  enum { DoInitFini = true };
 };
 
 template<class TJob, class TWorker>
@@ -44,8 +44,8 @@ public:
     : m_dispatcher(dispatcher)
     , m_func(this, &WorkerWrapper<TJob, TWorker>::doJob)
   {
-    if (!WorkerInfo<TJob>::DoInit) {
-      m_func.setNoInit();
+    if (!WorkerInfo<TJob>::DoInitFini) {
+      m_func.setNoInitFini();
     }
   }
 
@@ -79,11 +79,11 @@ private:
  * MyJobPtrVec jobs;
  * // prepare job list in "jobs"
  *
- * JobDispatcher<MyJob, MyWorker>(jobs, 10).run();
+ * JobDispatcher<MyJob, MyWorker>(std::move(jobs), 10).run();
  *
  * or
  *
- * JobDispatcher<MyJob, MyWorker> dispatcher(jobs, 10);
+ * JobDispatcher<MyJob, MyWorker> dispatcher(std::move(jobs), 10);
  * dispatcher.start();
  * // do something else;
  * dispatcher.waitForEnd();
@@ -93,18 +93,23 @@ private:
  *
  *  class MyWorker {
  *   public:
+ *     void onThreadEnter();
  *     void doJob(MyJobPtr job);
+ *     void onThreadExit();
  *  };
  */
 template<class TJob, class TWorker>
 class JobDispatcher {
  public:
-  JobDispatcher(std::vector<std::shared_ptr<TJob> > &jobs,
+  JobDispatcher(const std::vector<std::shared_ptr<TJob> > &&jobs,
                 unsigned int workerCount, bool showStatus = false)
-    : m_index(0), m_jobs(jobs), m_showStatus(showStatus), m_lastPercent(0) {
+    : m_index(0),
+      m_jobs(std::move(jobs)),
+      m_showStatus(showStatus),
+      m_lastPercent(0) {
     std::random_shuffle(m_jobs.begin(), m_jobs.end());
-    if (workerCount > jobs.size()) {
-      workerCount = jobs.size();
+    if (workerCount > m_jobs.size()) {
+      workerCount = m_jobs.size();
     }
     m_workers.resize(workerCount);
     for (unsigned int i = 0; i < m_workers.size(); i++) {
@@ -180,7 +185,7 @@ class JobDispatcher {
  private:
   Mutex m_mutex;
   unsigned int m_index;
-  std::vector<std::shared_ptr<TJob> > &m_jobs;
+  std::vector<std::shared_ptr<TJob> > m_jobs;
   std::vector<std::shared_ptr<WorkerWrapper<TJob, TWorker> > > m_workers;
   bool m_showStatus;
   int m_lastPercent;

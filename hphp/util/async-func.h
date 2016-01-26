@@ -169,7 +169,7 @@ struct AsyncFuncImpl {
     return s_finiFunc;
   }
 
-  void setNoInit() { m_noInit = true; }
+  void setNoInitFini() { m_noInitFini = true; }
 private:
   Synchronizable m_stopMonitor;
 
@@ -185,7 +185,7 @@ private:
   Exception* m_exception; // exception was thrown and thread was terminated
   int m_node;
   bool m_stopped;
-  bool m_noInit;
+  bool m_noInitFini;
 
   /**
    * Called by ThreadFunc() to delegate the work.

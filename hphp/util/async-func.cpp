@@ -35,7 +35,7 @@ AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
       m_threadStack(nullptr), m_threadId(0),
       m_exception(nullptr), m_node(0),
-      m_stopped(false), m_noInit(false) {
+      m_stopped(false), m_noInitFini(false) {
 }
 
 AsyncFuncImpl::~AsyncFuncImpl() {
@@ -124,7 +124,7 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
 }
 
 void AsyncFuncImpl::threadFuncImpl() {
-  if (s_initFunc && !m_noInit) {
+  if (s_initFunc && !m_noInitFini) {
     s_initFunc(s_initFuncArg);
   }
   try {
@@ -141,7 +141,7 @@ void AsyncFuncImpl::threadFuncImpl() {
     m_stopped = true;
     m_stopMonitor.notify();
   }
-  if (s_finiFunc) {
+  if (s_finiFunc && !m_noInitFini) {
     s_finiFunc(s_finiFuncArg);
   }
 }

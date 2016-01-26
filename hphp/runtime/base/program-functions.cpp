@@ -1946,6 +1946,15 @@ void hphp_process_init() {
   BootTimer::mark("xmlInitParser");
 
   g_context.getCheck();
+  InitFiniNode::ProcessPreInit();
+  // TODO(9795696): Race in thread map may trigger spurious logging at
+  // thread exit, so for now, only spawn threads if we're a server.
+  const uint32_t maxWorkers = RuntimeOption::ServerExecutionMode() ? 3 : 0;
+  InitFiniNode::ProcessInitConcurrentStart(maxWorkers);
+  SCOPE_EXIT {
+    InitFiniNode::ProcessInitConcurrentWaitForEnd();
+    BootTimer::mark("extra_process_init_concurrent_wait");
+  };
   g_vmProcessInit();
   BootTimer::mark("g_vmProcessInit");
 

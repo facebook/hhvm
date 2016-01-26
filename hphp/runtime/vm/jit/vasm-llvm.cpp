@@ -301,7 +301,7 @@ void reportLLVMError(void* data, const std::string& err, bool gen_crash_diag) {
 
 InitFiniNode llvmInit(
   []() { llvm::install_fatal_error_handler(reportLLVMError); },
-  InitFiniNode::When::ProcessInit);
+  InitFiniNode::When::ProcessInit, "llvm");
 
 InitFiniNode llvmExit(llvm::remove_fatal_error_handler,
                       InitFiniNode::When::ProcessExit);

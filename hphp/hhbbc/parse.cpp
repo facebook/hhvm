@@ -361,6 +361,22 @@ template<class T> void decode(PC& pc, T& val) {
   val = decode<T>(pc);
 }
 
+MKey make_mkey(const php::Func& func, MemberKey mk) {
+  switch (mk.mcode) {
+    case MEL: case MPL:
+      return MKey{mk.mcode, borrow(func.locals[mk.iva])};
+    case MEC: case MPC:
+      return MKey{mk.mcode, mk.iva};
+    case MET: case MPT: case MQT:
+      return MKey{mk.mcode, mk.litstr};
+    case MEI:
+      return MKey{mk.mcode, mk.int64};
+    case MW:
+      return MKey{};
+  }
+  not_reached();
+}
+
 template<class FindBlock>
 void populate_block(ParseUnitState& puState,
                     const FuncEmitter& fe,
@@ -458,6 +474,7 @@ void populate_block(ParseUnitState& puState,
 #define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
 #define IMM_OA(type)   type IMM_OA_IMPL
 #define IMM_VSA(n)     auto keys = decode_stringvec();
+#define IMM_KA(n)      auto mkey = make_mkey(func, decode_member_key(pc, &ue));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)

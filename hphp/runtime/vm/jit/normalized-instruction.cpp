@@ -35,7 +35,7 @@ static void populateImmediates(NormalizedInstruction& inst) {
     if (immType(inst.op(), i) == RATA) {
       inst.imm[i].u_RATA = decodeRAT(inst.unit(), pc);
     } else {
-      inst.imm[i] = getImm(inst.pc(), i);
+      inst.imm[i] = getImm(inst.pc(), i, inst.unit());
     }
     pc += immSize(inst.pc(), i);
   }

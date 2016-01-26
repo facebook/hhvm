@@ -23,7 +23,8 @@
 namespace HPHP {
 
 std::string SrcKey::showInst() const {
-  return instrToString(unit()->at(offset()));
+  auto const u = unit();
+  return instrToString(u->at(offset()), u);
 }
 
 std::string show(SrcKey sk) {
@@ -55,7 +56,8 @@ std::string showShort(SrcKey sk) {
 void sktrace(SrcKey sk, const char *fmt, ...) {
   if (!Trace::enabled) return;
 
-  auto inst = instrToString(sk.unit()->at(sk.offset()));
+  auto const u = sk.unit();
+  auto inst = instrToString(u->at(sk.offset()), u);
   Trace::trace("%s: %20s ", show(sk).c_str(), inst.c_str());
   va_list a;
   va_start(a, fmt);

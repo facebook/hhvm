@@ -438,81 +438,25 @@ static const struct {
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
   { OpBaseR,       {StackI,           MBase,        OutNone         }},
   { OpBaseH,       {None,             MBase,        OutNone         }},
-  { OpDimL,        {Local|MBase,      MBase,        OutNone         }},
-  { OpDimC,        {StackI|MBase,     MBase,        OutNone         }},
-  { OpDimInt,      {MBase,            MBase,        OutNone         }},
-  { OpDimStr,      {MBase,            MBase,        OutNone         }},
-  { OpDimNewElem,  {MBase,            MBase,        OutNone         }},
-  { OpFPassDimL,   {Local|MBase|FuncdRef,
+  { OpDim,         {MBase|MKey,       MBase,        OutNone         }},
+  { OpFPassDim,    {MBase|MKey|FuncdRef,
                                       MBase,        OutNone         }},
-  { OpFPassDimC,   {StackI|MBase|FuncdRef,
-                                      MBase,        OutNone         }},
-  { OpFPassDimInt, {MBase|FuncdRef,   MBase,        OutNone         }},
-  { OpFPassDimStr, {MBase|FuncdRef,   MBase,        OutNone         }},
-  { OpFPassDimNewElem,
-                   {MBase|FuncdRef,   MBase,        OutNone         }},
-  { OpQueryML,     {BStackN|Local|MBase,
+  { OpQueryM,      {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpQueryMC,     {BStackN|MBase,    Stack1,       OutUnknown      }},
-  { OpQueryMInt,   {BStackN|MBase,    Stack1,       OutUnknown      }},
-  { OpQueryMStr,   {BStackN|MBase,    Stack1,       OutUnknown      }},
-  { OpVGetML,      {BStackN|Local|MBase,
+  { OpVGetM,       {BStackN|MBase|MKey,
                                       Stack1,       OutVUnknown     }},
-  { OpVGetMC,      {BStackN|MBase,    Stack1,       OutVUnknown     }},
-  { OpVGetMInt,    {BStackN|MBase,    Stack1,       OutVUnknown     }},
-  { OpVGetMStr,    {BStackN|MBase,    Stack1,       OutVUnknown     }},
-  { OpVGetMNewElem,{BStackN|MBase,    Stack1,       OutVUnknown     }},
-  { OpFPassML,     {BStackN|Local|MBase|FuncdRef,
+  { OpFPassM,      {BStackN|MBase|MKey|FuncdRef,
                                       Stack1,       OutUnknown      }},
-  { OpFPassMC,     {BStackN|MBase|FuncdRef,
+  { OpSetM,        {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpFPassMInt,   {BStackN|MBase|FuncdRef,
+  { OpIncDecM,     {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpFPassMStr,   {BStackN|MBase|FuncdRef,
+  { OpSetOpM,      {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpFPassMNewElem,
-                   {BStackN|MBase|FuncdRef,
-                                      Stack1,       OutUnknown      }},
-  { OpSetML,       {Stack1|BStackN|Local|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetMC,       {Stack1|BStackN|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetMInt,     {Stack1|BStackN|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetMStr,     {Stack1|BStackN|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetMNewElem, {Stack1|MBase,     Stack1,       OutUnknown      }},
-  { OpIncDecML,    {BStackN|Local|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpIncDecMC,    {BStackN|MBase,    Stack1,       OutUnknown      }},
-  { OpIncDecMInt,  {BStackN|MBase,    Stack1,       OutUnknown      }},
-  { OpIncDecMStr,  {BStackN|MBase,    Stack1,       OutUnknown      }},
-  { OpIncDecMNewElem,
-                   {BStackN|MBase,    Stack1,       OutUnknown      }},
-  { OpSetOpML,     {Stack1|BStackN|Local|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetOpMC,     {Stack1|BStackN|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetOpMInt,   {Stack1|BStackN|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetOpMStr,   {Stack1|BStackN|MBase,
-                                      Stack1,       OutUnknown      }},
-  { OpSetOpMNewElem,
-                   {Stack1|MBase,     Stack1,       OutUnknown      }},
-  { OpBindML,      {Stack1|BStackN|Local|MBase,
+  { OpBindM,       {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutSameAsInput  }},
-  { OpBindMC,      {Stack1|BStackN|MBase,
-                                      Stack1,       OutSameAsInput  }},
-  { OpBindMInt,    {Stack1|BStackN|MBase,
-                                      Stack1,       OutSameAsInput  }},
-  { OpBindMStr,    {Stack1|BStackN|MBase,
-                                      Stack1,       OutSameAsInput  }},
-  { OpBindMNewElem,{Stack1|MBase,     Stack1,       OutSameAsInput  }},
-  { OpUnsetML,     {BStackN|Local|MBase,
+  { OpUnsetM,      {BStackN|MBase|MKey,
                                       None,         OutNone         }},
-  { OpUnsetMC,     {BStackN|MBase,    None,         OutNone         }},
-  { OpUnsetMInt,   {BStackN|MBase,    None,         OutNone         }},
-  { OpUnsetMStr,   {BStackN|MBase,    None,         OutNone         }},
   { OpSetWithRefLML,
                    {MBase,            None,         OutNone         }},
   { OpSetWithRefRML,
@@ -546,7 +490,7 @@ namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
     DontGuardStack1 | IgnoreInnerType | DontGuardAny | This |
-    MBase | StackI | IdxA;
+    MBase | StackI | IdxA | MKey;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -578,33 +522,23 @@ int64_t getStackPopped(PC pc) {
     case Op::FCallAwait:   return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
-    case Op::QueryML:    case Op::QueryMC:
-    case Op::QueryMInt:  case Op::QueryMStr:
-    case Op::VGetML:     case Op::VGetMC:
-    case Op::VGetMInt:   case Op::VGetMStr:
-    case Op::VGetMNewElem:
-    case Op::IncDecML:   case Op::IncDecMC:
-    case Op::IncDecMInt: case Op::IncDecMStr:
-    case Op::IncDecMNewElem:
-    case Op::UnsetML:    case Op::UnsetMC:
-    case Op::UnsetMInt:  case Op::UnsetMStr:
+    case Op::QueryM:
+    case Op::VGetM:
+    case Op::IncDecM:
+    case Op::UnsetM:
     case Op::NewPackedArray:
     case Op::ConcatN:
     case Op::FCallBuiltin:
     case Op::CreateCl:
       return getImm(pc, 0).u_IVA;
 
-    case Op::FPassML:   case Op::FPassMC:
-    case Op::FPassMInt: case Op::FPassMStr: case Op::FPassMNewElem:
+    case Op::FPassM:
       // imm[0] is argument index
       return getImm(pc, 1).u_IVA;
 
-    case Op::SetML:     case Op::SetMC:
-    case Op::SetMInt:   case Op::SetMStr:   case Op::SetMNewElem:
-    case Op::SetOpML:   case Op::SetOpMC:
-    case Op::SetOpMInt: case Op::SetOpMStr: case Op::SetOpMNewElem:
-    case Op::BindML:    case Op::BindMC:
-    case Op::BindMInt:  case Op::BindMStr:  case Op::BindMNewElem:
+    case Op::SetM:
+    case Op::SetOpM:
+    case Op::BindM:
       return getImm(pc, 0).u_IVA + 1;
 
     case Op::NewStructArray: return getImmVector(pc).size();
@@ -648,7 +582,6 @@ bool isAlwaysNop(Op op) {
   }
 }
 
-size_t localImmIdx(Op op) {
 #define NA
 #define ONE(a) a(0)
 #define TWO(a, b) a(0) b(1)
@@ -671,15 +604,30 @@ size_t localImmIdx(Op op) {
 #define BA(n)
 #define OA(op) BA
 #define VSA(n)
+#define KA(n)
+#define O(name, imm, ...) case Op::name: imm break;
 
+size_t localImmIdx(Op op) {
   size_t idx = 0xff;
   switch (op) {
-#define O(name, imm, ...) case Op::name: imm break;
     OPCODES
-#undef O
   }
   assert(idx != 0xff);
   return idx;
+}
+
+size_t memberKeyImmIdx(Op op) {
+  size_t idx = 0xff;
+  switch (op) {
+#undef LA
+#undef KA
+#define LA(n)
+#define KA(n) assert(idx == 0xff); idx = n;
+    OPCODES
+  }
+  assert(idx != 0xff);
+  return idx;
+}
 
 #undef ONE
 #undef TWO
@@ -700,7 +648,8 @@ size_t localImmIdx(Op op) {
 #undef BA
 #undef OA
 #undef VSA
-}
+#undef KA
+#undef O
 
 /*
  * getInputs --
@@ -772,9 +721,23 @@ InputInfoVec getInputs(NormalizedInstruction& ni) {
     // their first immediate.
     auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
-    inputs.emplace(inputs.end(), Location(Location::Local, loc));
+    inputs.emplace_back(Location(Location::Local, loc));
   }
-
+  if (input & MKey) {
+    auto mk = ni.imm[memberKeyImmIdx(ni.op())].u_KA;
+    switch (mk.mcode) {
+      case MEL: case MPL:
+        inputs.emplace_back(Location(Location::Local, mk.iva));
+        break;
+      case MEC: case MPC:
+        inputs.emplace_back(Location(BCSPOffset{int32_t(mk.iva)}));
+        break;
+      case MW: case MEI: case MET: case MPT: case MQT:
+        // The inputs vector is only used for deciding when to break the
+        // tracelet, which can never happen for these cases.
+        break;
+    }
+  }
   if (input & AllLocals) {
     ni.ignoreInnerType = true;
   }
@@ -1004,54 +967,16 @@ bool dontGuardAnyInputs(Op op) {
   case Op::BaseC:
   case Op::BaseR:
   case Op::BaseH:
-  case Op::DimL:
-  case Op::DimC:
-  case Op::DimInt:
-  case Op::DimStr:
-  case Op::DimNewElem:
-  case Op::FPassDimL:
-  case Op::FPassDimC:
-  case Op::FPassDimInt:
-  case Op::FPassDimStr:
-  case Op::FPassDimNewElem:
-  case Op::QueryML:
-  case Op::QueryMC:
-  case Op::QueryMInt:
-  case Op::QueryMStr:
-  case Op::VGetML:
-  case Op::VGetMC:
-  case Op::VGetMInt:
-  case Op::VGetMStr:
-  case Op::VGetMNewElem:
-  case Op::FPassML:
-  case Op::FPassMC:
-  case Op::FPassMInt:
-  case Op::FPassMStr:
-  case Op::FPassMNewElem:
-  case Op::SetML:
-  case Op::SetMC:
-  case Op::SetMInt:
-  case Op::SetMStr:
-  case Op::SetMNewElem:
-  case Op::IncDecML:
-  case Op::IncDecMC:
-  case Op::IncDecMInt:
-  case Op::IncDecMStr:
-  case Op::IncDecMNewElem:
-  case Op::SetOpML:
-  case Op::SetOpMC:
-  case Op::SetOpMInt:
-  case Op::SetOpMStr:
-  case Op::SetOpMNewElem:
-  case Op::BindML:
-  case Op::BindMC:
-  case Op::BindMInt:
-  case Op::BindMStr:
-  case Op::BindMNewElem:
-  case Op::UnsetML:
-  case Op::UnsetMC:
-  case Op::UnsetMInt:
-  case Op::UnsetMStr:
+  case Op::Dim:
+  case Op::FPassDim:
+  case Op::QueryM:
+  case Op::VGetM:
+  case Op::FPassM:
+  case Op::SetM:
+  case Op::IncDecM:
+  case Op::SetOpM:
+  case Op::BindM:
+  case Op::UnsetM:
   case Op::SetWithRefLML:
   case Op::SetWithRefRML:
     return false;
@@ -1209,6 +1134,7 @@ const char* show(TranslateResult r) {
 #define IMM_BA(n)      ni.imm[n].u_BA
 #define IMM_OA_IMPL(n) ni.imm[n].u_OA
 #define IMM_OA(subop)  (subop)IMM_OA_IMPL
+#define IMM_KA(n)      ni.imm[n].u_KA
 
 #define ONE(x0)           , IMM_##x0(0)
 #define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
@@ -1244,6 +1170,7 @@ static void translateDispatch(IRGS& irgs,
 #undef IMM_OA_IMPL
 #undef IMM_OA
 #undef IMM_VSA
+#undef IMM_KA
 
 //////////////////////////////////////////////////////////////////////
 

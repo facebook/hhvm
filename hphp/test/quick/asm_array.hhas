@@ -43,7 +43,7 @@
     Int 2
     AGetL $x
     BaseSC 2 0
-    QueryMC 2 CGet Elem
+    QueryM 2 CGet EC:0
     FPassC 0
   FCall 1
   PopR
@@ -62,7 +62,7 @@
   PopC
 
   BaseL $arr Warn
-  QueryMStr 0 CGet Elem "foo"
+  QueryM 0 CGet ET:"foo"
   String "\n"
   Concat
   Print
@@ -70,11 +70,11 @@
 
   String "one"
   BaseL $arr Define
-  SetMInt 0 Elem 1
+  SetM 0 EI:1
   PopC
 
   BaseL $arr Warn
-  QueryMInt 0 CGet Elem 1
+  QueryM 0 CGet EI:1
   String "\n"
   Concat
   Print
@@ -84,12 +84,12 @@
   SetL $key
   PopC
   BaseL $arr None
-  UnsetML 0 Elem $key
+  UnsetM 0 EL:$key
 
   # Test that it's unset
   CGetL $arr
   BaseC 0
-  QueryML 1 Isset Elem $key
+  QueryM 1 Isset EL:$key
   JmpZ unset_label
 
   String "This should be impossible...\n"

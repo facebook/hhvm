@@ -266,55 +266,20 @@ interpOutputLocals(IRGS& env,
       setImmLocType(0, TUninit);
       break;
 
-    // New minstrs are handled extremely conservatively for now.
-    case OpDimL:
-    case OpDimC:
-    case OpDimInt:
-    case OpDimStr:
-      if (inst.imm[2].u_OA & mDefine) smashesAllLocals = true;
+    // New minstrs are handled extremely conservatively.
+    case OpQueryM:
       break;
-    case OpDimNewElem:
+    case OpDim:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
       break;
-    case OpFPassDimL:
-    case OpFPassDimC:
-    case OpFPassDimInt:
-    case OpFPassDimStr:
-    case OpFPassDimNewElem:
-    case OpFPassML:
-    case OpFPassMC:
-    case OpFPassMInt:
-    case OpFPassMStr:
-    case OpFPassMNewElem:
-    case OpVGetML:
-    case OpVGetMC:
-    case OpVGetMInt:
-    case OpVGetMStr:
-    case OpVGetMNewElem:
-    case OpSetML:
-    case OpSetMC:
-    case OpSetMInt:
-    case OpSetMStr:
-    case OpSetMNewElem:
-    case OpIncDecML:
-    case OpIncDecMC:
-    case OpIncDecMInt:
-    case OpIncDecMStr:
-    case OpIncDecMNewElem:
-    case OpSetOpML:
-    case OpSetOpMC:
-    case OpSetOpMInt:
-    case OpSetOpMStr:
-    case OpSetOpMNewElem:
-    case OpBindML:
-    case OpBindMC:
-    case OpBindMInt:
-    case OpBindMStr:
-    case OpBindMNewElem:
-    case OpUnsetML:
-    case OpUnsetMC:
-    case OpUnsetMInt:
-    case OpUnsetMStr:
+    case OpFPassDim:
+    case OpFPassM:
+    case OpVGetM:
+    case OpSetM:
+    case OpIncDecM:
+    case OpSetOpM:
+    case OpBindM:
+    case OpUnsetM:
     case OpSetWithRefLML:
     case OpSetWithRefRML:
       smashesAllLocals = true;

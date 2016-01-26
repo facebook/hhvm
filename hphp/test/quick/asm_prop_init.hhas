@@ -87,7 +87,7 @@
 
   String "nonstat"
   BaseL $obj Warn
-  QueryMC 1 CGet Prop
+  QueryM 1 CGet PC:0
   String "\n"
   Concat
   Print

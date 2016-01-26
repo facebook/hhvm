@@ -175,6 +175,22 @@ struct EmitBcInfo {
   std::vector<BlockInfo> blockInfo;
 };
 
+MemberKey make_member_key(MKey mkey) {
+  switch (mkey.mcode) {
+    case MEC: case MPC:
+      return MemberKey{mkey.mcode, mkey.idx};
+    case MEL: case MPL:
+      return MemberKey{mkey.mcode, int32_t(mkey.local->id)};
+    case MET: case MPT: case MQT:
+      return MemberKey{mkey.mcode, mkey.litstr};
+    case MEI:
+      return MemberKey{mkey.mcode, mkey.int64};
+    case MW:
+      return MemberKey{};
+  }
+  not_reached();
+}
+
 EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          UnitEmitter& ue,
                          const php::Func& func) {
@@ -305,6 +321,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_OA(type)   IMM_OA_IMPL
 #define IMM_BA(n)      emit_branch(*data.target);
 #define IMM_VSA(n)     emit_vsa(data.keys);
+#define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -373,6 +390,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_OA_IMPL
 #undef IMM_OA
 #undef IMM_VSA
+#undef IMM_KA
 
 #undef IMM_NA
 #undef IMM_ONE

@@ -122,6 +122,7 @@ public:
 #define IMM_BA Label&
 #define IMM_OA(type) type
 #define IMM_VSA std::vector<std::string>&
+#define IMM_KA MemberKey
 #define O(name, imm, pop, push, flags) void name(imm);
   OPCODES
 #undef O
@@ -145,6 +146,7 @@ public:
 #undef IMM_BA
 #undef IMM_OA
 #undef IMM_VSA
+#undef IMM_KA
 
 private:
   ConstructPtr m_node;
@@ -717,6 +719,7 @@ public:
     };
   };
 
+  MemberKey symToMemberKey(Emitter& e, int i, bool allowW);
   size_t emitMOp(int iFirst, int& iLast, Emitter& e, MInstrOpts opts);
   void emitQueryMOp(int iFirst, int iLast, Emitter& e, QueryMOp op);
 

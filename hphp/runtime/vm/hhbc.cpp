@@ -131,6 +131,11 @@ ArgType immType(const Op opcode, int idx) {
   }
 }
 
+static size_t encoded_iva_size(uint8_t lowByte) {
+  // Low order bit set => 4-byte.
+  return (lowByte & 0x1 ? sizeof(int32_t) : sizeof(int8_t));
+}
+
 int immSize(PC origPC, int idx) {
   auto pc = origPC;
   auto const op = decode_op(pc);
@@ -150,10 +155,25 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
-    auto const imm = decode_raw<uint8_t>(pc);
+    return encoded_iva_size(decode_raw<uint8_t>(pc));
+  }
 
-    // Low order bit set => 4-byte.
-    return (imm & 0x1 ? sizeof(int32_t) : sizeof(unsigned char));
+  if (immType(op, idx) == KA) {
+    if (idx >= 1) pc += immSize(origPC, 0);
+    if (idx >= 2) pc += immSize(origPC, 1);
+    if (idx >= 3) pc += immSize(origPC, 2);
+
+    switch (decode_raw<MemberCode>(pc)) {
+      case MW:
+        return 1;
+      case MEL: case MPL: case MEC: case MPC:
+        return 1 + encoded_iva_size(decode_raw<uint8_t>(pc));
+      case MEI:
+        return 1 + sizeof(int64_t);
+      case MET: case MPT: case MQT:
+        return 1 + sizeof(Id);
+    }
+    not_reached();
   }
 
   if (immType(op, idx) == RATA) {
@@ -167,24 +187,19 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
-    int prefixes, vecElemSz;
+    int vecElemSz;
     auto itype = immType(op, idx);
     if (itype == BLA) {
-      prefixes = 1;
       vecElemSz = sizeof(Offset);
     } else if (itype == ILA) {
-      prefixes = 1;
       vecElemSz = 2 * sizeof(uint32_t);
     } else if (itype == VSA) {
-      prefixes = 1;
       vecElemSz = sizeof(Id);
     } else {
       assert(itype == SLA);
-      prefixes = 1;
       vecElemSz = sizeof(StrVecItem);
     }
-    return prefixes * sizeof(int32_t) +
-      vecElemSz * decode_raw<int32_t>(pc);
+    return sizeof(int32_t) + vecElemSz * decode_raw<int32_t>(pc);
   }
 
   ArgType type = immType(op, idx);
@@ -204,7 +219,7 @@ bool hasImmVector(Op opcode) {
   return false;
 }
 
-ArgUnion getImm(PC const origPC, int idx) {
+ArgUnion getImm(PC const origPC, int idx, const Unit* unit) {
   auto pc = origPC;
   auto const UNUSED op = decode_op(pc);
   assert(idx >= 0 && idx < numImmediates(op));
@@ -219,6 +234,9 @@ ArgUnion getImm(PC const origPC, int idx) {
   auto const type = immType(op, idx);
   if (type == IVA || type == LA || type == IA) {
     retval.u_IVA = decodeVariableSizeImm(&pc);
+  } else if (type == KA) {
+    assert(unit != nullptr);
+    retval.u_KA = decode_member_key(pc, unit);
   } else if (!immIsVector(op, cursor)) {
     always_assert(type != RATA);  // Decode RATAs with a different function.
     memcpy(&retval.bytes, pc, immSize(origPC, idx));
@@ -285,6 +303,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #define IMM_IA 0
 #define IMM_OA(x) 0
 #define IMM_VSA 0
+#define IMM_KA 0
 #define ONE(a) IMM_##a
 #define TWO(a, b) (IMM_##a + 2 * IMM_##b)
 #define THREE(a, b, c) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c)
@@ -306,6 +325,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #undef IMM_SLA
 #undef IMM_OA
 #undef IMM_VSA
+#undef IMM_KA
 #undef ONE
 #undef TWO
 #undef THREE
@@ -646,7 +666,7 @@ bool pushesActRec(Op opcode) {
   }
 }
 
-void staticArrayStreamer(ArrayData* ad, std::ostream& out) {
+void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
   out << "array(";
   if (!ad->empty()) {
     bool comma = false;
@@ -745,42 +765,42 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
   not_reached();
 }
 
-const char* const memberNames[] =
-  { "EC", "PC", "EL", "PL", "ET", "PT", "QT", "EI", "W"};
-const size_t memberNamesCount = sizeof(memberNames) /
-                                sizeof(*memberNames);
-
-static_assert(memberNamesCount == NumMemberCodes,
-             "Member code missing for memberCodeString");
-
-const char* memberCodeString(MemberCode mcode) {
-  assert(mcode >= 0 && mcode < NumMemberCodes);
-  return memberNames[mcode];
-}
-
-folly::Optional<MemberCode> parseMemberCode(const char* s) {
-  for (auto i = 0; i < memberNamesCount; i++) {
-    if (!strcmp(memberNames[i], s)) {
-      return MemberCode(i);
-    }
-  }
-  return folly::none;
-}
-
-std::string instrToString(PC it, const Unit* u /* = NULL */) {
+std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   std::stringstream out;
   PC iStart = it;
   Op op = decode_op(it);
 
   auto readRATA = [&] {
-    if (!u) {
-      auto const pc = it;
-      it += encodedRATSize(pc);
-      out << " <RepoAuthType>";
+    if (auto unit = u.left()) {
+      auto const rat = decodeRAT(unit, it);
+      out << ' ' << show(rat);
       return;
     }
-    auto const rat = decodeRAT(u, it);
-    out << ' ' << show(rat);
+
+    auto const pc = it;
+    it += encodedRATSize(pc);
+    out << " <RepoAuthType>";
+  };
+
+  auto offsetOf = [u](PC pc) {
+    return u.match(
+      [pc](const Unit* u) { return u->offsetOf(pc); },
+      [pc](const UnitEmitter* ue) { return ue->offsetOf(pc); }
+    );
+  };
+
+  auto lookupLitstrId = [u](Id id) {
+    return u.match(
+      [id](const Unit* u) { return u->lookupLitstrId(id); },
+      [id](const UnitEmitter* ue) { return ue->lookupLitstr(id); }
+    );
+  };
+
+  auto lookupArrayId = [u](Id id) {
+    return u.match(
+      [id](const Unit* u) { return u->lookupArrayId(id); },
+      [id](const UnitEmitter* ue) { return ue->lookupArray(id); }
+    );
   };
 
   switch (op) {
@@ -791,7 +811,7 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
   Offset _value = *(Offset*)it;                                     \
   out << " " << _value;                                             \
   if (u != nullptr) {                                               \
-    out << " (" << u->offsetOf(iStart + _value) << ")";             \
+    out << " (" << offsetOf(iStart + _value) << ")";                \
   }                                                                 \
   it += sizeof(Offset);                                             \
 } while (false)
@@ -824,17 +844,15 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
   if (id < 0) {                                                   \
     assert(op == OpSSwitch);                                      \
     out << sep << "-";                                            \
-  } else if (u) {                                                 \
-    const StringData* sd = u->lookupLitstrId(id);                 \
+  } else {                                                        \
+    auto const sd = lookupLitstrId(id);                           \
     out << sep << "\"" <<                                         \
       escapeStringForCPP(sd->data(), sd->size()) << "\"";         \
-  } else {                                                        \
-    out << sep << id;                                             \
   }                                                               \
 } while (false)
 
 #define READSVEC() do {                         \
-  int sz = decode_raw<int>(it);                   \
+  int sz = decode_raw<int>(it);                 \
   out << " <";                                  \
   const char* sep = "";                         \
   for (int i = 0; i < sz; ++i) {                \
@@ -843,16 +861,8 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
       READLITSTR("");                           \
       out << ":";                               \
     }                                           \
-    Offset o = decode_raw<Offset>(it);            \
-    if (u != nullptr) {                         \
-      if (iStart + o == u->entry() - 1) {       \
-        out << "Invalid";                       \
-      } else {                                  \
-        out << u->offsetOf(iStart + o);         \
-      }                                         \
-    } else {                                    \
-      out << o;                                 \
-    }                                           \
+    Offset o = decode_raw<Offset>(it);          \
+    out << offsetOf(iStart + o);                \
     sep = " ";                                  \
   }                                             \
   out << ">";                                   \
@@ -893,22 +903,19 @@ std::string instrToString(PC it, const Unit* u /* = NULL */) {
 #define H_OA(type) READOA(type)
 #define H_SA READLITSTR(" ")
 #define H_RATA readRATA()
-#define H_AA                                                  \
-  if (u) {                                                    \
-    out << " ";                                               \
-    staticArrayStreamer(u->lookupArrayId(*((Id*)it)), out);   \
-  } else {                                                    \
-    out << " " << *((Id*)it);                                 \
-  }                                                           \
-  it += sizeof(Id)
+#define H_AA do {                                                \
+  out << ' ';                                                    \
+  staticArrayStreamer(lookupArrayId(decode_raw<Id>(it)), out);   \
+} while (false)
 #define H_VSA do {                                      \
-  int sz = decode_raw<int32_t>(it);                       \
+  int sz = decode_raw<int32_t>(it);                     \
   out << " <";                                          \
   for (int i = 0; i < sz; ++i) {                        \
     H_SA;                                               \
   }                                                     \
   out << " >";                                          \
 } while (false)
+#define H_KA out << ' ' << show(decode_member_key(it, u))
 
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
@@ -940,6 +947,7 @@ OPCODES
 #undef H_SA
 #undef H_AA
 #undef H_VSA
+#undef H_KA
     default: assert(false);
   };
   return out.str();
@@ -1026,12 +1034,6 @@ static const char* QueryMOp_names[] = {
 #undef OP
 };
 
-static const char* PropElemOp_names[] = {
-#define OP(x) #x,
-  PROP_ELEM_OPS
-#undef OP
-};
-
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1092,7 +1094,6 @@ X(OODeclExistsOp)
 X(ObjMethodOp)
 X(SwitchKind)
 X(QueryMOp)
-X(PropElemOp)
 
 #undef X
 

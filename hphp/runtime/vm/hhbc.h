@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/member-key.h"
+#include "hphp/util/either.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 
@@ -32,6 +34,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Unit;
+struct UnitEmitter;
 struct Func;
 
 /*
@@ -62,6 +65,7 @@ struct Func;
   ARGTYPE(RATA,   RepoAuthType)  /* Statically inferred RepoAuthType */   \
   ARGTYPE(BA,     Offset)        /* Bytecode offset */                    \
   ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                \
+  ARGTYPE(KA,     MemberKey)     /* Member key: local, stack, int, str */ \
   ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
 
 enum ArgType {
@@ -122,35 +126,6 @@ enum InstrFlags {
   CF_FF = (CF | FF)
 };
 
-/**
- * E - an element, $x['y']
- * P - a property, $x->y
- * Q - a NullSafe version of P, $x?->y
- */
-enum MemberCode {
-  // Element and property, consuming a cell from the stack.
-  MEC,
-  MPC,
-
-  // Element and property, using an immediate local id.
-  MEL,
-  MPL,
-
-  // Element and property, using a string immediate
-  MET,
-  MPT,
-  MQT,
-
-  // Element, using an int64 immediate
-  MEI,
-
-  // New element operation: no key. If this is ever not the last MemberCode,
-  // NumMemberCodes must be adjusted.
-  MW,
-};
-
-constexpr size_t NumMemberCodes = MW + 1;
-
 enum MInstrAttr {
   MIA_none         = 0x00,
   MIA_warn         = 0x01,
@@ -175,43 +150,6 @@ enum MInstrAttr {
 };
 
 std::string show(MInstrAttr);
-
-inline bool memberCodeHasImm(MemberCode mc) {
-  return mc == MEL || mc == MPL || mc == MET ||
-    mc == MPT || mc == MEI || mc == MQT;
-}
-
-inline bool memberCodeImmIsLoc(MemberCode mc) {
-  return mc == MEL || mc == MPL;
-}
-
-inline bool memberCodeImmIsString(MemberCode mc) {
-  return mc == MET || mc == MPT || mc == MQT;
-}
-
-inline bool memberCodeImmIsInt(MemberCode mc) {
-  return mc == MEI;
-}
-
-enum class MCodeImm { None, Int, String, Local };
-inline MCodeImm memberCodeImmType(MemberCode mc) {
-  if (!memberCodeHasImm(mc))     return MCodeImm::None;
-  if (memberCodeImmIsLoc(mc))    return MCodeImm::Local;
-  if (memberCodeImmIsString(mc)) return MCodeImm::String;
-  if (memberCodeImmIsInt(mc))    return MCodeImm::Int;
-  not_reached();
-}
-
-inline int mcodeStackVals(MemberCode mc) {
-  return !memberCodeHasImm(mc) && mc != MW ? 1 : 0;
-}
-
-// Returns string representation of `mc'.  (Pointer to internal static
-// data, does not need to be freed.)
-const char* memberCodeString(MemberCode mc);
-
-// Same semantics as parseLocationCode, but for member codes.
-folly::Optional<MemberCode> parseMemberCode(const char*);
 
 #define INCDEC_OPS    \
   INCDEC_OP(PreInc)   \
@@ -408,17 +346,6 @@ inline MInstrAttr mOpFlagsToAttr(MOpFlags f) {
 enum class QueryMOp : uint8_t {
 #define OP(name) name,
   QUERY_M_OPS
-#undef OP
-};
-
-#define PROP_ELEM_OPS                           \
-  OP(Prop)                                      \
-  OP(PropQ)                                     \
-  OP(Elem)
-
-enum class PropElemOp : uint8_t {
-#define OP(name) name,
-  PROP_ELEM_OPS
 #undef OP
 };
 
@@ -709,96 +636,21 @@ constexpr int32_t kMaxConcatN = 4;
                                        NOV,             NOV,        FF) \
   O(FPassBaseL,      TWO(IVA, LA),                                      \
                                        NOV,             NOV,        FF) \
-  O(DimL,            THREE(LA, OA(PropElemOp), OA(MOpFlags)),           \
+  O(Dim,             TWO(OA(MOpFlags), KA),                             \
                                        NOV,             NOV,        NF) \
-  O(DimC,            THREE(IVA, OA(PropElemOp), OA(MOpFlags)),          \
-                                       NOV,             NOV,        NF) \
-  O(DimInt,          THREE(I64A, OA(PropElemOp), OA(MOpFlags)),         \
-                                       NOV,             NOV,        NF) \
-  O(DimStr,          THREE(SA, OA(PropElemOp), OA(MOpFlags)),           \
-                                       NOV,             NOV,        NF) \
-  O(DimNewElem,      ONE(OA(MOpFlags)),NOV,             NOV,        NF) \
-  O(FPassDimL,       THREE(IVA, LA, OA(PropElemOp)),                    \
-                                       NOV,             NOV,        FF) \
-  O(FPassDimC,       THREE(IVA, IVA, OA(PropElemOp)),                   \
-                                       NOV,             NOV,        FF) \
-  O(FPassDimInt,     THREE(IVA, I64A, OA(PropElemOp)),                  \
-                                       NOV,             NOV,        FF) \
-  O(FPassDimStr,     THREE(IVA, SA, OA(PropElemOp)),                    \
-                                       NOV,             NOV,        FF) \
-  O(FPassDimNewElem, ONE(IVA),         NOV,             NOV,        FF) \
-  O(QueryML,         FOUR(IVA, OA(QueryMOp), OA(PropElemOp), LA),       \
+  O(FPassDim,        TWO(IVA, KA),     NOV,             NOV,        FF) \
+  O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
-  O(QueryMC,         THREE(IVA, OA(QueryMOp), OA(PropElemOp)),          \
-                                       MFINAL,          ONE(CV),    NF) \
-  O(QueryMInt,       FOUR(IVA, OA(QueryMOp), OA(PropElemOp), I64A),     \
-                                       MFINAL,          ONE(CV),    NF) \
-  O(QueryMStr,       FOUR(IVA, OA(QueryMOp), OA(PropElemOp), SA),       \
-                                       MFINAL,          ONE(CV),    NF) \
-  O(VGetML,          THREE(IVA, OA(PropElemOp), LA),                    \
-                                       MFINAL,          ONE(VV),    NF) \
-  O(VGetMC,          TWO(IVA, OA(PropElemOp)),                          \
-                                       MFINAL,          ONE(VV),    NF) \
-  O(VGetMInt,        THREE(IVA, OA(PropElemOp), I64A),                  \
-                                       MFINAL,          ONE(VV),    NF) \
-  O(VGetMStr,        THREE(IVA, OA(PropElemOp), SA),                    \
-                                       MFINAL,          ONE(VV),    NF) \
-  O(VGetMNewElem,    ONE(IVA),         MFINAL,          ONE(VV),    NF) \
-  O(FPassML,         FOUR(IVA, IVA, OA(PropElemOp), LA),                \
+  O(VGetM,           TWO(IVA, KA),     MFINAL,          ONE(VV),    NF) \
+  O(FPassM,          THREE(IVA, IVA, KA),                               \
                                        F_MFINAL,        ONE(FV),    FF) \
-  O(FPassMC,         THREE(IVA, IVA, OA(PropElemOp)),                   \
-                                       F_MFINAL,        ONE(FV),    FF) \
-  O(FPassMInt,       FOUR(IVA, IVA, OA(PropElemOp), I64A),              \
-                                       F_MFINAL,        ONE(FV),    FF) \
-  O(FPassMStr,       FOUR(IVA, IVA, OA(PropElemOp), SA),                \
-                                       F_MFINAL,        ONE(FV),    FF) \
-  O(FPassMNewElem,   TWO(IVA, IVA),    F_MFINAL,        ONE(FV),    FF) \
-  O(SetML,           THREE(IVA, OA(PropElemOp), LA),                    \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(SetMC,           TWO(IVA, OA(PropElemOp)),                          \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(SetMInt,         THREE(IVA, OA(PropElemOp), I64A),                  \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(SetMStr,         THREE(IVA, OA(PropElemOp), SA),                    \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(SetMNewElem,     ONE(IVA),         C_MFINAL,        ONE(CV),    NF) \
-  O(IncDecML,        FOUR(IVA, OA(PropElemOp), OA(IncDecOp), LA),       \
+  O(SetM,            TWO(IVA, KA),     C_MFINAL,        ONE(CV),    NF) \
+  O(IncDecM,         THREE(IVA, OA(IncDecOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
-  O(IncDecMC,        THREE(IVA, OA(PropElemOp), OA(IncDecOp)),          \
-                                       MFINAL,          ONE(CV),    NF) \
-  O(IncDecMInt,      FOUR(IVA, OA(PropElemOp), OA(IncDecOp), I64A),     \
-                                       MFINAL,          ONE(CV),    NF) \
-  O(IncDecMStr,      FOUR(IVA, OA(PropElemOp), OA(IncDecOp), SA),       \
-                                       MFINAL,          ONE(CV),    NF) \
-  O(IncDecMNewElem,  TWO(IVA, OA(IncDecOp)),                            \
-                                       MFINAL,          ONE(CV),    NF) \
-  O(SetOpML,         FOUR(IVA, OA(PropElemOp), OA(SetOpOp), LA),        \
+  O(SetOpM,          THREE(IVA, OA(SetOpOp), KA),                       \
                                        C_MFINAL,        ONE(CV),    NF) \
-  O(SetOpMC,         THREE(IVA, OA(PropElemOp), OA(SetOpOp)),           \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(SetOpMInt,       FOUR(IVA, OA(PropElemOp), OA(SetOpOp), I64A),      \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(SetOpMStr,       FOUR(IVA, OA(PropElemOp), OA(SetOpOp), SA),        \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(SetOpMNewElem,   TWO(IVA, OA(SetOpOp)),                             \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(BindML,          THREE(IVA, OA(PropElemOp), LA),                    \
-                                       V_MFINAL,        ONE(VV),    NF) \
-  O(BindMC,          TWO(IVA, OA(PropElemOp)),                          \
-                                       V_MFINAL,        ONE(VV),    NF) \
-  O(BindMInt,        THREE(IVA, OA(PropElemOp), I64A),                  \
-                                       V_MFINAL,        ONE(VV),    NF) \
-  O(BindMStr,        THREE(IVA, OA(PropElemOp), SA),                    \
-                                       V_MFINAL,        ONE(VV),    NF) \
-  O(BindMNewElem,    ONE(IVA),         V_MFINAL,        ONE(VV),    NF) \
-  O(UnsetML,         THREE(IVA, OA(PropElemOp), LA),                    \
-                                       MFINAL,          NOV,        NF) \
-  O(UnsetMC,         TWO(IVA, OA(PropElemOp)),                          \
-                                       MFINAL,          NOV,        NF) \
-  O(UnsetMInt,       THREE(IVA, OA(PropElemOp), I64A),                  \
-                                       MFINAL,          NOV,        NF) \
-  O(UnsetMStr,       THREE(IVA, OA(PropElemOp), SA),                    \
-                                       MFINAL,          NOV,        NF) \
+  O(BindM,           TWO(IVA, KA),     V_MFINAL,        ONE(VV),    NF) \
+  O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
   O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
@@ -945,11 +797,12 @@ int numSuccs(PC opcode);
 bool pushesActRec(Op opcode);
 
 /*
- * The returned struct has normalized variable-sized immediates
+ * The returned struct has normalized variable-sized immediates. u must be
+ * provided unless you know that the immediate is not of type KA.
  *
  * Don't use with RATA immediates.
  */
-ArgUnion getImm(PC opcode, int idx);
+ArgUnion getImm(PC opcode, int idx, const Unit* u = nullptr);
 
 // Don't use this with variable-sized immediates!
 ArgUnion* getImmPtr(PC opcode, int idx);
@@ -960,8 +813,8 @@ size_t encodeVariableSizeImm(int32_t val, unsigned char* buf);
 
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
-std::string instrToString(PC it, const Unit* u = nullptr);
-void staticArrayStreamer(ArrayData*, std::ostream&);
+std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u);
+void staticArrayStreamer(const ArrayData*, std::ostream&);
 
 /*
  * Convert subopcodes or opcodes into strings.
@@ -979,7 +832,6 @@ const char* subopToName(ObjMethodOp);
 const char* subopToName(SwitchKind);
 const char* subopToName(MOpFlags);
 const char* subopToName(QueryMOp);
-const char* subopToName(PropElemOp);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.
@@ -1137,21 +989,21 @@ constexpr bool isTypeAssert(Op op) {
 
 inline bool isMemberBaseOp(Op op) {
   switch (op) {
-    case OpBaseNC:
-    case OpBaseNL:
-    case OpBaseGC:
-    case OpBaseGL:
-    case OpFPassBaseNC:
-    case OpFPassBaseNL:
-    case OpFPassBaseGC:
-    case OpFPassBaseGL:
-    case OpBaseSC:
-    case OpBaseSL:
-    case OpBaseL:
-    case OpFPassBaseL:
-    case OpBaseC:
-    case OpBaseR:
-    case OpBaseH:
+    case Op::BaseNC:
+    case Op::BaseNL:
+    case Op::BaseGC:
+    case Op::BaseGL:
+    case Op::FPassBaseNC:
+    case Op::FPassBaseNL:
+    case Op::FPassBaseGC:
+    case Op::FPassBaseGL:
+    case Op::BaseSC:
+    case Op::BaseSL:
+    case Op::BaseL:
+    case Op::FPassBaseL:
+    case Op::BaseC:
+    case Op::BaseR:
+    case Op::BaseH:
       return true;
 
     default:
@@ -1161,16 +1013,8 @@ inline bool isMemberBaseOp(Op op) {
 
 inline bool isMemberDimOp(Op op) {
   switch (op) {
-    case OpDimL:
-    case OpDimC:
-    case OpDimInt:
-    case OpDimStr:
-    case OpDimNewElem:
-    case OpFPassDimL:
-    case OpFPassDimC:
-    case OpFPassDimInt:
-    case OpFPassDimStr:
-    case OpFPassDimNewElem:
+    case Op::Dim:
+    case Op::FPassDim:
       return true;
 
     default:
@@ -1180,46 +1024,16 @@ inline bool isMemberDimOp(Op op) {
 
 inline bool isMemberFinalOp(Op op) {
   switch (op) {
-    case OpQueryML:
-    case OpQueryMC:
-    case OpQueryMInt:
-    case OpQueryMStr:
-    case OpVGetML:
-    case OpVGetMC:
-    case OpVGetMInt:
-    case OpVGetMStr:
-    case OpVGetMNewElem:
-    case OpFPassML:
-    case OpFPassMC:
-    case OpFPassMInt:
-    case OpFPassMStr:
-    case OpFPassMNewElem:
-    case OpSetML:
-    case OpSetMC:
-    case OpSetMInt:
-    case OpSetMStr:
-    case OpSetMNewElem:
-    case OpIncDecML:
-    case OpIncDecMC:
-    case OpIncDecMInt:
-    case OpIncDecMStr:
-    case OpIncDecMNewElem:
-    case OpSetOpML:
-    case OpSetOpMC:
-    case OpSetOpMInt:
-    case OpSetOpMStr:
-    case OpSetOpMNewElem:
-    case OpBindML:
-    case OpBindMC:
-    case OpBindMInt:
-    case OpBindMStr:
-    case OpBindMNewElem:
-    case OpUnsetML:
-    case OpUnsetMC:
-    case OpUnsetMInt:
-    case OpUnsetMStr:
-    case OpSetWithRefLML:
-    case OpSetWithRefRML:
+    case Op::QueryM:
+    case Op::VGetM:
+    case Op::FPassM:
+    case Op::SetM:
+    case Op::IncDecM:
+    case Op::SetOpM:
+    case Op::BindM:
+    case Op::UnsetM:
+    case Op::SetWithRefLML:
+    case Op::SetWithRefRML:
       return true;
 
     default:
@@ -1236,32 +1050,6 @@ StackTransInfo instrStackTransInfo(PC opcode);
  * Delta from FP to top pre-live ActRec.
  */
 int instrFpToArDelta(const Func* func, PC opcode);
-
-constexpr bool mcodeIsLiteral(MemberCode mcode) {
-  return mcode == MET || mcode == MEI || mcode == MPT || mcode == MQT;
-}
-
-constexpr bool mcodeIsProp(MemberCode mcode) {
-  return mcode == MPC || mcode == MPL || mcode == MPT || mcode == MQT;
-}
-
-constexpr bool mcodeIsElem(MemberCode mcode) {
-  return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
-}
-
-constexpr bool mcodeMaybeArrayStringKey(MemberCode mcode) {
-  return mcode == MEC || mcode == MEL || mcode == MET;
-}
-
-constexpr bool mcodeMaybeArrayIntKey(MemberCode mcode) {
-  return mcode == MEC || mcode == MEL || mcode == MEI;
-}
-
-constexpr bool mcodeMaybeVectorKey(MemberCode mcode) {
-  return mcode == MEC || mcode == MEL || mcode == MEI;
-}
-
-//////////////////////////////////////////////////////////////////////
 
 }
 

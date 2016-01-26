@@ -61,38 +61,55 @@ namespace php {
 
 //////////////////////////////////////////////////////////////////////
 
-struct MElem {
+struct MKey {
+  MKey()
+    : mcode{MW}
+    , int64{0}
+  {}
+
+  MKey(MemberCode mcode, borrowed_ptr<php::Local> local)
+    : mcode{mcode}
+    , local{local}
+  {}
+
+  MKey(MemberCode mcode, int32_t idx)
+    : mcode{mcode}
+    , idx{idx}
+  {}
+
+  MKey(MemberCode mcode, int64_t int64)
+    : mcode{mcode}
+    , int64{int64}
+  {}
+
+  MKey(MemberCode mcode, SString litstr)
+    : mcode{mcode}
+    , litstr{litstr}
+  {}
+
   MemberCode mcode;
   union {
-    SString immStr;
-    int64_t immInt;
-    borrowed_ptr<php::Local> immLoc;
+    SString litstr;
+    int64_t int64;
+    int64_t idx;
+    borrowed_ptr<php::Local> local;
   };
-
-  bool operator==(const MElem& o) const {
-    if (mcode != o.mcode) return false;
-    switch (mcode) {
-    case MEC:  /* fallthrough */
-    case MPC:  return true;
-    case MEL:  /* fallthrough */
-    case MPL:  return immLoc == o.immLoc;
-    case MET:  /* fallthrough */
-    case MPT:  /* fallthrough */
-    case MQT:  return immStr == o.immStr;
-    case MEI:  return immInt == o.immInt;
-    case MW:   return true;
-    }
-    not_reached();
-  }
-
-  bool operator!=(const MElem& o) const {
-    return !(*this == o);
-  }
 };
+
+inline bool operator==(MKey a, MKey b) {
+  return a.mcode == b.mcode && a.int64 == b.int64;
+}
+
+inline bool operator!=(MKey a, MKey b) {
+  return !(a == b);
+}
 
 struct BCHashHelper {
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
   static size_t hash(SString s) { return s->hash(); }
+  static size_t hash(MKey mkey) {
+    return HPHP::hash_int64_pair(mkey.mcode, mkey.int64);
+  }
 
   template<class T>
   static size_t hash(const std::vector<T>& v) {
@@ -148,6 +165,7 @@ namespace bc {
 #define IMM_TY_BA       borrowed_ptr<php::Block>
 #define IMM_TY_OA(type) type
 #define IMM_TY_VSA      std::vector<SString>
+#define IMM_TY_KA       MKey
 
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
@@ -164,6 +182,7 @@ namespace bc {
 #define IMM_NAME_OA_IMPL(n) subop##n
 #define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
 #define IMM_NAME_VSA(n)     keys
+#define IMM_NAME_KA(n)      mkey
 
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
@@ -179,6 +198,7 @@ namespace bc {
 #define IMM_EXTRA_BA        using has_target_flag = std::true_type;
 #define IMM_EXTRA_OA(x)
 #define IMM_EXTRA_VSA
+#define IMM_EXTRA_KA
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
@@ -387,6 +407,7 @@ OPCODES
 #undef IMM_TY_BA
 #undef IMM_TY_OA
 #undef IMM_TY_VSA
+#undef IMM_TY_KA
 
 // These are deliberately not undefined, so they can be used in other
 // places.
@@ -418,6 +439,7 @@ OPCODES
 #undef IMM_EXTRA_AA
 #undef IMM_EXTRA_BA
 #undef IMM_EXTRA_OA
+#undef IMM_EXTRA_KA
 
 #undef IMM_MEM
 #undef IMM_MEM_NA

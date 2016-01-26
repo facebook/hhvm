@@ -3564,88 +3564,36 @@ All final operations take a <stack count> immediate as %0, which indicates the
 number of member keys on the eval stack that must be consumed before pushing
 the final result, if any.
 
-QueryML   <stack count> <query op> <prop/elem op> <local id>    [...]  ->  [C]
-QueryMC   <stack count> <query op> <prop/elem op>               [...]  ->  [C]
-QueryMInt <stack count> <query op> <prop/elem op> <int64>       [...]  ->  [C]
-QueryMStr <stack count> <query op> <prop/elem op> <litstr id>   [...]  ->  [C]
+QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 
-  {CGet,Isset,Empty}{Prop,Elem}{L,C,I,T} member operation, depending on the
-  query op and prop/elem op immediates.
+  {CGet,Isset,Empty}{Prop,Elem}{L,C,I,T} member operation.
 
-VGetML   <stack count> <prop/elem op> <local id>     [...]  ->  [V]
-VGetMC   <stack count> <prop/elem op>                [...]  ->  [V]
-VGetMInt <stack count> <prop/elem op> <int64>        [...]  ->  [V]
-VGetMStr <stack count> <prop/elem op> <litstr id>    [...]  ->  [V]
+VGetM <stack count> <member key>    [...]  ->  [V]
 
-  {VGet}{Prop,Elem}{L,C,I,T} member operation, depending on the prop/elem op
-  immediate.
+  {VGet}{Prop,Elem}{L,C,I,T} or VGetNewElem member operation.
 
-VGetMNewElem <stack count>
+FPassM <param id> <stack count> <member key>    [...]  ->  [V]
 
-  VGetNewElem member operation.
+  {CGet,VGet}{Prop,Elem}{L,C,I,T} or VGetNewElem, member operation, depending
+  on the reffiness of the specified parameter.
 
-FPassML   <param id> <stack count> <prop/elem op> <local id>     [...]  ->  [V]
-FPassMC   <param id> <stack count> <prop/elem op>                [...]  ->  [V]
-FPassMInt <param id> <stack count> <prop/elem op> <int64>        [...]  ->  [V]
-FPassMStr <param id> <stack count> <prop/elem op> <litstr id>    [...]  ->  [V]
+SetM <stack count> <member key>    [... C]  ->  [C]
 
-  {CGet,VGet}{Prop,Elem}{L,C,I,T} member operation, depending on the reffiness
-  of the specified parameter and prop/elem op immediate.
+  Set{Prop,Elem}{L,C,I,T} or SetNewElem member operation.
 
-FPassMNewElem <param id> <stack count>
+IncDecM <stack count> <op> <member key>    [...]  ->  [C]
 
-  Fatal error or VGetNewElem member operation, depending on the reffiness of
-  the specified parameter.
+  IncDec{Prop,Elem}{L,C,I,T} or IncDecNewElem member operation.
 
-SetML   <stack count> <prop/elem op> <local id>     [... C]  ->  [C]
-SetMC   <stack count> <prop/elem op>                [... C]  ->  [C]
-SetMInt <stack count> <prop/elem op> <int64>        [... C]  ->  [C]
-SetMStr <stack count> <prop/elem op> <litstr id>    [... C]  ->  [C]
+SetOpM <stack count> <op> <member key>    [... C]  ->  [C]
 
-  Set{Prop,Elem}{L,C,I,T} member operation, depending on the prop/elem op
-  immediate.
+  SetOp{Prop,Elem}{L,C,I,T} or SetOpNewElem member operation.
 
-SetMNewElem <stack count>    [... C]  ->  [C]
+BindM <stack count> <member key>    [... V]  ->  [V]
 
-  SetNewElem member operation.
+  Bind{Prop,Elem}{L,C,I,T} or BindNewElem member operation.
 
-IncDecML   <stack count> <prop/elem op> <op> <local id>     [...]  ->  [C]
-IncDecMC   <stack count> <prop/elem op> <op>                [...]  ->  [C]
-IncDecMInt <stack count> <prop/elem op> <op> <int64>        [...]  ->  [C]
-IncDecMStr <stack count> <prop/elem op> <op> <litstr id>    [...]  ->  [C]
-
-  IncDec{Prop,Elem}{L,C,I,T} member operation.
-
-IncDecMNewElem <stack count> <op>    [...]  ->  [C]
-
-  IncDecNewElem member operation.
-
-SetOpML   <stack count> <prop/elem op> <op> <local id>     [... C]  ->  [C]
-SetOpMC   <stack count> <prop/elem op> <op>                [... C]  ->  [C]
-SetOpMInt <stack count> <prop/elem op> <op> <int64>        [... C]  ->  [C]
-SetOpMStr <stack count> <prop/elem op> <op> <litstr id>    [... C]  ->  [C]
-
-  SetOp{Prop,Elem}{L,C,I,T} member operation.
-
-SetOpMNewElem <stack count> <op>    [... C]  ->  [C]
-
-  SetOpNewElem member operation.
-
-BindML   <stack count> <prop/elem op> <local id>     [... V]  ->  [V]
-BindMC   <stack count> <prop/elem op>                [... V]  ->  [V]
-BindMInt <stack count> <prop/elem op> <int64>        [... V]  ->  [V]
-BindMStr <stack count> <prop/elem op> <litstr id>    [... V]  ->  [V]
-
-  Bind{Prop,Elem}{L,C,I,T} member operation.
-
-BindMNewElem <stack count>    [... V]  ->  [V]
-
-  BindNewElem member operation.
-
-UnsetML   <stack count> <prop/elem op> <local id>     [...]  ->  []
-UnsetMC   <stack count> <prop/elem op>                [...]  ->  []
-UnsetMInt <stack count> <prop/elem op> <int64>        [...]  ->  []
-UnsetMStr <stack count> <prop/elem op> <litstr id>    [...]  ->  []
+UnsetM <stack count> <member key>    [...]  ->  []
 
   Unset{Prop,Elem}{L,C,I,T} member operation.
 

@@ -48,7 +48,7 @@
     Print
     PopC
     BaseL $x Warn
-    QueryMStr 0 CGet Prop "x"
+    QueryM 0 CGet PT:"x"
     PopC
     Int 1
     RetC

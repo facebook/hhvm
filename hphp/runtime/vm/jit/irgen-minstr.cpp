@@ -890,7 +890,7 @@ void cleanTvRefs(IRGS& env) {
 }
 
 /*
- * If tvRef contains a value, DecRef tvRef2 and move tvRef's value to tvRef2,
+ * If tvRef is not Uninit, DecRef tvRef2 and move tvRef's value to tvRef2,
  * storing Uninit to tvRef. Returns the adjusted base, which may point to
  * tvRef2.
  */
@@ -1049,27 +1049,6 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
   return gen(env, op, miaData, basePtr, key, tvRefPtr(env));
 }
 
-void dimImpl(IRGS& env, PropElemOp propElem, MOpFlags flags, SSATmp* key) {
-  // Eagerly mark us as not needing ratchets.  If the intermediate operation
-  // ends up calling misLea(), this will be set to true.
-  env.irb->fs().setNeedRatchet(false);
-
-  auto newBase = [&] {
-    switch (propElem) {
-      case PropElemOp::Prop:
-        return propImpl(env, flags, key, false);
-      case PropElemOp::PropQ:
-        return propImpl(env, flags, key, true);
-      case PropElemOp::Elem:
-        return elemImpl(env, flags, key);
-    }
-    always_assert(false);
-  }();
-
-  newBase = ratchetRefs(env, newBase);
-  gen(env, StMBase, newBase);
-}
-
 /*
  * Pop nDiscard elements from the stack, push the result (if present), DecRef
  * tvRef(2), and mark the member operation as complete.
@@ -1118,65 +1097,6 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
     return gen(env, CGetProp, MInstrAttrData{mia}, base, key);
   }
   return gen(env, CGetPropQ, base, key);
-}
-
-void queryMImpl(IRGS& env, int32_t nDiscard, QueryMOp query,
-                PropElemOp propElem, SSATmp* key) {
-  auto basePtr = gen(env, LdMBase, TPtrToGen);
-  auto base = env.irb->fs().memberBaseValue();
-  auto objBase = base && base->isA(TObj) ? base : basePtr;
-  auto simpleOp = SimpleOp::None;
-
-  if (base && propElem == PropElemOp::Elem &&
-      query != QueryMOp::Empty && query != QueryMOp::CGetQuiet) {
-    simpleOp = simpleCollectionOp(base->type(), key->type(), true);
-
-    if (auto tc = simpleOpConstraint(simpleOp)) {
-      env.irb->constrainValue(base, *tc);
-    }
-  }
-
-  auto result = [&] {
-    switch (query) {
-      case QueryMOp::CGet:
-      case QueryMOp::CGetQuiet: {
-        auto const flags = getQueryMOpFlags(query);
-        switch (propElem) {
-          case PropElemOp::Prop:
-          case PropElemOp::PropQ:
-            return cGetPropImpl(env, objBase, key, flags,
-                                propElem == PropElemOp::PropQ);
-          case PropElemOp::Elem:
-            auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
-            return emitCGetElem(env, realBase, key, flags, simpleOp);
-        }
-        always_assert(false);
-      }
-
-      case QueryMOp::Isset:
-        switch (propElem) {
-          case PropElemOp::Prop:
-          case PropElemOp::PropQ:
-            return gen(env, IssetProp, objBase, key);
-          case PropElemOp::Elem:
-            auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
-            return emitIssetElem(env, realBase, key, simpleOp);
-        }
-
-      case QueryMOp::Empty:
-        switch (propElem) {
-          case PropElemOp::Prop:
-          case PropElemOp::PropQ:
-            return gen(env, EmptyProp, objBase, key);
-          case PropElemOp::Elem:
-            return gen(env, EmptyElem, basePtr, key);
-        }
-    }
-
-    always_assert(false);
-  }();
-
-  mFinalImpl(env, nDiscard, result);
 }
 
 Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
@@ -1339,6 +1259,20 @@ SSATmp* emitArraySet(IRGS& env, SSATmp* key, SSATmp* value) {
   return value;
 }
 
+SSATmp* setNewElemImpl(IRGS& env) {
+  auto const value = topC(env);
+  auto const basePtr = gen(env, LdMBase, TPtrToGen);
+  auto const base = env.irb->fs().memberBaseValue();
+
+  if (base && base->isA(TArr)) {
+    env.irb->constrainValue(base, DataTypeSpecific);
+    gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
+  } else {
+    gen(env, SetNewElem, makeCatchSet(env), basePtr, value);
+  }
+  return value;
+}
+
 SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
   auto value = topC(env, BCSPOffset{0}, DataTypeGeneric);
   auto const base = env.irb->fs().memberBaseValue();
@@ -1399,110 +1333,21 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
   return value;
 }
 
-void vGetMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
-  auto basePtr = gen(env, LdMBase, TPtrToGen);
-  auto base = env.irb->fs().memberBaseValue();
-  auto baseObj = base && base->isA(TObj) ? base : basePtr;
-
-  auto const result = [&] {
-    switch (propElem) {
-      case PropElemOp::PropQ:
-        gen(env, RaiseError,
-            cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
-      case PropElemOp::Prop:
-        return gen(env, VGetProp, baseObj, key);
-      case PropElemOp::Elem:
-        return gen(env, VGetElem, basePtr, key);
-    }
-    always_assert(false);
-  }();
-
-  mFinalImpl(env, nDiscard, result);
-}
-
-void setMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
-  auto const result = [&] {
-    if (propElem == PropElemOp::Prop) return setPropImpl(env, key);
-    if (propElem == PropElemOp::Elem) return setElemImpl(env, key);
-    always_assert(false);
-  }();
-
-  popC(env, DataTypeGeneric);
-  mFinalImpl(env, nDiscard, result);
-}
-
-void incDecMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 IncDecOp incDec, SSATmp* key) {
-  auto basePtr = gen(env, LdMBase, TPtrToGen);
-  auto base = env.irb->fs().memberBaseValue();
-  auto baseObj = base && base->isA(TObj) ? base : basePtr;
-
-  auto const result = [&] {
-    if (propElem == PropElemOp::Prop) {
-      return emitIncDecProp(env, incDec, baseObj, key);
-    }
-    if (propElem == PropElemOp::Elem) {
-      return gen(env, IncDecElem, IncDecData{incDec}, basePtr, key);
-    }
-    always_assert(false);
-  }();
-
-  mFinalImpl(env, nDiscard, result);
-}
-
-void setOpMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                SetOpOp op, SSATmp* key) {
-  auto basePtr = gen(env, LdMBase, TPtrToGen);
-  auto base = env.irb->fs().memberBaseValue();
-  auto baseObj = base && base->isA(TObj) ? base : basePtr;
-  auto rhs = topC(env);
-
-  auto const result = [&] {
-    if (propElem == PropElemOp::Prop) {
-      return gen(env, SetOpProp, SetOpData{op}, baseObj, key, rhs);
-    }
-    if (propElem == PropElemOp::Elem) {
-      return gen(env, SetOpElem, SetOpData{op}, basePtr, key, rhs);
-    }
-    always_assert(false);
-  }();
-
-  popDecRef(env);
-  mFinalImpl(env, nDiscard, result);
-}
-
-void bindMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
-  auto basePtr = gen(env, LdMBase, TPtrToGen);
-  auto base = env.irb->fs().memberBaseValue();
-  auto baseObj = base && base->isA(TObj) ? base : basePtr;
-  auto rhs = topV(env);
-
-  if (propElem == PropElemOp::Prop) {
-    gen(env, BindProp, baseObj, key, rhs);
-  } else if (propElem == PropElemOp::Elem) {
-    gen(env, BindElem, basePtr, key, rhs);
-  } else {
-    always_assert(false);
+SSATmp* memberKey(IRGS& env, MemberKey mk) {
+  switch (mk.mcode) {
+    case MW:
+      return nullptr;
+    case MEL: case MPL:
+      return ldLocInnerWarn(env, mk.iva, makeExit(env),
+                            makePseudoMainExit(env), DataTypeSpecific);
+    case MEC: case MPC:
+      return topC(env, BCSPOffset{int32_t(mk.iva)});
+    case MEI:
+      return cns(env, mk.int64);
+    case MET: case MPT: case MQT:
+      return cns(env, mk.litstr);
   }
-
-  popV(env);
-  mFinalImpl(env, nDiscard, rhs);
-}
-
-void unsetMImpl(IRGS& env, int32_t nDiscard, PropElemOp propElem, SSATmp* key) {
-  auto basePtr = gen(env, LdMBase, TPtrToGen);
-  auto base = env.irb->fs().memberBaseValue();
-  auto baseObj = base && base->isA(TObj) ? base : basePtr;
-
-  if (propElem == PropElemOp::Prop) {
-    gen(env, UnsetProp, baseObj, key);
-  } else if (propElem == PropElemOp::Elem) {
-    gen(env, UnsetElem, basePtr, key);
-  } else {
-    always_assert(false);
-  }
-
-  mFinalImpl(env, nDiscard, nullptr);
+  not_reached();
 }
 
 MOpFlags fpassFlags(IRGS& env, int32_t idx) {
@@ -1613,274 +1458,192 @@ void emitBaseH(IRGS& env) {
   env.irb->fs().setMemberBaseValue(base);
 }
 
-void emitDimL(IRGS& env, int32_t locId, PropElemOp propElem, MOpFlags flags) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  dimImpl(env, propElem, flags, key);
+void emitDim(IRGS& env, MOpFlags flags, MemberKey mk) {
+  // Eagerly mark us as not needing ratchets.  If the intermediate operation
+  // ends up calling misLea(), this will be set to true.
+  env.irb->fs().setNeedRatchet(false);
+
+  auto key = memberKey(env, mk);
+  auto newBase = [&] {
+    if (mcodeIsProp(mk.mcode)) {
+      return propImpl(env, flags, key, mk.mcode == MQT);
+    }
+    if (mcodeIsElem(mk.mcode)) {
+      return elemImpl(env, flags, key);
+    }
+    PUNT(DimNewElem);
+  }();
+
+  newBase = ratchetRefs(env, newBase);
+  gen(env, StMBase, newBase);
 }
 
-void emitDimC(IRGS& env, int32_t idx, PropElemOp propElem, MOpFlags flags) {
-  dimImpl(env, propElem, flags, topC(env, BCSPOffset{idx}));
+void emitFPassDim(IRGS& env, int32_t arg, MemberKey mk) {
+  emitDim(env, fpassFlags(env, arg), mk);
 }
 
-void emitDimInt(IRGS& env, int64_t key, PropElemOp propElem, MOpFlags flags) {
-  dimImpl(env, propElem, flags, cns(env, key));
+void emitQueryM(IRGS& env, int32_t nDiscard, QueryMOp query, MemberKey mk) {
+  if (mk.mcode == MW) PUNT(QueryNewElem);
+
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto objBase = base && base->isA(TObj) ? base : basePtr;
+  auto key = memberKey(env, mk);
+  auto simpleOp = SimpleOp::None;
+
+  if (base && mcodeIsElem(mk.mcode) &&
+      query != QueryMOp::Empty && query != QueryMOp::CGetQuiet) {
+    simpleOp = simpleCollectionOp(base->type(), key->type(), true);
+
+    if (auto tc = simpleOpConstraint(simpleOp)) {
+      env.irb->constrainValue(base, *tc);
+    }
+  }
+
+  auto const result = [&] {
+    switch (query) {
+      case QueryMOp::CGet:
+      case QueryMOp::CGetQuiet: {
+        auto const flags = getQueryMOpFlags(query);
+        if (mcodeIsProp(mk.mcode)) {
+          return cGetPropImpl(env, objBase, key, flags, mk.mcode == MQT);
+        }
+        auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
+        return emitCGetElem(env, realBase, key, flags, simpleOp);
+      }
+
+      case QueryMOp::Isset: {
+        if (mcodeIsProp(mk.mcode)) {
+          return gen(env, IssetProp, objBase, key);
+        }
+        auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
+        return emitIssetElem(env, realBase, key, simpleOp);
+      }
+
+      case QueryMOp::Empty:
+        return mcodeIsProp(mk.mcode) ? gen(env, EmptyProp, objBase, key)
+                                     : gen(env, EmptyElem, basePtr, key);
+    }
+    not_reached();
+  }();
+
+  mFinalImpl(env, nDiscard, result);
 }
 
-void emitDimStr(IRGS& env, const StringData* key,
-                PropElemOp propElem, MOpFlags flags) {
-  dimImpl(env, propElem, flags, cns(env, key));
+void emitVGetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+  auto key = memberKey(env, mk);
+
+  auto const result = [&] {
+    if (mcodeIsProp(mk.mcode)) {
+      if (mk.mcode == MQT) {
+        gen(env, RaiseError,
+            cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR)));
+      }
+      return gen(env, VGetProp, baseObj, key);
+    }
+    if (mcodeIsElem(mk.mcode)) {
+      return gen(env, VGetElem, basePtr, key);
+    }
+    PUNT(VGetNewElem);
+  }();
+
+  mFinalImpl(env, nDiscard, result);
 }
 
-void emitDimNewElem(IRGS& env, MOpFlags flags) {
-  interpOne(env, *env.currentNormalizedInstruction);
-}
-
-void emitFPassDimL(IRGS& env, int32_t arg, int32_t locId, PropElemOp propElem) {
-  emitDimL(env, locId, propElem, fpassFlags(env, arg));
-}
-
-void emitFPassDimC(IRGS& env, int32_t arg, int32_t idx, PropElemOp propElem) {
-  emitDimC(env, idx, propElem, fpassFlags(env, arg));
-}
-
-void emitFPassDimInt(IRGS& env, int32_t arg, int64_t key, PropElemOp propElem) {
-  emitDimInt(env, key, propElem, fpassFlags(env, arg));
-}
-
-void emitFPassDimStr(IRGS& env, int32_t arg, const StringData* key,
-                     PropElemOp propElem) {
-  emitDimStr(env, key, propElem, fpassFlags(env, arg));
-}
-
-void emitFPassDimNewElem(IRGS& env, int32_t arg) {
-  emitDimNewElem(env, fpassFlags(env, arg));
-}
-
-void emitQueryML(IRGS& env, int32_t nDiscard, QueryMOp query,
-                 PropElemOp propElem, int32_t locId) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  queryMImpl(env, nDiscard, query, propElem, key);
-}
-
-void emitQueryMC(IRGS& env, int32_t nDiscard, QueryMOp query,
-                 PropElemOp propElem) {
-  queryMImpl(env, nDiscard, query, propElem, topC(env));
-}
-
-void emitQueryMInt(IRGS& env, int32_t nDiscard, QueryMOp query,
-                   PropElemOp propElem, int64_t key) {
-  queryMImpl(env, nDiscard, query, propElem, cns(env, key));
-}
-
-void emitQueryMStr(IRGS& env, int32_t nDiscard, QueryMOp query,
-                   PropElemOp propElem, const StringData* key) {
-  queryMImpl(env, nDiscard, query, propElem, cns(env, key));
-}
-
-void emitVGetML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                int32_t locId) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  vGetMImpl(env, nDiscard, propElem, key);
-}
-
-void emitVGetMC(IRGS& env, int32_t nDiscard, PropElemOp propElem) {
-  vGetMImpl(env, nDiscard, propElem, topC(env));
-}
-
-void emitVGetMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 int64_t key) {
-  vGetMImpl(env, nDiscard, propElem, cns(env, key));
-}
-
-void emitVGetMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 const StringData* key) {
-  vGetMImpl(env, nDiscard, propElem, cns(env, key));
-}
-
-void emitVGetMNewElem(IRGS& env, int32_t nDiscard) {
-  SPUNT(__func__);
-}
-
-void emitFPassML(IRGS& env, int32_t arg, int32_t nDiscard, PropElemOp propElem,
-                 int32_t locId) {
+void emitFPassM(IRGS& env, int32_t arg, int32_t nDiscard, MemberKey mk) {
   if (fpassFlags(env, arg) == MOpFlags::Warn) {
-    return emitQueryML(env, nDiscard, QueryMOp::CGet, propElem, locId);
+    return emitQueryM(env, nDiscard, QueryMOp::CGet, mk);
   }
-  emitVGetML(env, nDiscard, propElem, locId);
+  emitVGetM(env, nDiscard, mk);
 }
 
-void emitFPassMC(IRGS& env, int32_t arg, int32_t nDiscard,
-                 PropElemOp propElem) {
-  if (fpassFlags(env, arg) == MOpFlags::Warn) {
-    return emitQueryMC(env, nDiscard, QueryMOp::CGet, propElem);
-  }
-  emitVGetMC(env, nDiscard, propElem);
-}
-
-void emitFPassMInt(IRGS& env, int32_t arg, int32_t nDiscard,
-                   PropElemOp propElem, int64_t key) {
-  if (fpassFlags(env, arg) == MOpFlags::Warn) {
-    return emitQueryMInt(env, nDiscard, QueryMOp::CGet, propElem, key);
-  }
-  emitVGetMInt(env, nDiscard, propElem, key);
-}
-
-void emitFPassMStr(IRGS& env, int32_t arg, int32_t nDiscard,
-                   PropElemOp propElem, const StringData* key) {
-  if (fpassFlags(env, arg) == MOpFlags::Warn) {
-    return emitQueryMStr(env, nDiscard, QueryMOp::CGet, propElem, key);
-  }
-  emitVGetMStr(env, nDiscard, propElem, key);
-}
-
-void emitFPassMNewElem(IRGS& env, int32_t arg, int32_t nDiscard) {
-  if (fpassFlags(env, arg) == MOpFlags::Warn) {
-    // This will throw.
-    return interpOne(env, *env.currentNormalizedInstruction);
-  }
-  emitVGetMNewElem(env, nDiscard);
-}
-
-void emitSetML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-               int32_t locId) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  setMImpl(env, nDiscard, propElem, key);
-}
-
-void emitSetMC(IRGS& env, int32_t nDiscard, PropElemOp propElem) {
-  setMImpl(env, nDiscard, propElem, topC(env, BCSPOffset{1}));
-}
-
-void emitSetMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 int64_t key) {
-  setMImpl(env, nDiscard, propElem, cns(env, key));
-}
-
-void emitSetMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 const StringData* key) {
-  setMImpl(env, nDiscard, propElem, cns(env, key));
-}
-
-void emitSetMNewElem(IRGS& env, int32_t nDiscard) {
-  auto const value = topC(env);
-  auto const basePtr = gen(env, LdMBase, TPtrToGen);
-  auto const base = env.irb->fs().memberBaseValue();
-
-  if (base && base->isA(TArr)) {
-    env.irb->constrainValue(base, DataTypeSpecific);
-    gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
-  } else {
-    gen(env, SetNewElem, makeCatchSet(env), basePtr, value);
-  }
+void emitSetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+  auto const key = memberKey(env, mk);
+  auto const result =
+    mk.mcode == MW        ? setNewElemImpl(env) :
+    mcodeIsElem(mk.mcode) ? setElemImpl(env, key) :
+                            setPropImpl(env, key);
 
   popC(env, DataTypeGeneric);
-  mFinalImpl(env, nDiscard, value);
+  mFinalImpl(env, nDiscard, result);
 }
 
-void emitIncDecML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                  IncDecOp incDec, int32_t locId) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  incDecMImpl(env, nDiscard, propElem, incDec, key);
-}
-
-void emitIncDecMC(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                  IncDecOp incDec) {
-  incDecMImpl(env, nDiscard, propElem, incDec, topC(env));
-}
-
-void emitIncDecMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                    IncDecOp incDec, int64_t key) {
-  incDecMImpl(env, nDiscard, propElem, incDec, cns(env, key));
-}
-
-void emitIncDecMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                    IncDecOp incDec, const StringData* key) {
-  incDecMImpl(env, nDiscard, propElem, incDec, cns(env, key));
-}
-
-void emitIncDecMNewElem(IRGS& env, int32_t nDiscard, IncDecOp incDec) {
-  interpOne(env, *env.currentNormalizedInstruction);
-}
-
-void emitSetOpML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                  SetOpOp op, int32_t locId) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  setOpMImpl(env, nDiscard, propElem, op, key);
-}
-
-void emitSetOpMC(IRGS& env, int32_t nDiscard, PropElemOp propElem, SetOpOp op) {
-  setOpMImpl(env, nDiscard, propElem, op, topC(env, BCSPOffset{1}));
-}
-
-void emitSetOpMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                    SetOpOp op, int64_t key) {
-  setOpMImpl(env, nDiscard, propElem, op, cns(env, key));
-}
-
-void emitSetOpMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                    SetOpOp op, const StringData* key) {
-  setOpMImpl(env, nDiscard, propElem, op, cns(env, key));
-}
-
-void emitSetOpMNewElem(IRGS& env, int32_t nDiscard, SetOpOp op) {
-  interpOne(env, *env.currentNormalizedInstruction);
-}
-
-void emitBindML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                int32_t locId) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  bindMImpl(env, nDiscard, propElem, key);
-}
-
-void emitBindMC(IRGS& env, int32_t nDiscard, PropElemOp propElem) {
-  bindMImpl(env, nDiscard, propElem, topC(env, BCSPOffset{1}));
-}
-
-void emitBindMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                  int64_t key) {
-  bindMImpl(env, nDiscard, propElem, cns(env, key));
-}
-
-void emitBindMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 const StringData* key) {
-  bindMImpl(env, nDiscard, propElem, cns(env, key));
-}
-
-void emitBindMNewElem(IRGS& env, int32_t nDiscard) {
+void emitIncDecM(IRGS& env, int32_t nDiscard, IncDecOp incDec, MemberKey mk) {
   auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+  auto key = memberKey(env, mk);
+
+  auto const result = [&] {
+    if (mcodeIsProp(mk.mcode)) {
+      return emitIncDecProp(env, incDec, baseObj, key);
+    }
+    if (mcodeIsElem(mk.mcode)) {
+      return gen(env, IncDecElem, IncDecData{incDec}, basePtr, key);
+    }
+    PUNT(IncDecNewElem);
+  }();
+
+  mFinalImpl(env, nDiscard, result);
+}
+
+void emitSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+  auto key = memberKey(env, mk);
+  auto rhs = topC(env);
+
+  auto const result = [&] {
+    if (mcodeIsProp(mk.mcode)) {
+      return gen(env, SetOpProp, SetOpData{op}, baseObj, key, rhs);
+    }
+    if (mcodeIsElem(mk.mcode)) {
+      return gen(env, SetOpElem, SetOpData{op}, basePtr, key, rhs);
+    }
+    PUNT(SetOpNewElem);
+  }();
+
+  popDecRef(env);
+  mFinalImpl(env, nDiscard, result);
+}
+
+void emitBindM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+  auto key = memberKey(env, mk);
   auto rhs = topV(env);
 
-  gen(env, BindNewElem, basePtr, rhs);
+  if (mcodeIsProp(mk.mcode)) {
+    gen(env, BindProp, baseObj, key, rhs);
+  } else if (mcodeIsElem(mk.mcode)) {
+    gen(env, BindElem, basePtr, key, rhs);
+  } else {
+    gen(env, BindNewElem, basePtr, rhs);
+  }
+
   popV(env);
   mFinalImpl(env, nDiscard, rhs);
 }
 
-void emitUnsetML(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 int32_t locId) {
-  auto key = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                        DataTypeSpecific);
-  unsetMImpl(env, nDiscard, propElem, key);
-}
+void emitUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+  auto basePtr = gen(env, LdMBase, TPtrToGen);
+  auto base = env.irb->fs().memberBaseValue();
+  auto baseObj = base && base->isA(TObj) ? base : basePtr;
+  auto key = memberKey(env, mk);
 
-void emitUnsetMC(IRGS& env, int32_t nDiscard, PropElemOp propElem) {
-  unsetMImpl(env, nDiscard, propElem, topC(env));
-}
+  if (mcodeIsProp(mk.mcode)) {
+    gen(env, UnsetProp, baseObj, key);
+  } else {
+    assert(mcodeIsElem(mk.mcode));
+    gen(env, UnsetElem, basePtr, key);
+  }
 
-void emitUnsetMInt(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                   int64_t key) {
-  unsetMImpl(env, nDiscard, propElem, cns(env, key));
-}
-
-void emitUnsetMStr(IRGS& env, int32_t nDiscard, PropElemOp propElem,
-                 const StringData* key) {
-  unsetMImpl(env, nDiscard, propElem, cns(env, key));
+  mFinalImpl(env, nDiscard, nullptr);
 }
 
 void emitSetWithRefLML(IRGS& env, int32_t keyLoc, int32_t valLoc) {

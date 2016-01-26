@@ -482,6 +482,22 @@ SString mStringKey(Type key) {
   return v && v->m_type == KindOfPersistentString ? v->m_data.pstr : nullptr;
 }
 
+Type key_type(ISS& env, MKey mkey) {
+  switch (mkey.mcode) {
+    case MW:
+      return TBottom;
+    case MEL: case MPL:
+      return locAsCell(env, mkey.local);
+    case MEC: case MPC:
+      return topC(env, mkey.idx);
+    case MEI:
+      return ival(mkey.int64);
+    case MET: case MPT: case MQT:
+      return sval(mkey.litstr);
+  }
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 // base ops
 
@@ -1135,120 +1151,6 @@ void miBaseSImpl(ISS& env, bool hasRhs, Type prop) {
   if (hasRhs) push(env, rhs);
 }
 
-void miDim(ISS& env, PropElemOp propElem, MOpFlags flags, Type key) {
-  switch (propElem) {
-    case PropElemOp::Prop:
-      return miProp(env, false, mOpFlagsToAttr(flags), key);
-    case PropElemOp::PropQ:
-      return miProp(env, true, mOpFlagsToAttr(flags), key);
-    case PropElemOp::Elem:
-      return miElem(env, mOpFlagsToAttr(flags), key);
-  }
-}
-
-void miQuery(ISS& env, int32_t nDiscard, QueryMOp op, PropElemOp propElem,
-             Type key) {
-  switch (propElem) {
-    // We don't currently do anything different for nullsafe query ops.
-    case PropElemOp::Prop:
-    case PropElemOp::PropQ:
-      switch (op) {
-        case QueryMOp::CGet:
-        case QueryMOp::CGetQuiet:
-          return miFinalCGetProp(env, nDiscard, key);
-        case QueryMOp::Isset:
-          return miFinalIssetProp(env, nDiscard, key);
-        case QueryMOp::Empty:
-          discard(env, nDiscard);
-          push(env, TBool);
-          return;
-      }
-    case PropElemOp::Elem:
-      switch (op) {
-        case QueryMOp::CGet:
-        case QueryMOp::CGetQuiet:
-          return miFinalCGetElem(env, nDiscard, key);
-        case QueryMOp::Isset:
-        case QueryMOp::Empty:
-          discard(env, nDiscard);
-          push(env, TBool);
-          return;
-      }
-  }
-}
-
-void miVGet(ISS& env, int32_t nDiscard, PropElemOp propElem, Type key) {
-  switch (propElem) {
-    case PropElemOp::Prop:
-    case PropElemOp::PropQ:
-      miFinalVGetProp(env, nDiscard, key, propElem == PropElemOp::PropQ);
-      break;
-    case PropElemOp::Elem:
-      miFinalVGetElem(env, nDiscard, key);
-      break;
-  }
-  moveBase(env, folly::none);
-}
-
-void miSet(ISS& env, int32_t nDiscard, PropElemOp propElem, Type key) {
-  if (propElem == PropElemOp::Prop) {
-    miFinalSetProp(env, nDiscard, key);
-  } else if (propElem == PropElemOp::Elem) {
-    miFinalSetElem(env, nDiscard, key);
-  } else {
-    always_assert(false);
-  }
-  moveBase(env, folly::none);
-}
-
-void miIncDec(
-  ISS& env, int32_t nDiscard, PropElemOp propElem, IncDecOp op, Type key
-) {
-  if (propElem == PropElemOp::Prop) {
-    miFinalIncDecProp(env, nDiscard, op, key);
-  } else if (propElem == PropElemOp::Elem) {
-    miFinalIncDecElem(env, nDiscard, op, key);
-  } else {
-    always_assert(false);
-  }
-  moveBase(env, folly::none);
-}
-
-void miSetOp(
-  ISS& env, int32_t nDiscard, PropElemOp propElem, SetOpOp op, Type key
-) {
-  if (propElem == PropElemOp::Prop) {
-    miFinalSetOpProp(env, nDiscard, op, key);
-  } else if (propElem == PropElemOp::Elem) {
-    miFinalSetOpElem(env, nDiscard, op, key);
-  } else {
-    always_assert(false);
-  }
-  moveBase(env, folly::none);
-}
-
-void miBind(ISS& env, int32_t nDiscard, PropElemOp propElem, Type key) {
-  if (propElem == PropElemOp::Prop) {
-    miFinalBindProp(env, nDiscard, key);
-  } else if (propElem == PropElemOp::Elem) {
-    miFinalBindElem(env, nDiscard, key);
-  } else {
-    always_assert(false);
-  }
-  moveBase(env, folly::none);
-}
-
-void miUnset(ISS& env, int32_t nDiscard, PropElemOp propElem, Type key) {
-  if (propElem == PropElemOp::Prop) {
-    miFinalUnsetProp(env, nDiscard, key);
-  } else if (propElem == PropElemOp::Elem) {
-    miFinalUnsetElem(env, nDiscard, key);
-  } else {
-    always_assert(false);
-  }
-  moveBase(env, folly::none);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 template<typename A, typename B>
@@ -1279,13 +1181,6 @@ typename std::enable_if<std::is_same<decltype(BC::subop2), MOpFlags>{}>::type
 setMOpFlags(BC& op, MOpFlags flags) {
   assert(op.subop2 == MOpFlags::Warn);
   op.subop2 = flags;
-}
-
-template<typename BC>
-typename std::enable_if<std::is_same<decltype(BC::subop3), MOpFlags>{}>::type
-setMOpFlags(BC& op, MOpFlags flags) {
-  assert(op.subop3 == MOpFlags::Warn);
-  op.subop3 = flags;
 }
 
 folly::Optional<MOpFlags> fpassFlags(ISS& env, int32_t arg) {
@@ -1405,184 +1300,128 @@ void in(ISS& env, const bc::FPassBaseL& op) {
 //////////////////////////////////////////////////////////////////////
 // Intermediate operations
 
-void in(ISS& env, const bc::DimL& op) {
-  miDim(env, op.subop2, op.subop3, locAsCell(env, op.loc1));
+void in(ISS& env, const bc::Dim& op) {
+  auto const key = key_type(env, op.mkey);
+  if (mcodeIsProp(op.mkey.mcode)) {
+    miProp(env, op.mkey.mcode == MQT, mOpFlagsToAttr(op.subop1), key);
+  } else if (mcodeIsElem(op.mkey.mcode)) {
+    miElem(env, mOpFlagsToAttr(op.subop1), key);
+  } else {
+    miNewElem(env);
+  }
 }
 
-void in(ISS& env, const bc::DimC& op) {
-  miDim(env, op.subop2, op.subop3, topC(env, op.arg1));
-}
-
-void in(ISS& env, const bc::DimInt& op) {
-  miDim(env, op.subop2, op.subop3, ival(op.arg1));
-}
-
-void in(ISS& env, const bc::DimStr& op) {
-  miDim(env, op.subop2, op.subop3, sval(op.str1));
-}
-
-void in(ISS& env, const bc::DimNewElem& op) {
-  miNewElem(env);
-}
-
-void in(ISS& env, const bc::FPassDimL& op) {
-  fpassImpl(env, op.arg1, bc::DimL{op.loc2, op.subop3, MOpFlags::Warn});
-}
-
-void in(ISS& env, const bc::FPassDimC& op) {
-  fpassImpl(env, op.arg1, bc::DimC{op.arg2, op.subop3, MOpFlags::Warn});
-}
-
-void in(ISS& env, const bc::FPassDimInt& op) {
-  fpassImpl(env, op.arg1, bc::DimInt{op.arg2, op.subop3, MOpFlags::Warn});
-}
-
-void in(ISS& env, const bc::FPassDimStr& op) {
-  fpassImpl(env, op.arg1, bc::DimStr{op.str2, op.subop3, MOpFlags::Warn});
-}
-
-void in(ISS& env, const bc::FPassDimNewElem& op) {
-  fpassImpl(env, op.arg1, bc::DimNewElem{MOpFlags::Warn});
+void in(ISS& env, const bc::FPassDim& op) {
+  fpassImpl(env, op.arg1, bc::Dim{MOpFlags::Warn, op.mkey});
 }
 
 //////////////////////////////////////////////////////////////////////
 // Final operations
 
-void in(ISS& env, const bc::QueryML& op) {
-  miQuery(env, op.arg1, op.subop2, op.subop3, locAsCell(env, op.loc4));
+void in(ISS& env, const bc::QueryM& op) {
+  auto const key = key_type(env, op.mkey);
+  auto const nDiscard = op.arg1;
+
+  if (mcodeIsProp(op.mkey.mcode)) {
+    // We don't currently do anything different for nullsafe query ops.
+    switch (op.subop2) {
+      case QueryMOp::CGet:
+      case QueryMOp::CGetQuiet:
+        return miFinalCGetProp(env, nDiscard, key);
+      case QueryMOp::Isset:
+        return miFinalIssetProp(env, nDiscard, key);
+      case QueryMOp::Empty:
+        discard(env, nDiscard);
+        push(env, TBool);
+        return;
+    }
+  } else if (mcodeIsElem(op.mkey.mcode)) {
+    switch (op.subop2) {
+      case QueryMOp::CGet:
+      case QueryMOp::CGetQuiet:
+        return miFinalCGetElem(env, nDiscard, key);
+      case QueryMOp::Isset:
+      case QueryMOp::Empty:
+        discard(env, nDiscard);
+        push(env, TBool);
+        return;
+    }
+  } else {
+    // QueryMNewElem will always throw without doing any work.
+    discard(env, op.arg1);
+    push(env, TInitCell);
+  }
 }
 
-void in(ISS& env, const bc::QueryMC& op) {
-  miQuery(env, op.arg1, op.subop2, op.subop3, topC(env));
-}
-
-void in(ISS& env, const bc::QueryMInt& op) {
-  miQuery(env, op.arg1, op.subop2, op.subop3, ival(op.arg4));
-}
-
-void in(ISS& env, const bc::QueryMStr& op) {
-  miQuery(env, op.arg1, op.subop2, op.subop3, sval(op.str4));
-}
-
-void in(ISS& env, const bc::VGetML& op) {
-  miVGet(env, op.arg1, op.subop2, locAsCell(env, op.loc3));
-}
-
-void in(ISS& env, const bc::VGetMC& op) {
-  miVGet(env, op.arg1, op.subop2, topC(env));
-}
-
-void in(ISS& env, const bc::VGetMInt& op) {
-  miVGet(env, op.arg1, op.subop2, ival(op.arg3));
-}
-
-void in(ISS& env, const bc::VGetMStr& op) {
-  miVGet(env, op.arg1, op.subop2, sval(op.str3));
-}
-
-void in(ISS& env, const bc::VGetMNewElem& op) {
-  miFinalVGetNewElem(env, op.arg1);
+void in(ISS& env, const bc::VGetM& op) {
+  auto const key = key_type(env, op.mkey);
+  if (mcodeIsProp(op.mkey.mcode)) {
+    miFinalVGetProp(env, op.arg1, key, op.mkey.mcode == MQT);
+  } else if (mcodeIsElem(op.mkey.mcode)) {
+    miFinalVGetElem(env, op.arg1, key);
+  } else {
+    miFinalVGetNewElem(env, op.arg1);
+  }
   moveBase(env, folly::none);
 }
 
-void in(ISS& env, const bc::SetML& op) {
-  miSet(env, op.arg1, op.subop2, locAsCell(env, op.loc3));
-}
-
-void in(ISS& env, const bc::SetMC& op) {
-  miSet(env, op.arg1, op.subop2, topC(env, 1));
-}
-
-void in(ISS& env, const bc::SetMInt& op) {
-  miSet(env, op.arg1, op.subop2, ival(op.arg3));
-}
-
-void in(ISS& env, const bc::SetMStr& op) {
-  miSet(env, op.arg1, op.subop2, sval(op.str3));
-}
-
-void in(ISS& env, const bc::SetMNewElem& op) {
-  miFinalSetNewElem(env, op.arg1);
+void in(ISS& env, const bc::SetM& op) {
+  auto const key = key_type(env, op.mkey);
+  if (mcodeIsProp(op.mkey.mcode)) {
+    miFinalSetProp(env, op.arg1, key);
+  } else if (mcodeIsElem(op.mkey.mcode)) {
+    miFinalSetElem(env, op.arg1, key);
+  } else {
+    miFinalSetNewElem(env, op.arg1);
+  }
   moveBase(env, folly::none);
 }
 
-void in(ISS& env, const bc::IncDecML& op) {
-  miIncDec(env, op.arg1, op.subop2, op.subop3, locAsCell(env, op.loc4));
-}
-
-void in(ISS& env, const bc::IncDecMC& op) {
-  miIncDec(env, op.arg1, op.subop2, op.subop3, topC(env));
-}
-
-void in(ISS& env, const bc::IncDecMInt& op) {
-  miIncDec(env, op.arg1, op.subop2, op.subop3, ival(op.arg4));
-}
-
-void in(ISS& env, const bc::IncDecMStr& op) {
-  miIncDec(env, op.arg1, op.subop2, op.subop3, sval(op.str4));
-}
-
-void in(ISS& env, const bc::IncDecMNewElem& op) {
-  miFinalIncDecNewElem(env, op.arg1);
+void in(ISS& env, const bc::IncDecM& op) {
+  auto const key = key_type(env, op.mkey);
+  if (mcodeIsProp(op.mkey.mcode)) {
+    miFinalIncDecProp(env, op.arg1, op.subop2, key);
+  } else if (mcodeIsElem(op.mkey.mcode)) {
+    miFinalIncDecElem(env, op.arg1, op.subop2, key);
+  } else {
+    miFinalIncDecNewElem(env, op.arg1);
+  }
   moveBase(env, folly::none);
 }
 
-void in(ISS& env, const bc::SetOpML& op) {
-  miSetOp(env, op.arg1, op.subop2, op.subop3, locAsCell(env, op.loc4));
-}
-
-void in(ISS& env, const bc::SetOpMC& op) {
-  miSetOp(env, op.arg1, op.subop2, op.subop3, topC(env, 1));
-}
-
-void in(ISS& env, const bc::SetOpMInt& op) {
-  miSetOp(env, op.arg1, op.subop2, op.subop3, ival(op.arg4));
-}
-
-void in(ISS& env, const bc::SetOpMStr& op) {
-  miSetOp(env, op.arg1, op.subop2, op.subop3, sval(op.str4));
-}
-
-void in(ISS& env, const bc::SetOpMNewElem& op) {
-  miFinalSetOpNewElem(env, op.arg1);
+void in(ISS& env, const bc::SetOpM& op) {
+  auto const key = key_type(env, op.mkey);
+  if (mcodeIsProp(op.mkey.mcode)) {
+    miFinalSetOpProp(env, op.arg1, op.subop2, key);
+  } else if (mcodeIsElem(op.mkey.mcode)) {
+    miFinalSetOpElem(env, op.arg1, op.subop2, key);
+  } else {
+    miFinalSetOpNewElem(env, op.arg1);
+  }
   moveBase(env, folly::none);
 }
 
-void in(ISS& env, const bc::BindML& op) {
-  miBind(env, op.arg1, op.subop2, locAsCell(env, op.loc3));
-}
-
-void in(ISS& env, const bc::BindMC& op) {
-  miBind(env, op.arg1, op.subop2, topC(env, 1));
-}
-
-void in(ISS& env, const bc::BindMInt& op) {
-  miBind(env, op.arg1, op.subop2, ival(op.arg3));
-}
-
-void in(ISS& env, const bc::BindMStr& op) {
-  miBind(env, op.arg1, op.subop2, sval(op.str3));
-}
-
-void in(ISS& env, const bc::BindMNewElem& op) {
-  miFinalBindNewElem(env, op.arg1);
+void in(ISS& env, const bc::BindM& op) {
+  auto const key = key_type(env, op.mkey);
+  if (mcodeIsProp(op.mkey.mcode)) {
+    miFinalBindProp(env, op.arg1, key);
+  } else if (mcodeIsElem(op.mkey.mcode)) {
+    miFinalBindElem(env, op.arg1, key);
+  } else {
+    miFinalBindNewElem(env, op.arg1);
+  }
   moveBase(env, folly::none);
 }
 
-void in(ISS& env, const bc::UnsetML& op) {
-  miUnset(env, op.arg1, op.subop2, locAsCell(env, op.loc3));
-}
-
-void in(ISS& env, const bc::UnsetMC& op) {
-  miUnset(env, op.arg1, op.subop2, topC(env));
-}
-
-void in(ISS& env, const bc::UnsetMInt& op) {
-  miUnset(env, op.arg1, op.subop2, ival(op.arg3));
-}
-
-void in(ISS& env, const bc::UnsetMStr& op) {
-  miUnset(env, op.arg1, op.subop2, sval(op.str3));
+void in(ISS& env, const bc::UnsetM& op) {
+  auto const key = key_type(env, op.mkey);
+  if (mcodeIsProp(op.mkey.mcode)) {
+    miFinalUnsetProp(env, op.arg1, key);
+  } else {
+    assert(mcodeIsElem(op.mkey.mcode));
+    miFinalUnsetElem(env, op.arg1, key);
+  }
+  moveBase(env, folly::none);
 }
 
 void in(ISS& env, const bc::SetWithRefLML& op) {
@@ -1597,64 +1436,19 @@ void in(ISS& env, const bc::SetWithRefRML& op) {
   miFinalSetWithRef(env);
 }
 
-template<typename In, typename COut, typename VOut>
-void fpassFinalImpl(ISS& env, In op, COut cOut, VOut vOut) {
+void in(ISS& env, const bc::FPassM& op) {
+  auto const cget = bc::QueryM{op.arg2, QueryMOp::CGet, op.mkey};
+  auto const vget = bc::VGetM{op.arg2, op.mkey};
+
   if (auto const flags = fpassFlags(env, op.arg1)) {
-    if (flags == MOpFlags::Warn) {
-      return reduce(env, cOut, bc::FPassC{op.arg1});
-    }
-    return reduce(env, vOut, bc::FPassVNop{op.arg1});
+    return flags == MOpFlags::Warn ? reduce(env, cget, bc::FPassC{op.arg1})
+                                   : reduce(env, vget, bc::FPassVNop{op.arg1});
   }
 
   mergePaths(
     env,
-    [&] { in(env, cOut); },
-    [&] { in(env, vOut); }
-  );
-}
-
-void in(ISS& env, const bc::FPassML& op) {
-  fpassFinalImpl(env, op,
-                 bc::QueryML{op.arg2, QueryMOp::CGet, op.subop3, op.loc4},
-                 bc::VGetML{op.arg2, op.subop3, op.loc4});
-}
-
-void in(ISS& env, const bc::FPassMC& op) {
-  fpassFinalImpl(env, op,
-                 bc::QueryMC{op.arg2, QueryMOp::CGet, op.subop3},
-                 bc::VGetMC{op.arg2, op.subop3});
-}
-
-void in(ISS& env, const bc::FPassMInt& op) {
-  fpassFinalImpl(env, op,
-                 bc::QueryMInt{op.arg2, QueryMOp::CGet, op.subop3, op.arg4},
-                 bc::VGetMInt{op.arg2, op.subop3, op.arg4});
-}
-
-void in(ISS& env, const bc::FPassMStr& op) {
-  fpassFinalImpl(env, op,
-                 bc::QueryMStr{op.arg2, QueryMOp::CGet, op.subop3, op.str4},
-                 bc::VGetMStr{op.arg2, op.subop3, op.str4});
-}
-
-void in(ISS& env, const bc::FPassMNewElem& op) {
-  // QueryMNewElem doesn't exist since it would be an invalid operation, so we
-  // use this approximation of what it would do instead. Note that it always
-  // fatals but we still treat it as a PEI for simplicity.
-  auto queryMNewElem = [&] {
-      discard(env, op.arg2);
-      push(env, TInitCell);
-  };
-
-  if (auto const flags = fpassFlags(env, op.arg1)) {
-    if (flags == MOpFlags::Warn) return queryMNewElem();
-    return reduce(env, bc::VGetMNewElem{op.arg2}, bc::FPassVNop{op.arg1});
-  }
-
-  mergePaths(
-    env,
-    queryMNewElem,
-    [&] { in(env, bc::VGetMNewElem{op.arg2}); }
+    [&] { in(env, cget); },
+    [&] { in(env, vget); }
   );
 }
 

@@ -89,6 +89,7 @@ struct UnitEmitter {
    */
   const unsigned char* bc() const;
   Offset bcPos() const;
+  Offset offsetOf(const unsigned char* pc) const;
 
   /*
    * Set the bytecode pointer by allocating a copy of `bc' with size `bclen'.

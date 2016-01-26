@@ -127,7 +127,7 @@ start_kt:         IssetL $func
                   JmpZ next_val_kt
                   CGetL $v
                   BaseL $res Define
-                  SetML 0 Elem $k
+                  SetM 0 EL:$k
                   PopC
     next_val_kt:  IterNextK 1 loop_val_kt $v $k
                   Jmp endloop_a_kt
@@ -140,7 +140,7 @@ start_kt:         IssetL $func
                   JmpZ next_both_kt
                   CGetL $v
                   BaseL $res Define
-                  SetML 0 Elem $k
+                  SetM 0 EL:$k
                   PopC
     next_both_kt: IterNextK 1 loop_both_kt $v $k
                   Jmp endloop_a_kt
@@ -152,7 +152,7 @@ start_kt:         IssetL $func
                   JmpZ next_key_kt
                   CGetL $v
                   BaseL $res Define
-                  SetML 0 Elem $k
+                  SetM 0 EL:$k
                   PopC
     next_key_kt:  IterNextK 1 loop_key_kt $v $k
   }
@@ -171,7 +171,7 @@ loop_n_kt:   CGetL $v
              JmpZ skip_n_kt
              CGetL $v
              BaseL $res Define
-             SetML 0 Elem $k
+             SetM 0 EL:$k
              PopC
 skip_n_kt:   IterNextK 1 loop_n_kt $v $k
 }

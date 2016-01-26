@@ -38,7 +38,7 @@
     PopR
   # line 7
     BaseL $ar DefineReffy
-    VGetMInt 0 Elem 0
+    VGetM 0 EI:0
     BindL $x
     PopV
   # line 8
@@ -92,7 +92,7 @@ loop:
   # line 17
     CGetL $v
     BaseL $ar2 Define
-    SetML 0 Elem $k
+    SetM 0 EL:$k
     PopC
   # line 18
     WIterNextK 0 loop $v $k

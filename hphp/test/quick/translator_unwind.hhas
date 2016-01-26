@@ -52,7 +52,7 @@ handler:
     This
     CGetL $id
     BaseC 1
-    SetMStr 1 Prop "x"
+    SetM 1 PT:"x"
     PopC
     Int 1
     RetC
@@ -62,7 +62,7 @@ handler:
     String "dtor: "
     This
     BaseC 0
-    QueryMStr 1 CGet Prop "x"
+    QueryM 1 CGet PT:"x"
     Concat
     String "\n"
     Concat

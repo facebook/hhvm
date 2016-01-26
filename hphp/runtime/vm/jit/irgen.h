@@ -277,6 +277,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType);
 #define IMM_AA         const ArrayData*
 #define IMM_BA         Offset
 #define IMM_OA(subop)  subop
+#define IMM_KA         MemberKey
 
 #define NA /*  */
 #define ONE(x0)              , IMM_##x0
@@ -309,6 +310,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType);
 #undef IMM_AA
 #undef IMM_BA
 #undef IMM_OA
+#undef IMM_KA
 
 //////////////////////////////////////////////////////////////////////
 

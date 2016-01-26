@@ -1119,6 +1119,43 @@ SSwitchJmpVector read_sswitch_jmpvector(AsmState& as) {
   return ret;
 }
 
+MemberKey read_member_key(AsmState& as) {
+  as.in.skipWhitespace();
+
+  std::string word;
+  if (!as.in.readword(word)) as.error("expected member code");
+
+  auto optMcode = parseMemberCode(word.c_str());
+  if (!optMcode) as.error("unrecognized member code `" + word + "'");
+
+  auto const mcode = *optMcode;
+  if (mcode != MW && as.in.getc() != ':') {
+    as.error("expected `:' after member code `" + word + "'");
+  }
+
+  switch (mcode) {
+    case MW:
+      return MemberKey{};
+    case MEL: case MPL: {
+      if (as.in.getc() != '$') {
+        as.error("*L member code must be followed by a local variable name");
+      }
+      std::string name;
+      if (!as.in.readword(name)) {
+        as.error("couldn't read name for local variable in member key");
+      }
+      return MemberKey{mcode, as.getLocalId("$" + name)};
+    }
+    case MEC: case MPC:
+      return MemberKey{mcode, read_opcode_arg<int32_t>(as)};
+    case MEI:
+      return MemberKey{mcode, read_opcode_arg<int64_t>(as)};
+    case MET: case MPT: case MQT:
+      return MemberKey{mcode, read_litstr(as)};
+  }
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::map<std::string,ParserFunc> opcode_parsers;
@@ -1195,6 +1232,8 @@ std::map<std::string,ParserFunc> opcode_parsers;
   );                                                                \
   as.ue->emitInt32(0);                                              \
 } while (0)
+
+#define IMM_KA encode_member_key(read_member_key(as), *as.ue)
 
 #define NUM_PUSH_NOV 0
 #define NUM_PUSH_ONE(a) 1
@@ -1286,6 +1325,7 @@ OPCODES
 #undef IMM_MA
 #undef IMM_AA
 #undef IMM_VSA
+#undef IMM_KA
 
 #undef NUM_PUSH_NOV
 #undef NUM_PUSH_ONE

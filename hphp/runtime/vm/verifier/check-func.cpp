@@ -518,6 +518,37 @@ bool FuncChecker::checkImmOAImpl(PC& pc, PC const instr) {
   return true;
 }
 
+bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
+  auto const mcode = decode_raw<MemberCode>(pc);
+  if (mcode < 0 || mcode >= NumMemberCodes) {
+    ferror("Invalid MemberCode {}\n", uint8_t{mcode});
+    return false;
+  }
+
+  auto ok = true;
+  switch (mcode) {
+    case MW:
+      break;
+    case MEL: case MPL: {
+      auto const loc = decode_iva(pc);
+      ok &= checkLocal(pc, loc);
+      break;
+    }
+    case MEC: case MPC:
+      decode_iva(pc);
+      break;
+    case MEI:
+      pc += sizeof(int64_t);
+      break;
+    case MET: case MPT: case MQT:
+      auto const id = decode_raw<Id>(pc);
+      ok &= checkString(pc, id);
+      break;
+  }
+
+  return ok;
+}
+
 /**
  * Check instruction and its immediates. Returns false if we can't continue
  * because we don't know the length of this instruction or one of the
@@ -555,7 +586,12 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
     return false;
   }
 
-  assert(pc == instr + instrLen(instr));
+  auto const expectPC = instr + instrLen(instr);
+  if (pc != expectPC) {
+    ferror("PC after decoding {} at {} is {} instead of expected {}\n",
+           opcodeToName(op), instr, pc, expectPC);
+    return false;
+  }
   return ok;
 }
 
@@ -636,52 +672,22 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef IDX_A
   };
   switch (peek_op(pc)) {
-  case Op::QueryML:
-  case Op::QueryMC:
-  case Op::QueryMInt:
-  case Op::QueryMStr:
-  case Op::VGetML:
-  case Op::VGetMC:
-  case Op::VGetMInt:
-  case Op::VGetMStr:
-  case Op::VGetMNewElem:
-  case Op::FPassML:
-  case Op::FPassMC:
-  case Op::FPassMInt:
-  case Op::FPassMStr:
-  case Op::FPassMNewElem:
-  case Op::IncDecML:
-  case Op::IncDecMC:
-  case Op::IncDecMInt:
-  case Op::IncDecMStr:
-  case Op::IncDecMNewElem:
-  case Op::UnsetML:
-  case Op::UnsetMC:
-  case Op::UnsetMInt:
-  case Op::UnsetMStr:
+  case Op::QueryM:
+  case Op::VGetM:
+  case Op::FPassM:
+  case Op::IncDecM:
+  case Op::UnsetM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
     return m_tmp_sig;
-  case Op::SetML:
-  case Op::SetMC:
-  case Op::SetMInt:
-  case Op::SetMStr:
-  case Op::SetMNewElem:
-  case Op::SetOpML:
-  case Op::SetOpMC:
-  case Op::SetOpMInt:
-  case Op::SetOpMStr:
-  case Op::SetOpMNewElem:
+  case Op::SetM:
+  case Op::SetOpM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
     }
     return m_tmp_sig;
-  case Op::BindML:
-  case Op::BindMC:
-  case Op::BindMInt:
-  case Op::BindMStr:
-  case Op::BindMNewElem:
+  case Op::BindM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? VV : CRV;
     }

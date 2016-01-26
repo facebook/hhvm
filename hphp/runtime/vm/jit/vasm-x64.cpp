@@ -946,6 +946,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
+    simplify(unit);
     if (regalloc) allocateRegisters(unit, abi);
   }
   if (unit.blocks.size() > 1) {

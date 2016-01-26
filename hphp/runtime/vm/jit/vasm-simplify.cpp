@@ -276,6 +276,50 @@ bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
   });
 }
 
+bool simplify(Env& env, const fallbackcc& inst, Vlabel b, size_t i) {
+  bool r{false};
+  for (int iIdx = i - 1; iIdx >=0; iIdx--) {
+    // Search backwards for a fallbackcc instruction
+    r |= if_inst<Vinstr::fallbackcc>(env, b, iIdx, [&] (const fallbackcc& flb) {
+      // Verify if it's using the same condition
+      if (inst.cc == flb.cc && inst.sf == flb.sf) {
+        // nop the current fallbackcc
+        return simplify_impl(env, b, i, [&] (Vout& v) {
+          v << nop{};
+          FTRACE(kVasmSimplifyLevel, "Removing redundant fallbackcc: {} \n",
+                 show(env.unit, flb));
+          return 1;
+        });
+      }
+      return false;
+    });
+    if (r) return r;
+  }
+  return false;
+}
+
+bool simplify(Env& env, const jcc& inst, Vlabel b, size_t i) {
+  bool r{false};
+  for (int iIdx = i - 1; iIdx >=0; iIdx--) {
+    // Search backwards for a fallbackcc instruction
+    r |= if_inst<Vinstr::fallbackcc>(env, b, iIdx, [&] (const fallbackcc& flb) {
+      // Verify if it's using the same condition
+      if (inst.cc == flb.cc && inst.sf == flb.sf) {
+        // Replace jcc with an unconditional jmp to the "false" branch
+        return simplify_impl(env, b, i, [&] (Vout& v) {
+          v << jmp{inst.targets[1]};
+          FTRACE(kVasmSimplifyLevel, "Replacing jcc with unconditional jmp\n",
+                 show(env.unit, inst));
+          return 1;
+        });
+      }
+      return false;
+    });
+    if (r) return r;
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

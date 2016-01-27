@@ -826,18 +826,23 @@ void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
 
   auto debugger = xdebug_hdf["Eval"]["Debugger"];
 
-  // Get everything as bools.
-  #define XDEBUG_OPT(T, name, sym, val) { \
-    std::string key = "XDebug" #sym; \
-    config_values[#sym] = Config::GetBool(ini, xdebug_hdf, \
-                                       "Eval.Debugger." + key, val); \
+#define XDEBUG_OPT(T, name, sym, val) {                               \
+    std::string key = "XDebug" #sym;                                  \
+    /* Only load the HDF value if it was specified, don't use the defaults. */ \
+    if (debugger.exists(key)) {                                       \
+      if (std::is_same<T, bool>::value) {                             \
+        config_values[#sym] = Config::GetBool(                        \
+          ini, xdebug_hdf, "Eval.Debugger." + key, val                \
+        );                                                            \
+      } else if (std::is_same<T, int>::value) {                       \
+        config_values[#sym] = Config::GetInt32(                       \
+          ini, xdebug_hdf, "Eval.Debugger." + key, val                \
+        );                                                            \
+      }                                                               \
+    }                                                                 \
   }
   XDEBUG_HDF_CFG
   #undef XDEBUG_OPT
-
-  // But patch up overload_var_dump since it's actually an int.
-  config_values["OverloadVarDump"] =
-    Config::GetInt32(ini, xdebug_hdf, "Eval.Debugger.XDebugOverloadVarDump", 1);
 
   // XDebug is disabled by default.
   Config::Bind(Enable, ini, xdebug_hdf, "Eval.Debugger.XDebugEnable", false);

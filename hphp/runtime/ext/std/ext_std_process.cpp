@@ -30,7 +30,10 @@
 
 #include <folly/String.h>
 
+#ifndef _MSC_VER
 #include "hphp/util/light-process.h"
+#endif
+#include "hphp/util/process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 
@@ -54,12 +57,51 @@
 # define _NSIG NSIG
 #endif
 
+#ifndef _MSC_VER
+# define MAYBE_WIFEXITED(var) if (WIFEXITED(var)) { var = WEXITSTATUS(var); }
+#else
+# define MAYBE_WIFEXITED(var)
+#endif
+
+#ifndef _MSC_VER
 extern char **environ;
+#endif
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // build environment pair list
+#ifdef _MSC_VER
+static char* build_envp(const Array& envs) {
+  char *envpw = NULL;
+  int size = envs.size();
+  if (size) {
+    size_t totalSize = 0;
+    for (ArrayIter iter(envs); iter; ++iter) {
+      StringBuffer nvpair;
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
+      totalSize += nvpair.size() + 1;
+    }
+    char* envp = envpw = (char*)malloc((totalSize + 1) * sizeof(char));
+    int i = 0;
+    for (ArrayIter iter(envs); iter; ++iter, ++i) {
+      StringBuffer nvpair;
+      nvpair.append(iter.first().toString());
+      nvpair.append('=');
+      nvpair.append(iter.second().toString());
+
+      memcpy(envp, nvpair.data(), nvpair.size());
+      envp += nvpair.size();
+      *envp++ = '\0';
+    }
+    *envp++ = NULL;
+  }
+  return envpw;
+}
+#else
 static char **build_envp(const Array& envs, std::vector<String> &senvs) {
   char **envp = NULL;
   int size = envs.size();
@@ -80,6 +122,7 @@ static char **build_envp(const Array& envs, std::vector<String> &senvs) {
   }
   return envp;
 }
+#endif
 
 // check whitelist
 static bool check_cmd(const char *cmd) {
@@ -131,12 +174,15 @@ void StandardExtension::initProcess() {
   HHVM_FE(proc_terminate);
   HHVM_FE(proc_close);
   HHVM_FE(proc_get_status);
+#ifndef _MSC_VER
   HHVM_FE(proc_nice);
+#endif
   HHVM_FE(escapeshellarg);
   HHVM_FE(escapeshellcmd);
 
   loadSystemlib("std_process");
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // popen
@@ -153,7 +199,11 @@ public:
 
   ~ShellExecContext() {
     if (m_proc) {
+#ifdef _MSC_VER
+      _pclose(m_proc);
+#else
       LightProcess::pclose(m_proc);
+#endif
     }
     if (m_sig_handler) {
       signal(SIGCHLD, m_sig_handler);
@@ -170,7 +220,14 @@ public:
       raise_warning("NULL byte detected. Possible attack");
       return nullptr;
     }
+#ifdef _MSC_VER
+    auto old_cwd = Process::GetCurrentDirectory();
+    chdir(g_context->getCwd().data());
+    m_proc = _popen(cmd, "r");
+    chdir(old_cwd.c_str());
+#else
     m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
+#endif
     if (m_proc == nullptr) {
       raise_warning("Unable to execute '%s'", cmd);
     }
@@ -178,7 +235,11 @@ public:
   }
 
   int exit() {
+#ifdef _MSC_VER
+    int status = _pclose(m_proc);
+#else
     int status = LightProcess::pclose(m_proc);
+#endif
     m_proc = nullptr;
     return status;
   }
@@ -217,7 +278,7 @@ String HHVM_FUNCTION(exec,
 
   Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
-  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
+  MAYBE_WIFEXITED(ret);
   return_var.assignIfRef(ret);
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
@@ -253,7 +314,7 @@ void HHVM_FUNCTION(passthru,
     g_context->write(String(buffer, len, CopyString));
   }
   int ret = ctx.exit();
-  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
+  MAYBE_WIFEXITED(ret);
   return_var.assignIfRef(ret);
 }
 
@@ -270,7 +331,7 @@ String HHVM_FUNCTION(system,
 
   Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
-  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
+  MAYBE_WIFEXITED(ret);
   return_var.assignIfRef(ret);
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
@@ -297,6 +358,9 @@ public:
   DECLARE_RESOURCE_ALLOCATION(ChildProcess)
 
   pid_t child;
+#ifdef _MSC_VER
+  HANDLE childHandle;
+#endif
   Array pipes;
   String command;
   Variant env;
@@ -314,6 +378,18 @@ public:
     }
     pipes.clear();
 
+#ifdef _MSC_VER
+    DWORD wstatus;
+    WaitForSingleObject(childHandle, INFINITE);
+    GetExitCodeProcess(childHandle, &wstatus);
+    if (wstatus == STILL_ACTIVE) {
+      CloseHandle(childHandle);
+      return -1;
+    } else {
+      CloseHandle(childHandle);
+      return wstatus;
+    }
+#else
     pid_t wait_pid;
     int wstatus;
     do {
@@ -325,10 +401,9 @@ public:
       return -1;
     }
 
-    if (WIFEXITED(wstatus)) {
-      wstatus = WEXITSTATUS(wstatus);
-    }
+    MAYBE_WIFEXITED(ret);
     return wstatus;
+#endif
   }
 };
 
@@ -343,21 +418,64 @@ void ChildProcess::sweep() {
 const StaticString s_w("w");
 
 class DescriptorItem {
+private:
+#ifdef _MSC_VER
+  typedef HANDLE FileDescriptor;
+  static constexpr HANDLE defaultFd = INVALID_HANDLE_VALUE;
+  static HANDLE dupFd(int fd) {
+    return dupHandle((HANDLE)_get_osfhandle(fd), true, false);
+  }
+  static void closeFd(HANDLE fd) {
+    if (fd != INVALID_HANDLE_VALUE) {
+      CloseHandle(fd);
+    }
+  }
+  static HANDLE dupHandle(HANDLE hd, bool inherit, bool closeOriginal) {
+    HANDLE copy, self = GetCurrentProcess();
+
+    if (!DuplicateHandle(self, hd, self, &copy, 0, inherit,
+       DUPLICATE_SAME_ACCESS | (closeOriginal ? DUPLICATE_CLOSE_SOURCE : 0))) {
+      return INVALID_HANDLE_VALUE;
+    }
+    return copy;
+  }
+  static int pipe(HANDLE pair[2]) {
+    SECURITY_ATTRIBUTES security;
+    memset(&security, 0, sizeof(security));
+    security.nLength = sizeof(security);
+    security.bInheritHandle = true;
+    security.lpSecurityDescriptor = nullptr;
+    return CreatePipe(&pair[0], &pair[1], &security, 0) ? 0 : -1;
+  }
+#else
+  typedef int FileDescriptor;
+  static constexpr int defaultFd = -1;
+  static int dupFd(int fd) {
+    return dup(fd);
+  }
+  static void closeFd(int fd) {
+    if (fd >= 0) {
+      close(fd);
+    }
+  }
+#endif
+
 public:
   DescriptorItem() :
-    index(-1), parentend(-1), childend(-1), mode(-1), mode_flags(-1) {
+    index(-1), parentend(defaultFd), childend(defaultFd),
+    mode(-1), mode_flags(-1) {
   }
 
   ~DescriptorItem() {
   }
 
   void cleanup() {
-    if (childend  >= 0) close(childend);
-    if (parentend >= 0) close(parentend);
+    closeFd(childend);
+    closeFd(parentend);
   }
 
   int index;               // desired fd number in child process
-  int parentend, childend; // fds for pipes in parent/child
+  FileDescriptor parentend, childend; // fds for pipes in parent/child
   int mode;                // mode for proc_open code
   int mode_flags;          // mode flags for opening fds
 
@@ -367,7 +485,7 @@ public:
 
   bool readFile(const req::ptr<File>& file) {
     mode = DESC_FILE;
-    childend = dup(file->fd());
+    childend = dupFd(file->fd());
     if (childend < 0) {
       raise_warning("unable to dup File-Handle for descriptor %d - %s",
                       index, folly::errnoStr(errno).c_str());
@@ -378,7 +496,7 @@ public:
 
   bool readPipe(const String& zmode) {
     mode = DESC_PIPE;
-    int newpipe[2];
+    FileDescriptor newpipe[2];
     if (0 != pipe(newpipe)) {
       raise_warning("unable to create pipe %s",
                       folly::errnoStr(errno).c_str());
@@ -393,13 +511,20 @@ public:
       parentend = newpipe[0];
       childend = newpipe[1];
     }
+#ifdef _MSC_VER
+    parentend = dupHandle(parentend, false, true);
+#endif
     mode_flags = mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
+#ifdef _MSC_VER
+    if (zmode.size() >= 2 && zmode[1] == 'b')
+      mode_flags |= O_BINARY;
+#endif
     return true;
   }
 
   bool openFile(const String& zfile, const String& zmode) {
     mode = DESC_FILE;
-      /* try a wrapper */
+    /* try a wrapper */
     Variant vfile = HHVM_FN(fopen)(zfile.c_str(), zmode.c_str());
     if (!vfile.isResource()) {
       raise_warning("Unable to open specified file: %s (mode %s)",
@@ -408,38 +533,54 @@ public:
     } else {
       auto file = cast<File>(vfile);
       file->flush();
-      childend = dup(file->fd());
+      childend = dupFd(file->fd());
       if (childend < 0) {
         raise_warning("unable to dup File-Handle for descriptor %d - %s",
                         index, folly::errnoStr(errno).c_str());
         return false;
       }
+#ifdef _MSC_VER
+      /* simulate the append mode by fseeking to the end of the file
+      this introduces a potential race-condition, but it is the best we can do, though */
+      if (strchr(zmode.data(), 'a')) {
+        SetFilePointer(childend, 0, nullptr, FILE_END);
+      }
+#endif
       return true;
     }
   }
 
   void dupChild() {
+#ifndef _MSC_VER
     if ((mode & ~DESC_PARENT_MODE_WRITE) == DESC_PIPE) {
-      close(parentend); parentend = -1;
+      closeFd(parentend);
+      parentend = defaultFd;
     }
     if (dup2(childend, index) < 0) {
       perror("dup2");
     }
     if (childend != index) {
-      close(childend); childend = -1;
+      closeFd(childend);
+      childend = defaultFd;
     }
+#endif
   }
 
   /* clean up all the child ends and then open streams on the parent
    * ends, where appropriate */
   Resource dupParent() {
-    close(childend); childend = -1;
+    closeFd(childend);
+    childend = defaultFd;
 
     if ((mode & ~DESC_PARENT_MODE_WRITE) == DESC_PIPE) {
+#ifdef _MSC_VER
+      return Resource(req::make<PlainFile>(_open_osfhandle((intptr_t)parentend, mode_flags), true));
+#else
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
       return Resource(req::make<PlainFile>(parentend, true));
+#endif
     }
 
     return Resource();
@@ -520,7 +661,11 @@ static bool pre_proc_open(const Array& descriptorspec,
 static Variant post_proc_open(const String& cmd, Variant& pipes,
                               const Variant& env,
                               std::vector<DescriptorItem> &items,
-                              pid_t child) {
+                              pid_t child
+#ifdef _MSC_VER
+                              , HANDLE childHandle
+#endif
+                              ) {
   if (child < 0) {
     /* failed to fork() */
     for (auto& item : items) {
@@ -534,6 +679,9 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
   auto proc = req::make<ChildProcess>();
   proc->command = cmd;
   proc->child = child;
+#ifdef _MSC_VER
+  proc->childHandle = childHandle;
+#endif
   proc->env = env;
 
   // need to set pipes to a new empty array, ignoring whatever it was
@@ -605,6 +753,116 @@ Variant HHVM_FUNCTION(proc_open,
     enva = env.toArray();
   }
 
+
+#ifdef _MSC_VER
+  PROCESS_INFORMATION pi;
+  HANDLE childHandle;
+  STARTUPINFO si;
+  BOOL newprocok;
+  SECURITY_ATTRIBUTES security;
+  DWORD dwCreateFlags = 0;
+  char *command_with_cmd;
+  UINT old_error_mode;
+  char cur_cwd[MAXPATHLEN];
+  bool suppress_errors = false;
+  bool bypass_shell = false;
+
+  if (!other_options.isNull() && other_options.isArray()) {
+    auto arr = other_options.asCArrRef();
+    if (arr.exists(String("suppress_errors", CopyString), true)) {
+      auto v = arr[String("suppress_errors", CopyString)];
+      if ((v.isBoolean() && v.asBooleanVal()) || (v.isInteger() && v.asInt64Val())) {
+        suppress_errors = true;
+      }
+    }
+
+    if (arr.exists(String("bypass_shell", CopyString), true)) {
+      auto v = arr[String("bypass_shell", CopyString)];
+      if ((v.isBoolean() && v.asBooleanVal()) || (v.isInteger() && v.asInt64Val())) {
+        bypass_shell = true;
+      }
+    }
+  }
+
+  /* we use this to allow the child to inherit handles */
+  memset(&security, 0, sizeof(security));
+  security.nLength = sizeof(security);
+  security.bInheritHandle = true;
+  security.lpSecurityDescriptor = nullptr;
+
+  memset(&si, 0, sizeof(si));
+  si.cb = sizeof(si);
+  si.dwFlags = STARTF_USESTDHANDLES;
+
+  si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+  si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+  si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+
+  if (!pre_proc_open(descriptorspec, items)) return false;
+  /* redirect stdin/stdout/stderr if requested */
+  for (size_t i = 0; i < items.size(); i++) {
+    switch (items[i].index) {
+      case 0:
+        si.hStdInput = items[i].childend;
+        break;
+      case 1:
+        si.hStdOutput = items[i].childend;
+        break;
+      case 2:
+        si.hStdError = items[i].childend;
+        break;
+    }
+  }
+
+
+  memset(&pi, 0, sizeof(pi));
+
+  if (suppress_errors) {
+    old_error_mode = SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+  }
+
+  dwCreateFlags = NORMAL_PRIORITY_CLASS;
+  if (RuntimeOption::ClientExecutionMode()) {
+    dwCreateFlags |= CREATE_NO_WINDOW;
+  }
+
+  char *envp = build_envp(enva);
+  if (bypass_shell) {
+    newprocok = CreateProcess(NULL, strdup(cmd.c_str()), &security, &security, TRUE, dwCreateFlags, envp, scwd.c_str(), &si, &pi);
+  } else {
+    std::string command_with = "cmd.exe /c ";
+    command_with += cmd.toCppString();
+
+    newprocok = CreateProcess(NULL, strdup(command_with.c_str()), &security, &security, TRUE, dwCreateFlags, envp, scwd.c_str(), &si, &pi);
+  }
+  free(envp);
+
+  if (suppress_errors) {
+    SetErrorMode(old_error_mode);
+  }
+
+  if (newprocok == FALSE) {
+    DWORD dw = GetLastError();
+    char* msg;
+    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&msg, 0, NULL);
+
+    /* clean up all the descriptors */
+    for (size_t i = 0; i < items.size(); i++) {
+      CloseHandle(items[i].childend);
+      if (items[i].parentend) {
+        CloseHandle(items[i].parentend);
+      }
+    }
+    raise_warning("CreateProcess failed, error code - %u: %s", dw, msg);
+    LocalFree(msg);
+    return false;
+  }
+
+  childHandle = pi.hProcess;
+  DWORD child = pi.dwProcessId;
+  CloseHandle(pi.hThread);
+  return post_proc_open(cmd, pipes, enva, items, (pid_t)child, childHandle);
+#else
   pid_t child;
 
   if (LightProcess::Available()) {
@@ -667,12 +925,17 @@ Variant HHVM_FUNCTION(proc_open,
   execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
   free(envp);
   _exit(127);
+#endif
 }
 
 bool HHVM_FUNCTION(proc_terminate,
                    const Resource& process,
                    int signal /* = SIGTERM */) {
+#ifdef _MSC_VER
+  return TerminateProcess(cast<ChildProcess>(process)->childHandle, 255);
+#else
   return kill(cast<ChildProcess>(process)->child, signal) == 0;
+#endif
 }
 
 int64_t HHVM_FUNCTION(proc_close,
@@ -695,12 +958,19 @@ Array HHVM_FUNCTION(proc_get_status,
   auto proc = cast<ChildProcess>(process);
 
   errno = 0;
+  bool running = true, signaled = false, stopped = false;
+  int exitcode = -1, termsig = 0, stopsig = 0;
+
+#ifdef _MSC_VER
+  DWORD wstatus;
+  GetExitCodeProcess(proc->childHandle, &wstatus);
+  running = wstatus == STILL_ACTIVE;
+  exitcode = running ? -1 : wstatus;
+#else
   int wstatus;
   pid_t wait_pid =
     LightProcess::waitpid(proc->child, &wstatus, WNOHANG|WUNTRACED);
 
-  bool running = true, signaled = false, stopped = false;
-  int exitcode = -1, termsig = 0, stopsig = 0;
   if (wait_pid == proc->child) {
     if (WIFEXITED(wstatus)) {
       running = false;
@@ -718,10 +988,11 @@ Array HHVM_FUNCTION(proc_get_status,
   } else if (wait_pid == -1) {
     running = false;
   }
+#endif
 
   return make_map_array(
     s_command,  proc->command,
-    s_pid,      proc->child,
+    s_pid, (int)proc->child,
     s_running,  running,
     s_signaled, signaled,
     s_stopped,  stopped,
@@ -731,6 +1002,7 @@ Array HHVM_FUNCTION(proc_get_status,
   );
 }
 
+#ifndef _MSC_VER
 bool HHVM_FUNCTION(proc_nice,
                    int increment) {
   if (nice(increment) < 0 && errno) {
@@ -740,6 +1012,7 @@ bool HHVM_FUNCTION(proc_nice,
   }
   return true;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // string functions

@@ -472,18 +472,15 @@ void HHVM_FUNCTION(SystemLib_parse_str,
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define EXTR_CONST(v) Native::registerConstant<KindOfInt64> \
-                                   (makeStaticString("EXTR_" #v), EXTR_##v);
-
 void StandardExtension::initVariable() {
-  EXTR_CONST(IF_EXISTS);
-  EXTR_CONST(OVERWRITE);
-  EXTR_CONST(PREFIX_ALL);
-  EXTR_CONST(PREFIX_IF_EXISTS);
-  EXTR_CONST(PREFIX_INVALID);
-  EXTR_CONST(PREFIX_SAME);
-  EXTR_CONST(REFS);
-  EXTR_CONST(SKIP);
+  HHVM_RC_INT_SAME(EXTR_IF_EXISTS);
+  HHVM_RC_INT_SAME(EXTR_OVERWRITE);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_ALL);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_IF_EXISTS);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_INVALID);
+  HHVM_RC_INT_SAME(EXTR_PREFIX_SAME);
+  HHVM_RC_INT_SAME(EXTR_REFS);
+  HHVM_RC_INT_SAME(EXTR_SKIP);
 
   HHVM_FE(is_null);
   HHVM_FE(is_bool);

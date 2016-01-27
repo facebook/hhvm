@@ -62,6 +62,23 @@ enum class Alignment : uint32_t {
   SmashJccAndJmp,
 };
 
+constexpr auto kNumAlignments =
+  static_cast<size_t>(Alignment::SmashJccAndJmp) + 1;
+
+/*
+ * Under most architectures, the Alignments can be expressed by stipulating
+ * that the code region given by
+ *
+ *    [frontier + offset, nbytes)
+ *
+ * fits into the nearest `align'-aligned and -sized line.
+ */
+struct AlignInfo {
+  size_t align;
+  size_t nbytes;
+  size_t offset;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

@@ -122,8 +122,9 @@ void smashCall(TCA inst, TCA target) {
   CodeCursor cursor { cb, inst };
   ppc64_asm::Assembler a { cb };
 
-  if (!ppc64_asm::Assembler::isCall(inst))
+  if (!ppc64_asm::Assembler::isCall(inst)) {
     always_assert(false && "smashCall has unexpected block");
+  }
 
   a.setFrontier(inst + smashableCallSkip());
 

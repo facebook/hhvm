@@ -78,6 +78,9 @@ TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
 
+constexpr size_t kSmashMovqImmOff = 0;
+constexpr size_t kSmashCmpqImmOff = 0;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

@@ -1,6 +1,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
@@ -28,7 +29,9 @@ const StaticString
   s_flags("flags");
 
 static Class* c_MCRouterException = nullptr;
-static Object mcr_getException(const std::string& message,
+
+ATTRIBUTE_NORETURN
+static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
                                mc_res_t reply = mc_res_unknown,
                                const std::string& key = "") {
@@ -45,11 +48,13 @@ static Object mcr_getException(const std::string& message,
     make_packed_array(message, (int64_t)op, (int64_t)reply, key),
     obj.get());
   tvRefcountedDecRef(&ret);
-  return obj;
+  throw_object(obj);
 }
 
 static Class* c_MCRouterOptionException = nullptr;
-static Object mcr_getOptionException(
+
+ATTRIBUTE_NORETURN
+static void mcr_throwOptionException(
   const std::vector<mc::McrouterOptionError>& errors) {
   if (!c_MCRouterOptionException) {
     c_MCRouterOptionException =
@@ -73,7 +78,7 @@ static Object mcr_getOptionException(
     c_MCRouterOptionException->getCtor(),
     make_packed_array(errorArray),
     obj.get());
-  return obj;
+  throw_object(obj);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -103,7 +108,7 @@ class MCRouter {
     }
 
     if (!router) {
-      throw mcr_getException("Unable to initialize MCRouter instance");
+      mcr_throwException("Unable to initialize MCRouter instance");
     }
 
     m_client = router->createClient(
@@ -112,7 +117,7 @@ class MCRouter {
       0);
 
     if (!m_client) {
-      throw mcr_getException("Unable to initilize MCRouterClient instance");
+      mcr_throwException("Unable to initilize MCRouterClient instance");
     }
   }
 
@@ -145,7 +150,7 @@ class MCRouter {
 
     auto errors = opts.updateFromDict(dict);
     if (!errors.empty()) {
-      throw mcr_getOptionException(errors);
+      mcr_throwOptionException(errors);
     }
   }
 };
@@ -164,7 +169,7 @@ class MCRouterResult : public AsioExternalThreadEvent {
    */
   void unserialize(Cell& c) override {
     if (!m_exception.empty()) {
-      throw mcr_getException(m_exception, m_op, m_replyCode, m_key);
+      mcr_throwException(m_exception, m_op, m_replyCode, m_key);
     }
     if ((m_result.m_type == KindOfString) && !m_result.m_data.pstr) {
       // Deferred string init, see below
@@ -398,7 +403,7 @@ static String HHVM_STATIC_METHOD(MCRouter, getOpName, int64_t op) {
   if (!name) {
     std::string msg = "Unknown mc_op_* value: ";
     msg += op;
-    throw mcr_getException(msg, (mc_op_t)op);
+    mcr_throwException(msg, (mc_op_t)op);
   }
   return name;
 }
@@ -408,7 +413,7 @@ static String HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
   if (!name) {
     std::string msg = "Unknown mc_res_* value: ";
     msg += res;
-    throw mcr_getException(msg, mc_op_unknown, (mc_res_t)res);
+    mcr_throwException(msg, mc_op_unknown, (mc_res_t)res);
   }
   return name;
 }

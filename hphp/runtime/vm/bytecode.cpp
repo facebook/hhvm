@@ -1342,7 +1342,7 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!(ctor->attrs() & AttrPublic)) {
     std::string msg = "Access to non-public constructor of class ";
     msg += class_->name()->data();
-    throw Reflection::AllocReflectionExceptionObject(msg);
+    Reflection::ThrowReflectionExceptionObject(msg);
   }
   // call constructor
   if (!isContainerOrNull(params)) {

@@ -22,7 +22,7 @@
 namespace HPHP { namespace thrift {
 
 void thrift_error(const String& what, TError why) {
-  throw create_object(s_TProtocolException, make_packed_array(what, why));
+  throw_object(s_TProtocolException, make_packed_array(what, why));
 }
 
 Array get_tspec(const Class* cls) {

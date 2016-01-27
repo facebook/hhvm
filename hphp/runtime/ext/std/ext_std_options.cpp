@@ -240,7 +240,7 @@ static Variant impl_assert(const Variant& assertion,
     if (message.isObject()) {
       Object exn = message.toObject();
       if (exn.instanceof(SystemLib::s_AssertionErrorClass)) {
-        throw exn;
+        throw_object(exn);
       }
     }
 

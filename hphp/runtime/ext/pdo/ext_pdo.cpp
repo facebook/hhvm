@@ -496,7 +496,7 @@ void throw_pdo_exception(const Variant& code, const Variant& info,
   if (!info.isNull()) {
     obj->o_set(s_errorInfo, info, s_PDOException);
   }
-  throw obj;
+  throw_object(obj);
 }
 
 void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,

@@ -521,7 +521,8 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   return cls->nameStr();
 }
 
-Object Reflection::AllocReflectionExceptionObject(const Variant& message) {
+ATTRIBUTE_NORETURN
+void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   Object inst{s_ReflectionExceptionClass};
   TypedValue ret;
   g_context->invokeFunc(&ret,
@@ -529,7 +530,7 @@ Object Reflection::AllocReflectionExceptionObject(const Variant& message) {
                         make_packed_array(message),
                         inst.get());
   tvRefcountedDecRef(&ret);
-  return inst;
+  throw_object(inst);
 }
 
 
@@ -1555,21 +1556,21 @@ static String HHVM_METHOD(ReflectionClass, getConstructorName) {
 }
 
 void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
-    if (!content.isString()) {
-      throw Exception("Native data of ReflectionClass should be a class name");
-    }
+  if (!content.isString()) {
+    throw Exception("Native data of ReflectionClass should be a class name");
+  }
 
-    String clsName = content.toString();
-    String result = init(clsName);
-    if (result.empty()) {
-      auto msg = folly::format("Class {} does not exist", clsName).str();
-      throw Reflection::AllocReflectionExceptionObject(String(msg));
-    }
+  String clsName = content.toString();
+  String result = init(clsName);
+  if (result.empty()) {
+    auto msg = folly::format("Class {} does not exist", clsName).str();
+    Reflection::ThrowReflectionExceptionObject(String(msg));
+  }
 
-    // It is possible that $name does not get serialized. If a class derives
-    // from ReflectionClass and the return value of its __sleep() function does
-    // not contain 'name', $name gets ignored. So, we restore $name here.
-    obj->o_set(s_name, result);
+  // It is possible that $name does not get serialized. If a class derives
+  // from ReflectionClass and the return value of its __sleep() function does
+  // not contain 'name', $name gets ignored. So, we restore $name here.
+  obj->o_set(s_name, result);
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {

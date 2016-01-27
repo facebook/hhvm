@@ -534,7 +534,7 @@ class CompactReader {
         Object exn = create_object(s_TApplicationException, Array());
         Array spec(get_tspec(exn->getVMClass()));
         readStruct(exn, spec);
-        throw exn;
+        throw_object(exn);
       } else {
         thrift_error("Invalid response type", ERR_INVALID_DATA);
       }

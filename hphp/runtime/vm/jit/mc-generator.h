@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/unwind.h"
 
 namespace HPHP { namespace jit {
 

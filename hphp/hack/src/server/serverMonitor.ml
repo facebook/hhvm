@@ -339,5 +339,4 @@ let start () =
   then
     Exit_status.exit (daemon_starter options daemon_entry typechecker_entry)
   else
-    ServerMain.daemon_main options (Unix.descr_of_in_channel stdin)
-      (Unix.descr_of_out_channel stdout)
+    monitor_daemon_main options typechecker_entry

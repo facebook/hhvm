@@ -1,0 +1,197 @@
+<?hh // strict
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+class OperationCanceledException extends Exception { }
+
+class PhpAwaitable implements Awaitable {
+  public function getWaitHandle() {
+    return HH\Asio\null();
+  }
+}
+
+class CatAwaitable implements Awaitable {
+  private resource $proc;
+  private array $pipes;
+
+  public function __construct() {
+    $descriptorspec = array(
+      0 => array("pipe", "r"),
+      1 => array("pipe", "w"),
+    );
+    $this->proc = proc_open("cat", $descriptorspec, $this->pipes);
+    if (!is_resource($this->proc) ||
+        !is_resource($this->pipes[0]) ||
+        !is_resource($this->pipes[0])) {
+      throw new Exception("proc_open failed!");
+    }
+  }
+
+  public function close(): void {
+    fclose($this->pipes[0]);
+    fclose($this->pipes[1]);
+    proc_close($this->proc);
+  }
+
+  public function __destuct() {
+    $this->close();
+  }
+
+  public function complete(): void {
+    fwrite($this->pipes[0], "done\n");
+    fflush($this->pipes[0]);
+  }
+
+  public function getWaitHandle(): Awaitable<int> {
+    return stream_await($this->pipes[1], STREAM_AWAIT_READ, 10.0);
+  }
+}
+
+function reschedule($priority = 0) {
+  $queue = RescheduleWaitHandle::QUEUE_DEFAULT;
+  return RescheduleWaitHandle::create($queue, $priority);
+}
+
+function testCancelInvalidAwaitables() {
+  echo "=== testCancelInvalidAwaitables ===\n";
+  try {
+    // try canceling something, that is not WaitHandle
+    HH\Asio\cancel(new PhpAwaitable, new OperationCanceledException);
+    echo "Fail\n";
+  } catch(Exception $e) {
+    echo "ok\n";
+  }
+  try {
+    // try canceling StaticWaitHandle
+    HH\Asio\cancel(HH\Asio\null(), new OperationCanceledException);
+    echo "Fail\n";
+  } catch(Exception $e) {
+    echo "ok\n";
+  }
+}
+
+async function testCancelBeforeAwait(): Awaitable<void> {
+  echo "=== testCancelBeforeAwait ===\n";
+  $awaitable = new CatAwaitable();
+  $wh = $awaitable->getWaitHandle();
+  var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
+  $completion = async {
+    await reschedule();
+    $awaitable->complete();
+  };
+
+  echo "before await\n";
+  $resv = await HH\Asio\vw(ImmVector {
+      $wh,
+      $completion,
+  });
+  echo "after await\n";
+
+  try {
+    $res = $resv[0]->getResult();
+    echo "this should not happen!\n";
+  } catch (OperationCanceledException $e) {
+    echo "operation was canceled\n";
+  }
+  $awaitable->close();
+}
+
+async function testCancelAfterAwait(): Awaitable<void> {
+  echo "=== testCancelAfterAwait ===\n";
+  $awaitable = new CatAwaitable();
+  $wh = $awaitable->getWaitHandle();
+  $completion = async {
+    await reschedule();
+    $awaitable->complete();
+  };
+
+  echo "before await\n";
+  $resv = await HH\Asio\vw(ImmVector {
+      $wh,
+      $completion,
+  });
+
+  $res = $resv[0]->getResult();
+  echo "after await\n";
+  var_dump($res == STREAM_AWAIT_READY);
+  var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == false);
+
+  $res = await $wh;             // await again
+  var_dump($res == STREAM_AWAIT_READY);
+
+  $awaitable->close();
+}
+
+async function testCancelDuringAwait(): Awaitable<void> {
+  echo "=== testCancelDuringAwait ===\n";
+  $awaitable = new CatAwaitable();
+  $wh = $awaitable->getWaitHandle();
+  $completion = async {
+    await reschedule(1);        // after $cancelation
+    $awaitable->complete();
+  };
+  $cancelation = async {
+    await reschedule(0);        // before $completion
+    var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
+  };
+  echo "before await\n";
+  $resv = await HH\Asio\vw(ImmVector {
+      $wh,
+      $completion,
+      $cancelation,
+  });
+  echo "after await\n";
+
+  try {
+    $res = $resv[0]->getResult();
+    echo "this should not happen\n";
+  } catch (OperationCanceledException $e) {
+    echo "operation was canceled\n";
+  }
+  $awaitable->close();
+}
+
+async function testCancelFromBeginIOWait(): Awaitable<void> {
+  echo "=== testCancelFromBeginIOWait ===\n";
+  $awaitable = new CatAwaitable();
+  $wh = $awaitable->getWaitHandle();
+
+  WaitHandle::setOnIOWaitEnterCallback(function() use ($wh) {
+      echo "io wait enter\n";
+      var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
+    });
+  WaitHandle::setOnIOWaitExitCallback(function() {
+      echo "io wait exit\n";
+    });
+
+  echo "before await\n";
+  try {
+    $res = await $wh;
+    echo "this should not happen!\n";
+  } catch (OperationCanceledException $e) {
+    echo "operation was canceled\n";
+  }
+  echo "after await\n";
+
+  WaitHandle::setOnIOWaitEnterCallback(null);
+  WaitHandle::setOnIOWaitExitCallback(null);
+  // clean up to avoid leaking libevent watch
+  // this is still wrong, since libevent 1.4 (used by hphp) does not support
+  // multiple events for same FD. But it gets us to predictable state.
+  $awaitable->complete();
+  await $awaitable->getWaitHandle();
+  $awaitable->close();
+}
+
+function main() {
+  testCancelInvalidAwaitables();
+
+  HH\Asio\join(testCancelBeforeAwait());
+  HH\Asio\join(testCancelAfterAwait());
+  HH\Asio\join(testCancelDuringAwait());
+  HH\Asio\join(testCancelFromBeginIOWait());
+
+  HH\Asio\join(testCancelDuringAwait());
+  HH\Asio\join(testCancelFromBeginIOWait());
+}
+
+main();

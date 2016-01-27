@@ -162,12 +162,19 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // Wait for pending external thread events...
     if (!m_externalThreadEvents.empty()) {
       // ...but only until the next sleeper (from any context) finishes.
-      auto waketime = session->sleepWakeTime();
 
       // Wait if necessary.
       if (LIKELY(!ete_queue->hasReceived())) {
         onIOWaitEnter(session);
-        ete_queue->receiveSomeUntil(waketime);
+        // check if onIOWaitEnter callback unblocked any wait handles
+        if (LIKELY(m_runnableQueue.empty() &&
+                   m_fastRunnableQueue.empty() &&
+                   !m_externalThreadEvents.empty() &&
+                   !ete_queue->hasReceived() &&
+                   m_priorityQueueDefault.empty())) {
+          auto waketime = session->sleepWakeTime();
+          ete_queue->receiveSomeUntil(waketime);
+        }
         onIOWaitExit(session);
       }
 
@@ -187,7 +194,13 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // be ready (in any context).
     if (!m_sleepEvents.empty()) {
       onIOWaitEnter(session);
-      std::this_thread::sleep_until(session->sleepWakeTime());
+      // check if onIOWaitEnter callback unblocked any wait handles
+      if (LIKELY(m_runnableQueue.empty() &&
+                 m_fastRunnableQueue.empty() &&
+                 m_externalThreadEvents.empty() &&
+                 m_priorityQueueDefault.empty())) {
+        std::this_thread::sleep_until(session->sleepWakeTime());
+      }
       onIOWaitExit(session);
 
       session->processSleepEvents();

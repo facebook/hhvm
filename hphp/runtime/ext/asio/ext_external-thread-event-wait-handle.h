@@ -56,6 +56,7 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   ObjectData* getPrivData() { return m_privData.get(); }
 
   void abandon(bool sweeping);
+  bool cancel(const Object& exception);
   void process();
   String getName();
   void exitContext(context_idx_t ctx_idx);

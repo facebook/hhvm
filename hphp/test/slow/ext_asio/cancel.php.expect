@@ -1,0 +1,38 @@
+=== testCancelInvalidAwaitables ===
+ok
+ok
+=== testCancelBeforeAwait ===
+bool(true)
+before await
+after await
+operation was canceled
+=== testCancelAfterAwait ===
+before await
+after await
+bool(true)
+bool(true)
+bool(true)
+=== testCancelDuringAwait ===
+before await
+bool(true)
+after await
+operation was canceled
+=== testCancelFromBeginIOWait ===
+before await
+io wait enter
+bool(true)
+io wait exit
+operation was canceled
+after await
+=== testCancelDuringAwait ===
+before await
+bool(true)
+after await
+operation was canceled
+=== testCancelFromBeginIOWait ===
+before await
+io wait enter
+bool(true)
+io wait exit
+operation was canceled
+after await

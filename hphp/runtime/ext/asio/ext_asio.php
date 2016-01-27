@@ -425,4 +425,16 @@ function has_finished<T>(Awaitable<T> $awaitable): bool {
   return $awaitable->isFinished();
 }
 
+/**
+ * Cancel Awaitable, if it's still pending.
+ *
+ * If Awaitable has not been completed yet, fails Awaitable with
+ * $exception and returns true.
+ * Otherwise, returns false.
+ *
+ * Throws InvalidArgumentException, if Awaitable does not support cancellation.
+ */
+<<__Native>>
+function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
+
 } // namespace

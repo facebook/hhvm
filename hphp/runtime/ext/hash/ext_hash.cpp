@@ -36,7 +36,6 @@
 #include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/ext/hash/hash_keccak.h"
 #include "hphp/runtime/ext/hash/hash_joaat.h"
-#include "hphp/system/constants.h"
 
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal

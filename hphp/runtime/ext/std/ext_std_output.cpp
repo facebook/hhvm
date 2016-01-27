@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/system/constants.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"

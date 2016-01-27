@@ -36,7 +36,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/system/constants.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
 #ifndef _MSC_VER

@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/user-stream-wrapper.h"
-#include "hphp/system/constants.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
 namespace HPHP {

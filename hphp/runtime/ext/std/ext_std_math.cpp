@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/zend-multiply.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/ext/std/ext_std.h"
-#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/system/constants.h"
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>

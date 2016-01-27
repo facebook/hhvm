@@ -70,7 +70,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/system/constants.h"
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/boot_timer.h"

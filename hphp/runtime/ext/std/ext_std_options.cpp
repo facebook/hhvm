@@ -46,7 +46,6 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/system/constants.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {

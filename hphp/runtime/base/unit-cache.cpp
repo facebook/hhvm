@@ -97,24 +97,29 @@ CachedUnit lookupUnitRepoAuth(const StringData* path) {
     return acc->second;
   }
 
-  /*
-   * Insert path.  Find the Md5 for this path, and then the unit for
-   * this Md5.  If either aren't found we return the
-   * default-constructed cache entry.
-   *
-   * NB: we're holding the CHM lock on this bucket while we're doing
-   * this.
-   */
-  MD5 md5;
-  if (!Repo::get().findFile(path->data(),
-                            RuntimeOption::SourceRoot,
-                            md5)) {
-    return acc->second;
-  }
+  try {
+    /*
+     * Insert path.  Find the Md5 for this path, and then the unit for
+     * this Md5.  If either aren't found we return the
+     * default-constructed cache entry.
+     *
+     * NB: we're holding the CHM lock on this bucket while we're doing
+     * this.
+     */
+    MD5 md5;
+    if (!Repo::get().findFile(path->data(),
+                              RuntimeOption::SourceRoot,
+                              md5)) {
+      return acc->second;
+    }
 
-  acc->second.unit = Repo::get().loadUnit(path->data(), md5).release();
-  if (acc->second.unit) {
-    acc->second.rdsBitId = rds::allocBit();
+    acc->second.unit = Repo::get().loadUnit(path->data(), md5).release();
+    if (acc->second.unit) {
+      acc->second.rdsBitId = rds::allocBit();
+    }
+  } catch (...) {
+    s_repoUnitCache.erase(acc);
+    throw;
   }
   return acc->second;
 }

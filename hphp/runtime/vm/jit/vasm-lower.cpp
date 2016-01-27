@@ -58,7 +58,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   Vout v(unit, scratch, vinstr.origin);
 
   int32_t const adjust = (vargs.stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
-  if (adjust) v << subqi{adjust, rsp(), rsp(), v.makeReg()};
+  if (adjust) v << lea{rsp()[-adjust], rsp()};
 
   // Push stack arguments, in reverse order.
   for (int i = vargs.stkArgs.size() - 1; i >= 0; --i) {
@@ -171,7 +171,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
     auto const delta = safe_cast<int32_t>(
       vargs.stkArgs.size() * sizeof(uintptr_t) + adjust
     );
-    v << addqi{delta, rsp(), rsp(), v.makeReg()};
+    v << lea{rsp()[delta], rsp()};
   }
 
   // Insert new instructions to the appropriate block.

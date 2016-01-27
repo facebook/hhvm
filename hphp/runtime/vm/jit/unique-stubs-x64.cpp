@@ -112,7 +112,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
 
       // Drop our call frame; the stublogue{} instruction guarantees that this
       // is exactly 16 bytes.
-      v << addqi{16, rsp(), rsp(), v.makeReg()};
+      v << lea{rsp()[16], rsp()};
 
       // Sync vmsp and return to the caller.  This unbalances the return stack
       // buffer, but if we're intercepting, we probably don't care.
@@ -121,7 +121,7 @@ TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
     });
 
     // Skip past the stuff we saved for the intercept case.
-    v << addqi{16, rsp(), rsp(), v.makeReg()};
+    v << lea{rsp()[16], rsp()};
 
     // Restore rvmfp() and return to the callee's func prologue.
     v << stubret{RegSet(), true};

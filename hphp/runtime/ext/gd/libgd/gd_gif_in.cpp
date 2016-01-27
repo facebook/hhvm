@@ -3,8 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
-
-#include "php.h"
+#include "gdhelpers.h"
 
 /* Used only when debugging GIF compression code */
 /* #define DEBUGGING_ENVARS */
@@ -355,10 +354,10 @@ GetDataBlock(gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP)
 				sprintf(&tmp[3*sizeof(char)*i], " %02x", buf[i]);
 			}
 		} else {
-			tmp = estrdup("");
+			tmp = gdEstrdup("");
 		}
 		php_gd_error_ex(E_NOTICE, "[GetDataBlock returning %d: %s]", rv, tmp);
-		efree(tmp);
+		gdFree(tmp);
 	}
 	return(rv);
 }

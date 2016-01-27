@@ -13,42 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef HPHP_DWARF_H_
 #define HPHP_DWARF_H_
 
-#include <string>
+#include "hphp/runtime/vm/jit/translator.h"
 
 #include <folly/Optional.h>
 
-#include "hphp/runtime/vm/jit/translator.h"
+#include <string>
+#include <vector>
+
 #ifndef _MSC_VER
 #include <libdwarf.h>
 #include <dwarf.h>
 #else
-// We don't have libdwarf, so stub it out.
-typedef void* Dwarf_Ptr;
-typedef uint32_t Dwarf_Unsigned;
-
-#define DW_EH_PE_absptr 0
-
-#define DW_CFA_def_cfa 0
-#define DW_CFA_offset 0
-#define DW_CFA_offset_extended_sf 0
-#define DW_CFA_same_value 0
-#define DW_CFA_set_loc 0
-#define DW_CFA_val_expression 0
-
-#define DW_OP_breg7 0
-#define DW_OP_const4s 0
-#define DW_OP_deref_size 0
-#define DW_OP_dup 0
-#define DW_OP_mul 0
-#define DW_OP_plus 0
+#include "hphp/runtime/vm/debug/dwarf-msvc.h"
 #endif
-#include <vector>
 
-namespace HPHP {
-namespace Debug {
+namespace HPHP { namespace Debug {
 
 using jit::TCA;
 
@@ -215,7 +198,6 @@ struct DwarfInfo {
   void syncChunks();
 };
 
-}
-}
+}}
 
 #endif

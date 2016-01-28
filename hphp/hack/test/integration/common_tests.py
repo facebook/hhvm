@@ -30,11 +30,14 @@ class CommonSaveStateTests(object):
         cls.tmp_dir = tempfile.mkdtemp()
         cls.hh_tmp_dir = tempfile.mkdtemp()
         cls.saved_state_name = 'foo'
+        hh_server_dir = os.path.dirname(hh_server)
         cls.test_env = dict(os.environ, **{
             'HH_TEST_MODE': '1',
             'HH_TMPDIR': cls.hh_tmp_dir,
-            'PATH': '%s:/bin:/usr/bin:/usr/local/bin' % cls.tmp_dir,
+            'PATH': '%s:%s:/bin:/usr/bin:/usr/local/bin' %
+                (hh_server_dir, cls.tmp_dir),
             'OCAMLRUNPARAM': 'b',
+            'HH_LOCALCONF_PATH': cls.repo_dir,
             })
 
         with open(os.path.join(init_dir, '.hhconfig'), 'w') as f:

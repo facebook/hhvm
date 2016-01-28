@@ -78,7 +78,6 @@ load_mini_script = %s
             '20',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
-            env={'HH_LOCALCONF_PATH': self.repo_dir},
             stdin=stdin)
 
     def check_cmd(self, expected_output, stdin=None, options=None):

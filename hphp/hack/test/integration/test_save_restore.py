@@ -65,7 +65,6 @@ load_script = %s
             '20',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
-            env={'HH_LOCALCONF_PATH': self.repo_dir},
             stdin=stdin)
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),

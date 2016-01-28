@@ -31,7 +31,6 @@ class TestFreshInit(common_tests.CommonSaveStateTests, unittest.TestCase):
             '--no-load',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
-            env={'HH_LOCALCONF_PATH': self.repo_dir},
             stdin=stdin)
 
         if retcode == 6 and retries > 0:

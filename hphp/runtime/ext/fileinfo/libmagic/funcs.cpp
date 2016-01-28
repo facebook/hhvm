@@ -358,7 +358,7 @@ file_getbuffer(struct magic_set *ms)
     return NULL;
   }
 
-#if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
+#if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC)
   {
     mbstate_t state;
     wchar_t nextchar;

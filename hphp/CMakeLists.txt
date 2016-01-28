@@ -28,6 +28,9 @@ endif()
 
 include(HPHPSetup)
 include(FollySetup)
+include(HHVMGenerateConfig)
+HHVM_GENERATE_CONFIG("${CMAKE_CURRENT_BINARY_DIR}/hphp-config.h")
+
 if (ENABLE_COTIRE)
   include(cotire)
   FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)

@@ -16,6 +16,7 @@
 #ifndef HPHP_HEAP_SCAN_H
 #define HPHP_HEAP_SCAN_H
 
+#include "hphp/hphp-config.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/object-data.h"

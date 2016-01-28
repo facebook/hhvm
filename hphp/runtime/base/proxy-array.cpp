@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/proxy-array.h"
 
+#include "hphp/hphp-config.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"

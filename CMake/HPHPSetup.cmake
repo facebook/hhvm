@@ -26,7 +26,6 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
    )
 
 if (ENABLE_ZEND_COMPAT)
-  add_definitions("-DENABLE_ZEND_COMPAT=1")
   list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
 endif()
 
@@ -201,24 +200,8 @@ else()
   message("Generating Release build")
 endif()
 
-if(DEBUG_MEMORY_LEAK)
-  add_definitions(-DDEBUG_MEMORY_LEAK=1)
-endif()
-
-if(DEBUG_APC_LEAK)
-  add_definitions(-DDEBUG_APC_LEAK=1)
-endif()
-
 if(ALWAYS_ASSERT)
   add_definitions(-DALWAYS_ASSERT=1)
-endif()
-
-if(EXECUTION_PROFILER)
-  add_definitions(-DEXECUTION_PROFILER=1)
-endif()
-
-if(ENABLE_FULL_SETLINE)
-  add_definitions(-DENABLE_FULL_SETLINE=1)
 endif()
 
 if(APPLE OR FREEBSD OR CYGWIN OR MSVC OR MINGW)
@@ -243,17 +226,9 @@ if(APPLE)
   add_definitions(-DMACOSX_DEPLOYMENT_TARGET=10.6)
 endif()
 
-if(ENABLE_FASTCGI)
-  add_definitions(-DENABLE_FASTCGI=1)
-endif ()
-
 if(DISABLE_HARDWARE_COUNTERS OR NOT LINUX)
   add_definitions(-DNO_HARDWARE_COUNTERS=1)
 endif ()
-
-if(ENABLE_AVX2)
-  add_definitions(-DENABLE_AVX2=1)
-endif()
 
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)

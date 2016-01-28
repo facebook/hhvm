@@ -399,6 +399,9 @@ struct JEMallocInitializer {
     dummy += "!";         // so the definition of dummy isn't optimized out
 #endif  /* __GLIBC__ */
 
+    // Enable backtracing through PHP frames (t9814472).
+    setenv("UNW_RBP_ALWAYS_VALID", "1", false);
+
     initNuma();
 
     // Create a special arena to be used for allocating objects in low memory.

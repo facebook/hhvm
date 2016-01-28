@@ -36,7 +36,7 @@ else
         if [ -f "$root/fbcode/.projectid" ]; then
           root="$root/fbcode"
         fi
-        compiler="hg log -l1 -r'reverse(::.) & file(\"$root/**\")' -T'{branch}-0-g{sub(r\"^\$\",node,mirrornode(\"fbcode\",\"git\"))}\n' 2> /dev/null"
+        compiler="hg --config trusted.users='*' log -l1 -r'reverse(::.) & file(\"$root/**\")' -T'{branch}-0-g{sub(r\"^\$\",node,mirrornode(\"fbcode\",\"git\"))}\n' 2> /dev/null"
         find_files="hg files -I hphp/"
         alias scm_update='hg pull && hg rebase -d master'
     else

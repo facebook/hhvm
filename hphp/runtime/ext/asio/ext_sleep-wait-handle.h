@@ -39,7 +39,8 @@ class c_SleepWaitHandle final : public c_WaitableWaitHandle {
   ~c_SleepWaitHandle() {}
 
  public:
-  void process();
+  bool cancel(const Object& exception);
+  bool process();
   String getName();
   void exitContext(context_idx_t ctx_idx);
   AsioSession::TimePoint getWakeTime() const { return m_waketime; };

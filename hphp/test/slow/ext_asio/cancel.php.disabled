@@ -69,8 +69,8 @@ function testCancelInvalidAwaitables() {
   }
 }
 
-async function testCancelBeforeAwait(): Awaitable<void> {
-  echo "=== testCancelBeforeAwait ===\n";
+async function testCancelExternalThreadEventBeforeAwait(): Awaitable<void> {
+  echo "=== testCancelExternalThreadEventBeforeAwait ===\n";
   $awaitable = new CatAwaitable();
   $wh = $awaitable->getWaitHandle();
   var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
@@ -95,8 +95,8 @@ async function testCancelBeforeAwait(): Awaitable<void> {
   $awaitable->close();
 }
 
-async function testCancelAfterAwait(): Awaitable<void> {
-  echo "=== testCancelAfterAwait ===\n";
+async function testCancelExternalThreadEventAfterAwait(): Awaitable<void> {
+  echo "=== testCancelExternalThreadEventAfterAwait ===\n";
   $awaitable = new CatAwaitable();
   $wh = $awaitable->getWaitHandle();
   $completion = async {
@@ -121,8 +121,8 @@ async function testCancelAfterAwait(): Awaitable<void> {
   $awaitable->close();
 }
 
-async function testCancelDuringAwait(): Awaitable<void> {
-  echo "=== testCancelDuringAwait ===\n";
+async function testCancelExternalThreadEventDuringAwait(): Awaitable<void> {
+  echo "=== testCancelExternalThreadEventDuringAwait ===\n";
   $awaitable = new CatAwaitable();
   $wh = $awaitable->getWaitHandle();
   $completion = async {
@@ -150,8 +150,8 @@ async function testCancelDuringAwait(): Awaitable<void> {
   $awaitable->close();
 }
 
-async function testCancelFromBeginIOWait(): Awaitable<void> {
-  echo "=== testCancelFromBeginIOWait ===\n";
+async function testCancelExternalThreadEventFromBeginIOWait(): Awaitable<void> {
+  echo "=== testCancelExternalThreadEventFromBeginIOWait ===\n";
   $awaitable = new CatAwaitable();
   $wh = $awaitable->getWaitHandle();
 
@@ -182,16 +182,91 @@ async function testCancelFromBeginIOWait(): Awaitable<void> {
   $awaitable->close();
 }
 
+async function testCancelSleepBeforeAwait(): Awaitable<void> {
+  echo "=== testCancelSleepBeforeAwait ===\n";
+  $wh = SleepWaitHandle::create(30000000);
+  var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
+  echo "before await\n";
+  try {
+    await $wh;
+    echo "this should not happen!\n";
+  } catch (OperationCanceledException $e) {
+    echo "operation was canceled\n";
+  }
+  echo "after await\n";
+
+}
+
+async function testCancelSleepAfterAwait(): Awaitable<void> {
+  echo "=== testCancelSleepAfterAwait ===\n";
+  $wh = SleepWaitHandle::create(100);
+  echo "before await\n";
+  await $wh;
+  echo "after await\n";
+  var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == false);
+  var_dump(HH\Asio\has_finished($wh));
+  await $wh;
+}
+
+async function testCancelSleepDuringAwait(): Awaitable<void> {
+  echo "=== testCancelSleepDuringAwait ===\n";
+  $wh = SleepWaitHandle::create(30000000);
+  $cancelation = async {
+    await reschedule(0);
+    var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
+  };
+  echo "before await\n";
+  $resv = await HH\Asio\vw(ImmVector {
+      $wh,
+      $cancelation,
+  });
+  echo "after await\n";
+
+  try {
+    $res = $resv[0]->getResult();
+    echo "this should not happen\n";
+  } catch (OperationCanceledException $e) {
+    echo "operation was canceled\n";
+  }
+}
+
+async function testCancelSleepFromBeginIOWait(): Awaitable<void> {
+  echo "=== testCancelSleepFromBeginIOWait ===\n";
+  $wh = SleepWaitHandle::create(30000000);
+
+  WaitHandle::setOnIOWaitEnterCallback(function() use ($wh) {
+      echo "io wait enter\n";
+      var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
+    });
+  WaitHandle::setOnIOWaitExitCallback(function() {
+      echo "io wait exit\n";
+    });
+
+  echo "before await\n";
+  try {
+    $res = await $wh;
+    echo "this should not happen!\n";
+  } catch (OperationCanceledException $e) {
+    echo "operation was canceled\n";
+  }
+  echo "after await\n";
+
+  WaitHandle::setOnIOWaitEnterCallback(null);
+  WaitHandle::setOnIOWaitExitCallback(null);
+}
+
 function main() {
   testCancelInvalidAwaitables();
 
-  HH\Asio\join(testCancelBeforeAwait());
-  HH\Asio\join(testCancelAfterAwait());
-  HH\Asio\join(testCancelDuringAwait());
-  HH\Asio\join(testCancelFromBeginIOWait());
+  HH\Asio\join(testCancelExternalThreadEventBeforeAwait());
+  HH\Asio\join(testCancelExternalThreadEventAfterAwait());
+  HH\Asio\join(testCancelExternalThreadEventDuringAwait());
+  HH\Asio\join(testCancelExternalThreadEventFromBeginIOWait());
 
-  HH\Asio\join(testCancelDuringAwait());
-  HH\Asio\join(testCancelFromBeginIOWait());
+  HH\Asio\join(testCancelSleepBeforeAwait());
+  HH\Asio\join(testCancelSleepAfterAwait());
+  HH\Asio\join(testCancelSleepDuringAwait());
+  HH\Asio\join(testCancelSleepFromBeginIOWait());
 }
 
 main();

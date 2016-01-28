@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/systemlib.h"
@@ -71,6 +72,8 @@ bool HHVM_FUNCTION(cancel, const Object& obj, const Object& exception) {
   switch(handle->getKind()) {
     case c_WaitHandle::Kind::ExternalThreadEvent:
       return handle->asExternalThreadEvent()->cancel(exception);
+    case c_WaitHandle::Kind::Sleep:
+      return handle->asSleep()->cancel(exception);
     default:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Cancellation unsupported for " +

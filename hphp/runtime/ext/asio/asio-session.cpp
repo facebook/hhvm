@@ -396,8 +396,9 @@ bool AsioSession::processSleepEvents() {
     if (wh->getWakeTime() > now) {
       break;
     }
-    woken = true;
-    wh->process();
+    if (wh->process()) {
+      woken = true;
+    }
     decRefObj(wh);
     std::pop_heap(m_sleepEvents.begin(), m_sleepEvents.end(), sleep_compare);
     m_sleepEvents.pop_back();

@@ -1,35 +1,45 @@
 === testCancelInvalidAwaitables ===
 ok
 ok
-=== testCancelBeforeAwait ===
+=== testCancelExternalThreadEventBeforeAwait ===
 bool(true)
 before await
 after await
 operation was canceled
-=== testCancelAfterAwait ===
+=== testCancelExternalThreadEventAfterAwait ===
 before await
 after await
 bool(true)
 bool(true)
 bool(true)
-=== testCancelDuringAwait ===
+=== testCancelExternalThreadEventDuringAwait ===
 before await
 bool(true)
 after await
 operation was canceled
-=== testCancelFromBeginIOWait ===
+=== testCancelExternalThreadEventFromBeginIOWait ===
 before await
 io wait enter
 bool(true)
 io wait exit
 operation was canceled
 after await
-=== testCancelDuringAwait ===
+=== testCancelSleepBeforeAwait ===
+bool(true)
+before await
+operation was canceled
+after await
+=== testCancelSleepAfterAwait ===
+before await
+after await
+bool(true)
+bool(true)
+=== testCancelSleepDuringAwait ===
 before await
 bool(true)
 after await
 operation was canceled
-=== testCancelFromBeginIOWait ===
+=== testCancelSleepFromBeginIOWait ===
 before await
 io wait enter
 bool(true)

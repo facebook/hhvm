@@ -90,6 +90,8 @@ struct AsioSession final {
   // Sleep event management.
   void enqueueSleepEvent(c_SleepWaitHandle* h);
   bool processSleepEvents();
+  // Wakeup time of next sleep wait handle or request timeout time.
+  // The returned timestamp may correspond to canceled wait handle.
   TimePoint sleepWakeTime();
 
   // Abrupt interrupt exception.

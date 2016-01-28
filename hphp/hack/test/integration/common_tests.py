@@ -126,10 +126,6 @@ assume_php = false""")
             self.repo_dir
         ])
 
-        # Monitor polls every second, so can take up to 2 cycles to detect
-        # typechecker exit.
-        time.sleep(2)
-
         for p in glob.glob(os.path.join(self.repo_dir, '*')):
             os.remove(p)
 

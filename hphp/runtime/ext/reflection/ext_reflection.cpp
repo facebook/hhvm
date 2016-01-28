@@ -467,12 +467,8 @@ Array HHVM_FUNCTION(type_structure,
   if (!cns_sd) {
     auto name = cls_or_obj.toString();
 
-    auto ne = NamedEntity::get(name.get(), /* allowCreate = */ false);
-    if (!ne) {
-      raise_error("Non-existent type alias %s", name.get()->data());
-    }
+    auto const typeAlias = Unit::loadTypeAlias(name.get());
 
-    auto const typeAlias = ne->getCachedTypeAlias();
     if (!typeAlias) {
       raise_error("Non-existent type alias %s", name.get()->data());
     }
@@ -1779,10 +1775,8 @@ const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
 // helper for __construct:
 // caller throws exception when return value is false
 static bool HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
-  auto ne = NamedEntity::get(name.get(), /* allowCreate = */ false);
-  if (!ne) return false;
+  auto const typeAliasReq = Unit::loadTypeAlias(name.get());
 
-  auto const typeAliasReq = ne->getCachedTypeAlias();
   if (!typeAliasReq) return false;
 
   ReflectionTypeAliasHandle::Get(this_)->setTypeAliasReq(typeAliasReq);

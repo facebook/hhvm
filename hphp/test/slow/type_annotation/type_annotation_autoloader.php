@@ -9,10 +9,13 @@ HH\autoload_set_paths(
     'class' => Map {
       'testautoloadedclass1' => 'type_annotation_autoloader-1.inc',
       'testautoloadedclass2' => 'type_annotation_autoloader-1.inc',
+      'testfoo' => 'type_annotation_autoloader-3.inc',
     },
     'type' => Map {
       'testautoloadedtype1' => 'type_annotation_autoloader-2.inc',
       'testautoloadedtype2' => 'type_annotation_autoloader-2.inc',
+      'testreflectiontypealias' => 'type_annotation_autoloader-3.inc',
+      'testtypestructuretypealias' => 'type_annotation_autoloader-4.inc',
     },
     'failure' => fun('autoload_miss'),
   },
@@ -48,3 +51,9 @@ type_structure(AutoloadType1::class);
 
 type AutoloadType2 = TestAutoloadedType2;
 type_structure(AutoloadType2::class);
+
+// ReflectionTypeAlias should autoload the alias it references
+new ReflectionTypeAlias(TestReflectionTypeAlias::class);
+
+// type_structure() should autoload the alias it references
+type_structure(TestTypeStructureTypeAlias::class);

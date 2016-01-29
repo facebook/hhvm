@@ -55,7 +55,7 @@ folly::Optional<int32_t> phys_reg_index(Vreg reg) {
  * either copying or lea'ing off another register.  The `base' register is not
  * necessarily a virtual register.
  */
-struct RegInfo { Vreg base; intptr_t disp; };
+struct RegInfo { Vreg base; int32_t disp; };
 
 DEBUG_ONLY std::string show(RegInfo x) {
   return folly::sformat("{} + {}", show(x.base), x.disp);

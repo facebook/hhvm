@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/service-data.h"
 
@@ -89,7 +90,9 @@ protected:
     bool error = true;
     std::string errorMsg;
 
-    assertx(MM().empty());
+    // rpc threads keep things live between requests, but other
+    // requests should not have allocated anything yet.
+    assertx(vmStack().isAllocated() || MM().empty());
 
     SCOPE_EXIT { m_handler->teardownRequest(transport); };
 

@@ -50,8 +50,9 @@ import optparse
 from . import templates
 
 class ConverterTestGenerator:
-    def __init__(self, options, prefix, changeHH):
+    def __init__(self, options, binary, prefix, changeHH):
         self.options = options
+        self.binary = binary
         self.prefix = prefix
         self.compute_paths()
         self.changeHH = changeHH
@@ -59,10 +60,6 @@ class ConverterTestGenerator:
     def compute_paths(self):
         self.input_dir = os.path.join(self.options.test_dir, self.prefix + 'input')
         self.output_dir = os.path.join(self.options.test_dir, self.prefix + 'output')
-        self.bin_name = getattr(self.options, self.prefix + 'binary')
-        self.bin_path = os.path.join(
-            self.options.bin_dir,
-            self.bin_name)
 
     def find_input_files(self):
         input_files = {}
@@ -94,8 +91,8 @@ class ConverterTestGenerator:
         class_name = (self.prefix + dirname).replace(' ', '_').title()
         class_str = templates.CLASS_TMPL.substitute(
             name=class_name,
-            bin_path=self.bin_path,
-            bin_name=self.bin_name,
+            bin_path=self.binary,
+            bin_name=os.path.basename(self.binary),
             code_dir=self.options.code_dir,
             changeHH=self.changeHH,
             additional_opts=files.get('__opts', ''),
@@ -135,15 +132,12 @@ class HHVMCollectionTestGenerator:
         self.options = options
 
     def generate(self):
-        bin_path = os.path.join(
-            self.options.bin_dir,
-            self.options.binary)
         test_input_dir = os.path.join(
             self.options.fbcode_dir,
             "hphp/test/slow/collection_classes/")
 
         return templates.HHVM_COLL_TEST_TMPL.substitute(
-            bin_path=bin_path,
+            bin_path=self.options.binary,
             code_dir=self.options.code_dir,
             test_input_dir=test_input_dir)
 
@@ -152,15 +146,12 @@ class HackTestInputTestGenerator:
         self.options = options
 
     def generate(self):
-        bin_path = os.path.join(
-            self.options.bin_dir,
-            self.options.binary)
         test_input_dir = os.path.join(
             self.options.fbcode_dir,
             "hphp/hack/test/typecheck/")
 
         return templates.HACK_TEST_INPUT_TEST_TMPL.substitute(
-            bin_path=bin_path,
+            bin_path=self.options.binary,
             code_dir=self.options.code_dir,
             test_input_dir=test_input_dir)
 
@@ -183,23 +174,11 @@ def compute_additional_paths(options):
         options.code_dir
     )
     options.test_dir = os.path.join(options.code_dir, 'test')
-    if options.binary.find("buck-out") < 0:
-        options.gen_file_dir = "%s/test" % options.install_dir
-    else:
-        options.gen_file_dir = "%s/" % options.install_dir
-
+    options.gen_file_dir = "%s/test" % options.install_dir
     options.gen_file_path = os.path.join(
         options.gen_file_dir,
         options.gen_file_name
     )
-    if options.binary.find("buck-out") < 0:
-        options.bin_dir = os.path.join(
-            options.fbcode_dir,
-            '_bin',
-            os.path.relpath(options.code_dir, options.fbcode_dir))
-    else:
-        options.bin_dir = os.path.dirname(options.binary)
-        options.binary = os.path.basename(options.binary)
 
 def mkdir_safe(dirname):
     if not(os.path.isdir(dirname)):
@@ -209,8 +188,9 @@ if __name__ == '__main__':
     options = parse_args()
     compute_additional_paths(options)
     generators = [
-        ConverterTestGenerator(options, "", True),
-        ConverterTestGenerator(options, "unparser_", False),
+        ConverterTestGenerator(options, options.binary, "", True),
+        ConverterTestGenerator(options, options.unparser_binary, "unparser_",
+            False),
         HHVMCollectionTestGenerator(options),
         HackTestInputTestGenerator(options),
     ]

@@ -6,14 +6,7 @@ ME_="$(basename $0)"
 warn () { printf '%s\n' "$*" >&2; }
 die () { warn "$ME_: $*"; exit 1; }
 
-# The sole argument must be the name of a directory in which
-# an h2tp binary resides.
-case $# in 1);; *) die "missing dir name argument";; esac
-path_dir=$(dirname $1)
-test -d "$path_dir" || die "not a directory: $path_dir"
-test -x "$path_dir/h2tp" || die "no h2tp binary in $path_dir"
-PATH="$path_dir:$PATH"
-export PATH
+h2tp=$1
 
 dir=
 
@@ -39,5 +32,5 @@ printf '%s\n' '<?hh' 'echo("hello");' > "$f"
 printf '%s\n' '<?php' 'require_once ($GLOBALS["HACKLIB_ROOT"]);' \
   'echo ("hello");' > $dir/exp-out
 
-h2tp "$in_dir" "$out_dir" > $dir/stdout
+$h2tp "$in_dir" "$out_dir" > $dir/stdout
 diff -u "$out_dir/bad file.php" $dir/exp-out

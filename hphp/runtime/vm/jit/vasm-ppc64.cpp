@@ -153,7 +153,7 @@ struct Vgen {
   // TODO(gut): move them to lower if rsp() manipulation is exclusively allowed
   // in lea and not anymore in addqi and subqi
   void emit(const addqi& i) {
-    if (i.s0.fits(HPHP::sz::word)) {
+    if (i.s0.fits(sz::word)) {
       a->li(rAsm, i.s0);
     } else {
       a->li32(rAsm, i.s0.l());
@@ -161,7 +161,7 @@ struct Vgen {
     a->addo(i.d, i.s1, rAsm, true);
   }
   void emit(const subqi& i) {
-    if (i.s0.fits(HPHP::sz::word)) {
+    if (i.s0.fits(sz::word)) {
       a->li(rAsm, i.s0);
     } else {
       a->li32(rAsm, i.s0.l());
@@ -254,7 +254,7 @@ struct Vgen {
   void emit(const not& i) { a->nor(i.d, i.s, i.s, false); }
   void emit(const orq& i) { a->or(i.d, i.s0, i.s1, true); }
   void emit(const orqi& i) {
-    if (i.s0.fits(HPHP::sz::word)) {
+    if (i.s0.fits(sz::word)) {
       a->li(rAsm,i.s0);
     } else {
       a->li32(rAsm,i.s0.l());
@@ -353,7 +353,7 @@ struct Vgen {
   }
   void emit(const xorq& i) { a->xor(i.d, i.s0, i.s1, true); }
   void emit(const xorqi& i) {
-    if (i.s0.fits(HPHP::sz::word)) {
+    if (i.s0.fits(sz::word)) {
       a->li(rAsm, i.s0);
     } else {
       a->li32(rAsm, i.s0.l());
@@ -732,7 +732,7 @@ void Vgen::emit(const tailcallstub& i) {
  */
 void lowerImm(Immed imm, Vout& v, Vreg& tmpRegister) {
   tmpRegister = v.makeReg();
-  if (imm.fits(HPHP::sz::word)) {
+  if (imm.fits(sz::word)) {
     v << ldimmw{imm, tmpRegister};
   } else {
     v << ldimml{imm, tmpRegister};
@@ -744,7 +744,7 @@ void lowerImm(Immed imm, Vout& v, Vreg& tmpRegister) {
  * need to be loaded into a register in order to be used.
  */
 bool patchImm(Immed imm, Vout& v, Vreg& tmpRegister) {
-  if (!imm.fits(HPHP::sz::word)) {
+  if (!imm.fits(sz::word)) {
     tmpRegister = v.makeReg();
     v << ldimml{imm, tmpRegister};
     return true;
@@ -1038,10 +1038,8 @@ void lowerForPPC64(Vout& v, callm& inst) {
 
 void lowerForPPC64(Vout& v, loadqp& inst) {
   // in PPC we don't have anything like a RIP register
-  // RIP register uses a absolute address so we can perform a baseless load in
-  // this case
-  Vptr p = baseless(inst.s.r.disp);
-  patchVptr(p, v);
+  // RIP register uses an absolute displacement address. Load it to a register
+  Vptr p(v.cns(inst.s.r.disp), 0); // this Vptr doesn't need patch
   v << load{p, inst.d};
 }
 

@@ -106,7 +106,7 @@ ADDS
 
 #undef ADDS
 
-void Assembler::addi(const Reg64& rt, const Reg64& ra, Immed64 imm) {
+void Assembler::addi(const Reg64& rt, const Reg64& ra, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(14, rn(rt), rn(ra), imm.w());
 }
@@ -115,7 +115,7 @@ void Assembler::addic(const Reg64& rt, const Reg64& ra, uint16_t imm, bool rc) {
   EmitDForm(12 + (uint8_t) rc, rn(rt), rn(ra), imm);
 }
 
-void Assembler::addis(const Reg64& rt, const Reg64& ra, Immed64 imm) {
+void Assembler::addis(const Reg64& rt, const Reg64& ra, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(15, rn(rt), rn(ra), imm.w());
 }
@@ -130,12 +130,12 @@ void Assembler::andc(const Reg64& ra, const Reg64& rs, const Reg64& rb,
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 60, rc);
 }
 
-void Assembler::andi(const Reg64& ra, const Reg64& rs, Immed64 imm) {
+void Assembler::andi(const Reg64& ra, const Reg64& rs, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(28, rn(rs), rn(ra), imm.w());
 }
 
-void Assembler::andis(const Reg64& ra, const Reg64& rs, Immed64 imm) {
+void Assembler::andis(const Reg64& ra, const Reg64& rs, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(29, rn(rs), rn(ra), imm.w());
 }
@@ -204,7 +204,7 @@ void Assembler::cmp(uint16_t bf, bool l, const Reg64& ra, const Reg64& rb) {
   EmitXForm(31, rn((bf+(uint16_t)l) & 0x1d), rn(ra), rn(rb), 0);
 }
 
-void Assembler::cmpi(uint16_t bf, bool l, const Reg64& ra, Immed64 imm) {
+void Assembler::cmpi(uint16_t bf, bool l, const Reg64& ra, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(11, rn((bf+(uint16_t)l) & 0x1d), rn(ra), imm.w());
 }
@@ -217,7 +217,7 @@ void Assembler::cmpl(uint16_t bf, bool l, const Reg64& ra, const Reg64& rb) {
   EmitXForm(31, rn((bf+(uint16_t)l) & 0x1d), rn(ra), rn(rb), 32);
 }
 
-void Assembler::cmpli(uint16_t bf, bool l, const Reg64& ra, Immed64 imm) {
+void Assembler::cmpli(uint16_t bf, bool l, const Reg64& ra, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(10, rn((bf+(uint16_t)l) & 0x1d), rn(ra), imm.w());
 }
@@ -441,12 +441,12 @@ void Assembler::orc(const Reg64& ra, const Reg64& rs, const Reg64& rb,
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 412, rc);
 }
 
-void Assembler::ori(const Reg64& ra, const Reg64& rs, Immed64 imm) {
+void Assembler::ori(const Reg64& ra, const Reg64& rs, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(24, rn(rs), rn(ra), imm.w());
 }
 
-void Assembler::oris(const Reg64& ra, const Reg64& rs, Immed64 imm) {
+void Assembler::oris(const Reg64& ra, const Reg64& rs, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(25, rn(rs), rn(ra), imm.w());
 }
@@ -674,12 +674,12 @@ void Assembler::xor(const Reg64& ra, const Reg64& rs, const Reg64& rb,
   EmitXForm(31, rn(rs), rn(ra), rn(rb), 316, rc);
 }
 
-void Assembler::xori(const Reg64& ra, const Reg64& rs, Immed64 imm) {
+void Assembler::xori(const Reg64& ra, const Reg64& rs, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(26, rn(rs), rn(ra), imm.w());
 }
 
-void Assembler::xoris(const Reg64& ra, const Reg64& rs, Immed64 imm) {
+void Assembler::xoris(const Reg64& ra, const Reg64& rs, Immed imm) {
   assert(imm.fits(HPHP::sz::word) && "Immediate is too big");
   EmitDForm(27, rn(rs), rn(ra), imm.w());
 }

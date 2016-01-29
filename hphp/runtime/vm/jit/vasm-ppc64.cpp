@@ -743,17 +743,13 @@ void lowerImm(Immed imm, Vout& v, Vreg& tmpRegister) {
  * Native ppc64 instructions can't handle an immediate bigger than 16 bits and
  * need to be loaded into a register in order to be used.
  */
-bool patchImm(Immed64 imm, Vout& v, Vreg& tmpRegister) {
-  if (imm.fits(HPHP::sz::word)) {
-    return false;
-  } else if (imm.fits(HPHP::sz::dword)) {
+bool patchImm(Immed imm, Vout& v, Vreg& tmpRegister) {
+  if (!imm.fits(HPHP::sz::word)) {
     tmpRegister = v.makeReg();
-    v << ldimml{imm.l(), tmpRegister};
+    v << ldimml{imm, tmpRegister};
     return true;
   } else {
-    tmpRegister = v.makeReg();
-    v << ldimmq{imm, tmpRegister};
-    return true;
+    return false;
   }
 }
 
@@ -796,7 +792,7 @@ void patchVptr(Vptr& p, Vout& v) {
 
   // taking care of the displacement, in case it is > 16bits
   Vreg disp_reg;
-  bool patched_disp = patchImm(p.disp, v, disp_reg);
+  bool patched_disp = patchImm(Immed(p.disp), v, disp_reg);
   switch (mode) {
     case AddressModes::Base:
     case AddressModes::IndexBase:
@@ -836,8 +832,7 @@ void patchVptr(Vptr& p, Vout& v) {
       if (patched_disp) {
         v << addq{disp_reg, p.index, index_disp_reg, VregSF(RegSF{0})};
       } else {
-        Immed disp = static_cast<int16_t>(p.disp);  // not patched so it fits
-        v << addqi{disp, p.index, index_disp_reg, VregSF(RegSF{0})};
+        v << addqi{p.disp, p.index, index_disp_reg, VregSF(RegSF{0})};
       }
       p.index = index_disp_reg;
       p.disp = 0;

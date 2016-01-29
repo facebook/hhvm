@@ -352,7 +352,7 @@ void HttpServer::waitForServers() {
 
 static void exit_on_timeout(int sig) {
   signal(sig, SIG_DFL);
-  kill(getpid(), SIGKILL);
+  kill((pid_t)getpid(), SIGKILL);
   // we really shouldn't get here, but who knows.
   // abort so we catch it as a crash.
   abort();

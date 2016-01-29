@@ -225,7 +225,11 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
     m_thread = 0;
     notify();
   } else {
+#ifdef _MSC_VER
+    m_thread = (int64_t)pthread_getw32threadid_np(Process::GetThreadId());
+#else
     m_thread = (int64_t)Process::GetThreadId();
+#endif
   }
   TRACE(2, "Current thread is now %" PRIx64 "\n", m_thread);
 }
@@ -539,7 +543,11 @@ static void append_stderr(const char *header, const char *msg,
 DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
   TRACE(2, "DebuggerProxy::createThreadInfo\n");
   DThreadInfoPtr info(new DThreadInfo());
+#ifdef _MSC_VER
+  info->m_id = (int64_t)pthread_getw32threadid_np(Process::GetThreadId());
+#else
   info->m_id = (int64_t)Process::GetThreadId();
+#endif
   info->m_desc = desc;
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -785,7 +793,12 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   // other threads which may hit interrupts while we're running,
   // since nested processInterrupt() calls would normally release
   // other threads on the way out.
+#ifdef _MSC_VER
+  assert(m_thread ==
+         (int64_t)pthread_getw32threadid_np(Process::GetThreadId()));
+#else
   assert(m_thread == (int64_t)Process::GetThreadId());
+#endif
   ThreadMode origThreadMode = m_threadMode;
   switchThreadMode(Sticky, m_thread);
   if (flags & ExecutePHPFlagsAtInterrupt) enableSignalPolling();

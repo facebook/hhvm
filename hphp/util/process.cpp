@@ -387,7 +387,7 @@ void Process::Daemonize(const char *stdoutFile /* = "/dev/null" */,
   pid_t pid, sid;
 
   /* already a daemon */
-  if (getppid() == 1) return;
+  if (getppid() == (pid_t)1) return;
 
 #ifdef _MSC_VER
   // We are Windows, fear us!
@@ -497,7 +497,7 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
       if (converted == ccmd && filename.find("/proc/") == 0) {
         long long pid = atoll(filename.c_str() + strlen("/proc/"));
         if (pid) {
-          pids.push_back(pid);
+          pids.push_back((pid_t)pid);
         }
       }
     }

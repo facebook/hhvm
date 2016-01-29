@@ -20,6 +20,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include <folly/Portability.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +35,7 @@ void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
-      m_threadStack(nullptr), m_threadId(0),
+      m_threadStack(nullptr), m_threadId({}),
       m_exception(nullptr), m_node(0),
       m_stopped(false), m_noInitFini(false) {
 }
@@ -104,7 +106,7 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
 
   void *ret = nullptr;
   pthread_join(m_threadId, &ret);
-  m_threadId = 0;
+  m_threadId = {};
 
   if (m_threadStack != nullptr) {
     size_t guardsize;

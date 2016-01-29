@@ -33,6 +33,8 @@
 
 #include <tbb/concurrent_hash_map.h>
 
+#include <folly/Portability.h>
+
 #include "hphp/util/portability.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/rank.h"
@@ -216,7 +218,11 @@ class ReadWriteMutex {
  * implementation tends to do crazy things when a rwlock is double-wlocked,
  * so check and assert early in debug builds.
  */
-  static constexpr pthread_t InvalidThread = (pthread_t)0;
+#ifdef MSVC_NO_STATIC_INCLASS_CONSTEXPR_INITIALIZATION
+  static const pthread_t InvalidThread;
+#else
+  static constexpr pthread_t InvalidThread = {};
+#endif
   pthread_t m_writeOwner;
   Rank m_rank;
 #endif
@@ -301,6 +307,12 @@ private:
 
   pthread_rwlock_t m_rwlock;
 };
+
+#if defined(DEBUG) && defined(MSVC_NO_STATIC_INCLASS_CONSTEXPR_INITIALIZATION)
+// Do this as COMDAT to avoid needing to create mutex.cpp just
+// for this workaround.
+__declspec(selectany) const pthread_t ReadWriteMutex::InvalidThread = {};
+#endif
 
 /*
  * A ranked wrapper around tbb::concurrent_hash_map.

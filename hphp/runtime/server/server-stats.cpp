@@ -613,7 +613,12 @@ void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
     }
 
     w->beginObject("thread");
+#ifdef _MSC_VER
+    w->writeEntry("id",
+      (int64_t)pthread_getw32threadid_np(Process::GetThreadId()));
+#else
     w->writeEntry("id", (int64_t)ts.m_threadId);
+#endif
     w->writeEntry("tid", (int64_t)ts.m_threadPid);
     w->writeEntry("req", ts.m_requestCount);
     w->writeEntry("bytes", ts.m_writeBytes);

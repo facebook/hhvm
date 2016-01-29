@@ -185,9 +185,15 @@ void startRequest() {
     }
     s_inflightRequests[threadIdx].startTime = correctTime(startTime);
     s_inflightRequests[threadIdx].pthreadId = Process::GetThreadId();
+#ifdef _MSC_VER
+    FTRACE(1, "threadIdx {} pthreadId {} start @gen {}\n", threadIdx,
+           pthread_getw32threadid_np(s_inflightRequests[threadIdx].pthreadId),
+           s_inflightRequests[threadIdx].startTime);
+#else
     FTRACE(1, "threadIdx {} pthreadId {} start @gen {}\n", threadIdx,
            s_inflightRequests[threadIdx].pthreadId,
            s_inflightRequests[threadIdx].startTime);
+#endif
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
       s_oldestRequestInFlight = s_inflightRequests[threadIdx].startTime;
     }

@@ -36,7 +36,11 @@ struct CmdInterrupt : DebuggerCommand {
       , m_program(program ? program : "")
       , m_site(site)
   {
+#ifdef _MSC_VER
+    m_threadId = (int64_t)pthread_getw32threadid_np(Process::GetThreadId());
+#else
     m_threadId = (int64_t)Process::GetThreadId();
+#endif
     if (error) m_errorMsg = error;
   }
 

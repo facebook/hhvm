@@ -83,7 +83,7 @@ public:
    * Process identifier.
    */
   static pid_t GetProcessId() {
-    return getpid();
+    return (pid_t)getpid();
   }
 
   /**
@@ -134,6 +134,8 @@ public:
     // case we will need to revisit this.
 #ifdef __linux__
     return pthread_self();
+#elif defined(_MSC_VER)
+    return (uint64_t)pthread_getw32threadhandle_np(pthread_self());
 #else
     return (uint64_t)pthread_self();
 #endif
@@ -154,7 +156,7 @@ public:
 #elif defined(__CYGWIN__) || defined(__MINGW__)
     return (long)pthread_self();
 #elif defined(_MSC_VER)
-    return GetCurrentThreadId();
+    return (pid_t)GetCurrentThreadId();
 #else
     return syscall(SYS_gettid);
 #endif

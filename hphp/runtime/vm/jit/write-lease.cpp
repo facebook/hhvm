@@ -45,7 +45,11 @@ bool Lease::mayLock(bool f) {
  * DEBUG-only, folks.
  */
 static inline pthread_t gremlinize_threadid(pthread_t tid) {
+#ifdef _MSC_VER
+  return pthread_t{(void*)(~((int64_t)pthread_getw32threadid_np(tid))), 0};
+#else
   return (pthread_t)(~((int64_t)tid));
+#endif
 }
 
 void Lease::gremlinLock() {

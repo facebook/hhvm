@@ -36,7 +36,11 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t HHVM_FUNCTION(hphp_get_thread_id) {
-  return  (unsigned long)Process::GetThreadId();
+#ifdef _MSC_VER
+  return (unsigned long)pthread_getw32threadid_np(Process::GetThreadId());
+#else
+  return (unsigned long)Process::GetThreadId();
+#endif
 }
 
 int64_t HHVM_FUNCTION(hphp_gettid) {

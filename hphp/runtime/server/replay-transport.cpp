@@ -34,7 +34,12 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   char buf[32];
   snprintf(buf, sizeof(buf), "%u", Process::GetProcessId());
   hdf["pid"] = std::string(buf);
+#ifdef _MSC_VER
+  snprintf(buf, sizeof(buf), "%" PRIx64,
+    (int64_t)pthread_getw32threadid_np(Process::GetThreadId()));
+#else
   snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)Process::GetThreadId());
+#endif
   hdf["tid"] = std::string(buf);
   snprintf(buf, sizeof(buf), "%u", Process::GetThreadPid());
   hdf["tpid"] = std::string(buf);

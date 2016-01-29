@@ -7103,6 +7103,10 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
 
   // how often to display the warning (1 / rate)
   auto rate = deprArgs.size() > 1 ? deprArgs[1]->getLiteralInteger() : 1;
+  if (rate <= 0) {
+    // deprecation warnings disabled
+    return;
+  }
 
   { // preface the message with the name of the offending function
     auto funcName = funcScope->getScopeName();

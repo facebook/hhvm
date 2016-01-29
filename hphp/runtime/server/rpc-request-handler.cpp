@@ -216,11 +216,16 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 }
 
 void RPCRequestHandler::abortRequest(Transport *transport) {
+  g_context.getCheck();
   GetAccessLog().onNewRequest();
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
   assert(vhost);
   transport->sendString("Service Unavailable", 503);
   GetAccessLog().log(transport, vhost);
+  if (!vmStack().isAllocated()) {
+    hphp_memory_cleanup();
+  }
+  m_reset = true;
 }
 
 const StaticString

@@ -46,9 +46,10 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include <folly/String.h>
+#include <sys/types.h>
+#ifndef _MSC_VER
 #include <dirent.h>
 #include <glob.h>
-#include <sys/types.h>
 #include <sys/file.h>
 #if defined(__FreeBSD__) || defined(__APPLE__)
 # include <sys/mount.h>
@@ -59,8 +60,12 @@
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
+#endif
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 #include <vector>
+
+namespace fs = boost::filesystem;
 
 #define REGISTER_CONSTANT(name, value)                                         \
   Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
@@ -109,6 +114,40 @@
   if ((exp) != 0) {                                       \
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
                     folly::errnoStr(errno).c_str());      \
+    return false;                                         \
+  }                                                       \
+
+#define CHECK_BOOST(dest, func, path)                     \
+  boost::system::error_code ec;                           \
+  dest = func(path.toCppString(), ec);                    \
+  if (ec) {                                               \
+    raise_warning(                                        \
+      "%s(): %s",                                         \
+      __FUNCTION__ + 2,                                   \
+      ec.message().c_str()                                \
+    );                                                    \
+    return false;                                         \
+  }                                                       \
+
+#define CHECK_BOOST_SILENT(dest, func, path)              \
+  boost::system::error_code ec;                           \
+  dest = func(path.toCppString(), ec);                    \
+  if (ec) {                                               \
+    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
+      ec.message().c_str()                                \
+    );                                                    \
+    return false;                                         \
+  }                                                       \
+
+#define CHECK_BOOST_ASSIGN(func, path, arg)               \
+  boost::system::error_code ec;                           \
+  func(path.toCppString(), arg, ec);                      \
+  if (ec) {                                               \
+    raise_warning(                                        \
+      "%s(): %s",                                         \
+      __FUNCTION__ + 2,                                   \
+      ec.message().c_str()                                \
+    );                                                    \
     return false;                                         \
   }                                                       \
 
@@ -250,8 +289,10 @@ Array stat_impl(struct stat *stat_sb) {
   ret.append((int64_t)stat_sb->st_atime);
   ret.append((int64_t)stat_sb->st_mtime);
   ret.append((int64_t)stat_sb->st_ctime);
+#ifndef _MSC_VER
   ret.append((int64_t)stat_sb->st_blksize);
   ret.append((int64_t)stat_sb->st_blocks);
+#endif
   ret.set(s_dev,     (int64_t)stat_sb->st_dev);
   ret.set(s_ino,     (int64_t)stat_sb->st_ino);
   ret.set(s_mode,    (int64_t)stat_sb->st_mode);
@@ -263,8 +304,10 @@ Array stat_impl(struct stat *stat_sb) {
   ret.set(s_atime,   (int64_t)stat_sb->st_atime);
   ret.set(s_mtime,   (int64_t)stat_sb->st_mtime);
   ret.set(s_ctime,   (int64_t)stat_sb->st_ctime);
+#ifndef _MSC_VER
   ret.set(s_blksize, (int64_t)stat_sb->st_blksize);
   ret.set(s_blocks,  (int64_t)stat_sb->st_blocks);
+#endif
   return ret.toArray();
 }
 
@@ -964,19 +1007,28 @@ Variant HHVM_FUNCTION(filectime,
 Variant HHVM_FUNCTION(filetype,
                       const String& filename) {
   CHECK_PATH(filename, 1);
-  struct stat sb;
-  CHECK_SYSTEM(lstatSyscall(filename, &sb));
+  // There is no symlink_dir, and a symlinked dir has a file_type of
+  // directory_file in the file_status, so we need to use is_symlink
+  // to emulate the behavior.
+  bool isLink = false;
+  CHECK_BOOST_SILENT(isLink, fs::is_symlink, filename);
+  if (isLink) {
+    return "link";
+  } else {
+    fs::file_status sb;
+    CHECK_BOOST(sb, fs::status, filename);
 
-  switch (sb.st_mode & S_IFMT) {
-  case S_IFLNK:  return "link";
-  case S_IFIFO:  return "fifo";
-  case S_IFCHR:  return "char";
-  case S_IFDIR:  return "dir";
-  case S_IFBLK:  return "block";
-  case S_IFREG:  return "file";
-  case S_IFSOCK: return "socket";
+    switch (sb.type()) {
+    case fs::file_type::symlink_file:  return "link";
+    case fs::file_type::fifo_file:  return "fifo";
+    case fs::file_type::character_file:  return "char";
+    case fs::file_type::directory_file:  return "dir";
+    case fs::file_type::block_file:  return "block";
+    case fs::file_type::regular_file:  return "file";
+    case fs::file_type::socket_file: return "socket";
+    default: return "unknown";
+    }
   }
-  return "unknown";
 }
 
 Variant HHVM_FUNCTION(linkinfo,
@@ -1147,9 +1199,9 @@ bool HHVM_FUNCTION(is_dir,
 bool HHVM_FUNCTION(is_link,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
-  struct stat sb;
-  CHECK_SYSTEM_SILENT(lstatSyscall(filename, &sb));
-  return (sb.st_mode & S_IFMT) == S_IFLNK;
+  bool isLink = false;
+  CHECK_BOOST_SILENT(isLink, fs::is_symlink, filename);
+  return isLink;
 }
 
 bool HHVM_FUNCTION(is_uploaded_file,
@@ -1334,10 +1386,10 @@ Variant HHVM_FUNCTION(pathinfo,
 Variant HHVM_FUNCTION(disk_free_space,
                       const String& directory) {
   CHECK_PATH(directory, 1);
-  struct statfs buf;
+  fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_SYSTEM(statfs(translated.c_str(), &buf));
-  return (double)buf.f_bsize * (double)buf.f_bavail;
+  CHECK_BOOST(sb, fs::space, translated);
+  return (double)sb.free;
 }
 
 Variant HHVM_FUNCTION(diskfreespace,
@@ -1349,10 +1401,10 @@ Variant HHVM_FUNCTION(diskfreespace,
 Variant HHVM_FUNCTION(disk_total_space,
                       const String& directory) {
   CHECK_PATH(directory, 1);
-  struct statfs buf;
+  fs::space_info sb;
   String translated = File::TranslatePath(directory);
-  CHECK_SYSTEM(statfs(translated.c_str(), &buf));
-  return (double)buf.f_bsize * (double)buf.f_blocks;
+  CHECK_BOOST(sb, fs::space, translated);
+  return (double)sb.capacity;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1375,6 +1427,7 @@ bool HHVM_FUNCTION(chmod,
   return true;
 }
 
+#ifndef _MSC_VER
 static int get_uid(const Variant& user) {
   int uid;
   if (user.isString()) {
@@ -1391,12 +1444,16 @@ static int get_uid(const Variant& user) {
   }
   return uid;
 }
+#endif
 
 bool HHVM_FUNCTION(chown,
                    const String& filename,
                    const Variant& user) {
   CHECK_PATH_FALSE(filename, 1);
 
+#ifdef _MSC_VER
+  return false;
+#else
   // If filename points to a user file, invoke UserStreamWrapper::chown(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
@@ -1419,6 +1476,7 @@ bool HHVM_FUNCTION(chown,
   }
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
   return true;
+#endif
 }
 
 bool HHVM_FUNCTION(lchown,
@@ -1426,6 +1484,9 @@ bool HHVM_FUNCTION(lchown,
                    const Variant& user) {
   CHECK_PATH_FALSE(filename, 1);
 
+#ifdef _MSC_VER
+  return false;
+#else
   // If filename points to a user file, invoke UserStreamWrapper::chown(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
@@ -1448,8 +1509,10 @@ bool HHVM_FUNCTION(lchown,
   }
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
   return true;
+#endif
 }
 
+#ifndef _MSC_VER
 static int get_gid(const Variant& group) {
   int gid;
   if (group.isString()) {
@@ -1466,12 +1529,16 @@ static int get_gid(const Variant& group) {
   }
   return gid;
 }
+#endif
 
 bool HHVM_FUNCTION(chgrp,
                    const String& filename,
                    const Variant& group) {
   CHECK_PATH_FALSE(filename, 1);
 
+#ifdef _MSC_VER
+  return false;
+#else
   // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
@@ -1494,6 +1561,7 @@ bool HHVM_FUNCTION(chgrp,
   }
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
+#endif
 }
 
 bool HHVM_FUNCTION(lchgrp,
@@ -1501,6 +1569,9 @@ bool HHVM_FUNCTION(lchgrp,
                    const Variant& group) {
   CHECK_PATH_FALSE(filename, 1);
 
+#ifdef _MSC_VER
+  return false;
+#else
   // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
@@ -1523,6 +1594,7 @@ bool HHVM_FUNCTION(lchgrp,
   }
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
+#endif
 }
 
 bool HHVM_FUNCTION(touch,
@@ -1557,6 +1629,10 @@ bool HHVM_FUNCTION(touch,
     fclose(f);
   }
 
+#ifdef _MSC_VER
+  CHECK_BOOST_ASSIGN(fs::last_write_time, translated, mtime);
+  // Windows doesn't have an access time to set.
+#else
   if (mtime == 0 && atime == 0) {
     // It is important to pass nullptr so that the OS sets mtime and atime
     // to the current time with maximum precision (more precise then seconds)
@@ -1567,6 +1643,7 @@ bool HHVM_FUNCTION(touch,
     newtime.modtime = mtime;
     CHECK_SYSTEM(utime(translated.data(), &newtime));
   }
+#endif
 
   return true;
 }
@@ -1648,8 +1725,8 @@ bool HHVM_FUNCTION(link,
                    const String& link) {
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
-  CHECK_SYSTEM(::link(File::TranslatePath(target).data(),
-                      File::TranslatePath(link).data()));
+  CHECK_BOOST_ASSIGN(fs::create_hard_link, File::TranslatePath(target),
+                     File::TranslatePath(link).toCppString());
   return true;
 }
 
@@ -1658,8 +1735,15 @@ bool HHVM_FUNCTION(symlink,
                    const String& link) {
   CHECK_PATH_FALSE(target, 1);
   CHECK_PATH_FALSE(link, 2);
-  CHECK_SYSTEM(symlink(File::TranslatePathKeepRelative(target).data(),
-                       File::TranslatePath(link).data()));
+  if (HHVM_FN(is_dir)(target)) {
+    CHECK_BOOST_ASSIGN(fs::create_directory_symlink,
+                       File::TranslatePathKeepRelative(target),
+                       File::TranslatePath(link).toCppString());
+  } else {
+    CHECK_BOOST_ASSIGN(fs::create_symlink,
+                       File::TranslatePathKeepRelative(target),
+                       File::TranslatePath(link).toCppString());
+  }
   return true;
 }
 
@@ -1886,10 +1970,14 @@ bool HHVM_FUNCTION(chdir,
 
 bool HHVM_FUNCTION(chroot,
                    const String& directory) {
+#ifdef _MSC_VER
+  raise_error("chroot is not available on Windows!");
+#else
   CHECK_PATH_FALSE(directory, 1);
   CHECK_SYSTEM(chroot(File::TranslatePath(directory).data()));
   CHECK_SYSTEM(chdir("/"));
   return true;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

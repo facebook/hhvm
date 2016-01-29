@@ -11,7 +11,6 @@ add_custom_command(
   ARGS "--system"
        "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
        "${CMAKE_CURRENT_BINARY_DIR}/constants.h"
-       "${CMAKE_CURRENT_SOURCE_DIR}/idl/constants.idl.json"
        ${EXTENSION_IDL_SOURCES}
   COMMENT "Generating class_map.cpp and constants.h")
 

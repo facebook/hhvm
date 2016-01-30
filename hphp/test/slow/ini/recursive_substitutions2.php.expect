@@ -1,0 +1,7 @@
+A false recursive setting at key hhvm.env_variables with offset MYINT and value 3. Value is literal or pointing to setting that does not exist. Skipping!
+INI Recursion Detected at offset named ANOTHERSTR. Using default runtime settings.
+A false recursive setting at key hhvm.env_variables with offset MYINT and value 3. Value is literal or pointing to setting that does not exist. Skipping!
+INI Recursion Detected at offset named ANOTHERSTR. Using default runtime settings.
+string(4) "4100"
+array(0) {
+}

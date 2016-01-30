@@ -1,0 +1,18 @@
+string(2) "77"
+string(2) "11"
+array(2) {
+  ["MYINT"]=>
+  string(2) "77"
+  ["MYSTR"]=>
+  string(3) "Bye"
+}
+array(2) {
+  ["SINT"]=>
+  string(1) "4"
+  ["SSTR"]=>
+  string(3) "Bye"
+}
+string(2) "77"
+string(2) "12"
+string(2) "12"
+string(2) "77"

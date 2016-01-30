@@ -133,6 +133,7 @@ public:
   const IniSettingMap operator[](const String& key) const;
   String toString() const { return m_map.toString();}
   Array toArray() const { return m_map.toArray();}
+  Array& toArrRef() { return m_map.toArrRef(); }
   Object toObject() const { return m_map.toObject();}
   bool isNull() const { return m_map.isNull();}
   bool isString() const { return m_map.isString();}
@@ -177,6 +178,13 @@ public:
   protected:
     void makeArray(Variant &hash, const std::string &offset,
                    const std::string &value);
+  private:
+    // Substitution copy or symlink via @ or : markers in the config line
+    void makeSettingSub(const String &key, const std::string &offset,
+                        const std::string &value, Variant& cur_settings);
+    void traverseToSet(const String &key, const std::string& offset,
+                       Variant& value, Variant& cur_settings,
+                       const std::string& stopChar);
   };
   class SectionParserCallback : public ParserCallback {
   public:
@@ -383,6 +391,12 @@ private:
     std::function<bool(const Variant&)>updateCallback,
     std::function<Variant()> getCallback,
     std::function<UserIniData *(void)> userDataCallback = nullptr);
+
+  /**
+   * Take a Variant full of KindOfRefs and unbox it.
+   */
+  static Variant Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
+                       bool& use_defaults, const String& array_key);
 };
 
 int64_t convert_bytes_to_long(const std::string& value);

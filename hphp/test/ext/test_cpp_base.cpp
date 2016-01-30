@@ -45,6 +45,7 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestVirtualHostIni);
   RUN_TEST(TestCollectionHdf);
   RUN_TEST(TestCollectionIni);
+  RUN_TEST(TestVariantArrayRef);
   return ret;
 }
 
@@ -57,6 +58,50 @@ static inline long in6addrWord(struct in6_addr addr, char wordNo) {
           (addr.s6_addr[(wordNo*4)+1] << 16) |
           (addr.s6_addr[(wordNo*4)+2] <<  8) |
           (addr.s6_addr[(wordNo*4)+3] <<  0)) & 0xFFFFFFFF;
+}
+
+static void arrayRefHelper(Variant& arr) {
+  String sms("hhvm.stats.max_slot");
+  String hfc("hhvm.hot_func_count");
+  Variant r(Variant::StrongBind{}, arr.toArrRef().lvalAt(sms));
+  arr.toArrRef().setRef(hfc, r);
+}
+
+bool TestCppBase::TestVariantArrayRef() {
+  String sms("hhvm.stats.max_slot");
+  String hfc("hhvm.hot_func_count");
+  String mla("hhvm.multi_level_array");
+  String k1("key1");
+  String k2("key2");
+  String k3("key3");
+  Variant v1(11);
+  Variant v2(77);
+  Variant v3(99);
+  Variant v4(true);
+
+  Variant ml_arr(Array::Create());
+  ml_arr.toArrRef().set(k1, Array::Create());
+  ml_arr.toArrRef().lvalAt(k1).toArrRef().set(k2, Array::Create());
+  ml_arr.toArrRef().lvalAt(k1).toArrRef().lvalAt(k2).toArrRef().set(k3, v4);
+
+  Variant arr(Array::Create());
+  arr.toArrRef().set(sms, v1);
+  arrayRefHelper(arr);
+  arr.toArrRef().set(sms, v2);
+
+  VERIFY(arr.toArray().rvalAt(hfc).toInt64() == 77);
+
+  // bidirectional references
+  arr.toArrRef().set(hfc, v3);
+  VERIFY(arr.toArray().rvalAt(sms).toInt64() == 99);
+
+  VERIFY(ml_arr.toArray().size() == 1);
+  VERIFY(ml_arr.toArray().rvalAt(k1).isArray() == true);
+  VERIFY(ml_arr.toArray().
+         rvalAt(k1).toArray().
+         rvalAt(k2).toArray().
+         rvalAt(k3).toBoolean() == true);
+  return Count(true);
 }
 
 bool TestCppBase::TestIpBlockMap() {

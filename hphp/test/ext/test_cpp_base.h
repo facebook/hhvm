@@ -47,6 +47,7 @@ class TestCppBase : public TestBase {
   bool TestVirtualHostIni();
   bool TestCollectionHdf();
   bool TestCollectionIni();
+  bool TestVariantArrayRef();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

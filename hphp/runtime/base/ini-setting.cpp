@@ -31,6 +31,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/portability.h"
+#include "hphp/util/logger.h"
 
 #ifndef _MSC_VER
 #include <glob.h>
@@ -39,6 +40,8 @@
 #define __STDC_LIMIT_MACROS
 #include <cstdint>
 #include <boost/range/join.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 #include <map>
 
 namespace HPHP {
@@ -55,6 +58,16 @@ const StaticString
   s_local_value("local_value"),
   s_access("access"),
   s_core("core");
+
+std::vector<std::string> split_brackets(const std::string& s) {
+  std::vector<std::string> split_value;
+  boost::split(split_value, s, boost::is_any_of("[]"));
+  // Splitting this way might give us an empty string at the end
+  if (split_value.back() == "") {
+    split_value.pop_back();
+  }
+  return split_value;
+}
 
 int64_t convert_bytes_to_long(const std::string& value) {
   if (value.size() == 0) {
@@ -481,7 +494,9 @@ void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
 void IniSetting::ParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   Variant *arr = (Variant*)arg;
-  forceToArray(*arr).set(String(key), Variant(value));
+  String skey(key);
+  Variant sval(value);
+  forceToArray(*arr).set(skey, sval);
 }
 
 void IniSetting::ParserCallback::onPopEntry(
@@ -491,12 +506,24 @@ void IniSetting::ParserCallback::onPopEntry(
     void *arg) {
   Variant *arr = (Variant*)arg;
   forceToArray(*arr);
-  auto& hash = arr->toArrRef().lvalAt(String(key));
-  forceToArray(hash);
-  if (!offset.empty()) {
-    makeArray(hash, offset, value);
-  } else {
-    hash.toArrRef().append(value);
+
+  bool oEmpty = offset.empty();
+  // Substitution copy or symlink
+  // Offset come in like: hhvm.a.b\0c\0@
+  // Check for `\0` because it is possible, although unlikely, to have
+  // something like hhvm.a.b[c@]. Thus we wouldn't want to make a substitution.
+  if (!oEmpty && (offset.size() == 1 || offset[offset.size() - 2] == '\0') &&
+      (offset.back() == '@' || offset.back() == ':')) {
+    makeSettingSub(key, offset, value, *arr);
+  } else {                                 // Normal array value
+    String skey(key);
+    auto& hash = arr->toArrRef().lvalAt(skey);
+    forceToArray(hash);
+    if (!oEmpty) {                         // a[b]
+      makeArray(hash, offset, value);
+    } else {                               // a[]
+      hash.toArrRef().append(value);
+    }
   }
 }
 
@@ -524,6 +551,79 @@ void IniSetting::ParserCallback::makeArray(Variant& hash,
       p += index.size() + 1;
     }
   } while (!last);
+}
+
+void IniSetting::ParserCallback::makeSettingSub(const String& key,
+                                                const std::string& offset,
+                                                const std::string& value,
+                                                Variant& cur_settings) {
+  assert(offset.size() == 1 ||
+         (offset.size() >=2 && offset[offset.size()-2] == 0));
+  auto type = offset.substr(offset.size() - 1);
+  assert(type == ":" || type == "@");
+  std::vector<std::string> copy_name_parts = split_brackets(value);
+  assert(!copy_name_parts.empty());
+  Variant* base = &cur_settings;
+  bool skip = false;
+  for (auto& part : copy_name_parts) {
+    if (!base->isArray()) {
+      *base = Array::Create();
+    }
+    auto lval = &base->toArrRef().lvalAt(String(part));
+    if (lval->isNull()) {
+      skip = true;
+    } else {
+      base = lval;
+    }
+  }
+  // if skip is true we have something like:
+  //   hhvm.env_variables["MYINT"][:] = 3
+  //   hhvm.stats.slot_duration[:] = "hhvm.stats.slot_duration"
+  if (skip) {
+    Logger::Warning("A false recursive setting at key %s with offset %s and "
+                    "value %s. Value is literal or pointing to setting that "
+                    "does not exist. Skipping!", key.toCppString().c_str(),
+                    offset.c_str(), value.c_str());
+  } else if (offset == ":") {
+   cur_settings.toArrRef().setRef(key, *base);
+  } else if (offset == "@") {
+    cur_settings.toArrRef().set(key, *base);
+  } else {
+    traverseToSet(key, offset, *base, cur_settings, type);
+  }
+}
+
+void IniSetting::ParserCallback::traverseToSet(const String &key,
+                                               const std::string& offset,
+                                               Variant& value,
+                                               Variant& cur_settings,
+                                               const std::string& stopChar) {
+  assert(stopChar == "@" || stopChar == ":");
+  assert(offset != stopChar);
+  assert(cur_settings.isArray());
+  auto isSymlink = stopChar == ":";
+  auto start = offset.c_str();
+  auto p = start;
+  auto& first(cur_settings.toArrRef().lvalAt(key));
+  forceToArray(first);
+  Variant *setting = &first;
+  String index;
+  bool done = false;
+  while (!done) {
+    index = String(p);
+    p += index.size() + 1;
+    if (strcmp(p, stopChar.c_str()) != 0) {
+      forceToArray(*setting);
+      setting = &setting->toArrRef().lvalAt(index);
+    } else {
+      done = true;
+    }
+  }
+  if (isSymlink) {
+    setting->toArrRef().setRef(index, value);
+  } else {
+    setting->toArrRef().set(index, value);
+  }
 }
 
 void IniSetting::ParserCallback::onConstant(std::string &result,
@@ -646,22 +746,22 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
   s_config_is_a_constant = false;
   auto ini_cpp = ini.toCppString();
   auto filename_cpp = filename.toCppString();
+  Variant ret = false;
   if (process_sections) {
     CallbackData data;
     SectionParserCallback cb;
     data.arr = Array::Create();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &data)) {
-      return data.arr;
+      ret = data.arr;
     }
   } else {
     ParserCallback cb;
-    Variant ret = Array::Create();
-    if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &ret)) {
-      return ret;
+    Variant arr = Array::Create();
+    if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &arr)) {
+      ret = arr;
     }
   }
-
-  return false;
+  return ret;
 }
 
 IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
@@ -672,9 +772,55 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
   SystemParserCallback cb;
   Variant parsed;
   zend_parse_ini_string(ini, filename, NormalScanner, cb, &parsed);
-  return std::move(parsed);
+  if (parsed.isNull()) {
+    return uninit_null();
+  }
+  // We have the final values for our ini settings.
+  // Unbox everything so that we have no more references in the map since we do
+  // things that might require us not to have references
+  // (e.g. calling Variant::SetEvalScalar(), which will assert if an
+  // arraydata's elements are KindOfRef)
+  std::set<ArrayData*> seen;
+  bool use_defaults = false;
+  Variant ret = Unbox(parsed, seen, use_defaults, empty_string());
+  if (use_defaults) {
+    return uninit_null();
+  }
+  return ret;
 }
 
+Variant IniSetting::Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
+                          bool& use_defaults, const String& array_key) {
+  assert(boxed.isArray());
+  Variant unboxed(Array::Create());
+  auto ad = boxed.getArrayData();
+  if (seen.insert(ad).second) {
+    for (auto it = boxed.toArray().begin(); it; it.next()) {
+      auto key = it.first();
+      // asserting here to ensure that key is  a scalar type that can be
+      // converted to a string.
+      assert(key.isScalar());
+      auto& elem = it.secondRef();
+      unboxed.asArrRef().set(
+        key,
+        elem.isArray() ? Unbox(elem, seen, use_defaults, key.toString()) : elem
+      );
+    }
+    seen.erase(ad);
+  } else {
+    // The insert into seen wasn't successful. We have recursion.
+    // break the recursive cycle, so the elements can be freed by the MM.
+    // The const_cast is ok because we fully own the array, with no sharing.
+
+    // Use the current array key to give a little help in the log message
+    const_cast<Variant&>(boxed).unset();
+    use_defaults = true;
+    Logger::Warning("INI Recursion Detected at offset named %s. "
+                    "Using default runtime settings.",
+                    array_key.toCppString().c_str());
+  }
+  return unboxed;
+}
 
 class IniCallbackData {
 public:

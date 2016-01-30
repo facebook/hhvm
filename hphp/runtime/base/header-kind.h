@@ -51,6 +51,22 @@ enum class Counted {
   Always // objects must be in request-heap with positive refcounts
 };
 
+enum class GCBits: uint8_t {
+  Unmarked = 0,
+  Mark = 1,
+  CMark = 2,
+  DualMark = 3,  // Mark|CMark
+};
+
+inline GCBits operator|(GCBits a, GCBits b) {
+  return static_cast<GCBits>(
+      static_cast<uint8_t>(a) | static_cast<uint8_t>(b)
+  );
+}
+inline bool operator&(GCBits a, GCBits b) {
+  return (static_cast<uint8_t>(a) & static_cast<uint8_t>(b)) != 0;
+}
+
 /*
  * Common header for all heap-allocated objects. Layout is carefully
  * designed to allow overlapping with the second word of a TypedValue,
@@ -64,20 +80,12 @@ template<class T = uint16_t, Counted CNT = Counted::Always>
 struct HeaderWord {
   union {
     struct {
-      union {
-        struct {
-          T aux;
-          HeaderKind kind;
-          mutable uint8_t mark:1;
-          mutable uint8_t cmark:1;
-        };
-        uint32_t lo32;
-      };
-      union {
-        mutable RefCount count;
-        uint32_t hi32;
-      };
+      T aux;
+      HeaderKind kind;
+      mutable GCBits marks;
+      mutable RefCount count;
     };
+    struct { uint32_t lo32, hi32; };
     uint64_t q;
   };
 

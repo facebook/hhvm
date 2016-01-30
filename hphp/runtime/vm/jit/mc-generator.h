@@ -23,6 +23,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/code-cache.h"
+#include "hphp/util/eh-frame.h"
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -398,7 +399,7 @@ private:
   TcaTransIDMap      m_jmpToTransID;
   uint64_t           m_numTrans;
   FixupMap           m_fixupMap;
-  UnwindInfoHandle   m_unwindRegistrar;
+  EHFrameHandle      m_unwindRegistrar;
   CatchTraceMap      m_catchTraceMap;
   Debug::DebugInfo   m_debugInfo;
   FreeStubList       m_freeStubs;

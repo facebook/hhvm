@@ -21,20 +21,14 @@
 using Dwarf_Ptr = void*;
 using Dwarf_Unsigned = uint32_t;
 
-#define DW_EH_PE_absptr 0
+#define DW_CFA_set_loc 0
 
 #define DW_CFA_def_cfa 0
+
+#define DW_CFA_same_value 0
 #define DW_CFA_offset 0
 #define DW_CFA_offset_extended_sf 0
-#define DW_CFA_same_value 0
-#define DW_CFA_set_loc 0
-#define DW_CFA_val_expression 0
 
-#define DW_OP_breg7 0
-#define DW_OP_const4s 0
-#define DW_OP_deref_size 0
-#define DW_OP_dup 0
-#define DW_OP_mul 0
-#define DW_OP_plus 0
+#define DW_EH_PE_absptr 0
 
 #endif

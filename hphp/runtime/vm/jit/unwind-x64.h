@@ -28,7 +28,9 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
+
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/eh-frame.h"
 
 #ifndef _MSC_VER
 #include <unwind.h>
@@ -147,8 +149,7 @@ inline const std::type_info& typeInfoFromUnwindException(
  * Called whenever we create a new translation cache for the whole
  * region of code.
  */
-typedef std::shared_ptr<void> UnwindInfoHandle;
-UnwindInfoHandle register_unwind_region(unsigned char* address, size_t size);
+EHFrameHandle register_unwind_region(unsigned char* address, size_t size);
 
 /*
  * The personality routine for code emitted by the jit.

@@ -110,4 +110,14 @@ void DataBlock::free(void* addr, size_t len) {
   m_freeRanges[off + len] = -(int64_t)len;
 }
 
+void DataBlock::reportFull(size_t nBytes) const {
+  throw DataBlockFull(m_name, folly::format(
+    "Attempted to emit {} byte(s) into a {} byte DataBlock with {} bytes "
+    "available. This almost certainly means the TC is full. If this is "
+    "the case, increasing Eval.JitASize, Eval.JitAColdSize, "
+    "Eval.JitAFrozenSize and Eval.JitGlobalDataSize in the configuration "
+    "file when running this script or application should fix this problem.",
+    nBytes, m_size, m_size - (m_frontier - m_base)).str());
+}
+
 }

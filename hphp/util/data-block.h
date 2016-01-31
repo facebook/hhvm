@@ -142,16 +142,11 @@ struct DataBlock {
   }
 
   void assertCanEmit(size_t nBytes) {
-    if (!canEmit(nBytes)) {
-      throw DataBlockFull(m_name, folly::format(
-        "Attempted to emit {} byte(s) into a {} byte DataBlock with {} bytes "
-        "available. This almost certainly means the TC is full. If this is "
-        "the case, increasing Eval.JitASize, Eval.JitAColdSize, "
-        "Eval.JitAFrozenSize and Eval.JitGlobalDataSize in the configuration "
-        "file when running this script or application should fix this problem.",
-        nBytes, m_size, m_size - (m_frontier - m_base)).str());
-    }
+    if (!canEmit(nBytes)) reportFull(nBytes);
   }
+
+  ATTRIBUTE_NORETURN
+  void reportFull(size_t nbytes) const;
 
   bool isValidAddress(const CodeAddress tca) const {
     return tca >= m_base && tca < (m_base + m_size);

@@ -168,23 +168,6 @@ static void declareConstants(std::ostream &out,
   }
 }
 
-static void outputConstants(const fbstring &invocation_trace,
-                            const char *outputfn,
-                            const fbvector<PhpConst>& consts) {
-  std::ofstream out(outputfn);
-
-  brandOutputFile(out, "gen-class-map.cpp", invocation_trace);
-
-  out << "#ifndef _H_SYSTEM_CONSTANTS\n"
-      << "#define _H_SYSTEM_CONSTANTS\n"
-      << "namespace HPHP {\n"
-      << "struct StaticString;\n"
-      << "struct Variant;\n";
-  declareConstants(out, consts, true);
-  out << "} // namespace HPHP\n"
-      << "#endif // _H_SYSTEM_CONSTANTS\n";
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Class Map
 
@@ -374,7 +357,6 @@ void print_usage(const char* program_name) {
             << "  " << program_name << "\n"
             << "    --system\n"
             << "    <class map output file>\n"
-            << "    <constants output file>\n"
             << "    <*.idl.json>...\n\n"
             << "  " << program_name << "\n"
             << "    <class map name>\n"
@@ -391,10 +373,6 @@ int main(int argc, const char* argv[]) {
   }
 
   bool system = !strcmp(argv[1], "--system");
-  if (system && argc < 4) {
-    print_usage(argv[0]);
-    return 0;
-  }
 
   fbstring invocation_trace;
   makeInvocationTrace(invocation_trace, argc, argv);
@@ -404,7 +382,7 @@ int main(int argc, const char* argv[]) {
   fbvector<PhpConst> consts;
   fbvector<PhpExtension> exts;
 
-  for (int i = (system ? 4 : 3); i < argc; ++i) {
+  for (int i = 3; i < argc; ++i) {
     try {
       parseIDL(argv[i], funcs, classes, consts, exts);
     } catch (const std::exception& exc) {
@@ -416,10 +394,6 @@ int main(int argc, const char* argv[]) {
   const char* path = argv[2];
   const char* name = (system ? "g_class_map" : argv[1]);
   outputClassMap(invocation_trace, path, name, classes, funcs, consts, exts);
-  if (system) {
-    path = argv[3];
-    outputConstants(invocation_trace, path, consts);
-  }
 
   return 0;
 }

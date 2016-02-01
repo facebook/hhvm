@@ -127,6 +127,8 @@ void StandardExtension::threadInitMisc() {
       "display_errors", RuntimeOption::EnableHipHopSyntax ? "stderr" : "1",
       IniSetting::SetAndGet<std::string>(
         [](const std::string& value) {
+          *s_misc_display_errors = value;
+
           if (value == s_1 || value == s_stdout) {
             Logger::SetStandardOut(stdout);
             return true;

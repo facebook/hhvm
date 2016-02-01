@@ -147,6 +147,19 @@ void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   always_assert(false);
 }
 
+#if defined(__powerpc64__)
+/*
+ * Tail call elimination needs to be disabled in order to have a valid frame
+ * pointer in fixupWork.
+ *
+ * PPC64 frame pointer points to the bottom of the frame, hence it changes
+ * depending of the locals stored on the stack and it might be in a different
+ * position than fixupWork, which would mean that the frame pointer grabbed
+ * inside of fixup would not point to a valid frame anymore on fixupWork
+ * context.
+ */
+__attribute__((__optimize__("no-optimize-sibling-calls")))
+#endif
 void FixupMap::fixup(ExecutionContext* ec) const {
   if (RuntimeOption::EvalSimulateARM) {
     // Walking the C++ stack doesn't work in simulation mode. Fortunately, the

@@ -136,8 +136,10 @@ using jit::TCA;
 #define IOP_ARGS        PC& pc
 #if DEBUG
 #define OPTBLD_INLINE
+#define OPTBLD_FLT_INLINE
 #else
-#define OPTBLD_INLINE ALWAYS_INLINE
+#define OPTBLD_INLINE       ALWAYS_INLINE
+#define OPTBLD_FLT_INLINE   INLINE_FLATTEN
 #endif
 TRACE_SET_MOD(bcinterp);
 
@@ -3474,7 +3476,7 @@ OPTBLD_INLINE void iopClsCnsD(IOP_ARGS) {
   cellDup(clsCns, *c1);
 }
 
-OPTBLD_INLINE void iopConcat(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopConcat(IOP_ARGS) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const s2 = cellAsVariant(*c2).toString();
@@ -4305,7 +4307,7 @@ OPTBLD_INLINE void cgetl_body(ActRec* fp,
   }
 }
 
-OPTBLD_INLINE void iopCGetL(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopCGetL(IOP_ARGS) {
   auto local = decode_la(pc);
   Cell* to = vmStack().allocC();
   TypedValue* fr = frame_local(vmfp(), local);
@@ -4819,7 +4821,7 @@ OPTBLD_INLINE void iopFPassM(IOP_ARGS) {
   vGetMImpl(pc, nDiscard);
 }
 
-OPTBLD_INLINE void iopSetM(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopSetM(IOP_ARGS) {
   auto const nDiscard = decode_iva(pc);
   auto const mk = decode_member_key(pc, liveUnit());
 
@@ -5024,7 +5026,7 @@ OPTBLD_INLINE void iopIssetS(IOP_ARGS) {
   ss.output->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE void iopIssetL(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopIssetL(IOP_ARGS) {
   auto local = decode_la(pc);
   TypedValue* tv = frame_local(vmfp(), local);
   bool ret = is_not_null(tvAsCVarRef(tv));
@@ -5069,7 +5071,7 @@ OPTBLD_INLINE void iopIsTypeC(IOP_ARGS) {
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE void iopAssertRATL(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopAssertRATL(IOP_ARGS) {
   auto localId = decode_la(pc);
   if (debug) {
     auto const rat = decodeRAT(vmfp()->m_func->unit(), pc);
@@ -5561,7 +5563,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_INLINE void iopFPushFuncD(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopFPushFuncD(IOP_ARGS) {
   auto numArgs = decode_iva(pc);
   auto id = decode<Id>(pc);
   const NamedEntityPair nep =
@@ -6090,7 +6092,7 @@ OPTBLD_INLINE void iopFCall(IOP_ARGS) {
   doFCall(ar, pc);
 }
 
-OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopFCallD(IOP_ARGS) {
   auto const ar = arFromInstr(pc - encoded_op_size(Op::FCallD));
   UNUSED auto numArgs = decode_iva(pc);
   UNUSED auto clsName = decode_litstr(pc);
@@ -6122,7 +6124,7 @@ OPTBLD_INLINE void iopFCallAwait(IOP_ARGS) {
   doFCall(ar, pc);
 }
 
-OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
+OPTBLD_FLT_INLINE void iopFCallBuiltin(IOP_ARGS) {
   auto numArgs = decode_iva(pc);
   auto numNonDefault = decode_iva(pc);
   auto id = decode<Id>(pc);

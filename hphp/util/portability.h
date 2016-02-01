@@ -78,6 +78,7 @@
 #define ALWAYS_INLINE      inline __attribute__((__always_inline__))
 #define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
 #define FLATTEN            __attribute__((__flatten__))
+#define INLINE_FLATTEN     inline __attribute__((__always_inline__,__flatten__))
 #define NEVER_INLINE       __attribute__((__noinline__))
 #define UNUSED             __attribute__((__unused__))
 #endif

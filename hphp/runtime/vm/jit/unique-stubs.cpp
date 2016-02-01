@@ -768,10 +768,7 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
   return vwrap(cb, [] (Vout& v) {
     v << stublogue{};
 
-    auto const rdata = rarg(0);
-    auto const rtype = rarg(1);
-
-    auto const destroy = [&] (Vout& v) {
+    { /* begin of PhysRegSaver scope */
       // decRefGeneric is called via callfaststub, whose ABI claims that all
       // registers are preserved.  This is true in the fast path, but in the
       // slow path we need to manually save caller-saved registers.
@@ -781,6 +778,10 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
       // As a consequence of being called via callfaststub, we can't safely use
       // any Vregs here except for status flags registers, at least not with
       // the default vwrap() ABI.  Just use the argument registers instead.
+      auto const rdata = rarg(0);
+      auto const rtype = rarg(1);
+
+      auto const destroy = [&] (Vout& v) {
       assertx(callerSaved.contains(rdata));
       assertx(callerSaved.contains(rtype));
 
@@ -794,9 +795,10 @@ TCA emitDecRefGeneric(CodeBlock& cb) {
       // The stub frame's saved RIP is at %rsp[8] before we saved the
       // caller-saved registers.
       v << syncpoint{makeIndirectFixup(prs.dwordsPushed() + 1)};
-    };
+      };
 
-    emitDecRefWork(v, v, rdata, destroy, false);
+      emitDecRefWork(v, v, rdata, destroy, false);
+    } /* end of PhysRegSaver scope, before stubret */
     v << stubret{};
   });
 }

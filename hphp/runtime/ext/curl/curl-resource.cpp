@@ -372,6 +372,12 @@ bool CurlResource::setLongOption(long option, long value) {
   } else if (option == CURLOPT_TIMEOUT_MS) {
     value = minTimeoutMS(value);
 #endif
+  } else if ((option == CURLOPT_SSL_VERIFYHOST) && (value == 1)) {
+    raise_notice(
+      "curl_setopt(): CURLOPT_SSL_VERIFYHOST set to true which disables "
+      "common name validation "
+      "(setting CURLOPT_SSL_VERIFYHOST to 2 enables common name validation)"
+    );
   }
 
   m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, value);
@@ -550,14 +556,25 @@ bool CurlResource::isFileOption(long option) {
          (option == CURLOPT_STDERR);
 }
 
+inline bool checkWritable(const std::string& mode) {
+  // This check is really hinky, but it's what PHP does. :/
+  if ((mode.find('r') != 0) || (mode.find('+') == 1)) {
+    return true;
+  }
+  raise_warning("curl_setopt(): the provided file handle is not writable");
+  return false;
+}
+
 bool CurlResource::setFileOption(long option, const req::ptr<File>& fp) {
   assertx(isFileOption(option));
   if (option == CURLOPT_FILE) {
+    if (!checkWritable(fp->getMode())) return false;
     m_write.fp = fp;
     m_write.method = PHP_CURL_FILE;
     return true;
   }
   if (option == CURLOPT_WRITEHEADER) {
+    if (!checkWritable(fp->getMode())) return false;
     m_write_header.fp = fp;
     m_write_header.method = PHP_CURL_FILE;
     return true;

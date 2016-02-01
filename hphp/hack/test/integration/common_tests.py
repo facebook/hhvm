@@ -76,7 +76,6 @@ assume_php = false""")
         """
 
         write_files(cls.files, init_dir)
-        write_files(cls.files, cls.repo_dir)
 
         cls.save_command(init_dir)
 
@@ -88,7 +87,6 @@ assume_php = false""")
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.repo_dir)
         shutil.rmtree(cls.tmp_dir)
         shutil.rmtree(cls.hh_tmp_dir)
 
@@ -99,35 +97,35 @@ assume_php = false""")
     def write_load_config(self, *changed_files):
         raise NotImplementedError()
 
-    @classmethod
-    def start_hh_server(cls):
-        cmd = [hh_server, cls.repo_dir]
+    def start_hh_server(self):
+        cmd = [hh_server, self.repo_dir]
         print(" ".join(cmd), file=sys.stderr)
         return subprocess.Popen(
                 cmd,
                 stderr=subprocess.PIPE,
-                env=cls.test_env)
+                env=self.test_env)
 
-    @classmethod
-    def get_server_logs(cls):
+    def get_server_logs(self):
         time.sleep(2)  # wait for logs to be written
-        log_file = cls.proc_call([
-            hh_client, '--logname', cls.repo_dir])[0].strip()
+        log_file = self.proc_call([
+            hh_client, '--logname', self.repo_dir])[0].strip()
         with open(log_file) as f:
             return f.read()
 
     def setUp(self):
+        if os.path.isdir(self.repo_dir) is False:
+            os.mkdir(self.repo_dir)
         write_files(self.files, self.repo_dir)
 
     def tearDown(self):
-        self.proc_call([
+        (_, _, exit_code) = self.proc_call([
             hh_client,
             'stop',
             self.repo_dir
         ])
+        self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
 
-        for p in glob.glob(os.path.join(self.repo_dir, '*')):
-            os.remove(p)
+        shutil.rmtree(self.repo_dir)
 
     @classmethod
     def proc_call(cls, args, env=None, stdin=None):

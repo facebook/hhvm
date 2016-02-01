@@ -158,7 +158,7 @@ void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
  * inside of fixup would not point to a valid frame anymore on fixupWork
  * context.
  */
-__attribute__((optimize("no-optimize-sibling-calls")))
+__attribute__((__optimize__("no-optimize-sibling-calls")))
 #endif
 void FixupMap::fixup(ExecutionContext* ec) const {
   if (RuntimeOption::EvalSimulateARM) {

@@ -17,6 +17,8 @@ configuration options, all of which default to false:
   /pprof/cmdline:   program command line
   /pprof/heap:      heap dump
   /pprof/symbol:    symbol lookup
+      retain        regex for symbols client cares about
+      exclude       regex for symbols client does not care about
 
   The /hhprof/* endpoints are intended for direct use, whereas the /pprof/*
   endpoints support jeprof (included with jemalloc).
@@ -60,9 +62,9 @@ Following are some common use case examples:
   KiB, which is a reasonable setting for most purposes, though the higher the
   sample rate, the higher the computational and memory overhead.
 
-  Download the resulting profile using jeprof:
+  Download the resulting profile using jeprof, symbolizing only PHP functions:
 
-    jeprof --raw 'example.com:8088/pprof/heap' > hhprof.raw
+    jeprof --raw --retain='^PHP::' 'example.com:8088/pprof/heap' > hhprof.raw
 
   Generate a call graph, focusing only on PHP functions:
 

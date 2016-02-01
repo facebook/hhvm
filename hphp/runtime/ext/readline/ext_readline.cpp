@@ -40,8 +40,8 @@ IMPLEMENT_THREAD_LOCAL(ReadlineVars, s_readline);
 
 }
 
-static Variant HHVM_FUNCTION(readline, const String& prompt) {
-  auto result = readline(prompt.data());
+static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
+  auto result = readline(prompt.isString() ? prompt.toString().data() : nullptr);
   if (result == nullptr) {
     return false;
   } else {

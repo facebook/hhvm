@@ -8,8 +8,6 @@
  *
  *)
 
-open Core
-
 let test_process_data =
   ServerProcess.{
     pid = 2758734;
@@ -32,14 +30,5 @@ let tests = [
   "test_dmesg_parser", test_dmesg_parser;
 ]
 
-let run (name, f) =
-  Printf.printf "Running %s ... %!" name;
-  let result = f () in
-  (if result
-  then Printf.printf "ok\n%!"
-  else Printf.printf "fail\n%!");
-  result
-
-
 let () =
-  exit (if List.for_all tests run then 0 else 1)
+  Unit_test.run_all tests

@@ -71,4 +71,4 @@ function readline_write_history(?string $filename = null): bool;
  *   returned has the ending newline removed.
  */
 <<__Native>>
-function readline(string $prompt): mixed;
+function readline(?string $prompt = null): mixed;

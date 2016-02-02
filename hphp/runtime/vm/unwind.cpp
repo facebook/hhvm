@@ -515,8 +515,7 @@ void unwindPhp() {
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
   g_context->m_faults.pop_back();
 
-  Object obj = Object::attach(fault.m_userException);
-  throw obj;
+  throw_object(Object::attach(fault.m_userException));
 }
 
 void unwindPhp(ObjectData* phpException) {

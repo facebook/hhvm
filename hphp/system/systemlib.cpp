@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include <vector>
 
@@ -164,52 +165,52 @@ Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
 }
 
 void throwExceptionObject(const Variant& message) {
-  throw AllocExceptionObject(message);
+  throw_object(AllocExceptionObject(message));
 }
 
 void throwErrorObject(const Variant& message) {
-  throw AllocErrorObject(message);
+  throw_object(AllocErrorObject(message));
 }
 
 void throwArithmeticErrorObject(const Variant& message) {
-  throw AllocArithmeticErrorObject(message);
+  throw_object(AllocArithmeticErrorObject(message));
 }
 
 void throwDivisionByZeroErrorObject(const Variant& message) {
-  throw AllocDivisionByZeroErrorObject(message);
+  throw_object(AllocDivisionByZeroErrorObject(message));
 }
 
 void throwParseErrorObject(const Variant& message) {
-  throw AllocParseErrorObject(message);
+  throw_object(AllocParseErrorObject(message));
 }
 
 void throwTypeErrorObject(const Variant& message) {
-  throw AllocTypeErrorObject(message);
+  throw_object(AllocTypeErrorObject(message));
 }
 
 void throwBadMethodCallExceptionObject(const Variant& message) {
-  throw AllocBadMethodCallExceptionObject(message);
+  throw_object(AllocBadMethodCallExceptionObject(message));
 }
 
 void throwInvalidArgumentExceptionObject(const Variant& message) {
-  throw AllocInvalidArgumentExceptionObject(message);
+  throw_object(AllocInvalidArgumentExceptionObject(message));
 }
 
 void throwRuntimeExceptionObject(const Variant& message) {
-  throw AllocRuntimeExceptionObject(message);
+  throw_object(AllocRuntimeExceptionObject(message));
 }
 
 void throwOutOfBoundsExceptionObject(const Variant& message) {
-  throw AllocOutOfBoundsExceptionObject(message);
+  throw_object(AllocOutOfBoundsExceptionObject(message));
 }
 
 void throwInvalidOperationExceptionObject(const Variant& message) {
-  throw AllocInvalidOperationExceptionObject(message);
+  throw_object(AllocInvalidOperationExceptionObject(message));
 }
 
 void throwDOMExceptionObject(const Variant& message,
                              const Variant& code) {
-  throw AllocDOMExceptionObject(message, code);
+  throw_object(AllocDOMExceptionObject(message, code));
 }
 
 void throwSoapFaultObject(const Variant& code,
@@ -218,9 +219,9 @@ void throwSoapFaultObject(const Variant& code,
                           const Variant& detail /* = null_variant */,
                           const Variant& name /* = null_variant */,
                           const Variant& header /* = null_variant */) {
-  throw Object{AllocSoapFaultObject(code, message,
+  throw_object(Object{AllocSoapFaultObject(code, message,
                                     actor, detail,
-                                    name, header)};
+                                    name, header)});
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

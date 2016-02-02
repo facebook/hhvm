@@ -1,3 +1,24 @@
+Testing tcp://
+Sending request to server...
+Server received request: ping
+Client received response: pong
+Sending request to server...
+Server received request: ping
+Client received response: pong
+Sending request to server...
+Server received request: ping
+Client received response: pong
+Testing tls://
+Sending request to server...
+Server received request: ping
+Client received response: pong
+Sending request to server...
+Server received request: ping
+Client received response: pong
+Sending request to server...
+Server received request: ping
+Client received response: pong
+Testing ssl://
 Sending request to server...
 Server received request: ping
 Client received response: pong

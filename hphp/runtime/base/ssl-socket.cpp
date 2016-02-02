@@ -370,7 +370,8 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 req::ptr<SSLSocket> SSLSocket::Create(
   int fd, int domain, const HostURL &hosturl, double timeout,
-  const req::ptr<StreamContext>& ctx) {
+  const req::ptr<StreamContext>& ctx
+) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 
@@ -391,8 +392,16 @@ req::ptr<SSLSocket> SSLSocket::Create(
     return nullptr;
   }
 
+  return Create(fd, domain, method, hosturl.getHost(), hosturl.getPort(),
+                timeout, ctx);
+}
+
+req::ptr<SSLSocket> SSLSocket::Create(
+  int fd, int domain, CryptoMethod method, std::string address, int port,
+  double timeout, const req::ptr<StreamContext>& ctx
+) {
   auto sock = req::make<SSLSocket>(
-    fd, domain, ctx, hosturl.getHost().c_str(), hosturl.getPort());
+    fd, domain, ctx, address.c_str(), port);
 
   sock->m_data->m_method = method;
   sock->m_data->m_connect_timeout = timeout;
@@ -762,6 +771,10 @@ bool SSLSocket::checkLiveness() {
     }
   }
   return true;
+}
+
+SSLSocket::CryptoMethod SSLSocket::getCryptoMethod() {
+  return m_data->m_method;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

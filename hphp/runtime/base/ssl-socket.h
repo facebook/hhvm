@@ -53,6 +53,10 @@ struct SSLSocket : Socket {
   static req::ptr<SSLSocket> Create(int fd, int domain, const HostURL &hosturl,
                                     double timeout,
                                     const req::ptr<StreamContext>& ctx);
+  static req::ptr<SSLSocket> Create(int fd, int domain, CryptoMethod method,
+                                    std::string address, int port,
+                                    double timeout,
+                                    const req::ptr<StreamContext>& ctx);
 
   SSLSocket();
   SSLSocket(int sockfd, int type, const req::ptr<StreamContext>& ctx,
@@ -75,6 +79,8 @@ struct SSLSocket : Socket {
   virtual int64_t readImpl(char *buffer, int64_t length) override;
   virtual int64_t writeImpl(const char *buffer, int64_t length) override;
   virtual bool checkLiveness() override;
+
+  CryptoMethod getCryptoMethod();
 
   explicit SSLSocket(std::shared_ptr<SSLSocketData> data);
   std::shared_ptr<SSLSocketData> getData() const {

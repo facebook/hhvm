@@ -333,7 +333,8 @@ static int php_read(req::ptr<Socket> sock, void *buf, int maxlen, int flags) {
 static req::ptr<Socket> create_new_socket(
   const HostURL &hosturl,
   VRefParam errnum,
-  VRefParam errstr
+  VRefParam errstr,
+  const Variant& context
 ) {
   int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
   int type = SOCK_STREAM;
@@ -347,12 +348,22 @@ static req::ptr<Socket> create_new_socket(
     domain = AF_UNIX;
   }
 
-  auto sock = req::make<Socket>(
-    socket(domain, type, 0),
-    domain,
-    hosturl.getHost().c_str(),
-    hosturl.getPort()
-  );
+  req::ptr<Socket> sock;
+  int fd = socket(domain, type, 0);
+  double timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getSocketDefaultTimeout();
+  req::ptr<StreamContext> streamctx;
+  if (context.isResource()) {
+    streamctx = cast<StreamContext>(context.toResource());
+  }
+
+  auto sslsock = SSLSocket::Create(fd, domain, hosturl, timeout, streamctx);
+  if (sslsock) {
+    sock = sslsock;
+  } else {
+    sock = req::make<Socket>(fd, domain, hosturl.getHost().c_str(),
+                             hosturl.getPort());
+  }
 
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
@@ -983,11 +994,12 @@ Variant socket_server_impl(
   const HostURL &hosturl,
   int flags, /* = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN */
   VRefParam errnum /* = null */,
-  VRefParam errstr /* = null */
+  VRefParam errstr /* = null */,
+  const Variant& context /* = null_variant */
 ) {
   errnum.assignIfRef(0);
   errstr.assignIfRef(empty_string());
-  auto sock = create_new_socket(hosturl, errnum, errstr);
+  auto sock = create_new_socket(hosturl, errnum, errstr, context);
   if (!sock) {
     return false;
   }

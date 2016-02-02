@@ -48,7 +48,7 @@ let data_producer_entry =
  * 1 second. *)
 let test_input_within_timeout () =
   let handle = Daemon.spawn
-      ~channel_mode:`socket ~log_mode:Daemon.Parent_streams
+      ~channel_mode:`socket (Unix.stdout, Unix.stderr)
       data_producer_entry 0.5 in
   let ic, _ = handle.Daemon.channels in
   Timeout.with_timeout
@@ -63,8 +63,8 @@ let test_input_within_timeout () =
 (** Child sends data after a 3 second delay. Parent read timeout is
  * 2 seconds. *)
 let test_input_exceeds_timeout () =
-  let handle = Daemon.spawn
-      ~channel_mode:`socket data_producer_entry 3.0 in
+  let handle = Daemon.spawn ~channel_mode:`socket
+    (Unix.stdout, Unix.stderr) data_producer_entry 3.0 in
   let ic, _ = handle.Daemon.channels in
   try
     Timeout.with_timeout
@@ -126,8 +126,8 @@ let slow_computation_with_timeout_entry =
 (** Forks a child that should exit after 2 seconds. *)
 let test_timeout_no_input () =
   let handle = Daemon.spawn
-      ~channel_mode:`socket ~log_mode:Daemon.Parent_streams
-      slow_computation_with_timeout_entry 2 in
+    ~channel_mode:`socket Daemon.(null_fd (), null_fd ())
+    slow_computation_with_timeout_entry 2 in
   let _ = Unix.select [] [] [] 2.2 in
   let pid = handle.Daemon.pid in
   let result = match Unix.waitpid [Unix.WNOHANG] pid with
@@ -171,7 +171,7 @@ let slow_computation_after_io_entry =
 let test_timeout_after_input () =
   (** This process times out after 2 seconds and exits. *)
   let handle = Daemon.spawn
-      ~channel_mode:`socket ~log_mode:Daemon.Parent_streams
+      ~channel_mode:`socket (Unix.stdout, Unix.stderr)
       slow_computation_after_io_entry 2 in
   let (_ic, oc) = handle.Daemon.channels in
   (** Wait 1.1 seconds before sending data on the in channel. *)

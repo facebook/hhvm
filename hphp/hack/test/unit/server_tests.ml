@@ -15,7 +15,6 @@ let test_process_data =
     start_t = 0.0;
     in_fd = Unix.stdin;
     out_fd = Unix.stdout;
-    log_file = "";
     last_request_handoff = ref 0.0;
   }
 

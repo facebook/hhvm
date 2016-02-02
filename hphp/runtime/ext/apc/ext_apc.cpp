@@ -551,14 +551,18 @@ public:
 
 class ApcLoadWorker {
 public:
-  void onThreadEnter() {}
+  void onThreadEnter() {
+    g_context.getCheck();
+  }
   void doJob(std::shared_ptr<ApcLoadJob> job) {
     char func_name[128];
     MemoryManager::SuppressOOM so(MM());
     snprintf(func_name, sizeof(func_name), "_apc_load_%d", job->m_index);
     apc_load_func(job->m_handle, func_name)();
   }
-  void onThreadExit() {}
+  void onThreadExit() {
+    hphp_memory_cleanup();
+  }
 };
 
 static size_t s_const_map_size = 0;

@@ -34,8 +34,6 @@
 // And start the blasted C stuff again
 extern "C" {
 
-#define HAVE_LIBJPEG
-#define HAVE_LIBPNG
 #define emalloc HPHP::req::malloc
 #define ecalloc HPHP::req::calloc
 #define efree HPHP::req::free

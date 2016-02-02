@@ -1,0 +1,10 @@
+
+Warning: include(non-existing-file.php): File not found in %s/include-error1.php on line 2
+
+Warning: include(non-existing-file.php): File not found in %s/include-error1.php on line 3
+
+Warning: include_once(non-existing-file.php): File not found in %s/include-error1.php on line 4
+
+Warning: include_once(non-existing-file.php): File not found in %s/include-error1.php on line 5
+
+Fatal error: require(non-existing-file.php): File not found in %s/include-error1.php on line 6

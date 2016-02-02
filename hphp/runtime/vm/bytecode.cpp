@@ -6493,7 +6493,7 @@ OPTBLD_INLINE void iopCIterFree(IOP_ARGS) {
   it->cfree();
 }
 
-OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags) {
+OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags, const char* opName) {
   Cell* c1 = vmStack().topC();
   auto path = String::attach(prepareKey(*c1));
   bool initial;
@@ -6527,9 +6527,9 @@ OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags) {
   vmStack().popC();
   if (unit == nullptr) {
     if (flags & InclOpFlags::Fatal) {
-      raise_error("File not found: %s", path.data());
+      raise_error("%s(%s): File not found", opName, path.data());
     } else {
-      raise_warning("File not found: %s", path.data());
+      raise_warning("%s(%s): File not found", opName, path.data());
     }
     vmStack().pushBool(false);
     return;
@@ -6544,23 +6544,27 @@ OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags) {
 }
 
 OPTBLD_INLINE void iopIncl(IOP_ARGS) {
-  inclOp(pc, InclOpFlags::Default);
+  inclOp(pc, InclOpFlags::Default, "include");
 }
 
 OPTBLD_INLINE void iopInclOnce(IOP_ARGS) {
-  inclOp(pc, InclOpFlags::Once);
+  inclOp(pc, InclOpFlags::Once, "include_once");
 }
 
 OPTBLD_INLINE void iopReq(IOP_ARGS) {
-  inclOp(pc, InclOpFlags::Fatal);
+  inclOp(pc, InclOpFlags::Fatal, "require");
 }
 
 OPTBLD_INLINE void iopReqOnce(IOP_ARGS) {
-  inclOp(pc, InclOpFlags::Fatal | InclOpFlags::Once);
+  inclOp(pc, InclOpFlags::Fatal | InclOpFlags::Once, "require_once");
 }
 
 OPTBLD_INLINE void iopReqDoc(IOP_ARGS) {
-  inclOp(pc, InclOpFlags::Fatal | InclOpFlags::Once | InclOpFlags::DocRoot);
+  inclOp(
+    pc,
+    InclOpFlags::Fatal | InclOpFlags::Once | InclOpFlags::DocRoot,
+    "require_once"
+  );
 }
 
 OPTBLD_INLINE void iopEval(IOP_ARGS) {

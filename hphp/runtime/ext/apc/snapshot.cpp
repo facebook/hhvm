@@ -31,6 +31,12 @@
 #include "hphp/runtime/ext/fb/ext_fb.h" // fb_unserialize
 #include "hphp/util/logger.h"
 
+// ftello is 64-bit by default under OSX,
+// and ftello64 doesn't exist.
+#ifdef __APPLE__
+ALWAYS_INLINE static off_t ftello64(FILE* stream) { return ftello(stream); }
+#endif
+
 namespace HPHP {
 
 void SnapshotBuilder::writeToFile(const std::string& filename) {
@@ -53,13 +59,13 @@ void SnapshotBuilder::writeToFile(const std::string& filename) {
     write32(p.second.sSize);
   }
   // Disk
-  auto diskOffset = ftello(m_file);
+  auto diskOffset = ftello64(m_file);
   for (const auto& p : m_stringDisk) {
     // ...but remember to ignore it when we need the actual size.
     writeRaw(p.second.sAddr, abs(p.second.sSize) + 1); // \0
   }
   // Write real header, as we are confident the output is complete.
-  auto totalSize = ftello(m_file);
+  auto totalSize = ftello64(m_file);
   rewind(m_file);
   writeRaw(SnapshotHeader::makeValid(diskOffset, totalSize));
   fclose(m_file);

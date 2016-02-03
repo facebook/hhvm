@@ -200,6 +200,7 @@ MemoryManager::MemoryManager() {
 }
 
 MemoryManager::~MemoryManager() {
+  // TODO(9879201): Assert empty() once all existing leaks are fixed.
   for (auto r : m_root_handles) r->invalidate();
 }
 

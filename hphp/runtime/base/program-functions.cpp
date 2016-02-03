@@ -1040,10 +1040,6 @@ int execute_program(int argc, char **argv) {
     } catch (const Exception &e) {
       Logger::Error("Uncaught exception: %s", e.what());
       throw;
-    } catch (const FailedAssertion& fa) {
-      fa.print();
-      StackTraceNoHeap::AddExtraLogging("Assertion failure", fa.summary);
-      abort();
     } catch (const std::exception &e) {
       Logger::Error("Uncaught exception: %s", e.what());
       throw;

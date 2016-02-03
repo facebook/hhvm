@@ -28,9 +28,6 @@
 
 #include "hphp/util/trace.h"
 
-// Include last to localize effects to this file
-#include "hphp/util/assert-throw.h"
-
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 

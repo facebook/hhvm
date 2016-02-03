@@ -177,46 +177,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Exception class for throwing assertions.
- */
-struct FailedAssertion : std::exception {
-  FailedAssertion(const char* msg, const char* file, unsigned line,
-                  const char* func)
-      : msg(msg)
-      , file(file)
-      , line(line)
-      , func(func)
-      , summary(makeSummary()) {}
-
-  const char* what() const noexcept override {
-    return summary.c_str();
-  }
-
-  void print() const {
-    fputs(summary.c_str(), stderr);
-    fputc('\n', stderr);
-  }
-
-  const char* const msg;
-  const char* const file;
-  unsigned const line;
-  const char* const func;
-  const std::string summary;
-
- private:
-  std::string makeSummary() const {
-    char buf[4096];
-    if (snprintf(buf, sizeof(buf), "Failed assertion '%s' in %s at %s:%u",
-                 msg, func, file, line) >= sizeof(buf)) {
-      buf[sizeof(buf)-1] = '\0';
-    }
-    return std::string(buf);
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 #define assert_impl(cond, fail) \
   ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
 
@@ -226,19 +186,12 @@ struct FailedAssertion : std::exception {
 #define assert_fail_impl_no_log(e, msg) \
   ::HPHP::assert_fail_no_log(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
 
-#define assert_throw_fail_impl(e) \
-  throw ::HPHP::FailedAssertion(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
-
 #define always_assert(e)            assert_impl(e, assert_fail_impl(e, ""))
 #define always_assert_no_log(e)    assert_impl(e, \
                                         assert_fail_impl_no_log(e, ""))
 #define always_assert_log(e, l)     assert_impl(e, assert_fail_impl(e, l()))
 #define always_assert_flog(e, ...)  assert_impl(e, assert_fail_impl(e,        \
                                         ::folly::format(__VA_ARGS__).str()))
-#define always_assert_throw(e)      assert_impl(e, assert_throw_fail_impl(e))
-#define always_assert_throw_log(e, l)                   \
-  assert_impl(e, (::HPHP::assert_log_failure(#e, l()),  \
-                  assert_throw_fail_impl(e)))
 
 #undef assert
 
@@ -248,16 +201,12 @@ struct FailedAssertion : std::exception {
 #define assert_no_log(e) always_assert_no_log(e)
 #define assert_log(e, l) always_assert_log(e, l)
 #define assert_flog(e, ...) always_assert_flog(e, __VA_ARGS__)
-#define assert_throw(e) always_assert_throw(e)
-#define assert_throw_log(e, l) always_assert_throw_log(e, l)
 #else
 #define assert(e) static_cast<void>(0)
 #define assertx(e) static_cast<void>(0)
 #define assert_no_log(e) static_cast<void>(0)
 #define assert_log(e, l) static_cast<void>(0)
 #define assert_flog(e, ...) static_cast<void>(0)
-#define assert_throw(e) static_cast<void>(0)
-#define assert_throw_log(e, l) static_cast<void>(0)
 #endif
 
 const bool do_assert =

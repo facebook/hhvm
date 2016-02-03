@@ -159,7 +159,7 @@ void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
 
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.
-  mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
+  mcg->cgFixups().inProgressTailJumps.push_back(incoming);
 }
 
 void SrcRec::newTranslation(TransLoc loc,

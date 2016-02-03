@@ -465,7 +465,7 @@ void Vgen::emit(const mcprep& i) {
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
   smashMovq(mov_addr, (imm << 1) | 1);
 
-  mcg->cgFixups().m_addressImmediates.insert(reinterpret_cast<TCA>(~imm));
+  mcg->cgFixups().addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

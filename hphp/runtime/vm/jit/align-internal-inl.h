@@ -85,7 +85,7 @@ void align(CodeBlock& cb, Alignment alignment, AlignContext context,
                   is_aligned(cb.frontier(), AImpl::s_table[idx + 1])));
 
   if (fixups) {
-    mcg->cgFixups().m_alignFixups.emplace(
+    mcg->cgFixups().alignFixups.emplace(
       cb.frontier(),
       std::make_pair(alignment, context)
     );

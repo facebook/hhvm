@@ -1695,7 +1695,7 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
   }
 
   if (fixups) {
-    fixups->m_reusedStubs.emplace_back(ret);
+    fixups->reusedStubs.emplace_back(ret);
   }
   return ret;
 }
@@ -1722,7 +1722,7 @@ MCGenerator::syncWork() {
 
 // Get the address of the literal val in the global data section.
 // If it's not there, add it to the map in m_fixups, which will
-// be committed to m_literals when m_fixups.process() is called.
+// be committed to literals when m_fixups.process() is called.
 const uint64_t*
 MCGenerator::allocLiteral(uint64_t val) {
   auto it = m_literals.find(val);
@@ -1730,7 +1730,7 @@ MCGenerator::allocLiteral(uint64_t val) {
     assertx(*it->second == val);
     return it->second;
   }
-  auto& pending = m_fixups.m_literals;
+  auto& pending = m_fixups.literals;
   it = pending.find(val);
   if (it != pending.end()) {
     assertx(*it->second == val);
@@ -1780,7 +1780,7 @@ MCGenerator::reachedTranslationLimit(SrcKey sk,
 
 void
 MCGenerator::recordSyncPoint(CodeAddress frontier, Fixup fix) {
-  m_fixups.m_pendingFixups.push_back(PendingFixup(frontier, fix));
+  m_fixups.fixups.push_back(PendingFixup(frontier, fix));
 }
 
 /*
@@ -1795,67 +1795,67 @@ template <typename T> void ClearContainer(T& container) {
 void
 CodeGenFixups::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches) {
-  for (uint32_t i = 0; i < m_pendingFixups.size(); i++) {
-    TCA tca = m_pendingFixups[i].m_tca;
+  for (uint32_t i = 0; i < fixups.size(); i++) {
+    TCA tca = fixups[i].m_tca;
     assertx(mcg->isValidCodeAddress(tca));
-    mcg->fixupMap().recordFixup(tca, m_pendingFixups[i].m_fixup);
+    mcg->fixupMap().recordFixup(tca, fixups[i].m_fixup);
   }
-  ClearContainer(m_pendingFixups);
+  ClearContainer(fixups);
 
   auto& ctm = mcg->catchTraceMap();
-  for (auto const& pair : m_pendingCatchTraces) {
+  for (auto const& pair : catches) {
     if (auto pos = ctm.find(pair.first)) {
       *pos = pair.second;
     } else {
       ctm.insert(pair.first, pair.second);
     }
   }
-  ClearContainer(m_pendingCatchTraces);
+  ClearContainer(catches);
 
-  for (auto const& elm : m_pendingJmpTransIDs) {
+  for (auto const& elm : jmpTransIDs) {
     mcg->getJmpToTransIDMap()[elm.first] = elm.second;
   }
-  ClearContainer(m_pendingJmpTransIDs);
+  ClearContainer(jmpTransIDs);
 
-  mcg->literals().insert(m_literals.begin(), m_literals.end());
-  ClearContainer(m_literals);
+  mcg->literals().insert(literals.begin(), literals.end());
+  ClearContainer(literals);
 
   if (inProgressTailBranches) {
-    m_inProgressTailJumps.swap(*inProgressTailBranches);
+    inProgressTailJumps.swap(*inProgressTailBranches);
   }
-  assertx(m_inProgressTailJumps.empty());
+  assertx(inProgressTailJumps.empty());
 
-  for (auto& stub : m_reusedStubs) {
+  for (auto& stub : reusedStubs) {
     mcg->getDebugInfo()->recordRelocMap(stub, 0, "NewStub");
   }
-  ClearContainer(m_reusedStubs);
+  ClearContainer(reusedStubs);
 }
 
 void CodeGenFixups::clear() {
-  ClearContainer(m_pendingFixups);
-  ClearContainer(m_pendingCatchTraces);
-  ClearContainer(m_pendingJmpTransIDs);
-  ClearContainer(m_reusedStubs);
-  ClearContainer(m_addressImmediates);
-  ClearContainer(m_codePointers);
-  ClearContainer(m_bcMap);
-  ClearContainer(m_alignFixups);
-  ClearContainer(m_inProgressTailJumps);
-  ClearContainer(m_literals);
+  ClearContainer(fixups);
+  ClearContainer(catches);
+  ClearContainer(jmpTransIDs);
+  ClearContainer(reusedStubs);
+  ClearContainer(addressImmediates);
+  ClearContainer(codePointers);
+  ClearContainer(bcMap);
+  ClearContainer(alignFixups);
+  ClearContainer(inProgressTailJumps);
+  ClearContainer(literals);
 }
 
 bool CodeGenFixups::empty() const {
   return
-    m_pendingFixups.empty() &&
-    m_pendingCatchTraces.empty() &&
-    m_pendingJmpTransIDs.empty() &&
-    m_reusedStubs.empty() &&
-    m_addressImmediates.empty() &&
-    m_codePointers.empty() &&
-    m_bcMap.empty() &&
-    m_alignFixups.empty() &&
-    m_inProgressTailJumps.empty() &&
-    m_literals.empty();
+    fixups.empty() &&
+    catches.empty() &&
+    jmpTransIDs.empty() &&
+    reusedStubs.empty() &&
+    addressImmediates.empty() &&
+    codePointers.empty() &&
+    bcMap.empty() &&
+    alignFixups.empty() &&
+    inProgressTailJumps.empty() &&
+    literals.empty();
 }
 
 TCA MCGenerator::translateWork(const TranslArgs& args) {
@@ -2002,7 +2002,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   auto loc = maker.markEnd();
 
   if (args.align) {
-    m_fixups.m_alignFixups.emplace(
+    m_fixups.alignFixups.emplace(
       loc.mainStart(),
       std::make_pair(Alignment::CacheLine, AlignContext::Dead)
     );
@@ -2040,7 +2040,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   if (RuntimeOption::EvalProfileBC) {
     auto* unit = sk.unit();
     TransBCMapping prev{};
-    for (auto& cur : m_fixups.m_bcMap) {
+    for (auto& cur : m_fixups.bcMap) {
       if (!cur.aStart) continue;
       if (prev.aStart) {
         if (prev.bcStart < unit->bclen()) {
@@ -2067,7 +2067,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
     }
   }
 
-  auto tr = maker.rec(sk, transKindToRecord, region, m_fixups.m_bcMap,
+  auto tr = maker.rec(sk, transKindToRecord, region, m_fixups.bcMap,
                       std::move(m_annotations), useLLVM(), hasLoop);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
@@ -2175,7 +2175,7 @@ void MCGenerator::initUniqueStubs() {
 
 void MCGenerator::registerCatchBlock(CTCA ip, TCA block) {
   FTRACE(1, "registerCatchBlock: afterCall: {} block: {}\n", ip, block);
-  m_fixups.m_pendingCatchTraces.emplace_back(ip, block);
+  m_fixups.catches.emplace_back(ip, block);
 }
 
 folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
@@ -2583,7 +2583,7 @@ void MCGenerator::setJmpTransID(TCA jmp) {
 
   TransID transId = m_tx.profData()->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
-  m_fixups.m_pendingJmpTransIDs.emplace_back(jmp, transId);
+  m_fixups.jmpTransIDs.emplace_back(jmp, transId);
 }
 
 void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {

@@ -28,7 +28,6 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -250,7 +249,7 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
                   CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
                   CodeBlock& frozen, CodeAddress frozen_start,
                   AsmInfo* ai) {
-  auto const& bc_map = mcg->cgFixups().m_bcMap;
+  auto const& bc_map = mcg->cgFixups().bcMap;
   if (!bc_map.empty()) {
     TRACE(1, "bcmaps before relocation\n");
     for (UNUSED auto const& map : bc_map) {
@@ -305,7 +304,7 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
   }
 
 #ifndef NDEBUG
-  auto& ip = mcg->cgFixups().m_inProgressTailJumps;
+  auto& ip = mcg->cgFixups().inProgressTailJumps;
   for (size_t i = 0; i < ip.size(); ++i) {
     const auto& ib = ip[i];
     assertx(!main.contains(ib.toSmash()));

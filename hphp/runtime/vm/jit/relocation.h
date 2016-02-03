@@ -50,10 +50,10 @@ struct RelocationInfo {
   }
   void rewind(TCA start, TCA end);
   void markAddressImmediates(const std::set<TCA>& ai) {
-    m_addressImmediates.insert(ai.begin(), ai.end());
+    addressImmediates.insert(ai.begin(), ai.end());
   }
   bool isAddressImmediate(TCA ip) {
-    return m_addressImmediates.count(ip);
+    return addressImmediates.count(ip);
   }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
   const RangeVec& srcRanges() { return m_srcRanges; }
@@ -69,7 +69,7 @@ struct RelocationInfo {
    * the fixup map would want the address of the nop.
    */
   std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
-  std::set<TCA> m_addressImmediates;
+  std::set<TCA> addressImmediates;
 };
 
 /*

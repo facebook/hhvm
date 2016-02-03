@@ -48,7 +48,7 @@ IRMetadataUpdater::IRMetadataUpdater(const Venv& env, AsmInfo* asm_info)
   }
   if (mcg->tx().isTransDBEnabled() ||
       RuntimeOption::EvalJitUseVtuneAPI) {
-    m_bcmap = &mcg->cgFixups().m_bcMap;
+    m_bcmap = &mcg->cgFixups().bcMap;
   }
 }
 
@@ -182,7 +182,7 @@ bool emit(Venv& env, const bindjcc1st& i) {
 bool emit(Venv& env, const bindaddr& i) {
   env.stubs.push_back({nullptr, nullptr, i});
   mcg->setJmpTransID(TCA(i.addr));
-  mcg->cgFixups().m_codePointers.insert(i.addr);
+  mcg->cgFixups().codePointers.insert(i.addr);
   return true;
 }
 

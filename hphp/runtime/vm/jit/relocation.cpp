@@ -206,13 +206,13 @@ struct TransRelocInfoHelper {
       tri.incomingBranches.push_back(IncomingBranch(ib));
     }
     for (auto& ai : addressImmediates) {
-      tri.fixups.m_addressImmediates.insert(ai + code.base());
+      tri.fixups.addressImmediates.insert(ai + code.base());
     }
     for (auto& cp : codePointers) {
-      tri.fixups.m_codePointers.insert((TCA*)cp);
+      tri.fixups.codePointers.insert((TCA*)cp);
     }
     for (auto v : alignFixups) {
-      tri.fixups.m_alignFixups.emplace(v.first + code.base(), v.second);
+      tri.fixups.alignFixups.emplace(v.first + code.base(), v.second);
     }
     return tri;
   }
@@ -223,7 +223,7 @@ void relocateStubs(TransLoc& loc, TCA frozenStart, TCA frozenEnd,
                    CodeGenFixups& fixups) {
   auto const stubSize = svcreq::stub_size();
 
-  for (auto addr : fixups.m_reusedStubs) {
+  for (auto addr : fixups.reusedStubs) {
     if (!loc.contains(addr)) continue;
     always_assert(frozenStart <= addr);
 
@@ -396,10 +396,10 @@ String perfRelocMapInfo(
     SrcKey sk, int argNum,
     const GrowableVector<IncomingBranch>& incomingBranchesIn,
     CodeGenFixups& fixups) {
-  for (auto& stub : fixups.m_reusedStubs) {
+  for (auto& stub : fixups.reusedStubs) {
     mcg->getDebugInfo()->recordRelocMap(stub, 0, "NewStub");
   }
-  swap_trick(fixups.m_reusedStubs);
+  swap_trick(fixups.reusedStubs);
 
   TransRelocInfoHelper trih;
   trih.skInt = sk.toAtomicInt();
@@ -411,15 +411,15 @@ String perfRelocMapInfo(
 
   auto& code = mcg->code;
 
-  for (auto v : fixups.m_addressImmediates) {
+  for (auto v : fixups.addressImmediates) {
     trih.addressImmediates.emplace_back(v - code.base());
   }
 
-  for (auto v : fixups.m_codePointers) {
+  for (auto v : fixups.codePointers) {
     trih.codePointers.emplace_back((uint64_t)v);
   }
 
-  for (auto v : fixups.m_alignFixups) {
+  for (auto v : fixups.alignFixups) {
     trih.alignFixups.emplace_back(v.first - code.base(), v.second);
   }
 
@@ -475,7 +475,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest) {
 
   RelocationInfo rel;
   size_t num = 0;
-  assert(mcg->cgFixups().m_alignFixups.empty());
+  assert(mcg->cgFixups().alignFixups.empty());
   for (size_t sz = relocs.size(); num < sz; num++) {
     auto& reloc = relocs[num];
     if (ignoreEntry(reloc.sk)) continue;
@@ -493,7 +493,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest) {
                        (uintptr_t)start, dest.frontier() - start));
     }
   }
-  swap_trick(mcg->cgFixups().m_alignFixups);
+  swap_trick(mcg->cgFixups().alignFixups);
   assert(mcg->cgFixups().empty());
 
   x64::adjustForRelocation(rel);
@@ -576,7 +576,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest) {
   CodeGenFixups fixups;
   for (auto stub : liveStubs) {
     FTRACE(1, "Stub: 0x{:08x}\n", (uintptr_t)stub);
-    fixups.m_reusedStubs.emplace_back(stub);
+    fixups.reusedStubs.emplace_back(stub);
     always_assert(!rel.adjustedAddressAfter(stub));
     fprintf(newRelocMap, "%" PRIxPTR " 0 %s\n", uintptr_t(stub), "NewStub");
   }

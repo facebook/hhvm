@@ -88,25 +88,25 @@ struct PendingFixup {
 };
 
 struct CodeGenFixups {
-  std::vector<PendingFixup> m_pendingFixups;
-  std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
-  std::vector<std::pair<TCA,TransID>> m_pendingJmpTransIDs;
-  std::vector<TCA> m_reusedStubs;
-  std::set<TCA> m_addressImmediates;
-  std::set<TCA*> m_codePointers;
-  std::vector<TransBCMapping> m_bcMap;
-  std::multimap<TCA,std::pair<Alignment,AlignContext>> m_alignFixups;
-  GrowableVector<IncomingBranch> m_inProgressTailJumps;
-  LiteralMap m_literals;
+  std::vector<PendingFixup> fixups;
+  std::vector<std::pair<CTCA, TCA>> catches;
+  std::vector<std::pair<TCA,TransID>> jmpTransIDs;
+  std::vector<TCA> reusedStubs;
+  std::set<TCA> addressImmediates;
+  std::set<TCA*> codePointers;
+  std::vector<TransBCMapping> bcMap;
+  std::multimap<TCA,std::pair<Alignment,AlignContext>> alignFixups;
+  GrowableVector<IncomingBranch> inProgressTailJumps;
+  LiteralMap literals;
 
-  CodeBlock* m_tletMain{nullptr};
-  CodeBlock* m_tletCold{nullptr};
-  CodeBlock* m_tletFrozen{nullptr};
+  CodeBlock* mainCode{nullptr};
+  CodeBlock* coldCode{nullptr};
+  CodeBlock* frozenCode{nullptr};
 
   void setBlocks(CodeBlock* main, CodeBlock* cold, CodeBlock* frozen) {
-    m_tletMain = main;
-    m_tletCold = cold;
-    m_tletFrozen = frozen;
+    mainCode = main;
+    coldCode = cold;
+    frozenCode = frozen;
   }
 
   void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);

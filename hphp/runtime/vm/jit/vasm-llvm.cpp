@@ -951,7 +951,7 @@ struct LLVMEmitter {
 
         auto const alignment = cc == CC_None ? Alignment::SmashJmp
                                              : Alignment::SmashJcc;
-        mcg->cgFixups().m_alignFixups.emplace(
+        mcg->cgFixups().alignFixups.emplace(
           jmpIp,
           std::make_pair(alignment, AlignContext::Live)
         );
@@ -2039,7 +2039,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
     inst.target.toAtomicInt(),
     TransFlags{}.packed
   );
-  mcg->cgFixups().m_codePointers.insert(inst.addr);
+  mcg->cgFixups().codePointers.insert(inst.addr);
   mcg->setJmpTransID(TCA(inst.addr));
 }
 

@@ -419,7 +419,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * If the key is not present, an exception is thrown. If you don't want an
    * exception to be thrown, use `get()` instead.
    *
-   * `$v = $map->at($k)` is semantically equivalent to `$v = $map[$k]`.
+   * `$v = $map->at($k)` is equivalent to `$v = $map[$k]`.
    *
    * @param $k - the key from which to retrieve the value.
    *
@@ -445,11 +445,12 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * Stores a value into the current `Map` with the specified key, overwriting
    * the previous value associated with the key.
    *
-   * If the key is not present, an exception is thrown. If you want to add a
-   * value even if a key is not present, use `add()`.
+   * This method is equivalent to `Map::add()`. If the key to set does not exist,
+   * it is created. This is inconsistent with, for example, `Vector::set()`
+   * where if the key is not found, an exception is thrown.
    *
-   * Assuming the key is present, `$map->set($k,$v)` is semantically equivalent
-   * to `$map[$k] = $v` (except that `set()` returns the current `Map`).
+   * `$map->set($k,$v)` is equivalent to `$map[$k] = $v` (except that `set()`
+   * returns the current `Map`).
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
@@ -467,9 +468,10 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * current `Map` associated with each key, overwriting the previous value
    * associated with the key.
    *
-   * If a key is not present this `Map` that is present in the `Traversable`,
-   * an exception is thrown. If you want to add a value even if a key is not
-   * present, use `addAll()`.
+   * This method is equivalent to `Map::addAll()`. If a key to set does not
+   * exist in the Map that does exist in the `Traversable`, it is created. This
+   * is inconsistent with, for example, the method `Vector::setAll()` where if
+   * a key is not found, an exception is thrown.
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
@@ -524,9 +526,10 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   /**
    * Add a key/value pair to the end of the current `Map`.
    *
-   * If you want to overwrite a value, use `set()`.
+   * This method is equivalent to `Map::set()`. If the key in the  `Pair`
+   * exists in the `Map`,  the value associated with it is overwritten.
    *
-   * `$map->add($p)` is semantically equivalent to both `$map[$k] = $v` and
+   * `$map->add($p)` is equivalent to both `$map[$k] = $v` and
    * `$map[] = Pair {$k, $v}` (except that `add()` returns the `Map`).
    *
    * Future changes made to the current `Map` ARE reflected in the returned
@@ -543,7 +546,9 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * For every element in the provided `Traversable`, add a key/value pair into
    * the current `Map`.
    *
-   * If you want to overwrite values, use `setAll()`.
+   * This method is equivalent to `Map::setAll()`. If a key in the `Traversable`
+   * exists in the `Map`, then the value associated with that key in the `Map`
+   * is overwritten.
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.

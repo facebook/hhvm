@@ -1,6 +1,6 @@
 #/bin/sh
 
-if echo $1 | grep -q 'install_dir=' ; then
+if echo $1 | grep -q -e 'install_dir=' -e 'fbcode_dir=' ; then
   # Skip --install_dir and --fbcode_dir.
   shift 2
 fi

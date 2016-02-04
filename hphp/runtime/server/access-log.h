@@ -78,8 +78,8 @@ public:
   bool setThreadLog(const char *file);
   void clearThreadLog();
   void onNewRequest();
+  void flushAllWriters();
 private:
-
   bool m_initialized;
   Mutex m_lock;
   GetThreadDataFunc m_fGetThreadData;
@@ -97,6 +97,7 @@ public:
   virtual void init(const std::string& username,
                     AccessLog::GetThreadDataFunc fn) = 0;
   virtual void write(Transport* transport, const VirtualHost* vhost) = 0;
+  virtual void flush() {}
 protected:
   const LogChannel m_channel;
   FILE* m_filelog{nullptr};

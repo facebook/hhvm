@@ -154,6 +154,12 @@ void AccessLog::onNewRequest() {
   threadData->startTime = TimeStamp::Current();
 }
 
+void AccessLog::flushAllWriters() {
+  if (!m_initialized) return;
+  m_defaultWriter->flush();
+  for (auto& file : m_files) file->flush();
+}
+
 bool AccessLog::setThreadLog(const char *file) {
   return (m_fGetThreadData()->log = fopen(file, "a")) != nullptr;
 }

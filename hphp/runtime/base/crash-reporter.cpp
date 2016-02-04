@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -45,7 +46,7 @@ static void bt_handler(int sig) {
     }
   }
 
-  // In case we crash again in the signal hander or something
+  // In case we crash again in the signal handler or something
   signal(sig, SIG_DFL);
   IsCrashing = true;
 
@@ -120,6 +121,9 @@ static void bt_handler(int sig) {
 
   Logger::Error("Core dumped: %s", strsignal(sig));
   Logger::Error("Stack trace in %s", RuntimeOption::StackTraceFilename.c_str());
+
+  // Flush whatever access logs are still pending
+  HttpRequestHandler::GetAccessLog().flushAllWriters();
 
   // Give the debugger a chance to do extra logging if there are any attached
   // debugger clients.

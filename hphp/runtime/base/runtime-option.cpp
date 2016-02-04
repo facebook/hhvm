@@ -1258,7 +1258,7 @@ void RuntimeOption::Load(
                  "Server.PspCpuTimeoutSeconds", 0);
     Config::Bind(ServerMemoryHeadRoom, ini, config, "Server.MemoryHeadRoom", 0);
     Config::Bind(RequestMemoryMaxBytes, ini, config,
-                 "Server.RequestMemoryMaxBytes", (16l << 30)); // 16GiB
+                 "Server.RequestMemoryMaxBytes", (16LL << 30)); // 16GiB
     Config::Bind(ServerGracefulShutdownWait, ini,
                  config, "Server.GracefulShutdownWait", 0);
     Config::Bind(ServerHarshShutdown, ini, config, "Server.HarshShutdown",

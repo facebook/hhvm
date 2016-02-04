@@ -173,7 +173,7 @@ struct Div {
       raise_warning(Strings::DIVISION_BY_ZERO);
       if (RuntimeOption::PHP7_IntSemantics) {
         // PHP7 uses the IEEE definition (+/- INF and NAN).
-        return make_dbl(t / 0.0);
+        return make_dbl(ieeeDivByZero(t));
       } else {
         return make_tv<KindOfBoolean>(false);
       }

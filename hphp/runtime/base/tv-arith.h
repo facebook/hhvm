@@ -186,6 +186,25 @@ void cellBitNot(Cell&);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * PHP 7 requires IEEE compliance with the result of dividing a value by
+ * zero. MSVC warns about the direct division by zero, and the literal division
+ * may not be portable to all platforms, so abstract the division out so
+ * that we can both keep MSVC quiet, and also handle platforms that don't
+ * have the same semantics as x86_64.
+ */
+ALWAYS_INLINE
+#pragma warning(suppress: 4723)
+double ieeeDivByZero(double d) {
+#if defined(__x86_64__) || defined(_M_X64)
+  return d / 0.0;
+#else
+# error How does this platform handle division by zero?
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif

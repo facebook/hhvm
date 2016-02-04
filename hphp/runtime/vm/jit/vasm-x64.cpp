@@ -742,7 +742,7 @@ void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   if (inst.saveframe) {
     unit.blocks[b].code[i] = push{rvmfp()};
   } else {
-    unit.blocks[b].code[i] = subqi{8, reg::rsp, reg::rsp, unit.makeReg()};
+    unit.blocks[b].code[i] = lea{reg::rsp[-8], reg::rsp};
   }
 }
 
@@ -752,7 +752,7 @@ void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
 
 void lower(Vunit& unit, stubtophp& inst, Vlabel b, size_t i) {
   lower_impl(unit, b, i, [&] (Vout& v) {
-    v << addqi{8, reg::rsp, reg::rsp, v.makeReg()};
+    v << lea{reg::rsp[8], reg::rsp};
     v << popm{inst.fp[AROFF(m_savedRip)]};
   });
 }

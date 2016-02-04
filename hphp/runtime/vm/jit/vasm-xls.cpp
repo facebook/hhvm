@@ -648,22 +648,6 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp) {
       return -8;
     case Vinstr::pop:
       return 8;
-    case Vinstr::addqi: {
-      auto& i = inst.addqi_;
-      if (i.d == Vreg64(sp)) {
-        assertx(i.s1 == Vreg64(sp));
-        return i.s0.l();
-      }
-      return 0;
-    }
-    case Vinstr::subqi: {
-      auto& i = inst.subqi_;
-      if (i.d == Vreg64(sp)) {
-        assertx(i.s1 == Vreg64(sp));
-        return -i.s0.l();
-      }
-      return 0;
-    }
     case Vinstr::lea: {
       auto& i = inst.lea_;
       if (i.d == Vreg64(sp)) {

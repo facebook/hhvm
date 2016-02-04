@@ -1254,6 +1254,8 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
     return u.phi_group;
   };
 
+  auto const is_fixed = [&] (Vreg r) { return variables[r]->fixed(); };
+
   for (auto const b : ctx.blocks) {
     auto const& code = unit.blocks[b].code;
     if (code.empty()) continue;
@@ -1265,7 +1267,10 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
       // A phidef'd variable just need to be assigned a phi group if it doesn't
       // already have one (i.e., from handling a phijmp).
       auto const& defs = unit.tuples[first.phidef_.defs];
-      for (auto const r : defs) def_phi_group(r, true);
+      for (auto const r : defs) {
+        if (is_fixed(r)) continue;
+        def_phi_group(r, true);
+      }
     }
 
     if (last.op == Vinstr::phijmp) {
@@ -1281,6 +1286,8 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
       // corresponding phi def variable (allocating a new group if the def
       // variable has not already been assigned one).
       for (size_t i = 0, n = uses.size(); i < n; ++i) {
+        if (is_fixed(defs[i])) continue;
+
         auto const pgid = def_phi_group(defs[i], true);
         addPhiGroupMember(variables, phi_groups,
                           uses[i], last.pos, pgid, defs[i]);
@@ -1300,6 +1307,8 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
       assertx(uses.size() == taken_defs.size());
 
       for (size_t i = 0, n = uses.size(); i < n; ++i) {
+        if (is_fixed(next_defs[i]) || is_fixed(taken_defs[i])) continue;
+
         auto const next_pgid  = def_phi_group(next_defs[i], false);
         auto const taken_pgid = def_phi_group(taken_defs[i], false);
         auto pgid = next_pgid;

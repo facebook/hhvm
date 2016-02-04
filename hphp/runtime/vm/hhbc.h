@@ -1041,6 +1041,14 @@ inline bool isMemberFinalOp(Op op) {
   }
 }
 
+// true if the opcode body can set pc=0 to halt the interpreter.
+constexpr bool instrCanHalt(Op op) {
+  return op == OpRetC || op == OpRetV || op == OpNativeImpl ||
+         op == OpAwait || op == OpCreateCont ||
+         op == OpYield || op == OpYieldK ||
+         op == OpYieldFromDelegate;
+}
+
 int instrNumPops(PC opcode);
 int instrNumPushes(PC opcode);
 FlavorDesc instrInputFlavor(PC op, uint32_t idx);

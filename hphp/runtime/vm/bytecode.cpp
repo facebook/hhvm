@@ -7764,13 +7764,7 @@ TCA dispatchImpl() {
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \
     }                                                         \
-    if (UNLIKELY(!pc)) {                                      \
-      op = Op::name;                                          \
-      assert(op == OpRetC || op == OpRetV ||                  \
-             op == OpAwait || op == OpCreateCont ||           \
-             op == OpYield || op == OpYieldK ||               \
-             op == OpYieldFromDelegate ||                     \
-             op == OpNativeImpl);                             \
+    if (instrCanHalt(Op::name) && UNLIKELY(!pc)) {            \
       vmfp() = nullptr;                                       \
       /* We returned from the top VM frame in this nesting level. This means
        * m_savedRip in our ActRec must have been callToExit, which should've

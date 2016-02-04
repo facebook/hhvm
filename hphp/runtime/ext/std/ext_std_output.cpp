@@ -72,12 +72,9 @@ void HHVM_FUNCTION(ob_clean) {
 bool HHVM_FUNCTION(ob_flush) {
   int level = g_context->obGetLevel();
   if (level == 0) {
-    raise_notice("failed to flush buffer. No buffer to flush");
     return false;
   }
   if (!g_context->obFlush()) {
-    raise_notice("failed to flush buffer of %s (%d)",
-        g_context->obGetBufferName().c_str(), level);
     return false;
   }
   return true;

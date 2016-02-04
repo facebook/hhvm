@@ -60,15 +60,15 @@ class c_ExternalThreadEventWaitHandle;
  *   protected:
  *     void unserialize(Cell& result) const {
  *       if (UNLIKELY(m_failed)) {
- *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
- *           "An error has occurred while scheduling the operation"));
- *         throw_object(e);
+ *         SystemLib::throwInvalidOperationExceptionObject(
+ *           "An error has occurred while scheduling the operation"
+ *         );
  *       }
  *
  *       if (UNLIKELY(m_value > m_maxValue)) {
- *         Object e(SystemLib::AllocInvalidOperationExceptionObject(
- *           "Invalid response returned by Foo backend"));
- *         throw_object(e);
+ *         SystemLib::throwInvalidOperationExceptionObject(
+ *           "Invalid response returned by Foo backend"
+ *         );
  *       }
  *
  *       cellDup(make_tv<KindOfInt64>(m_value), result);
@@ -86,9 +86,9 @@ class c_ExternalThreadEventWaitHandle;
  * Object f_gen_foo(int max_value) {
  *   // validate user input early
  *   if (max_value < 0) {
- *     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
- *       "Expected max_value to be non-negative"));
- *     throw_object(e);
+ *     SystemLib::throwInvalidArgumentExceptionObject(
+ *       "Expected max_value to be non-negative"
+ *     );
  *   }
  *
  *   FooEvent* event = new FooEvent(max_value);
@@ -102,9 +102,9 @@ class c_ExternalThreadEventWaitHandle;
  *     // unknown exception; should be never reached
  *     assert(false);
  *     event->abandon();
- *     Object e(SystemLib::AllocInvalidOperationExceptionObject(
- *       "Encountered unexpected exception"));
- *     throw_object(e);
+ *     SystemLib::throwInvalidOperationExceptionObject(
+ *       "Encountered unexpected exception"
+ *     );
  *   }
  *   return event->getWaitHandle();
  * }

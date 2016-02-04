@@ -65,7 +65,7 @@ void IntlError::throwException(const char *format, ...) {
   char buffer[1024];
   vsnprintf(buffer, sizeof(buffer), format, args);
   va_end(args);
-  throw_object(SystemLib::AllocExceptionObject(buffer));
+  SystemLib::throwExceptionObject(buffer);
 }
 
 /////////////////////////////////////////////////////////////////////////////

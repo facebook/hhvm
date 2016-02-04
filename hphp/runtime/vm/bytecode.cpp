@@ -7369,9 +7369,7 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
     }
 
     if (UNLIKELY(wh == nullptr)) {
-      Object e(SystemLib::AllocBadMethodCallExceptionObject(
-        "Await on a non-WaitHandle"));
-      throw e;
+      SystemLib::throwBadMethodCallExceptionObject("Await on a non-WaitHandle");
     }
   }
 

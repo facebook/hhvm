@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_STACKTRACE_H_
 #define incl_HPHP_STACKTRACE_H_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>

@@ -62,9 +62,15 @@ set(INFOTABS_SOURCE "${GENERATED_DIR}/ext_hhvm_infotabs.cpp")
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE"
              "${CMAKE_CURRENT_SOURCE_DIR}/../../system/idl")
 
-# Generate ext_hhvm_infotabs.cpp.  Need to write an empty file first to set up
-# the generated directories.
-file(WRITE ${INFOTABS_SOURCE} "")
+# Generate ext_hhvm_infotabs.cpp.
+if (NOT EXISTS ${INFOTABS_SOURCE})
+  # There's no `mkdir -p` in CMake, but file(WRITE) will do the job
+  # Remove the file afterward though, so that the gen-infotabs command
+  # doesn't think there's nothing to do
+  file(WRITE ${INFOTABS_SOURCE} "")
+  file(REMOVE ${INFOTABS_SOURCE})
+endif()
+
 add_custom_command(
   OUTPUT ${INFOTABS_SOURCE}
   DEPENDS ${CXX_HEADERS} ${HPHP_IDLS} gen-infotabs

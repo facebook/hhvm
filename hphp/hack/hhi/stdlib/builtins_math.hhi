@@ -63,3 +63,4 @@ function mt_getrandmax();
 function mt_srand($seed = null);
 function mt_rand($min = 0, $max = -1 /* mt_getrandmax */ );
 function lcg_value();
+function intdiv(int $numerator, int $denominator): int;

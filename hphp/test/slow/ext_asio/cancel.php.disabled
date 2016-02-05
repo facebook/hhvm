@@ -3,13 +3,7 @@
 
 class OperationCanceledException extends Exception { }
 
-class PhpAwaitable implements Awaitable {
-  public function getWaitHandle() {
-    return HH\Asio\null();
-  }
-}
-
-class CatAwaitable implements Awaitable {
+class CatWrapper {
   private resource $proc;
   private array $pipes;
 
@@ -32,10 +26,6 @@ class CatAwaitable implements Awaitable {
     proc_close($this->proc);
   }
 
-  public function __destuct() {
-    $this->close();
-  }
-
   public function complete(): void {
     fwrite($this->pipes[0], "done\n");
     fflush($this->pipes[0]);
@@ -55,7 +45,7 @@ function testCancelInvalidAwaitables() {
   echo "=== testCancelInvalidAwaitables ===\n";
   try {
     // try canceling something, that is not WaitHandle
-    HH\Asio\cancel(new PhpAwaitable, new OperationCanceledException);
+    HH\Asio\cancel(HH\Asio\null(), new OperationCanceledException);
     echo "Fail\n";
   } catch(Exception $e) {
     echo "ok\n";
@@ -71,12 +61,12 @@ function testCancelInvalidAwaitables() {
 
 async function testCancelExternalThreadEventBeforeAwait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventBeforeAwait ===\n";
-  $awaitable = new CatAwaitable();
-  $wh = $awaitable->getWaitHandle();
+  $cat = new CatWrapper();
+  $wh = $cat->getWaitHandle();
   var_dump(HH\Asio\cancel($wh, new OperationCanceledException) == true);
   $completion = async {
     await reschedule();
-    $awaitable->complete();
+    $cat->complete();
   };
 
   echo "before await\n";
@@ -92,16 +82,16 @@ async function testCancelExternalThreadEventBeforeAwait(): Awaitable<void> {
   } catch (OperationCanceledException $e) {
     echo "operation was canceled\n";
   }
-  $awaitable->close();
+  $cat->close();
 }
 
 async function testCancelExternalThreadEventAfterAwait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventAfterAwait ===\n";
-  $awaitable = new CatAwaitable();
-  $wh = $awaitable->getWaitHandle();
+  $cat = new CatWrapper();
+  $wh = $cat->getWaitHandle();
   $completion = async {
     await reschedule();
-    $awaitable->complete();
+    $cat->complete();
   };
 
   echo "before await\n";
@@ -118,16 +108,16 @@ async function testCancelExternalThreadEventAfterAwait(): Awaitable<void> {
   $res = await $wh;             // await again
   var_dump($res == STREAM_AWAIT_READY);
 
-  $awaitable->close();
+  $cat->close();
 }
 
 async function testCancelExternalThreadEventDuringAwait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventDuringAwait ===\n";
-  $awaitable = new CatAwaitable();
-  $wh = $awaitable->getWaitHandle();
+  $cat = new CatWrapper();
+  $wh = $cat->getWaitHandle();
   $completion = async {
     await reschedule(1);        // after $cancelation
-    $awaitable->complete();
+    $cat->complete();
   };
   $cancelation = async {
     await reschedule(0);        // before $completion
@@ -147,13 +137,13 @@ async function testCancelExternalThreadEventDuringAwait(): Awaitable<void> {
   } catch (OperationCanceledException $e) {
     echo "operation was canceled\n";
   }
-  $awaitable->close();
+  $cat->close();
 }
 
 async function testCancelExternalThreadEventFromBeginIOWait(): Awaitable<void> {
   echo "=== testCancelExternalThreadEventFromBeginIOWait ===\n";
-  $awaitable = new CatAwaitable();
-  $wh = $awaitable->getWaitHandle();
+  $cat = new CatWrapper();
+  $wh = $cat->getWaitHandle();
 
   WaitHandle::setOnIOWaitEnterCallback(function() use ($wh) {
       echo "io wait enter\n";
@@ -177,9 +167,9 @@ async function testCancelExternalThreadEventFromBeginIOWait(): Awaitable<void> {
   // clean up to avoid leaking libevent watch
   // this is still wrong, since libevent 1.4 (used by hphp) does not support
   // multiple events for same FD. But it gets us to predictable state.
-  $awaitable->complete();
-  await $awaitable->getWaitHandle();
-  $awaitable->close();
+  $cat->complete();
+  await $cat->getWaitHandle();
+  $cat->close();
 }
 
 async function testCancelSleepBeforeAwait(): Awaitable<void> {

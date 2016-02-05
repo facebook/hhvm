@@ -165,7 +165,7 @@ inline ArraySpec::ArraySpec(const Shape* shape)
 {}
 
 inline folly::Optional<ArrayData::ArrayKind> ArraySpec::kind() const {
-  auto kind = m_kind;
+  auto kind = static_cast<ArrayData::ArrayKind>(m_kind);
   return (m_sort & HasKind) ? folly::make_optional(kind) : folly::none;
 }
 

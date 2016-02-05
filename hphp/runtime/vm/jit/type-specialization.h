@@ -116,8 +116,8 @@ private:
    */
   union {
     struct {
-      SortOf m_sort : 8;
-      ArrayData::ArrayKind m_kind : 8;
+      uintptr_t m_sort : 8;
+      uintptr_t m_kind : 8;
       uintptr_t m_ptr : 48;
     };
     uintptr_t m_bits;
@@ -194,14 +194,19 @@ private:
   /*
    * Sort tag.
    */
-  enum SortOf : uint8_t { IsTop, IsBottom, IsSub, IsExact, };
+  enum SortOf : uint8_t {
+    IsTop,
+    IsBottom,
+    IsSub,
+    IsExact,
+  };
 
   /*
    * Data members.
    */
   union {
     struct {
-      SortOf m_sort : 8;
+      uintptr_t m_sort : 8;
       uintptr_t m_ptr : 56;
     };
     uintptr_t m_bits;

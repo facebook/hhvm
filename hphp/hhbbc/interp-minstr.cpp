@@ -1166,21 +1166,19 @@ void mergePaths(ISS& env, A a, B b) {
 }
 
 /*
- * Helpers to set the MOpFlags immediate of a bytecode struct, regardless of
- * its position. All users of these functions start with the flags set to Warn.
+ * Helpers to set the MOpFlags immediate of a bytecode struct, whether it's
+ * subop2 for Base* opcodes or subop1 for a Dim. All users of these functions
+ * start with the flags set to Warn.
  */
 template<typename BC>
-typename std::enable_if<std::is_same<decltype(BC::subop1), MOpFlags>{}>::type
-setMOpFlags(BC& op, MOpFlags flags) {
-  assert(op.subop1 == MOpFlags::Warn);
-  op.subop1 = flags;
-}
-
-template<typename BC>
-typename std::enable_if<std::is_same<decltype(BC::subop2), MOpFlags>{}>::type
-setMOpFlags(BC& op, MOpFlags flags) {
+void setMOpFlags(BC& op, MOpFlags flags) {
   assert(op.subop2 == MOpFlags::Warn);
   op.subop2 = flags;
+}
+
+void setMOpFlags(bc::Dim& op, MOpFlags flags) {
+  assert(op.subop1 == MOpFlags::Warn);
+  op.subop1 = flags;
 }
 
 folly::Optional<MOpFlags> fpassFlags(ISS& env, int32_t arg) {

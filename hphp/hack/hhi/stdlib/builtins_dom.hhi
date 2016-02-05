@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -91,7 +91,8 @@ class DOMComment extends DOMCharacterData {
 
 class DOMDocument extends DOMNode {
   public string $actualEncoding;
-  public DOMConfiguration $config;
+  //public DOMConfiguration $config; // Class undefined: DOMConfiguration - https://bugs.php.net/bug.php?id=55012
+  public mixed $config;
   public DOMDocumentType $doctype;
   public DOMElement $documentElement;
   public string $documentURI;

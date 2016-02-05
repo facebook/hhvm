@@ -81,10 +81,6 @@ void truncateMap(Container& c, SrcKey final) {
 
 PGORegionMode pgoRegionMode(const Func& func) {
   auto& s = RuntimeOption::EvalJitPGORegionSelector;
-  if ((s == "wholecfg" || s == "hotcfg") &&
-      RuntimeOption::EvalJitPGOCFGHotFuncOnly && !(func.attrs() & AttrHot)) {
-    return PGORegionMode::Hottrace;
-  }
   if (s == "hottrace") return PGORegionMode::Hottrace;
   if (s == "hotblock") return PGORegionMode::Hotblock;
   if (s == "hotcfg")   return PGORegionMode::HotCFG;

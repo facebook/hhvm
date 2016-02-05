@@ -417,7 +417,7 @@ PrologueCallersRec* ProfData::findPrologueCallersRec(const Func* func,
                                                      int nArgs) const {
   TransID tid = prologueTransId(func, nArgs);
   if (tid == kInvalidTransID) {
-    assertx(RuntimeOption::EvalJitPGOHotOnly && !(func->attrs() & AttrHot));
+    assertx(false);
     return nullptr;
   }
   assertx(transKind(tid) == TransKind::Proflogue);

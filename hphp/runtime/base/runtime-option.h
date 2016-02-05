@@ -520,8 +520,6 @@ public:
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    pgoRegionSelectorDefault())      \
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
-  F(bool,     JitPGOHotOnly,           false)                           \
-  F(bool,     JitPGOCFGHotFuncOnly,    false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \

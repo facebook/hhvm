@@ -71,7 +71,7 @@ Variant (*PropAccessorMap::get(const String& name))(const Object& this_) {
 }
 
 void (*PropAccessorMap::set(const String& name))
-     (const Object& this_, Variant& value) {
+     (const Object& this_, const Variant& value) {
   return (*lookupProp(name))->set;
 }
 
@@ -101,7 +101,7 @@ Variant getProp(const Object& obj, const String& name) {
   return nph->get(obj, name);
 }
 
-Variant setProp(const Object& obj, const String& name, Variant& value) {
+Variant setProp(const Object& obj, const String& name, const Variant& value) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assert(nph);
   assert(nph->set);

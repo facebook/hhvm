@@ -708,7 +708,7 @@ static Variant mysqli_driver_reconnect_get(const Object& this_) {
   return *getRawProp(this_, s_reconnect, s_mysqli_driver);
 }
 
-void mysqli_driver_reconnect_set(const Object& this_, Variant& value) {
+void mysqli_driver_reconnect_set(const Object& this_, const Variant& value) {
   this_->o_set(s_reconnect, value, s_mysqli_driver);
 }
 
@@ -716,7 +716,7 @@ static Variant mysqli_driver_report_mode_get(const Object& this_) {
   return *getRawProp(this_, s_report_mode, s_mysqli_driver);
 }
 
-void mysqli_driver_report_mode_set(const Object& this_, Variant& value) {
+void mysqli_driver_report_mode_set(const Object& this_, const Variant& value) {
   this_->o_set(s_report_mode, value, s_mysqli_driver);
 }
 

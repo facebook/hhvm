@@ -2123,6 +2123,25 @@ Variant HHVM_METHOD(DOMNode, appendChild,
   return create_node_object(new_child, data->doc());
 }
 
+DOMNode& DOMNode::operator=(const DOMNode& copy) {
+  if (auto copyNode = copy.nodep()) {
+    auto newNode = xmlDocCopyNode(copyNode, copyNode->doc, true /* deep */);
+    setNode(newNode);
+    if (auto d = copy.doc()) {
+      setDoc(std::move(d));
+    }
+    return *this;
+  }
+
+  if (m_node) {
+    assert(m_node->getCache() &&
+           Native::data<DOMNode>(m_node->getCache()) == this);
+    m_node->clearCache();
+    m_node = nullptr;
+  }
+  return *this;
+}
+
 Variant HHVM_METHOD(DOMNode, cloneNode,
                     bool deep /* = false */) {
   auto* data = Native::data<DOMNode>(this_);

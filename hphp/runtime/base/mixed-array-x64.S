@@ -7,10 +7,10 @@
 ETCH_SECTION(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE)
         .globl    _ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE
 
-ETCH_TYPE(ETCH_NAME(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE), @function)
-
+        ETCH_TYPE(ETCH_NAME(hashHelper_NvGetStr), @function)
 ETCH_NAME(hashHelper_NvGetStr):
-ETCH_LABEL(hashHelper_NvGetStr):
+        CFI(startproc)
+
         mov       0x10(%rsi), %ecx      // key->size()
         mov       (%rsi), %r9           // key->data()
         not       %edx                  // initialize to -1 (assert: it was 0)
@@ -36,10 +36,15 @@ ETCH_LABEL(hend):
         or        %edx, 0x14(%rsi)
         jmp       ETCH_LABEL(hasHash)
 
+        CFI(endproc)
+        ETCH_SIZE(hashHelper_NvGetStr)
+
 /*
  * HPHP::MixedArray::NvGetStr(const ArrayData* ad, const StringData* k);
  */
+
         ETCH_ALIGN16
+        ETCH_TYPE(ETCH_NAME(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE), @function)
 ETCH_NAME(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE):
         CFI(startproc)
 
@@ -54,7 +59,7 @@ ETCH_NAME(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE):
         lea       (%rax, %rax, 8), %rax
         lea       (%rdi, %rax, 8), %r10 // ad->hashTab()
         and       $0x7fffffff, %edx
-        jz        ETCH_LABEL(hashHelper_NvGetStr)
+        jz        ETCH_NAME(hashHelper_NvGetStr)
 
 ETCH_LABEL(hasHash):
         xor       %r9, %r9              // probe count

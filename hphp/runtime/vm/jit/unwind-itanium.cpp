@@ -249,7 +249,7 @@ tc_unwind_personality(int version,
 
     auto const ip = TCA(_Unwind_GetIP(context));
 
-    auto& stubs = mcg->tx().uniqueStubs;
+    auto& stubs = mcg->ustubs();
     if (ip == stubs.endCatchHelperPast) {
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
       return _URC_CONTINUE_UNWIND;
@@ -288,7 +288,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     // address is in functionEnterHelper or callToExit, rvmfp() won't contain a
     // real VM frame, so we skip those.
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
-    if (savedRip == mcg->tx().uniqueStubs.callToExit) {
+    if (savedRip == mcg->ustubs().callToExit) {
       ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
       return {nullptr, newFp};
     }
@@ -317,7 +317,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     }
 
     ITRACE(1, "No catch trace entry for {}; continuing\n",
-           mcg->tx().uniqueStubs.describe(savedRip));
+           mcg->ustubs().describe(savedRip));
   }
 }
 

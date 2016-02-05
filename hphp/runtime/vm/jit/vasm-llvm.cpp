@@ -2913,7 +2913,7 @@ void LLVMEmitter::emit(const phpret& inst) {
 
 void LLVMEmitter::emit(const leavetc& inst) {
   auto const exit = reinterpret_cast<intptr_t>(
-    mcg->tx().uniqueStubs.callToExit
+    mcg->ustubs().callToExit
   );
   auto const exit_ptr = m_irb.CreateIntToPtr(
     cns(exit),

@@ -237,7 +237,7 @@ void Func::initPrologues(int numParams) {
     return;
   }
 
-  auto const& stubs = mcg->tx().uniqueStubs;
+  auto const& stubs = mcg->ustubs();
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
@@ -586,7 +586,7 @@ int Func::numPrologues() const {
 }
 
 void Func::resetPrologue(int numParams) {
-  auto const& stubs = mcg->tx().uniqueStubs;
+  auto const& stubs = mcg->ustubs();
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 

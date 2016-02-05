@@ -37,7 +37,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE bool isPrologueStub(TCA addr) {
-  return addr == mcg->tx().uniqueStubs.fcallHelperThunk;
+  return addr == mcg->ustubs().fcallHelperThunk;
 }
 
 vixl::Register X(Vreg64 r) {
@@ -72,7 +72,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   a.  Br    (rAsm);
 
   a.  bind  (&target_data);
-  a.  dc64  (mcg->tx().uniqueStubs.funcPrologueRedispatch);
+  a.  dc64  (mcg->ustubs().funcPrologueRedispatch);
   a.  bind  (&after_data);
 }
 

@@ -897,7 +897,7 @@ TCA UniqueStubs::add(const char* name, TCA start) {
   return start;
 }
 
-std::string UniqueStubs::describe(TCA address) {
+std::string UniqueStubs::describe(TCA address) const {
   auto raw = [address] { return folly::sformat("{}", address); };
   if (m_ranges.empty()) return raw();
 
@@ -925,7 +925,7 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
     v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
   }
   v << copy{v.cns(sk.pc()), rarg(0)};
-  v << jmpi{mcg->tx().uniqueStubs.interpHelper, arg_regs(1)};
+  v << jmpi{mcg->ustubs().interpHelper, arg_regs(1)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

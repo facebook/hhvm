@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
@@ -38,7 +37,7 @@ namespace {
 constexpr auto kFuncGuardLen = 0x38;
 
 ALWAYS_INLINE bool isPrologueStub(TCA addr) {
-  return addr == mcg->tx().uniqueStubs.fcallHelperThunk;
+  return addr == mcg->ustubs().fcallHelperThunk;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,7 +59,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   a.  ld     (tmp2, rvmfp()[AROFF(m_func)]);
   a.  cmpld  (tmp1, tmp2);
 
-  a.  branchAuto(mcg->tx().uniqueStubs.funcPrologueRedispatch,
+  a.  branchAuto(mcg->ustubs().funcPrologueRedispatch,
                   ppc64_asm::BranchConditions::NotEqual);
 
   DEBUG_ONLY auto guard = funcGuardFromPrologue(a.frontier(), func);

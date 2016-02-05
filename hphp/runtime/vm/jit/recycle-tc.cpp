@@ -261,7 +261,7 @@ void reclaimFunction(const Func* func) {
   Trace::Indent _i;
 
   auto& data = it->second;
-  auto& us = mcg->tx().uniqueStubs;
+  auto& us = mcg->ustubs();
 
   ITRACE(1, "Smashing prologues\n");
   func->smashPrologues();

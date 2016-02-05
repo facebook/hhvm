@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
 #define incl_HPHP_JIT_UNIQUE_STUBS_H_
 
@@ -394,7 +395,7 @@ struct UniqueStubs {
    *
    * Otherwise, return a string representation of the raw address: "0xabcdef".
    */
-  std::string describe(TCA addr);
+  std::string describe(TCA addr) const;
 
 private:
   struct StubRange {

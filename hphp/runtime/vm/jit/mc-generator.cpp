@@ -352,7 +352,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   bool setFuncBody = func->getDVFunclets().size() == 0;
 
-  func->setFuncBody(m_tx.uniqueStubs.funcBodyHelperThunk);
+  func->setFuncBody(ustubs().funcBodyHelperThunk);
 
   // Invalidate SrcDB's entries for all func's SrcKeys.
   invalidateFuncProfSrcKeys(func);
@@ -647,7 +647,7 @@ MCGenerator::translate(const TranslArgs& args) {
 
 TCA MCGenerator::getFuncBody(Func* func) {
   TCA tca = func->getFuncBody();
-  if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
+  if (tca != ustubs().funcBodyHelperThunk) return tca;
 
   DVFuncletsVec dvs = func->getDVFunclets();
 
@@ -655,7 +655,7 @@ TCA MCGenerator::getFuncBody(Func* func) {
     LeaseHolder writer(Translator::WriteLease());
     if (!writer) return nullptr;
     tca = func->getFuncBody();
-    if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
+    if (tca != ustubs().funcBodyHelperThunk) return tca;
     tca = genFuncBodyDispatch(func, dvs);
     func->setFuncBody(tca);
   } else {
@@ -715,7 +715,7 @@ bool
 MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
                                  TCA& prologue) const {
   prologue = (TCA)func->getPrologue(paramIdx);
-  if (prologue != m_tx.uniqueStubs.fcallHelperThunk) {
+  if (prologue != ustubs().fcallHelperThunk) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
           func->fullName()->data(), paramIdx, prologue);
     assertx(isValidCodeAddress(prologue));
@@ -1332,7 +1332,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
         // jit, we need to deal with the suspend case here.
         assert(ar->m_r.m_aux.u_fcallAwaitFlag < 2);
         if (ar->m_r.m_aux.u_fcallAwaitFlag) {
-          start = m_tx.uniqueStubs.fcallAwaitSuspendHelper;
+          start = ustubs().fcallAwaitSuspendHelper;
           break;
         }
       }
@@ -1363,7 +1363,7 @@ TCA MCGenerator::handleServiceRequest(svcreq::ReqInfo& info) noexcept {
 
   if (start == nullptr) {
     vmpc() = sk.unit()->at(sk.offset());
-    start = m_tx.uniqueStubs.interpHelperSyncedPC;
+    start = ustubs().interpHelperSyncedPC;
   }
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
@@ -1438,7 +1438,7 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
     // We couldn't get a prologue address. Return a stub that will finish
     // entering the callee frame in C++, then call handleResume at the callee's
     // entry point.
-    start = m_tx.uniqueStubs.fcallHelperThunk;
+    start = ustubs().fcallHelperThunk;
   }
 
   return start;
@@ -1455,14 +1455,14 @@ TCA MCGenerator::handleFCallAwaitSuspend() {
 
   auto start = suspendStack(vmpc());
   tl_regState = VMRegState::DIRTY;
-  return start ? start : tx().uniqueStubs.resumeHelper;
+  return start ? start : ustubs().resumeHelper;
 }
 
 TCA MCGenerator::handleResume(bool interpFirst) {
   assert_native_stack_aligned();
   FTRACE(1, "handleResume({})\n", interpFirst);
 
-  if (!vmRegsUnsafe().pc) return m_tx.uniqueStubs.callToExit;
+  if (!vmRegsUnsafe().pc) return ustubs().callToExit;
 
   tl_regState = VMRegState::CLEAN;
 
@@ -2167,7 +2167,7 @@ void MCGenerator::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code).
                             hot(m_tx.useAHot()));
-  m_tx.uniqueStubs.emitAll();
+  m_ustubs.emitAll();
   m_fixups.process(nullptr); // in case we generated literals
 }
 

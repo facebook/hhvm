@@ -138,14 +138,14 @@ bool is_empty_catch(const Vblock& block) {
   return block.code.size() == 2 &&
          block.code[0].op == Vinstr::landingpad &&
          block.code[1].op == Vinstr::jmpi &&
-         block.code[1].jmpi_.target == mcg->tx().uniqueStubs.endCatchHelper;
+         block.code[1].jmpi_.target == mcg->ustubs().endCatchHelper;
 }
 
 void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
   bool const is_empty = is_empty_catch(env.unit.blocks[p.target]);
 
   auto const catch_target = is_empty
-    ? mcg->tx().uniqueStubs.endCatchHelper
+    ? mcg->ustubs().endCatchHelper
     : env.addrs[p.target];
   assertx(catch_target);
 

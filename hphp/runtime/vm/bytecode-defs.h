@@ -25,10 +25,10 @@ namespace HPHP {
 bool isReturnHelper(void* address);
 
 inline void ActRec::setReturnVMExit() {
-  assert(isReturnHelper(jit::mcg->tx().uniqueStubs.callToExit));
+  assert(isReturnHelper(jit::mcg->ustubs().callToExit));
   m_sfp = nullptr;
   m_savedRip =
-    reinterpret_cast<uintptr_t>(jit::mcg->tx().uniqueStubs.callToExit);
+    reinterpret_cast<uintptr_t>(jit::mcg->ustubs().callToExit);
   m_soff = 0;
 }
 

@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 
 namespace HPHP { namespace jit {
 
@@ -158,6 +159,7 @@ public:
   /*
    * Accessors.
    */
+  const UniqueStubs& ustubs() const { return m_ustubs; }
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
   CodeGenFixups& cgFixups() { return m_fixups; }
@@ -220,7 +222,7 @@ public:
   void enterTC(TCA start, ActRec* stashedAR);
  public:
   void enterTC() {
-    enterTC(m_tx.uniqueStubs.resumeHelper, nullptr);
+    enterTC(ustubs().resumeHelper, nullptr);
   }
   void enterTCAtPrologue(ActRec *ar, TCA start) {
     assertx(ar);
@@ -286,9 +288,8 @@ public:
    * in bytes. Note that the code may have been emitted by other threads.
    */
   void codeEmittedThisRequest(size_t& requestEntry, size_t& now) const;
-public:
-  CodeCache code;
 
+public:
   /*
    * This function is called by translated code to handle service requests,
    * which usually involve some kind of jump smashing. The returned address
@@ -393,8 +394,14 @@ private:
   bool dumpTCData();
   void drawCFG(std::ofstream& out) const;
 
+  /////////////////////////////////////////////////////////////////////////////
+
+public:
+  CodeCache code;
+
 private:
-  Translator         m_tx;
+  UniqueStubs m_ustubs;
+  Translator m_tx;
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;

@@ -56,8 +56,7 @@ namespace {
 struct Vgen {
   explicit Vgen(Venv& env)
     : text(env.text)
-    , assem(*env.cb)
-    , a(&assem)
+    , a(*env.cb)
     , current(env.current)
     , next(env.next)
     , jmps(env.jmps)
@@ -78,7 +77,7 @@ struct Vgen {
   // intrinsics
   void emit(const copy& i);
   void emit(const copy2& i);
-  void emit(const debugtrap& i) { a->int3(); }
+  void emit(const debugtrap& i) { a.int3(); }
   void emit(const fallthru& i) {}
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
@@ -90,10 +89,10 @@ struct Vgen {
 
   // native function abi
   void emit(const call& i);
-  void emit(const callm& i) { a->call(i.target); }
-  void emit(const callr& i) { a->call(i.target); }
+  void emit(const callm& i) { a.call(i.target); }
+  void emit(const callr& i) { a.call(i.target); }
   void emit(const calls& i);
-  void emit(const ret& i) { a->ret(); }
+  void emit(const ret& i) { a.ret(); }
 
   // stub function abi
   void emit(const stubret& i);
@@ -107,7 +106,7 @@ struct Vgen {
   void emit(const tailcallphp& i);
   void emit(const callarray& i);
   void emit(const contenter& i);
-  void emit(const leavetc&) { a->ret(); }
+  void emit(const leavetc&) { a.ret(); }
 
   // exceptions
   void emit(const landingpad& i) {}
@@ -116,140 +115,140 @@ struct Vgen {
   void emit(const unwind& i);
 
   // instructions
-  void emit(andb i) { commuteSF(i); a->andb(i.s0, i.d); }
-  void emit(andbi i) { binary(i); a->andb(i.s0, i.d); }
-  void emit(const andbim& i) { a->andb(i.s, i.m); }
-  void emit(andl i) { commuteSF(i); a->andl(i.s0, i.d); }
-  void emit(andli i) { binary(i); a->andl(i.s0, i.d); }
-  void emit(andq i) { commuteSF(i); a->andq(i.s0, i.d); }
-  void emit(andqi i) { binary(i); a->andq(i.s0, i.d); }
-  void emit(addli i) { binary(i); a->addl(i.s0, i.d); }
-  void emit(const addlm& i) { a->addl(i.s0, i.m); }
+  void emit(andb i) { commuteSF(i); a.andb(i.s0, i.d); }
+  void emit(andbi i) { binary(i); a.andb(i.s0, i.d); }
+  void emit(const andbim& i) { a.andb(i.s, i.m); }
+  void emit(andl i) { commuteSF(i); a.andl(i.s0, i.d); }
+  void emit(andli i) { binary(i); a.andl(i.s0, i.d); }
+  void emit(andq i) { commuteSF(i); a.andq(i.s0, i.d); }
+  void emit(andqi i) { binary(i); a.andq(i.s0, i.d); }
+  void emit(addli i) { binary(i); a.addl(i.s0, i.d); }
+  void emit(const addlm& i) { a.addl(i.s0, i.m); }
   void emit(const addlim& i);
-  void emit(addq i) { commuteSF(i); a->addq(i.s0, i.d); }
-  void emit(addqi i) { binary(i); a->addq(i.s0, i.d); }
+  void emit(addq i) { commuteSF(i); a.addq(i.s0, i.d); }
+  void emit(addqi i) { binary(i); a.addq(i.s0, i.d); }
   void emit(const addqim& i);
-  void emit(addsd i) { commute(i); a->addsd(i.s0, i.d); }
+  void emit(addsd i) { commute(i); a.addsd(i.s0, i.d); }
   void emit(const cloadq& i);
   void emit(const cmovq& i);
-  void emit(const cmpb& i) { a->cmpb(i.s0, i.s1); }
-  void emit(const cmpbi& i) { a->cmpb(i.s0, i.s1); }
-  void emit(const cmpbim& i) { a->cmpb(i.s0, i.s1); }
-  void emit(const cmpwim& i) { a->cmpw(i.s0, i.s1); }
-  void emit(const cmpl& i) { a->cmpl(i.s0, i.s1); }
-  void emit(const cmpli& i) { a->cmpl(i.s0, i.s1); }
-  void emit(const cmplim& i) { a->cmpl(i.s0, i.s1); }
-  void emit(const cmplm& i) { a->cmpl(i.s0, i.s1); }
-  void emit(const cmpq& i) { a->cmpq(i.s0, i.s1); }
-  void emit(const cmpqi& i) { a->cmpq(i.s0, i.s1); }
-  void emit(const cmpqim& i) { a->cmpq(i.s0, i.s1); }
-  void emit(const cmpqm& i) { a->cmpq(i.s0, i.s1); }
-  void emit(cmpsd i) { noncommute(i); a->cmpsd(i.s0, i.d, i.pred); }
-  void emit(const cqo& i) { a->cqo(); }
-  void emit(const cvttsd2siq& i) { a->cvttsd2siq(i.s, i.d); }
+  void emit(const cmpb& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpbim& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpwim& i) { a.cmpw(i.s0, i.s1); }
+  void emit(const cmpl& i) { a.cmpl(i.s0, i.s1); }
+  void emit(const cmpli& i) { a.cmpl(i.s0, i.s1); }
+  void emit(const cmplim& i) { a.cmpl(i.s0, i.s1); }
+  void emit(const cmplm& i) { a.cmpl(i.s0, i.s1); }
+  void emit(const cmpq& i) { a.cmpq(i.s0, i.s1); }
+  void emit(const cmpqi& i) { a.cmpq(i.s0, i.s1); }
+  void emit(const cmpqim& i) { a.cmpq(i.s0, i.s1); }
+  void emit(const cmpqm& i) { a.cmpq(i.s0, i.s1); }
+  void emit(cmpsd i) { noncommute(i); a.cmpsd(i.s0, i.d, i.pred); }
+  void emit(const cqo& i) { a.cqo(); }
+  void emit(const cvttsd2siq& i) { a.cvttsd2siq(i.s, i.d); }
   void emit(const cvtsi2sd& i);
   void emit(const cvtsi2sdm& i);
-  void emit(decl i) { unary(i); a->decl(i.d); }
-  void emit(const declm& i) { a->decl(i.m); }
-  void emit(decq i) { unary(i); a->decq(i.d); }
-  void emit(const decqm& i) { a->decq(i.m); }
-  void emit(divsd i) { noncommute(i); a->divsd(i.s0, i.d); }
-  void emit(imul i) { commuteSF(i); a->imul(i.s0, i.d); }
-  void emit(const idiv& i) { a->idiv(i.s); }
-  void emit(incl i) { unary(i); a->incl(i.d); }
-  void emit(const inclm& i) { a->incl(i.m); }
-  void emit(incq i) { unary(i); a->incq(i.d); }
-  void emit(const incqm& i) { a->incq(i.m); }
-  void emit(const incqmlock& i) { a->lock(); a->incq(i.m); }
-  void emit(const incwm& i) { a->incw(i.m); }
+  void emit(decl i) { unary(i); a.decl(i.d); }
+  void emit(const declm& i) { a.decl(i.m); }
+  void emit(decq i) { unary(i); a.decq(i.d); }
+  void emit(const decqm& i) { a.decq(i.m); }
+  void emit(divsd i) { noncommute(i); a.divsd(i.s0, i.d); }
+  void emit(imul i) { commuteSF(i); a.imul(i.s0, i.d); }
+  void emit(const idiv& i) { a.idiv(i.s); }
+  void emit(incl i) { unary(i); a.incl(i.d); }
+  void emit(const inclm& i) { a.incl(i.m); }
+  void emit(incq i) { unary(i); a.incq(i.d); }
+  void emit(const incqm& i) { a.incq(i.m); }
+  void emit(const incqmlock& i) { a.lock(); a.incq(i.m); }
+  void emit(const incwm& i) { a.incw(i.m); }
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
-  void emit(const jmpr& i) { a->jmp(i.target); }
-  void emit(const jmpm& i) { a->jmp(i.target); }
+  void emit(const jmpr& i) { a.jmp(i.target); }
+  void emit(const jmpm& i) { a.jmp(i.target); }
   void emit(const jmpi& i);
   void emit(const lea& i);
-  void emit(const leap& i) { a->lea(i.s, i.d); }
-  void emit(const loadups& i) { a->movups(i.s, i.d); }
-  void emit(const loadtqb& i) { a->loadb(i.s, i.d); }
-  void emit(const loadb& i) { a->loadb(i.s, i.d); }
-  void emit(const loadl& i) { a->loadl(i.s, i.d); }
-  void emit(const loadqp& i) { a->loadq(i.s, i.d); }
-  void emit(const loadsd& i) { a->movsd(i.s, i.d); }
-  void emit(const loadzbl& i) { a->loadzbl(i.s, i.d); }
-  void emit(const loadzbq& i) { a->loadzbl(i.s, Reg32(i.d)); }
-  void emit(const loadzlq& i) { a->loadl(i.s, Reg32(i.d)); }
-  void emit(const movb& i) { a->movb(i.s, i.d); }
-  void emit(const movl& i) { a->movl(i.s, i.d); }
-  void emit(const movzbl& i) { a->movzbl(i.s, i.d); }
-  void emit(const movzbq& i) { a->movzbl(i.s, Reg32(i.d)); }
-  void emit(mulsd i) { commute(i); a->mulsd(i.s0, i.d); }
-  void emit(neg i) { unary(i); a->neg(i.d); }
-  void emit(const nop& i) { a->nop(); }
-  void emit(not i) { unary(i); a->not(i.d); }
-  void emit(notb i) { unary(i); a->notb(i.d); }
-  void emit(const orbim& i) { a->orb(i.s0, i.m); }
-  void emit(const orwim& i) { a->orw(i.s0, i.m); }
-  void emit(orq i) { commuteSF(i); a->orq(i.s0, i.d); }
-  void emit(orqi i) { binary(i); a->orq(i.s0, i.d); }
-  void emit(const orqim& i) { a->orq(i.s0, i.m); }
-  void emit(const pop& i) { a->pop(i.d); }
-  void emit(const popm& i) { a->pop(i.d); }
-  void emit(psllq i) { binary(i); a->psllq(i.s0, i.d); }
-  void emit(psrlq i) { binary(i); a->psrlq(i.s0, i.d); }
-  void emit(const push& i) { a->push(i.s); }
-  void emit(const pushm& i) { a->push(i.s); }
-  void emit(const roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
-  void emit(const sarq& i) { unary(i); a->sarq(i.d); }
-  void emit(sarqi i) { binary(i); a->sarq(i.s0, i.d); }
-  void emit(const setcc& i) { a->setcc(i.cc, i.d); }
-  void emit(shlli i) { binary(i); a->shll(i.s0, i.d); }
-  void emit(shlq i) { unary(i); a->shlq(i.d); }
-  void emit(shlqi i) { binary(i); a->shlq(i.s0, i.d); }
-  void emit(shrli i) { binary(i); a->shrl(i.s0, i.d); }
-  void emit(shrqi i) { binary(i); a->shrq(i.s0, i.d); }
-  void emit(const sqrtsd& i) { a->sqrtsd(i.s, i.d); }
-  void emit(const storeups& i) { a->movups(i.s, i.m); }
-  void emit(const storeb& i) { a->storeb(i.s, i.m); }
+  void emit(const leap& i) { a.lea(i.s, i.d); }
+  void emit(const loadups& i) { a.movups(i.s, i.d); }
+  void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
+  void emit(const loadb& i) { a.loadb(i.s, i.d); }
+  void emit(const loadl& i) { a.loadl(i.s, i.d); }
+  void emit(const loadqp& i) { a.loadq(i.s, i.d); }
+  void emit(const loadsd& i) { a.movsd(i.s, i.d); }
+  void emit(const loadzbl& i) { a.loadzbl(i.s, i.d); }
+  void emit(const loadzbq& i) { a.loadzbl(i.s, Reg32(i.d)); }
+  void emit(const loadzlq& i) { a.loadl(i.s, Reg32(i.d)); }
+  void emit(const movb& i) { a.movb(i.s, i.d); }
+  void emit(const movl& i) { a.movl(i.s, i.d); }
+  void emit(const movzbl& i) { a.movzbl(i.s, i.d); }
+  void emit(const movzbq& i) { a.movzbl(i.s, Reg32(i.d)); }
+  void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
+  void emit(neg i) { unary(i); a.neg(i.d); }
+  void emit(const nop& i) { a.nop(); }
+  void emit(not i) { unary(i); a.not(i.d); }
+  void emit(notb i) { unary(i); a.notb(i.d); }
+  void emit(const orbim& i) { a.orb(i.s0, i.m); }
+  void emit(const orwim& i) { a.orw(i.s0, i.m); }
+  void emit(orq i) { commuteSF(i); a.orq(i.s0, i.d); }
+  void emit(orqi i) { binary(i); a.orq(i.s0, i.d); }
+  void emit(const orqim& i) { a.orq(i.s0, i.m); }
+  void emit(const pop& i) { a.pop(i.d); }
+  void emit(const popm& i) { a.pop(i.d); }
+  void emit(psllq i) { binary(i); a.psllq(i.s0, i.d); }
+  void emit(psrlq i) { binary(i); a.psrlq(i.s0, i.d); }
+  void emit(const push& i) { a.push(i.s); }
+  void emit(const pushm& i) { a.push(i.s); }
+  void emit(const roundsd& i) { a.roundsd(i.dir, i.s, i.d); }
+  void emit(const sarq& i) { unary(i); a.sarq(i.d); }
+  void emit(sarqi i) { binary(i); a.sarq(i.s0, i.d); }
+  void emit(const setcc& i) { a.setcc(i.cc, i.d); }
+  void emit(shlli i) { binary(i); a.shll(i.s0, i.d); }
+  void emit(shlq i) { unary(i); a.shlq(i.d); }
+  void emit(shlqi i) { binary(i); a.shlq(i.s0, i.d); }
+  void emit(shrli i) { binary(i); a.shrl(i.s0, i.d); }
+  void emit(shrqi i) { binary(i); a.shrq(i.s0, i.d); }
+  void emit(const sqrtsd& i) { a.sqrtsd(i.s, i.d); }
+  void emit(const storeups& i) { a.movups(i.s, i.m); }
+  void emit(const storeb& i) { a.storeb(i.s, i.m); }
   void emit(const storebi& i);
-  void emit(const storel& i) { a->storel(i.s, i.m); }
-  void emit(const storeli& i) { a->storel(i.s, i.m); }
-  void emit(const storeqi& i) { a->storeq(i.s, i.m); }
-  void emit(const storesd& i) { a->movsd(i.s, i.m); }
-  void emit(const storew& i) { a->storew(i.s, i.m); }
-  void emit(const storewi& i) { a->storew(i.s, i.m); }
-  void emit(subbi i) { binary(i); a->subb(i.s0, i.d); }
-  void emit(subl i) { noncommute(i); a->subl(i.s0, i.d); }
-  void emit(subli i) { binary(i); a->subl(i.s0, i.d); }
-  void emit(subq i) { noncommute(i); a->subq(i.s0, i.d); }
-  void emit(subqi i) { binary(i); a->subq(i.s0, i.d); }
-  void emit(subsd i) { noncommute(i); a->subsd(i.s0, i.d); }
-  void emit(const testb& i) { a->testb(i.s0, i.s1); }
-  void emit(const testbi& i) { a->testb(i.s0, i.s1); }
-  void emit(const testbim& i) { a->testb(i.s0, i.s1); }
+  void emit(const storel& i) { a.storel(i.s, i.m); }
+  void emit(const storeli& i) { a.storel(i.s, i.m); }
+  void emit(const storeqi& i) { a.storeq(i.s, i.m); }
+  void emit(const storesd& i) { a.movsd(i.s, i.m); }
+  void emit(const storew& i) { a.storew(i.s, i.m); }
+  void emit(const storewi& i) { a.storew(i.s, i.m); }
+  void emit(subbi i) { binary(i); a.subb(i.s0, i.d); }
+  void emit(subl i) { noncommute(i); a.subl(i.s0, i.d); }
+  void emit(subli i) { binary(i); a.subl(i.s0, i.d); }
+  void emit(subq i) { noncommute(i); a.subq(i.s0, i.d); }
+  void emit(subqi i) { binary(i); a.subq(i.s0, i.d); }
+  void emit(subsd i) { noncommute(i); a.subsd(i.s0, i.d); }
+  void emit(const testb& i) { a.testb(i.s0, i.s1); }
+  void emit(const testbi& i) { a.testb(i.s0, i.s1); }
+  void emit(const testbim& i) { a.testb(i.s0, i.s1); }
   void emit(const testwim& i);
-  void emit(const testl& i) { a->testl(i.s0, i.s1); }
-  void emit(const testli& i) { a->testl(i.s0, i.s1); }
+  void emit(const testl& i) { a.testl(i.s0, i.s1); }
+  void emit(const testli& i) { a.testl(i.s0, i.s1); }
   void emit(const testlim& i);
-  void emit(const testq& i) { a->testq(i.s0, i.s1); }
+  void emit(const testq& i) { a.testq(i.s0, i.s1); }
   void emit(const testqi& i);
-  void emit(const testqm& i) { a->testq(i.s0, i.s1); }
+  void emit(const testqm& i) { a.testq(i.s0, i.s1); }
   void emit(const testqim& i);
-  void emit(const ucomisd& i) { a->ucomisd(i.s0, i.s1); }
-  void emit(const ud2& i) { a->ud2(); }
-  void emit(unpcklpd i) { noncommute(i); a->unpcklpd(i.s0, i.d); }
-  void emit(xorb i) { commuteSF(i); a->xorb(i.s0, i.d); }
-  void emit(xorbi i) { binary(i); a->xorb(i.s0, i.d); }
-  void emit(xorl i) { commuteSF(i); a->xorl(i.s0, i.d); }
+  void emit(const ucomisd& i) { a.ucomisd(i.s0, i.s1); }
+  void emit(const ud2& i) { a.ud2(); }
+  void emit(unpcklpd i) { noncommute(i); a.unpcklpd(i.s0, i.d); }
+  void emit(xorb i) { commuteSF(i); a.xorb(i.s0, i.d); }
+  void emit(xorbi i) { binary(i); a.xorb(i.s0, i.d); }
+  void emit(xorl i) { commuteSF(i); a.xorl(i.s0, i.d); }
   void emit(xorq i);
-  void emit(xorqi i) { binary(i); a->xorq(i.s0, i.d); }
+  void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
 
 private:
   // helpers
-  void prep(Reg8 s, Reg8 d) { if (s != d) a->movb(s, d); }
-  void prep(Reg32 s, Reg32 d) { if (s != d) a->movl(s, d); }
-  void prep(Reg64 s, Reg64 d) { if (s != d) a->movq(s, d); }
-  void prep(RegXMM s, RegXMM d) { if (s != d) a->movdqa(s, d); }
+  void prep(Reg8 s, Reg8 d) { if (s != d) a.movb(s, d); }
+  void prep(Reg32 s, Reg32 d) { if (s != d) a.movl(s, d); }
+  void prep(Reg64 s, Reg64 d) { if (s != d) a.movq(s, d); }
+  void prep(RegXMM s, RegXMM d) { if (s != d) a.movdqa(s, d); }
 
   template<class Inst> void unary(Inst& i) { prep(i.s, i.d); }
   template<class Inst> void binary(Inst& i) { prep(i.s1, i.d); }
@@ -261,8 +260,7 @@ private:
 
 private:
   Vtext& text;
-  X64Assembler assem;
-  X64Assembler* a;
+  X64Assembler a;
 
   const Vlabel current;
   const Vlabel next;
@@ -343,21 +341,21 @@ void Vgen::emit(const copy& i) {
   if (i.s == i.d) return;
   if (i.s.isGP()) {
     if (i.d.isGP()) {                 // GP => GP
-      a->movq(i.s, i.d);
+      a.movq(i.s, i.d);
     } else {                             // GP => XMM
       assertx(i.d.isSIMD());
       // This generates a movq x86 instruction, which zero extends
       // the 64-bit value in srcReg into a 128-bit XMM register
-      a->movq_rx(i.s, i.d);
+      a.movq_rx(i.s, i.d);
     }
   } else {
     if (i.d.isGP()) {                 // XMM => GP
-      a->movq_xr(i.s, i.d);
+      a.movq_xr(i.s, i.d);
     } else {                             // XMM => XMM
       assertx(i.d.isSIMD());
       // This copies all 128 bits in XMM,
       // thus avoiding partial register stalls
-      a->movdqa(i.s, i.d);
+      a.movdqa(i.s, i.d);
     }
   }
 }
@@ -368,25 +366,25 @@ void Vgen::emit(const copy2& i) {
   assertx(d0 != d1);
   if (d0 == s1) {
     if (d1 == s0) {
-      a->xchgq(d0, d1);
+      a.xchgq(d0, d1);
     } else {
       // could do this in a simplify pass
-      if (s1 != d1) a->movq(s1, d1); // save s1 first; d1 != s0
-      if (s0 != d0) a->movq(s0, d0);
+      if (s1 != d1) a.movq(s1, d1); // save s1 first; d1 != s0
+      if (s0 != d0) a.movq(s0, d0);
     }
   } else {
     // could do this in a simplify pass
-    if (s0 != d0) a->movq(s0, d0);
-    if (s1 != d1) a->movq(s1, d1);
+    if (s0 != d0) a.movq(s0, d0);
+    if (s1 != d1) a.movq(s1, d1);
   }
 }
 
-void emit_simd_imm(X64Assembler* a, int64_t val, Vreg d) {
+void emit_simd_imm(X64Assembler& a, int64_t val, Vreg d) {
   if (val == 0) {
-    a->pxor(d, d); // does not modify flags
+    a.pxor(d, d); // does not modify flags
   } else {
     auto addr = mcg->allocLiteral(val);
-    a->movsd(rip[(intptr_t)addr], d);
+    a.movsd(rip[(intptr_t)addr], d);
   }
 }
 
@@ -395,7 +393,7 @@ void Vgen::emit(const ldimmb& i) {
   auto val = i.s.ub();
   if (i.d.isGP()) {
     Vreg8 d8 = i.d;
-    a->movb(static_cast<int8_t>(val), d8);
+    a.movb(static_cast<int8_t>(val), d8);
   } else {
     emit_simd_imm(a, val, i.d);
   }
@@ -406,7 +404,7 @@ void Vgen::emit(const ldimml& i) {
   auto val = i.s.l();
   if (i.d.isGP()) {
     Vreg32 d32 = i.d;
-    a->movl(val, d32);
+    a.movl(val, d32);
   } else {
     emit_simd_imm(a, uint32_t(val), i.d);
   }
@@ -417,9 +415,9 @@ void Vgen::emit(const ldimmq& i) {
   if (i.d.isGP()) {
     if (val == 0) {
       Vreg32 d32 = i.d;
-      a->movl(0, d32); // because emitImmReg tries the xor optimization
+      a.movl(0, d32); // because emitImmReg tries the xor optimization
     } else {
-      a->emitImmReg(i.s, i.d);
+      a.emitImmReg(i.s, i.d);
     }
   } else {
     emit_simd_imm(a, val, i.d);
@@ -427,26 +425,26 @@ void Vgen::emit(const ldimmq& i) {
 }
 
 void Vgen::emit(const ldimmqs& i) {
-  emitSmashableMovq(a->code(), i.s.q(), i.d);
+  emitSmashableMovq(a.code(), i.s.q(), i.d);
 }
 
 void Vgen::emit(const load& i) {
-  prefix(*a, i.s);
+  prefix(a, i.s);
   auto mref = i.s.mr();
   if (i.d.isGP()) {
-    a->loadq(mref, i.d);
+    a.loadq(mref, i.d);
   } else {
     assertx(i.d.isSIMD());
-    a->movsd(mref, i.d);
+    a.movsd(mref, i.d);
   }
 }
 
 void Vgen::emit(const store& i) {
   if (i.s.isGP()) {
-    a->storeq(i.s, i.d);
+    a.storeq(i.s, i.d);
   } else {
     assertx(i.s.isSIMD());
-    a->movsd(i.s, i.d);
+    a.movsd(i.s, i.d);
   }
 }
 
@@ -461,7 +459,7 @@ void Vgen::emit(const mcprep& i) {
    * Class*, so we'll always miss the inline check before it's smashed, and
    * handlePrimeCacheInit can tell it's not been smashed yet
    */
-  auto const mov_addr = emitSmashableMovq(a->code(), 0, r64(i.d));
+  auto const mov_addr = emitSmashableMovq(a.code(), 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
   smashMovq(mov_addr, (imm << 1) | 1);
 
@@ -471,8 +469,8 @@ void Vgen::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const call& i) {
-  if (a->jmpDeltaFits(i.target)) {
-    a->call(i.target);
+  if (a.jmpDeltaFits(i.target)) {
+    a.call(i.target);
   } else {
     // can't do a near call; store address in data section.
     // call by loading the address using rip-relative addressing.  This
@@ -480,23 +478,23 @@ void Vgen::emit(const call& i) {
     // this sequence is directly in-line, rip-relative like this is
     // more compact than loading a 64-bit immediate.
     auto addr = mcg->allocLiteral((uint64_t)i.target);
-    a->call(rip[(intptr_t)addr]);
+    a.call(rip[(intptr_t)addr]);
   }
 }
 
 void Vgen::emit(const calls& i) {
-  emitSmashableCall(a->code(), i.target);
+  emitSmashableCall(a.code(), i.target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const stubret& i) {
   if (i.saveframe) {
-    a->pop(rvmfp());
+    a.pop(rvmfp());
   } else {
-    a->addq(8, reg::rsp);
+    a.addq(8, reg::rsp);
   }
-  a->ret();
+  a.ret();
 }
 
 void Vgen::emit(const callstub& i) {
@@ -509,22 +507,22 @@ void Vgen::emit(const callfaststub& i) {
 }
 
 void Vgen::emit(const tailcallstub& i) {
-  a->addq(8, reg::rsp);
+  a.addq(8, reg::rsp);
   emit(jmpi{i.target, i.args});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const phpret& i) {
-  a->push(i.fp[AROFF(m_savedRip)]);
+  a.push(i.fp[AROFF(m_savedRip)]);
   if (!i.noframe) {
-    a->loadq(i.fp[AROFF(m_sfp)], i.d);
+    a.loadq(i.fp[AROFF(m_sfp)], i.d);
   }
-  a->ret();
+  a.ret();
 }
 
 void Vgen::emit(const callphp& i) {
-  emitSmashableCall(a->code(), i.stub);
+  emitSmashableCall(a.code(), i.stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
@@ -540,14 +538,14 @@ void Vgen::emit(const callarray& i) {
 void Vgen::emit(const contenter& i) {
   Label Stub, End;
   Reg64 fp = i.fp, target = i.target;
-  a->jmp8(End);
+  a.jmp8(End);
 
-  asm_label(*a, Stub);
-  a->pop(fp[AROFF(m_savedRip)]);
-  a->jmp(target);
+  asm_label(a, Stub);
+  a.pop(fp[AROFF(m_savedRip)]);
+  a.jmp(target);
 
-  asm_label(*a, End);
-  a->call(Stub);
+  asm_label(a, End);
+  a.call(Stub);
   // m_savedRip will point here.
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
@@ -555,28 +553,28 @@ void Vgen::emit(const contenter& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const nothrow& i) {
-  mcg->registerCatchBlock(a->frontier(), nullptr);
+  mcg->registerCatchBlock(a.frontier(), nullptr);
 }
 
 void Vgen::emit(const syncpoint& i) {
-  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
+  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a.frontier(),
          i.fix.pcOffset, i.fix.spOffset);
-  mcg->recordSyncPoint(a->frontier(), i.fix);
+  mcg->recordSyncPoint(a.frontier(), i.fix);
 }
 
 void Vgen::emit(const unwind& i) {
-  catches.push_back({a->frontier(), i.targets[1]});
+  catches.push_back({a.frontier(), i.targets[1]});
   emit(jmp{i.targets[0]});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const addlim& i) {
-  prefix(*a, i.m).addl(i.s0, i.m.mr());
+  prefix(a, i.m).addl(i.s0, i.m.mr());
 }
 
 void Vgen::emit(const addqim& i) {
-  prefix(*a, i.m).addq(i.s0, i.m.mr());
+  prefix(a, i.m).addq(i.s0, i.m.mr());
 }
 
 void Vgen::emit(const cloadq& i) {
@@ -587,13 +585,13 @@ void Vgen::emit(const cloadq& i) {
       // We can't move f over d or we'll clobber the Vptr we need to load from.
       // Since cload does the load unconditionally anyway, we can just load and
       // cmov.
-      a->loadq(i.t, i.d);
-      a->cmov_reg64_reg64(ccNegate(i.cc), i.f, i.d);
+      a.loadq(i.t, i.d);
+      a.cmov_reg64_reg64(ccNegate(i.cc), i.f, i.d);
       return;
     }
-    a->movq(i.f, i.d);
+    a.movq(i.f, i.d);
   }
-  a->cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
+  a.cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
 }
 
 // add s0 s1 d => mov s1->d; d += s0
@@ -605,17 +603,17 @@ void Vgen::emit(const cmovq& i) {
   } else {
     prep(i.f, i.d);
   }
-  a->cmov_reg64_reg64(i.cc, i.t, i.d);
+  a.cmov_reg64_reg64(i.cc, i.t, i.d);
 }
 
 void Vgen::emit(const cvtsi2sd& i) {
-  a->pxor(i.d, i.d);
-  a->cvtsi2sd(i.s, i.d);
+  a.pxor(i.d, i.d);
+  a.cvtsi2sd(i.s, i.d);
 }
 
 void Vgen::emit(const cvtsi2sdm& i) {
-  a->pxor(i.d, i.d);
-  a->cvtsi2sd(i.s, i.d);
+  a.pxor(i.d, i.d);
+  a.cvtsi2sd(i.s, i.d);
 }
 
 void Vgen::emit(const jcc& i) {
@@ -624,30 +622,30 @@ void Vgen::emit(const jcc& i) {
       return emit(jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}});
     }
     auto taken = i.targets[1];
-    jccs.push_back({a->frontier(), taken});
-    a->jcc(i.cc, a->frontier());
+    jccs.push_back({a.frontier(), taken});
+    a.jcc(i.cc, a.frontier());
   }
   emit(jmp{i.targets[0]});
 }
 
 void Vgen::emit(const jcci& i) {
-  a->jcc(i.cc, i.taken);
+  a.jcc(i.cc, i.taken);
   emit(jmp{i.target});
 }
 
 void Vgen::emit(const jmp& i) {
   if (next == i.target) return;
-  jmps.push_back({a->frontier(), i.target});
-  a->jmp(a->frontier());
+  jmps.push_back({a.frontier(), i.target});
+  a.jmp(a.frontier());
 }
 
 void Vgen::emit(const jmpi& i) {
-  if (a->jmpDeltaFits(i.target)) {
-    a->jmp(i.target);
+  if (a.jmpDeltaFits(i.target)) {
+    a.jmp(i.target);
   } else {
     // can't do a near jmp - use rip-relative addressing
     auto addr = mcg->allocLiteral((uint64_t)i.target);
-    a->jmp(rip[(intptr_t)addr]);
+    a.jmp(rip[(intptr_t)addr]);
   }
 }
 
@@ -656,12 +654,12 @@ void Vgen::emit(const lea& i) {
   if (i.s.disp == 0 && i.s.base.isValid() && !i.s.index.isValid()) {
     emit(copy{i.s.base, i.d});
   } else {
-    a->lea(i.s, i.d);
+    a.lea(i.s, i.d);
   }
 }
 
 void Vgen::emit(const storebi& i) {
-  prefix(*a, i.m).storeb(i.s, i.m.mr());
+  prefix(a, i.m).storeb(i.s, i.m.mr());
 }
 
 void Vgen::emit(const testwim& i) {
@@ -675,22 +673,22 @@ void Vgen::emit(const testwim& i) {
   }
 
   if (newMask > 0xff) {
-    a->testw(i.s0, i.s1);
+    a.testw(i.s0, i.s1);
   } else {
     emit(testbim{int8_t(newMask), i.s1 + off, i.sf});
   }
 }
 
 void Vgen::emit(const testlim& i) {
-  a->testl(i.s0, i.s1);
+  a.testl(i.s0, i.s1);
 }
 
 void Vgen::emit(const testqi& i) {
   auto const imm = i.s0.q();
   if (magFits(imm, sz::byte)) {
-    a->testb(i.s0, rbyte(i.s1));
+    a.testb(i.s0, rbyte(i.s1));
   } else {
-    a->testq(i.s0, i.s1);
+    a.testq(i.s0, i.s1);
   }
 }
 
@@ -698,7 +696,7 @@ void Vgen::emit(const testqim& i) {
   // The immediate is 32 bits, sign-extended to 64. If the sign bit isn't set,
   // we can get the same results by emitting a testlim.
   if (i.s0.l() < 0) {
-    a->testq(i.s0, i.s1);
+    a.testq(i.s0, i.s1);
   } else {
     emit(testlim{i.s0, i.s1, i.sf});
   }
@@ -710,7 +708,7 @@ void Vgen::emit(xorq i) {
     return emit(xorl{r32(i.s0), r32(i.s1), r32(i.d), i.sf});
   }
   commuteSF(i);
-  a->xorq(i.s0, i.d);
+  a.xorq(i.s0, i.d);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

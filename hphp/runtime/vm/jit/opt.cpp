@@ -93,6 +93,10 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     doPass(unit, optimizeStores, DCE::Full);
   }
 
+  if (RuntimeOption::EvalHHIRPartialInlineFrameOpts) {
+    doPass(unit, optimizeInlineReturns, DCE::Full);
+  }
+
   doPass(unit, optimizePhis, DCE::Full);
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {

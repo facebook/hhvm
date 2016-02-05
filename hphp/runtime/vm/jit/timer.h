@@ -32,6 +32,7 @@
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
   TIMER_NAME(optimize_reoptimize)               \
+  TIMER_NAME(partial_dce_DefInlineFP)           \
   TIMER_NAME(regalloc)                          \
   TIMER_NAME(regionizeFunc)                     \
   TIMER_NAME(selectTracelet)                    \

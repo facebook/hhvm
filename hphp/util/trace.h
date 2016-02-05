@@ -172,6 +172,7 @@ namespace Trace {
       TM(xenon)         \
       TM(xls)           \
       TM(xls_stats)     \
+      TM(pdce_inline)   \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \

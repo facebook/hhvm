@@ -14,13 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_UNWIND_MSVC_H_
-#define incl_HPHP_JIT_UNWIND_MSVC_H_
+#ifndef HPHP_UTIL_UNWIND_ITANIUM_MSVC_H_
+#define HPHP_UTIL_UNWIND_ITANIUM_MSVC_H_
 
-#include "hphp/util/assertions.h"
+#include <cstdint>
+
+#include <hphp/util/assertions.h>
+
+namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * MSVC doesn't have unwind.h, so when we need it, we instead include these
+ * MSVC doesn't support the Itanium exception handling ABI, so we have some
  * garbage stubs to convince MSVC to compile without freaking out.
  */
 struct _Unwind_Exception {
@@ -49,5 +55,9 @@ inline uintptr_t _Unwind_GetIP(_Unwind_Context*) {
 }
 inline void _Unwind_Resume() { always_assert(false); }
 inline void _Unwind_SetIP(_Unwind_Context*, uint64_t) { always_assert(false); }
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
 
 #endif

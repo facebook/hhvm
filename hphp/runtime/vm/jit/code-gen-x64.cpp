@@ -68,6 +68,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -600,7 +601,7 @@ void CodeGenerator::cgAssertType(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
-  emitLoad(inst->dst(), dstLoc(inst, 0), rvmtl()[unwinderTvOff()]);
+  emitLoad(inst->dst(), dstLoc(inst, 0), rvmtl()[unwinderTVOff()]);
 }
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {

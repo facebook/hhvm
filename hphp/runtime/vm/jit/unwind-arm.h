@@ -21,7 +21,7 @@
 #include "hphp/vixl/a64/instructions-a64.h"
 #include "hphp/vixl/a64/simulator-a64.h"
 
-#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
 
 namespace HPHP { namespace jit { namespace arm {
 

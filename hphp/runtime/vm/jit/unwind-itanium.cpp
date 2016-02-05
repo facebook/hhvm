@@ -14,27 +14,36 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/unwind-x64.h"
-
-#include <vector>
-#include <memory>
-#ifndef _MSC_VER
-#include <cxxabi.h>
-#endif
-#include <boost/mpl/identity.hpp>
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/member-operations.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/eh-frame.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/unwind-itanium.h"
+
+#include <folly/ScopeGuard.h>
+
+#include <memory>
+#include <typeinfo>
+
+#ifndef _MSC_VER
+#include <cxxabi.h>
+#include <unwind.h>
+#endif
 
 TRACE_SET_MOD(unwind);
 
@@ -46,71 +55,72 @@ rds::Link<UnwindRDS> unwindRdsInfo(rds::kInvalidHandle);
 
 namespace {
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Sync VM regs for the TC frame represented by `context'.
+ */
 void sync_regstate(_Unwind_Context* context) {
   assertx(tl_regState == VMRegState::DIRTY);
 
-  uintptr_t frameRbp = _Unwind_GetGR(context, Debug::RBP);
-  uintptr_t frameRip = _Unwind_GetIP(context);
-  FTRACE(2, "syncing regstate for rbp: {:#x} rip: {:#x}\n", frameRbp, frameRip);
+  uintptr_t fp = _Unwind_GetGR(context, dw_reg::RBP);
+  uintptr_t ip = _Unwind_GetIP(context);
+  FTRACE(2, "syncing regstate for: fp {:#x}, ip {:#x}\n", fp, ip);
 
-  /*
-   * fixupWork expects to be looking at the first frame that is out of
-   * the TC.  We have RBP/RIP for the TC frame that called out here,
-   * so we make a fake ActRec here to give it what it expects.
-   *
-   * Note: this doesn't work for IndirectFixup situations.  However,
-   * currently IndirectFixup is only used for destructors, which
-   * aren't allowed to throw, so this is ok.
-   */
-  ActRec fakeAr;
-  fakeAr.m_sfp = reinterpret_cast<ActRec*>(frameRbp);
-  fakeAr.m_savedRip = frameRip;
+  // fixupWork() takes an `ar' argument and syncs VM regs for the first TC
+  // frame it finds in the call chain for `ar'.  We can make it sync for the fp
+  // and rip in `context' by putting them in a fake ActRec here on the native
+  // stack, and passing a pointer to it.
+  //
+  // NB: This doesn't work for IndirectFixup situations.  However, currently
+  // IndirectFixup is only used for destructors, which aren't allowed to throw,
+  // so this is ok.
+  ActRec fakeAR;
+  fakeAR.m_sfp = reinterpret_cast<ActRec*>(fp);
+  fakeAR.m_savedRip = ip;
 
   Stats::inc(Stats::TC_SyncUnwind);
-  mcg->fixupMap().fixupWork(g_context.getNoCheck(), &fakeAr);
+  mcg->fixupMap().fixupWork(g_context.getNoCheck(), &fakeAR);
   tl_regState = VMRegState::CLEAN;
-  FTRACE(2, "synced vmfp: {} vmsp: {} vmpc: {}\n", vmfp(), vmsp(), vmpc());
+  FTRACE(2, "synced vmfp {}, vmsp {}, vmpc {}\n", vmfp(), vmsp(), vmpc());
 }
 
 /*
- * Lookup a catch trace for the given TCA, returning nullptr if none was
- * found. Will abort if a nullptr catch trace was registered, meaning this call
- * isn't allowed to throw.
+ * Look up a catch trace for `rip', returning nullptr if none was found.
+ *
+ * A present-but-nullptr catch trace indicates that a call is explicitly not
+ * allowed to throw.  A few of our optimization passes must be aware of every
+ * path out of a region, so throwing through jitted code without a catch block
+ * is very bad---and we abort in this case.
  */
 TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
   if (auto catchTraceOpt = mcg->getCatchTrace(rip)) {
     if (auto catchTrace = *catchTraceOpt) return catchTrace;
 
-    // A few of our optimization passes must be aware of every path out of
-    // the trace, so throwing through jitted code without a catch block is
-    // very bad. This is indicated with a present but nullptr entry in the
-    // catch trace map.
-    const size_t kCallSize = 5;
-    const uint8_t kCallOpcode = 0xe8;
+    // FIXME: This assumes that smashable calls and regular calls look the
+    // same, which is probably not true on non-x64 platforms.
+    auto const target = smashableCallTarget(smashableCallFromRet(rip));
 
-    auto callAddr = rip - kCallSize;
-    TCA helperAddr = nullptr;
-    if (*callAddr == kCallOpcode) {
-      helperAddr = rip + *reinterpret_cast<int32_t*>(callAddr + 1);
-    }
-
-    always_assert_flog(false,
-                       "Translated call to {} threw '{}' without "
-                       "catch block, return address: {}\n",
-                       getNativeFunctionName(helperAddr),
-                       typeInfoFromUnwindException(exn).name(),
-                       rip);
+    always_assert_flog(
+      false, "Translated call to {} threw '{}' without catch block; "
+             "return address: {}\n",
+      getNativeFunctionName(target), typeinfoFromUE(exn).name(), rip
+    );
   }
 
   return nullptr;
 }
 
+/*
+ * Look up the catch trace for the return address in `ctx', and install it by
+ * updating the unwind RDS info, as well as the IP in `ctx'.
+ */
 bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
                          bool do_side_exit, TypedValue unwinder_tv) {
   auto const rip = (TCA)_Unwind_GetIP(ctx);
   auto catchTrace = lookup_catch_trace(rip, exn);
   if (!catchTrace) {
-    FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
+    FTRACE(1, "no catch trace entry for ip {}; bailing\n", rip);
     return false;
   }
 
@@ -121,37 +131,40 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // If the catch trace isn't going to finish by calling _Unwind_Resume, we
   // consume the exception here. Otherwise, we leave a pointer to it in RDS so
   // endCatchHelper can pass it to _Unwind_Resume when it's done.
+  //
+  // In theory, the unwind API will let us set registers in the frame before
+  // executing our landing pad. In practice, trying to use their recommended
+  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
+  // things to the handler using the RDS. This also simplifies the handler code
+  // because it doesn't have to worry about saving its arguments somewhere
+  // while executing the exit trace.
   if (do_side_exit) {
     unwindRdsInfo->exn = nullptr;
 #ifndef _MSC_VER
     __cxxabiv1::__cxa_begin_catch(exn);
     __cxxabiv1::__cxa_end_catch();
 #endif
+    unwindRdsInfo->tv = unwinder_tv;
   } else {
     unwindRdsInfo->exn = exn;
   }
-
-  // In theory the unwind api will let us set registers in the frame before
-  // executing our landing pad. In practice, trying to use their recommended
-  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
-  // things to the handler using the RDS. This also simplifies the handler code
-  // because it doesn't have to worry about saving its arguments somewhere
-  // while executing the exit trace.
   unwindRdsInfo->doSideExit = do_side_exit;
-  if (do_side_exit) unwindRdsInfo->unwinderTv = unwinder_tv;
+
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
 
   return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 _Unwind_Reason_Code
 tc_unwind_personality(int version,
                       _Unwind_Action actions,
-                      uint64_t exceptionClass,
-                      _Unwind_Exception* exceptionObj,
+                      uint64_t exn_cls,
+                      _Unwind_Exception* ue,
                       _Unwind_Context* context) {
   // Exceptions thrown by g++-generated code will have the class "GNUCC++"
   // packed into a 64-bit int. libc++ has the class "CLNGC++". For now we
@@ -161,14 +174,14 @@ tc_unwind_personality(int version,
   DEBUG_ONLY constexpr uint64_t kMagicDependentClass = 0x474e5543432b2b01;
   DEBUG_ONLY constexpr uint64_t kLLVMMagicClass = 0x434C4E47432B2B00;
   DEBUG_ONLY constexpr uint64_t kLLVMMagicDependentClass = 0x434C4E47432B2B01;
-  assertx(exceptionClass == kMagicClass ||
-          exceptionClass == kMagicDependentClass ||
-          exceptionClass == kLLVMMagicClass ||
-          exceptionClass == kLLVMMagicDependentClass);
+  assertx(exn_cls == kMagicClass ||
+          exn_cls == kMagicDependentClass ||
+          exn_cls == kLLVMMagicClass ||
+          exn_cls == kLLVMMagicDependentClass);
   assertx(version == 1);
 
-  auto const& ti = typeInfoFromUnwindException(exceptionObj);
-  auto const std_exception = exceptionFromUnwindException(exceptionObj);
+  auto const& ti = typeinfoFromUE(ue);
+  auto const std_exception = exceptionFromUE(ue);
   InvalidSetMException* ism = nullptr;
   TVCoercionException* tce = nullptr;
   if (ti == typeid(InvalidSetMException)) {
@@ -188,8 +201,8 @@ tc_unwind_personality(int version,
 #else
     auto* exnType = ti.name();
 #endif
-    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}\n",
-           unwindType, exceptionObj,
+    FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}\n",
+           unwindType, ue,
            tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
            (TCA)_Unwind_GetIP(context), exnType);
   }
@@ -224,14 +237,18 @@ tc_unwind_personality(int version,
       sync_regstate(context);
     }
 
-    if (install_catch_trace(context, exceptionObj, ism || tce, tv)) {
+    // If we have a catch trace at the IP in the frame given by `context',
+    // install it.
+    if (install_catch_trace(context, ue, ism || tce, tv)) {
+      // Note that we should always have a catch trace for the special runtime
+      // helper exceptions above.
       always_assert((ism || tce) == bool(actions & _UA_HANDLER_FRAME));
       return _URC_INSTALL_CONTEXT;
     }
-
     always_assert(!(actions & _UA_HANDLER_FRAME));
 
-    auto ip = TCA(_Unwind_GetIP(context));
+    auto const ip = TCA(_Unwind_GetIP(context));
+
     auto& stubs = mcg->tx().uniqueStubs;
     if (ip == stubs.endCatchHelperPast) {
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
@@ -243,7 +260,7 @@ tc_unwind_personality(int version,
     }
 
     FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
-    unwindRdsInfo->exn = exceptionObj;
+    unwindRdsInfo->exn = ue;
     _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
     return _URC_INSTALL_CONTEXT;
   }
@@ -257,7 +274,7 @@ tc_unwind_personality(int version,
 TCUnwindInfo tc_unwind_resume(ActRec* fp) {
   while (true) {
     auto const newFp = fp->m_sfp;
-    ITRACE(1, "tc_unwind_resume processing fp: {} savedRip: {:#x} newFp: {}\n",
+    ITRACE(1, "tc_unwind_resume: fp {}, saved rip {:#x}, saved fp {}\n",
            fp, fp->m_savedRip, newFp);
     Trace::Indent indent;
     always_assert_flog(isVMFrame(fp),

@@ -38,6 +38,8 @@ namespace HPHP {
 
 class PDOMySqlStatement;
 
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_mysql, 1.0.2);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct PDOMySqlError {
@@ -1355,7 +1357,6 @@ bool PDOMySqlStatement::cursorCloser() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static PDOMySql s_mysql_driver;
 PDOMySql::PDOMySql() : PDODriver("mysql") {}
 
 req::ptr<PDOResource> PDOMySql::createResourceImpl() {
@@ -1369,43 +1370,6 @@ req::ptr<PDOResource> PDOMySql::createResource(
   return req::make<PDOMySqlResource>(
       std::dynamic_pointer_cast<PDOMySqlConnection>(conn));
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-static const StaticString s_PDO("PDO");
-static class pdo_mysqlExtension final : public Extension {
-public:
-  pdo_mysqlExtension() : Extension("pdo_mysql", " 1.0.2") {}
-
-  std::string mysql_default_socket;
-
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
-                     "pdo_mysql.default_socket", nullptr,
-                     &mysql_default_socket);
-  }
-
-  virtual const DependencySet getDeps() const override {
-    return DependencySet({ "pdo" });
-  }
-
-  void moduleInit() override {
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_USE_BUFFERED_QUERY,
-                 PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_LOCAL_INFILE, PDO_MYSQL_ATTR_LOCAL_INFILE);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_MAX_BUFFER_SIZE,
-                 PDO_MYSQL_ATTR_MAX_BUFFER_SIZE);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_INIT_COMMAND, PDO_MYSQL_ATTR_INIT_COMMAND);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_READ_DEFAULT_FILE,
-                 PDO_MYSQL_ATTR_READ_DEFAULT_FILE);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_READ_DEFAULT_GROUP,
-                 PDO_MYSQL_ATTR_READ_DEFAULT_GROUP);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_COMPRESS, PDO_MYSQL_ATTR_COMPRESS);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_DIRECT_QUERY, PDO_MYSQL_ATTR_DIRECT_QUERY);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_FOUND_ROWS, PDO_MYSQL_ATTR_FOUND_ROWS);
-    HHVM_RCC_INT(PDO, MYSQL_ATTR_IGNORE_SPACE, PDO_MYSQL_ATTR_IGNORE_SPACE);
-  }
-} s_pdo_mysql_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -16,17 +16,17 @@
 */
 
 #include "hphp/runtime/ext/pdo_sqlite/pdo_sqlite.h"
-#include "hphp/runtime/ext/pdo/ext_pdo.h"
 #include "hphp/runtime/ext/sqlite3/ext_sqlite3.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <sqlite3.h>
 
 namespace HPHP {
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, 1.0.1);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -642,7 +642,6 @@ bool PDOSqliteStatement::cursorCloser() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static PDOSqlite s_sqlite_driver;
 PDOSqlite::PDOSqlite() : PDODriver("sqlite") {}
 
 req::ptr<PDOResource> PDOSqlite::createResourceImpl() {
@@ -656,43 +655,6 @@ req::ptr<PDOResource> PDOSqlite::createResource(
   return req::make<PDOSqliteResource>(
       std::dynamic_pointer_cast<PDOSqliteConnection>(conn));
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
-                        const Variant& callback, int64_t argcount /* = -1 */) {
-  auto data = Native::data<PDOData>(this_);
-
-  auto conn = std::dynamic_pointer_cast<PDOSqliteConnection>(
-    data->m_dbh->conn());
-  if (conn == nullptr) {
-    return false;
-  }
-  return conn->createFunction(name, callback, argcount);
-}
-
-static bool HHVM_METHOD(PDO, sqlitecreateaggregate, const String& name,
-                        const Variant& step, const Variant& final,
-                        int64_t argcount /* = -1 */) {
-  raise_recoverable_error("PDO::sqliteCreateAggregate not implemented");
-  return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-static class pdo_sqliteExtension final : public Extension {
-public:
-  pdo_sqliteExtension() : Extension("pdo_sqlite", " 1.0.1") {}
-
-  virtual const DependencySet getDeps() const override {
-    return DependencySet({ "pdo" });
-  }
-
-  void moduleInit() override {
-    HHVM_ME(PDO, sqlitecreatefunction);
-    HHVM_ME(PDO, sqlitecreateaggregate);
-  }
-} s_pdo_sqlite_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

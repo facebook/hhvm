@@ -246,13 +246,10 @@ struct PDODriver {
   virtual req::ptr<PDOResource>
     createResource(const sp_PDOConnection& conn) = 0;
 
-  static const PDODriverMap& GetDrivers() { return GetMutableDrivers(); }
+  static const PDODriverMap& GetDrivers() { return s_drivers; }
 
 private:
-  static PDODriverMap& GetMutableDrivers() {
-    static PDODriverMap s_drivers;
-    return s_drivers;
-  }
+  static PDODriverMap s_drivers;
 
   const char *m_name;
 

@@ -200,7 +200,7 @@ documented much here. See class.h.
 Closures
 --------
 
-Closures are implemented in hhbc as subclassses of Closure, in conjunction with
+Closures are implemented in hhbc as subclasses of Closure, in conjunction with
 the CreateCl opcode. It is legal hhbc to create other subclasses of Closure (to
 represent user code that attempts to do the same), but attempting to
 instantiate one will result in a fatal error. The documentation of the CreateCl
@@ -244,7 +244,7 @@ the result is wrapped into a succeeded StaticWaitHandle and returned to the
 caller. If an exception is thrown, it is wrapped into a failed StaticWaitHandle
 and returned to the caller. Otherwise, if an Await opcode was reached and the
 provided child WaitHandle has not finished, the current execution state is
-suspended into an AsyncFunctionWaitHandle object and retured to the caller.
+suspended into an AsyncFunctionWaitHandle object and returned to the caller.
 This mechanism allows fast execution if no blocking asynchronous operation was
 reached.
 

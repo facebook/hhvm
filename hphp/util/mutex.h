@@ -207,7 +207,8 @@ struct SimpleMutex : BaseMutex<true> {
 /**
  * Read-write lock wrapper.
  */
-class ReadWriteMutex {
+struct ReadWriteMutex {
+private:
 #ifdef DEBUG
 /*
  * We have a track record of self-deadlocking on these, and our pthread
@@ -307,9 +308,7 @@ template<typename K, typename V, typename H=K, Rank R=RankUnranked>
 class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
   typedef tbb::concurrent_hash_map<K, V, H> RawCHM;
  public:
-  class accessor : public RawCHM::accessor {
-    bool freed;
-   public:
+  struct accessor : RawCHM::accessor {
     accessor() : freed(false) { pushRank(R); }
     ~accessor() { if (!freed) popRank(R); }
     void release() {
@@ -317,10 +316,10 @@ class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
       popRank(R);
       freed = true;
     }
-  };
-  class const_accessor : public RawCHM::const_accessor {
+  private:
     bool freed;
-   public:
+  };
+  struct const_accessor : RawCHM::const_accessor {
     const_accessor() : freed(false) { pushRank(R); }
     ~const_accessor() { if (!freed) popRank(R); }
     void release() {
@@ -328,6 +327,8 @@ class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
       popRank(R);
       freed = true;
     }
+  private:
+    bool freed;
   };
 
   bool find(const_accessor& a, const K& k) const { return RawCHM::find(a, k); }

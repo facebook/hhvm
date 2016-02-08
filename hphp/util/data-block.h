@@ -275,10 +275,7 @@ using CodeBlock = DataBlock;
 
 //////////////////////////////////////////////////////////////////////
 
-class UndoMarker {
-  CodeBlock& m_cb;
-  CodeAddress m_oldFrontier;
-  public:
+struct UndoMarker {
   explicit UndoMarker(CodeBlock& cb)
     : m_cb(cb)
     , m_oldFrontier(cb.frontier()) {
@@ -287,6 +284,10 @@ class UndoMarker {
   void undo() {
     m_cb.setFrontier(m_oldFrontier);
   }
+
+private:
+  CodeBlock& m_cb;
+  CodeAddress m_oldFrontier;
 };
 
 /*

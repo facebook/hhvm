@@ -40,7 +40,7 @@ namespace HPHP {
  *
  * Use DECLARE_STATIC_REQUEST_LOCAL to declare a *static* class field as
  * request local:
- *   class SomeClass {
+ *   struct SomeClass {
  *     DECLARE_STATIC_REQUEST_LOCAL(SomeFieldType, f);
  *   }
  *

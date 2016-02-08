@@ -39,12 +39,11 @@ DECLARE_BOOST_TYPES(FileScope);
 
 class AstWalkerStateVec;
 
-class IParseHandler {
+struct IParseHandler {
   /**
    * To avoid iteration of parse tree, we move any work that can be done
    * in parse phase into this function, so to speed up static analysis.
    */
-public:
   virtual ~IParseHandler() {}
 
   /**

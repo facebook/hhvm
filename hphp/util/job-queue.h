@@ -45,17 +45,15 @@ namespace HPHP {
  *
  * To use it, simply define your own job and worker class like this,
  *
- *   class MyJob {
- *     public:
- *       // storing job data
+ *   struct MyJob {
+ *     // storing job data
  *   };
  *
- *   class MyWorker : public JobQueueWorker<MyJob*> {
- *     public:
- *       virtual void doJob(MyJob *job) {
- *         // process the job
- *         delete job; // if it was new-ed
- *       }
+ *   struct MyWorker : JobQueueWorker<MyJob*> {
+ *     virtual void doJob(MyJob *job) {
+ *       // process the job
+ *       delete job; // if it was new-ed
+ *     }
  *   };
  *
  * Now, use JobQueueDispatcher to start the whole thing,
@@ -118,7 +116,7 @@ template<typename TJob,
          class DropCachePolicy = detail::NoDropCachePolicy>
 struct JobQueue : SynchronizableMulti {
   // trivial class for signaling queue stop
-  class StopSignal {};
+  struct StopSignal {};
 
 public:
   /**

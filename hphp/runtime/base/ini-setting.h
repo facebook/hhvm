@@ -144,7 +144,8 @@ private:
   Variant m_map;
 };
 
-class IniSetting {
+struct IniSetting {
+private:
 
   struct CallbackData {
     Variant active_section;

@@ -62,7 +62,7 @@ void registerNativePropHandler(const String& className,
  *
  * Example:
  *
- * class ElementPropHandler {
+ * struct ElementPropHandler {
  *   static Variant getProp(const Object& this_, const String& name) {
  *     // get `name` prop
  *   }

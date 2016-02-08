@@ -78,7 +78,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapData final : public RequestEventHandler {
+struct SoapData final : RequestEventHandler {
+private:
   // SDL cache
   struct sdlCacheBucket {
     sdlPtr sdl;

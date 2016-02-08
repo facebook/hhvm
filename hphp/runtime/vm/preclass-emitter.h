@@ -274,10 +274,10 @@ struct PreClassEmitter {
   ConstMap::Builder m_constMap;
 };
 
-class PreClassRepoProxy : public RepoProxy {
+struct PreClassRepoProxy : RepoProxy {
   friend class PreClass;
   friend class PreClassEmitter;
- public:
+
   explicit PreClassRepoProxy(Repo& repo);
   ~PreClassRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);

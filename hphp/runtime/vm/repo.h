@@ -40,7 +40,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Repo : public RepoProxy {
+struct Repo : RepoProxy {
+private:
   static SimpleMutex s_lock;
   static unsigned s_nRepos;
 

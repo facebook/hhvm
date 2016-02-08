@@ -76,7 +76,8 @@ struct is_malloc_size_class
 {};
 
 template<size_t Size>
-class next_malloc_size_class {
+struct next_malloc_size_class {
+private:
   template<size_t Multiple>
   struct round {
     static constexpr size_t value =

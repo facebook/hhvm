@@ -563,7 +563,8 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XMLWriterResource : public SweepableResourceData {
+struct XMLWriterResource : SweepableResourceData {
+private:
   DECLARE_RESOURCE_ALLOCATION(XMLWriterResource)
 
 public:

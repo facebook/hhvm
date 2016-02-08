@@ -593,7 +593,8 @@ void printTopFuncs() {
                                     helpersMinPercentage);
 }
 
-class CompTrans {
+struct CompTrans {
+private:
   const PerfEventsMap<TransID>& transPerfEvents;
   const PerfEventType           etype;
 

@@ -137,7 +137,8 @@ inline int numSuccBlocks(const Block* b) {
  * A GraphBuilder holds the temporary state required for building
  * a graph and is typically not needed once a Graph is built.
  */
-class GraphBuilder {
+struct GraphBuilder {
+private:
   typedef hphp_hash_map<PC, Block*> BlockMap;
   enum EdgeKind { FallThrough, Taken };
  public:

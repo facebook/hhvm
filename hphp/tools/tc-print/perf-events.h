@@ -66,7 +66,8 @@ struct Mapper {
   virtual folly::Optional<T> operator()(const S&) = 0;
 };
 
-class StackTraceTree {
+struct StackTraceTree {
+private:
   struct Node;
 
   std::shared_ptr<Node> root;

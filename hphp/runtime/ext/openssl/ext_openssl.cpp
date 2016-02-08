@@ -235,7 +235,8 @@ IMPLEMENT_RESOURCE_ALLOCATION(Key)
 /**
  * Certificate Signing Request
  */
-class CSRequest : public SweepableResourceData {
+struct CSRequest : SweepableResourceData {
+private:
   X509_REQ *m_csr;
 
 public:

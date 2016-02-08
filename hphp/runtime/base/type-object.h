@@ -29,7 +29,8 @@ namespace HPHP {
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
-class Object {
+struct Object {
+private:
   req::ptr<ObjectData> m_obj;
 
   using NoIncRef = req::ptr<ObjectData>::NoIncRef;

@@ -30,7 +30,8 @@ namespace HPHP {
 /**
  * Resource type wrapping around ResourceData to implement reference count.
  */
-class Resource {
+struct Resource {
+private:
   using Ptr = req::ptr<ResourceHdr>;
   using NoIncRef = Ptr::NoIncRef;
 

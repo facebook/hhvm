@@ -45,7 +45,7 @@ DECLARE_BOOST_TYPES(FunctionScope);
  *   try {...} catch (T obj) {...}
  *   extract(name_value_pair)
  */
-class VariableTable : public SymbolTable {
+struct VariableTable : SymbolTable {
   friend class AssignmentExpression;
 public:
   enum Attribute {

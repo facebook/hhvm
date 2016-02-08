@@ -106,7 +106,8 @@ private:
 };
 
 
-class GMP {
+struct GMP {
+private:
   static void initClass() {
     cls = Unit::lookupClass(s_GMP_GMP.get());
   }

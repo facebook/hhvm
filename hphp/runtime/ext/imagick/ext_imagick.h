@@ -117,10 +117,11 @@ void imagickThrow(const char* fmt, ...) {
 //////////////////////////////////////////////////////////////////////////////
 // WandResource
 template<typename Wand>
-class WandResource : public SweepableResourceData {
+struct WandResource : SweepableResourceData {
+private:
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
- public:
+public:
   explicit WandResource(Wand* wand, bool owner = true) :
       m_wand(wand), m_owner(owner) {
   }
@@ -149,7 +150,7 @@ class WandResource : public SweepableResourceData {
     return w;
   }
 
- private:
+private:
   void destroyWand();
   Wand* m_wand;
   bool m_owner;

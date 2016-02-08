@@ -257,13 +257,7 @@ namespace StackSym {
 } while (0)
 
 // RAII guard for function creation.
-class FuncFinisher {
-  EmitterVisitor* m_ev;
-  Emitter&        m_e;
-  FuncEmitter*    m_fe;
-  int32_t         m_stackPad;
-
- public:
+struct FuncFinisher {
   FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe,
                int32_t stackPad = 0)
     : m_ev(ev), m_e(e), m_fe(fe), m_stackPad(stackPad)
@@ -272,14 +266,16 @@ class FuncFinisher {
   ~FuncFinisher() {
     m_ev->finishFunc(m_e, m_fe, m_stackPad);
   }
+
+private:
+  EmitterVisitor* m_ev;
+  Emitter&        m_e;
+  FuncEmitter*    m_fe;
+  int32_t         m_stackPad;
 };
 
 // RAII guard for temporarily overriding an Emitter's location
-class LocationGuard {
-  Emitter& m_e;
-  OptLocation m_loc;
-
-public:
+struct LocationGuard {
   LocationGuard(Emitter& e, const OptLocation& newLoc)
       : m_e(e), m_loc(e.getTempLocation()) {
     if (newLoc) m_e.setTempLocation(newLoc);
@@ -287,6 +283,10 @@ public:
   ~LocationGuard() {
     m_e.setTempLocation(m_loc);
   }
+
+private:
+  Emitter& m_e;
+  OptLocation m_loc;
 };
 
 #define O(name, imm, pop, push, flags)                                  \
@@ -8399,9 +8399,7 @@ void EmitterVisitor::emitClass(Emitter& e,
 
 namespace {
 
-class ForeachIterGuard {
-  EmitterVisitor& m_ev;
- public:
+struct ForeachIterGuard {
   ForeachIterGuard(EmitterVisitor& ev,
                    Id iterId,
                    IterKind kind)
@@ -8412,6 +8410,9 @@ class ForeachIterGuard {
   ~ForeachIterGuard() {
     m_ev.popIterScope();
   }
+
+private:
+  EmitterVisitor& m_ev;
 };
 
 }

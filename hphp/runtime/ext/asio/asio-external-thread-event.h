@@ -45,7 +45,7 @@ class c_ExternalThreadEventWaitHandle;
  *
  * Example:
  *
- * class FooEvent : public AsioExternalThreadEvent {
+ * struct FooEvent : AsioExternalThreadEvent {
  *   public:
  *     FooEvent(int max_value) : m_maxValue(max_value), m_failed(false) {}
  *     ~FooEvent() {}

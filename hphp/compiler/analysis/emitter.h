@@ -426,7 +426,7 @@ struct Region {
   RegionPtr m_parent;
 };
 
-class EmitterVisitor {
+struct EmitterVisitor {
   friend class UnsetUnnamedLocalThunklet;
   friend class FuncFinisher;
 public:

@@ -66,7 +66,8 @@ std::string convDblToStrWithPhpFormat(double n);
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String {
+struct String {
+private:
   req::ptr<StringData> m_str;
 
 protected:
@@ -525,7 +526,8 @@ class StringMap :
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR
 
-class StrNR {
+struct StrNR {
+private:
   StringData *m_px;
 
 public:

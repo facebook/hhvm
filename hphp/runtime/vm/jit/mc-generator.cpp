@@ -1149,9 +1149,7 @@ MCGenerator::bindJccFirst(TCA jccAddr, SrcKey skTaken, SrcKey skNotTaken,
 
 namespace {
 
-class FreeRequestStubTrigger {
-  TCA m_stub;
- public:
+struct FreeRequestStubTrigger {
   explicit FreeRequestStubTrigger(TCA stub) : m_stub(stub) {
     TRACE(3, "FreeStubTrigger @ %p, stub %p\n", this, m_stub);
   }
@@ -1163,7 +1161,10 @@ class FreeRequestStubTrigger {
       Treadmill::enqueue(FreeRequestStubTrigger(m_stub));
     }
   }
+private:
+  TCA m_stub;
 };
+
 }
 
 #ifdef DEBUG

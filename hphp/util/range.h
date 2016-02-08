@@ -82,7 +82,8 @@ struct KeyRangePolicy {
  */
 template<typename Iter,
          template<typename> class RangePolicy = DefaultRangePolicy>
-class IterRange {
+struct IterRange {
+private:
   typedef RangePolicy<Iter> Extractor;
 public:
   typedef typename Extractor::value_type value_type;

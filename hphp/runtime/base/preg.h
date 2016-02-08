@@ -51,7 +51,8 @@ namespace HPHP {
 class Array;
 struct Variant;
 
-class pcre_cache_entry {
+struct pcre_cache_entry {
+private:
   pcre_cache_entry(const pcre_cache_entry&);
   pcre_cache_entry& operator=(const pcre_cache_entry&);
 

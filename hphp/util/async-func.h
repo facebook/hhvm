@@ -32,9 +32,8 @@ namespace HPHP {
 /**
  * Invokes a function asynchrously. For example,
  *
- *   class MyClass {
- *    public:
- *      void doJob();
+ *   struct MyClass {
+ *     void doJob();
  *   };
  *
  *   MyClass obj;
@@ -47,9 +46,8 @@ namespace HPHP {
  * Maybe this can help people understand asynchronous function is actually a
  * broader/identical view of running threads,
  *
- *   class MyRunnable {
- *    public:
- *      void run();
+ *   struct MyRunnable {
+ *     void run();
  *   };
  *
  *   MyRunnable thread;
@@ -59,10 +57,9 @@ namespace HPHP {
  * Well, asynchronous function is sometimes more flexible in writing a server,
  * because it can bind different threads to methods on the same object:
  *
- *   class MyServer {
- *    public:
- *      void thread1();
- *      void thread2();
+ *   struct MyServer {
+ *     void thread1();
+ *     void thread2();
  *   };
  *
  *   MyServer server;
@@ -75,24 +72,23 @@ namespace HPHP {
  * There is nothing wrong embedding the async function object itself in the
  * class like this,
  *
- *   class MyServer {
- *    public:
- *      MyServer()
- *       : m_thread1(this, &MyServer::thread1),
- *       : m_thread2(this, &MyServer::thread2) {
- *      }
+ *   struct MyServer {
+ *     MyServer()
+ *       : m_thread1(this, &MyServer::thread1)
+ *       , m_thread2(this, &MyServer::thread2)
+ *     {}
  *
- *      void thread1();
- *      void thread2();
+ *     void thread1();
+ *     void thread2();
  *
- *      void start() {
- *        m_thread1.start();
- *        m_thread2.start();
- *      }
+ *     void start() {
+ *       m_thread1.start();
+ *       m_thread2.start();
+ *     }
  *
- *    private:
- *      AsyncFunc<MyServer> m_thread1;
- *      AsyncFunc<MyServer> m_thread2;
+ *   private:
+ *     AsyncFunc<MyServer> m_thread1;
+ *     AsyncFunc<MyServer> m_thread2;
  *   };
  *
  */

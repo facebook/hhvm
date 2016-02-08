@@ -63,11 +63,7 @@ extern int g_dwarfCallback(
   Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
   Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error);
 
-class TCRange {
-  TCA m_start, m_end;
-  bool m_isAcold;
-  void V() const { assert(isValid()); }
- public:
+struct TCRange {
   TCRange() : m_start(nullptr), m_end(nullptr), m_isAcold(false) {
     assert(!isValid());
   }
@@ -98,6 +94,13 @@ class TCRange {
     m_end = newEnd;
     V();
   }
+
+private:
+  void V() const { assert(isValid()); }
+
+private:
+  TCA m_start, m_end;
+  bool m_isAcold;
 };
 
 struct DwarfBuf {

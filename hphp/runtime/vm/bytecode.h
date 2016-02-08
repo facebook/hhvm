@@ -667,7 +667,8 @@ struct Fault {
 };
 
 // Interpreter evaluation stack.
-class Stack {
+struct Stack {
+private:
   TypedValue* m_elms;
   TypedValue* m_top;
   TypedValue* m_base; // Stack grows down, so m_base is beyond the end of

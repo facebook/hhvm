@@ -425,7 +425,7 @@ struct ThreadLocalProxy {
  * How to use the thread-local macros:
  *
  * Use DECLARE_THREAD_LOCAL to declare a *static* class field as thread local:
- *   class SomeClass {
+ *   struct SomeClass {
  *     static DECLARE_THREAD_LOCAL(SomeFieldType, f);
  *   }
  *

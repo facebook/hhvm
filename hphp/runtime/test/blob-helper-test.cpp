@@ -39,7 +39,7 @@ void testSerializationExactEquality(const T& val) {
 }
 
 template <typename T>
-class IntegerSerializationTest : public ::testing::Test {};
+struct IntegerSerializationTest : ::testing::Test {};
 
 typedef ::testing::Types<
                 int8_t,

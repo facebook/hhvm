@@ -24,7 +24,8 @@
 
 namespace HPHP { namespace jit {
 
-class RepoWrapper {
+struct RepoWrapper {
+private:
   typedef std::map<MD5, Unit*> CacheType;
 
   Repo* repo;

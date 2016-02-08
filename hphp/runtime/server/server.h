@@ -34,11 +34,10 @@
  *     their specific requests, we really want to minimize writing an HTTP
  *     server to something like this,
  *
- *     class MyRequestHandler : public RequestHandler {
- *       public:
- *         virtual void handleRequest(Transport *transport) {
- *           // ...
- *         }
+ *     struct MyRequestHandler : RequestHandler {
+ *       virtual void handleRequest(Transport *transport) {
+ *         // ...
+ *       }
  *     };
  *
  *     Then, run a server like this,
@@ -56,11 +55,11 @@
  *     server, derive a new class from Server just like LibEventServer
  *     does.
  *
- *     class MyTransport : public Transport {
+ *     struct MyTransport : Transport {
  *       // implements transport-related functions
  *     };
  *
- *     class MyServer : public Server {
+ *     struct MyServer : Server {
  *       // implements how to start/stop a server
  *     };
  *

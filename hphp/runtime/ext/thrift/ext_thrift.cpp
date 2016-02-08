@@ -19,8 +19,7 @@
 
 namespace HPHP { namespace thrift {
 
-static class ThriftExtension final : public Extension {
-public:
+static struct ThriftExtension final : Extension {
   ThriftExtension() : Extension("thrift_protocol", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(thrift_protocol_write_binary);

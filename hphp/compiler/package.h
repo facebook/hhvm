@@ -39,8 +39,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
  * contains all classes, functions, variables, constants and their types.
  * Therefore, a package is really toppest entry point for parsing.
  */
-class Package {
-public:
+struct Package {
   explicit Package(const char *root,
                    bool bShortTags = true,
                    bool bAspTags = false);

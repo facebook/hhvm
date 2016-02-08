@@ -543,14 +543,12 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
 #endif
 }
 
-class ApcLoadJob {
-public:
+struct ApcLoadJob {
   ApcLoadJob(void *handle, int index) : m_handle(handle), m_index(index) {}
   void *m_handle; int m_index;
 };
 
-class ApcLoadWorker {
-public:
+struct ApcLoadWorker {
   void onThreadEnter() {
     g_context.getCheck();
   }

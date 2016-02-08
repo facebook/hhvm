@@ -43,8 +43,7 @@ class Func;
  * To use this class, instantiate a BCPattern with a list of opcodes and
  * metacharacters, then matchAnchored() on a PC.
  */
-class BCPattern {
-public:
+struct BCPattern {
   ////////////////////////////////////////////////////////////////////
 
   class Atom;
@@ -57,8 +56,7 @@ public:
    *
    * For JmpZ and JmpNZ, also supports pattern matching on the taken branch.
    */
-  class Atom {
-  public:
+  struct Atom {
     /* implicit */ Atom(Op op)
       : m_op(op)
       , m_capture(false)
@@ -129,8 +127,7 @@ public:
   /**
    * Result of a pattern match.
    */
-  class Result {
-  public:
+  struct Result {
     bool found() const  { return m_start; }
 
     PC getStart() const { return m_start; }

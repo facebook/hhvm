@@ -54,8 +54,7 @@ static __thread MEMCACHEGlobals* s_memcache_globals;
 
 const StaticString s_MemcacheData("MemcacheData");
 
-class MemcacheData {
- public:
+struct MemcacheData {
   memcached_st m_memcache;
   int m_compress_threshold;
   double m_min_compress_savings;
@@ -745,8 +744,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
 const StaticString s_MEMCACHE_HAVE_SESSION("MEMCACHE_HAVE_SESSION");
 
-class MemcacheExtension final : public Extension {
-  public:
+struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {
       // TODO: t5226715 We shouldn't need to check s_defaultLocale here,

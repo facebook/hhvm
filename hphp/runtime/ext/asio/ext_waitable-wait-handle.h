@@ -34,8 +34,7 @@ namespace HPHP {
 class AsioBlockable;
 class AsioContext;
 
-class c_WaitableWaitHandle : public c_WaitHandle {
- public:
+struct c_WaitableWaitHandle : c_WaitHandle {
   WAITHANDLE_CLASSOF(WaitableWaitHandle);
   WAITHANDLE_DTOR(WaitableWaitHandle);
 

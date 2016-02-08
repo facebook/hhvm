@@ -26,8 +26,7 @@ namespace HPHP {
  * Holding a list of char* safely, so other places only need to store char*
  * than making a copy.
  */
-class StringBag {
-public:
+struct StringBag {
   explicit StringBag(int reserve_count = 0);
   ~StringBag();
 

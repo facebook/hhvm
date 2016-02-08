@@ -33,8 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLReader
 
-class XMLReader {
-public:
+struct XMLReader {
   XMLReader();
   ~XMLReader();
   void close();

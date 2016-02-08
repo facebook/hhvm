@@ -144,9 +144,8 @@ public:
 /**
  * Base class of Expression and Statement.
  */
-class Construct : public std::enable_shared_from_this<Construct>,
-                  public JSON::CodeError::ISerializable {
-public:
+struct Construct : std::enable_shared_from_this<Construct>,
+                   JSON::CodeError::ISerializable {
   virtual ~Construct() {}
 
 #define DEC_STATEMENT_ENUM(x) KindOf##x,
@@ -340,8 +339,7 @@ protected:
   mutable int m_effectsTag;
 };
 
-class LocalEffectsContainer {
-public:
+struct LocalEffectsContainer {
   int getLocalEffects() const { return m_localEffects; }
   virtual void effectsCallback() = 0;
 protected:

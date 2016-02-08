@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(LabelStatement);
 
-class LabelStatement : public Statement {
-public:
+struct LabelStatement : Statement {
   LabelStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;

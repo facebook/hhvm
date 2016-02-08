@@ -53,9 +53,7 @@ struct TCRegionRec {
   uint32_t len;
 };
 
-class OfflineX86Code {
-
-public:
+struct OfflineX86Code {
 
   OfflineX86Code(std::string _dumpDir,
                  TCA _ahotBase,

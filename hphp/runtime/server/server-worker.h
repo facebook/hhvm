@@ -28,8 +28,7 @@ namespace HPHP {
 
 class Transport;
 
-class ServerJob {
-public:
+struct ServerJob {
   explicit ServerJob();
   virtual ~ServerJob() {}
 

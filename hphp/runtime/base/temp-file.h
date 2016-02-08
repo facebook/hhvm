@@ -26,8 +26,7 @@ namespace HPHP {
  * A temporary read/write file system file for php://temp, it will be deleted
  * from the file system on close.
  */
-class TempFile : public PlainFile {
-public:
+struct TempFile : PlainFile {
   DECLARE_RESOURCE_ALLOCATION(TempFile);
 
   explicit TempFile(bool autoDelete = true,

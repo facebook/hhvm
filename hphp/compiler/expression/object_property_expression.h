@@ -28,9 +28,7 @@ DECLARE_BOOST_TYPES(ObjectPropertyExpression);
 DECLARE_BOOST_TYPES(ClassScope);
 class Symbol;
 
-class ObjectPropertyExpression : public Expression,
-                                 public LocalEffectsContainer {
-public:
+struct ObjectPropertyExpression : Expression, LocalEffectsContainer {
   ObjectPropertyExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                            ExpressionPtr object, ExpressionPtr property,
                            PropAccessType propAccessType);

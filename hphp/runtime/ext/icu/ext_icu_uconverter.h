@@ -11,8 +11,7 @@ namespace HPHP { namespace Intl {
 
 extern const StaticString s_UConverter;
 
-class IntlUConverter : public IntlError {
-public:
+struct IntlUConverter : IntlError {
   IntlUConverter() {}
   IntlUConverter(const IntlUConverter& src) = delete;
   IntlUConverter& operator=(const IntlUConverter& src) {

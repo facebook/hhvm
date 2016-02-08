@@ -266,8 +266,7 @@ static bool HHVM_FUNCTION(readline_write_history,
   }
 }
 
-static class ReadlineExtension final : public Extension {
-  public:
+static struct ReadlineExtension final : Extension {
     ReadlineExtension() : Extension("readline") {}
     void moduleInit() override {
 #ifdef USE_EDITLINE

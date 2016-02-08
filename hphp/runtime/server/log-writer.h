@@ -37,8 +37,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassicWriter final : public LogWriter {
-public:
+struct ClassicWriter final : LogWriter {
   ClassicWriter(const AccessLogFileData& alfd, LogChannel chan)
     : LogWriter(chan)
     , m_logdata(alfd)
@@ -55,8 +54,7 @@ private:
   static void skipField(const char*& fmt);
 };
 
-class FieldGenerator {
-public:
+struct FieldGenerator {
   FieldGenerator(Transport* t, const VirtualHost* vh,
                  AccessLog::ThreadData* tdata)
     : transport(t)

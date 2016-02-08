@@ -26,8 +26,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(ClassRequireStatement);
 
-class ClassRequireStatement : public Statement, public IParseHandler {
-public:
+struct ClassRequireStatement : Statement, IParseHandler {
   ClassRequireStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                         const std::string &required,
                         bool isExtends);

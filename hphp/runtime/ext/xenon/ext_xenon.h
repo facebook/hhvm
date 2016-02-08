@@ -61,8 +61,7 @@
 */
 
 namespace HPHP {
-class Xenon final {
-  public:
+struct Xenon final {
 
     enum SampleType {
       // Sample was taken during I/O wait and thus does not represent CPU time.

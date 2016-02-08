@@ -22,8 +22,7 @@
 
 namespace HPHP {
 
-static class ThreadExtension final : public Extension {
-public:
+static struct ThreadExtension final : Extension {
   ThreadExtension() : Extension("thread", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(hphp_get_thread_id);

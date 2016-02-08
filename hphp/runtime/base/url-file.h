@@ -27,8 +27,7 @@ namespace HPHP {
 /**
  * url based files.
  */
-class UrlFile : public MemFile {
-public:
+struct UrlFile : MemFile {
   DECLARE_RESOURCE_ALLOCATION(UrlFile);
 
   explicit UrlFile(const char *method = "GET", const Array& headers = null_array,

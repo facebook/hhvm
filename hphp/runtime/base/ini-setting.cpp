@@ -822,8 +822,7 @@ Variant IniSetting::Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
   return unboxed;
 }
 
-class IniCallbackData {
-public:
+struct IniCallbackData {
   IniCallbackData() {
     extension = nullptr;
     mode = IniSetting::PHP_INI_NONE;

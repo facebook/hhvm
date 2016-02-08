@@ -6,8 +6,7 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-class StandardExtension final : public Extension {
- public:
+struct StandardExtension final : Extension {
   StandardExtension() : Extension("standard") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {

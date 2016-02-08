@@ -22,8 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StaticClassName : public IParseHandler {
-public:
+struct StaticClassName : IParseHandler {
   explicit StaticClassName(ExpressionPtr classExp);
 
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);

@@ -3388,8 +3388,7 @@ static Variant HHVM_METHOD(PDOStatement, __sleep) {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-static class PDOExtension final : public Extension {
-public:
+static struct PDOExtension final : Extension {
   PDOExtension() : Extension("pdo", " 1.0.4dev") {}
 
 #ifdef ENABLE_EXTENSION_PDO_MYSQL

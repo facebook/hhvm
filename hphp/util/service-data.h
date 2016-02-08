@@ -176,8 +176,7 @@ void exportAll(std::map<std::string, int64_t>& statsMap);
 folly::Optional<int64_t> exportCounterByKey(std::string& key);
 
 // Interface for a flat counter. All methods are thread safe.
-class ExportedCounter {
- public:
+struct ExportedCounter {
   ExportedCounter() : m_value(0) {}
   void increment() { m_value.fetch_add(1, std::memory_order_relaxed); }
   void decrement() { m_value.fetch_sub(1, std::memory_order_relaxed); }
@@ -197,8 +196,7 @@ class ExportedCounter {
 };
 
 // Interface for timeseries data. All methods are thread safe.
-class ExportedTimeSeries {
- public:
+struct ExportedTimeSeries {
   ExportedTimeSeries(int numBuckets,
                      const std::vector<std::chrono::seconds>& durations,
                      const std::vector<StatsType>& exportTypes);
@@ -222,8 +220,7 @@ class ExportedTimeSeries {
 };
 
 // Interface for histogram data. All methods are thread safe.
-class ExportedHistogram {
- public:
+struct ExportedHistogram {
   ExportedHistogram(int64_t bucketSize, int64_t min, int64_t max,
                     const std::vector<double>& exportPercentiles);
   void addValue(int64_t value);

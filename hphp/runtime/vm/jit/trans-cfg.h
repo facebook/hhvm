@@ -29,10 +29,8 @@ namespace HPHP { namespace jit {
 /**
  * A dynamic control-flow graph of single-block translations.
  */
-class TransCFG {
- public:
-  class Arc {
-   public:
+struct TransCFG {
+  struct Arc {
     static const int64_t kUnknownWeight = -1;
 
     Arc(TransID src, TransID dst, int64_t w)
@@ -57,8 +55,7 @@ class TransCFG {
   typedef std::vector<Arc*>                      ArcPtrVec;
   typedef hphp_hash_set<Arc*, pointer_hash<Arc>> ArcPtrSet;
 
-  class Node {
-   public:
+  struct Node {
     Node(TransID id, int64_t w)
         : m_id(id)
         , m_weight(w)

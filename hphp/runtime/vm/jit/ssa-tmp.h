@@ -26,8 +26,7 @@ class IRInstruction;
 class IRUnit;
 class IRBuilder;
 
-class SSATmp {
-public:
+struct SSATmp {
   uint32_t          id() const { return m_id; }
   IRInstruction*    inst() const { return m_inst; }
   void              setInstruction(IRInstruction* i, int dstId = 0);

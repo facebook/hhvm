@@ -126,8 +126,7 @@ void RequestLocal<T>::create() {
 #else // defined(USE_GCC_FAST_TLS)
 
 template<typename T>
-class RequestLocal {
-public:
+struct RequestLocal {
   explicit RequestLocal(ThreadLocal<T> & tl) : m_tlsObjects(tl) {}
 
   bool getInited() const {

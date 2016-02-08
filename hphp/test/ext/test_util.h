@@ -23,8 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestUtil : public TestBase {
- public:
+struct TestUtil : TestBase {
   TestUtil();
 
   virtual bool RunTests(const std::string &which);

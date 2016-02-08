@@ -32,8 +32,7 @@ const int64_t k_STREAM_FILTER_ALL   = k_STREAM_FILTER_READ |
 
 class File;
 
-class BucketBrigade : public ResourceData {
-public:
+struct BucketBrigade : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(BucketBrigade);
   CLASSNAME_IS("bucket brigade");
   const String& o_getClassNameHook() const override {
@@ -54,8 +53,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamFilter : public ResourceData {
-public:
+struct StreamFilter : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamFilter);
   CLASSNAME_IS("stream filter");
   const String& o_getClassNameHook() const override {

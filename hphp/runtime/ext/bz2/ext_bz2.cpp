@@ -241,8 +241,7 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bz2Extension final : public Extension {
- public:
+struct bz2Extension final : Extension {
   bz2Extension() : Extension("bz2") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {

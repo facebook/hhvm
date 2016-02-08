@@ -28,8 +28,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(UseTraitStatement);
 
-class UseTraitStatement : public Statement, public IParseHandler {
-public:
+struct UseTraitStatement : Statement, IParseHandler {
   UseTraitStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp,
                    StatementListPtr stmt);
 

@@ -703,8 +703,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 
-class XSLExtension final : public Extension {
-  public:
+struct XSLExtension final : Extension {
     XSLExtension() : Extension("xsl", "0.1") {};
 
     void moduleInit() override {

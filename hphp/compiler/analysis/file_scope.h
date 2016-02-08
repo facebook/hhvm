@@ -49,10 +49,8 @@ DECLARE_BOOST_TYPES(StatementList);
  * AnalysisResult objects to grab statements, functions and classes from
  * FileScope objects to form execution paths.
  */
-class FileScope : public BlockScope,
-                  public FunctionContainer,
-                  public JSON::DocTarget::ISerializable {
-public:
+struct FileScope : BlockScope, FunctionContainer,
+                   JSON::DocTarget::ISerializable {
   enum Attribute {
     ContainsDynamicVariable  = 0x0001,
     ContainsLDynamicVariable = 0x0002,

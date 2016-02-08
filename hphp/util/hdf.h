@@ -47,8 +47,7 @@ namespace HPHP {
  *   }
  */
 class HdfRaw; // reference counting HDF* raw pointer, implmented in .cpp file
-class Hdf {
-public:
+struct Hdf {
   /**
    * Constructors.
    */
@@ -378,8 +377,7 @@ private:
 /**
  * Base class of all exceptions Hdf class might throw.
  */
-class HdfException : public Exception {
-public:
+struct HdfException : Exception {
   HdfException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);
   EXCEPTION_COMMON_IMPL(HdfException);
@@ -388,8 +386,7 @@ public:
 /**
  * Trying to get a node's value, but it's not in the specified type.
  */
-class HdfDataTypeException : public HdfException {
-public:
+struct HdfDataTypeException : HdfException {
   HdfDataTypeException(const Hdf *hdf, const char *type, const char *value)
     : HdfException("HDF node [%s]'s value \"%s\" is not %s",
                    hdf->getFullPath().c_str(), value, type) {
@@ -400,8 +397,7 @@ public:
 /**
  * A node's value is not expected.
  */
-class HdfDataValueException : public HdfException {
-public:
+struct HdfDataValueException : HdfException {
   explicit HdfDataValueException(const Hdf *hdf, const char *expected = "")
     : HdfException("HDF node [%s]'s value \"%s\" is not expected %s",
                    hdf->getFullPath().c_str(), hdf->configGet(""), expected) {
@@ -412,8 +408,7 @@ public:
 /**
  * Calling a function in wrong context.
  */
-class HdfInvalidOperation : public HdfException {
-public:
+struct HdfInvalidOperation : HdfException {
   explicit HdfInvalidOperation(const char *operation)
     : HdfException("Invalid operation: %s", operation) {
   }

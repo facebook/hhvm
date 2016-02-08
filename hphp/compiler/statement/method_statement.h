@@ -30,7 +30,7 @@ DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-class MethodStatement : public Statement, public IParseHandler {
+struct MethodStatement : Statement, IParseHandler {
 protected:
   MethodStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,

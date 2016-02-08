@@ -48,8 +48,7 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
  * Configurable options set from command line or configurable file at startup
  * time.
  */
-class RuntimeOption {
-public:
+struct RuntimeOption {
   static void Load(
     IniSettingMap &ini, Hdf& config,
     const std::vector<std::string>& iniClis = std::vector<std::string>(),

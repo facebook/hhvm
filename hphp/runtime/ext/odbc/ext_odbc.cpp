@@ -40,8 +40,7 @@ static req::ptr<T> safe_cast(const Resource& res) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ODBCContext {
-public:
+struct ODBCContext {
   // extract an error from a handle
   static void extract_error(const SQLSMALLINT type, const SQLHANDLE hdl);
 
@@ -99,8 +98,7 @@ SQLCHAR* ODBCContext::get_last_error_msg()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ODBCColumn : public SweepableResourceData {
-public:
+struct ODBCColumn : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ODBCColumn);
 
   explicit ODBCColumn(const SQLHSTMT hdl_stmt, const int i_col);
@@ -202,8 +200,7 @@ SQLLEN ODBCColumn::total_column_size() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ODBCParam : public SweepableResourceData {
-public:
+struct ODBCParam : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ODBCParam);
 
   ODBCParam(const SQLHSTMT hdl_stmt, const int i_col);
@@ -231,8 +228,7 @@ ODBCParam::ODBCParam(const SQLHSTMT hdl_stmt, const int i_col)
 ///////////////////////////////////////////////////////////////////////////////
 
 // created per-query
-class ODBCCursor : public SweepableResourceData {
-public:
+struct ODBCCursor : SweepableResourceData {
   CLASSNAME_IS("odbc cursor")
   const String& o_getClassNameHook() const override { return classnameof(); }
   DECLARE_RESOURCE_ALLOCATION(ODBCCursor);
@@ -565,8 +561,7 @@ int64_t ODBCCursor::num_rows() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ODBCLink : public SweepableResourceData {
-public:
+struct ODBCLink : SweepableResourceData {
   CLASSNAME_IS("odbc link")
   const String& o_getClassNameHook() const override { return classnameof(); }
   DECLARE_RESOURCE_ALLOCATION(ODBCLink);
@@ -873,8 +868,7 @@ bool HHVM_FUNCTION(odbc_rollback, const Resource& link)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static class ODBCExtension final : public Extension {
- public:
+static struct ODBCExtension final : Extension {
   ODBCExtension() : Extension("odbc") { }
   void moduleInit() override {
     HHVM_FE(odbc_set_autocommit);

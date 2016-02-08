@@ -99,8 +99,7 @@ T* wait_handle(const ObjectData* obj) {
   return static_cast<T*>(const_cast<ObjectData*>(obj));
 }
 
-class c_WaitHandle : public ObjectData {
- public:
+struct c_WaitHandle : ObjectData {
   WAITHANDLE_CLASSOF(WaitHandle);
   WAITHANDLE_DTOR(WaitHandle);
 

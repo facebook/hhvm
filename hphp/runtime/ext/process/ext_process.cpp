@@ -179,8 +179,7 @@ DEFINE_CONSTANT(SIGSTKFLT, SIGSTKFLT);
 #define REGISTER_CONSTANT(name) \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)
 
-static class ProcessExtension final : public Extension {
-public:
+static struct ProcessExtension final : Extension {
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(pcntl_alarm);
@@ -448,8 +447,7 @@ static void pcntl_signal_handler(int signo) {
   }
 }
 
-class SignalHandlersStaticInitializer {
-public:
+struct SignalHandlersStaticInitializer {
   SignalHandlersStaticInitializer() {
     signal(SIGALRM, pcntl_signal_handler);
     signal(SIGUSR1, pcntl_signal_handler);

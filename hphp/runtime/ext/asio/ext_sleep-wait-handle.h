@@ -29,8 +29,7 @@ namespace HPHP {
 /**
  * A wait handle that sleeps until a give time passes.
  */
-class c_SleepWaitHandle final : public c_WaitableWaitHandle {
- public:
+struct c_SleepWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(SleepWaitHandle);
   WAITHANDLE_DTOR(SleepWaitHandle);
 

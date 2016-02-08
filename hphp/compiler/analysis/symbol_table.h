@@ -50,8 +50,7 @@ class Symbol;
 typedef hphp_string_map<Symbol*> StringToSymbolMap;
 typedef std::vector<Symbol*>     SymbolVec;
 
-class Symbol {
-public:
+struct Symbol {
   Symbol() : m_hash(0), m_parameter(-1) { m_flags_val = 0; }
 
   void import(BlockScopeRawPtr scope, const Symbol &src_sym);
@@ -230,8 +229,7 @@ private:
   ConstructPtr        m_initVal;
 };
 
-class SymParamWrapper : public JSON::DocTarget::ISerializable {
-public:
+struct SymParamWrapper : JSON::DocTarget::ISerializable {
   explicit SymParamWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
@@ -242,8 +240,7 @@ private:
   const Symbol *m_sym;
 };
 
-class SymClassVarWrapper : public JSON::DocTarget::ISerializable {
-public:
+struct SymClassVarWrapper : JSON::DocTarget::ISerializable {
   explicit SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
@@ -257,9 +254,8 @@ private:
 /**
  * Base class of VariableTable and ConstantTable.
  */
-class SymbolTable : public std::enable_shared_from_this<SymbolTable>,
-                    public JSON::CodeError::ISerializable {
-public:
+struct SymbolTable : std::enable_shared_from_this<SymbolTable>,
+                     JSON::CodeError::ISerializable {
   BlockScope *getScopePtr() const { return &m_blockScope; }
   BlockScopeRawPtr getBlockScope() const {
     return BlockScopeRawPtr(&m_blockScope);

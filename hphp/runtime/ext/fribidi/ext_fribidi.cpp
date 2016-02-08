@@ -156,8 +156,7 @@ static Array HHVM_FUNCTION(
   return result;
 }
 
-class FribidiExtension final : public Extension {
-public:
+struct FribidiExtension final : Extension {
   FribidiExtension() : Extension("fribidi") {}
   void moduleInit() override {
     // Charsets

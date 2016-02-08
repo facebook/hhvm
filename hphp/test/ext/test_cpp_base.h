@@ -32,8 +32,7 @@
  * calling library functions, therefore we can easily run it under valgrind
  * and other tools to detect any coding problems.
  */
-class TestCppBase : public TestBase {
- public:
+struct TestCppBase : TestBase {
   TestCppBase();
 
   virtual bool RunTests(const std::string &which);

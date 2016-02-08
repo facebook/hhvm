@@ -235,8 +235,7 @@ extern const Object null_object;
 ///////////////////////////////////////////////////////////////////////////////
 // ObjNR
 
-class ObjNR {
-public:
+struct ObjNR {
   explicit ObjNR(ObjectData* data) {
     m_px = data;
   }

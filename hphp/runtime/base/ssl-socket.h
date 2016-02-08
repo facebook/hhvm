@@ -127,8 +127,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // helper class
 
-class Certificate : public SweepableResourceData {
-public:
+struct Certificate : SweepableResourceData {
   X509 *m_cert;
   explicit Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
   ~Certificate() {

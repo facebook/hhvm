@@ -4401,8 +4401,7 @@ bool HHVM_FUNCTION(mb_send_mail,
   return ret;
 }
 
-static class mbstringExtension final : public Extension {
-  public:
+static struct mbstringExtension final : Extension {
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {

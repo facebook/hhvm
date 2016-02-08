@@ -148,7 +148,7 @@ private:
  * a VarEnv is attached. Internally uses a NameValueTable to hook up names to
  * the local locations.
  */
-class VarEnv {
+struct VarEnv {
  private:
   NameValueTable m_nvTable;
   ExtraArgs* m_extraArgs;

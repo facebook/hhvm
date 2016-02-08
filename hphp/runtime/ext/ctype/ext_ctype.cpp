@@ -100,8 +100,7 @@ bool HHVM_FUNCTION(ctype_xdigit, const Variant& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CtypeExtension final : public Extension {
- public:
+struct CtypeExtension final : Extension {
   CtypeExtension() : Extension("ctype") {}
   void moduleInit() override {
     HHVM_FE(ctype_alnum);

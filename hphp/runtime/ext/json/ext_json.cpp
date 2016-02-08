@@ -218,8 +218,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class JsonExtension final : public Extension {
- public:
+struct JsonExtension final : Extension {
   JsonExtension() : Extension("json", "1.2.1") {}
   void moduleInit() override {
     HHVM_RC_INT(JSON_HEX_TAG, k_JSON_HEX_TAG);

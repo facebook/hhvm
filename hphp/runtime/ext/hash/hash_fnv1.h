@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_fnv132 : public HashEngine {
-public:
+struct hash_fnv132 : HashEngine {
   explicit hash_fnv132(bool a);
 
   virtual void hash_init(void *context);
@@ -36,8 +35,7 @@ private:
   bool m_a;
 };
 
-class hash_fnv164 : public HashEngine {
-public:
+struct hash_fnv164 : HashEngine {
   explicit hash_fnv164(bool a);
 
   virtual void hash_init(void *context);

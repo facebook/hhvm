@@ -64,8 +64,7 @@ typedef std::vector< std::pair< BlockScopeRawPtr, int* > >
 /**
  * Base class of ClassScope and FunctionScope.
  */
-class BlockScope : public std::enable_shared_from_this<BlockScope> {
-public:
+struct BlockScope : std::enable_shared_from_this<BlockScope> {
   enum KindOf {
     ClassScope,
     FunctionScope,

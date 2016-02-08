@@ -52,8 +52,7 @@ DEFINE_JSON_OUTPUT_TYPE(DocTarget);
 std::string Escape(const char *s);
 
 template <typename T>
-class _ISerializable {
-public:
+struct _ISerializable {
   virtual ~_ISerializable() {}
 
   /**
@@ -62,8 +61,7 @@ public:
   virtual void serialize(_OutputStream<T> &out) const = 0;
 };
 
-class Name {
-public:
+struct Name {
   explicit Name(const char *name) {
     assert(name && *name);
     m_name = name;
@@ -82,8 +80,7 @@ private:
 enum class Null {};
 
 template <typename Type>
-class _OutputStream {
-public:
+struct _OutputStream {
   _OutputStream(std::ostream &out,
                 std::shared_ptr<AnalysisResult> ar) : m_out(out), m_ar(ar) {}
 
@@ -198,8 +195,7 @@ private:
 };
 
 template <typename Type>
-class _MapStream {
-public:
+struct _MapStream {
   explicit _MapStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}
 
@@ -239,8 +235,7 @@ private:
 };
 
 template <typename Type>
-class _ListStream {
-public:
+struct _ListStream {
   explicit _ListStream(_OutputStream<Type> &jout)
     : m_out(jout.raw()), m_jout(jout), m_first(true) {}
 

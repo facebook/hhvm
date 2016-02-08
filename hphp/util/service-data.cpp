@@ -123,8 +123,7 @@ void ExportedHistogram::exportAll(const std::string& prefix,
 
 namespace detail {
 template <class ClassWithPrivateDestructor>
-class FriendDeleter {
- public:
+struct FriendDeleter {
   template <class... Args>
   explicit FriendDeleter(Args&&... args)
       : m_instance(new ClassWithPrivateDestructor(
@@ -197,8 +196,7 @@ Value* getOrCreateWithArgs(tbb::concurrent_unordered_map<Key, Value*>& map,
   return result.first->second;
 }
 
-class Impl {
- public:
+struct Impl {
   ExportedCounter* createCounter(const std::string& name) {
     return getOrCreateWithArgs(m_counterMap, name);
   }

@@ -41,8 +41,7 @@ namespace sz {
 typedef uint8_t* Address;
 typedef uint8_t* CodeAddress;
 
-class DataBlockFull : public std::runtime_error {
- public:
+struct DataBlockFull : std::runtime_error {
   std::string name;
 
   DataBlockFull(const std::string& blockName, const std::string msg)
@@ -293,8 +292,7 @@ class UndoMarker {
 /*
  * RAII bookmark for scoped rewinding of frontier.
  */
-class CodeCursor : public UndoMarker {
- public:
+struct CodeCursor : UndoMarker {
   CodeCursor(CodeBlock& cb, CodeAddress newFrontier) : UndoMarker(cb) {
     cb.setFrontier(newFrontier);
   }

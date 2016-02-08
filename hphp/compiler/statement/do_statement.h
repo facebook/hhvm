@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(DoStatement);
 
-class DoStatement : public LoopStatement {
-public:
+struct DoStatement : LoopStatement {
   DoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
               StatementPtr stmt, ExpressionPtr condition);
 

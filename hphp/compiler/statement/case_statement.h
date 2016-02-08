@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(CaseStatement);
 
-class CaseStatement : public Statement {
-public:
+struct CaseStatement : Statement {
   CaseStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                 ExpressionPtr condition, StatementPtr stmt);
 

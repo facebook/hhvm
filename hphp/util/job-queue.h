@@ -116,8 +116,7 @@ struct SimpleReleaser : IQueuedJobsReleaser {
 template<typename TJob,
          bool waitable = false,
          class DropCachePolicy = detail::NoDropCachePolicy>
-class JobQueue : public SynchronizableMulti {
-public:
+struct JobQueue : SynchronizableMulti {
   // trivial class for signaling queue stop
   class StopSignal {};
 
@@ -405,8 +404,7 @@ template<typename TJob,
          bool countActive = false,
          bool waitable = false,
          class Policy = detail::NoDropCachePolicy>
-class JobQueueWorker {
-public:
+struct JobQueueWorker {
   typedef TJob JobType;
   typedef TContext ContextType;
   typedef JobQueue<TJob, waitable, Policy> QueueType;
@@ -501,8 +499,7 @@ private:
  * Driver class to push through the whole thing.
  */
 template<class TWorker>
-class JobQueueDispatcher : public IHostHealthObserver {
-public:
+struct JobQueueDispatcher : IHostHealthObserver {
   /**
    * Constructor.
    */

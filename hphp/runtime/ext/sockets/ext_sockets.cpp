@@ -1592,8 +1592,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
   return ret;
 }
 
-class SocketsExtension final : public Extension {
- public:
+struct SocketsExtension final : Extension {
   SocketsExtension() : Extension("sockets", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {

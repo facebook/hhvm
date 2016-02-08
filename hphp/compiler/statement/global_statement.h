@@ -25,8 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(GlobalStatement);
 
-class GlobalStatement : public Statement {
-public:
+struct GlobalStatement : Statement {
   GlobalStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
   StatementPtr preOptimize(AnalysisResultConstPtr ar) override;

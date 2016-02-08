@@ -60,10 +60,9 @@ typedef std::vector< ParameterExpressionPtrIdxPair >
  * A FunctionScope corresponds to a function declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-class FunctionScope : public BlockScope,
-                      public JSON::CodeError::ISerializable,
-                      public JSON::DocTarget::ISerializable {
-public:
+struct FunctionScope : BlockScope,
+                       JSON::CodeError::ISerializable,
+                       JSON::DocTarget::ISerializable {
   /**
    * User defined functions.
    */
@@ -314,8 +313,7 @@ public:
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);
 
-  class FunctionInfo {
-  public:
+  struct FunctionInfo {
     explicit FunctionInfo(int rva = -1)
       : m_maybeStatic(false)
       /*

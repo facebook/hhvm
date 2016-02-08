@@ -80,8 +80,7 @@ ATTRIBUTE_NORETURN void throwOOB(int64_t key);
 // class BaseVector: encapsulates functionality that is common to both
 // c_Vector and c_ImmVector. It doesn't map to any PHP-land class.
 
-class BaseVector : public ExtCollectionObjectData {
- public:
+struct BaseVector : ExtCollectionObjectData {
   void t___construct(const Variant& iterable = null_variant);
 
   // ConstCollection
@@ -507,8 +506,7 @@ class BaseVector : public ExtCollectionObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class Vector
 
-class c_Vector : public BaseVector {
- public:
+struct c_Vector : BaseVector {
   DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
@@ -591,8 +589,7 @@ class c_Vector : public BaseVector {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmVector
 
-class c_ImmVector : public BaseVector {
- public:
+struct c_ImmVector : BaseVector {
   DECLARE_CLASS_NO_SWEEP(ImmVector)
 
  public:
@@ -1237,7 +1234,7 @@ struct HashCollection : ExtCollectionObjectData {
  * It doesn't represent any PHP-land class; that job is delegated to its
  * c_-prefixed child classes.
  */
-class BaseMap : public HashCollection {
+struct BaseMap : HashCollection {
  protected:
   ATTRIBUTE_NORETURN static void throwOOB(int64_t key);
   ATTRIBUTE_NORETURN static void throwOOB(StringData* key);
@@ -1497,8 +1494,7 @@ class BaseMap : public HashCollection {
 ///////////////////////////////////////////////////////////////////////////////
 // class Map
 
-class c_Map : public BaseMap {
- public:
+struct c_Map : BaseMap {
   DECLARE_CLASS_NO_SWEEP(Map)
 
  public:
@@ -1554,8 +1550,7 @@ class c_Map : public BaseMap {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmMap
 
-class c_ImmMap : public BaseMap {
- public:
+struct c_ImmMap : BaseMap {
   DECLARE_CLASS_NO_SWEEP(ImmMap)
 
  public:
@@ -1601,8 +1596,7 @@ class c_ImmMap : public BaseMap {
  * BaseSet is a hash-table implementation of the Set ADT. It doesn't represent
  * any PHP-land class. That job is delegated to its c_-prefixed child classes.
  */
-class BaseSet : public HashCollection {
- public:
+struct BaseSet : HashCollection {
   void addAllKeysOf(Cell container);
   void addAll(const Variant& t);
 
@@ -1833,8 +1827,7 @@ class BaseSet : public HashCollection {
 ///////////////////////////////////////////////////////////////////////////////
 // class Set
 
-class c_Set : public BaseSet {
- public:
+struct c_Set : BaseSet {
   DECLARE_CLASS_NO_SWEEP(Set)
 
  public:
@@ -1889,8 +1882,7 @@ class c_Set : public BaseSet {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmSet
 
-class c_ImmSet : public BaseSet {
- public:
+struct c_ImmSet : BaseSet {
   DECLARE_CLASS_NO_SWEEP(ImmSet)
 
  public:

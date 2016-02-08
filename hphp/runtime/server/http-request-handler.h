@@ -42,8 +42,7 @@ void setProxyOriginPercentage(const std::string& origin, int percentage);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class HttpRequestHandler : public RequestHandler {
-public:
+struct HttpRequestHandler : RequestHandler {
   static AccessLog &GetAccessLog() { return s_accessLog; }
 
 public:

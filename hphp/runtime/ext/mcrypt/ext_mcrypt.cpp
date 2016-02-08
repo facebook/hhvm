@@ -31,8 +31,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MCrypt : public SweepableResourceData {
-public:
+struct MCrypt : SweepableResourceData {
   explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {}
 
   ~MCrypt() {
@@ -70,8 +69,7 @@ typedef enum {
   RAND
 } iv_source;
 
-class mcrypt_data {
-public:
+struct mcrypt_data {
   std::string algorithms_dir;
   std::string modes_dir;
 };
@@ -728,8 +726,7 @@ bool HHVM_FUNCTION(mcrypt_generic_end, const Resource& td) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class McryptExtension final : public Extension {
- public:
+struct McryptExtension final : Extension {
   McryptExtension() : Extension("mcrypt") {}
   void moduleInit() override {
     HHVM_RC_STR(MCRYPT_3DES, "tripledes");

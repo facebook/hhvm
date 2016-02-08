@@ -259,8 +259,7 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 
 extern IMPLEMENT_THREAD_LOCAL(PCREglobals, tl_pcre_globals);
 
-class PcreExtension final : public Extension {
-public:
+struct PcreExtension final : Extension {
   PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {

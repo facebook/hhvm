@@ -37,8 +37,7 @@ namespace HPHP {
  * Switching to raw pointers in a few select cases was a major
  * compile-time perf win for hphp.
  */
-template <class T> class hphp_raw_ptr {
-public:
+template <class T> struct hphp_raw_ptr {
   hphp_raw_ptr() : px(0) {}
   explicit hphp_raw_ptr(T *p) : px(p) {}
 

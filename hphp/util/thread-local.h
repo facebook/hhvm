@@ -309,8 +309,7 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
  *     These are only called if the singleton was actually created.
  */
 template <typename T>
-class ThreadLocalSingleton {
-public:
+struct ThreadLocalSingleton {
   // Call once per process just to guarantee order of initialization.
   ThreadLocalSingleton() { s_inited = true; }
 
@@ -507,8 +506,7 @@ inline void ThreadLocalSetCleanupHandler(pthread_key_t cleanup_key,
  * pointer from pthread's thread-specific data management.
  */
 template<typename T>
-class ThreadLocal {
-public:
+struct ThreadLocal {
   /**
    * Constructor that has to be called from a thread-neutral place.
    */
@@ -566,8 +564,7 @@ private:
 };
 
 template<typename T>
-class ThreadLocalNoCheck {
-public:
+struct ThreadLocalNoCheck {
   /**
    * Constructor that has to be called from a thread-neutral place.
    */
@@ -653,8 +650,7 @@ void ThreadLocalSingletonOnThreadCleanup(void *key) {
  * See fast-TlS version of ThreadLocalSingleton above for documentation.
  */
 template<typename T>
-class ThreadLocalSingleton {
-public:
+struct ThreadLocalSingleton {
   ThreadLocalSingleton() { getKey(); }
 
   NEVER_INLINE static T *getCheck();
@@ -737,8 +733,7 @@ pthread_key_t ThreadLocalSingleton<T>::s_cleanup_key;
 // some classes don't need new/delete at all
 
 template<typename T, bool throwOnNull = true>
-class ThreadLocalProxy {
-public:
+struct ThreadLocalProxy {
   /**
    * Constructor that has to be called from a thread-neutral place.
    */

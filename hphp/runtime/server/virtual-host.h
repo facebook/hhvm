@@ -24,8 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class VirtualHost {
-public:
+struct VirtualHost {
   static VirtualHost &GetDefault();
 
   static void SetCurrent(VirtualHost *vhost);

@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_crc32 : public HashEngine {
-public:
+struct hash_crc32 : HashEngine {
   hash_crc32(bool b);
 
   virtual void hash_init(void *context);

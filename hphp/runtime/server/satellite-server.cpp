@@ -90,8 +90,7 @@ bool SatelliteServerInfo::checkMainURL(const std::string& path) {
 ///////////////////////////////////////////////////////////////////////////////
 // InternalPageServer: Server + allowed URL checking
 
-class InternalPageServer : public SatelliteServer {
-public:
+struct InternalPageServer : SatelliteServer {
   explicit InternalPageServer(std::shared_ptr<SatelliteServerInfo> info)
     : m_allowedURLs(info->getURLs()) {
     m_server = ServerFactoryRegistry::createServer
@@ -137,8 +136,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // DanglingPageServer: same as Server
 
-class DanglingPageServer : public SatelliteServer {
-public:
+struct DanglingPageServer : SatelliteServer {
   explicit DanglingPageServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
@@ -167,8 +165,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // RPCServer: Server + RPCRequestHandler
 
-class RPCServer : public SatelliteServer {
-public:
+struct RPCServer : SatelliteServer {
   explicit RPCServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),

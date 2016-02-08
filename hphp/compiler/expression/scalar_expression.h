@@ -25,8 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ScalarExpression);
 
-class ScalarExpression : public Expression {
-public:
+struct ScalarExpression : Expression {
   ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                    int type, const std::string &value, bool quoted = false);
   ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,

@@ -32,8 +32,7 @@
 
 namespace HPHP {
 
-static class ServerExtension final : public Extension {
-public:
+static struct ServerExtension final : Extension {
   ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_RC_INT_SAME(PAGELET_NOT_READY);

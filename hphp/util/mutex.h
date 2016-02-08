@@ -41,7 +41,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <bool enableAssertions>
-class BaseMutex {
+struct BaseMutex {
 private:
 #ifdef DEBUG
   static const int kMagic = 0xba5eba11;
@@ -185,8 +185,7 @@ protected:
  * Standard recursive mutex, which can be used for condition variables.
  * This mutex does not support enabling assertions
  */
-class Mutex : public BaseMutex<false> {
-public:
+struct Mutex : BaseMutex<false> {
   explicit Mutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<false>(recursive, rank) {}
   explicit Mutex(Rank rank, bool recursive = true) :
@@ -198,8 +197,7 @@ public:
  * Simple recursive mutex, which does not expose the underlying raw
  * pthread_mutex_t. This allows this mutex to support enabling assertions
  */
-class SimpleMutex : public BaseMutex<true> {
-public:
+struct SimpleMutex : BaseMutex<true> {
   explicit SimpleMutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<true>(recursive, rank) {}
 };

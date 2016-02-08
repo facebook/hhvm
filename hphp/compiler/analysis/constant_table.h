@@ -36,8 +36,7 @@ DECLARE_BOOST_TYPES(ClassScope);
  *   class { const T_STRING = static_scalar,...}
  *   define('NAME', static_scalar)
  */
-class ConstantTable : public SymbolTable {
-public:
+struct ConstantTable : SymbolTable {
   explicit ConstantTable(BlockScope &blockScope);
 
   /**

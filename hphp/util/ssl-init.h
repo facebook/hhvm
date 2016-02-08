@@ -20,8 +20,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SSLInit {
-public:
+struct SSLInit {
   static void Init();
   static bool IsInited();
 };

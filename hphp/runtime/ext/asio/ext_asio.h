@@ -22,8 +22,7 @@
 
 namespace HPHP {
 
-class AsioExtension final : public Extension {
-public:
+struct AsioExtension final : Extension {
   AsioExtension() : Extension("asio", "0.1") {}
 
   void moduleInit() override {

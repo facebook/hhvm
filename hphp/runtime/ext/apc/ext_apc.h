@@ -26,8 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class apcExtension final : public Extension {
- public:
+struct apcExtension final : Extension {
   apcExtension() : Extension("apc", "4.0.2") {}
 
   static bool Enable;
@@ -129,8 +128,7 @@ void apc_load_impl_compressed(
   int *thrift_lens, const char *thrifts,
   int *other_lens, const char *others);
 
-class apc_rfc1867_data {
-public:
+struct apc_rfc1867_data {
   std::string tracking_key;
   int64_t content_length;
   std::string filename;

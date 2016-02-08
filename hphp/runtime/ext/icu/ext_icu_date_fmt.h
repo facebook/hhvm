@@ -27,8 +27,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlDateFormatter;
 
-class IntlDateFormatter : public IntlError {
- public:
+struct IntlDateFormatter : IntlError {
   IntlDateFormatter() {}
   IntlDateFormatter(const IntlDateFormatter&) = delete;
   IntlDateFormatter& operator=(const IntlDateFormatter& src) {

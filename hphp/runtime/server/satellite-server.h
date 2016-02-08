@@ -27,8 +27,7 @@ namespace HPHP {
 
 struct SatelliteServerInfo;
 
-class SatelliteServer {
-public:
+struct SatelliteServer {
   enum class Type {
     Unknown,
 
@@ -59,8 +58,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-class SatelliteServerInfo {
-public:
+struct SatelliteServerInfo {
   /**
    * These are regular expressions of URLs that are not allowed on main server.
    * These are collected from all internal page servers.

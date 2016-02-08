@@ -864,8 +864,7 @@ XMLWRITER_METHOD_AND_FUNCTION(String, xmlwriter_output_memory, outputMemory,
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
-class XMLWriterExtension final : public Extension {
-  public:
+struct XMLWriterExtension final : Extension {
     XMLWriterExtension() : Extension("xmlwriter", "0.1") {};
 
     void moduleInit() override {

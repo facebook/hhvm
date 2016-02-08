@@ -32,8 +32,7 @@ DECLARE_BOOST_TYPES(FunctionContainer);
 /**
  * Base class of both FileScope and ClassScope that can contain functions.
  */
-class FunctionContainer {
-public:
+struct FunctionContainer {
   FunctionContainer();
 
   /**

@@ -47,8 +47,7 @@ enum class VFileType : uint8_t {
   Directory
 };
 
-class CacheManager {
- public:
+struct CacheManager {
   CacheManager();
   ~CacheManager();
 

@@ -30,8 +30,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 //so that curl_global_init() is called ahead of time, avoiding crash
-class StaticInitializer {
-public:
+struct StaticInitializer {
   StaticInitializer() {
     curl_global_init(CURL_GLOBAL_ALL);
     SSLInit::Init();

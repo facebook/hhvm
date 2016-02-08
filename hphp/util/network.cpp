@@ -37,8 +37,7 @@ namespace HPHP {
 // without calling res_init(), any call to getaddrinfo() may leak memory:
 //  http://sources.redhat.com/ml/libc-hacker/2004-02/msg00049.html
 
-class ResolverLibInitializer {
-public:
+struct ResolverLibInitializer {
   ResolverLibInitializer() {
     res_init();
     // We call sethostent with stayopen = 1 to keep /etc/hosts open across calls

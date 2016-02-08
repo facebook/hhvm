@@ -202,8 +202,7 @@ private:
  * AsyncFuncImpl by all AsyncFunc<T> classes.
  */
 template<class T>
-class AsyncFunc : public AsyncFuncImpl {
-public:
+struct AsyncFunc : AsyncFuncImpl {
   AsyncFunc(T *obj, void (T::*member_func)())
     : AsyncFuncImpl((void*)this, run_), m_obj(obj), m_memberFunc(member_func) {
   }

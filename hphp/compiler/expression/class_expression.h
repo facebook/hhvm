@@ -30,8 +30,7 @@ using ClassExpressionPtr = std::shared_ptr<ClassExpression>;
 class ClassStatement;
 using ClassStatementPtr = std::shared_ptr<ClassStatement>;
 
-class ClassExpression : public FunctionCall {
-public:
+struct ClassExpression : FunctionCall {
   ClassExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                   ClassStatementPtr cls,
                   ExpressionListPtr params);

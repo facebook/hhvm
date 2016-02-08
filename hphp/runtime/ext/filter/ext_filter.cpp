@@ -136,8 +136,7 @@ private:
 };
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 
-static class FilterExtension final : public Extension {
-public:
+static struct FilterExtension final : Extension {
   FilterExtension() : Extension("filter", "0.11.0") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {

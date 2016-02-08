@@ -31,8 +31,7 @@ namespace HPHP {
 // so that it can be used in thread-local storage.
 // The easiest  way to use this as a thread-local variable is to make a small
 // subclass with a fixed format string.
-class ICUTransliterator {
- public:
+struct ICUTransliterator {
   ICUTransliterator() : uStatus_(U_ZERO_ERROR) {}
   bool set(const icu::UnicodeString& transformId);
   void transliterate(icu::UnicodeString& s);

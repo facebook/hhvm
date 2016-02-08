@@ -27,8 +27,7 @@ struct Func;
 struct Class;
 class StreamContext;
 
-class UserFSNode {
-public:
+struct UserFSNode {
   explicit UserFSNode(Class* cls,
                       const req::ptr<StreamContext>& context = nullptr);
 

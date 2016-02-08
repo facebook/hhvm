@@ -25,8 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(UnsetStatement);
 
-class UnsetStatement : public Statement {
-public:
+struct UnsetStatement : Statement {
   UnsetStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;

@@ -1087,8 +1087,7 @@ static bool HHVM_FUNCTION(mysqli_thread_safe) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class mysqliExtension final : public Extension {
-public:
+struct mysqliExtension final : Extension {
   mysqliExtension() : Extension("mysqli") {}
   // Use moduleLoad() for settings that are system-wide and cannot
   // change per request (e.g. PHP_INI_SYSTEM)

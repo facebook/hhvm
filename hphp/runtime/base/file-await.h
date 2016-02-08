@@ -32,8 +32,7 @@ class FileEventHandler : public AsioEventHandler {
   FileAwait* m_fileAwait;
 };
 
-class FileAwait : public AsioExternalThreadEvent {
- public:
+struct FileAwait : AsioExternalThreadEvent {
   enum Status {
     ERROR = -1,
     TIMEOUT = 0,

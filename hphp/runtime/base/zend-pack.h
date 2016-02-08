@@ -32,8 +32,7 @@ class Array;
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d,
  * x, X, Z and @.
  */
-class ZendPack {
-public:
+struct ZendPack {
   ZendPack();
 
   /**

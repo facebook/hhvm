@@ -21,7 +21,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestParser : public TestBase {
+struct TestParser : TestBase {
  protected:
   bool VerifyParser(const char *input, const char *output,
                     const char *file = "", int line = 0,

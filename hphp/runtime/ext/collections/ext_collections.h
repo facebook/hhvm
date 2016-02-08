@@ -90,8 +90,7 @@ ATTRIBUTE_NORETURN void throwUndef(const StringData* key);
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CollectionsExtension : public Extension {
- public:
+struct CollectionsExtension : Extension {
   CollectionsExtension(): Extension("collections") {}
 
   void moduleInit() override {

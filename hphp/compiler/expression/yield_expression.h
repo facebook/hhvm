@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(YieldExpression);
 
-class YieldExpression : public Expression {
-public:
+struct YieldExpression : Expression {
   YieldExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                   ExpressionPtr keyExp, ExpressionPtr valExp);
 

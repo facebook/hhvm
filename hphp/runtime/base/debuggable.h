@@ -29,8 +29,7 @@ namespace HPHP {
  * Implement this interface to report information to debugger or execute
  * debugger commands.
  */
-class IDebuggable {
-public:
+struct IDebuggable {
   enum Support {
     SupportInfo = 1,
     SupportDump = 2,

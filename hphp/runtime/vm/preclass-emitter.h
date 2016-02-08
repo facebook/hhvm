@@ -45,12 +45,10 @@ struct BuiltinObjExtents {
   ptrdiff_t odOffsetBytes;
 };
 
-class PreClassEmitter {
- public:
+struct PreClassEmitter {
   typedef std::vector<FuncEmitter*> MethodVec;
 
-  class Prop {
-   public:
+  struct Prop {
     Prop()
       : m_name(nullptr)
       , m_mangledName(nullptr)
@@ -98,8 +96,7 @@ class PreClassEmitter {
     RepoAuthType m_repoAuthType;
   };
 
-  class Const {
-   public:
+  struct Const {
     Const()
       : m_name(nullptr)
       , m_typeConstraint(nullptr)

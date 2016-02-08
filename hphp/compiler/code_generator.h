@@ -40,8 +40,7 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(LoopStatement);
 
-class CodeGenerator {
-public:
+struct CodeGenerator {
   enum Output {
     InvalidOutput,
 

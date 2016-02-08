@@ -2330,8 +2330,7 @@ private:
 IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
-class ArraySortTmp {
- public:
+struct ArraySortTmp {
   explicit ArraySortTmp(Array& arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr.get()->escalateForSort(sf);
     assert(m_ad == arr.get() || m_ad->hasExactlyOneRef());
@@ -2738,8 +2737,7 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ArrayExtension final : public Extension {
-public:
+struct ArrayExtension final : Extension {
   ArrayExtension() : Extension("array") {}
   void moduleInit() override {
     HHVM_RC_INT_SAME(UCOL_DEFAULT);

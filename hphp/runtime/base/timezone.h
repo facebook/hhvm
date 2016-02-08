@@ -37,8 +37,7 @@ class Array;
 /**
  * Handles all timezone related functions.
  */
-class TimeZone : public SweepableResourceData {
-public:
+struct TimeZone : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(TimeZone);
 
   /**

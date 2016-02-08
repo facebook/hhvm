@@ -26,8 +26,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(CatchStatement);
 
-class CatchStatement : public Statement, public StaticClassName {
-public:
+struct CatchStatement : Statement, StaticClassName {
   CatchStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                  const std::string &className, const std::string &variable,
                  StatementPtr stmt);

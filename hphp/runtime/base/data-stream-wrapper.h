@@ -24,8 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////n
 
-class DataStreamWrapper : public Stream::Wrapper {
- public:
+struct DataStreamWrapper : Stream::Wrapper {
   DataStreamWrapper() {
     m_isLocal = true;
   }

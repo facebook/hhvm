@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class UserFile : public File, public UserFSNode {
-public:
+struct UserFile : File, UserFSNode {
   DECLARE_RESOURCE_ALLOCATION(UserFile);
 
   explicit UserFile(Class *cls,

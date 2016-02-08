@@ -32,8 +32,7 @@ namespace Intl {
 
 /* Common error handling logic used by all Intl classes
  */
-class IntlError {
- public:
+struct IntlError {
   void setError(UErrorCode code, const char *format = nullptr, ...);
   void clearError(bool clearGlobalError = true);
 
@@ -93,8 +92,7 @@ inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
   return u8(u16.getBuffer(), u16.length(), error);
 }
 
-class IntlExtension final : public Extension {
- public:
+struct IntlExtension final : Extension {
   IntlExtension() : Extension("intl", "1.1.0") {}
 
   void moduleInit() override {

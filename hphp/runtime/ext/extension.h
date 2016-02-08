@@ -55,8 +55,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Extension : public IDebuggable {
-public:
+struct Extension : IDebuggable {
   static bool IsSystemlibPath(const std::string& path);
 
   // Look for "ext.{namehash}" in the binary and compile/merge it

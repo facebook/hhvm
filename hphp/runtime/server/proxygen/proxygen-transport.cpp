@@ -62,9 +62,7 @@ namespace HPHP {
  * The server side push handler is just here to catch errors and
  * egress state changes.
  */
-class PushTxnHandler : public proxygen::HTTPPushTransactionHandler {
-
- public:
+struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   PushTxnHandler(uint64_t pushId,
                  const std::shared_ptr<ProxygenTransport>& transport)
       : m_pushId(pushId),

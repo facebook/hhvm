@@ -302,8 +302,7 @@ private:
 /*
  * Initializer for a vector-shaped array.
  */
-class PackedArrayInit {
-public:
+struct PackedArrayInit {
   explicit PackedArrayInit(size_t n)
     : m_vec(PackedArray::MakeReserve(n))
 #ifndef NDEBUG

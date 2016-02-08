@@ -113,8 +113,7 @@ class c_ExternalThreadEventWaitHandle;
  *  - web request may die before the event is finished; never store pointers
  *    to any data owned by PHP as the PHP thread may die at any time
  */
-class AsioExternalThreadEvent {
-  public:
+struct AsioExternalThreadEvent {
     /**
      * Get wait handle representing this external thread event.
      *

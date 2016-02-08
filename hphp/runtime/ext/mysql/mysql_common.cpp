@@ -55,8 +55,7 @@ namespace HPHP {
 const StaticString
   s_mysqli_result("mysqli_result");
 
-class MySQLStaticInitializer {
-public:
+struct MySQLStaticInitializer {
   MySQLStaticInitializer() {
     mysql_library_init(0, NULL, NULL);
   }

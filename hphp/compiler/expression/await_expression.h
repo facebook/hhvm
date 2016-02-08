@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(AwaitExpression);
 
-class AwaitExpression : public Expression {
-public:
+struct AwaitExpression : Expression {
   AwaitExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                   ExpressionPtr exp);
 

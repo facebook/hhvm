@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(BinaryOpExpression);
 
-class BinaryOpExpression : public Expression {
-public:
+struct BinaryOpExpression : Expression {
   BinaryOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                      ExpressionPtr exp1, ExpressionPtr exp2, int op);
 

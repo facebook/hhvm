@@ -31,8 +31,7 @@ namespace HPHP {
  * preserves structure (order and keys) of the original array. If one of the
  * wait handles failed, the exception is propagated by failure.
  */
-class c_GenArrayWaitHandle final : public c_WaitableWaitHandle {
- public:
+struct c_GenArrayWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(GenArrayWaitHandle);
   WAITHANDLE_DTOR(GenArrayWaitHandle);
 

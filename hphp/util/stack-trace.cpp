@@ -222,8 +222,7 @@ std::string StackTrace::hexEncode(int minLevel /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // crash log
 
-class StackTraceLog {
-public:
+struct StackTraceLog {
   hphp_string_map<std::string> data;
 
   static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);

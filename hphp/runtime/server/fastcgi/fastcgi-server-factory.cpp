@@ -18,8 +18,7 @@
 
 namespace HPHP {
 
-class FastCGIServerFactory : public ServerFactory {
-public:
+struct FastCGIServerFactory : ServerFactory {
   FastCGIServerFactory() {}
 
   virtual ServerPtr createServer(const ServerOptions& options) override {

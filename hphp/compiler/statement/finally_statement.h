@@ -25,8 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(FinallyStatement);
 
-class FinallyStatement : public Statement {
-public:
+struct FinallyStatement : Statement {
   FinallyStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                StatementPtr stmt);
 

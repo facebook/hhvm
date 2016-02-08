@@ -1308,8 +1308,7 @@ template int64_t new_iter_array_key<true>(Iter* dest, ArrayData* ad,
                                           TypedValue* valOut,
                                           TypedValue* keyOut);
 
-class FreeObj {
- public:
+struct FreeObj {
   FreeObj() : m_obj(0) {}
   void operator=(ObjectData* obj) { m_obj = obj; }
   ~FreeObj() { if (UNLIKELY(m_obj != nullptr)) decRefObj(m_obj); }

@@ -28,8 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Cronolog {
-public:
+struct Cronolog {
   Cronolog() :
     m_periodicity(UNKNOWN),
     m_periodDelayUnits(UNKNOWN),

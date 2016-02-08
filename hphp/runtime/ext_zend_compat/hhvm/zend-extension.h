@@ -8,7 +8,7 @@ struct _zend_module_entry;
 
 namespace HPHP {
 
-class ZendExtension final : public Extension {
+struct ZendExtension final : Extension {
 private:
   zend_module_entry *getEntry();
 public:

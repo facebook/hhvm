@@ -41,8 +41,7 @@ const StaticString
   s_LDAP_ESCAPE_FILTER("LDAP_ESCAPE_FILTER"),
   s_LDAP_ESCAPE_DN("LDAP_ESCAPE_DN");
 
-static class LdapExtension final : public Extension {
-public:
+static struct LdapExtension final : Extension {
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_FILTER.get(),
@@ -136,8 +135,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class LdapRequestData {
-public:
+struct LdapRequestData {
   LdapRequestData() : m_num_links(0), m_max_links(-1) {
   }
 
@@ -147,8 +145,7 @@ public:
 static IMPLEMENT_THREAD_LOCAL(LdapRequestData, s_ldap_data);
 #define LDAPG(name) s_ldap_data->m_ ## name
 
-class LdapLink : public SweepableResourceData {
-public:
+struct LdapLink : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
   LdapLink() {}
@@ -209,8 +206,7 @@ void LdapLink::closeImpl() {
   }
 }
 
-class LdapResult : public SweepableResourceData {
-public:
+struct LdapResult : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapResult)
 
   LdapResult(LDAPMessage *res) : data(res) {}
@@ -235,8 +231,7 @@ public:
 };
 IMPLEMENT_RESOURCE_ALLOCATION(LdapResult)
 
-class LdapResultEntry : public SweepableResourceData {
-public:
+struct LdapResultEntry : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapResultEntry)
 
   LdapResultEntry(LDAPMessage *entry, req::ptr<LdapResult> res)

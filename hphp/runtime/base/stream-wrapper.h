@@ -31,8 +31,7 @@ class StreamContext;
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Wrapper {
- public:
+struct Wrapper {
   Wrapper() : m_isLocal(true) { }
 
   Wrapper(const Wrapper&) = delete;

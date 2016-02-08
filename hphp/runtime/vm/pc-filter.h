@@ -26,7 +26,7 @@ namespace HPHP {
 // Map which holds a set of PCs and supports reasonably fast addition and
 // lookup. Used to decide if a given PC falls within an interesting area, e.g.,
 // for breakpoints and stepping.
-class PCFilter {
+struct PCFilter {
 private:
   // Radix-tree implementation of pointer map
   struct PtrMapNode;

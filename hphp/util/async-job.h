@@ -32,14 +32,12 @@ template<class TJob, class TWorker>
 class JobDispatcher;
 
 template<class TJob>
-class WorkerInfo {
- public:
+struct WorkerInfo {
   enum { DoInitFini = true };
 };
 
 template<class TJob, class TWorker>
-class WorkerWrapper {
-public:
+struct WorkerWrapper {
   explicit WorkerWrapper(JobDispatcher<TJob, TWorker> &dispatcher)
     : m_dispatcher(dispatcher)
     , m_func(this, &WorkerWrapper<TJob, TWorker>::doJob)
@@ -99,8 +97,7 @@ private:
  *  };
  */
 template<class TJob, class TWorker>
-class JobDispatcher {
- public:
+struct JobDispatcher {
   JobDispatcher(const std::vector<std::shared_ptr<TJob> > &&jobs,
                 unsigned int workerCount, bool showStatus = false)
     : m_index(0),

@@ -26,8 +26,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(EncapsListExpression);
 
-class EncapsListExpression : public Expression {
-public:
+struct EncapsListExpression : Expression {
   EncapsListExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                        int type, ExpressionListPtr expList);
 

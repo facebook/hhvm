@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_snefru : public HashEngine {
-public:
+struct hash_snefru : HashEngine {
   hash_snefru();
 
   virtual void hash_init(void *context);

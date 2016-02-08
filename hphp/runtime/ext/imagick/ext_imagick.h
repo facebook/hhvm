@@ -35,8 +35,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
-class ImagickExtension final : public Extension {
- public:
+struct ImagickExtension final : Extension {
   ImagickExtension();
   void moduleInit() override;
   void threadInit() override;

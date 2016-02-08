@@ -28,7 +28,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(InterfaceStatement);
 
-class InterfaceStatement : public Statement, public IParseHandler {
+struct InterfaceStatement : Statement, IParseHandler {
 protected:
   InterfaceStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                      const std::string &name, ExpressionListPtr base,

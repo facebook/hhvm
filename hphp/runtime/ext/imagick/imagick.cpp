@@ -43,8 +43,7 @@ static void setImagePending(const Object& imagick, bool imagePending) {
 }
 
 // class ImageGeometry
-class ImageGeometry {
- public:
+struct ImageGeometry {
   static const ImageGeometry empty_geometry;
 
   ImageGeometry(int64_t width, int64_t height) :

@@ -29,8 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTime
 
-class DateTimeData {
-public:
+struct DateTimeData {
   DateTimeData() {}
   DateTimeData(const DateTimeData&) = delete;
   DateTimeData& operator=(const DateTimeData& other) {
@@ -106,8 +105,7 @@ Array HHVM_METHOD(DateTime, __debuginfo);
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
-class DateTimeZoneData {
-public:
+struct DateTimeZoneData {
   DateTimeZoneData() {}
   DateTimeZoneData(const DateTimeZoneData&) = delete;
   DateTimeZoneData& operator=(const DateTimeZoneData& other) {
@@ -159,8 +157,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
 
-class DateIntervalData {
-public:
+struct DateIntervalData {
   DateIntervalData() {}
   DateIntervalData(const DateIntervalData&) = delete;
   DateIntervalData& operator=(const DateIntervalData& other) {

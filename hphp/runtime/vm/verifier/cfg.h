@@ -171,8 +171,7 @@ class GraphBuilder {
 /**
  * Range over blocks in linear order
  */
-class LinearBlocks {
- public:
+struct LinearBlocks {
   LinearBlocks(Block* first, Block* end) : b(first), end(end) {
   }
   bool empty() const { return b == end; }
@@ -186,8 +185,7 @@ class LinearBlocks {
 /**
  * Range over the non-null Block* pointers in array.
  */
-class BlockPtrRange {
- public:
+struct BlockPtrRange {
   BlockPtrRange(Block** a, int cap) : i(a), end(&a[cap]) {
     trimFront();
     trimBack();
@@ -216,8 +214,7 @@ class BlockPtrRange {
 /**
  * Iterate through a contiguous range of instructions
  */
-class InstrRange {
- public:
+struct InstrRange {
   InstrRange(PC pc, PC end) : pc(pc), end(end) {
   }
   bool empty() const {

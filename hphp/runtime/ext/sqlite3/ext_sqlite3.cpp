@@ -760,8 +760,7 @@ bool HHVM_METHOD(SQLite3Result, finalize) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SQLite3Extension final : public Extension {
-public:
+static struct SQLite3Extension final : Extension {
   SQLite3Extension() : Extension("sqlite3", "0.7-dev") {}
   void moduleInit() override {
     HHVM_RC_INT(SQLITE3_ASSOC, PHP_SQLITE3_ASSOC);

@@ -46,14 +46,6 @@ inline SrcRec* Translator::getSrcRec(SrcKey sk) {
 ///////////////////////////////////////////////////////////////////////////////
 // Translator configuration.
 
-inline TransKind Translator::mode() const {
-  return m_mode;
-}
-
-inline void Translator::setMode(TransKind mode) {
-  m_mode = mode;
-}
-
 inline bool Translator::useAHot() const {
   return m_useAHot;
 }
@@ -105,8 +97,11 @@ inline Lease& Translator::WriteLease() {
 ///////////////////////////////////////////////////////////////////////////////
 // TransContext.
 
-inline TransContext::TransContext(TransID id, SrcKey sk, FPInvOffset spOff)
+inline TransContext::TransContext(
+  TransID id, TransKind kind, SrcKey sk, FPInvOffset spOff
+)
   : transID(id)
+  , kind(kind)
   , initSpOffset(spOff)
   , func(sk.valid() ? sk.func() : nullptr)
   , initBcOffset(sk.offset())

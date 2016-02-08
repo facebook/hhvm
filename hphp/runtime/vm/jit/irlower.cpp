@@ -375,6 +375,7 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
 
     Vasm vasm;
     auto& vunit = vasm.unit();
+    vunit.transKind = unit.context().kind;
     SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
 
     IRLS env(unit);

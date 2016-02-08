@@ -554,9 +554,8 @@ RegionDescPtr selectHotRegion(TransID transId,
  * The `allowInlining' flag should be disabled when we are selecting a tracelet
  * whose shape will be analyzed by the InliningDecider.
  */
-RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
-                             bool profiling,
-                             bool inlining = false);
+RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
+                             int32_t maxBCInstrs, bool inlining = false);
 
 struct HotTransContext {
   TransID tid;

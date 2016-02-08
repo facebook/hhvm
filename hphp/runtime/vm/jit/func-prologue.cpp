@@ -50,10 +50,12 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 TransContext prologue_context(TransID transID,
+                              TransKind kind,
                               const Func* func,
                               Offset entry) {
   return TransContext(
     transID,
+    kind,
     SrcKey{func, entry, SrcKey::PrologueTag{}},
     FPInvOffset{func->numSlotsInFrame()}
   );
@@ -65,8 +67,8 @@ TransContext prologue_context(TransID transID,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA genFuncPrologue(TransID transID, Func* func, int argc) {
-  auto context = prologue_context(transID, func,
+TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc) {
+  auto context = prologue_context(transID, kind, func,
                                   func->getEntryForNumArgs(argc));
   IRGS env{context, TransFlags{}};
 
@@ -85,7 +87,8 @@ TCA genFuncPrologue(TransID transID, Func* func, int argc) {
 }
 
 TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
-  auto context = prologue_context(kInvalidTransID, func, func->base());
+  auto context = prologue_context(kInvalidTransID, TransKind::Live,
+                                  func, func->base());
   IRGS env{context, TransFlags{}};
 
   assertx(mcg->cgFixups().empty());

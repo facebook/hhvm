@@ -53,10 +53,10 @@ namespace {
 
 struct Env {
   Env(const RegionContext& ctx,
+      TransKind kind,
       InterpSet& interp,
       SrcKey& breakAt,
       int32_t maxBCInstrs,
-      bool profiling,
       bool inlining)
     : ctx(ctx)
     , interp(interp)
@@ -68,11 +68,11 @@ struct Env {
     , blockFinished(false)
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
-    , irgs(TransContext{kInvalidTransID, sk, ctx.spOffset}, TransFlags{0})
+    , irgs(TransContext{kInvalidTransID, kind, sk, ctx.spOffset}, TransFlags{0})
     , arStates(1)
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)
-    , profiling(profiling)
+    , profiling(kind == TransKind::Profile)
     , inlining(inlining)
   {}
 
@@ -614,8 +614,8 @@ RegionDescPtr form_region(Env& env) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
-                             bool profiling, bool inlining /* = false */) {
+RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
+                             int32_t maxBCInstrs, bool inlining /* = false */) {
   Timer _t(Timer::selectTracelet);
   InterpSet interp;
   SrcKey breakAt;
@@ -625,7 +625,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
   FTRACE(1, "selectTracelet: starting with maxBCInstrs = {}\n", maxBCInstrs);
 
   do {
-    Env env{ctx, interp, breakAt, maxBCInstrs, profiling, inlining};
+    Env env{ctx, kind, interp, breakAt, maxBCInstrs, inlining};
     region = form_region(env);
     ++tries;
   } while (!region);
@@ -644,7 +644,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int32_t maxBCInstrs,
   if (RuntimeOption::EvalRegionRelaxGuards) {
     FTRACE(1, "selectTracelet: before optimizeGuards:\n{}\n",
            show(*region));
-    optimizeGuards(*region, profiling);
+    optimizeGuards(*region, kind == TransKind::Profile);
   }
 
   FTRACE(1, "selectTracelet returning, {}, {} tries:\n{}\n",

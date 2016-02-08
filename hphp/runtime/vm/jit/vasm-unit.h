@@ -196,6 +196,7 @@ struct Vunit {
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
   bool padding{false};
+  TransKind transKind{TransKind::Invalid};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

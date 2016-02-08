@@ -134,7 +134,8 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit);
 
 /*
  * Group blocks into main, cold, and frozen while preserving relative order
- * with each section.
+ * with each section. May use different layout algorithms depending on the
+ * TransKind of unit.
  */
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 

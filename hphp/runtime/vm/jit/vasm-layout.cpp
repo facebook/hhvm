@@ -412,8 +412,8 @@ jit::vector<Vlabel> pgoLayout(const Vunit& unit) {
 
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
   Timer timer(Timer::vasm_layout);
-  return mcg->tx().mode() == TransKind::Optimize ? pgoLayout(unit)
-                                                 : rpoLayout(unit);
+  return unit.transKind == TransKind::Optimize ? pgoLayout(unit)
+                                               : rpoLayout(unit);
 }
 
 } }

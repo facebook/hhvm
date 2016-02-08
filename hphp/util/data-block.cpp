@@ -23,7 +23,7 @@ void* DataBlock::allocInner(size_t len) {
 
   if (!len) return nullptr;
 
-  auto freeList = m_freeLists.lower_bound((Size) len);
+  auto freeList = m_freeLists.lower_bound(len);
   if (freeList == m_freeLists.end()) {
     return nullptr;
   }
@@ -48,7 +48,7 @@ void* DataBlock::allocInner(size_t len) {
 
   if (freeList->second.empty()) m_freeLists.erase(freeList);
 
-  return (void*)(off + m_base);
+  return m_base + off;
 }
 
 void DataBlock::free(void* addr, size_t len) {

@@ -59,7 +59,7 @@ struct DataBlockFull : std::runtime_error {
  * Memory is allocated from the end of the block unless specifically allocated
  * using allocInner.
  *
- * Unused memory can be freed using free(), if the memory is at the end of the
+ * Unused memory can be freed using free(). If the memory is at the end of the
  * block, the frontier will be moved back.
  *
  * Free memory is coalesced and allocation is done by best-fit.

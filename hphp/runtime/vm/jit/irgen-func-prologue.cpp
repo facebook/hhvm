@@ -270,7 +270,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = env.context.func;
 
   // Increment profiling counter.
-  if (mcg->tx().mode() == TransKind::Proflogue) {
+  if (env.context.kind == TransKind::Proflogue) {
     assertx(shouldPGOFunc(*func));
     auto profData = mcg->tx().profData();
 

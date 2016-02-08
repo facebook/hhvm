@@ -300,7 +300,7 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
     return nullptr;
   }
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate(args.sk.func())) return nullptr;
+  if (!writer || !shouldTranslate(args.sk.func(), args.kind)) return nullptr;
   if (!locked) {
     // Even though we knew above that we were going to skip
     // doing another translation, we wait until we get the
@@ -316,14 +316,12 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
   }
   SKTRACE(1, args.sk, "retranslate\n");
 
-  m_tx.setMode(profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live);
-  SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
-
-  auto start = translate(args);
+  auto newArgs = args;
+  newArgs.kind = profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+  auto start = translate(newArgs);
 
   // In PGO mode, we free all the profiling data once the TC is full.
-  if (RuntimeOption::EvalJitPGO &&
-      code.mainUsed() >= CodeCache::AMaxUsage) {
+  if (RuntimeOption::EvalJitPGO && code.mainUsed() >= CodeCache::AMaxUsage) {
     m_tx.profData()->free();
   }
 
@@ -336,8 +334,6 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   if (isDebuggerAttachedProcess()) return nullptr;
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
-
-  SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
 
   if (!m_tx.profData()->hasTransRec(transId)) return nullptr;
 
@@ -361,16 +357,15 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   TCA start = regeneratePrologues(func, sk);
 
   // Regionize func and translate all its regions.
-  m_tx.setMode(TransKind::Optimize);
   std::vector<RegionDescPtr> regions;
   regionizeFunc(func, this, regions);
 
   for (auto region : regions) {
-    m_tx.setMode(TransKind::Optimize);
     always_assert(!region->empty());
     auto regionSk = region->start();
     auto translArgs = TranslArgs{regionSk, align};
     translArgs.region = region;
+    translArgs.kind = TransKind::Optimize;
 
     if (setFuncBody && regionSk.offset() == func->base()) {
       translArgs.setFuncBody = true;
@@ -462,12 +457,11 @@ bool MCGenerator::shouldTranslateNoSizeLimit(const Func* func) const {
   return true;
 }
 
-bool MCGenerator::shouldTranslate(const Func* func) const {
+bool MCGenerator::shouldTranslate(const Func* func, TransKind kind) const {
   if (!shouldTranslateNoSizeLimit(func)) return false;
   // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do
   // allow Optimize translations past that limit.
-  return code.mainUsed() < CodeCache::AMaxUsage ||
-         m_tx.mode() == TransKind::Optimize;
+  return code.mainUsed() < CodeCache::AMaxUsage || kind == TransKind::Optimize;
 }
 
 
@@ -516,7 +510,7 @@ static void populateLiveContext(RegionContext& ctx) {
 
 TCA
 MCGenerator::createTranslation(const TranslArgs& args) {
-  if (!shouldTranslate(args.sk.func())) return nullptr;
+  if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
   /*
    * Try to become the writer. We delay this until we *know* we will have
@@ -526,7 +520,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
    */
   auto sk = args.sk;
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate(args.sk.func())) return nullptr;
+  if (!writer || !shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
   if (auto sr = m_tx.getSrcDB().find(sk)) {
     TCA tca = sr->getTopTranslation();
@@ -535,12 +529,12 @@ MCGenerator::createTranslation(const TranslArgs& args) {
       // added the first instance of this SrcRec while we did a
       // non-blocking wait on the write lease.
       return tca;
-    } else {
-      // Since we are holding the write lease, we know that sk is properly
-      // initialized, except that it has no translations (due to
-      // replaceOldTranslations)
-      return retranslate(args);
     }
+
+    // Since we are holding the write lease, we know that sk is properly
+    // initialized, except that it has no translations (due to
+    // replaceOldTranslations)
+    return retranslate(args);
   }
 
   if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {
@@ -552,7 +546,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   }();
 
   // We put retranslate requests at the end of our slab to more frequently
-  //   allow conditional jump fall-throughs
+  // allow conditional jump fall-throughs
   TCA astart          = code.main().frontier();
   TCA realColdStart   = code.realCold().frontier();
   TCA realFrozenStart = code.realFrozen().frontier();
@@ -622,16 +616,15 @@ TCA
 MCGenerator::translate(const TranslArgs& args) {
   INC_TPC(translate);
 
+  assert(args.kind != TransKind::Invalid);
   assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
-  assertx(m_tx.mode() != TransKind::Invalid);
-  SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
-  if (!shouldTranslate(args.sk.func())) return nullptr;
+  if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
   auto func = const_cast<Func*>(args.sk.func());
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
-                            .profile(m_tx.mode() == TransKind::Profile)
+                            .profile(args.kind == TransKind::Profile)
                             .hot(RuntimeOption::EvalHotFuncCount &&
                                  (func->attrs() & AttrHot) && m_tx.useAHot()));
 
@@ -728,10 +721,12 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   const int nparams = func->numNonVariadicParams();
   const int paramIndex = argc <= nparams ? argc : nparams + 1;
 
-  auto const funcBody = SrcKey { func, func->getEntryForNumArgs(argc), false };
+  auto const funcBody = SrcKey{func, func->getEntryForNumArgs(argc), false};
+  auto const kind = profileSrcKey(funcBody) ? TransKind::Proflogue
+                                            : TransKind::Prologue;
 
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
-                            .profile(m_tx.mode() == TransKind::Proflogue)
+                            .profile(kind == TransKind::Proflogue)
                             .hot(RuntimeOption::EvalHotFuncCount &&
                                  (func->attrs() & AttrHot) && m_tx.useAHot()));
   assertx(m_fixups.empty());
@@ -751,10 +746,10 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
 
   // Give the prologue a TransID if we have profiling data.
   auto transID = m_tx.profData()
-    ? m_tx.profData()->addTransPrologue(m_tx.mode(), funcBody, paramIndex)
+    ? m_tx.profData()->addTransPrologue(kind, funcBody, paramIndex)
     : kInvalidTransID;
 
-  TCA start = genFuncPrologue(transID, func, argc);
+  TCA start = genFuncPrologue(transID, kind, func, argc);
 
   auto loc = maker.markEnd();
   if (RuntimeOption::EvalEnableReusableTC) {
@@ -803,10 +798,9 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
         this, func->fullName()->data(), argc, start);
   func->setPrologue(paramIndex, start);
 
-  assertx(m_tx.mode() == TransKind::Prologue ||
-          m_tx.mode() == TransKind::Proflogue);
+  assertx(kind == TransKind::Prologue || kind == TransKind::Proflogue);
 
-  auto tr = maker.rec(funcBody, m_tx.mode());
+  auto tr = maker.rec(funcBody, kind);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
@@ -833,9 +827,6 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   TCA prologue;
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
-  Offset entry = func->getEntryForNumArgs(nPassed);
-  SrcKey funcBody(func, entry, false);
-
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
 
@@ -845,23 +836,12 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   if (forRegeneratePrologue) {
     if (!shouldTranslateNoSizeLimit(func)) return nullptr;
   } else {
-    if (!shouldTranslate(func)) return nullptr;
+    if (!shouldTranslate(func, TransKind::Prologue)) return nullptr;
   }
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
-
-  // We're coming from a BIND_CALL service request, so enable
-  // profiling if we haven't optimized the function entry yet.
-  assertx(m_tx.mode() == TransKind::Invalid ||
-         m_tx.mode() == TransKind::Prologue);
-  if (m_tx.mode() == TransKind::Invalid && profileSrcKey(funcBody)) {
-    m_tx.setMode(TransKind::Proflogue);
-  } else {
-    m_tx.setMode(TransKind::Prologue);
-  }
-  SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
   try {
     return emitFuncPrologue(func, nPassed);
@@ -897,8 +877,6 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
 
   // Regenerate the prologue.
   func->resetPrologue(nArgs);
-  m_tx.setMode(TransKind::Prologue);
-  SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
   auto const start = getFuncPrologue(
     func,
     nArgs,
@@ -932,13 +910,13 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   if (nArgs < func->numNonVariadicParams()) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
-      m_tx.setMode(TransKind::Optimize);
       SrcKey funcletSK(func, paramInfo.funcletOff, false);
       auto funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);
         auto args = TranslArgs{funcletSK, false};
         args.transId = funcletTransId;
+        args.kind = TransKind::Optimize;
         auto dvStart = translate(args);
         if (dvStart && !triggerSkStart && funcletSK == triggerSk) {
           triggerSkStart = dvStart;
@@ -1875,7 +1853,6 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   TCA        start             = code.main().frontier();
   TCA DEBUG_ONLY frozenStart   = code.frozen().frontier();
   SrcRec&    srcRec            = *m_tx.getSrcRec(sk);
-  TransKind  transKindToRecord = TransKind::Interp;
   UndoMarker undo[] = {
     UndoMarker{code.main()},
     UndoMarker{code.cold()},
@@ -1884,9 +1861,12 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   };
   m_annotations.clear();
 
+  auto kind = reachedTranslationLimit(sk, srcRec) ? TransKind::Interp
+                                                  : args.kind;
+
   setUseLLVM(
     RuntimeOption::EvalJitLLVM > 1 ||
-    (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize)
+    (RuntimeOption::EvalJitLLVM && kind == TransKind::Optimize)
   );
   SCOPE_EXIT { setUseLLVM(false); };
 
@@ -1909,9 +1889,8 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   RegionDescPtr region;
   bool hasLoop = false;
 
-  if (!reachedTranslationLimit(sk, srcRec)) {
-    // Attempt to create a region at this SrcKey
-    if (m_tx.mode() == TransKind::Optimize) {
+  if (kind != TransKind::Interp) {
+    if (kind == TransKind::Optimize) {
       assertx(RuntimeOption::EvalJitPGO);
       region = args.region;
       if (region) {
@@ -1923,13 +1902,13 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
         if (region && region->empty()) region = nullptr;
       }
     } else {
-      assertx(m_tx.mode() == TransKind::Profile ||
-              m_tx.mode() == TransKind::Live);
+      // Attempt to create a region at this SrcKey
+      assertx(kind == TransKind::Profile || kind == TransKind::Live);
       RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
                                sk.resumed() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
-      region = selectRegion(rContext, m_tx.mode());
+      region = selectRegion(rContext, kind);
     }
 
     auto result = TranslateResult::Retry;
@@ -1940,7 +1919,8 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
       auto const profTransID = RuntimeOption::EvalJitPGO
         ? m_tx.profData()->curTransID()
         : kInvalidTransID;
-      auto const transContext = TransContext(profTransID, sk, initSpOffset);
+      auto const transContext =
+        TransContext(profTransID, kind, sk, initSpOffset);
 
       IRGS irgs { transContext, args.flags };
       FTRACE(1, "{}{:-^40}{}\n",
@@ -1966,31 +1946,26 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
         // pending fixups.
         resetState();
       }
-
-      if (result == TranslateResult::Failure) {
-        // If the region translator failed, clear `region' to fall
-        // back to the interpreter.
-        FTRACE(1, "translateRegion: failed on region:\n{}\n", show(*region));
-        region.reset();
-      }
     }
 
-    if (!region) m_tx.setMode(TransKind::Interp);
-
-    if (result == TranslateResult::Success) {
-      assertx(m_tx.mode() == TransKind::Live    ||
-             m_tx.mode() == TransKind::Profile ||
-             m_tx.mode() == TransKind::Optimize);
-      transKindToRecord = m_tx.mode();
+    if (!region || result != TranslateResult::Success) {
+      // Fall back to the interpreter, either because region selection or
+      // region translation failed.
+      kind = TransKind::Interp;
+      region.reset();
+    } else {
+      assert(kind == TransKind::Profile ||
+             kind == TransKind::Live ||
+             kind == TransKind::Optimize);
     }
   }
 
-  if (transKindToRecord == TransKind::Interp) {
+  if (kind == TransKind::Interp) {
     assertCleanState();
     maker.markStart();
 
     FTRACE(1, "emitting dispatchBB interp request for failed "
-      "translation (spOff = {})\n", initSpOffset.offset);
+           "translation (spOff = {})\n", initSpOffset.offset);
     vwrap(code.main(),
           [&] (Vout& v) { emitInterpReq(v, sk, initSpOffset); },
           CodeKind::Helper);
@@ -2057,15 +2032,15 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
-    if (transKindToRecord == TransKind::Profile) {
+    if (kind == TransKind::Profile) {
       always_assert(region);
       m_tx.profData()->addTransProfile(region, pconds);
     } else {
-      m_tx.profData()->addTransNonProf(transKindToRecord, sk);
+      m_tx.profData()->addTransNonProf(kind, sk);
     }
   }
 
-  auto tr = maker.rec(sk, transKindToRecord, region, m_fixups.bcMap,
+  auto tr = maker.rec(sk, kind, region, m_fixups.bcMap,
                       std::move(m_annotations), useLLVM(), hasLoop);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
@@ -2123,7 +2098,7 @@ void MCGenerator::traceCodeGen(IRGS& irgs) {
     "IRUnit has loop but Eval.JitLoops=0"
   );
 
-  optimize(unit, *irgs.irb, m_tx.mode());
+  optimize(unit, irgs.context.kind);
   finishPass(" after optimizing ", kOptLevel);
 
   always_assert(this == mcg);
@@ -2576,8 +2551,8 @@ void MCGenerator::invalidateSrcKey(SrcKey sk) {
   sr->replaceOldTranslations();
 }
 
-void MCGenerator::setJmpTransID(TCA jmp) {
-  if (m_tx.mode() != TransKind::Profile) return;
+void MCGenerator::setJmpTransID(TCA jmp, TransKind kind) {
+  if (kind != TransKind::Profile) return;
 
   TransID transId = m_tx.profData()->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);

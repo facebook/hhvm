@@ -259,7 +259,7 @@ void raiseArrayIndexNotice(const int64_t index) {
 }
 
 void raiseArrayKeyNotice(const StringData* key) {
-  raise_notice("Undefined key: %s", key->data());
+  raise_notice("Undefined index: %s", key->data());
 }
 
 //////////////////////////////////////////////////////////////////////

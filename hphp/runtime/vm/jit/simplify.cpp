@@ -2127,7 +2127,7 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
-  if (!idx->hasConstVal()) return nullptr;
+  assertx(idx->hasConstVal(TInt));
   auto const value = arr->arrVal()->nvGet(idx->intVal());
   return value ? cns(env, *value) : nullptr;
 }
@@ -2136,7 +2136,7 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
-  if (!idx->hasConstVal()) return nullptr;
+  assertx(idx->hasConstVal(TStr));
   auto const value = [&] {
     int64_t val;
     if (idx->strVal()->isStrictlyInteger(val)) {
@@ -2148,9 +2148,57 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->hasConstVal()) {
-    if (inst->src(1)->type() <= TInt) return arrIntKeyImpl(env, inst);
-    if (inst->src(1)->type() <= TStr) return arrStrKeyImpl(env, inst);
+  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (inst->src(1)->type() <= TInt) {
+      if (auto result = arrIntKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, RaiseArrayIndexNotice, inst->taken(), inst->src(1));
+      return cns(env, TInitNull);
+    }
+    if (inst->src(1)->type() <= TStr) {
+      if (auto result = arrStrKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, RaiseArrayKeyNotice, inst->taken(), inst->src(1));
+      return cns(env, TInitNull);
+    }
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (inst->src(1)->isA(TInt)) {
+      if (auto result = arrIntKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, IncRef, inst->src(2));
+      return inst->src(2);
+    }
+    if (inst->src(1)->isA(TStr)) {
+      if (auto result = arrStrKeyImpl(env, inst)) {
+        return result;
+      }
+      gen(env, IncRef, inst->src(2));
+      return inst->src(2);
+    }
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
+    if (inst->src(1)->isA(TInt)) {
+      if (arrIntKeyImpl(env, inst)) {
+        return cns(env, true);
+      }
+    } else if (inst->src(1)->isA(TStr)) {
+      if (arrStrKeyImpl(env, inst)) {
+        return cns(env, true);
+      }
+    }
+    return cns(env, false);
   }
   return nullptr;
 }
@@ -2535,6 +2583,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CmpRes)
   X(EqCls)
   X(ArrayGet)
+  X(ArrayIdx)
+  X(AKExistsArr)
   X(OrdStr)
   X(LdLoc)
   X(LdStk)

@@ -199,7 +199,8 @@ void flush_thread_stack();
 /**
  * Like scoped_ptr, but calls free() on destruct
  */
-class ScopedMem {
+struct ScopedMem {
+ private:
   ScopedMem(const ScopedMem&); // disable copying
   ScopedMem& operator=(const ScopedMem&);
  public:

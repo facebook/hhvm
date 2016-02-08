@@ -47,8 +47,7 @@ using StructSpec = FixedVector<FieldSpec>;
 using SpecCacheMap = folly::AtomicHashMap<const ArrayData*, StructSpec>;
 
 // Provides safe access to specifications.
-class SpecHolder {
- public:
+struct SpecHolder {
   // The returned reference is valid at least while this SpecHolder is alive.
   const StructSpec& getSpec(const Array& spec) {
     auto it = s_specCacheMap.find(spec.get());

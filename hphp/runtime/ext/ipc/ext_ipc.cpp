@@ -54,8 +54,7 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-static class SysvmsgExtension final : public Extension {
-public:
+static struct SysvmsgExtension final : Extension {
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
@@ -77,8 +76,7 @@ public:
   }
 } s_sysvmsg_extension;
 
-static class SysvsemExtension final : public Extension {
-public:
+static struct SysvsemExtension final : Extension {
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(sem_acquire);
@@ -90,8 +88,7 @@ public:
   }
 } s_sysvsem_extension;
 
-static class SysvshmExtension final : public Extension {
-public:
+static struct SysvshmExtension final : Extension {
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(shm_attach);
@@ -126,8 +123,7 @@ int64_t HHVM_FUNCTION(ftok,
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
-class MessageQueue : public ResourceData {
-public:
+struct MessageQueue : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MessageQueue)
 
   int64_t key;
@@ -581,8 +577,7 @@ typedef struct {
   long total;
 } sysvshm_chunk_head;
 
-class sysvshm_shm {
-public:
+struct sysvshm_shm {
   key_t key;               /* Key set by user */
   long id;                 /* Returned by shmget. */
   sysvshm_chunk_head *ptr; /* memoryaddress of shared memory */
@@ -592,8 +587,7 @@ public:
   }
 };
 
-class shm_set : public std::set<sysvshm_shm*> {
-public:
+struct shm_set : std::set<sysvshm_shm*> {
   ~shm_set() {
     for (auto iter = begin(); iter != end(); ++iter) {
       delete *iter;

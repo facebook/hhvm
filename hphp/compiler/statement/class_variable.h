@@ -27,8 +27,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassVariable);
 DECLARE_BOOST_TYPES(SimpleVariable);
 
-class ClassVariable : public Statement, public IParseHandler {
-public:
+struct ClassVariable : Statement, IParseHandler {
   ClassVariable(STATEMENT_CONSTRUCTOR_PARAMETERS,
                 ModifierExpressionPtr modifiers,
                 std::string typeConstraint,

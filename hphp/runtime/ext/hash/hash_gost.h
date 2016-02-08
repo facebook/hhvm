@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_gost : public HashEngine {
-public:
+struct hash_gost : HashEngine {
   hash_gost();
 
   virtual void hash_init(void *context);

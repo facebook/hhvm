@@ -24,9 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ArrayElementExpression);
 
-class ArrayElementExpression : public Expression,
-                               public LocalEffectsContainer {
-public:
+struct ArrayElementExpression : Expression, LocalEffectsContainer {
   ArrayElementExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                          ExpressionPtr variable, ExpressionPtr offset);
 

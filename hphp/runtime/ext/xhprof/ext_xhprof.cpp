@@ -108,8 +108,7 @@ Variant HHVM_FUNCTION(xhprof_sample_disable) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class XHProfExtension : public Extension {
- public:
+struct XHProfExtension : Extension {
   XHProfExtension(): Extension("xhprof", "0.9.4") {}
 
   void moduleInit() override {

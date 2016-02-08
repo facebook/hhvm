@@ -379,8 +379,7 @@ Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MailparseExtension final : public Extension {
- public:
+struct MailparseExtension final : Extension {
   MailparseExtension() : Extension("mailparse") { }
   void moduleInit() override {
     HHVM_FE(mailparse_msg_create);

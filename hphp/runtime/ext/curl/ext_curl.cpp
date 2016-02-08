@@ -571,8 +571,7 @@ Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
 static int s_poolSize, s_reuseLimit, s_getTimeout;
 static std::string s_namedPools;
 
-class CurlExtension final : public Extension {
- public:
+struct CurlExtension final : Extension {
   CurlExtension() : Extension("curl") {}
   void moduleInit() override {
 #if LIBCURL_VERSION_NUM >= 0x071500

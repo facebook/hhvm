@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(IncludeExpression);
 
-class IncludeExpression : public UnaryOpExpression, public IParseHandler {
-public:
+struct IncludeExpression : UnaryOpExpression, IParseHandler {
   static std::string CheckInclude(ConstructPtr includeExp,
                                   FileScopePtr scope,
                                   ExpressionPtr fileExp,

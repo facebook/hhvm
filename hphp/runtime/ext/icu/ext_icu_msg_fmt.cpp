@@ -12,9 +12,11 @@
 
 U_NAMESPACE_BEGIN
 /**
- * This class isolates our access to private internal methods of
- * MessageFormat.  It is never instantiated; it exists only for C++
- * access management.
+ * This class isolates our access to private internal methods of MessageFormat.
+ * It is never instantiated; it exists only for C++ access management.
+ *
+ * It also has to be declared `class' because it's referenced as a friend class
+ * in the ICU headers.
  */
 class MessageFormatAdapter {
 public:

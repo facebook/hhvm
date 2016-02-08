@@ -27,8 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class MySqlStats {
-public:
+struct MySqlStats {
   enum Verb {
     UNKNOWN,
 

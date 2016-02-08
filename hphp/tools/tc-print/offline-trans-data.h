@@ -47,8 +47,7 @@ struct TransAddrRange {
   }
 };
 
-class OfflineTransData {
-public:
+struct OfflineTransData {
   explicit OfflineTransData(const std::string& dumpDir)
     : dumpDir(dumpDir) {
     loadTCData(dumpDir);

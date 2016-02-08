@@ -81,8 +81,7 @@ enum ObjPropType {
 
 typedef void* TStatementPtr;
 
-class ParserBase {
-public:
+struct ParserBase {
   enum NameKind {
     StringName,
     VarName,
@@ -211,8 +210,7 @@ protected:
     TStatementPtr stmt;
   };
 
-  class LabelInfo {
-  public:
+  struct LabelInfo {
     LabelInfo() : scopeId(0) {}
     int scopeId;
     LabelScopes scopes;

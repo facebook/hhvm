@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class AdminRequestHandler : public RequestHandler {
-public:
+struct AdminRequestHandler : RequestHandler {
   static AccessLog &GetAccessLog() { return s_accessLog; }
 
 public:

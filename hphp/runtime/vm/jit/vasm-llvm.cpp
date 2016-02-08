@@ -955,7 +955,7 @@ struct LLVMEmitter {
           jmpIp,
           std::make_pair(alignment, AlignContext::Live)
         );
-        mcg->setJmpTransID(jmpIp);
+        mcg->setJmpTransID(jmpIp, m_unit.transKind);
 
         if (found) {
           // If LLVM duplicated the tail call into more than one jmp
@@ -2025,7 +2025,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
   // do what vasm does here.
 
   auto& frozen = m_text.frozen().code;
-  mcg->setJmpTransID((TCA)inst.addr);
+  mcg->setJmpTransID((TCA)inst.addr, m_unit.transKind);
 
   auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!inst.target.resumed()) optSPOff = inst.spOff;
@@ -2040,7 +2040,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
     TransFlags{}.packed
   );
   mcg->cgFixups().codePointers.insert(inst.addr);
-  mcg->setJmpTransID(TCA(inst.addr));
+  mcg->setJmpTransID(TCA(inst.addr), m_unit.transKind);
 }
 
 void LLVMEmitter::emit(const defvmsp& inst) {

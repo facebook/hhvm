@@ -30,8 +30,7 @@ namespace HPHP{
 ///////////////////////////////////////////////////////////////////////////////
 // writers
 
-class Writer {
-public:
+struct Writer {
 
   enum class Format {
     XML,
@@ -90,8 +89,7 @@ protected:
   }
 };
 
-class XMLWriter : public Writer {
-public:
+struct XMLWriter : Writer {
   explicit XMLWriter(std::ostream &out) : Writer(out) {}
 
 
@@ -150,7 +148,7 @@ private:
   }
 };
 
-class JSONWriter : public Writer {
+struct JSONWriter : Writer {
 
 protected:
   // If true it will generate human-friendly output on multiple lines and with
@@ -295,9 +293,7 @@ public:
   }
 };
 
-class HTMLWriter : public Writer {
-
-public:
+struct HTMLWriter : Writer {
   explicit HTMLWriter(std::ostream &out) : Writer(out) {}
 
   virtual void writeFileHeader() {

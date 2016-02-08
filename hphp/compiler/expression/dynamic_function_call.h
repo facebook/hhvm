@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(DynamicFunctionCall);
 
-class DynamicFunctionCall : public FunctionCall {
-public:
+struct DynamicFunctionCall : FunctionCall {
   DynamicFunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       ExpressionPtr name, ExpressionListPtr params,
                       ExpressionPtr cls);

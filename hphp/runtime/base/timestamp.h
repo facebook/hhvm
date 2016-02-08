@@ -32,8 +32,7 @@ class String;
  * without including leap seconds. Therefore, this integer is by definition
  * non timezone specific and thus not shifted by DST.
  */
-class TimeStamp {
-public:
+struct TimeStamp {
   static int64_t Current();
   static double CurrentSecond();
   static Array CurrentTime();

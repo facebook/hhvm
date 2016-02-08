@@ -31,8 +31,7 @@ typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_exts = nullptr;
 
 // just to make valgrind cleaner
-class ExtensionRegistryUninitializer {
-public:
+struct ExtensionRegistryUninitializer {
   ~ExtensionRegistryUninitializer() {
     delete s_exts;
   }

@@ -26,8 +26,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 
-class EnumCache {
-public:
+struct EnumCache {
   EnumCache() {}
   ~EnumCache();
 

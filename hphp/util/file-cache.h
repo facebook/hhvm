@@ -32,8 +32,7 @@ namespace HPHP {
  * content serving.
  */
 
-class FileCache {
- public:
+struct FileCache {
   static std::string SourceRoot;
   static bool UseNewCache;
 

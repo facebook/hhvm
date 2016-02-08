@@ -42,7 +42,8 @@ class VariableUnserializer;
  * type of ArrayData to accomplish the task. This "upgrade" is called
  * escalation.
  */
-class Array {
+struct Array {
+private:
   using Ptr = req::ptr<ArrayData>;
   using NoIncRef = Ptr::NoIncRef;
   using NonNull = Ptr::NonNull;

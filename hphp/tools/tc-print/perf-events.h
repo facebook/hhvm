@@ -61,13 +61,13 @@ struct PerfEvent {
 };
 
 template<typename S, typename T>
-class Mapper {
-public:
+struct Mapper {
   virtual ~Mapper() {}
   virtual folly::Optional<T> operator()(const S&) = 0;
 };
 
-class StackTraceTree {
+struct StackTraceTree {
+private:
   struct Node;
 
   std::shared_ptr<Node> root;
@@ -89,9 +89,7 @@ public:
 };
 
 template<typename KeyType>
-class PerfEventsMap {
-
-public:
+struct PerfEventsMap {
   typedef std::array<uint64_t, NUM_EVENT_TYPES> EventsArray;
 
 private:

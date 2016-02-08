@@ -28,8 +28,7 @@ DECLARE_BOOST_TYPES(ClosureExpression);
 DECLARE_BOOST_TYPES(FunctionStatement);
 DECLARE_BOOST_TYPES(ExpressionList);
 
-class ClosureExpression : public Expression {
-public:
+struct ClosureExpression : Expression {
   ClosureExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                     ClosureType type,
                     FunctionStatementPtr func,

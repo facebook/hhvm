@@ -29,8 +29,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ShmCounter {
-public:
+struct ShmCounter {
   ShmCounter() {}
   explicit ShmCounter(const char *n) : count(0) {
     size_t size = sizeof(name);
@@ -41,8 +40,7 @@ public:
   char name[64];
   long long count;
 };
-class ShmCounters {
-public:
+struct ShmCounters {
   SHM_COUNTER_DEF(dummy_def1)
   SHM_COUNTER_DEF(dummy_def2)
   // Add your real counter definition here

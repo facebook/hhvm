@@ -46,8 +46,7 @@ constexpr size_t kFuncCountHint = 1200000;
  */
 
 template<typename Value>
-class AtomicVector {
- public:
+struct AtomicVector {
   AtomicVector(size_t size, const Value& def);
   ~AtomicVector();
 

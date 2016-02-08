@@ -21,7 +21,7 @@ namespace HPHP {
 
 static const char* kTestData = "some test data for serialization";
 
-class TestFileCache : public testing::Test {
+struct TestFileCache : testing::Test {
  protected:
   virtual void SetUp() {
     FileCache::UseNewCache = true;

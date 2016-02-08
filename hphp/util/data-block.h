@@ -41,8 +41,7 @@ namespace sz {
 typedef uint8_t* Address;
 typedef uint8_t* CodeAddress;
 
-class DataBlockFull : public std::runtime_error {
- public:
+struct DataBlockFull : std::runtime_error {
   std::string name;
 
   DataBlockFull(const std::string& blockName, const std::string msg)
@@ -60,7 +59,7 @@ class DataBlockFull : public std::runtime_error {
  * Memory is allocated from the end of the block unless specifically allocated
  * using allocInner.
  *
- * Unused memory can be freed using free(), if the memory is at the end of the
+ * Unused memory can be freed using free(). If the memory is at the end of the
  * block, the frontier will be moved back.
  *
  * Free memory is coalesced and allocation is done by best-fit.
@@ -276,10 +275,7 @@ using CodeBlock = DataBlock;
 
 //////////////////////////////////////////////////////////////////////
 
-class UndoMarker {
-  CodeBlock& m_cb;
-  CodeAddress m_oldFrontier;
-  public:
+struct UndoMarker {
   explicit UndoMarker(CodeBlock& cb)
     : m_cb(cb)
     , m_oldFrontier(cb.frontier()) {
@@ -288,13 +284,16 @@ class UndoMarker {
   void undo() {
     m_cb.setFrontier(m_oldFrontier);
   }
+
+private:
+  CodeBlock& m_cb;
+  CodeAddress m_oldFrontier;
 };
 
 /*
  * RAII bookmark for scoped rewinding of frontier.
  */
-class CodeCursor : public UndoMarker {
- public:
+struct CodeCursor : UndoMarker {
   CodeCursor(CodeBlock& cb, CodeAddress newFrontier) : UndoMarker(cb) {
     cb.setFrontier(newFrontier);
   }

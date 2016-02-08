@@ -21,8 +21,7 @@
 
 namespace HPHP {
 
-class GettextExtension final : public Extension {
-public:
+struct GettextExtension final : Extension {
   GettextExtension() : Extension("gettext") {}
   void moduleInit() override;
   void moduleInfo(Array &info) override;

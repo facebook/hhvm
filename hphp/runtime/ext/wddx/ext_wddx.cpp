@@ -257,8 +257,7 @@ static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
 
 //////////////////////////////////////////////////////////////////////////////
 
-class wddxExtension final : public Extension {
- public:
+struct wddxExtension final : Extension {
   wddxExtension() : Extension("wddx") {}
   void moduleInit() override {
     HHVM_FE(wddx_add_vars);

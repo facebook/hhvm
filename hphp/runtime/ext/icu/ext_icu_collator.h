@@ -10,8 +10,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_Collator;
 
-class Collator : public IntlError {
- public:
+struct Collator : IntlError {
   Collator() {}
   Collator(const Collator&) = delete;
   Collator& operator=(const Collator& src) {

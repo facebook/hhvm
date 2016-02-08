@@ -90,8 +90,7 @@ const char* const cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER =
 ///////////////////////////////////////////////////////////////////////////////
 // classes
 
-class GMPData {
-public:
+struct GMPData {
                  GMPData()
                  : m_isInit(false) {}
   virtual       ~GMPData() { close(); }
@@ -107,7 +106,8 @@ private:
 };
 
 
-class GMP {
+struct GMP {
+private:
   static void initClass() {
     cls = Unit::lookupClass(s_GMP_GMP.get());
   }

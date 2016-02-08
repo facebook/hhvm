@@ -47,7 +47,7 @@ namespace jit {
  * A func prologue does a large portion of the work of an interpreted FCall;
  * the rest of it is handled by the Call instruction.
  */
-TCA genFuncPrologue(TransID transID, Func* func, int argc);
+TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc);
 
 /*
  * Emit a func body dispatch entry point to the TC.

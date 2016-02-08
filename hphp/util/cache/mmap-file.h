@@ -25,8 +25,7 @@
 
 namespace HPHP {
 
-class MmapFile {
- public:
+struct MmapFile {
   explicit MmapFile(const std::string& path);
   ~MmapFile();
 

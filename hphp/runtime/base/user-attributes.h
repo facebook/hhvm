@@ -36,7 +36,8 @@ namespace HPHP {
  * Most things won't have attributes, so we've made the map optimize for the
  * case that it's empty (minimizing sizeof(UserAttributeMap)).
  */
-class UserAttributeMap {
+struct UserAttributeMap {
+private:
   using Map = hphp_hash_map<
     LowStringPtr,
     TypedValue,

@@ -38,8 +38,7 @@ static void callback_locking(int mode, int type, const char *file, int line) {
 
 static bool s_isSSLInited = false;
 
-class SSLUnitializer {
-public:
+struct SSLUnitializer {
   ~SSLUnitializer() {
     delete [] s_locks;
   }

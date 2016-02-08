@@ -311,8 +311,7 @@ String HHVM_FUNCTION(urlencode, const String& str) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StandardURLExtension final : public Extension {
- public:
+struct StandardURLExtension final : Extension {
   StandardURLExtension() : Extension("url") {}
   void moduleInit() override {
     HHVM_RC_INT(PHP_URL_SCHEME, k_PHP_URL_SCHEME);

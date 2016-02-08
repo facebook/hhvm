@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_tiger : public HashEngine {
-public:
+struct hash_tiger : HashEngine {
   hash_tiger(bool tiger3, int digest, bool invert = false);
 
   virtual void hash_init(void *context);

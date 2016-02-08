@@ -112,8 +112,7 @@ const IniSettingMap ini_iterate(const IniSettingMap& ini,
  * produce UserIniData. This registration is done at the same time that
  * the setter and getter are established; see the class SetAndGet
  */
-class UserIniData {
-public:
+struct UserIniData {
   virtual ~UserIniData() {}
 };
 
@@ -145,7 +144,8 @@ private:
   Variant m_map;
 };
 
-class IniSetting {
+struct IniSetting {
+private:
 
   struct CallbackData {
     Variant active_section;
@@ -162,8 +162,7 @@ public:
     RawScanner,
   };
 
-  class ParserCallback {
-  public:
+  struct ParserCallback {
     virtual ~ParserCallback() {};
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
@@ -186,8 +185,7 @@ public:
                        Variant& value, Variant& cur_settings,
                        const std::string& stopChar);
   };
-  class SectionParserCallback : public ParserCallback {
-  public:
+  struct SectionParserCallback : ParserCallback {
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
     virtual void onEntry(const std::string &key, const std::string &value,
@@ -197,8 +195,7 @@ public:
   private:
     Variant* activeArray(CallbackData* data);
   };
-  class SystemParserCallback : public ParserCallback {
-  public:
+  struct SystemParserCallback : ParserCallback {
     virtual void onEntry(const std::string &key, const std::string &value,
                          void *arg);
     virtual void onPopEntry(const std::string &key, const std::string &value,

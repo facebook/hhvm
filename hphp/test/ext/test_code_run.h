@@ -24,8 +24,7 @@
 /**
  * Testing PHP -> C++ -> execution.
  */
-class TestCodeRun : public TestBase {
- public:
+struct TestCodeRun : TestBase {
   TestCodeRun();
 
   virtual bool preTest();

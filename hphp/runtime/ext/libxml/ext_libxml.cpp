@@ -47,8 +47,7 @@ TRACE_SET_MOD(libxml);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class xmlErrorVec : public folly::fbvector<xmlError> {
-public:
+struct xmlErrorVec : folly::fbvector<xmlError> {
   ~xmlErrorVec() {
     clearErrors();
   }
@@ -614,8 +613,7 @@ void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
 ///////////////////////////////////////////////////////////////////////////////
 // Extension
 
-class LibXMLExtension final : public Extension {
-  public:
+struct LibXMLExtension final : Extension {
     LibXMLExtension() : Extension("libxml") {}
 
   private:

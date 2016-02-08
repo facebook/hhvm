@@ -22,8 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class PhpStreamWrapper : public Stream::Wrapper {
- public:
+struct PhpStreamWrapper : Stream::Wrapper {
   req::ptr<File> openFD(const char *sFD);
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,

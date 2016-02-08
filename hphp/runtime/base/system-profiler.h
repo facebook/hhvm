@@ -36,8 +36,7 @@ namespace HPHP {
  * That binding can be done in a dynamic shared object.
  */
 
-class SystemProfiler {
-public:
+struct SystemProfiler {
   SystemProfiler() { }
   virtual ~SystemProfiler() { }
 

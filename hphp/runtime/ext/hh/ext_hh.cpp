@@ -118,8 +118,7 @@ void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
   }
 }
 
-static class HHExtension final : public Extension {
- public:
+static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
     HHVM_NAMED_FE(HH\\autoload_set_paths, HHVM_FN(autoload_set_paths));
@@ -131,8 +130,7 @@ static class HHExtension final : public Extension {
   }
 } s_hh_extension;
 
-static class XHPExtension final : public Extension {
- public:
+static struct XHPExtension final : Extension {
   XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET) { }
   bool moduleEnabled() const override { return RuntimeOption::EnableXHP; }
 } s_xhp_extension;

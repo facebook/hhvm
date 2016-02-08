@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ForEachStatement);
 
-class ForEachStatement : public LoopStatement {
-public:
+struct ForEachStatement : LoopStatement {
   ForEachStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                    ExpressionPtr array, ExpressionPtr name, bool nameRef,
                    ExpressionPtr value, bool valueRef, bool awaitAs,

@@ -38,8 +38,7 @@ static zip* _zip_open(const String& filename, int _flags, int* zep) {
   return zip_open(to_full_path(filename).c_str(), _flags, zep);
 }
 
-class ZipStream : public File {
- public:
+struct ZipStream : File {
   DECLARE_RESOURCE_ALLOCATION(ZipStream);
 
   ZipStream(zip* z, const String& name) : m_zipFile(nullptr) {
@@ -96,8 +95,7 @@ void ZipStream::sweep() {
   File::sweep();
 }
 
-class ZipStreamWrapper : public Stream::Wrapper {
- public:
+struct ZipStreamWrapper : Stream::Wrapper {
   virtual req::ptr<File> open(const String& filename,
                               const String& mode,
                               int options,
@@ -126,8 +124,7 @@ class ZipStreamWrapper : public Stream::Wrapper {
   }
 };
 
-class ZipEntry : public SweepableResourceData {
- public:
+struct ZipEntry : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ZipEntry);
 
   CLASSNAME_IS("ZipEntry");
@@ -214,8 +211,7 @@ class ZipEntry : public SweepableResourceData {
 };
 IMPLEMENT_RESOURCE_ALLOCATION(ZipEntry);
 
-class ZipDirectory: public SweepableResourceData {
- public:
+struct ZipDirectory : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ZipDirectory);
 
   CLASSNAME_IS("ZipDirectory");
@@ -1255,8 +1251,7 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class zipExtension final : public Extension {
- public:
+struct zipExtension final : Extension {
   zipExtension() : Extension("zip", "1.12.4-dev") {}
   void moduleInit() override {
     HHVM_ME(ZipArchive, getProperty);

@@ -257,13 +257,7 @@ namespace StackSym {
 } while (0)
 
 // RAII guard for function creation.
-class FuncFinisher {
-  EmitterVisitor* m_ev;
-  Emitter&        m_e;
-  FuncEmitter*    m_fe;
-  int32_t         m_stackPad;
-
- public:
+struct FuncFinisher {
   FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe,
                int32_t stackPad = 0)
     : m_ev(ev), m_e(e), m_fe(fe), m_stackPad(stackPad)
@@ -272,14 +266,16 @@ class FuncFinisher {
   ~FuncFinisher() {
     m_ev->finishFunc(m_e, m_fe, m_stackPad);
   }
+
+private:
+  EmitterVisitor* m_ev;
+  Emitter&        m_e;
+  FuncEmitter*    m_fe;
+  int32_t         m_stackPad;
 };
 
 // RAII guard for temporarily overriding an Emitter's location
-class LocationGuard {
-  Emitter& m_e;
-  OptLocation m_loc;
-
-public:
+struct LocationGuard {
   LocationGuard(Emitter& e, const OptLocation& newLoc)
       : m_e(e), m_loc(e.getTempLocation()) {
     if (newLoc) m_e.setTempLocation(newLoc);
@@ -287,6 +283,10 @@ public:
   ~LocationGuard() {
     m_e.setTempLocation(m_loc);
   }
+
+private:
+  Emitter& m_e;
+  OptLocation m_loc;
 };
 
 #define O(name, imm, pop, push, flags)                                  \
@@ -2222,8 +2222,7 @@ bool EmitterVisitor::isJumpTarget(Offset target) {
   return (it != m_jumpTargetEvalStacks.end());
 }
 
-class IterFreeThunklet final : public Thunklet {
-public:
+struct IterFreeThunklet final : Thunklet {
   IterFreeThunklet(Id iterId, bool itRef)
     : m_id(iterId), m_itRef(itRef) {}
   void emit(Emitter& e) override {
@@ -2242,8 +2241,7 @@ private:
 /**
  * A thunklet for the fault region protecting a silenced (@) expression.
  */
-class RestoreErrorReportingThunklet final : public Thunklet {
-public:
+struct RestoreErrorReportingThunklet final : Thunklet {
   explicit RestoreErrorReportingThunklet(Id loc)
     : m_oldLevelLoc(loc) {}
   void emit(Emitter& e) override {
@@ -2254,8 +2252,7 @@ private:
   Id m_oldLevelLoc;
 };
 
-class UnsetUnnamedLocalThunklet final : public Thunklet {
-public:
+struct UnsetUnnamedLocalThunklet final : Thunklet {
   explicit UnsetUnnamedLocalThunklet(Id loc)
     : m_loc(loc) {}
   void emit(Emitter& e) override {
@@ -2267,8 +2264,7 @@ private:
   Id m_loc;
 };
 
-class UnsetUnnamedLocalsThunklet final : public Thunklet {
-public:
+struct UnsetUnnamedLocalsThunklet final : Thunklet {
   explicit UnsetUnnamedLocalsThunklet(std::vector<Id>&& locs)
     : m_locs(std::move(locs)) {}
   void emit(Emitter& e) override {
@@ -2283,8 +2279,7 @@ private:
   const std::vector<Id> m_locs;
 };
 
-class UnsetGeneratorDelegateThunklet final : public Thunklet {
-public:
+struct UnsetGeneratorDelegateThunklet final : Thunklet {
   explicit UnsetGeneratorDelegateThunklet(Id iterId)
     : m_id(iterId) {}
   void emit(Emitter& e) override {
@@ -2295,8 +2290,7 @@ private:
   Id m_id;
 };
 
-class FinallyThunklet final : public Thunklet {
-public:
+struct FinallyThunklet final : Thunklet {
   explicit FinallyThunklet(FinallyStatementPtr finallyStatement,
                            int numLiveIters)
       : m_finallyStatement(finallyStatement), m_numLiveIters(numLiveIters) {}
@@ -8405,9 +8399,7 @@ void EmitterVisitor::emitClass(Emitter& e,
 
 namespace {
 
-class ForeachIterGuard {
-  EmitterVisitor& m_ev;
- public:
+struct ForeachIterGuard {
   ForeachIterGuard(EmitterVisitor& ev,
                    Id iterId,
                    IterKind kind)
@@ -8418,6 +8410,9 @@ class ForeachIterGuard {
   ~ForeachIterGuard() {
     m_ev.popIterScope();
   }
+
+private:
+  EmitterVisitor& m_ev;
 };
 
 }
@@ -9827,8 +9822,7 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   return ue;
 }
 
-class UEQ : public Synchronizable {
- public:
+struct UEQ : Synchronizable {
   void push(UnitEmitter* ue) {
     assert(ue != nullptr);
     Lock lock(this);

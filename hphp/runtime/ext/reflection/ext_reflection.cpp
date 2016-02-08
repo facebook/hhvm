@@ -1812,8 +1812,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ReflectionExtension final : public Extension {
- public:
+struct ReflectionExtension final : Extension {
   ReflectionExtension() : Extension("reflection", "$Id$") { }
   void moduleInit() override {
     HHVM_FE(hphp_create_object);

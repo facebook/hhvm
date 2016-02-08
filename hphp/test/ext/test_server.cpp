@@ -251,8 +251,7 @@ void TestServer::KillServer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestServerRequestHandler : public RequestHandler {
-public:
+struct TestServerRequestHandler : RequestHandler {
   explicit TestServerRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
@@ -486,8 +485,7 @@ bool TestServer::TestSetCookie() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestTransport : public Transport {
-public:
+struct TestTransport : Transport {
   TestTransport() : m_code(0) {}
 
   int m_code;
@@ -650,8 +648,7 @@ bool TestServer::TestTakeoverServer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class EchoHandler : public RequestHandler {
-public:
+struct EchoHandler : RequestHandler {
   explicit EchoHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {

@@ -2134,7 +2134,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
 float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
                                        OptDecRefProfile& profile,
                                        Type type) {
-  auto const kind = mcg->tx().mode();
+  auto const kind = m_state.unit.context().kind;
   // Without profiling data, we assume destroy is unlikely.
   if (kind != TransKind::Profile && kind != TransKind::Optimize) return 0.0;
 

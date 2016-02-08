@@ -26,8 +26,7 @@ extern "C" {
 
 namespace HPHP {
 
-class Disasm {
- public:
+struct Disasm {
   struct Options {
     Options()
       : m_indentLevel(0)

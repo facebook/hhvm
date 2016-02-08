@@ -31,8 +31,7 @@ namespace HPHP {
  * interface.
  */
 template<class TServer, class TTransport>
-class ServerTaskEvent final : public AsioExternalThreadEvent {
- public:
+struct ServerTaskEvent final : AsioExternalThreadEvent {
   ServerTaskEvent() {}
 
   ~ServerTaskEvent() {

@@ -51,7 +51,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(LabelScope);
 
-class Statement : public Construct {
+struct Statement : Construct {
 private:
   static const char *Names[];
 

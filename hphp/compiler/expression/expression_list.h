@@ -25,8 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ExpressionList);
 
-class ExpressionList : public Expression {
-public:
+struct ExpressionList : Expression {
   enum ListKind {
     ListKindParam,
     ListKindComma,

@@ -26,8 +26,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_NumberFormatter;
 
-class NumberFormatter : public IntlError {
-public:
+struct NumberFormatter : IntlError {
   NumberFormatter() {}
   NumberFormatter(const NumberFormatter&) = delete;
   NumberFormatter& operator=(const NumberFormatter& src) {

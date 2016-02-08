@@ -33,8 +33,7 @@ namespace HPHP {
 class PageletTransport;
 class PageletServerTaskEvent;
 
-class PageletServer {
-public:
+struct PageletServer {
   static bool Enabled();
   static void Restart();
   static void Stop();
@@ -79,8 +78,7 @@ public:
   static int GetQueuedJobs();
 };
 
-class PageletTransport : public Transport, public Synchronizable {
-public:
+struct PageletTransport : Transport, Synchronizable {
   PageletTransport(
     const String& url, const Array& headers, const String& postData,
     const String& remoteHost,
@@ -154,8 +152,7 @@ private:
   PageletServerTaskEvent *m_event;
 };
 
-class PageletServerTaskEvent final : public AsioExternalThreadEvent {
-public:
+struct PageletServerTaskEvent final : AsioExternalThreadEvent {
 
   ~PageletServerTaskEvent() {
     if (m_job) m_job->decRefCount();

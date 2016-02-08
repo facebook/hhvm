@@ -531,8 +531,7 @@ void Unit::loadFunc(const Func *func) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FrameRestore {
- public:
+struct FrameRestore {
   explicit FrameRestore(const PreClass* preClass) {
     ActRec* fp = vmfp();
     PC pc = vmpc();

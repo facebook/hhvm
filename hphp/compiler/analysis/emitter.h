@@ -70,8 +70,7 @@ class EmitterVisitor;
 
 using OptLocation = folly::Optional<Location::Range>;
 
-class Emitter {
-public:
+struct Emitter {
   Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
       : m_node(node), m_ue(ue), m_ev(ev) {}
   UnitEmitter& getUnitEmitter() { return m_ue; }
@@ -274,8 +273,7 @@ public:
   void popFDesc();
 };
 
-class Label {
-public:
+struct Label {
   Label() : m_off(InvalidAbsoluteOffset) {}
   explicit Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
     set(e);
@@ -300,14 +298,12 @@ private:
   SymbolicStack m_evalStack;
 };
 
-class Thunklet {
-public:
+struct Thunklet {
   virtual ~Thunklet();
   virtual void emit(Emitter& e) = 0;
 };
 
-class Funclet {
-public:
+struct Funclet {
   explicit Funclet(Thunklet* body)
     : m_body(body) {
   }
@@ -351,8 +347,7 @@ DECLARE_BOOST_TYPES(Region);
  * implementation. The levels are used to keep track of the information
  * such as the control targets that can be taken inside a block.
  */
-class Region {
-public:
+struct Region {
   enum Kind {
     // Top-level (global) context.
     Global,
@@ -431,7 +426,7 @@ public:
   RegionPtr m_parent;
 };
 
-class EmitterVisitor {
+struct EmitterVisitor {
   friend class UnsetUnnamedLocalThunklet;
   friend class FuncFinisher;
 public:
@@ -524,8 +519,7 @@ private:
   typedef std::vector<NonScalarPair> NonScalarVec;
   typedef std::pair<Id, int> StrCase;
 
-  class PostponedMeth {
-  public:
+  struct PostponedMeth {
     PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
                   ClosureUseVarVec* useVars)
         : m_meth(m), m_fe(fe), m_top(top), m_closureUseVars(useVars) {}
@@ -535,16 +529,14 @@ private:
     ClosureUseVarVec* m_closureUseVars;
   };
 
-  class PostponedCtor {
-  public:
+  struct PostponedCtor {
     PostponedCtor(InterfaceStatementPtr is, FuncEmitter* fe)
       : m_is(is), m_fe(fe) {}
     InterfaceStatementPtr m_is;
     FuncEmitter* m_fe;
   };
 
-  class PostponedNonScalars {
-  public:
+  struct PostponedNonScalars {
     PostponedNonScalars(InterfaceStatementPtr is, FuncEmitter* fe,
                         NonScalarVec* v)
       : m_is(is), m_fe(fe), m_vec(v) {}
@@ -556,8 +548,7 @@ private:
     NonScalarVec* m_vec;
   };
 
-  class PostponedClosureCtor {
-  public:
+  struct PostponedClosureCtor {
     PostponedClosureCtor(ClosureUseVarVec& v, ClosureExpressionPtr e,
                          FuncEmitter* fe)
         : m_useVars(v), m_expr(e), m_fe(fe) {}
@@ -566,8 +557,7 @@ private:
     FuncEmitter* m_fe;
   };
 
-  class CatchRegion {
-  public:
+  struct CatchRegion {
     CatchRegion(Offset start, Offset end) : m_start(start),
       m_end(end) {}
     ~CatchRegion() {
@@ -582,8 +572,7 @@ private:
     std::vector<std::pair<StringData*, Label*> > m_catchLabels;
   };
 
-  class FaultRegion {
-  public:
+  struct FaultRegion {
     FaultRegion(Offset start,
                 Offset end,
                 Label* func,
@@ -602,8 +591,7 @@ private:
     IterKind m_iterKind;
   };
 
-  class FPIRegion {
-    public:
+  struct FPIRegion {
       FPIRegion(Offset start, Offset end, Offset fpOff)
         : m_start(start), m_end(end), m_fpOff(fpOff) {}
       Offset m_start;

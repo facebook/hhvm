@@ -766,8 +766,9 @@ RegionDescPtr selectRegion(const RegionContext& context,
         case RegionMode::Method:
           return selectMethod(context);
         case RegionMode::Tracelet:
-          return selectTracelet(context, RuntimeOption::EvalJitMaxRegionInstrs,
-                                kind == TransKind::Profile);
+          return selectTracelet(
+            context, kind, RuntimeOption::EvalJitMaxRegionInstrs
+          );
       }
       not_reached();
     } catch (const std::exception& e) {

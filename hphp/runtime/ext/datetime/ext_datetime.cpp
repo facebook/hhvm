@@ -853,8 +853,7 @@ static const StaticString
 #define DATE_RSS "D, d M Y H:i:s O"
 #define DATE_W3C "Y-m-d\\TH:i:sP"
 
-static class DateTimeExtension final : public Extension {
-public:
+static struct DateTimeExtension final : Extension {
   DateTimeExtension() : Extension("date", get_PHP_VERSION().c_str()) { }
 
   void moduleInit() override {

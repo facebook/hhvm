@@ -25,8 +25,7 @@ namespace HPHP {
 class Symbol;
 DECLARE_BOOST_TYPES(SimpleVariable);
 
-class SimpleVariable : public Expression {
-public:
+struct SimpleVariable : Expression {
   SimpleVariable(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                  const std::string &name,
                  const std::string &docComment = "");

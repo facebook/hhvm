@@ -711,7 +711,8 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class X64Assembler {
+struct X64Assembler {
+private:
   friend struct Label;
 
   /*

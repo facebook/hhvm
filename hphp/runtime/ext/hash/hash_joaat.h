@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_joaat : public HashEngine {
-public:
+struct hash_joaat : HashEngine {
   explicit hash_joaat();
 
   virtual void hash_init(void *context) override;

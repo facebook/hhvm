@@ -22,8 +22,7 @@
 
 namespace HPHP {
 
-class UserDirectory : public Directory, public UserFSNode {
-public:
+struct UserDirectory : Directory, UserFSNode {
   CLASSNAME_IS("UserDirectory")
   DECLARE_RESOURCE_ALLOCATION(UserDirectory)
 

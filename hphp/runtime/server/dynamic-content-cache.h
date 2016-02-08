@@ -25,8 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class DynamicContentCache {
-public:
+struct DynamicContentCache {
   static DynamicContentCache TheCache;
 
 public:

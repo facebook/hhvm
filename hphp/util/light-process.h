@@ -37,8 +37,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // light-weight process
 
-class LightProcess {
-public:
+struct LightProcess {
   LightProcess();
   ~LightProcess();
 

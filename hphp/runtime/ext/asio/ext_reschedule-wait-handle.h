@@ -31,8 +31,7 @@ namespace HPHP {
  *
  * RescheduleWaitHandle is guaranteed to never finish immediately.
  */
-class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
- public:
+struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(RescheduleWaitHandle);
   WAITHANDLE_DTOR(RescheduleWaitHandle);
 

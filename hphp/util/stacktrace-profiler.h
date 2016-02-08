@@ -51,7 +51,8 @@ struct StackTraceSample {
  * stack traces easier to understand:
  *   -O2 -fno-inline -fno-optimize-sibling-calls
  */
-class StackTraceProfiler {
+struct StackTraceProfiler {
+private:
   struct Node {
     explicit Node(void* addr) :
       addr(addr), callers(nullptr), next(nullptr), hits(0) {

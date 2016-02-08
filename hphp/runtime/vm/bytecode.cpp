@@ -2622,10 +2622,7 @@ void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
 
 // Treadmill solution for the SharedVariant memory management
 namespace {
-class FreedAPCHandle {
-  size_t m_memSize;
-  std::vector<APCHandle*> m_apcHandles;
-public:
+struct FreedAPCHandle {
   explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles, size_t size)
     : m_memSize(size), m_apcHandles(std::move(shandles))
   {}
@@ -2635,6 +2632,9 @@ public:
     }
     APCStats::getAPCStats().removePendingDelete(m_memSize);
   }
+private:
+  size_t m_memSize;
+  std::vector<APCHandle*> m_apcHandles;
 };
 }
 

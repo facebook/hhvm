@@ -50,7 +50,8 @@ namespace HPHP {
  * ConcurrentScalableCache is recommended instead.
  */
 template <class TKey, class TValue, class THash = tbb::tbb_hash_compare<TKey>>
-class ConcurrentLRUCache {
+struct ConcurrentLRUCache {
+private:
   /**
    * The LRU list node.
    *

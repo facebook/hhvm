@@ -294,8 +294,7 @@ private:
 
 private:
   template<typename Key, typename T, typename HashCompare>
-  class APCMap : public tbb::concurrent_hash_map<Key,T,HashCompare> {
-  public:
+  struct APCMap : tbb::concurrent_hash_map<Key,T,HashCompare> {
     // Append a random entry to 'entries'. The map must be non-empty and not
     // concurrently accessed. Returns false if this operation is not supported.
     bool getRandomAPCEntry(std::vector<EntryInfo>& entries);

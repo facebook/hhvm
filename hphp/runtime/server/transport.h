@@ -52,8 +52,7 @@ using CookieList = std::vector<std::pair<std::string, std::string>>;
  * Note that one transport object is created for each request, and
  * one transport is ONLY accessed from one single thread.
  */
-class Transport : public IDebuggable {
-public:
+struct Transport : IDebuggable {
   enum class Method {
     Unknown,
 

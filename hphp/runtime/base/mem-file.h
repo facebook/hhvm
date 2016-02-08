@@ -27,8 +27,7 @@ namespace HPHP {
 /**
  * memory based files.
  */
-class MemFile : public File {
-public:
+struct MemFile : File {
   DECLARE_RESOURCE_ALLOCATION(MemFile);
 
   explicit MemFile(const String& wrapper_type = null_string,

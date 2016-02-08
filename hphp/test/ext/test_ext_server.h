@@ -23,8 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestExtServer : public TestCppExt {
- public:
+struct TestExtServer : TestCppExt {
   virtual bool RunTests(const std::string &which);
 
   bool test_dangling_server_proxy_old_request();

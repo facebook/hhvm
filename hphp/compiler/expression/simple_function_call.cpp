@@ -101,8 +101,7 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
   }
 }
 
-static class FunctionTypeMapInitializer {
-public:
+static struct FunctionTypeMapInitializer {
   FunctionTypeMapInitializer() {
     SimpleFunctionCall::InitFunctionTypeMap();
   }

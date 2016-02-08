@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_salsa : public HashEngine {
-public:
+struct hash_salsa : HashEngine {
   hash_salsa(bool salsa10);
 
   virtual void hash_init(void *context);

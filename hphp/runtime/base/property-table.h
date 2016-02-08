@@ -23,8 +23,7 @@
 namespace HPHP {
 
 // Hash table that preserves insertion order.
-class PropertyTable {
-public:
+struct PropertyTable {
   PropertyTable();
   PropertyTable(const PropertyTable&);
   ~PropertyTable();

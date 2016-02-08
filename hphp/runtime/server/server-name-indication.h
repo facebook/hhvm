@@ -28,8 +28,7 @@
 
 namespace HPHP {
 
-class ServerNameIndication {
-public:
+struct ServerNameIndication {
 
   /**
    * The certificate handler function takes the "name" of the server and

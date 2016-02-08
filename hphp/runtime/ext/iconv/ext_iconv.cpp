@@ -1989,8 +1989,7 @@ const char* iconv_version() { return "2.5"; }
 #endif
 #endif
 
-class iconvExtension final : public Extension {
-public:
+struct iconvExtension final : Extension {
   iconvExtension() : Extension("iconv") {}
 
   void moduleInit() override {

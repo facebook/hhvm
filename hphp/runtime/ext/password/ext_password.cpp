@@ -20,8 +20,7 @@
 
 namespace HPHP {
 
-class PasswordExtension final : public Extension {
- public:
+struct PasswordExtension final : Extension {
   PasswordExtension() : Extension("password") {}
   void moduleInit() override {
     HHVM_RC_INT(PASSWORD_BCRYPT, 1);

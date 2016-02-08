@@ -11,8 +11,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_SpoofChecker;
 
-class SpoofChecker : public IntlError {
- public:
+struct SpoofChecker : IntlError {
   SpoofChecker() {
     UErrorCode error = U_ZERO_ERROR;
     m_checker = uspoof_open(&error);

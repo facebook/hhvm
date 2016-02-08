@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_keccak : public HashEngine {
- public:
+struct hash_keccak : HashEngine {
   hash_keccak(uint32_t capacity, uint32_t digestlen);
 
   void hash_init(void *context) override;

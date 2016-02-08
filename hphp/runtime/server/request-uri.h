@@ -25,8 +25,7 @@ namespace HPHP {
 class VirtualHost;
 class Transport;
 
-class RequestURI {
-public:
+struct RequestURI {
   RequestURI(const VirtualHost *vhost, Transport *transport,
              const std::string &pathTranslation,
              const std::string &sourceRoot);

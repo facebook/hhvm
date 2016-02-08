@@ -105,8 +105,7 @@ DECLARE_BOOST_TYPES(TypeAnnotation);
  * constants. If so, it is a double colon delimited string in the form
  * of "clsName::cnsName".
  */
-class TypeAnnotation {
-public:
+struct TypeAnnotation {
   TypeAnnotation(const std::string &name, TypeAnnotationPtr typeArgs);
 
   void setNullable() { m_nullable = true; }

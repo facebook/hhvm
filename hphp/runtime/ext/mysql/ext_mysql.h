@@ -49,8 +49,7 @@ Variant HHVM_FUNCTION(mysql_get_server_info, const Variant& link_identifier);
 Variant HHVM_FUNCTION(mysql_thread_id, const Variant& link_identifier);
 Variant HHVM_FUNCTION(mysql_warning_count, const Variant& link_identifier);
 
-class mysqlExtension final : public Extension {
-public:
+struct mysqlExtension final : Extension {
   mysqlExtension() : Extension("mysql", "1.0") {}
 
   // implementing IDebuggable

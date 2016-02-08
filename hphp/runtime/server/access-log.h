@@ -31,8 +31,7 @@ namespace HPHP {
 class LogWriter;
 enum class LogChannel {CRONOLOG, THREADLOCAL, REGULAR};
 
-class AccessLogFileData {
-public:
+struct AccessLogFileData {
   AccessLogFileData() {}
   AccessLogFileData(const std::string& fil,
                     const std::string& lnk,
@@ -53,10 +52,8 @@ private:
 };
 
 
-class AccessLog {
-public:
-  class ThreadData {
-  public:
+struct AccessLog {
+  struct ThreadData {
     ThreadData() : log(nullptr) {}
     FILE *log;
     int64_t startTime;
@@ -88,8 +85,7 @@ private:
 };
 
 
-class LogWriter {
-public:
+struct LogWriter {
   explicit LogWriter(LogChannel chan)
     : m_channel(chan)
   {}

@@ -30,8 +30,7 @@ namespace HPHP {
  * of the operation is always available and waiting for the wait handle finishes
  * immediately.
  */
-class c_StaticWaitHandle final : public c_WaitHandle {
- public:
+struct c_StaticWaitHandle final : c_WaitHandle {
   WAITHANDLE_CLASSOF(StaticWaitHandle);
   WAITHANDLE_DTOR(StaticWaitHandle);
 

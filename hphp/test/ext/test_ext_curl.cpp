@@ -32,8 +32,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestCurlRequestHandler : public RequestHandler {
-public:
+struct TestCurlRequestHandler : RequestHandler {
   explicit TestCurlRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {

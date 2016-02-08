@@ -148,7 +148,7 @@ private:
  * a VarEnv is attached. Internally uses a NameValueTable to hook up names to
  * the local locations.
  */
-class VarEnv {
+struct VarEnv {
  private:
   NameValueTable m_nvTable;
   ExtraArgs* m_extraArgs;
@@ -667,7 +667,8 @@ struct Fault {
 };
 
 // Interpreter evaluation stack.
-class Stack {
+struct Stack {
+private:
   TypedValue* m_elms;
   TypedValue* m_top;
   TypedValue* m_base; // Stack grows down, so m_base is beyond the end of

@@ -50,7 +50,7 @@ DECLARE_BOOST_TYPES(Statement);
 DECLARE_EXTENDED_BOOST_TYPES(Expression);
 class Variant;
 
-class Expression : public Construct {
+struct Expression : Construct {
 private:
   static const char *Names[];
 

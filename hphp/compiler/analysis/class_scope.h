@@ -58,11 +58,9 @@ enum class Derivation {
  * A class scope corresponds to a class declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-class ClassScope : public BlockScope, public FunctionContainer,
-                   public JSON::CodeError::ISerializable,
-                   public JSON::DocTarget::ISerializable {
-
-public:
+struct ClassScope : BlockScope, FunctionContainer,
+                    JSON::CodeError::ISerializable,
+                    JSON::DocTarget::ISerializable {
   enum class KindOf : int {
     ObjectClass,
     AbstractClass,

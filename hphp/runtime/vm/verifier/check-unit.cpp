@@ -24,8 +24,7 @@
 namespace HPHP {
 namespace Verifier {
 
-class UnitChecker {
- public:
+struct UnitChecker {
   UnitChecker(const Unit*, bool verbose);
   ~UnitChecker() {}
   bool verify();

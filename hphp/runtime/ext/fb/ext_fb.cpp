@@ -1161,8 +1161,7 @@ void const_load() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FBExtension : public Extension {
- public:
+struct FBExtension : Extension {
   FBExtension(): Extension("fb", "1.0.0") {}
 
   void moduleInit() override {

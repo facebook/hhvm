@@ -117,7 +117,7 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   , m_curMarker(initMarker)
   , m_state(initMarker)
   , m_curBlock(m_unit.entry())
-  , m_constrainGuards(mcg->tx().mode() != TransKind::Optimize)
+  , m_constrainGuards(unit.context().kind != TransKind::Optimize)
 {
   m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {

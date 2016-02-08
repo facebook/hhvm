@@ -59,7 +59,8 @@ namespace {
 /*
  * Dummy class to get some code to run before main().
  */
-class Init {
+struct Init {
+private:
   Module name2mod(folly::StringPiece name) {
     for (int i = 0; i < NumModules; i++) {
       if (name == tokNames[i]) {
@@ -69,7 +70,7 @@ class Init {
     return (Module)-1;
   }
 
-  public:
+public:
   Init() {
     /* Parse the environment for flags. */
     const char *envName = "TRACE";

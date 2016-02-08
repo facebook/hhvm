@@ -26,8 +26,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlTimeZone;
 
-class IntlTimeZone : public IntlError {
- public:
+struct IntlTimeZone : IntlError {
   IntlTimeZone() {}
   IntlTimeZone(const IntlTimeZone&) = delete;
   IntlTimeZone& operator=(const IntlTimeZone& src) {

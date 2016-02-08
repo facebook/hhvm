@@ -53,8 +53,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   ~c_AwaitAllWaitHandle() {}
 
  public:
-  class Node final {
-   public:
+  struct Node final {
     static constexpr ptrdiff_t blockableOff() {
       return offsetof(Node, m_blockable);
     }

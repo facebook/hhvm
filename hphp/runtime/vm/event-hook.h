@@ -38,8 +38,7 @@ namespace HPHP {
  *  - pending out of memory exceptions
  *  - pending timeout exceptions
  */
-class EventHook {
- public:
+struct EventHook {
   enum {
     NormalFunc,
     PseudoMain,

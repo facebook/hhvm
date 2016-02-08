@@ -65,8 +65,7 @@ enum class ThisContextError {
 ///////////////////////////////////////////////////////////////////////////////
 // scanner
 
-class Token : public ScannerToken {
-public:
+struct Token : ScannerToken {
   ExpressionPtr exp;
   StatementPtr stmt;
   TypeAnnotationPtr typeAnnotation;
@@ -114,8 +113,7 @@ public:
 
 DECLARE_BOOST_TYPES(Parser);
 
-class Parser : public ParserBase {
-public:
+struct Parser : ParserBase {
   static StatementListPtr ParseString(const String& input, AnalysisResultPtr ar,
                                       const char *fileName = nullptr,
                                       bool lambdaMode = false);

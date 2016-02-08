@@ -28,8 +28,7 @@ struct Array;
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassConstant);
 
-class ClassConstant : public Statement, public IParseHandler {
-public:
+struct ClassConstant : Statement, IParseHandler {
   ClassConstant(STATEMENT_CONSTRUCTOR_PARAMETERS, std::string typeConstraint,
                 ExpressionListPtr exp, bool abstract,
                 bool typeconst, TypeAnnotationPtr typeAnnot);

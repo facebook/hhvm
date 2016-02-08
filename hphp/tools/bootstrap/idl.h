@@ -165,8 +165,7 @@ enum class ParamMode {
   ZendFalse
 };
 
-class PhpConst {
- public:
+struct PhpConst {
   explicit PhpConst(const folly::dynamic& cns, fbstring cls = "");
 
   fbstring name() const { return m_name; }
@@ -200,8 +199,7 @@ class PhpConst {
   bool inferType(const folly::dynamic& cns);
 };
 
-class PhpParam {
- public:
+struct PhpParam {
   explicit PhpParam(const folly::dynamic& param, bool isMagicMethod = false,
                     ParamMode paramMode = ParamMode::CoerceAndCall);
 
@@ -249,8 +247,7 @@ class PhpParam {
   ParamMode m_paramMode;
 };
 
-class PhpFunc {
- public:
+struct PhpFunc {
   PhpFunc(const folly::dynamic& d, const fbstring& className);
 
   fbstring getPhpName() const { return m_phpName; }
@@ -349,8 +346,7 @@ private:
   int m_numTypeChecks;
 };
 
-class PhpProp {
- public:
+struct PhpProp {
   PhpProp(const folly::dynamic& d, fbstring cls);
 
   fbstring name() const { return m_name; }
@@ -366,8 +362,7 @@ class PhpProp {
   DataType m_kindOf;
 };
 
-class PhpClass {
- public:
+struct PhpClass {
   explicit PhpClass(const folly::dynamic &c);
 
   fbstring getPhpName() const { return m_phpName; };
@@ -422,8 +417,7 @@ class PhpClass {
   fbstring m_desc;
 };
 
-class PhpExtension {
- public:
+struct PhpExtension {
   explicit PhpExtension(const folly::dynamic& e)
     : m_extension(e) { }
 

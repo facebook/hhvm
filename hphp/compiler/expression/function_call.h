@@ -27,7 +27,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FunctionCall);
 
-class FunctionCall : public Expression, public StaticClassName {
+struct FunctionCall : Expression, StaticClassName {
 protected:
   FunctionCall(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr nameExp,
                const std::string &name, bool hadBackslash,

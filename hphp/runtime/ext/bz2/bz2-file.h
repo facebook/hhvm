@@ -27,8 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // BZ2File class
 
-class BZ2File : public File {
-public:
+struct BZ2File : File {
   DECLARE_RESOURCE_ALLOCATION(BZ2File);
 
   // overriding ResourceData

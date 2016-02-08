@@ -62,8 +62,7 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
 #define REGISTER_SAME_CONSTANT(name) HHVM_RC_INT(name, k_ ## name);
 
-static class StreamExtension final : public Extension {
-public:
+static struct StreamExtension final : Extension {
   StreamExtension() : Extension("stream") {}
   void moduleInit() override {
     REGISTER_SAME_CONSTANT(PSFS_ERR_FATAL);

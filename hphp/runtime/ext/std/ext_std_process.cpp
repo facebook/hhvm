@@ -145,8 +145,7 @@ void StandardExtension::initProcess() {
 
 namespace {
 
-class ShellExecContext final {
-public:
+struct ShellExecContext final {
   ShellExecContext() {
     m_sig_handler = signal(SIGCHLD, SIG_DFL);
   }
@@ -292,8 +291,7 @@ String HHVM_FUNCTION(system,
 ///////////////////////////////////////////////////////////////////////////////
 // proc
 
-class ChildProcess : public SweepableResourceData {
-public:
+struct ChildProcess : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ChildProcess)
 
   pid_t child;
@@ -342,8 +340,7 @@ void ChildProcess::sweep() {
 
 const StaticString s_w("w");
 
-class DescriptorItem {
-public:
+struct DescriptorItem {
   DescriptorItem() :
     index(-1), parentend(-1), childend(-1), mode(-1), mode_flags(-1) {
   }

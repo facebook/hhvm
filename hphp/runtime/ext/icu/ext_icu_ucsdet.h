@@ -11,8 +11,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_EncodingDetector;
 
-class EncodingDetector : public IntlError {
- public:
+struct EncodingDetector : IntlError {
   EncodingDetector() {
     UErrorCode error = U_ZERO_ERROR;
     m_encodingDetector = ucsdet_open(&error);
@@ -74,8 +73,7 @@ class EncodingDetector : public IntlError {
 
 extern const StaticString s_EncodingMatch;
 
-class EncodingMatch : public IntlError {
- public:
+struct EncodingMatch : IntlError {
   EncodingMatch() {}
   EncodingMatch(const EncodingMatch&) = delete;
   EncodingMatch& operator=(const EncodingMatch& src) {

@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(NullCoalesceExpression);
 
-class NullCoalesceExpression : public Expression {
-public:
+struct NullCoalesceExpression : Expression {
   NullCoalesceExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                          ExpressionPtr expFirst,
                          ExpressionPtr expSecond);

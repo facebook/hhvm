@@ -63,8 +63,7 @@ struct RepoExc : std::exception {
   std::string m_msg;
 };
 
-class RepoStmt {
- public:
+struct RepoStmt {
   explicit RepoStmt(Repo& repo);
   ~RepoStmt();
  private:
@@ -85,8 +84,7 @@ class RepoStmt {
 
 // Under most circumstances RepoTxnQuery should be used instead of RepoQuery;
 // queries outside of transactions are fraught with peril.
-class RepoQuery {
- public:
+struct RepoQuery {
   explicit RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
     assert(m_stmt.prepared());
@@ -154,8 +152,7 @@ class RepoQuery {
  * Semantics: the guard object will rollback the transaction unless
  * you tell it not to.  Call .commit() when you want things to stay.
  */
-class RepoTxn {
- public:
+struct RepoTxn {
   explicit RepoTxn(Repo& repo);
   ~RepoTxn();
 
@@ -186,8 +183,7 @@ class RepoTxn {
   bool m_error;
 };
 
-class RepoTxnQuery : public RepoQuery {
- public:
+struct RepoTxnQuery : RepoQuery {
   RepoTxnQuery(RepoTxn& txn, RepoStmt& stmt)
     : RepoQuery(stmt), m_txn(txn) {
   }
@@ -199,14 +195,12 @@ class RepoTxnQuery : public RepoQuery {
   RepoTxn& m_txn;
 };
 
-class RepoProxy {
- public:
+struct RepoProxy {
   explicit RepoProxy(Repo& repo) : m_repo(repo) {}
   ~RepoProxy() {}
 
  protected:
-  class Stmt : public RepoStmt {
-   public:
+  struct Stmt : RepoStmt {
     Stmt(Repo& repo, int repoId) : RepoStmt(repo), m_repoId(repoId) {}
    protected:
     int m_repoId;

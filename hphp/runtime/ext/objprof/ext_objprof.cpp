@@ -971,8 +971,7 @@ void HHVM_FUNCTION(set_mem_threshold_callback,
 
 }
 
-class objprofExtension final : public Extension {
-public:
+struct objprofExtension final : Extension {
   objprofExtension() : Extension("objprof", "1.0") { }
 
   void moduleInit() override {

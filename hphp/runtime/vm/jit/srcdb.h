@@ -220,7 +220,7 @@ struct SrcRec {
   /*
    * There is an unlikely race in retranslate, where two threads
    * could simultaneously generate the same translation for a
-   * tracelet. In practice its almost impossible to hit this, unless
+   * tracelet. In practice it's almost impossible to hit this, unless
    * Eval.JitRequireWriteLease is set. But when it is set, we hit
    * it a lot.
    * m_guard doesn't quite solve it, but its as good as things were

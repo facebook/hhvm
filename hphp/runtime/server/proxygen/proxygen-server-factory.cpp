@@ -18,8 +18,7 @@
 
 namespace HPHP {
 
-class ProxygenServerFactory : public ServerFactory {
-public:
+struct ProxygenServerFactory : ServerFactory {
   ProxygenServerFactory() {}
 
   virtual ServerPtr createServer(const ServerOptions& options) override {

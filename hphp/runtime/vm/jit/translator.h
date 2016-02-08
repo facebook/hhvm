@@ -108,7 +108,7 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
-  TransContext(TransID id, SrcKey sk, FPInvOffset spOff);
+  TransContext(TransID id, TransKind kind, SrcKey sk, FPInvOffset spOff);
 
   /*
    * The SrcKey for this translation.
@@ -121,6 +121,7 @@ struct TransContext {
    * The contents of SrcKey are re-laid out to avoid func table lookups.
    */
   TransID transID;  // May be kInvalidTransID if not for a real translation.
+  TransKind kind{TransKind::Invalid};
   FPInvOffset initSpOffset;
   const Func* func;
   Offset initBcOffset;
@@ -142,6 +143,7 @@ struct TranslArgs {
   bool setFuncBody{false};
   TransFlags flags{0};
   TransID transId{kInvalidTransID};
+  TransKind kind{TransKind::Invalid};
   RegionDescPtr region{nullptr};
 };
 
@@ -182,12 +184,6 @@ struct Translator {
 
   /////////////////////////////////////////////////////////////////////////////
   // Configuration.
-
-  /*
-   * We call the TransKind `mode' for some reason.
-   */
-  TransKind mode() const;
-  void setMode(TransKind mode);
 
   /*
    * Whether to use ahot.
@@ -294,7 +290,6 @@ struct Translator {
 private:
   int64_t m_createdTime;
 
-  TransKind m_mode;
   std::unique_ptr<ProfData> m_profData;
   bool m_useAHot;
 

@@ -34,8 +34,7 @@ struct Variant;
  *
  *   thrift --gen hphp my_service.thrift
  */
-class ThriftBuffer {
-public:
+struct ThriftBuffer {
   enum TType {
     T_STOP   = 0,
     T_VOID   = 1,

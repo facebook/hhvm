@@ -32,8 +32,7 @@ struct WarmupRequestHandlerFactory;
  * It counts the number of requests, and adds additional worker threads to the
  * server after a specified threshold.
  */
-class WarmupRequestHandler : public RequestHandler {
-public:
+struct WarmupRequestHandler : RequestHandler {
   explicit WarmupRequestHandler(
       int timeout,
       const std::shared_ptr<WarmupRequestHandlerFactory>& factory)
@@ -50,9 +49,9 @@ private:
   HttpRequestHandler m_reqHandler;
 };
 
-class WarmupRequestHandlerFactory :
-  public std::enable_shared_from_this<WarmupRequestHandlerFactory> {
-public:
+struct WarmupRequestHandlerFactory
+  : std::enable_shared_from_this<WarmupRequestHandlerFactory>
+{
   WarmupRequestHandlerFactory(Server *server,
                               uint32_t additionalThreads,
                               uint32_t reqCount,

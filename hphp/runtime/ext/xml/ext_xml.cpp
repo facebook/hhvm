@@ -41,8 +41,7 @@ enum php_xml_option {
     PHP_XML_OPTION_SKIP_WHITE
 };
 
-static class XMLExtension final : public Extension {
-public:
+static struct XMLExtension final : Extension {
   XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(xml_parser_create);
@@ -106,8 +105,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XmlParser : public SweepableResourceData {
-public:
+struct XmlParser : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XmlParser)
   XmlParser() {}
   virtual ~XmlParser();

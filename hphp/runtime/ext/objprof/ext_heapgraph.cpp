@@ -542,8 +542,7 @@ Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
 
 }
 
-class heapgraphExtension final : public Extension {
-public:
+struct heapgraphExtension final : Extension {
   heapgraphExtension() : Extension("heapgraph", "1.0") { }
 
   void moduleInit() override {

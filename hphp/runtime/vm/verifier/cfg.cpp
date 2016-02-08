@@ -255,8 +255,7 @@ Block* GraphBuilder::at(PC target) {
  * higher-numbered DV entry points, the last of which ultimately jumps to
  * the primary function body.
  */
-class RpoSort {
- public:
+struct RpoSort {
   explicit RpoSort(Graph* g);
  private:
   void visit(Block* b);

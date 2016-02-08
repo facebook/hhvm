@@ -38,8 +38,7 @@ class ProxygenTransport;
  * These messages hold a reference to the transport so it doesn't get deleted
  * out from under them in transit.
  */
-class ResponseMessage {
-  public:
+struct ResponseMessage {
   enum class Type {
     HEADERS,
     BODY,
@@ -94,12 +93,13 @@ class PushTxnHandler;
  * Note that one transport object is created for each request.  The transport
  * accessed by the I/O thread and dispatch thread, but it should be OK, right?
  */
-class ProxygenTransport : public Transport,
-  public proxygen::HTTPTransactionHandler,
-  public std::enable_shared_from_this<ProxygenTransport>,
-  public folly::AsyncTimeout,
-  public Synchronizable {
-public:
+struct ProxygenTransport
+  : Transport
+  , proxygen::HTTPTransactionHandler
+  , std::enable_shared_from_this<ProxygenTransport>
+  , folly::AsyncTimeout
+  , Synchronizable
+{
   explicit ProxygenTransport(ProxygenServer *server,
                              folly::EventBase *eventBase);
   virtual ~ProxygenTransport();

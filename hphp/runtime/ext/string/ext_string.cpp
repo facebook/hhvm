@@ -1819,7 +1819,8 @@ using HashTab    = std::array<int, HASH_TAB_SIZE+1>;
 using PrefixVec  = std::vector<uint16_t>;
 using PatternVec = std::vector<PatAndRepl>;
 
-class WuManberReplacement {
+struct WuManberReplacement {
+private:
   PrefixVec   prefix;   // prefixes hashes by pat suffix hash order
   size_t      m;        // minimum pattern length
   int         B;        // size of suffixes
@@ -2405,8 +2406,7 @@ String HHVM_FUNCTION(hebrevc,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StringExtension final : public Extension {
-public:
+struct StringExtension final : Extension {
   StringExtension() : Extension("string") {}
   void moduleInit() override {
     setlocale(LC_CTYPE, "");

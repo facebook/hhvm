@@ -35,8 +35,7 @@ extern const StaticString k_HPHP_TRIM_CHARLIST;
  * Utility string functions. These are mostly wrappers around zend/ string
  * functions, but in a safe and convenient form.
  */
-class StringUtil {
-public:
+struct StringUtil {
   enum class PadType {
     Left = 0,
     Right = 1,

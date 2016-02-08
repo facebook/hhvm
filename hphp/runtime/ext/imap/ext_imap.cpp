@@ -39,8 +39,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ImapStream : public SweepableResourceData {
-public:
+struct ImapStream : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ImapStream);
 
   ImapStream(MAILSTREAM *stream, int64_t flag)
@@ -1570,8 +1569,7 @@ static Variant HHVM_FUNCTION(imap_utf8, const String& mime_encoded_text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class imapExtension final : public Extension {
-public:
+static struct imapExtension final : Extension {
   imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {

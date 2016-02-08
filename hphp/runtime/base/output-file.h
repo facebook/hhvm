@@ -25,8 +25,7 @@ namespace HPHP {
 /**
  * For php://output, a simple wrapper of g_context->out().
  */
-class OutputFile : public File {
-public:
+struct OutputFile : File {
   DECLARE_RESOURCE_ALLOCATION(OutputFile);
 
   explicit OutputFile(const String& filename);

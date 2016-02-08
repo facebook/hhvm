@@ -16,8 +16,7 @@ void deepCopy(TypedValue*);
 class PairIterator;
 }
 
-class c_Pair : public ObjectData {
- public:
+struct c_Pair : ObjectData {
   DECLARE_COLLECTIONS_CLASS(Pair);
 
   enum class NoInit {};

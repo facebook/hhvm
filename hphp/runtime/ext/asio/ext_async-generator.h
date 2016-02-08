@@ -32,8 +32,7 @@ class c_WaitableWaitHandle;
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator
 
-class AsyncGenerator final : public BaseGenerator {
-public:
+struct AsyncGenerator final : BaseGenerator {
    AsyncGenerator() : m_waitHandle(nullptr) {}
   ~AsyncGenerator();
 

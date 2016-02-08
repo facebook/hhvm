@@ -33,8 +33,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-class ProxygenJob : public ServerJob {
-public:
+struct ProxygenJob : ServerJob {
   explicit ProxygenJob(std::shared_ptr<ProxygenTransport> transport);
 
   virtual void getRequestStart(struct timespec *reqStart);
@@ -49,8 +48,7 @@ typedef ServerWorker<std::shared_ptr<ProxygenJob>,
 
 class ProxygenServer;
 
-class HPHPSessionAcceptor : public proxygen::HTTPSessionAcceptor {
- public:
+struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   explicit HPHPSessionAcceptor(
     const proxygen::AcceptorConfiguration& config,
     ProxygenServer *server);
@@ -74,8 +72,7 @@ class HPHPSessionAcceptor : public proxygen::HTTPSessionAcceptor {
 typedef folly::NotificationQueue<ResponseMessage>
   ResponseMessageQueue;
 
-class HPHPWorkerThread : public proxygen::WorkerThread {
- public:
+struct HPHPWorkerThread : proxygen::WorkerThread {
   explicit HPHPWorkerThread(folly::EventBaseManager* ebm)
       : WorkerThread(ebm) {}
   virtual ~HPHPWorkerThread() {}
@@ -83,11 +80,10 @@ class HPHPWorkerThread : public proxygen::WorkerThread {
   virtual void cleanup() override;
 };
 
-class ProxygenServer : public Server,
-                       public ResponseMessageQueue::Consumer,
-                       public folly::AsyncTimeout,
-                       public TakeoverAgent::Callback {
- public:
+struct ProxygenServer : Server,
+                        ResponseMessageQueue::Consumer,
+                        folly::AsyncTimeout,
+                        TakeoverAgent::Callback {
   explicit ProxygenServer(const ServerOptions& options);
 
   ~ProxygenServer() {
@@ -212,8 +208,7 @@ class ProxygenServer : public Server,
   std::unique_ptr<TakeoverAgent> m_takeover_agent;
 };
 
-class ProxygenTransportTraits {
- public:
+struct ProxygenTransportTraits {
   ProxygenTransportTraits(std::shared_ptr<ProxygenJob> job,
     void *opaque, int id);
   ~ProxygenTransportTraits();

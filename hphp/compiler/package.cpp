@@ -193,9 +193,9 @@ std::shared_ptr<FileCache> Package::getFileCache() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ParserWorker :
-    public JobQueueWorker<std::pair<const char *,bool>, Package*, true, true> {
-public:
+struct ParserWorker
+  : JobQueueWorker<std::pair<const char *,bool>, Package*, true, true>
+{
   bool m_ret;
   ParserWorker() : m_ret(true) {}
   void doJob(JobType job) override {

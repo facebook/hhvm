@@ -32,8 +32,7 @@ struct XboxServerInfo;
 class RPCRequestHandler;
 class XboxTransport;
 
-class XboxServer {
-public:
+struct XboxServer {
   /**
    * Start or restart xbox server.
    */
@@ -69,8 +68,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxServerInfo : public SatelliteServerInfo {
-public:
+struct XboxServerInfo : SatelliteServerInfo {
   XboxServerInfo() : SatelliteServerInfo(IniSetting::Map::object, Hdf()) {
     m_type = SatelliteServer::Type::KindOfXboxServer;
     m_name = "xbox";
@@ -92,8 +90,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxTransport : public Transport, public Synchronizable {
-public:
+struct XboxTransport : Transport, Synchronizable {
   explicit XboxTransport(const String& message, const String& reqInitDoc = "");
 
   timespec getStartTimer() const { return m_queueTime; }

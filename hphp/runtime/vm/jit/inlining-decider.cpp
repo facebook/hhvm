@@ -489,8 +489,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   }
 
   // Produce a tracelet for the callee.
-  return selectTracelet(ctx, maxBCInstrs, false /* profiling */,
-                        true /* inlining */);
+  return selectTracelet(ctx, TransKind::Live, maxBCInstrs, true /* inlining */);
 }
 
 TransID findTransIDForCallee(const Func* callee, const int numArgs,

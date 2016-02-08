@@ -59,7 +59,7 @@ void removeExitPlaceholders(IRUnit& unit) {
 
 }
 
-void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
+void optimize(IRUnit& unit, TransKind kind) {
   Timer timer(Timer::optimize);
 
   assertx(checkEverything(unit));

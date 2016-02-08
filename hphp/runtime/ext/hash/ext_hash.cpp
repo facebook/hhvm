@@ -45,8 +45,7 @@
 
 namespace HPHP {
 
-static class HashExtension final : public Extension {
- public:
+static struct HashExtension final : Extension {
   HashExtension() : Extension("hash", "1.0") { }
   void moduleInit() override {
     HHVM_FE(hash);
@@ -72,8 +71,7 @@ static class HashExtension final : public Extension {
 static HashEngineMap HashEngines;
 using HashEnginePtr = std::shared_ptr<HashEngine>;
 
-class HashEngineMapInitializer {
-public:
+struct HashEngineMapInitializer {
   HashEngineMapInitializer() {
     HashEngines["md2"]        = HashEnginePtr(new hash_md2());
     HashEngines["md4"]        = HashEnginePtr(new hash_md4());

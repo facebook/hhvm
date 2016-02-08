@@ -210,7 +210,7 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
       // Check inner type eagerly if it is the first block during profiling.
       // Otherwise only check for BoxedInitCell.
       bool checkOuterTypeOnly =
-        !isEntry || mcg->tx().mode() != TransKind::Profile;
+        !isEntry || irgs.context.kind != TransKind::Profile;
       irgen::checkTypeLocation(irgs, loc, type, bcOff, checkOuterTypeOnly);
     }
   }
@@ -228,7 +228,7 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
       irgen::incTransCounter(irgs);
     }
 
-    if (mcg->tx().mode() == TransKind::Profile) {
+    if (irgs.context.kind == TransKind::Profile) {
       if (block->func()->isEntry(bcOff)) {
         irgen::checkCold(irgs, mcg->tx().profData()->curTransID());
       } else {
@@ -569,7 +569,7 @@ TranslateResult irGenRegion(IRGS& irgs,
   SCOPE_EXIT { irgs.profFactor = prevProfFactor; };
 
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
-         show(mcg->tx().mode()), profFactor, show(region));
+         show(irgs.context.kind), profFactor, show(region));
 
   if (RuntimeOption::EvalDumpRegion) {
     mcg->annotations().emplace_back("RegionDesc", show(region));
@@ -665,7 +665,7 @@ TranslateResult irGenRegion(IRGS& irgs,
     // translations.
     auto const isEntry = block == region.entry() && !inl.inlining();
     auto const checkOuterTypeOnly =
-      !isEntry || mcg->tx().mode() != TransKind::Profile;
+      !isEntry || irgs.context.kind != TransKind::Profile;
     emitPredictionsAndPreConditions(irgs, region, block, isEntry);
     irb.resetGuardFailBlock();
 
@@ -731,7 +731,7 @@ TranslateResult irGenRegion(IRGS& irgs,
         auto const* callee = inst.funcd;
 
         // We shouldn't be inlining profiling translations.
-        assertx(mcg->tx().mode() != TransKind::Profile);
+        assertx(irgs.context.kind != TransKind::Profile);
 
         assertx(calleeRegion->instrSize() <= budgetBCInstrs);
 
@@ -865,7 +865,7 @@ TranslateResult mcGenRegion(IRGS& irgs,
   auto const startSk = region.start();
   try {
     mcg->traceCodeGen(irgs);
-    if (mcg->tx().mode() == TransKind::Profile) {
+    if (irgs.context.kind == TransKind::Profile) {
       mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
     }
   } catch (const FailedCodeGen& exn) {
@@ -910,10 +910,10 @@ TranslateResult translateRegion(IRGS& irgs,
 
   // Set up inlining context, but disable it for profiling mode.
   InliningDecider inl(region.entry()->func());
-  if (mcg->tx().mode() == TransKind::Profile) inl.disable();
+  if (irgs.context.kind == TransKind::Profile) inl.disable();
 
   // Set the profCount of the IRUnit's entry block, which is created a priori.
-  if (mcg->tx().mode() == TransKind::Optimize) {
+  if (irgs.context.kind == TransKind::Optimize) {
     auto entryBID = region.entry()->id();
     assertx(hasTransID(entryBID));
     auto entryTID = getTransID(entryBID);
@@ -931,7 +931,7 @@ TranslateResult translateRegion(IRGS& irgs,
   // for region selection whenever we decide to retranslate.
   pConds.changed.clear();
   pConds.refined.clear();
-  if (mcg->tx().mode() == TransKind::Profile &&
+  if (irgs.context.kind == TransKind::Profile &&
       RuntimeOption::EvalJitPGOUsePostConditions) {
     auto& unit = irgs.irb->unit();
     auto  lastSrcKey = region.lastSrcKey();

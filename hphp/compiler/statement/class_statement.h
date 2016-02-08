@@ -28,8 +28,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ClassStatement);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-class ClassStatement : public InterfaceStatement {
-public:
+struct ClassStatement : InterfaceStatement {
   ClassStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                  int type, const std::string &name,
                  const std::string &parent, ExpressionListPtr base,

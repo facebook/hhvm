@@ -51,9 +51,7 @@ typedef ArenaImpl<4096> Arena;
 //////////////////////////////////////////////////////////////////////
 
 template<size_t kChunkBytes>
-class ArenaImpl {
-  static const size_t kMinBytes = 8;
-
+struct ArenaImpl {
  public:
   ArenaImpl();
   ~ArenaImpl();
@@ -102,6 +100,8 @@ class ArenaImpl {
     uint32_t index;
     uint32_t offset;
   };
+
+  static const size_t kMinBytes = 8;
 
  private:
   void* allocSlow(size_t nbytes);

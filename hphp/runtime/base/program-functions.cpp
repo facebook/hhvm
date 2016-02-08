@@ -2261,8 +2261,7 @@ bool is_hphp_session_initialized() {
   return s_sessionInitialized;
 }
 
-static class SetThreadInitFini {
-public:
+static struct SetThreadInitFini {
   SetThreadInitFini() {
     AsyncFuncImpl::SetThreadInitFunc([](void*) { hphp_thread_init(); },
                                      nullptr);

@@ -34,8 +34,7 @@ char *gzdecode(const char *data, int &len);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamCompressor {
-public:
+struct StreamCompressor {
   StreamCompressor(int level, int encoding_mode, bool header);
   ~StreamCompressor();
 

@@ -41,8 +41,7 @@ namespace HPHP {
 
 class Directory;
 
-class FileStreamWrapper : public Stream::Wrapper {
- public:
+struct FileStreamWrapper : Stream::Wrapper {
   static req::ptr<MemFile> openFromCache(
     const String& filename, const String& mode);
   virtual req::ptr<File> open(const String& filename,

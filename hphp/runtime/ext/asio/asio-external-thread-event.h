@@ -45,7 +45,7 @@ class c_ExternalThreadEventWaitHandle;
  *
  * Example:
  *
- * class FooEvent : public AsioExternalThreadEvent {
+ * struct FooEvent : AsioExternalThreadEvent {
  *   public:
  *     FooEvent(int max_value) : m_maxValue(max_value), m_failed(false) {}
  *     ~FooEvent() {}
@@ -113,8 +113,7 @@ class c_ExternalThreadEventWaitHandle;
  *  - web request may die before the event is finished; never store pointers
  *    to any data owned by PHP as the PHP thread may die at any time
  */
-class AsioExternalThreadEvent {
-  public:
+struct AsioExternalThreadEvent {
     /**
      * Get wait handle representing this external thread event.
      *

@@ -263,8 +263,7 @@ public:
   }
 };
 
-class DecoderTable {
-public:
+struct DecoderTable {
   DecoderTable() {
     decoder_table = new DecoderInfo*[kDecoderSize];
     for(int i = 0; i < kDecoderSize; i++)

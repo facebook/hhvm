@@ -25,8 +25,7 @@
 namespace HPHP {
 const StaticString s_finfo("finfo");
 
-class FileinfoResource : public SweepableResourceData {
-public:
+struct FileinfoResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(FileinfoResource)
   CLASSNAME_IS("file_info")
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -240,8 +239,7 @@ static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class fileinfoExtension final : public Extension {
- public:
+struct fileinfoExtension final : Extension {
   fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
   void moduleInit() override {
     HHVM_RC_INT(FILEINFO_NONE, MAGIC_NONE);

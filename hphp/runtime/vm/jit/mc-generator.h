@@ -264,7 +264,7 @@ public:
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   TCA getTranslatedCaller() const;
-  void setJmpTransID(TCA jmp);
+  void setJmpTransID(TCA jmp, TransKind kind);
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
@@ -351,7 +351,7 @@ private:
                    bool toTake,
                    bool& smashed);
 
-  bool shouldTranslate(const Func*) const;
+  bool shouldTranslate(const Func*, TransKind) const;
   bool shouldTranslateNoSizeLimit(const Func*) const;
 
   TCA getTopTranslation(SrcKey sk) {
@@ -362,6 +362,7 @@ private:
 
   TCA getTranslation(const TranslArgs& args);
   TCA createTranslation(const TranslArgs& args);
+  bool createRetranslateStub(SrcKey sk);
   TCA retranslate(const TranslArgs& args);
   TCA translate(const TranslArgs& args);
   TCA translateWork(const TranslArgs& args);

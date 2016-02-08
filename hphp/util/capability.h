@@ -26,8 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Capability {
-public:
+struct Capability {
   /**
    * This sets the  effective user ID of the current process, leaving
    * capability of binding to system ports (< 1024) to the user.

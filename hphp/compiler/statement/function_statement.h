@@ -28,8 +28,7 @@ DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FunctionStatement);
 
-class FunctionStatement : public MethodStatement {
-public:
+struct FunctionStatement : MethodStatement {
   FunctionStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                     ModifierExpressionPtr modifiers, bool ref,
                     const std::string &name, ExpressionListPtr params,

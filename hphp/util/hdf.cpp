@@ -26,8 +26,7 @@ namespace HPHP {
 /**
  * Helper class storing HDF raw pointer and reference counts on it.
  */
-class HdfRaw {
-public:
+struct HdfRaw {
   static Mutex HdfMutex;
 
   HdfRaw() : m_hdf(nullptr), m_count(1) {

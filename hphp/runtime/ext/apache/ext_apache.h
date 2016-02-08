@@ -25,8 +25,7 @@ namespace HPHP {
 
 Array HHVM_FUNCTION(apache_request_headers);
 
-class ApacheExtension final : public Extension {
- public:
+struct ApacheExtension final : Extension {
   ApacheExtension();
   virtual ~ApacheExtension();
   void moduleInit() override;

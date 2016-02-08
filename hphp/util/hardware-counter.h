@@ -41,8 +41,7 @@ struct PerfTable {
 
 class HardwareCounterImpl;
 
-class HardwareCounter {
-public:
+struct HardwareCounter {
   HardwareCounter();
   ~HardwareCounter();
 
@@ -85,8 +84,7 @@ private:
  * static values, so it doesn't even need to worry about thread safety
  * for the one static instance of itself.
  */
-class HardwareCounter {
-public:
+struct HardwareCounter {
   HardwareCounter() : m_countersSet(false) { }
   ~HardwareCounter() { }
 

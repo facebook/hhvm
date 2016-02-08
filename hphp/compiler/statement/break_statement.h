@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(BreakStatement);
 
-class BreakStatement : public Statement {
+struct BreakStatement : Statement {
 protected:
   BreakStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS, uint64_t depth);
 public:

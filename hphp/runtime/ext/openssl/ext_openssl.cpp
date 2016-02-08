@@ -50,8 +50,7 @@ const int64_t k_OPENSSL_PKCS1_PADDING = 1;
 
 static char default_ssl_conf_filename[PATH_MAX];
 
-class OpenSSLInitializer {
-public:
+struct OpenSSLInitializer {
   OpenSSLInitializer() {
     SSL_library_init();
     OpenSSL_add_all_ciphers();
@@ -88,8 +87,7 @@ static OpenSSLInitializer s_openssl_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // resource classes
 
-class Key : public SweepableResourceData {
-public:
+struct Key : SweepableResourceData {
   EVP_PKEY *m_key;
   explicit Key(EVP_PKEY *key) : m_key(key) { assert(m_key);}
   ~Key() {
@@ -237,7 +235,8 @@ IMPLEMENT_RESOURCE_ALLOCATION(Key)
 /**
  * Certificate Signing Request
  */
-class CSRequest : public SweepableResourceData {
+struct CSRequest : SweepableResourceData {
+private:
   X509_REQ *m_csr;
 
 public:
@@ -288,8 +287,7 @@ private:
 
 IMPLEMENT_RESOURCE_ALLOCATION(CSRequest)
 
-class php_x509_request {
-public:
+struct php_x509_request {
 #if OPENSSL_VERSION_NUMBER >= 0x10000002L
   LHASH_OF(CONF_VALUE) * global_config; /* Global SSL config */
   LHASH_OF(CONF_VALUE) * req_config;    /* SSL config for this request */
@@ -2857,8 +2855,7 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
 
 const StaticString s_OPENSSL_VERSION_TEXT("OPENSSL_VERSION_TEXT");
 
-class opensslExtension final : public Extension {
- public:
+struct opensslExtension final : Extension {
   opensslExtension() : Extension("openssl") {}
   void moduleInit() override {
     HHVM_RC_INT(OPENSSL_RAW_DATA, k_OPENSSL_RAW_DATA);

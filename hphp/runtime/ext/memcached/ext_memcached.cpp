@@ -222,8 +222,7 @@ static __thread MEMCACHEDGlobals* s_memcached_globals;
 #define MEMCACHEDG(name) s_memcached_globals->name
 
 namespace {
-class MemcachedResultWrapper {
-public:
+struct MemcachedResultWrapper {
   memcached_result_st value;
   explicit MemcachedResultWrapper(memcached_st *memcached) {
     memcached_result_create(memcached, &value);
@@ -247,10 +246,8 @@ static memcached_return_t memcached_dump_callback(const memcached_st*,
 
 const StaticString s_MemcachedData("MemcachedData");
 
-class MemcachedData {
- public:
-  class Impl {
-   public:
+struct MemcachedData {
+  struct Impl {
     Impl() :
       compression(true),
       serializer(q_Memcached$$SERIALIZER_PHP),
@@ -1398,8 +1395,7 @@ const StaticString s_SERIALIZER_IGBINARY("SERIALIZER_IGBINARY");
 const StaticString s_SERIALIZER_JSON("SERIALIZER_JSON");
 const StaticString s_SERIALIZER_PHP("SERIALIZER_PHP");
 
-class MemcachedExtension final : public Extension {
- public:
+struct MemcachedExtension final : Extension {
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
   void threadInit() override {
     if (s_memcached_globals) {

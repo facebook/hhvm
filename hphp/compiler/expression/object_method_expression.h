@@ -25,8 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ObjectMethodExpression);
 DECLARE_BOOST_TYPES(ClassScope);
 
-class ObjectMethodExpression : public FunctionCall {
-public:
+struct ObjectMethodExpression : FunctionCall {
   ObjectMethodExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                          ExpressionPtr object, ExpressionPtr method,
                          ExpressionListPtr params, bool nullsafe);

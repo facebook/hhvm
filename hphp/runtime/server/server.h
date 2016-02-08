@@ -34,11 +34,10 @@
  *     their specific requests, we really want to minimize writing an HTTP
  *     server to something like this,
  *
- *     class MyRequestHandler : public RequestHandler {
- *       public:
- *         virtual void handleRequest(Transport *transport) {
- *           // ...
- *         }
+ *     struct MyRequestHandler : RequestHandler {
+ *       virtual void handleRequest(Transport *transport) {
+ *         // ...
+ *       }
  *     };
  *
  *     Then, run a server like this,
@@ -56,11 +55,11 @@
  *     server, derive a new class from Server just like LibEventServer
  *     does.
  *
- *     class MyTransport : public Transport {
+ *     struct MyTransport : Transport {
  *       // implements transport-related functions
  *     };
  *
- *     class MyServer : public Server {
+ *     struct MyServer : Server {
  *       // implements how to start/stop a server
  *     };
  *
@@ -84,8 +83,7 @@ using ServerFactoryPtr = std::shared_ptr<ServerFactory>;
  * Note that each request handler may be invoked multiple times for different
  * requests.
  */
-class RequestHandler {
-public:
+struct RequestHandler {
   explicit RequestHandler(int timeout) : m_timeout(timeout) {}
   virtual ~RequestHandler() {}
 
@@ -134,8 +132,7 @@ typedef std::function<bool(const std::string&)> URLChecker;
  * Base class of an HTTP server. Defining minimal interface an HTTP server
  * needs to implement.
  */
-class Server {
-public:
+struct Server {
   enum class RunStatus {
     NOT_YET_STARTED = 0,
     RUNNING,
@@ -155,8 +152,7 @@ public:
   static void InstallStopSignalHandlers(ServerPtr server);
 
 public:
-  class ServerEventListener {
-   public:
+  struct ServerEventListener {
     virtual ~ServerEventListener() {}
     virtual void serverStopped(Server* server) {}
   };
@@ -302,8 +298,7 @@ private:
   RunStatus m_status;
 };
 
-class ServerOptions {
-public:
+struct ServerOptions {
   ServerOptions(const std::string &address,
                 uint16_t port,
                 int numThreads)
@@ -328,8 +323,7 @@ public:
 /**
  * A ServerFactory knows how to create Server objects.
  */
-class ServerFactory {
-public:
+struct ServerFactory {
   ServerFactory() {}
   virtual ~ServerFactory() {}
 
@@ -349,8 +343,7 @@ public:
  * This allows new server types to be plugged in dynamically, without having to
  * hard code the list of all possible server types.
  */
-class ServerFactoryRegistry {
-public:
+struct ServerFactoryRegistry {
   ServerFactoryRegistry();
 
   ServerFactoryRegistry(const ServerFactoryRegistry&) = delete;
@@ -376,14 +369,12 @@ private:
 /**
  * All exceptions Server throws should derive from this base class.
  */
-class ServerException : public Exception {
-public:
+struct ServerException : Exception {
   ServerException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);
 };
 
-class FailedToListenException : public ServerException {
-public:
+struct FailedToListenException : ServerException {
   explicit FailedToListenException(const std::string &addr)
     : ServerException("Failed to listen to unix socket at %s", addr.c_str()) {
   }
@@ -392,22 +383,19 @@ public:
   }
 };
 
-class InvalidUrlException : public ServerException {
-public:
+struct InvalidUrlException : ServerException {
   explicit InvalidUrlException(const char *part)
     : ServerException("Invalid URL: %s", part) {
   }
 };
 
-class InvalidMethodException : public ServerException {
-public:
+struct InvalidMethodException : ServerException {
   explicit InvalidMethodException(const char *msg)
     : ServerException("Invalid method: %s", msg) {
   }
 };
 
-class InvalidHeaderException : public ServerException {
-public:
+struct InvalidHeaderException : ServerException {
   InvalidHeaderException(const char *name, const char *value)
     : ServerException("Invalid header: %s: %s", name, value) {
   }

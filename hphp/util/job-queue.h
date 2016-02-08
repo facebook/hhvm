@@ -45,17 +45,15 @@ namespace HPHP {
  *
  * To use it, simply define your own job and worker class like this,
  *
- *   class MyJob {
- *     public:
- *       // storing job data
+ *   struct MyJob {
+ *     // storing job data
  *   };
  *
- *   class MyWorker : public JobQueueWorker<MyJob*> {
- *     public:
- *       virtual void doJob(MyJob *job) {
- *         // process the job
- *         delete job; // if it was new-ed
- *       }
+ *   struct MyWorker : JobQueueWorker<MyJob*> {
+ *     virtual void doJob(MyJob *job) {
+ *       // process the job
+ *       delete job; // if it was new-ed
+ *     }
  *   };
  *
  * Now, use JobQueueDispatcher to start the whole thing,
@@ -116,10 +114,9 @@ struct SimpleReleaser : IQueuedJobsReleaser {
 template<typename TJob,
          bool waitable = false,
          class DropCachePolicy = detail::NoDropCachePolicy>
-class JobQueue : public SynchronizableMulti {
-public:
+struct JobQueue : SynchronizableMulti {
   // trivial class for signaling queue stop
-  class StopSignal {};
+  struct StopSignal {};
 
 public:
   /**
@@ -405,8 +402,7 @@ template<typename TJob,
          bool countActive = false,
          bool waitable = false,
          class Policy = detail::NoDropCachePolicy>
-class JobQueueWorker {
-public:
+struct JobQueueWorker {
   typedef TJob JobType;
   typedef TContext ContextType;
   typedef JobQueue<TJob, waitable, Policy> QueueType;
@@ -501,8 +497,7 @@ private:
  * Driver class to push through the whole thing.
  */
 template<class TWorker>
-class JobQueueDispatcher : public IHostHealthObserver {
-public:
+struct JobQueueDispatcher : IHostHealthObserver {
   /**
    * Constructor.
    */

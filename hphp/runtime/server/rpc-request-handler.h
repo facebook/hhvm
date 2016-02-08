@@ -28,8 +28,7 @@ class RequestURI;
 class Transport;
 ///////////////////////////////////////////////////////////////////////////////
 
-class RPCRequestHandler : public RequestHandler {
-public:
+struct RPCRequestHandler : RequestHandler {
   static AccessLog &GetAccessLog() { return s_accessLog; }
 
   enum class ReturnEncodeType {

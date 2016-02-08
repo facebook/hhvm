@@ -83,8 +83,7 @@
 
 namespace HPHP {
 
-class CacheSaver {
- public:
+struct CacheSaver {
   struct DirEntry {
     uint64_t id;
     uint64_t flags;

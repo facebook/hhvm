@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Location {
-public:
+struct Location {
   Location() = default;
   Location(int l0, int c0, int l1, int c1)
       : r(l0, c0, l1, c1) {}

@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-class ThreadSafeLocaleHandler {
+struct ThreadSafeLocaleHandler {
 private:
   typedef struct {
     int category;

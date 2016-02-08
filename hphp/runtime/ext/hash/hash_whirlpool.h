@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_whirlpool : public HashEngine {
-public:
+struct hash_whirlpool : HashEngine {
   hash_whirlpool();
 
   virtual void hash_init(void *context);

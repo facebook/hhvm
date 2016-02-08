@@ -45,7 +45,8 @@ void DebuggerThriftBuffer::throwError(const char *msg, int code) {
 const StaticString
   s_hit_limit("Hit serialization limit"),
   s_unknown_exp("Hit unknown exception"),
-  s_type_mismatch("Type mismatch");
+  s_type_mismatch("Type mismatch"),
+  s_message("message");
 
 template<typename T>
 static inline int serializeImpl(T data, String& sdata) {
@@ -75,10 +76,30 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
                           VariableUnserializer::Type::DebuggerSerialize, true);
   try {
     data = vu.unserialize();
-  } catch (Exception &e) {
-    data = null_variant;
-    return DebuggerWireHelpers::UnknownError;
+  } catch (const std::exception& e) {
+    data = folly::sformat("unserialize() threw '{}'", e.what());
+    return DebuggerWireHelpers::ErrorMsg;
+  } catch (const Object& o) {
+    // Get the message property from the Exception if we can. Otherwise, use
+    // the class name.
+    assert(o->instanceof(SystemLib::s_ExceptionClass));
+
+    auto const info = o->getProp(SystemLib::s_ExceptionClass, s_message.get());
+    if (info.accessible && info.prop) {
+      auto& val = tvAsCVarRef(info.prop);
+      if (val.isString()) {
+        data = folly::sformat(
+          "unserialize() threw '{}' with message '{}'",
+          o->getVMClass()->name(), val.toCStrRef()
+        );
+        return DebuggerWireHelpers::ErrorMsg;
+      }
+    }
+
+    data = folly::sformat("unserialize() threw '{}'", o->getVMClass()->name());
+    return DebuggerWireHelpers::ErrorMsg;
   }
+
   return DebuggerWireHelpers::NoError;
 }
 

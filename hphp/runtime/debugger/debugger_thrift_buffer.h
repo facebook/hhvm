@@ -63,6 +63,7 @@ struct DebuggerWireHelpers {
     HitLimit,
     UnknownError,
     TypeMismatch,
+    ErrorMsg,
   };
 
   // Serialization functions for Array, Object, and Variant

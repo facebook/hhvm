@@ -514,14 +514,13 @@ struct StringDataHashICompare {
 typedef hphp_hash_set<String, hphp_string_hash, hphp_string_isame> StringISet;
 
 template<typename T>
-class StringIMap :
-  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame> { };
+using StringIMap =
+  hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame>;
 
-typedef hphp_hash_set<String, hphp_string_hash, hphp_string_same> StringSet;
+using StringSet = hphp_hash_set<String, hphp_string_hash, hphp_string_same>;
 
 template<typename T>
-class StringMap :
-  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_same> { };
+using StringMap = hphp_hash_map<String, T, hphp_string_hash, hphp_string_same>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR

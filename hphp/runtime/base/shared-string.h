@@ -79,10 +79,8 @@ struct shared_string_hash {
 };
 
 template<typename T>
-class hphp_shared_string_map :
-    public hphp_hash_map<SharedString, T, shared_string_hash,
-                         shared_string_eq> {
-};
+using hphp_shared_string_map =
+  hphp_hash_map<SharedString, T, shared_string_hash, shared_string_eq>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

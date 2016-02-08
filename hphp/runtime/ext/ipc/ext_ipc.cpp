@@ -587,8 +587,7 @@ struct sysvshm_shm {
   }
 };
 
-class shm_set : public std::set<sysvshm_shm*> {
-public:
+struct shm_set : std::set<sysvshm_shm*> {
   ~shm_set() {
     for (auto iter = begin(); iter != end(); ++iter) {
       delete *iter;

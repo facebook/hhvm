@@ -26,8 +26,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ConstantExpression);
 
-class ConstantExpression : public Expression, IParseHandler {
-public:
+struct ConstantExpression : Expression, private IParseHandler {
   ConstantExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                      const std::string &name,
                      bool hadBackslash,

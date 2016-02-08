@@ -305,9 +305,10 @@ private:
  * A ranked wrapper around tbb::concurrent_hash_map.
  */
 template<typename K, typename V, typename H=K, Rank R=RankUnranked>
-class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
+struct RankedCHM : tbb::concurrent_hash_map<K, V, H> {
+private:
   typedef tbb::concurrent_hash_map<K, V, H> RawCHM;
- public:
+public:
   struct accessor : RawCHM::accessor {
     accessor() : freed(false) { pushRank(R); }
     ~accessor() { if (!freed) popRank(R); }

@@ -208,10 +208,10 @@ struct TickRequestFactory {
   TickingClock* m_clock;
 };
 
-class TickWorker : public JobQueueWorker<TickRequestPtr, TickingClock*, true,
-                                         true>,
-                   public Tickable {
- public:
+struct TickWorker
+  : JobQueueWorker<TickRequestPtr, TickingClock*, true, true>
+  , Tickable
+{
   TickWorker() : m_ticks(0) {}
   virtual ~TickWorker() {}
 

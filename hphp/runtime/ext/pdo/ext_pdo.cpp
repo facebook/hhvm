@@ -455,8 +455,7 @@ static const struct pdo_sqlstate_info err_initializer[] = {
   { "XX002",  "Index corrupted" }
 };
 
-class PDOErrorHash : private hphp_const_char_map<const char *> {
-public:
+struct PDOErrorHash : private hphp_const_char_map<const char *> {
   PDOErrorHash() {
     for (unsigned int i = 0;
          i < sizeof(err_initializer)/sizeof(err_initializer[0]); i++) {

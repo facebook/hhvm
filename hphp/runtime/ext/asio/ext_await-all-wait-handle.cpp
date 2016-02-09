@@ -73,7 +73,7 @@ namespace {
     return c_StaticWaitHandle::CreateSucceeded(make_tv<KindOfNull>());
   }
 
-  void prepareChild(const Cell* src, context_idx_t& ctx_idx, uint32_t& cnt) {
+  void prepareChild(const Cell* src, context_idx_t& ctx_idx, int32_t& cnt) {
     auto const waitHandle = c_WaitHandle::fromCell(src);
     if (UNLIKELY(!waitHandle)) failWaitHandle();
     if (waitHandle->isFinished()) return;
@@ -82,25 +82,11 @@ namespace {
     ++cnt;
   }
 
-  bool addChild(const Cell* src, c_AwaitAllWaitHandle::Node*& dst,
-                uint32_t& idx) {
+  void addChild(const Cell* src, c_WaitableWaitHandle**& dst) {
     auto const waitHandle = c_WaitHandle::fromCellAssert(src);
-    if (waitHandle->isFinished()) return false;
-
+    if (waitHandle->isFinished()) return;
     waitHandle->incRefCount();
-    (--dst)->m_child = static_cast<c_WaitableWaitHandle*>(waitHandle);
-    dst->m_child->getParentChain().addParent(dst->m_blockable,
-      AsioBlockable::Kind::AwaitAllWaitHandleNode, idx--);
-    return true;
-  }
-
-  const MixedArray::Elm* mixedArrayNext(const MixedArray::Elm* cur,
-                                        const MixedArray::Elm* limit) {
-    do {
-      ++cur;
-    } while (cur != limit && MixedArray::isTombstone(cur->data.m_type));
-
-    return cur;
+    *(--dst) = static_cast<c_WaitableWaitHandle*>(waitHandle);
   }
 }
 
@@ -175,180 +161,194 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
   failVector();
 }
 
-template<typename T, typename F1, typename F2>
-Object c_AwaitAllWaitHandle::createAAWH(T start, T stop,
-                                        F1 iterNext, F2 getCell) {
-  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
-  uint32_t cnt = 0;
-
-  for (auto iter = start; iter != stop; iter = iterNext(iter, stop)) {
-    prepareChild(getCell(iter), ctx_idx, cnt);
-  }
-
-  if (!cnt) {
-    return Object{returnEmpty()};
-  }
-
-  if (LIKELY(cnt <= kMaxNodes)) {
-    // Common case: less than 64k items
-    auto result = Alloc(cnt);
-    auto next = &result->m_children[cnt];
-
-    uint32_t idx = cnt - 1;
-    for (auto iter = start; iter != stop; iter = iterNext(iter, stop)) {
-      addChild(getCell(iter), next, idx);
-    }
-
-    assert(next == &result->m_children[0]);
-    result->initialize(ctx_idx);
-    return Object{std::move(result)};
-  }
-
-  // Slow path. When we have more than 64k items, we need child AAWHs.
-  auto iter = start;
-  uint32_t nChildAAWH = (cnt + kMaxNodes - 1) / kMaxNodes;
-  auto rootAAWH = Alloc(nChildAAWH);
-  auto nextAAWH = &rootAAWH->m_children[nChildAAWH];
-  assert(nChildAAWH > 1);
-
-  uint32_t rootIdx = nChildAAWH - 1;
-  for (uint32_t i = 0; i < nChildAAWH; ++i) {
-    uint32_t n = (i < nChildAAWH - 1) ?
-        kMaxNodes : (cnt - i * kMaxNodes);
-    auto childAAWH = Alloc(n);
-    auto next = &childAAWH->m_children[n];
-    uint32_t idx = n - 1;
-    for (uint32_t j = 0; j < n ; iter = iterNext(iter, stop), ++j) {
-      assert(iter != stop);
-      if (!addChild(getCell(iter), next, idx)) {
-        // Don't count finished wait-handles
-        --j;
-      }
-    }
-    assert(next == &childAAWH->m_children[0]);
-    childAAWH->initialize(ctx_idx);
-
-    childAAWH->incRefCount();
-    (--nextAAWH)->m_child = static_cast<c_WaitableWaitHandle*>(childAAWH.get());
-    nextAAWH->m_child->getParentChain().addParent(nextAAWH->m_blockable,
-      AsioBlockable::Kind::AwaitAllWaitHandleNode, rootIdx--);
-  }
-  assert(nextAAWH == &rootAAWH->m_children[0]);
-  rootAAWH->initialize(ctx_idx);
-
-  return Object{std::move(rootAAWH)};
-}
-
 Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
   auto const start = packedData(dependencies);
   auto const stop  = start + dependencies->getSize();
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  int32_t cnt = 0;
 
-  return createAAWH<const TypedValue*>(start, stop,
-    [](const TypedValue* tv, UNUSED const TypedValue* limit) { return tv + 1; },
-    [](const TypedValue* tv) { return tvToCell(tv); });
+  for (auto iter = start; iter < stop; ++iter) {
+    prepareChild(tvToCell(iter), ctx_idx, cnt);
+  }
+
+  if (!cnt) return Object{returnEmpty()};
+
+  auto result = Alloc(cnt);
+  auto next = &result->m_children[cnt];
+
+  for (auto iter = start; iter < stop; ++iter) {
+    addChild(tvToCell(iter), next);
+  }
+
+  assert(next == &result->m_children[0]);
+  result->initialize(ctx_idx);
+  return Object{std::move(result)};
 }
 
 Object c_AwaitAllWaitHandle::FromStructArray(const StructArray* dependencies) {
   auto const start = dependencies->data();
   auto const stop = start + dependencies->getSize();
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  int32_t cnt = 0;
 
-  return createAAWH<const TypedValue*>(start, stop,
-    [](const TypedValue* tv, UNUSED const TypedValue* limit) { return tv + 1; },
-    [](const TypedValue* tv) { return tvToCell(tv); });
+  for (auto iter = start; iter < stop; ++iter) {
+    prepareChild(tvToCell(iter), ctx_idx, cnt);
+  }
+
+  if (!cnt) return Object{returnEmpty()};
+
+  auto result = Alloc(cnt);
+  auto next = &result->m_children[cnt];
+
+  for (auto iter = start; iter < stop; ++iter) {
+    addChild(tvToCell(iter), next);
+  }
+
+  assert(next == &result->m_children[0]);
+  result->initialize(ctx_idx);
+  return Object{std::move(result)};
 }
 
 Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
   auto const start = dependencies->data();
   auto const stop = start + dependencies->iterLimit();
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  int32_t cnt = 0;
 
-  return createAAWH<const MixedArray::Elm*>(start, stop, mixedArrayNext,
-    [](const MixedArray::Elm* elm) { return tvToCell(&elm->data); });
+  for (auto iter = start; iter < stop; ++iter) {
+    if (MixedArray::isTombstone(iter->data.m_type)) continue;
+    prepareChild(tvToCell(&iter->data), ctx_idx, cnt);
+  }
+
+  if (!cnt) return Object{returnEmpty()};
+
+  auto result = Alloc(cnt);
+  auto next = &result->m_children[cnt];
+
+  for (auto iter = start; iter < stop; ++iter) {
+    if (MixedArray::isTombstone(iter->data.m_type)) continue;
+    addChild(tvToCell(&iter->data), next);
+  }
+
+  assert(next == &result->m_children[0]);
+  result->initialize(ctx_idx);
+  return Object{std::move(result)};
 }
 
 Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
   auto const start = dependencies->firstElm();
   auto const stop = dependencies->elmLimit();
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  int32_t cnt = 0;
 
-  return createAAWH<const BaseMap::Elm*>(start, stop,
-    [](const BaseMap::Elm* cur, const BaseMap::Elm* limit) {
-      return BaseMap::nextElm(cur, limit); },
-    [](const BaseMap::Elm* elm) { return tvAssertCell(&elm->data); });
+  for (auto iter = start; iter != stop; iter = BaseMap::nextElm(iter, stop)) {
+    prepareChild(tvAssertCell(&iter->data), ctx_idx, cnt);
+  }
+
+  if (!cnt) return Object{returnEmpty()};
+
+  auto result = Alloc(cnt);
+  auto next = &result->m_children[cnt];
+
+  for (auto iter = start; iter != stop; iter = BaseMap::nextElm(iter, stop)) {
+    addChild(tvAssertCell(&iter->data), next);
+  }
+
+  assert(next == &result->m_children[0]);
+  result->initialize(ctx_idx);
+  return Object{std::move(result)};
 }
 
 Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
   auto const start = dependencies->data();
   auto const stop = start + dependencies->size();
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
+  int32_t cnt = 0;
 
-  return createAAWH<const TypedValue*>(start, stop,
-    [](const TypedValue* tv, UNUSED const TypedValue* limit) { return tv + 1; },
-    [](const TypedValue* tv) { return tvAssertCell(tv); });
+  for (auto iter = start; iter < stop; ++iter) {
+    prepareChild(tvAssertCell(iter), ctx_idx, cnt);
+  }
+
+  if (!cnt) return Object{returnEmpty()};
+
+  auto result = Alloc(cnt);
+  auto next = &result->m_children[cnt];
+
+  for (auto iter = start; iter < stop; ++iter) {
+    addChild(tvAssertCell(iter), next);
+  }
+
+  assert(next == &result->m_children[0]);
+  result->initialize(ctx_idx);
+  return Object{std::move(result)};
 }
 
 void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   setState(STATE_BLOCKED);
   setContextIdx(ctx_idx);
+  assert(m_cur >= 0);
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreate())) {
     auto vector = req::make<c_Vector>();
-    for (int32_t idx = m_cap - 1; idx >= 0; --idx) {
-      TypedValue child = make_tv<KindOfObject>(m_children[idx].m_child);
+    for (int32_t idx = m_cur; idx >= 0; --idx) {
+      TypedValue child = make_tv<KindOfObject>(m_children[idx]);
       vector->add(&child);
     }
     AsioSession::Get()->onAwaitAllCreate(this, Variant(std::move(vector)));
   }
 
+  blockOnCurrent<false>();
   incRefCount();
 }
 
-void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {
-  assert(idx <= m_unfinished);
-  assert(getState() == STATE_BLOCKED);
+void c_AwaitAllWaitHandle::onUnblocked() {
+  assert(m_cur >= 0);
+  assert(m_children[m_cur]->isFinished());
+  auto child = &m_children[m_cur];
 
-  if (idx == m_unfinished) {
-    for (uint32_t next = idx - 1; next < idx; --next) {
-      auto const child = m_children[next].m_child;
-      if (!child->isFinished()) {
-        // Found the next unfinished child.
-        m_unfinished = next;
+  do {
+    decRefObj(*child);
 
-        // Make sure there's no cyclic dependencies.
-        try {
-          detectCycle(child);
-        } catch (const Object& cycle_exception) {
-          markAsFailed(cycle_exception);
-        }
-        return;
-      }
+    if (m_cur == 0) {
+      auto parentChain = getParentChain();
+      setState(STATE_SUCCEEDED);
+      tvWriteNull(&m_resultOrException);
+      parentChain.unblock();
+      decRefObj(this);
+      return;
     }
-    // All children finished.
-    markAsFinished();
-  }
+
+    --m_cur;
+    --child;
+  } while ((*child)->isFinished());
+
+  assert(child == &m_children[m_cur]);
+  blockOnCurrent<true>();
 }
 
-void c_AwaitAllWaitHandle::markAsFinished() {
-  for (int i = 0; i < m_cap; i++) {
-    auto const child = m_children[i].m_child;
-    assert(child->isFinished());
-    decRefObj(child);
+template<bool checkCycle>
+void c_AwaitAllWaitHandle::blockOnCurrent() {
+  auto child = m_children[m_cur];
+  assert(!child->isFinished());
+
+  if (checkCycle) {
+    try {
+      detectCycle(child);
+    } catch (const Object& cycle_exception) {
+      markAsFailed(cycle_exception);
+      return;
+    }
   }
 
-  auto parentChain = getParentChain();
-  setState(STATE_SUCCEEDED);
-  tvWriteNull(&m_resultOrException);
-  parentChain.unblock();
-  decRefObj(this);
+  child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AwaitAllWaitHandle);
 }
 
 void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {
-  for (uint32_t idx = 0; idx < m_cap; idx++) {
-    auto const child = m_children[idx].m_child;
-    decRefObj(child);
-    if (!child->isFinished()) {
-      // Remove the current AAWH from the parent chain of all children.
-      child->getParentChain().removeFromChain(&m_children[idx].m_blockable);
-    }
+  auto child = &m_children[m_cur];
+  while (m_cur-- >= 0) {
+    decRefObj(*(child--));
   }
-
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
   tvWriteObject(exception.get(), &m_resultOrException);
@@ -362,8 +362,8 @@ String c_AwaitAllWaitHandle::getName() {
 
 c_WaitableWaitHandle* c_AwaitAllWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
-  assert(m_unfinished < m_cap);
-  return m_children[m_unfinished].m_child;
+  assert(m_cur >= 0);
+  return m_children[m_cur];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

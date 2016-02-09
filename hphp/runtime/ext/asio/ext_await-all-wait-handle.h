@@ -48,56 +48,27 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
                                 Class* cls = c_AwaitAllWaitHandle::classof())
     : c_WaitableWaitHandle(cls, HeaderKind::AwaitAllWH)
     , m_cap(cap)
-    , m_unfinished(cap - 1)
+    , m_cur(cap - 1)
   {}
   ~c_AwaitAllWaitHandle() {}
 
  public:
-  struct Node final {
-    static constexpr ptrdiff_t blockableOff() {
-      return offsetof(Node, m_blockable);
-    }
-
-    uint32_t getChildIdx() {
-      return m_blockable.getExtraData();
-    }
-
-    inline c_AwaitAllWaitHandle* getWaitHandle() {
-      return reinterpret_cast<c_AwaitAllWaitHandle*>(const_cast<char*>(
-        reinterpret_cast<const char*>(this - getChildIdx())
-        - c_AwaitAllWaitHandle::childrenOff()));
-    }
-
-    bool isFirstUnfinishedChild() {
-      return getChildIdx() == getWaitHandle()->m_unfinished;
-    }
-
-    void onUnblocked() {
-      getWaitHandle()->onUnblocked(getChildIdx());
-    }
-
-    AsioBlockable m_blockable;
-    c_WaitableWaitHandle* m_child;
-  };
-
-  static constexpr ptrdiff_t childrenOff() {
-    return offsetof(c_AwaitAllWaitHandle, m_children);
+  static constexpr ptrdiff_t blockableOff() {
+    return offsetof(c_AwaitAllWaitHandle, m_blockable);
   }
 
   String getName();
-  void onUnblocked(uint32_t idx);
+  void onUnblocked();
   c_WaitableWaitHandle* getChild();
   template<typename T> void forEachChild(T fn);
   template<class F> void scanChildren(F&) const;
 
   size_t heapSize() const { return heapSize(m_cap); }
   static size_t heapSize(unsigned count) {
-    return sizeof(c_AwaitAllWaitHandle) + count * sizeof(Node);
+    return sizeof(c_AwaitAllWaitHandle) + count * sizeof(c_WaitableWaitHandle*);
   }
 
  private:
-  template<typename T, typename F1, typename F2>
-  static Object createAAWH(T start, T stop, F1 iterNext, F2 getCell);
   static Object FromPackedArray(const ArrayData* dependencies);
   static Object FromStructArray(const StructArray* dependencies);
   static Object FromMixedArray(const MixedArray* dependencies);
@@ -105,7 +76,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   static Object FromVector(const BaseVector* dependencies);
   static req::ptr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
   void initialize(context_idx_t ctx_idx);
-  void markAsFinished(void);
+  template<bool checkCycle> void blockOnCurrent();
   void markAsFailed(const Object& exception);
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
 
@@ -116,10 +87,10 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                           const Variant& dependencies);
  private:
-  static constexpr uint32_t kMaxNodes = AsioBlockable::kExtraInfoMax + 1;
   uint32_t const m_cap; // how many children we have room for.
-  uint32_t m_unfinished; // index of the first unfinished child
-  Node m_children[0]; // allocated off the end
+  int32_t m_cur; // index of last child
+  AsioBlockable m_blockable;
+  c_WaitableWaitHandle* m_children[0]; // allocated off the end
 
  public:
   static const int8_t STATE_BLOCKED = 2;

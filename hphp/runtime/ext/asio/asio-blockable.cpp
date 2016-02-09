@@ -54,11 +54,11 @@ inline c_AsyncGeneratorWaitHandle* getAsyncGeneratorWaitHandle(
   return getContainingObject<c_AsyncGeneratorWaitHandle>(blockable);
 }
 
-inline c_AwaitAllWaitHandle::Node* getAwaitAllWaitHandleNode(
+inline c_AwaitAllWaitHandle* getAwaitAllWaitHandle(
   const AsioBlockable* blockable
 ) {
-  assert(blockable->getKind() == Kind::AwaitAllWaitHandleNode);
-  return getContainingObject<c_AwaitAllWaitHandle::Node>(blockable);
+  assert(blockable->getKind() == Kind::AwaitAllWaitHandle);
+  return getContainingObject<c_AwaitAllWaitHandle>(blockable);
 }
 
 inline c_ConditionWaitHandle* getConditionWaitHandle(
@@ -119,15 +119,6 @@ inline void exitContextImpl(
 }
 
 inline void exitContextImpl(
-  c_AwaitAllWaitHandle::Node* node,
-  context_idx_t ctx_idx
-) {
-  if (node->isFirstUnfinishedChild()) {
-    exitContextImpl(node->getWaitHandle(), ctx_idx);
-  }
-}
-
-inline void exitContextImpl(
   c_ConditionWaitHandle* waitHandle,
   context_idx_t ctx_idx
 ) {
@@ -147,8 +138,8 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
       return getAsyncFunctionWaitHandleNode(this)->getWaitHandle();
     case Kind::AsyncGeneratorWaitHandle:
       return getAsyncGeneratorWaitHandle(this);
-    case Kind::AwaitAllWaitHandleNode:
-      return getAwaitAllWaitHandleNode(this)->getWaitHandle();
+    case Kind::AwaitAllWaitHandle:
+      return getAwaitAllWaitHandle(this);
     case Kind::ConditionWaitHandle:
       return getConditionWaitHandle(this);
     case Kind::GenArrayWaitHandle:
@@ -172,8 +163,8 @@ void AsioBlockableChain::unblock() {
       case Kind::AsyncGeneratorWaitHandle:
         getAsyncGeneratorWaitHandle(cur)->onUnblocked();
         break;
-      case Kind::AwaitAllWaitHandleNode:
-        getAwaitAllWaitHandleNode(cur)->onUnblocked();
+      case Kind::AwaitAllWaitHandle:
+        getAwaitAllWaitHandle(cur)->onUnblocked();
         break;
       case Kind::ConditionWaitHandle:
         getConditionWaitHandle(cur)->onUnblocked();
@@ -200,8 +191,8 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
       case Kind::AsyncGeneratorWaitHandle:
         exitContextImpl(getAsyncGeneratorWaitHandle(cur), ctx_idx);
         break;
-      case Kind::AwaitAllWaitHandleNode:
-        exitContextImpl(getAwaitAllWaitHandleNode(cur), ctx_idx);
+      case Kind::AwaitAllWaitHandle:
+        exitContextImpl(getAwaitAllWaitHandle(cur), ctx_idx);
         break;
       case Kind::ConditionWaitHandle:
         exitContextImpl(getConditionWaitHandle(cur), ctx_idx);
@@ -217,27 +208,6 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
         break;
     }
   }
-}
-
-// Currently only AAWH utilizes this to handle failures.
-void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
-  AsioBlockable* prev = nullptr;
-  for (AsioBlockable* cur = m_firstParent, *next; cur; cur = next) {
-    next = cur->getNextParent();
-    if (ab == cur) {
-      // Found the AAWH we need to remove
-      assert(cur->getKind() == Kind::AwaitAllWaitHandleNode);
-      if (prev == nullptr) {
-        m_firstParent = next;
-      } else {
-        prev->updateNextParent(next);
-      }
-      return;
-    }
-    prev = cur;
-  }
-  // We should always be able to find the parent.
-  assert(false);
 }
 
 Array AsioBlockableChain::toArray() {

@@ -7425,7 +7425,7 @@ OPTBLD_INLINE void iopWHResult(IOP_ARGS) {
   // the failure condition is likely since we punt to this opcode
   // in the JIT when the state is failed.
   if (wh->isFailed()) {
-    throw Object{wh->getException()};
+    throw_object(Object{wh->getException()});
   }
   if (wh->isSucceeded()) {
     cellSet(wh->getResult(), *vmStack().topC());

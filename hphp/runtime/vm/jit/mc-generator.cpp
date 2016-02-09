@@ -1689,9 +1689,8 @@ TCA MCGenerator::getTranslatedCaller() const {
   return nullptr;
 }
 
-void
-MCGenerator::syncWork() {
-  assertx(tl_regState == VMRegState::DIRTY);
+void MCGenerator::syncWork() {
+  assertx(tl_regState != VMRegState::CLEAN);
   m_fixupMap.fixup(g_context.getNoCheck());
   tl_regState = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);

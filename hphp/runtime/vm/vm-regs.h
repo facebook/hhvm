@@ -48,12 +48,21 @@
 namespace HPHP {
 
 /*
- * DIRTY when the live register state is spread across the stack and Fixups.
- * CLEAN when it has been sync'ed into RDS.
+ * The current sync-state of the RDS vmRegs().
+ *
+ * CLEAN means that the RDS vmRegs are sync'd.  DIRTY means we need to sync
+ * them (by traversing the stack and looking up fixups)---this is what the
+ * value of tl_regState should be whenever we enter native code from translated
+ * PHP code.
+ *
+ * GUARDED is a special DIRTY state which indicates the state is guaranteed to
+ * be reset to DIRTY (via a scope guard) when returning to PHP code from a
+ * native helper.
  */
 enum class VMRegState : uint8_t {
   CLEAN,
-  DIRTY
+  DIRTY,
+  GUARDED
 };
 extern __thread VMRegState tl_regState;
 
@@ -147,7 +156,9 @@ struct VMRegAnchor {
   explicit VMRegAnchor(ActRec* ar);
 
   ~VMRegAnchor() {
-    tl_regState = m_old;
+    if (m_old != VMRegState::GUARDED) {
+      tl_regState = m_old;
+    }
   }
 
   VMRegAnchor(const VMRegAnchor&) = delete;
@@ -179,8 +190,38 @@ struct EagerVMRegAnchor {
   }
 
   ~EagerVMRegAnchor() {
-    tl_regState = m_old;
+    if (m_old != VMRegState::GUARDED) {
+      tl_regState = m_old;
+    }
   }
+
+  VMRegState m_old;
+};
+
+/*
+ * A scoped guard used around native code that is called from the JIT and which
+ * /may conditionally/ need the VM to be in a consistent state.
+ *
+ * Using VMRegAnchor by itself would mean that in some cases---where we perform
+ * many independent operations which only conditionally require syncing---we'd
+ * have to choose between always (and sometimes spuriously) syncing, or syncing
+ * multiple times when we could have synced just once.
+ *
+ * VMRegGuard is intended to be used around these conditional syncs (i.e.,
+ * conditional instantiations of VMRegAnchor).  It changes tl_regState to
+ * GUARDED, which tells sub-scoped VMRegAnchors that they may keep it set to
+ * CLEAN after they finish syncing.
+ */
+struct VMRegGuard {
+  VMRegGuard() : m_old(tl_regState) {
+    if (tl_regState == VMRegState::DIRTY) {
+      tl_regState = VMRegState::GUARDED;
+    }
+  }
+  ~VMRegGuard() { tl_regState = m_old; }
+
+  VMRegGuard(const VMRegGuard&) = delete;
+  VMRegGuard& operator=(const VMRegGuard&) = delete;
 
   VMRegState m_old;
 };

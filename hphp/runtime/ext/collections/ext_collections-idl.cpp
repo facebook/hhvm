@@ -208,7 +208,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) const {
-  VMRegAnchor _;
+  VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -239,7 +239,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) const {
-  VMRegAnchor _;
+  VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -1845,6 +1845,8 @@ Object c_Map::t_add(const Variant& val) {
 
 Object c_Map::t_addall(const Variant& iterable) {
   if (iterable.isNull()) return Object{this};
+  VMRegGuard _;
+
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   auto oldCap = cap();
@@ -2076,7 +2078,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
-  VMRegAnchor _;
+  VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -2158,7 +2160,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
-  VMRegAnchor _;
+  VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -2628,6 +2630,8 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_mapFromItems(const Variant& iterable) {
   if (iterable.isNull()) return Object{req::make<TMap>()};
+  VMRegGuard _;
+
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   auto target = req::make<TMap>();
@@ -3615,7 +3619,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
-  VMRegAnchor _;
+  VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -3651,7 +3655,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_filter(const Variant& callback, MakeArgs makeArgs) const {
-  VMRegAnchor _;
+  VMRegGuard _;
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {

@@ -33,7 +33,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FastCGIServer;
+struct FastCGIServer;
 
 /*
  * FastCGIAcceptor accepts new connections from a listening socket, wrapping

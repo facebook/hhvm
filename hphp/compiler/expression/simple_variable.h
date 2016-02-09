@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Symbol;
+struct Symbol;
 DECLARE_BOOST_TYPES(SimpleVariable);
 
 struct SimpleVariable : Expression {

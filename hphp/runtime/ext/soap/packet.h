@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapClient;
+struct SoapClient;
 bool parse_packet_soap(SoapClient *client,
                        const char *buffer,
                        int buffer_size,

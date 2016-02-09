@@ -22,8 +22,8 @@
 
 namespace HPHP {
 class ObjectData;
-class Unit;
-class Class;
+struct Unit;
+struct Class;
 class Func;
 class Object;
 } //namespace HPHP

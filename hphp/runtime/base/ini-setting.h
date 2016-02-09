@@ -27,9 +27,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class Extension;
-class String;
+struct Array;
+struct Extension;
+struct String;
 
 bool ini_on_update(const Variant& value, bool& p);
 bool ini_on_update(const Variant& value, double& p);

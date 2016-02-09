@@ -30,7 +30,7 @@ namespace HPHP {
  *
  * See asio-external-thread-event.h for more details.
  */
-class AsioExternalThreadEvent;
+struct AsioExternalThreadEvent;
 struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(ExternalThreadEventWaitHandle);
   WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);

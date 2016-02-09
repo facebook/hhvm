@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Transport;
+struct Transport;
 
 struct SourceRootInfo {
   explicit SourceRootInfo(Transport* transport);

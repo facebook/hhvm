@@ -275,8 +275,8 @@ struct PreClassEmitter {
 };
 
 struct PreClassRepoProxy : RepoProxy {
-  friend class PreClass;
-  friend class PreClassEmitter;
+  friend struct PreClass;
+  friend struct PreClassEmitter;
 
   explicit PreClassRepoProxy(Repo& repo);
   ~PreClassRepoProxy();

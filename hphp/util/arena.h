@@ -45,7 +45,7 @@ namespace HPHP {
  * The Arena typedef is for convenience when you want a default
  * configuration.  Use ArenaImpl if you want something specific.
  */
-template<size_t kChunkBytes> class ArenaImpl;
+template<size_t kChunkBytes> struct ArenaImpl;
 typedef ArenaImpl<4096> Arena;
 
 //////////////////////////////////////////////////////////////////////

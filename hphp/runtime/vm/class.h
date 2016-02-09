@@ -51,10 +51,10 @@ struct ClassInfo;
 struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
-class c_WaitHandle;
+struct c_WaitHandle;
 
 namespace collections {
-class CollectionsExtension;
+struct CollectionsExtension;
 }
 
 namespace Native {
@@ -1092,7 +1092,7 @@ private:
                                      const StringData* methName);
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
   using TMIData = TraitMethodImportData<TraitMethod,
                                         TMIOps,

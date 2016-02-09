@@ -90,7 +90,7 @@ struct BootTimer {
 private:
   static void add(const std::string& name, const TimeUsage value);
 
-  class Impl;
+  struct Impl;
 
   static bool s_started;
   static TimeUsage s_start;

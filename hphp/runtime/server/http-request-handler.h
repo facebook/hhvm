@@ -27,11 +27,11 @@
 
 namespace HPHP {
 
-class SourceRootInfo;
-class RequestURI;
+struct SourceRootInfo;
+struct RequestURI;
 
 namespace ServiceData {
-class ExportedTimeSeries;
+struct ExportedTimeSeries;
 }
 
 /*

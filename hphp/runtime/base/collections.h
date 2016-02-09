@@ -23,14 +23,14 @@
 #include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
-class ArrayData;
-class c_Pair;
-class c_Vector;
-class c_ImmVector;
-class c_Map;
-class c_ImmMap;
-class c_Set;
-class c_ImmSet;
+struct ArrayData;
+struct c_Pair;
+struct c_Vector;
+struct c_ImmVector;
+struct c_Map;
+struct c_ImmMap;
+struct c_Set;
+struct c_ImmSet;
 }
 
 namespace HPHP { namespace collections {

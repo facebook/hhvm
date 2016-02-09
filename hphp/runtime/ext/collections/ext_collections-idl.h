@@ -50,16 +50,16 @@ namespace HPHP {
 
 namespace collections{
 void deepCopy(TypedValue*);
-class PairIterator;
-class VectorIterator;
-class MapIterator;
-class SetIterator;
+struct PairIterator;
+struct VectorIterator;
+struct MapIterator;
+struct SetIterator;
 }
 
 /**
  * Called by the JIT on an emitVectorSet().
  */
-class c_Vector;
+struct c_Vector;
 void triggerCow(c_Vector* vec);
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
 
@@ -492,9 +492,9 @@ struct BaseVector : ExtCollectionObjectData {
   // Friends
 
   friend class collections::VectorIterator;
-  friend class BaseMap;
-  friend class BaseSet;
-  friend class c_Pair;
+  friend struct BaseMap;
+  friend struct BaseSet;
+  friend struct c_Pair;
   friend class c_AwaitAllWaitHandle;
 
   friend void collections::deepCopy(TypedValue*);
@@ -581,9 +581,9 @@ struct c_Vector : BaseVector {
   friend void collections::append(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 
-  friend class BaseMap;
-  friend class c_Pair;
-  friend class ArrayIter;
+  friend struct BaseMap;
+  friend struct c_Pair;
+  friend struct ArrayIter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -635,8 +635,8 @@ struct c_ImmVector : BaseVector {
 
   static c_ImmVector* Clone(ObjectData* obj);
 
-  friend class c_Vector;
-  friend class c_Pair;
+  friend struct c_Vector;
+  friend struct c_Pair;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1353,10 +1353,10 @@ struct BaseMap : HashCollection {
   friend void collections::deepCopy(TypedValue*);
 
   friend class collections::MapIterator;
-  friend class c_Vector;
-  friend class c_Map;
-  friend class c_ImmMap;
-  friend class ArrayIter;
+  friend struct c_Vector;
+  friend struct c_Map;
+  friend struct c_ImmMap;
+  friend struct ArrayIter;
   friend class c_AwaitAllWaitHandle;
   friend class c_GenMapWaitHandle;
 
@@ -1543,8 +1543,8 @@ struct c_Map : BaseMap {
  protected:
   Object getImmutableCopy();
 
-  friend class BaseMap;
-  friend class c_ImmMap;
+  friend struct BaseMap;
+  friend struct c_ImmMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1586,8 +1586,8 @@ struct c_ImmMap : BaseMap {
   Object t_immutable();
   String t___tostring();
 
-  friend class BaseMap;
-  friend class c_Map;
+  friend struct BaseMap;
+  friend struct c_Map;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1811,10 +1811,10 @@ struct BaseSet : HashCollection {
  private:
 
   friend class collections::SetIterator;
-  friend class c_Vector;
-  friend class c_Set;
-  friend class c_Map;
-  friend class ArrayIter;
+  friend struct c_Vector;
+  friend struct c_Set;
+  friend struct c_Map;
+  friend struct ArrayIter;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field

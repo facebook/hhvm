@@ -28,11 +28,11 @@
 namespace HPHP {
 
 // Forward declaration.
-class BlobDecoder;
-class BlobEncoder;
+struct BlobDecoder;
+struct BlobEncoder;
 struct StringData;
 struct TypedValue;
-class Repo;
+struct Repo;
 
 enum RepoId {
   RepoIdInvalid = -1,
@@ -173,7 +173,7 @@ struct RepoTxn {
   bool error() const { return m_error; }
 
  private:
-  friend class RepoTxnQuery;
+  friend struct RepoTxnQuery;
   void step(RepoQuery& query);
   void exec(RepoQuery& query);
   void rollback(); // nothrow

@@ -32,7 +32,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class StreamContext;
-class StreamFilter;
+struct StreamFilter;
 
 extern int __thread s_pcloseRet;
 

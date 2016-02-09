@@ -22,8 +22,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class VirtualHost;
-class Transport;
+struct VirtualHost;
+struct Transport;
 
 struct RequestURI {
   RequestURI(const VirtualHost *vhost, Transport *transport,

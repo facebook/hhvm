@@ -34,7 +34,7 @@ struct ArrayData;
 struct StringData;
 struct MArrayIter;
 struct MixedArray;
-class Shape;
+struct Shape;
 
 //////////////////////////////////////////////////////////////////////
 

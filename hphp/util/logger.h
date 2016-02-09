@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StackTrace;
+struct StackTrace;
 class Exception;
 
 struct Logger {

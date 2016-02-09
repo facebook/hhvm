@@ -47,7 +47,7 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-class Symbol;
+struct Symbol;
 
 enum class Derivation {
   Normal,
@@ -480,7 +480,7 @@ private:
     }
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
 public:
   using TMIData = TraitMethodImportData<TraitMethod, TMIOps,

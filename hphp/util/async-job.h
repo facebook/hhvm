@@ -29,7 +29,7 @@ namespace HPHP {
 // helper, skip to JobDispatcher at below to read comments and usages...
 
 template<class TJob, class TWorker>
-class JobDispatcher;
+struct JobDispatcher;
 
 template<class TJob>
 struct WorkerInfo {

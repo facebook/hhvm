@@ -189,8 +189,8 @@ void stashLineTable(const Unit* unit, LineTable table);
  * required.
  */
 struct Unit {
-  friend class UnitEmitter;
-  friend class UnitRepoProxy;
+  friend struct UnitEmitter;
+  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.

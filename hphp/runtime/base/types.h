@@ -23,11 +23,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class String;
+struct String;
 struct StaticString;
-class Array;
+struct Array;
 class Variant;
-class VarNR;
+struct VarNR;
 
 extern const Variant null_variant;      // uninitialized variant
 extern const Variant init_null_variant; // php null
@@ -48,7 +48,7 @@ extern const StaticString array_string; // String("Array")
 extern const StaticString empty_string_ref; // const StaticString&
 extern const Variant empty_string_variant_ref; // const Variant&
 
-class StringData;
+struct StringData;
 using LowStringPtr = LowPtr<const StringData>;
 
 ///////////////////////////////////////////////////////////////////////////////

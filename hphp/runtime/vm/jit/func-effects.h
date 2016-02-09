@@ -21,7 +21,7 @@ namespace HPHP {
 class Func;
 
 namespace jit {
-class NormalizedInstruction;
+struct NormalizedInstruction;
 
 /*
  * Could the CPP builtin function `callee` destroy the locals

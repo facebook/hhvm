@@ -29,9 +29,9 @@ namespace HPHP {
 
 #ifndef NO_HARDWARE_COUNTERS
 
-class InstructionCounter;
-class LoadCounter;
-class StoreCounter;
+struct InstructionCounter;
+struct LoadCounter;
+struct StoreCounter;
 
 struct PerfTable {
   const char* name;
@@ -39,7 +39,7 @@ struct PerfTable {
   uint64_t config;
 };
 
-class HardwareCounterImpl;
+struct HardwareCounterImpl;
 
 struct HardwareCounter {
   HardwareCounter();

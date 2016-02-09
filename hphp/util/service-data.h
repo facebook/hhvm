@@ -94,13 +94,13 @@ namespace HPHP {
  */
 namespace ServiceData {
 
-class ExportedCounter;
-class ExportedHistogram;
-class ExportedTimeSeries;
+struct ExportedCounter;
+struct ExportedHistogram;
+struct ExportedTimeSeries;
 
 namespace detail {
 template <class ClassWithPrivateDestructor>
-class FriendDeleter;
+struct FriendDeleter;
 };
 
 enum class StatsType { AVG, SUM, RATE, COUNT, PCT };

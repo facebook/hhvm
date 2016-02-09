@@ -38,8 +38,8 @@
 
 namespace HPHP {
 
-class CacheData;
-class MmapFile;
+struct CacheData;
+struct MmapFile;
 
 enum class VFileType : uint8_t {
   NotFound = 0,

@@ -39,7 +39,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Directory;
+struct Directory;
 
 struct FileStreamWrapper : Stream::Wrapper {
   static req::ptr<MemFile> openFromCache(

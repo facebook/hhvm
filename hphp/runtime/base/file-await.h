@@ -8,10 +8,10 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-class FileAwait;
+struct FileAwait;
 
 struct FileTimeoutHandler : AsioTimeoutHandler {
- friend class FileAwait;
+ friend struct FileAwait;
 
   FileTimeoutHandler(AsioEventBase* base, FileAwait* fa):
     AsioTimeoutHandler(base), m_fileAwait(fa) {}
@@ -23,7 +23,7 @@ struct FileTimeoutHandler : AsioTimeoutHandler {
 };
 
 struct FileEventHandler : AsioEventHandler {
- friend class FileAwait;
+ friend struct FileAwait;
 
   FileEventHandler(AsioEventBase* base, int fd, FileAwait* fa):
     AsioEventHandler(base, fd), m_fileAwait(fa) {}

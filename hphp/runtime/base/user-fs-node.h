@@ -22,7 +22,7 @@
 
 namespace HPHP {
 
-class Array;
+struct Array;
 struct Func;
 struct Class;
 class StreamContext;

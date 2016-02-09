@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class BlockScope;
-class CodeGenerator;
+struct CodeGenerator;
 class Variant;
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_EXTENDED_BOOST_TYPES(Type);
@@ -46,7 +46,7 @@ DECLARE_BOOST_TYPES(BlockScope);
 typedef std::set<std::string> SymbolSet;
 typedef std::map<std::string, std::set<std::string> > Type2SymbolSetMap;
 
-class Symbol;
+struct Symbol;
 typedef hphp_string_map<Symbol*> StringToSymbolMap;
 typedef std::vector<Symbol*>     SymbolVec;
 

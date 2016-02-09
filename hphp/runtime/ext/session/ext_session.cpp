@@ -71,7 +71,7 @@ static bool mod_is_open();
 ///////////////////////////////////////////////////////////////////////////////
 // global data
 
-class SessionSerializer;
+struct SessionSerializer;
 struct Session {
   enum Status {
     Disabled,

@@ -23,8 +23,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class String;
+struct Array;
+struct String;
 
 /**
  * Using an integer to represent time: the value of time in seconds since 0

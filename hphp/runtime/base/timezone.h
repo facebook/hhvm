@@ -30,7 +30,7 @@ extern "C" {
 
 namespace HPHP {
 
-class Array;
+struct Array;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -116,9 +116,9 @@ public:
   req::ptr<TimeZone> cloneTimeZone() const;
 
 protected:
-  friend class DateTime;
-  friend class TimeStamp;
-  friend class DateInterval;
+  friend struct DateTime;
+  friend struct TimeStamp;
+  friend struct DateInterval;
 
   /**
    * Returns raw pointer. For internal use only.

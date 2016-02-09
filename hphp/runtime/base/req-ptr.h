@@ -253,7 +253,7 @@ inline auto deref(const P& p) -> decltype(P().get()) {
 
 struct ResourceData;
 struct ObjectData;
-class Resource;
+struct Resource;
 class Object;
 struct Variant;
 

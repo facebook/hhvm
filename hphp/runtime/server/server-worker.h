@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-class Transport;
+struct Transport;
 
 struct ServerJob {
   explicit ServerJob();

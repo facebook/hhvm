@@ -33,10 +33,10 @@ struct AnalysisResult;
 namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename T> class _OutputStream;
-template <typename T> class _MapStream;
-template <typename T> class _ListStream;
-template <typename T> class _ISerializable;
+template <typename T> struct _OutputStream;
+template <typename T> struct _MapStream;
+template <typename T> struct _ListStream;
+template <typename T> struct _ISerializable;
 
 #define DEFINE_JSON_OUTPUT_TYPE(type) \
   struct type { \

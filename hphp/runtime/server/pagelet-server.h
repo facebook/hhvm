@@ -30,7 +30,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class PageletTransport;
+struct PageletTransport;
 class PageletServerTaskEvent;
 
 struct PageletServer {

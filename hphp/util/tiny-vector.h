@@ -60,7 +60,7 @@ namespace HPHP {
  */
 template<class T, size_t InternalSize = 1, size_t MinHeapCapacity = 0>
 struct TinyVector {
-  struct const_iterator;
+  class const_iterator;
 
 #ifndef __INTEL_COMPILER
   static_assert(boost::has_trivial_destructor<T>::value,

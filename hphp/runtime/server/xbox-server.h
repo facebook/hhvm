@@ -27,10 +27,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 struct XboxServerInfo;
-class RPCRequestHandler;
-class XboxTransport;
+struct RPCRequestHandler;
+struct XboxTransport;
 
 struct XboxServer {
   /**

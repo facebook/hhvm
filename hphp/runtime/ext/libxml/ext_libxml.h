@@ -119,7 +119,7 @@ private:
   xmlNodePtr m_node {nullptr};
   req::ptr<XMLDocumentData> m_doc {nullptr};
 
-  friend class XMLDocumentData;
+  friend struct XMLDocumentData;
 };
 
 struct XMLDocumentData : XMLNodeData {

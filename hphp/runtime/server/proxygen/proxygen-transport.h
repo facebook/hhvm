@@ -29,7 +29,7 @@
 #include <folly/IPAddress.h>
 
 namespace HPHP {
-class ProxygenServer;
+struct ProxygenServer;
 class ProxygenTransport;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ struct ResponseMessage {
   bool m_eom{false};
 };
 
-class PushTxnHandler;
+struct PushTxnHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 

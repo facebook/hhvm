@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 
 struct ExtendedLogger : Logger {
   static bool EnabledByDefault;

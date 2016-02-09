@@ -18,8 +18,8 @@
 
 namespace HPHP {
 
-class Array;
-class String;
+struct Array;
+struct String;
 struct Variant;
 
 ///////////////////////////////////////////////////////////////////////////////

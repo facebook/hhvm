@@ -24,8 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class String;
-class Array;
+struct String;
+struct Array;
 
 /**
  * How PHP formats a string. Called by ext/ext_string.cpp.

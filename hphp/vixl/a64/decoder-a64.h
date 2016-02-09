@@ -97,7 +97,7 @@ class DecoderVisitor {
   // Visitors are registered in a list.
   std::list<DecoderVisitor*> visitors_;
 
-  friend class Decoder;
+  friend struct Decoder;
 };
 
 

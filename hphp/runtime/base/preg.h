@@ -48,7 +48,7 @@ enum {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 struct Variant;
 
 struct pcre_cache_entry {

@@ -57,16 +57,16 @@ DECLARE_BOOST_TYPES(FunctionCall);
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(SwitchStatement);
 DECLARE_BOOST_TYPES(ForEachStatement);
-class StaticClassName;
-class HhbcExtFuncInfo;
-class HhbcExtClassInfo;
+struct StaticClassName;
+struct HhbcExtFuncInfo;
+struct HhbcExtClassInfo;
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Forward declarations.
-class Label;
-class EmitterVisitor;
+struct Label;
+struct EmitterVisitor;
 
 using OptLocation = folly::Optional<Location::Range>;
 
@@ -428,7 +428,7 @@ struct Region {
 
 struct EmitterVisitor {
   friend class UnsetUnnamedLocalThunklet;
-  friend class FuncFinisher;
+  friend struct FuncFinisher;
 public:
   typedef std::vector<int> IndexChain;
   typedef std::pair<ExpressionPtr, IndexChain> IndexPair;

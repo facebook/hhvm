@@ -23,9 +23,9 @@
 
 namespace HPHP {
 
-class SourceRootInfo;
-class RequestURI;
-class Transport;
+struct SourceRootInfo;
+struct RequestURI;
+struct Transport;
 ///////////////////////////////////////////////////////////////////////////////
 
 struct RPCRequestHandler : RequestHandler {

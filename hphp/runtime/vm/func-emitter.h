@@ -335,7 +335,7 @@ private:
  */
 struct FuncRepoProxy : public RepoProxy {
   friend class Func;
-  friend class FuncEmitter;
+  friend struct FuncEmitter;
 
   explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();

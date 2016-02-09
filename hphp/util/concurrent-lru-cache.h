@@ -129,7 +129,7 @@ public:
     }
 
   private:
-    friend class ConcurrentLRUCache;
+    friend struct ConcurrentLRUCache;
     HashMapConstAccessor m_hashAccessor;
   };
 

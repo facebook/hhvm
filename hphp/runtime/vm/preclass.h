@@ -104,7 +104,7 @@ using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
  *
  */
 struct PreClass : AtomicCountable {
-  friend class PreClassEmitter;
+  friend struct PreClassEmitter;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.

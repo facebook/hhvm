@@ -26,7 +26,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ObjectPropertyExpression);
 DECLARE_BOOST_TYPES(ClassScope);
-class Symbol;
+struct Symbol;
 
 struct ObjectPropertyExpression : Expression, LocalEffectsContainer {
   ObjectPropertyExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,

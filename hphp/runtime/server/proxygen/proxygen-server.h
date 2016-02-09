@@ -42,11 +42,11 @@ struct ProxygenJob : ServerJob {
   struct timespec reqStart;
 };
 
-class ProxygenTransportTraits;
+struct ProxygenTransportTraits;
 typedef ServerWorker<std::shared_ptr<ProxygenJob>,
   ProxygenTransportTraits> ProxygenWorker;
 
-class ProxygenServer;
+struct ProxygenServer;
 
 struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   explicit HPHPSessionAcceptor(

@@ -46,7 +46,7 @@ namespace HPHP {
  *     IP.2 = 192.168.100.101
  *   }
  */
-class HdfRaw; // reference counting HDF* raw pointer, implmented in .cpp file
+struct HdfRaw; // reference counting HDF* raw pointer, implmented in .cpp file
 struct Hdf {
   /**
    * Constructors.

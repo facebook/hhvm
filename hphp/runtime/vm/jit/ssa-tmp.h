@@ -22,9 +22,9 @@
 
 namespace HPHP { namespace jit {
 
-class IRInstruction;
-class IRUnit;
-class IRBuilder;
+struct IRInstruction;
+struct IRUnit;
+struct IRBuilder;
 
 struct SSATmp {
   uint32_t          id() const { return m_id; }
@@ -76,8 +76,8 @@ struct SSATmp {
   int numWords() const;
 
 private:
-  friend class IRUnit;
-  friend class IRBuilder;
+  friend struct IRUnit;
+  friend struct IRBuilder;
 
   // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.

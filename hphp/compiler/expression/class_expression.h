@@ -24,10 +24,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassExpression;
+struct ClassExpression;
 using ClassExpressionPtr = std::shared_ptr<ClassExpression>;
 
-class ClassStatement;
+struct ClassStatement;
 using ClassStatementPtr = std::shared_ptr<ClassStatement>;
 
 struct ClassExpression : FunctionCall {

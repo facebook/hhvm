@@ -46,7 +46,7 @@ class Func;
 struct BCPattern {
   ////////////////////////////////////////////////////////////////////
 
-  class Atom;
+  struct Atom;
 
   typedef std::vector<Atom> Expr;
   typedef std::vector<PC> CaptureVec;
@@ -151,7 +151,7 @@ struct BCPattern {
     PC m_end{0};
     CaptureVec m_captures;
 
-    friend class BCPattern;
+    friend struct BCPattern;
   };
 
   ////////////////////////////////////////////////////////////////////

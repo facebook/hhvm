@@ -76,7 +76,7 @@ struct DateInterval : SweepableResourceData {
   req::ptr<DateInterval> cloneDateInterval() const;
 
 protected:
-  friend class DateTime;
+  friend struct DateTime;
 
   timelib_rel_time *get() const { return m_di.get(); }
 

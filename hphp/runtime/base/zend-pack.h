@@ -25,8 +25,8 @@ namespace HPHP {
 // pack/unpack
 
 struct Variant;
-class String;
-class Array;
+struct String;
+struct Array;
 
 /**
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d,

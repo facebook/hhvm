@@ -28,7 +28,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-class LogWriter;
+struct LogWriter;
 enum class LogChannel {CRONOLOG, THREADLOCAL, REGULAR};
 
 struct AccessLogFileData {

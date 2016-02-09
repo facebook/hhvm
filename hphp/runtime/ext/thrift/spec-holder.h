@@ -41,6 +41,7 @@ struct FieldSpec {
   TType type;
   StringData* name;  // TODO(9396341): Consider using LowStringPtr.
   ArrayData* spec;
+  bool isUnion;
 };
 
 using StructSpec = FixedVector<FieldSpec>;
@@ -91,6 +92,8 @@ struct SpecHolder {
         (TType)fieldSpec.rvalAt(s_type, AccessFlags::Error_Key).toInt64();
       field.name =
         fieldSpec.rvalAt(s_var, AccessFlags::Error_Key).toString().get();
+      field.isUnion =
+        fieldSpec.rvalAt(s_union, AccessFlags::Key).toBoolean();
     }
     if (temp.size() >> 16) {
       thrift_error("Too many keys in TSPEC (expected < 2^16)",

@@ -48,6 +48,8 @@ const StaticString
   s_val("val"),
   s_elem("elem"),
   s_var("var"),
+  s_union("union"),
+  s__type("_type"),
   s_type("type"),
   s_ktype("ktype"),
   s_vtype("vtype"),
@@ -394,6 +396,10 @@ void binary_deserialize_slow(const Object& zthis, const Array& spec,
       if (ttypes_are_compatible(ttype, expected_ttype)) {
         Variant rv = binary_deserialize(ttype, transport, fieldspec);
         zthis->o_set(varname, rv, zthis->getClassName());
+        bool isUnion = fieldspec.rvalAt(s_union).toBoolean();
+        if (isUnion) {
+          zthis->o_set(s__type, Variant(fieldno), zthis->getClassName());
+        }
       } else {
         skip_element(ttype, transport);
       }
@@ -432,6 +438,14 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
         !ttypes_are_compatible(fieldType, fields[i].type)) {
       return binary_deserialize_slow(
         dest, spec, fieldNum, fieldType, transport);
+    }
+    if (fields[i].isUnion) {
+      if (s__type.equal(prop[numFields].name)) {
+        tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
+      } else {
+        return binary_deserialize_slow(
+          dest, spec, fieldNum, fieldType, transport);
+      }
     }
     ArrNR fieldSpec(fields[i].spec);
     tvAsVariant(&objProp[i]) =

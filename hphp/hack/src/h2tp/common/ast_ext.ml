@@ -9,7 +9,6 @@
  *)
 
 open Ast
-open Utils
 module Str = Str_ext
 let (=~) = Str.(=~)
 let mk_set = List.fold_left (fun acc x -> SSet.add x acc) SSet.empty

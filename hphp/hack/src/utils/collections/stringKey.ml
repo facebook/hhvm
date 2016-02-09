@@ -8,8 +8,6 @@
  *
  *)
 
-type msg =
-  | Ready
-  | Updates of SSet.t
-
-val entry_point: ((string * Path.t list), unit, msg) Daemon.entry
+type t = string
+let compare (x: t) (y: t) = String.compare x y
+let to_string x = x

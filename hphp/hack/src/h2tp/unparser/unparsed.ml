@@ -8,7 +8,6 @@
  *
  *)
 
-open Utils
 module List = Core_list
 
 type unparsed =

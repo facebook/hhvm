@@ -69,7 +69,6 @@ private:
   ServerPtr m_pageServer;
   ServerPtr m_adminServer;
   std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
-  std::vector<std::unique_ptr<SatelliteServer>> m_danglings;
   AsyncFunc<HttpServer> m_watchDog;
 
   bool startServer(bool pageServer);

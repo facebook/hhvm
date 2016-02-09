@@ -31,7 +31,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::set<std::string> SatelliteServerInfo::InternalURLs;
-int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
                                          const Hdf& hdf,
@@ -64,9 +63,6 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
     if (Config::GetBool(ini, hdf, "BlockMainServer", true, false)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
-  } else if (type == "DanglingPageServer") {
-    m_type = SatelliteServer::Type::KindOfDanglingPageServer;
-    DanglingServerPort = m_port;
   } else if (type == "RPCServer") {
     m_type = SatelliteServer::Type::KindOfRPCServer;
   } else {
@@ -134,35 +130,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// DanglingPageServer: same as Server
-
-struct DanglingPageServer : SatelliteServer {
-  explicit DanglingPageServer(std::shared_ptr<SatelliteServerInfo> info) {
-    m_server = ServerFactoryRegistry::createServer
-      (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
-       info->getThreadCount());
-    m_server->setRequestHandlerFactory<HttpRequestHandler>(
-      info->getTimeoutSeconds().count());
-  }
-
-  virtual void start() {
-    m_server->start();
-  }
-  virtual void stop() {
-    m_server->stop();
-    m_server->waitForEnd();
-  }
-  virtual int getActiveWorker() {
-    return m_server->getActiveWorker();
-  }
-  virtual int getQueuedJobs() {
-    return m_server->getQueuedJobs();
-  }
-private:
-  ServerPtr m_server;
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // RPCServer: Server + RPCRequestHandler
 
 struct RPCServer : SatelliteServer {
@@ -205,9 +172,6 @@ SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
     switch (info->getType()) {
     case Type::KindOfInternalPageServer:
       satellite.reset(new InternalPageServer(info));
-      break;
-    case Type::KindOfDanglingPageServer:
-      satellite.reset(new DanglingPageServer(info));
       break;
     case Type::KindOfRPCServer:
       satellite.reset(new RPCServer(info));

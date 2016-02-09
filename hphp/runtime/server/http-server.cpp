@@ -130,11 +130,7 @@ HttpServer::HttpServer()
     auto info = RuntimeOption::SatelliteServerInfos[i];
     auto satellite(SatelliteServer::Create(info));
     if (satellite) {
-      if (info->getType() == SatelliteServer::Type::KindOfDanglingPageServer) {
-        m_danglings.push_back(std::move(satellite));
-      } else {
-        m_satellites.push_back(std::move(satellite));
-      }
+      m_satellites.push_back(std::move(satellite));
     }
   }
 
@@ -177,7 +173,7 @@ HttpServer::HttpServer()
   }
 }
 
-// Synchronously stop satellites and start danglings
+// Synchronously stop satellites
 void HttpServer::onServerShutdown() {
   InitFiniNode::ServerFini();
 
@@ -199,19 +195,6 @@ void HttpServer::onServerShutdown() {
     m_adminServer->stop();
     m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");
-  }
-
-  // start dangling servers, so they can serve old version of pages
-  for (unsigned int i = 0; i < m_danglings.size(); i++) {
-    std::string name = m_danglings[i]->getName();
-    try {
-      m_danglings[i]->start();
-      Logger::Info("dangling server %s started", name.c_str());
-    } catch (Exception &e) {
-      Logger::Error("Unable to start danglings server %s: %s",
-                    name.c_str(), e.getMessage().c_str());
-      // it's okay not able to start them
-    }
   }
 }
 
@@ -315,23 +298,9 @@ void HttpServer::runOrExitProcess() {
     Logger::Info("page server stopped");
   }
 
-  onServerShutdown(); // dangling server already started here
-  time_t t0 = time(0);
+  onServerShutdown();
   if (RuntimeOption::ServerPort) {
     m_pageServer->stop();
-  }
-  time_t t1 = time(0);
-  if (!m_danglings.empty() && RuntimeOption::ServerDanglingWait > 0) {
-    int elapsed = t1 - t0;
-    if (RuntimeOption::ServerDanglingWait > elapsed) {
-      sleep(RuntimeOption::ServerDanglingWait - elapsed);
-    }
-  }
-
-  for (unsigned int i = 0; i < m_danglings.size(); i++) {
-    m_danglings[i]->stop();
-    Logger::Info("dangling server %s stopped",
-                 m_danglings[i]->getName().c_str());
   }
 
   waitForServers();

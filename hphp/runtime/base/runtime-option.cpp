@@ -169,7 +169,6 @@ int RuntimeOption::ServerGracefulShutdownWait = 0;
 bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
 bool RuntimeOption::ServerKillOnSIGTERM = false;
-int RuntimeOption::ServerDanglingWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
@@ -1266,13 +1265,9 @@ void RuntimeOption::Load(
     Config::Bind(ServerKillOnSIGTERM, ini, config, "Server.KillOnSIGTERM",
                  false);
     Config::Bind(ServerEvilShutdown, ini, config, "Server.EvilShutdown", true);
-    Config::Bind(ServerDanglingWait, ini, config, "Server.DanglingWait", 0);
     Config::Bind(ServerShutdownListenWait, ini, config,
                  "Server.ShutdownListenWait", 0);
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
-    if (ServerGracefulShutdownWait < ServerDanglingWait) {
-      ServerGracefulShutdownWait = ServerDanglingWait;
-    }
     Config::Bind(GzipCompressionLevel, ini, config,
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,

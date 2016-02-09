@@ -42,7 +42,6 @@ bool TestExtServer::RunTests(const std::string &which) {
   RuntimeOption::XboxServerInfoReqInitDoc = root + "test_xbox_init.php";
   XboxServer::Restart();
 
-  RUN_TEST(test_dangling_server_proxy_old_request);
   RUN_TEST(test_pagelet_server_task_start);
   RUN_TEST(test_pagelet_server_task_status);
   RUN_TEST(test_pagelet_server_task_result);
@@ -55,11 +54,6 @@ bool TestExtServer::RunTests(const std::string &which) {
   return ret;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-bool TestExtServer::test_dangling_server_proxy_old_request() {
-  return Count(true);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Pagelet Server unit test

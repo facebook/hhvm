@@ -32,7 +32,6 @@ struct SatelliteServer {
     Unknown,
 
     KindOfInternalPageServer,  // handles restricted URLs
-    KindOfDanglingPageServer,  // handles old version requests during shutdown
     KindOfRPCServer,           // invokes one PHP function and returns JSON
     KindOfXboxServer,          // handles internal xbox tasks
   };
@@ -64,7 +63,6 @@ struct SatelliteServerInfo {
    * These are collected from all internal page servers.
    */
   static std::set<std::string> InternalURLs;
-  static int DanglingServerPort;
 
   /**
    * Check whether a requested path should be allowed on the main server.

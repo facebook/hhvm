@@ -29,10 +29,6 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
                         std::string &which, std::string &set) {
   // individual test suites
   s_suite = suite;
-  if (suite == "TestLibEventServer") {
-    RUN_TESTSUITE(TestLibEventServer);
-    return;
-  }
 
   // set based tests with many suites
   if (set == "TestUnit") {

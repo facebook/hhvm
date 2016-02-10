@@ -37,7 +37,11 @@ namespace {
  */
 void checked_mprotect(void* addr, size_t size, int prot) {
   auto const rval = mprotect(addr, size, prot);
-  always_assert_flog(rval == 0, "mprotect failed in ReadOnlyArena");
+  always_assert_flog(rval == 0,
+                     "mprotect({},{},{})={} failed in ReadOnlyArena",
+                     addr, size,
+                     prot == PROT_READ ? "R" : "RW",
+                     rval);
 }
 
 }

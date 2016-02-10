@@ -689,7 +689,7 @@ function mysql_pconnect_with_db(string $server = '',
  *   server is working, otherwise FALSE.
  */
 <<__Native>>
-function mysql_ping(?resource $link_identifier = NULL): ?bool;
+function mysql_ping(?resource $link_identifier = NULL): bool;
 
 /**
  * Send a MySQL query

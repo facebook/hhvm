@@ -793,7 +793,7 @@ RegionDescPtr selectHotRegion(TransID transId,
   assertx(RuntimeOption::EvalJitPGO);
 
   const ProfData* profData = mcg->tx().profData();
-  auto const& func = *(profData->transFunc(transId));
+  auto const& func = *profData->transRec(transId)->func();
   FuncId funcId = func.getFuncId();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
                mcg->getJmpToTransIDMap());

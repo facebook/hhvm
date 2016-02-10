@@ -34,9 +34,12 @@ TRACE_SET_MOD(pgo);
 
 namespace {
 
-typedef hphp_hash_map<TransID, RegionDescPtr>            TransIDToRegionMap;
-typedef hphp_hash_map<RegionDescPtr, TransIDVec,
-                      smart_pointer_hash<RegionDescPtr>> RegionToTransIDsMap;
+using TransIDToRegionMap = hphp_hash_map<TransID, RegionDescPtr>;
+using RegionToTransIDsMap = hphp_hash_map<
+  RegionDescPtr,
+  TransIDVec,
+  smart_pointer_hash<RegionDescPtr>
+>;
 
 /**
  * Returns the set of of TransIDs that are in `bid's retranslation
@@ -79,11 +82,11 @@ void markCoveredArc(TransID src,
  */
 void markCovered(const TransCFG& cfg, const RegionDescPtr region,
                  const TransIDVec& selectedVec, const TransIDSet heads,
-                 TransIDToRegionMap  headToRegion,
+                 TransIDToRegionMap headToRegion,
                  TransIDSet& coveredNodes,
                  TransCFG::ArcPtrSet& coveredArcs) {
   assertx(selectedVec.size() > 0);
-  TransID newHead = selectedVec[0];
+  auto newHead = selectedVec[0];
   assertx(!region->empty());
   assertx(newHead == getTransID(region->entry()->id()));
 
@@ -92,7 +95,7 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
 
   // Mark all incoming arcs into newHead from covered nodes as covered.
   for (auto arc : cfg.inArcs(newHead)) {
-    TransID src = arc->src();
+    auto const src = arc->src();
     if (coveredNodes.count(src)) {
       markCoveredArc(src, arc->dst(), cfg, *region, coveredArcs);
     }
@@ -101,7 +104,7 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
   // Mark all CFG arcs within the region as covered.
   region->forEachArc([&](RegionDesc::BlockId src, RegionDesc::BlockId dst) {
     if (!hasTransID(dst)) return;
-    TransID dstTid = region->block(dst)->profTransID();
+    auto const dstTid = region->block(dst)->profTransID();
     auto markOutgoing = [&](TransID srcTid) {
       for (auto arc : cfg.outArcs(srcTid)) {
         if (arc->dst() == dstTid) {
@@ -163,9 +166,6 @@ void sortRegions(RegionVec&                  regions,
                  const ProfData*             profData,
                  const TransIDToRegionMap&   headToRegion,
                  const RegionToTransIDsMap&  regionToTransIds) {
-  RegionVec sorted;
-  RegionSet selected;
-
   if (regions.empty()) return;
 
   // First, pick the region starting at the lowest bytecode offset.
@@ -175,24 +175,25 @@ void sortRegions(RegionVec&                  regions,
   // there multiple regions starting at the lowest bytecode offset,
   // pick the one with the largest profile weight.
   RegionDescPtr entryRegion = nullptr;
-  int64_t    maxEntryWeight = -1;
-  Offset     lowestOffset   = kInvalidOffset;
+  int64_t maxEntryWeight = -1;
+  auto lowestOffset = kInvalidOffset;
   for (const auto& pair : regionToTransIds) {
-    auto  r    = pair.first;
+    auto r    = pair.first;
     auto& tids = pair.second;
-    TransID firstTid = tids[0];
-    Offset firstOffset = profData->transSrcKey(firstTid).offset();
-    int64_t weight = cfg.weight(firstTid);
+    auto const firstTid = tids[0];
+    auto const firstOffset = profData->transRec(firstTid)->srcKey().offset();
+    auto const weight = cfg.weight(firstTid);
     if (lowestOffset == kInvalidOffset || firstOffset < lowestOffset ||
         (firstOffset == lowestOffset && weight > maxEntryWeight)) {
-      entryRegion    = r;
+      entryRegion = r;
       maxEntryWeight = weight;
-      lowestOffset   = firstOffset;
+      lowestOffset = firstOffset;
     }
   }
 
   assertx(entryRegion);
-  sorted.push_back(entryRegion);
+  RegionVec sorted {entryRegion};
+  RegionSet selected;
   selected.insert(entryRegion);
 
   RegionDescPtr region = entryRegion;
@@ -270,7 +271,7 @@ void regionizeFunc(const Func* func,
   const Timer rf_timer(Timer::regionizeFunc);
   assertx(RuntimeOption::EvalJitPGO);
 
-  PGORegionMode regionMode = pgoRegionMode(*func);
+  auto regionMode = pgoRegionMode(*func);
 
   auto const funcId = func->getFuncId();
   auto const profData = mcg->tx().profData();
@@ -285,36 +286,39 @@ void regionizeFunc(const Func* func,
            funcId, dotFileName);
   }
 
-  TransCFG::ArcPtrVec   arcs = cfg.arcs();
-  std::vector<TransID> nodes = cfg.nodes();
+  auto arcs = cfg.arcs();
+  auto nodes = cfg.nodes();
 
-  std::sort(nodes.begin(), nodes.end(),
-            [&](TransID tid1, TransID tid2) -> bool {
-              if (regionMode == PGORegionMode::WholeCFG ||
-                  regionMode == PGORegionMode::HotCFG) {
-                auto bcOff1 = profData->transStartBcOff(tid1);
-                auto bcOff2 = profData->transStartBcOff(tid2);
-                if (bcOff1 != bcOff2) return bcOff1 < bcOff2;
-              }
-              if (cfg.weight(tid1) != cfg.weight(tid2)) {
-                return cfg.weight(tid1) > cfg.weight(tid2);
-              }
-              // In case of ties, pick older translations first, in an
-              // attempt to start loops at their headers.
-              return tid1 < tid2;
-            });
+  std::sort(
+    nodes.begin(),
+    nodes.end(),
+    [&](TransID tid1, TransID tid2) -> bool {
+      if (regionMode == PGORegionMode::WholeCFG ||
+          regionMode == PGORegionMode::HotCFG) {
+        auto bcOff1 = profData->transRec(tid1)->startBcOff();
+        auto bcOff2 = profData->transRec(tid2)->startBcOff();
+        if (bcOff1 != bcOff2) return bcOff1 < bcOff2;
+      }
+      if (cfg.weight(tid1) != cfg.weight(tid2)) {
+        return cfg.weight(tid1) > cfg.weight(tid2);
+      }
+      // In case of ties, pick older translations first, in an attempt to start
+      // loops at their headers.
+      return tid1 < tid2;
+    }
+  );
 
   TransCFG::ArcPtrSet coveredArcs;
-  TransIDSet          coveredNodes;
-  TransIDSet          heads;
-  TransIDToRegionMap  headToRegion;
+  TransIDSet coveredNodes;
+  TransIDSet heads;
+  TransIDToRegionMap headToRegion;
   RegionToTransIDsMap regionToTransIds;
   regions.clear();
 
   for (auto node : nodes) {
     if (!coveredNodes.count(node) ||
         !allArcsCovered(cfg.inArcs(node),  coveredArcs)) {
-      TransID newHead = node;
+      auto newHead = node;
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);
       TransIDSet selectedSet;
       TransIDVec selectedVec;
@@ -339,7 +343,7 @@ void regionizeFunc(const Func* func,
       }
       FTRACE(6, "regionizeFunc: selected region to cover node {}\n{}\n",
              newHead, show(*region));
-      profData->setOptimized(profData->transSrcKey(newHead));
+      profData->setOptimized(profData->transRec(newHead)->srcKey());
       assertx(selectedVec.size() > 0 && selectedVec[0] == newHead);
       regions.push_back(region);
       heads.insert(newHead);
@@ -367,4 +371,4 @@ void regionizeFunc(const Func* func,
   }
 }
 
-} }
+}}

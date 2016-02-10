@@ -69,17 +69,17 @@ std::unordered_map<const Func*, FuncInfo> s_funcTCData;
 void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
                             bool isGuard) {
   auto data = mcg->tx().profData();
-  auto tid = data->prologueTransId(func, numArgs);
-  if (tid == kInvalidTransID || !data->hasTransRec(tid) ||
-      data->transKind(tid) != TransKind::Proflogue) {
-    return;
-  }
-  auto* pc = data->prologueCallers(tid);
+  auto const tid = data->proflogueTransId(func, numArgs);
+  if (tid == kInvalidTransID) return;
+
+  auto rec = data->transRec(tid);
+  if (!rec || !rec->isProflogue()) return;
+
   if (isGuard) {
-    pc->removeGuardCaller(toSmash);
+    rec->removeGuardCaller(toSmash);
     return;
   }
-  pc->removeMainCaller(toSmash);
+  rec->removeMainCaller(toSmash);
 }
 
 /*

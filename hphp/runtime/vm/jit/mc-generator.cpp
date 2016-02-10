@@ -282,7 +282,7 @@ void MCGenerator::invalidateFuncProfSrcKeys(const Func* func) {
   assertx(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
   for (auto tid : m_tx.profData()->funcProfTransIDs(funcId)) {
-    invalidateSrcKey(m_tx.profData()->transSrcKey(tid));
+    invalidateSrcKey(m_tx.profData()->transRec(tid)->srcKey());
   }
 }
 
@@ -335,13 +335,14 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
 
-  if (!m_tx.profData()->hasTransRec(transId)) return nullptr;
+  auto rec = m_tx.profData()->transRec(transId);
+  if (!rec) return nullptr;
 
-  always_assert(m_tx.profData()->transRegion(transId) != nullptr);
+  always_assert(rec->region() != nullptr);
 
-  auto func   = m_tx.profData()->transFunc(transId);
+  auto func   = rec->func();
   auto funcId = func->getFuncId();
-  auto sk     = m_tx.profData()->transSrcKey(transId);
+  auto sk     = rec->srcKey();
 
   if (m_tx.profData()->optimized(funcId)) return nullptr;
   m_tx.profData()->setOptimized(funcId);
@@ -594,9 +595,6 @@ MCGenerator::createTranslation(const TranslArgs& args) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }
 
-    if (m_tx.profData()) {
-      m_tx.profData()->addTransNonProf(TransKind::Anchor, sk);
-    }
     assertx(!m_tx.isTransDBEnabled() ||
            m_tx.getTransRec(realColdStart)->kind == TransKind::Anchor);
   }
@@ -746,7 +744,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
 
   // Give the prologue a TransID if we have profiling data.
   auto transID = m_tx.profData()
-    ? m_tx.profData()->addTransPrologue(kind, funcBody, paramIndex)
+    ? m_tx.profData()->addTransProflogue(funcBody, paramIndex)
     : kInvalidTransID;
 
   TCA start = genFuncPrologue(transID, kind, func, argc);
@@ -872,8 +870,9 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
  * translation is generated; otherwise returns nullptr.
  */
 TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
-  Func* func = m_tx.profData()->transFunc(prologueTransId);
-  int  nArgs = m_tx.profData()->prologueArgs(prologueTransId);
+  auto rec = m_tx.profData()->transRec(prologueTransId);
+  auto func = rec->func();
+  auto nArgs = rec->prologueArgs();
 
   // Regenerate the prologue.
   func->resetPrologue(nArgs);
@@ -888,9 +887,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.
-  PrologueCallersRec* pcr =
-    m_tx.profData()->prologueCallers(prologueTransId);
-  for (TCA toSmash : pcr->mainCallers()) {
+  for (auto toSmash : rec->mainCallers()) {
     smashCall(toSmash, start);
   }
 
@@ -898,11 +895,11 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   // well.
   auto const guard = funcGuardFromPrologue(start, func);
   if (funcGuardMatches(guard, func)) {
-    for (TCA toSmash : pcr->guardCallers()) {
+    for (auto toSmash : rec->guardCallers()) {
       smashCall(toSmash, guard);
     }
   }
-  pcr->clearAllCallers();
+  rec->clearAllCallers();
 
   // If this prologue has a DV funclet, then generate a translation for the DV
   // funclet right after the prologue.
@@ -949,7 +946,7 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
   std::vector<TransID> prologTransIDs;
 
   for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
-    TransID tid = m_tx.profData()->prologueTransId(func, nArgs);
+    TransID tid = m_tx.profData()->proflogueTransId(func, nArgs);
     if (tid != kInvalidTransID) {
       prologTransIDs.push_back(tid);
     }
@@ -1392,12 +1389,14 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
         int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                    nArgs :  calleeNumParams + 1);
         if (code.prof().contains(start) && !m_tx.profData()->freed()) {
+          auto rec = m_tx.profData()->prologueTransRec(
+            func,
+            calledPrologNumArgs
+          );
           if (isImmutable) {
-            m_tx.profData()->addPrologueMainCaller(
-              func, calledPrologNumArgs, toSmash);
+            rec->addMainCaller(toSmash);
           } else {
-            m_tx.profData()->addPrologueGuardCaller(
-              func, calledPrologNumArgs, toSmash);
+            rec->addGuardCaller(toSmash);
           }
           is_profiled = true;
         }
@@ -2031,13 +2030,9 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
                        false, false);
   recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
                        false, false);
-  if (RuntimeOption::EvalJitPGO) {
-    if (kind == TransKind::Profile) {
-      always_assert(region);
-      m_tx.profData()->addTransProfile(region, pconds);
-    } else {
-      m_tx.profData()->addTransNonProf(kind, sk);
-    }
+  if (RuntimeOption::EvalJitPGO && kind == TransKind::Profile) {
+    always_assert(region);
+    m_tx.profData()->addTransProfile(region, pconds);
   }
 
   auto tr = maker.rec(sk, kind, region, m_fixups.bcMap,

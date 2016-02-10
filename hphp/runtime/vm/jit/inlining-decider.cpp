@@ -501,8 +501,9 @@ TransID findTransIDForCallee(const Func* callee, const int numArgs,
 
   auto const offset = callee->getEntryForNumArgs(numArgs);
   for (auto const id : idvec) {
-    if (profData->transStartBcOff(id) != offset) continue;
-    auto const region = profData->transRegion(id);
+    auto const rec = profData->transRec(id);
+    if (rec->startBcOff() != offset) continue;
+    auto const region = rec->region();
 
     auto const isvalid = [&] () {
       for (auto const& typeloc : region->entry()->typePreConditions()) {

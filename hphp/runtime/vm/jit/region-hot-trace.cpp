@@ -78,8 +78,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
   FTRACE(1, "selectHotTrace: starting with maxBCInstrs = {}\n", numBCInstrs);
 
   while (!selectedSet.count(tid)) {
-
-    RegionDescPtr blockRegion = ctx.profData->transRegion(tid);
+    auto rec = ctx.profData->transRec(tid);
+    auto blockRegion = rec->region();
     if (blockRegion == nullptr) break;
 
     // Break if region would be larger than the specified limit.
@@ -101,8 +101,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
     // large regions containing the function body (starting at various
     // DV funclets).
     if (prevId != kInvalidTransID) {
-      const Func* func = ctx.profData->transFunc(tid);
-      Offset  bcOffset = ctx.profData->transStartBcOff(tid);
+      auto const func = rec->func();
+      auto const bcOffset = rec->startBcOff();
       if (func->base() == bcOffset) {
         FTRACE(2, "selectHotTrace: breaking region because reached the main "
                "function body entry at Translation {} (BC offset {})\n",
@@ -112,7 +112,7 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
     }
 
     if (prevId != kInvalidTransID) {
-      auto sk = ctx.profData->transSrcKey(tid);
+      auto sk = rec->srcKey();
       if (ctx.profData->optimized(sk)) {
         FTRACE(2, "selectHotTrace: breaking region because next sk already "
                "optimized, for Translation {}\n", tid);
@@ -137,7 +137,7 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
     selectedSet.insert(tid);
     if (selectedVec) selectedVec->push_back(tid);
 
-    const auto lastSk = ctx.profData->transLastSrcKey(tid);
+    const auto lastSk = rec->lastSrcKey();
     if (breaksRegion(lastSk)) {
       FTRACE(2, "selectHotTrace: breaking region because of last instruction "
              "in Translation {}: {}\n", tid, opcodeToName(lastSk.op()));
@@ -159,8 +159,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
 
     TransCFG::ArcPtrVec possibleOutArcs;
     for (auto arc : outArcs) {
-      RegionDesc::BlockPtr possibleNext =
-        ctx.profData->transRegion(arc->dst())->entry();
+      auto dstRec = ctx.profData->transRec(arc->dst());
+      auto possibleNext = dstRec->region()->entry();
       if (preCondsAreSatisfied(possibleNext, accumPostConds)) {
         possibleOutArcs.emplace_back(arc);
       }

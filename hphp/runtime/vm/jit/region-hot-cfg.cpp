@@ -162,7 +162,8 @@ private:
            includedCases, includedHits, totalHits);
     auto firstDead = std::remove_if(
       begin(arcs), end(arcs), [&](const TransCFG::Arc* arc) {
-        const bool ok = allowedSks.count(m_profData->transSrcKey(arc->dst()));
+        auto const rec = m_profData->transRec(arc->dst());
+        const bool ok = allowedSks.count(rec->srcKey());
         ITRACE(5, "Arc {} -> {} {}included\n",
                arc->src(), arc->dst(), ok ? "" : "not ");
         return !ok;
@@ -172,7 +173,8 @@ private:
   }
 
   void visit(TransID tid) {
-    auto tidRegion = m_profData->transRegion(tid);
+    auto rec = m_profData->transRec(tid);
+    auto tidRegion = rec->region();
     auto tidInstrs = tidRegion->instrSize();
     if (tidInstrs > m_numBCInstrs) {
       ITRACE(5, "- visit: skipping {} due to region size\n", tid);
@@ -194,7 +196,7 @@ private:
     m_numBCInstrs -= tidInstrs;
     ITRACE(5, "- visit: adding {} ({})\n", tid, tidWeight);
 
-    auto const termSk = m_profData->transLastSrcKey(tid);
+    auto const termSk = rec->lastSrcKey();
     auto const termOp = termSk.op();
     if (!breaksRegion(termSk)) {
       auto srcBlockId = tidRegion->blocks().back().get()->id();
@@ -227,13 +229,14 @@ private:
         }
 
         // Skip dst if we already generated a region starting at that SrcKey.
-        auto dstSK = m_profData->transSrcKey(dst);
+        auto dstRec = m_profData->transRec(dst);
+        auto dstSK = dstRec->srcKey();
         if (!m_inlining && m_profData->optimized(dstSK)) {
           ITRACE(5, "- visit: skipping {} because SrcKey was already "
                  "optimize", showShort(dstSK));
           continue;
         }
-        always_assert(dst == m_profData->transRegion(dst)->entry()->id());
+        always_assert(dst == dstRec->region()->entry()->id());
 
         visit(dst);
 

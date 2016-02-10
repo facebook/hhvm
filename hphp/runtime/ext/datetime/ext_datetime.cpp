@@ -342,6 +342,10 @@ int64_t DateTimeData::getTimestamp(const ObjectData* od) {
   return getTimestamp(Object(const_cast<ObjectData*>(od)));
 }
 
+int DateTimeData::compare(const ObjectData* left, const ObjectData* right) {
+  return left->m_dt->compare(right);
+}
+
 Object DateTimeData::wrap(req::ptr<DateTime> dt) {
   Object obj{getClass()};
   DateTimeData* data = Native::data<DateTimeData>(obj);

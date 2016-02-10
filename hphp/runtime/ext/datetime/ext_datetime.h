@@ -51,6 +51,7 @@ struct DateTimeData {
 
   static int64_t getTimestamp(const Object& obj);
   static int64_t getTimestamp(const ObjectData* od);
+  static int compare(const ObjectData* left, const ObjectData* right);
   static Object wrap(req::ptr<DateTime> dt);
   static req::ptr<DateTime> unwrap(const Object& datetime);
   static Class* getClass();

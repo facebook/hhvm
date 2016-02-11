@@ -253,10 +253,15 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 bool shouldPGOFunc(const Func& func) {
-  // JITing pseudo-mains requires extra checks that blow the IR.  PGO can
-  // significantly increase the size of the regions, so disable it for
+  if (!RuntimeOption::EvalJitPGO) return false;
+
+  // JITing pseudo-mains requires extra checks that blow the IR.  PGO
+  // can significantly increase the size of the regions, so disable it for
   // pseudo-mains (so regions will be just tracelets).
-  return RuntimeOption::EvalJitPGO && !func.isPseudoMain();
+  if (func.isPseudoMain()) return false;
+
+  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
+  return func.attrs() & AttrHot;
 }
 
 bool MCGenerator::profileSrcKey(SrcKey sk) const {

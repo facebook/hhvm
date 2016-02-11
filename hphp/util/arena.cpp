@@ -109,8 +109,8 @@ void ArenaImpl<kChunkBytes>::createSlab() {
 
 //////////////////////////////////////////////////////////////////////
 
-template class ArenaImpl<4096>;
-template class ArenaImpl<32 * 1024>;
+template struct ArenaImpl<4096>;
+template struct ArenaImpl<32 * 1024>;
 
 //////////////////////////////////////////////////////////////////////
 

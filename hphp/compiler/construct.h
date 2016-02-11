@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Variant;
+struct Variant;
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(IParseHandler);
@@ -37,7 +37,7 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-class AstWalkerStateVec;
+struct AstWalkerStateVec;
 
 struct IParseHandler {
   /**

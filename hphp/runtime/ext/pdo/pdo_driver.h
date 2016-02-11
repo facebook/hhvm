@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOConnection;
+struct PDOConnection;
 struct PDODriver;
 struct PDOResource;
 struct PDOStatement;

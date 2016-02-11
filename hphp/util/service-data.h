@@ -189,7 +189,7 @@ struct ExportedCounter {
   int64_t getValue() const { return m_value.load(std::memory_order_relaxed); }
 
  private:
-  friend class detail::FriendDeleter<ExportedCounter>;
+  friend struct detail::FriendDeleter<ExportedCounter>;
   ~ExportedCounter() {}
 
   std::atomic_int_fast64_t m_value;
@@ -211,7 +211,7 @@ struct ExportedTimeSeries {
                  std::map<std::string, int64_t>& statsMap);
 
  private:
-  friend class detail::FriendDeleter<ExportedTimeSeries>;
+  friend struct detail::FriendDeleter<ExportedTimeSeries>;
   ~ExportedTimeSeries() {}
 
   folly::Synchronized<folly::MultiLevelTimeSeries<int64_t>,
@@ -229,7 +229,7 @@ struct ExportedHistogram {
                  std::map<std::string, int64_t>& statsMap);
 
  private:
-  friend class detail::FriendDeleter<ExportedHistogram>;
+  friend struct detail::FriendDeleter<ExportedHistogram>;
   ~ExportedHistogram() {}
 
   folly::Synchronized<folly::Histogram<int64_t>, folly::RWSpinLock> m_histogram;

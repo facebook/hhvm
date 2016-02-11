@@ -32,7 +32,7 @@ namespace HPHP {
  * An async generator wait handle represents one step of asynchronous execution
  * between two yield statements of an async generator.
  */
-class AsyncGenerator;
+struct AsyncGenerator;
 
 struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   WAITHANDLE_CLASSOF(AsyncGeneratorWaitHandle);

@@ -18,7 +18,7 @@
 #define incl_HPHP_FUNC_EFFECTS_H_
 
 namespace HPHP {
-class Func;
+struct Func;
 
 namespace jit {
 struct NormalizedInstruction;

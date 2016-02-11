@@ -48,7 +48,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_EXTENDED_BOOST_TYPES(Expression);
-class Variant;
+struct Variant;
 
 struct Expression : Construct {
 private:

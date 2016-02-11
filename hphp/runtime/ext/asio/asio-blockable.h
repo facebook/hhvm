@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class c_WaitableWaitHandle;
+struct c_WaitableWaitHandle;
 
 struct AsioBlockable final {
   enum class Kind : uint8_t {

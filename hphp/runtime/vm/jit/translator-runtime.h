@@ -28,7 +28,7 @@ struct _Unwind_Exception;
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-class Func;
+struct Func;
 struct c_Pair;
 struct c_Vector;
 struct MInstrState;

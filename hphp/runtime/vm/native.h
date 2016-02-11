@@ -28,7 +28,7 @@ namespace HPHP {
 struct ActRec;
 struct Class;
 struct FuncEmitter;
-class Object;
+struct Object;
 };
 
 /* Macros related to declaring/registering internal implementations

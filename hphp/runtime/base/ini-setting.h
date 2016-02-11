@@ -98,12 +98,12 @@ const IniSettingMap ini_iterate(const IniSettingMap& ini,
  * is done privately with the statics s_user_callbacks and
  * s_system_ini_callbacks.
  *
- * In addition, a unique instance of the class UserIniData can be
+ * In addition, a unique instance of the struct UserIniData can be
  * associated with the IniCallbackData. The IniCallbackData instance
  * is the point of ownership of the instance of UserIniData, and is
  * responsible for firing the destructor.
  *
- * The class UserIniData should be subclassed to hold data specific
+ * The struct UserIniData should be subclassed to hold data specific
  * to an initialization regime, such as the zend compatibility layer
  * implementation of zend_ini_entry. That subclass is responsible for
  * allocating/freeing its own internal data.
@@ -260,7 +260,7 @@ public:
     explicit SetAndGet(
       std::function<bool (const T&)> setter,
       std::function<T ()> getter,
-      std::function<class UserIniData *()>initter = nullptr)
+      std::function<struct UserIniData *()>initter = nullptr)
       : setter(setter),
         getter(getter),
         initter(initter) {}
@@ -269,7 +269,7 @@ public:
 
     std::function<bool (const T&)> setter;
     std::function<T ()> getter;
-    std::function<class UserIniData *()> initter;
+    std::function<struct UserIniData *()> initter;
   };
 
   /**

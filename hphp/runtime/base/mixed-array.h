@@ -335,7 +335,7 @@ private:
   friend struct BaseSet;
   friend struct c_Set;
   friend struct c_ImmSet;
-  friend class c_AwaitAllWaitHandle;
+  friend struct c_AwaitAllWaitHandle;
   enum class ClonePacked {};
   enum class CloneMixed {};
 

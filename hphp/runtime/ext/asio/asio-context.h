@@ -27,12 +27,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ActRec;
-class c_WaitableWaitHandle;
-class c_ResumableWaitHandle;
-class c_RescheduleWaitHandle;
-class c_SleepWaitHandle;
-class c_ExternalThreadEventWaitHandle;
-class c_AsyncFunctionWaitHandle;
+struct c_WaitableWaitHandle;
+struct c_ResumableWaitHandle;
+struct c_RescheduleWaitHandle;
+struct c_SleepWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
+struct c_AsyncFunctionWaitHandle;
 
 typedef uint8_t context_idx_t;
 

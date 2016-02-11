@@ -29,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StackTrace;
-class Exception;
+struct Exception;
 
 struct Logger {
   enum LogLevelType {

@@ -491,11 +491,11 @@ struct BaseVector : ExtCollectionObjectData {
 
   // Friends
 
-  friend class collections::VectorIterator;
+  friend struct collections::VectorIterator;
   friend struct BaseMap;
   friend struct BaseSet;
   friend struct c_Pair;
-  friend class c_AwaitAllWaitHandle;
+  friend struct c_AwaitAllWaitHandle;
 
   friend void collections::deepCopy(TypedValue*);
 
@@ -1352,13 +1352,13 @@ struct BaseMap : HashCollection {
  private:
   friend void collections::deepCopy(TypedValue*);
 
-  friend class collections::MapIterator;
+  friend struct collections::MapIterator;
   friend struct c_Vector;
   friend struct c_Map;
   friend struct c_ImmMap;
   friend struct ArrayIter;
-  friend class c_AwaitAllWaitHandle;
-  friend class c_GenMapWaitHandle;
+  friend struct c_AwaitAllWaitHandle;
+  friend struct c_GenMapWaitHandle;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
@@ -1810,7 +1810,7 @@ struct BaseSet : HashCollection {
 
  private:
 
-  friend class collections::SetIterator;
+  friend struct collections::SetIterator;
   friend struct c_Vector;
   friend struct c_Set;
   friend struct c_Map;

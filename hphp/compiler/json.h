@@ -190,8 +190,8 @@ private:
 
   std::ostream &raw() { return m_out;}
 
-  friend class _MapStream<Type>;
-  friend class _ListStream<Type>;
+  friend struct _MapStream<Type>;
+  friend struct _ListStream<Type>;
 };
 
 template <typename Type>

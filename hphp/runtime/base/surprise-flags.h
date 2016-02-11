@@ -70,6 +70,7 @@ enum SurpriseFlag : size_t {
     InterceptFlag |
     XenonSignalFlag |
     IntervalTimerFlag |
+    MemThresholdFlag |
     ResourceFlags,
 };
 

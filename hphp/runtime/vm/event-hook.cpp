@@ -96,6 +96,19 @@ struct ExecutingSetprofileCallbackGuard {
   }
 };
 
+void EventHook::DoMemoryThresholdCallback() {
+  clearSurpriseFlag(MemThresholdFlag);
+  if (!g_context->m_memThresholdCallback.isNull()) {
+    VMRegAnchor _;
+    try {
+      vm_call_user_func(g_context->m_memThresholdCallback, empty_array());
+    } catch (Object& ex) {
+      raise_error("Uncaught exception escaping mem Threshold callback: %s",
+                  ex.toString().data());
+    }
+  }
+}
+
 namespace {
 
 bool shouldRunUserProfiler(const Func* func) {
@@ -345,6 +358,11 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     Xenon::getInstance().log(Xenon::ExitSample);
   }
 
+  // Memory Threhsold
+  if (flags & MemThresholdFlag) {
+    DoMemoryThresholdCallback();
+  }
+
   // Run IntervalTimer callbacks only if it's safe to do so, i.e., not when
   // there's a pending exception or we're unwinding from a C++ exception.
   if (flags & IntervalTimerFlag
@@ -406,6 +424,11 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
     Xenon::getInstance().log(Xenon::EnterSample);
   }
 
+  // Memory Threhsold
+  if (flags & MemThresholdFlag) {
+    DoMemoryThresholdCallback();
+  }
+
   if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
@@ -422,6 +445,11 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
     Xenon::getInstance().log(Xenon::ResumeAwaitSample);
   }
 
+  // Memory Threhsold
+  if (flags & MemThresholdFlag) {
+    DoMemoryThresholdCallback();
+  }
+
   if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::ResumeAwaitSample);
   }
@@ -435,6 +463,11 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::EnterSample);
+  }
+
+  // Memory Threhsold
+  if (flags & MemThresholdFlag) {
+    DoMemoryThresholdCallback();
   }
 
   if (flags & IntervalTimerFlag) {

@@ -528,7 +528,6 @@ struct RuntimeOption {
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
-  F(bool,     JitLoops,                true)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \

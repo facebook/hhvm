@@ -1932,7 +1932,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
         maker.markStart();
 
         result = translateRegion(irgs, *region, retry, args.flags, pconds);
-        hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(irgs.unit);
+        hasLoop = cfgHasLoop(irgs.unit);
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {
         FTRACE(1, "translateRegion failed with '{}'\n", e.what());
@@ -2087,11 +2087,6 @@ void MCGenerator::traceCodeGen(IRGS& irgs) {
   };
 
   finishPass(" after initial translation ", kIRLevel);
-
-  always_assert_flog(
-    IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops),
-    "IRUnit has loop but Eval.JitLoops=0"
-  );
 
   optimize(unit, irgs.context.kind);
   finishPass(" after optimizing ", kOptLevel);

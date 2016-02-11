@@ -26,7 +26,7 @@ struct Array;
 struct RequestURI;
 struct SourceRootInfo;
 struct StringBuffer;
-class Variant;
+struct Variant;
 struct VirtualHost;
 
 struct HttpProtocol {

@@ -962,10 +962,6 @@ void FrameStateMgr::startBlock(Block* block,
   auto const it = m_states.find(block);
   auto const end = m_states.end();
 
-  DEBUG_ONLY auto const predsAllowed =
-    it != end || block->isEntry() || RuntimeOption::EvalJitLoops;
-  assertx(IMPLIES(block->numPreds() > 0, predsAllowed));
-
   if (it != end) {
     if (m_status == Status::Building) {
       always_assert_flog(

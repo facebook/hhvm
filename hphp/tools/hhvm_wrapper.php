@@ -107,7 +107,6 @@ function determine_flags(OptionMap $opts): string {
   if ($opts->containsKey('region-mode')) {
     if ($opts['region-mode'] == 'method') {
       $flags .=
-        '-v Eval.JitLoops=1 '.
         '-v Eval.JitPGO=0 '.
         '';
       if (!$opts->containsKey('compile')) {
@@ -118,7 +117,6 @@ function determine_flags(OptionMap $opts): string {
     if ($opts['region-mode'] == 'wholecfg') {
       $flags .=
         '-v Eval.JitPGORegionSelector='.((string)$opts['region-mode']).' '.
-        '-v Eval.JitLoops=1 '.
         '';
     } else {
       $flags .=

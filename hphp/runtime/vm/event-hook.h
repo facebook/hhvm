@@ -62,6 +62,8 @@ struct EventHook {
   static void EnableIntercept();
   static void DisableIntercept();
 
+  static void DoMemoryThresholdCallback();
+
   /**
    * Event hooks -- interpreter entry points.
    */

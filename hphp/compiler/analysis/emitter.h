@@ -427,7 +427,7 @@ struct Region {
 };
 
 struct EmitterVisitor {
-  friend class UnsetUnnamedLocalThunklet;
+  friend struct UnsetUnnamedLocalThunklet;
   friend struct FuncFinisher;
 public:
   typedef std::vector<int> IndexChain;

@@ -26,7 +26,7 @@ namespace HPHP {
 struct String;
 struct StaticString;
 struct Array;
-class Variant;
+struct Variant;
 struct VarNR;
 
 extern const Variant null_variant;      // uninitialized variant
@@ -53,8 +53,8 @@ using LowStringPtr = LowPtr<const StringData>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using VRefParam = const class VRefParamValue&;
-using RefResult = const class RefResultValue&;
+using VRefParam = const struct VRefParamValue&;
+using RefResult = const struct RefResultValue&;
 
 inline const Variant& variant(RefResult v)      {
   return *(Variant*)&v;

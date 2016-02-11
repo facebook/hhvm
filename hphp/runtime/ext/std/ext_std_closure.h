@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StandardExtension;
+struct StandardExtension;
 
 extern const StaticString s_Closure;
 
@@ -138,7 +138,7 @@ struct c_Closure : ObjectData {
 
 private:
   friend struct Class;
-  friend class StandardExtension;
+  friend struct StandardExtension;
 
   static Class* cls_Closure;
   static void setAllocators(Class* cls);

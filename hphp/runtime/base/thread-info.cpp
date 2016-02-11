@@ -180,7 +180,6 @@ size_t check_request_surprise() {
   auto const flags = fetchAndClearSurpriseFlags();
   auto const do_timedout = (flags & TimedOutFlag) && !p.getDebuggerAttached();
   auto const do_memExceeded = flags & MemExceededFlag;
-  auto const do_memThreshold = flags & MemThresholdFlag;
   auto const do_signaled = flags & SignaledFlag;
   auto const do_cpuTimedOut =
     (flags & CPUTimedOutFlag) && !p.getDebuggerAttached();
@@ -212,18 +211,6 @@ size_t check_request_surprise() {
       setSurpriseFlag(MemExceededFlag);
     } else {
       pendingException = generate_memory_exceeded_exception();
-    }
-  }
-  if (do_memThreshold) {
-    clearSurpriseFlag(MemThresholdFlag);
-    if (!g_context->m_memThresholdCallback.isNull()) {
-      VMRegAnchor _;
-      try {
-        vm_call_user_func(g_context->m_memThresholdCallback, empty_array());
-      } catch (Object& ex) {
-        raise_error("Uncaught exception escaping mem Threshold callback: %s",
-                    ex.toString().data());
-      }
     }
   }
   if (do_GC) {

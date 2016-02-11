@@ -103,8 +103,8 @@ void optimize(IRUnit& unit, TransKind kind) {
     doPass(unit, optimizeRefcounts, DCE::Full);
   }
 
-  if (RuntimeOption::EvalHHIRLICM && RuntimeOption::EvalJitLoops &&
-      cfgHasLoop(unit) && kind != TransKind::Profile) {
+  if (RuntimeOption::EvalHHIRLICM && cfgHasLoop(unit) &&
+      kind != TransKind::Profile) {
     doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
   }
 

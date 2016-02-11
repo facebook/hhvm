@@ -220,14 +220,6 @@ private:
           continue;
         }
 
-        // If dst is in the visiting set then this arc forms a cycle. Don't
-        // include it unless we've asked for loops.
-        if (!RuntimeOption::EvalJitLoops && m_visiting.count(dst)) {
-          ITRACE(5, "- visit: skipping arc {} -> {} because it would create "
-                 "a loop\n", tid, dst);
-          continue;
-        }
-
         // Skip dst if we already generated a region starting at that SrcKey.
         auto dstRec = m_profData->transRec(dst);
         auto dstSK = dstRec->srcKey();

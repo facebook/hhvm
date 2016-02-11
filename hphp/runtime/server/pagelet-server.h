@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct PageletTransport;
-class PageletServerTaskEvent;
+struct PageletServerTaskEvent;
 
 struct PageletServer {
   static bool Enabled();

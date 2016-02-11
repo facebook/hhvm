@@ -85,7 +85,7 @@ private:
   }
 
   /* needed to allow IncomingBranch to be put in a GrowableVector */
-  friend class GrowableVector<IncomingBranch>;
+  friend struct GrowableVector<IncomingBranch>;
   IncomingBranch() {}
 
   CompactTaggedPtr<void,Tag> m_ptr;

@@ -439,10 +439,7 @@ void RegionDesc::chainRetransBlocks() {
   // 3. Sort each chain.  In general, we want to sort each chain in
   //    decreasing order of profile weights.  However, note that this
   //    transformation can turn acyclic graphs into cyclic ones (see
-  //    example below).  Therefore, if JitLoops are disabled, we
-  //    instead sort each chain following the original block order,
-  //    which prevents loops from being generated if the region was
-  //    originally acyclic.
+  //    example below).
   //
   //    Here's an example showing how an acyclic CFG can become cyclic
   //    by chaining its retranslation blocks:
@@ -467,27 +464,13 @@ void RegionDesc::chainRetransBlocks() {
     return hasTransID(bid) ? profData->transCounter(getTransID(bid)) : 0;
   };
 
-  auto sortGeneral = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
+  auto cmpBlocks = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
     return weight(bid1) > weight(bid2);
   };
 
-  using SortFun = std::function<bool(RegionDesc::BlockId, RegionDesc::BlockId)>;
-  SortFun sortFunc = sortGeneral;
-
-  hphp_hash_map<RegionDesc::BlockId, uint32_t> origBlockOrder;
-  if (!RuntimeOption::EvalJitLoops) {
-    for (uint32_t i = 0; i < m_blocks.size(); i++) {
-      origBlockOrder[m_blocks[i]->id()] = i;
-    }
-    auto sortAcyclic = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
-      return origBlockOrder[bid1] < origBlockOrder[bid2];
-    };
-    sortFunc = sortAcyclic;
-  }
-
   TRACE(1, "chainRetransBlocks: computed chains:\n");
   for (auto& c : chains) {
-    std::sort(c.blocks.begin(), c.blocks.end(), sortFunc);
+    std::sort(c.blocks.begin(), c.blocks.end(), cmpBlocks);
 
     if (Trace::moduleEnabled(Trace::region, 1) && c.blocks.size() > 0) {
       FTRACE(1, "  -> {} (w={})", c.blocks[0], weight(c.blocks[0]));
@@ -892,27 +875,20 @@ bool breaksRegion(SrcKey sk) {
 
 namespace {
 
-struct DFSChecker {
-
-  explicit DFSChecker(const RegionDesc& region)
+struct DFSWalker {
+  explicit DFSWalker(const RegionDesc& region)
     : m_region(region) { }
 
-  bool check(RegionDesc::BlockId id) {
-    if (m_visiting.count(id) > 0) {
-      // Found a loop. This is only valid if EvalJitLoops is enabled.
-      return RuntimeOption::EvalJitLoops;
-    }
-    if (m_visited.count(id) > 0) return true;
+  void walk(RegionDesc::BlockId id) {
+    if (m_visited.count(id) > 0) return;
     m_visited.insert(id);
-    m_visiting.insert(id);
+
     if (auto nextRetrans = m_region.nextRetrans(id)) {
-      if (!check(nextRetrans.value())) return false;
+      walk(nextRetrans.value());
     }
     for (auto succ : m_region.succs(id)) {
-      if (!check(succ)) return false;
+      walk(succ);
     }
-    m_visiting.erase(id);
-    return true;
   }
 
   size_t numVisited() const { return m_visited.size(); }
@@ -920,7 +896,6 @@ struct DFSChecker {
  private:
   const RegionDesc&      m_region;
   RegionDesc::BlockIdSet m_visited;
-  RegionDesc::BlockIdSet m_visiting;
 };
 
 }
@@ -941,15 +916,10 @@ struct DFSChecker {
  *   5) Each block contains at most one successor corresponding to a
  *      given SrcKey.
  *
- *   6) The region doesn't contain any loops, unless JitLoops is
- *      enabled.
- *
  *   7) All blocks are reachable from the entry block.
  *
  *   8) For each block, there must be a path from the entry to it that
  *      includes only earlier blocks in the region.
- *
- *   9) The region is topologically sorted unless loops are enabled.
  *
  *  10) The block-retranslation chains cannot have cycles.
  *
@@ -1032,18 +1002,14 @@ bool check(const RegionDesc& region, std::string& error) {
     }
   }
 
-  // 6) is checked by dfsCheck.
-  DFSChecker dfsCheck(region);
-  if (!dfsCheck.check(region.entry()->id())) {
-    return bad("region is cyclic");
-  }
-
   // 7) All blocks are reachable from the entry (first) block.
-  if (dfsCheck.numVisited() != blockSet.size()) {
+  DFSWalker dfsWalk(region);
+  dfsWalk.walk(region.entry()->id());
+  if (dfsWalk.numVisited() != blockSet.size()) {
     return bad("region has unreachable blocks");
   }
 
-  // 8) and 9) are checked below.
+  // 8) is checked below.
   RegionDesc::BlockIdSet visited;
   auto& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
@@ -1062,10 +1028,6 @@ bool check(const RegionDesc& region, std::string& error) {
     if (nVisited == 0 && i != 0) {
       return bad(folly::sformat("block {} appears before all its predecessors",
                                 bid));
-    }
-    // 9) The region is topologically sorted unless loops are enabled.
-    if (!RuntimeOption::EvalJitLoops && nVisited != nAllPreds) {
-      return bad(folly::sformat("non-topological order (bid: {})", bid));
     }
     visited.insert(bid);
   }

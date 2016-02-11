@@ -1198,7 +1198,7 @@ private:
     std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
   finish_class();
 
-  friend class collections::CollectionsExtension;
+  friend struct collections::CollectionsExtension;
 
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;

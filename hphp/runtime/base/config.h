@@ -21,7 +21,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-class Variant;
+struct Variant;
 struct IniSettingMap;
 typedef std::vector<std::string> ConfigVector;
 typedef std::map<std::string, std::string> ConfigMap;

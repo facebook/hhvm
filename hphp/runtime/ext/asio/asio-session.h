@@ -28,12 +28,12 @@ namespace HPHP {
 
 struct ActRec;
 struct c_WaitHandle;
-class c_AwaitAllWaitHandle;
-class c_GenArrayWaitHandle;
-class c_GenMapWaitHandle;
-class c_GenVectorWaitHandle;
-class c_ConditionWaitHandle;
-class c_ResumableWaitHandle;
+struct c_AwaitAllWaitHandle;
+struct c_GenArrayWaitHandle;
+struct c_GenMapWaitHandle;
+struct c_GenVectorWaitHandle;
+struct c_ConditionWaitHandle;
+struct c_ResumableWaitHandle;
 
 struct AsioSession final {
   static void Init();

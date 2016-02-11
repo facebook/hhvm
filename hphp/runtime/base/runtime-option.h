@@ -520,6 +520,7 @@ struct RuntimeOption {
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    pgoRegionSelectorDefault())      \
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
+  F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
@@ -528,7 +529,6 @@ struct RuntimeOption {
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
-  F(bool,     JitLoops,                true)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \

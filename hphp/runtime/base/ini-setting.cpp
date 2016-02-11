@@ -897,7 +897,7 @@ void IniSetting::Bind(
   const std::string& name,
   std::function<bool(const Variant&)> updateCallback,
   std::function<Variant()> getCallback,
-  std::function<class UserIniData *(void)> userDataCallback
+  std::function<struct UserIniData *(void)> userDataCallback
 ) {
   assert(!name.empty());
 

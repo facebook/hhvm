@@ -3838,7 +3838,12 @@ OPTBLD_INLINE void iopFatal(IOP_ARGS) {
 
 OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
   if (offset <= 0 && UNLIKELY(checkSurpriseFlags())) {
-    check_request_surprise();
+    auto const flags = check_request_surprise();
+
+    // Memory Threhsold callback should also be fired here
+    if (flags & MemThresholdFlag) {
+      EventHook::DoMemoryThresholdCallback();
+    }
   }
 }
 

@@ -95,10 +95,6 @@ protected:
   const std::string m_serverType;
 };
 
-struct TestLibEventServer : TestServer {
-  TestLibEventServer() : TestServer("proxygen") {}
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // macros
 

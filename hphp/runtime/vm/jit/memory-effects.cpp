@@ -38,7 +38,8 @@ AliasClass pointee(
   always_assert(type <= TPtrToGen);
   auto const maybeRef = type.maybe(TPtrToRefGen);
   auto const typeNR = type - TPtrToRefGen;
-  auto const sinst = canonical(ptr)->inst();
+  auto const canonPtr = canonical(ptr);
+  auto const sinst = canonPtr->inst();
 
   if (sinst->is(UnboxPtr)) {
     return ARefAny | pointee(sinst->src(0), visited_labels);
@@ -52,7 +53,9 @@ AliasClass pointee(
     }
 
     auto const dsts = sinst->dsts();
-    auto const dstIdx = std::find(dsts.begin(), dsts.end(), ptr) - dsts.begin();
+    auto const dstIdx =
+      std::find(dsts.begin(), dsts.end(), canonPtr) - dsts.begin();
+    always_assert(dstIdx >= 0 && dstIdx < sinst->numDsts());
 
     folly::Optional<jit::flat_set<const IRInstruction*>> label_set;
     if (visited_labels == nullptr) {

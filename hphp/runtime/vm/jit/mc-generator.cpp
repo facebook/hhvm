@@ -253,10 +253,15 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 bool shouldPGOFunc(const Func& func) {
-  // JITing pseudo-mains requires extra checks that blow the IR.  PGO can
-  // significantly increase the size of the regions, so disable it for
+  if (!RuntimeOption::EvalJitPGO) return false;
+
+  // JITing pseudo-mains requires extra checks that blow the IR.  PGO
+  // can significantly increase the size of the regions, so disable it for
   // pseudo-mains (so regions will be just tracelets).
-  return RuntimeOption::EvalJitPGO && !func.isPseudoMain();
+  if (func.isPseudoMain()) return false;
+
+  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
+  return func.attrs() & AttrHot;
 }
 
 bool MCGenerator::profileSrcKey(SrcKey sk) const {
@@ -1932,7 +1937,7 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
         maker.markStart();
 
         result = translateRegion(irgs, *region, retry, args.flags, pconds);
-        hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(irgs.unit);
+        hasLoop = cfgHasLoop(irgs.unit);
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {
         FTRACE(1, "translateRegion failed with '{}'\n", e.what());
@@ -2087,11 +2092,6 @@ void MCGenerator::traceCodeGen(IRGS& irgs) {
   };
 
   finishPass(" after initial translation ", kIRLevel);
-
-  always_assert_flog(
-    IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops),
-    "IRUnit has loop but Eval.JitLoops=0"
-  );
 
   optimize(unit, irgs.context.kind);
   finishPass(" after optimizing ", kOptLevel);

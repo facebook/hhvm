@@ -30,9 +30,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class BlockScope;
+struct BlockScope;
 struct CodeGenerator;
-class Variant;
+struct Variant;
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);

@@ -31,8 +31,8 @@ namespace HPHP {
  * wait handle if a result is not yet available. Once the wait handle finishes,
  * all blocked wait handles are notified.
  */
-class AsioBlockable;
-class AsioContext;
+struct AsioBlockable;
+struct AsioContext;
 
 struct c_WaitableWaitHandle : c_WaitHandle {
   WAITHANDLE_CLASSOF(WaitableWaitHandle);

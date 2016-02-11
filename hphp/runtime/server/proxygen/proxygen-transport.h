@@ -30,7 +30,7 @@
 
 namespace HPHP {
 struct ProxygenServer;
-class ProxygenTransport;
+struct ProxygenTransport;
 
 ////////////////////////////////////////////////////////////////////////////////
 /** Message passed from dispatch thread to I/O thread

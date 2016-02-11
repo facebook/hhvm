@@ -68,16 +68,16 @@ String HHVM_METHOD(WaitHandle, getName);
  * passed as an array member of GenArrayWaitHandle).
  */
 
-class c_AsyncFunctionWaitHandle;
-class c_AsyncGeneratorWaitHandle;
-class c_AwaitAllWaitHandle;
-class c_GenArrayWaitHandle;
-class c_GenMapWaitHandle;
-class c_GenVectorWaitHandle;
-class c_ConditionWaitHandle;
-class c_RescheduleWaitHandle;
-class c_SleepWaitHandle;
-class c_ExternalThreadEventWaitHandle;
+struct c_AsyncFunctionWaitHandle;
+struct c_AsyncGeneratorWaitHandle;
+struct c_AwaitAllWaitHandle;
+struct c_GenArrayWaitHandle;
+struct c_GenMapWaitHandle;
+struct c_GenVectorWaitHandle;
+struct c_ConditionWaitHandle;
+struct c_RescheduleWaitHandle;
+struct c_SleepWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
 
 #define WAITHANDLE_CLASSOF(cn) \
   static Class* classof() { \

@@ -166,8 +166,8 @@ struct c_Pair : ObjectData {
   TypedValue elm1;
 
   friend void collections::deepCopy(TypedValue*);
-  friend class collections::PairIterator;
-  friend class collections::CollectionsExtension;
+  friend struct collections::PairIterator;
+  friend struct collections::CollectionsExtension;
   friend struct c_Vector;
   friend struct BaseVector;
   friend struct BaseMap;

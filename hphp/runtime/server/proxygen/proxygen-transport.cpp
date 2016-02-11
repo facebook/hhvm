@@ -24,7 +24,6 @@
 #include <boost/algorithm/string.hpp>
 #include <memory>
 #include <set>
-#include <proxygen/lib/http/codec/experimental/HTTP2Framer.h>
 
 using proxygen::HTTPException;
 using proxygen::HTTPHeaders;

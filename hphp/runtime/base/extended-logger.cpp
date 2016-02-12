@@ -101,7 +101,7 @@ void ExtendedLogger::Log(LogLevelType level, const Array& stackTrace,
   if (stackTrace.isNull()) return;
 
   if (UseLogFile) {
-    FILE *f = Output ? Output : GetStandardOut(level);
+    FILE *f = Output ? Output : GetStandardOut();
     PrintStackTrace(f, stackTrace, escape, escapeMore);
 
     FILE *tf = threadData->log;

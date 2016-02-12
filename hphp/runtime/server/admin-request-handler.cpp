@@ -361,6 +361,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (cmd == "flush-logs") {
       transport->sendString("OK\n");
+      Logger::FlushAll();
       HttpRequestHandler::GetAccessLog().flushAllWriters();
       AdminRequestHandler::GetAccessLog().flushAllWriters();
       RPCRequestHandler::GetAccessLog().flushAllWriters();

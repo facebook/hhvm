@@ -120,12 +120,16 @@ void Logger::Log(LogLevelType level, const std::string &msg,
   s_logger->log(level, msg, stackTrace, escape, escapeMore);
 }
 
-FILE *Logger::GetStandardOut(LogLevelType level) {
+FILE *Logger::GetStandardOut() {
   return s_logger->m_standardOut;
 }
 
 void Logger::SetStandardOut(FILE* file) {
   s_logger->m_standardOut = file;
+}
+
+void Logger::FlushAll() {
+  s_logger->flush();
 }
 
 int Logger::GetSyslogLevel(LogLevelType level) {
@@ -164,7 +168,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
     syslog(GetSyslogLevel(level), "%s", msg.c_str());
   }
   if (UseLogFile) {
-    FILE *stdf = GetStandardOut(level);
+    FILE *stdf = GetStandardOut();
     FILE *f;
     FILE *tf = threadData->log;
     if (tf && threadData->threadLogOnly) {

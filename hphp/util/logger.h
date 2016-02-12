@@ -100,11 +100,13 @@ struct Logger {
 
   static char *EscapeString(const std::string &msg);
 
-  static FILE *GetStandardOut(LogLevelType level);
+  static FILE *GetStandardOut();
   static void SetStandardOut(FILE*);
 
   virtual ~Logger() { }
   static void ResetPid();
+
+  static void FlushAll();
 
 protected:
   struct ThreadData {
@@ -140,6 +142,8 @@ protected:
   virtual void log(LogLevelType level, const std::string &msg,
                    const StackTrace *stackTrace,
                    bool escape = false, bool escapeMore = false);
+  // mainly intended for subclass of loggers that batch
+  virtual void flush() {}
 
   /**
    * What needs to be print for each line of logging. Currently it's

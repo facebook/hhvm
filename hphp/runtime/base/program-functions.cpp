@@ -901,6 +901,9 @@ static int start_server(const std::string &username, int xhprof) {
   RPCRequestHandler::GetAccessLog().init
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::RPCLogs,
      username);
+  SCOPE_EXIT { HttpRequestHandler::GetAccessLog().flushAllWriters(); };
+  SCOPE_EXIT { AdminRequestHandler::GetAccessLog().flushAllWriters(); };
+  SCOPE_EXIT { RPCRequestHandler::GetAccessLog().flushAllWriters(); };
 
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {

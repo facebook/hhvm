@@ -42,6 +42,7 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/alloc.h"
@@ -169,6 +170,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       string usage =
         "/stop:            stop the web server\n"
         "    instance-id   optional, if specified, instance ID has to match\n"
+        "/flush-logs:      trigger batching log-writers to flush all content\n"
         "/translate:       translate hex encoded stacktrace in 'stack' param\n"
         "    stack         required, stack trace to translate\n"
         "    build-id      optional, if specified, build ID has to match\n"
@@ -317,7 +319,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 
     bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
-                          (cmd != "instance-id")
+                          (cmd != "instance-id") && (cmd != "flush-logs")
 #if defined(ENABLE_HHPROF) && defined(USE_JEMALLOC)
                           && (mallctl == nullptr || (
                                  (cmd != "hhprof/start")
@@ -355,6 +357,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       Logger::Info("Got admin port stop request from %s",
                    transport->getRemoteHost());
       HttpServer::Server->stop();
+      break;
+    }
+    if (cmd == "flush-logs") {
+      transport->sendString("OK\n");
+      HttpRequestHandler::GetAccessLog().flushAllWriters();
+      AdminRequestHandler::GetAccessLog().flushAllWriters();
+      RPCRequestHandler::GetAccessLog().flushAllWriters();
       break;
     }
     if (cmd == "set-log-level") {

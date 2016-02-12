@@ -904,6 +904,7 @@ static int start_server(const std::string &username, int xhprof) {
   SCOPE_EXIT { HttpRequestHandler::GetAccessLog().flushAllWriters(); };
   SCOPE_EXIT { AdminRequestHandler::GetAccessLog().flushAllWriters(); };
   SCOPE_EXIT { RPCRequestHandler::GetAccessLog().flushAllWriters(); };
+  SCOPE_EXIT { Logger::FlushAll(); };
 
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {

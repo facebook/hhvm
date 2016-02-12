@@ -123,6 +123,7 @@ static void bt_handler(int sig) {
   Logger::Error("Stack trace in %s", RuntimeOption::StackTraceFilename.c_str());
 
   // Flush whatever access logs are still pending
+  Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
 
   // Give the debugger a chance to do extra logging if there are any attached

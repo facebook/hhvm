@@ -385,7 +385,8 @@ constexpr bool equivDataTypes(DataType t1, DataType t2) {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace folly {
-template<> struct FormatValue<HPHP::DataTypeCategory> {
+template<> class FormatValue<HPHP::DataTypeCategory> {
+ public:
   explicit FormatValue(HPHP::DataTypeCategory val) : m_val(val) {}
 
   template<typename Callback>
@@ -397,7 +398,8 @@ template<> struct FormatValue<HPHP::DataTypeCategory> {
   HPHP::DataTypeCategory m_val;
 };
 
-template<> struct FormatValue<HPHP::DataType> {
+template<> class FormatValue<HPHP::DataType> {
+ public:
   explicit FormatValue(HPHP::DataType dt) : m_dt(dt) {}
 
   template<typename C>

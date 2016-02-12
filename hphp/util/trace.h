@@ -452,7 +452,7 @@ FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_toString, toString);
 
 namespace folly {
 template<typename Val>
-struct FormatValue<Val,
+class FormatValue<Val,
                    typename std::enable_if<
                      HPHP::has_toString<Val, std::string() const>::value &&
                      // This is here because MSVC decides that StringPiece matches
@@ -461,6 +461,7 @@ struct FormatValue<Val,
                      !std::is_same<Val, StringPiece>::value,
                      void
                    >::type> {
+ public:
   explicit FormatValue(const Val& val) : m_val(val) {}
 
   template<typename Callback> void format(FormatArg& arg, Callback& cb) const {

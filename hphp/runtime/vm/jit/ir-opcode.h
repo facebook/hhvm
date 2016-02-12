@@ -184,7 +184,8 @@ namespace std {
 }
 
 namespace folly {
-template<> struct FormatValue<HPHP::jit::Opcode> {
+template<> class FormatValue<HPHP::jit::Opcode> {
+ public:
   explicit FormatValue(HPHP::jit::Opcode op) : m_op(op) {}
 
   template<typename Callback> void format(FormatArg& arg, Callback& cb) const {

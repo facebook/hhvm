@@ -329,6 +329,8 @@ static void exit_on_timeout(int sig) {
 
 void HttpServer::stop(const char* stopReason) {
   if (m_stopped) return;
+  // we're shutting down flush http logs
+  HttpRequestHandler::GetAccessLog().flushAllWriters();
 
   if (RuntimeOption::ServerGracefulShutdownWait) {
     signal(SIGALRM, exit_on_timeout);
@@ -342,6 +344,8 @@ void HttpServer::stop(const char* stopReason) {
 }
 
 void HttpServer::stopOnSignal(int sig) {
+  // we're shutting down flush http logs
+  HttpRequestHandler::GetAccessLog().flushAllWriters();
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM
   if (RuntimeOption::ServerKillOnSIGTERM && sig == SIGTERM) {

@@ -17,6 +17,7 @@ function ldap_mod_add($link, $dn, $entry) { }
 function ldap_mod_del($link, $dn, $entry) { }
 function ldap_mod_replace($link, $dn, $entry) { }
 function ldap_modify($link, $dn, $entry) { }
+function ldap_modify_batch($link, string $dn, array $modifs): bool { return false; }
 function ldap_bind($link, $bind_rdn = null, $bind_password = null) { }
 function ldap_set_rebind_proc($link, $callback) { }
 function ldap_sort($link, $result, $sortfilter) { }

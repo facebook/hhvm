@@ -145,6 +145,20 @@ function ldap_mod_replace(resource $link, string $dn, array $entry): bool;
 function ldap_modify(resource $link, string $dn, array $entry): bool;
 
 /**
+ * Modify the existing entries in the LDAP directory. Allows detailed
+ *   specification of the modifications to perform.
+ *
+ * @param resource $link - An LDAP link identifier, returned by
+ *   ldap_connect().
+ * @param string $dn - The distinguished name of an LDAP entity.
+ * @param array $modifs - An array specifying the modifications to perform.
+ *
+ * @return bool - Returns TRUE on success or FALSE on failure.
+ */
+<<__Native>>
+function ldap_modify_batch(resource $link, string $dn, array $modifs): bool;
+
+/**
  * Binds to the LDAP directory with specified RDN and password. If bind_rdn
  *   and bind_password are not specified, an anonymous bind is attempted.
  *

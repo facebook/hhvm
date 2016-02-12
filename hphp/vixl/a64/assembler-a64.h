@@ -45,9 +45,9 @@ constexpr int kRegListSizeInBits = sizeof(RegList) * 8;
 
 // Some CPURegister methods can return Register and FPRegister types, so we
 // need to declare them in advance.
-struct Register;
-struct FPRegister;
-struct MemOperand;
+class Register;
+class FPRegister;
+class MemOperand;
 
 
 class CPURegister {
@@ -554,7 +554,7 @@ class Label {
   // The label location.
   HPHP::CodeAddress target_;
 
-  friend struct Assembler;
+  friend class Assembler;
 };
 
 
@@ -583,7 +583,7 @@ class Literal {
   int64_t value_;
   unsigned size_;
 
-  friend struct Assembler;
+  friend class Assembler;
 };
 
 
@@ -1762,7 +1762,7 @@ class Assembler {
   HPHP::CodeAddress next_literal_pool_check_;
   unsigned literal_pool_monitor_;
 
-  friend struct BlockLiteralPoolScope;
+  friend class BlockLiteralPoolScope;
 
 #ifdef DEBUG
   bool finalized_;

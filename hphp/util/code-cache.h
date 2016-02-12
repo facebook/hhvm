@@ -39,7 +39,7 @@ struct CodeCache {
     Profile,   // 'prof' -- highest precedence
   };
 
-  class Selector;
+  struct Selector;
 
   /* Code block sizes read from configs. */
   static uint64_t AHotSize;

@@ -24,6 +24,8 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include <folly/small_vector.h>
+
 namespace HPHP {
 
 const StaticString
@@ -41,7 +43,9 @@ const StaticString
   s_arrow("->"),
   s_double_colon("::");
 
-static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
+static ActRec* getPrevActRec(
+    const ActRec* fp, Offset* prevPc,
+    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
   if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
     c_WaitableWaitHandle* currentWaitHandle = frame_afwh(fp);
     if (currentWaitHandle->isFinished()) {
@@ -59,8 +63,15 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
     auto const contextIdx = currentWaitHandle->getContextIdx();
     while (currentWaitHandle != nullptr) {
       auto p = currentWaitHandle->getParentChain().firstInContext(contextIdx);
-      if (p == nullptr) break;
+      if (p == nullptr ||
+          UNLIKELY(std::find(visitedWHs.begin(), visitedWHs.end(), p)
+          != visitedWHs.end())) {
+        // If the parent exists in our backtrace, it means we have detected a
+        // cycle. Fall back to savedFP in that case.
+        break;
+      }
 
+      visitedWHs.push_back(p);
       if (p->getKind() == c_WaitHandle::Kind::AsyncFunction) {
         auto wh = p->asAsyncFunction();
         *prevPc = wh->resumable()->resumeOffset();
@@ -76,6 +87,7 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
   auto bt = Array::Create();
+  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
 
   // If there is a parser frame, put it at the beginning of the backtrace.
   if (btArgs.m_parserFrame) {
@@ -98,7 +110,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   // Get the fp and pc of the top frame (possibly skipping one frame).
 
   if (btArgs.m_skipTop) {
-    fp = getPrevActRec(vmfp(), &pc);
+    fp = getPrevActRec(vmfp(), &pc, visitedWHs);
     // We skipped over the only VM frame, we're done.
     if (!fp) return bt;
   } else {
@@ -130,10 +142,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   // Handle the subsequent VM frames.
   Offset prevPc = 0;
-  for (auto prevFp = getPrevActRec(fp, &prevPc);
+  for (auto prevFp = getPrevActRec(fp, &prevPc, visitedWHs);
        fp != nullptr && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
        fp = prevFp, pc = prevPc,
-         prevFp = getPrevActRec(fp, &prevPc)) {
+         prevFp = getPrevActRec(fp, &prevPc, visitedWHs)) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) continue;
 

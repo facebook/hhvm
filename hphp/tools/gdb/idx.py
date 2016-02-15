@@ -63,7 +63,7 @@ def unordered_map_at(umap, key):
 # Boost accessors.
 
 def boost_flat_map_at(flat_map, key):
-    vec = flat_map['m_flat_tree']['m_data']['m_vect']['members_']
+    vec = flat_map['m_flat_tree']['m_data']['m_vect']['m_holder']
 
     first = vec['m_start']
     last = first + vec['m_size']

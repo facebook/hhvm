@@ -280,7 +280,7 @@ jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr,
       // TODO(#6836929): this has to be removed once we fix the underlying
       // issue with smashable instructions at the start of a section.
       while (42) {
-        DecodedInstruction di(rangeBase);
+        x64::DecodedInstruction di(rangeBase);
         if (!di.isNop()) break;
         rangeBase += di.size();
       }
@@ -890,7 +890,7 @@ struct LLVMEmitter {
       if (it == locRecs.records.end()) continue;
       for (auto const& record : it->second) {
         uint8_t* ip = record.address;
-        DecodedInstruction di(ip);
+        x64::DecodedInstruction di(ip);
         if (di.isCall()) {
           auto afterCall = ip + di.size();
           FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
@@ -905,7 +905,7 @@ struct LLVMEmitter {
                  L body) {
     for (auto& record : records) {
       uint8_t* ip = record.address;
-      DecodedInstruction di(ip);
+      x64::DecodedInstruction di(ip);
       if (di.isBranch()) {
         body(ip, di.isJmp() ? CC_None : di.jccCondCode());
       }
@@ -929,7 +929,7 @@ struct LLVMEmitter {
     // first (depending on whether the target SrcKey is a resumed function),
     // followed by an RIP relative lea of the jump address.
     if (!targetIsResumed) {
-      DecodedInstruction instr(addr);
+      x64::DecodedInstruction instr(addr);
       addr += instr.size();
     }
     auto const leaIp = addr;
@@ -1028,7 +1028,7 @@ struct LLVMEmitter {
              info.landingPad, info.start, info.end);
       auto found = false;
       for(auto ip = info.start; ip < info.end; ) {
-        DecodedInstruction di(ip);
+        x64::DecodedInstruction di(ip);
         ip += di.size();
         if (di.isCall()) {
           FTRACE(2, "  afterCall: {}\n", ip);

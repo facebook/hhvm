@@ -38,6 +38,8 @@ const char* show(RoundDirection rd) {
   not_reached();
 }
 
+namespace x64 {
+
 void DecodedInstruction::decode(uint8_t* ip) {
   m_ip = ip;
   m_flagsVal = 0;
@@ -551,4 +553,4 @@ uint8_t DecodedInstruction::getModRm() const {
   return m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
 }
 
-} }
+}}}

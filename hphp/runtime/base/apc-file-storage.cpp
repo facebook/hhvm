@@ -198,7 +198,8 @@ bool APCFileStorage::addFile() {
 #if defined(HAVE_POSIX_FALLOCATE) && HAVE_POSIX_FALLOCATE
   couldAllocate = posix_fallocate(fd, 0, m_chunkSize) == 0;
 #elif defined(__APPLE__)
-  fstore_t store = { F_ALLOCATECONTIG, F_PEOFPOSMODE, 0, m_chunkSize };
+  fstore_t store =
+    { F_ALLOCATECONTIG, F_PEOFPOSMODE, 0, static_cast<off_t>(m_chunkSize) };
   int ret = fcntl(fd, F_PREALLOCATE, &store);
   if (ret == -1) {
     store.fst_flags = F_ALLOCATEALL;

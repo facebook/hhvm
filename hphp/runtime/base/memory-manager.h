@@ -496,6 +496,9 @@ struct MemBlock {
  */
 struct BigHeap {
   BigHeap() {}
+  ~BigHeap() {
+    reset();
+  }
   bool empty() const {
     return m_slabs.empty() && m_bigs.empty();
   }

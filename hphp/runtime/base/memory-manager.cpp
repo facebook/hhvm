@@ -200,8 +200,14 @@ MemoryManager::MemoryManager() {
 }
 
 MemoryManager::~MemoryManager() {
-  // TODO(9879201): Assert empty() once all existing leaks are fixed.
-  for (auto r : m_root_handles) r->invalidate();
+  dropRootMaps();
+  if (debug) {
+    // Check that every allocation in heap has been freed before destruction.
+    forEachHeader([&](Header* h) {
+        assert(h->kind() == HeaderKind::Free);
+      });
+  }
+  // ~BigHeap releases its slabs/bigs.
 }
 
 void MemoryManager::dropRootMaps() {
@@ -1458,5 +1464,6 @@ void ContiguousHeap::createRequestHeap() {
 
 ContiguousHeap::~ContiguousHeap(){
   flush();
+  // ~BigHeap releases its slabs/bigs.
 }
 }

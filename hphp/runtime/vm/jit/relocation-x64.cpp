@@ -21,6 +21,8 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
+#include "hphp/util/decoded-instr.h"
+
 namespace HPHP { namespace jit { namespace x64 {
 
 namespace {

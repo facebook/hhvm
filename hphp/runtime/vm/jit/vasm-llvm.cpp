@@ -42,6 +42,7 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/decoded-instr.h"
 #include "hphp/util/disasm.h"
 
 #ifdef USE_LLVM

@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/decoded-instr.h"
 #include "hphp/util/data-block.h"
 
 namespace HPHP { namespace jit { namespace x64 {

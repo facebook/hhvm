@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include "hphp/util/data-block.h"
+#include "hphp/util/decoded-instr.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"

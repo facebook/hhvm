@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | (c) Copyright IBM Corporation 2016                                   |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,29 +13,27 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/asm-x64.h"
 
-#include <folly/Format.h>
+#ifndef incl_HPHP_JIT_DECODED_INSTR_H_
+#define incl_HPHP_JIT_DECODED_INSTR_H_
 
-#include "hphp/util/safe-cast.h"
+#include "hphp/runtime/base/arch.h"
+
+#include "hphp/util/decoded-instr-x64.h"
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
 namespace HPHP { namespace jit {
 
-// These are in order according to the binary encoding of the X64
-// condition codes.
-const char* cc_names[] = {
-  "O", "NO", "B", "AE", "E", "NE", "BE", "A",
-  "S", "NS", "P", "NP", "L", "GE", "LE", "G"
-};
+///////////////////////////////////////////////////////////////////////////////
 
-const char* show(RoundDirection rd) {
-  switch (rd) {
-    case RoundDirection::nearest:  return "nearest";
-    case RoundDirection::floor:    return "floor";
-    case RoundDirection::ceil:     return "ceil";
-    case RoundDirection::truncate: return "truncate";
-  }
-  not_reached();
-}
+#if defined(__powerpc64__)
+using DecodedInstruction = ppc64_asm::DecodedInstruction;
+#else
+using DecodedInstruction = x64::DecodedInstruction;
+#endif
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+
+}}
+
+#endif

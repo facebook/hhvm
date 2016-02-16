@@ -97,6 +97,7 @@ enum class OBFlags {
   Flushable = 2,
   Removable = 4,
   OutputDisabled = 8,
+  WriteToStdout = 16,
   Default = 1 | 2 | 4
 };
 

@@ -476,9 +476,14 @@ void ExecutionContext::flush() {
   if (!m_buffers.empty() &&
       RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
       !(m_buffers.front().flags & OBFlags::OutputDisabled)) {
-    StringBuffer &oss = m_buffers.front().oss;
+    OutputBuffer &buffer = m_buffers.front();
+    StringBuffer &oss = buffer.oss;
     if (!oss.empty()) {
-      writeTransport(oss.data(), oss.size());
+      if (buffer.flags & OBFlags::WriteToStdout) {
+        writeStdout(oss.data(), oss.size());
+      } else {
+        writeTransport(oss.data(), oss.size());
+      }
       oss.clear();
     }
   }

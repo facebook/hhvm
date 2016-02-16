@@ -286,22 +286,23 @@ void ProxygenServer::waitForEnd() {
 // Server shutdown - Explained
 //
 // 0. An alarm may be set in http-server.cpp to kill this process after
-//    ServerShutdownListenWait + ServerGracefulShutdownWait seconds
-//
-// 1. Set run status to STOPPING.  This should fail downstream healthchecks
-// 2. TODO: there should be a timeout for failing healthchecks only
-// 3. Shutdown the listen sockets, this will
+//    ServerPreShutdownWait + ServerShutdownListenWait +
+//    ServerGracefulShutdownWait seconds
+// 1. Set run status to STOPPING.  This should fail downstream healthchecks.
+//    If it is the page server, it will continue accepting requests for
+//    ServerPreShutdownWait seconds
+// 2. Shutdown the listen sockets, this will
 //     3.a Close any idle connections
 //     3.b Send SPDY GOAWAY frames
 //     3.c Insert Connection: close on HTTP/1.1 keep-alive connections as the
 //         response headers are sent
 //    Note: LibEventServer doesn't close the listen sockets if there is no
 //    ServerShutdownListenWait.
-// 4. After all connections close OR ServerShutdownListenWait seconds
+// 3. After all connections close OR ServerShutdownListenWait seconds
 //    elapse, stop the VM.  Incomplete requests in the I/O thread will not be
 //    executed.  Stopping the VM is synchronous and all requests will run to
 //    completion, unless the alarm fires.
-// 5. Allow responses to drain for up to ServerGracefulShutdownWait seconds.
+// 4. Allow responses to drain for up to ServerGracefulShutdownWait seconds.
 //    Note if shutting the VM down took non-zero time it's possible that the
 //    alarm will fire first and kill this process.
 
@@ -312,16 +313,23 @@ void ProxygenServer::stop() {
   Logger::Info("%p: Stopping ProxygenServer port=%d", this, m_port);
 
   setStatus(RunStatus::STOPPING);
-  // TODO: allow a configurable timeout before proceeding to the next phase
+
+  if (m_takeover_agent) {
+    m_worker.getEventBase()->runInEventBaseThread([this] {
+        m_takeover_agent->stop();
+      });
+  }
 
   // close listening sockets, this will initiate draining, including closing
   // idle conns
-  m_worker.getEventBase()->runInEventBaseThread([&] {
-      if (m_takeover_agent) {
-        m_takeover_agent->stop();
+  m_worker.getEventBase()->runInEventBaseThread([this] {
+      // Only wait ServerPreShutdownWait seconds for the page server.
+      int delayMilliSeconds = RuntimeOption::ServerPreShutdownWait * 1000;
+      if (delayMilliSeconds < 0 || getPort() != RuntimeOption::ServerPort) {
+        delayMilliSeconds = 0;
       }
-
-      stopListening();
+      m_worker.getEventBase()->runAfterDelay([this] { stopListening(); },
+                                             delayMilliSeconds);
     });
 }
 

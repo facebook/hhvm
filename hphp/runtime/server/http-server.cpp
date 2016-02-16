@@ -295,13 +295,13 @@ void HttpServer::runOrExitProcess() {
       Logger::Info("page server killed");
       return;
     }
-    Logger::Info("page server stopped");
+    Logger::Info("stopping page server");
   }
 
-  onServerShutdown();
   if (RuntimeOption::ServerPort) {
     m_pageServer->stop();
   }
+  onServerShutdown();
 
   waitForServers();
   m_watchDog.waitForEnd();
@@ -333,9 +333,14 @@ void HttpServer::stop(const char* stopReason) {
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
 
-  if (RuntimeOption::ServerGracefulShutdownWait) {
+  int totalWait =
+    RuntimeOption::ServerPreShutdownWait +
+    RuntimeOption::ServerShutdownListenWait +
+    RuntimeOption::ServerGracefulShutdownWait;
+
+  if (totalWait > 0) {
     signal(SIGALRM, exit_on_timeout);
-    alarm(RuntimeOption::ServerGracefulShutdownWait);
+    alarm(totalWait);
   }
 
   Lock lock(this);

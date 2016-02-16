@@ -219,3 +219,13 @@ function xbox_schedule_thread_reset(): void;
  */
 <<__HipHopSpecific, __Native>>
 function xbox_get_thread_time(): int;
+
+/**
+ * Whether the server is going to stop soon.
+ *
+ * @return bool - True if server is going to stop soon, False if
+ * server is not running, or is running without a schedule to stop.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_is_stopping(): bool;

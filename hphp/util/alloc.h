@@ -282,7 +282,9 @@ int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
   if (err != 0) {
     std::string errStr =
       folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
-    Logger::Warning(errStr);
+    if (!errOk) {
+      fprintf(stderr, "%s\n", errStr.c_str());
+    }
     always_assert(errOk || err == 0);
   }
   return err;

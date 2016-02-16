@@ -1513,6 +1513,8 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnection, close);
     HHVM_ME(AsyncMysqlConnection, releaseConnection);
     HHVM_ME(AsyncMysqlConnection, serverInfo);
+    HHVM_ME(AsyncMysqlConnection, sslSessionReused);
+    HHVM_ME(AsyncMysqlConnection, isSSL);
     HHVM_ME(AsyncMysqlConnection, warningCount);
     HHVM_ME(AsyncMysqlConnection, host);
     HHVM_ME(AsyncMysqlConnection, port);

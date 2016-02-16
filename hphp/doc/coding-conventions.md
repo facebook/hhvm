@@ -151,8 +151,11 @@ In C++, `struct` and `class` have nearly identical meanings; the only
 difference lies in the default accessibility (`struct` defaults to public, and
 `class`, to private).
 
-We do not assign further meaning to these keywords, so using `struct`
-everywhere is a common (but not required) practice.
+We do not assign further meaning to these keywords, so we use `struct`
+everywhere.  Efforts to compile under MSVC also require that we use the same
+keyword between a struct/class definition and its forward declarations due to
+MSVC's failure to adhere to the C++ spec, and sticking to `struct` everywhere
+makes this easier.
 
 ### Access control ###
 

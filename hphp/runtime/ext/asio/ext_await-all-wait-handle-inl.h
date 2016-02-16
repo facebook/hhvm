@@ -24,9 +24,8 @@ namespace HPHP {
 
 template<typename T>
 void c_AwaitAllWaitHandle::forEachChild(T fn) {
-  uint32_t const last = m_cur;
-  for (uint32_t idx = 0; idx <= last; ++idx) {
-    auto const child = m_children[idx];
+  for (uint32_t idx = 0; idx < m_cap; ++idx) {
+    auto const child = m_children[idx].m_child;
     if (child->isFinished()) continue;
     fn(child);
   }
@@ -35,8 +34,8 @@ void c_AwaitAllWaitHandle::forEachChild(T fn) {
 template<class F>
 void c_AwaitAllWaitHandle::scanChildren(F& mark) const {
   if (isFinished()) return;
-  for (uint32_t i = 0, last = m_cur; i <= last; ++i) {
-    mark(m_children[i]);
+  for (uint32_t i = 0; i < m_cap; ++i) {
+    mark(m_children[i].m_child);
   }
 }
 

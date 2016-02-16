@@ -368,7 +368,7 @@ Marker::operator()(const void* start, size_t len) {
 }
 
 // initially parse the heap to find valid objects and initialize metadata.
-void Marker::init() {
+NEVER_INLINE void Marker::init() {
   rds_ = folly::Range<const char*>((char*)rds::header(),
                                    RuntimeOption::EvalJitTargetCacheSize);
   MM().forEachHeader([&](Header* h) {
@@ -435,7 +435,7 @@ void Marker::init() {
   ptrs_.prepare();
 }
 
-void Marker::trace() {
+NEVER_INLINE void Marker::trace() {
   scanRoots(*this);
   while (!work_.empty()) {
     auto h = work_.back();
@@ -495,17 +495,19 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
   return true;
 }
 
-// another pass through the heap now that everything is marked.
-void Marker::sweep() {
+// another pass through the heap, this time using the PtrMap we computed
+// in init(). Free and maybe quarantine unmarked objects.
+NEVER_INLINE void Marker::sweep() {
   Counter marked, ambig, freed;
-  std::vector<Header*> reaped;
   auto& mm = MM();
-  mm.iterate([&](Header* h) {
-    assert(check_sweep_header(h));
-    auto size = h->size(); // internal size
-    if (h->hdr_.marks != GCBits::Unmarked) {
-      if (h->hdr_.marks & GCBits::Mark) marked += size;
-      else if (h->hdr_.marks & GCBits::CMark) ambig += size;
+  const bool use_quarantine = debug && RuntimeOption::EvalQuarantine;
+  if (use_quarantine) mm.beginQuarantine();
+  SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
+  ptrs_.iterate([&](const Header* hdr, size_t h_size) {
+    assert(check_sweep_header(hdr));
+    if (hdr->hdr_.marks != GCBits::Unmarked) {
+      if (hdr->hdr_.marks & GCBits::Mark) marked += h_size;
+      else if (hdr->hdr_.marks & GCBits::CMark) ambig += h_size;
       return; // continue foreach loop
     }
     // when freeing objects below, do not run their destructors! we don't
@@ -514,6 +516,7 @@ void Marker::sweep() {
     // also, if freeing the current object causes other objects to be freed,
     // then must initialize the FreeNode header on them, in order to continue
     // parsing. For now, defer freeing those kinds of objects to after parsing.
+    auto h = const_cast<Header*>(hdr);
     switch (h->kind()) {
       case HeaderKind::Packed:
       case HeaderKind::Struct:
@@ -523,6 +526,9 @@ void Marker::sweep() {
       case HeaderKind::Proxy:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
+        freed += h_size;
+        mm.objFree(h, h_size);
+        break;
       case HeaderKind::Object:
       case HeaderKind::WaitHandle:
       case HeaderKind::AwaitAllWH:
@@ -534,18 +540,30 @@ void Marker::sweep() {
       case HeaderKind::ImmMap:
       case HeaderKind::ImmSet:
       case HeaderKind::ResumableFrame:
-      case HeaderKind::NativeData:
+      case HeaderKind::NativeData: {
+        freed += h_size;
+        auto obj = h->obj();
+        if (obj->getAttribute(ObjectData::HasDynPropArr)) {
+          // dynPropTable is a req::hash_map, so this will req::free junk
+          g_context->dynPropTable.erase(obj);
+        }
+        mm.objFree(h, h->size());
+        break;
+      }
       case HeaderKind::Apc:
+        freed += h_size;
+        h->apc_.reap(); // also frees localCache and atomic-dec APCArray
+        break;
       case HeaderKind::String:
-        freed += size;
-        reaped.push_back(h);
+        freed += h_size;
+        h->str_.release(); // also maybe atomic-dec APCString
         break;
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
         // Don't free malloc-ed allocations even if they're not reachable.
         break;
       case HeaderKind::Free:
-        break;
+        // should not be in ptrmap; fall through to assert
       case HeaderKind::Hole:
       case HeaderKind::BigObj:
       case HeaderKind::ResumableObj:
@@ -559,27 +577,6 @@ void Marker::sweep() {
           marked.count, marked.bytes,
           ambig.count, ambig.bytes,
           freed.count, freed.bytes);
-  }
-  // once we're done iterating the heap, it's safe to free unreachable objects.
-  const bool use_quarantine = debug && RuntimeOption::EvalEagerGC;
-  if (use_quarantine) mm.beginQuarantine();
-  SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
-  for (auto h : reaped) {
-    if (h->kind() == HeaderKind::Apc) {
-      // frees localCache, delists, decref apc-array, free array
-      h->apc_.reap();
-    } else if (h->kind() == HeaderKind::String) {
-      // decref apc shared str, free str
-      h->str_.release(); // no destructor can run, so release() is safe.
-    } else if (auto obj = h->obj()) {
-      if (obj->getAttribute(ObjectData::HasDynPropArr)) {
-        // dynPropTable is a req::hash_map, so this will req::free junk
-        g_context->dynPropTable.erase(obj);
-      }
-      mm.objFree(h, h->size());
-    } else {
-      mm.objFree(h, h->size());
-    }
   }
 }
 

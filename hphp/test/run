@@ -155,7 +155,7 @@ function check_for_multiple_default_binaries($typechecker) {
   }
 
   $append_path = '/hphp/hhvm/hhvm';
-  $path_option = '--hhvm-binary_path';
+  $path_option = '--hhvm-binary-path';
   if ($typechecker) {
     $append_path = '/hphp/hack/src/hh_server';
     $path_option = '--hhserver-binary-path';

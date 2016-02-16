@@ -530,6 +530,7 @@ void MemoryManager::resetAllocator() {
   m_exiting = false;
   resetStatsImpl(true);
   FTRACE(1, "reset: strings {}\n", nstrings);
+  if (debug) resetEagerGC();
 }
 
 void MemoryManager::flush() {

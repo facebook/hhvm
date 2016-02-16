@@ -338,6 +338,12 @@ struct PtrMap {
     return regions_.size();
   }
 
+  template<class Fn> void iterate(Fn fn) const {
+    for (auto& r : regions_) {
+      fn(r.first, r.second);
+    }
+  }
+
 private:
   bool sanityCheck() const {
     // Verify that all the regions are in increasing and non-overlapping order.

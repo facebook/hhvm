@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 
 #include "hphp/runtime/base/execution-context.h"
@@ -22,12 +23,26 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/unwind-arm.h"
 
+#include "hphp/vixl/a64/constants-a64.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/vixl/a64/decoder-a64.h"
 #include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/vixl/a64/instructions-a64.h"
 #include "hphp/vixl/a64/simulator-a64.h"
+#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/code-gen-internal.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -52,70 +67,125 @@ namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * A partial equivalent of enterTCHelper, used to set up the ARM simulator.
- */
-static uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
-                                      ActRec* saved_rStashedAr) {
-  auto& vmRegs = vmRegsUnsafe();
-  sim.   set_xreg(x2a(rvmfp()).code(), vmRegs.fp);
-  sim.   set_xreg(x2a(rvmsp()).code(), vmRegs.stack.top());
-  sim.   set_xreg(x2a(rvmtl()).code(), rds::tl_base);
-
-  // Leave space for register spilling and MInstrState.
-  assertx(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
-
-  auto spOnEntry = sim.sp();
-
-  // Push the link register onto the stack. The link register is technically
-  // caller-saved; what this means in practice is that non-leaf functions push
-  // it at the very beginning and pop it just before returning (as opposed to
-  // just saving it around calls).
-  sim.   set_sp(sim.sp() - 16);
-  *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
-
-  return spOnEntry;
+static void alignJmpTarget(CodeBlock& cb) {
+  align(cb, Alignment::JmpTarget, AlignContext::Dead);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us) {
+  // FIXME: This function is near identical to its X64 equivalent, except for
+  // the pushing and popping of the link register, and using lea to manipulate
+  // the stack pointer.
+
+  alignJmpTarget(cb);
+
+  auto const start = vwrap(cb, [&] (Vout& v) {
+    auto const ar = v.makeReg();
+
+    v << copy{rvmfp(), ar};
+
+    // Set up the call frame for the stub.  We can't skip this like we do in
+    // other stubs because we need the return IP for this frame in the %rbp
+    // chain, in order to find the proper fixup for the VMRegAnchor in the
+    // intercept handler.
+
+    v << push{PhysReg{rLinkReg}};
+    v << push{rvmfp()};
+    v << copy{rsp(), rvmfp()};
+
+    // When we call the event hook, it might tell us to skip the callee
+    // (because of fb_intercept).  If that happens, we need to return to the
+    // caller, but the handler will have already popped the callee's frame.
+    // So, we need to save these values for later.
+    v << pushm{ar[AROFF(m_savedRip)]};
+    v << pushm{ar[AROFF(m_sfp)]};
+
+    v << copy2{ar, v.cns(EventHook::NormalFunc), rarg(0), rarg(1)};
+
+    bool (*hook)(const ActRec*, int) = &EventHook::onFunctionCall;
+    v << call{TCA(hook), rarg(0)|rarg(1)};
+  });
+
+  us.functionEnterHelperReturn = vwrap2(cb, [&] (Vout& v, Vout& vcold) {
+    auto const sf = v.makeReg();
+    v << testb{rret(), rret(), sf};
+
+    unlikelyIfThen(v, vcold, CC_Z, sf, [&] (Vout& v) {
+      auto const saved_rip = v.makeReg();
+
+      // The event hook has already cleaned up the stack and popped the
+      // callee's frame, so we're ready to continue from the original call
+      // site.  We just need to grab the fp/rip of the original frame that we
+      // saved earlier, and sync rvmsp().
+      v << pop{rvmfp()};
+      v << pop{saved_rip};
+
+      // Drop our call frame.
+      v << lea{rsp()[16], rsp()};
+
+      // Sync vmsp and return to the caller.  This unbalances the return stack
+      // buffer, but if we're intercepting, we probably don't care.
+      v << load{rvmtl()[rds::kVmspOff], rvmsp()};
+      v << jmpr{saved_rip};
+    });
+
+    // Skip past the stuff we saved for the intercept case.
+    v << lea{rsp()[16], rsp()};
+
+    // Execute a leave, returning us to the callee's prologue.
+    v << pop{rvmfp()};
+    v << ret{}; // pop{lr};ret{lr}
+  });
+
+  return start;
+}
+
+TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
+  auto const release = vwrap(cb, [&](Vout& v) {
+    v << ud2{};
+  });
+  us.freeManyLocalsHelper = vwrap(cb, [&](Vout& v) {
+    v << ud2{};
+  });
+  return release;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+extern "C" void enterTCExit();
+
+TCA emitCallToExit(CodeBlock& cb) {
+  vixl::MacroAssembler a { cb };
+  vixl::Label data;
+  auto const start = cb.frontier();
+
+  // Emulating the return to enterTCExit. Pop off the x29,x30 pair
+  a.Add(vixl::sp, vixl::sp, 16);
+
+  // Jump to enterTCExit
+  a.Ldr(rAsm, &data);
+  a.Br(rAsm);
+  a.bind(&data);
+  a.dc64(reinterpret_cast<int64_t>(enterTCExit));
+  return start;
+}
+
+TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us) {
+  auto const start = vwrap(cb, [&] (Vout& v) {
+    v << ret{};
+  });
+  return start;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void enterTCImpl(TCA start, ActRec* stashedAR) {
-  // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
-  // simulator's registers and stack, runs the translation, and gets the
-  // necessary information out of the registers when it's done.
-  vixl::PrintDisassembler disasm(std::cout);
-  vixl::Decoder decoder;
-  if (getenv("ARM_DISASM")) {
-    decoder.AppendVisitor(&disasm);
-  }
-  vixl::Simulator sim(&decoder, std::cout);
-  SCOPE_EXIT {
-    Stats::inc(Stats::vixl_SimulatedInstr, sim.instr_count());
-    Stats::inc(Stats::vixl_SimulatedLoad, sim.load_count());
-    Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
-  };
-
-  sim.set_exception_hook(arm::simulatorExceptionHook);
-
-  g_context->m_activeSims.push_back(&sim);
-  SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
-
-  DEBUG_ONLY auto spOnEntry = setupSimRegsAndStack(sim, stashedAR);
-
-  // The handshake is different when entering at a func prologue. The code
-  // we're jumping to expects to find a return address in x30, and a saved
-  // return address on the stack.
-  if (stashedAR) {
-    // Put the call's return address in the link register.
-    sim.set_lr(stashedAR->m_savedRip);
-  }
-
-  std::cout.flush();
-  sim.RunFrom(vixl::Instruction::Cast(start));
-  std::cout.flush();
-
-  assertx(sim.sp() == spOnEntry);
-
-  vmRegsUnsafe().fp = (ActRec*)sim.xreg(x2a(rvmfp()).code());
-  vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(x2a(rvmsp()).code());
+  CALLEE_SAVED_BARRIER();
+  auto& regs = vmRegsUnsafe();
+  jit::enterTCHelper(regs.stack.top(), regs.fp, start,
+                     vmFirstAR(), rds::tl_base, stashedAR);
+  CALLEE_SAVED_BARRIER();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

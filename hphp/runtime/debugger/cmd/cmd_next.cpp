@@ -266,7 +266,7 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   auto const op = decode_op(pc);
   assert(op == OpAwait || op == OpYield || op == OpYieldK);
   if (op == OpAwait) {
-    decodeVariableSizeImm(&pc);
+    decode_iva(pc);
   }
   Offset nextInst = fp->func()->unit()->offsetOf(pc);
   assert(nextInst != InvalidAbsoluteOffset);

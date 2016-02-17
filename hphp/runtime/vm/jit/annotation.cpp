@@ -78,17 +78,17 @@ const void annotate(NormalizedInstruction* i,
   if (!funcName && !clsName) {
     switch (pushOp) {
       case Op::FPushClsMethodD:
-        decodeVariableSizeImm(&pc);
+        decode_iva(pc);
         funcName = decode_litstr();
         clsName = decode_litstr();
         break;
       case Op::FPushFuncD:
-        decodeVariableSizeImm(&pc);
+        decode_iva(pc);
         funcName = decode_litstr();
         clsName = nullptr;
         break;
       case Op::FPushCtorD:
-        decodeVariableSizeImm(&pc);
+        decode_iva(pc);
         clsName = decode_litstr();
         break;
       default:

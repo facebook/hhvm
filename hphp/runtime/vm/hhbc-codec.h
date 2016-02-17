@@ -128,20 +128,14 @@ template<class T> T decode_oa(PC& pc) {
   return decode_raw<T>(pc);
 }
 
-ALWAYS_INLINE
-int32_t decodeVariableSizeImm(PC* immPtr) {
-  auto const small = **immPtr;
+ALWAYS_INLINE int32_t decode_iva(PC& pc) {
+  auto const small = *pc;
   if (UNLIKELY(small & 0x1)) {
-    auto const large = decode_raw<uint32_t>(*immPtr);
+    auto const large = decode_raw<uint32_t>(pc);
     return (int32_t)(large >> 1);
   }
-
-  (*immPtr)++;
+  pc++;
   return (int32_t)(small >> 1);
-}
-
-ALWAYS_INLINE int32_t decode_iva(PC& pc) {
-  return decodeVariableSizeImm(&pc);
 }
 
 /*

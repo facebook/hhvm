@@ -452,15 +452,15 @@ void populate_block(ParseUnitState& puState,
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
 #define IMM_ILA(n)     auto iterTab = decode_itertab();
-#define IMM_IVA(n)     auto arg##n = decodeVariableSizeImm(&pc);
+#define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
-                         auto id = decodeVariableSizeImm(&pc);   \
+                         auto id = decode_iva(pc);               \
                          always_assert(id < func.locals.size()); \
                          return borrow(func.locals[id]);         \
                        }();
 #define IMM_IA(n)      auto iter##n = [&] {                      \
-                         auto id = decodeVariableSizeImm(&pc);   \
+                         auto id = decode_iva(pc);               \
                          always_assert(id < func.iters.size());  \
                          return borrow(func.iters[id]);          \
                        }();

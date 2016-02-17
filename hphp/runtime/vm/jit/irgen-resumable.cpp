@@ -219,7 +219,7 @@ void emitAwait(IRGS& env) {
   auto const knownTy = [&] {
     auto pc = curUnit(env)->at(resumeOffset);
     if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
-    auto const stkLoc = decodeVariableSizeImm(&pc);
+    auto const stkLoc = decode_iva(pc);
     if (stkLoc != 0) return TInitCell;
     auto const rat = decodeRAT(curUnit(env), pc);
     auto const ty = ratToAssertType(env, rat);

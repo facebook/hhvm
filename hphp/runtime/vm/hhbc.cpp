@@ -233,7 +233,7 @@ ArgUnion getImm(PC const origPC, int idx, const Unit* unit) {
   always_assert(cursor == idx);
   auto const type = immType(op, idx);
   if (type == IVA || type == LA || type == IA) {
-    retval.u_IVA = decodeVariableSizeImm(&pc);
+    retval.u_IVA = decode_iva(pc);
   } else if (type == KA) {
     assert(unit != nullptr);
     retval.u_KA = decode_member_key(pc, unit);
@@ -816,13 +816,13 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   it += sizeof(Offset);                                             \
 } while (false)
 
-#define READV() out << " " << decodeVariableSizeImm(&it);
+#define READV() out << " " << decode_iva(it);
 
-#define READLA() out << " L:" << decodeVariableSizeImm(&it);
+#define READLA() out << " L:" << decode_iva(it);
 
 #define READIVA() do {                      \
   out << " ";                               \
-  auto imm = decodeVariableSizeImm((const uint8_t**)&it);    \
+  auto imm = decode_iva(it);                \
   if (op == OpIncStat && immIdx == 0) {     \
     out << Stats::g_counterNames[imm];      \
   } else {                                  \

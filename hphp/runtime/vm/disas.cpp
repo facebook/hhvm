@@ -305,10 +305,10 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
 #define IMM_ILA    print_itertab();
-#define IMM_IVA    out.fmt(" {}", decodeVariableSizeImm(&pc));
+#define IMM_IVA    out.fmt(" {}", decode_iva(pc));
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
-#define IMM_LA     out.fmt(" {}", loc_name(finfo, decodeVariableSizeImm(&pc)));
-#define IMM_IA     out.fmt(" {}", decodeVariableSizeImm(&pc));
+#define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
+#define IMM_IA     out.fmt(" {}", decode_iva(pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
 #define IMM_SA     out.fmt(" {}", \
                            escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));

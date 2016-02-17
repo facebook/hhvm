@@ -41,8 +41,8 @@ namespace arm {
 const Abi& abi(CodeKind kind = CodeKind::Trace);
 
 inline PhysReg rvmfp() { return vixl::x29; }
-inline PhysReg rvmsp() { return vixl::x19; }
-inline PhysReg rvmtl() { return vixl::x20; }
+inline PhysReg rvmsp() { return vixl::x28; }
+inline PhysReg rvmtl() { return vixl::x27; }
 inline PhysReg rsp()   { return vixl::sp; }
 
 inline RegSet vm_regs_no_sp()   { return rvmfp() | rvmtl(); }
@@ -54,7 +54,7 @@ PhysReg rret_simd(size_t i);
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
 
-constexpr size_t num_arg_regs() { return 7; }
+constexpr size_t num_arg_regs() { return 8; }
 constexpr size_t num_arg_regs_simd() { return 0; }
 
 RegSet arg_regs(size_t n);
@@ -108,6 +108,31 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
   return mapping[cc];
 }
 
+inline jit::ConditionCode convertCC(vixl::Condition cc) {
+  using namespace vixl;
+
+  // We'll index into this array by the arm64 condition code.
+  constexpr jit::ConditionCode mapping[] = {
+    jit::CC_O,   // overflow set
+    jit::CC_NO,  // overflow clear
+    jit::CC_B,   // unsigned lower
+    jit::CC_AE,  // unsigned higher or same
+    jit::CC_E,   // equal
+    jit::CC_NE,  // not equal
+    jit::CC_NA,  // unsigned lower or same
+    jit::CC_A,   // unsigned higher
+    jit::CC_S,   // plus (sign set)
+    jit::CC_NS,  // minus (sign clear)
+    jit::CC_P, jit::CC_NP, // invalid. These are the parity flags.
+    jit::CC_L,   // signed less than
+    jit::CC_GE,  // signed greater or equal
+    jit::CC_LE,  // signed less or equal
+    jit::CC_G,   // signed greater than
+  };
+
+  return mapping[cc];
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline vixl::Register svcReqArgReg(unsigned index) {
@@ -116,7 +141,8 @@ inline vixl::Register svcReqArgReg(unsigned index) {
 }
 
 // vixl MacroAssembler uses ip0/ip1 (x16-17) for macro instructions
-const vixl::Register rAsm(vixl::x9);
+const vixl::Register rAsm2(vixl::x15);
+const vixl::Register rAsm(vixl::x18);
 const vixl::Register rLinkReg(vixl::x30);
 const vixl::Register rHostCallReg(vixl::x16);
 

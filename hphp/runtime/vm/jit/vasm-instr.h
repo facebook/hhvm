@@ -118,12 +118,7 @@ struct Vunit;
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(divint, Inone, U(s0) U(s1), D(d))\
-  /* arm instructions */\
-  O(brk, I(code), Un, Dn)\
-  O(cbcc, I(cc), U(s), Dn)\
-  O(hostcall, I(argc), U(args), Dn)\
-  O(tbcc, I(cc) I(bit), U(s), Dn)\
-  /* x64 instructions */\
+  /* arithmetic instructions */\
   O(addl, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(addlm, Inone, U(s0) U(m), D(sf)) \
@@ -768,22 +763,6 @@ struct srem { Vreg s0, s1, d; };
 struct divint { Vreg s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
-// ARM.
-
-/*
- * ARM emulator native call intrinsic.
- */
-struct hostcall { RegSet args; uint8_t argc; };
-
-/*
- * ARM-specific instructions.
- */
-struct brk { uint16_t code; };
-struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
-struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
-
-///////////////////////////////////////////////////////////////////////////////
-// x64.
 
 /*
  * Unless specifically noted otherwise, instructions with a Vreg8 or Vreg16

@@ -58,6 +58,7 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
@@ -110,6 +111,7 @@
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 
 namespace HPHP { namespace jit {
@@ -2071,13 +2073,19 @@ TCA MCGenerator::translateWork(const TranslArgs& args) {
   }
 
   // Report jit maturity based on the amount of code emitted.
-  int32_t percent = code.mainUsed() * 100 / CodeCache::AMaxUsage;
-  if (percent > 100) percent = 100;
-  if (s_jitMaturityCounter &&
-      percent > s_jitMaturityCounter->getValue()) {
-    s_jitMaturityCounter->setValue(percent);
-    if (RuntimeOption::ServerExecutionMode()) {
-      Logger::Info("jit.maturity = %" PRId32, percent);
+  int32_t after = code.mainUsed() * 100 / CodeCache::AMaxUsage;
+  if (after > 100) after = 100;
+  if (s_jitMaturityCounter) {
+    int32_t before = s_jitMaturityCounter->getValue();
+    if (after > before) {
+      s_jitMaturityCounter->setValue(after);
+      constexpr int32_t kThreshold = 15;
+      if (StructuredLog::enabled() &&
+          before < kThreshold && kThreshold <= after) {
+        std::map<std::string, int64_t> cols;
+        cols["jit_mature_sec"] = time(0) - HttpServer::StartTime;
+        StructuredLog::log("hhvm_warmup", cols);
+      }
     }
   }
   return loc.mainStart();

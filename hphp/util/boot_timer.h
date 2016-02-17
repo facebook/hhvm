@@ -50,8 +50,6 @@ private:
   Unit m_cpu;
 };
 
-typedef void (*BootTimerCallback)(const std::map<std::string, TimeUsage>);
-
 /**
  * Times execution of the different parts of HHVM startup and warmup.
  *
@@ -74,10 +72,6 @@ struct BootTimer {
   // method and stores it as a sample with the given name
   static void mark(const std::string& name);
 
-  // Sets the callback to be invoked after BootTimer::done is called. Note
-  // that only one callback is supported; subsequent calls will overwrite it.
-  static void setDoneCallback(BootTimerCallback cb);
-
   struct Block {
     explicit Block(const std::string& name);
     ~Block();
@@ -95,7 +89,6 @@ private:
   static bool s_started;
   static TimeUsage s_start;
   static std::unique_ptr<BootTimer::Impl> s_instance;
-  static BootTimerCallback s_doneCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

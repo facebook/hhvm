@@ -18,11 +18,6 @@
 #define incl_HPHP_JIT_UNIQUE_STUBS_ARM_H_
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/vasm-gen.h"
-#include "hphp/runtime/vm/jit/vasm-reg.h"
-
-#include "hphp/util/data-block.h"
 
 namespace HPHP {
 
@@ -31,11 +26,6 @@ struct ActRec;
 namespace jit { namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-TCA emitFunctionEnterHelper(CodeBlock& cb, UniqueStubs& us);
-TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us);
-TCA emitCallToExit(CodeBlock& cb);
-TCA emitEndCatchHelper(CodeBlock& cb, UniqueStubs& us);
 
 void enterTCImpl(TCA start, ActRec* stashedAR);
 

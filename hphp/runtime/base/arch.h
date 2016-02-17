@@ -29,9 +29,8 @@ enum class Arch { X64, ARM, PPC64, };
 inline Arch arch() {
 #if defined(__powerpc64__)
   return Arch::PPC64;
-#elif defined(__aarch64__)
-  return Arch::ARM;
 #else
+  if (RuntimeOption::EvalSimulateARM) return Arch::ARM;
   return Arch::X64;
 #endif
 }

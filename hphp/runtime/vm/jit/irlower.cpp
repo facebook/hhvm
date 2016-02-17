@@ -328,7 +328,7 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
 
   bool do_relocate = false;
 
-  if (!mcg->useLLVM() && arch() == Arch::X64 &&
+  if (!mcg->useLLVM() &&
       !RuntimeOption::EvalEnableReusableTC &&
       RuntimeOption::EvalJitRelocationSize &&
       cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {

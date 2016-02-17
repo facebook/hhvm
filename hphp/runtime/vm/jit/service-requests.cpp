@@ -208,6 +208,11 @@ namespace x64 {
   static constexpr int kLeaVmSpLen = 7;
 }
 
+namespace arm {
+  static constexpr int kMovLen = 16; // FIXME
+  static constexpr int kLeaVmSpLen = 16; // FIXME
+}
+
 size_t stub_size() {
   // The extra args are the request type and the stub address.
   constexpr auto kTotalArgs = kMaxArgs + 2;
@@ -216,7 +221,7 @@ size_t stub_size() {
     case Arch::X64:
       return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
     case Arch::ARM:
-      not_implemented();
+      return kTotalArgs * arm::kMovLen + arm::kLeaVmSpLen;
     case Arch::PPC64:
       not_implemented();
   }
@@ -240,7 +245,24 @@ FPInvOffset extract_spoff(TCA stub) {
       }
 
     case Arch::ARM:
-      not_implemented();
+      {
+        struct Decoder : public vixl::Decoder {
+          void VisitAddSubImmediate(vixl::Instruction* inst) {
+            int64_t immed =
+              inst->ImmAddSub() << ((inst->ShiftAddSub() == 1) ? 12 : 0);
+            switch (inst->Mask(vixl::AddSubOpMask)) {
+              case vixl::ADD: offset = immed; break;
+              case vixl::SUB: offset = -immed; break;
+              default: break;
+            }
+          }
+          folly::Optional<int32_t> offset;
+        };
+        Decoder decoder;
+        decoder.Decode((vixl::Instruction*)(stub));
+        always_assert(decoder.offset && (*decoder.offset % sizeof(Cell)) == 0);
+        return FPInvOffset{-(*decoder.offset / int32_t{sizeof(Cell)})};
+      }
 
     case Arch::PPC64:
       not_implemented();

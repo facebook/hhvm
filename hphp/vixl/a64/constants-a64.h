@@ -52,9 +52,9 @@ V_(Rd, 4, 0, Bits)                        /* Destination register.     */      \
 V_(Rn, 9, 5, Bits)                        /* First source register.    */      \
 V_(Rm, 20, 16, Bits)                      /* Second source register.   */      \
 V_(Ra, 14, 10, Bits)                      /* Third source register.    */      \
-V_(Rt, 4, 0, Bits)                        /* Load dest / store source. */      \
-V_(Rt2, 14, 10, Bits)                     /* Load second dest /        */      \
-                                         /* store second source.      */       \
+V_(Rt, 4, 0, Bits)                        /* Load/store register.      */      \
+V_(Rt2, 14, 10, Bits)                     /* Load/store 2nd register   */      \
+V_(Rs, 20, 16, Bits)                      /* Exclusive access status.  */      \
 V_(PrefetchMode, 4, 0, Bits)                                                   \
                                                                                \
 /* Common bits */                                                              \
@@ -738,6 +738,45 @@ enum LoadStoreRegisterOffset {
   #undef LOAD_STORE_REGISTER_OFFSET
 };
 
+// Load/store excusively
+enum LoadStoreExclusive {
+  LoadStoreExclusiveFixed = 0x08000000,
+  LoadStoreExclusiveFMask = 0x3F000000,
+  LoadStoreExclusiveMask  = 0xFFE08000,
+  STXRB_w  = LoadStoreExclusiveFixed | 0x00000000,
+  STXRH_w  = LoadStoreExclusiveFixed | 0x40000000,
+  STXR_w   = LoadStoreExclusiveFixed | 0x80000000,
+  STXR_x   = LoadStoreExclusiveFixed | 0xC0000000,
+  LDXRB_w  = LoadStoreExclusiveFixed | 0x00400000,
+  LDXRH_w  = LoadStoreExclusiveFixed | 0x40400000,
+  LDXR_w   = LoadStoreExclusiveFixed | 0x80400000,
+  LDXR_x   = LoadStoreExclusiveFixed | 0xC0400000,
+  STXP_w   = LoadStoreExclusiveFixed | 0x80200000,
+  STXP_x   = LoadStoreExclusiveFixed | 0xC0200000,
+  LDXP_w   = LoadStoreExclusiveFixed | 0x80600000,
+  LDXP_x   = LoadStoreExclusiveFixed | 0xC0600000,
+  STLXRB_w = LoadStoreExclusiveFixed | 0x00008000,
+  STLXRH_w = LoadStoreExclusiveFixed | 0x40008000,
+  STLXR_w  = LoadStoreExclusiveFixed | 0x80008000,
+  STLXR_x  = LoadStoreExclusiveFixed | 0xC0008000,
+  LDAXRB_w = LoadStoreExclusiveFixed | 0x00408000,
+  LDAXRH_w = LoadStoreExclusiveFixed | 0x40408000,
+  LDAXR_w  = LoadStoreExclusiveFixed | 0x80408000,
+  LDAXR_x  = LoadStoreExclusiveFixed | 0xC0408000,
+  STLXP_w  = LoadStoreExclusiveFixed | 0x80208000,
+  STLXP_x  = LoadStoreExclusiveFixed | 0xC0208000,
+  LDAXP_w  = LoadStoreExclusiveFixed | 0x80608000,
+  LDAXP_x  = LoadStoreExclusiveFixed | 0xC0608000,
+  STLRB_w  = LoadStoreExclusiveFixed | 0x00808000,
+  STLRH_w  = LoadStoreExclusiveFixed | 0x40808000,
+  STLR_w   = LoadStoreExclusiveFixed | 0x80808000,
+  STLR_x   = LoadStoreExclusiveFixed | 0xC0808000,
+  LDARB_w  = LoadStoreExclusiveFixed | 0x00C08000,
+  LDARH_w  = LoadStoreExclusiveFixed | 0x40C08000,
+  LDAR_w   = LoadStoreExclusiveFixed | 0x80C08000,
+  LDAR_x   = LoadStoreExclusiveFixed | 0xC0C08000
+};
+
 // Conditional compare.
 enum ConditionalCompareOp {
   ConditionalCompareMask = 0x60000000,
@@ -934,8 +973,10 @@ enum FPDataProcessing1SourceOp {
   FRINTN   = FRINTN_s,
   FRINTP_s = FPDataProcessing1SourceFixed | 0x00048000,
   FRINTP_d = FPDataProcessing1SourceFixed | FP64 | 0x00048000,
+  FRINTP   = FRINTP_s,
   FRINTM_s = FPDataProcessing1SourceFixed | 0x00050000,
   FRINTM_d = FPDataProcessing1SourceFixed | FP64 | 0x00050000,
+  FRINTM   = FRINTM_s,
   FRINTZ_s = FPDataProcessing1SourceFixed | 0x00058000,
   FRINTZ_d = FPDataProcessing1SourceFixed | FP64 | 0x00058000,
   FRINTZ   = FRINTZ_s,

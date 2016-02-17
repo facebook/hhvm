@@ -152,6 +152,7 @@ struct RuntimeOption {
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
   static bool ServerKillOnSIGTERM;
+  static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
   static std::vector<std::string> ServerNextProtocols;
   static int GzipCompressionLevel;
@@ -548,6 +549,7 @@ struct RuntimeOption {
   F(bool, EagerGC,                     false)                           \
   /* only run eager-gc once at each surprise point (much faster) */     \
   F(bool, FilterGCPoints,              true)                            \
+  F(bool, Quarantine,                  false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \

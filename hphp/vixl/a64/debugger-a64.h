@@ -102,7 +102,7 @@ enum DebugParameters {
 
 // Forward declarations.
 class DebugCommand;
-struct Token;
+class Token;
 class FormatToken;
 
 class Debugger : public Simulator {

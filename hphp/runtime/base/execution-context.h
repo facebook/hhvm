@@ -40,7 +40,7 @@
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/pc-filter.h"
 
-namespace vixl { struct Simulator; }
+namespace vixl { class Simulator; }
 
 namespace HPHP {
 struct RequestEventHandler;

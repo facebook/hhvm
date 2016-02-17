@@ -295,13 +295,13 @@ void HttpServer::runOrExitProcess() {
       Logger::Info("page server killed");
       return;
     }
-    Logger::Info("page server stopped");
+    Logger::Info("stopping page server");
   }
 
-  onServerShutdown();
   if (RuntimeOption::ServerPort) {
     m_pageServer->stop();
   }
+  onServerShutdown();
 
   waitForServers();
   m_watchDog.waitForEnd();
@@ -329,10 +329,18 @@ static void exit_on_timeout(int sig) {
 
 void HttpServer::stop(const char* stopReason) {
   if (m_stopped) return;
+  // we're shutting down flush http logs
+  Logger::FlushAll();
+  HttpRequestHandler::GetAccessLog().flushAllWriters();
 
-  if (RuntimeOption::ServerGracefulShutdownWait) {
+  int totalWait =
+    RuntimeOption::ServerPreShutdownWait +
+    RuntimeOption::ServerShutdownListenWait +
+    RuntimeOption::ServerGracefulShutdownWait;
+
+  if (totalWait > 0) {
     signal(SIGALRM, exit_on_timeout);
-    alarm(RuntimeOption::ServerGracefulShutdownWait);
+    alarm(totalWait);
   }
 
   Lock lock(this);
@@ -342,6 +350,9 @@ void HttpServer::stop(const char* stopReason) {
 }
 
 void HttpServer::stopOnSignal(int sig) {
+  // we're shutting down flush http logs
+  Logger::FlushAll();
+  HttpRequestHandler::GetAccessLog().flushAllWriters();
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM
   if (RuntimeOption::ServerKillOnSIGTERM && sig == SIGTERM) {

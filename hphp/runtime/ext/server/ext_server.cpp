@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -55,6 +56,7 @@ static struct ServerExtension final : Extension {
     HHVM_FE(xbox_set_thread_timeout);
     HHVM_FE(xbox_schedule_thread_reset);
     HHVM_FE(xbox_get_thread_time);
+    HHVM_FE(server_is_stopping);
 
     loadSystemlib();
   }
@@ -238,6 +240,16 @@ int64_t HHVM_FUNCTION(xbox_get_thread_time) {
     return time(nullptr) - handler->getLastResetTime();
   }
   throw Exception("Not an xbox worker!");
+}
+
+bool HHVM_FUNCTION(server_is_stopping) {
+  if (HttpServer::Server) {
+    if (auto const server = HttpServer::Server->getPageServer()) {
+      return server->getStatus() == Server::RunStatus::STOPPING;
+    }
+  }
+  // Return false if not running in server mode.
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

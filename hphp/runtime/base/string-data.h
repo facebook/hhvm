@@ -538,7 +538,8 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 }
 
 namespace folly {
-template<> struct FormatValue<const HPHP::StringData*> {
+template<> class FormatValue<const HPHP::StringData*> {
+ public:
   explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
 
   template<typename Callback>
@@ -551,7 +552,8 @@ template<> struct FormatValue<const HPHP::StringData*> {
   const HPHP::StringData* m_val;
 };
 
-template<> struct FormatValue<HPHP::StringData*> {
+template<> class FormatValue<HPHP::StringData*> {
+ public:
   explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
 
   template<typename Callback>

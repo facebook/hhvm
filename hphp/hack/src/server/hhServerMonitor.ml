@@ -38,7 +38,9 @@ let start_server options name log_link daemon_entry =
   in
   let start_t = Unix.time () in
   let {Daemon.pid; Daemon.channels = (ic, oc)} =
-    Daemon.spawn ~channel_mode:`socket log_fds daemon_entry options in
+    (* TODO: switch this back to Daemon.spawn after it's compatible with
+     * shared memory (#9556242) *)
+    Daemon.fork ~channel_mode:`socket log_fds daemon_entry options in
   Hh_logger.log "Just started %s server with pid: %d." name pid;
   let server =
     SP.({
@@ -53,11 +55,11 @@ let start_server options name log_link daemon_entry =
 
 let start_hh_server options =
   let log_link = ServerFiles.log_link (ServerArgs.root options) in
-  start_server options Program.hh_server log_link ServerMain.entry
+  start_server options Program.hh_server log_link ServerMain.daemon_main
 
 let start_ide_server options =
   let log_link = ServerFiles.ide_log_link (ServerArgs.root options) in
-  start_server options Program.ide_server log_link IdeMain.entry
+  start_server options Program.ide_server log_link IdeMain.daemon_main
 
 (** Main method of the server monitor daemon. The daemon is responsible for
  * listening to socket requests from hh_client, checking Build ID, and relaying
@@ -82,6 +84,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
     let hh_server_monitor_starter = begin fun () ->
       let typechecker = start_hh_server options in
       let ide = start_ide_server options in
+      IdeProcessPipeInit.monitor_make_and_send
+        typechecker.SP.out_fd ide.SP.out_fd;
       [typechecker; ide]
     end in
     let waiting_client = ServerArgs.waiting_client options in

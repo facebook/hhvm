@@ -277,7 +277,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const ref = acls.is_ref()) {
+    if (acls.is_ref()) {
       if (auto const index = add_class(ret, acls)) {
         ret.all_ref.set(*index);
       }
@@ -386,28 +386,28 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const stk = acls.is_stack()) {
+    if (acls.is_stack()) {
       ret.all_stack.set(meta.index);
       return;
     }
 
-    if (auto const iterPos = acls.is_iterPos()) {
+    if (acls.is_iterPos()) {
       ret.all_iterPos.set(meta.index);
       return;
     }
 
-    if (auto const iterBase = acls.is_iterBase()) {
+    if (acls.is_iterBase()) {
       ret.all_iterBase.set(meta.index);
       return;
     }
 
-    if (auto const ref = acls.is_ref()) {
+    if (acls.is_ref()) {
       meta.conflicts = ret.all_ref;
       meta.conflicts.reset(meta.index);
       return;
     }
 
-    if (auto const mis = acls.is_mis()) {
+    if (acls.is_mis()) {
       // We don't maintain an all_mistate set so there's nothing to do here but
       // avoid hitting the assert below.
       return;

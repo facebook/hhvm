@@ -2,7 +2,6 @@ Class \Bar -> Class \Bar
 Class \Bar -> Class \FooParent
 Class \Bar -> Class \G
 Class \Bar -> Cstr \FooParent
-Class \Bar -> Extends FooParent
 Class \Bar -> Extends \FooParent
 Class \Foo -> Class \Bar
 Class \Foo -> Class \Foo
@@ -20,5 +19,4 @@ Class \IFoo -> Class \FooParent
 Class \IFoo -> Class \G
 Class \IFoo -> Class \IFoo
 Class \IFoo -> Cstr \FooParent
-Class \IFoo -> Extends FooParent
 Class \IFoo -> Extends \FooParent

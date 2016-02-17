@@ -135,23 +135,23 @@ double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
 //////////////////////////////////////////////////////////////////////////////
 // MySSLContextProvider
 MySSLContextProvider::MySSLContextProvider(
-    std::shared_ptr<am::SSLOptionsProviderBase> provider)
+    std::unique_ptr<am::SSLOptionsProviderBase> provider)
     : m_provider(std::move(provider)) {}
 
 Object MySSLContextProvider::newInstance(
-    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+    std::unique_ptr<am::SSLOptionsProviderBase> ssl_provider) {
   Object obj{getClass()};
   Native::data<MySSLContextProvider>(obj)
       ->setSSLProvider(std::move(ssl_provider));
   return obj;
 }
 
-std::shared_ptr<am::SSLOptionsProviderBase>&
-MySSLContextProvider::getSSLProvider() {
-  return m_provider;
+std::unique_ptr<am::SSLOptionsProviderBase>
+MySSLContextProvider::stealSSLProvider() {
+  return std::move(m_provider);
 }
 void MySSLContextProvider::setSSLProvider(
-    std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider) {
+    std::unique_ptr<am::SSLOptionsProviderBase> ssl_provider) {
   m_provider = std::move(ssl_provider);
 }
 
@@ -190,7 +190,7 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient,
   if (!sslContextProvider.isNull()) {
     auto* mysslContextProvider =
         Native::data<MySSLContextProvider>(sslContextProvider.toObject());
-    op->setSSLOptionsProviderBase(mysslContextProvider->getSSLProvider().get());
+    op->setSSLOptionsProviderBase(mysslContextProvider->stealSSLProvider());
   }
 
   if (timeout_micros < 0) {
@@ -1513,6 +1513,8 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnection, close);
     HHVM_ME(AsyncMysqlConnection, releaseConnection);
     HHVM_ME(AsyncMysqlConnection, serverInfo);
+    HHVM_ME(AsyncMysqlConnection, sslSessionReused);
+    HHVM_ME(AsyncMysqlConnection, isSSL);
     HHVM_ME(AsyncMysqlConnection, warningCount);
     HHVM_ME(AsyncMysqlConnection, host);
     HHVM_ME(AsyncMysqlConnection, port);

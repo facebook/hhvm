@@ -220,6 +220,7 @@ function xbox_schedule_thread_reset(): void;
 <<__HipHopSpecific, __Native>>
 function xbox_get_thread_time(): int;
 
+namespace HH {
 /**
  * Whether the server is going to stop soon.
  *
@@ -229,3 +230,14 @@ function xbox_get_thread_time(): int;
  */
 <<__HipHopSpecific, __Native>>
 function server_is_stopping(): bool;
+
+/**
+ * Returns the time that the http server has been running.
+ *
+ * @return int - number of seconds the server has been running.  -1 if
+ * server is not started.
+ *
+ */
+<<__HipHopSpecific, __Native>>
+function server_uptime(): int;
+}

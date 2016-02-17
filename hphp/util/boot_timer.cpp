@@ -18,6 +18,7 @@
 #include <cassert>
 
 #include "hphp/util/logger.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
@@ -114,7 +115,6 @@ BootTimer::Block::~Block() {
 bool BootTimer::s_started;
 TimeUsage BootTimer::s_start;
 std::unique_ptr<BootTimer::Impl> BootTimer::s_instance;
-BootTimerCallback BootTimer::s_doneCallback;
 
 void BootTimer::start() {
   BootTimer::s_started = true;
@@ -133,8 +133,14 @@ void BootTimer::done() {
   BootTimer::s_instance->add("TOTAL", total);
   BootTimer::s_instance->dumpMarks();
 
-  if (s_doneCallback) {
-    s_doneCallback(BootTimer::s_instance->m_marks);
+  if (StructuredLog::enabled()) {
+    std::lock_guard<std::mutex> lock(s_instance->m_marks_guard_);
+    std::map<std::string, int64_t> cols;
+    for (auto sample : s_instance->m_marks) {
+      cols[sample.first] = sample.second.wall().count();
+      cols[sample.first + " CPU"] = sample.second.cpu().count();
+    }
+    StructuredLog::log("hhvm_boot_timer", cols);
   }
 }
 
@@ -149,10 +155,6 @@ void BootTimer::mark(const std::string& info) {
 void BootTimer::add(const std::string& info, const TimeUsage value) {
   if (!s_started) return;
   BootTimer::s_instance->add(info, value);
-}
-
-void BootTimer::setDoneCallback(BootTimerCallback cb) {
-  s_doneCallback = cb;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -182,18 +182,24 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
   endif()
 
+  if (ENABLE_SPLIT_DWARF)
+    set(GDB_SUBOPTION "split-dwarf")
+  else()
+    set(GDB_SUBOPTION "")
+  endif()
+
   # No optimizations for debug builds.
   # -Og enables some optimizations, but makes debugging harder by optimizing
   # away some functions and locals. -O0 is more debuggable.
   # -O0-ggdb was reputed to cause gdb to crash (github #4450)
-  set(CMAKE_C_FLAGS_DEBUG            "-O0 -g")
-  set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+  set(CMAKE_C_FLAGS_DEBUG            "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
   set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
   set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
   set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration -Wno-missing-field-initializers")
 
   foreach(opt ${DISABLED_NAMED_WARNINGS})

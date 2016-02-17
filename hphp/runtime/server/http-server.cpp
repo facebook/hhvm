@@ -225,8 +225,6 @@ HttpServer::~HttpServer() {
 }
 
 void HttpServer::runOrExitProcess() {
-  StartTime = time(0);
-
   auto startupFailure = [] (const std::string& msg) {
     Logger::Error(msg);
     Logger::Error("Shutting down due to failure(s) to bind in "
@@ -245,6 +243,8 @@ void HttpServer::runOrExitProcess() {
     }
     Logger::Info("page server started");
   }
+
+  StartTime = time(nullptr);
 
   if (RuntimeOption::AdminServerPort) {
     if (!startServer(false)) {

@@ -28,8 +28,15 @@ let test_escape_unescape () =
     (result = s)
   end
 
+let test_empty_string () =
+  try
+    ignore (Hh_json.json_of_string "");
+    false
+  with Hh_json.Syntax_error _ -> true
+
 let tests = [
   "test_escape_unescape", test_escape_unescape;
+  "test_empty_string", test_empty_string;
 ]
 
 let () =

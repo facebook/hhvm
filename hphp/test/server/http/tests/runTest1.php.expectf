@@ -1,3 +1,6 @@
+Requesting 'test_status.php'
+string(%d) "int(%d)
+bool(false)"
 Requesting 'test_get.php?name=Foo'
 string(15) "string(3) "Foo""
 Requesting 'test_get.php?name=Bar'

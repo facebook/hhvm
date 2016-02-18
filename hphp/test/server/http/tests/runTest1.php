@@ -3,6 +3,7 @@
 require_once('test_base.inc');
 
 requestAll(array(
+  "test_status.php",
   "test_get.php?name=Foo",
   "test_get.php?name=Bar",
   "apc_apache_note.php",

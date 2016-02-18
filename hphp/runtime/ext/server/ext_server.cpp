@@ -56,8 +56,8 @@ static struct ServerExtension final : Extension {
     HHVM_FE(xbox_set_thread_timeout);
     HHVM_FE(xbox_schedule_thread_reset);
     HHVM_FE(xbox_get_thread_time);
-    HHVM_FE(server_is_stopping);
-    HHVM_FE(server_uptime);
+    HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
+    HHVM_FALIAS(HH\\server_uptime, server_uptime);
 
     loadSystemlib();
   }

@@ -3527,31 +3527,31 @@ OPTBLD_INLINE void iopNot(IOP_ARGS) {
   cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
 }
 
-template<class Op>
-OPTBLD_INLINE void implCellBinOp(PC& pc, Op op) {
+template<class Fn>
+OPTBLD_INLINE void implCellBinOp(PC& pc, Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
-  auto const result = op(*c2, *c1);
+  auto const result = fn(*c2, *c1);
   tvRefcountedDecRef(c2);
   *c2 = result;
   vmStack().popC();
 }
 
-template<class Op>
-OPTBLD_INLINE void implCellBinOpBool(PC& pc, Op op) {
+template<class Fn>
+OPTBLD_INLINE void implCellBinOpBool(PC& pc, Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
-  bool const result = op(*c2, *c1);
+  bool const result = fn(*c2, *c1);
   tvRefcountedDecRef(c2);
   *c2 = make_tv<KindOfBoolean>(result);
   vmStack().popC();
 }
 
-template<class Op>
-OPTBLD_INLINE void implCellBinOpInt64(PC& pc, Op op) {
+template<class Fn>
+OPTBLD_INLINE void implCellBinOpInt64(PC& pc, Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
-  auto const result = op(*c2, *c1);
+  auto const result = fn(*c2, *c1);
   tvRefcountedDecRef(c2);
   *c2 = make_tv<KindOfInt64>(result);
   vmStack().popC();

@@ -485,7 +485,7 @@ bool TestServer::TestSetCookie() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TestTransport : Transport {
+struct TestTransport final : Transport {
   TestTransport() : m_code(0) {}
 
   int m_code;
@@ -494,18 +494,18 @@ struct TestTransport : Transport {
   /**
    * Implementing HttpTransport...
    */
-  virtual const char *getUrl() { return "/string";}
-  virtual const char *getRemoteHost() { return "remote";}
-  virtual const void *getPostData(int &size) { size = 0; return nullptr;}
-  virtual uint16_t getRemotePort() { return 0; }
-  virtual Method getMethod() { return Transport::Method::GET;}
-  virtual std::string getHeader(const char *name) { return "";}
-  virtual void getHeaders(HeaderMap &headers) {}
-  virtual void addHeaderImpl(const char *name, const char *value) {}
-  virtual void removeHeaderImpl(const char *name) {}
+  const char *getUrl() override { return "/string"; }
+  const char *getRemoteHost() override { return "remote"; }
+  const void *getPostData(int &size) override { size = 0; return nullptr; }
+  uint16_t getRemotePort() override { return 0; }
+  Method getMethod() override { return Transport::Method::GET; }
+  std::string getHeader(const char *name) override { return ""; }
+  void getHeaders(HeaderMap &headers) override {}
+  void addHeaderImpl(const char *name, const char *value) override {}
+  void removeHeaderImpl(const char *name) override {}
 
-  virtual void sendImpl(const void *data, int size, int code, bool chunked,
-                        bool eom) {
+  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
+       override {
     m_response.clear();
     m_response.append((const char *)data, size);
     m_code = code;
@@ -648,10 +648,10 @@ bool TestServer::TestTakeoverServer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct EchoHandler : RequestHandler {
+struct EchoHandler final : RequestHandler {
   explicit EchoHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport) {
+  void handleRequest(Transport *transport) override {
     g_context.getCheck();
     HeaderMap headers;
     transport->getHeaders(headers);
@@ -683,7 +683,7 @@ struct EchoHandler : RequestHandler {
     transport->sendString(response);
     hphp_memory_cleanup();
   }
-  virtual void abortRequest(Transport *transport) {
+  void abortRequest(Transport *transport) override {
     transport->sendString("Service Unavailable", 503);
   }
 };

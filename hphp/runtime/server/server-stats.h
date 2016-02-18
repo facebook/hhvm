@@ -95,7 +95,7 @@ private:
   static std::vector<ServerStats*> s_loggers;
   static DECLARE_THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
 
-  typedef hphp_shared_string_map<int64_t> CounterMap;
+  using CounterMap = hphp_shared_string_map<int64_t>;
 
   struct PageStats {
     std::string m_url; // which page
@@ -103,7 +103,7 @@ private:
     int m_hit;         // page hits
     CounterMap m_values; // name value pairs
   };
-  typedef hphp_shared_string_map<PageStats> PageStatsMap;
+  using PageStatsMap = hphp_shared_string_map<PageStats>;
   struct TimeSlot {
     int64_t m_time;
     PageStatsMap m_pages;
@@ -165,7 +165,7 @@ private:
     int64_t wall_time; // micro-seconds
   };
   // keys: "url==>name" and "name==>address"
-  typedef hphp_string_map<IOStatus> IOStatusMap;
+  using IOStatusMap = hphp_string_map<IOStatus>;
 
   struct ThreadStatus {
     ThreadStatus();

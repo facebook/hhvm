@@ -32,10 +32,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TestCurlRequestHandler : RequestHandler {
+struct TestCurlRequestHandler final : RequestHandler {
   explicit TestCurlRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport) {
+  void handleRequest(Transport *transport) override {
     g_context.getCheck();
     transport->addHeader("ECHOED", transport->getHeader("ECHO").c_str());
 
@@ -50,7 +50,7 @@ struct TestCurlRequestHandler : RequestHandler {
     }
     hphp_memory_cleanup();
   }
-  virtual void abortRequest(Transport *transport) {
+  void abortRequest(Transport *transport) override {
     transport->sendString("Aborted");
   }
 };

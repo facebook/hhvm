@@ -1183,7 +1183,7 @@ struct PCInfo {
   int count;
   int unique;
 };
-typedef std::map<int, PCInfo> InfoMap;
+using InfoMap = std::map<int, PCInfo>;
 }
 
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,

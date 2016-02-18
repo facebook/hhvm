@@ -90,7 +90,7 @@ struct XboxServerInfo : SatelliteServerInfo {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct XboxTransport : Transport, Synchronizable {
+struct XboxTransport final : Transport, Synchronizable {
   explicit XboxTransport(const String& message, const String& reqInitDoc = "");
 
   timespec getStartTimer() const { return m_queueTime; }
@@ -98,10 +98,10 @@ struct XboxTransport : Transport, Synchronizable {
   /**
    * Request URI.
    */
-  virtual const char *getUrl();
-  virtual const char *getRemoteHost() { return "127.0.0.1"; }
-  virtual uint16_t getRemotePort() { return 0; }
-  virtual const std::string& getServerAddr() {
+  const char *getUrl() override;
+  const char *getRemoteHost() override { return "127.0.0.1"; }
+  uint16_t getRemotePort() override { return 0; }
+  const std::string& getServerAddr() override {
     auto const& ipv4 = RuntimeOption::GetServerPrimaryIPv4();
     return ipv4.empty() ? RuntimeOption::GetServerPrimaryIPv6() : ipv4;
   }
@@ -109,8 +109,8 @@ struct XboxTransport : Transport, Synchronizable {
   /**
    * Request data.
    */
-  virtual Method getMethod() { return Transport::Method::POST; }
-  virtual const void *getPostData(int &size) {
+  Method getMethod() override { return Transport::Method::POST; }
+  const void *getPostData(int &size) override {
     size = m_message.size();
     return m_message.data();
   }
@@ -118,14 +118,14 @@ struct XboxTransport : Transport, Synchronizable {
   /**
    * Manage headers.
    */
-  virtual std::string getHeader(const char *name);
-  virtual void getHeaders(HeaderMap &headers) {}
-  virtual void addHeaderImpl(const char *name, const char *value) {}
-  virtual void removeHeaderImpl(const char *name) {}
+  std::string getHeader(const char *name) override;
+  void getHeaders(HeaderMap &headers) override {}
+  void addHeaderImpl(const char *name, const char *value) override {}
+  void removeHeaderImpl(const char *name) override {}
 
-  virtual void sendImpl(const void *data, int size, int code, bool chunked,
-                        bool eom);
-  virtual void onSendEndImpl();
+  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
+       override;
+  void onSendEndImpl() override;
 
   /**
    * Task interface.

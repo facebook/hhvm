@@ -59,7 +59,7 @@ struct AccessLog {
     int64_t startTime;
     LogFileFlusher flusher;
   };
-  typedef ThreadData* (*GetThreadDataFunc)();
+  using GetThreadDataFunc = ThreadData* (*)();
   explicit AccessLog(GetThreadDataFunc f) :
     m_initialized(false), m_fGetThreadData(f) {}
   ~AccessLog();

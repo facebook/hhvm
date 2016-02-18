@@ -34,41 +34,41 @@ namespace HPHP {
 
 struct Variant;
 
-typedef struct _multipart_event_start {
+struct multipart_event_start {
   size_t  content_length;
-} multipart_event_start;
+};
 
-typedef struct _multipart_event_formdata {
+struct multipart_event_formdata {
   size_t  post_bytes_processed;
   char  *name;
   char  **value;
   size_t  length;
   size_t  *newlength;
-} multipart_event_formdata;
+};
 
-typedef struct _multipart_event_file_start {
+struct multipart_event_file_start {
   size_t  post_bytes_processed;
   char  *name;
   char  **filename;
-} multipart_event_file_start;
+};
 
-typedef struct _multipart_event_file_data {
+struct multipart_event_file_data {
   size_t  post_bytes_processed;
   off_t  offset;
   char  *data;
   size_t  length;
   size_t  *newlength;
-} multipart_event_file_data;
+};
 
-typedef struct _multipart_event_file_end {
+struct multipart_event_file_end {
   size_t      post_bytes_processed;
   const char* temp_filename;
   int         cancel_upload;
-} multipart_event_file_end;
+};
 
-typedef struct _multipart_event_end {
+struct multipart_event_end {
   size_t  post_bytes_processed;
-} multipart_event_end;
+};
 
 void rfc1867PostHandler(Transport *transport,
                         Array& post,

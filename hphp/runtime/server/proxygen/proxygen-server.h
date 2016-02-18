@@ -43,8 +43,8 @@ struct ProxygenJob : ServerJob {
 };
 
 struct ProxygenTransportTraits;
-typedef ServerWorker<std::shared_ptr<ProxygenJob>,
-  ProxygenTransportTraits> ProxygenWorker;
+using ProxygenWorker = ServerWorker<std::shared_ptr<ProxygenJob>,
+                                    ProxygenTransportTraits>;
 
 struct ProxygenServer;
 
@@ -69,8 +69,7 @@ struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   ProxygenServer *m_server;
 };
 
-typedef folly::NotificationQueue<ResponseMessage>
-  ResponseMessageQueue;
+using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
 
 struct HPHPWorkerThread : proxygen::WorkerThread {
   explicit HPHPWorkerThread(folly::EventBaseManager* ebm)

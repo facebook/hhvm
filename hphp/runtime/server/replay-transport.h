@@ -30,7 +30,7 @@ namespace HPHP {
  * debugging HTTP requests that cause problems that are hard to debug on live
  * servers.
  */
-struct ReplayTransport : Transport {
+struct ReplayTransport final : Transport {
   ReplayTransport() : m_ini(IniSetting::Map::object), m_code(0) {}
 
   void recordInput(Transport* transport, const char *filename);
@@ -40,17 +40,17 @@ struct ReplayTransport : Transport {
   /**
    * Implementing Transport...
    */
-  virtual const char *getUrl();
-  virtual const char *getRemoteHost();
-  virtual uint16_t getRemotePort();
-  virtual const void *getPostData(int &size);
-  virtual Method getMethod();
-  virtual std::string getHeader(const char *name);
-  virtual void getHeaders(HeaderMap &headers);
-  virtual void addHeaderImpl(const char *name, const char *value);
-  virtual void removeHeaderImpl(const char *name);
-  virtual void sendImpl(const void *data, int size, int code, bool chunked,
-                        bool eom);
+  const char *getUrl() override;
+  const char *getRemoteHost() override;
+  uint16_t getRemotePort() override;
+  const void *getPostData(int &size) override;
+  Method getMethod() override;
+  std::string getHeader(const char *name) override;
+  void getHeaders(HeaderMap &headers) override;
+  void addHeaderImpl(const char *name, const char *value) override;
+  void removeHeaderImpl(const char *name) override;
+  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
+       override;
 
   int getResponseCode() const { return m_code;}
   const std::string &getResponse() const { return m_response;}

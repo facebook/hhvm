@@ -35,6 +35,7 @@ namespace HPHP {
 
 static void destroy_uploaded_files();
 
+namespace {
 struct Rfc1867Data final : RequestEventHandler {
   std::set<std::string> rfc1867ProtectedVariables;
   std::set<std::string> rfc1867UploadedFiles;
@@ -53,6 +54,7 @@ struct Rfc1867Data final : RequestEventHandler {
   }
   void vscan(IMarker&) const override {}
 };
+}
 IMPLEMENT_STATIC_REQUEST_LOCAL(Rfc1867Data, s_rfc1867_data);
 
 /*
@@ -183,16 +185,16 @@ static void destroy_uploaded_files() {
   rfc1867UploadedFiles.clear();
 }
 
-
 /*
  *  Following code is based on apache_multipart_buffer.c from
  *  libapreq-0.33 package.
  *
  */
 
-#define FILLUNIT (1024 * 5)
+constexpr size_t FILLUNIT = 1024 * 5;
 
-typedef struct {
+namespace {
+struct multipart_buffer {
   Transport *transport;
 
   /* read buffer */
@@ -212,9 +214,10 @@ typedef struct {
   uint64_t throw_size; // sum of all previously read chunks
   char *cursor;
   uint64_t read_post_bytes;
-} multipart_buffer;
+};
+}
 
-typedef std::list<std::pair<std::string, std::string> > header_list;
+using header_list = std::list<std::pair<std::string, std::string>>;
 
 static uint32_t read_post(multipart_buffer *self, char *buf,
                           uint32_t bytes_to_read) {

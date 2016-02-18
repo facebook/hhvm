@@ -41,15 +41,16 @@ struct ServerNameIndication {
    *
    * Returns true if the cert was added
    */
-  typedef std::function<bool(const std::string&, const std::string&,
-                             const std::string&, bool)> CertHanlderFn;
+  using CertHandlerFn = std::function<bool(const std::string&,
+                                           const std::string&,
+                                           const std::string&, bool)>;
 
   /**
    * Loads all valid key pairs in cert_dir and invokes the handler.
    * Both the dir and the handler are sticky for use in loadFromFile()
    * and the default callback below.
    */
-  static void load(const std::string &cert_dir, CertHanlderFn certHandler);
+  static void load(const std::string &cert_dir, CertHandlerFn certHandler);
 
   /**
    * Loads a single key pair with the given name.  Must have called load()
@@ -58,7 +59,7 @@ struct ServerNameIndication {
    *
    */
   static bool loadFromFile(const std::string &name, bool duplicate,
-                           CertHanlderFn certHandler);
+                           CertHandlerFn certHandler);
 
   /**
    * Inserts a mapping from name:ctx in the global map used in the
@@ -76,7 +77,7 @@ private:
   static const std::string crt_ext;
   static const std::string key_ext;
   static std::string s_path;
-  static CertHanlderFn s_certHandlerFn;
+  static CertHandlerFn s_certHandlerFn;
 
   static bool setCTXFromMemory(SSL*, const std::string&);
   static bool setCTXFromFile(SSL*, const std::string&);

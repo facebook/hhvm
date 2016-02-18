@@ -125,8 +125,8 @@ private:
   int m_timeout;
 };
 
-typedef std::function<std::unique_ptr<RequestHandler>()> RequestHandlerFactory;
-typedef std::function<bool(const std::string&)> URLChecker;
+using RequestHandlerFactory = std::function<std::unique_ptr<RequestHandler>()>;
+using URLChecker = std::function<bool(const std::string&)>;
 
 /**
  * Base class of an HTTP server. Defining minimal interface an HTTP server

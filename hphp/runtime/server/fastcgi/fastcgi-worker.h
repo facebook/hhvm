@@ -63,8 +63,8 @@ private:
   std::shared_ptr<FastCGITransport> m_transport;
 };
 
-typedef ServerWorker<std::shared_ptr<FastCGIJob>,
-                     FastCGITransportTraits> FastCGIWorker;
+using FastCGIWorker = ServerWorker<std::shared_ptr<FastCGIJob>,
+                                   FastCGITransportTraits>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

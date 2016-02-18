@@ -93,7 +93,7 @@ struct PushTxnHandler;
  * Note that one transport object is created for each request.  The transport
  * accessed by the I/O thread and dispatch thread, but it should be OK, right?
  */
-struct ProxygenTransport
+struct ProxygenTransport final
   : Transport
   , proxygen::HTTPTransactionHandler
   , std::enable_shared_from_this<ProxygenTransport>

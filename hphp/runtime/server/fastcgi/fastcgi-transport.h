@@ -106,7 +106,7 @@ struct FastCGISession;
  * onBodyComplete()       None                None (remains live)  R/W
  * onSendEndImpl()        onComplete()        None (may destroy)   R/W
  */
-struct FastCGITransport : public Transport, private Synchronizable {
+struct FastCGITransport final : Transport, private Synchronizable {
   explicit FastCGITransport(FastCGISession* session) : m_session(session) {}
   virtual ~FastCGITransport() {}
 

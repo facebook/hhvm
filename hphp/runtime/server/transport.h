@@ -214,8 +214,9 @@ public:
    * Set cookie response header.
    */
   bool setCookie(const String& name, const String& value, int64_t expire = 0,
-                 const String& path = "", const String& domain = "", bool secure = false,
-                 bool httponly = false, bool encode_url = true);
+                 const String& path = "", const String& domain = "",
+                 bool secure = false, bool httponly = false,
+                 bool encode_url = true);
 
   /**
    * Add/remove a response header.
@@ -427,8 +428,8 @@ protected:
    * token's start char * addresses in ParamMaps. Therefore, this entire
    * process is very efficient without excessive string copying.
    */
-  typedef hphp_hash_map<const char*, std::vector<const char*>,
-                        cstr_hash, eqstr> ParamMap;
+  using ParamMap = hphp_hash_map<const char*, std::vector<const char*>,
+                                 cstr_hash, eqstr>;
 
   // timers
   timespec m_queueTime;

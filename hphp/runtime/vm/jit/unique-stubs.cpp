@@ -317,195 +317,6 @@ TCA emitInterpGenRet(CodeBlock& cb) {
   return start;
 }
 
-void storeAFWHResultHelper(Vout& v, PhysReg data, PhysReg type) {
-  using AFWH = c_AsyncFunctionWaitHandle;
-  const int64_t resultOff = AFWH::resultOff() - AFWH::arOff();
-  v << storeb{type, rvmfp()[TVOFF(m_type) + resultOff]};
-  v << store{data, rvmfp()[TVOFF(m_data) + resultOff]};
-}
-
-TCA emitAsyncRetCtrl(CodeBlock& cb) {
-  alignJmpTarget(cb);
-
-  return vwrap2(cb, [] (Vout& v, Vout& vcold) {
-    using AFWH = c_AsyncFunctionWaitHandle;
-
-    // We should finish accessing the argument registers before attempt any
-    // function calls.  Otherwise we'll have to preserve them around the calls.
-    // So first thing we do on both fast & slow paths is storing them.
-    auto const rData = rarg(0);
-    auto const rType = rarg(1);
-
-    auto const parentBl = v.makeReg();
-    // Load the parentChain
-    const int64_t parentOff = AFWH::parentChainOff() - AFWH::arOff();
-    v << load{rvmfp()[parentOff], parentBl};
-
-    // Set state to succeeded
-    auto const stateOff = c_WaitHandle::stateOff() - AFWH::arOff();
-    v << storebi{
-      c_WaitHandle::toKindState(
-        c_WaitHandle::Kind::AsyncFunction,
-        c_WaitHandle::STATE_SUCCEEDED
-      ),
-      rvmfp()[stateOff]
-    };
-
-    // Load WaitHandle -- used on both fast & slow paths.
-    auto const resumableObj = v.makeReg();
-    auto const objectOff = Resumable::dataOff() - Resumable::arOff();
-    v << lea{rvmfp()[objectOff], resumableObj};
-
-    // Check if there's any parent
-    auto const hasParent = v.makeReg();
-    v << testq{parentBl, parentBl, hasParent};
-    ifThen(v, CC_NZ, hasParent, [&] (Vout& v) {
-      // Next check if the parent is eligible for direct resumption:
-      // Step (a) to (d)
-
-      const int8_t afBlocked = AFWH::toKindState(
-        c_WaitHandle::Kind::AsyncFunction, AFWH::STATE_BLOCKED);
-      const int64_t resumeAddrToBlOff = AFWH::resumeAddrOff()
-        - AFWH::childrenOff() - AFWH::Node::blockableOff();
-      const int64_t kindStateToBlOff = AFWH::stateOff()
-        - AFWH::childrenOff() - AFWH::Node::blockableOff();
-      const int64_t bitsToBlOff = AsioBlockable::bitsOff();
-      const int64_t contextIdxToBlOff = AFWH::contextIdxOff()
-        - AFWH::childrenOff() - AFWH::Node::blockableOff();
-      const int64_t contextIdxToArOff = AFWH::contextIdxOff() - AFWH::arOff();
-
-      // (a) parentBl->getKind() != AFWH => nope
-      auto const isAFWH = v.makeReg();
-      assertx(uint8_t(AsioBlockable::Kind::AsyncFunctionWaitHandleNode) == 0);
-      v << testbim{7, parentBl[bitsToBlOff], isAFWH};
-      ifThen(v, CC_Z, isAFWH, [&] (Vout& v) {
-        // (b) parentBl->getBWH()->getKindState() != {Async, BLOCKED} => nope
-        auto const isBlocked = v.makeReg();
-        v << cmpbim{afBlocked, parentBl[kindStateToBlOff], isBlocked};
-        ifThen(v, CC_E, isBlocked, [&] (Vout& v) {
-          // (c) parentBl->getBWH()->resumable()->resumeAddr() == null => nope
-          auto const isNullAddr = v.makeReg();
-          v << cmpqim{0, parentBl[resumeAddrToBlOff], isNullAddr};
-          ifThen(v, CC_NE, isNullAddr, [&] (Vout& v) {
-            // (d) parentBl->getContextIdx() != child->getContextIdx() => nope
-            auto const childContextIdx = v.makeReg();
-            auto const parentContextIdx = v.makeReg();
-            auto const inSameContext = v.makeReg();
-
-            v << loadb{rvmfp()[contextIdxToArOff], childContextIdx};
-            v << loadb{parentBl[contextIdxToBlOff], parentContextIdx};
-            v << cmpb{parentContextIdx, childContextIdx, inSameContext};
-            ifThen(v, CC_E, inSameContext, [&] (Vout& v) {
-              //
-              // Parent eligible for fast return at this point.
-              //
-              // Steps on resume: 0) incRef retVal, 1) pushes the retVal on
-              // stack, 2) stores retVal in AFWH, 3) unblocks additional parents
-              // if there's any, 4) preserves saved FP, 5) decRef AFWH obj, 6)
-              // updates FP, 7) marks the AFWH as running, and finally 8)
-              // transfers control to the parent resume address.
-
-              // 0) IncRef retVal: in addition to pushing the retVal onto the
-              // stack, we are also storing it in the AFWH obj.
-              emitIncRefWork(v, rData, rType);
-
-              // 1) Push retVal on stack: SP was already adjusted for us.
-              v << storeb{rType, rvmsp()[TVOFF(m_type)]};
-              v << store{rData, rvmsp()[TVOFF(m_data)]};
-
-              // 2) Stores result into the AFWH object
-              storeAFWHResultHelper(v, rData, rType);
-
-              // 3) Unblock additional parents
-              auto const nextParent = v.makeReg();
-              auto const tmp = v.makeReg();
-              // Load next parent in chain
-              v << load{parentBl[bitsToBlOff], tmp};
-              v << andqi{~0x7, tmp, nextParent, v.makeReg()};
-
-              auto const hasAdditionalParents = v.makeReg();
-              v << testq{nextParent, nextParent, hasAdditionalParents};
-              unlikelyIfThen(v, vcold, CC_NZ, hasAdditionalParents,
-                [&] (Vout& v) {
-                  // Uncommon case: has additional parents and unblock them.
-                  v << vcall{CallSpec::direct(AsioBlockableChain::Unblock),
-                             v.makeVcallArgs({{nextParent}}), v.makeTuple({})};
-              });
-
-              // 4) Preserve saved FP.
-              const int64_t arToBlOff = AFWH::arOff() - AFWH::childrenOff()
-                                      - AFWH::Node::blockableOff();
-              auto const savedFP = v.makeReg();
-              v << load{rvmfp()[AROFF(m_sfp)], savedFP};
-              v << store{savedFP, parentBl[arToBlOff + AROFF(m_sfp)]};
-
-              // 5) DecRef: drop reference to the current AFWH twice:
-              //  - it is no longer being executed
-              //  - it is no longer referenced by the parent
-
-              // First DecRef no need to check for release
-              emitDecRef(v, resumableObj);
-              // The second DecRef may need to release.  The type is known to be
-              // KindOfObject -- use the DecRef optimized for it.
-              emitDecRefObj(v, resumableObj);
-
-              // 6) Update vmfp() and vmFirstAR().
-              v << lea{parentBl[arToBlOff], rvmfp()};
-              v << store{rvmfp(), rvmtl()[rds::kVmFirstAROff]};
-
-              // 7) setState(STATE_RUNNING);
-              const int8_t afRunning = c_WaitHandle::toKindState(
-                c_WaitHandle::Kind::AsyncFunction,
-                c_ResumableWaitHandle::STATE_RUNNING);
-              const int64_t stateToBlOff = AFWH::stateOff()
-                                         - AFWH::childrenOff()
-                                         - AFWH::Node::blockableOff();
-              v << storebi{afRunning, parentBl[stateToBlOff]};
-
-              // 8) Transfer control to the resume address.
-              const int64_t resumeAddrToArOff = AFWH::resumeAddrOff()
-                                              - AFWH::arOff();
-              v << jmpm{rvmfp()[resumeAddrToArOff], vm_regs_with_sp()};
-            });
-            // If not eligible for fast return, fall through all the way.
-          });
-        });
-      });
-    });
-    // Slow path: unblock all parents, and return to the scheduler.
-
-    // A bit code duplication: storing retVal into AFWH overwrites contextIdx
-    // (in the same union).  So it has to be done after checking fast return
-    // eligibility, but before calling unblock.
-
-    // Stores result into the AFWH object
-    storeAFWHResultHelper(v, rData, rType);
-
-    // Unblock all parents -- the sign flag is actually the same as hasParent,
-    // but unfortunately we cannot reuse it.
-    auto const hasParentFlag = v.makeReg();
-    v << testq{parentBl, parentBl, hasParentFlag};
-    ifThen(v, CC_NZ, hasParentFlag, [&] (Vout& v) {
-      v << vcall{CallSpec::direct(AsioBlockableChain::Unblock),
-                 v.makeVcallArgs({{parentBl}}), v.makeTuple({})};
-    });
-
-    // Load the saved frame pointer from the ActRec.
-    auto sfpOff = AROFF(m_sfp);
-    v << load{rvmfp()[sfpOff], rvmfp()};
-
-    // DecRef resumableObj
-    emitDecRefObj(v, resumableObj);
-
-    // Adjust stack: on slow path, retVal is not pushed on stack yet.
-    auto const sync_sp = v.makeReg();
-    v << lea{rvmsp()[cellsToBytes(1)], sync_sp};
-    v << syncvmsp{sync_sp};
-
-    v << leavetc{php_return_regs()};
-  });
-}
-
 TCA emitDebuggerInterpRet(CodeBlock& cb) {
   alignJmpTarget(cb);
 
@@ -528,6 +339,187 @@ TCA emitDebuggerInterpGenRet(CodeBlock& cb) {
     auto const ar = v.makeReg();
     loadGenFrame<async>(v, ar);
     debuggerRetImpl(v, ar);
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+using AFWH = c_AsyncFunctionWaitHandle;
+
+/*
+ * Convert an AsyncFunctionWaitHandle-relative offset to an offset relative to
+ * either its contained ActRec or AsioBlockable.
+ */
+constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
+  return off - AFWH::arOff();
+}
+constexpr ptrdiff_t bl_rel(ptrdiff_t off) {
+  return off - AFWH::childrenOff() - AFWH::Node::blockableOff();
+}
+
+/*
+ * Store the async function's return value to the AsyncFunctionWaitHandle.
+ */
+void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
+  auto const resultOff = ar_rel(AFWH::resultOff());
+  v << store{data, rvmfp()[resultOff + TVOFF(m_data)]};
+  v << storeb{type, rvmfp()[resultOff + TVOFF(m_type)]};
+}
+
+/*
+ * In a cold path, call into native code to unblock every member of an async
+ * function's dependency chain, if it has any.
+ */
+void unblockParents(Vout& v, Vout& vcold, Vreg parent) {
+  auto const sf = v.makeReg();
+  v << testq{parent, parent, sf};
+
+  unlikelyIfThen(v, vcold, CC_NZ, sf, [&] (Vout& v) {
+    v << vcall{CallSpec::direct(AsioBlockableChain::Unblock),
+               v.makeVcallArgs({{parent}}), v.makeTuple({})};
+  });
+}
+
+TCA emitAsyncRetCtrl(CodeBlock& cb) {
+  alignJmpTarget(cb);
+
+  return vwrap2(cb, [] (Vout& v, Vout& vcold) {
+    auto const data = rarg(0);
+    auto const type = rarg(1);
+
+    auto const slow_path = Vlabel(v.makeBlock());
+
+    // Load the parent chain.
+    auto const parentBl = v.makeReg();
+    v << load{rvmfp()[ar_rel(AFWH::parentChainOff())], parentBl};
+
+    // Set state to succeeded.
+    v << storebi{
+      c_WaitHandle::toKindState(
+        c_WaitHandle::Kind::AsyncFunction,
+        c_WaitHandle::STATE_SUCCEEDED
+      ),
+      rvmfp()[ar_rel(c_WaitHandle::stateOff())]
+    };
+
+    // Load the WaitHandle*.
+    auto const wh = v.makeReg();
+    v << lea{rvmfp()[Resumable::dataOff() - Resumable::arOff()], wh};
+
+    // Check if there's any parent.
+    auto const hasParent = v.makeReg();
+    v << testq{parentBl, parentBl, hasParent};
+    ifThen(v, CC_Z, hasParent, slow_path);
+
+    // Check parentBl->getKind() == AFWH.
+    static_assert(
+      uint8_t(AsioBlockable::Kind::AsyncFunctionWaitHandleNode) == 0,
+      "AFWH kind must be 0."
+    );
+    auto const isAFWH = v.makeReg();
+    v << testbim{0x7, parentBl[AsioBlockable::bitsOff()], isAFWH};
+    ifThen(v, CC_NZ, isAFWH, slow_path);
+
+    // Check parentBl->getBWH()->getKindState() == {Async, BLOCKED}.
+    auto const blockedState = AFWH::toKindState(
+      c_WaitHandle::Kind::AsyncFunction,
+      AFWH::STATE_BLOCKED
+    );
+    auto const isBlocked = v.makeReg();
+    v << cmpbim{blockedState, parentBl[bl_rel(AFWH::stateOff())], isBlocked};
+    ifThen(v, CC_NE, isBlocked, slow_path);
+
+    // Check parentBl->getBWH()->resumable()->resumeAddr() != nullptr.
+    auto const isNullAddr = v.makeReg();
+    v << cmpqim{0, parentBl[bl_rel(AFWH::resumeAddrOff())], isNullAddr};
+    ifThen(v, CC_E, isNullAddr, slow_path);
+
+    // CheckparentBl->getContextIdx() == child->getContextIdx().
+    auto const childContextIdx = v.makeReg();
+    auto const parentContextIdx = v.makeReg();
+    auto const inSameContext = v.makeReg();
+
+    v << loadb{rvmfp()[ar_rel(AFWH::contextIdxOff())], childContextIdx};
+    v << loadb{parentBl[bl_rel(AFWH::contextIdxOff())], parentContextIdx};
+    v << cmpb{parentContextIdx, childContextIdx, inSameContext};
+    ifThen(v, CC_NE, inSameContext, slow_path);
+
+    /*
+     * Fast path.
+     *
+     * Handle the return value, unblock any additional parents, release the
+     * WaitHandle, and transfer control to the parent.
+     */
+    // Incref the return value.  In addition to pushing the it onto the stack,
+    // we are also storing it in the AFWH object.
+    emitIncRefWork(v, data, type);
+
+    // Write the return value to the stack and the AFWH object.
+    v << storeb{type, rvmsp()[TVOFF(m_type)]};
+    v << store{data, rvmsp()[TVOFF(m_data)]};
+    storeAFWHResult(v, data, type);
+
+    // Load the next parent in the chain, and unblock the whole chain.
+    auto const nextParent = v.makeReg();
+    auto const tmp = v.makeReg();
+    v << load{parentBl[AsioBlockable::bitsOff()], tmp};
+    v << andqi{~0x7, tmp, nextParent, v.makeReg()};
+    unblockParents(v, vcold, nextParent);
+
+    // Set up PHP frame linkage for our parent by copying our ActRec's sfp.
+    auto const sfp = v.makeReg();
+    v << load{rvmfp()[AROFF(m_sfp)], sfp};
+    v << store{sfp, parentBl[bl_rel(AFWH::arOff()) + AROFF(m_sfp)]};
+
+    // Drop the reference to the current AFWH twice:
+    //  - it is no longer being executed
+    //  - it is no longer referenced by the parent
+    //
+    // The first time we don't need to check for release.  The second time, we
+    // do, but we can type-specialize.
+    emitDecRef(v, wh);
+    emitDecRefWorkObj(v, wh);
+
+    // Update vmfp() and vmFirstAR().
+    v << lea{parentBl[bl_rel(AFWH::arOff())], rvmfp()};
+    v << store{rvmfp(), rvmtl()[rds::kVmFirstAROff]};
+
+    // setState(STATE_RUNNING)
+    auto const runningState = c_WaitHandle::toKindState(
+      c_WaitHandle::Kind::AsyncFunction,
+      c_ResumableWaitHandle::STATE_RUNNING
+    );
+    v << storebi{runningState, parentBl[bl_rel(AFWH::stateOff())]};
+
+    // Transfer control to the resume address.
+    v << jmpm{rvmfp()[ar_rel(AFWH::resumeAddrOff())], php_return_regs()};
+
+    /*
+     * Slow path: unblock all parents, and return to the scheduler.
+     */
+    v = slow_path;
+
+    // Store result into the AFWH object and unblock all parents.
+    //
+    // Storing the result into the AFWH overwrites contextIdx (they share a
+    // union), so it has to be done after the checks in the fast path (but
+    // before unblocking parents).
+    storeAFWHResult(v, data, type);
+    unblockParents(v, vcold, parentBl);
+
+    // Load the saved frame pointer from the ActRec.
+    v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
+
+    // Decref the WaitHandle.  We only do it once here (unlike in the fast
+    // path) because the scheduler drops the other reference.
+    emitDecRefWorkObj(v, wh);
+
+    // Adjust stack: on slow path, retVal is not pushed on stack yet.
+    auto const sync_sp = v.makeReg();
+    v << lea{rvmsp()[cellsToBytes(1)], sync_sp};
+    v << syncvmsp{sync_sp};
+
+    v << leavetc{php_return_regs()};
   });
 }
 
@@ -572,8 +564,8 @@ TCA emitFCallArrayHelper(CodeBlock& cb, UniqueStubs& us) {
   align(cb, Alignment::CacheLine, AlignContext::Dead);
 
   TCA ret = vwrap(cb, [] (Vout& v) {
-      v << movl{v.cns(0), rarg(2)};
-    });
+    v << movl{v.cns(0), rarg(2)};
+  });
 
   us.fcallUnpackHelper = vwrap2(cb, [] (Vout& v, Vout& vcold) {
     // We reach fcallArrayHelper in the same context as a func prologue, so
@@ -700,6 +692,7 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us,
     v << ldimmb{1, rarg(1)};
     v << jmpi{rh.handleResume, RegSet(rarg(1))};
   });
+
   us.fcallAwaitSuspendHelper = vwrap(cb, [&] (Vout& v) {
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
     loadMCG(v, rarg(0));
@@ -709,7 +702,7 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, UniqueStubs& us,
     );
     v << call{handler, arg_regs(2)};
     v << jmpi{rh.reenterTC, RegSet()};
-    });
+  });
 
   return us.resumeHelperRet;
 }

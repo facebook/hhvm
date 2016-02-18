@@ -61,12 +61,20 @@ struct ConstModifiers {
 };
 
 union AuxUnion {
-  uint32_t u_fcallAwaitFlag;// true if we're suspending an FCallAwait
-  int32_t u_hash;           // key type and hash for MixedArray
-  VarNrFlag u_varNrFlag;    // magic number for asserts in VarNR
-  bool u_deepInit;          // used by Class::initPropsImpl for deep init
-  int32_t u_rdsHandle;      // used by unit.cpp to squirrel away rds handles TODO type
-  ConstModifiers u_constModifiers; // used by Class::Const
+  // Undiscriminated raw value.
+  uint32_t u_raw;
+  // True if we're suspending an FCallAwait.
+  uint32_t u_fcallAwaitFlag;
+  // Key type and hash for MixedArray.
+  int32_t u_hash;
+  // Magic number for asserts in VarNR.
+  VarNrFlag u_varNrFlag;
+  // Used by Class::initPropsImpl() for deep init.
+  bool u_deepInit;
+  // Used by unit.cpp to squirrel away RDS handles.
+  int32_t u_rdsHandle;
+  // Used by Class::Const.
+  ConstModifiers u_constModifiers;
 };
 
 /*

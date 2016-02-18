@@ -106,12 +106,6 @@ Vreg emitDecRef(Vout& v, Vreg data);
 void emitIncRefWork(Vout& v, Vreg data, Vreg type);
 
 /*
- * DecRef for KindOfObject type, and release the object if necessary.  This
- * DecRef optimizes for known KindOfObject (the case in AsyncRetCtrl stub).
- */
-void emitDecRefObj(Vout& v, Vreg obj);
-
-/*
  * Check the refcount of `data'.  If it's negative (and hence, a sentinel
  * static value), do nothing.  If it's exactly 1, release `data' via the code
  * emitted by `destroy'.  Otherwise, decref it.
@@ -121,6 +115,11 @@ void emitDecRefObj(Vout& v, Vreg obj);
 template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
                     Destroy destroy, bool unlikelyDestroy);
+
+/*
+ * Like emitDecRefWork(), but for a known-KindOfObject value.
+ */
+void emitDecRefWorkObj(Vout& v, Vreg obj);
 
 /*
  * Trap or otherwise fail if `data' does not have a realistic refcount (either

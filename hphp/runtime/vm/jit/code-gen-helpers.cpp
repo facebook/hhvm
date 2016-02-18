@@ -166,7 +166,7 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
   });
 }
 
-void emitDecRefObj(Vout& v, Vreg obj) {
+void emitDecRefWorkObj(Vout& v, Vreg obj) {
   auto const shouldRelease = v.makeReg();
   v << cmplim{1, obj[FAST_REFCOUNT_OFFSET], shouldRelease};
   ifThenElse(

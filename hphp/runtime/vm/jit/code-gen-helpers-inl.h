@@ -52,7 +52,8 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
                     Destroy destroy, bool unlikelyDestroy) {
   auto const sf = v.makeReg();
   v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
-  ifThenElse(v, vcold, CC_E, sf,
+  ifThenElse(
+    v, vcold, CC_E, sf,
     destroy,
     [&] (Vout& v) {
       // If it's not static, actually reduce the reference count.  This does

@@ -1989,12 +1989,18 @@ void hphp_process_init() {
   pthread_attr_t attr;
 // Linux+GNU extension
 #if defined(_GNU_SOURCE) && (defined(__linux__) || defined(__CYGWIN__))
-  pthread_getattr_np(pthread_self(), &attr);
+  if (pthread_getattr_np(pthread_self(), &attr) != 0 ) {
+    raise_fatal_error("pthread_getattr_np failed while checking stack limits");
+  }
 #else
-  pthread_attr_init(&attr);
+  if (pthread_attr_init(&attr) != 0 ) {
+    raise_fatal_error("pthread_attr_init failed while checking stack limits");
+  }
 #endif
   init_stack_limits(&attr);
-  pthread_attr_destroy(&attr);
+  if (pthread_attr_destroy(&attr) != 0 ) {
+    raise_fatal_error("pthread_attr_destroy failed while checking stack limits");
+  } 
   BootStats::mark("pthread_init");
 
   Process::InitProcessStatics();

@@ -88,9 +88,9 @@ static bool comp(const FuncHotness& a, const FuncHotness& b) {
  * set AttrHot to the top Eval.HotFuncCount functions.
  */
 static Mutex syncLock;
-static void setHotFuncAttr() {
+void profileSetHotFuncAttr() {
   static bool synced = false;
-  if (synced) return;
+  if (LIKELY(synced)) return;
 
   Lock lock(syncLock);
   if (synced) return;
@@ -169,15 +169,9 @@ static inline bool profileThisRequest() {
 }
 
 void profileRequestStart() {
-  bool p = profileThisRequest();
-  if (profileOn && !p) {
-    // If we are turning off profiling, set AttrHot on
-    // functions that are "hot".
-    setHotFuncAttr();
-  }
-  profileOn = p;
+  profileOn = profileThisRequest();
 
-  bool okToJit = !warmingUp && !p;
+  bool okToJit = !warmingUp && !profileOn;
   if (okToJit) {
     jit::Lease::mayLock(true);
     if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {

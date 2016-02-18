@@ -28,12 +28,14 @@ struct Func;
 
 //////////////////////////////////////////////////////////////////////
 
-// These are both best-effort, and return noisy results.
 void profileInit();
 void profileWarmupStart();
 void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
+void profileSetHotFuncAttr();
+
+// This is best-effort, and returns noisy results.
 int64_t requestCount();
 
 /*

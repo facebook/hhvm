@@ -627,6 +627,7 @@ MCGenerator::translate(const TranslArgs& args) {
 
   if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
+  profileSetHotFuncAttr();
   auto func = const_cast<Func*>(args.sk.func());
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
                             .profile(args.kind == TransKind::Profile)
@@ -730,6 +731,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   auto const kind = profileSrcKey(funcBody) ? TransKind::Proflogue
                                             : TransKind::Prologue;
 
+  profileSetHotFuncAttr();
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
                             .profile(kind == TransKind::Proflogue)
                             .hot(RuntimeOption::EvalHotFuncCount &&

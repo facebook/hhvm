@@ -2080,10 +2080,7 @@ void hphp_session_init() {
 }
 
 ExecutionContext *hphp_context_init() {
-  ExecutionContext *context = g_context.getNoCheck();
-  context->obStart();
-  context->obProtect(true);
-  return context;
+  return g_context.getNoCheck();
 }
 
 bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {

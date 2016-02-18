@@ -39,6 +39,16 @@ AliasClass pointee(
   auto const maybeRef = type.maybe(TPtrToRefGen);
   auto const typeNR = type - TPtrToRefGen;
   auto const canonPtr = canonical(ptr);
+  if (!canonPtr->isA(TPtrToGen)) {
+    // This can happen when ptr is TBottom from a passthrough instruction with
+    // a src that isn't TBottom. The most common cause of this is something
+    // like "t5:Bottom = CheckType<Str> t2:Int". It means ptr isn't really a
+    // pointer, so return AEmpty to avoid unnecessarily pessimizing any
+    // optimizations.
+    always_assert(ptr->isA(TBottom));
+    return AEmpty;
+  }
+
   auto const sinst = canonPtr->inst();
 
   if (sinst->is(UnboxPtr)) {

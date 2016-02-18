@@ -25,10 +25,6 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void emitLoadTVType(Vout& v, Vptr mem, Vreg8 d) {
-  v << loadb{mem, d};
-}
-
 inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << testbi{s0, s1, sf};
 }

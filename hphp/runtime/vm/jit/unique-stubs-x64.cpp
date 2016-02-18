@@ -197,9 +197,8 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, UniqueStubs& us) {
   auto const decref_local = [&] (Vout& v) {
     auto const sf = v.makeReg();
 
-    // We can't use emitLoadTVType() here because it does a byte load, and we
-    // need to sign-extend since we use `type' as a 32-bit array index to the
-    // destructor table.
+    // We can't do a byte load here---we have to sign-extend since we use
+    // `type' as a 32-bit array index to the destructor table.
     v << loadzbl{local[TVOFF(m_type)], type};
     emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
 

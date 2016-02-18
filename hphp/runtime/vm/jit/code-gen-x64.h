@@ -69,9 +69,6 @@ private:
 
   void emitTrashTV(Vreg, int32_t, char fillByte);
 
-  void emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
-  void emitLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref);
-
   template <class JmpFn>
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
 
@@ -165,23 +162,6 @@ private:
 private:
   IRLS& m_state;
 };
-
-// Helpers to compute a reference to a TypedValue type and data
-inline Vptr refTVType(Vreg reg) {
-  return reg[TVOFF(m_type)];
-}
-
-inline Vptr refTVData(Vreg reg) {
-  return reg[TVOFF(m_data)];
-}
-
-inline Vptr refTVType(Vptr ref) {
-  return ref + TVOFF(m_type);
-}
-
-inline Vptr refTVData(Vptr ref) {
-  return ref + TVOFF(m_data);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

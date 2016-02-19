@@ -27,9 +27,11 @@ namespace HPHP {
 struct VirtualHost {
   static VirtualHost &GetDefault();
 
+  static VirtualHost* Resolve(const std::string& host);
   static void SetCurrent(VirtualHost *vhost);
   static const VirtualHost *GetCurrent();
   static int64_t GetMaxPostSize();
+  static int64_t GetLowestMaxPostSize();
   static int64_t GetUploadMaxFileSize();
   static void UpdateSerializationSizeLimit();
   static const std::vector<std::string> &GetAllowedDirectories();
@@ -45,6 +47,7 @@ public:
             const std::string &ini_key = "");
   void addAllowedDirectories(const std::vector<std::string>& dirs);
   int getRequestTimeoutSeconds(int defaultTimeout) const;
+  int64_t getMaxPostSize() const;
 
   const std::string &getName() const { return m_name;}
   const std::string &getPathTranslation() const { return m_pathTranslation;}

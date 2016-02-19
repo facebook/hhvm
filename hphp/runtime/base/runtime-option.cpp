@@ -190,6 +190,7 @@ bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int64_t RuntimeOption::MaxPostSize = 100;
+int64_t RuntimeOption::LowestMaxPostSize = LLONG_MAX;
 bool RuntimeOption::AlwaysPopulateRawPostData = false;
 int64_t RuntimeOption::UploadMaxFileSize = 100;
 std::string RuntimeOption::UploadTmpDir = "/tmp";
@@ -1454,6 +1455,7 @@ void RuntimeOption::Load(
     // naturally (as specified top to bottom in the file and left to right on
     // the command line.
     Config::Iterate(vh_callback, ini, config, "VirtualHost");
+    LowestMaxPostSize = VirtualHost::GetLowestMaxPostSize();
   }
   {
     // IpBlocks

@@ -60,13 +60,35 @@ const VirtualHost *VirtualHost::GetCurrent() {
   return ret;
 }
 
+VirtualHost* VirtualHost::Resolve(const std::string& host) {
+  for (auto vhost : RuntimeOption::VirtualHosts) {
+    if (vhost->match(host)) {
+      return vhost.get();
+    }
+  }
+  return nullptr;
+}
+
+int64_t VirtualHost::getMaxPostSize() const {
+  if (m_runtimeOption.maxPostSize != -1) {
+    return m_runtimeOption.maxPostSize;
+  }
+  return RuntimeOption::MaxPostSize;
+}
+
+int64_t VirtualHost::GetLowestMaxPostSize() {
+  auto lowest = RuntimeOption::MaxPostSize;
+  for (auto vhost : RuntimeOption::VirtualHosts) {
+    auto max = vhost->getMaxPostSize();
+    lowest = std::min(lowest, max);
+  }
+  return lowest;
+}
+
 int64_t VirtualHost::GetMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  if (vh->m_runtimeOption.maxPostSize != -1) {
-    return vh->m_runtimeOption.maxPostSize;
-  }
-  return RuntimeOption::MaxPostSize;
+  return vh->getMaxPostSize();
 }
 
 int64_t VirtualHost::GetUploadMaxFileSize() {

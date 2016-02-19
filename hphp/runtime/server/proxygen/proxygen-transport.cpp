@@ -176,6 +176,24 @@ void ProxygenTransport::onHeadersComplete(
     });
 
   if (m_method == Transport::Method::POST && m_request->isHTTP1_1()) {
+    // fail fast if the post is too large, but only bother resolving host
+    // if content_length is larger than the minimum setting.
+    auto clen_str = getHeader("Content-Length");
+    auto content_length = strtoll(clen_str.c_str(), nullptr, 10);
+    auto max_post = RuntimeOption::LowestMaxPostSize;
+    if (content_length > max_post) {
+      auto host = headers.getSingleOrEmpty(HTTP_HEADER_HOST);
+      if (auto vhost = VirtualHost::Resolve(host)) {
+        max_post = vhost->getMaxPostSize();
+      }
+    }
+    auto post_too_big = false;
+    if (content_length < 0 || content_length > max_post) {
+      Logger::Warning("POST Content-Length of %lld bytes exceeds "
+                      "the limit of %" PRId64 " bytes",
+                      content_length, max_post);
+      post_too_big = true;
+    }
     const std::string& expectation =
       headers.getSingleOrEmpty(HTTP_HEADER_EXPECT);
     if (!expectation.empty()) {
@@ -184,6 +202,12 @@ void ProxygenTransport::onHeadersComplete(
       if (!boost::iequals(expectation, "100-continue")) {
         response.setStatusCode(417);
         response.setStatusMessage(HTTPMessage::getDefaultReason(417));
+        response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
+        sendEom = true;
+      } else if (post_too_big) {
+        // got expect 100-continue, but content_length is too big.
+        response.setStatusCode(413 /* Payload Too Large */);
+        response.setStatusMessage(HTTPMessage::getDefaultReason(413));
         response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
         sendEom = true;
       } else {
@@ -201,6 +225,10 @@ void ProxygenTransport::onHeadersComplete(
         // this object is no longer valid
         return;
       }
+    } else if (post_too_big) {
+      // did not receive "expect" header, but too much post data.
+      sendErrorResponse(413 /* Payload Too Large */);
+      return;
     }
   }
 

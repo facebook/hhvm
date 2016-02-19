@@ -81,12 +81,9 @@ static void CopyParams(Array& dest, Array& src) {
 const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
   if (!RuntimeOption::VirtualHosts.empty()) {
     std::string host = transport->getHeader("Host");
-    for (unsigned int i = 0; i < RuntimeOption::VirtualHosts.size(); i++) {
-      auto vhost = RuntimeOption::VirtualHosts[i];
-      if (vhost->match(host)) {
-        VirtualHost::SetCurrent(vhost.get());
-        return vhost.get();
-      }
+    if (auto vh = VirtualHost::Resolve(host)) {
+      VirtualHost::SetCurrent(vh);
+      return vh;
     }
   }
   VirtualHost::SetCurrent(nullptr);

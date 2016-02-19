@@ -172,6 +172,7 @@ struct RuntimeOption {
   static bool EnableEarlyFlush;
   static bool ForceChunkedEncoding;
   static int64_t MaxPostSize;
+  static int64_t LowestMaxPostSize;
   static bool AlwaysPopulateRawPostData;
   static int64_t UploadMaxFileSize;
   static std::string UploadTmpDir;

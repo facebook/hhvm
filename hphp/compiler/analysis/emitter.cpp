@@ -3827,6 +3827,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       Id pipeVar = emitVisitAndSetUnnamedL(e, b->getExp1());
       allocPipeLocal(pipeVar);
       visit(b->getExp2());
+      emitConvertToCell(e);
       releasePipeLocal(pipeVar);
       emitPushAndFreeUnnamedL(e, pipeVar, m_ue.bcPos());
       e.PopC();

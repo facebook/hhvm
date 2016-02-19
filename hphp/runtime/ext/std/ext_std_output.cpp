@@ -48,7 +48,7 @@ const int64_t k_PHP_OUTPUT_HANDLER_STDFLAGS =
 bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
                              int chunk_size /* = 0 */,
                              int flags /* = k_PHP_OUTPUT_HANDLER_STDFLAGS */) {
-  // ignoring flags for now
+  // Note: the only flag which is implemented is FLUSHABLE
 
   if (!callback.isNull()) {
     CallCtx ctx;
@@ -57,15 +57,29 @@ bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
       return false;
     }
   }
-  g_context->obStart(callback, chunk_size);
+  OBFlags f = OBFlags::None;
+  if (flags & k_PHP_OUTPUT_HANDLER_CLEANABLE) f |= OBFlags::Cleanable;
+  if (flags & k_PHP_OUTPUT_HANDLER_FLUSHABLE) f |= OBFlags::Flushable;
+  if (flags & k_PHP_OUTPUT_HANDLER_REMOVABLE) f |= OBFlags::Removable;
+  g_context->obStart(callback, chunk_size, f);
   return true;
 }
 void HHVM_FUNCTION(ob_clean) {
   // PHP_OUTPUT_HANDLER_START is included by PHP5
   g_context->obClean(k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_CLEAN);
 }
-void HHVM_FUNCTION(ob_flush) {
-  g_context->obFlush();
+bool HHVM_FUNCTION(ob_flush) {
+  int level = g_context->obGetLevel();
+  if (level == 0) {
+    raise_notice("failed to flush buffer. No buffer to flush");
+    return false;
+  }
+  if (!g_context->obFlush()) {
+    raise_notice("failed to flush buffer of %s (%d)",
+        g_context->obGetBufferName().c_str(), level);
+    return false;
+  }
+  return true;
 }
 bool HHVM_FUNCTION(ob_end_clean) {
   g_context->obClean(k_PHP_OUTPUT_HANDLER_START |
@@ -74,7 +88,7 @@ bool HHVM_FUNCTION(ob_end_clean) {
   return g_context->obEnd();
 }
 bool HHVM_FUNCTION(ob_end_flush) {
-  bool ret = g_context->obFlush();
+  bool ret = g_context->obFlush(true);
   g_context->obEnd();
   return ret;
 }

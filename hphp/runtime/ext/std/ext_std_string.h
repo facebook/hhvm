@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_OUTPUT_H_
-#define incl_HPHP_EXT_OUTPUT_H_
+#ifndef incl_HPHP_EXT_STD_STRING_H_
+#define incl_HPHP_EXT_STD_STRING_H_
 
 #include "hphp/runtime/ext/std/ext_std.h"
 

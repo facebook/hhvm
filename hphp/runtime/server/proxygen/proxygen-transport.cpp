@@ -530,17 +530,18 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
     // somewhere.
     return;
   }
+  bool suppressBody = m_method == Method::HEAD;
 
   VLOG(4) << "sendImpl called with data size=" << size << ", code=" << code
           << ", chunked=" << chunked << ", eom=" << eom;
-  eom |= !chunked;
+  eom |= suppressBody || !chunked;
   if (!m_sendStarted) {
     if (!chunked) {
       if (!m_response.getHeaders().exists(HTTP_HEADER_CONTENT_LENGTH)) {
         m_response.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH,
                                     folly::to<std::string>(size));
       }
-    } else {
+    } else if (!suppressBody) {
       // Explicitly add Transfer-Encoding: chunked here.  libproxygen will only
       // add it for keep-alive connections
       m_response.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");
@@ -551,26 +552,32 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
       HTTPMessage::getDefaultReason(code) : reasonStr.c_str();
     m_response.setStatusMessage(reason);
     m_response.setHTTPVersion(1, 1);
-    m_response.setIsChunked(chunked);
+    m_response.setIsChunked(chunked && !suppressBody);
+
     m_response.dumpMessage(4);
     m_server->putResponseMessage(
       ResponseMessage(shared_from_this(),
                       ResponseMessage::Type::HEADERS, 0,
-                      chunked, data, size, eom));
+                      chunked && !suppressBody,
+                      data,
+                      suppressBody ? 0 : size,
+                      eom));
     m_sendStarted = true;
   } else {
     m_server->putResponseMessage(
       ResponseMessage(shared_from_this(),
                       ResponseMessage::Type::BODY, 0,
-                      chunked, data, size, eom));
+                      chunked && !suppressBody,
+                      data,
+                      suppressBody ? 0 : size,
+                      eom));
   }
 
   if (eom) {
     m_sendEnded = true;
   }
 
-  if (chunked) {
-    assert(m_method != Method::HEAD);
+  if (chunked && !suppressBody) {
     /*
      * Chunked replies are sent async, so there is no way to know the
      * time it took to flush the response, but tracking the bytes sent is

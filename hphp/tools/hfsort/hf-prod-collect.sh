@@ -18,7 +18,7 @@ perf record -ag -e instructions -o /tmp/perf.data -- sleep ${SLEEP_TIME:-200}
 
 perf script -i /tmp/perf.data -f comm,ip -chhvm | sed -ne '/^[^ 	]/,+2p' | $GZIP -c > $TMPDIR/perf.pds.gz
 
-nm -S /proc/$HHVM_PID/exe > $TMPDIR/hhvm.nm
+nm -S ${HHVM_BIN_PATH:-/proc/$HHVM_PID/exe} > $TMPDIR/hhvm.nm
 
 pushd $TMPDIR/..
 

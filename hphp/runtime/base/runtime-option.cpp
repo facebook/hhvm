@@ -678,6 +678,13 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
           matchHdfPattern(cpu, ini, hdf, "cpu")) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));
+        if (hdf.exists("clear")) {
+          std::vector<std::string> list;
+          hdf["clear"].configGet(list);
+          for (auto const& s : list) {
+            config.remove(s);
+          }
+        }
         config.copy(hdf["overwrite"]);
         // no break here, so we can continue to match more overwrites
       }

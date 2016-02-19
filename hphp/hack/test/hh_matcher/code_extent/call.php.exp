@@ -2,6 +2,13 @@ on_program:
 
 newtype TestType = (int, int);
 
+const int X = 1;
+
+enum TestEnum : int {
+  A = 1;
+}
+
+<<__Memoize>>
 function test_fun(bool $a, int $b): array<int> {
   if ( $a) {
     echo '} } {';
@@ -58,8 +65,10 @@ TAG;
   return $arr;
 }
 
+<<__ConsistentConstruct>>
 class Foo {
 
+  <<__Memoize>>
   public function my_method(): void {
     try {
       test_fun(true, 1);
@@ -125,6 +134,37 @@ on_hint:
 
 on_def:
 
+const int X = 1
+
+=====
+
+on_expr:
+
+1
+
+=====
+
+on_hint:
+
+int
+
+=====
+
+on_def:
+
+enum TestEnum
+
+=====
+
+on_class_:
+
+enum TestEnum
+
+=====
+
+on_def:
+
+<<__Memoize>>
 function test_fun(bool $a, int $b): array<int> {
   if ( $a) {
     echo '} } {';
@@ -185,6 +225,7 @@ TAG;
 
 on_fun_:
 
+<<__Memoize>>
 function test_fun(bool $a, int $b): array<int> {
   if ( $a) {
     echo '} } {';
@@ -1199,8 +1240,10 @@ array<int>
 
 on_def:
 
+<<__ConsistentConstruct>>
 class Foo {
 
+  <<__Memoize>>
   public function my_method(): void {
     try {
       test_fun(true, 1);
@@ -1241,8 +1284,10 @@ class Foo {
 
 on_class_:
 
+<<__ConsistentConstruct>>
 class Foo {
 
+  <<__Memoize>>
   public function my_method(): void {
     try {
       test_fun(true, 1);
@@ -1283,7 +1328,8 @@ class Foo {
 
 on_method_:
 
-function my_method(): void {
+<<__Memoize>>
+  public function my_method(): void {
     try {
       test_fun(true, 1);
     } catch (\Exception $e) {

@@ -14,20 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/code-cache.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
+
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/func.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(mcg);
-
-#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
-const void* __hot_start = nullptr;
-const void* __hot_end = nullptr;
-#endif
 
 // This value should be enough bytes to emit the "main" part of a minimal
 // translation, which consists of a move and a jump.
@@ -46,29 +44,8 @@ uint32_t CodeCache::AutoTCShift = 0;
 uint32_t CodeCache::TCNumHugeHotMB = 0;
 uint32_t CodeCache::TCNumHugeColdMB = 0;
 
-CodeCache::Selector::Selector(const Args& args)
-  : m_cache(args.m_cache)
-  , m_oldSelection(m_cache.m_selection)
-{
-  // If a CodeBlock other than 'main' has already been selected, keep that
-  // selection.
-  if (m_cache.m_selection == Selection::Default) {
-    // Profile has higher precedence than Hot.
-    if (args.m_profile) {
-      m_cache.m_selection = Selection::Profile;
-    } else if (args.m_hot && m_cache.m_hot.available() > kMinTranslationBytes) {
-      m_cache.m_selection = Selection::Hot;
-    }
-  }
-}
-
-CodeCache::Selector::~Selector() {
-  m_cache.m_selection = m_oldSelection;
-}
-
 CodeCache::CodeCache()
-  : m_selection(Selection::Default)
-  , m_lock(false)
+  : m_useHot{RuntimeOption::RepoAuthoritative && CodeCache::AHotSize > 0}
 {
   static const size_t kRoundUp = 2 << 20;
 
@@ -205,13 +182,8 @@ CodeCache::CodeCache()
   assert(base - m_base + 2 * kRoundUp > allocationSize);
 }
 
-CodeCache::~CodeCache() {
-}
-
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
-  always_assert(!m_lock);
-  return jit::codeBlockChoose(addr, m_main, m_hot, m_prof,
-                              m_cold, m_frozen);
+  return codeBlockChoose(addr, m_main, m_hot, m_prof, m_cold, m_frozen);
 }
 
 size_t CodeCache::totalUsed() const {
@@ -237,28 +209,17 @@ void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
-CodeBlock& CodeCache::main() {
-  always_assert(!m_lock);
-    switch (m_selection) {
-      case Selection::Default: return m_main;
-      case Selection::Hot:     return m_hot;
-      case Selection::Profile: return m_prof;
-    }
-    always_assert(false && "Invalid Selection");
-}
-
-CodeBlock& CodeCache::cold() {
-  always_assert(!m_lock);
-  switch (m_selection) {
-    case Selection::Default:
-    case Selection::Hot:     return m_cold;
-    case Selection::Profile: return frozen();
+CodeCache::View CodeCache::view(bool hot, TransKind kind) {
+  // Profile takes precedence over hot.
+  if (kind == TransKind::Profile || kind == TransKind::Proflogue) {
+    return View{m_prof, m_frozen, m_frozen};
   }
-  always_assert(false && "Invalid Selection");
+
+  if (hot && m_useHot && m_hot.available() > kMinTranslationBytes) {
+    return View{m_hot, m_cold, m_frozen};
+  }
+
+  return View{m_main, m_cold, m_frozen};
 }
 
-CodeBlock& CodeCache::frozen() {
-  return m_frozen;
-}
-
-}
+}}

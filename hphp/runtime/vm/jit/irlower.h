@@ -17,10 +17,11 @@
 #ifndef incl_HPHP_JIT_IRLOWER_H_
 #define incl_HPHP_JIT_IRLOWER_H_
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 namespace HPHP { namespace jit {
 
@@ -98,7 +99,8 @@ struct IRLS {
  * emit code into main/cold/frozen sections, allocate RDS and global data, and
  * add fixup metadata.
  */
-void genCode(IRUnit& unit, CodeKind kind = CodeKind::Trace);
+void genCode(IRUnit& unit, CodeCache::View code,
+             CodeKind kind = CodeKind::Trace);
 
 ///////////////////////////////////////////////////////////////////////////////
 

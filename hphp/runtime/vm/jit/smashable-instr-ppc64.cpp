@@ -107,7 +107,7 @@ void smashMovq(TCA inst, uint64_t imm) {
 void smashCmpq(TCA inst, uint32_t imm) {
   always_assert(is_aligned(inst, Alignment::SmashCmpq));
 
-  auto& cb = mcg->code.blockFor(inst);
+  auto& cb = mcg->code().blockFor(inst);
   CodeCursor cursor { cb, inst };
   ppc64_asm::Assembler a { cb };
 
@@ -118,7 +118,7 @@ void smashCmpq(TCA inst, uint32_t imm) {
 }
 
 void smashCall(TCA inst, TCA target) {
-  auto& cb = mcg->code.blockFor(inst);
+  auto& cb = mcg->code().blockFor(inst);
   CodeCursor cursor { cb, inst };
   ppc64_asm::Assembler a { cb };
 
@@ -134,7 +134,7 @@ void smashCall(TCA inst, TCA target) {
 void smashJmp(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJmp));
 
-  auto& cb = mcg->code.blockFor(inst);
+  auto& cb = mcg->code().blockFor(inst);
   CodeCursor cursor { cb, inst };
   ppc64_asm::Assembler a { cb };
 
@@ -151,7 +151,7 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   if (cc == CC_None) {
     ppc64_asm::Assembler::patchBctr(inst, target);
   } else {
-    auto& cb = mcg->code.blockFor(inst);
+    auto& cb = mcg->code().blockFor(inst);
     CodeCursor cursor { cb, inst };
     ppc64_asm::Assembler a { cb };
     a.branchAuto(target, cc);

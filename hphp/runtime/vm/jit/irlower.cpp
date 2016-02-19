@@ -317,14 +317,15 @@ void relocateCode(const IRUnit& unit, size_t hhir_count,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
+void genCodeImpl(IRUnit& unit, CodeCache::View code,
+                 CodeKind kind, AsmInfo* ai) {
   Timer _t(Timer::codeGen);
-  CodeBlock& main_in = mcg->code.main();
-  CodeBlock& cold_in = mcg->code.cold();
+  CodeBlock& main_in = code.main();
+  CodeBlock& cold_in = code.cold();
 
   CodeBlock main;
   CodeBlock cold;
-  CodeBlock* frozen = &mcg->code.frozen();
+  CodeBlock* frozen = &code.frozen();
 
   bool do_relocate = false;
 
@@ -365,12 +366,10 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
 
   size_t hhir_count{0};
 
-  { mcg->code.lock();
+  {
     mcg->cgFixups().setBlocks(&main, &cold, frozen);
-
     SCOPE_EXIT {
       mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
-      mcg->code.unlock();
     };
 
     Vasm vasm;
@@ -444,12 +443,13 @@ void genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* ai) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void genCode(IRUnit& unit, CodeKind kind /* = CodeKind::Trace */) {
+void genCode(IRUnit& unit, CodeCache::View code,
+             CodeKind kind /* = CodeKind::Trace */) {
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(unit, kind, &ai);
+    genCodeImpl(unit, code, kind, &ai);
   } else {
-    genCodeImpl(unit, kind, nullptr);
+    genCodeImpl(unit, code, kind, nullptr);
   }
 }
 

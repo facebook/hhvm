@@ -1057,7 +1057,6 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 Translator::Translator()
   : m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
   , m_profData(nullptr)
-  , m_useAHot(RuntimeOption::RepoAuthoritative && CodeCache::AHotSize > 0)
 {
   initInstrInfo();
   if (RuntimeOption::EvalJitPGO) {

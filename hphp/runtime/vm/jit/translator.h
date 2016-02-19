@@ -182,18 +182,6 @@ struct Translator {
    */
   SrcRec* getSrcRec(SrcKey sk);
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Configuration.
-
-  /*
-   * Whether to use ahot.
-   *
-   * This defaults to runtime option values, and is only changed if we're using
-   * ahot and it runs out of space.
-   */
-  bool useAHot() const;
-  void setUseAHot(bool val);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Translation DB.
@@ -291,7 +279,6 @@ private:
   int64_t m_createdTime;
 
   std::unique_ptr<ProfData> m_profData;
-  bool m_useAHot;
 
   SrcDB m_srcDB;
 

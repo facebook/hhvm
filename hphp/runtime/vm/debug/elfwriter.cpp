@@ -556,7 +556,7 @@ int ElfWriter::writeStringSection() {
 
 int ElfWriter::writeTextSection() {
   int section = -1;
-  auto& code = mcg->code;
+  auto const& code = mcg->code();
   if ((section = newSection(
          ".text.tracelets", code.codeSize(),
          SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,

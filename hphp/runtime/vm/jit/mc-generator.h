@@ -22,7 +22,6 @@
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/asm-x64.h"
-#include "hphp/util/code-cache.h"
 #include "hphp/util/eh-frame.h"
 #include "hphp/util/ringbuffer.h"
 
@@ -34,6 +33,7 @@
 
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -149,7 +149,6 @@ struct MCGenerator {
 
   static CallSpec getDtorCall(DataType type);
 
-public:
   MCGenerator();
   ~MCGenerator();
 
@@ -159,6 +158,7 @@ public:
   /*
    * Accessors.
    */
+  CodeCache& code() { return m_code; }
   const UniqueStubs& ustubs() const { return m_ustubs; }
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
@@ -168,7 +168,7 @@ public:
   Annotations& annotations() { return m_annotations; }
   void recordSyncPoint(CodeAddress frontier, Fixup fix);
 
-  DataBlock& globalData() { return code.data(); }
+  DataBlock& globalData() { return m_code.data(); }
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
   TcaTransIDMap& getJmpToTransIDMap() {
@@ -176,7 +176,7 @@ public:
   }
 
   inline bool isValidCodeAddress(TCA tca) const {
-    return code.isValidCodeAddress(tca);
+    return m_code.isValidCodeAddress(tca);
   }
 
   /*
@@ -199,7 +199,7 @@ public:
 
   template<typename T, typename... Args>
   T* allocData(Args&&... args) {
-    return code.data().alloc<T>(std::forward<Args>(args)...);
+    return m_code.data().alloc<T>(std::forward<Args>(args)...);
   }
 
   /*
@@ -268,7 +268,7 @@ public:
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen(IRGS&);
+  void traceCodeGen(IRGS&, CodeCache::View);
   void recordGdbStub(const CodeBlock& cb, TCA start, const std::string& name);
 
   /*
@@ -395,12 +395,8 @@ private:
   bool dumpTCData();
   void drawCFG(std::ofstream& out) const;
 
-  /////////////////////////////////////////////////////////////////////////////
-
-public:
-  CodeCache code;
-
 private:
+  CodeCache m_code;
   UniqueStubs m_ustubs;
   Translator m_tx;
 

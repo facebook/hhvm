@@ -44,17 +44,6 @@ inline SrcRec* Translator::getSrcRec(SrcKey sk) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Translator configuration.
-
-inline bool Translator::useAHot() const {
-  return m_useAHot;
-}
-
-inline void Translator::setUseAHot(bool val) {
-  m_useAHot = val;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // TransDB.
 
 inline bool Translator::isTransDBEnabled() {

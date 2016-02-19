@@ -64,6 +64,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
@@ -73,7 +74,6 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/boot_timer.h"
-#include "hphp/util/code-cache.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/embedded-data.h"
@@ -710,6 +710,11 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
     ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }
 }
+
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
+const void* __hot_start = nullptr;
+const void* __hot_end = nullptr;
+#endif
 
 #if FACEBOOK && defined USE_SSECRC
 // Overwrite the functiosn

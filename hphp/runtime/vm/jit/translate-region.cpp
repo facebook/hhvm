@@ -559,7 +559,6 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
 TranslateResult irGenRegion(IRGS& irgs,
                             const RegionDesc& region,
                             TranslateRetryContext& retry,
-                            TransFlags trflags,
                             InliningDecider& inl,
                             int32_t& budgetBCInstrs,
                             double profFactor) {
@@ -700,7 +699,7 @@ TranslateResult irGenRegion(IRGS& irgs,
 
       // Singleton inlining optimization.
       if (RuntimeOption::EvalHHIRInlineSingletons && !lastInstr &&
-          shouldTrySingletonInline(region, block, inst, i, trflags) &&
+          shouldTrySingletonInline(region, block, inst, i, irgs.transFlags) &&
           knownFuncs.hasNext(inst.nextSk())) {
 
         // This is safe to do even if singleton inlining fails; we just won't
@@ -766,7 +765,7 @@ TranslateResult irGenRegion(IRGS& irgs,
                                mcg->tx().profData()->transCounter(calleeTID);
           }
 
-          auto result = irGenRegion(irgs, *calleeRegion, retry, trflags, inl,
+          auto result = irGenRegion(irgs, *calleeRegion, retry, inl,
                                     budgetBCInstrs, calleeProfFactor);
           assertx(budgetBCInstrs >= 0);
 
@@ -861,10 +860,11 @@ TranslateResult irGenRegion(IRGS& irgs,
 
 TranslateResult mcGenRegion(IRGS& irgs,
                             const RegionDesc& region,
+                            CodeCache::View code,
                             ProfSrcKeySet& toInterp) {
   auto const startSk = region.start();
   try {
-    mcg->traceCodeGen(irgs);
+    mcg->traceCodeGen(irgs, code);
     if (irgs.context.kind == TransKind::Profile) {
       mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
     }
@@ -883,8 +883,7 @@ TranslateResult mcGenRegion(IRGS& irgs,
     return TranslateResult::Retry;
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
-      assertx(mcg->tx().useAHot());
-      mcg->tx().setUseAHot(false);
+      mcg->code().disableHot();
       // We can't return Retry here because the code block selection
       // will still say hot.
       return TranslateResult::Failure;
@@ -902,8 +901,8 @@ TranslateResult mcGenRegion(IRGS& irgs,
 
 TranslateResult translateRegion(IRGS& irgs,
                                 const RegionDesc& region,
+                                CodeCache::View code,
                                 TranslateRetryContext& retry,
-                                TransFlags trflags,
                                 PostConditions& pConds) {
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
   SCOPE_ASSERT_DETAIL("IRUnit") { return show(irgs.unit); };
@@ -921,8 +920,7 @@ TranslateResult translateRegion(IRGS& irgs,
     irgs.unit.entry()->setProfCount(entryProfCount);
   }
   int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
-  auto irGenResult = irGenRegion(irgs, region, retry, trflags, inl,
-                                 budgetBCInstrs, 1);
+  auto irGenResult = irGenRegion(irgs, region, retry, inl, budgetBCInstrs, 1);
   assertx(budgetBCInstrs >= 0);
   FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
   if (irGenResult != TranslateResult::Success) return irGenResult;
@@ -942,7 +940,7 @@ TranslateResult translateRegion(IRGS& irgs,
     pConds = irgs.irb->postConds(mainExit);
   }
 
-  return mcGenRegion(irgs, region, retry.toInterp);
+  return mcGenRegion(irgs, region, code, retry.toInterp);
 }
 
 } }

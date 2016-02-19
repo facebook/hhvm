@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_TRANSLATE_REGION_H_
 #define incl_HPHP_TRANSLATE_REGION_H_
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"  // TransFlags
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
@@ -54,8 +55,8 @@ struct TranslateRetryContext {
  */
 TranslateResult translateRegion(IRGS& irgs,
                                 const RegionDesc& region,
+                                CodeCache::View code,
                                 TranslateRetryContext& retry,
-                                TransFlags trflags,
                                 PostConditions& pconds);
 
 //////////////////////////////////////////////////////////////////////

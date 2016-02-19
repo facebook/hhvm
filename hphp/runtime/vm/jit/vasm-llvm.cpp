@@ -1931,7 +1931,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
     mcg->getFreeStub(frozen, &mcg->cgFixups(), &reused),
     optSPOff,
     REQ_BIND_JMP,
-    mcg->code.base(),
+    m_text.main().code.base(),
     inst.target.toAtomicInt(),
     inst.trflags.packed
   );

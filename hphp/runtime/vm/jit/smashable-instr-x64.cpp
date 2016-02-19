@@ -115,7 +115,7 @@ void smashCall(TCA inst, TCA target) {
    * but presently this causes asserts to fire in MCGenerator because of a bug
    * with PGO and relocation.
    */
-  auto& cb = mcg->code.blockFor(inst);
+  auto& cb = mcg->code().blockFor(inst);
   CodeCursor cursor { cb, inst };
   X64Assembler a { cb };
   a.call(target);
@@ -124,7 +124,7 @@ void smashCall(TCA inst, TCA target) {
 void smashJmp(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJmp));
 
-  auto& cb = mcg->code.blockFor(inst);
+  auto& cb = mcg->code().blockFor(inst);
   CodeCursor cursor { cb, inst };
   X64Assembler a { cb };
 
@@ -141,7 +141,7 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   if (cc == CC_None) {
     X64Assembler::patchJcc(inst, target);
   } else {
-    auto& cb = mcg->code.blockFor(inst);
+    auto& cb = mcg->code().blockFor(inst);
     CodeCursor cursor { cb, inst };
     X64Assembler a { cb };
     a.jcc(cc, target);

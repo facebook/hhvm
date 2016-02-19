@@ -108,14 +108,13 @@ void postProcess(TransRelocInfo&& tri, void* paramPtr) {
   if (!rel.adjustedAddressAfter(tri.start)) {
     x64::adjustForRelocation(rel, tri.start, tri.end);
     auto coldStart = tri.coldStart;
-    if (&mcg->code.blockFor(coldStart) == &mcg->code.realFrozen()) {
+    if (&mcg->code().blockFor(coldStart) == &mcg->code().frozen()) {
       /*
-       * This is a bit silly. If we were generating code into frozen,
-       * and we also put stubs in frozen, and those stubs are now dead
-       * the code in them isn't valid (we smashed the first few bytes
-       * with a pointer and a size; see FreeStubList::StubNode).
-       * So skip over any of those. Its ok to process the live ones
-       * more than once.
+       * This is a bit silly. If we were generating code into frozen, and we
+       * also put stubs in frozen, and those stubs are now dead the code in
+       * them isn't valid (we smashed the first few bytes with a pointer and a
+       * size; see FreeStubList::StubNode).  So skip over any of those. Its ok
+       * to process the live ones more than once.
        */
       auto it = deadStubs.lower_bound(tri.coldStart);
       while (it != deadStubs.end() && *it < tri.coldEnd) {
@@ -159,7 +158,7 @@ void postProcess(TransRelocInfo&& tri, void* paramPtr) {
 }
 
 void readRelocsIntoVector(TransRelocInfo&& tri, void* data) {
-  if (mcg->code.prof().contains(tri.start)) return;
+  if (mcg->code().prof().contains(tri.start)) return;
   auto v = static_cast<std::vector<TransRelocInfo>*>(data);
   v->emplace_back(std::move(tri));
 }
@@ -219,7 +218,7 @@ struct TransRelocInfoHelper {
 };
 
 void relocateStubs(TransLoc& loc, TCA frozenStart, TCA frozenEnd,
-                   RelocationInfo& rel, CodeCache& cache,
+                   RelocationInfo& rel, CodeCache::View cache,
                    CodeGenFixups& fixups) {
   auto const stubSize = svcreq::stub_size();
 
@@ -369,10 +368,7 @@ void liveRelocate(int time) {
     }
   }
 
-  auto& code = mcg->code;
-  CodeCache::Selector cbSel(CodeCache::Selector::Args(code).hot(true));
-  CodeBlock& hot = code.main();
-
+  auto& hot = mcg->code().view(true /* hot */).main();
   relocate(relocs, hot);
 }
 
@@ -409,7 +405,7 @@ String perfRelocMapInfo(
     trih.incomingBranches.emplace_back(v.getOpaque());
   }
 
-  auto& code = mcg->code;
+  auto& code = mcg->code();
 
   for (auto v : fixups.addressImmediates) {
     trih.addressImmediates.emplace_back(v - code.base());
@@ -626,7 +622,7 @@ void readRelocations(
       TransRelocInfoHelper trih;
       blob(trih);
 
-      TransRelocInfo tri(trih.toTRI(mcg->code));
+      TransRelocInfo tri(trih.toTRI(mcg->code()));
       tri.start = reinterpret_cast<TCA>(addr);
       tri.end = reinterpret_cast<TCA>(end);
       x64::findFixups(tri.start, tri.end, tri.fixups);
@@ -638,7 +634,7 @@ void readRelocations(
 
 //////////////////////////////////////////////////////////////////////
 
-bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
+bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
                             TCA* adjust /* = nullptr */) {
   auto& mainCode = cache.main();
   auto& coldCode = cache.cold();

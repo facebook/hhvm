@@ -856,9 +856,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     HPHP::Server* server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    auto* mCGenerator = jit::mcg;
+    auto mcg = jit::mcg;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
-    mCGenerator->code.forEachBlock([&](const char* name, const CodeBlock& a) {
+    mcg->code().forEachBlock([&](const char* name, const CodeBlock& a) {
       auto isMain = strncmp(name, "main", 4) == 0;
       appendStat(folly::format("tc-{}size",
                                isMain ? "" : name).str(),
@@ -871,7 +871,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("funcs", Func::nextFuncId());
 
     if (RuntimeOption::EvalEnableReusableTC) {
-      mCGenerator->code.forEachBlock([&](const char* name, const CodeBlock& a) {
+      mcg->code().forEachBlock([&](const char* name, const CodeBlock& a) {
         appendStat(folly::format("tc-{}-allocs", name).str(), a.numAllocs());
         appendStat(folly::format("tc-{}-frees", name).str(), a.numFrees());
         appendStat(folly::format("tc-{}-free-size", name).str(), a.bytesFree());

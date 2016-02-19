@@ -20,9 +20,9 @@
 #include <cstdio>
 #include <vector>
 
-#include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {
 
@@ -120,7 +120,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot);
  *
  * If set *adjust will be updated to its post relocation address.
  */
-bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
+bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
                             TCA* adjust = nullptr);
 
 //////////////////////////////////////////////////////////////////////

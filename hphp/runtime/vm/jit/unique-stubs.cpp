@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/align.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -812,14 +813,15 @@ TCA emitThrowSwitchMode(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void UniqueStubs::emitAll() {
-  auto& main = mcg->code.main();
-  auto& cold = mcg->code.cold();
-  auto& frozen = mcg->code.frozen();
+void UniqueStubs::emitAll(CodeCache& code) {
+  auto view = code.view();
+  auto& main = view.main();
+  auto& cold = view.cold();
+  auto& frozen = view.frozen();
+  auto& hotBlock = code.view(true /* hot */).main();
 
   auto const hot = [&]() -> CodeBlock& {
-    auto& hot = const_cast<CodeBlock&>(mcg->code.hot());
-    return hot.available() > 512 ? hot : main;
+    return hotBlock.available() > 512 ? hotBlock : main;
   };
 
 #define ADD(name, stub) name = add(#name, (stub))
@@ -860,7 +862,7 @@ void UniqueStubs::emitAll() {
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA UniqueStubs::add(const char* name, TCA start) {
-  auto& cb = mcg->code.blockFor(start);
+  auto& cb = mcg->code().blockFor(start);
   auto const end = cb.frontier();
 
   FTRACE(1, "unique stub: {} @ {} -- {:4} bytes: {}\n",

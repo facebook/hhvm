@@ -30,6 +30,8 @@ struct SrcKey;
 
 namespace jit {
 
+struct CodeCache;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 constexpr int kNumFreeLocalsHelpers = 8;
@@ -389,7 +391,7 @@ struct UniqueStubs {
   /*
    * Emit one of every unique stub.
    */
-  void emitAll();
+  void emitAll(CodeCache& code);
 
   /*
    * Utility for logging stubs addresses during startup and registering the gdb

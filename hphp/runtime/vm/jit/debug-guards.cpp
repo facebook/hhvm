@@ -37,13 +37,11 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void addDbgGuardImpl(SrcKey sk, SrcRec* sr) {
+void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& main) {
   TCA realCode = sr->getTopTranslation();
   if (!realCode) return;  // No translations, nothing to do.
 
-  auto& cb = mcg->code.main();
-
-  auto const dbgGuard = vwrap(cb, [&] (Vout& v) {
+  auto const dbgGuard = vwrap(main, [&] (Vout& v) {
     if (!sk.resumed()) {
       auto const off = sr->nonResumedSPOff();
       v << lea{rvmfp()[-cellsToBytes(off.offset)], rvmsp()};
@@ -72,7 +70,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr) {
   }, CodeKind::Helper);
 
   // Emit a jump to the actual code.
-  auto const dbgBranchGuardSrc = emitSmashableJmp(cb, realCode);
+  auto const dbgBranchGuardSrc = emitSmashableJmp(main, realCode);
 
   // Add the guard to the SrcRec.
   sr->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);

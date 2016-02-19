@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/irgen.h"
@@ -36,7 +37,6 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include "hphp/util/asm-x64.h"
-#include "hphp/util/code-cache.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/growable-vector.h"
 #include "hphp/util/immed.h"
@@ -67,12 +67,13 @@ TransContext prologue_context(TransID transID,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc) {
+TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
+                    CodeCache::View code) {
   auto context = prologue_context(transID, kind, func,
                                   func->getEntryForNumArgs(argc));
   IRGS env{context, TransFlags{}};
 
-  auto& cb = mcg->code.main();
+  auto& cb = code.main();
 
   // Dump the func guard in the TC before anything else.
   emitFuncGuard(func, cb);
@@ -81,27 +82,28 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc) {
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
 
-  irlower::genCode(env.unit, CodeKind::CrossTrace);
+  irlower::genCode(env.unit, code, CodeKind::CrossTrace);
 
   return start;
 }
 
-TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
+TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
+                        CodeCache::View code) {
   auto context = prologue_context(kInvalidTransID, TransKind::Live,
                                   func, func->base());
   IRGS env{context, TransFlags{}};
 
   assertx(mcg->cgFixups().empty());
 
-  auto& main = mcg->code.main();
-  auto& frozen = mcg->code.frozen();
+  auto& main = code.main();
+  auto& frozen = code.frozen();
 
   auto const start = main.frontier();
 
   irgen::emitFuncBodyDispatch(env, dvs);
   irgen::sealUnit(env);
 
-  irlower::genCode(env.unit, CodeKind::CrossTrace);
+  irlower::genCode(env.unit, code, CodeKind::CrossTrace);
 
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;

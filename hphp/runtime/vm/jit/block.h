@@ -64,7 +64,8 @@ struct Block {
    * emitted in profiling mode (which become dead after optimized code is
    * emitted). Code for these blocks is emitted into the 'afrozen' section.
    *
-   * See also util/code-cache.h for comment on the 'ahot' and 'aprof' sections.
+   * See also runtime/vm/jit/code-cache.h for comment on the 'hot' and 'prof'
+   * sections.
    */
 
   enum class Hint { Neither, Likely, Unlikely, Unused };

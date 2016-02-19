@@ -89,29 +89,29 @@ TCA IncomingBranch::target() const {
   always_assert(false);
 }
 
-TCA TransLoc::mainStart()   const { return mcg->code.base() + m_mainOff; }
-TCA TransLoc::coldStart()   const { return mcg->code.base() + m_coldOff; }
-TCA TransLoc::frozenStart() const { return mcg->code.base() + m_frozenOff; }
+TCA TransLoc::mainStart()   const { return mcg->code().base() + m_mainOff; }
+TCA TransLoc::coldStart()   const { return mcg->code().base() + m_coldOff; }
+TCA TransLoc::frozenStart() const { return mcg->code().base() + m_frozenOff; }
 
 void TransLoc::setMainStart(TCA newStart) {
-  assert(mcg->code.base() <= newStart &&
-         newStart - mcg->code.base() < std::numeric_limits<uint32_t>::max());
+  assert(mcg->code().base() <= newStart &&
+         newStart - mcg->code().base() < std::numeric_limits<uint32_t>::max());
 
-  m_mainOff = newStart - mcg->code.base();
+  m_mainOff = newStart - mcg->code().base();
 }
 
 void TransLoc::setColdStart(TCA newStart) {
-  assert(mcg->code.base() <= newStart &&
-         newStart - mcg->code.base() < std::numeric_limits<uint32_t>::max());
+  assert(mcg->code().base() <= newStart &&
+         newStart - mcg->code().base() < std::numeric_limits<uint32_t>::max());
 
-  m_coldOff = newStart - mcg->code.base();
+  m_coldOff = newStart - mcg->code().base();
 }
 
 void TransLoc::setFrozenStart(TCA newStart) {
-  assert(mcg->code.base() <= newStart &&
-         newStart - mcg->code.base() < std::numeric_limits<uint32_t>::max());
+  assert(mcg->code().base() <= newStart &&
+         newStart - mcg->code().base() < std::numeric_limits<uint32_t>::max());
 
-  m_frozenOff = newStart - mcg->code.base();
+  m_frozenOff = newStart - mcg->code().base();
 }
 
 void SrcRec::setFuncInfo(const Func* f) {
@@ -139,7 +139,7 @@ FPInvOffset SrcRec::nonResumedSPOff() const {
 
 void SrcRec::chainFrom(IncomingBranch br) {
   assertx(br.type() == IncomingBranch::Tag::ADDR ||
-         mcg->code.isValidCodeAddress(br.toSmash()));
+          mcg->code().isValidCodeAddress(br.toSmash()));
   TCA destAddr = getTopTranslation();
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",

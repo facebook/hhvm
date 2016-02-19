@@ -29,7 +29,6 @@
 
 #include <folly/String.h>
 
-#include "hphp/util/code-cache.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
@@ -65,6 +64,8 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
+
+#include "hphp/runtime/vm/jit/code-cache.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1098,6 +1099,7 @@ void RuntimeOption::Load(
   }
   {
     // CodeCache
+    using jit::CodeCache;
     Config::Bind(CodeCache::AHotSize, ini, config, "Eval.JitAHotSize",
                  ahotDefault());
     Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize", 60 << 20);

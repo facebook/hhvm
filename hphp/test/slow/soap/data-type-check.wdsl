@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions
+  targetNamespace="test"
+  xmlns:tns="test"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:api="test"
+  xmlns:wsi="http://ws-i.org/schemas/conformanceClaim/"
+  >
+
+  <wsdl:types>
+    <xsd:schema
+      targetNamespace="test"
+      xmlns="test"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:complexType name="BodyType">
+        <xsd:simpleContent>
+          <xsd:extension base="xsd:string">
+            <xsd:attribute name="uid" type="xsd:unsignedInt" use="optional" default="0"/>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+
+      <xsd:element name="body" type="BodyType"/>
+    </xsd:schema>
+  </wsdl:types>
+
+  <wsdl:message name="testRequest">
+    <wsdl:part name="parameters" element="api:test"/>
+  </wsdl:message>
+
+  <wsdl:portType name="TestInterface">
+    <wsdl:operation name="test">
+      <wsdl:input name="testRequest" message="tns:testRequest"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="TestBinding" type="tns:TestInterface">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="test">
+      <soap:operation soapAction="test"/>
+      <wsdl:input name="testRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:service name="Test">
+    <wsdl:port name="TestEndPoint" binding="tns:TestBinding">
+      <soap:address location="test"/>
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>
